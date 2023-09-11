@@ -4,7 +4,6 @@ Nestlog is a lightweight header-only library for console logging.
 
 ## Examples
 
-    ```
     /* examples/ex1/ex1.cpp */
 
     #include "nestlog/scope.hpp"
@@ -21,11 +20,9 @@ Nestlog is a lightweight header-only library for console logging.
     main(int argc, char ** argv) {
         A(66);
     }
-    ```
 
-  output:
-    ```
+output:
+
     +A
-      :x 66
+     :x 66
     -A
-    ```
