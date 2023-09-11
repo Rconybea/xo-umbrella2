@@ -33,15 +33,20 @@ output:
 
     #include "nestlog/scope.hpp"
 
-     int fib(int n) {
-       XO_SCOPE(log);
+    int
+    fib(int n) {
+        XO_SCOPE(log);
 
-       int retval = 1;
+        int retval = 1;
 
-       if (n >= 2)
-          retval = fib(n - 1) + fib(n - 2);
+        if (n >= 2) {
+            log(":n ", n);
+            retval = fib(n - 1) + fib(n - 2);
+        }
 
-       log("result ", ":retval ", retval);
+        log(":n ", n, " -> :retval ", retval);
+
+        return retval;
     }
 
     int
@@ -58,31 +63,35 @@ output:
 
     +main
      +fib
+      :n 4
       +fib
+       :n 3
        +fib
+        :n 2
         +fib
-         result :retval 1
+         :n 1 -> :retval 1
         -fib
         +fib
-         result :retval 1
+         :n 0 -> :retval 1
         -fib
-        result :retval 2
+        :n 2 -> :retval 2
        -fib
        +fib
-        result :retval 1
+        :n 1 -> :retval 1
        -fib
-       result :retval 3
+       :n 3 -> :retval 3
       -fib
       +fib
+       :n 2
        +fib
-        result :retval 1
+        :n 1 -> :retval 1
        -fib
        +fib
-        result :retval 1
+        :n 0 -> :retval 1
        -fib
-       result :retval 2
+       :n 2 -> :retval 2
       -fib
-      result :retval 5
+      :n 4 -> :retval 5
      -fib
      :n 4 :fib(n) 5
     -main

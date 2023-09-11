@@ -8,10 +8,12 @@ fib(int n) {
 
     int retval = 1;
 
-    if (n >= 2)
+    if (n >= 2) {
+        log(":n ", n);
         retval = fib(n - 1) + fib(n - 2);
+    }
 
-    log("result ", ":retval ", retval);
+    log(":n ", n, " -> :retval ", retval);
 
     return retval;
 }
