@@ -6,16 +6,16 @@ using namespace xo;
 
 int
 fib(int n) {
-    scope log(XO_SSETUP0(), ":n ", n);
+    scope log(XO_ENTER0(), xtag("n", n));
 
     int retval = 1;
 
     if (n >= 2) {
         retval = fib(n - 1) + fib(n - 2);
-        log(":n ", n);
+        log(xtag("n", n));
     }
 
-    log.end_scope("<- :retval ", retval);
+    log.end_scope("<-", xtag("retval", retval));
 
     return retval;
 }
@@ -27,10 +27,10 @@ main(int argc, char ** argv) {
 
     int n = 4;
 
-    scope log(XO_SSETUP0(), ":n ", 4);
+    scope log(XO_ENTER0(), ":n ", 4);
 
     int fn = fib(n);
 
-    log(":n ", n);
-    log("<- :fib(n) ", fn);
+    log(xtag("n", n));
+    log("<-", xtag("fib(n)", fn));
 }
