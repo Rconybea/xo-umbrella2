@@ -46,8 +46,7 @@ namespace xo {
         /* common implementation for .preamble(), .postamble() */
         void entryexit_aux(std::string_view name1,
                            std::string_view name2,
-                           char label_char,
-                           bool newline_flag);
+                           char label_char);
 
     private:
         /* current nesting level for this thread */
@@ -110,8 +109,7 @@ namespace xo {
     void
     state_impl<CharT, Traits>::entryexit_aux(std::string_view name1,
                                              std::string_view name2,
-                                             char label_char,
-                                             bool newline_flag)
+                                             char label_char)
     {
         log_streambuf_type * sbuf = this->p_sbuf_phase1_.get();
 
@@ -123,9 +121,6 @@ namespace xo {
 
         /* scope name */
         this->ss_ << name1 << name2;
-
-        if (newline_flag)
-            this->ss_ << "\n";
     } /*entryexit_aux*/
 
     template <typename CharT, typename Traits>
@@ -133,7 +128,7 @@ namespace xo {
     state_impl<CharT, Traits>::preamble(std::string_view name1,
                                         std::string_view name2)
     {
-        this->entryexit_aux(name1, name2, '+' /*label_char*/, false /*!newline_flag*/);
+        this->entryexit_aux(name1, name2, '+' /*label_char*/);
     } /*preamble*/
 
     template <typename CharT, typename Traits>
@@ -141,7 +136,7 @@ namespace xo {
     state_impl<CharT, Traits>::postamble(std::string_view name1,
                                          std::string_view name2)
     {
-        this->entryexit_aux(name1, name2, '-' /*label_char*/, true /*newline_flag*/);
+        this->entryexit_aux(name1, name2, '-' /*label_char*/);
     }  /*postamble*/
 
     template <typename CharT, typename Traits>

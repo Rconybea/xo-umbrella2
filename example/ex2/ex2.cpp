@@ -14,7 +14,8 @@ fib(int n) {
         retval = fib(n - 1) + fib(n - 2);
         log(":n ", n);
     }
-    log("<- :retval ", retval);
+
+    log.end_scope("<- :retval ", retval);
 
     return retval;
 }

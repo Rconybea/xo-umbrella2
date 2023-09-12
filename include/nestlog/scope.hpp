@@ -105,7 +105,7 @@ namespace xo {
                 state_impl_type * logstate = require_indent_thread_local_state();
 
                 /* log to per-thread stream to prevent data races */
-                tosn(logstate2stream(logstate), rest...);
+                tosn(logstate2stream(logstate), std::forward<Tn>(rest)...);
 
                 this->flush2sbuf(logstate);
             }
@@ -114,10 +114,11 @@ namespace xo {
         } /*log*/
 
         template<typename... Tn>
-        bool operator()(Tn&&... rest) { return this->log(rest...); }
+        bool operator()(Tn&&... args) { return this->log(std::forward<Tn>(args)...); }
 
         /* call once to end scope before dtor */
-        void end_scope();
+        template<typename... Tn>
+        void end_scope(Tn&&... args);
 
     private:
         /* establish stream for logging;  use thread-local storage for threadsafetỵ
@@ -162,7 +163,7 @@ namespace xo {
 
             logstate->preamble(this->name1_, this->name2_);
 
-            tosn(logstate2stream(logstate), " ", args...);
+            tosn(logstate2stream(logstate), " ", std::forward<Tn>(args)...);
 
             logstate->flush2sbuf(std::clog.rdbuf());
 
@@ -227,8 +228,9 @@ namespace xo {
     } /*flush2sbuf*/
 
     template <typename CharT, typename Traits>
+    template <typename... Tn>
     void
-    basic_scope<CharT, Traits>::end_scope()
+    basic_scope<CharT, Traits>::end_scope(Tn&&... args)
     {
         if(!this->finalized_) {
             this->finalized_ = true;
@@ -239,6 +241,9 @@ namespace xo {
             logstate->decr_nesting();
 
             logstate->postamble(this->name1_, this->name2_);
+
+            tosn(logstate2stream(logstate), " ", std::forward<Tn>(args)...);
+
             logstate->flush2sbuf(std::clog.rdbuf());
         }
     } /*end_scope*/
