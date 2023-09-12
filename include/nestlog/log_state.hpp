@@ -27,11 +27,11 @@ namespace xo {
         std::ostream & ss() { return ss_; }
 
         /* call on entry to new scope */
-        void preamble(std::string_view name1, std::string_view name2);
+        void preamble(function_style style, std::string_view name1, std::string_view name2);
         /* call before each new log entry */
         void indent(char pad_char);
         /* call on exit from scope */
-        void postamble(std::string_view name1, std::string_view name2);
+        void postamble(function_style style, std::string_view name1, std::string_view name2);
 
         /* write collected output to *p_sbuf */
         void flush2sbuf(std::streambuf * p_sbuf);
@@ -44,7 +44,8 @@ namespace xo {
 
     private:
         /* common implementation for .preamble(), .postamble() */
-        void entryexit_aux(std::string_view name1,
+        void entryexit_aux(function_style style,
+                           std::string_view name1,
                            std::string_view name2,
                            char label_char);
 
@@ -107,7 +108,8 @@ namespace xo {
 
     template <typename CharT, typename Traits>
     void
-    state_impl<CharT, Traits>::entryexit_aux(std::string_view name1,
+    state_impl<CharT, Traits>::entryexit_aux(function_style style,
+                                             std::string_view name1,
                                              std::string_view name2,
                                              char label_char)
     {
@@ -119,24 +121,29 @@ namespace xo {
         /* mnemonic for scope entry/exit */
         this->ss_ << label_char;
 
+        if (log_config::indent_width > 1)
+            this->ss_ << ' ';
+
         /* scope name */
-        this->ss_ << name1 << name2;
+        this->ss_ << function_name(style, name1) << name2;
     } /*entryexit_aux*/
 
     template <typename CharT, typename Traits>
     void
-    state_impl<CharT, Traits>::preamble(std::string_view name1,
+    state_impl<CharT, Traits>::preamble(function_style style,
+                                        std::string_view name1,
                                         std::string_view name2)
     {
-        this->entryexit_aux(name1, name2, '+' /*label_char*/);
+        this->entryexit_aux(style, name1, name2, '+' /*label_char*/);
     } /*preamble*/
 
     template <typename CharT, typename Traits>
     void
-    state_impl<CharT, Traits>::postamble(std::string_view name1,
+    state_impl<CharT, Traits>::postamble(function_style style,
+                                         std::string_view name1,
                                          std::string_view name2)
     {
-        this->entryexit_aux(name1, name2, '-' /*label_char*/);
+        this->entryexit_aux(style, name1, name2, '-' /*label_char*/);
     }  /*postamble*/
 
     template <typename CharT, typename Traits>

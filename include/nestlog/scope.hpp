@@ -16,28 +16,29 @@ namespace xo {
     class state_impl;
 
 //#  define XO_SSETUP0() xo::scope_setup(__FUNCTION__)
-#  define XO_SSETUP0() xo::scope_setup(__PRETTY_FUNCTION__)
+#  define XO_SSETUP0() xo::scope_setup(log_config::style, __PRETTY_FUNCTION__)
 
     /* throw exception if condition not met*/
 #  define XO_EXPECT(f,msg) if(!(f)) { throw std::runtime_error(msg); }
     /* establish scope using current function name */
-#  define XO_SCOPE(name) xo::scope name(xo::scope_setup(__FUNCTION__))
+#  define XO_SCOPE(name) xo::scope name(xo::scope_setup(log_config::style, __PRETTY_FUNCTION__))
     /* like XO_SCOPE(name),  but also set enabled flag */
-#  define XO_SCOPE2(name, debug_flag) xo::scope name(xo::scope_setup(__FUNCTION__, debug_flag))
-#  define XO_SCOPE_DISABLED(name) xo::scope name(xo::scope_setup(__FUNCTION__, false))
+#  define XOf_SCOPE2(name, debug_flag) xo::scope name(xo::scope_setup(log_config::style, __PRETTY_FUNCTION__, debug_flag))
+#  define XO_SCOPE_DISABLED(name) xo::scope name(xo::scope_setup(log_config::style, __PRETTY_FUNCTION__, false))
 #  define XO_STUB() { XO_SCOPE(logr); logr.log("STUB"); }
 
     /* convenience class for basic_scope<..> construction (see below).
      * use to disambiguate setup from other arguments
      */
     struct scope_setup {
-        scope_setup(std::string_view name1, std::string_view name2, bool enabled_flag)
-            : name1_{name1}, name2_{name2}, enabled_flag_{enabled_flag} {}
-        scope_setup(std::string_view name1, bool enabled_flag)
-            : scope_setup(name1, "", enabled_flag) {}
-        scope_setup(std::string_view name1)
-            : scope_setup(name1, true /*enabled_flag*/) {}
+        scope_setup(function_style style, std::string_view name1, std::string_view name2, bool enabled_flag)
+            : style_{style}, name1_{name1}, name2_{name2}, enabled_flag_{enabled_flag} {}
+        scope_setup(function_style style, std::string_view name1, bool enabled_flag)
+            : scope_setup(style, name1, "", enabled_flag) {}
+        scope_setup(function_style style, std::string_view name1)
+            : scope_setup(style, name1, true /*enabled_flag*/) {}
 
+        function_style style_ = FS_Pretty;
         std::string_view name1_ = "<.name1>";
         std::string_view name2_ = "<.name2>";
         bool enabled_flag_ = false;
@@ -142,6 +143,8 @@ namespace xo {
 
         /* send indented output to this streambuf (e.g. std::clog.rdbuf()) */
         std::streambuf * dest_sbuf_ = std::clog.rdbuf();
+        /* style for displaying .name1 */
+        function_style style_ = FS_Pretty;
         /* name of this scope (part 1) */
         std::string_view name1_ = "<name1>";
         /* name of this scope (part 2) */
@@ -154,14 +157,15 @@ namespace xo {
     template <typename... Tn>
     basic_scope<CharT, Traits>::basic_scope(scope_setup setup, Tn&&... args)
 
-        : name1_{std::move(setup.name1_)},
+        : style_{setup.style_},
+          name1_{std::move(setup.name1_)},
           name2_{std::move(setup.name2_)},
           finalized_{!setup.enabled_flag_}
     {
         if(setup.enabled_flag_) {
             state_impl_type * logstate = basic_scope::require_thread_local_state();
 
-            logstate->preamble(this->name1_, this->name2_);
+            logstate->preamble(this->style_, this->name1_, this->name2_);
 
             tosn(logstate2stream(logstate), " ", std::forward<Tn>(args)...);
 
@@ -240,7 +244,7 @@ namespace xo {
 
             logstate->decr_nesting();
 
-            logstate->postamble(this->name1_, this->name2_);
+            logstate->postamble(this->style_, this->name1_, this->name2_);
 
             tosn(logstate2stream(logstate), " ", std::forward<Tn>(args)...);
 

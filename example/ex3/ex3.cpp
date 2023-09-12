@@ -1,4 +1,4 @@
-/* examples ex2/ex2.cpp */
+/* examples ex3/ex3.cpp */
 
 #include "nestlog/scope.hpp"
 
@@ -22,6 +22,7 @@ fib(int n) {
 
 int
 main(int argc, char ** argv) {
+    log_config::style = FS_Pretty;
     log_config::indent_width = 4;
 
     int n = 4;
