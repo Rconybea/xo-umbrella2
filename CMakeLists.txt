@@ -4,4 +4,6 @@ project(nestlog VERSION 0.1)
 enable_language(CXX)
 enable_testing()
 
+include(cmake/nestlog.cmake)
+
 add_subdirectory(example)
