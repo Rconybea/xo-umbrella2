@@ -15,6 +15,9 @@ namespace xo {
     template <typename ChartT, typename Traits>
     class state_impl;
 
+#  define XO_ENTER0() xo::scope_setup(log_config::style, __PRETTY_FUNCTION__)
+#  define XO_ENTER1(debug_flag) xo::scope_setup(log_config::style, __PRETTY_FUNCTION__, debug_flag)
+
 //#  define XO_SSETUP0() xo::scope_setup(__FUNCTION__)
 #  define XO_SSETUP0() xo::scope_setup(log_config::style, __PRETTY_FUNCTION__)
 
@@ -23,7 +26,7 @@ namespace xo {
     /* establish scope using current function name */
 #  define XO_SCOPE(name) xo::scope name(xo::scope_setup(log_config::style, __PRETTY_FUNCTION__))
     /* like XO_SCOPE(name),  but also set enabled flag */
-#  define XOf_SCOPE2(name, debug_flag) xo::scope name(xo::scope_setup(log_config::style, __PRETTY_FUNCTION__, debug_flag))
+#  define XO_SCOPE2(name, debug_flag) xo::scope name(xo::scope_setup(log_config::style, __PRETTY_FUNCTION__, debug_flag))
 #  define XO_SCOPE_DISABLED(name) xo::scope name(xo::scope_setup(log_config::style, __PRETTY_FUNCTION__, false))
 #  define XO_STUB() { XO_SCOPE(logr); logr.log("STUB"); }
 
@@ -37,6 +40,8 @@ namespace xo {
             : scope_setup(style, name1, "", enabled_flag) {}
         scope_setup(function_style style, std::string_view name1)
             : scope_setup(style, name1, true /*enabled_flag*/) {}
+
+        static scope_setup literal(std::string_view name1, bool enabled_flag = true) { return scope_setup(FS_Literal, name1, enabled_flag); }
 
         function_style style_ = FS_Pretty;
         std::string_view name1_ = "<.name1>";
