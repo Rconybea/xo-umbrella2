@@ -2,7 +2,9 @@
 
 #pragma once
 
+#include "log_config.hpp"
 #include "log_streambuf.hpp"
+#include "pad.hpp"
 #include <ostream>
 #include <memory>   // for std::unique_ptr
 
@@ -44,11 +46,12 @@ namespace xo {
         /* common implementation for .preamble(), .postamble() */
         void entryexit_aux(std::string_view name1,
                            std::string_view name2,
-                           char label_char);
+                           char label_char,
+                           bool newline_flag);
 
     private:
         /* current nesting level for this thread */
-        uint32_t nesting_level_ = 0;
+        std::uint32_t nesting_level_ = 0;
 
         /* buffer space for logging
          * (before pretty-printing for scope::log() calls that span multiple lines)
@@ -95,16 +98,20 @@ namespace xo {
 #endif
 
         /* indent to nesting level */
+        this->ss_ << pad(this->nesting_level_ * log_config::indent_width, pad_char);
+#ifdef OBSOLETE
         for(uint32_t i = 0, n = this->nesting_level_; i<n; ++i) {
             this->ss_ << pad_char;
         }
+#endif
     } /*indent*/
 
     template <typename CharT, typename Traits>
     void
     state_impl<CharT, Traits>::entryexit_aux(std::string_view name1,
                                              std::string_view name2,
-                                             char label_char)
+                                             char label_char,
+                                             bool newline_flag)
     {
         log_streambuf_type * sbuf = this->p_sbuf_phase1_.get();
 
@@ -115,7 +122,10 @@ namespace xo {
         this->ss_ << label_char;
 
         /* scope name */
-        this->ss_ << name1 << name2 << "\n";
+        this->ss_ << name1 << name2;
+
+        if (newline_flag)
+            this->ss_ << "\n";
     } /*entryexit_aux*/
 
     template <typename CharT, typename Traits>
@@ -123,7 +133,7 @@ namespace xo {
     state_impl<CharT, Traits>::preamble(std::string_view name1,
                                         std::string_view name2)
     {
-        this->entryexit_aux(name1, name2, '+' /*label_char*/);
+        this->entryexit_aux(name1, name2, '+' /*label_char*/, false /*!newline_flag*/);
     } /*preamble*/
 
     template <typename CharT, typename Traits>
@@ -131,7 +141,7 @@ namespace xo {
     state_impl<CharT, Traits>::postamble(std::string_view name1,
                                          std::string_view name2)
     {
-        this->entryexit_aux(name1, name2, '-' /*label_char*/);
+        this->entryexit_aux(name1, name2, '-' /*label_char*/, true /*newline_flag*/);
     }  /*postamble*/
 
     template <typename CharT, typename Traits>

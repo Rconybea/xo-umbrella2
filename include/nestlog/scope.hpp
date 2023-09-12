@@ -15,14 +15,33 @@ namespace xo {
     template <typename ChartT, typename Traits>
     class state_impl;
 
+//#  define XO_SSETUP0() xo::scope_setup(__FUNCTION__)
+#  define XO_SSETUP0() xo::scope_setup(__PRETTY_FUNCTION__)
+
     /* throw exception if condition not met*/
 #  define XO_EXPECT(f,msg) if(!(f)) { throw std::runtime_error(msg); }
     /* establish scope using current function name */
-#  define XO_SCOPE(name) xo::scope name(__FUNCTION__)
+#  define XO_SCOPE(name) xo::scope name(xo::scope_setup(__FUNCTION__))
     /* like XO_SCOPE(name),  but also set enabled flag */
-#  define XO_SCOPE2(name, debug_flag) xo::scope name(__FUNCTION__, debug_flag)
-#  define XO_SCOPE_DISABLED(name) xo::scope name(__FUNCTION__, false)
+#  define XO_SCOPE2(name, debug_flag) xo::scope name(xo::scope_setup(__FUNCTION__, debug_flag))
+#  define XO_SCOPE_DISABLED(name) xo::scope name(xo::scope_setup(__FUNCTION__, false))
 #  define XO_STUB() { XO_SCOPE(logr); logr.log("STUB"); }
+
+    /* convenience class for basic_scope<..> construction (see below).
+     * use to disambiguate setup from other arguments
+     */
+    struct scope_setup {
+        scope_setup(std::string_view name1, std::string_view name2, bool enabled_flag)
+            : name1_{name1}, name2_{name2}, enabled_flag_{enabled_flag} {}
+        scope_setup(std::string_view name1, bool enabled_flag)
+            : scope_setup(name1, "", enabled_flag) {}
+        scope_setup(std::string_view name1)
+            : scope_setup(name1, true /*enabled_flag*/) {}
+
+        std::string_view name1_ = "<.name1>";
+        std::string_view name2_ = "<.name2>";
+        bool enabled_flag_ = false;
+    }; /*scope_setup*/
 
     /* nesting logger
      *
@@ -64,9 +83,9 @@ namespace xo {
         using state_impl_type = state_impl<CharT, Traits>;
 
     public:
-        basic_scope(std::string_view name1);
-        basic_scope(std::string_view name1, bool enabled_flag);
-        basic_scope(std::string_view name1, std::string_view name2, bool enabled_flag);
+        //basic_scope(std::string_view name1, bool enabled_flag);
+        template <typename... Tn>
+        basic_scope(scope_setup setup, Tn&&... rest);
         ~basic_scope();
 
         bool enabled() const { return !finalized_; }
@@ -75,6 +94,8 @@ namespace xo {
 
         /* report current nesting level */
         std::uint32_t nesting_level() const;
+
+        void set_dest_sbuf(std::streambuf * x) { this->dest_sbuf_ = x; }
 
         template<typename... Tn>
         bool log(Tn&&... rest) {
@@ -86,7 +107,7 @@ namespace xo {
                 /* log to per-thread stream to prevent data races */
                 tosn(logstate2stream(logstate), rest...);
 
-                this->flush2clog(logstate);
+                this->flush2sbuf(logstate);
             }
 
             return true;
@@ -112,12 +133,14 @@ namespace xo {
         static std::ostream & logstate2stream(state_impl_type * logstate);
 
         /* write collected output to std::clog,  or chosen streambuf */
-        void flush2clog(state_impl_type * logstate, std::streambuf * p_sbuf = std::clog.rdbuf());
+        void flush2sbuf(state_impl_type * logstate);
 
     private:
         /* keep logging state separately for each thread */
         static thread_local std::unique_ptr<state_impl_type> s_threadlocal_state;
 
+        /* send indented output to this streambuf (e.g. std::clog.rdbuf()) */
+        std::streambuf * dest_sbuf_ = std::clog.rdbuf();
         /* name of this scope (part 1) */
         std::string_view name1_ = "<name1>";
         /* name of this scope (part 2) */
@@ -127,17 +150,20 @@ namespace xo {
     }; /*basic_scope*/
 
     template <typename CharT, typename Traits>
-    basic_scope<CharT, Traits>::basic_scope(std::string_view fn1,
-                                            std::string_view fn2,
-                                            bool enabled_flag)
-        : name1_(fn1),
-          name2_(fn2),
-          finalized_(!enabled_flag)
+    template <typename... Tn>
+    basic_scope<CharT, Traits>::basic_scope(scope_setup setup, Tn&&... args)
+
+        : name1_{std::move(setup.name1_)},
+          name2_{std::move(setup.name2_)},
+          finalized_{!setup.enabled_flag_}
     {
-        if(enabled_flag) {
+        if(setup.enabled_flag_) {
             state_impl_type * logstate = basic_scope::require_thread_local_state();
 
             logstate->preamble(this->name1_, this->name2_);
+
+            tosn(logstate2stream(logstate), " ", args...);
+
             logstate->flush2sbuf(std::clog.rdbuf());
 
             ///* next call to scope::log() can reset to beginning of buffer space */
@@ -146,16 +172,6 @@ namespace xo {
             logstate->incr_nesting();
         }
     } /*ctor*/
-
-    template <typename CharT, typename Traits>
-    basic_scope<CharT, Traits>::basic_scope(std::string_view fn1, bool enabled_flag)
-        : basic_scope(fn1, "", enabled_flag)
-    {}
-
-    template <typename CharT, typename Traits>
-    basic_scope<CharT, Traits>::basic_scope(std::string_view fn)
-        : basic_scope(fn, true /*enabled_flag*/)
-    {}
 
     template <typename CharT, typename Traits>
     basic_scope<CharT, Traits>::~basic_scope() {
@@ -205,11 +221,10 @@ namespace xo {
 
     template <typename CharT, typename Traits>
     void
-    basic_scope<CharT, Traits>::flush2clog(state_impl_type * logstate,
-                                           std::streambuf * p_sbuf)
+    basic_scope<CharT, Traits>::flush2sbuf(state_impl_type * logstate)
     {
-        logstate->flush2sbuf(p_sbuf);
-    } /*flush2clog*/
+        logstate->flush2sbuf(this->dest_sbuf_);
+    } /*flush2sbuf*/
 
     template <typename CharT, typename Traits>
     void

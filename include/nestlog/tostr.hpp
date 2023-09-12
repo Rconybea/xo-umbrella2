@@ -59,6 +59,12 @@ namespace xo {
      *   desired ctor
      */
 
+    /* no-op terminal case */
+    template<class Stream>
+    Stream & tos(Stream & s) {
+        return s;
+    }
+
     // Use:
     //   tos(s,a,b,c)
     // is the same as

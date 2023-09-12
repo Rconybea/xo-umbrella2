@@ -5,7 +5,8 @@
 #include <iostream>
 #include <vector>
 #include <cstring>   // e.g. for std::memcpy()
-#include <cassert>   // e.g. for std::memcpy()
+#include <cstdint>
+#include <cassert>
 
 namespace xo {
     /* recycling buffer for logging.

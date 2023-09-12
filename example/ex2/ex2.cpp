@@ -2,28 +2,33 @@
 
 #include "nestlog/scope.hpp"
 
+using namespace xo;
+
 int
 fib(int n) {
-    XO_SCOPE(log);
+    scope log(XO_SSETUP0(), ":n ", n);
 
     int retval = 1;
 
     if (n >= 2) {
-        log(":n ", n);
         retval = fib(n - 1) + fib(n - 2);
+        log(":n ", n);
     }
-
-    log(":n ", n, " -> :retval ", retval);
+    log("<- :retval ", retval);
 
     return retval;
 }
 
 int
 main(int argc, char ** argv) {
-    XO_SCOPE(log);
+    log_config::indent_width = 4;
 
     int n = 4;
+
+    scope log(XO_SSETUP0(), ":n", 4);
+
     int fn = fib(n);
 
-    log(":n ", n, " :fib(n) ", fn);
+    log(":n ", n);
+    log("<- :fib(n) ", fn);
 }
