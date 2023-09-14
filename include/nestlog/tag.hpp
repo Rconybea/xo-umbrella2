@@ -25,6 +25,8 @@ namespace xo {
     struct tag_impl {
         tag_impl(Name const & n, Value const & v)
             : name_{n}, value_{v} {}
+        tag_impl(Name && n, Value && v)
+            : name_{std::move(n)}, value_{std::move(v)} {}
 
         Name const & name() const { return name_; }
         Value const & value() const { return value_; }
@@ -66,6 +68,20 @@ namespace xo {
     xtag_pre(char const * n) {
         return tag_impl<true, char const *, char const *>(n, "");
     } /*xtag_pre*/
+
+    template<typename Name, typename Value>
+    tag_impl<false, Name, Value>
+    tag(Name && n, Value && v)
+    {
+        return tag_impl<false, Name, Value>(n, v);
+    } /*tag*/
+
+    template<typename Value>
+    tag_impl<false, char const *, Value>
+    tag(char const * n, Value && v)
+    {
+        return tag_impl<false, char const *, Value>(n, v);
+    } /*tag*/
 
     template <bool PrefixSpace, typename Name, typename Value>
     inline std::ostream &

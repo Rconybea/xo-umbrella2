@@ -6,13 +6,13 @@ using namespace xo;
 
 int
 fib(int n) {
-    scope log(XO_ENTER0(), xtag("n", n));
+    scope log(XO_ENTER0(), tag("n", n));
 
     int retval = 1;
 
     if (n >= 2) {
         retval = fib(n - 1) + fib(n - 2);
-        log(xtag("n", n));
+        log(tag("n", n));
     }
 
     log.end_scope("<-", xtag("retval", retval));
