@@ -1,8 +1,9 @@
-/* @file scopẹhpp */
+/* @file scope.hpp */
 
 #pragma once
 
 #include "log_state.hpp"
+#include "filename.hpp"
 #include "tostr.hpp"
 #include "tag.hpp"
 
@@ -15,38 +16,44 @@ namespace xo {
     template <typename ChartT, typename Traits>
     class state_impl;
 
-#  define XO_ENTER0() xo::scope_setup(xo::log_config::style, __PRETTY_FUNCTION__)
-#  define XO_ENTER1(debug_flag) xo::scope_setup(xo::log_config::style, __PRETTY_FUNCTION__, debug_flag)
+#  define XO_ENTER0() xo::scope_setup(xo::log_config::style, __PRETTY_FUNCTION__, __FILE__, __LINE__)
+#  define XO_ENTER1(debug_flag) xo::scope_setup(xo::log_config::style, __PRETTY_FUNCTION__, __FILE__, __LINE__, debug_flag)
 
 //#  define XO_SSETUP0() xo::scope_setup(__FUNCTION__)
-#  define XO_SSETUP0() xo::scope_setup(xo::log_config::style, __PRETTY_FUNCTION__)
+#  define XO_SSETUP0() xo::scope_setup(xo::log_config::style, __PRETTY_FUNCTION__, __FILE__, __LINE__)
 
     /* throw exception if condition not met*/
 #  define XO_EXPECT(f,msg) if(!(f)) { throw std::runtime_error(msg); }
     /* establish scope using current function name */
-#  define XO_SCOPE(name) xo::scope name(xo::scope_setup(xo::log_config::style, __PRETTY_FUNCTION__))
+#  define XO_SCOPE(name) xo::scope name(xo::scope_setup(xo::log_config::style, __PRETTY_FUNCTION__, __FILE__, __LINE__))
     /* like XO_SCOPE(name),  but also set enabled flag */
-#  define XO_SCOPE2(name, debug_flag) xo::scope name(xo::scope_setup(xo::log_config::style, __PRETTY_FUNCTION__, debug_flag))
-#  define XO_SCOPE_DISABLED(name) xo::scope name(xo::scope_setup(xo::log_config::style, __PRETTY_FUNCTION__, false))
+#  define XO_SCOPE2(name, debug_flag) xo::scope name(xo::scope_setup(xo::log_config::style, __PRETTY_FUNCTION__, __FILE__, __LINE__, debug_flag))
+#  define XO_SCOPE_DISABLED(name) xo::scope name(xo::scope_setup(xo::log_config::style, __PRETTY_FUNCTION__, __FILE__, __LINE__, false))
 #  define XO_STUB() { XO_SCOPE(logr); logr.log("STUB"); }
 
     /* convenience class for basic_scope<..> construction (see below).
      * use to disambiguate setup from other arguments
      */
     struct scope_setup {
-        scope_setup(function_style style, std::string_view name1, std::string_view name2, bool enabled_flag)
-            : style_{style}, name1_{name1}, name2_{name2}, enabled_flag_{enabled_flag} {}
-        scope_setup(function_style style, std::string_view name1, bool enabled_flag)
-            : scope_setup(style, name1, "", enabled_flag) {}
-        scope_setup(function_style style, std::string_view name1)
-            : scope_setup(style, name1, true /*enabled_flag*/) {}
+        scope_setup(function_style style, std::string_view name1, std::string_view name2,
+                    std::string_view file, std::uint32_t line, bool enabled_flag)
+            : style_{style}, name1_{name1}, name2_{name2}, file_{file}, line_{line}, enabled_flag_{enabled_flag} {}
+        scope_setup(function_style style, std::string_view name1, std::string_view file, std::uint32_t line, bool enabled_flag)
+            : scope_setup(style, name1, "", file, line, enabled_flag) {}
+        scope_setup(function_style style, std::string_view name1, std::string_view file, std::uint32_t line)
+            : scope_setup(style, name1, file, line, true /*enabled_flag*/) {}
 
-        static scope_setup literal(std::string_view name1, bool enabled_flag = true) { return scope_setup(FS_Literal, name1, enabled_flag); }
-        static scope_setup literal(std::string_view name1, std::string_view name2, bool enabled_flag = true) { return scope_setup(FS_Literal, name1, name2, enabled_flag); }
+        //static scope_setup literal(std::string_view name1, bool enabled_flag = true) { return scope_setup(FS_Literal, name1, enabled_flag); }
+        //static scope_setup literal(std::string_view name1, std::string_view name2, bool enabled_flag = true) { return scope_setup(FS_Literal, name1, name2, enabled_flag); }
 
         function_style style_ = FS_Pretty;
         std::string_view name1_ = "<.name1>";
         std::string_view name2_ = "<.name2>";
+        /* __FILE__ */
+        std::string_view file_ = "<.file>";
+        /* __LINE__ */
+        std::uint32_t line_ = 0;
+        /* true iff output enabled for this scope */
         bool enabled_flag_ = false;
     }; /*scope_setup*/
 
@@ -155,6 +162,10 @@ namespace xo {
         std::string_view name1_ = "<name1>";
         /* name of this scope (part 2) */
         std::string_view name2_ = "::<name2>";
+        /* captured value of __FILE__ */
+        std::string_view file_ = "<file>";
+        /* captured value of __LINE__ */
+        std::uint32_t line_ = 0;
         /* set once per scope .finalized=true <-> logging disabled */
         bool finalized_ = false;
     }; /*basic_scope*/
@@ -166,14 +177,23 @@ namespace xo {
         : style_{setup.style_},
           name1_{std::move(setup.name1_)},
           name2_{std::move(setup.name2_)},
+          file_{std::move(setup.file_)},
+          line_{setup.line_},
           finalized_{!setup.enabled_flag_}
     {
         if(setup.enabled_flag_) {
             state_impl_type * logstate = basic_scope::require_thread_local_state();
+            std::ostream & os = logstate2stream(logstate);
 
             logstate->preamble(this->style_, this->name1_, this->name2_);
 
-            tosn(logstate2stream(logstate), " ", std::forward<Tn>(args)...);
+            tosn(os, " ", std::forward<Tn>(args)...);
+
+            if (log_config::location_enabled) {
+                /* prints on next call to flush2sbuf */
+                logstate->set_location(this->file_, this->line_);
+                //tosn(os, " [", basename(this->file_), ":", this->line_, "]");
+            }
 
             logstate->flush2sbuf(std::clog.rdbuf());
 

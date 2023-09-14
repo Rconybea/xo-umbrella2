@@ -5,7 +5,9 @@
 #include "log_config.hpp"
 #include "log_streambuf.hpp"
 #include "pad.hpp"
+#include "filename.hpp"
 #include <ostream>
+#include <sstream>
 #include <memory>   // for std::unique_ptr
 
 namespace xo {
@@ -42,6 +44,12 @@ namespace xo {
             p_sbuf_phase2_->reset_stream();
         }
 
+        void set_location(std::string_view file, std::uint32_t line) {
+            this->location_flag_ = true;
+            this->file_ = std::move(file);
+            this->line_ = line;
+        } /*set_location*/
+
     private:
         /* common implementation for .preamble(), .postamble() */
         void entryexit_aux(function_style style,
@@ -58,6 +66,21 @@ namespace xo {
          * reused across tos() and scope::log() calls
          */
         std::unique_ptr<log_streambuf_type> p_sbuf_phase1_;
+
+        /* #of characters found in .p_sbuf_phase1 since last \n.
+         * this value is established+updated in .flush2sbuf().
+         * (in particular ignored by stream .ss())
+         */
+        std::size_t lpos_ = 0;
+
+        /* whenever .set_location() is called:
+         * - capture (file, line)
+         * - print them near right margin with next output line
+         * - ..and reset .location_flag
+         */
+        bool location_flag_ = false;
+        std::string_view file_;
+        std::uint32_t line_ = 0;
 
         /* buffer space for handling scope::log() calls that span multiple lines;
          * inserts extra characters in effort to indent gracefully
@@ -99,11 +122,6 @@ namespace xo {
 
         /* indent to nesting level */
         this->ss_ << pad(this->nesting_level_ * log_config::indent_width, pad_char);
-#ifdef OBSOLETE
-        for(uint32_t i = 0, n = this->nesting_level_; i<n; ++i) {
-            this->ss_ << pad_char;
-        }
-#endif
     } /*indent*/
 
     template <typename CharT, typename Traits>
@@ -124,7 +142,7 @@ namespace xo {
         if (log_config::indent_width > 1)
             this->ss_ << ' ';
 
-        /* scope name */
+        /* scope name - note no trailing newline;  expect .preamble()/.postamble() caller to supply */
         this->ss_ << function_name(style, name1) << name2;
     } /*entryexit_aux*/
 
@@ -153,12 +171,15 @@ namespace xo {
         log_streambuf_type * sbuf1 = this->p_sbuf_phase1_.get();
         log_streambuf_type * sbuf2 = this->p_sbuf_phase2_.get();
 
-        /* expecting sbuf to contain one line of output.
+        /* generally expecting sbuf to contain one line of output.
          * if it contains multiple newlines,  need to indent
          * after each one.
          *
          * will scan output in *sbuf1,  post-process to *sbuf2,
-         * then write *sbuf2 to clog
+         * then write *sbuf2 to output stream
+         *
+         * note: we inherit .lpos from prec call to .flush2sbuf(),
+         *       in the unlikely event that it's non-zero
          */
         char const * s = sbuf1->lo();
         char const * e = s + sbuf1->pos();
@@ -177,6 +198,8 @@ namespace xo {
 
             /* for indenting,  looking for first 'space following non-space, on first line', if any */
 
+            std::size_t lpos_on_newline = 0;
+
             while(p < e) {
                 if(space_after_nonspace) {
                     ;
@@ -191,18 +214,50 @@ namespace xo {
 
                 if(*p == '\n') {
                     ++p;
+                    /* reset .pos on newline */
+                    lpos_on_newline = this->lpos_;
+                    this->lpos_ = 0;
+
                     break;
                 } else {
                     ++p;
+
+                    /* increment .lpos on non-newline */
+                    ++(this->lpos_);
                 }
             }
 
             /* p=e or *p=\n */
 
             /* charseq [s,p) does not contain any newlines,  print it */
-            sbuf2->sputn(s, p - s);
+            if (lpos_on_newline > 0) {
+                /* charseq [s,p) does not contain any newlines,  print it */
+                sbuf2->sputn(s, p - s - 1);
 
-            if(p == e) {
+                if (this->location_flag_) {
+                    /* 'tab' to position 80 */
+                    sbuf2->sputc(' ');
+                    for (std::uint32_t i = lpos_on_newline + 1; i < log_config::location_tab; ++i)
+                       sbuf2->sputc(' ');
+
+                    std::stringstream ss;
+                    ss << "[" << basename(this->file_) << ":" << this->line_ << "]";
+
+                    std::string ss_str = std::move(ss.str()); /*c++20*/
+                    sbuf2->sputn(ss_str.c_str(), ss_str.size());
+
+                    this->location_flag_ = false;
+                    this->file_ = "";
+                    this->line_ = 0;
+                }
+
+                sbuf2->sputc('\n');
+            } else {
+                /* control here if .flush2sbuf() called without trailing newline in .p_sbuf_phase1 */
+                sbuf2->sputn(s, p - s);
+            }
+
+            if (p == e) {
                 break;
             }
 

@@ -24,6 +24,7 @@ int
 main(int argc, char ** argv) {
     log_config::style = FS_Pretty;
     log_config::indent_width = 4;
+    log_config::location_tab = 40;
 
     int n = 4;
 
@@ -34,3 +35,5 @@ main(int argc, char ** argv) {
     log(xtag("n", n));
     log("<-", xtag("fib(n)", fn));
 }
+
+/* ex3/ex3.cpp */

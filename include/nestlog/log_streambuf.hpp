@@ -36,30 +36,30 @@ namespace xo {
     protected:
         virtual std::streamsize
         xsputn(char const * s, std::streamsize n) override {
-                /* s must be an address in [this->lo() .. this->lo() + capacity()] */
+            /* s must be an address in [this->lo() .. this->lo() + capacity()] */
 
-                assert(this->hi() >= this->pptr());
+            assert(this->hi() >= this->pptr());
 
 #ifdef NOT_USING_DEBUG
-                std::cout << "xsputn: pbase=" << (void *)(this->pbase())
-                          << ", pptr=" << (void*)(this->pptr())
-                          << "(+" << (this->pptr() - this->lo()) << ")"
-                          << ", n=" << n << " -> (+" << (this->pptr() + n - this->lo()) << ")"
-                          << ", buf_v.size=" << this->buf_v_.size()
-                          << std::endl;
+            std::cout << "xsputn: pbase=" << (void *)(this->pbase())
+                      << ", pptr=" << (void*)(this->pptr())
+                      << "(+" << (this->pptr() - this->lo()) << ")"
+                      << ", n=" << n << " -> (+" << (this->pptr() + n - this->lo()) << ")"
+                      << ", buf_v.size=" << this->buf_v_.size()
+                      << std::endl;
 #endif
-                //std::cout << "xsputn: s=" << quoted(string_view(s, n)) << ", n=" << n << std::endl;
+            //std::cout << "xsputn: s=" << quoted(string_view(s, n)) << ", n=" << n << std::endl;
 
-                if (this->pptr() + n > this->hi()) {
-                    n = this->hi() - this->pptr();
-                    std::memcpy(this->pptr(), s, n);
-                } else {
-                    std::memcpy(this->pptr(), s, n);
-                }
-                this->pbump(n);
+            if (this->pptr() + n > this->hi()) {
+                n = this->hi() - this->pptr();
+                std::memcpy(this->pptr(), s, n);
+            } else {
+                std::memcpy(this->pptr(), s, n);
+            }
+            this->pbump(n);
 
-                return n;
-            } /*xsputn*/
+            return n;
+        } /*xsputn*/
 
         virtual int_type
         overflow(int_type new_ch) override
