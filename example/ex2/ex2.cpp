@@ -6,7 +6,7 @@ using namespace xo;
 
 int
 fib(int n) {
-    scope log(XO_SSETUP0(), ":n ", n);
+    scope log(XO_ENTER0(info), ":n ", n);
 
     int retval = 1;
 
@@ -26,7 +26,7 @@ main(int argc, char ** argv) {
 
     int n = 4;
 
-    scope log(XO_SSETUP0(), ":n ", 4);
+    scope log(XO_ENTER0(info), ":n ", 4);
 
     int fn = fib(n);
 

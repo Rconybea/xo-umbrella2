@@ -1,4 +1,4 @@
-/* @file Time.hpp */
+/* @file time.hpp */
 
 #pragma once
 
@@ -359,4 +359,4 @@ namespace std {
     } /*namespace chrono*/
 } /*namespace std*/
 
-/* end Time.hpp */
+/* end time.hpp */

@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "log_level.hpp"
 #include "function.hpp"
 #include "nestlog/color.hpp"
 #include <cstdint>
@@ -10,6 +11,8 @@ namespace xo {
     /* Tag here b/c we want header-only library */
     template <typename Tag>
     struct log_config_impl {
+        /* display log messages with severity >= .log_level */
+        static log_level min_log_level;
         /* true to log local time */
         static bool time_enabled;
         /* true to log time-of-day in local coords;  false for UTC coords */
@@ -40,6 +43,10 @@ namespace xo {
         /* color to use for code location */
         static std::uint32_t code_location_color;
     }; /*log_config_impl*/
+
+    template <typename Tag>
+    log_level
+    log_config_impl<Tag>::min_log_level = log_level::default_level;
 
     template <typename Tag>
     bool

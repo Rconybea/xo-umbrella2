@@ -6,7 +6,7 @@ using namespace xo;
 
 int
 fib(int n) {
-    scope log(XO_ENTER0(), tag("n", n));
+    scope log(XO_ENTER0(info), tag("n", n));
 
     int retval = 1;
 
@@ -21,6 +21,7 @@ fib(int n) {
 
 int
 main(int argc, char ** argv) {
+    log_config::min_log_level = log_level::info;
     log_config::time_enabled = true;
     log_config::time_local_flag = true;
     log_config::style = FS_Streamlined;
@@ -34,12 +35,12 @@ main(int argc, char ** argv) {
 
     int n = 4;
 
-    scope log(XO_ENTER0(), ":n ", 4);
+    scope log(XO_ENTER0(info), ":n ", 4);
 
     int fn = fib(n);
 
-    log(tag("n", n));
-    log("<-", xtag("fib(n)", fn));
+    log && log(tag("n", n));
+    log && log("<-", xtag("fib(n)", fn));
 }
 
 /* ex3/ex3.cpp */

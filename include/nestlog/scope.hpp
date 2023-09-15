@@ -16,16 +16,16 @@ namespace xo {
     template <typename ChartT, typename Traits>
     class state_impl;
 
-#  define XO_ENTER0() xo::scope_setup(xo::log_config::style, __PRETTY_FUNCTION__, __FILE__, __LINE__)
-#  define XO_ENTER1(debug_flag) xo::scope_setup(xo::log_config::style, __PRETTY_FUNCTION__, __FILE__, __LINE__, debug_flag)
+#  define XO_ENTER0(lvl) xo::scope_setup(xo::log_level::lvl, xo::log_config::style, __PRETTY_FUNCTION__, __FILE__, __LINE__)
+#  define XO_ENTER1(lvl, debug_flag) xo::scope_setup(xo::log_level::lvl, xo::log_config::style, __PRETTY_FUNCTION__, __FILE__, __LINE__, debug_flag)
 
 //#  define XO_SSETUP0() xo::scope_setup(__FUNCTION__)
-#  define XO_SSETUP0() xo::scope_setup(xo::log_config::style, __PRETTY_FUNCTION__, __FILE__, __LINE__)
+//#  define XO_SSETUP0(lvl) xo::scope_setup(xo::log_level::lvl, xo::log_config::style, __PRETTY_FUNCTION__, __FILE__, __LINE__)
 
     /* throw exception if condition not met*/
 #  define XO_EXPECT(f,msg) if(!(f)) { throw std::runtime_error(msg); }
     /* establish scope using current function name */
-#  define XO_SCOPE(name) xo::scope name(xo::scope_setup(xo::log_config::style, __PRETTY_FUNCTION__, __FILE__, __LINE__))
+#  define XO_SCOPE(name, lvl) xo::scope name(xo::scope_setup(xo::log_level::lvl, xo::log_config::style, __PRETTY_FUNCTION__, __FILE__, __LINE__))
     /* like XO_SCOPE(name),  but also set enabled flag */
 #  define XO_SCOPE2(name, debug_flag) xo::scope name(xo::scope_setup(xo::log_config::style, __PRETTY_FUNCTION__, __FILE__, __LINE__, debug_flag))
 #  define XO_SCOPE_DISABLED(name) xo::scope name(xo::scope_setup(xo::log_config::style, __PRETTY_FUNCTION__, __FILE__, __LINE__, false))
@@ -35,17 +35,21 @@ namespace xo {
      * use to disambiguate setup from other arguments
      */
     struct scope_setup {
-        scope_setup(function_style style, std::string_view name1, std::string_view name2,
-                    std::string_view file, std::uint32_t line, bool enabled_flag)
-            : style_{style}, name1_{name1}, name2_{name2}, file_{file}, line_{line}, enabled_flag_{enabled_flag} {}
-        scope_setup(function_style style, std::string_view name1, std::string_view file, std::uint32_t line, bool enabled_flag)
-            : scope_setup(style, name1, "", file, line, enabled_flag) {}
-        scope_setup(function_style style, std::string_view name1, std::string_view file, std::uint32_t line)
-            : scope_setup(style, name1, file, line, true /*enabled_flag*/) {}
+        scope_setup(log_level level, function_style style, std::string_view name1, std::string_view name2,
+                    std::string_view file, std::uint32_t line)
+            : log_level_{level}, style_{style}, name1_{name1}, name2_{name2}, file_{file}, line_{line} {}
+        scope_setup(log_level level, function_style style,
+                    std::string_view name1, std::string_view file, std::uint32_t line)
+            : scope_setup(level, style, name1, "" /*name2*/, file, line) {}
+
+        bool is_enabled() const { return (this->log_level_ >= log_config::min_log_level); }
 
         //static scope_setup literal(std::string_view name1, bool enabled_flag = true) { return scope_setup(FS_Literal, name1, enabled_flag); }
         //static scope_setup literal(std::string_view name1, std::string_view name2, bool enabled_flag = true) { return scope_setup(FS_Literal, name1, name2, enabled_flag); }
 
+        /* threshold level for logging -- write messages with severity >= this level */
+        log_level log_level_ = log_level::error;
+        /* FS_Pretty | FS_Streamlined | FS_Simple */
         function_style style_ = FS_Pretty;
         std::string_view name1_ = "<.name1>";
         std::string_view name2_ = "<.name2>";
@@ -53,8 +57,6 @@ namespace xo {
         std::string_view file_ = "<.file>";
         /* __LINE__ */
         std::uint32_t line_ = 0;
-        /* true iff output enabled for this scope */
-        bool enabled_flag_ = false;
     }; /*scope_setup*/
 
     /* nesting logger
@@ -182,9 +184,9 @@ namespace xo {
           name2_{std::move(setup.name2_)},
           file_{std::move(setup.file_)},
           line_{setup.line_},
-          finalized_{!setup.enabled_flag_}
+          finalized_{!(setup.is_enabled())}
     {
-        if(setup.enabled_flag_) {
+        if(setup.is_enabled()) {
             state_impl_type * logstate = basic_scope::require_thread_local_state();
             std::ostream & os = logstate2stream(logstate);
 

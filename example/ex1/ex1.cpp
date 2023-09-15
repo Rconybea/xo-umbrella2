@@ -3,7 +3,7 @@
 using namespace xo;
 
 void A(int x) {
-    XO_SCOPE(log);
+    XO_SCOPE(log, info);
 
     log("x:", x);
 }
