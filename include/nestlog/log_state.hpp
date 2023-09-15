@@ -58,8 +58,13 @@ namespace xo {
         /* space budget for time-of-day */
         std::size_t calc_time_indent() const {
             if (log_config::time_enabled) {
-                /*strlen("14:38:19.974 ")*/
-                return 13;
+                if (log_config::time_usec_flag) {
+                    /*strlen("14:38:19.123456 ")*/
+                    return 16;
+                } else {
+                    /*strlen("14:38:19.974 ")*/
+                    return 13;
+                }
             } else {
                 return 0;
             }
