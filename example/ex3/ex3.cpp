@@ -12,10 +12,9 @@ fib(int n) {
 
     if (n >= 2) {
         retval = fib(n - 1) + fib(n - 2);
-        log(tag("n", n));
     }
 
-    log.end_scope("<-", xtag("retval", retval));
+    log.end_scope(tag("n", n), " <-", xtag("retval", retval));
 
     return retval;
 }
@@ -24,7 +23,8 @@ int
 main(int argc, char ** argv) {
     log_config::style = FS_Streamlined;
     log_config::indent_width = 4;
-    log_config::location_tab = 40;
+    log_config::max_indent_width = 14;
+    log_config::location_tab = 70;
     log_config::encoding = CE_Xterm;
     log_config::function_entry_color = 69;
     log_config::function_exit_color = 70;
@@ -36,7 +36,7 @@ main(int argc, char ** argv) {
 
     int fn = fib(n);
 
-    log(xtag("n", n));
+    xtag("n", n);
     log("<-", xtag("fib(n)", fn));
 }
 

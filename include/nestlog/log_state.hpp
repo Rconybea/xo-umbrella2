@@ -126,8 +126,14 @@ namespace xo {
         }
 #endif
 
-        /* indent to nesting level */
-        this->ss_ << pad(this->nesting_level_ * log_config::indent_width, pad_char);
+        /* indent to nesting level.
+         *
+         * note: see also flush2sbuf(),  need special indent handling for continuation lines
+         *       (when application sends explicit newlines to this logger)
+         */
+        this->ss_ << pad(std::min(this->nesting_level_ * log_config::indent_width,
+                                  log_config::max_indent_width),
+                         pad_char);
     } /*indent*/
 
     template <typename CharT, typename Traits>
@@ -160,6 +166,15 @@ namespace xo {
         }
 
         this->ss_ << ee_label;
+
+        if (log_config::nesting_level_enabled) {
+            this->ss_
+                << "("
+                << with_color(log_config::encoding,
+                              log_config::nesting_level_color,
+                              this->nesting_level_)
+                << ")";
+        }
 
         if (log_config::indent_width > 1)
             this->ss_ << ' ';
@@ -257,7 +272,7 @@ namespace xo {
                 sbuf2->sputn(s, p - s - 1);
 
                 if (this->location_flag_) {
-                    /* 'tab' to position 80 */
+                    /* 'tab' to position lpos for [file:line] */
                     sbuf2->sputc(' ');
                     for (std::uint32_t i = lpos_on_newline + 1; i < log_config::location_tab; ++i)
                        sbuf2->sputc(' ');
@@ -280,9 +295,8 @@ namespace xo {
                 sbuf2->sputn(s, p - s);
             }
 
-            if (p == e) {
+            if (p == e)
                 break;
-            }
 
             // {
             //   char buf[80];
@@ -293,14 +307,16 @@ namespace xo {
 
             /* at least 1 char following newline,  need to indent for it
              * - minimum indent = nesting level;
-             * - however if space_after_nonspace defined, indent to that
+             * - however if space_after_nonspace defined, also indent for that
              */
-            uint32_t n_indent = this->nesting_level_;
+            std::uint32_t n_indent = std::min(this->nesting_level_ * log_config::indent_width,
+                                              log_config::max_indent_width);
 
+            /* this is just to indent for per-line entry/exit label */
             if(space_after_nonspace)
                 n_indent += (space_after_nonspace - s);
 
-            for(uint32_t i = 0; i < n_indent; ++i)
+            for(std::uint32_t i = 0; i < n_indent; ++i)
                 sbuf2->sputc(' ');
 
             s = p;

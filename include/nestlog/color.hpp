@@ -25,7 +25,7 @@ namespace xo {
     class color_impl {
     public:
         color_impl(color_flags flags, color_encoding encoding, std::uint32_t color, Contents && contents)
-            : flags_{flags}, encoding_{encoding}, color_{color}, contents_{std::move(contents)} {}
+            : flags_{flags}, encoding_{encoding}, color_{color}, contents_{std::forward<Contents>(contents)} {}
 
         std::uint32_t color() const { return color_; }
         Contents const & contents() const { return contents_; }
@@ -77,17 +77,17 @@ namespace xo {
 
     template <typename Contents>
     color_impl<Contents> with_ansi_color(std::uint32_t color, Contents && contents) {
-        return color_impl<Contents>(CF_All, CE_Ansi, color, std::move(contents));
+        return color_impl<Contents>(CF_All, CE_Ansi, color, std::forward(contents));
     } /*with_ansi_color*/
 
     template <typename Contents>
     color_impl<Contents> with_xterm_color(std::uint32_t color, Contents && contents) {
-        return color_impl<Contents>(CF_All, CE_Xterm, color, std::move(contents));
+        return color_impl<Contents>(CF_All, CE_Xterm, color, std::forward(contents));
     } /*with_ansi_color*/
 
     template <typename Contents>
     color_impl<Contents> with_color(color_encoding encoding, std::uint32_t color, Contents && contents) {
-        return color_impl<Contents>(CF_All, encoding, color, std::move(contents));
+        return color_impl<Contents>(CF_All, encoding, color, std::forward<Contents>(contents));
     } /*with_color*/
 
     inline color_impl<int>
