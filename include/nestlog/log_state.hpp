@@ -158,16 +158,23 @@ namespace xo {
          * (13 chars including trailing space)
          */
         if (log_config::time_enabled) {
+            using xo::time::time;
+            using xo::time::utc_nanos;
+            using xo::time::hms_msec;
+            using xo::time::hms_usec;
+
+            utc_nanos now_tm = time::now();
+
             if (log_config::time_local_flag) {
                 if (log_config::time_usec_flag)
-                    this->ss_ << xo::time::hms_usec::local(xo::time::time::now()) << " ";
+                    this->ss_ << hms_usec::local(now_tm) << " ";
                 else
-                    this->ss_ << xo::time::hms_msec::local(xo::time::time::now()) << " ";
+                    this->ss_ << hms_msec::local(now_tm) << " ";
             } else {
                 if (log_config::time_usec_flag)
-                    this->ss_ << xo::time::hms_usec::utc(xo::time::time::now()) << " ";
+                    this->ss_ << hms_usec::utc(now_tm) << " ";
                 else
-                    this->ss_ << xo::time::hms_msec::utc(xo::time::time::now()) << " ";
+                    this->ss_ << hms_msec::utc(now_tm) << " ";
             }
         }
         this->indent(' ');
