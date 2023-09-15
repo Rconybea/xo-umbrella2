@@ -118,6 +118,11 @@ namespace xo {
             } else {
                 state_impl_type * logstate = require_indent_thread_local_state();
 
+                /* indent for timestamp */
+                if (log_config::time_enabled)
+                    logstate->ss() << pad(13, ' ');
+                //logstate->indent(' ');
+
                 /* log to per-thread stream to prevent data races */
                 tosn(logstate2stream(logstate), std::forward<Tn>(rest)...);
 

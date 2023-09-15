@@ -10,6 +10,12 @@ namespace xo {
     /* Tag here b/c we want header-only library */
     template <typename Tag>
     struct log_config_impl {
+        /* true to log local time */
+        static bool time_enabled;
+        /* true to log time-of-day in local coords;  false for UTC coords */
+        static bool time_local_flag;
+        /* true to log time-of-day with microsecond precision;  false for millisecond precision */
+        static bool time_usec_flag;
         /* spaces per nesting level */
         static std::uint32_t indent_width;
         /* max #of spaces to introduce when indenting */
@@ -34,6 +40,18 @@ namespace xo {
         /* color to use for code location */
         static std::uint32_t code_location_color;
     }; /*log_config_impl*/
+
+    template <typename Tag>
+    bool
+    log_config_impl<Tag>::time_enabled = 1;
+
+    template <typename Tag>
+    bool
+    log_config_impl<Tag>::time_local_flag = true;
+
+    template <typename Tag>
+    bool
+    log_config_impl<Tag>::time_usec_flag = true;
 
     template <typename Tag>
     std::uint32_t

@@ -7,6 +7,7 @@
 #include "pad.hpp"
 #include "filename.hpp"
 #include "code_location.hpp"
+#include "time.hpp"
 #include <ostream>
 #include <sstream>
 #include <memory>   // for std::unique_ptr
@@ -146,6 +147,29 @@ namespace xo {
         log_streambuf_type * sbuf = this->p_sbuf_phase1_.get();
 
         sbuf->reset_stream();
+
+        /* e.g:
+         *
+         *   14:38:19.914
+         *   -------------
+         *   0123456789012
+         *   0         1
+         *
+         * (13 chars including trailing space)
+         */
+        if (log_config::time_enabled) {
+            if (log_config::time_local_flag) {
+                if (log_config::time_usec_flag)
+                    this->ss_ << xo::time::hms_usec::local(xo::time::time::now()) << " ";
+                else
+                    this->ss_ << xo::time::hms_msec::local(xo::time::time::now()) << " ";
+            } else {
+                if (log_config::time_usec_flag)
+                    this->ss_ << xo::time::hms_usec::utc(xo::time::time::now()) << " ";
+                else
+                    this->ss_ << xo::time::hms_msec::utc(xo::time::time::now()) << " ";
+            }
+        }
         this->indent(' ');
 
         char ee_label = '\0';
@@ -309,8 +333,13 @@ namespace xo {
              * - minimum indent = nesting level;
              * - however if space_after_nonspace defined, also indent for that
              */
-            std::uint32_t n_indent = std::min(this->nesting_level_ * log_config::indent_width,
-                                              log_config::max_indent_width);
+            std::uint32_t n_indent = 0;
+
+            if (log_config::time_enabled)
+                n_indent += 13; /*strlen("14:38:19.974 ")*/
+
+            n_indent += std::min(this->nesting_level_ * log_config::indent_width,
+                                 log_config::max_indent_width);
 
             /* this is just to indent for per-line entry/exit label */
             if(space_after_nonspace)
