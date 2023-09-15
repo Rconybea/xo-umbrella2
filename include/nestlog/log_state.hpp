@@ -24,6 +24,7 @@ namespace xo {
     class state_impl {
     public:
         using log_streambuf_type = log_streambuf<char, std::char_traits<char>>;
+        using utc_nanos = xo::time::utc_nanos;
 
     public:
         state_impl();
@@ -34,6 +35,40 @@ namespace xo {
         void decr_nesting() { --nesting_level_; }
 
         std::ostream & ss() { return ss_; }
+
+        void check_print_time(utc_nanos now_tm) {
+            using xo::time::time;
+            using xo::time::utc_nanos;
+            using xo::time::hms_msec;
+            using xo::time::hms_usec;
+
+            if (log_config::time_local_flag) {
+                if (log_config::time_usec_flag)
+                    this->ss_ << hms_usec::local(now_tm) << " ";
+                else
+                    this->ss_ << hms_msec::local(now_tm) << " ";
+            } else {
+                if (log_config::time_usec_flag)
+                    this->ss_ << hms_usec::utc(now_tm) << " ";
+                else
+                    this->ss_ << hms_msec::utc(now_tm) << " ";
+            }
+        } /*check_print_time*/
+
+        /* space budget for time-of-day */
+        std::size_t calc_time_indent() const {
+            if (log_config::time_enabled) {
+                /*strlen("14:38:19.974 ")*/
+                return 13;
+            } else {
+                return 0;
+            }
+        } /*calc_time_indent*/
+
+        void time_indent() {
+            if (log_config::time_enabled)
+                this->ss_ << pad(this->calc_time_indent(), ' ');
+        } /*time_indent*/
 
         /* call on entry to new scope */
         void preamble(function_style style, std::string_view name1, std::string_view name2);
@@ -148,35 +183,7 @@ namespace xo {
 
         sbuf->reset_stream();
 
-        /* e.g:
-         *
-         *   14:38:19.914
-         *   -------------
-         *   0123456789012
-         *   0         1
-         *
-         * (13 chars including trailing space)
-         */
-        if (log_config::time_enabled) {
-            using xo::time::time;
-            using xo::time::utc_nanos;
-            using xo::time::hms_msec;
-            using xo::time::hms_usec;
-
-            utc_nanos now_tm = time::now();
-
-            if (log_config::time_local_flag) {
-                if (log_config::time_usec_flag)
-                    this->ss_ << hms_usec::local(now_tm) << " ";
-                else
-                    this->ss_ << hms_msec::local(now_tm) << " ";
-            } else {
-                if (log_config::time_usec_flag)
-                    this->ss_ << hms_usec::utc(now_tm) << " ";
-                else
-                    this->ss_ << hms_msec::utc(now_tm) << " ";
-            }
-        }
+        this->check_print_time(xo::time::time::now());
         this->indent(' ');
 
         char ee_label = '\0';
@@ -342,8 +349,7 @@ namespace xo {
              */
             std::uint32_t n_indent = 0;
 
-            if (log_config::time_enabled)
-                n_indent += 13; /*strlen("14:38:19.974 ")*/
+            n_indent += this->calc_time_indent();
 
             n_indent += std::min(this->nesting_level_ * log_config::indent_width,
                                  log_config::max_indent_width);
