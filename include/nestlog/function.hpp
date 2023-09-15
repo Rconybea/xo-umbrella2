@@ -1,5 +1,7 @@
 /* @file function.hpp */
 
+#include "color.hpp"
+
 #include <iostream>
 #include <cstdint>
 
@@ -19,11 +21,19 @@ namespace xo {
     template <typename Tag>
     class function_name_impl {
     public:
+        /* color: ANSI escape color (lookup Select Graphic Rendition subset)
+         *        0 = none
+         *        31 = red
+         */
         function_name_impl(function_style style,
-                      std::string_view pretty)
-            : style_{style}, pretty_{pretty} {}
+                           color_encoding encoding,
+                           std::uint32_t color,
+                           std::string_view pretty)
+            : style_{style}, encoding_{encoding}, color_{color}, pretty_{pretty} {}
 
         function_style style() const { return style_; }
+        color_encoding encoding() const { return encoding_; }
+        std::uint32_t color() const { return color_; }
         std::string_view const & pretty() const { return pretty_; }
 
         /* e.g.
@@ -152,11 +162,16 @@ namespace xo {
                 if (ch == '>' || ch == ')')
                     --nesting_level;
             }
+
         } /*print_aux*/
 
     private:
         /* FS_Simple | FS_Pretty (= FS_Literal) | FS_Streamlined */
         function_style style_;
+        /* CE_Ansi | CE_Xterm */
+        color_encoding encoding_;
+        /* color,  if non-zero */
+        std::uint32_t color_;
         /* e.g. __PRETTY_FUNCTION__ */
         std::string_view pretty_;
     }; /*function_name_impl*/
@@ -167,19 +182,25 @@ namespace xo {
     operator<<(std::ostream & os,
                function_name const & fn)
     {
+        /* set text color */
+
         switch(fn.style()) {
         case FS_Literal:
-            os << fn.pretty();
+            os << with_color(fn.encoding(), fn.color(), fn.pretty());
             break;
         case FS_Pretty:
-            os << "[" << fn.pretty() << "]";
+            os << "[" << with_color(fn.encoding(), fn.color(), fn.pretty()) << "]";
             break;
         case FS_Simple:
+            os << color_on(fn.encoding(), fn.color());
             function_name::print_simple(os, fn.pretty());
+            os << color_off();
             break;
         case FS_Streamlined:
             /* omit namespace qualifiers and template arguments */
+            os << color_on(fn.encoding(), fn.color());
             function_name::print_streamlined(os, fn.pretty());
+            os << color_off();
             break;
         }
 

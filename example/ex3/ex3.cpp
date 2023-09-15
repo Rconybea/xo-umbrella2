@@ -22,9 +22,13 @@ fib(int n) {
 
 int
 main(int argc, char ** argv) {
-    log_config::style = FS_Pretty;
+    log_config::style = FS_Streamlined;
     log_config::indent_width = 4;
     log_config::location_tab = 40;
+    log_config::encoding = CE_Xterm;
+    log_config::function_entry_color = 69;
+    log_config::function_exit_color = 70;
+    log_config::code_location_color = 166;
 
     int n = 4;
 

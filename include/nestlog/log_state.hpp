@@ -6,11 +6,17 @@
 #include "log_streambuf.hpp"
 #include "pad.hpp"
 #include "filename.hpp"
+#include "code_location.hpp"
 #include <ostream>
 #include <sstream>
 #include <memory>   // for std::unique_ptr
 
 namespace xo {
+    enum EntryExit {
+        EE_Entry,
+        EE_Exit
+    };
+
     // track per-thread state associated with nesting logger
     //
     template <typename CharT, typename Traits>
@@ -55,7 +61,7 @@ namespace xo {
         void entryexit_aux(function_style style,
                            std::string_view name1,
                            std::string_view name2,
-                           char label_char);
+                           EntryExit entryexit);
 
     private:
         /* current nesting level for this thread */
@@ -129,21 +135,37 @@ namespace xo {
     state_impl<CharT, Traits>::entryexit_aux(function_style style,
                                              std::string_view name1,
                                              std::string_view name2,
-                                             char label_char)
+                                             EntryExit entryexit)
     {
         log_streambuf_type * sbuf = this->p_sbuf_phase1_.get();
 
         sbuf->reset_stream();
         this->indent(' ');
 
+        char ee_label = '\0';
+        std::uint32_t fn_color = 0;
+
+        color_encoding encoding = log_config::encoding;
+
         /* mnemonic for scope entry/exit */
-        this->ss_ << label_char;
+        switch(entryexit) {
+        case EE_Entry:
+            ee_label = '+';
+            fn_color = log_config::function_entry_color;
+            break;
+        case EE_Exit:
+            ee_label = '-';
+            fn_color = log_config::function_exit_color;
+            break;
+        }
+
+        this->ss_ << ee_label;
 
         if (log_config::indent_width > 1)
             this->ss_ << ' ';
 
         /* scope name - note no trailing newline;  expect .preamble()/.postamble() caller to supply */
-        this->ss_ << function_name(style, name1) << name2;
+        this->ss_ << function_name(style, encoding, fn_color, name1) << name2;
     } /*entryexit_aux*/
 
     template <typename CharT, typename Traits>
@@ -152,7 +174,7 @@ namespace xo {
                                         std::string_view name1,
                                         std::string_view name2)
     {
-        this->entryexit_aux(style, name1, name2, '+' /*label_char*/);
+        this->entryexit_aux(style, name1, name2, EE_Entry);
     } /*preamble*/
 
     template <typename CharT, typename Traits>
@@ -161,7 +183,7 @@ namespace xo {
                                          std::string_view name1,
                                          std::string_view name2)
     {
-        this->entryexit_aux(style, name1, name2, '-' /*label_char*/);
+        this->entryexit_aux(style, name1, name2, EE_Exit);
     }  /*postamble*/
 
     template <typename CharT, typename Traits>
@@ -241,7 +263,8 @@ namespace xo {
                        sbuf2->sputc(' ');
 
                     std::stringstream ss;
-                    ss << "[" << basename(this->file_) << ":" << this->line_ << "]";
+                    ss << code_location(this->file_, this->line_,
+                                        log_config::encoding, log_config::code_location_color);
 
                     std::string ss_str = std::move(ss.str()); /*c++20*/
                     sbuf2->sputn(ss_str.c_str(), ss_str.size());
