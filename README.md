@@ -91,7 +91,7 @@ output:
 
 output:
 
-  [ex3 output](img/ex3.png)
+  ![ex3 output](img/ex3.png)
 
     20:13:12.992909 +(0) main :n 4                                   [ex2.cpp:30]
     20:13:12.992968     +(1) fib :n 4                                [ex2.cpp:9]
