@@ -1,18 +1,20 @@
-# nestlog -- logging with automatic indenting according to call graph
+# nestlog -- logging with automatic call-graph indenting
 
 Nestlog is a lightweight header-only library for console logging.
 
 ## Features
 
+- header-only;  nothing to link
 - easy-to-read format uses indenting to show call structure.
   indentation has user-controlled upper limit to preserve readability with
   deeply nested call graphs
 - colorized output using vt100 color codes (ansi or xterm)
 - automatically captures + displays timestamp, function name and code location.
   supports several function-name formats to reflect tradeoff readability for precision
-- application code may issue logging code that contains embedded newlines;
+- application code may issue logging code that contains embedded newlines and/or color escapes;
   logger preserves indentation.
-- logger is 'truthy', so you only pay for formatting for entry points that are enabled.
+- logger is 'truthy' -> only pay for formatting when entry points is enabled.
+- also provides family of convenience stream-inserters
 
 ## Examples
 
