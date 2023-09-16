@@ -209,4 +209,5 @@ main(int argc, char ** argv) {
 ```
 
 output:
+
 ![ex4 output](img/ex4.png)
