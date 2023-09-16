@@ -37,16 +37,24 @@ namespace xo {
         std::string_view const & pretty() const { return pretty_; }
 
         /* e.g.
-         *   std::vector<std::pair<int, xo::bar> xo::sometemplateclass<T,U>::fib(int, char**)
+         *   <------------------------------------- s2 ------------------------------------->
+         *                                       <--------------------- s3 ----------------->
+         *                                                                   <----- s4 ----->
+         *   std::vector<std::pair<int, xo::bar> xo::sometemplateclass<T,U>::fib(int, char**) const
          *                                       ^                           ^
          *                                       p                           q
+         *
+         *                                                                   fib   <- .print_aux()
          */
         static void print_simple(std::ostream & os, std::string_view const & s) {
-            std::size_t p = exclude_return_type(s);
-            std::string_view s2 = s.substr(p);
-            std::size_t q = find_toplevel_sep(s2, true /*last_flag*/);
+            std::size_t p = exclude_const_suffix(s);
+            std::string_view s2 = s.substr(0, p); /* no const suffix */
+            std::size_t q = exclude_return_type(s2);
+            std::string_view s3 = s2.substr(q); /* no return type */
+            std::size_t r = find_toplevel_sep(s3, true /*last_flag*/);
+            std::string_view s4 = s3.substr(r);
 
-            print_aux(os, s2.substr(q));
+            print_aux(os, s4);
         } /*print_simple*/
 
         /* e.g.
