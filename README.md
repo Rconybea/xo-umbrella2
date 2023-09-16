@@ -67,6 +67,48 @@ output:
 
     int
     main(int argc, char ** argv) {
+        log_config::min_log_level = xo::log_level::info;
+        log_config::indent_width = 4;
+
+        int n = 4;
+
+        scope log(XO_ENTER0(info), ":n ", 4);
+
+        int fn = fib(n);
+
+        log && log(":n ", n);
+        log && log("<- :fib(n) ", fn);
+    }
+
+output:
+![ex2 output](img/ex2.png)
+
+### 3 example exposing runtime configuration options
+
+    ```
+    /* examples ex3/ex3.cpp */
+
+    #include "nestlog/scope.hpp"
+
+    using namespace xo;
+
+    int
+    fib(int n) {
+        scope log(XO_ENTER0(info), tag("n", n));
+
+        int retval = 1;
+
+        if (n >= 2) {
+            retval = fib(n - 1) + fib(n - 2);
+        }
+
+        log.end_scope(tag("n", n), " <-", xtag("retval", retval));
+
+        return retval;
+    }
+
+    int
+    main(int argc, char ** argv) {
         log_config::min_log_level = log_level::info;
         log_config::time_enabled = true;
         log_config::time_local_flag = true;
@@ -89,33 +131,8 @@ output:
         log && log("<-", xtag("fib(n)", fn));
     }
 
+    /* ex3/ex3.cpp */
+    ```
+
 output:
-
-  ![ex3 output](img/ex3.png)
-
-    20:13:12.992909 +(0) main :n 4                                   [ex2.cpp:30]
-    20:13:12.992968     +(1) fib :n 4                                [ex2.cpp:9]
-    20:13:12.992986         +(2) fib :n 3                            [ex2.cpp:9]
-    20:13:12.992999             +(3) fib :n 2                        [ex2.cpp:9]
-    20:13:12.993002                 +(4) fib :n 1                    [ex2.cpp:9]
-    20:13:12.993012                 -(4) fib <- :retval 1
-    20:13:12.993022                 +(4) fib :n 0                    [ex2.cpp:9]
-    20:13:12.993032                 -(4) fib <- :retval 1
-                                    :n 2
-    20:13:12.993049             -(3) fib <- :retval 2
-    20:13:12.993059             +(3) fib :n 1                        [ex2.cpp:9]
-    20:13:12.993069             -(3) fib <- :retval 1
-                                :n 3
-    20:13:12.993085         -(2) fib <- :retval 3
-    20:13:12.993095         +(2) fib :n 2                            [ex2.cpp:9]
-    20:13:12.993105             +(3) fib :n 1                        [ex2.cpp:9]
-    20:13:12.993115             -(3) fib <- :retval 1
-    20:13:12.993124             +(3) fib :n 0                        [ex2.cpp:9]
-    20:13:12.993134             -(3) fib <- :retval 1
-                                :n 2
-    20:13:12.993145         -(2) fib <- :retval 2
-                            :n 4
-    20:13:12.993155     -(1) fib <- :retval 5
-                        :n 4
-                        <- :fib(n) 5
-    20:13:12.993172 -(0) main
+![ex3 output](img/ex3.png)
