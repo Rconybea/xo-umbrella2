@@ -1,6 +1,6 @@
-# nestlog -- logging with automatic call-graph indenting
+# indentlog -- logging with automatic call-graph indenting
 
-Nestlog is a lightweight header-only library for console logging.
+Indentlog is a lightweight header-only library for console logging.
 
 ## Features
 
@@ -21,7 +21,7 @@ Nestlog is a lightweight header-only library for console logging.
 ### 1
 
 ```
-#include "nestlog/scope.hpp"
+#include "indentlog/scope.hpp"
 
 using namespace xo;
 
@@ -44,7 +44,7 @@ main(int argc, char ** argv) {
 output:
 ![ex1 output](img/ex1.png)
 
-- nestlog types are provided in the `xo` namespace.
+- indentlog types are provided in the `xo` namespace.
   macros are prefixed with `XO_`
 - indentation reflects call structure. We don't see anything for `main()`,
   since we didn't put any logging there
@@ -54,7 +54,7 @@ output:
 ```
 /* examples ex2/ex2.cpp */
 
-#include "nestlog/scope.hpp"
+#include "indentlog/scope.hpp"
 
 using namespace xo;
 
@@ -92,7 +92,7 @@ main(int argc, char ** argv) {
 output:
 ![ex2 output](img/ex2.png)
 
-- global configuration settings live in the `xo::log_config` class.  see [log_config.hpp](include/nestlog/log_config.hpp)
+- global configuration settings live in the `xo::log_config` class.  see [log_config.hpp](include/indentlog/log_config.hpp)
 - the recommended form `log && log(...)` tests whether logging at this site is enabled /before/ evaluating/formatting the log message;
   when logging is disabled,  this saves the cost of computing and formatting that message.
 
@@ -101,7 +101,7 @@ output:
 ```
     /* examples ex3/ex3.cpp */
 
-    #include "nestlog/scope.hpp"
+    #include "indentlog/scope.hpp"
 
     using namespace xo;
 
