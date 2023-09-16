@@ -20,26 +20,29 @@ Nestlog is a lightweight header-only library for console logging.
 
 ### 1
 
-    /* examples/ex1/ex1.cpp */
+```
+#include "nestlog/scope.hpp"
 
-    #include "nestlog/scope.hpp"
+using namespace xo;
 
-    void A(int x) {
-        XO_SCOPE(log);  // i.e. xo::scope log("A");
+void inner(int x) {
+    scope log(XO_ENTER0(always), ":x ", x);
+}
 
-        log("enter ", ":x ", x);
-    }
+void outer(int y) {
+    scope log(XO_ENTER0(always), ":y ", y);
 
-    int
-    main(int argc, char ** argv) {
-        A(66);
-    }
+    inner(2*y);
+}
+
+int
+main(int argc, char ** argv) {
+    outer(123);
+}
+```
 
 output:
-
-    +A
-     enter :x 66
-    -A
+![ex12 output](img/ex1.png)
 
 ### 2
 
