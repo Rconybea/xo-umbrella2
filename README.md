@@ -42,53 +42,60 @@ main(int argc, char ** argv) {
 ```
 
 output:
-![ex12 output](img/ex1.png)
+![ex1 output](img/ex1.png)
+
+- nestlog types are provided in the `xo` namespace.
+  macros are prefixed with `XO_`
+- indentation reflects call structure. We don't see anything for `main()`,
+  since we didn't put any logging there
 
 ### 2
 
-    /* examples ex2/ex2.cpp */
+```
+/* examples ex2/ex2.cpp */
 
-    #include "nestlog/scope.hpp"
+#include "nestlog/scope.hpp"
 
-    using namespace xo;
+using namespace xo;
 
-    int
-    fib(int n) {
-        scope log(XO_ENTER0(info), ":n ", n);
+int
+fib(int n) {
+    scope log(XO_ENTER0(info), ":n ", n);
 
-        int retval = 1;
+    int retval = 1;
 
-        if (n >= 2) {
-            retval = fib(n - 1) + fib(n - 2);
-            log && log(":n ", n);
-        }
-
-        log.end_scope("<- :retval ", retval);
-
-        return retval;
-    }
-
-    int
-    main(int argc, char ** argv) {
-        log_config::min_log_level = xo::log_level::info;
-        log_config::indent_width = 4;
-
-        int n = 4;
-
-        scope log(XO_ENTER0(info), ":n ", 4);
-
-        int fn = fib(n);
-
+    if (n >= 2) {
+        retval = fib(n - 1) + fib(n - 2);
         log && log(":n ", n);
-        log && log("<- :fib(n) ", fn);
     }
+
+    log.end_scope("<- :retval ", retval);
+
+    return retval;
+}
+
+int
+main(int argc, char ** argv) {
+    log_config::min_log_level = xo::log_level::info;
+    log_config::indent_width = 4;
+
+    int n = 4;
+
+    scope log(XO_ENTER0(info), ":n ", 4);
+
+    int fn = fib(n);
+
+    log && log(":n ", n);
+    log && log("<- :fib(n) ", fn);
+}
+```
 
 output:
 ![ex2 output](img/ex2.png)
 
 ### 3 example exposing runtime configuration options
 
-    ```
+```
     /* examples ex3/ex3.cpp */
 
     #include "nestlog/scope.hpp"
@@ -135,7 +142,7 @@ output:
     }
 
     /* ex3/ex3.cpp */
-    ```
+```
 
 output:
 ![ex3 output](img/ex3.png)
