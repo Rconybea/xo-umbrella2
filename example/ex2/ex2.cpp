@@ -12,7 +12,7 @@ fib(int n) {
 
     if (n >= 2) {
         retval = fib(n - 1) + fib(n - 2);
-        log(":n ", n);
+        log && log(":n ", n);
     }
 
     log.end_scope("<- :retval ", retval);
@@ -22,6 +22,7 @@ fib(int n) {
 
 int
 main(int argc, char ** argv) {
+    log_config::min_log_level = xo::log_level::info;
     log_config::indent_width = 4;
 
     int n = 4;
@@ -30,6 +31,6 @@ main(int argc, char ** argv) {
 
     int fn = fib(n);
 
-    log(":n ", n);
-    log("<- :fib(n) ", fn);
+    log && log(":n ", n);
+    log && log("<- :fib(n) ", fn);
 }

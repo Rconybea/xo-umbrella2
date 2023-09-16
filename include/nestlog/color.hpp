@@ -33,6 +33,8 @@ namespace xo {
         void print(std::ostream & os) const {
             if ((flags_ & CF_ColorOn) && (color_ > 0)) {
                 switch(encoding_) {
+                case CE_None:
+                    break;
                 case CE_Ansi:
                     os << "\033[" << color_ << "m";
                     break;
@@ -45,8 +47,16 @@ namespace xo {
             if (flags_ & CF_Contents)
                 os << contents_;
 
-            if ((flags_ & CF_ColorOff) && (color_ > 0))
-                os << "\033[0m";
+            if ((flags_ & CF_ColorOff) && (color_ > 0)) {
+                switch(encoding_) {
+                case CE_None:
+                    break;
+                case CE_Ansi:
+                case CE_Xterm:
+                    os << "\033[0m";
+                    break;
+                }
+            }
         } /*print*/
 
     private:

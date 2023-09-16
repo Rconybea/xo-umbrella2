@@ -17,7 +17,13 @@ namespace xo {
     class state_impl;
 
 #  define XO_ENTER0(lvl) xo::scope_setup(xo::log_level::lvl, xo::log_config::style, __PRETTY_FUNCTION__, __FILE__, __LINE__)
-#  define XO_ENTER1(lvl, debug_flag) xo::scope_setup(xo::log_level::lvl, xo::log_config::style, __PRETTY_FUNCTION__, __FILE__, __LINE__, debug_flag)
+#  define XO_ENTER1(lvl, debug_flag) XO_ENTER2(lvl, debug_flag, __PRETTY_FUNCTION__)
+#  define XO_ENTER2(lvl, debug_flag, name1) xo::scope_setup((debug_flag ? xo::log_level::lvl : xo::log_level::never), xo::log_config::style, name1, __FILE__, __LINE__)
+
+#  define XO_DEBUG(debug_flag) XO_ENTER1(always, debug_flag)
+#  define XO_DEBUG2(debug_flag, name1) XO_ENTER2(always, debug_flag, name1)
+
+#  define XO_LITERAL(lvl, name1, name2) xo::scope_setup(xo::log_level::lvl, FS_Literal, name1, name2, __FILE__, __LINE__)
 
 //#  define XO_SSETUP0() xo::scope_setup(__FUNCTION__)
 //#  define XO_SSETUP0(lvl) xo::scope_setup(xo::log_level::lvl, xo::log_config::style, __PRETTY_FUNCTION__, __FILE__, __LINE__)
@@ -27,8 +33,8 @@ namespace xo {
     /* establish scope using current function name */
 #  define XO_SCOPE(name, lvl) xo::scope name(xo::scope_setup(xo::log_level::lvl, xo::log_config::style, __PRETTY_FUNCTION__, __FILE__, __LINE__))
     /* like XO_SCOPE(name),  but also set enabled flag */
-#  define XO_SCOPE2(name, debug_flag) xo::scope name(xo::scope_setup(xo::log_config::style, __PRETTY_FUNCTION__, __FILE__, __LINE__, debug_flag))
-#  define XO_SCOPE_DISABLED(name) xo::scope name(xo::scope_setup(xo::log_config::style, __PRETTY_FUNCTION__, __FILE__, __LINE__, false))
+//#  define XO_SCOPE2(name, debug_flag) xo::scope name(xo::scope_setup(xo::log_config::style, __PRETTY_FUNCTION__, __FILE__, __LINE__, debug_flag))
+#  define XO_SCOPE_DISABLED(name) xo::scope name(xo::scope_setup(xo::log_level::never, xo::log_config::style, __PRETTY_FUNCTION__, __FILE__, __LINE__))
 #  define XO_STUB() { XO_SCOPE(logr); logr.log("STUB"); }
 
     /* convenience class for basic_scope<..> construction (see below).
