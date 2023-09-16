@@ -50,16 +50,30 @@ namespace xo {
         } /*print_simple*/
 
         /* e.g.
-         *   std::vector<std::pair<int, xo::bar> xo::sometemplateclass<T,U>::fib(int, char**)
-         *                                       ^   ^
-         *                                       p   q
+         *   <----------------------------------- s2 --------------------------------------->
+         *                                       <--------------------- s3 ----------------->
+         *                                           <----------------- s4 ----------------->
+         *   std::vector<std::pair<int, xo::bar> xo::sometemplateclass<T,U>::fib(int, char**) const
+         *                                       ^   ^                                      ^
+         *                                       q   r                                      p
+         *
+         *                                           sometemplateclass     ::fib   <- .print_aux()
+         *
          */
         static void print_streamlined(std::ostream & os, std::string_view const & s) {
-            std::size_t p = exclude_return_type(s);
-            std::string_view s2 = s.substr(p);
-            std::size_t q = find_toplevel_sep(s2, false /*!last_flag*/);
+            std::size_t p = exclude_const_suffix(s);
+            std::string_view s2 = s.substr(0, p); /*no const suffix */
+            std::size_t q = exclude_return_type(s2);
+            std::string_view s3 = s2.substr(q); /*no return type*/
+            std::size_t r = find_toplevel_sep(s3, false /*!last_flag*/);
+            std::string_view s4 = s3.substr(r); /*no namespace qualifier (unless function)*/
 
-            print_aux(os, s2.substr(q));
+            //std::cerr << "print_streamlined:  s=[" << s << "], p=" << p << std::endl;
+            //std::cerr << "print_streamlined: s2=[" << s2 << "], q=" << q << std::endl;
+            //std::cerr << "print_streamlined: s3=[" << s3 << "], r=" << r << std::endl;
+            //std::cerr << "print_streamlined: s4=[" << s4 << "]" << std::endl;
+
+            print_aux(os, s4);
         } /*print_streamlined*/
 
     private:
@@ -91,10 +105,23 @@ namespace xo {
             return 0;
         } /*exclude_return_type*/
 
+        static std::size_t exclude_const_suffix(std::string_view const & s) {
+            constexpr std::uint32_t c_prefix_z = 6 /*strlen(" const")*/;
+
+            if ((s.size() > c_prefix_z)
+                && (s.substr(s.size() - c_prefix_z) == " const"))
+            {
+                return s.size() - c_prefix_z;
+            }
+
+            return s.size();
+        } /*exclude_const_suffix*/
+
         /* e.g.
          *    xo::ns::someclass<xo::foo, xo::bar>::somemethod(xo::enum1, std::vector<xo::blah>)
          *            ^
          *            return this pos
+         *            (pos just after 2nd-last non-nested separator)
          *
          * last_flag:  return pos after last ::
          * !last_flag: return pos after 2nd-last ::
@@ -135,7 +162,9 @@ namespace xo {
                     --nesting_level;
             }
 
-            return last_flag ? pos_after_last_sep : pos_after_2ndlast_sep;
+            std::size_t retval = (last_flag ? pos_after_last_sep : pos_after_2ndlast_sep);
+
+            return retval;
         } /*find_toplevel_sep*/
 
         /* fib(int, char **) --> fib
@@ -143,7 +172,7 @@ namespace xo {
          * foo::bar<std::vector<char>>() -> foo::bar
          */
         static void print_aux(std::ostream & os, std::string_view const & s) {
-            //std::cerr << "print_aux: s=" << s << std::endl;
+            //std::cerr << "print_aux: s=[" << s << "]" << std::endl;
 
             /* strategy:
              * - print left-to-right,   omit anything between matching <> or () pairs.
@@ -152,17 +181,44 @@ namespace xo {
              */
             std::size_t nesting_level = 0;
 
+            /* index of next match within string 'operator()'.
+             * if we would print 'operator',  and it's followed by trailing paren pair,
+             * then don't exclude the trailing ()
+             */
+            std::int32_t match_operator_ix = 0;
+            constexpr char const * c_target_str = "operator(";
+
             for (char ch : s) {
-                if (ch == '<' || ch == '(')
+                //std::cerr << "print_aux: ch=[" << ch << "]" << ", nesting_level=" << nesting_level << ", match_operator_ix=" << match_operator_ix << std::endl;
+
+                /* looking for match on 'operator(' at nesting level 0 */
+                if ((nesting_level == 0) && (ch == c_target_str[match_operator_ix]) && (match_operator_ix < 9))
+                    ++match_operator_ix;
+                else
+                    match_operator_ix = 0;
+
+                /* don't increment nesting level if immediately after 'operator' */
+                if (ch == '<') {
                     ++nesting_level;
+                } else if (ch == '(') {
+                    if ((nesting_level == 0) && (match_operator_ix == 9)) {
+                        /* special case:
+                         *    012345678
+                         *    operator(
+                         * at toplevel;  don't count the '(' here toward nesting level
+                         */
+                        ;
+                    } else {
+                        ++nesting_level;
+                    }
+                }
 
                 if (nesting_level == 0)
                     os << ch;
 
-                if (ch == '>' || ch == ')')
+                if (nesting_level > 0 && ((ch == '>') || (ch == ')')))
                     --nesting_level;
             }
-
         } /*print_aux*/
 
     private:
