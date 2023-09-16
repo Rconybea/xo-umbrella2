@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "nestlog/tostr.hpp"
+#include "tostr.hpp"
 #include <sstream>
 #include <string_view>
 #include <utility>

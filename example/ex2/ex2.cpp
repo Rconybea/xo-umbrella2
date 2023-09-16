@@ -1,6 +1,6 @@
 /* examples ex2/ex2.cpp */
 
-#include "nestlog/scope.hpp"
+#include "indentlog/scope.hpp"
 
 using namespace xo;
 
