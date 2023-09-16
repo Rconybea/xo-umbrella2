@@ -42,16 +42,18 @@ namespace xo {
             using xo::time::hms_msec;
             using xo::time::hms_usec;
 
-            if (log_config::time_local_flag) {
-                if (log_config::time_usec_flag)
-                    this->ss_ << hms_usec::local(now_tm) << " ";
-                else
-                    this->ss_ << hms_msec::local(now_tm) << " ";
-            } else {
-                if (log_config::time_usec_flag)
-                    this->ss_ << hms_usec::utc(now_tm) << " ";
-                else
-                    this->ss_ << hms_msec::utc(now_tm) << " ";
+            if (log_config::time_enabled) {
+                if (log_config::time_local_flag) {
+                    if (log_config::time_usec_flag)
+                        this->ss_ << hms_usec::local(now_tm) << " ";
+                    else
+                        this->ss_ << hms_msec::local(now_tm) << " ";
+                } else {
+                    if (log_config::time_usec_flag)
+                        this->ss_ << hms_usec::utc(now_tm) << " ";
+                    else
+                        this->ss_ << hms_msec::utc(now_tm) << " ";
+                }
             }
         } /*check_print_time*/
 
