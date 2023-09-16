@@ -229,7 +229,7 @@ namespace xo {
                 << ")";
         }
 
-        if (log_config::indent_width > 1)
+        if (log_config::indent_width > 0)
             this->ss_ << ' ';
 
         /* scope name - note no trailing newline;  expect .preamble()/.postamble() caller to supply */

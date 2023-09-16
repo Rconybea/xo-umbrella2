@@ -19,7 +19,7 @@ namespace xo {
         static bool time_local_flag;
         /* true to log time-of-day with microsecond precision;  false for millisecond precision */
         static bool time_usec_flag;
-        /* spaces per nesting level */
+        /* spaces per nesting level.  0 -> no indenting */
         static std::uint32_t indent_width;
         /* max #of spaces to introduce when indenting */
         static std::uint32_t max_indent_width;
@@ -62,7 +62,7 @@ namespace xo {
 
     template <typename Tag>
     std::uint32_t
-    log_config_impl<Tag>::indent_width = 1;
+    log_config_impl<Tag>::indent_width = 2;
 
     template <typename Tag>
     std::uint32_t
