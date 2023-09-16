@@ -211,6 +211,14 @@ namespace xo {
         this->ss_ << ee_label;
 
         if (log_config::nesting_level_enabled) {
+            /* e.g.
+             *   (^[[38;5;195m7^[[0m)
+             *    <-----a---->b<-c->
+             *
+             *   a = color on
+             *   b = level - displayed in color
+             *   c = color off
+             */
             this->ss_
                 << "("
                 << with_color(log_config::encoding,

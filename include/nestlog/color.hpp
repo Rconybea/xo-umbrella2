@@ -118,7 +118,7 @@ namespace xo {
     inline color_impl<int>
     color_off() {
         /* any non-zero value works here for color */
-        return color_impl<int>(CF_ColorOff, CE_None, 1 /*color*/, 0);
+        return color_impl<int>(CF_ColorOff, CE_Ansi, 1 /*color*/, 0);
     } /*color_off*/
 
     template <typename Contents>
