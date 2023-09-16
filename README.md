@@ -49,7 +49,7 @@ output:
 - indentation reflects call structure. We don't see anything for `main()`,
   since we didn't put any logging there
 
-### 2
+### 2 slightly more elaborate
 
 ```
 /* examples ex2/ex2.cpp */
@@ -89,6 +89,9 @@ main(int argc, char ** argv) {
     log && log("<- :fib(n) ", fn);
 }
 ```
+- global configuration settings live in the `xo::log_config` class.  see [log_config.hpp](include/nestlog/log_config.hpp)
+- the recommended form `log && log(...)` tests whether logging at this site is enabled /before/ evaluating/formatting the log message;
+  when logging is disabled,  this saves the cost of computing and formatting that message.
 
 output:
 ![ex2 output](img/ex2.png)

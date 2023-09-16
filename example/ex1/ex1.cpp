@@ -2,13 +2,17 @@
 
 using namespace xo;
 
-void A(int x) {
-    XO_SCOPE(log, info);
+void inner(int x) {
+    scope log(XO_ENTER0(always), ":x ", x);
+}
 
-    log("x:", x);
+void outer(int y) {
+    scope log(XO_ENTER0(always), ":y ", y);
+
+    inner(2*y);
 }
 
 int
 main(int argc, char ** argv) {
-    A(66);
+    outer(123);
 }
