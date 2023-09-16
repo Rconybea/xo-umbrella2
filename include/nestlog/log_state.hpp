@@ -281,6 +281,11 @@ namespace xo {
          */
         char const * space_after_nonspace = nullptr;
 
+        /* true on VT100 color escape (\033);   in which case false on terminating char (m)
+         * don't advance lpos during escape
+         */
+        bool in_color_escape = false;
+
         while(true) {
             bool have_nonspace = false;
 
@@ -302,18 +307,29 @@ namespace xo {
                     }
                 }
 
-                if(*p == '\n') {
+                if (in_color_escape && (*p != '\n')) {
+                    /* in color escape -> don't advance .lpos */
+                    if (*p == 'm')
+                        in_color_escape = false;
                     ++p;
-                    /* reset .pos on newline */
+                } else if (*p == '\033') {
+                    /* begin color escape sequence */
+                    in_color_escape = true;
+                    ++p;
+                } else if (*p == '\n') {
+                    /* reset .pos on newline;  also drop any (incomplete + ill-formed) color escape */
+
+                    in_color_escape = false;
+
                     lpos_on_newline = this->lpos_;
                     this->lpos_ = 0;
 
+                    ++p;
                     break;
                 } else {
-                    ++p;
-
                     /* increment .lpos on non-newline */
                     ++(this->lpos_);
+                    ++p;
                 }
             }
 
@@ -358,7 +374,7 @@ namespace xo {
             //   std::clog.rdbuf()->sputn(buf, strlen(buf));
             //}
 
-            /* at least 1 char following newline,  need to indent for it
+            /* control here only for continuation lines (application logging code embedding its own newlines)
              * - minimum indent = nesting level;
              * - however if space_after_nonspace defined, also indent for that
              */
