@@ -35,10 +35,19 @@ main(int argc, char ** argv) {
     Quadratic quadratic(2.0, -5.0, 7.0);
 
     double x = 3.0;
-    double r = quadratic(3.0);
+    double r = 0.0;
 
-    log && log(tag("x", x));
-    log && log("<-", xtag("quadratic(x)", r));
+    log_config::style  = FS_Pretty;
+
+    r = quadratic(x);
+
+    log_config::style = FS_Streamlined;
+
+    r = quadratic(x);
+
+    log_config::style = FS_Simple;
+
+    r = quadratic(x);
 }
 
 /* end ex4.cpp */

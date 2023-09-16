@@ -99,53 +99,114 @@ output:
 ### 3 example exposing runtime configuration options
 
 ```
-    /* examples ex3/ex3.cpp */
+/* examples ex3/ex3.cpp */
 
-    #include "indentlog/scope.hpp"
+#include "indentlog/scope.hpp"
 
-    using namespace xo;
+using namespace xo;
 
-    int
-    fib(int n) {
-        scope log(XO_ENTER0(info), tag("n", n));
+int
+fib(int n) {
+    scope log(XO_ENTER0(info), tag("n", n));
 
-        int retval = 1;
+    int retval = 1;
 
-        if (n >= 2) {
-            retval = fib(n - 1) + fib(n - 2);
-        }
-
-        log.end_scope(tag("n", n), " <-", xtag("retval", retval));
-
-        return retval;
+    if (n >= 2) {
+        retval = fib(n - 1) + fib(n - 2);
     }
 
-    int
-    main(int argc, char ** argv) {
-        log_config::min_log_level = log_level::info;
-        log_config::time_enabled = true;
-        log_config::time_local_flag = true;
-        log_config::style = FS_Streamlined;
-        log_config::indent_width = 4;
-        log_config::max_indent_width = 30;
-        log_config::location_tab = 80;
-        log_config::encoding = CE_Xterm;
-        log_config::function_entry_color = 69;
-        log_config::function_exit_color = 70;
-        log_config::code_location_color = 166;
+    log.end_scope(tag("n", n), " <-", xtag("retval", retval));
 
-        int n = 3;
+    return retval;
+}
 
-        scope log(XO_ENTER0(info), ":n ", 4);
+int
+main(int argc, char ** argv) {
+    log_config::min_log_level = log_level::info;
+    log_config::time_enabled = true;
+    log_config::time_local_flag = true;
+    log_config::style = FS_Streamlined;
+    log_config::indent_width = 4;
+    log_config::max_indent_width = 30;
+    log_config::location_tab = 80;
+    log_config::encoding = CE_Xterm;
+    log_config::function_entry_color = 69;
+    log_config::function_exit_color = 70;
+    log_config::code_location_color = 166;
 
-        int fn = fib(n);
+    int n = 3;
 
-        log && log(tag("n", n));
-        log && log("<-", xtag("fib(n)", fn));
-    }
+    scope log(XO_ENTER0(info), ":n ", 4);
 
-    /* ex3/ex3.cpp */
+    int fn = fib(n);
+
+    log && log(tag("n", n));
+    log && log("<-", xtag("fib(n)", fn));
+}
+
+/* ex3/ex3.cpp */
 ```
 
 output:
 ![ex3 output](img/ex3.png)
+
+### 4 example: function signatures
+
+```
+/* @file ex4.cpp */
+
+#include "indentlog/scope.hpp"
+
+using namespace xo;
+
+class Quadratic {
+public:
+    Quadratic(double a, double b, double c) : a_{a}, b_{b}, c_{c} {}
+
+    double operator() (double x) const {
+        scope log(XO_ENTER0(info), tag("a", a_), xtag("b", b_), xtag("c", c_), xtag("x", x));
+
+        double retval = (a_ * x * x) + (b_ * x) + c_;
+
+        log.end_scope("<-", xtag("retval", retval));
+
+        return retval;
+    }
+
+private:
+    double a_ = 0.0;;
+    double b_ = 0.0;
+    double c_ = 0.0;
+};
+
+int
+main(int argc, char ** argv) {
+    //log_config::style  = FS_Pretty;
+    log_config::style  = FS_Streamlined;
+    log_config::min_log_level = log_level::info;
+
+    scope log(XO_ENTER0(info));
+
+    Quadratic quadratic(2.0, -5.0, 7.0);
+
+    double x = 3.0;
+    double r = 0.0;
+
+    log_config::style  = FS_Pretty;
+
+    r = quadratic(x);
+
+    log_config::style = FS_Streamlined;
+
+    r = quadratic(x);
+
+    log_config::style = FS_Simple;
+
+    r = quadratic(x);
+}
+
+/* end ex4.cpp */
+```
+
+output:
+![ex4 output](img/ex4.png)
