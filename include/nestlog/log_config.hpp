@@ -4,7 +4,7 @@
 
 #include "log_level.hpp"
 #include "function.hpp"
-#include "nestlog/color.hpp"
+#include "color.hpp"
 #include <cstdint>
 
 namespace xo {

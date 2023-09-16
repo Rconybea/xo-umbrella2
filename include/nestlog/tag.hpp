@@ -2,7 +2,10 @@
 
 #pragma once
 
-#include "nestlog/quoted.hpp"
+#include "tag_config.hpp"
+#include "concat.hpp"
+#include "quoted.hpp"
+#include "color.hpp"
 #include <iostream>
 
 // STRINGIFY(xyz) -> "xyz"
@@ -93,7 +96,7 @@ namespace xo {
         if(PrefixSpace)
             s << " ";
 
-        s << ":" << tag.name()
+        s << with_color(tag_config::encoding, tag_config::tag_color, concat((char const *)":", tag.name()))
           << " " << unq(tag.value());
 
         return s;
