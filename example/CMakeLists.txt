@@ -10,6 +10,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 add_subdirectory(ex1)
 add_subdirectory(ex2)
 add_subdirectory(ex3)
+add_subdirectory(ex4)
 
 # ----------------------------------------------------------------
 # make standard directories for std:: includes explicit
