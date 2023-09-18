@@ -26,7 +26,7 @@ namespace xo {
         /* if true enable explicit nesting level display [nnn] */
         static bool nesting_level_enabled;
         /* color to use for explicit nesting level */
-        static std::uint32_t nesting_level_color;
+        static color_spec nesting_level_color;
         /* display style for function names.  FS_Simple|FS_Pretty|FS_Streamlined */
         static function_style style;
         /* color encoding */
@@ -73,8 +73,8 @@ namespace xo {
     log_config_impl<Tag>::nesting_level_enabled = true;
 
     template <typename Tag>
-    std::uint32_t
-    log_config_impl<Tag>::nesting_level_color = 195;
+    color_spec
+    log_config_impl<Tag>::nesting_level_color = color_spec::xterm(195);
 
     template <typename Tag>
     function_style

@@ -223,8 +223,7 @@ namespace xo {
              */
             this->ss_
                 << "("
-                << with_color(color_spec(log_config::encoding,
-                                         log_config::nesting_level_color),
+                << with_color(log_config::nesting_level_color,
                               this->nesting_level_)
                 << ")";
         }
