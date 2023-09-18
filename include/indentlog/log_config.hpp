@@ -76,7 +76,7 @@ namespace xo {
 
     template <typename Tag>
     function_style
-    log_config_impl<Tag>::style = FS_Streamlined;
+    log_config_impl<Tag>::style = function_style::streamlined;
 
     template <typename Tag>
     color_spec_type

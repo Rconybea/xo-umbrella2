@@ -56,7 +56,7 @@ namespace xo {
         /* threshold level for logging -- write messages with severity >= this level */
         log_level log_level_ = log_level::error;
         /* FS_Pretty | FS_Streamlined | FS_Simple */
-        function_style style_ = FS_Pretty;
+        function_style style_ = function_style::pretty;
         std::string_view name1_ = "<.name1>";
         std::string_view name2_ = "<.name2>";
         /* __FILE__ */
@@ -168,7 +168,7 @@ namespace xo {
         /* send indented output to this streambuf (e.g. std::clog.rdbuf()) */
         std::streambuf * dest_sbuf_ = std::clog.rdbuf();
         /* style for displaying .name1 */
-        function_style style_ = FS_Pretty;
+        function_style style_ = function_style::pretty;
         /* name of this scope (part 1) */
         std::string_view name1_ = "<name1>";
         /* name of this scope (part 2) */

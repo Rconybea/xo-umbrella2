@@ -6,15 +6,22 @@
 #include <cstdint>
 
 namespace xo {
-    enum function_style {
-        /* literal: print given name,  no alterations */
-        FS_Literal,
-        /* pretty: print name, surrounded by [] */
-        FS_Pretty,
-        /* streamlined: remove extraneous detail,  try to print something like class::method */
-        FS_Streamlined,
-        /* simple: remove everything except function/method name */
-        FS_Simple
+    enum class function_style : std::uint8_t {
+        /* literal: print supplied text,  no alterations */
+        literal,
+        /* pretty: print name, surrounded by []
+         *   [double Quadratic::operator()(double) const]
+         */
+        pretty,
+        /* streamlined: remove extraneous detail,
+         * try to print something like class::method
+         *   Quadratic::operator()
+         */
+        streamlined,
+        /* simple: remove everything except function/method name
+         *   operator()
+         */
+        simple
     };
 
     /* Tag to drive header-only expression */
@@ -245,21 +252,21 @@ namespace xo {
         /* set text color */
 
         switch(fn.style()) {
-        case FS_Literal:
+        case function_style::literal:
             os << with_color(fn.colorspec(), fn.pretty());
             break;
-        case FS_Pretty:
+        case function_style::pretty:
             os << "[" << with_color(fn.colorspec(), fn.pretty()) << "]";
             break;
-        case FS_Simple:
-            os << color_on(fn.colorspec());
-            function_name::print_simple(os, fn.pretty());
-            os << color_off();
-            break;
-        case FS_Streamlined:
+        case function_style::streamlined:
             /* omit namespace qualifiers and template arguments */
             os << color_on(fn.colorspec());
             function_name::print_streamlined(os, fn.pretty());
+            os << color_off();
+            break;
+        case function_style::simple:
+            os << color_on(fn.colorspec());
+            function_name::print_simple(os, fn.pretty());
             os << color_off();
             break;
         }

@@ -26,8 +26,7 @@ private:
 
 int
 main(int argc, char ** argv) {
-    //log_config::style  = FS_Pretty;
-    log_config::style  = FS_Streamlined;
+    log_config::style  = function_style::streamlined;
     log_config::min_log_level = log_level::info;
 
     scope log(XO_ENTER0(info));
@@ -37,15 +36,15 @@ main(int argc, char ** argv) {
     double x = 3.0;
     double r = 0.0;
 
-    log_config::style  = FS_Pretty;
+    log_config::style  = function_style::pretty;
 
     r = quadratic(x);
 
-    log_config::style = FS_Streamlined;
+    log_config::style = function_style::streamlined;
 
     r = quadratic(x);
 
-    log_config::style = FS_Simple;
+    log_config::style = function_style::simple;
 
     r = quadratic(x);
 }
