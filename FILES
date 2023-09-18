@@ -1,0 +1,23 @@
+directory layout
+
++- README.md               markdown README,  for github
++- img                     image files,  used in docs
+|  +- ex1.png
+|  +- ex2.png
+|  +- ex3.png
+|  \- ex4.png
++- LICENSE                 software license
++- CMakeLists.txt          toplevel cmake config
++- cmake
+|  \- nestlog.cmake        cmake support files
++- compile_commands.json   symlink to record of compiler commands;  for LSP support
++- include                 to install,  copy contents of this directory to permanent location
+|  \- indentlog
+|     +- scope.hpp
+|     ...
+\- example
+   +- CMakeLists.txt       cmake config
+   +- ex1
+   |  +- CMakeLists.txt    ex1 cmake config
+   |  \- ex1.cpp           example .cpp exercising indentlog
+   ...
