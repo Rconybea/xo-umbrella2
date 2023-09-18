@@ -256,13 +256,13 @@ namespace xo {
             os << "[" << with_color(color_spec(fn.encoding(), fn.color()), fn.pretty()) << "]";
             break;
         case FS_Simple:
-            os << color_on(fn.encoding(), fn.color());
+            os << color_on(color_spec(fn.encoding(), fn.color()));
             function_name::print_simple(os, fn.pretty());
             os << color_off();
             break;
         case FS_Streamlined:
             /* omit namespace qualifiers and template arguments */
-            os << color_on(fn.encoding(), fn.color());
+            os << color_on(color_spec(fn.encoding(), fn.color()));
             function_name::print_streamlined(os, fn.pretty());
             os << color_off();
             break;

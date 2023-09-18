@@ -169,8 +169,8 @@ namespace xo {
     } /*color_on_xterm*/
 
     inline color_impl<int>
-    color_on(color_encoding encoding, std::uint32_t color) {
-        return color_impl<int>(CF_ColorOn, color_spec(encoding, color), 0);
+    color_on(color_spec spec) {
+        return color_impl<int>(CF_ColorOn, spec, 0);
     } /*color_on*/
 
     inline color_impl<int>
