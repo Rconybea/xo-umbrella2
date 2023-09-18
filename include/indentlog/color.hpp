@@ -112,9 +112,10 @@ namespace xo {
     template <typename Contents>
     class color_impl {
     public:
-        color_impl(color_flags flags, color_encoding encoding, std::uint32_t color, Contents && contents)
-            : flags_{flags}, spec_(encoding, color), contents_{std::forward<Contents>(contents)} {}
+        color_impl(color_flags flags, color_spec spec, Contents && contents)
+            : flags_{flags}, spec_{spec}, contents_{std::forward<Contents>(contents)} {}
 
+        color_spec const & spec() const { return spec_; }
         std::uint32_t color() const { return spec_.code(); }
         Contents const & contents() const { return contents_; }
 
@@ -130,6 +131,11 @@ namespace xo {
         } /*print*/
 
     private:
+        /* controls independently what to print
+         *     \033[38;5;117m hello, world! \033[0m
+         *     <------------> <-----------> <----->
+         *       CF_ColorOn    CF_Contents   CF_ColorOff
+         */
         color_flags flags_ = CF_None;
 
         color_spec spec_;
@@ -139,38 +145,38 @@ namespace xo {
 
     template <typename Contents>
     color_impl<Contents> with_ansi_color(std::uint32_t color, Contents && contents) {
-        return color_impl<Contents>(CF_All, CE_Ansi, color, std::forward(contents));
+        return color_impl<Contents>(CF_All, color_spec::ansi(color), std::forward(contents));
     } /*with_ansi_color*/
 
     template <typename Contents>
     color_impl<Contents> with_xterm_color(std::uint32_t color, Contents && contents) {
-        return color_impl<Contents>(CF_All, CE_Xterm, color, std::forward(contents));
+        return color_impl<Contents>(CF_All, color_spec::xterm(color), std::forward(contents));
     } /*with_ansi_color*/
 
     template <typename Contents>
     color_impl<Contents> with_color(color_encoding encoding, std::uint32_t color, Contents && contents) {
-        return color_impl<Contents>(CF_All, encoding, color, std::forward<Contents>(contents));
+        return color_impl<Contents>(CF_All, color_spec(encoding, color), std::forward<Contents>(contents));
     } /*with_color*/
 
     inline color_impl<int>
     color_on_ansi(std::uint32_t color) {
-        return color_impl<int>(CF_ColorOn, CE_Ansi, color, 0);
+        return color_impl<int>(CF_ColorOn, color_spec::ansi(color), 0);
     } /*color_on_ansi*/
 
     inline color_impl<int>
     color_on_xterm(std::uint32_t color) {
-        return color_impl<int>(CF_ColorOn, CE_Xterm, color, 0);
+        return color_impl<int>(CF_ColorOn, color_spec::xterm(color), 0);
     } /*color_on_xterm*/
 
     inline color_impl<int>
     color_on(color_encoding encoding, std::uint32_t color) {
-        return color_impl<int>(CF_ColorOn, encoding, color, 0);
+        return color_impl<int>(CF_ColorOn, color_spec(encoding, color), 0);
     } /*color_on*/
 
     inline color_impl<int>
     color_off() {
-        /* any non-zero value works here for color */
-        return color_impl<int>(CF_ColorOff, CE_Ansi, 1 /*color*/, 0);
+        /* any spec other than color_spec::none() works here */
+        return color_impl<int>(CF_ColorOff, color_spec::white(), 0);
     } /*color_off*/
 
     template <typename Contents>
