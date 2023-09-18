@@ -32,8 +32,8 @@ main(int argc, char ** argv) {
     log_config::max_indent_width = 30;
     log_config::location_tab = 80;
     log_config::encoding = CE_Xterm;
-    log_config::function_entry_color = 69;
-    log_config::function_exit_color = 70;
+    log_config::function_entry_color = color_spec::xterm(69);
+    log_config::function_exit_color = color_spec::xterm(70);
     log_config::code_location_color = color_spec::xterm(166);
 
     int n = 3;

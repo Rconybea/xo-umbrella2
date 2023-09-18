@@ -144,29 +144,9 @@ namespace xo {
     }; /*color_impl*/
 
     template <typename Contents>
-    color_impl<Contents> with_ansi_color(std::uint32_t color, Contents && contents) {
-        return color_impl<Contents>(CF_All, color_spec::ansi(color), std::forward(contents));
-    } /*with_ansi_color*/
-
-    template <typename Contents>
-    color_impl<Contents> with_xterm_color(std::uint32_t color, Contents && contents) {
-        return color_impl<Contents>(CF_All, color_spec::xterm(color), std::forward(contents));
-    } /*with_ansi_color*/
-
-    template <typename Contents>
     color_impl<Contents> with_color(color_spec spec, Contents && contents) {
         return color_impl<Contents>(CF_All, spec, std::forward<Contents>(contents));
     } /*with_color*/
-
-    inline color_impl<int>
-    color_on_ansi(std::uint32_t color) {
-        return color_impl<int>(CF_ColorOn, color_spec::ansi(color), 0);
-    } /*color_on_ansi*/
-
-    inline color_impl<int>
-    color_on_xterm(std::uint32_t color) {
-        return color_impl<int>(CF_ColorOn, color_spec::xterm(color), 0);
-    } /*color_on_xterm*/
 
     inline color_impl<int>
     color_on(color_spec spec) {

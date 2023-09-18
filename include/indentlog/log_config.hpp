@@ -34,8 +34,8 @@ namespace xo {
         /* color to use for function name,  on entry/exit (xo::scope creation/destruction)
          * (ansi color codes,  see Select Graphics Rendition subset)
          */
-        static std::uint32_t function_entry_color;
-        static std::uint32_t function_exit_color;
+        static color_spec function_entry_color;
+        static color_spec function_exit_color;
         /* if true,  append [file:line] to output */
         static bool location_enabled;
         /* when .location_enabled,  write [file:line] starting this many chars from left margin */
@@ -85,12 +85,12 @@ namespace xo {
     log_config_impl<Tag>::encoding = CE_Ansi;
 
     template <typename Tag>
-    std::uint32_t
-    log_config_impl<Tag>::function_entry_color = 34;
+    color_spec
+    log_config_impl<Tag>::function_entry_color = color_spec::ansi(34);
 
     template <typename Tag>
-    std::uint32_t
-    log_config_impl<Tag>::function_exit_color = 32;
+    color_spec
+    log_config_impl<Tag>::function_exit_color = color_spec::ansi(32);
 
     template <typename Tag>
     bool

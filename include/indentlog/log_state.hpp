@@ -194,9 +194,7 @@ namespace xo {
         this->indent(' ');
 
         char ee_label = '\0';
-        std::uint32_t fn_color = 0;
-
-        color_encoding encoding = log_config::encoding;
+        color_spec fn_color;
 
         /* mnemonic for scope entry/exit */
         switch(entryexit) {
@@ -232,7 +230,7 @@ namespace xo {
             this->ss_ << ' ';
 
         /* scope name - note no trailing newline;  expect .preamble()/.postamble() caller to supply */
-        this->ss_ << function_name(style, color_spec(encoding, fn_color), name1) << name2;
+        this->ss_ << function_name(style, fn_color, name1) << name2;
     } /*entryexit_aux*/
 
     template <typename CharT, typename Traits>
