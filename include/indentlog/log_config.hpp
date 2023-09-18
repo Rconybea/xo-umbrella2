@@ -29,8 +29,6 @@ namespace xo {
         static color_spec nesting_level_color;
         /* display style for function names.  FS_Simple|FS_Pretty|FS_Streamlined */
         static function_style style;
-        /* color encoding */
-        static color_encoding encoding;
         /* color to use for function name,  on entry/exit (xo::scope creation/destruction)
          * (ansi color codes,  see Select Graphics Rendition subset)
          */
@@ -79,10 +77,6 @@ namespace xo {
     template <typename Tag>
     function_style
     log_config_impl<Tag>::style = FS_Streamlined;
-
-    template <typename Tag>
-    color_encoding
-    log_config_impl<Tag>::encoding = CE_Ansi;
 
     template <typename Tag>
     color_spec
