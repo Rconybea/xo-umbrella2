@@ -1,23 +1,29 @@
 directory layout
 
-+- README.md               markdown README,  for github
-+- img                     image files,  used in docs
++- README.md                markdown README,  for github
++- img                      image files,  used in docs
 |  +- ex1.png
 |  +- ex2.png
 |  +- ex3.png
 |  \- ex4.png
-+- LICENSE                 software license
-+- CMakeLists.txt          toplevel cmake config
++- LICENSE                  software license
++- CMakeLists.txt           toplevel cmake config
 +- cmake
-|  \- nestlog.cmake        cmake support files
-+- compile_commands.json   symlink to record of compiler commands;  for LSP support
-+- include                 to install,  copy contents of this directory to permanent location
+|  \- nestlog.cmake         cmake support files
++- compile_commands.json    symlink to record of compiler commands;  for LSP support
++- include                  to install,  copy contents of this directory to permanent location
 |  \- indentlog
-|     +- scope.hpp
-|     ...
+|     +- scope.hpp          logger api -- appl code will #include this
+|     +- log_config.hpp     logger api -- control logger format, verbosity, colors etc.
+|     +- log_level.hpp      encode logger verbosity
+|     +- log_state.hpp      per-thread state tracking (e.g. recognize nesting)
+|     +- log_streambuf.hpp  custom streambuf
+|     \- print
+|        +- tag.hpp         stream inserters
+|        ...
 \- example
-   +- CMakeLists.txt       cmake config
+   +- CMakeLists.txt        cmake config
    +- ex1
-   |  +- CMakeLists.txt    ex1 cmake config
-   |  \- ex1.cpp           example .cpp exercising indentlog
+   |  +- CMakeLists.txt     ex1 cmake config
+   |  \- ex1.cpp            example .cpp exercising indentlog
    ...
