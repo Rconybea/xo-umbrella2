@@ -29,11 +29,11 @@ namespace xo {
                            color_encoding encoding,
                            std::uint32_t color,
                            std::string_view pretty)
-            : style_{style}, encoding_{encoding}, color_{color}, pretty_{pretty} {}
+            : style_{style}, color_spec_(encoding, color), pretty_{pretty} {}
 
         function_style style() const { return style_; }
-        color_encoding encoding() const { return encoding_; }
-        std::uint32_t color() const { return color_; }
+        color_encoding encoding() const { return color_spec_.encoding(); }
+        std::uint32_t color() const { return color_spec_.code(); }
         std::string_view const & pretty() const { return pretty_; }
 
         /* e.g.
@@ -232,10 +232,8 @@ namespace xo {
     private:
         /* FS_Simple | FS_Pretty (= FS_Literal) | FS_Streamlined */
         function_style style_;
-        /* CE_Ansi | CE_Xterm */
-        color_encoding encoding_;
-        /* color,  if non-zero */
-        std::uint32_t color_;
+        /* terminal color (controls vt100 escape) */
+        color_spec color_spec_;
         /* e.g. __PRETTY_FUNCTION__ */
         std::string_view pretty_;
     }; /*function_name_impl*/
