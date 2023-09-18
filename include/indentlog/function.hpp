@@ -26,14 +26,14 @@ namespace xo {
          *        31 = red
          */
         function_name_impl(function_style style,
-                           color_spec spec,
+                           color_spec const & spec,
                            std::string_view pretty)
             : style_{style}, color_spec_{spec}, pretty_{pretty} {}
 
         function_style style() const { return style_; }
-        color_spec const & spec() const { return color_spec_; }
-        color_encoding encoding() const { return color_spec_.encoding(); }
-        std::uint32_t color() const { return color_spec_.code(); }
+        color_spec const & colorspec() const { return color_spec_; }
+        //color_encoding encoding() const { return color_spec_.encoding(); }
+        //std::uint32_t color() const { return color_spec_.code(); }
         std::string_view const & pretty() const { return pretty_; }
 
         /* e.g.
@@ -248,19 +248,19 @@ namespace xo {
 
         switch(fn.style()) {
         case FS_Literal:
-            os << with_color(color_spec(fn.encoding(), fn.color()), fn.pretty());
+            os << with_color(fn.colorspec(), fn.pretty());
             break;
         case FS_Pretty:
-            os << "[" << with_color(color_spec(fn.encoding(), fn.color()), fn.pretty()) << "]";
+            os << "[" << with_color(fn.colorspec(), fn.pretty()) << "]";
             break;
         case FS_Simple:
-            os << color_on(color_spec(fn.encoding(), fn.color()));
+            os << color_on(fn.colorspec());
             function_name::print_simple(os, fn.pretty());
             os << color_off();
             break;
         case FS_Streamlined:
             /* omit namespace qualifiers and template arguments */
-            os << color_on(color_spec(fn.encoding(), fn.color()));
+            os << color_on(fn.colorspec());
             function_name::print_streamlined(os, fn.pretty());
             os << color_off();
             break;
