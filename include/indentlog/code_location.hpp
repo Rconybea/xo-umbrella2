@@ -19,13 +19,12 @@ namespace xo {
     public:
         code_location_impl(std::string_view file,
                            std::uint32_t line,
-                           color_encoding encoding = CE_Ansi,
-                           std::uint32_t color = 31 /*red*/)
-            : file_{file}, line_{line}, encoding_{encoding}, color_{color} {}
+                           color_spec colorspec)
+            : file_{file}, line_{line}, color_spec_{colorspec} {}
 
         void print_code_location(std::ostream & os) const {
             os << "["
-               << with_color(color_spec(encoding_, color_), basename(file_))
+               << with_color(color_spec_, basename(file_))
                << ":"
                << line_
                << "]";
@@ -36,10 +35,8 @@ namespace xo {
         std::string_view file_;
         /* __LINE__ */
         std::uint32_t line_ = 0;
-        /* color encoding for file,line */
-        color_encoding encoding_ = CE_Ansi;
-        /* color for file,line */
-        std::uint32_t color_ = 0;
+        /* color encoding for [file:line] */
+        color_spec color_spec_;
     }; /*code_location_impl*/
 
     using code_location = code_location_impl<class code_location_impl_tag>;

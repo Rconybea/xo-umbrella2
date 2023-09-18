@@ -32,8 +32,6 @@ namespace xo {
 
         function_style style() const { return style_; }
         color_spec const & colorspec() const { return color_spec_; }
-        //color_encoding encoding() const { return color_spec_.encoding(); }
-        //std::uint32_t color() const { return color_spec_.code(); }
         std::string_view const & pretty() const { return pretty_; }
 
         /* e.g.
