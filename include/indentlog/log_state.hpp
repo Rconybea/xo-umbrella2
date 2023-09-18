@@ -37,7 +37,7 @@ namespace xo {
         std::ostream & ss() { return ss_; }
 
         void check_print_time(utc_nanos now_tm) {
-            using xo::time::time;
+            using xo::time::timeutil;
             using xo::time::utc_nanos;
             using xo::time::hms_msec;
             using xo::time::hms_usec;
@@ -190,7 +190,7 @@ namespace xo {
 
         sbuf->reset_stream();
 
-        this->check_print_time(xo::time::time::now());
+        this->check_print_time(xo::time::timeutil::now());
         this->indent(' ');
 
         char ee_label = '\0';
