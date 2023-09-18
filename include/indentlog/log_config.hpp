@@ -41,7 +41,7 @@ namespace xo {
         /* when .location_enabled,  write [file:line] starting this many chars from left margin */
         static std::uint32_t location_tab;
         /* color to use for code location */
-        static std::uint32_t code_location_color;
+        static color_spec code_location_color;
     }; /*log_config_impl*/
 
     template <typename Tag>
@@ -101,8 +101,8 @@ namespace xo {
     log_config_impl<Tag>::location_tab = 80;
 
     template <typename Tag>
-    std::uint32_t
-    log_config_impl<Tag>::code_location_color = 31;
+    color_spec
+    log_config_impl<Tag>::code_location_color = color_spec::red();
 
     using log_config = log_config_impl<class log_config_tag>;
 } /*namespace xo*/

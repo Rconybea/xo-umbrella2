@@ -34,7 +34,7 @@ main(int argc, char ** argv) {
     log_config::encoding = CE_Xterm;
     log_config::function_entry_color = 69;
     log_config::function_exit_color = 70;
-    log_config::code_location_color = 166;
+    log_config::code_location_color = color_spec::xterm(166);
 
     int n = 3;
 

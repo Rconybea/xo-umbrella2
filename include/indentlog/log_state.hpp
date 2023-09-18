@@ -348,7 +348,7 @@ namespace xo {
 
                     std::stringstream ss;
                     ss << code_location(this->file_, this->line_,
-                                        color_spec(log_config::encoding, log_config::code_location_color));
+                                        log_config::code_location_color);
 
                     std::string ss_str = std::move(ss.str()); /*c++20*/
                     sbuf2->sputn(ss_str.c_str(), ss_str.size());
