@@ -11,6 +11,7 @@ namespace xo {
         none,
         ansi,
         xterm,
+        rgb
     };
 
     /* specify a color (consistent with ANSI escape sequences - the  Select Graphics Rendition subset
@@ -35,8 +36,7 @@ namespace xo {
         static color_spec_type ansi(std::uint32_t code) { return color_spec_type(color_encoding::ansi, code); }
         static color_spec_type xterm(std::uint32_t code) { return color_spec_type(color_encoding::xterm, code); }
         static color_spec_type rgb(std::uint8_t red, std::uint8_t green, std::uint8_t blue) {
-            return none();
-            //return color_spec(CE_Rgb, (red << 16 | green << 8 | blue));
+            return color_spec_type(color_encoding::rgb, (red << 16 | green << 8 | blue));
         }
 
         /* 4-bit foreground colors */
@@ -70,6 +70,11 @@ namespace xo {
             case color_encoding::xterm:
                 os << "\033[38;5;" << code_ << "m";
                 break;
+            case color_encoding::rgb:
+                os << "\033[38;2;"
+                   << (0xff & (code_ >> 16)) << ";"
+                   << (0xff & (code_ >> 8)) << ";"
+                   << (0xff & (code_ >> 0)) << "m";
             }
         } /*print_fg_color_on*/
 
@@ -80,6 +85,7 @@ namespace xo {
                 break;
             case color_encoding::ansi:
             case color_encoding::xterm:
+            case color_encoding::rgb:
                 os << "\033[0m";
                 break;
             }
