@@ -26,12 +26,12 @@ namespace xo {
          *        31 = red
          */
         function_name_impl(function_style style,
-                           color_encoding encoding,
-                           std::uint32_t color,
+                           color_spec spec,
                            std::string_view pretty)
-            : style_{style}, color_spec_(encoding, color), pretty_{pretty} {}
+            : style_{style}, color_spec_{spec}, pretty_{pretty} {}
 
         function_style style() const { return style_; }
+        color_spec const & spec() const { return color_spec_; }
         color_encoding encoding() const { return color_spec_.encoding(); }
         std::uint32_t color() const { return color_spec_.code(); }
         std::string_view const & pretty() const { return pretty_; }

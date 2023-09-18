@@ -233,7 +233,7 @@ namespace xo {
             this->ss_ << ' ';
 
         /* scope name - note no trailing newline;  expect .preamble()/.postamble() caller to supply */
-        this->ss_ << function_name(style, encoding, fn_color, name1) << name2;
+        this->ss_ << function_name(style, color_spec(encoding, fn_color), name1) << name2;
     } /*entryexit_aux*/
 
     template <typename CharT, typename Traits>
