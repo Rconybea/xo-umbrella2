@@ -250,10 +250,10 @@ namespace xo {
 
         switch(fn.style()) {
         case FS_Literal:
-            os << with_color(fn.encoding(), fn.color(), fn.pretty());
+            os << with_color(color_spec(fn.encoding(), fn.color()), fn.pretty());
             break;
         case FS_Pretty:
-            os << "[" << with_color(fn.encoding(), fn.color(), fn.pretty()) << "]";
+            os << "[" << with_color(color_spec(fn.encoding(), fn.color()), fn.pretty()) << "]";
             break;
         case FS_Simple:
             os << color_on(fn.encoding(), fn.color());

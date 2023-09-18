@@ -96,7 +96,7 @@ namespace xo {
         if(PrefixSpace)
             s << " ";
 
-        s << with_color(tag_config::encoding, tag_config::tag_color, concat((char const *)":", tag.name()))
+        s << with_color(color_spec(tag_config::encoding, tag_config::tag_color), concat((char const *)":", tag.name()))
           << " " << unq(tag.value());
 
         return s;

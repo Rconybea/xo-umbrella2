@@ -154,8 +154,8 @@ namespace xo {
     } /*with_ansi_color*/
 
     template <typename Contents>
-    color_impl<Contents> with_color(color_encoding encoding, std::uint32_t color, Contents && contents) {
-        return color_impl<Contents>(CF_All, color_spec(encoding, color), std::forward<Contents>(contents));
+    color_impl<Contents> with_color(color_spec spec, Contents && contents) {
+        return color_impl<Contents>(CF_All, spec, std::forward<Contents>(contents));
     } /*with_color*/
 
     inline color_impl<int>

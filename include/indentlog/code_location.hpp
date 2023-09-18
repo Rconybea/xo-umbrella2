@@ -25,7 +25,7 @@ namespace xo {
 
         void print_code_location(std::ostream & os) const {
             os << "["
-               << with_color(encoding_, color_, basename(file_))
+               << with_color(color_spec(encoding_, color_), basename(file_))
                << ":"
                << line_
                << "]";
