@@ -7,10 +7,10 @@
 #include <cstdint>
 
 namespace xo {
-    enum color_encoding {
-        CE_None,
-        CE_Ansi,
-        CE_Xterm,
+    enum class color_encoding : std::uint8_t {
+        none,
+        ansi,
+        xterm,
     };
 
     /* specify a color (consistent with ANSI escape sequences - the  Select Graphics Rendition subset
@@ -32,8 +32,8 @@ namespace xo {
             : encoding_{encoding}, code_{code} {}
 
         static color_spec none() { return color_spec(); }
-        static color_spec ansi(std::uint32_t code) { return color_spec(CE_Ansi, code); }
-        static color_spec xterm(std::uint32_t code) { return color_spec(CE_Xterm, code); }
+        static color_spec ansi(std::uint32_t code) { return color_spec(color_encoding::ansi, code); }
+        static color_spec xterm(std::uint32_t code) { return color_spec(color_encoding::xterm, code); }
         static color_spec rgb(std::uint8_t red, std::uint8_t green, std::uint8_t blue) {
             return none();
             //return color_spec(CE_Rgb, (red << 16 | green << 8 | blue));
@@ -62,12 +62,12 @@ namespace xo {
 
         void print_fg_color_on (std::ostream & os) const {
             switch (encoding_) {
-            case CE_None:
+            case color_encoding::none:
                 break;
-            case CE_Ansi:
+            case color_encoding::ansi:
                 os << "\033[31;" << code_ << "m";
                 break;
-            case CE_Xterm:
+            case color_encoding::xterm:
                 os << "\033[38;5;" << code_ << "m";
                 break;
             }
@@ -76,10 +76,10 @@ namespace xo {
         /* escape to reverse effect of .print_on() */
         void print_fg_color_off (std::ostream & os) const {
             switch (encoding_) {
-            case CE_None:
+            case color_encoding::none:
                 break;
-            case CE_Ansi:
-            case CE_Xterm:
+            case color_encoding::ansi:
+            case color_encoding::xterm:
                 os << "\033[0m";
                 break;
             }
@@ -87,7 +87,7 @@ namespace xo {
 
     private:
         /* none | ansi | xterm | rgb */
-        color_encoding encoding_ = CE_None;
+        color_encoding encoding_ = color_encoding::none;
         /* ansi  : 30..37, 90..97
          * xterm : 0..255
          *   see [[https://i.stack.imgur.com/KTSQa.png]]

@@ -22,7 +22,7 @@ namespace xo {
 
     template <typename Tag>
     color_encoding
-    tag_config_impl<Tag>::encoding = CE_Xterm;
+    tag_config_impl<Tag>::encoding = color_encoding::xterm;
 
     template <typename Tag>
     std::uint32_t

@@ -3,7 +3,7 @@
 #include <cstdint>
 
 namespace xo {
-    enum class log_level : std::uint32_t {
+    enum class log_level : std::uint8_t {
         /* control log message severity
          *   silent > always > severe > error > warning > info > chatty > never
          *
