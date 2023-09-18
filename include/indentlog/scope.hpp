@@ -3,9 +3,9 @@
 #pragma once
 
 #include "log_state.hpp"
-#include "filename.hpp"
-#include "tostr.hpp"
-#include "tag.hpp"
+#include "print/filename.hpp"
+#include "print/tostr.hpp"
+#include "print/tag.hpp"
 
 #include <stdexcept>
 #include <cstdint>

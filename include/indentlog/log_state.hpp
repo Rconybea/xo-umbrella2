@@ -4,10 +4,10 @@
 
 #include "log_config.hpp"
 #include "log_streambuf.hpp"
-#include "pad.hpp"
-#include "filename.hpp"
-#include "code_location.hpp"
-#include "time.hpp"
+#include "print/pad.hpp"
+#include "print/filename.hpp"
+#include "print/code_location.hpp"
+#include "print/time.hpp"
 #include <ostream>
 #include <sstream>
 #include <memory>   // for std::unique_ptr
