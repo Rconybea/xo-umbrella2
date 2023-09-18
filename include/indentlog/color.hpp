@@ -106,19 +106,26 @@ namespace xo {
         std::uint32_t code_ = 0;
     }; /*color_spec_type*/
 
-    enum color_flags {
-        CF_None = 0x0,
-        CF_ColorOn = 0x01,
-        CF_Contents = 0x02,
-        CF_ColorOff = 0x04,
-        CF_All = 0x07
+    enum class coloring_control_flags : std::uint8_t {
+        none = 0x0,
+        color_on = 0x01,
+        contents = 0x02,
+        color_off = 0x04,
+        all = 0x07
     };
+
+    inline std::uint8_t operator& (coloring_control_flags x, coloring_control_flags y) {
+        return static_cast<std::uint8_t>(x) & static_cast<std::uint8_t>(y);
+    }
+    inline std::uint8_t operator| (coloring_control_flags x, coloring_control_flags y) {
+        return static_cast<std::uint8_t>(x) | static_cast<std::uint8_t>(y);
+    }
 
     /* stream-insertable color control */
     template <typename Contents>
     class color_impl {
     public:
-        color_impl(color_flags flags, color_spec_type spec, Contents && contents)
+        color_impl(coloring_control_flags flags, color_spec_type spec, Contents && contents)
             : flags_{flags}, spec_{spec}, contents_{std::forward<Contents>(contents)} {}
 
         color_spec_type const & spec() const { return spec_; }
@@ -126,13 +133,13 @@ namespace xo {
         Contents const & contents() const { return contents_; }
 
         void print(std::ostream & os) const {
-            if (flags_ & CF_ColorOn)
+            if (flags_ & coloring_control_flags::color_on)
                 spec_.print_fg_color_on(os);
 
-            if (flags_ & CF_Contents)
+            if (flags_ & coloring_control_flags::contents)
                 os << contents_;
 
-            if (flags_ & CF_ColorOff)
+            if (flags_ & coloring_control_flags::color_off)
                 spec_.print_fg_color_off(os);
         } /*print*/
 
@@ -140,9 +147,9 @@ namespace xo {
         /* controls independently what to print
          *     \033[38;5;117m hello, world! \033[0m
          *     <------------> <-----------> <----->
-         *       CF_ColorOn    CF_Contents   CF_ColorOff
+         *        color_on       contents    color_off
          */
-        color_flags flags_ = CF_None;
+        coloring_control_flags flags_ = coloring_control_flags::none;
 
         color_spec_type spec_;
 
@@ -151,18 +158,18 @@ namespace xo {
 
     template <typename Contents>
     color_impl<Contents> with_color(color_spec_type spec, Contents && contents) {
-        return color_impl<Contents>(CF_All, spec, std::forward<Contents>(contents));
+        return color_impl<Contents>(coloring_control_flags::all, spec, std::forward<Contents>(contents));
     } /*with_color*/
 
     inline color_impl<int>
     color_on(color_spec_type spec) {
-        return color_impl<int>(CF_ColorOn, spec, 0);
+        return color_impl<int>(coloring_control_flags::color_on, spec, 0);
     } /*color_on*/
 
     inline color_impl<int>
     color_off() {
         /* any spec other than color_spec_type::none() works here */
-        return color_impl<int>(CF_ColorOff, color_spec_type::white(), 0);
+        return color_impl<int>(coloring_control_flags::color_off, color_spec_type::white(), 0);
     } /*color_off*/
 
     template <typename Contents>
