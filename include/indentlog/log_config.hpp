@@ -26,20 +26,20 @@ namespace xo {
         /* if true enable explicit nesting level display [nnn] */
         static bool nesting_level_enabled;
         /* color to use for explicit nesting level */
-        static color_spec nesting_level_color;
+        static color_spec_type nesting_level_color;
         /* display style for function names.  FS_Simple|FS_Pretty|FS_Streamlined */
         static function_style style;
         /* color to use for function name,  on entry/exit (xo::scope creation/destruction)
          * (ansi color codes,  see Select Graphics Rendition subset)
          */
-        static color_spec function_entry_color;
-        static color_spec function_exit_color;
+        static color_spec_type function_entry_color;
+        static color_spec_type function_exit_color;
         /* if true,  append [file:line] to output */
         static bool location_enabled;
         /* when .location_enabled,  write [file:line] starting this many chars from left margin */
         static std::uint32_t location_tab;
         /* color to use for code location */
-        static color_spec code_location_color;
+        static color_spec_type code_location_color;
     }; /*log_config_impl*/
 
     template <typename Tag>
@@ -71,20 +71,20 @@ namespace xo {
     log_config_impl<Tag>::nesting_level_enabled = true;
 
     template <typename Tag>
-    color_spec
-    log_config_impl<Tag>::nesting_level_color = color_spec::xterm(195);
+    color_spec_type
+    log_config_impl<Tag>::nesting_level_color = color_spec_type::xterm(195);
 
     template <typename Tag>
     function_style
     log_config_impl<Tag>::style = FS_Streamlined;
 
     template <typename Tag>
-    color_spec
-    log_config_impl<Tag>::function_entry_color = color_spec::ansi(34);
+    color_spec_type
+    log_config_impl<Tag>::function_entry_color = color_spec_type::ansi(34);
 
     template <typename Tag>
-    color_spec
-    log_config_impl<Tag>::function_exit_color = color_spec::ansi(32);
+    color_spec_type
+    log_config_impl<Tag>::function_exit_color = color_spec_type::ansi(32);
 
     template <typename Tag>
     bool
@@ -95,8 +95,8 @@ namespace xo {
     log_config_impl<Tag>::location_tab = 80;
 
     template <typename Tag>
-    color_spec
-    log_config_impl<Tag>::code_location_color = color_spec::red();
+    color_spec_type
+    log_config_impl<Tag>::code_location_color = color_spec_type::red();
 
     using log_config = log_config_impl<class log_config_tag>;
 } /*namespace xo*/

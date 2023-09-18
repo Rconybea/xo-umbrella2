@@ -26,12 +26,12 @@ namespace xo {
          *        31 = red
          */
         function_name_impl(function_style style,
-                           color_spec const & spec,
+                           color_spec_type const & spec,
                            std::string_view pretty)
             : style_{style}, color_spec_{spec}, pretty_{pretty} {}
 
         function_style style() const { return style_; }
-        color_spec const & colorspec() const { return color_spec_; }
+        color_spec_type const & colorspec() const { return color_spec_; }
         std::string_view const & pretty() const { return pretty_; }
 
         /* e.g.
@@ -231,7 +231,7 @@ namespace xo {
         /* FS_Simple | FS_Pretty (= FS_Literal) | FS_Streamlined */
         function_style style_;
         /* terminal color (controls vt100 escape) */
-        color_spec color_spec_;
+        color_spec_type color_spec_;
         /* e.g. __PRETTY_FUNCTION__ */
         std::string_view pretty_;
     }; /*function_name_impl*/

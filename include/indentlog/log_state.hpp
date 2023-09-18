@@ -194,7 +194,7 @@ namespace xo {
         this->indent(' ');
 
         char ee_label = '\0';
-        color_spec fn_color;
+        color_spec_type fn_color;
 
         /* mnemonic for scope entry/exit */
         switch(entryexit) {
