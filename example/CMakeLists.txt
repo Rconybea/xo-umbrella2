@@ -7,6 +7,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 
 #include(cmake/FindSphinx.cmake)
 
+add_subdirectory(hello)
 add_subdirectory(ex1)
 add_subdirectory(ex2)
 add_subdirectory(ex3)

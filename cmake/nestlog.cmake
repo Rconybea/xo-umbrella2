@@ -25,7 +25,6 @@ macro(xo_include_options target)
     # (2) clangd (run from emacs lsp-mode) can find them
     #
     if(CMAKE_EXPORT_COMPILE_COMMANDS)
-      set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES
-      ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES})
+      set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES})
     endif()
 endmacro()
