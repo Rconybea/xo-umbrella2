@@ -1,0 +1,25 @@
+development environment that works
+
+1.
+    1. nix stdenv = gcc12Stdenv    (see mkderivation.nix)
+    2. baseInputs has gcc          (but probably doesn't need it)
+    3. devInputs has llvmPackages_16.clang-unwrapped
+
+    This leads to env with
+      CC=gcc
+      CXX=g++
+      NIX_CC=/nix/store/$hash-gcc-wrapper-12.3.0
+
+2.
+
+    1. nix stdenv = clang16Stdenv  (see mkderivation.nix)
+    2. baseInputs has gcc
+    3. devInputs has llvmPackages_16.clang-unwrapped
+
+    This leads to env with:
+      CC=clang
+      CXX=clang++
+      NIX_CC=/nix/store/$hash-clang-wrapper-16.0.1
+
+    To build,  need to tell cmake to use gcc:
+      cmake -DCMAKE_CXX_COMPILER=$(which g++) -DCMAKE_C_COMPILER=$(which gcc) path/to/src
