@@ -20,6 +20,7 @@ endif()
 
 include(cmake/nestlog.cmake)
 add_subdirectory(example)
+add_subdirectory(utest)
 
 # header-only library
 #add_library(indentlog INTERFACE)
