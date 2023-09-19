@@ -37,6 +37,15 @@ $ make
 $ make install
 ```
 
+alternatively, if you're a nix user:
+```
+$ git clone git@github.com:rconybea/indentlog-nix.git
+$ ls -d indentlog-nix
+indentlog-nix
+$ cd indentlog-nix
+$ nix-build
+```
+
 ## Examples
 
 ### 1
