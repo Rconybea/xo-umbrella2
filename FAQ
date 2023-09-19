@@ -1,4 +1,4 @@
-development environment that works
+Q1.  how to get a nix development environment that works
 
 1.
     1. nix stdenv = gcc12Stdenv    (see mkderivation.nix)
@@ -23,3 +23,18 @@ development environment that works
 
     To build,  need to tell cmake to use gcc:
       cmake -DCMAKE_CXX_COMPILER=$(which g++) -DCMAKE_C_COMPILER=$(which gcc) path/to/src
+
+Q2.  how to add a dependency to github workflow
+
+    comments.
+    1. workflow configured in ./.github/cmake-single-platform.yml
+    2. workflow runs on ubuntu vm.  see
+         runs-on: ubuntu-latest
+       in cmake-single-platform.yml
+    3. find a desired dependency
+         $ apt-cache search ${keyword}
+       e.g.
+         $ apt-cache search catch2
+    4. add/edit install step to ./.github/cmake-single-platform.yml
+         - name: Install catch2
+           run: sudo apt-get install -y catch2
