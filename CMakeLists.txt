@@ -7,8 +7,12 @@ enable_testing()
 # always write compile_commands.json
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 
-set(CMAKE_INSTALL_PREFIX /home/roland/local)
-set(CMAKE_INSTALL_RPATH /home/roland/local/lib)
+if(NOT CMAKE_INSTALL_PREFIX)
+    set(CMAKE_INSTALL_PREFIX /home/roland/local CACHE STRING "install directory")
+endif()
+if(NOT CMAKE_INSTALL_RPATH)
+    set(CMAKE_INSTALL_RPATH /home/roland/local/lib CACHE STRING "runpath in installed libraries/executables")
+endif()
 
 include(cmake/nestlog.cmake)
 add_subdirectory(example)
@@ -24,3 +28,9 @@ add_subdirectory(example)
 #  PUBLIC_HEADER DESTINATION include)  # COMPONENT Development
 
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/ DESTINATION include)
+
+install(TARGETS hello DESTINATION bin/indentlog/example)
+install(TARGETS ex1 DESTINATION bin/indentlog/example)
+install(TARGETS ex2 DESTINATION bin/indentlog/example)
+install(TARGETS ex3 DESTINATION bin/indentlog/example)
+install(TARGETS ex4 DESTINATION bin/indentlog/example)
