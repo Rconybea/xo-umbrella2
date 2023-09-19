@@ -7,11 +7,15 @@ enable_testing()
 # always write compile_commands.json
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 
+if(NOT USER)
+    set(USER $ENV{USER})
+endif()
+
 if(NOT CMAKE_INSTALL_PREFIX)
-    set(CMAKE_INSTALL_PREFIX /home/roland/local CACHE STRING "install directory")
+    set(CMAKE_INSTALL_PREFIX /home/${USER}/local CACHE STRING "install directory")
 endif()
 if(NOT CMAKE_INSTALL_RPATH)
-    set(CMAKE_INSTALL_RPATH /home/roland/local/lib CACHE STRING "runpath in installed libraries/executables")
+    set(CMAKE_INSTALL_RPATH /home/${USER}/local/lib CACHE STRING "runpath in installed libraries/executables")
 endif()
 
 include(cmake/nestlog.cmake)

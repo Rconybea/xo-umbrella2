@@ -16,6 +16,27 @@ Indentlog is a lightweight header-only library for console logging.
 - logger is 'truthy' -> only pay for formatting when entry points is enabled.
 - also provides family of convenience stream-inserters
 
+## Getting Started
+
+### copy repository locally
+
+```
+$ git clone git@github.com:rconybea/indentlog.git
+$ ls -d indentlog
+indentlog
+```
+
+### build & install
+
+```
+$ cd indentlog
+$ mkdir build
+$ cd build
+$ cmake -DCMAKE_INSTALL_PREFIX=/usr/local ..
+$ make
+$ make install
+```
+
 ## Examples
 
 ### 1
