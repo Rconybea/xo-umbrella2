@@ -46,6 +46,8 @@ $ cd indentlog-nix
 $ nix-build
 ```
 
+For some more detail see [BUILD.md](BUILD.md)
+
 ## Examples
 
 ### 1

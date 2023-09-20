@@ -2,7 +2,14 @@ cmake_minimum_required(VERSION 3.10)
 
 project(nestlog VERSION 0.1)
 enable_language(CXX)
+
+include(cmake/nestlog.cmake)
+include(cmake/code-coverage.cmake)
+
 enable_testing()
+# activate code coverage for all executables + libraries (when -DCODE_COVERAGE=ON ??)
+add_code_coverage()
+add_code_coverage_all_targets()
 
 # always write compile_commands.json
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
@@ -18,7 +25,6 @@ if(NOT CMAKE_INSTALL_RPATH)
     set(CMAKE_INSTALL_RPATH /home/${USER}/local/lib CACHE STRING "runpath in installed libraries/executables")
 endif()
 
-include(cmake/nestlog.cmake)
 add_subdirectory(example)
 add_subdirectory(utest)
 

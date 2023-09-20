@@ -7,6 +7,7 @@ add_executable(${SELF_EXECUTABLE_NAME} ${SELF_SOURCE_FILES})
 xo_include_options(${SELF_EXECUTABLE_NAME})
 
 add_test(NAME ${SELF_EXECUTABLE_NAME} COMMAND ${SELF_EXECUTABLE_NAME})
+target_code_coverage(${SELF_EXECUTABLE_NAME} AUTO ALL)
 
 # ----------------------------------------------------------------
 # 3rd party dependency: catch2
