@@ -9,7 +9,13 @@ include(cmake/code-coverage.cmake)
 enable_testing()
 # activate code coverage for all executables + libraries (when -DCODE_COVERAGE=ON ??)
 add_code_coverage()
-add_code_coverage_all_targets()
+
+# 1. assuming that /nix/store/ prefixes .hpp files belonging to gcc, catch2 etc.
+#    we're not interested in code coverage for these sources.
+# 2. exclude the utest/ subdir, we don't need coverage on the unit tests themselves;
+#    rather,  want coverage on the code that the unit tests exercise.
+#
+add_code_coverage_all_targets(EXCLUDE /nix/store/* utest/*)
 
 # always write compile_commands.json
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
