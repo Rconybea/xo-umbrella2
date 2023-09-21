@@ -37,6 +37,10 @@ namespace ut {
          fixed_tcase(0.05, 1, "0.1"),
          fixed_tcase(0.05, 2, "0.05"),
 
+         fixed_tcase(-0.05, 0, "-0"),
+         fixed_tcase(-0.05, 1, "-0.1"),
+         fixed_tcase(-0.05, 2, "-0.05"),
+
          fixed_tcase(1e-6, 0, "0"),
          fixed_tcase(1e-6, 1, "0.0"),
          fixed_tcase(1e-6, 2, "0.00"),
