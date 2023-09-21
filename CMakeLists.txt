@@ -17,6 +17,9 @@ add_code_coverage()
 #
 add_code_coverage_all_targets(EXCLUDE /nix/store/* utest/*)
 
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
+
 # always write compile_commands.json
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 
