@@ -162,16 +162,16 @@ namespace xo {
              *    .tm_isdst (daylight savings time flag)
              *   usec       (0-999999)
              */
-            static std::pair<std::tm, uint32_t> split_tm(utc_nanos t0) {
+            static std::pair<std::tm, uint32_t> utc_split_tm(utc_nanos t0) {
                 using xo::time::microseconds;
                 using xo::time::utc_nanos;
 
                 /* use yyyymmdd.hh:mm:ss.nnnnnn */
 
-                time_t t0_time_t = (std::chrono::system_clock::to_time_t
-                                    (std::chrono::time_point_cast<xo::time::microseconds>(t0)));
+                time_t t0_time_t = (std::chrono::system_clock::to_time_t(t0));
+                //time_t t0_time_t = (std::chrono::system_clock::to_time_t(std::chrono::time_point_cast<xo::time::microseconds>(t0)));
 
-                /* convert to std::tm, un UTC coords,
+                /* convert to std::tm, in UTC coords,
                  * only provides 1-second precision
                  */
                 std::tm t0_tm;
@@ -186,7 +186,7 @@ namespace xo {
                 midnight_tm.tm_sec = 0;
 
                 /* convert back to epoch seconds */
-                time_t midnight_time_t = ::mktime(&midnight_tm);
+                time_t midnight_time_t = ::timegm(&midnight_tm);
 
                 utc_nanos t0_midnight =
                     (std::chrono::time_point_cast<xo::time::microseconds>(
@@ -198,7 +198,7 @@ namespace xo {
                     .count();
 
                 return std::make_pair(t0_tm, usec);
-            } /*split_tm*/
+            } /*utc_split_tm*/
 
             static void print_hms_msec(nanos dt, std::ostream & os) {
                 /* use hhmmss.nnn */
@@ -236,6 +236,12 @@ namespace xo {
                 os << buf;
             } /*print_hms_usec*/
 
+            /* print t0 like:
+             *   yyyymmdd:hh:mm:ss.uuuuuu
+             * e.g.
+             *   19700101:00:00:00.000000       // epoch
+             *   20230921:16:29:35.123456       // 21sep2023 4:29:35 pm + 12345 us
+             */
             static void print_utc_ymd_hms_usec(utc_nanos t0, std::ostream & os) {
                 using xo::time::microseconds;
                 using xo::time::utc_nanos;
@@ -246,7 +252,7 @@ namespace xo {
                 //uint32_t t0_usec;
 
                 /* (structured binding ftw!) */
-                auto [t0_tm, t0_usec] = split_tm(t0);
+                auto [t0_tm, t0_usec] = utc_split_tm(t0);
 
                 /* no std::format in clang11 afaict */
                 char usec_buf[7];
@@ -272,7 +278,7 @@ namespace xo {
              *   2012-04-23T18:25:43.511Z
              */
             static void print_iso8601(utc_nanos t0, std::ostream & os) {
-                auto [t0_tm, t0_usec] = split_tm(t0);
+                auto [t0_tm, t0_usec] = utc_split_tm(t0);
 
                 char msec_buf[8];
                 snprintf(msec_buf, sizeof(msec_buf), "%03d", t0_usec / 1000);
