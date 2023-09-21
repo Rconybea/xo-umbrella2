@@ -1,7 +1,7 @@
 # indentlog unit test
 
 set(SELF_EXECUTABLE_NAME utest.indentlog)
-set(SELF_SOURCE_FILES fixed.test.cpp quoted.test.cpp indentlog_utest_main.cpp)
+set(SELF_SOURCE_FILES fixed.test.cpp quoted.test.cpp vector.test.cpp array.test.cpp indentlog_utest_main.cpp)
 
 add_executable(${SELF_EXECUTABLE_NAME} ${SELF_SOURCE_FILES})
 xo_include_options(${SELF_EXECUTABLE_NAME})
