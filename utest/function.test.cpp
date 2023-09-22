@@ -25,6 +25,8 @@ namespace ut {
 
     std::vector<function_tcase> s_function_tcase_v(
         {
+            function_tcase(function_style::literal,     color_spec_type::none(), "anything goes here", "anything goes here"),
+
             function_tcase(function_style::pretty,      color_spec_type::none(), "void foo() const", "[void foo() const]"),
             function_tcase(function_style::streamlined, color_spec_type::none(), "void foo() const", "foo"),
             function_tcase(function_style::simple,      color_spec_type::none(), "void foo() const", "foo"),
