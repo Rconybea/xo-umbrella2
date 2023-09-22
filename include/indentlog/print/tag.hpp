@@ -29,7 +29,7 @@ namespace xo {
         tag_impl(Name const & n, Value const & v)
             : name_{n}, value_{v} {}
         tag_impl(Name && n, Value && v)
-            : name_{std::move(n)}, value_{std::move(v)} {}
+            : name_{std::forward<Name>(n)}, value_{std::forward<Value>(v)} {}
 
         Name const & name() const { return name_; }
         Value const & value() const { return value_; }
@@ -72,6 +72,8 @@ namespace xo {
         return tag_impl<true, char const *, char const *>(n, "");
     } /*xtag_pre*/
 
+    // ----- tag -----
+
     template<typename Name, typename Value>
     tag_impl<false, Name, Value>
     tag(Name && n, Value && v)
@@ -85,6 +87,8 @@ namespace xo {
     {
         return tag_impl<false, char const *, Value>(n, v);
     } /*tag*/
+
+    // ----- operator<< on tag_impl -----
 
     template <bool PrefixSpace, typename Name, typename Value>
     inline std::ostream &
