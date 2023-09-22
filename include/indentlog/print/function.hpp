@@ -24,6 +24,18 @@ namespace xo {
         simple
     };
 
+    inline std::ostream &
+    operator<< (std::ostream & os, function_style x) {
+        switch(x) {
+        case function_style::literal:     os << "literal";     break;
+        case function_style::pretty:      os << "pretty";      break;
+        case function_style::streamlined: os << "streamlined"; break;
+        case function_style::simple:      os << "simple";      break;
+        default:                          os << "???";         break;
+        }
+        return os;
+    } /*operator<<*/
+
     /* Tag to drive header-only expression */
     template <typename Tag>
     class function_name_impl {
