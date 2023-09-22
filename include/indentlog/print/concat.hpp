@@ -20,6 +20,11 @@ namespace xo {
         T2 x2_;
     }; /*concat_impl*/
 
+    template <typename T1>
+    T1 concat(T1 && x1) {
+        return x1;
+    } /*concat*/
+
     template <typename T1, typename T2>
     concat_impl<T1,T2> concat(T1 && x1, T2 && x2) {
         return concat_impl<T1,T2>(std::move(x1), std::move(x2));

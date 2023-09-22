@@ -21,6 +21,8 @@ namespace ut {
     std::vector<filename_tcase> s_filename_tcase_v(
         {
             filename_tcase("foo", "foo"),
+            filename_tcase("/foo", "foo"),
+            filename_tcase("/foo/bar", "bar"),
         });
 
     TEST_CASE("filename", "[filename]") {

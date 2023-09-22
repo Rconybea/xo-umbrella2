@@ -14,6 +14,18 @@ namespace xo {
         rgb
     };
 
+    inline std::ostream &
+    operator<< (std::ostream & os, color_encoding x) {
+        switch(x) {
+        case color_encoding::none: os << "none"; break;
+        case color_encoding::ansi: os << "ansi"; break;
+        case color_encoding::xterm: os << "xterm"; break;
+        case color_encoding::rgb: os << "rgb"; break;
+        default: os << "???"; break;
+        }
+        return os;
+    } /*operator<<*/
+
     /* specify a color (consistent with ANSI escape sequences - the  Select Graphics Rendition subset
      * see [[https://stackoverflow.com/questions/4842424/list-of-ansi-color-escape-sequences]]
      *
@@ -105,6 +117,12 @@ namespace xo {
          */
         std::uint32_t code_ = 0;
     }; /*color_spec_type*/
+
+    inline std::ostream &
+    operator<< (std::ostream & os, color_spec_type const & x) {
+        os << "<color_spec_type :encoding " << x.encoding() << " :code " << x.code() << ">";
+        return os;
+    } /*operator<<*/
 
     enum class coloring_control_flags : std::uint8_t {
         none = 0x0,
