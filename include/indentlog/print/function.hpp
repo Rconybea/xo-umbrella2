@@ -262,12 +262,12 @@ namespace xo {
             /* omit namespace qualifiers and template arguments */
             os << color_on(fn.colorspec());
             function_name::print_streamlined(os, fn.pretty());
-            os << color_off();
+            os << color_off(fn.colorspec());
             break;
         case function_style::simple:
             os << color_on(fn.colorspec());
             function_name::print_simple(os, fn.pretty());
-            os << color_off();
+            os << color_off(fn.colorspec());
             break;
         }
 

@@ -175,19 +175,19 @@ namespace xo {
     }; /*color_impl*/
 
     template <typename Contents>
-    color_impl<Contents> with_color(color_spec_type spec, Contents && contents) {
+    color_impl<Contents> with_color(color_spec_type const & spec, Contents && contents) {
         return color_impl<Contents>(coloring_control_flags::all, spec, std::forward<Contents>(contents));
     } /*with_color*/
 
     inline color_impl<int>
-    color_on(color_spec_type spec) {
+    color_on(color_spec_type const & spec) {
         return color_impl<int>(coloring_control_flags::color_on, spec, 0);
     } /*color_on*/
 
     inline color_impl<int>
-    color_off() {
+    color_off(color_spec_type const & spec) {
         /* any spec other than color_spec_type::none() works here */
-        return color_impl<int>(coloring_control_flags::color_off, color_spec_type::white(), 0);
+        return color_impl<int>(coloring_control_flags::color_off, spec, 0);
     } /*color_off*/
 
     template <typename Contents>
