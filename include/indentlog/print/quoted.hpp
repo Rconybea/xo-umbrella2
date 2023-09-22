@@ -30,8 +30,7 @@ namespace xo {
         template<typename T>
         class quoted_impl {
         public:
-            quoted_impl(bool unq_flag, T const & x) : unq_flag_{unq_flag}, value_{x} {}
-            quoted_impl(bool unq_flag, T && x) : unq_flag_{unq_flag}, value_{std::move(x)} {}
+            quoted_impl(bool unq_flag, T x) : unq_flag_{unq_flag}, value_{std::move(x)} {}
 
             bool unq_flag() const { return unq_flag_; }
             T const & value() const { return value_; }
