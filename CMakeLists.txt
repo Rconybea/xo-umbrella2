@@ -50,7 +50,7 @@ if(NOT CMAKE_INSTALL_PREFIX)
     set(CMAKE_INSTALL_PREFIX /home/${USER}/local CACHE STRING "install directory")
 endif()
 if(NOT CMAKE_INSTALL_RPATH)
-    set(CMAKE_INSTALL_RPATH /home/${USER}/local/lib CACHE STRING "runpath in installed libraries/executables")
+    set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib CACHE STRING "runpath in installed libraries/executables")
 endif()
 
 # ----------------------------------------------------------------
