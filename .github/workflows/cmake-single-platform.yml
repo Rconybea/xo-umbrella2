@@ -43,20 +43,17 @@ jobs:
       # install into ${{github.workspace}}/local
       run: cmake --install ${{github.workspace}}/build_indentlog
 
-#      # fetch source tree for indentlog dependency
-#      run: git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com:rconybea/indentlog.git
+    - name: Configure refcnt
+      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
+      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
+      run: cmake -B ${{github.workspace}}/build_refcnt -DCMAKE_PREFIX_PATH=${{github.workspace}}/local -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
 
-#    - name: Configure CMake
-#      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
-#      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-#      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+    - name: Build refcnt
+      # Build your program with the given configuration
+      run: cmake --build ${{github.workspace}}/build_refcnt --config ${{env.BUILD_TYPE}}
 
-#    - name: Build
-#      # Build your program with the given configuration
-#      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
-
-#    - name: Test
-#      working-directory: ${{github.workspace}}/build
-#      # Execute tests defined by the CMake configuration.
-#      # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
-#      run: ctest -C ${{env.BUILD_TYPE}}
+    - name: Test refcnt
+      working-directory: ${{github.workspace}}/build_recnt
+      # Execute tests defined by the CMake configuration.
+      # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
+      run: ctest -C ${{env.BUILD_TYPE}}
