@@ -34,7 +34,7 @@ jobs:
 
     - name: Configure indentlog
       # configure cmake for indentlog in dedicated build directory.
-      run: cmake -B ${{github.workspace}}/build_indentlog -DCMAKE_INSTALL_PREFIX=${{env.LOCAL_INSTALL_PREFIX}} repo/indentlog
+      run: cmake -B ${{github.workspace}}/build_indentlog -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local repo/indentlog
 
     - name: Build indentlog
       run: cmake --build ${{github.workspace}}/build_indentlog --config ${{env.BUILD_TYPE}}
