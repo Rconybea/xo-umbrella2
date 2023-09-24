@@ -22,7 +22,7 @@ namespace xo {
             } /*intrusive_ptr_log_aux*/
         } /*namespace*/
 
-        bool
+        void
         intrusive_ptr_set_debug(bool debug_flag) {
             s_logging_enabled = debug_flag;
         } /*intrusive_ptr_set_debug*/

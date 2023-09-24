@@ -14,9 +14,11 @@ macro(xo_include_options target)
     #
     target_include_directories(
       ${target} PUBLIC
-      ${PROJECT_SOURCE_DIR}/include              # e.g. for #include "indentlog/scope.hpp"
-      ${PROJECT_SOURCE_DIR}/include/${target}    # e.g. for #include "Refcounted.hpp" in refcnt/src
-      ${PROJECT_BINARY_DIR}                      # e.g. for generated config.hpp file
+      $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>              # e.g. for #include "indentlog/scope.hpp"
+      $<INSTALL_INTERFACE:include>
+      $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/${target}>    # e.g. for #include "Refcounted.hpp" in refcnt/src
+      $<INSTALL_INTERFACE:include/${target}>
+      $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>                      # e.g. for generated config.hpp file
     )
 
     # ----------------------------------------------------------------
@@ -72,7 +74,15 @@ endmacro()
 # use this for a subdir that builds a library
 #
 macro(xo_install_library target)
-    install(TARGETS ${target} DESTINATION lib)
+    install(
+        TARGETS ${target}
+        EXPORT ${target}Targets
+        LIBRARY DESTINATION lib COMPONENT Runtime
+        ARCHIVE DESTINATION lib COMPONENT Development
+        RUNTIME DESTINATION bin COMPONENT Runtime
+        PUBLIC_HEADER DESTINATION include COMPONENT Development
+        BUNDLE DESTINATION bin COMPONENT Runtime
+    )
 endmacro()
 
 # ----------------------------------------------------------------

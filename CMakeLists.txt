@@ -2,7 +2,7 @@
 
 cmake_minimum_required(VERSION 3.10)
 
-project(xo-refcnt VERSION 0.1)
+project(refcnt VERSION 0.1)
 enable_language(CXX)
 
 include(cmake/cxx.cmake)
@@ -12,7 +12,6 @@ include(cmake/code-coverage.cmake)
 # unit test setup
 
 enable_testing()
-
 
 # activate code coverage for all executables + libraries (when configured with -DCODE_COVERAGE=ON)
 add_code_coverage()
@@ -26,6 +25,7 @@ add_code_coverage_all_targets(EXCLUDE /nix/store/* utest/*)
 # ----------------------------------------------------------------
 # c++ settings
 
+set(XO_PROJECT_NAME refcnt)
 set(PROJECT_CXX_FLAGS "-fconcepts-diagnostics-depth=2")
 
 add_definitions(${PROJECT_CXX_FLAGS})
@@ -43,6 +43,42 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 # sources
 
 add_subdirectory(src)
+add_subdirectory(utest)
+
+# ----------------------------------------------------------------
+# cmake export
+
+set(XO_PROJECT_CONFIG_VERSION "${XO_PROJECT_NAME}ConfigVersion.cmake")
+set(XO_PROJECT_CONFIG "${XO_PROJECT_NAME}Config.cmake")
+
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file("${PROJECT_BINARY_DIR}/${XO_PROJECT_CONFIG_VERSION}"
+    VERSION 0.1
+    COMPATIBILITY AnyNewerVersion
+)
+
+#install(
+#    TARGETS ${XO_PROJECT_NAME}
+#    EXPORT ${XO_PROJECT_NAME}Targets
+#    LIBRARY DESTINATION lib COMPONENT Runtime
+#    ARCHIVE DESTINATION lib COMPONENT Development
+#    RUNTIME DESTINATION bin COMPONENT Runtime
+#    PUBLIC_HEADER DESTINATION include COMPONENT Development
+#    BUNDLE DESTINATION bin COMPONENT Runtime
+#    )
+
+configure_package_config_file(
+    "${PROJECT_SOURCE_DIR}/cmake/${XO_PROJECT_NAME}Config.cmake.in"
+    "${PROJECT_BINARY_DIR}/${XO_PROJECT_CONFIG}"
+    INSTALL_DESTINATION lib/cmake/${XO_PROJECT_NAME}
+    )
+
+install(EXPORT ${XO_PROJECT_NAME}Targets DESTINATION lib/cmake/${XO_PROJECT_NAME})
+install(
+    FILES
+    "${PROJECT_BINARY_DIR}/${XO_PROJECT_CONFIG_VERSION}"
+    "${PROJECT_BINARY_DIR}/${XO_PROJECT_CONFIG}"
+    DESTINATION lib/cmake/${XO_PROJECT_NAME})
 
 # ----------------------------------------------------------------
 # install .hpp

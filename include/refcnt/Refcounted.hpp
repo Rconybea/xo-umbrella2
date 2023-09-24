@@ -171,31 +171,31 @@ namespace xo {
                 return 0;
         } /*intrusive_ptr_refcount*/
 
-        void intrusive_ptr_set_debug(bool x);
-        void intrusive_ptr_log_ctor(std::string_view const & self_type,
-                                    void * this_ptr,
-                                    Refcount * x);
+        extern void intrusive_ptr_set_debug(bool x);
+        extern void intrusive_ptr_log_ctor(std::string_view const & self_type,
+                                           void * this_ptr,
+                                           Refcount * x);
         /* here actor short for 'aliasing ctor' */
-        void intrusive_ptr_log_actor(std::string_view const & self_type,
-                                     void * this_ptr,
-                                     Refcount * x);
-        void intrusive_ptr_log_cctor(std::string_view const & self_type,
-                                     void * this_ptr,
-                                     Refcount * x);
-        void intrusive_ptr_log_mctor(std::string_view const & self_type,
-                                     void *this_ptr,
-                                     Refcount * x);
-        void intrusive_ptr_log_dtor(std::string_view const & self_type,
-                                    void * this_ptr,
-                                    Refcount * x);
-        void intrusive_ptr_log_assign(std::string_view const & self_type,
-                                      void * this_ptr,
-                                      Refcount * x);
-        void intrusive_ptr_log_massign(std::string_view const & self_type,
-                                       void *this_ptr,
+        extern void intrusive_ptr_log_actor(std::string_view const & self_type,
+                                            void * this_ptr,
+                                            Refcount * x);
+        extern void intrusive_ptr_log_cctor(std::string_view const & self_type,
+                                            void * this_ptr,
+                                            Refcount * x);
+        extern void intrusive_ptr_log_mctor(std::string_view const & self_type,
+                                            void *this_ptr,
+                                            Refcount * x);
+        extern void intrusive_ptr_log_dtor(std::string_view const & self_type,
+                                           void * this_ptr,
+                                           Refcount * x);
+        extern void intrusive_ptr_log_assign(std::string_view const & self_type,
+                                             void * this_ptr,
+                                             Refcount * x);
+        extern void intrusive_ptr_log_massign(std::string_view const & self_type,
+                                              void *this_ptr,
                                        Refcount * x);
-        void intrusive_ptr_add_ref(Refcount * x);
-        void intrusive_ptr_release(Refcount * x);
+        extern void intrusive_ptr_add_ref(Refcount * x);
+        extern void intrusive_ptr_release(Refcount * x);
 
         template<typename T>
         inline std::ostream &
