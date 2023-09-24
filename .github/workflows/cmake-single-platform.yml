@@ -26,7 +26,11 @@ jobs:
       # install catch2.  see [[https://stackoverflow.com/questions/57982945/how-to-apt-get-install-in-a-github-actions-workflow]]
       run: sudo apt-get install -y catch2
 
-    - name: Fetch indentlog
+    - name: Clone indentlog
+      with:
+        repository: Rconybea/indentlog
+        path: repo/indentlog
+
       # fetch source tree for indentlog dependency
       run: git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com:rconybea/indentlog.git
 
