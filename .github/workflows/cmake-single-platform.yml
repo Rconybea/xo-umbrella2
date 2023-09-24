@@ -41,7 +41,7 @@ jobs:
 
     - name: Install indentlog
       # install into ${{github.workspace}}/local
-      run: cmake --build ${{github.workspace}}/build_indentlog install
+      run: cmake --install ${{github.workspace}}/build_indentlog
 
 #      # fetch source tree for indentlog dependency
 #      run: git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com:rconybea/indentlog.git
