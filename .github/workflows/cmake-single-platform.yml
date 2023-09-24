@@ -36,6 +36,9 @@ jobs:
       # configure cmake for indentlog in dedicated build directory.
       run: cmake -B ${{github.workspace}}/build_indentlog -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local repo/indentlog
 
+    - name: Build indentlog
+      run: cmake --build ${{github.workspace}}/build_indentlog --config ${{env.BUILD_TYPE}}
+
 #      # fetch source tree for indentlog dependency
 #      run: git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com:rconybea/indentlog.git
 
