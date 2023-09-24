@@ -28,7 +28,7 @@ jobs:
 
     - name: Fetch indentlog
       # fetch source tree for indentlog dependency
-      run: git clone git@github.com:rconybea/indentlog.git
+      run: git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com:rconybea/indentlog.git
 
 #    - name: Configure CMake
 #      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
