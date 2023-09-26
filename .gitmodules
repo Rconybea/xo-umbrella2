@@ -1,9 +1,0 @@
-[submodule "repo/indentlog"]
-    path = repo/indentlog
-    url = git@github.com:Rconybea/indentlog.git
-[submodule "repo/refcnt"]
-	path = repo/refcnt
-	url = git@github.com:Rconybea/refcnt.git
-[submodule "repo/subsys"]
-	path = repo/subsys
-	url = git@github.com:Rconybea/subsys.git

@@ -25,7 +25,8 @@ xo_install_library(${SELF_LIBRARY_NAME})
 #xo_refcnt_dependency(${SELF_LIBRARY_NAME})
 #xo_indentlog_dependency(${SELF_LIBRARY_NAME})
 
-add_dependencies(${SELF_LIBRARY_NAME} refcnt)
+find_package(refcnt REQUIRED)
+#add_dependencies(${SELF_LIBRARY_NAME} refcnt)
 target_include_directories(
     ${SELF_LIBRARY_NAME} PUBLIC
     $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/local/include>
@@ -33,7 +34,8 @@ target_include_directories(
 )
 target_link_libraries(${SELF_LIBRARY_NAME} PUBLIC refcnt)
 
-add_dependencies(${SELF_LIBRARY_NAME} indentlog)
+find_package(indentlog REQUIRED)
+#add_dependencies(${SELF_LIBRARY_NAME} indentlog)
 # note:  can't use find_package() here,
 #        because find_package() needs to run successfully before
 #        dependency gets installed.
