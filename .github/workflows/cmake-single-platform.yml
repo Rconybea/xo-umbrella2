@@ -53,6 +53,21 @@ jobs:
     - name: Install subsys
       run: cmake --install ${{github.workspace}}/build_subsys
 
+    - name: Clone refcnt
+      uses: actions/checkout@v3
+      with:
+        repository: Rconybea/refcnt
+        path: repo/refcnt
+
+    - name: Configure refcnt
+      run: cmake -B ${{github.workspace}}/build_refcnt -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local repo/refcnt
+
+    - name: Build refcnt
+      run: cmake --build ${{github.workspace}}/build_refcnt --config ${{env.BUILD_TYPE}}
+
+    - name: Install refcnt
+      run: cmake --install ${{github.workspace}}/build_refcnt
+
     - name: Checkout reflect
       uses: actions/checkout@v3
       with:
