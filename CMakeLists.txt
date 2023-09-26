@@ -41,90 +41,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # always write compile_commands.json
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 
-# ----------------------------------------------------------------
-# external projects (need these to exist before add_subdirectory() below)
-#
-# we are expecting these projects to coexist peacefully in build/local
-# (i.e. can run their `make install` steps independently with prefix build/local,
-#       without any collisions)
-#
-
-include(ExternalProject)
-
-## ----- indentlog ------
-
-# NOTE:  we could have cmake handle git interaction,
-#        but we want source for certain dependencies to live in a location
-#        that's suitable for accepting changes + coordinated commits.
-#        In particular,  not in the build directory!
-#
-externalproject_add(
-    project_indentlog
-    SOURCE_DIR ${PROJECT_SOURCE_DIR}/repo/indentlog
-    BINARY_DIR ${PROJECT_BINARY_DIR}/ext/indentlog
-    INSTALL_DIR ${PROJECT_BINARY_DIR}/local
-    CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCODE_COVERAGE=${CODE_COVERAGE} -DCMAKE_PREFIX_PATH=<INSTALL_DIR> -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
-    BUILD_COMMAND make
-    INSTALL_COMMAND make install
-    TEST_BEFORE_INSTALL True
-)
-
-add_library(indentlog INTERFACE IMPORTED)
-#set_property(TARGET indentlog PROPERTY IMPORTED_LOCATION ${PROJECT_BINARY_DIR}/local/lib/libindentlog.so)
-add_dependencies(indentlog project_indentlog)
-
-# runs ctest in indentlog build dir
-add_test(NAME indentlog COMMAND ${PROJECT_SOURCE_DIR}/cmake/run-external-ctest ${PROJECT_BINARY_DIR}/ext/indentlog)
-#target_code_coverage(indentlog EXTERNAL AUTO ALL)
-
-# ----- subsys -----
-
-externalproject_add(
-    project_subsys
-    SOURCE_DIR ${PROJECT_SOURCE_DIR}/repo/subsys
-    BINARY_DIR ${PROJECT_BINARY_DIR}/ext/subsys
-    INSTALL_DIR ${PROJECT_BINARY_DIR}/local
-    CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCODE_COVERAGE=${CODE_COVERAGE} -DCMAKE_PREFIX_PATH=<INSTALL_DIR> -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
-    BUILD_COMMAND make
-    INSTALL_COMMAND make install
-    TEST_BEFORE_INSTALL True
-)
-
-add_library(subsys INTERFACE IMPORTED)
-add_dependencies(subsys project_subsys)
-
-# runs ctest in subsys build dir
-add_test(NAME subsys COMMAND ${PROJECT_SOURCE_DIR}/cmake/run-external-ctest ${PROJECT_BINARY_DIR}/ext/subsys)
-
-# ----- refcnt -----
-
-# CMAKE_ARGS
-#   CMAKE_BUILD_TYPE propagate Debug/Release build type
-#   CODE_COVERAGE propagate code coverage setting
-#   CMAKE_PREFIX_PATH path for support cmake files of dependencies (needed for find_package() to work)
-#   CMAKE_INSTALL_PREFIX install subproject here
-# SOURCE_DIR  -- where to find already established source code
-# BINARY_DIR  -- run build for external project here
-# INSTALL_DIR -- (temporarily) install external project here
-#
-externalproject_add(
-    project_refcnt
-    SOURCE_DIR ${PROJECT_SOURCE_DIR}/repo/refcnt
-    BINARY_DIR ${PROJECT_BINARY_DIR}/ext/refcnt
-    INSTALL_DIR ${PROJECT_BINARY_DIR}/local
-    CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCODE_COVERAGE=${CODE_COVERAGE} -DCMAKE_PREFIX_PATH=<INSTALL_DIR> -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
-    BUILD_COMMAND make
-    INSTALL_COMMAND make install
-    TEST_BEFORE_INSTALL True
-)
-
-add_library(refcnt SHARED IMPORTED)
-set_property(TARGET refcnt PROPERTY IMPORTED_LOCATION ${PROJECT_BINARY_DIR}/local/lib/librefcnt.so)
-add_dependencies(refcnt project_refcnt)
-add_dependencies(refcnt project_indentlog)
-
-# runs ctest in refcnt build dir
-add_test(NAME refcnt COMMAND ${PROJECT_SOURCE_DIR}/cmake/run-external-ctest ${PROJECT_BINARY_DIR}/ext/refcnt)
+if(NOT CMAKE_INSTALL_RPATH)
+    set(CMAKE_INSTALL_RPATH $(CMAKE_INSTALL_PREFIX)/lib CACHE STRING "runpath in installed libraries/executables")
+endif()
 
 # ----------------------------------------------------------------
 # sources
