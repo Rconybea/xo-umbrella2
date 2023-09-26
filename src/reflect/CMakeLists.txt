@@ -46,6 +46,15 @@ target_include_directories(
 )
 target_link_libraries(${SELF_LIBRARY_NAME} PUBLIC indentlog)
 
+find_package(refcnt CONFIG REQUIRED)
+#add_dependencies(${SELF_LIBRARY_NAME} refcnt)
+target_include_directories(
+    ${SELF_LIBRARY_NAME} PUBLIC
+    $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/local/include>
+    $<INSTALL_INTERFACE:include>
+)
+target_link_libraries(${SELF_LIBRARY_NAME} PUBLIC refcnt)
+
 # ----------------------------------------------------------------
 # 3rd party dependency: boost:
 
