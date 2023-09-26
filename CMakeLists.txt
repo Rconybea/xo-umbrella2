@@ -12,7 +12,6 @@ include(cmake/code-coverage.cmake)
 # unit test setup
 
 enable_testing()
-
 # activate code coverage for all executables + libraries (when configured with -DCODE_COVERAGE=ON)
 add_code_coverage()
 # 1. assuming that /nix/store/ prefixes .hpp files belonging to gcc, catch2 etc.
@@ -38,6 +37,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # always write compile_commands.json
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
+
+if(NOT CMAKE_INSTALL_RPATH)
+    set(CMAKE_INSTALL_RPATH $(CMAKE_INSTALL_PREFIX)/lib CACHE STRING "runpath in installed libraries/executables")
+endif()
 
 # ----------------------------------------------------------------
 # sources
