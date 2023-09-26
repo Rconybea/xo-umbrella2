@@ -2,6 +2,8 @@
 
 cmake_minimum_required(VERSION 3.10)
 
+message(CMAKE_VERSION=${CMAKE_VERSION})
+
 project(reflect VERSION 0.1)
 enable_language(CXX)
 
