@@ -31,7 +31,7 @@ jobs:
         path: repo/indentlog
 
     - name: Configure indentlog
-      run: cmake -B ${{github.workspace}}/build_indentlog -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local repo/indentlog
+      run: cmake -B ${{github.workspace}}/build_indentlog -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local --debug-find repo/indentlog
 
     - name: Build indentlog
       run: cmake --build ${{github.workspace}}/build_indentlog --config ${{env.BUILD_TYPE}}
@@ -47,7 +47,7 @@ jobs:
         path: repo/subsys
 
     - name: Configure subsys
-      run: cmake -B ${{github.workspace}}/build_subsys -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local repo/subsys
+      run: cmake -B ${{github.workspace}}/build_subsys -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local --debug-find repo/subsys
 
 
     - name: Build subsys
@@ -56,12 +56,12 @@ jobs:
     - name: Install subsys
       run: cmake --install ${{github.workspace}}/build_subsys
 
+
     - name: Clone refcnt
       uses: actions/checkout@v3
       with:
         repository: Rconybea/refcnt
         path: repo/refcnt
-
 
     - name: Configure refcnt
       run: cmake -B ${{github.workspace}}/build_refcnt -DCMAKE_PREFIX_PATH=${{github.workspace}}/local -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local --debug-find repo/refcnt
