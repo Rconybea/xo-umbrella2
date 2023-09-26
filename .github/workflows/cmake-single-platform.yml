@@ -64,7 +64,7 @@ jobs:
 
 
     - name: Configure refcnt
-      run: cmake -B ${{github.workspace}}/build_refcnt -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local repo/refcnt
+      run: cmake -B ${{github.workspace}}/build_refcnt -DCMAKE_PREFIX_PATH=${{github.workspace}}/local -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local --debug-find repo/refcnt
 
     - name: Build refcnt
       run: cmake --build ${{github.workspace}}/build_refcnt --config ${{env.BUILD_TYPE}}
