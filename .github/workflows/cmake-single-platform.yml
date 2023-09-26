@@ -45,6 +45,24 @@ jobs:
       run: cmake --install ${{github.workspace}}/build_indentlog
 
 
+    - name: Clone refcnt
+      uses: actions/checkout@v3
+      with:
+        repository: Rconybea/refcnt
+        path: repo/refcnt
+
+    - name: Configure refcnt
+      # configure cmake for refcnt in dedicated build directory.
+      run: cmake -B ${{github.workspace}}/build_refcnt -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local repo/refcnt
+
+    - name: Build refcnt
+      run: cmake --build ${{github.workspace}}/build_refcnt --config ${{env.BUILD_TYPE}}
+
+    - name: Install refcnt
+      # install into ${{github.workspace}}/local
+      run: cmake --install ${{github.workspace}}/build_refcnt
+
+
     - name: Configure reflect library
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
