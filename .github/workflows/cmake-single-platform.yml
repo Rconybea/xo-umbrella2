@@ -38,6 +38,21 @@ jobs:
     - name: Install indentlog
       run: cmake --install ${{github.workspace}}/build_indentlog
 
+    - name: Clone subsys
+      uses: actions/checkout@v3
+      with:
+        repository: Rconybea/subsys
+        path: repo/subsys
+
+    - name: Configure subsys
+      run: cmake -B ${{github.workspace}}/build_subsys -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local repo/subsys
+
+    - name: Build subsys
+      run: cmake --build ${{github.workspace}}/build_subsys --config ${{env.BUILD_TYPE}}
+
+    - name: Install subsys
+      run: cmake --install ${{github.workspace}}/build_subsys
+
     - name: Checkout reflect
       uses: actions/checkout@v3
       with:
