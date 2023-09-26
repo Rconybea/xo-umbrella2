@@ -72,6 +72,7 @@ endmacro()
 
 # ----------------------------------------------------------------
 # use this for a subdir that builds a library
+# and supports find_package()
 #
 macro(xo_install_library target)
     install(
@@ -89,7 +90,7 @@ endmacro()
 # use this when relying on indentlog [[https://github.com/rconybea/indentlog]] headers
 #
 macro(xo_indentlog_dependency target)
-    find_package(indentlog REQUIRED)
+    find_package(indentlog CONFIG REQUIRED)
     #add_dependencies(${target} indentlog)
     target_link_libraries(${target} PUBLIC indentlog)
     #target_include_directories(${target} PUBLIC ${indentlog_DIR}/../../../include)
