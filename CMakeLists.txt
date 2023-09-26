@@ -49,7 +49,7 @@ endif()
 
 # early find_package() experiment
 find_package(indentlog CONFIG REQUIRED)
-find_package(refcnt2 CONFIG REQUIRED)
+find_package(refcnt CONFIG REQUIRED)
 
 # ----------------------------------------------------------------
 # sources
