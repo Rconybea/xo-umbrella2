@@ -23,6 +23,7 @@ jobs:
     - name: Install catch2
       run: sudo apt-get install -y catch2
 
+
     - name: Clone indentlog
       uses: actions/checkout@v3
       with:
@@ -38,6 +39,7 @@ jobs:
     - name: Install indentlog
       run: cmake --install ${{github.workspace}}/build_indentlog
 
+
     - name: Clone subsys
       uses: actions/checkout@v3
       with:
@@ -46,6 +48,7 @@ jobs:
 
     - name: Configure subsys
       run: cmake -B ${{github.workspace}}/build_subsys -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local repo/subsys
+
 
     - name: Build subsys
       run: cmake --build ${{github.workspace}}/build_subsys --config ${{env.BUILD_TYPE}}
@@ -59,6 +62,7 @@ jobs:
         repository: Rconybea/refcnt
         path: repo/refcnt
 
+
     - name: Configure refcnt
       run: cmake -B ${{github.workspace}}/build_refcnt -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local repo/refcnt
 
@@ -71,17 +75,19 @@ jobs:
     - name: Checkout reflect
       uses: actions/checkout@v3
 
+
+
     - name: Configure reflect
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_PREFIX_PATH=${{github.workspace}}/local -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+      run: cmake -B ${{github.workspace}}/build_reflect -DCMAKE_PREFIX_PATH=${{github.workspace}}/local -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
 
     - name: Build reflect
       # Build your program with the given configuration
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+      run: cmake --build ${{github.workspace}}/build_reflect --config ${{env.BUILD_TYPE}}
 
     - name: Test reflect
-      working-directory: ${{github.workspace}}/build
+      working-directory: ${{github.workspace}}/build_reflect
       # Execute tests defined by the CMake configuration.
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
       run: ctest -C ${{env.BUILD_TYPE}}
