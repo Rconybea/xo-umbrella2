@@ -32,6 +32,8 @@ jobs:
         repository: Rconybea/indentlog
         path: repo/indentlog
 
+
+
     - name: Configure indentlog
       # configure cmake for indentlog in dedicated build directory.
       run: cmake -B ${{github.workspace}}/build_indentlog -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local repo/indentlog
@@ -43,10 +45,12 @@ jobs:
       # install into ${{github.workspace}}/local
       run: cmake --install ${{github.workspace}}/build_indentlog
 
+
+
     - name: Configure refcnt
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: cmake -B ${{github.workspace}}/build_refcnt -DCMAKE_PREFIX_PATH=${{github.workspace}}/local -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+      run: cmake -B ${{github.workspace}}/build_refcnt -DCMAKE_PREFIX_PATH=${{github.workspace}}/local -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} --debug-find
 
     - name: Build refcnt
       # Build your program with the given configuration
