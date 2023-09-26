@@ -38,7 +38,7 @@ jobs:
       run: cmake -B ${{github.workspace}}/build_xo-cmake -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local repo/xo-cmake
 
     - name: Build xo-cmake (trivial)
-      run: cmake --build ${{github.worskpace}}/build_xo-cmake --config ${{env.BUILD_TYPE}}
+      run: cmake --build ${{github.workspace}}/build_xo-cmake --config ${{env.BUILD_TYPE}}
 
     - name: Install xo-cmake
       run: cmake --install ${{github.workspace}}/build_xo-cmake
