@@ -25,7 +25,6 @@ xo_install_library(${SELF_LIBRARY_NAME})
 #xo_refcnt_dependency(${SELF_LIBRARY_NAME})
 #xo_indentlog_dependency(${SELF_LIBRARY_NAME})
 
-find_package(indentlog CONFIG REQUIRED)
 #add_dependencies(${SELF_LIBRARY_NAME} indentlog)
 # note:  can't use find_package() here,
 #        because find_package() needs to run successfully before

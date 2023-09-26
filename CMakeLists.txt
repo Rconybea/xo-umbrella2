@@ -47,6 +47,9 @@ if(NOT CMAKE_INSTALL_RPATH)
     set(CMAKE_INSTALL_RPATH $(CMAKE_INSTALL_PREFIX)/lib CACHE STRING "runpath in installed libraries/executables")
 endif()
 
+# early find_package() experiment
+find_package(indentlog CONFIG REQUIRED)
+
 # ----------------------------------------------------------------
 # sources
 
