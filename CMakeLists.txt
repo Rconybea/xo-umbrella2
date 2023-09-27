@@ -19,12 +19,6 @@ add_code_coverage_all_targets(EXCLUDE /nix/store/* utest/*)
 
 set(XO_PROJECT_NAME subsys)
 
-if(NOT CMAKE_CXX_STANDARD)
-    set(CMAKE_CXX_STANDARD 20)
-endif()
-
-set(CMAKE_CXX_STANDARD_REQUIRED True)
-
 # always write compile_commands.json
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 
