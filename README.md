@@ -18,6 +18,11 @@ Indentlog is a lightweight header-only library for console logging.
 
 ## Getting Started
 
+### build + install `xo-cmake` dependency (cmake macros)
+
+see [github/Rconybea/xo-cmake](https://github.com/Rconybea/xo-cmake)
+(almost trivial,  installs a few `.cmake` files)
+
 ### copy repository locally
 
 ```
@@ -32,7 +37,7 @@ indentlog
 $ cd indentlog
 $ mkdir build
 $ cd build
-$ cmake -DCMAKE_INSTALL_PREFIX=/usr/local ..
+$ cmake -DCMAKE_MODULE_PATH=/usr/local/share/cmake  -DCMAKE_INSTALL_PREFIX=/usr/local ..
 $ make
 $ make install
 ```
