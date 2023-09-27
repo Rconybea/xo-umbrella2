@@ -30,7 +30,8 @@ subsys
 $ cd subsys
 $ mkdir build
 $ cd build
-$ cmake -DCMAKE_PREFIX_PATH=${INSTALL_PREFIX} -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} ..
+$ INSTALL_PREFIX=/usr/local  # or wherever you prefer
+$ cmake -DCMAKE_MODULE_PATH=${INSTALL_PREFIX}/share/cmake -DCMAKE_PREFIX_PATH=${INSTALL_PREFIX} -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} ..
 $ make
 $ make install
 ```

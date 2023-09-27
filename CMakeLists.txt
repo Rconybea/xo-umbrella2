@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.10)
 project(subsys VERSION 0.1)
 enable_language(CXX)
 
+include (xo_macros/xo_cxx)
 include(cmake/cxx.cmake)
 include(cmake/code-coverage.cmake)
 
