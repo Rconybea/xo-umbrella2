@@ -13,5 +13,6 @@ set(XO_PROJECT_NAME xo_macros)
 install(
     FILES
     "cmake/xo_cxx.cmake"
+    "cmake/code-coverage.cmake"
     DESTINATION share/cmake/${XO_PROJECT_NAME}
 )
