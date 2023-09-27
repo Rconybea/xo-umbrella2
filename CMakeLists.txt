@@ -7,7 +7,6 @@ enable_language(CXX)
 
 # common XO cmake macros (see proj/xo-cmake)
 include(xo_macros/xo_cxx)
-#include(cmake/cxx.cmake)
 include(xo_macros/code-coverage)
 
 # ----------------------------------------------------------------
