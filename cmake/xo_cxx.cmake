@@ -31,10 +31,11 @@ macro(xo_toplevel_compile_options)
         set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib CACHE STRING
             "runpath in installed libraries/executables")
     endif()
-endif()
+endmacro()
 
 # ----------------------------------------------------------------
-# use this in subdirs that compile c++ code
+# use this in subdirs that compile c++ code.
+# do not use for header-only subsystems;  see xo_include_headeronly_options2()
 #
 macro(xo_include_options2 target)
     # ----------------------------------------------------------------
@@ -67,13 +68,44 @@ macro(xo_include_options2 target)
     endif()
 endmacro()
 
+macro(xo_include_headeronly_options2 target)
+    # ----------------------------------------------------------------
+    # PROJECT_SOURCE_DIR:
+    #   so we can for example write
+    #     #include "ordinaltree/foo.hpp"
+    #   from anywhere in the project
+    # PROJECT_BINARY_DIR:
+    #   since generated version file will be in build directory,
+    #   need that build directory to also appear in
+    #   compiler's include path
+    #
+    target_include_directories(
+      ${target} INTERFACE
+      $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>              # e.g. for #include "indentlog/scope.hpp"
+      $<INSTALL_INTERFACE:include>
+      $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/${target}>    # e.g. for #include "Refcounted.hpp" in refcnt/src
+      $<INSTALL_INTERFACE:include/${target}>
+      $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>                      # e.g. for generated .hpp files
+    )
+
+    # ----------------------------------------------------------------
+    # make standard directories for std:: includes explicit
+    # so that
+    # (1) they appear in compile_commands.json.
+    # (2) clangd (run from emacs lsp-mode) can find them
+    #
+    if(CMAKE_EXPORT_COMPILE_COMMANDS)
+      set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES})
+    endif()
+endmacro()
+
 # ----------------------------------------------------------------
 #
 # Require:
 #     needs to be preceded by call to xo_toplevel_compile_options()
 #
 macro(xo_compile_options target)
-    target_copmile_options(${target} PRIVATE ${XO_COMPILE_OPTIONS})
+    target_compile_options(${target} PRIVATE ${XO_COMPILE_OPTIONS})
 endmacro()
 
 # ----------------------------------------------------------------
@@ -149,5 +181,16 @@ endmacro()
 #
 macro(xo_internal_dependency target dep)
     find_package(${dep} CONFIG REQUIRED)
+    target_link_libraries(${target} PUBLIC ${dep})
+endmacro()
+
+# dependency on target provided from this codebase.
+#
+# 1. don't need find_package() in this case,  since details of dep targets
+#    must be known to cmake for it to build them.
+# 2. in any case, can't use find_package() when cmake runs,
+#    because supporting .cmake files haven't been generated yet
+#
+macro(xo_self_dependency target dep)
     target_link_libraries(${target} PUBLIC ${dep})
 endmacro()
