@@ -53,41 +53,45 @@ add_subdirectory(utest)
 # ----------------------------------------------------------------
 # cmake export
 
-set(XO_PROJECT_CONFIG_VERSION "${XO_PROJECT_NAME}ConfigVersion.cmake")
-set(XO_PROJECT_CONFIG "${XO_PROJECT_NAME}Config.cmake")
+xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
 
-include(CMakePackageConfigHelpers)
-write_basic_package_version_file("${PROJECT_BINARY_DIR}/${XO_PROJECT_CONFIG_VERSION}"
-    VERSION 0.1
-    COMPATIBILITY AnyNewerVersion
-)
-
-#install(
-#    TARGETS ${XO_PROJECT_NAME}
-#    EXPORT ${XO_PROJECT_NAME}Targets
-#    LIBRARY DESTINATION lib COMPONENT Runtime
-#    ARCHIVE DESTINATION lib COMPONENT Development
-#    RUNTIME DESTINATION bin COMPONENT Runtime
-#    PUBLIC_HEADER DESTINATION include COMPONENT Development
-#    BUNDLE DESTINATION bin COMPONENT Runtime
+#set(XO_PROJECT_CONFIG_VERSION "${XO_PROJECT_NAME}ConfigVersion.cmake")
+#set(XO_PROJECT_CONFIG "${XO_PROJECT_NAME}Config.cmake")
+#
+#include(CMakePackageConfigHelpers)
+#write_basic_package_version_file("${PROJECT_BINARY_DIR}/${XO_PROJECT_CONFIG_VERSION}"
+#    VERSION 0.1
+#    COMPATIBILITY AnyNewerVersion
+#)
+#
+##install(
+##    TARGETS ${XO_PROJECT_NAME}
+##    EXPORT ${XO_PROJECT_NAME}Targets
+##    LIBRARY DESTINATION lib COMPONENT Runtime
+##    ARCHIVE DESTINATION lib COMPONENT Development
+##    RUNTIME DESTINATION bin COMPONENT Runtime
+##    PUBLIC_HEADER DESTINATION include COMPONENT Development
+##    BUNDLE DESTINATION bin COMPONENT Runtime
+##    )
+#
+#configure_package_config_file(
+#    "${PROJECT_SOURCE_DIR}/cmake/${XO_PROJECT_NAME}Config.cmake.in"
+#    "${PROJECT_BINARY_DIR}/${XO_PROJECT_CONFIG}"
+#    INSTALL_DESTINATION lib/cmake/${XO_PROJECT_NAME}
 #    )
-
-configure_package_config_file(
-    "${PROJECT_SOURCE_DIR}/cmake/${XO_PROJECT_NAME}Config.cmake.in"
-    "${PROJECT_BINARY_DIR}/${XO_PROJECT_CONFIG}"
-    INSTALL_DESTINATION lib/cmake/${XO_PROJECT_NAME}
-    )
-
-install(EXPORT ${XO_PROJECT_NAME}Targets DESTINATION lib/cmake/${XO_PROJECT_NAME})
-install(
-    FILES
-    "${PROJECT_BINARY_DIR}/${XO_PROJECT_CONFIG_VERSION}"
-    "${PROJECT_BINARY_DIR}/${XO_PROJECT_CONFIG}"
-    DESTINATION lib/cmake/${XO_PROJECT_NAME})
+#
+#install(EXPORT ${XO_PROJECT_NAME}Targets DESTINATION lib/cmake/${XO_PROJECT_NAME})
+#install(
+#    FILES
+#    "${PROJECT_BINARY_DIR}/${XO_PROJECT_CONFIG_VERSION}"
+#    "${PROJECT_BINARY_DIR}/${XO_PROJECT_CONFIG}"
+#    DESTINATION lib/cmake/${XO_PROJECT_NAME})
 
 # ----------------------------------------------------------------
 # install .hpp
 
-install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/ DESTINATION include)
+xo_install_include_tree()
+
+#install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/ DESTINATION include)
 
 # end CMakeLists.txt
