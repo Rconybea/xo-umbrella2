@@ -30,12 +30,6 @@ set(PROJECT_CXX_FLAGS "-fconcepts-diagnostics-depth=2")
 
 add_definitions(${PROJECT_CXX_FLAGS})
 
-if(NOT CMAKE_CXX_STANDARD)
-    set(CMAKE_CXX_STANDARD 20)
-endif()
-
-set(CMAKE_CXX_STANDARD_REQUIRED True)
-
 # always write compile_commands.json
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 
