@@ -35,9 +35,6 @@ set(PROJECT_CXX_FLAGS "")
 
 add_definitions(${PROJECT_CXX_FLAGS})
 
-# always write compile_commands.json
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
-
 xo_toplevel_compile_options()
 
 # ----------------------------------------------------------------
