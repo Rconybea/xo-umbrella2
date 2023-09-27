@@ -43,6 +43,13 @@ macro(xo_compile_options target)
 endmacro()
 
 # ----------------------------------------------------------------
+# use this to install typical include file subtree
+#
+macro(xo_install_include_tree)
+    install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/ DESTINATION include)
+endmacro()
+
+# ----------------------------------------------------------------
 #
 # dependency on an xo library (including header-only libraries)
 # e.g. indentlog
