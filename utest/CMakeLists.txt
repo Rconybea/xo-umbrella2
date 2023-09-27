@@ -20,14 +20,15 @@ target_code_coverage(${SELF_EXECUTABLE_NAME} AUTO ALL)
 #   since version file will be in build directory,  need that directory
 #   to also be included in compiler's include path
 #
-target_include_directories(${SELF_EXECUTABLE_NAME} PUBLIC
-                           ${PROJECT_SOURCE_DIR}
-                           ${PROJECT_BINARY_DIR})
+xo_include_options2(${SELF_EXECUTABLE_NAME})
+#target_include_directories(${SELF_EXECUTABLE_NAME} PUBLIC
+#                           ${PROJECT_SOURCE_DIR}
+#                           ${PROJECT_BINARY_DIR})
 
 # ----------------------------------------------------------------
 # internal dependencies: logutil, ...
 
-target_link_libraries(${SELF_EXECUTABLE_NAME} PUBLIC reflect)
+xo_internal_dependency(${SELF_EXECUTABLE_NAME} reflect)
 
 # ----------------------------------------------------------------
 # 3rd part dependency: catch2:
