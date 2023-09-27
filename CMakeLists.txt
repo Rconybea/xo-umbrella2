@@ -29,10 +29,8 @@ add_code_coverage_all_targets(EXCLUDE /nix/store/* ${PROJECT_SOURCE_DIR}/utest/*
 # ----------------------------------------------------------------
 # c++ settings
 
-set(XO_PROJECT_NAME reflect)
 set(PROJECT_CXX_FLAGS "")
 #set(PROJECT_CXX_FLAGS "-fconcepts-diagnostics-depth=2")
-
 add_definitions(${PROJECT_CXX_FLAGS})
 
 xo_toplevel_compile_options()
