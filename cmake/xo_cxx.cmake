@@ -47,11 +47,7 @@ macro(xo_toplevel_compile_options)
     endif()
 endmacro()
 
-# ----------------------------------------------------------------
-# use this in subdirs that compile c++ code.
-# do not use for header-only subsystems;  see xo_include_headeronly_options2()
-#
-macro(xo_include_options2 target)
+macro(xo_include_headeronly_options2 target)
     # ----------------------------------------------------------------
     # PROJECT_SOURCE_DIR:
     #   so we can for example write
@@ -63,7 +59,7 @@ macro(xo_include_options2 target)
     #   compiler's include path
     #
     target_include_directories(
-      ${target} PUBLIC
+      ${target} INTERFACE
       $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>              # e.g. for #include "indentlog/scope.hpp"
       $<INSTALL_INTERFACE:include>
       $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/${target}>    # e.g. for #include "Refcounted.hpp" in refcnt/src
@@ -82,7 +78,37 @@ macro(xo_include_options2 target)
     endif()
 endmacro()
 
-macro(xo_include_headeronly_options2 target)
+# ----------------------------------------------------------------
+# use this for a shared library.
+#
+macro(xo_add_shared_library target targetversion soversion sources)
+    add_library(${target} SHARED ${sources})
+    foreach(arg IN ITEMS ${ARGN})
+        #message("target=${target}; arg=${arg}")
+
+        # to use PUBLIC here would need to split:
+        #   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${arg}}>
+        #   $<INSTALL_INTERFACE:${arg}>
+        # but shouldn't need that,  since we arrange to install includes via
+        # xo_include_options2() below
+        #
+        target_sources(${target} PRIVATE ${arg})
+    endforeach()
+    set_target_properties(
+        ${target}
+        PROPERTIES
+        VERSION ${targetversion}
+        SOVERSION ${soversion})
+    xo_compile_options(${target})
+    xo_include_options2(${target})
+    xo_install_library2(${target})
+endmacro()
+
+# ----------------------------------------------------------------
+# use this in subdirs that compile c++ code.
+# do not use for header-only subsystems;  see xo_include_headeronly_options2()
+#
+macro(xo_include_options2 target)
     # ----------------------------------------------------------------
     # PROJECT_SOURCE_DIR:
     #   so we can for example write
@@ -94,7 +120,7 @@ macro(xo_include_headeronly_options2 target)
     #   compiler's include path
     #
     target_include_directories(
-      ${target} INTERFACE
+      ${target} PUBLIC
       $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>              # e.g. for #include "indentlog/scope.hpp"
       $<INSTALL_INTERFACE:include>
       $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/${target}>    # e.g. for #include "Refcounted.hpp" in refcnt/src
