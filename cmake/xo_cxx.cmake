@@ -66,6 +66,40 @@ macro(xo_install_library2 target)
 endmacro()
 
 # ----------------------------------------------------------------
+
+# for projectname=foo,  require:
+#   cmake/fooConfig.cmake.in
+#
+# prepares
+#   ${PREFIX}/lib/cmake/foo/fooConfig.cmake
+#   ${PREFIX}/lib/cmake/foo/fooConfigVersion.cmake
+#   ${PREFIX}/lib/cmake/foo/fooTargets.cmake
+#
+macro(xo_export_cmake_config projectname projectversion projecttargets)
+    include(CMakePackageConfigHelpers)
+    write_basic_package_version_file(
+        "${PROJECT_BINARY_DIR}/${projectname}ConfigVersion.cmake"
+        VERSION ${projectversion}
+        COMPATIBILITY AnyNewerVersion
+    )
+    configure_package_config_file(
+        "${PROJECT_SOURCE_DIR}/cmake/${projectname}Config.cmake.in"
+        "${PROJECT_BINARY_DIR}/${projectname}Config.cmake"
+        INSTALL_DESTINATION lib/cmake/${projectname}
+    )
+    install(
+        EXPORT ${projecttargets}
+        DESTINATION lib/cmake/${projectname}
+    )
+    install(
+        FILES
+        "${PROJECT_BINARY_DIR}/${projectname}ConfigVersion.cmake"
+        "${PROJECT_BINARY_DIR}/${projectname}Config.cmake"
+        DESTINATION lib/cmake/${projectname}
+    )
+endmacro()
+
+# ----------------------------------------------------------------
 #
 # dependency on an xo library (including header-only libraries)
 # e.g. indentlog
