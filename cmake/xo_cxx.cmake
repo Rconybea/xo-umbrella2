@@ -146,3 +146,14 @@ macro(xo_internal_dependency target dep)
     find_package(${dep} CONFIG REQUIRED)
     target_link_libraries(${target} PUBLIC ${dep})
 endmacro()
+
+# dependency on target provided from this codebase.
+#
+# 1. don't need find_package() in this case,  since details of dep targets
+#    must be known to cmake for it to build them.
+# 2. in any case, can't use find_package() when cmake runs,
+#    because supporting .cmake files haven't been generated yet
+#
+macro(xo_self_dependency target dep)
+    target_link_libraries(${target} PUBLIC ${dep})
+endmacro()
