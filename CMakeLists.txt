@@ -18,20 +18,6 @@ add_code_coverage()
 #
 add_code_coverage_all_targets(EXCLUDE /nix/store/* utest/*)
 
-# always write compile_commands.json
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
-
-if(NOT USER)
-    set(USER $ENV{USER})
-endif()
-
-# hmm. this works if explicitly given with cmake:
-#    cmake -DCMAKE_INSTALL_PREFIX=/home/roland/local path/to/source
-# but not as default
-if(NOT CMAKE_INSTALL_PREFIX)
-    set(CMAKE_INSTALL_PREFIX /home/${USER}/local CACHE STRING "install directory")
-endif()
-
 xo_toplevel_compile_options()
 
 add_subdirectory(example)
