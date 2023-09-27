@@ -6,15 +6,13 @@ project(randomgen VERSION 0.1)
 enable_language(CXX)
 
 include(xo_macros/xo_cxx)
-include(cmake/cxx.cmake)
-include(cmake/code-coverage.cmake)
+include(xo_macros/code-coverage)
+#include(cmake/cxx.cmake)
 
 # ----------------------------------------------------------------
 # unit test setup
 
 enable_testing()
-
-
 # activate code coverage for all executables + libraries (when configured with -DCODE_COVERAGE=ON)
 add_code_coverage()
 # 1. assuming that /nix/store/ prefixes .hpp files belonging to gcc, catch2 etc.
@@ -50,9 +48,8 @@ endif()
 if(NOT CMAKE_INSTALL_PREFIX)
     set(CMAKE_INSTALL_PREFIX /home/${USER}/local CACHE STRING "install directory")
 endif()
-if(NOT CMAKE_INSTALL_RPATH)
-    set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib CACHE STRING "runpath in installed libraries/executables")
-endif()
+
+xo_toplevel_compile_options()
 
 # ----------------------------------------------------------------
 # external dependencies
@@ -60,7 +57,7 @@ endif()
 # set CMAKE_INSTALL_PREFIX to analog of /usr
 # to use .cmake assistants from /usr/lib/cmake/indentlog
 #
-find_package(indentlog REQUIRED)
+#find_package(indentlog REQUIRED)
 
 # ----------------------------------------------------------------
 
@@ -69,6 +66,6 @@ add_subdirectory(example)
 
 # ----------------------------------------------------------------
 
-install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/ DESTINATION include)
+xo_install_include_tree()
 
 install(TARGETS ex1 DESTINATION bin/randomgen/example)

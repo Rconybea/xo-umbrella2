@@ -1,3 +1,3 @@
 add_executable(ex2 ex2.cpp)
-xo_include_options(ex2)
-xo_indentlog_dependency(ex2)
+xo_include_options2(ex2)
+xo_internal_dependency(ex2 indentlog)
