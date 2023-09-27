@@ -7,6 +7,8 @@ message(CMAKE_VERSION=${CMAKE_VERSION})
 project(reflect VERSION 0.1)
 enable_language(CXX)
 
+# common XO cmake macros (see proj/xo-cmake)
+include(xo_macros/xo_cxx)
 include(cmake/cxx.cmake)
 include(cmake/code-coverage.cmake)
 
