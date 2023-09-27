@@ -34,9 +34,8 @@ endif()
 if(NOT CMAKE_INSTALL_PREFIX)
     set(CMAKE_INSTALL_PREFIX /home/${USER}/local CACHE STRING "install directory")
 endif()
-if(NOT CMAKE_INSTALL_RPATH)
-    set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib CACHE STRING "runpath in installed libraries/executables")
-endif()
+
+xo_toplevel_compile_options()
 
 add_subdirectory(example)
 add_subdirectory(utest)
