@@ -72,6 +72,63 @@ macro(xo_compile_options target)
 endmacro()
 
 # ----------------------------------------------------------------
+# use this to install typical include file subtree
+#
+macro(xo_install_include_tree)
+    install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/ DESTINATION include)
+endmacro()
+
+# ----------------------------------------------------------------
+# use this for a subdir that builds a library
+# and supports find_package()
+#
+macro(xo_install_library2 target)
+    install(
+        TARGETS ${target}
+        EXPORT ${target}Targets
+        LIBRARY DESTINATION lib COMPONENT Runtime
+        ARCHIVE DESTINATION lib COMPONENT Development
+        RUNTIME DESTINATION bin COMPONENT Runtime
+        PUBLIC_HEADER DESTINATION include COMPONENT Development
+        BUNDLE DESTINATION bin COMPONENT Runtime
+    )
+endmacro()
+
+# ----------------------------------------------------------------
+
+# for projectname=foo,  require:
+#   cmake/fooConfig.cmake.in
+#
+# prepares
+#   ${PREFIX}/lib/cmake/foo/fooConfig.cmake
+#   ${PREFIX}/lib/cmake/foo/fooConfigVersion.cmake
+#   ${PREFIX}/lib/cmake/foo/fooTargets.cmake
+#
+macro(xo_export_cmake_config projectname projectversion projecttargets)
+    include(CMakePackageConfigHelpers)
+    write_basic_package_version_file(
+        "${PROJECT_BINARY_DIR}/${projectname}ConfigVersion.cmake"
+        VERSION ${projectversion}
+        COMPATIBILITY AnyNewerVersion
+    )
+    configure_package_config_file(
+        "${PROJECT_SOURCE_DIR}/cmake/${projectname}Config.cmake.in"
+        "${PROJECT_BINARY_DIR}/${projectname}Config.cmake"
+        INSTALL_DESTINATION lib/cmake/${projectname}
+    )
+    install(
+        EXPORT ${projecttargets}
+        DESTINATION lib/cmake/${projectname}
+    )
+    install(
+        FILES
+        "${PROJECT_BINARY_DIR}/${projectname}ConfigVersion.cmake"
+        "${PROJECT_BINARY_DIR}/${projectname}Config.cmake"
+        DESTINATION lib/cmake/${projectname}
+    )
+endmacro()
+
+# ----------------------------------------------------------------
 #
 # dependency on an xo library (including header-only libraries)
 # e.g. indentlog
