@@ -50,6 +50,22 @@ macro(xo_install_include_tree)
 endmacro()
 
 # ----------------------------------------------------------------
+# use this for a subdir that builds a library
+# and supports find_package()
+#
+macro(xo_install_library2 target)
+    install(
+        TARGETS ${target}
+        EXPORT ${target}Targets
+        LIBRARY DESTINATION lib COMPONENT Runtime
+        ARCHIVE DESTINATION lib COMPONENT Development
+        RUNTIME DESTINATION bin COMPONENT Runtime
+        PUBLIC_HEADER DESTINATION include COMPONENT Development
+        BUNDLE DESTINATION bin COMPONENT Runtime
+    )
+endmacro()
+
+# ----------------------------------------------------------------
 #
 # dependency on an xo library (including header-only libraries)
 # e.g. indentlog
