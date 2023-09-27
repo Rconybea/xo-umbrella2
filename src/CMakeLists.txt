@@ -8,8 +8,7 @@ set_target_properties(${SELF_LIBRARY_NAME}
               SOVERSION 1)
 
 xo_internal_dependency(${SELF_LIBRARY_NAME} indentlog)
-#xo_indentlog_dependency(${SELF_LIBRARY_NAME})
 
 xo_include_options2(${SELF_LIBRARY_NAME})
 xo_compile_options(${SELF_LIBRARY_NAME})
-xo_install_library(${SELF_LIBRARY_NAME})
+xo_install_library2(${SELF_LIBRARY_NAME})
