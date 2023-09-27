@@ -26,7 +26,7 @@ macro(xo_toplevel_compile_options)
     else()
         set(XO_COMPILE_OPTIONS ${XO_STANDARD_COMPILE_OPTIONS})
     endif()
-endif()
+endmacro()
 
 # ----------------------------------------------------------------
 # use this in subdirs that compile c++ code
@@ -68,7 +68,7 @@ endmacro()
 #     needs to be preceded by call to xo_toplevel_compile_options()
 #
 macro(xo_compile_options target)
-    target_copmile_options(${target} PRIVATE ${XO_COMPILE_OPTIONS})
+    target_compile_options(${target} PRIVATE ${XO_COMPILE_OPTIONS})
 endmacro()
 
 # ----------------------------------------------------------------
