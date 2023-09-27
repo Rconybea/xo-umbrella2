@@ -28,10 +28,11 @@ xo_include_options2(${SELF_EXECUTABLE_NAME})
 # ----------------------------------------------------------------
 # internal dependencies: logutil, ...
 
-xo_internal_dependency(${SELF_EXECUTABLE_NAME} reflect)
+# this won't work.  when cmake runs,  the Config files for reflect haven't been created yet.
+xo_self_dependency(${SELF_EXECUTABLE_NAME} reflect)
 
 # ----------------------------------------------------------------
-# 3rd part dependency: catch2:
+# 3rd party dependency: catch2:
 
 find_package(Catch2 2 REQUIRED)
 

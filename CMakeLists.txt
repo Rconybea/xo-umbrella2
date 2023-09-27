@@ -51,8 +51,8 @@ if(NOT CMAKE_INSTALL_RPATH)
 endif()
 
 # early find_package() experiment
-find_package(indentlog CONFIG REQUIRED)
-find_package(refcnt CONFIG REQUIRED)
+#find_package(indentlog CONFIG REQUIRED)
+#find_package(refcnt CONFIG REQUIRED)
 
 # ----------------------------------------------------------------
 # sources
