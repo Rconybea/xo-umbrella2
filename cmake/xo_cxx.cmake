@@ -26,6 +26,11 @@ macro(xo_toplevel_compile_options)
     else()
         set(XO_COMPILE_OPTIONS ${XO_STANDARD_COMPILE_OPTIONS})
     endif()
+
+    if(NOT CMAKE_INSTALL_RPATH)
+        set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib CACHE STRING
+            "runpath in installed libraries/executables")
+    endif()
 endif()
 
 # ----------------------------------------------------------------
