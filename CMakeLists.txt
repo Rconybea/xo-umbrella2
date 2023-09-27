@@ -5,8 +5,7 @@ enable_language(CXX)
 
 # common XO cmake macros (see proj/xo-cmake)
 include(xo_macros/xo_cxx)
-include(cmake/nestlog.cmake)
-include(cmake/code-coverage.cmake)
+include(xo_macros/code-coverage)
 
 enable_testing()
 # activate code coverage for all executables + libraries (when -DCODE_COVERAGE=ON)
@@ -46,10 +45,11 @@ add_subdirectory(utest)
 # see [[https://stackoverflow.com/questions/47718485/install-and-export-interface-only-library-cmake]]
 #
 add_library(indentlog INTERFACE)
-target_include_directories(indentlog INTERFACE
-  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>
-  )
+xo_include_headeronly_options2(indentlog)
+#target_include_directories(indentlog INTERFACE
+#  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+#  $<INSTALL_INTERFACE:include>
+#  )
 
 # ----------------------------------------------------------------
 # provide find_package() support
@@ -59,36 +59,6 @@ xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets
 # ----------------------------------------------------------------
 
 xo_install_library2(${PROJECT_NAME})
-
-#include(CMakePackageConfigHelpers)
-#write_basic_package_version_file("${PROJECT_BINARY_DIR}/indentlogConfigVersion.cmake"
-#    VERSION 0.1
-#    COMPATIBILITY AnyNewerVersion
-#)
-#
-#install(
-#    TARGETS indentlog
-#    EXPORT indentlogTargets
-#    LIBRARY DESTINATION lib COMPONENT Runtime
-#    ARCHIVE DESTINATION lib COMPONENT Development
-#    RUNTIME DESTINATION bin COMPONENT Runtime
-#    PUBLIC_HEADER DESTINATION include COMPONENT Development
-#    BUNDLE DESTINATION bin COMPONENT Runtime
-#    )
-
-#include(CMakePackageConfigHelpers)
-#configure_package_config_file(
-#    "${PROJECT_SOURCE_DIR}/cmake/indentlogConfig.cmake.in"
-#    "${PROJECT_BINARY_DIR}/indentlogConfig.cmake"
-#    INSTALL_DESTINATION lib/cmake/indentlog
-#    )
-#
-#install(EXPORT indentlogTargets DESTINATION lib/cmake/indentlog)
-#install(
-#    FILES
-#    "${PROJECT_BINARY_DIR}/indentlogConfigVersion.cmake"
-#    "${PROJECT_BINARY_DIR}/indentlogConfig.cmake"
-#    DESTINATION lib/cmake/indentlog)
 
 # ----------------------------------------------------------------
 # install .hpp
