@@ -30,9 +30,6 @@ set(PROJECT_CXX_FLAGS "-fconcepts-diagnostics-depth=2")
 
 add_definitions(${PROJECT_CXX_FLAGS})
 
-# always write compile_commands.json
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
-
 xo_toplevel_compile_options()
 
 # ----------------------------------------------------------------
