@@ -17,7 +17,7 @@ set_target_properties(${SELF_LIBRARY_NAME}
 #target_compile_options(${SELF_LIBRARY_NAME} PRIVATE -Werror -Wall -Wextra)
 xo_compile_options(${SELF_LIBRARY_NAME})
 xo_include_options2(${SELF_LIBRARY_NAME})
-xo_install_library(${SELF_LIBRARY_NAME})
+xo_install_library2(${SELF_LIBRARY_NAME})
 
 # ----------------------------------------------------------------
 # dependencies: logutil, ...

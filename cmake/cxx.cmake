@@ -1,36 +1,36 @@
-# ----------------------------------------------------------------
-# use this in subdirs that compile c++ code
+## ----------------------------------------------------------------
+## use this in subdirs that compile c++ code
+##
+#macro(xo_include_options target)
+#    # ----------------------------------------------------------------
+#    # PROJECT_SOURCE_DIR:
+#    #   so we can for example write
+#    #     #include "ordinaltree/foo.hpp"
+#    #   from anywhere in the project
+#    # PROJECT_BINARY_DIR:
+#    #   since generated version file will be in build directory,
+#    #   need that build directory to also appear in
+#    #   compiler's include path
+#    #
+#    target_include_directories(
+#      ${target} PUBLIC
+#      $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>              # e.g. for #include "indentlog/scope.hpp"
+#      $<INSTALL_INTERFACE:include>
+#      $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/${target}>    # e.g. for #include "Refcounted.hpp" in refcnt/src
+#      $<INSTALL_INTERFACE:include/${target}>
+#      $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>                      # e.g. for generated config.hpp file
+#    )
 #
-macro(xo_include_options target)
-    # ----------------------------------------------------------------
-    # PROJECT_SOURCE_DIR:
-    #   so we can for example write
-    #     #include "ordinaltree/foo.hpp"
-    #   from anywhere in the project
-    # PROJECT_BINARY_DIR:
-    #   since generated version file will be in build directory,
-    #   need that build directory to also appear in
-    #   compiler's include path
-    #
-    target_include_directories(
-      ${target} PUBLIC
-      $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>              # e.g. for #include "indentlog/scope.hpp"
-      $<INSTALL_INTERFACE:include>
-      $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/${target}>    # e.g. for #include "Refcounted.hpp" in refcnt/src
-      $<INSTALL_INTERFACE:include/${target}>
-      $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>                      # e.g. for generated config.hpp file
-    )
-
-    # ----------------------------------------------------------------
-    # make standard directories for std:: includes explicit
-    # so that
-    # (1) they appear in compile_commands.json.
-    # (2) clangd (run from emacs lsp-mode) can find them
-    #
-    if(CMAKE_EXPORT_COMPILE_COMMANDS)
-      set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES})
-    endif()
-endmacro()
+#    # ----------------------------------------------------------------
+#    # make standard directories for std:: includes explicit
+#    # so that
+#    # (1) they appear in compile_commands.json.
+#    # (2) clangd (run from emacs lsp-mode) can find them
+#    #
+#    if(CMAKE_EXPORT_COMPILE_COMMANDS)
+#      set(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES ${CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES})
+#    endif()
+#endmacro()
 
 # ----------------------------------------------------------------
 # variable
@@ -70,29 +70,30 @@ macro(xo_compile_options target)
     target_compile_options(${target} PRIVATE ${XO_COMPILE_OPTIONS})
 endmacro()
 
-# ----------------------------------------------------------------
-# use this for a subdir that builds a library
-# EXPORT drives .cmake config files intended for consumption
-# by higher-level cmake projects via find_package()
+## ----------------------------------------------------------------
+## use this for a subdir that builds a library
+## EXPORT drives .cmake config files intended for consumption
+## by higher-level cmake projects via find_package()
+##
+#macro(xo_install_library target)
+#    install(
+#        TARGETS ${target}
+#        EXPORT ${target}Targets
+#        LIBRARY DESTINATION lib COMPONENT Runtime
+#        ARCHIVE DESTINATION lib COMPONENT Development
+#        RUNTIME DESTINATION bin COMPONENT Runtime
+#        PUBLIC_HEADER DESTINATION include COMPONENT Development
+#        BUNDLE DESTINATION bin COMPONENT Runtime
+#    )
+#endmacro()
 #
-macro(xo_install_library target)
-    install(
-        TARGETS ${target}
-        EXPORT ${target}Targets
-        LIBRARY DESTINATION lib COMPONENT Runtime
-        ARCHIVE DESTINATION lib COMPONENT Development
-        RUNTIME DESTINATION bin COMPONENT Runtime
-        PUBLIC_HEADER DESTINATION include COMPONENT Development
-        BUNDLE DESTINATION bin COMPONENT Runtime
-    )
-endmacro()
-
-# ----------------------------------------------------------------
-# use this when relying on indentlog [[https://github.com/rconybea/indentlog]] headers
+## ----------------------------------------------------------------
+## use this when relying on indentlog [[https://github.com/rconybea/indentlog]] headers
+##
+#macro(xo_indentlog_dependency target)
+#    find_package(indentlog REQUIRED)
+#    #add_dependencies(${target} indentlog)
+#    target_link_libraries(${target} PUBLIC indentlog)
+#    #target_include_directories(${target} PUBLIC ${indentlog_DIR}/../../../include)
+#endmacro()
 #
-macro(xo_indentlog_dependency target)
-    find_package(indentlog REQUIRED)
-    #add_dependencies(${target} indentlog)
-    target_link_libraries(${target} PUBLIC indentlog)
-    #target_include_directories(${target} PUBLIC ${indentlog_DIR}/../../../include)
-endmacro()
