@@ -19,38 +19,13 @@ add_code_coverage_all_targets(EXCLUDE /nix/store/* utest/*)
 
 set(XO_PROJECT_NAME subsys)
 
-# always write compile_commands.json
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
-
-# ----------------------------------------------------------------
-# - author's convenience:  default install prefix to /home/$USER/local
-# - otherwise use -DCMAKE_INSTALL_PREFIX=/path/to/somewhere
-
-if(NOT USER)
-    set(USER $ENV{USER})
-endif()
-
-# hmm. this works if explicitly given with cmake:
-#    cmake -DCMAKE_INSTALL_PREFIX=/home/roland/local path/to/source
-# but not as default
-if(NOT CMAKE_INSTALL_PREFIX)
-    set(CMAKE_INSTALL_PREFIX /home/${USER}/local CACHE STRING "install directory")
-endif()
-
 xo_toplevel_compile_options()
-
-#add_subdirectory(example)
-#add_subdirectory(utest)
 
 # ----------------------------------------------------------------
 # installing header-only library
 
 add_library(subsys INTERFACE)
 xo_include_headeronly_options2(subsys)
-#target_include_directories(subsys INTERFACE
-#  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-#  $<INSTALL_INTERFACE:include>
-#)
 xo_install_library2(subsys)
 
 # ----------------------------------------------------------------
