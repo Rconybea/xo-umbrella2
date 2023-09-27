@@ -1,6 +1,32 @@
 
-set(XO_STANDARD_COMPILE_OPTIONS -Werror -Wall -Wextra)
-set(XO_COMPILE_OPTIONS ${XO_STANDARD_COMPILE_OPTIONS})
+macro(xo_toplevel_compile_options)
+    # ----------------------------------------------------------------
+    # variable
+    #   XO_ADDRESS_SANITIZE
+    # determines whether to enable address sanitizer for the XO project
+    # (see toplevel CMakeLists.txt)
+    # ----------------------------------------------------------------
+    if(XO_ADDRESS_SANITIZE)
+        add_compile_options(-fsanitize=address)
+        add_link_options(-fsanitize=address)
+    endif()
+
+    set(XO_STANDARD_COMPILE_OPTIONS -Werror -Wall -Wextra)
+    # XO_ADDRESS_SANITIZE_COMPILE_OPTIONS: use when XO_ADDRESS_SANITIZE=ON
+    #
+    # address sanitizer build complains about _FORTIFY_SOURCE redefines
+    #    In file included from <built-in>:460:
+    #    <command line>:1:9: error: '_FORTIFY_SOURCE' macro redefined [-Werror,-Wmacro-redefined]
+    #    #define _FORTIFY_SOURCE 2
+    #
+    set(XO_ADDRESS_SANITIZE_COMPILE_OPTIONS -Werror -Wall -Wextra -Wno-macro-redefined)
+
+    if(XO_ADDRESS_SANITIZE)
+        set(XO_COMPILE_OPTIONS ${XO_ADDRESS_SANITIZE_COMPILE_OPTIONS})
+    else()
+        set(XO_COMPILE_OPTIONS ${XO_STANDARD_COMPILE_OPTIONS})
+    endif()
+endif()
 
 # ----------------------------------------------------------------
 # use this in subdirs that compile c++ code
@@ -37,6 +63,9 @@ macro(xo_include_options2 target)
 endmacro()
 
 # ----------------------------------------------------------------
+#
+# Require:
+#     needs to be preceded by call to xo_toplevel_compile_options()
 #
 macro(xo_compile_options target)
     target_copmile_options(${target} PRIVATE ${XO_COMPILE_OPTIONS})
