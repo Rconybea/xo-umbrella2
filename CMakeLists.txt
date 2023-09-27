@@ -4,7 +4,7 @@ project(subsys VERSION 0.1)
 enable_language(CXX)
 
 include (xo_macros/xo_cxx)
-include(cmake/cxx.cmake)
+#include(cmake/cxx.cmake)
 include(cmake/code-coverage.cmake)
 
 enable_testing()
@@ -28,6 +28,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # always write compile_commands.json
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
+
+xo_toplevel_compile_options()
 
 # ----------------------------------------------------------------
 # - author's convenience:  default install prefix to /home/$USER/local
@@ -54,10 +56,11 @@ endif()
 # installing header-only library
 
 add_library(subsys INTERFACE)
-target_include_directories(subsys INTERFACE
-  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>
-)
+xo_include_headeronly_options2(subsys)
+#target_include_directories(subsys INTERFACE
+#  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+#  $<INSTALL_INTERFACE:include>
+#)
 xo_install_library2(subsys)
 
 # ----------------------------------------------------------------
@@ -65,36 +68,9 @@ xo_install_library2(subsys)
 
 xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
 
-## ----------------------------------------------------------------
-## cmake export
-## (so this library works with cmake's find_package())
-#
-#set(XO_PROJECT_CONFIG_VERSION "${XO_PROJECT_NAME}ConfigVersion.cmake")
-#set(XO_PROJECT_CONFIG "${XO_PROJECT_NAME}Config.cmake")
-#
-#include(CMakePackageConfigHelpers)
-#write_basic_package_version_file("${PROJECT_BINARY_DIR}/${XO_PROJECT_CONFIG_VERSION}"
-#    VERSION 0.1
-#    COMPATIBILITY AnyNewerVersion
-#)
-#
-#configure_package_config_file(
-#    "${PROJECT_SOURCE_DIR}/cmake/${XO_PROJECT_NAME}Config.cmake.in"
-#    "${PROJECT_BINARY_DIR}/${XO_PROJECT_CONFIG}"
-#    INSTALL_DESTINATION lib/cmake/${XO_PROJECT_NAME}
-#    )
-#
-#install(EXPORT ${XO_PROJECT_NAME}Targets DESTINATION lib/cmake/${XO_PROJECT_NAME})
-#install(
-#    FILES
-#    "${PROJECT_BINARY_DIR}/${XO_PROJECT_CONFIG_VERSION}"
-#    "${PROJECT_BINARY_DIR}/${XO_PROJECT_CONFIG}"
-#    DESTINATION lib/cmake/${XO_PROJECT_NAME})
-
 # ----------------------------------------------------------------
 # install .hpp
 
 xo_install_include_tree()
-#install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/ DESTINATION include)
 
 # end CMakeLists.txt
