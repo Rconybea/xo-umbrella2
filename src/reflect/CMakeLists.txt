@@ -16,11 +16,17 @@ set_target_properties(${SELF_LIBRARY_NAME}
 #
 #target_compile_options(${SELF_LIBRARY_NAME} PRIVATE -Werror -Wall -Wextra)
 xo_compile_options(${SELF_LIBRARY_NAME})
-xo_include_options(${SELF_LIBRARY_NAME})
+xo_include_options2(${SELF_LIBRARY_NAME})
 xo_install_library(${SELF_LIBRARY_NAME})
 
 # ----------------------------------------------------------------
 # dependencies: logutil, ...
+
+#target_include_directories(
+#    ${SELF_LIBRARY_NAME} PUBLIC
+#    $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/local/include>
+#    $<INSTALL_INTERFACE:include>
+#)
 
 #xo_refcnt_dependency(${SELF_LIBRARY_NAME})
 #xo_indentlog_dependency(${SELF_LIBRARY_NAME})
@@ -29,21 +35,19 @@ xo_install_library(${SELF_LIBRARY_NAME})
 # note:  can't use find_package() here,
 #        because find_package() needs to run successfully before
 #        dependency gets installed.
-target_include_directories(
-    ${SELF_LIBRARY_NAME} PUBLIC
-    $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/local/include>
-    $<INSTALL_INTERFACE:include>
-)
-target_link_libraries(${SELF_LIBRARY_NAME} PUBLIC indentlog)
+xo_internal_dependency(${SELF_LIBRARY_NAME} indentlog)
 
-find_package(refcnt CONFIG REQUIRED)
-#add_dependencies(${SELF_LIBRARY_NAME} refcnt)
-target_include_directories(
-    ${SELF_LIBRARY_NAME} PUBLIC
-    $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/local/include>
-    $<INSTALL_INTERFACE:include>
-)
-target_link_libraries(${SELF_LIBRARY_NAME} PUBLIC refcnt)
+#target_link_libraries(${SELF_LIBRARY_NAME} PUBLIC indentlog)
+
+xo_internal_dependency(${SELF_LIBRARY_NAME} refcnt)
+#find_package(refcnt CONFIG REQUIRED)
+##add_dependencies(${SELF_LIBRARY_NAME} refcnt)
+#target_include_directories(
+#    ${SELF_LIBRARY_NAME} PUBLIC
+#    $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/local/include>
+#    $<INSTALL_INTERFACE:include>
+#)
+#target_link_libraries(${SELF_LIBRARY_NAME} PUBLIC refcnt)
 
 # ----------------------------------------------------------------
 # 3rd party dependency: boost:
