@@ -29,19 +29,8 @@ set(PROJECT_CXX_FLAGS "-fconcepts-diagnostics-depth=2")
 
 add_definitions(${PROJECT_CXX_FLAGS})
 
-# always write compile_commands.json
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
-
 # ----------------------------------------------------------------
 # default install
-
-if(NOT USER)
-    set(USER $ENV{USER})
-endif()
-
-if(NOT CMAKE_INSTALL_PREFIX)
-    set(CMAKE_INSTALL_PREFIX /home/${USER}/local CACHE STRING "install directory")
-endif()
 
 xo_toplevel_compile_options()
 
