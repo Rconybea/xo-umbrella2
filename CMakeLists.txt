@@ -51,36 +51,51 @@ target_include_directories(indentlog INTERFACE
   $<INSTALL_INTERFACE:include>
   )
 
-include(CMakePackageConfigHelpers)
-write_basic_package_version_file("${PROJECT_BINARY_DIR}/indentlogConfigVersion.cmake"
-    VERSION 0.1
-    COMPATIBILITY AnyNewerVersion
-)
+# ----------------------------------------------------------------
+# provide find_package() support
 
-install(
-    TARGETS indentlog
-    EXPORT indentlogTargets
-    LIBRARY DESTINATION lib COMPONENT Runtime
-    ARCHIVE DESTINATION lib COMPONENT Development
-    RUNTIME DESTINATION bin COMPONENT Runtime
-    PUBLIC_HEADER DESTINATION include COMPONENT Development
-    BUNDLE DESTINATION bin COMPONENT Runtime
-    )
+xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
 
-include(CMakePackageConfigHelpers)
-configure_package_config_file(
-    "${PROJECT_SOURCE_DIR}/cmake/indentlogConfig.cmake.in"
-    "${PROJECT_BINARY_DIR}/indentlogConfig.cmake"
-    INSTALL_DESTINATION lib/cmake/indentlog
-    )
+# ----------------------------------------------------------------
 
-install(EXPORT indentlogTargets DESTINATION lib/cmake/indentlog)
-install(
-    FILES
-    "${PROJECT_BINARY_DIR}/indentlogConfigVersion.cmake"
-    "${PROJECT_BINARY_DIR}/indentlogConfig.cmake"
-    DESTINATION lib/cmake/indentlog)
-install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/ DESTINATION include)
+xo_install_library2(${PROJECT_NAME})
+
+#include(CMakePackageConfigHelpers)
+#write_basic_package_version_file("${PROJECT_BINARY_DIR}/indentlogConfigVersion.cmake"
+#    VERSION 0.1
+#    COMPATIBILITY AnyNewerVersion
+#)
+#
+#install(
+#    TARGETS indentlog
+#    EXPORT indentlogTargets
+#    LIBRARY DESTINATION lib COMPONENT Runtime
+#    ARCHIVE DESTINATION lib COMPONENT Development
+#    RUNTIME DESTINATION bin COMPONENT Runtime
+#    PUBLIC_HEADER DESTINATION include COMPONENT Development
+#    BUNDLE DESTINATION bin COMPONENT Runtime
+#    )
+
+#include(CMakePackageConfigHelpers)
+#configure_package_config_file(
+#    "${PROJECT_SOURCE_DIR}/cmake/indentlogConfig.cmake.in"
+#    "${PROJECT_BINARY_DIR}/indentlogConfig.cmake"
+#    INSTALL_DESTINATION lib/cmake/indentlog
+#    )
+#
+#install(EXPORT indentlogTargets DESTINATION lib/cmake/indentlog)
+#install(
+#    FILES
+#    "${PROJECT_BINARY_DIR}/indentlogConfigVersion.cmake"
+#    "${PROJECT_BINARY_DIR}/indentlogConfig.cmake"
+#    DESTINATION lib/cmake/indentlog)
+
+# ----------------------------------------------------------------
+# install .hpp
+
+xo_install_include_tree()
+
+# ----------------------------------------------------------------
 
 install(TARGETS hello DESTINATION bin/indentlog/example)
 install(TARGETS ex1 DESTINATION bin/indentlog/example)
