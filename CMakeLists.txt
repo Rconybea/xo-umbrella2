@@ -5,6 +5,8 @@ cmake_minimum_required(VERSION 3.10)
 project(refcnt VERSION 0.1)
 enable_language(CXX)
 
+# common XO cmake macros (see proj/xo-cmake)
+include(xo_macros/xo_cxx)
 include(cmake/cxx.cmake)
 include(cmake/code-coverage.cmake)
 

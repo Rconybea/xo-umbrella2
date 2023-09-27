@@ -12,7 +12,7 @@ Refcnt is a small shared library supplying intrusive reference counting.
 
 ### build + install `indentlog` dependency
 
-see [github/rconybea/indentlog](https://github.com/Rconybea/indentlog)
+see [github/Rconybea/indentlog](https://github.com/Rconybea/indentlog)
 
 ### copy `refcnt` repository locally
 ```
@@ -26,10 +26,12 @@ refcnt
 $ cd refcnt
 $ mkdir build
 $ cd build
-$ cmake -DCMAKE_PREFIX_PATH=${INSTALL_PREFIX} -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} ..
+$ cmake -DCMAKE_MODULE_PATH=${INSTALL_PREFIX}/share/cmake  -DCMAKE_PREFIX_PATH=${INSTALL_PREFIX} -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} ..
 $ make
 $ make install
 ```
+
+`CMAKE_PREFIX_PATH` should point to prefix where `indentlog` is installed
 
 alternatively,  if you're a nix user:
 ```
@@ -38,6 +40,14 @@ $ ls -d xo-nix
 xo-nix
 $ cd xo-nix
 $ nix-build -A refcnt
+```
+
+### build for unit test coverage
+```
+$ cd refcnt
+$ mkdir ccov
+$ cd ccov
+$ cmake -DCMAKE_MODULE_PATH=${INSTALL_PREFIX}/share/cmake  -DCMAKE_PREFIX_PATH=${INSTALL_PREFIX} -DCODE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug ..
 ```
 
 ## Examples
