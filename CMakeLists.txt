@@ -40,6 +40,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # always write compile_commands.json
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 
+xo_toplevel_compile_options()
+
 if(NOT CMAKE_INSTALL_RPATH)
     set(CMAKE_INSTALL_RPATH $(CMAKE_INSTALL_PREFIX)/lib CACHE STRING "runpath in installed libraries/executables")
 endif()
