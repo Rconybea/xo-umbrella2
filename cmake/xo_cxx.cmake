@@ -34,6 +34,13 @@ macro(xo_toplevel_compile_options)
         set(XO_COMPILE_OPTIONS ${XO_STANDARD_COMPILE_OPTIONS})
     endif()
 
+    # writes ${PROJECT_BINARY_DIR}/compile_commands.json;
+    # (symlink from toplevel git dir to tell LSP how to build)
+    #
+    if(NOT DEFINED CMAKE_EXPORT_COMPILE_COMMANDS)
+        set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
+    endif()
+
     if(NOT CMAKE_INSTALL_RPATH)
         set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib CACHE STRING
             "runpath in installed libraries/executables")
