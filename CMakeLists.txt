@@ -28,8 +28,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # always write compile_commands.json
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 
-xo_toplevel_compile_options()
-
 # ----------------------------------------------------------------
 # - author's convenience:  default install prefix to /home/$USER/local
 # - otherwise use -DCMAKE_INSTALL_PREFIX=/path/to/somewhere
@@ -44,9 +42,8 @@ endif()
 if(NOT CMAKE_INSTALL_PREFIX)
     set(CMAKE_INSTALL_PREFIX /home/${USER}/local CACHE STRING "install directory")
 endif()
-if(NOT CMAKE_INSTALL_RPATH)
-    set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib CACHE STRING "runpath in installed libraries/executables")
-endif()
+
+xo_toplevel_compile_options()
 
 #add_subdirectory(example)
 #add_subdirectory(utest)
