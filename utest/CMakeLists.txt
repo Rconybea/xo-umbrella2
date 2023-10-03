@@ -15,7 +15,18 @@ target_code_coverage(${SELF_EXECUTABLE_NAME} AUTO ALL)
 # ----------------------------------------------------------------
 # 3rd party dependency: catch2
 
+# 1. using target_link_libraries(.. Catch2) here doesn't work;
+#    build tries to link to a Catch2 library.
+#    perhaps Catch2 target not declared INTERFACE?
+# 2. nix build doesn't need this;  dependency on catch2
+#    puts include directory in NIX_CFLAGS_COMPILE,  so stuff 'just works'
+#
 find_package(Catch2 2 REQUIRED)
+set(Catch2_INCLUDES "${Catch2_DIR}/../..")
+target_include_directories(${SELF_EXECUTABLE_NAME} PUBLIC ${Catch2_INCLUDES})
+
+#xo_internal_dependency(${SELF_EXECUTABLE_NAME} Catch2)
+#target_link_libraries(${SELF_EXECUTABLE_NAME} PUBLIC Catch2)
 
 # ----------------------------------------------------------------
 # make standard directories for std:: includes explicit
