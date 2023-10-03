@@ -1,0 +1,31 @@
+#                     heading level 1
+##                    heading level 2
+######                heading level 6
+
+blank line            new paragraph
+two spaces at eod     force line break
+
+**bold**              bold text
+__bold__              also bold text  (but don't embed within a word)
+
+*italics*
+
+***bolditalic***
+
+> text to blockquote
+>
+> + more paragraphs
+
+> text to blockquote
+>
+>> with nested blockquote
+
+- bullets            also can prefix with + or *
+
+1. numbered lists
+
+indent 4 spaces (or 1 tab) for code blocks
+
+`inline code`
+
+---                  on a line by itself -> horizontal rule
