@@ -35,7 +35,7 @@ target_link_libraries(${SELF_EXECUTABLE_NAME} PUBLIC refcnt)
 # ----------------------------------------------------------------
 # 3rd part dependency: catch2:
 
-find_package(Catch2 2 REQUIRED)
+xo_external_target_dependency(${SELF_EXECUTABLE_NAME} Catch2 Catch2::Catch2)
 
 # need this so that catch2/include appears in compile_commands.json,
 # on which lsp integration relies.
