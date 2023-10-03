@@ -22,7 +22,8 @@ target_code_coverage(${SELF_EXECUTABLE_NAME} AUTO ALL)
 #    puts include directory in NIX_CFLAGS_COMPILE,  so stuff 'just works'
 #
 find_package(Catch2 2 REQUIRED)
-set(Catch2_INCLUDES "${Catch2_DIR}/../..")
+set(Catch2_INCLUDES "${Catch2_DIR}/../../../include")
+#get_target_property(Catch2_INCLUDES Catch2 INCLUDE_DIRECTORIES)
 target_include_directories(${SELF_EXECUTABLE_NAME} PUBLIC ${Catch2_INCLUDES})
 
 #xo_internal_dependency(${SELF_EXECUTABLE_NAME} Catch2)
