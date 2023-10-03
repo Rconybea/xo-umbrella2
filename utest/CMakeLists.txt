@@ -7,7 +7,7 @@ set(SELF_SOURCE_FILES
     indentlog_utest_main.cpp)
 
 add_executable(${SELF_EXECUTABLE_NAME} ${SELF_SOURCE_FILES})
-xo_include_options(${SELF_EXECUTABLE_NAME})
+xo_include_options2(${SELF_EXECUTABLE_NAME})
 
 add_test(NAME ${SELF_EXECUTABLE_NAME} COMMAND ${SELF_EXECUTABLE_NAME})
 target_code_coverage(${SELF_EXECUTABLE_NAME} AUTO ALL)
