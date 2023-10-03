@@ -224,6 +224,20 @@ macro(xo_internal_dependency target dep)
     target_link_libraries(${target} PUBLIC ${dep})
 endmacro()
 
+# dependency on namespaced target
+# e.g.
+#   add_library(foo ..) or add_executable(foo ...)
+# then
+#   xo_external_namespaced_dependency(foo Catch2 Catch2::Catch2)
+# equivalent to
+#   find_package(Catch2 CONFIG REQUIRED)
+#   target_link_libraries(foo PUBLIC Catch2::Catch2)
+#
+macro(xo_external_target_dependency target pkg pkgtarget)
+    find_package(${pkg} CONFIG REQUIRED)
+    target_link_libraries(${target} PUBLIC ${pkgtarget})
+endmacro()
+
 # dependency on target provided from this codebase.
 #
 # 1. don't need find_package() in this case,  since details of dep targets
@@ -234,3 +248,6 @@ endmacro()
 macro(xo_self_dependency target dep)
     target_link_libraries(${target} PUBLIC ${dep})
 endmacro()
+
+# ----------------------------------------------------------------
+#
