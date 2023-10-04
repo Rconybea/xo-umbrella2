@@ -1,3 +1,5 @@
+# indentlog/CMakeLists.txt
+
 cmake_minimum_required(VERSION 3.10)
 
 project(indentlog VERSION 0.1)
@@ -6,6 +8,9 @@ enable_language(CXX)
 # common XO cmake macros (see proj/xo-cmake)
 include(xo_macros/xo_cxx)
 include(xo_macros/code-coverage)
+
+# ----------------------------------------------------------------
+# unit test setup
 
 enable_testing()
 # activate code coverage for all executables + libraries (when -DCODE_COVERAGE=ON)
@@ -18,6 +23,8 @@ add_code_coverage()
 #
 add_code_coverage_all_targets(EXCLUDE /nix/store/* utest/*)
 
+# ----------------------------------------------------------------
+
 xo_toplevel_compile_options()
 
 add_subdirectory(example)
@@ -28,24 +35,13 @@ add_subdirectory(utest)
 #
 add_library(indentlog INTERFACE)
 xo_include_headeronly_options2(indentlog)
-#target_include_directories(indentlog INTERFACE
-#  $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-#  $<INSTALL_INTERFACE:include>
-#  )
 
 # ----------------------------------------------------------------
-# provide find_package() support
-
-xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
-
-# ----------------------------------------------------------------
+# standard install + provide find_package() support
 
 xo_install_library2(${PROJECT_NAME})
-
-# ----------------------------------------------------------------
-# install .hpp
-
 xo_install_include_tree()
+xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
 
 # ----------------------------------------------------------------
 

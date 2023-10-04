@@ -37,7 +37,8 @@ indentlog
 $ cd indentlog
 $ mkdir build
 $ cd build
-$ cmake -DCMAKE_MODULE_PATH=/usr/local/share/cmake  -DCMAKE_INSTALL_PREFIX=/usr/local ..
+$ PREFIX=/usr/local  # for example
+$ cmake -DCMAKE_MODULE_PATH=${PREFIX}/share/cmake  -DCMAKE_INSTALL_PREFIX=${PREFIX} ..
 $ make
 $ make install
 ```
