@@ -1,9 +1,14 @@
 /* @file random_seed.hpp */
 
-#include "indentlog/print/array.hpp"
+//#include "indentlog/print/array.hpp"
 #include <iostream>
 #include <cstdint>
 #include <stdlib.h>
+#ifdef _BSD_SOURCE
+# include <bsd/stdlib.h>
+#else
+# include <sys/random.h>
+#endif
 
 namespace xo {
     namespace rng {
@@ -20,10 +25,22 @@ namespace xo {
          */
         template<typename T>
         void random_seed(T * p_seed) {
+#      ifdef _BSD_SOURCE
             /* NOTE: arc4random_buf() works on darwin/nix;
              *       probably need to do something else on intel linux
              */
-            arc4random_buf(p_seed, sizeof(*p_seed));
+            ::arc4random_buf(p_seed, sizeof(*p_seed));
+#      else
+            /* avail flags: GRND_RANDOM | GRND_NONBLOCK */
+            while (::getrandom(p_seed, sizeof(*p_seed), 0) == -1) {
+                if (errno == EINTR) {
+                    /* interrupted by signal,  try again */
+                    continue;
+                } else {
+                    break;
+                }
+            }
+#      endif
         } /*random_seed*/
 
         template<typename T>
