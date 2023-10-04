@@ -9,8 +9,7 @@ enable_language(CXX)
 
 # common XO cmake macros (see proj/xo-cmake)
 include(xo_macros/xo_cxx)
-include(cmake/cxx.cmake)
-include(cmake/code-coverage.cmake)
+include(xo_macros/code-coverage)
 
 # ----------------------------------------------------------------
 # unit test setup
@@ -30,31 +29,11 @@ add_code_coverage_all_targets(EXCLUDE /nix/store/* ${PROJECT_SOURCE_DIR}/utest/*
 # ----------------------------------------------------------------
 # c++ settings
 
-set(XO_PROJECT_NAME reflect)
 set(PROJECT_CXX_FLAGS "")
 #set(PROJECT_CXX_FLAGS "-fconcepts-diagnostics-depth=2")
-
 add_definitions(${PROJECT_CXX_FLAGS})
 
-if(NOT CMAKE_CXX_STANDARD)
-    set(CMAKE_CXX_STANDARD 20)
-endif()
-
-set(CMAKE_CXX_STANDARD_REQUIRED True)
-
-# always write compile_commands.json
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
-
 xo_toplevel_compile_options()
-
-if(NOT CMAKE_INSTALL_RPATH)
-    set(CMAKE_INSTALL_RPATH $(CMAKE_INSTALL_PREFIX)/lib CACHE STRING "runpath in installed libraries/executables")
-endif()
-
-
-# early find_package() experiment
-find_package(indentlog CONFIG REQUIRED)
-find_package(refcnt CONFIG REQUIRED)
 
 # ----------------------------------------------------------------
 # sources
@@ -67,54 +46,7 @@ add_subdirectory(utest)
 
 xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
 
-## ----------------------------------------------------------------
-## cmake export:
-##
-## populate .cmake files in $CMAKE_INSTALL_LIBDIR/cmake/reflect.
-## cmake projects that include this directory in $CMAKE_PREFIX_PATH
-## can use
-##   find_package(reflect REQUIRED)
-## and
-##   target_link_libraries(${sometarget} PUBLIC reflect)
-## to use the reflect library
-#
-#set(XO_PROJECT_CONFIG_VERSION "${XO_PROJECT_NAME}ConfigVersion.cmake")
-#set(XO_PROJECT_CONFIG "${XO_PROJECT_NAME}Config.cmake")
-#
-#include(CMakePackageConfigHelpers)
-#
-## generates build/reflectConfigVersion.cmake
-#write_basic_package_version_file(
-#    "${PROJECT_BINARY_DIR}/${XO_PROJECT_CONFIG_VERSION}"
-#    VERSION 0.1
-#    COMPATIBILITY AnyNewerVersion
-#)
-#
-## generates build/reflectConfig.cmake
-#configure_package_config_file(
-#    "${PROJECT_SOURCE_DIR}/cmake/${XO_PROJECT_NAME}Config.cmake.in"
-#    "${PROJECT_BINARY_DIR}/${XO_PROJECT_CONFIG}"
-#    INSTALL_DESTINATION lib/cmake/${XO_PROJECT_NAME}
-#)
-#
-## creates {reflectTargets.cmake, reflectTargets-noconfig.cmake} in $CMAKE_INSTALL_LIBDIR/cmake/reflect/
-## requires
-##   install(.. EXPORT reflectTargets ..)
-##
-#install(
-#    EXPORT ${XO_PROJECT_NAME}Targets
-#    DESTINATION lib/cmake/${XO_PROJECT_NAME}
-#)
-#
-## creates {reflectConfigVersion.cmake, reflectConfig.cmake} in $CMAKE_INSTALL_LIBDIR/cmake/reflect/
-#install(
-#    FILES
-#    "${PROJECT_BINARY_DIR}/${XO_PROJECT_CONFIG_VERSION}"
-#    "${PROJECT_BINARY_DIR}/${XO_PROJECT_CONFIG}"
-#    DESTINATION lib/cmake/${XO_PROJECT_NAME})
-
 # ----------------------------------------------------------------
 # install .hpp files
 
 xo_install_include_tree()
-#install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/reflect/ DESTINATION include/reflect)
