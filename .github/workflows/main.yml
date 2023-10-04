@@ -26,6 +26,10 @@ jobs:
       # install catch2.  see [[https://stackoverflow.com/questions/57982945/how-to-apt-get-install-in-a-github-actions-workflow]]
       run: sudo apt-get install -y catch2
 
+    - name: Install libbsd-dev
+      # provides arc4random_buf in randomgen
+      run: sudo apt-get install -y libbsd-dev
+
     # ----------------------------------------------------------------
 
     - name: Clone xo-cmake
