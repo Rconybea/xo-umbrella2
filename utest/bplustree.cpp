@@ -5,6 +5,7 @@
 #include "random_tree_ops.hpp"
 #include "xo/ordinaltree/BplusTree.hpp"
 #include "randomgen/random_seed.hpp"
+#include "randomgen/print.hpp"
 #include "indentlog/scope.hpp"
 #include "catch2/catch.hpp"
 
