@@ -1,11 +1,11 @@
 # build unittest 'refcnt/utest/utest.refcnt
 
 set(SELF_EXECUTABLE_NAME utest.refcnt)
-
 # These tests can use the Catch2-provided main
 set(SELF_SOURCE_FILES intrusive_ptr.test.cpp refcnt_utest_main.cpp)
+
 add_executable(${SELF_EXECUTABLE_NAME} ${SELF_SOURCE_FILES})
-xo_include_options(${SELF_EXECUTABLE_NAME})
+xo_include_options2(${SELF_EXECUTABLE_NAME})
 
 add_test(NAME ${SELF_EXECUTABLE_NAME} COMMAND ${SELF_EXECUTABLE_NAME})
 target_code_coverage(${SELF_EXECUTABLE_NAME} AUTO ALL)
@@ -15,17 +15,17 @@ target_code_coverage(${SELF_EXECUTABLE_NAME} AUTO ALL)
 # ----------------------------------------------------------------
 # generic project dependency
 
-# PROJECT_SOURCE_DIR:
-#   so we can for example write
-#     #include "indentlog/scope.hpp"
-#   from anywhere in the project
-# PROJECT_BINARY_DIR:
-#   since version file will be in build directory,  need that directory
-#   to also be included in compiler's include path
-#
-target_include_directories(${SELF_EXECUTABLE_NAME} PUBLIC
-                           ${PROJECT_SOURCE_DIR}
-                           ${PROJECT_BINARY_DIR})
+## PROJECT_SOURCE_DIR:
+##   so we can for example write
+##     #include "indentlog/scope.hpp"
+##   from anywhere in the project
+## PROJECT_BINARY_DIR:
+##   since version file will be in build directory,  need that directory
+##   to also be included in compiler's include path
+##
+#target_include_directories(${SELF_EXECUTABLE_NAME} PUBLIC
+#                           ${PROJECT_SOURCE_DIR}
+#                           ${PROJECT_BINARY_DIR})
 
 # ----------------------------------------------------------------
 # internal dependencies: refcnt, ...
@@ -33,7 +33,7 @@ target_include_directories(${SELF_EXECUTABLE_NAME} PUBLIC
 target_link_libraries(${SELF_EXECUTABLE_NAME} PUBLIC refcnt)
 
 # ----------------------------------------------------------------
-# 3rd part dependency: catch2:
+# 3rd party dependency: catch2:
 
 xo_external_target_dependency(${SELF_EXECUTABLE_NAME} Catch2 Catch2::Catch2)
 
