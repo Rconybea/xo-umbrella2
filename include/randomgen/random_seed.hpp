@@ -1,6 +1,5 @@
 /* @file random_seed.hpp */
 
-//#include "indentlog/print/array.hpp"
 #include <iostream>
 #include <cstdint>
 #include <stdlib.h>
