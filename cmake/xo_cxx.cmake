@@ -219,9 +219,20 @@ endmacro()
 #
 # dep: name of required dependency,  e.g. indentlog
 #
-macro(xo_internal_dependency target dep)
+macro(xo_dependency target dep)
     find_package(${dep} CONFIG REQUIRED)
     target_link_libraries(${target} PUBLIC ${dep})
+endmacro()
+
+macro(xo_internal_dependency target dep)
+  xo_dependency(target dep)
+endmacro()
+
+# dependency on a header-only library
+#
+macro(xo_dependency_headeronly target dep)
+  find_package(${dep} CONFIG REQUIRED)
+  target_link_libraries(${target} INTERFACE ${dep})
 endmacro()
 
 # dependency on namespaced target
