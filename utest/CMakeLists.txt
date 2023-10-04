@@ -30,7 +30,8 @@ target_code_coverage(${SELF_EXECUTABLE_NAME} AUTO ALL)
 # ----------------------------------------------------------------
 # internal dependencies: refcnt, ...
 
-target_link_libraries(${SELF_EXECUTABLE_NAME} PUBLIC refcnt)
+xo_self_dependency(${SELF_EXECUTABLE_NAME} refcnt)
+#target_link_libraries(${SELF_EXECUTABLE_NAME} PUBLIC refcnt)
 
 # ----------------------------------------------------------------
 # 3rd party dependency: catch2:
