@@ -27,7 +27,7 @@ target_include_directories(${SELF_EXECUTABLE_NAME} PUBLIC
 # ----------------------------------------------------------------
 # internal dependencies: logutil, ...
 
-target_link_libraries(${SELF_EXECUTABLE_NAME} PUBLIC reflect)
+xo_self_dependency(${SELF_EXECUTABLE_NAME} reflect)
 
 # ----------------------------------------------------------------
 # 3rd part dependency: catch2:
