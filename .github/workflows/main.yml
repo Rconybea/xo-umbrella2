@@ -62,24 +62,24 @@ jobs:
       # install into ${{github.workspace}}/local
       run: cmake --install ${{github.workspace}}/build_indentlog
 
-#    # ----------------------------------------------------------------
-#
-#    - name: Clone subsys
-#      uses: actions/checkout@v3
-#      with:
-#        repository: Rconybea/subsys
-#        path: repo/subsys
-#
-#    - name: Configure subsys
-#      # configure cmake for subsys in dedicated build directory.
-#      run: cmake -B ${{github.workspace}}/build_subsys -DCMAKE_MODULE_PATH=${{github.workspace}}/local/share/cmake -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local repo/subsys
-#
-#    - name: Build subsys
-#      run: cmake --build ${{github.workspace}}/build_subsys --config ${{env.BUILD_TYPE}}
-#
-#    - name: Install subsys
-#      # install into ${{github.workspace}}/local
-#      run: cmake --install ${{github.workspace}}/build_subsys
+    # ----------------------------------------------------------------
+
+    - name: Clone randomgen
+      uses: actions/checkout@v3
+      with:
+        repository: Rconybea/randomgen
+        path: repo/randomgen
+
+    - name: Configure randomgen
+      # configure cmake for randomgen in dedicated build directory.
+      run: cmake -B ${{github.workspace}}/build_randomgen -DCMAKE_MODULE_PATH=${{github.workspace}}/local/share/cmake -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/loal repo/randomgen
+
+    - name: Build randomgen
+      run: cmake --build ${{github.workspace}}/build_randomgen --config ${{env.BUILD_TYPE}}
+
+    - name: Install randomgen
+      # install into ${{github.workspace}}/local
+      run: cmake --install ${{github.workspace}}/build_randomgen
 
     # ----------------------------------------------------------------
 
@@ -105,14 +105,14 @@ jobs:
     - name: Configure self (xo-ordinaltree)
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: cmake -B ${{github.workspace}}/build_xo_ordinaltree -DCMAKE_MODULE_PATH=${{github.workspace}}/local/share/cmake -DCMAKE_PREFIX_PATH=${{github.workspace}}/local -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+      run: cmake -B ${{github.workspace}}/build_ordinaltree -DCMAKE_MODULE_PATH=${{github.workspace}}/local/share/cmake -DCMAKE_PREFIX_PATH=${{github.workspace}}/local -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
 
-    - name: Build self (xo_ordinaltree)
+    - name: Build self (xo-ordinaltree)
       # Build your program with the given configuration
-      run: cmake --build ${{github.workspace}}/build_xo_ordinaltree --config ${{env.BUILD_TYPE}}
+      run: cmake --build ${{github.workspace}}/build_ordinaltree --config ${{env.BUILD_TYPE}}
 
-    - name: Test self (xo_ordinaltree)
-      working-directory: ${{github.workspace}}/build_xo_ordinaltree
+    - name: Test self (xo-ordinaltree)
+      working-directory: ${{github.workspace}}/build_ordinaltree
       # Execute tests defined by the CMake configuration.
       # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
       run: ctest -C ${{env.BUILD_TYPE}}
