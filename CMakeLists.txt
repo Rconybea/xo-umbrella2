@@ -1,8 +1,8 @@
-# xo-tree/CMakeLists.txt
+# xo-ordinaltree/CMakeLists.txt
 
 cmake_minimum_required(VERSION 3.10)
 
-project(xo_tree VERSION 0.1)
+project(xo_ordinaltree VERSION 0.1)
 enable_language(CXX)
 
 # common XO macros (see github:Rconybea/xo-cmake)
@@ -15,7 +15,7 @@ include(xo_macros/code-coverage)
 enable_testing()
 # enable code coverage for all executables+libraries
 # (when configured with -DCODE_COVERAGE=ON)
-# 
+#
 add_code_coverage()
 add_code_coverage_all_targets(
   EXCLUDE
@@ -33,7 +33,7 @@ xo_toplevel_compile_options()
 
 add_subdirectory(utest)
 
-set(SELF_LIB xo_tree)
+set(SELF_LIB xo_ordinaltree)
 
 add_library(${SELF_LIB} INTERFACE)
 xo_include_headeronly_options2(${SELF_LIB})
@@ -49,4 +49,3 @@ xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets
 # input dependencies
 
 xo_dependency_headeronly(${SELF_LIB} randomgen)
-

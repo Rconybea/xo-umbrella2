@@ -1,7 +1,7 @@
 /* @file redblacktree.cpp */
 
 #include "random_tree_ops.hpp"
-#include "xo/tree/RedBlackTree.hpp"
+#include "xo/ordinaltree/RedBlackTree.hpp"
 #include <map>
 
 namespace {
