@@ -76,7 +76,7 @@ jobs:
 
     - name: Configure randomgen
       # configure cmake for randomgen in dedicated build directory.
-      run: cmake -B ${{github.workspace}}/build_randomgen -DCMAKE_MODULE_PATH=${{github.workspace}}/local/share/cmake -DCMAKE_PREFIX_PATH=${{github.workspace}}/local -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/loal repo/randomgen
+      run: cmake -B ${{github.workspace}}/build_randomgen -DCMAKE_MODULE_PATH=${{github.workspace}}/local/share/cmake -DCMAKE_PREFIX_PATH=${{github.workspace}}/local -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local repo/randomgen
 
     - name: Build randomgen
       run: cmake --build ${{github.workspace}}/build_randomgen --config ${{env.BUILD_TYPE}}
