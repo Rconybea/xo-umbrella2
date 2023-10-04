@@ -6,7 +6,8 @@
 $ cd randomgen
 $ mkdir build
 $ cd build
-$ cmake -DCMAKE_MODULE_PATH=${INSTALL_PREFIX}/share/cmake  -DCMAKE_PREFIX_PATH=$(INSTALL_PREFIX) ..
+$ PREFIX=/usr/local # for example
+$ cmake -DCMAKE_MODULE_PATH=${PREFIX}/share/cmake -DCMAKE_PREFIX_PATH=$(PREFIX) -DCMAKE_INSTALL_PREFIX=${PREFIX} ..
 $ make
 $ make install
 ```

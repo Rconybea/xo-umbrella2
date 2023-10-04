@@ -1,4 +1,4 @@
-# using indentlog/CMakeLists.txt as model
+# randomgen/CMakeLists.txt
 
 cmake_minimum_required(VERSION 3.10)
 
@@ -23,14 +23,14 @@ add_code_coverage()
 add_code_coverage_all_targets(EXCLUDE /nix/store/* utest/*)
 
 # ----------------------------------------------------------------
-# c++ settings
+# bespoke (usually temporary) c++ settings
 
-set(PROJECT_CXX_FLAGS "-fconcepts-diagnostics-depth=2")
-
+set(PROJECT_CXX_FLAGS "")
+#set(PROJECT_CXX_FLAGS "-fconcepts-diagnostics-depth=2")
 add_definitions(${PROJECT_CXX_FLAGS})
 
 # ----------------------------------------------------------------
-# default install
+# common include paths etc.
 
 xo_toplevel_compile_options()
 
@@ -40,7 +40,7 @@ xo_toplevel_compile_options()
 # set CMAKE_INSTALL_PREFIX to analog of /usr
 # to use .cmake assistants from /usr/lib/cmake/indentlog
 #
-#find_package(indentlog REQUIRED)
+# xo_internal_dependency(..)
 
 # ----------------------------------------------------------------
 
@@ -48,7 +48,20 @@ add_subdirectory(example)
 #add_subdirectory(utest)
 
 # ----------------------------------------------------------------
+# output targets
 
+set(SELF_LIB randomgen)
+add_library(${SELF_LIB} INTERFACE)
+xo_include_headeronly_options2(${SELF_LIB})
+
+# ----------------------------------------------------------------
+# standard install + provide find_package() support
+
+xo_install_library2(${SELF_LIB})
 xo_install_include_tree()
+xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
+
+# ----------------------------------------------------------------
+# install additional components
 
 install(TARGETS ex1 DESTINATION bin/randomgen/example)
