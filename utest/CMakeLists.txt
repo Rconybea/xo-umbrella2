@@ -33,7 +33,7 @@ xo_self_dependency(${SELF_EXECUTABLE_NAME} reflect)
 # ----------------------------------------------------------------
 # 3rd party dependency: catch2:
 
-find_package(Catch2 2 REQUIRED)
+xo_external_target_dependency(${SELF_EXECUTABLE_NAME} Catch2 Catch2::Catch2)
 
 # need this so that catch2/include appears in compile_commands.json,
 # on which lsp integration relies.
