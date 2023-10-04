@@ -225,7 +225,7 @@ macro(xo_dependency target dep)
 endmacro()
 
 macro(xo_internal_dependency target dep)
-  xo_dependency(target dep)
+  xo_dependency(${target} ${dep})
 endmacro()
 
 # dependency on a header-only library
