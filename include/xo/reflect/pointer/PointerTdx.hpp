@@ -7,7 +7,7 @@
 
 #include "xo/reflect/TypeDescrExtra.hpp"
 #include "xo/reflect/EstablishTypeDescr.hpp"
-#include "indentlog/scope.hpp"
+#include "xo/indentlog/scope.hpp"
 
 namespace xo {
     namespace reflect {

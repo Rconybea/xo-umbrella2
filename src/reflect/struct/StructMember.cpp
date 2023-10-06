@@ -4,7 +4,7 @@
  */
 
 #include "struct/StructMember.hpp"
-#include "indentlog/scope.hpp"
+#include "xo/indentlog/scope.hpp"
 #include <type_traits>
 
 namespace xo {

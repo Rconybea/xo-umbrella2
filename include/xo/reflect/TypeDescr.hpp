@@ -3,7 +3,7 @@
 #pragma once
 
 #include "TypeDescrExtra.hpp"
-#include "cxxutil/demangle.hpp"
+#include "xo/cxxutil/demangle.hpp"
 #include <iostream>
 #include <typeinfo>
 #include <unordered_map>
