@@ -37,9 +37,9 @@ macro(xo_toplevel_compile_options)
     # writes ${PROJECT_BINARY_DIR}/compile_commands.json;
     # (symlink from toplevel git dir to tell LSP how to build)
     #
-    if(NOT DEFINED CMAKE_EXPORT_COMPILE_COMMANDS)
-        set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
-    endif()
+    # note: trying to protect this with if(NOT DEFINED ..) is /not/ effective
+    #
+    set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 
     if(NOT CMAKE_INSTALL_RPATH)
         set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib CACHE STRING
