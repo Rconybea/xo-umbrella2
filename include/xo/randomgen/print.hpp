@@ -2,6 +2,6 @@
 
 #pragma once
 
-#include "indentlog/print/array.hpp"
+#include "xo/indentlog/print/array.hpp"
 
 /* end print.hpp */
