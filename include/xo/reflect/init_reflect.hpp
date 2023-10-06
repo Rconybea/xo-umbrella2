@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "subsys/Subsystem.hpp"
+#include "xo/subsys/Subsystem.hpp"
 
 namespace xo {
   /* tag to represent the reflect/ subsystem within ordered initialization */
