@@ -1,6 +1,6 @@
 /* @file Displayable.cpp */
 
-#include "refcnt/Displayable.hpp"
+#include "Displayable.hpp"
 
 namespace xo {
     using xo::tostr;

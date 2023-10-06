@@ -1,6 +1,6 @@
 /* @file intrusive_ptr.test.cpp */
 
-#include "refcnt/Refcounted.hpp"
+#include "Refcounted.hpp"
 #include "indentlog/scope.hpp"
 #include "catch2/catch.hpp"
 #include <string_view>
