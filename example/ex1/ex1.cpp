@@ -1,10 +1,8 @@
 /* @file ex1.cpp */
 
-#include "randomgen/xoshiro256.hpp"
+#include "xo/randomgen/xoshiro256.hpp"
 #include <algorithm>
 #include <iostream>
-//#include <array>
-//#include <cstdint>
 
 using namespace xo;
 using namespace xo::rng;
