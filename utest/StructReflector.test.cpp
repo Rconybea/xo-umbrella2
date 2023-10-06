@@ -3,12 +3,12 @@
  * author: Roland Conybeare, Aug 2022
  */
 
-#include "reflect/Reflect.hpp"
-#include "reflect/StructReflector.hpp"
+#include "xo/reflect/Reflect.hpp"
+#include "xo/reflect/StructReflector.hpp"
 #include <catch2/catch.hpp>
 
 #define STRINGIFY(x) #x
-      
+
 namespace xo {
   using xo::reflect::Reflect;
   using xo::reflect::TaggedPtr;
@@ -129,7 +129,7 @@ namespace xo {
 
       REQUIRE(tp.get_child(2).td() == Reflect::require<double>());
       REQUIRE(tp.get_child(2).address() == &(recd1.z_));
-	      
+
       REQUIRE(tp.get_child(3).is_universal_null());
       REQUIRE(tp.get_child(3).td() == nullptr);
       REQUIRE(tp.get_child(3).address() == nullptr);

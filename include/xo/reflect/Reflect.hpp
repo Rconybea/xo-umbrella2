@@ -5,12 +5,12 @@
 
 #pragma once
 
-#include "reflect/SelfTagging.hpp"
-#include "reflect/EstablishTypeDescr.hpp"
-#include "reflect/atomic/AtomicTdx.hpp"
-#include "reflect/pointer/PointerTdx.hpp"
-#include "reflect/vector/VectorTdx.hpp"
-#include "reflect/struct/StructTdx.hpp"
+#include "SelfTagging.hpp"
+#include "EstablishTypeDescr.hpp"
+#include "atomic/AtomicTdx.hpp"
+#include "pointer/PointerTdx.hpp"
+#include "vector/VectorTdx.hpp"
+#include "struct/StructTdx.hpp"
 #include "refcnt/Refcounted.hpp"
 #include <vector>
 #include <array>
@@ -22,7 +22,7 @@ namespace xo {
     class EstablishTdx {
     public:
       static std::unique_ptr<TypeDescrExtra> make() { return AtomicTdx::make(); }
-    }; /*EstablishTdx*/      
+    }; /*EstablishTdx*/
 
     // ----- xo::ref::rp<Object> -----
 
@@ -34,7 +34,7 @@ namespace xo {
     }; /*EstablishTdx*/
 
     // ----- std::array<Element, N> -----
-    
+
     /* definition provide after decl for Reflect {} below */
     template<typename Element, std::size_t N>
     class EstablishTdx<std::array<Element, N>> {
@@ -73,11 +73,11 @@ namespace xo {
     class TaggedPtrMaker<SelfTagging> {
     public:
       static TaggedPtr make_tp(SelfTagging * x) {
-	return x->self_tp();
+    return x->self_tp();
       } /*make_tp*/
 
       static TaggedRcptr make_rctp(SelfTagging * x) {
-	return x->self_tp();
+    return x->self_tp();
       } /*make_rctp*/
     }; /*TaggedPtrMaker*/
 
@@ -113,35 +113,35 @@ namespace xo {
        * implemented in specialized header (like [reflect/struct/VectorTdx.hpp]) to
        * refer to reflection info for T without having to pull in all the
        * headers needed to properly reflect T (like this [reflect/Reflect.hpp])
-       * 
+       *
        */
       template<typename T>
       static TypeDescrW require() {
-	TypeDescrW retval_td = EstablishTypeDescr::establish<T>();
+    TypeDescrW retval_td = EstablishTypeDescr::establish<T>();
 
-	/* mark TypeDescr for T as complete (even though it isn't quite yet),
-	 * so that when we encounter recursive types,  reflection terminates.
-	 * For example consider type resulting from code like
-	 *
-	 *    typename T;
-	 *    using T = std::vector<T *>;
-	 *
-	 */
-	if (retval_td->mark_complete()) {
-	  /* control here on 2nd+later calls to require<T>().
-	   * in principle can immediately short-circuit.
-	   */
-	} else {
-	  /* control comes here the first time require<T>() runs */
+    /* mark TypeDescr for T as complete (even though it isn't quite yet),
+     * so that when we encounter recursive types,  reflection terminates.
+     * For example consider type resulting from code like
+     *
+     *    typename T;
+     *    using T = std::vector<T *>;
+     *
+     */
+    if (retval_td->mark_complete()) {
+      /* control here on 2nd+later calls to require<T>().
+       * in principle can immediately short-circuit.
+       */
+    } else {
+      /* control comes here the first time require<T>() runs */
 
-	  auto final_tdx = EstablishTdx<T>::make();
+      auto final_tdx = EstablishTdx<T>::make();
 
-	  retval_td->assign_tdextra(std::move(final_tdx));
+      retval_td->assign_tdextra(std::move(final_tdx));
 
-	  /* also need to require for each child */
-	}
+      /* also need to require for each child */
+    }
 
-	return retval_td;
+    return retval_td;
       } /*require*/
 
       /* Use:

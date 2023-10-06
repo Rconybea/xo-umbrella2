@@ -2,9 +2,10 @@
 
 #pragma once
 
-#include "reflect/TypeDescrExtra.hpp"
-#include "reflect/TaggedPtr.hpp"
-#include "reflect/struct/StructMember.hpp"
+#include "xo/reflect/TypeDescrExtra.hpp"
+#include "xo/reflect/TaggedPtr.hpp"
+#include "StructMember.hpp"
+//#include "xo/reflect/struct/StructMember.hpp"
 #include <vector>
 #include <functional>
 #include <memory>

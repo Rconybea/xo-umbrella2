@@ -3,7 +3,7 @@
  * author: Roland Conybeare, Aug 2022
  */
 
-#include "reflect/Reflect.hpp"
+#include "xo/reflect/Reflect.hpp"
 #include <catch2/catch.hpp>
 
 namespace xo {

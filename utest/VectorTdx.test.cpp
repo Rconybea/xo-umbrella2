@@ -3,7 +3,7 @@
  * author: Roland Conybeare, Aug 2022
  */
 
-#include "reflect/Reflect.hpp"
+#include "xo/reflect/Reflect.hpp"
 #include <catch2/catch.hpp>
 
 namespace xo {
@@ -81,7 +81,7 @@ namespace xo {
       REQUIRE(tp0.td()->metatype() == Metatype::mt_atomic);
       REQUIRE(tp0.recover_native<double>() == &(v[0]));
       REQUIRE(tp0.n_child() == 0);
-      
+
       TaggedPtr tp1 = tp.get_child(1);
 
       REQUIRE(tp1.td()->complete_flag());
@@ -91,7 +91,7 @@ namespace xo {
       REQUIRE(tp1.td()->metatype() == Metatype::mt_atomic);
       REQUIRE(tp1.recover_native<double>() == &(v[1]));
       REQUIRE(tp1.n_child() == 0);
-    } /*TEST(std-vector-reflect-two)*/      
+    } /*TEST(std-vector-reflect-two)*/
 
     // ----- std::array -----
 
@@ -163,7 +163,7 @@ namespace xo {
       REQUIRE(tp0.td()->metatype() == Metatype::mt_atomic);
       REQUIRE(tp0.recover_native<double>() == &(v[0]));
       REQUIRE(tp0.n_child() == 0);
-      
+
       TaggedPtr tp1 = tp.get_child(1);
 
       REQUIRE(tp1.td()->complete_flag());
@@ -173,7 +173,7 @@ namespace xo {
       REQUIRE(tp1.td()->metatype() == Metatype::mt_atomic);
       REQUIRE(tp1.recover_native<double>() == &(v[1]));
       REQUIRE(tp1.n_child() == 0);
-    } /*TEST(std-array-reflect-two)*/      
+    } /*TEST(std-array-reflect-two)*/
 
   } /*namespace ut*/
 } /*namespace xo*/

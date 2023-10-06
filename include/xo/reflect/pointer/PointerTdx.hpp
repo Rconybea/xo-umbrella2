@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "reflect/TypeDescrExtra.hpp"
-#include "reflect/EstablishTypeDescr.hpp"
+#include "xo/reflect/TypeDescrExtra.hpp"
+#include "xo/reflect/EstablishTypeDescr.hpp"
 #include "indentlog/scope.hpp"
 
 namespace xo {

@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "reflect/TypeDescr.hpp"
-#include "reflect/TaggedPtr.hpp"
+#include "TypeDescr.hpp"
+#include "TaggedPtr.hpp"
 
 namespace xo {
   namespace reflect {
@@ -26,28 +26,28 @@ namespace xo {
 
       template<typename T>
       static TypeDescrW establish() {
-	TypeDescrW td = TypeDescrBase::require(&typeid(T),
-					       type_name<T>(),
-					       nullptr);
+    TypeDescrW td = TypeDescrBase::require(&typeid(T),
+                           type_name<T>(),
+                           nullptr);
 
 #ifdef NOT_USING
-	std::function<TaggedPtr (void *)> to_self_tp;
+    std::function<TaggedPtr (void *)> to_self_tp;
 
-	if (std::is_base_of_v<SelfTagging, T>) {
-	  /* T is a descendant of SelfTagging (or T = SelfTagging);
-	   * use SelfTagging.self_tp()
-	   */
-	  to_self_tp = [](void * x) { return reinterpret_cast<T *>(x)->self_tp(); };
-	} else {
-	  /* T is not a descendant of SelfTagging.
-	   * want to return 
-	   */
-	  to_self_tp = [td](void * x) { return TaggedPtr(td, x); };
-	}
+    if (std::is_base_of_v<SelfTagging, T>) {
+      /* T is a descendant of SelfTagging (or T = SelfTagging);
+       * use SelfTagging.self_tp()
+       */
+      to_self_tp = [](void * x) { return reinterpret_cast<T *>(x)->self_tp(); };
+    } else {
+      /* T is not a descendant of SelfTagging.
+       * want to return
+       */
+      to_self_tp = [td](void * x) { return TaggedPtr(td, x); };
+    }
 
-	td->assign_to_self_tp(to_self_tp);
+    td->assign_to_self_tp(to_self_tp);
 #endif
-	return td;
+    return td;
       }
     }; /*EstablishTypeDescr*/
 

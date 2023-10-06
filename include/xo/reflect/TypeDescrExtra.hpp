@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "reflect/Metatype.hpp"
+#include "Metatype.hpp"
 #include <string>
 /* note: this file #include'd into TypeDescr.hpp */
 #include <cstdint>

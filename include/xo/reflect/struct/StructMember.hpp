@@ -2,10 +2,9 @@
 
 #pragma once
 
-#include "reflect/TypeDescr.hpp"
-#include "reflect/EstablishTypeDescr.hpp"
-//#include "reflect/Reflect.hpp"
-#include "reflect/TaggedPtr.hpp"
+#include "xo/reflect/TypeDescr.hpp"
+#include "xo/reflect/EstablishTypeDescr.hpp"
+#include "xo/reflect/TaggedPtr.hpp"
 #include <string>
 #include <memory>
 
@@ -14,7 +13,7 @@ namespace reflect {
   class AbstractStructMemberAccessor {
   public:
     virtual ~AbstractStructMemberAccessor() = default;
-    
+
     /* get tagged pointer referring to this member of the object at *struct_addr */
     TaggedPtr member_tp(void * struct_addr) const;
 
@@ -30,7 +29,7 @@ namespace reflect {
      *   .member_td() => Reflect::require<int>();
      */
     virtual TypeDescr member_td() const = 0;
-    
+
     /* get address of a particular member,  given parent address */
     virtual void * address(void * struct_addr) const = 0;
 
@@ -63,7 +62,7 @@ namespace reflect {
 
   public:
     GeneralStructMemberAccessor(Memptr memptr) : member_td_{EstablishTypeDescr::establish<MemberT>()},
-						 memptr_{memptr} {}
+                         memptr_{memptr} {}
     GeneralStructMemberAccessor(GeneralStructMemberAccessor const & x) = default;
     virtual ~GeneralStructMemberAccessor() = default;
 
@@ -78,7 +77,7 @@ namespace reflect {
 
       return &(owner_addr->*memptr_);
     } /*address_impl*/
-  
+
     // ----- Inherited from AbstractStructMemberAccessor -----
 
 #ifdef OBSOLETE
@@ -102,7 +101,7 @@ namespace reflect {
 
     virtual std::unique_ptr<AbstractStructMemberAccessor> clone() const override {
       return std::unique_ptr<AbstractStructMemberAccessor>
-	(new GeneralStructMemberAccessor(*this));
+    (new GeneralStructMemberAccessor(*this));
     } /*clone*/
 
   private:
@@ -142,7 +141,7 @@ namespace reflect {
     static std::unique_ptr<AncestorStructMemberAccessor>
     adopt(std::unique_ptr<AbstractStructMemberAccessor> ancestor_accessor) {
       return std::unique_ptr<AncestorStructMemberAccessor>
-	(new AncestorStructMemberAccessor(std::move(ancestor_accessor)));
+    (new AncestorStructMemberAccessor(std::move(ancestor_accessor)));
     } /*adopt*/
 
     void * address_impl(StructT * self_addr) const {
@@ -171,7 +170,7 @@ namespace reflect {
 
     virtual std::unique_ptr<AbstractStructMemberAccessor> clone() const override {
       return std::unique_ptr<AbstractStructMemberAccessor>
-	(new AncestorStructMemberAccessor(std::move(this->ancestor_accessor_->clone())));
+    (new AncestorStructMemberAccessor(std::move(this->ancestor_accessor_->clone())));
     } /*clone*/
 
   private:
@@ -186,11 +185,11 @@ namespace reflect {
    public:
     StructMember() = default;
     StructMember(std::string const & name,
-		 std::unique_ptr<AbstractStructMemberAccessor> accessor)
+         std::unique_ptr<AbstractStructMemberAccessor> accessor)
       : member_name_{name}, accessor_{std::move(accessor)} {}
     StructMember(StructMember && x)
       : member_name_{std::move(x.member_name_)},
-	accessor_{std::move(x.accessor_)} {}
+    accessor_{std::move(x.accessor_)} {}
 
     static StructMember null();
 
@@ -210,8 +209,8 @@ namespace reflect {
       assert(EstablishTypeDescr::establish<StructT>() == this->get_struct_td());
 
       return StructMember(this->member_name(),
-			  std::move(AncestorStructMemberAccessor<DescendantT, StructT>::adopt
-				    (std::move(this->accessor_->clone()))));
+              std::move(AncestorStructMemberAccessor<DescendantT, StructT>::adopt
+                    (std::move(this->accessor_->clone()))));
     } /*for_descendant*/
 
     StructMember & operator=(StructMember && x) {

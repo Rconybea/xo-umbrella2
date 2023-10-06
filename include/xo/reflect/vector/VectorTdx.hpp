@@ -5,12 +5,8 @@
 
 #pragma once
 
-#include "reflect/TypeDescrExtra.hpp"
-//#include "reflect/TaggedPtr.hpp"
-#include "reflect/EstablishTypeDescr.hpp"
-//#include "reflect/TaggedPtr.hpp"
-//#include <vector>
-//#include <memory>
+#include "xo/reflect/TypeDescrExtra.hpp"
+#include "xo/reflect/EstablishTypeDescr.hpp"
 
 namespace xo {
   namespace reflect {
@@ -42,19 +38,19 @@ namespace xo {
       using target_t = VectorT;
 
       static std::unique_ptr<StlVectorTdx> make() {
-	return std::unique_ptr<StlVectorTdx>(new StlVectorTdx());
+    return std::unique_ptr<StlVectorTdx>(new StlVectorTdx());
       } /*make*/
 
       virtual uint32_t n_child(void * object) const override {
-	target_t * vec = reinterpret_cast<target_t *>(object);
+    target_t * vec = reinterpret_cast<target_t *>(object);
 
-	return vec->size();
+    return vec->size();
       } /*n_child*/
 
       virtual TaggedPtr child_tp(uint32_t i, void * object) const override {
-	target_t * vec = reinterpret_cast<target_t *>(object);
+    target_t * vec = reinterpret_cast<target_t *>(object);
 
-	return establish_most_derived_tp(&((*vec)[i]));
+    return establish_most_derived_tp(&((*vec)[i]));
       } /*child_tp*/
     }; /*StlVectorTdx*/
 
@@ -66,9 +62,9 @@ namespace xo {
 
     template<typename Element, std::size_t N>
     using StdArrayTdx = StlVectorTdx<std::array<Element, N>>;
-    
+
     // ----- std::vector<Element> -----
-    
+
     /* coordinates with EstablishTdx<std::vector<Element>>::make()
      * see [reflect/Reflect.hpp]
      */
@@ -76,21 +72,21 @@ namespace xo {
     class StdVectorTdx : public VectorTdx {
     public:
       using target_t = std::vector<Element>;
-	
+
       static std::unique_ptr<StdVectorTdx> make() {
-	return std::unique_ptr<StdVectorTdx>(new StdVectorTdx());
+    return std::unique_ptr<StdVectorTdx>(new StdVectorTdx());
       } /*make*/
 
       virtual uint32_t n_child(void * object) const override {
-	target_t * vec = reinterpret_cast<target_t *>(object);
+    target_t * vec = reinterpret_cast<target_t *>(object);
 
-	return vec->size();
+    return vec->size();
       } /*n_child*/
 
       virtual TaggedPtr child_tp(uint32_t i, void * object) const override {
-	target_t * vec = reinterpret_cast<target_t *>(object);
+    target_t * vec = reinterpret_cast<target_t *>(object);
 
-	return establish_most_derived_tp(&((*vec)[i]));
+    return establish_most_derived_tp(&((*vec)[i]));
       }
     }; /*StdVectorTdx*/
   } /*namespace reflect*/
