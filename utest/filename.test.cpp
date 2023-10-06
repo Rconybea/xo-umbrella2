@@ -1,7 +1,7 @@
 /* @file filename.test.cpp */
 
-#include "indentlog/print/filename.hpp"
-#include "indentlog/print/tag.hpp"
+#include "xo/indentlog/print/filename.hpp"
+#include "xo/indentlog/print/tag.hpp"
 #include <vector>
 #include <catch2/catch.hpp>
 

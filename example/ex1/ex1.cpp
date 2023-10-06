@@ -1,4 +1,6 @@
-#include "indentlog/scope.hpp"
+/* ex1.cpp */
+
+#include "xo/indentlog/scope.hpp"
 
 using namespace xo;
 
@@ -16,3 +18,5 @@ int
 main(int argc, char ** argv) {
     outer(123);
 }
+
+/* end ex1.cpp */

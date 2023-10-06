@@ -1,7 +1,7 @@
 /* @file timeutil.test.cpp */
 
-#include "indentlog/timeutil/timeutil.hpp"
-#include "indentlog/print/tag.hpp"
+#include "xo/indentlog/timeutil/timeutil.hpp"
+#include "xo/indentlog/print/tag.hpp"
 #include <catch2/catch.hpp>
 #include <sstream>
 

@@ -1,6 +1,6 @@
 /* @file ex4.cpp */
 
-#include "indentlog/scope.hpp"
+#include "xo/indentlog/scope.hpp"
 
 using namespace xo;
 

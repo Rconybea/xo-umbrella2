@@ -1,7 +1,7 @@
 /* @file function.test.cpp */
 
-#include "indentlog/print/function.hpp"
-#include "indentlog/print/tag.hpp"
+#include "xo/indentlog/print/function.hpp"
+#include "xo/indentlog/print/tag.hpp"
 #include <catch2/catch.hpp>
 #include <sstream>
 

@@ -1,8 +1,8 @@
 /* @file tag.test.cpp */
 
-#include "indentlog/print/tag.hpp"
-#include "indentlog/print/vector.hpp"
-#include "indentlog/print/concat.hpp"
+#include "xo/indentlog/print/tag.hpp"
+#include "xo/indentlog/print/vector.hpp"
+#include "xo/indentlog/print/concat.hpp"
 #include <catch2/catch.hpp>
 #include <sstream>
 

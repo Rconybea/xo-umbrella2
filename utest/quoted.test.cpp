@@ -1,7 +1,7 @@
 /* @file fixed.test.cpp */
 
-#include "indentlog/print/quoted.hpp"
-#include "indentlog/print/tag.hpp"
+#include "xo/indentlog/print/quoted.hpp"
+#include "xo/indentlog/print/tag.hpp"
 #include <catch2/catch.hpp>
 #include <sstream>
 

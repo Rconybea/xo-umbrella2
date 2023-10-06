@@ -1,8 +1,8 @@
 /* @file code_location.test.cpp */
 
-#include "indentlog/print/code_location.hpp"
-#include "indentlog/print/color.hpp"
-#include "indentlog/print/tag.hpp"
+#include "xo/indentlog/print/code_location.hpp"
+#include "xo/indentlog/print/color.hpp"
+#include "xo/indentlog/print/tag.hpp"
 #include <vector>
 #include <catch2/catch.hpp>
 
