@@ -20,7 +20,7 @@ target_code_coverage(${SELF_EXECUTABLE_NAME} AUTO ALL)
 #   since version file will be in build directory,  need that directory
 #   to also be included in compiler's include path
 #
-xo_include_options2(${SELF_EXECUTABLE_NAME})
+#xo_include_options2(${SELF_EXECUTABLE_NAME})
 #target_include_directories(${SELF_EXECUTABLE_NAME} PUBLIC
 #                           ${PROJECT_SOURCE_DIR}
 #                           ${PROJECT_BINARY_DIR})
