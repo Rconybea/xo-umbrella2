@@ -17,13 +17,13 @@ see [github/Rconybea/indentlog](https://github.com/Rconybea/indentlog)
 ### copy `refcnt` repository locally
 ```
 $ git clone git@github.com:rconybea/refcnt.git
-$ ls -d refcnt
-refcnt
+$ ls -d xo-refcnt
+xo-refcnt
 ```
 
 ### build + install
 ```
-$ cd refcnt
+$ cd xo-refcnt
 $ mkdir build
 $ cd build
 $ cmake -DCMAKE_MODULE_PATH=${INSTALL_PREFIX}/share/cmake  -DCMAKE_PREFIX_PATH=${INSTALL_PREFIX} -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} ..
@@ -39,22 +39,28 @@ $ git clone git@github.com:rconybea/xo-nix.git
 $ ls -d xo-nix
 xo-nix
 $ cd xo-nix
-$ nix-build -A refcnt
+$ nix-build -A xo-refcnt
 ```
 
 ### build for unit test coverage
 ```
-$ cd refcnt
+$ cd xo-refcnt
 $ mkdir ccov
 $ cd ccov
 $ cmake -DCMAKE_MODULE_PATH=${INSTALL_PREFIX}/share/cmake  -DCMAKE_PREFIX_PATH=${INSTALL_PREFIX} -DCODE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug ..
+```
+
+### LSP support
+```
+$ cd xo-refcnt
+$ ln -s build/compile_commands.json  # lsp will look for compile_commands.json in the root of the source tree
 ```
 
 ## Examples
 
 ### 1
 ```
-#include "refcnt/Refcounted.hpp"
+#include "xo/refcnt/Refcounted.hpp"
 
 using xo::ref::Refcounted;
 

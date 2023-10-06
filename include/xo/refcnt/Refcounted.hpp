@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "indentlog/scope.hpp"
-#include "cxxutil/demangle.hpp"
+#include "xo/indentlog/scope.hpp"
+#include "xo/cxxutil/demangle.hpp"
 
 //#include <boost/intrusive_ptr.hpp>
 #include <atomic>
