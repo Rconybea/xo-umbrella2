@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include "indentlog/scope.hpp"
-#include "indentlog/print/pad.hpp"
-#include "indentlog/print/quoted.hpp"
+#include "xo/indentlog/scope.hpp"
+#include "xo/indentlog/print/pad.hpp"
+#include "xo/indentlog/print/quoted.hpp"
 #include <concepts>
 #include <iterator>
 #include <array>

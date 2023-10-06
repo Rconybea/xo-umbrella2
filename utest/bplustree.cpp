@@ -6,7 +6,7 @@
 #include "xo/ordinaltree/BplusTree.hpp"
 #include "xo/randomgen/random_seed.hpp"
 #include "xo/randomgen/print.hpp"
-#include "indentlog/scope.hpp"
+#include "xo/indentlog/scope.hpp"
 #include "catch2/catch.hpp"
 
 namespace {

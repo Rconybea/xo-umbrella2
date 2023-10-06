@@ -4,8 +4,8 @@
 
 #include "IteratorUtil.hpp"
 #include "bplustree_tags.hpp"
-#include "indentlog/scope.hpp"
-#include "indentlog/print/tag.hpp"
+#include "xo/indentlog/scope.hpp"
+#include "xo/indentlog/print/tag.hpp"
 #include <memory> // for std::unique_ptr
 #include <string>
 

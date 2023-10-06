@@ -1,9 +1,9 @@
 /* @file random_tree_ops.hpp **/
 
 #include "xo/randomgen/xoshiro256.hpp"
-#include "indentlog/scope.hpp"
-#include "indentlog/print/tag.hpp"
-#include "indentlog/print/vector.hpp"
+#include "xo/indentlog/scope.hpp"
+#include "xo/indentlog/print/tag.hpp"
+#include "xo/indentlog/print/vector.hpp"
 #include "catch2/catch.hpp"
 #include <algorithm>
 #include <map>

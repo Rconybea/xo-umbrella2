@@ -3,7 +3,7 @@
 #pragma once
 
 #include "GenericNode.hpp"
-#include "indentlog/scope.hpp"
+#include "xo/indentlog/scope.hpp"
 #include <cassert>
 
 namespace xo {

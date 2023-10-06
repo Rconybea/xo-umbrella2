@@ -4,7 +4,7 @@
 
 #include "IteratorUtil.hpp"
 #include "LeafNode.hpp"
-#include "indentlog/print/tostr.hpp"
+#include "xo/indentlog/print/tostr.hpp"
 
 namespace xo {
     namespace tree {

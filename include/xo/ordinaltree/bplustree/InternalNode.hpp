@@ -3,8 +3,8 @@
 #pragma once
 
 #include "GenericNode.hpp"
-#include "indentlog/scope.hpp"
-#include "indentlog/print/tostr.hpp"
+#include "xo/indentlog/scope.hpp"
+#include "xo/indentlog/print/tostr.hpp"
 #include <cassert>
 
 namespace xo {
