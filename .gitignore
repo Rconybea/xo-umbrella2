@@ -2,3 +2,5 @@
 .cache
 # typical cmake build directory (source-tree-nephew)
 build*/*
+# symlink to builddir/compile_commands.json;  should be set manually in dev sandbox
+compile_commands.json
