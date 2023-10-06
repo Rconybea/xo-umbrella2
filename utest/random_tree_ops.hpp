@@ -1,6 +1,6 @@
 /* @file random_tree_ops.hpp **/
 
-#include "randomgen/xoshiro256.hpp"
+#include "xo/randomgen/xoshiro256.hpp"
 #include "indentlog/scope.hpp"
 #include "indentlog/print/tag.hpp"
 #include "indentlog/print/vector.hpp"
