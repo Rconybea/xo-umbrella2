@@ -2,7 +2,6 @@
 
 #pragma once
 
-//#include "reflect/atomic/AtomicTdx.hpp"
 #include "TypeDescrExtra.hpp"
 #include "cxxutil/demangle.hpp"
 #include <iostream>
@@ -16,80 +15,80 @@
 #include <cassert>
 
 namespace xo {
-  namespace reflect {
-    class TaggedPtr;  /* see [reflect/TaggedPtr.hpp] */
+    namespace reflect {
+        class TaggedPtr;  /* see [reflect/TaggedPtr.hpp] */
 
-    /* A reflected type is a type for which we keep information around at runtime
-     * Assign reflected types unique (within an executable) ids,
-     * allocating consecutively, starting from 1.
-     * Reserve 0 as a sentinel
-     */
-    class TypeId {
-    public:
-      /* allocate a new TypeId value.
-       * promise:
-       * - retval.id() > 0
-       */
-      static TypeId allocate() { return TypeId(s_next_id++); }
+        /* A reflected type is a type for which we keep information around at runtime
+         * Assign reflected types unique (within an executable) ids,
+         * allocating consecutively, starting from 1.
+         * Reserve 0 as a sentinel
+         */
+        class TypeId {
+        public:
+            /* allocate a new TypeId value.
+             * promise:
+             * - retval.id() > 0
+             */
+            static TypeId allocate() { return TypeId(s_next_id++); }
 
-      std::uint32_t id() const { return id_; }
+            std::uint32_t id() const { return id_; }
 
-    private:
-      explicit TypeId(std::uint32_t id) : id_{id} {}
+        private:
+            explicit TypeId(std::uint32_t id) : id_{id} {}
 
-    private:
-      static std::uint32_t s_next_id;
+        private:
+            static std::uint32_t s_next_id;
 
-      /* unique index# for this type.
-       * 0 reserved for sentinel
-       */
-      std::uint32_t id_ = 0;
-    }; /*TypeId*/
+            /* unique index# for this type.
+             * 0 reserved for sentinel
+             */
+            std::uint32_t id_ = 0;
+        }; /*TypeId*/
 
-    inline std::ostream &
-    operator<<(std::ostream & os, TypeId x) {
-      os << x.id();
-      return os;
-    } /*operator<<*/
+        inline std::ostream &
+        operator<<(std::ostream & os, TypeId x) {
+            os << x.id();
+            return os;
+        } /*operator<<*/
 
-    /* runtime description of a struct/class instance variable */
-    class StructMember;
+        /* runtime description of a struct/class instance variable */
+        class StructMember;
 
-    class TypeDescrBase;
+        class TypeDescrBase;
 
-    using TypeDescr = TypeDescrBase const *;
-    using TypeDescrW = TypeDescrBase *;
+        using TypeDescr = TypeDescrBase const *;
+        using TypeDescrW = TypeDescrBase *;
 
-    /* convenience wrapper for a std::type_info pointer.
-     * works properly with pybind11,  since python doens't encounter
-     * native type_info pointer,  it won't try to delete it.
-     */
-    class TypeInfoRef {
-    public:
-      explicit TypeInfoRef(std::type_info const * tinfo) : tinfo_{tinfo} {}
-      TypeInfoRef(TypeInfoRef const & x) = default;
+        /* convenience wrapper for a std::type_info pointer.
+         * works properly with pybind11,  since python doens't encounter
+         * native type_info pointer,  it won't try to delete it.
+         */
+        class TypeInfoRef {
+        public:
+            explicit TypeInfoRef(std::type_info const * tinfo) : tinfo_{tinfo} {}
+            TypeInfoRef(TypeInfoRef const & x) = default;
 
-      /* use:
-       *   TypeInfoRef tinfo = TypeInfoRef::make<T>();
-       */
-      template<typename T>
-      TypeInfoRef make() { return TypeInfoRef(&typeid(T)); }
+            /* use:
+             *   TypeInfoRef tinfo = TypeInfoRef::make<T>();
+             */
+            template<typename T>
+            TypeInfoRef make() { return TypeInfoRef(&typeid(T)); }
 
-      std::size_t hash_code() const { return this->tinfo_->hash_code(); }
-      char const * impl_name() const { return this->tinfo_->name(); }
+            std::size_t hash_code() const { return this->tinfo_->hash_code(); }
+            char const * impl_name() const { return this->tinfo_->name(); }
 
-      static bool is_equal(TypeInfoRef x, TypeInfoRef y) noexcept {
-          if (x.hash_code() != y.hash_code())
-              return false;
+            static bool is_equal(TypeInfoRef x, TypeInfoRef y) noexcept {
+                if (x.hash_code() != y.hash_code())
+                    return false;
 
-          return ::strcmp(x.impl_name(), y.impl_name()) == 0;
-      } /*is_equal*/
+                return ::strcmp(x.impl_name(), y.impl_name()) == 0;
+            } /*is_equal*/
 
-    private:
-      /* native type_info object for encapsulated type */
-      std::type_info const * tinfo_ = nullptr;
-    }; /*TypeInfoRef*/
-  } /*namespace reflect*/
+        private:
+            /* native type_info object for encapsulated type */
+            std::type_info const * tinfo_ = nullptr;
+        }; /*TypeInfoRef*/
+    } /*namespace reflect*/
 } /*namespace xo*/
 
 namespace std {
