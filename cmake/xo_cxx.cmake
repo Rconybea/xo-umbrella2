@@ -58,8 +58,11 @@ macro(xo_include_headeronly_options2 target)
     #   need that build directory to also appear in
     #   compiler's include path
     #
+    # NOTE: using INTERFACE here is mandatory.  Otherwise get error:
+    #        target_include_directories may only set INTERFACE properties on INTERFACE targets
+    #
     target_include_directories(
-      ${target} PUBLIC
+      ${target} INTERFACE
       $<INSTALL_INTERFACE:include>
       $<INSTALL_INTERFACE:include/xo/${target}>
       $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>              # e.g. for #include "indentlog/scope.hpp"
