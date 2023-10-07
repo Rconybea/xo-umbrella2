@@ -60,11 +60,11 @@ macro(xo_include_headeronly_options2 target)
     #
     target_include_directories(
       ${target} INTERFACE
-      $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>              # e.g. for #include "indentlog/scope.hpp"
       $<INSTALL_INTERFACE:include>
+      $<INSTALL_INTERFACE:include/xo/${target}>
+      $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>              # e.g. for #include "indentlog/scope.hpp"
       $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/${target}>    # e.g. for #include "Refcounted.hpp" in refcnt/src when ${target}=refcnt [DEPRECATED]
       $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/xo/${target}>    # e.g. for #include "TypeDescr.hpp" in reflect/src when ${target}=reflect
-#      $<INSTALL_INTERFACE:include/xo/${target}>
       $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>                      # e.g. for generated .hpp files
     )
 
