@@ -8,4 +8,5 @@ set(SELF_SRCS pyreflect.cpp)
 
 xo_pybind11_library(${SELF_LIB} ${SELF_SRCS})
 
-xo_dependency(${SELF_LIB} reflect)
+xo_pybind11_dependency(${SELF_LIB} reflect)
+

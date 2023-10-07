@@ -49,4 +49,4 @@ PYTHONPATH=~/local2/lib python
 <type_table_v[0]:>
 ```
 
-Not /immediately/ interesting:  no reflected types in `pyreflect` itself
+Not _immediately_ interesting:  no reflected types in `pyreflect` itself
