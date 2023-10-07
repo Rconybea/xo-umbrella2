@@ -284,8 +284,24 @@ macro(xo_pybind11_link_flags)
     set_property(
       TARGET pybind11::python_link_helper
       APPEND
-      PROPERTY INTERFACE_LINK_OPTIONS "$<$<PLATFORM_ID:Darwin>:LINKER:-flat_namespace>"
-      )
+      PROPERTY
+      INTERFACE_LINK_OPTIONS "$<$<PLATFORM_ID:Darwin>:LINKER:-flat_namespace>")
+
+    # looks like pybind11_add_module() tries to link transitive deps
+    # of libs mentioned in xo_dependency() -- perhaps for link-time optimization?
+    #
+    # For example when linking libpyreflect, get link line with -lrefcnt
+    # (presumably since cmake knows that libreflect.so depends on librefcnt.so);
+    # this triggers error,  since link doesn't know where to find librefcnt.so
+    #
+    # To workaround,  add ${CMAKE_INSTALL_PREFIX}/lib to the link line.
+    #
+    # WARNING: expect this not to work in a hermetic nix build!
+    #
+    set_property(TARGET pybind11::python_link_helper
+        APPEND
+        PROPERTY
+        INTERFACE_LINK_OPTIONS "-L${CMAKE_INSTALL_PREFIX}/lib")
 endmacro()
 
 # ----------------------------------------------------------------
