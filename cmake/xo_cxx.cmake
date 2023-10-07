@@ -234,7 +234,12 @@ endmacro()
 #
 macro(xo_dependency_headeronly target dep)
   find_package(${dep} CONFIG REQUIRED)
-  target_link_libraries(${target} INTERFACE ${dep})
+  # PUBLIC here is important -- it's needed so that include directories that are required by ${dep},
+  # will be included in compilation of ${target}.
+  #
+  # INTERFACE doesn't make this happen;  for a header-only library,  it should be supplied to the add_library() macro
+  #
+  target_link_libraries(${target} PUBLIC ${dep})
 endmacro()
 
 # dependency on namespaced target
