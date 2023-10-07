@@ -263,4 +263,46 @@ macro(xo_self_dependency target dep)
 endmacro()
 
 # ----------------------------------------------------------------
+# need this when linking pybind11-generated libraries
 #
+macro(xo_pybind11_link_flags)
+    # see:
+    # 1. FAQ Build Issues Q2
+    # 2. CMAKE_SHARED_LINKER_FLAGS in src/CMakeLists.txt
+    # 3. pybind11 cmake support, somewhere like
+    #   [path/to/pybind11-2.9.2/
+    #     lib/python3.9-pybind11-2.9.2/
+    #     lib/python3.9/site-packages/
+    #     pybind11/share/cmake/
+    #     pybind11/pybind11Common.cmake]
+    #
+    set_property(
+      TARGET pybind11::python_link_helper
+      APPEND
+      PROPERTY INTERFACE_LINK_OPTIONS "$<$<PLATFORM_ID:Darwin>:LINKER:-flat_namespace>"
+      )
+endmacro()
+
+# ----------------------------------------------------------------
+# use this for a subdir that builds a python library using pybind11
+#
+# expecting the following
+# 1. a directory pyfoo/ -> library pyfoo
+# 2. pyfoo/pyfoo.hpp.in -> pyfoo/pyfoo.hpp
+#
+macro(xo_pybind11_library target source_files)
+    configure_file(${target}.hpp.in ${target}.hpp)
+
+    # find_package(Python..) finds python in
+    #   /Library/Frameworks/Python.framework/...
+    # but we want to use python from nix
+    #
+    #find_package(Python COMPONENTS Interpreter Development REQUIRED)
+    #
+
+    find_package(pybind11)
+    pybind11_add_module(${target} MODULE ${source_files})
+    xo_pybind11_link_flags()
+    # use xo_install_library2() instead
+    #install(TARGETS ${target} DESTINATION lib)
+endmacro()
