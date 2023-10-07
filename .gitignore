@@ -1,0 +1,4 @@
+# lsp keeps state here
+.cache
+# typical build directory
+build
