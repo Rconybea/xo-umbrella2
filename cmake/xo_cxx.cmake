@@ -240,14 +240,23 @@ macro(xo_dependency_headeronly target dep)
   # Conflict here between PUBLIC and INTERFACE
   #
   # PUBLIC ensures that include directories required by ${dep} will also be included in compilation of ${target};
-  # we generally want this
+  # i.e. will appear in property ${target}.INCLUDE_DIRECTORIES
   #
   # INTERFACE mandatory when depending on a header-only library (created with add_library(foo INTERFACE)).
   # otherwise get error:
   #   INTERFACE library can only be used with the INTERFACE keyword of
   #   target_link_libraries
+  # Unfortunately target_link_libraries() does not copy dependent's INTERFACE_INCLUDE_DIRECTORIES property
+  # (at least asof cmake 3.25.3).  Dependent's INCLUDE_DIRECTORIES property will be empty,  since it's header-only.
+  #
+  # Workaround by copying property explicity,  which we do below
   #
   target_link_libraries(${target} INTERFACE ${dep})
+
+  get_target_property(xo_dependency_headeronly__tmp ${dep} INTERFACE_INCLUDE_DIRECTORIES)
+  set_property(
+      TARGET ${target}
+      APPEND PROPERTY INCLUDE_DIRECTORIES ${xo_dependency_headeronly__tmp})
 endmacro()
 
 # dependency on namespaced target
