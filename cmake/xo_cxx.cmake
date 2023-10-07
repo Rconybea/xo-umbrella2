@@ -341,11 +341,60 @@ macro(xo_pybind11_library target source_files)
     find_package(pybind11)
 
     # this only works if one source file, right?
+    #
+    # 6oct2023
+    # Having trouble at link time with this.
+    # Getting broken link for nix,  because link line lists short library nicknames
+    # (e.g. -lfoo) for transitive deps.  nix link needs to be given the directory
+    # in which libfoo.so resides,  so we need to ensure full path
+    #
+    # - source files:
+    #     -fPIC -fvisibility=hidden -flto -fno-fat-lto-objects
+    # - library:
+    #     -fPIC -flto
+    #     (transitive closure of library deps for lto?)
+    #
     pybind11_add_module(${target} MODULE ${source_files})
 
     xo_pybind11_link_flags()
     xo_include_options2(${target})
-    # use xo_install_library2() instead
-    #install(TARGETS ${target} DESTINATION lib)
     xo_install_library2(${target})
+endmacro()
+
+# ----------------------------------------------------------------
+# use this for a dependency of a pybind11 library,
+# e.g. that was introduced by xo_pybind11_library()
+#
+# Working around the following problem (cmake 3.25.3, pybind11 2.10.4).N
+# if:
+# 1. we have pybind11 library pyfoo,  depending on c++ native library foo.
+# 2. foo depends on other libraries foodep1, foodep2;
+#    assume also that foodep2 is header-only
+#
+# if we write:
+#   # CMakeLists.txt
+#   pybind11_add_module(pyfoo MODULE pyfoo.cpp)
+#   find_package(foo CONFIG_REQUIRED)
+#   target_link_libraries(pyfoo PUBLIC foo)
+#
+# get compile instructions like:
+#   g++ -o pyfoo.cpython-311-x86_64-linux-gnu.so path/to/pyfoo.cpp.o path/to/libfoo.so.x.y -lfoodep1 -lfoodep2
+#
+# 1. This is broken for foodep2,  since there no libfoodep2.so exists
+# 2. Also broken for nix build,  because directory containing libfoodep1.so doesn't appear on the compile line.
+#    (It's likely possible to extract this from the .cmake package in lib/cmake/foo/fooTargets.cmake,
+#     but I don't know how to do that yet)
+#
+# workaround here is to suppress these secondary dependencies.
+# This assumes:
+# 1. secondary dependencies are all in shared libraries (not needed on link line)
+# 2. (maybe?) primary dependency libfoo.so is sufficient to satisfy g++
+#    -- conceivably true if libfoo.so has RUNPATH etc.
+#
+macro(xo_pybind11_dependency target dep)
+    find_package(${dep} CONFIG REQUIRED)
+    # clobber secondary dependencies, as discussed above
+    set_property(TARGET ${dep} PROPERTY INTERFACE_LINK_LIBRARIES "")
+    # now that secondary deps are gone,  attach to target pybind11 library
+    xo_dependency(${target} ${dep})
 endmacro()
