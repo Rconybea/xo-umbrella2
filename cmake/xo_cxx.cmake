@@ -59,7 +59,7 @@ macro(xo_include_headeronly_options2 target)
     #   compiler's include path
     #
     target_include_directories(
-      ${target} INTERFACE
+      ${target} PUBLIC
       $<INSTALL_INTERFACE:include>
       $<INSTALL_INTERFACE:include/xo/${target}>
       $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>              # e.g. for #include "indentlog/scope.hpp"
