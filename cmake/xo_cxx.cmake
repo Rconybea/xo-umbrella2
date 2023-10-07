@@ -234,12 +234,17 @@ endmacro()
 #
 macro(xo_dependency_headeronly target dep)
   find_package(${dep} CONFIG REQUIRED)
-  # PUBLIC here is important -- it's needed so that include directories that are required by ${dep},
-  # will be included in compilation of ${target}.
+  # Conflict here between PUBLIC and INTERFACE
   #
-  # INTERFACE doesn't make this happen;  for a header-only library,  it should be supplied to the add_library() macro
+  # PUBLIC ensures that include directories required by ${dep} will also be included in compilation of ${target};
+  # we generally want this
   #
-  target_link_libraries(${target} PUBLIC ${dep})
+  # INTERFACE mandatory when depending on a header-only library (created with add_library(foo INTERFACE)).
+  # otherwise get error:
+  #   INTERFACE library can only be used with the INTERFACE keyword of
+  #   target_link_libraries
+  #
+  target_link_libraries(${target} INTERFACE ${dep})
 endmacro()
 
 # dependency on namespaced target
