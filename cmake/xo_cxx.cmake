@@ -322,8 +322,13 @@ macro(xo_pybind11_library target source_files)
     #
 
     find_package(pybind11)
+
+    # this only works if one source file, right?
     pybind11_add_module(${target} MODULE ${source_files})
+
     xo_pybind11_link_flags()
+    xo_include_options2(${target})
     # use xo_install_library2() instead
     #install(TARGETS ${target} DESTINATION lib)
+    xo_install_library2(${target})
 endmacro()
