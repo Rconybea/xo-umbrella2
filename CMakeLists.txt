@@ -48,4 +48,6 @@ xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets
 # ----------------------------------------------------------------
 # input dependencies
 
-xo_dependency_headeronly(${SELF_LIB} randomgen)
+# xo-ordinaltree is also header-only
+#
+xo_headeronly_dependency(${SELF_LIB} randomgen)
