@@ -13,9 +13,9 @@ target_code_coverage(${SELF_EXE} AUTO ALL)
 # ----------------------------------------------------------------
 # internal dependencies: refcnt, ...
 
-xo_internal_dependency(${SELF_EXE} refcnt)
-xo_internal_dependency(${SELF_EXE} indentlog)
-xo_dependency_headeronly(${SELF_EXE} randomgen)
+xo_dependency(${SELF_EXE} refcnt)
+xo_dependency(${SELF_EXE} indentlog)
+xo_dependency(${SELF_EXE} randomgen)
 
 # ----------------------------------------------------------------
 # 3rd part dependency: catch2:
