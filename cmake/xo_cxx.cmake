@@ -229,13 +229,9 @@ macro(xo_dependency target dep)
     target_link_libraries(${target} PUBLIC ${dep})
 endmacro()
 
-macro(xo_internal_dependency target dep)
-  xo_dependency(${target} ${dep})
-endmacro()
-
-# dependency on a header-only library
+# dependency of a header-only library on another header-only library
 #
-macro(xo_dependency_headeronly target dep)
+macro(xo_headeronly_dependency target dep)
   find_package(${dep} CONFIG REQUIRED)
   # Conflict here between PUBLIC and INTERFACE
   #
@@ -253,10 +249,10 @@ macro(xo_dependency_headeronly target dep)
   #
   target_link_libraries(${target} INTERFACE ${dep})
 
-  get_target_property(xo_dependency_headeronly__tmp ${dep} INTERFACE_INCLUDE_DIRECTORIES)
-  set_property(
-      TARGET ${target}
-      APPEND PROPERTY INCLUDE_DIRECTORIES ${xo_dependency_headeronly__tmp})
+#  get_target_property(xo_dependency_headeronly__tmp ${dep} INTERFACE_INCLUDE_DIRECTORIES)
+#  set_property(
+#      TARGET ${target}
+#      APPEND PROPERTY INCLUDE_DIRECTORIES ${xo_dependency_headeronly__tmp})
 endmacro()
 
 # dependency on namespaced target
@@ -396,5 +392,6 @@ macro(xo_pybind11_dependency target dep)
     # clobber secondary dependencies, as discussed above
     set_property(TARGET ${dep} PROPERTY INTERFACE_LINK_LIBRARIES "")
     # now that secondary deps are gone,  attach to target pybind11 library
-    xo_dependency(${target} ${dep})
+    # skip xo_dependency() here,  that would repeat the find_package() expansion
+    target_link_libraries(${target} PUBLIC ${dep})
 endmacro()
