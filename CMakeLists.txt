@@ -40,7 +40,7 @@ xo_toplevel_compile_options()
 # set CMAKE_INSTALL_PREFIX to analog of /usr
 # to use .cmake assistants from /usr/lib/cmake/indentlog
 #
-# xo_internal_dependency(..)
+# xo_dependency(..)
 
 # ----------------------------------------------------------------
 
