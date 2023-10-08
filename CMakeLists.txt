@@ -7,20 +7,20 @@ enable_language(CXX)
 
 # common XO cmake macros (see github:Rconybea/xo-cmake)
 include(xo_macros/xo_cxx)
-#include(xo_macros/code-coverage)   # very little to unit test here
+include(xo_macros/code-coverage)   # very little to unit test here
 
 # ----------------------------------------------------------------
 # unit test setup
 
-#enable_testing()
+enable_testing()
 ## enable code coverage for all executables+libraries
 ## (when configured with -DCODE_COVERAGE=ON)
 ##
-#add_code_coverage()
-#add_code_coverage_all_targets(
-#  EXCLUDE
-#  /nix/store/*
-#  ${PROJECT_SOURCE_DIR}/utest/*)
+add_code_coverage()
+add_code_coverage_all_targets(
+  EXCLUDE
+  /nix/store/*
+  ${PROJECT_SOURCE_DIR}/utest/*)
 
 # ----------------------------------------------------------------
 # bespoke (usually temporary) c++ settings
