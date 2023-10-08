@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "indentlog/scope.hpp"
+#include "xo/indentlog/scope.hpp"
 #include <functional>
 #include <list>
 #include <string_view>
