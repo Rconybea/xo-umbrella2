@@ -6,6 +6,7 @@
 #pragma once
 
 #include "xo/indentlog/scope.hpp"
+#include <iostream>
 #include <functional>
 #include <list>
 #include <string_view>
@@ -56,6 +57,12 @@ namespace xo {
          */
         std::uint64_t evidence_ = 0;
     }; /*InitEvidence*/
+
+    inline std::ostream &
+    operator<<(std::ostream & os, InitEvidence x) {
+        os << "<init-evidence " << x.evidence() << ">";
+        return os;
+    } /*operator<<*/
 
     /* Goals:
      * 1. provide for code that must run once (and only once)
