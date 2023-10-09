@@ -37,7 +37,7 @@ xo_toplevel_compile_options()
 # ----------------------------------------------------------------
 
 add_subdirectory(src/printjson)
-#add_subdirectory(utest)
+add_subdirectory(utest)
 
 # ----------------------------------------------------------------
 # provide find_package() support for printjson customers
