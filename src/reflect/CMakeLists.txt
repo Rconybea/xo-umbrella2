@@ -8,9 +8,9 @@ xo_add_shared_library(${SELF_LIBRARY_NAME} ${PROJECT_VERSION} 1 ${SELF_SOURCE_FI
 # ----------------------------------------------------------------
 # dependencies: indentlog, ...
 
-# note: changes here must coordinate with cmake/reflectConfig.cmake.in
-xo_dependency(${SELF_LIBRARY_NAME} indentlog)
 xo_dependency(${SELF_LIBRARY_NAME} refcnt)
+xo_dependency(${SELF_LIBRARY_NAME} indentlog)
+xo_dependency(${SELF_LIBRARY_NAME} subsys)
 
 # ----------------------------------------------------------------
 # 3rd party dependency: boost:
