@@ -17,6 +17,7 @@ namespace xo {
     using xo::reflect::TypeDescr;
     using xo::reflect::TaggedPtr;
     using xo::reflect::TaggedRcptr;
+    using xo::print::quoted;
     using xo::time::iso8601;
     using xo::ref::rp;
     using xo::xtag;
@@ -183,6 +184,46 @@ namespace xo {
             this->print_tp(obj->self_tp(), p_os);
         } /*print_obj*/
 
+        /* Consider:
+         *   TaggedPtr tp = ...;
+         *   std::ostream * p_os = ...;
+         *
+         *   PrintJson * pjson = PrintJsonSingleton::instance();
+         *
+         *   // print json representation,  depending on runtime type of tp's target
+         *   pjson->print_tp(tp, p_os);
+         *
+         *   // can also use .print(),  relying on JsonPrinter_TaggedPtr
+         *   // .print() will next original TaggedPtr in another;
+         *   // this shim unwinds that
+         *   //
+         *   pjson->print(tp, p_os);
+         */
+        class JsonPrinter_TaggedPtr : public JsonPrinter {
+        public:
+            JsonPrinter_TaggedPtr(PrintJson const * pjson) : JsonPrinter(pjson) {}
+
+            virtual void print_json(TaggedPtr tp,
+                                    std::ostream * p_os) const override {
+                TaggedPtr * x = this->check_recover_native<TaggedPtr>(tp, p_os);
+
+                if (x) {
+                    this->pjson()->print_tp(*x, p_os);
+                }
+            } /*print_json*/
+        }; /*JsonPrinter_TaggedPtr*/
+
+        namespace {
+            void
+            provide_tagged_ptr_printer(PrintJson * p_json)
+            {
+                std::unique_ptr<JsonPrinter> printer(new JsonPrinter_TaggedPtr(p_json));
+
+                p_json->provide_printer(Reflect::require<TaggedPtr>(),
+                                        std::move(printer));
+            } /*provide_tagged_ptr_printer*/
+        } /*namespace*/
+
         class JsonPrinter_bool : public JsonPrinter {
         public:
             JsonPrinter_bool(PrintJson const * pjson) : JsonPrinter(pjson) {}
@@ -299,7 +340,7 @@ namespace xo {
 
                 if (x) {
                     /* TODO: escapes special characters */
-                    *p_os << *x;
+                    *p_os << quoted(*x);
                 } else {
                     report_internal_type_consistency_error(Reflect::require<T>(),
                                                            tp.td(),
@@ -360,6 +401,8 @@ namespace xo {
         void
         PrintJson::provide_std_printers()
         {
+            provide_tagged_ptr_printer(this);
+
             provide_bool_printer(this);
 
             provide_integer_printer<std::int16_t>(this);
