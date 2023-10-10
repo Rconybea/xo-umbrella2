@@ -1,0 +1,5 @@
+# lsp keep state here
+.cache
+# typical build directories
+build
+ccov
