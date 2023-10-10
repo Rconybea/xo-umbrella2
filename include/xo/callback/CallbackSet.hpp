@@ -82,7 +82,7 @@ namespace xo {
 
         /* If Fnptr is a type such that this works:
          *   Fnptr fn = ...;
-         *   using Fn = Fnptr::destination_type;
+         *   using Fn = Fnptr::element_type;
          *   Fn * native_fn = fn.get();
          *   (native_fn->*member_fn)(args ...);
          *
@@ -101,6 +101,8 @@ namespace xo {
          * when adding/removing callback.
          *
          * Require:
+         * - Fnptr::element_type
+         * - Fnptr::get() -> Fnptr::element_type const *
          * - can invoke (Fnptr->*member_fn)(...)
          *
          * implementation is reentrant: running callbacks can safely make
@@ -130,7 +132,7 @@ namespace xo {
                     for(CbRecd<Fn> const & cb_recd : this->cb_v_) {
                         callback_type * native_cb = cb_recd.fn_.get();
 
-                        /* clang11 doesn't like
+                        /* clang11 doesn't like (with cb=cb_recd.fn_)
                          *   cb->*member_fn
                          * when cb-> is overloaded
                          */
@@ -255,17 +257,6 @@ namespace xo {
                 }
             } /*remove_callback_impl*/
 
-#ifdef NOT_USING
-            void remove_callback_impl(Fn const & target_fn) {
-                auto ix = std::find(this->cb_v_.begin(), this->cb_v_.end(), target_fn);
-
-                if(ix != this->cb_v_.end())
-                    this->cb_v_.erase(ix);
-
-                target_fn->notify_remove_callback();
-            } /*remove_callback_impl*/
-#endif
-
         private:
             bool cb_running_ = false;
             /* collection of callback functions */
@@ -297,7 +288,7 @@ namespace xo {
             } /*operator()*/
 
         private:
-            /* implements operator()(...) */
+            /* implements NotifyCallbackSet's operator()(...) */
             MemberFn privileged_member_fn_;
         }; /*NotifyCallbackSet*/
 
