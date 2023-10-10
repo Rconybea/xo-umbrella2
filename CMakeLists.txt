@@ -10,7 +10,7 @@ include(xo_macros/xo_cxx)
 include(xo_macros/code-coverage)
 
 # ----------------------------------------------------------------
-# unit test setup
+# unit test setup (for consistency with other xo libraries.  no unit tests as of 10oct2023)
 
 enable_testing()
 # activate code coverage for all executables + libraries (when configured with -DCODE_COVERAGE=ON)
