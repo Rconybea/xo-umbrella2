@@ -65,7 +65,9 @@ namespace xo {
              * RemoveCallback: deferred CallbackSet<Fn>::remove_callback(.fn)
              */
             CbsetCmdEnum cmd_ = AddCallback;
+            /* operate on callback with this id */
             CallbackId id_;
+            /* callback function to add/remove */
             Fn fn_;
         }; /*ReentrantCbsetCmd*/
 
