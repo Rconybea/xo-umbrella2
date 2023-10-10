@@ -3,3 +3,5 @@
 # typical build directories
 build
 ccov
+# for lsp: manual symlink to chosen build directory
+compile_commands.json
