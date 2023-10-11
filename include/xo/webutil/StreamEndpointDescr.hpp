@@ -6,10 +6,8 @@
 #pragma once
 
 #include "Alist.hpp"
-#include "callback/CallbackSet.hpp"
-#include "refcnt/Refcounted.hpp"
-#include "indentlog/print/tag.hpp"
-#include "indentlog/print/tostr.hpp"
+#include "xo/callback/CallbackSet.hpp"
+#include "xo/refcnt/Refcounted.hpp"
 #include <functional>
 
 namespace xo {
@@ -30,22 +28,15 @@ namespace xo {
         public:
             StreamEndpointDescr(std::string uri_pattern,
                                 StreamSubscribeFn subscribe_fn,
-                                StreamUnsubscribeFn unsubscribe_fn)
-                : uri_pattern_{std::move(uri_pattern)},
-                  subscribe_fn_{std::move(subscribe_fn)},
-                  unsubscribe_fn_{std::move(unsubscribe_fn)} {}
+                                StreamUnsubscribeFn unsubscribe_fn);
 
             std::string const & uri_pattern() const { return uri_pattern_; }
             StreamSubscribeFn const & subscribe_fn() const { return subscribe_fn_; }
             StreamUnsubscribeFn const & unsubscribe_fn() const { return unsubscribe_fn_; }
 
-            void display(std::ostream & os) const {
-                using xo::xtag;
+            void display(std::ostream & os) const;
 
-                os << "<StreamEndpointDescr" << xtag("uri_pattern", uri_pattern_) << ">";
-            } /*display*/
-
-            std::string display_string() const { return xo::tostr(*this); }
+            std::string display_string() const;
 
         private:
             /* unique pattern in URI-space for this endpoint

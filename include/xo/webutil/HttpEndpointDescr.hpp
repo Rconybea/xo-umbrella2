@@ -5,11 +5,10 @@
 
 #pragma once
 
-#include "web_util/Alist.hpp"
-#include "refcnt/Refcounted.hpp"
-#include "indentlog/print/tag.hpp"
-#include "indentlog/print/tostr.hpp"
+#include "Alist.hpp"
+#include "xo/refcnt/Refcounted.hpp"
 #include <functional>
+#include <string>
 
 namespace xo {
     namespace web {
@@ -26,21 +25,14 @@ namespace xo {
         class HttpEndpointDescr {
         public:
             HttpEndpointDescr(std::string uri_pattern,
-                              HttpEndpointFn endpoint_fn)
-                : uri_pattern_{std::move(uri_pattern)},
-                  endpoint_fn_{std::move(endpoint_fn)}
-                {}
+                              HttpEndpointFn endpoint_fn);
 
             std::string const & uri_pattern() const { return uri_pattern_; }
             HttpEndpointFn const & endpoint_fn() const { return endpoint_fn_; }
 
-            void display(std::ostream & os) const {
-                using xo::xtag;
+            void display(std::ostream & os) const;
 
-                os << "<HttpEndpointDescr" << xtag("uri_pattern", uri_pattern_) << ">";
-            } /*display*/
-
-            std::string display_string() const { return xo::tostr(*this); }
+            std::string display_string() const;
 
         private:
             /* unique pattern in URI-space for this endpoint.

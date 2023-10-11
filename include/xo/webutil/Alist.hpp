@@ -19,19 +19,9 @@ namespace xo {
             Alist() = default;
 
             /* lookup association by name */
-            std::string_view lookup(std::string n) const {
-                for (auto const & ix : this->assoc_v_) {
-                    if (ix.first == n) {
-                        return ix.second;
-                    }
-                }
+            std::string_view lookup(std::string n) const;
 
-                return "";
-            } /*lookup*/
-
-            void push_back(std::string n, std::string v) {
-                this->assoc_v_.push_back(std::make_pair(std::move(n), std::move(v)));
-            }
+            void push_back(std::string n, std::string v);
 
         private:
             std::vector<std::pair<std::string, std::string>> assoc_v_;

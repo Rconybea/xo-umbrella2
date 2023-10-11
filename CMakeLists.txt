@@ -24,20 +24,19 @@ add_code_coverage()
 add_code_coverage_all_targets(EXCLUDE /nix/store/* utest/*)
 
 # ----------------------------------------------------------------
+# common c++ settings
+
+# PROJECT_CXX_FLAGS: bespoke for this project - usually empty
+set(PROJECT_CXX_FLAGS "")
+#set(PROJECT_CXX_FLAGS "-fconcepts-diagnostics-depth=2")
+add_definitions(${PROJECT_CXX_FLAGS})
 
 xo_toplevel_compile_options()
 
 # ----------------------------------------------------------------
+# sources
 
-# header-only library.
-# see [[https://stackoverflow.com/questions/47718485/install-and-export-interface-only-library-cmake]]
-#
-xo_add_headeronly_library(webutil)
-
-# ----------------------------------------------------------------
-# standard install
-
-xo_install_library3(webutil ${PROJECT_NAME}Targets)
+add_subdirectory(src/webutil)
 
 # ----------------------------------------------------------------
 # provide find_package() support
@@ -46,5 +45,7 @@ xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets
 
 # ----------------------------------------------------------------
 # install bespoke targets, if any
+
+xo_install_include_tree()
 
 #install(TARGETS example DESTINATION bin/xo-webutil/example)
