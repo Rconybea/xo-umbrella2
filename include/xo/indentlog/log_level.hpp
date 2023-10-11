@@ -1,5 +1,7 @@
 /* @file log_level.hpp */
 
+#pragma once
+
 #include <cstdint>
 
 namespace xo {
