@@ -184,6 +184,20 @@ macro(xo_install_library2 target)
     )
 endmacro()
 
+macro(xo_install_library3 target projectTargets)
+    install(
+        TARGETS ${target}
+        EXPORT ${projectTargets}
+        LIBRARY DESTINATION lib COMPONENT Runtime
+        ARCHIVE DESTINATION lib COMPONENT Development
+        RUNTIME DESTINATION bin COMPONENT Runtime
+        PUBLIC_HEADER DESTINATION include COMPONENT Development
+        BUNDLE DESTINATION bin COMPONENT Runtime
+    )
+
+    xo_install_include_tree()
+endmacro()
+
 # ----------------------------------------------------------------
 
 # for projectname=foo,  require:
