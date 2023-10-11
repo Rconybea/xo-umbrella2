@@ -37,6 +37,7 @@ xo_toplevel_compile_options()
 # ----------------------------------------------------------------
 
 add_subdirectory(src/reactor)
+add_subdirectory(utest)
 
 # ----------------------------------------------------------------
 # provide find_pacakge() support for reactor customers
