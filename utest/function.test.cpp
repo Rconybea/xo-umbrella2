@@ -36,6 +36,8 @@ namespace ut {
             function_tcase(function_style::simple,      color_spec_type::none(), "void xo::class::foo() const", "foo"),
 
             function_tcase(function_style::pretty,      color_spec_type::blue(), "void xo::class::foo() const", "[\033[31;34mvoid xo::class::foo() const\033[0m]"),
+
+            function_tcase(function_style::streamlined, color_spec_type::none(), "void xo::reactor::FifoQueue<T, EvTimeFn>::notify_ev(const T&) [with T = std::pair<std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::duration<long int, std::ratio<1, 1000000000> > >, long unsigned int>; EvTimeFn = xo::reactor::EventTimeFn<std::pair<std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::duration<long int, std::ratio<1, 1000000000> > >, long unsigned int> >]", "FifoQueue::notify_ev"),
         });
 
     TEST_CASE("function", "[function]") {

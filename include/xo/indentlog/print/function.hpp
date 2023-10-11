@@ -54,31 +54,35 @@ namespace xo {
         std::string_view const & pretty() const { return pretty_; }
 
         /* e.g.
-         *   <------------------------------------- s2 ------------------------------------->
-         *                                       <--------------------- s3 ----------------->
-         *                                                                   <----- s4 ----->
-         *   std::vector<std::pair<int, xo::bar> xo::sometemplateclass<T,U>::fib(int, char**) const
+         *   <----------------------------------------------------- s ---------------------------------------------------------->
+         *   <----------------------------------------- s2 --------------------------------------->
+         *   <------------------------------------- s3 ------------------------------------->
+         *                                       <--------------------- s4 ----------------->
+         *                                                                   <----- s5 ----->
+         *   std::vector<std::pair<int, xo::bar> xo::sometemplateclass<T,U>::fib(int, char**) const [with T = int; with U = char]
          *                                       ^                           ^
          *                                       p                           q
          *
          *                                                                   fib   <- .print_aux()
          */
         static void print_simple(std::ostream & os, std::string_view const & s) {
-            std::size_t p = exclude_const_suffix(s);
-            std::string_view s2 = s.substr(0, p); /* no const suffix */
-            std::size_t q = exclude_return_type(s2);
-            std::string_view s3 = s2.substr(q); /* no return type */
-            std::size_t r = find_toplevel_sep(s3, true /*last_flag*/);
-            std::string_view s4 = s3.substr(r);
+            std::string_view s2 = exclude_template_footnote_suffix(s);
+            std::string_view s3 = exclude_const_suffix(s2) /*no const suffix*/;
+            std::size_t q = exclude_return_type(s3);
+            std::string_view s4 = s3.substr(q); /* no return type */
+            std::size_t r = find_toplevel_sep(s4, true /*last_flag*/);
+            std::string_view s5 = s4.substr(r);
 
-            print_aux(os, s4);
+            print_aux(os, s5);
         } /*print_simple*/
 
         /* e.g.
-         *   <----------------------------------- s2 --------------------------------------->
-         *                                       <--------------------- s3 ----------------->
-         *                                           <----------------- s4 ----------------->
-         *   std::vector<std::pair<int, xo::bar> xo::sometemplateclass<T,U>::fib(int, char**) const
+         *   <------------------------------------------------------------- s -------------------------------------------------->
+         *   <----------------------------------------------- s2 --------------------------------->
+         *   <----------------------------------- s3 --------------------------------------->
+         *                                       <--------------------- s4 ----------------->
+         *                                           <----------------- s5 ----------------->
+         *   std::vector<std::pair<int, xo::bar> xo::sometemplateclass<T,U>::fib(int, char**) const [with T = int; with U = char]
          *                                       ^   ^                                      ^
          *                                       q   r                                      p
          *
@@ -86,19 +90,20 @@ namespace xo {
          *
          */
         static void print_streamlined(std::ostream & os, std::string_view const & s) {
-            std::size_t p = exclude_const_suffix(s);
-            std::string_view s2 = s.substr(0, p); /*no const suffix */
-            std::size_t q = exclude_return_type(s2);
-            std::string_view s3 = s2.substr(q); /*no return type*/
-            std::size_t r = find_toplevel_sep(s3, false /*!last_flag*/);
-            std::string_view s4 = s3.substr(r); /*no namespace qualifier (unless function)*/
+            std::string_view s2 = exclude_template_footnote_suffix(s);
+            std::string_view s3 = exclude_const_suffix(s2) /*no const suffix */;
+            std::size_t q = exclude_return_type(s3);
+            std::string_view s4 = s3.substr(q); /*no return type*/
+            std::size_t r = find_toplevel_sep(s4, false /*!last_flag*/);
+            std::string_view s5 = s4.substr(r); /*no namespace qualifier (unless function)*/
 
-            //std::cerr << "print_streamlined:  s=[" << s << "], p=" << p << std::endl;
-            //std::cerr << "print_streamlined: s2=[" << s2 << "], q=" << q << std::endl;
-            //std::cerr << "print_streamlined: s3=[" << s3 << "], r=" << r << std::endl;
-            //std::cerr << "print_streamlined: s4=[" << s4 << "]" << std::endl;
+            //std::cerr << "print_streamlined:  s=[" << s << "]" << std::endl;
+            //std::cerr << "print_streamlined: s2=[" << s2 << "] (excluded [with ..] suffix)" << std::endl;
+            //std::cerr << "print_streamlined: s3=[" << s3 << "], p=" << p << " (excluded const suffix)" << std::endl;
+            //std::cerr << "print_streamlined: s4=[" << s4 << "], q=" << q << " (excluded return type)" << std::endl;
+            //std::cerr << "print_streamlined: s5=[" << s5 << "], r=" << r << " (excluded ns qualifier)" << std::endl;
 
-            print_aux(os, s4);
+            print_aux(os, s5);
         } /*print_streamlined*/
 
     private:
@@ -130,16 +135,29 @@ namespace xo {
             return 0;
         } /*exclude_return_type*/
 
-        static std::size_t exclude_const_suffix(std::string_view const & s) {
-            constexpr std::uint32_t c_prefix_z = 6 /*strlen(" const")*/;
+        /* e.g.
+         *    void xo::foo::Foo<T, S>::notify(const T&) [with T = std::pair<int, char>; S = xo::foo::Bar]
+         */
+        static std::string_view exclude_template_footnote_suffix(std::string_view const & s) {
+            /* strategy:
+             * - left-to-right
+             * - exclude ' [with '... to end of string
+             */
+            std::size_t p = s.find(" [with ");
 
-            if ((s.size() > c_prefix_z)
-                && (s.substr(s.size() - c_prefix_z) == " const"))
+            return s.substr(0, p);
+        } /*exclude_template_footnote_suffix*/
+
+        static std::string_view exclude_const_suffix(std::string_view const & s) {
+            constexpr std::uint32_t c_suffix_z = 6 /*strlen(" const")*/;
+
+            if ((s.size() > c_suffix_z)
+                && (s.substr(s.size() - c_suffix_z) == " const"))
             {
-                return s.size() - c_prefix_z;
+                return s.substr(0, s.size() - c_suffix_z);
             }
 
-            return s.size();
+            return s;
         } /*exclude_const_suffix*/
 
         /* e.g.
