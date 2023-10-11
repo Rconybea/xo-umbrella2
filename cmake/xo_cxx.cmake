@@ -109,6 +109,14 @@ macro(xo_add_shared_library target targetversion soversion sources)
 endmacro()
 
 # ----------------------------------------------------------------
+# use this for a header-only library
+#
+macro(xo_add_headeronly_library target)
+    add_library(${target} INTERFACE)
+    xo_include_headeronly_options2(${target})
+endmacro()
+
+# ----------------------------------------------------------------
 # use this in subdirs that compile c++ code.
 # do not use for header-only subsystems;  see xo_include_headeronly_options2()
 #
