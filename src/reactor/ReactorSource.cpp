@@ -1,4 +1,4 @@
-/* @file Source.cpp */
+/* @file ReactorSource.cpp */
 
 #include "ReactorSource.hpp"
 #include "xo/indentlog/print/time.hpp"

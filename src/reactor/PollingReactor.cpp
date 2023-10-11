@@ -45,6 +45,11 @@ namespace xo {
             return false;
         } /*remove_source*/
 
+        void
+        PollingReactor::notify_source_primed(brw<ReactorSource>) {
+            /* nothing to do here -- all sources always checked by polling loop */
+        } /*notify_source_primed*/
+
         int64_t
         PollingReactor::find_nonempty_source(size_t start_ix)
         {
@@ -74,13 +79,25 @@ namespace xo {
         {
             int64_t ix = this->find_nonempty_source(this->next_ix_);
 
+            scope log(XO_DEBUG(this->loglevel() == log_level::chatty));
+
+            log && log(xtag("self", this), xtag("src_ix", ix));
+
+            uint64_t retval = 0;
+
             if(ix >= 0) {
                 brw<ReactorSource> src = this->source_v_[ix];
 
-                return src->deliver_one();
+                log && log(xtag("src.name", src->name()));
+
+                retval = src->deliver_one();
             } else {
-                return 0;
+                retval = 0;
             }
+
+            log.end_scope(xtag("retval", retval));
+
+            return retval;
         } /*run_one*/
     } /*namespace reactor*/
 } /*namespace xo*/

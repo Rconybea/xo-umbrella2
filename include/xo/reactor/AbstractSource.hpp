@@ -38,10 +38,16 @@ namespace xo {
             virtual TypeDescr source_ev_type() const = 0;
 
             /* if true:  event objects (see .source_ev_type())
-             *           maybe overwritten between callbacks.
+             *           may be overwritten between callbacks.
              *           A sink that wants to capture events
              *           (e.g. EventStore<>) will need to deep-copy them
              * if false: event objects are preserved between callbacks.
+             *
+             * A source that stores events received from elsewhere (e.g. FifoQueue)
+             * is probably volatile.
+             *
+             * A source that remembers (in explicit memory) every event it produces
+             * is not volatile
              */
             virtual bool is_volatile() const = 0;
 
