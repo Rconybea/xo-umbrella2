@@ -33,13 +33,12 @@ add_subdirectory(utest)
 # header-only library.
 # see [[https://stackoverflow.com/questions/47718485/install-and-export-interface-only-library-cmake]]
 #
-add_library(indentlog INTERFACE)
-xo_include_headeronly_options2(indentlog)
+xo_add_headeronly_library(indentlog)
 
 # ----------------------------------------------------------------
 # standard install + provide find_package() support
 
-xo_install_library2(${PROJECT_NAME})
+xo_install_library2(indentlog)
 xo_install_include_tree()
 xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
 
