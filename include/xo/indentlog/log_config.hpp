@@ -27,7 +27,7 @@ namespace xo {
         static bool nesting_level_enabled;
         /* color to use for explicit nesting level */
         static color_spec_type nesting_level_color;
-        /* display style for function names.  FS_Simple|FS_Pretty|FS_Streamlined */
+        /* display style for function names. function_style:: literal|simple|pretty|streamlined */
         static function_style style;
         /* color to use for function name,  on entry/exit (xo::scope creation/destruction)
          * (ansi color codes,  see Select Graphics Rendition subset)
