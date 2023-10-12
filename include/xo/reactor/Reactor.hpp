@@ -61,6 +61,9 @@ namespace xo {
              */
             void run() { this->run_n(-1); }
 
+        protected:
+            Reactor();
+
         private:
             /* control logging verbosity */
             log_level loglevel_;

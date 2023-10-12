@@ -1,5 +1,6 @@
 /* @file PollingReactor.test.cpp */
 
+#include "xo/reactor/init_reactor.hpp"
 #include "xo/reactor/PollingReactor.hpp"
 #include "xo/reactor/FifoQueue.hpp"
 #include "xo/reactor/Sink.hpp"
@@ -57,8 +58,12 @@ namespace xo {
         }
     } /*namespace*/
 
+    static InitEvidence s_evidence = InitSubsys<S_reactor_tag>::require();
+
     namespace ut {
         TEST_CASE("polling0", "[reactor]") {
+            Subsystem::initialize_all();
+
             rp<PollingReactor> reactor = PollingReactor::make();
 
             REQUIRE(reactor.get());
@@ -193,6 +198,8 @@ namespace xo {
         } /*run_polling1_test*/
 
         TEST_CASE("polling1", "[reactor]") {
+            Subsystem::initialize_all();
+
             //log_config::style = function_style::streamlined;
             log_config::location_tab = 100;
 
