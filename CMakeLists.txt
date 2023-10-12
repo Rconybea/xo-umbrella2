@@ -1,9 +1,12 @@
-# reflect/CMakeLists.txt
+# xo-reflect/CMakeLists.txt
 
 cmake_minimum_required(VERSION 3.10)
 
 project(reflect VERSION 0.1)
 enable_language(CXX)
+
+message(STATUS "CMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}")
+message(STATUS "CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}")
 
 # common XO cmake macros (see proj/xo-cmake)
 include(xo_macros/xo_cxx)
