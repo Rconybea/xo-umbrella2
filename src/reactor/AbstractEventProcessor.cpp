@@ -78,7 +78,7 @@ namespace xo {
         void
         AbstractEventProcessor::display(std::ostream & os) const
         {
-            os << "<AbstractSource>";
+            os << "<AbstractEventProcessor" << xtag("name", name()) << ">";
         } /*display*/
 
         std::string
