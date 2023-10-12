@@ -17,18 +17,22 @@ namespace xo {
             Subsystem::initialize_all();
         }
 
-        void
+        std::uint64_t
         Reactor::run_n(int32_t n)
         {
+            std::uint64_t retval = 0;
+
             if (n == -1) {
                 for (;;) {
-                    this->run_one();
+                    retval += this->run_one();
                 }
             } else {
                 for (int32_t i=0; i<n; ++i) {
-                    this->run_one();
+                    retval += this->run_one();
                 }
             }
+
+            return retval;
         } /*run_n*/
     } /*namespace reactor*/
 } /*namespace xo*/

@@ -155,10 +155,7 @@ namespace xo {
 
                 /* pick random #of elements to remove (from front of queue) */
                 {
-
-
-                    for (std::size_t j = 0; j < n_deq_attempted; ++j)
-                        n_deq_done += reactor->run_one();
+                    n_deq_done += reactor->run_n(n_deq_attempted);
 
                     n_work_attempted += n_deq_attempted;
                     n_work_done += n_deq_done;

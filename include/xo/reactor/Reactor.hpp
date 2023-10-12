@@ -54,7 +54,7 @@ namespace xo {
              * otherwise dispatch up to n events.
              * n = 0 is a noop
              */
-            void run_n(int32_t n);
+            std::uint64_t run_n(int32_t n);
 
             /* borrow calling thread to run indefinitely.
              * suitable implementation for dedicated reactor threads
