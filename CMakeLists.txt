@@ -14,5 +14,6 @@ install(
     FILES
     "cmake/xo_cxx.cmake"
     "cmake/code-coverage.cmake"
+    PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
     DESTINATION share/cmake/${XO_PROJECT_NAME}
 )
