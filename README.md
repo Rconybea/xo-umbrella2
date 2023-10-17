@@ -1,5 +1,12 @@
 # ordinal tree library
 
+## Getting Started
+
+### build + install dependencies
+
+- see [github/Rconybea/randomgen](https://github.com/Rconybea/randomgen) -- random number generators e.g. xoshiro256ss
+- see [github/Rconybea/refcnt](https://github.com/Rconybea/refcnt) -- intrusive reference-counting
+
 ### build + install
 ```
 $ cd xo-ordinaltree
