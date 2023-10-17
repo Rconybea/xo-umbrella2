@@ -1,6 +1,13 @@
 # printjson library
 
-# build + install
+## Getting Started
+
+### build + install dependencies
+
+- [github/Rconybea/reflect](https://github.com/Rconybea/reflect)
+
+### build + install
+
 ```
 $ cd xo-printjson
 $ mkdir build
@@ -11,7 +18,8 @@ $ make
 $ make install
 ```
 
-# build for unit test coverage
+### build for unit test coverage
+
 ```
 $ cd xo-printjson
 $ mkdir ccov
@@ -22,7 +30,8 @@ $ make ccov          # runs instrumented unit tests
 $ make ccov-all      # generates lcov report
 ```
 
-# LSP support
+### LSP support
+
 ```
 $ cd xo-printjson
 $ ln -s build/compile_commands.json  # lsp will look for compile_commands.json in the root of the source tree
