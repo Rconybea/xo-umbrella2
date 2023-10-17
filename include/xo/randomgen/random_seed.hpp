@@ -24,7 +24,7 @@ namespace xo {
          */
         template<typename T>
         void random_seed(T * p_seed) {
-#      ifdef _BSD_SOURCE
+#      ifdef __clang__
             /* NOTE: arc4random_buf() works on darwin/nix;
              *       probably need to do something else on intel linux
              */
