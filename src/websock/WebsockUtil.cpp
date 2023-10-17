@@ -13,6 +13,8 @@ namespace xo {
 
             /* ubuntu build (available via github actions) has older version of libwebsockets.
              * typically building (e.g. via nix) with libwebsockets 4.3.2
+             *
+             * see lws_config.h for version numbers vars
              */
 
             switch (x) {
@@ -48,7 +50,7 @@ namespace xo {
                 CASE(LWS_CALLBACK_RECEIVE_CLIENT_HTTP);
                 CASE(LWS_CALLBACK_COMPLETED_CLIENT_HTTP);
                 CASE(LWS_CALLBACK_CLIENT_HTTP_WRITEABLE);
-#if LWS_LIBRARY_VERSION_MAJOR >= 4
+#if (LWS_LIBRARY_VERSION_MAJOR >= 4) && (LWS_LIBRARY_VERSION_MINOR >= 3)
                 CASE(LWS_CALLBACK_CLIENT_HTTP_REDIRECT);
 #endif
                 CASE(LWS_CALLBACK_CLIENT_HTTP_BIND_PROTOCOL);
@@ -118,7 +120,7 @@ namespace xo {
                 CASE(LWS_CALLBACK_TIMER);
                 CASE(LWS_CALLBACK_EVENT_WAIT_CANCELLED);
                 CASE(LWS_CALLBACK_CHILD_CLOSING);
-#if LWS_LIBRARY_VERSION_MAJOR >= 4
+#if (LWS_LIBRARY_VERSION_MAJOR >= 4) && (LWS_LIBRARY_VERSION_MINOR >= 3)
                 CASE(LWS_CALLBACK_CONNECTING);
 #endif
                 CASE(LWS_CALLBACK_VHOST_CERT_AGING);
@@ -134,7 +136,7 @@ namespace xo {
                 CASE(LWS_CALLBACK_MQTT_CLIENT_CLOSED);
                 CASE(LWS_CALLBACK_MQTT_ACK);
                 CASE(LWS_CALLBACK_MQTT_RESEND);
-#if LWS_LIBRARY_VERSION_MAJOR >= 4
+#if (LWS_LIBRARY_VERSION_MAJOR >= 4) && (LWS_LIBRARY_VERSION_MINOR >= 3)
                 CASE(LWS_CALLBACK_MQTT_UNSUBSCRIBE_TIMEOUT);
                 CASE(LWS_CALLBACK_MQTT_SHADOW_TIMEOUT);
 #endif
