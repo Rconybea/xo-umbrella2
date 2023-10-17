@@ -79,7 +79,7 @@ namespace xo {
         {
             int64_t ix = this->find_nonempty_source(this->next_ix_);
 
-            scope log(XO_DEBUG(this->loglevel() == log_level::chatty));
+            scope log(XO_DEBUG(this->loglevel() <= log_level::chatty));
 
             log && log(xtag("self", this), xtag("src_ix", ix));
 
