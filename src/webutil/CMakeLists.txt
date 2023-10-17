@@ -9,6 +9,7 @@ xo_add_shared_library(${SELF_LIB} ${PROJECT_VERSION} 1 ${SELF_SRCS})
 # ----------------------------------------------------------------
 # external dependencies
 
+xo_dependency(${SELF_LIB} refcnt)
 xo_dependency(${SELF_LIB} callback)
 
 # end CMakeLists.txt

@@ -6,8 +6,8 @@
 #pragma once
 
 #include "Alist.hpp"
-#include "xo/callback/CallbackSet.hpp"
 #include "xo/refcnt/Refcounted.hpp"
+#include "xo/callback/CallbackSet.hpp"
 #include <functional>
 
 namespace xo {
