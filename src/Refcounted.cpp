@@ -14,7 +14,7 @@ namespace xo {
                                   void * this_ptr,
                                   Refcount * x)
             {
-                scope lscope(XO_LITERAL(verbose, self_type, method_name),
+                scope lscope(XO_LITERAL(log_level::verbose, self_type, method_name),
                              "enter",
                              xtag("this", this_ptr),
                              xtag("x", x),
