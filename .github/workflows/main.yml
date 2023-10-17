@@ -120,6 +120,25 @@ jobs:
 
     # ----------------------------------------------------------------
 
+    - name: Clone ordinaltree
+      uses: actions/checkout@v3
+      with:
+        repository: Rconybea/xo-ordinaltree
+        path: repo/ordinaltree
+
+    - name: Configure ordinaltree
+      # configure cmake for ordinaltree in dedicated build directory.
+      run: cmake -B ${{github.workspace}}/build_ordinaltree -DCMAKE_MODULE_PATH=${{github.workspace}}/local/share/cmake -DCMAKE_PREFIX_PATH=${{github.workspace}}/local -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local repo/ordinaltree
+
+    - name: Build ordinaltree
+      run: cmake --build ${{github.workspace}}/build_ordinaltree --config ${{env.BUILD_TYPE}}
+
+    - name: Install ordinaltree
+      # install into ${{github.workspace}}/local
+      run: cmake --install ${{github.workspace}}/build_ordinaltree
+
+    # ----------------------------------------------------------------
+
     - name: Clone callback
       uses: actions/checkout@v3
       with:
