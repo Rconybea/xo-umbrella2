@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <iostream>
 #include <cstdint>
 
 namespace xo {
@@ -54,6 +55,23 @@ namespace xo {
         return (static_cast<std::uint32_t>(x) <= static_cast<std::uint32_t>(y));
     }
 
+    inline std::ostream &
+    operator<<(std::ostream & os,
+               log_level x) {
+        switch(x) {
+        case log_level::never: os << "never"; break;
+        case log_level::verbose: os << "verbose"; break;
+        case log_level::chatty: os << "chatty"; break;
+        case log_level::info: os << "info"; break;
+        case log_level::warning: os << "warning"; break;
+        case log_level::error: os << "error"; break;
+        case log_level::severe: os << "severe"; break;
+        case log_level::always: os << "always"; break;
+        case log_level::silent: os << "silent"; break;
+            //default: os << "???"; break;
+        }
+        return os;
+    } /* operator<<*/
 } /*namespace xo*/
 
 /* end log_level.hpp */

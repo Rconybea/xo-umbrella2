@@ -38,7 +38,7 @@ xo_add_headeronly_library(indentlog)
 # ----------------------------------------------------------------
 # standard install + provide find_package() support
 
-xo_install_library2(indentlog)
+xo_install_library3(indentlog ${PROJECT_NAME}Targets)
 xo_install_include_tree()
 xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
 

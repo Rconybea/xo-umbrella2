@@ -23,7 +23,7 @@ namespace xo {
 #  define XO_DEBUG(debug_flag) XO_ENTER1(always, debug_flag)
 #  define XO_DEBUG2(debug_flag, name1) XO_ENTER2(always, debug_flag, name1)
 
-#  define XO_LITERAL(lvl, name1, name2) xo::scope_setup(xo::log_level::lvl, function_style::literal, name1, name2, __FILE__, __LINE__)
+#  define XO_LITERAL(lvl, name1, name2) xo::scope_setup(lvl, function_style::literal, name1, name2, __FILE__, __LINE__)
 
 //#  define XO_SSETUP0() xo::scope_setup(__FUNCTION__)
 //#  define XO_SSETUP0(lvl) xo::scope_setup(xo::log_level::lvl, xo::log_config::style, __PRETTY_FUNCTION__, __FILE__, __LINE__)
