@@ -2,11 +2,11 @@
 
 #pragma once
 
-#include "xo/refcnt/Refcounted.hpp"
 //#include "indentlog/scope.hpp"
 //#include "indentlog/print/tag.hpp"
 #include <functional>
 #include <vector>
+#include <cstdint>
 
 namespace xo {
     namespace fn {
