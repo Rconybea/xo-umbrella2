@@ -1,5 +1,9 @@
 # indentlog build details
 
+## mac osx
+
+Note: ~ expansion doesn't work in a pure build environment.  
+
 ## Test Coverage
 
 ### enable coverage build
