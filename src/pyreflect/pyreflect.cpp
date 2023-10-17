@@ -26,7 +26,8 @@ namespace xo {
             //py::class_<utc_nanos>(m, "utc_nanos");
 
             //py::class_<TypeDescrImpl>(m, "TypeDescr");
-            py::class_<TypeDescrBase,     unowned_ptr<TypeDescrBase>>(m, "TypeDescr")
+            py::class_<TypeDescrBase,
+                       unowned_ptr<TypeDescrBase>>(m, "TypeDescr")
                 .def_static("print_reflected_types",
                             [](){ TypeDescrBase::print_reflected_types(std::cout); })
                 .def_property_readonly("canonical_name", &TypeDescrBase::canonical_name)
