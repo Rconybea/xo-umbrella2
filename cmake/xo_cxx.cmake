@@ -191,7 +191,10 @@ endmacro()
 # use this to install typical include file subtree
 #
 macro(xo_install_include_tree)
-    install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/ DESTINATION include)
+    install(
+        DIRECTORY ${PROJECT_SOURCE_DIR}/include/
+        FILE_PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
 endmacro()
 
 # ----------------------------------------------------------------
@@ -248,13 +251,14 @@ macro(xo_export_cmake_config projectname projectversion projecttargets)
     )
     install(
         EXPORT ${projecttargets}
-        DESTINATION lib/cmake/${projectname}
-    )
+        PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/cmake/${projectname})
     install(
         FILES
         "${PROJECT_BINARY_DIR}/${projectname}ConfigVersion.cmake"
         "${PROJECT_BINARY_DIR}/${projectname}Config.cmake"
-        DESTINATION lib/cmake/${projectname}
+        PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/cmake/${projectname}
     )
 endmacro()
 

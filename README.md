@@ -12,10 +12,17 @@ Collects cmake macros to be shared across XO projects (e.g. indentlog, reflect, 
 In some XO project `foo`:
 ```
 $ cd build
-$ cmake -DCMAKE_MODULE_PATH=/usr/local/share/cmake ..
+$ PREFIX=/usr/local # or wherever you prefer
+$ cmake -DCMAKE_MODULE_PATH=${PREFIX}/share/cmake -DCMAKE_INSTALL_PREFIX=${PREFIX} ..
+$ make install
 ```
 
 then in `foo/CMakeLists.txt`:
 ```
 include(xo_macros/xo_cxx)
+```
+
+when configuring `foo`:
+```
+$ cmake -DCMAKE_MODULE_PATH=${PREFIX}/share/cmake path/to/foo
 ```
