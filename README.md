@@ -1,15 +1,19 @@
 # webutil library (header-only)
 
-# dependencies
+## Getting Started
 
-- xo-cmake [github/Rconybea/xo-cmake](https://github.com/Rconybea/xo-cmake)
+### build + install dependencies
 
-# clone repo
+- xo-callback [github/Rconybea/xo-callback](https://github.com/Rconybea/xo-callback)
+
+### clone repo
+
 ```
 $ git clone git@github.com:Rconybea/xo-webutil.git
 ```
 
-# build and install
+### build and install
+
 ```
 $ cd xo-webutil
 $ BUILDDIR=build     # for example
@@ -21,7 +25,8 @@ $ make
 $ make install
 ```
 
-# LSP support
+### LSP support
+
 ```
 $ cd xo-webutil
 $ ln -s $BUILDDIR/compile_commands.json
