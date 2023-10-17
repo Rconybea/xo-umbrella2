@@ -158,6 +158,25 @@ jobs:
 
     # ----------------------------------------------------------------
 
+    - name: Clone printjson
+      uses: actions/checkout@v3
+      with:
+        repository: Rconybea/xo-printjson
+        path: repo/printjson
+
+    - name: Configure printjson
+      # configure cmake for printjson in dedicated build directory.
+      run: cmake -B ${{github.workspace}}/build_printjson -DCMAKE_MODULE_PATH=${{github.workspace}}/local/share/cmake -DCMAKE_PREFIX_PATH=${{github.workspace}}/local -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local repo/printjson
+
+    - name: Build printjson
+      run: cmake --build ${{github.workspace}}/build_printjson --config ${{env.BUILD_TYPE}}
+
+    - name: Install printjson
+      # install into ${{github.workspace}}/local
+      run: cmake --install ${{github.workspace}}/build_printjson
+
+    # ----------------------------------------------------------------
+
     - name: Configure self (reactor)
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
