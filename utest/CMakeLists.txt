@@ -10,22 +10,6 @@ add_test(NAME ${SELF_EXECUTABLE_NAME} COMMAND ${SELF_EXECUTABLE_NAME})
 target_code_coverage(${SELF_EXECUTABLE_NAME} AUTO ALL)
 
 # ----------------------------------------------------------------
-# generic project dependency
-
-# PROJECT_SOURCE_DIR:
-#   so we can for example write
-#     #include "indentlog/scope.hpp"
-#   from anywhere in the project
-# PROJECT_BINARY_DIR:
-#   since version file will be in build directory,  need that directory
-#   to also be included in compiler's include path
-#
-#xo_include_options2(${SELF_EXECUTABLE_NAME})
-#target_include_directories(${SELF_EXECUTABLE_NAME} PUBLIC
-#                           ${PROJECT_SOURCE_DIR}
-#                           ${PROJECT_BINARY_DIR})
-
-# ----------------------------------------------------------------
 # internal dependencies: logutil, ...
 
 xo_self_dependency(${SELF_EXECUTABLE_NAME} reflect)
@@ -34,15 +18,6 @@ xo_self_dependency(${SELF_EXECUTABLE_NAME} reflect)
 # 3rd party dependency: catch2:
 
 xo_external_target_dependency(${SELF_EXECUTABLE_NAME} Catch2 Catch2::Catch2)
-
-# need this so that catch2/include appears in compile_commands.json,
-# on which lsp integration relies.
-#
-# See also /nix/store/*-catch2-*/lib/cmake/Catch2/ParseAndAddCatchTests.cmake;
-# commands here derived from ^ .cmake file
-#
-#find_path(CATCH_INCLUDE_DIR "catch2/catch.hpp")
-#target_include_directories(${SELF_EXECUTABLE_NAME} PUBLIC ${CATCH_INCLUDE_DIR})
 
 # ----------------------------------------------------------------
 # make standard directories for std:: includes explicit
