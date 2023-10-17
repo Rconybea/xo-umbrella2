@@ -16,6 +16,8 @@ xo_add_shared_library(${SELF_LIB} ${PROJECT_VERSION} 1 ${SELF_SRCS})
 #       must coordinate with find_dependency() calls
 #       in xo-reactor/cmake/reactorConfig.cmake.in
 #
+#xo_dependency(${SELF_LIB} xo_ordinaltree)  # for some reason wants to link -lxo_ordinaltree ??
 xo_dependency(${SELF_LIB} reflect)
 xo_dependency(${SELF_LIB} webutil)
+xo_dependency(${SELF_LIB} printjson)
 xo_dependency(${SELF_LIB} callback)
