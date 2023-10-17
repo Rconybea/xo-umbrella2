@@ -13,16 +13,18 @@
 
 namespace xo {
     namespace time {
-
-        using utc_nanos = std::chrono::time_point<std::chrono::system_clock,
-                                                  std::chrono::nanoseconds>;
-
         using nanos = std::chrono::nanoseconds;
         using microseconds = std::chrono::microseconds;
         using milliseconds = std::chrono::milliseconds;
         using seconds = std::chrono::seconds;
         using hours = std::chrono::hours;
         using days = std::chrono::days;
+
+        using utc_nanos = std::chrono::time_point<std::chrono::system_clock,
+                                                  std::chrono::nanoseconds>;
+        using utc_micros = std::chrono::time_point<std::chrono::system_clock,
+                                                   std::chrono::microseconds>;
+
 
         struct timeutil {
             static utc_nanos now() {
@@ -168,7 +170,9 @@ namespace xo {
 
                 /* use yyyymmdd.hh:mm:ss.nnnnnn */
 
-                time_t t0_time_t = (std::chrono::system_clock::to_time_t(t0));
+                time_t t0_time_t
+                    = (std::chrono::system_clock::to_time_t
+                       (std::chrono::time_point_cast<microseconds>(t0)));
                 //time_t t0_time_t = (std::chrono::system_clock::to_time_t(std::chrono::time_point_cast<xo::time::microseconds>(t0)));
 
                 /* convert to std::tm, in UTC coords,

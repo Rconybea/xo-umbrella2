@@ -232,7 +232,7 @@ namespace xo {
     } /*nesting_level*/
 
     template <typename CharT, typename Traits>
-    basic_scope<CharT, Traits>::state_impl_type *
+    typename basic_scope<CharT, Traits>::state_impl_type *
     basic_scope<CharT, Traits>::require_indent_thread_local_state()
     {
         state_impl_type * local_state = require_thread_local_state();
@@ -244,7 +244,7 @@ namespace xo {
     } /*require_thread_local_stream*/
 
     template <typename CharT, typename Traits>
-    basic_scope<CharT, Traits>::state_impl_type *
+    typename basic_scope<CharT, Traits>::state_impl_type *
     basic_scope<CharT, Traits>::require_thread_local_state()
     {
         if(!s_threadlocal_state) {

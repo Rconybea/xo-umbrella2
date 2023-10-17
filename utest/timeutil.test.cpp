@@ -10,75 +10,82 @@ using namespace xo::time;
 using namespace std::chrono;
 
 namespace ut {
+    template <typename FromTime>
+    inline utc_micros to_micros(FromTime tm) {
+        return std::chrono::time_point_cast<xo::time::microseconds>(tm);
+    } /*to_micros*/
+
     TEST_CASE("epoch", "[timeutil]") {
         //tag_config::tag_color = color_spec_type::none();
+        using xo::time::microseconds;
+
 
         utc_nanos t0 = timeutil::epoch();
 
-        REQUIRE(std::chrono::system_clock::to_time_t(t0) == std::time_t(0));
+        REQUIRE(std::chrono::system_clock::to_time_t(to_micros(t0)) == std::time_t(0));
     } /*TEST_CASE(epoch)*/
 
     TEST_CASE("ymd_hms", "[timeutil]") {
         {
             utc_nanos t0 = timeutil::ymd_hms(19700101 /*ymd*/, 0 /*hms*/);
-            REQUIRE(std::chrono::system_clock::to_time_t(t0) == std::time_t(0));
+            REQUIRE(std::chrono::system_clock::to_time_t(to_micros(t0)) == std::time_t(0));
         }
 
         {
             utc_nanos t0 = timeutil::ymd_hms(19700101 /*ymd*/, 1 /*hms*/);
-            REQUIRE(std::chrono::system_clock::to_time_t(t0) == std::time_t(1));
+            REQUIRE(std::chrono::system_clock::to_time_t(to_micros(t0)) == std::time_t(1));
         }
 
         {
             utc_nanos t0 = timeutil::ymd_hms(19700101 /*ymd*/, 100 /*hms*/);
-            REQUIRE(std::chrono::system_clock::to_time_t(t0) == std::time_t(60));
+            REQUIRE(std::chrono::system_clock::to_time_t(to_micros(t0)) == std::time_t(60));
         }
 
         {
             utc_nanos t0 = timeutil::ymd_hms(19700101 /*ymd*/, 10000 /*hms*/);
-            REQUIRE(std::chrono::system_clock::to_time_t(t0) == std::time_t(3600));
+            REQUIRE(std::chrono::system_clock::to_time_t(to_micros(t0)) == std::time_t(3600));
         }
 
         {
             utc_nanos t0 = timeutil::ymd_hms(19700101 /*ymd*/, 235959 /*hms*/);
-            REQUIRE(std::chrono::system_clock::to_time_t(t0) == std::time_t(86399));
+            REQUIRE(std::chrono::system_clock::to_time_t(to_micros(t0)) == std::time_t(86399));
         }
 
         {
             utc_nanos t0 = timeutil::ymd_hms(19700102 /*ymd*/, 235959 /*hms*/);
-            REQUIRE(std::chrono::system_clock::to_time_t(t0) == std::time_t(86400 + 86399));
+            REQUIRE(std::chrono::system_clock::to_time_t(to_micros(t0)) == std::time_t(86400 + 86399));
         }
 
         {
             utc_nanos t0 = timeutil::ymd_hms(19700131 /*ymd*/, 235959 /*hms*/);
-            REQUIRE(std::chrono::system_clock::to_time_t(t0) == std::time_t(30 * 86400 + 86399));
+            REQUIRE(std::chrono::system_clock::to_time_t(to_micros(t0)) == std::time_t(30 * 86400 + 86399));
         }
 
         {
             utc_nanos t0 = timeutil::ymd_hms(19700201 /*ymd*/, 235959 /*hms*/);
-            REQUIRE(std::chrono::system_clock::to_time_t(t0) == std::time_t(31 * 86400 + 86399));
+            REQUIRE(std::chrono::system_clock::to_time_t(to_micros(t0)) == std::time_t(31 * 86400 + 86399));
         }
     } /*TEST_CASE(ymd_hms)*/
 
     TEST_CASE("ymd_midnight", "[timeutil]") {
         {
             utc_nanos t0 = timeutil::ymd_midnight(19700101 /*ymd*/);
-            REQUIRE(std::chrono::system_clock::to_time_t(t0) == std::time_t(0));
+            REQUIRE(std::chrono::system_clock::to_time_t(to_micros(t0)) == std::time_t(0));
         }
 
         {
             utc_nanos t0 = timeutil::ymd_midnight(19700102 /*ymd*/);
-            REQUIRE(std::chrono::system_clock::to_time_t(t0) == std::time_t(86400));
+            REQUIRE(std::chrono::system_clock::to_time_t(to_micros(t0)) == std::time_t(86400));
         }
 
         {
             utc_nanos t0 = timeutil::ymd_midnight(19700131 /*ymd*/);
-            REQUIRE(std::chrono::system_clock::to_time_t(t0) == std::time_t(30 * 86400));
+            REQUIRE(std::chrono::system_clock::to_time_t(to_micros(t0)) == std::time_t(30 * 86400));
         }
 
         {
             utc_nanos t0 = timeutil::ymd_midnight(19700201 /*ymd*/);
-            REQUIRE(system_clock::to_time_t(t0) == std::time_t(31 * 86400));
+            REQUIRE(system_clock::to_time_t(to_micros(t0)) == std::time_t(31 * 86400));
         }
     } /*TEST_CASE(ymd_midnight)*/
 
@@ -144,10 +151,10 @@ namespace ut {
             INFO(xtag("tc.utc_ymd_hms_usec_str", tc.utc_ymd_hms_usec_str_));
 
             utc_nanos const t0 = timeutil::ymd_hms_usec(tc.ymd_, tc.hms_, tc.usec_);
-            REQUIRE(system_clock::to_time_t(t0) == std::time_t(tc.epoch_sec_));
+            REQUIRE(system_clock::to_time_t(to_micros(t0)) == std::time_t(tc.epoch_sec_));
 
             auto x = timeutil::utc_split_vs_midnight(t0);
-            REQUIRE(system_clock::to_time_t(x.first) == tc.midnight_sec_);
+            REQUIRE(system_clock::to_time_t(to_micros(x.first)) == tc.midnight_sec_);
             REQUIRE(x.second == seconds(tc.fractional_sec_) + microseconds(tc.fractional_usec_));
 
             {
