@@ -1,4 +1,4 @@
-# webutil library (header-only)
+# webutil library
 
 ## Getting Started
 
