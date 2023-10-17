@@ -1,6 +1,13 @@
 # python bindings for c++ reflection library (xo-reflect)
 
-## build + install
+## Getting Started
+
+### build + install dependencies
+
+- [github/Rconybea/xo-pyutil](https://github.com/Rconybea/xo-pyutil)
+- [github/Rconybea/xo-reflect](https://github.com/Rconybea/xo-reflect)
+
+### build + install
 ```
 $ cd xo-pyreflect
 $ mkdir build
@@ -13,8 +20,9 @@ $ cmake \
 $ make
 $ make install
 ```
+(also see .github/workflows/main.yml)
 
-## build for unit test coverage
+### build for unit test coverage
 ```
 $ cd xo-pyreflect
 $ mkdir build-ccov
@@ -26,7 +34,7 @@ $ cmake \
     -DCMAKE_BUILD_TYPE=Debug ..
 ```
 
-## LSP (language server) support
+### LSP (language server) support
 
 LSP looks for compile commands in the root of the source tree;
 while Cmake creates them in the root of its build directory.
