@@ -26,7 +26,8 @@ add_code_coverage_all_targets(EXCLUDE /nix/store/* utest/*)
 # c++ settings
 
 set(XO_PROJECT_NAME refcnt)
-set(PROJECT_CXX_FLAGS "-fconcepts-diagnostics-depth=2")
+set(PROJECT_CXX_FLAGS "")
+#set(PROJECT_CXX_FLAGS "-fconcepts-diagnostics-depth=2")  # gcc-only!
 
 add_definitions(${PROJECT_CXX_FLAGS})
 
