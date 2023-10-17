@@ -1,5 +1,12 @@
 # reflection library
 
+## Getting Started
+
+### build + install  dependencies
+
+- [github/Rconybea/xo-refcnt](https://github.com/Rconybea/xo-refcnt)
+- [github/Rconybea/xo-subsys](https://github.com/Rconybea/xo-subsys)
+
 ### build + install
 ```
 $ cd reflect
