@@ -85,6 +85,32 @@ endmacro()
 # ----------------------------------------------------------------
 # use this for a shared library.
 #
+macro(xo_add_shared_library3 target projectTargets targetversion soversion sources)
+    add_library(${target} SHARED ${sources})
+    foreach(arg IN ITEMS ${ARGN})
+        #message("target=${target}; arg=${arg}")
+
+        # to use PUBLIC here would need to split:
+        #   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${arg}}>
+        #   $<INSTALL_INTERFACE:${arg}>
+        # but shouldn't need that,  since we arrange to install includes via
+        # xo_include_options2() below
+        #
+        target_sources(${target} PRIVATE ${arg})
+    endforeach()
+    set_target_properties(
+        ${target}
+        PROPERTIES
+        VERSION ${targetversion}
+        SOVERSION ${soversion})
+    xo_compile_options(${target})
+    xo_include_options2(${target})
+    xo_install_library3(${target} ${projectTargets})
+endmacro()
+
+# ----------------------------------------------------------------
+# OBSOLETE.  prefer xo_add_shared_library3()
+#
 macro(xo_add_shared_library target targetversion soversion sources)
     add_library(${target} SHARED ${sources})
     foreach(arg IN ITEMS ${ARGN})
@@ -133,11 +159,11 @@ macro(xo_include_options2 target)
     #
     target_include_directories(
       ${target} PUBLIC
-      $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>              # e.g. for #include "indentlog/scope.hpp"
       $<INSTALL_INTERFACE:include>
+      $<INSTALL_INTERFACE:include/xo/${target}>
+      $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>              # e.g. for #include "indentlog/scope.hpp"
       $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/${target}>    # e.g. for #include "Refcounted.hpp" in refcnt/src [DEPRECATED]
       $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/xo/${target}>    # e.g. for #include "TypeDescr.hpp" in reflect/src when ${target}=reflect
-#      $<INSTALL_INTERFACE:include/xo/${target}>
       $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>                      # e.g. for generated .hpp files
     )
 
@@ -346,8 +372,9 @@ endmacro()
 # 1. a directory pyfoo/ -> library pyfoo
 # 2. pyfoo/pyfoo.hpp.in -> pyfoo/pyfoo.hpp
 #
-macro(xo_pybind11_library target source_files)
-    configure_file(${target}.hpp.in ${target}.hpp)
+macro(xo_pybind11_library target projectTargets source_files)
+    configure_file(${target}.hpp.in
+                   ${PROJECT_SOURCE_DIR}/include/xo/${target}/${target}.hpp)
 
     # find_package(Python..) finds python in
     #   /Library/Frameworks/Python.framework/...
@@ -376,7 +403,7 @@ macro(xo_pybind11_library target source_files)
 
     xo_pybind11_link_flags()
     xo_include_options2(${target})
-    xo_install_library2(${target})
+    xo_install_library3(${target} ${projectTargets})
 endmacro()
 
 # ----------------------------------------------------------------
