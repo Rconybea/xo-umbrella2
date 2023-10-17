@@ -17,23 +17,36 @@ namespace xo {
          *
          * can use id to remove callback later:
          *   cbset.remove_callback(cb_id);
+         *
+         * Tag so xo-callback can be header-only
          */
-        class CallbackId {
+        template <typename Tag>
+        class CallbackIdImpl {
         public:
-            CallbackId() = default;
-            explicit CallbackId(uint32_t id) : id_{id} {}
+            CallbackIdImpl() = default;
+            explicit CallbackIdImpl(uint32_t id) : id_{id} {}
 
             /* generate a globally-unique id (not threadsafe) */
-            static CallbackId generate();
+            static CallbackIdImpl generate() {
+                static CallbackIdImpl s_last_id;
+
+                s_last_id = CallbackIdImpl(s_last_id.id() + 1);
+
+                return s_last_id;
+            } /*generate*/
 
             uint32_t id() const { return id_; }
 
         private:
             uint32_t id_ = 0;
-        }; /*CallbackId*/
+        }; /*CallbackIdImpl*/
 
-        inline bool operator==(CallbackId lhs, CallbackId rhs) { return lhs.id() == rhs.id(); }
-        inline bool operator!=(CallbackId lhs, CallbackId rhs) { return lhs.id() != rhs.id(); }
+        template <typename Tag>
+        inline bool operator==(CallbackIdImpl<Tag> lhs, CallbackIdImpl<Tag> rhs) { return lhs.id() == rhs.id(); }
+        template <typename Tag>
+        inline bool operator!=(CallbackIdImpl<Tag> lhs, CallbackIdImpl<Tag> rhs) { return lhs.id() != rhs.id(); }
+
+        using CallbackId = CallbackIdImpl<class CallbackId_tag>;
 
         /*   queue add/remove callback instructions encountered during callback
          *   execution, to avoid invalidating vector iterator.
