@@ -2,16 +2,17 @@
 
 in-memory queuing system
 
-# dependencies
+## Getting Started
+
+### build + install dependencies
 
 build+install these first
 
-- xo-reflect [github.com/Rconybea/xo-reflect]
-- xo-callback [github.com/Rconybea/xo-callback]
+- xo-reflect [github.com/Rconybea/xo-reflect](https://github.com/Rconybea/reflect)
+- xo-callback [github.com/Rconybea/xo-callback](https://github.com/Rconybea/xo-callback)
+- xo-webutil [github.com/Rconybea/xo-webutil](https://github.com/Rconybea/xo-webutil)
 
-# build + install
-
-# build
+### build + install xo-reactor
 ```
 $ cd reactor
 $ mkdir build
@@ -23,7 +24,7 @@ $ make install
 ```
 (also see .github/workflows/main.yml)
 
-# build for unit test coverage
+### build for unit test coverage
 ```
 $ cd xo-reactor
 $ mkdir ccov
@@ -31,7 +32,9 @@ $ cd ccov
 $ cmake -DCMAKE_MODULE_PATH=${INSTALL_PREFIX}/share/cmake  -DCMAKE_PREFIX_PATH=${INSTALL_PREFIX} -DCODE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug ..
 ```
 
-# LSP support
+## Development
+
+### LSP support
 
 LSP looks for compile commands in the root of the source tree;
 cmake creates them in the root of its build directory.
@@ -39,4 +42,15 @@ cmake creates them in the root of its build directory.
 ```
 $ cd xo-reactor
 $ ln -s build/compile_commands.json
+```
+
+### display cmake variables
+
+- `-L` list variables
+- `-A` include 'advanced' variables
+- `-H` include help text
+
+```
+$ cd reactor/build
+$ cmake -LAH
 ```
