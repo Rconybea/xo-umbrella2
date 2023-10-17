@@ -25,7 +25,7 @@ add_code_coverage()
 add_code_coverage_all_targets(EXCLUDE /nix/store/* ${PROJECT_SOURCE_DIR}/utest/* ${PROJECT_BINARY_DIR}/local/* ${PROJECT_SOURCE_DIR}/repo/*)
 
 # ----------------------------------------------------------------
-# c++ settings
+# common c++ settings
 
 # PROJECT_CXX_FLAGS: bespoke for this project - usually empty
 set(PROJECT_CXX_FLAGS "")

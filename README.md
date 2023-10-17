@@ -5,7 +5,14 @@ Reentrant:
    even while being invoked.
 2. Any such re-entrant operations are deferred until callback invocation completes.
 
-# build + install
+## Getting Started
+
+### build + install dependencies
+
+- [github/Rconybea/refcnt](https://github.com/Rconybea/refcnt)
+
+### build + install
+
 ```
 $ cd xo-callback
 $ mkdir build
@@ -20,7 +27,8 @@ $ make install
 ```
 (also see .github/workflows/main.yml)
 
-# build for unit test coverage
+### build for unit test coverage
+
 ```
 $ cd xo-callback
 $ mkdir build-ccov
@@ -32,7 +40,7 @@ $ cmake \
     -DCMAKE_BUILD_TYPE=Debug ..
 ```
 
-# LSP (language server) support
+### LSP (language server) support
 
 LSP looks for compile commands in the root of the source tree;
 cmake creates them in the root of its build directory.
