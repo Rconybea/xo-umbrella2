@@ -1,0 +1,25 @@
+/* @file pyprocess.hpp
+ *
+ * automatically generated from src/pyprocess/pyprocess.hpp.in
+ * see src/pyprocess/CMakeLists.txt
+ */
+
+/* python requires module name = library name
+ * example:
+ *   PYBIND11_MODULE(PYPROCESS_MODULE_NAME(), m) { ... }
+ */
+#define PYPROCESS_MODULE_NAME() @SELF_LIBRARY_NAME@
+
+/* example:
+ *   py::module_::import(PYPROCESS_MODULE_NAME_STR)
+ */
+#define PYPROCESS_MODULE_NAME_STR "@SELF_LIBRARY_NAME@"
+
+/* example:
+ *   PYPROCESS_IMPORT_MODULE()
+ * replaces
+ *   py::module_::import("pyprocess")
+ */
+#define PYPROCESS_IMPORT_MODULE() py::module_::import("@SELF_LIBRARY_NAME@")
+
+/* end pyprocess.hpp */

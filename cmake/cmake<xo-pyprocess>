@@ -1,0 +1,4 @@
+  /home/roland/proj/xo-pyprocess/cmake:
+  drwxr-xr-x 2 roland roland 4096 Oct 12 21:49 .
+  drwxr-xr-x 6 roland roland 4096 Oct 12 21:49 ..
+  -rw-r--r-- 1 roland roland  125 Oct 12 21:49 xo_pyprocessConfig.cmake.in
