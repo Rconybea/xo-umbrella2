@@ -724,9 +724,13 @@ namespace xo {
              */
             void init_cx_config(lws_context_creation_info * p_cx_config) {
                 ::memset(p_cx_config, 0, sizeof(*p_cx_config));
-                p_cx_config->port   = this->ws_config_.port();
+                p_cx_config->port       = this->ws_config_.port();
                 p_cx_config->vhost_name = "localhost";
-                p_cx_config->pvo    = &(this->pvo_);
+#if defined(LWS_WITH_PLUGINS)
+                p_cx_config->pvo        = &(this->pvo_);
+#else
+                p_cx_config->pvo        = nullptr;
+#endif
                 p_cx_config->protocols  = this->protocol_v_.data();
                 p_cx_config->mounts     = &(this->mount_static_);
                 /* userdata -- accessible from context with lws_context_user() */
