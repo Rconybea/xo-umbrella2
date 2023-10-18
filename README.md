@@ -15,7 +15,7 @@ build+install these first
 
 ## build
 ```
-$ cd process
+$ cd xo-process
 $ mkdir build
 $ cd build
 $ INSTALL_PREFIX=/usr/local  # or wherever you prefer
