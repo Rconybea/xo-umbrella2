@@ -161,6 +161,25 @@ jobs:
 
     # ----------------------------------------------------------------
 
+    - name: Clone pyutil
+      uses: actions/checkout@v3
+      with:
+        repository: Rconybea/xo-pyutil
+        path: repo/pyutil
+
+    - name: Configure pyutil
+      # configure cmake for pyutil in dedicated build directory.
+      run: cmake -B ${{github.workspace}}/build_pyutil -DCMAKE_MODULE_PATH=${{github.workspace}}/local/share/cmake -DCMAKE_PREFIX_PATH=${{github.workspace}}/local -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local repo/pyutil
+
+    - name: Build pyutil
+      run: cmake --build ${{github.workspace}}/build_pyutil --config ${{env.BUILD_TYPE}}
+
+    - name: Install pyutil
+      # install into ${{github.workspace}}/local
+      run: cmake --install ${{github.workspace}}/build_pyutil
+
+    # ----------------------------------------------------------------
+
     - name: Clone pywebutil
       uses: actions/checkout@v3
       with:
@@ -291,25 +310,6 @@ jobs:
     - name: Install process
       # install into ${{github.workspace}}/local
       run: cmake --install ${{github.workspace}}/build_process
-
-    # ----------------------------------------------------------------
-
-    - name: Clone pyutil
-      uses: actions/checkout@v3
-      with:
-        repository: Rconybea/xo-pyutil
-        path: repo/pyutil
-
-    - name: Configure pyutil
-      # configure cmake for pyutil in dedicated build directory.
-      run: cmake -B ${{github.workspace}}/build_pyutil -DCMAKE_MODULE_PATH=${{github.workspace}}/local/share/cmake -DCMAKE_PREFIX_PATH=${{github.workspace}}/local -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local repo/pyutil
-
-    - name: Build pyutil
-      run: cmake --build ${{github.workspace}}/build_pyutil --config ${{env.BUILD_TYPE}}
-
-    - name: Install pyutil
-      # install into ${{github.workspace}}/local
-      run: cmake --install ${{github.workspace}}/build_pyutil
 
     # ----------------------------------------------------------------
 
