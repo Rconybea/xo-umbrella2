@@ -377,8 +377,15 @@ endmacro()
 # 2. pyfoo/pyfoo.hpp.in -> pyfoo/pyfoo.hpp
 #
 macro(xo_pybind11_library target projectTargets source_files)
-    configure_file(${target}.hpp.in
-                   ${PROJECT_SOURCE_DIR}/include/xo/${target}/${target}.hpp)
+    configure_file(
+        ${target}.hpp.in
+        ${PROJECT_BINARY_DIR}/${target}.hpp)
+    # was ${PROJECT_SOURCE_DIR}/include/xo/${target}/${target}.hpp)
+
+    install(
+        FILES ${PROJECT_BINARY_DIR}/${target}.hpp
+        PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
+        DESTINATION ${CMAKE_INSTALL_PREFIX}/include/xo/${target})
 
     # find_package(Python..) finds python in
     #   /Library/Frameworks/Python.framework/...
