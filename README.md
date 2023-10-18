@@ -8,7 +8,7 @@ constructive, simulation-aware models for stochastic processes
 
 build+install these first
 
-- xo-reactor [github.com/Rconybea/xo-reactor](https://github.com/Rconybea/xo-reactor)
+- xo-simulator [github.com/Rconybea/xo-simulator](https://github.com/Rconybea/xo-simulator)
 - randomgen [github.com/Rconybea/randomgen](https://github.com/Rconybea/randomgen)
 
 # build + install
