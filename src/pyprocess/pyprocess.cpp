@@ -1,7 +1,7 @@
 /* @file pyprocess.cpp */
 
 // note: need pyprocess/ here bc pyprocess.hpp is generated, located in build directory
-#include "src/pyprocess/pyprocess.hpp"
+#include "pyprocess.hpp"
 #include "xo/pywebutil/pywebutil.hpp"
 #include "xo/process/init_process.hpp"
 #include "xo/process/UpxToConsole.hpp"
