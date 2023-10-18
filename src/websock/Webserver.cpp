@@ -1561,25 +1561,29 @@ namespace xo {
              *                          and whether or not .per_session_data_size is 0.
              *  .tx_packet_size
              */
-            p_v->push_back({
-                    "http",
-                    &WebserverImpl::notify_dynamic_http,
-                    sizeof(struct per_session_data__http),
-                    0,
-                    0,
-                    NULL,
-                    0
+            p_v->push_back(
+                {"http",
+                 &WebserverImpl::notify_dynamic_http,
+                 sizeof(struct per_session_data__http),
+                 0,
+                 0,
+                 NULL,
+                 0
                 });
-            p_v->push_back({
-                    "lws-minimal",
-                    &WebserverImplWsThread::notify_minimal,
-                    sizeof(struct per_session_data__minimal),
-                    128,
-                    0,
-                    NULL,
-                    0});
+            p_v->push_back(
+                {"lws-minimal",
+                 &WebserverImplWsThread::notify_minimal,
+                 sizeof(struct per_session_data__minimal),
+                 128,
+                 0,
+                 NULL,
+                 0});
             /* mandatory end-of-array sentinel,  requires by lws */
+#if ((LWS_LIBRARY_VERSION_MAJOR > 4) || (LWS_LIBRARY_VERSION_MAJOR == 4) && (LWS_LIBRARY_VERSION_MINOR >= 3))
             p_v->push_back(LWS_PROTOCOL_LIST_TERM);
+#else
+            p_v->push_back({ nullptr, nullptr, 0, 0, 0, nullptr, 0});
+#endif
         } /*init_protocols*/
 
         /* called reentrantly from ::lws_service(),
@@ -1889,6 +1893,8 @@ namespace xo {
                       " | visit http://localhost:%d\n", this->ws_config_.port());
 #if defined(LWS_WITH_PLUGINS)
             lwsl_user("LWS_WITH_PLUGINS present");
+#endif
+#if defined(LWS_WITH_TLS)
             lwsl_user("LWS_WITH_TLS present");
 #endif
 
