@@ -23,6 +23,8 @@ $ make install
 ```
 (also see .github/workflows/main.yml)
 
+## Development
+
 ### build for unit test coverage
 ```
 $ cd xo-pyprintjson
@@ -43,4 +45,15 @@ while Cmake creates them in the root of its build directory.
 ```
 $ cd xo-pyprintjson
 $ ln -s build/compile_commands.json  # supply compile commands to LSP
+```
+
+### display cmake variables
+
+- `-L` list variables
+- `-A` include 'advanced' variables
+- `-H` include help text
+
+```
+$ cd xo-pyprintjson/build
+$ cmake -LAH
 ```
