@@ -25,6 +25,9 @@ jobs:
       # install catch2.  see [[https://stackoverflow.com/questions/57982945/how-to-apt-get-install-in-a-github-actions-workflow]]
       run: sudo apt-get install -y catch2
 
+    - name: Install pybind11-dev
+      run: sudo apt-get install -y pybind11-dev
+
     # ----------------------------------------------------------------
 
     - name: Clone xo-cmake
