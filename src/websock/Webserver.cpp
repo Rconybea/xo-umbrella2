@@ -677,8 +677,7 @@ namespace xo {
                     /* .origin_protocol */    LWSMPRO_CALLBACK, /* dynamic */
                     /* .mountpoint_len */         4,      /* char count */
                     /* .basic_auth_login_file */  NULL,
-#                  if ((LWS_LIBRARY_VERSION_MAJOR < 4)
-                       || ((LWS_LIBRARY_VERSION_MAJOR == 4) && (LWS_LIBRARY_VERSION_MINOR < 3)))
+#                  if ((LWS_LIBRARY_VERSION_MAJOR < 4) || ((LWS_LIBRARY_VERSION_MAJOR == 4) && (LWS_LIBRARY_VERSION_MINOR < 3)))
                     /* ._unused[] */ { nullptr, nullptr },
 #                  endif
                 };
@@ -705,8 +704,7 @@ namespace xo {
                     /* .origin_protocol */    LWSMPRO_FILE,   /* files in a dir */
                     /* .mountpoint_len */         1,      /* char count */
                     /* .basic_auth_login_file */  NULL,
-#                  if ((LWS_LIBRARY_VERSION_MAJOR < 4)
-                       || ((LWS_LIBRARY_VERSION_MAJOR == 4) && (LWS_LIBRARY_VERSION_MINOR < 3)))
+#                  if ((LWS_LIBRARY_VERSION_MAJOR < 4) || ((LWS_LIBRARY_VERSION_MAJOR == 4) && (LWS_LIBRARY_VERSION_MINOR < 3)))
                     /* ._unused[] */ { nullptr, nullptr },
 #                  endif
                 };
