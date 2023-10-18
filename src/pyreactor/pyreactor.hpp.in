@@ -1,0 +1,25 @@
+/* @file pyreactor.hpp
+ *
+ * automatically generated from src/pyreflect/pyreactor.hpp.in
+ * see src/pyreactor/CMakeLists.txt
+ */
+
+/* python requires module name = library name
+ * example:
+ *   PYBIND11_MODULE(PYREACTOR_MODULE_NAME(), m) { ... }
+ */
+#define PYREACTOR_MODULE_NAME() @SELF_LIBRARY_NAME@
+
+/* example:
+ *   py::module_::import(PYREACTOR_MODULE_NAME_STR)
+ */
+#define PYREACTOR_MODULE_NAME_STR "@SELF_LIBRARY_NAME@"
+
+/* example:
+ *   PYREACTOR_IMPORT_MODULE()
+ * replaces
+ *   py::module_::import("pyreactor")
+ */
+#define PYREACTOR_IMPORT_MODULE() py::module_::import("@SELF_LIBRARY_NAME@")
+
+/* end pyreactor.hpp */
