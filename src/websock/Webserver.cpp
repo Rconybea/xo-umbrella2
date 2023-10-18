@@ -657,6 +657,8 @@ namespace xo {
             virtual void init_protocols(std::vector<lws_protocols> * p_v) = 0;
 
             void init_mount_dynamic(lws_http_mount * p_mount) {
+                /* see lws-context-vhost.h for lws_http_mount */
+
                 *p_mount = {
                     /* .mount_next */         NULL,       /* linked-list "next" */
                     /* .mountpoint */         "/dyn",         /* mountpoint URL */
@@ -675,6 +677,9 @@ namespace xo {
                     /* .origin_protocol */    LWSMPRO_CALLBACK, /* dynamic */
                     /* .mountpoint_len */         4,      /* char count */
                     /* .basic_auth_login_file */  NULL,
+#                  if (LWS_LIBRARY_VERSION_MAJOR < 4) || (LWS_LIBRARY_VERSION_MINOR < 3)  // -Werror=missing-field-initializers
+                    /* ._unused[] */ { nullptr, nullptr },
+#                  endif
                 };
             } /*init_mount_dynamic*/
 
