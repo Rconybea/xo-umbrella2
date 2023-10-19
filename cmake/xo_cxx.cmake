@@ -518,10 +518,19 @@ macro(xo_pybind11_library target projectTargets source_files)
         ${PROJECT_BINARY_DIR}/${target}.hpp)
     # was ${PROJECT_SOURCE_DIR}/include/xo/${target}/${target}.hpp)
 
-    install(
-        FILES ${PROJECT_BINARY_DIR}/${target}.hpp
-        PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/include/xo/${target})
+    xo_establish_symlink_install()
+
+    if(XO_SYMLINK_INSTALL)
+        xo_install_make_symlink(
+            ${PROJECT_BINARY_DIR}
+            ${CMAKE_INSTALL_PREFIX}/include/xo/${target}
+            ${target}.hpp)
+    else()
+        install(
+            FILES ${PROJECT_BINARY_DIR}/${target}.hpp
+            PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
+            DESTINATION ${CMAKE_INSTALL_PREFIX}/include/xo/${target})
+    endif()
 
     # find_package(Python..) finds python in
     #   /Library/Frameworks/Python.framework/...
