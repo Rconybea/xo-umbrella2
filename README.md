@@ -1,7 +1,12 @@
 # random number generators
 
-# to build + install locally
+## Getting Started
 
+### build + install dependencies
+
+- see [github/Rconybea/cmake](https://github.com/Rconybea/xo-cmake) -- cmake modules
+
+### to build + install locally
 ```
 $ cd randomgen
 $ mkdir build
