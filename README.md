@@ -14,7 +14,7 @@ build+install these first
 
 ### build + install xo-reactor
 ```
-$ cd reactor
+$ cd xo-reactor
 $ mkdir build
 $ cd build
 $ INSTALL_PREFIX=/usr/local  # or wherever you prefer
@@ -24,6 +24,8 @@ $ make install
 ```
 (also see .github/workflows/main.yml)
 
+## Development
+
 ### build for unit test coverage
 ```
 $ cd xo-reactor
@@ -31,8 +33,6 @@ $ mkdir ccov
 $ cd ccov
 $ cmake -DCMAKE_MODULE_PATH=${INSTALL_PREFIX}/share/cmake  -DCMAKE_PREFIX_PATH=${INSTALL_PREFIX} -DCODE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug ..
 ```
-
-## Development
 
 ### LSP support
 
@@ -51,6 +51,6 @@ $ ln -s build/compile_commands.json
 - `-H` include help text
 
 ```
-$ cd reactor/build
+$ cd xo-reactor/build
 $ cmake -LAH
 ```
