@@ -24,12 +24,16 @@ namespace xo {
             // os << dist
             // is >> dist
 
-        } && std::copyable<Distribution>
+        }
+#ifdef __clang__
+        // std::copyable apparently not available in clang11 ?
+#else
+        && std::copyable<Distribution>
         && std::copyable<typename Distribution::param_type>
+#endif
         && std::equality_comparable<typename Distribution::param_type>;
     } /*namespace rng*/
 
 } /*namespace xo*/
-
 
 /* end distribution_concept.hpp */
