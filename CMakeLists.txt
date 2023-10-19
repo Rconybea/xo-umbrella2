@@ -5,8 +5,8 @@ cmake_minimum_required(VERSION 3.10)
 project(reflect VERSION 0.1)
 enable_language(CXX)
 
-message(STATUS "CMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}")
-message(STATUS "CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}")
+#message(STATUS "CMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}")
+#message(STATUS "CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}")
 
 # common XO cmake macros (see proj/xo-cmake)
 include(xo_macros/xo_cxx)
@@ -50,4 +50,4 @@ xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets
 # ----------------------------------------------------------------
 # install .hpp files
 
-xo_install_include_tree()
+#xo_install_include_tree()
