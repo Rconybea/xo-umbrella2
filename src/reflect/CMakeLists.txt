@@ -1,20 +1,21 @@
 # reflect/CMakeLists.txt
 
-set(SELF_LIBRARY_NAME reflect)
-set(SELF_SOURCE_FILES TypeDescr.cpp TypeDescrExtra.cpp TaggedRcptr.cpp atomic/AtomicTdx.cpp pointer/PointerTdx.cpp vector/VectorTdx.cpp struct/StructTdx.cpp struct/StructMember.cpp init_reflect.cpp)
+set(SELF_LIB reflect)
+set(SELF_SRCS TypeDescr.cpp TypeDescrExtra.cpp TaggedRcptr.cpp atomic/AtomicTdx.cpp pointer/PointerTdx.cpp vector/VectorTdx.cpp struct/StructTdx.cpp struct/StructMember.cpp init_reflect.cpp)
 
-xo_add_shared_library(${SELF_LIBRARY_NAME} ${PROJECT_VERSION} 1 ${SELF_SOURCE_FILES})
+#xo_add_shared_library(${SELF_LIB} ${PROJECT_VERSION} 1 ${SELF_SRCS})
+xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 ${SELF_SRCS})
 
 # ----------------------------------------------------------------
 # dependencies: indentlog, ...
 
-xo_dependency(${SELF_LIBRARY_NAME} refcnt)
-xo_dependency(${SELF_LIBRARY_NAME} indentlog)
-xo_dependency(${SELF_LIBRARY_NAME} subsys)
+xo_dependency(${SELF_LIB} refcnt)
+xo_dependency(${SELF_LIB} indentlog)
+xo_dependency(${SELF_LIB} subsys)
 
 # ----------------------------------------------------------------
 # 3rd party dependency: boost:
 
-#xo_boost_dependency(${SELF_LIBRARY_NAME})
+#xo_boost_dependency(${SELF_LIB})
 
 # end CMakeLists.txt
