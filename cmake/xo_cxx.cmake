@@ -559,7 +559,7 @@ macro(xo_pybind11_library target projectTargets source_files)
 
     xo_pybind11_link_flags()
     xo_include_options2(${target})
-    xo_install_library3(${target} ${projectTargets})
+    xo_install_library4(${target} ${projectTargets})
 endmacro()
 
 # ----------------------------------------------------------------
