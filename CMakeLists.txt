@@ -17,25 +17,15 @@ add_code_coverage()
 #
 add_code_coverage_all_targets(EXCLUDE /nix/store/* utest/*)
 
-set(XO_PROJECT_NAME subsys)
+#set(XO_PROJECT_NAME subsys)
 
 xo_toplevel_compile_options()
 
 # ----------------------------------------------------------------
 # installing header-only library
 
-add_library(subsys INTERFACE)
-xo_include_headeronly_options2(subsys)
-xo_install_library2(subsys)
-
-# ----------------------------------------------------------------
-# provide find_package() support
-
+xo_add_headeronly_library(subsys)
+xo_install_library4(subsys ${PROJECT_NAME}Targets)
 xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
-
-# ----------------------------------------------------------------
-# install .hpp
-
-xo_install_include_tree()
 
 # end CMakeLists.txt
