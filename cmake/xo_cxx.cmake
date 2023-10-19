@@ -513,21 +513,23 @@ endmacro()
 # 2. pyfoo/pyfoo.hpp.in -> pyfoo/pyfoo.hpp
 #
 macro(xo_pybind11_library target projectTargets source_files)
+    file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/include/xo/${target})
+
     configure_file(
         ${target}.hpp.in
-        ${PROJECT_BINARY_DIR}/${target}.hpp)
+        ${PROJECT_BINARY_DIR}/include/xo/${target}/${target}.hpp)
     # was ${PROJECT_SOURCE_DIR}/include/xo/${target}/${target}.hpp)
 
     xo_establish_symlink_install()
 
     if(XO_SYMLINK_INSTALL)
         xo_install_make_symlink(
-            ${PROJECT_BINARY_DIR}
+            ${PROJECT_BINARY_DIR}/include/xo/${target}
             ${CMAKE_INSTALL_PREFIX}/include/xo/${target}
             ${target}.hpp)
     else()
         install(
-            FILES ${PROJECT_BINARY_DIR}/${target}.hpp
+            FILES ${PROJECT_BINARY_DIR}/include/xo/${target}/${target}.hpp
             PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
             DESTINATION ${CMAKE_INSTALL_PREFIX}/include/xo/${target})
     endif()
