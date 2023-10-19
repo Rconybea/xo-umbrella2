@@ -47,6 +47,7 @@ xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets
 # ----------------------------------------------------------------
 # install .hpp
 
-xo_install_include_tree()
+#xo_install_include_tree()
+xo_install_include_tree3(include/xo/cxxutil)
 
 # end CMakeLists.txt
