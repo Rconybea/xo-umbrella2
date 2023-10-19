@@ -188,13 +188,84 @@ macro(xo_compile_options target)
 endmacro()
 
 # ----------------------------------------------------------------
+#
+# establish default value for XO_SYMLINK_INSTALL.
+#
+# may want to use this for a nested build,
+# where we want to run cmake for nested codebase using externalproject_add().
+#
+# in this case:
+# 1. will need to build+install nested project foo to temporary location in build tree,
+#    so that build artifacts (such as fooConfig.cmake) are available to depending
+#    projects
+# 2. bona fide install with (for example) copied .hpp files interferes with
+#    cross-codebase development.
+#    2a. want changes to original .hpp files to trigger rebuild of depending codebases.
+#        This won't happen if depending project relies on a copy
+#    2b. want IDE that observes compiler commands (i.e. LSP) to visit .hpp files
+#        in their original codebase,  since that's the correct place to make any edits.
+#
+# see
+# - xo_install_include_tree()
+#
+macro(xo_establish_symlink_install)
+    if(NOT DEFINED XO_SYMLINK_INSTALL)
+        set(XO_SYMLINK_INSTALL False)
+    endif()
+endmacro()
+
+# ----------------------------------------------------------------
 # use this to install typical include file subtree
 #
 macro(xo_install_include_tree)
-    install(
-        DIRECTORY ${PROJECT_SOURCE_DIR}/include/
-        FILE_PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
+    xo_establish_symlink_install()
+
+    if(XO_SYMLINK_INSTALL)
+        message(FATAL_ERROR "symlink install not implemented for ${PROJECT_SOURCE_DIR}/include -- use xo_install_include_tree3()")
+    else()
+        install(
+            DIRECTORY ${PROJECT_SOURCE_DIR}/include/
+            FILE_PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
+            DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
+    endif()
+endmacro()
+
+# create symlink from ${symlink_path} -> ${dest_path},
+# from
+#   make install
+#
+macro(xo_install_make_symlink dest_path symlink_dir symlink_name)
+    install(CODE "message(\"make_directory: ${symlink_dir}\")")
+    install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${symlink_dir})")
+
+    install(CODE "message(\"symlink: ${symlink_dir}/${symlink_name} -> ${dest_path}/${symlink_name}\")")
+    install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink ${dest_path}/${symlink_name} ${symlink_dir}/${symlink_name})")
+endmacro()
+
+# e.g. path = include/xo/foo to install xo-foo/include/xo/foo
+#
+macro(xo_install_include_tree3 subdir_path)
+    xo_establish_symlink_install()
+
+    if(XO_SYMLINK_INSTALL)
+        # ugh.  cmake doesn't allow input path argument to cmake_path()
+        # to be a macro variable.
+        set(_xo_install_include_tree3_subdir_path ${subdir_path})
+        set(_xo_install_include_tree3_dirname "")
+        set(_xo_install_include_tree3_basename "")
+        cmake_path(GET _xo_install_include_tree3_subdir_path PARENT_PATH _xo_install_include_tree3_dirname)
+        cmake_path(GET _xo_install_include_tree3_subdir_path FILENAME _xo_install_include_tree3_basename)
+
+        xo_install_make_symlink(
+            ${PROJECT_SOURCE_DIR}/${_xo_install_include_tree3_dirname}
+            ${CMAKE_INSTALL_PREFIX}/${_xo_install_include_tree3_dirname}
+            ${_xo_install_include_tree3_basename})
+    else()
+        install(
+            DIRECTORY ${PROJECT_SOURCE_DIR}/${subdir_path}
+            FILE_PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
+            DESTINATION ${CMAKE_INSTALL_PREFIX}/${subdir_path})
+    endif()
 endmacro()
 
 # ----------------------------------------------------------------
@@ -225,6 +296,22 @@ macro(xo_install_library3 target projectTargets)
     )
 
     xo_install_include_tree()
+endmacro()
+
+macro(xo_install_library4 target projectTargets)
+    install(
+        TARGETS ${target}
+        EXPORT ${projectTargets}
+        LIBRARY DESTINATION lib COMPONENT Runtime
+        ARCHIVE DESTINATION lib COMPONENT Development
+        RUNTIME DESTINATION bin COMPONENT Runtime
+        PUBLIC_HEADER DESTINATION include COMPONENT Development
+        BUNDLE DESTINATION bin COMPONENT Runtime
+    )
+
+    xo_install_include_tree3(include/xo/${target})
+
+    #xo_install_include_tree() -- use xo_install_include_tree3() separately
 endmacro()
 
 # ----------------------------------------------------------------
