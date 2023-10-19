@@ -43,16 +43,16 @@ $ make
 $ make install
 ```
 
-alternatively, if you're a nix user:
-```
-$ git clone git@github.com:rconybea/indentlog-nix.git
-$ ls -d indentlog-nix
-indentlog-nix
-$ cd indentlog-nix
-$ nix-build
-```
-
 For some more detail see [BUILD.md](BUILD.md)
+
+### LSP support
+
+lsp will look for `compile_commands.json` in the root of the source tree; cmake creates it in build directory
+
+```
+$ cd xo-indentlog
+$ ln -s build/compile_commands.json
+```
 
 ## Examples
 
