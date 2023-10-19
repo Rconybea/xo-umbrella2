@@ -1,4 +1,4 @@
-name: build xo-callback + xo dependencies
+name: build xo-reactor + xo dependencies
 
 on:
   push:
