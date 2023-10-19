@@ -347,6 +347,22 @@ macro(xo_install_library4 target projectTargets)
     #xo_install_include_tree() -- use xo_install_include_tree3() separately
 endmacro()
 
+macro(xo_install_library5 target nxo_target projectTargets)
+    install(
+        TARGETS ${target}
+        EXPORT ${projectTargets}
+        LIBRARY DESTINATION lib COMPONENT Runtime
+        ARCHIVE DESTINATION lib COMPONENT Development
+        RUNTIME DESTINATION bin COMPONENT Runtime
+        PUBLIC_HEADER DESTINATION include COMPONENT Development
+        BUNDLE DESTINATION bin COMPONENT Runtime
+    )
+
+    xo_install_include_tree3(include/xo/${nxo_target})
+
+    #xo_install_include_tree() -- use xo_install_include_tree3() separately
+endmacro()
+
 # ----------------------------------------------------------------
 
 # for projectname=foo,  require:
