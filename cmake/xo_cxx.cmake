@@ -249,6 +249,8 @@ endmacro()
 # use this to install typical include file subtree
 #
 macro(xo_install_include_tree)
+    message(WARNING "deprecated xo_install_include_tree(); prefer xo_install_include_tree3()")
+
     xo_establish_symlink_install()
 
     if(XO_SYMLINK_INSTALL)
