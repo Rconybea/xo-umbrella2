@@ -83,9 +83,38 @@ macro(xo_include_headeronly_options2 target)
 endmacro()
 
 # ----------------------------------------------------------------
-# use this for a shared library.
+# use this to introduce a shared library.
+# - has symlink-enabled .hpp install
+#
+macro(xo_add_shared_library4 target projectTargets targetversion soversion sources)
+    add_library(${target} SHARED ${sources})
+    foreach(arg IN ITEMS ${ARGN})
+        #message("target=${target}; arg=${arg}")
+
+        # to use PUBLIC here would need to split:
+        #   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${arg}}>
+        #   $<INSTALL_INTERFACE:${arg}>
+        # but shouldn't need that,  since we arrange to install includes via
+        # xo_include_options2() below
+        #
+        target_sources(${target} PRIVATE ${arg})
+    endforeach()
+    set_target_properties(
+        ${target}
+        PROPERTIES
+        VERSION ${targetversion}
+        SOVERSION ${soversion})
+    xo_compile_options(${target})
+    xo_include_options2(${target})
+    xo_install_library4(${target} ${projectTargets})
+endmacro()
+
+# ----------------------------------------------------------------
+# OBSOLETE.  prefer xo_add_shared_library4()
 #
 macro(xo_add_shared_library3 target projectTargets targetversion soversion sources)
+    message(WARNING "obsolete call to xo_add_shared_library3(); prefer xo_add_shared_library4()")
+
     add_library(${target} SHARED ${sources})
     foreach(arg IN ITEMS ${ARGN})
         #message("target=${target}; arg=${arg}")
@@ -112,6 +141,8 @@ endmacro()
 # OBSOLETE.  prefer xo_add_shared_library3()
 #
 macro(xo_add_shared_library target targetversion soversion sources)
+    message(WARNING "obsolete call to xo_add_shared_library(); prefer xo_add_shared_library4()")
+
     add_library(${target} SHARED ${sources})
     foreach(arg IN ITEMS ${ARGN})
         #message("target=${target}; arg=${arg}")
