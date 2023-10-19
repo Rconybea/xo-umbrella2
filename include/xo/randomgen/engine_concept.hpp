@@ -7,6 +7,8 @@
 
 namespace std {
 #ifdef __clang__
+
+# if __clang_major__ <= 11
     template < class T >
     concept integral = std::is_integral_v<T>;
 
@@ -31,8 +33,11 @@ namespace std {
         && requires { { G::min() } -> std::same_as<std::invoke_result_t<G&>>;
                       { G::max() } -> std::same_as<std::invoke_result_t<G&>>;
                       requires std::bool_constant<(G::min() < G::max())>::value; };
+# endif
+
 #else
     /* uniform_random_bit_generator provided by gcc 12.3.2 */
+    /* uniform_random_bit_generator provided by clang 16 */
 #endif
 } /*namespace std*/
 

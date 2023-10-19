@@ -30,8 +30,9 @@ namespace xo {
 #else
         && std::copyable<Distribution>
         && std::copyable<typename Distribution::param_type>
+        && std::equality_comparable<typename Distribution::param_type>
 #endif
-        && std::equality_comparable<typename Distribution::param_type>;
+        ;
     } /*namespace rng*/
 
 } /*namespace xo*/
