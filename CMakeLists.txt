@@ -43,8 +43,3 @@ add_subdirectory(src/pyreflect)
 # provide find_package() support
 
 xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
-
-# ----------------------------------------------------------------
-# install .hpp files
-
-#xo_install_include_tree()
