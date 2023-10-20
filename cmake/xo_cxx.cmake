@@ -305,6 +305,8 @@ endmacro()
 # use this for a subdir that builds a library
 # and supports find_package()
 #
+# note: used deliberately in xo_pybind11_library() below
+#
 macro(xo_install_library2 target)
     install(
         TARGETS ${target}
@@ -345,6 +347,18 @@ macro(xo_install_library4 target projectTargets)
     xo_install_include_tree3(include/xo/${target})
 
     #xo_install_include_tree() -- use xo_install_include_tree3() separately
+endmacro()
+
+macro(xo_install_library4_noincludes target projectTargets)
+    install(
+        TARGETS ${target}
+        EXPORT ${projectTargets}
+        LIBRARY DESTINATION lib COMPONENT Runtime
+        ARCHIVE DESTINATION lib COMPONENT Development
+        RUNTIME DESTINATION bin COMPONENT Runtime
+        PUBLIC_HEADER DESTINATION include COMPONENT Development
+        BUNDLE DESTINATION bin COMPONENT Runtime
+    )
 endmacro()
 
 macro(xo_install_library5 target nxo_target projectTargets)
@@ -524,9 +538,9 @@ macro(xo_pybind11_library target projectTargets source_files)
 
     if(XO_SYMLINK_INSTALL)
         xo_install_make_symlink(
-            ${PROJECT_BINARY_DIR}/include/xo/${target}
-            ${CMAKE_INSTALL_PREFIX}/include/xo/${target}
-            ${target}.hpp)
+            ${PROJECT_BINARY_DIR}/include/xo
+            ${CMAKE_INSTALL_PREFIX}/include/xo
+            ${target})
     else()
         install(
             FILES ${PROJECT_BINARY_DIR}/include/xo/${target}/${target}.hpp
@@ -561,7 +575,9 @@ macro(xo_pybind11_library target projectTargets source_files)
 
     xo_pybind11_link_flags()
     xo_include_options2(${target})
-    xo_install_library4(${target} ${projectTargets})
+    # don't want to symlink include tree,  because lives in build dir.
+    # see install for generated .hpp above
+    xo_install_library4_noincludes(${target} ${projectTargets})
 endmacro()
 
 # ----------------------------------------------------------------
