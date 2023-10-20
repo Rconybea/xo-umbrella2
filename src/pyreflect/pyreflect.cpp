@@ -1,7 +1,7 @@
 /* @file pyreflect.cpp */
 
 // note: need pyreflect/ here bc pyreflect.hpp is generated, located in build directory
-#include "pyreflect.hpp"
+#include "xo/pyreflect/pyreflect.hpp"
 #include "xo/reflect/TypeDescr.hpp"
 #include "xo/reflect/TaggedRcptr.hpp"
 #include "xo/reflect/SelfTagging.hpp"
