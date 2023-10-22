@@ -65,9 +65,11 @@ endmacro()
 
 # e.g.
 # - xo_target = xo_pyutil
-# - nxo_target = pyutil
 #
-macro(xo_include_headeronly_options5 target nxo_target)
+macro(xo_include_headeronly_options target)
+    string(REGEX REPLACE "^xo_" "" _nxo_target ${target})
+    string(REGEX REPLACE "^xo-" "" _nxo_target ${_nxo_target})
+
     # ----------------------------------------------------------------
     # PROJECT_SOURCE_DIR:
     #   so we can for example write
@@ -84,12 +86,10 @@ macro(xo_include_headeronly_options5 target nxo_target)
     target_include_directories(
       ${target} INTERFACE
       $<INSTALL_INTERFACE:include>
-      $<INSTALL_INTERFACE:include/xo/${nxo_target}>
-      $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>                 # e.g. for #include "indentlog/scope.hpp"
-      #$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/${target}>      # e.g. for #include "Refcounted.hpp" in refcnt/src when ${target}=refcnt [DEPRECATED]
-      $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/xo/${nxo_target}>    # e.g. for #include "TypeDescr.hpp" in reflect/src when ${target}=reflect
-      #$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>                 # e.g. for generated .hpp files
-      $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include/xo/${nxo_target}>    # e.g. for generated .hpp files
+      $<INSTALL_INTERFACE:include/xo/${_nxo_target}>
+      $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>                      # e.g. for #include "indentlog/scope.hpp"
+      $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/xo/${_nxo_target}>    # e.g. for #include "TypeDescr.hpp" in reflect/src when ${target}=reflect
+      $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include/xo/${_nxo_target}>    # e.g. for generated .hpp files
     )
 
     # ----------------------------------------------------------------
@@ -104,7 +104,7 @@ macro(xo_include_headeronly_options5 target nxo_target)
 endmacro()
 
 macro(xo_include_headeronly_options2 target)
-    xo_include_headeronly_options5(${target} ${target})
+    xo_include_headeronly_options(${target})
 endmacro()
 
 # ----------------------------------------------------------------
@@ -205,9 +205,8 @@ endmacro()
 #
 # e.g.
 # - target=xo_pyutil      cmake target name for this library
-# - nxo_target=pyutil     directory for this target under include/xo
 #
-macro(xo_add_headeronly_library5 target nxo_target)
+macro(xo_add_headeronly_library target)
     add_library(${target} INTERFACE)
 
     set_property(
@@ -220,11 +219,7 @@ macro(xo_add_headeronly_library5 target nxo_target)
         TARGET ${target}
         PROPERTY xo_bindir ${PROJECT_BINARY_DIR})
 
-    xo_include_headeronly_options5(${target} ${nxo_target})
-endmacro()
-
-macro(xo_add_headeronly_library target)
-    xo_add_headeronly_library5(${target} ${target})
+    xo_include_headeronly_options(${target})
 endmacro()
 
 # ----------------------------------------------------------------
