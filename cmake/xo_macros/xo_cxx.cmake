@@ -404,6 +404,9 @@ macro(xo_install_library3 target projectTargets)
 endmacro()
 
 macro(xo_install_library4 target projectTargets)
+    string(REGEX REPLACE "^xo_" "" _nxo_target ${target})
+    string(REGEX REPLACE "^xo-" "" _nxo_target ${_nxo_target})
+
     install(
         TARGETS ${target}
         EXPORT ${projectTargets}
@@ -414,7 +417,7 @@ macro(xo_install_library4 target projectTargets)
         BUNDLE DESTINATION bin COMPONENT Runtime
     )
 
-    xo_install_include_tree3(include/xo/${target})
+    xo_install_include_tree3(include/xo/${_nxo_target})
 
     #xo_install_include_tree() -- use xo_install_include_tree3() separately
 endmacro()
@@ -429,22 +432,6 @@ macro(xo_install_library4_noincludes target projectTargets)
         PUBLIC_HEADER DESTINATION include COMPONENT Development
         BUNDLE DESTINATION bin COMPONENT Runtime
     )
-endmacro()
-
-macro(xo_install_library5 target nxo_target projectTargets)
-    install(
-        TARGETS ${target}
-        EXPORT ${projectTargets}
-        LIBRARY DESTINATION lib COMPONENT Runtime
-        ARCHIVE DESTINATION lib COMPONENT Development
-        RUNTIME DESTINATION bin COMPONENT Runtime
-        PUBLIC_HEADER DESTINATION include COMPONENT Development
-        BUNDLE DESTINATION bin COMPONENT Runtime
-    )
-
-    xo_install_include_tree3(include/xo/${nxo_target})
-
-    #xo_install_include_tree() -- use xo_install_include_tree3() separately
 endmacro()
 
 # ----------------------------------------------------------------
