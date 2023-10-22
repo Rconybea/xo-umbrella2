@@ -52,7 +52,7 @@ xo_toplevel_compile_options()
 
 set(SELF_SHORTNAME pyutil)
 set(SELF_LIB xo_${SELF_SHORTNAME})
-xo_add_headeronly_library5(${SELF_LIB} ${SELF_SHORTNAME})
+xo_add_headeronly_library(${SELF_LIB})
 #xo_include_headeronly_options2(${SELF_LIB})
 
 # ----------------------------------------------------------------
