@@ -36,13 +36,12 @@ add_subdirectory(utest)
 # ----------------------------------------------------------------
 # header-only library
 
-set(SELF_SHORTNAME ordinaltree)
-set(SELF_LIB xo_${SELF_SHORTNAME})
+set(SELF_LIB xo_ordinaltree)
 xo_add_headeronly_library(${SELF_LIB})
 
 # ----------------------------------------------------------------
 #
-xo_install_library5(${SELF_LIB} ${SELF_SHORTNAME} ${PROJECT_NAME}Targets)
+xo_install_library4(${SELF_LIB} ${PROJECT_NAME}Targets)
 # (note: ..Targets from xo_install_library2())
 xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
 
