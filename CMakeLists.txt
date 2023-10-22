@@ -38,7 +38,7 @@ add_subdirectory(utest)
 
 set(SELF_SHORTNAME ordinaltree)
 set(SELF_LIB xo_${SELF_SHORTNAME})
-xo_add_headeronly_library5(${SELF_LIB} ${SELF_SHORTNAME})
+xo_add_headeronly_library(${SELF_LIB})
 
 # ----------------------------------------------------------------
 #
