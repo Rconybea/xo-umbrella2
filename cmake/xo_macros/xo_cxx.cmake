@@ -834,7 +834,7 @@ endmacro()
 # use this for a dependency of a pybind11 library,
 # e.g. that was introduced by xo_pybind11_library()
 #
-# Working around the following problem (cmake 3.25.3, pybind11 2.10.4).N
+# Working around the following problem (cmake 3.25.3, pybind11 2.10.4)
 # if:
 # 1. we have pybind11 library pyfoo,  depending on c++ native library foo.
 # 2. foo depends on other libraries foodep1, foodep2;
@@ -849,7 +849,7 @@ endmacro()
 # get compile instructions like:
 #   g++ -o pyfoo.cpython-311-x86_64-linux-gnu.so path/to/pyfoo.cpp.o path/to/libfoo.so.x.y -lfoodep1 -lfoodep2
 #
-# 1. This is broken for foodep2,  since there no libfoodep2.so exists
+# 1. This is broken for foodep2,  since in this case no libfoodep2.so exists
 # 2. Also broken for nix build,  because directory containing libfoodep1.so doesn't appear on the compile line.
 #    (It's likely possible to extract this from the .cmake package in lib/cmake/foo/fooTargets.cmake,
 #     but I don't know how to do that yet)
@@ -871,6 +871,8 @@ macro(xo_pybind11_dependency target dep)
     else()
         message("xo_pybind11_dependency: ${target}: clobbering ${dep}.INTERFACE_LINK_LIBRARIES")
         set_property(TARGET ${dep} PROPERTY INTERFACE_LINK_LIBRARIES "")
+
+        # also have to clobber libraries for
     endif()
     # now that secondary deps are gone,  attach to target pybind11 library
     # skip xo_dependency() here,  that would repeat the find_package() expansion
