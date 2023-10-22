@@ -46,7 +46,7 @@ xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets
 # ----------------------------------------------------------------
 
 install(TARGETS hello DESTINATION bin/indentlog/example)
-install(TARGETS ex1 DESTINATION bin/indentlog/example)
-install(TARGETS ex2 DESTINATION bin/indentlog/example)
-install(TARGETS ex3 DESTINATION bin/indentlog/example)
-install(TARGETS ex4 DESTINATION bin/indentlog/example)
+install(TARGETS indentlog_ex1 DESTINATION bin/indentlog/example)
+install(TARGETS indentlog_ex2 DESTINATION bin/indentlog/example)
+install(TARGETS indentlog_ex3 DESTINATION bin/indentlog/example)
+install(TARGETS indentlog_ex4 DESTINATION bin/indentlog/example)
