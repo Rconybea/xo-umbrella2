@@ -13,6 +13,7 @@ target_code_coverage(${SELF_EXE} AUTO ALL)
 # internal dependency (on this codebase)
 
 xo_self_dependency(${SELF_EXE} reactor)
+xo_dependency(${SELF_EXE} randomgen)
 
 # ----------------------------------------------------------------
 # external dependencies
