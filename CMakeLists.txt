@@ -44,9 +44,4 @@ add_subdirectory(utest)
 
 xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
 
-# ----------------------------------------------------------------
-# install project .hpp files
-
-xo_install_include_tree()
-
 # end CMakeLists.txt

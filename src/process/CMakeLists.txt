@@ -5,7 +5,7 @@ set(SELF_SRCS
     BrownianMotion.cpp ExpProcess.cpp Realization.cpp UpxEvent.cpp UpxToConsole.cpp
     init_process.cpp)
 
-xo_add_shared_library3(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 ${SELF_SRCS})
+xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 ${SELF_SRCS})
 
 # ----------------------------------------------------------------
 # external dependencies
