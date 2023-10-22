@@ -63,12 +63,20 @@ macro(xo_toplevel_compile_options)
     endif()
 endmacro()
 
+# xo_strip_xo_prefix(xo_foo tmp) --> tmp=foo
+# xo_strip_xo_prefix(xo-foo tmp) --> tmp=foo
+# xo_strip_xo_prefix(foo tmp)    --> tmp=foo
+#
+macro(xo_strip_xo_prefix str outputvar)
+    string(REGEX REPLACE "^xo_" "" _tmp ${str})
+    string(REGEX REPLACE "^xo-" "" ${outputvar} ${_tmp})
+endmacro()
+
 # e.g.
 # - xo_target = xo_pyutil
 #
 macro(xo_include_headeronly_options target)
-    string(REGEX REPLACE "^xo_" "" _nxo_target ${target})
-    string(REGEX REPLACE "^xo-" "" _nxo_target ${_nxo_target})
+    xo_strip_xo_prefix(${target} _nxo_target)
 
     # ----------------------------------------------------------------
     # PROJECT_SOURCE_DIR:
@@ -242,8 +250,7 @@ endmacro()
 macro(xo_include_options2 target)
     xo_establish_submodule_build()
 
-    string(REGEX REPLACE "^xo_" "" _nxo_target ${target})
-    string(REGEX REPLACE "^xo-" "" _nxo_target ${_nxo_target})
+    xo_strip_xo_prefix(${target} _nxo_target)
 
     #message("xo_include_options2: XO_SUBMODULE_BUILD=${XO_SUBMODULE_BUILD}")
 
@@ -404,8 +411,7 @@ macro(xo_install_library3 target projectTargets)
 endmacro()
 
 macro(xo_install_library4 target projectTargets)
-    string(REGEX REPLACE "^xo_" "" _nxo_target ${target})
-    string(REGEX REPLACE "^xo-" "" _nxo_target ${_nxo_target})
+    xo_strip_xo_prefix(${target} _nxo_target)
 
     install(
         TARGETS ${target}
@@ -505,8 +511,7 @@ endmacro()
 # nxo_dep:    cmake target without any xo_ prefix. (e.g. pyutil)
 #
 macro(xo_dependency_helper target visibility dep)
-    string(REGEX REPLACE "^xo_" "" _nxo_dep ${dep})
-    string(REGEX REPLACE "^xo-" "" _nxo_dep ${_nxo_dep})
+    xo_strip_xo_prefix(${dep} _nxo_dep)
 
     xo_establish_submodule_build()
 
@@ -746,8 +751,7 @@ endmacro()
 # 2. pyfoo/pyfoo.hpp.in -> pyfoo/pyfoo.hpp
 #
 macro(xo_pybind11_library target projectTargets source_files)
-    string(REGEX REPLACE "^xo_" "" _nxo_target ${target})
-    string(REGEX REPLACE "^xo-" "" _nxo_target ${_nxo_target})
+    xo_strip_xo_prefix(${target} _nxo_target)
 
     file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/include/xo/${_nxo_target})
 
