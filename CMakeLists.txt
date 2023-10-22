@@ -50,15 +50,14 @@ xo_toplevel_compile_options()
 # ----------------------------------------------------------------
 # output targets
 
-set(SELF_SHORTNAME pyutil)
-set(SELF_LIB xo_${SELF_SHORTNAME})
+set(SELF_LIB xo_pyutil)
 xo_add_headeronly_library(${SELF_LIB})
 #xo_include_headeronly_options2(${SELF_LIB})
 
 # ----------------------------------------------------------------
 # standard install + provide find_package() support
 
-xo_install_library5(${SELF_LIB} ${SELF_SHORTNAME} ${PROJECT_NAME}Targets)
+xo_install_library4(${SELF_LIB} ${PROJECT_NAME}Targets)
 #xo_install_include_tree()
 xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
 
