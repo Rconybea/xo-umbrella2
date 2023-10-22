@@ -36,7 +36,7 @@ add_subdirectory(utest)
 # ----------------------------------------------------------------
 # header-only library
 
-set(SELF_LIB ordinaltree)
+set(SELF_LIB xo_ordinaltree)
 xo_add_headeronly_library(${SELF_LIB})
 
 # ----------------------------------------------------------------
