@@ -528,15 +528,15 @@ macro(xo_dependency_helper target visibility dep)
     endif()
 
     if (XO_SUBMODULE_BUILD)
-        get_target_property(_tmp ${target} LINK_LIBRARIES)
-        message("xo_dependency_helper: ${target} -> ${dep}: ${target}.LINK_LIBRARIES=${_tmp}")
-        get_target_property(_tmp ${dep} LINK_LIBRARIES)
-        message("xo_dependency_helper: ${target} -> ${dep}: ${dep}.LINK_LIBRARIES=${_tmp}")
+        #get_target_property(_tmp ${target} LINK_LIBRARIES)
+        #message("xo_dependency_helper: ${target} -> ${dep}: ${target}.LINK_LIBRARIES=${_tmp}")
+        #get_target_property(_tmp ${dep} LINK_LIBRARIES)
+        #message("xo_dependency_helper: ${target} -> ${dep}: ${dep}.LINK_LIBRARIES=${_tmp}")
 
-        get_target_property(_tmp ${target} INTERFACE_LINK_LIBRARIES)
-        message("xo_dependency_helper: ${target} -> ${dep}: ${target}.INTERFACE_LINK_LIBRARIES=${_tmp}")
-        get_target_property(_tmp ${dep} INTERFACE_LINK_LIBRARIES)
-        message("xo_dependency_helper: ${target} -> ${dep}: ${dep}.INTERFACE_LINK_LIBRARIES=${_tmp}")
+        #get_target_property(_tmp ${target} INTERFACE_LINK_LIBRARIES)
+        #message("xo_dependency_helper: ${target} -> ${dep}: ${target}.INTERFACE_LINK_LIBRARIES=${_tmp}")
+        #get_target_property(_tmp ${dep} INTERFACE_LINK_LIBRARIES)
+        #message("xo_dependency_helper: ${target} -> ${dep}: ${dep}.INTERFACE_LINK_LIBRARIES=${_tmp}")
 
         # add INCLUDE_DIRECTORIES from ${dep} to ${target}.
         #
@@ -554,7 +554,7 @@ macro(xo_dependency_helper target visibility dep)
         get_target_property(_depbindir ${dep} xo_bindir)
         get_target_property(_tmp ${dep} INTERFACE_INCLUDE_DIRECTORIES)
         if(_tmp)
-            message("xo_dependency_helper: ${target}: + ${dep}.INCLUDE_DIRECTORIES: ${_tmp}")
+            #message("xo_dependency_helper: ${target}: + ${dep}.INCLUDE_DIRECTORIES: ${_tmp}")
             foreach(dir ${_tmp})
                 # want to add these to compile line for $target}.
                 # this will happen automatically for ${dep}'s own directories;
@@ -563,21 +563,16 @@ macro(xo_dependency_helper target visibility dep)
                 # however we also need directories for ${dep}'s transitive dependencies
                 #
                 if(${dir} MATCHES "BUILD_INTERFACE")
-                    message("xo_dependency_helper: ${target} -> ${dep}: consider dir=${dir}")
+                    #message("xo_dependency_helper: ${target} -> ${dep}: consider dir=${dir}")
                     if(${dir} MATCHES ${_depsrcdir})
                         #message(" skip ${dir}")
                     elseif(${dir} MATCHES ${_depbindir})
                         #message(" skip ${dir}")
                     else()
-                        message(" KEEP ${dir}")
+                        #message(" KEEP ${dir}")
                         target_include_directories(${target} ${visibility} ${dir})
                     endif()
                 endif()
-
-#                set_property(
-#                    TARGET ${target}
-#                    APPEND
-#                    PROPERTY INCLUDE_DIRECTORIES ${dir})
             endforeach()
             get_target_property(_tmp ${target} INTERFACE_INCLUDE_DIRECTORIES)
             list(REMOVE_DUPLICATES _tmp)
@@ -625,13 +620,13 @@ macro(xo_dependency target dep)
 
     xo_dependency_helper(${target} PUBLIC ${dep})
 
-    message("----------------------------------------------------------------")
-    #message("xo_dependency: ${target}.xo_deps.pre=${_xo_dependency_tmp0}")
-    #message("xo_dependency: ${dep}.xo_deps=${_xo_dependency_tmp2}")
-    get_target_property(_tmp ${target} xo_deps)
-    message("xo_dependency: ${target}.xo_deps=${_tmp}")
-    #get_target_property(_tmp ${target} INCLUDE_DIRECTORIES)
-    #message("xo_dependency: ${target}.INCLUDE_DIRECTORIES=${_tmp} before target_link_libraries with ${dep}")
+    #message("----------------------------------------------------------------")
+    ##message("xo_dependency: ${target}.xo_deps.pre=${_xo_dependency_tmp0}")
+    ##message("xo_dependency: ${dep}.xo_deps=${_xo_dependency_tmp2}")
+    #get_target_property(_tmp ${target} xo_deps)
+    #message("xo_dependency: ${target}.xo_deps=${_tmp}")
+    ##get_target_property(_tmp ${target} INCLUDE_DIRECTORIES)
+    ##message("xo_dependency: ${target}.INCLUDE_DIRECTORIES=${_tmp} before target_link_libraries with ${dep}")
 
     target_link_libraries(${target} PUBLIC ${dep})
     #target_link_libraries(${target} ${dep})
@@ -642,7 +637,7 @@ macro(xo_dependency target dep)
     #message("xo_dependency: ${dep}.INCLUDE_DIRECTORIES=${_tmp}")
     #get_target_property(_tmp ${dep} INTERFACE_INCLUDE_DIRECTORIES)
     #message("xo_dependency: ${dep}.INTERFACE_INCLUDE_DIRECTORIES=${_tmp}")
-    message("----------------------------------------------------------------")
+    #message("----------------------------------------------------------------")
 endmacro()
 
 # dependency of a header-only library on another header-only library
@@ -853,7 +848,7 @@ macro(xo_pybind11_dependency target dep)
     # clobber secondary dependencies, as discussed above
     if(XO_SUBMODULE_BUILD)
         # ok to keep dep libraries on link line in submodule build
-        message("xo_pybind11_dependency: ${target}: don't clobber ${dep}.INTERFACE_LINK_LIBRARIES")
+        #message("xo_pybind11_dependency: ${target}: don't clobber ${dep}.INTERFACE_LINK_LIBRARIES")
     else()
         message("xo_pybind11_dependency: ${target}: clobbering ${dep}.INTERFACE_LINK_LIBRARIES")
         set_property(TARGET ${dep} PROPERTY INTERFACE_LINK_LIBRARIES "")
