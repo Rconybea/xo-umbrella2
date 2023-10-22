@@ -247,6 +247,9 @@ endmacro()
 macro(xo_include_options2 target)
     xo_establish_submodule_build()
 
+    string(REGEX REPLACE "^xo_" "" _nxo_target ${target})
+    string(REGEX REPLACE "^xo-" "" _nxo_target ${_nxo_target})
+
     #message("xo_include_options2: XO_SUBMODULE_BUILD=${XO_SUBMODULE_BUILD}")
 
     # ----------------------------------------------------------------
@@ -262,12 +265,12 @@ macro(xo_include_options2 target)
     target_include_directories(
       ${target} PUBLIC
       $<INSTALL_INTERFACE:include>
-      $<INSTALL_INTERFACE:include/xo/${target}>
-      $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>                 # e.g. for #include "indentlog/scope.hpp"
-      #$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/${target}>      # e.g. for #include "Refcounted.hpp" in refcnt/src [DEPRECATED]
-      $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/xo/${target}>    # e.g. for #include "TypeDescr.hpp" in reflect/src when ${target}=reflect
-      #$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>                 # e.g. for generated .hpp files
-      $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include/xo/${target}>    # e.g. for generated .hpp files
+      $<INSTALL_INTERFACE:include/xo/${_nxo_target}>
+      $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>                      # e.g. for #include "indentlog/scope.hpp"
+      #$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/${target}>           # e.g. for #include "Refcounted.hpp" in refcnt/src [DEPRECATED]
+      $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/xo/${_nxo_target}>    # e.g. for #include "TypeDescr.hpp" in reflect/src when ${target}=reflect
+      #$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>                     # e.g. for generated .hpp files
+      $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include/xo/${_nxo_target}>    # e.g. for generated .hpp files
     )
 
     # ----------------------------------------------------------------
@@ -761,11 +764,14 @@ endmacro()
 # 2. pyfoo/pyfoo.hpp.in -> pyfoo/pyfoo.hpp
 #
 macro(xo_pybind11_library target projectTargets source_files)
-    file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/include/xo/${target})
+    string(REGEX REPLACE "^xo_" "" _nxo_target ${target})
+    string(REGEX REPLACE "^xo-" "" _nxo_target ${_nxo_target})
+
+    file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/include/xo/${_nxo_target})
 
     configure_file(
-        ${target}.hpp.in
-        ${PROJECT_BINARY_DIR}/include/xo/${target}/${target}.hpp)
+        ${_nxo_target}.hpp.in
+        ${PROJECT_BINARY_DIR}/include/xo/${_nxo_target}/${_nxo_target}.hpp)
     # was ${PROJECT_SOURCE_DIR}/include/xo/${target}/${target}.hpp)
 
     xo_establish_symlink_install()
@@ -774,12 +780,12 @@ macro(xo_pybind11_library target projectTargets source_files)
         xo_install_make_symlink(
             ${PROJECT_BINARY_DIR}/include/xo
             ${CMAKE_INSTALL_PREFIX}/include/xo
-            ${target})
+            ${_nxo_target})
     else()
         install(
-            FILES ${PROJECT_BINARY_DIR}/include/xo/${target}/${target}.hpp
+            FILES ${PROJECT_BINARY_DIR}/include/xo/${_nxo_target}/${_nxo_target}.hpp
             PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
-            DESTINATION ${CMAKE_INSTALL_PREFIX}/include/xo/${target})
+            DESTINATION ${CMAKE_INSTALL_PREFIX}/include/xo/${_nxo_target})
     endif()
 
     # find_package(Python..) finds python in
