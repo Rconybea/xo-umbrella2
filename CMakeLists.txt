@@ -12,8 +12,8 @@ set(XO_PROJECT_NAME xo_macros)
 
 install(
     FILES
-    "cmake/xo_cxx.cmake"
-    "cmake/code-coverage.cmake"
+    "cmake/xo_macros/xo_cxx.cmake"
+    "cmake/xo_macros/code-coverage.cmake"
     PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
-    DESTINATION share/cmake/${XO_PROJECT_NAME}
+    DESTINATION share/cmake/xo_macros
 )
