@@ -1,6 +1,6 @@
 # xo_pyreflect/src/pyreflect/CMakeLists.txt
 
-set(SELF_LIB pyreflect)
+set(SELF_LIB xo_pyreflect)
 set(SELF_SRCS pyreflect.cpp)
 
 # ----------------------------------------------------------------
