@@ -28,4 +28,4 @@ xo_dependency(${SELF_LIB} reactor)
 # ----------------------------------------------------------------
 # external dependencies
 
-xo_external_target_dependency(${SELF_LIB} eigen3 Eigen3::Eigen)
+xo_external_target_dependency(${SELF_LIB} Eigen3 Eigen3::Eigen)
