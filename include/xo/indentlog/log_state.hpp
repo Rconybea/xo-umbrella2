@@ -347,7 +347,7 @@ namespace xo {
                     ss << code_location(this->file_, this->line_,
                                         log_config::code_location_color);
 
-                    std::string ss_str = std::move(ss.str()); /*c++20*/
+                    std::string ss_str = ss.str(); /*hoping for copy elision here*/
                     sbuf2->sputn(ss_str.c_str(), ss_str.size());
 
                     this->location_flag_ = false;
