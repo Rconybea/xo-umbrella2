@@ -13,9 +13,12 @@ add_test(NAME ${SELF_EXE} COMMAND ${SELF_EXE})
 target_code_coverage(${SELF_EXE} AUTO ALL)
 
 # ----------------------------------------------------------------
-# create convenience symlink to canned data
+# create convenience symlink from build dir back to canned data.
+# This is ok since we don't implement install for unit tests
 
 #create_symlink("${CMAKE_SOURCE_DIR}/utestdata/" "src/filter/utest/utestdata")
+file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/utest/utestdata)
+file(CREATE_LINK ${PROJECT_SOURCE_DIR}/utest/utestdata/filter ${PROJECT_BINARY_DIR}/utest/utestdata/filter SYMBOLIC)
 
 # ----------------------------------------------------------------
 # generic project dependency

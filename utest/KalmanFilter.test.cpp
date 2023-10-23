@@ -29,9 +29,6 @@ namespace xo {
     using xo::ref::rp;
     using xo::log_level;
     using logutil::matrix;
-    //using logutil::scope;
-    //using logutil::tostr;
-    //using logutil::xtag;
     using xo::print::ccs;
     using Eigen::MatrixXd;
     using Eigen::VectorXd;
