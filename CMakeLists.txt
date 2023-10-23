@@ -12,6 +12,7 @@ set(XO_PROJECT_NAME xo_macros)
 
 install(
     FILES
+    "cmake/xo_macros/xo-project-macros.cmake"
     "cmake/xo_macros/xo_cxx.cmake"
     "cmake/xo_macros/code-coverage.cmake"
     PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
