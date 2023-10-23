@@ -2,9 +2,8 @@
 
 #pragma once
 
-//#include "time/Time.hpp"
+#include "EventSource.hpp"
 #include "Sink.hpp"
-//#include "xo/reactor/DirectSource.hpp"
 #include "Reactor.hpp"
 #include "HeapReducer.hpp"
 #include "xo/callback/CallbackSet.hpp"
