@@ -349,6 +349,8 @@ endmacro()
 macro(xo_establish_symlink_install)
     if(NOT DEFINED XO_SYMLINK_INSTALL)
         set(XO_SYMLINK_INSTALL False)
+
+        message(XO_SYMLINK_INSTALL=${XO_SYMLINK_INSTALL})
     endif()
 endmacro()
 
@@ -387,14 +389,15 @@ endmacro()
 macro(xo_install_include_tree3 subdir_path)
     xo_establish_symlink_install()
 
+    # ugh.  cmake doesn't allow input path argument to cmake_path()
+    # to be a macro variable.
+    set(_xo_install_include_tree3_subdir_path ${subdir_path})
+    set(_xo_install_include_tree3_dirname "")
+    set(_xo_install_include_tree3_basename "")
+    cmake_path(GET _xo_install_include_tree3_subdir_path PARENT_PATH _xo_install_include_tree3_dirname)
+    cmake_path(GET _xo_install_include_tree3_subdir_path FILENAME _xo_install_include_tree3_basename)
+
     if(XO_SYMLINK_INSTALL)
-        # ugh.  cmake doesn't allow input path argument to cmake_path()
-        # to be a macro variable.
-        set(_xo_install_include_tree3_subdir_path ${subdir_path})
-        set(_xo_install_include_tree3_dirname "")
-        set(_xo_install_include_tree3_basename "")
-        cmake_path(GET _xo_install_include_tree3_subdir_path PARENT_PATH _xo_install_include_tree3_dirname)
-        cmake_path(GET _xo_install_include_tree3_subdir_path FILENAME _xo_install_include_tree3_basename)
 
         xo_install_make_symlink(
             ${PROJECT_SOURCE_DIR}/${_xo_install_include_tree3_dirname}
@@ -404,7 +407,7 @@ macro(xo_install_include_tree3 subdir_path)
         install(
             DIRECTORY ${PROJECT_SOURCE_DIR}/${subdir_path}
             FILE_PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
-            DESTINATION ${CMAKE_INSTALL_PREFIX}/${subdir_path})
+            DESTINATION ${CMAKE_INSTALL_PREFIX}/${_xo_install_include_tree3_dirname})
     endif()
 endmacro()
 
@@ -554,6 +557,7 @@ macro(xo_dependency_helper target visibility dep)
             xo_dependency_helper1(${target} ${visibility} repo/${_nxo_dep}/include)
         endif()
     else()
+        message("xo_dependency_helper: find_package() on ${dep} for ${target}")
         find_package(${dep} CONFIG REQUIRED)
     endif()
 
