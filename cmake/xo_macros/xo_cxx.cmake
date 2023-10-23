@@ -1,4 +1,16 @@
 
+macro(xo_cxx_toplevel_options)
+    enable_language(CXX)
+    xo_toplevel_compile_options()
+    xo_toplevel_testing_options()
+endmacro()
+
+macro(xo_toplevel_testing_options)
+    enable_testing()
+    add_code_coverage()
+    add_code_coverage_all_targets(EXCLUDE /nix/store* utest/*)
+endmacro()
+
 macro(xo_toplevel_compile_options)
     define_property(
         TARGET
@@ -214,6 +226,24 @@ endmacro()
 # e.g.
 # - target=xo_pyutil      cmake target name for this library
 #
+macro(xo_add_headeronly_library4 target projectTargets)
+    add_library(${target} INTERFACE)
+
+    set_property(
+        TARGET ${target}
+        PROPERTY xo_deps "${target}")
+    set_property(
+        TARGET ${target}
+        PROPERTY xo_srcdir ${PROJECT_SOURCE_DIR})
+    set_property(
+        TARGET ${target}
+        PROPERTY xo_bindir ${PROJECT_BINARY_DIR})
+
+    xo_include_headeronly_options(${target})
+
+    xo_install_library4(${target} ${projectTargets})
+endmacro()
+
 macro(xo_add_headeronly_library target)
     add_library(${target} INTERFACE)
 
