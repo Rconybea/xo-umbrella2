@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "distribution/Distribution.hpp"
+#include "Distribution.hpp"
 #include <cmath>
 
 namespace xo {
@@ -12,6 +12,9 @@ namespace xo {
         class Normal : public Distribution<double> {
         public:
             Normal() = default;
+
+            /* N(0,1):  mean 0, sdev 1 */
+            static ref::rp<Normal> unit() { return new Normal(); }
 
             /* normal probability density:
              *

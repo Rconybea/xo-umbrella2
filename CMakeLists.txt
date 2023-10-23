@@ -10,9 +10,9 @@ include(xo_macros/xo-project-macros)
 xo_cxx_toplevel_options()
 
 #add_subdirectory(example)
-#add_subdirectory(uteest)
+add_subdirectory(src/distribution)  # note refcnt dep -> not header-only
+add_subdirectory(utest)
 
-xo_add_headeronly_library4(xo_distribution ${PROJECT_NAME}Targets)
 xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
 
 # ----------------------------------------------------------------
