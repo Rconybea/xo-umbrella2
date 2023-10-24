@@ -1,0 +1,25 @@
+/* @file pykalmanfilter.hpp
+ *
+ * automatically generated from src/pykalmanfilter/pykalmanfilter.hpp.in
+ * see src/pykalmanfilter/CMakeLists.txt
+ */
+
+/* python requires module name = library name
+ * example:
+ *   PYBIND11_MODULE(PYKALMANFILTER_MODULE_NAME(), m) { ... }
+ */
+#define PYKALMANFILTER_MODULE_NAME() @SELF_LIB@
+
+/* example:
+ *   py::module_::import(PYKALMANFILTER_MODULE_NAME_STR)
+ */
+#define PYKALMANFILTER_MODULE_NAME_STR "@SELF_LIB@"
+
+/* example:
+ *   PYKALMANFILTER_IMPORT_MODULE()
+ * replaces
+ *   py::module_::import("pykalmanfilter")
+ */
+#define PYKALMANFILTER_IMPORT_MODULE() py::module_::import("@SELF_LIB@")
+
+/* end pykalmanfilter.hpp */
