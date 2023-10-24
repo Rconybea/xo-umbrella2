@@ -3,7 +3,7 @@
 #include "xo/kalmanfilter/KalmanFilter.hpp"
 #include "xo/kalmanfilter/KalmanFilterEngine.hpp"
 #include "xo/kalmanfilter/print_eigen.hpp"
-#include "statistics/SampleStatistics.hpp"
+#include "xo/statistics/SampleStatistics.hpp"
 #include "xo/randomgen/normalgen.hpp"
 #include "xo/randomgen/xoshiro256.hpp"
 #include "xo/indentlog/scope.hpp"
