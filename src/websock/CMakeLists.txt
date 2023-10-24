@@ -8,6 +8,9 @@ xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 $
 # ----------------------------------------------------------------
 # external dependencies
 
+# note: changes to xo_dependency() calls here
+#       must coordinate with find_dependency() calls in
+#       xo-websock/cmake/websockConfig.cmake.in
 xo_dependency(${SELF_LIB} reactor)
 xo_dependency(${SELF_LIB} webutil)
 
@@ -15,7 +18,3 @@ xo_dependency(${SELF_LIB} webutil)
 xo_external_target_dependency(${SELF_LIB} Libwebsockets websockets_shared)
 # see jsoncpp-namespaced-targets.cmake (maybe?) for available targets
 xo_external_target_dependency(${SELF_LIB} jsoncpp jsoncpp_lib)
-
-# note: changes to xo_dependency() calls here
-#       must coordinate with find_dependency() calls in
-#       xo-websock/cmake/websockConfig.cmake.in
