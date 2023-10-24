@@ -1,6 +1,6 @@
 # xo_pyreactor/src/pyreactor/CMakeLists.txt
 
-set(SELF_LIB pyreactor)
+set(SELF_LIB xo_pyreactor)
 set(SELF_SRCS pyreactor.cpp)
 
 xo_pybind11_library(${SELF_LIB} ${PROJECT_NAME}Targets ${SELF_SRCS})
