@@ -1,4 +1,4 @@
-/* @file ReactorPy.cpp */
+/* @file pyreactor.cpp */
 
 #include "pyreactor.hpp"
 #include "xo/pyprintjson/pyprintjson.hpp"
@@ -138,4 +138,4 @@ namespace xo {
     } /*namespace reactor*/
 } /*namespace xo*/
 
-/* end ReactorPy.cpp */
+/* end pyreactor.cpp */
