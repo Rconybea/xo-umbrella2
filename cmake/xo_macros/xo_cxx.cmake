@@ -350,7 +350,7 @@ macro(xo_establish_symlink_install)
     if(NOT DEFINED XO_SYMLINK_INSTALL)
         set(XO_SYMLINK_INSTALL False)
 
-        message(XO_SYMLINK_INSTALL=${XO_SYMLINK_INSTALL})
+        #message(XO_SYMLINK_INSTALL=${XO_SYMLINK_INSTALL})
     endif()
 endmacro()
 
