@@ -884,7 +884,7 @@ macro(xo_pybind11_dependency target dep)
         # ok to keep dep libraries on link line in submodule build
         #message("xo_pybind11_dependency: ${target}: don't clobber ${dep}.INTERFACE_LINK_LIBRARIES")
     else()
-        message("xo_pybind11_dependency: ${target}: clobbering ${dep}.INTERFACE_LINK_LIBRARIES")
+        message("xo_pybind11_dependency: ${target}: remove ${dep}.INTERFACE_LINK_LIBRARIES to avoid problems with transitive deps")
         set_property(TARGET ${dep} PROPERTY INTERFACE_LINK_LIBRARIES "")
 
         # also have to clobber libraries for
