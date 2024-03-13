@@ -80,7 +80,7 @@ namespace xo {
                 char * p_hi = p_base + this->buf_v_.capacity();
 
                 this->setp(p_base, p_hi);
-                this->pbump(old_n + 1);
+                this->pbump(old_n + 1);  /*see 'this->buf_v_[old_n] - new_ch' above*/
 
                 return new_ch;
             } /*overflow*/
