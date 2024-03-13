@@ -803,13 +803,7 @@ macro(xo_pybind11_library target projectTargets source_files)
             DESTINATION ${CMAKE_INSTALL_PREFIX}/include/xo/${_nxo_target})
     endif()
 
-    # find_package(Python..) finds python in
-    #   /Library/Frameworks/Python.framework/...
-    # but we want to use python from nix
-    #
-    #find_package(Python COMPONENTS Interpreter Development REQUIRED)
-    #
-
+    find_package(Python COMPONENTS Interpreter Development REQUIRED)
     find_package(pybind11)
 
     # this only works if one source file, right?
