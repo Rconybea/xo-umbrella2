@@ -15,6 +15,7 @@ xo_dependency(${SELF_LIB} reactor)
 xo_dependency(${SELF_LIB} webutil)
 
 # see LibwebsocketsTargets-release.cmake for available targets
+# this dependency doesn't show up via cmake-export
 xo_external_target_dependency(${SELF_LIB} Libwebsockets websockets_shared)
 # see jsoncpp-namespaced-targets.cmake (maybe?) for available targets
 xo_external_target_dependency(${SELF_LIB} jsoncpp jsoncpp_lib)
