@@ -50,10 +50,10 @@ Assumes `xo-pydistribution` installed to `~/local2/lib`
 
 ```
 PYTHONPATH=~/local2/lib python
->>> import pydistribution
->>> dir(pydistribution)
+>>> import xo_pydistribution
+>>> dir(xo_pydistribution)
 ['Distribution', 'ExplicitDist', '__doc__', '__file__', '__loader__', '__name__', '__package__', '__spec__', 'normalcdf']
->>> from pydistribution import *
+>>> from xo_pydistribution import *
 ```
 
 normal distribution

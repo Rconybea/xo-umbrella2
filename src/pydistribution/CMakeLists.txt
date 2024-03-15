@@ -1,6 +1,6 @@
 # xo_pydistribution/src/pydistribution/CMakeLists.txt
 
-set(SELF_LIB pydistribution)
+set(SELF_LIB xo_pydistribution)
 set(SELF_SRCS pydistribution.cpp)
 
 xo_pybind11_library(${SELF_LIB} ${PROJECT_NAME}Targets ${SELF_SRCS})
