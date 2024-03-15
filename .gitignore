@@ -1,7 +1,6 @@
-# lsp keep state here
+# clangd working space (see emacs+lsp)
 .cache
-# typical build directories
-build
-ccov
-# for lsp: manual symlink to chosen build directory
+# typical cmake build directory (source-tree-nephew)
+.build*
+# symlink to builddir/compile_commands.json;  should be set manually in dev sandbox
 compile_commands.json
