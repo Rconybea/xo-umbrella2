@@ -23,6 +23,17 @@ $ make install
 ```
 (also see .github/workflows/main.yml)
 
+## Examples
+
+Assumes `xo-pywebutil` installed to `~/local2/lib`
+```
+$ PYTHONPATH=~/local2/lib:$PYTHONPATH python
+>>> import xo_pywebutil
+>>> dir(xo_pywebutil)
+['EndpointDescr', 'StreamEndpointDescr', '__doc__', '__file__', '__loader__', '__name__', '__package__', '__spec__']
+>>> from xo_pywebutil import *
+```
+
 ## Development
 
 ### build for unit test coverage
