@@ -4,8 +4,7 @@ cmake_minimum_required(VERSION 3.10)
 
 project(xo_distribution VERSION 1.0)
 
-# common XO cmake macros (see github.com:Rconybea/xo-cmake)
-include(xo_macros/xo-project-macros)
+include(cmake/xo-bootstrap-macros.cmake)
 
 xo_cxx_toplevel_options()
 
