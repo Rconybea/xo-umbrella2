@@ -6,8 +6,7 @@ project(webutil VERSION 1.0)
 enable_language(CXX)
 
 # common XO cmake macros (see proj/xo-cmake)
-include(xo_macros/xo_cxx)
-include(xo_macros/code-coverage)
+include(cmake/xo-bootstrap-macros.cmake)
 
 # ----------------------------------------------------------------
 # unit test setup (no unit tests yet,  but want 'make tests' to do something)
