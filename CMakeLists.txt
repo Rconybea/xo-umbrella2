@@ -6,8 +6,7 @@ project(xo_pyutil VERSION 0.1)
 enable_language(CXX)
 
 # common XO cmake macros (see github:Rconybea/xo-cmake)
-include(xo_macros/xo_cxx)
-include(xo_macros/code-coverage)   # very little to unit test here
+include(cmake/xo-bootstrap-macros.cmake)
 
 # ----------------------------------------------------------------
 # unit test setup
