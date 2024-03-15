@@ -1,10 +1,9 @@
 # xo-pywebsock/CMakeLists.txt
 
 cmake_minimum_required(VERSION 3.10)
-
 project(xo_pywebsock VERSION 1.0)
 
-include(xo_macros/xo-project-macros)
+include(cmake/xo-bootstrap-macros.cmake)
 
 xo_cxx_toplevel_options()
 

@@ -1,6 +1,6 @@
 # xo_pywebsock/src/pywebsock/CMakeLists.txt
 
-set(SELF_LIB pywebsock)
+set(SELF_LIB xo_pywebsock)
 set(SELF_SRCS pywebsock.cpp)
 
 xo_pybind11_library(${SELF_LIB} ${PROJECT_NAME}Targets ${SELF_SRCS})
