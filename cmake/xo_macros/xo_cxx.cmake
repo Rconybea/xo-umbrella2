@@ -557,7 +557,7 @@ macro(xo_dependency_helper target visibility dep)
             xo_dependency_helper1(${target} ${visibility} repo/${_nxo_dep}/include)
         endif()
     else()
-        message("xo_dependency_helper: find_package() on ${dep} for ${target}")
+        message("-- [${target}] find_package(${dep}) (xo_dependency_helper)")
         find_package(${dep} CONFIG REQUIRED)
     endif()
 
@@ -713,6 +713,7 @@ endmacro()
 #   target_link_libraries(foo PUBLIC Catch2::Catch2)
 #
 macro(xo_external_target_dependency target pkg pkgtarget)
+    message("-- [${target}] find_package(${pkg}) (xo_external_target_dependency)")
     find_package(${pkg} CONFIG REQUIRED)
     target_link_libraries(${target} PUBLIC ${pkgtarget})
     #target_link_libraries(${target} ${pkgtarget})
@@ -803,7 +804,9 @@ macro(xo_pybind11_library target projectTargets source_files)
             DESTINATION ${CMAKE_INSTALL_PREFIX}/include/xo/${_nxo_target})
     endif()
 
+    message("-- [${target}] find_package(Python) (xo_pybind11_library)")
     find_package(Python COMPONENTS Interpreter Development REQUIRED)
+    message("-- [${target}] find_package(pybind11) (xo_pybind11_library)")
     find_package(pybind11)
 
     # this only works if one source file, right?
@@ -878,7 +881,7 @@ macro(xo_pybind11_dependency target dep)
         # ok to keep dep libraries on link line in submodule build
         #message("xo_pybind11_dependency: ${target}: don't clobber ${dep}.INTERFACE_LINK_LIBRARIES")
     else()
-        message("xo_pybind11_dependency: ${target}: remove ${dep}.INTERFACE_LINK_LIBRARIES to avoid problems with transitive deps")
+        message("-- [${target}] remove ${dep}.INTERFACE_LINK_LIBRARIES to avoid problems with transitive deps (xo_pybind11_dependency)")
         set_property(TARGET ${dep} PROPERTY INTERFACE_LINK_LIBRARIES "")
 
         # also have to clobber libraries for
