@@ -5,9 +5,8 @@ cmake_minimum_required(VERSION 3.10)
 project(printjson VERSION 0.1)
 enable_language(CXX)
 
-# common XO cmake macros (see proj/xo-cmake)
-include(xo_macros/xo_cxx)
-include(xo_macros/code-coverage)
+# common XO cmake macros (see https://github.com/rconybea/xo-cmake)
+include(cmake/xo-bootstrap-macros.cmake)
 
 # ----------------------------------------------------------------
 # unit test setup
