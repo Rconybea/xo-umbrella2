@@ -5,9 +5,7 @@ cmake_minimum_required(VERSION 3.10)
 project(xo_pyreflect VERSION 0.1)
 enable_language(CXX)
 
-# common XO cmake macros (see github.com:Rconybea/xo-cmake)
-include(xo_macros/xo_cxx)
-include(xo_macros/code-coverage)
+include(cmake/xo-bootstrap-macros.cmake)
 
 # ----------------------------------------------------------------
 # unit test setup

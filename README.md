@@ -1,4 +1,4 @@
-# python bindings for c++ reflection library (xo-reflect)
+# python bindings for c++ reflection library (xo-pyreflect)
 
 ## Getting Started
 
@@ -22,6 +22,22 @@ $ make install
 ```
 (also see .github/workflows/main.yml)
 
+## Examples
+
+Assumes `xo-pyreflect` installed to `~/local2/lib`
+
+```
+PYTHONPATH=~/local2/lib python
+>>> import xo_pyreflect
+>>> dir(xo_pyreflect)
+['SelfTagging', 'TaggedRcptr', 'TypeDescr', '__doc__', '__file__', '__loader__', '__name__', '__package__', '__spec__']
+>>> xo_pyreflect.TypeDescr.print_reflected_types()
+<type_table_v[0]:>
+```
+(Not _immediately_ interesting:  no reflected types in `pyreflect` itself)
+
+## Development
+
 ### build for unit test coverage
 ```
 $ cd xo-pyreflect
@@ -37,24 +53,20 @@ $ cmake \
 ### LSP (language server) support
 
 LSP looks for compile commands in the root of the source tree;
-while Cmake creates them in the root of its build directory.
+while `cmake` creates them in the root of its build directory.
 
 ```
 $ cd xo-pyreflect
 $ ln -s build/compile_commands.json  # supply compile commands to LSP
 ```
 
-## Examples
+### display cmake variables
 
-Assumes `xo-pyreflect` installed to `~/local2/lib`
+- `-L` list variables
+- `-A` include 'advanced' variables
+- `-H` include help text
 
 ```
-PYTHONPATH=~/local2/lib python
->>> import pyreflect
->>> dir(pyreflect)
-['SelfTagging', 'TaggedRcptr', 'TypeDescr', '__doc__', '__file__', '__loader__', '__name__', '__package__', '__spec__']
->>> pyreflect.TypeDescr.print_reflected_types()
-<type_table_v[0]:>
+$ cd xo-pyprintjson/build
+$ cmake -LAH
 ```
-
-Not _immediately_ interesting:  no reflected types in `pyreflect` itself
