@@ -1,0 +1,63 @@
+name: build xo-pyreflect + dependencies
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    # The CMake configure and build commands are platform agnostic and should work equally well on Windows or Mac.
+    # You can convert this to a matrix build if you need cross-platform coverage.
+    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: checkout source
+      uses: actions/checkout@v3
+
+    - name: Install catch2
+      # install catch2.  see [[https://stackoverflow.com/questions/57982945/how-to-apt-get-install-in-a-github-actions-workflow]]
+      run: sudo apt-get install -y catch2
+
+    - name: Install pybind11-dev
+      run: sudo apt-get install -y pybind11-dev
+
+    # ----------------------------------------------------------------
+
+    - name: clone xo-cmake
+      uses: actions/checkout@v3
+      with:
+        repository: Rconybea/xo-cmake
+        path: repo/xo-cmake
+
+    - name: Configure xo-cmake
+      run: cmake -B ${{github.workspace}}/build_xo-cmake -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local repo/xo-cmake
+
+    - name: Build xo-cmake (trivial)
+      run: cmake --build ${{github.workspace}}/build_xo-cmake --config ${{env.BUILD_TYPE}}
+
+    - name: Install xo-cmake
+      run: cmake --install ${{github.workspace}}/build_xo-cmake
+
+    # ----------------------------------------------------------------
+
+    - name: Configure self (pysimulator)
+      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
+      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
+      run: cmake -B ${{github.workspace}}/build_pysimulator -DCMAKE_MODULE_PATH=${{github.workspace}}/local/share/cmake -DCMAKE_PREFIX_PATH=${{github.workspace}}/local -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+
+    - name: Build self (pysimulator)
+      # Build your program with the given configuration
+      run: cmake --build ${{github.workspace}}/build_pysimulator --config ${{env.BUILD_TYPE}}
+
+    - name: Test self (pysimulator)
+      working-directory: ${{github.workspace}}/build_pysimulator
+      # Execute tests defined by the CMake configuration.
+      # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
+      run: ctest -C ${{env.BUILD_TYPE}}
