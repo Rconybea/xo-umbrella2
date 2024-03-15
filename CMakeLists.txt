@@ -6,8 +6,7 @@ project(xo_ordinaltree VERSION 0.1)
 enable_language(CXX)
 
 # common XO macros (see github:Rconybea/xo-cmake)
-include(xo_macros/xo_cxx)
-include(xo_macros/code-coverage)
+include(cmake/xo-bootstrap-macros.cmake)
 
 # ----------------------------------------------------------------
 # unit test setup
