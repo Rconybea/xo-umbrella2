@@ -1,6 +1,6 @@
 # xo_pyprocess/src/pyprocess/CMakeLists.txt
 
-set(SELF_LIB pyprocess)
+set(SELF_LIB xo_pyprocess)
 set(SELF_SRCS pyprocess.cpp)
 
 xo_pybind11_library(${SELF_LIB} ${PROJECT_NAME}Targets ${SELF_SRCS})
