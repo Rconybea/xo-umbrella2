@@ -25,6 +25,17 @@ $ make install
 ```
 (also see .github/workflows/main.yml)
 
+## Examples
+
+Assumes `xo-pyreactor` installed to `~/local2/lib`
+```
+PYTHONPATH=~/local2/lib:$PYTHONPATH python
+>>> import xo_pyreactor
+>>> dir(xo_pyreactor)
+['AbstractEventProcessor', 'AbstractEventStore', 'AbstractSink', 'AbstractSource', 'CallbackId', 'Reactor', 'ReactorSource', '__doc__', '__file__', '__loader__', '__name__', '__package__', '__spec__', 'time2str']
+>>>
+```
+
 ## Development
 
 ### build for unit test coverage
