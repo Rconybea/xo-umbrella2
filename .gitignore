@@ -3,5 +3,4 @@ compile_commands.json
 # lsp keeps state here
 .cache
 # typical build dirs
-build
-ccov
+.build*

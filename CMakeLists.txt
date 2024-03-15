@@ -6,7 +6,7 @@ project(indentlog VERSION 0.1)
 enable_language(CXX)
 
 # common XO cmake macros (see proj/xo-cmake)
-include(xo_macros/xo-project-macros)
+include(cmake/xo-bootstrap-macros.cmake)
 
 # ----------------------------------------------------------------
 # unit test setup
