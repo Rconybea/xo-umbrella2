@@ -15,5 +15,3 @@ xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 $
 #       in xo-simulator/cmake/simulatorConfig.cmake.in
 #
 xo_dependency(${SELF_LIB} reactor)
-#xo_dependency(${SELF_LIB} webutil)
-#xo_dependency(${SELF_LIB} callback)
