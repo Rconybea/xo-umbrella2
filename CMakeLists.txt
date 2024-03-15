@@ -3,8 +3,7 @@ cmake_minimum_required(VERSION 3.10)
 project(subsys VERSION 0.1)
 enable_language(CXX)
 
-include(xo_macros/xo_cxx)
-include(xo_macros/code-coverage)
+include(cmake/xo-bootstrap-macros.cmake)
 
 enable_testing()
 # activate code coverage for all executables + libraries (when -DCODE_COVERAGE=ON)
