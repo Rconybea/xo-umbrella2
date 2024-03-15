@@ -1,0 +1,25 @@
+/* @file pysimulator.hpp
+ *
+ * automatically generated from src/xo_pysimulator/pysimulator.hpp.in
+ * see src/xo_pysimulator/CMakeLists.txt
+ */
+
+/* python requires module name = library name
+ * example:
+ *   PYBIND11_MODULE(PYSIMULATOR_MODULE_NAME(), m) { ... }
+ */
+#define PYSIMULATOR_MODULE_NAME() @SELF_LIB@
+
+/* example:
+ *   py::module_::import(PYSIMULATOR_MODULE_NAME_STR)
+ */
+#define PYSIMULATOR_MODULE_NAME_STR "@SELF_LIB@"
+
+/* example:
+ *   PYSIMULATOR_IMPORT_MODULE()
+ * replaces
+ *   py::module_::import("pysimulator")
+ */
+#define PYSIMULATOR_IMPORT_MODULE() py::module_::import("@SELF_LIB@")
+
+/* end pysimulator.hpp */
