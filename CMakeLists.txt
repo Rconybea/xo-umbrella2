@@ -9,8 +9,7 @@ enable_language(CXX)
 #message(STATUS "CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}")
 
 # common XO cmake macros (see proj/xo-cmake)
-include(xo_macros/xo_cxx)
-include(xo_macros/code-coverage)
+include(cmake/xo-bootstrap-macros.cmake)
 
 # ----------------------------------------------------------------
 # unit test setup
