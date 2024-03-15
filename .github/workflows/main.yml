@@ -21,12 +21,16 @@ jobs:
     - name: checkout source
       uses: actions/checkout@v3
 
-    - name: Install catch2
-      # install catch2.  see [[https://stackoverflow.com/questions/57982945/how-to-apt-get-install-in-a-github-actions-workflow]]
-      run: sudo apt-get install -y catch2
+    - name: Install dependencies
+      run: |
+        echo "::group::install catch2"
+        # install catch2.  see [[https://stackoverflow.com/questions/57982945/how-to-apt-get-install-in-a-github-actions-workflow]]
+        sudo apt-get install -y catch2
+        echo "::endgroup"
 
-    - name: Install pybind11-dev
-      run: sudo apt-get install -y pybind11-dev
+        echo "::group::install pybind11"
+        run: sudo apt-get install -y pybind11-dev
+        echo "::endgroup"
 
     # ----------------------------------------------------------------
 
@@ -35,9 +39,8 @@ jobs:
       with:
         repository: Rconybea/xo-cmake
         path: repo/xo-cmake
-
-    - name: Configure xo-cmake
-      run: cmake -B ${{github.workspace}}/build_xo-cmake -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local repo/xo-cmake
+      run: |
+        cmake -B ${{github.workspace}}/build_xo-cmake -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local repo/xo-cmake
 
     - name: Build xo-cmake (trivial)
       run: cmake --build ${{github.workspace}}/build_xo-cmake --config ${{env.BUILD_TYPE}}
