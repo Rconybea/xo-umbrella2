@@ -594,14 +594,27 @@ jobs:
     - name: Configure self (pysimulator)
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: cmake -B ${{github.workspace}}/build_pysimulator -DCMAKE_MODULE_PATH=${{github.workspace}}/local/share/cmake -DCMAKE_PREFIX_PATH=${{github.workspace}}/local -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+      run: |
+        XONAME=xo-pysimulator
+        BUILDDIR=${{github.workspace}}/build_${XONAME}
+        PREFIX=${{github.workspace}}/local
 
-    - name: Build self (pysimulator)
-      # Build your program with the given configuration
-      run: cmake --build ${{github.workspace}}/build_pysimulator --config ${{env.BUILD_TYPE}}
+        echo "::group::repo dir tree"
+        tree -L 2 repo
+        echo "::endgroup"
 
-    - name: Test self (pysimulator)
-      working-directory: ${{github.workspace}}/build_pysimulator
-      # Execute tests defined by the CMake configuration.
-      # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
-      run: ctest -C ${{env.BUILD_TYPE}}
+        echo "::group::configure ${XONAME}"
+        cmake -B ${BUILDDIR} -DCMAKE_MODULE_PATH=${PREFIX}/share/cmake -DCMAKE_PREFIX_PATH=${PREFIX} -DCMAKE_INSTALL_PREFIX=${PREFIX} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+        echo "::endgroup"
+
+        echo "::group::compile ${XONAME}"
+        cmake --build ${BUILDDIR} --config ${{env.BUILD_TYPE}}
+        echo "::endgroup"
+
+        echo "::group::local dir tree"
+        tree -L 3 ${PREFIX}
+        echo "::endgroup"
+
+        # Execute tests defined by the CMake configuration.
+        # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
+        (cd ${BUILDDIR} && ctest -C ${{env.BUILD_TYPE}})
