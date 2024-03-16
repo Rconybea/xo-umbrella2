@@ -311,6 +311,41 @@ jobs:
 
     # ----------------------------------------------------------------
 
+    - name: clone xo-randomgen
+      uses: actions/checkout@v3
+      with:
+        repository: Rconybea/xo-randomgen
+        path: repo/xo-randomgen
+
+    - name: build xo-randomgen
+      run: |
+        XONAME=xo-randomgen
+        XOSRC=repo/${XONAME}
+        BUILDDIR=${{github.workspace}}/build_${XONAME}
+        PREFIX=${{github.workspace}}/local
+
+        echo "::group::repo dir tree"
+        tree -L 2 repo
+        echo "::endgroup"
+
+        echo "::group::configure ${XONAME}"
+        cmake -B ${BUILDDIR} -DCMAKE_INSTALL_PREFIX=${PREFIX} ${XOSRC}
+        echo "::endgroup"
+
+        echo "::group::compile ${XONAME}"
+        cmake --build ${BUILDDIR} --config ${{env.BUILD_TYPE}} -j
+        echo "::endgroup"
+
+        echo "::group::local install ${XONAME}"
+        cmake --install ${BUILDDIR}
+        echo "::endgroup"
+
+        echo "::group::local dir tree"
+        tree -L 3 ${PREFIX}
+        echo "::endgroup"
+
+    # ----------------------------------------------------------------
+
     - name: clone xo-ordinaltree
       uses: actions/checkout@v3
       with:
