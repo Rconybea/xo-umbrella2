@@ -279,7 +279,7 @@ jobs:
     - name: clone xo-randomgen
       uses: actions/checkout@v3
       with:
-        repository: Rconybea/xo-randomgen
+        repository: Rconybea/randomgen
         path: repo/xo-randomgen
 
     - name: build xo-randomgen
