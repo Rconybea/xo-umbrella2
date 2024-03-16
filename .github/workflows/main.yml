@@ -64,7 +64,7 @@ jobs:
     - name: clone xo-reflect
       uses: actions/checkout@v3
       with:
-        repository: Rconybea/xo-reflect
+        repository: Rconybea/reflect  # not xo-reflect !
         path: repo/xo-reflect
 
     - name: build xo-reflect
