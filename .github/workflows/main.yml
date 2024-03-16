@@ -213,7 +213,7 @@ jobs:
     - name: clone xo-pyreflect
       uses: actions/checkout@v3
       with:
-        repository: Rconybea/pyreflect
+        repository: Rconybea/xo-pyreflect
         path: repo/xo-pyreflect
 
     - name: build xo-pyreflect
