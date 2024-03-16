@@ -48,15 +48,15 @@ jobs:
         BUILDDIR=${{github.workspace}}/build_${XONAME}
         PREFIX=${{github.workspace}}/local
 
-        echo "::group::configure ${XONAME}
+        echo "::group::configure ${XONAME}"
         cmake -B ${BUILDDIR} -DCMAKE_INSTALL_PREFIX=${PREFIX} ${XOSRC}
         echo "::endgroup"
 
-        echo "::group::compile ${XONAME}
+        echo "::group::compile ${XONAME}"
         cmake --build ${{github.workspace}}/build_xo-cmake --config ${{env.BUILD_TYPE}}
         echo "::endgroup"
 
-        echo "::group::local install ${XONAME}
+        echo "::group::local install ${XONAME}"
         cmake --install ${{github.workspace}}/build_xo-cmake
         echo "::endgroup"
 
