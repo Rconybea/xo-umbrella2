@@ -69,7 +69,7 @@ jobs:
 
     - name: build xo-simulator
       run: |
-        echo "::group::configure xo-simulator
+        echo "::group::configure xo-simulator"
         cmake -B ${{github.workspace}}/build_xo-simulator -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local repo/xo-simulator
         echo "::endgroup"
 
