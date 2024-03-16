@@ -61,33 +61,33 @@ jobs:
 
     # ----------------------------------------------------------------
 
-    - name: clone xo-reactor
+    - name: clone xo-reflect
       uses: actions/checkout@v3
       with:
-        repository: Rconybea/xo-reactor
-        path: repo/xo-reactor
+        repository: Rconybea/xo-reflect
+        path: repo/xo-reflect
 
-    - name: build xo-reactor
+    - name: build xo-reflect
       run: |
-        XONAME=xo-reactor
+        XONAME=xo-reflect
         XOSRC=repo/${XONAME}
         BUILDDIR=${{github.workspace}}/build_${XONAME}
         PREFIX=${{github.workspace}}/local
 
-        echo "::group::configure xo-reactor"
+        echo "::group::configure ${XONAME}
         cmake -B ${BUILDDIR} -DCMAKE_INSTALL_PREFIX=${PREFIX} ${XOSRC}
         echo "::endgroup"
 
-        echo "::group::compile xo-reactor"
-        cmake --build ${{github.workspace}}/build_xo-reactor --config ${{env.BUILD_TYPE}}
+        echo "::group::compile ${XONAME}
+        cmake --build ${BUILDDIR} --config ${{env.BUILD_TYPE}}
         echo "::endgroup"
 
-        echo "::group::local install xo-reactor";
-        cmake --install ${{github.workspace}}/build_xo-reactor
+        echo "::group::local install ${XONAME};
+        cmake --install ${BUILDDIR}
         echo "::endgroup"
 
         echo "::group::local dir tree"
-        tree ${{github.workspace}}/local
+        tree ${PREFIX}
         echo "::endgroup"
 
     - name: Configure self (pysimulator)
