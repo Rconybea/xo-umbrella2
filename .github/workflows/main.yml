@@ -486,15 +486,15 @@ jobs:
 
     # ----------------------------------------------------------------
 
-    - name: clone xo-pyprintjson
+    - name: clone xo-pyreflect
       uses: actions/checkout@v3
       with:
-        repository: Rconybea/xo-pyprintjson
-        path: repo/xo-pyprintjson
+        repository: Rconybea/xo-pyreflect
+        path: repo/xo-pyreflect
 
-    - name: build xo-pyprintjson
+    - name: build xo-pyreflect
       run: |
-        XONAME=xo-pyprintjson
+        XONAME=xo-pyreflect
         XOSRC=repo/${XONAME}
         BUILDDIR=${{github.workspace}}/build_${XONAME}
         PREFIX=${{github.workspace}}/local
@@ -521,15 +521,15 @@ jobs:
 
     # ----------------------------------------------------------------
 
-    - name: clone xo-pyreflect
+    - name: clone xo-pyprintjson
       uses: actions/checkout@v3
       with:
-        repository: Rconybea/xo-pyreflect
-        path: repo/xo-pyreflect
+        repository: Rconybea/xo-pyprintjson
+        path: repo/xo-pyprintjson
 
-    - name: build xo-pyreflect
+    - name: build xo-pyprintjson
       run: |
-        XONAME=xo-pyreflect
+        XONAME=xo-pyprintjson
         XOSRC=repo/${XONAME}
         BUILDDIR=${{github.workspace}}/build_${XONAME}
         PREFIX=${{github.workspace}}/local
