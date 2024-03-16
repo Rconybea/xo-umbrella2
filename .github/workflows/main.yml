@@ -75,10 +75,10 @@ jobs:
         PREFIX=${{github.workspace}}/local
 
         echo "::group::repo dir tree"
-        tree repo
+        tree -L 2 repo
         echo "::endgroup"
 
-        echo "::group::configure ${XONAME}
+        echo "::group::configure ${XONAME}"
         cmake -B ${BUILDDIR} -DCMAKE_INSTALL_PREFIX=${PREFIX} ${XOSRC}
         echo "::endgroup"
 
@@ -86,7 +86,7 @@ jobs:
         cmake --build ${BUILDDIR} --config ${{env.BUILD_TYPE}}
         echo "::endgroup"
 
-        echo "::group::local install ${XONAME};
+        echo "::group::local install ${XONAME}"
         cmake --install ${BUILDDIR}
         echo "::endgroup"
 
