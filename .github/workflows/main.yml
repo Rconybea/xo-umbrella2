@@ -82,7 +82,7 @@ jobs:
         echo "::endgroup"
 
         echo "::group::local dir tree"
-        tree ${{github.workspace}//local
+        tree ${{github.workspace}}/local
         echo "::endgroup"
 
     - name: Configure self (pysimulator)
