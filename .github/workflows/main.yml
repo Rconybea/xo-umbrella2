@@ -43,33 +43,38 @@ jobs:
 
     - name: build xo-cmake
       run: |
-        echo "::group::configure xo-cmake"
-        cmake -B ${{github.workspace}}/build_xo-cmake -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local repo/xo-cmake
+        XONAME=xo-cmake
+        XOSRC=repo/${XONAME}
+        BUILDDIR=${{github.workspace}}/build_${XONAME}
+        PREFIX=${{github.workspace}}/local
+
+        echo "::group::configure ${XONAME}
+        cmake -B ${BUILDDIR} -DCMAKE_INSTALL_PREFIX=${PREFIX} ${XOSRC}
         echo "::endgroup"
 
-        echo "::group::compile xo-cmake"
+        echo "::group::compile ${XONAME}
         cmake --build ${{github.workspace}}/build_xo-cmake --config ${{env.BUILD_TYPE}}
         echo "::endgroup"
 
-        echo "::group::local install xo-cmake"
+        echo "::group::local install ${XONAME}
         cmake --install ${{github.workspace}}/build_xo-cmake
         echo "::endgroup"
 
         echo "::group::local dir tree"
-        tree ${{github.workspace}}/local
+        tree ${PREFIX}
         echo "::endgroup"
 
     # ----------------------------------------------------------------
 
-    - name: clone xo-reflect
+    - name: clone xo-refcnt
       uses: actions/checkout@v3
       with:
-        repository: Rconybea/reflect
-        path: repo/xo-reflect
+        repository: Rconybea/refcnt
+        path: repo/xo-refcnt
 
-    - name: build xo-reflect
+    - name: build xo-refcnt
       run: |
-        XONAME=xo-reflect
+        XONAME=xo-refcnt
         XOSRC=repo/${XONAME}
         BUILDDIR=${{github.workspace}}/build_${XONAME}
         PREFIX=${{github.workspace}}/local
