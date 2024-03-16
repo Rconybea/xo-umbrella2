@@ -39,14 +39,20 @@ jobs:
       with:
         repository: Rconybea/xo-cmake
         path: repo/xo-cmake
+
+    - name: build xo-cmake
       run: |
+        echo "::group::configure xo-cmake"
         cmake -B ${{github.workspace}}/build_xo-cmake -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local repo/xo-cmake
+        echo "::endgroup"
 
-    - name: Build xo-cmake (trivial)
-      run: cmake --build ${{github.workspace}}/build_xo-cmake --config ${{env.BUILD_TYPE}}
+        echo "::group::compile xo-cmake"
+        cmake --build ${{github.workspace}}/build_xo-cmake --config ${{env.BUILD_TYPE}}
+        echo "::endgroup"
 
-    - name: Install xo-cmake
-      run: cmake --install ${{github.workspace}}/build_xo-cmake
+        echo "::group::local install xo-cmake"
+        cmake --install ${{github.workspace}}/build_xo-cmake
+        echo "::endgroup"
 
     # ----------------------------------------------------------------
 
