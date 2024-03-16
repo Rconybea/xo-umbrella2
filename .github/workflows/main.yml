@@ -414,6 +414,41 @@ jobs:
         tree -L 3 ${PREFIX}
         echo "::endgroup"
 
+    # ----------------------------------------------------------------
+
+    - name: clone xo-simulator
+      uses: actions/checkout@v3
+      with:
+        repository: Rconybea/xo-simulator
+        path: repo/xo-simulator
+
+    - name: build xo-simulator
+      run: |
+        XONAME=xo-simulator
+        XOSRC=repo/${XONAME}
+        BUILDDIR=${{github.workspace}}/build_${XONAME}
+        PREFIX=${{github.workspace}}/local
+
+        echo "::group::repo dir tree"
+        tree -L 2 repo
+        echo "::endgroup"
+
+        echo "::group::configure ${XONAME}"
+        cmake -B ${BUILDDIR} -DCMAKE_INSTALL_PREFIX=${PREFIX} ${XOSRC}
+        echo "::endgroup"
+
+        echo "::group::compile ${XONAME}"
+        cmake --build ${BUILDDIR} --config ${{env.BUILD_TYPE}} -j
+        echo "::endgroup"
+
+        echo "::group::local install ${XONAME}"
+        cmake --install ${BUILDDIR}
+        echo "::endgroup"
+
+        echo "::group::local dir tree"
+        tree -L 3 ${PREFIX}
+        echo "::endgroup"
+
     - name: Configure self (pysimulator)
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
