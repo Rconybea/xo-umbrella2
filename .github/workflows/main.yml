@@ -33,8 +33,8 @@ jobs:
         sudo apt-get install  -y libeigen3-dev
         echo "::endgroup"
 
-        #echo "::group::install pybind11"
-        #sudo apt-get install -y pybind11-dev
+        echo "::group::install pybind11"
+        sudo apt-get install -y pybind11-dev
         #echo "::endgroup"
 
     # ----------------------------------------------------------------
