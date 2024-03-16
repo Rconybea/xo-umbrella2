@@ -209,7 +209,7 @@ jobs:
     - name: clone xo-reactor
       uses: actions/checkout@v3
       with:
-        repository: Rconybea/reactor
+        repository: Rconybea/xo-reactor
         path: repo/xo-reactor
 
     - name: build xo-reactor
