@@ -61,24 +61,29 @@ jobs:
 
     # ----------------------------------------------------------------
 
-    - name: clone xo-simulator
+    - name: clone xo-reactor
       uses: actions/checkout@v3
       with:
-        repository: Rconybea/xo-simulator
-        path: repo/xo-simulator
+        repository: Rconybea/xo-reactor
+        path: repo/xo-reactor
 
-    - name: build xo-simulator
+    - name: build xo-reactor
       run: |
-        echo "::group::configure xo-simulator"
-        cmake -B ${{github.workspace}}/build_xo-simulator -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local repo/xo-simulator
+        XONAME=xo-reactor
+        XOSRC=repo/${XONAME}
+        BUILDDIR=${{github.workspace}}/build_${XONAME}
+        PREFIX=${{github.workspace}}/local
+
+        echo "::group::configure xo-reactor"
+        cmake -B ${BUILDDIR} -DCMAKE_INSTALL_PREFIX=${PREFIX} ${XOSRC}
         echo "::endgroup"
 
-        echo "::group::compile xo-simulator"
-        cmake --build ${{github.workspace}}/build_xo-simulator --config ${{env.BUILD_TYPE}}
+        echo "::group::compile xo-reactor"
+        cmake --build ${{github.workspace}}/build_xo-reactor --config ${{env.BUILD_TYPE}}
         echo "::endgroup"
 
-        echo "::group::local install xo-simulator";
-        cmake --install ${{github.workspace}}/build_xo-simulator
+        echo "::group::local install xo-reactor";
+        cmake --install ${{github.workspace}}/build_xo-reactor
         echo "::endgroup"
 
         echo "::group::local dir tree"
