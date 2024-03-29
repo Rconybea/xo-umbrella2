@@ -20,7 +20,7 @@ namespace {
     using utest::TreeUtil;
 
     using xo::scope;
-    using xo::scope_setup;
+    //using xo::scope_setup;
     using xo::xtag;
 
     using BtreeKey = int;
