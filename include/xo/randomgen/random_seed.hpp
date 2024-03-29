@@ -76,6 +76,7 @@ namespace xo {
         operator<<(std::ostream & os,
                    Seed<T> const & x)
         {
+            /* NOTE: if compile error here,  may want caller to #include [indentlog/print/vector.hpp] */
             os << x.seed_;
             return os;
         } /*operator<<*/
