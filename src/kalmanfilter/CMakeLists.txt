@@ -21,11 +21,10 @@ set(SELF_SRCS
 xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 ${SELF_SRCS})
 
 # ----------------------------------------------------------------
-# internal dependencies
+# Dependencies
+#
+# REMINDER:  must coordinate with find_dependency() calls in
+#            [xo-kalmanfilter/cmake/xo_kalmanfilterConfig.cmake.in]
 
 xo_dependency(${SELF_LIB} reactor)
-
-# ----------------------------------------------------------------
-# external dependencies
-
 xo_external_target_dependency(${SELF_LIB} Eigen3 Eigen3::Eigen)
