@@ -9,7 +9,9 @@
 #include <iostream>
 
 // STRINGIFY(xyz) -> "xyz"
-#define STRINGIFY(x) #x
+#ifndef STRINGIFY
+# define STRINGIFY(x) #x
+#endif
 
 // TAG(xyz) -> tag("xyz", xyz)
 #define TAG(x) xo::make_tag(STRINGIFY(x), x)
