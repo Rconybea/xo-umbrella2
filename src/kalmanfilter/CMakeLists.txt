@@ -23,8 +23,8 @@ xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 $
 # ----------------------------------------------------------------
 # Dependencies
 #
-# REMINDER: these must coodinate with find_dependency() calls in
-#           [xo-kalmanfilter/cmake/xo_kalmanfilterConfig.cmake.in]
-#
+# REMINDER:  must coordinate with find_dependency() calls in
+#            [xo-kalmanfilter/cmake/xo_kalmanfilterConfig.cmake.in]
+
 xo_dependency(${SELF_LIB} reactor)
 xo_external_target_dependency(${SELF_LIB} Eigen3 Eigen3::Eigen)
