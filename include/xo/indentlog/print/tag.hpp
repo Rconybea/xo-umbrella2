@@ -17,6 +17,9 @@
 #define TAG(x) xo::make_tag(STRINGIFY(x), x)
 #define TAG2(x, y) xo::make_tag(x, y)
 
+#define XTAG(x) xo::xtag(STRINGIFY(x), x)
+//#define XTAG2(x, y) xo::xtag(x, y)
+
 namespace xo {
     // associate a name with a value
     //
