@@ -36,6 +36,7 @@ xo_toplevel_compile_options()
 # ----------------------------------------------------------------
 
 #add_subdirectory(src/unit)
+add_subdirectory(example)
 add_subdirectory(utest)
 add_subdirectory(docs)
 
