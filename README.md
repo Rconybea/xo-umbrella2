@@ -23,6 +23,13 @@ $ make
 $ make install
 ```
 
+### build documentation
+```
+$ cd xo-unit
+$ cmake --build .build -- sphinx
+```
+When this completes,  point local browser to `xo-unit/.build/docs/sphinx/index.html`.
+
 ### build for unit test coverage
 ```
 $ cd xo-unit
