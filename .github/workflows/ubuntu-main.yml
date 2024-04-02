@@ -23,10 +23,15 @@ jobs:
 
     - name: Install dependencies
       run: |
-        echo "::group::install catch2"
-        # install catch2.  see
+        # install catch2, doxygen.  see
         #   [[https://stackoverflow.com/questions/57982945/how-to-apt-get-install-in-a-github-actions-workflow]]
+
+        echo "::group::install catch2"
         sudo apt-get install -y catch2
+        echo "::endgroup"
+
+        echo "::group::install doxygen"
+        sudo apt-get install -y doxygen
         echo "::endgroup"
 
         #echo "::group::install pybind11"
