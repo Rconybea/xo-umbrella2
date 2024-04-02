@@ -17,7 +17,7 @@ namespace xo {
      * - bpu_list -> bpu_node
      */
 
-    namespace obs {
+    namespace unit {
         // ----- lookup_bpu -----
 
         /**
@@ -510,7 +510,7 @@ namespace xo {
         template<typename D>
         using canonical_t = canonical_impl<D>::dim_type;
 
-    } /*namespace obs*/
+    } /*namespace unit*/
 } /*namespace xo*/
 
 /* end dimension_impl.hpp */

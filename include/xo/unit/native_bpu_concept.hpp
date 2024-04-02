@@ -7,7 +7,7 @@
 #include <concepts>
 
 namespace xo {
-    namespace obs {
+    namespace unit {
         /**
          *  e.g. see native_bpu<native_dim_id, std::ratio<..>>
          *
@@ -35,8 +35,7 @@ namespace xo {
                 && (std::is_signed_v<decltype(NativeBpu::c_den)>))
             // && std::copyable<Foo>
             ;
-    } /*namespace obs*/
+    } /*namespace unit*/
 } /*namespace xo*/
-
 
 /* end native_bpu_concept.hpp */

@@ -2,10 +2,11 @@
 
 #pragma once
 
+
 #include "stringliteral.hpp"
 
 namespace xo {
-    namespace obs {
+    namespace unit {
         enum class dim {
             /** weight.  native unit = 1 gram **/
             mass,
@@ -52,8 +53,7 @@ namespace xo {
 
         template <dim Dim>
         constexpr auto native_unit_for_v = native_unit_for<Dim>::value;
-    } /*namespace obs*/
+    } /*namespace unit*/
 } /*namespace xo*/
-
 
 /* end dim_util.hpp */

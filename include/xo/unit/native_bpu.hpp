@@ -7,7 +7,7 @@
 #include <ratio>
 
 namespace xo {
-    namespace obs {
+    namespace unit {
         // ----- native_bpu -----
 
         /** @class native_bpu
@@ -253,7 +253,7 @@ namespace xo {
                 _p_type /*Power*/ >;
         };
 
-    } /*namespace obs*/
+    } /*namespace unit*/
 } /*namespace xo*/
 
 /* end native_bpu.hpp */

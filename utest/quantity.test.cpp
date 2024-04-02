@@ -9,31 +9,32 @@
 #include <catch2/catch.hpp>
 
 namespace xo {
-    using xo::obs::quantity;
+    using xo::unit::quantity;
 
-    using xo::obs::qty::milliseconds;
-    using xo::obs::qty::seconds;
-    using xo::obs::qty::minutes;
-    using xo::obs::qty::volatility30d;
-    using xo::obs::qty::volatility250d;
+    using xo::unit::qty::kilograms;
+    using xo::unit::qty::milliseconds;
+    using xo::unit::qty::seconds;
+    using xo::unit::qty::minutes;
+    using xo::unit::qty::volatility30d;
+    using xo::unit::qty::volatility250d;
 
-    using xo::obs::unit_find_bpu_t;
-    using xo::obs::unit_conversion_factor_t;
-    using xo::obs::unit_cartesian_product_t;
-    using xo::obs::unit_cartesian_product;
-    using xo::obs::unit_invert_t;
-    using xo::obs::unit_abbrev_v;
-    using xo::obs::same_dimension_v;
-    using xo::obs::dim;
+    using xo::unit::unit_find_bpu_t;
+    using xo::unit::unit_conversion_factor_t;
+    using xo::unit::unit_cartesian_product_t;
+    using xo::unit::unit_cartesian_product;
+    using xo::unit::unit_invert_t;
+    using xo::unit::unit_abbrev_v;
+    using xo::unit::same_dimension_v;
+    using xo::unit::dim;
 
-    using xo::obs::from_ratio;
-    using xo::obs::stringliteral_from_ratio;
-    using xo::obs::ratio2str_aux;
-    using xo::obs::cstr_from_ratio;
+    using xo::unit::from_ratio;
+    using xo::unit::stringliteral_from_ratio;
+    using xo::unit::ratio2str_aux;
+    using xo::unit::cstr_from_ratio;
 
     using xo::reflect::Reflect;
 
-    namespace units = xo::obs::units;
+    namespace units = xo::unit::units;
 
     namespace ut {
         /* use 'testcase' snippet to add test cases here */
@@ -626,7 +627,7 @@ namespace xo {
 
             //auto rng = xo::rng::xoshiro256ss(seed);
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.mult2"));
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.div4"));
             //log && log("(A)", xtag("foo", foo));
 
             auto q1 = volatility250d(0.2);
@@ -645,6 +646,41 @@ namespace xo {
 
             /* verify scale of result */
             CHECK(r == Approx(0.692820323).epsilon(1e-6));
+
+        } /*TEST_CASE(div4)*/
+
+        TEST_CASE("muldiv5", "[quantity]") {
+            constexpr bool c_debug_flag = true;
+
+            // can get bits from /dev/random by uncommenting the 2nd line below
+            //uint64_t seed = xxx;
+            //rng::Seed<xoshio256ss> seed;
+
+            //auto rng = xo::rng::xoshiro256ss(seed);
+
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.muldiv5"));
+            //log && log("(A)", xtag("foo", foo));
+
+            auto t = milliseconds(10);
+            auto m = kilograms(2.5);
+
+            auto a = m / (t * t);
+
+            /* 0.1/sqrt(30dy) ~ 0.288675/sqrt(250dy),
+             * so q1/q2 ~ 0.6928
+             */
+
+            log && log(XTAG(m), XTAG(t), xtag("a=m.t^-2", a));
+
+            /* verify dimensions of result + sticky units */
+            CHECK(strcmp(t.unit_cstr(), "ms") == 0);
+            CHECK(strcmp(m.unit_cstr(), "kg") == 0);
+            CHECK(strcmp(a.unit_cstr(), "kg.ms^-2") == 0);
+
+            CHECK(a.scale() == 0.025);
+
+            /* verify scale of result */
+            //CHECK(r == Approx(0.692820323).epsilon(1e-6));
 
         } /*TEST_CASE(div4)*/
     } /*namespace ut*/

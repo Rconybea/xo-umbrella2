@@ -3,10 +3,9 @@
 #pragma once
 
 #include "native_bpu_concept.hpp"
-//#include <concepts>
 
 namespace xo {
-    namespace obs {
+    namespace unit {
         /** checks most non-empty BPU (basis power unit) node types;
          *  cannot check BpuList::rest_type,  because concept definition
          *  can't (as of c++23) be recursive.
@@ -83,7 +82,7 @@ namespace xo {
             && (ratio_concept<typename Unit::scalefactor_type>
                 && bpu_list_concept<typename Unit::dim_type>
                 && bpu_list_concept<typename Unit::canon_type>);
-    } /*namespace obs*/
+    } /*namespace unit*/
 } /*namespace xo*/
 
 /* end dimension_concept.hpp */

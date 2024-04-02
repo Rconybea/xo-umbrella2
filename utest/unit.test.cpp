@@ -14,33 +14,33 @@ namespace xo {
 
         using xo::reflect::Reflect;
 
-        using xo::obs::dim;
-        using xo::obs::native_unit_abbrev_v;
-        using xo::obs::units::scaled_native_unit_abbrev_v;
-        //using xo::obs::native_dim_abbrev;
-        using xo::obs::stringliteral_compare;
-        using xo::obs::literal_size_v;
-        using xo::obs::stringliteral_from_digit;
-        using xo::obs::stringliteral_from_int_v;
-        using xo::obs::stringliteral;
+        using xo::unit::dim;
+        using xo::unit::native_unit_abbrev_v;
+        using xo::unit::units::scaled_native_unit_abbrev_v;
+        //using xo::unit::native_dim_abbrev;
+        using xo::unit::stringliteral_compare;
+        using xo::unit::literal_size_v;
+        using xo::unit::stringliteral_from_digit;
+        using xo::unit::stringliteral_from_int_v;
+        using xo::unit::stringliteral;
 #ifndef __clang__
-        using xo::obs::stringliteral_concat;
-        using xo::obs::stringliteral_from_ratio;
-        using xo::obs::bpu_assemble_abbrev_helper;
-        using xo::obs::bpu_assemble_abbrev;
+        using xo::unit::stringliteral_concat;
+        using xo::unit::stringliteral_from_ratio;
+        using xo::unit::bpu_assemble_abbrev_helper;
+        using xo::unit::bpu_assemble_abbrev;
 #endif
-        using xo::obs::bpu_node;
-        using xo::obs::wrap_unit;
-        using xo::obs::unit_abbrev_v;
-        //using xo::obs::dim_abbrev_v;
-        using xo::obs::di_cartesian_product;
-        using xo::obs::di_cartesian_product1;
-        using xo::obs::unit_cartesian_product_t;
-        using xo::obs::bpu_cartesian_product;
-        using xo::obs::bpu_cartesian_product_helper;
-        using xo::obs::unit_invert_t;
-        using xo::obs::units::gram;
-        using xo::obs::units::second;
+        using xo::unit::bpu_node;
+        using xo::unit::wrap_unit;
+        using xo::unit::unit_abbrev_v;
+        //using xo::unit::dim_abbrev_v;
+        using xo::unit::di_cartesian_product;
+        using xo::unit::di_cartesian_product1;
+        using xo::unit::unit_cartesian_product_t;
+        using xo::unit::bpu_cartesian_product;
+        using xo::unit::bpu_cartesian_product_helper;
+        using xo::unit::unit_invert_t;
+        using xo::unit::units::gram;
+        using xo::unit::units::second;
         using xo::print::ccs;
 
         template <typename T>
@@ -180,74 +180,74 @@ namespace xo {
             scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.dimension"));
             //log && log("(A)", xtag("foo", foo));
 
-            using t1 = obs::bpu<obs::dim::currency, std::ratio<1,1>>;
+            using t1 = unit::bpu<unit::dim::currency, std::ratio<1,1>>;
 
-            static_assert(t1::c_native_dim == obs::dim::currency);
+            static_assert(t1::c_native_dim == unit::dim::currency);
             static_assert(t1::power_type::num == 1);
             static_assert(t1::power_type::den == 1);
 
-            using t2 = obs::bpu<obs::dim::time, std::ratio<1>, std::ratio<-1,2>>;
+            using t2 = unit::bpu<unit::dim::time, std::ratio<1>, std::ratio<-1,2>>;
 
-            static_assert(t2::c_native_dim == obs::dim::time);
+            static_assert(t2::c_native_dim == unit::dim::time);
             static_assert(t2::power_type::num == -1);
             static_assert(t2::power_type::den == 2);
 
             using dim1 = wrap_unit<std::ratio<1>, bpu_node<t1>>;
             using d1 = dim1::dim_type; /* ccy */
             REQUIRE(unused_same<d1::front_type, t1>());
-            REQUIRE(unused_same<obs::lookup_bpu<d1, 0>::power_unit_type, t1>());
+            REQUIRE(unused_same<unit::lookup_bpu<d1, 0>::power_unit_type, t1>());
 #ifdef NOT_USING
-            static_assert(obs::lo_basis_elt_of<d1>::c_lo_basis == t1::c_basis);
+            static_assert(unit::lo_basis_elt_of<d1>::c_lo_basis == t1::c_basis);
 #endif
 
-            static_assert(obs::native_lo_bwp_of<d1>::bwp_type::c_index == 0);
-            static_assert(obs::native_lo_bwp_of<d1>::bwp_type::c_basis == obs::dim::currency);
+            static_assert(unit::native_lo_bwp_of<d1>::bwp_type::c_index == 0);
+            static_assert(unit::native_lo_bwp_of<d1>::bwp_type::c_basis == unit::dim::currency);
 
 
             using dim2 = wrap_unit<std::ratio<1>, bpu_node<t2>>;
             using d2 = dim2::dim_type; /* t^(-1/2) */
             REQUIRE(unused_same<d2::front_type, t2>());
-            REQUIRE(unused_same<obs::lookup_bpu<d2, 0>::power_unit_type, t2>());
-            static_assert(obs::native_lo_bwp_of<d2>::bwp_type::c_index == 0);
-            static_assert(obs::native_lo_bwp_of<d2>::bwp_type::c_basis == obs::dim::time);
+            REQUIRE(unused_same<unit::lookup_bpu<d2, 0>::power_unit_type, t2>());
+            static_assert(unit::native_lo_bwp_of<d2>::bwp_type::c_index == 0);
+            static_assert(unit::native_lo_bwp_of<d2>::bwp_type::c_basis == unit::dim::time);
 
             using dim3 = wrap_unit<std::ratio<1>, bpu_node<t1, bpu_node<t2>>>;
             using d3 = dim3::dim_type; /* ccy.t^(-1/2) */
-            REQUIRE(unused_same<obs::lookup_bpu<d3, 0>::power_unit_type, t1>());
+            REQUIRE(unused_same<unit::lookup_bpu<d3, 0>::power_unit_type, t1>());
 
             {
-                using type = obs::lookup_bpu<d3, 1>::power_unit_type;
-                //std::cerr << "obs::power_unit_of<d3,1>::power_unit_type" << xtag("type",  reflect::type_name<type>()) << std::endl;
+                using type = unit::lookup_bpu<d3, 1>::power_unit_type;
+                //std::cerr << "unit::power_unit_of<d3,1>::power_unit_type" << xtag("type",  reflect::type_name<type>()) << std::endl;
 
                 REQUIRE(unused_same<type, t2>());
             }
 
 #ifdef NOT_USING
-            static_assert(obs::lo_basis_elt_of<d3>::c_lo_basis == t2::c_basis);
+            static_assert(unit::lo_basis_elt_of<d3>::c_lo_basis == t2::c_basis);
 #endif
 
             /* lowest is in pos 1,  beacuse t2=time before t1=currency */
-            static_assert(obs::native_lo_bwp_of<d3>::bwp_type::c_index == 1);
+            static_assert(unit::native_lo_bwp_of<d3>::bwp_type::c_index == 1);
 
-            static_assert(unused_same<obs::without_elt<d3, 0>::dim_type, d2>());
-            //using type = obs::without_elt<d3, 1>::dim_type;
-            //std::cerr << "obs::without_elt<d3,1>::dim_type" << xtag("type", reflect::type_name<type>()) << std::endl;
-            static_assert(unused_same<obs::without_elt<d3, 1>::dim_type, d1>());
+            static_assert(unused_same<unit::without_elt<d3, 0>::dim_type, d2>());
+            //using type = unit::without_elt<d3, 1>::dim_type;
+            //std::cerr << "unit::without_elt<d3,1>::dim_type" << xtag("type", reflect::type_name<type>()) << std::endl;
+            static_assert(unused_same<unit::without_elt<d3, 1>::dim_type, d1>());
 
 
             using d3b = wrap_unit<std::ratio<1>,
                                   bpu_node<t2, bpu_node<t1>>>::dim_type; /* t^(-1/2).ccy */
-            //using d3b = obs::dimension_impl<t2, obs::dimension_impl<t1>>; /* t^(-1/2).ccy */
-            REQUIRE(unused_same<obs::lookup_bpu<d3b, 0>::power_unit_type, t2>());
-            REQUIRE(unused_same<obs::lookup_bpu<d3b, 1>::power_unit_type, t1>());
+            //using d3b = unit::dimension_impl<t2, unit::dimension_impl<t1>>; /* t^(-1/2).ccy */
+            REQUIRE(unused_same<unit::lookup_bpu<d3b, 0>::power_unit_type, t2>());
+            REQUIRE(unused_same<unit::lookup_bpu<d3b, 1>::power_unit_type, t1>());
 
             /* lowest is in pos 0 */
-            static_assert(obs::native_lo_bwp_of<d3b>::bwp_type::c_index == 0);
+            static_assert(unit::native_lo_bwp_of<d3b>::bwp_type::c_index == 0);
 
-            static_assert(unused_same<obs::without_elt<d3b, 0>::dim_type, d1>());
-            static_assert(unused_same<obs::without_elt<d3b, 1>::dim_type, d2>());
+            static_assert(unused_same<unit::without_elt<d3b, 0>::dim_type, d1>());
+            static_assert(unused_same<unit::without_elt<d3b, 1>::dim_type, d2>());
 
-            static_assert(unused_same<obs::canonical_t<d3>, obs::canonical_t<d3b>>());
+            static_assert(unused_same<unit::canonical_t<d3>, unit::canonical_t<d3b>>());
 
             log && log(xtag("d1.abbrev", unit_abbrev_v<dim1>.c_str()));
             log && log(xtag("d2.abbrev", unit_abbrev_v<dim2>.c_str()));

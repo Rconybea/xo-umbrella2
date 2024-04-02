@@ -8,7 +8,7 @@
 #include <cstdint>
 
 namespace xo {
-    namespace obs {
+    namespace unit {
 
         // ----- stringliteral -----
 
@@ -164,7 +164,7 @@ namespace xo {
             static constexpr auto value = stringliteral_concat("-", _suffix.value_);
         };
 
-    } /*namespace obs*/
+    } /*namespace unit*/
 } /*namespace xo*/
 
 /* end stringliteral.hpp */

@@ -5,9 +5,9 @@
 #include <concepts>
 
 namespace xo {
-    namespace obs {
+    namespace unit {
         template <typename Ratio>
         concept ratio_concept = (std::is_signed_v<decltype(Ratio::num)>
                                  && std::is_signed_v<decltype(Ratio::den)>);
-    } /*namespace obs*/
+    } /*namespace unit*/
 } /*namespace xo*/

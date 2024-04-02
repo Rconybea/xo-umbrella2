@@ -5,7 +5,7 @@
 #include <concepts>
 
 namespace xo {
-    namespace obs {
+    namespace unit {
         template <typename Quantity>
         concept quantity_concept = requires(Quantity qty, typename Quantity::repr_type repr)
         {
@@ -17,5 +17,5 @@ namespace xo {
             { Quantity::unit_quantity() } -> std::same_as<Quantity>;
             { Quantity::promote(repr) } -> std::same_as<Quantity>;
         };
-    } /*namespace obs*/
+    } /*namespace unit*/
 } /*namespace xo*/

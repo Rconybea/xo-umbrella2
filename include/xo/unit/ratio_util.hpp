@@ -8,7 +8,7 @@
 #include <numeric>
 
 namespace xo {
-    namespace obs {
+    namespace unit {
         // ----- ratio_floor -----
 
         template <typename Ratio>
@@ -236,7 +236,7 @@ namespace xo {
             return exponent2str_aux<Ratio::type::num, Ratio::type::den>().value;
         };
 
-    } /*namespace obs*/
+    } /*namespace unit*/
 } /*namespace xo*/
 
 /* end ratio_util.hpp */

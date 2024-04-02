@@ -1,11 +1,11 @@
-/* @file dimension.hpp */
+/* @file unit.hpp */
 
 #pragma once
 
 #include "dimension_impl.hpp"
 
 namespace xo {
-    namespace obs {
+    namespace unit {
         // ----- wrap_unit -----
 
         template <typename Scalefactor, typename BpuList>
@@ -26,6 +26,7 @@ namespace xo {
 
         // ----- normalize_unit -----
 
+        /* like Unit,  but with scalefactor 1 */
         template <typename Unit>
         struct normalize_unit {
             static_assert(unit_concept<Unit>);
@@ -239,7 +240,7 @@ namespace xo {
 
             using milligram  = wrap_unit< std::ratio<1>,
                                           bpu_node< bpu<dim::mass,
-                                                               std::ratio<1, 1000>> > >;
+                                                        std::ratio<1, 1000>> > >;
 
             template <>
             struct scaled_native_unit_abbrev<dim::mass, std::ratio<1, 1000>> {
@@ -248,10 +249,10 @@ namespace xo {
 
             using gram       = wrap_unit< std::ratio<1>,
                                           bpu_node< bpu<dim::mass,
-                                                               std::ratio<1>> > >;
+                                                        std::ratio<1>> > >;
             using kilogram   = wrap_unit< std::ratio<1>,
                                           bpu_node< bpu<dim::mass,
-                                                               std::ratio<1000>> > >;
+                                                        std::ratio<1000>> > >;
 
             template <>
             struct scaled_native_unit_abbrev<dim::mass, std::ratio<1000>> {
@@ -385,10 +386,8 @@ namespace xo {
             using price      = wrap_unit< std::ratio<1>,
                                           bpu_node< bpu<dim::price,
                                                                std::ratio<1>> > >;
-        }
-
-    } /*namespace obs*/
+        } /*namespace units*/
+    } /*namespace unit*/
 } /*namespace xo*/
 
-
-/* end dimension.hpp */
+/* end unit.hpp */

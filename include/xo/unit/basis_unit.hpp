@@ -4,7 +4,7 @@
 #include "ratio_util.hpp"
 
 namespace xo {
-    namespace obs {
+    namespace unit {
         /** @class basis_unit
          *
          *  @brief A dimensionless multiple with natively-specified (i.e. at compile-time) dimension
@@ -56,9 +56,9 @@ namespace xo {
         template<dim BasisDim>
         constexpr auto native_unit_abbrev_v = native_unit_abbrev_helper<BasisDim>::value;
 
-        // ----- scaled_native_unit_abbrev_helper -----
-
         namespace units {
+            // ----- scaled_native_unit_abbrev_helper -----
+
             /* Require: InnerScale is ratio type; InnerScale >= 1 */
             template <dim BasisDim, typename InnerScale>
             struct scaled_native_unit_abbrev;
@@ -80,7 +80,7 @@ namespace xo {
             template <dim BasisDim, typename InnerScale>
             constexpr auto scaled_native_unit_abbrev_v = scaled_native_unit_abbrev<BasisDim, InnerScale>::value;
         }
-    } /*namespace obs*/
+    } /*namespace unit*/
 } /*namespace xo*/
 
 /** end basis_unit.hpp **/

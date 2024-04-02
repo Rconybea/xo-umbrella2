@@ -8,7 +8,7 @@
 //#include "xo/indentlog/scope.hpp"
 
 namespace xo {
-    namespace obs {
+    namespace unit {
         /** @class promoter
          *
          *  Aux class assister for quantity::promote()
@@ -35,7 +35,7 @@ namespace xo {
          *  - Repr * Repr -> Repr
          *  - Repr / Repr -> Repr
          **/
-        template <typename Unit, typename Repr> //, typename RequiredDimensionType = Unit>
+        template <typename Unit, typename Repr = double>
         class quantity {
         public:
             using unit_type = Unit;
@@ -415,7 +415,7 @@ namespace xo {
             };
 
             template <typename Repr = double>
-            inline auto kilograms(Repr x) -> quantity<units::gram, Repr> {
+            inline auto kilograms(Repr x) -> quantity<units::kilogram, Repr> {
                 return quantity<units::kilogram, Repr>::promote(x);
             };
 
@@ -495,7 +495,7 @@ namespace xo {
                 return quantity<units::volatility_250d, Repr>::promote(x);
             }
         } /*namespace qty*/
-    } /*namespace obs*/
+    } /*namespace unit*/
 } /*namespace xo*/
 
 /* end quantity.hpp */
