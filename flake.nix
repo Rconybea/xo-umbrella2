@@ -100,6 +100,7 @@
                 packages.xo-refcnt = appliedOverlay.xo-refcnt;
                 packages.xo-subsys = appliedOverlay.xo-subsys;
                 packages.xo-reflect = appliedOverlay.xo-reflect;
+                packages.xo-unit = appliedOverlay.xo-unit;
                 # placeholder-C
 
                 packages.xo-userenv = appliedOverlay.xo-userenv;
