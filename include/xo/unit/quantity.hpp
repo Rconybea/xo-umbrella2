@@ -123,8 +123,20 @@ namespace xo {
 
                 using repr_type = std::common_type_t<repr_type, typename Quantity2::repr_type>;
 
-                repr_type r_scale = ((scale() * c_scalefactor_inexact * unit_type::scalefactor_type::num)
-                                     / (y.scale() * unit_type::scalefactor_type::den));
+                repr_type r_scale = ((scale() * c_scalefactor_inexact * exact_scalefactor_type::num)
+                                     / (y.scale() * exact_scalefactor_type::den));
+
+#              ifdef NOT_USING_DEBUG
+                using xo::reflect::Reflect;
+                scope log(XO_DEBUG(true /*c_debug_flag*/));
+                log && log(xtag("unit_divide_type", Reflect::require<unit_divide_type>()->canonical_name()));
+                log && log(xtag("exact_unit_type", Reflect::require<exact_unit_type>()->canonical_name()));
+                log && log(xtag("norm_unit_type", Reflect::require<norm_unit_type>()->canonical_name()));
+                log && log(xtag("exact_scalefactor_type", Reflect::require<exact_scalefactor_type>()->canonical_name()));
+                log && log(xtag("c_scalefactor_inexact", c_scalefactor_inexact));
+                log && log(xtag("r_scale", r_scale));
+                log && log(xtag("repr_type", Reflect::require<repr_type>()->canonical_name()));
+#              endif
 
                 return quantity<norm_unit_type, repr_type>::promote(r_scale);
             }
