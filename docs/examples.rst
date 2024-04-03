@@ -46,6 +46,40 @@ Remarks:
 *  Units are sticky: since we expressed ``t`` in milliseconds and ``m`` in kilograms, result is in the same terms.
 *  Unit ordering is sticky.  Mass appears on the left in printed value of ``a`` because it was on the left-hand side of ``operator/``
 *  Example omits verifying ``decltype(a)``,  to keep output small.
+*  Conversion factors are exact (provided dimensions are limited to integer powers).
+   Exact conversion involves no loss of precision.
+
+Explicit scale conversion
+-------------------------
+
+Can convert between compatible units explictly:
+
+.. code-block:: cpp
+   :linenos:
+   :emphasize-lines: 11-12
+
+    #include "xo/unit/quantity.hpp"
+    #include <iostream>
+
+    int
+    main () {
+        namespace u = xo::unit::units;
+        namespace qty = xo::unit::qty;
+        using namespace std;
+
+        auto t1 = qty::milliseconds(25.0);
+        auto t1_usec = t1.with_unit<u::microsecond>();
+        auto t1_sec = t1.with_unit<u::second>();
+
+        cerr << "t1: " << t1 << ", t1_usec: " << t1_usec << ", t1_sec: " << t1_sec << endl;
+    }
+
+with output:
+
+.. code-block::
+
+    t1: 25ms, t1_usec: 25000us, t1_sec: 0.025s
+
 
 Scale conversion triggered by assignment
 ----------------------------------------
@@ -86,7 +120,7 @@ Remarks:
 Scale conversion triggered by arithmetic
 ----------------------------------------
 
-In representing a particular quantity,
+When representing a particular quantity,
 xo-unit uses at most one scale for each :term:`basis dimension` associated with the unit for that quantity.
 When an arithmetic operator encounters basis units involving two different scales,
 the operator will adopt the scale provided by the left-hand argument:
@@ -115,3 +149,78 @@ with output:
 .. code-block::
 
     t1: 1ms, t2: 1min, t1*t2: 60000ms^2
+
+Dimensionless quantities collapse automatically
+-----------------------------------------------
+
+.. code-block:: cpp
+   :linenos:
+   :emphasize-lines: 14-15
+
+    #include "xo/unit/quantity.hpp"
+    #include <iostream>
+
+    int main() {
+        namespace u = xo::unit;
+        namespace qty = xo::units::qty;
+        using namespace std;
+
+        auto t1 = qty::milliseconds(1);
+        auto t2 = qty::minutes(1);
+        auto r1 = t1 / t2.with_repr<double>();
+        auto r2 = t2 / t1.with_repr<double>();
+
+        static_assert<same_as<decltype(r1), double>);
+        static_assert<same_as<decltype(r2), double>);
+
+        cerr << "t1: " << t1 << ", t2: " << t2 << ", t1/t2: " << r1 << ", t2/t1: " << r2 << endl;
+    }
+
+with output:
+
+.. code-block::
+
+    t1: 1ms, t2: 1min, t1/t2: 1.66667e-05, t2/t1: 60000
+
+
+Fractional dimension
+--------------------
+
+Fractional dimensions are supported;   they work in the same way as familiar integral dimensions.
+
+Only caveat is that converting between fractional units with different scales creates a floating-point conversion factor,
+which may incur loss of precision based on floating-point roundoff.
+
+.. code-block:: cpp
+   :linenos:
+   :emphasize-lines: 15
+
+    #include "xo/unit/quantity.hpp"
+    #include <iostream>
+
+    int
+    main () {
+        namespace u = xo::unit::units;
+        namespace qty = xo::unit::qty;
+        using namespace std;
+
+        /* 20% volatility over 250 days (approx number of trading days in one year) */
+        auto q1 = qty::volatility250d(0.2);
+        /* 10% volatility over 30 days */
+        auto q2 = qty::volatility30d(0.1);
+
+        static_assert(q2.basis_power<dim::time, double> == 0.5);
+
+        auto sum = q1 + q2;
+        auto prod = q1 * q2;
+
+        static_assert(prod.basis_power<dim::time> == 1);
+
+        cerr << "q1: " << q1 << ", q2: " << q2 << ", q1+q2: " << sum << ", q1*q2" << prod << endl;
+    }
+
+with output:
+
+.. code-block::
+
+    q1: 0.2yr250^-(1/2), q2: 0.1mo^-(1/2), q1+q2: 0.488675yr250^(1/2), q1*q2: 0.057735yr250^-1
