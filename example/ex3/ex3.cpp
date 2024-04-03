@@ -7,7 +7,6 @@ int
 main () {
     namespace u = xo::unit::units;
     namespace qty = xo::unit::qty;
-    using xo::unit::quantity;
     using namespace std;
 
     auto t1 = qty::milliseconds(1);

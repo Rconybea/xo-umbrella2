@@ -54,8 +54,8 @@ namespace xo {
 
             REQUIRE(t.scale() == 1);
 
-            static_assert(t.c_basis_power<dim::time> == 1);
-            static_assert(t.c_basis_power<dim::mass> == 0);
+            static_assert(t.basis_power<dim::time> == 1);
+            static_assert(t.basis_power<dim::mass> == 0);
         } /*TEST_CASE(quantity)*/
 
         TEST_CASE("add1", "[quantity]") {
@@ -74,8 +74,8 @@ namespace xo {
             CHECK(strcmp(sum.unit_cstr(), "s") == 0);
 
             static_assert(std::same_as<decltype(sum)::unit_type, units::second>);
-            static_assert(t1.c_basis_power<dim::time> == 1);
-            static_assert(t2.c_basis_power<dim::time> == 1);
+            static_assert(t1.basis_power<dim::time> == 1);
+            static_assert(t2.basis_power<dim::time> == 1);
 
             REQUIRE(sum.scale() == 3);
 
@@ -95,7 +95,7 @@ namespace xo {
             auto m2 = minutes(2);
 
             {
-                static_assert(m2.c_basis_power<dim::time> == 1);
+                static_assert(m2.basis_power<dim::time> == 1);
 
                 log && log(xtag("m2.scale", m2.scale()), xtag("m2.unit", m2.unit_cstr()));
 
@@ -118,7 +118,7 @@ namespace xo {
                 auto sum = t1 + t2;
 
                 static_assert(std::same_as<decltype(sum)::unit_type, units::second>);
-                static_assert(sum.c_basis_power<dim::time> == 1);
+                static_assert(sum.basis_power<dim::time> == 1);
 
                 log && log(xtag("t1.unit", t1.unit_cstr()), xtag("t2.unit", t2.unit_cstr()));
                 log && log(xtag("sum.unit", sum.unit_cstr()));
@@ -136,7 +136,7 @@ namespace xo {
             /* sum will take unit from lhs argument to + */
             auto sum = t1 + t2;
 
-            static_assert(sum.c_basis_power<dim::time> == 1);
+            static_assert(sum.basis_power<dim::time> == 1);
             static_assert(std::same_as<decltype(sum)::unit_type, units::second>);
 
             REQUIRE(sum.scale() == 121);
@@ -187,10 +187,10 @@ namespace xo {
             {
                 q2 = q1;
 
-                static_assert(q1.c_basis_power<dim::mass> == 1);
-                static_assert(q1.c_basis_power<dim::time> == -1);
-                static_assert(q2.c_basis_power<dim::mass> == 1);
-                static_assert(q2.c_basis_power<dim::time> == -1);
+                static_assert(q1.basis_power<dim::mass> == 1);
+                static_assert(q1.basis_power<dim::time> == -1);
+                static_assert(q2.basis_power<dim::mass> == 1);
+                static_assert(q2.basis_power<dim::time> == -1);
 
                 log && log(XTAG(q1), XTAG(q2));
 
@@ -249,7 +249,7 @@ namespace xo {
             {
                 auto sum = vol_250d + vol_30d;
 
-                static_assert(sum.c_basis_power<dim::time, double> == -0.5);
+                static_assert(sum.basis_power<dim::time, double> == -0.5);
 
                 log && log(XTAG(sum));
 
@@ -279,7 +279,7 @@ namespace xo {
             {
                 auto r = q0 * q1;
 
-                static_assert(r.c_basis_power<dim::time> == 2);
+                static_assert(r.basis_power<dim::time> == 2);
 
                 log && log(xtag("q0", q0), xtag("q1", q1), xtag("q0*q1", r));
                 log && log(xtag("r.type", Reflect::require<decltype(r)>()->canonical_name()));
@@ -292,7 +292,7 @@ namespace xo {
             {
                 auto r = q1 * q2;
 
-                static_assert(r.c_basis_power<dim::time> == 2);
+                static_assert(r.basis_power<dim::time> == 2);
 
                 log && log(xtag("q1", q1), xtag("q2", q2), xtag("q1*q2", r));
                 log && log(xtag("r.type", Reflect::require<decltype(r)>()->canonical_name()));
@@ -305,7 +305,7 @@ namespace xo {
             {
                 auto r = q2 * q1;
 
-                static_assert(r.c_basis_power<dim::time> == 2);
+                static_assert(r.basis_power<dim::time> == 2);
 
                 log && log(xtag("q1", q1), xtag("q2", q2), xtag("r=q2*q1", r));
                 log && log(xtag("r.type", Reflect::require<decltype(r)>()->canonical_name()));
@@ -318,7 +318,7 @@ namespace xo {
             {
                 auto r = q2 * 60;
 
-                static_assert(r.c_basis_power<dim::time> == 1);
+                static_assert(r.basis_power<dim::time> == 1);
                 static_assert(std::same_as<decltype(r)::repr_type, int>);
 
                 log && log(xtag("q2*60", r));
@@ -332,7 +332,7 @@ namespace xo {
             {
                 auto r = q2 * 60U;
 
-                static_assert(r.c_basis_power<dim::time> == 1);
+                static_assert(r.basis_power<dim::time> == 1);
                 static_assert(std::same_as<decltype(r)::repr_type, uint32_t>);
 
                 log && log(xtag("q2*60U", r));
@@ -346,7 +346,7 @@ namespace xo {
             {
                 auto r = (q2 * 60.5);
 
-                static_assert(r.c_basis_power<dim::time> == 1);
+                static_assert(r.basis_power<dim::time> == 1);
 
                 /* verify dimension */
                 static_assert(std::same_as<decltype(r)::repr_type, double>);
@@ -365,7 +365,7 @@ namespace xo {
                 auto r = (q2 * 60.5f);
 
                 /* verify dimension */
-                static_assert(r.c_basis_power<dim::time> == 1);
+                static_assert(r.basis_power<dim::time> == 1);
                 static_assert(std::same_as<decltype(r)::repr_type, float>);
 
                 log && log(xtag("r.type", Reflect::require<decltype(r)>()->canonical_name()));
@@ -378,7 +378,7 @@ namespace xo {
             {
                 auto r = 60 * q2;
 
-                static_assert(r.c_basis_power<dim::time> == 1);
+                static_assert(r.basis_power<dim::time> == 1);
                 static_assert(std::same_as<decltype(r)::repr_type, int>);
 
                 log && log(xtag("60*q2", r));
@@ -394,7 +394,7 @@ namespace xo {
 
                 auto r = 60.5 * q2;
 
-                static_assert(r.c_basis_power<dim::time> == 1);
+                static_assert(r.basis_power<dim::time> == 1);
 
                 log && log(xtag("r.type", Reflect::require<decltype(r)>()->canonical_name()));
                 static_assert(std::same_as<decltype(r)::repr_type, double>);
@@ -409,7 +409,7 @@ namespace xo {
 
                 auto r = 60.5f * q2;
 
-                static_assert(r.c_basis_power<dim::time> == 1);
+                static_assert(r.basis_power<dim::time> == 1);
                 static_assert(std::same_as<decltype(r)::repr_type, float>);
 
                 log && log(xtag("r.type", Reflect::require<decltype(r)>()->canonical_name()));
@@ -475,7 +475,7 @@ namespace xo {
                 log && log(XTAG(q0), xtag("r1=1.0/q0", r1));
 
                 /* verify dimension */
-                static_assert(r1.c_basis_power<dim::time> == -1);
+                static_assert(r1.basis_power<dim::time> == -1);
 
                 /* verify scale */
                 REQUIRE(r1.scale() == 0.2);
@@ -529,7 +529,7 @@ namespace xo {
                 log && log(xtag("r.type", Reflect::require<decltype(r)>()->canonical_name()));
 
                 /* verify dimension */
-                static_assert(r.c_basis_power<dim::time> == -1);
+                static_assert(r.basis_power<dim::time> == -1);
 
                 /* verify scale */
                 REQUIRE(r.scale() == 0.0125);
@@ -542,7 +542,7 @@ namespace xo {
                 log && log(xtag("r.type", Reflect::require<decltype(r)>()->canonical_name()));
 
                 /* verify dimension */
-                static_assert(r.c_basis_power<dim::time> == 1);
+                static_assert(r.basis_power<dim::time> == 1);
 
                 /* verify scale */
                 REQUIRE(r.scale() == 1.25);
@@ -597,7 +597,7 @@ namespace xo {
                 log && log(xtag("r.type", Reflect::require<decltype(r)>()->canonical_name()));
 
                 /* verify dimension */
-                static_assert(r.c_basis_power<dim::time> == -1);
+                static_assert(r.basis_power<dim::time> == -1);
 
                 /* verify scale */
                 REQUIRE(r.scale() == 0.0125);
@@ -610,7 +610,7 @@ namespace xo {
                 log && log(xtag("r.type", Reflect::require<decltype(r)>()->canonical_name()));
 
                 /* verify dimension */
-                static_assert(r.c_basis_power<dim::time> == 1);
+                static_assert(r.basis_power<dim::time> == 1);
 
                 /* verify scale */
                 REQUIRE(r.scale() == 1.25);
@@ -619,6 +619,8 @@ namespace xo {
         } /*TEST_CASE(div3)*/
 
         TEST_CASE("div4", "[quantity]") {
+            /* test with exact scalefactor */
+
             constexpr bool c_debug_flag = false;
 
             // can get bits from /dev/random by uncommenting the 2nd line below
@@ -628,6 +630,39 @@ namespace xo {
             //auto rng = xo::rng::xoshiro256ss(seed);
 
             scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.div4"));
+            //log && log("(A)", xtag("foo", foo));
+
+            auto q1 = milliseconds(1);
+            auto q2 = minutes(1);
+
+            auto r = q1 / q2.with_repr<double>();
+
+            /* 0.1/sqrt(30dy) ~ 0.288675/sqrt(250dy),
+             * so q1/q2 ~ 0.6928
+             */
+
+            log && log(XTAG(q1), XTAG(q2), xtag("q1/q2", r));
+
+            /* verify dimensionless result */
+            static_assert(std::same_as<decltype(r), double>);
+
+            /* verify scale of result */
+            CHECK(r == Approx(0.00001666667).epsilon(1e-6));
+
+        } /*TEST_CASE(div4)*/
+
+        TEST_CASE("div5", "[quantity]") {
+            /* test with inexact scalefactor */
+
+            constexpr bool c_debug_flag = false;
+
+            // can get bits from /dev/random by uncommenting the 2nd line below
+            //uint64_t seed = xxx;
+            //rng::Seed<xoshio256ss> seed;
+
+            //auto rng = xo::rng::xoshiro256ss(seed);
+
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.div5"));
             //log && log("(A)", xtag("foo", foo));
 
             auto q1 = volatility250d(0.2);
@@ -647,10 +682,10 @@ namespace xo {
             /* verify scale of result */
             CHECK(r == Approx(0.692820323).epsilon(1e-6));
 
-        } /*TEST_CASE(div4)*/
+        } /*TEST_CASE(div5)*/
 
         TEST_CASE("muldiv5", "[quantity]") {
-            constexpr bool c_debug_flag = true;
+            constexpr bool c_debug_flag = false;
 
             // can get bits from /dev/random by uncommenting the 2nd line below
             //uint64_t seed = xxx;
@@ -682,7 +717,7 @@ namespace xo {
             /* verify scale of result */
             //CHECK(r == Approx(0.692820323).epsilon(1e-6));
 
-        } /*TEST_CASE(div4)*/
+        } /*TEST_CASE(muldiv5)*/
     } /*namespace ut*/
 } /*namespace xo*/
 

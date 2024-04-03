@@ -63,7 +63,7 @@ namespace xo {
              *    q.basis_power<dim::mass> -> 0
              **/
             template <dim BasisDim, typename PowerRepr = int>
-            static constexpr PowerRepr c_basis_power = from_ratio<PowerRepr, typename find_bpu_t<BasisDim>::power_type>();
+            static constexpr PowerRepr basis_power = from_ratio<PowerRepr, typename find_bpu_t<BasisDim>::power_type>();
 
             /** @brief get scale value (relative to unit) (@ref scale_) **/
             constexpr Repr scale() const { return scale_; }

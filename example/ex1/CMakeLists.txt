@@ -10,5 +10,6 @@ xo_include_options2(${SELF_EXE})
 # dependencies..
 
 xo_self_dependency(${SELF_EXE} xo_unit)
+xo_dependency(${SELF_EXE} reflect)
 
 # end CMakeLists.txt
