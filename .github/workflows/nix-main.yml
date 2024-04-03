@@ -42,7 +42,7 @@ jobs:
       run: |
         echo "::group::clone xo-unit repo"
         mkdir -p repo
-        GIT_SSL_NO_VERIFY=true git clone https://${{env.GIT_USER}}:${{env.GIT_TOKEN}}@github.com/rconybea/xo-unit.git repo
+        GIT_SSL_NO_VERIFY=true git clone https://${{env.GIT_USER}}:${{env.GIT_TOKEN}}@github.com/rconybea/xo-unit.git repo/xo-unit
         echo "::endgroup"
 
         echo "::group::build xo-unit with nix"
