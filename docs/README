@@ -1,0 +1,30 @@
+map
+
+   index.rst
+   +- install.rst
+   +- examples.rst
+   +- classes.rst
+   +- glossary.rst
+
+examples
+
+.. doxygenclass:: ${c++ class name}
+   :project:
+   :path:
+   :members:
+   :protected-members:
+   :private-members:
+   :undoc-members:
+   :member-groups:
+   :members-only:
+   :outline:
+   :no-link:
+   :allow-dot-graphs:
+
+.. doxygendefine:: ${c preprocessor define}
+
+.. doxygenconcept:: ${c++ concept definition}
+
+.. doxygenenum:: ${c++ enum definition}
+
+.. doxygenfunction:: ${c++ function name}
