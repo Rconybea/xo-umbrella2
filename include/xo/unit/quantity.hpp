@@ -77,6 +77,12 @@ namespace xo {
                 return promoter<Unit, Repr>::promote(x);
             }
 
+            template <typename Unit2>
+            constexpr quantity<Unit2, Repr> with_unit() const { return *this; }
+
+            template <typename Repr2>
+            constexpr quantity<unit_type, Repr2> with_repr() const { return quantity<unit_type, Repr2>::promote(scale_); }
+
             template <typename Quantity2>
             auto multiply(Quantity2 y) const {
                 //constexpr bool c_debug_flag = false;
