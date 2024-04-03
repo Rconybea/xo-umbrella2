@@ -130,9 +130,9 @@
                 #doxygen = prev.doxygen;
 
                 pybind11 = pythonPackages.pybind11;
-                #breathe = python3Packages.breathe;
-                #sphinx = python3Packages.sphinx;
-                #sphinx-rtd-theme = python3Packages.sphinx-rtd-theme;
+                #breathe = pythonPackages.breathe;
+                #sphinx = pythonPackages.sphinx;
+                #sphinx-rtd-theme = pythonPackages.sphinx-rtd-theme;
 
                 #extras1 = { boost = boost; };
                 #extras2 = { boost = boost; python3Packages = python3Packages; pybind11 = pybind11; };
@@ -164,7 +164,10 @@
 
                 xo-unit =
                   (prev.callPackage ./pkgs/xo-unit.nix { xo-cmake = xo-cmake;
-                                                         xo-reflect = xo-reflect; }).overrideAttrs
+                                                         xo-reflect = xo-reflect;
+                                                         python = python;
+                                                         pythonPackages = pythonPackages;
+                                                       }).overrideAttrs
                     (old: { src = ./.; });
 
                 # placeholder-D
