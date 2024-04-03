@@ -1,3 +1,6 @@
+# flake.nix builds source in this tree.
+# must not commit flake.lock that would need hash from this repo
+flake.lock
 # clangd working space (see emacs+lsp)
 .cache
 # typical cmake build directory (source-tree-nephew)
