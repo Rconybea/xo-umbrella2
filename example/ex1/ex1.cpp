@@ -5,7 +5,7 @@
 
 int
 main () {
-    namespace qty = xo::obs::qty;
+    namespace qty = xo::unit::qty;
     using namespace std;
 
     auto t = qty::milliseconds(10);

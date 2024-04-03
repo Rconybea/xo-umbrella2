@@ -5,9 +5,9 @@
 
 int
 main () {
-    namespace u = xo::obs::units;
-    namespace qty = xo::obs::qty;
-    using xo::obs::quantity;
+    namespace u = xo::unit::units;
+    namespace qty = xo::unit::qty;
+    using xo::unit::quantity;
     using namespace std;
 
     auto t1 = qty::milliseconds(1);
