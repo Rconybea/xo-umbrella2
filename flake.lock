@@ -1,0 +1,141 @@
+{
+  "nodes": {
+    "flake-utils": {
+      "inputs": {
+        "systems": "systems"
+      },
+      "locked": {
+        "lastModified": 1710146030,
+        "narHash": "sha256-SZ5L6eA7HJ/nmkzGG7/ISclqe6oZdOZTNoesiInkXPQ=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "b1d9ab70662946ef0850d488da1c9019f3a9752a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "narHash": "sha256-ci7ghtn0YKXw68Wkufou0DK3pwTmkfWeFOYkRsnLagc=",
+        "type": "tarball",
+        "url": "https://github.com/NixOS/nixpkgs/archive/217b3e910660fbf603b0995a6d2c3992aef4cc37.tar.gz"
+      },
+      "original": {
+        "type": "tarball",
+        "url": "https://github.com/NixOS/nixpkgs/archive/217b3e910660fbf603b0995a6d2c3992aef4cc37.tar.gz"
+      }
+    },
+    "root": {
+      "inputs": {
+        "flake-utils": "flake-utils",
+        "nixpkgs": "nixpkgs",
+        "xo-cmake-path": "xo-cmake-path",
+        "xo-indentlog-path": "xo-indentlog-path",
+        "xo-refcnt-path": "xo-refcnt-path",
+        "xo-reflect-path": "xo-reflect-path",
+        "xo-subsys-path": "xo-subsys-path"
+      }
+    },
+    "systems": {
+      "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
+      }
+    },
+    "xo-cmake-path": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1712015268,
+        "narHash": "sha256-+nu4z5LA1nSE8NwQ0l0AhhykUO9B2b5BvEs1mLNiI3Y=",
+        "owner": "Rconybea",
+        "repo": "xo-cmake",
+        "rev": "b8f2360b899739b72272036324a6997aa9169c8f",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Rconybea",
+        "repo": "xo-cmake",
+        "type": "github"
+      }
+    },
+    "xo-indentlog-path": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1712008884,
+        "narHash": "sha256-WGe9fQq6PM9CbZuA0maJOxOErN71l9J1/cHPigkLJoU=",
+        "owner": "Rconybea",
+        "repo": "indentlog",
+        "rev": "20774158ad3cd2f5feadecf9b994972443538ef7",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Rconybea",
+        "repo": "indentlog",
+        "type": "github"
+      }
+    },
+    "xo-refcnt-path": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1711737792,
+        "narHash": "sha256-Grel2sXne5LUGNqlcxcrbhqstXXAQxhQsXpd5Rcjn7E=",
+        "owner": "Rconybea",
+        "repo": "refcnt",
+        "rev": "cffffdae7c15273dfad8e04acf64193e644bda81",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Rconybea",
+        "repo": "refcnt",
+        "type": "github"
+      }
+    },
+    "xo-reflect-path": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1710545203,
+        "narHash": "sha256-L3421dvkTtibSGchOjj4RdCITtnlX8+4rU3XEnakf1s=",
+        "owner": "Rconybea",
+        "repo": "reflect",
+        "rev": "fe986a320a2b1993a8399602cb3a3b6dc8c86253",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Rconybea",
+        "repo": "reflect",
+        "type": "github"
+      }
+    },
+    "xo-subsys-path": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1711737221,
+        "narHash": "sha256-7VjuMxme3wmht32nzRjw6XhzfXu4szmNZjErDqCp6E8=",
+        "owner": "Rconybea",
+        "repo": "subsys",
+        "rev": "06bd4324305996db9b24a98c010a63c4593c1e21",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Rconybea",
+        "repo": "subsys",
+        "type": "github"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
