@@ -46,5 +46,6 @@ jobs:
         echo "::endgroup"
 
         echo "::group::build xo-unit with nix"
-        (cd repo/xo-unit && nix build -L --print-build-logs .#xo-unit && tree ./result)
+        export NIXPKGS_ALLOW_UNFREE=1
+        (cd repo/xo-unit && nix build --impure -L --print-build-logs .#xo-unit && tree ./result)
         echo "::endgroup"
