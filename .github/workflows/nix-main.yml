@@ -38,11 +38,11 @@ jobs:
     steps:
       # not using usual checkout actions:  they don't work out-of-the-box from within a container
 
-    - name: xo-unix
+    - name: xo-unit
       run: |
         echo "::group::clone xo-unit repo"
         mkdir -p repo
-        GIT_SSL_NO_VERIFY=true git clone https://${{env.GIT_USER}}:${{env.GIT_TOKEN}}@github.com/rconybea/xo-unix.git repo
+        GIT_SSL_NO_VERIFY=true git clone https://${{env.GIT_USER}}:${{env.GIT_TOKEN}}@github.com/rconybea/xo-unit.git repo
         echo "::endgroup"
 
         echo "::group::build xo-unit with nix"
