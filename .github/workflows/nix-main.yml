@@ -1,0 +1,50 @@
+# Workflow to build xo-unit using custom docker container;
+# container provides nix support
+#
+# NOTES
+# 1. GIT_TOKEN granted automatically by github.
+#    has read permission on public resources + read/write permission on this repo
+#
+# 2. container built from [[https:github.com:rconybea/docker-nix-builder]]
+#    Includes dependencies:
+#    - nix
+#    - compiler toolchain:  gcc, binutils, bash, etc
+#    - git
+#    - cmake
+#    - catch2
+#    - pybind11 + python
+#    - libwebsockets
+#    - jsoncpp
+#
+name: xo-unit nix builder
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build_job:
+    name: xo-unit nix build on docker-nix-builder
+    runs-on: ubuntu-latest
+    container:
+      # custom docker image. see github.com:rconybea/docker-nix-builder for definition
+      image: ghcr.io/rconybea/docker-nix-builder:v1
+
+    steps:
+      # not using usual checkout actions:  they don't work out-of-the-box from within a container
+
+    - name: xo-unix
+      run: |
+        echo "::group::clone xo-unit repo"
+        mkdir -p repo
+        GIT_SSL_NO_VERIFY=true git clone https://${{env.GIT_USER}}:${{env.GIT_TOKEN}}@github.com/rconybea/xo-unix.git repo
+        echo "::endgroup"
+
+        echo "::group::build xo-unit with nix"
+        (cd repo/xo-unit && nix build -L --print-build-logs .#xo-unit && tree ./result)
+        echo "::endgroup"
