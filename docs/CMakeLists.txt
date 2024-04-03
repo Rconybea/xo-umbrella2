@@ -94,4 +94,9 @@ else()
         DESTINATION ${CMAKE_INSTALL_PREFIX}/share/doc/${PROJECT_NAME}
         COMPONENT Documentation
         OPTIONAL)
+
+    # make docs --> generate sphinx documentation
+    add_custom_target(
+        docs
+        DEPENDS sphinx)
 endif()
