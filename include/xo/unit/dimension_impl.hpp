@@ -180,7 +180,7 @@ namespace xo {
             using dim_type = typename Dim::rest_type;
         };
 
-        // ----- bpu_list -----
+        // ----- bpu_node -----
 
         /** Represents the cartesian product of a list of 'native basis power units';
          *  represents something with dimensions
@@ -232,6 +232,48 @@ namespace xo {
 
             /** number of dimensions represented by this struct **/
             static constexpr std::uint32_t n_dimension = 1;
+        };
+
+        // ----- di_replace_basis_scale -----
+
+        /**
+         *  @brief Replace BpuList member with matching BasisDim, preserving everything except (inner) scalefactor
+         **/
+        template <typename BpuList, typename NewBpu>
+        struct di_replace_basis_scale;
+
+        template <typename Front, typename Rest, typename NewBpu, bool MatchesFront = (Front::c_native_dim == NewBpu::c_native_dim)>
+        struct di_replace_basis_scale_aux;
+
+        /** specialization for non-empty BpuList **/
+        template <typename BpuList, typename NewBpu>
+        struct di_replace_basis_scale {
+            using type = di_replace_basis_scale_aux<typename BpuList::front_type,
+                                                    typename BpuList::rest_type,
+                                                    NewBpu>::type;
+        };
+
+        /** specialization for empty BpuList -- error not found **/
+        template <typename NewBpu>
+        struct di_replace_basis_scale<void, NewBpu> {};
+
+        /** specialization for matching front **/
+        template <typename Front, typename Rest, typename NewBpu>
+        struct di_replace_basis_scale_aux<Front, Rest, NewBpu, /*MatchesFront*/ true> {
+            using _replace_bpu_type = bpu<Front::c_native_dim,
+                typename NewBpu::scalefactor_type,
+                typename Front::power_type>;
+
+            static_assert(native_bpu_concept<_replace_bpu_type>);
+
+            /* NewBpu replaces Front */
+            using type = bpu_node<_replace_bpu_type, Rest>;
+        };
+
+        template <typename Front, typename Rest, typename NewBpu>
+        struct di_replace_basis_scale_aux<Front, Rest, NewBpu, /*MatchesFront*/ false> {
+            /* keep Front, replace NewBpu in rest */
+            using type = bpu_node<Front, typename di_replace_basis_scale<Rest, NewBpu>::type>;
         };
 
         // ----- bpu_cartesian_product -----
