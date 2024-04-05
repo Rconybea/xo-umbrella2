@@ -513,6 +513,38 @@ namespace xo {
                 return quantity<units::volatility_250d, Repr>::promote(x);
             }
         } /*namespace qty*/
+
+        namespace unit_qty {
+            /** @brief quantity with mass dimension, representing 1mg (1 milligram = 10^-3 grams) **/
+            static constexpr auto milligram = qty::milligrams(1.0);
+            /** @brief quantity with mass dimension, representing 1g (1 gram) **/
+            static constexpr auto gram = qty::grams(1.0);
+            /** @brief quantity with mass dimension, representing 1kg (1 kilogram = 1000 grams) **/
+            static constexpr auto kilogram = qty::kilograms(1.0);
+
+            /** @brief quantity with length dimension representing 1mm (10^-3 meters) **/
+            static constexpr auto millimeter = qty::millimeters(1.0);
+            /** @brief quantity with length dimension representing 1m (1 meter) **/
+            static constexpr auto meter = qty::meters(1.0);
+            /** @brief quantity with length dimension representing 1km (1 kilometer = 1000 meters) **/
+            static constexpr auto kilometer = qty::kilometers(1.0);
+
+            /** @brief quantity with time dimension representing 1ns (1 nanosecond = 10^-9 seconds) **/
+            static constexpr auto nanosecond = qty::microseconds(1);
+            /** @brief quantity with time dimension representing 1us (1 microsecond = 10^-6 seconds) **/
+            static constexpr auto microsecond = qty::microseconds(1);
+            /** @brief quantity with time dimension representing 1ms (1 milliseconds = 10^-3 seconds) **/
+            static constexpr auto millisecond = qty::milliseconds(1);
+            /** @brief quantity with time dimension representing 1s (1 second) **/
+            static constexpr auto second = qty::seconds(1);
+            /** @brief quantity with time dimension representing 1min (1 minute = 60 seconds) **/
+            static constexpr auto minute = qty::minutes(1);
+            /** @brief quantity with time dimension representing 1hr (1 hour = 60 minutes) **/
+            static constexpr auto hour = qty::hours(1);
+            /** @brief quantity with time dimension representing 1dy (1 day = 24 hours) **/
+            static constexpr auto day = qty::days(1);
+        }
+
     } /*namespace unit*/
 } /*namespace xo*/
 
