@@ -7,7 +7,7 @@ else()
     # otherwise use top-level doxygen setup instead.
 
     set(ALL_LIBRARY_TARGETS xo_unit)  # todo: automate this from xo-cmake macros
-    set(ALL_UTEST_TARGETS utest.unit) # todo: automate this from xo-cmake macros
+    set(ALL_UTEST_TARGETS utest.unit xo_unit_ex1 xo_unit_ex2 xo_unit_ex3 xo_unit_ex4 xo_unit_ex5 xo_unit_ex6) # todo: automate this from xo-cmake macros
 
     # look for doxygen executable
     find_program(DOXYGEN_EXECUTABLE NAMES doxygen REQUIRED)
@@ -19,22 +19,27 @@ else()
 
     set(DOX_CONFIG_FILE ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
 
-    #set(DOX_DEPS ${PROJECT_SOURCE_DIR}/mainpage.dox)   # not yet
     set(DOX_INPUT_DIR ${PROJECT_SOURCE_DIR})
     set(DOX_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/dox)
 
     set(DOX_INDEX_FILE ${DOX_OUTPUT_DIR}/html/index.html)
+
+    # .hpp files reachable from xo-unit/include
+    #
+    # REMINDER: for reliability will need to re-run cmake when the set of .hpp files changes
+    #
+    file(GLOB_RECURSE DOX_HPP_FILES_GLOB ${PROJECT_SOURCE_DIR}/include *.hpp)
 
     set(SPHINX_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/sphinx/html)
     set(SPHINX_INDEX_FILE ${SPHINX_OUTPUT_DIR}/index.html)
     #
     # sphinx .rst files reachable from cmake-examples/docs
     #
-    # REMINDER: will need to re-run cmake when the set of .rst files changes
+    # REMINDER: for reliability will need to re-run cmake when the set of .rst files changes
     #
     file(GLOB_RECURSE SPHINX_RST_FILES_GLOB ${CMAKE_CURRENT_SOURCE_DIR} *.rst)
 
-    set(SPHINX_RST_FILES index.rst install.rst examples.rst classes.rst glossary.rst)
+    set(SPHINX_RST_FILES index.rst install.rst examples.rst unit-quantities.rst quantity-class.rst quantity-factoryfunctions.rst quantity-unitvars.rst unit-reference.rst unit-concept.rst glossary.rst)
 
     # TODO:
     # 1. move Doxyfile.in to xo-cmake project
@@ -45,10 +50,12 @@ else()
         FILE_PERMISSIONS OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
         @ONLY)
 
+    set(DOX_DEPS ${ALL_LIBRARY_TARGETS} ${ALL_UTEST_TARGETS} ${DOX_HPP_FILES_GLOB})
+
     file(MAKE_DIRECTORY ${DOX_OUTPUT_DIR})
     add_custom_command(
         OUTPUT ${DOX_INDEX_FILE}
-        DEPENDS ${DOX_DEPS} ${ALL_LIBRARY_TARGETS} ${ALL_UTEST_TARGETS}
+        DEPENDS ${DOX_DEPS}
         COMMAND "${DOXYGEN_EXECUTABLE}" ${DOX_CONFIG_FILE}
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
         MAIN_DEPENDENCY ${DOX_CONFIG_FILE}
@@ -62,15 +69,16 @@ else()
     #
     add_custom_target(
         doxygen
-        DEPENDS ${DOX_INDEX_FILE}
+        DEPENDS ${DOX_INDEX_FILE} ${DOX_DEPS}
     )
 
     # root of sphinx doc tree
     set(SPHINX_SOURCE ${CMAKE_CURRENT_SOURCE_DIR})
+    set(SPHINX_DEPS doxygen conf.py ${SPHINX_RST_FILES} ${SPHINX_RST_FILES_GLOB} ${DOX_DEPS})
 
     add_custom_command(
         OUTPUT ${SPHINX_INDEX_FILE}
-        DEPENDS doxygen conf.py ${SPHINX_RST_FILES} ${SPHINX_RST_FILES_GLOB}
+        DEPENDS ${SPHINX_DEPS}
         COMMAND ${SPHINX_EXECUTABLE}
         -b html -Dbreathe_projects.xodoxxml=${CMAKE_CURRENT_BINARY_DIR}/dox/xml
         ${SPHINX_SOURCE} ${SPHINX_OUTPUT_DIR}

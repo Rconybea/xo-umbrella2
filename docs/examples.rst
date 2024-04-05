@@ -15,16 +15,17 @@ Compile-time unit inference
     #include <iostream>
 
     int main() {
-        namespace u = xo::unit;
-        namespace qty = u::qty;
+        namespace u = xo::unit::units;
+        namespace qty = xo::unit::qty;
+        using xo::unit::quantity;
         using namespace std;
 
         auto t = qty::milliseconds(10);
         auto m = qty::kilograms(2.5);
         auto a = m / (t * t);
 
-        static_assert(same_as<decltype(t), u::quantity<u::millisecond, int>>);
-        static_assert(same_as<decltype(m), u::quantity<u::kilogram, double>>);
+        static_assert(same_as<decltype(t), quantity<u::millisecond, int>>);
+        static_assert(same_as<decltype(m), quantity<u::kilogram, double>>);
         static_assert(sizeof(t) == sizeof(int));
         static_assert(sizeof(m) == sizeof(double));
         static_assert(sizeof(a) == sizeof(double));
@@ -88,7 +89,7 @@ One way to convert units is by assignment:
 
 .. code-block:: cpp
    :linenos:
-   :emphasize-lines: 9-10
+   :emphasize-lines: 10-11
 
     #include "xo/unit/quantity.hpp"
     #include <iostream>
@@ -96,6 +97,7 @@ One way to convert units is by assignment:
     int main() {
         namespace u = xo::unit;
         namespace qty = xo::units::qty;
+        using xo::unit::quantity;
         using namespace std;
 
         quantity<units::second> t = qty::milliseconds(10);

@@ -24,11 +24,13 @@ runtime (since we can't construct new c++ types at runtime).
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: xo-unit contents:
 
    install
    examples
-   classes
+   unit-quantities
+   quantity-reference
+   unit-reference
 
 Indices and Tables
 ------------------
@@ -36,5 +38,3 @@ Indices and Tables
 * :ref:`glossary`
 * :ref:`genindex`
 * :ref:`search`
-
-.. toctree::

@@ -3,6 +3,7 @@ map
    index.rst
    +- install.rst
    +- examples.rst
+   +- unit-quantities.rst
    +- classes.rst
    +- glossary.rst
 
