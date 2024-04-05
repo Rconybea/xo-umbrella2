@@ -239,6 +239,7 @@ namespace xo {
 
             // ----- weight -----
 
+            /** @brief a unit type representing 1mg (10^-3 grams) **/
             using milligram  = wrap_unit< std::ratio<1>,
                                           bpu_node< bpu<dim::mass,
                                                         std::ratio<1, 1000>> > >;

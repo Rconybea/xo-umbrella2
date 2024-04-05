@@ -20,26 +20,27 @@ namespace xo {
 
         /** @class quantity
          *
-         *  @brief represets a scalar quantity;  enforces dimensional consistency at compile time
+         *  @brief represents a scalar quantity; enforces dimensional consistency at compile time.
          *
-         *  Repr representation.
-         *  Unit unit
-         *  Assert use to specify required unit dimension
+         * - @p Unit is a type identifying dimension and scale attaching to this quantity.
+         *   Unit must satisfy @c unit_concept<Unit>
+         * - @p Repr is a type used to represent quantity values, scaled by @p Unit.
+         *   Repr must satisfy @c numeric_concept<Repr>
          *
-         *  Require:
-         *  - Repr copyable, assignable
-         *  - Repr = 0
-         *  - Repr = 1
-         *  - Repr + Repr -> Repr
-         *  - Repr - Repr -> Repr
-         *  - Repr * Repr -> Repr
-         *  - Repr / Repr -> Repr
+         * A quantity's run-time state consists of exactly one @p Repr
+         * instance:
+         *   @c sizeof(quantity<Unit, Repr>) == sizeof(Repr)
          **/
         template <typename Unit, typename Repr = double>
         class quantity {
         public:
+            /** @defgroup quantity-traits **/
+            ///@{
+            /** @brief type capturing the units (and dimension) of this quantity **/
             using unit_type = Unit;
+            /** @brief type used for representation of this quantity **/
             using repr_type = Repr;
+            ///@}
 
             /* non-unity compile-time scale factors can arise during unit conversion;
              * for example see method quantity::in_units_of()
@@ -48,41 +49,232 @@ namespace xo {
             static_assert(std::same_as< typename Unit::canon_type, typename Unit::canon_type >);
 
         public:
+            /** @defgroup quantity-ctors constructors
+             **/
+            ///@{
             constexpr quantity() = default;
             constexpr quantity(quantity const & x) = default;
             constexpr quantity(quantity && x) = default;
+            ///@}
 
-            template <dim BasisDim>
-            using find_bpu_t = unit_find_bpu_t<unit_type, BasisDim>;
-
-            /**
-             *  For example:
-             *    auto q = qty::milliseconds(5) * qty::seconds(1);
-             *  then
-             *    q.basis_power<dim::time> -> 2
-             *    q.basis_power<dim::mass> -> 0
+            /** @defgroup quantity-named-ctors named constructors
              **/
-            template <dim BasisDim, typename PowerRepr = int>
-            static constexpr PowerRepr basis_power = from_ratio<PowerRepr, typename find_bpu_t<BasisDim>::power_type>();
-
-            /** @brief get scale value (relative to unit) (@ref scale_) **/
-            constexpr Repr scale() const { return scale_; }
-            /** @brief abbreviation for this quantity's units **/
-            static constexpr char const * unit_cstr() { return unit_abbrev_v<unit_type>.c_str(); }
-            /** @brief return unit quantity -- amount with this Unit that has representation = 1 **/
+            ///@{
+            /** @brief construct a unit quantity using @c unit_type
+             *
+             *  @code
+             *  auto q = qty::milliseconds(17) / qty::kilometers(23.0);
+             *  q::unit_quantity();   // 1ms.km^-1
+             *  @endcode
+             **/
             static constexpr quantity unit_quantity() { return quantity(1); }
-            /** @brief promote representation to quantity.  Same as multiplying by Unit **/
+            /** @brief promote representation to quantity.  Same as multiplying by Unit
+             **/
             static constexpr auto promote(Repr x) {
                 //std::cerr << "quantity<U,R>::promote: x=" << x << ", R=" << reflect::Reflect::require<Repr>()->canonical_name() << std::endl;
                 return promoter<Unit, Repr>::promote(x);
             }
+            ///@}
 
-            template <typename Unit2>
-            constexpr quantity<Unit2, Repr> with_unit() const { return *this; }
+            /** @addtogroup quantity-traits **/
+            ///@{
 
+            /** @brief report this quantity's basis-power-unit type for a given basis dimension
+             *
+             *  Example:
+             *  @code
+             *  auto q = 1.0 / (qty::milliseconds(5) * qty::seconds(100.0));
+             *  q.unit_cstr(); // "ms^-2"
+             *
+             *  using tmp = q.find_bpu_t<dim::time>;
+             *
+             *  tmp::c_native_dim;          // dim::time
+             *  tmp::c_native_unit;         // native_unit_id::second
+             *  tmp::scalefactor_type::num; // 1
+             *  tmp::scalefactor_type::den; // 1000
+             *  tmp::power_type::num;       // -2
+             *  tmp::pwoer_type::den;       // 1
+             *  @endcode
+             **/
+            template <dim BasisDim>
+            using find_bpu_t = unit_find_bpu_t<unit_type, BasisDim>;
+
+            /** @brief report this quantity's scalefactor type for given basis dimension **/
+            template <dim BasisDim>
+            using basis_scale_type = typename find_bpu_t<BasisDim>::scalefactor_type::type;
+
+            ///@}
+
+            /** @defgroup quantity-access-methods **/
+            ///@{
+            /** @brief get scale value (relative to unit) (@ref scale_) **/
+            constexpr Repr scale() const { return scale_; }
+            /** @brief abbreviation for this quantity's units
+             *
+             *  This string literal is constructed at compile-time by concatenating
+             *  abbreviations for each basis-power-unit.
+             *  For implementation see:
+             *  * @c xo::unit::native_unit_abbrev_helper
+             *    (in xo/unit/basis_unit.hpp) for each native dimension
+             *  * @c xo::unit::scaled_native_unit_abbrev
+             *    (in xo/unit/basis_unit.hpp) last-resort handling for scaled native dimensions
+             *  * @c xo::unit::scaled_native_unit_abbrev
+             *    (in xo/unit/unit.hpp) specializations for scaled native dimensions
+             **/
+            static constexpr char const * unit_cstr() { return unit_abbrev_v<unit_type>.c_str(); }
+            ///@}
+
+            /** @defgroup quantity-constants constants
+             **/
+            ///@{
+            /** @brief report exponent of @p BasisDim in dimension of this quantity
+             *
+             *  For example:
+             *  @code
+             *  auto q = qty::milliseconds(5) * qty::seconds(1);
+             *  int p1 = q.basis_power<dim::time>; // p1 == 2
+             *  int p2 = q.basis_power<dim::mass>; // p2 == 0
+             *  @endcode
+             **/
+            template <dim BasisDim, typename PowerRepr = int>
+            static constexpr PowerRepr basis_power = from_ratio<PowerRepr,
+                                                                typename find_bpu_t<BasisDim>::power_type>();
+            ///@}
+
+            /** @defgroup quantity-unit-conversion **/
+            ///@{
+            /** @brief convert to quantity representing the same amount, but changing units and perhaps representation.
+             *
+             *  These two expressions are equivalent:
+             *  @code
+             *  q.with_unit<units::millisecond>();
+             *  quantity<units::millisecond, q::repr_type>(q);
+             *  @endcode
+             *
+             **/
+            template <typename Unit2, typename Repr2 = repr_type>
+            constexpr quantity<Unit2, Repr2> with_unit() const { return *this; }
+
+            /**
+             * @brief produce quantity scaled according to @p BasisUnit2,  representing the same value as @c *this.
+             *
+             * For example:
+             *
+             * @code{.cpp}
+             * auto q1 = 1.0 / minutes(1) * kilograms(2.5);         // q1 = 2.5kg.min^-1
+             * auto q2 = q1.with_basis_unit<units::millisecond>();  // q2 in kg.ms^-1
+             * @endcode
+             *
+             * Motivation is ability to chain rescaling to reach desired compound unit
+             *
+             * @code
+             * auto q3 = q1.with_basis_unit<units::second>()
+             *             .with_basis_unit<units::gram>();   // q3 in g.s^-1
+             * @endcode
+             **/
+            template <typename BasisUnit2, typename Repr2 = repr_type>
+            constexpr auto with_basis_unit() const {
+                static_assert(basis_unit_concept<BasisUnit2>);
+
+                using new_bpu_type = BasisUnit2::dim_type::front_type;
+                using old_bpulist_type = unit_type::dim_type;
+                using new_bpulist_type = di_replace_basis_scale<old_bpulist_type, new_bpu_type>::type;
+                using new_unit_type = wrap_unit<std::ratio<1>, new_bpulist_type>;
+
+#              ifdef NOT_USING_DEBUG
+                using xo::reflect::Reflect;
+                scope log(XO_DEBUG(true /*c_debug_flag*/));
+                log && log(xtag("old_unit_type", Reflect::require<unit_type>()->canonical_name()));
+                log && log(xtag("new_unit_type", Reflect::require<new_unit_type>()->canonical_name()));
+#              endif
+
+                return this->with_unit<new_unit_type, Repr2>();
+            }
+
+            /**
+             * @brief express this quantity in the same units as @p q
+             *
+             * @pre @c *this and @p q must have the same dimension
+             *
+             * @param q  take units from @c q::unit_type, ignoring @c q.scale()
+             * @return this amount, but expressed using the same units as @p q
+             **/
+            template <typename Quantity>
+            auto with_units_from(Quantity q) const {
+                return this->with_units<typename Quantity::unit_type>();
+            }
+
+            /**
+             * @brief express this quantity in units of @p Unit2.
+             *
+             * @p Unit2 specifies new units
+             * @p Repr2 specifies representation
+             * @return this amount, but expressed as a multiple of @p Unit2
+             **/
+            template <typename Unit2, typename Repr2 = repr_type>
+            auto with_units() const {
+                Repr2 x = this->in_units_of<Unit2, Repr2>();
+
+                return quantity<Unit2, Repr2>::promote(x);
+            }
+
+            /**
+             * @brief compute scale with respect to @p Unit2
+             *
+             * @pre @c *this must have the same dimension as @p Unit2
+             *
+             * @p Unit2   rescale in terms of this unit.
+             * @p Repr2   compute scale in this representation
+             * @return scale to use for @c quantity<Unit2,Repr2> representing the same amount as @c *this.
+             **/
+            template <typename Unit2, typename Repr2 = repr_type>
+            Repr2 in_units_of() const {
+                // static_assert(dimension_of<Unit> == dimension_of<Unit2>);  // discard all the scaling values
+
+                static_assert(same_dimension_v<Unit, Unit2>);
+
+                using _convert_to_u2_type = unit_cartesian_product<Unit, unit_invert_t<Unit2>>;
+
+                using exact_scalefactor_type = _convert_to_u2_type::exact_unit_type::scalefactor_type;
+                constexpr double c_scalefactor_inexact = _convert_to_u2_type::c_scalefactor_inexact;
+
+                // _convert_u2_type
+                //  - scalefactor_type
+                //  - dim_type
+                //  - canon_type
+
+                /* if _convert_u2_type isn't dimensionless,  then {Unit2, Unit} have different dimensions */
+
+                return ((this->scale_ * c_scalefactor_inexact * exact_scalefactor_type::num) / exact_scalefactor_type::den);
+            }
+
+            /**
+             * @brief convert to quantity with  representation @p Repr2
+             *
+             * @return a quantity representing the same amount as @c *this, but using representation @p Repr2
+             **/
             template <typename Repr2>
             constexpr quantity<unit_type, Repr2> with_repr() const { return quantity<unit_type, Repr2>::promote(scale_); }
+            ///@}
 
+
+            /** @defgroup quantity-arithmeticsupport **/
+            ///@{
+            /**
+             * @brief multiply this quantity *x* by another quantity *y*.
+             *
+             * Result will propagate dimension and units appropriately.
+             * If *x* and *y* use conflicting scale factors for a dimension,
+             * adopt scalefactor from *x*.
+             *
+             * note: result will be a dimensionless value (e.g. type @c double)
+             * if units cancel.
+             *
+             * @pre @p Quantity2 must satisfy @c quantity_concept<Quantity2>
+             *
+             * @param y   multiply by this amount
+             * @return x.multiply(y) returns amount representing x*y
+             **/
             template <typename Quantity2>
             auto multiply(Quantity2 y) const {
                 //constexpr bool c_debug_flag = false;
@@ -118,6 +310,21 @@ namespace xo {
                 return quantity<norm_unit_type, repr_type>::promote(r_scale);
             }
 
+            /**
+             * @brief multiply this quantity *x* by another quantity *y*
+             *
+             * Result will propagate dimension and units appropriately.
+             * If *x* and *y* use conflicting scale factors for a dimension,
+             * adopt scalefactor from *x*.
+             *
+             * note: result will be a dimensionless value (e.g. type @c double)
+             * if units cancel.
+             *
+             * @pre @p Quantity2 must satisfy @c quantity_concept<Quantity2>
+             *
+             * @param y   divide by this amount
+             * @return x.divide(y) returns amount representing x/y
+             **/
             template <typename Quantity2>
             auto divide(Quantity2 y) const {
                 using unit_divide_type = unit_divide<Unit, typename Quantity2::unit_type>;
@@ -151,15 +358,17 @@ namespace xo {
             // quantity operator/=()
 
             /**
-             *  scale by dimensionless number
+             *  @brief scale this quantity *x* by dimensionless amount @p y
+             *
+             *  @return quantity representing @c x*y
              **/
             template <typename Repr2>
-            auto scale_by(Repr2 x) const {
+            auto scale_by(Repr2 y) const {
                 static_assert(!quantity_concept<Repr2>);
 
                 using r_repr_type = std::common_type_t<repr_type, Repr2>;
 
-                r_repr_type r_scale = this->scale_ * x;
+                r_repr_type r_scale = this->scale_ * y;
 
                 //std::cerr << "quantity::scale_by: scale=" << scale << ", repr_type=" << reflect::Reflect::require<repr_type>()->canonical_name() << std::endl;
 
@@ -167,7 +376,9 @@ namespace xo {
             }
 
             /**
-             *  divide by dimensionless number
+             *  @brief divide this quantity *x* by dimensionless amount @p y
+             *
+             *  @return quantity representing @c x/y
              **/
             template <typename Repr2>
             auto divide_by(Repr2 x) const {
@@ -179,7 +390,9 @@ namespace xo {
             }
 
             /**
-             *  divide dimensionless number by this quantity
+             *  @brief divide dimensionless number @p x by this quantity @c y
+             *
+             *  @return quantity representing @c x/y
              **/
             template <typename Repr2>
             auto divide_into(Repr2 x) const {
@@ -191,30 +404,19 @@ namespace xo {
 
                 return quantity<r_unit_type, r_repr_type>::promote(r_scale);
             }
+            ///@}
 
-            template <typename Unit2, typename Repr2>
-            Repr2 in_units_of() const {
-                // static_assert(dimension_of<Unit> == dimension_of<Unit2>);  // discard all the scaling values
-
-                static_assert(same_dimension_v<Unit, Unit2>);
-
-                using _convert_to_u2_type = unit_cartesian_product<Unit, unit_invert_t<Unit2>>;
-
-                using exact_scalefactor_type = _convert_to_u2_type::exact_unit_type::scalefactor_type;
-                constexpr double c_scalefactor_inexact = _convert_to_u2_type::c_scalefactor_inexact;
-
-                // _convert_u2_type
-                //  - scalefactor_type
-                //  - dim_type
-                //  - canon_type
-
-                /* if _convert_u2_type isn't dimensionless,  then {Unit2, Unit} have different dimensions */
-
-                return ((this->scale_ * c_scalefactor_inexact * exact_scalefactor_type::num) / exact_scalefactor_type::den);
-            }
-
+            /** @defgroup quantity-arithmetic **/
+            ///@{
+            /** @brief add quantity in-place
+             *
+             *  @pre @p y must have the same dimension as @c *this.
+             *
+             *  @param y  quantity to add
+             *  @retval this quantity after adding y
+             **/
             template <typename Quantity2>
-            quantity operator+=(Quantity2 y) {
+            quantity & operator+=(Quantity2 y) {
                 static_assert(std::same_as<
                               typename unit_type::canon_type,
                               typename Quantity2::unit_type::canon_type >);
@@ -227,8 +429,15 @@ namespace xo {
                 return *this;
             }
 
+            /** @brief subtract quantity in-place
+             *
+             *  @pre @p y must have the same dimensions as @c *this
+             *
+             *  @param y  quantity to subtract
+             *  @retval this quantity after subtracting y
+             **/
             template <typename Quantity2>
-            quantity operator-=(Quantity2 y) {
+            quantity & operator-=(Quantity2 y) {
                 static_assert(std::same_as<
                               typename unit_type::canon_type,
                               typename Quantity2::unit_type::canon_type >);
@@ -240,10 +449,16 @@ namespace xo {
 
                 return *this;
             }
+            ///@}
 
-            /* convert to quantity with same dimension, different {unit_type, repr_type} */
+            /** @addtogroup quantity-unit-conversion **/
+            ///@{
+            /** @brief convert to quantity with same dimension, different {unit_type, repr_type}
+             *
+             *  @pre @c Quantity2 must have the same dimension as @c *this.
+             **/
             template <typename Quantity2>
-            operator Quantity2 () const {
+            constexpr operator Quantity2 () const {
                 /* avoid truncating precision when converting:
                  * use best available representation
                  */
@@ -251,13 +466,26 @@ namespace xo {
 
                 return Quantity2::promote(this->in_units_of<typename Quantity2::unit_type, tmp_repr_type>());
             }
+            ///@}
 
+            /** @defgroup quantity-print-support **/
+            ///@{
+            /** @brief write printed representation on stream
+             *
+             *  @param os   write on this output stream
+             **/
             void display(std::ostream & os) const {
                 os << this->scale() << unit_cstr();
             }
+            ///@}
 
+            /** @defgroup quantity-assignment **/
+            ///@{
+            /** @brief copy constructor **/
             quantity & operator=(quantity const & x) = default;
+            /** @brief move constructor **/
             quantity & operator=(quantity && x) = default;
+            ///@}
 
         private:
             explicit constexpr quantity(Repr x) : scale_{x} {}
