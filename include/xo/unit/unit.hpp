@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "unit_concept.hpp"
 #include "dimension_impl.hpp"
 
 namespace xo {
