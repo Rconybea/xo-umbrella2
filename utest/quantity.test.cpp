@@ -12,9 +12,14 @@ namespace xo {
     using xo::unit::quantity;
 
     using xo::unit::qty::kilograms;
+
+    using xo::unit::qty::meters;
+    using xo::unit::qty::kilometers;
+
     using xo::unit::qty::milliseconds;
     using xo::unit::qty::seconds;
     using xo::unit::qty::minutes;
+    using xo::unit::qty::hours;
     using xo::unit::qty::volatility30d;
     using xo::unit::qty::volatility250d;
 
@@ -718,6 +723,72 @@ namespace xo {
             //CHECK(r == Approx(0.692820323).epsilon(1e-6));
 
         } /*TEST_CASE(muldiv5)*/
+
+        TEST_CASE("rescale", "[quantity]") {
+            constexpr bool c_debug_flag = false;
+
+            // can get bits from /dev/random by uncommenting the 2nd line below
+            //uint64_t seed = xxx;
+            //rng::Seed<xoshio256ss> seed;
+
+            //auto rng = xo::rng::xoshiro256ss(seed);
+
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.rescale"));
+            //log && log("(A)", xtag("foo", foo));
+
+            auto q = kilograms(150.0) / minutes(1); /* 150.0kg.min^-1 */
+
+            CHECK(strcmp(q.unit_cstr(), "kg.min^-1") == 0);
+            CHECK(q.scale() == 150.0);
+
+            log && log(XTAG(q));
+
+            namespace u = xo::unit::units;
+
+            auto q1 = q.with_basis_unit<u::millisecond>(); /* 0.0025kg.ms^-1 */
+
+            CHECK(strcmp(q1.unit_cstr(), "kg.ms^-1") == 0);
+            CHECK(q1.scale() == 0.0025);
+
+            log && log(XTAG(q1));
+
+            auto q2 = q1.with_basis_unit<u::gram>(); /* 2.5g.ms^-1 */
+
+            CHECK(strcmp(q2.unit_cstr(), "g.ms^-1") == 0);
+            CHECK(q2.scale() == 2.5);
+
+            log && log(XTAG(q2));
+
+            auto q3 = q2.with_basis_unit<u::second>(); /* 2500g.s^-1 */
+
+            CHECK(strcmp(q3.unit_cstr(), "g.s^-1") == 0);
+            CHECK(q3.scale() == 2500.0);
+
+            log && log(XTAG(q3));
+        } /*TEST_CASE(rescale)*/
+
+        TEST_CASE("rescale2", "[quantity]") {
+            constexpr bool c_debug_flag = true;
+
+            // can get bits from /dev/random by uncommenting the 2nd line below
+            //uint64_t seed = xxx;
+            //rng::Seed<xoshio256ss> seed;
+
+            //auto rng = xo::rng::xoshiro256ss(seed);
+
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.rescale2"));
+            //log && log("(A)", xtag("foo", foo));
+
+            namespace u = xo::unit::unit_qty;
+
+            auto q1 = kilometers(150.0) / u::hour;
+            auto q2 = q1.with_units_from(u::meter / u::second);
+
+            log && log(XTAG(q1), XTAG(q2));
+        } /*TEST_CASE(rescale2)*/
+
+
+
     } /*namespace ut*/
 } /*namespace xo*/
 
