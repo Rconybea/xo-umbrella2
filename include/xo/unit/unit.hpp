@@ -270,12 +270,12 @@ namespace xo {
             };
 
             using meter      = wrap_unit< std::ratio<1>,
-                                          bpu_node< bpu<dim::time,
-                                                               std::ratio<1>> > >;
+                                          bpu_node< bpu<dim::distance,
+                                                        std::ratio<1>> > >;
 
             using kilometer  = wrap_unit< std::ratio<1>,
-                                          bpu_node< bpu<dim::time,
-                                                               std::ratio<1000>> > >;
+                                          bpu_node< bpu<dim::distance,
+                                                        std::ratio<1000>> > >;
             template <>
             struct scaled_native_unit_abbrev<dim::distance, std::ratio<1000>> {
                 static constexpr auto value = stringliteral("km");
