@@ -4,18 +4,12 @@
 
 #include "quantity_concept.hpp"
 #include "unit.hpp"
+#include "detail/promoter.hpp"
 //#include "xo/reflect/Reflect.hpp"
 //#include "xo/indentlog/scope.hpp"
 
 namespace xo {
     namespace unit {
-        /** @class promoter
-         *
-         *  Aux class assister for quantity::promote()
-         **/
-        template <typename Unit, typename Repr, bool Dimensionless = dimensionless_v<Unit> >
-        struct promoter;
-
         // ----- quantity -----
 
         /** @class quantity
@@ -72,10 +66,7 @@ namespace xo {
             static constexpr quantity unit_quantity() { return quantity(1); }
             /** @brief promote representation to quantity.  Same as multiplying by Unit
              **/
-            static constexpr auto promote(Repr x) {
-                //std::cerr << "quantity<U,R>::promote: x=" << x << ", R=" << reflect::Reflect::require<Repr>()->canonical_name() << std::endl;
-                return promoter<Unit, Repr>::promote(x);
-            }
+            static constexpr auto promote(Repr x);
             ///@}
 
             /** @addtogroup quantity-traits **/
@@ -500,18 +491,12 @@ namespace xo {
             Repr scale_ = 0;
         }; /*quantity*/
 
-        // ----- promoter -----
-
-        /* collapse dimensionless quantity to its repr_type> */
         template <typename Unit, typename Repr>
-        struct promoter<Unit, Repr, /*Dimensionless*/ true> {
-            static constexpr Repr promote(Repr x) { return x; };
-        };
-
-        template <typename Unit, typename Repr>
-        struct promoter<Unit, Repr, /*Dimensionless*/ false> {
-            static constexpr quantity<Unit, Repr> promote(Repr x) { return quantity<Unit, Repr>(x); }
-        };
+        constexpr auto
+        quantity<Unit, Repr>::promote(Repr x) {
+            //std::cerr << "quantity<U,R>::promote: x=" << x << ", R=" << reflect::Reflect::require<Repr>()->canonical_name() << std::endl;
+            return promoter<Unit, Repr>::promote(x);
+        }
 
         // ----- operator+ -----
 
