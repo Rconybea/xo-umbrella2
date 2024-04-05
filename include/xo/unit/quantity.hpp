@@ -42,6 +42,8 @@ namespace xo {
             using repr_type = Repr;
             ///@}
 
+            static_assert(unit_concept<Unit>);
+            static_assert(numeric_concept<Repr>);
             /* non-unity compile-time scale factors can arise during unit conversion;
              * for example see method quantity::in_units_of()
              */
