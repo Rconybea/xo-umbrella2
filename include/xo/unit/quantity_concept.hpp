@@ -2,7 +2,8 @@
 
 #pragma once
 
-#include <concepts>
+#include "unit_concept.hpp"
+#include "numeric_concept.hpp"
 
 namespace xo {
     namespace unit {
