@@ -70,18 +70,6 @@ namespace xo {
                 && bpu_list_concept<typename Dimension::canon_type>
                 );
 
-        // ----------------------------------------------------------------
-
-        template <typename Unit>
-        concept unit_concept = requires(Unit unit)
-        {
-            typename Unit::scalefactor_type;
-            typename Unit::dim_type;
-            typename Unit::canon_type;
-        }
-            && (ratio_concept<typename Unit::scalefactor_type>
-                && bpu_list_concept<typename Unit::dim_type>
-                && bpu_list_concept<typename Unit::canon_type>);
     } /*namespace unit*/
 } /*namespace xo*/
 
