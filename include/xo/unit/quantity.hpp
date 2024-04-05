@@ -286,7 +286,7 @@ namespace xo {
         // ----- operator+ -----
 
         template <typename Quantity1, typename Quantity2>
-        inline Quantity1 operator+ (Quantity1 x, Quantity2 y) {
+        inline constexpr Quantity1 operator+ (Quantity1 x, Quantity2 y) {
             static_assert(same_dimension_v<typename Quantity1::unit_type, typename Quantity2::unit_type>);
 
             /* convert y to match units used by x;
@@ -298,7 +298,7 @@ namespace xo {
         }
 
         template <typename Quantity1, typename Quantity2>
-        inline Quantity1 operator- (Quantity1 x, Quantity2 y) {
+        inline constexpr Quantity1 operator- (Quantity1 x, Quantity2 y) {
             static_assert(std::same_as
                           < typename Quantity1::unit_type::dimension_type::canon_type,
                           typename Quantity2::unit_type::dimension_type::canon_type >);
@@ -315,7 +315,7 @@ namespace xo {
         }
 
         template <typename Quantity1, typename Quantity2>
-        inline auto operator* (Quantity1 x, Quantity2 y) {
+        inline constexpr auto operator* (Quantity1 x, Quantity2 y) {
             static_assert(quantity_concept<Quantity1>);
             static_assert(quantity_concept<Quantity2>);
 
@@ -325,7 +325,7 @@ namespace xo {
         /** e.g. DECLARE_LH_MULT(int32_t) **/
 #      define DECLARE_LH_MULT(lhtype)                  \
         template <typename Quantity>                   \
-        inline auto                                    \
+        inline constexpr auto                          \
         operator* (lhtype x, Quantity y) {             \
             static_assert(quantity_concept<Quantity>); \
             return y.scale_by(x);                      \
@@ -346,7 +346,7 @@ namespace xo {
         /** e.g. DECLARE_RH_MULT(int32_t) **/
 #      define DECLARE_RH_MULT(rhtype)                  \
         template <typename Quantity>                   \
-        inline auto                                    \
+        inline constexpr auto                          \
         operator* (Quantity x, rhtype y) {             \
             static_assert(quantity_concept<Quantity>); \
             return x.scale_by(y);                      \
@@ -365,7 +365,7 @@ namespace xo {
 #      undef DECLARE_LH_MULT
 
         template <typename Quantity1, typename Quantity2>
-        inline auto operator/ (Quantity1 x, Quantity2 y) {
+        inline constexpr auto operator/ (Quantity1 x, Quantity2 y) {
             static_assert(quantity_concept<Quantity1>);
             static_assert(quantity_concept<Quantity2>);
 
@@ -374,7 +374,7 @@ namespace xo {
 
 #      define DECLARE_LH_DIV(lhtype)                   \
         template <typename Quantity>                   \
-        inline auto                                    \
+        inline constexpr auto                          \
         operator/ (lhtype x, Quantity y) {             \
             static_assert(quantity_concept<Quantity>); \
             return y.divide_into(x);                   \
@@ -394,7 +394,7 @@ namespace xo {
 
 #      define DECLARE_RH_DIV(rhtype) \
         template <typename Quantity> \
-        inline auto \
+        inline constexpr auto \
         operator/ (Quantity x, rhtype y) { \
             static_assert(quantity_concept<Quantity>); \
             return x.divide_by(y); \
@@ -422,72 +422,85 @@ namespace xo {
         namespace qty {
             // ----- mass -----
 
+            /** @brief create quantity representing @p x milligrams **/
             template <typename Repr = double>
-            inline auto milligrams(Repr x) -> quantity<units::milligram, Repr> {
+            inline constexpr auto milligrams(Repr x) -> quantity<units::milligram, Repr> {
                 return quantity<units::milligram, Repr>::promote(x);
             };
 
+            /** @brief create quantity representing @p x grams **/
             template <typename Repr = double>
-            inline auto grams(Repr x) -> quantity<units::gram, Repr> {
+            inline constexpr auto grams(Repr x) -> quantity<units::gram, Repr> {
                 return quantity<units::gram, Repr>::promote(x);
             };
 
+            /** @brief create quantity representing @p x kilograms **/
             template <typename Repr = double>
-            inline auto kilograms(Repr x) -> quantity<units::kilogram, Repr> {
+            inline constexpr auto kilograms(Repr x) -> quantity<units::kilogram, Repr> {
                 return quantity<units::kilogram, Repr>::promote(x);
             };
 
             // ----- distance -----
 
+            /** @brief create quantity representing @p x millimeters **/
             template <typename Repr = double>
-            inline auto millimeters(Repr x) -> quantity<units::millimeter, Repr> {
+            inline constexpr auto millimeters(Repr x) -> quantity<units::millimeter, Repr> {
                 return quantity<units::millimeter, Repr>::promote(x);
             }
 
+            /** @brief create quantity representing @p x meters **/
             template <typename Repr = double>
-            inline auto meters(Repr x) -> quantity<units::meter, Repr> {
+            inline constexpr auto meters(Repr x) -> quantity<units::meter, Repr> {
                 return quantity<units::meter, Repr>::promote(x);
             }
 
+            /** @brief create quantity representing @p x kilometers **/
             template <typename Repr = double>
-            inline auto kilometers(Repr x) -> quantity<units::kilometer, Repr> {
+            inline constexpr auto kilometers(Repr x) -> quantity<units::kilometer, Repr> {
                 return quantity<units::kilometer, Repr>::promote(x);
             }
 
             // ----- time -----
 
+            /** @brief create quantity representing @p x nanoseconds **/
             template <typename Repr = double>
-            inline auto nanoseconds(Repr x) -> quantity<units::nanosecond, Repr> {
+            inline constexpr auto nanoseconds(Repr x) -> quantity<units::nanosecond, Repr> {
                 return quantity<units::nanosecond, Repr>::promote(x);
             }
 
+            /** @brief create quantity representing @p x microseconds **/
             template <typename Repr = double>
-            inline auto microseconds(Repr x) -> quantity<units::microsecond, Repr> {
+            inline constexpr auto microseconds(Repr x) -> quantity<units::microsecond, Repr> {
                 return quantity<units::microsecond, Repr>::promote(x);
             }
 
+            /** @brief create quantity representing @p x milliseconds **/
             template <typename Repr = double>
-            inline auto milliseconds(Repr x) -> quantity<units::millisecond, Repr> {
+            inline constexpr auto milliseconds(Repr x) -> quantity<units::millisecond, Repr> {
                 return quantity<units::millisecond, Repr>::promote(x);
             }
 
+            /** @brief create quantity representing @p x seconds **/
             template <typename Repr = double>
-            inline auto seconds(Repr x) -> quantity<units::second, Repr> {
+            inline constexpr auto seconds(Repr x) -> quantity<units::second, Repr> {
                 return quantity<units::second, Repr>::promote(x);
             }
 
+            /** @brief create quantity representing @p x minutes **/
             template <typename Repr = double>
-            inline auto minutes(Repr x) -> quantity<units::minute, Repr> {
+            inline constexpr auto minutes(Repr x) -> quantity<units::minute, Repr> {
                 return quantity<units::minute, Repr>::promote(x);
             }
 
+            /** @brief create quantity representing @p x hours **/
             template <typename Repr = double>
-            inline auto hours(Repr x) -> quantity<units::hour, Repr> {
+            inline constexpr auto hours(Repr x) -> quantity<units::hour, Repr> {
                 return quantity<units::hour, Repr>::promote(x);
             }
 
+            /** @brief create quantity representing @p x days (1 day = exactly 24 hours) **/
             template <typename Repr = double>
-            inline auto days(Repr x) -> quantity<units::day, Repr> {
+            inline constexpr auto days(Repr x) -> quantity<units::day, Repr> {
                 return quantity<units::day, Repr>::promote(x);
             }
 
@@ -495,21 +508,21 @@ namespace xo {
 
             /** quantity in units of 1/sqrt(1dy) **/
             template <typename Repr = double>
-            inline auto volatility1d(Repr x) -> quantity<units::volatility_1d, Repr> {
+            inline constexpr auto volatility1d(Repr x) -> quantity<units::volatility_1d, Repr> {
                 return quantity<units::volatility_1d, Repr>::promote(x);
             }
 
             /** quantity in units of 1/sqrt(30days)
              **/
             template <typename Repr = double>
-            inline auto volatility30d(Repr x) -> quantity<units::volatility_30d, Repr> {
+            inline constexpr auto volatility30d(Repr x) -> quantity<units::volatility_30d, Repr> {
                 return quantity<units::volatility_30d, Repr>::promote(x);
             }
 
             /** quantity in units of 1/sqrt(250days)
              **/
             template <typename Repr = double>
-            inline auto volatility250d(Repr x) -> quantity<units::volatility_250d, Repr> {
+            inline constexpr auto volatility250d(Repr x) -> quantity<units::volatility_250d, Repr> {
                 return quantity<units::volatility_250d, Repr>::promote(x);
             }
         } /*namespace qty*/
