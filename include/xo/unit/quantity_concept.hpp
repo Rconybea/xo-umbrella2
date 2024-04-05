@@ -17,6 +17,7 @@ namespace xo {
             { Quantity::unit_cstr() } -> std::same_as<char const *>;
             { Quantity::unit_quantity() } -> std::same_as<Quantity>;
             { Quantity::promote(repr) } -> std::same_as<Quantity>;
-        };
+        } && (unit_concept<typename Quantity::unit_type>
+              && numeric_concept<typename Quantity::repr_type>);
     } /*namespace unit*/
 } /*namespace xo*/
