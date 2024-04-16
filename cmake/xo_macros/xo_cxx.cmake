@@ -736,6 +736,19 @@ macro(xo_self_dependency target dep)
     target_link_libraries(${target} PUBLIC ${dep})
 endmacro()
 
+# dependency on target provided from this codebase.
+#
+# Similar comments as for xo_self_dependency()
+# 1. don't need find_package() in this case,  since details of dep targets
+#    must be known to cmake for it to build them.
+# 2. in any case, can't use find_package() when cmake runs,
+#    because supporting .cmake files haven't been generated yet
+# 3. need to use INTERFACE instead of PUBLIC for a header-only dep
+#
+macro(xo_self_headeronly_dependency target dep)
+    target_link_libraries(${target} INTERFACE ${dep})
+endmacro()
+
 # ----------------------------------------------------------------
 # need this when linking pybind11-generated libraries
 #
