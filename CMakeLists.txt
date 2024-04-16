@@ -1,8 +1,8 @@
 # xo-stringliteral/CMakeLists.txt
 
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.25)
 
-project(xo_stringliteral VERSION 1.0)
+project(xo_flatstring VERSION 1.0)
 enable_language(CXX)
 
 # common XO cmake macros (see proj/xo-cmake)
@@ -12,17 +12,37 @@ include(cmake/xo-bootstrap-macros.cmake)
 # unit test setup
 
 enable_testing()
-# activate code coverage for all executables + libraries (when configured with -DCODE_COVERAGE=ON)
-add_code_coverage()
 
-# 1. assuming that /nix/store/ prefixes .hpp files belonging to gcc, catch2 etc.
-#    we're not interested in code coverage for these sources.
-# 2. exclude the utest/ subdir, we don't need coverage on the unit tests themselves;
-#    rather,  want coverage on the code that the unit tests exercise.
+# ----------------------------------------------------------------
+# cmake -DCMAKE_BUILD_TYPE=coverage
+
+if (NOT DEFINED PROJECT_CXX_FLAGS_COVERAGE)
+    # note: for clang would use -fprofile-instr-generate -fcoverage-mapping here instead and also at link time
+    set(PROJECT_CXX_FLAGS_COVERAGE ${PROJECT_CXX_FLAGS} -ggdb -Og -fprofile-arcs -ftest-coverage
+        CACHE STRING "coverage c++ compiler flags")
+endif()
+message("-- PROJECT_CXX_FLAGS_COVERAGE: coverage c++ flags are [${PROJECT_CXX_FLAGS_COVERAGE}]")
+
+add_compile_options("$<$<CONFIG:COVERAGE>:${PROJECT_CXX_FLAGS_COVERAGE}>")
+# when -DCMAKE_BUILD_TYPE=coverage, link executables with gcov
+link_libraries("$<$<CONFIG:COVERAGE>:gcov>")
+
+find_program(LCOV_EXECUTABLE NAMES lcov)
+find_program(GENHTML_EXECUTABLE NAMES genhtml)
+
+# with coverage build:
+# 1. invoke instrumented executables for which you want coverage:
+#     (cd path/to/build && ctest)
+# 2. post-process low-level coverage data
+#     (path/to/build/gen-ccov)
+# 3. point browser to generated html data
+#     file:///path/to/build/ccov/html/index.html
 #
-# NOTE: this seems to work only with the 'ccov-all' target.  In particular,  doesn't seem to do anything with the 'ccov' target
-#
-add_code_coverage_all_targets(EXCLUDE /nix/store/* ${PROJECT_SOURCE_DIR}/utest/* ${PROJECT_BINARY_DIR}/local/* ${PROJECT_SOURCE_DIR}/repo/*)
+configure_file(
+    ${PROJECT_SOURCE_DIR}/cmake/gen-ccov.in
+    ${PROJECT_BINARY_DIR}/gen-ccov)
+
+file(CHMOD ${PROJECT_BINARY_DIR}/gen-ccov PERMISSIONS OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 
 # ----------------------------------------------------------------
 # c++ settings
@@ -37,8 +57,8 @@ xo_toplevel_compile_options()
 # ----------------------------------------------------------------
 
 add_subdirectory(example)
-#add_subdirectory(utest)
-#add_subdirectory(docs)
+add_subdirectory(utest)
+add_subdirectory(docs)
 
 # ----------------------------------------------------------------
 # provide find_package() support for projects using this library
