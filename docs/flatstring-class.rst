@@ -17,6 +17,11 @@ Instance Variables
 .. doxygengroup:: flatstring-instance-variables
     :content-only:
 
+Types
+-----
+
+.. doxygengroup:: flatstring-types
+
 Constants
 ---------
 

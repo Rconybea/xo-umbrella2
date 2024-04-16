@@ -12,4 +12,5 @@ Flatstring Functions
 
 .. doxygenfunction:: xo::flatstring_concat
 
-.. doxygenfunction:: xo::flatstring_compare
+.. doxygengroup:: flatstring-3way-compare
+    :content-only:

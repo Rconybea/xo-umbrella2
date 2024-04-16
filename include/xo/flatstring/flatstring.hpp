@@ -29,20 +29,30 @@ namespace xo {
      **/
     template <std::size_t N>
     struct flatstring {
-        /** @defgroup flatstring-types template types **/
+        /** @defgroup flatstring-types template types
+         *  @brief Template types exposed by @c flatstring<N>
+         **/
         ///@{
+        /** @brief character traits for this flatstring **/
         using traits_type            = std::char_traits<char>;
+        /** @brief type of each character in this flatstring **/
         using value_type             = char;
         using allocator_type         = std::allocator<char>;
         using size_type              = std::allocator_traits<allocator_type>::size_type;
         using difference_type        = std::allocator_traits<allocator_type>::difference_type;
+        /** @brief type of a character reference **/
         using reference              = value_type &;
+        /** @brief type of a readonly character reference **/
         using const_reference        = const value_type &;
         using pointer                = std::allocator_traits<allocator_type>::pointer;
         using const_pointer          = std::allocator_traits<allocator_type>::const_pointer;
+        /** @brief representation for a read/write iterator **/
         using iterator               = char *;
+        /** @brief representation for a readonly iterator **/
         using const_iterator         = const char *;
+        /** @brief representation for a read/write reverse iterator **/
         using reverse_iterator       = char *;
+        /** @brief representation for a readonly reverse iterator **/
         using const_reverse_iterator = const char *;
         ///@}
 
@@ -129,6 +139,7 @@ namespace xo {
         ///@{
         constexpr iterator begin() { return &value_[0]; }
         constexpr iterator end() { return this->last(); }
+
         constexpr const_iterator cbegin() const { return &value_[0]; }
         constexpr const_iterator cend() const { return const_cast<flatstring*>(this)->last<iterator>(); }
         constexpr const_iterator begin() const { return cbegin(); }
@@ -329,16 +340,13 @@ namespace xo {
     all_same_v = std::conjunction_v< std::is_same<First, Rest>... >;
 #endif
 
-    /** @brief Concatenate native or wrapped string literals
-     *
-     *  Can mix stringliteral objects and native C-style string literals,
-     *  and still preserve constexpr-ness.
+    /** @brief Concatenate flatstrings, possibly mixed with C-style char arrays
      *
      *  Example:
      *  @code
-     *  constexpr auto s = stringliteral_concat(stringliteral("hello"),
-     *                                          ", ",
-     *                                          stringliteral("world"));
+     *  constexpr auto s = flatstring_concat(flatstring("hello"),
+     *                                       ", ",
+     *                                       flatstring("world"));
      *  static_assert(s.capacity == 13);
      *  @endcode
      *
@@ -383,11 +391,11 @@ namespace xo {
         return result;
     }
 
-    /** @brief compare two string literals lexicographically.
+    /** @brief compare two flatstrings lexicographically.
      *
      *  Example:
      *  @code
-     *  constexpr auto cmp = stringliteral_compare(stringliteral("foo"), stringliteral("bar"));
+     *  constexpr auto cmp = flatstring_compare(stringliteral("foo"), stringliteral("bar"));
      *  static_assert(cmp > 0);
      *  @endcode
      **/
@@ -400,15 +408,25 @@ namespace xo {
         return (std::string_view(s1.value_) <=> std::string_view(s2.value_));
     }
 
-    /** @brief 3-way compare for two stringliterals **/
+    /** @defgroup flatstring-3way-compare 3way-compare **/
+    ///@{
+    /** @brief 3-way compare for two flatstrings
+     *
+     *  Example
+     *  @code
+     *  constexpr auto cmp = (flatstring("foo") <=> flatstring("bar"));
+     *  static_assert(cmp != 0);
+     *  @endcode
+     **/
     template <std::size_t N1,
               std::size_t N2>
     constexpr auto
     operator<=>(const flatstring<N1> & s1,
                 const flatstring<N2> & s2) noexcept
     {
-        return flatstring_compare(s1, s2);
+        return (std::string_view(s1) <=> std::string_view(s2));
     }
+    ///@}
 } /*namespace xo*/
 
 /** end stringliteral.hpp **/
