@@ -1,6 +1,6 @@
 /** @file flatstring.utest.cpp **/
 
-#include "xo/stringliteral/stringliteral.hpp"
+#include "xo/flatstring/flatstring.hpp"
 #include "xo/indentlog/scope.hpp"
 #include "xo/indentlog/print/tag.hpp"
 #include <catch2/catch.hpp>
