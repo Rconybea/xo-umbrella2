@@ -6,12 +6,15 @@ Features:
 - char array representation with maximum size set at compile time.
 - compile time construction from char array and string concatenation
 - pointer-free implementation, instances can be used as template arguments
-- To the extent practical, provides the same api as `std::string`
+- To the extent practical, provides the same api as `std::string`: includes iterators,
+  access methods, assignment, conversion operators.
 
 Limitations:
 - requires c++20
 - not resizable.
 - does not support wide characters.
+- (asof April 2024) missing features: `insert`, `erase`, `push_back`, `append`, `replace`,
+  `find`, `compare`, `starts_with`, `ends_with`, `contains`, `substr`.
 
 ## Getting started
 
