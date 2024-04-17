@@ -50,10 +50,80 @@ namespace xo {
         using iterator               = char *;
         /** @brief representation for a readonly iterator **/
         using const_iterator         = const char *;
-        /** @brief representation for a read/write reverse iterator **/
-        using reverse_iterator       = char *;
-        /** @brief representation for a readonly reverse iterator **/
-        using const_reverse_iterator = const char *;
+
+        /** @brief representation for a read/write reverse iterator
+         *
+         *  constexpr implementation is tricky here,  since we can't
+         *  form the address 'just before the beginning of the string' for @p rend()
+         *  without losing constexprness (at least with gcc 13.1)
+         *
+         *  Instead iterator always refers to the address immediately after its
+         *  real target. This works since @c rbegin() refers to the char just before
+         *  trailing null
+         **/
+        struct reverse_iterator {
+        public:
+            constexpr reverse_iterator(char * p) : p_{p} {}
+
+            constexpr bool _has_pointer() const { return p_ != nullptr; }
+
+            constexpr bool operator==(const reverse_iterator & rhs) const noexcept {
+                return p_ == rhs.p_;
+            }
+
+            constexpr char & operator* () const { return *(p_ - 1); }
+
+            constexpr reverse_iterator & operator++ () {
+                --p_;
+                return *this;
+            }
+
+            constexpr reverse_iterator operator++ (int) {
+                reverse_iterator copy = *this;
+                --p_;
+                return copy;
+            }
+
+        private:
+            char * p_;
+        };
+
+        /** @brief representation for a readonly reverse iterator
+         *
+         *  constexpr implementation is tricky here,  since we can't
+         *  form the address 'just before the beginning of the string' for @p rend()
+         *  without losing constexprness (at least with gcc 13.1)
+         *
+         *  Instead iterator always refers to the address immediately after its
+         *  real target. This works since @c rbegin() refers to the char just before
+         *  trailing null
+         **/
+        struct const_reverse_iterator {
+        public:
+            constexpr const_reverse_iterator(const char * p) : p_{p} {}
+
+            constexpr bool _has_pointer() const { return p_ != nullptr; }
+
+            constexpr bool operator==(const const_reverse_iterator & rhs) const noexcept {
+                return p_ == rhs.p_;
+            }
+
+            constexpr const char & operator* () const { return *(p_ - 1); }
+
+            constexpr const_reverse_iterator & operator++ () {
+                --p_;
+                return *this;
+            }
+
+            constexpr const_reverse_iterator operator++ (int) {
+                const_reverse_iterator copy = *this;
+                --p_;
+                return copy;
+            }
+
+        private:
+            const char * p_;
+        };
         ///@}
 
         /** @defgroup flatstring-constants constants **/
@@ -131,22 +201,22 @@ namespace xo {
          *
          *  @pre 0<=pos<=N-1
          **/
-        constexpr value_type & operator[](size_type pos) { return value_[pos]; }
-        constexpr const value_type & operator[](size_type pos) const { return value_[pos]; }
+        constexpr value_type & operator[](size_type pos) noexcept { return value_[pos]; }
+        constexpr const value_type & operator[](size_type pos) const noexcept { return value_[pos]; }
         ///@}
 
         /** @defgroup flatstring-iterators iterators **/
         ///@{
         constexpr iterator begin() { return &value_[0]; }
-        constexpr iterator end() { return this->last(); }
+        constexpr iterator end() { return this->last<iterator>(); }
 
         constexpr const_iterator cbegin() const { return &value_[0]; }
         constexpr const_iterator cend() const { return const_cast<flatstring*>(this)->last<iterator>(); }
         constexpr const_iterator begin() const { return cbegin(); }
         constexpr const_iterator end() const { return cend(); }
 
-        constexpr reverse_iterator rbegin() { return this->last(); }
-        constexpr reverse_iterator rend() { return &value_[0]; }
+        constexpr reverse_iterator rbegin() { return reverse_iterator(this->last<iterator>()); }
+        constexpr reverse_iterator rend() { return reverse_iterator(&value_[0]); }
         constexpr const_reverse_iterator crbegin() const { return const_cast<flatstring*>(this)->last<iterator>(); }
         constexpr const_reverse_iterator crend() const { return &value_[0]; }
         constexpr const_reverse_iterator rbegin() const { return crbegin(); }
@@ -156,7 +226,7 @@ namespace xo {
         /** @defgroup flatstring-assign assignment **/
         ///@{
         /** @brief put string into empty state.  fills entire char array with nulls **/
-        void clear() { std::fill_n(value_, N, '\0'); }
+        constexpr void clear() noexcept { std::fill_n(value_, N, '\0'); }
 
         /** @brief replace contents with min(count,N-1) copies of character ch **/
         constexpr flatstring & assign(size_type count, value_type ch) {
@@ -168,7 +238,7 @@ namespace xo {
 
             return *this;
         }
-        /** @brief replace contents with first N-1 characters of str **/
+        /** @brief replace contents with first N-1 characters of @p x **/
         constexpr flatstring & assign(const flatstring & x) {
             for (std::size_t pos = 0; pos < N-1; ++pos)
                 value_[pos] = x.value_[pos];
@@ -176,13 +246,15 @@ namespace xo {
             return *this;
         }
         /** @brief replace contents with substring [pos,pos+count] of str **/
-        constexpr flatstring & assign(const flatstring & x,
+        template <std::size_t N2>
+        constexpr flatstring & assign(const flatstring<N2> & x,
                                       size_type pos, size_type count = npos) {
             std::size_t i = 0;
             for (;
                  i < std::min(std::min(count,
-                                       std::max(x.capacity-1 - pos,
-                                                0)),
+                                       (x.fixed_capacity-1 > pos)
+                                       ? x.fixed_capacity-1 - pos
+                                       : 0ul),
                               N-1);
                  ++i)
                 value_[i] = x.value_[pos+i];
@@ -274,7 +346,7 @@ namespace xo {
          *    strcmp(s, "obey...");
          *  @endcode
          **/
-        constexpr operator const char * () const { return value_; }
+        constexpr operator const char * () const noexcept { return value_; }
         ///@}
 
     private:
@@ -293,7 +365,7 @@ namespace xo {
         }
 
         template <typename Iterator>
-        constexpr Iterator last() {
+        constexpr Iterator last() noexcept {
             Iterator p = &value_[N-1];
 
             /* search backward for first padding '\0' */
@@ -425,6 +497,26 @@ namespace xo {
                 const flatstring<N2> & s2) noexcept
     {
         return (std::string_view(s1) <=> std::string_view(s2));
+    }
+
+    /** @brief equality comparison for two flatstrings.
+     *
+     *  Example
+     *  @code
+     *  constexpr bool cmp = (flatstring("foo") == flatstring("foo"));
+     *  static_assert(cmp == true);
+     *  @endcode
+     *
+     *  @note spaceship operator alone isn't sufficient to get this defined,
+     *        at least with gcc 13.1
+     **/
+    template <std::size_t N1,
+              std::size_t N2>
+    constexpr bool
+    operator==(const flatstring<N1> & s1,
+               const flatstring<N2> & s2) noexcept
+    {
+        return ((s1 <=> s2) == std::strong_ordering::equal);
     }
     ///@}
 } /*namespace xo*/
