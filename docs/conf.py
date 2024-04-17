@@ -6,7 +6,7 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'xo stringlit documentation'
+project = 'xo flatstring documentation'
 copyright = '2024, Roland Conybeare'
 author = 'Roland Conybeare'
 

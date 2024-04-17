@@ -1,4 +1,4 @@
-# xo-stringliteral/docs/CMakeLists.txt
+# xo-flatstring/docs/CMakeLists.txt
 
 if (XO_SUBMODULE_BUILD)
     # in submodule build, rely on toplevel docs/CMakeLists.txt file instead
@@ -6,8 +6,8 @@ else()
     # build docs starting from here only in standalone build.
     # otherwise use top-level doxygen setup instead.
 
-    set(ALL_LIBRARY_TARGETS xo_stringliteral)  # todo: automate this from xo-cmake macros
-    set(ALL_UTEST_TARGETS xo_stringliteral_ex1 ) # todo: automate this from xo-cmake macros
+    set(ALL_LIBRARY_TARGETS xo_flatstring)  # todo: automate this from xo-cmake macros
+    set(ALL_UTEST_TARGETS xo_flatstring_ex1 ) # todo: automate this from xo-cmake macros
 
     # look for doxygen executable
     find_program(DOXYGEN_EXECUTABLE NAMES doxygen REQUIRED)
@@ -24,7 +24,7 @@ else()
 
     set(DOX_INDEX_FILE ${DOX_OUTPUT_DIR}/html/index.html)
 
-    # .hpp files reachable from xo-stringliteral/include
+    # .hpp files reachable from xo-flatstring/include
     #
     # REMINDER: for reliability will need to re-run cmake when the set of .hpp files changes
     #
