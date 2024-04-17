@@ -60,6 +60,9 @@ $ cmake --build .build-ccov -- ccov
 
 browse to `.build-ccov/ccov/html/index.html`
 
+Running `cmake --install` for a coverage build will install coverage report (if generated)
+to `${CMAKE_INSTALL_PREFIX}/share/doc/xo_flatstring`
+
 ### LSP support
 ```
 $ cd xo-flatstring

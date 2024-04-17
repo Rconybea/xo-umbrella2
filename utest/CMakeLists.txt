@@ -17,6 +17,9 @@ add_test(NAME ${SELF_EXE} COMMAND ${SELF_EXE})
 set(CCOV_OUTPUT_DIR ${PROJECT_BINARY_DIR}/ccov/html)
 set(CCOV_INDEX_FILE ${CCOV_OUTPUT_DIR}/index.html)
 set(CCOV_REPORT_EXE ${PROJECT_BINARY_DIR}/gen-ccov)
+# CMAKE_INSTALL_DOCDIR
+#  =default=> DATAROOTDIR/doc/PROJECT_NAME
+#  =default=> CMAKE_INSTALL_PREFIX/share/doc/xo_flatstring
 set(CCOV_INSTALL_DOCDIR ${CMAKE_INSTALL_DOCDIR}/ccov)
 
 # 'test' target should always be out-of-date
