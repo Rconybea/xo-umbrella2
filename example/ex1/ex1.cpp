@@ -14,6 +14,7 @@ main() {
     using xo::stringliteral_compare;
 #endif
 
+#ifdef NOT_USING
     static_assert(foo1().x_ == 1);
     static_assert(foo1().y_ == 2);
 
@@ -67,6 +68,7 @@ main() {
 
 
     static_assert(z8 == 10);
+#endif
 
 #ifdef NOT_USING
     static_assert(count_size("0123") == 5);
@@ -83,6 +85,7 @@ main() {
     static_assert(z10 == 5);
 #endif
 
+#ifdef NOT_USING
     //constexpr auto z11 = foofn2("0123");
 
     //static_assert(z9 > 22);
@@ -97,11 +100,13 @@ main() {
     static_assert(s10.size() == 9);
 
     cerr << s10.c_str() << endl;
+#endif
 
 #ifdef NOT_SUCCESSFUL
     constexpr auto s11 = stringlit_make("0", "1", "23", "456", "78");
 #endif
 
+#ifdef NOT_USING
     constexpr std::size_t z9 = stringlit_capacity(s9, s10);
 
     static_assert(z9 == 19);
@@ -117,6 +122,7 @@ main() {
     static_assert(s13.size() == 36);
 
     cerr << s13.c_str() << endl;
+#endif
 
 #ifdef NOT_USING
     static_assert(stringliteral_compare(s1, s1) == 0);
