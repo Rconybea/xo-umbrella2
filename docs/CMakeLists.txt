@@ -94,12 +94,15 @@ else()
     # - html docs generated in build/docs/sphinx
     # - copy the doc tree to share/doc/xo_unit/html
     #
+    #  DESTINATION: CMAKE_INSTALL_DOCDIR
+    #                => DATAROOTDIR/doc/PROJECT_NAME
+    #                => CMAKE_INSTALL_PREFIX/share/doc/xo_flatstring
     #  OPTIONAL:    install directory tree if it exists,
     #               but don't complain if it's missing
     install(
         DIRECTORY ${SPHINX_OUTPUT_DIR}
         FILE_PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
-        DESTINATION ${CMAKE_INSTALL_PREFIX}/share/doc/${PROJECT_NAME}
+        DESTINATION ${CMAKE_INSTALL_DOCDIR}
         COMPONENT Documentation
         OPTIONAL)
 
