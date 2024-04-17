@@ -18,8 +18,8 @@ Limitations:
 
 ## Documentation
 
-- xo-flatstring documentation here: [documentation][https://rconybea.github.io/web/xo-flatstring/html/index.html]
-- unit test coverage here: [coverage][https://rconybea.github.io/web/xo-flatstring/ccov/html/index.html]
+- xo-flatstring documentation here: [documentation](https://rconybea.github.io/web/xo-flatstring/html/index.html)
+- unit test coverage here: [coverage](https://rconybea.github.io/web/xo-flatstring/ccov/html/index.html)
 
 ## Getting started
 
