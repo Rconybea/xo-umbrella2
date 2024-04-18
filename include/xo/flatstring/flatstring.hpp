@@ -168,6 +168,38 @@ namespace xo {
         }
         ///@}
 
+        /** @brief construct from integer **/
+        static constexpr flatstring from_int(int x) {
+            constexpr size_t buf_z = 20;
+
+            bool negative_flag = (x < 0);
+            std::size_t i = buf_z;
+            char buf[buf_z];
+            std::fill_n(buf, N, '\0');
+
+            if (negative_flag)
+                x = -x;
+
+            buf[--i] = '\0';
+
+            if (x == 0)
+                buf[--i] = '0';
+
+            while ((i > 0) && (x != 0)) {
+                buf[--i] = ('0' + x % 10);
+                x = x / 10;
+            }
+
+            if ((i > 0) && negative_flag)
+                buf[--i] = '-';
+
+            char retv[N];
+            std::fill_n(retv, N, '\0');
+            std::copy_n(buf + i, buf_z - i, retv);
+
+            return retv;
+        }
+
         /** @defgroup flatstring-properties property-methods **/
         ///@{
         /** @brief true if (and only if) string is empty **/
