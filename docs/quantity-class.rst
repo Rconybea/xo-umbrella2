@@ -32,6 +32,12 @@ The simplest way to create a quantity instance is to use either
 *  factory functions in ``xo::unit::qty``, see :doc:`quantity-factoryfunctions`
 *  unit variables in ``xo::unit::units``, see :doc:`quantity-unitvars`
 
+Assignment
+----------
+
+.. doxygengroup:: quantity-assignment
+   :content-only:
+
 Access Methods
 --------------
 
@@ -63,8 +69,10 @@ Support methods for arithmetic operations
 .. doxygengroup:: quantity-arithmeticsupport
    :content-only:
 
-Assignment
+Comparison
 ----------
 
-.. doxygengroup:: quantity-assignment
+Support methods for comparison operators
+
+.. doxygengroup:: quantity-comparisonsupport
    :content-only:

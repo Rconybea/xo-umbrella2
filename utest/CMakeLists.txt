@@ -1,4 +1,4 @@
-# build unittest observable/utest
+# xo-unit/utest/CMakeLists.txt
 
 set(SELF_EXECUTABLE_NAME utest.unit)
 set(SELF_SOURCE_FILES

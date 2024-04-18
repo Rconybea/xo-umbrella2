@@ -41,7 +41,7 @@ add_subdirectory(utest)
 add_subdirectory(docs)
 
 # ----------------------------------------------------------------
-# provide find_package() support for reactor customers
+# provide find_package() support for projects using this library
 
 set(SELF_LIB xo_unit)
 xo_add_headeronly_library(${SELF_LIB})
