@@ -16,7 +16,7 @@ Relative to `boost::ratio`:
 
 ## Documentation
 
-- xo-ratio documentation under construction
+- xo-ratio documentation [under construction]: [documentation](https://rconybea.github.io/web/xo-ratio/html/index.html)
 - unit test coverage here: [coverage](https://rconybea.github.io/web/xo-ratio/ccov/html/index.html)
 
 ## Getting Started
