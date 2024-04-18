@@ -231,6 +231,25 @@ namespace xo {
 
                 REQUIRE(::strcmp(concat.c_str(), req_str.c_str()) == 0);
             }
+
+#ifdef NOT_USING
+            {
+                auto concat4 = flatstring_concat(str,
+                                                 flatstring(text2),
+                                                 str,
+                                                 flatstring(text2));
+                auto req_str = string(text) + string(text2) + string(text) + string(text2);
+
+                REQUIRE(::strcmp(concat4.c_str(), req_str.c_str()) == 0);
+            }
+#endif
+
+            {
+                auto concat4 = flatstring_concat(str, str2, str, str2);
+                auto req_str = string(text) + string(text2) + string(text) + string(text2);
+
+                REQUIRE(::strcmp(concat4.c_str(), req_str.c_str()) == 0);
+            }
         }
 
         template <typename String>

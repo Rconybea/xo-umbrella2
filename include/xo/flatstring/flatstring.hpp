@@ -452,7 +452,18 @@ namespace xo {
         std::size_t pos = 0;
 
         auto detail_concat = [ &pos, &result ](auto && arg) {
-            constexpr auto count = (sizeof(arg) - sizeof(value_type)) / sizeof(value_type);
+            /* tradeoff here:
+             * 1. flatstring::size() is constexpr, so we can concat strings with size() < capacity().
+             *    (note flatstring::from_int() likely creates such strings)
+             * 2. ..but no size() method on char arrays.
+             * 3. std::size() not suitable: size of char array includes null terminator,
+             *    while flatstring.size() excludes it, and flatstring behavior is consistent with
+             *    std::string.size()
+             * Consequence of using arg.size() here; have to wrap char arrays with
+             * flatstring() to use them with flatstring_concat()
+             */
+            auto count = arg.size();
+            //constexpr auto count = (sizeof(arg) - sizeof(value_type)) / sizeof(value_type);
 
             std::copy_n(/*arg.c_str()*/ static_cast<const char *>(arg), count, result.value_ + pos);
             pos += count;

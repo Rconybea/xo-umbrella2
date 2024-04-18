@@ -136,12 +136,12 @@ main() {
     static_assert(sizeof(s14) == 7);
 
     constexpr flatstring s15 = flatstring_concat(flatstring("hello"),
-                                                       ", ",
-                                                       flatstring("world"));
+                                                 flatstring(", "),
+                                                 flatstring("world"));
     static_assert(s15.fixed_capacity == 13);
     static_assert(sizeof(s15) == 13);
 
-    constexpr auto s16 = xo::flatstring_concat("foo", "bar");
+    constexpr auto s16 = xo::flatstring_concat(flatstring("foo"), flatstring("bar"));
 
     static_assert(s16.fixed_capacity == 7);
 
