@@ -147,10 +147,10 @@ namespace xo {
                 return compare_aux(x, y);
             }
 
-            constexpr Int num() const { return num_; }
-            constexpr Int den() const { return den_; }
+            constexpr Int num() const noexcept { return num_; }
+            constexpr Int den() const noexcept { return den_; }
 
-            constexpr bool is_integer() const { return den_ == 1 || den_ == -1; }
+            constexpr bool is_integer() const noexcept { return den_ == 1 || den_ == -1; }
 
             constexpr ratio negate() const { return ratio(-num_, den_); }
             constexpr ratio reciprocal() const { return ratio(den_, num_); }
@@ -200,7 +200,7 @@ namespace xo {
 
             /** @brief convert to representation using different integer types **/
             template <typename Ratio2>
-            constexpr operator Ratio2 () const requires ratio_concept<Ratio2> {
+            constexpr operator Ratio2 () const noexcept requires ratio_concept<Ratio2> {
                 return Ratio2(num_, den_);
             }
 
@@ -209,7 +209,7 @@ namespace xo {
              *
              *  @pre @p x, @p y have non-negative denominator
              **/
-            static constexpr auto compare_aux(ratio x, ratio y) {
+            static constexpr auto compare_aux(ratio x, ratio y) noexcept {
                 /* control here: b>=0, d>=0 */
 
                 /* (a/b)   <=> (c/d)
