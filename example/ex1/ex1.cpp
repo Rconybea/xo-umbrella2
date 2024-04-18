@@ -1,13 +1,75 @@
 /** @file ex1.cpp **/
 
 #include "xo/ratio/ratio_iostream.hpp"
+#include "xo/indentlog/scope.hpp"
+#include "xo/indentlog/print/hex.hpp"
 #include <iostream>
+
+namespace {
+    using xo::xtag;
+    using xo::hex_view;
+
+#ifdef NOT_USING
+    template <std::size_t N>
+    xo::flatstring<N>
+    flatstring_from_int(int x)
+    {
+        XO_SCOPE(log, always);
+
+        constexpr size_t buf_z = 20;
+
+        bool negative_flag = (x < 0);
+        std::size_t i = buf_z;
+        char buf[buf_z];
+        std::fill_n(buf, N, '\0');
+
+        if (negative_flag)
+            x = -x;
+
+        buf[--i] = '\0';
+
+        while ((i > 0) && (x != 0)) {
+            buf[--i] = ('0' + x % 10);
+            x = x / 10;
+        }
+
+        if ((i > 0) && negative_flag)
+            buf[--i] = '-';
+
+        char retv[N];
+        std::fill_n(retv, N, '\0');
+        std::copy_n(buf + i, buf_z - i, retv);
+
+        log && log(xtag("i",i), xtag("buf[i..]", hex_view(buf+i, buf+buf_z, true)));
+
+        return retv;
+    }
+#endif
+
+    template <typename Ratio, std::size_t N>
+    constexpr xo::flatstring<N>
+    ratio_to_str(Ratio x) noexcept
+    {
+        if (x.is_integer()) {
+            return xo::flatstring<N>::from_int(x.num());
+        } else {
+            constexpr auto num_str = xo::flatstring<N>::from_int(x.num());
+            constexpr auto den_str = xo::flatstring<N>::from_int(x.den());
+
+            constexpr auto tmp = flatstring_concat("(", num_str, "/", den_str, ")");
+
+            return tmp;
+        }
+    }
+
+}
 
 int
 main() {
     using xo::ratio::make_ratio;
     using xo::ratio::ratio;
     using xo::ratio::ratio_concept;
+    using xo::flatstring;
     using namespace std;
 
     constexpr auto r1 = make_ratio(2, 3);
@@ -158,10 +220,23 @@ main() {
     static_assert(!r16.is_integer());
 
     constexpr auto r17 = 2 / r9;
-    cerr << "r17=2/r9: " << r17 << endl;
+    cerr << "r17=2/r9: " << r17 << endl; // 9/2
 
     static_assert(r17 == ratio(9, 2));
     static_assert(!r17.is_integer());
+
+    constexpr auto s17_num_str = flatstring<20>::from_int(r17.num());
+    static_assert(s17_num_str == flatstring("9"));
+    constexpr auto s17_den_str = flatstring<20>::from_int(r17.den());
+    static_assert(s17_den_str == flatstring("2"));
+    constexpr auto s17_str = flatstring_concat(flatstring_concat(flatstring("("),
+                                                                 s17_num_str),
+                                               flatstring_concat(flatstring("/"),
+                                                                 s17_den_str),
+                                               flatstring(")"));
+    cerr << "s17_str=" << s17_str << endl;
+
+    //constexpr auto s17 = ratio_to_str<decltype(r17), 20>(r17);
 
     constexpr auto r18 = r12 / r8;
     cerr << "r18=r12/r8: " << r12/r8 << endl;
@@ -179,6 +254,15 @@ main() {
 
     static_assert(!r20.is_integer());
     static_assert(r20 == ratio(8, 729));
+
+    //cerr << flatstring_from_int<10>(1) << endl;
+
+    constexpr auto s20 = flatstring<10>::from_int(-123);
+    cerr << "s20=" << s20 << endl;
+
+    static_assert(s20.size() > 0);
+    static_assert(s20 == flatstring("-123"));
+
 
     /* verify constexpr working */
     static_assert(ratio<int>(2,3).num() == 2);
