@@ -14,6 +14,11 @@ Relative to `std::ratio`:
 Relative to `boost::ratio`:
 1. Streamlined, assumes modern compiler support
 
+## Documentation
+
+- xo-ratio documentation under construction
+- unit test coverage here: [coverage](https://rconybea.github.io/web/xo-ratio/ccov/html/index.html)
+
 ## Getting Started
 
 ### install dependencies
