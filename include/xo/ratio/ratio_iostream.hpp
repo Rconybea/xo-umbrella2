@@ -17,9 +17,9 @@ namespace xo {
          *  print_ratio(std::cerr, make_ratio(1,2); // outputs "<ratio 1/2>"
          *  @endcode
          **/
-        template <typename Ratio>
+        template <typename Int>
         void
-        print_ratio (std::ostream & os, const Ratio & x) {
+        print_ratio (std::ostream & os, const ratio<Int> & x) {
             os << "<ratio " << x.num() << "/" << x.den() << ">";
         }
 
@@ -30,9 +30,9 @@ namespace xo {
          *  std::cout << make_ratio(2,3); // outputs "<ratio 2/3>"
          *  @endcode
          **/
-        template <typename Ratio>
+        template <typename Int>
         inline std::ostream &
-        operator<< (std::ostream & os, const Ratio & x) {
+        operator<< (std::ostream & os, const ratio<Int> & x) {
             print_ratio(os, x);
             return os;
         }
