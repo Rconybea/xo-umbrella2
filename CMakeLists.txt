@@ -58,7 +58,7 @@ xo_toplevel_compile_options()
 
 add_subdirectory(example)
 add_subdirectory(utest)
-#add_subdirectory(docs)
+add_subdirectory(docs)
 
 # ----------------------------------------------------------------
 # provide find_package() support for projects using this library
