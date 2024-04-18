@@ -7,6 +7,7 @@
 #include <xo/indentlog/scope.hpp>
 #include <xo/indentlog/print/tag.hpp>
 #include <catch2/catch.hpp>
+#include <compare>
 
 namespace xo {
     using xo::unit::quantity;
@@ -787,7 +788,73 @@ namespace xo {
             log && log(XTAG(q1), XTAG(q2));
         } /*TEST_CASE(rescale2)*/
 
+        TEST_CASE("compare1", "[quantity]") {
+            constexpr bool c_debug_flag = true;
 
+            // can get bits from /dev/random by uncommenting the 2nd line below
+            //uint64_t seed = xxx;
+            //rng::Seed<xoshio256ss> seed;
+
+            //auto rng = xo::rng::xoshiro256ss(seed);
+
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.compare1"));
+            //log && log("(A)", xtag("foo", foo));
+
+            namespace u = xo::unit::unit_qty;
+
+            auto q1 = kilometers(150.0) / u::hour;
+            auto q2 = kilometers(100.0) / u::hour;
+
+            CHECK(is_gt(q1 <=> q2));
+            CHECK(is_eq(q1 <=> q1));
+            CHECK(is_lt(q2 <=> q1));
+            CHECK(q1 == q1);
+            CHECK(q1 != q2);
+            CHECK(q1 >= q1);
+            CHECK(q1 <= q1);
+
+            CHECK(q1 > q2);
+            CHECK(q1 >= q2);
+
+            CHECK(q2 < q1);
+            CHECK(q2 <= q1);
+
+            log && log(XTAG(q1), XTAG(q2), XTAG(is_gt(q1<=>q2)));
+        } /*TEST_CASE(compare1)*/
+
+        TEST_CASE("compare2", "[quantity]") {
+            constexpr bool c_debug_flag = true;
+
+            // can get bits from /dev/random by uncommenting the 2nd line below
+            //uint64_t seed = xxx;
+            //rng::Seed<xoshio256ss> seed;
+
+            //auto rng = xo::rng::xoshiro256ss(seed);
+
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.compare2"));
+            //log && log("(A)", xtag("foo", foo));
+
+            namespace u = xo::unit::unit_qty;
+
+            auto q1 = kilometers(150.0) / u::hour;
+            auto q2 = meters(30.0) / u::second;
+
+            CHECK(is_gt(q1 <=> q2));
+            CHECK(is_eq(q1 <=> q1));
+            CHECK(is_lt(q2 <=> q1));
+            CHECK(q1 == q1);
+            CHECK(q1 != q2);
+            CHECK(q1 >= q1);
+            CHECK(q1 <= q1);
+
+            CHECK(q1 > q2);
+            CHECK(q1 >= q2);
+
+            CHECK(q2 < q1);
+            CHECK(q2 <= q1);
+
+            log && log(XTAG(q1), XTAG(q2), XTAG(is_gt(q1<=>q2)));
+        } /*TEST_CASE(compare2)*/
 
     } /*namespace ut*/
 } /*namespace xo*/
