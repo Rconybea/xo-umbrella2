@@ -1,0 +1,547 @@
+/** @file ratio.hpp
+ *
+ *  Author: Roland Conybeare
+ **/
+
+#pragma once
+
+#include "ratio_concept.hpp"
+#include <numeric>
+#include <compare>
+//#include <type_traits>
+
+namespace xo {
+    namespace ratio {
+        namespace detail {
+            /** @brief converts ratio to lowest terms when feasible
+             *
+             * Falls back to identity function for non-totally-ordered Ratio::component_type
+             */
+            template <typename Ratio, bool EnabledFlag = std::totally_ordered<typename Ratio::component_type>>
+            struct reducer_type;
+
+            /** @brief promote value to ratio type **/
+            template <typename Ratio, typename FromType, bool FromRatioFlag = ratio_concept<FromType>>
+            struct promoter_type;
+        }
+
+        /** @brief represent a ratio of two Int values. **/
+        template <typename Int>
+        requires std::totally_ordered<Int>
+        struct ratio
+        {
+        public:
+            using component_type = Int;
+
+        public:
+            constexpr ratio(Int n, Int d) : num_{n}, den_{d} {}
+
+            /** @brief ratio in lowest commono terms
+             *
+             **/
+            static constexpr ratio reduce(Int n, Int d) {
+                return ratio(n, d).reduce();
+            }
+
+            /** @brief add two ratios **/
+            static constexpr ratio add(const ratio & x,
+                                       const ratio & y) {
+                /* (a/b) + (c/d)
+                 *   = a.d / (b.d) + b.c / (b.d)
+                 *   = (a.d + b.c) / (b.d)
+                 */
+
+                auto a = x.num();
+                auto b = x.den();
+                auto c = y.num();
+                auto d = y.den();
+
+                auto num = a*d + b*c;
+                auto den = b*d;
+
+                return ratio(num, den).maybe_reduce();
+            }
+
+            /** @brief subtract two ratios **/
+            static constexpr ratio subtract(const ratio & x,
+                                            const ratio & y) {
+                return add(x, y.negate());
+            }
+
+            /** @brief multiply two ratios **/
+            static constexpr ratio multiply(const ratio & x,
+                                            const ratio & y) {
+                /* (a/b) * (c/d) = a.c / b.d */
+
+                /* if x,y normalized,
+                 * opportunity to cancel common factor between (a, d) or (c, b)
+                 *
+                 * want to do this before multiplying to avoid overflow involving intermediate terms
+                 */
+
+                auto a1 = x.num();
+                auto b1 = x.den();
+                auto c1 = y.num();
+                auto d1 = y.den();
+
+                auto ad_gcf = std::gcd(a1, d1);
+                auto bc_gcf = std::gcd(b1, c1);
+
+                auto a = a1 / ad_gcf;
+                auto b = b1 / bc_gcf;
+                auto c = c1 / bc_gcf;
+                auto d = d1 / ad_gcf;
+
+                auto num = a*c;
+                auto den = b*d;
+
+                return ratio(num, den).maybe_reduce();
+            }
+
+            /** @brief divide two ratios **/
+            static constexpr ratio divide(const ratio & x,
+                                          const ratio & y) {
+                return multiply(x, y.reciprocal());
+            }
+
+            /** @brief compute integer power of a ratio **/
+            constexpr ratio power(int p) const {
+
+                constexpr ratio retval = ratio(1, 1);
+
+                if (p == 0)
+                    return ratio(1, 1);
+
+                if (p < 0)
+                    return this->reciprocal().power(-p);
+
+                /* inv: x^p = aj.xj^pj */
+                ratio aj = ratio(1, 1);
+                ratio xj = *this;
+                int pj = p;
+
+                while (pj > 0) {
+                    if (pj % 2 == 0) {
+                        /* a.x^(2q) = a.(x^2)^q */
+                        xj = xj * xj;
+                        pj = pj / 2;
+                    } else {
+                        /* a.x^(2q+1) = (a.x).x^(2q) */
+                        aj = aj * xj;
+                        pj = (pj - 1);
+                    }
+                }
+
+                /* pj = 0, so: x^p = aj.xj^pj = aj.xj^0 = aj */
+                return aj;
+            }
+
+            /** @brief 3-way compare two ratios **/
+            static constexpr auto compare(ratio x, ratio y) {
+                /* ensure minus signs in numerators only */
+                if (x.den() < 0)
+                    return compare_aux(ratio(-x.num(), -x.den()), y);
+                if (y.den() < 0)
+                    return compare_aux(x, ratio(-y.num(), -y.den()));
+
+                return compare_aux(x, y);
+            }
+
+            constexpr Int num() const { return num_; }
+            constexpr Int den() const { return den_; }
+
+            constexpr bool is_integer() const { return den_ == 1 || den_ == -1; }
+
+            constexpr ratio negate() const { return ratio(-num_, den_); }
+            constexpr ratio reciprocal() const { return ratio(den_, num_); }
+
+            /** @brief requires component_type is totally ordered **/
+            constexpr Int floor() const { return (num_ / den_); }
+
+            /** @brief requires component_type is totally ordered **/
+            constexpr Int ceil() const { return floor() + 1; }
+
+            /** @brief reduce to lowest terms
+             *
+             *  @pre @c Int type must be totally ordered
+             **/
+            constexpr ratio reduce() const requires std::totally_ordered<Int> {
+                if (den_ < 0)
+                    return ratio(-num_, -den_).reduce();
+
+                auto factor = std::gcd(num_, den_);
+
+                return ratio(num_ / factor,
+                             den_ / factor);
+            }
+
+            /** @brief reduce to lowest terms,  if Int representation admits
+             *
+             *  Otherwise fallback to identity function
+             **/
+            constexpr ratio maybe_reduce() const {
+                return detail::reducer_type<ratio>::attempt_reduce(*this);
+            }
+
+            /** @brief return fractional part of this ratio
+             *
+             *  @pre @c Int type must be totally ordered
+             **/
+            constexpr ratio frac() const requires std::totally_ordered<Int> {
+                return ratio::subtract(*this, this->floor());
+            }
+
+            /** @brief convert to non-ratio representation
+             *
+             *  For example: to int or double
+             **/
+            template <typename Repr>
+            constexpr Repr to() const { return num_ / static_cast<Repr>(den_); }
+
+            /** @brief convert to representation using different integer types **/
+            template <typename Ratio2>
+            constexpr operator Ratio2 () const requires ratio_concept<Ratio2> {
+                return Ratio2(num_, den_);
+            }
+
+        private:
+            /** @brief 3-way compare auxiliary function.
+             *
+             *  @pre @p x, @p y have non-negative denominator
+             **/
+            static constexpr auto compare_aux(ratio x, ratio y) {
+                /* control here: b>=0, d>=0 */
+
+                /* (a/b)   <=> (c/d)
+                 * (a.d/b) <=> c       no sign change, since d >= 0
+                 * (a.d)   <=> (b.c)   no sign change, since b >= 0
+                 */
+                auto a = x.num();
+                auto b = x.den();
+                auto c = y.num();
+                auto d = y.den();
+
+                auto lhs = a*d;
+                auto rhs = b*c;
+
+                return lhs <=> rhs;
+            }
+
+        private:
+            /** @brief numerator **/
+            Int num_;
+            /** @brief denominator **/
+            Int den_;
+        };
+
+        namespace detail {
+            template <typename Ratio, bool EnabledFlag>
+            struct reducer_type {};
+
+            template <typename Ratio>
+            struct reducer_type<Ratio, true /*EnabledFlag*/> {
+                static constexpr Ratio attempt_reduce(Ratio x) { return x.reduce(); }
+            };
+
+            template <typename Ratio>
+            struct reducer_type<Ratio, false /*!EnabledFlag*/> {
+                static constexpr Ratio attempt_reduce(Ratio x) { return x; }
+            };
+        }
+
+        namespace detail {
+            template <typename Ratio, typename FromType, bool FromRatioFlag>
+            struct promoter_type;
+
+            template <typename Ratio, typename FromType>
+            struct promoter_type<Ratio, FromType, true /*FromRatioFlag*/> {
+                /* to 'promote' a ratio,  rely on its conversion operator */
+                static constexpr Ratio promote(FromType x) { return x; }
+            };
+
+            template <typename Ratio, typename FromType>
+            struct promoter_type<Ratio, FromType, false /*!FromRatioFlag*/> {
+                /* to 'promote' a non-ratio,  use denominator=1 */
+                static constexpr Ratio promote(FromType x) { return Ratio(x, 1); }
+            };
+        }
+
+        template <typename Int1, typename Int2>
+        constexpr auto
+        make_ratio (Int1 n, Int2 d = 1) -> ratio<std::common_type_t<Int1, Int2>>
+        {
+            return ratio<std::common_type_t<Int1, Int2>>(n, d).maybe_reduce();
+        }
+
+        namespace detail {
+            /** @brief auxiliary function for binary ratio operations
+             *
+             *  Support binary ratio operations on combinations:
+             *  - (ratio<T>, ratio<U>)
+             *  - (ratio<T>, U)    // where U is not a ratio
+             *  - (T, ratio(U))    // where T is not a ratio
+             *
+             *  Goals:
+             *
+             *  1. Support expressions like
+             *
+             *  @code
+             *     auto x = 1 + make_ratio(2,3);
+             *  @endcode
+             *
+             *  2. promote to wider types as needed
+             *
+             *  @code
+             *     auto x = make_ratio(2,3) + make_ratio(1ul,2ul);
+             *     static_assert(std::same_as<x::component_type, unsigned long>);
+             *  @endcode
+             *
+             *  3. avoid interfering with other templates that may overload operator+
+             *
+             *  @pre at least one of (Left,Right) must be known to be a ratio
+             **/
+            template <typename Left,
+                      typename Right,
+                      bool LeftIsRatio = ratio_concept<Left>,
+                      bool RightIsRatio = ratio_concept<Right>>
+            struct op_aux_type;
+
+            /** @brief specialization for two ratio types **/
+            template <typename LeftRatio,
+                      typename RightRatio>
+            requires (ratio_concept<LeftRatio> && ratio_concept<RightRatio>)
+            struct op_aux_type<LeftRatio, RightRatio, true /*LeftIsRatio*/, true /*RightIsRatio*/> {
+                using component_type = std::common_type_t<typename LeftRatio::component_type,
+                                                          typename RightRatio::component_type>;
+
+                using ratio_type = ratio<component_type>;
+
+                static constexpr ratio_type add (const LeftRatio & x,
+                                                 const RightRatio & y)
+                    {
+                        return ratio_type::add(x, y);
+                    }
+
+                static constexpr ratio_type subtract (const LeftRatio & x,
+                                                      const RightRatio & y)
+                    {
+                        return ratio_type::subtract(x, y);
+                    }
+
+                static constexpr ratio_type multiply (const LeftRatio & x,
+                                                      const RightRatio & y)
+                    {
+                        return ratio_type::multiply(x, y);
+                    }
+
+                static constexpr ratio_type divide (const LeftRatio & x,
+                                                      const RightRatio & y)
+                    {
+                        return ratio_type::divide(x, y);
+                    }
+
+                static constexpr auto compare (const LeftRatio & x,
+                                               const RightRatio & y)
+                    {
+                        return ratio_type::compare(x, y);
+                    }
+            };
+
+            /** @brief specialization for left-hand ratio and right-hand integer value **/
+            template <typename LeftRatio,
+                      typename Right>
+            requires (ratio_concept<LeftRatio> && !ratio_concept<Right>)
+            struct op_aux_type<LeftRatio, Right, true /*LeftIsRatio*/, false /*RightIsRatio*/> {
+                using component_type = std::common_type_t<typename LeftRatio::component_type, Right>;
+
+                using ratio_type = ratio<component_type>;
+
+                static constexpr ratio_type add (const LeftRatio & x,
+                                                 const Right & y)
+                    {
+                        /* reminder: adding an integer can't introduce reduced terms */
+                        return ratio_type(x.num() + x.den() * y, x.den());
+                    }
+
+                static constexpr ratio_type subtract (const LeftRatio & x,
+                                                      const Right & y)
+                    {
+                        /* reminder: subtracting an integer can't introduce reduced terms */
+                        return ratio_type(x.num() - x.den() * y, x.den());
+                    }
+
+                static constexpr ratio_type multiply (const LeftRatio & x,
+                                                      const Right & yp)
+                    {
+                        auto gcf = std::gcd(x.den(), yp);
+
+                        auto a = x.num();
+                        auto b = x.den() / gcf;
+                        auto y = yp / gcf;
+
+                        return ratio_type(a*y, b);
+                    }
+
+                static constexpr ratio_type divide (const LeftRatio & x,
+                                                    const Right & yp)
+                    {
+                        auto gcf = std::gcd(x.num(), yp);
+
+                        auto a = x.num() / gcf;
+                        auto b = x.den();
+                        auto y = yp / gcf;
+
+                        return ratio_type(a*y, b);
+                    }
+
+                static constexpr auto compare (const LeftRatio & x,
+                                               const Right & y)
+                    {
+                        /* note: in c++26 std::signof is constexpr,  usable here */
+                        if (x.den() >= 0)
+                            return compare_aux(x, y);
+                        else
+                            return compare_aux(LeftRatio(-x.num(), -x.den()), y);
+                    }
+
+            private:
+                static constexpr auto compare_aux (const LeftRatio & x, const Right & y) {
+                    return (x.num() <=> x.den() * y);
+                }
+            };
+
+            /** @brief specialization for left-hand integer value and right-hand ratio **/
+            template <typename Left,
+                      typename RightRatio>
+            requires (!ratio_concept<Left> && ratio_concept<RightRatio>)
+            struct op_aux_type<Left, RightRatio, false /*LeftIsRatio*/, true /*RightIsRatio*/> {
+                using component_type = std::common_type_t<Left, typename RightRatio::component_type>;
+
+                using ratio_type = ratio<component_type>;
+
+                static constexpr ratio_type add(const Left & x,
+                                                const RightRatio & y)
+                    {
+                        /* reminder: adding an integer can't introduce reduced terms */
+                        return ratio_type(x * y.den() + y.num(), y.den());
+                    }
+
+                static constexpr ratio_type subtract(const Left & x,
+                                                     const RightRatio & y)
+                    {
+                        /* reminder: subtracting an integer can't introduce reduced terms */
+                        return ratio_type(x * y.den() - y.num(), y.den());
+                    }
+
+                static constexpr ratio_type multiply (const Left & xp,
+                                                      const RightRatio & y)
+                    {
+                        auto gcf = std::gcd(xp, y.den());
+
+                        auto x = xp / gcf;
+                        auto c = y.num();
+                        auto d = y.den() / gcf;
+
+                        return ratio_type(x*c, d);
+                    }
+
+                static constexpr ratio_type divide (const Left & x,
+                                                    const RightRatio & y)
+                    {
+                        return multiply(x, y.reciprocal());
+                    }
+
+                static constexpr auto compare(const Left & x,
+                                              const RightRatio & y)
+                    {
+                        if (y.den() >= 0)
+                            return compare_aux(x, y);
+                        else
+                            return compare_aux(x, RightRatio(-y.num(), -y.den()));
+                    }
+
+            private:
+                static constexpr auto compare_aux (const Left & x,
+                                                   const RightRatio & y)
+                    {
+                        return (x * y.den() <=> y.num());
+                    };
+            };
+        } /*namespace detail*/
+
+        /** @brief add two ratios.
+         *
+         *  One argument may be a non-ratio type if it can be promoted to a ratio
+         **/
+        template <typename Ratio1, typename Ratio2>
+        inline constexpr auto
+        operator+ (const Ratio1 & x, const Ratio2 & y)
+            requires (ratio_concept<Ratio1> || ratio_concept<Ratio2>)
+        {
+            return detail::op_aux_type<Ratio1, Ratio2>::add(x, y);
+        }
+
+        /** @brief subtract two ratios.
+         *
+         *  One argument may be a non-ratio type if it can be promoted to a ratio
+         **/
+        template <typename Ratio1, typename Ratio2>
+        inline constexpr auto
+        operator- (const Ratio1 & x, const Ratio2 & y)
+            requires (ratio_concept<Ratio1> || ratio_concept<Ratio2>)
+        {
+            return detail::op_aux_type<Ratio1, Ratio2>::subtract(x, y);
+        }
+
+        /** @brief multiply two ratios
+         *
+         *  One argument may be a non-ratio type if it can be promoted to a ratio
+         **/
+        template <typename Ratio1, typename Ratio2>
+        inline constexpr auto
+        operator* (const Ratio1 & x, const Ratio2 & y)
+            requires (ratio_concept<Ratio1> || ratio_concept<Ratio2>)
+        {
+            return detail::op_aux_type<Ratio1, Ratio2>::multiply(x, y);
+        }
+
+        /** @brief divide two ratios
+         *
+         *  One argument may be a non-ratio type if it can be promoted to a ratio
+         **/
+        template <typename Ratio1, typename Ratio2>
+        inline constexpr auto
+        operator/ (const Ratio1 & x, const Ratio2 & y)
+            requires (ratio_concept<Ratio1> || ratio_concept<Ratio2>)
+        {
+            return detail::op_aux_type<Ratio1, Ratio2>::divide(x, y);
+        }
+
+        /** @brief compare two ratios for equality
+         *
+         *  One argument may be a non-ratio type if it can be promoted to a ratio
+         **/
+        template <typename Ratio1, typename Ratio2>
+        inline constexpr bool
+        operator== (const Ratio1 & x, const Ratio2 & y)
+            requires (ratio_concept<Ratio1> || ratio_concept<Ratio2>)
+        {
+            return (detail::op_aux_type<Ratio1, Ratio2>::compare(x, y) == 0);
+        }
+
+        /** @brief compare two ratios
+         *
+         *  One argument may be a non-ratio type if it can be promoted to a ratio
+         **/
+        template <typename Ratio1, typename Ratio2>
+        inline constexpr auto
+        operator<=> (const Ratio1 & x, const Ratio2 & y)
+            requires (ratio_concept<Ratio1> || ratio_concept<Ratio2>)
+        {
+            return detail::op_aux_type<Ratio1, Ratio2>::compare(x, y);
+        }
+
+    } /*namespace ratio*/
+} /*namespace xo*/
+
+/** end ratio.hpp **/
