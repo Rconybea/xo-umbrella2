@@ -502,6 +502,7 @@ namespace xo {
              *  @pre @c Quantity2 must have the same dimension as @c *this.
              **/
             template <typename Quantity2>
+            requires quantity_concept<Quantity2> && same_dimension_v<unit_type, typename Quantity2::unit_type>
             constexpr operator Quantity2 () const {
                 /* avoid truncating precision when converting:
                  * use best available representation

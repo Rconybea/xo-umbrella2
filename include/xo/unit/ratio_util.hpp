@@ -13,7 +13,7 @@ namespace xo {
 
         template <typename Ratio>
         struct ratio_floor {
-            using type = std::ratio<Ratio::num/Ratio::den>;
+            using type = std::ratio<Ratio::num/Ratio::den, 1>;
         };
 
         template <typename Ratio>
