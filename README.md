@@ -35,7 +35,7 @@ When this completes,  point local browser to `xo-unit/.build/docs/sphinx/index.h
 $ cd xo-unit
 $ mkdir .build-ccov
 $ cd .build-ccov
-$ cmake -DCMAKE_MODULE_PATH=${INSTALL_PREFIX}/share/cmake  -DCMAKE_PREFIX_PATH=${INSTALL_PREFIX} -DCODE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug ..
+$ cmake -DCMAKE_MODULE_PATH=${PREFIX}/share/cmake  -DCMAKE_PREFIX_PATH=${PREFIX} -DCODE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug ..
 ```
 
 ### LSP support
