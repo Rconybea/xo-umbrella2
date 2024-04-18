@@ -440,6 +440,61 @@ namespace xo {
             }
             ///@}
 
+            /** @defgroup quantity-comparisonsupport **/
+            ///@{
+            /** @brief compare this quantity with another, return 3-way comparison
+             *
+             *  @pre arguments must be quantities having the same dimension
+             *
+             *  @param y rhs quantity to compare
+             *  @return signed integer;  {-ve, 0, +ve} when @c *this is {less than, equal, greater than} @p y
+             **/
+            template <typename Quantity2>
+            requires quantity_concept<Quantity2> && same_dimension_v<unit_type, typename Quantity2::unit_type>
+            auto compare(Quantity2 y) const {
+                /* convert y to same {units, repr} as *this */
+                quantity y2 = y;
+
+                auto cmp = (this->scale_ <=> y2.scale());
+
+                return cmp;
+            }
+            ///@}
+
+            /** @defgroup quantity-comparison **/
+            ///@{
+            /** @brief 3-way comparison of two quantities
+             *
+             *  @pre arguments must be quantities having the same dimension
+             *
+             *  @param y rhs quantity to compare
+             *  @return std::partial_ordering
+             **/
+            template <typename Quantity2>
+            requires quantity_concept<Quantity2> && same_dimension_v<unit_type, typename Quantity2::unit_type>
+            auto operator<=>(Quantity2 y) const {
+                return this->compare(y);
+            }
+
+            /** @brief compare two quantities for equality
+             *
+             *  Although compiler generates this (due to presence of 3-way comparison operator),
+             *  it flags ambiguous overload when included alongside .h files from std::distribution.
+             *  Look like ambiguity would need to be resolved by a header change
+             **/
+            template <typename Quantity2>
+            requires quantity_concept<Quantity2> && same_dimension_v<unit_type, typename Quantity2::unit_type>
+            bool operator==(Quantity2 y) const {
+                return std::is_eq(this->compare(y));
+            }
+
+            template <typename Quantity2>
+            requires quantity_concept<Quantity2> && same_dimension_v<unit_type, typename Quantity2::unit_type>
+            bool operator!=(Quantity2 y) const {
+                return std::is_neq(this->compare(y));
+            }
+
+
             /** @addtogroup quantity-unit-conversion **/
             ///@{
             /** @brief convert to quantity with same dimension, different {unit_type, repr_type}
