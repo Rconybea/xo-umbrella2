@@ -7,6 +7,7 @@ Relative to `std::ratio`:
    This means it can be used seamlessly at runtime.
 2. Supports a few more arithmetic operations,
    for example exponentiation to integer powers.
+3. Provides constexpr conversion to fixed-capacity strings (using xo-flatstring)
 3. Provides concept support (with c++20)
 4. Requires modern (c++17) support to achieve this
 
@@ -15,6 +16,7 @@ Relative to `std::ratio`:
 ### install dependencies
 
 - [github/Rconybea/xo-cmake](https://github.com/Rconybea/xo-cmake) cmake macros
+- [github/Rconybea/xo-flatstring](https://github.com/Rconybea/xo-flatstring) fixed-capacity strings
 
 ### build + install
 ```
