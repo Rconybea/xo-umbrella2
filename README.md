@@ -19,8 +19,9 @@ Relative to `boost::ratio`:
 ### install dependencies
 
 - [github/Rconybea/xo-cmake](https://github.com/Rconybea/xo-cmake) cmake macros
-- [github/rconybea/xo-indentlog](https://github.com/Rconybea/xo-indentlog) logging (used by unit tests)
 - [github/Rconybea/xo-flatstring](https://github.com/Rconybea/xo-flatstring) fixed-capacity strings
+- [github/rconybea/xo-indentlog](https://github.com/Rconybea/xo-indentlog) logging (used by unit tests)
+- [github/rconybea/xo-randomgen](https://github.com/Rconybea/xo-randomgen) rng (used by unit tests)
 
 ### clone xo-ratio
 
