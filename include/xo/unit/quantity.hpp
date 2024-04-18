@@ -406,13 +406,11 @@ namespace xo {
              *  @pre @p y must have the same dimension as @c *this.
              *
              *  @param y  quantity to add
-             *  @retval this quantity after adding y
+             *  @return this quantity after adding y
              **/
             template <typename Quantity2>
             quantity & operator+=(Quantity2 y) {
-                static_assert(std::same_as<
-                              typename unit_type::canon_type,
-                              typename Quantity2::unit_type::canon_type >);
+                static_assert(same_dimension_v<unit_type, typename Quantity2::unit_type>);
 
                 /* relying on assignment that correctly converts-to-lhs-units */
                 quantity y2 = y;
@@ -427,13 +425,11 @@ namespace xo {
              *  @pre @p y must have the same dimensions as @c *this
              *
              *  @param y  quantity to subtract
-             *  @retval this quantity after subtracting y
+             *  @return this quantity after subtracting y
              **/
             template <typename Quantity2>
             quantity & operator-=(Quantity2 y) {
-                static_assert(std::same_as<
-                              typename unit_type::canon_type,
-                              typename Quantity2::unit_type::canon_type >);
+                static_assert(same_dimension_v<unit_type, typename Quantity2::unit_type>);
 
                 quantity y2 = y;
 
