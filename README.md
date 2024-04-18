@@ -23,6 +23,18 @@ Limitations:
 
 ## Getting started
 
+### Install dependencies
+
+- [github/Rconybea/xo-cmake](https://github.com/Rconybea/xo-cmake) cmake macros
+- [github/Rconybea/xo-indentlog](https://github.com/Rconybea/indentlog) logging (used by unit tests)
+
+### Clone xo-flatstring
+
+```
+$ cd ~/proj  # for example
+$ git clone https://github.com/rconybea/xo-flatstring
+```
+
 ### build + install
 ```
 $ cd xo-flatstring
