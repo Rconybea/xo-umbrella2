@@ -168,6 +168,26 @@ namespace xo {
         }
         ///@}
 
+        /** @brief construct from another flatstring **/
+        template <std::size_t N2>
+        static constexpr flatstring from_flatstring(const flatstring<N2> & str) noexcept {
+            flatstring retval;
+
+            retval.assign(str);
+
+            return retval;
+        }
+
+        /** @brief construct from char array **/
+        template <std::size_t N2>
+        static constexpr flatstring from_chars(const char (&str)[N2]) noexcept {
+            flatstring retval;
+
+            retval.assign(str);
+
+            return retval;
+        }
+
         /** @brief construct from integer **/
         static constexpr flatstring from_int(int x) {
             constexpr size_t buf_z = 20;
