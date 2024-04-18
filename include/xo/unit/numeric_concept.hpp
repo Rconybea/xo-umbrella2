@@ -11,12 +11,8 @@ namespace xo {
          *
          *  Intended to include at least:
          *  - built-in integral and floating-point types
-         *  - boost::rational<U>
-         *  - std::complex<U>
+         *  - xo::raio<U>
          *  - xo::unit::quantity<U,R>
-         *
-         *  This implies we don't require T to be totally ordered,
-         *  and don't require (<,<=,>=,>) operators.
          *
          *  Intend numeric_concept to apply to types suitable for
          *  xo::unit::quantity::repr_type.

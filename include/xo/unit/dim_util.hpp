@@ -21,7 +21,7 @@ namespace xo {
              *        (1usd + 1eur) is well-defined,  but (1sec + 1m) is not.
              **/
             currency,
-            /** a screen price. dimensionless **/
+            /** a screen price **/
             price,
         };
 
