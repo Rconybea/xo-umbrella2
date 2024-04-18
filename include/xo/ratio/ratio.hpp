@@ -6,6 +6,7 @@
 #pragma once
 
 #include "ratio_concept.hpp"
+#include "xo/flatstring/flatstring.hpp"
 #include <numeric>
 #include <compare>
 //#include <type_traits>
@@ -196,7 +197,42 @@ namespace xo {
              *  For example: to int or double
              **/
             template <typename Repr>
-            constexpr Repr to() const { return num_ / static_cast<Repr>(den_); }
+            constexpr Repr to() const noexcept { return num_ / static_cast<Repr>(den_); }
+
+            /** @brief convert to short human-friendly flatstring representation
+             *
+             *  Example:
+             *  @code
+             *  ratio(7,1).to_str<5>();  // "7"
+             *  ratio(1,7).to_str<5>();  // "(1/7)"
+             *  ratio(-1,7).to_str<10>(); // "(-1/7)"
+             *  ratio(-1,7).to_str<5>(); // "(-1/"
+             *  @endcode
+             **/
+            template <std::size_t N>
+            constexpr flatstring<N> to_str() const noexcept {
+                if (this->is_integer()) {
+                    return flatstring<N>::from_int(num_);
+                } else {
+                    auto num_str = flatstring<N>::from_int(num_);
+                    auto den_str = flatstring<N>::from_int(den_);
+
+                    /* tmp capacity will be about 2N+3 */
+                    auto tmp = flatstring_concat(flatstring("("),
+                                                 num_str,
+                                                 flatstring("/"),
+                                                 den_str,
+                                                 flatstring(")"));
+
+                    flatstring<N> retval;
+                    retval.assign(tmp);
+
+                    return retval;
+                }
+            }
+
+            /** @brief negate operator **/
+            constexpr ratio operator-() const { return ratio(-num_, den_); }
 
             /** @brief convert to representation using different integer types **/
             template <typename Ratio2>

@@ -6,7 +6,7 @@ include(CMakeFindDependencyMacro)
 #       must coordinate with xo_dependency() calls
 #       in xo-reactor/src/reactor/CMakeLists.txt
 #
-#find_dependency(reflect)
+find_dependency(xo_flatstring)
 #find_dependency(subsys)
 #find_dependency(Eigen3)
 #find_dependency(webutil)
