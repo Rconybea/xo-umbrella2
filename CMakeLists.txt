@@ -51,7 +51,7 @@ xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets
 # ----------------------------------------------------------------
 # dependencies
 
-#xo_headeronly_dependency(${SELF_LIB} randomgen)
+xo_headeronly_dependency(${SELF_LIB} xo_ratio)
 # etc..
 
 # end CMakeLists.txt

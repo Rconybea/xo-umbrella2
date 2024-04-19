@@ -2,12 +2,15 @@
 
 #pragma once
 
-
-#include "stringliteral.hpp"
+//#include "stringliteral.hpp"
+//#include "xo/flatstring/flatstring.hpp"
+#include <cstdint>
 
 namespace xo {
     namespace unit {
         enum class dim {
+            invalid = -1,
+
             /** weight.  native unit = 1 gram **/
             mass,
             /** distance.  native unit = 1 meter **/
@@ -23,7 +26,12 @@ namespace xo {
             currency,
             /** a screen price **/
             price,
+
+            /** comes last, counts entries **/
+            n_dim
         };
+
+        static constexpr std::size_t n_dim = static_cast<std::size_t>(dim::n_dim);
 
         enum class native_unit_id {
             gram,
@@ -53,6 +61,7 @@ namespace xo {
 
         template <dim Dim>
         constexpr auto native_unit_for_v = native_unit_for<Dim>::value;
+
     } /*namespace unit*/
 } /*namespace xo*/
 
