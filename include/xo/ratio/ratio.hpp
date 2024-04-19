@@ -41,7 +41,7 @@ namespace xo {
              *
              **/
             static constexpr ratio reduce(Int n, Int d) {
-                return ratio(n, d).reduce();
+                return ratio(n, d).normalize();
             }
 
             /** @brief add two ratios **/
@@ -166,9 +166,9 @@ namespace xo {
              *
              *  @pre @c Int type must be totally ordered
              **/
-            constexpr ratio reduce() const requires std::totally_ordered<Int> {
+            constexpr ratio normalize() const requires std::totally_ordered<Int> {
                 if (den_ < 0)
-                    return ratio(-num_, -den_).reduce();
+                    return ratio(-num_, -den_).normalize();
 
                 auto factor = std::gcd(num_, den_);
 

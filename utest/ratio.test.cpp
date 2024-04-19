@@ -32,7 +32,7 @@ namespace xo {
                 Int den_sign = sign_dist_(rng) ? -1 : +1;
                 Int den = den_sign * (1 + int_dist_(rng));
 
-                return xo::ratio::ratio(num, den).reduce();
+                return xo::ratio::ratio(num, den).normalize();
             }
 
             template <typename Rng>
