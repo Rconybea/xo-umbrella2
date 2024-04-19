@@ -26,6 +26,7 @@ Why ``ratio``?
    :caption: xo-ratio contents:
 
    install
+   ratio-reference
 
 Indices and Tables
 ------------------
