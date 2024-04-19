@@ -1,6 +1,8 @@
 /* @file dimension.test.cpp */
 
 #include "xo/unit/unit.hpp"
+#include "xo/unit/basis_unit2.hpp"
+#include "xo/unit/dim_util2.hpp"
 #include "xo/reflect/Reflect.hpp"
 #include "xo/cxxutil/demangle.hpp"
 #include "xo/indentlog/scope.hpp"
@@ -15,6 +17,14 @@ namespace xo {
         using xo::reflect::Reflect;
 
         using xo::unit::dim;
+        using xo::unit::basis_unit2_abbrev_type;
+        using xo::unit::native_unit2;
+        using xo::unit::native_unit2_v;
+        using xo::unit::scalefactor_ratio_type;
+        using xo::unit::units::scaled_native_unit2_abbrev;
+        using xo::unit::units::scaled_native_unit2_abbrev_v;
+        using xo::unit::basis_unit2_store;
+
         using xo::unit::native_unit_abbrev_v;
         using xo::unit::units::scaled_native_unit_abbrev_v;
         //using xo::unit::native_dim_abbrev;
@@ -54,6 +64,140 @@ namespace xo {
         {
             return result;
         }
+
+        TEST_CASE("basis_unit2", "[basis_unit2]") {
+            constexpr bool c_debug_flag = true;
+
+            // can get bits from /dev/random by uncommenting the 2nd line below
+            //uint64_t seed = xxx;
+            //rng::Seed<xoshio256ss> seed;
+
+            //auto rng = xo::rng::xoshiro256ss(seed);
+
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.basis_unit2"));
+            //log && log("(A)", xtag("foo", foo));
+
+            static_assert(native_unit2_v[static_cast<int>(dim::mass)].native_dim() == dim::mass);
+            static_assert(native_unit2_v[static_cast<int>(dim::distance)].native_dim() == dim::distance);
+            static_assert(native_unit2_v[static_cast<int>(dim::time)].native_dim() == dim::time);
+            static_assert(native_unit2_v[static_cast<int>(dim::time)].native_dim() == dim::time);
+            static_assert(native_unit2_v[static_cast<int>(dim::currency)].native_dim() == dim::currency);
+            static_assert(native_unit2_v[static_cast<int>(dim::price)].native_dim() == dim::price);
+
+            log && log(xtag("mass*10^-9",       scaled_native_unit2_abbrev_v<dim::mass,               1, 1000000000>));
+            log && log(xtag("mass*10^-6",       scaled_native_unit2_abbrev_v<dim::mass,               1,    1000000>));
+            log && log(xtag("mass*10^-3",       scaled_native_unit2_abbrev_v<dim::mass,               1,       1000>));
+            log && log(xtag("mass",             scaled_native_unit2_abbrev_v<dim::mass>));
+            log && log(xtag("mass*10^3",        scaled_native_unit2_abbrev_v<dim::mass,            1000,          1>));
+            log && log(xtag("mass*10^6",        scaled_native_unit2_abbrev_v<dim::mass,         1000000,          1>));
+            log && log(xtag("mass*10^9",        scaled_native_unit2_abbrev_v<dim::mass,      1000000000,          1>));
+
+            log && log(xtag("distance*10^-9",   scaled_native_unit2_abbrev_v<dim::distance,           1, 1000000000>));
+            log && log(xtag("distance*10^-6",   scaled_native_unit2_abbrev_v<dim::distance,           1,    1000000>));
+            log && log(xtag("distance*10^-3",   scaled_native_unit2_abbrev_v<dim::distance,           1,       1000>));
+            log && log(xtag("distance",         scaled_native_unit2_abbrev_v<dim::distance>));
+            log && log(xtag("distance*10^3",    scaled_native_unit2_abbrev_v<dim::distance,        1000,          1>));
+
+            log && log(xtag("time*10^-9",       scaled_native_unit2_abbrev_v<dim::time,               1, 1000000000>));
+            log && log(xtag("time*10^-6",       scaled_native_unit2_abbrev_v<dim::time,               1,    1000000>));
+            log && log(xtag("time*10^-3",       scaled_native_unit2_abbrev_v<dim::time,               1,       1000>));
+            log && log(xtag("time",             scaled_native_unit2_abbrev_v<dim::time>));
+            log && log(xtag("time*60",          scaled_native_unit2_abbrev_v<dim::time,              60,          1>));
+            log && log(xtag("time*3600",        scaled_native_unit2_abbrev_v<dim::time,            3600,          1>));
+            log && log(xtag("time*24*3600",     scaled_native_unit2_abbrev_v<dim::time,         24*3600,          1>));
+            log && log(xtag("time*250*24*3600", scaled_native_unit2_abbrev_v<dim::time,     250*24*3600,          1>));
+            log && log(xtag("time*360*24*3600", scaled_native_unit2_abbrev_v<dim::time,     360*24*3600,          1>));
+            log && log(xtag("time*365*24*3600", scaled_native_unit2_abbrev_v<dim::time,     365*24*3600,          1>));
+
+            log && log(xtag("currency",         scaled_native_unit2_abbrev_v<dim::currency>));
+
+            log && log(xtag("price",            scaled_native_unit2_abbrev_v<dim::price>));
+
+            REQUIRE(xo::unit::units::scaled_native_unit2_abbrev<dim::mass>::value == xo::flatstring("g"));
+
+            /* proof that scaled_native_unit2_abbrev::value is constexpr */
+            static_assert(scaled_native_unit2_abbrev_v<dim::mass>
+                          == basis_unit2_abbrev_type::from_flatstring(xo::flatstring("g")));
+
+        } /*TEST_CASE(basis_unit2)*/
+
+        TEST_CASE("basis_unit2_store", "[basis_unit2_store]") {
+            constexpr bool c_debug_flag = true;
+
+            // can get bits from /dev/random by uncommenting the 2nd line below
+            //uint64_t seed = xxx;
+            //rng::Seed<xoshio256ss> seed;
+
+            //auto rng = xo::rng::xoshiro256ss(seed);
+
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.basis_unit2_store"));
+            //log && log("(A)", xtag("foo", foo));
+
+            basis_unit2_store<class AnyTag> bu_store;
+
+            log && log(xtag("mass*10^-9",       bu_store.bu_abbrev(dim::mass,     scalefactor_ratio_type(          1, 1000000000))));
+            log && log(xtag("mass*10^-6",       bu_store.bu_abbrev(dim::mass,     scalefactor_ratio_type(          1,    1000000))));
+            log && log(xtag("mass*10^-3",       bu_store.bu_abbrev(dim::mass,     scalefactor_ratio_type(          1,       1000))));
+            log && log(xtag("mass",             bu_store.bu_abbrev(dim::mass,     scalefactor_ratio_type(          1,          1))));
+            log && log(xtag("mass*10^3",        bu_store.bu_abbrev(dim::mass,     scalefactor_ratio_type(       1000,          1))));
+            log && log(xtag("mass*10^6",        bu_store.bu_abbrev(dim::mass,     scalefactor_ratio_type(    1000000,          1))));
+            log && log(xtag("mass*10^9",        bu_store.bu_abbrev(dim::mass,     scalefactor_ratio_type( 1000000000,          1))));
+
+            log && log(xtag("distance*10^-9",   bu_store.bu_abbrev(dim::distance, scalefactor_ratio_type(          1, 1000000000))));
+            log && log(xtag("distance*10^-6",   bu_store.bu_abbrev(dim::distance, scalefactor_ratio_type(          1,    1000000))));
+            log && log(xtag("distance*10^-3",   bu_store.bu_abbrev(dim::distance, scalefactor_ratio_type(          1,       1000))));
+            log && log(xtag("distance",         bu_store.bu_abbrev(dim::distance, scalefactor_ratio_type(          1,          1))));
+            log && log(xtag("distance*10^3",    bu_store.bu_abbrev(dim::distance, scalefactor_ratio_type(       1000,          1))));
+
+            log && log(xtag("time*10^-9",       bu_store.bu_abbrev(dim::time,     scalefactor_ratio_type(          1, 1000000000))));
+            log && log(xtag("time*10^-6",       bu_store.bu_abbrev(dim::time,     scalefactor_ratio_type(          1,    1000000))));
+            log && log(xtag("time*10^-3",       bu_store.bu_abbrev(dim::time,     scalefactor_ratio_type(          1,       1000))));
+            log && log(xtag("time",             bu_store.bu_abbrev(dim::time,     scalefactor_ratio_type(          1,          1))));
+            log && log(xtag("time*60",          bu_store.bu_abbrev(dim::time,     scalefactor_ratio_type(         60,          1))));
+            log && log(xtag("time*3600",        bu_store.bu_abbrev(dim::time,     scalefactor_ratio_type(       3600,          1))));
+            log && log(xtag("time*24*3600",     bu_store.bu_abbrev(dim::time,     scalefactor_ratio_type(    24*3600,          1))));
+            log && log(xtag("time*250*24*3600", bu_store.bu_abbrev(dim::time,     scalefactor_ratio_type(250*24*3600,          1))));
+            log && log(xtag("time*360*24*3600", bu_store.bu_abbrev(dim::time,     scalefactor_ratio_type(360*24*3600,          1))));
+            log && log(xtag("time*365*24*3600", bu_store.bu_abbrev(dim::time,     scalefactor_ratio_type(365*24*3600,          1))));
+
+
+#ifdef NOT_USING
+            log && log(xtag("mass*10^-9",       scaled_native_unit2_abbrev_v<dim::mass,               1, 1000000000>));
+            log && log(xtag("mass*10^-6",       scaled_native_unit2_abbrev_v<dim::mass,               1,    1000000>));
+            log && log(xtag("mass*10^-3",       scaled_native_unit2_abbrev_v<dim::mass,               1,       1000>));
+            log && log(xtag("mass",             scaled_native_unit2_abbrev_v<dim::mass>));
+            log && log(xtag("mass*10^3",        scaled_native_unit2_abbrev_v<dim::mass,            1000,          1>));
+            log && log(xtag("mass*10^6",        scaled_native_unit2_abbrev_v<dim::mass,         1000000,          1>));
+            log && log(xtag("mass*10^9",        scaled_native_unit2_abbrev_v<dim::mass,      1000000000,          1>));
+
+            log && log(xtag("distance*10^-9",   scaled_native_unit2_abbrev_v<dim::distance,           1, 1000000000>));
+            log && log(xtag("distance*10^-6",   scaled_native_unit2_abbrev_v<dim::distance,           1,    1000000>));
+            log && log(xtag("distance*10^-3",   scaled_native_unit2_abbrev_v<dim::distance,           1,       1000>));
+            log && log(xtag("distance",         scaled_native_unit2_abbrev_v<dim::distance>));
+            log && log(xtag("distance*10^3",    scaled_native_unit2_abbrev_v<dim::distance,        1000,          1>));
+
+            log && log(xtag("time*10^-9",       scaled_native_unit2_abbrev_v<dim::time,               1, 1000000000>));
+            log && log(xtag("time*10^-6",       scaled_native_unit2_abbrev_v<dim::time,               1,    1000000>));
+            log && log(xtag("time*10^-3",       scaled_native_unit2_abbrev_v<dim::time,               1,       1000>));
+            log && log(xtag("time",             scaled_native_unit2_abbrev_v<dim::time>));
+            log && log(xtag("time*60",          scaled_native_unit2_abbrev_v<dim::time,              60,          1>));
+            log && log(xtag("time*3600",        scaled_native_unit2_abbrev_v<dim::time,            3600,          1>));
+            log && log(xtag("time*24*3600",     scaled_native_unit2_abbrev_v<dim::time,         24*3600,          1>));
+            log && log(xtag("time*250*24*3600", scaled_native_unit2_abbrev_v<dim::time,     250*24*3600,          1>));
+            log && log(xtag("time*360*24*3600", scaled_native_unit2_abbrev_v<dim::time,     360*24*3600,          1>));
+            log && log(xtag("time*365*24*3600", scaled_native_unit2_abbrev_v<dim::time,     365*24*3600,          1>));
+
+            log && log(xtag("currency",         scaled_native_unit2_abbrev_v<dim::currency>));
+
+            log && log(xtag("price",            scaled_native_unit2_abbrev_v<dim::price>));
+
+            REQUIRE(xo::unit::units::scaled_native_unit2_abbrev<dim::mass>::value == xo::flatstring("g"));
+
+            /* proof that scaled_native_unit2_abbrev::value is constexpr */
+            static_assert(scaled_native_unit2_abbrev_v<dim::mass>
+                          == basis_unit2_abbrev_type::from_flatstring(xo::flatstring("g")));
+#endif
+        } /*TEST_CASE(basis_unit2_store)*/
 
         TEST_CASE("native_unit_abbrev", "[native_dim_abbrev]") {
             constexpr bool c_debug_flag = true;

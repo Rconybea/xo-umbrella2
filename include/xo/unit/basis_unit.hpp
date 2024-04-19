@@ -70,7 +70,7 @@ namespace xo {
 
             template <dim BasisDim, typename InnerScale>
             struct scaled_native_unit_abbrev {
-                /* e.g. unit of '10000 grams' will have abbrev '1000g' in absence
+                /* e.g. unit of '1000 grams' will have abbrev '1000g' in absence
                  *      of a specialization for scaled_native_unit_abbrev
                  */
                 static constexpr auto value = stringliteral_concat(stringliteral_from_ratio<InnerScale>().value_,
