@@ -81,8 +81,16 @@ Unit test dependencies:
 
 To build documentation, will also need:
 
-* `doxygen`
-* `graphviz`
-* `sphinx`
-* `breathe`
-* `sphinx_rtd_theme`
+* `doxygen`_ c++ documentation
+* `graphviz`_ graph drawing software, used by doxygen
+* `sphinx`_ documentation system, ReST (`.rst`) format
+* `breathe`_ use `doxygen`-generated ingredients in sphinx `.rst` files
+* `sphinx_rtd_theme`_ css for sphinx html output
+
+Can install these
+
+.. _doxygen: https://www.doxygen.nl
+.. _graphviz: https://graphviz.org
+.. _sphinx: https://www.sphinx-doc.org/en/master
+.. _breathe: https://breathe.readthedocs.io/en/latest
+.. _sphinx_rtd_theme: https://github.com/readthedocs/sphinx_rtd_theme
