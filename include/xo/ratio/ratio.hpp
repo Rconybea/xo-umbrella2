@@ -26,17 +26,31 @@ namespace xo {
             struct promoter_type;
         }
 
-        /** @brief represent a ratio of two Int values. **/
-        template <typename Int>
-        requires std::totally_ordered<Int>
+        /** @class ratio
+         *  @brief represent a ratio of two Int values.
+         **/
+        template <typename Int> requires std::totally_ordered<Int>
         struct ratio
         {
         public:
+            /** @defgroup ratio-types **/
+            ///@{
+            /** @brief representation for (numerator, denominator) **/
             using component_type = Int;
+            ///@}
 
         public:
+            /** @defgroup ratio-ctor **/
+            ///@{
+            /** @brief construct ratio with numerator @p n and denominator @p d.
+             *
+             *  Ratio need not be normalized
+             **/
             constexpr ratio(Int n, Int d) : num_{n}, den_{d} {}
+            ///@}
 
+            /** @defgroup ratio-static-methods **/
+            ///@{
             /** @brief ratio in lowest commono terms
              *
              **/
@@ -44,7 +58,10 @@ namespace xo {
                 return ratio(n, d).normalize();
             }
 
-            /** @brief add two ratios **/
+            /** @brief add ratios @p x and @p y
+             *
+             *  @post result ratio is normalized
+             **/
             static constexpr ratio add(const ratio & x,
                                        const ratio & y) {
                 /* (a/b) + (c/d)
@@ -63,13 +80,19 @@ namespace xo {
                 return ratio(num, den).maybe_reduce();
             }
 
-            /** @brief subtract two ratios **/
+            /** @brief subtract ratio @p y from ratio @p x
+             *
+             *  @post result ratio is normalized
+             **/
             static constexpr ratio subtract(const ratio & x,
                                             const ratio & y) {
                 return add(x, y.negate());
             }
 
-            /** @brief multiply two ratios **/
+            /** @brief multiply ratios @p x and @p y
+             *
+             *  @post result ratio is normalized
+             **/
             static constexpr ratio multiply(const ratio & x,
                                             const ratio & y) {
                 /* (a/b) * (c/d) = a.c / b.d */
@@ -99,13 +122,20 @@ namespace xo {
                 return ratio(num, den).maybe_reduce();
             }
 
-            /** @brief divide two ratios **/
+            /** @brief divide ratio @p y into ratio @p x
+             *
+             *  @post result ratio is normalized
+             **/
             static constexpr ratio divide(const ratio & x,
-                                          const ratio & y) {
-                return multiply(x, y.reciprocal());
-            }
+                                          const ratio & y)
+                {
+                    return multiply(x, y.reciprocal());
+                }
 
-            /** @brief compute integer power of a ratio **/
+            /** @brief compute integer exponent @p p of this ratio
+             *
+             *  @note time complexity is O(log p)
+             **/
             constexpr ratio power(int p) const {
 
                 constexpr ratio retval = ratio(1, 1);
@@ -147,19 +177,33 @@ namespace xo {
 
                 return compare_aux(x, y);
             }
+            ///@}
 
+            /** @defgroup ratio-access **/
+            ///@{
+            /** @brief fetch ratio's numerator **/
             constexpr Int num() const noexcept { return num_; }
+            /** @brief fetch ratio's denominator **/
             constexpr Int den() const noexcept { return den_; }
 
+            /** @brief true if and only if ratio represents an integer
+             *
+             *  (denominator is +/- 1)
+             **/
             constexpr bool is_integer() const noexcept { return den_ == 1 || den_ == -1; }
+            ///@}
 
+            /** @defgroup ratio-methods **/
+            ///@{
+            /** @brief r.negate() is the exact ratio representing @c -r **/
             constexpr ratio negate() const { return ratio(-num_, den_); }
+            /** @brief r.reciprocal() is the eact ratio representing @c 1/r **/
             constexpr ratio reciprocal() const { return ratio(den_, num_); }
 
-            /** @brief requires component_type is totally ordered **/
+            /** @brief r.floor() is the largest integer x : x <= r **/
             constexpr Int floor() const { return (num_ / den_); }
 
-            /** @brief requires component_type is totally ordered **/
+            /** @brief r.ceil() is the smallest integer x : r < x. **/
             constexpr Int ceil() const { return floor() + 1; }
 
             /** @brief reduce to lowest terms
@@ -192,6 +236,12 @@ namespace xo {
                 return ratio::subtract(*this, this->floor());
             }
 
+            /** @brief negate operator **/
+            constexpr ratio operator-() const { return ratio(-num_, den_); }
+            ///@}
+
+            /** @defgroup ratio-conversion **/
+            ///@{
             /** @brief convert to non-ratio representation
              *
              *  For example: to int or double
@@ -203,10 +253,10 @@ namespace xo {
              *
              *  Example:
              *  @code
-             *  ratio(7,1).to_str<5>();  // "7"
-             *  ratio(1,7).to_str<5>();  // "(1/7)"
+             *  ratio(7,1).to_str<5>();   // "7"
+             *  ratio(1,7).to_str<5>();   // "(1/7)"
              *  ratio(-1,7).to_str<10>(); // "(-1/7)"
-             *  ratio(-1,7).to_str<5>(); // "(-1/"
+             *  ratio(-1,7).to_str<5>();  // "(-1/"
              *  @endcode
              **/
             template <std::size_t N>
@@ -231,14 +281,12 @@ namespace xo {
                 }
             }
 
-            /** @brief negate operator **/
-            constexpr ratio operator-() const { return ratio(-num_, den_); }
-
             /** @brief convert to representation using different integer types **/
             template <typename Ratio2>
             constexpr operator Ratio2 () const noexcept requires ratio_concept<Ratio2> {
                 return Ratio2(num_, den_);
             }
+            ///@}
 
         private:
             /** @brief 3-way compare auxiliary function.
@@ -264,10 +312,13 @@ namespace xo {
             }
 
         private:
+            /** @defgroup ratio-instance-variables **/
+            ///@{
             /** @brief numerator **/
             Int num_;
             /** @brief denominator **/
             Int den_;
+            ///@}
         };
 
         namespace detail {
@@ -276,7 +327,7 @@ namespace xo {
 
             template <typename Ratio>
             struct reducer_type<Ratio, true /*EnabledFlag*/> {
-                static constexpr Ratio attempt_reduce(Ratio x) { return x.reduce(); }
+                static constexpr Ratio attempt_reduce(Ratio x) { return x.normalize(); }
             };
 
             template <typename Ratio>
@@ -302,6 +353,7 @@ namespace xo {
             };
         }
 
+        /** @brief create a ratio in lowest terms from two integers **/
         template <typename Int1, typename Int2>
         constexpr auto
         make_ratio (Int1 n, Int2 d = 1) -> ratio<std::common_type_t<Int1, Int2>>
@@ -505,6 +557,8 @@ namespace xo {
             };
         } /*namespace detail*/
 
+        /** @defgroup ratio-arithmetic **/
+        ///@{
         /** @brief add two ratios.
          *
          *  One argument may be a non-ratio type if it can be promoted to a ratio
@@ -552,7 +606,10 @@ namespace xo {
         {
             return detail::op_aux_type<Ratio1, Ratio2>::divide(x, y);
         }
+        ///@}
 
+        /** @defgroup ratio-3way-compare 3way comparison **/
+        ///@{
         /** @brief compare two ratios for equality
          *
          *  One argument may be a non-ratio type if it can be promoted to a ratio
@@ -576,6 +633,7 @@ namespace xo {
         {
             return detail::op_aux_type<Ratio1, Ratio2>::compare(x, y);
         }
+        ///@}
 
     } /*namespace ratio*/
 } /*namespace xo*/
