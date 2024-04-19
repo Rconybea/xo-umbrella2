@@ -3,15 +3,39 @@
 cmake_minimum_required(VERSION 3.10)
 
 project(xo_unit VERSION 1.0)
+enable_testing()
 enable_language(CXX)
 
 # common XO cmake macros (see proj/xo-cmake)
 include(cmake/xo-bootstrap-macros.cmake)
 
 # ----------------------------------------------------------------
+# cmake -DCMAKE_BUILD_TYPE=debug
+
+# clear out hardwired default.
+# we want override project-level defaults, so need to prevent interference from hardwired defaults
+# (the problem with non-empty hardwired defaults is that we can't tell if they've been set on the
+# command line)
+#
+set(CMAKE_CXX_FLAGS_DEBUG "")
+
+# CMAKE_CXX_FLAGS_DEBUG is built-in to cmake and has non-empty default.
+#  -> we cannot tell whether it was set on the command line
+#  -> use PROJECT_CXX_FLAGS_DEBUG instead
+#
+# built-in default value is -g; can hardwire different project policy here
+#
+if (NOT DEFINED PROJECT_CXX_FLAGS_DEBUG)
+    set(PROJECT_CXX_FLAGS_DEBUG ${PROJECT_CXX_FLAGS} -ggdb -Og
+        CACHE STRING "debug c++ compiler flags")
+endif()
+message("-- PROJECT_CXX_FLAGS_DEBUG: debug c++ flags are [${PROJECT_CXX_FLAGS_DEBUG}]")
+
+add_compile_options("$<$<CONFIG:DEBUG>:${PROJECT_CXX_FLAGS_DEBUG}>")
+
+# ----------------------------------------------------------------
 # unit test setup
 
-enable_testing()
 # activate code coverage for all executables + libraries (when configured with -DCODE_COVERAGE=ON)
 add_code_coverage()
 # 1. assuming that /nix/store/ prefixes .hpp files belonging to gcc, catch2 etc.
