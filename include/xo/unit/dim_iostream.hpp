@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "dim_util.hpp"
+#include "dimension.hpp"
 #include <iostream>
 
 namespace xo {

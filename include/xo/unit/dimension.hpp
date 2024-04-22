@@ -1,4 +1,4 @@
-/* @file dim_util.hpp */
+/* @file dimension.hpp */
 
 #pragma once
 
@@ -77,4 +77,4 @@ namespace xo {
     } /*namespace qty*/
 } /*namespace xo*/
 
-/* end dim_util.hpp */
+/* end dimension.hpp */
