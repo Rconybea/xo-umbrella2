@@ -5,8 +5,6 @@
 #include "native_unit.hpp"
 #include "basis_unit_abbrev.hpp"
 #include "xo/ratio/ratio.hpp"
-#include <algorithm>
-#include <vector>
 
 namespace xo {
     namespace qty {
