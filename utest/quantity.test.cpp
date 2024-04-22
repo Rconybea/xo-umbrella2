@@ -769,7 +769,7 @@ namespace xo {
         } /*TEST_CASE(rescale)*/
 
         TEST_CASE("rescale2", "[quantity]") {
-            constexpr bool c_debug_flag = true;
+            constexpr bool c_debug_flag = false;
 
             // can get bits from /dev/random by uncommenting the 2nd line below
             //uint64_t seed = xxx;
@@ -789,7 +789,7 @@ namespace xo {
         } /*TEST_CASE(rescale2)*/
 
         TEST_CASE("compare1", "[quantity]") {
-            constexpr bool c_debug_flag = true;
+            constexpr bool c_debug_flag = false;
 
             // can get bits from /dev/random by uncommenting the 2nd line below
             //uint64_t seed = xxx;
@@ -823,7 +823,7 @@ namespace xo {
         } /*TEST_CASE(compare1)*/
 
         TEST_CASE("compare2", "[quantity]") {
-            constexpr bool c_debug_flag = true;
+            constexpr bool c_debug_flag = false;
 
             // can get bits from /dev/random by uncommenting the 2nd line below
             //uint64_t seed = xxx;
