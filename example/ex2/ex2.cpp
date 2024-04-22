@@ -1,6 +1,6 @@
 /** @file ex2.cpp **/
 
-#include "xo/unit/quantity.hpp"
+#include "xo/unit/mpl/quantity.hpp"
 #include <iostream>
 
 int

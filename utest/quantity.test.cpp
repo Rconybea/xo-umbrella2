@@ -1,6 +1,6 @@
 /* @file quantity.test.cpp */
 
-#include "xo/unit/quantity.hpp"
+#include "xo/unit/mpl/quantity.hpp"
 #include "xo/reflect/Reflect.hpp"
 //#include <xo/randomgen/random_seed.hpp>
 //#include <xo/randomgen/xoshiro256.hpp>
