@@ -44,36 +44,6 @@ namespace xo {
         }
 
         static constexpr std::size_t n_dim = static_cast<std::size_t>(dim::n_dim);
-
-        enum class native_unit_id {
-            gram,
-            meter,
-            second,
-            currency,
-            price
-        };
-
-        template <dim Dim>
-        struct native_unit_for;
-
-        template <>
-        struct native_unit_for<dim::mass>     { static constexpr auto value = native_unit_id::gram;     };
-
-        template <>
-        struct native_unit_for<dim::distance> { static constexpr auto value = native_unit_id::meter;    };
-
-        template <>
-        struct native_unit_for<dim::time>     { static constexpr auto value = native_unit_id::second;   };
-
-        template <>
-        struct native_unit_for<dim::currency> { static constexpr auto value = native_unit_id::currency; };
-
-        template <>
-        struct native_unit_for<dim::price>    { static constexpr auto value = native_unit_id::price;    };
-
-        template <dim Dim>
-        constexpr auto native_unit_for_v = native_unit_for<Dim>::value;
-
     } /*namespace qty*/
 } /*namespace xo*/
 
