@@ -1,4 +1,4 @@
-/** @file dim_util2.hpp
+/** @file native_unit.hpp
  *
  *  Author: Roland Conybeare
  **/
@@ -12,17 +12,17 @@ namespace xo {
     namespace qty {
         using native_unit2_abbrev_type = flatstring<8>;
 
-        /** @class native_unit2
+        /** @class native_unit
          *
          *  @brief Represent a native (built-in) unit.
          *
-         *  A basis_unit2 is expressed as a multiple of a native_unit2
+         *  A basis_unit is expressed as a multiple of a native_unit
          *
          **/
         struct native_unit {
         public:
             constexpr native_unit(dim native_dim,
-                                   const native_unit2_abbrev_type & abbrev_str)
+                                  const native_unit2_abbrev_type & abbrev_str)
                 : native_dim_{native_dim},
                   abbrev_str_{abbrev_str}
                 {}
@@ -46,6 +46,4 @@ namespace xo {
     } /*namespace qty*/
 } /*namespace xo*/
 
-
-
-/** end dim_util2.hpp **/
+/** end native_unit.hpp **/
