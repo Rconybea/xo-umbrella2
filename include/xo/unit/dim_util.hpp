@@ -2,8 +2,6 @@
 
 #pragma once
 
-//#include "stringliteral.hpp"
-//#include "xo/flatstring/flatstring.hpp"
 #include <cstdint>
 
 namespace xo {
@@ -35,11 +33,11 @@ namespace xo {
         dim2str(dim x)
         {
             switch(x) {
-            case dim::mass: return "mass";
+            case dim::mass:     return "mass";
             case dim::distance: return "distance";
-            case dim::time: return "time";
+            case dim::time:     return "time";
             case dim::currency: return "currency";
-            case dim::price: return "price";
+            case dim::price:    return "price";
             default: break;
             }
             return "?dim";
@@ -59,19 +57,19 @@ namespace xo {
         struct native_unit_for;
 
         template <>
-        struct native_unit_for<dim::mass> { static constexpr auto value = native_unit_id::gram; };
+        struct native_unit_for<dim::mass>     { static constexpr auto value = native_unit_id::gram;     };
 
         template <>
-        struct native_unit_for<dim::distance> { static constexpr auto value = native_unit_id::meter; };
+        struct native_unit_for<dim::distance> { static constexpr auto value = native_unit_id::meter;    };
 
         template <>
-        struct native_unit_for<dim::time> { static constexpr auto value = native_unit_id::second; };
+        struct native_unit_for<dim::time>     { static constexpr auto value = native_unit_id::second;   };
 
         template <>
         struct native_unit_for<dim::currency> { static constexpr auto value = native_unit_id::currency; };
 
         template <>
-        struct native_unit_for<dim::price> { static constexpr auto value = native_unit_id::price; };
+        struct native_unit_for<dim::price>    { static constexpr auto value = native_unit_id::price;    };
 
         template <dim Dim>
         constexpr auto native_unit_for_v = native_unit_for<Dim>::value;
