@@ -13,6 +13,158 @@ namespace xo {
 
         using scalefactor_ratio_type = xo::ratio::ratio<std::int64_t>;
 
+        namespace abbrev {
+            // ----- units for dim::mass -----
+
+            static
+            constexpr basis_unit2_abbrev_type
+            mass_unit2_abbrev(const scalefactor_ratio_type & scalefactor)
+            {
+                if (scalefactor.num() == 1) {
+                    switch (scalefactor.den()) {
+                    case 1:
+                        return basis_unit2_abbrev_type::from_chars("g");
+                    case 1000:
+                        return basis_unit2_abbrev_type::from_chars("mg");
+                    case 1000000:
+                        return basis_unit2_abbrev_type::from_chars("ug");
+                    case 1000000000:
+                        return basis_unit2_abbrev_type::from_chars("ng");
+                    }
+                }
+
+                if (scalefactor.den() == 1) {
+                    switch (scalefactor.num()) {
+                    case 1000:
+                        return basis_unit2_abbrev_type::from_chars("kg");
+                    case 1000000:
+                        return basis_unit2_abbrev_type::from_chars("t");
+                    case 1000000000:
+                        return basis_unit2_abbrev_type::from_chars("kt");
+                    }
+                }
+
+                /* e.g. unit of '1000 grams' will have abbrev '1000g' in absence
+                 *      of a specialization for scaled_native_unit_abbrev
+                 */
+                return (basis_unit2_abbrev_type::from_flatstring
+                        (flatstring_concat
+                         (scalefactor.to_str<basis_unit2_abbrev_type::fixed_capacity>(),
+                          native_unit2_v[static_cast<std::uint32_t>(dim::mass)].abbrev_str())));
+            }
+
+            // ----- units for dim::distance -----
+
+            static
+            constexpr basis_unit2_abbrev_type
+            distance_unit2_abbrev(const scalefactor_ratio_type & scalefactor)
+            {
+                if (scalefactor.num() == 1) {
+                    switch (scalefactor.den()) {
+                    case 1:
+                        return basis_unit2_abbrev_type::from_chars("m");
+                    case 1000:
+                        return basis_unit2_abbrev_type::from_chars("mm");
+                    case 1000000:
+                        return basis_unit2_abbrev_type::from_chars("um");
+                    case 1000000000:
+                        return basis_unit2_abbrev_type::from_chars("nm");
+                    }
+                }
+
+                if (scalefactor.den() == 1) {
+                    switch (scalefactor.num()) {
+                    case 1000:
+                        return basis_unit2_abbrev_type::from_chars("km");
+                    case 1000000:
+                        return basis_unit2_abbrev_type::from_chars("Mm");
+                    case 1000000000:
+                        return basis_unit2_abbrev_type::from_chars("Gm");
+                    }
+                }
+
+                /* e.g. unit of '1000 grams' will have abbrev '1000g' in absence
+                 *      of a specialization for scaled_native_unit_abbrev
+                 */
+                return (basis_unit2_abbrev_type::from_flatstring
+                        (flatstring_concat
+                         (scalefactor.to_str<basis_unit2_abbrev_type::fixed_capacity>(),
+                          native_unit2_v[static_cast<std::uint32_t>(dim::mass)].abbrev_str())));
+            }
+
+            // ----- units for dim::time -----
+
+            static
+            constexpr basis_unit2_abbrev_type
+            time_unit2_abbrev(const scalefactor_ratio_type & scalefactor)
+            {
+                if (scalefactor.num() == 1) {
+                    switch (scalefactor.den()) {
+                    case 1:
+                        return basis_unit2_abbrev_type::from_chars("s");
+                    case 1000:
+                        return basis_unit2_abbrev_type::from_chars("ms");
+                    case 1000000:
+                        return basis_unit2_abbrev_type::from_chars("us");
+                    case 1000000000:
+                        return basis_unit2_abbrev_type::from_chars("ns");
+                    }
+                }
+
+                if (scalefactor.den() == 1) {
+                    switch (scalefactor.num()) {
+                    case 60:
+                        return basis_unit2_abbrev_type::from_chars("min");
+                    case 3600:
+                        return basis_unit2_abbrev_type::from_chars("hr");
+                    case 24*3600:
+                        return basis_unit2_abbrev_type::from_chars("dy");
+                    case 7*24*3600:
+                        return basis_unit2_abbrev_type::from_chars("wk");
+                    case 30*24*3600:
+                        return basis_unit2_abbrev_type::from_chars("mo");
+                    case 250*24*3600:
+                        return basis_unit2_abbrev_type::from_chars("yr250");
+                    case 360*24*3600:
+                        return basis_unit2_abbrev_type::from_chars("yr360");
+                    case 365*24*3600:
+                        return basis_unit2_abbrev_type::from_chars("yr365");
+                    }
+                }
+
+                /* e.g. unit of '1000 grams' will have abbrev '1000g' in absence
+                 *      of a specialization for scaled_native_unit_abbrev
+                 */
+                return (basis_unit2_abbrev_type::from_flatstring
+                        (flatstring_concat
+                         (scalefactor.to_str<basis_unit2_abbrev_type::fixed_capacity>(),
+                          native_unit2_v[static_cast<std::uint32_t>(dim::mass)].abbrev_str())));
+            }
+
+            static
+            constexpr basis_unit2_abbrev_type
+            basis_unit2_abbrev(dim native_dim,
+                               const scalefactor_ratio_type & scalefactor)
+            {
+                switch(native_dim) {
+                case dim::mass:
+                    return mass_unit2_abbrev(scalefactor);
+                case dim::distance:
+                    return distance_unit2_abbrev(scalefactor);
+                case dim::time:
+                    return time_unit2_abbrev(scalefactor);
+                }
+
+                /* e.g. unit of '1000 grams' will have abbrev '1000g' in absence
+                 *      of a specialization for scaled_native_unit_abbrev
+                 */
+                return (basis_unit2_abbrev_type::from_flatstring
+                        (flatstring_concat
+                         (scalefactor.to_str<basis_unit2_abbrev_type::fixed_capacity>(),
+                          native_unit2_v[static_cast<std::uint32_t>(native_dim)].abbrev_str())));
+            }
+        }; /*abbrev*/
+
         /** @class basis_unit2
          *  @brief A dimensionless multiple of a single natively-specified basis dimension
          *
@@ -20,6 +172,7 @@ namespace xo {
          **/
         struct basis_unit2 {
         public:
+            constexpr basis_unit2() = default;
             constexpr basis_unit2(dim native_dim, const scalefactor_ratio_type & scalefactor)
                 : native_dim_{native_dim},
                   scalefactor_{scalefactor}
@@ -28,11 +181,26 @@ namespace xo {
             constexpr dim native_dim() const { return native_dim_; }
             constexpr const scalefactor_ratio_type & scalefactor() const { return scalefactor_; }
 
+            constexpr basis_unit2_abbrev_type abbrev() const {
+                return abbrev::basis_unit2_abbrev(native_dim_,
+                                                  scalefactor_);
+            }
+
+            constexpr basis_unit2 & operator=(const basis_unit2 & x) = default;
+
             /** @brief identifies a native unit, e.g. time (in seconds) **/
-            const dim native_dim_;
+            dim native_dim_ = dim::invalid;
             /** @brief this unit defined as multiple scalefactor times native unit **/
-            const scalefactor_ratio_type scalefactor_;
+            scalefactor_ratio_type scalefactor_;
         };
+
+        namespace bu2 {
+            constexpr basis_unit2 nanogram  = basis_unit2(dim::mass, scalefactor_ratio_type(1,    1000000000));
+            constexpr basis_unit2 microgram = basis_unit2(dim::mass, scalefactor_ratio_type(1,    1000000));
+            constexpr basis_unit2 milligram = basis_unit2(dim::mass, scalefactor_ratio_type(1,    1000));
+            constexpr basis_unit2 gram      = basis_unit2(dim::mass, scalefactor_ratio_type(1,    1));
+            constexpr basis_unit2 kilogram  = basis_unit2(dim::mass, scalefactor_ratio_type(1000, 1));
+        }
 
         namespace units {
             /** for runtime work,  would like to be able to promptly find special abbreviation
@@ -92,10 +260,8 @@ namespace xo {
                 //                      xo::ratio::ratio<std::int64_t>(InnerScaleNum, InnerScaleDen));
             };
 
-            // ----- units for dim::mass -----
-
             template <>
-            struct scaled_native_unit2_abbrev<dim::mass, 1, 1000000000> {
+            struct scaled_native_unit2_abbrev<dim::mass, bu2::nanogram.scalefactor().num(), bu2::nanogram.scalefactor().den()> {
                 static constexpr const basis_unit2_abbrev_type value = basis_unit2_abbrev_type::from_chars("ng");
             };
 
@@ -198,145 +364,6 @@ namespace xo {
             template <dim BasisDim, std::int64_t InnerScaleNum = 1, std::int64_t InnerScaleDen = 1>
             constexpr auto scaled_native_unit2_abbrev_v = scaled_native_unit2_abbrev<BasisDim, InnerScaleNum, InnerScaleDen>::value;
         }
-
-        /** @class basis_unit2_store
-         *  @brief Store known basis units for runtime
-         **/
-        template <typename Tag>
-        struct basis_unit2_store {
-            basis_unit2_store() : bu_abbrev_vv_(static_cast<std::size_t>(dim::n_dim)) {
-                this->bu_establish_abbrev_for<dim::mass,              1, 1000000000>();
-                this->bu_establish_abbrev_for<dim::mass,              1,    1000000>();
-                this->bu_establish_abbrev_for<dim::mass,              1,       1000>();
-                this->bu_establish_abbrev_for<dim::mass,              1,          1>();
-                this->bu_establish_abbrev_for<dim::mass,           1000,          1>();
-                this->bu_establish_abbrev_for<dim::mass,        1000000,          1>();
-                this->bu_establish_abbrev_for<dim::mass,     1000000000,          1>();
-
-                this->bu_establish_abbrev_for<dim::distance,          1, 1000000000>();
-                this->bu_establish_abbrev_for<dim::distance,          1,    1000000>();
-                this->bu_establish_abbrev_for<dim::distance,          1,       1000>();
-                this->bu_establish_abbrev_for<dim::distance,          1,          1>();
-                this->bu_establish_abbrev_for<dim::distance,       1000,          1>();
-
-                this->bu_establish_abbrev_for<dim::time,              1, 1000000000>();
-                this->bu_establish_abbrev_for<dim::time,              1,    1000000>();
-                this->bu_establish_abbrev_for<dim::time,              1,       1000>();
-                this->bu_establish_abbrev_for<dim::time,              1,          1>();
-                this->bu_establish_abbrev_for<dim::time,             60,          1>();
-                this->bu_establish_abbrev_for<dim::time,           3600,          1>();
-                this->bu_establish_abbrev_for<dim::time,        24*3600,          1>();
-                this->bu_establish_abbrev_for<dim::time,    250*24*3600,          1>();
-                this->bu_establish_abbrev_for<dim::time,    360*24*3600,          1>();
-                this->bu_establish_abbrev_for<dim::time,    365*24*3600,          1>();
-
-                this->bu_establish_abbrev_for<dim::currency,          1,          1>();
-
-                this->bu_establish_abbrev_for<dim::price,             1,          1>();
-            }
-
-            /* e.g.
-             *   [(1/1000000000, "nm"), (1/1000000, "um"), (1/1000, "mm"), (1/1, "m"), (1000/1, "km")]
-             */
-            using native_scale_v = std::vector<std::pair<scalefactor_ratio_type, basis_unit2_abbrev_type>>;
-
-            /** @brief get basis-unit abbreviation at runtime **/
-            basis_unit2_abbrev_type bu_abbrev(dim basis_dim,
-                                              const scalefactor_ratio_type & scalefactor) const {
-                const auto & bu_abbrev_v = bu_abbrev_vv_[static_cast<std::size_t>(basis_dim)];
-
-                std::size_t i_abbrev = bu_abbrev_lub_ix(basis_dim, scalefactor, bu_abbrev_v);
-
-                if ((i_abbrev < bu_abbrev_v.size())
-                    && (bu_abbrev_v[i_abbrev].first == scalefactor))
-                {
-                    return bu_abbrev_v[i_abbrev].second;
-                } else {
-                    return units::bu_fallback_abbrev(basis_dim, scalefactor);
-                }
-            }
-
-            template <dim BasisDim, std::int64_t InnerScaleNum, std::int64_t InnerScaleDen>
-            void bu_establish_abbrev_for() {
-                this->bu_establish_abbrev(basis_unit2(BasisDim,
-                                                      scalefactor_ratio_type(InnerScaleNum, InnerScaleDen)),
-                                          units::scaled_native_unit2_abbrev_v<BasisDim, InnerScaleNum, InnerScaleDen>);
-            }
-
-            /** @brief establish abbreviation @p abbrev for basis unit @p bu
-             **/
-            void bu_establish_abbrev(const basis_unit2 & bu,
-                                     const basis_unit2_abbrev_type & abbrev) {
-
-                auto & bu_abbrev_v = bu_abbrev_vv_[static_cast<std::size_t>(bu.native_dim())];
-
-                std::int32_t i_abbrev = 0;
-
-                if (!bu_abbrev_v.empty()) {
-                    i_abbrev = bu_abbrev_lub_ix(bu.native_dim(),
-                                                bu.scalefactor(),
-                                                bu_abbrev_v);
-                }
-
-                auto entry = std::make_pair(bu.scalefactor(), abbrev);
-
-                if ((i_abbrev < bu_abbrev_v.size())
-                    && (bu_abbrev_v[i_abbrev].first == bu.scalefactor()))
-                {
-                    bu_abbrev_v[i_abbrev] = entry;
-                } else {
-                    bu_abbrev_v.insert(bu_abbrev_v.begin() + i_abbrev, entry);
-                }
-            }
-
-        private:
-            /** @brief get least-upper-bound index position in bu_abbrev_v[]
-             *
-             *  return value in [0, n] where n = bu_abbrev_v.size()
-             **/
-            static std::size_t bu_abbrev_lub_ix(dim basis_dim,
-                                                const scalefactor_ratio_type & scalefactor,
-                                                const native_scale_v & bu_abbrev_v)
-                {
-                    std::size_t n = bu_abbrev_v.size();
-
-                    if (n == 0)
-                        return 0;
-
-                    std::size_t lo = 0;
-                    std::size_t hi = n-1;
-
-                    if (scalefactor <= bu_abbrev_v[lo].first)
-                        return 0;
-
-                    auto cmp = (scalefactor <=> bu_abbrev_v[hi].first);
-
-                    if (cmp > 0)
-                        return n;
-
-                    if (cmp == 0)
-                        return hi;
-
-                    while (hi-lo > 1) {
-                        /* inv:
-                         *   bu_abbrev_v[lo].first < scalefactor <= bu_abbrev_v[hi].first
-                         */
-
-                        std::size_t mid = lo + (hi - lo)/2;
-
-                        if (scalefactor > bu_abbrev_v[mid].first)
-                            lo = mid;
-                        else
-                            hi = mid;
-                    }
-
-                    return hi;
-                }
-
-        private:
-            /* bu_abbrev_v[dim] holds known units for native unit dim */
-            std::vector<native_scale_v> bu_abbrev_vv_;
-        };
 
     } /*namespace unit*/
 } /*namespace xo*/

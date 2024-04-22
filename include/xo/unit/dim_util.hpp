@@ -31,6 +31,20 @@ namespace xo {
             n_dim
         };
 
+        inline const char *
+        dim2str(dim x)
+        {
+            switch(x) {
+            case dim::mass: return "mass";
+            case dim::distance: return "distance";
+            case dim::time: return "time";
+            case dim::currency: return "currency";
+            case dim::price: return "price";
+            default: break;
+            }
+            return "?dim";
+        }
+
         static constexpr std::size_t n_dim = static_cast<std::size_t>(dim::n_dim);
 
         enum class native_unit_id {
