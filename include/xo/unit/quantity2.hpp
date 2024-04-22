@@ -8,7 +8,7 @@
 #include "bpu_array.hpp"
 
 namespace xo {
-    namespace unit {
+    namespace qty {
         /** @class quantity
          *  @brief represent a scalar quantity with attached units.  enforce dimensional consistency.
          *
@@ -21,7 +21,7 @@ namespace xo {
 
         private:
         };
-    } /*namespace unit*/
+    } /*namespace qty*/
 } /*namespace xo*/
 
 

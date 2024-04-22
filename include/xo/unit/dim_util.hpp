@@ -7,7 +7,7 @@
 #include <cstdint>
 
 namespace xo {
-    namespace unit {
+    namespace qty {
         enum class dim {
             invalid = -1,
 
@@ -76,7 +76,7 @@ namespace xo {
         template <dim Dim>
         constexpr auto native_unit_for_v = native_unit_for<Dim>::value;
 
-    } /*namespace unit*/
+    } /*namespace qty*/
 } /*namespace xo*/
 
 /* end dim_util.hpp */

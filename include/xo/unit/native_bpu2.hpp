@@ -10,7 +10,7 @@
 #include "dim_iostream.hpp"
 
 namespace xo {
-    namespace unit {
+    namespace qty {
         using bpu2_abbrev_type = flatstring<24>;
 
         using power_ratio_type = xo::ratio::ratio<std::int64_t>;
@@ -126,7 +126,7 @@ namespace xo {
                       flatstring_from_exponent<PowerNum, PowerDen>())));
         };
 #endif
-    } /*namespace unit*/
+    } /*namespace qty*/
 } /*namespace xo*/
 
 

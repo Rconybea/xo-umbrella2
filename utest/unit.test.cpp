@@ -23,57 +23,31 @@ namespace xo {
 
         using xo::reflect::Reflect;
 
-        namespace su2 = xo::unit::su2;
+        namespace su2 = xo::qty::su2;
 
-        using xo::unit::Quantity2;
-        using xo::unit::dim;
-        using xo::unit::basis_unit2_abbrev_type;
-        using xo::unit::native_unit2;
-        using xo::unit::native_unit2_v;
-        using xo::unit::scalefactor_ratio_type;
-        using xo::unit::units::scaled_native_unit2_abbrev;
-        using xo::unit::units::scaled_native_unit2_abbrev_v;
-        using xo::unit::basis_unit2;
-        using xo::unit::abbrev::basis_unit2_abbrev;;
-        using xo::unit::bpu2_abbrev_type;
-        using xo::unit::abbrev::bpu2_abbrev;
-        using xo::unit::basis_unit2_store;
-        using xo::unit::power_ratio_type;
-        using xo::unit::abbrev::flatstring_from_exponent;
-        using xo::unit::bpu2;
-        using xo::unit::detail::bpu2_rescale;
-        using xo::unit::detail::bpu2_product;
-        using xo::unit::natural_unit;
-        using xo::unit::bpu_array_maker;
-        using xo::unit::detail::nu_product;
-        using xo::unit::unit_qty;
+        using xo::qty::Quantity2;
+        using xo::qty::dim;
+        using xo::qty::basis_unit2_abbrev_type;
+        using xo::qty::native_unit2;
+        using xo::qty::native_unit2_v;
+        using xo::qty::scalefactor_ratio_type;
+        using xo::qty::units::scaled_native_unit2_abbrev;
+        using xo::qty::units::scaled_native_unit2_abbrev_v;
+        using xo::qty::basis_unit2;
+        using xo::qty::abbrev::basis_unit2_abbrev;;
+        using xo::qty::bpu2_abbrev_type;
+        using xo::qty::abbrev::bpu2_abbrev;
+        using xo::qty::basis_unit2_store;
+        using xo::qty::power_ratio_type;
+        using xo::qty::abbrev::flatstring_from_exponent;
+        using xo::qty::bpu2;
+        using xo::qty::detail::bpu2_rescale;
+        using xo::qty::detail::bpu2_product;
+        using xo::qty::natural_unit;
+        using xo::qty::bpu_array_maker;
+        using xo::qty::detail::nu_product;
+        using xo::qty::unit_qty;
 
-        //using xo::unit::native_unit_abbrev_v;
-        //using xo::unit::units::scaled_native_unit_abbrev_v;
-        //using xo::unit::native_dim_abbrev;
-        //using xo::unit::stringliteral_compare;
-        //using xo::unit::literal_size_v;
-        //using xo::unit::stringliteral_from_digit;
-        //using xo::unit::stringliteral_from_int_v;
-        //using xo::unit::stringliteral;
-#ifndef __clang__
-        //using xo::unit::stringliteral_concat;
-        //using xo::unit::stringliteral_from_ratio;
-        //using xo::unit::bpu_assemble_abbrev_helper;
-        //using xo::unit::bpu_assemble_abbrev;
-#endif
-        //using xo::unit::bpu_node;
-        //using xo::unit::wrap_unit;
-        //using xo::unit::unit_abbrev_v;
-        //using xo::unit::dim_abbrev_v;
-        //using xo::unit::di_cartesian_product;
-        //using xo::unit::di_cartesian_product1;
-        //using xo::unit::unit_cartesian_product_t;
-        //using xo::unit::bpu_cartesian_product;
-        //using xo::unit::bpu_cartesian_product_helper;
-        //using xo::unit::unit_invert_t;
-        //using xo::unit::units::gram;
-        //using xo::unit::units::second;
         using xo::print::ccs;
 
         template <typename T>
@@ -206,7 +180,7 @@ namespace xo {
 
             log && log(xtag("price",            scaled_native_unit2_abbrev_v<dim::price>));
 
-            REQUIRE(xo::unit::units::scaled_native_unit2_abbrev<dim::mass>::value == xo::flatstring("g"));
+            REQUIRE(xo::qty::units::scaled_native_unit2_abbrev<dim::mass>::value == xo::flatstring("g"));
 
             /* proof that scaled_native_unit2_abbrev::value is constexpr */
             static_assert(scaled_native_unit2_abbrev_v<dim::mass>

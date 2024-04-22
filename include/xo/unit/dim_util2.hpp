@@ -9,7 +9,7 @@
 #include "xo/flatstring/flatstring.hpp"
 
 namespace xo {
-    namespace unit {
+    namespace qty {
         using native_unit2_abbrev_type = flatstring<8>;
 
         /** @class native_unit2
@@ -43,7 +43,7 @@ namespace xo {
             native_unit2(dim::price,    native_unit2_abbrev_type::from_chars("px")),
         };
 
-    } /*namespace unit*/
+    } /*namespace qty*/
 } /*namespace xo*/
 
 

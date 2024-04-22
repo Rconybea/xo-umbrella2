@@ -9,7 +9,7 @@
 //#include <cstdint>
 
 namespace xo {
-    namespace unit {
+    namespace qty {
         /** @class bpu2_array_rescale_result
          *  @brief Represents the product sqrt(outer_scale_sq) * outer_scale_exact * nat_unit
          **/
@@ -120,7 +120,7 @@ namespace xo {
                      rr.outer_scale_exact_ * x_unit.outer_scale_exact_ * y_unit.outer_scale_exact_,
                      rr.outer_scale_sq_ * x_unit.outer_scale_sq_ * y_unit.outer_scale_sq_));
         }
-    } /*namespace unit*/
+    } /*namespace qty*/
 } /*namespace xo*/
 
 /** end scaled_unit2.hpp **/

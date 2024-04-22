@@ -8,7 +8,7 @@
 #include "natural_unit.hpp"
 
 namespace xo {
-    namespace unit {
+    namespace qty {
         /** @class unit2
          *  @brief represent an arbitrary unit along with dimension details
          *
@@ -18,7 +18,7 @@ namespace xo {
          **/
         template <typename Int>
         using unit2 = natural_unit<Int>;
-    } /*namespace unit*/
+    } /*namespace qty*/
 } /*namespace xo*/
 
 /** end unit2.hpp **/

@@ -10,7 +10,7 @@
 #include <iostream>
 
 namespace xo {
-    namespace unit {
+    namespace qty {
         template <typename Int>
         inline std::ostream &
         operator<<(std::ostream & os, const bpu2<Int> & x) {
@@ -22,7 +22,7 @@ namespace xo {
 
             return os;
         }
-    } /*namespace unit*/
+    } /*namespace qty*/
 } /*namespace xo*/
 
 

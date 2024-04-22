@@ -39,7 +39,7 @@ namespace xo {
         //using xo::unit::bpu2_abbrev_type;
         //using xo::unit::abbrev::bpu2_abbrev;
         //using xo::unit::basis_unit2_store;
-        using xo::unit::power_ratio_type;
+        using xo::qty::power_ratio_type;
         //using xo::unit::abbrev::flatstring_from_exponent;
         //using xo::unit::bpu2;
         //using xo::unit::detail::bpu2_rescale;

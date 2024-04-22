@@ -10,7 +10,7 @@
 #include "unit2.hpp"
 
 namespace xo {
-    namespace unit {
+    namespace qty {
         /** @class quantity
          *  @brief represent a scalar quantity with attached units.  enforce dimensional consistency.
          *
@@ -87,7 +87,7 @@ namespace xo {
         {
             return Quantity::multiply(x, y);
         }
-    } /*namespace unit*/
+    } /*namespace qty*/
 } /*namespace xo*/
 
 

@@ -9,7 +9,7 @@
 #include <iostream>
 
 namespace xo {
-    namespace unit {
+    namespace qty {
         template <typename Int>
         inline std::ostream &
         operator<<(std::ostream & os, const natural_unit<Int> & x) {
@@ -22,7 +22,7 @@ namespace xo {
             os << "]>";
             return os;
         }
-    } /*namespace unit*/
+    } /*namespace qty*/
 } /*namespace xo*/
 
 /** end natural_unit_iostream.hpp **/

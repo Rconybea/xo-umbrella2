@@ -5,7 +5,7 @@
 #include <concepts>
 
 namespace xo {
-    namespace unit {
+    namespace qty {
         /** @concept numeric_concept
          *  @brief Concept for values that participate in arithmetic operations (+,-,*,/) and comparisons
          *
@@ -28,7 +28,7 @@ namespace xo {
             { x == y };
             { x != y };
         };
-    } /*namespace unit*/
+    } /*namespace qty*/
 } /*namespace xo*/
 
 /* end numeric_concept.hpp */

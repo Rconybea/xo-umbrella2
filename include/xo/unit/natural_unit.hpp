@@ -10,7 +10,7 @@
 #include <cassert>
 
 namespace xo {
-    namespace unit {
+    namespace qty {
         /** @class natural_unit
          *  @brief an array representing the cartesian product of distinct basis-power-units
          *
@@ -223,7 +223,7 @@ namespace xo {
             constexpr auto nanogram = bpu_array_maker<std::int64_t>::make_bpu_array(make_unit_power<std::int64_t>(bu2::nanogram));
             constexpr auto microgram = bpu_array_maker<std::int64_t>::make_bpu_array(make_unit_power<std::int64_t>(bu2::microgram));
         }
-    } /*namespace unit*/
+    } /*namespace qty*/
 } /*namespace xo*/
 
 /** end natural_unit.hpp **/

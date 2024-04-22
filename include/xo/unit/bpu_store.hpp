@@ -5,7 +5,7 @@
 #include "native_bpu2.hpp"
 
 namespace xo {
-    namespace unit {
+    namespace qty {
         /** @class basis_unit2_store
          *  @brief Store known basis units for runtime
          **/
@@ -156,7 +156,7 @@ namespace xo {
             /* bu_abbrev_v[dim] holds known units for native unit dim */
             std::vector<native_scale_v> bu_abbrev_vv_;
         };
-    } /*namespace unit*/
+    } /*namespace qty*/
 } /*namespace xo*/
 
 /** end bpu_store.hpp **/

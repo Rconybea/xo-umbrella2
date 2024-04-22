@@ -8,7 +8,7 @@
 #include <vector>
 
 namespace xo {
-    namespace unit {
+    namespace qty {
         using basis_unit2_abbrev_type = flatstring<16>;
 
         using scalefactor_ratio_type = xo::ratio::ratio<std::int64_t>;
@@ -365,7 +365,7 @@ namespace xo {
             constexpr auto scaled_native_unit2_abbrev_v = scaled_native_unit2_abbrev<BasisDim, InnerScaleNum, InnerScaleDen>::value;
         }
 
-    } /*namespace unit*/
+    } /*namespace qty*/
 } /*namespace xo*/
 
 

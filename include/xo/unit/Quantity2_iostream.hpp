@@ -9,7 +9,7 @@
 #include <iostream>
 
 namespace xo {
-    namespace unit {
+    namespace qty {
         template <typename Repr = double,
                   typename Int = std::int64_t>
         inline std::ostream &
@@ -23,7 +23,7 @@ namespace xo {
 
             return os;
         }
-    } /*namespace unit*/
+    } /*namespace qty*/
 } /*namespace xo*/
 
 /** end Quantity2_iostream.hpp **/

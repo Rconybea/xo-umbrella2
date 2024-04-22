@@ -6,7 +6,7 @@
 #include "numeric_concept.hpp"
 
 namespace xo {
-    namespace unit {
+    namespace qty {
         template <typename Quantity>
         concept quantity2_concept = requires(Quantity qty, typename Quantity::repr_type repr)
         {
@@ -19,5 +19,5 @@ namespace xo {
             //{ Quantity::promote(repr) } -> std::same_as<Quantity>;
         } && (true //unit_concept<typename Quantity::unit_type>
               && numeric_concept<typename Quantity::repr_type>);
-    } /*namespace unit*/
+    } /*namespace qty*/
 } /*namespace xo*/
