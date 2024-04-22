@@ -10,7 +10,7 @@
 #include "xo/unit/bpu2.hpp"
 #include "xo/unit/bpu2_iostream.hpp"
 #include "xo/unit/basis_unit2.hpp"
-#include "xo/unit/dim_util2.hpp"
+#include "xo/unit/native_unit.hpp"
 #include "xo/reflect/Reflect.hpp"
 //#include "xo/cxxutil/demangle.hpp"
 #include "xo/indentlog/scope.hpp"
@@ -28,7 +28,7 @@ namespace xo {
         using xo::qty::Quantity2;
         using xo::qty::dim;
         using xo::qty::basis_unit2_abbrev_type;
-        using xo::qty::native_unit2;
+        using xo::qty::native_unit;
         using xo::qty::native_unit2_v;
         using xo::qty::scalefactor_ratio_type;
         using xo::qty::units::scaled_native_unit2_abbrev;

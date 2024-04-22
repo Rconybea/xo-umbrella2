@@ -19,9 +19,9 @@ namespace xo {
          *  A basis_unit2 is expressed as a multiple of a native_unit2
          *
          **/
-        struct native_unit2 {
+        struct native_unit {
         public:
-            constexpr native_unit2(dim native_dim,
+            constexpr native_unit(dim native_dim,
                                    const native_unit2_abbrev_type & abbrev_str)
                 : native_dim_{native_dim},
                   abbrev_str_{abbrev_str}
@@ -35,12 +35,12 @@ namespace xo {
             native_unit2_abbrev_type abbrev_str_;
         };
 
-        static constexpr native_unit2 native_unit2_v[n_dim] = {
-            native_unit2(dim::mass,     native_unit2_abbrev_type::from_chars("g")),
-            native_unit2(dim::distance, native_unit2_abbrev_type::from_chars("m")),
-            native_unit2(dim::time,     native_unit2_abbrev_type::from_chars("s")),
-            native_unit2(dim::currency, native_unit2_abbrev_type::from_chars("ccy")),
-            native_unit2(dim::price,    native_unit2_abbrev_type::from_chars("px")),
+        static constexpr native_unit native_unit2_v[n_dim] = {
+            native_unit(dim::mass,     native_unit2_abbrev_type::from_chars("g")),
+            native_unit(dim::distance, native_unit2_abbrev_type::from_chars("m")),
+            native_unit(dim::time,     native_unit2_abbrev_type::from_chars("s")),
+            native_unit(dim::currency, native_unit2_abbrev_type::from_chars("ccy")),
+            native_unit(dim::price,    native_unit2_abbrev_type::from_chars("px")),
         };
 
     } /*namespace qty*/
