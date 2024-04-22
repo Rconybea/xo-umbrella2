@@ -1,6 +1,6 @@
 /* @file mpl_unit.test.cpp */
 
-#include "native_bpu2.hpp"
+//#include "native_bpu.hpp"
 #include "xo/unit/mpl/quantity.hpp"
 //#include "xo/unit/unit.hpp"
 //#include "xo/unit/Quantity2_iostream.hpp"
@@ -39,7 +39,7 @@ namespace xo {
         //using xo::unit::bpu2_abbrev_type;
         //using xo::unit::abbrev::bpu2_abbrev;
         //using xo::unit::basis_unit2_store;
-        using xo::qty::power_ratio_type;
+        //using xo::unit::power_ratio_type;
         //using xo::unit::abbrev::flatstring_from_exponent;
         //using xo::unit::bpu2;
         //using xo::unit::detail::bpu2_rescale;

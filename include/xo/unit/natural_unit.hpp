@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "native_bpu2.hpp"
+#include "bpu2.hpp"
 #include <cmath>
 #include <cassert>
 

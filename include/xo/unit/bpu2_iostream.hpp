@@ -6,7 +6,7 @@
 #pragma once
 
 #include "xo/ratio/ratio_iostream.hpp"
-#include "native_bpu2.hpp"
+#include "bpu2.hpp"
 #include <iostream>
 
 namespace xo {
