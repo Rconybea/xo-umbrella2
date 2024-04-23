@@ -1,4 +1,4 @@
-/** @file native_bpu2.hpp
+/** @file bpu.hpp
  *
  *  Author: Roland Conybeare
  **/
@@ -11,7 +11,7 @@
 
 namespace xo {
     namespace qty {
-        using bpu2_abbrev_type = flatstring<24>;
+        using bpu_abbrev_type = flatstring<24>;
 
         using power_ratio_type = xo::ratio::ratio<std::int64_t>;
 
@@ -38,12 +38,12 @@ namespace xo {
                 }
             }
 
-            static constexpr bpu2_abbrev_type
+            static constexpr bpu_abbrev_type
             bpu2_abbrev(dim native_dim,
                         const scalefactor_ratio_type & scalefactor,
                         const power_ratio_type & power)
             {
-                return (bpu2_abbrev_type::from_flatstring
+                return (bpu_abbrev_type::from_flatstring
                         (flatstring_concat
                          (basis_unit2_abbrev(native_dim, scalefactor),
                           flatstring_from_exponent(power.num(), power.den()))));
@@ -90,7 +90,7 @@ namespace xo {
              *                power_ratio_type(-2,1)).abbrev() => "min^-2"
              *  @endcode
              **/
-            constexpr bpu2_abbrev_type abbrev() const
+            constexpr bpu_abbrev_type abbrev() const
                 {
                     return abbrev::bpu2_abbrev(native_dim_,
                                                scalefactor_,
@@ -111,23 +111,7 @@ namespace xo {
             return bpu<Int>::unit_power(bu);
         }
 
-#ifdef NOT_USING
-        template <
-            dim BasisDim,
-            std::int64_t InnerScaleNum, std::int64_t InnerScaleDen,
-            std::int64_t PowerNum, std::int64_t PowerDen
-            >
-        constexpr bpu2_abbrev_type
-        bpu2_assemble_abbrev_helper()
-        {
-            return (bpu2_abbrev_type::from_flatstring
-                    (flatstring_concat
-                     (units::scaled_native_unit2_abbrev_v<BasisDim, InnerScaleNum, InnerScaleDen>,
-                      flatstring_from_exponent<PowerNum, PowerDen>())));
-        };
-#endif
     } /*namespace qty*/
 } /*namespace xo*/
 
-
-/** end native_bpu2.hpp **/
+/** end bpu.hpp **/

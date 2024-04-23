@@ -35,7 +35,7 @@ namespace xo {
         using xo::qty::units::scaled_native_unit2_abbrev_v;
         using xo::qty::basis_unit;
         using xo::qty::abbrev::basis_unit2_abbrev;;
-        using xo::qty::bpu2_abbrev_type;
+        using xo::qty::bpu_abbrev_type;
         using xo::qty::abbrev::bpu2_abbrev;
         using xo::qty::basis_unit2_store;
         using xo::qty::power_ratio_type;
@@ -312,24 +312,24 @@ namespace xo {
             log && log(xtag("kg*kg", bpu2_abbrev(dim::mass, scalefactor_ratio_type(1000, 1), power_ratio_type(2, 1))));
 
             static_assert(bpu<int64_t>(dim::mass, scalefactor_ratio_type(1, 1), power_ratio_type(1, 1)).abbrev()
-                          == bpu2_abbrev_type::from_chars("g"));
+                          == bpu_abbrev_type::from_chars("g"));
             static_assert(bpu<int64_t>(dim::mass, scalefactor_ratio_type(1000, 1), power_ratio_type(1, 1)).abbrev()
-                          == bpu2_abbrev_type::from_chars("kg"));
+                          == bpu_abbrev_type::from_chars("kg"));
             static_assert(bpu<int64_t>(dim::mass, scalefactor_ratio_type(1000, 1), power_ratio_type(-1, 1)).abbrev()
-                          == bpu2_abbrev_type::from_chars("kg^-1"));
+                          == bpu_abbrev_type::from_chars("kg^-1"));
             static_assert(bpu<int64_t>(dim::mass, scalefactor_ratio_type(1000, 1), power_ratio_type(-2, 1)).abbrev()
-                          == bpu2_abbrev_type::from_chars("kg^-2"));
+                          == bpu_abbrev_type::from_chars("kg^-2"));
 
             static_assert(bpu<int64_t>(dim::time, scalefactor_ratio_type(60, 1), power_ratio_type(-2, 1)).abbrev()
-                          == bpu2_abbrev_type::from_chars("min^-2"));
+                          == bpu_abbrev_type::from_chars("min^-2"));
             static_assert(bpu<int64_t>(dim::time, scalefactor_ratio_type(3600, 1), power_ratio_type(-1, 1)).abbrev()
-                          == bpu2_abbrev_type::from_chars("hr^-1"));
+                          == bpu_abbrev_type::from_chars("hr^-1"));
             static_assert(bpu<int64_t>(dim::time, scalefactor_ratio_type(24*3600, 1), power_ratio_type(-1, 1)).abbrev()
-                          == bpu2_abbrev_type::from_chars("dy^-1"));
+                          == bpu_abbrev_type::from_chars("dy^-1"));
             static_assert(bpu<int64_t>(dim::time, scalefactor_ratio_type(360*24*3600, 1), power_ratio_type(-1, 1)).abbrev()
-                          == bpu2_abbrev_type::from_chars("yr360^-1"));
+                          == bpu_abbrev_type::from_chars("yr360^-1"));
             static_assert(bpu<int64_t>(dim::time, scalefactor_ratio_type(360*24*3600, 1), power_ratio_type(-1, 2)).abbrev()
-                          == bpu2_abbrev_type::from_chars("yr360^(-1/2)"));
+                          == bpu_abbrev_type::from_chars("yr360^(-1/2)"));
         } /*TEST_CASE(bpu2_abbrev)*/
 
 

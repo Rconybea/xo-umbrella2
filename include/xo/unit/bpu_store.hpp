@@ -65,7 +65,7 @@ namespace xo {
                 }
 
             /** @brief get basis-power-unit abbreviation at runtime **/
-            bpu2_abbrev_type bpu_abbrev(dim basis_dim,
+            bpu_abbrev_type bpu_abbrev(dim basis_dim,
                                         const scalefactor_ratio_type & scalefactor,
                                         const power_ratio_type & power)
                 {
