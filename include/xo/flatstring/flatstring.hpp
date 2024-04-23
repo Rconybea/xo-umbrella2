@@ -353,6 +353,54 @@ namespace xo {
         }
         ///@}
 
+        /** @defgroup flatstring-append append **/
+        ///@{
+        /** @brief append contents of null-terminated string cstr **/
+        constexpr flatstring & append(const value_type * cstr) {
+            std::size_t z = this->size();
+            std::size_t i = 0;
+            for (; (z+i < N-1) && (cstr[i] != '\0'); ++i)
+                value_[z+i] = cstr[i];
+            for (; z+i < N; ++i)
+                value_[z+i] = '\0';
+
+            return *this;
+        }
+
+        /** @brief append the first count members of cstr[] **/
+        constexpr flatstring & append(const value_type * cstr, size_type count) {
+            std::size_t z = this->size();
+            std::size_t i = 0;
+            for (; z+i < std::min(N-1, count); ++i)
+                value_[z+i] = cstr[i];
+            for (; z+i < N; ++i)
+                value_[z+i] = '\0';
+
+            return *this;
+        }
+
+        /** @brief append substring [pos .. pos + count) of x **/
+        template <std::size_t N2>
+        constexpr flatstring & append(const flatstring<N2> & x,
+                                      size_type pos, size_type count = npos)
+            {
+                std::size_t i_src = 0;
+                std::size_t i_dest = size();
+                for (;
+                     i_src < std::min(std::min(count,
+                                               (x.fixed_capacity-1 > pos)
+                                               ? x.fixed_capacity-1 - pos
+                                               : 0ul),
+                                      N-1);
+                     ++i_src, ++i_dest)
+                    value_[i_dest] = x.value_[pos+i_src];
+                for (; i_dest < N; ++i_dest)
+                    value_[i_dest] = '\0';
+
+                return *this;
+            }
+        ///@}
+
         // insert
         // insert_range
         // erase
