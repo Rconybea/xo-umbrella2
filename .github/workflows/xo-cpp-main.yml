@@ -62,3 +62,39 @@ jobs:
         echo "::group::local dir tree"
         tree ${PREFIX}
         echo "::endgroup"
+
+    # ----------------------------------------------------------------
+
+    - name: xo-indentlog
+      run: |
+        XO_NAME=xo-indentlog
+        XO_SRC=repo/${XO_NAME}
+        XO_BUILDDIR=${{github.workspace}}/build_${XO_NAME}
+        PREFIX=${{github.workspace}}/local
+
+        XO_REPO=https://github.com/rconybea/indentlog.git
+
+        mkdir -p ${XO_SRC}
+        mkdir -p ${XO_BUILDDIR}
+
+        echo "::group::clone ${XO_NAME}"
+        export GIT_SSH_COMMAND='ssh -o StrictHostKeyChecking=no'
+        export GIT_SSL_NOVERIFY=true
+        git clone ${XO_REPO} ${XO_SRC}
+        echo "::endgroup"
+
+        echo "::group::configure ${XO_NAME}"
+        cmake -B ${XO_BUILDDIR} -DCMAKE_INSTALL_PREFIX=${PREFIX} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} ${XO_SRC}
+        echo "::endgroup"
+
+        echo "::group::compile ${XO_NAME}"
+        cmake --build ${XO_BUILDDIR} -j
+        echo "::endgroup"
+
+        echo "::group::local install ${XO_NAME}"
+        cmake --install ${XO_BUILDDIR}
+        echo "::endgroup"
+
+        echo "::group::local dir tree"
+        tree ${PREFIX}
+        echo "::endgroup"
