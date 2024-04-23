@@ -51,7 +51,7 @@ jobs:
         cmake -B ${XO_BUILDDIR} -DCMAKE_INSTALL_PREFIX=${PREFIX} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} ${XO_SRC}
         echo "::endgroup"
 
-        echo "::group::compile ${XO_NAME}
+        echo "::group::compile ${XO_NAME}"
         cmake --build ${XO_BUILDDIR} -j
         echo "::endgroup"
 
