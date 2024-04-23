@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "Quantity2.hpp"
+#include "Quantity.hpp"
 #include <iostream>
 
 namespace xo {
@@ -14,7 +14,7 @@ namespace xo {
                   typename Int = std::int64_t>
         inline std::ostream &
         operator<< (std::ostream & os,
-                    const Quantity2<Repr, Int> & x)
+                    const Quantity<Repr, Int> & x)
         {
             os << "<qty"
                << xtag("scale", x.scale())

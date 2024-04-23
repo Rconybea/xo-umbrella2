@@ -2,7 +2,7 @@
 
 #include "xo/unit/unit.hpp"
 #include "xo/unit/Quantity2_iostream.hpp"
-#include "xo/unit/Quantity2.hpp"
+#include "xo/unit/Quantity.hpp"
 #include "xo/unit/scaled_unit_iostream.hpp"
 #include "xo/unit/natural_unit.hpp"
 #include "xo/unit/natural_unit_iostream.hpp"
@@ -25,7 +25,7 @@ namespace xo {
 
         namespace su2 = xo::qty::su2;
 
-        using xo::qty::Quantity2;
+        using xo::qty::Quantity;
         using xo::qty::dim;
         using xo::qty::basis_unit2_abbrev_type;
         using xo::qty::native_unit;
@@ -807,7 +807,7 @@ namespace xo {
             //log && log("(A)", xtag("foo", foo));
 
             /* not constexpr until c++26 */
-            Quantity2 ng = unit_qty(su2::nanogram);
+            Quantity ng = unit_qty(su2::nanogram);
             auto ng2 = ng * ng;
 
             log && log(xtag("ng*ng", ng2));
@@ -828,8 +828,8 @@ namespace xo {
             //log && log("(A)", xtag("foo", foo));
 
             /* not constexpr until c++26 */
-            Quantity2 ng = unit_qty(su2::nanogram);
-            Quantity2 ug = unit_qty(su2::microgram);
+            Quantity ng = unit_qty(su2::nanogram);
+            Quantity ug = unit_qty(su2::microgram);
 
             {
                 auto prod1 = ng * ug;
