@@ -70,8 +70,8 @@ namespace xo {
                   power_{power}
                 {}
             constexpr bpu(dim native_dim,
-                           const scalefactor_ratio_type & scalefactor,
-                           const power_ratio_type & power)
+                          const scalefactor_ratio_type & scalefactor,
+                          const power_ratio_type & power)
                 : basis_unit(native_dim, scalefactor),
                   power_{power}
                 {}

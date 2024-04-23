@@ -24,8 +24,8 @@ namespace xo {
 
             constexpr scaled_unit reciprocal() const {
                 return scaled_unit(nu_reciprocal(natural_unit_,
-                                                  outer_scale_exact_.reciprocal(),
-                                                  1.0 / outer_scale_sq_));
+                                                 outer_scale_exact_.reciprocal(),
+                                                 1.0 / outer_scale_sq_));
             }
 
             natural_unit<Int> natural_unit_;
@@ -37,8 +37,8 @@ namespace xo {
             template <typename Int>
             constexpr auto make_unit_rescale_result(const natural_unit<Int> & bpuv) {
                 return scaled_unit<Int>(bpuv,
-                                                      ratio::ratio<Int>(1, 1),
-                                                      1.0);
+                                        ratio::ratio<Int>(1, 1),
+                                        1.0);
             }
         }
 
@@ -59,7 +59,9 @@ namespace xo {
                 bpu<Int> prod_bpu = lhs_bpu;
                 auto rr = bpu_product_inplace(&prod_bpu, rhs_bpu);
 
-                return bpu2_rescale_result<Int>(prod_bpu, rr.outer_scale_exact_, rr.outer_scale_sq_);
+                return bpu2_rescale_result<Int>(prod_bpu,
+                                                rr.outer_scale_exact_,
+                                                rr.outer_scale_sq_);
             }
 
             template <typename Int>
