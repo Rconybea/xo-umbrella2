@@ -6,7 +6,7 @@
 #pragma once
 
 #include "quantity2_concept.hpp"
-#include "scaled_unit2.hpp"
+#include "scaled_unit.hpp"
 #include "natural_unit.hpp"
 
 namespace xo {
@@ -75,7 +75,7 @@ namespace xo {
         template <typename Repr = double,
                   typename Int = std::int64_t>
         inline constexpr Quantity2<Repr, Int>
-        unit_qty(const scaled_unit2<Int> & u) {
+        unit_qty(const scaled_unit<Int> & u) {
             return Quantity2<Repr, Int>
                 (u.outer_scale_exact_.template to<double>() * ::sqrt(u.outer_scale_sq_),
                  u.natural_unit_);

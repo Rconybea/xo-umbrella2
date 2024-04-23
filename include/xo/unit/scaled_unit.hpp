@@ -6,7 +6,6 @@
 #pragma once
 
 #include "natural_unit.hpp"
-//#include <cstdint>
 
 namespace xo {
     namespace qty {
@@ -14,8 +13,8 @@ namespace xo {
          *  @brief Represents the product sqrt(outer_scale_sq) * outer_scale_exact * nat_unit
          **/
         template <typename Int>
-        struct scaled_unit2 {
-            constexpr scaled_unit2(const natural_unit<Int> & nat_unit,
+        struct scaled_unit {
+            constexpr scaled_unit(const natural_unit<Int> & nat_unit,
                                    ratio::ratio<Int> outer_scale_exact,
                                    double outer_scale_sq)
                 : natural_unit_{nat_unit},
@@ -23,8 +22,8 @@ namespace xo {
                   outer_scale_sq_{outer_scale_sq}
                 {}
 
-            constexpr scaled_unit2 reciprocal() const {
-                return scaled_unit2(nu_reciprocal(natural_unit_,
+            constexpr scaled_unit reciprocal() const {
+                return scaled_unit(nu_reciprocal(natural_unit_,
                                                   outer_scale_exact_.reciprocal(),
                                                   1.0 / outer_scale_sq_));
             }
@@ -37,7 +36,7 @@ namespace xo {
         namespace detail {
             template <typename Int>
             constexpr auto make_unit_rescale_result(const natural_unit<Int> & bpuv) {
-                return scaled_unit2<Int>(bpuv,
+                return scaled_unit<Int>(bpuv,
                                                       ratio::ratio<Int>(1, 1),
                                                       1.0);
             }
@@ -65,21 +64,21 @@ namespace xo {
 
             template <typename Int>
             constexpr
-            scaled_unit2<Int>
+            scaled_unit<Int>
             nu_product(const natural_unit<Int> & lhs_bpu_array,
                        const bpu<Int> & rhs_bpu)
             {
                 natural_unit<Int> prod = lhs_bpu_array;
                 auto rr = bpu_array_product_inplace(&prod, rhs_bpu);
 
-                return scaled_unit2<Int>(prod,
+                return scaled_unit<Int>(prod,
                                                       rr.outer_scale_exact_,
                                                       rr.outer_scale_sq_);
             };
 
             template <typename Int>
             constexpr
-            scaled_unit2<Int>
+            scaled_unit<Int>
             nu_product(const natural_unit<Int> & lhs_bpu_array,
                        const natural_unit<Int> & rhs_bpu_array)
             {
@@ -100,7 +99,7 @@ namespace xo {
                     sfr.outer_scale_sq_ *= sfr2.outer_scale_sq_;
                 }
 
-                return scaled_unit2<Int>(prod,
+                return scaled_unit<Int>(prod,
                                          sfr.outer_scale_exact_,
                                          sfr.outer_scale_sq_);
             }
@@ -108,14 +107,14 @@ namespace xo {
         }
 
         template <typename Int>
-        inline constexpr scaled_unit2<Int>
-        operator* (const scaled_unit2<Int> & x_unit,
-                   const scaled_unit2<Int> & y_unit)
+        inline constexpr scaled_unit<Int>
+        operator* (const scaled_unit<Int> & x_unit,
+                   const scaled_unit<Int> & y_unit)
         {
             auto rr = detail::nu_product(x_unit.natural_unit_,
                                                 y_unit.natural_unit_);
 
-            return (scaled_unit2<Int>
+            return (scaled_unit<Int>
                     (rr.natural_unit_,
                      rr.outer_scale_exact_ * x_unit.outer_scale_exact_ * y_unit.outer_scale_exact_,
                      rr.outer_scale_sq_ * x_unit.outer_scale_sq_ * y_unit.outer_scale_sq_));

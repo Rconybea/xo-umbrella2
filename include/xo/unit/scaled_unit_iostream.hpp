@@ -5,14 +5,14 @@
 
 #pragma once
 
-#include "scaled_unit2.hpp"
+#include "scaled_unit.hpp"
 #include <iostream>
 
 namespace xo {
     namespace qty {
         template <typename Int>
         inline std::ostream &
-        operator<<(std::ostream & os, const scaled_unit2<Int> & x) {
+        operator<<(std::ostream & os, const scaled_unit<Int> & x) {
             os << "<scaled-unit"
                << xtag("bpuv", x.natural_unit_)
                << xtag("outer_scale_exact", x.outer_scale_exact_)
