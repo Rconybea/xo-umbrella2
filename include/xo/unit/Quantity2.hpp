@@ -7,7 +7,7 @@
 
 #include "quantity2_concept.hpp"
 #include "scaled_unit2.hpp"
-#include "unit2.hpp"
+#include "natural_unit.hpp"
 
 namespace xo {
     namespace qty {
@@ -29,11 +29,12 @@ namespace xo {
         class Quantity2 {
         public:
             using repr_type = Repr;
-            using unit_type = unit2<Int>;
+            using unit_type = natural_unit<Int>;
             using ratio_int_type = Int;
 
         public:
-            constexpr Quantity2(Repr scale, const unit2<Int> & unit)
+            constexpr Quantity2(Repr scale,
+                                const natural_unit<Int> & unit)
                 : scale_{scale}, unit_{unit} {}
 
             constexpr const repr_type & scale() const { return scale_; }
@@ -66,7 +67,7 @@ namespace xo {
             /** @brief quantity represents this multiple of a unit amount **/
             Repr scale_ = Repr{};
             /** @brief unit for this quantity **/
-            unit2<Int> unit_;
+            natural_unit<Int> unit_;
         }; /*Quantity2*/
 
         /** note: won't have constexpr result until c++26 (when ::sqrt(), ::pow() are constexpr)
@@ -75,8 +76,9 @@ namespace xo {
                   typename Int = std::int64_t>
         inline constexpr Quantity2<Repr, Int>
         unit_qty(const scaled_unit2<Int> & u) {
-            return Quantity2<Repr, Int>(u.outer_scale_exact_.template to<double>() * ::sqrt(u.outer_scale_sq_),
-                                        u.natural_unit_);
+            return Quantity2<Repr, Int>
+                (u.outer_scale_exact_.template to<double>() * ::sqrt(u.outer_scale_sq_),
+                 u.natural_unit_);
         }
 
         /** note: won't have constexpr result until c++26 (when ::sqrt(), ::pow() are constexpr)

@@ -40,8 +40,8 @@ namespace xo {
 
             static constexpr bpu_abbrev_type
             bpu_abbrev(dim native_dim,
-                        const scalefactor_ratio_type & scalefactor,
-                        const power_ratio_type & power)
+                       const scalefactor_ratio_type & scalefactor,
+                       const power_ratio_type & power)
             {
                 return (bpu_abbrev_type::from_flatstring
                         (flatstring_concat
