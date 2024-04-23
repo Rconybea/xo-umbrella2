@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "bpu2.hpp"
+#include "bpu.hpp"
 
 namespace xo {
     namespace qty {

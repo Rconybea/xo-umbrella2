@@ -52,12 +52,12 @@ namespace xo {
             template <typename Int>
             constexpr
             detail::bpu2_rescale_result<Int>
-            bpu2_product(const bpu2<Int> & lhs_bpu,
-                         const bpu2<Int> & rhs_bpu)
+            bpu2_product(const bpu<Int> & lhs_bpu,
+                         const bpu<Int> & rhs_bpu)
             {
                 assert(lhs_bpu.native_dim() == rhs_bpu.native_dim());
 
-                bpu2<Int> prod_bpu = lhs_bpu;
+                bpu<Int> prod_bpu = lhs_bpu;
                 auto rr = bpu_product_inplace(&prod_bpu, rhs_bpu);
 
                 return bpu2_rescale_result<Int>(prod_bpu, rr.outer_scale_exact_, rr.outer_scale_sq_);
@@ -67,7 +67,7 @@ namespace xo {
             constexpr
             scaled_unit2<Int>
             nu_product(const natural_unit<Int> & lhs_bpu_array,
-                       const bpu2<Int> & rhs_bpu)
+                       const bpu<Int> & rhs_bpu)
             {
                 natural_unit<Int> prod = lhs_bpu_array;
                 auto rr = bpu_array_product_inplace(&prod, rhs_bpu);

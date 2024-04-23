@@ -7,7 +7,7 @@
 #include "xo/unit/natural_unit.hpp"
 #include "xo/unit/natural_unit_iostream.hpp"
 #include "xo/unit/bpu_store.hpp"
-#include "xo/unit/bpu2.hpp"
+#include "xo/unit/bpu.hpp"
 #include "xo/unit/bpu2_iostream.hpp"
 #include "xo/unit/basis_unit.hpp"
 #include "xo/unit/native_unit.hpp"
@@ -40,7 +40,7 @@ namespace xo {
         using xo::qty::basis_unit2_store;
         using xo::qty::power_ratio_type;
         using xo::qty::abbrev::flatstring_from_exponent;
-        using xo::qty::bpu2;
+        using xo::qty::bpu;
         using xo::qty::detail::bpu2_rescale;
         using xo::qty::detail::bpu2_product;
         using xo::qty::natural_unit;
@@ -311,24 +311,24 @@ namespace xo {
             log && log(xtag("kg", bpu2_abbrev(dim::mass, scalefactor_ratio_type(1000, 1), power_ratio_type(1, 1))));
             log && log(xtag("kg*kg", bpu2_abbrev(dim::mass, scalefactor_ratio_type(1000, 1), power_ratio_type(2, 1))));
 
-            static_assert(bpu2<int64_t>(dim::mass, scalefactor_ratio_type(1, 1), power_ratio_type(1, 1)).abbrev()
+            static_assert(bpu<int64_t>(dim::mass, scalefactor_ratio_type(1, 1), power_ratio_type(1, 1)).abbrev()
                           == bpu2_abbrev_type::from_chars("g"));
-            static_assert(bpu2<int64_t>(dim::mass, scalefactor_ratio_type(1000, 1), power_ratio_type(1, 1)).abbrev()
+            static_assert(bpu<int64_t>(dim::mass, scalefactor_ratio_type(1000, 1), power_ratio_type(1, 1)).abbrev()
                           == bpu2_abbrev_type::from_chars("kg"));
-            static_assert(bpu2<int64_t>(dim::mass, scalefactor_ratio_type(1000, 1), power_ratio_type(-1, 1)).abbrev()
+            static_assert(bpu<int64_t>(dim::mass, scalefactor_ratio_type(1000, 1), power_ratio_type(-1, 1)).abbrev()
                           == bpu2_abbrev_type::from_chars("kg^-1"));
-            static_assert(bpu2<int64_t>(dim::mass, scalefactor_ratio_type(1000, 1), power_ratio_type(-2, 1)).abbrev()
+            static_assert(bpu<int64_t>(dim::mass, scalefactor_ratio_type(1000, 1), power_ratio_type(-2, 1)).abbrev()
                           == bpu2_abbrev_type::from_chars("kg^-2"));
 
-            static_assert(bpu2<int64_t>(dim::time, scalefactor_ratio_type(60, 1), power_ratio_type(-2, 1)).abbrev()
+            static_assert(bpu<int64_t>(dim::time, scalefactor_ratio_type(60, 1), power_ratio_type(-2, 1)).abbrev()
                           == bpu2_abbrev_type::from_chars("min^-2"));
-            static_assert(bpu2<int64_t>(dim::time, scalefactor_ratio_type(3600, 1), power_ratio_type(-1, 1)).abbrev()
+            static_assert(bpu<int64_t>(dim::time, scalefactor_ratio_type(3600, 1), power_ratio_type(-1, 1)).abbrev()
                           == bpu2_abbrev_type::from_chars("hr^-1"));
-            static_assert(bpu2<int64_t>(dim::time, scalefactor_ratio_type(24*3600, 1), power_ratio_type(-1, 1)).abbrev()
+            static_assert(bpu<int64_t>(dim::time, scalefactor_ratio_type(24*3600, 1), power_ratio_type(-1, 1)).abbrev()
                           == bpu2_abbrev_type::from_chars("dy^-1"));
-            static_assert(bpu2<int64_t>(dim::time, scalefactor_ratio_type(360*24*3600, 1), power_ratio_type(-1, 1)).abbrev()
+            static_assert(bpu<int64_t>(dim::time, scalefactor_ratio_type(360*24*3600, 1), power_ratio_type(-1, 1)).abbrev()
                           == bpu2_abbrev_type::from_chars("yr360^-1"));
-            static_assert(bpu2<int64_t>(dim::time, scalefactor_ratio_type(360*24*3600, 1), power_ratio_type(-1, 2)).abbrev()
+            static_assert(bpu<int64_t>(dim::time, scalefactor_ratio_type(360*24*3600, 1), power_ratio_type(-1, 2)).abbrev()
                           == bpu2_abbrev_type::from_chars("yr360^(-1/2)"));
         } /*TEST_CASE(bpu2_abbrev)*/
 
@@ -349,7 +349,7 @@ namespace xo {
             {
                 constexpr auto p = power_ratio_type(1, 1);
 
-                constexpr auto orig_bpu = bpu2<int64_t>(dim::mass,
+                constexpr auto orig_bpu = bpu<int64_t>(dim::mass,
                                                         scalefactor_ratio_type(1000, 1),
                                                         power_ratio_type(1, 1));
                 static_assert(orig_bpu.native_dim() == dim::mass);
@@ -384,7 +384,7 @@ namespace xo {
             {
                 constexpr auto p = power_ratio_type(-1, 2);
 
-                constexpr auto orig_bpu = bpu2<int64_t>(dim::time,
+                constexpr auto orig_bpu = bpu<int64_t>(dim::time,
                                                         scalefactor_ratio_type(360*24*3600, 1),
                                                         power_ratio_type(-1, 2));
                 static_assert(orig_bpu.native_dim() == dim::time);
@@ -423,7 +423,7 @@ namespace xo {
             {
                 constexpr auto p = power_ratio_type(-3, 2);
 
-                constexpr auto orig_bpu = bpu2<int64_t>(dim::time,
+                constexpr auto orig_bpu = bpu<int64_t>(dim::time,
                                                         scalefactor_ratio_type(360*24*3600, 1),
                                                         power_ratio_type(-3, 2));
                 static_assert(orig_bpu.native_dim() == dim::time);
@@ -472,12 +472,12 @@ namespace xo {
             //log && log("(A)", xtag("foo", foo));
 
             {
-                constexpr auto bpu_x = bpu2<int64_t>(dim::time,
+                constexpr auto bpu_x = bpu<int64_t>(dim::time,
                                                      scalefactor_ratio_type(360*24*3600, 1),
                                                      power_ratio_type(-3,2));
                 static_assert(bpu_x.native_dim() == dim::time);
 
-                constexpr auto bpu_y = bpu2<int64_t>(dim::time,
+                constexpr auto bpu_y = bpu<int64_t>(dim::time,
                                                      scalefactor_ratio_type(360*24*3600, 1),
                                                      power_ratio_type(1,2));
                 static_assert(bpu_y.native_dim() == dim::time);
@@ -509,12 +509,12 @@ namespace xo {
             //log && log("(A)", xtag("foo", foo));
 
             {
-                constexpr auto bpu_x = bpu2<int64_t>(dim::time,
+                constexpr auto bpu_x = bpu<int64_t>(dim::time,
                                                      scalefactor_ratio_type(360*24*3600, 1),
                                                      power_ratio_type(-3,2));
                 static_assert(bpu_x.native_dim() == dim::time);
 
-                constexpr auto bpu_y = bpu2<int64_t>(dim::time,
+                constexpr auto bpu_y = bpu<int64_t>(dim::time,
                                                      scalefactor_ratio_type(30*24*3600, 1),
                                                      power_ratio_type(1,2));
                 static_assert(bpu_y.native_dim() == dim::time);
@@ -554,7 +554,7 @@ namespace xo {
             {
                 constexpr natural_unit<int64_t> v
                     = (bpu_array_maker<int64_t>::make_bpu_array
-                       (bpu2<int64_t>(dim::mass, scalefactor_ratio_type(1000, 1), power_ratio_type(1, 1))));
+                       (bpu<int64_t>(dim::mass, scalefactor_ratio_type(1000, 1), power_ratio_type(1, 1))));
 
                 static_assert(v.n_bpu() == 1);
             }
@@ -562,8 +562,8 @@ namespace xo {
             {
                 constexpr natural_unit<int64_t> v
                     = (bpu_array_maker<int64_t>::make_bpu_array
-                       (bpu2<int64_t>(dim::distance, scalefactor_ratio_type(1, 1000), power_ratio_type(2, 1)),
-                        bpu2<int64_t>(dim::mass, scalefactor_ratio_type(1, 1000), power_ratio_type(-1, 1))));
+                       (bpu<int64_t>(dim::distance, scalefactor_ratio_type(1, 1000), power_ratio_type(2, 1)),
+                        bpu<int64_t>(dim::mass, scalefactor_ratio_type(1, 1000), power_ratio_type(-1, 1))));
 
                 static_assert(v.n_bpu() == 2);
             }
@@ -584,12 +584,12 @@ namespace xo {
             {
                 constexpr natural_unit<int64_t> v
                     = (bpu_array_maker<int64_t>::make_bpu_array
-                       (bpu2<int64_t>(dim::distance, scalefactor_ratio_type(1, 1000), power_ratio_type(2, 1)),
-                        bpu2<int64_t>(dim::mass, scalefactor_ratio_type(1, 1000), power_ratio_type(-1, 1))));
+                       (bpu<int64_t>(dim::distance, scalefactor_ratio_type(1, 1000), power_ratio_type(2, 1)),
+                        bpu<int64_t>(dim::mass, scalefactor_ratio_type(1, 1000), power_ratio_type(-1, 1))));
 
                 static_assert(v.n_bpu() == 2);
 
-                constexpr bpu2<int64_t> bpu(dim::time,
+                constexpr bpu<int64_t> bpu(dim::time,
                                             scalefactor_ratio_type(250*24*3600, 1),
                                             power_ratio_type(-1, 2));
 
@@ -631,12 +631,12 @@ namespace xo {
             {
                 constexpr natural_unit<int64_t> v
                     = (bpu_array_maker<int64_t>::make_bpu_array
-                       (bpu2<int64_t>(dim::distance, scalefactor_ratio_type(1, 1000), power_ratio_type(2, 1)),
-                        bpu2<int64_t>(dim::time, scalefactor_ratio_type(30*24*3600, 1), power_ratio_type(-1, 2))));
+                       (bpu<int64_t>(dim::distance, scalefactor_ratio_type(1, 1000), power_ratio_type(2, 1)),
+                        bpu<int64_t>(dim::time, scalefactor_ratio_type(30*24*3600, 1), power_ratio_type(-1, 2))));
 
                 static_assert(v.n_bpu() == 2);
 
-                constexpr bpu2<int64_t> bpu(dim::time,
+                constexpr bpu<int64_t> bpu(dim::time,
                                             scalefactor_ratio_type(360*24*3600, 1),
                                             power_ratio_type(-1, 2));
 
@@ -675,12 +675,12 @@ namespace xo {
             {
                 constexpr natural_unit<int64_t> v
                     = (bpu_array_maker<int64_t>::make_bpu_array
-                       (bpu2<int64_t>(dim::distance, scalefactor_ratio_type(1, 1000), power_ratio_type(2, 1)),
-                        bpu2<int64_t>(dim::mass, scalefactor_ratio_type(1, 1000), power_ratio_type(-1, 1))));
+                       (bpu<int64_t>(dim::distance, scalefactor_ratio_type(1, 1000), power_ratio_type(2, 1)),
+                        bpu<int64_t>(dim::mass, scalefactor_ratio_type(1, 1000), power_ratio_type(-1, 1))));
 
                 static_assert(v.n_bpu() == 2);
 
-                constexpr bpu2<int64_t> bpu(dim::distance,
+                constexpr bpu<int64_t> bpu(dim::distance,
                                             scalefactor_ratio_type(1, 1000),
                                             power_ratio_type(-1, 1));
 
@@ -719,14 +719,14 @@ namespace xo {
             {
                 constexpr natural_unit<int64_t> v
                     = (bpu_array_maker<int64_t>::make_bpu_array
-                       (bpu2<int64_t>(dim::distance, scalefactor_ratio_type(1, 1000), power_ratio_type(2, 1)),
-                        bpu2<int64_t>(dim::mass, scalefactor_ratio_type(1, 1000), power_ratio_type(-1, 1))));
+                       (bpu<int64_t>(dim::distance, scalefactor_ratio_type(1, 1000), power_ratio_type(2, 1)),
+                        bpu<int64_t>(dim::mass, scalefactor_ratio_type(1, 1000), power_ratio_type(-1, 1))));
 
                 static_assert(v.n_bpu() == 2);
 
                 constexpr natural_unit<int64_t> w
                     = (bpu_array_maker<int64_t>::make_bpu_array
-                       (bpu2<int64_t>(dim::time, scalefactor_ratio_type(30*24*3600, 1), power_ratio_type(-1, 2))));
+                       (bpu<int64_t>(dim::time, scalefactor_ratio_type(30*24*3600, 1), power_ratio_type(-1, 2))));
 
                 static_assert(w.n_bpu() == 1);
 

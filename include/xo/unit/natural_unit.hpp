@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "bpu2.hpp"
+#include "bpu.hpp"
 #include <cmath>
 #include <cassert>
 
@@ -30,22 +30,22 @@ namespace xo {
             constexpr natural_unit() : n_bpu_{0} {}
 
             constexpr std::size_t n_bpu() const { return n_bpu_; }
-            constexpr bpu2<Int> * bpu_v() const { return bpu_v_; }
+            constexpr bpu<Int> * bpu_v() const { return bpu_v_; }
 
-            constexpr void push_back(const bpu2<Int> & bpu) {
+            constexpr void push_back(const bpu<Int> & bpu) {
                 if (n_bpu_ < n_dim)
                     bpu_v_[n_bpu_++] = bpu;
             }
 
-            constexpr bpu2<Int> & operator[](std::size_t i) { return bpu_v_[i]; }
-            constexpr const bpu2<Int> & operator[](std::size_t i) const { return bpu_v_[i]; }
+            constexpr bpu<Int> & operator[](std::size_t i) { return bpu_v_[i]; }
+            constexpr const bpu<Int> & operator[](std::size_t i) const { return bpu_v_[i]; }
 
         private:
             /** @brief the number of occupied slots in @c bpu_v_ **/
             std::size_t n_bpu_;
 
             /** @brief storage for basis power units **/
-            bpu2<Int> bpu_v_[n_dim];
+            bpu<Int> bpu_v_[n_dim];
         };
 
         namespace detail {
@@ -116,7 +116,7 @@ namespace xo {
 
             template <typename Int>
             struct bpu2_rescale_result {
-                constexpr bpu2_rescale_result(const bpu2<Int> & bpu_rescaled,
+                constexpr bpu2_rescale_result(const bpu<Int> & bpu_rescaled,
                                               const ratio::ratio<Int> & outer_scale_exact,
                                               double outer_scale_sq)
                     : bpu_rescaled_{bpu_rescaled},
@@ -125,7 +125,7 @@ namespace xo {
                     {}
 
                 /* (b'.u)^p */
-                bpu2<Int> bpu_rescaled_;
+                bpu<Int> bpu_rescaled_;
                 /* (b/b')^p0 */
                 ratio::ratio<Int> outer_scale_exact_;
                 /* [(b/b')^q]^2 -- until c++26 only allow q=0 or q=1/2 */
@@ -135,7 +135,7 @@ namespace xo {
             template <typename Int>
             constexpr
             bpu2_rescale_result<Int>
-            bpu2_rescale(const bpu2<Int> & orig,
+            bpu2_rescale(const bpu<Int> & orig,
                          const scalefactor_ratio_type & new_scalefactor)
             {
                 ratio::ratio<Int> mult = (orig.scalefactor() / new_scalefactor);
@@ -154,7 +154,7 @@ namespace xo {
                     // remaining possibilities not supported until c++26
                 }
 
-                return bpu2_rescale_result<Int>(bpu2<Int>(orig.native_dim(),
+                return bpu2_rescale_result<Int>(bpu<Int>(orig.native_dim(),
                                                           new_scalefactor,
                                                           orig.power()),
                                                 mult.power(orig.power().floor()),
@@ -164,15 +164,15 @@ namespace xo {
             template <typename Int>
             constexpr
             outer_scalefactor_result<Int>
-            bpu_product_inplace(bpu2<Int> * p_target_bpu,
-                                const bpu2<Int> & rhs_bpu_orig)
+            bpu_product_inplace(bpu<Int> * p_target_bpu,
+                                const bpu<Int> & rhs_bpu_orig)
             {
                 assert(rhs_bpu_orig.native_dim() == p_target_bpu->native_dim());
 
                 bpu2_rescale_result<Int> rhs_bpu_rr = bpu2_rescale(rhs_bpu_orig,
                                                                    p_target_bpu->scalefactor());
 
-                *p_target_bpu = bpu2<Int>(p_target_bpu->native_dim(),
+                *p_target_bpu = bpu<Int>(p_target_bpu->native_dim(),
                                           p_target_bpu->scalefactor(),
                                           p_target_bpu->power() + rhs_bpu_orig.power());
 
@@ -184,7 +184,7 @@ namespace xo {
             constexpr
             outer_scalefactor_result<Int>
             bpu_array_product_inplace(natural_unit<Int> * p_target,
-                                      const bpu2<Int> & bpu)
+                                      const bpu<Int> & bpu)
             {
                 std::size_t i = 0;
                 for (; i < p_target->n_bpu(); ++i) {

@@ -58,26 +58,26 @@ namespace xo {
          *  native_bpu<universal::time, ratio<1>, ratio<-1,2>> represents unit of 1/sqrt(t)
          **/
         template<typename Int>
-        struct bpu2 : basis_unit {
+        struct bpu : basis_unit {
         public:
             using ratio_int_type = Int;
 
         public:
-            constexpr bpu2() = default;
-            constexpr bpu2(const basis_unit & bu,
-                           const power_ratio_type & power)
+            constexpr bpu() = default;
+            constexpr bpu(const basis_unit & bu,
+                          const power_ratio_type & power)
                 : basis_unit{bu},
                   power_{power}
                 {}
-            constexpr bpu2(dim native_dim,
+            constexpr bpu(dim native_dim,
                            const scalefactor_ratio_type & scalefactor,
                            const power_ratio_type & power)
                 : basis_unit(native_dim, scalefactor),
                   power_{power}
                 {}
 
-            static constexpr bpu2<Int> unit_power(const basis_unit & bu) {
-                return bpu2<Int>(bu, power_ratio_type(1,1));
+            static constexpr bpu<Int> unit_power(const basis_unit & bu) {
+                return bpu<Int>(bu, power_ratio_type(1,1));
             }
 
             constexpr const power_ratio_type & power() const { return power_; }
@@ -98,8 +98,8 @@ namespace xo {
                 }
 
             /* for bpu x, x.reciprocal() represents dimension of 1/x */
-            constexpr bpu2<Int> reciprocal() const {
-                return bpu2<Int>(native_dim(), scalefactor(), power_.negate());
+            constexpr bpu<Int> reciprocal() const {
+                return bpu<Int>(native_dim(), scalefactor(), power_.negate());
             }
 
             /** @brief this unit represents native dimension taken to this power **/
@@ -108,7 +108,7 @@ namespace xo {
 
         template <typename Int>
         constexpr auto make_unit_power(const basis_unit & bu) {
-            return bpu2<Int>::unit_power(bu);
+            return bpu<Int>::unit_power(bu);
         }
 
 #ifdef NOT_USING
