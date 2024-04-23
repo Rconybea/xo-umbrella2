@@ -1,7 +1,7 @@
 /* @file unit.test.cpp */
 
 #include "xo/unit/unit.hpp"
-#include "xo/unit/Quantity2_iostream.hpp"
+#include "xo/unit/Quantity_iostream.hpp"
 #include "xo/unit/Quantity.hpp"
 #include "xo/unit/scaled_unit_iostream.hpp"
 #include "xo/unit/natural_unit.hpp"
