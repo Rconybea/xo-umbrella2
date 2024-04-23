@@ -42,6 +42,8 @@ namespace xo {
         public:
             /** @defgroup ratio-ctor **/
             ///@{
+            /** @brief construct ratio 0/1 **/
+            constexpr ratio() = default;
             /** @brief construct ratio with numerator @p n and denominator @p d.
              *
              *  Ratio need not be normalized
@@ -132,41 +134,6 @@ namespace xo {
                     return multiply(x, y.reciprocal());
                 }
 
-            /** @brief compute integer exponent @p p of this ratio
-             *
-             *  @note time complexity is O(log p)
-             **/
-            constexpr ratio power(int p) const {
-
-                constexpr ratio retval = ratio(1, 1);
-
-                if (p == 0)
-                    return ratio(1, 1);
-
-                if (p < 0)
-                    return this->reciprocal().power(-p);
-
-                /* inv: x^p = aj.xj^pj */
-                ratio aj = ratio(1, 1);
-                ratio xj = *this;
-                int pj = p;
-
-                while (pj > 0) {
-                    if (pj % 2 == 0) {
-                        /* a.x^(2q) = a.(x^2)^q */
-                        xj = xj * xj;
-                        pj = pj / 2;
-                    } else {
-                        /* a.x^(2q+1) = (a.x).x^(2q) */
-                        aj = aj * xj;
-                        pj = (pj - 1);
-                    }
-                }
-
-                /* pj = 0, so: x^p = aj.xj^pj = aj.xj^0 = aj */
-                return aj;
-            }
-
             /** @brief 3-way compare two ratios **/
             static constexpr auto compare(ratio x, ratio y) {
                 /* ensure minus signs in numerators only */
@@ -185,6 +152,12 @@ namespace xo {
             constexpr Int num() const noexcept { return num_; }
             /** @brief fetch ratio's denominator **/
             constexpr Int den() const noexcept { return den_; }
+
+            /** @brief true if and only if ratio is equal to zero **/
+            constexpr bool is_zero() const noexcept { return (num_ == 0) && (den_ != 0); }
+
+            /** @brief true if and only if ratio is equal to one **/
+            constexpr bool is_unity() const noexcept { return (num_ != 0) && (num_ == den_); }
 
             /** @brief true if and only if ratio represents an integer
              *
@@ -233,7 +206,42 @@ namespace xo {
              *  @pre @c Int type must be totally ordered
              **/
             constexpr ratio frac() const requires std::totally_ordered<Int> {
-                return ratio::subtract(*this, this->floor());
+                return ratio::subtract(*this, ratio(this->floor(), 1));
+            }
+
+            /** @brief compute integer exponent @p p of this ratio
+             *
+             *  @note time complexity is O(log p)
+             **/
+            constexpr ratio power(int p) const {
+
+                constexpr ratio retval = ratio(1, 1);
+
+                if (p == 0)
+                    return ratio(1, 1);
+
+                if (p < 0)
+                    return this->reciprocal().power(-p);
+
+                /* inv: x^p = aj.xj^pj */
+                ratio aj = ratio(1, 1);
+                ratio xj = *this;
+                int pj = p;
+
+                while (pj > 0) {
+                    if (pj % 2 == 0) {
+                        /* a.x^(2q) = a.(x^2)^q */
+                        xj = xj * xj;
+                        pj = pj / 2;
+                    } else {
+                        /* a.x^(2q+1) = (a.x).x^(2q) */
+                        aj = aj * xj;
+                        pj = (pj - 1);
+                    }
+                }
+
+                /* pj = 0, so: x^p = aj.xj^pj = aj.xj^0 = aj */
+                return aj;
             }
 
             /** @brief negate operator **/
@@ -315,9 +323,9 @@ namespace xo {
             /** @defgroup ratio-instance-variables **/
             ///@{
             /** @brief numerator **/
-            Int num_;
+            Int num_ = 0;
             /** @brief denominator **/
-            Int den_;
+            Int den_ = 1;
             ///@}
         };
 
