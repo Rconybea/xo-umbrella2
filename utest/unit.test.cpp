@@ -36,7 +36,7 @@ namespace xo {
         using xo::qty::basis_unit;
         using xo::qty::abbrev::basis_unit2_abbrev;;
         using xo::qty::bpu_abbrev_type;
-        using xo::qty::abbrev::bpu2_abbrev;
+        using xo::qty::abbrev::bpu_abbrev;
         using xo::qty::basis_unit2_store;
         using xo::qty::power_ratio_type;
         using xo::qty::abbrev::flatstring_from_exponent;
@@ -306,10 +306,10 @@ namespace xo {
             scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.bpu2_assemble_abbrev"));
             //log && log("(A)", xtag("foo", foo));
 
-            log && log(xtag("1/(kg*kg)", bpu2_abbrev(dim::mass, scalefactor_ratio_type(1000, 1), power_ratio_type(-2, 1))));
-            log && log(xtag("1/kg", bpu2_abbrev(dim::mass, scalefactor_ratio_type(1000, 1), power_ratio_type(-1, 1))));
-            log && log(xtag("kg", bpu2_abbrev(dim::mass, scalefactor_ratio_type(1000, 1), power_ratio_type(1, 1))));
-            log && log(xtag("kg*kg", bpu2_abbrev(dim::mass, scalefactor_ratio_type(1000, 1), power_ratio_type(2, 1))));
+            log && log(xtag("1/(kg*kg)", bpu_abbrev(dim::mass, scalefactor_ratio_type(1000, 1), power_ratio_type(-2, 1))));
+            log && log(xtag("1/kg", bpu_abbrev(dim::mass, scalefactor_ratio_type(1000, 1), power_ratio_type(-1, 1))));
+            log && log(xtag("kg", bpu_abbrev(dim::mass, scalefactor_ratio_type(1000, 1), power_ratio_type(1, 1))));
+            log && log(xtag("kg*kg", bpu_abbrev(dim::mass, scalefactor_ratio_type(1000, 1), power_ratio_type(2, 1))));
 
             static_assert(bpu<int64_t>(dim::mass, scalefactor_ratio_type(1, 1), power_ratio_type(1, 1)).abbrev()
                           == bpu_abbrev_type::from_chars("g"));

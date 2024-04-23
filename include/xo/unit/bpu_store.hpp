@@ -69,7 +69,7 @@ namespace xo {
                                         const scalefactor_ratio_type & scalefactor,
                                         const power_ratio_type & power)
                 {
-                    return abbrev::bpu2_abbrev(basis_dim,
+                    return abbrev::bpu_abbrev(basis_dim,
                                                scalefactor,
                                                power);
                 }

@@ -39,7 +39,7 @@ namespace xo {
             }
 
             static constexpr bpu_abbrev_type
-            bpu2_abbrev(dim native_dim,
+            bpu_abbrev(dim native_dim,
                         const scalefactor_ratio_type & scalefactor,
                         const power_ratio_type & power)
             {
@@ -92,7 +92,7 @@ namespace xo {
              **/
             constexpr bpu_abbrev_type abbrev() const
                 {
-                    return abbrev::bpu2_abbrev(native_dim_,
+                    return abbrev::bpu_abbrev(native_dim_,
                                                scalefactor_,
                                                power_);
                 }
