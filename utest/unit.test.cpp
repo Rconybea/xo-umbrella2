@@ -8,7 +8,7 @@
 #include "xo/unit/natural_unit_iostream.hpp"
 #include "xo/unit/bpu_store.hpp"
 #include "xo/unit/bpu.hpp"
-#include "xo/unit/bpu2_iostream.hpp"
+#include "xo/unit/bpu_iostream.hpp"
 #include "xo/unit/basis_unit.hpp"
 #include "xo/unit/native_unit.hpp"
 #include "xo/reflect/Reflect.hpp"
