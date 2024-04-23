@@ -1200,5 +1200,4 @@ namespace xo {
     } /*namespace ut*/
 } /*namespace xo*/
 
-
 /* end dimension.test.cpp */
