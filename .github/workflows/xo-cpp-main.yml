@@ -36,7 +36,7 @@ jobs:
         XO_BUILDDIR=${{github.workspace}}/build_${XO_NAME}
         PREFIX=${{github.workspace}}/local
 
-        XO_REPO=https://github.com/rconybea/xo-flatstring.git
+        XO_REPO=https://github.com/rconybea/xo-cmake.git
 
         mkdir -p ${XO_SRC}
         mkdir -p ${XO_BUILDDIR}
