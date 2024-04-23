@@ -1158,6 +1158,45 @@ namespace xo {
 
             //REQUIRE(ng2.scale() == 1);
         } /*TEST_CASE(Quantity6)*/
+
+        TEST_CASE("Quantity7", "[Quantity]") {
+            constexpr bool c_debug_flag = true;
+
+            // can get bits from /dev/random by uncommenting the 2nd line below
+            //uint64_t seed = xxx;
+            //rng::Seed<xoshio256ss> seed;
+
+            //auto rng = xo::rng::xoshiro256ss(seed);
+
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.Quantity7"));
+            //log && log("(A)", xtag("foo", foo));
+
+            /* not constexpr until c++26 */
+            Quantity ng = unit_qty(su2::nanogram);
+            Quantity ug = unit_qty(su2::microgram);
+
+            {
+                auto sum1 = ng - ug;
+                log && log(xtag("ng-ug", sum1));
+
+                /* units will be nanograms,  since that's on lhs */
+                REQUIRE(sum1.unit().n_bpu() == 1);
+                REQUIRE(sum1.unit()[0].scalefactor() == scalefactor_ratio_type(1, 1000000000));
+                REQUIRE(sum1.scale() == -999.0);
+            }
+
+            {
+                auto sum2 = ug - ng;
+                log && log(xtag("ug-ng", sum2));
+
+                /* units will be micrograms,  since that's on rhs */
+                REQUIRE(sum2.unit().n_bpu() == 1);
+                REQUIRE(sum2.unit()[0].scalefactor() == scalefactor_ratio_type(1, 1000000));
+                REQUIRE(sum2.scale() == 0.999);
+            }
+
+            //REQUIRE(ng2.scale() == 1);
+        } /*TEST_CASE(Quantity7)*/
     } /*namespace ut*/
 } /*namespace xo*/
 
