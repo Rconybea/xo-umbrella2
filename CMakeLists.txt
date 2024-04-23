@@ -6,6 +6,7 @@ project(xo_ratio VERSION 1.0)
 enable_language(CXX)
 
 # common XO cmake macros (see proj/xo-cmake)
+include(GNUInstallDirs)
 include(cmake/xo-bootstrap-macros.cmake)
 
 # ----------------------------------------------------------------
