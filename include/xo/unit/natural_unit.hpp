@@ -16,10 +16,11 @@ namespace xo {
         /** @class natural_unit
          *  @brief an array representing the cartesian product of distinct basis-power-units
          *
-         *  1. Each bpu in the array represents a power of a basis dimension,  e.g. "meter" or "second^2".
-         *  2. Each bpu in an array has a different dimension id.
+         *  1. Quantities are represented as a multiple of a natural unit
+         *  2. Each bpu in the array represents a power of a basis dimension,  e.g. "meter" or "second^2".
+         *  3. Each bpu in an array has a different dimension id.
          *     For example dim::time, if present, appears once.
-         *  3. Basis dimensions can appear in any order.
+         *  4. Basis dimensions can appear in any order.
          *     Order used for constructing abbreviations: will get @c "kg.m" or @c "m.kg"
          *     depending on the orderin of @c dim::distance and @c dim::mass in @c bpu_v_
          **/
@@ -44,6 +45,14 @@ namespace xo {
                 }
 
                 return retval;
+            }
+
+            /** @brief remove bpu at position @p p **/
+            constexpr void remove_bpu(size_t p) {
+                for (std::size_t i = p; i+1 < n_bpu_; ++i)
+                    bpu_v_[i] = bpu_v_[i+1];
+
+                --n_bpu_;
             }
 
             constexpr void push_back(const bpu<Int> & bpu) {
@@ -187,8 +196,8 @@ namespace xo {
                                                                    p_target_bpu->scalefactor());
 
                 *p_target_bpu = bpu<Int>(p_target_bpu->native_dim(),
-                                          p_target_bpu->scalefactor(),
-                                          p_target_bpu->power() + rhs_bpu_orig.power());
+                                         p_target_bpu->scalefactor(),
+                                         p_target_bpu->power() + rhs_bpu_orig.power());
 
                 return outer_scalefactor_result<Int>(rhs_bpu_rr.outer_scale_exact_,
                                                      rhs_bpu_rr.outer_scale_sq_);
@@ -197,22 +206,84 @@ namespace xo {
             template <typename Int>
             constexpr
             outer_scalefactor_result<Int>
-            bpu_array_product_inplace(natural_unit<Int> * p_target,
-                                      const bpu<Int> & bpu)
+            bpu_ratio_inplace(bpu<Int> * p_target_bpu,
+                              const bpu<Int> & rhs_bpu_orig)
+            {
+                assert(rhs_bpu_orig.native_dim() == p_target_bpu->native_dim());
+
+                bpu2_rescale_result<Int> rhs_bpu_rr = bpu2_rescale(rhs_bpu_orig,
+                                                                   p_target_bpu->scalefactor());
+
+                *p_target_bpu = bpu<Int>(p_target_bpu->native_dim(),
+                                         p_target_bpu->scalefactor(),
+                                         p_target_bpu->power() - rhs_bpu_orig.power());
+
+                return outer_scalefactor_result<Int>(power_ratio_type(1,1) / rhs_bpu_rr.outer_scale_exact_,
+                                                     1.0 / rhs_bpu_rr.outer_scale_sq_);
+            }
+
+            template <typename Int>
+            constexpr
+            outer_scalefactor_result<Int>
+            nu_product_inplace(natural_unit<Int> * p_target,
+                               const bpu<Int> & bpu)
             {
                 std::size_t i = 0;
                 for (; i < p_target->n_bpu(); ++i) {
-                    if ((*p_target)[i].native_dim() == bpu.native_dim()) {
-                        outer_scalefactor_result<Int> retval = bpu_product_inplace(&((*p_target)[i]), bpu);
+                    auto * p_target_bpu = &((*p_target)[i]);
 
-                        /* TODO: strip 0 power */
+                    if (p_target_bpu->native_dim() == bpu.native_dim()) {
+                        outer_scalefactor_result<Int> retval = bpu_product_inplace(p_target_bpu, bpu);
+
+                        if (p_target_bpu->power().is_zero()) {
+                            /* dimension assoc'd with *p_target_bpu has been cancelled */
+                            p_target->remove_bpu(i);
+                        }
 
                         return retval;
                     }
                 }
 
-                /* control here: i=p_target->n_bpu() */
+                /* control here: i=p_target->n_bpu()
+                 * Dimension represented by bpu does not already appear in *p_target.
+                 * Adopt bpu's scalefactor
+                 */
+
                 p_target->push_back(bpu);
+
+                return outer_scalefactor_result<Int>
+                    (ratio::ratio<Int>(1, 1) /*outer_scale_exact*/,
+                     1.0 /*outer_scale_sq*/);
+            }
+
+            template <typename Int>
+            constexpr
+            outer_scalefactor_result<Int>
+            nu_ratio_inplace(natural_unit<Int> * p_target,
+                             const bpu<Int> & bpu)
+            {
+                std::size_t i = 0;
+                for (; i < p_target->n_bpu(); ++i) {
+                    auto * p_target_bpu = &((*p_target)[i]);
+
+                    if (p_target_bpu->native_dim() == bpu.native_dim()) {
+                        outer_scalefactor_result<Int> retval = bpu_ratio_inplace(p_target_bpu, bpu);
+
+                        if (p_target_bpu->power().is_zero()) {
+                            /* dimension assoc'd with *p_target_bpu has been cancelled */
+                            p_target->remove_bpu(i);
+                        }
+
+                        return retval;
+                    }
+                }
+
+                /* here: i=p_target->n_bpu()
+                 * Dimension represented by bpu does not already appear in *p_target.
+                 * Adopt bpu's scalefactor
+                 */
+
+                p_target->push_back(bpu.reciprocal());
 
                 return outer_scalefactor_result<Int>
                     (ratio::ratio<Int>(1, 1) /*outer_scale_exact*/,

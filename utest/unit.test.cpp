@@ -46,6 +46,9 @@ namespace xo {
         using xo::qty::natural_unit;
         using xo::qty::bpu_array_maker;
         using xo::qty::detail::nu_product;
+        using xo::qty::detail::nu_bpu_product;
+        using xo::qty::detail::nu_ratio_inplace;
+        using xo::qty::detail::nu_ratio;
         using xo::qty::unit_qty;
 
         using xo::print::ccs;
@@ -595,7 +598,7 @@ namespace xo {
 
                 static_assert(bpu.power() == power_ratio_type(-1, 2));
 
-                constexpr auto prod_rr = nu_product(v, bpu);
+                constexpr auto prod_rr = nu_bpu_product(v, bpu);
 
                 log && log(xtag("prod_rr.bpu_array", prod_rr.natural_unit_));
                 log && log(xtag("prod_rr.outer_scale_exact", prod_rr.outer_scale_exact_));
@@ -642,7 +645,7 @@ namespace xo {
 
                 static_assert(bpu.power() == power_ratio_type(-1, 2));
 
-                constexpr auto prod_rr = nu_product(v, bpu);
+                constexpr auto prod_rr = nu_bpu_product(v, bpu);
 
                 log && log(xtag("prod_rr.bpu_array", prod_rr.natural_unit_));
                 log && log(xtag("prod_rr.outer_scale_exact", prod_rr.outer_scale_exact_));
@@ -686,7 +689,7 @@ namespace xo {
 
                 static_assert(bpu.power() == power_ratio_type(-1, 1));
 
-                constexpr auto prod_rr = nu_product(v, bpu);
+                constexpr auto prod_rr = nu_bpu_product(v, bpu);
 
                 log && log(xtag("prod_rr.bpu_array", prod_rr.natural_unit_));
                 log && log(xtag("prod_rr.outer_scale_exact", prod_rr.outer_scale_exact_));
@@ -832,6 +835,104 @@ namespace xo {
             }
         } /*TEST_CASE(natural_unit2)*/
 
+        TEST_CASE("natural_unit3", "[natural_unit]") {
+            constexpr bool c_debug_flag = true;
+
+            // can get bits from /dev/random by uncommenting the 2nd line below
+            //uint64_t seed = xxx;
+            //rng::Seed<xoshio256ss> seed;
+
+            //auto rng = xo::rng::xoshiro256ss(seed);
+
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.natural_unit3"));
+            //log && log("(A)", xtag("foo", foo));
+
+            {
+                constexpr natural_unit<int64_t> v
+                    = (bpu_array_maker<int64_t>::make_bpu_array
+                       (bpu<int64_t>(dim::mass, scalefactor_ratio_type(1000, 1), power_ratio_type(1, 1)),
+                        bpu<int64_t>(dim::distance, scalefactor_ratio_type(1, 1), power_ratio_type(1, 1))));
+
+                static_assert(v.n_bpu() == 2);
+
+                log && log(xtag("v.abbrev", v.abbrev()));
+
+                static_assert(v.abbrev().size() > 0);
+                static_assert(v.abbrev() == flatstring("kg.m"));
+
+                {
+                    natural_unit<int64_t> w = v;
+
+                    nu_ratio_inplace(&w,
+                                     bpu<int64_t>(dim::mass, scalefactor_ratio_type(1000, 1), power_ratio_type(1, 1)));
+
+                    log && log(xtag("w.abbrev", w.abbrev()));
+
+                    REQUIRE(w.n_bpu() == 1);
+                    REQUIRE(w[0].native_dim() == dim::distance);
+                    REQUIRE(w.abbrev() == flatstring("m"));
+                }
+
+                {
+                    constexpr natural_unit<int64_t> w
+                        = (bpu_array_maker<int64_t>::make_bpu_array
+                           (bpu<int64_t>(dim::mass, scalefactor_ratio_type(1000, 1), power_ratio_type(1, 1))));
+
+                    static_assert(w.n_bpu() == 1);
+
+                    log && log(xtag("w.abbrev", w.abbrev()));
+
+                    constexpr auto rr = nu_ratio(v, w);
+
+                    log && log(xtag("rr", rr));
+
+                    REQUIRE(rr.natural_unit_.n_bpu() == 1);
+                    REQUIRE(rr.natural_unit_[0].native_dim() == dim::distance);
+                    REQUIRE(rr.natural_unit_.abbrev() == flatstring("m"));
+                }
+
+                {
+                    constexpr natural_unit<int64_t> w
+                        = (bpu_array_maker<int64_t>::make_bpu_array
+                           (bpu<int64_t>(dim::time, scalefactor_ratio_type(1, 1), power_ratio_type(1, 1))));
+
+                    static_assert(w.n_bpu() == 1);
+
+                    log && log(xtag("w.abbrev", w.abbrev()));
+
+                    constexpr auto rr = nu_ratio(v, w);
+
+                    log && log(xtag("rr", rr));
+
+                    REQUIRE(rr.natural_unit_.n_bpu() == 3);
+                    REQUIRE(rr.natural_unit_[0].native_dim() == dim::mass);
+                    REQUIRE(rr.natural_unit_[1].native_dim() == dim::distance);
+                    REQUIRE(rr.natural_unit_[2].native_dim() == dim::time);
+                    REQUIRE(rr.natural_unit_.abbrev() == flatstring("kg.m.s^-1"));
+                }
+
+                {
+                    natural_unit<int64_t> w = v;
+
+                    REQUIRE(w.n_bpu() == 2);
+                    REQUIRE(w[0].native_dim() == dim::mass);
+
+                    nu_ratio_inplace(&w,
+                                     bpu<int64_t>(dim::time, scalefactor_ratio_type(1, 1), power_ratio_type(2, 1)));
+
+                    REQUIRE(w.n_bpu() == 3);
+                    REQUIRE(w[0].native_dim() == dim::mass);
+                    REQUIRE(w[1].native_dim() == dim::distance);
+                    REQUIRE(w[2].native_dim() == dim::time);
+
+                    log && log(xtag("w.abbrev", w.abbrev()));
+
+                    REQUIRE(w.n_bpu() == 3);
+                    REQUIRE(w.abbrev() == flatstring("kg.m.s^-2"));
+                }
+            }
+        } /*TEST_CASE(natural_unit3)*/
+
         TEST_CASE("scaled_unit0", "[scaled_unit0]") {
             constexpr bool c_debug_flag = true;
 
@@ -854,6 +955,29 @@ namespace xo {
             static_assert(ng.natural_unit_.n_bpu() == 1);
             static_assert(ng2.natural_unit_.n_bpu() == 1);
         } /*TEST_CASE(scaled_unit0)*/
+
+        TEST_CASE("scaled_unit1", "[scaled_unit1]") {
+            constexpr bool c_debug_flag = true;
+
+            // can get bits from /dev/random by uncommenting the 2nd line below
+            //uint64_t seed = xxx;
+            //rng::Seed<xoshio256ss> seed;
+
+            //auto rng = xo::rng::xoshiro256ss(seed);
+
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.scaled_unit1"));
+            //log && log("(A)", xtag("foo", foo));
+
+            constexpr auto ng = su2::nanogram;
+            constexpr auto ng2 = ng / ng;
+
+            log && log(xtag("ng", ng));
+            log && log(xtag("ng/ng", ng2));
+            //log && log(xtag("ng/ng",
+
+            static_assert(ng.natural_unit_.n_bpu() == 1);
+            static_assert(ng2.natural_unit_.n_bpu() == 0);
+        } /*TEST_CASE(scaled_unit1)*/
 
         TEST_CASE("Quantity", "[Quantity]") {
             constexpr bool c_debug_flag = true;
@@ -910,6 +1034,27 @@ namespace xo {
 
             /* not constexpr until c++26 */
             Quantity ng = unit_qty(su2::nanogram);
+            auto ng0 = ng / ng;
+
+            log && log(xtag("ng/ng", ng0));
+
+            REQUIRE(ng0.scale() == 1);
+        } /*TEST_CASE(Quantity3)*/
+
+        TEST_CASE("Quantity4", "[Quantity]") {
+            constexpr bool c_debug_flag = true;
+
+            // can get bits from /dev/random by uncommenting the 2nd line below
+            //uint64_t seed = xxx;
+            //rng::Seed<xoshio256ss> seed;
+
+            //auto rng = xo::rng::xoshiro256ss(seed);
+
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.Quantity4"));
+            //log && log("(A)", xtag("foo", foo));
+
+            /* not constexpr until c++26 */
+            Quantity ng = unit_qty(su2::nanogram);
             Quantity ug = unit_qty(su2::microgram);
 
             {
@@ -937,7 +1082,43 @@ namespace xo {
             }
 
             //REQUIRE(ng2.scale() == 1);
-        } /*TEST_CASE(Quantity3)*/
+        } /*TEST_CASE(Quantity4)*/
+
+        TEST_CASE("Quantity5", "[Quantity]") {
+            constexpr bool c_debug_flag = true;
+
+            // can get bits from /dev/random by uncommenting the 2nd line below
+            //uint64_t seed = xxx;
+            //rng::Seed<xoshio256ss> seed;
+
+            //auto rng = xo::rng::xoshiro256ss(seed);
+
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.Quantity5"));
+            //log && log("(A)", xtag("foo", foo));
+
+            /* not constexpr until c++26 */
+            Quantity ng = unit_qty(su2::nanogram);
+            Quantity ug = unit_qty(su2::microgram);
+
+            {
+                auto ratio1 = ng / ug;
+                log && log(xtag("ng/ug", ratio1));
+
+                /* units will be nanograms,  since that's on lhs */
+                REQUIRE(ratio1.unit().n_bpu() == 0);
+                REQUIRE(ratio1.scale() == 0.001);
+            }
+
+            {
+                auto ratio2 = ug / ng;
+                log && log(xtag("ug/ng", ratio2));
+
+                REQUIRE(ratio2.unit().n_bpu() == 0);
+                REQUIRE(ratio2.scale() == 1000.0);
+            }
+
+            //REQUIRE(ng2.scale() == 1);
+        } /*TEST_CASE(Quantity5)*/
     } /*namespace ut*/
 } /*namespace xo*/
 
