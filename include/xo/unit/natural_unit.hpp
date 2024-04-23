@@ -33,6 +33,8 @@ namespace xo {
             constexpr natural_unit() : n_bpu_{0} {}
 
             constexpr std::size_t n_bpu() const { return n_bpu_; }
+            constexpr bool is_dimensionless() const { return n_bpu_ == 0; }
+
             constexpr bpu<Int> * bpu_v() const { return bpu_v_; }
 
             constexpr nu_abbrev_type abbrev() const {
@@ -62,6 +64,17 @@ namespace xo {
 
             constexpr bpu<Int> & operator[](std::size_t i) { return bpu_v_[i]; }
             constexpr const bpu<Int> & operator[](std::size_t i) const { return bpu_v_[i]; }
+
+            template <typename Int2>
+            constexpr natural_unit<Int2> to_repr() const {
+                natural_unit<Int2> retval;
+
+                std::size_t i = 0;
+                for (; i < n_bpu_; ++i)
+                    retval.push_back(bpu_v_[i].template to_repr<Int2>());
+
+                return retval;
+            }
 
         private:
             /** @brief the number of occupied slots in @c bpu_v_ **/

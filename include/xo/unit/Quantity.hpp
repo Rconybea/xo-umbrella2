@@ -44,13 +44,13 @@ namespace xo {
 
             constexpr Quantity reciprocal() const { return Quantity(1.0 / scale_, unit_.reciprocal()); }
 
-            template <typename OtherQuantity>
+            template <typename Quantity2>
             static constexpr
-            auto multiply(const Quantity & x, const OtherQuantity & y) {
+            auto multiply(const Quantity & x, const Quantity2 & y) {
                 using r_repr_type = std::common_type_t<typename Quantity::repr_type,
-                                                       typename OtherQuantity::repr_type>;
+                                                       typename Quantity2::repr_type>;
                 using r_int_type = std::common_type_t<typename Quantity::ratio_int_type,
-                                                      typename OtherQuantity::ratio_int_type>;
+                                                      typename Quantity2::ratio_int_type>;
 
                 auto rr = detail::nu_product(x.unit(), y.unit());
 
@@ -85,6 +85,30 @@ namespace xo {
                                                          rr.natural_unit_);
             }
 
+            template <typename Quantity2>
+            static constexpr
+            auto add(const Quantity & x, const Quantity2 & y) {
+                using r_repr_type = std::common_type_t<typename Quantity::repr_type,
+                                                       typename Quantity2::repr_type>;
+                using r_int_type = std::common_type_t<typename Quantity::ratio_int_type,
+                                                      typename Quantity2::ratio_int_type>;
+
+                /* conversion to get y in same units as x:  multiply by y/x */
+                auto rr = detail::nu_ratio(y.unit(), x.unit());
+
+                if (rr.natural_unit_.is_dimensionless()) {
+                    r_repr_type r_scale = (static_cast<r_repr_type>(x.scale())
+                                           + (::sqrt(rr.outer_scale_sq_)
+                                              * rr.outer_scale_exact_.template to<r_repr_type>()
+                                              * static_cast<r_repr_type>(y.scale())));
+
+                    return Quantity<r_repr_type, r_int_type>(r_scale, x.unit_.template to_repr<r_int_type>());
+                } else {
+                    /* units don't match! */
+                    return Quantity<r_repr_type, r_int_type>(std::numeric_limits<Repr>::quiet_NaN(),
+                                                             x.unit_.template to_repr<r_int_type>());
+                }
+            }
 
         private:
             /** @brief quantity represents this multiple of a unit amount **/
@@ -106,23 +130,47 @@ namespace xo {
 
         /** note: won't have constexpr result until c++26 (when ::sqrt(), ::pow() are constexpr)
          **/
-        template <typename Quantity, typename OtherQuantity>
+        template <typename Repr = double,
+                  typename Int = std::int64_t>
+        inline constexpr Quantity<Repr, Int>
+        natural_unit_qty(const natural_unit<Int> & nu) {
+            return Quantity<Repr, Int>(1.0, nu);
+        }
+
+        /** note: won't have constexpr result until c++26 (when ::sqrt(), ::pow() are constexpr)
+         **/
+        template <typename Quantity, typename Quantity2>
+        requires quantity2_concept<Quantity> && quantity2_concept<Quantity2>
         constexpr auto
-        operator* (const Quantity & x, const OtherQuantity & y)
+        operator* (const Quantity & x, const Quantity2 & y)
         {
             return Quantity::multiply(x, y);
         }
 
         /** note: won't have constexpr result until c++26 (when ::sqrt(), ::pow() are constexpr)
          **/
-        template <typename Quantity, typename OtherQuantity>
+        template <typename Quantity, typename Quantity2>
+        requires quantity2_concept<Quantity> && quantity2_concept<Quantity2>
         constexpr auto
-        operator/ (const Quantity & x, const OtherQuantity & y)
+        operator/ (const Quantity & x, const Quantity2 & y)
         {
             return Quantity::divide(x, y);
         }
+
+        /** note: won't have constexpr result until c++26 (when ::sqrt(), ::pow() are constexpr)
+         **/
+        template <typename Quantity, typename Quantity2>
+        requires quantity2_concept<Quantity> && quantity2_concept<Quantity2>
+        constexpr auto
+        operator+ (const Quantity & x, const Quantity2 & y)
+        {
+            return Quantity::add(x, y);
+        }
+
+        namespace unit {
+            constexpr auto nanogram = natural_unit_qty(nu2::nanogram);
+        }
     } /*namespace qty*/
 } /*namespace xo*/
-
 
 /** end Quantity.hpp **/

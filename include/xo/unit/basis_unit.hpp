@@ -1,4 +1,4 @@
-/** @file basis_unit2.hpp **/
+/** @file basis_unit.hpp **/
 
 #pragma once
 
@@ -211,5 +211,4 @@ namespace xo {
     } /*namespace qty*/
 } /*namespace xo*/
 
-
-/** end basis_unit2.hpp **/
+/** end basis_unit.hpp **/

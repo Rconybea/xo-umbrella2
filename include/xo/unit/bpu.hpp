@@ -102,6 +102,13 @@ namespace xo {
                 return bpu<Int>(native_dim(), scalefactor(), power_.negate());
             }
 
+            template <typename Int2>
+            constexpr bpu<Int2> to_repr() const {
+                return bpu<Int2>(this->native_dim(),
+                                 this->scalefactor(),
+                                 ratio::ratio<Int2>(power_.num(), power_.den()));
+            }
+
             /** @brief this unit represents native dimension taken to this power **/
             power_ratio_type power_;
         };
