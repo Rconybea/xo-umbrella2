@@ -6,7 +6,7 @@
 #pragma once
 
 #include "xo/indentlog/print/tag.hpp"
-#include "basis_unit2.hpp"
+#include "basis_unit.hpp"
 #include "dim_iostream.hpp"
 
 namespace xo {
@@ -58,25 +58,25 @@ namespace xo {
          *  native_bpu<universal::time, ratio<1>, ratio<-1,2>> represents unit of 1/sqrt(t)
          **/
         template<typename Int>
-        struct bpu2 : basis_unit2 {
+        struct bpu2 : basis_unit {
         public:
             using ratio_int_type = Int;
 
         public:
             constexpr bpu2() = default;
-            constexpr bpu2(const basis_unit2 & bu,
+            constexpr bpu2(const basis_unit & bu,
                            const power_ratio_type & power)
-                : basis_unit2{bu},
+                : basis_unit{bu},
                   power_{power}
                 {}
             constexpr bpu2(dim native_dim,
                            const scalefactor_ratio_type & scalefactor,
                            const power_ratio_type & power)
-                : basis_unit2(native_dim, scalefactor),
+                : basis_unit(native_dim, scalefactor),
                   power_{power}
                 {}
 
-            static constexpr bpu2<Int> unit_power(const basis_unit2 & bu) {
+            static constexpr bpu2<Int> unit_power(const basis_unit & bu) {
                 return bpu2<Int>(bu, power_ratio_type(1,1));
             }
 
@@ -107,7 +107,7 @@ namespace xo {
         };
 
         template <typename Int>
-        constexpr auto make_unit_power(const basis_unit2 & bu) {
+        constexpr auto make_unit_power(const basis_unit & bu) {
             return bpu2<Int>::unit_power(bu);
         }
 

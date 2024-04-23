@@ -9,7 +9,7 @@
 #include "xo/unit/bpu_store.hpp"
 #include "xo/unit/bpu2.hpp"
 #include "xo/unit/bpu2_iostream.hpp"
-#include "xo/unit/basis_unit2.hpp"
+#include "xo/unit/basis_unit.hpp"
 #include "xo/unit/native_unit.hpp"
 #include "xo/reflect/Reflect.hpp"
 //#include "xo/cxxutil/demangle.hpp"
@@ -33,7 +33,7 @@ namespace xo {
         using xo::qty::scalefactor_ratio_type;
         using xo::qty::units::scaled_native_unit2_abbrev;
         using xo::qty::units::scaled_native_unit2_abbrev_v;
-        using xo::qty::basis_unit2;
+        using xo::qty::basis_unit;
         using xo::qty::abbrev::basis_unit2_abbrev;;
         using xo::qty::bpu2_abbrev_type;
         using xo::qty::abbrev::bpu2_abbrev;
@@ -88,65 +88,65 @@ namespace xo {
 
             log && log("---------------------");
 
-            static_assert(basis_unit2(dim::mass, scalefactor_ratio_type(1, 1000000000)).abbrev()
+            static_assert(basis_unit(dim::mass, scalefactor_ratio_type(1, 1000000000)).abbrev()
                           == basis_unit2_abbrev_type::from_chars("ng"));
-            static_assert(basis_unit2(dim::mass, scalefactor_ratio_type(1, 1000000)).abbrev()
+            static_assert(basis_unit(dim::mass, scalefactor_ratio_type(1, 1000000)).abbrev()
                           == basis_unit2_abbrev_type::from_chars("ug"));
-            static_assert(basis_unit2(dim::mass, scalefactor_ratio_type(1, 1000)).abbrev()
+            static_assert(basis_unit(dim::mass, scalefactor_ratio_type(1, 1000)).abbrev()
                           == basis_unit2_abbrev_type::from_chars("mg"));
-            static_assert(basis_unit2(dim::mass, scalefactor_ratio_type(1, 1)).abbrev()
+            static_assert(basis_unit(dim::mass, scalefactor_ratio_type(1, 1)).abbrev()
                           == basis_unit2_abbrev_type::from_chars("g"));
-            static_assert(basis_unit2(dim::mass, scalefactor_ratio_type(1000, 1)).abbrev()
+            static_assert(basis_unit(dim::mass, scalefactor_ratio_type(1000, 1)).abbrev()
                           == basis_unit2_abbrev_type::from_chars("kg"));
-            static_assert(basis_unit2(dim::mass, scalefactor_ratio_type(1000000, 1)).abbrev()
+            static_assert(basis_unit(dim::mass, scalefactor_ratio_type(1000000, 1)).abbrev()
                           == basis_unit2_abbrev_type::from_chars("t"));
-            static_assert(basis_unit2(dim::mass, scalefactor_ratio_type(1000000000, 1)).abbrev()
+            static_assert(basis_unit(dim::mass, scalefactor_ratio_type(1000000000, 1)).abbrev()
                           == basis_unit2_abbrev_type::from_chars("kt"));
 
             log && log(xtag("distance", basis_unit2_abbrev(dim::distance, scalefactor_ratio_type(1, 1))));
 
-            static_assert(basis_unit2(dim::distance, scalefactor_ratio_type(1, 1000000000)).abbrev()
+            static_assert(basis_unit(dim::distance, scalefactor_ratio_type(1, 1000000000)).abbrev()
                           == basis_unit2_abbrev_type::from_chars("nm"));
-            static_assert(basis_unit2(dim::distance, scalefactor_ratio_type(1, 1000000)).abbrev()
+            static_assert(basis_unit(dim::distance, scalefactor_ratio_type(1, 1000000)).abbrev()
                           == basis_unit2_abbrev_type::from_chars("um"));
-            static_assert(basis_unit2(dim::distance, scalefactor_ratio_type(1, 1000)).abbrev()
+            static_assert(basis_unit(dim::distance, scalefactor_ratio_type(1, 1000)).abbrev()
                           == basis_unit2_abbrev_type::from_chars("mm"));
-            static_assert(basis_unit2(dim::distance, scalefactor_ratio_type(1, 1)).abbrev()
+            static_assert(basis_unit(dim::distance, scalefactor_ratio_type(1, 1)).abbrev()
                           == basis_unit2_abbrev_type::from_chars("m"));
-            static_assert(basis_unit2(dim::distance, scalefactor_ratio_type(1000, 1)).abbrev()
+            static_assert(basis_unit(dim::distance, scalefactor_ratio_type(1000, 1)).abbrev()
                           == basis_unit2_abbrev_type::from_chars("km"));
-            static_assert(basis_unit2(dim::distance, scalefactor_ratio_type(1000000, 1)).abbrev()
+            static_assert(basis_unit(dim::distance, scalefactor_ratio_type(1000000, 1)).abbrev()
                           == basis_unit2_abbrev_type::from_chars("Mm"));
-            static_assert(basis_unit2(dim::distance, scalefactor_ratio_type(1000000000, 1)).abbrev()
+            static_assert(basis_unit(dim::distance, scalefactor_ratio_type(1000000000, 1)).abbrev()
                           == basis_unit2_abbrev_type::from_chars("Gm"));
 
             log && log(xtag("time", basis_unit2_abbrev(dim::time, scalefactor_ratio_type(1, 1))));
 
-            static_assert(basis_unit2(dim::time, scalefactor_ratio_type(1, 1000000000)).abbrev()
+            static_assert(basis_unit(dim::time, scalefactor_ratio_type(1, 1000000000)).abbrev()
                           == basis_unit2_abbrev_type::from_chars("ns"));
-            static_assert(basis_unit2(dim::time, scalefactor_ratio_type(1, 1000000)).abbrev()
+            static_assert(basis_unit(dim::time, scalefactor_ratio_type(1, 1000000)).abbrev()
                           == basis_unit2_abbrev_type::from_chars("us"));
-            static_assert(basis_unit2(dim::time, scalefactor_ratio_type(1, 1000000)).abbrev()
+            static_assert(basis_unit(dim::time, scalefactor_ratio_type(1, 1000000)).abbrev()
                           == basis_unit2_abbrev_type::from_chars("us"));
-            static_assert(basis_unit2(dim::time, scalefactor_ratio_type(1, 1000)).abbrev()
+            static_assert(basis_unit(dim::time, scalefactor_ratio_type(1, 1000)).abbrev()
                           == basis_unit2_abbrev_type::from_chars("ms"));
-            static_assert(basis_unit2(dim::time, scalefactor_ratio_type(1, 1)).abbrev()
+            static_assert(basis_unit(dim::time, scalefactor_ratio_type(1, 1)).abbrev()
                           == basis_unit2_abbrev_type::from_chars("s"));
-            static_assert(basis_unit2(dim::time, scalefactor_ratio_type(60, 1)).abbrev()
+            static_assert(basis_unit(dim::time, scalefactor_ratio_type(60, 1)).abbrev()
                           == basis_unit2_abbrev_type::from_chars("min"));
-            static_assert(basis_unit2(dim::time, scalefactor_ratio_type(3600, 1)).abbrev()
+            static_assert(basis_unit(dim::time, scalefactor_ratio_type(3600, 1)).abbrev()
                           == basis_unit2_abbrev_type::from_chars("hr"));
-            static_assert(basis_unit2(dim::time, scalefactor_ratio_type(24*3600, 1)).abbrev()
+            static_assert(basis_unit(dim::time, scalefactor_ratio_type(24*3600, 1)).abbrev()
                           == basis_unit2_abbrev_type::from_chars("dy"));
-            static_assert(basis_unit2(dim::time, scalefactor_ratio_type(7*24*3600, 1)).abbrev()
+            static_assert(basis_unit(dim::time, scalefactor_ratio_type(7*24*3600, 1)).abbrev()
                           == basis_unit2_abbrev_type::from_chars("wk"));
-            static_assert(basis_unit2(dim::time, scalefactor_ratio_type(30*24*3600, 1)).abbrev()
+            static_assert(basis_unit(dim::time, scalefactor_ratio_type(30*24*3600, 1)).abbrev()
                           == basis_unit2_abbrev_type::from_chars("mo"));
-            static_assert(basis_unit2(dim::time, scalefactor_ratio_type(250*24*3600, 1)).abbrev()
+            static_assert(basis_unit(dim::time, scalefactor_ratio_type(250*24*3600, 1)).abbrev()
                           == basis_unit2_abbrev_type::from_chars("yr250"));
-            static_assert(basis_unit2(dim::time, scalefactor_ratio_type(360*24*3600, 1)).abbrev()
+            static_assert(basis_unit(dim::time, scalefactor_ratio_type(360*24*3600, 1)).abbrev()
                           == basis_unit2_abbrev_type::from_chars("yr360"));
-            static_assert(basis_unit2(dim::time, scalefactor_ratio_type(365*24*3600, 1)).abbrev()
+            static_assert(basis_unit(dim::time, scalefactor_ratio_type(365*24*3600, 1)).abbrev()
                           == basis_unit2_abbrev_type::from_chars("yr365"));
 
             log && log("---------------------");

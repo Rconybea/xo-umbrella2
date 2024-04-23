@@ -13,10 +13,10 @@ namespace xo {
          *
          *  For example "3600 minutes" or "1e-6 grams"
          **/
-        struct basis_unit2 {
+        struct basis_unit {
         public:
-            constexpr basis_unit2() = default;
-            constexpr basis_unit2(dim native_dim, const scalefactor_ratio_type & scalefactor)
+            constexpr basis_unit() = default;
+            constexpr basis_unit(dim native_dim, const scalefactor_ratio_type & scalefactor)
                 : native_dim_{native_dim},
                   scalefactor_{scalefactor}
                 {}
@@ -29,7 +29,7 @@ namespace xo {
                                                   scalefactor_);
             }
 
-            constexpr basis_unit2 & operator=(const basis_unit2 & x) = default;
+            constexpr basis_unit & operator=(const basis_unit & x) = default;
 
             /** @brief identifies a native unit, e.g. time (in seconds) **/
             dim native_dim_ = dim::invalid;
@@ -38,11 +38,11 @@ namespace xo {
         };
 
         namespace bu2 {
-            constexpr basis_unit2 nanogram  = basis_unit2(dim::mass, scalefactor_ratio_type(1,    1000000000));
-            constexpr basis_unit2 microgram = basis_unit2(dim::mass, scalefactor_ratio_type(1,    1000000));
-            constexpr basis_unit2 milligram = basis_unit2(dim::mass, scalefactor_ratio_type(1,    1000));
-            constexpr basis_unit2 gram      = basis_unit2(dim::mass, scalefactor_ratio_type(1,    1));
-            constexpr basis_unit2 kilogram  = basis_unit2(dim::mass, scalefactor_ratio_type(1000, 1));
+            constexpr basis_unit nanogram  = basis_unit(dim::mass, scalefactor_ratio_type(1,    1000000000));
+            constexpr basis_unit microgram = basis_unit(dim::mass, scalefactor_ratio_type(1,    1000000));
+            constexpr basis_unit milligram = basis_unit(dim::mass, scalefactor_ratio_type(1,    1000));
+            constexpr basis_unit gram      = basis_unit(dim::mass, scalefactor_ratio_type(1,    1));
+            constexpr basis_unit kilogram  = basis_unit(dim::mass, scalefactor_ratio_type(1000, 1));
         }
 
         namespace units {

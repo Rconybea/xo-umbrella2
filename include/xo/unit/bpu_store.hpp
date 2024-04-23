@@ -77,14 +77,14 @@ namespace xo {
             template <dim BasisDim, std::int64_t InnerScaleNum, std::int64_t InnerScaleDen>
             void bu_establish_abbrev_for() {
                 this->bu_establish_abbrev
-                    (basis_unit2(BasisDim,
+                    (basis_unit(BasisDim,
                                  scalefactor_ratio_type(InnerScaleNum, InnerScaleDen)),
                      units::scaled_native_unit2_abbrev_v<BasisDim, InnerScaleNum, InnerScaleDen>);
             }
 
             /** @brief establish abbreviation @p abbrev for basis unit @p bu
              **/
-            void bu_establish_abbrev(const basis_unit2 & bu,
+            void bu_establish_abbrev(const basis_unit & bu,
                                      const basis_unit2_abbrev_type & abbrev) {
 
                 auto & bu_abbrev_v = bu_abbrev_vv_[static_cast<std::size_t>(bu.native_dim())];
