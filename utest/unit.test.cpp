@@ -751,6 +751,87 @@ namespace xo {
             }
         } /*TEST_CASE(bpu_array_product3)*/
 
+        TEST_CASE("natural_unit0", "[natural_unit]") {
+            constexpr bool c_debug_flag = true;
+
+            // can get bits from /dev/random by uncommenting the 2nd line below
+            //uint64_t seed = xxx;
+            //rng::Seed<xoshio256ss> seed;
+
+            //auto rng = xo::rng::xoshiro256ss(seed);
+
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.natural_unit0"));
+            //log && log("(A)", xtag("foo", foo));
+
+            {
+                constexpr natural_unit<int64_t> v
+                    = (bpu_array_maker<int64_t>::make_bpu_array
+                       (bpu<int64_t>(dim::distance, scalefactor_ratio_type(1, 1000), power_ratio_type(2, 1)),
+                        bpu<int64_t>(dim::mass, scalefactor_ratio_type(1, 1000), power_ratio_type(-1, 1))));
+
+                static_assert(v.n_bpu() == 2);
+
+                log && log(xtag("v.abbrev", v.abbrev()));
+
+                static_assert(v.abbrev().size() > 0);
+                static_assert(v.abbrev() == flatstring("mm^2.mg^-1"));
+            }
+        } /*TEST_CASE(natural_unit0)*/
+
+        TEST_CASE("natural_unit1", "[natural_unit]") {
+            constexpr bool c_debug_flag = true;
+
+            // can get bits from /dev/random by uncommenting the 2nd line below
+            //uint64_t seed = xxx;
+            //rng::Seed<xoshio256ss> seed;
+
+            //auto rng = xo::rng::xoshiro256ss(seed);
+
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.natural_unit1"));
+            //log && log("(A)", xtag("foo", foo));
+
+            {
+                constexpr natural_unit<int64_t> v
+                    = (bpu_array_maker<int64_t>::make_bpu_array
+                       (bpu<int64_t>(dim::distance, scalefactor_ratio_type(1000, 1), power_ratio_type(2, 1))));
+
+                static_assert(v.n_bpu() == 1);
+
+                log && log(xtag("v.abbrev", v.abbrev()));
+
+                static_assert(v.abbrev().size() > 0);
+                static_assert(v.abbrev() == flatstring("km^2"));
+            }
+        } /*TEST_CASE(natural_unit1)*/
+
+        TEST_CASE("natural_unit2", "[natural_unit]") {
+            constexpr bool c_debug_flag = true;
+
+            // can get bits from /dev/random by uncommenting the 2nd line below
+            //uint64_t seed = xxx;
+            //rng::Seed<xoshio256ss> seed;
+
+            //auto rng = xo::rng::xoshiro256ss(seed);
+
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.natural_unit2"));
+            //log && log("(A)", xtag("foo", foo));
+
+            {
+                constexpr natural_unit<int64_t> v
+                    = (bpu_array_maker<int64_t>::make_bpu_array
+                       (bpu<int64_t>(dim::mass, scalefactor_ratio_type(1000, 1), power_ratio_type(1, 1)),
+                        bpu<int64_t>(dim::distance, scalefactor_ratio_type(1, 1), power_ratio_type(1, 1)),
+                        bpu<int64_t>(dim::time, scalefactor_ratio_type(1, 1), power_ratio_type(-2, 1))));
+
+                static_assert(v.n_bpu() == 3);
+
+                log && log(xtag("v.abbrev", v.abbrev()));
+
+                static_assert(v.abbrev().size() > 0);
+                static_assert(v.abbrev() == flatstring("kg.m.s^-2"));
+            }
+        } /*TEST_CASE(natural_unit2)*/
+
         TEST_CASE("scaled_unit0", "[scaled_unit0]") {
             constexpr bool c_debug_flag = true;
 

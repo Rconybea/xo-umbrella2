@@ -11,6 +11,8 @@
 
 namespace xo {
     namespace qty {
+        using nu_abbrev_type = flatstring<32>;
+
         /** @class natural_unit
          *  @brief an array representing the cartesian product of distinct basis-power-units
          *
@@ -31,6 +33,18 @@ namespace xo {
 
             constexpr std::size_t n_bpu() const { return n_bpu_; }
             constexpr bpu<Int> * bpu_v() const { return bpu_v_; }
+
+            constexpr nu_abbrev_type abbrev() const {
+                nu_abbrev_type retval;
+
+                for (std::size_t i = 0; i < n_bpu_; ++i) {
+                    if (i > 0)
+                        retval.append(".");
+                    retval.append(bpu_v_[i].abbrev(), 0, -1);
+                }
+
+                return retval;
+            }
 
             constexpr void push_back(const bpu<Int> & bpu) {
                 if (n_bpu_ < n_dim)
