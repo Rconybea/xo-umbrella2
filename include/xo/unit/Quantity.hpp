@@ -45,6 +45,21 @@ namespace xo {
             constexpr Quantity unit_qty() const { return Quantity(1, unit_); }
             constexpr Quantity reciprocal() const { return Quantity(1.0 / scale_, unit_.reciprocal()); }
 
+            constexpr
+            auto rescale(const natural_unit<Int> & unit2) const {
+                /* conversion factor from .unit -> unit2*/
+                auto rr = detail::nu_ratio(this->unit_, unit2);
+
+                if (rr.natural_unit_.is_dimensionless()) {
+                    repr_type r_scale = (::sqrt(rr.outer_scale_sq_)
+                                         * rr.outer_scale_exact_.template to<repr_type>()
+                                         * this->scale_);
+                    return Quantity(r_scale, unit2);
+                } else {
+                    return Quantity(std::numeric_limits<repr_type>::quiet_NaN(), unit2);
+                }
+            }
+
             template <typename Quantity2>
             static constexpr
             auto multiply(const Quantity & x, const Quantity2 & y) {
