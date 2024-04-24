@@ -40,8 +40,9 @@ namespace xo {
             constexpr const repr_type & scale() const { return scale_; }
             constexpr const unit_type & unit() const { return unit_; }
 
-            constexpr Quantity unit_qty() const { return Quantity(1, unit_); }
+            constexpr bool is_dimensionless() const { return unit_.is_dimensionless(); }
 
+            constexpr Quantity unit_qty() const { return Quantity(1, unit_); }
             constexpr Quantity reciprocal() const { return Quantity(1.0 / scale_, unit_.reciprocal()); }
 
             template <typename Quantity2>

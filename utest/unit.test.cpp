@@ -46,8 +46,6 @@ namespace xo {
         using xo::qty::detail::nu_ratio;
         using xo::qty::unit_qty;
 
-        using xo::print::ccs;
-
         template <typename T>
         int unused()
         {
