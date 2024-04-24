@@ -60,6 +60,12 @@ namespace xo {
                 }
             }
 
+            template <typename Dimensionless>
+            requires std::is_arithmetic_v<Dimensionless>
+            constexpr auto scale_by(Dimensionless x) const {
+                return Quantity(x * this->scale_, this->unit_);
+            }
+
             template <typename Quantity2>
             static constexpr
             auto multiply(const Quantity & x, const Quantity2 & y) {
