@@ -72,6 +72,12 @@ namespace xo {
                 return Quantity(this->scale_ / x, this->unit_);
             }
 
+            template <typename Dimensionless>
+            requires std::is_arithmetic_v<Dimensionless>
+            constexpr auto divide_into(Dimensionless x) const {
+                return Quantity(x / this->scale_, this->unit_.reciprocal());
+            }
+
             template <typename Quantity2>
             static constexpr
             auto multiply(const Quantity & x, const Quantity2 & y) {
