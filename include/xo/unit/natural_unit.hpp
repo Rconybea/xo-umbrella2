@@ -13,6 +13,9 @@ namespace xo {
     namespace qty {
         using nu_abbrev_type = flatstring<32>;
 
+        template <typename Int>
+        class natural_unit;
+
         /** @class natural_unit
          *  @brief an array representing the cartesian product of distinct basis-power-units
          *
@@ -36,6 +39,15 @@ namespace xo {
             constexpr bool is_dimensionless() const { return n_bpu_ == 0; }
 
             constexpr bpu<Int> * bpu_v() const { return bpu_v_; }
+
+            constexpr natural_unit reciprocal() const {
+                natural_unit retval;
+
+                for (std::size_t i = 0; i < this->n_bpu(); ++i)
+                    retval.push_back((*this)[i].reciprocal());
+
+                return retval;
+            }
 
             constexpr nu_abbrev_type abbrev() const {
                 nu_abbrev_type retval;
@@ -302,18 +314,6 @@ namespace xo {
                     (ratio::ratio<Int>(1, 1) /*outer_scale_exact*/,
                      1.0 /*outer_scale_sq*/);
             }
-
-            template <typename Int>
-            constexpr natural_unit<Int>
-            nu_reciprocal(const natural_unit<Int> & nu)
-            {
-                natural_unit<Int> retval;
-
-                for (std::size_t i = 0; i < nu.n_bpu(); ++i)
-                    retval.push_back(nu[i].reciprocal());
-
-                return retval;
-            } /*nunit_reciprocal*/
 
         } /*namespace detail*/
 
