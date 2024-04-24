@@ -1,4 +1,4 @@
-name: XO ratio builder
+name: XO unit builder
 
 on:
   push:
