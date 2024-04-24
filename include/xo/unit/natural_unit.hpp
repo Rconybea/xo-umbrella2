@@ -318,8 +318,8 @@ namespace xo {
         } /*namespace detail*/
 
         namespace nu2 {
-            constexpr auto nanogram = bpu_array_maker<std::int64_t>::make_bpu_array(make_unit_power<std::int64_t>(bu2::nanogram));
-            constexpr auto microgram = bpu_array_maker<std::int64_t>::make_bpu_array(make_unit_power<std::int64_t>(bu2::microgram));
+            constexpr auto nanogram = bpu_array_maker<std::int64_t>::make_bpu_array(make_unit_power<std::int64_t>(bu::nanogram));
+            constexpr auto microgram = bpu_array_maker<std::int64_t>::make_bpu_array(make_unit_power<std::int64_t>(bu::microgram));
         }
     } /*namespace qty*/
 } /*namespace xo*/

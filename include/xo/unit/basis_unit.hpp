@@ -37,7 +37,7 @@ namespace xo {
             scalefactor_ratio_type scalefactor_;
         };
 
-        namespace bu2 {
+        namespace bu {
             constexpr basis_unit nanogram  = basis_unit(dim::mass, scalefactor_ratio_type(1,    1000000000));
             constexpr basis_unit microgram = basis_unit(dim::mass, scalefactor_ratio_type(1,    1000000));
             constexpr basis_unit milligram = basis_unit(dim::mass, scalefactor_ratio_type(1,    1000));
@@ -104,7 +104,7 @@ namespace xo {
             };
 
             template <>
-            struct scaled_native_unit2_abbrev<dim::mass, bu2::nanogram.scalefactor().num(), bu2::nanogram.scalefactor().den()> {
+            struct scaled_native_unit2_abbrev<dim::mass, bu::nanogram.scalefactor().num(), bu::nanogram.scalefactor().den()> {
                 static constexpr const basis_unit2_abbrev_type value = basis_unit2_abbrev_type::from_chars("ng");
             };
 

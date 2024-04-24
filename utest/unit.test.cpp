@@ -58,7 +58,7 @@ namespace xo {
             return result;
         }
 
-        TEST_CASE("basis_unit2", "[basis_unit2]") {
+        TEST_CASE("basis_unit", "[basis_unit]") {
             constexpr bool c_debug_flag = true;
 
             // can get bits from /dev/random by uncommenting the 2nd line below
@@ -67,7 +67,7 @@ namespace xo {
 
             //auto rng = xo::rng::xoshiro256ss(seed);
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.basis_unit2"));
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.basis_unit"));
             //log && log("(A)", xtag("foo", foo));
 
             static_assert(native_unit2_v[static_cast<int>(dim::mass)].native_dim() == dim::mass);
@@ -182,7 +182,7 @@ namespace xo {
             static_assert(scaled_native_unit2_abbrev_v<dim::mass>
                           == basis_unit2_abbrev_type::from_flatstring(xo::flatstring("g")));
 
-        } /*TEST_CASE(basis_unit2)*/
+        } /*TEST_CASE(basis_unit)*/
 
         TEST_CASE("basis_unit2_store", "[basis_unit2_store]") {
             constexpr bool c_debug_flag = false;
