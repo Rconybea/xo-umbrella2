@@ -11,8 +11,6 @@
 #include "xo/unit/bpu_iostream.hpp"
 #include "xo/unit/basis_unit.hpp"
 #include "xo/unit/native_unit.hpp"
-//#include "xo/reflect/Reflect.hpp"
-//#include "xo/cxxutil/demangle.hpp"
 #include "xo/indentlog/scope.hpp"
 #include "xo/indentlog/print/tag.hpp"
 #include <catch2/catch.hpp>
@@ -21,14 +19,11 @@ namespace xo {
     namespace ut {
         /* compile-time tests */
 
-        //using xo::reflect::Reflect;
-
         namespace su2 = xo::qty::su2;
 
         using xo::qty::Quantity;
         using xo::qty::dim;
         using xo::qty::basis_unit2_abbrev_type;
-        using xo::qty::native_unit;
         using xo::qty::native_unit2_v;
         using xo::qty::scalefactor_ratio_type;
         using xo::qty::units::scaled_native_unit2_abbrev;
