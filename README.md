@@ -34,8 +34,17 @@ When this completes,  point local browser to `xo-unit/.build/docs/sphinx/index.h
 ```
 $ cd xo-unit
 $ mkdir .build-ccov
-$ cd .build-ccov
-$ cmake -DCMAKE_MODULE_PATH=${PREFIX}/share/cmake  -DCMAKE_PREFIX_PATH=${PREFIX} -DCODE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug ..
+$ cmake -DCMAKE_BUILD_TYPE=coverage -DCMAKE_PREFIX_PATH=${PREFIX} -B .build-ccov
+```
+
+run coverage-enabled unit tests
+```
+$ cmake --build .build-ccov -- test
+```
+
+generate html+text coverage report
+```
+$cmake --build .build-ccov -- ccov
 ```
 
 ### LSP support
