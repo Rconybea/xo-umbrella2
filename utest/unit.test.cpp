@@ -11,7 +11,7 @@
 #include "xo/unit/bpu_iostream.hpp"
 #include "xo/unit/basis_unit.hpp"
 #include "xo/unit/native_unit.hpp"
-#include "xo/reflect/Reflect.hpp"
+//#include "xo/reflect/Reflect.hpp"
 //#include "xo/cxxutil/demangle.hpp"
 #include "xo/indentlog/scope.hpp"
 #include "xo/indentlog/print/tag.hpp"
@@ -21,7 +21,7 @@ namespace xo {
     namespace ut {
         /* compile-time tests */
 
-        using xo::reflect::Reflect;
+        //using xo::reflect::Reflect;
 
         namespace su2 = xo::qty::su2;
 
