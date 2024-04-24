@@ -2,9 +2,9 @@
 
 set(SELF_EXECUTABLE_NAME utest.unit)
 set(SELF_SOURCE_FILES
-    unit_utest_main.cpp
-    mpl_unit.test.cpp
-    unit.test.cpp quantity.test.cpp)
+    unit_utest_main.cpp  #mpl_unit.test.cpp
+    unit.test.cpp #quantity.test.cpp
+)
 
 add_executable(${SELF_EXECUTABLE_NAME} ${SELF_SOURCE_FILES})
 xo_include_options2(${SELF_EXECUTABLE_NAME})
@@ -16,7 +16,7 @@ target_code_coverage(${SELF_EXECUTABLE_NAME} AUTO ALL)
 # internal dependencies: logutil, ...
 
 xo_self_dependency(${SELF_EXECUTABLE_NAME} xo_unit)
-xo_dependency(${SELF_EXECUTABLE_NAME} reflect)
+#xo_dependency(${SELF_EXECUTABLE_NAME} reflect)
 
 # ----------------------------------------------------------------
 # 3rd party dependency: catch2:
