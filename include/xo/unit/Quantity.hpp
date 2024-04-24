@@ -242,14 +242,22 @@ namespace xo {
             return Quantity::divide(x, y);
         }
 
-        /** note: won't have constexpr result until c++26 (when ::sqrt(), ::pow() are constexpr)
-         **/
+        /** note: doesn not require unit scaling, so constexpr with c++23 **/
         template <typename Quantity, typename Dimensionless>
         requires quantity2_concept<Quantity> && std::is_arithmetic_v<Dimensionless>
         constexpr auto
         operator/ (const Quantity & x, Dimensionless y)
         {
             return x.divide_by(y);
+        }
+
+        /** note: doesn not require unit scaling, so constexpr with c++23 **/
+        template <typename Dimensionless, typename Quantity>
+        requires std::is_arithmetic_v<Dimensionless> && quantity2_concept<Quantity>
+        constexpr auto
+        operator/ (Dimensionless x, const Quantity & y)
+        {
+            return y.divide_into(x);
         }
 
         /** note: won't have constexpr result until c++26 (when ::sqrt(), ::pow() are constexpr)
