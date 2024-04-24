@@ -94,7 +94,7 @@ namespace xo {
                                        * static_cast<r_repr_type>(y.scale()));
 
                 return Quantity<r_repr_type, r_int_type>(r_scale,
-                                                          rr.natural_unit_);
+                                                         rr.natural_unit_);
             }
 
             template <typename Quantity2>
@@ -167,6 +167,14 @@ namespace xo {
                     return Quantity<r_repr_type, r_int_type>(std::numeric_limits<Repr>::quiet_NaN(),
                                                              x.unit_.template to_repr<r_int_type>());
                 }
+            }
+
+            template <typename Quantity2>
+            static constexpr
+            auto compare(const Quantity & x, const Quantity2 & y) {
+                Quantity y2 = y.rescale(x.unit_);
+
+                return x.scale() <=> y2.scale();
             }
 
         private:
