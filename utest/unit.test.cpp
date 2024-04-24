@@ -1190,6 +1190,138 @@ namespace xo {
 
             //REQUIRE(ng2.scale() == 1);
         } /*TEST_CASE(Quantity7)*/
+
+        TEST_CASE("Quantity.compare", "[Quantity.compare]") {
+            constexpr bool c_debug_flag = false;
+
+            // can get bits from /dev/random by uncommenting the 2nd line below
+            //uint64_t seed = xxx;
+            //rng::Seed<xoshio256ss> seed;
+
+            //auto rng = xo::rng::xoshiro256ss(seed);
+
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.Quantity.compare"));
+            //log && log("(A)", xtag("foo", foo));
+
+            /* not constexpr until c++26 */
+            Quantity ng = 1000 * unit_qty(su2::nanogram);
+            Quantity ug = unit_qty(su2::microgram);
+
+            {
+                auto cmp = (ng == ug);
+                log && log(xtag("ng==ug", cmp));
+
+                /* units will be nanograms,  since that's on lhs */
+                REQUIRE(cmp == true);
+            }
+
+            {
+                auto cmp = (ng != ug);
+                log && log(xtag("ng!=ug", cmp));
+
+                /* units will be nanograms,  since that's on lhs */
+                REQUIRE(cmp == false);
+            }
+
+            {
+                auto cmp = (ng < ug);
+                log && log(xtag("ng<ug", cmp));
+
+               /* units will be nanograms,  since that's on lhs */
+                REQUIRE(cmp == false);
+            }
+
+            {
+                auto cmp = (ng <= ug);
+                log && log(xtag("ng=<ug", cmp));
+
+                /* units will be nanograms,  since that's on lhs */
+                REQUIRE(cmp == true);
+            }
+
+            {
+                auto cmp = (ng > ug);
+                log && log(xtag("ng>ug", cmp));
+
+                /* units will be nanograms,  since that's on lhs */
+                REQUIRE(cmp == false);
+            }
+
+            {
+                auto cmp = (ng >= ug);
+                log && log(xtag("ng>=ug", cmp));
+
+                /* units will be nanograms,  since that's on lhs */
+                REQUIRE(cmp == true);
+            }
+
+        } /*TEST_CASE(Quantity.compare)*/
+
+        TEST_CASE("Quantity.compare2", "[Quantity]") {
+            constexpr bool c_debug_flag = false;
+
+            // can get bits from /dev/random by uncommenting the 2nd line below
+            //uint64_t seed = xxx;
+            //rng::Seed<xoshio256ss> seed;
+
+            //auto rng = xo::rng::xoshiro256ss(seed);
+
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.Quantity.compare2"));
+            //log && log("(A)", xtag("foo", foo));
+
+            /* not constexpr until c++26 */
+            Quantity ng = unit_qty(su2::nanogram);
+            Quantity ug = unit_qty(su2::microgram);
+
+            {
+                auto cmp = (ng == ug);
+                log && log(xtag("ng==ug", cmp));
+
+                /* units will be nanograms,  since that's on lhs */
+                REQUIRE(cmp == false);
+            }
+
+            {
+                auto cmp = (ng != ug);
+                log && log(xtag("ng!=ug", cmp));
+
+                /* units will be nanograms,  since that's on lhs */
+                REQUIRE(cmp == true);
+            }
+
+            {
+                auto cmp = (ng < ug);
+                log && log(xtag("ng<ug", cmp));
+
+                /* units will be nanograms,  since that's on lhs */
+                REQUIRE(cmp == true);
+            }
+
+            {
+                auto cmp = (ng <= ug);
+                log && log(xtag("ng=<ug", cmp));
+
+                /* units will be nanograms,  since that's on lhs */
+                REQUIRE(cmp == true);
+            }
+
+            {
+                auto cmp = (ng > ug);
+                log && log(xtag("ng>ug", cmp));
+
+                /* units will be nanograms,  since that's on lhs */
+                REQUIRE(cmp == false);
+            }
+
+            {
+                auto cmp = (ng >= ug);
+                log && log(xtag("ng>=ug", cmp));
+
+                /* units will be nanograms,  since that's on lhs */
+                REQUIRE(cmp == false);
+            }
+
+        } /*TEST_CASE(Quantity.compare2)*/
     } /*namespace ut*/
 } /*namespace xo*/
 
