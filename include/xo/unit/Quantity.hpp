@@ -280,6 +280,26 @@ namespace xo {
             return Quantity::subtract(x, y);
         }
 
+        /** note: won't have constexpr result until c++26 (when ::sqrt(), ::pow() are constexpr)
+         **/
+        template <typename Quantity, typename Quantity2>
+        requires quantity2_concept<Quantity> && quantity2_concept<Quantity2>
+        constexpr auto
+        operator== (const Quantity & x, const Quantity2 & y)
+        {
+            return (Quantity::compare(x, y) == 0);
+        }
+
+        /** note: won't have constexpr result until c++26 (when ::sqrt(), ::pow() are constexpr)
+         **/
+        template <typename Quantity, typename Quantity2>
+        requires quantity2_concept<Quantity> && quantity2_concept<Quantity2>
+        constexpr auto
+        operator<=> (const Quantity & x, const Quantity2 & y)
+        {
+            return Quantity::compare(x, y);
+        }
+
         namespace unit {
             constexpr auto nanogram = natural_unit_qty(nu2::nanogram);
         }
