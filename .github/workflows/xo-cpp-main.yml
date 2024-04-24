@@ -1,0 +1,248 @@
+name: XO ratio builder
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    # The CMake configure and build commands are platform agnostic and should work equally well on Windows or Mac.
+    # You can convert this to a matrix build if you need cross-platform coverage.
+    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+    runs-on: ubuntu-latest
+
+    container:
+      # custom docker image.  see github.com:rconybea/docker-xo-builder for definition
+      image: ghcr.io/rconybea/docker-xo-builder:v1
+
+    steps:
+    - name: xo-cmake
+      run: |
+        # treat github.com as known host to prevent shtoopid SSL errors
+        mkdir -p ~/.ssh
+        ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
+        cat ~/.ssh/known_hosts
+
+        git config --global http.sslVerify false
+
+        XO_NAME=xo-cmake
+        XO_SRC=repo/${XO_NAME}
+        XO_BUILDDIR=${{github.workspace}}/build_${XO_NAME}
+        PREFIX=${{github.workspace}}/local
+
+        XO_REPO=https://github.com/rconybea/xo-cmake.git
+
+        mkdir -p ${XO_SRC}
+        mkdir -p ${XO_BUILDDIR}
+
+        echo "::group::clone ${XO_NAME}"
+        export GIT_SSH_COMMAND='ssh -o StrictHostKeyChecking=no'
+        export GIT_SSL_NOVERIFY=true
+        git clone ${XO_REPO} ${XO_SRC}
+        echo "::endgroup"
+
+        echo "::group::configure ${XO_NAME}"
+        cmake -B ${XO_BUILDDIR} -DCMAKE_INSTALL_PREFIX=${PREFIX} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} ${XO_SRC}
+        echo "::endgroup"
+
+        echo "::group::compile ${XO_NAME}"
+        cmake --build ${XO_BUILDDIR} -j
+        echo "::endgroup"
+
+        echo "::group::local install ${XO_NAME}"
+        cmake --install ${XO_BUILDDIR}
+        echo "::endgroup"
+
+        echo "::group::local dir tree"
+        tree ${PREFIX}
+        echo "::endgroup"
+
+    # ----------------------------------------------------------------
+
+    - name: xo-indentlog
+      run: |
+        XO_NAME=xo-indentlog
+        XO_SRC=repo/${XO_NAME}
+        XO_BUILDDIR=${{github.workspace}}/build_${XO_NAME}
+        PREFIX=${{github.workspace}}/local
+
+        XO_REPO=https://github.com/rconybea/indentlog.git
+
+        mkdir -p ${XO_SRC}
+        mkdir -p ${XO_BUILDDIR}
+
+        echo "::group::clone ${XO_NAME}"
+        export GIT_SSH_COMMAND='ssh -o StrictHostKeyChecking=no'
+        export GIT_SSL_NOVERIFY=true
+        git clone ${XO_REPO} ${XO_SRC}
+        echo "::endgroup"
+
+        echo "::group::configure ${XO_NAME}"
+        cmake -B ${XO_BUILDDIR} -DCMAKE_INSTALL_PREFIX=${PREFIX} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} ${XO_SRC}
+        echo "::endgroup"
+
+        echo "::group::compile ${XO_NAME}"
+        cmake --build ${XO_BUILDDIR} -j
+        echo "::endgroup"
+
+        echo "::group::local install ${XO_NAME}"
+        cmake --install ${XO_BUILDDIR}
+        echo "::endgroup"
+
+        echo "::group::local dir tree"
+        tree ${PREFIX}
+        echo "::endgroup"
+
+    # ----------------------------------------------------------------
+
+    - name: xo-flatstring
+      run: |
+        XO_NAME=xo-flatstring
+        XO_SRC=repo/${XO_NAME}
+        XO_BUILDDIR=${{github.workspace}}/build_${XO_NAME}
+        PREFIX=${{github.workspace}}/local
+
+        XO_REPO=https://github.com/rconybea/${XO_NAME}.git
+
+        mkdir -p ${XO_SRC}
+        mkdir -p ${XO_BUILDDIR}
+
+        echo "::group::clone ${XO_NAME}"
+        export GIT_SSH_COMMAND='ssh -o StrictHostKeyChecking=no'
+        export GIT_SSL_NOVERIFY=true
+        git clone ${XO_REPO} ${XO_SRC}
+        echo "::endgroup"
+
+        echo "::group::configure ${XO_NAME}"
+        cmake -B ${XO_BUILDDIR} -DCMAKE_INSTALL_PREFIX=${PREFIX} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} ${XO_SRC}
+        echo "::endgroup"
+
+        echo "::group::compile ${XO_NAME}"
+        cmake --build ${XO_BUILDDIR} -j
+        echo "::endgroup"
+
+        echo "::group::local install ${XO_NAME}"
+        cmake --install ${XO_BUILDDIR}
+        echo "::endgroup"
+
+        echo "::group::local dir tree"
+        tree ${PREFIX}
+        echo "::endgroup"
+
+    # ----------------------------------------------------------------
+
+    - name: xo-randomgen
+      run: |
+        XO_NAME=xo-randomgen
+        XO_SRC=repo/${XO_NAME}
+        XO_BUILDDIR=${{github.workspace}}/build_${XO_NAME}
+        PREFIX=${{github.workspace}}/local
+
+        XO_REPO=https://github.com/rconybea/randomgen.git
+
+        mkdir -p ${XO_SRC}
+        mkdir -p ${XO_BUILDDIR}
+
+        echo "::group::clone ${XO_NAME}"
+        export GIT_SSH_COMMAND='ssh -o StrictHostKeyChecking=no'
+        export GIT_SSL_NOVERIFY=true
+        git clone ${XO_REPO} ${XO_SRC}
+        echo "::endgroup"
+
+        echo "::group::configure ${XO_NAME}"
+        cmake -B ${XO_BUILDDIR} -DCMAKE_INSTALL_PREFIX=${PREFIX} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} ${XO_SRC}
+        echo "::endgroup"
+
+        echo "::group::compile ${XO_NAME}"
+        cmake --build ${XO_BUILDDIR} -j
+        echo "::endgroup"
+
+        echo "::group::local install ${XO_NAME}"
+        cmake --install ${XO_BUILDDIR}
+        echo "::endgroup"
+
+        echo "::group::local dir tree"
+        tree ${PREFIX}
+        echo "::endgroup"
+
+    # ----------------------------------------------------------------
+
+    - name: xo-ratio
+      run: |
+        XO_NAME=xo-ratio
+        XO_SRC=repo/${XO_NAME}
+        XO_BUILDDIR=${{github.workspace}}/build_${XO_NAME}
+        PREFIX=${{github.workspace}}/local
+
+        XO_REPO=https://github.com/rconybea/${XO_NAME}.git
+
+        mkdir -p ${XO_SRC}
+        mkdir -p ${XO_BUILDDIR}
+
+        echo "::group::clone ${XO_NAME}"
+        export GIT_SSH_COMMAND='ssh -o StrictHostKeyChecking=no'
+        export GIT_SSL_NOVERIFY=true
+        git clone ${XO_REPO} ${XO_SRC}
+        echo "::endgroup"
+
+        echo "::group::configure ${XO_NAME}"
+        cmake -B ${XO_BUILDDIR} -DCMAKE_INSTALL_PREFIX=${PREFIX} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} ${XO_SRC}
+        echo "::endgroup"
+
+        echo "::group::compile ${XO_NAME}"
+        cmake --build ${XO_BUILDDIR} -j
+        echo "::endgroup"
+
+        echo "::group::local install ${XO_NAME}"
+        cmake --install ${XO_BUILDDIR}
+        echo "::endgroup"
+
+        echo "::group::local dir tree"
+        tree ${PREFIX}
+        echo "::endgroup"
+
+    # ----------------------------------------------------------------
+
+    - name: xo-unit
+      run: |
+        XO_NAME=xo-unit
+        XO_SRC=repo/${XO_NAME}
+        XO_BUILDDIR=${{github.workspace}}/build_${XO_NAME}
+        PREFIX=${{github.workspace}}/local
+
+        XO_REPO=https://github.com/rconybea/${XO_NAME}.git
+
+        mkdir -p ${XO_SRC}
+        mkdir -p ${XO_BUILDDIR}
+
+        echo "::group::clone ${XO_NAME}"
+        export GIT_SSH_COMMAND='ssh -o StrictHostKeyChecking=no'
+        export GIT_SSL_NOVERIFY=true
+        git clone ${XO_REPO} ${XO_SRC}
+        echo "::endgroup"
+
+        echo "::group::configure ${XO_NAME}"
+        cmake -B ${XO_BUILDDIR} -DCMAKE_INSTALL_PREFIX=${PREFIX} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} ${XO_SRC}
+        echo "::endgroup"
+
+        echo "::group::compile ${XO_NAME}"
+        cmake --build ${XO_BUILDDIR} -j
+        echo "::endgroup"
+
+        echo "::group::test ${XO_NAME}"
+        cmake --build ${XO_BUILDDIR} -- test
+        echo "::endgroup"
+
+        echo "::group::local install ${XO_NAME}"
+        cmake --install ${XO_BUILDDIR}
+        echo "::endgroup"
+
+        echo "::group::local dir tree"
+        tree ${PREFIX}
+        echo "::endgroup"
