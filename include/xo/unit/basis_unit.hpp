@@ -38,11 +38,70 @@ namespace xo {
         };
 
         namespace bu {
-            constexpr basis_unit nanogram  = basis_unit(dim::mass, scalefactor_ratio_type(1,    1000000000));
-            constexpr basis_unit microgram = basis_unit(dim::mass, scalefactor_ratio_type(1,    1000000));
-            constexpr basis_unit milligram = basis_unit(dim::mass, scalefactor_ratio_type(1,    1000));
-            constexpr basis_unit gram      = basis_unit(dim::mass, scalefactor_ratio_type(1,    1));
-            constexpr basis_unit kilogram  = basis_unit(dim::mass, scalefactor_ratio_type(1000, 1));
+            // ----- mass -----
+
+            constexpr basis_unit picogram         = basis_unit(dim::mass, scalefactor_ratio_type(            1, 1000000000000));
+            constexpr basis_unit nanogram         = basis_unit(dim::mass, scalefactor_ratio_type(            1,    1000000000));
+            constexpr basis_unit microgram        = basis_unit(dim::mass, scalefactor_ratio_type(            1,       1000000));
+            constexpr basis_unit milligram        = basis_unit(dim::mass, scalefactor_ratio_type(            1,          1000));
+            constexpr basis_unit gram             = basis_unit(dim::mass, scalefactor_ratio_type(            1,             1));
+            constexpr basis_unit kilogram         = basis_unit(dim::mass, scalefactor_ratio_type(         1000,             1));
+            constexpr basis_unit tonne            = basis_unit(dim::mass, scalefactor_ratio_type(      1000000,             1));
+            constexpr basis_unit kilotonne        = basis_unit(dim::mass, scalefactor_ratio_type(   1000000000,             1));
+            constexpr basis_unit megatonne        = basis_unit(dim::mass, scalefactor_ratio_type(1000000000000,             1));
+
+            // ----- distance -----
+
+            /* International spelling */
+            constexpr basis_unit picometre        = basis_unit(dim::distance, scalefactor_ratio_type(            1, 1000000000000));
+            constexpr basis_unit nanometre        = basis_unit(dim::distance, scalefactor_ratio_type(            1,    1000000000));
+            constexpr basis_unit micrometre       = basis_unit(dim::distance, scalefactor_ratio_type(            1,       1000000));
+            constexpr basis_unit millimetre       = basis_unit(dim::distance, scalefactor_ratio_type(            1,          1000));
+            constexpr basis_unit metre            = basis_unit(dim::distance, scalefactor_ratio_type(            1,             1));
+            constexpr basis_unit kilometre        = basis_unit(dim::distance, scalefactor_ratio_type(         1000,             1));
+            constexpr basis_unit megametre        = basis_unit(dim::distance, scalefactor_ratio_type(      1000000,             1));
+            constexpr basis_unit gigametre        = basis_unit(dim::distance, scalefactor_ratio_type(   1000000000,             1));
+
+            constexpr basis_unit lightsecond      = basis_unit(dim::distance, scalefactor_ratio_type(    299792458,             1));
+            constexpr basis_unit astronomicalunit = basis_unit(dim::distance, scalefactor_ratio_type( 149597870700,             1));
+
+            /* US spelling */
+            constexpr basis_unit picometer        = picometre;
+            constexpr basis_unit nanometer        = nanometre;
+            constexpr basis_unit micrometer       = micrometre;
+            constexpr basis_unit millimeter       = millimetre;
+            constexpr basis_unit meter            = metre;
+            constexpr basis_unit kilometer        = kilometre;
+
+            // ----- time -----
+
+            constexpr basis_unit picosecond       = basis_unit(dim::time,     scalefactor_ratio_type(            1, 1000000000000));
+            constexpr basis_unit nanosecond       = basis_unit(dim::time,     scalefactor_ratio_type(            1,    1000000000));
+            constexpr basis_unit microsecond      = basis_unit(dim::time,     scalefactor_ratio_type(            1,       1000000));
+            constexpr basis_unit millisecond      = basis_unit(dim::time,     scalefactor_ratio_type(            1,          1000));
+            constexpr basis_unit second           = basis_unit(dim::time,     scalefactor_ratio_type(            1,             1));
+            constexpr basis_unit minute           = basis_unit(dim::time,     scalefactor_ratio_type(           60,             1));
+            constexpr basis_unit hour             = basis_unit(dim::time,     scalefactor_ratio_type(         3600,             1));
+            constexpr basis_unit day              = basis_unit(dim::time,     scalefactor_ratio_type(      24*3600,             1));
+            constexpr basis_unit week             = basis_unit(dim::time,     scalefactor_ratio_type(    7*24*3600,             1));
+            constexpr basis_unit month            = basis_unit(dim::time,     scalefactor_ratio_type(   30*24*3600,             1));
+            constexpr basis_unit year             = basis_unit(dim::time,     scalefactor_ratio_type((365*24+6)*3600,           1));
+
+            /* alt conventions used in finance */
+            constexpr basis_unit year365          = basis_unit(dim::time,     scalefactor_ratio_type(  365*24*3600,             1));
+            constexpr basis_unit year360          = basis_unit(dim::time,     scalefactor_ratio_type(  360*24*3600,             1));
+            /* 250 = approx number of trading days in a calendar year */
+            constexpr basis_unit year250          = basis_unit(dim::time,     scalefactor_ratio_type(  250*24*3600,             1));
+
+            // ----- currency -----
+
+            /* pseudounit -- placeholder for any actual currency amount */
+            constexpr basis_unit currency         = basis_unit(dim::currency, scalefactor_ratio_type(            1,             1));
+
+            // ----- price -----
+
+            /* psuedounit -- context-dependent interpretation */
+            constexpr basis_unit price            = basis_unit(dim::price,    scalefactor_ratio_type(            1,             1));
         }
 
         namespace units {
@@ -84,6 +143,7 @@ namespace xo {
                           native_unit2_v[static_cast<std::uint32_t>(basis_dim)].abbrev_str())));
             }
 
+#ifdef NOT_USING
             template <dim BasisDim,
                       std::int64_t InnerScaleNum,
                       std::int64_t InnerScaleDen>
@@ -109,12 +169,12 @@ namespace xo {
             };
 
             template <>
-            struct scaled_native_unit2_abbrev<dim::mass, 1, 1000000> {
+            struct scaled_native_unit2_abbrev<dim::mass, bu::microgram.scalefactor().num(), bu::microgram.scalefactor().den()> {
                 static constexpr const basis_unit2_abbrev_type value = basis_unit2_abbrev_type::from_chars("ug");
             };
 
             template <>
-            struct scaled_native_unit2_abbrev<dim::mass, 1, 1000> {
+            struct scaled_native_unit2_abbrev<dim::mass, bu::milligram.scalefactor().num(), bu::milligram.scalefactor().den()> {
                 static constexpr const basis_unit2_abbrev_type value = basis_unit2_abbrev_type::from_chars("mg");
             };
 
@@ -206,7 +266,9 @@ namespace xo {
 
             template <dim BasisDim, std::int64_t InnerScaleNum = 1, std::int64_t InnerScaleDen = 1>
             constexpr auto scaled_native_unit2_abbrev_v = scaled_native_unit2_abbrev<BasisDim, InnerScaleNum, InnerScaleDen>::value;
+#endif
         }
+
 
     } /*namespace qty*/
 } /*namespace xo*/

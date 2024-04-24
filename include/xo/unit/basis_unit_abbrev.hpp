@@ -45,6 +45,8 @@ namespace xo {
                         return basis_unit2_abbrev_type::from_chars("ug");
                     case 1000000000:
                         return basis_unit2_abbrev_type::from_chars("ng");
+                    case 1000000000000:
+                        return basis_unit2_abbrev_type::from_chars("pg");
                     }
                 }
 
@@ -56,6 +58,8 @@ namespace xo {
                         return basis_unit2_abbrev_type::from_chars("t");
                     case 1000000000:
                         return basis_unit2_abbrev_type::from_chars("kt");
+                    case 1000000000000:
+                        return basis_unit2_abbrev_type::from_chars("Mt");
                     }
                 }
 
@@ -78,6 +82,8 @@ namespace xo {
                         return basis_unit2_abbrev_type::from_chars("um");
                     case 1000000000:
                         return basis_unit2_abbrev_type::from_chars("nm");
+                    case 1000000000000:
+                        return basis_unit2_abbrev_type::from_chars("pm");
                     }
                 }
 
@@ -87,8 +93,12 @@ namespace xo {
                         return basis_unit2_abbrev_type::from_chars("km");
                     case 1000000:
                         return basis_unit2_abbrev_type::from_chars("Mm");
+                    case 299792458:
+                        return basis_unit2_abbrev_type::from_chars("lsec");
                     case 1000000000:
                         return basis_unit2_abbrev_type::from_chars("Gm");
+                    case 149597870700:
+                        return basis_unit2_abbrev_type::from_chars("AU");
                     }
                 }
 
@@ -111,6 +121,8 @@ namespace xo {
                         return basis_unit2_abbrev_type::from_chars("us");
                     case 1000000000:
                         return basis_unit2_abbrev_type::from_chars("ns");
+                    case 1000000000000:
+                        return basis_unit2_abbrev_type::from_chars("ps");
                     }
                 }
 
@@ -132,6 +144,8 @@ namespace xo {
                         return basis_unit2_abbrev_type::from_chars("yr360");
                     case 365*24*3600:
                         return basis_unit2_abbrev_type::from_chars("yr365");
+                    case 365*24*3600+6*3600:
+                        return basis_unit2_abbrev_type::from_chars("yr");
                     }
                 }
 
@@ -161,7 +175,7 @@ namespace xo {
                 if (scalefactor.num() == 1) {
                     switch(scalefactor.den()) {
                     case 1:
-                        return basis_unit2_abbrev_type::from_chars("ccy");
+                        return basis_unit2_abbrev_type::from_chars("px");
                     }
                 }
 

@@ -80,7 +80,7 @@ namespace xo {
                 this->bu_establish_abbrev
                     (basis_unit(BasisDim,
                                  scalefactor_ratio_type(InnerScaleNum, InnerScaleDen)),
-                     units::scaled_native_unit2_abbrev_v<BasisDim, InnerScaleNum, InnerScaleDen>);
+                     abbrev::basis_unit2_abbrev(BasisDim, scalefactor_ratio_type(InnerScaleNum, InnerScaleDen)));
             }
 
             /** @brief establish abbreviation @p abbrev for basis unit @p bu

@@ -19,6 +19,7 @@ namespace xo {
     namespace ut {
         /* compile-time tests */
 
+        namespace bu = xo::qty::bu;
         namespace su2 = xo::qty::su2;
 
         using xo::qty::Quantity;
@@ -27,7 +28,7 @@ namespace xo {
         using xo::qty::native_unit2_v;
         using xo::qty::scalefactor_ratio_type;
         using xo::qty::units::scaled_native_unit2_abbrev;
-        using xo::qty::units::scaled_native_unit2_abbrev_v;
+        //using xo::qty::units::scaled_native_unit2_abbrev_v;
         using xo::qty::basis_unit;
         using xo::qty::abbrev::basis_unit2_abbrev;;
         using xo::qty::bpu_abbrev_type;
@@ -84,67 +85,80 @@ namespace xo {
 
             log && log("---------------------");
 
-            static_assert(basis_unit(dim::mass, scalefactor_ratio_type(1, 1000000000)).abbrev()
+            /* note: using CHECK to make test show up in coverage */
+
+#          define REQUIRE_x2(x) static_assert(x); REQUIRE(x)
+
+            REQUIRE_x2(bu::picogram.abbrev() == basis_unit2_abbrev_type::from_chars("pg"));
+            REQUIRE_x2(bu::nanogram.abbrev()
                           == basis_unit2_abbrev_type::from_chars("ng"));
-            static_assert(basis_unit(dim::mass, scalefactor_ratio_type(1, 1000000)).abbrev()
+            REQUIRE_x2(bu::microgram.abbrev()
                           == basis_unit2_abbrev_type::from_chars("ug"));
-            static_assert(basis_unit(dim::mass, scalefactor_ratio_type(1, 1000)).abbrev()
+            REQUIRE_x2(bu::milligram.abbrev()
                           == basis_unit2_abbrev_type::from_chars("mg"));
-            static_assert(basis_unit(dim::mass, scalefactor_ratio_type(1, 1)).abbrev()
+            REQUIRE_x2(bu::gram.abbrev()
                           == basis_unit2_abbrev_type::from_chars("g"));
-            static_assert(basis_unit(dim::mass, scalefactor_ratio_type(1000, 1)).abbrev()
+            REQUIRE_x2(bu::kilogram.abbrev()
                           == basis_unit2_abbrev_type::from_chars("kg"));
-            static_assert(basis_unit(dim::mass, scalefactor_ratio_type(1000000, 1)).abbrev()
+            REQUIRE_x2(bu::tonne.abbrev()
                           == basis_unit2_abbrev_type::from_chars("t"));
-            static_assert(basis_unit(dim::mass, scalefactor_ratio_type(1000000000, 1)).abbrev()
+            REQUIRE_x2(bu::kilotonne.abbrev()
                           == basis_unit2_abbrev_type::from_chars("kt"));
+            REQUIRE_x2(bu::megatonne.abbrev()
+                          == basis_unit2_abbrev_type::from_chars("Mt"));
 
             log && log(xtag("distance", basis_unit2_abbrev(dim::distance, scalefactor_ratio_type(1, 1))));
 
-            static_assert(basis_unit(dim::distance, scalefactor_ratio_type(1, 1000000000)).abbrev()
+            REQUIRE_x2(bu::picometre.abbrev()
+                          == basis_unit2_abbrev_type::from_chars("pm"));
+            REQUIRE_x2(bu::nanometre.abbrev()
                           == basis_unit2_abbrev_type::from_chars("nm"));
-            static_assert(basis_unit(dim::distance, scalefactor_ratio_type(1, 1000000)).abbrev()
+            REQUIRE_x2(bu::micrometre.abbrev()
                           == basis_unit2_abbrev_type::from_chars("um"));
-            static_assert(basis_unit(dim::distance, scalefactor_ratio_type(1, 1000)).abbrev()
+            REQUIRE_x2(bu::millimetre.abbrev()
                           == basis_unit2_abbrev_type::from_chars("mm"));
-            static_assert(basis_unit(dim::distance, scalefactor_ratio_type(1, 1)).abbrev()
+            REQUIRE_x2(bu::metre.abbrev()
                           == basis_unit2_abbrev_type::from_chars("m"));
-            static_assert(basis_unit(dim::distance, scalefactor_ratio_type(1000, 1)).abbrev()
+            REQUIRE_x2(bu::kilometre.abbrev()
                           == basis_unit2_abbrev_type::from_chars("km"));
-            static_assert(basis_unit(dim::distance, scalefactor_ratio_type(1000000, 1)).abbrev()
+            REQUIRE_x2(bu::megametre.abbrev()
                           == basis_unit2_abbrev_type::from_chars("Mm"));
-            static_assert(basis_unit(dim::distance, scalefactor_ratio_type(1000000000, 1)).abbrev()
+            REQUIRE_x2(bu::gigametre.abbrev()
                           == basis_unit2_abbrev_type::from_chars("Gm"));
+
+            REQUIRE_x2(bu::lightsecond.abbrev() == basis_unit2_abbrev_type::from_chars("lsec"));
+            REQUIRE_x2(bu::astronomicalunit.abbrev() == basis_unit2_abbrev_type::from_chars("AU"));
 
             log && log(xtag("time", basis_unit2_abbrev(dim::time, scalefactor_ratio_type(1, 1))));
 
-            static_assert(basis_unit(dim::time, scalefactor_ratio_type(1, 1000000000)).abbrev()
-                          == basis_unit2_abbrev_type::from_chars("ns"));
-            static_assert(basis_unit(dim::time, scalefactor_ratio_type(1, 1000000)).abbrev()
-                          == basis_unit2_abbrev_type::from_chars("us"));
-            static_assert(basis_unit(dim::time, scalefactor_ratio_type(1, 1000000)).abbrev()
-                          == basis_unit2_abbrev_type::from_chars("us"));
-            static_assert(basis_unit(dim::time, scalefactor_ratio_type(1, 1000)).abbrev()
-                          == basis_unit2_abbrev_type::from_chars("ms"));
-            static_assert(basis_unit(dim::time, scalefactor_ratio_type(1, 1)).abbrev()
-                          == basis_unit2_abbrev_type::from_chars("s"));
-            static_assert(basis_unit(dim::time, scalefactor_ratio_type(60, 1)).abbrev()
-                          == basis_unit2_abbrev_type::from_chars("min"));
-            static_assert(basis_unit(dim::time, scalefactor_ratio_type(3600, 1)).abbrev()
-                          == basis_unit2_abbrev_type::from_chars("hr"));
-            static_assert(basis_unit(dim::time, scalefactor_ratio_type(24*3600, 1)).abbrev()
-                          == basis_unit2_abbrev_type::from_chars("dy"));
-            static_assert(basis_unit(dim::time, scalefactor_ratio_type(7*24*3600, 1)).abbrev()
-                          == basis_unit2_abbrev_type::from_chars("wk"));
-            static_assert(basis_unit(dim::time, scalefactor_ratio_type(30*24*3600, 1)).abbrev()
-                          == basis_unit2_abbrev_type::from_chars("mo"));
-            static_assert(basis_unit(dim::time, scalefactor_ratio_type(250*24*3600, 1)).abbrev()
-                          == basis_unit2_abbrev_type::from_chars("yr250"));
-            static_assert(basis_unit(dim::time, scalefactor_ratio_type(360*24*3600, 1)).abbrev()
-                          == basis_unit2_abbrev_type::from_chars("yr360"));
-            static_assert(basis_unit(dim::time, scalefactor_ratio_type(365*24*3600, 1)).abbrev()
-                          == basis_unit2_abbrev_type::from_chars("yr365"));
+            REQUIRE_x2(bu::second.abbrev() == basis_unit2_abbrev_type::from_chars("s"));
+            REQUIRE_x2(bu::picosecond.abbrev() == basis_unit2_abbrev_type::from_chars("ps"));
+            REQUIRE_x2(bu::nanosecond.abbrev() == basis_unit2_abbrev_type::from_chars("ns"));
+            REQUIRE_x2(bu::microsecond.abbrev() == basis_unit2_abbrev_type::from_chars("us"));
+            REQUIRE_x2(bu::millisecond.abbrev() == basis_unit2_abbrev_type::from_chars("ms"));
+            REQUIRE_x2(bu::second.abbrev() == basis_unit2_abbrev_type::from_chars("s"));
+            REQUIRE_x2(bu::minute.abbrev() == basis_unit2_abbrev_type::from_chars("min"));
+            REQUIRE_x2(bu::hour.abbrev() == basis_unit2_abbrev_type::from_chars("hr"));
+            REQUIRE_x2(bu::day.abbrev() == basis_unit2_abbrev_type::from_chars("dy"));
+            REQUIRE_x2(bu::week.abbrev() == basis_unit2_abbrev_type::from_chars("wk"));
+            REQUIRE_x2(bu::month.abbrev() == basis_unit2_abbrev_type::from_chars("mo"));
 
+            REQUIRE_x2(bu::year.abbrev() == basis_unit2_abbrev_type::from_chars("yr"));
+            REQUIRE_x2(bu::year250.abbrev() == basis_unit2_abbrev_type::from_chars("yr250"));
+            REQUIRE_x2(bu::year360.abbrev() == basis_unit2_abbrev_type::from_chars("yr360"));
+            REQUIRE_x2(bu::year365.abbrev() == basis_unit2_abbrev_type::from_chars("yr365"));
+
+            log && log(xtag("currency", basis_unit2_abbrev(dim::currency, scalefactor_ratio_type(1, 1))));
+
+            REQUIRE_x2(bu::currency.abbrev() == flatstring("ccy"));
+
+            log && log(xtag("price", basis_unit2_abbrev(dim::price, scalefactor_ratio_type(1, 1))));
+
+            REQUIRE_x2(bu::price.abbrev() == flatstring("px"));
+
+#          undef REQUIRE_x2
+
+#ifdef OBSOLETE
             log && log("---------------------");
 
             log && log(xtag("mass*10^-9",       scaled_native_unit2_abbrev_v<dim::mass,               1, 1000000000>));
@@ -181,6 +195,7 @@ namespace xo {
             /* proof that scaled_native_unit2_abbrev::value is constexpr */
             static_assert(scaled_native_unit2_abbrev_v<dim::mass>
                           == basis_unit2_abbrev_type::from_flatstring(xo::flatstring("g")));
+#endif
 
         } /*TEST_CASE(basis_unit)*/
 
