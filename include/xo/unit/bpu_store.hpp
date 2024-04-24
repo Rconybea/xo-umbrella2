@@ -3,6 +3,7 @@
 #pragma once
 
 #include "bpu.hpp"
+#include <vector>
 
 namespace xo {
     namespace qty {
