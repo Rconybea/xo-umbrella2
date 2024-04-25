@@ -132,7 +132,8 @@ jobs:
         echo "::endgroup"
 
         echo "::group::build ${XO_NAME} docs"
-        cmake --build ${XO_BUILDDIR} -- docs
+        cmake --build ${XO_BUILDDIR} -- doxygen
+        # note: sphinx+breathe not working (cause unknown) from docker-xo-builder, asof 25apr2024.
         echo "::endgroup"
 
         echo "::group::local install ${XO_NAME}"
