@@ -17,23 +17,58 @@ macro(xo_cxx_toplevel_options)
     enable_language(CXX)
     xo_toplevel_compile_options()
     xo_toplevel_testing_options()
-endmacro()
-
-macro(xo_toplevel_testing_options)
-    enable_testing()
-    add_code_coverage()
-    add_code_coverage_all_targets(EXCLUDE /nix/store* utest/*)
+    add_custom_target(all_libraries)
 endmacro()
 
 macro(xo_cxx_toplevel_options2)
     enable_language(CXX)
     xo_toplevel_compile_options()
     enable_testing()
+    add_custom_target(all_libraries)
+    add_custom_target(all_utest_executables)
 endmacro()
+
+macro(xo_toplevel_testing_options)
+    enable_testing()
+    add_code_coverage()
+    add_code_coverage_all_targets(EXCLUDE /nix/store* utest/*)
+    add_custom_target(all_utest_executables)
+endmacro()
+
+# debug build (cmake -DCMAKE_BUILD_TYPE=debug path/to/source)
+#
+macro(xo_toplevel_debug_config2)
+    if (${CMAKE_BUILD_TYPE} STREQUAL "debug")
+        # clear out hardwired default.
+        # we want to override project-level defaults,
+        # but need to prevent interference from hardwired defaults
+        # (the problem with non-empty hardwired defaults is that we can't tell if they've
+        # been set on the command line)
+        #
+        set(CMAKE_CXX_FLAGS_DEBUG "")
+
+        # CMAKE_CXX_FLAGS_DEBUG is built-in to cmake and has non-empty default.
+        #  -> we cannot tell whether it was set on the command line
+        #  -> use PROJECT_CXX_FLAGS_DEBUG instead
+        #
+        # built-in default value is -g; can hardwire different project policy here
+        #
+        if (NOT DEFINED PROJECT_CXX_FLAGS_DEBUG)
+            set(PROJECT_CXX_FLAGS_DEBUG ${PROJECT_CXX_FLAGS} -ggdb -Og
+                CACHE STRING "debug c++ compiler flags")
+        endif()
+        if (${CMAKE_BUILD_TYPE} STREQUAL debug)
+            message(STATUS "PROJECT_CXX_FLAGS_DEBUG: debug c++ flags are [${PROJECT_CXX_FLAGS_DEBUG}]")
+        endif()
+
+        add_compile_options("$<$<CONFIG:DEBUG>:${PROJECT_CXX_FLAGS_DEBUG}>")
+    endif()
+endmacro()
+
 
 # coverage build:
 # 0.
-#     (cmake -DCMAKE_BUILD_TYPE=coverage ..)
+#     (cmake -DCMAKE_BUILD_TYPE=coverage path/to/source)
 # 1. invoke instrumented executables for which you want coverage:
 #     (cmake --build path/to/build -- test)
 # 2. post-process low-level coverage data
@@ -54,7 +89,7 @@ macro(xo_toplevel_coverage_config2)
             set(PROJECT_CXX_FLAGS_COVERAGE -ggdb -Og -fprofile-arcs -ftest-coverage
                 CACHE STRING "coverage c++ compiler flags")
         endif()
-        message("-- PROJECT_CXX_FLAGS_COVERAGE: coverage c++ flags are [${PROJECT_CXX_FLAGS_COVERAGE}]")
+        message(STATUS "PROJECT_CXX_FLAGS_COVERAGE: coverage c++ flags are [${PROJECT_CXX_FLAGS_COVERAGE}]")
 
         add_compile_options("$<$<CONFIG:COVERAGE>:${PROJECT_CXX_FLAGS_COVERAGE}>")
         # when -DCMAKE_BUILD_TYPE=coverage, must also link executables with gcov
@@ -69,6 +104,146 @@ macro(xo_toplevel_coverage_config2)
             file(CHMOD ${PROJECT_BINARY_DIR}/gen-ccov PERMISSIONS OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
         endif()
     endif()
+endmacro()
+
+# caller should set ALL_LIBRARY_TARGETS ALL_UTEST_TARGETS before calling
+# xo_doxygen_standard_deps().
+#
+# xo_add_headeronly_library4(), xo_add_shared_library4(), xo_pybind11_library()
+# all add their target to ALL_LIBRARY_TARGETS.
+#
+macro(xo_doxygen_collect_deps)
+    get_target_property(_all_libs all_libraries targets)
+    get_target_property(_all_utests all_utest_executables targets)
+
+    message(DEBUG "_all_libs=${_all_libs}")
+    message(DEBUG "_all_utests=${_all_utests}")
+
+    ## .hpp files reachable from xo-flatstring/include
+    ##
+    ## REMINDER: for reliability will need to re-run cmake when the set of .hpp files changes
+    ##
+    #file(GLOB_RECURSE DOX_HPP_FILES_GLOB ${PROJECT_SOURCE_DIR}/include "*.hpp")
+    #message(STATUS "DOX_HPP_FILES_GLOB=${DOX_HPP_FILES_GLOB}")
+    #set(DOX_DEPS ${_all_libs} ${_all_utests} ${DOX_HPP_FILES_GLOB})
+
+    set(DOX_DEPS ${_all_libs} ${_all_utests})
+
+    message(STATUS "DOX_DEPS=${DOX_DEPS}")
+endmacro()
+
+# caller must set DOX_DEPS before invoking xo_toplevel_doxygen_config()
+#
+macro(xo_docdir_doxygen_config)
+    if (XO_SUBMODULE_BUILD)
+        # in submodule build, rely on toplevel docs/CMakeLists.txt file instead
+    else()
+        # look for doxygen executable
+        find_program(DOXYGEN_EXECUTABLE NAMES doxygen REQUIRED)
+        message(STATUS "DOXYGEN_EXECUTABLE=${DOXYGEN_EXECUTABLE}")
+
+        execute_process(COMMAND ${XO_CMAKE_CONFIG_EXECUTABLE} --doxygen-template OUTPUT_VARIABLE DOXYGEN_CONFIG_TEMPLATE)
+        message(STATUS "DOXYGEN_CONFIG_TEMPLATE=${DOXYGEN_CONFIG_TEMPLATE}")
+
+        set(DOX_CONFIG_FILE ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
+
+        set(DOX_INPUT_DIR ${PROJECT_SOURCE_DIR})
+        set(DOX_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/dox)
+
+        set(DOX_INDEX_FILE ${DOX_OUTPUT_DIR}/html/index.html)
+
+        configure_file(
+            ${DOXYGEN_CONFIG_TEMPLATE} ${DOX_CONFIG_FILE}
+            FILE_PERMISSIONS OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+            @ONLY)
+
+        file(MAKE_DIRECTORY ${DOX_OUTPUT_DIR})
+        add_custom_command(
+            OUTPUT ${DOX_INDEX_FILE}
+            DEPENDS ${DOX_DEPS}
+            COMMAND "${DOXYGEN_EXECUTABLE}" ${DOX_CONFIG_FILE}
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+            MAIN_DEPENDENCY ${DOX_CONFIG_FILE}
+            COMMENT "Generating docs (doxygen)")
+
+        # To build this target
+        #   $ cmake --build .build -j -- doxygen
+        # or
+        #   $ cd .build
+        #   $ make doxygen
+        #
+        add_custom_target(
+            doxygen
+            DEPENDS ${DOX_INDEX_FILE} ${DOX_DEPS}
+        )
+
+    endif()
+endmacro()
+
+macro(xo_docdir_sphinx_config rst_files)
+    list(APPEND SPHINX_RST_FILES ${rst_files})
+    foreach(arg IN ITEMS ${ARGN})
+        list(APPEND SPHINX_RST_FILES ${arg})
+    endforeach()
+
+    message(STATUS "SPHINX_RST_FILES=${SPHINX_RST_FILES}")
+
+    if (XO_SUBMODULE_BUILD)
+        # in submodule build, rely on toplevel docs/CMakeLists.txt file instead
+    else()
+        # build docs starting from here only in standalone build.
+        # otherwise use top-level doxygen setup instead.
+
+        #set(ALL_LIBRARY_TARGETS xo_flatstring)  # todo: automate this from xo-cmake macros
+        #set(ALL_UTEST_TARGETS xo_flatstring_ex1 utest.flatstring) # todo: automate this from xo-cmake macros
+
+        # look for sphinx-build executable
+        find_program(SPHINX_EXECUTABLE NAMES sphinx-build REQUIRED)
+        message(STATUS "SPHINX_EXECUTABLE=${SPHINX_EXECUTABLE}")
+
+        set(SPHINX_OUTPUT_DIR ${CMAKE_CURRENT_BINARY_DIR}/sphinx/html)
+        set(SPHINX_INDEX_FILE ${SPHINX_OUTPUT_DIR}/index.html)
+
+        # root of sphinx doc tree
+        set(SPHINX_SOURCE ${CMAKE_CURRENT_SOURCE_DIR})
+        set(SPHINX_DEPS doxygen conf.py ${SPHINX_RST_FILES} ${SPHINX_RST_FILES_GLOB} ${DOX_DEPS})
+
+        add_custom_command(
+            OUTPUT ${SPHINX_INDEX_FILE}
+            DEPENDS ${SPHINX_DEPS}
+            COMMAND ${SPHINX_EXECUTABLE}
+            -b html -Dbreathe_projects.xodoxxml=${CMAKE_CURRENT_BINARY_DIR}/dox/xml
+            ${SPHINX_SOURCE} ${SPHINX_OUTPUT_DIR}
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+            COMMENT "Generating docs (sphinx) -> [${SPHINX_OUTPUT_DIR}]")
+
+        # make sphinx --> generate sphinx documentation
+        #
+        add_custom_target(
+            sphinx
+            DEPENDS ${SPHINX_INDEX_FILE})
+
+        # - html docs generated in build/docs/sphinx
+        # - copy the doc tree to share/doc/xo_unit/html
+        #
+        #  DESTINATION: CMAKE_INSTALL_DOCDIR
+        #                => DATAROOTDIR/doc/PROJECT_NAME
+        #                => CMAKE_INSTALL_PREFIX/share/doc/xo_flatstring
+        #  OPTIONAL:    install directory tree if it exists,
+        #               but don't complain if it's missing
+        install(
+            DIRECTORY ${SPHINX_OUTPUT_DIR}
+            FILE_PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
+            DESTINATION ${CMAKE_INSTALL_DOCDIR}
+            COMPONENT Documentation
+            OPTIONAL)
+
+        # make docs --> generate sphinx documentation
+        add_custom_target(
+            docs
+            DEPENDS sphinx)
+    endif()
+
 endmacro()
 
 macro(xo_toplevel_compile_options)
@@ -193,6 +368,7 @@ endmacro()
 #
 macro(xo_add_shared_library4 target projectTargets targetversion soversion sources)
     add_library(${target} SHARED ${sources})
+
     set_property(
         TARGET ${target}
         PROPERTY xo_deps "${target}")
@@ -214,11 +390,18 @@ macro(xo_add_shared_library4 target projectTargets targetversion soversion sourc
         #
         target_sources(${target} PRIVATE ${arg})
     endforeach()
+
+    set_property(
+        TARGET all_libraries
+        APPEND
+        PROPERTY targets ${target})
+
     set_target_properties(
         ${target}
         PROPERTIES
         VERSION ${targetversion}
         SOVERSION ${soversion})
+
     xo_compile_options(${target})
     xo_include_options2(${target})
     xo_install_library4(${target} ${projectTargets})
@@ -231,6 +414,7 @@ macro(xo_add_shared_library3 target projectTargets targetversion soversion sourc
     message(WARNING "${target}: obsolete call to xo_add_shared_library3(); prefer xo_add_shared_library4()")
 
     add_library(${target} SHARED ${sources})
+
     foreach(arg IN ITEMS ${ARGN})
         #message("target=${target}; arg=${arg}")
 
@@ -242,6 +426,12 @@ macro(xo_add_shared_library3 target projectTargets targetversion soversion sourc
         #
         target_sources(${target} PRIVATE ${arg})
     endforeach()
+
+    set_property(
+        TARGET all_libraries
+        APPEND
+        PROPERTY targets ${target})
+
     set_target_properties(
         ${target}
         PROPERTIES
@@ -259,6 +449,7 @@ macro(xo_add_shared_library target targetversion soversion sources)
     message(WARNING "${target}: obsolete call to xo_add_shared_library(); prefer xo_add_shared_library4()")
 
     add_library(${target} SHARED ${sources})
+
     foreach(arg IN ITEMS ${ARGN})
         #message("target=${target}; arg=${arg}")
 
@@ -270,6 +461,12 @@ macro(xo_add_shared_library target targetversion soversion sources)
         #
         target_sources(${target} PRIVATE ${arg})
     endforeach()
+
+    set_property(
+        TARGET all_libraries
+        APPEND
+        PROPERTY targets ${target})
+
     set_target_properties(
         ${target}
         PROPERTIES
@@ -290,6 +487,11 @@ macro(xo_add_headeronly_library4 target projectTargets)
     add_library(${target} INTERFACE)
 
     set_property(
+        TARGET all_libraries
+        APPEND
+        PROPERTY targets ${target})
+
+    set_property(
         TARGET ${target}
         PROPERTY xo_deps "${target}")
     set_property(
@@ -308,6 +510,11 @@ macro(xo_add_headeronly_library target)
     add_library(${target} INTERFACE)
 
     set_property(
+        TARGET all_libraries
+        APPEND
+        PROPERTY targets ${target})
+
+    set_property(
         TARGET ${target}
         PROPERTY xo_deps "${target}")
     set_property(
@@ -318,6 +525,26 @@ macro(xo_add_headeronly_library target)
         PROPERTY xo_bindir ${PROJECT_BINARY_DIR})
 
     xo_include_headeronly_options(${target})
+endmacro()
+
+# ----------------------------------------------------------------
+# use this for a unit test executable
+#
+macro(xo_add_utest_executable target sources)
+    # this only adds the first argument..
+    add_executable(${target} ${sources})
+    xo_include_options2(${target})
+    add_test(NAME ${target} COMMAND ${target})
+
+    foreach(arg IN ITEMS ${ARGN})
+        target_sources(${target} PRIVATE ${arg})
+    endforeach()
+
+    set_property(
+        TARGET all_utest_executables
+        APPEND
+        PROPERTY targets ${target})
+
 endmacro()
 
 # ----------------------------------------------------------------
@@ -877,9 +1104,9 @@ macro(xo_pybind11_library target projectTargets source_files)
             DESTINATION ${CMAKE_INSTALL_PREFIX}/include/xo/${_nxo_target})
     endif()
 
-    message("-- [${target}] find_package(Python) (xo_pybind11_library)")
+    message(STATUS "[${target}] find_package(Python) (xo_pybind11_library)")
     find_package(Python COMPONENTS Interpreter Development REQUIRED)
-    message("-- [${target}] find_package(pybind11) (xo_pybind11_library)")
+    message(STATUS "[${target}] find_package(pybind11) (xo_pybind11_library)")
     find_package(pybind11)
 
     # this only works if one source file, right?
@@ -897,6 +1124,11 @@ macro(xo_pybind11_library target projectTargets source_files)
     #     (transitive closure of library deps for lto?)
     #
     pybind11_add_module(${target} MODULE ${source_files})
+
+    set_property(
+        TARGET all_libraries
+        APPEND
+        PROPERTY targets ${target})
 
     set_property(
         TARGET ${target}
