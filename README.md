@@ -40,7 +40,7 @@ $ git clone https://github.com/Rconybea/xo-ratio
 $ cd xo-ratio
 $ PREFIX=/usr/local # for example
 $ BUILDDIR=.build   # for example
-$ make ${BUILDDIR}
+$ mkdir ${BUILDDIR}
 $ cmake --build .build
 $ cmake --install .build
 ```

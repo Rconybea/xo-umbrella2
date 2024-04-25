@@ -5,9 +5,7 @@ set(SELF_SRCS
     ratio_utest_main.cpp
     ratio.test.cpp)
 
-add_executable(${SELF_EXE} ${SELF_SRCS})
-xo_include_options2(${SELF_EXE})
-add_test(NAME ${SELF_EXE} COMMAND ${SELF_EXE})
+xo_add_utest_executable(${SELF_EXE} ${SELF_SRCS})
 
 # ----------------------------------------------------------------
 # in coverage build,  target to build+install coverage report
@@ -55,3 +53,5 @@ xo_self_headeronly_dependency(${SELF_EXE} xo_ratio)
 xo_dependency(${SELF_EXE} randomgen)
 xo_dependency(${SELF_EXE} indentlog)
 xo_external_target_dependency(${SELF_EXE} Catch2 Catch2::Catch2)
+
+# end CMakeLists.txt
