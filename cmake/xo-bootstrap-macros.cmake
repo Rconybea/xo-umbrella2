@@ -18,7 +18,7 @@ endif()
 message(STATUS "XO_CMAKE_CONFIG_EXECUTABLE=${XO_CMAKE_CONFIG_EXECUTABLE}")
 
 if (("${CMAKE_MODULE_PATH}" STREQUAL "") OR ("${CMAKE_MODULE_PATH}" STREQUAL prefix))
-    message(STATUS "call XO_CMAKE_CONFIG_EXECUTABLE to get CMAKE_MODULE_PATH");
+    message(STATUS "call XO_CMAKE_CONFIG_EXECUTABLE to get CMAKE_MODULE_PATH")
     # default to typical install location for xo-project-macros
     execute_process(COMMAND ${XO_CMAKE_CONFIG_EXECUTABLE} --cmake-module-path OUTPUT_VARIABLE CMAKE_MODULE_PATH)
 else()
