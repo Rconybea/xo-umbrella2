@@ -42,30 +42,32 @@ endmacro()
 #     file:///path/to/build/ccov/html/index.html
 #
 macro(xo_toplevel_coverage_config2)
-    #find_program(LCOV_EXECUTABLE NAMES lcov)
-    #find_program(GENHTML_EXECUTABLE NAMES genhtml)
-    # see bin/xo-cmake-lcov-harness in this repo
-    execute_process(COMMAND ${XO_CMAKE_CONFIG_EXECUTABLE} --lcov-harness-exe OUTPUT_VARIABLE XO_CMAKE_LCOV_HARNESS_EXECUTABLE)
-    execute_process(COMMAND ${XO_CMAKE_CONFIG_EXECUTABLE} --gen-ccov-template OUTPUT_VARIABLE XO_CMAKE_GEN_CCOV_TEMPLATE)
+    if (${CMAKE_BUILD_TYPE} STREQUAL "coverage")
+        #find_program(LCOV_EXECUTABLE NAMES lcov)
+        #find_program(GENHTML_EXECUTABLE NAMES genhtml)
+        # see bin/xo-cmake-lcov-harness in this repo
+        execute_process(COMMAND ${XO_CMAKE_CONFIG_EXECUTABLE} --lcov-harness-exe OUTPUT_VARIABLE XO_CMAKE_LCOV_HARNESS_EXECUTABLE)
+        execute_process(COMMAND ${XO_CMAKE_CONFIG_EXECUTABLE} --gen-ccov-template OUTPUT_VARIABLE XO_CMAKE_GEN_CCOV_TEMPLATE)
 
-    if (NOT DEFINED PROJECT_CXX_FLAGS_COVERAGE)
-        # note: for clang would use -fprofile-instr-generate -fcoverage-mapping here instead and also at link time
-        set(PROJECT_CXX_FLAGS_COVERAGE -ggdb -Og -fprofile-arcs -ftest-coverage
-            CACHE STRING "coverage c++ compiler flags")
-    endif()
-    message("-- PROJECT_CXX_FLAGS_COVERAGE: coverage c++ flags are [${PROJECT_CXX_FLAGS_COVERAGE}]")
+        if (NOT DEFINED PROJECT_CXX_FLAGS_COVERAGE)
+            # note: for clang would use -fprofile-instr-generate -fcoverage-mapping here instead and also at link time
+            set(PROJECT_CXX_FLAGS_COVERAGE -ggdb -Og -fprofile-arcs -ftest-coverage
+                CACHE STRING "coverage c++ compiler flags")
+        endif()
+        message("-- PROJECT_CXX_FLAGS_COVERAGE: coverage c++ flags are [${PROJECT_CXX_FLAGS_COVERAGE}]")
 
-    add_compile_options("$<$<CONFIG:COVERAGE>:${PROJECT_CXX_FLAGS_COVERAGE}>")
-    # when -DCMAKE_BUILD_TYPE=coverage, must also link executables with gcov
-    link_libraries("$<$<CONFIG:COVERAGE>:gcov>")
+        add_compile_options("$<$<CONFIG:COVERAGE>:${PROJECT_CXX_FLAGS_COVERAGE}>")
+        # when -DCMAKE_BUILD_TYPE=coverage, must also link executables with gcov
+        link_libraries("$<$<CONFIG:COVERAGE>:gcov>")
 
-    if("${XO_CMAKE_GEN_CCOV_TEMPLATE}" STREQUAL "")
-        message(ERROR "xo_toplevel_testing_config2: XO_CMAKE_GEN_CCOV_TEMPLATE not set")
-        message(ERROR "see xo_toplevel_testing_options2()")
-    else()
-        message(DEBUG "XO_CMAKE_GEN_CCOV_TEMPLATE=${XO_CMAKE_GEN_CCOV_TEMPLATE}")
-        configure_file(${XO_CMAKE_GEN_CCOV_TEMPLATE} ${PROJECT_BINARY_DIR}/gen-ccov @ONLY)
-        file(CHMOD ${PROJECT_BINARY_DIR}/gen-ccov PERMISSIONS OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+        if("${XO_CMAKE_GEN_CCOV_TEMPLATE}" STREQUAL "")
+            message(ERROR "xo_toplevel_testing_config2: XO_CMAKE_GEN_CCOV_TEMPLATE not set")
+            message(ERROR "see xo_toplevel_testing_options2()")
+        else()
+            message(DEBUG "XO_CMAKE_GEN_CCOV_TEMPLATE=${XO_CMAKE_GEN_CCOV_TEMPLATE}")
+            configure_file(${XO_CMAKE_GEN_CCOV_TEMPLATE} ${PROJECT_BINARY_DIR}/gen-ccov @ONLY)
+            file(CHMOD ${PROJECT_BINARY_DIR}/gen-ccov PERMISSIONS OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+        endif()
     endif()
 endmacro()
 
