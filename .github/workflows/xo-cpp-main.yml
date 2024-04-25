@@ -64,6 +64,7 @@ jobs:
         echo "::endgroup"
 
         echo "::group::verify"
+        ls -l ${PREFIX}/xo-cmake-config
         ${PREFIX}/xo-cmake-config --help
         echo "$(${PREFIX}/xo-cmake-config --lcov-exe)"
         echo "$(${PREFIX}/xo-cmake-config --genhtml-exe)"
