@@ -29,7 +29,7 @@ install(
     "cmake/xo_macros/xo_cxx.cmake"
     "cmake/xo_macros/code-coverage.cmake"
     PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
-    DESTINATION share/cmake/xo_macros
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/xo_macros
 )
 
 install(
