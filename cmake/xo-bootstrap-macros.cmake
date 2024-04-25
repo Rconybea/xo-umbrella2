@@ -9,15 +9,19 @@
 #   /usr/local/share/cmake/xo_macros/xo-project-macros.cmake
 # ----------------------------------------------------------------
 
+find_program(XO_CMAKE_CONFIG_EXECUTABLE NAMES xo-cmake-config REQUIRED)
+
+if ("${XO_CMAKE_CONFIG_EXECUTABLE}" STREQUAL "XO_CMAKE_CONFIG_EXECUTABLE-NOT_FOUND")
+    message(FATAL "could not find xo-cmake-config executable")
+endif()
+
 if (("${CMAKE_MODULE_PATH}" STREQUAL "") OR ("${CMAKE_MODULE_PATH}" STREQUAL prefix))
     # default to typical install location for xo-project-macros
-    set(CMAKE_MODULE_PATH ${CMAKE_INSTALL_PREFIX}/share/cmake)
+    execute_process(COMMAND ${XO_CMAKE_CONFIG_EXECUTABLE} --cmake-module-path OUTPUT_VARIABLE CMAKE_MODULE_PATH)
 endif()
 
 if (NOT XO_SUBMODULE_BUILD)
-    message("-- GUESSED_CMAKE_CMD=cmake -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD} -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH} -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_INSTALL_DOCDIR=${CMAKE_INSTALL_DOCDIR} -B ${CMAKE_BINARY_DIR}")
-    message("-- CMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}")
-    message("-- CMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}")
+    message(STATUS "CMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}")
 endif()
 
 # needs to have been installed somewhere on CMAKE_MODULE_PATH,
@@ -25,3 +29,5 @@ endif()
 #
 #include(xo_macros/xo-project-macros)
 include(xo_macros/xo_cxx)   # not using v1 code-coverage; testing cmake-examples impl instead
+
+xo_cxx_bootstrap_message()

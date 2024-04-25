@@ -1,49 +1,25 @@
-# xo-stringliteral/CMakeLists.txt
+# xo-flatstring/CMakeLists.txt
 
 cmake_minimum_required(VERSION 3.25)
 
 project(xo_flatstring VERSION 1.0)
-enable_language(CXX)
+#enable_language(CXX)
 
 # common XO cmake macros (see proj/xo-cmake)
 include(GNUInstallDirs)
 include(cmake/xo-bootstrap-macros.cmake)
 
-# ----------------------------------------------------------------
-# unit test setup
+xo_cxx_toplevel_options2()
 
+# ----------------------------------------------------------------
+# unit test + coverage setup
+#
 enable_testing()
 
 # ----------------------------------------------------------------
 # cmake -DCMAKE_BUILD_TYPE=coverage
-
-if (NOT DEFINED PROJECT_CXX_FLAGS_COVERAGE)
-    # note: for clang would use -fprofile-instr-generate -fcoverage-mapping here instead and also at link time
-    set(PROJECT_CXX_FLAGS_COVERAGE ${PROJECT_CXX_FLAGS} -ggdb -Og -fprofile-arcs -ftest-coverage
-        CACHE STRING "coverage c++ compiler flags")
-endif()
-message("-- PROJECT_CXX_FLAGS_COVERAGE: coverage c++ flags are [${PROJECT_CXX_FLAGS_COVERAGE}]")
-
-add_compile_options("$<$<CONFIG:COVERAGE>:${PROJECT_CXX_FLAGS_COVERAGE}>")
-# when -DCMAKE_BUILD_TYPE=coverage, link executables with gcov
-link_libraries("$<$<CONFIG:COVERAGE>:gcov>")
-
-find_program(LCOV_EXECUTABLE NAMES lcov)
-find_program(GENHTML_EXECUTABLE NAMES genhtml)
-
-# with coverage build:
-# 1. invoke instrumented executables for which you want coverage:
-#     (cd path/to/build && ctest)
-# 2. post-process low-level coverage data
-#     (path/to/build/gen-ccov)
-# 3. point browser to generated html data
-#     file:///path/to/build/ccov/html/index.html
 #
-configure_file(
-    ${PROJECT_SOURCE_DIR}/cmake/gen-ccov.in
-    ${PROJECT_BINARY_DIR}/gen-ccov)
-
-file(CHMOD ${PROJECT_BINARY_DIR}/gen-ccov PERMISSIONS OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+xo_toplevel_coverage_config2()
 
 # ----------------------------------------------------------------
 # c++ settings

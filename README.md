@@ -50,6 +50,8 @@ $ cmake --install .build
 $ cd xo-flatstring
 $ cmake --build .build -- docs
 ```
+
+Must invoke `docs` target explicitly to prepare documentation
 When complete, point local browser to `xo-flatstring/.build/docs/sphinx/index.html`
 
 ### build with test coverage
@@ -70,7 +72,12 @@ generate html+text coverage report
 $ cmake --build .build-ccov -- ccov
 ```
 
-browse to `.build-ccov/ccov/html/index.html`
+For html test coverage browse to `.build-ccov/ccov/html/index.html`
+
+install documentation only, along with test-coverage report
+```
+$ cmake --install .build-ccov --component Documentation
+```
 
 ### LSP support
 ```
