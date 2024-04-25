@@ -15,6 +15,8 @@ if ("${XO_CMAKE_CONFIG_EXECUTABLE}" STREQUAL "XO_CMAKE_CONFIG_EXECUTABLE-NOT_FOU
     message(FATAL "could not find xo-cmake-config executable")
 endif()
 
+message(STATUS "XO_CMAKE_CONFIG_EXECUTABLE=${XO_CMAKE_CONFIG_EXECUTABLE}")
+
 if (("${CMAKE_MODULE_PATH}" STREQUAL "") OR ("${CMAKE_MODULE_PATH}" STREQUAL prefix))
     # default to typical install location for xo-project-macros
     execute_process(COMMAND ${XO_CMAKE_CONFIG_EXECUTABLE} --cmake-module-path OUTPUT_VARIABLE CMAKE_MODULE_PATH)
