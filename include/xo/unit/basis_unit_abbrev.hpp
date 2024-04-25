@@ -182,6 +182,8 @@ namespace xo {
                 return fallback_unit_abbrev(scalefactor, dim::price);
             }
 
+            // ----- basis_unit2_abbrev -----
+
             static
             constexpr basis_unit2_abbrev_type
             basis_unit2_abbrev(dim native_dim,
@@ -200,16 +202,13 @@ namespace xo {
                     return price_unit2_abbrev(scalefactor);
                 case dim::invalid:
                 case dim::n_dim:
+                    return basis_unit2_abbrev_type();
                     break;
                 }
 
-                /* e.g. unit of '1000 grams' will have abbrev '1000g' in absence
-                 *      of a specialization for scaled_native_unit_abbrev
-                 */
-                return (basis_unit2_abbrev_type::from_flatstring
-                        (flatstring_concat
-                         (scalefactor.to_str<basis_unit2_abbrev_type::fixed_capacity>(),
-                          native_unit2_v[static_cast<std::uint32_t>(native_dim)].abbrev_str())));
+                /* unreachable (for well-constructed dim instances) */
+
+                return basis_unit2_abbrev_type();
             }
         } /*namespace abbrev*/
     } /*namespace qty*/
