@@ -14,11 +14,12 @@ display xo-cmake configuration variables
 Options:
   -u | --usage        brief help message
   --help              this help message
+  --cmake-module-path report directory providing xo-cmake macros (will use/appear-in CMAKE_MODULE_PATH)
   --lcov-exe          report path to 'lcov' executable
   --genhtml-exe       report path to 'genhtml' executable
   --lcov-harness-exe  report path to 'xo-cmake-lcov-harness' executable
   --gen-ccov-template report path to 'gen-ccov.in' template
-  --cmake-module-path report directory providing xo-cmake macros (will use/appear-in CMAKE_MODULE_PATH)
+  --doxygen-template  report path to 'Doxyfile.in' template
 
 EOF
 }
@@ -30,6 +31,9 @@ while [[ $# > 0 ]]; do
             ;;
         -h | --help)
             cmd='help'
+            ;;
+        --cmake-module-path)
+            cmd='cmake_module_path'
             ;;
         --lcov-exe)
             cmd='lcov_exe'
@@ -43,8 +47,8 @@ while [[ $# > 0 ]]; do
         --gen-ccov-template)
             cmd='gen_ccov_template'
             ;;
-        --cmake-module-path)
-            cmd='cmake_module_path'
+        --doxygen-template)
+            cmd='doxygen_template'
             ;;
         *)
             usage
@@ -61,6 +65,8 @@ if [[ $cmd == 'usage' ]]; then
 elif [[ $cmd == 'help' ]]; then
     echo -n "help: "
     help
+elif [[ $cmd == 'cmake_module_path' ]]; then
+    echo -n @CMAKE_INSTALL_FULL_DATADIR@/cmake
 elif [[ $cmd == 'lcov_exe' ]]; then
     echo -n @LCOV_EXECUTABLE@
 elif [[ $cmd == 'genhtml_exe' ]]; then
@@ -69,6 +75,6 @@ elif [[ $cmd == 'lcov_harness_exe' ]]; then
     echo -n @CMAKE_INSTALL_FULL_BINDIR@/xo-cmake-lcov-harness
 elif [[ $cmd == 'gen_ccov_template' ]]; then
     echo -n @CMAKE_INSTALL_FULL_DATADIR@/xo-macros/gen-ccov.in
-elif [[ $cmd == 'cmake_module_path' ]]; then
-    echo -n @CMAKE_INSTALL_FULL_DATADIR@/cmake
+elif [[ $cmd == 'doxygen_template' ]]; then
+    echo -n @CMAKE_INSTALL_FULL_DATADIR@/xo-macros/Doxyfile.in
 fi
