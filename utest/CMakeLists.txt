@@ -6,9 +6,7 @@ set(SELF_SOURCE_FILES
     unit.test.cpp #quantity.test.cpp
 )
 
-add_executable(${SELF_EXECUTABLE_NAME} ${SELF_SOURCE_FILES})
-xo_include_options2(${SELF_EXECUTABLE_NAME})
-add_test(NAME ${SELF_EXECUTABLE_NAME} COMMAND ${SELF_EXECUTABLE_NAME})
+xo_add_utest_executable(${SELF_EXECUTABLE_NAME} ${SELF_SOURCE_FILES})
 
 # ----------------------------------------------------------------
 # in coverage build,  target to build+install coverage report

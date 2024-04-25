@@ -6,6 +6,11 @@ Similar to `boost::units`,  but:
 1. streamlined: assumes modern (c++20) support
 2. supports fractional dimensions (rational powers)
 
+## Documentation
+
+- xo-unit documentation [under construction]: [documentation](https://rconybea.github.io/web/xo-unit/html/index.html)
+- unit test coverage here: [coverage](https://rconybea.github.io/web/xo-unit/ccov/html/index.html)
+
 ## Getting Started
 
 ### build + install dependencies
