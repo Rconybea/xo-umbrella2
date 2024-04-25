@@ -11,7 +11,6 @@ xo_cxx_toplevel_options2()
 
 # ----------------------------------------------------------------
 # cmake -DCMAKE_BUILD_TYPE=coverage
-#
 xo_toplevel_coverage_config2()
 
 # ----------------------------------------------------------------
@@ -26,7 +25,6 @@ add_definitions(${PROJECT_CXX_FLAGS})
 
 add_subdirectory(example)
 add_subdirectory(utest)
-add_subdirectory(docs)
 
 # ----------------------------------------------------------------
 # provide find_package() support for projects using this library
@@ -35,6 +33,11 @@ set(SELF_LIB xo_flatstring)
 xo_add_headeronly_library(${SELF_LIB})
 xo_install_library4(${SELF_LIB} ${PROJECT_NAME}Targets)
 xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
+
+# ----------------------------------------------------------------
+# docs targets depend on all the other library/utest targets
+#
+add_subdirectory(docs)
 
 # ----------------------------------------------------------------
 # dependencies
