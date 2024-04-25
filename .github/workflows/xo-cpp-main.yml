@@ -131,6 +131,10 @@ jobs:
         cmake --build ${XO_BUILDDIR} -- test
         echo "::endgroup"
 
+        echo "::group::build ${XO_NAME} docs"
+        cmake --build ${XO_BUILDDIR} -- docs
+        echo "::endgroup"
+
         echo "::group::local install ${XO_NAME}"
         cmake --install ${XO_BUILDDIR}
         echo "::endgroup"
