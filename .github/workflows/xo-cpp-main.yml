@@ -64,11 +64,11 @@ jobs:
         echo "::endgroup"
 
         echo "::group::verify"
-        ls -l ${PREFIX}/xo-cmake-config
-        ${PREFIX}/xo-cmake-config --help
-        echo "$(${PREFIX}/xo-cmake-config --lcov-exe)"
-        echo "$(${PREFIX}/xo-cmake-config --genhtml-exe)"
-        echo "$(${PREFIX}/xo-cmake-config --lcov-harness-exe)"
-        echo "$(${PREFIX}/xo-cmake-config --gen-ccov-template)"
-        echo "$(${PREFIX}/xo-cmake-config --cmake-module-path)"
+        ls -l ${PREFIX}/bin/xo-cmake-config
+        ${PREFIX}/bin/xo-cmake-config --help
+        echo "$(${PREFIX}/bin/xo-cmake-config --lcov-exe)"
+        echo "$(${PREFIX}/bin/xo-cmake-config --genhtml-exe)"
+        echo "$(${PREFIX}/bin/xo-cmake-config --lcov-harness-exe)"
+        echo "$(${PREFIX}/bin/xo-cmake-config --gen-ccov-template)"
+        echo "$(${PREFIX}/bin/xo-cmake-config --cmake-module-path)"
         echo "::endgroup"
