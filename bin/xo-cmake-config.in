@@ -70,5 +70,5 @@ elif [[ $cmd == 'lcov_harness_exe' ]]; then
 elif [[ $cmd == 'gen_ccov_template' ]]; then
     echo -n @CMAKE_INSTALL_FULL_DATADIR@/xo-macros/gen-ccov.in
 elif [[ $cmd == 'cmake_module_path' ]]; then
-    echo -n @CMAKE_INSTALL_DATADIR@
+    echo -n @CMAKE_INSTALL_FULL_DATADIR@
 fi
