@@ -17,6 +17,9 @@ else()
     find_program(SPHINX_EXECUTABLE NAMES sphinx-build REQUIRED)
     message("-- SPHINX_EXECUTABLE=${SPHINX_EXECUTABLE}")
 
+    execute_process(COMMAND ${XO_CMAKE_CONFIG_EXECUTABLE} --doxygen-template OUTPUT_VARIABLE DOXYGEN_CONFIG_TEMPLATE)
+    message(STATUS "DOXYGEN_CONFIG_TEMPLATE=${DOXYGEN_CONFIG_TEMPLATE}")
+
     set(DOX_CONFIG_FILE ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
 
     set(DOX_INPUT_DIR ${PROJECT_SOURCE_DIR})
@@ -46,7 +49,7 @@ else()
     # 2. replace this command section with xo-cmake macro
     #
     configure_file(
-        Doxyfile.in ${DOX_CONFIG_FILE}
+        ${DOXYGEN_CONFIG_TEMPLATE} ${DOX_CONFIG_FILE}
         FILE_PERMISSIONS OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
         @ONLY)
 
