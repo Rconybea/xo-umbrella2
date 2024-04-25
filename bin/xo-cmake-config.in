@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+
+usage() {
+    echo "$0 [-u|--usage|-h|--help|--lcov-exe|--genhtml-exe|--lcov-harness-exe|--gen-ccov-template|--cmake-module-path]" 1>&2
+}
+
+help() {
+    usage
+
+    cat <<EOF
+
+display xo-cmake configuration variables
+
+Options:
+  -u | --usage        brief help message
+  --help              this help message
+  --lcov-exe          report path to 'lcov' executable
+  --genhtml-exe       report path to 'genhtml' executable
+  --lcov-harness-exe  report path to 'xo-cmake-lcov-harness' executable
+  --gen-ccov-template report path to 'gen-ccov.in' template
+  --cmake-module-path report directory providing xo-cmake macros (will use/appear-in CMAKE_MODULE_PATH)
+
+EOF
+}
+
+while [[ $# > 0 ]]; do
+    case "$1" in
+        -u | --usage)
+            cmd='usage'
+            ;;
+        -h | --help)
+            cmd='help'
+            ;;
+        --lcov-exe)
+            cmd='lcov_exe'
+            ;;
+        --genhtml-exe)
+            cmd='genhtml_exe'
+            ;;
+        --lcov-harness-exe)
+            cmd='lcov_harness_exe'
+            ;;
+        --gen-ccov-template)
+            cmd='gen_ccov_template'
+            ;;
+        --cmake-module-path)
+            cmd='cmake_module_path'
+            ;;
+        *)
+            usage
+            exit 1
+            ;;
+    esac
+
+    shift
+done
+
+if [[ $cmd == 'usage' ]]; then
+    echo -n "usage: "
+    usage
+elif [[ $cmd == 'help' ]]; then
+    echo -n "help: "
+    help
+elif [[ $cmd == 'lcov_exe' ]]; then
+    echo -n @LCOV_EXECUTABLE@
+elif [[ $cmd == 'genhtml_exe' ]]; then
+    echo -n @GENHTML_EXECUTABLE@
+elif [[ $cmd == 'lcov_harness_exe' ]]; then
+    echo -n @CMAKE_INSTALL_FULL_BINDIR@/xo-cmake-lcov-harness
+elif [[ $cmd == 'gen_ccov_template' ]]; then
+    echo -n @CMAKE_INSTALL_FULL_DATADIR@/xo-macros/gen-ccov.in
+elif [[ $cmd == 'cmake_module_path' ]]; then
+    echo -n @CMAKE_MODULE_PATH@
+fi

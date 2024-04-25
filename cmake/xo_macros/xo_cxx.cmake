@@ -1,5 +1,19 @@
 
+macro(xo_cxx_config_message)
+    message(STATUS "GUESSED_CMAKE_CMD=cmake -DXO_CMAKE_CONFIG_EXECUTABLE=${XO_CMAKE_CONFIG_EXECUTABLE} -DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD} -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DCMAKE_MODULE_PATH=${CMAKE_MODULE_PATH} -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_INSTALL_DOCDIR=${CMAKE_INSTALL_DOCDIR} -B ${CMAKE_BINARY_DIR}")
+    message(STATUS "XO_CMAKE_CONFIG_EXECUTABLE=${XO_CMAKE_CONFIG_EXECUTABLE}")
+    message(STATUS "CMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}")
+endmacro()
+
+macro(xo_cxx_bootstrap_message)
+    if (NOT XO_SUBMODULE_BUILD)
+        xo_cxx_config_message()
+    endif()
+endmacro()
+
+# deprecated -- prefer xo_cxx_toplevel_options2()
 macro(xo_cxx_toplevel_options)
+    message(WARNING "deprecated: prefer xo_cxx_toplevel_options2")
     enable_language(CXX)
     xo_toplevel_compile_options()
     xo_toplevel_testing_options()
@@ -9,6 +23,50 @@ macro(xo_toplevel_testing_options)
     enable_testing()
     add_code_coverage()
     add_code_coverage_all_targets(EXCLUDE /nix/store* utest/*)
+endmacro()
+
+macro(xo_cxx_toplevel_options2)
+    enable_language(CXX)
+    xo_toplevel_compile_options()
+    enable_testing()
+endmacro()
+
+# coverage build:
+# 0.
+#     (cmake -DCMAKE_BUILD_TYPE=coverage ..)
+# 1. invoke instrumented executables for which you want coverage:
+#     (cmake --build path/to/build -- test)
+# 2. post-process low-level coverage data
+#     (path/to/build/gen-ccov)
+# 3. point browser to generated html data
+#     file:///path/to/build/ccov/html/index.html
+#
+macro(xo_toplevel_coverage_config2)
+    #find_program(LCOV_EXECUTABLE NAMES lcov)
+    #find_program(GENHTML_EXECUTABLE NAMES genhtml)
+    # see bin/xo-cmake-lcov-harness in this repo
+    execute_process(COMMAND ${XO_CMAKE_CONFIG_EXECUTABLE} --lcov-harness-exe OUTPUT_VARIABLE XO_CMAKE_LCOV_HARNESS_EXECUTABLE)
+    execute_process(COMMAND ${XO_CMAKE_CONFIG_EXECUTABLE} --gen-ccov-template OUTPUT_VARIABLE XO_CMAKE_GEN_CCOV_TEMPLATE)
+
+    if (NOT DEFINED PROJECT_CXX_FLAGS_COVERAGE)
+        # note: for clang would use -fprofile-instr-generate -fcoverage-mapping here instead and also at link time
+        set(PROJECT_CXX_FLAGS_COVERAGE -ggdb -Og -fprofile-arcs -ftest-coverage
+            CACHE STRING "coverage c++ compiler flags")
+    endif()
+    message("-- PROJECT_CXX_FLAGS_COVERAGE: coverage c++ flags are [${PROJECT_CXX_FLAGS_COVERAGE}]")
+
+    add_compile_options("$<$<CONFIG:COVERAGE>:${PROJECT_CXX_FLAGS_COVERAGE}>")
+    # when -DCMAKE_BUILD_TYPE=coverage, must also link executables with gcov
+    link_libraries("$<$<CONFIG:COVERAGE>:gcov>")
+
+    if("${XO_CMAKE_GEN_CCOV_TEMPLATE}" STREQUAL "")
+        message(ERROR "xo_toplevel_testing_config2: XO_CMAKE_GEN_CCOV_TEMPLATE not set")
+        message(ERROR "see xo_toplevel_testing_options2()")
+    else()
+        message(DEBUG "XO_CMAKE_GEN_CCOV_TEMPLATE=${XO_CMAKE_GEN_CCOV_TEMPLATE}")
+        configure_file(${XO_CMAKE_GEN_CCOV_TEMPLATE} ${PROJECT_BINARY_DIR}/gen-ccov @ONLY)
+        file(CHMOD ${PROJECT_BINARY_DIR}/gen-ccov PERMISSIONS OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+    endif()
 endmacro()
 
 macro(xo_toplevel_compile_options)
@@ -557,7 +615,7 @@ macro(xo_dependency_helper target visibility dep)
             xo_dependency_helper1(${target} ${visibility} repo/${_nxo_dep}/include)
         endif()
     else()
-        message("-- [${target}] find_package(${dep}) (xo_dependency_helper)")
+       message(STATUS "[${target}] find_package(${dep}) (xo_dependency_helper)")
         find_package(${dep} CONFIG REQUIRED)
     endif()
 
