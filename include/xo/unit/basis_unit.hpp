@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "native_unit.hpp"
+#include "dimension.hpp"
 #include "basis_unit_abbrev.hpp"
 #include "xo/ratio/ratio.hpp"
 
