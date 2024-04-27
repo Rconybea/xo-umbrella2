@@ -16,6 +16,34 @@ namespace xo {
         template <typename Int>
         class natural_unit;
 
+        namespace detail {
+            template <typename Int, typename... Ts>
+            constexpr void
+            push_bpu_array(natural_unit<Int> * p_target, Ts... args);
+
+            template <typename Int>
+            constexpr void
+            push_bpu_array(natural_unit<Int> * p_target) {}
+
+            template <typename Int, typename T0, typename... Ts>
+            constexpr void
+            push_bpu_array(natural_unit<Int> * p_target, T0 && bpu0, Ts... args) {
+                p_target->push_back(bpu0);
+                push_bpu_array(p_target, args...);
+            }
+        }
+
+        template <typename Int>
+        struct bpu_array_maker {
+            template <typename... Ts>
+            static constexpr natural_unit<Int>
+            make_bpu_array(Ts... args) {
+                natural_unit<Int> bpu_array;
+                detail::push_bpu_array(&bpu_array, args...);
+                return bpu_array;
+            }
+        };
+
         /** @class natural_unit
          *  @brief an array representing the cartesian product of distinct basis-power-units
          *
@@ -34,6 +62,10 @@ namespace xo {
 
         public:
             constexpr natural_unit() : n_bpu_{0} {}
+
+            static constexpr natural_unit from_bu(basis_unit bu) {
+                return bpu_array_maker<Int>::make_bpu_array(make_unit_power<Int>(bu));
+            }
 
             constexpr std::size_t n_bpu() const { return n_bpu_; }
             constexpr bool is_dimensionless() const { return n_bpu_ == 0; }
@@ -94,34 +126,6 @@ namespace xo {
 
             /** @brief storage for basis power units **/
             bpu<Int> bpu_v_[n_dim];
-        };
-
-        namespace detail {
-            template <typename Int, typename... Ts>
-            constexpr void
-            push_bpu_array(natural_unit<Int> * p_target, Ts... args);
-
-            template <typename Int>
-            constexpr void
-            push_bpu_array(natural_unit<Int> * p_target) {}
-
-            template <typename Int, typename T0, typename... Ts>
-            constexpr void
-            push_bpu_array(natural_unit<Int> * p_target, T0 && bpu0, Ts... args) {
-                p_target->push_back(bpu0);
-                push_bpu_array(p_target, args...);
-            }
-        }
-
-        template <typename Int>
-        struct bpu_array_maker {
-            template <typename... Ts>
-            static constexpr natural_unit<Int>
-            make_bpu_array(Ts... args) {
-                natural_unit<Int> bpu_array;
-                detail::push_bpu_array(&bpu_array, args...);
-                return bpu_array;
-            }
         };
 
         namespace detail {
