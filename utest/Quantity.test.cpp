@@ -19,7 +19,7 @@ namespace xo {
     using xo::qty::natural_unit;
     using xo::qty::basis_unit;
     using xo::qty::n_dim;
-    namespace nu = xo::qty::nu2;
+    namespace nu = xo::qty::nu;
     namespace bu = xo::qty::bu;
 
     using xo::rng::xoshiro256ss;

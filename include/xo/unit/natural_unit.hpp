@@ -34,7 +34,7 @@ namespace xo {
         }
 
         template <typename Int>
-        struct bpu_array_maker {
+        struct nu_maker {
             template <typename... Ts>
             static constexpr natural_unit<Int>
             make_bpu_array(Ts... args) {
@@ -64,7 +64,7 @@ namespace xo {
             constexpr natural_unit() : n_bpu_{0} {}
 
             static constexpr natural_unit from_bu(basis_unit bu) {
-                return bpu_array_maker<Int>::make_bpu_array(make_unit_power<Int>(bu));
+                return nu_maker<Int>::make_bpu_array(make_unit_power<Int>(bu));
             }
 
             constexpr std::size_t n_bpu() const { return n_bpu_; }
