@@ -88,7 +88,7 @@ namespace xo {
             template <typename Int>
             constexpr
             scaled_unit<Int>
-            nu_bpu_product(const natural_unit<Int> & lhs_bpu_array,
+            su_bpu_product(const natural_unit<Int> & lhs_bpu_array,
                            const bpu<Int> & rhs_bpu)
             {
                 natural_unit<Int> prod = lhs_bpu_array;

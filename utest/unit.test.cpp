@@ -42,7 +42,7 @@ namespace xo {
         using xo::qty::natural_unit;
         using xo::qty::bpu_array_maker;
         using xo::qty::detail::su_product;
-        using xo::qty::detail::nu_bpu_product;
+        using xo::qty::detail::su_bpu_product;
         using xo::qty::detail::nu_ratio_inplace;
         using xo::qty::detail::su_ratio;
         using xo::qty::unit_qty;
@@ -594,7 +594,7 @@ namespace xo {
 
                 static_assert(bpu.power() == power_ratio_type(-1, 2));
 
-                constexpr auto prod_rr = nu_bpu_product(v, bpu);
+                constexpr auto prod_rr = su_bpu_product(v, bpu);
 
                 log && log(xtag("prod_rr.bpu_array", prod_rr.natural_unit_));
                 log && log(xtag("prod_rr.outer_scale_exact", prod_rr.outer_scale_exact_));
@@ -641,7 +641,7 @@ namespace xo {
 
                 static_assert(bpu.power() == power_ratio_type(-1, 2));
 
-                constexpr auto prod_rr = nu_bpu_product(v, bpu);
+                constexpr auto prod_rr = su_bpu_product(v, bpu);
 
                 log && log(xtag("prod_rr.bpu_array", prod_rr.natural_unit_));
                 log && log(xtag("prod_rr.outer_scale_exact", prod_rr.outer_scale_exact_));
@@ -685,7 +685,7 @@ namespace xo {
 
                 static_assert(bpu.power() == power_ratio_type(-1, 1));
 
-                constexpr auto prod_rr = nu_bpu_product(v, bpu);
+                constexpr auto prod_rr = su_bpu_product(v, bpu);
 
                 log && log(xtag("prod_rr.bpu_array", prod_rr.natural_unit_));
                 log && log(xtag("prod_rr.outer_scale_exact", prod_rr.outer_scale_exact_));
