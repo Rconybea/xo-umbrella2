@@ -213,8 +213,9 @@ namespace xo {
 
                         REQUIRE(nu1_j.n_bpu() == 1);
 
-                        /* pick power in {+1, -1} */
-                        int power = ((rng() % 2 == 0) ? +1 : -1);
+                        int power = 1 + (rng() % 2); /* power in {1, 2} */
+                        if (rng() % 2)
+                            power = -power; /* power in +/- {1,2} */
 
                         if (power == -1)
                             nu1_j = nu1_j.reciprocal();
@@ -341,7 +342,7 @@ namespace xo {
          * 2. verify +,- by combining quantities with different units
          */
         TEST_CASE("Quantity.full", "[Quantity.full]") {
-            constexpr bool c_debug_flag = true;
+            constexpr bool c_debug_flag = false;
 
             //auto rng = xo::rng::xoshiro256ss(seed);
 
