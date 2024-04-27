@@ -294,7 +294,7 @@ namespace xo {
                     /* q1/q2, with exact representation (given no fractional dimensions)
                      *
                      */
-                    auto su = xo::qty::detail::nu_ratio<decltype(q1)::ratio_int_type,
+                    auto su = xo::qty::detail::su_ratio<decltype(q1)::ratio_int_type,
                                                         decltype(q1)::ratio_int2x_type>(q1.unit(), q2.unit());
 
                     INFO(xtag("su.natural_unit", su.natural_unit_));

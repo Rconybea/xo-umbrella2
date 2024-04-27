@@ -44,7 +44,7 @@ namespace xo {
         using xo::qty::detail::nu_product;
         using xo::qty::detail::nu_bpu_product;
         using xo::qty::detail::nu_ratio_inplace;
-        using xo::qty::detail::nu_ratio;
+        using xo::qty::detail::su_ratio;
         using xo::qty::unit_qty;
 
         TEST_CASE("basis_unit", "[basis_unit]") {
@@ -878,7 +878,7 @@ namespace xo {
 
                     log && log(xtag("w.abbrev", w.abbrev()));
 
-                    constexpr auto rr = nu_ratio<int64_t, __int128_t>(v, w);
+                    constexpr auto rr = su_ratio<int64_t, __int128_t>(v, w);
 
                     log && log(xtag("rr", rr));
 
@@ -896,7 +896,7 @@ namespace xo {
 
                     log && log(xtag("w.abbrev", w.abbrev()));
 
-                    constexpr auto rr = nu_ratio<int64_t, __int128_t>(v, w);
+                    constexpr auto rr = su_ratio<int64_t, __int128_t>(v, w);
 
                     log && log(xtag("rr", rr));
 

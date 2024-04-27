@@ -53,10 +53,14 @@ namespace xo {
             constexpr
             auto rescale(const natural_unit<Int> & unit2) const {
                 /* conversion factor from .unit -> unit2*/
-                auto rr = detail::nu_ratio<ratio_int_type,
+                auto rr = detail::su_ratio<ratio_int_type,
                                            ratio_int2x_type>(this->unit_, unit2);
 
                 if (rr.natural_unit_.is_dimensionless()) {
+                    /* FIXME: rr.outer_scale_exact_ can overflow since fixed precision.
+                     *        accumulate in scale instead
+                     */
+
                     repr_type r_scale = (::sqrt(rr.outer_scale_sq_)
                                          * rr.outer_scale_exact_.template to<repr_type>()
                                          * this->scale_);
@@ -115,9 +119,9 @@ namespace xo {
                 using r_int2x_type = std::common_type_t<typename Quantity::ratio_int2x_type,
                                                         typename Quantity2::ratio_int2x_type>;
 
-                auto rr = detail::nu_ratio<r_int_type, r_int2x_type>(x.unit(), y.unit());
+                auto rr = detail::su_ratio<r_int_type, r_int2x_type>(x.unit(), y.unit());
 
-                /* note: nu_ratio() reports multiplicative outer scaling factors,
+                /* note: su_ratio() reports multiplicative outer scaling factors,
                  *       so multiply is correct here
                  */
                 r_repr_type r_scale = (::sqrt(rr.outer_scale_sq_)
@@ -140,7 +144,7 @@ namespace xo {
                                                         typename Quantity2::ratio_int2x_type>;
 
                 /* conversion to get y in same units as x:  multiply by y/x */
-                auto rr = detail::nu_ratio<r_int_type, r_int2x_type>(y.unit(), x.unit());
+                auto rr = detail::su_ratio<r_int_type, r_int2x_type>(y.unit(), x.unit());
 
                 if (rr.natural_unit_.is_dimensionless()) {
                     r_repr_type r_scale = (static_cast<r_repr_type>(x.scale())
@@ -167,7 +171,7 @@ namespace xo {
                                                         typename Quantity2::ratio_int2x_type>;
 
                 /* conversion to get y in same units as x:  multiply by y/x */
-                auto rr = detail::nu_ratio<r_int_type, r_int2x_type>(y.unit(), x.unit());
+                auto rr = detail::su_ratio<r_int_type, r_int2x_type>(y.unit(), x.unit());
 
                 if (rr.natural_unit_.is_dimensionless()) {
                     r_repr_type r_scale = (static_cast<r_repr_type>(x.scale())
