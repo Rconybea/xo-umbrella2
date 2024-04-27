@@ -237,8 +237,8 @@ namespace xo {
 
                             REQUIRE(nu2_j.n_bpu() == 1);
 
-                            double rx = (nu1_j[0].scalefactor().template to<double>()
-                                         / nu2_j[0].scalefactor().template to<double>());
+                            double rx = (nu1_j[0].scalefactor().template convert_to<double>()
+                                         / nu2_j[0].scalefactor().template convert_to<double>());
 
                             if ((rx > max_magdiff_per_bu) || (rx < 1.0/max_magdiff_per_bu)) {
                                 log && log(xtag("nu_z", p_nu_v->size()), xtag("nu2_j_ix", nu2_j_ix));
@@ -295,7 +295,9 @@ namespace xo {
                      *
                      */
                     auto su = xo::qty::detail::su_ratio<decltype(q1)::ratio_int_type,
-                                                        decltype(q1)::ratio_int2x_type>(q1.unit(), q2.unit());
+                                                        decltype(q1)::ratio_int2x_type,
+                                                        double>
+                        (q1.unit(), q2.unit());
 
                     INFO(xtag("su.natural_unit", su.natural_unit_));
                     INFO(xtag("su.outer_scale_exact", su.outer_scale_factor_));

@@ -62,7 +62,7 @@ namespace xo {
                      */
 
                     repr_type r_scale = (::sqrt(rr.outer_scale_sq_)
-                                         * rr.outer_scale_factor_.template to<repr_type>()
+                                         * rr.outer_scale_factor_.template convert_to<repr_type>()
                                          * this->scale_);
                     return Quantity(r_scale, unit2);
                 } else {
@@ -101,7 +101,7 @@ namespace xo {
                 auto rr = detail::su_product<r_int_type, r_int2x_type>(x.unit(), y.unit());
 
                 r_repr_type r_scale = (::sqrt(rr.outer_scale_sq_)
-                                       * rr.outer_scale_factor_.template to<r_repr_type>()
+                                       * rr.outer_scale_factor_.template convert_to<r_repr_type>()
                                        * static_cast<r_repr_type>(x.scale())
                                        * static_cast<r_repr_type>(y.scale()));
 
@@ -125,7 +125,7 @@ namespace xo {
                  *       so multiply is correct here
                  */
                 r_repr_type r_scale = (::sqrt(rr.outer_scale_sq_)
-                                       * rr.outer_scale_factor_.template to<r_repr_type>()
+                                       * rr.outer_scale_factor_.template convert_to<r_repr_type>()
                                        * static_cast<r_repr_type>(x.scale())
                                        / static_cast<r_repr_type>(y.scale()));
 

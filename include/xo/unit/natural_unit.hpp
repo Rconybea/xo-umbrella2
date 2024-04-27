@@ -155,40 +155,43 @@ namespace xo {
              *  - (b/b')^q inexactly (as a double)
              **/
 
-            template <typename Int>
+            template <typename Int,
+                      typename OuterScale = ratio::ratio<Int> >
             struct outer_scalefactor_result {
-                constexpr outer_scalefactor_result(const ratio::ratio<Int> & outer_scale_exact,
+                constexpr outer_scalefactor_result(const OuterScale & outer_scale_factor,
                                                    double outer_scale_sq)
-                    : outer_scale_exact_{outer_scale_exact},
+                    : outer_scale_factor_{outer_scale_factor},
                       outer_scale_sq_{outer_scale_sq} {}
 
                 /* (b/b')^p0 */
-                ratio::ratio<Int> outer_scale_exact_;
+                OuterScale outer_scale_factor_;
                 /* (b/b')^q -- until c++26 only allow q=0 or q=1/2 */
                 double  outer_scale_sq_;
             };
 
-            template <typename Int>
+            template <typename Int,
+                      typename OuterScale = ratio::ratio<Int> >
             struct bpu2_rescale_result {
                 constexpr bpu2_rescale_result(const bpu<Int> & bpu_rescaled,
-                                              const ratio::ratio<Int> & outer_scale_exact,
+                                              const OuterScale & outer_scale_factor,
                                               double outer_scale_sq)
                     : bpu_rescaled_{bpu_rescaled},
-                      outer_scale_exact_{outer_scale_exact},
+                      outer_scale_factor_{outer_scale_factor},
                       outer_scale_sq_{outer_scale_sq}
                     {}
 
                 /* (b'.u)^p */
                 bpu<Int> bpu_rescaled_;
                 /* (b/b')^p0 */
-                ratio::ratio<Int> outer_scale_exact_;
+                OuterScale outer_scale_factor_;
                 /* [(b/b')^q]^2 -- until c++26 only allow q=0 or q=1/2 */
                 double  outer_scale_sq_;
             };
 
-            template <typename Int>
+            template < typename Int,
+                       typename OuterScale = ratio::ratio<Int> >
             constexpr
-            bpu2_rescale_result<Int>
+            bpu2_rescale_result<Int, OuterScale>
             bpu2_rescale(const bpu<Int> & orig,
                          const scalefactor_ratio_type & new_scalefactor)
             {
@@ -203,59 +206,67 @@ namespace xo {
                 if (p_frac.den() == 1) {
                     mult_sq = 1.0;
                 } else if(p_frac.den() == 2) {
-                    mult_sq = mult.template to<double>();
+                    mult_sq = mult.template convert_to<double>();
                 } else {
                     // remaining possibilities not supported until c++26
                 }
 
-                return bpu2_rescale_result<Int>(bpu<Int>(orig.native_dim(),
-                                                          new_scalefactor,
-                                                          orig.power()),
-                                                mult.power(orig.power().floor()),
-                                                mult_sq);
+                ratio::ratio<Int> mult_p = mult.power(orig.power().floor());
+
+                return bpu2_rescale_result<Int, OuterScale>(bpu<Int>(orig.native_dim(),
+                                                                     new_scalefactor,
+                                                                     orig.power()),
+                                                            mult_p.template convert_to<OuterScale>(),
+                                                            mult_sq);
             }
 
-            template <typename Int>
+            template < typename Int,
+                       typename OuterScale >
             constexpr
-            outer_scalefactor_result<Int>
+            outer_scalefactor_result<Int, OuterScale>
             bpu_product_inplace(bpu<Int> * p_target_bpu,
                                 const bpu<Int> & rhs_bpu_orig)
             {
                 assert(rhs_bpu_orig.native_dim() == p_target_bpu->native_dim());
 
-                bpu2_rescale_result<Int> rhs_bpu_rr = bpu2_rescale(rhs_bpu_orig,
-                                                                   p_target_bpu->scalefactor());
+                bpu2_rescale_result<Int, OuterScale> rhs_bpu_rr
+                    = bpu2_rescale<Int, OuterScale>(rhs_bpu_orig,
+                                                    p_target_bpu->scalefactor().template convert_to<OuterScale>());
 
                 *p_target_bpu = bpu<Int>(p_target_bpu->native_dim(),
                                          p_target_bpu->scalefactor(),
                                          p_target_bpu->power() + rhs_bpu_orig.power());
 
-                return outer_scalefactor_result<Int>(rhs_bpu_rr.outer_scale_exact_,
+                return outer_scalefactor_result<Int>(rhs_bpu_rr.outer_scale_factor_,
                                                      rhs_bpu_rr.outer_scale_sq_);
             }
 
-            template <typename Int>
+            template < typename Int,
+                       typename OuterScale >
             constexpr
-            outer_scalefactor_result<Int>
+            outer_scalefactor_result<Int, OuterScale>
             bpu_ratio_inplace(bpu<Int> * p_target_bpu,
                               const bpu<Int> & rhs_bpu_orig)
             {
                 assert(rhs_bpu_orig.native_dim() == p_target_bpu->native_dim());
 
-                bpu2_rescale_result<Int> rhs_bpu_rr = bpu2_rescale(rhs_bpu_orig,
-                                                                   p_target_bpu->scalefactor());
+                bpu2_rescale_result<Int, OuterScale> rhs_bpu_rr
+                    = bpu2_rescale<Int, OuterScale>(rhs_bpu_orig,
+                                                    p_target_bpu->scalefactor());
 
                 *p_target_bpu = bpu<Int>(p_target_bpu->native_dim(),
                                          p_target_bpu->scalefactor(),
                                          p_target_bpu->power() - rhs_bpu_orig.power());
 
-                return outer_scalefactor_result<Int>(power_ratio_type(1,1) / rhs_bpu_rr.outer_scale_exact_,
-                                                     1.0 / rhs_bpu_rr.outer_scale_sq_);
+                return outer_scalefactor_result<Int, OuterScale>
+                    (OuterScale(1) / rhs_bpu_rr.outer_scale_factor_,
+                     1.0 / rhs_bpu_rr.outer_scale_sq_);
             }
 
-            template <typename Int>
+            template < typename Int,
+                       typename OuterScale >
             constexpr
-            outer_scalefactor_result<Int>
+            outer_scalefactor_result<Int, OuterScale>
             nu_product_inplace(natural_unit<Int> * p_target,
                                const bpu<Int> & bpu)
             {
@@ -264,7 +275,8 @@ namespace xo {
                     auto * p_target_bpu = &((*p_target)[i]);
 
                     if (p_target_bpu->native_dim() == bpu.native_dim()) {
-                        outer_scalefactor_result<Int> retval = bpu_product_inplace(p_target_bpu, bpu);
+                        outer_scalefactor_result<Int, OuterScale> retval
+                            = bpu_product_inplace<Int, OuterScale>(p_target_bpu, bpu);
 
                         if (p_target_bpu->power().is_zero()) {
                             /* dimension assoc'd with *p_target_bpu has been cancelled */
@@ -282,14 +294,15 @@ namespace xo {
 
                 p_target->push_back(bpu);
 
-                return outer_scalefactor_result<Int>
-                    (ratio::ratio<Int>(1, 1) /*outer_scale_exact*/,
+                return outer_scalefactor_result<Int, OuterScale>
+                    (OuterScale(1) /*outer_scale_factor*/,
                      1.0 /*outer_scale_sq*/);
             }
 
-            template <typename Int>
+            template < typename Int,
+                       typename OuterScale = ratio::ratio<Int> >
             constexpr
-            outer_scalefactor_result<Int>
+            outer_scalefactor_result<Int, OuterScale>
             nu_ratio_inplace(natural_unit<Int> * p_target,
                              const bpu<Int> & bpu)
             {
@@ -298,7 +311,8 @@ namespace xo {
                     auto * p_target_bpu = &((*p_target)[i]);
 
                     if (p_target_bpu->native_dim() == bpu.native_dim()) {
-                        outer_scalefactor_result<Int> retval = bpu_ratio_inplace(p_target_bpu, bpu);
+                        outer_scalefactor_result<Int, OuterScale> retval
+                            = bpu_ratio_inplace<Int, OuterScale>(p_target_bpu, bpu);
 
                         if (p_target_bpu->power().is_zero()) {
                             /* dimension assoc'd with *p_target_bpu has been cancelled */
@@ -316,8 +330,8 @@ namespace xo {
 
                 p_target->push_back(bpu.reciprocal());
 
-                return outer_scalefactor_result<Int>
-                    (ratio::ratio<Int>(1, 1) /*outer_scale_exact*/,
+                return outer_scalefactor_result<Int, OuterScale>
+                    (OuterScale(1) /*outer_scale_factor*/,
                      1.0 /*outer_scale_sq*/);
             }
 

@@ -100,9 +100,11 @@ namespace xo {
                                         rr.outer_scale_sq_);
             };
 
-            template <typename Int, typename Int2x = width2x<Int>>
+            template <typename Int,
+                      typename Int2x = width2x<Int>,
+                      typename OuterScale = ratio::ratio<Int2x>>
             constexpr
-            scaled_unit<Int>
+            scaled_unit<Int, OuterScale>
             su_product(const natural_unit<Int> & lhs_bpu_array,
                        const natural_unit<Int> & rhs_bpu_array)
             {
@@ -113,26 +115,29 @@ namespace xo {
                  * in lh_bpu_array
                  */
                 auto sfr = (detail::outer_scalefactor_result<Int2x>
-                            (ratio::ratio<Int2x>(1, 1) /*outer_scale_exact*/,
+                            (OuterScale(1) /*outer_scale_factor*/,
                              1.0 /*outer_scale_sq*/));
 
                 for (std::size_t i = 0; i < rhs_bpu_array.n_bpu(); ++i) {
-                    auto sfr2 = nu_product_inplace(&prod, rhs_bpu_array[i].template to_repr<Int2x>());
+                    auto sfr2 = nu_product_inplace<Int2x, OuterScale>(&prod,
+                                                                      rhs_bpu_array[i].template to_repr<Int2x>());
 
-                    sfr.outer_scale_exact_ = sfr.outer_scale_exact_ * sfr2.outer_scale_exact_;
+                    sfr.outer_scale_factor_ = sfr.outer_scale_factor_ * sfr2.outer_scale_factor_;
                     sfr.outer_scale_sq_ *= sfr2.outer_scale_sq_;
                 }
 
-                return scaled_unit<Int>(prod.template to_repr<Int>(),
-                                        sfr.outer_scale_exact_,
-                                        sfr.outer_scale_sq_);
+                return scaled_unit<Int, OuterScale>(prod.template to_repr<Int>(),
+                                                    sfr.outer_scale_factor_,
+                                                    sfr.outer_scale_sq_);
             }
 
             /* use Int2x to accumulate scalefactor
              */
-            template <typename Int, typename Int2x = width2x<Int>>
+            template < typename Int,
+                       typename Int2x = width2x<Int>,
+                       typename OuterScale = ratio::ratio<Int2x> >
             constexpr
-            scaled_unit<Int>
+            scaled_unit<Int, OuterScale>
             su_ratio(const natural_unit<Int> & nu_lhs,
                      const natural_unit<Int> & nu_rhs)
             {
@@ -142,23 +147,25 @@ namespace xo {
                  * any basis-units in rhs_bpu_array that conflict with the same dimension
                  * in lh_bpu_array
                  */
-                auto sfr = (detail::outer_scalefactor_result<Int2x>
-                            (ratio::ratio<Int2x>(1, 1) /*outer_scale_exact*/,
+                auto sfr = (detail::outer_scalefactor_result<Int2x, OuterScale>
+                            (OuterScale(1) /*outer_scale_factor*/,
                              1.0 /*outer_scale_sq*/));
 
                 for (std::size_t i = 0; i < nu_rhs.n_bpu(); ++i) {
-                    auto sfr2 = nu_ratio_inplace(&ratio, nu_rhs[i].template to_repr<Int2x>());
+                    auto sfr2 = nu_ratio_inplace<Int2x, OuterScale>(&ratio,
+                                                                    nu_rhs[i].template to_repr<Int2x>());
 
                     /* note: nu_ratio_inplace() reports multiplicative outer scaling factors,
                      *       so multiply is correct here
                      */
-                    sfr.outer_scale_exact_ = sfr.outer_scale_exact_ * sfr2.outer_scale_exact_;
+                    sfr.outer_scale_factor_ = (sfr.outer_scale_factor_
+                                               * sfr2.outer_scale_factor_);
                     sfr.outer_scale_sq_ *= sfr2.outer_scale_sq_;
                 }
 
-                return scaled_unit<Int>(ratio.template to_repr<Int>(),
-                                        sfr.outer_scale_exact_,
-                                        sfr.outer_scale_sq_);
+                return scaled_unit<Int, OuterScale>(ratio.template to_repr<Int>(),
+                                                    sfr.outer_scale_factor_,
+                                                    sfr.outer_scale_sq_);
             }
         }
 
