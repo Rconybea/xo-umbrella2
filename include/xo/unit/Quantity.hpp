@@ -333,7 +333,7 @@ namespace xo {
         }
 
         namespace unit {
-            constexpr auto nanogram = natural_unit_qty(nu2::nanogram);
+            constexpr auto nanogram = natural_unit_qty(nu::nanogram);
         }
     } /*namespace qty*/
 } /*namespace xo*/

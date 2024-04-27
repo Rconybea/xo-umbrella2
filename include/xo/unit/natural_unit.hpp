@@ -321,7 +321,7 @@ namespace xo {
 
         } /*namespace detail*/
 
-        namespace nu2 {
+        namespace nu {
             constexpr auto dimensionless = natural_unit<std::int64_t>();
 
             constexpr auto picogram = natural_unit<std::int64_t>::from_bu(bu::picogram);
@@ -363,7 +363,7 @@ namespace xo {
             constexpr auto currency = natural_unit<std::int64_t>::from_bu(bu::currency);
 
             constexpr auto price = natural_unit<std::int64_t>::from_bu(bu::price);
-        }
+        } /*namespace nu*/
     } /*namespace qty*/
 } /*namespace xo*/
 

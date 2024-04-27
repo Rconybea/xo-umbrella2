@@ -43,8 +43,8 @@ namespace xo {
         }
 
         namespace su2 {
-            constexpr auto nanogram = detail::make_unit_rescale_result<std::int64_t>(nu2::nanogram);
-            constexpr auto microgram = detail::make_unit_rescale_result<std::int64_t>(nu2::microgram);
+            constexpr auto nanogram = detail::make_unit_rescale_result<std::int64_t>(nu::nanogram);
+            constexpr auto microgram = detail::make_unit_rescale_result<std::int64_t>(nu::microgram);
         }
 
         namespace detail {
