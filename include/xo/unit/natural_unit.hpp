@@ -130,6 +130,25 @@ namespace xo {
             bpu<Int> bpu_v_[n_dim];
         };
 
+        template <typename Int>
+        constexpr bool
+        operator==(const natural_unit<Int> & x, const natural_unit<Int> & y) {
+            if (x.n_bpu() != y.n_bpu())
+                return false;
+
+            for (std::size_t i = 0, n = x.n_bpu(); i<n; ++i)
+                if (x[i] != y[i])
+                    return false;
+
+            return true;
+        }
+
+        template <typename Int>
+        constexpr bool
+        operator!=(const natural_unit<Int> & x, const natural_unit<Int> & y) {
+            return !(x == y);
+        }
+
         namespace detail {
             /**
              *  Given bpu ~ (b.u)^p:

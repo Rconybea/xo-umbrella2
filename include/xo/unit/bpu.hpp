@@ -118,6 +118,22 @@ namespace xo {
             return bpu<Int>::unit_power(bu);
         }
 
+        template <typename Int>
+        inline constexpr bool
+        operator==(const bpu<Int> & x, const bpu<Int> & y) {
+            return ((x.native_dim_ == y.native_dim_)
+                    && (x.scalefactor_ == y.scalefactor_)
+                    && (x.power_ == y.power_));
+        }
+
+        template <typename Int>
+        inline constexpr bool
+        operator!=(const bpu<Int> & x, const bpu<Int> & y) {
+            return ((x.native_dim_ != y.native_dim_)
+                    || (x.scalefactor_ != y.scalefactor_)
+                    || (x.power_ != y.power_));
+        }
+
     } /*namespace qty*/
 } /*namespace xo*/
 

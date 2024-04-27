@@ -37,6 +37,20 @@ namespace xo {
             scalefactor_ratio_type scalefactor_;
         };
 
+        inline constexpr bool
+        operator==(const basis_unit & x, const basis_unit & y)
+        {
+            return ((x.native_dim_ == y.native_dim_)
+                    && (x.scalefactor_ == y.scalefactor_));
+        }
+
+        inline constexpr bool
+        operator!=(const basis_unit & x, const basis_unit & y)
+        {
+            return ((x.native_dim_ != y.native_dim_)
+                    || (x.scalefactor_ != y.scalefactor_));
+        }
+
         namespace bu {
             // ----- mass -----
 
@@ -144,134 +158,7 @@ namespace xo {
                          (scalefactor.to_str<basis_unit2_abbrev_type::fixed_capacity>(),
                           native_unit2_v[static_cast<std::uint32_t>(basis_dim)].abbrev_str())));
             }
-
-#ifdef NOT_USING
-            template <dim BasisDim,
-                      std::int64_t InnerScaleNum,
-                      std::int64_t InnerScaleDen>
-            struct scaled_native_unit2_abbrev {
-                /* e.g. unit of '1000 grams' will have abbrev '1000g' in absence
-                 *      of a specialization for scaled_native_unit_abbrev
-                 */
-                static constexpr const basis_unit2_abbrev_type value
-                = (basis_unit2_abbrev_type::from_flatstring
-                   (flatstring_concat
-                    (xo::ratio::ratio<std::int64_t>(InnerScaleNum,
-                                                    InnerScaleDen)
-                     .to_str<basis_unit2_abbrev_type::fixed_capacity>(),
-                     native_unit2_v[static_cast<std::uint32_t>(BasisDim)].abbrev_str())));
-
-                // = bu_fallback_abbrev(BasisDim,
-                //                      xo::ratio::ratio<std::int64_t>(InnerScaleNum, InnerScaleDen));
-            };
-
-            template <>
-            struct scaled_native_unit2_abbrev<dim::mass, bu::nanogram.scalefactor().num(), bu::nanogram.scalefactor().den()> {
-                static constexpr const basis_unit2_abbrev_type value = basis_unit2_abbrev_type::from_chars("ng");
-            };
-
-            template <>
-            struct scaled_native_unit2_abbrev<dim::mass, bu::microgram.scalefactor().num(), bu::microgram.scalefactor().den()> {
-                static constexpr const basis_unit2_abbrev_type value = basis_unit2_abbrev_type::from_chars("ug");
-            };
-
-            template <>
-            struct scaled_native_unit2_abbrev<dim::mass, bu::milligram.scalefactor().num(), bu::milligram.scalefactor().den()> {
-                static constexpr const basis_unit2_abbrev_type value = basis_unit2_abbrev_type::from_chars("mg");
-            };
-
-            template <>
-            struct scaled_native_unit2_abbrev<dim::mass, 1000, 1> {
-                static constexpr const basis_unit2_abbrev_type value = basis_unit2_abbrev_type::from_chars("kg");
-            };
-
-            template <>
-            struct scaled_native_unit2_abbrev<dim::mass, 1000000, 1> {
-                static constexpr const basis_unit2_abbrev_type value = basis_unit2_abbrev_type::from_chars("t");
-            };
-
-            template <>
-            struct scaled_native_unit2_abbrev<dim::mass, 1000000000, 1> {
-                static constexpr const basis_unit2_abbrev_type value = basis_unit2_abbrev_type::from_chars("kt");
-            };
-
-            // ----- units for dim::distance -----
-
-            template <>
-            struct scaled_native_unit2_abbrev<dim::distance, 1, 1000000000> {
-                static constexpr const basis_unit2_abbrev_type value = basis_unit2_abbrev_type::from_chars("nm");
-            };
-
-            template <>
-            struct scaled_native_unit2_abbrev<dim::distance, 1, 1000000> {
-                static constexpr const basis_unit2_abbrev_type value = basis_unit2_abbrev_type::from_chars("um");
-            };
-
-            template <>
-            struct scaled_native_unit2_abbrev<dim::distance, 1, 1000> {
-                static constexpr const basis_unit2_abbrev_type value = basis_unit2_abbrev_type::from_chars("mm");
-            };
-
-            template <>
-            struct scaled_native_unit2_abbrev<dim::distance, 1000, 1> {
-                static constexpr const basis_unit2_abbrev_type value = basis_unit2_abbrev_type::from_chars("km");
-            };
-
-            // ----- units for dim::time -----
-
-            template <>
-            struct scaled_native_unit2_abbrev<dim::time, 1, 1000000000> {
-                static constexpr const basis_unit2_abbrev_type value = basis_unit2_abbrev_type::from_chars("ns");
-            };
-
-            template <>
-            struct scaled_native_unit2_abbrev<dim::time, 1, 1000000> {
-                static constexpr const basis_unit2_abbrev_type value = basis_unit2_abbrev_type::from_chars("us");
-            };
-
-            template <>
-            struct scaled_native_unit2_abbrev<dim::time, 1, 1000> {
-                static constexpr const basis_unit2_abbrev_type value = basis_unit2_abbrev_type::from_chars("ms");
-            };
-
-            template <>
-            struct scaled_native_unit2_abbrev<dim::time, 60, 1> {
-                static constexpr const basis_unit2_abbrev_type value = basis_unit2_abbrev_type::from_chars("min");
-            };
-
-            template <>
-            struct scaled_native_unit2_abbrev<dim::time, 3600, 1> {
-                static constexpr const basis_unit2_abbrev_type value = basis_unit2_abbrev_type::from_chars("hr");
-            };
-
-            template <>
-            struct scaled_native_unit2_abbrev<dim::time, 24*3600, 1> {
-                static constexpr const basis_unit2_abbrev_type value = basis_unit2_abbrev_type::from_chars("dy");
-            };
-
-            template <>
-            struct scaled_native_unit2_abbrev<dim::time, 250*24*3600, 1> {
-                static constexpr const basis_unit2_abbrev_type value = basis_unit2_abbrev_type::from_chars("yr250");
-            };
-
-            template <>
-            struct scaled_native_unit2_abbrev<dim::time, 360*24*3600, 1> {
-                static constexpr const basis_unit2_abbrev_type value = basis_unit2_abbrev_type::from_chars("yr360");
-            };
-
-            template <>
-            struct scaled_native_unit2_abbrev<dim::time, 365*24*3600, 1> {
-                static constexpr const basis_unit2_abbrev_type value = basis_unit2_abbrev_type::from_chars("yr365");
-            };
-
-            // ----- native unit abbrev api -----
-
-            template <dim BasisDim, std::int64_t InnerScaleNum = 1, std::int64_t InnerScaleDen = 1>
-            constexpr auto scaled_native_unit2_abbrev_v = scaled_native_unit2_abbrev<BasisDim, InnerScaleNum, InnerScaleDen>::value;
-#endif
         }
-
-
     } /*namespace qty*/
 } /*namespace xo*/
 
