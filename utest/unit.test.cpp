@@ -47,18 +47,6 @@ namespace xo {
         using xo::qty::detail::nu_ratio;
         using xo::qty::unit_qty;
 
-        template <typename T>
-        int unused()
-        {
-            return 1;
-        }
-
-        template <typename T1, typename T2>
-        constexpr bool unused_same(typename std::enable_if_t<std::is_same<T1, T2>::value, bool> result = true)
-        {
-            return result;
-        }
-
         TEST_CASE("basis_unit", "[basis_unit]") {
             constexpr bool c_debug_flag = true;
 
@@ -741,7 +729,7 @@ namespace xo {
 
                 static_assert(w.n_bpu() == 1);
 
-                constexpr auto prod_rr = nu_product(v, w);
+                constexpr auto prod_rr = nu_product<int64_t, __int128_t>(v, w);
 
                 log && log(xtag("prod_rr.bpu_array", prod_rr.natural_unit_));
                 log && log(xtag("prod_rr.outer_scale_exact", prod_rr.outer_scale_exact_));
@@ -890,7 +878,7 @@ namespace xo {
 
                     log && log(xtag("w.abbrev", w.abbrev()));
 
-                    constexpr auto rr = nu_ratio(v, w);
+                    constexpr auto rr = nu_ratio<int64_t, __int128_t>(v, w);
 
                     log && log(xtag("rr", rr));
 
@@ -908,7 +896,7 @@ namespace xo {
 
                     log && log(xtag("w.abbrev", w.abbrev()));
 
-                    constexpr auto rr = nu_ratio(v, w);
+                    constexpr auto rr = nu_ratio<int64_t, __int128_t>(v, w);
 
                     log && log(xtag("rr", rr));
 
