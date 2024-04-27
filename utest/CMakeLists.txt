@@ -3,6 +3,7 @@
 set(SELF_EXECUTABLE_NAME utest.unit)
 set(SELF_SOURCE_FILES
     unit_utest_main.cpp  #mpl_unit.test.cpp
+    Quantity.test.cpp
     unit.test.cpp #quantity.test.cpp
 )
 
