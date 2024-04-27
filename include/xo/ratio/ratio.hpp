@@ -24,12 +24,17 @@ namespace xo {
             /** @brief promote value to ratio type **/
             template <typename Ratio, typename FromType, bool FromRatioFlag = ratio_concept<FromType>>
             struct promoter_type;
+
+            /** @brief convert value to different numeric (or ratio) representation **/
+            template <typename Ratio, typename ToType, bool ToRatioFlag = ratio_concept<ToType>>
+            struct converter_type;
         }
 
         /** @class ratio
          *  @brief represent a ratio of two Int values.
          **/
-        template <typename Int> requires std::totally_ordered<Int>
+        template <typename Int>
+        requires std::totally_ordered<Int>
         struct ratio
         {
         public:
@@ -255,7 +260,9 @@ namespace xo {
              *  For example: to int or double
              **/
             template <typename Repr>
-            constexpr Repr to() const noexcept { return num_ / static_cast<Repr>(den_); }
+            constexpr Repr convert_to() const noexcept {
+                return detail::converter_type<ratio, Repr>::convert(*this);
+            }
 
             /** @brief convert to short human-friendly flatstring representation
              *
@@ -358,6 +365,23 @@ namespace xo {
             struct promoter_type<Ratio, FromType, false /*!FromRatioFlag*/> {
                 /* to 'promote' a non-ratio,  use denominator=1 */
                 static constexpr Ratio promote(FromType x) { return Ratio(x, 1); }
+            };
+        }
+
+        namespace detail {
+            template <typename Ratio, typename ToType, bool ToRatioFlag>
+            struct converter_type;
+
+            template <typename Ratio, typename ToType>
+            struct converter_type<Ratio, ToType, true /*ToRatioFlag*/> {
+                /* to convert to a ratio,  can just use built-in conversion */
+                static constexpr ToType convert(Ratio x) { return ToType(x.num(), x.den()); }
+            };
+
+            template <typename Ratio, typename ToType>
+            struct converter_type<Ratio, ToType, false /*!ToRatioFlag*/> {
+                /* to convert to non-ratio,  do division */
+                static constexpr ToType convert(Ratio x) { return x.num() / static_cast<ToType>(x.den()); }
             };
         }
 
