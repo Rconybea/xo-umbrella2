@@ -53,7 +53,7 @@ namespace xo {
              *
              *  Ratio need not be normalized
              **/
-            constexpr ratio(Int n, Int d) : num_{n}, den_{d} {}
+            constexpr ratio(Int n, Int d = 1) : num_{n}, den_{d} {}
             ///@}
 
             /** @defgroup ratio-static-methods **/
