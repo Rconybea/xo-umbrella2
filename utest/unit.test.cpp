@@ -40,7 +40,7 @@ namespace xo {
         using xo::qty::detail::bpu2_rescale;
         using xo::qty::detail::bpu2_product;
         using xo::qty::natural_unit;
-        using xo::qty::nu_maker;
+        using xo::qty::detail::nu_maker;
         using xo::qty::detail::su_product;
         using xo::qty::detail::su_bpu_product;
         using xo::qty::detail::nu_ratio_inplace;

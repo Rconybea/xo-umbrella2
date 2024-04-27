@@ -33,16 +33,18 @@ namespace xo {
             }
         }
 
-        template <typename Int>
-        struct nu_maker {
-            template <typename... Ts>
-            static constexpr natural_unit<Int>
-            make_nu(Ts... args) {
-                natural_unit<Int> bpu_array;
-                detail::push_bpu_array(&bpu_array, args...);
-                return bpu_array;
-            }
-        };
+        namespace detail {
+            template <typename Int>
+            struct nu_maker {
+                template <typename... Ts>
+                static constexpr natural_unit<Int>
+                make_nu(Ts... args) {
+                    natural_unit<Int> bpu_array;
+                    detail::push_bpu_array(&bpu_array, args...);
+                    return bpu_array;
+                }
+            };
+        }
 
         /** @class natural_unit
          *  @brief an array representing the cartesian product of distinct basis-power-units
@@ -64,7 +66,7 @@ namespace xo {
             constexpr natural_unit() : n_bpu_{0} {}
 
             static constexpr natural_unit from_bu(basis_unit bu) {
-                return nu_maker<Int>::make_nu(make_unit_power<Int>(bu));
+                return detail::nu_maker<Int>::make_nu(make_unit_power<Int>(bu));
             }
 
             constexpr std::size_t n_bpu() const { return n_bpu_; }
