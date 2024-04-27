@@ -191,6 +191,20 @@ namespace xo {
                 return x.scale() <=> y2.scale();
             }
 
+            /* also works with Quantity2 = double, int, .. */
+            template <typename Quantity2>
+            Quantity & operator*= (const Quantity2 & x) {
+                *this = *this * x;
+                return *this;
+            }
+
+            /* also works with Quantity2 = double, int, .. */
+            template <typename Quantity2>
+            Quantity & operator/= (const Quantity2 & x) {
+                *this = *this / x;
+                return *this;
+            }
+
         private:
             /** @brief quantity represents this multiple of a unit amount **/
             Repr scale_ = Repr{};
