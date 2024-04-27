@@ -178,20 +178,20 @@ main() {
     cerr << "r10=r9*9: " << r10 << endl; // output <ratio 4/1>
 
     static_assert(r10 == 4);
-    static_assert(r10.to<int>() == 4);
+    static_assert(r10.convert_to<int>() == 4);
 
     constexpr auto r11 = r9 * 3;
     cerr << "r11=r9*3: " << r11 << endl; // output <ratio 4/3>
 
     static_assert(r11 == make_ratio(4, 3));
-    static_assert(r11.to<int>() == 1);
+    static_assert(r11.convert_to<int>() == 1);
 
     constexpr auto r12 = 9 * r9;
     cerr << "r12=9*r9: " << r12 << endl;
 
     static_assert(r12 == r10);
     static_assert(r12 == make_ratio(4, 1));
-    static_assert(r12.to<int>() == 4);
+    static_assert(r12.convert_to<int>() == 4);
 
     constexpr auto r13 = 3 * r9;
     cerr << "r13=3*r9: " << r13 << endl; // output <ratio 4/3>
@@ -199,13 +199,13 @@ main() {
     static_assert(r13 == make_ratio(4, 3));
     static_assert(r13 == make_ratio(-4, -3));
     static_assert(r13 == r11);
-    static_assert(r13.to<int>() == 1);
+    static_assert(r13.convert_to<int>() == 1);
 
     constexpr auto r14 = r9 / r9;
     cerr << "r14=r9/r9: " << r14 << endl; // output <ratio 4/3>
 
     static_assert(r14 == 1);
-    static_assert(r14.to<int>() == 1);
+    static_assert(r14.convert_to<int>() == 1);
 
     constexpr auto r15 = r9 / r8;
     cerr << "r15=r9/r8: " << r15 << endl; // (4/9) / (-2/3) = (4/9) * (3/-2) = 12/-18 = -2/3
