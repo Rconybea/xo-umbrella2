@@ -326,7 +326,17 @@ namespace xo {
                 return lhs <=> rhs;
             }
 
+            /* we want ratio<T> to be a structural type,
+             * so that we can use an instance as a non-type template parameter.
+             *
+             * with private members, clang 18 (we believe incorrectly) complains that ratio<T> is not structural.
+             */
+#ifdef __clang__
+        public:
+#else
         private:
+#endif
+
             /** @defgroup ratio-instance-variables **/
             ///@{
             /** @brief numerator **/
