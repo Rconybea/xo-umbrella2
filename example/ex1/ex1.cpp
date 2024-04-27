@@ -62,6 +62,12 @@ namespace {
         }
     }
 
+    /* verify can use ratio instance as template argument */
+    using ratio64_t = xo::ratio::ratio<int64_t>;
+
+    template<ratio64_t Ratio>
+    constexpr double my_ratio_approx = Ratio.num_ / static_cast<double>(Ratio.den_);
+
 }
 
 int
@@ -71,6 +77,9 @@ main() {
     using xo::ratio::ratio_concept;
     using xo::flatstring;
     using namespace std;
+
+    static_assert(my_ratio_approx<ratio64_t(1, 2)> == 0.5);
+    static_assert(my_ratio_approx<ratio64_t{}> == 0.0);
 
     constexpr auto r1 = make_ratio(2, 3);
     cerr << "r1=make_ratio(2,3): " << r1 << endl; // output <ratio 2/3>
