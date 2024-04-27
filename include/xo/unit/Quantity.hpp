@@ -195,6 +195,10 @@ namespace xo {
                 return x.scale() <=> y2.scale();
             }
 
+            Quantity operator-() const {
+                return Quantity(-scale_, unit_);
+            }
+
             /* also works with Quantity2 = double, int, .. */
             template <typename Quantity2>
             Quantity & operator*= (const Quantity2 & x) {

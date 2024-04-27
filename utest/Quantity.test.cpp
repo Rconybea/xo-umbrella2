@@ -340,6 +340,10 @@ namespace xo {
                     auto q1_minus_q2 = q1 - q2;
                     REQUIRE(q1_minus_q2.unit() == q1.unit());
                     REQUIRE(q1_minus_q2.scale() == Approx(1.0 - k2).epsilon(1.0e-6));
+
+                    auto q1_neg = -q1;
+                    REQUIRE(q1_neg.unit() == q1.unit());
+                    REQUIRE(q1_neg.scale() == -q1.scale());
                 }
             }
         }
