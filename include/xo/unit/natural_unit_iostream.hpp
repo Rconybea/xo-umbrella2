@@ -6,6 +6,7 @@
 #pragma once
 
 #include "natural_unit.hpp"
+#include "bpu_iostream.hpp"
 #include <iostream>
 
 namespace xo {
