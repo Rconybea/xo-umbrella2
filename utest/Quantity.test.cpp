@@ -298,7 +298,7 @@ namespace xo {
                                                         decltype(q1)::ratio_int2x_type>(q1.unit(), q2.unit());
 
                     INFO(xtag("su.natural_unit", su.natural_unit_));
-                    INFO(xtag("su.outer_scale_exact", su.outer_scale_exact_));
+                    INFO(xtag("su.outer_scale_exact", su.outer_scale_factor_));
                     INFO(xtag("su.outer_scale_sq", su.outer_scale_sq_));
 
                     REQUIRE(q1 == q1);

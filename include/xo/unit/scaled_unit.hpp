@@ -9,27 +9,28 @@
 
 namespace xo {
     namespace qty {
-        /** @class bpu2_array_rescale_result
+        /** @class scaled_unit
          *  @brief Represents the product sqrt(outer_scale_sq) * outer_scale_exact * nat_unit
          **/
-        template <typename Int>
+        template < typename Int,
+                   typename OuterScale = ratio::ratio<Int> >
         struct scaled_unit {
             constexpr scaled_unit(const natural_unit<Int> & nat_unit,
-                                   ratio::ratio<Int> outer_scale_exact,
-                                   double outer_scale_sq)
+                                  OuterScale outer_scale_factor,
+                                  double outer_scale_sq)
                 : natural_unit_{nat_unit},
-                  outer_scale_exact_{outer_scale_exact},
+                  outer_scale_factor_{outer_scale_factor},
                   outer_scale_sq_{outer_scale_sq}
                 {}
 
             constexpr scaled_unit reciprocal() const {
                 return scaled_unit(nu_reciprocal(natural_unit_,
-                                                 outer_scale_exact_.reciprocal(),
+                                                 1 / outer_scale_factor_,
                                                  1.0 / outer_scale_sq_));
             }
 
             natural_unit<Int> natural_unit_;
-            ratio::ratio<Int> outer_scale_exact_;
+            OuterScale outer_scale_factor_;
             double outer_scale_sq_;
         };
 
@@ -172,9 +173,9 @@ namespace xo {
 
             return (scaled_unit<Int>
                     (rr.natural_unit_,
-                     (ratio::ratio<Int2x>(rr.outer_scale_exact_)
-                      * ratio::ratio<Int2x>(x_unit.outer_scale_exact_)
-                      * ratio::ratio<Int2x>(y_unit.outer_scale_exact_)),
+                     (ratio::ratio<Int2x>(rr.outer_scale_factor_)
+                      * ratio::ratio<Int2x>(x_unit.outer_scale_factor_)
+                      * ratio::ratio<Int2x>(y_unit.outer_scale_factor_)),
                      rr.outer_scale_sq_ * x_unit.outer_scale_sq_ * y_unit.outer_scale_sq_));
         }
 
@@ -189,9 +190,9 @@ namespace xo {
 
             return (scaled_unit<Int>
                     (rr.natural_unit_,
-                     (ratio::ratio<Int2x>(rr.outer_scale_exact_)
-                      * ratio::ratio<Int2x>(x_unit.outer_scale_exact_)
-                      * ratio::ratio<Int2x>(y_unit.outer_scale_exact_)),
+                     (ratio::ratio<Int2x>(rr.outer_scale_factor_)
+                      * ratio::ratio<Int2x>(x_unit.outer_scale_factor_)
+                      * ratio::ratio<Int2x>(y_unit.outer_scale_factor_)),
                      rr.outer_scale_sq_ * x_unit.outer_scale_sq_ * y_unit.outer_scale_sq_));
         }
     } /*namespace qty*/

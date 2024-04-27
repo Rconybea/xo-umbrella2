@@ -597,7 +597,7 @@ namespace xo {
                 constexpr auto prod_rr = su_bpu_product(v, bpu);
 
                 log && log(xtag("prod_rr.bpu_array", prod_rr.natural_unit_));
-                log && log(xtag("prod_rr.outer_scale_exact", prod_rr.outer_scale_exact_));
+                log && log(xtag("prod_rr.outer_scale_exact", prod_rr.outer_scale_factor_));
                 log && log(xtag("prod_rr.outer_scale_sq", prod_rr.outer_scale_sq_));
 
                 static_assert(prod_rr.natural_unit_.n_bpu() == 3);
@@ -610,7 +610,7 @@ namespace xo {
                 static_assert(prod_rr.natural_unit_[2].native_dim() == dim::time);
                 static_assert(prod_rr.natural_unit_[2].scalefactor() == scalefactor_ratio_type(250*24*3600, 1));
                 static_assert(prod_rr.natural_unit_[2].power() == power_ratio_type(-1, 2));
-                static_assert(prod_rr.outer_scale_exact_ == scalefactor_ratio_type(1, 1));
+                static_assert(prod_rr.outer_scale_factor_ == scalefactor_ratio_type(1, 1));
                 static_assert(prod_rr.outer_scale_sq_ == 1.0);
             }
         } /*TEST_CASE(bpu_array_product0)*/
@@ -644,7 +644,7 @@ namespace xo {
                 constexpr auto prod_rr = su_bpu_product(v, bpu);
 
                 log && log(xtag("prod_rr.bpu_array", prod_rr.natural_unit_));
-                log && log(xtag("prod_rr.outer_scale_exact", prod_rr.outer_scale_exact_));
+                log && log(xtag("prod_rr.outer_scale_exact", prod_rr.outer_scale_factor_));
                 log && log(xtag("prod_rr.outer_scale_sq", prod_rr.outer_scale_sq_));
 
                 static_assert(prod_rr.natural_unit_.n_bpu() == 2);
@@ -654,7 +654,7 @@ namespace xo {
                 static_assert(prod_rr.natural_unit_[1].native_dim() == dim::time);
                 static_assert(prod_rr.natural_unit_[1].scalefactor() == scalefactor_ratio_type(30*24*3600, 1));
                 static_assert(prod_rr.natural_unit_[1].power() == power_ratio_type(-1, 1));
-                static_assert(prod_rr.outer_scale_exact_ == scalefactor_ratio_type(1, 1));
+                static_assert(prod_rr.outer_scale_factor_ == scalefactor_ratio_type(1, 1));
                 static_assert(prod_rr.outer_scale_sq_ == 12.0);
             }
         } /*TEST_CASE(bpu_array_product1)*/
@@ -688,7 +688,7 @@ namespace xo {
                 constexpr auto prod_rr = su_bpu_product(v, bpu);
 
                 log && log(xtag("prod_rr.bpu_array", prod_rr.natural_unit_));
-                log && log(xtag("prod_rr.outer_scale_exact", prod_rr.outer_scale_exact_));
+                log && log(xtag("prod_rr.outer_scale_exact", prod_rr.outer_scale_factor_));
                 log && log(xtag("prod_rr.outer_scale_sq", prod_rr.outer_scale_sq_));
 
                 static_assert(prod_rr.natural_unit_.n_bpu() == 2);
@@ -698,7 +698,7 @@ namespace xo {
                 static_assert(prod_rr.natural_unit_[1].native_dim() == dim::mass);
                 static_assert(prod_rr.natural_unit_[1].scalefactor() == scalefactor_ratio_type(1, 1000));
                 static_assert(prod_rr.natural_unit_[1].power() == power_ratio_type(-1, 1));
-                static_assert(prod_rr.outer_scale_exact_ == scalefactor_ratio_type(1, 1));
+                static_assert(prod_rr.outer_scale_factor_ == scalefactor_ratio_type(1, 1));
                 static_assert(prod_rr.outer_scale_sq_ == 1.0);
             }
         } /*TEST_CASE(bpu_array_product2)*/
@@ -732,7 +732,7 @@ namespace xo {
                 constexpr auto prod_rr = su_product<int64_t, __int128_t>(v, w);
 
                 log && log(xtag("prod_rr.bpu_array", prod_rr.natural_unit_));
-                log && log(xtag("prod_rr.outer_scale_exact", prod_rr.outer_scale_exact_));
+                log && log(xtag("prod_rr.outer_scale_exact", prod_rr.outer_scale_factor_));
                 log && log(xtag("prod_rr.outer_scale_sq", prod_rr.outer_scale_sq_));
 
                 static_assert(prod_rr.natural_unit_.n_bpu() == 3);
@@ -745,7 +745,7 @@ namespace xo {
                 static_assert(prod_rr.natural_unit_[2].native_dim() == dim::time);
                 static_assert(prod_rr.natural_unit_[2].scalefactor() == scalefactor_ratio_type(30*24*3600, 1));
                 static_assert(prod_rr.natural_unit_[2].power() == power_ratio_type(-1, 2));
-                static_assert(prod_rr.outer_scale_exact_ == scalefactor_ratio_type(1, 1));
+                static_assert(prod_rr.outer_scale_factor_ == scalefactor_ratio_type(1, 1));
                 static_assert(prod_rr.outer_scale_sq_ == 1.0);
             }
         } /*TEST_CASE(bpu_array_product3)*/
