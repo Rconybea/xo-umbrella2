@@ -72,6 +72,8 @@ namespace xo {
             constexpr basis_unit millimeter       = millimetre;
             constexpr basis_unit meter            = metre;
             constexpr basis_unit kilometer        = kilometre;
+            constexpr basis_unit megameter        = megametre;
+            constexpr basis_unit gigameter        = gigametre;
 
             // ----- time -----
 

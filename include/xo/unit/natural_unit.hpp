@@ -322,8 +322,47 @@ namespace xo {
         } /*namespace detail*/
 
         namespace nu2 {
-            constexpr auto nanogram = bpu_array_maker<std::int64_t>::make_bpu_array(make_unit_power<std::int64_t>(bu::nanogram));
-            constexpr auto microgram = bpu_array_maker<std::int64_t>::make_bpu_array(make_unit_power<std::int64_t>(bu::microgram));
+            constexpr auto dimensionless = natural_unit<std::int64_t>();
+
+            constexpr auto picogram = natural_unit<std::int64_t>::from_bu(bu::picogram);
+            constexpr auto nanogram = natural_unit<std::int64_t>::from_bu(bu::nanogram);
+            constexpr auto microgram = natural_unit<std::int64_t>::from_bu(bu::microgram);
+            constexpr auto milligram = natural_unit<std::int64_t>::from_bu(bu::milligram);
+            constexpr auto gram = natural_unit<std::int64_t>::from_bu(bu::gram);
+            constexpr auto kilogram = natural_unit<std::int64_t>::from_bu(bu::kilogram);
+            constexpr auto tonne = natural_unit<std::int64_t>::from_bu(bu::tonne);
+            constexpr auto kilotonne = natural_unit<std::int64_t>::from_bu(bu::kilotonne);
+            constexpr auto megatonne = natural_unit<std::int64_t>::from_bu(bu::megatonne);
+
+            constexpr auto picometer = natural_unit<std::int64_t>::from_bu(bu::picometer);
+            constexpr auto nanometer = natural_unit<std::int64_t>::from_bu(bu::nanometer);
+            constexpr auto micrometer = natural_unit<std::int64_t>::from_bu(bu::micrometer);
+            constexpr auto millimeter = natural_unit<std::int64_t>::from_bu(bu::millimeter);
+            constexpr auto meter = natural_unit<std::int64_t>::from_bu(bu::meter);
+            constexpr auto kilometer = natural_unit<std::int64_t>::from_bu(bu::kilometer);
+            constexpr auto megameter = natural_unit<std::int64_t>::from_bu(bu::megameter);
+            constexpr auto gigameter = natural_unit<std::int64_t>::from_bu(bu::gigameter);
+            constexpr auto lightsecond = natural_unit<std::int64_t>::from_bu(bu::lightsecond);
+            constexpr auto astronomicalunit = natural_unit<std::int64_t>::from_bu(bu::astronomicalunit);
+
+            constexpr auto picosecond = natural_unit<std::int64_t>::from_bu(bu::picosecond);
+            constexpr auto nanosecond = natural_unit<std::int64_t>::from_bu(bu::nanosecond);
+            constexpr auto microsecond = natural_unit<std::int64_t>::from_bu(bu::microsecond);
+            constexpr auto millisecond = natural_unit<std::int64_t>::from_bu(bu::millisecond);
+            constexpr auto second = natural_unit<std::int64_t>::from_bu(bu::second);
+            constexpr auto minute = natural_unit<std::int64_t>::from_bu(bu::minute);
+            constexpr auto hour = natural_unit<std::int64_t>::from_bu(bu::hour);
+            constexpr auto day = natural_unit<std::int64_t>::from_bu(bu::day);
+            constexpr auto week = natural_unit<std::int64_t>::from_bu(bu::week);
+            constexpr auto month = natural_unit<std::int64_t>::from_bu(bu::month);
+            constexpr auto year = natural_unit<std::int64_t>::from_bu(bu::year);
+            constexpr auto year250 = natural_unit<std::int64_t>::from_bu(bu::year250);
+            constexpr auto year360 = natural_unit<std::int64_t>::from_bu(bu::year360);
+            constexpr auto year365 = natural_unit<std::int64_t>::from_bu(bu::year365);
+
+            constexpr auto currency = natural_unit<std::int64_t>::from_bu(bu::currency);
+
+            constexpr auto price = natural_unit<std::int64_t>::from_bu(bu::price);
         }
     } /*namespace qty*/
 } /*namespace xo*/
