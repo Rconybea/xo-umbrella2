@@ -309,11 +309,9 @@ namespace xo {
                     REQUIRE(su.natural_unit_.is_dimensionless());
                     REQUIRE(su.outer_scale_sq_ == 1.0);
 
-                    if (k1 == 1.0) {
-                        /* these will only approximately be true in general */
-                        REQUIRE((q1/q2).scale() == Approx(1.0).epsilon(1.0e-6));
-                        REQUIRE((q2/q1).scale() == Approx(1.0).epsilon(1.0e-6));
-                    }
+                    /* these will only approximately be true in general */
+                    REQUIRE((q1/q2).scale() == Approx(k1).epsilon(1.0e-6));
+                    REQUIRE((q2/q1).scale() == Approx(k2).epsilon(1.0e-6));
 
                     if (abs(k1 - 1.0) > 1.0e-6) {
                         REQUIRE(q1 != q2);
@@ -333,6 +331,15 @@ namespace xo {
                             REQUIRE(q2 >= q1);
                         }
                     }
+
+                    auto q1_plus_q2 = q1 + q2;
+                    /* k2 = q1/q2;  so q1+q2 = q1(1 + q2/q1) = q1(1 + k2) */
+                    REQUIRE(q1_plus_q2.unit() == q1.unit());
+                    REQUIRE(q1_plus_q2.scale() == Approx(1.0 + k2).epsilon(1.0e-6));
+
+                    auto q1_minus_q2 = q1 - q2;
+                    REQUIRE(q1_minus_q2.unit() == q1.unit());
+                    REQUIRE(q1_minus_q2.scale() == Approx(1.0 - k2).epsilon(1.0e-6));
                 }
             }
         }
