@@ -49,6 +49,27 @@ namespace xo {
 
         namespace detail {
             template <typename Int>
+            struct width2x;
+
+            template <>
+            struct width2x<std::int16_t> {
+                using type = std::int32_t;
+            };
+
+            template <>
+            struct width2x<std::int32_t> {
+                using type = std::int64_t;
+            };
+
+            template <>
+            struct width2x<std::int64_t> {
+                using type = __int128_t;
+            };
+
+            template <typename Int>
+            using width2x_t = width2x<Int>::type;
+
+            template <typename Int>
             constexpr
             detail::bpu2_rescale_result<Int>
             bpu2_product(const bpu<Int> & lhs_bpu,
@@ -78,52 +99,57 @@ namespace xo {
                                         rr.outer_scale_sq_);
             };
 
-            template <typename Int>
+            template <typename Int, typename Int2x = width2x<Int>>
             constexpr
             scaled_unit<Int>
             nu_product(const natural_unit<Int> & lhs_bpu_array,
                        const natural_unit<Int> & rhs_bpu_array)
             {
-                natural_unit<Int> prod = lhs_bpu_array;
+                natural_unit<Int2x> prod = lhs_bpu_array.template to_repr<Int2x>();
 
                 /* accumulate product of scalefactors spun off by rescaling
                  * any basis-units in rhs_bpu_array that conflict with the same dimension
                  * in lh_bpu_array
                  */
-                auto sfr = (detail::outer_scalefactor_result<Int>
-                            (scalefactor_ratio_type(1, 1) /*outer_scale_exact*/,
+                auto sfr = (detail::outer_scalefactor_result<Int2x>
+                            (ratio::ratio<Int2x>(1, 1) /*outer_scale_exact*/,
                              1.0 /*outer_scale_sq*/));
 
                 for (std::size_t i = 0; i < rhs_bpu_array.n_bpu(); ++i) {
-                    auto sfr2 = nu_product_inplace(&prod, rhs_bpu_array[i]);
+                    auto sfr2 = nu_product_inplace(&prod, rhs_bpu_array[i].template to_repr<Int2x>());
 
                     sfr.outer_scale_exact_ = sfr.outer_scale_exact_ * sfr2.outer_scale_exact_;
                     sfr.outer_scale_sq_ *= sfr2.outer_scale_sq_;
                 }
 
-                return scaled_unit<Int>(prod,
-                                         sfr.outer_scale_exact_,
-                                         sfr.outer_scale_sq_);
+                return scaled_unit<Int>(prod.template to_repr<Int>(),
+                                        sfr.outer_scale_exact_,
+                                        sfr.outer_scale_sq_);
             }
 
-            template <typename Int>
+            /* use Int2x to accumulate scalefactor
+             *
+             * TODO:  rename to su_ratio()
+             *
+             */
+            template <typename Int, typename Int2x = width2x<Int>>
             constexpr
             scaled_unit<Int>
             nu_ratio(const natural_unit<Int> & nu_lhs,
                      const natural_unit<Int> & nu_rhs)
             {
-                natural_unit<Int> ratio = nu_lhs;
+                natural_unit<Int2x> ratio = nu_lhs.template to_repr<Int2x>();
 
                 /* accumulate product of scalefactors spun off by rescaling
                  * any basis-units in rhs_bpu_array that conflict with the same dimension
                  * in lh_bpu_array
                  */
-                auto sfr = (detail::outer_scalefactor_result<Int>
-                            (scalefactor_ratio_type(1, 1) /*outer_scale_exact*/,
+                auto sfr = (detail::outer_scalefactor_result<Int2x>
+                            (ratio::ratio<Int2x>(1, 1) /*outer_scale_exact*/,
                              1.0 /*outer_scale_sq*/));
 
                 for (std::size_t i = 0; i < nu_rhs.n_bpu(); ++i) {
-                    auto sfr2 = nu_ratio_inplace(&ratio, nu_rhs[i]);
+                    auto sfr2 = nu_ratio_inplace(&ratio, nu_rhs[i].template to_repr<Int2x>());
 
                     /* note: nu_ratio_inplace() reports multiplicative outer scaling factors,
                      *       so multiply is correct here
@@ -132,37 +158,43 @@ namespace xo {
                     sfr.outer_scale_sq_ *= sfr2.outer_scale_sq_;
                 }
 
-                return scaled_unit<Int>(ratio,
+                return scaled_unit<Int>(ratio.template to_repr<Int>(),
                                         sfr.outer_scale_exact_,
                                         sfr.outer_scale_sq_);
             }
         }
 
-        template <typename Int>
+        template <typename Int,
+                  typename Int2x = detail::width2x_t<Int>>
         inline constexpr scaled_unit<Int>
         operator* (const scaled_unit<Int> & x_unit,
                    const scaled_unit<Int> & y_unit)
         {
-            auto rr = detail::nu_product(x_unit.natural_unit_,
-                                         y_unit.natural_unit_);
+            auto rr = detail::nu_product<Int, Int2x>(x_unit.natural_unit_,
+                                                     y_unit.natural_unit_);
 
             return (scaled_unit<Int>
                     (rr.natural_unit_,
-                     rr.outer_scale_exact_ * x_unit.outer_scale_exact_ * y_unit.outer_scale_exact_,
+                     (ratio::ratio<Int2x>(rr.outer_scale_exact_)
+                      * ratio::ratio<Int2x>(x_unit.outer_scale_exact_)
+                      * ratio::ratio<Int2x>(y_unit.outer_scale_exact_)),
                      rr.outer_scale_sq_ * x_unit.outer_scale_sq_ * y_unit.outer_scale_sq_));
         }
 
-        template <typename Int>
+        template <typename Int,
+                  typename Int2x = detail::width2x_t<Int>>
         inline constexpr scaled_unit<Int>
         operator/ (const scaled_unit<Int> & x_unit,
                    const scaled_unit<Int> & y_unit)
         {
-            auto rr = detail::nu_ratio(x_unit.natural_unit_,
-                                       y_unit.natural_unit_);
+            auto rr = detail::nu_ratio<Int, Int2x>(x_unit.natural_unit_,
+                                                   y_unit.natural_unit_);
 
             return (scaled_unit<Int>
                     (rr.natural_unit_,
-                     rr.outer_scale_exact_ * x_unit.outer_scale_exact_ * y_unit.outer_scale_exact_,
+                     (ratio::ratio<Int2x>(rr.outer_scale_exact_)
+                      * ratio::ratio<Int2x>(x_unit.outer_scale_exact_)
+                      * ratio::ratio<Int2x>(y_unit.outer_scale_exact_)),
                      rr.outer_scale_sq_ * x_unit.outer_scale_sq_ * y_unit.outer_scale_sq_));
         }
     } /*namespace qty*/
