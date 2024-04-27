@@ -149,7 +149,7 @@ namespace xo {
                 if (rr.natural_unit_.is_dimensionless()) {
                     r_repr_type r_scale = (static_cast<r_repr_type>(x.scale())
                                            + (::sqrt(rr.outer_scale_sq_)
-                                              * rr.outer_scale_factor_.template to<r_repr_type>()
+                                              * rr.outer_scale_factor_.template convert_to<r_repr_type>()
                                               * static_cast<r_repr_type>(y.scale())));
 
                     return Quantity<r_repr_type, r_int_type>(r_scale, x.unit_.template to_repr<r_int_type>());
@@ -176,7 +176,7 @@ namespace xo {
                 if (rr.natural_unit_.is_dimensionless()) {
                     r_repr_type r_scale = (static_cast<r_repr_type>(x.scale())
                                            - (::sqrt(rr.outer_scale_sq_)
-                                              * rr.outer_scale_factor_.template to<r_repr_type>()
+                                              * rr.outer_scale_factor_.template convert_to<r_repr_type>()
                                               * static_cast<r_repr_type>(y.scale())));
 
                     return Quantity<r_repr_type, r_int_type>(r_scale, x.unit_.template to_repr<r_int_type>());
