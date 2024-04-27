@@ -333,7 +333,7 @@ namespace xo {
                     }
 
                     auto q1_plus_q2 = q1 + q2;
-                    /* k2 = q1/q2;  so q1+q2 = q1(1 + q2/q1) = q1(1 + k2) */
+                    /* k1 = q1/q2;  k2 = q2/q1; so q1+q2 = q1(1 + q2/q1) = q1(1 + k2) */
                     REQUIRE(q1_plus_q2.unit() == q1.unit());
                     REQUIRE(q1_plus_q2.scale() == Approx(1.0 + k2).epsilon(1.0e-6));
 
@@ -344,6 +344,20 @@ namespace xo {
                     auto q1_neg = -q1;
                     REQUIRE(q1_neg.unit() == q1.unit());
                     REQUIRE(q1_neg.scale() == -q1.scale());
+
+                    auto q1_mult_k2 = q1 * k2;
+                    auto k2_mult_q1 = k2 * q1;
+                    REQUIRE(q1_mult_k2.unit() == q1.unit());
+                    REQUIRE(k2_mult_q1.unit() == q1.unit());
+                    REQUIRE(q1_mult_k2 == k2_mult_q1);
+
+                    /* expect q1*k2 ~ q2,  but may not be exact */
+                    {
+                        auto s = q1_mult_k2 / q2;
+
+                        REQUIRE(s.is_dimensionless());
+                        REQUIRE(s.scale() == Approx(1.0).epsilon(1.0e-6));
+                    }
                 }
             }
         }
