@@ -102,7 +102,7 @@ namespace xo {
             template <typename Int, typename Int2x = width2x<Int>>
             constexpr
             scaled_unit<Int>
-            nu_product(const natural_unit<Int> & lhs_bpu_array,
+            su_product(const natural_unit<Int> & lhs_bpu_array,
                        const natural_unit<Int> & rhs_bpu_array)
             {
                 natural_unit<Int2x> prod = lhs_bpu_array.template to_repr<Int2x>();
@@ -167,7 +167,7 @@ namespace xo {
         operator* (const scaled_unit<Int> & x_unit,
                    const scaled_unit<Int> & y_unit)
         {
-            auto rr = detail::nu_product<Int, Int2x>(x_unit.natural_unit_,
+            auto rr = detail::su_product<Int, Int2x>(x_unit.natural_unit_,
                                                      y_unit.natural_unit_);
 
             return (scaled_unit<Int>

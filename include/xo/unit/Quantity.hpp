@@ -98,7 +98,7 @@ namespace xo {
                 using r_int2x_type = std::common_type_t<typename Quantity2::ratio_int2x_type,
                                                         typename Quantity2::ratio_int2x_type>;
 
-                auto rr = detail::nu_product<r_int_type, r_int2x_type>(x.unit(), y.unit());
+                auto rr = detail::su_product<r_int_type, r_int2x_type>(x.unit(), y.unit());
 
                 r_repr_type r_scale = (::sqrt(rr.outer_scale_sq_)
                                        * rr.outer_scale_exact_.template to<r_repr_type>()

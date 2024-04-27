@@ -41,7 +41,7 @@ namespace xo {
         using xo::qty::detail::bpu2_product;
         using xo::qty::natural_unit;
         using xo::qty::bpu_array_maker;
-        using xo::qty::detail::nu_product;
+        using xo::qty::detail::su_product;
         using xo::qty::detail::nu_bpu_product;
         using xo::qty::detail::nu_ratio_inplace;
         using xo::qty::detail::su_ratio;
@@ -729,7 +729,7 @@ namespace xo {
 
                 static_assert(w.n_bpu() == 1);
 
-                constexpr auto prod_rr = nu_product<int64_t, __int128_t>(v, w);
+                constexpr auto prod_rr = su_product<int64_t, __int128_t>(v, w);
 
                 log && log(xtag("prod_rr.bpu_array", prod_rr.natural_unit_));
                 log && log(xtag("prod_rr.outer_scale_exact", prod_rr.outer_scale_exact_));
