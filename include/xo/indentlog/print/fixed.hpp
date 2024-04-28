@@ -3,6 +3,7 @@
 #pragma once
 
 #include <iostream>
+#include <cstdint>
 
 namespace xo {
     /* use:
@@ -17,12 +18,12 @@ namespace xo {
      */
     class fixed {
     public:
-        fixed(double x, uint16_t prec) : x_{x}, prec_{prec} {}
+        fixed(double x, std::uint16_t prec) : x_{x}, prec_{prec} {}
 
         /* print this value */
         double x_;
         /* precision */
-        uint16_t prec_ = 0;
+        std::uint16_t prec_ = 0;
     }; /*fixed*/
 
     inline std::ostream &
