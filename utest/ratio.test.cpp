@@ -208,6 +208,12 @@ namespace xo {
                     auto ratio1_str = ratio1.template to_str<20>();
 
                     log && log(XTAG(ratio1_str));
+
+                    REQUIRE(!ratio1_str.empty());
+
+                    /* TODO: more tests here --
+                     *       if we write parser,  verify can recover original ratio
+                     */
                 }
             }
 
