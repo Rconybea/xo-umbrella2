@@ -3,6 +3,7 @@
 #pragma once
 
 #include <iostream>
+#include <cstdint>
 
 namespace xo {
     /**
@@ -21,7 +22,7 @@ namespace xo {
     **/
     struct hex {
         /** @brief constructor;  create stream-inserter instance */
-        hex(std::uint8_t x, bool w_char = false) : x_{x}, with_char_{w_char} {}
+        explicit hex(std::uint8_t x, bool w_char = false) : x_{x}, with_char_{w_char} {}
 
         /**
            @brief print hexadecimal byte-value on to stream.
@@ -62,9 +63,8 @@ namespace xo {
        @param os    print on this stream
        @param ins   package for value to insert
     **/
-    template<typename Stream>
-    Stream &
-    operator<< (Stream & os, hex const & ins) {
+    inline std::iostream &
+    operator<< (std::iostream & os, hex const & ins) {
         ins.print(os);
         return os;
     }
