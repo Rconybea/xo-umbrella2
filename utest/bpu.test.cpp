@@ -9,7 +9,7 @@ namespace xo {
         using bpu64_type = bpu<std::int64_t>;
 
         /* compile-time test:
-         * verify we can use a bpu as a non-type template parameter.
+         * verify we can use a bpu64_type instance as a non-type template parameter.
          * Will need this for quantity<Repr, Int, natural_unit<Int>>
          */
         template <bpu64_type bpu>

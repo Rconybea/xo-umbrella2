@@ -24,9 +24,9 @@ namespace xo {
                 {}
 
             constexpr scaled_unit reciprocal() const {
-                return scaled_unit(nu_reciprocal(natural_unit_,
-                                                 1 / outer_scale_factor_,
-                                                 1.0 / outer_scale_sq_));
+                return scaled_unit(natural_unit_.reciprocal(),
+                                   1 / outer_scale_factor_,
+                                   1.0 / outer_scale_sq_);
             }
 
             natural_unit<Int> natural_unit_;

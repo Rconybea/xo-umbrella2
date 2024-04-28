@@ -122,7 +122,7 @@ namespace xo {
                 return retval;
             }
 
-        private:
+        public: /* need public members so that a natural_unit instance can be a non-type template parameter (a structural type) */
             /** @brief the number of occupied slots in @c bpu_v_ **/
             std::size_t n_bpu_;
 

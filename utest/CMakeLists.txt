@@ -6,6 +6,7 @@ set(SELF_SRCS
     Quantity.test.cpp
     bpu.test.cpp
     bu.test.cpp
+    natural_unit.test.cpp
     unit.test.cpp #quantity.test.cpp
 )
 
