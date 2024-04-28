@@ -5,8 +5,9 @@
 
 #pragma once
 
-#include "xo/ratio/ratio_iostream.hpp"
 #include "bpu.hpp"
+#include "xo/ratio/ratio_iostream.hpp"
+#include "xo/indentlog/print/tag.hpp"
 #include <iostream>
 
 namespace xo {
