@@ -86,52 +86,6 @@ namespace xo {
 
         } /*TEST_CASE(basis_unit2_store)*/
 
-        TEST_CASE("scaled_unit0", "[scaled_unit0]") {
-            constexpr bool c_debug_flag = true;
-
-            // can get bits from /dev/random by uncommenting the 2nd line below
-            //uint64_t seed = xxx;
-            //rng::Seed<xoshio256ss> seed;
-
-            //auto rng = xo::rng::xoshiro256ss(seed);
-
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.scaled_unit0"));
-            //log && log("(A)", xtag("foo", foo));
-
-            constexpr auto ng = su::nanogram;
-            constexpr auto ng2 = ng * ng;
-
-            log && log(xtag("ng", ng));
-            log && log(xtag("ng*ng", ng2));
-            //log && log(xtag("ng/ng",
-
-            static_assert(ng.natural_unit_.n_bpu() == 1);
-            static_assert(ng2.natural_unit_.n_bpu() == 1);
-        } /*TEST_CASE(scaled_unit0)*/
-
-        TEST_CASE("scaled_unit1", "[scaled_unit1]") {
-            constexpr bool c_debug_flag = true;
-
-            // can get bits from /dev/random by uncommenting the 2nd line below
-            //uint64_t seed = xxx;
-            //rng::Seed<xoshio256ss> seed;
-
-            //auto rng = xo::rng::xoshiro256ss(seed);
-
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.scaled_unit1"));
-            //log && log("(A)", xtag("foo", foo));
-
-            constexpr auto ng = su::nanogram;
-            constexpr auto ng2 = ng / ng;
-
-            log && log(xtag("ng", ng));
-            log && log(xtag("ng/ng", ng2));
-            //log && log(xtag("ng/ng",
-
-            static_assert(ng.natural_unit_.n_bpu() == 1);
-            static_assert(ng2.natural_unit_.n_bpu() == 0);
-        } /*TEST_CASE(scaled_unit1)*/
-
     } /*namespace ut*/
 } /*namespace xo*/
 

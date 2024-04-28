@@ -69,6 +69,37 @@ namespace xo {
                 static_assert(prod_rr.outer_scale_sq_ == 1.0);
             }
         } /*TEST_CASE(su_product)*/
+
+        TEST_CASE("scaled_unit0", "[scaled_unit0]") {
+            constexpr bool c_debug_flag = false;
+
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.scaled_unit0"));
+
+            constexpr auto ng = su::nanogram;
+            constexpr auto ng2 = ng * ng;
+
+            log && log(xtag("ng", ng));
+            log && log(xtag("ng*ng", ng2));
+
+            static_assert(ng.natural_unit_.n_bpu() == 1);
+            static_assert(ng2.natural_unit_.n_bpu() == 1);
+        } /*TEST_CASE(scaled_unit0)*/
+
+        TEST_CASE("scaled_unit1", "[scaled_unit1]") {
+            constexpr bool c_debug_flag = false;
+
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.scaled_unit1"));
+
+            constexpr auto ng = su::nanogram;
+            constexpr auto ng2 = ng / ng;
+
+            log && log(xtag("ng", ng));
+            log && log(xtag("ng/ng", ng2));
+
+            static_assert(ng.natural_unit_.n_bpu() == 1);
+            static_assert(ng2.natural_unit_.n_bpu() == 0);
+        } /*TEST_CASE(scaled_unit1)*/
+
     } /*namespace qty*/
 } /*namespace xo*/
 
