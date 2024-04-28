@@ -1,49 +1,35 @@
 /* @file unit.test.cpp */
 
-#include "xo/unit/unit2.hpp"
+//#include "xo/unit/unit2.hpp"
 #include "xo/unit/Quantity_iostream.hpp"
 #include "xo/unit/scaled_unit_iostream.hpp"
 #include "xo/unit/Quantity.hpp"
-#include "xo/unit/scaled_unit_iostream.hpp"
 #include "xo/unit/natural_unit.hpp"
-#include "xo/unit/natural_unit_iostream.hpp"
 #include "xo/unit/bpu_store.hpp"
 #include "xo/unit/bpu.hpp"
-#include "xo/unit/bpu_iostream.hpp"
-#include "xo/unit/basis_unit.hpp"
-#include "xo/unit/native_unit.hpp"
 #include "xo/indentlog/scope.hpp"
 #include "xo/indentlog/print/tag.hpp"
-#include "xo/flatstring/int128_iostream.hpp"
 #include <catch2/catch.hpp>
 
 namespace xo {
     namespace ut {
         /* compile-time tests */
 
-        namespace bu = xo::qty::bu;
+        //namespace bu = xo::qty::bu;
         namespace su2 = xo::qty::su2;
 
         using xo::qty::Quantity;
         using xo::qty::dim;
         using xo::qty::basis_unit2_abbrev_type;
         using xo::qty::scalefactor_ratio_type;
-        using xo::qty::units::scaled_native_unit2_abbrev;
-        //using xo::qty::units::scaled_native_unit2_abbrev_v;
-        using xo::qty::basis_unit;
-        using xo::qty::abbrev::basis_unit2_abbrev;
-        using xo::qty::bpu_abbrev_type;
-        using xo::qty::abbrev::bpu_abbrev;
+        //using xo::qty::bpu_abbrev_type;
         using xo::qty::basis_unit2_store;
         using xo::qty::power_ratio_type;
         using xo::qty::bpu;
         using xo::qty::detail::bpu2_rescale;
-        //using xo::qty::detail::bpu2_product;
         using xo::qty::natural_unit;
         using xo::qty::detail::nu_maker;
         using xo::qty::detail::su_product;
-        //using xo::qty::detail::su_bpu_product;
-        using xo::qty::detail::su_ratio;
         using xo::qty::unit_qty;
 
         TEST_CASE("basis_unit2_store", "[basis_unit2_store]") {
@@ -111,45 +97,6 @@ namespace xo {
             REQUIRE(::strcmp(bu_store.bu_abbrev(dim::time,     scalefactor_ratio_type(365*24*3600,          1)).c_str(), "yr365") == 0);
 
         } /*TEST_CASE(basis_unit2_store)*/
-
-        TEST_CASE("bpu2_abbrev", "[bpu2_abbrev]") {
-            constexpr bool c_debug_flag = true;
-
-            // can get bits from /dev/random by uncommenting the 2nd line below
-            //uint64_t seed = xxx;
-            //rng::Seed<xoshio256ss> seed;
-
-            //auto rng = xo::rng::xoshiro256ss(seed);
-
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.bpu2_assemble_abbrev"));
-            //log && log("(A)", xtag("foo", foo));
-
-            log && log(xtag("1/(kg*kg)", bpu_abbrev(dim::mass, scalefactor_ratio_type(1000, 1), power_ratio_type(-2, 1))));
-            log && log(xtag("1/kg", bpu_abbrev(dim::mass, scalefactor_ratio_type(1000, 1), power_ratio_type(-1, 1))));
-            log && log(xtag("kg", bpu_abbrev(dim::mass, scalefactor_ratio_type(1000, 1), power_ratio_type(1, 1))));
-            log && log(xtag("kg*kg", bpu_abbrev(dim::mass, scalefactor_ratio_type(1000, 1), power_ratio_type(2, 1))));
-
-            static_assert(bpu<int64_t>(dim::mass, scalefactor_ratio_type(1, 1), power_ratio_type(1, 1)).abbrev()
-                          == bpu_abbrev_type::from_chars("g"));
-            static_assert(bpu<int64_t>(dim::mass, scalefactor_ratio_type(1000, 1), power_ratio_type(1, 1)).abbrev()
-                          == bpu_abbrev_type::from_chars("kg"));
-            static_assert(bpu<int64_t>(dim::mass, scalefactor_ratio_type(1000, 1), power_ratio_type(-1, 1)).abbrev()
-                          == bpu_abbrev_type::from_chars("kg^-1"));
-            static_assert(bpu<int64_t>(dim::mass, scalefactor_ratio_type(1000, 1), power_ratio_type(-2, 1)).abbrev()
-                          == bpu_abbrev_type::from_chars("kg^-2"));
-
-            static_assert(bpu<int64_t>(dim::time, scalefactor_ratio_type(60, 1), power_ratio_type(-2, 1)).abbrev()
-                          == bpu_abbrev_type::from_chars("min^-2"));
-            static_assert(bpu<int64_t>(dim::time, scalefactor_ratio_type(3600, 1), power_ratio_type(-1, 1)).abbrev()
-                          == bpu_abbrev_type::from_chars("hr^-1"));
-            static_assert(bpu<int64_t>(dim::time, scalefactor_ratio_type(24*3600, 1), power_ratio_type(-1, 1)).abbrev()
-                          == bpu_abbrev_type::from_chars("dy^-1"));
-            static_assert(bpu<int64_t>(dim::time, scalefactor_ratio_type(360*24*3600, 1), power_ratio_type(-1, 1)).abbrev()
-                          == bpu_abbrev_type::from_chars("yr360^-1"));
-            static_assert(bpu<int64_t>(dim::time, scalefactor_ratio_type(360*24*3600, 1), power_ratio_type(-1, 2)).abbrev()
-                          == bpu_abbrev_type::from_chars("yr360^(-1/2)"));
-        } /*TEST_CASE(bpu2_abbrev)*/
-
 
         TEST_CASE("bpu_rescale", "[bpu_rescale]") {
             constexpr bool c_debug_flag = true;
