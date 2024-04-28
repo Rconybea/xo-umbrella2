@@ -29,6 +29,8 @@ namespace xo {
                                    1.0 / outer_scale_sq_);
             }
 
+        public: /* need public members so that a scaled_unit instance can be a non-type template parameter (a structural type) */
+
             natural_unit<Int> natural_unit_;
             OuterScale outer_scale_factor_;
             double outer_scale_sq_;
@@ -69,40 +71,6 @@ namespace xo {
 
             template <typename Int>
             using width2x_t = width2x<Int>::type;
-
-#ifdef NOT_USING
-            template <typename Int>
-            constexpr
-            detail::bpu2_rescale_result<Int>
-            bpu2_product(const bpu<Int> & lhs_bpu,
-                         const bpu<Int> & rhs_bpu)
-            {
-                assert(lhs_bpu.native_dim() == rhs_bpu.native_dim());
-
-                bpu<Int> prod_bpu = lhs_bpu;
-                auto rr = bpu_product_inplace(&prod_bpu, rhs_bpu);
-
-                return bpu2_rescale_result<Int>(prod_bpu,
-                                                rr.outer_scale_exact_,
-                                                rr.outer_scale_sq_);
-            }
-#endif
-
-#ifdef NOT_USING
-            template <typename Int>
-            constexpr
-            scaled_unit<Int>
-            su_bpu_product(const natural_unit<Int> & lhs_bpu_array,
-                           const bpu<Int> & rhs_bpu)
-            {
-                natural_unit<Int> prod = lhs_bpu_array;
-                auto rr = nu_product_inplace(&prod, rhs_bpu);
-
-                return scaled_unit<Int>(prod,
-                                        rr.outer_scale_exact_,
-                                        rr.outer_scale_sq_);
-            };
-#endif
 
             template <typename Int,
                       typename Int2x = width2x<Int>,
