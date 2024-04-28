@@ -46,7 +46,9 @@ add_subdirectory(docs)
 # ----------------------------------------------------------------
 # dependencies
 
+# for some reason,  this doesn't reliably bring in xo_flatstring dependency
 xo_headeronly_dependency(${SELF_LIB} xo_ratio)
+xo_headeronly_dependency(${SELF_LIB} xo_flatstring)
 # etc..
 
 # end CMakeLists.txt
