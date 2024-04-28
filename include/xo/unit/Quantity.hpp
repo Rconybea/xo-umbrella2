@@ -48,6 +48,7 @@ namespace xo {
             constexpr bool is_dimensionless() const { return unit_.is_dimensionless(); }
 
             constexpr Quantity unit_qty() const { return Quantity(1, unit_); }
+            constexpr Quantity zero_qty() const { return Quantity(0, unit_); }
             constexpr Quantity reciprocal() const { return Quantity(1.0 / scale_, unit_.reciprocal()); }
 
             constexpr
