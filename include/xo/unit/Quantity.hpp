@@ -11,7 +11,7 @@
 
 namespace xo {
     namespace qty {
-        /** @class quantity
+        /** @class Quantity
          *  @brief represent a scalar quantity with attached units.  enforce dimensional consistency.
          *
          *  Constexpr implementation,  but units are explicitly represented:
@@ -19,6 +19,8 @@ namespace xo {
          *
          *  Explicit unit representation allows introducing units at runtime,
          *  for example in python bindings
+         *
+         *  See xo::qty::quantity<> for implementation with units established at compile time
          *
          *  Require:
          *  - Repr supports numeric operations (+, -, *, /)
