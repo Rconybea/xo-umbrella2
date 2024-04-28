@@ -2,10 +2,7 @@
 
 include(CMakeFindDependencyMacro)
 
-# note: changes to find_dependency() calls here
-#       must coordinate with xo_dependency() calls
-#       in xo-reactor/src/reactor/CMakeLists.txt
-#
+find_dependency(xo_ratio)
 #find_dependency(reflect)
 #find_dependency(subsys)
 #find_dependency(Eigen3)
