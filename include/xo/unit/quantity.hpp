@@ -45,7 +45,16 @@ namespace xo {
         };
 
         namespace qty {
+            inline constexpr auto picograms(double x) { return quantity<double, std::int64_t, nu::picogram>(x); }
+            inline constexpr auto nanograms(double x) { return quantity<double, std::int64_t, nu::nanogram>(x); }
+            inline constexpr auto micrograms(double x) { return quantity<double, std::int64_t, nu::microgram>(x); }
+            inline constexpr auto milligrams(double x) { return quantity<double, std::int64_t, nu::milligram>(x); }
             inline constexpr auto grams(double x) { return quantity<double, std::int64_t, nu::gram>(x); }
+            inline constexpr auto kilograms(double x) { return quantity<double, std::int64_t, nu::kilogram>(x); }
+            inline constexpr auto tonnes(double x) { return quantity<double, std::int64_t, nu::tonne>(x); }
+            inline constexpr auto kilotonnes(double x) { return quantity<double, std::int64_t, nu::kilotonne>(x); }
+            inline constexpr auto megatonnes(double x) { return quantity<double, std::int64_t, nu::megatonne>(x); }
+            inline constexpr auto gigatonnes(double x) { return quantity<double, std::int64_t, nu::gigatonne>(x); }
         }
     } /*namespace qty*/
 } /*namespace xo*/
