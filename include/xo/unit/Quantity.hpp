@@ -26,7 +26,7 @@ namespace xo {
          **/
         template <typename Repr = double,
                   typename Int = std::int64_t,
-                  typename Int2x = __int128_t>
+                  typename Int2x = detail::width2x_t<Int>>
         class Quantity {
         public:
             using repr_type = Repr;
