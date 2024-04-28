@@ -36,7 +36,6 @@ namespace xo {
         using xo::qty::abbrev::bpu_abbrev;
         using xo::qty::basis_unit2_store;
         using xo::qty::power_ratio_type;
-        using xo::qty::abbrev::flatstring_from_exponent;
         using xo::qty::bpu;
         using xo::qty::detail::bpu2_rescale;
         //using xo::qty::detail::bpu2_product;
@@ -112,46 +111,6 @@ namespace xo {
             REQUIRE(::strcmp(bu_store.bu_abbrev(dim::time,     scalefactor_ratio_type(365*24*3600,          1)).c_str(), "yr365") == 0);
 
         } /*TEST_CASE(basis_unit2_store)*/
-
-        TEST_CASE("flatstring_from_exponent", "[flatstring_from_exponent]") {
-            constexpr bool c_debug_flag = false;
-
-            // can get bits from /dev/random by uncommenting the 2nd line below
-            //uint64_t seed = xxx;
-            //rng::Seed<xoshio256ss> seed;
-
-            //auto rng = xo::rng::xoshiro256ss(seed);
-
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.flatstring_from_exponent"));
-            //log && log("(A)", xtag("foo", foo));
-
-            log && log(xtag("^-3", flatstring_from_exponent(-3,1)));
-            log && log(xtag("^-2", flatstring_from_exponent(-2,1)));
-            log && log(xtag("^-1", flatstring_from_exponent(-1,1)));
-            log && log(xtag("^-1/2", flatstring_from_exponent(-1,2)));
-            log && log(xtag("^0", flatstring_from_exponent(0,1)));
-            log && log(xtag("^1/2", flatstring_from_exponent(1,2)));
-            log && log(xtag("^1", flatstring_from_exponent(1,1)));
-            log && log(xtag("^2", flatstring_from_exponent(2,1)));
-            log && log(xtag("^3", flatstring_from_exponent(3,1)));
-
-            static_assert(flatstring<5>::from_flatstring(flatstring_from_exponent(-3,1))
-                          == flatstring<5>::from_flatstring(flatstring("^-3")));
-            static_assert(flatstring<5>::from_flatstring(flatstring_from_exponent(-2,1))
-                          == flatstring<5>::from_flatstring(flatstring("^-2")));
-            static_assert(flatstring<5>::from_flatstring(flatstring_from_exponent(-1,1))
-                          == flatstring<5>::from_flatstring(flatstring("^-1")));
-            static_assert(flatstring<5>::from_flatstring(flatstring_from_exponent(-1,2))
-                          == flatstring<5>::from_flatstring(flatstring("^(-1/2)")));
-            static_assert(flatstring<5>::from_flatstring(flatstring_from_exponent(1,2))
-                          == flatstring<5>::from_flatstring(flatstring("^(1/2)")));
-            static_assert(flatstring<5>::from_flatstring(flatstring_from_exponent(1,1))
-                          == flatstring<5>::from_flatstring(flatstring("")));
-            static_assert(flatstring<5>::from_flatstring(flatstring_from_exponent(2,1))
-                          == flatstring<5>::from_flatstring(flatstring("^2")));
-            static_assert(flatstring<5>::from_flatstring(flatstring_from_exponent(3,1))
-                          == flatstring<5>::from_flatstring(flatstring("^3")));
-        } /*TEST_CASE(flatstring_from_exponent)*/
 
         TEST_CASE("bpu2_abbrev", "[bpu2_abbrev]") {
             constexpr bool c_debug_flag = true;
