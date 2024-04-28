@@ -1,10 +1,7 @@
 /* @file unit.test.cpp */
 
-//#include "xo/unit/unit2.hpp"
-#include "xo/unit/Quantity_iostream.hpp"
 #include "xo/unit/scaled_unit_iostream.hpp"
-#include "xo/unit/Quantity.hpp"
-#include "xo/unit/natural_unit.hpp"
+//#include "xo/unit/scaled_unit.hpp"
 #include "xo/unit/bpu_store.hpp"
 #include "xo/unit/bpu.hpp"
 #include "xo/indentlog/scope.hpp"
@@ -15,19 +12,13 @@ namespace xo {
     namespace ut {
         /* compile-time tests */
 
-        //namespace bu = xo::qty::bu;
-        namespace su2 = xo::qty::su2;
+        namespace su = xo::qty::su;
 
-        using xo::qty::Quantity;
         using xo::qty::dim;
         using xo::qty::basis_unit2_abbrev_type;
         using xo::qty::scalefactor_ratio_type;
-        //using xo::qty::bpu_abbrev_type;
         using xo::qty::basis_unit2_store;
         using xo::qty::power_ratio_type;
-        using xo::qty::bpu;
-        using xo::qty::natural_unit;
-        using xo::qty::unit_qty;
 
         TEST_CASE("basis_unit2_store", "[basis_unit2_store]") {
             constexpr bool c_debug_flag = false;
@@ -107,7 +98,7 @@ namespace xo {
             scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.scaled_unit0"));
             //log && log("(A)", xtag("foo", foo));
 
-            constexpr auto ng = su2::nanogram;
+            constexpr auto ng = su::nanogram;
             constexpr auto ng2 = ng * ng;
 
             log && log(xtag("ng", ng));
@@ -130,7 +121,7 @@ namespace xo {
             scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.scaled_unit1"));
             //log && log("(A)", xtag("foo", foo));
 
-            constexpr auto ng = su2::nanogram;
+            constexpr auto ng = su::nanogram;
             constexpr auto ng2 = ng / ng;
 
             log && log(xtag("ng", ng));

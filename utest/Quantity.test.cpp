@@ -12,7 +12,7 @@
 #include <string>
 
 namespace xo {
-    namespace su = xo::qty::su2;
+    namespace su = xo::qty::su;
     namespace nu = xo::qty::nu;
 
     using xo::qty::Quantity;
