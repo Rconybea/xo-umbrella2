@@ -6,6 +6,8 @@
 #pragma once
 
 #include "scaled_unit.hpp"
+#include "natural_unit_iostream.hpp"
+#include "xo/flatstring/int128_iostream.hpp"
 #include <iostream>
 
 namespace xo {
