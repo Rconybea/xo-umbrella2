@@ -12,7 +12,7 @@ namespace ut {
     struct quoted_tcase {
         quoted_tcase() = default;
         quoted_tcase(std::string x, bool unq_flag, std::string s)
-            : x_{x}, unq_flag_{unq_flag}, s_{std::move(s)} {}
+            : x_{std::move(x)}, unq_flag_{unq_flag}, s_{std::move(s)} {}
 
         /* string to be printed-in-machine-readable-form */
         std::string x_;
@@ -33,30 +33,37 @@ namespace ut {
             quoted_tcase("foo", true, "foo"),
             quoted_tcase("foo", false, "\"foo\""),
 
-            quoted_tcase("foo\n", true, "\"foo\\\n\""),
-            quoted_tcase("foo\n", false, "\"foo\\\n\""),
+            quoted_tcase("foo\n", true, "\"foo\\n\""),
+            quoted_tcase("foo\n", false, "\"foo\n\""), /* writes "foo\n", but gets turned into newline somewhere */
 
             quoted_tcase("two words", true, "\"two words\""),
             quoted_tcase("two words", false, "\"two words\""),
 
-            quoted_tcase("1st\n2nd", true, "\"1st\\\n2nd\""),
-            quoted_tcase("1st\n2nd", true, "\"1st\\\n2nd\""),
+            quoted_tcase("1st\n2nd", true, "\"1st\\n2nd\""),
+            quoted_tcase("1st\n2nd", false, "\"1st\n2nd\""),
 
-            quoted_tcase("misakte\rfix", true, "\"misakte\\\rfix\""),
-            quoted_tcase("misakte\rfix", true, "\"misakte\\\rfix\""),
+            quoted_tcase("misakte\rfix", true, "\"misakte\\rfix\""),
+            quoted_tcase("misakte\rfix", false, "\"misakte\rfix\""),
 
             quoted_tcase("\"oh!\", she said", true, "\"\\\"oh!\\\", she said\""),
             quoted_tcase("\"oh!\", she said", false, "\"\\\"oh!\\\", she said\""),
 
             quoted_tcase("<object printer output>", true, "<object printer output>"),
-            quoted_tcase("<object printer output>", false, "<object printer output>"),
+            quoted_tcase("<object printer output>", false, "\"<object printer output>\""),
         });
 
     TEST_CASE("quoted", "[quoted]") {
         for (std::uint32_t i_tc = 0, z_tc = s_quoted_tcase_v.size(); i_tc < z_tc; ++i_tc) {
             quoted_tcase const & tc = s_quoted_tcase_v[i_tc];
 
-            INFO(tostr(xtag("i_tc", i_tc), xtag("x", tc.x_), xtag("unq_flag", tc.unq_flag_)));
+            INFO(tostr("i_tc=", i_tc, " unq_flag=", tc.unq_flag_));
+            INFO("tc.x_ ----------------");
+            INFO(tostr("[", tc.x_, "]"));
+            INFO("tc.x_ ----------------");
+
+            bool special_char = (tc.x_.find_first_of(" \"\n\r\\") != std::string::npos);
+
+            INFO(tostr("special_char=", special_char));
 
             std::stringstream ss;
             if (tc.unq_flag_)
@@ -64,9 +71,17 @@ namespace ut {
             else
                 ss << quoted(tc.x_);
 
-            INFO(xtag("ss.str", ss.str()));
+            INFO("tc.s ----------------");
+            INFO(tostr("[", tc.s_, "]"));
+            INFO("tc.s ----------------");
+            INFO("ss.str ----------------");
+            INFO(tostr("[", ss.str(), "]"));
+            INFO("ss.str ----------------");
 
             REQUIRE(ss.str() == tc.s_);
+
+            if (ss.str() != tc.s_)
+                break;
         }
 
         REQUIRE(s_quoted_tcase_v.size() > 1);

@@ -74,11 +74,12 @@ namespace xo {
                             break;
                         case '\n':
                             /* newline -> \n */
-                            os << "\\\n";
+                            /* somehow attempt to escape the newline triggers collapse */
+                            os << "\\n";
                             break;
                         case '\r':
                             /* cr -> \r */
-                            os << "\\\r";
+                            os << "\\r";
                             break;
                         case '\\':
                             /* \ => \\  (mind c++ requires we escape \) */
