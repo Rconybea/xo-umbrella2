@@ -214,12 +214,14 @@ namespace xo {
                 return *this;
             }
 
+            constexpr nu_abbrev_type abbrev() const { return unit_.abbrev(); }
+
         private:
             /** @brief quantity represents this multiple of a unit amount **/
             Repr scale_ = Repr{};
             /** @brief unit for this quantity **/
             natural_unit<Int> unit_;
-        }; /*Quantity2*/
+        }; /*Quantity*/
 
         /** note: won't have constexpr result until c++26 (when ::sqrt(), ::pow() are constexpr)
          **/
