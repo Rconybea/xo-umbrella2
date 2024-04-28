@@ -109,7 +109,8 @@ namespace xo {
                                  ratio::ratio<Int2>(power_.num(), power_.den()));
             }
 
-            /** @brief this unit represents native dimension taken to this power **/
+        public: /* need public members so that a basis_unit instance can be a non-type template parameter (a structural type) */
+            /** @brief this unit represents basis dimension (bu) taken to this power **/
             power_ratio_type power_;
         };
 

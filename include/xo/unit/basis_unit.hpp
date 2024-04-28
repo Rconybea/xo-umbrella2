@@ -31,6 +31,7 @@ namespace xo {
 
             constexpr basis_unit & operator=(const basis_unit & x) = default;
 
+        public: /* need public members so that a basis_unit instance can be a non-type template parameter (a structural type) */
             /** @brief identifies a native unit, e.g. time (in seconds) **/
             dim native_dim_ = dim::invalid;
             /** @brief this unit defined as multiple scalefactor times native unit **/
