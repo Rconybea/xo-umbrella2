@@ -7,6 +7,7 @@ set(SELF_SRCS
     quantity.test.cpp
     bpu.test.cpp
     basis_unit.test.cpp
+    scaled_unit.test.cpp
     natural_unit.test.cpp
     unit.test.cpp #quantity.test.cpp
 )

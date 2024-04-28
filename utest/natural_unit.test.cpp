@@ -8,9 +8,11 @@
 #include <catch2/catch.hpp>
 
 namespace xo {
+    using xo::qty::detail::su_product;
     using xo::qty::detail::su_ratio;
     using xo::qty::detail::nu_ratio_inplace;
     using xo::qty::detail::nu_maker;
+    using xo::qty::detail::bpu2_rescale; // -> nu_rescale or bpu_rescale
 
     namespace qty {
         using nu64_type = natural_unit<std::int64_t>;
@@ -178,6 +180,245 @@ namespace xo {
             }
         } /*TEST_CASE(natural_unit3)*/
 
+        TEST_CASE("bpu_rescale", "[bpu_rescale]") {
+            constexpr bool c_debug_flag = false;
+
+            // can get bits from /dev/random by uncommenting the 2nd line below
+            //uint64_t seed = xxx;
+            //rng::Seed<xoshio256ss> seed;
+
+            //auto rng = xo::rng::xoshiro256ss(seed);
+
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.bpu_rescale"));
+            //log && log("(A)", xtag("foo", foo));
+
+            /* keep spelled-out test.  Will generalize to fractional powers when c++26 available */
+            {
+                constexpr auto p = power_ratio_type(1, 1);
+
+                constexpr auto orig_bpu = bpu<int64_t>(dim::mass,
+                                                        scalefactor_ratio_type(1000, 1),
+                                                        power_ratio_type(1, 1));
+                static_assert(orig_bpu.native_dim() == dim::mass);
+
+                constexpr auto new_scalefactor = scalefactor_ratio_type(1000000, 1);
+
+                constexpr auto mult = orig_bpu.scalefactor() / new_scalefactor;
+                static_assert(mult.num() == 1);
+                static_assert(mult.den() == 1000);
+
+                constexpr auto p_floor = orig_bpu.power().floor();
+                static_assert(p_floor == 1);
+
+                constexpr auto p_frac = orig_bpu.power().frac().template convert_to<double>();
+                static_assert(p_frac == 0.0);
+
+                constexpr auto outer_sf_exact = mult.power(p_floor);
+                static_assert(outer_sf_exact.num() == 1);
+                static_assert(outer_sf_exact.den() == 1000);
+
+                constexpr auto mult_inexact = mult.template convert_to<double>();
+                static_assert(mult_inexact == 0.001);
+
+                constexpr auto rr = bpu2_rescale<int64_t>(orig_bpu, scalefactor_ratio_type(1000000, 1));
+
+                static_assert(rr.bpu_rescaled_.power() == power_ratio_type(1,1));
+                static_assert(rr.outer_scale_factor_ == outer_sf_exact);
+                static_assert(rr.outer_scale_sq_ == 1.0);
+            }
+
+            /* keep spelled-out test.  Will generalize to other fractional powers when c++26 available */
+            {
+                constexpr auto p = power_ratio_type(-1, 2);
+
+                constexpr auto orig_bpu = bpu<int64_t>(dim::time,
+                                                        scalefactor_ratio_type(360*24*3600, 1),
+                                                        power_ratio_type(-1, 2));
+                static_assert(orig_bpu.native_dim() == dim::time);
+
+                constexpr auto new_scalefactor = scalefactor_ratio_type(30*24*3600, 1);
+
+                constexpr auto mult = orig_bpu.scalefactor() / new_scalefactor;
+                log && log(xtag("mult", mult));
+                static_assert(mult.num() == 12);
+                static_assert(mult.den() == 1);
+
+                constexpr auto p_floor = orig_bpu.power().floor();
+                static_assert(p_floor == 0);
+
+                constexpr auto p_frac = orig_bpu.power().frac().template convert_to<double>();
+                static_assert(p_frac == -0.5);
+
+                constexpr auto outer_sf_exact = mult.power(p_floor);
+                static_assert(outer_sf_exact.num() == 1);
+                static_assert(outer_sf_exact.den() == 1);
+
+                constexpr auto mult_inexact = mult.template convert_to<double>();
+                static_assert(mult_inexact == 12.0);
+
+                constexpr auto rr = bpu2_rescale<int64_t>(orig_bpu, scalefactor_ratio_type(30*24*3600, 1));
+
+                log && log(xtag("rr.outer_scale_exact", rr.outer_scale_factor_),
+                           xtag("rr.outer_scale_sq", rr.outer_scale_sq_));
+
+                static_assert(rr.bpu_rescaled_.power() == power_ratio_type(-1,2));
+                static_assert(rr.outer_scale_factor_ == outer_sf_exact);
+                static_assert(rr.outer_scale_sq_ == 12.0);
+            }
+
+            /* keep spelled-out test.  Will generalize to other fractional powers when c++26 available */
+            {
+                constexpr auto p = power_ratio_type(-3, 2);
+
+                constexpr auto orig_bpu = bpu<int64_t>(dim::time,
+                                                        scalefactor_ratio_type(360*24*3600, 1),
+                                                        power_ratio_type(-3, 2));
+                static_assert(orig_bpu.native_dim() == dim::time);
+
+                constexpr auto new_scalefactor = scalefactor_ratio_type(30*24*3600, 1);
+
+                constexpr auto mult = orig_bpu.scalefactor() / new_scalefactor;
+                log && log(xtag("mult", mult));
+                static_assert(mult.num() == 12);
+                static_assert(mult.den() == 1);
+
+                constexpr auto p_floor = orig_bpu.power().floor();
+                static_assert(p_floor == -1);
+
+                constexpr auto p_frac = orig_bpu.power().frac().template convert_to<double>();
+                static_assert(p_frac == -0.5);
+
+                constexpr auto outer_sf_exact = mult.power(p_floor);
+                static_assert(outer_sf_exact.num() == 1);
+                static_assert(outer_sf_exact.den() == 12);
+
+                constexpr auto mult_inexact = mult.template convert_to<double>();
+                static_assert(mult_inexact == 12.0);
+
+                constexpr auto rr = bpu2_rescale<int64_t>(orig_bpu, scalefactor_ratio_type(30*24*3600, 1));
+
+                log && log(xtag("rr.outer_scale_exact", rr.outer_scale_factor_),
+                           xtag("rr.outer_scale_sq", rr.outer_scale_sq_));
+
+                static_assert(rr.bpu_rescaled_.power() == power_ratio_type(-3,2));
+                static_assert(rr.outer_scale_factor_ == outer_sf_exact);
+                static_assert(rr.outer_scale_sq_ == 12.0);
+            }
+        } /*TEST_CASE(bpu_rescale)*/
+
+        TEST_CASE("bpu_product", "[bpu_product]") {
+            constexpr bool c_debug_flag = false;
+
+            // can get bits from /dev/random by uncommenting the 2nd line below
+            //uint64_t seed = xxx;
+            //rng::Seed<xoshio256ss> seed;
+
+            //auto rng = xo::rng::xoshiro256ss(seed);
+
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.bpu_product"));
+            //log && log("(A)", xtag("foo", foo));
+
+            {
+                constexpr auto bpu_x = bpu<int64_t>(dim::time,
+                                                     scalefactor_ratio_type(360*24*3600, 1),
+                                                     power_ratio_type(-3,2));
+                static_assert(bpu_x.native_dim() == dim::time);
+
+                constexpr auto bpu_y = bpu<int64_t>(dim::time,
+                                                     scalefactor_ratio_type(360*24*3600, 1),
+                                                     power_ratio_type(1,2));
+                static_assert(bpu_y.native_dim() == dim::time);
+
+#ifdef NOT_USING
+                constexpr auto bpu_prod = bpu2_product<int64_t>(bpu_x, bpu_y);
+
+                log && log(xtag("bpu_prod.bpu_rescaled", bpu_prod.bpu_rescaled_));
+                log && log(xtag("bpu_prod.outer_scale_exact", bpu_prod.outer_scale_exact_));
+                log && log(xtag("bpu_prod.outer_scale_sq", bpu_prod.outer_scale_sq_));
+
+                static_assert(bpu_prod.bpu_rescaled_.native_dim() == dim::time);
+                static_assert(bpu_prod.bpu_rescaled_.scalefactor() == scalefactor_ratio_type(360*24*3600, 1));
+                static_assert(bpu_prod.bpu_rescaled_.power() == power_ratio_type(-1, 1));
+                static_assert(bpu_prod.outer_scale_exact_ == scalefactor_ratio_type(1,1));
+                static_assert(bpu_prod.outer_scale_sq_ == 1.0);
+#endif
+            }
+        } /*TEST_CASE(bpu_product)*/
+
+        TEST_CASE("bpu_product2", "[bpu_product]") {
+            constexpr bool c_debug_flag = false;
+
+            // can get bits from /dev/random by uncommenting the 2nd line below
+            //uint64_t seed = xxx;
+            //rng::Seed<xoshio256ss> seed;
+
+            //auto rng = xo::rng::xoshiro256ss(seed);
+
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.bpu_product2"));
+            //log && log("(A)", xtag("foo", foo));
+
+            {
+                constexpr auto bpu_x = bpu<int64_t>(dim::time,
+                                                     scalefactor_ratio_type(360*24*3600, 1),
+                                                     power_ratio_type(-3,2));
+                static_assert(bpu_x.native_dim() == dim::time);
+
+                constexpr auto bpu_y = bpu<int64_t>(dim::time,
+                                                     scalefactor_ratio_type(30*24*3600, 1),
+                                                     power_ratio_type(1,2));
+                static_assert(bpu_y.native_dim() == dim::time);
+
+#ifdef NOT_USING
+                constexpr auto bpu_prod = bpu2_product<int64_t>(bpu_x, bpu_y);
+
+                log && log(xtag("bpu_prod.bpu_rescaled", bpu_prod.bpu_rescaled_));
+                log && log(xtag("bpu_prod.outer_scale_exact", bpu_prod.outer_scale_exact_));
+                log && log(xtag("bpu_prod.outer_scale_sq", bpu_prod.outer_scale_sq_));
+
+                static_assert(bpu_prod.bpu_rescaled_.native_dim() == dim::time);
+                static_assert(bpu_prod.bpu_rescaled_.scalefactor() == scalefactor_ratio_type(360*24*3600, 1));
+                static_assert(bpu_prod.bpu_rescaled_.power() == power_ratio_type(-1, 1));
+                static_assert(bpu_prod.outer_scale_exact_ == scalefactor_ratio_type(1,1));
+                static_assert(bpu_prod.outer_scale_sq_ == 1.0/12.0);
+#endif
+            }
+        } /*TEST_CASE(bpu_product2)*/
+
+        TEST_CASE("bpu_array", "[bpu_array]") {
+            constexpr bool c_debug_flag = false;
+
+            // can get bits from /dev/random by uncommenting the 2nd line below
+            //uint64_t seed = xxx;
+            //rng::Seed<xoshio256ss> seed;
+
+            //auto rng = xo::rng::xoshiro256ss(seed);
+
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.bpu_array"));
+            //log && log("(A)", xtag("foo", foo));
+
+            {
+                constexpr natural_unit<int64_t> v;
+
+                static_assert(v.n_bpu() == 0);
+            }
+
+            {
+                constexpr natural_unit<int64_t> v
+                    = (nu_maker<int64_t>::make_nu
+                       (bpu<int64_t>(dim::mass, scalefactor_ratio_type(1000, 1), power_ratio_type(1, 1))));
+
+                static_assert(v.n_bpu() == 1);
+            }
+
+            {
+                constexpr natural_unit<int64_t> v
+                    = (nu_maker<int64_t>::make_nu
+                       (bpu<int64_t>(dim::distance, scalefactor_ratio_type(1, 1000), power_ratio_type(2, 1)),
+                        bpu<int64_t>(dim::mass, scalefactor_ratio_type(1, 1000), power_ratio_type(-1, 1))));
+
+                static_assert(v.n_bpu() == 2);
+            }
+        } /*TEST_CASE(bpu_array)*/
     } /*namespace qty*/
 } /*namespace xo*/
 
