@@ -70,6 +70,7 @@ namespace xo {
             template <typename Int>
             using width2x_t = width2x<Int>::type;
 
+#ifdef NOT_USING
             template <typename Int>
             constexpr
             detail::bpu2_rescale_result<Int>
@@ -85,7 +86,9 @@ namespace xo {
                                                 rr.outer_scale_exact_,
                                                 rr.outer_scale_sq_);
             }
+#endif
 
+#ifdef NOT_USING
             template <typename Int>
             constexpr
             scaled_unit<Int>
@@ -99,6 +102,7 @@ namespace xo {
                                         rr.outer_scale_exact_,
                                         rr.outer_scale_sq_);
             };
+#endif
 
             template <typename Int,
                       typename Int2x = width2x<Int>,

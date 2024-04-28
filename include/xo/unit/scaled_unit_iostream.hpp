@@ -10,9 +10,11 @@
 
 namespace xo {
     namespace qty {
-        template <typename Int>
+        template <typename Int, typename OuterScale>
         inline std::ostream &
-        operator<<(std::ostream & os, const scaled_unit<Int> & x) {
+        operator<<(std::ostream & os,
+                   const scaled_unit<Int, OuterScale> & x)
+        {
             os << "<scaled-unit"
                << xtag("outer_scale_factor", x.outer_scale_factor_)
                << xtag("outer_scale_sq", x.outer_scale_sq_)

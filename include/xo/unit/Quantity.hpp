@@ -227,7 +227,7 @@ namespace xo {
         inline constexpr Quantity<Repr, Int>
         unit_qty(const scaled_unit<Int> & u) {
             return Quantity<Repr, Int>
-                (u.outer_scale_factor_.template to<double>() * ::sqrt(u.outer_scale_sq_),
+                (u.outer_scale_factor_.template convert_to<double>() * ::sqrt(u.outer_scale_sq_),
                  u.natural_unit_);
         }
 
