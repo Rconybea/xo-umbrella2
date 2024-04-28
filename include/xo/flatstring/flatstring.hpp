@@ -189,8 +189,14 @@ namespace xo {
         }
 
         /** @brief construct from integer **/
-        static constexpr flatstring from_int(int x) {
-            constexpr size_t buf_z = 20;
+        template <typename Int>
+        requires std::is_integral_v<Int>
+        static constexpr flatstring from_int(Int x) {
+            /*  32-bit int ~ 4e9
+             *  64-bit int ~ 16e18
+             * 128-bit int - 256e36 ~ 2.6e38
+             */
+            constexpr size_t buf_z = 64;
 
             bool negative_flag = (x < 0);
             std::size_t i = buf_z;
