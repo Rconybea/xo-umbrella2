@@ -5,7 +5,7 @@ set(SELF_SRCS
     unit_utest_main.cpp  #mpl_unit.test.cpp
     Quantity.test.cpp
     bpu.test.cpp
-    bu.test.cpp
+    basis_unit.test.cpp
     natural_unit.test.cpp
     unit.test.cpp #quantity.test.cpp
 )
