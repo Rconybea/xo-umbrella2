@@ -259,7 +259,7 @@ namespace xo {
                 auto [t0_tm, t0_usec] = utc_split_tm(t0);
 
                 /* no std::format in clang11 afaict */
-                char usec_buf[7];
+                char usec_buf[8];
                 snprintf(usec_buf, sizeof(usec_buf), "%06d", t0_usec);
 
 
