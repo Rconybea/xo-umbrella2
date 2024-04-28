@@ -4,6 +4,7 @@ set(SELF_EXE utest.unit)
 set(SELF_SRCS
     unit_utest_main.cpp  #mpl_unit.test.cpp
     Quantity.test.cpp
+    quantity.test.cpp
     bpu.test.cpp
     basis_unit.test.cpp
     natural_unit.test.cpp
