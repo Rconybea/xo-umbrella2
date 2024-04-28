@@ -6,21 +6,21 @@
 #include "xo/randomgen/xoshiro256.hpp"
 #include "xo/indentlog/scope.hpp"
 #include "xo/indentlog/print/tag.hpp"
-//#include "xo/indentlog/print/vector.hpp"
-#include "xo/indentlog/print/array.hpp"
 #include <catch2/catch.hpp>
 #include <set>
 #include <vector>
 #include <string>
 
 namespace xo {
-    using xo::qty::Quantity;
-    using xo::qty::scaled_unit;
-    using xo::qty::natural_unit;
-    using xo::qty::basis_unit;
-    using xo::qty::n_dim;
+    namespace su = xo::qty::su2;
     namespace nu = xo::qty::nu;
-    namespace bu = xo::qty::bu;
+
+    using xo::qty::Quantity;
+    using xo::qty::natural_unit;
+    using xo::qty::power_ratio_type;
+    using xo::qty::scalefactor_ratio_type;
+    using xo::qty::dim;
+    using xo::qty::n_dim;
 
     using xo::rng::xoshiro256ss;
 
@@ -369,14 +369,11 @@ namespace xo {
         TEST_CASE("Quantity.full", "[Quantity.full]") {
             constexpr bool c_debug_flag = false;
 
-            //auto rng = xo::rng::xoshiro256ss(seed);
-
             scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.Quantity.full"));
-            //log && log("(A)", xtag("foo", foo));
 
-            // can get bits from /dev/random by uncommenting the 2nd line below
-            uint64_t seed = 7032458451101515502;
+            // can get bits instead from /dev/random by uncommenting the line below in place of 2nd line
             //rng::Seed<xoshiro256ss> seed;
+            uint64_t seed = 7032458451101515502;
 
             log && log(tag("seed", seed));
 
@@ -384,6 +381,294 @@ namespace xo {
 
             quantity_tests(c_debug_flag, rng);
         } /*TEST_CASE(Quantity.full)*/
+
+        TEST_CASE("Quantity", "[Quantity]") {
+            constexpr bool c_debug_flag = false;
+
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.Quantity"));
+
+            /* not constexpr until c++26 */
+            auto ng = unit_qty(su::nanogram);
+
+            log && log(xtag("ng", ng));
+
+            REQUIRE(ng.scale() == 1);
+        } /*TEST_CASE(Quantity)*/
+
+        TEST_CASE("Quantity2", "[Quantity]") {
+            constexpr bool c_debug_flag = false;
+
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.Quantity2"));
+
+            /* not constexpr until c++26 */
+            Quantity ng = unit_qty(su::nanogram);
+            auto ng2 = ng * ng;
+
+            log && log(xtag("ng*ng", ng2));
+
+            REQUIRE(ng2.scale() == 1);
+        } /*TEST_CASE(Quantity2)*/
+
+        TEST_CASE("Quantity3", "[Quantity]") {
+            constexpr bool c_debug_flag = false;
+
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.Quantity3"));
+
+            /* not constexpr until c++26 */
+            Quantity ng = unit_qty(su::nanogram);
+            auto ng0 = ng / ng;
+
+            log && log(xtag("ng/ng", ng0));
+
+            REQUIRE(ng0.scale() == 1);
+        } /*TEST_CASE(Quantity3)*/
+
+        TEST_CASE("Quantity4", "[Quantity]") {
+            constexpr bool c_debug_flag = false;
+
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.Quantity4"));
+
+            /* not constexpr until c++26 */
+            Quantity ng = unit_qty(su::nanogram);
+            Quantity ug = unit_qty(su::microgram);
+
+            {
+                auto prod1 = ng * ug;
+                log && log(xtag("ng*ug", prod1));
+
+                /* units will be nanograms,  since that's on lhs */
+                REQUIRE(prod1.unit().n_bpu() == 1);
+                REQUIRE(prod1.unit()[0].native_dim() == dim::mass);
+                REQUIRE(prod1.unit()[0].scalefactor() == scalefactor_ratio_type(1, 1000000000));
+                REQUIRE(prod1.unit()[0].power() == power_ratio_type(2, 1));
+                REQUIRE(prod1.scale() == 1000);
+            }
+
+            {
+                auto prod2 = ug * ng;
+                log && log(xtag("ug*ng", prod2));
+
+                REQUIRE(prod2.unit().n_bpu() == 1);
+                REQUIRE(prod2.unit()[0].native_dim() == dim::mass);
+                REQUIRE(prod2.unit()[0].native_dim() == dim::mass);
+                REQUIRE(prod2.unit()[0].scalefactor() == scalefactor_ratio_type(1, 1000000));
+                REQUIRE(prod2.unit()[0].power() == power_ratio_type(2, 1));
+                REQUIRE(prod2.scale() == 0.001);
+            }
+
+            //REQUIRE(ng2.scale() == 1);
+        } /*TEST_CASE(Quantity4)*/
+
+        TEST_CASE("Quantity5", "[Quantity]") {
+            constexpr bool c_debug_flag = false;
+
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.Quantity5"));
+
+            /* not constexpr until c++26 */
+            Quantity ng = unit_qty(su::nanogram);
+            Quantity ug = unit_qty(su::microgram);
+
+            {
+                auto ratio1 = ng / ug;
+                log && log(xtag("ng/ug", ratio1));
+
+                /* units will be nanograms,  since that's on lhs */
+                REQUIRE(ratio1.unit().n_bpu() == 0);
+                REQUIRE(ratio1.scale() == 0.001);
+            }
+
+            {
+                auto ratio2 = ug / ng;
+                log && log(xtag("ug/ng", ratio2));
+
+                REQUIRE(ratio2.unit().n_bpu() == 0);
+                REQUIRE(ratio2.scale() == 1000.0);
+            }
+
+            //REQUIRE(ng2.scale() == 1);
+        } /*TEST_CASE(Quantity5)*/
+
+        TEST_CASE("Quantity6", "[Quantity]") {
+            constexpr bool c_debug_flag = false;
+
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.Quantity6"));
+
+            /* not constexpr until c++26 */
+            Quantity ng = unit_qty(su::nanogram);
+            Quantity ug = unit_qty(su::microgram);
+
+            {
+                auto sum1 = ng + ug;
+                log && log(xtag("ng+ug", sum1));
+
+                /* units will be nanograms,  since that's on lhs */
+                REQUIRE(sum1.unit().n_bpu() == 1);
+                REQUIRE(sum1.unit()[0].scalefactor() == scalefactor_ratio_type(1, 1000000000));
+                REQUIRE(sum1.scale() == 1001.0);
+            }
+
+            {
+                auto sum2 = ug + ng;
+                log && log(xtag("ug+ng", sum2));
+
+                /* units will be micrograms,  since that's on rhs */
+                REQUIRE(sum2.unit().n_bpu() == 1);
+                REQUIRE(sum2.unit()[0].scalefactor() == scalefactor_ratio_type(1, 1000000));
+                REQUIRE(sum2.scale() == 1.001);
+            }
+
+            //REQUIRE(ng2.scale() == 1);
+        } /*TEST_CASE(Quantity6)*/
+
+        TEST_CASE("Quantity7", "[Quantity]") {
+            constexpr bool c_debug_flag = false;
+
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.Quantity7"));
+
+            /* not constexpr until c++26 */
+            Quantity ng = unit_qty(su::nanogram);
+            Quantity ug = unit_qty(su::microgram);
+
+            {
+                auto sum1 = ng - ug;
+                log && log(xtag("ng-ug", sum1));
+
+                /* units will be nanograms,  since that's on lhs */
+                REQUIRE(sum1.unit().n_bpu() == 1);
+                REQUIRE(sum1.unit()[0].scalefactor() == scalefactor_ratio_type(1, 1000000000));
+                REQUIRE(sum1.scale() == -999.0);
+            }
+
+            {
+                auto sum2 = ug - ng;
+                log && log(xtag("ug-ng", sum2));
+
+                /* units will be micrograms,  since that's on rhs */
+                REQUIRE(sum2.unit().n_bpu() == 1);
+                REQUIRE(sum2.unit()[0].scalefactor() == scalefactor_ratio_type(1, 1000000));
+                REQUIRE(sum2.scale() == 0.999);
+            }
+
+            //REQUIRE(ng2.scale() == 1);
+        } /*TEST_CASE(Quantity7)*/
+
+        TEST_CASE("Quantity.compare", "[Quantity.compare]") {
+            constexpr bool c_debug_flag = false;
+
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.Quantity.compare"));
+
+            /* not constexpr until c++26 */
+            Quantity ng = 1000 * unit_qty(su::nanogram);
+            Quantity ug = unit_qty(su::microgram);
+
+            {
+                auto cmp = (ng == ug);
+                log && log(xtag("ng==ug", cmp));
+
+                /* units will be nanograms,  since that's on lhs */
+                REQUIRE(cmp == true);
+            }
+
+            {
+                auto cmp = (ng != ug);
+                log && log(xtag("ng!=ug", cmp));
+
+                /* units will be nanograms,  since that's on lhs */
+                REQUIRE(cmp == false);
+            }
+
+            {
+                auto cmp = (ng < ug);
+                log && log(xtag("ng<ug", cmp));
+
+               /* units will be nanograms,  since that's on lhs */
+                REQUIRE(cmp == false);
+            }
+
+            {
+                auto cmp = (ng <= ug);
+                log && log(xtag("ng=<ug", cmp));
+
+                /* units will be nanograms,  since that's on lhs */
+                REQUIRE(cmp == true);
+            }
+
+            {
+                auto cmp = (ng > ug);
+                log && log(xtag("ng>ug", cmp));
+
+                /* units will be nanograms,  since that's on lhs */
+                REQUIRE(cmp == false);
+            }
+
+            {
+                auto cmp = (ng >= ug);
+                log && log(xtag("ng>=ug", cmp));
+
+                /* units will be nanograms,  since that's on lhs */
+                REQUIRE(cmp == true);
+            }
+
+        } /*TEST_CASE(Quantity.compare)*/
+
+        TEST_CASE("Quantity.compare2", "[Quantity]") {
+            constexpr bool c_debug_flag = false;
+
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.Quantity.compare2"));
+
+            /* not constexpr until c++26 */
+            Quantity ng = unit_qty(su::nanogram);
+            Quantity ug = unit_qty(su::microgram);
+
+            {
+                auto cmp = (ng == ug);
+                log && log(xtag("ng==ug", cmp));
+
+                /* units will be nanograms,  since that's on lhs */
+                REQUIRE(cmp == false);
+            }
+
+            {
+                auto cmp = (ng != ug);
+                log && log(xtag("ng!=ug", cmp));
+
+                /* units will be nanograms,  since that's on lhs */
+                REQUIRE(cmp == true);
+            }
+
+            {
+                auto cmp = (ng < ug);
+                log && log(xtag("ng<ug", cmp));
+
+                /* units will be nanograms,  since that's on lhs */
+                REQUIRE(cmp == true);
+            }
+
+            {
+                auto cmp = (ng <= ug);
+                log && log(xtag("ng=<ug", cmp));
+
+                /* units will be nanograms,  since that's on lhs */
+                REQUIRE(cmp == true);
+            }
+
+            {
+                auto cmp = (ng > ug);
+                log && log(xtag("ng>ug", cmp));
+
+                /* units will be nanograms,  since that's on lhs */
+                REQUIRE(cmp == false);
+            }
+
+            {
+                auto cmp = (ng >= ug);
+                log && log(xtag("ng>=ug", cmp));
+
+                /* units will be nanograms,  since that's on lhs */
+                REQUIRE(cmp == false);
+            }
+
+        } /*TEST_CASE(Quantity.compare2)*/
     } /*namespace ut*/
 } /*namespace xo*/
 
