@@ -6,6 +6,7 @@
 #pragma once
 
 #include "bpu.hpp"
+#include "dim_iostream.hpp"
 #include "xo/ratio/ratio_iostream.hpp"
 #include "xo/indentlog/print/tag.hpp"
 #include <iostream>
