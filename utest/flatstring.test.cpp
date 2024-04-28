@@ -1,6 +1,7 @@
 /** @file flatstring.utest.cpp **/
 
 #include "xo/flatstring/flatstring.hpp"
+#include "xo/flatstring/int128_iostream.hpp"
 #include "xo/indentlog/scope.hpp"
 #include "xo/indentlog/print/tag.hpp"
 #include "xo/indentlog/print/hex.hpp"
@@ -418,6 +419,25 @@ namespace xo {
             REQUIRE(s13_copy2 == s13);
 
         } /*TEST_CASE(flatstring)*/
+
+        TEST_CASE("flatstring_int128", "[flatstring]") {
+            //constexpr bool c_debug_flag = false;
+
+            // can get bits from /dev/random by uncommenting the 2nd line below
+            //uint64_t seed = xxx;
+            //rng::Seed<xoshio256ss> seed;
+
+            //auto rng = xo::rng::xoshiro256ss(seed);
+
+            //scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.flatstring_int128"));
+            //log && log("(A)", xtag("foo", foo));
+
+            __int128_t x = 65536UL*65536UL*65536UL*65536UL*65536UL;
+
+            stringstream ss;
+            ss << x;
+        } /*TEST_CASE(flatstring_int128)*/
+
 
     } /*namespace ut*/
 } /*namespace xo*/
