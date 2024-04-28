@@ -64,6 +64,7 @@ namespace xo {
             constexpr basis_unit tonne            = basis_unit(dim::mass, scalefactor_ratio_type(      1000000,             1));
             constexpr basis_unit kilotonne        = basis_unit(dim::mass, scalefactor_ratio_type(   1000000000,             1));
             constexpr basis_unit megatonne        = basis_unit(dim::mass, scalefactor_ratio_type(1000000000000,             1));
+            constexpr basis_unit gigatonne        = basis_unit(dim::mass, scalefactor_ratio_type(1000000000000000,             1));
 
             // ----- distance -----
 

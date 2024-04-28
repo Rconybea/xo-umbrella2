@@ -60,6 +60,8 @@ namespace xo {
                         return basis_unit2_abbrev_type::from_chars("kt");
                     case 1000000000000:
                         return basis_unit2_abbrev_type::from_chars("Mt");
+                    case 1000000000000000:
+                        return basis_unit2_abbrev_type::from_chars("Gt");
                     }
                 }
 

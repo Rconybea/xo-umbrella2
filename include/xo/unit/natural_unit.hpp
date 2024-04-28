@@ -368,6 +368,7 @@ namespace xo {
             constexpr auto tonne = natural_unit<std::int64_t>::from_bu(bu::tonne);
             constexpr auto kilotonne = natural_unit<std::int64_t>::from_bu(bu::kilotonne);
             constexpr auto megatonne = natural_unit<std::int64_t>::from_bu(bu::megatonne);
+            constexpr auto gigatonne = natural_unit<std::int64_t>::from_bu(bu::gigatonne);
 
             constexpr auto picometer = natural_unit<std::int64_t>::from_bu(bu::picometer);
             constexpr auto nanometer = natural_unit<std::int64_t>::from_bu(bu::nanometer);
