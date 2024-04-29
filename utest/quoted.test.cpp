@@ -53,7 +53,11 @@ namespace ut {
 #endif
 
             quoted_tcase("misakte\rfix", true, "\"misakte\\rfix\""),
+#if __GNUC__ >= 13 && __GNUC_MINOR >= 2
             quoted_tcase("misakte\rfix", false, "\"misakte\rfix\""),
+#else
+            quoted_tcase("misakte\rfix", false, "\"misakte\\rfix\""),
+#endif
 
             quoted_tcase("\"oh!\", she said", true, "\"\\\"oh!\\\", she said\""),
             quoted_tcase("\"oh!\", she said", false, "\"\\\"oh!\\\", she said\""),
@@ -65,6 +69,10 @@ namespace ut {
     TEST_CASE("quoted", "[quoted]") {
         for (std::uint32_t i_tc = 0, z_tc = s_quoted_tcase_v.size(); i_tc < z_tc; ++i_tc) {
             quoted_tcase const & tc = s_quoted_tcase_v[i_tc];
+
+            /* NOTE: don't use tag()/xtag() here,
+             *       since implementation relies on the inserter we are testing
+             */
 
             INFO(tostr("i_tc=", i_tc, " unq_flag=", tc.unq_flag_));
             INFO("tc.x_ ----------------");
