@@ -1,14 +1,15 @@
 /* @file fixed.test.cpp */
 
 #include "xo/indentlog/print/quoted.hpp"
-#include "xo/indentlog/print/tag.hpp"
+//#include "xo/indentlog/print/tag.hpp"
+#include "xo/indentlog/print/hex.hpp"
 #include <catch2/catch.hpp>
 #include <sstream>
 
-using namespace xo;
-using namespace xo::print;
-
 namespace ut {
+    using namespace xo;
+    using namespace xo::print;
+
     struct quoted_tcase {
         quoted_tcase() = default;
         quoted_tcase(std::string x, bool unq_flag, std::string s)
@@ -97,7 +98,7 @@ namespace ut {
             INFO(tostr("[", tc.s_, "]"));
             INFO("tc.s ----------------");
             INFO("ss.str ----------------");
-            INFO(tostr("[", ss.view(), "]"));
+            INFO(tostr("[", hex_view(ss.view().begin(), ss.view().end(), true), "]"));
             INFO(tostr("[", ss.str(), "]"));
             INFO("ss.str ----------------");
 
