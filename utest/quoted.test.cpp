@@ -35,7 +35,7 @@ namespace ut {
 
             quoted_tcase("foo\n", true, "\"foo\\n\""),
 #if __GNUC__ >= 13 && __GNUC_MINOR__ >= 2
-            /* writes "foo\n", but gets turned into newline somewhere.  only on very recent gcc. */
+            /* writes "foo\n", but gets turned into newline somewhere.  only on very recent gcc. (not on 11.4.0) */
             quoted_tcase("foo\n", false, "\"foo\n\""),
 #else
             quoted_tcase("foo\n", false, "\"foo\\n\""),
@@ -45,7 +45,12 @@ namespace ut {
             quoted_tcase("two words", false, "\"two words\""),
 
             quoted_tcase("1st\n2nd", true, "\"1st\\n2nd\""),
+#if __GNUC__ >= 13 && __GNUC_MINOR_ >= 2
+            /* writes "1st\\nsecond", but still gets turned into newline somewhere.  only on very recent gcc. (not on 11.4.0) */
             quoted_tcase("1st\n2nd", false, "\"1st\n2nd\""),
+#else
+            quoted_tcase("1st\n2nd", false, "\"1st\\n2nd\""),
+#endif
 
             quoted_tcase("misakte\rfix", true, "\"misakte\\rfix\""),
             quoted_tcase("misakte\rfix", false, "\"misakte\rfix\""),
