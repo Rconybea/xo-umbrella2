@@ -97,7 +97,7 @@ namespace xo {
 
         private:
             /* .unq_flag:  if true,  omit surrounding " chars
-             *             if printed value satisfies both:
+             *             whenever printed value satisfies both:
              *             - no escaped chars
              *             - no spaces
              */

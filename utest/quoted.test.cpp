@@ -45,7 +45,7 @@ namespace ut {
             quoted_tcase("two words", false, "\"two words\""),
 
             quoted_tcase("1st\n2nd", true, "\"1st\\n2nd\""),
-#if __GNUC__ >= 13 && __GNUC_MINOR_ >= 2
+#if __GNUC__ >= 13 && __GNUC_MINOR__ >= 2
             /* writes "1st\\nsecond", but still gets turned into newline somewhere.  only on very recent gcc. (not on 11.4.0) */
             quoted_tcase("1st\n2nd", false, "\"1st\n2nd\""),
 #else
@@ -53,7 +53,7 @@ namespace ut {
 #endif
 
             quoted_tcase("misakte\rfix", true, "\"misakte\\rfix\""),
-#if __GNUC__ >= 13 && __GNUC_MINOR >= 2
+#if __GNUC__ >= 13 && __GNUC_MINOR__ >= 2
             quoted_tcase("misakte\rfix", false, "\"misakte\rfix\""),
 #else
             quoted_tcase("misakte\rfix", false, "\"misakte\\rfix\""),
@@ -63,7 +63,11 @@ namespace ut {
             quoted_tcase("\"oh!\", she said", false, "\"\\\"oh!\\\", she said\""),
 
             quoted_tcase("<object printer output>", true, "<object printer output>"),
+#if __GNUC__ >= 13 && __GNUC_MINOR__ >= 2
             quoted_tcase("<object printer output>", false, "\"<object printer output>\""),
+#else
+            quoted_tcase("<object printer output>", false, "\"<object printer output>\""),
+#endif
         });
 
     TEST_CASE("quoted", "[quoted]") {
@@ -93,6 +97,7 @@ namespace ut {
             INFO(tostr("[", tc.s_, "]"));
             INFO("tc.s ----------------");
             INFO("ss.str ----------------");
+            INFO(tostr("[", ss.view(), "]"));
             INFO(tostr("[", ss.str(), "]"));
             INFO("ss.str ----------------");
 
