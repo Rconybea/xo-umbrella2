@@ -38,7 +38,7 @@ endmacro()
 # debug build (cmake -DCMAKE_BUILD_TYPE=debug path/to/source)
 #
 macro(xo_toplevel_debug_config2)
-    if (${CMAKE_BUILD_TYPE} STREQUAL "debug")
+    if ("${CMAKE_BUILD_TYPE}" STREQUAL "debug")
         # clear out hardwired default.
         # we want to override project-level defaults,
         # but need to prevent interference from hardwired defaults
@@ -77,7 +77,7 @@ endmacro()
 #     file:///path/to/build/ccov/html/index.html
 #
 macro(xo_toplevel_coverage_config2)
-    if (${CMAKE_BUILD_TYPE} STREQUAL "coverage")
+    if ("${CMAKE_BUILD_TYPE}" STREQUAL "coverage")
         #find_program(LCOV_EXECUTABLE NAMES lcov)
         #find_program(GENHTML_EXECUTABLE NAMES genhtml)
         # see bin/xo-cmake-lcov-harness in this repo
