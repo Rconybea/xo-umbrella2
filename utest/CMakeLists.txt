@@ -3,7 +3,7 @@
 set(SELF_EXE utest.unit)
 set(SELF_SRCS
     unit_utest_main.cpp  #mpl_unit.test.cpp
-    Quantity2.test.cpp
+    xquantity.test.cpp
     quantity.test.cpp
     bpu.test.cpp
     basis_unit.test.cpp
