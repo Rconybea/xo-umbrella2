@@ -1,7 +1,7 @@
 /* @file Quantity.test.cpp */
 
-#include "Quantity.hpp"
-#include "Quantity_iostream.hpp"
+#include "Quantity2.hpp"
+#include "Quantity2_iostream.hpp"
 #include "xo/randomgen/random_seed.hpp"
 #include "xo/randomgen/xoshiro256.hpp"
 #include "xo/indentlog/scope.hpp"
