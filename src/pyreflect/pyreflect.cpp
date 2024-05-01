@@ -26,6 +26,12 @@ namespace xo {
             //py::class_<utc_nanos>(m, "utc_nanos");
 
             //py::class_<TypeDescrImpl>(m, "TypeDescr");
+            /* TypeDescrBase instances are created automatically at library load time
+             * by static initializers.  The reflection library (xo-reflect) is responsible
+             * for lifetime of TypeDescrobjects.  Under no circumstances should python
+             * (or pybind11) directly destroy a TypeDescrImpl instance, hence use of
+             * unowned_ptr<TypeDescrBase> here.
+             */
             py::class_<TypeDescrBase,
                        unowned_ptr<TypeDescrBase>>(m, "TypeDescr")
                 .def_static("print_reflected_types",
