@@ -3,24 +3,19 @@
 cmake_minimum_required(VERSION 3.10)
 
 project(xo_pyutil VERSION 0.1)
-enable_language(CXX)
 
-# common XO cmake macros (see github:Rconybea/xo-cmake)
-include(xo_macros/xo_cxx)
-include(xo_macros/code-coverage)   # very little to unit test here
+include(GNUInstallDirs)
+include(cmake/xo-bootstrap-macros.cmake)   # very little to unit test here
+
+xo_cxx_toplevel_options2()
 
 # ----------------------------------------------------------------
-# unit test setup
+# cmake -DCMAKE_BUILD_TYPE=coverage
+xo_toplevel_coverage_config2()
 
-enable_testing()
-## enable code coverage for all executables+libraries
-## (when configured with -DCODE_COVERAGE=ON)
-##
-add_code_coverage()
-add_code_coverage_all_targets(
-  EXCLUDE
-  /nix/store/*
-  ${PROJECT_SOURCE_DIR}/utest/*)
+# ----------------------------------------------------------------
+# cmake -DCMAKE_BUILD_TYPE=debug
+xo_toplevel_debug_config2()
 
 # ----------------------------------------------------------------
 # bespoke (usually temporary) c++ settings
@@ -30,35 +25,17 @@ set(PROJECT_CXX_FLAGS "")
 add_definitions(${PROJECT_CXX_FLAGS})
 
 # ----------------------------------------------------------------
-# c++ settings
-
-xo_toplevel_compile_options()
-
-# ----------------------------------------------------------------
-# external dependencies
-#
-# set CMAKE_INSTALL_PREFIX to analog of /usr
-# to use .cmake assistants from /usr/lib/cmake/indentlog
-#
-# xo_dependency(..)
-
-# ----------------------------------------------------------------
 
 #add_subdirectory(example)
 #add_subdirectory(utest)
 
 # ----------------------------------------------------------------
-# output targets
 
 set(SELF_LIB xo_pyutil)
 add_library(${SELF_LIB} INTERFACE)
 xo_include_headeronly_options2(${SELF_LIB})
-
-# ----------------------------------------------------------------
-# standard install + provide find_package() support
-
 xo_install_library2(${SELF_LIB})
-xo_install_include_tree()
+xo_install_include_tree3(include/xo/pyutil)
 xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
 
 # ----------------------------------------------------------------
