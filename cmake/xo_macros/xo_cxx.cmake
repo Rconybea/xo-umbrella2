@@ -105,6 +105,51 @@ macro(xo_toplevel_coverage_config2)
     endif()
 endmacro()
 
+# target to build+install coverage report.
+#
+macro(xo_utest_coverage_config2)
+    if (XO_SUBMODULE_BUILD)
+        # in submodule build, will generate aggregate coverage report
+        # for all xo libraries.
+    else()
+        set(CCOV_OUTPUT_DIR ${PROJECT_BINARY_DIR}/ccov/html)
+        set(CCOV_INDEX_FILE ${CCOV_OUTPUT_DIR}/index.html)
+        # see xo_toplevel_coverage_report()
+        set(CCOV_REPORT_EXE ${PROJECT_BINARY_DIR}/gen-ccov)
+        # CMAKE_INSTALL_DOCDIR
+        #  =default=> DATAROOTDIR/doc/PROJECT_NAME
+        #  =default=> CMAKE_INSTALL_PREFIX/share/doc/xo_flatstring
+        set(CCOV_INSTALL_DOCDIR ${CMAKE_INSTALL_DOCDIR}/ccov)
+
+        # collect utest deps (like xo_doxygen_collect_deps())
+        get_target_property(_all_utests all_utest_executables targets)
+        message(DEBUG "_all_utests=${_all_utests}")
+
+        # 'test' target should always be out-of-date
+        #
+        # DEPENDS: reminder - can't put 'test' here,  requires 'all' target
+        #
+        add_custom_command(
+            OUTPUT ${CCOV_INDEX_FILE}
+            DEPENDS ${_all_utests}
+            COMMAND ${CCOV_REPORT_EXE}
+            WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+            COMMENT "Generating coverage report -> [${CCOV_OUTPUT_DIR}]")
+
+        add_custom_target(
+            ccov
+            DEPENDS ${CCOV_INDEX_FILE} ${SELF_EXE})
+
+        # OPTIONAL: quietly skip this step if ccov report not generated
+        install(
+            DIRECTORY ${CCOV_OUTPUT_DIR}
+            FILE_PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
+            DESTINATION ${CCOV_INSTALL_DOCDIR}
+            COMPONENT Documentation
+            OPTIONAL)
+    endif()
+endmacro()
+
 # caller should set ALL_LIBRARY_TARGETS ALL_UTEST_TARGETS before calling
 # xo_doxygen_standard_deps().
 #
