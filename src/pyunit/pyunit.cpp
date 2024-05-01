@@ -150,6 +150,24 @@ namespace xo {
                              return x / y;
                          })
 
+                .def("__eq__",
+                     [](const XoQuantity & x, const XoQuantity & y)
+                         {
+                             return x == y;
+                         })
+
+                .def("__eq__",
+                     [](const XoQuantity & x, double y)
+                         {
+                             return x == y;
+                         })
+
+                .def("__req__",
+                     [](const XoQuantity & y, double x)
+                         {
+                             return x == y;
+                         })
+
                 .def("__repr__",
                      [](const XoQuantity & x)
                          {
