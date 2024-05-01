@@ -1,5 +1,6 @@
 /* @file fixed.test.cpp */
 
+#include "xo/indentlog/scope.hpp"
 #include "xo/indentlog/print/quoted.hpp"
 //#include "xo/indentlog/print/tag.hpp"
 #include "xo/indentlog/print/hex.hpp"
@@ -25,6 +26,85 @@ namespace ut {
         /* expected result */
         std::string s_;
     }; /*quoted_tcase*/
+
+    TEST_CASE("sstream.1char", "[quoted]") {
+        constexpr bool c_debug_flag = true;
+
+        scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.sstream"));
+
+        /* testing unexpected sstream behavior */
+        {
+            std::stringstream ss;
+
+            log && log("empty stream");
+
+            ss << '\\';
+
+            log && log("after: lone escaped backslash");
+            log && log(hex_view(ss.view().begin(), ss.view().end(), true));
+
+            ss << 'n';
+
+            log && log("after: lone 'n' char");
+            log && log(hex_view(ss.view().begin(), ss.view().end(), true));
+
+            log && log("ss.str()=[", ss.str(), "]");
+            log && log("quoted(\"\\n\")=[", quoted("\\n"), "]");
+        }
+
+        /* testing unexpected sstream behavior */
+        {
+            std::stringstream ss;
+
+            log && log("empty stream");
+
+            ss << "\\n";
+
+            log && log("after: '\\n' escaped backslash + n");
+            log && log(hex_view(ss.view().begin(), ss.view().end(), true));
+        }
+
+        /* testing unexpected sstream behavior */
+        {
+            std::stringstream ss;
+
+            log && log("empty stream");
+
+            ss << quoted("\n");
+
+            log && log("after: quoted('\\n')");
+            log && log(hex_view(ss.view().begin(), ss.view().end(), true));
+        }
+
+        /* testing unexpected sstream behavior */
+        {
+            std::stringstream ss;
+
+            log && log("empty stream");
+
+            ss << quoted("foo\n");
+
+            log && log("after: quoted(\"foo\n\")");
+            log && log(hex_view(ss.view().begin(), ss.view().end(), true));
+            log && log("> ss.str ----------------");
+            log && log(ss.str());
+            log && log("< ss.str ----------------");
+        }
+
+        /* testing unexpected sstream behavior */
+        {
+            std::stringstream ss;
+
+            log && log("empty stream");
+
+            ss << unq("\n");
+
+            log && log("after: unq('\\n')");
+            log && log(hex_view(ss.view().begin(), ss.view().end(), true));
+        }
+
+    } /*TEST_CASE(sstream)*/
+
 
     std::vector<quoted_tcase> s_quoted_tcase_v(
         {
