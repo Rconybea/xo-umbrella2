@@ -109,7 +109,8 @@ namespace xo {
             for (std::uint8_t const * p = lo_; p < hi_; ++p) {
                 if (i > 0)
                     os << " ";
-                os << hex(*p, as_text_);
+                xo::hex(*p, as_text_).print(os);
+                //os << xo::hex(*p, as_text_);
                 ++i;
             }
             os << "]";
