@@ -39,8 +39,15 @@ namespace xo {
             unit.attr("kilogram")  = &xo::qty::nu::kilogram;
             unit.attr("tonne")     = &xo::qty::nu::tonne;
             unit.attr("kilotonne") = &xo::qty::nu::kilotonne;
+            unit.attr("megatonne") = &xo::qty::nu::megatonne;
 
+            unit.attr("picometer") = &xo::qty::nu::picometer;
+            unit.attr("nanometer") = &xo::qty::nu::nanometer;
+            unit.attr("micrometer") = &xo::qty::nu::micrometer;
+            unit.attr("millimeter") = &xo::qty::nu::millimeter;
             unit.attr("meter") = &xo::qty::nu::meter;
+            unit.attr("kilometer") = &xo::qty::nu::kilometer;
+            unit.attr("megameter") = &xo::qty::nu::megameter;
 
             py::module qty = m.def_submodule("qty");
 
@@ -52,8 +59,15 @@ namespace xo {
             qty.def("kilograms",  [](double x) { return XoQuantity(x, nu::kilogram); });
             qty.def("tonnes",     [](double x) { return XoQuantity(x, nu::tonne); });
             qty.def("kilotonnes", [](double x) { return XoQuantity(x, nu::kilotonne); });
+            qty.def("megaonnes", [](double x) { return XoQuantity(x, nu::megatonne); });
 
+            qty.def("picometers", [](double x) { return XoQuantity(x, nu::picometer); });
+            qty.def("nanometers", [](double x) { return XoQuantity(x, nu::nanometer); });
+            qty.def("micrometers", [](double x) { return XoQuantity(x, nu::micrometer); });
+            qty.def("millimeters", [](double x) { return XoQuantity(x, nu::millimeter); });
             qty.def("meters", [](double x) { return XoQuantity(x, nu::meter); });
+            qty.def("kilometers", [](double x) { return XoQuantity(x, nu::kilometer); });
+            qty.def("megameters", [](double x) { return XoQuantity(x, nu::megameter); });
 
             py::class_<XoQuantity>(m, "Quantity")
                 .def(py::init<double, const Unit &>(),
