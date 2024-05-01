@@ -18,7 +18,7 @@ xo_toplevel_coverage_config2()
 xo_toplevel_debug_config2()
 
 
-set(XO_PROJECT_NAME subsys)
+#set(XO_PROJECT_NAME subsys)
 
 # ----------------------------------------------------------------
 # installing header-only library

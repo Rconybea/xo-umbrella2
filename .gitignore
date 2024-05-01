@@ -1,2 +1,6 @@
-# typical build location
+# symlink to ${mybuilddirectory}/compile_commands.json for LSP
+compile_commands.json
+# LSP keeps state here
+.cache
+# typical build directories
 .build*
