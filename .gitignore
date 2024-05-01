@@ -1,2 +1,2 @@
 # typical build location
-build
+.build*
