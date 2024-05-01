@@ -14,6 +14,10 @@ xo_cxx_toplevel_options2()
 xo_toplevel_coverage_config2()
 
 # ----------------------------------------------------------------
+# cmake -DCMAKE_BUILD_TYPE=debug
+xo_toplevel_debug_config2()
+
+# ----------------------------------------------------------------
 # c++ settings
 
 # one-time project-specific c++ flags.  usually empty
@@ -27,11 +31,11 @@ add_subdirectory(example)
 add_subdirectory(utest)
 
 # ----------------------------------------------------------------
-# provide find_package() support for projects using this library
 
 set(SELF_LIB xo_flatstring)
 xo_add_headeronly_library(${SELF_LIB})
 xo_install_library4(${SELF_LIB} ${PROJECT_NAME}Targets)
+# provide find_package() support for projects using this library
 xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
 
 # ----------------------------------------------------------------
