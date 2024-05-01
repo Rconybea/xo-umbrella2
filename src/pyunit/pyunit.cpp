@@ -100,6 +100,24 @@ namespace xo {
                              return x + y;
                          })
 
+                .def("__sub__",
+                     [](const XoQuantity & x, const XoQuantity & y)
+                         {
+                             return x - y;
+                         })
+
+                .def("__sub__",
+                     [](const XoQuantity & x, double y)
+                         {
+                             return x - y;
+                         })
+
+                .def("__rsub__",
+                     [](double y, const XoQuantity & x)
+                         {
+                             return x - y;
+                         })
+
                 .def("__mul__",
                      [](const XoQuantity & x, const XoQuantity & y)
                          {
