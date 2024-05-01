@@ -115,7 +115,7 @@ namespace ut {
             quoted_tcase("foo", false, "\"foo\""),
 
             quoted_tcase("foo\n", true, "\"foo\\n\""),
-#if __GNUC__ >= 13 && __GNUC_MINOR__ >= 2
+#if 0 && __GNUC__ >= 13 && __GNUC_MINOR__ >= 2
             /* writes "foo\n", but gets turned into newline somewhere.  only on very recent gcc. (not on 11.4.0) */
             quoted_tcase("foo\n", false, "\"foo\n\""),
 #else
