@@ -38,7 +38,7 @@ endmacro()
 # debug build (cmake -DCMAKE_BUILD_TYPE=debug path/to/source)
 #
 macro(xo_toplevel_debug_config2)
-    if (${CMAKE_BUILD_TYPE} STREQUAL "debug")
+    if ("${CMAKE_BUILD_TYPE}" STREQUAL "debug")
         # clear out hardwired default.
         # we want to override project-level defaults,
         # but need to prevent interference from hardwired defaults
@@ -57,9 +57,8 @@ macro(xo_toplevel_debug_config2)
             set(PROJECT_CXX_FLAGS_DEBUG ${PROJECT_CXX_FLAGS} -ggdb -Og
                 CACHE STRING "debug c++ compiler flags")
         endif()
-        if (${CMAKE_BUILD_TYPE} STREQUAL debug)
-            message(STATUS "PROJECT_CXX_FLAGS_DEBUG: debug c++ flags are [${PROJECT_CXX_FLAGS_DEBUG}]")
-        endif()
+
+        message(STATUS "PROJECT_CXX_FLAGS_DEBUG: debug c++ flags are [${PROJECT_CXX_FLAGS_DEBUG}]")
 
         add_compile_options("$<$<CONFIG:DEBUG>:${PROJECT_CXX_FLAGS_DEBUG}>")
     endif()
@@ -77,7 +76,7 @@ endmacro()
 #     file:///path/to/build/ccov/html/index.html
 #
 macro(xo_toplevel_coverage_config2)
-    if (${CMAKE_BUILD_TYPE} STREQUAL "coverage")
+    if ("${CMAKE_BUILD_TYPE}" STREQUAL "coverage")
         #find_program(LCOV_EXECUTABLE NAMES lcov)
         #find_program(GENHTML_EXECUTABLE NAMES genhtml)
         # see bin/xo-cmake-lcov-harness in this repo
