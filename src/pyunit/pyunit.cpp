@@ -24,26 +24,36 @@ namespace xo {
                 .def("__repr__",
                      [](Unit & x)
                          {
-                             /* e.g. "1g" for xo::qty::nu::gram */
-                             return tostr(1, x.abbrev());
+                             /* e.g. "<unit g>" for xo::qty::nu::gram */
+                             return tostr("<Unit ", x.abbrev(), ">");
                          })
                 ;
 
             py::module unit = m.def_submodule("unit");
 
+            unit.attr("picogram")  = &xo::qty::nu::picogram;
+            unit.attr("nanoogram") = &xo::qty::nu::nanogram;
             unit.attr("microgram") = &xo::qty::nu::microgram;
             unit.attr("milligram") = &xo::qty::nu::milligram;
-            unit.attr("gram") = &xo::qty::nu::gram;
-            unit.attr("kilogram") = &xo::qty::nu::kilogram;
-            unit.attr("tonne") = &xo::qty::nu::tonne;
+            unit.attr("gram")      = &xo::qty::nu::gram;
+            unit.attr("kilogram")  = &xo::qty::nu::kilogram;
+            unit.attr("tonne")     = &xo::qty::nu::tonne;
+            unit.attr("kilotonne") = &xo::qty::nu::kilotonne;
+
+            unit.attr("meter") = &xo::qty::nu::meter;
 
             py::module qty = m.def_submodule("qty");
 
+            qty.def("picograms",  [](double x) { return XoQuantity(x, nu::picogram); });
+            qty.def("nanograms",  [](double x) { return XoQuantity(x, nu::nanogram); });
             qty.def("micrograms", [](double x) { return XoQuantity(x, nu::microgram); });
             qty.def("milligrams", [](double x) { return XoQuantity(x, nu::milligram); });
-            qty.def("grams", [](double x) { return XoQuantity(x, nu::gram); });
-            qty.def("kilograms", [](double x) { return XoQuantity(x, nu::kilogram); });
-            qty.def("tonnes", [](double x) { return XoQuantity(x, nu::tonne); });
+            qty.def("grams",      [](double x) { return XoQuantity(x, nu::gram); });
+            qty.def("kilograms",  [](double x) { return XoQuantity(x, nu::kilogram); });
+            qty.def("tonnes",     [](double x) { return XoQuantity(x, nu::tonne); });
+            qty.def("kilotonnes", [](double x) { return XoQuantity(x, nu::kilotonne); });
+
+            qty.def("meters", [](double x) { return XoQuantity(x, nu::meter); });
 
             py::class_<XoQuantity>(m, "Quantity")
                 .def(py::init<double, const Unit &>(),
