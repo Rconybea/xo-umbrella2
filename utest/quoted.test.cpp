@@ -143,12 +143,9 @@ namespace ut {
             quoted_tcase("\"oh!\", she said", true, "\"\\\"oh!\\\", she said\""),
             quoted_tcase("\"oh!\", she said", false, "\"\\\"oh!\\\", she said\""),
 
+            // special carveout for strings bracketed by <..>;  assume already well-formed
             quoted_tcase("<object printer output>", true, "<object printer output>"),
-#if __GNUC__ >= 13 && __GNUC_MINOR__ >= 2
-            quoted_tcase("<object printer output>", false, "\"<object printer output>\""),
-#else
-            quoted_tcase("<object printer output>", false, "\"<object printer output>\""),
-#endif
+            quoted_tcase("<object printer output>", false, "<object printer output>"),
         });
 
     TEST_CASE("quoted", "[quoted]") {
