@@ -401,6 +401,26 @@ namespace xo {
             return Quantity::compare(x, y);
         }
 
+        /** note: won't have constexpr result until c++26 (when ::sqrt(), ::pow() are constexpr)
+         **/
+        template <typename Quantity, double>
+        requires quantity2_concept<Quantity>
+        constexpr auto
+        operator<=> (const Quantity & x, double y)
+        {
+            return Quantity::compare(x, Quantity(y, nu::dimensionless));
+        }
+
+        /** note: won't have constexpr result until c++26 (when ::sqrt(), ::pow() are constexpr)
+         **/
+        template <typename Quantity, double>
+        requires quantity2_concept<Quantity>
+        constexpr auto
+        operator<=> (double x, const Quantity & y)
+        {
+            return Quantity::compare(Quantity(x, nu::dimensionless), y);
+        }
+
         namespace unit {
             constexpr auto nanogram = natural_unit_qty(nu::nanogram);
         }
