@@ -67,6 +67,25 @@ namespace xo {
                 .def("reciprocal", &XoQuantity::reciprocal)
                 .def("rescale", &XoQuantity::rescale,
                      py::arg("unit"))
+
+                .def("__add__",
+                     [](const XoQuantity & x, const XoQuantity & y)
+                         {
+                             return x + y;
+                         })
+
+                .def("__add__",
+                     [](const XoQuantity & x, double y)
+                         {
+                             return x + y;
+                         })
+
+                .def("__radd__",
+                     [](double y, const XoQuantity & x)
+                         {
+                             return x + y;
+                         })
+
                 .def("__mul__",
                      [](const XoQuantity & x, const XoQuantity & y)
                          {
