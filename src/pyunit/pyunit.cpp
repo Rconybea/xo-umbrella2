@@ -48,6 +48,15 @@ namespace xo {
             py::class_<XoQuantity>(m, "Quantity")
                 .def(py::init<double, const Unit &>(),
                      py::arg("scale"), py::arg("unit"))
+
+                .def("scale", &XoQuantity::scale)
+                .def("unit", &XoQuantity::unit)
+                .def("is_dimensionless", &XoQuantity::is_dimensionless)
+                .def("unit_qty", &XoQuantity::unit_qty)
+                .def("zero_qty", &XoQuantity::zero_qty)
+                .def("reciprocal", &XoQuantity::reciprocal)
+                .def("rescale", &XoQuantity::rescale,
+                     py::arg("unit"))
                 .def("__mul__",
                      [](const XoQuantity & x, const XoQuantity & y)
                          {
@@ -85,6 +94,10 @@ namespace xo {
                          {
                              return tostr(x);
                          })
+                .def("abbrev",
+                     [](const XoQuantity & x) {
+                         return std::string(x.abbrev().c_str());
+                     })
                 ;
         }
     }
