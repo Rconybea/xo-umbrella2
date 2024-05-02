@@ -50,8 +50,11 @@
 
   inputs.xo-cmake-path          = { type = "github"; owner = "Rconybea"; repo = "xo-cmake";          flake = false; };
   inputs.xo-indentlog-path      = { type = "github"; owner = "Rconybea"; repo = "indentlog";         flake = false; };
+  inputs.xo-flatstring-path     = { type = "github"; owner = "Rconybea"; repo = "xo-flatstring";     flake = false; };
   inputs.xo-refcnt-path         = { type = "github"; owner = "Rconybea"; repo = "refcnt";            flake = false; };
   inputs.xo-subsys-path         = { type = "github"; owner = "Rconybea"; repo = "subsys";            flake = false; };
+  inputs.xo-randomgen-path      = { type = "github"; owner = "Rconybea"; repo = "randomgen";         flake = false; };
+  inputs.xo-ratio-path          = { type = "github"; owner = "Rconybea"; repo = "xo-ratio";          flake = false; };
   #inputs.xo-pyutil-path         = { type = "github"; owner = "Rconybea"; repo = "xo-pyutil";         flake = false; };
   inputs.xo-reflect-path        = { type = "github"; owner = "Rconybea"; repo = "reflect";           flake = false; };
   #inputs.xo-pyreflect-path      = { type = "github"; owner = "Rconybea"; repo = "xo-pyreflect";      flake = false; };
@@ -64,8 +67,11 @@
       flake-utils,
       xo-cmake-path,
       xo-indentlog-path,
+      xo-flatstring-path,
       xo-refcnt-path,
       xo-subsys-path,
+      xo-randomgen-path,
+      xo-ratio-path,
       xo-reflect-path,
       # placeholder-B
     } :
@@ -97,8 +103,11 @@
 
                 packages.xo-cmake = appliedOverlay.xo-cmake;
                 packages.xo-indentlog = appliedOverlay.xo-indentlog;
+                packages.xo-flatstring = appliedOverlay.xo-flatstring;
                 packages.xo-refcnt = appliedOverlay.xo-refcnt;
                 packages.xo-subsys = appliedOverlay.xo-subsys;
+                packages.xo-randomgen = appliedOverlay.xo-randomgen;
+                packages.xo-ratio = appliedOverlay.xo-ratio;
                 packages.xo-reflect = appliedOverlay.xo-reflect;
                 packages.xo-unit = appliedOverlay.xo-unit;
                 # placeholder-C
@@ -147,9 +156,31 @@
                   (prev.callPackage ./pkgs/xo-indentlog.nix { xo-cmake = xo-cmake; }).overrideAttrs
                     (old: { src = xo-indentlog-path; });
 
+                xo-flatstring =
+                  (prev.callPackage ./pkgs/xo-flatstring.nix { xo-cmake = xo-cmake;
+                                                               xo-indentlog = xo-indentlog;
+                                                               python = python;
+                                                               pythonPackages = pythonPackages; }).overrideAttrs
+                    (old: { src = xo-flatstring-path; });
+
                 xo-subsys =
                   (prev.callPackage ./pkgs/xo-subsys.nix { xo-cmake = xo-cmake; }).overrideAttrs
                     (old: { src = xo-subsys-path; });
+
+                xo-randomgen =
+                  (prev.callPackage ./pkgs/xo-randomgen.nix { xo-cmake = xo-cmake;
+                                                              xo-indentlog = xo-indentlog;
+                                                            }).overrideAttrs
+                    (old: { src = xo-randomgen-path; });
+
+                xo-ratio =
+                  (prev.callPackage ./pkgs/xo-ratio.nix { xo-cmake = xo-cmake;
+                                                          xo-flatstring = xo-flatstring;
+                                                          xo-randomgen = xo-randomgen;
+                                                          python = python;
+                                                          pythonPackages = pythonPackages;
+                                                        }).overrideAttrs
+                    (old: { src = xo-ratio-path; });
 
                 xo-refcnt =
                   (prev.callPackage ./pkgs/xo-refcnt.nix { xo-cmake = xo-cmake;
@@ -164,7 +195,9 @@
 
                 xo-unit =
                   (prev.callPackage ./pkgs/xo-unit.nix { xo-cmake = xo-cmake;
-                                                         xo-reflect = xo-reflect;
+                                                         xo-flatstring = xo-flatstring;
+                                                         xo-randomgen = xo-randomgen;
+                                                         xo-ratio = xo-ratio;
                                                          python = python;
                                                          pythonPackages = pythonPackages;
                                                        }).overrideAttrs
@@ -178,6 +211,8 @@
                                                             xo-indentlog = xo-indentlog;
                                                             xo-subsys = xo-subsys;
                                                             xo-refcnt = xo-refcnt;
+                                                            xo-randomgen = xo-randomgen;
+                                                            xo-ratio = xo-ratio;
                                                             xo-reflect = xo-reflect;
                                                             xo-unit = xo-unit;
                                                           }).overrideAttrs(old: {});
@@ -192,8 +227,11 @@
                 {
                   xo-cmake = xo-cmake;
                   xo-indentlog = xo-indentlog;
+                  xo-flatstring = xo-flatstring;
                   xo-subsys = xo-subsys;
                   xo-refcnt = xo-refcnt;
+                  xo-randomgen = xo-randomgen;
+                  xo-ratio = xo-ratio;
                   xo-reflect = xo-reflect;
                   xo-unit = xo-unit;
                   # placeholder-E

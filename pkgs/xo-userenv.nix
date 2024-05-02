@@ -3,7 +3,7 @@
   buildFHSUserEnv, # ... other deps here
 
   # xo dependencies
-  xo-cmake, xo-indentlog, xo-subsys, xo-refcnt, xo-reflect, xo-unit,
+  xo-cmake, xo-indentlog, xo-subsys, xo-refcnt, xo-ratio, xo-reflect, xo-unit,
 
   # other args
 
@@ -16,6 +16,7 @@ buildFHSUserEnv {
                        xo-indentlog
                        xo-subsys
                        xo-refcnt
+                       xo-ratio
                        xo-reflect
                        xo-unit
                      ];

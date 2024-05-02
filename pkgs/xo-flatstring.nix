@@ -1,8 +1,24 @@
 {
-  # nixpkgs dependencies
+  # 1. nixpkgs dependencies
+  # 1.1. python
+  python, pythonPackages,
+
+  # 1.2. particular python packages
+  sphinx ? pythonPackages.sphinx,
+  sphinx-rtd-theme ? pythonPackages.sphinx-rtd-theme,
+  breathe ? pythonPackages.breathe,
+
+  # 1.3. document-generation packages
+  #      use of makeFontsConf adapted from nixpkgs/development/libraries/gtkmm/4.x.nix
+  #
+  doxygen, graphviz,
+  ##fontconfig,
+  ##makeFontsConf,
+
+  # 1.4. c++ build/utest chain
   stdenv, cmake, catch2, # ... other deps here
 
-  # xo dependencies
+  # 2. xo dependencies
   xo-cmake, xo-indentlog
 
   # args
@@ -31,7 +47,29 @@ stdenv.mkDerivation (finalattrs:
     });
 
     cmakeFlags = ["-DXO_CMAKE_CONFIG_EXECUTABLE=${xo-cmake}/bin/xo-cmake-config"];
+
+    # move HOME so fontconfig can do sensible things
+    buildPhase = ''
+      #set -x
+
+      echo "FONTCONFIG_FILE=$FONTCONFIG_FILE"
+
+      #export FONTCONFIG_FILE=$fontconfig.out/etc/fonts/fonts.conf
+      export HOME=$TMPDIR
+      export XDG_CONFIG_HOME=$TMPDIR
+
+      mkdir $XDG_CONFIG_HOME/fontconfig
+
+      #grep xdg $FONTCONFIG_FILE
+
+      #$fontconfig.out/bin/fc-cache -v
+
+      make && make docs
+      #make
+    '';
+
     doCheck = true;
-    nativeBuildInputs = [ cmake catch2 ];
+    nativeBuildInputs = [ cmake catch2
+                          doxygen graphviz sphinx sphinx-rtd-theme breathe ];
     propagatedBuildInputs = [ xo-indentlog ];
   })

@@ -16,13 +16,13 @@
   makeFontsConf,
 
   # used for graphviz (dot) see docs/Doxyfile.in
-  helvetica-neue-lt-std,
+  #helvetica-neue-lt-std,
 
   # 1.4. c++ build/utest chain
   stdenv, cmake, catch2, # ... other deps here
 
   # 2. xo dependencies
-  xo-cmake, xo-reflect,
+  xo-cmake, xo-flatstring, xo-ratio, xo-randomgen,
 
   # args
 
@@ -49,9 +49,10 @@ stdenv.mkDerivation (finalattrs:
       #rev = "c0472c9d7e4d2c53bfb977d3182380832fe96645";
     });
 
-    cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake"];
+    cmakeFlags = ["-DXO_CMAKE_CONFIG_EXECUTABLE=${xo-cmake}/bin/xo-cmake-config"];
 
-    FONTCONFIG_FILE = makeFontsConf { fontDirectories = [ helvetica-neue-lt-std ]; };
+    # NOTE: helvetic-neue-lt-std has unfree license
+    #FONTCONFIG_FILE = makeFontsConf { fontDirectories = [ helvetica-neue-lt-std ]; };
 
     # move HOME so fontconfig can do sensible things
     buildPhase = ''
@@ -72,10 +73,7 @@ stdenv.mkDerivation (finalattrs:
       make && make docs
     '';
 
-    # NOTE: helvetic-neue-lt-std has unfree license
-    #FONTCONFIG_FILE = makeFontsConf { fontDirectories = [ helvetica-neue-lt-std ]; };
-
     doCheck = true;
-    nativeBuildInputs = [ cmake catch2 doxygen graphviz sphinx sphinx-rtd-theme breathe ];
-    propagatedBuildInputs = [ xo-reflect ];
+    nativeBuildInputs = [ cmake catch2 doxygen graphviz sphinx sphinx-rtd-theme breathe xo-randomgen ];
+    propagatedBuildInputs = [ xo-flatstring xo-ratio ];
   })

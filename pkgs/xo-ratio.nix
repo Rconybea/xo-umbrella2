@@ -1,17 +1,17 @@
 {
   # 1. nixpkgs dependencies
   # 1.1. python
-  #python, pythonPackages,
+  python, pythonPackages,
 
   # 1.2. particular python packages
-  #sphinx ? pythonPackages.sphinx,
-  #sphinx-rtd-theme ? pythonPackages.sphinx-rtd-theme,
-  #breathe ? pythonPackages.breathe,
+  sphinx ? pythonPackages.sphinx,
+  sphinx-rtd-theme ? pythonPackages.sphinx-rtd-theme,
+  breathe ? pythonPackages.breathe,
 
   # 1.3. document-generation packages
   #      use of makeFontsConf adapted from nixpkgs/development/libraries/gtkmm/4.x.nix
   #
-  #doxygen, graphviz,
+  doxygen, graphviz,
   ##fontconfig,
   ##makeFontsConf,
 
@@ -22,7 +22,7 @@
   stdenv, cmake, catch2, # ... other deps here
 
   # 2. xo dependencies
-  xo-cmake, 
+  xo-cmake, xo-flatstring, xo-randomgen,
 
   # args
 
@@ -40,7 +40,7 @@
 
 stdenv.mkDerivation (finalattrs:
   {
-    name = "xo-unit";
+    name = "xo-ratio";
 
     src = (fetchGit {
       url = "https://github.com/rconybea/xo-ratio";
@@ -70,14 +70,14 @@ stdenv.mkDerivation (finalattrs:
 
       #$fontconfig.out/bin/fc-cache -v
 
-      #make && make docs
-
-      make && make install
+      make && make docs
+      #make
     '';
 
     doCheck = true;
     nativeBuildInputs = [ cmake catch2
-                          #doxygen graphviz sphinx sphinx-rtd-theme breathe
+                          doxygen graphviz sphinx sphinx-rtd-theme breathe
+                          xo-randomgen
                         ];
-    propagatedBuildInputs = [  ];
+    propagatedBuildInputs = [ xo-flatstring ];
   })
