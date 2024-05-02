@@ -21,16 +21,16 @@ namespace xo {
 
         /* Printing cases:
          * 1. T&&:
-         *    move into quoted_impl<T>.  T must be moveable!
+         *    move into quot_impl<T>.  T must be moveable!
          * 2. T&:
-         *    copy reference into quoted_impl<T&>.
-         *    similarly for T const &, copy reference into quoted_impl<T const &>
+         *    copy reference into quot_impl<T&>.
+         *    similarly for T const &, copy reference into quot_impl<T const &>
          */
 
         template<typename T>
-        class quoted_impl {
+        class quot_impl {
         public:
-            quoted_impl(bool unq_flag, T x) : unq_flag_{unq_flag}, value_{std::move(x)} {}
+            quot_impl(bool unq_flag, T x) : unq_flag_{unq_flag}, value_{std::move(x)} {}
 
             bool unq_flag() const { return unq_flag_; }
             T const & value() const { return value_; }
@@ -110,11 +110,11 @@ namespace xo {
             bool unq_flag_ = false;
             /* .value:  value to be printed */
             T value_;
-        }; /*quoted_impl*/
+        }; /*quot_impl*/
 
         template<typename T>
         std::ostream &
-        operator<<(std::ostream & os, quoted_impl<T> const & x) {
+        operator<<(std::ostream & os, quot_impl<T> const & x) {
             x.print(os);
             return os;
         } /*operator*/
@@ -124,19 +124,19 @@ namespace xo {
          * 1. call quoted(x) with rvalue std::string x, then:
          *    - T will be deduced to [std::string]
          *        (in particular: _not_ std::string &, std::string const &, std::string &&)
-         *    - rvalue std::string passed to quoted_impl ctor
+         *    - rvalue std::string passed to quot_impl ctor
          *
          * 2a. call quoted(x) with std::string & x, then:
          *    - T deduced to [std::string &]
-         *    - std::string & passed to quoted_impl ctor
+         *    - std::string & passed to quot_impl ctor
          *
          * 2b. call quoted(x) with std::string const & x, then:
          *    - T deduced to [std::string const &]
-         *    - std::string const & passed to quoted_impl ctor
+         *    - std::string const & passed to quot_impl ctor
          */
         template<typename T>
         auto quot(T && x) {
-            return quoted_impl(false /*unq_flag*/, std::forward<T>(x));
+            return quot_impl(false /*unq_flag*/, std::forward<T>(x));
         }
 
         inline auto qcstr(char const * x) {
@@ -145,7 +145,7 @@ namespace xo {
 
         template<typename T>
         auto unq(T && x) {
-            return quoted_impl(true /*unq_flag*/, std::forward<T>(x));
+            return quot_impl(true /*unq_flag*/, std::forward<T>(x));
         }
     } /*namespace print*/
 } /*namespace xo*/

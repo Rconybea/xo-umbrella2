@@ -48,7 +48,7 @@ namespace xo {
                       << ", buf_v.size=" << this->buf_v_.size()
                       << std::endl;
 #endif
-            //std::cout << "xsputn: s=" << quoted(string_view(s, n)) << ", n=" << n << std::endl;
+            //std::cout << "xsputn: s=" << quot(string_view(s, n)) << ", n=" << n << std::endl;
 
             if (this->pptr() + n > this->hi()) {
                 n = this->hi() - this->pptr();
