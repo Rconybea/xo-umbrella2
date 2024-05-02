@@ -20,14 +20,14 @@ namespace xo {
         constexpr su64_type su_reciprocal = su.reciprocal();
 
         TEST_CASE("scaled_unit", "[scaled_unit]") {
-            static_assert(su_reciprocal<scaled_unit(nu::gram, xo::ratio::ratio(1LL), 1)>.natural_unit_ == nu::gram.reciprocal());
-            REQUIRE(su_reciprocal<scaled_unit(nu::gram, xo::ratio::ratio(1LL), 1)>.natural_unit_ == nu::gram.reciprocal());
+            static_assert(su_reciprocal<scaled_unit(nu::gram, xo::ratio::ratio(1L), 1)>.natural_unit_ == nu::gram.reciprocal());
+            REQUIRE(su_reciprocal<scaled_unit(nu::gram, xo::ratio::ratio(1L), 1)>.natural_unit_ == nu::gram.reciprocal());
 
-            static_assert(su_reciprocal<scaled_unit(nu::gram, xo::ratio::ratio(1LL), 1)>.outer_scale_factor_ == 1);
-            REQUIRE(su_reciprocal<scaled_unit(nu::gram, xo::ratio::ratio(1LL), 1)>.outer_scale_factor_ == 1);
+            static_assert(su_reciprocal<scaled_unit(nu::gram, xo::ratio::ratio(1L), 1)>.outer_scale_factor_ == 1);
+            REQUIRE(su_reciprocal<scaled_unit(nu::gram, xo::ratio::ratio(1L), 1)>.outer_scale_factor_ == 1);
 
-            static_assert(su_reciprocal<scaled_unit(nu::gram, xo::ratio::ratio(1LL), 1)>.outer_scale_sq_ == 1.0);
-            REQUIRE(su_reciprocal<scaled_unit(nu::gram, xo::ratio::ratio(1LL), 1)>.outer_scale_sq_ == 1.0);
+            static_assert(su_reciprocal<scaled_unit(nu::gram, xo::ratio::ratio(1L), 1)>.outer_scale_sq_ == 1.0);
+            REQUIRE(su_reciprocal<scaled_unit(nu::gram, xo::ratio::ratio(1L), 1)>.outer_scale_sq_ == 1.0);
         } /*TEST_CASE(scaled_unit)*/
 
         TEST_CASE("su_product", "[scaled_unit]") {
