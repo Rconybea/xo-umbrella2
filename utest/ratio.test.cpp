@@ -50,7 +50,7 @@ namespace xo {
         void
         ratio_tests(Rng & rng)
         {
-            constexpr bool debug_flag = true;
+            constexpr bool debug_flag = false;
 
             std::size_t n_ratio = 25;
             std::size_t n_experiment = n_ratio * n_ratio / 4;
