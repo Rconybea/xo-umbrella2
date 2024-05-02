@@ -333,16 +333,6 @@ namespace xo {
 
         /** note: won't have constexpr result until c++26 (when ::sqrt(), ::pow() are constexpr)
          **/
-        template <typename Quantity, typename Quantity2>
-        requires quantity2_concept<Quantity> && quantity2_concept<Quantity2>
-        constexpr auto
-        operator== (const Quantity & x, const Quantity2 & y)
-        {
-            return (Quantity::compare(x, y) == 0);
-        }
-
-        /** note: won't have constexpr result until c++26 (when ::sqrt(), ::pow() are constexpr)
-         **/
         template <typename Quantity>
         requires quantity2_concept<Quantity>
         constexpr auto
@@ -359,16 +349,6 @@ namespace xo {
         operator== (double x, const Quantity & y)
         {
             return (Quantity(x, nu::dimensionless) == y);
-        }
-
-        /** note: won't have constexpr result until c++26 (when ::sqrt(), ::pow() are constexpr)
-         **/
-        template <typename Quantity, typename Quantity2>
-        requires quantity2_concept<Quantity> && quantity2_concept<Quantity2>
-        constexpr auto
-        operator<=> (const Quantity & x, const Quantity2 & y)
-        {
-            return Quantity::compare(x, y);
         }
 
         /** note: won't have constexpr result until c++26 (when ::sqrt(), ::pow() are constexpr)
