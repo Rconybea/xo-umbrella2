@@ -209,6 +209,7 @@
                 xo-userenv =
                   (prev.callPackage ./pkgs/xo-userenv.nix { xo-cmake = xo-cmake;
                                                             xo-indentlog = xo-indentlog;
+                                                            xo-flatstring = xo-flatstring;
                                                             xo-subsys = xo-subsys;
                                                             xo-refcnt = xo-refcnt;
                                                             xo-randomgen = xo-randomgen;
