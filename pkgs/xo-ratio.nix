@@ -1,19 +1,19 @@
 {
   # 1. nixpkgs dependencies
   # 1.1. python
-  python, pythonPackages,
+  #python, pythonPackages,
 
   # 1.2. particular python packages
-  sphinx ? pythonPackages.sphinx,
-  sphinx-rtd-theme ? pythonPackages.sphinx-rtd-theme,
-  breathe ? pythonPackages.breathe,
+  #sphinx ? pythonPackages.sphinx,
+  #sphinx-rtd-theme ? pythonPackages.sphinx-rtd-theme,
+  #breathe ? pythonPackages.breathe,
 
   # 1.3. document-generation packages
   #      use of makeFontsConf adapted from nixpkgs/development/libraries/gtkmm/4.x.nix
   #
-  doxygen, graphviz,
-  #fontconfig,
-  makeFontsConf,
+  #doxygen, graphviz,
+  ##fontconfig,
+  ##makeFontsConf,
 
   # used for graphviz (dot) see docs/Doxyfile.in
   #helvetica-neue-lt-std,
@@ -22,7 +22,7 @@
   stdenv, cmake, catch2, # ... other deps here
 
   # 2. xo dependencies
-  xo-cmake, xo-reflect,
+  xo-cmake, 
 
   # args
 
@@ -43,7 +43,7 @@ stdenv.mkDerivation (finalattrs:
     name = "xo-unit";
 
     src = (fetchGit {
-      url = "https://github.com/rconybea/xo-unit";
+      url = "https://github.com/rconybea/xo-ratio";
       version = "1.0";
       #ref = "ex1";
       #rev = "c0472c9d7e4d2c53bfb977d3182380832fe96645";
@@ -56,7 +56,7 @@ stdenv.mkDerivation (finalattrs:
 
     # move HOME so fontconfig can do sensible things
     buildPhase = ''
-      set -x
+      #set -x
 
       echo "FONTCONFIG_FILE=$FONTCONFIG_FILE"
 
@@ -70,10 +70,14 @@ stdenv.mkDerivation (finalattrs:
 
       #$fontconfig.out/bin/fc-cache -v
 
-      make && make docs
+      #make && make docs
+
+      make && make install
     '';
 
     doCheck = true;
-    nativeBuildInputs = [ cmake catch2 doxygen graphviz sphinx sphinx-rtd-theme breathe ];
-    propagatedBuildInputs = [ xo-reflect ];
+    nativeBuildInputs = [ cmake catch2
+                          #doxygen graphviz sphinx sphinx-rtd-theme breathe
+                        ];
+    propagatedBuildInputs = [  ];
   })
