@@ -35,24 +35,9 @@ namespace xo {
             bool unq_flag() const { return unq_flag_; }
             T const & value() const { return value_; }
 
-            void print(std::ostream & os) const {
-                std::string xs = xo::tostr(value_);
-
-                if (xs.empty()) {
-                    /* always print empty string as "" */
-                    os << "\"\"";
-                } else if ((xs.at(0) == '<') && (xs.at(xs.size() - 1) == '>')) {
-                    /* assume string represents output of a well-formed object printer,
-                     * and already self-escapes
-                     */
-                    os << xs;
-                } else if (xs.find_first_of(" \"\n\r\\") == std::string::npos) {
-                    /* no escapes needed,  just print xs */
-                    if (unq_flag_)
-                        os << xs;
-                    else
-                        os << "\"" << xs << "\"";
-                } else {
+            void print_with_escapes(const std::string & xs,
+                                    std::ostream & os) const
+                {
                     /* printed value contains a space
                      * and/or a must-be-escaped character.
                      * in any case, need quotes
@@ -82,7 +67,7 @@ namespace xo {
                             os << "\\r";
                             break;
                         case '\\':
-                            /* \ => \\  (mind c++ requires we escape \) */
+                           /* \ => \\  (mind c++ requires we escape \) */
                             os << "\\\\";
                             break;
                         default:
@@ -92,6 +77,27 @@ namespace xo {
                     }
 
                     os << "\"";
+                }
+
+            void print(std::ostream & os) const {
+                std::string xs = xo::tostr(value_);
+
+                if (xs.empty()) {
+                    /* always print empty string as "" */
+                    os << "\"\"";
+                } else if ((xs.at(0) == '<') && (xs.at(xs.size() - 1) == '>')) {
+                    /* assume string represents output of a well-formed object printer,
+                     * and already self-escapes
+                     */
+                    os << xs;
+                } else if (xs.find_first_of(" \"\n\r\\") == std::string::npos) {
+                    /* no escapes needed,  just print xs */
+                    if (unq_flag_)
+                        os << xs;
+                    else
+                        os << "\"" << xs << "\"";
+                } else {
+                    this->print_with_escapes(xs, os);
                 }
             } /*print*/
 
