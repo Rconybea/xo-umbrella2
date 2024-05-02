@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "quantity2_concept.hpp"
+#include "quantity_concept.hpp"
 //#include <cstdint>
 
 namespace xo {
