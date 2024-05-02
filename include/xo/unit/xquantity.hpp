@@ -1,4 +1,4 @@
-/** @file Quantity.hpp
+/** @file xquantity.hpp
  *
  *  Author: Roland Conybeare
  **/
@@ -29,7 +29,7 @@ namespace xo {
         template <typename Repr = double,
                   typename Int = std::int64_t,
                   typename Int2x = detail::width2x_t<Int>>
-        class Quantity {
+        class xquantity {
         public:
             using repr_type = Repr;
             using unit_type = natural_unit<Int>;
@@ -38,9 +38,9 @@ namespace xo {
 
         public:
             /* zero, dimensionless */
-            constexpr Quantity()
+            constexpr xquantity()
                 : scale_{0}, unit_{natural_unit<Int>()} {}
-            constexpr Quantity(Repr scale,
+            constexpr xquantity(Repr scale,
                                const natural_unit<Int> & unit)
                 : scale_{scale}, unit_{unit} {}
 
@@ -49,9 +49,9 @@ namespace xo {
 
             constexpr bool is_dimensionless() const { return unit_.is_dimensionless(); }
 
-            constexpr Quantity unit_qty() const { return Quantity(1, unit_); }
-            constexpr Quantity zero_qty() const { return Quantity(0, unit_); }
-            constexpr Quantity reciprocal() const { return Quantity(1.0 / scale_, unit_.reciprocal()); }
+            constexpr xquantity unit_qty() const { return xquantity(1, unit_); }
+            constexpr xquantity zero_qty() const { return xquantity(0, unit_); }
+            constexpr xquantity reciprocal() const { return xquantity(1.0 / scale_, unit_.reciprocal()); }
 
             constexpr
             auto rescale(const natural_unit<Int> & unit2) const {
@@ -63,38 +63,38 @@ namespace xo {
                     repr_type r_scale = (::sqrt(rr.outer_scale_sq_)
                                          * rr.outer_scale_factor_.template convert_to<repr_type>()
                                          * this->scale_);
-                    return Quantity(r_scale, unit2);
+                    return xquantity(r_scale, unit2);
                 } else {
-                    return Quantity(std::numeric_limits<repr_type>::quiet_NaN(), unit2);
+                    return xquantity(std::numeric_limits<repr_type>::quiet_NaN(), unit2);
                 }
             }
 
             template <typename Dimensionless>
             requires std::is_arithmetic_v<Dimensionless>
             constexpr auto scale_by(Dimensionless x) const {
-                return Quantity(x * this->scale_, this->unit_);
+                return xquantity(x * this->scale_, this->unit_);
             }
 
             template <typename Dimensionless>
             requires std::is_arithmetic_v<Dimensionless>
             constexpr auto divide_by(Dimensionless x) const {
-                return Quantity(this->scale_ / x, this->unit_);
+                return xquantity(this->scale_ / x, this->unit_);
             }
 
             template <typename Dimensionless>
             requires std::is_arithmetic_v<Dimensionless>
             constexpr auto divide_into(Dimensionless x) const {
-                return Quantity(x / this->scale_, this->unit_.reciprocal());
+                return xquantity(x / this->scale_, this->unit_.reciprocal());
             }
 
             template <typename Quantity2>
             static constexpr
-            auto multiply(const Quantity & x, const Quantity2 & y) {
-                using r_repr_type = std::common_type_t<typename Quantity::repr_type,
+            auto multiply(const xquantity & x, const Quantity2 & y) {
+                using r_repr_type = std::common_type_t<typename xquantity::repr_type,
                                                        typename Quantity2::repr_type>;
-                using r_int_type = std::common_type_t<typename Quantity::ratio_int_type,
+                using r_int_type = std::common_type_t<typename xquantity::ratio_int_type,
                                                       typename Quantity2::ratio_int_type>;
-                using r_int2x_type = std::common_type_t<typename Quantity::ratio_int2x_type,
+                using r_int2x_type = std::common_type_t<typename xquantity::ratio_int2x_type,
                                                         typename Quantity2::ratio_int2x_type>;
 
                 auto rr = detail::su_product<r_int_type, r_int2x_type>(x.unit(), y.unit());
@@ -104,18 +104,18 @@ namespace xo {
                                        * static_cast<r_repr_type>(x.scale())
                                        * static_cast<r_repr_type>(y.scale()));
 
-                return Quantity<r_repr_type, r_int_type>(r_scale,
+                return xquantity<r_repr_type, r_int_type>(r_scale,
                                                          rr.natural_unit_);
             }
 
             template <typename Quantity2>
             static constexpr
-            auto divide(const Quantity & x, const Quantity2 & y) {
-                using r_repr_type = std::common_type_t<typename Quantity::repr_type,
+            auto divide(const xquantity & x, const Quantity2 & y) {
+                using r_repr_type = std::common_type_t<typename xquantity::repr_type,
                                                        typename Quantity2::repr_type>;
-                using r_int_type = std::common_type_t<typename Quantity::ratio_int_type,
+                using r_int_type = std::common_type_t<typename xquantity::ratio_int_type,
                                                       typename Quantity2::ratio_int_type>;
-                using r_int2x_type = std::common_type_t<typename Quantity::ratio_int2x_type,
+                using r_int2x_type = std::common_type_t<typename xquantity::ratio_int2x_type,
                                                         typename Quantity2::ratio_int2x_type>;
 
                 auto rr = detail::su_ratio<r_int_type, r_int2x_type>(x.unit(), y.unit());
@@ -128,18 +128,18 @@ namespace xo {
                                        * static_cast<r_repr_type>(x.scale())
                                        / static_cast<r_repr_type>(y.scale()));
 
-                return Quantity<r_repr_type, r_int_type>(r_scale,
+                return xquantity<r_repr_type, r_int_type>(r_scale,
                                                          rr.natural_unit_);
             }
 
             template <typename Quantity2>
             static constexpr
-            auto add(const Quantity & x, const Quantity2 & y) {
-                using r_repr_type = std::common_type_t<typename Quantity::repr_type,
+            auto add(const xquantity & x, const Quantity2 & y) {
+                using r_repr_type = std::common_type_t<typename xquantity::repr_type,
                                                        typename Quantity2::repr_type>;
-                using r_int_type = std::common_type_t<typename Quantity::ratio_int_type,
+                using r_int_type = std::common_type_t<typename xquantity::ratio_int_type,
                                                       typename Quantity2::ratio_int_type>;
-                using r_int2x_type = std::common_type_t<typename Quantity::ratio_int2x_type,
+                using r_int2x_type = std::common_type_t<typename xquantity::ratio_int2x_type,
                                                         typename Quantity2::ratio_int2x_type>;
 
                 /* conversion to get y in same units as x:  multiply by y/x */
@@ -151,22 +151,22 @@ namespace xo {
                                               * rr.outer_scale_factor_.template convert_to<r_repr_type>()
                                               * static_cast<r_repr_type>(y.scale())));
 
-                    return Quantity<r_repr_type, r_int_type>(r_scale, x.unit_.template to_repr<r_int_type>());
+                    return xquantity<r_repr_type, r_int_type>(r_scale, x.unit_.template to_repr<r_int_type>());
                 } else {
                     /* units don't match! */
-                    return Quantity<r_repr_type, r_int_type>(std::numeric_limits<Repr>::quiet_NaN(),
+                    return xquantity<r_repr_type, r_int_type>(std::numeric_limits<Repr>::quiet_NaN(),
                                                              x.unit_.template to_repr<r_int_type>());
                 }
             }
 
             template <typename Quantity2>
             static constexpr
-            auto subtract(const Quantity & x, const Quantity2 & y) {
-                using r_repr_type = std::common_type_t<typename Quantity::repr_type,
+            auto subtract(const xquantity & x, const Quantity2 & y) {
+                using r_repr_type = std::common_type_t<typename xquantity::repr_type,
                                                        typename Quantity2::repr_type>;
-                using r_int_type = std::common_type_t<typename Quantity::ratio_int_type,
+                using r_int_type = std::common_type_t<typename xquantity::ratio_int_type,
                                                       typename Quantity2::ratio_int_type>;
-                using r_int2x_type = std::common_type_t<typename Quantity::ratio_int2x_type,
+                using r_int2x_type = std::common_type_t<typename xquantity::ratio_int2x_type,
                                                         typename Quantity2::ratio_int2x_type>;
 
                 /* conversion to get y in same units as x:  multiply by y/x */
@@ -178,36 +178,36 @@ namespace xo {
                                               * rr.outer_scale_factor_.template convert_to<r_repr_type>()
                                               * static_cast<r_repr_type>(y.scale())));
 
-                    return Quantity<r_repr_type, r_int_type>(r_scale, x.unit_.template to_repr<r_int_type>());
+                    return xquantity<r_repr_type, r_int_type>(r_scale, x.unit_.template to_repr<r_int_type>());
                 } else {
                     /* units don't match! */
-                    return Quantity<r_repr_type, r_int_type>(std::numeric_limits<Repr>::quiet_NaN(),
+                    return xquantity<r_repr_type, r_int_type>(std::numeric_limits<Repr>::quiet_NaN(),
                                                              x.unit_.template to_repr<r_int_type>());
                 }
             }
 
             template <typename Quantity2>
             static constexpr
-            auto compare(const Quantity & x, const Quantity2 & y) {
-                Quantity y2 = y.rescale(x.unit_);
+            auto compare(const xquantity & x, const Quantity2 & y) {
+                xquantity y2 = y.rescale(x.unit_);
 
                 return x.scale() <=> y2.scale();
             }
 
-            Quantity operator-() const {
-                return Quantity(-scale_, unit_);
+            xquantity operator-() const {
+                return xquantity(-scale_, unit_);
             }
 
             /* also works with Quantity2 = double, int, .. */
             template <typename Quantity2>
-            Quantity & operator*= (const Quantity2 & x) {
+            xquantity & operator*= (const Quantity2 & x) {
                 *this = *this * x;
                 return *this;
             }
 
             /* also works with Quantity2 = double, int, .. */
             template <typename Quantity2>
-            Quantity & operator/= (const Quantity2 & x) {
+            xquantity & operator/= (const Quantity2 & x) {
                 *this = *this / x;
                 return *this;
             }
@@ -227,9 +227,9 @@ namespace xo {
          **/
         template <typename Repr = double,
                   typename Int = std::int64_t>
-        inline constexpr Quantity<Repr, Int>
+        inline constexpr xquantity<Repr, Int>
         unit_qty(const scaled_unit<Int> & u) {
-            return Quantity<Repr, Int>
+            return xquantity<Repr, Int>
                 (u.outer_scale_factor_.template convert_to<double>() * ::sqrt(u.outer_scale_sq_),
                  u.natural_unit_);
         }
@@ -238,9 +238,9 @@ namespace xo {
          **/
         template <typename Repr = double,
                   typename Int = std::int64_t>
-        inline constexpr Quantity<Repr, Int>
+        inline constexpr xquantity<Repr, Int>
         natural_unit_qty(const natural_unit<Int> & nu) {
-            return Quantity<Repr, Int>(1.0, nu);
+            return xquantity<Repr, Int>(1.0, nu);
         }
 
         /** note: won't have constexpr result until c++26 (when ::sqrt(), ::pow() are constexpr)
@@ -377,4 +377,4 @@ namespace xo {
     } /*namespace qty*/
 } /*namespace xo*/
 
-/** end Quantity.hpp **/
+/** end xquantity.hpp **/

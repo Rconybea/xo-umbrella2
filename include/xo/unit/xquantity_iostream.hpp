@@ -15,7 +15,7 @@ namespace xo {
                   typename Int = std::int64_t>
         inline std::ostream &
         operator<< (std::ostream & os,
-                    const Quantity<Repr, Int> & x)
+                    const xquantity<Repr, Int> & x)
         {
             os << x.scale() << x.abbrev();
 

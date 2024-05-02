@@ -1,4 +1,4 @@
-/* @file Quantity.test.cpp */
+/* @file xquantity.test.cpp */
 
 #include "xquantity.hpp"
 #include "xquantity_iostream.hpp"
@@ -15,7 +15,7 @@ namespace xo {
     namespace su = xo::qty::su;
     namespace nu = xo::qty::nu;
 
-    using xo::qty::Quantity;
+    using xo::qty::xquantity;
     using xo::qty::natural_unit;
     using xo::qty::power_ratio_type;
     using xo::qty::scalefactor_ratio_type;
@@ -163,8 +163,8 @@ namespace xo {
                      * track relative scale as we go
                      */
 
-                    Quantity q1 = natural_unit_qty(nu::dimensionless);
-                    Quantity q2 = natural_unit_qty(nu::dimensionless);
+                    xquantity q1 = natural_unit_qty(nu::dimensionless);
+                    xquantity q2 = natural_unit_qty(nu::dimensionless);
 
                     static_assert(std::same_as<decltype(q1)::ratio_int_type, std::int64_t>);
                     static_assert(std::same_as<decltype(q1)::ratio_int2x_type, __int128_t>);
@@ -172,8 +172,8 @@ namespace xo {
                     double k1 = 0.0; /*q1/q2*/
                     double k2 = 0.0; /*q2/q1*/
                     {
-                        Quantity q12 = (q1/q2);
-                        Quantity q21 = (q2/q1);
+                        xquantity q12 = (q1/q2);
+                        xquantity q21 = (q2/q1);
 
                         REQUIRE(q12.is_dimensionless());
                         REQUIRE(q21.is_dimensionless());
@@ -220,10 +220,10 @@ namespace xo {
                         if (power == -1)
                             nu1_j = nu1_j.reciprocal();
 
-                        Quantity q1_j = natural_unit_qty<double, int64_t>(nu1_j);
-                        Quantity q2_j = q1_j;
-                        Quantity r1;
-                        Quantity r2;
+                        xquantity q1_j = natural_unit_qty<double, int64_t>(nu1_j);
+                        xquantity q2_j = q1_j;
+                        xquantity r1;
+                        xquantity r2;
 
                         auto nu2_j = nu1_j;
                         auto nu2_j_ix = rng() % p_nu_v->size();
@@ -366,10 +366,10 @@ namespace xo {
          * 1. start with a set of basis units in each dimension.
          * 2. verify +,- by combining quantities with different units
          */
-        TEST_CASE("Quantity.full", "[Quantity.full]") {
+        TEST_CASE("xquantity.full", "[xquantity.full]") {
             constexpr bool c_debug_flag = false;
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.Quantity.full"));
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.xquantity.full"));
 
             // can get bits instead from /dev/random by uncommenting the line below in place of 2nd line
             //rng::Seed<xoshiro256ss> seed;
@@ -380,12 +380,12 @@ namespace xo {
             auto rng = xoshiro256ss(seed);
 
             quantity_tests(c_debug_flag, rng);
-        } /*TEST_CASE(Quantity.full)*/
+        } /*TEST_CASE(xquantity.full)*/
 
-        TEST_CASE("Quantity", "[Quantity]") {
+        TEST_CASE("xquantity", "[xquantity]") {
             constexpr bool c_debug_flag = false;
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.Quantity"));
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.xquantity"));
 
             /* not constexpr until c++26 */
             auto ng = unit_qty(su::nanogram);
@@ -393,44 +393,44 @@ namespace xo {
             log && log(xtag("ng", ng));
 
             REQUIRE(ng.scale() == 1);
-        } /*TEST_CASE(Quantity)*/
+        } /*TEST_CASE(xquantity)*/
 
-        TEST_CASE("Quantity2", "[Quantity]") {
+        TEST_CASE("xquantity2", "[xquantity]") {
             constexpr bool c_debug_flag = false;
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.Quantity2"));
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.xquantity2"));
 
             /* not constexpr until c++26 */
-            Quantity ng = unit_qty(su::nanogram);
+            xquantity ng = unit_qty(su::nanogram);
             auto ng2 = ng * ng;
 
             log && log(xtag("ng*ng", ng2));
 
             REQUIRE(ng2.scale() == 1);
-        } /*TEST_CASE(Quantity2)*/
+        } /*TEST_CASE(xquantity2)*/
 
-        TEST_CASE("Quantity3", "[Quantity]") {
+        TEST_CASE("xquantity3", "[xquantity]") {
             constexpr bool c_debug_flag = false;
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.Quantity3"));
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.xquantity3"));
 
             /* not constexpr until c++26 */
-            Quantity ng = unit_qty(su::nanogram);
+            xquantity ng = unit_qty(su::nanogram);
             auto ng0 = ng / ng;
 
             log && log(xtag("ng/ng", ng0));
 
             REQUIRE(ng0.scale() == 1);
-        } /*TEST_CASE(Quantity3)*/
+        } /*TEST_CASE(xquantity3)*/
 
-        TEST_CASE("Quantity4", "[Quantity]") {
+        TEST_CASE("xquantity4", "[xquantity]") {
             constexpr bool c_debug_flag = false;
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.Quantity4"));
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.xquantity4"));
 
             /* not constexpr until c++26 */
-            Quantity ng = unit_qty(su::nanogram);
-            Quantity ug = unit_qty(su::microgram);
+            xquantity ng = unit_qty(su::nanogram);
+            xquantity ug = unit_qty(su::microgram);
 
             {
                 auto prod1 = ng * ug;
@@ -457,16 +457,16 @@ namespace xo {
             }
 
             //REQUIRE(ng2.scale() == 1);
-        } /*TEST_CASE(Quantity4)*/
+        } /*TEST_CASE(xquantity4)*/
 
-        TEST_CASE("Quantity5", "[Quantity]") {
+        TEST_CASE("xquantity5", "[xquantity]") {
             constexpr bool c_debug_flag = false;
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.Quantity5"));
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.xquantity5"));
 
             /* not constexpr until c++26 */
-            Quantity ng = unit_qty(su::nanogram);
-            Quantity ug = unit_qty(su::microgram);
+            xquantity ng = unit_qty(su::nanogram);
+            xquantity ug = unit_qty(su::microgram);
 
             {
                 auto ratio1 = ng / ug;
@@ -486,16 +486,16 @@ namespace xo {
             }
 
             //REQUIRE(ng2.scale() == 1);
-        } /*TEST_CASE(Quantity5)*/
+        } /*TEST_CASE(xquantity5)*/
 
-        TEST_CASE("Quantity6", "[Quantity]") {
+        TEST_CASE("xquantity6", "[xquantity]") {
             constexpr bool c_debug_flag = false;
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.Quantity6"));
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.xquantity6"));
 
             /* not constexpr until c++26 */
-            Quantity ng = unit_qty(su::nanogram);
-            Quantity ug = unit_qty(su::microgram);
+            xquantity ng = unit_qty(su::nanogram);
+            xquantity ug = unit_qty(su::microgram);
 
             {
                 auto sum1 = ng + ug;
@@ -518,16 +518,16 @@ namespace xo {
             }
 
             //REQUIRE(ng2.scale() == 1);
-        } /*TEST_CASE(Quantity6)*/
+        } /*TEST_CASE(xquantity6)*/
 
-        TEST_CASE("Quantity7", "[Quantity]") {
+        TEST_CASE("xquantity7", "[xquantity]") {
             constexpr bool c_debug_flag = false;
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.Quantity7"));
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.xquantity7"));
 
             /* not constexpr until c++26 */
-            Quantity ng = unit_qty(su::nanogram);
-            Quantity ug = unit_qty(su::microgram);
+            xquantity ng = unit_qty(su::nanogram);
+            xquantity ug = unit_qty(su::microgram);
 
             {
                 auto sum1 = ng - ug;
@@ -550,16 +550,16 @@ namespace xo {
             }
 
             //REQUIRE(ng2.scale() == 1);
-        } /*TEST_CASE(Quantity7)*/
+        } /*TEST_CASE(xquantity7)*/
 
-        TEST_CASE("Quantity.compare", "[Quantity.compare]") {
+        TEST_CASE("xquantity.compare", "[xquantity.compare]") {
             constexpr bool c_debug_flag = false;
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.Quantity.compare"));
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.xquantity.compare"));
 
             /* not constexpr until c++26 */
-            Quantity ng = 1000 * unit_qty(su::nanogram);
-            Quantity ug = unit_qty(su::microgram);
+            xquantity ng = 1000 * unit_qty(su::nanogram);
+            xquantity ug = unit_qty(su::microgram);
 
             {
                 auto cmp = (ng == ug);
@@ -609,16 +609,16 @@ namespace xo {
                 REQUIRE(cmp == true);
             }
 
-        } /*TEST_CASE(Quantity.compare)*/
+        } /*TEST_CASE(xquantity.compare)*/
 
-        TEST_CASE("Quantity.compare2", "[Quantity]") {
+        TEST_CASE("xquantity.compare2", "[xquantity]") {
             constexpr bool c_debug_flag = false;
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.Quantity.compare2"));
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.xquantity.compare2"));
 
             /* not constexpr until c++26 */
-            Quantity ng = unit_qty(su::nanogram);
-            Quantity ug = unit_qty(su::microgram);
+            xquantity ng = unit_qty(su::nanogram);
+            xquantity ug = unit_qty(su::microgram);
 
             {
                 auto cmp = (ng == ug);
@@ -668,9 +668,9 @@ namespace xo {
                 REQUIRE(cmp == false);
             }
 
-        } /*TEST_CASE(Quantity.compare2)*/
+        } /*TEST_CASE(xquantity.compare2)*/
     } /*namespace ut*/
 } /*namespace xo*/
 
 
-/* end Quantity.test.cpp */
+/* end xquantity.test.cpp */
