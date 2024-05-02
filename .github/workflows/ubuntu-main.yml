@@ -114,15 +114,15 @@ jobs:
 
     # ----------------------------------------------------------------
 
-    - name: clone xo-refcnt
+    - name: clone xo-flatstring
       uses: actions/checkout@v3
       with:
-        repository: Rconybea/refcnt
-        path: repo/xo-refcnt
+        repository: Rconybea/xo-flatstring
+        path: repo/xo-flatstring
 
-    - name: build xo-refcnt
+    - name: build xo-flatstring
       run: |
-        XONAME=xo-refcnt
+        XONAME=xo-flatstring
         XOSRC=repo/${XONAME}
         BUILDDIR=${{github.workspace}}/build_${XONAME}
         PREFIX=${{github.workspace}}/local
@@ -149,15 +149,15 @@ jobs:
 
     # ----------------------------------------------------------------
 
-    - name: clone xo-subsys
+    - name: clone xo-randomgen
       uses: actions/checkout@v3
       with:
-        repository: Rconybea/subsys
-        path: repo/xo-subsys
+        repository: Rconybea/randomgen
+        path: repo/xo-randomgen
 
-    - name: build xo-subsys
+    - name: build xo-randomgen
       run: |
-        XONAME=xo-subsys
+        XONAME=xo-randomgen
         XOSRC=repo/${XONAME}
         BUILDDIR=${{github.workspace}}/build_${XONAME}
         PREFIX=${{github.workspace}}/local
@@ -184,15 +184,15 @@ jobs:
 
     # ----------------------------------------------------------------
 
-    - name: clone xo-reflect
+    - name: clone xo-ratio
       uses: actions/checkout@v3
       with:
-        repository: Rconybea/reflect
-        path: repo/xo-reflect
+        repository: Rconybea/xo-ratio
+        path: repo/xo-ratio
 
-    - name: build xo-reflect
+    - name: build xo-ratio
       run: |
-        XONAME=xo-reflect
+        XONAME=xo-ratio
         XOSRC=repo/${XONAME}
         BUILDDIR=${{github.workspace}}/build_${XONAME}
         PREFIX=${{github.workspace}}/local
