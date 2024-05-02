@@ -65,6 +65,35 @@ macro(xo_toplevel_debug_config2)
 endmacro()
 
 
+# asan (address sanitizer) build (cmake -DCMAKE_BUILD_TYPE=asan path/to/source)
+#
+macro(xo_toplevel_asan_config2)
+    if ("${CMAKE_BUILD_TYPE}" STREQUAL "asan")
+        # following the same pattern used for xo_toplevel_debug_config2(),
+        # although not needed here (if PROJECT_CXX_FLAGS_ASAN has no builtin default value)
+
+        set(CMAKE_CXX_FLAGS_ASAN "")
+
+        if (NOT DEFINED PROJECT_CXX_FLAGS_ASAN)
+            set(PROJECT_CXX_FLAGS_ASAN ${PROJECT_CXX_FLAGS} -Og -fsanitize=address
+                CACHE STRING "asan c++ compiler flags")
+        endif()
+
+        message(STATUS "PROJECT_CXX_FLAGS_ASAN: asan c++ flags are [${PROJECT_CXX_FLAGS_ASAN}]")
+
+        add_compile_options("$<$<CONFIG:ASAN>:${PROJECT_CXX_FLAGS_ASAN}>")
+
+        if (NOT DEFINED PROJECT_LINK_FLAGS_ASAN)
+            set(PROJECT_LINK_FLAGS_ASAN ${PROJECT_LINK_FLAGS} -fsanitize=address
+                CACHE STRING "asan link flags")
+        endif()
+        message(STATUS "PROJECT_LINK_FLAGS_ASAN: asan link flags are [${PROJECT_LINK_FLAGS_ASAN}]")
+
+        add_link_options("$<$<CONFIG:ASAN>:${PROJECT_LINK_FLAGS_ASAN}>")
+    endif()
+endmacro()
+
+
 # coverage build:
 # 0.
 #     (cmake -DCMAKE_BUILD_TYPE=coverage path/to/source)
