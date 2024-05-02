@@ -13,6 +13,8 @@ namespace xo {
             typename Quantity::unit_type;
             typename Quantity::repr_type;
 
+            //{ Quantity::multiply(qty, qty) };
+
             { qty.scale() } -> std::same_as<const typename Quantity::repr_type &>;
             { qty.unit() } -> std::same_as<const typename Quantity::unit_type &>;
             //{ Quantity::unit_cstr() } -> std::same_as<char const *>;

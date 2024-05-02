@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "quantity2_concept.hpp"
+#include "quantity_ops.hpp"
 #include "scaled_unit.hpp"
 #include "natural_unit.hpp"
 
@@ -60,10 +60,6 @@ namespace xo {
                                            ratio_int2x_type>(this->unit_, unit2);
 
                 if (rr.natural_unit_.is_dimensionless()) {
-                    /* FIXME: rr.outer_scale_exact_ can overflow since fixed precision.
-                     *        accumulate in scale instead
-                     */
-
                     repr_type r_scale = (::sqrt(rr.outer_scale_sq_)
                                          * rr.outer_scale_factor_.template convert_to<repr_type>()
                                          * this->scale_);
@@ -98,7 +94,7 @@ namespace xo {
                                                        typename Quantity2::repr_type>;
                 using r_int_type = std::common_type_t<typename Quantity::ratio_int_type,
                                                       typename Quantity2::ratio_int_type>;
-                using r_int2x_type = std::common_type_t<typename Quantity2::ratio_int2x_type,
+                using r_int2x_type = std::common_type_t<typename Quantity::ratio_int2x_type,
                                                         typename Quantity2::ratio_int2x_type>;
 
                 auto rr = detail::su_product<r_int_type, r_int2x_type>(x.unit(), y.unit());
@@ -216,6 +212,8 @@ namespace xo {
                 return *this;
             }
 
+            // TODO: operator+=, operator-=
+
             constexpr nu_abbrev_type abbrev() const { return unit_.abbrev(); }
 
         private:
@@ -243,34 +241,6 @@ namespace xo {
         inline constexpr Quantity<Repr, Int>
         natural_unit_qty(const natural_unit<Int> & nu) {
             return Quantity<Repr, Int>(1.0, nu);
-        }
-
-        /** note: won't have constexpr result until c++26 (when ::sqrt(), ::pow() are constexpr)
-         **/
-        template <typename Quantity, typename Quantity2>
-        requires quantity2_concept<Quantity> && quantity2_concept<Quantity2>
-        constexpr auto
-        operator* (const Quantity & x, const Quantity2 & y)
-        {
-            return Quantity::multiply(x, y);
-        }
-
-        /** note: does not require unit scaling,  so constexpr with c++23 **/
-        template <typename Dimensionless, typename Quantity>
-        requires std::is_arithmetic_v<Dimensionless> && quantity2_concept<Quantity>
-        constexpr auto
-        operator* (Dimensionless x, const Quantity & y)
-        {
-            return y.scale_by(x);
-        }
-
-        /** note: does not require unit scaling,  so constexpr with c++23 **/
-        template <typename Dimensionless, typename Quantity>
-        requires std::is_arithmetic_v<Dimensionless> && quantity2_concept<Quantity>
-        constexpr auto
-        operator* (const Quantity & x, Dimensionless y)
-        {
-            return x.scale_by(y);
         }
 
         /** note: won't have constexpr result until c++26 (when ::sqrt(), ::pow() are constexpr)
@@ -319,16 +289,6 @@ namespace xo {
         operator- (const Quantity & x, const Quantity2 & y)
         {
             return Quantity::subtract(x, y);
-        }
-
-        /** note: won't have constexpr result until c++26 (when ::sqrt(), ::pow() are constexpr)
-         **/
-        template <typename Quantity, typename Quantity2>
-        requires quantity2_concept<Quantity> && quantity2_concept<Quantity2>
-        constexpr auto
-        operator== (const Quantity & x, const Quantity2 & y)
-        {
-            return (Quantity::compare(x, y) == 0);
         }
 
         /** note: won't have constexpr result until c++26 (when ::sqrt(), ::pow() are constexpr)

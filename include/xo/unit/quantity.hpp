@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "quantity_ops.hpp"
 #include "natural_unit.hpp"
 #include "scaled_unit.hpp"
 
@@ -20,7 +21,7 @@ namespace xo {
             typename Repr = double,
             typename Int = std::int64_t,
             natural_unit<Int> NaturalUnit = natural_unit<Int>(),
-            typename Int2x = detail::width2x<Int>
+            typename Int2x = detail::width2x_t<Int>
             >
         class quantity {
         public:
@@ -35,6 +36,86 @@ namespace xo {
 
             constexpr const repr_type & scale() const { return scale_; }
             constexpr const unit_type & unit() const { return s_unit; }
+
+            // is_dimensionless
+
+            // unit_qty
+            // zero_qty
+            // reciprocal
+
+            /* parallel implementation to Quantity<Repr, Int>::rescale(),
+             * except that NaturalUnit2 is a compile-time-only template-argument
+             *
+             * NOTE: constexpr as long as no fractional units involved.
+             */
+            template <natural_unit<Int> NaturalUnit2>
+            constexpr
+            auto rescale() const {
+                /* conversion factor from .unit -> unit2*/
+                auto rr = detail::su_ratio<ratio_int_type,
+                                           ratio_int2x_type>(NaturalUnit, NaturalUnit2);
+
+                if (rr.natural_unit_.is_dimensionless()) {
+                    repr_type r_scale = (((rr.outer_scale_sq_ == 1.0)
+                                          ? 1.0
+                                          : ::sqrt(rr.outer_scale_sq_))
+                                         * rr.outer_scale_factor_.template convert_to<repr_type>()
+                                         * this->scale_);
+                    return quantity<Repr, Int, NaturalUnit2, Int2x>(r_scale);
+                } else {
+                    return quantity<Repr, Int, NaturalUnit2, Int2x>(std::numeric_limits<repr_type>::quiet_NaN());
+                }
+            }
+
+            template <typename Dimensionless>
+            requires std::is_arithmetic_v<Dimensionless>
+            constexpr auto scale_by(Dimensionless x) const {
+                return quantity(x * this->scale_);
+            }
+
+            // divide_by
+            // divide_into
+
+            /* parallel implementation to Quantity<Repr, Int>,
+             * but return type will have dimension computed at compile-time
+             */
+            template <typename Quantity2>
+            static constexpr auto multiply(const quantity & x, const Quantity2 & y) {
+                using r_repr_type = std::common_type_t<typename quantity::repr_type,
+                                                       typename Quantity2::repr_type>;
+                using r_int_type = std::common_type_t<typename quantity::ratio_int_type,
+                                                      typename Quantity2::ratio_int_type>;
+                using r_int2x_type = std::common_type_t<typename quantity::ratio_int2x_type,
+                                                        typename Quantity2::ratio_int2x_type>;
+
+                constexpr auto rr = detail::su_product<r_int_type, r_int2x_type>(x.unit(), y.unit());
+
+                r_repr_type r_scale = (::sqrt(rr.outer_scale_sq_)
+                                       * rr.outer_scale_factor_.template convert_to<r_repr_type>()
+                                       * static_cast<r_repr_type>(x.scale())
+                                       * static_cast<r_repr_type>(y.scale()));
+
+                return quantity<r_repr_type, r_int_type, rr.natural_unit_, r_int2x_type>(r_scale);
+            }
+
+            // divide
+            // add
+            // subtract
+
+            /* parallel implementation to Quantity<Repr, Int> */
+            template <typename Quantity2>
+            static constexpr
+            auto compare(const quantity &x, const Quantity2 & y) {
+                quantity y2 = y.template rescale<s_unit>();
+
+                return x.scale() <=> y2.scale();
+            }
+
+            // operator-
+            // operator+=
+            // operator-=
+            // operator*=
+            // operator/=
 
             constexpr nu_abbrev_type abbrev() const { return s_unit.abbrev(); }
 
@@ -89,6 +170,12 @@ namespace xo {
             inline constexpr auto year360s(double x) { return quantity<double, std::int64_t, nu::year360>(x); }
             inline constexpr auto year365s(double x) { return quantity<double, std::int64_t, nu::year365>(x); }
             //inline constexpr auto year366s(double x) { return quantity<double, std::int64_t, nu::year366>(x); }
+
+            // ----- volatility -----
+
+            /* volatility in units of 1/yr */
+            inline constexpr auto volatility_250d(double x) { return quantity<double, std::int64_t, nu::volatility_250d>(x); }
+            inline constexpr auto volatility_360d(double x) { return quantity<double, std::int64_t, nu::volatility_360d>(x); }
         }
     } /*namespace qty*/
 } /*namespace xo*/

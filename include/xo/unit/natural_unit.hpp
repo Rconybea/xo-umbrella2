@@ -65,8 +65,9 @@ namespace xo {
         public:
             constexpr natural_unit() : n_bpu_{0} {}
 
-            static constexpr natural_unit from_bu(basis_unit bu) {
-                return detail::nu_maker<Int>::make_nu(make_unit_power<Int>(bu));
+            static constexpr natural_unit from_bu(basis_unit bu,
+                                                  power_ratio_type power = power_ratio_type(1)) {
+                return detail::nu_maker<Int>::make_nu(bpu<Int>(bu, power));
             }
 
             constexpr std::size_t n_bpu() const { return n_bpu_; }
@@ -399,6 +400,9 @@ namespace xo {
             constexpr auto currency = natural_unit<std::int64_t>::from_bu(bu::currency);
 
             constexpr auto price = natural_unit<std::int64_t>::from_bu(bu::price);
+
+            constexpr auto volatility_250d = natural_unit<std::int64_t>::from_bu(bu::year250, power_ratio_type(-1,2));
+            constexpr auto volatility_360d = natural_unit<std::int64_t>::from_bu(bu::year360, power_ratio_type(-1,2));
         } /*namespace nu*/
     } /*namespace qty*/
 } /*namespace xo*/

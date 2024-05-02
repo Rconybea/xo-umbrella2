@@ -314,6 +314,63 @@ namespace xo {
             REQUIRE(tostr(yr365) == "1yr365");
         } /*TEST_CASE(quantity.time)*/
 
+        TEST_CASE("quantity.mult", "[quantity.mult]") {
+            constexpr auto pg = qty::picograms(1.0);
+            constexpr auto ng = qty::nanograms(1.0);
+            constexpr auto ug = qty::micrograms(1.0);
+
+            constexpr auto ng_in_pg = ng.rescale<pg.unit()>();
+
+            static_assert(ng_in_pg.scale() == 1000);
+            static_assert(ng_in_pg == pg * 1000);
+
+            /* multiplication by dimensionless values is constexpr in c++23
+             * comparison in not constexpr until c++26
+             */
+
+            /* picograms:nanograms */
+
+            static_assert(pg * 1000 == ng);
+            REQUIRE(pg * 1000 == ng);
+            static_assert(1000 * pg == ng);
+            REQUIRE(1000 * pg == ng);
+            static_assert(ng * 0.001 == pg);
+            REQUIRE(ng * 0.001 == pg);
+            static_assert(0.001 * ng == pg);
+            REQUIRE(0.001 * ng == pg);
+
+            /* picograms:micrograms */
+
+            static_assert(pg * 1e6 == ug);
+            REQUIRE(pg * 1e6 == ug);
+            static_assert(1e6 * pg == ug);
+            REQUIRE(1e6 * pg == ug);
+            static_assert(ug * 1e-6 == pg);
+            REQUIRE(ug * 1e-6 == pg);
+            static_assert(1e-6 * ug == pg);
+            REQUIRE(1e-6 * ug == pg);
+
+            /* nanograms:micrograms */
+
+            static_assert(ng * 1e3 == ug);
+            REQUIRE(ng * 1e3 == ug);
+            static_assert(1e3 * ng == ug);
+            REQUIRE(1e3 * ng == ug);
+            static_assert(ug * 1e-3 == ng);
+            REQUIRE(ug * 1e-3 == ng);
+            static_assert(1e-3 * ug == ng);
+            REQUIRE(1e-3 * ug == ng);
+
+            // /* picograms:milligrams */
+            // /* nanograms:milligrams */
+            // /* micrograms:milligrams */
+
+            // /* picograms:grams */
+            // /* nanograms:grams */
+            // /* micrograms:grams */
+            // /* milligrams:grams */
+        } /*TEST_CASE(quantity.mult)*/
+
     } /*namespace qty*/
 } /*namespace xo*/
 
