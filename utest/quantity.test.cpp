@@ -21,61 +21,61 @@ namespace xo {
             //log && log("(A)", xtag("foo", foo));
 
             constexpr auto pg = qty::picograms(1.0);
-            static_assert(quantity2_concept<decltype(pg)>);
+            static_assert(quantity_concept<decltype(pg)>);
             static_assert(sizeof(pg) == sizeof(double));
             static_assert(pg.scale() == 1.0);
             static_assert(pg.abbrev() == flatstring("pg"));
 
             constexpr auto ng = qty::nanograms(1.0);
-            static_assert(quantity2_concept<decltype(ng)>);
+            static_assert(quantity_concept<decltype(ng)>);
             static_assert(sizeof(ng) == sizeof(double));
             static_assert(ng.scale() == 1.0);
             static_assert(ng.abbrev() == flatstring("ng"));
 
             constexpr auto ug = qty::micrograms(1.0);
-            static_assert(quantity2_concept<decltype(ug)>);
+            static_assert(quantity_concept<decltype(ug)>);
             static_assert(sizeof(ug) == sizeof(double));
             static_assert(ug.scale() == 1.0);
             static_assert(ug.abbrev() == flatstring("ug"));
 
             constexpr auto mg = qty::milligrams(1.0);
-            static_assert(quantity2_concept<decltype(mg)>);
+            static_assert(quantity_concept<decltype(mg)>);
             static_assert(sizeof(mg) == sizeof(double));
             static_assert(mg.scale() == 1.0);
             static_assert(mg.abbrev() == flatstring("mg"));
 
             constexpr auto g = qty::grams(1.0);
-            static_assert(quantity2_concept<decltype(g)>);
+            static_assert(quantity_concept<decltype(g)>);
             static_assert(sizeof(g) == sizeof(double));
             static_assert(g.scale() == 1.0);
             static_assert(g.abbrev() == flatstring("g"));
 
             constexpr auto kg = qty::kilograms(1.0);
-            static_assert(quantity2_concept<decltype(kg)>);
+            static_assert(quantity_concept<decltype(kg)>);
             static_assert(sizeof(kg) == sizeof(double));
             static_assert(kg.scale() == 1.0);
             static_assert(kg.abbrev() == flatstring("kg"));
 
             constexpr auto t = qty::tonnes(1.0);
-            static_assert(quantity2_concept<decltype(t)>);
+            static_assert(quantity_concept<decltype(t)>);
             static_assert(sizeof(t) == sizeof(double));
             static_assert(t.scale() == 1.0);
             static_assert(t.abbrev() == flatstring("t"));
 
             constexpr auto kt = qty::kilotonnes(1.0);
-            static_assert(quantity2_concept<decltype(kt)>);
+            static_assert(quantity_concept<decltype(kt)>);
             static_assert(sizeof(kt) == sizeof(double));
             static_assert(kt.scale() == 1.0);
             static_assert(kt.abbrev() == flatstring("kt"));
 
             constexpr auto mt = qty::megatonnes(1.0);
-            static_assert(quantity2_concept<decltype(mt)>);
+            static_assert(quantity_concept<decltype(mt)>);
             static_assert(sizeof(mt) == sizeof(double));
             static_assert(mt.scale() == 1.0);
             static_assert(mt.abbrev() == flatstring("Mt"));
 
             constexpr auto gt = qty::gigatonnes(1.0);
-            static_assert(quantity2_concept<decltype(gt)>);
+            static_assert(quantity_concept<decltype(gt)>);
             static_assert(sizeof(gt) == sizeof(double));
             static_assert(gt.scale() == 1.0);
             static_assert(gt.abbrev() == flatstring("Gt"));
@@ -111,61 +111,61 @@ namespace xo {
             scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.quantity.distance"));
 
             constexpr auto pm = qty::picometers(1.0);
-            static_assert(quantity2_concept<decltype(pm)>);
+            static_assert(quantity_concept<decltype(pm)>);
             static_assert(sizeof(pm) == sizeof(double));
             static_assert(pm.scale() == 1.0);
             static_assert(pm.abbrev() == flatstring("pm"));
 
             constexpr auto nm = qty::nanometers(1.0);
-            static_assert(quantity2_concept<decltype(nm)>);
+            static_assert(quantity_concept<decltype(nm)>);
             static_assert(sizeof(nm) == sizeof(double));
             static_assert(nm.scale() == 1.0);
             static_assert(nm.abbrev() == flatstring("nm"));
 
             constexpr auto um = qty::micrometers(1.0);
-            static_assert(quantity2_concept<decltype(um)>);
+            static_assert(quantity_concept<decltype(um)>);
             static_assert(sizeof(um) == sizeof(double));
             static_assert(um.scale() == 1.0);
             static_assert(um.abbrev() == flatstring("um"));
 
             constexpr auto mm = qty::millimeters(1.0);
-            static_assert(quantity2_concept<decltype(mm)>);
+            static_assert(quantity_concept<decltype(mm)>);
             static_assert(sizeof(mm) == sizeof(double));
             static_assert(mm.scale() == 1.0);
             static_assert(mm.abbrev() == flatstring("mm"));
 
             constexpr auto m = qty::meters(1.0);
-            static_assert(quantity2_concept<decltype(m)>);
+            static_assert(quantity_concept<decltype(m)>);
             static_assert(sizeof(m) == sizeof(double));
             static_assert(m.scale() == 1.0);
             static_assert(m.abbrev() == flatstring("m"));
 
             constexpr auto km = qty::kilometers(1.0);
-            static_assert(quantity2_concept<decltype(km)>);
+            static_assert(quantity_concept<decltype(km)>);
             static_assert(sizeof(km) == sizeof(double));
             static_assert(km.scale() == 1.0);
             static_assert(km.abbrev() == flatstring("km"));
 
             constexpr auto Mm = qty::megameters(1.0);
-            static_assert(quantity2_concept<decltype(Mm)>);
+            static_assert(quantity_concept<decltype(Mm)>);
             static_assert(sizeof(Mm) == sizeof(double));
             static_assert(Mm.scale() == 1.0);
             static_assert(Mm.abbrev() == flatstring("Mm"));
 
             constexpr auto Gm = qty::gigameters(1.0);
-            static_assert(quantity2_concept<decltype(Gm)>);
+            static_assert(quantity_concept<decltype(Gm)>);
             static_assert(sizeof(Gm) == sizeof(double));
             static_assert(Gm.scale() == 1.0);
             static_assert(Gm.abbrev() == flatstring("Gm"));
 
             constexpr auto lsec = qty::lightseconds(1.0);
-            static_assert(quantity2_concept<decltype(lsec)>);
+            static_assert(quantity_concept<decltype(lsec)>);
             static_assert(sizeof(lsec) == sizeof(double));
             static_assert(lsec.scale() == 1.0);
             static_assert(lsec.abbrev() == flatstring("lsec"));
 
             constexpr auto AU = qty::astronomicalunits(1.0);
-            static_assert(quantity2_concept<decltype(AU)>);
+            static_assert(quantity_concept<decltype(AU)>);
             static_assert(sizeof(AU) == sizeof(double));
             static_assert(AU.scale() == 1.0);
             static_assert(AU.abbrev() == flatstring("AU"));
@@ -200,85 +200,85 @@ namespace xo {
             scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.quantity.time"));
 
             constexpr auto ps = qty::picoseconds(1.0);
-            static_assert(quantity2_concept<decltype(ps)>);
+            static_assert(quantity_concept<decltype(ps)>);
             static_assert(sizeof(ps) == sizeof(double));
             static_assert(ps.scale() == 1.0);
             static_assert(ps.abbrev() == flatstring("ps"));
 
             constexpr auto ns = qty::nanoseconds(1.0);
-            static_assert(quantity2_concept<decltype(ns)>);
+            static_assert(quantity_concept<decltype(ns)>);
             static_assert(sizeof(ns) == sizeof(double));
             static_assert(ns.scale() == 1.0);
             static_assert(ns.abbrev() == flatstring("ns"));
 
             constexpr auto us = qty::microseconds(1.0);
-            static_assert(quantity2_concept<decltype(us)>);
+            static_assert(quantity_concept<decltype(us)>);
             static_assert(sizeof(us) == sizeof(double));
             static_assert(us.scale() == 1.0);
             static_assert(us.abbrev() == flatstring("us"));
 
             constexpr auto ms = qty::milliseconds(1.0);
-            static_assert(quantity2_concept<decltype(ms)>);
+            static_assert(quantity_concept<decltype(ms)>);
             static_assert(sizeof(ms) == sizeof(double));
             static_assert(ms.scale() == 1.0);
             static_assert(ms.abbrev() == flatstring("ms"));
 
             constexpr auto s = qty::seconds(1.0);
-            static_assert(quantity2_concept<decltype(s)>);
+            static_assert(quantity_concept<decltype(s)>);
             static_assert(sizeof(s) == sizeof(double));
             static_assert(s.scale() == 1.0);
             static_assert(s.abbrev() == flatstring("s"));
 
             constexpr auto min = qty::minutes(1.0);
-            static_assert(quantity2_concept<decltype(min)>);
+            static_assert(quantity_concept<decltype(min)>);
             static_assert(sizeof(min) == sizeof(double));
             static_assert(min.scale() == 1.0);
             static_assert(min.abbrev() == flatstring("min"));
 
             constexpr auto hr = qty::hours(1.0);
-            static_assert(quantity2_concept<decltype(hr)>);
+            static_assert(quantity_concept<decltype(hr)>);
             static_assert(sizeof(hr) == sizeof(double));
             static_assert(hr.scale() == 1.0);
             static_assert(hr.abbrev() == flatstring("hr"));
 
             constexpr auto dy = qty::days(1.0);
-            static_assert(quantity2_concept<decltype(dy)>);
+            static_assert(quantity_concept<decltype(dy)>);
             static_assert(sizeof(dy) == sizeof(double));
             static_assert(dy.scale() == 1.0);
             static_assert(dy.abbrev() == flatstring("dy"));
 
             constexpr auto wk = qty::weeks(1.0);
-            static_assert(quantity2_concept<decltype(wk)>);
+            static_assert(quantity_concept<decltype(wk)>);
             static_assert(sizeof(wk) == sizeof(double));
             static_assert(wk.scale() == 1.0);
             static_assert(wk.abbrev() == flatstring("wk"));
 
             constexpr auto mo = qty::months(1.0);
-            static_assert(quantity2_concept<decltype(mo)>);
+            static_assert(quantity_concept<decltype(mo)>);
             static_assert(sizeof(mo) == sizeof(double));
             static_assert(mo.scale() == 1.0);
             static_assert(mo.abbrev() == flatstring("mo"));
 
             constexpr auto yr = qty::years(1.0);
-            static_assert(quantity2_concept<decltype(yr)>);
+            static_assert(quantity_concept<decltype(yr)>);
             static_assert(sizeof(yr) == sizeof(double));
             static_assert(yr.scale() == 1.0);
             static_assert(yr.abbrev() == flatstring("yr"));
 
             constexpr auto yr250 = qty::year250s(1.0);
-            static_assert(quantity2_concept<decltype(yr250)>);
+            static_assert(quantity_concept<decltype(yr250)>);
             static_assert(sizeof(yr250) == sizeof(double));
             static_assert(yr250.scale() == 1.0);
             static_assert(yr250.abbrev() == flatstring("yr250"));
 
             constexpr auto yr360 = qty::year360s(1.0);
-            static_assert(quantity2_concept<decltype(yr360)>);
+            static_assert(quantity_concept<decltype(yr360)>);
             static_assert(sizeof(yr360) == sizeof(double));
             static_assert(yr360.scale() == 1.0);
             static_assert(yr360.abbrev() == flatstring("yr360"));
 
             constexpr auto yr365 = qty::year365s(1.0);
-            static_assert(quantity2_concept<decltype(yr365)>);
+            static_assert(quantity_concept<decltype(yr365)>);
             static_assert(sizeof(yr365) == sizeof(double));
             static_assert(yr365.scale() == 1.0);
             static_assert(yr365.abbrev() == flatstring("yr365"));

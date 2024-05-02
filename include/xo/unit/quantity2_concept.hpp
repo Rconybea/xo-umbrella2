@@ -8,7 +8,7 @@
 namespace xo {
     namespace qty {
         template <typename Quantity>
-        concept quantity2_concept = requires(Quantity qty, typename Quantity::repr_type repr)
+        concept quantity_concept = requires(Quantity qty, typename Quantity::repr_type repr)
         {
             typename Quantity::unit_type;
             typename Quantity::repr_type;
