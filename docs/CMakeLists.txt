@@ -7,4 +7,4 @@ xo_docdir_sphinx_config(
     quantity-reference.rst quantity-class.rst quantity-factoryfunctions.rst quantity-unitvars.rst
     unit-reference.rst unit-concept.rst unit-quantities.rst
 )
-xo_utest_coverage_config2()
+#xo_utest_coverage_config2()
