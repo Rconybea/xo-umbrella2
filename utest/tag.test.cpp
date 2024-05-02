@@ -9,19 +9,21 @@
 using namespace xo;
 
 namespace ut {
+    using xo::print::ccs;
+
     TEST_CASE("tag", "[tag]") {
         tag_config::tag_color = color_spec_type::none();
 
         {
             std::stringstream ss;
-            ss << tag("foo", "hello,world!");
+            ss << tag("foo", ccs("hello,world!"));
 
             REQUIRE(ss.str() == ":foo hello,world!");
         }
 
         {
             std::stringstream ss;
-            ss << tag("foo", "hello, world!");
+            ss << tag("foo", ccs("hello, world!"));
 
             REQUIRE(ss.str() == ":foo \"hello, world!\"");
         }
@@ -43,7 +45,7 @@ namespace ut {
 
         {
             std::stringstream ss;
-            ss << tag("foo", "hello") << xtag("bar", "there");
+            ss << tag("foo", ccs("hello")) << xtag("bar", ccs("there"));
 
             REQUIRE(ss.str() == ":foo hello :bar there");
         }
@@ -52,7 +54,7 @@ namespace ut {
 
         {
             std::stringstream ss;
-            ss << tag("foo", "hello,world!");
+            ss << tag("foo", ccs("hello,world!"));
 
             /*                   color on       color off
              *                   <--------->    <----->

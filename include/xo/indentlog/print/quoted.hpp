@@ -135,12 +135,12 @@ namespace xo {
          *    - std::string const & passed to quoted_impl ctor
          */
         template<typename T>
-        auto quoted(T && x) {
+        auto quot(T && x) {
             return quoted_impl(false /*unq_flag*/, std::forward<T>(x));
         }
 
         inline auto qcstr(char const * x) {
-            return quoted(x);
+            return quot(x);
         } /*qcstr*/
 
         template<typename T>

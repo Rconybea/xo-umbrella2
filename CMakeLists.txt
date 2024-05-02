@@ -14,6 +14,10 @@ xo_cxx_toplevel_options2()
 xo_toplevel_debug_config2()
 
 # ----------------------------------------------------------------
+# cmake -DCMAKE_BUILD_TYPE=asan
+xo_toplevel_asan_config2()
+
+# ----------------------------------------------------------------
 # cmake -DCMAKE_BUILD_TYPE=coverage
 xo_toplevel_coverage_config2()
 

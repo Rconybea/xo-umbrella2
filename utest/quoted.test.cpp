@@ -11,9 +11,9 @@ namespace ut {
     using namespace xo;
     using namespace xo::print;
 
-    struct quoted_tcase {
-        quoted_tcase() = default;
-        quoted_tcase(std::string x, bool unq_flag, std::string s)
+    struct quot_tcase {
+        quot_tcase() = default;
+        quot_tcase(std::string x, bool unq_flag, std::string s)
             : x_{std::move(x)}, unq_flag_{unq_flag}, s_{std::move(s)} {}
 
         /* string to be printed-in-machine-readable-form */
@@ -25,12 +25,24 @@ namespace ut {
         bool unq_flag_ = true;
         /* expected result */
         std::string s_;
-    }; /*quoted_tcase*/
+    }; /*quot_tcase*/
 
-    TEST_CASE("sstream.1char", "[quoted]") {
-        constexpr bool c_debug_flag = true;
+    /* NOTE: spelled out tests here in aftermath
+     *       of hard-to-diagnose regression in gcc 13.2;
+     *       turned out to have something to originate in confusion
+     *       between xo::print::quoted and std::quoted.
+     *
+     *       Problem does not occur in gcc 12.3 and earlier,
+     *       perhaps some alias for std::quoted appears somewhere in global
+     *       namespace??
+     *
+     *       Resolved by renaming xo::print::quoted -> xo::print::quot
+     */
 
-        scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.sstream"));
+    TEST_CASE("sstream.1char", "[sstream]") {
+        constexpr bool c_debug_flag = false;
+
+        scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.sstream.1char"));
 
         /* testing unexpected sstream behavior */
         {
@@ -43,14 +55,45 @@ namespace ut {
             log && log("after: lone escaped backslash");
             log && log(hex_view(ss.view().begin(), ss.view().end(), true));
 
+            REQUIRE(ss.view() == std::string_view("\\"));
+
             ss << 'n';
 
             log && log("after: lone 'n' char");
             log && log(hex_view(ss.view().begin(), ss.view().end(), true));
 
+            REQUIRE(ss.view() == std::string_view("\\n"));
+
             log && log("ss.str()=[", ss.str(), "]");
-            log && log("quoted(\"\\n\")=[", quoted("\\n"), "]");
         }
+    } /*TEST_CASE(sstream.1char)*/
+
+    TEST_CASE("sstream.2bslash", "[sstream]") {
+        constexpr bool c_debug_flag = false;
+
+        scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.sstream.2bslash"));
+
+        /* testing unexpected sstream behavior */
+        {
+            std::stringstream ss;
+
+            log && log("empty stream");
+
+            ss << "\\\\";
+
+            log && log("after: 2x escaped backslash");
+            log && log(hex_view(ss.view().begin(), ss.view().end(), true));
+
+            REQUIRE(ss.view() == std::string_view("\\\\"));
+
+            log && log("ss.str()=[", ss.str(), "]");
+        }
+    } /*TEST_CASE(sstream.2bslash)*/
+
+    TEST_CASE("sstream.2char", "[sstream]") {
+        constexpr bool c_debug_flag = false;
+
+        scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.sstream.2char"));
 
         /* testing unexpected sstream behavior */
         {
@@ -63,6 +106,12 @@ namespace ut {
             log && log("after: '\\n' escaped backslash + n");
             log && log(hex_view(ss.view().begin(), ss.view().end(), true));
         }
+    }
+
+    TEST_CASE("sstream.3char", "[sstream]") {
+        constexpr bool c_debug_flag = false;
+
+        scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.sstream.3char"));
 
         /* testing unexpected sstream behavior */
         {
@@ -70,9 +119,111 @@ namespace ut {
 
             log && log("empty stream");
 
-            ss << quoted("\n");
+            /* this is what quot("\\n") should wind up executing.. */
+            ss << "\\\\";
+            ss << 'n';
 
-            log && log("after: quoted('\\n')");
+            log && log("after: '\\\\n' 2x escaped backslash + n");
+            log && log(hex_view(ss.view().begin(), ss.view().end(), true));
+
+            REQUIRE(ss.view() == std::string_view("\\\\n"));
+        }
+    }
+
+    TEST_CASE("sstream.quot.1bslash", "[quot]") {
+        constexpr bool c_debug_flag = false;
+
+        scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.sstream.quot.1bslash"));
+
+        log && log("quot(\"\\\")=[", quot("\\"), "]");
+
+        std::stringstream ss2;
+        ss2 << quot("\\");
+
+        REQUIRE(ss2.view() == std::string_view("\"\\\\\"")); /* ["\\"] */
+    }
+
+    TEST_CASE("sstream.quot.newline", "[quot]") {
+        constexpr bool c_debug_flag = false;
+
+        scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.sstream.quot.newline"));
+
+        log && log("quot(\"\\n\")=[", quot("\n"), "]");
+
+        std::stringstream ss2;
+        ss2 << quot("\n");
+
+        REQUIRE(ss2.view() == std::string_view("\"\\n\"")); /* ["\n"] */
+    }
+
+    TEST_CASE("sstream.quot.2bslash", "[quot]") {
+        constexpr bool c_debug_flag = false;
+
+        scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.quot.2bslash"));
+
+        log && log("quot(\"\\\\\")=[", quot("\\\\"), "]");
+
+        std::stringstream ss2;
+        ss2 << quot("\\\\"); /* quoting string with two backslashes need to give ["\\\\"] */
+
+        REQUIRE(ss2.view() == std::string_view("\"\\\\\\\\\"")); /* rhs is ["\\\\"] */
+    }
+
+    TEST_CASE("sstream.quot.2charnewline", "[quot]") {
+        constexpr bool c_debug_flag = false;
+
+        scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.sstream.quot.2charnewline"));
+
+        log && log("quot(\"x\\n\")=[", quot("x\n"), "]");
+
+        std::stringstream ss2;
+        ss2 << quot("x\n");
+
+        REQUIRE(ss2.view() == std::string_view("\"x\\n\"")); /* ["\n"] */
+    }
+
+    TEST_CASE("sstream.quot.2char", "[quot]") {
+        constexpr bool c_debug_flag = false;
+
+        scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.quot.2char"));
+
+        log && log("quot(\"\\n\")=[", quot("\\n"), "]");
+
+        std::stringstream ss2;
+        ss2 << quot("\\n");
+
+        //std::cerr << quoted_debug::s_log_last_quoted.view() << std::endl;
+
+        //log && log("debug_log=[", quoted_debug::s_log_last_quoted.view() , "]");
+
+        REQUIRE(ss2.view() == std::string_view("\"\\\\n\""));
+    }
+
+    TEST_CASE("sstream.quot.foonewline", "[quot]") {
+        constexpr bool c_debug_flag = false;
+
+        scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.sstream.quot.2charnewline"));
+
+        std::stringstream ss2;
+        ss2 << quot("foo\n");
+
+        REQUIRE(ss2.view() == std::string_view("\"foo\\n\"")); /* ["\n"] */
+    }
+
+    TEST_CASE("sstream.rest", "[quot]") {
+        constexpr bool c_debug_flag = false;
+
+        scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.sstream"));
+
+        /* testing unexpected sstream behavior */
+        {
+            std::stringstream ss;
+
+            log && log("empty stream");
+
+            ss << quot("\n");
+
+            log && log("after: quot('\\n')");
             log && log(hex_view(ss.view().begin(), ss.view().end(), true));
         }
 
@@ -82,9 +233,9 @@ namespace ut {
 
             log && log("empty stream");
 
-            ss << quoted("foo\n");
+            ss << quot("foo\n");
 
-            log && log("after: quoted(\"foo\n\")");
+            log && log("after: quot(\"foo\n\")");
             log && log(hex_view(ss.view().begin(), ss.view().end(), true));
             log && log("> ss.str ----------------");
             log && log(ss.str());
@@ -105,52 +256,37 @@ namespace ut {
 
     } /*TEST_CASE(sstream)*/
 
-
-    std::vector<quoted_tcase> s_quoted_tcase_v(
+    std::vector<quot_tcase> s_quot_tcase_v(
         {
-            quoted_tcase("", true, "\"\""),
-            quoted_tcase("", false, "\"\""),
+            quot_tcase("", true, "\"\""),
+            quot_tcase("", false, "\"\""),
 
-            quoted_tcase("foo", true, "foo"),
-            quoted_tcase("foo", false, "\"foo\""),
+            quot_tcase("foo", true, "foo"),
+            quot_tcase("foo", false, "\"foo\""),
 
-            quoted_tcase("foo\n", true, "\"foo\\n\""),
-#if 0 && __GNUC__ >= 13 && __GNUC_MINOR__ >= 2
-            /* writes "foo\n", but gets turned into newline somewhere.  only on very recent gcc. (not on 11.4.0) */
-            quoted_tcase("foo\n", false, "\"foo\n\""),
-#else
-            quoted_tcase("foo\n", false, "\"foo\\n\""),
-#endif
+            quot_tcase("foo\n", true, "\"foo\\n\""),
+            quot_tcase("foo\n", false, "\"foo\\n\""),
 
-            quoted_tcase("two words", true, "\"two words\""),
-            quoted_tcase("two words", false, "\"two words\""),
+            quot_tcase("two words", true, "\"two words\""),
+            quot_tcase("two words", false, "\"two words\""),
 
-            quoted_tcase("1st\n2nd", true, "\"1st\\n2nd\""),
-#if __GNUC__ >= 13 && __GNUC_MINOR__ >= 2
-            /* writes "1st\\nsecond", but still gets turned into newline somewhere.  only on very recent gcc. (not on 11.4.0) */
-            quoted_tcase("1st\n2nd", false, "\"1st\n2nd\""),
-#else
-            quoted_tcase("1st\n2nd", false, "\"1st\\n2nd\""),
-#endif
+            quot_tcase("1st\n2nd", true, "\"1st\\n2nd\""),
+            quot_tcase("1st\n2nd", false, "\"1st\\n2nd\""),
 
-            quoted_tcase("misakte\rfix", true, "\"misakte\\rfix\""),
-#if __GNUC__ >= 13 && __GNUC_MINOR__ >= 2
-            quoted_tcase("misakte\rfix", false, "\"misakte\rfix\""),
-#else
-            quoted_tcase("misakte\rfix", false, "\"misakte\\rfix\""),
-#endif
+            quot_tcase("misakte\rfix", true, "\"misakte\\rfix\""),
+            quot_tcase("misakte\rfix", false, "\"misakte\\rfix\""),
 
-            quoted_tcase("\"oh!\", she said", true, "\"\\\"oh!\\\", she said\""),
-            quoted_tcase("\"oh!\", she said", false, "\"\\\"oh!\\\", she said\""),
+            quot_tcase("\"oh!\", she said", true, "\"\\\"oh!\\\", she said\""),
+            quot_tcase("\"oh!\", she said", false, "\"\\\"oh!\\\", she said\""),
 
             // special carveout for strings bracketed by <..>;  assume already well-formed
-            quoted_tcase("<object printer output>", true, "<object printer output>"),
-            quoted_tcase("<object printer output>", false, "<object printer output>"),
+            quot_tcase("<object printer output>", true, "<object printer output>"),
+            quot_tcase("<object printer output>", false, "<object printer output>"),
         });
 
-    TEST_CASE("quoted", "[quoted]") {
-        for (std::uint32_t i_tc = 0, z_tc = s_quoted_tcase_v.size(); i_tc < z_tc; ++i_tc) {
-            quoted_tcase const & tc = s_quoted_tcase_v[i_tc];
+    TEST_CASE("quot", "[quot]") {
+        for (std::uint32_t i_tc = 0, z_tc = s_quot_tcase_v.size(); i_tc < z_tc; ++i_tc) {
+            quot_tcase const & tc = s_quot_tcase_v[i_tc];
 
             /* NOTE: don't use tag()/xtag() here,
              *       since implementation relies on the inserter we are testing
@@ -161,15 +297,11 @@ namespace ut {
             INFO(tostr("[", tc.x_, "]"));
             INFO("tc.x_ ----------------");
 
-            bool special_char = (tc.x_.find_first_of(" \"\n\r\\") != std::string::npos);
-
-            INFO(tostr("special_char=", special_char));
-
             std::stringstream ss;
             if (tc.unq_flag_)
                 ss << unq(tc.x_);
             else
-                ss << quoted(tc.x_);
+                ss << quot(tc.x_);
 
             INFO("tc.s ----------------");
             INFO(tostr("[", tc.s_, "]"));
@@ -185,7 +317,7 @@ namespace ut {
                 break;
         }
 
-        REQUIRE(s_quoted_tcase_v.size() > 1);
+        REQUIRE(s_quot_tcase_v.size() > 1);
     }
 } /*namespace ut*/
 
