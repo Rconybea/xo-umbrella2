@@ -21,8 +21,7 @@ namespace xo {
             typename Repr = double,
             typename Int = std::int64_t,
             natural_unit<Int> NaturalUnit = natural_unit<Int>(),
-            typename Int2x = detail::width2x_t<Int>
-            >
+            typename Int2x = detail::width2x_t<Int> >
         class quantity {
         public:
             using repr_type = Repr;
@@ -69,6 +68,30 @@ namespace xo {
                 }
             }
 
+            template <scaled_unit<Int> ScaledUnit2>
+            constexpr
+            auto rescale() const {
+                /* conversion factor from .unit -> unit2*/
+                auto rr = detail::su_ratio<ratio_int_type,
+                                           ratio_int2x_type>(NaturalUnit, ScaledUnit2.natural_unit_);
+
+                if (rr.natural_unit_.is_dimensionless()) {
+                    /* NOTE: test for unit .outer_scale_sq values to get constexpr result with c++23
+                     *       and integer dimension powers.
+                     */
+                    repr_type r_scale = ((((rr.outer_scale_sq_ == 1.0)
+                                           && (ScaledUnit2.outer_scale_sq_ == 1.0))
+                                          ? 1.0
+                                          : ::sqrt(rr.outer_scale_sq_ / ScaledUnit2.outer_scale_sq_))
+                                         * rr.outer_scale_factor_.template convert_to<repr_type>()
+                                         * this->scale_
+                                         / ScaledUnit2.outer_scale_factor_.template convert_to<repr_type>());
+                    return quantity<Repr, Int, ScaledUnit2.natural_unit_, Int2x>(r_scale);
+                } else {
+                    return quantity<Repr, Int, ScaledUnit2.natural_unit_, Int2x>(std::numeric_limits<repr_type>::quiet_NaN());
+                }
+            }
+
             template <typename Dimensionless>
             requires std::is_arithmetic_v<Dimensionless>
             constexpr auto scale_by(Dimensionless x) const {
@@ -99,11 +122,43 @@ namespace xo {
 
             constexpr nu_abbrev_type abbrev() const { return s_unit.abbrev(); }
 
+            quantity & operator=(const quantity & x) {
+                this->scale_ = x.scale_;
+                return *this;
+            }
+
+            template <typename Q2>
+            requires(quantity_concept<Q2>
+                     && Q2::always_constexpr_unit)
+            quantity & operator=(const Q2 & x) {
+                auto x2 = x.template rescale<s_unit>();
+
+                this->scale_ = x2.scale();
+
+                return *this;
+            }
+
+            template <typename Q2>
+            requires(quantity_concept<Q2>
+                     && Q2::always_constexpr_unit)
+            constexpr operator Q2() const {
+                return this->template rescale<Q2::s_unit>();
+            }
+
         public: /* need public members so that a quantity instance can be a non-type template parameter (is a structural type) */
             static constexpr natural_unit<Int> s_unit = NaturalUnit;
 
             Repr scale_ = Repr{};
         };
+
+        template <natural_unit<::std::int64_t> NaturalUnit = natural_unit<::std::int64_t>()>
+        using stdquantity = xo::qty::quantity<double, ::std::int64_t, NaturalUnit>;
+
+        template <typename Quantity, typename Int, typename Int2x>
+        constexpr auto
+        rescale(const Quantity & x, const scaled_unit<Int, Int2x> & su) {
+            return x.template rescale<su>();
+        }
 
         struct quantity_util {
             /* parallel implementation to Quantity<Repr, Int> multiply,
@@ -168,6 +223,17 @@ namespace xo {
             }
         };
 
+        template <typename Q1, typename Q2, typename Int = typename Q2::ratio_int_type, natural_unit<Int> Unit = Q2::s_unit>
+        requires (quantity_concept<Q1>
+                  && quantity_concept<Q2>
+                  && Q1::always_constexpr_unit
+                  && Q2::always_constexpr_unit)
+        constexpr auto
+        with_units(const Q1 & x, const Q2 & y)
+        {
+            return x.template rescale<Unit>();
+        }
+
         /** note: won't have constexpr result w/ fractional dimension until c++26 (when ::sqrt(), ::pow() are constexpr)
          **/
         template <typename Q1, typename Q2>
@@ -222,6 +288,8 @@ namespace xo {
             inline constexpr auto lightseconds(double x) { return quantity<double, std::int64_t, nu::lightsecond>(x); }
             inline constexpr auto astronomicalunits(double x) { return quantity<double, std::int64_t, nu::astronomicalunit>(x); }
 
+            static constexpr auto meter = meters(1);
+
             // ----- time -----
 
             inline constexpr auto picoseconds(double x) { return quantity<double, std::int64_t, nu::picosecond>(x); }
@@ -239,6 +307,8 @@ namespace xo {
             inline constexpr auto year360s(double x) { return quantity<double, std::int64_t, nu::year360>(x); }
             inline constexpr auto year365s(double x) { return quantity<double, std::int64_t, nu::year365>(x); }
             //inline constexpr auto year366s(double x) { return quantity<double, std::int64_t, nu::year366>(x); }
+
+            static constexpr auto second = seconds(1);
 
             // ----- volatility -----
 
