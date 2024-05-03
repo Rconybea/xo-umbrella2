@@ -371,6 +371,57 @@ namespace xo {
             // /* milligrams:grams */
         } /*TEST_CASE(quantity.mult)*/
 
+        TEST_CASE("quantity.mult2", "[quantity.mult]") {
+            constexpr auto ms = qty::milliseconds(1.0);
+
+            /* proof that ms.s_unit is constexpr */
+            static_assert(ms.s_unit.n_bpu() == 1);
+
+            /* proof that ms.unit() is constexpr */
+            static_assert(ms.unit().n_bpu() == 1);
+
+            constexpr auto rr = detail::su_product<decltype(ms)::ratio_int_type, decltype(ms)::ratio_int2x_type>(ms.unit(), ms.unit());
+
+            /* proof that detail::su_product<..>(..) return value is constexpr */
+            static_assert(rr.outer_scale_sq_ == 1.0);
+            static_assert(rr.outer_scale_factor_.template convert_to<decltype(ms)::repr_type>() == 1.0);
+            static_assert(rr.natural_unit_.n_bpu() == 1);
+
+            constexpr auto q1 = quantity<decltype(ms)::repr_type,
+                                        decltype(ms)::ratio_int_type,
+                                        rr.natural_unit_,
+                                        decltype(ms)::ratio_int2x_type>(ms.scale() * ms.scale());
+
+            /* proof that q is constexpr */
+            static_assert(q1.scale() == 1.0);
+            static_assert(q1.unit().n_bpu() == 1);
+
+            {
+                using r_int_type = std::common_type_t<decltype(ms)::ratio_int_type,
+                                                      decltype(ms)::ratio_int_type>;
+                using r_int2x_type = std::common_type_t<decltype(ms)::ratio_int2x_type,
+                                                        decltype(ms)::ratio_int2x_type>;
+
+                constexpr auto rr = detail::su_product<r_int_type, r_int2x_type>(ms.unit(), ms.unit());
+
+                static_assert(rr.outer_scale_sq_ == 1.0);
+            }
+
+            constexpr auto q2 = quantity_util::multiply(ms, ms);
+
+            /* proof that q2 is constexpr */
+            static_assert(q2.scale() == 1.0);
+            static_assert(q2.unit().n_bpu() == 1);
+            static_assert(q2.unit()[0].power() == power_ratio_type(2,1));
+
+            constexpr auto q3 = ms * ms;
+
+            /* proof that q3 is constexpr */
+            static_assert(q3.scale() == 1.0);
+            static_assert(q3.unit().n_bpu() == 1);
+            static_assert(q3.unit()[0].power() == power_ratio_type(2,1));
+
+        } /*TEST_CASE(quantity.mult2)*/
     } /*namespace qty*/
 } /*namespace xo*/
 

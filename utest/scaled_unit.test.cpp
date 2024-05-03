@@ -70,7 +70,7 @@ namespace xo {
             }
         } /*TEST_CASE(su_product)*/
 
-        TEST_CASE("scaled_unit0", "[scaled_unit0]") {
+        TEST_CASE("scaled_unit0", "[scaled_unit]") {
             constexpr bool c_debug_flag = false;
 
             scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.scaled_unit0"));
@@ -85,7 +85,7 @@ namespace xo {
             static_assert(ng2.natural_unit_.n_bpu() == 1);
         } /*TEST_CASE(scaled_unit0)*/
 
-        TEST_CASE("scaled_unit1", "[scaled_unit1]") {
+        TEST_CASE("scaled_unit1", "[scaled_unit]") {
             constexpr bool c_debug_flag = false;
 
             scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.scaled_unit1"));
@@ -99,6 +99,21 @@ namespace xo {
             static_assert(ng.natural_unit_.n_bpu() == 1);
             static_assert(ng2.natural_unit_.n_bpu() == 0);
         } /*TEST_CASE(scaled_unit1)*/
+
+        TEST_CASE("scaled_unit2", "[scaled_unit]") {
+            constexpr bool c_debug_flag = false;
+
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.scaled_unit2"));
+
+            constexpr auto ms = su::millisecond;
+            constexpr auto ms2 = ms * ms;
+
+            log && log(xtag("ms", ms));
+            log && log(xtag("ms*ms", ms2));
+
+            static_assert(ms.natural_unit_.n_bpu() == 1);
+            static_assert(ms2.natural_unit_.n_bpu() == 1);
+        } /*TEST_CASE(scaled_unit2)*/
 
     } /*namespace qty*/
 } /*namespace xo*/
