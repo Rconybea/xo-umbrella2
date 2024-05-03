@@ -11,6 +11,5 @@ xo_include_options2(${SELF_EXE})
 
 xo_self_headeronly_dependency(${SELF_EXE} xo_unit)
 xo_dependency(${SELF_EXE} xo_flatstring)
-#xo_dependency(${SELF_EXE} reflect)
 
 # end CMakeLists.txt
