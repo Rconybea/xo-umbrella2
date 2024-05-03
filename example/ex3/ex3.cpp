@@ -1,18 +1,28 @@
 /** @file ex3.cpp **/
 
-#include "xo/unit/mpl/quantity.hpp"
+#include "xo/unit/quantity.hpp"
+#include "xo/unit/quantity_iostream.hpp"
 #include <iostream>
 
 int
 main () {
-    namespace u = xo::unit::units;
-    namespace qty = xo::unit::qty;
+    namespace q = xo::qty::qty;
+    namespace u = xo::qty::nu;
+    using xo::qty::with_units;
+    using xo::qty::stdquantity;
+    using xo::qty::quantity;
+    using xo::flatstring;
     using namespace std;
 
-    auto t1 = qty::milliseconds(1);
-    auto t2 = qty::minutes(1);
+    constexpr stdquantity<u::second> t = q::minutes(2);
+    constexpr stdquantity<u::meter> d = q::kilometers(2.5);
 
-    cerr << "t1: " << t1 << ", t2: " << t2 << ", t1*t2: " << t1*t2 << endl;
+    constexpr auto t2 = t*t;
+    constexpr auto a = d / (t*t);
+
+    cerr << "t: " << t << ", d: " << d
+         << ", d.t^-2: " << a
+         << endl;
 }
 
 /** end ex3.cpp **/
