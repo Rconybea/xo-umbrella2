@@ -12,8 +12,10 @@ dimension checking and unit conversion.
 Functionality is similar in spirit to that provided by ``boost::units``;
 however there are some important differences:
 
-First, implementation relies on c++20 features
-like class-instance template parameters to efficiently assemble string constants at compile time.
+* interchangeable compile-time / run-time unit representation.
+* constexpr string representation for things like unit abbreviations.
+* supports fractional dimensions,  for concepts like volatility.
+* integration with python (see sister project xo-pyunit)
 
 Second, ``xo-unit`` supports fractional dimensions.  This allows using it to naturally handle
 concepts like volatility (dimension 1/sqrt(time)), for example.

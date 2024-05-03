@@ -11,7 +11,7 @@ Install
 .. _xo-unit source: https://github.com/rconybea/xo-unit
 
 Implementation relies on some c++20 features (for example class-instances as template arguments).
-Tested with gcc 12.3
+Tested with gcc 12.3, 13.2
 
 Include as submodule
 --------------------
@@ -35,7 +35,7 @@ to c++ source files that rely on xo-unit
 Supported compilers
 -------------------
 
-* developed with gcc 12.3.0;  github CI using gcc 11.4.0 (asof March 2024)
+* developed with gcc 12.3.0 and gcc 13.2.0;  github CI using gcc 11.4.0 (asof March 2024)
 
 Building from source
 --------------------

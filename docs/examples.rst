@@ -9,109 +9,172 @@ Examples
 Compile-time unit inference
 ---------------------------
 
-.. code-block:: cpp
+See ``xo-unit/examples/ex1`` for code below.
 
-    #include "xo/unit/quantity.hpp"
-    #include <iostream>
-
-    int main() {
-        namespace u = xo::unit::units;
-        namespace qty = xo::unit::qty;
-        using xo::unit::quantity;
-        using namespace std;
-
-        auto t = qty::milliseconds(10);
-        auto m = qty::kilograms(2.5);
-        auto a = m / (t * t);
-
-        static_assert(same_as<decltype(t), quantity<u::millisecond, int>>);
-        static_assert(same_as<decltype(m), quantity<u::kilogram, double>>);
-        static_assert(sizeof(t) == sizeof(int));
-        static_assert(sizeof(m) == sizeof(double));
-        static_assert(sizeof(a) == sizeof(double));
-
-        cerr << "t: " << t << ", m: " << m << ", a: " << a << endl;
-    }
-
-with output:
-
-.. code-block::
-
-    t: 10ms, m: 2.5kg, m.t^-2: 0.025kg.ms^-2
-
-Remarks:
-
-*  The ``xo-unit`` system runs entirely at compile time;  there's no runtime overhead.
-*  No runtime overhead includes construction of literal strings such as ``kg.ms^-2``
-   (this is once place implementation requires c++20)
-*  Units are sticky: since we expressed ``t`` in milliseconds and ``m`` in kilograms, result is in the same terms.
-*  Unit ordering is sticky.  Mass appears on the left in printed value of ``a`` because it was on the left-hand side of ``operator/``
-*  Example omits verifying ``decltype(a)``,  to keep output small.
-*  Conversion factors are exact (provided dimensions are limited to integer powers).
-   Exact conversion involves no loss of precision.
-
-Explicit scale conversion
--------------------------
-
-Can convert between compatible units explictly:
+Units propagate through familiar arithmetic expressions:
 
 .. code-block:: cpp
    :linenos:
-   :emphasize-lines: 11-12
+   :emphasize-lines: 15-16
 
     #include "xo/unit/quantity.hpp"
+    #include "xo/unit/quantity_iostream.hpp"
     #include <iostream>
 
     int
     main () {
-        namespace u = xo::unit::units;
-        namespace qty = xo::unit::qty;
+        namespace q = xo::qty::qty;
+        namespace su = xo::qty::su;
+        using xo::qty::quantity;
         using namespace std;
 
-        auto t1 = qty::milliseconds(25.0);
-        auto t1_usec = t1.with_unit<u::microsecond>();
-        auto t1_sec = t1.with_unit<u::second>();
+        constexpr auto t = q::minutes(2);
+        constexpr auto d = q::kilometers(2.5);
 
-        cerr << "t1: " << t1 << ", t1_usec: " << t1_usec << ", t1_sec: " << t1_sec << endl;
+        constexpr auto t2 = t*t;
+        constexpr auto a = d / (t*t);
+
+        cerr << "t: " << t << ", d: " << d
+             << ", t^2: " << t2
+             << ", d.t^-2: " << a
+             << endl;
     }
+
 
 with output:
 
 .. code-block::
 
-    t1: 25ms, t1_usec: 25000us, t1_sec: 0.025s
+    t: 2min, d: 2.5km, t^2: 4min^2, d.t^-2: 0.625km.min^-2
+
+Remarks:
+
+- ``xo::qty::quantity`` performs unit consistency checking and propagation at compile time.  Runtime space/time overhead is zero.
+- Unit abbreviations (such as ``kg.min^-2`` above) are computed at compile time.  See ``xo::flatstring`` for constexpr string implementation.
+- Units are sticky: since we expressed ``t`` in minutes, ``(t*t)`` and ``d/(t*t)`` also use minutes.
+- Unit ordering is sticky.  Distance appears on the left of time in printed value of ``d/(t*t)``
+  because it was on the left-hand side of ``operator/``
+- See ``xo::xquantity`` for parallel implementation that defers unit checking until runtime.
+
+We can use static asserts to prove that units are being computed at compile-time
+
+.. code-block:: cpp
+   :linenos:
+
+    static_assert(std::same_as<decltype(t)::repr_type, double>);
+    static_assert(sizeof(t) == sizeof(double));
+    static_assert(t.scale() == 2);
+    static_assert(t.abbrev() == flatstring("min"));
+
+    static_assert(std::same_as<decltype(d)::repr_type, double>);
+    static_assert(sizeof(d) == sizeof(double));
+    static_assert(d.scale() == 2.5);
+    static_assert(d.abbrev() == flatstring("km"));
+
+    static_assert(std::same_as<decltype(t2)::repr_type, double>);
+    static_assert(sizeof(t2) == sizeof(double));
+    static_assert(t2.scale() == 4);
+    static_assert(t2.abbrev() == flatstring("min^2"));
+
+    static_assert(std::same_as<decltype(a)::repr_type, double>);
+    static_assert(sizeof(a) == sizeof(double));
+    static_assert(a.scale() == 0.625);
+    static_assert(a.abbrev() == flatstring("km.min^-2"));
+
+
+Explicit scale conversion using rescale method
+----------------------------------------------
+
+Can convert between compatible units explictly:
+
+See ``xo-unit/examples/ex2`` for code below.
+
+.. code-block:: cpp
+   :linenos:
+   :emphasize-lines: 9
+
+    ...
+
+    constexpr auto t = q::minutes(2);
+    constexpr auto d = q::kilometers(2.5);
+
+    constexpr auto t2 = t*t;
+    constexpr auto a = d / (t*t);
+
+    constexpr auto a2 = a.template rescale<su::meter / (su::second * su::second)>();
+
+    static_assert(a2.abbrev() == flatstring("m.s^-2"));
+
+    cerr << "a2: " << a2 << endl;
+
+with output:
+
+.. code-block:: cpp
+
+    a2: 0.173611m.s^-2
+
+Explicit scale conversion from another quantity
+-----------------------------------------------
+
+Alternatively,  can transfer units from another quantity
+
+See ``xo-unit/example/ex2`` for code below
+
+.. code-block:: cpp
+   :linenos:
+   :emphasize-lines: 1-2
+
+    constexpr auto au = q::meter / (q::second * q::second);  /* just for units */
+    constexpr auto a3 = with_units(a, au);
+
+    static_assert(a3.abbrev() == flatstring("m.s^-2"));
+
+    cerr << "a3: " << a3 << endl;
+
+with output:
+
+.. code-block:: cpp
+
+    a3: 0.173611m.s^-2
 
 
 Scale conversion triggered by assignment
 ----------------------------------------
 
-One way to convert units is by assignment:
+Another way to convert units is by assignment
+
+See ``xo-unit/example/ex3`` for code below
 
 .. code-block:: cpp
    :linenos:
    :emphasize-lines: 10-11
 
-    #include "xo/unit/quantity.hpp"
-    #include <iostream>
-
-    int main() {
-        namespace u = xo::unit;
-        namespace qty = xo::units::qty;
-        using xo::unit::quantity;
+    int
+    main () {
+        namespace q = xo::qty::qty;
+        namespace nu = xo::qty::nu;
+        using xo::qty::with_units;
+        using xo::qty::stdquantity;
+        using xo::qty::quantity;
+        using xo::flatstring;
         using namespace std;
 
-        quantity<units::second> t = qty::milliseconds(10);
-        quantity<units::gram> m = qty::kilograms(2.5);
-        auto a = m / (t * t);
+        constexpr stdquantity<nu::second> t = q::minutes(2);
+        constexpr stdquantity<nu::meter> d = q::kilometers(2.5);
 
-        cerr << "t: " << t << ", m: " << m << ", a: " << a << endl;
+        constexpr auto t2 = t*t;
+        constexpr auto a = d / (t*t);
+
+        cerr << "t: " << t << ", d: " << d
+             << ", d.t^-2: " << a
+             << endl;
     }
 
 with output:
 
 .. code-block::
 
-    t: 0.01s, m: 2500g, m.t^-2: 2.5e+07g.s^-2
+    t: 120s, d: 2500m, d.t^-2: 0.17e611m.s^-2
 
 Remarks:
 
