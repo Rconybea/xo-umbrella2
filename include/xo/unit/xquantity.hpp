@@ -41,8 +41,10 @@ namespace xo {
             constexpr xquantity()
                 : scale_{0}, unit_{natural_unit<Int>()} {}
             constexpr xquantity(Repr scale,
-                               const natural_unit<Int> & unit)
+                                const natural_unit<Int> & unit)
                 : scale_{scale}, unit_{unit} {}
+
+            static constexpr bool always_constexpr_unit = false;
 
             constexpr const repr_type & scale() const { return scale_; }
             constexpr const unit_type & unit() const { return unit_; }
@@ -105,7 +107,7 @@ namespace xo {
                                        * static_cast<r_repr_type>(y.scale()));
 
                 return xquantity<r_repr_type, r_int_type>(r_scale,
-                                                         rr.natural_unit_);
+                                                          rr.natural_unit_);
             }
 
             template <typename Quantity2>
@@ -221,7 +223,7 @@ namespace xo {
             Repr scale_ = Repr{};
             /** @brief unit for this quantity **/
             natural_unit<Int> unit_;
-        }; /*Quantity*/
+        }; /*xquantity*/
 
         /** note: won't have constexpr result until c++26 (when ::sqrt(), ::pow() are constexpr)
          **/

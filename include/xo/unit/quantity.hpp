@@ -34,6 +34,8 @@ namespace xo {
             constexpr quantity() : scale_{0} {}
             explicit constexpr quantity(Repr scale) : scale_{scale} {}
 
+            static constexpr bool always_constexpr_unit = true;
+
             constexpr const repr_type & scale() const { return scale_; }
             constexpr const unit_type & unit() const { return s_unit; }
 
