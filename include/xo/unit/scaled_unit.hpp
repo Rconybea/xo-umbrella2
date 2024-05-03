@@ -50,6 +50,8 @@ namespace xo {
 
             constexpr auto nanogram = detail::make_unit_rescale_result<std::int64_t>(nu::nanogram);
             constexpr auto microgram = detail::make_unit_rescale_result<std::int64_t>(nu::microgram);
+
+            constexpr auto millisecond = detail::make_unit_rescale_result<std::int64_t>(nu::millisecond);
         }
 
         namespace detail {

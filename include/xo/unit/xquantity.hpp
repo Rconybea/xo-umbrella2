@@ -230,7 +230,8 @@ namespace xo {
         template <typename Repr = double,
                   typename Int = std::int64_t>
         inline constexpr xquantity<Repr, Int>
-        unit_qty(const scaled_unit<Int> & u) {
+        unit_qty(const scaled_unit<Int> & u)
+        {
             return xquantity<Repr, Int>
                 (u.outer_scale_factor_.template convert_to<double>() * ::sqrt(u.outer_scale_sq_),
                  u.natural_unit_);
@@ -243,6 +244,18 @@ namespace xo {
         inline constexpr xquantity<Repr, Int>
         natural_unit_qty(const natural_unit<Int> & nu) {
             return xquantity<Repr, Int>(1.0, nu);
+        }
+
+        /** note: won't have constexpr result until c++26 (when ::sqrt(), ::pow() are constexpr)
+         **/
+        template <typename Q1, typename Q2>
+        requires (quantity_concept<Q1>
+                  && quantity_concept<Q2>
+                  && (!Q1::always_constexpr_unit || !Q2::always_constexpr_unit))
+        constexpr auto
+        operator* (const Q1 & x, const Q2 & y)
+        {
+            return Q1::multiply(x, y);
         }
 
         /** note: won't have constexpr result until c++26 (when ::sqrt(), ::pow() are constexpr)

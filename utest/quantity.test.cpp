@@ -2,7 +2,7 @@
 
 #include "xo/unit/quantity.hpp"
 #include "xo/unit/quantity_iostream.hpp"
-#include "xo/unit/quantity2_concept.hpp"
+#include "xo/unit/quantity_concept.hpp"
 #include "xo/indentlog/scope.hpp"
 #include <catch2/catch.hpp>
 
