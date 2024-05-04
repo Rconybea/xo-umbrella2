@@ -419,7 +419,12 @@ namespace xo {
 
             // ----- volatility -----
 
-            /* volatility in units of 1/yr */
+            /* variance expressed has dimension 1/t;
+             * volatility ~ sqrt(variance),  has dimension 1/sqrt(t)
+             */
+
+            template <typename Repr>
+            inline constexpr auto volatility_30d(Repr x) { return quantity<nu::volatility_30d, Repr>(x); }
             template <typename Repr>
             inline constexpr auto volatility_250d(Repr x) { return quantity<nu::volatility_250d, Repr>(x); }
             template <typename Repr>
