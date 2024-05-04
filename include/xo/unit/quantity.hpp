@@ -276,39 +276,63 @@ namespace xo {
         namespace qty {
             // ----- mass -----
 
-            inline constexpr auto picograms(double x) { return quantity<nu::picogram, double>(x); }
-            inline constexpr auto nanograms(double x) { return quantity<nu::nanogram, double>(x); }
-            inline constexpr auto micrograms(double x) { return quantity<nu::microgram, double>(x); }
-            inline constexpr auto milligrams(double x) { return quantity<nu::milligram, double>(x); }
-            inline constexpr auto grams(double x) { return quantity<nu::gram, double>(x); }
-            inline constexpr auto kilograms(double x) { return quantity<nu::kilogram, double>(x); }
-            inline constexpr auto tonnes(double x) { return quantity<nu::tonne, double>(x); }
-            inline constexpr auto kilotonnes(double x) { return quantity<nu::kilotonne, double>(x); }
-            inline constexpr auto megatonnes(double x) { return quantity<nu::megatonne, double>(x); }
-            inline constexpr auto gigatonnes(double x) { return quantity<nu::gigatonne, double>(x); }
+            template <typename Repr>
+            inline constexpr auto picograms(Repr x) { return quantity<nu::picogram, Repr>(x); }
+            template <typename Repr>
+            inline constexpr auto nanograms(Repr x) { return quantity<nu::nanogram, Repr>(x); }
+            template <typename Repr>
+            inline constexpr auto micrograms(Repr x) { return quantity<nu::microgram, Repr>(x); }
+            template <typename Repr>
+            inline constexpr auto milligrams(Repr x) { return quantity<nu::milligram, Repr>(x); }
+            template <typename Repr>
+            inline constexpr auto grams(Repr x) { return quantity<nu::gram, Repr>(x); }
+            template <typename Repr>
+            inline constexpr auto kilograms(Repr x) { return quantity<nu::kilogram, Repr>(x); }
+            template <typename Repr>
+            inline constexpr auto tonnes(Repr x) { return quantity<nu::tonne, Repr>(x); }
+            template <typename Repr>
+            inline constexpr auto kilotonnes(Repr x) { return quantity<nu::kilotonne, Repr>(x); }
+            template <typename Repr>
+            inline constexpr auto megatonnes(Repr x) { return quantity<nu::megatonne, Repr>(x); }
+            template <typename Repr>
+            inline constexpr auto gigatonnes(Repr x) { return quantity<nu::gigatonne, Repr>(x); }
 
             // ----- distance -----
 
-            inline constexpr auto picometers(double x) { return quantity<nu::picometer, double>(x); }
-            inline constexpr auto nanometers(double x) { return quantity<nu::nanometer, double>(x); }
-            inline constexpr auto micrometers(double x) { return quantity<nu::micrometer, double>(x); }
-            inline constexpr auto millimeters(double x) { return quantity<nu::millimeter, double>(x); }
-            inline constexpr auto meters(double x) { return quantity<nu::meter, double>(x); }
-            inline constexpr auto kilometers(double x) { return quantity<nu::kilometer, double>(x); }
-            inline constexpr auto megameters(double x) { return quantity<nu::megameter, double>(x); }
-            inline constexpr auto gigameters(double x) { return quantity<nu::gigameter, double>(x); }
+            template <typename Repr>
+            inline constexpr auto picometers(Repr x) { return quantity<nu::picometer, Repr>(x); }
+            template <typename Repr>
+            inline constexpr auto nanometers(Repr x) { return quantity<nu::nanometer, Repr>(x); }
+            template <typename Repr>
+            inline constexpr auto micrometers(Repr x) { return quantity<nu::micrometer, Repr>(x); }
+            template <typename Repr>
+            inline constexpr auto millimeters(Repr x) { return quantity<nu::millimeter, Repr>(x); }
+            template <typename Repr>
+            inline constexpr auto meters(Repr x) { return quantity<nu::meter, Repr>(x); }
+            template <typename Repr>
+            inline constexpr auto kilometers(Repr x) { return quantity<nu::kilometer, Repr>(x); }
+            template <typename Repr>
+            inline constexpr auto megameters(Repr x) { return quantity<nu::megameter, Repr>(x); }
+            template <typename Repr>
+            inline constexpr auto gigameters(Repr x) { return quantity<nu::gigameter, Repr>(x); }
 
-            inline constexpr auto lightseconds(double x) { return quantity<nu::lightsecond, double>(x); }
-            inline constexpr auto astronomicalunits(double x) { return quantity<nu::astronomicalunit, double>(x); }
+            template <typename Repr>
+            inline constexpr auto lightseconds(Repr x) { return quantity<nu::lightsecond, Repr>(x); }
+            template <typename Repr>
+            inline constexpr auto astronomicalunits(Repr x) { return quantity<nu::astronomicalunit, Repr>(x); }
 
             static constexpr auto meter = meters(1);
 
             // ----- time -----
 
-            inline constexpr auto picoseconds(double x) { return quantity<nu::picosecond, double>(x); }
-            inline constexpr auto nanoseconds(double x) { return quantity<nu::nanosecond, double>(x); }
-            inline constexpr auto microseconds(double x) { return quantity<nu::microsecond, double>(x); }
-            inline constexpr auto milliseconds(double x) { return quantity<nu::millisecond, double>(x); }
+            template <typename Repr>
+            inline constexpr auto picoseconds(Repr x) { return quantity<nu::picosecond, Repr>(x); }
+            template <typename Repr>
+            inline constexpr auto nanoseconds(Repr x) { return quantity<nu::nanosecond, Repr>(x); }
+            template <typename Repr>
+            inline constexpr auto microseconds(Repr x) { return quantity<nu::microsecond, Repr>(x); }
+            template <typename Repr>
+            inline constexpr auto milliseconds(Repr x) { return quantity<nu::millisecond, Repr>(x); }
 
             template <typename Repr>
             inline constexpr auto seconds(Repr x) { return quantity<nu::second, Repr>(x); }
@@ -316,23 +340,33 @@ namespace xo {
             template <typename Repr>
             inline constexpr auto minutes(Repr x) { return quantity<nu::minute, Repr>(x); }
 
-            inline constexpr auto hours(double x) { return quantity<nu::hour, double>(x); }
-            inline constexpr auto days(double x) { return quantity<nu::day, double>(x); }
-            inline constexpr auto weeks(double x) { return quantity<nu::week, double>(x); }
-            inline constexpr auto months(double x) { return quantity<nu::month, double>(x); }
-            inline constexpr auto years(double x) { return quantity<nu::year, double>(x); }
-            inline constexpr auto year250s(double x) { return quantity<nu::year250, double>(x); }
-            inline constexpr auto year360s(double x) { return quantity<nu::year360, double>(x); }
-            inline constexpr auto year365s(double x) { return quantity<nu::year365, double>(x); }
-            //inline constexpr auto year366s(double x) { return quantity<double,std::int64_t, nu::year366>(x); }
+            template <typename Repr>
+            inline constexpr auto hours(Repr x) { return quantity<nu::hour, Repr>(x); }
+            template <typename Repr>
+            inline constexpr auto days(Repr x) { return quantity<nu::day, Repr>(x); }
+            template <typename Repr>
+            inline constexpr auto weeks(Repr x) { return quantity<nu::week, Repr>(x); }
+            template <typename Repr>
+            inline constexpr auto months(Repr x) { return quantity<nu::month, Repr>(x); }
+            template <typename Repr>
+            inline constexpr auto years(Repr x) { return quantity<nu::year, Repr>(x); }
+            template <typename Repr>
+            inline constexpr auto year250s(Repr x) { return quantity<nu::year250, Repr>(x); }
+            template <typename Repr>
+            inline constexpr auto year360s(Repr x) { return quantity<nu::year360, Repr>(x); }
+            template <typename Repr>
+            inline constexpr auto year365s(Repr x) { return quantity<nu::year365, Repr>(x); }
+            //inline constexpr auto year366s(Repr x) { return quantity<double,std::int64_t, nu::year366>(x); }
 
             static constexpr auto second = seconds(1);
 
             // ----- volatility -----
 
             /* volatility in units of 1/yr */
-            inline constexpr auto volatility_250d(double x) { return quantity<nu::volatility_250d, double>(x); }
-            inline constexpr auto volatility_360d(double x) { return quantity<nu::volatility_360d, double>(x); }
+            template <typename Repr>
+            inline constexpr auto volatility_250d(Repr x) { return quantity<nu::volatility_250d, Repr>(x); }
+            template <typename Repr>
+            inline constexpr auto volatility_360d(Repr x) { return quantity<nu::volatility_360d, Repr>(x); }
         }
 
         /* reminder: see [quantity_ops.hpp] for operator* etc */
