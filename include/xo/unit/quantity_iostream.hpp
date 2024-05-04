@@ -18,7 +18,11 @@ namespace xo {
             >
         inline std::ostream &
         operator<< (std::ostream & os,
-                    const quantity<Repr, Int, NaturalUnit, Int2x> & x)
+                    const quantity<Repr,
+#ifdef TYPE_INFERENCE_EXPERIMENT
+                    Int,
+#endif
+                    NaturalUnit, Int2x> & x)
         {
             os << x.scale() << x.abbrev();
             return os;
