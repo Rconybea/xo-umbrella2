@@ -387,8 +387,8 @@ namespace xo {
             static_assert(rr.outer_scale_factor_.template convert_to<decltype(ms)::repr_type>() == 1.0);
             static_assert(rr.natural_unit_.n_bpu() == 1);
 
-            constexpr auto q1 = quantity<decltype(ms)::repr_type,
-                                         rr.natural_unit_,
+            constexpr auto q1 = quantity<rr.natural_unit_,
+                                         decltype(ms)::repr_type,
                                          decltype(ms)::ratio_int2x_type>(ms.scale() * ms.scale());
 
             /* proof that q is constexpr */
@@ -439,9 +439,9 @@ namespace xo {
             static_assert(rr.outer_scale_factor_.template convert_to<decltype(ms)::repr_type>() == 1.0);
             static_assert(rr.natural_unit_.n_bpu() == 0);
 
-            constexpr auto q1 = quantity<decltype(ms)::repr_type,
-                                        rr.natural_unit_,
-                                        decltype(ms)::ratio_int2x_type>(ms.scale() * ms.scale());
+            constexpr auto q1 = quantity<rr.natural_unit_,
+                                         decltype(ms)::repr_type,
+                                         decltype(ms)::ratio_int2x_type>(ms.scale() * ms.scale());
 
             /* proof that q is constexpr */
             static_assert(q1.scale() == 1.0);

@@ -18,8 +18,8 @@ namespace xo {
          *  sizeof(quantity) == sizeof(Repr).
          **/
         template <
-            typename Repr = double,
             auto /*natural_unit<Int>*/ NaturalUnit = natural_unit<std::int64_t>(),
+            typename Repr = double,
             typename Int2x = detail::width2x_t<typename decltype(NaturalUnit)::ratio_int_type> >
         class quantity {
         public:
@@ -46,8 +46,8 @@ namespace xo {
             template <typename Repr2>
             constexpr
             auto with_repr() const {
-                return quantity<Repr2,
-                                s_unit,
+                return quantity<s_unit,
+                                Repr2,
                                 ratio_int2x_type>(scale_);
             }
 
@@ -69,9 +69,9 @@ namespace xo {
                                           : ::sqrt(rr.outer_scale_sq_))
                                          * rr.outer_scale_factor_.template convert_to<repr_type>()
                                          * this->scale_);
-                    return quantity<Repr, NaturalUnit2, Int2x>(r_scale);
+                    return quantity<NaturalUnit2, Repr, Int2x>(r_scale);
                 } else {
-                    return quantity<Repr, NaturalUnit2, Int2x>(std::numeric_limits<repr_type>::quiet_NaN());
+                        return quantity<NaturalUnit2, Repr, Int2x>(std::numeric_limits<repr_type>::quiet_NaN());
                 }
             }
 
@@ -93,9 +93,9 @@ namespace xo {
                                          * rr.outer_scale_factor_.template convert_to<repr_type>()
                                          * this->scale_
                                          / ScaledUnit2.outer_scale_factor_.template convert_to<repr_type>());
-                    return quantity<Repr, ScaledUnit2.natural_unit_, Int2x>(r_scale);
+                    return quantity<ScaledUnit2.natural_unit_, Repr, Int2x>(r_scale);
                 } else {
-                    return quantity<Repr, ScaledUnit2.natural_unit_, Int2x>(std::numeric_limits<repr_type>::quiet_NaN());
+                    return quantity<ScaledUnit2.natural_unit_, Repr, Int2x>(std::numeric_limits<repr_type>::quiet_NaN());
                 }
             }
 
@@ -160,7 +160,7 @@ namespace xo {
 
         template <typename Repr = double,
                   natural_unit<std::int64_t> NaturalUnit = natural_unit<std::int64_t>()>
-        using stdquantity = quantity<Repr, NaturalUnit>;
+        using stdquantity = quantity<NaturalUnit, Repr>;
 
         template <typename Quantity, typename Int, typename Int2x>
         constexpr auto
@@ -195,8 +195,8 @@ namespace xo {
                                            * static_cast<r_repr_type>(x.scale())
                                            * static_cast<r_repr_type>(y.scale()));
 
-                    return quantity<r_repr_type,
-                                    rr.natural_unit_,
+                    return quantity<rr.natural_unit_,
+                                    r_repr_type,
                                     r_int2x_type
                                     >(r_scale);
                 }
@@ -223,8 +223,8 @@ namespace xo {
                                            * static_cast<r_repr_type>(x.scale())
                                            / static_cast<r_repr_type>(y.scale()));
 
-                    return quantity<r_repr_type,
-                                    rr.natural_unit_,
+                    return quantity<rr.natural_unit_,
+                                    r_repr_type,
                                     r_int2x_type
                                     >(r_scale);
                 }
@@ -280,54 +280,54 @@ namespace xo {
         namespace qty {
             // ----- mass -----
 
-            inline constexpr auto picograms(double x) { return quantity<double, nu::picogram>(x); }
-            inline constexpr auto nanograms(double x) { return quantity<double, nu::nanogram>(x); }
-            inline constexpr auto micrograms(double x) { return quantity<double, nu::microgram>(x); }
-            inline constexpr auto milligrams(double x) { return quantity<double, nu::milligram>(x); }
-            inline constexpr auto grams(double x) { return quantity<double, nu::gram>(x); }
-            inline constexpr auto kilograms(double x) { return quantity<double, nu::kilogram>(x); }
-            inline constexpr auto tonnes(double x) { return quantity<double, nu::tonne>(x); }
-            inline constexpr auto kilotonnes(double x) { return quantity<double, nu::kilotonne>(x); }
-            inline constexpr auto megatonnes(double x) { return quantity<double, nu::megatonne>(x); }
-            inline constexpr auto gigatonnes(double x) { return quantity<double, nu::gigatonne>(x); }
+            inline constexpr auto picograms(double x) { return quantity<nu::picogram, double>(x); }
+            inline constexpr auto nanograms(double x) { return quantity<nu::nanogram, double>(x); }
+            inline constexpr auto micrograms(double x) { return quantity<nu::microgram, double>(x); }
+            inline constexpr auto milligrams(double x) { return quantity<nu::milligram, double>(x); }
+            inline constexpr auto grams(double x) { return quantity<nu::gram, double>(x); }
+            inline constexpr auto kilograms(double x) { return quantity<nu::kilogram, double>(x); }
+            inline constexpr auto tonnes(double x) { return quantity<nu::tonne, double>(x); }
+            inline constexpr auto kilotonnes(double x) { return quantity<nu::kilotonne, double>(x); }
+            inline constexpr auto megatonnes(double x) { return quantity<nu::megatonne, double>(x); }
+            inline constexpr auto gigatonnes(double x) { return quantity<nu::gigatonne, double>(x); }
 
             // ----- distance -----
 
-            inline constexpr auto picometers(double x) { return quantity<double, nu::picometer>(x); }
-            inline constexpr auto nanometers(double x) { return quantity<double, nu::nanometer>(x); }
-            inline constexpr auto micrometers(double x) { return quantity<double, nu::micrometer>(x); }
-            inline constexpr auto millimeters(double x) { return quantity<double, nu::millimeter>(x); }
-            inline constexpr auto meters(double x) { return quantity<double, nu::meter>(x); }
-            inline constexpr auto kilometers(double x) { return quantity<double, nu::kilometer>(x); }
-            inline constexpr auto megameters(double x) { return quantity<double, nu::megameter>(x); }
-            inline constexpr auto gigameters(double x) { return quantity<double, nu::gigameter>(x); }
+            inline constexpr auto picometers(double x) { return quantity<nu::picometer, double>(x); }
+            inline constexpr auto nanometers(double x) { return quantity<nu::nanometer, double>(x); }
+            inline constexpr auto micrometers(double x) { return quantity<nu::micrometer, double>(x); }
+            inline constexpr auto millimeters(double x) { return quantity<nu::millimeter, double>(x); }
+            inline constexpr auto meters(double x) { return quantity<nu::meter, double>(x); }
+            inline constexpr auto kilometers(double x) { return quantity<nu::kilometer, double>(x); }
+            inline constexpr auto megameters(double x) { return quantity<nu::megameter, double>(x); }
+            inline constexpr auto gigameters(double x) { return quantity<nu::gigameter, double>(x); }
 
-            inline constexpr auto lightseconds(double x) { return quantity<double, nu::lightsecond>(x); }
-            inline constexpr auto astronomicalunits(double x) { return quantity<double, nu::astronomicalunit>(x); }
+            inline constexpr auto lightseconds(double x) { return quantity<nu::lightsecond, double>(x); }
+            inline constexpr auto astronomicalunits(double x) { return quantity<nu::astronomicalunit, double>(x); }
 
             static constexpr auto meter = meters(1);
 
             // ----- time -----
 
-            inline constexpr auto picoseconds(double x) { return quantity<double, nu::picosecond>(x); }
-            inline constexpr auto nanoseconds(double x) { return quantity<double, nu::nanosecond>(x); }
-            inline constexpr auto microseconds(double x) { return quantity<double, nu::microsecond>(x); }
-            inline constexpr auto milliseconds(double x) { return quantity<double, nu::millisecond>(x); }
+            inline constexpr auto picoseconds(double x) { return quantity<nu::picosecond, double>(x); }
+            inline constexpr auto nanoseconds(double x) { return quantity<nu::nanosecond, double>(x); }
+            inline constexpr auto microseconds(double x) { return quantity<nu::microsecond, double>(x); }
+            inline constexpr auto milliseconds(double x) { return quantity<nu::millisecond, double>(x); }
 
             template <typename Repr>
-            inline constexpr auto seconds(Repr x) { return quantity<Repr, nu::second>(x); }
+            inline constexpr auto seconds(Repr x) { return quantity<nu::second, Repr>(x); }
 
             template <typename Repr>
-            inline constexpr auto minutes(Repr x) { return quantity<Repr, nu::minute>(x); }
+            inline constexpr auto minutes(Repr x) { return quantity<nu::minute, Repr>(x); }
 
-            inline constexpr auto hours(double x) { return quantity<double, nu::hour>(x); }
-            inline constexpr auto days(double x) { return quantity<double, nu::day>(x); }
-            inline constexpr auto weeks(double x) { return quantity<double, nu::week>(x); }
-            inline constexpr auto months(double x) { return quantity<double, nu::month>(x); }
-            inline constexpr auto years(double x) { return quantity<double, nu::year>(x); }
-            inline constexpr auto year250s(double x) { return quantity<double, nu::year250>(x); }
-            inline constexpr auto year360s(double x) { return quantity<double, nu::year360>(x); }
-            inline constexpr auto year365s(double x) { return quantity<double, nu::year365>(x); }
+            inline constexpr auto hours(double x) { return quantity<nu::hour, double>(x); }
+            inline constexpr auto days(double x) { return quantity<nu::day, double>(x); }
+            inline constexpr auto weeks(double x) { return quantity<nu::week, double>(x); }
+            inline constexpr auto months(double x) { return quantity<nu::month, double>(x); }
+            inline constexpr auto years(double x) { return quantity<nu::year, double>(x); }
+            inline constexpr auto year250s(double x) { return quantity<nu::year250, double>(x); }
+            inline constexpr auto year360s(double x) { return quantity<nu::year360, double>(x); }
+            inline constexpr auto year365s(double x) { return quantity<nu::year365, double>(x); }
             //inline constexpr auto year366s(double x) { return quantity<double,std::int64_t, nu::year366>(x); }
 
             static constexpr auto second = seconds(1);
@@ -335,8 +335,8 @@ namespace xo {
             // ----- volatility -----
 
             /* volatility in units of 1/yr */
-            inline constexpr auto volatility_250d(double x) { return quantity<double, nu::volatility_250d>(x); }
-            inline constexpr auto volatility_360d(double x) { return quantity<double, nu::volatility_360d>(x); }
+            inline constexpr auto volatility_250d(double x) { return quantity<nu::volatility_250d, double>(x); }
+            inline constexpr auto volatility_360d(double x) { return quantity<nu::volatility_360d, double>(x); }
         }
 
         /* reminder: see [quantity_ops.hpp] for operator* etc */
