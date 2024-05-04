@@ -158,8 +158,8 @@ namespace xo {
             Repr scale_ = Repr{};
         };
 
-        template <typename Repr = double,
-                  natural_unit<std::int64_t> NaturalUnit = natural_unit<std::int64_t>()>
+        template < natural_unit<std::int64_t> NaturalUnit = natural_unit<std::int64_t>(),
+                   typename Repr = double >
         using stdquantity = quantity<NaturalUnit, Repr>;
 
         template <typename Quantity, typename Int, typename Int2x>

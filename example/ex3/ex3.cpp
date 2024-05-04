@@ -13,8 +13,8 @@ main () {
     using xo::flatstring;
     using namespace std;
 
-    constexpr stdquantity<double, u::second> t = q::minutes(2);
-    constexpr stdquantity<double, u::meter> d = q::kilometers(2.5);
+    constexpr stdquantity<u::second, double> t = q::minutes(2);
+    constexpr stdquantity<u::meter, double> d = q::kilometers(2.5);
 
     constexpr auto t2 = t*t;
     constexpr auto a = d / (t*t);
