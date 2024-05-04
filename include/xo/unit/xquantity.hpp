@@ -156,7 +156,7 @@ namespace xo {
                     return xquantity<r_repr_type, r_int_type>(r_scale, x.unit_.template to_repr<r_int_type>());
                 } else {
                     /* units don't match! */
-                    return xquantity<r_repr_type, r_int_type>(std::numeric_limits<Repr>::quiet_NaN(),
+                    return xquantity<r_repr_type, r_int_type>(std::numeric_limits<r_repr_type>::quiet_NaN(),
                                                              x.unit_.template to_repr<r_int_type>());
                 }
             }
@@ -183,7 +183,7 @@ namespace xo {
                     return xquantity<r_repr_type, r_int_type>(r_scale, x.unit_.template to_repr<r_int_type>());
                 } else {
                     /* units don't match! */
-                    return xquantity<r_repr_type, r_int_type>(std::numeric_limits<Repr>::quiet_NaN(),
+                    return xquantity<r_repr_type, r_int_type>(std::numeric_limits<r_repr_type>::quiet_NaN(),
                                                              x.unit_.template to_repr<r_int_type>());
                 }
             }
