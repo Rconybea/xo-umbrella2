@@ -232,12 +232,13 @@ namespace xo {
                 constexpr auto p = power_ratio_type(-1, 2);
 
                 constexpr auto orig_bpu = bpu<int64_t>(dim::time,
-                                                        scalefactor_ratio_type(360*24*3600, 1),
-                                                        power_ratio_type(-1, 2));
+                                                       scalefactor_ratio_type(360*24*3600, 1),
+                                                       power_ratio_type(-1, 2));
                 static_assert(orig_bpu.native_dim() == dim::time);
 
                 constexpr auto new_scalefactor = scalefactor_ratio_type(30*24*3600, 1);
 
+                /* orig ~ 360d volatility,  new = 30d volatility */
                 constexpr auto mult = orig_bpu.scalefactor() / new_scalefactor;
                 log && log(xtag("mult", mult));
                 static_assert(mult.num() == 12);
@@ -263,7 +264,7 @@ namespace xo {
 
                 static_assert(rr.bpu_rescaled_.power() == power_ratio_type(-1,2));
                 static_assert(rr.outer_scale_factor_ == outer_sf_exact);
-                static_assert(rr.outer_scale_sq_ == 12.0);
+                static_assert(rr.outer_scale_sq_ == 1 / 12.0);
             }
 
             /* keep spelled-out test.  Will generalize to other fractional powers when c++26 available */
@@ -302,7 +303,7 @@ namespace xo {
 
                 static_assert(rr.bpu_rescaled_.power() == power_ratio_type(-3,2));
                 static_assert(rr.outer_scale_factor_ == outer_sf_exact);
-                static_assert(rr.outer_scale_sq_ == 12.0);
+                static_assert(rr.outer_scale_sq_ == 1 / 12.0);
             }
         } /*TEST_CASE(bpu_rescale)*/
 

@@ -215,20 +215,29 @@ namespace xo {
             bpu2_rescale(const bpu<Int> & orig,
                          const scalefactor_ratio_type & new_scalefactor)
             {
+                /* we have orig,  representing qty (b.u)^p,
+                 * with b=orig.scalefactor, u=native dimension, p=orig.power
+                 */
+
                 ratio::ratio<Int> mult = (orig.scalefactor() / new_scalefactor);
 
-                /* inv: p_frac in [0, 1) */
+                /* inv: p_frac in (-1, 1) */
                 auto p_frac = orig.power().frac();
 
                 /* asof c++26: replace mult_sq with ::pow(mult, p_frac) */
                 double mult_sq = std::numeric_limits<double>::quiet_NaN();
 
-                if (p_frac.den() == 1) {
-                    mult_sq = 1.0;
-                } else if(p_frac.den() == 2) {
-                    mult_sq = mult.template convert_to<double>();
-                } else {
-                    // remaining possibilities not supported until c++26
+                /* pre-c++26 workaround */
+                {
+                    if (p_frac.den() == 1) {
+                        mult_sq = 1.0;
+                    } else if(p_frac.num() == 1 && p_frac.den() == 2) {
+                        mult_sq = mult.template convert_to<double>();
+                    } else if(p_frac.num() == -1 && p_frac.den() == 2) {
+                        mult_sq = 1.0 / mult.template convert_to<double>();
+                    } else {
+                        // remaining possibilities not supported until c++26
+                    }
                 }
 
                 ratio::ratio<Int> mult_p = mult.power(orig.power().floor());
