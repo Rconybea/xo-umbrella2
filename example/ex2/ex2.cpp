@@ -38,4 +38,5 @@ main () {
     cerr << "a3: " << a3 << endl;
 }
 
+
 /** end ex2.cpp **/

@@ -157,8 +157,9 @@ namespace xo {
             Repr scale_ = Repr{};
         };
 
-        template <natural_unit<::std::int64_t> NaturalUnit = natural_unit<::std::int64_t>()>
-        using stdquantity = xo::qty::quantity<double, ::std::int64_t, NaturalUnit>;
+        template <typename Repr = double,
+                  natural_unit<std::int64_t> NaturalUnit = natural_unit<std::int64_t>()>
+        using stdquantity = quantity<Repr, std::int64_t, NaturalUnit>;
 
         template <typename Quantity, typename Int, typename Int2x>
         constexpr auto
