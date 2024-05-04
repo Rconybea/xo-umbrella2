@@ -180,7 +180,7 @@ namespace xo {
 
         namespace detail {
             struct quantity_util {
-                /* parallel implementation to Quantity<Repr, Int> multiply,
+                /* parallel implementation to xquantity<Repr, Int> multiply,
                  * but return type will have dimension computed at compile-time
                  */
                 template <typename Q1, typename Q2>
@@ -419,7 +419,6 @@ namespace xo {
             inline constexpr auto year360s(Repr x) { return quantity<nu::year360, Repr>(x); }
             template <typename Repr>
             inline constexpr auto year365s(Repr x) { return quantity<nu::year365, Repr>(x); }
-            //inline constexpr auto year366s(Repr x) { return quantity<double,std::int64_t, nu::year366>(x); }
 
             static constexpr auto second = seconds(1);
 
