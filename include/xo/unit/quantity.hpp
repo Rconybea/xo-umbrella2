@@ -160,68 +160,70 @@ namespace xo {
             return x.template rescale<su>();
         }
 
-        struct quantity_util {
-            /* parallel implementation to Quantity<Repr, Int> multiply,
-             * but return type will have dimension computed at compile-time
-             */
-            template <typename Q1, typename Q2>
-            requires (quantity_concept<Q1>
-                      && quantity_concept<Q2>
-                      && Q1::always_constexpr_unit
-                      && Q2::always_constexpr_unit)
-            static constexpr auto multiply(Q1 x, Q2 y) {
-                using r_repr_type = std::common_type_t<typename Q1::repr_type,
-                                                       typename Q2::repr_type>;
-                using r_int_type = std::common_type_t<typename Q1::ratio_int_type,
-                                                      typename Q2::ratio_int_type>;
-                using r_int2x_type = std::common_type_t<typename Q1::ratio_int2x_type,
-                                                        typename Q2::ratio_int2x_type>;
+        namespace detail {
+            struct quantity_util {
+                /* parallel implementation to Quantity<Repr, Int> multiply,
+                 * but return type will have dimension computed at compile-time
+                 */
+                template <typename Q1, typename Q2>
+                requires (quantity_concept<Q1>
+                          && quantity_concept<Q2>
+                          && Q1::always_constexpr_unit
+                          && Q2::always_constexpr_unit)
+                static constexpr auto multiply(Q1 x, Q2 y) {
+                    using r_repr_type = std::common_type_t<typename Q1::repr_type,
+                                                           typename Q2::repr_type>;
+                    using r_int_type = std::common_type_t<typename Q1::ratio_int_type,
+                                                          typename Q2::ratio_int_type>;
+                    using r_int2x_type = std::common_type_t<typename Q1::ratio_int2x_type,
+                                                            typename Q2::ratio_int2x_type>;
 
-                constexpr auto rr = detail::su_product<r_int_type, r_int2x_type>(x.unit(), y.unit());
+                    constexpr auto rr = detail::su_product<r_int_type, r_int2x_type>(x.unit(), y.unit());
 
-                r_repr_type r_scale = (((rr.outer_scale_sq_ == 1.0)
-                                        ? 1.0
-                                        : ::sqrt(rr.outer_scale_sq_))
-                                       * rr.outer_scale_factor_.template convert_to<r_repr_type>()
-                                       * static_cast<r_repr_type>(x.scale())
-                                       * static_cast<r_repr_type>(y.scale()));
+                    r_repr_type r_scale = (((rr.outer_scale_sq_ == 1.0)
+                                            ? 1.0
+                                            : ::sqrt(rr.outer_scale_sq_))
+                                           * rr.outer_scale_factor_.template convert_to<r_repr_type>()
+                                           * static_cast<r_repr_type>(x.scale())
+                                           * static_cast<r_repr_type>(y.scale()));
 
-                return quantity<r_repr_type,
-                                r_int_type,
-                                rr.natural_unit_,
-                                r_int2x_type
-                                >(r_scale);
-            }
+                    return quantity<r_repr_type,
+                                    r_int_type,
+                                    rr.natural_unit_,
+                                    r_int2x_type
+                                    >(r_scale);
+                }
 
-            template <typename Q1, typename Q2>
-            requires (quantity_concept<Q1>
-                      && quantity_concept<Q2>
-                      && Q1::always_constexpr_unit
-                      && Q2::always_constexpr_unit)
-            static constexpr auto divide(Q1 x, Q2 y) {
-                using r_repr_type = std::common_type_t<typename Q1::repr_type,
-                                                       typename Q2::repr_type>;
-                using r_int_type = std::common_type_t<typename Q1::ratio_int_type,
-                                                      typename Q2::ratio_int_type>;
-                using r_int2x_type = std::common_type_t<typename Q1::ratio_int2x_type,
-                                                        typename Q2::ratio_int2x_type>;
+                template <typename Q1, typename Q2>
+                requires (quantity_concept<Q1>
+                          && quantity_concept<Q2>
+                          && Q1::always_constexpr_unit
+                          && Q2::always_constexpr_unit)
+                static constexpr auto divide(Q1 x, Q2 y) {
+                    using r_repr_type = std::common_type_t<typename Q1::repr_type,
+                                                           typename Q2::repr_type>;
+                    using r_int_type = std::common_type_t<typename Q1::ratio_int_type,
+                                                          typename Q2::ratio_int_type>;
+                    using r_int2x_type = std::common_type_t<typename Q1::ratio_int2x_type,
+                                                            typename Q2::ratio_int2x_type>;
 
-                constexpr auto rr = detail::su_ratio<r_int_type, r_int2x_type>(x.unit(), y.unit());
+                    constexpr auto rr = detail::su_ratio<r_int_type, r_int2x_type>(x.unit(), y.unit());
 
-                r_repr_type r_scale = (((rr.outer_scale_sq_ == 1.0)
-                                        ? 1.0
-                                        : ::sqrt(rr.outer_scale_sq_))
-                                       * rr.outer_scale_factor_.template convert_to<r_repr_type>()
-                                       * static_cast<r_repr_type>(x.scale())
-                                       / static_cast<r_repr_type>(y.scale()));
+                    r_repr_type r_scale = (((rr.outer_scale_sq_ == 1.0)
+                                            ? 1.0
+                                            : ::sqrt(rr.outer_scale_sq_))
+                                           * rr.outer_scale_factor_.template convert_to<r_repr_type>()
+                                           * static_cast<r_repr_type>(x.scale())
+                                           / static_cast<r_repr_type>(y.scale()));
 
-                return quantity<r_repr_type,
-                                r_int_type,
-                                rr.natural_unit_,
-                                r_int2x_type
-                                >(r_scale);
-            }
-        };
+                    return quantity<r_repr_type,
+                                    r_int_type,
+                                    rr.natural_unit_,
+                                    r_int2x_type
+                                    >(r_scale);
+                }
+            };
+        } /*namespace detail*/
 
         template <typename Q1, typename Q2, typename Int = typename Q2::ratio_int_type, natural_unit<Int> Unit = Q2::s_unit>
         requires (quantity_concept<Q1>
@@ -244,7 +246,7 @@ namespace xo {
         constexpr auto
         operator* (const Q1 & x, const Q2 & y)
         {
-            return quantity_util::multiply(x, y);
+            return detail::quantity_util::multiply(x, y);
         }
 
         /** note: won't have constexpr result w/ fractional dimension until c++26 (when ::sqrt(), ::pow() are constexpr)
@@ -257,7 +259,7 @@ namespace xo {
         constexpr auto
         operator/ (const Q1 & x, const Q2 & y)
         {
-            return quantity_util::divide(x, y);
+            return detail::quantity_util::divide(x, y);
         }
 
         namespace qty {

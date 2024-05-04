@@ -407,7 +407,7 @@ namespace xo {
                 static_assert(rr.outer_scale_sq_ == 1.0);
             }
 
-            constexpr auto q2 = quantity_util::multiply(ms, ms);
+            constexpr auto q2 = detail::quantity_util::multiply(ms, ms);
 
             /* proof that q2 is constexpr */
             static_assert(q2.scale() == 1.0);
@@ -460,7 +460,7 @@ namespace xo {
                 static_assert(rr.outer_scale_sq_ == 1.0);
             }
 
-            constexpr auto q2 = quantity_util::divide(ms, ms);
+            constexpr auto q2 = detail::quantity_util::divide(ms, ms);
 
             /* proof that q2 is constexpr */
             static_assert(q2.scale() == 1.0);
