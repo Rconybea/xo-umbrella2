@@ -43,7 +43,13 @@ namespace xo {
 
             // unit_qty
             // zero_qty
-            // reciprocal
+
+            constexpr
+            auto reciprocal() const {
+                return quantity<s_unit.reciprocal(),
+                                repr_type,
+                                ratio_int2x_type>(1.0 / scale_);
+            }
 
             template <typename Repr2>
             constexpr
