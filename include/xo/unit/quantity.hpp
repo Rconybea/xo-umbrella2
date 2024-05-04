@@ -227,7 +227,7 @@ namespace xo {
             };
         } /*namespace detail*/
 
-        template <typename Q1, typename Q2, typename Int = typename Q2::ratio_int_type, natural_unit<Int> Unit = Q2::s_unit>
+        template <typename Q1, typename Q2, auto Unit = Q2::s_unit>
         requires (quantity_concept<Q1>
                   && quantity_concept<Q2>
                   && Q1::always_constexpr_unit
