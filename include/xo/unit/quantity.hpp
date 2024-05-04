@@ -37,7 +37,9 @@ namespace xo {
             constexpr const repr_type & scale() const { return scale_; }
             constexpr const unit_type & unit() const { return s_unit; }
 
-            // is_dimensionless
+            constexpr bool is_dimensionless() const {
+                return s_unit.is_dimensionless();
+            }
 
             // unit_qty
             // zero_qty
@@ -151,6 +153,12 @@ namespace xo {
             constexpr operator Q2() const {
                 return this->template rescale<Q2::s_unit>().template with_repr<typename Q2::repr_type>();
             }
+
+            constexpr operator Repr() const
+                requires (NaturalUnit.is_dimensionless())
+                {
+                    return scale_;
+                }
 
         public: /* need public members so that a quantity instance can be a non-type template parameter (is a structural type) */
             static constexpr natural_unit<ratio_int_type> s_unit = NaturalUnit;
