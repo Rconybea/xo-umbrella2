@@ -227,6 +227,14 @@ namespace xo {
             };
         } /*namespace detail*/
 
+        template <auto Unit, typename Q1>
+        requires(quantity_concept<Q1>
+                 && Q1::always_constexpr_unit)
+        constexpr auto
+        with_units(const Q1 & x) {
+            return x.template rescale_ext<Unit>();
+        }
+
         template <typename Q1, typename Q2, auto Unit = Q2::s_unit>
         requires (quantity_concept<Q1>
                   && quantity_concept<Q2>
