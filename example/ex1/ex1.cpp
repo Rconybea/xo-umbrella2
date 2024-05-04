@@ -23,8 +23,8 @@ main () {
          << ", d.t^-2: " << a
          << endl;
 
-    static_assert(std::same_as<decltype(t)::repr_type, double>);
-    static_assert(sizeof(t) == sizeof(double));
+    static_assert(std::same_as<decltype(t)::repr_type, int>);
+    static_assert(sizeof(t) == sizeof(int));
     static_assert(t.scale() == 2);
     static_assert(t.abbrev() == flatstring("min"));
 
@@ -33,8 +33,8 @@ main () {
     static_assert(d.scale() == 2.5);
     static_assert(d.abbrev() == flatstring("km"));
 
-    static_assert(std::same_as<decltype(t2)::repr_type, double>);
-    static_assert(sizeof(t2) == sizeof(double));
+    static_assert(std::same_as<decltype(t2)::repr_type, int>);
+    static_assert(sizeof(t2) == sizeof(int));
     static_assert(t2.scale() == 4);
     static_assert(t2.abbrev() == flatstring("min^2"));
 

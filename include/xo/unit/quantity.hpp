@@ -313,8 +313,13 @@ namespace xo {
             inline constexpr auto nanoseconds(double x) { return quantity<double, std::int64_t, nu::nanosecond>(x); }
             inline constexpr auto microseconds(double x) { return quantity<double, std::int64_t, nu::microsecond>(x); }
             inline constexpr auto milliseconds(double x) { return quantity<double, std::int64_t, nu::millisecond>(x); }
-            inline constexpr auto seconds(double x) { return quantity<double, std::int64_t, nu::second>(x); }
-            inline constexpr auto minutes(double x) { return quantity<double, std::int64_t, nu::minute>(x); }
+
+            template <typename Repr>
+            inline constexpr auto seconds(Repr x) { return quantity<Repr, std::int64_t, nu::second>(x); }
+
+            template <typename Repr>
+            inline constexpr auto minutes(Repr x) { return quantity<Repr, std::int64_t, nu::minute>(x); }
+
             inline constexpr auto hours(double x) { return quantity<double, std::int64_t, nu::hour>(x); }
             inline constexpr auto days(double x) { return quantity<double, std::int64_t, nu::day>(x); }
             inline constexpr auto weeks(double x) { return quantity<double, std::int64_t, nu::week>(x); }
