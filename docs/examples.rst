@@ -259,10 +259,14 @@ with output:
 Fractional dimension
 --------------------
 
-Fractional dimensions are supported;   they work in the same way as familiar integral dimensions.
+Fractional dimensions have limited support.
+Prior to c++26 we can only support fractional dimensions with denominator 2,
+such as powers -3/2, -1/2, +1/2, +3/2 etc.
 
-Only caveat is that converting between fractional units with different scales creates a floating-point conversion factor,
-which may incur loss of precision based on floating-point roundoff.
+c++26 will enable support for support fractional dimensions involving other ratios,
+by offering constexpr ``::pow()``
+
+See ``xo-unit/examples/ex6`` for code below
 
 .. code-block:: cpp
    :linenos:
@@ -282,18 +286,23 @@ which may incur loss of precision based on floating-point roundoff.
         /* 10% volatility over 30 days */
         auto q2 = qty::volatility30d(0.1);
 
-        static_assert(q2.basis_power<dim::time, double> == 0.5);
-
         auto sum = q1 + q2;
         auto prod = q1 * q2;
 
-        static_assert(prod.basis_power<dim::time> == 1);
+        static_assert(sum.abbrev() == flatstring("yr360^(-1/2)"));
+        static_assert(prod.abbrev() == flatstring("yr360^-1"));
 
-        cerr << "q1: " << q1 << ", q2: " << q2 << ", q1+q2: " << sum << ", q1*q2" << prod << endl;
+        std::cerr << "q1: " << q1 << std::endl;
+        std::cerr << "q2: " << q2 << std::endl;
+        std::cerr << "q1+q2: " << sum << std::endl;
+        std::cerr << "q1*q2: " << prod << std::endl;
     }
 
 with output:
 
 .. code-block::
 
-    q1: 0.2yr250^-(1/2), q2: 0.1mo^-(1/2), q1+q2: 0.488675yr250^(1/2), q1*q2: 0.057735yr250^-1
+    q1: 0.2yr360^(-1/2)
+    q2: 0.1mo^(-1/2)
+    q1+q2: 0.54641yr360^(-1/2)
+    q1*q2: 0.069282yr360^-1

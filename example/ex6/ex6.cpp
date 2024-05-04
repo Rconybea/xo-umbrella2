@@ -2,7 +2,6 @@
 
 #include "xo/unit/quantity.hpp"
 #include "xo/unit/quantity_iostream.hpp"
-#include "xo/flatstring/int128_iostream.hpp"
 #include <iostream>
 
 int
@@ -15,8 +14,6 @@ main () {
     auto q1 = q::volatility_360d(0.2);
     /* 10% volatility over 30 days */
     auto q2 = q::volatility_30d(0.1);
-
-    //quantity<nu::volatility_360d> q2p = q2;
 
     /* 10% volatility per 30 days
      *  ~ (10% * sqrt(360/30)) volatility over 360 days
