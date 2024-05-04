@@ -1,26 +1,30 @@
 /** @file ex4.cpp **/
 
-#include "xo/unit/mpl/quantity.hpp"
+#include "xo/unit/quantity.hpp"
+#include "xo/unit/quantity_iostream.hpp"
 #include <iostream>
 
 int
 main () {
-    namespace u = xo::unit::units;
-    namespace qty = xo::unit::qty;
-    using namespace std;
+    //namespace u = xo::qty::units;
+    namespace q = xo::qty::qty;
+    using xo::qty::with_repr;
 
-    /* 20% volatility over 250 days (approx number of trading days in one year) */
-    auto t1 = qty::milliseconds(1);
-    /* 10% volatility over 30 days */
-    auto t2 = qty::minutes(1);
+    auto t1 = q::milliseconds(1);
+    auto t2 = q::minutes(1);
 
-    auto r1 = t1 / t2.with_repr<double>();
-    auto r2 = t2 / t1.with_repr<double>();
+    auto r1 = t1 / with_repr<double>(t2);
 
-    static_assert(same_as<decltype(r1), double>);
-    static_assert(same_as<decltype(r2), double>);
+    static_assert(r1.is_dimensionless());
+    static_assert(!t2.is_dimensionless());
 
-    cerr << "t1: " << t1 << ", t2: " << t2 << ", t1/t2: " << r1 << ", t2/t1: " << r2 << endl;
+    /* r1_value: assignment compiles,  since r1 dimensionless */
+    double r1_value = r1;
+
+    /* r2_value: assignment won't compile,  'cannot convert' error */
+    //double r2_value = t2;
+
+    std::cerr << "t1: " << t1 << ", t2: " << t2 << ", t1/t2: " << r1 << std::endl;
 }
 
 /** end ex4.cpp */
