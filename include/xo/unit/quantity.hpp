@@ -18,7 +18,7 @@ namespace xo {
          *  sizeof(quantity) == sizeof(Repr).
          **/
         template <
-            auto /*natural_unit<Int>*/ NaturalUnit = natural_unit<std::int64_t>(),
+            auto /*natural_unit<Int>*/ NaturalUnit,
             typename Repr = double,
             typename Int2x = detail::width2x_t<typename decltype(NaturalUnit)::ratio_int_type> >
         class quantity {
