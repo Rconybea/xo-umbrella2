@@ -8,7 +8,7 @@ int
 main () {
     namespace q = xo::qty::qty;
     namespace su = xo::qty::su;
-    using xo::qty::with_units;
+    using xo::qty::with_units_from;
     using xo::qty::quantity;
     using xo::flatstring;
     using namespace std;
@@ -31,7 +31,7 @@ main () {
     cerr << "a2: " << a2 << endl;
 
     constexpr auto au = q::meter / (q::second * q::second);
-    constexpr auto a3 = with_units(a, au);
+    constexpr auto a3 = with_units_from(a, au);
 
     static_assert(a3.abbrev() == flatstring("m.s^-2"));
 

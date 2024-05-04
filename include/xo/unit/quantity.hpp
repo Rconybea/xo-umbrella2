@@ -231,7 +231,7 @@ namespace xo {
                   && Q1::always_constexpr_unit
                   && Q2::always_constexpr_unit)
         constexpr auto
-        with_units(const Q1 & x, const Q2 & y)
+        with_units_from(const Q1 & x, const Q2 & y)
         {
             return x.template rescale<Unit>();
         }
