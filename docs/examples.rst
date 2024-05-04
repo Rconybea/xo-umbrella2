@@ -144,7 +144,7 @@ See ``xo-unit/example/ex3`` for code below
 
 .. code-block:: cpp
    :linenos:
-   :emphasize-lines: 11-12
+   :emphasize-lines: 12-13
 
     int
     main () {
@@ -173,12 +173,12 @@ with output:
 
 Remarks:
 
-*  Assignment to ``t`` converted to representation ``double``.
-   We could have used :code:`quantity<nu::second, int>` to preserve
-   right-hand-side representation.
+- Assignment to ``t`` converted to representation ``double``.
+  We could have used :code:`quantity<nu::second, int>` to preserve
+  right-hand-side representation.
 
-Scale conversion triggered by arithmetic
-----------------------------------------
+Scale conversion and arithmetic
+-------------------------------
 
 When representing a particular quantity,
 xo-unit uses at most one scale for each :term:`basis dimension` associated with the unit for that quantity.
@@ -210,37 +210,50 @@ with output:
 
     t1: 1ms, t2: 1min, t1*t2: 60000ms^2
 
-Dimensionless quantities collapse automatically
------------------------------------------------
+Dimensionless quantities unwrap implicitly
+------------------------------------------
+
+See ``xo-unit/examples/ex4`` for code below.
 
 .. code-block:: cpp
    :linenos:
-   :emphasize-lines: 14-15
+   :emphasize-lines: 23,26
 
     #include "xo/unit/quantity.hpp"
+    #include "xo/unit/quantity_iostream.hpp"
     #include <iostream>
 
-    int main() {
-        namespace u = xo::unit;
-        namespace qty = xo::units::qty;
-        using namespace std;
+    int
+    main () {
+        namespace q = xo::qty::qty;
 
-        auto t1 = qty::milliseconds(1);
-        auto t2 = qty::minutes(1);
-        auto r1 = t1 / t2.with_repr<double>();
-        auto r2 = t2 / t1.with_repr<double>();
+        auto t1 = q::milliseconds(1);
+        auto t2 = q::minutes(1);
 
-        static_assert<same_as<decltype(r1), double>);
-        static_assert<same_as<decltype(r2), double>);
+        auto r1 = t1 / with_repr<double>(t2);
 
-        cerr << "t1: " << t1 << ", t2: " << t2 << ", t1/t2: " << r1 << ", t2/t1: " << r2 << endl;
+        static_assert(r1.is_dimensionless());
+        static_assert(!t2.is_dimensionless());
+
+        static_assert(std::same_as<static_cast<double>(r1), double>);
+
+        // static_assert fails b/c static_cast only available for dimensionless quantity
+        //static_assert(std::same_as<decltype(static_cast<double>(t2)), double>);
+
+        // r1_value: assignment compiles,  since r1 dimensionless
+        double r1_value = r1;
+
+        // r2_value: assignment won't compile,  'cannot convert' error
+        //double r2_value = t2;
+
+        std::cerr << "t1: " << t1 << ", t2: " << t2 << ", t1/t2: " << r1_value << std::endl;
     }
 
 with output:
 
 .. code-block::
 
-    t1: 1ms, t2: 1min, t1/t2: 1.66667e-05, t2/t1: 60000
+    t1: 1ms, t2: 1min, t1/t2: 1.66667e-05
 
 
 Fractional dimension

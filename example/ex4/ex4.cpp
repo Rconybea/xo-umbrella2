@@ -6,9 +6,7 @@
 
 int
 main () {
-    //namespace u = xo::qty::units;
     namespace q = xo::qty::qty;
-    using xo::qty::with_repr;
 
     auto t1 = q::milliseconds(1);
     auto t2 = q::minutes(1);
@@ -17,6 +15,9 @@ main () {
 
     static_assert(r1.is_dimensionless());
     static_assert(!t2.is_dimensionless());
+
+    static_assert(std::same_as<decltype(static_cast<double>(r1)), double>);
+    //static_assert(std::same_as<decltype(static_cast<double>(t2)), double>);
 
     /* r1_value: assignment compiles,  since r1 dimensionless */
     double r1_value = r1;
