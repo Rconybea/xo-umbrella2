@@ -158,10 +158,6 @@ namespace xo {
             Repr scale_ = Repr{};
         };
 
-        template < natural_unit<std::int64_t> NaturalUnit,
-                   typename Repr = double >
-        using stdquantity = quantity<NaturalUnit, Repr>;
-
         template <typename Quantity, typename Int, typename Int2x>
         constexpr auto
         rescale(const Quantity & x, const scaled_unit<Int, Int2x> & su) {
