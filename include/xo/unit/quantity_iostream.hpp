@@ -10,12 +10,7 @@
 
 namespace xo {
     namespace qty {
-        template <
-            typename Repr = double,
-            typename Int = std::int64_t,
-            natural_unit<Int> NaturalUnit = natural_unit<Int>(),
-            typename Int2x = detail::width2x<Int>
-            >
+        template < auto NaturalUnit, typename Repr, typename Int2x >
         inline std::ostream &
         operator<< (std::ostream & os,
                     const quantity<NaturalUnit, Repr, Int2x> & x)
