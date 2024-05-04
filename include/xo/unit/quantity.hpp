@@ -232,6 +232,34 @@ namespace xo {
                                     r_int2x_type
                                     >(r_scale);
                 }
+
+                template <typename Q1, typename Q2>
+                requires(quantity_concept<Q1>
+                         && quantity_concept<Q2>
+                         && Q1::always_constexpr_unit
+                         && Q2::always_constexpr_unit)
+                static constexpr auto add(Q1 x, Q2 y) {
+                    using r_repr_type = std::common_type_t<typename Q1::repr_type,
+                                                           typename Q2::repr_type>;
+                    using r_int_type = std::common_type_t<typename Q1::ratio_int_type,
+                                                          typename Q2::ratio_int_type>;
+                    using r_int2x_type = std::common_type_t<typename Q1::ratio_int2x_type,
+                                                            typename Q2::ratio_int2x_type>;
+                    /* conversion to get y in same units as x: multiply by y/x */
+                    auto rr = detail::su_ratio<r_int_type, r_int2x_type>(y.unit(), x.unit());
+
+                    if (rr.natural_unit_.is_dimensionless()) {
+                        r_repr_type r_scale = (static_cast<r_repr_type>(x.scale())
+                                               + (::sqrt(rr.outer_scale_sq_)
+                                                  * rr.outer_scale_factor_.template convert_to<r_repr_type>()
+                                                  * static_cast<r_repr_type>(y.scale())));
+
+                        return quantity<x.s_unit, r_repr_type, r_int2x_type>(r_scale);
+                    } else {
+                        /* units don't match! */
+                        return quantity<x.s_unit, r_repr_type, r_int2x_type>(std::numeric_limits<r_repr_type>::quiet_NaN());
+                    }
+                }
             };
         } /*namespace detail*/
 
@@ -287,6 +315,19 @@ namespace xo {
         operator/ (const Q1 & x, const Q2 & y)
         {
             return detail::quantity_util::divide(x, y);
+        }
+
+        /** note: won't have constexpr result w/ fractional dimension until c++26 (when ::sqrt(), ::pow() are constexpr)
+         **/
+        template <typename Q1, typename Q2>
+        requires (quantity_concept<Q1>
+                  && quantity_concept<Q2>
+                  && Q1::always_constexpr_unit
+                  && Q2::always_constexpr_unit)
+        constexpr auto
+        operator+ (const Q1 & x, const Q2 & y)
+        {
+            return detail::quantity_util::add(x, y);
         }
 
         namespace qty {
