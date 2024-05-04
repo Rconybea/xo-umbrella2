@@ -24,7 +24,7 @@ main () {
          << ", d.t^-2: " << a
          << endl;
 
-    constexpr auto a2 = a.template rescale<su::meter / (su::second * su::second)>();
+    constexpr auto a2 = a.rescale_ext<su::meter / (su::second * su::second)>();
 
     static_assert(a2.abbrev() == flatstring("m.s^-2"));
 

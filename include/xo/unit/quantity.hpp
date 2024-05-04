@@ -76,7 +76,7 @@ namespace xo {
 
             template <scaled_unit<Int> ScaledUnit2>
             constexpr
-            auto rescale() const {
+            auto rescale_ext() const {
                 /* conversion factor from .unit -> unit2*/
                 auto rr = detail::su_ratio<ratio_int_type,
                                            ratio_int2x_type>(NaturalUnit, ScaledUnit2.natural_unit_);

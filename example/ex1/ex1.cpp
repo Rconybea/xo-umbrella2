@@ -43,7 +43,7 @@ main () {
     static_assert(a.scale() == 0.625);
     static_assert(a.abbrev() == flatstring("km.min^-2"));
 
-    constexpr auto a2 = a.rescale<(su::meter / (su::second * su::second))>();
+    constexpr auto a2 = a.rescale_ext<(su::meter / (su::second * su::second))>();
 
     cerr << "d.t^-2: " << a2 << endl;
 
