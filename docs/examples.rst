@@ -125,7 +125,7 @@ See ``xo-unit/example/ex2`` for code below
    :emphasize-lines: 1-2
 
     constexpr auto au = q::meter / (q::second * q::second);  /* just for units */
-    constexpr auto a3 = with_units(a, au);
+    constexpr auto a3 = with_units_from(a, au);  /* a, but with units from au */
 
     static_assert(a3.abbrev() == flatstring("m.s^-2"));
 
@@ -138,16 +138,18 @@ with output:
     a3: 0.173611m.s^-2
 
 
-Scale conversion triggered by assignment
-----------------------------------------
+Implicit Scale conversion triggered by assignment
+-------------------------------------------------
 
-Another way to convert units is by assignment
+Another way to convert units is to assign to a variable
+with desired units -- this works because the units are encoded
+as part of the assigned variable's type.
 
 See ``xo-unit/example/ex3`` for code below
 
 .. code-block:: cpp
    :linenos:
-   :emphasize-lines: 10-11
+   :emphasize-lines: 11-12
 
     int
     main () {
@@ -179,8 +181,8 @@ with output:
 Remarks:
 
 *  Assignment to ``t`` converted to representation ``double``.
-   We could have used :code:`quantity<unit::second, int>` to convert (possibly rounding down)
-   representation to `int`.
+   We could have used :code:`stdquantity<int, u::second>` to preserve
+   right-hand-side representation.
 
 Scale conversion triggered by arithmetic
 ----------------------------------------
