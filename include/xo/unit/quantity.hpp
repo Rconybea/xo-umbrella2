@@ -44,6 +44,12 @@ namespace xo {
             // zero_qty
             // reciprocal
 
+            template <typename Repr2>
+            constexpr
+            auto with_repr() const {
+                return quantity<Repr2, ratio_int_type, s_unit, ratio_int2x_type>(scale_);
+            }
+
             /* parallel implementation to Quantity<Repr, Int>::rescale(),
              * except that NaturalUnit2 is a compile-time-only template-argument
              *
@@ -142,7 +148,7 @@ namespace xo {
             requires(quantity_concept<Q2>
                      && Q2::always_constexpr_unit)
             constexpr operator Q2() const {
-                return this->template rescale<Q2::s_unit>();
+                return this->template rescale<Q2::s_unit>().template with_repr<typename Q2::repr_type>();
             }
 
         public: /* need public members so that a quantity instance can be a non-type template parameter (is a structural type) */
@@ -234,6 +240,15 @@ namespace xo {
         with_units_from(const Q1 & x, const Q2 & y)
         {
             return x.template rescale<Unit>();
+        }
+
+        template <typename Repr2, typename Q1>
+        requires (quantity_concept<Q1>
+                  && Q1::always_constexpr_unit)
+        constexpr auto
+        with_repr(const Q1 & x)
+        {
+            return x.template with_repr<Repr2>();
         }
 
         /** note: won't have constexpr result w/ fractional dimension until c++26 (when ::sqrt(), ::pow() are constexpr)
