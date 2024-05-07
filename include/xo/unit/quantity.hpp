@@ -411,6 +411,7 @@ namespace xo {
             static constexpr auto kilotonne = kilotonnes(1);
         } /*namespace qty*/
 
+        namespace qty {
             // ----- distance -----
 
             template <typename Repr>
@@ -447,8 +448,32 @@ namespace xo {
             /** @brief create quantity representing @p x statute miles of distance, with compile-time unit representation **/
             template <typename Repr>
             inline constexpr auto miles(Repr x) { return quantity<nu::mile, Repr>(x); }
-            static constexpr auto meter = meters(1);
 
+            /** @brief a quantity representing 1 picometer of distance, with compile-time unit representation **/
+            static constexpr auto picometer = picometers(1);
+            /** @brief a quantity representing 1 nanometer of distance, with compile-time unit representation **/
+            static constexpr auto nanometer = nanometers(1);
+            /** @brief a quantity representing 1 micrometer of distance, with compile-time unit representation **/
+            static constexpr auto micrometer = micrometers(1);
+            /** @brief a quantity representing 1 millimeter of distance, with compile-time unit representation **/
+            static constexpr auto millimeter = millimeters(1);
+            /** @brief a quantity representing 1 meter of distance, with compile-time unit representation **/
+            static constexpr auto meter = meters(1);
+            /** @brief a quantity representing 1 kilometer of distance, with compile-time unit representation **/
+            static constexpr auto kilometer = kilometers(1);
+            /** @brief a quantity representing 1 megameter of distance, with compile-time unit representation **/
+            static constexpr auto megameter = megameters(1);
+            /** @brief a quantity representing 1 gigameter of distance, with compile-time unit representation **/
+            static constexpr auto gigameter = gigameters(1);
+
+            /** @brief a quantity representing exactly 1 lightsecond of distance,  with compile-time unit representation **/
+            static constexpr auto lightsecond = lightseconds(1);
+            /** @brief a quantity representing exactly 1 astronomical unit of distance,  with compile-time unit representation **/
+            static constexpr auto astronomicalunit = astronomicalunits(1);
+
+        } /*namespace qty*/
+
+        namespace qty {
             // ----- time -----
 
             template <typename Repr>
@@ -484,6 +509,7 @@ namespace xo {
             inline constexpr auto year365s(Repr x) { return quantity<nu::year365, Repr>(x); }
 
             static constexpr auto second = seconds(1);
+        } /*namespace qty*/
 
             // ----- volatility -----
 
