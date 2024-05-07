@@ -12,7 +12,7 @@
 #include <string>
 
 namespace xo {
-    namespace su = xo::qty::su;
+    namespace u = xo::qty::u;
     namespace nu = xo::qty::nu;
 
     using xo::qty::xquantity;
@@ -388,7 +388,7 @@ namespace xo {
             scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.xquantity"));
 
             /* not constexpr until c++26 */
-            auto ng = unit_qty(su::nanogram);
+            auto ng = unit_qty(u::nanogram);
 
             log && log(xtag("ng", ng));
 
@@ -401,7 +401,7 @@ namespace xo {
             scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.xquantity2"));
 
             /* not constexpr until c++26 */
-            xquantity ng = unit_qty(su::nanogram);
+            xquantity ng = unit_qty(u::nanogram);
             auto ng2 = ng * ng;
 
             log && log(xtag("ng*ng", ng2));
@@ -415,7 +415,7 @@ namespace xo {
             scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.xquantity3"));
 
             /* not constexpr until c++26 */
-            xquantity ng = unit_qty(su::nanogram);
+            xquantity ng = unit_qty(u::nanogram);
             auto ng0 = ng / ng;
 
             log && log(xtag("ng/ng", ng0));
@@ -429,8 +429,8 @@ namespace xo {
             scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.xquantity4"));
 
             /* not constexpr until c++26 */
-            xquantity ng = unit_qty(su::nanogram);
-            xquantity ug = unit_qty(su::microgram);
+            xquantity ng = unit_qty(u::nanogram);
+            xquantity ug = unit_qty(u::microgram);
 
             {
                 auto prod1 = ng * ug;
@@ -465,8 +465,8 @@ namespace xo {
             scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.xquantity5"));
 
             /* not constexpr until c++26 */
-            xquantity ng = unit_qty(su::nanogram);
-            xquantity ug = unit_qty(su::microgram);
+            xquantity ng = unit_qty(u::nanogram);
+            xquantity ug = unit_qty(u::microgram);
 
             {
                 auto ratio1 = ng / ug;
@@ -494,8 +494,8 @@ namespace xo {
             scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.xquantity6"));
 
             /* not constexpr until c++26 */
-            xquantity ng = unit_qty(su::nanogram);
-            xquantity ug = unit_qty(su::microgram);
+            xquantity ng = unit_qty(u::nanogram);
+            xquantity ug = unit_qty(u::microgram);
 
             {
                 auto sum1 = ng + ug;
@@ -526,8 +526,8 @@ namespace xo {
             scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.xquantity7"));
 
             /* not constexpr until c++26 */
-            xquantity ng = unit_qty(su::nanogram);
-            xquantity ug = unit_qty(su::microgram);
+            xquantity ng = unit_qty(u::nanogram);
+            xquantity ug = unit_qty(u::microgram);
 
             {
                 auto sum1 = ng - ug;
@@ -558,8 +558,8 @@ namespace xo {
             scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.xquantity.compare"));
 
             /* not constexpr until c++26 */
-            xquantity ng = 1000 * unit_qty(su::nanogram);
-            xquantity ug = unit_qty(su::microgram);
+            xquantity ng = 1000 * unit_qty(u::nanogram);
+            xquantity ug = unit_qty(u::microgram);
 
             {
                 auto cmp = (ng == ug);
@@ -617,8 +617,8 @@ namespace xo {
             scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.xquantity.compare2"));
 
             /* not constexpr until c++26 */
-            xquantity ng = unit_qty(su::nanogram);
-            xquantity ug = unit_qty(su::microgram);
+            xquantity ng = unit_qty(u::nanogram);
+            xquantity ug = unit_qty(u::microgram);
 
             {
                 auto cmp = (ng == ug);

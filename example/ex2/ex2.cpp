@@ -7,7 +7,7 @@
 int
 main () {
     namespace q = xo::qty::qty;
-    namespace su = xo::qty::su;
+    namespace u = xo::qty::u;
     using xo::qty::with_units_from;
     using xo::qty::with_units;
     using xo::qty::quantity;
@@ -25,13 +25,13 @@ main () {
          << ", d.t^-2: " << a
          << endl;
 
-    constexpr auto a2 = a.rescale_ext<su::meter / (su::second * su::second)>();
+    constexpr auto a2 = a.rescale_ext<u::meter / (u::second * u::second)>();
 
     static_assert(a2.abbrev() == flatstring("m.s^-2"));
 
     cerr << "a2: " << a2 << endl;
 
-    constexpr auto a3 = with_units<su::meter / (su::second * su::second)>(a);
+    constexpr auto a3 = with_units<u::meter / (u::second * u::second)>(a);
 
     static_assert(a3.abbrev() == flatstring("m.s^-2"));
 

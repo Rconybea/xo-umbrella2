@@ -7,7 +7,7 @@
 int
 main () {
     namespace q = xo::qty::qty;
-    namespace su = xo::qty::su;
+    namespace u = xo::qty::u;
     using xo::qty::quantity;
     using xo::flatstring;
     using namespace std;
@@ -43,7 +43,7 @@ main () {
     static_assert(a.scale() == 0.625);
     static_assert(a.abbrev() == flatstring("km.min^-2"));
 
-    constexpr auto a2 = a.rescale_ext<(su::meter / (su::second * su::second))>();
+    constexpr auto a2 = a.rescale_ext<(u::meter / (u::second * u::second))>();
 
     cerr << "d.t^-2: " << a2 << endl;
 

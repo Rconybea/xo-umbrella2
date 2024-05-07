@@ -389,7 +389,7 @@ namespace xo {
             static_assert(rr.outer_scale_factor_.template convert_to<decltype(ms)::repr_type>() == 1.0);
             static_assert(rr.natural_unit_.n_bpu() == 1);
 
-            constexpr auto q1 = quantity<detail::make_unit_rescale_result<decltype(ms)::ratio_int_type>(rr.natural_unit_),
+            constexpr auto q1 = quantity<detail::su_promote<decltype(ms)::ratio_int_type>(rr.natural_unit_),
                                          decltype(ms)::repr_type>(ms.scale() * ms.scale());
 
             /* proof that q is constexpr */
@@ -461,7 +461,7 @@ namespace xo {
             static_assert(rr.outer_scale_factor_.template convert_to<decltype(ms)::repr_type>() == 1.0);
             static_assert(rr.natural_unit_.n_bpu() == 0);
 
-            constexpr auto q1 = quantity<detail::make_unit_rescale_result<decltype(ms)::ratio_int_type>(rr.natural_unit_),
+            constexpr auto q1 = quantity<detail::su_promote<decltype(ms)::ratio_int_type>(rr.natural_unit_),
                                          decltype(ms)::repr_type>(ms.scale() * ms.scale());
 
             /* proof that q is constexpr */

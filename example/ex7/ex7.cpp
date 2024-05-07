@@ -6,9 +6,8 @@
 
 int
 main () {
-    //namespace u = xo::unit::units;
     using namespace xo::qty;
-    //namespace su = xo::qty::su;
+    namespace u = xo::qty::u;
     namespace q = xo::qty::qty;
     using namespace std;
 
@@ -23,7 +22,7 @@ main () {
     /* rescale to not-so-absurd units */
 
     /* kg.m.s^-2 */
-    quantity res = qty3.rescale_ext<su::kilogram * su::meter / (su::second * su::second)>();
+    quantity res = qty3.rescale_ext<u::kilogram * u::meter / (u::second * u::second)>();
 
     /* 2.57958e-10kg.m.s^-2 */
     cerr << "res: " << res << endl;

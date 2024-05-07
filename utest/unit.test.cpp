@@ -12,7 +12,7 @@ namespace xo {
     namespace ut {
         /* compile-time tests */
 
-        namespace su = xo::qty::su;
+        namespace u = xo::qty::u;
 
         using xo::qty::dim;
         using xo::qty::basis_unit2_abbrev_type;

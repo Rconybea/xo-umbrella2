@@ -75,7 +75,7 @@ namespace xo {
 
             scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.scaled_unit0"));
 
-            constexpr auto ng = su::nanogram;
+            constexpr auto ng = u::nanogram;
             constexpr auto ng2 = ng * ng;
 
             log && log(xtag("ng", ng));
@@ -90,7 +90,7 @@ namespace xo {
 
             scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.scaled_unit1"));
 
-            constexpr auto ng = su::nanogram;
+            constexpr auto ng = u::nanogram;
             constexpr auto ng2 = ng / ng;
 
             log && log(xtag("ng", ng));
@@ -105,7 +105,7 @@ namespace xo {
 
             scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.scaled_unit2"));
 
-            constexpr auto ms = su::millisecond;
+            constexpr auto ms = u::millisecond;
             constexpr auto ms2 = ms * ms;
 
             log && log(xtag("ms", ms));

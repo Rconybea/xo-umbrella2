@@ -253,7 +253,7 @@ namespace xo {
                                            * static_cast<r_repr_type>(x.scale())
                                            * static_cast<r_repr_type>(y.scale()));
 
-                    return quantity<detail::make_unit_rescale_result<r_int_type>(rr.natural_unit_),
+                    return quantity<detail::su_promote<r_int_type>(rr.natural_unit_),
                                     r_repr_type>(r_scale);
                 }
 
@@ -280,7 +280,7 @@ namespace xo {
                                            * static_cast<r_repr_type>(x.scale())
                                            / static_cast<r_repr_type>(y.scale()));
 
-                    return quantity<detail::make_unit_rescale_result<r_int_type>(rr.natural_unit_),
+                    return quantity<detail::su_promote<r_int_type>(rr.natural_unit_),
                                     r_repr_type>(r_scale);
                 }
 
@@ -427,28 +427,28 @@ namespace xo {
             // ----- mass -----
 
             template <typename Repr>
-            inline constexpr auto picograms(Repr x) { return quantity<su::picogram, Repr>(x); }
+            inline constexpr auto picograms(Repr x) { return quantity<u::picogram, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto nanograms(Repr x) { return quantity<su::nanogram, Repr>(x); }
+            inline constexpr auto nanograms(Repr x) { return quantity<u::nanogram, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto micrograms(Repr x) { return quantity<su::microgram, Repr>(x); }
+            inline constexpr auto micrograms(Repr x) { return quantity<u::microgram, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto milligrams(Repr x) { return quantity<su::milligram, Repr>(x); }
+            inline constexpr auto milligrams(Repr x) { return quantity<u::milligram, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto grams(Repr x) { return quantity<su::gram, Repr>(x); }
+            inline constexpr auto grams(Repr x) { return quantity<u::gram, Repr>(x); }
 
             /** @brief create a quantity representing @p x kilograms of mass,  with compile-time unit representation **/
             template <typename Repr>
-            inline constexpr auto kilograms(Repr x) { return quantity<su::kilogram, Repr>(x); }
+            inline constexpr auto kilograms(Repr x) { return quantity<u::kilogram, Repr>(x); }
 
             template <typename Repr>
-            inline constexpr auto tonnes(Repr x) { return quantity<su::tonne, Repr>(x); }
+            inline constexpr auto tonnes(Repr x) { return quantity<u::tonne, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto kilotonnes(Repr x) { return quantity<su::kilotonne, Repr>(x); }
+            inline constexpr auto kilotonnes(Repr x) { return quantity<u::kilotonne, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto megatonnes(Repr x) { return quantity<su::megatonne, Repr>(x); }
+            inline constexpr auto megatonnes(Repr x) { return quantity<u::megatonne, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto gigatonnes(Repr x) { return quantity<su::gigatonne, Repr>(x); }
+            inline constexpr auto gigatonnes(Repr x) { return quantity<u::gigatonne, Repr>(x); }
 
             /** @brief a quantity representing 1 picogram of mass, with compile-time unit representation **/
             static constexpr auto picogram = picograms(1);
@@ -472,39 +472,39 @@ namespace xo {
             // ----- distance -----
 
             template <typename Repr>
-            inline constexpr auto picometers(Repr x) { return quantity<su::picometer, Repr>(x); }
+            inline constexpr auto picometers(Repr x) { return quantity<u::picometer, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto nanometers(Repr x) { return quantity<su::nanometer, Repr>(x); }
+            inline constexpr auto nanometers(Repr x) { return quantity<u::nanometer, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto micrometers(Repr x) { return quantity<su::micrometer, Repr>(x); }
+            inline constexpr auto micrometers(Repr x) { return quantity<u::micrometer, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto millimeters(Repr x) { return quantity<su::millimeter, Repr>(x); }
+            inline constexpr auto millimeters(Repr x) { return quantity<u::millimeter, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto meters(Repr x) { return quantity<su::meter, Repr>(x); }
+            inline constexpr auto meters(Repr x) { return quantity<u::meter, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto kilometers(Repr x) { return quantity<su::kilometer, Repr>(x); }
+            inline constexpr auto kilometers(Repr x) { return quantity<u::kilometer, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto megameters(Repr x) { return quantity<su::megameter, Repr>(x); }
+            inline constexpr auto megameters(Repr x) { return quantity<u::megameter, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto gigameters(Repr x) { return quantity<su::gigameter, Repr>(x); }
+            inline constexpr auto gigameters(Repr x) { return quantity<u::gigameter, Repr>(x); }
 
             template <typename Repr>
-            inline constexpr auto lightseconds(Repr x) { return quantity<su::lightsecond, Repr>(x); }
+            inline constexpr auto lightseconds(Repr x) { return quantity<u::lightsecond, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto astronomicalunits(Repr x) { return quantity<su::astronomicalunit, Repr>(x); }
+            inline constexpr auto astronomicalunits(Repr x) { return quantity<u::astronomicalunit, Repr>(x); }
 
             /** @brief create quantity representing @p x inches of distance, with compile-time unit representation **/
             template <typename Repr>
-            inline constexpr auto inches(Repr x) { return quantity<su::inch, Repr>(x); }
+            inline constexpr auto inches(Repr x) { return quantity<u::inch, Repr>(x); }
             /** @brief create quantity representing @p x feet of distance, with compile-time unit representation **/
             template <typename Repr>
-            inline constexpr auto feet(Repr x) { return quantity<su::foot, Repr>(x); }
+            inline constexpr auto feet(Repr x) { return quantity<u::foot, Repr>(x); }
             /** @brief create quantity representing @p x yards of distance, with compile-time unit representation **/
             template <typename Repr>
-            inline constexpr auto yards(Repr x) { return quantity<su::yard, Repr>(x); }
+            inline constexpr auto yards(Repr x) { return quantity<u::yard, Repr>(x); }
             /** @brief create quantity representing @p x statute miles of distance, with compile-time unit representation **/
             template <typename Repr>
-            inline constexpr auto miles(Repr x) { return quantity<su::mile, Repr>(x); }
+            inline constexpr auto miles(Repr x) { return quantity<u::mile, Repr>(x); }
 
             /** @brief a quantity representing 1 picometer of distance, with compile-time unit representation **/
             static constexpr auto picometer = picometers(1);
@@ -534,44 +534,44 @@ namespace xo {
             // ----- time -----
 
             template <typename Repr>
-            inline constexpr auto picoseconds(Repr x) { return quantity<su::picosecond, Repr>(x); }
+            inline constexpr auto picoseconds(Repr x) { return quantity<u::picosecond, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto nanoseconds(Repr x) { return quantity<su::nanosecond, Repr>(x); }
+            inline constexpr auto nanoseconds(Repr x) { return quantity<u::nanosecond, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto microseconds(Repr x) { return quantity<su::microsecond, Repr>(x); }
+            inline constexpr auto microseconds(Repr x) { return quantity<u::microsecond, Repr>(x); }
 
             template <typename Repr>
-            inline constexpr auto milliseconds(Repr x) { return quantity<su::millisecond, Repr>(x); }
+            inline constexpr auto milliseconds(Repr x) { return quantity<u::millisecond, Repr>(x); }
 
             /** @brief create quantity representing @p x seconds of time, with compile-time unit representation **/
             template <typename Repr>
 
-            inline constexpr auto seconds(Repr x) { return quantity<su::second, Repr>(x); }
+            inline constexpr auto seconds(Repr x) { return quantity<u::second, Repr>(x); }
 
             /** @brief create quantity representing @p x minutes of time, with compile-time unit representation **/
             template <typename Repr>
-            inline constexpr auto minutes(Repr x) { return quantity<su::minute, Repr>(x); }
+            inline constexpr auto minutes(Repr x) { return quantity<u::minute, Repr>(x); }
 
             /** @brief create quantity representing @p x hours of time, with compile-time unit representation **/
             template <typename Repr>
-            inline constexpr auto hours(Repr x) { return quantity<su::hour, Repr>(x); }
+            inline constexpr auto hours(Repr x) { return quantity<u::hour, Repr>(x); }
 
             /** @brief create quantity representing @p x days of time, with compile-time unit representation **/
             template <typename Repr>
-            inline constexpr auto days(Repr x) { return quantity<su::day, Repr>(x); }
+            inline constexpr auto days(Repr x) { return quantity<u::day, Repr>(x); }
 
             template <typename Repr>
-            inline constexpr auto weeks(Repr x) { return quantity<su::week, Repr>(x); }
+            inline constexpr auto weeks(Repr x) { return quantity<u::week, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto months(Repr x) { return quantity<su::month, Repr>(x); }
+            inline constexpr auto months(Repr x) { return quantity<u::month, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto years(Repr x) { return quantity<su::year, Repr>(x); }
+            inline constexpr auto years(Repr x) { return quantity<u::year, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto year250s(Repr x) { return quantity<su::year250, Repr>(x); }
+            inline constexpr auto year250s(Repr x) { return quantity<u::year250, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto year360s(Repr x) { return quantity<su::year360, Repr>(x); }
+            inline constexpr auto year360s(Repr x) { return quantity<u::year360, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto year365s(Repr x) { return quantity<su::year365, Repr>(x); }
+            inline constexpr auto year365s(Repr x) { return quantity<u::year365, Repr>(x); }
 
             /** @brief a quantity representing 1 second of time, with compile-time unit representation **/
             static constexpr auto second = seconds(1);
@@ -591,13 +591,13 @@ namespace xo {
              */
 
             template <typename Repr>
-            inline constexpr auto volatility_30d(Repr x) { return quantity<su::volatility_30d, Repr>(x); }
+            inline constexpr auto volatility_30d(Repr x) { return quantity<u::volatility_30d, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto volatility_250d(Repr x) { return quantity<su::volatility_250d, Repr>(x); }
+            inline constexpr auto volatility_250d(Repr x) { return quantity<u::volatility_250d, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto volatility_360d(Repr x) { return quantity<su::volatility_360d, Repr>(x); }
+            inline constexpr auto volatility_360d(Repr x) { return quantity<u::volatility_360d, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto volatility_365d(Repr x) { return quantity<su::volatility_365d, Repr>(x); }
+            inline constexpr auto volatility_365d(Repr x) { return quantity<u::volatility_365d, Repr>(x); }
         } /*namespace qty*/
 
         /* reminder: see [quantity_ops.hpp] for operator* etc */

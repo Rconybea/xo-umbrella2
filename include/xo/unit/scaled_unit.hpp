@@ -56,61 +56,67 @@ namespace xo {
 
         namespace detail {
             template <typename Int>
-            constexpr auto make_unit_rescale_result(const natural_unit<Int> & bpuv) {
+            constexpr auto su_promote(const natural_unit<Int> & bpuv) {
                 return scaled_unit<Int>(bpuv,
                                         ratio::ratio<Int>(1, 1),
                                         1.0);
             }
         }
 
-        namespace su {
-            constexpr auto picogram = detail::make_unit_rescale_result<std::int64_t>(nu::picogram);
-            constexpr auto nanogram = detail::make_unit_rescale_result<std::int64_t>(nu::nanogram);
-            constexpr auto microgram = detail::make_unit_rescale_result<std::int64_t>(nu::microgram);
-            constexpr auto milligram = detail::make_unit_rescale_result<std::int64_t>(nu::milligram);
-            constexpr auto gram = detail::make_unit_rescale_result<std::int64_t>(nu::gram);
-            constexpr auto kilogram = detail::make_unit_rescale_result<std::int64_t>(nu::kilogram);
-            constexpr auto tonne = detail::make_unit_rescale_result<std::int64_t>(nu::tonne);
-            constexpr auto kilotonne = detail::make_unit_rescale_result<std::int64_t>(nu::kilotonne);
-            constexpr auto megatonne = detail::make_unit_rescale_result<std::int64_t>(nu::megatonne);
-            constexpr auto gigatonne = detail::make_unit_rescale_result<std::int64_t>(nu::gigatonne);
+        namespace u {
+            /* values here can be used as template arguments to quantity:
+             * e.g.
+             *   quantity<u:picogram> qty1;
+             *   quantity<u:meter/u:second> velocity;
+             */
 
-            constexpr auto picometer = detail::make_unit_rescale_result<std::int64_t>(nu::picometer);
-            constexpr auto nanometer = detail::make_unit_rescale_result<std::int64_t>(nu::nanometer);
-            constexpr auto micrometer = detail::make_unit_rescale_result<std::int64_t>(nu::micrometer);
-            constexpr auto millimeter = detail::make_unit_rescale_result<std::int64_t>(nu::millimeter);
-            constexpr auto meter = detail::make_unit_rescale_result<std::int64_t>(nu::meter);
-            constexpr auto kilometer = detail::make_unit_rescale_result<std::int64_t>(nu::kilometer);
-            constexpr auto megameter = detail::make_unit_rescale_result<std::int64_t>(nu::megameter);
-            constexpr auto gigameter = detail::make_unit_rescale_result<std::int64_t>(nu::gigameter);
+            constexpr auto picogram = detail::su_promote<std::int64_t>(nu::picogram);
+            constexpr auto nanogram = detail::su_promote<std::int64_t>(nu::nanogram);
+            constexpr auto microgram = detail::su_promote<std::int64_t>(nu::microgram);
+            constexpr auto milligram = detail::su_promote<std::int64_t>(nu::milligram);
+            constexpr auto gram = detail::su_promote<std::int64_t>(nu::gram);
+            constexpr auto kilogram = detail::su_promote<std::int64_t>(nu::kilogram);
+            constexpr auto tonne = detail::su_promote<std::int64_t>(nu::tonne);
+            constexpr auto kilotonne = detail::su_promote<std::int64_t>(nu::kilotonne);
+            constexpr auto megatonne = detail::su_promote<std::int64_t>(nu::megatonne);
+            constexpr auto gigatonne = detail::su_promote<std::int64_t>(nu::gigatonne);
 
-            constexpr auto lightsecond = detail::make_unit_rescale_result<std::int64_t>(nu::lightsecond);
-            constexpr auto astronomicalunit = detail::make_unit_rescale_result<std::int64_t>(nu::astronomicalunit);
+            constexpr auto picometer = detail::su_promote<std::int64_t>(nu::picometer);
+            constexpr auto nanometer = detail::su_promote<std::int64_t>(nu::nanometer);
+            constexpr auto micrometer = detail::su_promote<std::int64_t>(nu::micrometer);
+            constexpr auto millimeter = detail::su_promote<std::int64_t>(nu::millimeter);
+            constexpr auto meter = detail::su_promote<std::int64_t>(nu::meter);
+            constexpr auto kilometer = detail::su_promote<std::int64_t>(nu::kilometer);
+            constexpr auto megameter = detail::su_promote<std::int64_t>(nu::megameter);
+            constexpr auto gigameter = detail::su_promote<std::int64_t>(nu::gigameter);
 
-            constexpr auto inch = detail::make_unit_rescale_result<std::int64_t>(nu::inch);
-            constexpr auto foot = detail::make_unit_rescale_result<std::int64_t>(nu::foot);
-            constexpr auto yard = detail::make_unit_rescale_result<std::int64_t>(nu::yard);
-            constexpr auto mile = detail::make_unit_rescale_result<std::int64_t>(nu::mile);
+            constexpr auto lightsecond = detail::su_promote<std::int64_t>(nu::lightsecond);
+            constexpr auto astronomicalunit = detail::su_promote<std::int64_t>(nu::astronomicalunit);
 
-            constexpr auto picosecond = detail::make_unit_rescale_result<std::int64_t>(nu::picosecond);
-            constexpr auto nanosecond = detail::make_unit_rescale_result<std::int64_t>(nu::nanosecond);
-            constexpr auto microsecond = detail::make_unit_rescale_result<std::int64_t>(nu::microsecond);
-            constexpr auto millisecond = detail::make_unit_rescale_result<std::int64_t>(nu::millisecond);
-            constexpr auto second = detail::make_unit_rescale_result<std::int64_t>(nu::second);
-            constexpr auto minute = detail::make_unit_rescale_result<std::int64_t>(nu::minute);
-            constexpr auto hour = detail::make_unit_rescale_result<std::int64_t>(nu::hour);
-            constexpr auto day = detail::make_unit_rescale_result<std::int64_t>(nu::day);
-            constexpr auto week = detail::make_unit_rescale_result<std::int64_t>(nu::week);
-            constexpr auto month = detail::make_unit_rescale_result<std::int64_t>(nu::month);
-            constexpr auto year = detail::make_unit_rescale_result<std::int64_t>(nu::year);
-            constexpr auto year250 = detail::make_unit_rescale_result<std::int64_t>(nu::year250);
-            constexpr auto year360 = detail::make_unit_rescale_result<std::int64_t>(nu::year360);
-            constexpr auto year365 = detail::make_unit_rescale_result<std::int64_t>(nu::year365);
+            constexpr auto inch = detail::su_promote<std::int64_t>(nu::inch);
+            constexpr auto foot = detail::su_promote<std::int64_t>(nu::foot);
+            constexpr auto yard = detail::su_promote<std::int64_t>(nu::yard);
+            constexpr auto mile = detail::su_promote<std::int64_t>(nu::mile);
 
-            constexpr auto volatility_30d = detail::make_unit_rescale_result<std::int64_t>(nu::volatility_30d);
-            constexpr auto volatility_250d = detail::make_unit_rescale_result<std::int64_t>(nu::volatility_250d);
-            constexpr auto volatility_360d = detail::make_unit_rescale_result<std::int64_t>(nu::volatility_360d);
-            constexpr auto volatility_365d = detail::make_unit_rescale_result<std::int64_t>(nu::volatility_365d);
+            constexpr auto picosecond = detail::su_promote<std::int64_t>(nu::picosecond);
+            constexpr auto nanosecond = detail::su_promote<std::int64_t>(nu::nanosecond);
+            constexpr auto microsecond = detail::su_promote<std::int64_t>(nu::microsecond);
+            constexpr auto millisecond = detail::su_promote<std::int64_t>(nu::millisecond);
+            constexpr auto second = detail::su_promote<std::int64_t>(nu::second);
+            constexpr auto minute = detail::su_promote<std::int64_t>(nu::minute);
+            constexpr auto hour = detail::su_promote<std::int64_t>(nu::hour);
+            constexpr auto day = detail::su_promote<std::int64_t>(nu::day);
+            constexpr auto week = detail::su_promote<std::int64_t>(nu::week);
+            constexpr auto month = detail::su_promote<std::int64_t>(nu::month);
+            constexpr auto year = detail::su_promote<std::int64_t>(nu::year);
+            constexpr auto year250 = detail::su_promote<std::int64_t>(nu::year250);
+            constexpr auto year360 = detail::su_promote<std::int64_t>(nu::year360);
+            constexpr auto year365 = detail::su_promote<std::int64_t>(nu::year365);
+
+            constexpr auto volatility_30d = detail::su_promote<std::int64_t>(nu::volatility_30d);
+            constexpr auto volatility_250d = detail::su_promote<std::int64_t>(nu::volatility_250d);
+            constexpr auto volatility_360d = detail::su_promote<std::int64_t>(nu::volatility_360d);
+            constexpr auto volatility_365d = detail::su_promote<std::int64_t>(nu::volatility_365d);
         }
 
         namespace detail {
