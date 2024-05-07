@@ -425,6 +425,18 @@ namespace xo {
             template <typename Repr>
             inline constexpr auto astronomicalunits(Repr x) { return quantity<nu::astronomicalunit, Repr>(x); }
 
+            /** @brief create quantity representing @p x inches of distance, with compile-time unit representation **/
+            template <typename Repr>
+            inline constexpr auto inches(Repr x) { return quantity<nu::inch, Repr>(x); }
+            /** @brief create quantity representing @p x feet of distance, with compile-time unit representation **/
+            template <typename Repr>
+            inline constexpr auto feet(Repr x) { return quantity<nu::foot, Repr>(x); }
+            /** @brief create quantity representing @p x yards of distance, with compile-time unit representation **/
+            template <typename Repr>
+            inline constexpr auto yards(Repr x) { return quantity<nu::yard, Repr>(x); }
+            /** @brief create quantity representing @p x statute miles of distance, with compile-time unit representation **/
+            template <typename Repr>
+            inline constexpr auto miles(Repr x) { return quantity<nu::mile, Repr>(x); }
             static constexpr auto meter = meters(1);
 
             // ----- time -----

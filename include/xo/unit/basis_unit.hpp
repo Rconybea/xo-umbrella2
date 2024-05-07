@@ -91,6 +91,15 @@ namespace xo {
             constexpr basis_unit megameter        = megametre;
             constexpr basis_unit gigameter        = gigametre;
 
+            /** @brief basis-unit representing 1 inch; defined as exactly 1/12 feet **/
+            constexpr basis_unit inch             = basis_unit(dim::distance, scalefactor_ratio_type(       3048, 120000));
+            /** @brief basis-unit representing 1 foot; defined as exactly 0.3048 meters **/
+            constexpr basis_unit foot             = basis_unit(dim::distance, scalefactor_ratio_type(       3048,  10000));
+            /** @brief basis-unit representing 1 yard; defined as exactly 3 feet **/
+            constexpr basis_unit yard             = basis_unit(dim::distance, scalefactor_ratio_type(     3*3048,  10000));
+            /** @brief basis-unit representing 1 mile; defined as exactly 1760 yards = 5280 feet **/
+            constexpr basis_unit mile             = basis_unit(dim::distance, scalefactor_ratio_type(  5280*3048,  10000));
+
             // ----- time -----
 
             constexpr basis_unit picosecond       = basis_unit(dim::time,     scalefactor_ratio_type(            1, 1000000000000));

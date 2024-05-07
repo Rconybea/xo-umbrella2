@@ -369,6 +369,8 @@ namespace xo {
         namespace nu {
             constexpr auto dimensionless = natural_unit<std::int64_t>();
 
+            // ----- mass -----
+
             constexpr auto picogram = natural_unit<std::int64_t>::from_bu(bu::picogram);
             constexpr auto nanogram = natural_unit<std::int64_t>::from_bu(bu::nanogram);
             constexpr auto microgram = natural_unit<std::int64_t>::from_bu(bu::microgram);
@@ -380,6 +382,8 @@ namespace xo {
             constexpr auto megatonne = natural_unit<std::int64_t>::from_bu(bu::megatonne);
             constexpr auto gigatonne = natural_unit<std::int64_t>::from_bu(bu::gigatonne);
 
+            // ----- distance -----
+
             constexpr auto picometer = natural_unit<std::int64_t>::from_bu(bu::picometer);
             constexpr auto nanometer = natural_unit<std::int64_t>::from_bu(bu::nanometer);
             constexpr auto micrometer = natural_unit<std::int64_t>::from_bu(bu::micrometer);
@@ -390,6 +394,13 @@ namespace xo {
             constexpr auto gigameter = natural_unit<std::int64_t>::from_bu(bu::gigameter);
             constexpr auto lightsecond = natural_unit<std::int64_t>::from_bu(bu::lightsecond);
             constexpr auto astronomicalunit = natural_unit<std::int64_t>::from_bu(bu::astronomicalunit);
+
+            constexpr auto inch = natural_unit<std::int64_t>::from_bu(bu::inch);
+            constexpr auto foot = natural_unit<std::int64_t>::from_bu(bu::foot);
+            constexpr auto yard = natural_unit<std::int64_t>::from_bu(bu::yard);
+            constexpr auto mile = natural_unit<std::int64_t>::from_bu(bu::mile);
+
+            // ----- time -----
 
             constexpr auto picosecond = natural_unit<std::int64_t>::from_bu(bu::picosecond);
             constexpr auto nanosecond = natural_unit<std::int64_t>::from_bu(bu::nanosecond);
