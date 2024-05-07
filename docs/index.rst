@@ -14,7 +14,7 @@ however there are some important differences:
 
 * streamlined implementation using c++20 features.
 * along with no-runtime-overhead compile-time unit inference,
-  also provides defer-until-runtime representation. 
+  also provides defer-until-runtime representation.
 * constexpr string representation for things like unit abbreviations.
 * supports fractional dimensions, for concepts like volatility.
 * integration with python (see sister project xo-pyunit)
@@ -32,7 +32,7 @@ runtime (since we can't construct new c++ types at runtime).
 
    install
    examples
-   abstractions
+   implementation
    unit-quantities
    quantity-reference
    unit-reference

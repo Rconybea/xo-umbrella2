@@ -1,7 +1,9 @@
-.. _abstractions:
+.. _implementation:
 
-Representation
-==============
+Abstraction Tower
+=================
+
+Abstraction tower for *xo-unit* components.
 
 .. ditaa::
 
@@ -19,7 +21,41 @@ Representation
     |       dimension       |
     +-----------------------+
 
-- quantity: see :doc:`quantity-reference`
+- quantity:    see :doc:`quantity-reference`.
+  quantity with compile-time unit work
+
+- xquantity:
+  quantity with unit work deferred until runtime
+
+- scaled_unit:
+  a unit involving zero or more dimensions, and associated conversion factor.
+
+  - expresses result of arithmetic involving multiple scales.
+  - scaled_units are closed under multiplication and division.
+  - multiplication and division commit to a single :code:`basis_unit` for each
+    dimension.
+
+- natural_unit:
+  a unit involving zero or more dimensions, and at most one scale per dimension.
+  A quantity instance is always represented as a dimensionless multiple
+  of a natural unit
+
+  - natural_units are *not* closed under multiplication and division.
+    (for example consider :code:`xo::qty::qty::foot * xo::qty::qty::meter`)
+
+- bpu:
+  a power of a basis unit. Has a single dimension.
+
+- basis_unit:
+  a unit with a single dimension and scale.
+
+- dimension:
+  identifies a dimension, such as mass or time.
+
+Representation
+==============
+
+Worked example using :cpp:class:`xo::qty::quantity`
 
 .. code-block:: cpp
     :linenos:
