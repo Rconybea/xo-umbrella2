@@ -105,7 +105,7 @@ namespace xo {
             auto rescale() const {
                 /* conversion factor from .unit -> unit2*/
                 auto rr = detail::su_ratio<ratio_int_type,
-                                           ratio_int2x_type>(NaturalUnit, NaturalUnit2);
+                                           ratio_int2x_type>(s_unit, NaturalUnit2);
 
                 if (rr.natural_unit_.is_dimensionless()) {
                     repr_type r_scale = (((rr.outer_scale_sq_ == 1.0)
@@ -124,7 +124,7 @@ namespace xo {
             auto rescale_ext() const {
                 /* conversion factor from .unit -> unit2*/
                 auto rr = detail::su_ratio<ratio_int_type,
-                                           ratio_int2x_type>(NaturalUnit, ScaledUnit2.natural_unit_);
+                                           ratio_int2x_type>(s_unit, ScaledUnit2.natural_unit_);
 
                 if (rr.natural_unit_.is_dimensionless()) {
                     /* NOTE: test for unit .outer_scale_sq values to get constexpr result with c++23
