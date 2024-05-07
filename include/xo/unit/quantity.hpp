@@ -18,15 +18,14 @@ namespace xo {
          *  sizeof(quantity) == sizeof(Repr).
          **/
         template <
-            auto /*natural_unit<Int>*/ NaturalUnit,
-            typename Repr = double,
-            typename Int2x = detail::width2x_t<typename decltype(NaturalUnit)::ratio_int_type> >
+            auto NaturalUnit,
+            typename Repr = double>
         class quantity {
         public:
             using repr_type = Repr;
             using unit_type = decltype(NaturalUnit);
-            using ratio_int_type = decltype(NaturalUnit)::ratio_int_type;
-            using ratio_int2x_type = Int2x;
+            using ratio_int_type = unit_type::ratio_int_type;
+            using ratio_int2x_type = detail::width2x_t<typename unit_type::ratio_int_type>;
 
         public:
             constexpr quantity() : scale_{0} {}
@@ -47,16 +46,13 @@ namespace xo {
             constexpr
             auto reciprocal() const {
                 return quantity<s_unit.reciprocal(),
-                                repr_type,
-                                ratio_int2x_type>(1.0 / scale_);
+                                repr_type>(1.0 / scale_);
             }
 
             template <typename Repr2>
             constexpr
             auto with_repr() const {
-                return quantity<s_unit,
-                                Repr2,
-                                ratio_int2x_type>(scale_);
+                return quantity<s_unit, Repr2>(scale_);
             }
 
             /* parallel implementation to Quantity<Repr, Int>::rescale(),
@@ -77,9 +73,9 @@ namespace xo {
                                           : ::sqrt(rr.outer_scale_sq_))
                                          * rr.outer_scale_factor_.template convert_to<repr_type>()
                                          * this->scale_);
-                    return quantity<NaturalUnit2, Repr, Int2x>(r_scale);
+                    return quantity<NaturalUnit2, Repr>(r_scale);
                 } else {
-                        return quantity<NaturalUnit2, Repr, Int2x>(std::numeric_limits<repr_type>::quiet_NaN());
+                        return quantity<NaturalUnit2, Repr>(std::numeric_limits<repr_type>::quiet_NaN());
                 }
             }
 
@@ -101,9 +97,9 @@ namespace xo {
                                          * rr.outer_scale_factor_.template convert_to<repr_type>()
                                          * this->scale_
                                          / ScaledUnit2.outer_scale_factor_.template convert_to<repr_type>());
-                    return quantity<ScaledUnit2.natural_unit_, Repr, Int2x>(r_scale);
+                    return quantity<ScaledUnit2.natural_unit_, Repr>(r_scale);
                 } else {
-                    return quantity<ScaledUnit2.natural_unit_, Repr, Int2x>(std::numeric_limits<repr_type>::quiet_NaN());
+                    return quantity<ScaledUnit2.natural_unit_, Repr>(std::numeric_limits<repr_type>::quiet_NaN());
                 }
             }
 
@@ -205,10 +201,7 @@ namespace xo {
                                            * static_cast<r_repr_type>(x.scale())
                                            * static_cast<r_repr_type>(y.scale()));
 
-                    return quantity<rr.natural_unit_,
-                                    r_repr_type,
-                                    r_int2x_type
-                                    >(r_scale);
+                    return quantity<rr.natural_unit_, r_repr_type>(r_scale);
                 }
 
                 template <typename Q1, typename Q2>
@@ -233,10 +226,7 @@ namespace xo {
                                            * static_cast<r_repr_type>(x.scale())
                                            / static_cast<r_repr_type>(y.scale()));
 
-                    return quantity<rr.natural_unit_,
-                                    r_repr_type,
-                                    r_int2x_type
-                                    >(r_scale);
+                    return quantity<rr.natural_unit_, r_repr_type>(r_scale);
                 }
 
                 template <typename Q1, typename Q2>
@@ -260,10 +250,10 @@ namespace xo {
                                                   * rr.outer_scale_factor_.template convert_to<r_repr_type>()
                                                   * static_cast<r_repr_type>(y.scale())));
 
-                        return quantity<x.s_unit, r_repr_type, r_int2x_type>(r_scale);
+                        return quantity<x.s_unit, r_repr_type>(r_scale);
                     } else {
                         /* units don't match! */
-                        return quantity<x.s_unit, r_repr_type, r_int2x_type>(std::numeric_limits<r_repr_type>::quiet_NaN());
+                        return quantity<x.s_unit, r_repr_type>(std::numeric_limits<r_repr_type>::quiet_NaN());
                     }
                 }
 
@@ -288,10 +278,10 @@ namespace xo {
                                                   * rr.outer_scale_factor_.template convert_to<r_repr_type>()
                                                   * static_cast<r_repr_type>(y.scale())));
 
-                        return quantity<x.s_unit, r_repr_type, r_int2x_type>(r_scale);
+                        return quantity<x.s_unit, r_repr_type>(r_scale);
                     } else {
                         /* units don't match! */
-                        return quantity<x.s_unit, r_repr_type, r_int2x_type>(std::numeric_limits<r_repr_type>::quiet_NaN());
+                        return quantity<x.s_unit, r_repr_type>(std::numeric_limits<r_repr_type>::quiet_NaN());
                     }
                 }
             };

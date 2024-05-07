@@ -10,10 +10,10 @@
 
 namespace xo {
     namespace qty {
-        template < auto NaturalUnit, typename Repr, typename Int2x >
+        template < auto NaturalUnit, typename Repr >
         inline std::ostream &
         operator<< (std::ostream & os,
-                    const quantity<NaturalUnit, Repr, Int2x> & x)
+                    const quantity<NaturalUnit, Repr> & x)
         {
             os << x.scale() << x.abbrev();
             return os;
