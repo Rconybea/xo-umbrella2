@@ -19,13 +19,6 @@ namespace xo {
         {
             os << x.scale() << x.abbrev();
 
-#ifdef NOT_USING
-            os << "<qty"
-               << xtag("scale", x.scale())
-               << xtag("unit", x.unit())
-               << ">";
-#endif
-
             return os;
         }
     } /*namespace qty*/
