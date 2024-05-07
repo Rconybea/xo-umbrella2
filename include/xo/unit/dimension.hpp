@@ -6,7 +6,7 @@
 
 namespace xo {
     namespace qty {
-        enum class dim {
+        enum class dimension {
             invalid = -1,
 
             /** weight.  native unit = 1 gram **/
@@ -29,21 +29,23 @@ namespace xo {
             n_dim
         };
 
+        using dim = dimension;
+
         inline const char *
-        dim2str(dim x)
+        dim2str(dimension x)
         {
             switch(x) {
-            case dim::mass:     return "mass";
-            case dim::distance: return "distance";
-            case dim::time:     return "time";
-            case dim::currency: return "currency";
-            case dim::price:    return "price";
+            case dimension::mass:     return "mass";
+            case dimension::distance: return "distance";
+            case dimension::time:     return "time";
+            case dimension::currency: return "currency";
+            case dimension::price:    return "price";
             default: break;
             }
             return "?dim";
         }
 
-        static constexpr std::size_t n_dim = static_cast<std::size_t>(dim::n_dim);
+        static constexpr std::size_t n_dim = static_cast<std::size_t>(dimension::n_dim);
     } /*namespace qty*/
 } /*namespace xo*/
 

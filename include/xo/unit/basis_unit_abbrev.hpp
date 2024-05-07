@@ -18,7 +18,7 @@ namespace xo {
             static
             constexpr basis_unit2_abbrev_type
             fallback_unit_abbrev(const scalefactor_ratio_type & scalefactor,
-                                 dim native_dim)
+                                 dimension native_dim)
             {
                 /* e.g. unit of '1000 grams' will have abbrev '1000g' in absence
                  *      of a specialization for scaled_native_unit_abbrev
@@ -65,7 +65,7 @@ namespace xo {
                     }
                 }
 
-                return fallback_unit_abbrev(scalefactor, dim::mass);
+                return fallback_unit_abbrev(scalefactor, dimension::mass);
             }
 
             // ----- units for dim::distance -----
@@ -104,7 +104,7 @@ namespace xo {
                     }
                 }
 
-                return fallback_unit_abbrev(scalefactor, dim::distance);
+                return fallback_unit_abbrev(scalefactor, dimension::distance);
             }
 
             // ----- units for dim::time -----
@@ -151,7 +151,7 @@ namespace xo {
                     }
                 }
 
-                return fallback_unit_abbrev(scalefactor, dim::time);
+                return fallback_unit_abbrev(scalefactor, dimension::time);
             }
 
             // ----- units for dim::currency -----
@@ -166,7 +166,7 @@ namespace xo {
                     }
                 }
 
-                return fallback_unit_abbrev(scalefactor, dim::currency);
+                return fallback_unit_abbrev(scalefactor, dimension::currency);
             }
 
             // ----- units for dim::price -----
@@ -181,29 +181,29 @@ namespace xo {
                     }
                 }
 
-                return fallback_unit_abbrev(scalefactor, dim::price);
+                return fallback_unit_abbrev(scalefactor, dimension::price);
             }
 
             // ----- basis_unit2_abbrev -----
 
             static
             constexpr basis_unit2_abbrev_type
-            basis_unit2_abbrev(dim native_dim,
+            basis_unit2_abbrev(dimension native_dim,
                                const scalefactor_ratio_type & scalefactor)
             {
                 switch(native_dim) {
-                case dim::mass:
+                case dimension::mass:
                     return mass_unit2_abbrev(scalefactor);
-                case dim::distance:
+                case dimension::distance:
                     return distance_unit2_abbrev(scalefactor);
-                case dim::time:
+                case dimension::time:
                     return time_unit2_abbrev(scalefactor);
-                case dim::currency:
+                case dimension::currency:
                     return currency_unit2_abbrev(scalefactor);
-                case dim::price:
+                case dimension::price:
                     return price_unit2_abbrev(scalefactor);
-                case dim::invalid:
-                case dim::n_dim:
+                case dimension::invalid:
+                case dimension::n_dim:
                     return basis_unit2_abbrev_type();
                     break;
                 }

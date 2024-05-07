@@ -21,26 +21,26 @@ namespace xo {
          **/
         struct native_unit {
         public:
-            constexpr native_unit(dim native_dim,
+            constexpr native_unit(dimension native_dim,
                                   const native_unit2_abbrev_type & abbrev_str)
                 : native_dim_{native_dim},
                   abbrev_str_{abbrev_str}
                 {}
 
-            constexpr dim native_dim() const { return native_dim_; }
+            constexpr dimension native_dim() const { return native_dim_; }
             constexpr const native_unit2_abbrev_type & abbrev_str() const { return abbrev_str_; }
 
         private:
-            dim native_dim_;
+            dimension native_dim_;
             native_unit2_abbrev_type abbrev_str_;
         };
 
         static constexpr native_unit native_unit2_v[n_dim] = {
-            native_unit(dim::mass,     native_unit2_abbrev_type::from_chars("g")),
-            native_unit(dim::distance, native_unit2_abbrev_type::from_chars("m")),
-            native_unit(dim::time,     native_unit2_abbrev_type::from_chars("s")),
-            native_unit(dim::currency, native_unit2_abbrev_type::from_chars("ccy")),
-            native_unit(dim::price,    native_unit2_abbrev_type::from_chars("px")),
+            native_unit(dimension::mass,     native_unit2_abbrev_type::from_chars("g")),
+            native_unit(dimension::distance, native_unit2_abbrev_type::from_chars("m")),
+            native_unit(dimension::time,     native_unit2_abbrev_type::from_chars("s")),
+            native_unit(dimension::currency, native_unit2_abbrev_type::from_chars("ccy")),
+            native_unit(dimension::price,    native_unit2_abbrev_type::from_chars("px")),
         };
 
     } /*namespace qty*/

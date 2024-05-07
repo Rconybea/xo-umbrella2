@@ -16,12 +16,13 @@ namespace xo {
         struct basis_unit {
         public:
             constexpr basis_unit() = default;
-            constexpr basis_unit(dim native_dim, const scalefactor_ratio_type & scalefactor)
+            constexpr basis_unit(dimension native_dim,
+                                 const scalefactor_ratio_type & scalefactor)
                 : native_dim_{native_dim},
                   scalefactor_{scalefactor}
                 {}
 
-            constexpr dim native_dim() const { return native_dim_; }
+            constexpr dimension native_dim() const { return native_dim_; }
             constexpr const scalefactor_ratio_type & scalefactor() const { return scalefactor_; }
 
             constexpr basis_unit2_abbrev_type abbrev() const {
@@ -33,7 +34,7 @@ namespace xo {
 
         public: /* need public members so that a basis_unit instance can be a non-type template parameter (a structural type) */
             /** @brief identifies a native unit, e.g. time (in seconds) **/
-            dim native_dim_ = dim::invalid;
+            dimension native_dim_ = dimension::invalid;
             /** @brief this unit defined as multiple scalefactor times native unit **/
             scalefactor_ratio_type scalefactor_;
         };
