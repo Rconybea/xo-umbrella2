@@ -30,9 +30,9 @@ namespace xo {
          *  @endcode
          **/
         template <
-            auto NaturalUnit,
+            auto ScaledUnit,
             typename Repr = double>
-        requires (NaturalUnit.is_natural())
+        requires (ScaledUnit.is_natural() && ScaledUnit.is_scaled_unit_type())
         class quantity {
         public:
             /** @defgroup quantity-type-traits quantity type traits **/
@@ -40,7 +40,7 @@ namespace xo {
             /** @brief runtime representation for value of this type **/
             using repr_type = Repr;
             /** @brief type used to represent unit information */
-            using unit_type = decltype(NaturalUnit);
+            using unit_type = decltype(ScaledUnit);
             /** @brief type used for numerator and denominator in basis-unit scalefactor ratios */
             using ratio_int_type = unit_type::ratio_int_type;
             /** @brief double-width type used for numerator and denominator of intermediate
@@ -53,9 +53,9 @@ namespace xo {
         public:
             /** @defgroup quantity-ctors quantity constructors**/
             ///@{
-            /** @brief create a zero amount with dimension @c NaturalUnit **/
+            /** @brief create a zero amount with dimension @c ScaledUnit **/
             constexpr quantity() : scale_{0} {}
-            /** @brief create a quantity representing @p scale @c NaturalUnits **/
+            /** @brief create a quantity representing @p scale @c ScaledUnits **/
             explicit constexpr quantity(Repr scale) : scale_{scale} {}
             ///@}
 
@@ -73,11 +73,11 @@ namespace xo {
             /** @brief value of @c scale_ in quantity representing amount (@c scale_ * @c s_unit) **/
             constexpr const repr_type & scale() const { return scale_; }
             /** @brief s_unit in quantity representing amount (@c scale_ * @c s_unit) **/
-            constexpr const unit_type & unit() const { return s_unit; }
+            constexpr const unit_type & unit() const { return s_scaled_unit; }
 
             /** @brief true iff this quantity represents a dimensionless value **/
             constexpr bool is_dimensionless() const {
-                return s_unit.is_dimensionless();
+                return s_scaled_unit.is_dimensionless();
             }
             ///@}
 
@@ -86,14 +86,14 @@ namespace xo {
 
             constexpr
             auto reciprocal() const {
-                return quantity<s_unit.reciprocal(),
+                return quantity<s_scaled_unit.reciprocal(),
                                 repr_type>(1.0 / scale_);
             }
 
             template <typename Repr2>
             constexpr
             auto with_repr() const {
-                return quantity<s_unit, Repr2>(scale_);
+                return quantity<s_scaled_unit, Repr2>(scale_);
             }
 
             /* parallel implementation to Quantity<Repr, Int>::rescale(),
@@ -106,7 +106,8 @@ namespace xo {
             auto rescale() const {
                 /* conversion factor from .unit -> unit2*/
                 auto rr = detail::su_ratio<ratio_int_type,
-                                           ratio_int2x_type>(s_unit, NaturalUnit2);
+                                           ratio_int2x_type>(s_scaled_unit.natural_unit_,
+                                                             NaturalUnit2);
 
                 if (rr.natural_unit_.is_dimensionless()) {
                     repr_type r_scale = (((rr.outer_scale_sq_ == 1.0)
@@ -125,11 +126,16 @@ namespace xo {
             auto rescale_ext() const {
                 /* conversion factor from .unit -> unit2*/
                 auto rr = detail::su_ratio<ratio_int_type,
-                                           ratio_int2x_type>(s_unit, ScaledUnit2.natural_unit_);
+                                           ratio_int2x_type>(s_scaled_unit.natural_unit_,
+                                                             ScaledUnit2.natural_unit_);
 
                 if (rr.natural_unit_.is_dimensionless()) {
                     /* NOTE: test for unit .outer_scale_sq values to get constexpr result with c++23
                      *       and integer dimension powers.
+                     *
+                     * NOTE: we don't intend to support mixed-unit quantities.
+                     *       If we change intention, will need to take into account
+                     *       (s_scaled_unit.outer_scale_factor_, s_scaled_unit.outer_scale_sq_)
                      */
                     repr_type r_scale = ((((rr.outer_scale_sq_ == 1.0)
                                            && (ScaledUnit2.outer_scale_sq_ == 1.0))
@@ -138,9 +144,9 @@ namespace xo {
                                        * rr.outer_scale_factor_.template convert_to<repr_type>()
                                          * this->scale_
                                          / ScaledUnit2.outer_scale_factor_.template convert_to<repr_type>());
-                    return quantity<ScaledUnit2.natural_unit_, Repr>(r_scale);
+                    return quantity<ScaledUnit2, Repr>(r_scale);
                 } else {
-                    return quantity<ScaledUnit2.natural_unit_, Repr>(std::numeric_limits<repr_type>::quiet_NaN());
+                    return quantity<ScaledUnit2, Repr>(std::numeric_limits<repr_type>::quiet_NaN());
                 }
             }
 
@@ -149,7 +155,7 @@ namespace xo {
             constexpr auto scale_by(Dimensionless x) const {
                 using r_repr_type = std::common_type_t<repr_type, Dimensionless>;
 
-                return quantity<s_unit, r_repr_type>(x * this->scale_);
+                return quantity<s_scaled_unit, r_repr_type>(x * this->scale_);
             }
 
             // divide_by
@@ -163,7 +169,7 @@ namespace xo {
             template <typename Quantity2>
             static constexpr
             auto compare(const quantity &x, const Quantity2 & y) {
-                quantity y2 = y.template rescale<s_unit>();
+                quantity y2 = y.template rescale_ext<s_scaled_unit>();
 
                 return x.scale() <=> y2.scale();
             }
@@ -174,7 +180,9 @@ namespace xo {
             // operator*=
             // operator/=
 
-            constexpr nu_abbrev_type abbrev() const { return s_unit.abbrev(); }
+            constexpr nu_abbrev_type abbrev() const {
+                return s_scaled_unit.natural_unit_.abbrev();
+            }
 
             quantity & operator=(const quantity & x) {
                 this->scale_ = x.scale_;
@@ -185,7 +193,7 @@ namespace xo {
             requires(quantity_concept<Q2>
                      && Q2::always_constexpr_unit)
             quantity & operator=(const Q2 & x) {
-                auto x2 = x.template rescale<s_unit>();
+                auto x2 = x.template rescale_ext<s_scaled_unit>();
 
                 this->scale_ = x2.scale();
 
@@ -196,17 +204,17 @@ namespace xo {
             requires(quantity_concept<Q2>
                      && Q2::always_constexpr_unit)
             constexpr operator Q2() const {
-                return this->template rescale<Q2::s_unit>().template with_repr<typename Q2::repr_type>();
+                return this->template rescale_ext<Q2::s_scaled_unit>().template with_repr<typename Q2::repr_type>();
             }
 
             constexpr operator Repr() const
-                requires (NaturalUnit.is_dimensionless())
+                requires (ScaledUnit.is_dimensionless())
                 {
                     return scale_;
                 }
 
         public: /* need public members so that a quantity instance can be a non-type template parameter (is a structural type) */
-            static constexpr natural_unit<ratio_int_type> s_unit = NaturalUnit;
+            static constexpr scaled_unit<ratio_int_type> s_scaled_unit = ScaledUnit;
 
             Repr scale_ = Repr{};
         };
@@ -235,7 +243,8 @@ namespace xo {
                     using r_int2x_type = std::common_type_t<typename Q1::ratio_int2x_type,
                                                             typename Q2::ratio_int2x_type>;
 
-                    constexpr auto rr = detail::su_product<r_int_type, r_int2x_type>(x.unit(), y.unit());
+                    constexpr auto rr = detail::su_product<r_int_type, r_int2x_type>(x.unit().natural_unit_,
+                                                                                     y.unit().natural_unit_);
 
                     r_repr_type r_scale = (((rr.outer_scale_sq_ == 1.0)
                                             ? 1.0
@@ -244,7 +253,8 @@ namespace xo {
                                            * static_cast<r_repr_type>(x.scale())
                                            * static_cast<r_repr_type>(y.scale()));
 
-                    return quantity<rr.natural_unit_, r_repr_type>(r_scale);
+                    return quantity<detail::make_unit_rescale_result<r_int_type>(rr.natural_unit_),
+                                    r_repr_type>(r_scale);
                 }
 
                 template <typename Q1, typename Q2>
@@ -260,7 +270,8 @@ namespace xo {
                     using r_int2x_type = std::common_type_t<typename Q1::ratio_int2x_type,
                                                             typename Q2::ratio_int2x_type>;
 
-                    constexpr auto rr = detail::su_ratio<r_int_type, r_int2x_type>(x.unit(), y.unit());
+                    constexpr auto rr = detail::su_ratio<r_int_type, r_int2x_type>(x.unit().natural_unit_,
+                                                                                   y.unit().natural_unit_);
 
                     r_repr_type r_scale = (((rr.outer_scale_sq_ == 1.0)
                                             ? 1.0
@@ -269,7 +280,8 @@ namespace xo {
                                            * static_cast<r_repr_type>(x.scale())
                                            / static_cast<r_repr_type>(y.scale()));
 
-                    return quantity<rr.natural_unit_, r_repr_type>(r_scale);
+                    return quantity<detail::make_unit_rescale_result<r_int_type>(rr.natural_unit_),
+                                    r_repr_type>(r_scale);
                 }
 
                 template <typename Q1, typename Q2>
@@ -285,7 +297,8 @@ namespace xo {
                     using r_int2x_type = std::common_type_t<typename Q1::ratio_int2x_type,
                                                             typename Q2::ratio_int2x_type>;
                     /* conversion to get y in same units as x: multiply by y/x */
-                    auto rr = detail::su_ratio<r_int_type, r_int2x_type>(y.unit(), x.unit());
+                    auto rr = detail::su_ratio<r_int_type, r_int2x_type>(y.unit().natural_unit_,
+                                                                         x.unit().natural_unit_);
 
                     if (rr.natural_unit_.is_dimensionless()) {
                         r_repr_type r_scale = (static_cast<r_repr_type>(x.scale())
@@ -293,10 +306,10 @@ namespace xo {
                                                   * rr.outer_scale_factor_.template convert_to<r_repr_type>()
                                                   * static_cast<r_repr_type>(y.scale())));
 
-                        return quantity<x.s_unit, r_repr_type>(r_scale);
+                        return quantity<x.s_scaled_unit, r_repr_type>(r_scale);
                     } else {
                         /* units don't match! */
-                        return quantity<x.s_unit, r_repr_type>(std::numeric_limits<r_repr_type>::quiet_NaN());
+                        return quantity<x.s_scaled_unit, r_repr_type>(std::numeric_limits<r_repr_type>::quiet_NaN());
                     }
                 }
 
@@ -338,7 +351,7 @@ namespace xo {
             return x.template rescale_ext<Unit>();
         }
 
-        template <typename Q1, typename Q2, auto Unit = Q2::s_unit>
+        template <typename Q1, typename Q2, auto Unit = Q2::s_scaled_unit>
         requires (quantity_concept<Q1>
                   && quantity_concept<Q2>
                   && Q1::always_constexpr_unit
@@ -346,7 +359,7 @@ namespace xo {
         constexpr auto
         with_units_from(const Q1 & x, const Q2 & y)
         {
-            return x.template rescale<Unit>();
+            return x.template rescale_ext<Unit>();
         }
 
         template <typename Repr2, typename Q1>
@@ -414,28 +427,28 @@ namespace xo {
             // ----- mass -----
 
             template <typename Repr>
-            inline constexpr auto picograms(Repr x) { return quantity<nu::picogram, Repr>(x); }
+            inline constexpr auto picograms(Repr x) { return quantity<su::picogram, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto nanograms(Repr x) { return quantity<nu::nanogram, Repr>(x); }
+            inline constexpr auto nanograms(Repr x) { return quantity<su::nanogram, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto micrograms(Repr x) { return quantity<nu::microgram, Repr>(x); }
+            inline constexpr auto micrograms(Repr x) { return quantity<su::microgram, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto milligrams(Repr x) { return quantity<nu::milligram, Repr>(x); }
+            inline constexpr auto milligrams(Repr x) { return quantity<su::milligram, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto grams(Repr x) { return quantity<nu::gram, Repr>(x); }
+            inline constexpr auto grams(Repr x) { return quantity<su::gram, Repr>(x); }
 
             /** @brief create a quantity representing @p x kilograms of mass,  with compile-time unit representation **/
             template <typename Repr>
-            inline constexpr auto kilograms(Repr x) { return quantity<nu::kilogram, Repr>(x); }
+            inline constexpr auto kilograms(Repr x) { return quantity<su::kilogram, Repr>(x); }
 
             template <typename Repr>
-            inline constexpr auto tonnes(Repr x) { return quantity<nu::tonne, Repr>(x); }
+            inline constexpr auto tonnes(Repr x) { return quantity<su::tonne, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto kilotonnes(Repr x) { return quantity<nu::kilotonne, Repr>(x); }
+            inline constexpr auto kilotonnes(Repr x) { return quantity<su::kilotonne, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto megatonnes(Repr x) { return quantity<nu::megatonne, Repr>(x); }
+            inline constexpr auto megatonnes(Repr x) { return quantity<su::megatonne, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto gigatonnes(Repr x) { return quantity<nu::gigatonne, Repr>(x); }
+            inline constexpr auto gigatonnes(Repr x) { return quantity<su::gigatonne, Repr>(x); }
 
             /** @brief a quantity representing 1 picogram of mass, with compile-time unit representation **/
             static constexpr auto picogram = picograms(1);
@@ -459,39 +472,39 @@ namespace xo {
             // ----- distance -----
 
             template <typename Repr>
-            inline constexpr auto picometers(Repr x) { return quantity<nu::picometer, Repr>(x); }
+            inline constexpr auto picometers(Repr x) { return quantity<su::picometer, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto nanometers(Repr x) { return quantity<nu::nanometer, Repr>(x); }
+            inline constexpr auto nanometers(Repr x) { return quantity<su::nanometer, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto micrometers(Repr x) { return quantity<nu::micrometer, Repr>(x); }
+            inline constexpr auto micrometers(Repr x) { return quantity<su::micrometer, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto millimeters(Repr x) { return quantity<nu::millimeter, Repr>(x); }
+            inline constexpr auto millimeters(Repr x) { return quantity<su::millimeter, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto meters(Repr x) { return quantity<nu::meter, Repr>(x); }
+            inline constexpr auto meters(Repr x) { return quantity<su::meter, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto kilometers(Repr x) { return quantity<nu::kilometer, Repr>(x); }
+            inline constexpr auto kilometers(Repr x) { return quantity<su::kilometer, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto megameters(Repr x) { return quantity<nu::megameter, Repr>(x); }
+            inline constexpr auto megameters(Repr x) { return quantity<su::megameter, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto gigameters(Repr x) { return quantity<nu::gigameter, Repr>(x); }
+            inline constexpr auto gigameters(Repr x) { return quantity<su::gigameter, Repr>(x); }
 
             template <typename Repr>
-            inline constexpr auto lightseconds(Repr x) { return quantity<nu::lightsecond, Repr>(x); }
+            inline constexpr auto lightseconds(Repr x) { return quantity<su::lightsecond, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto astronomicalunits(Repr x) { return quantity<nu::astronomicalunit, Repr>(x); }
+            inline constexpr auto astronomicalunits(Repr x) { return quantity<su::astronomicalunit, Repr>(x); }
 
             /** @brief create quantity representing @p x inches of distance, with compile-time unit representation **/
             template <typename Repr>
-            inline constexpr auto inches(Repr x) { return quantity<nu::inch, Repr>(x); }
+            inline constexpr auto inches(Repr x) { return quantity<su::inch, Repr>(x); }
             /** @brief create quantity representing @p x feet of distance, with compile-time unit representation **/
             template <typename Repr>
-            inline constexpr auto feet(Repr x) { return quantity<nu::foot, Repr>(x); }
+            inline constexpr auto feet(Repr x) { return quantity<su::foot, Repr>(x); }
             /** @brief create quantity representing @p x yards of distance, with compile-time unit representation **/
             template <typename Repr>
-            inline constexpr auto yards(Repr x) { return quantity<nu::yard, Repr>(x); }
+            inline constexpr auto yards(Repr x) { return quantity<su::yard, Repr>(x); }
             /** @brief create quantity representing @p x statute miles of distance, with compile-time unit representation **/
             template <typename Repr>
-            inline constexpr auto miles(Repr x) { return quantity<nu::mile, Repr>(x); }
+            inline constexpr auto miles(Repr x) { return quantity<su::mile, Repr>(x); }
 
             /** @brief a quantity representing 1 picometer of distance, with compile-time unit representation **/
             static constexpr auto picometer = picometers(1);
@@ -521,43 +534,44 @@ namespace xo {
             // ----- time -----
 
             template <typename Repr>
-            inline constexpr auto picoseconds(Repr x) { return quantity<nu::picosecond, Repr>(x); }
+            inline constexpr auto picoseconds(Repr x) { return quantity<su::picosecond, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto nanoseconds(Repr x) { return quantity<nu::nanosecond, Repr>(x); }
+            inline constexpr auto nanoseconds(Repr x) { return quantity<su::nanosecond, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto microseconds(Repr x) { return quantity<nu::microsecond, Repr>(x); }
+            inline constexpr auto microseconds(Repr x) { return quantity<su::microsecond, Repr>(x); }
 
             template <typename Repr>
-            inline constexpr auto milliseconds(Repr x) { return quantity<nu::millisecond, Repr>(x); }
+            inline constexpr auto milliseconds(Repr x) { return quantity<su::millisecond, Repr>(x); }
 
             /** @brief create quantity representing @p x seconds of time, with compile-time unit representation **/
             template <typename Repr>
-            inline constexpr auto seconds(Repr x) { return quantity<nu::second, Repr>(x); }
+
+            inline constexpr auto seconds(Repr x) { return quantity<su::second, Repr>(x); }
 
             /** @brief create quantity representing @p x minutes of time, with compile-time unit representation **/
             template <typename Repr>
-            inline constexpr auto minutes(Repr x) { return quantity<nu::minute, Repr>(x); }
+            inline constexpr auto minutes(Repr x) { return quantity<su::minute, Repr>(x); }
 
             /** @brief create quantity representing @p x hours of time, with compile-time unit representation **/
             template <typename Repr>
-            inline constexpr auto hours(Repr x) { return quantity<nu::hour, Repr>(x); }
+            inline constexpr auto hours(Repr x) { return quantity<su::hour, Repr>(x); }
 
             /** @brief create quantity representing @p x days of time, with compile-time unit representation **/
             template <typename Repr>
-            inline constexpr auto days(Repr x) { return quantity<nu::day, Repr>(x); }
+            inline constexpr auto days(Repr x) { return quantity<su::day, Repr>(x); }
 
             template <typename Repr>
-            inline constexpr auto weeks(Repr x) { return quantity<nu::week, Repr>(x); }
+            inline constexpr auto weeks(Repr x) { return quantity<su::week, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto months(Repr x) { return quantity<nu::month, Repr>(x); }
+            inline constexpr auto months(Repr x) { return quantity<su::month, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto years(Repr x) { return quantity<nu::year, Repr>(x); }
+            inline constexpr auto years(Repr x) { return quantity<su::year, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto year250s(Repr x) { return quantity<nu::year250, Repr>(x); }
+            inline constexpr auto year250s(Repr x) { return quantity<su::year250, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto year360s(Repr x) { return quantity<nu::year360, Repr>(x); }
+            inline constexpr auto year360s(Repr x) { return quantity<su::year360, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto year365s(Repr x) { return quantity<nu::year365, Repr>(x); }
+            inline constexpr auto year365s(Repr x) { return quantity<su::year365, Repr>(x); }
 
             /** @brief a quantity representing 1 second of time, with compile-time unit representation **/
             static constexpr auto second = seconds(1);
@@ -577,13 +591,13 @@ namespace xo {
              */
 
             template <typename Repr>
-            inline constexpr auto volatility_30d(Repr x) { return quantity<nu::volatility_30d, Repr>(x); }
+            inline constexpr auto volatility_30d(Repr x) { return quantity<su::volatility_30d, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto volatility_250d(Repr x) { return quantity<nu::volatility_250d, Repr>(x); }
+            inline constexpr auto volatility_250d(Repr x) { return quantity<su::volatility_250d, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto volatility_360d(Repr x) { return quantity<nu::volatility_360d, Repr>(x); }
+            inline constexpr auto volatility_360d(Repr x) { return quantity<su::volatility_360d, Repr>(x); }
             template <typename Repr>
-            inline constexpr auto volatility_365d(Repr x) { return quantity<nu::volatility_360d, Repr>(x); }
+            inline constexpr auto volatility_365d(Repr x) { return quantity<su::volatility_365d, Repr>(x); }
         } /*namespace qty*/
 
         /* reminder: see [quantity_ops.hpp] for operator* etc */

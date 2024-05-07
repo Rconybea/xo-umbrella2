@@ -7,13 +7,14 @@
 int
 main () {
     namespace q = xo::qty::qty;
-    namespace nu = xo::qty::nu;
+    namespace su = xo::qty::su;
+    //namespace nu = xo::qty::nu;
     using xo::qty::quantity;
     using xo::flatstring;
     using namespace std;
 
-    constexpr quantity<nu::second> t = q::minutes(2);
-    constexpr quantity<nu::meter> d = q::kilometers(2.5);
+    constexpr quantity<su::second> t = q::minutes(2);
+    constexpr quantity<su::meter> d = q::kilometers(2.5);
 
     constexpr auto t2 = t*t;
     constexpr auto a = d / (t*t);

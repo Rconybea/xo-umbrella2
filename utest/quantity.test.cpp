@@ -319,7 +319,7 @@ namespace xo {
             constexpr auto ng = qty::nanograms(1.0);
             constexpr auto ug = qty::micrograms(1.0);
 
-            constexpr auto ng_in_pg = ng.rescale<pg.unit()>();
+            constexpr auto ng_in_pg = ng.rescale_ext<pg.unit()>();
 
             static_assert(ng_in_pg.scale() == 1000);
             static_assert(ng_in_pg == pg * 1000);
@@ -375,19 +375,21 @@ namespace xo {
             constexpr auto ms = qty::milliseconds(1.0);
 
             /* proof that ms.s_unit is constexpr */
-            static_assert(ms.s_unit.n_bpu() == 1);
+            static_assert(ms.s_scaled_unit.n_bpu() == 1);
 
             /* proof that ms.unit() is constexpr */
             static_assert(ms.unit().n_bpu() == 1);
 
-            constexpr auto rr = detail::su_product<decltype(ms)::ratio_int_type, decltype(ms)::ratio_int2x_type>(ms.unit(), ms.unit());
+            constexpr auto rr = detail::su_product<decltype(ms)::ratio_int_type,
+                                                   decltype(ms)::ratio_int2x_type>(ms.unit().natural_unit_,
+                                                                                   ms.unit().natural_unit_);
 
             /* proof that detail::su_product<..>(..) return value is constexpr */
             static_assert(rr.outer_scale_sq_ == 1.0);
             static_assert(rr.outer_scale_factor_.template convert_to<decltype(ms)::repr_type>() == 1.0);
             static_assert(rr.natural_unit_.n_bpu() == 1);
 
-            constexpr auto q1 = quantity<rr.natural_unit_,
+            constexpr auto q1 = quantity<detail::make_unit_rescale_result<decltype(ms)::ratio_int_type>(rr.natural_unit_),
                                          decltype(ms)::repr_type>(ms.scale() * ms.scale());
 
             /* proof that q is constexpr */
@@ -400,7 +402,8 @@ namespace xo {
                 using r_int2x_type = std::common_type_t<decltype(ms)::ratio_int2x_type,
                                                         decltype(ms)::ratio_int2x_type>;
 
-                constexpr auto rr = detail::su_product<r_int_type, r_int2x_type>(ms.unit(), ms.unit());
+                constexpr auto rr = detail::su_product<r_int_type, r_int2x_type>(ms.unit().natural_unit_,
+                                                                                 ms.unit().natural_unit_);
 
                 static_assert(rr.outer_scale_sq_ == 1.0);
             }
@@ -428,15 +431,15 @@ namespace xo {
             constexpr auto r_qty = ng * 7.55;
 
             static_assert(l_qty.unit().n_bpu() == 1);
-            static_assert(l_qty.unit().bpu_v_[0].native_dim() == dim::mass);
-            static_assert(l_qty.unit().bpu_v_[0].power() == xo::ratio::ratio(1,1));
-            static_assert(l_qty.unit().bpu_v_[0].scalefactor() == xo::ratio::ratio(1,1000000000));
+            static_assert(l_qty.unit()[0].native_dim() == dim::mass);
+            static_assert(l_qty.unit()[0].power() == xo::ratio::ratio(1,1));
+            static_assert(l_qty.unit()[0].scalefactor() == xo::ratio::ratio(1,1000000000));
             static_assert(l_qty.scale() == 7.55);
 
             static_assert(r_qty.unit().n_bpu() == 1);
-            static_assert(r_qty.unit().bpu_v_[0].native_dim() == dim::mass);
-            static_assert(r_qty.unit().bpu_v_[0].power() == xo::ratio::ratio(1,1));
-            static_assert(r_qty.unit().bpu_v_[0].scalefactor() == xo::ratio::ratio(1,1000000000));
+            static_assert(r_qty.unit()[0].native_dim() == dim::mass);
+            static_assert(r_qty.unit()[0].power() == xo::ratio::ratio(1,1));
+            static_assert(r_qty.unit()[0].scalefactor() == xo::ratio::ratio(1,1000000000));
             static_assert(r_qty.scale() == 7.55);
         }
 
@@ -444,20 +447,21 @@ namespace xo {
             constexpr auto ms = qty::milliseconds(1.0);
 
             /* proof that ms.s_unit is constexpr */
-            static_assert(ms.s_unit.n_bpu() == 1);
+            static_assert(ms.s_scaled_unit.n_bpu() == 1);
 
             /* proof that ms.unit() is constexpr */
             static_assert(ms.unit().n_bpu() == 1);
 
             constexpr auto rr = detail::su_ratio<decltype(ms)::ratio_int_type,
-                                                 decltype(ms)::ratio_int2x_type>(ms.unit(), ms.unit());
+                                                 decltype(ms)::ratio_int2x_type>(ms.unit().natural_unit_,
+                                                                                 ms.unit().natural_unit_);
 
             /* proof that detail::su_product<..>(..) return value is constexpr */
             static_assert(rr.outer_scale_sq_ == 1.0);
             static_assert(rr.outer_scale_factor_.template convert_to<decltype(ms)::repr_type>() == 1.0);
             static_assert(rr.natural_unit_.n_bpu() == 0);
 
-            constexpr auto q1 = quantity<rr.natural_unit_,
+            constexpr auto q1 = quantity<detail::make_unit_rescale_result<decltype(ms)::ratio_int_type>(rr.natural_unit_),
                                          decltype(ms)::repr_type>(ms.scale() * ms.scale());
 
             /* proof that q is constexpr */
@@ -470,7 +474,8 @@ namespace xo {
                 using r_int2x_type = std::common_type_t<decltype(ms)::ratio_int2x_type,
                                                         decltype(ms)::ratio_int2x_type>;
 
-                constexpr auto rr = detail::su_ratio<r_int_type, r_int2x_type>(ms.unit(), ms.unit());
+                constexpr auto rr = detail::su_ratio<r_int_type, r_int2x_type>(ms.unit().natural_unit_,
+                                                                               ms.unit().natural_unit_);
 
                 static_assert(rr.outer_scale_sq_ == 1.0);
             }

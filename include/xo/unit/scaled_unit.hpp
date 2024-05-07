@@ -15,6 +15,8 @@ namespace xo {
         template < typename Int,
                    typename OuterScale = ratio::ratio<Int> >
         struct scaled_unit {
+            using ratio_int_type = typename natural_unit<Int>::ratio_int_type;
+
             constexpr scaled_unit(const natural_unit<Int> & nat_unit,
                                   OuterScale outer_scale_factor,
                                   double outer_scale_sq)
@@ -22,6 +24,8 @@ namespace xo {
                   outer_scale_factor_{outer_scale_factor},
                   outer_scale_sq_{outer_scale_sq}
                 {}
+
+            constexpr bool is_scaled_unit_type() const { return true; }
 
             constexpr scaled_unit reciprocal() const {
                 return scaled_unit(natural_unit_.reciprocal(),
@@ -36,6 +40,12 @@ namespace xo {
             constexpr bool is_natural() const {
                 return (outer_scale_factor_ == OuterScale(1) && (outer_scale_sq_ == 1.0));
             }
+
+            constexpr bool is_dimensionless() const { return natural_unit_.is_dimensionless(); }
+            constexpr std::size_t n_bpu() const { return natural_unit_.n_bpu(); }
+
+            constexpr bpu<Int> & operator[](std::size_t i) { return natural_unit_[i]; }
+            constexpr const bpu<Int> & operator[](std::size_t i) const { return natural_unit_[i]; }
 
         public: /* need public members so that a scaled_unit instance can be a non-type template parameter (a structural type) */
 
@@ -54,19 +64,53 @@ namespace xo {
         }
 
         namespace su {
+            constexpr auto picogram = detail::make_unit_rescale_result<std::int64_t>(nu::picogram);
             constexpr auto nanogram = detail::make_unit_rescale_result<std::int64_t>(nu::nanogram);
             constexpr auto microgram = detail::make_unit_rescale_result<std::int64_t>(nu::microgram);
             constexpr auto milligram = detail::make_unit_rescale_result<std::int64_t>(nu::milligram);
             constexpr auto gram = detail::make_unit_rescale_result<std::int64_t>(nu::gram);
             constexpr auto kilogram = detail::make_unit_rescale_result<std::int64_t>(nu::kilogram);
+            constexpr auto tonne = detail::make_unit_rescale_result<std::int64_t>(nu::tonne);
+            constexpr auto kilotonne = detail::make_unit_rescale_result<std::int64_t>(nu::kilotonne);
+            constexpr auto megatonne = detail::make_unit_rescale_result<std::int64_t>(nu::megatonne);
+            constexpr auto gigatonne = detail::make_unit_rescale_result<std::int64_t>(nu::gigatonne);
 
+            constexpr auto picometer = detail::make_unit_rescale_result<std::int64_t>(nu::picometer);
+            constexpr auto nanometer = detail::make_unit_rescale_result<std::int64_t>(nu::nanometer);
+            constexpr auto micrometer = detail::make_unit_rescale_result<std::int64_t>(nu::micrometer);
             constexpr auto millimeter = detail::make_unit_rescale_result<std::int64_t>(nu::millimeter);
             constexpr auto meter = detail::make_unit_rescale_result<std::int64_t>(nu::meter);
             constexpr auto kilometer = detail::make_unit_rescale_result<std::int64_t>(nu::kilometer);
+            constexpr auto megameter = detail::make_unit_rescale_result<std::int64_t>(nu::megameter);
+            constexpr auto gigameter = detail::make_unit_rescale_result<std::int64_t>(nu::gigameter);
 
+            constexpr auto lightsecond = detail::make_unit_rescale_result<std::int64_t>(nu::lightsecond);
+            constexpr auto astronomicalunit = detail::make_unit_rescale_result<std::int64_t>(nu::astronomicalunit);
+
+            constexpr auto inch = detail::make_unit_rescale_result<std::int64_t>(nu::inch);
+            constexpr auto foot = detail::make_unit_rescale_result<std::int64_t>(nu::foot);
+            constexpr auto yard = detail::make_unit_rescale_result<std::int64_t>(nu::yard);
+            constexpr auto mile = detail::make_unit_rescale_result<std::int64_t>(nu::mile);
+
+            constexpr auto picosecond = detail::make_unit_rescale_result<std::int64_t>(nu::picosecond);
+            constexpr auto nanosecond = detail::make_unit_rescale_result<std::int64_t>(nu::nanosecond);
+            constexpr auto microsecond = detail::make_unit_rescale_result<std::int64_t>(nu::microsecond);
             constexpr auto millisecond = detail::make_unit_rescale_result<std::int64_t>(nu::millisecond);
             constexpr auto second = detail::make_unit_rescale_result<std::int64_t>(nu::second);
             constexpr auto minute = detail::make_unit_rescale_result<std::int64_t>(nu::minute);
+            constexpr auto hour = detail::make_unit_rescale_result<std::int64_t>(nu::hour);
+            constexpr auto day = detail::make_unit_rescale_result<std::int64_t>(nu::day);
+            constexpr auto week = detail::make_unit_rescale_result<std::int64_t>(nu::week);
+            constexpr auto month = detail::make_unit_rescale_result<std::int64_t>(nu::month);
+            constexpr auto year = detail::make_unit_rescale_result<std::int64_t>(nu::year);
+            constexpr auto year250 = detail::make_unit_rescale_result<std::int64_t>(nu::year250);
+            constexpr auto year360 = detail::make_unit_rescale_result<std::int64_t>(nu::year360);
+            constexpr auto year365 = detail::make_unit_rescale_result<std::int64_t>(nu::year365);
+
+            constexpr auto volatility_30d = detail::make_unit_rescale_result<std::int64_t>(nu::volatility_30d);
+            constexpr auto volatility_250d = detail::make_unit_rescale_result<std::int64_t>(nu::volatility_250d);
+            constexpr auto volatility_360d = detail::make_unit_rescale_result<std::int64_t>(nu::volatility_360d);
+            constexpr auto volatility_365d = detail::make_unit_rescale_result<std::int64_t>(nu::volatility_365d);
         }
 
         namespace detail {

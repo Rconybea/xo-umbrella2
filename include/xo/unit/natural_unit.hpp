@@ -427,6 +427,7 @@ namespace xo {
             constexpr auto volatility_30d = natural_unit<std::int64_t>::from_bu(bu::month, power_ratio_type(-1,2));
             constexpr auto volatility_250d = natural_unit<std::int64_t>::from_bu(bu::year250, power_ratio_type(-1,2));
             constexpr auto volatility_360d = natural_unit<std::int64_t>::from_bu(bu::year360, power_ratio_type(-1,2));
+            constexpr auto volatility_365d = natural_unit<std::int64_t>::from_bu(bu::year365, power_ratio_type(-1,2));
         } /*namespace nu*/
     } /*namespace qty*/
 } /*namespace xo*/
