@@ -421,6 +421,25 @@ namespace xo {
 
         } /*TEST_CASE(quantity.mult2)*/
 
+        TEST_CASE("quantity.mult3", "[quantity.mult]") {
+            constexpr auto ng = qty::nanogram;
+
+            constexpr auto l_qty = 7.55 * ng;
+            constexpr auto r_qty = ng * 7.55;
+
+            static_assert(l_qty.unit().n_bpu() == 1);
+            static_assert(l_qty.unit().bpu_v_[0].native_dim() == dim::mass);
+            static_assert(l_qty.unit().bpu_v_[0].power() == xo::ratio::ratio(1,1));
+            static_assert(l_qty.unit().bpu_v_[0].scalefactor() == xo::ratio::ratio(1,1000000000));
+            static_assert(l_qty.scale() == 7.55);
+
+            static_assert(r_qty.unit().n_bpu() == 1);
+            static_assert(r_qty.unit().bpu_v_[0].native_dim() == dim::mass);
+            static_assert(r_qty.unit().bpu_v_[0].power() == xo::ratio::ratio(1,1));
+            static_assert(r_qty.unit().bpu_v_[0].scalefactor() == xo::ratio::ratio(1,1000000000));
+            static_assert(r_qty.scale() == 7.55);
+        }
+
         TEST_CASE("quantity.div2", "[quantity.div]") {
             constexpr auto ms = qty::milliseconds(1.0);
 

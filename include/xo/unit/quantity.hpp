@@ -106,7 +106,9 @@ namespace xo {
             template <typename Dimensionless>
             requires std::is_arithmetic_v<Dimensionless>
             constexpr auto scale_by(Dimensionless x) const {
-                return quantity(x * this->scale_);
+                using r_repr_type = std::common_type_t<repr_type, Dimensionless>;
+
+                return quantity<s_unit, r_repr_type>(x * this->scale_);
             }
 
             // divide_by
