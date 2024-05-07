@@ -200,6 +200,7 @@ namespace xo {
                      rr.outer_scale_sq_ * x_unit.outer_scale_sq_ * y_unit.outer_scale_sq_));
         }
 
+#ifdef OBSOLETE
         template <typename Int,
                   typename Int2x = detail::width2x_t<Int>>
         inline constexpr scaled_unit<Int>
@@ -221,6 +222,7 @@ namespace xo {
 
             return x_unit2 * y_unit;
         }
+#endif
 
         template <typename Int,
                   typename Int2x = detail::width2x_t<Int>>
@@ -239,6 +241,7 @@ namespace xo {
                      rr.outer_scale_sq_ * x_unit.outer_scale_sq_ * y_unit.outer_scale_sq_));
         }
 
+#ifdef OBSOLETE
         template <typename Int,
                   typename Int2x = detail::width2x_t<Int>>
         inline constexpr scaled_unit<Int>
@@ -260,6 +263,7 @@ namespace xo {
 
             return x_unit2 / y_unit;
         }
+#endif
     } /*namespace qty*/
 } /*namespace xo*/
 
