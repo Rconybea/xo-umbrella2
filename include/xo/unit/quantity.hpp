@@ -530,7 +530,9 @@ namespace xo {
             inline constexpr auto volatility_250d(Repr x) { return quantity<nu::volatility_250d, Repr>(x); }
             template <typename Repr>
             inline constexpr auto volatility_360d(Repr x) { return quantity<nu::volatility_360d, Repr>(x); }
-        }
+            template <typename Repr>
+            inline constexpr auto volatility_365d(Repr x) { return quantity<nu::volatility_360d, Repr>(x); }
+        } /*namespace qty*/
 
         /* reminder: see [quantity_ops.hpp] for operator* etc */
     } /*namespace qty*/
