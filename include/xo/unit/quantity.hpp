@@ -393,6 +393,24 @@ namespace xo {
             template <typename Repr>
             inline constexpr auto gigatonnes(Repr x) { return quantity<nu::gigatonne, Repr>(x); }
 
+            /** @brief a quantity representing 1 picogram of mass, with compile-time unit representation **/
+            static constexpr auto picogram = picograms(1);
+            /** @brief a quantity representing 1 nanogram of mass, with compile-time unit representation **/
+            static constexpr auto nanogram = nanograms(1);
+            /** @brief a quantity representing 1 microgram of mass, with compile-time unit representation **/
+            static constexpr auto microgram = micrograms(1);
+            /** @brief a quantity representing 1 milligram of mass, with compile-time unit representation **/
+            static constexpr auto milligram = milligrams(1);
+            /** @brief a quantity representing 1 gram of mass, with compile-time unit representation **/
+            static constexpr auto gram = grams(1);
+            /** @brief a quantity representing 1 kilogram of mass, with compile-time unit representation **/
+            static constexpr auto kilogram = kilograms(1);
+            /** @brief a quantity representing 1 metric tonne of mass, with compile-time unit representation **/
+            static constexpr auto tonne = tonnes(1);
+            /** @brief a quantity representing 1 metric kilotonne of mass, with compile-time unit representation **/
+            static constexpr auto kilotonne = kilotonnes(1);
+        } /*namespace qty*/
+
             // ----- distance -----
 
             template <typename Repr>
