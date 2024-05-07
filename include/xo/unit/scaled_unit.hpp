@@ -48,11 +48,17 @@ namespace xo {
         namespace su {
             constexpr auto nanogram = detail::make_unit_rescale_result<std::int64_t>(nu::nanogram);
             constexpr auto microgram = detail::make_unit_rescale_result<std::int64_t>(nu::microgram);
+            constexpr auto milligram = detail::make_unit_rescale_result<std::int64_t>(nu::milligram);
+            constexpr auto gram = detail::make_unit_rescale_result<std::int64_t>(nu::gram);
+            constexpr auto kilogram = detail::make_unit_rescale_result<std::int64_t>(nu::kilogram);
 
+            constexpr auto millimeter = detail::make_unit_rescale_result<std::int64_t>(nu::millimeter);
             constexpr auto meter = detail::make_unit_rescale_result<std::int64_t>(nu::meter);
+            constexpr auto kilometer = detail::make_unit_rescale_result<std::int64_t>(nu::kilometer);
 
             constexpr auto millisecond = detail::make_unit_rescale_result<std::int64_t>(nu::millisecond);
             constexpr auto second = detail::make_unit_rescale_result<std::int64_t>(nu::second);
+            constexpr auto minute = detail::make_unit_rescale_result<std::int64_t>(nu::minute);
         }
 
         namespace detail {
