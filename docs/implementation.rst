@@ -21,7 +21,7 @@ Abstraction tower for *xo-unit* components.
     |       dimension       |
     +-----------------------+
 
-- quantity:    see :doc:`quantity-reference`.
+- quantity: see :doc:`quantity-reference`.
   quantity with compile-time unit work
 
 - xquantity:
@@ -49,7 +49,7 @@ Abstraction tower for *xo-unit* components.
 - basis_unit:
   a unit with a single dimension and scale.
 
-- dimension:
+- dimension: see :doc:`dimension-enum`.
   identifies a dimension, such as mass or time.
 
 Representation

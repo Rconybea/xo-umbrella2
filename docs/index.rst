@@ -36,6 +36,7 @@ runtime (since we can't construct new c++ types at runtime).
    unit-quantities
    quantity-reference
    unit-reference
+   dimension-enum
 
 Indices and Tables
 ------------------
