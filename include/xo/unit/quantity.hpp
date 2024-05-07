@@ -518,6 +518,7 @@ namespace xo {
             static constexpr auto day = days(1);
         } /*namespace qty*/
 
+        namespace qty {
             // ----- volatility -----
 
             /* variance expressed has dimension 1/t;
