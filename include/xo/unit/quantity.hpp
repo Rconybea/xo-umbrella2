@@ -12,33 +12,73 @@
 namespace xo {
     namespace qty {
         /** @class quantity
+         *
          *  @brief represent a scalar quantity with associated units.
+         *
+         *  - @p NaturalUnit is a non-type template parameter
+         *    identifying a unit used for this quantity.
+         *    In *xo-unit* it will be an instance of @c natural_unit
+         *  - @p Repr is a type used to represent a multiple
+         *    of @p NaturalUnit.
          *
          *  Enforce dimensional consistency at compile time.
          *  sizeof(quantity) == sizeof(Repr).
+         *
+         *  A quantity's runtime state consists of exactly one @p Repr instance:
+         *  @code
+         *  sizeof(quantity<NaturalUnit, Repr>) == sizeof(Repr)
+         *  @endcode
          **/
         template <
             auto NaturalUnit,
             typename Repr = double>
         class quantity {
         public:
+            /** @defgroup quantity-type-traits quantity type traits **/
+            ///@{
+            /** @brief runtime representation for value of this type **/
             using repr_type = Repr;
+            /** @brief type used to represent unit information */
             using unit_type = decltype(NaturalUnit);
+            /** @brief type used for numerator and denominator in basis-unit scalefactor ratios */
             using ratio_int_type = unit_type::ratio_int_type;
+            /** @brief double-width type used for numerator and denominator of intermediate
+             *         scalefactor ratios.  Used to mitigate loss of precision during computation
+             *         of conversion factors between units with widely-differing magnitude
+             **/
             using ratio_int2x_type = detail::width2x_t<typename unit_type::ratio_int_type>;
+            ///@}
 
         public:
+            /** @defgroup quantity-ctors quantity constructors**/
+            ///@{
+            /** @brief create a zero amount with dimension @c NaturalUnit **/
             constexpr quantity() : scale_{0} {}
+            /** @brief create a quantity representing @p scale @c NaturalUnits **/
             explicit constexpr quantity(Repr scale) : scale_{scale} {}
+            ///@}
 
+            /** @defgroup quantity-constants static quantity constants **/
+            ///@{
+            /** @brief Use to distinguish @ref quantity from xquantity instances.
+             *
+             *  Useful in c++ template resolution.
+             **/
             static constexpr bool always_constexpr_unit = true;
+            ///@}
 
+            /** @defgroup quantity-access-methods quantity access methods **/
+            ///@{
+            /** @brief value of @c scale_ in quantity representing amount (@c scale_ * @c s_unit) **/
             constexpr const repr_type & scale() const { return scale_; }
+            /** @brief s_unit in quantity representing amount (@c scale_ * @c s_unit) **/
             constexpr const unit_type & unit() const { return s_unit; }
 
+            /** @brief true iff this quantity represents a dimensionless value **/
             constexpr bool is_dimensionless() const {
                 return s_unit.is_dimensionless();
             }
+            ///@}
 
             // unit_qty
             // zero_qty
@@ -94,7 +134,7 @@ namespace xo {
                                            && (ScaledUnit2.outer_scale_sq_ == 1.0))
                                           ? 1.0
                                           : ::sqrt(rr.outer_scale_sq_ / ScaledUnit2.outer_scale_sq_))
-                                         * rr.outer_scale_factor_.template convert_to<repr_type>()
+                                       * rr.outer_scale_factor_.template convert_to<repr_type>()
                                          * this->scale_
                                          / ScaledUnit2.outer_scale_factor_.template convert_to<repr_type>());
                     return quantity<ScaledUnit2.natural_unit_, Repr>(r_scale);
@@ -382,8 +422,11 @@ namespace xo {
             inline constexpr auto milligrams(Repr x) { return quantity<nu::milligram, Repr>(x); }
             template <typename Repr>
             inline constexpr auto grams(Repr x) { return quantity<nu::gram, Repr>(x); }
+
+            /** @brief create a quantity representing @p x kilograms of mass,  with compile-time unit representation **/
             template <typename Repr>
             inline constexpr auto kilograms(Repr x) { return quantity<nu::kilogram, Repr>(x); }
+
             template <typename Repr>
             inline constexpr auto tonnes(Repr x) { return quantity<nu::tonne, Repr>(x); }
             template <typename Repr>
@@ -482,19 +525,26 @@ namespace xo {
             inline constexpr auto nanoseconds(Repr x) { return quantity<nu::nanosecond, Repr>(x); }
             template <typename Repr>
             inline constexpr auto microseconds(Repr x) { return quantity<nu::microsecond, Repr>(x); }
+
             template <typename Repr>
             inline constexpr auto milliseconds(Repr x) { return quantity<nu::millisecond, Repr>(x); }
 
+            /** @brief create quantity representing @p x seconds of time, with compile-time unit representation **/
             template <typename Repr>
             inline constexpr auto seconds(Repr x) { return quantity<nu::second, Repr>(x); }
 
+            /** @brief create quantity representing @p x minutes of time, with compile-time unit representation **/
             template <typename Repr>
             inline constexpr auto minutes(Repr x) { return quantity<nu::minute, Repr>(x); }
 
+            /** @brief create quantity representing @p x hours of time, with compile-time unit representation **/
             template <typename Repr>
             inline constexpr auto hours(Repr x) { return quantity<nu::hour, Repr>(x); }
+
+            /** @brief create quantity representing @p x days of time, with compile-time unit representation **/
             template <typename Repr>
             inline constexpr auto days(Repr x) { return quantity<nu::day, Repr>(x); }
+
             template <typename Repr>
             inline constexpr auto weeks(Repr x) { return quantity<nu::week, Repr>(x); }
             template <typename Repr>

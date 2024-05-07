@@ -11,16 +11,21 @@
 
 namespace xo {
     namespace qty {
-        /** @class Quantity
-         *  @brief represent a scalar quantity with attached units.  enforce dimensional consistency.
+        /** @class xquantity
+         *  @brief represent a scalar quantity with polymorphic units.
+         *
+         *  - @p Repr type used represent a dimensionless multiple of a natural unit.
          *
          *  Constexpr implementation,  but units are explicitly represented:
+         *  @code
          *  sizeof(Quantity2) > sizeof(Repr)
+         *  @endcode
          *
          *  Explicit unit representation allows introducing units at runtime,
-         *  for example in python bindings
+         *  for example in python bindings.
+         *  See for example <a href="https://github.com/rconybea/xo-pyutil">xo-pyutil</a>
          *
-         *  See xo::qty::quantity<> for implementation with units established at compile time
+         *  See @ref quantity for implementation with units established at compile time
          *
          *  Require:
          *  - Repr supports numeric operations (+, -, *, /)

@@ -28,7 +28,7 @@ namespace xo {
         template <typename Unit, typename Repr = double>
         class quantity {
         public:
-            /** @defgroup quantity-traits **/
+            /** @defgroup mpl-quantity-traits **/
             ///@{
             /** @brief type capturing the units (and dimension) of this quantity **/
             using unit_type = Unit;
@@ -45,7 +45,7 @@ namespace xo {
             static_assert(std::same_as< typename Unit::canon_type, typename Unit::canon_type >);
 
         public:
-            /** @defgroup quantity-ctors constructors
+            /** @defgroup mpl-quantity-ctors constructors
              **/
             ///@{
             constexpr quantity() = default;
@@ -69,7 +69,7 @@ namespace xo {
             static constexpr auto promote(Repr x);
             ///@}
 
-            /** @addtogroup quantity-traits **/
+            /** @addtogroup mpl-quantity-traits **/
             ///@{
 
             /** @brief report this quantity's basis-power-unit type for a given basis dimension
@@ -98,7 +98,7 @@ namespace xo {
 
             ///@}
 
-            /** @defgroup quantity-access-methods **/
+            /** @defgroup mpl-quantity-access-methods **/
             ///@{
             /** @brief get scale value (relative to unit) (@ref scale_) **/
             constexpr Repr scale() const { return scale_; }
@@ -117,7 +117,7 @@ namespace xo {
             static constexpr char const * unit_cstr() { return unit_abbrev_v<unit_type>.c_str(); }
             ///@}
 
-            /** @defgroup quantity-constants constants
+            /** @defgroup mpl-quantity-constants constants
              **/
             ///@{
             /** @brief report exponent of @p BasisDim in dimension of this quantity
