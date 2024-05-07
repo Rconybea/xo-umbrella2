@@ -508,7 +508,14 @@ namespace xo {
             template <typename Repr>
             inline constexpr auto year365s(Repr x) { return quantity<nu::year365, Repr>(x); }
 
+            /** @brief a quantity representing 1 second of time, with compile-time unit representation **/
             static constexpr auto second = seconds(1);
+            /** @brief a quantity representing 1 minute of time, with compile-time unit representation **/
+            static constexpr auto minute = minutes(1);
+            /** @brief a quantity representing 1 hour of time, with compile-time unit representation **/
+            static constexpr auto hour = hours(1);
+            /** @brief a quantity representing 1 day of time (exactly 24 hours), with compile-time unit representation **/
+            static constexpr auto day = days(1);
         } /*namespace qty*/
 
             // ----- volatility -----
