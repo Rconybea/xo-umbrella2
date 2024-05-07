@@ -1,4 +1,4 @@
-/** @file scaled_unit2.hpp
+/** @file scaled_unit.hpp
  *
  *  Author: Roland Conybeare
  **/
@@ -216,4 +216,4 @@ namespace xo {
     } /*namespace qty*/
 } /*namespace xo*/
 
-/** end scaled_unit2.hpp **/
+/** end scaled_unit.hpp **/

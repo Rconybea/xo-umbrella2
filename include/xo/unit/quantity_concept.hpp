@@ -1,4 +1,4 @@
-/** @file quantity2_concept.hpp **/
+/** @file quantity_concept.hpp **/
 
 #pragma once
 
@@ -24,3 +24,5 @@ namespace xo {
               && numeric_concept<typename Quantity::repr_type>);
     } /*namespace qty*/
 } /*namespace xo*/
+
+/* end quantity_concept.hpp */

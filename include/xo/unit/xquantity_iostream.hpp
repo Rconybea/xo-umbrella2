@@ -1,4 +1,4 @@
-/** @file Quantity2_iostream.hpp
+/** @file xquantity_iostream.hpp
  *
  *  Author: Roland Conybeare
  **/
@@ -31,4 +31,4 @@ namespace xo {
     } /*namespace qty*/
 } /*namespace xo*/
 
-/** end Quantity2_iostream.hpp **/
+/** end xquantity_iostream.hpp **/

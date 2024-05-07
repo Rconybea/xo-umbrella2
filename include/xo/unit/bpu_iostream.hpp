@@ -1,4 +1,4 @@
-/** @file native_bpu2_iostream.hpp
+/** @file bpu_iostream.hpp
  *
  *  Author: Roland Conybeare
  **/
@@ -27,5 +27,4 @@ namespace xo {
     } /*namespace qty*/
 } /*namespace xo*/
 
-
-/** end native_bpu2_iostream.hpp **/
+/** end bpu_iostream.hpp **/
