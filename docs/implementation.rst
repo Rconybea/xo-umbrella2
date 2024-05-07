@@ -30,7 +30,10 @@ Abstraction tower for *xo-unit* components.
 - scaled_unit:
   a unit involving zero or more dimensions, and associated conversion factor.
 
-  - expresses result of arithmetic involving multiple scales.
+  - can express result of arithmetic involving multiple scales,
+    by reporting an outer scalefactor
+  - a scaled unit is 'natural' if its outer scalefactor is 1.
+  - quantities are represented by associating a natural scaled_unit instance
   - scaled_units are closed under multiplication and division.
   - multiplication and division commit to a single :code:`basis_unit` for each
     dimension.

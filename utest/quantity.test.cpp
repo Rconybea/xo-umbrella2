@@ -483,6 +483,7 @@ namespace xo {
             constexpr auto q2 = detail::quantity_util::divide(ms, ms);
 
             /* proof that q2 is constexpr */
+            static_assert(q2.is_dimensionless());
             static_assert(q2.scale() == 1.0);
             static_assert(q2.unit().n_bpu() == 0);
             static_assert(q2.unit()[0].power() == power_ratio_type(0,1));
@@ -490,6 +491,7 @@ namespace xo {
             constexpr auto q3 = ms / ms;
 
             /* proof that q3 is constexpr */
+            static_assert(q3.is_dimensionless());
             static_assert(q3.scale() == 1.0);
             static_assert(q3.unit().n_bpu() == 0);
             static_assert(q3.unit()[0].power() == power_ratio_type(0,1));
