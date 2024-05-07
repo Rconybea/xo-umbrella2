@@ -10,18 +10,26 @@ Quantity Factory Functions
 
     #include <xo/unit/quantity.hpp>
 
-.. doxygenfunction:: xo::unit::qty::milligrams
-.. doxygenfunction:: xo::unit::qty::grams
-.. doxygenfunction:: xo::unit::qty::kilograms
+Mass
+----
+.. doxygenfunction:: xo::qty::qty::milligrams
+.. doxygenfunction:: xo::qty::qty::grams
+.. doxygenfunction:: xo::qty::qty::kilograms
 
-.. doxygenfunction:: xo::unit::qty::millimeters
-.. doxygenfunction:: xo::unit::qty::meters
-.. doxygenfunction:: xo::unit::qty::kilometers
+Distance
+--------
+.. doxygenfunction:: xo::qty::qty::millimeters
+.. doxygenfunction:: xo::qty::qty::meters
+.. doxygenfunction:: xo::qty::qty::kilometers
 
-.. doxygenfunction:: xo::unit::qty::nanoseconds
-.. doxygenfunction:: xo::unit::qty::microseconds
-.. doxygenfunction:: xo::unit::qty::milliseconds
-.. doxygenfunction:: xo::unit::qty::seconds
-.. doxygenfunction:: xo::unit::qty::minutes
-.. doxygenfunction:: xo::unit::qty::hours
-.. doxygenfunction:: xo::unit::qty::days
+.. doxygenfunction:: xo::qty::qty::inches
+
+Time
+----
+.. doxygenfunction:: xo::qty::qty::nanoseconds
+.. doxygenfunction:: xo::qty::qty::microseconds
+.. doxygenfunction:: xo::qty::qty::milliseconds
+.. doxygenfunction:: xo::qty::qty::seconds
+.. doxygenfunction:: xo::qty::qty::minutes
+.. doxygenfunction:: xo::qty::qty::hours
+.. doxygenfunction:: xo::qty::qty::days

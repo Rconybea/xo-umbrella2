@@ -8,29 +8,24 @@ Quantity
     #include <xo/unit/quantity.hpp>
 
 The primary data structure for interacting with xo-unit is the
-template class ``xo::unit::quantity``.
+template class ``xo::qty::quantity``.
 
-.. doxygenclass:: xo::unit::quantity
+.. doxygenclass:: xo::qty::quantity
 
 Type Traits
 -----------
 
-.. doxygengroup:: quantity-traits
-   :content-only:
+.. doxygengroup:: quantity-type-traits
 
 Constructors
 ------------
 
 .. doxygengroup:: quantity-ctors
-   :content-only:
-
-.. doxygengroup:: quantity-named-ctors
-   :content-only:
 
 The simplest way to create a quantity instance is to use either
 
-*  factory functions in ``xo::unit::qty``, see :doc:`quantity-factoryfunctions`
-*  unit variables in ``xo::unit::units``, see :doc:`quantity-unitvars`
+*  factory functions in ``xo::qty::qty``, see :doc:`quantity-factoryfunctions`
+*  unit variables in ``xo::qty::qty``, see :doc:`quantity-unitvars`
 
 Assignment
 ----------

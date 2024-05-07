@@ -15,7 +15,9 @@ author = 'Roland Conybeare'
 
 #extensions = []
 extensions = [ "breathe",
-               "sphinx.ext.autodoc"  # generate info from docstrings
+               "sphinx.ext.autodoc",     # generate info from docstrings
+               "sphinxcontrib.ditaa",    # diagrams-through-ascii-art
+               "sphinxcontrib.plantuml"  # text -> uml diagrams
               ]
 
 # note: breathe requires doxygen xml output -> must have GENERATE_XML = YES in Doxyfile.in
