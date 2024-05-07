@@ -32,6 +32,7 @@ namespace xo {
         template <
             auto NaturalUnit,
             typename Repr = double>
+        requires (NaturalUnit.is_natural())
         class quantity {
         public:
             /** @defgroup quantity-type-traits quantity type traits **/

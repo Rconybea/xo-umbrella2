@@ -70,6 +70,9 @@ namespace xo {
                 return detail::nu_maker<Int>::make_nu(bpu<Int>(bu, power));
             }
 
+            /** always true.  @see scaled_unit::is_natural **/
+            constexpr bool is_natural() const { return true; }
+
             constexpr std::size_t n_bpu() const { return n_bpu_; }
             constexpr bool is_dimensionless() const { return n_bpu_ == 0; }
 
