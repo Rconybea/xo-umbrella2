@@ -29,6 +29,11 @@ namespace xo {
                                    1.0 / outer_scale_sq_);
             }
 
+            /** @brief true iff scaled unit can be faithfully represented by a @ref natural_unit **/
+            constexpr bool is_natural() const {
+                return (outer_scale_factor_ = OuterScale(1) && (outer_scale_sq_ == 1.0));
+            }
+
         public: /* need public members so that a scaled_unit instance can be a non-type template parameter (a structural type) */
 
             natural_unit<Int> natural_unit_;
