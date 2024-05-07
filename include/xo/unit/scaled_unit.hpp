@@ -156,6 +156,28 @@ namespace xo {
         template <typename Int,
                   typename Int2x = detail::width2x_t<Int>>
         inline constexpr scaled_unit<Int>
+        operator* (const scaled_unit<Int> & x_unit,
+                   const natural_unit<Int> & y_unit)
+        {
+            auto y_unit2 = detail::make_unit_rescale_result<Int>(y_unit);
+
+            return x_unit * y_unit2;
+        }
+
+        template <typename Int,
+                  typename Int2x = detail::width2x_t<Int>>
+        inline constexpr scaled_unit<Int>
+        operator* (const natural_unit<Int> & x_unit,
+                   const scaled_unit<Int> & y_unit)
+        {
+            auto x_unit2 = detail::make_unit_rescale_result<Int>(x_unit);
+
+            return x_unit2 * y_unit;
+        }
+
+        template <typename Int,
+                  typename Int2x = detail::width2x_t<Int>>
+        inline constexpr scaled_unit<Int>
         operator/ (const scaled_unit<Int> & x_unit,
                    const scaled_unit<Int> & y_unit)
         {
@@ -168,6 +190,28 @@ namespace xo {
                       * ratio::ratio<Int2x>(x_unit.outer_scale_factor_)
                       * ratio::ratio<Int2x>(y_unit.outer_scale_factor_)),
                      rr.outer_scale_sq_ * x_unit.outer_scale_sq_ * y_unit.outer_scale_sq_));
+        }
+
+        template <typename Int,
+                  typename Int2x = detail::width2x_t<Int>>
+        inline constexpr scaled_unit<Int>
+        operator/ (const scaled_unit<Int> & x_unit,
+                   const natural_unit<Int> & y_unit)
+        {
+            auto y_unit2 = detail::make_unit_rescale_result<Int>(y_unit);
+
+            return x_unit / y_unit2;
+        }
+
+        template <typename Int,
+                  typename Int2x = detail::width2x_t<Int>>
+        inline constexpr scaled_unit<Int>
+        operator/ (const natural_unit<Int> & x_unit,
+                   const scaled_unit<Int> & y_unit)
+        {
+            auto x_unit2 = detail::make_unit_rescale_result<Int>(x_unit);
+
+            return x_unit2 / y_unit;
         }
     } /*namespace qty*/
 } /*namespace xo*/
