@@ -55,15 +55,15 @@ namespace xo {
         namespace bu {
             // ----- mass -----
 
-            constexpr basis_unit picogram         = basis_unit(dim::mass, scalefactor_ratio_type(            1, 1000000000000));
-            constexpr basis_unit nanogram         = basis_unit(dim::mass, scalefactor_ratio_type(            1,    1000000000));
-            constexpr basis_unit microgram        = basis_unit(dim::mass, scalefactor_ratio_type(            1,       1000000));
-            constexpr basis_unit milligram        = basis_unit(dim::mass, scalefactor_ratio_type(            1,          1000));
-            constexpr basis_unit gram             = basis_unit(dim::mass, scalefactor_ratio_type(            1,             1));
-            constexpr basis_unit kilogram         = basis_unit(dim::mass, scalefactor_ratio_type(         1000,             1));
-            constexpr basis_unit tonne            = basis_unit(dim::mass, scalefactor_ratio_type(      1000000,             1));
-            constexpr basis_unit kilotonne        = basis_unit(dim::mass, scalefactor_ratio_type(   1000000000,             1));
-            constexpr basis_unit megatonne        = basis_unit(dim::mass, scalefactor_ratio_type(1000000000000,             1));
+            constexpr basis_unit picogram         = basis_unit(dim::mass, scalefactor_ratio_type(               1, 1000000000000));
+            constexpr basis_unit nanogram         = basis_unit(dim::mass, scalefactor_ratio_type(               1,    1000000000));
+            constexpr basis_unit microgram        = basis_unit(dim::mass, scalefactor_ratio_type(               1,       1000000));
+            constexpr basis_unit milligram        = basis_unit(dim::mass, scalefactor_ratio_type(               1,          1000));
+            constexpr basis_unit gram             = basis_unit(dim::mass, scalefactor_ratio_type(               1,             1));
+            constexpr basis_unit kilogram         = basis_unit(dim::mass, scalefactor_ratio_type(            1000,             1));
+            constexpr basis_unit tonne            = basis_unit(dim::mass, scalefactor_ratio_type(         1000000,             1));
+            constexpr basis_unit kilotonne        = basis_unit(dim::mass, scalefactor_ratio_type(      1000000000,             1));
+            constexpr basis_unit megatonne        = basis_unit(dim::mass, scalefactor_ratio_type(   1000000000000,             1));
             constexpr basis_unit gigatonne        = basis_unit(dim::mass, scalefactor_ratio_type(1000000000000000,             1));
 
             // ----- distance -----
