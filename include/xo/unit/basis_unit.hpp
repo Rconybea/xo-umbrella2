@@ -4,10 +4,15 @@
 
 #include "dimension.hpp"
 #include "basis_unit_abbrev.hpp"
+//#include "bpu_store.hpp"
 #include "xo/ratio/ratio.hpp"
 
 namespace xo {
     namespace qty {
+        using bu_abbrev_type = flatstring<16>;
+        using scalefactor_ratio_type = xo::ratio::ratio<std::int64_t>;
+        using scalefactor2x_ratio_type = xo::ratio::ratio<__int128>;
+
         /** @class basis_unit
          *  @brief A dimensionless multiple of a single natively-specified basis dimension
          *
@@ -31,12 +36,13 @@ namespace xo {
             constexpr const scalefactor_ratio_type & scalefactor() const { return scalefactor_; }
             ///@}
 
-            constexpr bu_abbrev_type abbrev() const {
-                return abbrev::basis_unit2_abbrev(native_dim_,
-                                                  scalefactor_);
+#ifdef OBSOLETE // use bu_abbrev(bu)
+           constexpr bu_abbrev_type abbrev() const {
+                return basis_unit2_abbrev(native_dim_, scalefactor_);
             }
+#endif
 
-        public: /* need public members so that a basis_unit instance can be a non-type template parameter (a structural type) */
+        public: /* public so instance can be a non-type template parameter (a structural type) */
             /** @defgroup basis-unit-instance-vars **/
             ///@{
             /** @brief identifies a native unit, e.g. time (in seconds) **/
@@ -171,7 +177,6 @@ namespace xo {
                 ///@}
             } /*namespace bu*/
         } /*namespace detail*/
-
 
         namespace units {
             /** for runtime work,  would like to be able to promptly find special abbreviation

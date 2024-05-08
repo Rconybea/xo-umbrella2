@@ -12,8 +12,6 @@ namespace xo {
     namespace ut {
         /* compile-time tests */
 
-        namespace u = xo::qty::u;
-
         using xo::qty::dim;
         using xo::qty::bu_abbrev_type;
         using xo::qty::scalefactor_ratio_type;
@@ -32,7 +30,7 @@ namespace xo {
             scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.basis_unit2_store"));
             //log && log("(A)", xtag("foo", foo));
 
-            basis_unit2_store<class AnyTag> bu_store;
+            basis_unit2_store/*<class AnyTag>*/ bu_store;
 
             log && log(xtag("mass*10^-9",       bu_store.bu_abbrev(dim::mass,     scalefactor_ratio_type(          1, 1000000000))));
             log && log(xtag("mass*10^-6",       bu_store.bu_abbrev(dim::mass,     scalefactor_ratio_type(          1,    1000000))));

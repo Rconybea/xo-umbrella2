@@ -11,10 +11,14 @@
 
 namespace xo {
     namespace qty {
+#ifdef OBSOLETE
         using bu_abbrev_type = flatstring<16>;
         using scalefactor_ratio_type = xo::ratio::ratio<std::int64_t>;
+        using scalefactor2x_ratio_type = xo::ratio::ratio<__int128>;
+        #endif
 
         namespace abbrev {
+#ifdef OBSOLETE
             static
             constexpr bu_abbrev_type
             fallback_unit_abbrev(const scalefactor_ratio_type & scalefactor,
@@ -237,6 +241,7 @@ namespace xo {
 
                 return bu_abbrev_type();
             }
+#endif
         } /*namespace abbrev*/
     } /*namespace qty*/
 } /*namespace xo*/

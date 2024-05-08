@@ -6,13 +6,10 @@
 #pragma once
 
 #include "basis_unit.hpp"
+#include "bpu_store.hpp"
 
 namespace xo {
     namespace qty {
-        using bpu_abbrev_type = flatstring<24>;
-
-        using power_ratio_type = xo::ratio::ratio<std::int64_t>;
-
         namespace abbrev {
             using power_abbrev_type = flatstring<16>;
 
@@ -43,7 +40,7 @@ namespace xo {
             {
                 return (bpu_abbrev_type::from_flatstring
                         (flatstring_concat
-                         (basis_unit2_abbrev(native_dim, scalefactor),
+                         (bu_abbrev(basis_unit(native_dim, scalefactor)),
                           flatstring_from_exponent(power.num(), power.den()))));
             }
         }
