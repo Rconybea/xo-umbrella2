@@ -177,33 +177,6 @@ namespace xo {
                 ///@}
             } /*namespace bu*/
         } /*namespace detail*/
-
-        namespace units {
-            /** for runtime work,  would like to be able to promptly find special abbreviation
-             *  keyed by (native_dim, scalefactor).
-             *
-             *  Also want to support compile-time-only unit computation.
-             *  Since constexpr unordered containers aren't obviously feasible (as of c++23).
-             *
-             *  Solution adopted here is to support introduction of scaled native units
-             *  only at compile time,  at least for now
-             **/
-
-            // ----- bu_fallback_abbrev -----
-
-            /* Require: InnerScale is ratio type; InnerScale >= 1 */
-            template <dim BasisDim, std::int64_t InnerScaleNum = 1, std::int64_t InnerScaleDen = 1>
-            struct scaled_native_unit2_abbrev;
-
-            template <dim BasisDim>
-            struct scaled_native_unit2_abbrev<BasisDim, 1, 1> {
-                static constexpr const bu_abbrev_type value
-                = (bu_abbrev_type::from_flatstring
-                   (native_unit2_v[static_cast<uint32_t>(BasisDim)]
-                    .abbrev_str()));
-            };
-
-        }
     } /*namespace qty*/
 } /*namespace xo*/
 
