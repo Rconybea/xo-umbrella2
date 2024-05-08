@@ -6,7 +6,7 @@
 #pragma once
 
 #include "basis_unit.hpp"
-#include "bpu_store.hpp"
+#include "bu_store.hpp"
 
 namespace xo {
     namespace qty {

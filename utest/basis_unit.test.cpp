@@ -1,7 +1,7 @@
 /* @file bu.test.cpp */
 
 #include "xo/unit/basis_unit.hpp"
-#include "xo/unit/bpu_store.hpp"
+#include "xo/unit/bu_store.hpp"
 #include "xo/indentlog/scope.hpp"
 //#include "xo/indentlog/print/tag.hpp"
 #include <catch2/catch.hpp>

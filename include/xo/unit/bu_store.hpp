@@ -1,4 +1,4 @@
-/** @file bpu_store.hpp **/
+/** @file bu_store.hpp **/
 
 #pragma once
 
@@ -115,8 +115,8 @@ namespace xo {
          *  @brief Store known basis units for runtime
          **/
         //template <typename Tag>
-        struct basis_unit2_store {
-            constexpr basis_unit2_store() {
+        struct bu_store {
+            constexpr bu_store() {
                 // ----- mass -----
 
                 this->bu_establish_abbrev(detail::bu::picogram, bu_abbrev_type::from_chars("pg"));
@@ -190,28 +190,6 @@ namespace xo {
                     }
                 }
 
-#ifdef OBSOLETE
-            /** @brief get basis-power-unit abbreviation at runtime **/
-            bpu_abbrev_type bpu_abbrev(dim basis_dim,
-                                      const scalefactor_ratio_type & scalefactor,
-                                      const power_ratio_type & power)
-                {
-                    return abbrev::bpu_abbrev(basis_dim,
-                                              scalefactor,
-                                              power);
-                }
-#endif
-
-#ifdef OBSOLETE
-            template <dim BasisDim, std::int64_t InnerScaleNum, std::int64_t InnerScaleDen>
-            void bu_establish_abbrev_for() {
-                this->bu_establish_abbrev
-                    (basis_unit(BasisDim,
-                                scalefactor_ratio_type(InnerScaleNum, InnerScaleDen)),
-                     abbrev::basis_unit2_abbrev(BasisDim, scalefactor_ratio_type(InnerScaleNum, InnerScaleDen)));
-            }
-#endif
-
             constexpr void bu_establish_abbrev(const basis_unit & bu,
                                                const bu_abbrev_type & abbrev) {
                 auto & dim_store = bu_abbrev_vv_[static_cast<std::size_t>(bu.native_dim_)];
@@ -226,7 +204,7 @@ namespace xo {
             std::array<bu_dim_store, n_dim> bu_abbrev_vv_;
         };
 
-        static constexpr basis_unit2_store bu_abbrev_store = basis_unit2_store();
+        static constexpr bu_store bu_abbrev_store = bu_store();
 
         constexpr bu_abbrev_type
         bu_abbrev(const basis_unit & bu)
@@ -236,4 +214,4 @@ namespace xo {
     } /*namespace qty*/
 } /*namespace xo*/
 
-/** end bpu_store.hpp **/
+/** end bu_store.hpp **/
