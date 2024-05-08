@@ -203,16 +203,6 @@ namespace xo {
                     .abbrev_str()));
             };
 
-            inline
-            constexpr bu_abbrev_type
-            bu_fallback_abbrev(dim basis_dim,
-                               const scalefactor_ratio_type & scalefactor)
-            {
-                return (bu_abbrev_type::from_flatstring
-                        (flatstring_concat
-                         (scalefactor.to_str<bu_abbrev_type::fixed_capacity>(),
-                          native_unit2_v[static_cast<std::uint32_t>(basis_dim)].abbrev_str())));
-            }
         }
     } /*namespace qty*/
 } /*namespace xo*/

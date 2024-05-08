@@ -173,6 +173,16 @@ namespace xo {
                 //this->bu_establish_abbrev_for<dim::price,             1,          1>();
             }
 
+            static constexpr bu_abbrev_type
+            bu_fallback_abbrev(dim basis_dim,
+                               const scalefactor_ratio_type & scalefactor)
+            {
+                return (bu_abbrev_type::from_flatstring
+                        (flatstring_concat
+                         (scalefactor.to_str<bu_abbrev_type::fixed_capacity>(),
+                          native_unit2_v[static_cast<std::uint32_t>(basis_dim)].abbrev_str())));
+            }
+
             /** @brief get basis-unit abbreviation at runtime **/
             constexpr bu_abbrev_type bu_abbrev(dim basis_dim,
                                                const scalefactor_ratio_type & scalefactor) const
@@ -186,7 +196,7 @@ namespace xo {
                     {
                         return bu_abbrev_v[i_abbrev].second;
                     } else {
-                        return units::bu_fallback_abbrev(basis_dim, scalefactor);
+                        return bu_fallback_abbrev(basis_dim, scalefactor);
                     }
                 }
 
