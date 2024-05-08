@@ -36,12 +36,6 @@ namespace xo {
             constexpr const scalefactor_ratio_type & scalefactor() const { return scalefactor_; }
             ///@}
 
-#ifdef OBSOLETE // use bu_abbrev(bu)
-           constexpr bu_abbrev_type abbrev() const {
-                return basis_unit2_abbrev(native_dim_, scalefactor_);
-            }
-#endif
-
         public: /* public so instance can be a non-type template parameter (a structural type) */
             /** @defgroup basis-unit-instance-vars **/
             ///@{
@@ -167,13 +161,21 @@ namespace xo {
                 /** @defgroup basis-unit-misc-units **/
                 ///@{
 
+                constexpr basis_unit currency_unit(std::int64_t num, std::int64_t den) {
+                    return basis_unit(dimension::currency, scalefactor_ratio_type(num, den));
+                }
+
                 /* pseudounit -- placeholder for any actual currency amount */
-                constexpr basis_unit currency         = basis_unit(dim::currency, scalefactor_ratio_type(            1,             1));
+                constexpr basis_unit currency = currency_unit(1, 1);
 
                 // ----- price -----
 
+                constexpr basis_unit price_unit(std::int64_t num, std::int64_t den) {
+                    return basis_unit(dimension::price, scalefactor_ratio_type(num, den));
+                }
+
                 /* psuedounit -- context-dependent interpretation */
-                constexpr basis_unit price            = basis_unit(dim::price,    scalefactor_ratio_type(            1,             1));
+                constexpr basis_unit price = price_unit(1, 1);
                 ///@}
             } /*namespace bu*/
         } /*namespace detail*/
