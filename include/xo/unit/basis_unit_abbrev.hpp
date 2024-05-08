@@ -114,8 +114,20 @@ namespace xo {
                         return bu_abbrev_type::from_chars("AU");
                     }
                 }
+
+                if (scalefactor.den() == 10000) {
+                    switch(scalefactor.num()) {
+                    case 3048:
+                        return bu_abbrev_type::from_chars("ft");
+                    case 3*3048:
+                        return bu_abbrev_type::from_chars("yd");
+                    case 5280*3048:
+                        return bu_abbrev_type::from_chars("mi");
                     }
                 }
+
+                if (scalefactor.num() == 3048 && scalefactor.den() == 120000)
+                    return bu_abbrev_type::from_chars("in");
 
                 return fallback_unit_abbrev(scalefactor, dimension::distance);
             }

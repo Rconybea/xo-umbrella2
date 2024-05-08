@@ -111,6 +111,11 @@ namespace xo {
             REQUIRE_x2(bu::lightsecond.abbrev() == flatstring("lsec"));
             REQUIRE_x2(bu::astronomicalunit.abbrev() == flatstring("AU"));
 
+            REQUIRE_x2(bu::inch.abbrev() == flatstring("in"));
+            REQUIRE_x2(bu::foot.abbrev() == flatstring("ft"));
+            REQUIRE_x2(bu::yard.abbrev() == flatstring("yd"));
+            REQUIRE_x2(bu::mile.abbrev() == flatstring("mi"));
+
             log && log(xtag("time", basis_unit2_abbrev(dim::time, scalefactor_ratio_type(1, 1))));
 
             REQUIRE_x2(bu::picosecond.abbrev() == bu_abbrev_type::from_chars("ps"));
