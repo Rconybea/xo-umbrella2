@@ -19,8 +19,10 @@ namespace xo {
         constexpr bpu_abbrev_type bpu_mpl_abbrev = bpu.abbrev();
 
         TEST_CASE("bpu", "[bpu]") {
-            static_assert(bpu_mpl_abbrev<bpu64_type::unit_power(bu::gram)> == bpu64_type::unit_power(bu::gram).abbrev());
-            REQUIRE(bpu_mpl_abbrev<bpu64_type::unit_power(bu::gram)> == bpu64_type::unit_power(bu::gram).abbrev());
+            static_assert(bpu_mpl_abbrev<bpu64_type::unit_power(detail::bu::gram)>
+                          == bpu64_type::unit_power(detail::bu::gram).abbrev());
+            REQUIRE(bpu_mpl_abbrev<bpu64_type::unit_power(detail::bu::gram)>
+                    == bpu64_type::unit_power(detail::bu::gram).abbrev());
         } /*TEST_CASE(bpu)*/
 
         TEST_CASE("flatstring_from_exponent", "[flatstring_from_exponent]") {

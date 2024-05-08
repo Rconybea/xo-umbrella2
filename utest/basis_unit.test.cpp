@@ -12,7 +12,7 @@ namespace xo {
     using xo::qty::basis_unit2_abbrev_type;
     using xo::qty::native_unit2_v;
     using xo::qty::dim;
-    namespace bu = xo::qty::bu;
+    namespace bu = xo::qty::detail::bu;
 
     namespace ut {
 

@@ -50,7 +50,7 @@ Abstraction tower for *xo-unit* components.
 
   A power of a basis unit. Has a single dimension.
 
-- basis_unit: see :doc:`basis-unit-class`.
+- basis_unit: see :doc:`basis-unit-reference`.
 
   A unit with a single dimension and scale.
 

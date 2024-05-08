@@ -31,6 +31,17 @@ namespace xo {
 
             // ----- units for dim::mass -----
 
+            /** @brief return abbreviated suffix to use for a mass unit
+             *  of (relative) size @p scalefactor.
+             *
+             *  Example:
+             *  @code
+             *  using namespace xo::qty;
+             *
+             *  static_assert(abbrev::mass_unit2_abbrev(scalefactor_ratio_type(1,1000))
+             *                == xo::flatstring("mg"));
+             *  @endcode
+             **/
             static
             constexpr basis_unit2_abbrev_type
             mass_unit2_abbrev(const scalefactor_ratio_type & scalefactor)
