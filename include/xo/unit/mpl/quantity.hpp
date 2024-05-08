@@ -495,7 +495,7 @@ namespace xo {
             }
 
 
-            /** @addtogroup quantity-unit-conversion **/
+            /** @addtogroup mpl-quantity-unit-conversion **/
             ///@{
             /** @brief convert to quantity with same dimension, different {unit_type, repr_type}
              *
@@ -513,7 +513,7 @@ namespace xo {
             }
             ///@}
 
-            /** @defgroup quantity-print-support **/
+            /** @defgroup mpl-quantity-print-support **/
             ///@{
             /** @brief write printed representation on stream
              *
@@ -524,7 +524,7 @@ namespace xo {
             }
             ///@}
 
-            /** @defgroup quantity-assignment **/
+            /** @defgroup mpl-quantity-assignment **/
             ///@{
             /** @brief copy constructor **/
             quantity & operator=(quantity const & x) = default;

@@ -84,11 +84,14 @@ namespace xo {
             // unit_qty
             // zero_qty
 
+            /** @defgroup quantity-arithmetic-support **/
+            ///@{
             constexpr
             auto reciprocal() const {
                 return quantity<s_scaled_unit.reciprocal(),
                                 repr_type>(1.0 / scale_);
             }
+            ///@}
 
             template <typename Repr2>
             constexpr
@@ -96,6 +99,8 @@ namespace xo {
                 return quantity<s_scaled_unit, Repr2>(scale_);
             }
 
+            /** @defgroup quantity-unit-conversion **/
+            ///@{
             /* parallel implementation to Quantity<Repr, Int>::rescale(),
              * except that NaturalUnit2 is a compile-time-only template-argument
              *
@@ -149,6 +154,7 @@ namespace xo {
                     return quantity<ScaledUnit2, Repr>(std::numeric_limits<repr_type>::quiet_NaN());
                 }
             }
+            ///@}
 
             template <typename Dimensionless>
             requires std::is_arithmetic_v<Dimensionless>
@@ -165,6 +171,8 @@ namespace xo {
             // add
             // subtract
 
+            /** @defgroup quantity-comparison-support **/
+            ///@{
             /* parallel implementation to Quantity<Repr, Int> */
             template <typename Quantity2>
             static constexpr
@@ -173,6 +181,7 @@ namespace xo {
 
                 return x.scale() <=> y2.scale();
             }
+            ///@}
 
             // operator-
             // operator+=
@@ -184,11 +193,15 @@ namespace xo {
                 return s_scaled_unit.natural_unit_.abbrev();
             }
 
+            /** @defgroup quantity-assignment quantity assignment operators **/
+            ///@{
+            /** @brief assignment from quantity with identical units **/
             quantity & operator=(const quantity & x) {
                 this->scale_ = x.scale_;
                 return *this;
             }
 
+            /** @brief assignment from quantity with compatible units **/
             template <typename Q2>
             requires(quantity_concept<Q2>
                      && Q2::always_constexpr_unit)
@@ -199,13 +212,17 @@ namespace xo {
 
                 return *this;
             }
+            ///@}
 
+            /** @defgroup quantity-unit-conversion **/
+            ///@{
             template <typename Q2>
             requires(quantity_concept<Q2>
                      && Q2::always_constexpr_unit)
             constexpr operator Q2() const {
                 return this->template rescale_ext<Q2::s_scaled_unit>().template with_repr<typename Q2::repr_type>();
             }
+            ///@}
 
             constexpr operator Repr() const
                 requires (ScaledUnit.is_dimensionless())
@@ -213,10 +230,18 @@ namespace xo {
                     return scale_;
                 }
 
-        public: /* need public members so that a quantity instance can be a non-type template parameter (is a structural type) */
+        public: /* need public members so that instance can be a non-type template parameter (is a structural type) */
+            /** @defgroup quantity-static-vars **/
+            ///@{
+            /** @brief unit for quantity of this type. Determined at compile-time **/
             static constexpr scaled_unit<ratio_int_type> s_scaled_unit = ScaledUnit;
+            ///@}
 
+            /** @defgroup quantity-instance-vars **/
+            ///@{
+            /** @brief quantity represents this multiple of @ref s_scaled_unit **/
             Repr scale_ = Repr{};
+            ///@}
         };
 
         template <typename Quantity, typename Int, typename Int2x>

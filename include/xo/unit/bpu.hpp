@@ -5,9 +5,7 @@
 
 #pragma once
 
-//#include "xo/indentlog/print/tag.hpp"
 #include "basis_unit.hpp"
-//#include "dim_iostream.hpp"
 
 namespace xo {
     namespace qty {
@@ -50,15 +48,12 @@ namespace xo {
             }
         }
 
-        /** @class native_bpu2
+        /** @class bpu
          *
          *  @brief represent product of a compile-time scale-factor with a rational power of a native unit
-         *
-         *  Example:
-         *  native_bpu<universal::time, ratio<1>, ratio<-1,2>> represents unit of 1/sqrt(t)
          **/
         template<typename Int>
-        struct bpu : basis_unit {
+        struct bpu {
         public:
             using ratio_int_type = Int;
 
@@ -66,13 +61,13 @@ namespace xo {
             constexpr bpu() = default;
             constexpr bpu(const basis_unit & bu,
                           const power_ratio_type & power)
-                : basis_unit{bu},
+                : bu_{bu},
                   power_{power}
                 {}
             constexpr bpu(dim native_dim,
                           const scalefactor_ratio_type & scalefactor,
                           const power_ratio_type & power)
-                : basis_unit(native_dim, scalefactor),
+                : bu_(native_dim, scalefactor),
                   power_{power}
                 {}
 
@@ -80,6 +75,8 @@ namespace xo {
                 return bpu<Int>(bu, power_ratio_type(1,1));
             }
 
+            constexpr dimension native_dim() const { return bu_.native_dim(); }
+            constexpr const scalefactor_ratio_type & scalefactor() const { return bu_.scalefactor(); }
             constexpr const power_ratio_type & power() const { return power_; }
 
             /** @brief abbreviation for this dimension
@@ -92,14 +89,14 @@ namespace xo {
              **/
             constexpr bpu_abbrev_type abbrev() const
                 {
-                    return abbrev::bpu_abbrev(native_dim_,
-                                               scalefactor_,
-                                               power_);
+                    return abbrev::bpu_abbrev(bu_.native_dim_,
+                                              bu_.scalefactor_,
+                                              power_);
                 }
 
             /* for bpu x, x.reciprocal() represents dimension of 1/x */
             constexpr bpu<Int> reciprocal() const {
-                return bpu<Int>(native_dim(), scalefactor(), power_.negate());
+                return bpu<Int>(bu_.native_dim(), bu_.scalefactor(), power_.negate());
             }
 
             template <typename Int2>
@@ -110,6 +107,8 @@ namespace xo {
             }
 
         public: /* need public members so that a basis_unit instance can be a non-type template parameter (a structural type) */
+            /** @brief this bpu represent a power of this basis unit **/
+            basis_unit bu_;
             /** @brief this unit represents basis dimension (bu) taken to this power **/
             power_ratio_type power_;
         };
@@ -122,16 +121,16 @@ namespace xo {
         template <typename Int>
         inline constexpr bool
         operator==(const bpu<Int> & x, const bpu<Int> & y) {
-            return ((x.native_dim_ == y.native_dim_)
-                    && (x.scalefactor_ == y.scalefactor_)
+            return ((x.native_dim() == y.native_dim())
+                    && (x.scalefactor() == y.scalefactor())
                     && (x.power_ == y.power_));
         }
 
         template <typename Int>
         inline constexpr bool
         operator!=(const bpu<Int> & x, const bpu<Int> & y) {
-            return ((x.native_dim_ != y.native_dim_)
-                    || (x.scalefactor_ != y.scalefactor_)
+            return ((x.native_dim() != y.native_dim())
+                    || (x.scalefactor() != y.scalefactor())
                     || (x.power_ != y.power_));
         }
 

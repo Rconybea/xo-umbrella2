@@ -5,7 +5,7 @@
 
 namespace xo {
     namespace unit {
-        /** @class basis_unit
+        /** @class mpl_basis_unit
          *
          *  @brief A dimensionless multiple with natively-specified (i.e. at compile-time) dimension
          **/

@@ -38,8 +38,8 @@ namespace xo {
             {
                 constexpr natural_unit<int64_t> v
                     = (nu_maker<int64_t>::make_nu
-                       (bpu<int64_t>(dim::distance, scalefactor_ratio_type(1, 1000), power_ratio_type(2, 1)),
-                        bpu<int64_t>(dim::mass, scalefactor_ratio_type(1, 1000), power_ratio_type(-1, 1))));
+                       (bpu<int64_t>(dim::distance, scalefactor_ratio_type(1, 1000), power_ratio_type(2, 1)) /*mm^2*/,
+                        bpu<int64_t>(dim::mass, scalefactor_ratio_type(1, 1000), power_ratio_type(-1, 1)) /*mg^-1*/));
 
                 static_assert(v.n_bpu() == 2);
 

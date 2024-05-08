@@ -47,12 +47,15 @@ Abstraction tower for *xo-unit* components.
     (for example consider :code:`xo::qty::qty::foot * xo::qty::qty::meter`)
 
 - bpu:
-  a power of a basis unit. Has a single dimension.
 
-- basis_unit:
-  a unit with a single dimension and scale.
+  A power of a basis unit. Has a single dimension.
+
+- basis_unit: see :doc:`basis-unit-class`.
+
+  A unit with a single dimension and scale.
 
 - dimension: see :doc:`dimension-enum`.
+
   identifies a dimension, such as mass or time.
 
 Representation

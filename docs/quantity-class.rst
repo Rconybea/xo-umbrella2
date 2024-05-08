@@ -17,6 +17,12 @@ Type Traits
 
 .. doxygengroup:: quantity-type-traits
 
+Member Variables
+----------------
+
+.. doxygengroup:: quantity-static-vars
+.. doxygengroup:: quantity-instance-vars
+
 Constructors
 ------------
 
@@ -61,13 +67,11 @@ Arithmetic
 
 Support methods for arithmetic operations
 
-.. doxygengroup:: quantity-arithmeticsupport
-   :content-only:
+.. doxygengroup:: quantity-arithmetic-support
 
 Comparison
 ----------
 
 Support methods for comparison operators
 
-.. doxygengroup:: quantity-comparisonsupport
-   :content-only:
+.. doxygengroup:: quantity-comparison-support
