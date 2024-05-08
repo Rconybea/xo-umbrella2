@@ -2,9 +2,9 @@
 
 #pragma once
 
+#include "native_unit.hpp"
 #include "dimension.hpp"
-#include "basis_unit_abbrev.hpp"
-//#include "bpu_store.hpp"
+//#include "basis_unit_abbrev.hpp"
 #include "xo/ratio/ratio.hpp"
 
 namespace xo {
@@ -189,7 +189,7 @@ namespace xo {
              *  only at compile time,  at least for now
              **/
 
-            // ----- scaled_native_unit_abbrev_helper -----
+            // ----- bu_fallback_abbrev -----
 
             /* Require: InnerScale is ratio type; InnerScale >= 1 */
             template <dim BasisDim, std::int64_t InnerScaleNum = 1, std::int64_t InnerScaleDen = 1>

@@ -197,8 +197,6 @@ namespace xo {
                 dim_store.bu_establish_abbrev(bu.scalefactor_, abbrev);
             }
 
-        private:
-
         public:
             /** **/
             std::array<bu_dim_store, n_dim> bu_abbrev_vv_;
