@@ -46,10 +46,10 @@ namespace xo {
             /* e.g.
              *   [(1/1000000000, "nm"), (1/1000000, "um"), (1/1000, "mm"), (1/1, "m"), (1000/1, "km")]
              */
-            using native_scale_v = std::vector<std::pair<scalefactor_ratio_type, basis_unit2_abbrev_type>>;
+            using native_scale_v = std::vector<std::pair<scalefactor_ratio_type, bu_abbrev_type>>;
 
             /** @brief get basis-unit abbreviation at runtime **/
-            basis_unit2_abbrev_type bu_abbrev(dim basis_dim,
+            bu_abbrev_type bu_abbrev(dim basis_dim,
                                               const scalefactor_ratio_type & scalefactor) const
                 {
                     const auto & bu_abbrev_v = bu_abbrev_vv_[static_cast<std::size_t>(basis_dim)];
@@ -86,7 +86,7 @@ namespace xo {
             /** @brief establish abbreviation @p abbrev for basis unit @p bu
              **/
             void bu_establish_abbrev(const basis_unit & bu,
-                                     const basis_unit2_abbrev_type & abbrev) {
+                                     const bu_abbrev_type & abbrev) {
 
                 auto & bu_abbrev_v = bu_abbrev_vv_[static_cast<std::size_t>(bu.native_dim())];
 

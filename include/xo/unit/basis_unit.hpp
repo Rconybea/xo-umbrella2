@@ -31,7 +31,7 @@ namespace xo {
             constexpr const scalefactor_ratio_type & scalefactor() const { return scalefactor_; }
             ///@}
 
-            constexpr basis_unit2_abbrev_type abbrev() const {
+            constexpr bu_abbrev_type abbrev() const {
                 return abbrev::basis_unit2_abbrev(native_dim_,
                                                   scalefactor_);
             }
@@ -192,20 +192,20 @@ namespace xo {
 
             template <dim BasisDim>
             struct scaled_native_unit2_abbrev<BasisDim, 1, 1> {
-                static constexpr const basis_unit2_abbrev_type value
-                = (basis_unit2_abbrev_type::from_flatstring
+                static constexpr const bu_abbrev_type value
+                = (bu_abbrev_type::from_flatstring
                    (native_unit2_v[static_cast<uint32_t>(BasisDim)]
                     .abbrev_str()));
             };
 
             inline
-            constexpr basis_unit2_abbrev_type
+            constexpr bu_abbrev_type
             bu_fallback_abbrev(dim basis_dim,
                                const scalefactor_ratio_type & scalefactor)
             {
-                return (basis_unit2_abbrev_type::from_flatstring
+                return (bu_abbrev_type::from_flatstring
                         (flatstring_concat
-                         (scalefactor.to_str<basis_unit2_abbrev_type::fixed_capacity>(),
+                         (scalefactor.to_str<bu_abbrev_type::fixed_capacity>(),
                           native_unit2_v[static_cast<std::uint32_t>(basis_dim)].abbrev_str())));
             }
         }

@@ -9,7 +9,7 @@ namespace xo {
     using xo::qty::scalefactor_ratio_type;
     using xo::qty::abbrev::basis_unit2_abbrev;
     using xo::qty::basis_unit;
-    using xo::qty::basis_unit2_abbrev_type;
+    using xo::qty::bu_abbrev_type;
     using xo::qty::native_unit2_v;
     using xo::qty::dim;
     namespace bu = xo::qty::detail::bu;
@@ -21,7 +21,7 @@ namespace xo {
          * we will need this for quantity<Repr, Int, natural_unit<Int>>
          */
         template <basis_unit bu>
-        constexpr basis_unit2_abbrev_type bu_mpl_abbrev = bu.abbrev();
+        constexpr bu_abbrev_type bu_mpl_abbrev = bu.abbrev();
 
         TEST_CASE("basis_unit", "[basis_unit]") {
             static_assert(bu_mpl_abbrev<bu::gram> == bu::gram.abbrev());
@@ -42,7 +42,7 @@ namespace xo {
             log && log(xtag("mass*10^3", basis_unit2_abbrev(dim::mass, scalefactor_ratio_type(1000, 1))));
 
             static_assert(basis_unit2_abbrev(dim::mass, scalefactor_ratio_type(1000, 1))
-                          == basis_unit2_abbrev_type::from_chars("kg"));
+                          == bu_abbrev_type::from_chars("kg"));
 
             log && log("---------------------");
 
@@ -50,64 +50,84 @@ namespace xo {
 
 #          define REQUIRE_x2(x) static_assert(x); REQUIRE(x)
 
-            REQUIRE_x2(bu::picogram.abbrev() == basis_unit2_abbrev_type::from_chars("pg"));
+            log && log(xtag("mass", basis_unit2_abbrev(dim::distance, scalefactor_ratio_type(1, 1))));
+
+            REQUIRE_x2(bu::picogram.abbrev() == bu_abbrev_type::from_chars("pg"));
             REQUIRE_x2(bu::nanogram.abbrev()
-                          == basis_unit2_abbrev_type::from_chars("ng"));
+                          == bu_abbrev_type::from_chars("ng"));
             REQUIRE_x2(bu::microgram.abbrev()
-                          == basis_unit2_abbrev_type::from_chars("ug"));
+                          == bu_abbrev_type::from_chars("ug"));
             REQUIRE_x2(bu::milligram.abbrev()
-                          == basis_unit2_abbrev_type::from_chars("mg"));
+                          == bu_abbrev_type::from_chars("mg"));
             REQUIRE_x2(bu::gram.abbrev()
-                          == basis_unit2_abbrev_type::from_chars("g"));
+                          == bu_abbrev_type::from_chars("g"));
             REQUIRE_x2(bu::kilogram.abbrev()
-                          == basis_unit2_abbrev_type::from_chars("kg"));
+                          == bu_abbrev_type::from_chars("kg"));
             REQUIRE_x2(bu::tonne.abbrev()
-                          == basis_unit2_abbrev_type::from_chars("t"));
+                          == bu_abbrev_type::from_chars("t"));
             REQUIRE_x2(bu::kilotonne.abbrev()
-                          == basis_unit2_abbrev_type::from_chars("kt"));
+                          == bu_abbrev_type::from_chars("kt"));
             REQUIRE_x2(bu::megatonne.abbrev()
-                          == basis_unit2_abbrev_type::from_chars("Mt"));
+                          == bu_abbrev_type::from_chars("Mt"));
+            REQUIRE_x2(bu::gigatonne.abbrev()
+                          == bu_abbrev_type::from_chars("Gt"));
 
             log && log(xtag("distance", basis_unit2_abbrev(dim::distance, scalefactor_ratio_type(1, 1))));
 
             REQUIRE_x2(bu::picometre.abbrev()
-                          == basis_unit2_abbrev_type::from_chars("pm"));
+                          == bu_abbrev_type::from_chars("pm"));
             REQUIRE_x2(bu::nanometre.abbrev()
-                          == basis_unit2_abbrev_type::from_chars("nm"));
+                          == bu_abbrev_type::from_chars("nm"));
             REQUIRE_x2(bu::micrometre.abbrev()
-                          == basis_unit2_abbrev_type::from_chars("um"));
+                          == bu_abbrev_type::from_chars("um"));
             REQUIRE_x2(bu::millimetre.abbrev()
-                          == basis_unit2_abbrev_type::from_chars("mm"));
+                          == bu_abbrev_type::from_chars("mm"));
             REQUIRE_x2(bu::metre.abbrev()
-                          == basis_unit2_abbrev_type::from_chars("m"));
+                          == bu_abbrev_type::from_chars("m"));
             REQUIRE_x2(bu::kilometre.abbrev()
-                          == basis_unit2_abbrev_type::from_chars("km"));
+                          == bu_abbrev_type::from_chars("km"));
             REQUIRE_x2(bu::megametre.abbrev()
-                          == basis_unit2_abbrev_type::from_chars("Mm"));
+                          == bu_abbrev_type::from_chars("Mm"));
             REQUIRE_x2(bu::gigametre.abbrev()
-                          == basis_unit2_abbrev_type::from_chars("Gm"));
+                          == bu_abbrev_type::from_chars("Gm"));
 
-            REQUIRE_x2(bu::lightsecond.abbrev() == basis_unit2_abbrev_type::from_chars("lsec"));
-            REQUIRE_x2(bu::astronomicalunit.abbrev() == basis_unit2_abbrev_type::from_chars("AU"));
+            REQUIRE_x2(bu::picometer.abbrev()
+                          == bu_abbrev_type::from_chars("pm"));
+            REQUIRE_x2(bu::nanometer.abbrev()
+                          == bu_abbrev_type::from_chars("nm"));
+            REQUIRE_x2(bu::micrometer.abbrev()
+                          == bu_abbrev_type::from_chars("um"));
+            REQUIRE_x2(bu::millimeter.abbrev()
+                          == bu_abbrev_type::from_chars("mm"));
+            REQUIRE_x2(bu::meter.abbrev()
+                          == bu_abbrev_type::from_chars("m"));
+            REQUIRE_x2(bu::kilometer.abbrev()
+                          == bu_abbrev_type::from_chars("km"));
+            REQUIRE_x2(bu::megameter.abbrev()
+                          == bu_abbrev_type::from_chars("Mm"));
+            REQUIRE_x2(bu::gigameter.abbrev()
+                          == bu_abbrev_type::from_chars("Gm"));
+
+            REQUIRE_x2(bu::lightsecond.abbrev() == flatstring("lsec"));
+            REQUIRE_x2(bu::astronomicalunit.abbrev() == flatstring("AU"));
 
             log && log(xtag("time", basis_unit2_abbrev(dim::time, scalefactor_ratio_type(1, 1))));
 
-            REQUIRE_x2(bu::second.abbrev() == basis_unit2_abbrev_type::from_chars("s"));
-            REQUIRE_x2(bu::picosecond.abbrev() == basis_unit2_abbrev_type::from_chars("ps"));
-            REQUIRE_x2(bu::nanosecond.abbrev() == basis_unit2_abbrev_type::from_chars("ns"));
-            REQUIRE_x2(bu::microsecond.abbrev() == basis_unit2_abbrev_type::from_chars("us"));
-            REQUIRE_x2(bu::millisecond.abbrev() == basis_unit2_abbrev_type::from_chars("ms"));
-            REQUIRE_x2(bu::second.abbrev() == basis_unit2_abbrev_type::from_chars("s"));
-            REQUIRE_x2(bu::minute.abbrev() == basis_unit2_abbrev_type::from_chars("min"));
-            REQUIRE_x2(bu::hour.abbrev() == basis_unit2_abbrev_type::from_chars("hr"));
-            REQUIRE_x2(bu::day.abbrev() == basis_unit2_abbrev_type::from_chars("dy"));
-            REQUIRE_x2(bu::week.abbrev() == basis_unit2_abbrev_type::from_chars("wk"));
-            REQUIRE_x2(bu::month.abbrev() == basis_unit2_abbrev_type::from_chars("mo"));
+            REQUIRE_x2(bu::picosecond.abbrev() == bu_abbrev_type::from_chars("ps"));
+            REQUIRE_x2(bu::nanosecond.abbrev() == bu_abbrev_type::from_chars("ns"));
+            REQUIRE_x2(bu::microsecond.abbrev() == bu_abbrev_type::from_chars("us"));
+            REQUIRE_x2(bu::millisecond.abbrev() == bu_abbrev_type::from_chars("ms"));
+            REQUIRE_x2(bu::second.abbrev() == bu_abbrev_type::from_chars("s"));
+            REQUIRE_x2(bu::minute.abbrev() == bu_abbrev_type::from_chars("min"));
+            REQUIRE_x2(bu::hour.abbrev() == bu_abbrev_type::from_chars("hr"));
+            REQUIRE_x2(bu::day.abbrev() == bu_abbrev_type::from_chars("dy"));
+            REQUIRE_x2(bu::week.abbrev() == bu_abbrev_type::from_chars("wk"));
+            REQUIRE_x2(bu::month.abbrev() == bu_abbrev_type::from_chars("mo"));
 
-            REQUIRE_x2(bu::year.abbrev() == basis_unit2_abbrev_type::from_chars("yr"));
-            REQUIRE_x2(bu::year250.abbrev() == basis_unit2_abbrev_type::from_chars("yr250"));
-            REQUIRE_x2(bu::year360.abbrev() == basis_unit2_abbrev_type::from_chars("yr360"));
-            REQUIRE_x2(bu::year365.abbrev() == basis_unit2_abbrev_type::from_chars("yr365"));
+            REQUIRE_x2(bu::year.abbrev() == bu_abbrev_type::from_chars("yr"));
+            REQUIRE_x2(bu::year250.abbrev() == bu_abbrev_type::from_chars("yr250"));
+            REQUIRE_x2(bu::year360.abbrev() == bu_abbrev_type::from_chars("yr360"));
+            REQUIRE_x2(bu::year365.abbrev() == bu_abbrev_type::from_chars("yr365"));
 
             log && log(xtag("currency", basis_unit2_abbrev(dim::currency, scalefactor_ratio_type(1, 1))));
 

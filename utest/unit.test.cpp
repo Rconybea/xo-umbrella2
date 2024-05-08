@@ -15,7 +15,7 @@ namespace xo {
         namespace u = xo::qty::u;
 
         using xo::qty::dim;
-        using xo::qty::basis_unit2_abbrev_type;
+        using xo::qty::bu_abbrev_type;
         using xo::qty::scalefactor_ratio_type;
         using xo::qty::basis_unit2_store;
         using xo::qty::power_ratio_type;
