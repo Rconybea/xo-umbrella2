@@ -87,10 +87,13 @@ namespace xo {
 
             /** @defgroup bpu-access-methods bpu access methods **/
             ///@{
-            /** @brief report this bpu's @ref basis_unit **/
+            /** @brief report this bpu's @ref basis_unit, e.g. @c detail::bu::minute **/
             constexpr const basis_unit & bu() const { return bu_; }
+            /** @brief report this bpu's @ref dimension, e.g. @c dimension::time **/
             constexpr dimension native_dim() const { return bu_.native_dim(); }
+            /** @brief report this bpu's scale factor, e.g. @c 60/1 for @c detail::bu::minute **/
             constexpr const scalefactor_ratio_type & scalefactor() const { return bu_.scalefactor(); }
+            /** @brief report this bpu's exponent,  e.g. @c 3/1 for bpu representing cubic meters **/
             constexpr const power_ratio_type & power() const { return power_; }
             ///@}
 
