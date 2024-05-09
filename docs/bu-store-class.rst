@@ -7,7 +7,7 @@ Basis Unit Store
 
     #include <xo/unit/bu_store.hpp>
 
-    namespace bu = xo::qty::bu;
+    namespace bu = xo::qty::detail::bu;
 
 A :code:`xo::qty::bu_store` is a small, constexpr, key-value store associating
 abbreviations with basis units. To satisfy the constexpr requirement,
@@ -54,7 +54,28 @@ This class supports the implementation of ``natural_unit::abbrev()``.
 
 Application code is not expected to interact directly with it.
 
-.. doxygenclass:: xo::qty::bu_store
+.. doxygenclass:: xo::qty::detail::bu_store
+
+For example, this would be possible:
+
+.. code-block:: cpp
+
+    #include <xo/unit/bu_store.hpp>
+
+    namespace bu = using xo::qty::detail::bu;
+    using xo::qty::detail::bu_store;
+    using xo::qty::dim;
+    using xo::flatstring;
+
+    constexpr bu_store store;
+    static_assert(store.bu_abbrev(bu::minute) == flatstring("min"));
+    static_assert(store.bu_abbrev(bu::microgram) == flatstring("ug"));
+
+
+.. doxygenclass:: xo::qty::detail::bu_dim_store
+.. doxygengroup:: bu-dim-store-type-traits
+.. doxygengroup:: bu-dim-store-instance-vars
+
 
 Constants
 ---------
