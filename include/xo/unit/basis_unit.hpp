@@ -37,7 +37,7 @@ namespace xo {
             ///@}
 
         public: /* public so instance can be a non-type template parameter (a structural type) */
-            /** @defgroup basis-unit-instance-vars **/
+            /** @defgroup basis-unit-instance-vars basis_unit instance variables **/
             ///@{
             /** @brief identifies a native unit, e.g. time (in seconds) **/
             dimension native_dim_ = dimension::invalid;
@@ -152,8 +152,8 @@ namespace xo {
                 /* 250 = approx number of trading days in a calendar year */
                 constexpr basis_unit year250          = time_unit(         250*24*3600,             1);
 
-                constexpr basis_unit century          = time_unit( 100L*(365*24+6)*3600,             1);
-                constexpr basis_unit millenium        = time_unit(1000L*(365*24+6)*3600,             1);
+                //constexpr basis_unit century          = time_unit( 100L*(365*24+6)*3600,             1);
+                //constexpr basis_unit millenium        = time_unit(1000L*(365*24+6)*3600,             1);
                 ///@}
 
                 // ----- currency -----
