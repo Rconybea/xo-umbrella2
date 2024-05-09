@@ -33,6 +33,7 @@ runtime (since we can't construct new c++ types at runtime).
    install
    examples
    implementation
+   development
    unit-quantities
    quantity-reference
    unit-reference

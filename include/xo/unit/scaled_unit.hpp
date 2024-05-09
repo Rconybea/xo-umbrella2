@@ -70,53 +70,64 @@ namespace xo {
              *   quantity<u:meter/u:second> velocity;
              */
 
-            constexpr auto picogram = detail::su_promote<std::int64_t>(nu::picogram);
-            constexpr auto nanogram = detail::su_promote<std::int64_t>(nu::nanogram);
-            constexpr auto microgram = detail::su_promote<std::int64_t>(nu::microgram);
-            constexpr auto milligram = detail::su_promote<std::int64_t>(nu::milligram);
-            constexpr auto gram = detail::su_promote<std::int64_t>(nu::gram);
-            constexpr auto kilogram = detail::su_promote<std::int64_t>(nu::kilogram);
-            constexpr auto tonne = detail::su_promote<std::int64_t>(nu::tonne);
-            constexpr auto kilotonne = detail::su_promote<std::int64_t>(nu::kilotonne);
-            constexpr auto megatonne = detail::su_promote<std::int64_t>(nu::megatonne);
-            constexpr auto gigatonne = detail::su_promote<std::int64_t>(nu::gigatonne);
+            constexpr auto
+            su_from_bu(const basis_unit & bu,
+                       const power_ratio_type & power = power_ratio_type(1))
+            {
+                return detail::su_promote<std::int64_t>(natural_unit<std::int64_t>::from_bu(bu, power));
+            }
 
-            constexpr auto picometer = detail::su_promote<std::int64_t>(nu::picometer);
-            constexpr auto nanometer = detail::su_promote<std::int64_t>(nu::nanometer);
-            constexpr auto micrometer = detail::su_promote<std::int64_t>(nu::micrometer);
-            constexpr auto millimeter = detail::su_promote<std::int64_t>(nu::millimeter);
-            constexpr auto meter = detail::su_promote<std::int64_t>(nu::meter);
-            constexpr auto kilometer = detail::su_promote<std::int64_t>(nu::kilometer);
-            constexpr auto megameter = detail::su_promote<std::int64_t>(nu::megameter);
-            constexpr auto gigameter = detail::su_promote<std::int64_t>(nu::gigameter);
+            constexpr auto picogram         = su_from_bu(detail::bu::picogram);
+            constexpr auto nanogram         = su_from_bu(detail::bu::nanogram);
+            constexpr auto microgram        = su_from_bu(detail::bu::microgram);
+            constexpr auto milligram        = su_from_bu(detail::bu::milligram);
+            constexpr auto gram             = su_from_bu(detail::bu::gram);
+            constexpr auto kilogram         = su_from_bu(detail::bu::kilogram);
+            constexpr auto tonne            = su_from_bu(detail::bu::tonne);
+            constexpr auto kilotonne        = su_from_bu(detail::bu::kilotonne);
+            constexpr auto megatonne        = su_from_bu(detail::bu::megatonne);
+            constexpr auto gigatonne        = su_from_bu(detail::bu::gigatonne);
 
-            constexpr auto lightsecond = detail::su_promote<std::int64_t>(nu::lightsecond);
-            constexpr auto astronomicalunit = detail::su_promote<std::int64_t>(nu::astronomicalunit);
+            constexpr auto picometer        = su_from_bu(detail::bu::picometer);
+            constexpr auto nanometer        = su_from_bu(detail::bu::nanometer);
+            constexpr auto micrometer       = su_from_bu(detail::bu::micrometer);
+            constexpr auto millimeter       = su_from_bu(detail::bu::millimeter);
+            constexpr auto meter            = su_from_bu(detail::bu::meter);
+            constexpr auto kilometer        = su_from_bu(detail::bu::kilometer);
+            constexpr auto megameter        = su_from_bu(detail::bu::megameter);
+            constexpr auto gigameter        = su_from_bu(detail::bu::gigameter);
 
-            constexpr auto inch = detail::su_promote<std::int64_t>(nu::inch);
-            constexpr auto foot = detail::su_promote<std::int64_t>(nu::foot);
-            constexpr auto yard = detail::su_promote<std::int64_t>(nu::yard);
-            constexpr auto mile = detail::su_promote<std::int64_t>(nu::mile);
+            constexpr auto lightsecond      = su_from_bu(detail::bu::lightsecond);
+            constexpr auto astronomicalunit = su_from_bu(detail::bu::astronomicalunit);
 
-            constexpr auto picosecond = detail::su_promote<std::int64_t>(nu::picosecond);
-            constexpr auto nanosecond = detail::su_promote<std::int64_t>(nu::nanosecond);
-            constexpr auto microsecond = detail::su_promote<std::int64_t>(nu::microsecond);
-            constexpr auto millisecond = detail::su_promote<std::int64_t>(nu::millisecond);
-            constexpr auto second = detail::su_promote<std::int64_t>(nu::second);
-            constexpr auto minute = detail::su_promote<std::int64_t>(nu::minute);
-            constexpr auto hour = detail::su_promote<std::int64_t>(nu::hour);
-            constexpr auto day = detail::su_promote<std::int64_t>(nu::day);
-            constexpr auto week = detail::su_promote<std::int64_t>(nu::week);
-            constexpr auto month = detail::su_promote<std::int64_t>(nu::month);
-            constexpr auto year = detail::su_promote<std::int64_t>(nu::year);
-            constexpr auto year250 = detail::su_promote<std::int64_t>(nu::year250);
-            constexpr auto year360 = detail::su_promote<std::int64_t>(nu::year360);
-            constexpr auto year365 = detail::su_promote<std::int64_t>(nu::year365);
+            constexpr auto inch             = su_from_bu(detail::bu::inch);
+            constexpr auto foot             = su_from_bu(detail::bu::foot);
+            constexpr auto yard             = su_from_bu(detail::bu::yard);
+            constexpr auto mile             = su_from_bu(detail::bu::mile);
 
-            constexpr auto volatility_30d = detail::su_promote<std::int64_t>(nu::volatility_30d);
-            constexpr auto volatility_250d = detail::su_promote<std::int64_t>(nu::volatility_250d);
-            constexpr auto volatility_360d = detail::su_promote<std::int64_t>(nu::volatility_360d);
-            constexpr auto volatility_365d = detail::su_promote<std::int64_t>(nu::volatility_365d);
+            constexpr auto picosecond       = su_from_bu(detail::bu::picosecond);
+            constexpr auto nanosecond       = su_from_bu(detail::bu::nanosecond);
+            constexpr auto microsecond      = su_from_bu(detail::bu::microsecond);
+            constexpr auto millisecond      = su_from_bu(detail::bu::millisecond);
+            constexpr auto second           = su_from_bu(detail::bu::second);
+            constexpr auto minute           = su_from_bu(detail::bu::minute);
+            constexpr auto hour             = su_from_bu(detail::bu::hour);
+            constexpr auto day              = su_from_bu(detail::bu::day);
+            constexpr auto week             = su_from_bu(detail::bu::week);
+            constexpr auto month            = su_from_bu(detail::bu::month);
+            constexpr auto year             = su_from_bu(detail::bu::year);
+            constexpr auto year250          = su_from_bu(detail::bu::year250);
+            constexpr auto year360          = su_from_bu(detail::bu::year360);
+            constexpr auto year365          = su_from_bu(detail::bu::year365);
+
+            constexpr auto volatility_30d   = su_from_bu(detail::bu::month,
+                                                         power_ratio_type(-1,2));
+            constexpr auto volatility_250d  = su_from_bu(detail::bu::year250,
+                                                         power_ratio_type(-1,2));
+            constexpr auto volatility_360d  = su_from_bu(detail::bu::year360,
+                                                         power_ratio_type(-1,2));
+            constexpr auto volatility_365d  = su_from_bu(detail::bu::year365,
+                                                         power_ratio_type(-1,2));
         }
 
         namespace detail {

@@ -15,7 +15,9 @@ Abstraction tower for *xo-unit* components.
     |     natural_unit      |
     +-----------------------+
     |          bpu          |
-    +-----------------------+
+    +-----------+           |
+    |  bu_store |           |
+    +-----------+-----------+
     |       basis_unit      |
     +-----------------------+
     |       dimension       |
@@ -49,6 +51,12 @@ Abstraction tower for *xo-unit* components.
 - bpu:
 
   A power of a basis unit. Has a single dimension.
+
+- bu_store:
+
+  Associates basis units with abbreviations.
+
+  For example ``bu::kilogram`` => ``"kg"``
 
 - basis_unit: see :doc:`basis-unit-reference`.
 
@@ -184,11 +192,15 @@ Worked example using :cpp:class:`xo::qty::quantity`
 .. code-block:: cpp
     :linenos:
 
-    namespace su = xo::qty::su;
+    namespace u = xo::qty::u;
 
     // (123*7.55) ng.km.min^-2  ==>  2.57958e-10kg.m.s^-2
 
-    quantity qty3b = qty3.rescale_ext<su::kilogram * su::meter / (su::second * su::second)>();
+    constexpr auto newton = u::kilogram * u::meter / (u::second * u::second);
+
+    quantity<newton> qty3b = qty3;
+
+    // quantity qty3b = qty3.rescale_ext<newton>();
 
 .. uml::
     :caption: quantity 928.65 ng.km.min^-2
