@@ -52,7 +52,7 @@ Abstraction tower for *xo-unit* components.
 
   A power of a basis unit. Has a single dimension.
 
-- bu_store:
+- bu_store: see :doc:`bu-store-class`.
 
   Associates basis units with abbreviations.
 

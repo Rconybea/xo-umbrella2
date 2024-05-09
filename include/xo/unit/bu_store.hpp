@@ -210,8 +210,15 @@ namespace xo {
             std::array<bu_dim_store, n_dim> bu_abbrev_vv_;
         };
 
+        /** @brief global abbreviation store.
+         *
+         *  @note
+         *  Extending the contents of this store at runtime is not supported,
+         *  in favor of preserving constexpr abbreviations.
+         **/
         static constexpr bu_store bu_abbrev_store = bu_store();
 
+        /** @brief get abbreviation for basis-unit @p bu **/
         constexpr bu_abbrev_type
         bu_abbrev(const basis_unit & bu)
         {
