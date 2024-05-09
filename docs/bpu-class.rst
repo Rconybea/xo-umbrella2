@@ -7,7 +7,7 @@ BPU
 
     #include <xo/unit/bpu.hpp>
 
-A :code:`xo::qty::bpu` represents a rational (usually integer) power of a :doc:`basis-unit-class`.
+A :code:`xo::qty::bpu` (aka "basis power unit") represents a rational (usually integer) power of a :doc:`basis-unit-class`.
 
 For example:
 
@@ -30,3 +30,35 @@ For example:
     vol : native_dim = dim::time
     vol : scalefactor = 365*24*3600
     vol : power = -1/2
+
+.. doxygenclass:: xo::qty::bpu
+
+Member Variables
+----------------
+
+.. doxygengroup:: bpu-instance-vars
+
+Constructors
+------------
+
+.. doxygengroup:: bpu-ctors
+
+Access Methods
+--------------
+
+.. doxygengroup:: bpu-access-methods
+
+Other Methods
+-------------
+
+.. doxygengroup:: bpu-methods
+
+Comparison
+----------
+
+.. doxygengroup:: bpu-comparison
+
+Details
+-------
+
+.. doxygengroup:: bpu-abbrev-helpers
