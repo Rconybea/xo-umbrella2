@@ -37,6 +37,7 @@ runtime (since we can't construct new c++ types at runtime).
    unit-quantities
    quantity-reference
    unit-reference
+   bpu-class
    bu-store-class
    basis-unit-reference
    dimension-enum

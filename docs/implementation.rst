@@ -48,21 +48,21 @@ Abstraction tower for *xo-unit* components.
   - natural_units are *not* closed under multiplication and division.
     (for example consider :code:`xo::qty::qty::foot * xo::qty::qty::meter`)
 
-- bpu:
+- bpu: :doc:`bpu-class`.
 
-  A power of a basis unit. Has a single dimension.
+  A rational (usually integer) power of a basis unit. Has a single dimension.
 
-- bu_store: see :doc:`bu-store-class`.
+- bu_store: :doc:`bu-store-class`.
 
   Associates basis units with abbreviations.
 
   For example ``bu::kilogram`` => ``"kg"``
 
-- basis_unit: see :doc:`basis-unit-reference`.
+- basis_unit: :doc:`basis-unit-reference`.
 
   A unit with a single dimension and scale.
 
-- dimension: see :doc:`dimension-enum`.
+- dimension: :doc:`dimension-enum`.
 
   identifies a dimension, such as mass or time.
 
