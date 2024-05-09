@@ -11,6 +11,7 @@
 namespace xo {
     namespace qty {
         namespace abbrev {
+            /** fixed-size string representation for exponent of a basis-power-unit **/
             using power_abbrev_type = flatstring<16>;
 
             /** @defgroup bpu-abbrev-helpers bpu abbrev helpers **/
@@ -20,22 +21,23 @@ namespace xo {
              *  Auxiliary function for @ref bpu_abbrev
              **/
             constexpr power_abbrev_type
-            flatstring_from_exponent(std::int64_t num,
-                                     std::int64_t den)
+            flatstring_from_exponent(const power_ratio_type & power)
             {
-                if (den == 1) {
-                    if (num == 1) {
+                if (power.den() == 1) {
+                    if (power.num() == 1) {
+                        /* for no exponent annotation for power ^1 */
                         return power_abbrev_type::from_chars("");
                     } else {
+                        /* e.g. "^-1", "^2" */
                         return (power_abbrev_type::from_flatstring
                                 (flatstring_concat(flatstring("^"),
-                                                   power_abbrev_type::from_int(num))));
+                                                   power_abbrev_type::from_int(power.num()))));
                     }
                 } else {
+                    /* e.g. "^1/2", "^-1/2" */
                     return (power_abbrev_type::from_flatstring
                             (flatstring_concat(flatstring("^"),
-                                               xo::ratio::make_ratio(num, den)
-                                               .to_str<power_abbrev_type::fixed_capacity>())));
+                                               power.to_str<power_abbrev_type::fixed_capacity>())));
                 }
             }
 
@@ -48,7 +50,7 @@ namespace xo {
                 return (bpu_abbrev_type::from_flatstring
                         (flatstring_concat
                          (bu_abbrev(basis_unit(native_dim, scalefactor)),
-                          flatstring_from_exponent(power.num(), power.den()))));
+                          flatstring_from_exponent(power))));
             }
             ///@}
         }
