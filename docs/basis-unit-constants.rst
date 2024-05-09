@@ -19,8 +19,6 @@ Those units are implemented on top of the basis units described here.
 Mass Units
 ----------
 
-.. doxygenfunction:: xo::qty::abbrev::mass_unit2_abbrev
-
 .. doxygengroup:: basis-unit-mass-units
 
 Distance Units

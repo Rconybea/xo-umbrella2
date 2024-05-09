@@ -111,66 +111,64 @@ namespace xo {
             std::array<entry_type, max_bu_per_dim> bu_abbrev_v_;
         };
 
-        /** @class basis_unit2_store
-         *  @brief Store known basis units for runtime
+        /** @class bu_store
+         *  @brief associate basis units with abbreviations
          **/
-        //template <typename Tag>
         struct bu_store {
             constexpr bu_store() {
                 // ----- mass -----
 
-                this->bu_establish_abbrev(detail::bu::picogram, bu_abbrev_type::from_chars("pg"));
-                this->bu_establish_abbrev(detail::bu::nanogram, bu_abbrev_type::from_chars("ng"));
-                this->bu_establish_abbrev(detail::bu::microgram, bu_abbrev_type::from_chars("ug"));
-                this->bu_establish_abbrev(detail::bu::milligram, bu_abbrev_type::from_chars("mg"));
-                this->bu_establish_abbrev(detail::bu::gram, bu_abbrev_type::from_chars("g"));
-                this->bu_establish_abbrev(detail::bu::kilogram, bu_abbrev_type::from_chars("kg"));
-                this->bu_establish_abbrev(detail::bu::tonne, bu_abbrev_type::from_chars("t"));
-                this->bu_establish_abbrev(detail::bu::kilotonne, bu_abbrev_type::from_chars("kt"));
-                this->bu_establish_abbrev(detail::bu::megatonne, bu_abbrev_type::from_chars("Mt"));
-                this->bu_establish_abbrev(detail::bu::gigatonne, bu_abbrev_type::from_chars("Gt"));
+                this->bu_establish_abbrev(detail::bu::picogram,         bu_abbrev_type::from_chars("pg"));
+                this->bu_establish_abbrev(detail::bu::nanogram,         bu_abbrev_type::from_chars("ng"));
+                this->bu_establish_abbrev(detail::bu::microgram,        bu_abbrev_type::from_chars("ug"));
+                this->bu_establish_abbrev(detail::bu::milligram,        bu_abbrev_type::from_chars("mg"));
+                this->bu_establish_abbrev(detail::bu::gram,             bu_abbrev_type::from_chars("g"));
+                this->bu_establish_abbrev(detail::bu::kilogram,         bu_abbrev_type::from_chars("kg"));
+                this->bu_establish_abbrev(detail::bu::tonne,            bu_abbrev_type::from_chars("t"));
+                this->bu_establish_abbrev(detail::bu::kilotonne,        bu_abbrev_type::from_chars("kt"));
+                this->bu_establish_abbrev(detail::bu::megatonne,        bu_abbrev_type::from_chars("Mt"));
+                this->bu_establish_abbrev(detail::bu::gigatonne,        bu_abbrev_type::from_chars("Gt"));
 
                 // ----- distance -----
 
-                this->bu_establish_abbrev(detail::bu::picometer, bu_abbrev_type::from_chars("pm"));
-                this->bu_establish_abbrev(detail::bu::nanometer, bu_abbrev_type::from_chars("nm"));
-                this->bu_establish_abbrev(detail::bu::micrometer, bu_abbrev_type::from_chars("um"));
-                this->bu_establish_abbrev(detail::bu::millimeter, bu_abbrev_type::from_chars("mm"));
-                this->bu_establish_abbrev(detail::bu::meter, bu_abbrev_type::from_chars("m"));
-                this->bu_establish_abbrev(detail::bu::kilometer, bu_abbrev_type::from_chars("km"));
-                this->bu_establish_abbrev(detail::bu::megameter, bu_abbrev_type::from_chars("Mm"));
-                this->bu_establish_abbrev(detail::bu::gigameter, bu_abbrev_type::from_chars("Gm"));
+                this->bu_establish_abbrev(detail::bu::picometer,        bu_abbrev_type::from_chars("pm"));
+                this->bu_establish_abbrev(detail::bu::nanometer,        bu_abbrev_type::from_chars("nm"));
+                this->bu_establish_abbrev(detail::bu::micrometer,       bu_abbrev_type::from_chars("um"));
+                this->bu_establish_abbrev(detail::bu::millimeter,       bu_abbrev_type::from_chars("mm"));
+                this->bu_establish_abbrev(detail::bu::meter,            bu_abbrev_type::from_chars("m"));
+                this->bu_establish_abbrev(detail::bu::kilometer,        bu_abbrev_type::from_chars("km"));
+                this->bu_establish_abbrev(detail::bu::megameter,        bu_abbrev_type::from_chars("Mm"));
+                this->bu_establish_abbrev(detail::bu::gigameter,        bu_abbrev_type::from_chars("Gm"));
 
-                this->bu_establish_abbrev(detail::bu::lightsecond, bu_abbrev_type::from_chars("lsec"));
+                this->bu_establish_abbrev(detail::bu::lightsecond,      bu_abbrev_type::from_chars("lsec"));
                 this->bu_establish_abbrev(detail::bu::astronomicalunit, bu_abbrev_type::from_chars("AU"));
 
-                this->bu_establish_abbrev(detail::bu::inch, bu_abbrev_type::from_chars("in"));
-                this->bu_establish_abbrev(detail::bu::foot, bu_abbrev_type::from_chars("ft"));
-                this->bu_establish_abbrev(detail::bu::yard, bu_abbrev_type::from_chars("yd"));
-                this->bu_establish_abbrev(detail::bu::mile, bu_abbrev_type::from_chars("mi"));
+                this->bu_establish_abbrev(detail::bu::inch,             bu_abbrev_type::from_chars("in"));
+                this->bu_establish_abbrev(detail::bu::foot,             bu_abbrev_type::from_chars("ft"));
+                this->bu_establish_abbrev(detail::bu::yard,             bu_abbrev_type::from_chars("yd"));
+                this->bu_establish_abbrev(detail::bu::mile,             bu_abbrev_type::from_chars("mi"));
 
                 // ----- time -----
 
-                this->bu_establish_abbrev(detail::bu::picosecond, bu_abbrev_type::from_chars("ps"));
-                this->bu_establish_abbrev(detail::bu::nanosecond, bu_abbrev_type::from_chars("ns"));
-                this->bu_establish_abbrev(detail::bu::microsecond, bu_abbrev_type::from_chars("us"));
-                this->bu_establish_abbrev(detail::bu::millisecond, bu_abbrev_type::from_chars("ms"));
-                this->bu_establish_abbrev(detail::bu::second, bu_abbrev_type::from_chars("s"));
-                this->bu_establish_abbrev(detail::bu::minute, bu_abbrev_type::from_chars("min"));
-                this->bu_establish_abbrev(detail::bu::hour, bu_abbrev_type::from_chars("hr"));
-                this->bu_establish_abbrev(detail::bu::day, bu_abbrev_type::from_chars("dy"));
-                this->bu_establish_abbrev(detail::bu::week, bu_abbrev_type::from_chars("wk"));
-                this->bu_establish_abbrev(detail::bu::month, bu_abbrev_type::from_chars("mo"));
-                this->bu_establish_abbrev(detail::bu::year250, bu_abbrev_type::from_chars("yr250"));
-                this->bu_establish_abbrev(detail::bu::year, bu_abbrev_type::from_chars("yr"));
-                this->bu_establish_abbrev(detail::bu::year360, bu_abbrev_type::from_chars("yr360"));
-                this->bu_establish_abbrev(detail::bu::year365, bu_abbrev_type::from_chars("yr365"));
+                this->bu_establish_abbrev(detail::bu::picosecond,       bu_abbrev_type::from_chars("ps"));
+                this->bu_establish_abbrev(detail::bu::nanosecond,       bu_abbrev_type::from_chars("ns"));
+                this->bu_establish_abbrev(detail::bu::microsecond,      bu_abbrev_type::from_chars("us"));
+                this->bu_establish_abbrev(detail::bu::millisecond,      bu_abbrev_type::from_chars("ms"));
+                this->bu_establish_abbrev(detail::bu::second,           bu_abbrev_type::from_chars("s"));
+                this->bu_establish_abbrev(detail::bu::minute,           bu_abbrev_type::from_chars("min"));
+                this->bu_establish_abbrev(detail::bu::hour,             bu_abbrev_type::from_chars("hr"));
+                this->bu_establish_abbrev(detail::bu::day,              bu_abbrev_type::from_chars("dy"));
+                this->bu_establish_abbrev(detail::bu::week,             bu_abbrev_type::from_chars("wk"));
+                this->bu_establish_abbrev(detail::bu::month,            bu_abbrev_type::from_chars("mo"));
+                this->bu_establish_abbrev(detail::bu::year250,          bu_abbrev_type::from_chars("yr250"));
+                this->bu_establish_abbrev(detail::bu::year,             bu_abbrev_type::from_chars("yr"));
+                this->bu_establish_abbrev(detail::bu::year360,          bu_abbrev_type::from_chars("yr360"));
+                this->bu_establish_abbrev(detail::bu::year365,          bu_abbrev_type::from_chars("yr365"));
 
                 // ----- misc (currency, price) -----
 
-                this->bu_establish_abbrev(detail::bu::currency, bu_abbrev_type::from_chars("ccy"));
-                this->bu_establish_abbrev(detail::bu::price, bu_abbrev_type::from_chars("px"));
-                //this->bu_establish_abbrev_for<dim::price,             1,          1>();
+                this->bu_establish_abbrev(detail::bu::currency,         bu_abbrev_type::from_chars("ccy"));
+                this->bu_establish_abbrev(detail::bu::price,            bu_abbrev_type::from_chars("px"));
             }
 
             static constexpr bu_abbrev_type

@@ -71,7 +71,7 @@ namespace xo {
                     return basis_unit(dimension::mass, scalefactor_ratio_type(num, den));
                 }
 
-                /** @defgroup basis-unit-mass-units **/
+                /** @defgroup basis-unit-mass-units basis_unit mass units **/
                 ///@{
                 constexpr basis_unit picogram         = mass_unit(               1, 1000000000000);
                 constexpr basis_unit nanogram         = mass_unit(               1,    1000000000);
@@ -91,30 +91,30 @@ namespace xo {
                     return basis_unit(dimension::distance, scalefactor_ratio_type(num, den));
                 }
 
-                /** @defgroup basis-unit-distance-units **/
+                /** @defgroup basis-unit-distance-units basis_unit distance units **/
                 ///@{
-                /* International spelling */
-                constexpr basis_unit picometre        = distance_unit(            1, 1000000000000);
-                constexpr basis_unit nanometre        = distance_unit(            1,    1000000000);
-                constexpr basis_unit micrometre       = distance_unit(            1,       1000000);
-                constexpr basis_unit millimetre       = distance_unit(            1,          1000);
-                constexpr basis_unit metre            = distance_unit(            1,             1);
-                constexpr basis_unit kilometre        = distance_unit(         1000,             1);
-                constexpr basis_unit megametre        = distance_unit(      1000000,             1);
-                constexpr basis_unit gigametre        = distance_unit(   1000000000,             1);
+                /* US spelling */
+                constexpr basis_unit picometer        = distance_unit(            1, 1000000000000);
+                constexpr basis_unit nanometer        = distance_unit(            1,    1000000000);
+                constexpr basis_unit micrometer       = distance_unit(            1,       1000000);
+                constexpr basis_unit millimeter       = distance_unit(            1,          1000);
+                constexpr basis_unit meter            = distance_unit(            1,             1);
+                constexpr basis_unit kilometer        = distance_unit(         1000,             1);
+                constexpr basis_unit megameter        = distance_unit(      1000000,             1);
+                constexpr basis_unit gigameter        = distance_unit(   1000000000,             1);
 
                 constexpr basis_unit lightsecond      = distance_unit(    299792458,             1);
                 constexpr basis_unit astronomicalunit = distance_unit( 149597870700,             1);
 
-                /* US spelling */
-                constexpr basis_unit picometer        = picometre;
-                constexpr basis_unit nanometer        = nanometre;
-                constexpr basis_unit micrometer       = micrometre;
-                constexpr basis_unit millimeter       = millimetre;
-                constexpr basis_unit meter            = metre;
-                constexpr basis_unit kilometer        = kilometre;
-                constexpr basis_unit megameter        = megametre;
-                constexpr basis_unit gigameter        = gigametre;
+                /* Int'l spelling */
+                constexpr basis_unit picometre        = picometer;
+                constexpr basis_unit nanometre        = nanometer;
+                constexpr basis_unit micrometre       = micrometer;
+                constexpr basis_unit millimetre       = millimeter;
+                constexpr basis_unit metre            = meter;
+                constexpr basis_unit kilometre        = kilometer;
+                constexpr basis_unit megametre        = megameter;
+                constexpr basis_unit gigametre        = gigameter;
 
                 /** @brief basis-unit representing 1 inch; defined as exactly 1/12 feet **/
                 constexpr basis_unit inch             = distance_unit(       3048, 120000);
@@ -132,7 +132,7 @@ namespace xo {
                     return basis_unit(dimension::time, scalefactor_ratio_type(num, den));
                 }
 
-                /** @defgroup basis-unit-time-units **/
+                /** @defgroup basis-unit-time-units basis_unit time units **/
                 ///@{
                 constexpr basis_unit picosecond       = time_unit(                   1, 1000000000000);
                 constexpr basis_unit nanosecond       = time_unit(                   1,    1000000000);
@@ -158,7 +158,7 @@ namespace xo {
 
                 // ----- currency -----
 
-                /** @defgroup basis-unit-misc-units **/
+                /** @defgroup basis-unit-misc-units basis_unit miscellaneous units**/
                 ///@{
 
                 constexpr basis_unit currency_unit(std::int64_t num, std::int64_t den) {
