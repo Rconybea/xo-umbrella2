@@ -270,6 +270,10 @@ macro(xo_toplevel_compile_options)
         set(CMAKE_CXX_STANDARD_REQUIRED True)
     endif()
 
+    if(NOT DEFINED PROJECT_INCLUDE_STEM_DIR)
+        set(PROJECT_INCLUDE_STEM_DIR xo)
+    endif()
+
     # ----------------------------------------------------------------
     # variable
     #   XO_ADDRESS_SANITIZE
@@ -315,8 +319,8 @@ endmacro()
 # xo_strip_xo_prefix(foo tmp)    --> tmp=foo
 #
 macro(xo_strip_xo_prefix str outputvar)
-    string(REGEX REPLACE "^xo_" "" _tmp ${str})
-    string(REGEX REPLACE "^xo-" "" ${outputvar} ${_tmp})
+    string(REGEX REPLACE "^${PROJECT_INCLUDE_STEM_DIR}_" "" _tmp ${str})
+    string(REGEX REPLACE "^${PROJECT_INCLUDE_STEM_DIR}-" "" ${outputvar} ${_tmp})
 endmacro()
 
 # e.g.
@@ -341,10 +345,10 @@ macro(xo_include_headeronly_options target)
     target_include_directories(
       ${target} INTERFACE
       $<INSTALL_INTERFACE:include>
-      $<INSTALL_INTERFACE:include/xo/${_nxo_target}>
+      $<INSTALL_INTERFACE:include/${PROJECT_INCLUDE_STEM_DIR}/${_nxo_target}>
       $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>                      # e.g. for #include "indentlog/scope.hpp"
-      $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/xo/${_nxo_target}>    # e.g. for #include "TypeDescr.hpp" in reflect/src when ${target}=reflect
-      $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include/xo/${_nxo_target}>    # e.g. for generated .hpp files
+      $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/${PROJECT_INCLUDE_STEM_DIR}/${_nxo_target}>    # e.g. for #include "TypeDescr.hpp" in reflect/src when ${target}=reflect
+      $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include/${PROJECT_INCLUDE_STEM_DIR}/${_nxo_target}>    # e.g. for generated .hpp files
     )
 
     # ----------------------------------------------------------------
@@ -584,12 +588,12 @@ macro(xo_include_options2 target)
     target_include_directories(
       ${target} PUBLIC
       $<INSTALL_INTERFACE:include>
-      $<INSTALL_INTERFACE:include/xo/${_nxo_target}>
+      $<INSTALL_INTERFACE:include/${PROJECT_INCLUDE_STEM_DIR}/${_nxo_target}>
       $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>                      # e.g. for #include "indentlog/scope.hpp"
       #$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/${target}>           # e.g. for #include "Refcounted.hpp" in refcnt/src [DEPRECATED]
-      $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/xo/${_nxo_target}>    # e.g. for #include "TypeDescr.hpp" in reflect/src when ${target}=reflect
+      $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/${PROJECT_INCLUDE_STEM_DIR}/${_nxo_target}>    # e.g. for #include "TypeDescr.hpp" in reflect/src when ${target}=reflect
       #$<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include>                     # e.g. for generated .hpp files
-      $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include/xo/${_nxo_target}>    # e.g. for generated .hpp files
+      $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}/include/${PROJECT_INCLUDE_STEM_DIR}/${_nxo_target}>    # e.g. for generated .hpp files
     )
 
     # ----------------------------------------------------------------
@@ -743,7 +747,7 @@ macro(xo_install_library4 target projectTargets)
         BUNDLE DESTINATION bin COMPONENT Runtime
     )
 
-    xo_install_include_tree3(include/xo/${_nxo_target})
+    xo_install_include_tree3(include/${PROJECT_INCLUDE_STEM_DIR}/${_nxo_target})
 
     #xo_install_include_tree() -- use xo_install_include_tree3() separately
 endmacro()
@@ -1083,11 +1087,11 @@ endmacro()
 macro(xo_pybind11_library target projectTargets source_files)
     xo_strip_xo_prefix(${target} _nxo_target)
 
-    file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/include/xo/${_nxo_target})
+    file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/include/${PROJECT_INCLUDE_STEM_DIR}/${_nxo_target})
 
     configure_file(
         ${_nxo_target}.hpp.in
-        ${PROJECT_BINARY_DIR}/include/xo/${_nxo_target}/${_nxo_target}.hpp)
+        ${PROJECT_BINARY_DIR}/include/${PROJECT_INCLUDE_STEM_DIR}/${_nxo_target}/${_nxo_target}.hpp)
     # was ${PROJECT_SOURCE_DIR}/include/xo/${target}/${target}.hpp)
 
     xo_establish_symlink_install()
@@ -1099,9 +1103,9 @@ macro(xo_pybind11_library target projectTargets source_files)
             ${_nxo_target})
     else()
         install(
-            FILES ${PROJECT_BINARY_DIR}/include/xo/${_nxo_target}/${_nxo_target}.hpp
+            FILES ${PROJECT_BINARY_DIR}/include/${PROJECT_INCLUDE_STEM_DIR}/${_nxo_target}/${_nxo_target}.hpp
             PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
-            DESTINATION ${CMAKE_INSTALL_PREFIX}/include/xo/${_nxo_target})
+            DESTINATION ${CMAKE_INSTALL_PREFIX}/include/${PROJECT_INCLUDE_STEM_DIR}/${_nxo_target})
     endif()
 
     message(STATUS "[${target}] find_package(Python) (xo_pybind11_library)")
