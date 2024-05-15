@@ -17,22 +17,48 @@ macro(xo_cxx_toplevel_options)
     enable_language(CXX)
     xo_toplevel_compile_options()
     xo_toplevel_testing_options()
+
+    add_custom_target(all_executables)
+    set_property(
+        TARGET all_executables
+        PROPERTY targets "")
+
     add_custom_target(all_libraries)
+    set_property(
+        TARGET all_libraries
+        PROPERTY targets "")
 endmacro()
 
 macro(xo_cxx_toplevel_options2)
     enable_language(CXX)
     xo_toplevel_compile_options()
     enable_testing()
+
+    add_custom_target(all_executables)
+    set_property(
+        TARGET all_executables
+        PROPERTY targets "")
+
     add_custom_target(all_libraries)
+    set_property(
+        TARGET all_libraries
+        PROPERTY targets "")
+
     add_custom_target(all_utest_executables)
+    set_property(
+        TARGET all_utest_executables
+        PROPERTY targets "")
 endmacro()
 
 macro(xo_toplevel_testing_options)
     enable_testing()
     add_code_coverage()
     add_code_coverage_all_targets(EXCLUDE /nix/store* utest/*)
+
     add_custom_target(all_utest_executables)
+    set_property(
+        TARGET all_utest_executables
+        PROPERTY targets "")
 endmacro()
 
 # debug build (cmake -DCMAKE_BUILD_TYPE=debug path/to/source)
@@ -186,9 +212,11 @@ endmacro()
 # all add their target to ALL_LIBRARY_TARGETS.
 #
 macro(xo_doxygen_collect_deps)
+    get_target_property(_all_exes all_executables targets)
     get_target_property(_all_libs all_libraries targets)
     get_target_property(_all_utests all_utest_executables targets)
 
+    message(DEBUG "_all_exes=${_all_exes}")
     message(DEBUG "_all_libs=${_all_libs}")
     message(DEBUG "_all_utests=${_all_utests}")
 
@@ -200,7 +228,7 @@ macro(xo_doxygen_collect_deps)
     #message(STATUS "DOX_HPP_FILES_GLOB=${DOX_HPP_FILES_GLOB}")
     #set(DOX_DEPS ${_all_libs} ${_all_utests} ${DOX_HPP_FILES_GLOB})
 
-    set(DOX_DEPS ${_all_libs} ${_all_utests})
+    set(DOX_DEPS ${_all_exes} ${_all_libs} ${_all_utests})
 
     message(STATUS "DOX_DEPS=${DOX_DEPS}")
 endmacro()
@@ -601,14 +629,38 @@ macro(xo_add_headeronly_library target)
 endmacro()
 
 # ----------------------------------------------------------------
+# use this for an executable
+#
+macro(xo_add_executable target sources)
+    # this only adds the first argument..
+    add_executable(${target} ${sources})
+    xo_include_options2(${target})
+
+    # this adds all the remaining arguments
+    foreach(arg IN ITEMS ${ARGN})
+        target_sources(${target} PRIVATE ${arg})
+    endforeach()
+
+    # remember executable for certain downstream targets,
+    # such as xo_doxygen_collect_deps()
+    #
+    set_property(
+        TARGET all_executables
+        APPEND
+        PROPERTY targets ${target})
+endmacro()
+
+# ----------------------------------------------------------------
 # use this for a unit test executable
 #
 macro(xo_add_utest_executable target sources)
     # this only adds the first argument..
     add_executable(${target} ${sources})
     xo_include_options2(${target})
+
     add_test(NAME ${target} COMMAND ${target})
 
+    # this adds all the remaining arguments
     foreach(arg IN ITEMS ${ARGN})
         target_sources(${target} PRIVATE ${arg})
     endforeach()
