@@ -57,11 +57,39 @@ macro(xo_toplevel_debug_config2)
             set(PROJECT_CXX_FLAGS_DEBUG ${PROJECT_CXX_FLAGS} -ggdb -Og
                 CACHE STRING "debug c++ compiler flags")
         endif()
-        if (${CMAKE_BUILD_TYPE} STREQUAL debug)
-            message(STATUS "PROJECT_CXX_FLAGS_DEBUG: debug c++ flags are [${PROJECT_CXX_FLAGS_DEBUG}]")
-        endif()
+
+        message(STATUS "PROJECT_CXX_FLAGS_DEBUG: debug c++ flags are [${PROJECT_CXX_FLAGS_DEBUG}]")
 
         add_compile_options("$<$<CONFIG:DEBUG>:${PROJECT_CXX_FLAGS_DEBUG}>")
+    endif()
+endmacro()
+
+
+# asan (address sanitizer) build (cmake -DCMAKE_BUILD_TYPE=asan path/to/source)
+#
+macro(xo_toplevel_asan_config2)
+    if ("${CMAKE_BUILD_TYPE}" STREQUAL "asan")
+        # following the same pattern used for xo_toplevel_debug_config2(),
+        # although not needed here (if PROJECT_CXX_FLAGS_ASAN has no builtin default value)
+
+        set(CMAKE_CXX_FLAGS_ASAN "")
+
+        if (NOT DEFINED PROJECT_CXX_FLAGS_ASAN)
+            set(PROJECT_CXX_FLAGS_ASAN ${PROJECT_CXX_FLAGS} -Og -fsanitize=address
+                CACHE STRING "asan c++ compiler flags")
+        endif()
+
+        message(STATUS "PROJECT_CXX_FLAGS_ASAN: asan c++ flags are [${PROJECT_CXX_FLAGS_ASAN}]")
+
+        add_compile_options("$<$<CONFIG:ASAN>:${PROJECT_CXX_FLAGS_ASAN}>")
+
+        if (NOT DEFINED PROJECT_LINK_FLAGS_ASAN)
+            set(PROJECT_LINK_FLAGS_ASAN ${PROJECT_LINK_FLAGS} -fsanitize=address
+                CACHE STRING "asan link flags")
+        endif()
+        message(STATUS "PROJECT_LINK_FLAGS_ASAN: asan link flags are [${PROJECT_LINK_FLAGS_ASAN}]")
+
+        add_link_options("$<$<CONFIG:ASAN>:${PROJECT_LINK_FLAGS_ASAN}>")
     endif()
 endmacro()
 
@@ -103,6 +131,51 @@ macro(xo_toplevel_coverage_config2)
             configure_file(${XO_CMAKE_GEN_CCOV_TEMPLATE} ${PROJECT_BINARY_DIR}/gen-ccov @ONLY)
             file(CHMOD ${PROJECT_BINARY_DIR}/gen-ccov PERMISSIONS OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
         endif()
+    endif()
+endmacro()
+
+# target to build+install coverage report.
+#
+macro(xo_utest_coverage_config2)
+    if (XO_SUBMODULE_BUILD)
+        # in submodule build, will generate aggregate coverage report
+        # for all xo libraries.
+    else()
+        set(CCOV_OUTPUT_DIR ${PROJECT_BINARY_DIR}/ccov/html)
+        set(CCOV_INDEX_FILE ${CCOV_OUTPUT_DIR}/index.html)
+        # see xo_toplevel_coverage_report()
+        set(CCOV_REPORT_EXE ${PROJECT_BINARY_DIR}/gen-ccov)
+        # CMAKE_INSTALL_DOCDIR
+        #  =default=> DATAROOTDIR/doc/PROJECT_NAME
+        #  =default=> CMAKE_INSTALL_PREFIX/share/doc/xo_flatstring
+        set(CCOV_INSTALL_DOCDIR ${CMAKE_INSTALL_DOCDIR}/ccov)
+
+        # collect utest deps (like xo_doxygen_collect_deps())
+        get_target_property(_all_utests all_utest_executables targets)
+        message(DEBUG "_all_utests=${_all_utests}")
+
+        # 'test' target should always be out-of-date
+        #
+        # DEPENDS: reminder - can't put 'test' here,  requires 'all' target
+        #
+        add_custom_command(
+            OUTPUT ${CCOV_INDEX_FILE}
+            DEPENDS ${_all_utests}
+            COMMAND ${CCOV_REPORT_EXE}
+            WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+            COMMENT "Generating coverage report -> [${CCOV_OUTPUT_DIR}]")
+
+        add_custom_target(
+            ccov
+            DEPENDS ${CCOV_INDEX_FILE} ${SELF_EXE})
+
+        # OPTIONAL: quietly skip this step if ccov report not generated
+        install(
+            DIRECTORY ${CCOV_OUTPUT_DIR}
+            FILE_PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
+            DESTINATION ${CCOV_INSTALL_DOCDIR}
+            COMPONENT Documentation
+            OPTIONAL)
     endif()
 endmacro()
 
