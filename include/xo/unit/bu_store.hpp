@@ -125,6 +125,9 @@ namespace xo {
              *  @brief associate basis units with abbreviations
              **/
             struct bu_store {
+                /** @defgroup bu-store-constructors bu-store constructors **/
+                ///@{
+                /** construct canonical instance containing all known basis units **/
                 constexpr bu_store() {
                     // ----- mass -----
 
@@ -180,7 +183,25 @@ namespace xo {
                     this->bu_establish_abbrev(detail::bu::currency,         bu_abbrev_type::from_chars("ccy"));
                     this->bu_establish_abbrev(detail::bu::price,            bu_abbrev_type::from_chars("px"));
                 }
+                ///@}
 
+                /** @defgroup bu-store-implementation-methods **/
+                ///@{
+                /** report fallback abbreviation for a basis unit.
+                 *
+                 *  Typically unused.  Will be invoked only if a basis unit exists for which
+                 *  @ref bu_store::bu_establish_abbrev was not called by bu_store's constructor.
+                 *
+                 *  Tries to produce something unambiguous,
+                 *  while still supplying enough information
+                 *  to indicate what's needed to resolve the problem.
+                 *
+                 *  Example
+                 *  @code
+                 *  bu_store.bu_fallback_abbrev(dim::mass, scalefactor_ratio_type(1234,1))
+                 *    => "1234g"
+                 *  @endcode
+                 **/
                 static constexpr bu_abbrev_type
                 bu_fallback_abbrev(dim basis_dim,
                                    const scalefactor_ratio_type & scalefactor)
@@ -190,7 +211,10 @@ namespace xo {
                                  (scalefactor.to_str<bu_abbrev_type::fixed_capacity>(),
                                   native_unit2_v[static_cast<std::uint32_t>(basis_dim)].abbrev_str())));
                     }
+                ///@}
 
+                /** @defgroup bu-store-access-methods **/
+                ///@{
                 /** @brief get basis-unit abbreviation at runtime **/
                 constexpr bu_abbrev_type bu_abbrev(const basis_unit & bu) const
                     {
@@ -206,17 +230,32 @@ namespace xo {
                             return bu_fallback_abbrev(bu.native_dim(), bu.scalefactor());
                         }
                     }
+                ///@}
 
+                /** @addtogroup bu-store-implementation-methods **/
+                ///@{
+                /** associate abbreviation @p abbrev with basis unit @p bu
+                 *
+                 *  Example:
+                 *  @code
+                 *  // femtograms
+                 *  bu_store.bu_establish_abbrev(detail::bu::mass_unit(1, 1000000000000000), "fg")
+                 *  @endcode
+                 **/
                 constexpr void bu_establish_abbrev(const basis_unit & bu,
                                                    const bu_abbrev_type & abbrev) {
                     auto & dim_store = bu_abbrev_vv_[static_cast<std::size_t>(bu.native_dim_)];
 
                     dim_store.bu_establish_abbrev(bu.scalefactor_, abbrev);
                 }
+                ///@}
 
-            public:
-                /** **/
+            public: /* ntoe: public members required so bu_dim_store can be a structural type */
+                /** @defgroup bu-store-instance-vars **/
+                ///@{
+                /** bu-store contents, indexed by native dimension **/
                 std::array<bu_dim_store, n_dim> bu_abbrev_vv_;
+                ///@}
             };
         } /*namespace detail*/
 

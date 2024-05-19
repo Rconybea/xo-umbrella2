@@ -7,6 +7,9 @@ Basis Unit
 
     #include <xo/unit/basis_unit.hpp>
 
+Class
+-----
+
 A :code:`basis_unit` represents a unit belonging to a single native dimension.
 For example :code:`bu::meter` representing a distance of 1 meter.
 

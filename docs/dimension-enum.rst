@@ -3,6 +3,24 @@
 Dimension
 =========
 
+.. ditaa::
+
+    +-----------+-----------+
+    |  quantity | xquantity |
+    +-----------+-----------+
+    |      scaled_unit      |
+    +-----------------------+
+    |     natural_unit      |
+    +-----------------------+
+    |          bpu          |
+    +-----------+           |
+    |  bu_store |           |
+    +-----------+-----------+
+    |       basis_unit      |
+    +-----------------------+
+    |cYEL   dimension       |
+    +-----------------------+
+
 .. code-block:: cpp
 
     #include <xo/unit/dimension.hpp>

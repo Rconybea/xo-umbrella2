@@ -36,7 +36,8 @@ runtime (since we can't construct new c++ types at runtime).
    development
    unit-quantities
    quantity-reference
-   unit-reference
+   scaled-unit-class
+   natural-unit-class
    bpu-class
    bu-store-class
    basis-unit-reference

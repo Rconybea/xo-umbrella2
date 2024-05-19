@@ -63,13 +63,18 @@ namespace xo {
             using ratio_int_type = Int;
 
         public:
+            /** @addtogroup natural-unit-ctors **/
+            ///@{
             constexpr natural_unit() : n_bpu_{0} {}
 
             static constexpr natural_unit from_bu(basis_unit bu,
                                                   power_ratio_type power = power_ratio_type(1)) {
                 return detail::nu_maker<Int>::make_nu(bpu<Int>(bu, power));
             }
+            ///@}
 
+            /** @addtogroup natural-unit-access-methods **/
+            ///@{
             /** always true.  @see scaled_unit::is_natural **/
             constexpr bool is_natural() const { return true; }
 
@@ -77,7 +82,10 @@ namespace xo {
             constexpr bool is_dimensionless() const { return n_bpu_ == 0; }
 
             constexpr bpu<Int> * bpu_v() const { return bpu_v_; }
+            ///@}
 
+            /** @defgroup natural-unit-methods **/
+            ///@{
             constexpr natural_unit reciprocal() const {
                 natural_unit retval;
 
@@ -111,10 +119,16 @@ namespace xo {
                 if (n_bpu_ < n_dim)
                     bpu_v_[n_bpu_++] = bpu;
             }
+            ///@}
 
+            /** @addtogroup natural-unit-access-methods **/
+            ///@{
             constexpr bpu<Int> & operator[](std::size_t i) { return bpu_v_[i]; }
             constexpr const bpu<Int> & operator[](std::size_t i) const { return bpu_v_[i]; }
+            ///@}
 
+            /** @defgroup natural-unit-conversion-methods **/
+            ///@{
             template <typename Int2>
             constexpr natural_unit<Int2> to_repr() const {
                 natural_unit<Int2> retval;
@@ -125,13 +139,17 @@ namespace xo {
 
                 return retval;
             }
+            ///@}
 
-        public: /* need public members so that a natural_unit instance can be a non-type template parameter (a structural type) */
+        public: /* public members so instance can be non-type template parameter (is a structural type) */
+            /** @defgroup natural-unit-instance-vars **/
+            ///@{
             /** @brief the number of occupied slots in @c bpu_v_ **/
             std::size_t n_bpu_;
 
             /** @brief storage for basis power units **/
             bpu<Int> bpu_v_[n_dim];
+            ///@}
         };
 
         template <typename Int>

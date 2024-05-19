@@ -3,6 +3,24 @@
 Basis Unit Store
 ================
 
+.. ditaa::
+
+    +-----------+-----------+
+    |  quantity | xquantity |
+    +-----------+-----------+
+    |      scaled_unit      |
+    +-----------------------+
+    |     natural_unit      |
+    +-----------------------+
+    |          bpu          |
+    +-------------+         |
+    |cYEL bu_store|         |
+    +-------------+---------+
+    |       basis_unit      |
+    +-----------------------+
+    |       dimension       |
+    +-----------------------+
+
 .. code-block:: cpp
 
     #include <xo/unit/bu_store.hpp>
@@ -21,19 +39,19 @@ recording all built-in units along with their associated abbreviations
     :scale: 99%
     :align: center
 
-    map mass_table {
+    map mass_table<<bu_dim_store>> {
     bu::milligram => "mg"
     bu::gram => "g"
     bu::kilogram => "kg"
     }
 
-    map distance_table {
+    map distance_table<<bu_dim_store>> {
     bu::millimeter => "mm"
     bu::meter => "m"
     bu::kilometer => "km"
     }
 
-    map time_table {
+    map time_table<<bu_dim_store>> {
     bu::millisecond => "ms"
     bu::second => "s"
     bu::minute => "min"
@@ -50,9 +68,12 @@ recording all built-in units along with their associated abbreviations
     bu_abbrev_store o-- time_table
 
 
-This class supports the implementation of ``natural_unit::abbrev()``.
+This class exists to support the implementation of ``natural_unit::abbrev()``.
 
 Application code is not expected to interact directly with it.
+
+Class
+-----
 
 .. doxygenclass:: xo::qty::detail::bu_store
 
@@ -71,6 +92,9 @@ For example, this would be possible:
     static_assert(store.bu_abbrev(bu::minute) == flatstring("min"));
     static_assert(store.bu_abbrev(bu::microgram) == flatstring("ug"));
 
+.. doxygengroup:: bu-store-constructors
+.. doxygengroup:: bu-store-access-methods
+.. doxygengroup:: bu-store-implementation-methods
 
 .. doxygenclass:: xo::qty::detail::bu_dim_store
 .. doxygengroup:: bu-dim-store-type-traits

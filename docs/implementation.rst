@@ -23,14 +23,17 @@ Abstraction tower for *xo-unit* components.
     |       dimension       |
     +-----------------------+
 
-- quantity: see :doc:`quantity-reference`.
-  quantity with compile-time unit work
+- :doc:`quantity<quantity-reference>`:
+
+  A quantity with compile-time unit work
 
 - xquantity:
-  quantity with unit work deferred until runtime
 
-- scaled_unit:
-  a unit involving zero or more dimensions, and associated conversion factor.
+  A quantity with unit work deferred until runtime
+
+- :doc:`scaled_unit<scaled-unit-class>`:
+
+  A unit involving zero or more dimensions, and associated conversion factor.
 
   - can express result of arithmetic involving multiple scales,
     by reporting an outer scalefactor
@@ -40,29 +43,30 @@ Abstraction tower for *xo-unit* components.
   - multiplication and division commit to a single :code:`basis_unit` for each
     dimension.
 
-- natural_unit:
-  a unit involving zero or more dimensions, and at most one scale per dimension.
+- :doc:`natural_unit<natural-unit-class>`
+
+  A unit involving zero or more dimensions, and at most one scale per dimension.
   A quantity instance is always represented as a dimensionless multiple
   of a natural unit
 
   - natural_units are *not* closed under multiplication and division.
     (for example consider :code:`xo::qty::qty::foot * xo::qty::qty::meter`)
 
-- bpu: :doc:`bpu-class`.
+- :doc:`bpu<bpu-class>`
 
   A rational (usually integer) power of a basis unit. Has a single dimension.
 
-- bu_store: :doc:`bu-store-class`.
+- :doc:`bu_store<bu-store-class>`
 
   Associates basis units with abbreviations.
 
   For example ``bu::kilogram`` => ``"kg"``
 
-- basis_unit: :doc:`basis-unit-reference`.
+- :doc:`basis_unit<basis-unit-reference>`
 
   A unit with a single dimension and scale.
 
-- dimension: :doc:`dimension-enum`.
+- :doc:`dimension<dimension-enum>`
 
   identifies a dimension, such as mass or time.
 
