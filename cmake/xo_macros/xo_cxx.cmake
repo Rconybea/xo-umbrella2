@@ -122,6 +122,18 @@ macro(xo_toplevel_asan_config2)
     endif()
 endmacro()
 
+# support for
+#   cmake -DCMAKE_BUILD_TYPE=release
+#   cmake -DCMAKE_BUILD_TYPE=debug
+#   cmake -DCMAKE_BUILD_TYPE+asan
+#   cmake -DCMAKE_BUILD_TYPE=coverage
+#
+macro(xo_toplevel_config2)
+    xo_toplevel_release_config2()
+    xo_toplevel_debug_config2()
+    xo_toplevel_asan_config2()
+    xo_toplevel_coverage_config2()
+endmacro()
 
 # coverage build:
 # 0.
