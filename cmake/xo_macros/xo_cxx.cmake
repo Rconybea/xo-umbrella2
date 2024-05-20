@@ -29,6 +29,7 @@ macro(xo_cxx_toplevel_options)
         PROPERTY targets "")
 endmacro()
 
+# deprecated -- prefer xo_cxx_toplevel_options3()
 macro(xo_cxx_toplevel_options2)
     enable_language(CXX)
     xo_toplevel_compile_options()
@@ -50,6 +51,15 @@ macro(xo_cxx_toplevel_options2)
         PROPERTY targets "")
 endmacro()
 
+macro(xo_cxx_toplevel_options3)
+    enable_language(CXX)
+    xo_toplevel_compile_options()
+    enable_testing()
+    add_custom_target(all_libraries)
+    add_custom_target(all_utest_executables)
+    xo_toplevel_config2()
+endmacro()
+
 macro(xo_toplevel_testing_options)
     enable_testing()
     add_code_coverage()
@@ -59,6 +69,35 @@ macro(xo_toplevel_testing_options)
     set_property(
         TARGET all_utest_executables
         PROPERTY targets "")
+endmacro()
+
+# release build (cmake -DCMAKE_BUILD_TYPE=release path/to/source)
+#
+macro(xo_toplevel_release_config2)
+    if ("${CMAKE_BUILD_TYPE}" STREQUAL "release")
+        # clear out hardwired default
+        # we want to override project-level defaults,
+        # but need to prevent interference from hardwired defaults
+        # (the problem with non-empty hardwired defaults is that we can't tell if they've
+        # been set on the command line)
+        #
+        set(CMAKE_CXX_FLAGS_RELEASE "")
+
+        # CMAKE_CXX_FLAGS_RELEASE is built-in to cmake and has non-empty default
+        # -> we cannot tell whether it was set on the command line
+        # -> use PROJECT_CXX_FLAGS_RELEASE instead
+        #
+        # built-in default value is -march=native -O3 -DNDEBUG
+        #
+        if (NOT DEFINED PROJECT_CXX_FLAGS_RELEASE)
+            set(PROJECT_CXX_FLAGS_RELEASE ${PROJECT_CXX_FLAGS} -march=native -O3 -DNDEBUG
+                CACHE STRING "release c++ compiler flags")
+        endif()
+
+        message(STATUS "PROJECT_CXX_FLAGS_RELEASE: release c++ flags are [${PROJECT_CXX_FLAGS_RELEASE}]")
+
+        add_compile_options("$<$<CONFIG:RELEASE>:${PROJECT_CXX_FLAGS_RELEASE}>")
+    endif()
 endmacro()
 
 # debug build (cmake -DCMAKE_BUILD_TYPE=debug path/to/source)
@@ -119,6 +158,18 @@ macro(xo_toplevel_asan_config2)
     endif()
 endmacro()
 
+# support for
+#   cmake -DCMAKE_BUILD_TYPE=release
+#   cmake -DCMAKE_BUILD_TYPE=debug
+#   cmake -DCMAKE_BUILD_TYPE+asan
+#   cmake -DCMAKE_BUILD_TYPE=coverage
+#
+macro(xo_toplevel_config2)
+    xo_toplevel_release_config2()
+    xo_toplevel_debug_config2()
+    xo_toplevel_asan_config2()
+    xo_toplevel_coverage_config2()
+endmacro()
 
 # coverage build:
 # 0.
