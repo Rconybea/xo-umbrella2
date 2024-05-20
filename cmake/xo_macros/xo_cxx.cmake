@@ -35,6 +35,35 @@ macro(xo_toplevel_testing_options)
     add_custom_target(all_utest_executables)
 endmacro()
 
+# release build (cmake -DCMAKE_BUILD_TYPE=release path/to/source)
+#
+macro(xo_toplevel_release_config2)
+    if ("${CMAKE_BUILD_TYPE}" STREQUAL "release")
+        # clear out hardwired default
+        # we want to override project-level defaults,
+        # but need to prevent interference from hardwired defaults
+        # (the problem with non-empty hardwired defaults is that we can't tell if they've
+        # been set on the command line)
+        #
+        set(CMAKE_CXX_FLAGS_RELEASE "")
+
+        # CMAKE_CXX_FLAGS_RELEASE is built-in to cmake and has non-empty default
+        # -> we cannot tell whether it was set on the command line
+        # -> use PROJECT_CXX_FLAGS_RELEASE instead
+        #
+        # built-in default value is -march=native -O3 -DNDEBUG
+        #
+        if (NOT DEFINED PROJECT_CXX_FLAGS_RELEASE)
+            set(PROJECT_CXX_FLAGS_RELEASE ${PROJECT_CXX_FLAGS} -march=native -O3 -DNDEBUG
+                CACHE STRING "release c++ compiler flags")
+        endif()
+
+        message(STATUS "PROJECT_CXX_FLAGS_RELEASE: release c++ flags are [${PROJECT_CXX_FLAGS_RELEASE}]")
+
+        add_compile_options("$<$<CONFIG:RELEASE>:${PROJECT_CXX_FLAGS_RELEASE}>")
+    endif()
+endmacro()
+
 # debug build (cmake -DCMAKE_BUILD_TYPE=debug path/to/source)
 #
 macro(xo_toplevel_debug_config2)
