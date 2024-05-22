@@ -12,13 +12,15 @@ set(SELF_SRCS
     unit.test.cpp #quantity.test.cpp
 )
 
-xo_add_utest_executable(${SELF_EXE} ${SELF_SRCS})
+if (ENABLE_TESTING)
+    xo_add_utest_executable(${SELF_EXE} ${SELF_SRCS})
 
-# ----------------------------------------------------------------
-# dependencies..
+    # ----------------------------------------------------------------
+    # dependencies..
 
-xo_self_dependency(${SELF_EXE} xo_unit)
-xo_headeronly_dependency(${SELF_EXE} xo_ratio)
-xo_external_target_dependency(${SELF_EXE} Catch2 Catch2::Catch2)
+    xo_self_dependency(${SELF_EXE} xo_unit)
+    xo_headeronly_dependency(${SELF_EXE} xo_ratio)
+    xo_external_target_dependency(${SELF_EXE} Catch2 Catch2::Catch2)
+endif()
 
 # end CMakeLists.txt

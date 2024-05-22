@@ -8,9 +8,7 @@ int
 main () {
     namespace q = xo::qty::qty;
     namespace u = xo::qty::u;
-    //namespace nu = xo::qty::nu;
     using xo::qty::quantity;
-    using xo::flatstring;
     using namespace std;
 
     constexpr quantity<u::second> t = q::minutes(2);

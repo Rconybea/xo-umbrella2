@@ -17,7 +17,6 @@ main () {
     static_assert(!t2.is_dimensionless());
 
     static_assert(std::same_as<decltype(static_cast<double>(r1)), double>);
-    //static_assert(std::same_as<decltype(static_cast<double>(t2)), double>);
 
     /* r1_value: assignment compiles,  since r1 dimensionless */
     double r1_value = r1;

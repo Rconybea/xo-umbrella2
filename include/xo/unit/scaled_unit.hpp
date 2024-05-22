@@ -15,8 +15,22 @@ namespace xo {
         template < typename Int,
                    typename OuterScale = ratio::ratio<Int> >
         struct scaled_unit {
+            /** @defgroup scaled-unit-type-traits scaled-unit type traits **/
+            ///@{
+
+            /** type for representing individual basis-unit scalefactors **/
             using ratio_int_type = typename natural_unit<Int>::ratio_int_type;
 
+            ///@}
+
+        public:
+            /** @defgroup scaled-unit-ctors scaled-unit constructors **/
+            ///@{
+
+            /** create scaled unit representing a multiple
+             *  @p outer_scale_factor * @p sqrt(outer_scale_sq)
+             *  of natural unit @p nat_unit
+             **/
             constexpr scaled_unit(const natural_unit<Int> & nat_unit,
                                   OuterScale outer_scale_factor,
                                   double outer_scale_sq)
@@ -25,33 +39,72 @@ namespace xo {
                   outer_scale_sq_{outer_scale_sq}
                 {}
 
+            ///@}
+
+            /** @defgroup scaled-unit-access-methods scaled-unit access methods **/
+            ///@{
+
+            /** always true for scaled_unit **/
             constexpr bool is_scaled_unit_type() const { return true; }
 
+            /** true iff scaled unit can be faithfully represented by a @ref natural_unit **/
+            constexpr bool is_natural() const {
+                return (outer_scale_factor_ == OuterScale(1) && (outer_scale_sq_ == 1.0));
+            }
+
+            /** true if this scaled unit has no dimension **/
+            constexpr bool is_dimensionless() const { return natural_unit_.is_dimensionless(); }
+
+            /** get number of distinct native dimensions present.
+             *  e.g. for unit Newton = 1 kg.m.s^-2, n_bpu would be 3,
+             *  with {mass, distance, time} present.
+             *  Note that this value does not count exponents
+             **/
+            constexpr std::size_t n_bpu() const { return natural_unit_.n_bpu(); }
+
+            ///@}
+
+            /** @defgroup scaled-unit-general-methods scaled-unit access methods **/
+            ///@{
+
+            /** return reciprocal of this unit. **/
             constexpr scaled_unit reciprocal() const {
                 return scaled_unit(natural_unit_.reciprocal(),
                                    1 / outer_scale_factor_,
                                    1.0 / outer_scale_sq_);
             }
 
-            /** @brief true iff scaled unit can be faithfully represented by a @ref natural_unit **/
-            constexpr bool is_natural() const {
-                return (outer_scale_factor_ == OuterScale(1) && (outer_scale_sq_ == 1.0));
+            /** get bpu for dimension @p d.  if d isn't present,  construct bpu with 0 power **/
+            constexpr bpu<Int> lookup_dim(dimension d) const {
+                return natural_unit_.lookup_dim(d);
             }
 
-            constexpr bool is_dimensionless() const { return natural_unit_.is_dimensionless(); }
-            constexpr std::size_t n_bpu() const { return natural_unit_.n_bpu(); }
-
+            /** return @p i'th bpu associated with this unit **/
             constexpr bpu<Int> & operator[](std::size_t i) { return natural_unit_[i]; }
+            /** return @p i'th bpu associated with this unit (const version) **/
             constexpr const bpu<Int> & operator[](std::size_t i) const { return natural_unit_[i]; }
 
-        public: /* need public members so that a scaled_unit instance can be a non-type template parameter (a structural type) */
+            ///@}
 
-            natural_unit<Int> natural_unit_;
+        public: /* public members so scaled_unit instance can be a non-type template parameter (a structural type) */
+
+            /** @defgroup scaled-unit-instance-vars **/
+            ///@{
+
+            /** scale factor multiplying @ref natural_unit_ **/
             OuterScale outer_scale_factor_;
+
+            /** squared scale factor multiplying @ref natural_unit_ **/
             double outer_scale_sq_;
+
+            /** natural unit term in this scaled unit **/
+            natural_unit<Int> natural_unit_;
+
+            ///@}
         };
 
         namespace detail {
+            /** promote natural unit to scaled unit (with unit outer scalefactors) **/
             template <typename Int>
             constexpr auto su_promote(const natural_unit<Int> & bpuv) {
                 return scaled_unit<Int>(bpuv,
@@ -71,60 +124,154 @@ namespace xo {
             su_from_bu(const basis_unit & bu,
                        const power_ratio_type & power = power_ratio_type(1))
             {
-                return detail::su_promote<std::int64_t>(natural_unit<std::int64_t>::from_bu(bu, power));
+                return detail::su_promote(natural_unit<std::int64_t>::from_bu(bu, power));
             }
 
+            /** @defgroup scaled-unit-dimensionless scaled-unit dimensionless constant **/
+            ///@{
+
+            /** dimensionless unit; equivalent to 1 **/
+            constexpr auto dimensionless    = detail::su_promote<std::int64_t>(nu::dimensionless);
+
+            ///@}
+
+            // ----- mass units -----
+
+            /** @defgroup scaled-unit-mass scaled-unit mass units **/
+            ///@{
+
+            /** unit of 10^-12 grams **/
             constexpr auto picogram         = su_from_bu(detail::bu::picogram);
+            /** unit of 10^-9 grams **/
             constexpr auto nanogram         = su_from_bu(detail::bu::nanogram);
+            /** unit of 10^-6 grams **/
             constexpr auto microgram        = su_from_bu(detail::bu::microgram);
+            /** unit of 10^-3 grams **/
             constexpr auto milligram        = su_from_bu(detail::bu::milligram);
+            /** unit of 1 gram **/
             constexpr auto gram             = su_from_bu(detail::bu::gram);
+            /** unit of 10^3 grams **/
             constexpr auto kilogram         = su_from_bu(detail::bu::kilogram);
+            /** unit of 1 metric tonne = 10^3 kg **/
             constexpr auto tonne            = su_from_bu(detail::bu::tonne);
+            /** unit of 10^3 tonnes = 10^6 kg **/
             constexpr auto kilotonne        = su_from_bu(detail::bu::kilotonne);
+            /** unit of 10^6 tonnes = 10^9 kg **/
             constexpr auto megatonne        = su_from_bu(detail::bu::megatonne);
+            /** unit of 10^9 tonnes = 10^12 kg **/
             constexpr auto gigatonne        = su_from_bu(detail::bu::gigatonne);
 
+            ///@}
+
+            // ----- distance units -----
+
+            /** @defgroup scaled-unit-distance scaled-unit distance units **/
+            ///@{
+
+            /** unit of 10^-12 meters **/
             constexpr auto picometer        = su_from_bu(detail::bu::picometer);
+            /** unit of 10^-9 meters **/
             constexpr auto nanometer        = su_from_bu(detail::bu::nanometer);
+            /** unit of 10^-6 meters **/
             constexpr auto micrometer       = su_from_bu(detail::bu::micrometer);
+            /** unit of 10^-3 meters **/
             constexpr auto millimeter       = su_from_bu(detail::bu::millimeter);
+            /** unit of 1 meter **/
             constexpr auto meter            = su_from_bu(detail::bu::meter);
+            /** unit of 10^3 meters **/
             constexpr auto kilometer        = su_from_bu(detail::bu::kilometer);
+            /** unit of 10^6 meters (not commonly used) **/
             constexpr auto megameter        = su_from_bu(detail::bu::megameter);
+            /** unit of 10^9 meters (not commonly used) **/
             constexpr auto gigameter        = su_from_bu(detail::bu::gigameter);
 
+            /** unit of 1 light-second = distance light travels in a vacuum in 1 second **/
             constexpr auto lightsecond      = su_from_bu(detail::bu::lightsecond);
+            /** unit of 1 astronomical unit, for approximate radius of earth orbit **/
             constexpr auto astronomicalunit = su_from_bu(detail::bu::astronomicalunit);
 
+            /** unit of 1 inch = 1/12 feet **/
             constexpr auto inch             = su_from_bu(detail::bu::inch);
+            /** unit of 1 foot = 0.3048 meters **/
             constexpr auto foot             = su_from_bu(detail::bu::foot);
+            /** unit of 1 yard = 3 feet **/
             constexpr auto yard             = su_from_bu(detail::bu::yard);
+            /** unit of 1 mile = 1760 yards **/
             constexpr auto mile             = su_from_bu(detail::bu::mile);
 
+            ///@}
+
+            // ----- time units -----
+
+            /** @defgroup scaled-unit-time scaled-unit time units **/
+            ///@{
+
+            /** unit of 1 picosecond = 10^-12 seconds **/
             constexpr auto picosecond       = su_from_bu(detail::bu::picosecond);
+            /** unit of 1 nanosecond = 10^-9 seconds **/
             constexpr auto nanosecond       = su_from_bu(detail::bu::nanosecond);
+            /** unit of 1 microseccond = 10^-6 seconds **/
             constexpr auto microsecond      = su_from_bu(detail::bu::microsecond);
+            /** unit of 1 millisecond = 10^-3 seconds **/
             constexpr auto millisecond      = su_from_bu(detail::bu::millisecond);
+            /** unit of 1 second **/
             constexpr auto second           = su_from_bu(detail::bu::second);
+            /** unit of 1 minute **/
             constexpr auto minute           = su_from_bu(detail::bu::minute);
+            /** unit of 1 hour **/
             constexpr auto hour             = su_from_bu(detail::bu::hour);
+            /** unit for a 24-hour day **/
             constexpr auto day              = su_from_bu(detail::bu::day);
+            /** unit for a week comprising exactly 7 24-hour days **/
             constexpr auto week             = su_from_bu(detail::bu::week);
+            /** unit for a 30-day month **/
             constexpr auto month            = su_from_bu(detail::bu::month);
+            /** unit for a year containing exactly 365.25 24-hour days **/
             constexpr auto year             = su_from_bu(detail::bu::year);
+            /** unit for a 'year' containing exactly 250 24-hour days.
+             *  (approximates the number of business days in a year)
+             **/
             constexpr auto year250          = su_from_bu(detail::bu::year250);
+            /** unit for a 'year' containing exactly 360 24-hour days **/
             constexpr auto year360          = su_from_bu(detail::bu::year360);
+            /** unit for a 'year' containing exactly 365 24-hour days **/
             constexpr auto year365          = su_from_bu(detail::bu::year365);
 
+            ///@}
+
+            /** @defgroup scaled-unit-misc scaled-unit miscellaneous units **/
+            ///@{
+
+            // ----- currency -----
+
+            /** generic currency unit **/
+            constexpr auto currency         = su_from_bu(detail::bu::currency);
+
+            // ----- price - ---
+
+            /** generic price unit **/
+            constexpr auto price            = su_from_bu(detail::bu::price);
+
+            ///@}
+
+            // ----- volatility units -----
+
+            /** @defgroup scaled-unit-volatility scaled-unit volatility units **/
+            ///@{
+
+            /** volatility, in 30-day units **/
             constexpr auto volatility_30d   = su_from_bu(detail::bu::month,
                                                          power_ratio_type(-1,2));
+            /** volatility, in 250-day 'annual' units **/
             constexpr auto volatility_250d  = su_from_bu(detail::bu::year250,
                                                          power_ratio_type(-1,2));
+            /** volatility, in 360-day 'annual' units **/
             constexpr auto volatility_360d  = su_from_bu(detail::bu::year360,
                                                          power_ratio_type(-1,2));
+            /** volatility, in 365-day 'annual' units **/
             constexpr auto volatility_365d  = su_from_bu(detail::bu::year365,
                                                          power_ratio_type(-1,2));
+            ///@}
         }
 
         namespace detail {
@@ -197,6 +344,13 @@ namespace xo {
             }
         }
 
+        /** @defgroup scaled-unit-operators **/
+        ///@{
+
+        /** Multiply scaled_unit instances @p x_unit and @p y_unit.
+         *  Result is a scaled_unit for the product dimension.
+         *  For each basis dimension, result will prioritize scale from @p x_unit ahead of @p y_unit.
+         **/
         template <typename Int,
                   typename Int2x = detail::width2x_t<Int>>
         inline constexpr scaled_unit<Int>
@@ -214,30 +368,10 @@ namespace xo {
                      rr.outer_scale_sq_ * x_unit.outer_scale_sq_ * y_unit.outer_scale_sq_));
         }
 
-#ifdef OBSOLETE
-        template <typename Int,
-                  typename Int2x = detail::width2x_t<Int>>
-        inline constexpr scaled_unit<Int>
-        operator* (const scaled_unit<Int> & x_unit,
-                   const natural_unit<Int> & y_unit)
-        {
-            auto y_unit2 = detail::make_unit_rescale_result<Int>(y_unit);
-
-            return x_unit * y_unit2;
-        }
-
-        template <typename Int,
-                  typename Int2x = detail::width2x_t<Int>>
-        inline constexpr scaled_unit<Int>
-        operator* (const natural_unit<Int> & x_unit,
-                   const scaled_unit<Int> & y_unit)
-        {
-            auto x_unit2 = detail::make_unit_rescale_result<Int>(x_unit);
-
-            return x_unit2 * y_unit;
-        }
-#endif
-
+        /** Divide scaled_unit instances @p x_unit by @p y_unit.
+         *  Result is a scaled_unit for the quotient dimension.
+         *  For each basis dimension, result will prioritize scale from @p x_unit ahead of @p y_unit.
+         **/
         template <typename Int,
                   typename Int2x = detail::width2x_t<Int>>
         inline constexpr scaled_unit<Int>
@@ -255,29 +389,7 @@ namespace xo {
                      rr.outer_scale_sq_ * x_unit.outer_scale_sq_ * y_unit.outer_scale_sq_));
         }
 
-#ifdef OBSOLETE
-        template <typename Int,
-                  typename Int2x = detail::width2x_t<Int>>
-        inline constexpr scaled_unit<Int>
-        operator/ (const scaled_unit<Int> & x_unit,
-                   const natural_unit<Int> & y_unit)
-        {
-            auto y_unit2 = detail::make_unit_rescale_result<Int>(y_unit);
-
-            return x_unit / y_unit2;
-        }
-
-        template <typename Int,
-                  typename Int2x = detail::width2x_t<Int>>
-        inline constexpr scaled_unit<Int>
-        operator/ (const natural_unit<Int> & x_unit,
-                   const scaled_unit<Int> & y_unit)
-        {
-            auto x_unit2 = detail::make_unit_rescale_result<Int>(x_unit);
-
-            return x_unit2 / y_unit;
-        }
-#endif
+        ///@}
     } /*namespace qty*/
 } /*namespace xo*/
 

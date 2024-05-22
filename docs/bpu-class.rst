@@ -3,23 +3,32 @@
 BPU
 ===
 
-.. ditaa::
+A rational (usually integral) power of a single basis unit
 
-    +-----------+-----------+
-    |  quantity | xquantity |
-    +-----------+-----------+
-    |      scaled_unit      |
-    +-----------------------+
-    |     natural_unit      |
-    +-----------------------+
-    |cYEL      bpu          |
-    +-------------+         |
-    |  bu_store   |         |
-    +-------------+---------+
-    |       basis_unit      |
-    +-----------------------+
-    |       dimension       |
-    +-----------------------+
+Context
+-------
+
+.. ditaa::
+    :--scale: 0.85
+
+    +----------------+---------------+
+    |     quantity   |   xquantity   |
+    +----------------+---------------+
+    |          scaled_unit           |
+    +--------------------------------+
+    |         natural_unit           |
+    +--------------------------------+
+    |cYEL           bpu              |
+    +----------------+               |
+    |    bu_store    |               |
+    +----------------+---------------+
+    |           basis_unit           |
+    +--------------------------------+
+    |            dimension           |
+    +--------------------------------+
+
+Introduction
+------------
 
 .. code-block:: cpp
 
@@ -48,6 +57,13 @@ For example:
     vol : native_dim = dim::time
     vol : scalefactor = 365*24*3600
     vol : power = -1/2
+
+:code:`bpu` is intended as an implementation-level abstraction.
+Application code will normally interact with the more-general :code:`scaled_unit`
+instead of :code:`bpu`.
+
+Class
+-----
 
 .. doxygenclass:: xo::qty::bpu
 

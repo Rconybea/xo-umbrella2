@@ -31,9 +31,7 @@ namespace xo {
                 p_target->push_back(bpu0);
                 push_bpu_array(p_target, args...);
             }
-        }
 
-        namespace detail {
             template <typename Int>
             struct nu_maker {
                 template <typename... Ts>
@@ -52,40 +50,61 @@ namespace xo {
          *  1. Quantities are represented as a multiple of a natural unit
          *  2. Each bpu in the array represents a power of a basis dimension,  e.g. "meter" or "second^2".
          *  3. Each bpu in an array has a different dimension id.
-         *     For example dim::time, if present, appears once.
+         *     For example @c dim::time, if present, appears once.
          *  4. Basis dimensions can appear in any order.
          *     Order used for constructing abbreviations: will get @c "kg.m" or @c "m.kg"
-         *     depending on the orderin of @c dim::distance and @c dim::mass in @c bpu_v_
+         *     depending on the ordering of @c dim::distance and @c dim::mass in @c bpu_v_
+         *
+         *  @c Int supplies representation for numerator and denominator in basis-unit scale factors.
          **/
         template <typename Int>
         class natural_unit {
         public:
+            /** @defgroup natural-unit-type-traits natural unit type traits **/
+            ///@{
+            /** @brief representation for numerator and denominator of scalefactor ratios **/
             using ratio_int_type = Int;
+            ///@}
 
         public:
             /** @addtogroup natural-unit-ctors **/
             ///@{
+
+            /** construct dimensionless unit **/
             constexpr natural_unit() : n_bpu_{0} {}
 
+            /** construct unit representing basis unit @p bu with exponent @p power **/
             static constexpr natural_unit from_bu(basis_unit bu,
                                                   power_ratio_type power = power_ratio_type(1)) {
                 return detail::nu_maker<Int>::make_nu(bpu<Int>(bu, power));
             }
+
             ///@}
 
             /** @addtogroup natural-unit-access-methods **/
             ///@{
-            /** always true.  @see scaled_unit::is_natural **/
+
+            /** always true.  Provided for symmetry with @c xo::qty::scaled_unit::is_natural **/
             constexpr bool is_natural() const { return true; }
 
+            /** get member @c n_bpu **/
             constexpr std::size_t n_bpu() const { return n_bpu_; }
+            /** true if this unit has no dimension **/
             constexpr bool is_dimensionless() const { return n_bpu_ == 0; }
 
+            /** get address of member @c bpu_v **/
             constexpr bpu<Int> * bpu_v() const { return bpu_v_; }
+
             ///@}
 
             /** @defgroup natural-unit-methods **/
             ///@{
+
+            /** construct reciprocal of this unit.
+             *
+             *  For example reciprocal of a newton (abbreviation @c "kg.m.s^-2") is
+             *  a unit with abbreviation @c "kg^-1.m^-1.s^2"
+             **/
             constexpr natural_unit reciprocal() const {
                 natural_unit retval;
 
@@ -95,6 +114,12 @@ namespace xo {
                 return retval;
             }
 
+            /** abbreviation for this unit.
+             *
+             *  Apply as suffix when printing quantities involving this unit.
+             *
+             *  For example @c "mm" for millimeters, or @c "ns" for nanoseconds
+             **/
             constexpr nu_abbrev_type abbrev() const {
                 nu_abbrev_type retval;
 
@@ -107,7 +132,7 @@ namespace xo {
                 return retval;
             }
 
-            /** @brief remove bpu at position @p p **/
+            /** remove bpu at position @p p **/
             constexpr void remove_bpu(size_t p) {
                 for (std::size_t i = p; i+1 < n_bpu_; ++i)
                     bpu_v_[i] = bpu_v_[i+1];
@@ -115,20 +140,44 @@ namespace xo {
                 --n_bpu_;
             }
 
+            /** append @p bpu to this unit in-place
+             *
+             *  Require @c bpu.native_dim does not match any existing member of @ref bpu_v_
+             **/
             constexpr void push_back(const bpu<Int> & bpu) {
                 if (n_bpu_ < n_dim)
                     bpu_v_[n_bpu_++] = bpu;
             }
+
             ///@}
 
             /** @addtogroup natural-unit-access-methods **/
             ///@{
+
+            /** get bpu for dimension @p d.  if d isn't present,  construct bpu with 0 power **/
+            constexpr bpu<Int> lookup_dim(dimension d) const {
+                for (std::size_t i = 0, n = n_bpu(); i<n; ++i) {
+                    if (d == bpu_v_[i].native_dim())
+                        return bpu_v_[i];
+                }
+
+                /** not found,  return sentinel **/
+                return bpu<Int>(d, scalefactor_ratio_type(0), power_ratio_type(0));
+            }
+
+            /** get element @p i of @ref bpu_v_ **/
             constexpr bpu<Int> & operator[](std::size_t i) { return bpu_v_[i]; }
+            /** get element @p i of @ref bpu_v_ (const version) **/
             constexpr const bpu<Int> & operator[](std::size_t i) const { return bpu_v_[i]; }
+
             ///@}
 
             /** @defgroup natural-unit-conversion-methods **/
             ///@{
+
+            /** convert to equivalent unit using scalefactor representation @p Int2 instead of
+             *  @ref ratio_int_type
+             **/
             template <typename Int2>
             constexpr natural_unit<Int2> to_repr() const {
                 natural_unit<Int2> retval;
@@ -139,37 +188,57 @@ namespace xo {
 
                 return retval;
             }
+
             ///@}
 
         public: /* public members so instance can be non-type template parameter (is a structural type) */
             /** @defgroup natural-unit-instance-vars **/
             ///@{
-            /** @brief the number of occupied slots in @c bpu_v_ **/
+
+            /** the number of occupied slots in @c bpu_v_ **/
             std::size_t n_bpu_;
 
-            /** @brief storage for basis power units **/
+            /** storage for basis power units **/
             bpu<Int> bpu_v_[n_dim];
+
             ///@}
         };
 
+        /** @defgroup natural-unit-comparison-functions natural-unit comparison functions **/
+        ///@{
+
+        /** compare natural units @p x, @p y for equality. **/
         template <typename Int>
         constexpr bool
-        operator==(const natural_unit<Int> & x, const natural_unit<Int> & y) {
+        operator==(const natural_unit<Int> & x,
+                   const natural_unit<Int> & y)
+        {
             if (x.n_bpu() != y.n_bpu())
                 return false;
 
-            for (std::size_t i = 0, n = x.n_bpu(); i<n; ++i)
-                if (x[i] != y[i])
+            /* does x contain any dimension that isn't present in y? */
+            for (std::size_t i = 0, n = x.n_bpu(); i<n; ++i) {
+                const bpu<Int> & xi = x[i];
+                if (xi != y.lookup_dim(xi.native_dim()))
                     return false;
+            }
+
+            /* if all bpu's x[i] match something from y,  then x,y must be equal
+             * since they each have the same number of bpu's
+             */
 
             return true;
         }
 
+        /** compare natural units @p x, @p y for inequality **/
         template <typename Int>
         constexpr bool
-        operator!=(const natural_unit<Int> & x, const natural_unit<Int> & y) {
+        operator!=(const natural_unit<Int> & x,
+                   const natural_unit<Int> & y) {
             return !(x == y);
         }
+
+        ///@}
 
         namespace detail {
             /**
@@ -387,6 +456,11 @@ namespace xo {
 
         } /*namespace detail*/
 
+        /** @brief namespace for constants representing basis natural units
+         *
+         *  Application code will typically use parallel scaled-unit constants
+         *  (see the 'u' namespace in 'scaled_unit.hpp')
+         **/
         namespace nu {
             constexpr auto dimensionless = natural_unit<std::int64_t>();
 
@@ -445,7 +519,8 @@ namespace xo {
             constexpr auto volatility_30d = natural_unit<std::int64_t>::from_bu(detail::bu::month, power_ratio_type(-1,2));
             constexpr auto volatility_250d = natural_unit<std::int64_t>::from_bu(detail::bu::year250, power_ratio_type(-1,2));
             constexpr auto volatility_360d = natural_unit<std::int64_t>::from_bu(detail::bu::year360, power_ratio_type(-1,2));
-            constexpr auto volatility_365d = natural_unit<std::int64_t>::from_bu(detail::bu::year365, power_ratio_type(-1,2));        } /*namespace nu*/
+            constexpr auto volatility_365d = natural_unit<std::int64_t>::from_bu(detail::bu::year365, power_ratio_type(-1,2));
+        } /*namespace nu*/
     } /*namespace qty*/
 } /*namespace xo*/
 

@@ -15,7 +15,7 @@ namespace xo {
          *
          *  @brief represent a scalar quantity with associated units.
          *
-         *  - @p NaturalUnit is a non-type template parameter
+         *  - @p NaturalUnit is a non-type template paramoeter
          *    identifying a unit used for this quantity.
          *    In *xo-unit* it will be an instance of @c natural_unit
          *  - @p Repr is a type used to represent a multiple
@@ -93,19 +93,19 @@ namespace xo {
             }
             ///@}
 
+            /** @defgroup quantity-unit-conversion **/
+            ///@{
+
+            /** create equivalent quantity using scale representation @p Repr2 instead of @c Repr **/
             template <typename Repr2>
             constexpr
             auto with_repr() const {
                 return quantity<s_scaled_unit, Repr2>(scale_);
             }
 
-            /** @defgroup quantity-unit-conversion **/
-            ///@{
-            /* parallel implementation to Quantity<Repr, Int>::rescale(),
-             * except that NaturalUnit2 is a compile-time-only template-argument
-             *
-             * NOTE: constexpr as long as no fractional units involved.
-             */
+            /** create equivalent quantity expressed as a multiple of @p NaturalUnit2
+             *  instead of @ref s_unit
+             **/
             template <natural_unit<ratio_int_type> NaturalUnit2>
             constexpr
             auto rescale() const {
@@ -126,6 +126,9 @@ namespace xo {
                 }
             }
 
+            /** create equivalent quantity expressed as as multiple of @p ScaledUnit2
+             *  instead of @ref s_unit
+             **/
             template <scaled_unit<ratio_int_type> ScaledUnit2>
             constexpr
             auto rescale_ext() const {
@@ -156,6 +159,10 @@ namespace xo {
             }
             ///@}
 
+            /** create quantity representing this amount multiplied by dimensionless value @p x
+             *
+             *  @pre x must be an arithmetic type such as @c int or @c double
+             **/
             template <typename Dimensionless>
             requires std::is_arithmetic_v<Dimensionless>
             constexpr auto scale_by(Dimensionless x) const {
@@ -173,7 +180,7 @@ namespace xo {
 
             /** @defgroup quantity-comparison-support **/
             ///@{
-            /* parallel implementation to Quantity<Repr, Int> */
+            /** compare two @c quantity instances, under three-way comparison **/
             template <typename Quantity2>
             static constexpr
             auto compare(const quantity &x, const Quantity2 & y) {
@@ -189,19 +196,21 @@ namespace xo {
             // operator*=
             // operator/=
 
+            /** **/
             constexpr nu_abbrev_type abbrev() const {
                 return s_scaled_unit.natural_unit_.abbrev();
             }
 
             /** @defgroup quantity-assignment quantity assignment operators **/
             ///@{
-            /** @brief assignment from quantity with identical units **/
+
+            /** assignment from quantity with identical units **/
             quantity & operator=(const quantity & x) {
                 this->scale_ = x.scale_;
                 return *this;
             }
 
-            /** @brief assignment from quantity with compatible units **/
+            /** assignment from quantity with compatible units **/
             template <typename Q2>
             requires(quantity_concept<Q2>
                      && Q2::always_constexpr_unit)
@@ -212,43 +221,67 @@ namespace xo {
 
                 return *this;
             }
+
             ///@}
 
             /** @defgroup quantity-unit-conversion **/
             ///@{
+
+            /** */
             template <typename Q2>
             requires(quantity_concept<Q2>
                      && Q2::always_constexpr_unit)
             constexpr operator Q2() const {
                 return this->template rescale_ext<Q2::s_scaled_unit>().template with_repr<typename Q2::repr_type>();
             }
-            ///@}
 
+            /** For dimensionless quantities: convert to underlying scale value
+             *
+             *  Not present for dimensioned quantities.
+             **/
             constexpr operator Repr() const
                 requires (ScaledUnit.is_dimensionless())
                 {
                     return scale_;
                 }
 
+            ///@}
+
         public: /* need public members so that instance can be a non-type template parameter (is a structural type) */
             /** @defgroup quantity-static-vars **/
             ///@{
+
             /** @brief unit for quantity of this type. Determined at compile-time **/
             static constexpr scaled_unit<ratio_int_type> s_scaled_unit = ScaledUnit;
+
             ///@}
 
             /** @defgroup quantity-instance-vars **/
             ///@{
-            /** @brief quantity represents this multiple of @ref s_scaled_unit **/
+
+            /** quantity represents this multiple of @ref s_scaled_unit
+             *
+             *  Public to avoid disqualifying @c quantity as a 'structural type';
+             *  prerequisite for using a @c quantity instance as a non-type template parameter
+             **/
             Repr scale_ = Repr{};
+
             ///@}
         };
 
+        ///@{
+
+        /**
+         *
+         **/
         template <typename Quantity, typename Int, typename Int2x>
         constexpr auto
-        rescale(const Quantity & x, const scaled_unit<Int, Int2x> & su) {
+        rescale(const Quantity & x,
+                const scaled_unit<Int, Int2x> & su) {
             return x.template rescale<su>();
         }
+
+        ///@}
 
         namespace detail {
             struct quantity_util {
@@ -451,29 +484,49 @@ namespace xo {
         namespace qty {
             // ----- mass -----
 
+            /** create quantity representing @p x picograms of mass, with compile-time unit representation **/
             template <typename Repr>
             inline constexpr auto picograms(Repr x) { return quantity<u::picogram, Repr>(x); }
+
+            /** create quantity representing @p x nanograms of mass, with compile-time unit representation **/
             template <typename Repr>
             inline constexpr auto nanograms(Repr x) { return quantity<u::nanogram, Repr>(x); }
+
+            /** create quantity representing @p x micrograms of mass, with compile-time unit representation **/
             template <typename Repr>
             inline constexpr auto micrograms(Repr x) { return quantity<u::microgram, Repr>(x); }
+
+            /** create quantity representing @p x milligrams of mass, with compile-time unit representation **/
             template <typename Repr>
             inline constexpr auto milligrams(Repr x) { return quantity<u::milligram, Repr>(x); }
+
+            /** create quantity representing @p x grams of mass, with compile-time unit representation **/
             template <typename Repr>
             inline constexpr auto grams(Repr x) { return quantity<u::gram, Repr>(x); }
 
-            /** @brief create a quantity representing @p x kilograms of mass,  with compile-time unit representation **/
+            /** create quantity representing @p x kilograms of mass,  with compile-time unit representation **/
             template <typename Repr>
             inline constexpr auto kilograms(Repr x) { return quantity<u::kilogram, Repr>(x); }
 
+            /** create quantity representing @p x tonnes of mass, with compile-time unit representation **/
             template <typename Repr>
             inline constexpr auto tonnes(Repr x) { return quantity<u::tonne, Repr>(x); }
+
+            /** create quantity representing @p x kilotonnes of mass, with compile-time unit representation **/
             template <typename Repr>
             inline constexpr auto kilotonnes(Repr x) { return quantity<u::kilotonne, Repr>(x); }
+
+            /** create quantity representing @p x megatonnes of mass, with compile-time unit representation **/
             template <typename Repr>
             inline constexpr auto megatonnes(Repr x) { return quantity<u::megatonne, Repr>(x); }
+
+            /** create quantity representing @p x gigatonnes of mass, with compile-time unit representation **/
             template <typename Repr>
             inline constexpr auto gigatonnes(Repr x) { return quantity<u::gigatonne, Repr>(x); }
+        }
+
+        namespace qty {
+            // ----- mass constants ----
 
             /** @brief a quantity representing 1 picogram of mass, with compile-time unit representation **/
             static constexpr auto picogram = picograms(1);
@@ -496,46 +549,74 @@ namespace xo {
         namespace qty {
             // ----- distance -----
 
+            /** create quantity representing @p x picometers of distance, with compile-time unit operations **/
             template <typename Repr>
             inline constexpr auto picometers(Repr x) { return quantity<u::picometer, Repr>(x); }
+
+            /** create quantity representing @p x nanometers of distance, with compile-time unit operations **/
             template <typename Repr>
             inline constexpr auto nanometers(Repr x) { return quantity<u::nanometer, Repr>(x); }
+
+            /** create quantity representing @p x micrometers of distance, with compile-time unit operations **/
             template <typename Repr>
             inline constexpr auto micrometers(Repr x) { return quantity<u::micrometer, Repr>(x); }
+
+            /** create quantity representing @p x millimeters of distance, with compile-time unit operations **/
             template <typename Repr>
             inline constexpr auto millimeters(Repr x) { return quantity<u::millimeter, Repr>(x); }
+
+            /** create quantity representing @p x meters of distance, with compile-time unit operations **/
             template <typename Repr>
             inline constexpr auto meters(Repr x) { return quantity<u::meter, Repr>(x); }
+
+            /** create quantity representing @p x kilometers of distance, with compile-time unit operations **/
             template <typename Repr>
             inline constexpr auto kilometers(Repr x) { return quantity<u::kilometer, Repr>(x); }
+
+            /** create quantity representing @p x megameters of distance, with compile-time unit operations **/
             template <typename Repr>
             inline constexpr auto megameters(Repr x) { return quantity<u::megameter, Repr>(x); }
+
+            /** create quantity representing @p x gigameters of distance,
+             *  with compile-time unit operations
+             **/
             template <typename Repr>
             inline constexpr auto gigameters(Repr x) { return quantity<u::gigameter, Repr>(x); }
 
+            /** create quantity representing @p x light-seconds of distance,
+             *  with compile-time unit operations.
+             **/
             template <typename Repr>
             inline constexpr auto lightseconds(Repr x) { return quantity<u::lightsecond, Repr>(x); }
+
+            /** create quantity representing @p x astronomical units of distance,
+             *  with compile-time unit representation
+             **/
             template <typename Repr>
             inline constexpr auto astronomicalunits(Repr x) { return quantity<u::astronomicalunit, Repr>(x); }
 
-            /** @brief create quantity representing @p x inches of distance, with compile-time unit representation **/
+            /** create quantity representing @p x inches of distance, with compile-time unit representation **/
             template <typename Repr>
             inline constexpr auto inches(Repr x) { return quantity<u::inch, Repr>(x); }
-            /** @brief create quantity representing @p x feet of distance, with compile-time unit representation **/
+            /** create quantity representing @p x feet of distance, with compile-time unit representation **/
             template <typename Repr>
             inline constexpr auto feet(Repr x) { return quantity<u::foot, Repr>(x); }
-            /** @brief create quantity representing @p x yards of distance, with compile-time unit representation **/
+            /** create quantity representing @p x yards of distance, with compile-time unit representation **/
             template <typename Repr>
             inline constexpr auto yards(Repr x) { return quantity<u::yard, Repr>(x); }
-            /** @brief create quantity representing @p x statute miles of distance, with compile-time unit representation **/
+            /** create quantity representing @p x statute miles of distance, with compile-time unit representation **/
             template <typename Repr>
             inline constexpr auto miles(Repr x) { return quantity<u::mile, Repr>(x); }
+        }
 
-            /** @brief a quantity representing 1 picometer of distance, with compile-time unit representation **/
+        namespace qty {
+            // ----- distance constants -----
+
+            /** a quantity representing 1 picometer of distance, with compile-time unit representation **/
             static constexpr auto picometer = picometers(1);
-            /** @brief a quantity representing 1 nanometer of distance, with compile-time unit representation **/
+            /** a quantity representing 1 nanometer of distance, with compile-time unit representation **/
             static constexpr auto nanometer = nanometers(1);
-            /** @brief a quantity representing 1 micrometer of distance, with compile-time unit representation **/
+            /** a quantity representing 1 micrometer of distance, with compile-time unit representation **/
             static constexpr auto micrometer = micrometers(1);
             /** @brief a quantity representing 1 millimeter of distance, with compile-time unit representation **/
             static constexpr auto millimeter = millimeters(1);
@@ -558,52 +639,83 @@ namespace xo {
         namespace qty {
             // ----- time -----
 
+            /** create quantity representing @p x picoseconds of time, with compile-time unit operations **/
             template <typename Repr>
             inline constexpr auto picoseconds(Repr x) { return quantity<u::picosecond, Repr>(x); }
+
+            /** create quantity representing @p x nanoseconds of time, with compile-time unit operations **/
             template <typename Repr>
             inline constexpr auto nanoseconds(Repr x) { return quantity<u::nanosecond, Repr>(x); }
+
+            /** create quantity representing @p x microseconds of time, with compile-time unit operations **/
             template <typename Repr>
             inline constexpr auto microseconds(Repr x) { return quantity<u::microsecond, Repr>(x); }
 
+            /** create quantity representing @p x milliseconds of time, with compile-time unit operations **/
             template <typename Repr>
             inline constexpr auto milliseconds(Repr x) { return quantity<u::millisecond, Repr>(x); }
 
-            /** @brief create quantity representing @p x seconds of time, with compile-time unit representation **/
+            /** create quantity representing @p x seconds of time, with compile-time unit operations **/
             template <typename Repr>
-
             inline constexpr auto seconds(Repr x) { return quantity<u::second, Repr>(x); }
 
-            /** @brief create quantity representing @p x minutes of time, with compile-time unit representation **/
+            /** create quantity representing @p x minutes of time, with compile-time unit operations **/
             template <typename Repr>
             inline constexpr auto minutes(Repr x) { return quantity<u::minute, Repr>(x); }
 
-            /** @brief create quantity representing @p x hours of time, with compile-time unit representation **/
+            /** create quantity representing @p x hours of time, with compile-time unit operations **/
             template <typename Repr>
             inline constexpr auto hours(Repr x) { return quantity<u::hour, Repr>(x); }
 
-            /** @brief create quantity representing @p x days of time, with compile-time unit representation **/
+            /** create quantity representing @p x exactly-24-hour days of time, with compile-time unit operations **/
             template <typename Repr>
             inline constexpr auto days(Repr x) { return quantity<u::day, Repr>(x); }
 
+            /** creeate quantity representing @p x weeks of time,
+             *  with compile-time unit operations.  Each week has exactly 7 24-hour days.
+             **/
             template <typename Repr>
             inline constexpr auto weeks(Repr x) { return quantity<u::week, Repr>(x); }
+
+            /** create quantity representing @p x months of time,
+             *  with compile-time unit operations.  Each month has exactly 30 24-hour days
+             **/
             template <typename Repr>
             inline constexpr auto months(Repr x) { return quantity<u::month, Repr>(x); }
+
+            /** create quantity representing @p x years of time,
+             *  with compile-time unit operations.  Each year has exactly 365.25 24-hour days
+             **/
             template <typename Repr>
             inline constexpr auto years(Repr x) { return quantity<u::year, Repr>(x); }
+
+            /** create quantity representing @p x '250-day years' of time.
+             *  250 represents approximate number of business days in a calendar year.
+             **/
             template <typename Repr>
             inline constexpr auto year250s(Repr x) { return quantity<u::year250, Repr>(x); }
+
+            /** create quantity representing @p x '360-day years' of time **/
             template <typename Repr>
             inline constexpr auto year360s(Repr x) { return quantity<u::year360, Repr>(x); }
+
+            /** create quantity representing @p x '365-day years' of time **/
             template <typename Repr>
             inline constexpr auto year365s(Repr x) { return quantity<u::year365, Repr>(x); }
+        }
+
+        namespace qty {
+            // ----- time constants ----
 
             /** @brief a quantity representing 1 second of time, with compile-time unit representation **/
             static constexpr auto second = seconds(1);
+
             /** @brief a quantity representing 1 minute of time, with compile-time unit representation **/
             static constexpr auto minute = minutes(1);
+
             /** @brief a quantity representing 1 hour of time, with compile-time unit representation **/
             static constexpr auto hour = hours(1);
+
             /** @brief a quantity representing 1 day of time (exactly 24 hours), with compile-time unit representation **/
             static constexpr auto day = days(1);
         } /*namespace qty*/
@@ -615,12 +727,19 @@ namespace xo {
              * volatility ~ sqrt(variance),  has dimension 1/sqrt(t)
              */
 
+            /** create quantity representing @p x units of 30-day volatility, with compile-time unit representation **/
             template <typename Repr>
             inline constexpr auto volatility_30d(Repr x) { return quantity<u::volatility_30d, Repr>(x); }
+
+            /** create quantity representing @p x units of 250-day volatility, with compile-time unit representation **/
             template <typename Repr>
             inline constexpr auto volatility_250d(Repr x) { return quantity<u::volatility_250d, Repr>(x); }
+
+            /** create quantity representing @p x units of 360-day volatility, with compile-time unit representation **/
             template <typename Repr>
             inline constexpr auto volatility_360d(Repr x) { return quantity<u::volatility_360d, Repr>(x); }
+
+            /** create quantity representing @p x units of 365-day volatility, with compile-time unit representation **/
             template <typename Repr>
             inline constexpr auto volatility_365d(Repr x) { return quantity<u::volatility_365d, Repr>(x); }
         } /*namespace qty*/

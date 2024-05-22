@@ -33,15 +33,15 @@ runtime (since we can't construct new c++ types at runtime).
    install
    examples
    implementation
-   development
-   unit-quantities
    quantity-reference
-   scaled-unit-class
+   xquantity-reference
+   scaled-unit-reference
    natural-unit-class
    bpu-class
    bu-store-class
    basis-unit-reference
    dimension-enum
+   development
 
 Indices and Tables
 ------------------

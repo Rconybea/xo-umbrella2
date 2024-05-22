@@ -1,9 +1,23 @@
 .. _implementation:
 
-Abstraction Tower
-=================
+Components
+==========
 
-Abstraction tower for *xo-unit* components.
+Library dependencies for *xo-unit*:
+
+.. ditaa::
+
+    +-----------------+
+    |     xo_unit     |
+    +-----------------+
+    |    xo_ratio     |
+    +-----------------+
+    |  xo_flatstring  |
+    +-----------------+
+
+``xo-unit`` also depends on ``xo-cmake`` macros.
+
+Abstraction tower for *xo-unit* components:
 
 .. ditaa::
 
@@ -25,13 +39,31 @@ Abstraction tower for *xo-unit* components.
 
 - :doc:`quantity<quantity-reference>`:
 
-  A quantity with compile-time unit work
+  A quantity with unit checking and conversion done at compile-time
 
-- xquantity:
+    .. code-block:: cpp
 
-  A quantity with unit work deferred until runtime
+        #include "xo/unit/quantity.hpp"
+        auto q1 = xo::qty::qty::kilometers(7.5);
+
+- :doc:`xquantity<xquantity-reference>`:
+
+  A quantity with unit checking and conversion done at run-time.
+  This is useful if unit information isn't known at compile time, for example
+  if reading units from console input.
+
+    .. code-block:: cpp
+
+        #include "xo/unit/xquantity.hpp"
+        xquantity qty1(7.5, xo::qty::u::foot)
+
 
 - :doc:`scaled_unit<scaled-unit-class>`:
+
+    .. code-block:: cpp
+
+        #include "xo/unit/scaled_unit.hpp"
+        auto u = xo::qty::u::millimeter;
 
   A unit involving zero or more dimensions, and associated conversion factor.
 
@@ -45,6 +77,11 @@ Abstraction tower for *xo-unit* components.
 
 - :doc:`natural_unit<natural-unit-class>`
 
+    .. code-block:: cpp
+
+        #include "xo/unit/natural_unit.hpp"
+        auto u = xo::qty::nu::millimeter;
+
   A unit involving zero or more dimensions, and at most one scale per dimension.
   A quantity instance is always represented as a dimensionless multiple
   of a natural unit
@@ -56,24 +93,46 @@ Abstraction tower for *xo-unit* components.
 
   A rational (usually integer) power of a basis unit. Has a single dimension.
 
+    .. code-block:: cpp
+
+        #include "xo/unit/bpu.hpp"
+        xo::qty::bpu(xo::qty::detail::bu::millimeter,
+                     xo::qty::power_ratio_type(2));  // mm^2
+
 - :doc:`bu_store<bu-store-class>`
 
   Associates basis units with abbreviations.
+  Abbreviations used to decorate printed quantities.
 
   For example ``bu::kilogram`` => ``"kg"``
+
+    .. code-block:: cpp
+
+        #include "xo/unit/bu_store.hpp"
+        xo::qty::bu_abbrev_store.bu_abbrev(xo::qty::detail::bu::picogram); // "pg"
 
 - :doc:`basis_unit<basis-unit-reference>`
 
   A unit with a single dimension and scale.
 
+    .. code-block:: cpp
+
+        #include "xo/unit/basis_unit.hpp"
+        auto b = xo::qty::detail::bu::picogram;
+
 - :doc:`dimension<dimension-enum>`
 
   identifies a dimension, such as mass or time.
 
+    .. code-block:: cpp
+
+        #include "xo/unit/dimension.hpp"
+        auto d = xo::qty::dimension::mass;
+
 Representation
 ==============
 
-Worked example using :cpp:class:`xo::qty::quantity`
+Worked example using :cpp:class:`xo::qty::quantity`.
 
 .. code-block:: cpp
     :linenos:
@@ -81,10 +140,13 @@ Worked example using :cpp:class:`xo::qty::quantity`
 
     #include "xo/unit/quantity.hpp"
     ...
+    using xo::qty;
     namespace q = xo::qty::qty;
 
     // 7.55km.min^-2
     quantity qty1 = 7.55 * q::kilometer / (q::minute * q::minute);
+
+Note: in diagrams below, components with pale blue background are discarded before runtime
 
 .. uml::
     :caption: representation for quantity 7.55km.min^-2
@@ -94,7 +156,7 @@ Worked example using :cpp:class:`xo::qty::quantity`
     object qty1<<quantity>>
     qty1 : scale = 7.55
 
-    rectangle {
+    rectangle #e0f0ff {
 
     object km_per_min2<<natural_unit>>
     km_per_min2 : n_bpu = 2
@@ -132,7 +194,7 @@ Worked example using :cpp:class:`xo::qty::quantity`
     object qty2<<quantity>>
     qty2 : scale = 123
 
-    rectangle {
+    rectangle #e0f0ff {
 
     object ng_unit<<natural_unit>>
     ng_unit : n_bpu = 1
@@ -163,7 +225,7 @@ Worked example using :cpp:class:`xo::qty::quantity`
     object qty3<<quantity>>
     qty3 : scale = 928.65
 
-    rectangle {
+    rectangle #e0f0ff {
 
       object ng_km_min2_unit<<natural_unit>>
       ng_km_min2_unit : n_bpu = 3
@@ -214,7 +276,7 @@ Worked example using :cpp:class:`xo::qty::quantity`
     object qty3b<<quantity>>
     qty3b : scale = 2.59758e-10
 
-    rectangle {
+    rectangle #e0f0ff {
 
       object kg_m_s2_unit<<natural_unit>>
       kg_m_s2_unit : n_bpu = 3

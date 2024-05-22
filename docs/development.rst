@@ -1,12 +1,12 @@
 .. _development:
 
+Development
+===========
+
 Miscellaneous development notes for *xo-unit*.
 
-How To...
-=========
-
-Add Basis Unit
---------------
+Addding a Basis Unit
+--------------------
 
 To add a basis unit for an existing dimension:
 

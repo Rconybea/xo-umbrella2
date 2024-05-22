@@ -1,7 +1,7 @@
-# xo-unit/example/ex3/CMakeLists.txt
+# xo-unit/example/ex8/CMakeLists.txt
 
-set(SELF_EXE xo_unit_ex3)
-set(SELF_SRCS ex3.cpp)
+set(SELF_EXE xo_unit_ex8)
+set(SELF_SRCS ex8.cpp)
 
 if (XO_ENABLE_EXAMPLES)
     xo_add_executable(${SELF_EXE} ${SELF_SRCS})

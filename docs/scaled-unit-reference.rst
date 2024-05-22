@@ -1,9 +1,9 @@
-.. _basis-unit-reference:
+.. _scaled-unit-reference:
 
-Basis Unit Reference
-====================
+Scaled Unit Reference
+=====================
 
-Built-in named units for each native dimension
+A dimensionless multiple of a :doc:`natural_unit<natural-unit-class>`
 
 .. ditaa::
     :--scale: 0.85
@@ -11,7 +11,7 @@ Built-in named units for each native dimension
     +----------------+---------------+
     |     quantity   |   xquantity   |
     +----------------+---------------+
-    |          scaled_unit           |
+    |cYEL      scaled_unit           |
     +--------------------------------+
     |         natural_unit           |
     +--------------------------------+
@@ -19,7 +19,7 @@ Built-in named units for each native dimension
     +----------------+               |
     |    bu_store    |               |
     +----------------+---------------+
-    |cYEL       basis_unit           |
+    |           basis_unit           |
     +--------------------------------+
     |            dimension           |
     +--------------------------------+
@@ -27,5 +27,5 @@ Built-in named units for each native dimension
 .. toctree::
    :maxdepth: 1
 
-   Basis Unit Class <basis-unit-class>
-   basis-unit-constants
+   Scaled Unit Class <scaled-unit-class>
+   scaled-unit-constants

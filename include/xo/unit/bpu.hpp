@@ -41,7 +41,7 @@ namespace xo {
                 }
             }
 
-            /** @brief construct suffix abbreviation for a basis-power-unit **/
+            /** construct suffix abbreviation for a basis-power-unit **/
             static constexpr bpu_abbrev_type
             bpu_abbrev(dim native_dim,
                        const scalefactor_ratio_type & scalefactor,
@@ -67,23 +67,29 @@ namespace xo {
         public:
             /** @defgroup bpu-ctors bpu constructors **/
             ///@{
+            /** default constructor.  creates dimensionless bpu,
+             *  representing zero'th power of sentinel basis unit
+             **/
             constexpr bpu() = default;
+            /** construct @c bpu representing exponent @p power of basis unit @p bu **/
             constexpr bpu(const basis_unit & bu,
                           const power_ratio_type & power)
                 : bu_{bu},
                   power_{power}
                 {}
+            /** construct @c bpu representing exponent @p power of @c basis_unit(native_dim,scalefactor) **/
             constexpr bpu(dim native_dim,
                           const scalefactor_ratio_type & scalefactor,
                           const power_ratio_type & power)
                 : bu_(native_dim, scalefactor),
                   power_{power}
                 {}
-            ///@}
 
+            /** construct bpu representing basis unit @p bu, i.e. with unit exponent **/
             static constexpr bpu<Int> unit_power(const basis_unit & bu) {
                 return bpu<Int>(bu, power_ratio_type(1,1));
             }
+            ///@}
 
             /** @defgroup bpu-access-methods bpu access methods **/
             ///@{
@@ -99,7 +105,7 @@ namespace xo {
 
             /** @defgroup bpu-methods **/
             ///@{
-            /** @brief abbreviation for this dimension
+            /** abbreviation for this dimension
              *
              *  @code
              *  bpu<int64_t>(dim::time,
@@ -114,7 +120,7 @@ namespace xo {
                                               power_);
                 }
 
-            /** @brief for bpu @c x, @c x.reciprocal() represents dimension of @c 1/x
+            /** for bpu @c x, @c x.reciprocal() represents dimension of @c 1/x
              *
              *  Example:
              *  @code
@@ -129,7 +135,7 @@ namespace xo {
                 return bpu<Int>(bu_.native_dim(), bu_.scalefactor(), power_.negate());
             }
 
-            /** @brief construct bpu representing the same unit, but using @c Int2 to represent exponenct **/
+            /** construct bpu representing the same unit, but using @c Int2 to represent exponenct **/
             template <typename Int2>
             constexpr bpu<Int2> to_repr() const {
                 return bpu<Int2>(this->native_dim(),
@@ -141,21 +147,29 @@ namespace xo {
         public: /* need public members so that a basis_unit instance can be a non-type template parameter (a structural type) */
             /** @defgroup bpu-instance-vars **/
             ///@{
-            /** @brief this bpu represent a power of this basis unit **/
+            /** this @c bpu represent a power of basis unit @c bu.
+             *
+             *  Public to avoid disqualifying @c bpu as a 'structural type'.
+             **/
             struct basis_unit bu_;
-            /** @brief this unit represents basis dimension (bu) taken to this power **/
-            power_ratio_type power_;
+            /** this unit represents basis dimension (bu) taken to this power
+             *
+             *  Public to avoid disqualifying @c bpu as a 'structural type'.
+             **/
+            power_ratio_type power_ = {};
             ///@}
         };
 
         /** @defgroup bpu-comparison **/
         ///@{
-        /** @brief compare bpus @p x and @p y for equality **/
+        /** @brief compare bpus @p x and @p y for equality
+         *
+         *  Equality requires that both basis unit and power are equal
+         **/
         template <typename Int>
         inline constexpr bool
         operator==(const bpu<Int> & x, const bpu<Int> & y) {
-            return ((x.native_dim() == y.native_dim())
-                    && (x.scalefactor() == y.scalefactor())
+            return ((x.bu() == y.bu())
                     && (x.power_ == y.power_));
         }
 
@@ -163,8 +177,7 @@ namespace xo {
         template <typename Int>
         inline constexpr bool
         operator!=(const bpu<Int> & x, const bpu<Int> & y) {
-            return ((x.native_dim() != y.native_dim())
-                    || (x.scalefactor() != y.scalefactor())
+            return ((x.bu() != y.bu())
                     || (x.power_ != y.power_));
         }
         ///@}

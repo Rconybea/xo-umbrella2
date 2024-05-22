@@ -15,7 +15,7 @@ Units propagate through familiar arithmetic expressions:
 
 .. code-block:: cpp
    :linenos:
-   :emphasize-lines: 15-16
+   :emphasize-lines: 14-15
 
     #include "xo/unit/quantity.hpp"
     #include "xo/unit/quantity_iostream.hpp"
@@ -25,7 +25,6 @@ Units propagate through familiar arithmetic expressions:
     main () {
         namespace q = xo::qty::qty;
         namespace su = xo::qty::su;
-        using xo::qty::quantity;
         using namespace std;
 
         constexpr auto t = q::minutes(2);
@@ -39,7 +38,6 @@ Units propagate through familiar arithmetic expressions:
              << ", d.t^-2: " << a
              << endl;
     }
-
 
 with output:
 
@@ -101,29 +99,50 @@ See ``xo-unit/examples/ex2`` for code below.
    :linenos:
    :emphasize-lines: 10,13,16-17
 
-    ...
+    #include "xo/unit/quantity.hpp"
+    #include "xo/unit/quantity_iostream.hpp"
+    #include <iostream>
 
-    constexpr auto t = q::minutes(2);
-    constexpr auto d = q::kilometers(2.5);
+    int
+    main () {
+        namespace q = xo::qty::qty;
+        namespace u = xo::qty::u;
+        using xo::qty::with_units_from;
+        using xo::qty::with_units;
+        using xo::qty::quantity;
+        using xo::flatstring;
+        using namespace std;
 
-    constexpr auto t2 = t*t;
-    constexpr auto a = d / (t*t);
+        constexpr auto t = q::minutes(2);
+        constexpr auto d = q::kilometers(2.5);
 
-    // 1.
-    constexpr auto a2 = with_units<su::meter / (su::second * su::second)>(a);
+        constexpr auto t2 = t*t;
+        constexpr auto a = d / (t*t);
 
-    // 2.
-    constexpr auto a3 = a.rescale_ext<su::meter / (su::second * su::second)>();
+        cerr << "t: " << t << ", d: " << d
+             << ", t^2: " << t2
+             << ", d.t^-2: " << a
+             << endl;
 
-    // 3.
-    constexpr auto au = q::meter / (q::second * q::second);
-    constexpr auto a4 = with_units_from(a, au); // 3.
+        constexpr auto a2 = with_units<u::meter / (u::second * u::second)>(a);
 
-    static_assert(a2.abbrev() == flatstring("m.s^-2"));
+        static_assert(a2.abbrev() == flatstring("m.s^-2"));
 
-    cerr << "a2: " << a2 << endl;
-    cerr << "a3: " << a3 << endl;
-    cerr << "a4: " << a4 << endl;
+        cerr << "a2: " << a2 << endl;
+
+        constexpr auto a3 = a.rescale_ext<u::meter / (u::second * u::second)>();
+
+        static_assert(a3.abbrev() == flatstring("m.s^-2"));
+
+        cerr << "a3: " << a3 << endl;
+
+        constexpr auto au = q::meter / (q::second * q::second);
+        constexpr auto a4 = with_units_from(a, au);
+
+        static_assert(a4.abbrev() == flatstring("m.s^-2"));
+
+        cerr << "a4: " << a4 << endl;
+    }
 
 with output:
 
@@ -149,13 +168,11 @@ See ``xo-unit/example/ex3`` for code below
     int
     main () {
         namespace q = xo::qty::qty;
-        namespace nu = xo::qty::nu;
-        using xo::qty::with_units;
+        namespace u = xo::qty::u;
         using xo::qty::quantity;
-        using xo::flatstring;
 
-        constexpr quantity<nu::second> t = q::minutes(2);
-        constexpr quantity<nu::meter> d = q::kilometers(2.5);
+        constexpr quantity<u::second> t = q::minutes(2);
+        constexpr quantity<u::meter> d = q::kilometers(2.5);
 
         constexpr auto t2 = t*t;
         constexpr auto a = d / (t*t);
@@ -174,8 +191,8 @@ with output:
 Remarks:
 
 - Assignment to ``t`` converted to representation ``double``.
-  We could have used :code:`quantity<nu::second, int>` to preserve
-  right-hand-side representation.
+  We could have instead used :code:`quantity<u::second, int>` to propagate
+  right-hand-side representation
 
 Scale conversion and arithmetic
 -------------------------------
@@ -185,6 +202,8 @@ xo-unit uses at most one scale for each :term:`basis dimension` associated with 
 When an arithmetic operator encounters basis units involving two different scales,
 the operator will adopt the scale provided by the left-hand argument:
 
+See ``xo-unit/example/ex4`` for code below
+
 .. code-block:: cpp
    :linenos:
    :emphasize-lines: 11
@@ -193,15 +212,13 @@ the operator will adopt the scale provided by the left-hand argument:
     #include <iostream>
 
     int main() {
-        namespace u = xo::unit;
-        namespace qty = xo::units::qty;
-        using namespace std;
+        namespace q = xo::qty::qty;
 
         auto t1 = qty::milliseconds(1);
         auto t2 = qty::minutes(1);
         auto p = t1 * t2;
 
-        cerr << "t1: " << t1 << ", t2: " << t2 << ", p: " << p << endl;
+        std::cerr << "t1: " << t1 << ", t2: " << t2 << ", p: " << p << std::endl;
     }
 
 with output:
@@ -210,8 +227,11 @@ with output:
 
     t1: 1ms, t2: 1min, t1*t2: 60000ms^2
 
+
 Dimensionless quantities unwrap implicitly
 ------------------------------------------
+
+Conversely,  compiler rejects attempt to implictly unwrap a dimensioned quantity.
 
 See ``xo-unit/examples/ex4`` for code below.
 
@@ -237,13 +257,10 @@ See ``xo-unit/examples/ex4`` for code below.
 
         static_assert(std::same_as<static_cast<double>(r1), double>);
 
-        // static_assert fails b/c static_cast only available for dimensionless quantity
-        //static_assert(std::same_as<decltype(static_cast<double>(t2)), double>);
-
         // r1_value: assignment compiles,  since r1 dimensionless
         double r1_value = r1;
 
-        // r2_value: assignment won't compile,  'cannot convert' error
+        // r2_value: bad assignment won't compile,  'cannot convert' error
         //double r2_value = t2;
 
         std::cerr << "t1: " << t1 << ", t2: " << t2 << ", t1/t2: " << r1_value << std::endl;
@@ -273,18 +290,19 @@ See ``xo-unit/examples/ex6`` for code below
    :emphasize-lines: 15
 
     #include "xo/unit/quantity.hpp"
+    #include "xo/unit/quantity_iostream.hpp"
     #include <iostream>
 
     int
     main () {
         namespace u = xo::unit::units;
-        namespace qty = xo::unit::qty;
+        namespace q = xo::unit::qty;
         using namespace std;
 
         /* 20% volatility over 250 days (approx number of trading days in one year) */
-        auto q1 = qty::volatility250d(0.2);
+        auto q1 = q::volatility_250d(0.2);
         /* 10% volatility over 30 days */
-        auto q2 = qty::volatility30d(0.1);
+        auto q2 = q::volatility_30d(0.1);
 
         auto sum = q1 + q2;
         auto prod = q1 * q2;
@@ -306,3 +324,43 @@ with output:
     q2: 0.1mo^(-1/2)
     q1+q2: 0.54641yr360^(-1/2)
     q1*q2: 0.069282yr360^-1
+
+
+Dynamic dimension
+-----------------
+
+If the dimension (or units) associated with a quantity are not known at compile-time,
+use ``xo::qty::xquantity`` instead of ``xo::qty::quantity``.
+
+See ``xo-unit/example/ex8`` for code below
+
+.. code-block:: cpp
+   :linenos:
+   :emphasize-lines: 10-12
+
+    #include "xo/unit/xquantity.hpp"
+    #include "xo/unit/xquantity_iostream.hpp"
+    #include <iostream>
+
+    int
+    main () {
+        using namespace xo::qty;
+        namespace u = xo::qty::u;
+
+        xquantity qty1(7, u::foot);
+        xquantity qty2(6.0, u::inch);
+        xquantity qty3 = qty1 + qty2;
+
+        std::cerr << "qty1: " << qty1 << std::endl;
+        std::cerr << "qty2: " << qty2 << std::endl;
+        std::cerr << "qty3: " << qty3 << std::endl;
+
+        /* rescale to mm */
+        xquantity res = qty3.rescale(xo::qty::nu::millimeter);
+
+        /* 2286mm */
+        std::cerr << "res: " << res << std::endl;
+    }
+
+Here ``u::foot`` and ``u::inch`` are literals,
+but they could have been read from console input or another runtime-only context.

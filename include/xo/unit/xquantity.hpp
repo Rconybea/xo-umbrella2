@@ -48,6 +48,16 @@ namespace xo {
             constexpr xquantity(Repr scale,
                                 const natural_unit<Int> & unit)
                 : scale_{scale}, unit_{unit} {}
+            constexpr xquantity(Repr scale,
+                                const scaled_unit<Int> & unit)
+                :
+                scale_(scale
+                       * unit.outer_scale_factor_.template convert_to<double>()
+                       * ((unit.outer_scale_sq_ == 1.0)
+                          ? 1.0
+                          : ::sqrt(unit.outer_scale_sq_))
+                    ),
+                  unit_{unit.natural_unit_} {}
 
             static constexpr bool always_constexpr_unit = false;
 

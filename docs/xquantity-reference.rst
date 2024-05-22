@@ -1,15 +1,12 @@
-.. _basis-unit-reference:
+.. _xquantity-reference:
 
-Basis Unit Reference
-====================
-
-Built-in named units for each native dimension
+Xquantity Reference
+===================
 
 .. ditaa::
-    :--scale: 0.85
 
     +----------------+---------------+
-    |     quantity   |   xquantity   |
+    |     quantity   |cYEL xquantity |
     +----------------+---------------+
     |          scaled_unit           |
     +--------------------------------+
@@ -19,13 +16,12 @@ Built-in named units for each native dimension
     +----------------+               |
     |    bu_store    |               |
     +----------------+---------------+
-    |cYEL       basis_unit           |
+    |           basis_unit           |
     +--------------------------------+
     |            dimension           |
     +--------------------------------+
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
-   Basis Unit Class <basis-unit-class>
-   basis-unit-constants
+   xquantity-class
