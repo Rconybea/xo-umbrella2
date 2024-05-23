@@ -11,7 +11,7 @@ A dimensionless multiple of a :doc:`natural_unit<natural-unit-class>`
     +----------------+---------------+
     |     quantity   |   xquantity   |
     +----------------+---------------+
-    |cYEL      scaled_unit           |
+    |cBLU      scaled_unit           |
     +--------------------------------+
     |         natural_unit           |
     +--------------------------------+

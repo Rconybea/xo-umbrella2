@@ -4,9 +4,10 @@ Quantity Reference
 ==================
 
 .. ditaa::
+    :--scale: 0.85
 
     +----------------+---------------+
-    |cYEL quantity   |   xquantity   |
+    |cBLU quantity   |   xquantity   |
     +----------------+---------------+
     |          scaled_unit           |
     +--------------------------------+
@@ -27,3 +28,4 @@ Quantity Reference
    quantity-class
    quantity-factoryfunctions
    quantity-unitvars
+   quantity-source-code

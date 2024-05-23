@@ -3,7 +3,7 @@
 Scaled Unit Constants
 =====================
 
-Built-in unit constants.
+Built-in unit constants, for use with conversions
 
 Context
 -------
@@ -14,7 +14,7 @@ Context
     +----------------+---------------+
     |     quantity   |   xquantity   |
     +----------------+---------------+
-    |cYEL      scaled_unit           |
+    |cBLU      scaled_unit           |
     +--------------------------------+
     |         natural_unit           |
     +--------------------------------+

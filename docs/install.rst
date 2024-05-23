@@ -7,25 +7,34 @@ Install
 =======
 
 ``xo-unit`` uses supporting header-only libraries ``xo-ratio`` and ``xo-flatstring``.
-All three are on github:
+and (optionally) cmake macros ``xo-cmake``.  These are on github:
 
-- `xo-unit source`_
-- `xo-ratio source`_
-- `xo-flatstring source`_
+- `xo-unit source`_ (constexpr quantities, units and dimension-checking)
+- `xo-ratio source`_ (constexpr exact ratios)
+- `xo-flatstring source`_ (constexpr strings)
+- `xo-cmake source`_ (shared cmake macros)
 
 .. _xo-unit source: https://github.com/rconybea/xo-unit
 .. _xo-ratio source: https://github.com/rconybea/xo-ratio
 .. _xo-flatstring source: https://github.com/rconybea/xo-flatstring
+.. _xo-cmake source: https://github.com/rconybea/xo-cmake
+
+`xo-cmake` is nccessary to invoke `xo` cmake build for:
+
+-  site install
+-  example programs
+-  unit tests
+
+Can omit to instead copy `xo_unit`, `xo-ratio` and `xo-flatstring` source trees;
+see instructions below for including as git submodule
 
 Implementation relies on some c++20 features (for example class-instances as template arguments).
 Tested with gcc 12.3, 13.2
 
-``xo-unit`` also relies on sister header-only libraries:
-
-One way to use ``xo-unit`` in a project is to import the source tree directly:
-
 Include as submodule
 --------------------
+
+One way to use ``xo-unit`` in a project is to import the source tree directly:
 
 .. code-block:: bash
 
@@ -50,21 +59,18 @@ to c++ source files that rely on xo-unit
 Ubuntu Install Pattern
 ----------------------
 
-Example instructions (from github actions CI) for build starting from stock ubuntu are in `ubuntu-main.yml`_
-
-.. _ubuntu-main.yml: https://github.com/Rconybea/xo-unit/blob/main/.github/workflows/ubuntu-main.yml
-
+:doc:`Example instructions<ubuntu-github-workflow>` (used for github actions CI) for build starting from stock ubuntu
 
 Installing from source
 ----------------------
 
-Although the xo-unit, xo-ratio and xo-flatstring libraries are header-only,
-they do have a build dependency on shared cmake macros,  and a bootstrap script `xo-cmake-config`.
+Install scripts for `xo-unit`, `xo-ratio` and `xo-flatstring` depend on shared cmake macros
+and a bootstrap script `xo-cmake-config`.
 
 * `xo-cmake`_ source
 
 .. _xo-cmake: https://github.com/rconybea/xo-cmake
-  
+
 Preamble:
 
 .. code-block:: bash
@@ -183,7 +189,7 @@ Preamble:
    git clone https://github.com/rconybea/xo-unit
 
    PREFIX=~/local  # ..or other desired installation prefix
-                
+
 Build and Install `catch2` (assuming ubuntu here):
 
 .. code-block:: bash
@@ -216,7 +222,7 @@ Build and Install `xo-randomgen` (no unit tests yet):
     cmake --build xo-randomgen/.build -j
     cmake --install xo-randomgen/.build
 
-Build, Test and Install `xo-flatstring`:    
+Build, Test and Install `xo-flatstring`:
 
 .. code-block:: bash
 
@@ -255,7 +261,7 @@ To enable building example programs:
 
     cd ~/proj/xo
     cmake -DCMAKE_INSTALL_PREFIX=$PREFIX -DXO_ENABLE_EXAMPLES=1 -B xo-unit/.build -S xo-unit
-    
+
 Run examples from the build directory:
 
 .. code-block:: bash
@@ -288,17 +294,16 @@ Preamble (assuming ubuntu here):
     sudo apt-get install python3-sphinx-rtd-theme
     sudo apt-get install python3-breathe
 
-Build `xo-unit` docs 
+Build `xo-unit` docs
 
 .. code-block:: bash
 
     cd ~/proj/xo
     cmake -DCMAKE_INSTALL_PREFIX=$PREFIX -B xo-unit/.build
-    cmake --build xo-unit/.build -- docs                
+    cmake --build xo-unit/.build -- docs
     cmake --install xo-unit/.build   # if docs built,  installs to $PREFIX/share/doc/xo_unit/html
 
 Supported compilers
 -------------------
 
 * developed with gcc 12.3.0 and gcc 13.2.0;  github CI using gcc 11.4.0 (asof March 2024)
-

@@ -28,7 +28,7 @@ runtime (since we can't construct new c++ types at runtime).
 
 .. toctree::
    :maxdepth: 2
-   :caption: xo-unit contents:
+   :caption: xo-unit contents
 
    install
    examples
@@ -42,10 +42,7 @@ runtime (since we can't construct new c++ types at runtime).
    basis-unit-reference
    dimension-enum
    development
-
-Indices and Tables
-------------------
-
-* :ref:`glossary`
-* :ref:`genindex`
-* :ref:`search`
+   ubuntu-github-workflow
+   glossary
+   genindex
+   search

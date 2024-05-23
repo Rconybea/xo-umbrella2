@@ -9,23 +9,44 @@
 
 namespace xo {
     namespace qty {
-        /** note: does not require unit scaling,  so constexpr with c++23 **/
-        template <typename Dimensionless, typename Quantity>
-        requires std::is_arithmetic_v<Dimensionless> && quantity_concept<Quantity>
+        /** @defgroup quantity-dimensionless-operators **/
+        ///@{
+
+        /** subtract an arithmetic value from a dimensionless quantity **/
+        template <typename Quantity,
+                  typename Dimensionless>
+        requires (quantity_concept<Quantity>
+                  && Quantity::is_dimensionless()
+                  && std::is_arithmetic_v<Dimensionless>)
         constexpr auto
-        operator* (Dimensionless x, const Quantity & y)
+        operator- (const Quantity & x, Dimensionless y)
         {
-            return y.scale_by(x);
+            using repr_type = std::common_type_t<typename Quantity::repr_type, Dimensionless>;
+
+            auto xp = static_cast<repr_type>(x.scale());
+            auto yp = static_cast<repr_type>(y);
+
+            return xp - yp;
         }
 
-        /** note: does not require unit scaling,  so constexpr with c++23 **/
-        template <typename Dimensionless, typename Quantity>
-        requires std::is_arithmetic_v<Dimensionless> && quantity_concept<Quantity>
+        /** subtract a dimensionless quantity from an arithmetic value **/
+        template <typename Dimensionless,
+                  typename Quantity>
+        requires (std::is_arithmetic_v<Dimensionless>
+                  && quantity_concept<Quantity>
+                  && Quantity::is_dimensionless())
         constexpr auto
-        operator* (const Quantity & x, Dimensionless y)
+        operator- (Dimensionless x, const Quantity & y)
         {
-            return x.scale_by(y);
+            using repr_type = std::common_type_t<Dimensionless, typename Quantity::repr_type>;
+
+            auto xp = static_cast<repr_type>(x);
+            auto yp = static_cast<repr_type>(y.scale());
+
+            return xp - yp;
         }
+
+        ///@}
 
         /** note: won't have constexpr result until c++26 (when ::sqrt(), ::pow() are constexpr)
          **/

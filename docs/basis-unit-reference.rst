@@ -19,7 +19,7 @@ Built-in named units for each native dimension
     +----------------+               |
     |    bu_store    |               |
     +----------------+---------------+
-    |cYEL       basis_unit           |
+    |cBLU       basis_unit           |
     +--------------------------------+
     |            dimension           |
     +--------------------------------+

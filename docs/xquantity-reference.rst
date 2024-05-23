@@ -4,9 +4,10 @@ Xquantity Reference
 ===================
 
 .. ditaa::
+    :--scale: 0.85
 
     +----------------+---------------+
-    |     quantity   |cYEL xquantity |
+    |     quantity   |cBLU xquantity |
     +----------------+---------------+
     |          scaled_unit           |
     +--------------------------------+

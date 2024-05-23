@@ -45,6 +45,9 @@ namespace xo {
             ///@{
 
             /** always true for scaled_unit **/
+            static constexpr bool is_scaled_unit_type_v = true;
+
+            /** always true for scaled_unit **/
             constexpr bool is_scaled_unit_type() const { return true; }
 
             /** true iff scaled unit can be faithfully represented by a @ref natural_unit **/

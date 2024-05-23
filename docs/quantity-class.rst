@@ -3,10 +3,16 @@
 Quantity
 ========
 
+Dimensioned quantity with compile-time unit checking/conversion
+
+Context
+-------
+
 .. ditaa::
+    :--scale: 0.85
 
     +----------------+---------------+
-    |cYEL quantity   |   xquantity   |
+    |cBLU quantity   |   xquantity   |
     +----------------+---------------+
     |          scaled_unit           |
     +--------------------------------+
@@ -36,15 +42,37 @@ Quantity
 
     rectangle constexpr #e0f0ff {
 
-    object unit<<natural_unit>>
+    object unit<<scaled_unit>>
+    unit : is_natural() = true
 
-    qty1 o-- unit : s_unit (static constexpr)
+    qty1 o-- unit : s_scaled_unit (static constexpr)
 
     }
 
-Arithmetic on :doc:`xo::qty::quantity<quantity-reference>` instances
-does *not* use ``xo::qty::quantity::s_scaled_unit`` at runtime;
-instead gets everything it needs at compile time.
+-  Arithmetic on :doc:`xo::qty::quantity<quantity-reference>` instances
+   does *not* use ``xo::qty::quantity::s_scaled_unit`` at runtime;
+   instead gets everything it needs at compile time.
+
+-  The :code:`xo::qty::quantity` template takes a :doc:`xo::qty::scaled_unit<scaled-unit-class>` instance,
+   but only accepts values with :code:`xo::qty::scaled_unit::is_natural() == true`.
+
+   This accomodation (instead of requiring a :doc:`xo::qty::natural_unit<natural-unit-class>` instance
+   is to make possible code like this possible:
+
+   .. code-block:: cpp
+
+       #include "xo/unit/quantity.hpp"
+
+       using namespace xo::qty;
+
+       quantity<u::meter / u::second> x;
+       quantity<u::meter * u::mter> y;
+
+   while rejecting attempt to mix multiple scales in the same quantity value:
+
+   .. code-block:: cpp
+
+       quantity<u::meter * u::millimeter> x; // will not compile
 
 Class
 -----
@@ -81,19 +109,16 @@ Assignment
 ----------
 
 .. doxygengroup:: quantity-assignment
-   :content-only:
 
 Access Methods
 --------------
 
 .. doxygengroup:: quantity-access-methods
-   :content-only:
 
 Constants
 ---------
 
 .. doxygengroup:: quantity-constants
-   :content-only:
 
 Conversion Methods
 ------------------
@@ -101,13 +126,11 @@ Conversion Methods
 Amount-preserving conversion to quantities with different units and/or representation.
 
 .. doxygengroup:: quantity-unit-conversion
-   :content-only:
 
-Arithmetic
-----------
+Arithmetic Operators
+--------------------
 
-.. doxygengroup:: quantity-arithmetic
-   :content-only:
+.. doxygengroup:: quantity-operators
 
 Support methods for arithmetic operations
 

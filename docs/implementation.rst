@@ -3,7 +3,7 @@
 Components
 ==========
 
-Library dependencies for *xo-unit*:
+Library dependency tower for *xo-unit*:
 
 .. ditaa::
 
@@ -14,28 +14,31 @@ Library dependencies for *xo-unit*:
     +-----------------+
     |  xo_flatstring  |
     +-----------------+
+    |    xo_cmake     |
+    +-----------------+
 
-``xo-unit`` also depends on ``xo-cmake`` macros.
+Install instructions :doc:`here<install>`
 
 Abstraction tower for *xo-unit* components:
 
 .. ditaa::
+    :--scale: 0.85
 
-    +-----------+-----------+
-    |  quantity | xquantity |
-    +-----------+-----------+
-    |      scaled_unit      |
-    +-----------------------+
-    |     natural_unit      |
-    +-----------------------+
-    |          bpu          |
-    +-----------+           |
-    |  bu_store |           |
-    +-----------+-----------+
-    |       basis_unit      |
-    +-----------------------+
-    |       dimension       |
-    +-----------------------+
+    +----------------+---------------+
+    |     quantity   |   xquantity   |
+    +----------------+---------------+
+    |          scaled_unit           |
+    +--------------------------------+
+    |         natural_unit           |
+    +--------------------------------+
+    |               bpu              |
+    +----------------+               |
+    |    bu_store    |               |
+    +----------------+---------------+
+    |           basis_unit           |
+    +--------------------------------+
+    |            dimension           |
+    +--------------------------------+
 
 - :doc:`quantity<quantity-reference>`:
 

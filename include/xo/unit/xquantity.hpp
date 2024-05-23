@@ -18,7 +18,7 @@ namespace xo {
          *
          *  Constexpr implementation,  but units are explicitly represented:
          *  @code
-         *  sizeof(Quantity2) > sizeof(Repr)
+         *  sizeof(xquantity) > sizeof(xquantity::repr_type)
          *  @endcode
          *
          *  Explicit unit representation allows introducing units at runtime,
@@ -32,22 +32,47 @@ namespace xo {
          *  - Repr supports conversion from double.
          **/
         template <typename Repr = double,
-                  typename Int = std::int64_t,
-                  typename Int2x = detail::width2x_t<Int>>
+                  typename Int = std::int64_t>
         class xquantity {
         public:
+            /** @defgroup xquantity-type-traits xquantity type traits **/
+            ///@{
+            /** @brief runtime representation for this value's scale **/
             using repr_type = Repr;
+            /** @brief runtime representation for this value's unit **/
             using unit_type = natural_unit<Int>;
+            /** @brief type used for numerator and denominator in basis-unit scalefactor ratios **/
             using ratio_int_type = Int;
-            using ratio_int2x_type = Int2x;
+            /** @brief double-width type for numerator and denominator of intermediate
+             *         scalefactor ratios.  Use to mitigate loss of precision during computation
+             *         of conversion factors between units with widely-differing magnitude
+             **/
+            using ratio_int2x_type = detail::width2x_t<typename unit_type::ratio_int_type>;
+            ///@}
 
         public:
-            /* zero, dimensionless */
+            /** @defgroup xquantity-ctors xquantity constructors **/
+            ///@{
+
+            /** create dimensionless, zero quantity **/
             constexpr xquantity()
                 : scale_{0}, unit_{natural_unit<Int>()} {}
+            /** create quantity representing multiple of @p scale times @p unit **/
             constexpr xquantity(Repr scale,
                                 const natural_unit<Int> & unit)
                 : scale_{scale}, unit_{unit} {}
+            /** create quantity representing multiple of @p scale times @p unit.
+             *
+             *  Collects outer scalefactors (if any) from @p unit,
+             *  so for example:
+             *
+             *  @code
+             *  using namespace xo::qty;
+             *  xquantity q(123, u::meter * u::millimeter);
+             *
+             *  q.scale() --> 0.123
+             *  @endcode
+             **/
             constexpr xquantity(Repr scale,
                                 const scaled_unit<Int> & unit)
                 :
@@ -59,17 +84,39 @@ namespace xo {
                     ),
                   unit_{unit.natural_unit_} {}
 
+            ///@}
+
             static constexpr bool always_constexpr_unit = false;
 
+            /** @defgroup xquantity-access-methods xquantity access methods **/
+            ///@{
+
+            /** get member @ref scale_ **/
             constexpr const repr_type & scale() const { return scale_; }
+            /** get member @ref unit_ **/
             constexpr const unit_type & unit() const { return unit_; }
 
+            /** true iff this quantity has no dimension **/
             constexpr bool is_dimensionless() const { return unit_.is_dimensionless(); }
 
+            /** return abbreviation for quantities with this unit **/
+            constexpr nu_abbrev_type abbrev() const { return unit_.abbrev(); }
+
+            ///@}
+
+            /** @defgroup xquantity-methods xquantity methods **/
+            ///@{
+
+            /** create unit quantity with same unit as @c this **/
             constexpr xquantity unit_qty() const { return xquantity(1, unit_); }
+
+            /** create zero quantity with same unit as @c this **/
             constexpr xquantity zero_qty() const { return xquantity(0, unit_); }
+
+            /** create quantity representing reciprocal of @c this **/
             constexpr xquantity reciprocal() const { return xquantity(1.0 / scale_, unit_.reciprocal()); }
 
+            /** create quantity representing the same value,  but in units of @p unit2 **/
             constexpr
             auto rescale(const natural_unit<Int> & unit2) const {
                 /* conversion factor from .unit -> unit2*/
@@ -86,24 +133,28 @@ namespace xo {
                 }
             }
 
+            /** create quantity representing this value scaled by dimensionless mutliplier @p x **/
             template <typename Dimensionless>
             requires std::is_arithmetic_v<Dimensionless>
             constexpr auto scale_by(Dimensionless x) const {
                 return xquantity(x * this->scale_, this->unit_);
             }
 
+            /** create quantity representing this value scaled by dimensionless multiplier @p 1/x **/
             template <typename Dimensionless>
             requires std::is_arithmetic_v<Dimensionless>
             constexpr auto divide_by(Dimensionless x) const {
                 return xquantity(this->scale_ / x, this->unit_);
             }
 
+            /** create quantity representing dimensionless numerator @p x divided by this value **/
             template <typename Dimensionless>
             requires std::is_arithmetic_v<Dimensionless>
             constexpr auto divide_into(Dimensionless x) const {
                 return xquantity(x / this->scale_, this->unit_.reciprocal());
             }
 
+            /** multiply two @c xquantity values, or a mixed (@c xquantity, @c quantity) pair **/
             template <typename Quantity2>
             static constexpr
             auto multiply(const xquantity & x, const Quantity2 & y) {
@@ -125,6 +176,7 @@ namespace xo {
                                                           rr.natural_unit_);
             }
 
+            /** compute quotient @p x / @p y,  where @p x and @p y are xquantities **/
             template <typename Quantity2>
             static constexpr
             auto divide(const xquantity & x, const Quantity2 & y) {
@@ -149,6 +201,7 @@ namespace xo {
                                                          rr.natural_unit_);
             }
 
+            /** compute sum @p x + @p y,  where @p x and @p y are xquantities **/
             template <typename Quantity2>
             static constexpr
             auto add(const xquantity & x, const Quantity2 & y) {
@@ -176,6 +229,7 @@ namespace xo {
                 }
             }
 
+            /** compute difference @p x - @p y,  where @p x and @p y are xquantities **/
             template <typename Quantity2>
             static constexpr
             auto subtract(const xquantity & x, const Quantity2 & y) {
@@ -203,6 +257,7 @@ namespace xo {
                 }
             }
 
+            /** perform 3-way comparison between @c xquantity values @p x and @p y **/
             template <typename Quantity2>
             static constexpr
             auto compare(const xquantity & x, const Quantity2 & y) {
@@ -211,6 +266,10 @@ namespace xo {
                 return x.scale() <=> y2.scale();
             }
 
+            ///@}
+
+            /** @defgroup xquantity-operators xquantity operators **/
+            ///@{
             xquantity operator-() const {
                 return xquantity(-scale_, unit_);
             }
@@ -228,16 +287,20 @@ namespace xo {
                 *this = *this / x;
                 return *this;
             }
+            ///@}
 
             // TODO: operator+=, operator-=
 
-            constexpr nu_abbrev_type abbrev() const { return unit_.abbrev(); }
-
         private:
-            /** @brief quantity represents this multiple of a unit amount **/
+            /** @defgroup xquantity-instance-vars **/
+            ///@{
+
+            /** quantity represents this multiple of a unit amount **/
             Repr scale_ = Repr{};
-            /** @brief unit for this quantity **/
+            /** unit for this quantity **/
             natural_unit<Int> unit_;
+
+            ///@}
         }; /*xquantity*/
 
         /** note: won't have constexpr result until c++26 (when ::sqrt(), ::pow() are constexpr)
@@ -271,6 +334,26 @@ namespace xo {
         operator* (const Q1 & x, const Q2 & y)
         {
             return Q1::multiply(x, y);
+        }
+
+        /** note: won't have constexpr result until c++26 (when ::sqrt(), ::pow() are constexpr)
+         **/
+        template <typename Quantity>
+        requires quantity_concept<Quantity>
+        constexpr auto
+        operator* (double x, const Quantity & y)
+        {
+            return y.scale_by(x);
+        }
+
+        /** note: won't have constexpr result until c++26 (when ::sqrt(), ::pow() are constexpr)
+         **/
+        template <typename Quantity>
+        requires quantity_concept<Quantity>
+        constexpr auto
+        operator* (const Quantity & x, double y)
+        {
+            return x.scale_by(y);
         }
 
         /** note: won't have constexpr result until c++26 (when ::sqrt(), ::pow() are constexpr)
@@ -334,7 +417,8 @@ namespace xo {
         /** note: won't have constexpr result until c++26 (when ::sqrt(), ::pow() are constexpr)
          **/
         template <typename Quantity, typename Quantity2>
-        requires quantity_concept<Quantity> && quantity_concept<Quantity2>
+        requires (quantity_concept<Quantity>
+                  && quantity_concept<Quantity2>)
         constexpr auto
         operator- (const Quantity & x, const Quantity2 & y)
         {

@@ -8,6 +8,7 @@
 #include "quantity_ops.hpp"
 #include "natural_unit.hpp"
 #include "scaled_unit.hpp"
+#include "scaled_unit_concept.hpp"
 
 namespace xo {
     namespace qty {
@@ -70,22 +71,40 @@ namespace xo {
 
             /** @defgroup quantity-access-methods quantity access methods **/
             ///@{
+
             /** @brief value of @c scale_ in quantity representing amount (@c scale_ * @c s_unit) **/
             constexpr const repr_type & scale() const { return scale_; }
+
             /** @brief s_unit in quantity representing amount (@c scale_ * @c s_unit) **/
             constexpr const unit_type & unit() const { return s_scaled_unit; }
 
             /** @brief true iff this quantity represents a dimensionless value **/
-            constexpr bool is_dimensionless() const {
+            static constexpr bool is_dimensionless() {
                 return s_scaled_unit.is_dimensionless();
             }
-            ///@}
 
-            // unit_qty
-            // zero_qty
+            /** abbreviated suffix for quantities with this unit **/
+            constexpr nu_abbrev_type abbrev() const {
+                return s_scaled_unit.natural_unit_.abbrev();
+            }
+
+            ///@}
 
             /** @defgroup quantity-arithmetic-support **/
             ///@{
+
+            /** create unit quantity with same unit as @c this **/
+            constexpr
+            auto unit_qty() const {
+                return quantity<s_scaled_unit, repr_type>(1);
+            }
+
+            /** create zero quantity with same unit as @c this **/
+            constexpr
+            auto zero_qty() const {
+                return quantity<s_scaled_unit, repr_type>(0);
+            }
+
             constexpr
             auto reciprocal() const {
                 return quantity<s_scaled_unit.reciprocal(),
@@ -159,6 +178,9 @@ namespace xo {
             }
             ///@}
 
+            /** @addtogroup quantity-arithmetic-support **/
+            ///@{
+
             /** create quantity representing this amount multiplied by dimensionless value @p x
              *
              *  @pre x must be an arithmetic type such as @c int or @c double
@@ -171,15 +193,36 @@ namespace xo {
                 return quantity<s_scaled_unit, r_repr_type>(x * this->scale_);
             }
 
-            // divide_by
-            // divide_into
+            /** create quantity representing this quantity divided by dimensionless value @p x
+             *
+             *  @pre x must be an arithmetic type such as @c int or @c double
+             **/
+            template <typename Dimensionless>
+            requires std::is_arithmetic_v<Dimensionless>
+            constexpr auto divide_by(Dimensionless x) const {
+                using r_repr_type = std::common_type_t<repr_type, Dimensionless>;
 
-            // divide
-            // add
-            // subtract
+                return quantity<s_scaled_unit, r_repr_type>(this->scale_ / x);
+            }
+
+            /** create quantity representing dimensionless value @x divided by this quantity
+             *
+             *  @pre x must be an arithmetic type such as @c int or @c double
+             **/
+            template <typename Dimensionless>
+            requires std::is_arithmetic_v<Dimensionless>
+            constexpr auto divide_into(Dimensionless x) const {
+                using r_repr_type = std::common_type_t<repr_type, Dimensionless>;
+
+                return quantity(static_cast<r_repr_type>(x) / this->scale_,
+                                s_scaled_unit.reciprocal());
+            }
+
+            ///@}
 
             /** @defgroup quantity-comparison-support **/
             ///@{
+
             /** compare two @c quantity instances, under three-way comparison **/
             template <typename Quantity2>
             static constexpr
@@ -188,18 +231,43 @@ namespace xo {
 
                 return x.scale() <=> y2.scale();
             }
+
             ///@}
 
-            // operator-
-            // operator+=
-            // operator-=
+            /** @defgroup quantity-operators **/
+            ///@{
+
+            /** unary negation;  preserves unit information **/
+            quantity operator-() const {
+                return quantity(-scale_);
+            }
+
+            /** add @p y in-place, converting units if necessary **/
+            template <typename Quantity2>
+            constexpr
+            quantity & operator+=(const Quantity2 & y) {
+                quantity y2 = y.template rescale_ext<s_scaled_unit>();
+
+                this->scale_ += y2.scale();
+
+                return *this;
+            }
+
+            /** subtract @p y in-place, converting units if necessary **/
+            template <typename Quantity2>
+            constexpr
+            quantity & operator-=(const Quantity2 & y) {
+                quantity y2 = y.template rescale_ext<s_scaled_unit>();
+
+                this->scale_ -= y2.scale();
+
+                return *this;
+            }
+
             // operator*=
             // operator/=
 
-            /** **/
-            constexpr nu_abbrev_type abbrev() const {
-                return s_scaled_unit.natural_unit_.abbrev();
-            }
+            ///@}
 
             /** @defgroup quantity-assignment quantity assignment operators **/
             ///@{
@@ -429,6 +497,9 @@ namespace xo {
             return x.template with_repr<Repr2>();
         }
 
+        /** @addtogroup quantity-operators **/
+        ///@{
+
         /** note: won't have constexpr result w/ fractional dimension until c++26 (when ::sqrt(), ::pow() are constexpr)
          **/
         template <typename Q1, typename Q2>
@@ -442,7 +513,27 @@ namespace xo {
             return detail::quantity_util::multiply(x, y);
         }
 
-        /** note: won't have constexpr result w/ fractional dimension until c++26 (when ::sqrt(), ::pow() are constexpr)
+        /** note: does not require unit scaling,  so constexpr with c++23 **/
+        template <typename Dimensionless, typename Quantity>
+        requires std::is_arithmetic_v<Dimensionless> && quantity_concept<Quantity>
+        constexpr auto
+        operator* (const Quantity & x, Dimensionless y)
+        {
+            return x.scale_by(y);
+        }
+
+        /** note: does not require unit scaling,  so constexpr with c++23 **/
+        template <typename Dimensionless, typename Quantity>
+        requires std::is_arithmetic_v<Dimensionless> && quantity_concept<Quantity>
+        constexpr auto
+        operator* (Dimensionless x, const Quantity & y)
+        {
+            return y.scale_by(x);
+        }
+
+        /** divide quantity @p x by quantity @p y.
+         *
+         *  note: won't have constexpr result w/ fractional dimension until c++26 (when ::sqrt(), ::pow() are constexpr)
          **/
         template <typename Q1, typename Q2>
         requires (quantity_concept<Q1>
@@ -455,7 +546,30 @@ namespace xo {
             return detail::quantity_util::divide(x, y);
         }
 
-        /** note: won't have constexpr result w/ fractional dimension until c++26 (when ::sqrt(), ::pow() are constexpr)
+        /** divide quantity @p x by dimensionless value @p y **/
+        template <typename Dimensionless, typename Quantity>
+        requires std::is_arithmetic_v<Dimensionless> && quantity_concept<Quantity>
+        constexpr auto
+        operator/ (const Quantity & x, Dimensionless y)
+        {
+            return x.divide_by(y);
+        }
+
+        /** divide dimensionless value @p x by quantity @p y **/
+        template <typename Dimensionless, typename Quantity>
+        requires std::is_arithmetic_v<Dimensionless> && quantity_concept<Quantity>
+        constexpr auto
+        operator/ (Dimensionless x, const Quantity & y)
+        {
+            return y.divide_into(x);
+        }
+
+        /** add quantity @p y to quantity @p x.  Result will have the same units as @p x.
+         *  Representation will be the widest of {@c x::repr_type, @c y::repr_type}.
+         *
+         *  note: won't have constexpr result w/ fractional dimension until c++26 (when ::sqrt(), ::pow() are constexpr)
+         *
+         *  @pre @p x and @p y expected to have consistent dimensions
          **/
         template <typename Q1, typename Q2>
         requires (quantity_concept<Q1>
@@ -468,7 +582,46 @@ namespace xo {
             return detail::quantity_util::add(x, y);
         }
 
-        /** note: won't have constexpr result w/ fractional dimension until c++26 (when ::sqrt(), ::pow() are constexpr)
+        /** subtract an arithmetic value from a dimensionless quantity **/
+        template <typename Quantity,
+                  typename Dimensionless>
+        requires (quantity_concept<Quantity>
+                  && Quantity::is_dimensionless()
+                  && std::is_arithmetic_v<Dimensionless>)
+        constexpr auto
+        operator+ (const Quantity & x, Dimensionless y)
+        {
+            using repr_type = std::common_type_t<typename Quantity::repr_type, Dimensionless>;
+
+            auto xp = static_cast<repr_type>(x.scale());
+            auto yp = static_cast<repr_type>(y);
+
+            return xp + yp;
+        }
+
+        /** subtract a dimensionless quantity from an arithmetic value **/
+        template <typename Dimensionless,
+                  typename Quantity>
+        requires (std::is_arithmetic_v<Dimensionless>
+                  && quantity_concept<Quantity>
+                  && Quantity::is_dimensionless())
+        constexpr auto
+        operator+ (Dimensionless x, const Quantity & y)
+        {
+            using repr_type = std::common_type_t<Dimensionless, typename Quantity::repr_type>;
+
+            auto xp = static_cast<repr_type>(x);
+            auto yp = static_cast<repr_type>(y.scale());
+
+            return xp + yp;
+        }
+
+        /** subtract quantity @p y from quantity @p x.  Result will have the same units as @p x.
+         *  Representation will be the widest of {@c x::repr_type, @c y::repr_type}
+         *
+         *  note: won't have constexpr result w/ fractional dimension until c++26 (when ::sqrt(), ::pow() are constexpr)
+         *
+         *  @pre @p x and @p y expected to have consistent dimensions
          **/
         template <typename Q1, typename Q2>
         requires (quantity_concept<Q1>
@@ -480,6 +633,8 @@ namespace xo {
         {
             return detail::quantity_util::subtract(x, y);
         }
+
+        ///@}
 
         namespace qty {
             // ----- mass -----
@@ -528,22 +683,26 @@ namespace xo {
         namespace qty {
             // ----- mass constants ----
 
-            /** @brief a quantity representing 1 picogram of mass, with compile-time unit representation **/
+            /** a quantity representing 1 picogram of mass, with compile-time unit representation **/
             static constexpr auto picogram = picograms(1);
-            /** @brief a quantity representing 1 nanogram of mass, with compile-time unit representation **/
+            /** a quantity representing 1 nanogram of mass, with compile-time unit representation **/
             static constexpr auto nanogram = nanograms(1);
-            /** @brief a quantity representing 1 microgram of mass, with compile-time unit representation **/
+            /** a quantity representing 1 microgram of mass, with compile-time unit representation **/
             static constexpr auto microgram = micrograms(1);
-            /** @brief a quantity representing 1 milligram of mass, with compile-time unit representation **/
+            /** a quantity representing 1 milligram of mass, with compile-time unit representation **/
             static constexpr auto milligram = milligrams(1);
-            /** @brief a quantity representing 1 gram of mass, with compile-time unit representation **/
+            /** a quantity representing 1 gram of mass, with compile-time unit representation **/
             static constexpr auto gram = grams(1);
-            /** @brief a quantity representing 1 kilogram of mass, with compile-time unit representation **/
+            /** a quantity representing 1 kilogram of mass, with compile-time unit representation **/
             static constexpr auto kilogram = kilograms(1);
-            /** @brief a quantity representing 1 metric tonne of mass, with compile-time unit representation **/
+            /** a quantity representing 1 metric tonne of mass, with compile-time unit representation **/
             static constexpr auto tonne = tonnes(1);
-            /** @brief a quantity representing 1 metric kilotonne of mass, with compile-time unit representation **/
+            /** a quantity representing 1 metric kilotonne of mass, with compile-time unit representation **/
             static constexpr auto kilotonne = kilotonnes(1);
+            /** a quantity representing 1 metric megatonne of mass, with compile-time unit representation **/
+            static constexpr auto megatonne = megatonnes(1);
+            /** a quantity representing 1 metric gigatonne of mass, with compile-time unit representation **/
+            static constexpr auto gigatonne = gigatonnes(1);
         } /*namespace qty*/
 
         namespace qty {
@@ -618,22 +777,37 @@ namespace xo {
             static constexpr auto nanometer = nanometers(1);
             /** a quantity representing 1 micrometer of distance, with compile-time unit representation **/
             static constexpr auto micrometer = micrometers(1);
-            /** @brief a quantity representing 1 millimeter of distance, with compile-time unit representation **/
+            /** a quantity representing 1 millimeter of distance, with compile-time unit representation **/
             static constexpr auto millimeter = millimeters(1);
-            /** @brief a quantity representing 1 meter of distance, with compile-time unit representation **/
+            /** a quantity representing 1 meter of distance, with compile-time unit representation **/
             static constexpr auto meter = meters(1);
-            /** @brief a quantity representing 1 kilometer of distance, with compile-time unit representation **/
+            /** a quantity representing 1 kilometer of distance, with compile-time unit representation **/
             static constexpr auto kilometer = kilometers(1);
-            /** @brief a quantity representing 1 megameter of distance, with compile-time unit representation **/
+            /** a quantity representing 1 megameter of distance, with compile-time unit representation **/
             static constexpr auto megameter = megameters(1);
-            /** @brief a quantity representing 1 gigameter of distance, with compile-time unit representation **/
+            /** a quantity representing 1 gigameter of distance, with compile-time unit representation **/
             static constexpr auto gigameter = gigameters(1);
 
-            /** @brief a quantity representing exactly 1 lightsecond of distance,  with compile-time unit representation **/
+            /** a quantity representing exactly 1 lightsecond of distance,
+             *  with compile-time unit representation
+             **/
             static constexpr auto lightsecond = lightseconds(1);
-            /** @brief a quantity representing exactly 1 astronomical unit of distance,  with compile-time unit representation **/
+            /** a quantity representing exactly 1 astronomical unit of distance,
+             *  with compile-time unit representation
+             **/
             static constexpr auto astronomicalunit = astronomicalunits(1);
 
+            /** a quantity representing 1 inch of distance, with compile-time unit operations **/
+            static constexpr auto inch = inches(1);
+
+            /** a quantity representing 1 foot of distance, with compile-time unit operations **/
+            static constexpr auto foot = feet(1);
+
+            /** a quantity representing 1 yard of distance, with compile-time unit operations **/
+            static constexpr auto yard = yards(1);
+
+            /** a quantity representing 1 mile of distance, with compile-time unit operations **/
+            static constexpr auto mile = miles(1);
         } /*namespace qty*/
 
         namespace qty {
@@ -707,17 +881,48 @@ namespace xo {
         namespace qty {
             // ----- time constants ----
 
-            /** @brief a quantity representing 1 second of time, with compile-time unit representation **/
+            /** a quantity representing 1 picosecond of time, with compile-time unit representation **/
+            static constexpr auto picosecond = picoseconds(1);
+
+            /** a quantity representing 1 nanosecond of time, with compile-time unit representation **/
+            static constexpr auto nanosecond = nanoseconds(1);
+
+            /** a quantity representing 1 microsecond of time, with compile-time unit representation **/
+            static constexpr auto microsecond = microseconds(1);
+
+            /** a quantity representing 1 millisecond of time, with compile-time unit representation **/
+            static constexpr auto millisecond = milliseconds(1);
+
+            /** a quantity representing 1 second of time, with compile-time unit representation **/
             static constexpr auto second = seconds(1);
 
-            /** @brief a quantity representing 1 minute of time, with compile-time unit representation **/
+            /** a quantity representing 1 minute of time, with compile-time unit representation **/
             static constexpr auto minute = minutes(1);
 
-            /** @brief a quantity representing 1 hour of time, with compile-time unit representation **/
+            /** a quantity representing 1 hour of time, with compile-time unit representation **/
             static constexpr auto hour = hours(1);
 
-            /** @brief a quantity representing 1 day of time (exactly 24 hours), with compile-time unit representation **/
+            /** a quantity representing 1 day of time (exactly 24 hours), with compile-time unit representation **/
             static constexpr auto day = days(1);
+
+            /** a quantity representing 1 week of time (7 24-hour days), with compile-time unit representation **/
+            static constexpr auto week = weeks(1);
+
+            /** a quantity representing 1 month of time (30 24-hour days), with compile-time unit representation **/
+            static constexpr auto month = months(1);
+
+            /** a quantity representing 1 year of time (365.25 24-hour days), with compile-time unit representation **/
+            static constexpr auto year = years(1);
+
+            /** a quantity representing 1 250-day year of time, with compile-time unit representation **/
+            static constexpr auto year250 = year250s(1);
+
+            /** a quantity representing 1 360-day year of time, with compile-time unit representation **/
+            static constexpr auto year360 = year360s(1);
+
+            /** a quantity representing 1 365-day year of time, with compile-time unit representation **/
+            static constexpr auto year365 = year365s(1);
+
         } /*namespace qty*/
 
         namespace qty {

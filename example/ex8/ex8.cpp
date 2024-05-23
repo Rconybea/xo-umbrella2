@@ -8,11 +8,12 @@ int
 main () {
     using namespace xo::qty;
     namespace u = xo::qty::u;
-    //namespace q = xo::qty::qty;
     using namespace std;
 
-    xquantity qty1(7, u::foot);
-    xquantity qty2(6.0, u::inch);
+    constexpr xquantity qty1(7, u::foot);
+    constexpr xquantity qty2(6.0, u::inch);
+
+    // constexpr not supported for xquantity addition
     xquantity qty3 = qty1 + qty2;
 
     cerr << "qty1: " << qty1 << endl;
@@ -24,6 +25,13 @@ main () {
 
     /* 2286mm */
     cerr << "res: " << res << endl;
+
+    /* 12 */
+    xquantity qty4 = qty1 / qty2;
+
+    auto res2 = qty4 + 4;
+
+    cerr << "res2: " << res << endl;
 }
 
 /** end ex8.cpp */

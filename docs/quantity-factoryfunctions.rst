@@ -1,9 +1,18 @@
 .. _quantity_factoryfunctions:
 
+Quantity Factory Functions
+==========================
+
+Convenience functions for creating quantities with compile-time units
+
+Context
+-------
+
 .. ditaa::
+    :--scale: 0.85
 
     +----------------+---------------+
-    |cYEL quantity   |   xquantity   |
+    |cBLU quantity   |   xquantity   |
     +----------------+---------------+
     |          scaled_unit           |
     +--------------------------------+
@@ -21,8 +30,8 @@
 .. toctree::
    :maxdepth: 2
 
-Quantity Factory Functions
-==========================
+Introduction
+------------
 
 .. code-block:: cpp
 

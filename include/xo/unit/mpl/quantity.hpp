@@ -399,7 +399,7 @@ namespace xo {
             }
             ///@}
 
-            /** @defgroup quantity-arithmetic **/
+            /** @defgroup mpl-quantity-arithmetic **/
             ///@{
             /** @brief add quantity in-place
              *
