@@ -264,8 +264,23 @@ namespace xo {
                 return *this;
             }
 
-            // operator*=
-            // operator/=
+            /** multiply @p y in-place.  y must be dimensionless **/
+            template <typename Dimensionless>
+            requires std::is_arithmetic_v<Dimensionless>
+            constexpr
+            quantity & operator*=(Dimensionless y) {
+                this->scale_ *= y;
+                return *this;
+            }
+
+            /** divide @p y in-place.  y must be dimensionless **/
+            template <typename Dimensionless>
+            requires std::is_arithmetic_v<Dimensionless>
+            constexpr
+            quantity & operator/=(Dimensionless y) {
+                this->scale_ /= y;
+                return *this;
+            }
 
             ///@}
 
@@ -632,6 +647,40 @@ namespace xo {
         operator- (const Q1 & x, const Q2 & y)
         {
             return detail::quantity_util::subtract(x, y);
+        }
+
+        /** subtract an arithmetic value from a dimensionless quantity **/
+        template <typename Quantity,
+                  typename Dimensionless>
+        requires (quantity_concept<Quantity>
+                  && Quantity::is_dimensionless()
+                  && std::is_arithmetic_v<Dimensionless>)
+        constexpr auto
+        operator- (const Quantity & x, Dimensionless y)
+        {
+            using repr_type = std::common_type_t<typename Quantity::repr_type, Dimensionless>;
+
+            auto xp = static_cast<repr_type>(x.scale());
+            auto yp = static_cast<repr_type>(y);
+
+            return xp - yp;
+        }
+
+        /** subtract a dimensionless quantity from an arithmetic value **/
+        template <typename Dimensionless,
+                  typename Quantity>
+        requires (std::is_arithmetic_v<Dimensionless>
+                  && quantity_concept<Quantity>
+                  && Quantity::is_dimensionless())
+        constexpr auto
+        operator- (Dimensionless x, const Quantity & y)
+        {
+            using repr_type = std::common_type_t<Dimensionless, typename Quantity::repr_type>;
+
+            auto xp = static_cast<repr_type>(x);
+            auto yp = static_cast<repr_type>(y.scale());
+
+            return xp - yp;
         }
 
         ///@}
