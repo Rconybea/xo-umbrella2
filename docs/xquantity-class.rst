@@ -74,14 +74,23 @@ Constants
 
 .. doxygengroup:: xquantity-constants
 
-General Methods
----------------
+Conversion Methods
+------------------
 
-.. doxygengroup:: xquantity-methods
+.. doxygengroup:: xquantity-unit-conversion
 
 Arithmetic
 ----------
 
+.. doxygengroup:: xquantity-operators
+
 Support methods for arithmetic operations
 
 .. doxygengroup:: xquantity-arithmetic-support
+
+Comparison
+----------
+
+Support methods for comparison operators
+
+.. doxygengroup:: xquantity-comparison-support

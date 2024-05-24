@@ -124,28 +124,6 @@ namespace xo {
             /** create quantity representing reciprocal of @c this **/
             constexpr xquantity reciprocal() const { return xquantity(1.0 / scale_, unit_.reciprocal()); }
 
-            ///@}
-
-            /** @defgroup xquantity-methods xquantity methods **/
-            ///@{
-
-            /** create quantity representing the same value,  but in units of @p unit2 **/
-            constexpr
-            auto rescale(const natural_unit<Int> & unit2) const {
-                /* conversion factor from .unit -> unit2*/
-                auto rr = detail::su_ratio<ratio_int_type,
-                                           ratio_int2x_type>(this->unit_, unit2);
-
-                if (rr.natural_unit_.is_dimensionless()) {
-                    repr_type r_scale = (::sqrt(rr.outer_scale_sq_)
-                                         * rr.outer_scale_factor_.template convert_to<repr_type>()
-                                         * this->scale_);
-                    return xquantity(r_scale, unit2);
-                } else {
-                    return xquantity(std::numeric_limits<repr_type>::quiet_NaN(), unit2);
-                }
-            }
-
             /** create quantity representing this value scaled by dimensionless mutliplier @p x **/
             template <typename Dimensionless>
             requires std::is_arithmetic_v<Dimensionless>
@@ -270,6 +248,30 @@ namespace xo {
                 }
             }
 
+            ///@}
+
+            /** @defgroup xquantity-unit-conversion **/
+            ///@{
+
+            /** create quantity representing the same value,  but in units of @p unit2 **/
+            constexpr
+            auto rescale(const natural_unit<Int> & unit2) const {
+                /* conversion factor from .unit -> unit2*/
+                auto rr = detail::su_ratio<ratio_int_type,
+                                           ratio_int2x_type>(this->unit_, unit2);
+
+                if (rr.natural_unit_.is_dimensionless()) {
+                    repr_type r_scale = (::sqrt(rr.outer_scale_sq_)
+                                         * rr.outer_scale_factor_.template convert_to<repr_type>()
+                                         * this->scale_);
+                    return xquantity(r_scale, unit2);
+                } else {
+                    return xquantity(std::numeric_limits<repr_type>::quiet_NaN(), unit2);
+                }
+            }
+
+            ///@}
+
             /** @defgroup xquantity-comparison-support xquantity comparison support methods **/
             ///@{
 
@@ -286,18 +288,40 @@ namespace xo {
 
             /** @defgroup xquantity-operators xquantity operators **/
             ///@{
+
+            /** add @p x in-place,  converting units if necessary **/
+            template <typename Quantity2>
+            xquantity & operator+= (const Quantity2 & x) {
+                *this = *this + x;
+                return *this;
+            }
+
+            /** unary negation;  preserves unit information **/
             xquantity operator-() const {
                 return xquantity(-scale_, unit_);
             }
 
-            /* also works with Quantity2 = double, int, .. */
+            /** subtract @p x in-place,  converting units if necessary **/
+            template <typename Quantity2>
+            xquantity & operator-= (const Quantity2 & x) {
+                *this = *this - x;
+                return *this;
+            }
+
+            /** multiply @p x in-place,  converting units if necessary
+             *
+             *  @note: unlike @c quantity::operator*=, may change dimension of lhs
+             **/
             template <typename Quantity2>
             xquantity & operator*= (const Quantity2 & x) {
                 *this = *this * x;
                 return *this;
             }
 
-            /* also works with Quantity2 = double, int, .. */
+            /** divide @p x in-place,  converting units if necessary
+             *
+             *  @note: unlike @c quantity::operator/=, may change dimension of lhs
+             **/
             template <typename Quantity2>
             xquantity & operator/= (const Quantity2 & x) {
                 *this = *this / x;
