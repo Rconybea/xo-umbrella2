@@ -270,6 +270,35 @@ namespace xo {
                 }
             }
 
+            constexpr
+            auto rescale_ext(const scaled_unit<Int> & unit2) const {
+                /* conversion factor from .unit -> unit2*/
+                auto rr = detail::su_ratio<ratio_int_type,
+                                           ratio_int2x_type>(unit_,
+                                                             unit2.natural_unit_);
+
+                if (rr.natural_unit_.is_dimensionless()) {
+                    /* NOTE: test for unit .outer_scale_sq values to get constexpr result with c++23
+                     *       and integer dimension powers.
+                     *
+                     * NOTE: we don't intend to support mixed-unit quantities.
+                     *       If we change intention, will need to take into account
+                     *       (s_scaled_unit.outer_scale_factor_, s_scaled_unit.outer_scale_sq_)
+                     */
+                    repr_type r_scale
+                        = ((((rr.outer_scale_sq_ == 1.0)
+                             && (unit2.outer_scale_sq_ == 1.0))
+                            ? 1.0
+                            : ::sqrt(rr.outer_scale_sq_ / unit2.outer_scale_sq_))
+                           * rr.outer_scale_factor_.template convert_to<repr_type>()
+                           * this->scale_
+                           / unit2.outer_scale_factor_.template convert_to<repr_type>());
+                    return xquantity(r_scale, unit2);
+                } else {
+                    return xquantity(std::numeric_limits<repr_type>::quiet_NaN(), unit2);
+                }
+            }
+
             ///@}
 
             /** @defgroup xquantity-comparison-support xquantity comparison support methods **/
@@ -440,7 +469,7 @@ namespace xo {
         constexpr auto
         operator+ (const Quantity & x, double y)
         {
-            return x + Quantity(y, nu::dimensionless);
+            return x + Quantity(y, u::dimensionless);
         }
 
         /** note: won't have constexpr result until c++26 (when ::sqrt(), ::pow() are constexpr)
@@ -450,7 +479,7 @@ namespace xo {
         constexpr auto
         operator+ (double x, const Quantity & y)
         {
-            return Quantity(x, nu::dimensionless) + y;
+            return Quantity(x, u::dimensionless) + y;
         }
 
         /** note: won't have constexpr result until c++26 (when ::sqrt(), ::pow() are constexpr)
@@ -471,7 +500,7 @@ namespace xo {
         constexpr auto
         operator- (const Quantity & x, double y)
         {
-            return x - Quantity(y, nu::dimensionless);
+            return x - Quantity(y, u::dimensionless);
         }
 
         /** note: won't have constexpr result until c++26 (when ::sqrt(), ::pow() are constexpr)
@@ -481,7 +510,7 @@ namespace xo {
         constexpr auto
         operator- (double x, const Quantity & y)
         {
-            return Quantity(x, nu::dimensionless) - y;
+            return Quantity(x, u::dimensionless) - y;
         }
 
         /** note: won't have constexpr result until c++26 (when ::sqrt(), ::pow() are constexpr)
@@ -491,7 +520,7 @@ namespace xo {
         constexpr auto
         operator== (const Quantity & x, double y)
         {
-            return (x == Quantity(y, nu::dimensionless));
+            return (x == Quantity(y, u::dimensionless));
         }
 
         /** note: won't have constexpr result until c++26 (when ::sqrt(), ::pow() are constexpr)
@@ -501,7 +530,7 @@ namespace xo {
         constexpr auto
         operator== (double x, const Quantity & y)
         {
-            return (Quantity(x, nu::dimensionless) == y);
+            return (Quantity(x, u::dimensionless) == y);
         }
 
         /** note: won't have constexpr result until c++26 (when ::sqrt(), ::pow() are constexpr)
@@ -511,7 +540,7 @@ namespace xo {
         constexpr auto
         operator<=> (const Quantity & x, double y)
         {
-            return Quantity::compare(x, Quantity(y, nu::dimensionless));
+            return Quantity::compare(x, Quantity(y, u::dimensionless));
         }
 
         /** note: won't have constexpr result until c++26 (when ::sqrt(), ::pow() are constexpr)
@@ -521,11 +550,11 @@ namespace xo {
         constexpr auto
         operator<=> (double x, const Quantity & y)
         {
-            return Quantity::compare(Quantity(x, nu::dimensionless), y);
+            return Quantity::compare(Quantity(x, u::dimensionless), y);
         }
 
-        namespace unit {
-            constexpr auto nanogram = natural_unit_qty(nu::nanogram);
+        namespace xu {
+            constexpr auto nanogram = xquantity(1.0, u::nanogram);
         }
     } /*namespace qty*/
 } /*namespace xo*/

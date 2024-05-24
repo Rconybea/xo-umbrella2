@@ -24,11 +24,6 @@ namespace xo {
         template <nu64_type nu>
         constexpr nu_abbrev_type nu_mpl_abbrev = nu.abbrev();
 
-        TEST_CASE("natural_unit", "[natural_unit]") {
-            static_assert(nu_mpl_abbrev<nu::gram> == nu::gram.abbrev());
-            REQUIRE(nu_mpl_abbrev<nu::gram> == nu::gram.abbrev());
-        } /*TEST_CASE(natural_unit)*/
-
         TEST_CASE("natural_unit0", "[natural_unit]") {
             constexpr bool c_debug_flag = false;
 

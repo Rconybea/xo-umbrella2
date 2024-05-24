@@ -458,7 +458,7 @@ namespace xo {
 
         /** @brief namespace for constants representing basis natural units
          *
-         *  Application code will typically use parallel scaled-unit constants
+         *  Application code will typically use instead parallel scaled-unit constants
          *  (see the 'u' namespace in 'scaled_unit.hpp')
          **/
         namespace nu {

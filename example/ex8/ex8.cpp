@@ -21,7 +21,7 @@ main () {
     cerr << "qty3: " << qty3 << endl;
 
     /* rescale to mm */
-    xquantity res = qty3.rescale(xo::qty::nu::millimeter);
+    xquantity res = qty3.rescale_ext(xo::qty::u::millimeter);
 
     /* 2286mm */
     cerr << "res: " << res << endl;

@@ -106,6 +106,8 @@ namespace xo {
             ///@}
         };
 
+        // TODO: comparison operators
+
         namespace detail {
             /** promote natural unit to scaled unit (with unit outer scalefactors) **/
             template <typename Int>
@@ -134,7 +136,7 @@ namespace xo {
             ///@{
 
             /** dimensionless unit; equivalent to 1 **/
-            constexpr auto dimensionless    = detail::su_promote<std::int64_t>(nu::dimensionless);
+            constexpr auto dimensionless    = detail::su_promote(natural_unit<std::int64_t>());
 
             ///@}
 
