@@ -127,8 +127,8 @@ Amount-preserving conversion to quantities with different units and/or represent
 
 .. doxygengroup:: quantity-unit-conversion
 
-Arithmetic Operators
---------------------
+Arithmetic
+----------
 
 .. doxygengroup:: quantity-operators
 

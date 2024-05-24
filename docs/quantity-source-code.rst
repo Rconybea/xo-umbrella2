@@ -3,9 +3,9 @@
 Quantity Source Code
 ====================
 
-github: `quantity.hpp @github.com`_
+github: `quantity.hpp @github`_
 
-.. _`quantity.hpp @github.com`: https://github.com/rconybea/xo-unit/blob/main/include/xo/unit/quantity.hpp
+.. _`quantity.hpp @github`: https://github.com/rconybea/xo-unit/blob/main/include/xo/unit/quantity.hpp
 
 .. literalinclude:: ../include/xo/unit/quantity.hpp
     :language: c++

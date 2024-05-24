@@ -26,3 +26,4 @@ Xquantity Reference
    :maxdepth: 2
 
    xquantity-class
+   xquantity-source-code

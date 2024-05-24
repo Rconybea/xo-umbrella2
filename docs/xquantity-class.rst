@@ -69,7 +69,19 @@ Access Methods
 
 .. doxygengroup:: xquantity-access-methods
 
+Constants
+---------
+
+.. doxygengroup:: xquantity-constants
+
 General Methods
 ---------------
 
 .. doxygengroup:: xquantity-methods
+
+Arithmetic
+----------
+
+Support methods for arithmetic operations
+
+.. doxygengroup:: xquantity-arithmetic-support

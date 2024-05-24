@@ -86,7 +86,15 @@ namespace xo {
 
             ///@}
 
+            /** defgroup xqautnity-constants static xquantity constants **/
+            ///@{
+
+            /** false since unit information may be unknown at compile time.
+             *  Coordinates with quantity::always_constexpr_unit
+             **/
             static constexpr bool always_constexpr_unit = false;
+
+            ///@}
 
             /** @defgroup xquantity-access-methods xquantity access methods **/
             ///@{
@@ -107,6 +115,9 @@ namespace xo {
             /** @defgroup xquantity-methods xquantity methods **/
             ///@{
 
+            /** @defgroup xquantity-arithmetic-support **/
+            ///@{
+
             /** create unit quantity with same unit as @c this **/
             constexpr xquantity unit_qty() const { return xquantity(1, unit_); }
 
@@ -115,6 +126,11 @@ namespace xo {
 
             /** create quantity representing reciprocal of @c this **/
             constexpr xquantity reciprocal() const { return xquantity(1.0 / scale_, unit_.reciprocal()); }
+
+            ///@}
+
+            /** @defgroup xquantity-methods xquantity methods **/
+            ///@{
 
             /** create quantity representing the same value,  but in units of @p unit2 **/
             constexpr
