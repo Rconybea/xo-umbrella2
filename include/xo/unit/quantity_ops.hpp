@@ -9,7 +9,7 @@
 
 namespace xo {
     namespace qty {
-        /** note: won't have constexpr result until c++26 (when ::sqrt(), ::pow() are constexpr)
+        /** note: won't have constexpr result until c++26 (when @c sqrt(), @c pow() are constexpr)
          **/
         template <typename Quantity, typename Quantity2>
         requires quantity_concept<Quantity> && quantity_concept<Quantity2>
@@ -19,7 +19,7 @@ namespace xo {
             return (Quantity::compare(x, y) == 0);
         }
 
-        /** note: won't have constexpr result until c++26 (when ::sqrt(), ::pow() are constexpr)
+        /** note: won't have constexpr result until c++26 (when @c sqrt(), @c pow() are constexpr)
          **/
         template <typename Quantity, typename Quantity2>
         requires quantity_concept<Quantity> && quantity_concept<Quantity2>

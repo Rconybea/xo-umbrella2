@@ -86,11 +86,11 @@ namespace xo {
 
             ///@}
 
-            /** defgroup xqautnity-constants static xquantity constants **/
+            /** @defgroup xquantity-constants static xquantity constants **/
             ///@{
 
             /** false since unit information may be unknown at compile time.
-             *  Coordinates with quantity::always_constexpr_unit
+             *  Coordinates with @c quantity::always_constexpr_unit
              **/
             static constexpr bool always_constexpr_unit = false;
 
@@ -112,10 +112,7 @@ namespace xo {
 
             ///@}
 
-            /** @defgroup xquantity-methods xquantity methods **/
-            ///@{
-
-            /** @defgroup xquantity-arithmetic-support **/
+            /** @defgroup xquantity-arithmetic-support**/
             ///@{
 
             /** create unit quantity with same unit as @c this **/
@@ -273,6 +270,9 @@ namespace xo {
                 }
             }
 
+            /** @defgroup xquantity-comparison-support xquantity comparison support methods **/
+            ///@{
+
             /** perform 3-way comparison between @c xquantity values @p x and @p y **/
             template <typename Quantity2>
             static constexpr
@@ -303,9 +303,8 @@ namespace xo {
                 *this = *this / x;
                 return *this;
             }
-            ///@}
 
-            // TODO: operator+=, operator-=
+            ///@}
 
         private:
             /** @defgroup xquantity-instance-vars **/
@@ -319,7 +318,7 @@ namespace xo {
             ///@}
         }; /*xquantity*/
 
-        /** note: won't have constexpr result until c++26 (when ::sqrt(), ::pow() are constexpr)
+        /** note: won't have constexpr result until c++26 (when @c sqrt(), @c pow() are constexpr)
          **/
         template <typename Repr = double,
                   typename Int = std::int64_t>
@@ -331,7 +330,7 @@ namespace xo {
                  u.natural_unit_);
         }
 
-        /** note: won't have constexpr result until c++26 (when ::sqrt(), ::pow() are constexpr)
+        /** note: won't have constexpr result until c++26 (when @c sqrt(), @c pow() are constexpr)
          **/
         template <typename Repr = double,
                   typename Int = std::int64_t>
@@ -340,7 +339,7 @@ namespace xo {
             return xquantity<Repr, Int>(1.0, nu);
         }
 
-        /** note: won't have constexpr result until c++26 (when ::sqrt(), ::pow() are constexpr)
+        /** note: won't have constexpr result until c++26 (when @c sqrt(), @c pow() are constexpr)
          **/
         template <typename Q1, typename Q2>
         requires (quantity_concept<Q1>

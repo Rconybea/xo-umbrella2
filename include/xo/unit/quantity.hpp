@@ -205,7 +205,7 @@ namespace xo {
                 return quantity<s_scaled_unit, r_repr_type>(this->scale_ / x);
             }
 
-            /** create quantity representing dimensionless value @x divided by this quantity
+            /** create quantity representing dimensionless value @p x divided by this quantity
              *
              *  @pre x must be an arithmetic type such as @c int or @c double
              **/
@@ -515,7 +515,7 @@ namespace xo {
         /** @addtogroup quantity-operators **/
         ///@{
 
-        /** note: won't have constexpr result w/ fractional dimension until c++26 (when ::sqrt(), ::pow() are constexpr)
+        /** note: won't have constexpr result w/ fractional dimension until c++26 (when @c sqrt(), @c pow() are constexpr)
          **/
         template <typename Q1, typename Q2>
         requires (quantity_concept<Q1>
@@ -548,7 +548,7 @@ namespace xo {
 
         /** divide quantity @p x by quantity @p y.
          *
-         *  note: won't have constexpr result w/ fractional dimension until c++26 (when ::sqrt(), ::pow() are constexpr)
+         *  note: won't have constexpr result w/ fractional dimension until c++26 (when @c sqrt(), @c pow() are constexpr)
          **/
         template <typename Q1, typename Q2>
         requires (quantity_concept<Q1>
@@ -582,7 +582,7 @@ namespace xo {
         /** add quantity @p y to quantity @p x.  Result will have the same units as @p x.
          *  Representation will be the widest of {@c x::repr_type, @c y::repr_type}.
          *
-         *  note: won't have constexpr result w/ fractional dimension until c++26 (when ::sqrt(), ::pow() are constexpr)
+         *  note: won't have constexpr result w/ fractional dimension until c++26 (when @c sqrt(), @c pow() are constexpr)
          *
          *  @pre @p x and @p y expected to have consistent dimensions
          **/
@@ -634,7 +634,7 @@ namespace xo {
         /** subtract quantity @p y from quantity @p x.  Result will have the same units as @p x.
          *  Representation will be the widest of {@c x::repr_type, @c y::repr_type}
          *
-         *  note: won't have constexpr result w/ fractional dimension until c++26 (when ::sqrt(), ::pow() are constexpr)
+         *  note: won't have constexpr result w/ fractional dimension until c++26 (when @c sqrt(), @c pow() are constexpr)
          *
          *  @pre @p x and @p y expected to have consistent dimensions
          **/

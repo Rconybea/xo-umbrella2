@@ -15,4 +15,3 @@ xo_docdir_sphinx_config(
     development.rst
     ubuntu-github-workflow.rst
 )
-#xo_utest_coverage_config2()
