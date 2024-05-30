@@ -1,3 +1,5 @@
+# emacs project control file
+.projectile
 # clangd working space (see emacs+lsp)
 .cache
 # typical cmake build directory (source-tree-nephew)

@@ -8,12 +8,7 @@ enable_language(CXX)
 include(GNUInstallDirs)
 include(cmake/xo-bootstrap-macros.cmake)
 
-xo_cxx_toplevel_options2()
-
-# ----------------------------------------------------------------
-# cmake -DCMAKE_BUILD_TYPE=coverage
-#
-xo_toplevel_coverage_config2()
+xo_cxx_toplevel_options3()
 
 # ----------------------------------------------------------------
 # c++ settings
