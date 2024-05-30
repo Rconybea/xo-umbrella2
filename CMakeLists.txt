@@ -7,19 +7,15 @@ project(indentlog VERSION 1.0)
 include(GNUInstallDirs)
 include(cmake/xo-bootstrap-macros.cmake)
 
-xo_cxx_toplevel_options2()
+xo_cxx_toplevel_options3()
 
 # ----------------------------------------------------------------
-# cmake -DCMAKE_BUILD_TYPE=debug
-xo_toplevel_debug_config2()
+# c++ settings
 
-# ----------------------------------------------------------------
-# cmake -DCMAKE_BUILD_TYPE=asan
-xo_toplevel_asan_config2()
-
-# ----------------------------------------------------------------
-# cmake -DCMAKE_BUILD_TYPE=coverage
-xo_toplevel_coverage_config2()
+# one-time project-specific c++ flags.  usually empty
+#set(PROJECT_CXX_FLAGS "-Wstringop-overread")
+#set(PROJECT_CXX_FLAGS "-fconcepts-diagnostics-depth=2")
+add_definitions(${PROJECT_CXX_FLAGS})
 
 # ----------------------------------------------------------------
 
@@ -35,9 +31,18 @@ xo_install_library4(${SELF_LIB} ${PROJECT_NAME}Targets)
 xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
 
 # ----------------------------------------------------------------
+# docs targets depend on all the other library/utest targets
+#
+#add_subdirectory(docs)
 
-install(TARGETS hello DESTINATION bin/indentlog/example)
-install(TARGETS indentlog_ex1 DESTINATION bin/indentlog/example)
-install(TARGETS indentlog_ex2 DESTINATION bin/indentlog/example)
-install(TARGETS indentlog_ex3 DESTINATION bin/indentlog/example)
-install(TARGETS indentlog_ex4 DESTINATION bin/indentlog/example)
+# ----------------------------------------------------------------
+
+if (XO_ENABLE_EXAMPLES)
+    install(TARGETS hello DESTINATION bin/indentlog/example)
+    install(TARGETS indentlog_ex1 DESTINATION bin/indentlog/example)
+    install(TARGETS indentlog_ex2 DESTINATION bin/indentlog/example)
+    install(TARGETS indentlog_ex3 DESTINATION bin/indentlog/example)
+    install(TARGETS indentlog_ex4 DESTINATION bin/indentlog/example)
+endif()
+
+# end CMakeLists.txt

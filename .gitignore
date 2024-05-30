@@ -1,3 +1,5 @@
+# emacs projectile config
+.projectile
 # symlink to ${my_build_directory}/compile_commands.json to make LSP work
 compile_commands.json
 # lsp keeps state here
