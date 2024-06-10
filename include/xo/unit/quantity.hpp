@@ -975,6 +975,14 @@ namespace xo {
         } /*namespace qty*/
 
         namespace qty {
+            // ----- currency -----
+
+            /** create quantity representing @p x units of currency, with compile-time unit representation **/
+            template <typename Repr>
+            inline constexpr auto currency(Repr x) { return quantity<u::currency, Repr>(x); }
+        }
+
+        namespace qty {
             // ----- volatility -----
 
             /* variance expressed has dimension 1/t;
