@@ -78,6 +78,11 @@ namespace xo {
             /** @brief s_unit in quantity representing amount (@c scale_ * @c s_unit) **/
             constexpr const unit_type & unit() const { return s_scaled_unit; }
 
+            /** @brief true iff this quantity is strictly negative **/
+            constexpr bool is_negative() const { return scale_ < Repr{0}; }
+            /** @brief true iff this quantity is strictly positive **/
+            constexpr bool is_positive() const { return scale_ > Repr{0}; }
+
             /** @brief true iff this quantity represents a dimensionless value **/
             static constexpr bool is_dimensionless() {
                 return s_scaled_unit.is_dimensionless();
