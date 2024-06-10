@@ -219,8 +219,8 @@ namespace xo {
             constexpr auto divide_into(Dimensionless x) const {
                 using r_repr_type = std::common_type_t<repr_type, Dimensionless>;
 
-                return quantity(static_cast<r_repr_type>(x) / this->scale_,
-                                s_scaled_unit.reciprocal());
+                return quantity<s_scaled_unit.reciprocal(), r_repr_type>
+                    (static_cast<r_repr_type>(x) / this->scale_);
             }
 
             ///@}
