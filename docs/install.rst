@@ -65,7 +65,7 @@ Installing from source
 ----------------------
 
 Install scripts for `xo-unit`, `xo-ratio` and `xo-flatstring` depend on shared cmake macros
-and a bootstrap script `xo-cmake-config` fro `xo-cmake`.
+and a bootstrap script `xo-cmake-config` from `xo-cmake`.
 
 Preamble:
 
