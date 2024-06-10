@@ -371,6 +371,21 @@ namespace xo {
             // /* milligrams:grams */
         } /*TEST_CASE(quantity.mult)*/
 
+        TEST_CASE("quantity.currency", "[quantity.currency]") {
+            constexpr bool c_debug_flag = true;
+
+            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.quantity.time"));
+
+            constexpr auto ccy = qty::currency(1.0);
+            static_assert(quantity_concept<decltype(ccy)>);
+            static_assert(sizeof(ccy) == sizeof(double));
+            static_assert(ccy.scale() == 1.0);
+            static_assert(ccy.abbrev() == flatstring("ccy"));
+
+            log && log(xtag("ccy.abbrev", ccy.abbrev()));
+            REQUIRE(tostr(ccy) == "1ccy");
+        } /*TEST_CASE(quantity.currency)*/
+
         TEST_CASE("quantity.mult2", "[quantity.mult]") {
             constexpr auto ms = qty::milliseconds(1.0);
 
