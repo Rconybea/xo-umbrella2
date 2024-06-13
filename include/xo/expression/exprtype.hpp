@@ -24,6 +24,8 @@ namespace xo {
             primitive,
             /** function call **/
             apply,
+            /** function definition **/
+            lambda,
 
             /** not an expression.  comes last, counts entries **/
             n_expr
@@ -37,6 +39,7 @@ namespace xo {
             case exprtype::constant: return "constant";
             case exprtype::primitive: return "primitive";
             case exprtype::apply: return "apply";
+            case exprtype::lambda: return "lambda";
             default: break;
             }
 
