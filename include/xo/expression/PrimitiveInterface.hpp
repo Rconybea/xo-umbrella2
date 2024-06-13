@@ -22,6 +22,7 @@ namespace xo {
             }
 
             virtual const std::string & name() const = 0;
+            virtual int n_arg() const = 0;
 
             //virtual TypeDescr value_td() const override = 0;
             //virtual TaggedPtr value_tp() const override = 0;

@@ -42,6 +42,8 @@ namespace xo {
             // ----- PrimitiveInterface -----
 
             virtual std::string const & name() const { return name_; }
+            /** FIXME for now **/
+            virtual int n_arg() const { return 1; }
 
             // ----- ConstantInterface -----
 

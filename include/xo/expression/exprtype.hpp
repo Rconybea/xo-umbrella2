@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <ostream>
 #include <cstdint>
 
 namespace xo {
@@ -44,6 +45,14 @@ namespace xo {
 
         /** @brief number of built-in expression types,  repr convenient for array sizing **/
         static constexpr std::size_t n_exprtype = static_cast<std::size_t>(exprtype::n_expr);
+
+        inline std::ostream &
+        operator<<(std::ostream & os,
+                   exprtype x)
+        {
+            os << expr2str(x);
+            return os;
+        }
     } /*namespace ast*/
 } /*namespace xo*/
 

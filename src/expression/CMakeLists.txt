@@ -3,6 +3,7 @@
 set(SELF_LIB xo_expression)
 set(SELF_SRCS
     Expression.cpp
+    Apply.cpp
     #init_reflect.cpp
 )
 
