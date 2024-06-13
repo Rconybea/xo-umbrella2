@@ -5,6 +5,7 @@ set(SELF_SRCS
     Expression.cpp
     Apply.cpp
     Lambda.cpp
+    Variable.cpp
     #init_reflect.cpp
 )
 

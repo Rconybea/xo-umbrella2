@@ -26,6 +26,8 @@ namespace xo {
             apply,
             /** function definition **/
             lambda,
+            /** variable reference **/
+            variable,
 
             /** not an expression.  comes last, counts entries **/
             n_expr
@@ -40,6 +42,7 @@ namespace xo {
             case exprtype::primitive: return "primitive";
             case exprtype::apply: return "apply";
             case exprtype::lambda: return "lambda";
+            case exprtype::variable: return "variable";
             default: break;
             }
 

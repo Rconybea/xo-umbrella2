@@ -21,10 +21,17 @@ namespace xo {
             /** @p argv   Formal parameters, in left-to-right order
              *  @p body   Expression for body of this function
              **/
-            Lambda(const std::vector<std::string> & argv,
+            Lambda(const std::string & name,
+                   const std::vector<std::string> & argv,
                    const ref::rp<Expression> & body)
-                : Expression(exprtype::lambda), argv_{argv}, body_{body} {}
+                : Expression(exprtype::lambda), name_{name}, argv_{argv}, body_{body} {}
 
+            /** downcast from Expression **/
+            static ref::brw<Lambda> from(ref::brw<Expression> x) {
+                return ref::brw<Lambda>::from(x);
+            }
+
+            const std::string & name() const { return name_; }
             const std::vector<std::string> & argv() const { return argv_; }
             const ref::rp<Expression> & body() const { return body_; }
 
@@ -33,11 +40,27 @@ namespace xo {
             virtual void display(std::ostream & os) const override;
 
         private:
+            /** lambda name.  Initially supporting only form like
+             *    (define (foo x y z)
+             *      (+ (* x x) (* y y) (* z z)))
+             *
+             *  In any case need to supply names for distinct things-for-which-code-is-generated
+             *  so that they can be linked etc.
+             **/
+            std::string name_;
             /** formal argument names **/
             std::vector<std::string> argv_;
             /** function body **/
             ref::rp<Expression> body_;
         }; /*Lambda*/
+
+        inline ref::rp<Lambda>
+        make_lambda(const std::string & name,
+                    const std::vector<std::string> & argv,
+                    const ref::rp<Expression> & body)
+        {
+            return new Lambda(name, argv, body);
+        }
     } /*namespace ast*/
 } /*namespace xo*/
 

@@ -44,7 +44,7 @@ namespace xo {
 
         inline ref::rp<Apply>
         make_apply(const ref::rp<Expression> & fn,
-                              const ref::rp<Expression> & arg1) {
+                   const ref::rp<Expression> & arg1) {
             std::vector<ref::rp<Expression>> argv;
             argv.push_back(arg1);
 

@@ -8,6 +8,7 @@ namespace xo {
         void
         Lambda::display(std::ostream & os) const {
             os << "<Lambda"
+               << xtag("name", name_)
                << xtag("argv", argv_)
                << xtag("body", body_)
                << ">";
