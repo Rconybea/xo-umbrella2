@@ -19,6 +19,8 @@ $ xo-build --clone --configure --build --install xo-jit
 $ xo-build --clone --configure --build --install xo-pyutil
 $ xo-build --clone --configure --build --install xo-pyexpression
 ```
+note: can use `xo-build -n` to dry-run here
+
 ### copy `xo-pyjit` repository locally
 ```
 $ xo-build --clone xo-pyjit

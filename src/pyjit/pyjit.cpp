@@ -46,8 +46,8 @@ namespace xo {
                          x.print(ss);
                          return buf;
                      })
-                .def("__repr__",
-                     &Jit::display_string)
+//                .def("__repr__",
+//                     &Jit::display_string)
                 ;
 
         }
