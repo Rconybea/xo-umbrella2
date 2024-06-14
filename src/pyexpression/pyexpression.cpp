@@ -8,6 +8,7 @@
 #include "xo/expression/Primitive.hpp"
 #include "xo/expression/ConstantInterface.hpp"
 #include "xo/expression/Constant.hpp"
+#include "xo/expression/Variable.hpp"
 #include "xo/pyutil/pyutil.hpp"
 #include <pybind11/functional.h>
 #include <pybind11/stl.h>
@@ -23,6 +24,8 @@ namespace xo {
         using xo::ast::make_primitive;
         using xo::ast::ConstantInterface;
         using xo::ast::Constant;
+        using xo::ast::Variable;
+        using xo::ast::make_var;
         using xo::reflect::TaggedPtr;
         using xo::ref::rp;
         namespace py = pybind11;
@@ -116,6 +119,14 @@ namespace xo {
                 ;
 
             m.def("make_apply", &make_apply);
+
+            // ----- Variables -----
+
+            py::class_<Variable, Expression, rp<Variable>>(m, "Variable")
+                .def_property_readonly("name", &Variable::name, py::doc("variable name"))
+                ;
+
+            m.def("make_var", &make_var);
 
         } /*pyexpresion*/
     } /*namespace ast*/
