@@ -14,12 +14,15 @@
 
 extern "C" {
     /* never defined!  must not ever generate code that relies on these */
+    unsigned int fake_rdtsc();
     unsigned int fake_mm_getcsr();
-    unsigned int fake_mm_setcsr(unsigned int a);
+    unsigned int fake_mm_setcsr();
 }
 
+/* __rdtsc: clang encounters this from <immintrin.h>, for example */
+#define __rdtsc() fake_rdtsc()
 #define _mm_getcsr(a) fake_mm_getcsr()
-#define _mm_setcsr(a) fake_mm_setcsr(a)
+#define _mm_setcsr(a) fake_mm_setcsr()
 
 #endif
 
