@@ -10,28 +10,41 @@ Refcnt is a small shared library supplying intrusive reference counting.
 
 ## Getting Started
 
-### build + install `indentlog` dependency
+### build + install `xo-cmake` dependency (cmake macros)
 
-see [github/Rconybea/indentlog](https://github.com/Rconybea/indentlog)
+see [github/Rconybea/xo-cmake](https://github.com/Rconybea/xo-cmake)
+
+Installs a few cmake ingredients,  along with a build assistant for XO projects such as this one.
+
+### build + install XO deps
+```
+$ xo-build --clone --configure --build --install xo-indentlog
+```
 
 ### copy `refcnt` repository locally
 ```
-$ git clone git@github.com:rconybea/refcnt.git
-$ ls -d xo-refcnt
-xo-refcnt
+$ xo-build --clone xo-refcnt
+```
+
+or equivalently
+```
+$ git clone git@github.com:rconybea/refcnt.git xo-refcnt
 ```
 
 ### build + install
 ```
-$ cd xo-refcnt
-$ mkdir build
-$ cd build
-$ cmake -DCMAKE_MODULE_PATH=${INSTALL_PREFIX}/share/cmake  -DCMAKE_PREFIX_PATH=${INSTALL_PREFIX} -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} ..
-$ make
-$ make install
+$ xo-build --configure --build --install xo-refcnt
 ```
 
-`CMAKE_PREFIX_PATH` should point to prefix where `indentlog` is installed
+or equivalently:
+```
+$ mkdir xo-refcnt/.build
+$ cmake -DCMAKE_INSTALL_PREFIX=${PREFIX} -S xo-refcnt -B xo-refcnt/.build
+$ cmake --build xo-refcnt/.build
+$ cmake --install xo-refcnt/.build
+```
+
+`CMAKE_PREFIX_PATH` should point to the prefix where `xo-indentlog` is installed
 
 alternatively,  if you're a nix user:
 ```
@@ -44,10 +57,8 @@ $ nix-build -A xo-refcnt
 
 ### build for unit test coverage
 ```
-$ cd xo-refcnt
-$ mkdir ccov
-$ cd ccov
-$ cmake -DCMAKE_MODULE_PATH=${INSTALL_PREFIX}/share/cmake  -DCMAKE_PREFIX_PATH=${INSTALL_PREFIX} -DCODE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug ..
+$ cmake -DCMAKE_BUILD_TYPE=coverage -DCMAKE_PREFIX_PATH=${PREFIX} -S xo-refcnt -B xo-refcnt/.build-ccov
+$ cmake --build xo-refcnt/.build-ccov
 ```
 
 ### LSP support
