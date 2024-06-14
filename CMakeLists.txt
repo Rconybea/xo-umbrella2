@@ -23,6 +23,12 @@ configure_file(
     @ONLY
     )
 
+configure_file(
+    ${PROJECT_SOURCE_DIR}/bin/xo-build.in
+    ${PROJECT_BINARY_DIR}/xo-build
+    @ONLY
+    )
+
 install(
     FILES
     "cmake/xo_macros/xo-project-macros.cmake"
@@ -36,6 +42,7 @@ install(
     FILES
     "${PROJECT_BINARY_DIR}/xo-cmake-lcov-harness"
     "${PROJECT_BINARY_DIR}/xo-cmake-config"
+    "${PROJECT_BINARY_DIR}/xo-build"
     PERMISSIONS OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
     DESTINATION ${CMAKE_INSTALL_BINDIR}
 )

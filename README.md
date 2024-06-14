@@ -42,6 +42,8 @@ $ cp $PREFIX/share/xo-macros/xo-bootstrap-macros.cmake cmake/
 then in `foo/CMakeLists.txt`:
 ```
 include(cmake/xo-bootstrap-macros.cmake)
+
+xo_cxx_toplevel_options3()
 ```
 
 Now as long as `$PREFIX/bin` is in `PATH`:

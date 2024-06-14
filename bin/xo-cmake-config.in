@@ -13,7 +13,7 @@ display xo-cmake configuration variables
 
 Options:
   -u | --usage        brief help message
-  --help              this help message
+  -h | --help         this help message
   --cmake-module-path report directory providing xo-cmake macros (will use/appear-in CMAKE_MODULE_PATH)
   --lcov-exe          report path to 'lcov' executable
   --genhtml-exe       report path to 'genhtml' executable

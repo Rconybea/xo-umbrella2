@@ -1,0 +1,214 @@
+#!/usr/bin/env bash
+
+usage() {
+    echo "$0 [-u|--usage|-h|--help] [--xoname=NAME] [--repo]"
+}
+
+help() {
+    usage
+
+    cat <<EOF
+
+fetch and/or build xo component libraries
+
+Options:
+  -u | --usage      brief help message
+  -h | --help       this help message
+  --list            list known xo library
+  -n                dry-run: don't actually invoke state-changing commands
+  --xoname=NAME     operate on xo subsystem NAME
+  --repo            report github repo for NAME
+  --clone           git clone xo library NAME in current directory
+  --configure       run cmake for xo library NAME in immediate subdir
+                    Will use NAME/.build as build directory
+  --build           run cmake build for xo library NAME in immediate subdir
+  --install         run cmake install for xo library NAME in immediate subdir
+EOF
+}
+
+noop_flag=0
+xoname=
+repo_flag=0
+clone_flag=0
+configure_flag=0
+build_flag=0
+install_flag=0
+
+while [[ $# > 0 ]]; do
+    case "$1" in
+        -u | --usage)
+            cmd='usage'
+            ;;
+        -h | --help)
+            cmd='help'
+            ;;
+        -n)
+            noop_flag=1
+            ;;
+        --list)
+            cmd='list'
+            ;;
+        --xoname=*)
+            xoname="${1#*=}"
+            ;;
+        --repo)
+            repo_flag=1
+            ;;
+        --clone)
+            clone_flag=1
+            ;;
+        --configure|--config)
+            configure_flag=1
+            ;;
+        --build)
+            build_flag=1
+            ;;
+        --install)
+            install_flag=1
+            ;;
+        xo-*)
+            xoname="$1"
+            ;;
+        *)
+            usage
+            exit 1
+            ;;
+    esac
+
+    shift
+done
+
+subsystem_list() {
+    cat <<EOF
+xo-cmake
+xo-indentlog
+xo-refcnt
+xo-subsys
+xo-reflect
+xo-pyutil
+xo-pyreflect
+xo-expression
+xo-pyexpression
+xo-jit
+xo-pyjit
+EOF
+}
+
+XO_REPO_STEM="https://github.com/Rconybea"
+
+repo() {
+    xoname=$1
+
+    case "$xoname" in
+        xo-cmake)
+            echo "${XO_REPO_STEM}/xo-cmake.git"
+            ;;
+        xo-indentlog)
+            echo "${XO_REPO_STEM}/indentlog.git"
+            ;;
+        xo-refcnt)
+            echo "${XO_REPO_STEM}/refcnt.git"
+            ;;
+        xo-subsys)
+            echo "${XO_REPO_STEM}/subsys.git"
+            ;;
+        xo-reflect)
+            echo "${XO_REPO_STEM}/reflect.git"
+            ;;
+        xo-pyutil)
+            echo "${XO_REPO_STEM}/xo-pyutil.git"
+            ;;
+        xo-pyreflect)
+            echo "${XO_REPO_STEM}/xo-pyreflect.git"
+            ;;
+        xo-expression)
+            echo "${XO_REPO_STEM}/xo-expression.git"
+            ;;
+        xo-pyexpression)
+            echo "${XO_REPO_STEM}/xo-pyexpression.git"
+            ;;
+        xo-jit)
+            echo "${XO_REPO_STEM}/xo-jit.git"
+            ;;
+        xo-pyjit)
+            echo "${XO_REPO_STEM}/xo-pyjit.git"
+            ;;
+        *)
+            echo "$0: unknown xo component [${xoname}]"
+            return 1
+    esac
+
+    return 0
+}
+
+if [[ $cmd == 'usage' ]]; then
+    echo -n "usage: "
+    usage
+    exit 0
+elif [[ $cmd == 'help' ]]; then
+    echo -n "help; "
+    help
+    exit 0
+fi
+
+set -e
+
+if [[ $cmd == 'list' ]]; then
+    subsystem_list
+fi
+
+if [[ $repo_flag -eq 1 ]]; then
+    if [[ -n "$xoname" ]]; then
+        repo $xoname
+    fi
+fi
+
+if [[ $clone_flag -eq 1 ]]; then
+    if [[ -n "$xoname" ]]; then
+        url=$(repo $xoname)
+
+        cmd="git clone $url"
+
+        if [[ $noop_flag -eq 1 ]]; then
+            echo $cmd
+        else
+            $cmd
+        fi
+    fi
+fi
+
+if [[ $configure_flag -eq 1 ]]; then
+    if [[ -n "$xoname" ]]; then
+        cmd="cmake -DCMAKE_INSTALL_PREFIX=@CMAKE_INSTALL_PREFIX@ -S $xoname -B $xoname/.build"
+
+        if [[ $noop_flag -eq 1 ]]; then
+            echo $cmd
+        else
+            $cmd
+        fi
+    fi
+fi
+
+if [[ $build_flag -eq 1 ]]; then
+    if [[ -n "$xoname" ]]; then
+        cmd="cmake --build $xoname/.build -j"
+
+        if [[ $noop_flag -eq 1 ]]; then
+            echo $cmd
+        else
+            $cmd
+        fi
+    fi
+fi
+
+if [[ $install_flag -eq 1 ]]; then
+    if [[ -n "$xoname" ]]; then
+        cmd="cmake --install $xoname/.build"
+
+        if [[ $noop_flag -eq 1 ]]; then
+            echo $cmd
+        else
+            $cmd
+        fi
+    fi
+fi
