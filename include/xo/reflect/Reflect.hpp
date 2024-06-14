@@ -11,6 +11,7 @@
 #include "pointer/PointerTdx.hpp"
 #include "vector/VectorTdx.hpp"
 #include "struct/StructTdx.hpp"
+#include "function/FunctionTdx.hpp"
 #include "xo/refcnt/Refcounted.hpp"
 #include <vector>
 #include <array>
@@ -21,44 +22,69 @@ namespace xo {
         template<typename T>
         class EstablishTdx {
         public:
+            /** Create auxiliary reflection info for type @tparam T,
+             *  once full definition is available.
+             *
+             *  This includes:
+             *  - metatype
+             *  - component structure (types for navigable component objects)
+             *
+             **/
             static std::unique_ptr<TypeDescrExtra> make() { return AtomicTdx::make(); }
-        }; /*EstablishTdx*/
+        };
 
         // ----- xo::ref::rp<Object> -----
 
-        /* definition provide after decl for Reflect {} below */
         template<typename Object>
         class EstablishTdx<xo::ref::rp<Object>> {
         public:
+            /* definition provide after decl for Reflect {} below */
             static std::unique_ptr<TypeDescrExtra> make();
-        }; /*EstablishTdx*/
+        };
 
         // ----- std::array<Element, N> -----
 
-        /* definition provide after decl for Reflect {} below */
         template<typename Element, std::size_t N>
         class EstablishTdx<std::array<Element, N>> {
         public:
+            /* definition provide after decl for Reflect {} below */
             static std::unique_ptr<TypeDescrExtra> make();
-        }; /*EstablishTdx*/
+        };
 
         // ----- std::vector<Element> -----
 
-        /* definition provide after decl for Reflect {} below */
         template<typename Element>
         class EstablishTdx<std::vector<Element>> {
         public:
+            /* definition provide after decl for Reflect {} below */
             static std::unique_ptr<TypeDescrExtra> make();
-        }; /*EstablishTdx*/
+        };
 
         // ----- std::pair<Lhs, Rhs> -----
 
-        /* definition provide after decl for Reflect {} below */
         template<typename Lhs, typename Rhs>
         class EstablishTdx<std::pair<Lhs, Rhs>> {
         public:
+            /* definition provide after decl for Reflect {} below */
             static std::unique_ptr<TypeDescrExtra> make();
-        }; /*EstablishTdx*/
+        };
+
+        // ----- Retval (*)(A1 .. An) -----
+
+        template<typename Retval, typename... Args>
+        class EstablishTdx<Retval(*)(Args...)> {
+        public:
+            /* definition provided after decl for Reflect {} below */
+            static std::unique_ptr<TypeDescrExtra> make();
+        };
+
+        // ----- Retval (*)() -----
+
+        template <typename Retval>
+        class EstablishTdx<Retval(*)()> {
+            /* definition provided after decl for Reflect {} below */
+            static std::unique_ptr<TypeDescrExtra> make();
+        };
 
         // ----- MakeTagged -----
 
@@ -229,6 +255,46 @@ namespace xo {
 
             return StructTdx::pair<Lhs, Rhs>();
         } /*make*/
+
+        // ----- Retval (*) (A1 .. An) -----
+
+        namespace detail {
+            /** @class AssembleArgv
+             *  @brief create vector of complete TypeDescr objects comprising all template arguments
+             *
+             *  Use:
+             *    std::vector<TypeDescr> v;
+             *    AssembleArgv<Arg1, .., Argn>::append_argv(&v);
+             *    // do something with v
+             **/
+            template <typename... Args>
+            struct AssembleArgv;
+
+            template <>
+            struct AssembleArgv<> {
+                static void append_argv(std::vector<TypeDescr> * p_v) {}
+            };
+
+            template <typename Arg, typename... Rest>
+            struct AssembleArgv<Arg, Rest...> {
+                static void append_argv(std::vector<TypeDescr> * p_v) {
+                    p_v->push_back(Reflect::require<Arg>());
+                    AssembleArgv<Rest...>::append_argv(p_v);
+                }
+            };
+        } /*detail*/
+
+        /* declared above before
+         *   class Reflect { ... }
+         */
+        template <typename Retval, typename... Args>
+        std::unique_ptr<TypeDescrExtra>
+        EstablishTdx<Retval (*)(Args...)>::make() {
+            std::vector<TypeDescr> argv;
+            detail::AssembleArgv<Args...>::append_argv(&argv);
+
+            return FunctionTdx::make_function(Reflect::require<Retval>(), std::move(argv));
+        }
     } /*namespace reflect*/
 } /*namespace xo*/
 

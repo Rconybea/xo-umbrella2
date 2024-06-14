@@ -179,8 +179,10 @@ namespace xo {
                 }
             } /*recover_native*/
 
+            bool is_pointer() const { return this->tdextra_->is_pointer(); }
             bool is_vector() const { return this->tdextra_->is_vector(); }
             bool is_struct() const { return this->tdextra_->is_struct(); }
+            bool is_function() const { return this->tdextra_->is_function(); }
 
             /* given a T-instance object,  return tagged pointer with T replaced
              * by the most-derived-subtype of T to which *object belongs.
@@ -203,6 +205,7 @@ namespace xo {
             std::string const & struct_member_name(uint32_t i) const {
                 return this->tdextra_->struct_member_name(i);
             }
+
             /* fetch runtime description for i'th reflected instance variable.
              *
              * require:
@@ -215,6 +218,14 @@ namespace xo {
                 assert(sm);
                 return *sm;
             } /*struct_member*/
+
+            uint32_t n_fn_arg() const { return this->tdextra_->n_fn_arg(); }
+
+            /* require:
+             * - .is_function() = true
+             */
+            TypeDescr fn_retval() const { return this->tdextra_->fn_retval(); }
+            TypeDescr fn_arg(uint32_t i) const { return this->tdextra_->fn_arg(i); }
 
             void display(std::ostream & os) const;
             std::string display_string() const;

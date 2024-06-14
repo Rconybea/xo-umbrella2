@@ -59,9 +59,10 @@ namespace xo {
             void assign_address(void * x) { address_ = x; }
 
             bool is_universal_null() const { return (td_ == nullptr) && (address_ == nullptr); }
+            bool is_pointer() const { return td_ && td_->is_pointer(); }
             bool is_vector() const { return td_ && td_->is_vector(); }
             bool is_struct() const { return td_ && td_->is_struct(); }
-
+            bool is_function() const { return td_ && td_->is_function(); }
 
             /* returns pointer-to-T,  if in fact this tagged pointer is understood
              * to refer to a T-instance;  otherwise nullptr
@@ -71,11 +72,16 @@ namespace xo {
 
             uint32_t n_child() const {
                 return this->td_->n_child(this->address_);
-            } /*n_child*/
+            }
 
             TaggedPtr get_child(uint32_t i) const {
                 return this->td_->child_tp(i, this->address_);
-            } /*get_child*/
+            }
+
+            /* if reflected function (.is_function() = true):
+             * number of arguments to that function
+             */
+            uint32_t n_fn_arg() const { return this->td_->n_fn_arg(); }
 
             /* require:
              * - .is_struct() is true
