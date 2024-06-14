@@ -2,19 +2,45 @@
 
 ## Getting Started
 
-### Build + install dependencies
+### Build + install `xo-cmake` dependency
 
-- [github/Rconybea/xo-jit](https://github.com/Rconybea/xo-jit)
-- [github/Rconybea/xo-pyexpression](https://github.com/Rconybea/xo-pyexpression)
+- [github/Rconybea/xo-cmake](https://github.com/Rconybea/xo-cmake)
 
-### build + isntall
+Installs a few cmake ingredients,  along with a build assistant `xo-build` for XO projects such as this one.
+
+### build + install other necessary XO dependencies
+```
+$ xo-build --clone --configure --build --install xo-indentlog
+$ xo-build --clone --configure --build --install xo-refnct
+$ xo-build --clone --configure --build --install xo-subsys
+$ xo-build --clone --configure --build --install xo-reflect
+$ xo-build --clone --configure --build --install xo-expression
+$ xo-build --clone --configure --build --install xo-jit
+$ xo-build --clone --configure --build --install xo-pyutil
+$ xo-build --clone --configure --build --install xo-pyexpression
+```
+### copy `xo-pyjit` repository locally
+```
+$ xo-build --clone xo-pyjit
+```
+
+or equivalently
+```
+$ git clone git@github.com:Rconybea/xo-pyjit.git
+```
+
+### build + install xo-pyjit
+```
+$ xo-build --configure --build --install xo-pyjit
+```
+
+or equivalently:
 
 ```
-$ cd xo-pyjit
 $ PREFIX=/usr/local         # or preferred install location
-$ cmake -DCMAKE_INSTALL_PREFIX=$PREFIX -S . -B .build
-$ cmake --build .build -j
-$ cmake --install .build
+$ cmake -DCMAKE_INSTALL_PREFIX=$PREFIX -S xo-pyjit -B xo-pyjit/.build
+$ cmake --build xo-pyjit/.build -j
+$ cmake --install xo-pyjit/.build
 ```
 (also see .github/workflows/main.yml)
 
