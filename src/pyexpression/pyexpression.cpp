@@ -5,7 +5,10 @@
 #include "xo/expression/Expression.hpp"
 #include "xo/expression/ConstantInterface.hpp"
 #include "xo/expression/Constant.hpp"
+#include "xo/expression/PrimitiveInterface.hpp"
+#include "xo/expression/Primitive.hpp"
 #include "xo/pyutil/pyutil.hpp"
+#include <cmath>
 
 namespace xo {
     namespace ast {
@@ -13,6 +16,9 @@ namespace xo {
         using xo::ast::Expression;
         using xo::ast::ConstantInterface;
         using xo::ast::Constant;
+        using xo::ast::PrimitiveInterface;
+        using xo::ast::Primitive;
+        using xo::ast::make_primitive;
         using xo::reflect::TaggedPtr;
         using xo::ref::rp;
         namespace py = pybind11;
@@ -37,6 +43,8 @@ namespace xo {
                 .def("extype", &Expression::extype)
                 .def("__repr__", &Expression::display_string);
             ;
+
+            // ----- Constants -----
 
             py::class_<ConstantInterface,
                        Expression,
@@ -67,6 +75,31 @@ namespace xo {
                   },
                   py::arg("x"),
                   py::doc("make_constant(x) creates constant expression holding x [wip - only works for double"))
+                ;
+
+            // ----- Primitives -----
+
+            py::class_<PrimitiveInterface,
+                Expression,
+                       rp<PrimitiveInterface>>(m, "PrimitiveInterface")
+                .def("name", &PrimitiveInterface::name,
+                     py::doc("name of this primitive function;  use this name to invoke the function"))
+                .def("n_arg", &PrimitiveInterface::n_arg,
+                     py::doc("number of arguments to this function (not counting return value)"))
+                ;
+
+            using Fn_dbl_dbl_type = double (*)(double);
+
+            m.def("make_sqrt_pm", []() { return make_primitive<Fn_dbl_dbl_type>("sqrt", sqrt); },
+                  py::doc("create primitive representing the ::sqrt() function"));
+            m.def("make_sin_pm", []() { return make_primitive<Fn_dbl_dbl_type>("sin", ::sin); },
+                  py::doc("create primitive representing the ::sin() function"));
+            m.def("make_cos_pm", []() { return make_primitive<Fn_dbl_dbl_type>("cos", ::cos); },
+                  py::doc("create primitive representing the ::cos() function"));
+
+            py::class_<Primitive<double (*)(double)>,
+                       PrimitiveInterface,
+                       rp<Primitive<double (*)(double)>>>(m, "Primitive_double_double")
                 ;
 
         } /*pyexpresion*/
