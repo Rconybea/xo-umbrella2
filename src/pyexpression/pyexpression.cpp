@@ -9,6 +9,8 @@
 #include "xo/expression/ConstantInterface.hpp"
 #include "xo/expression/Constant.hpp"
 #include "xo/pyutil/pyutil.hpp"
+#include <pybind11/functional.h>
+#include <pybind11/stl.h>
 #include <cmath>
 
 namespace xo {
