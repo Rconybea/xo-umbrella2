@@ -9,6 +9,7 @@
 #include "xo/expression/ConstantInterface.hpp"
 #include "xo/expression/Constant.hpp"
 #include "xo/expression/Variable.hpp"
+#include "xo/expression/Lambda.hpp"
 #include "xo/pyutil/pyutil.hpp"
 #include <pybind11/functional.h>
 #include <pybind11/stl.h>
@@ -26,6 +27,8 @@ namespace xo {
         using xo::ast::Constant;
         using xo::ast::Variable;
         using xo::ast::make_var;
+        using xo::ast::Lambda;
+        using xo::ast::make_lambda;
         using xo::reflect::TaggedPtr;
         using xo::ref::rp;
         namespace py = pybind11;
@@ -111,9 +114,7 @@ namespace xo {
 
             // ----- Apply -----
 
-            py::class_<Apply,
-                       Expression,
-                       rp<Apply>>(m, "Apply")
+            py::class_<Apply, Expression, rp<Apply>>(m, "Apply")
                 .def_property_readonly("fn", &Apply::fn, py::doc("function to be invoked"))
                 .def_property_readonly("argv", &Apply::argv, py::doc("expressions (in position order) for function arguments"))
                 ;
@@ -128,6 +129,15 @@ namespace xo {
 
             m.def("make_var", &make_var);
 
+            // ----- Lambdas -----
+
+            py::class_<Lambda, Expression, rp<Lambda>>(m, "Lambda")
+                .def_property_readonly("name", &Lambda::name, py::doc("lambda name (maybe automatically generated?)"))
+                .def_property_readonly("argv", &Lambda::argv, py::doc("lambda formal parameters"))
+                .def_property_readonly("body", &Lambda::body, py::doc("lambda body expression"))
+                ;
+
+            m.def("make_lambda", &make_lambda);
         } /*pyexpresion*/
     } /*namespace ast*/
 } /*namespace xo*/
