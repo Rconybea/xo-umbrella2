@@ -3,10 +3,11 @@
 #include "pyexpression.hpp"
 #include "xo/pyreflect/pyreflect.hpp"
 #include "xo/expression/Expression.hpp"
-#include "xo/expression/ConstantInterface.hpp"
-#include "xo/expression/Constant.hpp"
+#include "xo/expression/Apply.hpp"
 #include "xo/expression/PrimitiveInterface.hpp"
 #include "xo/expression/Primitive.hpp"
+#include "xo/expression/ConstantInterface.hpp"
+#include "xo/expression/Constant.hpp"
 #include "xo/pyutil/pyutil.hpp"
 #include <cmath>
 
@@ -14,11 +15,12 @@ namespace xo {
     namespace ast {
         using xo::ast::exprtype;
         using xo::ast::Expression;
-        using xo::ast::ConstantInterface;
-        using xo::ast::Constant;
+        using xo::ast::make_apply;
         using xo::ast::PrimitiveInterface;
         using xo::ast::Primitive;
         using xo::ast::make_primitive;
+        using xo::ast::ConstantInterface;
+        using xo::ast::Constant;
         using xo::reflect::TaggedPtr;
         using xo::ref::rp;
         namespace py = pybind11;
@@ -80,7 +82,7 @@ namespace xo {
             // ----- Primitives -----
 
             py::class_<PrimitiveInterface,
-                Expression,
+                       Expression,
                        rp<PrimitiveInterface>>(m, "PrimitiveInterface")
                 .def("name", &PrimitiveInterface::name,
                      py::doc("name of this primitive function;  use this name to invoke the function"))
@@ -101,6 +103,17 @@ namespace xo {
                        PrimitiveInterface,
                        rp<Primitive<double (*)(double)>>>(m, "Primitive_double_double")
                 ;
+
+            // ----- Apply -----
+
+            py::class_<Apply,
+                       Expression,
+                       rp<Apply>>(m, "Apply")
+                .def_property_readonly("fn", &Apply::fn, py::doc("function to be invoked"))
+                .def_property_readonly("argv", &Apply::argv, py::doc("expressions (in position order) for function arguments"))
+                ;
+
+            m.def("make_apply", &make_apply);
 
         } /*pyexpresion*/
     } /*namespace ast*/
