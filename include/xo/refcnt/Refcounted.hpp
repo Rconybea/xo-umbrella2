@@ -28,7 +28,9 @@ namespace xo {
         public:
             intrusive_ptr() : ptr_(nullptr) {}
             intrusive_ptr(T * x) : ptr_(x) {
+#ifdef XO_INTRUSIVE_PTR_ENABLE_LOGGING
                 intrusive_ptr_log_ctor(sc_self_type, this, x);
+#endif
                 intrusive_ptr_add_ref(ptr_);
             } /*ctor*/
 
@@ -38,20 +40,26 @@ namespace xo {
              *       instrusive_ptr.
              */
             intrusive_ptr(intrusive_ptr const & x) : ptr_(x.get()) {
+#ifdef XO_INTRUSIVE_PTR_ENABLE_LOGGING
                 intrusive_ptr_log_cctor(sc_self_type, this, x.get());
+#endif
                 intrusive_ptr_add_ref(ptr_);
             } /*cctor*/
 
             /* create from instrusive pointer to some related type S */
             template<typename S>
             intrusive_ptr(intrusive_ptr<S> const & x) : ptr_(x.get()) {
+#ifdef XO_INTRUSIVE_PTR_ENABLE_LOGGING
                 intrusive_ptr_log_cctor(sc_self_type, this, x.get());
+#endif
                 intrusive_ptr_add_ref(ptr_);
             } /*cctor*/
 
             /* move ctor -- in this case don't need to update refcount */
             intrusive_ptr(intrusive_ptr && x) : ptr_{std::move(x.ptr_)} {
+#ifdef XO_INTRUSIVE_PTR_ENABLE_LOGGING
                 intrusive_ptr_log_mctor(sc_self_type, this, ptr_);
+#endif
                 /* since we're moving from x,  need to make sure x dtor
                  * doesn't decrement refcount
                  */
@@ -66,7 +74,9 @@ namespace xo {
             template<typename Y>
             intrusive_ptr(intrusive_ptr<Y> const & /*x*/, element_type * y) : ptr_{y} {
                 if (std::is_same<Y, element_type>()) {
+#ifdef XO_INTRUSIVE_PTR_ENABLE_LOGGING
                     intrusive_ptr_log_actor(sc_self_type, this, y);
+#endif
                     intrusive_ptr_add_ref(ptr_);
                     ; /* trivial aliasing,  proceed */
                 } else {
@@ -80,7 +90,9 @@ namespace xo {
             ~intrusive_ptr() {
                 T * x = this->ptr_;
 
+#ifdef XO_INTRUSIVE_PTR_ENABLE_LOGGING
                 intrusive_ptr_log_dtor(sc_self_type, this, x);
+#endif
 
                 this->ptr_ = nullptr;
 
@@ -103,7 +115,9 @@ namespace xo {
             intrusive_ptr<T> & operator=(intrusive_ptr<T> const & rhs) {
                 T * x = rhs.get();
 
+#ifdef XO_INTRUSIVE_PTR_ENABLE_LOGGING
                 intrusive_ptr_log_assign(sc_self_type, this, x);
+#endif
 
                 T * old = this->ptr_;
                 this->ptr_ = x;
@@ -115,7 +129,9 @@ namespace xo {
             } /*operator=*/
 
             intrusive_ptr<T> & operator=(intrusive_ptr<T> && rhs) {
+#ifdef XO_INTRUSIVE_PTR_ENABLE_LOGGING
                 intrusive_ptr_log_massign(sc_self_type, this, rhs.get());
+#endif
 
                 std::swap(this->ptr_, rhs.ptr_);
 
@@ -134,7 +150,8 @@ namespace xo {
         }; /*intrusive_ptr*/
 
         template<typename T>
-        inline bool operator==(intrusive_ptr<T> const & x, intrusive_ptr<T> const & y) { return intrusive_ptr<T>::compare(x, y) == 0; }
+        inline bool operator==(intrusive_ptr<T> const & x,
+                               intrusive_ptr<T> const & y) { return intrusive_ptr<T>::compare(x, y) == 0; }
 
         template<typename T>
         using rp = intrusive_ptr<T>;
@@ -171,6 +188,7 @@ namespace xo {
                 return 0;
         } /*intrusive_ptr_refcount*/
 
+#ifdef XO_INTRUSIVE_PTR_ENABLE_LOGGING
         extern void intrusive_ptr_set_debug(bool x);
         extern void intrusive_ptr_log_ctor(std::string_view const & self_type,
                                            void * this_ptr,
@@ -193,7 +211,8 @@ namespace xo {
                                              Refcount * x);
         extern void intrusive_ptr_log_massign(std::string_view const & self_type,
                                               void *this_ptr,
-                                       Refcount * x);
+                                              Refcount * x);
+#endif
         extern void intrusive_ptr_add_ref(Refcount * x);
         extern void intrusive_ptr_release(Refcount * x);
 
@@ -207,6 +226,15 @@ namespace xo {
             }
             return os;
         } /*operator<<*/
+
+        /** Wrap a (presumably non-reference-counted) class T so that it has a refcount.
+         **/
+        template <typename T>
+        class RefcountWrapper : public Refcount, public T {
+        public:
+            template<typename... Args>
+            RefcountWrapper(Args... args) : Refcount(), T(std::forward<Args...>(args...)) {}
+        };
 
         /* borrow a reference-counted pointer to pass down the stack
          * 1. borrowed pointer intended to replace:

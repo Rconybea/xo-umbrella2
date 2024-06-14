@@ -4,6 +4,7 @@
 
 namespace xo {
     namespace ref {
+#ifdef XO_INTRUSIVE_PTR_ENABLE_LOGGING
         namespace {
             /* verbose logging for intrusive_ptr */
             static bool s_logging_enabled = false;
@@ -89,6 +90,7 @@ namespace xo {
             if (s_logging_enabled)
                 intrusive_ptr_log_aux(self_type, "::m=", this_ptr, x);
         } /*intrusive_ptr_log_massign*/
+#endif
 
         void
         intrusive_ptr_add_ref(Refcount * x)
