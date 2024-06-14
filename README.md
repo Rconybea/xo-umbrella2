@@ -38,7 +38,7 @@ $ xo-build --configure --build --install xo-expression
 or equivalently:
 ```
 $ PREFIX=/usr/local  # or wherever you prefer
-$ cmake -DCMAKE_INSTALL_PREFIX=${PREFIX} -S xo-expression -B xo-reflect/.build
+$ cmake -DCMAKE_INSTALL_PREFIX=${PREFIX} -S xo-expression -B xo-jit/.build
 $ cmake --build xo-expression/.build
 $ cmake --install xo-expression/.build
 ```
