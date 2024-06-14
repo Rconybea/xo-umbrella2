@@ -1,7 +1,12 @@
 # build unittest reflect/utest
 
 set(SELF_EXECUTABLE_NAME utest.reflect)
-set(SELF_SOURCE_FILES reflect_utest_main.cpp StructReflector.test.cpp VectorTdx.test.cpp StructTdx.test.cpp)
+set(SELF_SOURCE_FILES
+    reflect_utest_main.cpp
+    StructReflector.test.cpp
+    VectorTdx.test.cpp
+    StructTdx.test.cpp
+    FunctionTdx.test.cpp)
 
 xo_add_utest_executable(${SELF_EXECUTABLE_NAME} ${SELF_SOURCE_FILES})
 
