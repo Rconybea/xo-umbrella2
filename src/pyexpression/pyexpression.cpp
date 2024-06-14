@@ -44,7 +44,7 @@ namespace xo {
 
             py::class_<Expression,
                        rp<Expression>>(m, "Expression")
-                .def("extype", &Expression::extype)
+                .def_property_readonly("extype", &Expression::extype)
                 .def("__repr__", &Expression::display_string);
             ;
 
