@@ -1,3 +1,5 @@
+# emacs configuration for workspace
+.projectile
 # clangd working space (see emacs+lsp)
 .cache
 # typical cmake build directory (source-tree-nephew)
