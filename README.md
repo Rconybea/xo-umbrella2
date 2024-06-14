@@ -21,26 +21,36 @@ Indentlog is a lightweight header-only library for console logging.
 ### build + install `xo-cmake` dependency (cmake macros)
 
 see [github/Rconybea/xo-cmake](https://github.com/Rconybea/xo-cmake)
-(almost trivial,  installs a few `.cmake` files)
+
+Installs a few cmake ingredients,  along with a build assistant for XO projects such as this one.
 
 ### copy repository locally
 
+Using `xo-build` (provided by `xo-cmake`):
 ```
-$ git clone git@github.com:rconybea/indentlog.git
-$ ls -d indentlog
-indentlog
+$ xo-build --clone xo-indentlog
+```
+
+or equivalently:
+```
+$ cd ~/proj
+$ git clone git@github.com:Rconybea/indentlog.git xo-indentlog
 ```
 
 ### build & install
 
+Using `xo-build`:
 ```
-$ cd indentlog
-$ mkdir build
-$ cd build
+$ xo-build --configure --build --install xo-indentlog
+```
+
+or equivalently:
+```
+$ mkdir xo-indentlog/.build
 $ PREFIX=/usr/local  # for example
-$ cmake -DCMAKE_MODULE_PATH=${PREFIX}/share/cmake  -DCMAKE_INSTALL_PREFIX=${PREFIX} ..
-$ make
-$ make install
+$ cmake -DCMAKE_INSTALL_PREFIX=${PREFIX} -S xo-indentlog -B xo-indentlog/.build
+$ cmake --build xo-indentlog/.build
+$ cmake --install xo-indentlog/.build
 ```
 
 For some more detail see [BUILD.md](BUILD.md)
