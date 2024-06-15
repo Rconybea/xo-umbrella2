@@ -49,9 +49,19 @@ namespace xo {
                      /* we're assuming llvm-generated code lives for as long as the Jit
                       * instance that created it.
                       *
-                      * RC 14jun2024 - I think this is true modulo use of llvm resource trackers.
+                      * RC 14jun2024 - I think this is true, modulo use of llvm resource trackers.
                       */
                      py::return_value_policy::reference_internal)
+                .def("lookup_dbl_dbl_fn",
+                     [](Jit & jit, const std::string & symbol) {
+                         auto llvm_addr = jit.lookup_symbol(symbol);
+
+                         auto fn_addr = llvm_addr.toPtr<double (*) (double)>();
+
+                         return new XferFn(fn_addr);
+                     })
+                ;
+
             py::class_<XferFn, rp<XferFn>>(m, "XferFn")
                 .def("__call__",
                      [](XferFn & self, double x) { return self(x); }
