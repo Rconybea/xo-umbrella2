@@ -7,6 +7,16 @@
 #include <pybind11/stl.h>
 
 namespace xo {
+    struct XferFn : public ref::Refcount {
+        using fptr_type = double (*) (double);
+
+        explicit XferFn(fptr_type fptr) : fptr_{fptr} {}
+
+        double operator() (double x) { return (*fptr_)(x); }
+
+        fptr_type fptr_;
+    };
+
     namespace jit {
         using xo::ast::Expression;
         using xo::ref::rp;
@@ -42,6 +52,10 @@ namespace xo {
                       * RC 14jun2024 - I think this is true modulo use of llvm resource trackers.
                       */
                      py::return_value_policy::reference_internal)
+            py::class_<XferFn, rp<XferFn>>(m, "XferFn")
+                .def("__call__",
+                     [](XferFn & self, double x) { return self(x); }
+                    )
                 ;
 
             py::class_<llvm::Value,
