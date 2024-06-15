@@ -4,6 +4,7 @@
 #include "xo/pyexpression/pyexpression.hpp"
 #include "xo/jit/Jit.hpp"
 #include "xo/pyutil/pyutil.hpp"
+#include <pybind11/stl.h>
 
 namespace xo {
     namespace jit {
