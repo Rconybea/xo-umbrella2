@@ -52,13 +52,66 @@ Assumes `xo-pyjit` installed to `~/local2/lib`,
 i.e. built with `PREFIX=~/local2`.
 ```
 PYTHONPATH=~/local2/lib:$PYTHONPATH python
->>> from xo_pyexpression import *
 >>> from xo_pyjit import *
->>> x=make_constant(3.14159)
+>>> from xo_pyexpression import *
+```
+
+create a jit from within python
+```
 >>> jit=Jit.make()
->>> code=jit.codegen(x)
->>> x.print
-double 3.141600e+00
+>>> jit.dump_execution_sesion()
+JITDylib "<main>" (ES: 0x0000000000446ee0, State = Open)
+Link order: [ ("<main>", MatchAllSymbols) ]
+Symbol table:
+```
+
+build an AST from within python
+```
+>>> x=make_var('x')                  # "x" a variable (context not yet known)
+>>> f1=make_sin_pm()                 # "sin()"
+>>> c1=make_apply(f1,x)              # "sin(x)"
+>>> f2=make_cos_pm()                 # "cos()"
+>>> c2=make_apply(f2,c1)             # "cos(sin(x))"
+>>> lm=make_lambda('foo', ['x'], c2) # "def foo(x): cos(sin(x))"
+>>> lm
+<Lambda :name foo :argv [x] :body <Apply :fn <Primitive :name cos :type "double (*)(double)" :value 1> :argv "[<Apply :fn <Primitive :name sin :type \"double (*)(double)\" :value 1> :argv \"[<Variable :name x>]\">]">>
+```
+
+generate llvm IR for our AST
+```
+>>> code=jit.codegen(lm)
+>>> print(code.print())
+define double @foo(double %x) {
+entry:
+  %calltmp = call double @sin(double %x)
+  %calltmp1 = call double @cos(double %calltmp)
+  ret double %calltmp1
+}
+```
+
+generate machine code for our AST,  lookup compiled function so we can invoke it directly
+```
+>>> jit.machgen_current_module()
+>>> jit.dump_execution_session()
+JITDylib "<main>" (ES: 0x0000000000446ee0, State = Open)
+Link order: [ ("<main>", MatchAllSymbols) ]
+Symbol table:
+    "foo": <not resolved>  [Callable] Never-Searched (Materializer 0x646fe0, xojit)
+>>> fn=jit.lookup_dbl_dbl_fn('foo')
+
+>>> jit.dump_execution_session()
+JITDylib "<main>" (ES: 0x0000000000446ee0, State = Open)
+Link order: [ ("<main>", MatchAllSymbols) ]
+Symbol table:
+    "cos": 0x7ffff7926670 [Data] Ready
+    "foo": 0x7fffee2b6000 [Callable] Ready
+    "sin": 0x7ffff7925e50 [Data] Ready
+```
+
+invoke just-compiled code!
+```
+>>> fn(22)
+0.999960827417674
 ```
 
 ## Development
