@@ -52,6 +52,9 @@ namespace xo {
                       * RC 14jun2024 - I think this is true, modulo use of llvm resource trackers.
                       */
                      py::return_value_policy::reference_internal)
+                .def("machgen_current_module", &Jit::machgen_current_module,
+                     py::doc("Make current module available for execution via the jit.\n"
+                             "Adds all functions generated since last call to this method."))
                 .def("lookup_dbl_dbl_fn",
                      [](Jit & jit, const std::string & symbol) {
                          auto llvm_addr = jit.lookup_symbol(symbol);
