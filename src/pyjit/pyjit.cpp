@@ -24,6 +24,12 @@ namespace xo {
                             py::doc("create Jit instance. Not threadsafe,"
                                     " but does not share resources with any other Jit instance"))
 
+                .def_property_readonly("target_triple", &Jit::target_triple,
+                                       py::doc("string describing target host for code generation"))
+                .def("get_function_name_v", &Jit::get_function_name_v,
+                     py::doc("get vector of function names defined in jit module"))
+                .def("dump_execution_session", &Jit::dump_execution_session,
+                     py::doc("write to console with state of all jit-owned dynamic libraries"))
                 .def("codegen",
                      [](Jit & jit, const rp<Expression> & expr) {
                          return jit.codegen(expr.borrow());
