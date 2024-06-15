@@ -67,9 +67,10 @@ namespace xo {
              *
              *  @pre @ref TypeDescrExtra::is_function() is true
              **/
-            virtual uint32_t n_fn_arg() const { return 0; }
             virtual const TypeDescrBase * fn_retval() const { return nullptr; }
+            virtual uint32_t n_fn_arg() const { return 0; }
             virtual const TypeDescrBase * fn_arg(uint32_t /*i_arg*/) const { return nullptr; }
+            virtual bool fn_is_noexcept() const { return false; }
         }; /*TypeDescrExtra*/
     } /*namespace reflect*/
 } /*namespace xo*/

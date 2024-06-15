@@ -226,6 +226,7 @@ namespace xo {
              */
             TypeDescr fn_retval() const { return this->tdextra_->fn_retval(); }
             TypeDescr fn_arg(uint32_t i) const { return this->tdextra_->fn_arg(i); }
+            bool fn_is_noexcept() const { return this->tdextra_->fn_is_noexcept(); }
 
             void display(std::ostream & os) const;
             std::string display_string() const;

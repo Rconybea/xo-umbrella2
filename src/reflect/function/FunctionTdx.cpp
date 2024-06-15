@@ -5,19 +5,28 @@
 
 namespace xo {
     namespace reflect {
-            /** create instance.  Will be invoked exactly once for each reflected function type **/
+        /** create instance.  Will be invoked exactly once for each reflected function type **/
         std::unique_ptr<FunctionTdx>
         FunctionTdx::make_function(TypeDescr retval_td,
-                                   std::vector<TypeDescr> arg_td_v)
+                                   std::vector<TypeDescr> arg_td_v,
+                                   bool is_noexcept)
         {
-            return std::unique_ptr<FunctionTdx>(new FunctionTdx(retval_td, std::move(arg_td_v)));
+            return std::unique_ptr<FunctionTdx>(new FunctionTdx(retval_td,
+                                                                is_noexcept,
+                                                                std::move(arg_td_v)));
         }
 
         FunctionTdx::FunctionTdx(TypeDescr retval_td,
+                                 bool is_noexcept,
                                  std::vector<TypeDescr> arg_td_v)
             : retval_td_{retval_td},
-              arg_td_v_{std::move(arg_td_v)}
-        {}
+              arg_td_v_{std::move(arg_td_v)},
+              is_noexcept_{is_noexcept}
+        {
+            if (!retval_td) {
+                throw std::runtime_error("FunctionTdx::ctor: null return type?");
+            }
+        }
 
         TaggedPtr
         FunctionTdx::child_tp(uint32_t /*i*/, void * /*object*/) const

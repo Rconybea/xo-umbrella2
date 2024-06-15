@@ -72,16 +72,38 @@ namespace xo {
         // ----- Retval (*)(A1 .. An) -----
 
         template<typename Retval, typename... Args>
-        class EstablishTdx<Retval(*)(Args...)> {
+        class EstablishTdx<Retval (*)(Args...)> {
         public:
             /* definition provided after decl for Reflect {} below */
             static std::unique_ptr<TypeDescrExtra> make();
         };
 
-        // ----- Retval (*)() -----
+        // ----- Retval (*)(A1 .. An) noexcept -----
 
-        template <typename Retval>
-        class EstablishTdx<Retval(*)()> {
+        template<typename Retval, typename... Args>
+        class EstablishTdx<Retval (*)(Args...) noexcept> {
+        public:
+            /* definition provided after decl for Reflect {} below */
+            static std::unique_ptr<TypeDescrExtra> make();
+        };
+
+        // ----- EstasblishFunctionTdx -------------------------------------
+
+        template <typename T>
+        class EstablishFunctionTdx;
+
+        // ----- Retval (*)(A1 .. An) -----
+
+        template<typename Retval, typename... Args>
+        class EstablishFunctionTdx<Retval (*)(Args...)> {
+        public:
+            /* definition provided after decl for Reflect {} below */
+            static std::unique_ptr<TypeDescrExtra> make();
+        };
+
+        template<typename Retval, typename... Args>
+        class EstablishFunctionTdx<Retval (*)(Args...) noexcept> {
+        public:
             /* definition provided after decl for Reflect {} below */
             static std::unique_ptr<TypeDescrExtra> make();
         };
@@ -170,6 +192,41 @@ namespace xo {
                 return retval_td;
             } /*require*/
 
+            /* can optionally use this when reflecting a function pointer.
+             * Should get the same result as reflect<T>(),
+             * but will not fallback to AtomicTdx if T is not recognized as a function pointer
+             */
+            template <typename T>
+            static TypeDescrW require_function() {
+                //static_assert(std::is_function_v<T>);
+
+                TypeDescrW retval_td = EstablishTypeDescr::establish<T>();
+
+                /* mark TypeDescr for T as complete (even though it isn't quite yet),
+                 * so that when we encounter recursive types,  reflection terminates.
+                 * For example consider type resulting from code like
+                 *
+                 *    typename T;
+                 *    using T = std::vector<T *>;
+                 *
+                 */
+                if (retval_td->mark_complete()) {
+                    /* control here on 2nd+later calls to require<T>().
+                     * in principle can immediately short-circuit.
+                     */
+                } else {
+                    /* control comes here the first time require<T>() runs */
+
+                    auto final_tdx = EstablishFunctionTdx<T>::make();
+
+                    retval_td->assign_tdextra(std::move(final_tdx));
+
+                    /* also need to require for each child */
+                }
+
+                return retval_td;
+            }
+
             /* Use:
              *    T * xyz = ...;
              *    TaggedPtr xyz_tp = Reflect::make_tp(xyz);
@@ -256,7 +313,7 @@ namespace xo {
             return StructTdx::pair<Lhs, Rhs>();
         } /*make*/
 
-        // ----- Retval (*) (A1 .. An) -----
+        // ----- Retval(A1 .. An) -----
 
         namespace detail {
             /** @class AssembleArgv
@@ -272,7 +329,7 @@ namespace xo {
 
             template <>
             struct AssembleArgv<> {
-                static void append_argv(std::vector<TypeDescr> * p_v) {}
+                static void append_argv(std::vector<TypeDescr> * /*p_v*/) {}
             };
 
             template <typename Arg, typename... Rest>
@@ -284,6 +341,28 @@ namespace xo {
             };
         } /*detail*/
 
+        template <typename Retval, typename... Args>
+        std::unique_ptr<TypeDescrExtra>
+        EstablishFunctionTdx<Retval (*)(Args...)>::make() {
+            std::vector<TypeDescr> argv;
+            detail::AssembleArgv<Args...>::append_argv(&argv);
+
+            return FunctionTdx::make_function(Reflect::require<Retval>(),
+                                              std::move(argv),
+                                              false /*!is_noexcept*/);
+        }
+
+        template <typename Retval, typename... Args>
+        std::unique_ptr<TypeDescrExtra>
+        EstablishFunctionTdx<Retval (*)(Args...) noexcept>::make() {
+            std::vector<TypeDescr> argv;
+            detail::AssembleArgv<Args...>::append_argv(&argv);
+
+            return FunctionTdx::make_function(Reflect::require<Retval>(),
+                                              std::move(argv),
+                                              true /*is_noexcept*/);
+        }
+
         /* declared above before
          *   class Reflect { ... }
          */
@@ -293,8 +372,25 @@ namespace xo {
             std::vector<TypeDescr> argv;
             detail::AssembleArgv<Args...>::append_argv(&argv);
 
-            return FunctionTdx::make_function(Reflect::require<Retval>(), std::move(argv));
+            return FunctionTdx::make_function(Reflect::require<Retval>(),
+                                              std::move(argv),
+                                              false /*!is_noexcept*/);
         }
+
+        /* declared above before
+         *   class Reflect { ... }
+         */
+        template <typename Retval, typename... Args>
+        std::unique_ptr<TypeDescrExtra>
+        EstablishTdx<Retval (*)(Args...) noexcept>::make() {
+            std::vector<TypeDescr> argv;
+            detail::AssembleArgv<Args...>::append_argv(&argv);
+
+            return FunctionTdx::make_function(Reflect::require<Retval>(),
+                                              std::move(argv),
+                                              true /*is_noexcept*/);
+        }
+
     } /*namespace reflect*/
 } /*namespace xo*/
 
