@@ -2,28 +2,49 @@
 
 ## Getting Started
 
-### build + install  dependencies
+### build + install `xo-cmake` dependency
 
-- [github/Rconybea/refcnt](https://github.com/Rconybea/refcnt)
-- [github/Rconybea/subsys](https://github.com/Rconybea/subsys)
+- [github/Rconybea/xo-cmake](https://github.com/Rconybea/xo-cmake)
 
-### build + install
+Installs a few cmake ingredients,  along with a build assistant `xo-build` for XO projects such as this one.
+
+### build + install other XO dependencies
 ```
-$ cd reflect
-$ mkdir build
-$ cd build
-$ INSTALL_PREFIX=/usr/local  # or wherever you prefer
-$ cmake -DCMAKE_MODULE_PATH=${INSTALL_PREFIX}/share/cmake -DCMAKE_PREFIX_PATH=${INSTALL_PREFIX} -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX} ..
-$ make
-$ make install
+$ xo-build --clone --configure --build --install xo-indentlog
+$ xo-build --clone --configure --build --install xo-refnct
+$ xo-build --clone --configure --build --install xo-subsys
+```
+
+Note: can use `-n` to dry-run here
+
+### copy `xo-reflect` repository locally
+```
+$ xo-build --clone xo-reflect
+```
+
+or equivalently
+```
+$ git clone git@github.com:Rconybea/xo-reflect.git
+```
+
+### build + install xo-reflect
+```
+$ xo-build --configure --build --install xo-reflect
+```
+
+or equivalently:
+
+```
+$ PREFIX=/usr/local  # or wherever you prefer
+$ cmake -DCMAKE_INSTALL_PREFIX=${PREFIX} -S xo-reflect -B xo-reflect/.build
+$ cmake --build xo-reflect/.build
+$ cmake --install xo-reflect/.build
 ```
 
 ### build for unit test coverage
 ```
-$ cd xo-reflect
-$ mkdir build-ccov
-$ cd build-ccov
-$ cmake -DCMAKE_MODULE_PATH=${INSTALL_PREFIX}/share/cmake  -DCMAKE_PREFIX_PATH=${INSTALL_PREFIX} -DCODE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug ..
+$ cmake -DCMAKE_BUILD_TYPE=coverage -DCMAKE_INSTALL_PREFIX=$PREFIX xo-reflect/.build-ccov
+$ cmake --build xo-reflect/.build-ccov
 ```
 
 ### LSP support
