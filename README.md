@@ -58,8 +58,8 @@ PYTHONPATH=~/local2/lib:$PYTHONPATH python
 
 create a jit from within python
 ```
->>> jit=Jit.make()
->>> jit.dump_execution_sesion()
+>>> mp=MachPipeline.make()
+>>> mp.dump_execution_sesion()
 JITDylib "<main>" (ES: 0x0000000000446ee0, State = Open)
 Link order: [ ("<main>", MatchAllSymbols) ]
 Symbol table:
@@ -79,7 +79,7 @@ build an AST from within python
 
 generate llvm IR for our AST
 ```
->>> code=jit.codegen(lm)
+>>> code=mp.codegen(lm)
 >>> print(code.print())
 define double @foo(double %x) {
 entry:
@@ -91,15 +91,15 @@ entry:
 
 generate machine code for our AST,  lookup compiled function so we can invoke it directly
 ```
->>> jit.machgen_current_module()
->>> jit.dump_execution_session()
+>>> mp.machgen_current_module()
+>>> mp.dump_execution_session()
 JITDylib "<main>" (ES: 0x0000000000446ee0, State = Open)
 Link order: [ ("<main>", MatchAllSymbols) ]
 Symbol table:
     "foo": <not resolved>  [Callable] Never-Searched (Materializer 0x646fe0, xojit)
->>> fn=jit.lookup_dbl_dbl_fn('foo')
+>>> fn=mp.lookup_dbl_dbl_fn('foo')
 
->>> jit.dump_execution_session()
+>>> mp.dump_execution_session()
 JITDylib "<main>" (ES: 0x0000000000446ee0, State = Open)
 Link order: [ ("<main>", MatchAllSymbols) ]
 Symbol table:

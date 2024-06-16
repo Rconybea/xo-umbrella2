@@ -2,7 +2,7 @@
 
 #include "pyjit.hpp"
 #include "xo/pyexpression/pyexpression.hpp"
-#include "xo/jit/Jit.hpp"
+#include "xo/jit/MachPipeline.hpp"
 #include "xo/pyutil/pyutil.hpp"
 #include <pybind11/stl.h>
 
@@ -29,19 +29,20 @@ namespace xo {
 
             m.doc() = "pybind11 plugin for xo-jit";
 
-            py::class_<Jit, rp<Jit>>(m, "Jit")
-                .def_static("make", &Jit::make,
-                            py::doc("create Jit instance. Not threadsafe,"
-                                    " but does not share resources with any other Jit instance"))
+            py::class_<MachPipeline, rp<MachPipeline>>(m, "MachPipeline")
+                .def_static("make", &MachPipeline::make,
+                            py::doc("Create machine pipeline for in-process code generation"
+                                    " and execution. Not threadsafe.\n"
+                                    "Does not share resources with any other instance"))
 
-                .def_property_readonly("target_triple", &Jit::target_triple,
+                .def_property_readonly("target_triple", &MachPipeline::target_triple,
                                        py::doc("string describing target host for code generation"))
-                .def("get_function_name_v", &Jit::get_function_name_v,
+                .def("get_function_name_v", &MachPipeline::get_function_name_v,
                      py::doc("get vector of function names defined in jit module"))
-                .def("dump_execution_session", &Jit::dump_execution_session,
+                .def("dump_execution_session", &MachPipeline::dump_execution_session,
                      py::doc("write to console with state of all jit-owned dynamic libraries"))
                 .def("codegen",
-                     [](Jit & jit, const rp<Expression> & expr) {
+                     [](MachPipeline & jit, const rp<Expression> & expr) {
                          return jit.codegen(expr.borrow());
                      },
                      py::arg("x"),
@@ -52,11 +53,11 @@ namespace xo {
                       * RC 14jun2024 - I think this is true, modulo use of llvm resource trackers.
                       */
                      py::return_value_policy::reference_internal)
-                .def("machgen_current_module", &Jit::machgen_current_module,
+                .def("machgen_current_module", &MachPipeline::machgen_current_module,
                      py::doc("Make current module available for execution via the jit.\n"
                              "Adds all functions generated since last call to this method."))
                 .def("lookup_dbl_dbl_fn",
-                     [](Jit & jit, const std::string & symbol) {
+                     [](MachPipeline & jit, const std::string & symbol) {
                          auto llvm_addr = jit.lookup_symbol(symbol);
 
                          auto fn_addr = llvm_addr.toPtr<double (*) (double)>();
