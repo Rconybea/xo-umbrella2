@@ -129,7 +129,7 @@ namespace xo {
                 .def_property_readonly("argv", &Apply::argv, py::doc("expressions (in position order) for function arguments"))
                 ;
 
-            m.def("make_apply", &make_apply);
+            m.def("make_apply", &Apply::make);
 
             // ----- Variables -----
 
