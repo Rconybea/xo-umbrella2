@@ -35,6 +35,9 @@ namespace xo {
             const std::vector<std::string> & argv() const { return argv_; }
             const ref::rp<Expression> & body() const { return body_; }
 
+            /** return number of arguments expected by this function **/
+            int n_arg() const { return argv_.size(); }
+
             // ----- Expression -----
 
             virtual void display(std::ostream & os) const override;

@@ -33,17 +33,20 @@ namespace xo {
                       FunctionPointer fnptr)
                 : PrimitiveInterface(),
                   name_{name},
-                  value_td_{Reflect::require<FunctionPointer>()},
+                  value_td_{Reflect::require_function<FunctionPointer>()},
                   value_{fnptr}
-                {}
+                {
+                    if (!value_td_->is_function())
+                        throw std::runtime_error("Primitive: expected function pointer");
+                    if (!value_td_->fn_retval())
+                        throw std::runtime_error("Primitive: expected non-null function return value");
+                }
 
             FunctionPointer value() const { return value_; }
 
             // ----- PrimitiveInterface -----
 
-            virtual std::string const & name() const { return name_; }
-            /** FIXME for now **/
-            virtual int n_arg() const { return 1; }
+            virtual std::string const & name() const override { return name_; }
 
             // ----- ConstantInterface -----
 
