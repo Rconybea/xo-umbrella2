@@ -26,22 +26,18 @@ add_definitions(${PROJECT_CXX_FLAGS})
 
 # ----------------------------------------------------------------
 
-#add_subdirectory(example)
-#add_subdirectory(utest)
-
 # ----------------------------------------------------------------
 
 set(SELF_LIB xo_pyutil)
 
 xo_add_headeronly_library(${SELF_LIB})
-#xo_include_headeronly_options2(${SELF_LIB})
+xo_install_library4(${SELF_LIB} ${PROJECT_NAME}Targets)
+xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
 
 # ----------------------------------------------------------------
-# standard install + provide find_package() support
 
-xo_install_library4(${SELF_LIB} ${PROJECT_NAME}Targets)
-
-xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
+add_subdirectory(example)
+#add_subdirectory(utest)
 
 # ----------------------------------------------------------------
 # install any additional components

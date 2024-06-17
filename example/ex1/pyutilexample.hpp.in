@@ -1,0 +1,21 @@
+/* @file pyutilexample.hpp */
+
+/* python requires module name = library name
+ * example:
+ *   PYBIND11_MODULE(XO_PYUTILEXAMPLE_MODULE_NAME(), m) { ... }
+ */
+#define XO_PYUTILEXAMPLE_MODULE_NAME() @SELF_LIB@
+
+/* example:
+ *   py::module_::import(XO_PYUTILEXAMPLE_MODULE_NAME_STR)
+ */
+#define XO_PYUTILEXAMPLE_MODULE_NAME_STR "@SELF_LIB@"
+
+/* example:
+ *   XO_PYUTILEXAMPLE_IMPORT_MODULE()
+ * replaces
+ *   py::module_::import("xo_pyexpression")
+ */
+#define XO_PYUTILEXAMPLE_IMPORT_MODULE() py::module_::import("@SELF_LIB@")
+
+/* end pyutilexample.hpp */
