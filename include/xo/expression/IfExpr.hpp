@@ -25,7 +25,7 @@ namespace xo {
             IfExpr(const ref::rp<Expression> & test,
                    const ref::rp<Expression> & when_true,
                    const ref::rp<Expression> & when_false)
-                : Expression(exprtype::if_expr),
+                : Expression(exprtype::ifexpr),
                   test_{test},
                   when_true_{when_true},
                   when_false_{when_false} {}
@@ -55,9 +55,9 @@ namespace xo {
         }; /*IfExpr*/
 
         inline ref::rp<IfExpr>
-        make_if_expr(const ref::rp<Expression> & test,
-                     const ref::rp<Expression> & when_true,
-                     const ref::rp<Expression> & when_false)
+        make_ifexpr(const ref::rp<Expression> & test,
+                    const ref::rp<Expression> & when_true,
+                    const ref::rp<Expression> & when_false)
         {
             return new IfExpr(test, when_true, when_false);
         }

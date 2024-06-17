@@ -20,6 +20,9 @@ namespace xo {
          *  - execute it on a VM
          *  - compile using LLVM
          *    see xo-jit/
+         *
+         *  Expressions are immutable.  This means they can resused
+         *  across jit interactions
          **/
         class Expression : public ref::Refcount {
         public:

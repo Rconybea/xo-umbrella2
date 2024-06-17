@@ -29,7 +29,7 @@ namespace xo {
             /** variable reference **/
             variable,
             /** if-then-else **/
-            if_expr,
+            ifexpr,
 
             /** not an expression.  comes last, counts entries **/
             n_expr
@@ -45,7 +45,7 @@ namespace xo {
             case exprtype::apply: return "apply";
             case exprtype::lambda: return "lambda";
             case exprtype::variable: return "variable";
-            case exprtype::if_expr: return "if_expr";
+            case exprtype::ifexpr: return "if_expr";
             default: break;
             }
 
