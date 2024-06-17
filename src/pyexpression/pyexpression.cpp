@@ -143,8 +143,10 @@ namespace xo {
 
             py::class_<Lambda, Expression, rp<Lambda>>(m, "Lambda")
                 .def_property_readonly("name", &Lambda::name, py::doc("lambda name (maybe automatically generated?)"))
+                .def_property_readonly("type_str", &Lambda::type_str, py::doc("string specifying lambda type. e.g. \"double(double,double)\""))
                 .def_property_readonly("argv", &Lambda::argv, py::doc("lambda formal parameters"))
                 .def_property_readonly("body", &Lambda::body, py::doc("lambda body expression"))
+                .def_property_readonly("n_arg", &Lambda::n_arg, py::doc("number of format parameters to this lambda function"))
                 ;
 
             m.def("make_lambda", &make_lambda);
