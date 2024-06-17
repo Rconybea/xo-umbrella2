@@ -49,6 +49,7 @@ namespace xo {
             std::vector<ref::rp<Expression>> argv_;
         }; /*Apply*/
 
+#ifdef NOT_USING
         namespace detail {
             /** Use:
              **   std::vector<ref::rp<Expression>>
@@ -59,7 +60,7 @@ namespace xo {
 
             template <>
             struct apply_push_args<> {
-                static void p9ush_all(std::vector<ref::rp<Expression>> * /*p_argv*/) {}
+                static void push_all(std::vector<ref::rp<Expression>> * /*p_argv*/) {}
             };
 
             template <typename Arg1, typename... Rest>
@@ -72,6 +73,7 @@ namespace xo {
                     };
             };
         }
+#endif
 
         /* reminder: initializer-lists are compile-time only */
         inline ref::rp<Apply>
