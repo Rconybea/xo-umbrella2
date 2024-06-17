@@ -22,9 +22,6 @@ add_definitions(${PROJECT_CXX_FLAGS})
 add_subdirectory(example)
 add_subdirectory(utest)
 
-# ----------------------------------------------------------------
-# provide find_package() support for projects using this library
-
 set(SELF_LIB xo_unit)
 xo_add_headeronly_library(${SELF_LIB})
 xo_install_library4(${SELF_LIB} ${PROJECT_NAME}Targets)

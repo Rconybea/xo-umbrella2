@@ -2,7 +2,7 @@
 
 Provides compile-time dimension checking and scaling.
 
-Similar to `boost::units`,  but:
+Similar in spirit to `boost::units`,  but:
 1. streamlined: assumes modern (c++20) support
 2. supports fractional dimensions (rational powers)
 
@@ -39,27 +39,41 @@ double x = a2.scale();
 
 See [full install instructions](https://rconybea.github.io/web/xo-unit/html/install.html) for other installation strategies.
 
-### build + install upstream dependencies
+### build + install `xo-cmake` dependency
 
 - [github/Rconybea/xo-cmake](https://github.com/Rconybea/xo-cmake)
-- [github/Rconybea/xo-flatstring](https://github.com/Rconybea/xo-flatstring)
-- [github/Rconybea/xo-ratio](https://github.com/Rconybea/xo-ratio)
 
-(Below assumes they're installed using some common value for `PREFIX`)
+Installs a few cmake ingredients,  along with build assistant `xo-build` for XO projects such as this one.
 
-### fetch xo-unit
+### build + install other XO dependencies
 ```
-$ cd ~/proj
+$ xo-build --clone --configure --build --install xo-flatstring
+$ xo-build --clone --configure --build --install xo-ratio
+```
+
+Note: can use `-n` to dry-run here
+
+### copy  `xo-unit` repository locally
+```
+$ xo-build --clone xo-unit
+```
+
+or equivalently
+```
 $ git clone https://github.com/rconybea/xo-unit
 ```
 
-### build + install
+### build + install `xo-unit`
 ```
-$ cd xo-unit
+$ xo-build --configure --build --install xo-unit
+```
+
+or equivalently:
+```
 $ PREFIX=/usr/local  # or wherever you prefer
-$ cmake -DCMAKE_INSTALL_PREFIX=${PREFIX} -S . -B .build
-$ cmake --build .build -j
-$ cmake --install .build
+$ cmake -DCMAKE_INSTALL_PREFIX=${PREFIX} -S xo-unit -B xo-unit/.build
+$ cmake --build xo-unit/.build -j
+$ cmake --install xo-unit/.build
 ```
 
 ### build documentation
@@ -71,24 +85,25 @@ When this completes,  can point local browser to `xo-unit/.build/docs/sphinx/ind
 
 ### build for unit test coverage
 
-Note that unit tests involve additional dependencies:
-- [github/Rconybea/xo-indentlog](https://github.com/Rconybea/indentlog)
-- [github/Rconybea/xo-randomgen](https://github.com/Rconybea/randomgen)
+(Note that unit tests involve additional dependencies):
+```
+$ xo-build --clone --configure --build --install xo-indentlog
+$ xo-build --clone --configure --build --install xo-randomgen
+```
 
 ```
-$ cd xo-unit
-$ mkdir .build-ccov
-$ cmake -DCMAKE_BUILD_TYPE=coverage -DCMAKE_INSTALL_PREFIX=${PREFIX} -DENABLE_TESTING=1 -B .build-ccov
+$ cmake -DCMAKE_BUILD_TYPE=coverage -DCMAKE_INSTALL_PREFIX=$PREFIX -DENABLE_TESTING=1 xo-unit/.build-ccov
+$ cmake --build xo-unit/.build-ccov
 ```
 
 run coverage-enabled unit tests:
 ```
-$ cmake --build .build-ccov -- test
+$ cmake --build xo-unit/.build-ccov -- test
 ```
 
 generate html+text coverage report:
 ```
-$ .build-ccov/gen-ccov
+$ xo-unit/.build-ccov/gen-ccov
 ```
 To see coverage,  can point local browser to `xo-unit/.build-ccov/ccov/html/index.html`
 
