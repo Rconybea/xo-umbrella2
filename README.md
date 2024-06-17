@@ -1,6 +1,13 @@
 # xo-expression library
 
 A library for representing abstract syntax trees for EGAD (a small expression-based language).
+See also
+- [github/Rconybea/xo-jit](https://github.com/Rconybea/xo-jit)
+  EGAD code generation via LLVM
+- [github/Rconybea/xo-pyexpression](https://github.com/Rconybea/xo-pyexpression)
+  build EGAD expressions from a python session
+- [github/Rconybea/xo-pyjit](https://github.com/Rconybea/xo-pyjit)
+  compile + run EGAD expressions from a python session
 
 ## Getting Started
 
