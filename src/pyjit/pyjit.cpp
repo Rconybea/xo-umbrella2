@@ -7,15 +7,25 @@
 #include <pybind11/stl.h>
 
 namespace xo {
-    struct XferFn : public ref::Refcount {
+    struct XferDbl2DblFn : public ref::Refcount {
         using fptr_type = double (*) (double);
 
-        explicit XferFn(fptr_type fptr) : fptr_{fptr} {}
+        explicit XferDbl2DblFn(fptr_type fptr) : fptr_{fptr} {}
 
         double operator() (double x) { return (*fptr_)(x); }
 
         fptr_type fptr_;
-    };
+    }; /*XferDbl2DblFn*/
+
+    struct XferDblDbl2DblFn : public ref::Refcount {
+        using fptr_type = double (*) (double, double);
+
+        explicit XferDblDbl2DblFn(fptr_type fptr) : fptr_{fptr} {}
+
+        double operator() (double x, double y) { return (*fptr_)(x, y); }
+
+        fptr_type fptr_;
+    }; /*XferDblDbl2DblFn*/
 
     namespace jit {
         using xo::ast::Expression;
@@ -56,19 +66,36 @@ namespace xo {
                 .def("machgen_current_module", &MachPipeline::machgen_current_module,
                      py::doc("Make current module available for execution via the jit.\n"
                              "Adds all functions generated since last call to this method."))
-                .def("lookup_dbl_dbl_fn",
+                /* double -> double */
+                .def("lookup_dbl2dbl_fn",
                      [](MachPipeline & jit, const std::string & symbol) {
                          auto llvm_addr = jit.lookup_symbol(symbol);
 
                          auto fn_addr = llvm_addr.toPtr<double (*) (double)>();
 
-                         return new XferFn(fn_addr);
+                         return new XferDbl2DblFn(fn_addr);
+                     })
+
+                /* (double x double) -> double */
+                .def("lookup_dbldbl2dbl_fn",
+                     [](MachPipeline & jit, const std::string & symbol) {
+                         auto llvm_addr = jit.lookup_symbol(symbol);
+
+                         auto fn_addr = llvm_addr.toPtr<double (*) (double, double)>();
+
+                         return new XferDblDbl2DblFn(fn_addr);
                      })
                 ;
 
-            py::class_<XferFn, rp<XferFn>>(m, "XferFn")
+
+            py::class_<XferDbl2DblFn, rp<XferDbl2DblFn>>(m, "XferDbl2DblFn")
                 .def("__call__",
-                     [](XferFn & self, double x) { return self(x); }
+                     [](XferDbl2DblFn & self, double x) { return self(x); }
+                    )
+                ;
+            py::class_<XferDblDbl2DblFn, rp<XferDblDbl2DblFn>>(m, "XferDblDbl2DblFn")
+                .def("__call__",
+                     [](XferDblDbl2DblFn & self, double x, double y) { return self(x, y); }
                     )
                 ;
 
