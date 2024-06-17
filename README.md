@@ -73,9 +73,9 @@ build an AST from within python
 ```
 >>> x=make_var('x')                  # "x" a variable (context not yet known)
 >>> f1=make_sin_pm()                 # "sin()"
->>> c1=make_apply(f1,[x])              # "sin(x)"
+>>> c1=make_apply(f1,[x])            # "sin(x)"
 >>> f2=make_cos_pm()                 # "cos()"
->>> c2=make_apply(f2,[c1])             # "cos(sin(x))"
+>>> c2=make_apply(f2,[c1])           # "cos(sin(x))"
 >>> lm=make_lambda('foo', ['x'], c2) # "def foo(x): cos(sin(x))"
 >>> lm
 <Lambda :name foo :argv [x] :body <Apply :fn <Primitive :name cos :type "double (*)(double)" :value 1> :argv "[<Apply :fn <Primitive :name sin :type \"double (*)(double)\" :value 1> :argv \"[<Variable :name x>]\">]">>
