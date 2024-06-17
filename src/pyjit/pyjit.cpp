@@ -3,6 +3,7 @@
 #include "pyjit.hpp"
 #include "xo/pyexpression/pyexpression.hpp"
 #include "xo/jit/MachPipeline.hpp"
+#include "xo/pyutil/pycaller.hpp"
 #include "xo/pyutil/pyutil.hpp"
 #include <pybind11/stl.h>
 
@@ -29,7 +30,10 @@ namespace xo {
 
     namespace jit {
         using xo::ast::Expression;
+        using xo::pyutil::pycaller_base;
+        using xo::pyutil::pycaller;
         using xo::ref::rp;
+        //using xo::ref::Refcount;
         using xo::ref::unowned_ptr;
         namespace py = pybind11;
 
@@ -39,6 +43,8 @@ namespace xo {
 
             m.doc() = "pybind11 plugin for xo-jit";
 
+            pycaller<double, double>::declare_once(m);
+            pycaller<double, double, double>::declare_once(m);
             py::class_<MachPipeline, rp<MachPipeline>>(m, "MachPipeline")
                 .def_static("make", &MachPipeline::make,
                             py::doc("Create machine pipeline for in-process code generation"
@@ -85,6 +91,30 @@ namespace xo {
 
                          return new XferDblDbl2DblFn(fn_addr);
                      })
+
+                .def("lookup_fn",
+                     [](MachPipeline & jit, const std::string & prototype, const std::string & symbol) -> pycaller_base* {
+                         auto llvm_addr = jit.lookup_symbol(symbol);
+
+                         /* note: llvm_addr.toPtr<..> always succeeds,
+                          *       event if pointer refers to an object of incompatible type
+                          *
+                          * note: return value policy is for python to own the wrapper
+                          */
+
+                         if((prototype == "double(double,double)") || (prototype == "double(*)(double,double)")) {
+                             auto fn_addr = llvm_addr.toPtr<double(*)(double,double)>();
+
+                             return new pycaller<double, double, double>(fn_addr);
+                             //return new XferDblDbl2DblFn(fn_addr);
+                         } else if ((prototype == "double(double)") || (prototype == "double(*)(double)")) {
+                             auto fn_addr = llvm_addr.toPtr<double(*)(double)>();
+
+                             return new pycaller<double, double>(fn_addr);
+                         } else {
+                             throw std::runtime_error(tostr("MachPipeline.lookup_fn: unknown function prototype",
+                                                            xtag("p", prototype)));
+                         }})
                 ;
 
 
