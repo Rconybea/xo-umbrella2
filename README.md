@@ -1,5 +1,9 @@
 # python bindings for llvm JIT for EGAD (xo-pyjit)
 
+## Links
+
+- [cheatsheet for pyobject<->c++ conversion](https://github.com/pybind/pybind11/issues/1201)
+
 ## Getting Started
 
 ### Build + install `xo-cmake` dependency
