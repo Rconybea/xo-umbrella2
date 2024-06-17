@@ -10,6 +10,7 @@
 #include "xo/expression/Constant.hpp"
 #include "xo/expression/Variable.hpp"
 #include "xo/expression/Lambda.hpp"
+#include "xo/expression/IfExpr.hpp"
 #include "xo/pyutil/pyutil.hpp"
 #include <pybind11/functional.h>
 #include <pybind11/stl.h>
@@ -29,6 +30,8 @@ namespace xo {
         using xo::ast::make_var;
         using xo::ast::Lambda;
         using xo::ast::make_lambda;
+        using xo::ast::IfExpr;
+        using xo::ast::make_ifexpr;
         using xo::reflect::TaggedPtr;
         using xo::ref::rp;
         namespace py = pybind11;
@@ -46,6 +49,7 @@ namespace xo {
                 .value("apply", exprtype::apply)
                 .value("lambda", exprtype::lambda)
                 .value("variable", exprtype::variable)
+                .value("ifexpr", exprtype::ifexpr)
                 ;
 
             py::class_<Expression,
@@ -138,6 +142,16 @@ namespace xo {
                 ;
 
             m.def("make_lambda", &make_lambda);
+
+            // ----- IfExpr -----
+
+            py::class_<IfExpr, Expression, rp<IfExpr>>(m, "IfExpr")
+                .def_property_readonly("test", &IfExpr::test, py::doc("test expression"))
+                .def_property_readonly("when_true", &IfExpr::when_true, py::doc("execute this expression when (and only when) test succeeds"))
+                .def_property_readonly("when_false", &IfExpr::when_false, py::doc("execute this expression when (and only when) test fails"))
+                ;
+
+            m.def("make_ifexpr", &make_ifexpr);
         } /*pyexpresion*/
     } /*namespace ast*/
 } /*namespace xo*/
