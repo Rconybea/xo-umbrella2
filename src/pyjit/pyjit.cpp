@@ -45,6 +45,7 @@ namespace xo {
 
             pycaller<double, double>::declare_once(m);
             pycaller<double, double, double>::declare_once(m);
+
             py::class_<MachPipeline, rp<MachPipeline>>(m, "MachPipeline")
                 .def_static("make", &MachPipeline::make,
                             py::doc("Create machine pipeline for in-process code generation"
@@ -72,6 +73,9 @@ namespace xo {
                 .def("machgen_current_module", &MachPipeline::machgen_current_module,
                      py::doc("Make current module available for execution via the jit.\n"
                              "Adds all functions generated since last call to this method."))
+                .def("dump_current_module", &MachPipeline::dump_current_module,
+                     py::doc("Dump contents of current module to console"))
+
                 /* double -> double */
                 .def("lookup_dbl2dbl_fn",
                      [](MachPipeline & jit, const std::string & symbol) {
