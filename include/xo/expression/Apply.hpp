@@ -20,10 +20,11 @@ namespace xo {
          **/
         class Apply : public Expression {
         public:
-            Apply(const ref::rp<Expression> & fn,
-                  const std::vector<ref::rp<Expression>> & argv)
-                : Expression(exprtype::apply), fn_{fn}, argv_(argv)
-                {}
+            static ref::rp<Apply> make(const ref::rp<Expression> & fn,
+                                       const std::vector<ref::rp<Expression>> & argv)
+                {
+                    return new Apply(fn, argv);
+                }
 
             /** downcast from Expression **/
             static ref::brw<Apply> from(ref::brw<Expression> x) {
@@ -36,19 +37,48 @@ namespace xo {
             virtual void display(std::ostream & os) const;
 
         private:
+            Apply(const ref::rp<Expression> & fn,
+                  const std::vector<ref::rp<Expression>> & argv)
+                : Expression(exprtype::apply), fn_{fn}, argv_(argv)
+                {}
+
+        private:
             /** function to invoke **/
             ref::rp<Expression> fn_;
             /** argument expressions,  in l-to-r order **/
             std::vector<ref::rp<Expression>> argv_;
         }; /*Apply*/
 
+        namespace detail {
+            /** Use:
+             **   std::vector<ref::rp<Expression>>
+             **/
+
+            template <typename... Args>
+            struct apply_push_args;
+
+            template <>
+            struct apply_push_args<> {
+                static void p9ush_all(std::vector<ref::rp<Expression>> * /*p_argv*/) {}
+            };
+
+            template <typename Arg1, typename... Rest>
+            struct apply_push_args<Arg1, Rest...> {
+                static void push_all(std::vector<ref::rp<Expression>> * p_argv,
+                                     const ref::rp<Expression> & x, Rest... rest)
+                    {
+                        p_argv->push_back(x);
+                        apply_push_args<Rest...>::push_all(p_argv, rest...);
+                    };
+            };
+        }
+
+        /* reminder: initializer-lists are compile-time only */
         inline ref::rp<Apply>
         make_apply(const ref::rp<Expression> & fn,
-                   const ref::rp<Expression> & arg1) {
-            std::vector<ref::rp<Expression>> argv;
-            argv.push_back(arg1);
-
-            return new Apply(fn, argv);
+                   const std::initializer_list<ref::rp<Expression>> args) {
+            std::vector<ref::rp<Expression>> argv(args);
+            return Apply::make(fn, argv);
         } /*make_apply*/
 
     } /*namespace ast*/
