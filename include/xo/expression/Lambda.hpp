@@ -23,8 +23,7 @@ namespace xo {
              **/
             Lambda(const std::string & name,
                    const std::vector<std::string> & argv,
-                   const ref::rp<Expression> & body)
-                : Expression(exprtype::lambda), name_{name}, argv_{argv}, body_{body} {}
+                   const ref::rp<Expression> & body);
 
             /** downcast from Expression **/
             static ref::brw<Lambda> from(ref::brw<Expression> x) {
@@ -32,6 +31,7 @@ namespace xo {
             }
 
             const std::string & name() const { return name_; }
+            const std::string & type_str() const { return type_str_; }
             const std::vector<std::string> & argv() const { return argv_; }
             const ref::rp<Expression> & body() const { return body_; }
 
@@ -51,6 +51,10 @@ namespace xo {
              *  so that they can be linked etc.
              **/
             std::string name_;
+            /** e.g.
+             *    "double(double,double)"  for function of two doubles that returns a double
+             **/
+            std::string type_str_;
             /** formal argument names **/
             std::vector<std::string> argv_;
             /** function body **/
