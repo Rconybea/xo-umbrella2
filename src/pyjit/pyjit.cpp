@@ -8,6 +8,7 @@
 #include <pybind11/stl.h>
 
 namespace xo {
+#ifdef OBSOLETE
     struct XferDbl2DblFn : public ref::Refcount {
         using fptr_type = double (*) (double);
 
@@ -27,6 +28,7 @@ namespace xo {
 
         fptr_type fptr_;
     }; /*XferDblDbl2DblFn*/
+#endif
 
     namespace jit {
         using xo::ast::Expression;
@@ -76,6 +78,7 @@ namespace xo {
                 .def("dump_current_module", &MachPipeline::dump_current_module,
                      py::doc("Dump contents of current module to console"))
 
+#ifdef OBSOLETE
                 /* double -> double */
                 .def("lookup_dbl2dbl_fn",
                      [](MachPipeline & jit, const std::string & symbol) {
@@ -95,6 +98,7 @@ namespace xo {
 
                          return new XferDblDbl2DblFn(fn_addr);
                      })
+#endif
 
                 .def("lookup_fn",
                      [](MachPipeline & jit, const std::string & prototype, const std::string & symbol) -> pycaller_base* {
@@ -122,6 +126,7 @@ namespace xo {
                 ;
 
 
+#ifdef OBSOLETE
             py::class_<XferDbl2DblFn, rp<XferDbl2DblFn>>(m, "XferDbl2DblFn")
                 .def("__call__",
                      [](XferDbl2DblFn & self, double x) { return self(x); }
@@ -132,6 +137,7 @@ namespace xo {
                      [](XferDblDbl2DblFn & self, double x, double y) { return self(x, y); }
                     )
                 ;
+#endif
 
             py::class_<llvm::Value,
                        unowned_ptr<llvm::Value>>(m, "llvm_Value")
