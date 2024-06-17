@@ -12,6 +12,9 @@
 namespace xo {
     namespace pyutil {
         struct pycaller_base {
+            using void_function_type = void (*)();
+            using factory_function_type = pycaller_base*(*)(void_function_type);
+
             virtual ~pycaller_base() = default;
 
             static pybind11::module & declare_once(pybind11::module & m) {
@@ -40,8 +43,11 @@ namespace xo {
         struct pycaller<Retval> : public pycaller_base {
             using self_type = pycaller<Retval>;
             using function_type = Retval (*)();
+            using void_function_type = void (*)();
 
-            pycaller(function_type addr) : fptr_{reinterpret_cast<function_type>(addr)} {}
+            pycaller(void_function_type addr) : fptr_{reinterpret_cast<function_type>(addr)} {}
+
+            static pycaller_base * make(void_function_type addr) { return new pycaller(addr); }
 
             static pybind11::module & declare_once(pybind11::module & m) {
                 static bool s_once = false;
@@ -68,8 +74,11 @@ namespace xo {
         struct pycaller<Retval, Arg1> : public pycaller_base {
             using self_type = pycaller<Retval, Arg1>;
             using function_type = Retval (*)(Arg1);
+            using void_function_type = void (*)();
 
-            pycaller(function_type addr) : fptr_{reinterpret_cast<function_type>(addr)} {}
+            pycaller(void_function_type addr) : fptr_{reinterpret_cast<function_type>(addr)} {}
+
+            static pycaller_base * make(void_function_type addr) { return new pycaller(addr); }
 
             static pybind11::module & declare_once(pybind11::module & m) {
                 static bool s_once = false;
@@ -99,8 +108,11 @@ namespace xo {
         struct pycaller<Retval, Arg1, Arg2> : public pycaller_base {
             using self_type = pycaller<Retval, Arg1, Arg2>;
             using function_type = Retval (*)(Arg1, Arg2);
+            using void_function_type = void (*)();
 
-            pycaller(function_type addr) : fptr_{reinterpret_cast<function_type>(addr)} {}
+            pycaller(void_function_type addr) : fptr_{reinterpret_cast<function_type>(addr)} {}
+
+            static pycaller_base * make(void_function_type addr) { return new pycaller(addr); }
 
             static pybind11::module & declare_once(pybind11::module & m) {
                 static bool s_once = false;
