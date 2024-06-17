@@ -110,10 +110,16 @@ namespace xo {
                   py::doc("create primitive representing the ::sin() function"));
             m.def("make_cos_pm", []() { return make_primitive<Fn_dbl_dbl_type>("cos", ::cos); },
                   py::doc("create primitive representing the ::cos() function"));
+            m.def("make_pow_pm", []() { return make_primitive<double (*)(double, double)>("pow", ::pow); },
+                  py::doc("create primitive representing the ::pow() function"));
 
             py::class_<Primitive<double (*)(double)>,
                        PrimitiveInterface,
                        rp<Primitive<double (*)(double)>>>(m, "Primitive_double_double")
+                ;
+            py::class_<Primitive<double (*)(double, double)>,
+                       PrimitiveInterface,
+                       rp<Primitive<double (*)(double, double)>>>(m, "Primitive_double_double_double")
                 ;
 
             // ----- Apply -----
