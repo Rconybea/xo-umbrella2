@@ -13,7 +13,7 @@ namespace xo {
     namespace pyutil {
         struct pycaller_base {
             virtual ~pycaller_base() = default;
-g
+
             static pybind11::module & declare_once(pybind11::module & m) {
                 static bool s_once = false;
                 if (!s_once) {
