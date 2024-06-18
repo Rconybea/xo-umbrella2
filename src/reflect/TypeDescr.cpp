@@ -15,6 +15,25 @@ namespace xo {
         uint32_t
         TypeId::s_next_id = 1;
 
+        std::string
+        FunctionTdxInfo::make_canonical_name() const
+        {
+            std::ostringstream ss;
+
+            ss << retval_td_->canonical_name();
+            ss << "(*)(";
+            for (std::size_t i = 0, n = arg_td_v_.size(); i < n; ++i) {
+                if (i > 0)
+                    ss << ",";
+                ss << arg_td_v_[i]->canonical_name();
+            }
+            ss << ")";
+
+            return ss.str();
+        } /*make_canonical_name*/
+
+        // ----- TypeDescrBase -----
+
         std::unordered_map<FunctionTdxInfo, TypeDescrBase*>
         TypeDescrBase::s_function_type_map;
 

@@ -148,18 +148,21 @@ namespace xo {
                 return true;
             }
 
+            /** construct canonical description for this type
+             *  will be like
+             *    Retval(*)(Arg1,..,Argn)
+             **/
+            std::string make_canonical_name() const;
+
+        public:
             /** function return value **/
             TypeDescr retval_td_ = nullptr;
             /** function arguments,  in positional order **/
             std::vector<TypeDescr> arg_td_v_;
             /** true iff function promises never to throw **/
             bool is_noexcept_ = false;
-        };
-    }
-}
+        }; /*FunctionTdxInfo*/
 
-namespace xo {
-    namespace reflect {
         class TypeDescrExtra;
 
         /* run-time description for a native c++ type */
