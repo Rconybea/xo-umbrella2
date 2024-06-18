@@ -124,11 +124,11 @@ namespace xo {
         } /*namespace*/
 
         TypeDescrBase::TypeDescrBase(TypeId id,
-                                     std::type_info const * tinfo,
+                                     std::type_info const * native_tinfo,
                                      std::string_view canonical_name,
                                      std::unique_ptr<TypeDescrExtra> tdextra)
             : id_{std::move(id)},
-              typeinfo_{tinfo},
+              native_typeinfo_{native_tinfo},
               canonical_name_{std::move(canonical_name)},
               short_name_{unqualified_name(canonical_name_)},
               tdextra_{std::move(tdextra)}

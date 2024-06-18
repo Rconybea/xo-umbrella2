@@ -27,7 +27,7 @@ or equivalently
 $ git clone git@github.com:Rconybea/xo-reflect.git
 ```
 
-### build + install xo-reflect
+### build + install `xo-reflect`
 ```
 $ xo-build --configure --build --install xo-reflect
 ```

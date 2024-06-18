@@ -149,28 +149,66 @@ namespace xo {
             static void print_reflected_types(std::ostream & os);
 
             TypeId id() const { return id_; }
-            std::type_info const * typeinfo() const { return typeinfo_; }
+            std::type_info const * native_typeinfo() const { return native_typeinfo_; }
             std::string_view const & canonical_name() const { return canonical_name_; }
             std::string_view const & short_name() const { return short_name_; }
             bool complete_flag() const { return complete_flag_; }
             TypeDescrExtra * tdextra() const { return tdextra_.get(); }
             Metatype metatype() const { return tdextra_->metatype(); }
 
-            /* true iff the type represented by *this is the same as the type T.
+            /* true iff the type represented by *this is the same as the type
+             * represented by T.
              *
              * Warning: comparing typeinfo address can give false negatives.
              *          suspect this is caused by problems coalescing linker symbols
              *          in the clang toolchain.
              */
             template<typename T>
+            [[deprecated]]
             bool is_native() const {
-                return ((this->typeinfo() == &typeid(T))
-                        || (this->typeinfo()->hash_code() == typeid(T).hash_code())
-                        || (this->typeinfo()->name() == typeid(T).name()));
+                if (this->native_typeinfo()) {
+                    /* reminder: typeid(T).name() is 'interesting' but not intended
+                     *           to be human-readable.  It's not how compiler labels
+                     *           a type for a human reader
+                     */
+                    return ((this->native_typeinfo() == &typeid(T))
+                            || (this->native_typeinfo()->hash_code() == typeid(T).hash_code())
+                            || (this->native_typeinfo()->name() == typeid(T).name()));
+                } else {
+                    /** if this type was established via Reflect::require<T1>(),
+                     *  then .canonical_name is computed by type_name<T>()
+                     *
+                     *  (see demangle.hh in xo-refcnt,  which post-processes __PRETTY_FUNCTION__
+                     *   or __FUNCSIG__)
+                     *
+                     *  To manually construct an equivalent type,
+                     *  it's necessary to:
+                     *  1. construct a unique and unambiguous canonical name for the type
+                     *  2. be aware that type will only be recognized as equivalent to
+                     *     a natively-reflected type if canonical name matches exactly.
+                     **/
+
+                    /** FOR NOW: give up. **/
+                    throw std::runtime_error("TypeDescrBase::is_native: not implemented for manually-constructed TypeDescr objects.  Prefer is_native2()");
+                }
             } /*is_native*/
 
-            /* safe downcast -- like dynamic_cast<>,  but does not require a source type */
+            /** safe downcast -- like dynamic_cast<>,  but does not require a source type.
+             *
+             *  TODO: need variation on this to correctly-handle function types,
+             *        since for exampple cast from void* -> void (*)() is not allowed
+             *
+             *  WARNING: relies on deprecated is_native<T>().  Application code should prefer any of:
+             *  1. recover_native2(src_td, src_address)
+             *  2. Reflect::recover_native<T>(src_td, src_address)
+             *  3. TaggedPtr(src_td,src_address).recover_native<T>()
+             *  instead of src_td->recover_native<T>()
+             *
+             *  (note: awkwardness here is that we don't have access to {Reflect.hpp, TaggedPtr.hpp}
+             *   from this .hpp file,  since TypeDescr.hpp is included by those headers)
+             **/
             template<typename T>
+            [[deprecated]]
             T * recover_native(void * address) const {
                 if (this->is_native<T>()) {
                     return reinterpret_cast<T *>(address);
@@ -178,6 +216,22 @@ namespace xo {
                     return nullptr;
                 }
             } /*recover_native*/
+
+            /** safe downcast -- like dynamic_cast<>,  but does not require a source type.
+             *
+             *  Application code should prefer TaggedPtr::recover_native<T>()
+             *
+             *  TODO: need variation on this to correctly-handle function types,
+             *        since for exampple cast from void* -> void (*)() is not allowed
+             **/
+            template<typename T>
+            T * recover_native2(TypeDescr address_td, void * address) const {
+                if (this == address_td) {
+                    return reinterpret_cast<T *>(address);
+                } else {
+                    return nullptr;
+                }
+            } /*recover_native2*/
 
             bool is_pointer() const { return this->tdextra_->is_pointer(); }
             bool is_vector() const { return this->tdextra_->is_vector(); }
@@ -255,7 +309,9 @@ namespace xo {
              *   - s_type_table_map[TypeInfoRef(x->typeinfo())] = x
              */
 
-            /* hashmap of all TypeDescr instances, indexed by .  singleton */
+            /* hashmap of all native TypeDescr instances, indexed by typeinfo.
+             * singleton.
+             */
             static std::unordered_map<TypeInfoRef, std::unique_ptr<TypeDescrBase>> s_type_table_map;
             /* hashmap of (presumed) duplicate TypeInfoRef values.
              * This happens with clang sometimes when the same type is referenced
@@ -269,8 +325,13 @@ namespace xo {
         private:
             /* unique id# for this type */
             TypeId id_;
-            /* typeinfo for type T */
-            std::type_info const * typeinfo_ = nullptr;
+            /** typeinfo for type T,  if available.  nullptr otherwise.
+             *
+             *  1. Always available for type-descriptions constructed via Reflect::require<T>.
+             *  2. Always missing for manually-constructed TypeDescr instances, for example
+             *     see Lambda.cpp in xo-expression.
+             **/
+            std::type_info const * native_typeinfo_ = nullptr;
             /* canonical name for this type (see demangle.hpp for type_name<T>())
              * e.g.
              *   xo::option::Px2

@@ -227,6 +227,15 @@ namespace xo {
                 return retval_td;
             }
 
+            /** given address @p src_address of a value with type described by @p src,
+             *  return typed pointer of type @tparam T,  provided that @p src_td
+             *  actually describes @tparam T.   Otherwise returns nullptr
+             **/
+            template <typename T>
+            static T * recover_native(TypeDescr src_td, void * src_address) {
+                return TaggedPtr(src_td, src_address).recover_native<T>();
+            }
+
             /* Use:
              *    T * xyz = ...;
              *    TaggedPtr xyz_tp = Reflect::make_tp(xyz);

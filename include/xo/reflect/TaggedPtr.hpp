@@ -68,7 +68,7 @@ namespace xo {
              * to refer to a T-instance;  otherwise nullptr
              */
             template<typename T>
-            T * recover_native() const { return this->td_->recover_native<T>(this->address_); }
+            T * recover_native() const { return this->td_->recover_native2<T>(this->td_, this->address_); }
 
             uint32_t n_child() const {
                 return this->td_->n_child(this->address_);
