@@ -11,17 +11,21 @@ namespace xo {
                                    std::vector<TypeDescr> arg_td_v,
                                    bool is_noexcept)
         {
-            return std::unique_ptr<FunctionTdx>(new FunctionTdx(retval_td,
-                                                                is_noexcept,
-                                                                std::move(arg_td_v)));
+            return make_function(FunctionTdxInfo(retval_td,
+                                                 std::move(arg_td_v),
+                                                 is_noexcept));
         }
 
-        FunctionTdx::FunctionTdx(TypeDescr retval_td,
-                                 bool is_noexcept,
-                                 std::vector<TypeDescr> arg_td_v)
-            : info_{retval_td, std::move(arg_td_v), is_noexcept}
+        std::unique_ptr<FunctionTdx>
+        FunctionTdx::make_function(const FunctionTdxInfo & fn_info)
         {
-            if (!retval_td) {
+            return std::unique_ptr<FunctionTdx>(new FunctionTdx(fn_info));
+        }
+
+        FunctionTdx::FunctionTdx(const FunctionTdxInfo & fn_info)
+            : info_{fn_info}
+        {
+            if (!info_.retval_td_) {
                 throw std::runtime_error("FunctionTdx::ctor: null return type?");
             }
         }

@@ -24,6 +24,10 @@ namespace xo {
             static std::unique_ptr<FunctionTdx> make_function(TypeDescr retval_td,
                                                               std::vector<TypeDescr> arg_td_v,
                                                               bool is_noexcept);
+            /** create instance from FunctionTdxInfo
+             *  @param fn_info.   function ingredients -- return type, arg types, noexcept
+             **/
+            static std::unique_ptr<FunctionTdx> make_function(const FunctionTdxInfo & fn_info);
 
             // ----- Inherited from TypeDescrExtra -----
 
@@ -39,9 +43,7 @@ namespace xo {
             virtual bool fn_is_noexcept() const override { return info_.is_noexcept_; }
 
         private:
-            FunctionTdx(TypeDescr retval_td,
-                        bool is_noexcept,
-                        std::vector<TypeDescr> arg_td_v);
+            FunctionTdx(const FunctionTdxInfo & fn_info);
 
         private:
             /** ingredients in complete function type description **/
