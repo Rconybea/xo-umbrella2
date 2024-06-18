@@ -4,6 +4,7 @@
 #include "TaggedPtr.hpp"
 #include "TypeDescrExtra.hpp"
 #include "atomic/AtomicTdx.hpp"
+#include "function/FunctionTdx.hpp"
 #include "xo/indentlog/scope.hpp"
 
 namespace xo {
