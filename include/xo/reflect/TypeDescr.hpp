@@ -190,6 +190,8 @@ namespace xo {
                                       std::unique_ptr<TypeDescrExtra> tdextra);
 
             /* print table of reflected types to os */
+            /** lookup type by canonical name **/
+            static TypeDescr lookup_by_name(const std::string & canonical_name);
             static void print_reflected_types(std::ostream & os);
 
             TypeId id() const { return id_; }

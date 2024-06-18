@@ -146,6 +146,19 @@ namespace xo {
             return new_slot.get();
         } /*require*/
 
+        TypeDescr
+        TypeDescrBase::lookup_by_name(const std::string & name) {
+            auto ix = s_canonical_type_table_map.find(name);
+
+            if (ix == s_canonical_type_table_map.end()) {
+                throw std::runtime_error(tostr("TypeDescrBase::lookup_by_name"
+                                               ": no registered type with canonical name T",
+                                               xtag("T", name)));
+            }
+
+            return ix->second;
+        } /*lookup_by_name*/
+
         void
         TypeDescrBase::print_reflected_types(std::ostream & os)
         {
