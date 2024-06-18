@@ -32,10 +32,11 @@ namespace xo {
             virtual TaggedPtr child_tp(uint32_t i, void * object) const override;
             const std::string & struct_member_name(uint32_t i) const override;
 
-            virtual TypeDescr fn_retval() const override { return retval_td_; }
-            virtual uint32_t n_fn_arg() const override { return arg_td_v_.size(); }
-            virtual TypeDescr fn_arg(uint32_t i) const override { return arg_td_v_[i]; }
-            virtual bool fn_is_noexcept() const override { return is_noexcept_; }
+            virtual const FunctionTdxInfo * fn_info() const override { return &info_; }
+            virtual TypeDescr fn_retval() const override { return info_.retval_td_; }
+            virtual uint32_t n_fn_arg() const override { return info_.arg_td_v_.size(); }
+            virtual TypeDescr fn_arg(uint32_t i) const override { return info_.arg_td_v_[i]; }
+            virtual bool fn_is_noexcept() const override { return info_.is_noexcept_; }
 
         private:
             FunctionTdx(TypeDescr retval_td,
@@ -43,12 +44,8 @@ namespace xo {
                         std::vector<TypeDescr> arg_td_v);
 
         private:
-            /** function return value **/
-            TypeDescr retval_td_;
-            /** function arguments,  in positional order **/
-            std::vector<TypeDescr> arg_td_v_;
-            /** true iff function promises never to throw **/
-            bool is_noexcept_ = false;
+            /** ingredients in complete function type description **/
+            FunctionTdxInfo info_;
         }; /*FunctionTdx*/
     } /*namespace reflect*/
 } /*namespace xo*/

@@ -11,6 +11,7 @@ namespace xo {
     namespace reflect {
         /* forward-declaring here.  see [reflect/struct/StructMember.hpp] */
         class StructMember;
+        class FunctionTdxInfo;
         class TypeDescrBase;
         class TaggedPtr;
 
@@ -67,6 +68,7 @@ namespace xo {
              *
              *  @pre @ref TypeDescrExtra::is_function() is true
              **/
+            virtual const FunctionTdxInfo * fn_info() const { return nullptr; }
             virtual const TypeDescrBase * fn_retval() const { return nullptr; }
             virtual uint32_t n_fn_arg() const { return 0; }
             virtual const TypeDescrBase * fn_arg(uint32_t /*i_arg*/) const { return nullptr; }

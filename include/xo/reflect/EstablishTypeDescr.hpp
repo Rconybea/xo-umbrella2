@@ -40,7 +40,7 @@ namespace xo {
             template<typename T>
             static TypeDescrW establish() {
                 TypeDescrW td = TypeDescrBase::require(&typeid(T),
-                                                       type_name<T>(),
+                                                       std::string(type_name<T>()),
                                                        nullptr);
 
 #ifdef NOT_USING

@@ -19,9 +19,7 @@ namespace xo {
         FunctionTdx::FunctionTdx(TypeDescr retval_td,
                                  bool is_noexcept,
                                  std::vector<TypeDescr> arg_td_v)
-            : retval_td_{retval_td},
-              arg_td_v_{std::move(arg_td_v)},
-              is_noexcept_{is_noexcept}
+            : info_{retval_td, std::move(arg_td_v), is_noexcept}
         {
             if (!retval_td) {
                 throw std::runtime_error("FunctionTdx::ctor: null return type?");

@@ -116,6 +116,50 @@ namespace xo {
         } /*namespace detail*/
 #endif
 
+        /* hashable contents of a FunctionTdx instance (without requiring decl of TypeDescrExtra),
+         * for unique-ification of manually-constructed function types
+         */
+        struct FunctionTdxInfo {
+            FunctionTdxInfo() = default;
+            FunctionTdxInfo(TypeDescr retval_td,
+                            const std::vector<TypeDescr> & arg_td_v,
+                            bool is_noexcept)
+                : retval_td_{retval_td},
+                  arg_td_v_{arg_td_v},
+                  is_noexcept_{is_noexcept}
+                {}
+
+            /** compare two FunctionTdxInfo objects for equality
+             **/
+            inline bool operator==(const FunctionTdxInfo & other) const noexcept {
+                if (retval_td_ != other.retval_td_)
+                    return true;
+                if (arg_td_v_.size() != other.arg_td_v_.size())
+                    return false;
+
+                for (std::size_t i = 0, n = arg_td_v_.size(); i < n; ++i) {
+                    if (arg_td_v_[i] != other.arg_td_v_[i])
+                        return false;
+                }
+
+                if (is_noexcept_ != other.is_noexcept_)
+                    return false;
+
+                return true;
+            }
+
+            /** function return value **/
+            TypeDescr retval_td_ = nullptr;
+            /** function arguments,  in positional order **/
+            std::vector<TypeDescr> arg_td_v_;
+            /** true iff function promises never to throw **/
+            bool is_noexcept_ = false;
+        };
+    }
+}
+
+namespace xo {
+    namespace reflect {
         class TypeDescrExtra;
 
         /* run-time description for a native c++ type */
@@ -130,8 +174,8 @@ namespace xo {
              * introducing this for unit testing
              */
             static bool is_reflected(std::type_info const * tinfo) {
-                return (s_type_table_map.find(TypeInfoRef(tinfo))
-                        != s_type_table_map.end());
+                return (s_native_type_table_map.find(TypeInfoRef(tinfo))
+                        != s_native_type_table_map.end());
             } /*is_reflected*/
 
             /* NOTE:
@@ -141,17 +185,17 @@ namespace xo {
              *   See FAQ
              *     [Build Issues|Q2 - dynamic_cast<Foo<*>> fails]
              */
-            static TypeDescrW require(std::type_info const * tinfo,
-                                      std::string_view canonical_name,
+            static TypeDescrW require(const std::type_info * tinfo,
+                                      const std::string & canonical_name,
                                       std::unique_ptr<TypeDescrExtra> tdextra);
 
             /* print table of reflected types to os */
             static void print_reflected_types(std::ostream & os);
 
             TypeId id() const { return id_; }
-            std::type_info const * native_typeinfo() const { return native_typeinfo_; }
-            std::string_view const & canonical_name() const { return canonical_name_; }
-            std::string_view const & short_name() const { return short_name_; }
+            const std::type_info * native_typeinfo() const { return native_typeinfo_; }
+            const std::string & canonical_name() const { return canonical_name_; }
+            const std::string_view & short_name() const { return short_name_; }
             bool complete_flag() const { return complete_flag_; }
             TypeDescrExtra * tdextra() const { return tdextra_.get(); }
             Metatype metatype() const { return tdextra_->metatype(); }
@@ -273,6 +317,8 @@ namespace xo {
                 return *sm;
             } /*struct_member*/
 
+            /** nullptr for non-function types **/
+            const FunctionTdxInfo * fn_info() const { return this->tdextra_->fn_info(); }
             uint32_t n_fn_arg() const { return this->tdextra_->n_fn_arg(); }
 
             /* require:
@@ -298,29 +344,62 @@ namespace xo {
 
         private:
             TypeDescrBase(TypeId id,
-                          std::type_info const * tinfo,
-                          std::string_view canonical_name,
+                          const std::type_info * tinfo,
+                          const std::string & canonical_name,
                           std::unique_ptr<TypeDescrExtra> tdextra);
+
+            void assign_native_tinfo(const std::type_info * tinfo) {
+                assert(!native_typeinfo_);
+                native_typeinfo_ = tinfo;
+            }
 
         private:
             /* invariant:
              * - for all TypeDescrImpl instances x:
              *   - s_type_table_v[x->id()] = x
-             *   - s_type_table_map[TypeInfoRef(x->typeinfo())] = x
+             *   - s_native_type_table_map[TypeInfoRef(x->typeinfo())] = x
              */
 
-            /* hashmap of all native TypeDescr instances, indexed by typeinfo.
-             * singleton.
-             */
-            static std::unordered_map<TypeInfoRef, std::unique_ptr<TypeDescrBase>> s_type_table_map;
-            /* hashmap of (presumed) duplicate TypeInfoRef values.
-             * This happens with clang sometimes when the same type is referenced
-             * from multiple modules (i.e. shared libs).
-             */
+            /** vector of all TypeDescr instances, indexed by TypeId.  singleton. **/
+            static std::vector<std::unique_ptr<TypeDescrBase>> s_type_table_v;
+
+            /** hashmap of all TypeDescr instances,
+             *  indexed by canonical_name.
+             *
+             *  For manually-constructed TypeDescr instances
+             *  (see xo-expression for use-case) we require:
+             *
+             *  - TypeDescr::canonical_name uniquely identifies type
+             *  - to interact with an actually-equivalent type T
+             *    constructed by c++ compiler,  we need
+             *    to use the same canonical name that the compiler uses.
+             *
+             *    See type xo::reflect::type_name<>() [in demangle.hpp under xo-refcnt]
+             *    for implementation
+             **/
+            static std::unordered_map<std::string, TypeDescrBase*> s_canonical_type_table_map;
+
+            /** hashmap of all native TypeDescr instances,
+             *  indexed by typeinfo. singleton.
+             **/
+            static std::unordered_map<TypeInfoRef, TypeDescrBase *> s_native_type_table_map;
+
+            /** hashmap of (presumed) duplicate TypeInfoRef values.
+             *  This happens with clang sometimes when the same type is referenced
+             *  from multiple modules (i.e. shared libs).
+             **/
             static std::unordered_map<TypeInfoRef, TypeDescrBase *> s_coalesced_type_table_map;
 
-            /* vector of all TypeDescr instances.  singleton. */
-            static std::vector<TypeDescrBase *> s_type_table_v;
+            /** map from a vector of TypeDescr objects:
+             *    [Retval, Arg1, ...Argn]
+             *  to TypeDescr for function type
+             *    Retval(*)(Arg1..Argn)
+             *
+             *  Use these to unique-ify function types across:
+             *  - types sourced natively from c++ compiler
+             *  - types manually constructed (e.g. see Lambda.cpp in xo-expression)
+             **/
+            static std::unordered_map<FunctionTdxInfo, TypeDescrBase *> s_function_type_map;
 
         private:
             /* unique id# for this type */
@@ -332,15 +411,20 @@ namespace xo {
              *     see Lambda.cpp in xo-expression.
              **/
             std::type_info const * native_typeinfo_ = nullptr;
-            /* canonical name for this type (see demangle.hpp for type_name<T>())
+            /** canonical name for this type (see demangle.hpp for type_name<T>())
              * e.g.
              *   xo::option::Px2
-             */
-            std::string_view canonical_name_;
-            /* suffix of .canonical_name, just after last ':'
-             * e.g.
-             *   Px2
-             */
+             *
+             * NOTE: if we only had to deal with types created via Reflect::reflect<T>(),
+             *       then canonical_name could be string_view.  For manually-constructed
+             *       types,  there is no compiler-generated C-string constant to reference,
+             *       so need to use std::string here
+             **/
+            std::string canonical_name_;
+            /** substring .canonical_name, just after last ':'
+             *  e.g.
+             *    Px2
+             **/
             std::string_view short_name_;
             /* set to true once final value for .tdextra is established
              * intially all TypeDescr objects will use AtomicTdx for .tdextra
@@ -379,5 +463,25 @@ namespace xo {
 
     } /*namespace reflect*/
 } /*namespace xo*/
+
+namespace std {
+    /** @brief overload for hashing xo::reflect::FunctionTdxInfo objects
+     **/
+    template <>
+    struct hash<xo::reflect::FunctionTdxInfo> {
+        inline size_t operator()(const xo::reflect::FunctionTdxInfo & x) const noexcept {
+            /* we can hash on addresses,  since TypeDescr objects are immutable */
+            std::size_t h = hash<xo::reflect::TypeDescr>{}(x.retval_td_);
+
+            for (std::size_t i = 0, n = x.arg_td_v_.size(); i < n; ++i) {
+                h = (h << 1) ^ hash<xo::reflect::TypeDescr>{}(x.arg_td_v_[i]);
+            }
+
+            h = (h << 1) ^ (x.is_noexcept_ ? 1 : 0);
+
+            return h;
+        }
+    };
+}
 
 /* end TypeDescr.hpp */

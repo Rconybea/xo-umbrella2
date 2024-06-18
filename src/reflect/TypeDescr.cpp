@@ -15,69 +15,135 @@ namespace xo {
         uint32_t
         TypeId::s_next_id = 1;
 
-        std::unordered_map<TypeInfoRef, std::unique_ptr<TypeDescrBase>>
-        TypeDescrBase::s_type_table_map;
+        std::unordered_map<FunctionTdxInfo, TypeDescrBase*>
+        TypeDescrBase::s_function_type_map;
+
+        std::unordered_map<std::string, TypeDescrBase*>
+        TypeDescrBase::s_canonical_type_table_map;
+
+        std::unordered_map<TypeInfoRef, TypeDescrBase*>
+        TypeDescrBase::s_native_type_table_map;
 
         std::unordered_map<TypeInfoRef, TypeDescrBase*>
         TypeDescrBase::s_coalesced_type_table_map;
 
-        std::vector<TypeDescrW>
+        std::vector<std::unique_ptr<TypeDescrBase>>
         TypeDescrBase::s_type_table_v;
 
         TypeDescrW
-        TypeDescrBase::require(std::type_info const * tinfo,
-                               std::string_view canonical_name,
+        TypeDescrBase::require(const std::type_info * native_tinfo,
+                               const std::string & canonical_name,
                                std::unique_ptr<TypeDescrExtra> tdextra)
         {
-            /* 1. lookup by tinfo hash_code in s_type_table_map */
-            {
-                auto ix = s_type_table_map.find(TypeInfoRef(tinfo));
+            if (native_tinfo) {
+                /* 1. lookup by tinfo hash_code in s_type_table_map
+                 *    Not available for manually-constructed type descriptions.
+                 */
+                {
+                    auto ix = s_native_type_table_map.find(TypeInfoRef(native_tinfo));
 
-                if ((ix != s_type_table_map.end()) && ix->second)
-                    return ix->second.get();
-            }
+                    if ((ix != s_native_type_table_map.end()) && ix->second)
+                        return ix->second;
+                }
 
-            /* 2. lookup by tinfo hash_code in s_coalesced_type_table_map */
-            {
-                auto ix = s_coalesced_type_table_map.find(TypeInfoRef(tinfo));
+                /* 2. lookup by tinfo hash_code in s_coalesced_type_table_map */
+                {
+                    auto ix = s_coalesced_type_table_map.find(TypeInfoRef(native_tinfo));
 
-                if ((ix != s_coalesced_type_table_map.end()) && ix->second)
-                    return ix->second;
-            }
-
-            /* 3. O(n) lookup by canonical_name,  before we create a new slot.
-             *
-             * Have to accept that on clang type_info objects aren't always unique (!$@#!!)
-             *
-             * TODO: lookup table keyed by canonical_name
-             */
-            for (TypeDescrBase * x : s_type_table_v) {
-                if (x && (x->canonical_name() == canonical_name)) {
-                    /* 1. assume *x represents the type associated with tinfo.
-                     * 2. *do* store tinfo in s_coalesced_type_table_map[],
-                     *    for faster lookup next time
-                     */
-                    s_coalesced_type_table_map[TypeInfoRef(tinfo)] = x;
-
-                    return x;
+                    if ((ix != s_coalesced_type_table_map.end()) && ix->second)
+                        return ix->second;
                 }
             }
 
-            TypeId id = TypeId::allocate();
+            /* 3. lookup by canonical_name,  before we create a new slot.
+             *
+             * Have to accept that on clang type_info objects aren't always unique (!$@#!!)
+             */
+            {
+                auto ix = s_canonical_type_table_map.find(canonical_name);
 
-            std::unique_ptr<TypeDescrBase> & slot = s_type_table_map[TypeInfoRef(tinfo)];
+                if (ix != s_canonical_type_table_map.end()) {
+                    /** assume existing slot, with same canonical name,
+                     *  represents the same type as native_tinfo
+                     **/
+                    if (native_tinfo) {
+                        auto existing_tinfo = ix->second->native_typeinfo();
 
-            slot.reset(new TypeDescrBase(id,
-                                         tinfo,
-                                         canonical_name,
-                                         std::move(tdextra)));
+                        /* given we have a match:
+                         * - on existing TypeDescr
+                         * - with same canonical name as type assoc'd with native_tinfo
+                         * then:
+                         *   it's possible existing TypeDescr was manually constructed
+                         *   (i.e. without capturing std::type_info).
+                         *
+                         * With that in mind, attach that typeinfo now
+                         */
+                        if (!existing_tinfo) {
+                            ix->second->assign_native_tinfo(native_tinfo);
 
-            if (s_type_table_v.size() <= id.id())
-                s_type_table_v.resize(id.id() + 1);
+                            s_native_type_table_map[TypeInfoRef(native_tinfo)]
+                                = ix->second;
+                        }
 
-            s_type_table_v[id.id()] = slot.get();
+                        if (existing_tinfo
+                            && (existing_tinfo != native_tinfo))
+                        {
+                            /* we have encountered distinct std::type_info objects
+                             * that appear to represent the same type.
+                             * (at least types with the same canonical name)
+                             *
+                             * We observe this happening sometimes with clang-prepared
+                             * shared libraries;  perhaps something going wrong with
+                             * symbol coalescing.
+                             *
+                             * Store the dups in s_coalesced_type_table_map for future reference.
+                             */
+                            auto jx = s_coalesced_type_table_map.find(TypeInfoRef(native_tinfo));
 
-            return slot.get();
+                            if (jx == s_coalesced_type_table_map.end())
+                                s_coalesced_type_table_map[TypeInfoRef(native_tinfo)]
+                                    = ix->second;
+                        }
+                    }
+
+                    return ix->second;
+                }
+            }
+
+            /* when control here:
+             * need type added to:
+             * - s_type_table_v
+             * - s_canonical_type_table_map
+             * - s_native_type_table_map
+             * - s_coalesced_type_table_map (omit, only used for dups)
+             * - s_function_type_map (if type represents a function)
+             */
+
+            /* allocate slot for a new TypeDescr instance: */
+
+            TypeId new_td_id = TypeId::allocate();
+
+            if (s_type_table_v.size() <= new_td_id.id())
+                s_type_table_v.resize(new_td_id.id() + 1);
+
+            auto & new_slot = s_type_table_v[new_td_id.id()];
+
+            auto new_td = new TypeDescrBase(new_td_id,
+                                            native_tinfo,
+                                            canonical_name,
+                                            std::move(tdextra));
+
+            new_slot.reset(new_td);
+
+            s_canonical_type_table_map[std::string(new_slot->canonical_name())] = new_td;
+            if (native_tinfo)
+                s_native_type_table_map[TypeInfoRef(native_tinfo)] = new_td;
+
+            if (new_td->tdextra() && new_td->is_function()) {
+                s_function_type_map[*(new_td->fn_info())] = new_td;
+            }
+
+            return new_slot.get();
         } /*require*/
 
         void
@@ -85,7 +151,7 @@ namespace xo {
         {
             os << "<type_table_v[" << s_type_table_v.size() << "]:";
 
-            for (TypeDescrBase * td : s_type_table_v) {
+            for (const auto & td : s_type_table_v) {
                 os << "\n ";
                 if (td) {
                     td->display(os);
@@ -124,8 +190,8 @@ namespace xo {
         } /*namespace*/
 
         TypeDescrBase::TypeDescrBase(TypeId id,
-                                     std::type_info const * native_tinfo,
-                                     std::string_view canonical_name,
+                                     const std::type_info * native_tinfo,
+                                     const std::string & canonical_name,
                                      std::unique_ptr<TypeDescrExtra> tdextra)
             : id_{std::move(id)},
               native_typeinfo_{native_tinfo},
