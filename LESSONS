@@ -1,0 +1,9 @@
+* want reflection to work without requiring std::type_info,
+  so that in xo-expression we can create function types that
+  C++ compiler has never encountered.
+
+** This means we need the ability to construct the canonical name
+   for a type without c++ compiler's assistance.
+
+** need lookup using function ingredients (return types + arg types + noexcept)
+   to intern lambda types
