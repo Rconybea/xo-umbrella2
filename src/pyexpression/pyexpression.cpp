@@ -137,7 +137,9 @@ namespace xo {
                 .def_property_readonly("name", &Variable::name, py::doc("variable name"))
                 ;
 
-            m.def("make_var", &make_var);
+            m.def("make_var", &make_var,
+                  py::arg("name"),
+                  py::arg("var_type"));
 
             // ----- Lambdas -----
 
