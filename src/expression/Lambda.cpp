@@ -14,7 +14,7 @@ namespace xo {
     namespace ast {
         rp<Lambda>
         Lambda::make(const std::string & name,
-                     const std::vector<rp<Expression>> & argv,
+                     const std::vector<rp<Variable>> & argv,
                      const ref::rp<Expression> & body)
         {
             using xo::reflect::FunctionTdx;
@@ -47,7 +47,7 @@ namespace xo {
 
         Lambda::Lambda(const std::string & name,
                        TypeDescr lambda_type,
-                       const std::vector<rp<Expression>> & argv,
+                       const std::vector<rp<Variable>> & argv,
                        const ref::rp<Expression> & body)
             : Expression(exprtype::lambda, lambda_type),
               name_{name},

@@ -6,6 +6,7 @@
 #pragma once
 
 #include "Expression.hpp"
+#include "Variable.hpp"
 #include <vector>
 #include <string>
 //#include <cstdint>
@@ -24,7 +25,7 @@ namespace xo {
              *  @p body   Expression for body of this function
              **/
             static ref::rp<Lambda> make(const std::string & name,
-                                        const std::vector<ref::rp<Expression>> & argv,
+                                        const std::vector<ref::rp<Variable>> & argv,
                                         const ref::rp<Expression> & body);
 
             /** downcast from Expression **/
@@ -34,7 +35,7 @@ namespace xo {
 
             const std::string & name() const { return name_; }
             const std::string & type_str() const { return type_str_; }
-            const std::vector<ref::rp<Expression>> & argv() const { return argv_; }
+            const std::vector<ref::rp<Variable>> & argv() const { return argv_; }
             const ref::rp<Expression> & body() const { return body_; }
 
             /** return number of arguments expected by this function **/
@@ -50,7 +51,7 @@ namespace xo {
              **/
             Lambda(const std::string & name,
                    TypeDescr lambda_type,
-                   const std::vector<ref::rp<Expression>> & argv,
+                   const std::vector<ref::rp<Variable>> & argv,
                    const ref::rp<Expression> & body);
 
         private:
@@ -67,14 +68,14 @@ namespace xo {
              **/
             std::string type_str_;
             /** formal argument names **/
-            std::vector<ref::rp<Expression>> argv_;
+            std::vector<ref::rp<Variable>> argv_;
             /** function body **/
             ref::rp<Expression> body_;
         }; /*Lambda*/
 
         inline ref::rp<Lambda>
         make_lambda(const std::string & name,
-                    const std::vector<ref::rp<Expression>> & argv,
+                    const std::vector<ref::rp<Variable>> & argv,
                     const ref::rp<Expression> & body)
         {
             return Lambda::make(name, argv, body);
