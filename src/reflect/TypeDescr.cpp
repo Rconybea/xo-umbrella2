@@ -22,7 +22,7 @@ namespace xo {
             std::ostringstream ss;
 
             ss << retval_td_->canonical_name();
-            ss << "(*)(";
+            ss << " (*)(";
             for (std::size_t i = 0, n = arg_td_v_.size(); i < n; ++i) {
                 if (i > 0)
                     ss << ",";
