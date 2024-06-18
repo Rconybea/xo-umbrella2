@@ -20,11 +20,13 @@ namespace xo {
          **/
         class Apply : public Expression {
         public:
+            using TypeDescr = xo::reflect::TypeDescr;
+
+        public:
+            /** create new apply-expression instance
+             **/
             static ref::rp<Apply> make(const ref::rp<Expression> & fn,
-                                       const std::vector<ref::rp<Expression>> & argv)
-                {
-                    return new Apply(fn, argv);
-                }
+                                       const std::vector<ref::rp<Expression>> & argv);
 
             /** downcast from Expression **/
             static ref::brw<Apply> from(ref::brw<Expression> x) {
@@ -37,9 +39,11 @@ namespace xo {
             virtual void display(std::ostream & os) const;
 
         private:
-            Apply(const ref::rp<Expression> & fn,
+            Apply(TypeDescr apply_valuetype,
+                  const ref::rp<Expression> & fn,
                   const std::vector<ref::rp<Expression>> & argv)
-                : Expression(exprtype::apply), fn_{fn}, argv_(argv)
+                : Expression(exprtype::apply, apply_valuetype),
+                  fn_{fn}, argv_(argv)
                 {}
 
         private:

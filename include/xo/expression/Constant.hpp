@@ -29,13 +29,12 @@ namespace xo {
             using TypeDescr = xo::reflect::TypeDescr;
 
         public:
-            explicit Constant(const T & x)
-                : ConstantInterface(exprtype::constant),
-                  value_td_{Reflect::require<T>()},
-                  value_(x)
-                {
-                    static_assert(std::is_standard_layout_v<T> && std::is_trivial_v<T>);
-                }
+            /** create constant expression representing literal value x **/
+            static ref::rp<Constant> make(const T & x) {
+                TypeDescr x_valuetype = Reflect::require<T>();
+
+                return new Constant(x_valuetype, x);
+            }
 
             const T & value() const { return value_; }
 
@@ -60,6 +59,15 @@ namespace xo {
             }
 
         private:
+            explicit Constant(TypeDescr x_type, const T & x)
+                : ConstantInterface(exprtype::constant, x_type),
+                  value_td_{Reflect::require<T>()},
+                  value_(x)
+                {
+                    static_assert(std::is_standard_layout_v<T> && std::is_trivial_v<T>);
+                }
+
+        private:
             /** type description for T **/
             TypeDescr value_td_;
             /** value of this constant **/
@@ -69,7 +77,7 @@ namespace xo {
         template <typename T>
         ref::rp<Constant<std::remove_reference_t<T>>>
         make_constant(const T & x) {
-            return new Constant(x);
+            return Constant<T>::make(x);
         }
 
     } /*namespace ast*/

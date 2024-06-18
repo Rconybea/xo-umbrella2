@@ -22,7 +22,7 @@ namespace xo {
 
         public:
             /** @p extype sets expression-type;  could be constant|primitive **/
-            ConstantInterface(exprtype extype) : Expression{extype} {}
+            ConstantInterface(exprtype extype, TypeDescr valuetype) : Expression{extype, valuetype} {}
 
             /** downcast from Expression **/
             static ref::brw<ConstantInterface> from(ref::brw<Expression> x) {

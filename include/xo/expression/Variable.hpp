@@ -15,7 +15,14 @@ namespace xo {
          **/
         class Variable : public Expression {
         public:
-            Variable(const std::string & name) : Expression(exprtype::variable), name_{name} {}
+            /** create expression representing a variable
+             *  identified by @p name,  that can take on values
+             *  described by @p var_type.
+             **/
+            static ref::rp<Variable> make(const std::string & name,
+                                          TypeDescr var_type) {
+                return new Variable(name, var_type);
+            }
 
             /** downcast from Expression **/
             static ref::brw<Variable> from(ref::brw<Expression> x) {
@@ -27,13 +34,20 @@ namespace xo {
             virtual void display(std::ostream & os) const;
 
         private:
+            Variable(const std::string & name,
+                     TypeDescr var_type)
+                : Expression(exprtype::variable, var_type),
+                  name_{name} {}
+
+        private:
             /** variable name **/
             std::string name_;
         }; /*Variable*/
 
         inline ref::rp<Variable>
-        make_var(const std::string & name) {
-            return new Variable(name);
+        make_var(const std::string & name,
+                 reflect::TypeDescr var_type) {
+            return Variable::make(name, var_type);
         }
     } /*namespace ast*/
 } /*namespace xo*/

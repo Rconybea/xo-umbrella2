@@ -14,7 +14,8 @@ namespace xo {
     namespace ast {
         class PrimitiveInterface : public ConstantInterface {
         public:
-            PrimitiveInterface() : ConstantInterface(exprtype::primitive) {}
+            PrimitiveInterface(TypeDescr fn_type)
+                : ConstantInterface(exprtype::primitive, fn_type) {}
 
             /** downcast from Expression **/
             static ref::brw<PrimitiveInterface> from(ref::brw<Expression> x) {

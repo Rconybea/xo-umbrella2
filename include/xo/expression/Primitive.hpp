@@ -20,6 +20,10 @@ namespace xo {
          *
          *  In any case, a primitive serves as both declaration and definition
          *  (May be possible to relax this to declaration-only using null value_ as sentinel..?)
+         *
+         *  @tparam FunctionPointer   a function-pointer type, e.g. double(*)(double).
+         *          Must be in this "canonical form".  std::function<double(double)>
+         *          won't work here.
          **/
         template <typename FunctionPointer>
         class Primitive: public PrimitiveInterface {
@@ -29,18 +33,12 @@ namespace xo {
             using TypeDescr = xo::reflect::TypeDescr;
 
         public:
-            Primitive(const std::string & name,
-                      FunctionPointer fnptr)
-                : PrimitiveInterface(),
-                  name_{name},
-                  value_td_{Reflect::require_function<FunctionPointer>()},
-                  value_{fnptr}
-                {
-                    if (!value_td_->is_function())
-                        throw std::runtime_error("Primitive: expected function pointer");
-                    if (!value_td_->fn_retval())
-                        throw std::runtime_error("Primitive: expected non-null function return value");
-                }
+            static ref::rp<Primitive> make(const std::string & name,
+                                           FunctionPointer fnptr) {
+                TypeDescr fn_type = Reflect::require<FunctionPointer>();
+
+                return new Primitive(fn_type, name, fnptr);
+            }
 
             FunctionPointer value() const { return value_; }
 
@@ -70,6 +68,22 @@ namespace xo {
             }
 
         private:
+            Primitive(TypeDescr fn_type,
+                      const std::string & name,
+                      FunctionPointer fnptr)
+                : PrimitiveInterface(fn_type),
+                  name_{name},
+                  value_td_{Reflect::require_function<FunctionPointer>()},
+                  value_{fnptr}
+                {
+                    if (!value_td_->is_function())
+                        throw std::runtime_error("Primitive: expected function pointer");
+                    if (!value_td_->fn_retval())
+                        throw std::runtime_error("Primitive: expected non-null function return value");
+                }
+
+
+        private:
             // from Expression:
             //   exprtype extype_
 
@@ -85,7 +99,7 @@ namespace xo {
         template <typename FunctionPointer>
         ref::rp<Primitive<FunctionPointer>>
         make_primitive(const std::string & name, FunctionPointer x) {
-            return new Primitive(name, x);
+            return Primitive<FunctionPointer>::make(name, x);
         }
     } /*namespace ast*/
 } /*namespace xo*/
