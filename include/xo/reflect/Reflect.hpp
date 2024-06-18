@@ -227,6 +227,12 @@ namespace xo {
                 return retval_td;
             }
 
+            /** true iff @p src_td is a type-description for @tparam T **/
+            template <typename T>
+            static bool is_native(TypeDescr src_td) {
+                return  (require<T>() == src_td);
+            }
+
             /** given address @p src_address of a value with type described by @p src,
              *  return typed pointer of type @tparam T,  provided that @p src_td
              *  actually describes @tparam T.   Otherwise returns nullptr
