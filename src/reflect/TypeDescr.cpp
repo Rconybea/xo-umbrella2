@@ -165,6 +165,20 @@ namespace xo {
             return new_slot.get();
         } /*require*/
 
+        TypeDescrW
+        TypeDescrBase::require_by_fn_info(const FunctionTdxInfo & fn_info) {
+            auto ix = s_function_type_map.find(fn_info);
+
+            if (ix != s_function_type_map.end())
+                return ix->second;
+
+            auto fn_tdextra = FunctionTdx::make_function(fn_info);
+
+            return require(nullptr /*native_tinfo - n/avail on this path*/,
+                           fn_info.make_canonical_name(),
+                           std::move(fn_tdextra));
+        } /*require_by_fn_info*/
+
         TypeDescr
         TypeDescrBase::lookup_by_name(const std::string & name) {
             auto ix = s_canonical_type_table_map.find(name);

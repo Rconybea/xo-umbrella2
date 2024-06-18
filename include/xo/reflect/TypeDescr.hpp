@@ -192,7 +192,9 @@ namespace xo {
                                       const std::string & canonical_name,
                                       std::unique_ptr<TypeDescrExtra> tdextra);
 
-            /* print table of reflected types to os */
+            /** Create type-description for function from input ingredients. **/
+            static TypeDescrW require_by_fn_info(const FunctionTdxInfo & fn_info);
+
             /** lookup type by canonical name **/
             static TypeDescr lookup_by_name(const std::string & canonical_name);
             static void print_reflected_types(std::ostream & os);
