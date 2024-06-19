@@ -17,6 +17,7 @@ namespace xo {
 
             virtual ~pycaller_base() = default;
 
+            /* note: need inherited class pycaller_base revealed to pybind11 too */
             static pybind11::module & declare_once(pybind11::module & m) {
                 static bool s_once = false;
                 if (!s_once) {
@@ -27,8 +28,10 @@ namespace xo {
             }
         };
 
-        /** Invoke function pointer of type Retval(*)(Args...),
-         *  with arguments converted from py::object, and return type converted back to py::object.
+        /** @class pycaller
+         *  @brief Invoke function pointer of type Retval(*)(Args...) from py::object
+         *
+         *  Arguments converted from py::object, and return type converted back to py::object.
          *
          *  Each distinct combination of {Retval,Args...} needs to be established at compile time
          *  (since we need PyCall<Retval, Args...> to be instantiated for particular types)
@@ -49,12 +52,14 @@ namespace xo {
 
             static pycaller_base * make(void_function_type addr) { return new pycaller(addr); }
 
-            static pybind11::module & declare_once(pybind11::module & m) {
+            /* note: prototype_str must be [const char *],  pybind11 requirement */
+            static pybind11::module & declare_once(pybind11::module & m,
+                                                   const char * prototype_str) {
                 static bool s_once = false;
                 if (!s_once) {
                     s_once = true;
                     pycaller_base::declare_once(m);
-                    pybind11::class_<self_type, pycaller_base>(m, "pycaller0")
+                    pybind11::class_<self_type, pycaller_base>(m, prototype_str)
                         .def("__call__",
                              [](self_type & self)
                                  {
@@ -80,12 +85,14 @@ namespace xo {
 
             static pycaller_base * make(void_function_type addr) { return new pycaller(addr); }
 
-            static pybind11::module & declare_once(pybind11::module & m) {
+            /* note: prototype_str must be [const char *],  pybind11 requirement */
+            static pybind11::module & declare_once(pybind11::module & m,
+                                                   const char * prototype_str) {
                 static bool s_once = false;
                 if (!s_once) {
                     s_once = true;
                     pycaller_base::declare_once(m);
-                    pybind11::class_<self_type, pycaller_base>(m, "pycaller1")
+                    pybind11::class_<self_type, pycaller_base>(m, prototype_str)
                         .def("__call__",
                              [](self_type & self, Arg1 arg1)
                                  {
@@ -114,12 +121,14 @@ namespace xo {
 
             static pycaller_base * make(void_function_type addr) { return new pycaller(addr); }
 
-            static pybind11::module & declare_once(pybind11::module & m) {
+            /* note: prototype_str must be [const char *],  pybind11 requirement */
+            static pybind11::module & declare_once(pybind11::module & m,
+                                                   const char * prototype_str) {
                 static bool s_once = false;
                 if (!s_once) {
                     s_once = true;
                     pycaller_base::declare_once(m);
-                    pybind11::class_<self_type, pycaller_base>(m, "pycaller2")
+                    pybind11::class_<self_type, pycaller_base>(m, prototype_str)
                         .def("__call__",
                              [](self_type & self, Arg1 arg1, Arg2 arg2)
                                  {
