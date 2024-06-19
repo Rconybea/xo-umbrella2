@@ -5,6 +5,7 @@
 #include "xo/jit/MachPipeline.hpp"
 #include "xo/pyutil/pycaller.hpp"
 #include "xo/pyutil/pyutil.hpp"
+#include <llvm/Config/llvm-config.h>
 #include <pybind11/stl.h>
 
 namespace xo {
@@ -96,6 +97,9 @@ namespace xo {
 
             //pycaller<double, double>::declare_once(m);
             //pycaller<double, double, double>::declare_once(m);
+
+            m.def("llvm_version", []() { return LLVM_VERSION_STRING; },
+                  py::doc("llvm_version() reports compile-time llvm version string (via [llvm-config.h])"));
 
             py::class_<MachPipeline, rp<MachPipeline>>(m, "MachPipeline")
                 .def_static("make", &MachPipeline::make,
