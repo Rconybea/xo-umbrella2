@@ -35,10 +35,11 @@ namespace xo {
 
         public:
             static ref::rp<Primitive> make(const std::string & name,
-                                           FunctionPointer fnptr) {
+                                           FunctionPointer fnptr,
+                                           bool explicit_symbol_def) {
                 TypeDescr fn_type = Reflect::require<FunctionPointer>();
 
-                return new Primitive(fn_type, name, fnptr);
+                return new Primitive(fn_type, name, fnptr, explicit_symbol_def);
             }
 
             FunctionPointer value() const { return value_; }
@@ -53,6 +54,9 @@ namespace xo {
             }
 
             // ----- PrimitiveInterface -----
+
+            virtual bool explicit_symbol_def() const override { return explicit_symbol_def_; }
+            virtual void_function_type function_address() const override { return reinterpret_cast<void_function_type>(value_); }
 
             // ----- FunctionInterface -----
 
@@ -74,11 +78,13 @@ namespace xo {
         private:
             Primitive(TypeDescr fn_type,
                       const std::string & name,
-                      FunctionPointer fnptr)
+                      FunctionPointer fnptr,
+                      bool explicit_symbol_def)
                 : PrimitiveInterface(fn_type),
                   name_{name},
                   value_td_{Reflect::require_function<FunctionPointer>()},
-                  value_{fnptr}
+                  value_{fnptr},
+                  explicit_symbol_def_{explicit_symbol_def}
                 {
                     if (!value_td_->is_function())
                         throw std::runtime_error("Primitive: expected function pointer");
@@ -97,13 +103,21 @@ namespace xo {
             TypeDescr value_td_;
             /** address of executable function **/
             FunctionPointer value_;
+            /** if true,  use Jit.intern_symbol() to provide explicit binding.
+             *  Currently mystified as to what's distinguishes functions like ::sin(), ::sqrt()
+             *  (which work do not require this) from symbols like ::mul_i32(), which do)
+             **/
+            bool explicit_symbol_def_ = false;
         }; /*Primitive*/
 
         /** adopt function @p x as a callable primitive function named @p name **/
         template <typename FunctionPointer>
         ref::rp<Primitive<FunctionPointer>>
-        make_primitive(const std::string & name, FunctionPointer x) {
-            return Primitive<FunctionPointer>::make(name, x);
+        make_primitive(const std::string & name,
+                       FunctionPointer x,
+                       bool explicit_symbol_def)
+        {
+            return Primitive<FunctionPointer>::make(name, x, explicit_symbol_def);
         }
     } /*namespace ast*/
 } /*namespace xo*/

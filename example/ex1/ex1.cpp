@@ -17,7 +17,9 @@ main() {
     }
 
     {
-        auto expr = make_primitive("sqrt", &::sqrt);
+        auto expr = make_primitive("sqrt",
+                                   &::sqrt,
+                                   false /*!explicit_symbol_def*/);
 
         auto expr_td = expr->value_td();
 
