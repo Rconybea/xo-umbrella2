@@ -56,6 +56,7 @@ Assumes `xo-pyjit` installed to `~/local2/lib`,
 i.e. built with `PREFIX=~/local2`.
 ```
 PYTHONPATH=~/local2/lib:$PYTHONPATH python
+>>> from xo_pyreflect import *
 >>> from xo_pyjit import *
 >>> from xo_pyexpression import *
 ```
@@ -71,12 +72,13 @@ Symbol table:
 
 build an AST from within python
 ```
->>> x=make_var('x')                  # "x" a variable (context not yet known)
+>>> f64_t=TypeDescr.lookup_by_name('double')
+>>> x=make_var('x',f64_t)                  # "x" a variable (context not yet known)
 >>> f1=make_sin_pm()                 # "sin()"
 >>> c1=make_apply(f1,[x])            # "sin(x)"
 >>> f2=make_cos_pm()                 # "cos()"
 >>> c2=make_apply(f2,[c1])           # "cos(sin(x))"
->>> lm=make_lambda('foo', ['x'], c2) # "def foo(x): cos(sin(x))"
+>>> lm=make_lambda('foo', [x], c2)   # "def foo(x): cos(sin(x))"
 >>> lm
 <Lambda :name foo :argv [x] :body <Apply :fn <Primitive :name cos :type "double (*)(double)" :value 1> :argv "[<Apply :fn <Primitive :name sin :type \"double (*)(double)\" :value 1> :argv \"[<Variable :name x>]\">]">>
 ```
