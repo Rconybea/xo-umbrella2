@@ -200,6 +200,8 @@ namespace xo {
 
             /** print table of reflected types to os **/
             static void print_reflected_types(std::ostream & os);
+            /** print table of function types to os **/
+            static void print_function_types(std::ostream & os);
 
             TypeId id() const { return id_; }
             const std::type_info * native_typeinfo() const { return native_typeinfo_; }
@@ -470,6 +472,19 @@ namespace xo {
             return os;
         }
 
+        class TypeDescrTable {
+        public:
+            TypeDescrTable * instance() { return &s_instance; }
+
+        private:
+            /** initialize with builtin atomic types:
+             *    float, double, char, short, int, long, bool
+             **/
+            TypeDescrTable();
+
+        private:
+            static TypeDescrTable s_instance;
+        };
     } /*namespace reflect*/
 } /*namespace xo*/
 

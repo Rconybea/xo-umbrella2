@@ -3,6 +3,7 @@
 #include "TypeDescr.hpp"
 #include "TaggedPtr.hpp"
 #include "TypeDescrExtra.hpp"
+#include "Reflect.hpp"
 #include "atomic/AtomicTdx.hpp"
 #include "function/FunctionTdx.hpp"
 #include "xo/indentlog/scope.hpp"
@@ -301,6 +302,20 @@ namespace xo {
             this->complete_flag_ = true;
             this->tdextra_ = std::move(tdx);
         } /*assign_tdextra*/
+
+        TypeDescrTable::TypeDescrTable() {
+            Reflect::require<bool>();
+            Reflect::require<char>();
+            Reflect::require<short>();
+            Reflect::require<int>();
+            Reflect::require<long>();
+            Reflect::require<long long>();
+            Reflect::require<float>();
+            Reflect::require<double>();
+        } /*ctor*/
+
+        TypeDescrTable
+        TypeDescrTable::s_instance;
     } /*namespace reflect*/
 } /*namespace xo*/
 
