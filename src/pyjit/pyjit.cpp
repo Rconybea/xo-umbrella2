@@ -3,6 +3,8 @@
 #include "pyjit.hpp"
 #include "xo/pyexpression/pyexpression.hpp"
 #include "xo/jit/MachPipeline.hpp"
+#include "xo/jit/intrinsics.hpp"
+#include "xo/expression/Primitive.hpp"
 #include "xo/pyutil/pycaller.hpp"
 #include "xo/pyutil/pyutil.hpp"
 #include <llvm/Config/llvm-config.h>
@@ -11,6 +13,7 @@
 namespace xo {
     namespace jit {
         using xo::ast::Expression;
+        using xo::ast::make_primitive;
         using xo::pyutil::pycaller_base;
         using xo::pyutil::pycaller;
         using xo::ref::rp;
@@ -32,15 +35,25 @@ namespace xo {
              *
              *  Although it takes module as argument,  the module being used
              *  doesn't (shoudn't ??) matter
+             *
+             *  note: pybind11 requires [const char *] pycaller_id_str
+             *
+             *  Example:
+             *    pycaller_store::instance()
+             *      ->require_prototype<int, int>*(m, "pycaller_i32_i32", "int (*)(int)")
+             *
+             *  @p pycaller_id_str   python pycaller class name;  must be unique
+             *  @p prototype_str     prototype string for @ref lookup_prototype;  must be unique
              **/
             template <typename Retval, typename... Args>
             pycaller_base::factory_function_type
             require_prototype(py::module & m,
-                              const std::string & prototype_str)
+                              const char * pycaller_id_str,
+                              const char * prototype_str)
                 {
                     using caller_type = pycaller<Retval, Args...>;
 
-                    caller_type::declare_once(m);
+                    caller_type::declare_once(m, pycaller_id_str);
 
                     /* factory function takes function pointer of type
                      *   Retval(*)(Args...)
@@ -90,16 +103,37 @@ namespace xo {
 
             m.doc() = "pybind11 plugin for xo-jit";
 
+            /* reminder: prototype_str must be valid python class name */
             pycaller_store::instance()
-                ->require_prototype<double, double>(m, "double (*)(double)");
+                ->require_prototype<int, int>(m, "pycaller_i32_i32", "int (*)(int)");
             pycaller_store::instance()
-                ->require_prototype<double, double, double>(m, "double (*)(double,double)");
+                ->require_prototype<int, int, int>(m, "pycaller_i32_i32_i32", "int (*)(int, int)");
+            pycaller_store::instance()
+                ->require_prototype<double, double>(m, "pycaller_f64_f64", "double (*)(double)");
+            pycaller_store::instance()
+                ->require_prototype<double, double, double>(m, "pycaller_f64_f64_f64", "double (*)(double, double)");
 
             //pycaller<double, double>::declare_once(m);
             //pycaller<double, double, double>::declare_once(m);
 
             m.def("llvm_version", []() { return LLVM_VERSION_STRING; },
                   py::doc("llvm_version() reports compile-time llvm version string (via [llvm-config.h])"));
+
+            m.def("make_mul_i32_pm",
+                  []()
+                      {
+                          return make_primitive<int32_t (*)(int32_t, int32_t)>
+                              ("mul_i32", ::mul_i32, true /*explicit_symbol_def*/);
+                      },
+                  py::doc("create primitive for 32-bit signed integer multiplication"));
+
+            m.def("make_mul_f64_pm",
+                  []()
+                      {
+                          return make_primitive<double (*)(double, double)>
+                              ("mul_f64", ::mul_f64, true /*explicit_symbol_def*/);
+                      },
+                  py::doc("create primitive for 64-bit floating point multiplication"));
 
             py::class_<MachPipeline, rp<MachPipeline>>(m, "MachPipeline")
                 .def_static("make", &MachPipeline::make,
