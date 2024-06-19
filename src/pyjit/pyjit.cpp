@@ -112,9 +112,9 @@ namespace xo {
             m.doc() = "pybind11 plugin for xo-jit";
 
             pycaller_store::instance()
-                ->require_prototype<double, double>(m, "double(double)");
+                ->require_prototype<double, double>(m, "double (*)(double)");
             pycaller_store::instance()
-                ->require_prototype<double, double, double>(m, "double(double,double)");
+                ->require_prototype<double, double, double>(m, "double (*)(double,double)");
 
             //pycaller<double, double>::declare_once(m);
             //pycaller<double, double, double>::declare_once(m);
@@ -179,27 +179,32 @@ namespace xo {
                           * so any function type will appear to succeed here.
                           * We cast to particular function type within the  pycaller<..> template
                           */
-                         auto fn_addr = llvm_addr.toPtr<void(*)()>();
+                         if (llvm_addr) {
+                             auto fn_addr = llvm_addr.get().toPtr<void(*)()>();
 
-                         /* note: llvm_addr.toPtr<..> always succeeds,
-                          *       event if pointer refers to an object of incompatible type
-                          *
-                          * note: return value policy is for python to own the wrapper
-                          *
-                          * note: pycaller signatures need to have been introduced in advance
-                          *       (in practice determined at compile time,
-                          *       since they encode a function-signature-specific calling sequence)
-                          *       by calling pycaller_store::instance()->require_prototype<Retval, Args...>(prototype);
-                          */
+                             /* note: llvm_addr.toPtr<..> always succeeds,
+                              *       event if pointer refers to an object of incompatible type
+                              *
+                              * note: return value policy is for python to own the wrapper
+                              *
+                              * note: pycaller signatures need to have been introduced in advance
+                              *       (in practice determined at compile time,
+                              *       since they encode a function-signature-specific calling sequence)
+                              *       by calling pycaller_store::instance()->require_prototype<Retval, Args...>(prototype);
+                              */
 
-                         auto factory = pycaller_store::instance()->lookup_prototype(prototype);
+                             auto factory = pycaller_store::instance()->lookup_prototype(prototype);
 
-                         if (!factory) {
-                             throw std::runtime_error(tostr("MachPipeline.lookup_fn: unknown function prototype",
-                                                            xtag("p", prototype)));
+                             if (!factory) {
+                                 throw std::runtime_error(tostr("MachPipeline.lookup_fn: unknown function prototype",
+                                                                xtag("p", prototype)));
+                             }
+
+                             return (*factory)(fn_addr);
+                         } else {
+                             throw std::runtime_error(tostr("MachPipeline.lookup_fn: lookup on symbol S failed",
+                                                            xtag("S", symbol)));
                          }
-
-                         return (*factory)(fn_addr);
 
 #ifdef OBSOLETE
                          if((prototype == "double(double,double)") || (prototype == "double(*)(double,double)")) {
