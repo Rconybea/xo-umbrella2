@@ -49,7 +49,7 @@ namespace xo {
                        TypeDescr lambda_type,
                        const std::vector<rp<Variable>> & argv,
                        const ref::rp<Expression> & body)
-            : Expression(exprtype::lambda, lambda_type),
+            : FunctionInterface(exprtype::lambda, lambda_type),
               name_{name},
               argv_{argv},
               body_{body}

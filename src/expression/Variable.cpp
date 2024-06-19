@@ -8,6 +8,7 @@ namespace xo {
         Variable::display(std::ostream & os) const {
             os << "<Variable"
                << xtag("name", name_)
+               << xtag("type", this->valuetype()->short_name())
                << ">";
         } /*display*/
     } /*namespace ast*/

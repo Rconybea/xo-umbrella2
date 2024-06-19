@@ -6,6 +6,7 @@
 #pragma once
 
 #include "Expression.hpp"
+#include "FunctionInterface.hpp"
 #include "Variable.hpp"
 #include <vector>
 #include <string>
@@ -17,7 +18,7 @@ namespace xo {
          *  @brief abstract syntax tree for a function definition
          *
          **/
-        class Lambda : public Expression {
+        class Lambda : public FunctionInterface {
         public:
             /**
              *  @p name   Name for this lambda -- must be unique
@@ -33,13 +34,17 @@ namespace xo {
                 return ref::brw<Lambda>::from(x);
             }
 
-            const std::string & name() const { return name_; }
             const std::string & type_str() const { return type_str_; }
             const std::vector<ref::rp<Variable>> & argv() const { return argv_; }
             const ref::rp<Expression> & body() const { return body_; }
 
+            // ----- FunctionInterface -----
+
+            virtual const std::string & name() const override { return name_; }
             /** return number of arguments expected by this function **/
-            int n_arg() const { return argv_.size(); }
+            virtual int n_arg() const override { return argv_.size(); }
+            virtual TypeDescr fn_retval() const override { return body_->valuetype(); }
+            virtual TypeDescr fn_arg(uint32_t i) const override { return argv_[i]->valuetype(); }
 
             // ----- Expression -----
 

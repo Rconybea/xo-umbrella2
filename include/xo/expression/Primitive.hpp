@@ -6,6 +6,7 @@
 #pragma once
 
 #include "PrimitiveInterface.hpp"
+#include "xo/reflect/Reflect.hpp"
 //#include <cstdint>
 
 namespace xo {
@@ -42,20 +43,23 @@ namespace xo {
 
             FunctionPointer value() const { return value_; }
 
-            // ----- PrimitiveInterface -----
-
-            virtual std::string const & name() const override { return name_; }
-
-            // ----- ConstantInterface -----
-
-            virtual TypeDescr value_td() const override { return value_td_; }
-            virtual TaggedPtr value_tp() const override {
+            TypeDescr value_td() const { return value_td_; }
+            TaggedPtr value_tp() const {
                 /* note: idk why,  but need to spell this out in two steps with gcc 13.2 */
                 const void * erased_cptr = &value_;
                 void * erased_ptr = const_cast<void*>(erased_cptr);
 
                 return TaggedPtr(value_td_, erased_ptr);
             }
+
+            // ----- PrimitiveInterface -----
+
+            // ----- FunctionInterface -----
+
+            virtual std::string const & name() const override { return name_; }
+            virtual int n_arg() const override { return this->value_td()->n_fn_arg(); }
+            virtual TypeDescr fn_retval() const override { return this->value_td()->fn_retval(); }
+            virtual TypeDescr fn_arg(uint32_t i) const override { return this->value_td()->fn_arg(i); }
 
             // ----- Expression -----
 
