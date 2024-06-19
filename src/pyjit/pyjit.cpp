@@ -8,28 +8,6 @@
 #include <pybind11/stl.h>
 
 namespace xo {
-#ifdef OBSOLETE
-    struct XferDbl2DblFn : public ref::Refcount {
-        using fptr_type = double (*) (double);
-
-        explicit XferDbl2DblFn(fptr_type fptr) : fptr_{fptr} {}
-
-        double operator() (double x) { return (*fptr_)(x); }
-
-        fptr_type fptr_;
-    }; /*XferDbl2DblFn*/
-
-    struct XferDblDbl2DblFn : public ref::Refcount {
-        using fptr_type = double (*) (double, double);
-
-        explicit XferDblDbl2DblFn(fptr_type fptr) : fptr_{fptr} {}
-
-        double operator() (double x, double y) { return (*fptr_)(x, y); }
-
-        fptr_type fptr_;
-    }; /*XferDblDbl2DblFn*/
-#endif
-
     namespace jit {
         using xo::ast::Expression;
         using xo::pyutil::pycaller_base;
@@ -149,27 +127,6 @@ namespace xo {
                 .def("dump_current_module", &MachPipeline::dump_current_module,
                      py::doc("Dump contents of current module to console"))
 
-#ifdef OBSOLETE
-                /* double -> double */
-                .def("lookup_dbl2dbl_fn",
-                     [](MachPipeline & jit, const std::string & symbol) {
-                         auto llvm_addr = jit.lookup_symbol(symbol);
-
-                         auto fn_addr = llvm_addr.toPtr<double (*) (double)>();
-
-                         return new XferDbl2DblFn(fn_addr);
-                     })
-
-                /* (double x double) -> double */
-                .def("lookup_dbldbl2dbl_fn",
-                     [](MachPipeline & jit, const std::string & symbol) {
-                         auto llvm_addr = jit.lookup_symbol(symbol);
-
-                         auto fn_addr = llvm_addr.toPtr<double (*) (double, double)>();
-
-                         return new XferDblDbl2DblFn(fn_addr);
-                     })
-#endif
 
                 .def("lookup_fn",
                      [](MachPipeline & jit, const std::string & prototype, const std::string & symbol) -> pycaller_base* {
@@ -205,17 +162,6 @@ namespace xo {
                              throw std::runtime_error(tostr("MachPipeline.lookup_fn: lookup on symbol S failed",
                                                             xtag("S", symbol)));
                          }
-
-#ifdef OBSOLETE
-                         if((prototype == "double(double,double)") || (prototype == "double(*)(double,double)")) {
-                             return new pycaller<double, double, double>(fn_addr);
-                         } else if ((prototype == "double(double)") || (prototype == "double(*)(double)")) {
-                             return new pycaller<double, double>(fn_addr);
-                         } else {
-                             throw std::runtime_error(tostr("MachPipeline.lookup_fn: unknown function prototype",
-                                                            xtag("p", prototype)));
-                         }
-#endif
                      })
                 ;
 
