@@ -165,6 +165,10 @@ namespace xo {
                 .def("dump_current_module", &MachPipeline::dump_current_module,
                      py::doc("Dump contents of current module to console"))
 
+                .def("mangle", &MachPipeline::mangle,
+                     py::arg("symbol"),
+                     py::doc("mangle(symbol) reports mangled version of symbol.\n"
+                             "throws exception if mangling fails"))
 
                 .def("lookup_fn",
                      [](MachPipeline & jit, const std::string & prototype, const std::string & symbol) -> pycaller_base* {
