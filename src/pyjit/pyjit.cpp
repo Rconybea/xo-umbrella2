@@ -195,7 +195,7 @@ namespace xo {
                              auto factory = pycaller_store::instance()->lookup_prototype(prototype);
 
                              if (!factory) {
-                                 throw std::runtime_error(tostr("MachPipeline.lookup_fn: unknown function prototype",
+                                 throw std::runtime_error(tostr("MachPipeline.lookup_fn: unknown function prototype p",
                                                                 xtag("p", prototype)));
                              }
 
@@ -204,22 +204,13 @@ namespace xo {
                              throw std::runtime_error(tostr("MachPipeline.lookup_fn: lookup on symbol S failed",
                                                             xtag("S", symbol)));
                          }
-                     })
+                     },
+                     py::arg("prototype"), py::arg("symbol"),
+                     py::doc("lookup_fn(proto,sym) fetches function associated with sym in jit,\n"
+                             "and wraps it as a callable python function.\n"
+                             "proto *must* match (with exact spelling) pycaller registered at compile time with pycaller_store::instance,\n"
+                             "for example 'int (*)(int, int)'"))
                 ;
-
-
-#ifdef OBSOLETE
-            py::class_<XferDbl2DblFn, rp<XferDbl2DblFn>>(m, "XferDbl2DblFn")
-                .def("__call__",
-                     [](XferDbl2DblFn & self, double x) { return self(x); }
-                    )
-                ;
-            py::class_<XferDblDbl2DblFn, rp<XferDblDbl2DblFn>>(m, "XferDblDbl2DblFn")
-                .def("__call__",
-                     [](XferDblDbl2DblFn & self, double x, double y) { return self(x, y); }
-                    )
-                ;
-#endif
 
             py::class_<llvm::Value,
                        unowned_ptr<llvm::Value>>(m, "llvm_Value")
