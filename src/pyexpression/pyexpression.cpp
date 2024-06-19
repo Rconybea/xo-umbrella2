@@ -55,6 +55,7 @@ namespace xo {
             py::class_<Expression,
                        rp<Expression>>(m, "Expression")
                 .def_property_readonly("extype", &Expression::extype)
+                .def_property_readonly("valuetype", &Expression::valuetype)
                 .def("__repr__", &Expression::display_string);
             ;
 
@@ -106,7 +107,8 @@ namespace xo {
 
             m.def("make_sqrt_pm", []() { return make_primitive<Fn_dbl_dbl_type>("sqrt", sqrt); },
                   py::doc("create primitive representing the ::sqrt() function"));
-            m.def("make_sin_pm", []() { return make_primitive<Fn_dbl_dbl_type>("sin", ::sin); },
+            m.def("make_sin_pm",
+                  []() { return make_primitive<Fn_dbl_dbl_type>("sin", ::sin); },
                   py::doc("create primitive representing the ::sin() function"));
             m.def("make_cos_pm", []() { return make_primitive<Fn_dbl_dbl_type>("cos", ::cos); },
                   py::doc("create primitive representing the ::cos() function"));
