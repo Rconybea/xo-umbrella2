@@ -103,26 +103,44 @@ namespace xo {
                      py::doc("number of arguments to this function (not counting return value)"))
                 ;
 
-            using Fn_dbl_dbl_type = double (*)(double);
+            using int32_t = std::int32_t;
 
-            m.def("make_sqrt_pm", []() { return make_primitive<Fn_dbl_dbl_type>("sqrt", sqrt); },
-                  py::doc("create primitive representing the ::sqrt() function"));
-            m.def("make_sin_pm",
-                  []() { return make_primitive<Fn_dbl_dbl_type>("sin", ::sin); },
-                  py::doc("create primitive representing the ::sin() function"));
-            m.def("make_cos_pm", []() { return make_primitive<Fn_dbl_dbl_type>("cos", ::cos); },
-                  py::doc("create primitive representing the ::cos() function"));
-            m.def("make_pow_pm", []() { return make_primitive<double (*)(double, double)>("pow", ::pow); },
-                  py::doc("create primitive representing the ::pow() function"));
+            py::class_<Primitive<int32_t (*)(int32_t, int32_t)>,
+                       PrimitiveInterface,
+                       rp<Primitive<int32_t (*)(int32_t, int32_t)>>>(m, "Primitive_i32_i32")
+                ;
 
             py::class_<Primitive<double (*)(double)>,
                        PrimitiveInterface,
                        rp<Primitive<double (*)(double)>>>(m, "Primitive_double_double")
                 ;
+            using Fn_dbl_dbl_type = double (*)(double);
+
+            m.def("make_sqrt_pm", []() { return make_primitive<double (*)(double)>("sqrt",
+                                                                                   ::sqrt,
+                                                                                   false /*!explicit_symbol_def*/); },
+                  py::doc("create primitive representing the ::sqrt() function"));
+            m.def("make_sin_pm",
+                  []() { return make_primitive<Fn_dbl_dbl_type>("sin",
+                                                                ::sin,
+                                                                false /*!explicit_symbol_def*/); },
+                  py::doc("create primitive representing the ::sin() function"));
+            m.def("make_cos_pm",
+                  []() { return make_primitive<Fn_dbl_dbl_type>("cos",
+                                                                ::cos,
+                                                                false /*!explicit_symbol_def*/); },
+                  py::doc("create primitive representing the ::cos() function"));
+
             py::class_<Primitive<double (*)(double, double)>,
                        PrimitiveInterface,
                        rp<Primitive<double (*)(double, double)>>>(m, "Primitive_double_double_double")
                 ;
+
+            m.def("make_pow_pm",
+                  []() { return make_primitive<double (*)(double, double)>("pow",
+                                                                           ::pow,
+                                                                           false /*!explicit_symbol_def*/); },
+                  py::doc("create primitive representing the ::pow() function"));
 
             // ----- Apply -----
 
