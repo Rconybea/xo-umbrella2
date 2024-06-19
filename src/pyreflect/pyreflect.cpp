@@ -28,6 +28,8 @@ namespace xo {
             //py::class_<TypeDescrImpl>(m, "TypeDescr");
             py::class_<TypeDescrBase,
                        unowned_ptr<TypeDescrBase>>(m, "TypeDescr")
+
+                .def_static("lookup_by_name", &TypeDescrBase::lookup_by_name)
                 .def_static("print_reflected_types",
                             [](){ TypeDescrBase::print_reflected_types(std::cout); })
                 .def_property_readonly("canonical_name", &TypeDescrBase::canonical_name)
