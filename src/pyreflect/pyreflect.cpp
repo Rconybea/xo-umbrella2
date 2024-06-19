@@ -34,6 +34,7 @@ namespace xo {
                             [](){ TypeDescrBase::print_reflected_types(std::cout); })
                 .def_property_readonly("canonical_name", &TypeDescrBase::canonical_name)
                 .def_property_readonly("short_name", &TypeDescrBase::short_name)
+                .def_property_readonly("complete_flag", &TypeDescrBase::complete_flag)
                 .def("__repr__", &TypeDescrBase::display_string);
 
             /* note: this means python will use
