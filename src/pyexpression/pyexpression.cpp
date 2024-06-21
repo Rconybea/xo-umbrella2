@@ -118,17 +118,20 @@ namespace xo {
 
             m.def("make_sqrt_pm", []() { return make_primitive<double (*)(double)>("sqrt",
                                                                                    ::sqrt,
-                                                                                   false /*!explicit_symbol_def*/); },
+                                                                                   false /*!explicit_symbol_def*/,
+                                                                                   llvmintrinsic::fp_sqrt); },
                   py::doc("create primitive representing the ::sqrt() function"));
             m.def("make_sin_pm",
                   []() { return make_primitive<Fn_dbl_dbl_type>("sin",
                                                                 ::sin,
-                                                                false /*!explicit_symbol_def*/); },
+                                                                false /*!explicit_symbol_def*/,
+                                                                llvmintrinsic::fp_sin); },
                   py::doc("create primitive representing the ::sin() function"));
             m.def("make_cos_pm",
                   []() { return make_primitive<Fn_dbl_dbl_type>("cos",
                                                                 ::cos,
-                                                                false /*!explicit_symbol_def*/); },
+                                                                false /*!explicit_symbol_def*/,
+                                                                llvmintrinsic::fp_cos); },
                   py::doc("create primitive representing the ::cos() function"));
 
             py::class_<Primitive<double (*)(double, double)>,
@@ -139,7 +142,8 @@ namespace xo {
             m.def("make_pow_pm",
                   []() { return make_primitive<double (*)(double, double)>("pow",
                                                                            ::pow,
-                                                                           false /*!explicit_symbol_def*/); },
+                                                                           false /*!explicit_symbol_def*/,
+                                                                           llvmintrinsic::fp_pow); },
                   py::doc("create primitive representing the ::pow() function"));
 
             // ----- Apply -----
