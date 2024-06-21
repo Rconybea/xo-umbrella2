@@ -6,6 +6,7 @@
 #pragma once
 
 #include "FunctionInterface.hpp"
+#include "llvmintrinsic.hpp"
 
 //#include <cstdint>
 
@@ -34,9 +35,11 @@ namespace xo {
              **/
             virtual bool explicit_symbol_def() const = 0;
 
-            /** function address for this primitive
-             **/
+            /** function address for this primitive **/
             virtual void_function_type function_address() const = 0;
+
+            /** get llvm intrinsic hint for this primitive **/
+            virtual llvmintrinsic intrinsic() const = 0;
 
             // virtual const std::string & name() const;
             // virtual int n_arg() const;

@@ -6,6 +6,7 @@
 #pragma once
 
 #include "PrimitiveInterface.hpp"
+#include "llvmintrinsic.hpp"
 #include "xo/reflect/Reflect.hpp"
 //#include <cstdint>
 
@@ -15,9 +16,11 @@ namespace xo {
          *  @brief syntax for a constant that refers to a known function.
          *
          *  Two cases here:
-         *  1. primitive refers to a function that is supported directly in llvm
-         *     (e.g. floating-point addition)
-         *  2. primitive refers to a compiled (C/C++) function that we can invoke at runtime
+         *  1. (always) primitive refers to a compiled (C/C++) function that we can invoke at runtime
+         *  2. (sometimes) primitive also refers to a function that is supported directly in llvm
+         *     (e.g. floating-point addition).  In that case @ref intrinsic_
+         *     identifies that direct support, provided it knows at codegen time which primitive
+         *     is being invoked
          *
          *  In any case, a primitive serves as both declaration and definition
          *  (May be possible to relax this to declaration-only using null value_ as sentinel..?)
@@ -36,13 +39,15 @@ namespace xo {
         public:
             static ref::rp<Primitive> make(const std::string & name,
                                            FunctionPointer fnptr,
-                                           bool explicit_symbol_def) {
+                                           bool explicit_symbol_def,
+                                           llvmintrinsic intrinsic) {
                 TypeDescr fn_type = Reflect::require<FunctionPointer>();
 
-                return new Primitive(fn_type, name, fnptr, explicit_symbol_def);
+                return new Primitive(fn_type, name, fnptr, explicit_symbol_def, intrinsic);
             }
 
             FunctionPointer value() const { return value_; }
+            llvmintrinsic intrinsic() const { return intrinsic_; }
 
             TypeDescr value_td() const { return value_td_; }
             TaggedPtr value_tp() const {
@@ -79,12 +84,14 @@ namespace xo {
             Primitive(TypeDescr fn_type,
                       const std::string & name,
                       FunctionPointer fnptr,
-                      bool explicit_symbol_def)
+                      bool explicit_symbol_def,
+                      llvmintrinsic intrinsic)
                 : PrimitiveInterface(fn_type),
                   name_{name},
                   value_td_{Reflect::require_function<FunctionPointer>()},
                   value_{fnptr},
-                  explicit_symbol_def_{explicit_symbol_def}
+                  explicit_symbol_def_{explicit_symbol_def},
+                  intrinsic_{intrinsic}
                 {
                     if (!value_td_->is_function())
                         throw std::runtime_error("Primitive: expected function pointer");
@@ -103,11 +110,16 @@ namespace xo {
             TypeDescr value_td_;
             /** address of executable function **/
             FunctionPointer value_;
-            /** if true,  use Jit.intern_symbol() to provide explicit binding.
-             *  Currently mystified as to what's distinguishes functions like ::sin(), ::sqrt()
-             *  (which work do not require this) from symbols like ::mul_i32(), which do)
+            /** for LLVM: if true,  use Jit.intern_symbol() to provide explicit binding.
+             *
+             *  Not obvious what distinguishes functions like ::sin(), ::sqrt()
+             *  (which work without this) from symbols like ::mul_i32(), which do.
              **/
             bool explicit_symbol_def_ = false;
+            /** invalid:    generate call (IRBuilder::CreateCall)
+             *  all others: generate direct use of LLVM intrinsic
+             **/
+            llvmintrinsic intrinsic_;
         }; /*Primitive*/
 
         /** adopt function @p x as a callable primitive function named @p name **/
@@ -115,9 +127,10 @@ namespace xo {
         ref::rp<Primitive<FunctionPointer>>
         make_primitive(const std::string & name,
                        FunctionPointer x,
-                       bool explicit_symbol_def)
+                       bool explicit_symbol_def,
+                       llvmintrinsic intrinsic)
         {
-            return Primitive<FunctionPointer>::make(name, x, explicit_symbol_def);
+            return Primitive<FunctionPointer>::make(name, x, explicit_symbol_def, intrinsic);
         }
     } /*namespace ast*/
 } /*namespace xo*/

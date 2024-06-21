@@ -2,6 +2,7 @@
 
 #include "xo/expression/Constant.hpp"
 #include "xo/expression/Primitive.hpp"
+#include "xo/expression/llvmintrinsic.hpp"
 #include <iostream>
 #include <cmath>
 
@@ -9,6 +10,7 @@ int
 main() {
     using xo::ast::make_constant;
     using xo::ast::make_primitive;
+    using xo::ast::llvmintrinsic;
     using std::cout;
     using std::endl;
 
@@ -19,7 +21,8 @@ main() {
     {
         auto expr = make_primitive("sqrt",
                                    &::sqrt,
-                                   false /*!explicit_symbol_def*/);
+                                   false /*!explicit_symbol_def*/,
+                                   llvmintrinsic::fp_sqrt);
 
         auto expr_td = expr->value_td();
 
