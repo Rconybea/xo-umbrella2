@@ -103,7 +103,7 @@ JITDylib "<main>" (ES: 0x0000000000446ee0, State = Open)
 Link order: [ ("<main>", MatchAllSymbols) ]
 Symbol table:
     "foo": <not resolved>  [Callable] Never-Searched (Materializer 0x646fe0, xojit)
->>> fn=mp.lookup_dbl2dbl_fn('foo')
+>>> fn=mp.lookup_fn('double (*)(double, double)', 'foo')
 
 >>> mp.dump_execution_session()
 JITDylib "<main>" (ES: 0x0000000000446ee0, State = Open)
