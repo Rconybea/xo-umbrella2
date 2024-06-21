@@ -14,6 +14,7 @@ namespace xo {
     namespace jit {
         using xo::ast::Expression;
         using xo::ast::make_primitive;
+        using xo::ast::llvmintrinsic;
         using xo::pyutil::pycaller_base;
         using xo::pyutil::pycaller;
         using xo::ref::rp;
@@ -123,7 +124,7 @@ namespace xo {
                   []()
                       {
                           return make_primitive<int32_t (*)(int32_t, int32_t)>
-                              ("mul_i32", ::mul_i32, true /*explicit_symbol_def*/);
+                              ("mul_i32", ::mul_i32, true /*explicit_symbol_def*/, llvmintrinsic::i_mul);
                       },
                   py::doc("create primitive for 32-bit signed integer multiplication"));
 
@@ -131,7 +132,7 @@ namespace xo {
                   []()
                       {
                           return make_primitive<double (*)(double, double)>
-                              ("mul_f64", ::mul_f64, true /*explicit_symbol_def*/);
+                              ("mul_f64", ::mul_f64, true /*explicit_symbol_def*/, llvmintrinsic::fp_mul);
                       },
                   py::doc("create primitive for 64-bit floating point multiplication"));
 
