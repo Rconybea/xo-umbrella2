@@ -84,6 +84,7 @@ xo-cmake
 xo-indentlog
 xo-refcnt
 xo-subsys
+xo-ratio
 xo-reflect
 xo-pyutil
 xo-pyreflect
@@ -111,6 +112,9 @@ repo() {
             ;;
         xo-subsys)
             echo "${XO_REPO_STEM}/subsys.git"
+            ;;
+        xo-ratio)
+            echo "${XO_REPO_STEM}/xo-ratio.git"
             ;;
         xo-reflect)
             echo "${XO_REPO_STEM}/reflect.git"
