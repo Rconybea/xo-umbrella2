@@ -8,6 +8,7 @@
 #include "xo/reflect/TypeDescr.hpp"
 #include "xo/refcnt/Refcounted.hpp"
 #include "exprtype.hpp"
+#include <functional>
 
 namespace xo {
     namespace ast {
@@ -29,6 +30,7 @@ namespace xo {
          **/
         class Expression : public ref::Refcount {
         public:
+            using VisitFn = std::function<void (ref::brw<Expression>)>;
             using TypeDescr = xo::reflect::TypeDescr;
 
         public:
@@ -37,6 +39,13 @@ namespace xo {
 
             exprtype extype() const { return extype_; }
             TypeDescr valuetype() const { return valuetype_; }
+
+            /** visit each Expression node in this AST,
+             *  and invoke @p fn for each.
+             *  Returns the number of nodes visited.
+             *  Preorder: call @p fn for a node before visiting children
+             **/
+            virtual std::size_t visit_preorder(VisitFn visitor_fn) = 0;
 
             /** write human-readable representation to stream **/
             virtual void display(std::ostream & os) const = 0;

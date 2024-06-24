@@ -51,6 +51,11 @@ namespace xo {
 
             // ----- Expression -----
 
+            virtual std::size_t visit_preorder(VisitFn visitor_fn) override {
+                visitor_fn(this);
+                return 1;
+            }
+
             virtual void display(std::ostream & os) const override {
                 os << "<Constant"
                    << xtag("type", value_td_->short_name())

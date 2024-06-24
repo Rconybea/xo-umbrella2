@@ -46,6 +46,13 @@ namespace xo {
             // virtual TypeDescr fn_retval() const;
             // virtual TypeDescr fn_arg(uint32_t i) const;
 
+            // ----- Expression -----
+
+            virtual std::size_t visit_preorder(VisitFn visitor_fn) override {
+                visitor_fn(this);
+                return 1;
+            }
+
         private:
         }; /*PrimitiveInterface*/
     } /*namespace ast*/

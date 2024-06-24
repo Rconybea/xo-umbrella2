@@ -36,7 +36,20 @@ namespace xo {
             const ref::rp<Expression> & fn() const { return fn_; }
             const std::vector<ref::rp<Expression>> & argv() const { return argv_; }
 
-            virtual void display(std::ostream & os) const;
+            virtual std::size_t visit_preorder(VisitFn visitor_fn) override {
+                std::size_t n = 1;
+
+                visitor_fn(this);
+
+                n += fn_->visit_preorder(visitor_fn);
+
+                for (const auto & arg : argv_)
+                    n += arg->visit_preorder(visitor_fn);
+
+                return n;
+            }
+
+            virtual void display(std::ostream & os) const override;
 
         private:
             Apply(TypeDescr apply_valuetype,

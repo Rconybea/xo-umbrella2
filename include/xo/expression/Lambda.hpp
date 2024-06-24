@@ -48,6 +48,19 @@ namespace xo {
 
             // ----- Expression -----
 
+            virtual std::size_t visit_preorder(VisitFn visitor_fn) override {
+                std::size_t n = 1;
+
+                visitor_fn(this);
+
+                for (const auto & arg : argv_)
+                    n += arg->visit_preorder(visitor_fn);
+
+                n += body_->visit_preorder(visitor_fn);
+
+                return n;
+            }
+
             virtual void display(std::ostream & os) const override;
 
         private:

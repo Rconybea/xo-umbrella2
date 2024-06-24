@@ -31,7 +31,12 @@ namespace xo {
 
             const std::string & name() const { return name_; }
 
-            virtual void display(std::ostream & os) const;
+            virtual std::size_t visit_preorder(VisitFn visitor_fn) override {
+                visitor_fn(this);
+                return 1;
+            }
+
+            virtual void display(std::ostream & os) const override;
 
         private:
             Variable(const std::string & name,
