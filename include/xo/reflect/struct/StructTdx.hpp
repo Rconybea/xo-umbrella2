@@ -67,7 +67,9 @@ namespace xo {
                     return TypeDescrExtra::most_derived_self_tp(object_td, object);
                 }
             }
+            /* object argument ignored for structs,  since size is fixed */
             virtual uint32_t n_child(void * /*object*/) const override { return this->member_v_.size(); }
+            virtual uint32_t n_child_fixed() const override { return this->member_v_.size(); }
             virtual TaggedPtr child_tp(uint32_t i, void * object) const override;
             virtual std::string const & struct_member_name(uint32_t i) const override;
             virtual StructMember const * struct_member(uint32_t i) const override;

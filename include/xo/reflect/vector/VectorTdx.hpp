@@ -17,10 +17,14 @@ namespace xo {
             /* named ctor idiom.  create new instance for a vector type */
             //static std::unique_ptr<VectorTdx> make();
 
+            /** @brief true if array elements are stored at regularly-spaced offsetts **/
+            virtual bool has_contiguous_storage() const = 0;
+
             // ----- Inherited from TypeDescrExtra -----
 
             virtual Metatype metatype() const override { return Metatype::mt_vector; }
             virtual uint32_t n_child(void * object) const override = 0;
+            virtual uint32_t n_child_fixed() const override = 0;
             virtual TaggedPtr child_tp(uint32_t i, void * object) const override = 0;
             /* (forbidden) */
             virtual std::string const & struct_member_name(uint32_t i) const override;
@@ -41,11 +45,15 @@ namespace xo {
                 return std::unique_ptr<StlVectorTdx>(new StlVectorTdx());
             } /*make*/
 
+            virtual bool has_contiguous_storage() const override { return true; }
+
             virtual uint32_t n_child(void * object) const override {
                 target_t * vec = reinterpret_cast<target_t *>(object);
 
                 return vec->size();
             } /*n_child*/
+
+            virtual uint32_t n_child_fixed() const override { return 0; /*unknown*/ }
 
             virtual TaggedPtr child_tp(uint32_t i, void * object) const override {
                 target_t * vec = reinterpret_cast<target_t *>(object);
@@ -61,7 +69,10 @@ namespace xo {
          */
 
         template<typename Element, std::size_t N>
-        using StdArrayTdx = StlVectorTdx<std::array<Element, N>>;
+        class StdArrayTdx : public StlVectorTdx<std::array<Element, N>> {
+            virtual uint32_t n_child(void * /*object*/) const override { return N; }
+            virtual uint32_t n_child_fixed() const override { return N; }
+        }; /*StdArrayTdx*/
 
         // ----- std::vector<Element> -----
 
@@ -77,11 +88,17 @@ namespace xo {
                 return std::unique_ptr<StdVectorTdx>(new StdVectorTdx());
             } /*make*/
 
+            virtual bool has_contiguous_storage() const override { return true; }
+
             virtual uint32_t n_child(void * object) const override {
                 target_t * vec = reinterpret_cast<target_t *>(object);
 
                 return vec->size();
             } /*n_child*/
+
+            virtual uint32_t n_child_fixed() const override {
+                return 0; /* not known without object */
+            }
 
             virtual TaggedPtr child_tp(uint32_t i, void * object) const override {
                 target_t * vec = reinterpret_cast<target_t *>(object);

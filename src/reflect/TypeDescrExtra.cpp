@@ -12,7 +12,7 @@ namespace xo {
   namespace reflect {
     TaggedPtr
     TypeDescrExtra::most_derived_self_tp(TypeDescrBase const * object_td,
-					 void * object) const
+                     void * object) const
     {
       return TaggedPtr(object_td, object);
     } /*most_derived_self_tp*/
@@ -24,7 +24,7 @@ namespace xo {
       static std::string s_null;
       return s_null;
     } /*struct_member_name*/
-    
+
     StructMember const *
     TypeDescrExtra::struct_member(uint32_t /*i*/) const {
       assert(false);

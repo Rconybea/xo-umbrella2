@@ -54,6 +54,11 @@ namespace xo {
              */
             virtual TaggedPtr most_derived_self_tp(TypeDescrBase const * object_td, void * object) const;
             virtual uint32_t n_child(void * object) const = 0;
+            /** number of children,  fixed at compile time.
+             *  Will return 0 for types like std::vector<..> (because number is unknown);
+             *  Will also return 0 for types like {bool, int, long} (because number is zero)
+             **/
+            virtual uint32_t n_child_fixed() const = 0;
             virtual TaggedPtr child_tp(uint32_t i, void * object) const = 0;
             /* require:
              *   .is_struct()

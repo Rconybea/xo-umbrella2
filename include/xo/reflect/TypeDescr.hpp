@@ -305,6 +305,7 @@ namespace xo {
              *   .n_child() reports #of instance variables (that have been reflected)
              */
             uint32_t n_child(void * object) const { return this->tdextra_->n_child(object); }
+            /** in some circumstances can use this with object=nullptr **/
             TaggedPtr child_tp(uint32_t i, void * object) const;
 
             /* require:

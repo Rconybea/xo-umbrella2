@@ -2,6 +2,7 @@
 
 #include "atomic/AtomicTdx.hpp"
 #include "TaggedPtr.hpp"
+#include <sys/types.h>
 
 namespace xo {
     namespace reflect {
