@@ -35,6 +35,7 @@ namespace xo {
             virtual uint32_t n_child(void * /*object*/) const override { return 0; }
             virtual uint32_t n_child_fixed() const override { return 0; }
             virtual TaggedPtr child_tp(uint32_t i, void * object) const override;
+            virtual TypeDescr fixed_child_td(uint32_t i) const override;
             const std::string & struct_member_name(uint32_t i) const override;
 
             virtual const FunctionTdxInfo * fn_info() const override { return &info_; }

@@ -2,6 +2,7 @@
 
 #include "function/FunctionTdx.hpp"
 #include "TaggedPtr.hpp"
+#include "TypeDescr.hpp"
 
 namespace xo {
     namespace reflect {
@@ -34,6 +35,11 @@ namespace xo {
         FunctionTdx::child_tp(uint32_t /*i*/, void * /*object*/) const
         {
             return TaggedPtr::universal_null();
+        }
+
+        TypeDescr
+        FunctionTdx::fixed_child_td(uint32_t /*i*/) const {
+            return nullptr;
         }
 
         const std::string &

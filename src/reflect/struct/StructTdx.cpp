@@ -1,6 +1,7 @@
 /* @file StructTdx.cpp */
 
 #include "struct/StructTdx.hpp"
+#include "TypeDescr.hpp"
 
 namespace xo {
     using std::uint32_t;
@@ -24,11 +25,22 @@ namespace xo {
                 return TaggedPtr::universal_null();
             }
 
-            StructMember const & member_info = this->member_v_[i];
+            const StructMember & member_info = this->member_v_[i];
 
             return member_info.get_member_tp(object);
 
         } /*get_child*/
+
+        TypeDescr
+        StructTdx::fixed_child_td(uint32_t i ) const
+        {
+            if (i >= this->member_v_.size())
+                return nullptr;
+
+            const StructMember & member_info = this->member_v_[i];
+
+            return member_info.get_member_td();
+        } /*fixed_child_td*/
 
         std::string const &
         StructTdx::struct_member_name(uint32_t i) const

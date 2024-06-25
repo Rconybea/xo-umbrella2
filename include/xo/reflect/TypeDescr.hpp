@@ -305,7 +305,18 @@ namespace xo {
              *   .n_child() reports #of instance variables (that have been reflected)
              */
             uint32_t n_child(void * object) const { return this->tdextra_->n_child(object); }
-            /** in some circumstances can use this with object=nullptr **/
+            /** number of children,  if that number is fixed at compile time.  otherwise 0
+             **/
+            uint32_t n_child_fixed() const { return this->tdextra_->n_child_fixed(); }
+            /** TypeDescr for i'th child,  using only information available at compile time.
+             *  e.g. for vectors/pointers, always returns ElementType.
+             **/
+            TypeDescr fixed_child_td(uint32_t i) const { return this->tdextra_->fixed_child_td(i); }
+            /** TaggedPtr to child @p i.
+             *  Will report most-derived-type for type tag,
+             *  so may refer to a proper subtype (e.g. derived class) of the type
+             *  reported by @c fixed_child_td(i)
+             **/
             TaggedPtr child_tp(uint32_t i, void * object) const;
 
             /* require:

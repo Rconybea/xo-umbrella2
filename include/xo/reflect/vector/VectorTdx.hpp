@@ -26,6 +26,7 @@ namespace xo {
             virtual uint32_t n_child(void * object) const override = 0;
             virtual uint32_t n_child_fixed() const override = 0;
             virtual TaggedPtr child_tp(uint32_t i, void * object) const override = 0;
+            virtual TypeDescr fixed_child_td(uint32_t i) const override = 0;
             /* (forbidden) */
             virtual std::string const & struct_member_name(uint32_t i) const override;
         }; /*VectorTdx*/
@@ -33,6 +34,7 @@ namespace xo {
         // ----- StlVectorTdx -----
 
         /* require:
+         * - VectorT::value_type
          * - VectorT.size()
          * - VectorT[int] :: lvalue
          */
@@ -60,6 +62,10 @@ namespace xo {
 
                 return establish_most_derived_tp(&((*vec)[i]));
             } /*child_tp*/
+
+            virtual TypeDescr fixed_child_td(uint32_t /*i*/) const override {
+                return EstablishTypeDescr::establish<typename VectorT::value_type>();
+            }
         }; /*StlVectorTdx*/
 
         // ----- std::array<Element, N> -----
@@ -104,6 +110,10 @@ namespace xo {
                 target_t * vec = reinterpret_cast<target_t *>(object);
 
                 return establish_most_derived_tp(&((*vec)[i]));
+            }
+
+            virtual TypeDescr fixed_child_td(uint32_t /*i*/) const override {
+                return EstablishTypeDescr::establish<Element>();
             }
         }; /*StdVectorTdx*/
     } /*namespace reflect*/

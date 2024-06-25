@@ -59,6 +59,12 @@ namespace xo {
              *  Will also return 0 for types like {bool, int, long} (because number is zero)
              **/
             virtual uint32_t n_child_fixed() const = 0;
+            /** type description for i'th child,  based on information available at compile time.
+             *  For vectors/pointers, this always refers to element type.
+             *
+             *  nullptr for atomics
+             **/
+            virtual const TypeDescrBase * fixed_child_td(uint32_t i) const = 0;
             virtual TaggedPtr child_tp(uint32_t i, void * object) const = 0;
             /* require:
              *   .is_struct()
