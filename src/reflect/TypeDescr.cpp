@@ -288,6 +288,7 @@ namespace xo {
             return retval;
         } /*mark_complete*/
 
+#ifdef NOT_USING
         void
         TypeDescrBase::assign_tdextra(std::unique_ptr<TypeDescrExtra> tdx)
         {
@@ -302,6 +303,7 @@ namespace xo {
             this->complete_flag_ = true;
             this->tdextra_ = std::move(tdx);
         } /*assign_tdextra*/
+#endif
 
         TypeDescrTable::TypeDescrTable() {
             Reflect::require<bool>();

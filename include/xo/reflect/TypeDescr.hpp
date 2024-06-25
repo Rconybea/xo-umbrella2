@@ -351,7 +351,10 @@ namespace xo {
             /* call this once to attach extended type information to a type-description
              * (e.g. description of struct members for a record type)
              */
-            void assign_tdextra(std::unique_ptr<TypeDescrExtra> tdx);
+            void assign_tdextra(std::unique_ptr<TypeDescrExtra> tdx) {
+                this->complete_flag_ = true;
+                this->tdextra_ = std::move(tdx);
+            }
 
         private:
             TypeDescrBase(TypeId id,
