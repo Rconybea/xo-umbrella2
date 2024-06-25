@@ -28,7 +28,7 @@ $ xo-build --clone xo-refcnt
 
 or equivalently
 ```
-$ git clone git@github.com:rconybea/refcnt.git xo-refcnt
+$ git clone git@github.com:Rconybea/refcnt.git xo-refcnt
 ```
 
 ### build + install

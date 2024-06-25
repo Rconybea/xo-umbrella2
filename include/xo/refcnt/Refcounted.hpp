@@ -257,8 +257,11 @@ namespace xo {
         template<typename T>
         class Borrow {
         public:
-            template<typename S>
+            template <typename S>
             Borrow(rp<S> const & x) : ptr_(x.get()) {}
+
+            template <typename S>
+            Borrow(S * x) : ptr_(x) {}
 
             Borrow(Borrow const & x) = default;
 
