@@ -13,6 +13,7 @@ Installs a few cmake ingredients,  along with a build assistant `xo-build` for X
 $ xo-build --clone --configure --build --install xo-indentlog
 $ xo-build --clone --configure --build --install xo-refnct
 $ xo-build --clone --configure --build --install xo-subsys
+$ xo-build --clone --configure --build --install xo-reflectutil
 ```
 
 Note: can use `-n` to dry-run here
