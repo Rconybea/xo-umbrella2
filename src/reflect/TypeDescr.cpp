@@ -314,6 +314,7 @@ namespace xo {
             Reflect::require<long long>();
             Reflect::require<float>();
             Reflect::require<double>();
+            Reflect::require<std::string>();
         } /*ctor*/
 
         TypeDescrTable
