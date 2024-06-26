@@ -68,6 +68,36 @@ macro(xo_toplevel_testing_options)
         PROPERTY targets "")
 endmacro()
 
+# default build (cmake -DCMAKE_BUILD_TYPE= path/to/source)
+#
+macro(xo_toplevel_default_config2)
+    if ("${CMAKE_BUILD_TYPE}" STREQUAL "")
+        # clear out hardwired default.
+        # we want to override project-level defaults,
+        # but need to prevent interference from hardwired defaults
+        # (the problem with non-empty hardwired defaults is that we can't tell if they've
+        # been set on the command line)
+        #
+        set(CMAKE_CXX_FLAGS_DEFAULT "")
+
+        # CMAKE_CXX_FLAGS_DEBUG is built-in to cmake and has non-empty default.
+        #  -> we cannot tell whether it was set on the command line
+        #  -> use PROJECT_CXX_FLAGS_DEBUG instead
+        #
+        # built-in default value is -g; can hardwire different project policy here
+        #
+        if (NOT DEFINED PROJECT_CXX_FLAGS_DEFAULT)
+            set(PROJECT_CXX_FLAGS_DEFAULT ${PROJECT_CXX_FLAGS} -fno-strict-aliasing -O
+                CACHE STRING "default c++ compiler flags")
+        endif()
+
+        message(STATUS "PROJECT_CXX_FLAGS_DEFAULT: default c++ flags are [${PROJECT_CXX_FLAGS_DEFAULT}]")
+
+        # note no $<CONFIG:xxx> selector here
+        add_compile_options("${PROJECT_CXX_FLAGS_DEFAULT}")
+    endif()
+endmacro()
+
 # release build (cmake -DCMAKE_BUILD_TYPE=release path/to/source)
 #
 macro(xo_toplevel_release_config2)
@@ -87,7 +117,7 @@ macro(xo_toplevel_release_config2)
         # built-in default value is -march=native -O3 -DNDEBUG
         #
         if (NOT DEFINED PROJECT_CXX_FLAGS_RELEASE)
-            set(PROJECT_CXX_FLAGS_RELEASE ${PROJECT_CXX_FLAGS} -march=native -O3 -DNDEBUG
+            set(PROJECT_CXX_FLAGS_RELEASE ${PROJECT_CXX_FLAGS} -fno-strict-aliasing -march=native -O3 -DNDEBUG
                 CACHE STRING "release c++ compiler flags")
         endif()
 
@@ -116,7 +146,7 @@ macro(xo_toplevel_debug_config2)
         # built-in default value is -g; can hardwire different project policy here
         #
         if (NOT DEFINED PROJECT_CXX_FLAGS_DEBUG)
-            set(PROJECT_CXX_FLAGS_DEBUG ${PROJECT_CXX_FLAGS} -ggdb -Og
+            set(PROJECT_CXX_FLAGS_DEBUG ${PROJECT_CXX_FLAGS} -fno-strict-aliasing -ggdb -Og
                 CACHE STRING "debug c++ compiler flags")
         endif()
 
@@ -137,7 +167,7 @@ macro(xo_toplevel_asan_config2)
         set(CMAKE_CXX_FLAGS_ASAN "")
 
         if (NOT DEFINED PROJECT_CXX_FLAGS_ASAN)
-            set(PROJECT_CXX_FLAGS_ASAN ${PROJECT_CXX_FLAGS} -Og -fsanitize=address
+            set(PROJECT_CXX_FLAGS_ASAN ${PROJECT_CXX_FLAGS} -fno-strict-aliasing -Og -fsanitize=address
                 CACHE STRING "asan c++ compiler flags")
         endif()
 
