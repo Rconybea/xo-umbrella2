@@ -1,4 +1,4 @@
-** @file Object.hpp
+/** @file Object.hpp
  *
  *  Author: Roland Conybeare
  **/
