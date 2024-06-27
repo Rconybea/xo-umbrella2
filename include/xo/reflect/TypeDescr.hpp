@@ -119,7 +119,8 @@ namespace xo {
         /* hashable contents of a FunctionTdx instance (without requiring decl of TypeDescrExtra),
          * for unique-ification of manually-constructed function types
          */
-        struct FunctionTdxInfo {
+        class FunctionTdxInfo {
+        public:
             FunctionTdxInfo() = default;
             FunctionTdxInfo(TypeDescr retval_td,
                             const std::vector<TypeDescr> & arg_td_v,
