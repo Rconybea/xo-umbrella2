@@ -36,6 +36,13 @@ namespace xo {
                 return 1;
             }
 
+            virtual void attach_envs(ref::brw<Environment> /*p*/) override {}
+
+#ifdef NOT_USING
+            virtual std::int32_t find_free_vars(std::set<ref::brw<Variable>> * p_set) override {
+            }
+#endif
+
             virtual void display(std::ostream & os) const override;
 
         private:

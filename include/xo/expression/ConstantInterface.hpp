@@ -33,6 +33,12 @@ namespace xo {
             virtual TypeDescr value_td() const = 0;
             /** reflection-tagged pointer to literal value of this constant **/
             virtual TaggedPtr value_tp() const = 0;
+
+            // ----- Expression -----
+
+            virtual void attach_envs(ref::brw<Environment> /*p*/) override {}
+
+
         }; /*ConstantInterface*/
 
     } /*namespace ast*/

@@ -9,9 +9,14 @@
 #include "xo/refcnt/Refcounted.hpp"
 #include "exprtype.hpp"
 #include <functional>
+#include <set>
 
 namespace xo {
     namespace ast {
+        class Variable; /* see Variable.hpp */
+        class Lambda;   /* see Lamnbda.hpp */
+        class Environment; /* see Environment.hpp */
+
         /** @class Expression
          *  @brief abstract syntax tree for an EGAD program
          *
@@ -46,6 +51,22 @@ namespace xo {
              *  Preorder: call @p fn for a node before visiting children
              **/
             virtual std::size_t visit_preorder(VisitFn visitor_fn) = 0;
+
+            /** attach an environment to each lambda expression X in this subtree,
+             *  that will:
+             *  - resolve names matching X's arguments (formal parameters) to
+             *    from @p X.argv
+             *  - resolve free variables from @p parent
+             **/
+            virtual void attach_envs(ref::brw<Environment> parent) = 0;
+
+            /** append to *p_set the set of free variables in this expression.
+             *  returns the number of free variables introduced
+             *
+             *  @param env   stack of lexcically-enclosing lamnbda expressions,
+             *               in nesting order, i.e. outermost first, innertmost last
+             **/
+            //virtual std::int32_t find_free_vars(std::vector<ref::brw<Lambda>> env) = 0;
 
             /** write human-readable representation to stream **/
             virtual void display(std::ostream & os) const = 0;

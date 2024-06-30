@@ -53,6 +53,8 @@ namespace xo {
                 return 1;
             }
 
+            virtual void attach_envs(ref::brw<Environment> /*p*/) override {}
+
         private:
         }; /*PrimitiveInterface*/
     } /*namespace ast*/

@@ -8,6 +8,7 @@
 #include "Expression.hpp"
 #include "FunctionInterface.hpp"
 #include "Variable.hpp"
+#include "LocalEnv.hpp"
 #include <vector>
 #include <string>
 //#include <cstdint>
@@ -35,16 +36,16 @@ namespace xo {
             }
 
             const std::string & type_str() const { return type_str_; }
-            const std::vector<ref::rp<Variable>> & argv() const { return argv_; }
+            const std::vector<ref::rp<Variable>> & argv() const { return local_env_->argv(); }
             const ref::rp<Expression> & body() const { return body_; }
 
             // ----- FunctionInterface -----
 
             virtual const std::string & name() const override { return name_; }
             /** return number of arguments expected by this function **/
-            virtual int n_arg() const override { return argv_.size(); }
+            virtual int n_arg() const override { return local_env_->n_arg(); }
             virtual TypeDescr fn_retval() const override { return body_->valuetype(); }
-            virtual TypeDescr fn_arg(uint32_t i) const override { return argv_[i]->valuetype(); }
+            virtual TypeDescr fn_arg(uint32_t i) const override { return local_env_->fn_arg(i); }
 
             // ----- Expression -----
 
@@ -53,12 +54,16 @@ namespace xo {
 
                 visitor_fn(this);
 
-                for (const auto & arg : argv_)
+                for (const auto & arg : local_env_->argv())
                     n += arg->visit_preorder(visitor_fn);
 
                 n += body_->visit_preorder(visitor_fn);
 
                 return n;
+            }
+
+            virtual void attach_envs(ref::brw<Environment> p) override {
+                local_env_->assign_parent(p);
             }
 
             virtual void display(std::ostream & os) const override;
@@ -69,7 +74,7 @@ namespace xo {
              **/
             Lambda(const std::string & name,
                    TypeDescr lambda_type,
-                   const std::vector<ref::rp<Variable>> & argv,
+                   const ref::rp<LocalEnv> & local_env,
                    const ref::rp<Expression> & body);
 
         private:
@@ -85,10 +90,16 @@ namespace xo {
              *    "double(double,double)"  for function of two doubles that returns a double
              **/
             std::string type_str_;
-            /** formal argument names **/
-            std::vector<ref::rp<Variable>> argv_;
             /** function body **/
             ref::rp<Expression> body_;
+
+            /** established (once) by @ref attach_envs.
+             *
+             * @note data dependency on ancestor expressions that don't exist yet
+             * when Lambda constructor runs,  so we need to assign @ref local_env_
+             * later.
+             **/
+            ref::rp<LocalEnv> local_env_;
         }; /*Lambda*/
 
         inline ref::rp<Lambda>

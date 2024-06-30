@@ -41,23 +41,23 @@ namespace xo {
 
             return new Lambda(name,
                               lambda_td,
-                              argv,
+                              LocalEnv::make(argv),
                               body);
         } /*make*/
 
         Lambda::Lambda(const std::string & name,
                        TypeDescr lambda_type,
-                       const std::vector<rp<Variable>> & argv,
+                       const rp<LocalEnv> & local_env,
                        const ref::rp<Expression> & body)
             : FunctionInterface(exprtype::lambda, lambda_type),
               name_{name},
-              argv_{argv},
-              body_{body}
+              body_{body},
+              local_env_{local_env}
         {
             stringstream ss;
             ss << "double";
             ss << "(";
-            for (std::size_t i = 0; i < argv.size(); ++i) {
+            for (std::size_t i = 0, n = this->n_arg(); i < n; ++i) {
                 if (i > 0)
                     ss << ",";
                 ss << "double";
@@ -65,13 +65,15 @@ namespace xo {
             ss << ")";
 
             type_str_ = ss.str();
+
+            body_->attach_envs(local_env_);
         } /*ctor*/
 
         void
         Lambda::display(std::ostream & os) const {
             os << "<Lambda"
                << xtag("name", name_)
-               << xtag("argv", argv_)
+               << xtag("argv", local_env_->argv())
                << xtag("body", body_)
                << ">";
         } /*display*/

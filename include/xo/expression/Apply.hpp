@@ -49,6 +49,13 @@ namespace xo {
                 return n;
             }
 
+            virtual void attach_envs(ref::brw<Environment> p) override {
+                fn_->attach_envs(p);
+
+                for (const auto & arg : argv_)
+                    arg->attach_envs(p);
+            }
+
             virtual void display(std::ostream & os) const override;
 
         private:
