@@ -38,7 +38,7 @@ namespace xo {
 
             // ----- Environment -----
 
-            virtual ref::brw<Variable> lookup_var(const std::string & target) const override {
+            virtual ref::brw<Expression> lookup_var(const std::string & target) const override {
                 for (const auto & arg : argv_) {
                     if (arg->name() == target)
                         return arg;

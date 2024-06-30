@@ -12,9 +12,10 @@ namespace xo {
     namespace ast {
         class Environment : public ref::Refcount {
         public:
-            /** lookup variable-expression @p vname in this environment
+            /** lookup variable-expression @p vname in this environment.
+             *  returns llvm::Value representing code that produces a value for vname
              **/
-            virtual ref::brw<Variable> lookup_var(const std::string & vname) const = 0;
+            virtual ref::brw<Expression> lookup_var(const std::string & vname) const = 0;
         };
     } /*namespace ast*/
 } /*namespace xo*/
