@@ -31,6 +31,12 @@ namespace xo {
 
             const std::string & name() const { return name_; }
 
+            virtual std::set<std::string> get_free_variables() const override {
+                std::set<std::string> retval;
+                retval.insert(this->name_);
+                return retval;
+            }
+
             virtual std::size_t visit_preorder(VisitFn visitor_fn) override {
                 visitor_fn(this);
                 return 1;

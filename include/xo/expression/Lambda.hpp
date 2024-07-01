@@ -49,6 +49,16 @@ namespace xo {
 
             // ----- Expression -----
 
+            virtual std::set<std::string> get_free_variables() const override {
+                std::set<std::string> retval = body_->get_free_variables();
+
+                /* but remove formals. */
+                for (const auto & var : local_env_->argv())
+                    retval.erase(var->name());
+
+                return retval;
+            }
+
             virtual std::size_t visit_preorder(VisitFn visitor_fn) override {
                 std::size_t n = 1;
 

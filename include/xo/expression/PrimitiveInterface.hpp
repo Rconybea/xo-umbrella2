@@ -48,6 +48,10 @@ namespace xo {
 
             // ----- Expression -----
 
+            virtual std::set<std::string> get_free_variables() const override {
+                return std::set<std::string>();
+            }
+
             virtual std::size_t visit_preorder(VisitFn visitor_fn) override {
                 visitor_fn(this);
                 return 1;

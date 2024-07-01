@@ -36,6 +36,10 @@ namespace xo {
 
             // ----- Expression -----
 
+            virtual std::set<std::string> get_free_variables() const override {
+                return std::set<std::string>();
+            }
+
             virtual void attach_envs(ref::brw<Environment> /*p*/) override {}
 
 

@@ -36,6 +36,20 @@ namespace xo {
             const ref::rp<Expression> & fn() const { return fn_; }
             const std::vector<ref::rp<Expression>> & argv() const { return argv_; }
 
+            virtual std::set<std::string> get_free_variables() const override {
+                std::set<std::string> retval = fn_->get_free_variables();
+
+                for (const auto & arg : argv_) {
+                    std::set<std::string> arg_free_set
+                        = arg->get_free_variables();
+
+                    for (const auto & name : arg_free_set)
+                        retval.insert(name);
+                }
+
+                return retval;
+            }
+
             virtual std::size_t visit_preorder(VisitFn visitor_fn) override {
                 std::size_t n = 1;
 

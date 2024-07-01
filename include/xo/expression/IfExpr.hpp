@@ -40,6 +40,21 @@ namespace xo {
 
             // ----- Expression -----
 
+            virtual std::set<std::string> get_free_variables() const override {
+                std::set<std::string> retval = test_->get_free_variables();
+
+                std::set<std::string> free_vars;
+                free_vars = when_true_->get_free_variables();
+                for (const auto & s : free_vars)
+                    retval.insert(s);
+
+                free_vars = when_false_->get_free_variables();
+                for (const auto & s : free_vars)
+                    retval.insert(s);
+
+                return retval;
+            }
+
             virtual std::size_t visit_preorder(VisitFn visitor_fn) override {
                 std::size_t n = 1;
 

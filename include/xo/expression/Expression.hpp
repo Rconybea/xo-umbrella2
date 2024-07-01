@@ -45,6 +45,12 @@ namespace xo {
             exprtype extype() const { return extype_; }
             TypeDescr valuetype() const { return valuetype_; }
 
+            /** find free named variables in this expression.
+             *  comprises the set of names that don't match formal parameters in
+             *  enclosing lambdas.
+             **/
+            virtual std::set<std::string> get_free_variables() const = 0;
+
             /** visit each Expression node in this AST,
              *  and invoke @p fn for each.
              *  Returns the number of nodes visited.
