@@ -48,7 +48,7 @@ namespace xo {
                              body);
 
             /* need two-phase construction b/c pointer cycle */
-            env->assign_owner(retval.get());
+            env->assign_origin(retval.get());
 
             return retval;
         } /*make*/

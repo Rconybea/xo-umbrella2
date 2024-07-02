@@ -28,15 +28,15 @@ namespace xo {
                 return new LocalEnv(argv);
             }
 
-            Lambda * owner() const { return owner_; }
+            Lambda * origin() const { return origin_; }
             const std::vector<ref::rp<Variable>> & argv() const { return argv_; }
             int n_arg() const { return argv_.size(); }
             TypeDescr fn_arg(uint32_t i) const { return argv_[i]->valuetype(); }
 
-            /** single-assign this environment's owner **/
-            void assign_owner(Lambda * p) {
-                assert(owner_ == nullptr);
-                owner_ = p;
+            /** single-assign this environment's origin **/
+            void assign_origin(Lambda * p) {
+                assert(origin_ == nullptr);
+                origin_ = p;
             }
 
             /** single-assign this environment's parent **/
@@ -68,10 +68,10 @@ namespace xo {
              *
              *  Invariant:
              *  @code
-             *  owner_->local_env_ == this
+             *  origin_->local_env_ == this
              *  @endcode
              **/
-            Lambda * owner_ = nullptr;
+            Lambda * origin_ = nullptr;
 
             /** formal argument names **/
             std::vector<ref::rp<Variable>> argv_;
