@@ -45,6 +45,19 @@ namespace xo {
                               body);
         } /*make*/
 
+        std::set<std::string>
+        Lambda::calc_free_variables() const
+        {
+            std::set<std::string> retval
+                = body_->get_free_variables();
+
+            /* but remove formals. */
+            for (const auto & var : local_env_->argv())
+                retval.erase(var->name());
+
+            return retval;
+        } /*calc_free_variables*/
+
         Lambda::Lambda(const std::string & name,
                        TypeDescr lambda_type,
                        const rp<LocalEnv> & local_env,
@@ -64,7 +77,8 @@ namespace xo {
             }
             ss << ")";
 
-            type_str_ = ss.str();
+            this->type_str_ = ss.str();
+            this->free_var_set_ = this->calc_free_variables();
 
             body_->attach_envs(local_env_);
         } /*ctor*/

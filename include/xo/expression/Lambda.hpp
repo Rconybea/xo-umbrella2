@@ -39,6 +39,8 @@ namespace xo {
             const std::vector<ref::rp<Variable>> & argv() const { return local_env_->argv(); }
             const ref::rp<Expression> & body() const { return body_; }
 
+            bool needs_closure_flag() const { return !free_var_set_.empty(); }
+
             // ----- FunctionInterface -----
 
             virtual const std::string & name() const override { return name_; }
@@ -50,13 +52,7 @@ namespace xo {
             // ----- Expression -----
 
             virtual std::set<std::string> get_free_variables() const override {
-                std::set<std::string> retval = body_->get_free_variables();
-
-                /* but remove formals. */
-                for (const auto & var : local_env_->argv())
-                    retval.erase(var->name());
-
-                return retval;
+                return this->free_var_set_;
             }
 
             virtual std::size_t visit_preorder(VisitFn visitor_fn) override {
@@ -87,6 +83,9 @@ namespace xo {
                    const ref::rp<LocalEnv> & local_env,
                    const ref::rp<Expression> & body);
 
+            /** compute free-variable set for this lambda **/
+            std::set<std::string> calc_free_variables() const;
+
         private:
             /** lambda name.  Initially supporting only form like
              *    (define (foo x y z)
@@ -102,6 +101,9 @@ namespace xo {
             std::string type_str_;
             /** function body **/
             ref::rp<Expression> body_;
+
+            /** free variables for this lambda **/
+            std::set<std::string> free_var_set_;
 
             /** established (once) by @ref attach_envs.
              *
