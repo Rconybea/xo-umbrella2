@@ -7,6 +7,7 @@
 
 #include "Environment.hpp"
 #include <map>
+#include <string>
 
 namespace xo {
     namespace ast {
@@ -23,7 +24,16 @@ namespace xo {
 
             // ----- Environment -----
 
-            virtual ref::brw<Expression> lookup_var(const std::string & vname) const {
+            virtual bool is_global_env() const override { return true; }
+
+            virtual binding_path lookup_binding(const std::string & vname) const override {
+                /* i_link: -1 for global environment
+                 * j_slot: not used
+                 */
+                return { -1, 0 };
+            }
+
+            virtual ref::brw<Expression> lookup_var(const std::string & vname) const override {
                 auto ix = global_map_.find(vname);
 
                 if (ix == global_map_.end()) {

@@ -7,6 +7,7 @@ set(SELF_SRCS
     Lambda.cpp
     Variable.cpp
     IfExpr.cpp
+    LocalEnv.cpp
 )
 
 xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 ${SELF_SRCS})

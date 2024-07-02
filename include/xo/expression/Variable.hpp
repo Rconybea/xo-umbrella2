@@ -6,6 +6,7 @@
 #pragma once
 
 #include "Expression.hpp"
+#include "binding_path.hpp"
 
 namespace xo {
     namespace ast {
@@ -42,7 +43,7 @@ namespace xo {
                 return 1;
             }
 
-            virtual void attach_envs(ref::brw<Environment> /*p*/) override {}
+            virtual void attach_envs(ref::brw<Environment> /*p*/) override;
 
             virtual void display(std::ostream & os) const override;
 
@@ -55,6 +56,10 @@ namespace xo {
         private:
             /** variable name **/
             std::string name_;
+            /** navigate environment via this path to find runtime memory
+             *  location for this variable
+             **/
+            binding_path path_;
         }; /*Variable*/
 
         inline ref::rp<Variable>

@@ -47,6 +47,10 @@ namespace xo {
 
             // ----- Environment -----
 
+            virtual bool is_global_env() const override { return false; }
+
+            virtual binding_path lookup_binding(const std::string & vname) const override;
+
             virtual ref::brw<Expression> lookup_var(const std::string & target) const override {
                 for (const auto & arg : argv_) {
                     if (arg->name() == target)
@@ -61,7 +65,7 @@ namespace xo {
 
         private:
             LocalEnv(const std::vector<ref::rp<Variable>> & argv)
-                : argv_(argv) {}
+                : origin_{nullptr}, argv_(argv) {}
 
         private:
             /** Lambnda for which this environment created.
