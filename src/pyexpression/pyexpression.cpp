@@ -55,6 +55,7 @@ namespace xo {
             py::class_<Expression,
                        rp<Expression>>(m, "Expression")
                 .def_property_readonly("extype", &Expression::extype)
+                .def("get_free_variables", &Expression::get_free_variables)
                 .def("__repr__", &Expression::display_string);
             ;
 
@@ -104,13 +105,13 @@ namespace xo {
 
             using Fn_dbl_dbl_type = double (*)(double);
 
-            m.def("make_sqrt_pm", []() { return make_primitive<Fn_dbl_dbl_type>("sqrt", sqrt); },
+            m.def("make_sqrt_pm", []() { return make_primitive<Fn_dbl_dbl_type>("sqrt", sqrt, false /*!explicit*/, llvmintrinsic::invalid); },
                   py::doc("create primitive representing the ::sqrt() function"));
-            m.def("make_sin_pm", []() { return make_primitive<Fn_dbl_dbl_type>("sin", ::sin); },
+            m.def("make_sin_pm", []() { return make_primitive<Fn_dbl_dbl_type>("sin", ::sin, false /*!explicit*/, llvmintrinsic::invalid); },
                   py::doc("create primitive representing the ::sin() function"));
-            m.def("make_cos_pm", []() { return make_primitive<Fn_dbl_dbl_type>("cos", ::cos); },
+            m.def("make_cos_pm", []() { return make_primitive<Fn_dbl_dbl_type>("cos", ::cos, false /*!explicit*/, llvmintrinsic::invalid); },
                   py::doc("create primitive representing the ::cos() function"));
-            m.def("make_pow_pm", []() { return make_primitive<double (*)(double, double)>("pow", ::pow); },
+            m.def("make_pow_pm", []() { return make_primitive<double (*)(double, double)>("pow", ::pow, false /*!explicit*/, llvmintrinsic::invalid); },
                   py::doc("create primitive representing the ::pow() function"));
 
             py::class_<Primitive<double (*)(double)>,
