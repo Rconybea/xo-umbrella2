@@ -9,6 +9,8 @@
 
 namespace xo {
     namespace ast {
+        class Lambda;
+
         /** @brief LocalEnv
          *
          *  @class Local environment for a lambda.
@@ -26,9 +28,16 @@ namespace xo {
                 return new LocalEnv(argv);
             }
 
+            Lambda * owner() const { return owner_; }
             const std::vector<ref::rp<Variable>> & argv() const { return argv_; }
             int n_arg() const { return argv_.size(); }
             TypeDescr fn_arg(uint32_t i) const { return argv_[i]->valuetype(); }
+
+            /** single-assign this environment's owner **/
+            void assign_owner(Lambda * p) {
+                assert(owner_ == nullptr);
+                owner_ = p;
+            }
 
             /** single-assign this environment's parent **/
             void assign_parent(ref::brw<Environment> p) {
@@ -55,11 +64,20 @@ namespace xo {
                 : argv_(argv) {}
 
         private:
+            /** Lambnda for which this environment created.
+             *
+             *  Invariant:
+             *  @code
+             *  owner_->local_env_ == this
+             *  @endcode
+             **/
+            Lambda * owner_ = nullptr;
+
             /** formal argument names **/
             std::vector<ref::rp<Variable>> argv_;
 
-            /** parent environment.  Free variable in this lambda's
-             *  body,  will be resolved by referring them to @ref parent_env_.
+            /** parent environment.  A free variable in this lambda's
+             *  body will be resolved by referring them to @ref parent_env_.
              **/
             ref::rp<Environment> parent_env_;
         };

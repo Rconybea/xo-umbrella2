@@ -39,10 +39,18 @@ namespace xo {
             TypeDescr lambda_td
                 = TypeDescrBase::require_by_fn_info(function_info);
 
-            return new Lambda(name,
-                              lambda_td,
-                              LocalEnv::make(argv),
-                              body);
+            rp<LocalEnv> env = LocalEnv::make(argv);
+
+            rp<Lambda> retval
+                = new Lambda(name,
+                             lambda_td,
+                             env,
+                             body);
+
+            /* need two-phase construction b/c pointer cycle */
+            env->assign_owner(retval.get());
+
+            return retval;
         } /*make*/
 
         std::set<std::string>
