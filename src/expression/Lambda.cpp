@@ -112,7 +112,7 @@ namespace xo {
                                 return var.get();
                             } else {
                                 /* substitute already-encountered var_map[] member */
-                                return ix->second;
+                                return ix->second.get();
                             }
                         } else {
                             return x.get();

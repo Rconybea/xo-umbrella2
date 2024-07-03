@@ -69,6 +69,14 @@ namespace xo {
                 return n;
             }
 
+            virtual std::size_t visit_layer(VisitFn visitor_fn) override {
+                std::size_t n = 1;
+
+                visitor_fn(this);
+
+                return n;
+            }
+
             virtual ref::rp<Expression> xform_layer(TransformFn /*xform_fn*/) override {
                 /* a layer is bounded by lambdas,  don't enter them */
                 return this;

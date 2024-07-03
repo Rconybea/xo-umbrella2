@@ -67,6 +67,18 @@ namespace xo {
                 return n;
             }
 
+            virtual std::size_t visit_layer(VisitFn visitor_fn) override {
+                std::size_t n = 1;
+
+                visitor_fn(this);
+
+                n += this->test_->visit_layer(visitor_fn);
+                n += this->when_true_->visit_layer(visitor_fn);
+                n += this->when_false_->visit_layer(visitor_fn);
+
+                return n;
+            }
+
             virtual ref::rp<Expression> xform_layer(TransformFn xform_fn) override {
                 this->test_ = this->test_->xform_layer(xform_fn);
                 this->when_true_ = this->when_true_->xform_layer(xform_fn);

@@ -6,6 +6,8 @@
 #pragma once
 
 #include "Environment.hpp"
+#include "Variable.hpp"
+#include "xo/reflect/TypeDescr.hpp"
 
 namespace xo {
     namespace ast {

@@ -61,6 +61,13 @@ namespace xo {
              **/
             virtual std::size_t visit_preorder(VisitFn visitor_fn) = 0;
 
+            /** visit each Expression node in this AST,
+             *  including immediately-nested Lambda nodes;
+             *  but do not recurse into the params/body of such nested Lambdas.
+             *  Returns the number of nodes visited
+             **/
+            virtual std::size_t visit_layer(VisitFn visitor_fn) = 0;
+
             /** traverse ast @ref visit_preorder but do not visit Lambdas **/
             virtual ref::rp<Expression> xform_layer(TransformFn visitor_fn) = 0;
 
