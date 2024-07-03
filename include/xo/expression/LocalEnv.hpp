@@ -35,6 +35,11 @@ namespace xo {
             int n_arg() const { return argv_.size(); }
             TypeDescr fn_arg(uint32_t i) const { return argv_[i]->valuetype(); }
 
+            /** report binding path for a formal parameter.
+             *  Returns sentinel if @p vname doesn't appear in @ref argv_
+             **/
+            binding_path lookup_local_binding(const std::string & vname) const;
+
             /** single-assign this environment's origin **/
             void assign_origin(Lambda * p) {
                 assert(origin_ == nullptr);
