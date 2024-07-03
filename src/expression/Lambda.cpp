@@ -69,25 +69,9 @@ namespace xo {
             return retval;
         } /*calc_free_variables*/
 
-        Lambda::Lambda(const std::string & name,
-                       TypeDescr lambda_type,
-                       const rp<LocalEnv> & local_env,
-                       const ref::rp<Expression> & body)
-            : FunctionInterface(exprtype::lambda, lambda_type),
-              name_{name},
-              body_{body},
-              local_env_{local_env}
+        void
+        Lambda::regularize_layer_vars()
         {
-            stringstream ss;
-            ss << "double";
-            ss << "(";
-            for (std::size_t i = 0, n = this->n_arg(); i < n; ++i) {
-                if (i > 0)
-                    ss << ",";
-                ss << "double";
-            }
-            ss << ")";
-
             /* regularize local_env+body:  make sure exactly one instance
              * (i.e. with object identity) of a Variable appears
              * within one layer of a lambda body.
@@ -133,11 +117,33 @@ namespace xo {
                             }
                         });
             }
+        } /*regularize_layer_vars*/
+
+        Lambda::Lambda(const std::string & name,
+                       TypeDescr lambda_type,
+                       const rp<LocalEnv> & local_env,
+                       const ref::rp<Expression> & body)
+            : FunctionInterface(exprtype::lambda, lambda_type),
+              name_{name},
+              body_{body},
+              local_env_{local_env}
+        {
+            stringstream ss;
+            ss << "double";
+            ss << "(";
+            for (std::size_t i = 0, n = this->n_arg(); i < n; ++i) {
+                if (i > 0)
+                    ss << ",";
+                ss << "double";
+            }
+            ss << ")";
 
             this->type_str_ = ss.str();
             this->free_var_set_ = this->calc_free_variables();
 
-            body_->attach_envs(local_env_);
+            this->regularize_layer_vars();
+
+            this->body_->attach_envs(local_env_);
         } /*ctor*/
 
         void

@@ -91,6 +91,14 @@ namespace xo {
             /** compute free-variable set for this lambda **/
             std::set<std::string> calc_free_variables() const;
 
+            /** ensure at most one Variable instance with a particular name
+             *  in this lambda,  but ignore nested lambdas.
+             *
+             *  Goal is to unify variables that can use the same binding
+             *  path to determine memory location at runtime.
+             **/
+            void regularize_layer_vars();
+
         private:
             /** lambda name.  Initially supporting only form like
              *    (define (foo x y z)
