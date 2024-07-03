@@ -103,9 +103,11 @@ namespace xo {
 
                                 auto ix = var_map.find(var->name());
                                 if (ix == var_map.end()) {
-                                    /* add to var_map */
+                                    /* add to var_map,  copy to ensure Variable
+                                     * is unique to layer
+                                     */
 
-                                    var_map[var->name()] = var.get();
+                                    var_map[var->name()] = Variable::copy(var);
 
                                     return var.get();
                                 } else {

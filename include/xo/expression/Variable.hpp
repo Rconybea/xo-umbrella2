@@ -25,6 +25,11 @@ namespace xo {
                 return new Variable(name, var_type);
             }
 
+            /** return copy of x:  same var, different object identity **/
+            static ref::rp<Variable> copy(ref::brw<Variable> x) {
+                return new Variable(x->name(), x->valuetype());
+            }
+
             /** downcast from Expression **/
             static ref::brw<Variable> from(ref::brw<Expression> x) {
                 return ref::brw<Variable>::from(x);
