@@ -110,6 +110,28 @@ namespace xo {
 
                     var_map[arg->name()] = arg;
                 }
+
+                body_ = body_->xform_layer
+                    ([&var_map](ref::brw<Expression> x) -> ref::rp<Expression>
+                        {
+                            if (x->extype() == exprtype::variable) {
+                                ref::brw<Variable> var = Variable::from(x);
+
+                                auto ix = var_map.find(var->name());
+                                if (ix == var_map.end()) {
+                                    /* add to var_map */
+
+                                    var_map[var->name()] = var.get();
+
+                                    return var.get();
+                                } else {
+                                    /* substitute already-encountered var_map[] member */
+                                    return ix->second;
+                                }
+                            } else {
+                                return x.get();
+                            }
+                        });
             }
 
             this->type_str_ = ss.str();
