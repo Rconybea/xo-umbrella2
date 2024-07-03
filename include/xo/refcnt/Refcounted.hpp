@@ -297,8 +297,11 @@ namespace xo {
                 return ptrdiff_t(x.get() - y.get());
             } /*compare*/
 
-        private:
-            Borrow(T * x) : ptr_(x) {}
+            template <typename S>
+            Borrow<T> & operator=(const Borrow<S> & x) {
+                ptr_ = x.get();
+                return *this;
+            }
 
         private:
             T * ptr_ = nullptr;
