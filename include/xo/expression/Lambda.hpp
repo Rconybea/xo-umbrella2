@@ -125,6 +125,9 @@ namespace xo {
             /** free variables for this lambda **/
             std::set<std::string> free_var_set_;
 
+            /** variables that appear free in some nested lambda **/
+            std::set<std::string> captured_var_set_;
+
             /** map giving unique identity to each variable appearing in this layer.
              *  includes:
              *  - formal parameters
