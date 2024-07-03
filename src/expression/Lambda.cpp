@@ -69,7 +69,7 @@ namespace xo {
             return retval;
         } /*calc_free_variables*/
 
-        void
+        std::map<std::string, ref::rp<Variable>>
         Lambda::regularize_layer_vars()
         {
             /* regularize local_env+body:  make sure exactly one instance
@@ -83,42 +83,43 @@ namespace xo {
              * Motivation is to unify Variables that would use the same
              * binding_path to resolve their runtime location.
              */
-            {
-                std::map<std::string, rp<Variable>> var_map;
+            std::map<std::string, rp<Variable>> var_map;
 
-                for (const auto & arg : local_env_->argv()) {
-                    /* each arg name can appear at most once
-                     * in a particular lambda's parameter list
-                     */
-                    assert(var_map.find(arg->name()) == var_map.end());
+            for (const auto & arg : local_env_->argv()) {
+                /* each arg name can appear at most once
+                 * in a particular lambda's parameter list
+                 */
+                assert(var_map.find(arg->name()) == var_map.end());
 
-                    var_map[arg->name()] = arg;
-                }
-
-                body_ = body_->xform_layer
-                    ([&var_map](ref::brw<Expression> x) -> ref::rp<Expression>
-                        {
-                            if (x->extype() == exprtype::variable) {
-                                ref::brw<Variable> var = Variable::from(x);
-
-                                auto ix = var_map.find(var->name());
-                                if (ix == var_map.end()) {
-                                    /* add to var_map,  copy to ensure Variable
-                                     * is unique to layer
-                                     */
-
-                                    var_map[var->name()] = Variable::copy(var);
-
-                                    return var.get();
-                                } else {
-                                    /* substitute already-encountered var_map[] member */
-                                    return ix->second;
-                                }
-                            } else {
-                                return x.get();
-                            }
-                        });
+                var_map[arg->name()] = arg;
             }
+
+            this->body_
+                = (body_->xform_layer
+                   ([&var_map](ref::brw<Expression> x) -> ref::rp<Expression>
+                    {
+                        if (x->extype() == exprtype::variable) {
+                            ref::brw<Variable> var = Variable::from(x);
+
+                            auto ix = var_map.find(var->name());
+                            if (ix == var_map.end()) {
+                                /* add to var_map,  copy to ensure Variable
+                                 * not shared with any other layer
+                                 */
+
+                                var_map[var->name()] = Variable::copy(var);
+
+                                return var.get();
+                            } else {
+                                /* substitute already-encountered var_map[] member */
+                                return ix->second;
+                            }
+                        } else {
+                            return x.get();
+                        }
+                    }));
+
+            return var_map;
         } /*regularize_layer_vars*/
 
         Lambda::Lambda(const std::string & name,
@@ -141,12 +142,20 @@ namespace xo {
             ss << ")";
 
             this->type_str_ = ss.str();
-            this->free_var_set_ = this->calc_free_variables();
 
-            this->regularize_layer_vars();
+            /* ensure variables are unique within layer for this lambda */
+            this->layer_var_map_ = this->regularize_layer_vars();
+
+            this->free_var_set_ = this->calc_free_variables();
 
             this->body_->attach_envs(local_env_);
         } /*ctor*/
+
+        void
+        Lambda::attach_envs(ref::brw<Environment> p) {
+            local_env_->assign_parent(p);
+
+        }
 
         void
         Lambda::display(std::ostream & os) const {

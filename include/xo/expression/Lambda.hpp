@@ -9,6 +9,7 @@
 #include "FunctionInterface.hpp"
 #include "Variable.hpp"
 #include "LocalEnv.hpp"
+#include <map>
 #include <vector>
 #include <string>
 //#include <cstdint>
@@ -73,9 +74,7 @@ namespace xo {
                 return this;
             }
 
-            virtual void attach_envs(ref::brw<Environment> p) override {
-                local_env_->assign_parent(p);
-            }
+            virtual void attach_envs(ref::brw<Environment> p) override;
 
             virtual void display(std::ostream & os) const override;
 
@@ -97,7 +96,7 @@ namespace xo {
              *  Goal is to unify variables that can use the same binding
              *  path to determine memory location at runtime.
              **/
-            void regularize_layer_vars();
+            std::map<std::string, ref::rp<Variable>> regularize_layer_vars();
 
         private:
             /** lambda name.  Initially supporting only form like
@@ -117,6 +116,16 @@ namespace xo {
 
             /** free variables for this lambda **/
             std::set<std::string> free_var_set_;
+
+            /** map giving unique identity to each variable appearing in this layer.
+             *  includes:
+             *  - formal parameters
+             *  - free variables in @ref body_
+             *  excludes:
+             *  - any variables appearing in nested lambdas
+             *    (whether formals or free variables)
+             **/
+            std::map<std::string, ref::rp<Variable>> layer_var_map_;
 
             /** established (once) by @ref attach_envs.
              *
