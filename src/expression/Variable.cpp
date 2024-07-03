@@ -8,7 +8,11 @@ namespace xo {
         void
         Variable::attach_envs(ref::brw<Environment> e) {
             /** e makes accessible all enclosing lexical scopes **/
-            this->path_ = e->lookup_binding(this->name_);
+            if (this->path_.i_link_ == -2 /*sentinel*/) {
+                this->path_ = e->lookup_binding(this->name_);
+            } else {
+                /* have already established binding for this Variable */
+            }
         } /*attach_envs*/
 
         void

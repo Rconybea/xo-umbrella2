@@ -135,6 +135,9 @@ namespace xo {
              **/
             std::map<std::string, ref::rp<Variable>> layer_var_map_;
 
+            /** all lambdas nested once inside this lambda's body **/
+            std::map<std::string, ref::brw<Lambda>> nested_lambda_map_;
+
             /** established (once) by @ref attach_envs.
              *
              * @note data dependency on ancestor expressions that don't exist yet

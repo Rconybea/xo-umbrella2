@@ -26,7 +26,7 @@ namespace xo {
 
             virtual bool is_global_env() const override { return true; }
 
-            virtual binding_path lookup_binding(const std::string & vname) const override {
+            virtual binding_path lookup_binding(const std::string & /*vname*/) const override {
                 /* i_link: -1 for global environment
                  * j_slot: not used
                  */

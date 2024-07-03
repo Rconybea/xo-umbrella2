@@ -83,7 +83,7 @@ namespace xo {
              * Motivation is to unify Variables that would use the same
              * binding_path to resolve their runtime location.
              */
-            std::map<std::string, rp<Variable>> var_map;
+            std::map<std::string, ref::rp<Variable>> var_map;
 
             for (const auto & arg : local_env_->argv()) {
                 /* each arg name can appear at most once
@@ -148,6 +148,24 @@ namespace xo {
 
             this->free_var_set_ = this->calc_free_variables();
 
+            std::map<std::string, ref::brw<Lambda>> nested_lambda_map;
+
+            this->body_->visit_layer
+                ([&nested_lambda_map]
+                 (ref::brw<Expression> expr)
+                    {
+                        if (expr->extype() == exprtype::lambda) {
+                            ref::brw<Lambda> lm = Lambda::from(expr);
+
+                            nested_lambda_map[lm->name()] = lm.get();
+                        }
+                    });
+
+            this->nested_lambda_map_ = std::move(nested_lambda_map);
+
+            /* in particular:
+             * - establish binding path for each variable
+             */
             this->body_->attach_envs(local_env_);
         } /*ctor*/
 
@@ -155,6 +173,7 @@ namespace xo {
         Lambda::attach_envs(ref::brw<Environment> p) {
             local_env_->assign_parent(p);
 
+            /** establish a binding path for each variable **/
         }
 
         void

@@ -13,8 +13,8 @@ namespace xo {
          *  providing its location.
          **/
         struct binding_path {
-            /** @of parent links to traverse.  -1 if global **/
-            int i_link_ = -1;
+            /** @of parent links to traverse.  -1 if global. -2 if sentinel **/
+            int i_link_ = -2;
             /** for variables bound in some local environment:
              *  slot# within that environment.
              *
