@@ -63,6 +63,15 @@ namespace xo {
                 return n;
             }
 
+            virtual ref::rp<Expression> xform_layer(TransformFn xform_fn) override {
+                this->fn_ = fn_->xform_layer(xform_fn);
+
+                for (auto & arg : argv_)
+                    arg = arg->xform_layer(xform_fn);
+
+                return xform_fn(this);
+            }
+
             virtual void attach_envs(ref::brw<Environment> p) override {
                 fn_->attach_envs(p);
 

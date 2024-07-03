@@ -60,10 +60,19 @@ namespace xo {
 
                 visitor_fn(this);
 
+                n += this->test_->visit_preorder(visitor_fn);
                 n += this->when_true_->visit_preorder(visitor_fn);
                 n += this->when_false_->visit_preorder(visitor_fn);
 
                 return n;
+            }
+
+            virtual ref::rp<Expression> xform_layer(TransformFn xform_fn) override {
+                this->test_ = this->test_->xform_layer(xform_fn);
+                this->when_true_ = this->when_true_->xform_layer(xform_fn);
+                this->when_false_= this->when_false_->xform_layer(xform_fn);
+
+                return xform_fn(this);
             }
 
             virtual void attach_envs(ref::brw<Environment> p) override {

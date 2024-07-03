@@ -57,6 +57,10 @@ namespace xo {
                 return 1;
             }
 
+            virtual ref::rp<Expression> xform_layer(TransformFn xform_fn) override {
+                return xform_fn(this);
+            }
+
             virtual void attach_envs(ref::brw<Environment> /*p*/) override {}
 
         private:

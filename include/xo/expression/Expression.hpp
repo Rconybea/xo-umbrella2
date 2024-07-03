@@ -35,7 +35,10 @@ namespace xo {
          **/
         class Expression : public ref::Refcount {
         public:
-            using VisitFn = std::function<void (ref::brw<Expression>)>;
+            using VisitFn = std::function
+                <void (ref::brw<Expression>)>;
+            using TransformFn = std::function
+                <ref::rp<Expression> (ref::brw<Expression>)>;
             using TypeDescr = xo::reflect::TypeDescr;
 
         public:
@@ -57,6 +60,9 @@ namespace xo {
              *  Preorder: call @p fn for a node before visiting children
              **/
             virtual std::size_t visit_preorder(VisitFn visitor_fn) = 0;
+
+            /** traverse ast @ref visit_preorder but do not visit Lambdas **/
+            virtual ref::rp<Expression> xform_layer(TransformFn visitor_fn) = 0;
 
             /** attach an environment to each lambda expression X in this subtree,
              *  that will:

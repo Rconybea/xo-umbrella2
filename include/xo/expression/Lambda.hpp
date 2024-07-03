@@ -68,6 +68,11 @@ namespace xo {
                 return n;
             }
 
+            virtual ref::rp<Expression> xform_layer(TransformFn /*xform_fn*/) override {
+                /* a layer is bounded by lambdas,  don't enter them */
+                return this;
+            }
+
             virtual void attach_envs(ref::brw<Environment> p) override {
                 local_env_->assign_parent(p);
             }

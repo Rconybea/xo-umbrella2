@@ -4,6 +4,7 @@
 #include "xo/reflect/TypeDescr.hpp"
 #include "xo/reflect/function/FunctionTdx.hpp"
 #include "xo/indentlog/print/vector.hpp"
+#include <map>
 
 namespace xo {
     using xo::reflect::TypeDescrBase;
@@ -25,10 +26,12 @@ namespace xo {
              **/
 
             std::vector<TypeDescr> arg_td_v;
-            arg_td_v.reserve(argv.size());
+            {
+                arg_td_v.reserve(argv.size());
 
-            for (const auto & arg : argv) {
-                arg_td_v.push_back(arg->valuetype());
+                for (const auto & arg : argv) {
+                    arg_td_v.push_back(arg->valuetype());
+                }
             }
 
             auto function_info
@@ -84,6 +87,30 @@ namespace xo {
                 ss << "double";
             }
             ss << ")";
+
+            /* regularize local_env+body:  make sure exactly one instance
+             * (i.e. with object identity) of a Variable appears
+             * within one layer of a lambda body.
+             *
+             * Here 'layer' means excluding appearance in any nested lambdas
+             * (i.e. whether or not such appearance would resolve to the same
+             * memory location).
+             *
+             * Motivation is to unify Variables that would use the same
+             * binding_path to resolve their runtime location.
+             */
+            {
+                std::map<std::string, rp<Variable>> var_map;
+
+                for (const auto & arg : local_env_->argv()) {
+                    /* each arg name can appear at most once
+                     * in a particular lambda's parameter list
+                     */
+                    assert(var_map.find(arg->name()) == var_map.end());
+
+                    var_map[arg->name()] = arg;
+                }
+            }
 
             this->type_str_ = ss.str();
             this->free_var_set_ = this->calc_free_variables();

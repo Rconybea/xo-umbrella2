@@ -56,6 +56,10 @@ namespace xo {
                 return 1;
             }
 
+            virtual ref::rp<Expression> xform_layer(TransformFn xform_fn) override {
+                return xform_fn(this);
+            }
+
             virtual void display(std::ostream & os) const override {
                 os << "<Constant"
                    << xtag("type", value_td_->short_name())
