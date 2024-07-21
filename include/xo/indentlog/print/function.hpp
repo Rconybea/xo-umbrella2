@@ -7,20 +7,20 @@
 
 namespace xo {
     enum class function_style : std::uint8_t {
-        /* literal: print supplied text,  no alterations */
+        /** literal: print supplied text,  no alterations **/
         literal,
-        /* pretty: print name, surrounded by []
+        /** pretty: print name, surrounded by []
          *   [double Quadratic::operator()(double) const]
-         */
+         **/
         pretty,
-        /* streamlined: remove extraneous detail,
-         * try to print something like class::method
-         *   Quadratic::operator()
-         */
+        /** streamlined: remove extraneous detail,
+         *  try to print something like class::method
+         *    Quadratic::operator()
+         **/
         streamlined,
-        /* simple: remove everything except function/method name
-         *   operator()
-         */
+        /** simple: remove everything except function/method name
+         *    operator()
+         **/
         simple
     };
 
@@ -99,7 +99,7 @@ namespace xo {
 
             //std::cerr << "print_streamlined:  s=[" << s << "]" << std::endl;
             //std::cerr << "print_streamlined: s2=[" << s2 << "] (excluded [with ..] suffix)" << std::endl;
-            //std::cerr << "print_streamlined: s3=[" << s3 << "], p=" << p << " (excluded const suffix)" << std::endl;
+            //std::cerr << "print_streamlined: s3=[" << s3 << "] (excluded const suffix)" << std::endl;
             //std::cerr << "print_streamlined: s4=[" << s4 << "], q=" << q << " (excluded return type)" << std::endl;
             //std::cerr << "print_streamlined: s5=[" << s5 << "], r=" << r << " (excluded ns qualifier)" << std::endl;
 
@@ -143,7 +143,12 @@ namespace xo {
              * - left-to-right
              * - exclude ' [with '... to end of string
              */
+#if __clang__
+            /* clang footnote like [CharT = char] instead of [with CharT = char] */
+            std::size_t p = s.find(" [");
+#else
             std::size_t p = s.find(" [with ");
+#endif
 
             return s.substr(0, p);
         } /*exclude_template_footnote_suffix*/
