@@ -1,6 +1,6 @@
 # tokenizer/CMakeLists.txt
 
-set(SELF_LIB tokenizer)
+set(SELF_LIB xo_tokenizer)
 set(SELF_SRCS
     tokentype.cpp
     token.cpp)

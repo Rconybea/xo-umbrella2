@@ -2,7 +2,7 @@
 
 cmake_minimum_required(VERSION 3.10)
 
-project(tokenizer VERSION 0.1)
+project(xo_tokenizer VERSION 0.1)
 
 include(GNUInstallDirs)
 include(cmake/xo-bootstrap-macros.cmake)

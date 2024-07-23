@@ -3,7 +3,7 @@
  * author: Roland Conybeare
  */
 
-#include "tokenizer.hpp"
+#include "xo/tokenizer/tokenizer.hpp"
 #include <catch2/catch.hpp>
 
 namespace xo {
