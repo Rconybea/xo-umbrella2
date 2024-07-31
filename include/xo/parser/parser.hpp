@@ -20,6 +20,7 @@ namespace xo {
             empty,
             symbol,
             expression,
+            typedescr,
 
             n_exprirtype
         };
@@ -43,6 +44,7 @@ namespace xo {
         class exprir {
         public:
             using Expression = xo::ast::Expression;
+            using TypeDescr = xo::reflect::TypeDescr;
 
         public:
             exprir() = default;
@@ -52,10 +54,14 @@ namespace xo {
             exprir(exprirtype xir_type,
                    rp<Expression> expr)
                 : xir_type_{xir_type}, expr_{std::move(expr)} {}
+            exprir(exprirtype xir_type,
+                   TypeDescr td)
+                : xir_type_{xir_type}, td_{td} {}
 
             exprirtype xir_type() const { return xir_type_; }
             const std::string & symbol_name() const { return symbol_name_; }
             const rp<Expression> & expr() const { return expr_; }
+            TypeDescr td() const { return td_; }
 
             void print(std::ostream & os) const;
 
@@ -66,6 +72,8 @@ namespace xo {
             std::string symbol_name_;
             /** xir_type=expression: a completed expression **/
             rp<Expression> expr_;
+            /** xir_type=typedescr: object identifying/describing a datatype **/
+            TypeDescr td_ = nullptr;
         };
 
         inline std::ostream &
@@ -88,6 +96,7 @@ namespace xo {
 
             expect_rhs_expression,
             expect_symbol,
+            expect_type,
 
             n_exprstatetype
         };
@@ -184,6 +193,7 @@ namespace xo {
         public:
             using exprtype = xo::ast::exprtype;
             using token_type = token<char>;
+            using TypeDescr = xo::reflect::TypeDescr;
 
         public:
             exprstate() = default;
@@ -240,7 +250,7 @@ namespace xo {
              *  |   |   | |   | | (done)
              *  |   |   | |   | def_4:expect_rhs_expression
              *  |   |   | |   def_3
-             *  |   |   | def_2:expect_symbol
+             *  |   |   | def_2:expect_type
              *  |   |   def_1
              *  |   def_0:expect_symbol
              *  expect_toplevel_expression_sequence
@@ -262,7 +272,7 @@ namespace xo {
             /** e.g. f64 in
              *    def foo : f64 = 1
              **/
-            std::string def_lhs_type_;
+            TypeDescr def_lhs_td_ = nullptr;
         }; /*exprstate*/
 
         inline std::ostream &

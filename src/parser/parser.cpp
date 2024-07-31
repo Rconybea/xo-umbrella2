@@ -6,13 +6,15 @@
 #include "parser.hpp"
 #include "xo/expression/DefineExpr.hpp"
 #include "xo/expression/Constant.hpp"
-#include <regex>
+//#include <regex>
 #include <stdexcept>
 
 namespace xo {
     using xo::ast::Expression;
     using xo::ast::DefineExpr;
     using xo::ast::Constant;
+    using xo::reflect::Reflect;
+    using xo::reflect::TypeDescr;
 
     namespace scm {
         const char *
@@ -26,6 +28,8 @@ namespace xo {
                 return "symbol";
             case exprirtype::expression:
                 return "expression";
+            case exprirtype::typedescr:
+                return "typedescr";
             case exprirtype::n_exprirtype:
                 break;
             }
@@ -38,8 +42,10 @@ namespace xo {
             os << "<exprir"
                << xtag("type", xir_type_)
                << xtag("symbol_name", symbol_name_)
-               << xtag("expr", expr_)
-               << ">";
+               << xtag("expr", expr_);
+            if (td_)
+                os << xtag("td", td_->short_name());
+            os << ">";
         }
 
         const char *
@@ -63,6 +69,8 @@ namespace xo {
                 return "expect_rhs_expression";
             case exprstatetype::expect_symbol:
                 return "expect_symbol";
+            case exprstatetype::expect_type:
+                return "expect_type";
             case exprstatetype::n_exprstatetype:
                 break;
             }
@@ -147,6 +155,7 @@ namespace xo {
             case exprstatetype::expect_rhs_expression:
                 return false;
             case exprstatetype::expect_symbol:
+            case exprstatetype::expect_type:
                 return false;
             case exprstatetype::invalid:
             case exprstatetype::n_exprstatetype:
@@ -171,6 +180,10 @@ namespace xo {
                 return true;
 
             case exprstatetype::expect_symbol:
+                return true;
+
+            case exprstatetype::expect_type:
+                /* treat symbol as typename */
                 return true;
 
             case exprstatetype::invalid:
@@ -198,6 +211,7 @@ namespace xo {
                  * may not begin with a colon
                  */
             case exprstatetype::expect_symbol:
+            case exprstatetype::expect_type:
                 return false;
 
             case exprstatetype::invalid:
@@ -225,6 +239,7 @@ namespace xo {
                  * may not begin with singleassign '='
                  */
             case exprstatetype::expect_symbol:
+            case exprstatetype::expect_type:
                 return false;
 
             case exprstatetype::invalid:
@@ -249,6 +264,7 @@ namespace xo {
                 return true;
 
             case exprstatetype::expect_symbol:
+            case exprstatetype::expect_type:
                 return false;
 
             case exprstatetype::invalid:
@@ -324,6 +340,36 @@ namespace xo {
                                   exprstatetype::invalid /*not used*/,
                                   exprstatetype::invalid /*not used*/);
 
+            case exprstatetype::expect_type: {
+                TypeDescr td = nullptr;
+
+                /* TODO: replace with typetable lookup */
+
+                if (tk.text() == "f64")
+                    td = Reflect::require<double>();
+                else if(tk.text() == "f32")
+                    td = Reflect::require<float>();
+                else if(tk.text() == "i16")
+                    td = Reflect::require<std::int16_t>();
+                else if(tk.text() == "i32")
+                    td = Reflect::require<std::int32_t>();
+                else if(tk.text() == "i64")
+                    td = Reflect::require<std::int64_t>();
+
+                if (!td) {
+                    throw std::runtime_error
+                        (tostr(self_name,
+                               ": unknown type name",
+                               " (expecting f64|f32|i16|i32|i64)",
+                               xtag("typename", tk.text())));
+                }
+
+                return expraction(expractiontype::pop,
+                                  exprir(exprirtype::typedescr, td),
+                                  exprstatetype::invalid /*not used*/,
+                                  exprstatetype::invalid /*not used*/);
+            }
+
             case exprstatetype::invalid:
             case exprstatetype::n_exprstatetype:
                 /* unreachable */
@@ -352,7 +398,7 @@ namespace xo {
 
                 return expraction(expractiontype::push1,
                                   exprir(),
-                                  exprstatetype::expect_symbol,
+                                  exprstatetype::expect_type,
                                   exprstatetype::invalid /*not used*/);
             } else {
                 assert(false);
@@ -520,7 +566,7 @@ namespace xo {
                 return expraction();
             case exprstatetype::def_2:
                 this->exs_type_ = exprstatetype::def_3;
-                this->def_lhs_type_ = ir.symbol_name();
+                this->def_lhs_td_ = ir.td();
 
                 return expraction::keep();
             case exprstatetype::def_3:
@@ -553,6 +599,7 @@ namespace xo {
                 }
 
             case exprstatetype::expect_rhs_expression:
+            case exprstatetype::expect_type:
             case exprstatetype::expect_symbol:
                 /* unreachable
                  * (this exprstate issues pop instruction from exprstate::on_input()
@@ -571,9 +618,10 @@ namespace xo {
         exprstate::print(std::ostream & os) const {
             os << "<exprstate"
                << xtag("type", exs_type_)
-               << xtag("def_lhs_symbol", def_lhs_symbol_)
-               << xtag("def_lhs_type", def_lhs_type_)
-               << ">";
+               << xtag("def_lhs_symbol", def_lhs_symbol_);
+            if (def_lhs_td_)
+                os << xtag("def_lhs_td", def_lhs_td_->short_name());
+            os << ">";
         }
 
         // ----- parser -----

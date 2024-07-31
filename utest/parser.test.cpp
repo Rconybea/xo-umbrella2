@@ -96,7 +96,7 @@ namespace xo {
                  */
                 CHECK(parser.stack_size() == 3);
                 if (parser.stack_size() > 0)
-                    CHECK(parser.i_exstype(0) == exprstatetype::expect_symbol);
+                    CHECK(parser.i_exstype(0) == exprstatetype::expect_type);
                 if (parser.stack_size() > 1)
                     CHECK(parser.i_exstype(1) == exprstatetype::def_2);
                 if (parser.stack_size() > 2)
@@ -105,14 +105,14 @@ namespace xo {
             }
 
             /* input:
-             *   def foo : footype
-             *            ^       ^
-             *            0       1
+             *   def foo : f64
+             *            ^   ^
+             *            0   1
              */
             {
-                auto r4 = parser.include_token(token_type::symbol_token("footype"));
+                auto r4 = parser.include_token(token_type::symbol_token("f64"));
 
-                cerr << "parser state after [def foo : footype]" << endl;
+                cerr << "parser state after [def foo : f64]" << endl;
                 cerr << parser << endl;
 
                 REQUIRE(r4.get() == nullptr);
@@ -138,14 +138,14 @@ namespace xo {
             }
 
             /* input:
-             *   def foo : footype =
-             *                    ^ ^
-             *                    0 1
+             *   def foo : f64 =
+             *                ^ ^
+             *                0 1
              */
             {
                 auto r5 = parser.include_token(token_type::singleassign());
 
-                cerr << "parser state after [def foo : footype =]" << endl;
+                cerr << "parser state after [def foo : f64 =]" << endl;
                 cerr << parser << endl;
 
                 REQUIRE(r5.get() == nullptr);
@@ -169,14 +169,14 @@ namespace xo {
             }
 
             /* input:
-             *   def foo : footype = 3.14159265
-             *                      ^          ^
-             *                      0          1
+             *   def foo : f64 = 3.14159265
+             *                  ^          ^
+             *                  0          1
              */
             {
                 auto r6 = parser.include_token(token_type::f64_token("3.14159265"));
 
-                cerr << "parser state after [def foo : footype = 3.14159265]" << endl;
+                cerr << "parser state after [def foo : f64 = 3.14159265]" << endl;
                 cerr << parser << endl;
 
                 REQUIRE(r6.get() != nullptr);
