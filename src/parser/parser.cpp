@@ -41,9 +41,6 @@ namespace xo {
         exprir::print(std::ostream & os) const {
             os << "<exprir"
                << xtag("type", xir_type_);
-                //<< xtag("symbol_name", symbol_name_);
-            if (td_)
-                os << xtag("td", td_->short_name());
             os << ">";
         }
 
@@ -339,11 +336,50 @@ namespace xo {
                 }
 
                 p_stack->pop_exprstate();
-                p_stack->top_exprstate().on_exprir
-                    (exprir(exprirtype::typedescr, td), p_stack, p_emit_expr);
-                //return expraction::pop(exprir(exprirtype::typedescr, td));
+                p_stack->top_exprstate().on_typedescr(td, p_stack, p_emit_expr);
                 return;
             }
+
+            case exprstatetype::invalid:
+            case exprstatetype::n_exprstatetype:
+                /* unreachable */
+                assert(false);
+                return;
+            }
+        }
+
+        void
+        exprstate::on_typedescr(TypeDescr td,
+                                exprstatestack * /*p_stack*/,
+                                rp<Expression> * /*p_emit_expr*/)
+        {
+            switch(this->exs_type_) {
+            case exprstatetype::expect_toplevel_expression_sequence:
+            case exprstatetype::def_0:
+            case exprstatetype::def_1:
+                /* NOT IMPLEMENTED */
+                assert(false);
+                return;
+
+            case exprstatetype::def_2:
+                this->exs_type_ = exprstatetype::def_3;
+                this->def_lhs_td_ = td;
+
+                return;
+            case exprstatetype::def_3:
+            case exprstatetype::def_4:
+                /* NOT IMPLEMENTED */
+                assert(false);
+                return;
+
+            case exprstatetype::expect_rhs_expression:
+            case exprstatetype::expect_type:
+            case exprstatetype::expect_symbol:
+                /* unreachable
+                 * (this exprstate issues pop instruction from exprstate::on_input()
+                 */
+                assert(false);
+                return;
 
             case exprstatetype::invalid:
             case exprstatetype::n_exprstatetype:
@@ -630,19 +666,10 @@ namespace xo {
             case exprstatetype::expect_toplevel_expression_sequence:
             case exprstatetype::def_0:
             case exprstatetype::def_1:
-                /* NOT IMPLEMENTED */
-                assert(false);
-                return;
             case exprstatetype::def_2:
-                this->exs_type_ = exprstatetype::def_3;
-                this->def_lhs_td_ = ir.td();
-
-                return;
             case exprstatetype::def_3:
-                /* NOT IMPLEMENTED */
-                assert(false);
-                return;
             case exprstatetype::def_4:
+                /* NOT IMPLEMENTED */
                 assert(false);
                 return;
 
