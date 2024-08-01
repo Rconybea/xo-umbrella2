@@ -356,7 +356,7 @@ namespace xo {
             }
         }
 
-        expraction
+        void
         exprstate::on_colon(exprstatestack * p_stack) {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
@@ -375,11 +375,8 @@ namespace xo {
                 this->exs_type_ = exprstatetype::def_2;
 
                 p_stack->push_exprstate(exprstatetype::expect_type);
-
-                return expraction::keep();
             } else {
                 assert(false);
-                return expraction();
             }
         }
 
