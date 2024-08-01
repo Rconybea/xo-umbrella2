@@ -7,6 +7,7 @@
 
 #include "xo/expression/Expression.hpp"
 #include "xo/expression/DefineExpr.hpp"
+#include "xo/expression/ConvertExpr.hpp"
 #include "xo/tokenizer/token.hpp"
 #include <stack>
 #include <stdexcept>
@@ -49,6 +50,7 @@ namespace xo {
         public:
             using Expression = xo::ast::Expression;
             using DefineExprAccess = xo::ast::DefineExprAccess;
+            using ConvertExprAccess = xo::ast::ConvertExprAccess;
             using exprtype = xo::ast::exprtype;
             using token_type = token<char>;
             using TypeDescr = xo::reflect::TypeDescr;
@@ -139,17 +141,14 @@ namespace xo {
 
             /** scaffold a define-expression here **/
             rp<DefineExprAccess> def_expr_;
+            rp<ConvertExprAccess> cvt_expr_;
 
 #ifdef OBSOLETE
-            /** e.g. foo in
-             *    def foo : f64 = 1
-             **/
-            std::string def_lhs_symbol_;
-#endif
             /** e.g. f64 in
              *    def foo : f64 = 1
              **/
             TypeDescr def_lhs_td_ = nullptr;
+#endif
         }; /*exprstate*/
 
         inline std::ostream &

@@ -369,10 +369,13 @@ namespace xo {
 
             case exprstatetype::def_2:
                 this->exs_type_ = exprstatetype::def_3;
-
-                this->def_lhs_td_ = td;
+                this->cvt_expr_ = ConvertExprAccess::make(td /*dest_type*/,
+                                                          nullptr /*source_expr*/);
+                this->def_expr_->assign_rhs(this->cvt_expr_);
+                //this->def_lhs_td_ = td;
 
                 return;
+
             case exprstatetype::def_3:
             case exprstatetype::def_4:
                 /* NOT IMPLEMENTED */
@@ -585,17 +588,12 @@ namespace xo {
                  */
                 rp<Expression> rhs_value = expr.get();
 
-                if (def_lhs_td_)
-                    rhs_value = ConvertExpr::make(def_lhs_td_, rhs_value);
+                if (this->cvt_expr_)
+                    this->cvt_expr_->assign_arg(rhs_value);
+                else
+                    this->def_expr_->assign_rhs(rhs_value);;
 
-                rp<DefineExprAccess> def_expr = this->def_expr_;
-
-                def_expr->assign_rhs(rhs_value);
-
-#ifdef OBSOLETE
-                rp<Expression> def = DefineExpr::make(this->def_lhs_symbol_,
-                                                      rhs_value);
-#endif
+                rp<Expression> def_expr = this->def_expr_;
 
                 p_stack->pop_exprstate(); /* NOT KOSHER. invalidates *this */
 
@@ -671,9 +669,8 @@ namespace xo {
         exprstate::print(std::ostream & os) const {
             os << "<exprstate"
                << xtag("type", exs_type_)
-               << xtag("def_expr", def_expr_);
-            if (def_lhs_td_)
-                os << xtag("def_lhs_td", def_lhs_td_->short_name());
+               << xtag("def_expr", def_expr_)
+               << xtag("cvt_expr", cvt_expr_);
             os << ">";
         }
 
