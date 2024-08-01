@@ -442,7 +442,9 @@ namespace xo {
         }
 
         expraction
-        exprstate::on_f64(const token_type & tk) {
+        exprstate::on_f64(const token_type & tk,
+                          exprstatestack * /*p_stack*/)
+        {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
@@ -483,7 +485,7 @@ namespace xo {
                 return expraction();
 
             case tokentype::tk_f64:
-                return this->on_f64(tk);
+                return this->on_f64(tk, p_stack);
 
             case tokentype::tk_string:
                 assert(false);
