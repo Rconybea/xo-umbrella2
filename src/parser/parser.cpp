@@ -415,7 +415,7 @@ namespace xo {
         }
 
         expraction
-        exprstate::on_singleassign() {
+        exprstate::on_singleassign(exprstatestack * /*p_stack*/) {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
@@ -516,7 +516,7 @@ namespace xo {
                 return expraction();
 
             case tokentype::tk_singleassign:
-                return this->on_singleassign();
+                return this->on_singleassign(p_stack);
 
             case tokentype::tk_assign:
             case tokentype::tk_yields:
