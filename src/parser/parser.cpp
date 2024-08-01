@@ -625,10 +625,10 @@ namespace xo {
             os << ">";
         }
 
-        // ----- parser -----
+        // ----- exprstatestack -----
 
         exprstate &
-        parser::top_exprstate() {
+        exprstatestack::top_exprstate() {
             std::size_t z = stack_.size();
 
             if (z == 0) {
@@ -640,7 +640,7 @@ namespace xo {
         }
 
         void
-        parser::push_exprstate(const exprstate & exs) {
+        exprstatestack::push_exprstate(const exprstate & exs) {
             std::size_t z = stack_.size();
 
             stack_.resize(z+1);
@@ -649,7 +649,7 @@ namespace xo {
         }
 
         void
-        parser::pop_exprstate() {
+        exprstatestack::pop_exprstate() {
             std::size_t z = stack_.size();
 
             if (z > 0)
@@ -657,8 +657,25 @@ namespace xo {
         }
 
         void
+        exprstatestack::print(std::ostream & os) const {
+            os << "<exprstatestack"
+               << xtag("size", stack_.size())
+               << std::endl;
+
+            for (std::size_t i = 0, z = stack_.size(); i < z; ++i) {
+                os << "  [" << z-i-1 << "] "
+                   << stack_[i]
+                   << std::endl;
+            }
+
+            os << ">" << std::endl;
+        }
+
+        // ----- parser -----
+
+        void
         parser::begin_translation_unit() {
-            this->push_exprstate
+            xs_stack_.push_exprstate
                 (exprstate::expect_toplevel_expression_sequence());
         }
 
@@ -668,7 +685,7 @@ namespace xo {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            if (stack_.empty()) {
+            if (xs_stack_.empty()) {
                 throw std::runtime_error(tostr("parser::include_token",
                                                 ": parser not expecting input"
                                                "(call parser.begin_translation_unit()..?)",
@@ -676,7 +693,7 @@ namespace xo {
             }
 
             /* stack_ is non-empty */
-            expraction action = this->top_exprstate().on_input(tk);
+            expraction action = xs_stack_.top_exprstate().on_input(tk);
 
             /* loop until reach parsing state that requires more input */
             for (;;) {
@@ -690,23 +707,25 @@ namespace xo {
                     return action.expr_ir().expr();
 
                 case expractiontype::pop:
-                    this->pop_exprstate();
+                    xs_stack_.pop_exprstate();
 
-                    if (stack_.empty()) {
+                    if (xs_stack_.empty()) {
                         throw std::runtime_error(tostr("parser::include_token",
                                                        ": pop leaves empty stack"));
                     }
 
-                    action = this->top_exprstate().on_exprir(action.expr_ir());
+                    action = (xs_stack_
+                              .top_exprstate()
+                              .on_exprir(action.expr_ir()));
                     break;
 
                 case expractiontype::push1:
-                    this->push_exprstate(action.push_exs1());
+                    xs_stack_.push_exprstate(action.push_exs1());
                     return nullptr;
 
                 case expractiontype::push2:
-                    this->push_exprstate(action.push_exs1());
-                    this->push_exprstate(action.push_exs2());
+                    xs_stack_.push_exprstate(action.push_exs1());
+                    xs_stack_.push_exprstate(action.push_exs2());
                     return nullptr;
 
                 case expractiontype::invalid:
@@ -721,14 +740,9 @@ namespace xo {
         void
         parser::print(std::ostream & os) const {
             os << "<parser"
-               << xtag("stack", stack_.size())
                << std::endl;
 
-            for (std::size_t i = 0, z = stack_.size(); i < z; ++i) {
-                os << "  [" << i << "] "
-                   << stack_[i]
-                   << std::endl;
-            }
+            xs_stack_.print(os);
 
             os << ">" << std::endl;
         }

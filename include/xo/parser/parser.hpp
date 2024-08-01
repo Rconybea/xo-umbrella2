@@ -282,6 +282,45 @@ namespace xo {
             return os;
         }
 
+        /** @class exprstatestack
+         *  @brief A stack of exprstate objects
+         **/
+        class exprstatestack {
+        public:
+            exprstatestack() {}
+
+            bool empty() const { return stack_.empty(); }
+            std::size_t size() const { return stack_.size(); }
+
+            exprstate & top_exprstate();
+            void push_exprstate(const exprstate & exs);
+            void pop_exprstate();
+
+            /** relative to top-of-stack.
+             *  0 -> top (last in),  z-1 -> bottom (first in)
+             **/
+            exprstate & operator[](std::size_t i) {
+                std::size_t z = stack_.size();
+
+                assert(i < z);
+
+                return stack_[z - i - 1];
+            }
+
+            const exprstate & operator[](std::size_t i) const {
+                std::size_t z = stack_.size();
+
+                assert(i < z);
+
+                return stack_[z - i - 1];
+            }
+
+            void print (std::ostream & os) const;
+
+        private:
+            std::vector<exprstate> stack_;
+        };
+
         /** schematica parser
          *
          *  Examples:
@@ -400,17 +439,17 @@ namespace xo {
             parser() = default;
 
             /** for diagnostics: number of entries in parser stack **/
-            std::size_t stack_size() const { return stack_.size(); }
+            std::size_t stack_size() const { return xs_stack_.size(); }
             /** for diagnostics: exprstatetype at level @p i
              *  (taken relative to top of stack)
              *
              *  @pre 0 <= i < stack_size
              **/
             exprstatetype i_exstype(std::size_t i) const {
-                std::size_t z = stack_.size();
+                std::size_t z = xs_stack_.size();
 
                 if (i < z) {
-                    return stack_[(z - 1) - i].exs_type();
+                    return xs_stack_[i].exs_type();
                 }
 
                 /* out of bounds */
@@ -434,11 +473,6 @@ namespace xo {
             void print(std::ostream & os) const;
 
         private:
-            exprstate & top_exprstate();
-            void push_exprstate(const exprstate & exs);
-            void pop_exprstate();
-
-        private:
             /** state recording state associated with enclosing expressions.
              *
              *  Note: at least asof c++23, the std::stack api doesn't support access
@@ -448,7 +482,7 @@ namespace xo {
              *  - bottom of stack is stack_[0]
              *  - top of stack is stack_[N-1]
              **/
-            std::vector<exprstate> stack_;
+            exprstatestack xs_stack_;
 
         }; /*parser*/
 
