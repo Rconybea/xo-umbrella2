@@ -6,12 +6,14 @@
 #include "parser.hpp"
 #include "xo/expression/DefineExpr.hpp"
 #include "xo/expression/Constant.hpp"
+#include "xo/expression/ConvertExpr.hpp"
 //#include <regex>
 #include <stdexcept>
 
 namespace xo {
     using xo::ast::Expression;
     using xo::ast::DefineExpr;
+    using xo::ast::ConvertExpr;
     using xo::ast::Constant;
     using xo::reflect::Reflect;
     using xo::reflect::TypeDescr;
@@ -582,12 +584,15 @@ namespace xo {
                  * 2. if ir_type is an expression,  adopt as rhs
                  */
                 if (ir.xir_type() == exprirtype::expression) {
-                    /* TODO: do something with def_lhs_type */
+                    /* TODO: do something with def_lhs_td */
 
                     rp<Expression> rhs_value = ir.expr();
-                    rp<Expression> def
-                        = DefineExpr::make(this->def_lhs_symbol_,
-                                           rhs_value);
+
+                    if (def_lhs_td_)
+                        rhs_value = ConvertExpr::make(def_lhs_td_, rhs_value);
+
+                    rp<Expression> def = DefineExpr::make(this->def_lhs_symbol_,
+                                                          rhs_value);
 
                     return expraction(expractiontype::pop,
                                       exprir(exprirtype::expression, def),
