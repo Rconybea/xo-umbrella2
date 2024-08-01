@@ -272,7 +272,7 @@ namespace xo {
              */
         }
 
-        expraction
+        void
         exprstate::on_symbol(const token_type & tk,
                              exprstatestack * p_stack,
                              rp<Expression> * p_emit_expr)
@@ -306,16 +306,17 @@ namespace xo {
             case exprstatetype::def_4:
                 /* unreachable */
                 assert(false);
-                return expraction();
+                return;
 
             case exprstatetype::expect_rhs_expression:
             case exprstatetype::expect_symbol:
                 /* have to do pop first */
 
                 p_stack->pop_exprstate();
-                return p_stack->top_exprstate().on_exprir
+                p_stack->top_exprstate().on_exprir
                     (exprir(exprirtype::symbol, tk.text()), p_stack, p_emit_expr);
                 //return expraction::pop(exprir(exprirtype::symbol, tk.text()));
+                return;
 
             case exprstatetype::expect_type: {
                 TypeDescr td = nullptr;
@@ -342,16 +343,17 @@ namespace xo {
                 }
 
                 p_stack->pop_exprstate();
-                return p_stack->top_exprstate().on_exprir
+                p_stack->top_exprstate().on_exprir
                     (exprir(exprirtype::typedescr, td), p_stack, p_emit_expr);
                 //return expraction::pop(exprir(exprirtype::typedescr, td));
+                return;
             }
 
             case exprstatetype::invalid:
             case exprstatetype::n_exprstatetype:
                 /* unreachable */
                 assert(false);
-                return expraction();
+                return;
             }
         }
 

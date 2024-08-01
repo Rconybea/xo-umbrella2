@@ -233,9 +233,9 @@ namespace xo {
 
         private:
             void on_def(exprstatestack * p_stack);
-            expraction on_symbol(const token_type & tk,
-                                 exprstatestack * p_stack,
-                                 rp<Expression> * p_emit_expr);
+            void on_symbol(const token_type & tk,
+                           exprstatestack * p_stack,
+                           rp<Expression> * p_emit_expr);
             void on_colon(exprstatestack * p_stack);
             void on_singleassign(exprstatestack * p_stack);
             void on_f64(const token_type & tk,
