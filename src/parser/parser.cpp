@@ -96,23 +96,13 @@ namespace xo {
 
         expraction
         expraction::keep() {
-            return expraction(expractiontype::keep,
-                              exprir());
+            return expraction(expractiontype::keep);
         }
-
-#ifdef OBSOLETE
-        expraction
-        expraction::emit(const exprir & ir) {
-            return expraction(expractiontype::emit,
-                              ir);
-        }
-#endif
 
         void
         expraction::print(std::ostream & os) const {
             os << "<expraction";
             os << xtag("type", action_type_);
-            os << xtag("ir", expr_ir_);
             os << ">";
         }
 

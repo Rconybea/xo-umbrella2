@@ -134,18 +134,23 @@ namespace xo {
         class expraction {
         public:
             expraction() = default;
-            explicit expraction(expractiontype action_type,
-                                const exprir & expr_ir)
-                : action_type_{action_type}, expr_ir_{expr_ir}
+            explicit expraction(expractiontype action_type
+#ifdef OBSOLETE
+                                const exprir & expr_ir
+#endif
+                )
+                : action_type_{action_type}
+#ifdef OBSOLETE
+                , expr_ir_{expr_ir}
+#endif
                 {}
 
             static expraction keep();
-#ifdef OBSOLETE
-            static expraction emit(const exprir & ir);
-#endif
 
             expractiontype action_type() const { return action_type_; }
+#ifdef OBSOLETE
             const exprir & expr_ir() const { return expr_ir_; }
+#endif
 
             void print(std::ostream & os) const;
 
@@ -158,10 +163,12 @@ namespace xo {
              * pop:  drop exprstate,  report exprir to parent
              **/
             expractiontype action_type_ = expractiontype::invalid;
+#ifdef OBSOLETE
             /**
              * intermediate representation (pass to enclosing stack state)
              **/
             exprir expr_ir_;
+#endif
         };
 
         inline std::ostream &
