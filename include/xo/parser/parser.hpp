@@ -113,7 +113,6 @@ namespace xo {
         enum class expractiontype {
             invalid = -1,
 
-            push1,
             keep,
             emit,
             pop,

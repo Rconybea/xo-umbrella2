@@ -85,8 +85,6 @@ namespace xo {
             switch(x) {
             case expractiontype::invalid:
                 return "?invalid";
-            case expractiontype::push1:
-                return "push1";
             case expractiontype::keep:
                 return "keep";
             case expractiontype::emit:
@@ -387,7 +385,7 @@ namespace xo {
         }
 
         expraction
-        exprstate::on_colon(exprstatestack * /*p_stack*/) {
+        exprstate::on_colon(exprstatestack * p_stack) {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
@@ -404,10 +402,9 @@ namespace xo {
             if (this->exs_type_ == exprstatetype::def_1) {
                 this->exs_type_ = exprstatetype::def_2;
 
-                return expraction(expractiontype::push1,
-                                  exprir(),
-                                  exprstatetype::expect_type,
-                                  exprstatetype::invalid /*not used*/);
+                p_stack->push_exprstate(exprstatetype::expect_type);
+
+                return expraction::keep();
             } else {
                 assert(false);
                 return expraction();
@@ -415,7 +412,7 @@ namespace xo {
         }
 
         expraction
-        exprstate::on_singleassign(exprstatestack * /*p_stack*/) {
+        exprstate::on_singleassign(exprstatestack * p_stack) {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
@@ -431,10 +428,9 @@ namespace xo {
             if (this->exs_type_ == exprstatetype::def_3) {
                 this->exs_type_ = exprstatetype::def_4;
 
-                return expraction(expractiontype::push1,
-                                  exprir(),
-                                  exprstatetype::expect_rhs_expression,
-                                  exprstatetype::invalid /*not used*/);
+                p_stack->push_exprstate(exprstatetype::expect_rhs_expression);
+
+                return expraction::keep();
             } else {
                 assert(false);
                 return expraction();
@@ -730,11 +726,11 @@ namespace xo {
                                          &xs_stack_));
                     break;
 
+#ifdef OBSOLETE
                 case expractiontype::push1:
                     xs_stack_.push_exprstate(action.push_exs1());
                     return nullptr;
 
-#ifdef OBSOLETE
                 case expractiontype::push2:
                     xs_stack_.push_exprstate(action.push_exs1());
                     xs_stack_.push_exprstate(action.push_exs2());
