@@ -6,6 +6,7 @@
 #pragma once
 
 #include "xo/expression/Expression.hpp"
+#include "xo/expression/DefineExpr.hpp"
 #include "xo/tokenizer/token.hpp"
 #include <stack>
 #include <stdexcept>
@@ -47,13 +48,17 @@ namespace xo {
         class exprstate {
         public:
             using Expression = xo::ast::Expression;
+            using DefineExprAccess = xo::ast::DefineExprAccess;
             using exprtype = xo::ast::exprtype;
             using token_type = token<char>;
             using TypeDescr = xo::reflect::TypeDescr;
 
         public:
             exprstate() = default;
-            exprstate(exprstatetype exs_type) : exs_type_{exs_type} {}
+            exprstate(exprstatetype exs_type,
+                      rp<DefineExprAccess> def_expr = nullptr)
+                : exs_type_{exs_type},
+                  def_expr_{std::move(def_expr)} {}
 
             static exprstate expect_toplevel_expression_sequence() {
                 return exprstate(exprstatetype::expect_toplevel_expression_sequence);
@@ -132,10 +137,15 @@ namespace xo {
              **/
             exprstatetype exs_type_;
 
+            /** scaffold a define-expression here **/
+            rp<DefineExprAccess> def_expr_;
+
+#ifdef OBSOLETE
             /** e.g. foo in
              *    def foo : f64 = 1
              **/
             std::string def_lhs_symbol_;
+#endif
             /** e.g. f64 in
              *    def foo : f64 = 1
              **/

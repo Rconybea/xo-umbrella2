@@ -258,7 +258,9 @@ namespace xo {
                                                xtag("state", *this)));
             }
 
-            p_stack->push_exprstate(exprstatetype::def_0);
+            p_stack->push_exprstate(exprstate(exprstatetype::def_0,
+                                              DefineExprAccess::make_empty()));
+
             /* todo: replace:
              *   expect_symbol_or_function_signature()
              */
@@ -367,6 +369,7 @@ namespace xo {
 
             case exprstatetype::def_2:
                 this->exs_type_ = exprstatetype::def_3;
+
                 this->def_lhs_td_ = td;
 
                 return;
@@ -585,11 +588,18 @@ namespace xo {
                 if (def_lhs_td_)
                     rhs_value = ConvertExpr::make(def_lhs_td_, rhs_value);
 
+                rp<DefineExprAccess> def_expr = this->def_expr_;
+
+                def_expr->assign_rhs(rhs_value);
+
+#ifdef OBSOLETE
                 rp<Expression> def = DefineExpr::make(this->def_lhs_symbol_,
                                                       rhs_value);
+#endif
 
-                p_stack->pop_exprstate();
-                p_stack->top_exprstate().on_expr(def,
+                p_stack->pop_exprstate(); /* NOT KOSHER. invalidates *this */
+
+                p_stack->top_exprstate().on_expr(def_expr,
                                                  p_stack,
                                                  p_emit_expr);
                 return;
@@ -629,7 +639,8 @@ namespace xo {
                 return;
             case exprstatetype::def_0:
                 this->exs_type_ = exprstatetype::def_1;
-                this->def_lhs_symbol_ = symbol_name;
+                this->def_expr_->assign_lhs_name(symbol_name);
+                //this->def_lhs_symbol_ = symbol_name;
 
                 return;
             case exprstatetype::def_1:
@@ -655,51 +666,12 @@ namespace xo {
                 return;
             }
         }
-
-#ifdef OBSOLETE
-        void
-        exprstate::on_exprir(const exprir & ir,
-                             exprstatestack * /*p_stack*/,
-                             rp<Expression> * /*p_emit_expr*/)
-        {
-            constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
-            log && log(xtag("ir", ir));
-            log && log(xtag("state", *this));
-
-            switch(this->exs_type_) {
-            case exprstatetype::expect_toplevel_expression_sequence:
-            case exprstatetype::def_0:
-            case exprstatetype::def_1:
-            case exprstatetype::def_2:
-            case exprstatetype::def_3:
-            case exprstatetype::def_4:
-                /* NOT IMPLEMENTED */
-                assert(false);
-                return;
-
-            case exprstatetype::expect_rhs_expression:
-            case exprstatetype::expect_type:
-            case exprstatetype::expect_symbol:
-                /* unreachable
-                 * (this exprstate issues pop instruction from exprstate::on_input()
-                 */
-                assert(false);
-                return;
-            case exprstatetype::invalid:
-            case exprstatetype::n_exprstatetype:
-                /* unreachable */
-                assert(false);
-                return;
-            }
-        }
-#endif
 
         void
         exprstate::print(std::ostream & os) const {
             os << "<exprstate"
                << xtag("type", exs_type_)
-               << xtag("def_lhs_symbol", def_lhs_symbol_);
+               << xtag("def_expr", def_expr_);
             if (def_lhs_td_)
                 os << xtag("def_lhs_td", def_lhs_td_->short_name());
             os << ">";
