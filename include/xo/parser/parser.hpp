@@ -134,14 +134,15 @@ namespace xo {
         class expraction {
         public:
             expraction() = default;
-            expraction(expractiontype action_type,
-                       const exprir & expr_ir)
+            explicit expraction(expractiontype action_type,
+                                const exprir & expr_ir)
                 : action_type_{action_type}, expr_ir_{expr_ir}
                 {}
 
             static expraction keep();
             static expraction emit(const exprir & ir);
-            static expraction pop(const exprir & ir);
+            //static expraction pop(const exprir & ir);
+            static expraction pop();
 
             expractiontype action_type() const { return action_type_; }
             const exprir & expr_ir() const { return expr_ir_; }

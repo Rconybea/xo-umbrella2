@@ -110,10 +110,18 @@ namespace xo {
                               ir);
         }
 
+#ifdef OBSOLETE
         expraction
         expraction::pop(const exprir & ir) {
             return expraction(expractiontype::pop,
                               ir);
+        }
+#endif
+
+        expraction
+        expraction::pop() {
+            return expraction(expractiontype::pop,
+                              exprir());
         }
 
         void
@@ -293,7 +301,7 @@ namespace xo {
 
         expraction
         exprstate::on_symbol(const token_type & tk,
-                             exprstatestack * /*p_stack*/)
+                             exprstatestack * p_stack)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
@@ -328,7 +336,12 @@ namespace xo {
 
             case exprstatetype::expect_rhs_expression:
             case exprstatetype::expect_symbol:
-                return expraction::pop(exprir(exprirtype::symbol, tk.text()));
+                /* have to do pop first */
+
+                p_stack->pop_exprstate();
+                return p_stack->top_exprstate().on_exprir
+                    (exprir(exprirtype::symbol, tk.text()), p_stack);
+                //return expraction::pop(exprir(exprirtype::symbol, tk.text()));
 
             case exprstatetype::expect_type: {
                 TypeDescr td = nullptr;
@@ -354,7 +367,10 @@ namespace xo {
                                xtag("typename", tk.text())));
                 }
 
-                return expraction::pop(exprir(exprirtype::typedescr, td));
+                p_stack->pop_exprstate();
+                return p_stack->top_exprstate().on_exprir
+                    (exprir(exprirtype::typedescr, td), p_stack);
+                //return expraction::pop(exprir(exprirtype::typedescr, td));
             }
 
             case exprstatetype::invalid:
@@ -420,7 +436,7 @@ namespace xo {
 
         expraction
         exprstate::on_f64(const token_type & tk,
-                          exprstatestack * /*p_stack*/)
+                          exprstatestack * p_stack)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
@@ -435,8 +451,12 @@ namespace xo {
             }
 
             if (this->exs_type_ == exprstatetype::expect_rhs_expression) {
-                return expraction::pop(exprir(exprirtype::expression,
-                                              Constant<double>::make(tk.f64_value())));
+                p_stack->pop_exprstate();
+
+                return p_stack->top_exprstate()
+                    .on_exprir(exprir(exprirtype::expression,
+                                      Constant<double>::make(tk.f64_value())),
+                               p_stack);
             } else {
                 assert(false);
                 return expraction();
@@ -522,7 +542,7 @@ namespace xo {
 
         expraction
         exprstate::on_exprir(const exprir & ir,
-                             exprstatestack * /*p_stack*/)
+                             exprstatestack * p_stack)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
@@ -580,7 +600,10 @@ namespace xo {
                     rp<Expression> def = DefineExpr::make(this->def_lhs_symbol_,
                                                           rhs_value);
 
-                    return expraction::pop(exprir(exprirtype::expression, def));
+                    p_stack->pop_exprstate();
+                    return p_stack->top_exprstate()
+                        .on_exprir(exprir(exprirtype::expression, def),
+                                   p_stack);
                 } else {
                     assert(false);
                     return expraction();
@@ -706,17 +729,6 @@ namespace xo {
                               .on_exprir(action.expr_ir(),
                                          &xs_stack_));
                     break;
-
-#ifdef OBSOLETE
-                case expractiontype::push1:
-                    xs_stack_.push_exprstate(action.push_exs1());
-                    return nullptr;
-
-                case expractiontype::push2:
-                    xs_stack_.push_exprstate(action.push_exs1());
-                    xs_stack_.push_exprstate(action.push_exs2());
-                    return nullptr;
-#endif
 
                 case expractiontype::invalid:
                 case expractiontype::n_expractiontype:
