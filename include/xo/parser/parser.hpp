@@ -115,7 +115,7 @@ namespace xo {
 
             keep,
             emit,
-            pop,
+            //pop,
 
             n_expractiontype
         };
@@ -141,8 +141,9 @@ namespace xo {
 
             static expraction keep();
             static expraction emit(const exprir & ir);
-            //static expraction pop(const exprir & ir);
+#ifdef OBSOLETE
             static expraction pop();
+#endif
 
             expractiontype action_type() const { return action_type_; }
             const exprir & expr_ir() const { return expr_ir_; }

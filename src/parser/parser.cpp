@@ -89,8 +89,8 @@ namespace xo {
                 return "keep";
             case expractiontype::emit:
                 return "emit";
-            case expractiontype::pop:
-                return "pop";
+                //case expractiontype::pop:
+                //return "pop";
             case expractiontype::n_expractiontype:
                 break;
             }
@@ -118,11 +118,13 @@ namespace xo {
         }
 #endif
 
+#ifdef OBSOLETE
         expraction
         expraction::pop() {
             return expraction(expractiontype::pop,
                               exprir());
         }
+#endif
 
         void
         expraction::print(std::ostream & os) const {
@@ -716,6 +718,7 @@ namespace xo {
                 case expractiontype::emit:
                     return action.expr_ir().expr();
 
+#ifdef OBSOLETE
                 case expractiontype::pop:
                     xs_stack_.pop_exprstate();
 
@@ -729,6 +732,7 @@ namespace xo {
                               .on_exprir(action.expr_ir(),
                                          &xs_stack_));
                     break;
+#endif
 
                 case expractiontype::invalid:
                 case expractiontype::n_expractiontype:
