@@ -12,6 +12,7 @@
 
 namespace xo {
     namespace scm {
+#ifdef OBSOLETE
         // ----- exprir -----
 
         enum class exprirtype {
@@ -66,6 +67,7 @@ namespace xo {
             x.print(os);
             return os;
         }
+#endif
 
         enum class exprstatetype {
             invalid = -1,
@@ -204,10 +206,12 @@ namespace xo {
             void on_typedescr(TypeDescr td,
                               exprstatestack * p_stack,
                               rp<Expression> * p_emit_expr);
+#ifdef OBSOLETE
             /** update exprstate in response to IR (intermediate representation)
              *  from nested parsing task
              **/
             void on_exprir(const exprir & ir, exprstatestack * p_stack, rp<Expression> * p_emit_expr);
+#endif
 
             /** print human-readable representation on @p os **/
             void print(std::ostream & os) const;

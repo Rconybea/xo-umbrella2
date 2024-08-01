@@ -19,6 +19,7 @@ namespace xo {
     using xo::reflect::TypeDescr;
 
     namespace scm {
+#ifdef OBSOLETE
         const char *
         exprirtype_descr(exprirtype x) {
             switch(x) {
@@ -43,6 +44,7 @@ namespace xo {
                << xtag("type", xir_type_);
             os << ">";
         }
+#endif
 
         const char *
         exprstatetype_descr(exprstatetype x) {
@@ -652,6 +654,7 @@ namespace xo {
             }
         }
 
+#ifdef OBSOLETE
         void
         exprstate::on_exprir(const exprir & ir,
                              exprstatestack * /*p_stack*/,
@@ -688,6 +691,7 @@ namespace xo {
                 return;
             }
         }
+#endif
 
         void
         exprstate::print(std::ostream & os) const {
