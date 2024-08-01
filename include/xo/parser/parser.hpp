@@ -19,7 +19,6 @@ namespace xo {
 
             empty,
             symbol,
-            expression,
             typedescr,
 
             n_exprirtype
@@ -52,15 +51,11 @@ namespace xo {
                    const std::string & x)
                 : xir_type_{xir_type}, symbol_name_{x} {}
             exprir(exprirtype xir_type,
-                   rp<Expression> expr)
-                : xir_type_{xir_type}, expr_{std::move(expr)} {}
-            exprir(exprirtype xir_type,
                    TypeDescr td)
                 : xir_type_{xir_type}, td_{td} {}
 
             exprirtype xir_type() const { return xir_type_; }
             const std::string & symbol_name() const { return symbol_name_; }
-            const rp<Expression> & expr() const { return expr_; }
             TypeDescr td() const { return td_; }
 
             void print(std::ostream & os) const;
@@ -70,8 +65,6 @@ namespace xo {
             exprirtype xir_type_ = exprirtype::invalid;
             /** xir_type=symbol: a symbol (type or variable) name **/
             std::string symbol_name_;
-            /** xir_type=expression: a completed expression **/
-            rp<Expression> expr_;
             /** xir_type=typedescr: object identifying/describing a datatype **/
             TypeDescr td_ = nullptr;
         };

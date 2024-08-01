@@ -28,8 +28,6 @@ namespace xo {
                 return "empty";
             case exprirtype::symbol:
                 return "symbol";
-            case exprirtype::expression:
-                return "expression";
             case exprirtype::typedescr:
                 return "typedescr";
             case exprirtype::n_exprirtype:
@@ -43,8 +41,7 @@ namespace xo {
         exprir::print(std::ostream & os) const {
             os << "<exprir"
                << xtag("type", xir_type_)
-               << xtag("symbol_name", symbol_name_)
-               << xtag("expr", expr_);
+               << xtag("symbol_name", symbol_name_);
             if (td_)
                 os << xtag("td", td_->short_name());
             os << ">";
@@ -576,8 +573,8 @@ namespace xo {
 
         void
         exprstate::on_exprir(const exprir & ir,
-                             exprstatestack * p_stack,
-                             rp<Expression> * p_emit_expr)
+                             exprstatestack * /*p_stack*/,
+                             rp<Expression> * /*p_emit_expr*/)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
@@ -591,11 +588,6 @@ namespace xo {
                  *
                  * parser::include_token() returns
                  */
-
-                if (ir.xir_type() == exprirtype::expression) {
-                    *p_emit_expr = ir.expr();
-                    return;
-                }
 
                 /* NOT IMPLEMENTED */
                 assert(false);
@@ -619,31 +611,8 @@ namespace xo {
                 assert(false);
                 return;
             case exprstatetype::def_4:
-                /* have all the ingredients to create an expression
-                 * representing a definition
-                 *
-                 * 1. if ir_type is a symbol,  interpret as variable name.
-                 *    Need to be able to locate variable by type
-                 * 2. if ir_type is an expression,  adopt as rhs
-                 */
-                if (ir.xir_type() == exprirtype::expression) {
-                    /* TODO: do something with def_lhs_td */
-
-                    rp<Expression> rhs_value = ir.expr();
-
-                    if (def_lhs_td_)
-                        rhs_value = ConvertExpr::make(def_lhs_td_, rhs_value);
-
-                    rp<Expression> def = DefineExpr::make(this->def_lhs_symbol_,
-                                                          rhs_value);
-
-                    p_stack->pop_exprstate();
-                    return p_stack->top_exprstate().on_expr(def,
-                                                            p_stack, p_emit_expr);
-                } else {
-                    assert(false);
-                    return;
-                }
+                assert(false);
+                return;
 
             case exprstatetype::expect_rhs_expression:
             case exprstatetype::expect_type:
