@@ -87,8 +87,6 @@ namespace xo {
                 return "?invalid";
             case expractiontype::push1:
                 return "push1";
-            case expractiontype::push2:
-                return "push2";
             case expractiontype::keep:
                 return "keep";
             case expractiontype::emit:
@@ -118,6 +116,7 @@ namespace xo {
                               exprstatetype::invalid /*not used*/);
         }
 
+#ifdef OBSOLETE
         expraction
         expraction::push2(exprstatetype s1,
                           exprstatetype s2) {
@@ -126,6 +125,7 @@ namespace xo {
                               s1,
                               s2);
         }
+#endif
 
         expraction
         expraction::pop(const exprir & ir) {
@@ -285,7 +285,7 @@ namespace xo {
         }
 
         expraction
-        exprstate::on_def() {
+        exprstate::on_def(exprstatestack * p_stack) {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
@@ -299,15 +299,17 @@ namespace xo {
                                                xtag("state", *this)));
             }
 
+            p_stack->push_exprstate(exprstatetype::def_0);
+            /* todo: replace:
+             *   expect_symbol_or_function_signature()
+             */
+            p_stack->push_exprstate(exprstatetype::expect_symbol);
+
             /* keyword 'def' introduces a definition:
              *   def pi : f64 = 3.14159265
              *   def sq(x : f64) -> f64 { (x * x) }
              */
-            return expraction::push2(exprstatetype::def_0,
-                                     /* todo: replace:
-                                      *   expect_symbol_or_function_signature()
-                                      */
-                                     exprstatetype::expect_symbol);
+            return expraction::keep();
         }
 
         expraction
@@ -461,7 +463,9 @@ namespace xo {
         }
 
         expraction
-        exprstate::on_input(const token_type & tk) {
+        exprstate::on_input(const token_type & tk,
+                            exprstatestack * p_stack)
+        {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
             log && log(xtag("tk", tk));
@@ -470,7 +474,7 @@ namespace xo {
             switch(tk.tk_type()) {
 
             case tokentype::tk_def:
-                return this->on_def();
+                return this->on_def(p_stack);
 
             case tokentype::tk_i64:
                 assert(false);
@@ -536,7 +540,9 @@ namespace xo {
         }
 
         expraction
-        exprstate::on_exprir(const exprir & ir) {
+        exprstate::on_exprir(const exprir & ir,
+                             exprstatestack * /*p_stack*/)
+        {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
             log && log(xtag("ir", ir));
@@ -693,7 +699,7 @@ namespace xo {
             }
 
             /* stack_ is non-empty */
-            expraction action = xs_stack_.top_exprstate().on_input(tk);
+            expraction action = xs_stack_.top_exprstate().on_input(tk, &xs_stack_);
 
             /* loop until reach parsing state that requires more input */
             for (;;) {
@@ -716,17 +722,20 @@ namespace xo {
 
                     action = (xs_stack_
                               .top_exprstate()
-                              .on_exprir(action.expr_ir()));
+                              .on_exprir(action.expr_ir(),
+                                         &xs_stack_));
                     break;
 
                 case expractiontype::push1:
                     xs_stack_.push_exprstate(action.push_exs1());
                     return nullptr;
 
+#ifdef OBSOLETE
                 case expractiontype::push2:
                     xs_stack_.push_exprstate(action.push_exs1());
                     xs_stack_.push_exprstate(action.push_exs2());
                     return nullptr;
+#endif
 
                 case expractiontype::invalid:
                 case expractiontype::n_expractiontype:

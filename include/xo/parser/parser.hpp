@@ -114,7 +114,6 @@ namespace xo {
             invalid = -1,
 
             push1,
-            push2,
             keep,
             emit,
             pop,
@@ -146,7 +145,9 @@ namespace xo {
 
             static expraction keep();
             static expraction emit(const exprir & ir);
+#ifdef OBSOLETE
             static expraction push2(exprstatetype s1, exprstatetype s2);
+#endif
             static expraction pop(const exprir & ir);
 
             expractiontype action_type() const { return action_type_; }
@@ -240,7 +241,7 @@ namespace xo {
             void print(std::ostream & os) const;
 
         private:
-            expraction on_def();
+            expraction on_def(exprstatestack * p_stack);
             expraction on_symbol(const token_type & tk);
             expraction on_colon();
             expraction on_singleassign();
