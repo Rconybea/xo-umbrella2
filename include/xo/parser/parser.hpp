@@ -179,6 +179,7 @@ namespace xo {
          **/
         class exprstate {
         public:
+            using Expression = xo::ast::Expression;
             using exprtype = xo::ast::exprtype;
             using token_type = token<char>;
             using TypeDescr = xo::reflect::TypeDescr;
@@ -215,21 +216,25 @@ namespace xo {
             /** update exprstate in response to incoming token @p tk,
              *  forward instructions to parent parser
              **/
-            expraction on_input(const token_type & tk, exprstatestack * p_stack);
+            expraction on_input(const token_type & tk, exprstatestack * p_stack, rp<Expression> * p_emit_expr);
             /** update exprstate in response to IR (intermediate representation)
              *  from nested parsing task
              **/
-            expraction on_exprir(const exprir & ir, exprstatestack * p_stack);
+            expraction on_exprir(const exprir & ir, exprstatestack * p_stack, rp<Expression> * p_emit_expr);
 
             /** print human-readable representation on @p os **/
             void print(std::ostream & os) const;
 
         private:
             expraction on_def(exprstatestack * p_stack);
-            expraction on_symbol(const token_type & tk, exprstatestack * p_stack);
+            expraction on_symbol(const token_type & tk,
+                                 exprstatestack * p_stack,
+                                 rp<Expression> * p_emit_expr);
             expraction on_colon(exprstatestack * p_stack);
             expraction on_singleassign(exprstatestack * p_stack);
-            expraction on_f64(const token_type & tk, exprstatestack * p_stack);
+            expraction on_f64(const token_type & tk,
+                              exprstatestack * p_stack,
+                              rp<Expression> * p_emit_expr);
 
         private:
             /**

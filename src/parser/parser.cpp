@@ -303,7 +303,8 @@ namespace xo {
 
         expraction
         exprstate::on_symbol(const token_type & tk,
-                             exprstatestack * p_stack)
+                             exprstatestack * p_stack,
+                             rp<Expression> * p_emit_expr)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
@@ -342,7 +343,7 @@ namespace xo {
 
                 p_stack->pop_exprstate();
                 return p_stack->top_exprstate().on_exprir
-                    (exprir(exprirtype::symbol, tk.text()), p_stack);
+                    (exprir(exprirtype::symbol, tk.text()), p_stack, p_emit_expr);
                 //return expraction::pop(exprir(exprirtype::symbol, tk.text()));
 
             case exprstatetype::expect_type: {
@@ -371,7 +372,7 @@ namespace xo {
 
                 p_stack->pop_exprstate();
                 return p_stack->top_exprstate().on_exprir
-                    (exprir(exprirtype::typedescr, td), p_stack);
+                    (exprir(exprirtype::typedescr, td), p_stack, p_emit_expr);
                 //return expraction::pop(exprir(exprirtype::typedescr, td));
             }
 
@@ -438,7 +439,8 @@ namespace xo {
 
         expraction
         exprstate::on_f64(const token_type & tk,
-                          exprstatestack * p_stack)
+                          exprstatestack * p_stack,
+                          rp<Expression> * p_emit_expr)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
@@ -458,7 +460,8 @@ namespace xo {
                 return p_stack->top_exprstate()
                     .on_exprir(exprir(exprirtype::expression,
                                       Constant<double>::make(tk.f64_value())),
-                               p_stack);
+                               p_stack,
+                               p_emit_expr);
             } else {
                 assert(false);
                 return expraction();
@@ -467,7 +470,8 @@ namespace xo {
 
         expraction
         exprstate::on_input(const token_type & tk,
-                            exprstatestack * p_stack)
+                            exprstatestack * p_stack,
+                            rp<Expression> * p_emit_expr)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
@@ -484,14 +488,14 @@ namespace xo {
                 return expraction();
 
             case tokentype::tk_f64:
-                return this->on_f64(tk, p_stack);
+                return this->on_f64(tk, p_stack, p_emit_expr);
 
             case tokentype::tk_string:
                 assert(false);
                 return expraction();
 
             case tokentype::tk_symbol:
-                return this->on_symbol(tk, p_stack);
+                return this->on_symbol(tk, p_stack, p_emit_expr);
 
             case tokentype::tk_leftparen:
 
@@ -544,7 +548,8 @@ namespace xo {
 
         expraction
         exprstate::on_exprir(const exprir & ir,
-                             exprstatestack * p_stack)
+                             exprstatestack * p_stack,
+                             rp<Expression> * p_emit_expr)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
@@ -559,8 +564,10 @@ namespace xo {
                  * parser::include_token() returns
                  */
 
-                if (ir.xir_type() == exprirtype::expression)
-                    return expraction::emit(ir);
+                if (ir.xir_type() == exprirtype::expression) {
+                    *p_emit_expr = ir.expr();
+                    return expraction::keep();
+                }
 
                 /* NOT IMPLEMENTED */
                 assert(false);
@@ -605,7 +612,7 @@ namespace xo {
                     p_stack->pop_exprstate();
                     return p_stack->top_exprstate()
                         .on_exprir(exprir(exprirtype::expression, def),
-                                   p_stack);
+                                   p_stack, p_emit_expr);
                 } else {
                     assert(false);
                     return expraction();
@@ -691,7 +698,7 @@ namespace xo {
                 (exprstate::expect_toplevel_expression_sequence());
         }
 
-        rp<xo::ast::Expression>
+        rp<Expression>
         parser::include_token(const token_type & tk)
         {
             constexpr bool c_debug_flag = true;
@@ -705,42 +712,30 @@ namespace xo {
             }
 
             /* stack_ is non-empty */
-            expraction action = xs_stack_.top_exprstate().on_input(tk, &xs_stack_);
 
-            /* loop until reach parsing state that requires more input */
-            for (;;) {
-                log && log(xtag("action", action));
+            rp<Expression> retval;
 
-                switch(action.action_type()) {
-                case expractiontype::keep:
-                    return nullptr;
+            expraction action = xs_stack_.top_exprstate().on_input(tk, &xs_stack_, &retval);
 
-                case expractiontype::emit:
-                    return action.expr_ir().expr();
+            log && log(xtag("action", action));
+
+            return retval;
 
 #ifdef OBSOLETE
-                case expractiontype::pop:
-                    xs_stack_.pop_exprstate();
+            switch(action.action_type()) {
+            case expractiontype::keep:
+                return nullptr;
 
-                    if (xs_stack_.empty()) {
-                        throw std::runtime_error(tostr("parser::include_token",
-                                                       ": pop leaves empty stack"));
-                    }
+            case expractiontype::emit:
+                //return action.expr_ir().expr();
 
-                    action = (xs_stack_
-                              .top_exprstate()
-                              .on_exprir(action.expr_ir(),
-                                         &xs_stack_));
-                    break;
-#endif
-
-                case expractiontype::invalid:
-                case expractiontype::n_expractiontype:
-                    /* unreachable */
-                    assert(false);
-                    return nullptr;
-                }
+            case expractiontype::invalid:
+            case expractiontype::n_expractiontype:
+                /* unreachable */
+                assert(false);
+                return nullptr;
             }
+#endif
         } /*include_token*/
 
         void
