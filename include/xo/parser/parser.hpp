@@ -232,7 +232,7 @@ namespace xo {
             void print(std::ostream & os) const;
 
         private:
-            expraction on_def(exprstatestack * p_stack);
+            void on_def(exprstatestack * p_stack);
             expraction on_symbol(const token_type & tk,
                                  exprstatestack * p_stack,
                                  rp<Expression> * p_emit_expr);
