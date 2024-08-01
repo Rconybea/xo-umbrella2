@@ -242,7 +242,7 @@ namespace xo {
 
         private:
             expraction on_def(exprstatestack * p_stack);
-            expraction on_symbol(const token_type & tk);
+            expraction on_symbol(const token_type & tk, exprstatestack * p_stack);
             expraction on_colon();
             expraction on_singleassign();
             expraction on_f64(const token_type & tk);
