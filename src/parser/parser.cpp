@@ -127,6 +127,14 @@ namespace xo {
                               s2);
         }
 
+        expraction
+        expraction::pop(const exprir & ir) {
+            return expraction(expractiontype::pop,
+                              ir,
+                              exprstatetype::invalid /*not used*/,
+                              exprstatetype::invalid /*not used*/);
+        }
+
         void
         expraction::print(std::ostream & os) const {
             os << "<expraction";
@@ -337,10 +345,7 @@ namespace xo {
 
             case exprstatetype::expect_rhs_expression:
             case exprstatetype::expect_symbol:
-                return expraction(expractiontype::pop,
-                                  exprir(exprirtype::symbol, tk.text()),
-                                  exprstatetype::invalid /*not used*/,
-                                  exprstatetype::invalid /*not used*/);
+                return expraction::pop(exprir(exprirtype::symbol, tk.text()));
 
             case exprstatetype::expect_type: {
                 TypeDescr td = nullptr;
@@ -366,10 +371,7 @@ namespace xo {
                                xtag("typename", tk.text())));
                 }
 
-                return expraction(expractiontype::pop,
-                                  exprir(exprirtype::typedescr, td),
-                                  exprstatetype::invalid /*not used*/,
-                                  exprstatetype::invalid /*not used*/);
+                return expraction::pop(exprir(exprirtype::typedescr, td));
             }
 
             case exprstatetype::invalid:
@@ -450,11 +452,8 @@ namespace xo {
             }
 
             if (this->exs_type_ == exprstatetype::expect_rhs_expression) {
-                return expraction(expractiontype::pop,
-                                  exprir(exprirtype::expression,
-                                         Constant<double>::make(tk.f64_value())),
-                                  exprstatetype::invalid /*not used*/,
-                                  exprstatetype::invalid /*not used*/);
+                return expraction::pop(exprir(exprirtype::expression,
+                                              Constant<double>::make(tk.f64_value())));
             } else {
                 assert(false);
                 return expraction();
@@ -594,10 +593,7 @@ namespace xo {
                     rp<Expression> def = DefineExpr::make(this->def_lhs_symbol_,
                                                           rhs_value);
 
-                    return expraction(expractiontype::pop,
-                                      exprir(exprirtype::expression, def),
-                                      exprstatetype::invalid /*not used*/,
-                                      exprstatetype::invalid /*not used*/);
+                    return expraction::pop(exprir(exprirtype::expression, def));
                 } else {
                     assert(false);
                     return expraction();

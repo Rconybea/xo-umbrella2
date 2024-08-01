@@ -147,6 +147,7 @@ namespace xo {
             static expraction keep();
             static expraction emit(const exprir & ir);
             static expraction push2(exprstatetype s1, exprstatetype s2);
+            static expraction pop(const exprir & ir);
 
             expractiontype action_type() const { return action_type_; }
             const exprir & expr_ir() const { return expr_ir_; }
