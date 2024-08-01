@@ -226,7 +226,7 @@ namespace xo {
             /** update exprstate in response to IR (intermediate representation)
              *  from nested parsing task
              **/
-            expraction on_exprir(const exprir & ir, exprstatestack * p_stack, rp<Expression> * p_emit_expr);
+            void on_exprir(const exprir & ir, exprstatestack * p_stack, rp<Expression> * p_emit_expr);
 
             /** print human-readable representation on @p os **/
             void print(std::ostream & os) const;

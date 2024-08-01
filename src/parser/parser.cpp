@@ -516,7 +516,7 @@ namespace xo {
             assert(false);
         }
 
-        expraction
+        void
         exprstate::on_exprir(const exprir & ir,
                              exprstatestack * p_stack,
                              rp<Expression> * p_emit_expr)
@@ -536,30 +536,30 @@ namespace xo {
 
                 if (ir.xir_type() == exprirtype::expression) {
                     *p_emit_expr = ir.expr();
-                    return expraction::keep();
+                    return;
                 }
 
                 /* NOT IMPLEMENTED */
                 assert(false);
-                return expraction();
+                return;
             case exprstatetype::def_0:
                 this->exs_type_ = exprstatetype::def_1;
                 this->def_lhs_symbol_ = ir.symbol_name();
 
-                return expraction::keep();
+                return;
             case exprstatetype::def_1:
                 /* NOT IMPLEMENTED */
                 assert(false);
-                return expraction();
+                return;
             case exprstatetype::def_2:
                 this->exs_type_ = exprstatetype::def_3;
                 this->def_lhs_td_ = ir.td();
 
-                return expraction::keep();
+                return;
             case exprstatetype::def_3:
                 /* NOT IMPLEMENTED */
                 assert(false);
-                return expraction();
+                return;
             case exprstatetype::def_4:
                 /* have all the ingredients to create an expression
                  * representing a definition
@@ -585,7 +585,7 @@ namespace xo {
                                    p_stack, p_emit_expr);
                 } else {
                     assert(false);
-                    return expraction();
+                    return;
                 }
 
             case exprstatetype::expect_rhs_expression:
@@ -595,12 +595,12 @@ namespace xo {
                  * (this exprstate issues pop instruction from exprstate::on_input()
                  */
                 assert(false);
-                return expraction();
+                return;
             case exprstatetype::invalid:
             case exprstatetype::n_exprstatetype:
                 /* unreachable */
                 assert(false);
-                return expraction();
+                return;
             }
         }
 
