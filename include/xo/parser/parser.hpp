@@ -222,7 +222,7 @@ namespace xo {
             /** update exprstate in response to incoming token @p tk,
              *  forward instructions to parent parser
              **/
-            expraction on_input(const token_type & tk, exprstatestack * p_stack, rp<Expression> * p_emit_expr);
+            void on_input(const token_type & tk, exprstatestack * p_stack, rp<Expression> * p_emit_expr);
             /** update exprstate in response to IR (intermediate representation)
              *  from nested parsing task
              **/

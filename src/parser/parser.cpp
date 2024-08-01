@@ -440,7 +440,7 @@ namespace xo {
             }
         }
 
-        expraction
+        void
         exprstate::on_input(const token_type & tk,
                             exprstatestack * p_stack,
                             rp<Expression> * p_emit_expr)
@@ -453,21 +453,24 @@ namespace xo {
             switch(tk.tk_type()) {
 
             case tokentype::tk_def:
-                return this->on_def(p_stack);
+                this->on_def(p_stack);
+                return;
 
             case tokentype::tk_i64:
                 assert(false);
-                return expraction();
+                return;
 
             case tokentype::tk_f64:
-                return this->on_f64(tk, p_stack, p_emit_expr);
+                this->on_f64(tk, p_stack, p_emit_expr);
+                return;
 
             case tokentype::tk_string:
                 assert(false);
-                return expraction();
+                return;
 
             case tokentype::tk_symbol:
-                return this->on_symbol(tk, p_stack, p_emit_expr);
+                this->on_symbol(tk, p_stack, p_emit_expr);
+                return;
 
             case tokentype::tk_leftparen:
 
@@ -482,18 +485,20 @@ namespace xo {
             case tokentype::tk_dot:
             case tokentype::tk_comma:
                 assert(false);
-                return expraction();
+                return;
 
             case tokentype::tk_colon:
-                return this->on_colon(p_stack);
+                this->on_colon(p_stack);
+                return;
 
             case tokentype::tk_doublecolon:
             case tokentype::tk_semicolon:
                 assert(false);
-                return expraction();
+                return;
 
             case tokentype::tk_singleassign:
-                return this->on_singleassign(p_stack);
+                this->on_singleassign(p_stack);
+                return;
 
             case tokentype::tk_assign:
             case tokentype::tk_yields:
@@ -506,16 +511,15 @@ namespace xo {
             case tokentype::tk_in:
             case tokentype::tk_end:
                 assert(false);
-                return expraction();
+                return;
 
             case tokentype::tk_invalid:
             case tokentype::n_tokentype:
                 assert(false);
-                return expraction();
+                return;
             }
 
             assert(false);
-            return expraction();
         }
 
         expraction
@@ -687,27 +691,10 @@ namespace xo {
 
             rp<Expression> retval;
 
-            expraction action = xs_stack_.top_exprstate().on_input(tk, &xs_stack_, &retval);
+            xs_stack_.top_exprstate().on_input(tk, &xs_stack_, &retval);
 
-            log && log(xtag("action", action));
 
             return retval;
-
-#ifdef OBSOLETE
-            switch(action.action_type()) {
-            case expractiontype::keep:
-                return nullptr;
-
-            case expractiontype::emit:
-                //return action.expr_ir().expr();
-
-            case expractiontype::invalid:
-            case expractiontype::n_expractiontype:
-                /* unreachable */
-                assert(false);
-                return nullptr;
-            }
-#endif
         } /*include_token*/
 
         void
