@@ -380,7 +380,7 @@ namespace xo {
             }
         }
 
-        expraction
+        void
         exprstate::on_singleassign(exprstatestack * p_stack) {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
@@ -398,11 +398,8 @@ namespace xo {
                 this->exs_type_ = exprstatetype::def_4;
 
                 p_stack->push_exprstate(exprstatetype::expect_rhs_expression);
-
-                return expraction::keep();
             } else {
                 assert(false);
-                return expraction();
             }
         }
 
