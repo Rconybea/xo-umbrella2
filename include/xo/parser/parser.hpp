@@ -188,6 +188,8 @@ namespace xo {
             return os;
         }
 
+        class exprstatestack;
+
         /** state associated with a partially-parsed expression.
          **/
         class exprstate {
@@ -228,11 +230,11 @@ namespace xo {
             /** update exprstate in response to incoming token @p tk,
              *  forward instructions to parent parser
              **/
-            expraction on_input(const token_type & tk);
+            expraction on_input(const token_type & tk, exprstatestack * p_stack);
             /** update exprstate in response to IR (intermediate representation)
              *  from nested parsing task
              **/
-            expraction on_exprir(const exprir & ir);
+            expraction on_exprir(const exprir & ir, exprstatestack * p_stack);
 
             /** print human-readable representation on @p os **/
             void print(std::ostream & os) const;
