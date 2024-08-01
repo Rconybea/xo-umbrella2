@@ -47,15 +47,17 @@ namespace xo {
 
         public:
             exprir() = default;
+#ifdef OBSOLETE
             exprir(exprirtype xir_type,
                    const std::string & x)
                 : xir_type_{xir_type}, symbol_name_{x} {}
+#endif
             exprir(exprirtype xir_type,
                    TypeDescr td)
                 : xir_type_{xir_type}, td_{td} {}
 
             exprirtype xir_type() const { return xir_type_; }
-            const std::string & symbol_name() const { return symbol_name_; }
+            //const std::string & symbol_name() const { return symbol_name_; }
             TypeDescr td() const { return td_; }
 
             void print(std::ostream & os) const;
@@ -63,8 +65,10 @@ namespace xo {
         private:
             /** IR type code **/
             exprirtype xir_type_ = exprirtype::invalid;
+#ifdef OBSOLETE
             /** xir_type=symbol: a symbol (type or variable) name **/
             std::string symbol_name_;
+#endif
             /** xir_type=typedescr: object identifying/describing a datatype **/
             TypeDescr td_ = nullptr;
         };
@@ -220,6 +224,10 @@ namespace xo {
             void on_expr(ref::brw<Expression> expr,
                          exprstatestack * p_stack,
                          rp<Expression> * p_emit_expr);
+            /** update exprstate when expecting a symbol **/
+            void on_symbol(const std::string & symbol,
+                           exprstatestack * p_stack,
+                           rp<Expression> * p_emit_expr);
             /** update exprstate in response to IR (intermediate representation)
              *  from nested parsing task
              **/

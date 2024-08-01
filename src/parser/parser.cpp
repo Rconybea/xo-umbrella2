@@ -40,8 +40,8 @@ namespace xo {
         void
         exprir::print(std::ostream & os) const {
             os << "<exprir"
-               << xtag("type", xir_type_)
-               << xtag("symbol_name", symbol_name_);
+               << xtag("type", xir_type_);
+                //<< xtag("symbol_name", symbol_name_);
             if (td_)
                 os << xtag("td", td_->short_name());
             os << ">";
@@ -310,8 +310,8 @@ namespace xo {
                 /* have to do pop first */
 
                 p_stack->pop_exprstate();
-                p_stack->top_exprstate().on_exprir(exprir(exprirtype::symbol, tk.text()), p_stack, p_emit_expr);
-                //return expraction::pop(exprir(exprirtype::symbol, tk.text()));
+                p_stack->top_exprstate().on_symbol(tk.text(),
+                                                   p_stack, p_emit_expr);
                 return;
 
             case exprstatetype::expect_type: {
@@ -572,15 +572,10 @@ namespace xo {
         }
 
         void
-        exprstate::on_exprir(const exprir & ir,
+        exprstate::on_symbol(const std::string & symbol_name,
                              exprstatestack * /*p_stack*/,
                              rp<Expression> * /*p_emit_expr*/)
         {
-            constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
-            log && log(xtag("ir", ir));
-            log && log(xtag("state", *this));
-
             switch(this->exs_type_) {
             case exprstatetype::expect_toplevel_expression_sequence:
                 /* toplevel expression sequence accepts an
@@ -594,9 +589,46 @@ namespace xo {
                 return;
             case exprstatetype::def_0:
                 this->exs_type_ = exprstatetype::def_1;
-                this->def_lhs_symbol_ = ir.symbol_name();
+                this->def_lhs_symbol_ = symbol_name;
 
                 return;
+            case exprstatetype::def_1:
+            case exprstatetype::def_2:
+            case exprstatetype::def_3:
+            case exprstatetype::def_4:
+                /* NOT IMPLEMENTED */
+                assert(false);
+                return;
+
+            case exprstatetype::expect_rhs_expression:
+            case exprstatetype::expect_type:
+            case exprstatetype::expect_symbol:
+                /* unreachable
+                 * (this exprstate issues pop instruction from exprstate::on_input()
+                 */
+                assert(false);
+                return;
+            case exprstatetype::invalid:
+            case exprstatetype::n_exprstatetype:
+                /* unreachable */
+                assert(false);
+                return;
+            }
+        }
+
+        void
+        exprstate::on_exprir(const exprir & ir,
+                             exprstatestack * /*p_stack*/,
+                             rp<Expression> * /*p_emit_expr*/)
+        {
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+            log && log(xtag("ir", ir));
+            log && log(xtag("state", *this));
+
+            switch(this->exs_type_) {
+            case exprstatetype::expect_toplevel_expression_sequence:
+            case exprstatetype::def_0:
             case exprstatetype::def_1:
                 /* NOT IMPLEMENTED */
                 assert(false);
