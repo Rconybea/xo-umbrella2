@@ -76,6 +76,7 @@ namespace xo {
             return "???";
         }
 
+#ifdef OBSOLETE
         const char *
         expractiontype_descr(expractiontype x) {
             switch(x) {
@@ -101,6 +102,7 @@ namespace xo {
             os << xtag("type", action_type_);
             os << ">";
         }
+#endif
 
         bool
         exprstate::admits_definition() const {

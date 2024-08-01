@@ -97,6 +97,7 @@ namespace xo {
             return os;
         }
 
+#ifdef OBSOLETE
         enum class expractiontype {
             invalid = -1,
 
@@ -149,6 +150,7 @@ namespace xo {
             x.print(os);
             return os;
         }
+#endif
 
         class exprstatestack;
 
