@@ -223,6 +223,10 @@ namespace xo {
              *  forward instructions to parent parser
              **/
             void on_input(const token_type & tk, exprstatestack * p_stack, rp<Expression> * p_emit_expr);
+            /** update exprstate in response to a successfully-parsed subexpression **/
+            void on_expr(ref::brw<Expression> expr,
+                         exprstatestack * p_stack,
+                         rp<Expression> * p_emit_expr);
             /** update exprstate in response to IR (intermediate representation)
              *  from nested parsing task
              **/

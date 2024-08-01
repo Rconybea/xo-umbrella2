@@ -313,8 +313,7 @@ namespace xo {
                 /* have to do pop first */
 
                 p_stack->pop_exprstate();
-                p_stack->top_exprstate().on_exprir
-                    (exprir(exprirtype::symbol, tk.text()), p_stack, p_emit_expr);
+                p_stack->top_exprstate().on_exprir(exprir(exprirtype::symbol, tk.text()), p_stack, p_emit_expr);
                 //return expraction::pop(exprir(exprirtype::symbol, tk.text()));
                 return;
 
@@ -424,11 +423,9 @@ namespace xo {
             if (this->exs_type_ == exprstatetype::expect_rhs_expression) {
                 p_stack->pop_exprstate();
 
-                p_stack->top_exprstate()
-                    .on_exprir(exprir(exprirtype::expression,
-                                      Constant<double>::make(tk.f64_value())),
-                               p_stack,
-                               p_emit_expr);
+                p_stack->top_exprstate().on_expr(Constant<double>::make(tk.f64_value()),
+                                                 p_stack,
+                                                 p_emit_expr);
             } else {
                 assert(false);
             }
@@ -517,6 +514,67 @@ namespace xo {
         }
 
         void
+        exprstate::on_expr(ref::brw<Expression> expr,
+                           exprstatestack * p_stack,
+                           rp<Expression> * p_emit_expr)
+        {
+            switch(this->exs_type_) {
+            case exprstatetype::expect_toplevel_expression_sequence:
+                /* toplevel expression sequence accepts an
+                 * arbitrary number of expressions.
+                 *
+                 * parser::include_token() returns
+                 */
+
+                *p_emit_expr = expr.get();
+                return;
+            case exprstatetype::def_0:
+            case exprstatetype::def_1:
+            case exprstatetype::def_2:
+            case exprstatetype::def_3:
+                /* NOT IMPLEMENTED */
+                assert(false);
+                return;
+            case exprstatetype::def_4: {
+                /* have all the ingredients to create an expression
+                 * representing a definition
+                 *
+                 * 1. if ir_type is a symbol,  interpret as variable name.
+                 *    Need to be able to locate variable by type
+                 * 2. if ir_type is an expression,  adopt as rhs
+                 */
+                rp<Expression> rhs_value = expr.get();
+
+                if (def_lhs_td_)
+                    rhs_value = ConvertExpr::make(def_lhs_td_, rhs_value);
+
+                rp<Expression> def = DefineExpr::make(this->def_lhs_symbol_,
+                                                      rhs_value);
+
+                p_stack->pop_exprstate();
+                p_stack->top_exprstate().on_expr(def,
+                                                 p_stack,
+                                                 p_emit_expr);
+                return;
+            }
+
+            case exprstatetype::expect_rhs_expression:
+            case exprstatetype::expect_type:
+            case exprstatetype::expect_symbol:
+                /* unreachable
+                 * (this exprstate issues pop instruction from exprstate::on_input()
+                 */
+                assert(false);
+                return;
+            case exprstatetype::invalid:
+            case exprstatetype::n_exprstatetype:
+                /* unreachable */
+                assert(false);
+                return;
+            }
+        }
+
+        void
         exprstate::on_exprir(const exprir & ir,
                              exprstatestack * p_stack,
                              rp<Expression> * p_emit_expr)
@@ -580,9 +638,8 @@ namespace xo {
                                                           rhs_value);
 
                     p_stack->pop_exprstate();
-                    return p_stack->top_exprstate()
-                        .on_exprir(exprir(exprirtype::expression, def),
-                                   p_stack, p_emit_expr);
+                    return p_stack->top_exprstate().on_expr(def,
+                                                            p_stack, p_emit_expr);
                 } else {
                     assert(false);
                     return;
