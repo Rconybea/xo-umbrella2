@@ -135,24 +135,16 @@ namespace xo {
         public:
             expraction() = default;
             expraction(expractiontype action_type,
-                       const exprir & expr_ir,
-                       exprstatetype push_exs1,
-                       exprstatetype push_exs2)
-                : action_type_{action_type}, expr_ir_{expr_ir},
-                  push_exs1_{push_exs1}, push_exs2_{push_exs2}
+                       const exprir & expr_ir)
+                : action_type_{action_type}, expr_ir_{expr_ir}
                 {}
 
             static expraction keep();
             static expraction emit(const exprir & ir);
-#ifdef OBSOLETE
-            static expraction push2(exprstatetype s1, exprstatetype s2);
-#endif
             static expraction pop(const exprir & ir);
 
             expractiontype action_type() const { return action_type_; }
             const exprir & expr_ir() const { return expr_ir_; }
-            exprstatetype push_exs1() const { return push_exs1_; }
-            exprstatetype push_exs2() const { return push_exs2_; }
 
             void print(std::ostream & os) const;
 
@@ -169,15 +161,6 @@ namespace xo {
              * intermediate representation (pass to enclosing stack state)
              **/
             exprir expr_ir_;
-            /** with action_type push1 or push2,
-             *  parser will push exprstate with this type
-             **/
-            exprstatetype push_exs1_ = exprstatetype::invalid;
-            /** with action_type push2,
-             *  parser will push exprstate with this type
-             *  (after pushing exprstate built from push_exs1_)
-             **/
-            exprstatetype push_exs2_ = exprstatetype::invalid;
         };
 
         inline std::ostream &

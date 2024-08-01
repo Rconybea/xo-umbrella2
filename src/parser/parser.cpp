@@ -101,36 +101,19 @@ namespace xo {
         expraction
         expraction::keep() {
             return expraction(expractiontype::keep,
-                              exprir(),
-                              exprstatetype::invalid /*not used*/,
-                              exprstatetype::invalid /*not used*/);
+                              exprir());
         }
 
         expraction
         expraction::emit(const exprir & ir) {
             return expraction(expractiontype::emit,
-                              ir,
-                              exprstatetype::invalid /*not used*/,
-                              exprstatetype::invalid /*not used*/);
+                              ir);
         }
-
-#ifdef OBSOLETE
-        expraction
-        expraction::push2(exprstatetype s1,
-                          exprstatetype s2) {
-            return expraction(expractiontype::push2,
-                              exprir(),
-                              s1,
-                              s2);
-        }
-#endif
 
         expraction
         expraction::pop(const exprir & ir) {
             return expraction(expractiontype::pop,
-                              ir,
-                              exprstatetype::invalid /*not used*/,
-                              exprstatetype::invalid /*not used*/);
+                              ir);
         }
 
         void
@@ -138,8 +121,6 @@ namespace xo {
             os << "<expraction";
             os << xtag("type", action_type_);
             os << xtag("ir", expr_ir_);
-            os << xtag("push_exs1", push_exs1_);
-            os << xtag("push_exs2", push_exs2_);
             os << ">";
         }
 
