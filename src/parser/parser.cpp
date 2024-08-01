@@ -194,8 +194,27 @@ namespace xo {
         exprstate::admits_singleassign() const {
             switch(exs_type_) {
             case exprstatetype::expect_toplevel_expression_sequence:
+
+                /*
+                 *   def foo       = 1
+                 *   def foo : f64 = 1
+                 *  ^   ^   ^ ^   ^ ^ ^
+                 *  |   |   | |   | | (done)
+                 *  |   |   | |   | def_4:expect_rhs_expression
+                 *  |   |   | |   def_3
+                 *  |   |   | def_2:expect_type
+                 *  |   |   def_1
+                 *  |   def_0:expect_symbol
+                 *  expect_toplevel_expression_sequence
+                 *
+                 * note that we skip from def_1 -> def_4 if '=' instead of ':'
+                 */
             case exprstatetype::def_0:
+                return false;
+
             case exprstatetype::def_1:
+                return true;
+
             case exprstatetype::def_2:
                 return false;
 
@@ -203,6 +222,7 @@ namespace xo {
                 return true;
 
             case exprstatetype::def_4:
+
             case exprstatetype::expect_rhs_expression:
                 /* rhs-expressions (or expressions for that matter)
                  * may not begin with singleassign '='
@@ -437,7 +457,9 @@ namespace xo {
                                                xtag("state", *this)));
             }
 
-            if (this->exs_type_ == exprstatetype::def_3) {
+            if ((this->exs_type_ == exprstatetype::def_1)
+                || (this->exs_type_ == exprstatetype::def_3))
+            {
                 this->exs_type_ = exprstatetype::def_4;
 
                 p_stack->push_exprstate(exprstatetype::expect_rhs_expression);

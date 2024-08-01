@@ -141,14 +141,10 @@ namespace xo {
 
             /** scaffold a define-expression here **/
             rp<DefineExprAccess> def_expr_;
-            rp<ConvertExprAccess> cvt_expr_;
-
-#ifdef OBSOLETE
-            /** e.g. f64 in
-             *    def foo : f64 = 1
+            /** scafford a convert-expression here.
+             *  May be nested within a def_expr
              **/
-            TypeDescr def_lhs_td_ = nullptr;
-#endif
+            rp<ConvertExprAccess> cvt_expr_;
         }; /*exprstate*/
 
         inline std::ostream &
