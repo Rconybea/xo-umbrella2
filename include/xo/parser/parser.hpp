@@ -114,7 +114,7 @@ namespace xo {
             invalid = -1,
 
             keep,
-            emit,
+            //emit,
             //pop,
 
             n_expractiontype
@@ -140,9 +140,8 @@ namespace xo {
                 {}
 
             static expraction keep();
-            static expraction emit(const exprir & ir);
 #ifdef OBSOLETE
-            static expraction pop();
+            static expraction emit(const exprir & ir);
 #endif
 
             expractiontype action_type() const { return action_type_; }

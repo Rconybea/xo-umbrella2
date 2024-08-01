@@ -87,10 +87,6 @@ namespace xo {
                 return "?invalid";
             case expractiontype::keep:
                 return "keep";
-            case expractiontype::emit:
-                return "emit";
-                //case expractiontype::pop:
-                //return "pop";
             case expractiontype::n_expractiontype:
                 break;
             }
@@ -104,25 +100,11 @@ namespace xo {
                               exprir());
         }
 
+#ifdef OBSOLETE
         expraction
         expraction::emit(const exprir & ir) {
             return expraction(expractiontype::emit,
                               ir);
-        }
-
-#ifdef OBSOLETE
-        expraction
-        expraction::pop(const exprir & ir) {
-            return expraction(expractiontype::pop,
-                              ir);
-        }
-#endif
-
-#ifdef OBSOLETE
-        expraction
-        expraction::pop() {
-            return expraction(expractiontype::pop,
-                              exprir());
         }
 #endif
 
