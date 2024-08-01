@@ -12,63 +12,6 @@
 
 namespace xo {
     namespace scm {
-#ifdef OBSOLETE
-        // ----- exprir -----
-
-        enum class exprirtype {
-            invalid = -1,
-
-            empty,
-            symbol,
-            typedescr,
-
-            n_exprirtype
-        };
-
-        extern const char *
-        exprirtype_descr(exprirtype x);
-
-        inline std::ostream &
-        operator<< (std::ostream & os,
-                    exprirtype x)
-        {
-            os << exprirtype_descr(x);
-            return os;
-        }
-
-        /** intermediate representation for some part of an expression
-         *
-         *  Examples:
-         *  1. a variable name (but without type information)
-         **/
-        class exprir {
-        public:
-            using Expression = xo::ast::Expression;
-            using TypeDescr = xo::reflect::TypeDescr;
-
-        public:
-            exprir() = default;
-            explicit exprir(exprirtype xir_type)
-                : xir_type_{xir_type} {}
-
-            exprirtype xir_type() const { return xir_type_; }
-            //const std::string & symbol_name() const { return symbol_name_; }
-            //TypeDescr td() const { return td_; }
-
-            void print(std::ostream & os) const;
-
-        private:
-            /** IR type code **/
-            exprirtype xir_type_ = exprirtype::invalid;
-        };
-
-        inline std::ostream &
-        operator<< (std::ostream & os, const exprir & x) {
-            x.print(os);
-            return os;
-        }
-#endif
-
         enum class exprstatetype {
             invalid = -1,
 
@@ -96,61 +39,6 @@ namespace xo {
             os << exprstatetype_descr(x);
             return os;
         }
-
-#ifdef OBSOLETE
-        enum class expractiontype {
-            invalid = -1,
-
-            keep,
-            //emit,
-            //pop,
-
-            n_expractiontype
-        };
-
-        extern const char *
-        expractiontype_descr(expractiontype x);
-
-        inline std::ostream &
-        operator<< (std::ostream & os, expractiontype x) {
-            os << expractiontype_descr(x);
-            return os;
-        }
-
-        /** an action associated with parser response to an incoming lexical
-         **/
-        class expraction {
-        public:
-            expraction() = default;
-            explicit expraction(expractiontype action_type)
-                : action_type_{action_type}
-                {}
-
-            static expraction keep();
-
-            expractiontype action_type() const { return action_type_; }
-
-            void print(std::ostream & os) const;
-
-        private:
-            /**
-             * push1: push new exprstate built from push_exs1_
-             * push2: push new exprstate built from push_exs1_,
-             *        followed by push_exs2_
-             * keep: keep current exprstate (which will have updated inplace)
-             * pop:  drop exprstate,  report exprir to parent
-             **/
-            expractiontype action_type_ = expractiontype::invalid;
-        };
-
-        inline std::ostream &
-        operator<< (std::ostream & os,
-                    const expraction & x)
-        {
-            x.print(os);
-            return os;
-        }
-#endif
 
         class exprstatestack;
 
@@ -208,13 +96,6 @@ namespace xo {
             void on_typedescr(TypeDescr td,
                               exprstatestack * p_stack,
                               rp<Expression> * p_emit_expr);
-#ifdef OBSOLETE
-            /** update exprstate in response to IR (intermediate representation)
-             *  from nested parsing task
-             **/
-            void on_exprir(const exprir & ir, exprstatestack * p_stack, rp<Expression> * p_emit_expr);
-#endif
-
             /** print human-readable representation on @p os **/
             void print(std::ostream & os) const;
 
