@@ -409,7 +409,7 @@ namespace xo {
             }
         }
 
-        expraction
+        void
         exprstate::on_f64(const token_type & tk,
                           exprstatestack * p_stack,
                           rp<Expression> * p_emit_expr)
@@ -429,14 +429,13 @@ namespace xo {
             if (this->exs_type_ == exprstatetype::expect_rhs_expression) {
                 p_stack->pop_exprstate();
 
-                return p_stack->top_exprstate()
+                p_stack->top_exprstate()
                     .on_exprir(exprir(exprirtype::expression,
                                       Constant<double>::make(tk.f64_value())),
                                p_stack,
                                p_emit_expr);
             } else {
                 assert(false);
-                return expraction();
             }
         }
 
