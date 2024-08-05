@@ -4,8 +4,6 @@
 #include "xo/indentlog/print/vector.hpp"
 
 namespace xo {
-    using xo::ref::rp;
-
     namespace ast {
         rp<Apply>
         Apply::make(const rp<Expression> & fn,

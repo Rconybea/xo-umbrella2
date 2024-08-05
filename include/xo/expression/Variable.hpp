@@ -20,13 +20,13 @@ namespace xo {
              *  identified by @p name,  that can take on values
              *  described by @p var_type.
              **/
-            static ref::rp<Variable> make(const std::string & name,
-                                          TypeDescr var_type) {
+            static rp<Variable> make(const std::string & name,
+                                     TypeDescr var_type) {
                 return new Variable(name, var_type);
             }
 
             /** return copy of x:  same var, different object identity **/
-            static ref::rp<Variable> copy(ref::brw<Variable> x) {
+            static rp<Variable> copy(ref::brw<Variable> x) {
                 return new Variable(x->name(), x->valuetype());
             }
 
@@ -53,7 +53,7 @@ namespace xo {
                 return 1;
             }
 
-            virtual ref::rp<Expression> xform_layer(TransformFn xform_fn) override {
+            virtual rp<Expression> xform_layer(TransformFn xform_fn) override {
                 return xform_fn(this);
             }
 
@@ -76,7 +76,7 @@ namespace xo {
             binding_path path_;
         }; /*Variable*/
 
-        inline ref::rp<Variable>
+        inline rp<Variable>
         make_var(const std::string & name,
                  reflect::TypeDescr var_type) {
             return Variable::make(name, var_type);

@@ -25,16 +25,16 @@ namespace xo {
         public:
             /** create new apply-expression instance
              **/
-            static ref::rp<Apply> make(const ref::rp<Expression> & fn,
-                                       const std::vector<ref::rp<Expression>> & argv);
+            static rp<Apply> make(const rp<Expression> & fn,
+                                  const std::vector<rp<Expression>> & argv);
 
             /** downcast from Expression **/
             static ref::brw<Apply> from(ref::brw<Expression> x) {
                 return ref::brw<Apply>::from(x);
             }
 
-            const ref::rp<Expression> & fn() const { return fn_; }
-            const std::vector<ref::rp<Expression>> & argv() const { return argv_; }
+            const rp<Expression> & fn() const { return fn_; }
+            const std::vector<rp<Expression>> & argv() const { return argv_; }
 
             virtual std::set<std::string> get_free_variables() const override {
                 std::set<std::string> retval = fn_->get_free_variables();
@@ -76,7 +76,7 @@ namespace xo {
                 return n;
             }
 
-            virtual ref::rp<Expression> xform_layer(TransformFn xform_fn) override {
+            virtual rp<Expression> xform_layer(TransformFn xform_fn) override {
                 this->fn_ = fn_->xform_layer(xform_fn);
 
                 for (auto & arg : argv_)
@@ -96,17 +96,17 @@ namespace xo {
 
         private:
             Apply(TypeDescr apply_valuetype,
-                  const ref::rp<Expression> & fn,
-                  const std::vector<ref::rp<Expression>> & argv)
+                  const rp<Expression> & fn,
+                  const std::vector<rp<Expression>> & argv)
                 : Expression(exprtype::apply, apply_valuetype),
                   fn_{fn}, argv_(argv)
                 {}
 
         private:
             /** function to invoke **/
-            ref::rp<Expression> fn_;
+            rp<Expression> fn_;
             /** argument expressions,  in l-to-r order **/
-            std::vector<ref::rp<Expression>> argv_;
+            std::vector<rp<Expression>> argv_;
         }; /*Apply*/
 
 #ifdef NOT_USING
@@ -136,10 +136,10 @@ namespace xo {
 #endif
 
         /* reminder: initializer-lists are compile-time only */
-        inline ref::rp<Apply>
-        make_apply(const ref::rp<Expression> & fn,
-                   const std::initializer_list<ref::rp<Expression>> args) {
-            std::vector<ref::rp<Expression>> argv(args);
+        inline rp<Apply>
+        make_apply(const rp<Expression> & fn,
+                   const std::initializer_list<rp<Expression>> args) {
+            std::vector<rp<Expression>> argv(args);
             return Apply::make(fn, argv);
         } /*make_apply*/
 

@@ -38,7 +38,7 @@ namespace xo {
             using VisitFn = std::function
                 <void (ref::brw<Expression>)>;
             using TransformFn = std::function
-                <ref::rp<Expression> (ref::brw<Expression>)>;
+                <rp<Expression> (ref::brw<Expression>)>;
             using TypeDescr = xo::reflect::TypeDescr;
 
         public:
@@ -69,7 +69,7 @@ namespace xo {
             virtual std::size_t visit_layer(VisitFn visitor_fn) = 0;
 
             /** traverse ast @ref visit_preorder but do not visit Lambdas **/
-            virtual ref::rp<Expression> xform_layer(TransformFn visitor_fn) = 0;
+            virtual rp<Expression> xform_layer(TransformFn visitor_fn) = 0;
 
             /** attach an environment to each lambda expression X in this subtree,
              *  that will:

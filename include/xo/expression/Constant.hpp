@@ -30,7 +30,7 @@ namespace xo {
 
         public:
             /** create constant expression representing literal value x **/
-            static ref::rp<Constant> make(const T & x) {
+            static rp<Constant> make(const T & x) {
                 TypeDescr x_valuetype = Reflect::require<T>();
 
                 return new Constant(x_valuetype, x);
@@ -61,7 +61,7 @@ namespace xo {
                 return 1;
             }
 
-            virtual ref::rp<Expression> xform_layer(TransformFn xform_fn) override {
+            virtual rp<Expression> xform_layer(TransformFn xform_fn) override {
                 return xform_fn(this);
             }
 
@@ -89,7 +89,7 @@ namespace xo {
         }; /*Constant*/
 
         template <typename T>
-        ref::rp<Constant<std::remove_reference_t<T>>>
+        rp<Constant<std::remove_reference_t<T>>>
         make_constant(const T & x) {
             return Constant<T>::make(x);
         }

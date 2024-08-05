@@ -26,12 +26,12 @@ namespace xo {
 
         public:
             /** named ctor idiom.  Create instance with local variables per @p argv **/
-            static ref::rp<LocalEnv> make(const std::vector<ref::rp<Variable>> & argv) {
+            static rp<LocalEnv> make(const std::vector<rp<Variable>> & argv) {
                 return new LocalEnv(argv);
             }
 
             Lambda * origin() const { return origin_; }
-            const std::vector<ref::rp<Variable>> & argv() const { return argv_; }
+            const std::vector<rp<Variable>> & argv() const { return argv_; }
             int n_arg() const { return argv_.size(); }
             TypeDescr fn_arg(uint32_t i) const { return argv_[i]->valuetype(); }
 
@@ -71,7 +71,7 @@ namespace xo {
             }
 
         private:
-            LocalEnv(const std::vector<ref::rp<Variable>> & argv)
+            LocalEnv(const std::vector<rp<Variable>> & argv)
                 : origin_{nullptr}, argv_(argv) {}
 
         private:
@@ -85,12 +85,12 @@ namespace xo {
             Lambda * origin_ = nullptr;
 
             /** formal argument names **/
-            std::vector<ref::rp<Variable>> argv_;
+            std::vector<rp<Variable>> argv_;
 
             /** parent environment.  A free variable in this lambda's
              *  body will be resolved by referring them to @ref parent_env_.
              **/
-            ref::rp<Environment> parent_env_;
+            rp<Environment> parent_env_;
         };
     } /*namespace ast*/
 } /*namespace xo*/

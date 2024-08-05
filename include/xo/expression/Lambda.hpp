@@ -27,9 +27,9 @@ namespace xo {
              *  @p argv   Formal parameters, in left-to-right order
              *  @p body   Expression for body of this function
              **/
-            static ref::rp<Lambda> make(const std::string & name,
-                                        const std::vector<ref::rp<Variable>> & argv,
-                                        const ref::rp<Expression> & body);
+            static rp<Lambda> make(const std::string & name,
+                                   const std::vector<rp<Variable>> & argv,
+                                   const rp<Expression> & body);
 
             /** downcast from Expression **/
             static ref::brw<Lambda> from(ref::brw<Expression> x) {
@@ -37,8 +37,8 @@ namespace xo {
             }
 
             const std::string & type_str() const { return type_str_; }
-            const std::vector<ref::rp<Variable>> & argv() const { return local_env_->argv(); }
-            const ref::rp<Expression> & body() const { return body_; }
+            const std::vector<rp<Variable>> & argv() const { return local_env_->argv(); }
+            const rp<Expression> & body() const { return body_; }
 
             bool needs_closure_flag() const { return !free_var_set_.empty(); }
 
@@ -77,7 +77,7 @@ namespace xo {
                 return n;
             }
 
-            virtual ref::rp<Expression> xform_layer(TransformFn /*xform_fn*/) override {
+            virtual rp<Expression> xform_layer(TransformFn /*xform_fn*/) override {
                 /* a layer is bounded by lambdas,  don't enter them */
                 return this;
             }
@@ -92,8 +92,8 @@ namespace xo {
              **/
             Lambda(const std::string & name,
                    TypeDescr lambda_type,
-                   const ref::rp<LocalEnv> & local_env,
-                   const ref::rp<Expression> & body);
+                   const rp<LocalEnv> & local_env,
+                   const rp<Expression> & body);
 
             /** compute free-variable set for this lambda **/
             std::set<std::string> calc_free_variables() const;
@@ -104,7 +104,7 @@ namespace xo {
              *  Goal is to unify variables that can use the same binding
              *  path to determine memory location at runtime.
              **/
-            std::map<std::string, ref::rp<Variable>> regularize_layer_vars();
+            std::map<std::string, rp<Variable>> regularize_layer_vars();
 
         private:
             /** lambda name.  Initially supporting only form like
@@ -120,7 +120,7 @@ namespace xo {
              **/
             std::string type_str_;
             /** function body **/
-            ref::rp<Expression> body_;
+            rp<Expression> body_;
 
             /** free variables for this lambda **/
             std::set<std::string> free_var_set_;
@@ -136,7 +136,7 @@ namespace xo {
              *  - any variables appearing in nested lambdas
              *    (whether formals or free variables)
              **/
-            std::map<std::string, ref::rp<Variable>> layer_var_map_;
+            std::map<std::string, rp<Variable>> layer_var_map_;
 
             /** all lambdas nested once inside this lambda's body **/
             std::map<std::string, ref::brw<Lambda>> nested_lambda_map_;
@@ -147,13 +147,13 @@ namespace xo {
              * when Lambda constructor runs,  so we need to assign @ref local_env_
              * later.
              **/
-            ref::rp<LocalEnv> local_env_;
+            rp<LocalEnv> local_env_;
         }; /*Lambda*/
 
-        inline ref::rp<Lambda>
+        inline rp<Lambda>
         make_lambda(const std::string & name,
-                    const std::vector<ref::rp<Variable>> & argv,
-                    const ref::rp<Expression> & body)
+                    const std::vector<rp<Variable>> & argv,
+                    const rp<Expression> & body)
         {
             return Lambda::make(name, argv, body);
         }

@@ -25,18 +25,18 @@ namespace xo {
              *  @p when_true or @p when_false, depending on result
              *  of evaluating expression @p test
              **/
-            static ref::rp<IfExpr> make(const ref::rp<Expression> & test,
-                                        const ref::rp<Expression> & when_true,
-                                        const ref::rp<Expression> & when_false);
+            static rp<IfExpr> make(const rp<Expression> & test,
+                                   const rp<Expression> & when_true,
+                                   const rp<Expression> & when_false);
 
             /** downcast from Expression **/
             static ref::brw<IfExpr> from(ref::brw<Expression> x) {
                 return ref::brw<IfExpr>::from(x);
             }
 
-            const ref::rp<Expression> & test() const { return test_; }
-            const ref::rp<Expression> & when_true() const { return when_true_; }
-            const ref::rp<Expression> & when_false() const { return when_false_; }
+            const rp<Expression> & test() const { return test_; }
+            const rp<Expression> & when_true() const { return when_true_; }
+            const rp<Expression> & when_false() const { return when_false_; }
 
             // ----- Expression -----
 
@@ -79,7 +79,7 @@ namespace xo {
                 return n;
             }
 
-            virtual ref::rp<Expression> xform_layer(TransformFn xform_fn) override {
+            virtual rp<Expression> xform_layer(TransformFn xform_fn) override {
                 this->test_ = this->test_->xform_layer(xform_fn);
                 this->when_true_ = this->when_true_->xform_layer(xform_fn);
                 this->when_false_= this->when_false_->xform_layer(xform_fn);
@@ -113,13 +113,13 @@ namespace xo {
              *  @p when_false else-branch;  executes only when test fails
              **/
             IfExpr(TypeDescr ifexpr_type,
-                   const ref::rp<Expression> & test,
-                   const ref::rp<Expression> & when_true,
-                   const ref::rp<Expression> & when_false)
+                   rp<Expression> test,
+                   rp<Expression> when_true,
+                   rp<Expression> when_false)
                 : Expression(exprtype::ifexpr, ifexpr_type),
-                  test_{test},
-                  when_true_{when_true},
-                  when_false_{when_false} {}
+                  test_{std::move(test)},
+                  when_true_{std::move(when_true)},
+                  when_false_{std::move(when_false)} {}
 
         private:
             /** if:
@@ -127,15 +127,15 @@ namespace xo {
              *
              *  executes x;  if true execute y; otherwise execute z
              **/
-            ref::rp<Expression> test_;
-            ref::rp<Expression> when_true_;
-            ref::rp<Expression> when_false_;
+            rp<Expression> test_;
+            rp<Expression> when_true_;
+            rp<Expression> when_false_;
         }; /*IfExpr*/
 
-        inline ref::rp<IfExpr>
-        make_ifexpr(const ref::rp<Expression> & test,
-                    const ref::rp<Expression> & when_true,
-                    const ref::rp<Expression> & when_false)
+        inline rp<IfExpr>
+        make_ifexpr(const rp<Expression> & test,
+                    const rp<Expression> & when_true,
+                    const rp<Expression> & when_false)
         {
             return IfExpr::make(test, when_true, when_false);
         }

@@ -62,7 +62,7 @@ namespace xo {
                 return 1;
             }
 
-            virtual ref::rp<Expression> xform_layer(TransformFn xform_fn) override {
+            virtual rp<Expression> xform_layer(TransformFn xform_fn) override {
                 return xform_fn(this);
             }
 

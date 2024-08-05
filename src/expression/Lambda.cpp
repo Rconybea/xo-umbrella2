@@ -9,14 +9,13 @@
 namespace xo {
     using xo::reflect::TypeDescrBase;
     using xo::reflect::FunctionTdxInfo;
-    using xo::ref::rp;
     using std::stringstream;
 
     namespace ast {
         rp<Lambda>
         Lambda::make(const std::string & name,
                      const std::vector<rp<Variable>> & argv,
-                     const ref::rp<Expression> & body)
+                     const rp<Expression> & body)
         {
             using xo::reflect::FunctionTdx;
 
@@ -69,7 +68,7 @@ namespace xo {
             return retval;
         } /*calc_free_variables*/
 
-        std::map<std::string, ref::rp<Variable>>
+        std::map<std::string, rp<Variable>>
         Lambda::regularize_layer_vars()
         {
             /* regularize local_env+body:  make sure exactly one instance
@@ -83,7 +82,7 @@ namespace xo {
              * Motivation is to unify Variables that would use the same
              * binding_path to resolve their runtime location.
              */
-            std::map<std::string, ref::rp<Variable>> var_map;
+            std::map<std::string, rp<Variable>> var_map;
 
             for (const auto & arg : local_env_->argv()) {
                 /* each arg name can appear at most once
@@ -96,7 +95,7 @@ namespace xo {
 
             this->body_
                 = (body_->xform_layer
-                   ([&var_map](ref::brw<Expression> x) -> ref::rp<Expression>
+                   ([&var_map](ref::brw<Expression> x) -> rp<Expression>
                     {
                         if (x->extype() == exprtype::variable) {
                             ref::brw<Variable> var = Variable::from(x);

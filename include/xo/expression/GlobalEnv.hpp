@@ -14,7 +14,7 @@ namespace xo {
         class GlobalEnv : public Environment {
         public:
             /** create instance.  Probably only need one of these **/
-            static ref::rp<GlobalEnv> make() { return new GlobalEnv(); }
+            static rp<GlobalEnv> make() { return new GlobalEnv(); }
 
             ref::brw<Expression> require_global(const std::string & vname,
                                                 ref::brw<Expression> expr) {
@@ -51,7 +51,7 @@ namespace xo {
             /* for assignable globals,  need to allocate memory
              * addresses for these.
              */
-            std::map<std::string, ref::rp<Expression>> global_map_;
+            std::map<std::string, rp<Expression>> global_map_;
         };
     } /*namespace ast*/
 } /*namespace xo*/
