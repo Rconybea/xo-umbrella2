@@ -124,7 +124,7 @@ namespace xo {
         Lambda::Lambda(const std::string & name,
                        TypeDescr lambda_type,
                        const rp<LocalEnv> & local_env,
-                       const ref::rp<Expression> & body)
+                       const rp<Expression> & body)
             : FunctionInterface(exprtype::lambda, lambda_type),
               name_{name},
               body_{body},
