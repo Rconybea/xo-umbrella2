@@ -3,6 +3,7 @@
 set(SELF_EXE utest.ratio)
 set(SELF_SRCS
     ratio_utest_main.cpp
+    ratio_reflect.test.cpp
     ratio.test.cpp)
 
 if (ENABLE_TESTING)
@@ -14,6 +15,7 @@ if (ENABLE_TESTING)
     # dependencies..
 
     xo_self_headeronly_dependency(${SELF_EXE} xo_ratio)
+    xo_dependency(${SELF_EXE} reflect)
     xo_dependency(${SELF_EXE} randomgen)
     xo_dependency(${SELF_EXE} indentlog)
     xo_external_target_dependency(${SELF_EXE} Catch2 Catch2::Catch2)

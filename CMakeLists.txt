@@ -39,6 +39,7 @@ add_subdirectory(docs)
 # ----------------------------------------------------------------
 # dependencies
 
+xo_headeronly_dependency(${SELF_LIB} xo_reflectutil)
 xo_headeronly_dependency(${SELF_LIB} xo_flatstring)
 #xo_headeronly_dependency(${SELF_LIB} randomgen)
 # etc..
