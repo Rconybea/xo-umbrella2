@@ -124,7 +124,7 @@ namespace xo {
 
         /** adopt function @p x as a callable primitive function named @p name **/
         template <typename FunctionPointer>
-        ref::rp<Primitive<FunctionPointer>>
+        rp<Primitive<FunctionPointer>>
         make_primitive(const std::string & name,
                        FunctionPointer x,
                        bool explicit_symbol_def,
