@@ -37,10 +37,10 @@ namespace xo {
             using TypeDescr = xo::reflect::TypeDescr;
 
         public:
-            static ref::rp<Primitive> make(const std::string & name,
-                                           FunctionPointer fnptr,
-                                           bool explicit_symbol_def,
-                                           llvmintrinsic intrinsic) {
+            static rp<Primitive> make(const std::string & name,
+                                      FunctionPointer fnptr,
+                                      bool explicit_symbol_def,
+                                      llvmintrinsic intrinsic) {
                 TypeDescr fn_type = Reflect::require<FunctionPointer>();
 
                 return new Primitive(fn_type, name, fnptr, explicit_symbol_def, intrinsic);
