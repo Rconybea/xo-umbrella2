@@ -7,9 +7,9 @@
 #include <catch2/catch.hpp>
 
 namespace xo {
-    using xo::tok::tokentype;
-    using token = xo::tok::token<char>;
-    using xo::tok::span;
+    using xo::scm::tokentype;
+    using token = xo::scm::token<char>;
+    using xo::scm::span;
 
     namespace ut {
         namespace {
@@ -111,7 +111,7 @@ namespace xo {
                 INFO(xtag("i_tc", i_tc));
 
                 using tokenizer
-                    = xo::tok::tokenizer<char>;
+                    = xo::scm::tokenizer<char>;
 
                 tokenizer tkz;
                 tokenizer::span_type

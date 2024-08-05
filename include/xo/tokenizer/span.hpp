@@ -7,7 +7,7 @@
 #include <cassert>
 
 namespace xo {
-    namespace tok {
+    namespace scm {
         /** @class span compression/span.hpp
          *
          *  @brief Represents a contiguous memory range,  without ownership.
@@ -137,5 +137,5 @@ namespace xo {
             x.print(os);
             return os;
         }
-    } /*namespace tok*/
+    } /*namespace scm*/
 } /*namespace xo*/

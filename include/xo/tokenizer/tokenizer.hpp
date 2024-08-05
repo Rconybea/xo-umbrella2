@@ -11,7 +11,7 @@
 #include <cassert>
 
 namespace xo {
-    namespace tok {
+    namespace scm {
         /**
          *  Use:
          *  @code
@@ -619,7 +619,7 @@ namespace xo {
 
             return tk;
         } /*notify_eof*/
-    } /*namespace tok*/
+    } /*namespace scm*/
 } /*namespace xo*/
 
 /* end tokenizer.hpp */

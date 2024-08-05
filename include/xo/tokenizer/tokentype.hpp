@@ -9,7 +9,7 @@
 #include <ostream>
 
 namespace xo {
-    namespace tok {
+    namespace scm {
         /** @enum tokentype
          *  @brief enum to identify different schematica input token types
          *
@@ -124,6 +124,9 @@ namespace xo {
             /** keyword 'in' **/
             tk_in,
 
+            /** keyword 'end' **/
+            tk_end,
+
             n_tokentype /* comes last, counts #of entries */
         }; /*tokentype*/
 
@@ -135,8 +138,7 @@ namespace xo {
             os << tokentype_descr(tk_type);
             return os;
         }
-    } /*namespace tok*/
+    } /*namespace scm*/
 } /*namespace xo*/
-
 
 /* end tokentype.hpp */

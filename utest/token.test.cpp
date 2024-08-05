@@ -8,8 +8,8 @@
 #include <memory>
 
 namespace xo {
-    using token = xo::tok::token<char>;
-    using xo::tok::tokentype;
+    using token = xo::scm::token<char>;
+    using xo::scm::tokentype;
 
     namespace ut {
         struct testcase_i64 {

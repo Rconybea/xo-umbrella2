@@ -8,11 +8,12 @@
 #include "tokentype.hpp"
 #include "xo/indentlog/print/tag.hpp"
 #include <stdexcept>
+#include <ostream>
 #include <string>
 #include <cstdint>
 
 namespace xo {
-    namespace tok {
+    namespace scm {
         namespace detail {
             /* compute a * b^p,  p >= 0 */
             constexpr double
@@ -100,6 +101,9 @@ namespace xo {
              *    [+|-][0-9]*[.][0-9]*[e|E][+|-][0-9]*
              **/
             double f64_value() const;
+
+            /** print human-readable token representation on stream @p os **/
+            void print(std::ostream & os) const;
 
         private:
             /** category for this token **/
@@ -327,7 +331,25 @@ namespace xo {
 
             return retval;
         } /*f64_value*/
-    } /*Namespace tok*/
+
+        template <typename CharT>
+        void
+        token<CharT>::print(std::ostream & os) const {
+            os << "<token"
+               << xtag("type", tk_type_)
+               << xtag("text", text_)
+               << ">";
+        } /*print*/
+
+        template <typename CharT>
+        inline std::ostream &
+        operator<< (std::ostream & os,
+                    const token<CharT> & tk)
+        {
+            tk.print(os);
+            return os;
+        }
+    } /*Namespace scm*/
 } /*namespace xo*/
 
 

@@ -9,7 +9,7 @@
 #include <new>
 
 namespace xo {
-    namespace tok {
+    namespace scm {
         /**
          * @class buffer buffer.hpp
          *
@@ -318,7 +318,7 @@ namespace xo {
         swap(buffer<CharT> & lhs, buffer<CharT> & rhs) {
             lhs.swap(rhs);
         }
-    } /*namespace tok*/
+    } /*namespace scm*/
 } /*namespace xo*/
 
 /* end buffer.hpp */
