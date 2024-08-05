@@ -54,6 +54,7 @@ namespace xo {
         TypeDescrW
         TypeDescrBase::require(const std::type_info * native_tinfo,
                                const std::string & canonical_name,
+                               detail::Invoker * invoker,
                                std::unique_ptr<TypeDescrExtra> tdextra)
         {
             if (native_tinfo) {
@@ -152,7 +153,8 @@ namespace xo {
             auto new_td = new TypeDescrBase(new_td_id,
                                             native_tinfo,
                                             canonical_name,
-                                            std::move(tdextra));
+                                            std::move(tdextra),
+                                            invoker);
 
             new_slot.reset(new_td);
 
@@ -178,6 +180,7 @@ namespace xo {
 
             return require(nullptr /*native_tinfo - n/avail on this path*/,
                            fn_info.make_canonical_name(),
+                           nullptr /*invoker*/,
                            std::move(fn_tdextra));
         } /*require_by_fn_info*/
 
@@ -240,11 +243,13 @@ namespace xo {
         TypeDescrBase::TypeDescrBase(TypeId id,
                                      const std::type_info * native_tinfo,
                                      const std::string & canonical_name,
-                                     std::unique_ptr<TypeDescrExtra> tdextra)
+                                     std::unique_ptr<TypeDescrExtra> tdextra,
+                                     detail::Invoker * invoker)
             : id_{std::move(id)},
               native_typeinfo_{native_tinfo},
               canonical_name_{std::move(canonical_name)},
               short_name_{unqualified_name(canonical_name_)},
+              invoker_{invoker},
               tdextra_{std::move(tdextra)}
         {
         }

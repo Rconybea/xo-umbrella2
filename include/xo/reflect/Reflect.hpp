@@ -36,7 +36,7 @@ namespace xo {
         // ----- xo::ref::rp<Object> -----
 
         template<typename Object>
-        class EstablishTdx<xo::ref::rp<Object>> {
+        class EstablishTdx<rp<Object>> {
         public:
             /* definition provide after decl for Reflect {} below */
             static std::unique_ptr<TypeDescrExtra> make();
@@ -182,9 +182,12 @@ namespace xo {
                 } else {
                     /* control comes here the first time require<T>() runs */
 
+                    static detail::InvokerAux<T> s_final_invoker;
+
                     auto final_tdx = EstablishTdx<T>::make();
 
-                    retval_td->assign_tdextra(std::move(final_tdx));
+                    retval_td->assign_tdextra(&s_final_invoker,
+                                              std::move(final_tdx));
 
                     /* also need to require for each child */
                 }
@@ -274,7 +277,7 @@ namespace xo {
          */
         template<typename Object>
         std::unique_ptr<TypeDescrExtra>
-        EstablishTdx<xo::ref::rp<Object>>::make() {
+        EstablishTdx<rp<Object>>::make() {
             /* need to ensure Object is property reflected.
              *
              * In practice must be a class type,  since has to store refcount
@@ -282,7 +285,7 @@ namespace xo {
              */
             Reflect::require<Object>();
 
-            return RefPointerTdx<xo::ref::rp<Object>>::make();
+            return RefPointerTdx<rp<Object>>::make();
         } /*make*/
 
         // ----- std::array<Element, N> -----

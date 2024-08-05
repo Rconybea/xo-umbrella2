@@ -9,10 +9,6 @@ set(SELF_SOURCE_FILES
     FunctionTdx.test.cpp)
 
 xo_add_utest_executable(${SELF_EXECUTABLE_NAME} ${SELF_SOURCE_FILES})
-
-# ----------------------------------------------------------------
-# deps: indentlog, ..
-
 xo_self_dependency(${SELF_EXECUTABLE_NAME} reflect)
 xo_external_target_dependency(${SELF_EXECUTABLE_NAME} Catch2 Catch2::Catch2)
 

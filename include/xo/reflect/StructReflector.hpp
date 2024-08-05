@@ -80,11 +80,14 @@ namespace xo {
                                 return SelfTagger<StructT, have_to_self_tp>::self_tp(object);
                             });
 
+                    static detail::InvokerAux<StructT> s_final_invoker;
+
                     auto tdx = StructTdx::make(std::move(this->member_v_),
                                                have_to_self_tp,
                                                to_self_tp_fn);
 
-                    this->td_->assign_tdextra(std::move(tdx));
+                    this->td_->assign_tdextra(&s_final_invoker,
+                                              std::move(tdx));
                 }
             } /*complete*/
 

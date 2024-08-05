@@ -41,7 +41,8 @@ namespace xo {
             static TypeDescrW establish() {
                 TypeDescrW td = TypeDescrBase::require(&typeid(T),
                                                        std::string(type_name<T>()),
-                                                       nullptr);
+                                                       nullptr /*tdextra*/,
+                                                       nullptr /*invoker*/);
 
 #ifdef NOT_USING
                 std::function<TaggedPtr (void *)> to_self_tp;

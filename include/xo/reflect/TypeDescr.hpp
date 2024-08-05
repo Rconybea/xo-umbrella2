@@ -88,6 +88,33 @@ namespace xo {
             /* native type_info object for encapsulated type */
             std::type_info const * tinfo_ = nullptr;
         }; /*TypeInfoRef*/
+
+        namespace detail {
+            struct Invoker {
+                virtual void dtor(void * addr) const = 0;
+            };
+
+            /** Auxiliary template for capturing destructor for type T,
+             *  if it has one.
+             *
+             *  Example
+             *    T * p = new T(...);
+             *    DestructorAux<T>::dtor(p);
+             **/
+            template <typename T>
+            struct InvokerAux : public Invoker {
+                virtual void dtor(void * addr) const override {
+                    T * obj = static_cast<T *>(addr);
+
+                    obj->~T();
+                }
+            };
+
+            template<>
+            struct InvokerAux<void> : public Invoker {
+                virtual void dtor(void *) const override {}
+            };
+        } /*namespace detail*/
     } /*namespace reflect*/
 } /*namespace xo*/
 
@@ -191,6 +218,7 @@ namespace xo {
              */
             static TypeDescrW require(const std::type_info * tinfo,
                                       const std::string & canonical_name,
+                                      detail::Invoker * invoker,
                                       std::unique_ptr<TypeDescrExtra> tdextra);
 
             /** Create type-description for function from input ingredients. **/
@@ -364,16 +392,21 @@ namespace xo {
             /* call this once to attach extended type information to a type-description
              * (e.g. description of struct members for a record type)
              */
-            void assign_tdextra(std::unique_ptr<TypeDescrExtra> tdx) {
+            void assign_tdextra(detail::Invoker * invoker,
+                                std::unique_ptr<TypeDescrExtra> tdx) {
                 this->complete_flag_ = true;
+                this->invoker_ = invoker;
                 this->tdextra_ = std::move(tdx);
             }
+
+            // ----- actions -----
 
         private:
             TypeDescrBase(TypeId id,
                           const std::type_info * tinfo,
                           const std::string & canonical_name,
-                          std::unique_ptr<TypeDescrExtra> tdextra);
+                          std::unique_ptr<TypeDescrExtra> tdextra,
+                          detail::Invoker * invoker);
 
             void assign_native_tinfo(const std::type_info * tinfo) {
                 assert(!native_typeinfo_);
@@ -429,8 +462,9 @@ namespace xo {
             static std::unordered_map<FunctionTdxInfo, TypeDescrBase *> s_function_type_map;
 
         private:
-            /* unique id# for this type */
+            /** unique id# for this type **/
             TypeId id_;
+
             /** typeinfo for type T,  if available.  nullptr otherwise.
              *
              *  1. Always available for type-descriptions constructed via Reflect::require<T>.
@@ -438,6 +472,7 @@ namespace xo {
              *     see Lambda.cpp in xo-expression.
              **/
             std::type_info const * native_typeinfo_ = nullptr;
+
             /** canonical name for this type (see demangle.hpp for type_name<T>())
              * e.g.
              *   xo::option::Px2
@@ -448,19 +483,28 @@ namespace xo {
              *       so need to use std::string here
              **/
             std::string canonical_name_;
+
             /** substring .canonical_name, just after last ':'
              *  e.g.
              *    Px2
              **/
             std::string_view short_name_;
-            /* set to true once final value for .tdextra is established
+
+            /** set to true once final value for .tdextra is established
              * intially all TypeDescr objects will use AtomicTdx for .tdextra
              * Reflect::require() upgrades .tdextra for particular types.
              * When that procedure makes a decision for a type T,
              * .complete_flag will be set to true for the corresponding TypeDescrBase instance
-             */
+             **/
             bool complete_flag_ = false;
-            /* additional type information that either:
+
+            /** capture basic instance-management operations for this type.
+             *  Given an instance T x:
+             *  - invoker_->dtor(&x) invokes T::~T()
+             **/
+            detail::Invoker * invoker_;
+
+            /** additional type information that either:
              * (a) isn't universal across all types,
              *     e.g. dereferencing instance of a pointer type
              * (b) can't be captured with template-fu,
@@ -469,7 +513,7 @@ namespace xo {
              * generally .tdextra will be populated some time after TypeDescrBase's ctor exits.
              * This is necessary because of (b) above,  also because of possibility of recursive
              * types.
-             */
+             **/
             std::unique_ptr<TypeDescrExtra> tdextra_;
         }; /*TypeDescrBase*/
 

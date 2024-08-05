@@ -21,8 +21,6 @@ namespace xo {
          **/
         class Object : public reflect::SelfTagging {
         public:
-            using TypeId = xo::reflect::TypeId;
-
             Object(TypeId type_id) : type_id_{type_id} {}
 
         private:
