@@ -1,3 +1,5 @@
+# emacs workspace config
+.projectile
 # symlink to ${mybuilddirectory}/compile_commands.json for LSP
 compile_commands.json
 # LSP keeps state here
