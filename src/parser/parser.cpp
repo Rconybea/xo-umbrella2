@@ -19,33 +19,6 @@ namespace xo {
     using xo::reflect::TypeDescr;
 
     namespace scm {
-#ifdef OBSOLETE
-        const char *
-        exprirtype_descr(exprirtype x) {
-            switch(x) {
-            case exprirtype::invalid:
-                return "?invalid";
-            case exprirtype::empty:
-                return "empty";
-            case exprirtype::symbol:
-                return "symbol";
-            case exprirtype::typedescr:
-                return "typedescr";
-            case exprirtype::n_exprirtype:
-                break;
-            }
-
-            return "???exprirtype";
-        }
-
-        void
-        exprir::print(std::ostream & os) const {
-            os << "<exprir"
-               << xtag("type", xir_type_);
-            os << ">";
-        }
-#endif
-
         const char *
         exprstatetype_descr(exprstatetype x) {
             switch(x) {
@@ -75,34 +48,6 @@ namespace xo {
 
             return "???";
         }
-
-#ifdef OBSOLETE
-        const char *
-        expractiontype_descr(expractiontype x) {
-            switch(x) {
-            case expractiontype::invalid:
-                return "?invalid";
-            case expractiontype::keep:
-                return "keep";
-            case expractiontype::n_expractiontype:
-                break;
-            }
-
-            return "???";
-        }
-
-        expraction
-        expraction::keep() {
-            return expraction(expractiontype::keep);
-        }
-
-        void
-        expraction::print(std::ostream & os) const {
-            os << "<expraction";
-            os << xtag("type", action_type_);
-            os << ">";
-        }
-#endif
 
         bool
         exprstate::admits_definition() const {
