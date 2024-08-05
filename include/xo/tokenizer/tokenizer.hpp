@@ -69,7 +69,7 @@ namespace xo {
             /** true if tokenizer contains stored prefix of
              *  possibly-incomplete token
              **/
-            bool has_prefix() const { !prefix_.empty(); }
+            bool has_prefix() const { return !prefix_.empty(); }
 
             /** assemble token from text @p token_text
              **/
