@@ -35,8 +35,8 @@ namespace xo {
             bool unq_flag() const { return unq_flag_; }
             T const & value() const { return value_; }
 
-            void print_with_escapes(const std::string & xs,
-                                    std::ostream & os) const
+            static void print_with_escapes(const std::string & xs,
+                                           std::ostream & os)
                 {
                     /* printed value contains a space
                      * and/or a must-be-escaped character.
@@ -97,7 +97,7 @@ namespace xo {
                     else
                         os << "\"" << xs << "\"";
                 } else {
-                    this->print_with_escapes(xs, os);
+                    print_with_escapes(xs, os);
                 }
             } /*print*/
 
