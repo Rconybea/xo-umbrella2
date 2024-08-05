@@ -11,6 +11,14 @@
 
 namespace xo {
     namespace ref {
+        template <typename T>
+        class intrusive_ptr;
+    }
+
+    template <typename T>
+    using rp = ref::intrusive_ptr<T>;
+
+    namespace ref {
         class Refcount;
 
         template<typename T>
@@ -152,9 +160,6 @@ namespace xo {
         template<typename T>
         inline bool operator==(intrusive_ptr<T> const & x,
                                intrusive_ptr<T> const & y) { return intrusive_ptr<T>::compare(x, y) == 0; }
-
-        template<typename T>
-        using rp = intrusive_ptr<T>;
 
         class Refcount {
         public:

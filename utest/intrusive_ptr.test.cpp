@@ -9,7 +9,6 @@
 namespace xo {
     using xo::ref::Refcount;
     using xo::ref::Borrow;
-    using xo::ref::rp;
     using xo::ref::brw;
     using xo::ref::intrusive_ptr_refcount;
     using xo::ref::intrusive_ptr_add_ref;
