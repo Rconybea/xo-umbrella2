@@ -6,7 +6,7 @@
 #pragma once
 
 #include <ostream>
-#include <cstdint>
+//#include <cstdint>
 
 namespace xo {
     namespace ast {
@@ -32,6 +32,8 @@ namespace xo {
             variable,
             /** if-then-else **/
             ifexpr,
+            /** type conversion **/
+            convert,
 
             /** not an expression.  comes last, counts entries **/
             n_expr
@@ -49,6 +51,7 @@ namespace xo {
             case exprtype::lambda: return "lambda";
             case exprtype::variable: return "variable";
             case exprtype::ifexpr: return "if_expr";
+            case exprtype::convert: return "convert";
             default: break;
             }
 
