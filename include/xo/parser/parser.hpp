@@ -286,7 +286,7 @@ namespace xo {
          *     arg-expr(i)      = expression
          *
          *   if-expr          = if (test-expr) then-block else else-block
-         *                       | (test-expr) ? then-expr : else-expr
+         *                       | ((test-expr) ? then-expr : else-expr)
          *     test-expr        = expression
          *     then-block       = block
          *     else-block       = block
