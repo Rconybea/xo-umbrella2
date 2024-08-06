@@ -86,6 +86,7 @@ namespace xo {
             static token if_token() { return token(tokentype::tk_if); }
             static token let() { return token(tokentype::tk_let); }
             static token in() { return token(tokentype::tk_in); }
+            static token end() { return token(tokentype::tk_end); }
 
             tokentype tk_type() const { return tk_type_; }
             const std::string & text() const { return text_; }

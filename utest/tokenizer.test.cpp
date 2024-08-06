@@ -100,6 +100,14 @@ namespace xo {
                  token::string_token("tab to the right [\t], to the right [\t]"), true},
 
                 {"symbol", false, token::symbol_token("symbol"), true},
+
+                {"type", false, token::type(), true},
+                {"def", false, token::def(), true},
+                {"lambda", false, token::lambda(), true},
+                {"if", false, token::if_token(), true},
+                {"let", false, token::let(), true},
+                {"in", false, token::in(), true},
+                {"end", false, token::end(), true},
             };
         }
 

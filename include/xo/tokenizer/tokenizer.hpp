@@ -510,6 +510,34 @@ namespace xo {
                 ; /* nothing to do here -- desired tk_text already constructed */
             }
 
+            if (tk_type == tokentype::tk_symbol) {
+                /* check for keywords */
+
+                bool keep_text = false;
+
+                if (tk_text == "type") {
+                    tk_type = tokentype::tk_type;
+                } else if (tk_text == "def") {
+                    tk_type = tokentype::tk_def;
+                } else if (tk_text == "lambda") {
+                    tk_type = tokentype::tk_lambda;
+                } else if (tk_text == "if") {
+                    tk_type = tokentype::tk_if;
+                } else if (tk_text == "let") {
+                    tk_type = tokentype::tk_let;
+                } else if (tk_text == "in") {
+                    tk_type = tokentype::tk_in;
+                } else if (tk_text == "end") {
+                    tk_type = tokentype::tk_end;
+                } else {
+                    /* keep as symbol */
+                    keep_text = true;
+                }
+
+                if (!keep_text)
+                    tk_text.clear();
+            }
+
             return token_type(tk_type, std::move(tk_text));
         } /*assemble_token*/
 
