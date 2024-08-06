@@ -1,6 +1,6 @@
 # parser/CMakeLists.txt
 
-set(SELF_LIB xo_parser)
+set(SELF_LIB xo_reader)
 set(SELF_SRCS
     parser.cpp
     reader.cpp)

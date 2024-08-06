@@ -3,7 +3,7 @@
  * author: Roland Conybeare
  */
 
-#include "xo/parser/parser.hpp"
+#include "xo/reader/parser.hpp"
 #include <catch2/catch.hpp>
 
 namespace xo {

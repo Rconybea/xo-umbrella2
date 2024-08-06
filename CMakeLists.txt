@@ -1,8 +1,8 @@
-# xo-parser/CMakeLists.txt
+# xo-reader/CMakeLists.txt
 
 cmake_minimum_required(VERSION 3.10)
 
-project(xo_parser VERSION 0.1)
+project(xo_reader VERSION 0.1)
 
 include(GNUInstallDirs)
 include(cmake/xo-bootstrap-macros.cmake)
@@ -18,7 +18,7 @@ add_definitions(${PROJECT_CXX_FLAGS})
 
 # ----------------------------------------------------------------
 
-add_subdirectory(src/parser)
+add_subdirectory(src/reader)
 add_subdirectory(utest)
 
 # ----------------------------------------------------------------
