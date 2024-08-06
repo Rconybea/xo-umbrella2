@@ -12,8 +12,8 @@
 
 namespace xo {
     using xo::ast::Expression;
-    using xo::ast::DefineExpr;
-    using xo::ast::ConvertExpr;
+    //using xo::ast::DefineExpr;
+    //using xo::ast::ConvertExpr;
     using xo::ast::Constant;
     using xo::reflect::Reflect;
     using xo::reflect::TypeDescr;
