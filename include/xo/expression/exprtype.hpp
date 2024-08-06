@@ -22,6 +22,8 @@ namespace xo {
             constant,
             /** a literal constant that refers to a linkable named function **/
             primitive,
+            /** variable/function definition **/
+            define,
             /** function call **/
             apply,
             /** function definition **/
@@ -42,6 +44,7 @@ namespace xo {
             case exprtype::invalid: return "?exprtype";
             case exprtype::constant: return "constant";
             case exprtype::primitive: return "primitive";
+            case exprtype::define: return "define";
             case exprtype::apply: return "apply";
             case exprtype::lambda: return "lambda";
             case exprtype::variable: return "variable";
