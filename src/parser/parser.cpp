@@ -76,6 +76,8 @@ namespace xo {
                 /* unreachable */
                 return false;
             }
+
+            return false;
         }
 
         bool
@@ -105,6 +107,8 @@ namespace xo {
                 /* unreachable */
                 return false;
             }
+
+            return false;
         }
 
         bool
@@ -133,6 +137,8 @@ namespace xo {
                 /* unreachable */
                 return false;
             }
+
+            return false;
         }
 
         bool
@@ -181,6 +187,8 @@ namespace xo {
                 /* unreachable */
                 return false;
             }
+
+            return false;
         }
 
         bool
@@ -206,6 +214,8 @@ namespace xo {
                 /* unreachable */
                 return false;
             }
+
+            return false;
         }
 
         void
