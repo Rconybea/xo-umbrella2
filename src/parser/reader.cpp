@@ -4,6 +4,16 @@
 
 namespace xo {
     namespace scm {
+        void
+        reader::begin_translation_unit() {
+            parser_.begin_translation_unit();
+        }
+
+        reader_result
+        reader::end_translation_unit() {
+            return this->read_expr(span_type(nullptr, nullptr), true /*eof*/);
+        }
+
         reader_result
         reader::read_expr(const span_type & input_arg, bool eof)
         {

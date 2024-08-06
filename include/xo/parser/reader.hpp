@@ -31,6 +31,7 @@ namespace xo {
          *  Use:
          *  @code
          *    reader rdr;
+         *    rdr.begin_translation_unit()
          *
          *    bool eof = false;
          *    while (!eof) {
@@ -62,6 +63,22 @@ namespace xo {
 
         public:
             reader() = default;
+
+            /** call once before calling .read_expr():
+             *  1. with new reader
+             *  2. if last read_expr() call had eof=true
+             **/
+            void begin_translation_unit();
+
+            /** counterpart to .begin_translation_unit(),
+             *  provided for symmetry's sake
+             *
+             *  Equivalent to:
+             *  @code
+             *    read_expr(span_type(nullptr, nullptr), true);
+             *  @endcode
+             **/
+            reader_result end_translation_unit();
 
             /** Try to read one expression from @p input.
              *  Return struct containing parsed expression
