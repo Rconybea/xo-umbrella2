@@ -92,6 +92,10 @@ namespace xo {
             /** human-readable string representation **/
             virtual std::string display_string() const;
 
+        protected:
+            /** useful when scaffolding expressions in a parser **/
+            void assign_valuetype(TypeDescr x) { valuetype_ = x; }
+
         private:
             /** expression type (constant | apply | ..) for this expression **/
             exprtype extype_ = exprtype::invalid;
