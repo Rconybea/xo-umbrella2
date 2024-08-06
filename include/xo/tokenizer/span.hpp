@@ -93,6 +93,16 @@ namespace xo {
             /** @brief report the number of elements (of type CharT) in this span. **/
             size_type size() const { return hi_ - lo_; }
 
+            span & operator+=(const span & x) {
+                if (hi_ == x.lo_) {
+                    hi_ = x.hi_;
+                } else {
+                    assert(false);
+                }
+
+                return *this;
+            }
+
             /** print representation for this span on stream @p os **/
             void print(std::ostream & os) const {
                 os << "<span"
