@@ -24,6 +24,14 @@ namespace xo {
             /** @brief create span for the contiguous memory range [@p lo, @p hi) **/
             span(CharT * lo, CharT * hi) : lo_{lo}, hi_{hi} {}
 
+            /** @brief create span for C-style string @p cstr **/
+            static span from_cstr(const CharT * cstr) {
+                CharT * lo = cstr;
+                CharT * hi = cstr ? cstr + strlen(cstr) : nullptr;
+
+                return span(lo, hi);
+            }
+
             ///@{
 
             /** @name getters **/
