@@ -1,6 +1,6 @@
 # xo-reader/utest/CMakeLists.txt
 
-set(UTEST_EXE utest.parser)
+set(UTEST_EXE utest.reader)
 set(UTEST_SRCS
     reader_utest_main.cpp
     parser.test.cpp)
