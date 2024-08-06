@@ -83,6 +83,12 @@ namespace xo {
              **/
             scan_result scan(const span_type & input);
 
+            /** When eof is false, same as scan(input).
+             *  When eof is true and scan(input) does not report a token,
+             *  return notify_eof()
+             **/
+            scan_result scan2(const span_type & input, bool eof);
+
             /** notify end of input,  resolve any stored input **/
             token_type notify_eof();
 
@@ -606,6 +612,18 @@ namespace xo {
             return scan_result
                 { tk, input.prefix(whitespace.size() + token_span.size()) };
         } /*scan*/
+
+        template <typename CharT>
+        auto
+        tokenizer<CharT>::scan2(const span_type & input, bool eof) -> scan_result {
+            auto sr = this->scan(input);
+
+            if (!sr.first.is_valid() && eof) {
+                sr.first = this->notify_eof();
+            }
+
+            return sr;
+        }
 
         template <typename CharT>
         auto
