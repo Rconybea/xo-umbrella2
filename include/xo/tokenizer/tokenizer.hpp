@@ -22,7 +22,7 @@ namespace xo {
          *    span_type input = ...;
          *
          *    while !input.empty() {
-         *        auto res = tkz.assemble_scan(input);
+         *        auto res = tkz.scan(input);
          *        const auto & tk = res.first;
          *
          *        // do something with tk if tk.is_valid()
@@ -75,7 +75,12 @@ namespace xo {
              **/
             token_type assemble_token(const span_type & token_text) const;
 
-            /** scan for next input token,  given @p input **/
+            /** scan for next input token,  given @p input.
+             *  Note tokenizer can consume input (e.g. whitespace)
+             *  without completing a token
+             *
+             *  @return {parsed token, consumed span}
+             **/
             scan_result scan(const span_type & input);
 
             /** notify end of input,  resolve any stored input **/
@@ -568,7 +573,7 @@ namespace xo {
                 }
 
                 if (!complete_flag) {
-                    /* need more input to know if/when tokken complete */
+                    /* need more input to know if/when token complete */
                     this->prefix_ += std::string(tk_start, input.hi());
 
                     log && log(xtag("captured-prefix", this->prefix_));
