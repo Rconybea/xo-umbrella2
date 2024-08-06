@@ -3,7 +3,8 @@
 set(UTEST_EXE utest.reader)
 set(UTEST_SRCS
     reader_utest_main.cpp
-    parser.test.cpp)
+    parser.test.cpp
+    reader.test.cpp)
 
 if (ENABLE_TESTING)
     xo_add_utest_executable(${UTEST_EXE} ${UTEST_SRCS})
