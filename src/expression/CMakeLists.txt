@@ -3,6 +3,7 @@
 set(SELF_LIB xo_expression)
 set(SELF_SRCS
     Expression.cpp
+    DefineExpr.cpp
     Apply.cpp
     Lambda.cpp
     Variable.cpp
