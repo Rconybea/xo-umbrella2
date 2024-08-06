@@ -329,6 +329,17 @@ namespace xo {
             return Borrow<T>(*this);
         } /*borrow*/
 
+        template<typename T>
+        inline std::ostream &
+        operator<<(std::ostream & os, Borrow<T> x) {
+            if (x) {
+                os << *x;
+            } else {
+                os << "<nullptr "  << reflect::type_name<T>() << ">";
+            }
+            return os;
+        } /*operator<<*/
+
     } /*namespace ref*/
 } /*namespace xo*/
 
