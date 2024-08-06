@@ -327,6 +327,12 @@ namespace xo {
                 return exprstatetype::invalid;
             }
 
+            /** true iff parser contains state for an incomplete expression.
+             *  For this to be true,  parser must have consumed at least one token
+             *  since end of last toplevel expression
+             **/
+            bool has_incomplete_expr() const;
+
             /** put parser into state for beginning of a translation unit
              *  (i.e. input stream)
              **/

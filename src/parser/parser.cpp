@@ -689,6 +689,11 @@ namespace xo {
 
         // ----- parser -----
 
+        bool
+        parser::has_incomplete_expr() const {
+            return !xs_stack_.empty();
+        }
+
         void
         parser::begin_translation_unit() {
             xs_stack_.push_exprstate
