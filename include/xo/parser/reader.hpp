@@ -6,10 +6,27 @@
 #pragma once
 
 #include "parser.hpp"
+#include "xo/expression/Expression.hpp"
 #include "xo/tokenizer/tokenizer.hpp"
 
 namespace xo {
     namespace scm {
+        /** @class parse_result
+         *  @brief Result object returned from reader::read_expr
+         **/
+        struct reader_result {
+            using Expression = xo::ast::Expression;
+            using span_type = span<const char>;
+
+            /** parsed schematica expression **/
+            rp<Expression> expr_;
+            /** span giving text input consumed to construct expr,
+             *  including any leading whitespace.
+             *  This is the span returned in result of tokenizer<char>::scan()
+             **/
+            span_type rem_;
+        };
+
         /**
          *  Use:
          *  @code
@@ -21,7 +38,7 @@ namespace xo {
          *        // eof: true if no more input will be forthcoming from this stream
          *        eof = ins.eof();
          *
-         *        for (auto rem = input; ; !rem.empty()) {
+         *        for (auto rem = input; !rem.empty();) {
          *            // res: (parsed-expr, used)
          *            auto res = rdr.read_expr(rem, eof);
          *
@@ -40,17 +57,31 @@ namespace xo {
          **/
         class reader {
         public:
+            using tokenizer_type = tokenizer<char>;
+            using span_type = tokenizer_type::span_type;
+
+        public:
             reader() = default;
+
+            /** Try to read one expression from @p input.
+             *  Return struct containing parsed expression
+             *  and span of characters comprising that expression
+             *
+             *  @param input  Supply this input span of chars
+             *  @param eof.  True if input stream supplying @p input
+             *         reports end-of-file immediately after the last char
+             *         in @p input.
+             **/
+            reader_result read_expr(const span_type & input, bool eof);
 
         private:
             /** tokenizer: text -> tokens **/
-            tokenizer tokenizer_;
+            tokenizer_type tokenizer_;
 
-            /** parser: tokens -> expressions (TODO: reanme ->reader) **/
+            /** parser: tokens -> expressions **/
             parser parser_;
         };
     } /*namespace scm*/
 } /*namespace xo*/
 
-
-/* end Repl.hpp */
+/* end reader.hpp */
