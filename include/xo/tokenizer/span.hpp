@@ -114,6 +114,7 @@ namespace xo {
             /** print representation for this span on stream @p os **/
             void print(std::ostream & os) const {
                 os << "<span"
+                   << xtag("addr", (void*)lo_)
                    << xtag("size", size())
                    << " :text " << xo::print::quot(std::string_view(lo_, hi_))
                    << ">";
