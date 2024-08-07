@@ -507,7 +507,8 @@ namespace xo {
                 /* have to do pop first, before sending symbol to
                  * the o.g. symbol-requester
                  */
-                p_stack->pop_exprstate();
+                std::unique_ptr<exprstate> self = p_stack->pop_exprstate();
+
                 p_stack->top_exprstate().on_symbol(tk.text(),
                                                    p_stack, p_emit_expr);
                 return;
@@ -537,7 +538,7 @@ namespace xo {
                                xtag("typename", tk.text())));
                 }
 
-                p_stack->pop_exprstate();
+                std::unique_ptr<exprstate> self = p_stack->pop_exprstate();
                 p_stack->top_exprstate().on_typedescr(td, p_stack, p_emit_expr);
                 return;
             }
@@ -657,7 +658,7 @@ namespace xo {
             if (this->exs_type_ == exprstatetype::expr_progress) {
                 rp<Expression> expr = this->gen_expr_;
 
-                p_stack->pop_exprstate(); /* NOT KOSHER. invalidates *this */
+                std::unique_ptr<exprstate> self = p_stack->pop_exprstate(); /* NOT KOSHER. invalidates *this */
 
                 p_stack->top_exprstate().on_expr(expr,
                                                  p_stack,
@@ -681,7 +682,7 @@ namespace xo {
             } else if (this->exs_type_ == exprstatetype::def_5) {
                 rp<Expression> expr = this->def_expr_;
 
-                p_stack->pop_exprstate(); /* NOT KOSHER. invalidates *this */
+                std::unique_ptr<exprstate> self = p_stack->pop_exprstate(); /* NOT KOSHER. invalidates *this */
 
                 p_stack->top_exprstate().on_expr(expr,
                                                  p_stack,
@@ -770,14 +771,14 @@ namespace xo {
                 /* right paren confirms stack expression */
                 rp<Expression> expr = this->gen_expr_;
 
-                p_stack->pop_exprstate(); /* NOT KOSHER.  invalidates *this */
+                std::unique_ptr<exprstate> self = p_stack->pop_exprstate(); /* NOT KOSHER.  invalidates *this */
 
                 if (p_stack->empty()) {
                     throw std::runtime_error(tostr(self_name,
                                                    ": expected non-empty parsing stack"));
                 }
 
-                log && log(xtag("stack", *p_stack));
+                log && log(xtag("stack", p_stack));
 
                 p_stack->top_exprstate().on_expr(expr, p_stack, p_emit_expr);
 
@@ -786,7 +787,7 @@ namespace xo {
             } else if (this->exs_type_ == exprstatetype::lparen_1) {
                 rp<Expression> expr = this->gen_expr_;
 
-                p_stack->pop_exprstate(); /* NOT KOSHER.  invalidates *this */
+                std::unique_ptr<exprstate> self = p_stack->pop_exprstate(); /* NOT KOSHER.  invalidates *this */
 
                 p_stack->top_exprstate().on_expr(expr, p_stack, p_emit_expr);
             }
@@ -981,7 +982,7 @@ namespace xo {
 
             case exprstatetype::expect_rhs_expression: {
 
-                p_stack->pop_exprstate(); /* NOT KOSHER.  invalidates *this */
+                std::unique_ptr<exprstate> self = p_stack->pop_exprstate(); /* NOT KOSHER.  invalidates *this */
 
                 p_stack->top_exprstate().on_expr(expr,
                                                  p_stack,
@@ -1088,23 +1089,23 @@ namespace xo {
                     ("parser::top_exprstate: unexpected empty stack");
             }
 
-            return stack_[z-1];
+            return *(stack_[z-1]);
         }
 
         void
-        exprstatestack::push_exprstate(const exprstate & exs) {
+        exprstatestack::push_exprstate(std::unique_ptr<exprstate> exs) {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag),
-                      xtag("exs", exs));
+                      xtag("exs", *exs));
 
             std::size_t z = stack_.size();
 
             stack_.resize(z+1);
 
-            stack_[z] = exs;
+            stack_[z] = std::move(exs);
         }
 
-        void
+        std::unique_ptr<exprstate>
         exprstatestack::pop_exprstate() {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag),
@@ -1112,8 +1113,15 @@ namespace xo {
 
             std::size_t z = stack_.size();
 
-            if (z > 0)
+            if (z > 0) {
+                std::unique_ptr<exprstate> top = std::move(stack_[z-1]);
+
                 stack_.resize(z-1);
+
+                return top;
+            } else {
+                return nullptr;
+            }
         }
 
         void

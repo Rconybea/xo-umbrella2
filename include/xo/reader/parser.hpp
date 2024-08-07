@@ -83,26 +83,26 @@ namespace xo {
                   gen_expr_{std::move(candidate_expr)},
                   def_expr_{std::move(def_expr)} {}
 
-            static exprstate expect_toplevel_expression_sequence() {
-                return exprstate(exprstatetype::expect_toplevel_expression_sequence, nullptr, nullptr);
+            static std::unique_ptr<exprstate> expect_toplevel_expression_sequence() {
+                return std::make_unique<exprstate>(exprstate(exprstatetype::expect_toplevel_expression_sequence, nullptr, nullptr));
             }
-            static exprstate expect_rhs_expression() {
-                return exprstate(exprstatetype::expect_rhs_expression, nullptr, nullptr);
+            static std::unique_ptr<exprstate> expect_rhs_expression() {
+                return std::make_unique<exprstate>(exprstate(exprstatetype::expect_rhs_expression, nullptr, nullptr));
             }
-            static exprstate expect_symbol() {
-                return exprstate(exprstatetype::expect_symbol, nullptr, nullptr);
+            static std::unique_ptr<exprstate> expect_symbol() {
+                return std::make_unique<exprstate>(exprstate(exprstatetype::expect_symbol, nullptr, nullptr));
             }
-            static exprstate expect_type() {
-                return exprstate(exprstatetype::expect_type, nullptr, nullptr);
+            static std::unique_ptr<exprstate> expect_type() {
+                return std::make_unique<exprstate>(exprstate(exprstatetype::expect_type, nullptr, nullptr));
             }
-            static exprstate make_expr_progress(rp<Expression> expr) {
-                return exprstate(exprstatetype::expr_progress, expr, nullptr);
+            static std::unique_ptr<exprstate> make_expr_progress(rp<Expression> expr) {
+                return std::make_unique<exprstate>(exprstate(exprstatetype::expr_progress, expr, nullptr));
             }
-            static exprstate def_0(rp<DefineExprAccess> def_expr) {
-                return exprstate(exprstatetype::def_0, nullptr, def_expr);
+            static std::unique_ptr<exprstate> def_0(rp<DefineExprAccess> def_expr) {
+                return std::make_unique<exprstate>(exprstate(exprstatetype::def_0, nullptr, def_expr));
             }
-            static exprstate lparen_0() {
-                return exprstate(exprstatetype::lparen_0, nullptr, nullptr);
+            static std::unique_ptr<exprstate> lparen_0() {
+                return std::make_unique<exprstate>(exprstate(exprstatetype::lparen_0, nullptr, nullptr));
             }
 
             exprstatetype exs_type() const { return exs_type_; }
@@ -217,13 +217,13 @@ namespace xo {
             std::size_t size() const { return stack_.size(); }
 
             exprstate & top_exprstate();
-            void push_exprstate(const exprstate & exs);
-            void pop_exprstate();
+            void push_exprstate(std::unique_ptr<exprstate> exs);
+            std::unique_ptr<exprstate> pop_exprstate();
 
             /** relative to top-of-stack.
              *  0 -> top (last in),  z-1 -> bottom (first in)
              **/
-            exprstate & operator[](std::size_t i) {
+            std::unique_ptr<exprstate> & operator[](std::size_t i) {
                 std::size_t z = stack_.size();
 
                 assert(i < z);
@@ -231,7 +231,7 @@ namespace xo {
                 return stack_[z - i - 1];
             }
 
-            const exprstate & operator[](std::size_t i) const {
+            const std::unique_ptr<exprstate> & operator[](std::size_t i) const {
                 std::size_t z = stack_.size();
 
                 assert(i < z);
@@ -242,12 +242,18 @@ namespace xo {
             void print (std::ostream & os) const;
 
         private:
-            std::vector<exprstate> stack_;
+            std::vector<std::unique_ptr<exprstate>> stack_;
         };
 
         inline std::ostream &
         operator<< (std::ostream & os, const exprstatestack & x) {
             x.print(os);
+            return os;
+        }
+
+        inline std::ostream &
+        operator<< (std::ostream & os, const exprstatestack * x) {
+            x->print(os);
             return os;
         }
 
@@ -401,7 +407,7 @@ namespace xo {
                 std::size_t z = xs_stack_.size();
 
                 if (i < z) {
-                    return xs_stack_[i].exs_type();
+                    return xs_stack_[i]->exs_type();
                 }
 
                 /* out of bounds */
