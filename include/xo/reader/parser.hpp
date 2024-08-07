@@ -82,6 +82,7 @@ namespace xo {
                 : exs_type_{exs_type},
                   gen_expr_{std::move(candidate_expr)},
                   def_expr_{std::move(def_expr)} {}
+            virtual ~exprstate() = default;
 
             static std::unique_ptr<exprstate> expect_toplevel_expression_sequence() {
                 return std::make_unique<exprstate>(exprstate(exprstatetype::expect_toplevel_expression_sequence, nullptr, nullptr));
@@ -110,59 +111,59 @@ namespace xo {
             /** true iff this parsing state admits a 'def' keyword
              *  as next token
              **/
-            bool admits_definition() const;
+            virtual bool admits_definition() const;
             /** true iff this parsing state admits a symbol as next token **/
-            bool admits_symbol() const;
+            virtual bool admits_symbol() const;
             /** true iff this parsing state admits a colon as next token **/
-            bool admits_colon() const;
+            virtual bool admits_colon() const;
             /** true iff this parsing state admits a semicolon as next token **/
-            bool admits_semicolon() const;
+            virtual bool admits_semicolon() const;
             /** true iff this parsing state admits a singleassign '=' as next token **/
-            bool admits_singleassign() const;
+            virtual bool admits_singleassign() const;
             /** true iff this parsing state admits a leftparen '(' as next token **/
-            bool admits_leftparen() const;
+            virtual bool admits_leftparen() const;
             /** truee iff this parsing state admits a rightparen ')' as next token **/
-            bool admits_rightparen() const;
+            virtual bool admits_rightparen() const;
             /** true iff this parsing state admits a 64-bit floating point literal token **/
-            bool admits_f64() const;
+            virtual bool admits_f64() const;
 
             /** update exprstate in response to incoming token @p tk,
              *  forward instructions to parent parser
              **/
             void on_input(const token_type & tk, exprstatestack * p_stack, rp<Expression> * p_emit_expr);
             /** update exprstate in response to a successfully-parsed subexpression **/
-            void on_expr(ref::brw<Expression> expr,
-                         exprstatestack * p_stack,
-                         rp<Expression> * p_emit_expr);
+            virtual void on_expr(ref::brw<Expression> expr,
+                                 exprstatestack * p_stack,
+                                 rp<Expression> * p_emit_expr);
             /** update exprstate when expecting a symbol **/
-            void on_symbol(const std::string & symbol,
-                           exprstatestack * p_stack,
-                           rp<Expression> * p_emit_expr);
+            virtual void on_symbol(const std::string & symbol,
+                                   exprstatestack * p_stack,
+                                   rp<Expression> * p_emit_expr);
             /** update exprstate when expeccting a typedescr **/
-            void on_typedescr(TypeDescr td,
-                              exprstatestack * p_stack,
-                              rp<Expression> * p_emit_expr);
+            virtual void on_typedescr(TypeDescr td,
+                                      exprstatestack * p_stack,
+                                      rp<Expression> * p_emit_expr);
             /** print human-readable representation on @p os **/
-            void print(std::ostream & os) const;
+            virtual void print(std::ostream & os) const;
 
-        private:
-            void on_def(exprstatestack * p_stack);
-            void on_symbol(const token_type & tk,
-                           exprstatestack * p_stack,
-                           rp<Expression> * p_emit_expr);
-            void on_colon(exprstatestack * p_stack);
-            void on_semicolon(exprstatestack * p_stack,
-                              rp<Expression> * p_emit_expr);
-            void on_singleassign(exprstatestack * p_stack);
-            void on_leftparen(exprstatestack * p_stack,
-                              rp<Expression> * p_emit_expr);
-            void on_rightparen(exprstatestack * p_stack,
-                               rp<Expression> * p_emit_expr);
-            void on_f64(const token_type & tk,
-                        exprstatestack * p_stack,
-                        rp<Expression> * p_emit_expr);
+        protected:
+            virtual void on_def(exprstatestack * p_stack);
+            virtual void on_symbol(const token_type & tk,
+                                   exprstatestack * p_stack,
+                                   rp<Expression> * p_emit_expr);
+            virtual void on_colon(exprstatestack * p_stack);
+            virtual void on_semicolon(exprstatestack * p_stack,
+                                      rp<Expression> * p_emit_expr);
+            virtual void on_singleassign(exprstatestack * p_stack);
+            virtual void on_leftparen(exprstatestack * p_stack,
+                                      rp<Expression> * p_emit_expr);
+            virtual void on_rightparen(exprstatestack * p_stack,
+                                       rp<Expression> * p_emit_expr);
+            virtual void on_f64(const token_type & tk,
+                                exprstatestack * p_stack,
+                                rp<Expression> * p_emit_expr);
 
-        private:
+        protected:
             /**
              *   def foo : f64 = 1 ;
              *  ^   ^   ^ ^   ^ ^ ^ ^
@@ -193,11 +194,6 @@ namespace xo {
              *  May be nested within a def_expr
              **/
             rp<ConvertExprAccess> cvt_expr_;
-
-#ifdef NOT_YET
-            /* polymorphic state here */
-            std::unique_ptr<exprstateaux> state_;
-#endif
         }; /*exprstate*/
 
         inline std::ostream &
