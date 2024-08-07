@@ -648,6 +648,10 @@ namespace xo {
 
             if (!sr.first.is_valid() && eof) {
                 sr.first = this->notify_eof();
+                /* always consume remainder of input here.
+                 * ambiguous prefix can represent at most one token
+                 */
+                sr.second = input;
             }
 
             return sr;
