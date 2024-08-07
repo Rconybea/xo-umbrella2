@@ -991,7 +991,7 @@ namespace xo {
         } /*on_expr*/
 
         void
-        exprstate::on_symbol(const std::string & symbol_name,
+        exprstate::on_symbol(const std::string & /*symbol_name*/,
                              exprstatestack * /*p_stack*/,
                              rp<Expression> * /*p_emit_expr*/)
         {
@@ -1007,17 +1007,12 @@ namespace xo {
                 assert(false);
                 return;
             case exprstatetype::def_0:
-                this->exs_type_ = exprstatetype::def_1;
-                this->def_expr_->assign_lhs_name(symbol_name);
-                //this->def_lhs_symbol_ = symbol_name;
-
-                return;
             case exprstatetype::def_1:
             case exprstatetype::def_2:
             case exprstatetype::def_3:
             case exprstatetype::def_4:
             case exprstatetype::def_5:
-                /* NOT IMPLEMENTED */
+                /* unreachable */
                 assert(false);
                 return;
 

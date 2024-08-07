@@ -65,6 +65,45 @@ namespace xo {
                 return;
             }
         }
+
+        void
+        define_xs::on_symbol(const std::string & symbol_name,
+                             exprstatestack * /*p_stack*/,
+                             rp<Expression> * /*p_emit_expr*/)
+        {
+            switch (this->exs_type_) {
+            case exprstatetype::expect_toplevel_expression_sequence:
+                /* unreachable */
+                assert(false);
+                return;
+            case exprstatetype::def_0:
+                this->exs_type_ = exprstatetype::def_1;
+                this->def_expr_->assign_lhs_name(symbol_name);
+                //this->def_lhs_symbol_ = symbol_name;
+
+                return;
+            case exprstatetype::def_1:
+            case exprstatetype::def_2:
+            case exprstatetype::def_3:
+            case exprstatetype::def_4:
+            case exprstatetype::def_5:
+                /* NOT IMPLEMENTED */
+                assert(false);
+                return;
+
+            case exprstatetype::lparen_0:
+            case exprstatetype::lparen_1:
+            case exprstatetype::expect_rhs_expression:
+            case exprstatetype::expect_type:
+            case exprstatetype::expect_symbol:
+            case exprstatetype::expr_progress:
+            case exprstatetype::invalid:
+            case exprstatetype::n_exprstatetype:
+                /* unreachable */
+                assert(false);
+                return;
+            }
+        }
     } /*namespace scm*/
 } /*namespace xo*/
 

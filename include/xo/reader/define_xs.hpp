@@ -23,6 +23,10 @@ namespace xo {
             virtual void on_expr(ref::brw<Expression> expr,
                                  exprstatestack * p_stack,
                                  rp<Expression> * p_emit_expr) override;
+            virtual void on_symbol(const std::string & symbol_name,
+                                   exprstatestack * p_stack,
+                                   rp<Expression> * p_emit_expr) override;
+
         private:
             /**
              *   def foo : f64 = 1 ;
