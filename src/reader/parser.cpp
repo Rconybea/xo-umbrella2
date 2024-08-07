@@ -70,11 +70,7 @@ namespace xo {
             case exprstatetype::def_3:
             case exprstatetype::def_4:
             case exprstatetype::def_5:
-                /* note for def_4:
-                 * rhs could certainly be a function body that contains
-                 * nested defines; but then immediately-enclosing-exprstate
-                 * would be a block
-                 */
+                /* unreachable */
                 return false;
             case exprstatetype::lparen_0:
             case exprstatetype::lparen_1:
