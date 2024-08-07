@@ -25,6 +25,12 @@ namespace xo {
             def_2,
             def_3,
             def_4,
+            def_5,
+
+            /* lparen_0: look for expression; capture + advance to lparen_1 */
+            lparen_0,
+            /* lparen_1: expect rightparen */
+            lparen_1,
 
             expect_rhs_expression,
             expect_symbol,
@@ -45,6 +51,17 @@ namespace xo {
         }
 
         class exprstatestack;
+
+#ifdef NOT_YET
+        class exprstateaux {
+        public:
+        };
+
+        class lparen_xsa : public exprstateaux {
+        public:
+        private:
+        };
+#endif
 
         /** state associated with a partially-parsed expression.
          **/
@@ -84,6 +101,9 @@ namespace xo {
             static exprstate def_0(rp<DefineExprAccess> def_expr) {
                 return exprstate(exprstatetype::def_0, nullptr, def_expr);
             }
+            static exprstate lparen_0() {
+                return exprstate(exprstatetype::lparen_0, nullptr, nullptr);
+            }
 
             exprstatetype exs_type() const { return exs_type_; }
 
@@ -99,10 +119,10 @@ namespace xo {
             bool admits_semicolon() const;
             /** true iff this parsing state admits a singleassign '=' as next token **/
             bool admits_singleassign() const;
-#ifdef NOT_YET
             /** true iff this parsing state admits a leftparen '(' as next token **/
             bool admits_leftparen() const;
-#endif
+            /** truee iff this parsing state admits a rightparen ')' as next token **/
+            bool admits_rightparen() const;
             /** true iff this parsing state admits a 64-bit floating point literal token **/
             bool admits_f64() const;
 
@@ -134,10 +154,10 @@ namespace xo {
             void on_semicolon(exprstatestack * p_stack,
                               rp<Expression> * p_emit_expr);
             void on_singleassign(exprstatestack * p_stack);
-#ifdef NOT_YET
             void on_leftparen(exprstatestack * p_stack,
                               rp<Expression> * p_emit_expr);
-#endif
+            void on_rightparen(exprstatestack * p_stack,
+                               rp<Expression> * p_emit_expr);
             void on_f64(const token_type & tk,
                         exprstatestack * p_stack,
                         rp<Expression> * p_emit_expr);
@@ -147,7 +167,7 @@ namespace xo {
              *   def foo : f64 = 1 ;
              *  ^   ^   ^ ^   ^ ^ ^ ^
              *  |   |   | |   | | | (done)
-             *  |   |   | |   | | ??
+             *  |   |   | |   | | def_4:expect_rhs_expression:expr_progress
              *  |   |   | |   | def_4:expect_rhs_expression
              *  |   |   | |   def_3
              *  |   |   | def_2:expect_type
@@ -173,6 +193,11 @@ namespace xo {
              *  May be nested within a def_expr
              **/
             rp<ConvertExprAccess> cvt_expr_;
+
+#ifdef NOT_YET
+            /* polymorphic state here */
+            std::unique_ptr<exprstateaux> state_;
+#endif
         }; /*exprstate*/
 
         inline std::ostream &
@@ -219,6 +244,12 @@ namespace xo {
         private:
             std::vector<exprstate> stack_;
         };
+
+        inline std::ostream &
+        operator<< (std::ostream & os, const exprstatestack & x) {
+            x.print(os);
+            return os;
+        }
 
         /** schematica parser
          *

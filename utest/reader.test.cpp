@@ -7,19 +7,34 @@ namespace xo {
     using xo::scm::reader;
 
     namespace ut {
+        namespace {
+            struct test_case {
+                const char * text_;
+            };
+
+            std::vector<test_case> s_testcase_v = {
+                {"def foo : f64 = 3.14159265;"},
+                {"def foo : f64 = (3.14159265);"}
+            };
+        }
+
         TEST_CASE("reader", "[reader]") {
-            for (std::size_t i_tc = 0; i_tc < 1; ++i_tc) {
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag), xtag("utest", "reader"));
+
+            for (std::size_t i_tc = 0; i_tc < s_testcase_v.size(); ++i_tc) {
+                const test_case & tc = s_testcase_v[i_tc];
+
                 reader rdr;
 
-                constexpr bool c_debug_flag = true;
-                scope log(XO_DEBUG(c_debug_flag),
-                          xtag("utest", "reader"), xtag("i_tc", i_tc));
+                scope log(XO_ENTER2(always, c_debug_flag, "reader.testcase"),
+                           xtag("i_tc", i_tc));
 
                 rdr.begin_translation_unit();
 
                 try {
                     auto input
-                        = reader::span_type::from_cstr("def foo : f64 = 3.14159265;");
+                        = reader::span_type::from_cstr(tc.text_);
                     auto rr
                         = rdr.read_expr(input, true /*eof*/);
 
