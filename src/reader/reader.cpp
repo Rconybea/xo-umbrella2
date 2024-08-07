@@ -17,6 +17,9 @@ namespace xo {
         reader_result
         reader::read_expr(const span_type & input_arg, bool eof)
         {
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
             span_type input = input_arg;
 
             /* input text-span consumed by this call.
@@ -32,7 +35,13 @@ namespace xo {
                 const auto & tk = sr.first;
                 const span_type & used_span = sr.second;
 
+                log && log(xtag("used_span", used_span));
+                log && log(xtag("input.pre", input));
+
                 input = input.after_prefix(used_span);
+
+                log && log(xtag("expr_span.pre", expr_span));
+
                 expr_span += used_span;
 
                 if (tk.is_valid()) {
@@ -40,6 +49,9 @@ namespace xo {
                     auto expr = this->parser_.include_token(tk);
 
                     if (expr) {
+                        log && log(xtag("outcome", "victory!"),
+                                   xtag("expr", expr));
+
                         /* token completes an expression -> victory */
                         return reader_result(expr, expr_span);
                     } else {
@@ -48,7 +60,6 @@ namespace xo {
                          *
                          * input span may contain more tokens -> iterate
                          */
-                        input = input.after_prefix(used_span);
                     }
                 } else {
                     assert(input.empty());
@@ -75,6 +86,8 @@ namespace xo {
                          ": unintelligible input recognized at eof");
                 }
             }
+
+            log && log(xtag("outcome", "noop"));
 
             return reader_result(nullptr, expr_span);
         }

@@ -18,11 +18,20 @@ namespace xo {
                 rdr.begin_translation_unit();
 
                 try {
-                    auto rr = rdr.read_expr(reader::span_type::from_cstr("def foo : f64 = 3.14159265"),
-                                            true /*eof*/);
+                    auto input
+                        = reader::span_type::from_cstr("def foo : f64 = 3.14159265;");
+                    auto rr
+                        = rdr.read_expr(input, true /*eof*/);
 
                     REQUIRE(rr.expr_.get());
-                    REQUIRE(rr.rem_.empty());
+
+                    log && log(xtag("expr", rr.expr_));
+
+                    input = input.after_prefix(rr.rem_);
+
+                    log && log(xtag("post.input", input));
+
+                    REQUIRE(input.empty());
                 } catch (std::exception & ex) {
                     log && log(ex.what());
 

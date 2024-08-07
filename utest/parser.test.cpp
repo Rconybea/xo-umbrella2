@@ -201,7 +201,43 @@ namespace xo {
                     cerr << "parser state after [def foo : f64 = 3.14159265]" << endl;
                     cerr << parser << endl;
 
-                    REQUIRE(r6.get() != nullptr);
+                    REQUIRE(r6.get() == nullptr);
+
+                    /* stack should be
+                     *
+                     *   expect_toplevel_expression_sequence
+                     */
+                    CHECK(parser.stack_size() == 4);
+                    if (parser.stack_size() > 0)
+                        CHECK(parser.i_exstype(0) == exprstatetype::expr_progress);
+                    if (parser.stack_size() > 1)
+                        CHECK(parser.i_exstype(1) == exprstatetype::expect_rhs_expression);
+                    if (parser.stack_size() > 2)
+                        CHECK(parser.i_exstype(2) == exprstatetype::def_4);
+                    if (parser.stack_size() > 3)
+                        CHECK(parser.i_exstype(3)
+                              == exprstatetype::expect_toplevel_expression_sequence);
+                }
+
+                /* input:
+                 *
+                 * i_tc==0:
+                 *   def foo = 3.14159265 ;
+                 *                       ^ ^
+                 *                       0 1
+                 *
+                 * i_tc==1:
+                 *   def foo : f64 = 3.14159265 ;
+                 *                             ^ ^
+                 *                             0 1
+                 */
+                {
+                    auto r7 = parser.include_token(token_type::semicolon());
+
+                    cerr << "parser state after [def foo : f64 = 3.14159265;]" << endl;
+                    cerr << parser << endl;
+
+                    REQUIRE(r7.get() != nullptr);
 
                     CHECK(parser.stack_size() == 1);
 

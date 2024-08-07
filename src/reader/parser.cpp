@@ -21,7 +21,7 @@ namespace xo {
     namespace scm {
         const char *
         exprstatetype_descr(exprstatetype x) {
-            switch(x) {
+            switch (x) {
             case exprstatetype::invalid:
                 return "?invalid";
             case exprstatetype::expect_toplevel_expression_sequence:
@@ -42,6 +42,8 @@ namespace xo {
                 return "expect_symbol";
             case exprstatetype::expect_type:
                 return "expect_type";
+            case exprstatetype::expr_progress:
+                return "expr_progress";
             case exprstatetype::n_exprstatetype:
                 break;
             }
@@ -51,7 +53,7 @@ namespace xo {
 
         bool
         exprstate::admits_definition() const {
-            switch(exs_type_) {
+            switch (exs_type_) {
             case exprstatetype::expect_toplevel_expression_sequence:
                 return true;
 
@@ -71,6 +73,8 @@ namespace xo {
             case exprstatetype::expect_symbol:
             case exprstatetype::expect_type:
                 return false;
+            case exprstatetype::expr_progress:
+                return false;
             case exprstatetype::invalid:
             case exprstatetype::n_exprstatetype:
                 /* unreachable */
@@ -82,7 +86,7 @@ namespace xo {
 
         bool
         exprstate::admits_symbol() const {
-            switch(exs_type_) {
+            switch (exs_type_) {
             case exprstatetype::expect_toplevel_expression_sequence:
             case exprstatetype::def_0:
             case exprstatetype::def_1:
@@ -102,6 +106,9 @@ namespace xo {
                 /* treat symbol as typename */
                 return true;
 
+            case exprstatetype::expr_progress:
+                return false;
+
             case exprstatetype::invalid:
             case exprstatetype::n_exprstatetype:
                 /* unreachable */
@@ -113,7 +120,7 @@ namespace xo {
 
         bool
         exprstate::admits_colon() const {
-            switch(exs_type_) {
+            switch (exs_type_) {
             case exprstatetype::expect_toplevel_expression_sequence:
             case exprstatetype::def_0:
                 return false;
@@ -132,6 +139,9 @@ namespace xo {
             case exprstatetype::expect_type:
                 return false;
 
+            case exprstatetype::expr_progress:
+                return false;
+
             case exprstatetype::invalid:
             case exprstatetype::n_exprstatetype:
                 /* unreachable */
@@ -142,13 +152,36 @@ namespace xo {
         }
 
         bool
+        exprstate::admits_semicolon() const {
+            switch (exs_type_) {
+            case exprstatetype::expect_toplevel_expression_sequence:
+            case exprstatetype::def_0:
+            case exprstatetype::def_1:
+            case exprstatetype::def_2:
+            case exprstatetype::def_3:
+            case exprstatetype::def_4:
+            case exprstatetype::expect_rhs_expression:
+            case exprstatetype::expect_symbol:
+            case exprstatetype::expect_type:
+                return false;
+            case exprstatetype::expr_progress:
+                return true;
+            case exprstatetype::invalid:
+            case exprstatetype::n_exprstatetype:
+                return false;
+            }
+
+            return false;
+        }
+
+        bool
         exprstate::admits_singleassign() const {
-            switch(exs_type_) {
+            switch (exs_type_) {
             case exprstatetype::expect_toplevel_expression_sequence:
 
                 /*
-                 *   def foo       = 1
-                 *   def foo : f64 = 1
+                 *   def foo       = 1 ;
+                 *   def foo : f64 = 1 ;
                  *  ^   ^   ^ ^   ^ ^ ^
                  *  |   |   | |   | | (done)
                  *  |   |   | |   | def_4:expect_rhs_expression
@@ -182,6 +215,9 @@ namespace xo {
             case exprstatetype::expect_type:
                 return false;
 
+            case exprstatetype::expr_progress:
+                return false;
+
             case exprstatetype::invalid:
             case exprstatetype::n_exprstatetype:
                 /* unreachable */
@@ -193,7 +229,7 @@ namespace xo {
 
         bool
         exprstate::admits_f64() const {
-            switch(exs_type_) {
+            switch (exs_type_) {
             case exprstatetype::expect_toplevel_expression_sequence:
             case exprstatetype::def_0:
             case exprstatetype::def_1:
@@ -209,6 +245,9 @@ namespace xo {
             case exprstatetype::expect_type:
                 return false;
 
+            case exprstatetype::expr_progress:
+                return false;
+
             case exprstatetype::invalid:
             case exprstatetype::n_exprstatetype:
                 /* unreachable */
@@ -217,6 +256,61 @@ namespace xo {
 
             return false;
         }
+
+#ifdef NOT_YET
+        bool
+        exprstate::admits_leftparen() const {
+            switch (exs_type_) {
+            case exprstatetype::expect_toplevel_expression_sequence:
+                /* input like
+                 *   (function(blah...))
+                 * not allowed at toplevel;
+                 * creates ambiguity e.g. consider
+                 *   x := foo
+                 *   (bar)
+                 *
+                 * is rhs 'foo' or 'foo(bar)'
+                 */
+                return false;
+
+            case exprstatetype::def_0:
+            case exprstatetype::def_1:
+            case exprstatetype::def_2:
+            case exprstatetype::def_3:
+            case exprstatetype::def_4:
+                /* input like
+                 *   def foo : f64 = (
+                 *      ^   ^ ^   ^ ^
+                 *      |   | |   | def_4
+                 *      |   | |   def_3
+                 *      |   | def_2
+                 *      |   def_1
+                 *      def_0
+                 *
+                 * not allowed or relies on pushing another state
+                 */
+                return false;
+
+            case exprstatetype::expect_rhs_expression:
+                /* can always begin non-toplevel expression with '(' */
+                return true;
+
+            case exprstatetype::expect_type:
+                return false;
+
+            case exprstatetype::expect_symbol:
+                return false;
+
+            case exprstatetype::invalid:
+            case exprstatetype::n_exprstatetype:
+                /* unreachable */
+                assert(false);
+                return false;
+            }
+
+            return false;
+        }
+#endif
 
         void
         exprstate::on_def(exprstatestack * p_stack) {
@@ -233,13 +327,13 @@ namespace xo {
                                                xtag("state", *this)));
             }
 
-            p_stack->push_exprstate(exprstate(exprstatetype::def_0,
-                                              DefineExprAccess::make_empty()));
+            p_stack->push_exprstate
+                (exprstate::def_0(DefineExprAccess::make_empty()));
 
             /* todo: replace:
              *   expect_symbol_or_function_signature()
              */
-            p_stack->push_exprstate(exprstatetype::expect_symbol);
+            p_stack->push_exprstate(exprstate::expect_symbol());
 
             /* keyword 'def' introduces a definition:
              *   def pi : f64 = 3.14159265
@@ -255,6 +349,8 @@ namespace xo {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
+            log && log(xtag("exstype", p_stack->top_exprstate().exs_type()));
+
             constexpr const char * self_name = "exprstate::on_symbol";
 
             if (!this->admits_symbol()) {
@@ -265,7 +361,7 @@ namespace xo {
                            xtag("state", *this)));
             }
 
-            switch(this->exs_type_) {
+            switch (this->exs_type_) {
             case exprstatetype::expect_toplevel_expression_sequence:
                 throw std::runtime_error
                     (tostr(self_name,
@@ -284,13 +380,44 @@ namespace xo {
                 return;
 
             case exprstatetype::expect_rhs_expression:
-            case exprstatetype::expect_symbol:
-                /* have to do pop first */
+            {
+                /* various possibilities when looking for rhs expression:
+                 *
+                 *   x := y       // (1)
+                 *   x := f(a)    // (2)
+                 *   x := f(a,b)  // (3)
+                 *
+                 * need lookahead token following symbol to distinguish
+                 * between (1) (symbol completes rhs expression)
+                 * and {(2), (3)} (symbol is function call)
+                 */
 
+                /* have to do pop first, before sending symbol to
+                 * the o.g. symbol-requester
+                 */
+#ifdef NOT_YET
+                p_stack->push_exprstate(exprstate(exprstatetype::expr_progress,
+                                                  Variable::make(name, type)));
+#endif
+
+#ifdef LATER
+                p_stack->pop_exprstate();
+                p_stack->top_exprstate().on_symbol(tk.text(),
+                                                   p_stack, p_emit_expr);
+#endif
+                return;
+            }
+
+            case exprstatetype::expect_symbol:
+            {
+                /* have to do pop first, before sending symbol to
+                 * the o.g. symbol-requester
+                 */
                 p_stack->pop_exprstate();
                 p_stack->top_exprstate().on_symbol(tk.text(),
                                                    p_stack, p_emit_expr);
                 return;
+            }
 
             case exprstatetype::expect_type: {
                 TypeDescr td = nullptr;
@@ -321,20 +448,27 @@ namespace xo {
                 return;
             }
 
+            case exprstatetype::expr_progress:
+                /* illegal input, e.g.
+                 *   foo bar
+                 */
+                assert(false);
+                return;
+
             case exprstatetype::invalid:
             case exprstatetype::n_exprstatetype:
                 /* unreachable */
                 assert(false);
                 return;
             }
-        }
+        } /*on_symbol*/
 
         void
         exprstate::on_typedescr(TypeDescr td,
                                 exprstatestack * /*p_stack*/,
                                 rp<Expression> * /*p_emit_expr*/)
         {
-            switch(this->exs_type_) {
+            switch (this->exs_type_) {
             case exprstatetype::expect_toplevel_expression_sequence:
             case exprstatetype::def_0:
             case exprstatetype::def_1:
@@ -366,6 +500,10 @@ namespace xo {
                 assert(false);
                 return;
 
+            case exprstatetype::expr_progress:
+                assert(false);
+                return;
+
             case exprstatetype::invalid:
             case exprstatetype::n_exprstatetype:
                 /* unreachable */
@@ -392,7 +530,36 @@ namespace xo {
             if (this->exs_type_ == exprstatetype::def_1) {
                 this->exs_type_ = exprstatetype::def_2;
 
-                p_stack->push_exprstate(exprstatetype::expect_type);
+                p_stack->push_exprstate(exprstate::expect_type());
+            } else {
+                assert(false);
+            }
+        }
+
+        void
+        exprstate::on_semicolon(exprstatestack * p_stack,
+                                rp<Expression> * p_emit_expr)
+        {
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
+            constexpr const char * self_name = "exprstate::on_semicolon";
+
+            if (!this->admits_semicolon())
+            {
+                throw std::runtime_error(tostr(self_name,
+                                               ": unexpected semicolon for parsing state",
+                                               xtag("state", *this)));
+            }
+
+            if (this->exs_type_ == exprstatetype::expr_progress) {
+                rp<Expression> expr = this->gen_expr_;
+
+                p_stack->pop_exprstate(); /* NOT KOSHER. invalidates *this */
+
+                p_stack->top_exprstate().on_expr(expr,
+                                                 p_stack,
+                                                 p_emit_expr);
             } else {
                 assert(false);
             }
@@ -417,16 +584,51 @@ namespace xo {
             {
                 this->exs_type_ = exprstatetype::def_4;
 
-                p_stack->push_exprstate(exprstatetype::expect_rhs_expression);
+                p_stack->push_exprstate(exprstate::expect_rhs_expression());
             } else {
                 assert(false);
             }
         }
 
+#ifdef OBSOLETE
+        /**
+           consider input:
+
+           x := y(foo())
+
+           Is that an assignment x:=y followed by function call (foo()) ?
+           Or assignment with rhs calling a function y() with argument foo()
+
+           policy: forbid parenthesis as beginning of a toplevel expression
+         **/
+
+        void
+        exprstate::on_leftparen(exprstatestack * p_stack,
+                                rp<Expression> * p_emit_expr)
+        {
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
+            if (!this->admits_leftparen())
+            {
+                throw std::runtime_error(tostr(self_name,
+                                               ": unexpected leftparen '(' for parsing state",
+                                               xtag("state", *this)));
+            }
+
+            if (this->exs_type_ == exprstatetype::expect_rhs_expression) {
+                /* push lparen_0 to remember to look for subsequent rightparen */
+                p_stack->push_exprstate(exprstatetype::lparen_0);
+
+                p_stack->push_exprstate(exprstatetype::expect_rhs_expression);
+            }
+        }
+#endif
+
         void
         exprstate::on_f64(const token_type & tk,
                           exprstatestack * p_stack,
-                          rp<Expression> * p_emit_expr)
+                          rp<Expression> * /*p_emit_expr*/)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
@@ -441,11 +643,9 @@ namespace xo {
             }
 
             if (this->exs_type_ == exprstatetype::expect_rhs_expression) {
-                p_stack->pop_exprstate();
-
-                p_stack->top_exprstate().on_expr(Constant<double>::make(tk.f64_value()),
-                                                 p_stack,
-                                                 p_emit_expr);
+                p_stack->push_exprstate
+                    (exprstate::make_expr_progress
+                     (Constant<double>::make(tk.f64_value())));
             } else {
                 assert(false);
             }
@@ -461,7 +661,7 @@ namespace xo {
             log && log(xtag("tk", tk));
             log && log(xtag("state", *this));
 
-            switch(tk.tk_type()) {
+            switch (tk.tk_type()) {
 
             case tokentype::tk_def:
                 this->on_def(p_stack);
@@ -503,8 +703,11 @@ namespace xo {
                 return;
 
             case tokentype::tk_doublecolon:
-            case tokentype::tk_semicolon:
                 assert(false);
+                return;
+
+            case tokentype::tk_semicolon:
+                this->on_semicolon(p_stack, p_emit_expr);
                 return;
 
             case tokentype::tk_singleassign:
@@ -538,7 +741,13 @@ namespace xo {
                            exprstatestack * p_stack,
                            rp<Expression> * p_emit_expr)
         {
-            switch(this->exs_type_) {
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
+            log && log(xtag("exstype", this->exs_type_),
+                       xtag("expr", expr));
+
+            switch (this->exs_type_) {
             case exprstatetype::expect_toplevel_expression_sequence:
                 /* toplevel expression sequence accepts an
                  * arbitrary number of expressions.
@@ -546,7 +755,7 @@ namespace xo {
                  * parser::include_token() returns
                  */
 
-                *p_emit_expr = expr.get();
+                *p_emit_expr = expr.promote();
                 return;
             case exprstatetype::def_0:
             case exprstatetype::def_1:
@@ -580,11 +789,26 @@ namespace xo {
                 return;
             }
 
-            case exprstatetype::expect_rhs_expression:
+            case exprstatetype::expect_rhs_expression: {
+
+                p_stack->pop_exprstate(); /* NOT KOSHER.  invalidates *this */
+
+                p_stack->top_exprstate().on_expr(expr,
+                                                 p_stack,
+                                                 p_emit_expr);
+
+                return;
+            }
+
             case exprstatetype::expect_type:
             case exprstatetype::expect_symbol:
                 /* unreachable
                  * (this exprstate issues pop instruction from exprstate::on_input()
+                 */
+                assert(false);
+                return;
+            case exprstatetype::expr_progress:
+                /* consecutive expressions isn't legal
                  */
                 assert(false);
                 return;
@@ -594,7 +818,7 @@ namespace xo {
                 assert(false);
                 return;
             }
-        }
+        } /*on_expr*/
 
         void
         exprstate::on_symbol(const std::string & symbol_name,
@@ -634,6 +858,9 @@ namespace xo {
                  */
                 assert(false);
                 return;
+            case exprstatetype::expr_progress:
+                assert(false);
+                return;
             case exprstatetype::invalid:
             case exprstatetype::n_exprstatetype:
                 /* unreachable */
@@ -645,9 +872,11 @@ namespace xo {
         void
         exprstate::print(std::ostream & os) const {
             os << "<exprstate"
-               << xtag("type", exs_type_)
-               << xtag("def_expr", def_expr_)
-               << xtag("cvt_expr", cvt_expr_);
+               << xtag("type", exs_type_);
+            if (def_expr_)
+                os << xtag("def_expr", def_expr_);
+            if (cvt_expr_)
+                os << xtag("cvt_expr", cvt_expr_);
             os << ">";
         }
 
@@ -667,6 +896,10 @@ namespace xo {
 
         void
         exprstatestack::push_exprstate(const exprstate & exs) {
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag),
+                      xtag("exs", exs));
+
             std::size_t z = stack_.size();
 
             stack_.resize(z+1);
@@ -676,6 +909,10 @@ namespace xo {
 
         void
         exprstatestack::pop_exprstate() {
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag),
+                      xtag("top.exstype", top_exprstate().exs_type()));
+
             std::size_t z = stack_.size();
 
             if (z > 0)
@@ -714,7 +951,7 @@ namespace xo {
         parser::include_token(const token_type & tk)
         {
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG(c_debug_flag), xtag("tk", tk));
 
             if (xs_stack_.empty()) {
                 throw std::runtime_error(tostr("parser::include_token",
@@ -729,6 +966,7 @@ namespace xo {
 
             xs_stack_.top_exprstate().on_input(tk, &xs_stack_, &retval);
 
+            log && log(xtag("retval", retval));
 
             return retval;
         } /*include_token*/

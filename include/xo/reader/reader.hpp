@@ -18,6 +18,9 @@ namespace xo {
             using Expression = xo::ast::Expression;
             using span_type = span<const char>;
 
+            reader_result(rp<Expression> expr, span_type rem)
+                : expr_{std::move(expr)}, rem_{rem} {}
+
             /** parsed schematica expression **/
             rp<Expression> expr_;
             /** span giving text input consumed to construct expr,

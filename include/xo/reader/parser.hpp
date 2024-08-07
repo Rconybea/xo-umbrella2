@@ -30,6 +30,8 @@ namespace xo {
             expect_symbol,
             expect_type,
 
+            expr_progress,
+
             n_exprstatetype
         };
 
@@ -58,18 +60,29 @@ namespace xo {
         public:
             exprstate() = default;
             exprstate(exprstatetype exs_type,
-                      rp<DefineExprAccess> def_expr = nullptr)
+                      rp<Expression> candidate_expr,
+                      rp<DefineExprAccess> def_expr)
                 : exs_type_{exs_type},
+                  gen_expr_{std::move(candidate_expr)},
                   def_expr_{std::move(def_expr)} {}
 
             static exprstate expect_toplevel_expression_sequence() {
-                return exprstate(exprstatetype::expect_toplevel_expression_sequence);
+                return exprstate(exprstatetype::expect_toplevel_expression_sequence, nullptr, nullptr);
             }
-            static exprstate def_0() {
-                return exprstate(exprstatetype::def_0);
+            static exprstate expect_rhs_expression() {
+                return exprstate(exprstatetype::expect_rhs_expression, nullptr, nullptr);
             }
             static exprstate expect_symbol() {
-                return exprstate(exprstatetype::expect_symbol);
+                return exprstate(exprstatetype::expect_symbol, nullptr, nullptr);
+            }
+            static exprstate expect_type() {
+                return exprstate(exprstatetype::expect_type, nullptr, nullptr);
+            }
+            static exprstate make_expr_progress(rp<Expression> expr) {
+                return exprstate(exprstatetype::expr_progress, expr, nullptr);
+            }
+            static exprstate def_0(rp<DefineExprAccess> def_expr) {
+                return exprstate(exprstatetype::def_0, nullptr, def_expr);
             }
 
             exprstatetype exs_type() const { return exs_type_; }
@@ -82,8 +95,14 @@ namespace xo {
             bool admits_symbol() const;
             /** true iff this parsing state admits a colon as next token **/
             bool admits_colon() const;
+            /** true iff this parsing state admits a semicolon as next token **/
+            bool admits_semicolon() const;
             /** true iff this parsing state admits a singleassign '=' as next token **/
             bool admits_singleassign() const;
+#ifdef NOT_YET
+            /** true iff this parsing state admits a leftparen '(' as next token **/
+            bool admits_leftparen() const;
+#endif
             /** true iff this parsing state admits a 64-bit floating point literal token **/
             bool admits_f64() const;
 
@@ -112,16 +131,23 @@ namespace xo {
                            exprstatestack * p_stack,
                            rp<Expression> * p_emit_expr);
             void on_colon(exprstatestack * p_stack);
+            void on_semicolon(exprstatestack * p_stack,
+                              rp<Expression> * p_emit_expr);
             void on_singleassign(exprstatestack * p_stack);
+#ifdef NOT_YET
+            void on_leftparen(exprstatestack * p_stack,
+                              rp<Expression> * p_emit_expr);
+#endif
             void on_f64(const token_type & tk,
                         exprstatestack * p_stack,
                         rp<Expression> * p_emit_expr);
 
         private:
             /**
-             *   def foo : f64 = 1
-             *  ^   ^   ^ ^   ^ ^ ^
-             *  |   |   | |   | | (done)
+             *   def foo : f64 = 1 ;
+             *  ^   ^   ^ ^   ^ ^ ^ ^
+             *  |   |   | |   | | | (done)
+             *  |   |   | |   | | ??
              *  |   |   | |   | def_4:expect_rhs_expression
              *  |   |   | |   def_3
              *  |   |   | def_2:expect_type
@@ -139,6 +165,8 @@ namespace xo {
              **/
             exprstatetype exs_type_;
 
+            /** generic expression **/
+            rp<Expression> gen_expr_;
             /** scaffold a define-expression here **/
             rp<DefineExprAccess> def_expr_;
             /** scafford a convert-expression here.
@@ -199,10 +227,10 @@ namespace xo {
          *    decltype point
          *
          *    // forward declarations
-         *    decl pi : f64
-         *    decl fib(n : i32) -> i32
+         *    decl pi : f64;
+         *    decl fib(n : i32) -> i32;
          *
-         *    def pi = 3.14159265  // constant. = is single assignment
+         *    def pi = 3.14159265;  // constant. = is single assignment
          *
          *    def fib(n : i32) -> i32 {
          *      // nested defs ok
@@ -211,33 +239,37 @@ namespace xo {
          *        //   (n == 0) ? s1 : aux(n - 1, s1 + s2, s1)
          *        //
          *        if (n == 0) {
-         *          s1
+         *          s1;
          *        } else {
-         *          aux(n - 1, s1 + s2, s1)
+         *          aux(n - 1, s1 + s2, s1);
          *        }
          *
          *        // or:
          *        //  if (n == 0) ? s1 : aux(n - 1, s1 + s2, s1)
          *      }
          *
-         *      aux(n=n, s1=1, s2=0)
+         *      aux(n=n, s1=1, s2=0);
          *    }
          *
-         *    def anotherfib = lambda(n : i32) { fib(n) }
+         *    def x := "fu"; // non-constant
+         *    x += "bar";
          *
-         *    def any : object
-         *    def l : list<object> = '()
+         *    def anotherfib = lambda(n : i32) { fib(n) };
          *
-         *    deftype point :: {x : f64, y : f64}
-         *    deftype polar :: {arg : f64, mag : f64}
+         *    def any : object;
+         *    def l : list<object> = '();
+         *
+         *    deftype point :: {x : f64, y : f64};
+         *    deftype polar :: {arg : f64, mag : f64};
          *
          *    def polar2rect(pt : polar) -> point {
          *      point(x = pt.mag * cos(arg),
-         *            y = pt.mag * sin(arg))
+         *            y = pt.mag * sin(arg));
          *    }
          *
          * Grammar:
-         *   toplevel-program = expression*
+         *   toplevel-program = $expression(1); ..; $expression(n)
+         *
          *   type-decl        = decltype $typename [<$tp1 .. $tpn>]
          *   expression       = define-expr
          *                       | literal-expr
@@ -245,6 +277,7 @@ namespace xo {
          *                       | apply-expr
          *                       | if-expr
          *                       | lambda-expr
+         *                       | arithmetic-expr
          *                       | block
          *
          *   define-expr      = type-decl
@@ -297,6 +330,23 @@ namespace xo {
          *                              ..,
          *                              $paramname(n) : $type(n)) body-expr
          *    body-expr       = expression
+         *
+         *   arithmetic-expr  = expression binop expression
+         *
+         *    binop           = +
+         *                       | -
+         *                       | *
+         *                       | /
+         *                       | |
+         *                       | &
+         *                       | ^
+         *                       | ==
+         *                       | !=
+         *                       | <
+         *                       | <=
+         *                       | =>
+         *                       | >
+         *
          **/
         class parser {
         public:
