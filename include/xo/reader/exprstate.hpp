@@ -99,9 +99,6 @@ namespace xo {
             static std::unique_ptr<exprstate> make_expr_progress(rp<Expression> expr) {
                 return std::make_unique<exprstate>(exprstate(exprstatetype::expr_progress, expr, nullptr));
             }
-            static std::unique_ptr<exprstate> def_0(rp<DefineExprAccess> def_expr) {
-                return std::make_unique<exprstate>(exprstate(exprstatetype::def_0, nullptr, def_expr));
-            }
             static std::unique_ptr<exprstate> lparen_0() {
                 return std::make_unique<exprstate>(exprstate(exprstatetype::lparen_0, nullptr, nullptr));
             }
@@ -164,26 +161,6 @@ namespace xo {
                                 rp<Expression> * p_emit_expr);
 
         protected:
-            /**
-             *   def foo : f64 = 1 ;
-             *  ^   ^   ^ ^   ^ ^ ^ ^
-             *  |   |   | |   | | | (done)
-             *  |   |   | |   | | def_4:expect_rhs_expression:expr_progress
-             *  |   |   | |   | def_4:expect_rhs_expression
-             *  |   |   | |   def_3
-             *  |   |   | def_2:expect_type
-             *  |   |   def_1
-             *  |   def_0:expect_symbol
-             *  expect_toplevel_expression_sequence
-             *
-             *   def_0:expect_symbol: got 'def' keyword, symbol to follow
-             *   def_1: got symbol name
-             *   def_2:expect_symbol got (optional) colon, type name to follow
-             *   def_3: got symbol type
-             *   def_4:expect_rhs_expression got (optional) equal sign, value to follow
-             *   (done): definition complete,  pop exprstate from stack
-             *
-             **/
             exprstatetype exs_type_;
 
             /** generic expression **/
@@ -254,6 +231,5 @@ namespace xo {
         }
     } /*namespace scm*/
 } /*namespace xo*/
-
 
 /** end exprstate.hpp **/

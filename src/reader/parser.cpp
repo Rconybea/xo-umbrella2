@@ -4,6 +4,7 @@
  */
 
 #include "parser.hpp"
+#include "define_xs.hpp"
 #include "xo/expression/DefineExpr.hpp"
 #include "xo/expression/Constant.hpp"
 #include "xo/expression/ConvertExpr.hpp"
@@ -410,7 +411,7 @@ namespace xo {
             }
 
             p_stack->push_exprstate
-                (exprstate::def_0(DefineExprAccess::make_empty()));
+                (define_xs::def_0(DefineExprAccess::make_empty()));
 
             /* todo: replace:
              *   expect_symbol_or_function_signature()
@@ -938,31 +939,9 @@ namespace xo {
             case exprstatetype::def_1:
             case exprstatetype::def_2:
             case exprstatetype::def_3:
-                /* NOT IMPLEMENTED */
-                assert(false);
-                return;
-            case exprstatetype::def_4: {
-                /* have all the ingredients to create an expression
-                 * representing a definition
-                 *
-                 * 1. if ir_type is a symbol,  interpret as variable name.
-                 *    Need to be able to locate variable by type
-                 * 2. if ir_type is an expression,  adopt as rhs
-                 */
-                rp<Expression> rhs_value = expr.promote();
-
-                if (this->cvt_expr_)
-                    this->cvt_expr_->assign_arg(rhs_value);
-                else
-                    this->def_expr_->assign_rhs(rhs_value);;
-
-                rp<Expression> def_expr = this->def_expr_;
-
-                this->exs_type_ = exprstatetype::def_5;
-                return;
-            }
-
+            case exprstatetype::def_4:
             case exprstatetype::def_5:
+                /* unreachable.  see define_xs::on_expr() */
                 assert(false);
                 return;
 
