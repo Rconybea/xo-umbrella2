@@ -475,6 +475,32 @@ namespace xo {
                 assert(false);
             }
         }
+
+        void
+        define_xs::on_singleassign(exprstatestack * p_stack)
+        {
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
+            constexpr const char * self_name = "exprstate::on_singleassign";
+
+            if (!this->admits_singleassign())
+            {
+                throw std::runtime_error(tostr(self_name,
+                                               ": unexpected equals for parsing state",
+                                               xtag("state", *this)));
+            }
+
+            if ((this->exs_type_ == exprstatetype::def_1)
+                || (this->exs_type_ == exprstatetype::def_3))
+            {
+                this->exs_type_ = exprstatetype::def_4;
+
+                p_stack->push_exprstate(exprstate::expect_rhs_expression());
+            } else {
+                assert(false);
+            }
+        }
     } /*namespace scm*/
 } /*namespace xo*/
 

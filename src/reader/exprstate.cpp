@@ -658,7 +658,7 @@ namespace xo {
         }
 
         void
-        exprstate::on_singleassign(exprstatestack * p_stack) {
+        exprstate::on_singleassign(exprstatestack * /*p_stack*/) {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
@@ -671,15 +671,7 @@ namespace xo {
                                                xtag("state", *this)));
             }
 
-            if ((this->exs_type_ == exprstatetype::def_1)
-                || (this->exs_type_ == exprstatetype::def_3))
-            {
-                this->exs_type_ = exprstatetype::def_4;
-
-                p_stack->push_exprstate(exprstate::expect_rhs_expression());
-            } else {
-                assert(false);
-            }
+            assert(false);
         }
 
         void

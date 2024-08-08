@@ -41,6 +41,7 @@ namespace xo {
             virtual void on_colon(exprstatestack * p_stack) override;
             virtual void on_semicolon(exprstatestack * p_stack,
                                       rp<Expression> * /*p_emit_expr*/) override;
+            virtual void on_singleassign(exprstatestack * p_stack) override;
 
         private:
             /**
