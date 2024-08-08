@@ -310,17 +310,8 @@ namespace xo {
             case exprstatetype::def_3:
             case exprstatetype::def_4:
             case exprstatetype::def_5:
-                /* input like
-                 *   def foo : f64 = (
-                 *      ^   ^ ^   ^ ^
-                 *      |   | |   | def_4
-                 *      |   | |   def_3
-                 *      |   | def_2
-                 *      |   def_1
-                 *      def_0
-                 *
-                 * not allowed or relies on pushing another state
-                 */
+                /* unreachable */
+                assert(false);
                 return false;
 
             case exprstatetype::lparen_0:
@@ -357,12 +348,16 @@ namespace xo {
         exprstate::admits_rightparen() const {
             switch (exs_type_) {
             case exprstatetype::expect_toplevel_expression_sequence:
+                return false;
+
             case exprstatetype::def_0:
             case exprstatetype::def_1:
             case exprstatetype::def_2:
             case exprstatetype::def_3:
             case exprstatetype::def_4:
             case exprstatetype::def_5:
+                /* unreachable */
+                assert(false);
                 return false;
 
             case exprstatetype::lparen_0:

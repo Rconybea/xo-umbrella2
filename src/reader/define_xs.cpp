@@ -200,6 +200,82 @@ namespace xo {
 
             return false;
         }
+
+        bool
+        define_xs::admits_leftparen() const {
+            switch (exs_type_) {
+            case exprstatetype::expect_toplevel_expression_sequence:
+                /* unreachable */
+                assert(false);
+                return false;
+
+            case exprstatetype::def_0:
+            case exprstatetype::def_1:
+            case exprstatetype::def_2:
+            case exprstatetype::def_3:
+            case exprstatetype::def_4:
+            case exprstatetype::def_5:
+                /* input like
+                 *   def foo : f64 = (
+                 *      ^   ^ ^   ^ ^
+                 *      |   | |   | def_4
+                 *      |   | |   def_3
+                 *      |   | def_2
+                 *      |   def_1
+                 *      def_0
+                 *
+                 * not allowed or relies on pushing another state
+                 */
+                return false;
+
+            case exprstatetype::lparen_0:
+            case exprstatetype::lparen_1:
+            case exprstatetype::expect_rhs_expression:
+            case exprstatetype::expect_type:
+            case exprstatetype::expect_symbol:
+            case exprstatetype::expr_progress:
+            case exprstatetype::invalid:
+            case exprstatetype::n_exprstatetype:
+                /* unreachable */
+                assert(false);
+                return false;
+            }
+
+            return false;
+        }
+
+        bool
+        define_xs::admits_rightparen() const {
+            switch (exs_type_) {
+            case exprstatetype::expect_toplevel_expression_sequence:
+                /* unreachable */
+                assert(false);
+                return false;
+
+            case exprstatetype::def_0:
+            case exprstatetype::def_1:
+            case exprstatetype::def_2:
+            case exprstatetype::def_3:
+            case exprstatetype::def_4:
+            case exprstatetype::def_5:
+                return false;
+
+            case exprstatetype::lparen_0:
+            case exprstatetype::lparen_1:
+            case exprstatetype::expect_rhs_expression:
+            case exprstatetype::expect_type:
+            case exprstatetype::expect_symbol:
+            case exprstatetype::expr_progress:
+            case exprstatetype::invalid:
+            case exprstatetype::n_exprstatetype:
+                /* unreachable */
+                assert(false);
+                return false;
+            }
+
+            return false;
+        }
+
         void
         define_xs::on_expr(ref::brw<Expression> expr,
                            exprstatestack * /* p_stack */,

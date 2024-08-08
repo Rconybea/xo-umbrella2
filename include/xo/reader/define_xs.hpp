@@ -25,6 +25,8 @@ namespace xo {
             virtual bool admits_colon() const override;
             virtual bool admits_semicolon() const override;
             virtual bool admits_singleassign() const override;
+            virtual bool admits_leftparen() const override;
+            virtual bool admits_rightparen() const override;
 
             // virtual void on_f64(..) override
             virtual void on_expr(ref::brw<Expression> expr,
