@@ -4,6 +4,11 @@
 
 namespace xo {
     namespace scm {
+        std::unique_ptr<define_xs>
+        define_xs::def_0(rp<DefineExprAccess> def_expr) {
+            return std::make_unique<define_xs>(define_xs(def_expr));
+        }
+
         define_xs::define_xs(rp<DefineExprAccess> def_expr)
             : exprstate(exprstatetype::def_0,
                         nullptr /*gen_expr*/,
