@@ -2,6 +2,7 @@
 
 #include "exprstate.hpp"
 #include "define_xs.hpp"
+#include "progress_xs.hpp"
 //#include "xo/expression/DefineExpr.hpp"
 #include "xo/expression/Constant.hpp"
 //#include "xo/expression/ConvertExpr.hpp"
@@ -59,6 +60,8 @@ namespace xo {
             case exprstatetype::expect_type:
                 return false;
             case exprstatetype::expr_progress:
+                /* unreachable */
+                assert(false);
                 return false;
             case exprstatetype::invalid:
             case exprstatetype::n_exprstatetype:
@@ -94,6 +97,8 @@ namespace xo {
                 return true;
 
             case exprstatetype::expr_progress:
+                /* unreachable */
+                assert(false);
                 return false;
 
             case exprstatetype::invalid:
@@ -126,6 +131,8 @@ namespace xo {
                 return false;
 
             case exprstatetype::expr_progress:
+                /* unreachable */
+                assert(false);
                 return false;
 
             case exprstatetype::invalid:
@@ -149,6 +156,8 @@ namespace xo {
             case exprstatetype::expect_type:
                 return false;
             case exprstatetype::expr_progress:
+                /* unreachable */
+                assert(false);
                 return true;
             case exprstatetype::invalid:
             case exprstatetype::n_exprstatetype:
@@ -193,6 +202,8 @@ namespace xo {
                 return false;
 
             case exprstatetype::expr_progress:
+                /* unreachable */
+                assert(false);
                 return false;
 
             case exprstatetype::invalid:
@@ -228,6 +239,8 @@ namespace xo {
                 return false;
 
             case exprstatetype::expr_progress:
+                /* unreachable */
+                assert(false);
                 return false;
 
             case exprstatetype::invalid:
@@ -276,7 +289,8 @@ namespace xo {
                 return false;
 
             case exprstatetype::expr_progress:
-                /* todo: will parse as function call */
+                /* unreachable */
+                assert(false);
                 return false;
 
             case exprstatetype::invalid:
@@ -318,9 +332,6 @@ namespace xo {
                 return false;
 
             case exprstatetype::expr_progress:
-                /* satisfies expression form */
-                return true;
-
             case exprstatetype::invalid:
             case exprstatetype::n_exprstatetype:
                 /* unreachable */
@@ -475,9 +486,7 @@ namespace xo {
             }
 
             case exprstatetype::expr_progress:
-                /* illegal input, e.g.
-                 *   foo bar
-                 */
+                /* unreachable */
                 assert(false);
                 return;
 
@@ -519,6 +528,7 @@ namespace xo {
                 return;
 
             case exprstatetype::expr_progress:
+                /* unreachable */
                 assert(false);
                 return;
 
@@ -549,8 +559,8 @@ namespace xo {
         }
 
         void
-        exprstate::on_semicolon(exprstatestack * p_stack,
-                                rp<Expression> * p_emit_expr)
+        exprstate::on_semicolon(exprstatestack * /*p_stack*/,
+                                rp<Expression> * /*p_emit_expr*/)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
@@ -564,33 +574,7 @@ namespace xo {
                                                xtag("state", *this)));
             }
 
-            if (this->exs_type_ == exprstatetype::expr_progress) {
-                rp<Expression> expr = this->gen_expr_;
-
-                std::unique_ptr<exprstate> self = p_stack->pop_exprstate(); /* NOT KOSHER. invalidates *this */
-
-                p_stack->top_exprstate().on_expr(expr,
-                                                 p_stack,
-                                                 p_emit_expr);
-                /* control here on input like:
-                 *   (1.234;
-                 *
-                 * a. '(' sets up stack [lparen_0:expect_rhs_expression]
-                 *     (see exprstate::on_leftparen())
-                 * b. 1.234 pushes (in case operators) [lparen_0:expect_rhs_expression:expr_progress]
-                 *     (see exprstate::on_f64())
-                 * c. semicolon completes expr_progress [lparen_0:expect_rhs_expression]
-                 *     deliver expresssion to expect_rhs_expression.on_expr()
-                 *     (see exprstate::on_expr())
-                 * d. expr_rhs_expression forwards expression to [lparen_0]
-                 * e. lparen_0 advances to [lparen_1]
-                 * f. now deliver semicolon;  [lparen_1] rejects
-                 */
-
-                p_stack->top_exprstate().on_semicolon(p_stack, p_emit_expr);
-            } else {
-                assert(false);
-            }
+            assert(false);
         }
 
         void
@@ -650,33 +634,8 @@ namespace xo {
             }
 
             if (this->exs_type_ == exprstatetype::expr_progress) {
-                /* stack may be something like:
-                 *
-                 *   lparen_0
-                 *   expect_rhs_expression
-                 *   expr_progress
-                 *                   <-- rightparen
-                 *
-                 * 1. rightparen completes expression-in-progress
-                 * 2. rightparen must then match innermost waiting lparen_0
-                 */
-
-                /* right paren confirms stack expression */
-                rp<Expression> expr = this->gen_expr_;
-
-                std::unique_ptr<exprstate> self = p_stack->pop_exprstate();
-
-                if (p_stack->empty()) {
-                    throw std::runtime_error(tostr(self_name,
-                                                   ": expected non-empty parsing stack"));
-                }
-
-                log && log(xtag("stack", p_stack));
-
-                p_stack->top_exprstate().on_expr(expr, p_stack, p_emit_expr);
-
-                /* now deliver rightparen */
-                p_stack->top_exprstate().on_rightparen(p_stack, p_emit_expr);
+                /* unreachable -- see progress_xs::on_rightparen() */
+                assert(false);
             } else if (this->exs_type_ == exprstatetype::lparen_1) {
                 rp<Expression> expr = this->gen_expr_;
 
@@ -709,7 +668,7 @@ namespace xo {
                  *            \---tk---/
                  */
                 p_stack->push_exprstate
-                    (exprstate::make_expr_progress
+                    (progress_xs::make
                      (Constant<double>::make(tk.f64_value())));
             } else {
                 assert(false);
@@ -834,7 +793,7 @@ namespace xo {
 
             case exprstatetype::lparen_0: {
                 this->exs_type_ = exprstatetype::lparen_1; /* wants on_rightparen */
-                p_stack->push_exprstate(exprstate::make_expr_progress(expr.promote()));
+                p_stack->push_exprstate(progress_xs::make(expr.promote()));
 
                 return;
             }
@@ -865,8 +824,7 @@ namespace xo {
                 assert(false);
                 return;
             case exprstatetype::expr_progress:
-                /* consecutive expressions isn't legal
-                 */
+                /* unreachable */
                 assert(false);
                 return;
             case exprstatetype::invalid:

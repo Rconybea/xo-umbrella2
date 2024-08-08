@@ -87,9 +87,11 @@ namespace xo {
             static std::unique_ptr<exprstate> expect_type() {
                 return std::make_unique<exprstate>(exprstate(exprstatetype::expect_type, nullptr));
             }
+#ifdef RELOCATED
             static std::unique_ptr<exprstate> make_expr_progress(rp<Expression> expr) {
                 return std::make_unique<exprstate>(exprstate(exprstatetype::expr_progress, expr));
             }
+#endif
             static std::unique_ptr<exprstate> lparen_0() {
                 return std::make_unique<exprstate>(exprstate(exprstatetype::lparen_0, nullptr));
             }
@@ -135,7 +137,7 @@ namespace xo {
             /** print human-readable representation on @p os **/
             virtual void print(std::ostream & os) const;
 
-        protected:
+        public:
             virtual void on_def(exprstatestack * p_stack);
             virtual void on_symbol(const token_type & tk,
                                    exprstatestack * p_stack,
