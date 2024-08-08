@@ -423,6 +423,30 @@ namespace xo {
             }
         }
 
+        void
+        define_xs::on_colon(exprstatestack * p_stack) {
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
+            constexpr const char * self_name = "exprstate::on_colon";
+
+            /* lots of illegal states */
+            if (!this->admits_colon())
+            {
+                throw std::runtime_error(tostr(self_name,
+                                               ": unexpected colon for parsing state",
+                                               xtag("state", *this)));
+            }
+
+            if (this->exs_type_ == exprstatetype::def_1) {
+                this->exs_type_ = exprstatetype::def_2;
+
+                p_stack->push_exprstate(exprstate::expect_type());
+            } else {
+                assert(false);
+            }
+        }
+
     } /*namespace scm*/
 } /*namespace xo*/
 
