@@ -6,8 +6,6 @@
 #pragma once
 
 #include "xo/expression/Expression.hpp"
-#include "xo/expression/DefineExpr.hpp"
-#include "xo/expression/ConvertExpr.hpp"
 #include "xo/tokenizer/token.hpp"
 #include <stack>
 //#include <cstdint>
@@ -65,7 +63,6 @@ namespace xo {
         class exprstate {
         public:
             using Expression = xo::ast::Expression;
-            using DefineExprAccess = xo::ast::DefineExprAccess;
             using exprtype = xo::ast::exprtype;
             using token_type = token<char>;
             using TypeDescr = xo::reflect::TypeDescr;
@@ -73,30 +70,28 @@ namespace xo {
         public:
             exprstate() = default;
             exprstate(exprstatetype exs_type,
-                      rp<Expression> candidate_expr,
-                      rp<DefineExprAccess> def_expr)
+                      rp<Expression> candidate_expr)
                 : exs_type_{exs_type},
-                  gen_expr_{std::move(candidate_expr)},
-                  def_expr_{std::move(def_expr)} {}
+                  gen_expr_{std::move(candidate_expr)} {}
             virtual ~exprstate() = default;
 
             static std::unique_ptr<exprstate> expect_toplevel_expression_sequence() {
-                return std::make_unique<exprstate>(exprstate(exprstatetype::expect_toplevel_expression_sequence, nullptr, nullptr));
+                return std::make_unique<exprstate>(exprstate(exprstatetype::expect_toplevel_expression_sequence, nullptr));
             }
             static std::unique_ptr<exprstate> expect_rhs_expression() {
-                return std::make_unique<exprstate>(exprstate(exprstatetype::expect_rhs_expression, nullptr, nullptr));
+                return std::make_unique<exprstate>(exprstate(exprstatetype::expect_rhs_expression, nullptr));
             }
             static std::unique_ptr<exprstate> expect_symbol() {
-                return std::make_unique<exprstate>(exprstate(exprstatetype::expect_symbol, nullptr, nullptr));
+                return std::make_unique<exprstate>(exprstate(exprstatetype::expect_symbol, nullptr));
             }
             static std::unique_ptr<exprstate> expect_type() {
-                return std::make_unique<exprstate>(exprstate(exprstatetype::expect_type, nullptr, nullptr));
+                return std::make_unique<exprstate>(exprstate(exprstatetype::expect_type, nullptr));
             }
             static std::unique_ptr<exprstate> make_expr_progress(rp<Expression> expr) {
-                return std::make_unique<exprstate>(exprstate(exprstatetype::expr_progress, expr, nullptr));
+                return std::make_unique<exprstate>(exprstate(exprstatetype::expr_progress, expr));
             }
             static std::unique_ptr<exprstate> lparen_0() {
-                return std::make_unique<exprstate>(exprstate(exprstatetype::lparen_0, nullptr, nullptr));
+                return std::make_unique<exprstate>(exprstate(exprstatetype::lparen_0, nullptr));
             }
 
             exprstatetype exs_type() const { return exs_type_; }
@@ -162,8 +157,6 @@ namespace xo {
 
             /** generic expression **/
             rp<Expression> gen_expr_;
-            /** scaffold a define-expression here **/
-            rp<DefineExprAccess> def_expr_;
         }; /*exprstate*/
 
         inline std::ostream &

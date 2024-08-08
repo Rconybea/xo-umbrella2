@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include "xo/expression/DefineExpr.hpp"
+#include "xo/expression/ConvertExpr.hpp"
 #include "exprstate.hpp"
 //#include <cstdint>
 
@@ -28,6 +30,7 @@ namespace xo {
          **/
         class define_xs : public exprstate {
         public:
+            using DefineExprAccess = xo::ast::DefineExprAccess;
             using ConvertExprAccess = xo::ast::ConvertExprAccess;
 
         public:
@@ -35,7 +38,7 @@ namespace xo {
             virtual ~define_xs() = default;
 
             static const define_xs * from(const exprstate * x) { return dynamic_cast<const define_xs *>(x); }
-            static std::unique_ptr<define_xs> def_0(rp<DefineExprAccess> def_expr);
+            static std::unique_ptr<define_xs> def_0();
 
             defexprstatetype defxs_type() const { return defxs_type_; }
 
@@ -93,6 +96,8 @@ namespace xo {
              *
              **/
             defexprstatetype defxs_type_;
+            /** scaffold a define-expression here **/
+            rp<DefineExprAccess> def_expr_;
             /** scafford a convert-expression here.
              *  May be nested within a def_expr
              **/

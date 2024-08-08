@@ -346,8 +346,7 @@ namespace xo {
                                                xtag("state", *this)));
             }
 
-            p_stack->push_exprstate
-                (define_xs::def_0(DefineExprAccess::make_empty()));
+            p_stack->push_exprstate(define_xs::def_0());
 
             /* todo: replace:
              *   expect_symbol_or_function_signature()
@@ -928,8 +927,6 @@ namespace xo {
         exprstate::print(std::ostream & os) const {
             os << "<exprstate"
                << xtag("type", exs_type_);
-            if (def_expr_)
-                os << xtag("def_expr", def_expr_);
             os << ">";
         }
 

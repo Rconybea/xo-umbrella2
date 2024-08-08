@@ -5,15 +5,15 @@
 namespace xo {
     namespace scm {
         std::unique_ptr<define_xs>
-        define_xs::def_0(rp<DefineExprAccess> def_expr) {
-            return std::make_unique<define_xs>(define_xs(def_expr));
+        define_xs::def_0() {
+            return std::make_unique<define_xs>(define_xs(DefineExprAccess::make_empty()));
         }
 
         define_xs::define_xs(rp<DefineExprAccess> def_expr)
             : exprstate(exprstatetype::defexpr,
-                        nullptr /*gen_expr*/,
-                        def_expr),
-              defxs_type_{defexprstatetype::def_0}
+                        nullptr /*gen_expr*/),
+              defxs_type_{defexprstatetype::def_0},
+              def_expr_{std::move(def_expr)}
         {}
 
         bool
