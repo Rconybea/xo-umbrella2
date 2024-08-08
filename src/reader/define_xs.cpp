@@ -520,6 +520,45 @@ namespace xo {
 
             assert(false); /* inserting this during refactor...? */
         }
+
+        void
+        define_xs::on_rightparen(exprstatestack * /*p_stack*/,
+                                 rp<Expression> * /*p_emit_expr*/)
+        {
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
+            constexpr const char * self_name = "exprstate::on_rightparen";
+
+            if (!this->admits_rightparen())
+            {
+                throw std::runtime_error(tostr(self_name,
+                                               ": unexpected rightparen ')' for parsing state",
+                                               xtag("state", *this)));
+            }
+
+            assert(false); /* inserting this during refactor..? */
+        }
+
+        void
+        define_xs::on_f64(const token_type & /*tk*/,
+                          exprstatestack * /*p_stack*/,
+                          rp<Expression> * /*p_emit_expr*/)
+        {
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
+            constexpr const char * self_name = "exprstate::on_f64";
+
+            if (!this->admits_f64())
+            {
+                throw std::runtime_error(tostr(self_name,
+                                               ": unexpected floating-point literal for parsing state",
+                                               xtag("state", *this)));
+            }
+
+            assert(false);
+        }
     } /*namespace scm*/
 } /*namespace xo*/
 
