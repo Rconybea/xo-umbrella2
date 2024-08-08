@@ -375,6 +375,54 @@ namespace xo {
                 return;
             }
         }
+
+        void
+        define_xs::on_typedescr(TypeDescr td,
+                                exprstatestack * /*p_stack*/,
+                                rp<Expression> * /*p_emit_expr*/)
+        {
+            switch (this->exs_type_) {
+            case exprstatetype::expect_toplevel_expression_sequence:
+                /* unreachable */
+                assert(false);
+                return;
+
+            case exprstatetype::def_0:
+            case exprstatetype::def_1:
+                /* NOT IMPLEMENTED (ill-formed program) */
+                assert(false);
+                return;
+
+            case exprstatetype::def_2:
+                this->exs_type_ = exprstatetype::def_3;
+                this->cvt_expr_ = ConvertExprAccess::make(td /*dest_type*/,
+                                                          nullptr /*source_expr*/);
+                this->def_expr_->assign_rhs(this->cvt_expr_);
+                //this->def_lhs_td_ = td;
+
+                return;
+
+            case exprstatetype::def_3:
+            case exprstatetype::def_4:
+            case exprstatetype::def_5:
+                /* NOT IMPLEMENTED */
+                assert(false);
+                return;
+
+            case exprstatetype::lparen_0:
+            case exprstatetype::lparen_1:
+            case exprstatetype::expect_rhs_expression:
+            case exprstatetype::expect_type:
+            case exprstatetype::expect_symbol:
+            case exprstatetype::expr_progress:
+            case exprstatetype::invalid:
+            case exprstatetype::n_exprstatetype:
+                /* unreachable */
+                assert(false);
+                return;
+            }
+        }
+
     } /*namespace scm*/
 } /*namespace xo*/
 

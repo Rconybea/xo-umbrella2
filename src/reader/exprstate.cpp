@@ -549,7 +549,7 @@ namespace xo {
         } /*on_symbol*/
 
         void
-        exprstate::on_typedescr(TypeDescr td,
+        exprstate::on_typedescr(TypeDescr /*td*/,
                                 exprstatestack * /*p_stack*/,
                                 rp<Expression> * /*p_emit_expr*/)
         {
@@ -557,25 +557,14 @@ namespace xo {
 
             switch (this->exs_type_) {
             case exprstatetype::expect_toplevel_expression_sequence:
+
             case exprstatetype::def_0:
             case exprstatetype::def_1:
-                /* NOT IMPLEMENTED */
-                assert(false);
-                return;
-
             case exprstatetype::def_2:
-                this->exs_type_ = exprstatetype::def_3;
-                this->cvt_expr_ = ConvertExprAccess::make(td /*dest_type*/,
-                                                          nullptr /*source_expr*/);
-                this->def_expr_->assign_rhs(this->cvt_expr_);
-                //this->def_lhs_td_ = td;
-
-                return;
-
             case exprstatetype::def_3:
             case exprstatetype::def_4:
             case exprstatetype::def_5:
-                /* NOT IMPLEMENTED */
+                /* unreachable */
                 assert(false);
                 return;
 
