@@ -94,12 +94,16 @@ namespace xo {
         exprstate::admits_symbol() const {
             switch (exs_type_) {
             case exprstatetype::expect_toplevel_expression_sequence:
+                return false;
+
             case exprstatetype::def_0:
             case exprstatetype::def_1:
             case exprstatetype::def_2:
             case exprstatetype::def_3:
             case exprstatetype::def_4:
             case exprstatetype::def_5:
+                /* unreachable */
+                assert(false);
                 return false;
 
             case exprstatetype::lparen_0:

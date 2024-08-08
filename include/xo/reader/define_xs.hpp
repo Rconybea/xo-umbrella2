@@ -21,6 +21,7 @@ namespace xo {
             static std::unique_ptr<define_xs> def_0(rp<DefineExprAccess> def_expr);
 
             virtual bool admits_definition() const override;
+            virtual bool admits_symbol() const override;
             // virtual void on_f64(..) override
             virtual void on_expr(ref::brw<Expression> expr,
                                  exprstatestack * p_stack,
