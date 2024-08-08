@@ -22,6 +22,8 @@ namespace xo {
 
             virtual bool admits_definition() const override;
             virtual bool admits_symbol() const override;
+            virtual bool admits_colon() const override;
+
             // virtual void on_f64(..) override
             virtual void on_expr(ref::brw<Expression> expr,
                                  exprstatestack * p_stack,
