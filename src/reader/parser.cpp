@@ -71,6 +71,7 @@ namespace xo {
             case exprstatetype::def_4:
             case exprstatetype::def_5:
                 /* unreachable */
+                assert(false);
                 return false;
             case exprstatetype::lparen_0:
             case exprstatetype::lparen_1:

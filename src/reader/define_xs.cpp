@@ -115,6 +115,37 @@ namespace xo {
             return false;
         }
 
+        bool
+        define_xs::admits_semicolon() const {
+            switch (exs_type_) {
+            case exprstatetype::expect_toplevel_expression_sequence:
+                /* unreachable */
+                assert(false);
+                return false;
+            case exprstatetype::def_0:
+            case exprstatetype::def_1:
+            case exprstatetype::def_2:
+            case exprstatetype::def_3:
+            case exprstatetype::def_4:
+                return false;
+            case exprstatetype::def_5:
+                return true;
+            case exprstatetype::lparen_0:
+            case exprstatetype::lparen_1:
+            case exprstatetype::expect_rhs_expression:
+            case exprstatetype::expect_symbol:
+            case exprstatetype::expect_type:
+            case exprstatetype::expr_progress:
+            case exprstatetype::invalid:
+            case exprstatetype::n_exprstatetype:
+                /* unreachable */
+                assert(false);
+                return false;
+            }
+
+            return false;
+        }
+
         void
         define_xs::on_expr(ref::brw<Expression> expr,
                            exprstatestack * /* p_stack */,
