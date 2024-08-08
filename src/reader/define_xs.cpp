@@ -501,6 +501,25 @@ namespace xo {
                 assert(false);
             }
         }
+
+        void
+        define_xs::on_leftparen(exprstatestack * /*p_stack*/,
+                                rp<Expression> * /*p_emit_expr*/)
+        {
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
+            constexpr const char * self_name = "exprstate::on_leftparen";
+
+            if (!this->admits_leftparen())
+            {
+                throw std::runtime_error(tostr(self_name,
+                                               ": unexpected leftparen '(' for parsing state",
+                                               xtag("state", *this)));
+            }
+
+            assert(false); /* inserting this during refactor...? */
+        }
     } /*namespace scm*/
 } /*namespace xo*/
 
