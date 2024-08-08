@@ -447,6 +447,34 @@ namespace xo {
             }
         }
 
+        void
+        define_xs::on_semicolon(exprstatestack * p_stack,
+                                rp<Expression> * p_emit_expr)
+        {
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
+            constexpr const char * self_name = "exprstate::on_semicolon";
+
+            if (!this->admits_semicolon())
+            {
+                throw std::runtime_error(tostr(self_name,
+                                               ": unexpected semicolon for parsing state",
+                                               xtag("state", *this)));
+            }
+
+            if (this->exs_type_ == exprstatetype::def_5) {
+                rp<Expression> expr = this->def_expr_;
+
+                std::unique_ptr<exprstate> self = p_stack->pop_exprstate();
+
+                p_stack->top_exprstate().on_expr(expr,
+                                                 p_stack,
+                                                 p_emit_expr);
+            } else {
+                assert(false);
+            }
+        }
     } /*namespace scm*/
 } /*namespace xo*/
 

@@ -652,14 +652,6 @@ namespace xo {
                  */
 
                 p_stack->top_exprstate().on_semicolon(p_stack, p_emit_expr);
-            } else if (this->exs_type_ == exprstatetype::def_5) {
-                rp<Expression> expr = this->def_expr_;
-
-                std::unique_ptr<exprstate> self = p_stack->pop_exprstate(); /* NOT KOSHER. invalidates *this */
-
-                p_stack->top_exprstate().on_expr(expr,
-                                                 p_stack,
-                                                 p_emit_expr);
             } else {
                 assert(false);
             }
