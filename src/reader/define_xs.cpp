@@ -146,6 +146,60 @@ namespace xo {
             return false;
         }
 
+        bool
+        define_xs::admits_singleassign() const {
+            switch (exs_type_) {
+            case exprstatetype::expect_toplevel_expression_sequence:
+                /* unreachable */
+                assert(false);
+                return false;
+
+                /*
+                 *   def foo       = 1 ;
+                 *   def foo : f64 = 1 ;
+                 *  ^   ^   ^ ^   ^ ^ ^
+                 *  |   |   | |   | | (done)
+                 *  |   |   | |   | def_4:expect_rhs_expression
+                 *  |   |   | |   def_3
+                 *  |   |   | def_2:expect_type
+                 *  |   |   def_1
+                 *  |   def_0:expect_symbol
+                 *  expect_toplevel_expression_sequence
+                 *
+                 * note that we skip from def_1 -> def_4 if '=' instead of ':'
+                 */
+            case exprstatetype::def_0:
+                return false;
+
+            case exprstatetype::def_1:
+                return true;
+
+            case exprstatetype::def_2:
+                return false;
+
+            case exprstatetype::def_3:
+                return true;
+
+            case exprstatetype::def_4:
+            case exprstatetype::def_5:
+                return false;
+
+            case exprstatetype::lparen_0:
+            case exprstatetype::lparen_1:
+            case exprstatetype::expect_rhs_expression:
+            case exprstatetype::expect_symbol:
+            case exprstatetype::expect_type:
+            case exprstatetype::expr_progress:
+            case exprstatetype::invalid:
+            case exprstatetype::n_exprstatetype:
+                /* unreachable */
+                /* unreachable */
+                assert(false);
+                return false;
+            }
+
+            return false;
+        }
         void
         define_xs::on_expr(ref::brw<Expression> expr,
                            exprstatestack * /* p_stack */,
