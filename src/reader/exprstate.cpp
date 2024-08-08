@@ -930,8 +930,6 @@ namespace xo {
                << xtag("type", exs_type_);
             if (def_expr_)
                 os << xtag("def_expr", def_expr_);
-            if (cvt_expr_)
-                os << xtag("cvt_expr", cvt_expr_);
             os << ">";
         }
 

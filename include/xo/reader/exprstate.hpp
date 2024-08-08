@@ -21,14 +21,6 @@ namespace xo {
             expect_toplevel_expression_sequence,
 
             defexpr,
-#ifdef OBSOLETE
-            def_0,
-            def_1,
-            def_2,
-            def_3,
-            def_4,
-            def_5,
-#endif
 
             /* lparen_0: look for expression; capture + advance to lparen_1 */
             lparen_0,
@@ -74,7 +66,6 @@ namespace xo {
         public:
             using Expression = xo::ast::Expression;
             using DefineExprAccess = xo::ast::DefineExprAccess;
-            using ConvertExprAccess = xo::ast::ConvertExprAccess;
             using exprtype = xo::ast::exprtype;
             using token_type = token<char>;
             using TypeDescr = xo::reflect::TypeDescr;
@@ -173,10 +164,6 @@ namespace xo {
             rp<Expression> gen_expr_;
             /** scaffold a define-expression here **/
             rp<DefineExprAccess> def_expr_;
-            /** scafford a convert-expression here.
-             *  May be nested within a def_expr
-             **/
-            rp<ConvertExprAccess> cvt_expr_;
         }; /*exprstate*/
 
         inline std::ostream &

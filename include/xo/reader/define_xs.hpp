@@ -28,6 +28,9 @@ namespace xo {
          **/
         class define_xs : public exprstate {
         public:
+            using ConvertExprAccess = xo::ast::ConvertExprAccess;
+
+        public:
             define_xs(rp<DefineExprAccess> def_expr);
             virtual ~define_xs() = default;
 
@@ -66,6 +69,8 @@ namespace xo {
                                 exprstatestack * p_stack,
                                 rp<Expression> * /*p_emit_expr*/) override;
 
+            virtual void print(std::ostream & os) const override;
+
         private:
             /**
              *   def foo : f64 = 1 ;
@@ -88,6 +93,10 @@ namespace xo {
              *
              **/
             defexprstatetype defxs_type_;
+            /** scafford a convert-expression here.
+             *  May be nested within a def_expr
+             **/
+            rp<ConvertExprAccess> cvt_expr_;
         };
     } /*namespace scm*/
 } /*namespace xo*/

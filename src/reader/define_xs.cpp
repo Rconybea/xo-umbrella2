@@ -462,6 +462,17 @@ namespace xo {
 
             assert(false);
         }
+
+        void
+        define_xs::print(std::ostream & os) const {
+            os << "<define_xs"
+               << xtag("type", exs_type_);
+            if (def_expr_)
+                os << xtag("def_expr", def_expr_);
+            if (cvt_expr_)
+                os << xtag("cvt_expr", cvt_expr_);
+            os << ">";
+        }
     } /*namespace scm*/
 } /*namespace xo*/
 
