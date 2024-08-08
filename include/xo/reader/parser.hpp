@@ -167,6 +167,17 @@ namespace xo {
                 return exprstatetype::invalid;
             }
 
+            exprstate const * i_exstate(std::size_t i) const {
+                std::size_t z = xs_stack_.size();
+
+                if (i < z) {
+                    return xs_stack_[i].get();
+                }
+
+                /* out of bounds */
+                return nullptr;
+            }
+
             /** true iff parser contains state for an incomplete expression.
              *  For this to be true,  parser must have consumed at least one token
              *  since end of last toplevel expression

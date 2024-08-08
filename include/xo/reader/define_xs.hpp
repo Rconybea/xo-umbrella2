@@ -10,6 +10,19 @@
 
 namespace xo {
     namespace scm {
+        enum class defexprstatetype {
+            invalid = -1,
+
+            def_0,
+            def_1,
+            def_2,
+            def_3,
+            def_4,
+            def_5,
+
+            n_defexprstatetype,
+        };
+
         /** @class define_xs
          *  @brief state to provide parsing of a define-expression
          **/
@@ -18,7 +31,10 @@ namespace xo {
             define_xs(rp<DefineExprAccess> def_expr);
             virtual ~define_xs() = default;
 
+            static const define_xs * from(const exprstate * x) { return dynamic_cast<const define_xs *>(x); }
             static std::unique_ptr<define_xs> def_0(rp<DefineExprAccess> def_expr);
+
+            defexprstatetype defxs_type() const { return defxs_type_; }
 
             virtual bool admits_definition() const override;
             virtual bool admits_symbol() const override;
@@ -71,6 +87,7 @@ namespace xo {
              *   (done): definition complete,  pop exprstate from stack
              *
              **/
+            defexprstatetype defxs_type_;
         };
     } /*namespace scm*/
 } /*namespace xo*/

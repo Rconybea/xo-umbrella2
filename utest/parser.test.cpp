@@ -4,12 +4,15 @@
  */
 
 #include "xo/reader/parser.hpp"
+#include "xo/reader/define_xs.hpp"
 #include <catch2/catch.hpp>
 
 namespace xo {
     using parser_type = xo::scm::parser;
     using token_type = parser_type::token_type;
     using xo::scm::exprstatetype;
+    using xo::scm::define_xs;
+    using xo::scm::defexprstatetype;
     using std::cerr;
     using std::endl;
 
@@ -45,8 +48,11 @@ namespace xo {
                     CHECK(parser.stack_size() == 3);
                     if (parser.stack_size() > 0)
                         CHECK(parser.i_exstype(0) == exprstatetype::expect_symbol);
-                    if (parser.stack_size() > 1)
-                        CHECK(parser.i_exstype(1) == exprstatetype::def_0);
+                    if (parser.stack_size() > 1) {
+                        CHECK(parser.i_exstype(1) == exprstatetype::defexpr);
+                        REQUIRE(define_xs::from(parser.i_exstate(1)) != nullptr);
+                        CHECK(define_xs::from(parser.i_exstate(1))->defxs_type() == defexprstatetype::def_0);
+                    }
                     if (parser.stack_size() > 2)
                         CHECK(parser.i_exstype(2)
                               == exprstatetype::expect_toplevel_expression_sequence);
@@ -71,8 +77,11 @@ namespace xo {
                      *   def_1
                      */
                     CHECK(parser.stack_size() == 2);
-                    if (parser.stack_size() > 0)
-                        CHECK(parser.i_exstype(0) == exprstatetype::def_1);
+                    if (parser.stack_size() > 0) {
+                        CHECK(parser.i_exstype(0) == exprstatetype::defexpr);
+                        REQUIRE(define_xs::from(parser.i_exstate(0)) != nullptr);
+                        CHECK(define_xs::from(parser.i_exstate(0))->defxs_type() == defexprstatetype::def_1);
+                    }
                     if (parser.stack_size() > 1)
                         CHECK(parser.i_exstype(1)
                               == exprstatetype::expect_toplevel_expression_sequence);
@@ -104,8 +113,11 @@ namespace xo {
                         CHECK(parser.stack_size() == 3);
                         if (parser.stack_size() > 0)
                             CHECK(parser.i_exstype(0) == exprstatetype::expect_type);
-                        if (parser.stack_size() > 1)
-                            CHECK(parser.i_exstype(1) == exprstatetype::def_2);
+                        if (parser.stack_size() > 1) {
+                            CHECK(parser.i_exstype(1) == exprstatetype::defexpr);
+                            REQUIRE(define_xs::from(parser.i_exstate(1)) != nullptr);
+                            CHECK(define_xs::from(parser.i_exstate(1))->defxs_type() == defexprstatetype::def_2);
+                        }
                         if (parser.stack_size() > 2)
                             CHECK(parser.i_exstype(2)
                                   == exprstatetype::expect_toplevel_expression_sequence);
@@ -132,8 +144,11 @@ namespace xo {
                          *   def_3
                          */
                         CHECK(parser.stack_size() == 2);
-                        if (parser.stack_size() > 0)
-                            CHECK(parser.i_exstype(0) == exprstatetype::def_3);
+                        if (parser.stack_size() > 0) {
+                            CHECK(parser.i_exstype(0) == exprstatetype::defexpr);
+                            REQUIRE(define_xs::from(parser.i_exstate(0)) != nullptr);
+                            CHECK(define_xs::from(parser.i_exstate(0))->defxs_type() == defexprstatetype::def_3);
+                        }
                         if (parser.stack_size() > 1)
                             CHECK(parser.i_exstype(1)
                                   == exprstatetype::expect_toplevel_expression_sequence);
@@ -176,8 +191,11 @@ namespace xo {
                     CHECK(parser.stack_size() == 3);
                     if (parser.stack_size() > 0)
                         CHECK(parser.i_exstype(0) == exprstatetype::expect_rhs_expression);
-                    if (parser.stack_size() > 1)
-                        CHECK(parser.i_exstype(1) == exprstatetype::def_4);
+                    if (parser.stack_size() > 1) {
+                        CHECK(parser.i_exstype(1) == exprstatetype::defexpr);
+                        REQUIRE(define_xs::from(parser.i_exstate(1)) != nullptr);
+                        CHECK(define_xs::from(parser.i_exstate(1))->defxs_type() == defexprstatetype::def_4);
+                    }
                     if (parser.stack_size() > 2)
                         CHECK(parser.i_exstype(2)
                               == exprstatetype::expect_toplevel_expression_sequence);
@@ -212,8 +230,11 @@ namespace xo {
                         CHECK(parser.i_exstype(0) == exprstatetype::expr_progress);
                     if (parser.stack_size() > 1)
                         CHECK(parser.i_exstype(1) == exprstatetype::expect_rhs_expression);
-                    if (parser.stack_size() > 2)
-                        CHECK(parser.i_exstype(2) == exprstatetype::def_4);
+                    if (parser.stack_size() > 2) {
+                        CHECK(parser.i_exstype(2) == exprstatetype::defexpr);
+                        REQUIRE(define_xs::from(parser.i_exstate(2)) != nullptr);
+                        CHECK(define_xs::from(parser.i_exstate(2))->defxs_type() == defexprstatetype::def_4);
+                    }
                     if (parser.stack_size() > 3)
                         CHECK(parser.i_exstype(3)
                               == exprstatetype::expect_toplevel_expression_sequence);

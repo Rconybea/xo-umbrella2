@@ -20,12 +20,15 @@ namespace xo {
             /** toplevel of some translation unit **/
             expect_toplevel_expression_sequence,
 
+            defexpr,
+#ifdef OBSOLETE
             def_0,
             def_1,
             def_2,
             def_3,
             def_4,
             def_5,
+#endif
 
             /* lparen_0: look for expression; capture + advance to lparen_1 */
             lparen_0,
@@ -62,6 +65,8 @@ namespace xo {
         private:
         };
 #endif
+
+        class define_xs;
 
         /** state associated with a partially-parsed expression.
          **/

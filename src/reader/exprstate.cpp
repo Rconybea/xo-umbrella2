@@ -20,18 +20,8 @@ namespace xo {
                 return "?invalid";
             case exprstatetype::expect_toplevel_expression_sequence:
                 return "expect_toplevel_expression_sequence";
-            case exprstatetype::def_0:
-                return "def_0";
-            case exprstatetype::def_1:
-                return "def_1";
-            case exprstatetype::def_2:
-                return "def_2";
-            case exprstatetype::def_3:
-                return "def_3";
-            case exprstatetype::def_4:
-                return "def_4";
-            case exprstatetype::def_5:
-                return "def_5";
+            case exprstatetype::defexpr:
+                return "defexpr";
             case exprstatetype::lparen_0:
                 return "lparen_0";
             case exprstatetype::lparen_1:
@@ -57,12 +47,7 @@ namespace xo {
             case exprstatetype::expect_toplevel_expression_sequence:
                 return true;
 
-            case exprstatetype::def_0:
-            case exprstatetype::def_1:
-            case exprstatetype::def_2:
-            case exprstatetype::def_3:
-            case exprstatetype::def_4:
-            case exprstatetype::def_5:
+            case exprstatetype::defexpr:
                 /* unreachable */
                 assert(false);
                 return false;
@@ -90,12 +75,7 @@ namespace xo {
             case exprstatetype::expect_toplevel_expression_sequence:
                 return false;
 
-            case exprstatetype::def_0:
-            case exprstatetype::def_1:
-            case exprstatetype::def_2:
-            case exprstatetype::def_3:
-            case exprstatetype::def_4:
-            case exprstatetype::def_5:
+            case exprstatetype::defexpr:
                 /* unreachable */
                 assert(false);
                 return false;
@@ -129,16 +109,12 @@ namespace xo {
         exprstate::admits_colon() const {
             switch (exs_type_) {
             case exprstatetype::expect_toplevel_expression_sequence:
-            case exprstatetype::def_0:
+
+            case exprstatetype::defexpr:
+                /* unreachable -- redirects to define_xs::admits_colon() */
+                assert(false);
                 return false;
 
-            case exprstatetype::def_1:
-                return true;
-
-            case exprstatetype::def_2:
-            case exprstatetype::def_3:
-            case exprstatetype::def_4:
-            case exprstatetype::def_5:
             case exprstatetype::lparen_0:
             case exprstatetype::lparen_1:
             case exprstatetype::expect_rhs_expression:
@@ -165,14 +141,7 @@ namespace xo {
         exprstate::admits_semicolon() const {
             switch (exs_type_) {
             case exprstatetype::expect_toplevel_expression_sequence:
-            case exprstatetype::def_0:
-            case exprstatetype::def_1:
-            case exprstatetype::def_2:
-            case exprstatetype::def_3:
-            case exprstatetype::def_4:
-                return false;
-            case exprstatetype::def_5:
-                return true;
+            case exprstatetype::defexpr:
             case exprstatetype::lparen_0:
             case exprstatetype::lparen_1:
             case exprstatetype::expect_rhs_expression:
@@ -208,20 +177,10 @@ namespace xo {
                  *
                  * note that we skip from def_1 -> def_4 if '=' instead of ':'
                  */
-            case exprstatetype::def_0:
+            case exprstatetype::defexpr:
+                /* unreachable - redirects to define_xs */
+                assert(false);
                 return false;
-
-            case exprstatetype::def_1:
-                return true;
-
-            case exprstatetype::def_2:
-                return false;
-
-            case exprstatetype::def_3:
-                return true;
-
-            case exprstatetype::def_4:
-            case exprstatetype::def_5:
 
             case exprstatetype::lparen_0:
             case exprstatetype::lparen_1:
@@ -249,12 +208,10 @@ namespace xo {
         exprstate::admits_f64() const {
             switch (exs_type_) {
             case exprstatetype::expect_toplevel_expression_sequence:
-            case exprstatetype::def_0:
-            case exprstatetype::def_1:
-            case exprstatetype::def_2:
-            case exprstatetype::def_3:
-            case exprstatetype::def_4:
-            case exprstatetype::def_5:
+
+            case exprstatetype::defexpr:
+                /* unreachable - redirects to define_xs */
+                assert(false);
                 return false;
 
             case exprstatetype::lparen_0:
@@ -297,13 +254,8 @@ namespace xo {
                  */
                 return false;
 
-            case exprstatetype::def_0:
-            case exprstatetype::def_1:
-            case exprstatetype::def_2:
-            case exprstatetype::def_3:
-            case exprstatetype::def_4:
-            case exprstatetype::def_5:
-                /* unreachable */
+            case exprstatetype::defexpr:
+                /* unreachable - redirects to define_xs */
                 assert(false);
                 return false;
 
@@ -343,13 +295,8 @@ namespace xo {
             case exprstatetype::expect_toplevel_expression_sequence:
                 return false;
 
-            case exprstatetype::def_0:
-            case exprstatetype::def_1:
-            case exprstatetype::def_2:
-            case exprstatetype::def_3:
-            case exprstatetype::def_4:
-            case exprstatetype::def_5:
-                /* unreachable */
+            case exprstatetype::defexpr:
+                /* unreachable - redirects to define_xs */
                 assert(false);
                 return false;
 
@@ -442,13 +389,8 @@ namespace xo {
                            xtag("symbol", tk)));
                 break;
 
-            case exprstatetype::def_0:
-            case exprstatetype::def_1:
-            case exprstatetype::def_2:
-            case exprstatetype::def_3:
-            case exprstatetype::def_4:
-            case exprstatetype::def_5:
-                /* unreachable */
+            case exprstatetype::defexpr:
+                /* unreachable - redirects to define_xs */
                 assert(false);
                 return;
 
@@ -558,13 +500,8 @@ namespace xo {
             switch (this->exs_type_) {
             case exprstatetype::expect_toplevel_expression_sequence:
 
-            case exprstatetype::def_0:
-            case exprstatetype::def_1:
-            case exprstatetype::def_2:
-            case exprstatetype::def_3:
-            case exprstatetype::def_4:
-            case exprstatetype::def_5:
-                /* unreachable */
+            case exprstatetype::defexpr:
+                /* unreachable - redirects to define_xs */
                 assert(false);
                 return;
 
@@ -728,7 +665,7 @@ namespace xo {
                 /* right paren confirms stack expression */
                 rp<Expression> expr = this->gen_expr_;
 
-                std::unique_ptr<exprstate> self = p_stack->pop_exprstate(); /* NOT KOSHER.  invalidates *this */
+                std::unique_ptr<exprstate> self = p_stack->pop_exprstate();
 
                 if (p_stack->empty()) {
                     throw std::runtime_error(tostr(self_name,
@@ -744,7 +681,7 @@ namespace xo {
             } else if (this->exs_type_ == exprstatetype::lparen_1) {
                 rp<Expression> expr = this->gen_expr_;
 
-                std::unique_ptr<exprstate> self = p_stack->pop_exprstate(); /* NOT KOSHER.  invalidates *this */
+                std::unique_ptr<exprstate> self = p_stack->pop_exprstate();
 
                 p_stack->top_exprstate().on_expr(expr, p_stack, p_emit_expr);
             }
@@ -891,13 +828,8 @@ namespace xo {
 
                 *p_emit_expr = expr.promote();
                 return;
-            case exprstatetype::def_0:
-            case exprstatetype::def_1:
-            case exprstatetype::def_2:
-            case exprstatetype::def_3:
-            case exprstatetype::def_4:
-            case exprstatetype::def_5:
-                /* unreachable.  see define_xs::on_expr() */
+            case exprstatetype::defexpr:
+                /* unreachable.  redirects to define_xs::on_expr() */
                 assert(false);
                 return;
 
@@ -962,13 +894,8 @@ namespace xo {
                 /* NOT IMPLEMENTED */
                 assert(false);
                 return;
-            case exprstatetype::def_0:
-            case exprstatetype::def_1:
-            case exprstatetype::def_2:
-            case exprstatetype::def_3:
-            case exprstatetype::def_4:
-            case exprstatetype::def_5:
-                /* unreachable */
+            case exprstatetype::defexpr:
+                /* unreachable - redirects to define_xs */
                 assert(false);
                 return;
 
