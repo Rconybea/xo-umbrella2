@@ -56,9 +56,9 @@ namespace xo {
             virtual void on_rightparen_token(const token_type & tk,
                                              exprstatestack * p_stack,
                                              rp<Expression> * /*p_emit_expr*/) override;
-            virtual void on_f64(const token_type & tk,
-                                exprstatestack * p_stack,
-                                rp<Expression> * /*p_emit_expr*/) override;
+            virtual void on_f64_token(const token_type & tk,
+                                      exprstatestack * p_stack,
+                                      rp<Expression> * /*p_emit_expr*/) override;
 
             virtual void print(std::ostream & os) const override;
 
