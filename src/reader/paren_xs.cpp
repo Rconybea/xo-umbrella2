@@ -154,8 +154,9 @@ namespace xo {
         }
 
         void
-        paren_xs::on_rightparen(exprstatestack * p_stack,
-                                rp<Expression> * p_emit_expr)
+        paren_xs::on_rightparen_token(const token_type & /*tk*/,
+                                      exprstatestack * p_stack,
+                                      rp<Expression> * p_emit_expr)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
