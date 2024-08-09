@@ -41,6 +41,7 @@ namespace xo {
             return "???";
         }
 
+#ifdef OBSOLETE
         bool
         exprstate::admits_definition() const {
             switch (exs_type_) {
@@ -69,6 +70,7 @@ namespace xo {
 
             return false;
         }
+#endif
 
         bool
         exprstate::admits_symbol() const {
