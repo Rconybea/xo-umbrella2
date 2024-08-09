@@ -70,11 +70,6 @@ namespace xo {
                 {}
             virtual ~exprstate() = default;
 
-#ifdef RELOCATED
-            static std::unique_ptr<exprstate> expect_toplevel_expression_sequence() {
-                return std::make_unique<exprstate>(exprstate(exprstatetype::expect_toplevel_expression_sequence));
-            }
-#endif
             static std::unique_ptr<exprstate> expect_rhs_expression() {
                 return std::make_unique<exprstate>(exprstate(exprstatetype::expect_rhs_expression));
             }
@@ -87,12 +82,6 @@ namespace xo {
 
             exprstatetype exs_type() const { return exs_type_; }
 
-#ifdef OBSOLETE
-            /** true iff this parsing state admits a 'def' keyword
-             *  as next token
-             **/
-            virtual bool admits_definition() const;
-#endif
             /** true iff this parsing state admits a symbol as next token **/
             virtual bool admits_symbol() const;
             /** true iff this parsing state admits a colon as next token **/
