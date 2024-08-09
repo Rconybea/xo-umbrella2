@@ -43,15 +43,13 @@ namespace xo {
         progress_xs::admits_f64() const { return false; }
 
         void
-        progress_xs::on_def_token(const token_type & /*tk*/,
+        progress_xs::on_def_token(const token_type & tk,
                                   exprstatestack * /*p_stack*/)
         {
             constexpr const char * self_name = "progress_xs::on_def";
 
             /* nothing here - admits_definition unconditionally false */
-            throw std::runtime_error(tostr(self_name,
-                                           ": unexpected keyword 'def' for parsing state",
-                                           xtag("state", *this)));
+            this->illegal_input_error(self_name, tk) ;
         }
 
         void
@@ -84,14 +82,12 @@ namespace xo {
         }
 
         void
-        progress_xs::on_colon_token(const token_type & /*tk*/,
+        progress_xs::on_colon_token(const token_type & tk,
                                     exprstatestack * /*p_stack*/)
         {
             constexpr const char * self_name = "progress_xs::on_colon";
 
-            throw std::runtime_error(tostr(self_name,
-                                           ": unexpected colon for parsing state",
-                                           xtag("state", *this)));
+            this->illegal_input_error(self_name, tk);
         }
 
         void
@@ -128,18 +124,16 @@ namespace xo {
         }
 
         void
-        progress_xs::on_singleassign_token(const token_type & /*tk*/,
+        progress_xs::on_singleassign_token(const token_type & tk,
                                            exprstatestack * /*p_stack*/)
         {
             constexpr const char * self_name = "progress_xs::on_singleassign";
 
-            throw std::runtime_error(tostr(self_name,
-                                           ": unexpected equals for parsing state",
-                                           xtag("state", *this)));
+            this->illegal_input_error(self_name, tk);
         }
 
         void
-        progress_xs::on_leftparen_token(const token_type & /*tk*/,
+        progress_xs::on_leftparen_token(const token_type & tk,
                                         exprstatestack * /*p_stack*/,
                                         rp<Expression> * /*p_emit_expr*/)
         {
@@ -148,9 +142,7 @@ namespace xo {
 
             constexpr const char * self_name = "exprstate::on_leftparen";
 
-            throw std::runtime_error(tostr(self_name,
-                                           ": unexpected leftparen '(' for parsing state",
-                                           xtag("state", *this)));
+            this->illegal_input_error(self_name, tk);
         }
 
          void
@@ -194,7 +186,7 @@ namespace xo {
          }
 
         void
-        progress_xs::on_f64_token(const token_type & /*tk*/,
+        progress_xs::on_f64_token(const token_type & tk,
                                   exprstatestack * /*p_stack*/,
                                   rp<Expression> * /*p_emit_expr*/)
         {
@@ -203,9 +195,7 @@ namespace xo {
 
             constexpr const char * self_name = "progress_xs::on_f64";
 
-            throw std::runtime_error(tostr(self_name,
-                                           ": unexpected floating-point literal for parsing state",
-                                           xtag("state", *this)));
+            this->illegal_input_error(self_name, tk);
         }
 
         void

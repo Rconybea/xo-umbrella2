@@ -382,7 +382,7 @@ namespace xo {
         }
 
         void
-        define_xs::on_singleassign_token(const token_type & /*tk*/,
+        define_xs::on_singleassign_token(const token_type & tk,
                                          exprstatestack * p_stack)
         {
             constexpr bool c_debug_flag = true;
@@ -390,11 +390,8 @@ namespace xo {
 
             constexpr const char * self_name = "exprstate::on_singleassign";
 
-            if (!this->admits_singleassign())
-            {
-                throw std::runtime_error(tostr(self_name,
-                                               ": unexpected equals for parsing state",
-                                               xtag("state", *this)));
+            if (!this->admits_singleassign()) {
+                this->illegal_input_error(self_name, tk);
             }
 
             if ((this->defxs_type_ == defexprstatetype::def_1)
@@ -409,7 +406,7 @@ namespace xo {
         }
 
         void
-        define_xs::on_leftparen_token(const token_type & /*tk*/,
+        define_xs::on_leftparen_token(const token_type & tk,
                                       exprstatestack * /*p_stack*/,
                                        rp<Expression> * /*p_emit_expr*/)
         {
@@ -420,16 +417,14 @@ namespace xo {
 
             if (!this->admits_leftparen())
             {
-                throw std::runtime_error(tostr(self_name,
-                                               ": unexpected leftparen '(' for parsing state",
-                                               xtag("state", *this)));
+                this->illegal_input_error(self_name, tk);
             }
 
             assert(false); /* inserting this during refactor...? */
         }
 
         void
-        define_xs::on_rightparen_token(const token_type & /*tk*/,
+        define_xs::on_rightparen_token(const token_type & tk,
                                        exprstatestack * /*p_stack*/,
                                        rp<Expression> * /*p_emit_expr*/)
         {
@@ -440,16 +435,14 @@ namespace xo {
 
             if (!this->admits_rightparen())
             {
-                throw std::runtime_error(tostr(self_name,
-                                               ": unexpected rightparen ')' for parsing state",
-                                               xtag("state", *this)));
+                this->illegal_input_error(self_name, tk);
             }
 
             assert(false); /* inserting this during refactor..? */
         }
 
         void
-        define_xs::on_f64_token(const token_type & /*tk*/,
+        define_xs::on_f64_token(const token_type & tk,
                                 exprstatestack * /*p_stack*/,
                                 rp<Expression> * /*p_emit_expr*/)
         {
@@ -460,9 +453,7 @@ namespace xo {
 
             if (!this->admits_f64())
             {
-                throw std::runtime_error(tostr(self_name,
-                                               ": unexpected floating-point literal for parsing state",
-                                               xtag("state", *this)));
+                this->illegal_input_error(self_name, tk);
             }
 
             assert(false);

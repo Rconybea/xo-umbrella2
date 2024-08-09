@@ -73,14 +73,12 @@ namespace xo {
         }
 
         void
-        paren_xs::on_def_token(const token_type & /*tk*/,
+        paren_xs::on_def_token(const token_type & tk,
                                exprstatestack * /*p_stack*/)
         {
             constexpr const char * c_self_name = "paren_xs::on_def";
 
-            throw std::runtime_error(tostr(c_self_name,
-                                           ": unexpected keyword 'def' for parsing state",
-                                           xtag("state", *this)));
+            this->illegal_input_error(c_self_name, tk);
         }
 
         void
@@ -110,66 +108,56 @@ namespace xo {
         }
 
         void
-        paren_xs::on_colon_token(const token_type & /*tk*/,
+        paren_xs::on_colon_token(const token_type & tk,
                                  exprstatestack * /*p_stack*/)
         {
             constexpr const char * c_self_name = "paren_xs::on_colon";
 
-            throw std::runtime_error(tostr(c_self_name,
-                                           ": unexpected colon for parsing state",
-                                           xtag("state", *this)));
+            this->illegal_input_error(c_self_name, tk);
         }
 
         void
-        paren_xs::on_semicolon_token(const token_type & /*tk*/,
+        paren_xs::on_semicolon_token(const token_type & tk,
                                      exprstatestack * /*p_stack*/,
                                      rp<Expression> * /*p_emit_expr*/)
         {
             constexpr const char * c_self_name = "paren_xs::on_semicolon";
 
-            throw std::runtime_error(tostr(c_self_name,
-                                           ": unexpected semicolon for parsing state",
-                                           xtag("state", *this)));
+            this->illegal_input_error(c_self_name, tk);
         }
 
         void
-        paren_xs::on_singleassign_token(const token_type & /*tk*/,
+        paren_xs::on_singleassign_token(const token_type & tk,
                                         exprstatestack * /*p_stack*/)
         {
             constexpr const char * c_self_name = "paren_xs::on_singleassign";
 
-            throw std::runtime_error(tostr(c_self_name,
-                                           ": unexpected equals for parsing state",
-                                           xtag("state", *this)));
+            this->illegal_input_error(c_self_name, tk);
         }
 
         void
-        paren_xs::on_leftparen_token(const token_type & /*tk*/,
+        paren_xs::on_leftparen_token(const token_type & tk,
                                      exprstatestack * /*p_stack*/,
                                      rp<Expression> * /*p_emit_expr*/)
         {
             constexpr const char * c_self_name = "paren_xs::on_leftparen";
 
-            throw std::runtime_error(tostr(c_self_name,
-                                           ": unexpected leftparen '(' for parsing state",
-                                           xtag("state", *this)));
+            this->illegal_input_error(c_self_name, tk);
         }
 
         void
-        paren_xs::on_rightparen_token(const token_type & /*tk*/,
+        paren_xs::on_rightparen_token(const token_type & tk,
                                       exprstatestack * p_stack,
                                       rp<Expression> * p_emit_expr)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            constexpr const char * self_name = "paren_xs::on_rightparen";
+            constexpr const char * c_self_name = "paren_xs::on_rightparen";
 
             if (!this->admits_rightparen())
             {
-                throw std::runtime_error(tostr(self_name,
-                                               ": unexpected rightparen ')' for parsing state",
-                                               xtag("state", *this)));
+                this->illegal_input_error(c_self_name, tk);
             }
 
             if (this->parenxs_type_ == parenexprstatetype::lparen_1) {
@@ -182,7 +170,7 @@ namespace xo {
         }
 
         void
-        paren_xs::on_f64_token(const token_type & /*tk*/,
+        paren_xs::on_f64_token(const token_type & tk,
                                exprstatestack * /*p_stack*/,
                                rp<Expression> * /*p_emit_expr*/)
         {
@@ -193,9 +181,7 @@ namespace xo {
 
             if (!this->admits_f64())
             {
-                throw std::runtime_error(tostr(c_self_name,
-                                               ": unexpected floating-point literal for parsing state",
-                                               xtag("state", *this)));
+                this->illegal_input_error(c_self_name, tk);
             }
 
             assert(false);

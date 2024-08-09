@@ -320,19 +320,18 @@ namespace xo {
         }
 
         void
-        exprstate::on_def_token(const token_type & /*tk*/,
-                                exprstatestack * p_stack) {
+        exprstate::on_def_token(const token_type & tk,
+                                exprstatestack * p_stack)
+        {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            constexpr const char * self_name = "exprstate::on_def";
+            constexpr const char * c_self_name = "exprstate::on_def_token";
 
             /* lots of illegal states */
             if (!this->admits_definition())
             {
-                throw std::runtime_error(tostr(self_name,
-                                               ": unexpected keyword 'def' for parsing state",
-                                               xtag("state", *this)));
+                this->illegal_input_error(c_self_name, tk);
             }
 
             p_stack->push_exprstate(define_xs::def_0());
@@ -358,20 +357,16 @@ namespace xo {
 
             log && log(xtag("exstype", p_stack->top_exprstate().exs_type()));
 
-            constexpr const char * self_name = "exprstate::on_symbol";
+            constexpr const char * c_self_name = "exprstate::on_symbol_token";
 
             if (!this->admits_symbol()) {
-                throw std::runtime_error
-                    (tostr(self_name,
-                           ": unexpected symbol-token for parsing state",
-                           xtag("symbol", tk),
-                           xtag("state", *this)));
+                this->illegal_input_error(c_self_name, tk);
             }
 
             switch (this->exs_type_) {
             case exprstatetype::expect_toplevel_expression_sequence:
                 throw std::runtime_error
-                    (tostr(self_name,
+                    (tostr(c_self_name,
                            ": unexpected symbol-token at top-level",
                            " (expecting decl|def)",
                            xtag("symbol", tk)));
@@ -442,7 +437,7 @@ namespace xo {
 
                 if (!td) {
                     throw std::runtime_error
-                        (tostr(self_name,
+                        (tostr(c_self_name,
                                ": unknown type name",
                                " (expecting f64|f32|i16|i32|i64)",
                                xtag("typename", tk.text())));
@@ -833,6 +828,17 @@ namespace xo {
             os << "<exprstate"
                << xtag("type", exs_type_);
             os << ">";
+        }
+
+        void
+        exprstate::illegal_input_error(const char * self_name,
+                                       const token_type & tk) const
+        {
+            throw std::runtime_error
+                (tostr(self_name,
+                       ": unexpected input token for parsing state",
+                       xtag("token", tk),
+                       xtag("state", *this)));
         }
 
         // ----- exprstatestack -----

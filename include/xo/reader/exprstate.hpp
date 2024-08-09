@@ -157,6 +157,13 @@ namespace xo {
                                       rp<Expression> * p_emit_expr);
 
         protected:
+            /** throw exception when next token is inconsistent with
+             *  parsing state
+             **/
+            void illegal_input_error(const char * self_name,
+                                     const token_type & tk) const;
+
+        protected:
             /** explicit subtype: identifies derived class **/
             exprstatetype exs_type_;
         }; /*exprstate*/
