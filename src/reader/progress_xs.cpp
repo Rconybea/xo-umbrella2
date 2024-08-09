@@ -126,7 +126,9 @@ namespace xo {
         }
 
         void
-        progress_xs::on_singleassign(exprstatestack * /*p_stack*/) {
+        progress_xs::on_singleassign_token(const token_type & /*tk*/,
+                                           exprstatestack * /*p_stack*/)
+        {
             constexpr const char * self_name = "progress_xs::on_singleassign";
 
             throw std::runtime_error(tostr(self_name,

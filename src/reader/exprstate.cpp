@@ -544,7 +544,8 @@ namespace xo {
         }
 
         void
-        exprstate::on_singleassign(exprstatestack * /*p_stack*/) {
+        exprstate::on_singleassign_token(const token_type & /*tk*/,
+                                         exprstatestack * /*p_stack*/) {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
@@ -701,7 +702,7 @@ namespace xo {
                 return;
 
             case tokentype::tk_singleassign:
-                this->on_singleassign(p_stack);
+                this->on_singleassign_token(tk, p_stack);
                 return;
 
             case tokentype::tk_assign:

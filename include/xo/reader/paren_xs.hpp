@@ -61,7 +61,8 @@ namespace xo {
             virtual void on_semicolon_token(const token_type & tk,
                                             exprstatestack * p_stack,
                                             rp<Expression> * /*p_emit_expr*/) override;
-            virtual void on_singleassign(exprstatestack * p_stack) override;
+            virtual void on_singleassign_token(const token_type & tk,
+                                               exprstatestack * p_stack) override;
             virtual void on_leftparen(exprstatestack * p_stack,
                                       rp<Expression> * /*p_emit_expr*/) override;
             virtual void on_rightparen(exprstatestack * p_stack,
