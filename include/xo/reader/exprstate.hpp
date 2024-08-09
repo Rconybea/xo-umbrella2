@@ -141,7 +141,9 @@ namespace xo {
             /** handle incoming '=' token **/
             virtual void on_singleassign_token(const token_type & tk,
                                                exprstatestack * p_stack);
-            virtual void on_leftparen(exprstatestack * p_stack,
+            /** handle incoming '(' token **/
+            virtual void on_leftparen_token(const token_type & tk,
+                                            exprstatestack * p_stack,
                                       rp<Expression> * p_emit_expr);
             virtual void on_rightparen(exprstatestack * p_stack,
                                        rp<Expression> * p_emit_expr);

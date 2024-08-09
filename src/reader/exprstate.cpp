@@ -562,8 +562,9 @@ namespace xo {
         }
 
         void
-        exprstate::on_leftparen(exprstatestack * p_stack,
-                                rp<Expression> * /*p_emit_expr*/)
+        exprstate::on_leftparen_token(const token_type & /*tk*/,
+                                      exprstatestack * p_stack,
+                                      rp<Expression> * /*p_emit_expr*/)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
@@ -670,7 +671,7 @@ namespace xo {
                 return;
 
             case tokentype::tk_leftparen:
-                this->on_leftparen(p_stack, p_emit_expr);
+                this->on_leftparen_token(tk, p_stack, p_emit_expr);
                 return;
 
             case tokentype::tk_rightparen:
