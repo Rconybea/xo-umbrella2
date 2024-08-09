@@ -108,7 +108,8 @@ namespace xo {
         }
 
         void
-        paren_xs::on_colon(exprstatestack * /*p_stack*/)
+        paren_xs::on_colon_token(const token_type & /*tk*/,
+                                 exprstatestack * /*p_stack*/)
         {
             constexpr const char * c_self_name = "paren_xs::on_colon";
 

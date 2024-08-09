@@ -504,7 +504,9 @@ namespace xo {
         }
 
         void
-        exprstate::on_colon(exprstatestack * /*p_stack*/) {
+        exprstate::on_colon_token(const token_type & /*tk*/,
+                                  exprstatestack * /*p_stack*/)
+        {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
@@ -686,7 +688,7 @@ namespace xo {
                 return;
 
             case tokentype::tk_colon:
-                this->on_colon(p_stack);
+                this->on_colon_token(tk, p_stack);
                 return;
 
             case tokentype::tk_doublecolon:

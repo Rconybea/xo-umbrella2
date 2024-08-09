@@ -326,7 +326,9 @@ namespace xo {
         }
 
         void
-        define_xs::on_colon(exprstatestack * p_stack) {
+        define_xs::on_colon_token(const token_type & /*tk*/,
+                                  exprstatestack * p_stack)
+        {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 

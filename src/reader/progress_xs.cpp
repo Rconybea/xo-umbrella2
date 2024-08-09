@@ -82,7 +82,9 @@ namespace xo {
         }
 
         void
-        progress_xs::on_colon(exprstatestack * /*p_stack*/) {
+        progress_xs::on_colon_token(const token_type & /*tk*/,
+                                    exprstatestack * /*p_stack*/)
+        {
             constexpr const char * self_name = "progress_xs::on_colon";
 
             throw std::runtime_error(tostr(self_name,
