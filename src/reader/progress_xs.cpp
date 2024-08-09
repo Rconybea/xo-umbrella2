@@ -43,7 +43,9 @@ namespace xo {
         progress_xs::admits_f64() const { return false; }
 
         void
-        progress_xs::on_def(exprstatestack * /*p_stack*/) {
+        progress_xs::on_def_token(const token_type & /*tk*/,
+                                  exprstatestack * /*p_stack*/)
+        {
             constexpr const char * self_name = "progress_xs::on_def";
 
             /* nothing here - admits_definition unconditionally false */

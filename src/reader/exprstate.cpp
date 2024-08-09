@@ -320,7 +320,8 @@ namespace xo {
         }
 
         void
-        exprstate::on_def(exprstatestack * p_stack) {
+        exprstate::on_def_token(const token_type & /*tk*/,
+                                exprstatestack * p_stack) {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
@@ -652,7 +653,7 @@ namespace xo {
             switch (tk.tk_type()) {
 
             case tokentype::tk_def:
-                this->on_def(p_stack);
+                this->on_def_token(tk, p_stack);
                 return;
 
             case tokentype::tk_i64:

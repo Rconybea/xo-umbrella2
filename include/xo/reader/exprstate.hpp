@@ -126,7 +126,9 @@ namespace xo {
 
             // ----- input methods -----
 
-            virtual void on_def(exprstatestack * p_stack);
+            /** handle incoming 'def' token **/
+            virtual void on_def_token(const token_type & tk,
+                                      exprstatestack * p_stack);
             /** handle incoming symbol token **/
             virtual void on_symbol_token(const token_type & tk,
                                          exprstatestack * p_stack,

@@ -73,7 +73,9 @@ namespace xo {
         }
 
         void
-        paren_xs::on_def(exprstatestack * /*p_stack*/) {
+        paren_xs::on_def_token(const token_type & /*tk*/,
+                               exprstatestack * /*p_stack*/)
+        {
             constexpr const char * c_self_name = "paren_xs::on_def";
 
             throw std::runtime_error(tostr(c_self_name,

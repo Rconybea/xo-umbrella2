@@ -40,9 +40,6 @@ namespace xo {
             virtual bool admits_rightparen() const override;
             virtual bool admits_f64() const override;
 
-            // virtual void on_f64(..) override
-            virtual void on_def(exprstatestack * p_stack) override;
-
             virtual void on_expr(ref::brw<Expression> expr,
                                  exprstatestack * p_stack,
                                  rp<Expression> * p_emit_expr) override;
@@ -53,6 +50,8 @@ namespace xo {
                                       exprstatestack * /*p_stack*/,
                                       rp<Expression> * /*p_emit_expr*/) override;
 
+            virtual void on_def_token(const token_type & tk,
+                                      exprstatestack * p_stack) override;
             virtual void on_symbol_token(const token_type & tk,
                                          exprstatestack * p_stack,
                                          rp<Expression> * p_emit_expr) override;
