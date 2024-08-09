@@ -201,7 +201,7 @@ namespace xo {
 
         void
         progress_xs::print(std::ostream & os) const {
-            os << "<exprstate"
+            os << "<progress_xs"
                << xtag("type", exs_type_);
             if (gen_expr_)
                 os << xtag("gen_expr", gen_expr_);
