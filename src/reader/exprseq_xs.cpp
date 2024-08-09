@@ -47,6 +47,16 @@ namespace xo {
 
             this->illegal_input_error(c_self_name, tk);
         }
+
+        void
+        exprseq_xs::on_typedescr(TypeDescr /*td*/,
+                                 exprstatestack * /*p_stack*/,
+                                 rp<Expression> * /*p_emit_expr*/)
+        {
+            /* unreachable - typedescr should never get delivered to exprseq */
+            assert(false);
+            return;
+        }
     } /*namespace scm*/
 } /*namespace xo*/
 

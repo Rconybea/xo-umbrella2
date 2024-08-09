@@ -413,7 +413,6 @@ namespace xo {
 
             switch (this->exs_type_) {
             case exprstatetype::expect_toplevel_expression_sequence:
-
             case exprstatetype::defexpr:
             case exprstatetype::parenexpr:
                 /* unreachable - redirects to define_xs */
