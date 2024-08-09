@@ -18,15 +18,24 @@ namespace xo {
             /** toplevel of some translation unit **/
             expect_toplevel_expression_sequence,
 
+            /** handle define-expression
+             *  see @ref define_xs
+             **/
             defexpr,
 
-            /* handle parenthesized expression */
+            /** handle parenthesized expression
+             *  see @ref paren_xs
+             **/
             parenexpr,
 
             expect_rhs_expression,
             expect_symbol,
             expect_type,
 
+            /** handle expression-in-progress,
+             *  in case infix operators to follow
+             *  see @ref progress_xs
+             **/
             expr_progress,
 
             n_exprstatetype
@@ -115,11 +124,13 @@ namespace xo {
             /** print human-readable representation on @p os **/
             virtual void print(std::ostream & os) const;
 
-        public:
+            // ----- input methods -----
+
             virtual void on_def(exprstatestack * p_stack);
-            virtual void on_symbol(const token_type & tk,
-                                   exprstatestack * p_stack,
-                                   rp<Expression> * p_emit_expr);
+            /** handle incoming symbol token **/
+            virtual void on_symbol_token(const token_type & tk,
+                                         exprstatestack * p_stack,
+                                         rp<Expression> * p_emit_expr);
             virtual void on_colon(exprstatestack * p_stack);
             virtual void on_semicolon(exprstatestack * p_stack,
                                       rp<Expression> * p_emit_expr);

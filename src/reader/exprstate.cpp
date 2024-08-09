@@ -348,9 +348,9 @@ namespace xo {
         }
 
         void
-        exprstate::on_symbol(const token_type & tk,
-                             exprstatestack * p_stack,
-                             rp<Expression> * p_emit_expr)
+        exprstate::on_symbol_token(const token_type & tk,
+                                   exprstatestack * p_stack,
+                                   rp<Expression> * p_emit_expr)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
@@ -662,7 +662,7 @@ namespace xo {
                 return;
 
             case tokentype::tk_symbol:
-                this->on_symbol(tk, p_stack, p_emit_expr);
+                this->on_symbol_token(tk, p_stack, p_emit_expr);
                 return;
 
             case tokentype::tk_leftparen:

@@ -53,9 +53,9 @@ namespace xo {
                                       exprstatestack * /*p_stack*/,
                                       rp<Expression> * /*p_emit_expr*/) override;
 
-            virtual void on_symbol(const token_type & tk,
-                                   exprstatestack * p_stack,
-                                   rp<Expression> * p_emit_expr) override;
+            virtual void on_symbol_token(const token_type & tk,
+                                         exprstatestack * p_stack,
+                                         rp<Expression> * p_emit_expr) override;
             virtual void on_colon(exprstatestack * p_stack) override;
             virtual void on_semicolon(exprstatestack * p_stack,
                                       rp<Expression> * /*p_emit_expr*/) override;
