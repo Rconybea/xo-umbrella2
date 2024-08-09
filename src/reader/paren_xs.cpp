@@ -5,6 +5,15 @@
 
 namespace xo {
     namespace scm {
+        paren_xs::paren_xs()
+            : parenxs_type_{parenexprstatetype::lparen_0}
+        {}
+
+        std::unique_ptr<paren_xs>
+        paren_xs::lparen_0() {
+            return std::make_unique<paren_xs>(paren_xs());
+        }
+
         bool
         paren_xs::admits_definition() const { return false; }
 
@@ -23,13 +32,45 @@ namespace xo {
         bool
         paren_xs::admits_leftparen() const { /*unreachable*/  return false; }
 
-        /** TODO: fixme **/
         bool
-        paren_xs::admits_rightparen() const { return exprstate::admits_rightparen(); }
+        paren_xs::admits_rightparen() const {
+            switch (parenxs_type_) {
+            case parenexprstatetype::lparen_0:
+                /* unreachable */
+                assert(false);
+                return false;
 
-        /** TODO: fixme **/
+            case parenexprstatetype::lparen_1:
+                return true;
+
+            case parenexprstatetype::invalid:
+            case parenexprstatetype::n_parenexprstatetype:
+                /* unreachable */
+                assert(false);
+                return false;
+            }
+
+            return false;
+        }
+
         bool
-        paren_xs::admits_f64() const { return exprstate::admits_f64(); }
+        paren_xs::admits_f64() const {
+            switch (parenxs_type_) {
+            case parenexprstatetype::lparen_0:
+                return true;
+
+            case parenexprstatetype::lparen_1:
+                return false;
+
+            case parenexprstatetype::invalid:
+            case parenexprstatetype::n_parenexprstatetype:
+                /* unreachable */
+                assert(false);
+                return false;
+            }
+
+            return false;
+        }
 
         void
         paren_xs::on_def(exprstatestack * /*p_stack*/) {
@@ -124,7 +165,7 @@ namespace xo {
                                                xtag("state", *this)));
             }
 
-            if (this->exs_type_ == exprstatetype::lparen_1) {
+            if (this->parenxs_type_ == parenexprstatetype::lparen_1) {
                 rp<Expression> expr = this->gen_expr_;
 
                 std::unique_ptr<exprstate> self = p_stack->pop_exprstate();
@@ -164,15 +205,15 @@ namespace xo {
             log && log(xtag("exstype", this->exs_type_),
                        xtag("expr", expr));
 
-            switch (this->exs_type_) {
-            case exprstatetype::lparen_0: {
-                this->exs_type_ = exprstatetype::lparen_1; /* wants on_rightparen */
+            switch (this->parenxs_type_) {
+            case parenexprstatetype::lparen_0: {
+                this->parenxs_type_ = parenexprstatetype::lparen_1; /* wants on_rightparen */
                 p_stack->push_exprstate(progress_xs::make(expr.promote()));
 
                 return;
             }
 
-            case exprstatetype::lparen_1: {
+            case parenexprstatetype::lparen_1: {
                 this->gen_expr_ = expr.promote();
 
                 /* expect immediate incoming call, this time to on_rightparen() */
@@ -191,9 +232,9 @@ namespace xo {
                             exprstatestack * /*p_stack*/,
                             rp<Expression> * /*p_emit_expr*/)
         {
-            switch(this->exs_type_) {
-            case exprstatetype::lparen_0:
-            case exprstatetype::lparen_1:
+            switch(this->parenxs_type_) {
+            case parenexprstatetype::lparen_0:
+            case parenexprstatetype::lparen_1:
                 /* NOT IMPLEMENTED */
                 assert(false);
                 return;

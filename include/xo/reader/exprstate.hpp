@@ -20,10 +20,8 @@ namespace xo {
 
             defexpr,
 
-            /* lparen_0: look for expression; capture + advance to lparen_1 */
-            lparen_0,
-            /* lparen_1: expect rightparen */
-            lparen_1,
+            /* handle parenthesized expression */
+            parenexpr,
 
             expect_rhs_expression,
             expect_symbol,
@@ -44,17 +42,6 @@ namespace xo {
         }
 
         class exprstatestack;
-
-#ifdef NOT_YET
-        class exprstateaux {
-        public:
-        };
-
-        class lparen_xsa : public exprstateaux {
-        public:
-        private:
-        };
-#endif
 
         class define_xs;
 
@@ -92,9 +79,11 @@ namespace xo {
                 return std::make_unique<exprstate>(exprstate(exprstatetype::expr_progress, expr));
             }
 #endif
+#ifdef RELOCATED
             static std::unique_ptr<exprstate> lparen_0() {
                 return std::make_unique<exprstate>(exprstate(exprstatetype::lparen_0, nullptr));
             }
+#endif
 
             exprstatetype exs_type() const { return exs_type_; }
 

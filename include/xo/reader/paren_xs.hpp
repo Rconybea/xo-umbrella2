@@ -24,12 +24,12 @@ namespace xo {
          **/
         class paren_xs : public exprstate {
         public:
-            //paren_xs(rp<Expression> valex);
+            paren_xs();
             virtual ~paren_xs() = default;
 
             static const paren_xs * from(const exprstate * x) { return dynamic_cast<const paren_xs *>(x); }
 
-            //static std::unique_ptr<paren_xs> make();
+            static std::unique_ptr<paren_xs> lparen_0();
 
             virtual bool admits_definition() const override;
             virtual bool admits_symbol() const override;
@@ -71,7 +71,6 @@ namespace xo {
             virtual void print(std::ostream & os) const override;
 
         private:
-#ifdef NOT_YET
             /**
              *  ( foo ... )
              *   ^
@@ -79,7 +78,6 @@ namespace xo {
              *   lparen_0
              **/
             parenexprstatetype parenxs_type_;
-#endif
         };
     } /*namespace scm*/
 } /*namespace xo*/

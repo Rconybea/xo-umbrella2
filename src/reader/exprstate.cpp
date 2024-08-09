@@ -3,6 +3,7 @@
 #include "exprstate.hpp"
 #include "define_xs.hpp"
 #include "progress_xs.hpp"
+#include "paren_xs.hpp"
 //#include "xo/expression/DefineExpr.hpp"
 #include "xo/expression/Constant.hpp"
 //#include "xo/expression/ConvertExpr.hpp"
@@ -23,10 +24,8 @@ namespace xo {
                 return "expect_toplevel_expression_sequence";
             case exprstatetype::defexpr:
                 return "defexpr";
-            case exprstatetype::lparen_0:
-                return "lparen_0";
-            case exprstatetype::lparen_1:
-                return "lparen_1";
+            case exprstatetype::parenexpr:
+                return "parenexpr";
             case exprstatetype::expect_rhs_expression:
                 return "expect_rhs_expression";
             case exprstatetype::expect_symbol:
@@ -49,11 +48,10 @@ namespace xo {
                 return true;
 
             case exprstatetype::defexpr:
+            case exprstatetype::parenexpr:
                 /* unreachable */
                 assert(false);
                 return false;
-            case exprstatetype::lparen_0:
-            case exprstatetype::lparen_1:
             case exprstatetype::expect_rhs_expression:
                 return false;
             case exprstatetype::expect_symbol:
@@ -79,12 +77,11 @@ namespace xo {
                 return false;
 
             case exprstatetype::defexpr:
+            case exprstatetype::parenexpr:
                 /* unreachable */
                 assert(false);
                 return false;
 
-            case exprstatetype::lparen_0:
-            case exprstatetype::lparen_1:
             case exprstatetype::expect_rhs_expression:
                 /* treat symbol as variable name */
                 return true;
@@ -116,12 +113,11 @@ namespace xo {
             case exprstatetype::expect_toplevel_expression_sequence:
 
             case exprstatetype::defexpr:
-                /* unreachable -- redirects to define_xs::admits_colon() */
+            case exprstatetype::parenexpr:
+                /* unreachable -- redirects to define_xs::admits_colon() etc */
                 assert(false);
                 return false;
 
-            case exprstatetype::lparen_0:
-            case exprstatetype::lparen_1:
             case exprstatetype::expect_rhs_expression:
                 /* rhs-expressions (or expressions for that matter)
                  * may not begin with a colon
@@ -149,8 +145,7 @@ namespace xo {
             switch (exs_type_) {
             case exprstatetype::expect_toplevel_expression_sequence:
             case exprstatetype::defexpr:
-            case exprstatetype::lparen_0:
-            case exprstatetype::lparen_1:
+            case exprstatetype::parenexpr:
             case exprstatetype::expect_rhs_expression:
             case exprstatetype::expect_symbol:
             case exprstatetype::expect_type:
@@ -187,53 +182,15 @@ namespace xo {
                  * note that we skip from def_1 -> def_4 if '=' instead of ':'
                  */
             case exprstatetype::defexpr:
-                /* unreachable - redirects to define_xs */
+            case exprstatetype::parenexpr:
+                /* unreachable - redirects to define_xs etrc */
                 assert(false);
                 return false;
 
-            case exprstatetype::lparen_0:
-            case exprstatetype::lparen_1:
             case exprstatetype::expect_rhs_expression:
                 /* rhs-expressions (or expressions for that matter)
                  * may not begin with singleassign '='
                  */
-            case exprstatetype::expect_symbol:
-            case exprstatetype::expect_type:
-                return false;
-
-            case exprstatetype::expr_progress:
-                /* unreachable */
-                assert(false);
-                return false;
-
-            case exprstatetype::invalid:
-            case exprstatetype::n_exprstatetype:
-                /* unreachable */
-                return false;
-            }
-
-            return false;
-        }
-
-        bool
-        exprstate::admits_f64() const {
-            switch (exs_type_) {
-            case exprstatetype::expect_toplevel_expression_sequence:
-
-            case exprstatetype::defexpr:
-                /* unreachable - redirects to define_xs */
-                assert(false);
-                return false;
-
-            case exprstatetype::lparen_0:
-                return true;
-
-            case exprstatetype::lparen_1:
-                return false;
-
-            case exprstatetype::expect_rhs_expression:
-                return true;
-
             case exprstatetype::expect_symbol:
             case exprstatetype::expect_type:
                 return false;
@@ -268,13 +225,8 @@ namespace xo {
                 return false;
 
             case exprstatetype::defexpr:
+            case exprstatetype::parenexpr:
                 /* unreachable - redirects to define_xs */
-                assert(false);
-                return false;
-
-            case exprstatetype::lparen_0:
-            case exprstatetype::lparen_1:
-                /* unreachable */
                 assert(false);
                 return false;
 
@@ -310,17 +262,10 @@ namespace xo {
                 return false;
 
             case exprstatetype::defexpr:
+            case exprstatetype::parenexpr:
                 /* unreachable - redirects to define_xs */
                 assert(false);
                 return false;
-
-            case exprstatetype::lparen_0:
-                /* unreachable -- will have pushed expect_rhs_expression */
-                assert(false);
-                return false;
-
-            case exprstatetype::lparen_1:
-                return true;
 
             case exprstatetype::expect_rhs_expression:
                 return false;
@@ -336,6 +281,38 @@ namespace xo {
             case exprstatetype::n_exprstatetype:
                 /* unreachable */
                 assert(false);
+                return false;
+            }
+
+            return false;
+        }
+
+        bool
+        exprstate::admits_f64() const {
+            switch (exs_type_) {
+            case exprstatetype::expect_toplevel_expression_sequence:
+
+            case exprstatetype::defexpr:
+            case exprstatetype::parenexpr:
+                /* unreachable - redirects to define_xs */
+                assert(false);
+                return false;
+
+            case exprstatetype::expect_rhs_expression:
+                return true;
+
+            case exprstatetype::expect_symbol:
+            case exprstatetype::expect_type:
+                return false;
+
+            case exprstatetype::expr_progress:
+                /* unreachable */
+                assert(false);
+                return false;
+
+            case exprstatetype::invalid:
+            case exprstatetype::n_exprstatetype:
+                /* unreachable */
                 return false;
             }
 
@@ -400,20 +377,10 @@ namespace xo {
                 break;
 
             case exprstatetype::defexpr:
+            case exprstatetype::parenexpr:
                 /* unreachable - redirects to define_xs */
                 assert(false);
                 return;
-
-            case exprstatetype::lparen_0:
-                /* todo: variable reference */
-                assert(false);
-                break;
-
-            case exprstatetype::lparen_1:
-                /* unreachable */
-
-                assert(false);
-                break;
 
             case exprstatetype::expect_rhs_expression:
             {
@@ -503,18 +470,14 @@ namespace xo {
                                 exprstatestack * /*p_stack*/,
                                 rp<Expression> * /*p_emit_expr*/)
         {
-            /* returning type description to somethign that wants it */
+            /* returning type description to something that wants it */
 
             switch (this->exs_type_) {
             case exprstatetype::expect_toplevel_expression_sequence:
 
             case exprstatetype::defexpr:
+            case exprstatetype::parenexpr:
                 /* unreachable - redirects to define_xs */
-                assert(false);
-                return;
-
-            case exprstatetype::lparen_0:
-            case exprstatetype::lparen_1:
                 assert(false);
                 return;
 
@@ -612,14 +575,14 @@ namespace xo {
 
             if (this->exs_type_ == exprstatetype::expect_rhs_expression) {
                 /* push lparen_0 to remember to look for subsequent rightparen. */
-                p_stack->push_exprstate(exprstate::lparen_0());
+                p_stack->push_exprstate(paren_xs::lparen_0());
                 p_stack->push_exprstate(exprstate::expect_rhs_expression());
             }
         }
 
         void
-        exprstate::on_rightparen(exprstatestack * p_stack,
-                                 rp<Expression> * p_emit_expr)
+        exprstate::on_rightparen(exprstatestack * /*p_stack*/,
+                                 rp<Expression> * /*p_emit_expr*/)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
@@ -633,15 +596,10 @@ namespace xo {
                                                xtag("state", *this)));
             }
 
-            if (this->exs_type_ == exprstatetype::expr_progress) {
-                /* unreachable -- see progress_xs::on_rightparen() */
+            if (this->exs_type_ == exprstatetype::expr_progress
+                || this->exs_type_ == exprstatetype::parenexpr) {
+                /* unreachable -- see progress_xs::on_rightparen() etc */
                 assert(false);
-            } else if (this->exs_type_ == exprstatetype::lparen_1) {
-                rp<Expression> expr = this->gen_expr_;
-
-                std::unique_ptr<exprstate> self = p_stack->pop_exprstate();
-
-                p_stack->top_exprstate().on_expr(expr, p_stack, p_emit_expr);
             }
         }
 
@@ -787,23 +745,10 @@ namespace xo {
                 *p_emit_expr = expr.promote();
                 return;
             case exprstatetype::defexpr:
-                /* unreachable.  redirects to define_xs::on_expr() */
+            case exprstatetype::parenexpr:
+                /* unreachable.  redirects to define_xs::on_expr() etc */
                 assert(false);
                 return;
-
-            case exprstatetype::lparen_0: {
-                this->exs_type_ = exprstatetype::lparen_1; /* wants on_rightparen */
-                p_stack->push_exprstate(progress_xs::make(expr.promote()));
-
-                return;
-            }
-
-            case exprstatetype::lparen_1: {
-                this->gen_expr_ = expr.promote();
-
-                /* expect immediate incoming call, this time to on_rightparen() */
-                return;
-            }
 
             case exprstatetype::expect_rhs_expression: {
 
@@ -852,13 +797,8 @@ namespace xo {
                 assert(false);
                 return;
             case exprstatetype::defexpr:
-                /* unreachable - redirects to define_xs */
-                assert(false);
-                return;
-
-            case exprstatetype::lparen_0:
-            case exprstatetype::lparen_1:
-                /* NOT IMPLEMENTED */
+            case exprstatetype::parenexpr:
+                /* unreachable - redirects to define_xs etc */
                 assert(false);
                 return;
 
