@@ -10,8 +10,7 @@ namespace xo {
         }
 
         define_xs::define_xs(rp<DefineExprAccess> def_expr)
-            : exprstate(exprstatetype::defexpr,
-                        nullptr /*gen_expr*/),
+            : exprstate(exprstatetype::defexpr),
               defxs_type_{defexprstatetype::def_0},
               def_expr_{std::move(def_expr)}
         {}

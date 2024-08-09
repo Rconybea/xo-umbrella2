@@ -58,10 +58,8 @@ namespace xo {
             virtual void print(std::ostream & os) const override;
 
         private:
-#ifdef NOT_YET
             /** populate an expression here **/
             rp<Expression> gen_expr_;
-#endif
         };
     } /*namespace scm*/
 } /*namespace xo*/

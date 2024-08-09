@@ -78,6 +78,8 @@ namespace xo {
              *   lparen_0
              **/
             parenexprstatetype parenxs_type_;
+            /** populate expression (representing parenthesized value) here **/
+            rp<Expression> gen_expr_;
         };
     } /*namespace scm*/
 } /*namespace xo*/

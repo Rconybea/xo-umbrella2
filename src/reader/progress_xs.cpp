@@ -10,8 +10,8 @@ namespace xo {
         }
 
         progress_xs::progress_xs(rp<Expression> valex)
-            : exprstate(exprstatetype::expr_progress,
-                        std::move(valex))
+            : exprstate(exprstatetype::expr_progress),
+              gen_expr_{std::move(valex)}
         {}
 
         bool

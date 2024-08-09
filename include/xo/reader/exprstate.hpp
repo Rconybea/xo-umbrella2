@@ -56,34 +56,23 @@ namespace xo {
 
         public:
             exprstate() = default;
-            exprstate(exprstatetype exs_type,
-                      rp<Expression> candidate_expr)
-                : exs_type_{exs_type},
-                  gen_expr_{std::move(candidate_expr)} {}
+            exprstate(exprstatetype exs_type)
+                : exs_type_{exs_type}
+                {}
             virtual ~exprstate() = default;
 
             static std::unique_ptr<exprstate> expect_toplevel_expression_sequence() {
-                return std::make_unique<exprstate>(exprstate(exprstatetype::expect_toplevel_expression_sequence, nullptr));
+                return std::make_unique<exprstate>(exprstate(exprstatetype::expect_toplevel_expression_sequence));
             }
             static std::unique_ptr<exprstate> expect_rhs_expression() {
-                return std::make_unique<exprstate>(exprstate(exprstatetype::expect_rhs_expression, nullptr));
+                return std::make_unique<exprstate>(exprstate(exprstatetype::expect_rhs_expression));
             }
             static std::unique_ptr<exprstate> expect_symbol() {
-                return std::make_unique<exprstate>(exprstate(exprstatetype::expect_symbol, nullptr));
+                return std::make_unique<exprstate>(exprstate(exprstatetype::expect_symbol));
             }
             static std::unique_ptr<exprstate> expect_type() {
-                return std::make_unique<exprstate>(exprstate(exprstatetype::expect_type, nullptr));
+                return std::make_unique<exprstate>(exprstate(exprstatetype::expect_type));
             }
-#ifdef RELOCATED
-            static std::unique_ptr<exprstate> make_expr_progress(rp<Expression> expr) {
-                return std::make_unique<exprstate>(exprstate(exprstatetype::expr_progress, expr));
-            }
-#endif
-#ifdef RELOCATED
-            static std::unique_ptr<exprstate> lparen_0() {
-                return std::make_unique<exprstate>(exprstate(exprstatetype::lparen_0, nullptr));
-            }
-#endif
 
             exprstatetype exs_type() const { return exs_type_; }
 
@@ -144,10 +133,8 @@ namespace xo {
                                 rp<Expression> * p_emit_expr);
 
         protected:
+            /** explicit subtype: identifies derived class **/
             exprstatetype exs_type_;
-
-            /** generic expression **/
-            rp<Expression> gen_expr_;
         }; /*exprstate*/
 
         inline std::ostream &
