@@ -315,13 +315,6 @@ namespace xo {
 
             switch (this->exs_type_) {
             case exprstatetype::expect_toplevel_expression_sequence:
-                throw std::runtime_error
-                    (tostr(c_self_name,
-                           ": unexpected symbol-token at top-level",
-                           " (expecting decl|def)",
-                           xtag("symbol", tk)));
-                break;
-
             case exprstatetype::defexpr:
             case exprstatetype::parenexpr:
                 /* unreachable - redirects to define_xs */
@@ -409,7 +402,7 @@ namespace xo {
                 assert(false);
                 return;
             }
-        } /*on_symbol*/
+        }
 
         void
         exprstate::on_typedescr(TypeDescr /*td*/,

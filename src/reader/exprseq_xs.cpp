@@ -37,6 +37,16 @@ namespace xo {
              *   def sq(x : f64) -> f64 { (x * x) }
              */
         }
+
+        void
+        exprseq_xs::on_symbol_token(const token_type & tk,
+                                    exprstatestack * /*p_stack*/,
+                                    rp<Expression> * /*p_emit_expr*/)
+        {
+            constexpr const char * c_self_name = "exprseq_xs::on_symbol_token";
+
+            this->illegal_input_error(c_self_name, tk);
+        }
     } /*namespace scm*/
 } /*namespace xo*/
 
