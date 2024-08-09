@@ -14,8 +14,10 @@ namespace xo {
             return std::make_unique<paren_xs>(paren_xs());
         }
 
+#ifdef OBSOLETE
         bool
         paren_xs::admits_definition() const { return false; }
+#endif
 
         bool
         paren_xs::admits_symbol() const { return true; }

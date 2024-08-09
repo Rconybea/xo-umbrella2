@@ -16,6 +16,11 @@ namespace xo {
          **/
         class exprseq_xs : public exprstate {
         public:
+            exprseq_xs();
+
+            static std::unique_ptr<exprseq_xs> expect_toplevel_expression_sequence();
+
+        public:
             // ----- token input methods -----
 
             virtual void on_def_token(const token_type & tk,

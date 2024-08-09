@@ -15,6 +15,7 @@ namespace xo {
               def_expr_{std::move(def_expr)}
         {}
 
+#ifdef OBSOLETE
         bool
         define_xs::admits_definition() const
         {
@@ -41,6 +42,7 @@ namespace xo {
 
             return false;
         }
+#endif
 
         bool
         define_xs::admits_symbol() const {

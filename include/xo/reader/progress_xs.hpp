@@ -22,7 +22,9 @@ namespace xo {
 
             static std::unique_ptr<progress_xs> make(rp<Expression> valex);
 
+#ifdef OBSOLETE
             virtual bool admits_definition() const override;
+#endif
             virtual bool admits_symbol() const override;
             virtual bool admits_colon() const override;
             virtual bool admits_semicolon() const override;

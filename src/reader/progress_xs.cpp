@@ -14,8 +14,10 @@ namespace xo {
               gen_expr_{std::move(valex)}
         {}
 
+#ifdef OBSOLETE
         bool
         progress_xs::admits_definition() const { return false; }
+#endif
 
         bool
         progress_xs::admits_symbol() const { return false; }

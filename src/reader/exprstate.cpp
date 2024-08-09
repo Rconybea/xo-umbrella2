@@ -323,8 +323,11 @@ namespace xo {
 
         void
         exprstate::on_def_token(const token_type & tk,
-                                exprstatestack * p_stack)
+                                exprstatestack * /*p_stack*/)
         {
+            this->illegal_input_error("exprstate::on_def_token", tk);
+
+#ifdef OBSOLETE
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
@@ -347,6 +350,7 @@ namespace xo {
              *   def pi : f64 = 3.14159265
              *   def sq(x : f64) -> f64 { (x * x) }
              */
+#endif
         }
 
         void

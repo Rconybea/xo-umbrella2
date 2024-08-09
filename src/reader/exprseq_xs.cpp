@@ -5,6 +5,17 @@
 
 namespace xo {
     namespace scm {
+        std::unique_ptr<exprseq_xs>
+        exprseq_xs::expect_toplevel_expression_sequence()
+        {
+            return std::make_unique<exprseq_xs>(exprseq_xs());
+        }
+
+        exprseq_xs::exprseq_xs()
+            : exprstate(exprstatetype::expect_toplevel_expression_sequence)
+        {
+        }
+
         void
         exprseq_xs::on_def_token(const token_type & /*tk*/,
                                  exprstatestack * p_stack)
@@ -28,6 +39,5 @@ namespace xo {
         }
     } /*namespace scm*/
 } /*namespace xo*/
-
 
 /* end exprseq_xs.cpp */

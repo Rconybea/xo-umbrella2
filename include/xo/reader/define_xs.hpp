@@ -42,7 +42,9 @@ namespace xo {
 
             defexprstatetype defxs_type() const { return defxs_type_; }
 
+#ifdef OBSOLETE
             virtual bool admits_definition() const override;
+#endif
             virtual bool admits_symbol() const override;
             virtual bool admits_colon() const override;
             virtual bool admits_semicolon() const override;

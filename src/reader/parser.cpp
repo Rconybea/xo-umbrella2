@@ -5,6 +5,7 @@
 
 #include "parser.hpp"
 #include "define_xs.hpp"
+#include "exprseq_xs.hpp"
 #include "xo/expression/DefineExpr.hpp"
 #include "xo/expression/Constant.hpp"
 #include "xo/expression/ConvertExpr.hpp"
@@ -30,7 +31,7 @@ namespace xo {
         void
         parser::begin_translation_unit() {
             xs_stack_.push_exprstate
-                (exprstate::expect_toplevel_expression_sequence());
+                (exprseq_xs::expect_toplevel_expression_sequence());
         }
 
         rp<Expression>
