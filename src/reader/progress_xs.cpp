@@ -93,8 +93,9 @@ namespace xo {
         }
 
         void
-        progress_xs::on_semicolon(exprstatestack * p_stack,
-                                  rp<Expression> * p_emit_expr)
+        progress_xs::on_semicolon_token(const token_type & tk,
+                                        exprstatestack * p_stack,
+                                        rp<Expression> * p_emit_expr)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
@@ -121,7 +122,7 @@ namespace xo {
              * f. now deliver semicolon;  [lparen_1] rejects
              */
 
-            p_stack->top_exprstate().on_semicolon(p_stack, p_emit_expr);
+            p_stack->top_exprstate().on_semicolon_token(tk, p_stack, p_emit_expr);
         }
 
         void

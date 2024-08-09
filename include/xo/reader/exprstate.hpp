@@ -134,8 +134,10 @@ namespace xo {
             /** handle incoming ':' token **/
             virtual void on_colon_token(const token_type & tk,
                                         exprstatestack * p_stack);
-            virtual void on_semicolon(exprstatestack * p_stack,
-                                      rp<Expression> * p_emit_expr);
+            /** handle incoming ';' token **/
+            virtual void on_semicolon_token(const token_type & tk,
+                                            exprstatestack * p_stack,
+                                            rp<Expression> * p_emit_expr);
             virtual void on_singleassign(exprstatestack * p_stack);
             virtual void on_leftparen(exprstatestack * p_stack,
                                       rp<Expression> * p_emit_expr);

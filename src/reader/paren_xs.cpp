@@ -119,8 +119,9 @@ namespace xo {
         }
 
         void
-        paren_xs::on_semicolon(exprstatestack * /*p_stack*/,
-                               rp<Expression> * /*p_emit_expr*/)
+        paren_xs::on_semicolon_token(const token_type & /*tk*/,
+                                     exprstatestack * /*p_stack*/,
+                                     rp<Expression> * /*p_emit_expr*/)
         {
             constexpr const char * c_self_name = "paren_xs::on_semicolon";
 
