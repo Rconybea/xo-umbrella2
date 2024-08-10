@@ -257,18 +257,17 @@ namespace xo {
             return false;
         }
 
+#ifdef OBSOLETE
         bool
         exprstate::admits_f64() const {
             switch (exs_type_) {
             case exprstatetype::expect_toplevel_expression_sequence:
             case exprstatetype::defexpr:
             case exprstatetype::parenexpr:
+            case exprstatetype::expect_rhs_expression:
                 /* unreachable - redirects to define_xs */
                 assert(false);
                 return false;
-
-            case exprstatetype::expect_rhs_expression:
-                return true;
 
             case exprstatetype::expect_symbol:
             case exprstatetype::expect_type:
@@ -287,6 +286,7 @@ namespace xo {
 
             return false;
         }
+#endif
 
         void
         exprstate::on_def_token(const token_type & tk,
@@ -522,7 +522,7 @@ namespace xo {
 
         void
         exprstate::on_f64_token(const token_type & tk,
-                                exprstatestack * p_stack,
+                                exprstatestack * /*p_stack*/,
                                 rp<Expression> * /*p_emit_expr*/)
         {
             constexpr bool c_debug_flag = true;
@@ -530,24 +530,7 @@ namespace xo {
 
             constexpr const char * self_name = "exprstate::on_f64";
 
-            if (!this->admits_f64())
-            {
-                throw std::runtime_error(tostr(self_name,
-                                               ": unexpected floating-point literal for parsing state",
-                                               xtag("state", *this)));
-            }
-
-            if (this->exs_type_ == exprstatetype::expect_rhs_expression) {
-                /* e.g.
-                 *   def pi = 3.14159265;
-                 *            \---tk---/
-                 */
-                p_stack->push_exprstate
-                    (progress_xs::make
-                     (Constant<double>::make(tk.f64_value())));
-            } else {
-                assert(false);
-            }
+            this->illegal_input_error(self_name, tk);
         }
 
         void

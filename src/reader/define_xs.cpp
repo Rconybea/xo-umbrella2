@@ -425,12 +425,7 @@ namespace xo {
 
             constexpr const char * self_name = "exprstate::on_f64";
 
-            if (!this->admits_f64())
-            {
-                this->illegal_input_error(self_name, tk);
-            }
-
-            assert(false);
+            this->illegal_input_error(self_name, tk);
         }
 
         void

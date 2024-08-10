@@ -31,16 +31,14 @@ namespace xo {
 
             static std::unique_ptr<paren_xs> lparen_0();
 
-#ifdef OBSOLETE
-            virtual bool admits_definition() const override;
-#endif
+            bool admits_f64() const;
+
             virtual bool admits_symbol() const override;
             virtual bool admits_colon() const override;
             virtual bool admits_semicolon() const override;
             virtual bool admits_singleassign() const override;
             virtual bool admits_leftparen() const override;
             virtual bool admits_rightparen() const override;
-            virtual bool admits_f64() const override;
 
             virtual void on_expr(ref::brw<Expression> expr,
                                  exprstatestack * p_stack,
