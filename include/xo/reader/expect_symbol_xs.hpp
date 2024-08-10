@@ -19,6 +19,10 @@ namespace xo {
             expect_symbol_xs();
 
             static std::unique_ptr<expect_symbol_xs> expect_symbol_expression();
+
+            virtual void on_symbol_token(const token_type & tk,
+                                         exprstatestack * p_stack,
+                                         rp<Expression> * p_emit_expr) override;
         };
     } /*namespace scm*/
 } /*namespace xo*/

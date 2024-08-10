@@ -198,21 +198,10 @@ namespace xo {
             case exprstatetype::defexpr:
             case exprstatetype::parenexpr:
             case exprstatetype::expect_rhs_expression:
+            case exprstatetype::expect_symbol:
                 /* unreachable - redirected to define_xs etc */
                 assert(false);
                 return;
-
-            case exprstatetype::expect_symbol:
-            {
-                /* have to do pop first, before sending symbol to
-                 * the o.g. symbol-requester
-                 */
-                std::unique_ptr<exprstate> self = p_stack->pop_exprstate();
-
-                p_stack->top_exprstate().on_symbol(tk.text(),
-                                                   p_stack, p_emit_expr);
-                return;
-            }
 
             case exprstatetype::expect_type: {
                 TypeDescr td = nullptr;
