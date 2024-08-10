@@ -2,6 +2,7 @@
 
 #include "define_xs.hpp"
 #include "expect_expr_xs.hpp"
+#include "expect_type_xs.hpp"
 
 namespace xo {
     namespace scm {
@@ -321,7 +322,7 @@ namespace xo {
             if (this->defxs_type_ == defexprstatetype::def_1) {
                 this->defxs_type_ = defexprstatetype::def_2;
 
-                p_stack->push_exprstate(exprstate::expect_type());
+                p_stack->push_exprstate(expect_type_xs::make());
             } else {
                 assert(false);
             }

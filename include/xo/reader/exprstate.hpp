@@ -75,9 +75,11 @@ namespace xo {
                 return std::make_unique<exprstate>(exprstate(exprstatetype::expect_symbol));
             }
 #endif
+#ifdef RELOCATED
             static std::unique_ptr<exprstate> expect_type() {
                 return std::make_unique<exprstate>(exprstate(exprstatetype::expect_type));
             }
+#endif
 
             exprstatetype exs_type() const { return exs_type_; }
 
