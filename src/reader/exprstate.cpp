@@ -87,9 +87,6 @@ namespace xo {
                 return false;
 
             case exprstatetype::expect_rhs_expression:
-                /* rhs-expressions (or expressions for that matter)
-                 * may not begin with a colon
-                 */
             case exprstatetype::expect_symbol:
             case exprstatetype::expect_type:
                 return false;
@@ -155,9 +152,6 @@ namespace xo {
                 return false;
 
             case exprstatetype::expect_rhs_expression:
-                /* rhs-expressions (or expressions for that matter)
-                 * may not begin with singleassign '='
-                 */
             case exprstatetype::expect_symbol:
             case exprstatetype::expect_type:
                 return false;

@@ -2,6 +2,7 @@
 
 #include "exprseq_xs.hpp"
 #include "define_xs.hpp"
+#include "expect_symbol_xs.hpp"
 
 namespace xo {
     namespace scm {
@@ -30,7 +31,7 @@ namespace xo {
             /* todo: replace:
              *   expect_symbol_or_function_signature()
              */
-            p_stack->push_exprstate(exprstate::expect_symbol());
+            p_stack->push_exprstate(expect_symbol_xs::expect_symbol_expression());
 
             /* keyword 'def' introduces a definition:
              *   def pi : f64 = 3.14159265
