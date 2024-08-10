@@ -70,17 +70,6 @@ namespace xo {
                 {}
             virtual ~exprstate() = default;
 
-#ifdef RELOCATED
-            static std::unique_ptr<exprstate> expect_symbol() {
-                return std::make_unique<exprstate>(exprstate(exprstatetype::expect_symbol));
-            }
-#endif
-#ifdef RELOCATED
-            static std::unique_ptr<exprstate> expect_type() {
-                return std::make_unique<exprstate>(exprstate(exprstatetype::expect_type));
-            }
-#endif
-
             exprstatetype exs_type() const { return exs_type_; }
 
             /** true iff this parsing state admits a symbol as next token **/

@@ -23,11 +23,6 @@ namespace xo {
         bool
         paren_xs::admits_singleassign() const { return false; }
 
-#ifdef OBSOLETE
-        bool
-        paren_xs::admits_leftparen() const { /*unreachable*/  return false; }
-#endif
-
         bool
         paren_xs::admits_rightparen() const {
             switch (parenxs_type_) {
