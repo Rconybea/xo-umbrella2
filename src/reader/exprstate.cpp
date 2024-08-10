@@ -680,14 +680,6 @@ namespace xo {
 
             switch (this->exs_type_) {
             case exprstatetype::expect_toplevel_expression_sequence:
-                /* toplevel expression sequence accepts an
-                 * arbitrary number of expressions.
-                 *
-                 * parser::include_token() returns
-                 */
-
-                *p_emit_expr = expr.promote();
-                return;
             case exprstatetype::defexpr:
             case exprstatetype::parenexpr:
                 /* unreachable.  redirects to define_xs::on_expr() etc */

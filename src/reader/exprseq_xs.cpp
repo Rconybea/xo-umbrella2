@@ -57,6 +57,21 @@ namespace xo {
             assert(false);
             return;
         }
+
+        void
+        exprseq_xs::on_expr(ref::brw<Expression> expr,
+                            exprstatestack * /*p_stack*/,
+                            rp<Expression> * p_emit_expr)
+        {
+            /* toplevel expression sequence accepts an
+             * arbitrary number of expressions.
+             *
+             * parser::include_token() returns
+             */
+
+            *p_emit_expr = expr.promote();
+        } /*on_expr*/
+
     } /*namespace scm*/
 } /*namespace xo*/
 
