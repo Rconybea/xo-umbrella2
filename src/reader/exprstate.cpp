@@ -76,30 +76,6 @@ namespace xo {
             return false;
         }
 
-#ifdef OBSOLETE
-        bool
-        exprstate::admits_semicolon() const {
-            switch (exs_type_) {
-            case exprstatetype::expect_toplevel_expression_sequence:
-            case exprstatetype::defexpr:
-            case exprstatetype::parenexpr:
-            case exprstatetype::expect_rhs_expression:
-            case exprstatetype::expect_symbol:
-            case exprstatetype::expect_type:
-                return false;
-            case exprstatetype::expr_progress:
-                /* unreachable */
-                assert(false);
-                return true;
-            case exprstatetype::invalid:
-            case exprstatetype::n_exprstatetype:
-                return false;
-            }
-
-            return false;
-        }
-#endif
-
         bool
         exprstate::admits_singleassign() const {
             switch (exs_type_) {
