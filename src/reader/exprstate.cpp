@@ -82,7 +82,6 @@ namespace xo {
         exprstate::admits_colon() const {
             switch (exs_type_) {
             case exprstatetype::expect_toplevel_expression_sequence:
-
             case exprstatetype::defexpr:
             case exprstatetype::parenexpr:
                 /* unreachable -- redirects to define_xs::admits_colon() etc */
@@ -137,7 +136,6 @@ namespace xo {
         exprstate::admits_singleassign() const {
             switch (exs_type_) {
             case exprstatetype::expect_toplevel_expression_sequence:
-
                 /*
                  *   def foo       = 1 ;
                  *   def foo : f64 = 1 ;
@@ -262,7 +260,6 @@ namespace xo {
         exprstate::admits_f64() const {
             switch (exs_type_) {
             case exprstatetype::expect_toplevel_expression_sequence:
-
             case exprstatetype::defexpr:
             case exprstatetype::parenexpr:
                 /* unreachable - redirects to define_xs */
@@ -723,15 +720,6 @@ namespace xo {
         {
             switch(this->exs_type_) {
             case exprstatetype::expect_toplevel_expression_sequence:
-                /* toplevel expression sequence accepts an
-                 * arbitrary number of expressions.
-                 *
-                 * parser::include_token() returns
-                 */
-
-                /* NOT IMPLEMENTED */
-                assert(false);
-                return;
             case exprstatetype::defexpr:
             case exprstatetype::parenexpr:
                 /* unreachable - redirects to define_xs etc */
