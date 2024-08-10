@@ -1,6 +1,7 @@
 /* @file define_xs.cpp */
 
 #include "define_xs.hpp"
+#include "expect_expr_xs.hpp"
 
 namespace xo {
     namespace scm {
@@ -14,35 +15,6 @@ namespace xo {
               defxs_type_{defexprstatetype::def_0},
               def_expr_{std::move(def_expr)}
         {}
-
-#ifdef OBSOLETE
-        bool
-        define_xs::admits_definition() const
-        {
-            switch (defxs_type_) {
-
-            case defexprstatetype::def_0:
-            case defexprstatetype::def_1:
-            case defexprstatetype::def_2:
-            case defexprstatetype::def_3:
-            case defexprstatetype::def_4:
-            case defexprstatetype::def_5:
-                /* note for def_4:
-                 * rhs could certainly be a function body that contains
-                 * nested defines; but then immediately-enclosing-exprstate
-                 * would be a block
-                 */
-                return false;
-            case defexprstatetype::invalid:
-            case defexprstatetype::n_defexprstatetype:
-                /* unreachable */
-                assert(false);
-                return false;
-            }
-
-            return false;
-        }
-#endif
 
         bool
         define_xs::admits_symbol() const {
@@ -401,7 +373,7 @@ namespace xo {
             {
                 this->defxs_type_ = defexprstatetype::def_4;
 
-                p_stack->push_exprstate(exprstate::expect_rhs_expression());
+                p_stack->push_exprstate(expect_expr_xs::expect_rhs_expression());
             } else {
                 assert(false);
             }

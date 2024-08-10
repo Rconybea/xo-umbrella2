@@ -8,7 +8,8 @@ set(SELF_SRCS
     define_xs.cpp
     progress_xs.cpp
     paren_xs.cpp
-    exprseq_xs.cpp)
+    exprseq_xs.cpp
+    expect_expr_xs.cpp)
 
 xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 ${SELF_SRCS})
 xo_dependency(${SELF_LIB} xo_expression)

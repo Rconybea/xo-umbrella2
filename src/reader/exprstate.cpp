@@ -4,6 +4,7 @@
 #include "define_xs.hpp"
 #include "progress_xs.hpp"
 #include "paren_xs.hpp"
+#include "expect_expr_xs.hpp"
 //#include "xo/expression/DefineExpr.hpp"
 #include "xo/expression/Constant.hpp"
 //#include "xo/expression/ConvertExpr.hpp"
@@ -491,7 +492,7 @@ namespace xo {
             if (this->exs_type_ == exprstatetype::expect_rhs_expression) {
                 /* push lparen_0 to remember to look for subsequent rightparen. */
                 p_stack->push_exprstate(paren_xs::lparen_0());
-                p_stack->push_exprstate(exprstate::expect_rhs_expression());
+                p_stack->push_exprstate(expect_expr_xs::expect_rhs_expression());
             }
         }
 
@@ -660,7 +661,7 @@ namespace xo {
 
             case exprstatetype::expect_rhs_expression: {
 
-                std::unique_ptr<exprstate> self = p_stack->pop_exprstate(); /* NOT KOSHER.  invalidates *this */
+                std::unique_ptr<exprstate> self = p_stack->pop_exprstate();
 
                 p_stack->top_exprstate().on_expr(expr,
                                                  p_stack,

@@ -70,9 +70,11 @@ namespace xo {
                 {}
             virtual ~exprstate() = default;
 
+#ifdef RELOCATED
             static std::unique_ptr<exprstate> expect_rhs_expression() {
                 return std::make_unique<exprstate>(exprstate(exprstatetype::expect_rhs_expression));
             }
+#endif
             static std::unique_ptr<exprstate> expect_symbol() {
                 return std::make_unique<exprstate>(exprstate(exprstatetype::expect_symbol));
             }
