@@ -19,6 +19,9 @@ namespace xo {
 
             static std::unique_ptr<expect_expr_xs> expect_rhs_expression();
 
+            virtual void on_leftparen_token(const token_type & tk,
+                                            exprstatestack * p_stack,
+                                            rp<Expression> * p_emit_expr) override;
             virtual void on_f64_token(const token_type & tk,
                                       exprstatestack * p_stack,
                                       rp<Expression> * p_emit_expr) override;

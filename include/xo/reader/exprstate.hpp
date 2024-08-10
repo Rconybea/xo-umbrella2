@@ -70,11 +70,6 @@ namespace xo {
                 {}
             virtual ~exprstate() = default;
 
-#ifdef RELOCATED
-            static std::unique_ptr<exprstate> expect_rhs_expression() {
-                return std::make_unique<exprstate>(exprstate(exprstatetype::expect_rhs_expression));
-            }
-#endif
             static std::unique_ptr<exprstate> expect_symbol() {
                 return std::make_unique<exprstate>(exprstate(exprstatetype::expect_symbol));
             }
@@ -96,10 +91,6 @@ namespace xo {
             virtual bool admits_leftparen() const;
             /** truee iff this parsing state admits a rightparen ')' as next token **/
             virtual bool admits_rightparen() const;
-#ifdef OBSOLETE
-            /** true iff this parsing state admits a 64-bit floating point literal token **/
-            virtual bool admits_f64() const;
-#endif
 
             /** update exprstate in response to incoming token @p tk,
              *  forward instructions to parent parser

@@ -196,13 +196,10 @@ namespace xo {
 
             case exprstatetype::defexpr:
             case exprstatetype::parenexpr:
-                /* unreachable - redirects to define_xs */
+            case exprstatetype::expect_rhs_expression:
+                /* unreachable - redirects to define_xs etc */
                 assert(false);
                 return false;
-
-            case exprstatetype::expect_rhs_expression:
-                /* can always begin non-toplevel expression with '(' */
-                return true;
 
             case exprstatetype::expect_type:
                 return false;
@@ -256,37 +253,6 @@ namespace xo {
 
             return false;
         }
-
-#ifdef OBSOLETE
-        bool
-        exprstate::admits_f64() const {
-            switch (exs_type_) {
-            case exprstatetype::expect_toplevel_expression_sequence:
-            case exprstatetype::defexpr:
-            case exprstatetype::parenexpr:
-            case exprstatetype::expect_rhs_expression:
-                /* unreachable - redirects to define_xs */
-                assert(false);
-                return false;
-
-            case exprstatetype::expect_symbol:
-            case exprstatetype::expect_type:
-                return false;
-
-            case exprstatetype::expr_progress:
-                /* unreachable */
-                assert(false);
-                return false;
-
-            case exprstatetype::invalid:
-            case exprstatetype::n_exprstatetype:
-                /* unreachable */
-                return false;
-            }
-
-            return false;
-        }
-#endif
 
         void
         exprstate::on_def_token(const token_type & tk,
