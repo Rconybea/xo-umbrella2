@@ -18,9 +18,6 @@ namespace xo {
         progress_xs::admits_symbol() const { return false; }
 
         bool
-        progress_xs::admits_colon() const { return false; }
-
-        bool
         progress_xs::admits_semicolon() const { return true; }
 
         bool

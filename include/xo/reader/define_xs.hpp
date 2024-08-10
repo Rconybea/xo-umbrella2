@@ -43,9 +43,9 @@ namespace xo {
             defexprstatetype defxs_type() const { return defxs_type_; }
 
             bool admits_rightparen() const;
+            bool admits_colon() const;
 
             virtual bool admits_symbol() const override;
-            virtual bool admits_colon() const override;
             virtual bool admits_semicolon() const override;
             virtual bool admits_singleassign() const override;
 

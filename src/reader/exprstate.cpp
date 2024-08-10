@@ -77,35 +77,6 @@ namespace xo {
         }
 
         bool
-        exprstate::admits_colon() const {
-            switch (exs_type_) {
-            case exprstatetype::expect_toplevel_expression_sequence:
-            case exprstatetype::defexpr:
-            case exprstatetype::parenexpr:
-                /* unreachable -- redirects to define_xs::admits_colon() etc */
-                assert(false);
-                return false;
-
-            case exprstatetype::expect_rhs_expression:
-            case exprstatetype::expect_symbol:
-            case exprstatetype::expect_type:
-                return false;
-
-            case exprstatetype::expr_progress:
-                /* unreachable */
-                assert(false);
-                return false;
-
-            case exprstatetype::invalid:
-            case exprstatetype::n_exprstatetype:
-                /* unreachable */
-                return false;
-            }
-
-            return false;
-        }
-
-        bool
         exprstate::admits_semicolon() const {
             switch (exs_type_) {
             case exprstatetype::expect_toplevel_expression_sequence:
@@ -214,12 +185,9 @@ namespace xo {
             constexpr const char * self_name = "exprstate::on_colon";
 
             /* lots of illegal states */
-            if (!this->admits_colon())
-            {
-                throw std::runtime_error(tostr(self_name,
-                                               ": unexpected colon for parsing state",
-                                               xtag("state", *this)));
-            }
+            throw std::runtime_error(tostr(self_name,
+                                           ": unexpected colon for parsing state",
+                                           xtag("state", *this)));
 
             assert(false);
         }

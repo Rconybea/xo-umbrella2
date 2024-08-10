@@ -18,9 +18,6 @@ namespace xo {
         paren_xs::admits_symbol() const { return true; }
 
         bool
-        paren_xs::admits_colon() const { return false; }
-
-        bool
         paren_xs::admits_semicolon() const { return false; }
 
         bool

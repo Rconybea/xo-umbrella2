@@ -35,12 +35,8 @@ namespace xo {
             bool admits_rightparen() const;
 
             virtual bool admits_symbol() const override;
-            virtual bool admits_colon() const override;
             virtual bool admits_semicolon() const override;
             virtual bool admits_singleassign() const override;
-#ifdef OBSOLETE
-            virtual bool admits_leftparen() const override;
-#endif
 
             virtual void on_expr(ref::brw<Expression> expr,
                                  exprstatestack * p_stack,
