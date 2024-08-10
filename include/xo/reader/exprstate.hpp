@@ -90,9 +90,9 @@ namespace xo {
 #ifdef OBSOLETE
             /** true iff this parsing state admits a leftparen '(' as next token **/
             virtual bool admits_leftparen() const;
-#endif
             /** truee iff this parsing state admits a rightparen ')' as next token **/
             virtual bool admits_rightparen() const;
+#endif
 
             /** update exprstate in response to incoming token @p tk,
              *  forward instructions to parent parser

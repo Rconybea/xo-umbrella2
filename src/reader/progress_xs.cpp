@@ -26,11 +26,13 @@ namespace xo {
         bool
         progress_xs::admits_singleassign() const { return false; }
 
+#ifdef OBSOLETE
         bool
         progress_xs::admits_rightparen() const {
             /* satisfies expression form */
             return true;
         }
+#endif
 
         bool
         progress_xs::admits_f64() const { return false; }

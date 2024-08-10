@@ -181,50 +181,6 @@ namespace xo {
 
 #ifdef OBSOLETE
         bool
-        exprstate::admits_leftparen() const {
-            switch (exs_type_) {
-            case exprstatetype::expect_toplevel_expression_sequence:
-                /* input like
-                 *   (function(blah...))
-                 * not allowed at toplevel;
-                 * creates ambiguity e.g. consider
-                 *   x := foo
-                 *   (bar)
-                 *
-                 * is rhs 'foo' or 'foo(bar)'
-                 */
-                return false;
-
-            case exprstatetype::defexpr:
-            case exprstatetype::parenexpr:
-            case exprstatetype::expect_rhs_expression:
-                /* unreachable - redirects to define_xs etc */
-                assert(false);
-                return false;
-
-            case exprstatetype::expect_type:
-                return false;
-
-            case exprstatetype::expect_symbol:
-                return false;
-
-            case exprstatetype::expr_progress:
-                /* unreachable */
-                assert(false);
-                return false;
-
-            case exprstatetype::invalid:
-            case exprstatetype::n_exprstatetype:
-                /* unreachable */
-                assert(false);
-                return false;
-            }
-
-            return false;
-        }
-#endif
-
-        bool
         exprstate::admits_rightparen() const {
             switch (exs_type_) {
             case exprstatetype::expect_toplevel_expression_sequence:
@@ -255,6 +211,7 @@ namespace xo {
 
             return false;
         }
+#endif
 
         void
         exprstate::on_def_token(const token_type & tk,
@@ -428,7 +385,7 @@ namespace xo {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            constexpr const char * self_name = "exprstate::on_singleassign";
+            constexpr const char * self_name = "exprstate::on_singleassign_token";
 
             if (!this->admits_singleassign())
             {
@@ -448,13 +405,13 @@ namespace xo {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            constexpr const char * self_name = "exprstate::on_leftparen";
+            constexpr const char * self_name = "exprstate::on_leftparen_token";
 
             this->illegal_input_error(self_name, tk);
         }
 
         void
-        exprstate::on_rightparen_token(const token_type & /*tk*/,
+        exprstate::on_rightparen_token(const token_type & tk,
                                        exprstatestack * /*p_stack*/,
                                        rp<Expression> * /*p_emit_expr*/)
         {
@@ -463,18 +420,7 @@ namespace xo {
 
             constexpr const char * self_name = "exprstate::on_rightparen";
 
-            if (!this->admits_rightparen())
-            {
-                throw std::runtime_error(tostr(self_name,
-                                               ": unexpected rightparen ')' for parsing state",
-                                               xtag("state", *this)));
-            }
-
-            if (this->exs_type_ == exprstatetype::expr_progress
-                || this->exs_type_ == exprstatetype::parenexpr) {
-                /* unreachable -- see progress_xs::on_rightparen() etc */
-                assert(false);
-            }
+            this->illegal_input_error(self_name, tk);
         }
 
         void

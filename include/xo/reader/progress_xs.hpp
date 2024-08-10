@@ -30,8 +30,8 @@ namespace xo {
             virtual bool admits_singleassign() const override;
 #ifdef OBSOLETE
             virtual bool admits_leftparen() const override;
-#endif
             virtual bool admits_rightparen() const override;
+#endif
 
             virtual void on_expr(ref::brw<Expression> expr,
                                  exprstatestack * p_stack,

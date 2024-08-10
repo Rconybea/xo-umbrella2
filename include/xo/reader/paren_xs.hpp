@@ -32,6 +32,7 @@ namespace xo {
             static std::unique_ptr<paren_xs> lparen_0();
 
             bool admits_f64() const;
+            bool admits_rightparen() const;
 
             virtual bool admits_symbol() const override;
             virtual bool admits_colon() const override;
@@ -40,7 +41,6 @@ namespace xo {
 #ifdef OBSOLETE
             virtual bool admits_leftparen() const override;
 #endif
-            virtual bool admits_rightparen() const override;
 
             virtual void on_expr(ref::brw<Expression> expr,
                                  exprstatestack * p_stack,
