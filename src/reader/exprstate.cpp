@@ -180,7 +180,7 @@ namespace xo {
         void
         exprstate::on_symbol_token(const token_type & tk,
                                    exprstatestack * p_stack,
-                                   rp<Expression> * p_emit_expr)
+                                   rp<Expression> * /*p_emit_expr*/)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
@@ -199,38 +199,10 @@ namespace xo {
             case exprstatetype::parenexpr:
             case exprstatetype::expect_rhs_expression:
             case exprstatetype::expect_symbol:
+            case exprstatetype::expect_type:
                 /* unreachable - redirected to define_xs etc */
                 assert(false);
                 return;
-
-            case exprstatetype::expect_type: {
-                TypeDescr td = nullptr;
-
-                /* TODO: replace with typetable lookup */
-
-                if (tk.text() == "f64")
-                    td = Reflect::require<double>();
-                else if(tk.text() == "f32")
-                    td = Reflect::require<float>();
-                else if(tk.text() == "i16")
-                    td = Reflect::require<std::int16_t>();
-                else if(tk.text() == "i32")
-                    td = Reflect::require<std::int32_t>();
-                else if(tk.text() == "i64")
-                    td = Reflect::require<std::int64_t>();
-
-                if (!td) {
-                    throw std::runtime_error
-                        (tostr(c_self_name,
-                               ": unknown type name",
-                               " (expecting f64|f32|i16|i32|i64)",
-                               xtag("typename", tk.text())));
-                }
-
-                std::unique_ptr<exprstate> self = p_stack->pop_exprstate();
-                p_stack->top_exprstate().on_typedescr(td, p_stack, p_emit_expr);
-                return;
-            }
 
             case exprstatetype::expr_progress:
                 /* unreachable */
