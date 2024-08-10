@@ -408,34 +408,9 @@ namespace xo {
         {
             /* returning type description to something that wants it */
 
-            switch (this->exs_type_) {
-            case exprstatetype::expect_toplevel_expression_sequence:
-            case exprstatetype::defexpr:
-            case exprstatetype::parenexpr:
-                /* unreachable - redirects to define_xs */
-                assert(false);
-                return;
-
-            case exprstatetype::expect_rhs_expression:
-            case exprstatetype::expect_type:
-            case exprstatetype::expect_symbol:
-                /* unreachable
-                 * (this exprstate issues pop instruction from exprstate::on_input()
-                 */
-                assert(false);
-                return;
-
-            case exprstatetype::expr_progress:
-                /* unreachable */
-                assert(false);
-                return;
-
-            case exprstatetype::invalid:
-            case exprstatetype::n_exprstatetype:
-                /* unreachable */
-                assert(false);
-                return;
-            }
+            /* unreachable - implement in derived class */
+            assert(false);
+            return;
         }
 
         void
@@ -718,31 +693,10 @@ namespace xo {
                              exprstatestack * /*p_stack*/,
                              rp<Expression> * /*p_emit_expr*/)
         {
-            switch(this->exs_type_) {
-            case exprstatetype::expect_toplevel_expression_sequence:
-            case exprstatetype::defexpr:
-            case exprstatetype::parenexpr:
-                /* unreachable - redirects to define_xs etc */
-                assert(false);
-                return;
-
-            case exprstatetype::expect_rhs_expression:
-            case exprstatetype::expect_type:
-            case exprstatetype::expect_symbol:
-                /* unreachable
-                 * (this exprstate issues pop instruction from exprstate::on_input()
-                 */
-                assert(false);
-                return;
-            case exprstatetype::expr_progress:
-                assert(false);
-                return;
-            case exprstatetype::invalid:
-            case exprstatetype::n_exprstatetype:
-                /* unreachable */
-                assert(false);
-                return;
-            }
+            /* unreachable - derived class that can receive
+             * will override this method
+             */
+            assert(false);
         }
 
         void
