@@ -35,7 +35,6 @@ namespace xo {
             bool admits_rightparen() const;
 
             virtual bool admits_symbol() const override;
-            virtual bool admits_semicolon() const override;
             virtual bool admits_singleassign() const override;
 
             virtual void on_expr(ref::brw<Expression> expr,

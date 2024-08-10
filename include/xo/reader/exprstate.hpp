@@ -74,8 +74,10 @@ namespace xo {
 
             /** true iff this parsing state admits a symbol as next token **/
             virtual bool admits_symbol() const;
+#ifdef OBSOLETE
             /** true iff this parsing state admits a semicolon as next token **/
             virtual bool admits_semicolon() const;
+#endif
             /** true iff this parsing state admits a singleassign '=' as next token **/
             virtual bool admits_singleassign() const;
 

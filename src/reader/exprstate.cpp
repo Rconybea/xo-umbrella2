@@ -76,6 +76,7 @@ namespace xo {
             return false;
         }
 
+#ifdef OBSOLETE
         bool
         exprstate::admits_semicolon() const {
             switch (exs_type_) {
@@ -97,6 +98,7 @@ namespace xo {
 
             return false;
         }
+#endif
 
         bool
         exprstate::admits_singleassign() const {
@@ -202,14 +204,9 @@ namespace xo {
 
             constexpr const char * self_name = "exprstate::on_semicolon";
 
-            if (!this->admits_semicolon())
-            {
-                throw std::runtime_error(tostr(self_name,
-                                               ": unexpected semicolon for parsing state",
-                                               xtag("state", *this)));
-            }
-
-            assert(false);
+            throw std::runtime_error(tostr(self_name,
+                                           ": unexpected semicolon for parsing state",
+                                           xtag("state", *this)));
         }
 
         void

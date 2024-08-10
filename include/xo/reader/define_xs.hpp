@@ -44,9 +44,9 @@ namespace xo {
 
             bool admits_rightparen() const;
             bool admits_colon() const;
+            bool admits_semicolon() const;
 
             virtual bool admits_symbol() const override;
-            virtual bool admits_semicolon() const override;
             virtual bool admits_singleassign() const override;
 
             // virtual void on_f64(..) override
