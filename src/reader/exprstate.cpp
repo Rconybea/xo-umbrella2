@@ -189,32 +189,7 @@ namespace xo {
 
             constexpr const char * c_self_name = "exprstate::on_symbol_token";
 
-            if (!this->admits_symbol()) {
-                this->illegal_input_error(c_self_name, tk);
-            }
-
-            switch (this->exs_type_) {
-            case exprstatetype::expect_toplevel_expression_sequence:
-            case exprstatetype::defexpr:
-            case exprstatetype::parenexpr:
-            case exprstatetype::expect_rhs_expression:
-            case exprstatetype::expect_symbol:
-            case exprstatetype::expect_type:
-                /* unreachable - redirected to define_xs etc */
-                assert(false);
-                return;
-
-            case exprstatetype::expr_progress:
-                /* unreachable */
-                assert(false);
-                return;
-
-            case exprstatetype::invalid:
-            case exprstatetype::n_exprstatetype:
-                /* unreachable */
-                assert(false);
-                return;
-            }
+            this->illegal_input_error(c_self_name, tk);
         }
 
         void
