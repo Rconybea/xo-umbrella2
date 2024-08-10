@@ -14,11 +14,6 @@ namespace xo {
             return std::make_unique<paren_xs>(paren_xs());
         }
 
-#ifdef OBSOLETE
-        bool
-        paren_xs::admits_definition() const { return false; }
-#endif
-
         bool
         paren_xs::admits_symbol() const { return true; }
 
@@ -31,8 +26,10 @@ namespace xo {
         bool
         paren_xs::admits_singleassign() const { return false; }
 
+#ifdef OBSOLETE
         bool
         paren_xs::admits_leftparen() const { /*unreachable*/  return false; }
+#endif
 
         bool
         paren_xs::admits_rightparen() const {

@@ -179,6 +179,7 @@ namespace xo {
             return false;
         }
 
+#ifdef OBSOLETE
         bool
         exprstate::admits_leftparen() const {
             switch (exs_type_) {
@@ -221,6 +222,7 @@ namespace xo {
 
             return false;
         }
+#endif
 
         bool
         exprstate::admits_rightparen() const {
@@ -439,8 +441,8 @@ namespace xo {
         }
 
         void
-        exprstate::on_leftparen_token(const token_type & /*tk*/,
-                                      exprstatestack * p_stack,
+        exprstate::on_leftparen_token(const token_type & tk,
+                                      exprstatestack * /*p_stack*/,
                                       rp<Expression> * /*p_emit_expr*/)
         {
             constexpr bool c_debug_flag = true;
@@ -448,18 +450,7 @@ namespace xo {
 
             constexpr const char * self_name = "exprstate::on_leftparen";
 
-            if (!this->admits_leftparen())
-            {
-                throw std::runtime_error(tostr(self_name,
-                                               ": unexpected leftparen '(' for parsing state",
-                                               xtag("state", *this)));
-            }
-
-            if (this->exs_type_ == exprstatetype::expect_rhs_expression) {
-                /* push lparen_0 to remember to look for subsequent rightparen. */
-                p_stack->push_exprstate(paren_xs::lparen_0());
-                p_stack->push_exprstate(expect_expr_xs::expect_rhs_expression());
-            }
+            this->illegal_input_error(self_name, tk);
         }
 
         void

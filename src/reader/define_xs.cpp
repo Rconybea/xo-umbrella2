@@ -131,6 +131,7 @@ namespace xo {
             return false;
         }
 
+#ifdef OBSOLETE
         bool
         define_xs::admits_leftparen() const {
             switch (defxs_type_) {
@@ -163,6 +164,7 @@ namespace xo {
 
             return false;
         }
+#endif
 
         bool
         define_xs::admits_rightparen() const {
@@ -379,6 +381,7 @@ namespace xo {
             }
         }
 
+#ifdef OBSOLETE
         void
         define_xs::on_leftparen_token(const token_type & tk,
                                       exprstatestack * /*p_stack*/,
@@ -389,13 +392,11 @@ namespace xo {
 
             constexpr const char * self_name = "exprstate::on_leftparen";
 
-            if (!this->admits_leftparen())
-            {
-                this->illegal_input_error(self_name, tk);
-            }
+            this->illegal_input_error(self_name, tk);
 
             assert(false); /* inserting this during refactor...? */
         }
+#endif
 
         void
         define_xs::on_rightparen_token(const token_type & tk,

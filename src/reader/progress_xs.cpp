@@ -14,11 +14,6 @@ namespace xo {
               gen_expr_{std::move(valex)}
         {}
 
-#ifdef OBSOLETE
-        bool
-        progress_xs::admits_definition() const { return false; }
-#endif
-
         bool
         progress_xs::admits_symbol() const { return false; }
 
@@ -30,10 +25,6 @@ namespace xo {
 
         bool
         progress_xs::admits_singleassign() const { return false; }
-
-        /* todo: will parse as function call */
-        bool
-        progress_xs::admits_leftparen() const { return false; }
 
         bool
         progress_xs::admits_rightparen() const {

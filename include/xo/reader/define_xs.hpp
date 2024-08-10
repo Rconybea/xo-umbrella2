@@ -43,13 +43,13 @@ namespace xo {
             defexprstatetype defxs_type() const { return defxs_type_; }
 
 #ifdef OBSOLETE
-            virtual bool admits_definition() const override;
+            bool admits_leftparen() const;
 #endif
+
             virtual bool admits_symbol() const override;
             virtual bool admits_colon() const override;
             virtual bool admits_semicolon() const override;
             virtual bool admits_singleassign() const override;
-            virtual bool admits_leftparen() const override;
             virtual bool admits_rightparen() const override;
 
             // virtual void on_f64(..) override
@@ -69,9 +69,11 @@ namespace xo {
                                             rp<Expression> * /*p_emit_expr*/) override;
             virtual void on_singleassign_token(const token_type & tk,
                                                exprstatestack * p_stack) override;
+#ifdef OBSOLETE
             virtual void on_leftparen_token(const token_type & tk,
                                             exprstatestack * p_stack,
                                             rp<Expression> * /*p_emit_expr*/) override;
+#endif
             virtual void on_rightparen_token(const token_type & tk,
                                              exprstatestack * p_stack,
                                              rp<Expression> * /*p_emit_expr*/) override;
