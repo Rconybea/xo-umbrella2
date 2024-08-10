@@ -87,12 +87,6 @@ namespace xo {
             virtual bool admits_semicolon() const;
             /** true iff this parsing state admits a singleassign '=' as next token **/
             virtual bool admits_singleassign() const;
-#ifdef OBSOLETE
-            /** true iff this parsing state admits a leftparen '(' as next token **/
-            virtual bool admits_leftparen() const;
-            /** truee iff this parsing state admits a rightparen ')' as next token **/
-            virtual bool admits_rightparen() const;
-#endif
 
             /** update exprstate in response to incoming token @p tk,
              *  forward instructions to parent parser

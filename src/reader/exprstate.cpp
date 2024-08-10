@@ -50,13 +50,10 @@ namespace xo {
 
             case exprstatetype::defexpr:
             case exprstatetype::parenexpr:
+            case exprstatetype::expect_rhs_expression:
                 /* unreachable */
                 assert(false);
                 return false;
-
-            case exprstatetype::expect_rhs_expression:
-                /* treat symbol as variable name */
-                return true;
 
             case exprstatetype::expect_symbol:
                 return true;
@@ -179,40 +176,6 @@ namespace xo {
             return false;
         }
 
-#ifdef OBSOLETE
-        bool
-        exprstate::admits_rightparen() const {
-            switch (exs_type_) {
-            case exprstatetype::expect_toplevel_expression_sequence:
-                return false;
-
-            case exprstatetype::defexpr:
-            case exprstatetype::parenexpr:
-                /* unreachable - redirects to define_xs */
-                assert(false);
-                return false;
-
-            case exprstatetype::expect_rhs_expression:
-                return false;
-
-            case exprstatetype::expect_type:
-                return false;
-
-            case exprstatetype::expect_symbol:
-                return false;
-
-            case exprstatetype::expr_progress:
-            case exprstatetype::invalid:
-            case exprstatetype::n_exprstatetype:
-                /* unreachable */
-                assert(false);
-                return false;
-            }
-
-            return false;
-        }
-#endif
-
         void
         exprstate::on_def_token(const token_type & tk,
                                 exprstatestack * /*p_stack*/)
@@ -240,38 +203,10 @@ namespace xo {
             case exprstatetype::expect_toplevel_expression_sequence:
             case exprstatetype::defexpr:
             case exprstatetype::parenexpr:
-                /* unreachable - redirects to define_xs */
+            case exprstatetype::expect_rhs_expression:
+                /* unreachable - redirected to define_xs etc */
                 assert(false);
                 return;
-
-            case exprstatetype::expect_rhs_expression:
-            {
-                /* various possibilities when looking for rhs expression:
-                 *
-                 *   x := y       // (1)
-                 *   x := f(a)    // (2)
-                 *   x := f(a,b)  // (3)
-                 *
-                 * need lookahead token following symbol to distinguish
-                 * between (1) (symbol completes rhs expression)
-                 * and {(2), (3)} (symbol is function call)
-                 */
-
-                /* have to do pop first, before sending symbol to
-                 * the o.g. symbol-requester
-                 */
-#ifdef NOT_YET
-                p_stack->push_exprstate(exprstate(exprstatetype::expr_progress,
-                                                  Variable::make(name, type)));
-#endif
-
-#ifdef LATER
-                p_stack->pop_exprstate();
-                p_stack->top_exprstate().on_symbol(tk.text(),
-                                                   p_stack, p_emit_expr);
-#endif
-                return;
-            }
 
             case exprstatetype::expect_symbol:
             {
@@ -528,8 +463,8 @@ namespace xo {
 
         void
         exprstate::on_expr(ref::brw<Expression> expr,
-                           exprstatestack * p_stack,
-                           rp<Expression> * p_emit_expr)
+                           exprstatestack * /*p_stack*/,
+                           rp<Expression> * /*p_emit_expr*/)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
@@ -537,42 +472,7 @@ namespace xo {
             log && log(xtag("exstype", this->exs_type_),
                        xtag("expr", expr));
 
-            switch (this->exs_type_) {
-            case exprstatetype::expect_toplevel_expression_sequence:
-            case exprstatetype::defexpr:
-            case exprstatetype::parenexpr:
-                /* unreachable.  redirects to define_xs::on_expr() etc */
-                assert(false);
-                return;
-
-            case exprstatetype::expect_rhs_expression: {
-
-                std::unique_ptr<exprstate> self = p_stack->pop_exprstate();
-
-                p_stack->top_exprstate().on_expr(expr,
-                                                 p_stack,
-                                                 p_emit_expr);
-
-                return;
-            }
-
-            case exprstatetype::expect_type:
-            case exprstatetype::expect_symbol:
-                /* unreachable
-                 * (this exprstate issues pop instruction from exprstate::on_input()
-                 */
-                assert(false);
-                return;
-            case exprstatetype::expr_progress:
-                /* unreachable */
-                assert(false);
-                return;
-            case exprstatetype::invalid:
-            case exprstatetype::n_exprstatetype:
-                /* unreachable */
-                assert(false);
-                return;
-            }
+            assert(false);
         } /*on_expr*/
 
         void
