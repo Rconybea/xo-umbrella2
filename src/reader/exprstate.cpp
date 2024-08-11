@@ -1,16 +1,16 @@
 /* @file exprstate.cpp */
 
 #include "exprstate.hpp"
-#include "define_xs.hpp"
-#include "progress_xs.hpp"
-#include "paren_xs.hpp"
-#include "expect_expr_xs.hpp"
-#include "xo/expression/Constant.hpp"
-#include "xo/reflect/Reflect.hpp"
+//#include "define_xs.hpp"
+//#include "progress_xs.hpp"
+//#include "paren_xs.hpp"
+//#include "expect_expr_xs.hpp"
+//#include "xo/expression/Constant.hpp"
+//#include "xo/reflect/Reflect.hpp"
 
 namespace xo {
-    using xo::ast::Constant;
-    using xo::reflect::Reflect;
+    //using xo::ast::Constant;
+    //using xo::reflect::Reflect;
     using xo::reflect::TypeDescr;
 
     namespace scm {
@@ -75,7 +75,7 @@ namespace xo {
         }
 
         void
-        exprstate::on_colon_token(const token_type & /*tk*/,
+        exprstate::on_colon_token(const token_type & tk,
                                   exprstatestack * /*p_stack*/)
         {
             constexpr bool c_debug_flag = true;
@@ -83,16 +83,11 @@ namespace xo {
 
             constexpr const char * self_name = "exprstate::on_colon";
 
-            /* lots of illegal states */
-            throw std::runtime_error(tostr(self_name,
-                                           ": unexpected colon for parsing state",
-                                           xtag("state", *this)));
-
-            assert(false);
+            this->illegal_input_error(self_name, tk);
         }
 
         void
-        exprstate::on_semicolon_token(const token_type & /*tk*/,
+        exprstate::on_semicolon_token(const token_type & tk,
                                       exprstatestack * /*p_stack*/,
                                       rp<Expression> * /*p_emit_expr*/)
         {
@@ -101,22 +96,18 @@ namespace xo {
 
             constexpr const char * self_name = "exprstate::on_semicolon";
 
-            throw std::runtime_error(tostr(self_name,
-                                           ": unexpected semicolon for parsing state",
-                                           xtag("state", *this)));
+            this->illegal_input_error(self_name, tk);
         }
 
         void
-        exprstate::on_singleassign_token(const token_type & /*tk*/,
+        exprstate::on_singleassign_token(const token_type & tk,
                                          exprstatestack * /*p_stack*/) {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
             constexpr const char * self_name = "exprstate::on_singleassign_token";
 
-            throw std::runtime_error(tostr(self_name,
-                                           ": unexpected equals for parsing state",
-                                           xtag("state", *this)));
+            this->illegal_input_error(self_name, tk);
         }
 
         void
