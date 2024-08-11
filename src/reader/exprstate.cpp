@@ -5,9 +5,7 @@
 #include "progress_xs.hpp"
 #include "paren_xs.hpp"
 #include "expect_expr_xs.hpp"
-//#include "xo/expression/DefineExpr.hpp"
 #include "xo/expression/Constant.hpp"
-//#include "xo/expression/ConvertExpr.hpp"
 #include "xo/reflect/Reflect.hpp"
 
 namespace xo {
@@ -41,42 +39,6 @@ namespace xo {
 
             return "???";
         }
-
-#ifdef OBSOLETE
-        bool
-        exprstate::admits_symbol() const {
-            switch (exs_type_) {
-            case exprstatetype::expect_toplevel_expression_sequence:
-                return false;
-
-            case exprstatetype::defexpr:
-            case exprstatetype::parenexpr:
-            case exprstatetype::expect_rhs_expression:
-                /* unreachable */
-                assert(false);
-                return false;
-
-            case exprstatetype::expect_symbol:
-                return true;
-
-            case exprstatetype::expect_type:
-                /* treat symbol as typename */
-                return true;
-
-            case exprstatetype::expr_progress:
-                /* unreachable */
-                assert(false);
-                return false;
-
-            case exprstatetype::invalid:
-            case exprstatetype::n_exprstatetype:
-                /* unreachable */
-                return false;
-            }
-
-            return false;
-        }
-#endif
 
         void
         exprstate::on_def_token(const token_type & tk,

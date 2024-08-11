@@ -72,11 +72,6 @@ namespace xo {
 
             exprstatetype exs_type() const { return exs_type_; }
 
-#ifdef OBSOLETE
-            /** true iff this parsing state admits a symbol as next token **/
-            virtual bool admits_symbol() const;
-#endif
-
             /** update exprstate in response to incoming token @p tk,
              *  forward instructions to parent parser
              **/
