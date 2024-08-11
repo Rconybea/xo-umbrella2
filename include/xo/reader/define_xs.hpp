@@ -47,7 +47,9 @@ namespace xo {
             bool admits_semicolon() const;
 
             virtual bool admits_symbol() const override;
-            virtual bool admits_singleassign() const override;
+#ifdef OBSOLETE
+            bool admits_singleassign() const;
+#endif
 
             // virtual void on_f64(..) override
             virtual void on_expr(ref::brw<Expression> expr,

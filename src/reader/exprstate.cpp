@@ -76,6 +76,7 @@ namespace xo {
             return false;
         }
 
+#ifdef OBSOLETE
         bool
         exprstate::admits_singleassign() const {
             switch (exs_type_) {
@@ -118,6 +119,7 @@ namespace xo {
 
             return false;
         }
+#endif
 
         void
         exprstate::on_def_token(const token_type & tk,
@@ -193,14 +195,9 @@ namespace xo {
 
             constexpr const char * self_name = "exprstate::on_singleassign_token";
 
-            if (!this->admits_singleassign())
-            {
-                throw std::runtime_error(tostr(self_name,
-                                               ": unexpected equals for parsing state",
-                                               xtag("state", *this)));
-            }
-
-            assert(false);
+            throw std::runtime_error(tostr(self_name,
+                                           ": unexpected equals for parsing state",
+                                           xtag("state", *this)));
         }
 
         void

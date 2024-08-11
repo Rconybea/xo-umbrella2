@@ -88,24 +88,11 @@ namespace xo {
             return false;
         }
 
+#ifdef OBSOLETE
         bool
         define_xs::admits_singleassign() const {
             switch (defxs_type_) {
 
-                /*
-                 *   def foo       = 1 ;
-                 *   def foo : f64 = 1 ;
-                 *  ^   ^   ^ ^   ^ ^ ^
-                 *  |   |   | |   | | (done)
-                 *  |   |   | |   | def_4:expect_rhs_expression
-                 *  |   |   | |   def_3
-                 *  |   |   | def_2:expect_type
-                 *  |   |   def_1
-                 *  |   def_0:expect_symbol
-                 *  expect_toplevel_expression_sequence
-                 *
-                 * note that we skip from def_1 -> def_4 if '=' instead of ':'
-                 */
             case defexprstatetype::def_0:
                 return false;
 
@@ -131,6 +118,7 @@ namespace xo {
 
             return false;
         }
+#endif
 
 #ifdef OBSOLETE
         bool
@@ -367,10 +355,20 @@ namespace xo {
 
             constexpr const char * self_name = "exprstate::on_singleassign";
 
-            if (!this->admits_singleassign()) {
-                this->illegal_input_error(self_name, tk);
-            }
-
+            /*
+             *   def foo       = 1 ;
+             *   def foo : f64 = 1 ;
+             *  ^   ^   ^ ^   ^ ^ ^
+             *  |   |   | |   | | (done)
+             *  |   |   | |   | def_4:expect_rhs_expression
+             *  |   |   | |   def_3
+             *  |   |   | def_2:expect_type
+             *  |   |   def_1
+             *  |   def_0:expect_symbol
+             *  expect_toplevel_expression_sequence
+             *
+             * note that we skip from def_1 -> def_4 if '=' instead of ':'
+             */
             if ((this->defxs_type_ == defexprstatetype::def_1)
                 || (this->defxs_type_ == defexprstatetype::def_3))
             {
@@ -378,7 +376,7 @@ namespace xo {
 
                 p_stack->push_exprstate(expect_expr_xs::expect_rhs_expression());
             } else {
-                assert(false);
+                this->illegal_input_error(self_name, tk);
             }
         }
 
