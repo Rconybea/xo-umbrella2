@@ -42,6 +42,7 @@ namespace xo {
             return "???";
         }
 
+#ifdef OBSOLETE
         bool
         exprstate::admits_symbol() const {
             switch (exs_type_) {
@@ -75,6 +76,7 @@ namespace xo {
 
             return false;
         }
+#endif
 
         void
         exprstate::on_def_token(const token_type & tk,

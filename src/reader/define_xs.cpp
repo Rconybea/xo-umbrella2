@@ -18,28 +18,6 @@ namespace xo {
         {}
 
         bool
-        define_xs::admits_symbol() const {
-            switch (defxs_type_) {
-
-            case defexprstatetype::def_0:
-            case defexprstatetype::def_1:
-            case defexprstatetype::def_2:
-            case defexprstatetype::def_3:
-            case defexprstatetype::def_4:
-            case defexprstatetype::def_5:
-                return false;
-
-            case defexprstatetype::invalid:
-            case defexprstatetype::n_defexprstatetype:
-                /* unreachable */
-                assert(false);
-                return false;
-            }
-
-            return false;
-        }
-
-        bool
         define_xs::admits_colon() const {
             switch (defxs_type_) {
 

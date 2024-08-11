@@ -34,8 +34,6 @@ namespace xo {
             bool admits_f64() const;
             bool admits_rightparen() const;
 
-            virtual bool admits_symbol() const override;
-
             virtual void on_expr(ref::brw<Expression> expr,
                                  exprstatestack * p_stack,
                                  rp<Expression> * p_emit_expr) override;

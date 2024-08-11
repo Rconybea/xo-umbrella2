@@ -15,9 +15,6 @@ namespace xo {
         }
 
         bool
-        paren_xs::admits_symbol() const { return true; }
-
-        bool
         paren_xs::admits_rightparen() const {
             switch (parenxs_type_) {
             case parenexprstatetype::lparen_0:

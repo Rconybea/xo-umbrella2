@@ -72,13 +72,17 @@ namespace xo {
 
             exprstatetype exs_type() const { return exs_type_; }
 
+#ifdef OBSOLETE
             /** true iff this parsing state admits a symbol as next token **/
             virtual bool admits_symbol() const;
+#endif
 
             /** update exprstate in response to incoming token @p tk,
              *  forward instructions to parent parser
              **/
-            void on_input(const token_type & tk, exprstatestack * p_stack, rp<Expression> * p_emit_expr);
+            void on_input(const token_type & tk,
+                          exprstatestack * p_stack,
+                          rp<Expression> * p_emit_expr);
 
             /** update exprstate in response to a successfully-parsed subexpression **/
             virtual void on_expr(ref::brw<Expression> expr,
