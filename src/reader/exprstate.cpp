@@ -76,51 +76,6 @@ namespace xo {
             return false;
         }
 
-#ifdef OBSOLETE
-        bool
-        exprstate::admits_singleassign() const {
-            switch (exs_type_) {
-            case exprstatetype::expect_toplevel_expression_sequence:
-                /*
-                 *   def foo       = 1 ;
-                 *   def foo : f64 = 1 ;
-                 *  ^   ^   ^ ^   ^ ^ ^
-                 *  |   |   | |   | | (done)
-                 *  |   |   | |   | def_4:expect_rhs_expression
-                 *  |   |   | |   def_3
-                 *  |   |   | def_2:expect_type
-                 *  |   |   def_1
-                 *  |   def_0:expect_symbol
-                 *  expect_toplevel_expression_sequence
-                 *
-                 * note that we skip from def_1 -> def_4 if '=' instead of ':'
-                 */
-            case exprstatetype::defexpr:
-            case exprstatetype::parenexpr:
-                /* unreachable - redirects to define_xs etrc */
-                assert(false);
-                return false;
-
-            case exprstatetype::expect_rhs_expression:
-            case exprstatetype::expect_symbol:
-            case exprstatetype::expect_type:
-                return false;
-
-            case exprstatetype::expr_progress:
-                /* unreachable */
-                assert(false);
-                return false;
-
-            case exprstatetype::invalid:
-            case exprstatetype::n_exprstatetype:
-                /* unreachable */
-                return false;
-            }
-
-            return false;
-        }
-#endif
-
         void
         exprstate::on_def_token(const token_type & tk,
                                 exprstatestack * /*p_stack*/)
