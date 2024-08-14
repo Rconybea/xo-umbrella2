@@ -62,7 +62,7 @@ namespace xo {
 
             /** @brief create span representing prefix up to (but not including) @p *p
              **/
-            span prefix(CharT * p) const {
+            span prefix_upto(CharT * p) const {
                 if (p <= hi_)
                     return span(lo_, p);
                 else

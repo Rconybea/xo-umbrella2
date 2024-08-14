@@ -560,13 +560,13 @@ namespace xo {
                 /* no-op */
                 return {
                     token_type::invalid(),
-                    input.prefix(ix)
+                    input.prefix_upto(ix)
                 };
             }
 
             /* here: *ix is not whitespace */
 
-            auto whitespace = input.prefix(ix);
+            auto whitespace = input.prefix_upto(ix);
 
             log && log(xtag("whitespace.size", whitespace.size()));
 
@@ -630,7 +630,7 @@ namespace xo {
                 }
             }
 
-            auto token_span = input.after_prefix(whitespace).prefix(ix);
+            auto token_span = input.after_prefix(whitespace).prefix_upto(ix);
 
             token tk
                 = (this->prefix_.empty()

@@ -37,6 +37,11 @@ namespace xo {
                 CASE(tk_assign);
                 CASE(tk_yields);
 
+                CASE(tk_plus);
+                CASE(tk_minus);
+                CASE(tk_star);
+                CASE(tk_slash);
+
                 CASE(tk_type);
                 CASE(tk_def);
                 CASE(tk_lambda);

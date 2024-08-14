@@ -106,6 +106,20 @@ namespace xo {
             /** '->' **/
             tk_yields,
 
+            /** note: operators not treated as punctuation
+             *  'do-always' is a legal variable name,
+             *  as is 'maybe*2', 'maybe+1', 'path/to/foo'
+             **/
+
+            /** operator '+' **/
+            tk_plus,
+            /** operator '-' **/
+            tk_minus,
+            /** operator '*' **/
+            tk_star,
+            /** operator '/' **/
+            tk_slash,
+
             /** keyworkd 'type' **/
             tk_type,
 
