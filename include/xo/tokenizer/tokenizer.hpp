@@ -147,6 +147,10 @@ namespace xo {
             case '+':
                 /* can't be punctuation -- can appear inside f64 token */
                 return false;
+            case '*':
+            case '/':
+                /* not punctuation -- for symmetry with +,- */
+                return false;
             case '.':
                 /* can't be punctuation -- can appear inside f64 token */
                 return false;
@@ -179,6 +183,16 @@ namespace xo {
             switch (*ix) {
             case '-':
             case '+':
+                if (token_text.size() == 1) {
+                    /* standalone '+' or '-' */
+                    if (*ix == '+')
+                        tk_type = tokentype::tk_plus;
+                    else if(*ix == '-')
+                        tk_type = tokentype::tk_minus;
+                }
+
+                /** fall through to numeric literal code below **/
+                ;
             case '.':
             case '0':
             case '1':
@@ -306,6 +320,18 @@ namespace xo {
 
                 break;
             }
+            case '*':
+                if (token_text.size() == 1) {
+                    /* standalone '*' */
+                    tk_type = tokentype::tk_star;
+                }
+                break;
+            case '/':
+                if (token_text.size() == 1) {
+                    /* standalone '/' */
+                    tk_type = tokentype::tk_slash;
+                }
+                break;
             case '"':
             {
                 log && log("recognize string-token");
