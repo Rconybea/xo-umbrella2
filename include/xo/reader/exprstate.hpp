@@ -144,6 +144,8 @@ namespace xo {
             return os;
         }
 
+        // ----- exprstatestack -----
+
         /** @class exprstatestack
          *  @brief A stack of exprstate objects
          **/
