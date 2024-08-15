@@ -10,6 +10,18 @@
 
 namespace xo {
     namespace scm {
+        /* represent an infix operator */
+        enum class optype {
+            invalid = -1,
+
+            op_add,
+            op_subtract,
+            op_multiply,
+            op_divide,
+
+            n_optype
+        };
+
         /** @class progress_xs
          *  @brief state machine for parsing a schematica runtime-value-expression
          **/
@@ -49,6 +61,12 @@ namespace xo {
             virtual void on_rightparen_token(const token_type & tk,
                                              exprstatestack * p_stack,
                                              rp<Expression> * /*p_emit_expr*/) override;
+
+            /* entry point for an infix operator token */
+            virtual void on_operator_token(const token_type & tk,
+                                           exprstatestack * p_stack,
+                                           rp<Expression> * p_emit_expr) override;
+
             virtual void on_f64_token(const token_type & tk,
                                       exprstatestack * p_stack,
                                       rp<Expression> * /*p_emit_expr*/) override;
@@ -58,6 +76,9 @@ namespace xo {
         private:
             /** populate an expression here **/
             rp<Expression> gen_expr_;
+
+            /** infix operator,  if supplied **/
+            optype op_type_ = optype::invalid;
         };
     } /*namespace scm*/
 } /*namespace xo*/
