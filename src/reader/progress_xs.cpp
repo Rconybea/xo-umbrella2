@@ -28,14 +28,34 @@ namespace xo {
             return "???";
         }
 
-        std::unique_ptr<progress_xs>
-        progress_xs::make(rp<Expression> valex) {
-            return std::make_unique<progress_xs>(progress_xs(std::move(valex)));
+        int
+        precedence(optype x) {
+            switch (x) {
+            case optype::invalid:
+            case optype::n_optype:
+                return 0;
+
+            case optype::op_add:
+            case optype::op_subtract:
+                return 1;
+
+            case optype::op_multiply:
+            case optype::op_divide:
+                return 2;
+            }
+
+            return 0;
         }
 
-        progress_xs::progress_xs(rp<Expression> valex)
+        std::unique_ptr<progress_xs>
+        progress_xs::make(rp<Expression> valex, optype op) {
+            return std::make_unique<progress_xs>(progress_xs(std::move(valex), op));
+        }
+
+        progress_xs::progress_xs(rp<Expression> valex, optype op)
             : exprstate(exprstatetype::expr_progress),
-              lhs_{std::move(valex)}
+              lhs_{std::move(valex)},
+              op_type_{op}
         {}
 
         bool
@@ -57,6 +77,15 @@ namespace xo {
              * consider input like
              *   3.14 + 2.0 * ...
              */
+
+            constexpr const char * c_self_name = "progress_xs::assemble_expr";
+
+            if ((op_type_ != optype::invalid) && (rhs_.get() == nullptr)) {
+                throw std::runtime_error(tostr(c_self_name,
+                                               ": expected expr on rhs of operator",
+                                               xtag("lhs", lhs_),
+                                               xtag("op", op_type_)));
+            }
 
             /* consecutive expressions not legal, e.g:
              *   3.14 6.28
@@ -252,35 +281,90 @@ namespace xo {
 
          }
 
+        namespace {
+            optype
+            tk2op(const tokentype & tktype) {
+                switch (tktype) {
+                case tokentype::tk_plus:
+                    return optype::op_add;
+                case tokentype::tk_minus:
+                    return optype::op_subtract;
+                case tokentype::tk_star:
+                    return optype::op_multiply;
+                case tokentype::tk_slash:
+                    return optype::op_divide;
+                default:
+                    assert(false);
+                    return optype::invalid;
+                }
+                return optype::invalid;
+            }
+        }
+
         void
         progress_xs::on_operator_token(const token_type & tk,
                                        exprstatestack * p_stack,
-                                       rp<Expression> * p_emit_expr)
+                                       rp<Expression> * /*p_emit_expr*/)
         {
             constexpr const char * c_self_name = "progress_xs::on_operator_token";
 
             if (op_type_ == optype::invalid) {
-                switch(tk.tk_type()) {
-                case tokentype::tk_plus:
-                    this->op_type_ = optype::op_add;
-                    break;
-                case tokentype::tk_minus:
-                    this->op_type_ = optype::op_subtract;
-                    break;
-                case tokentype::tk_star:
-                    this->op_type_ = optype::op_multiply;
-                    break;
-                case tokentype::tk_slash:
-                    this->op_type_ = optype::op_divide;
-                    break;
-                default:
-                    /* unreachable */
-                    assert(false);
-                    exprstate::on_operator_token(tk, p_stack, p_emit_expr);
-                }
+                this->op_type_ = tk2op(tk.tk_type());
 
                 /* infix operator must be followed by non-empty expression */
                 p_stack->push_exprstate(expect_expr_xs::expect_rhs_expression());
+            } else if (rhs_) {
+                /* already have complete expression stashed.
+                 * behavior depends on operator precedence for tk with stored operator
+                 * this->op_type_
+                 */
+                optype op2 = tk2op(tk.tk_type());
+
+                if (precedence(op2) <= precedence(this->op_type_)) {
+                    /* e.g.
+                     *   6.2 * 4.9 + ...
+                     *
+                     * in stack:
+                     *   1. progress_xs lhs=6.2, op=*, rhs=4.9
+                     *
+                     * out stack
+                     *   1. progress_xs lhs=apply(*,6.2,4.9), op=+
+                     */
+
+                    /* 1. instantiate expression for *this */
+                    auto expr = this->assemble_expr();
+
+                    /* 2. remove from stack */
+                    std::unique_ptr<exprstate> self  = p_stack->pop_exprstate();
+
+                    /* 3. replace with new progress_xs: */
+                    p_stack->push_exprstate(progress_xs::make(expr, op2));
+
+                    /* infix operator must be followed by non-empty expression */
+                    p_stack->push_exprstate(expect_expr_xs::expect_rhs_expression());
+                } else {
+                    /* e.g.
+                     *   6.2 + 4.9 * ...
+                     *
+                     * in stack:
+                     *   1. progress_xs lhs=6.2, op=+, rhs=4.9
+                     *
+                     * out stack:
+                     *   1. progress_xs lhs=6.2, op=+
+                     *   2. expect_rhs_expression
+                     *   3. progress_xs lhs=4.9, op=*
+                     *   4. expect_rhs_expression
+                     */
+
+                    std::unique_ptr<exprstate> self = p_stack->pop_exprstate();
+
+                    /* 1. replace with nested incomplete infix exprs */
+                    p_stack->push_exprstate(progress_xs::make(lhs_, op_type_));
+                    p_stack->push_exprstate(expect_expr_xs::expect_rhs_expression());
+                    p_stack->push_exprstate(progress_xs::make(rhs_, op2));
+                    p_stack->push_exprstate(expect_expr_xs::expect_rhs_expression());
+                }
+
             } else {
                 throw std::runtime_error(tostr(c_self_name,
                                                ": expected expression following operator",

@@ -26,6 +26,9 @@ namespace xo {
         extern const char *
         optype_descr(optype x);
 
+        extern int
+        precedence(optype x);
+
         inline std::ostream &
         operator<< (std::ostream & os, optype x) {
             os << optype_descr(x);
@@ -37,12 +40,13 @@ namespace xo {
          **/
         class progress_xs : public exprstate {
         public:
-            progress_xs(rp<Expression> valex);
+            progress_xs(rp<Expression> valex, optype op);
             virtual ~progress_xs() = default;
 
             static const progress_xs * from(const exprstate * x) { return dynamic_cast<const progress_xs *>(x); }
 
-            static std::unique_ptr<progress_xs> make(rp<Expression> valex);
+            static std::unique_ptr<progress_xs> make(rp<Expression> valex,
+                                                     optype optype = optype::invalid);
 
             bool admits_f64() const;
 
