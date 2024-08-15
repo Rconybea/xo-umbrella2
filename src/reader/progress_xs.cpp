@@ -5,9 +5,29 @@
 #include "xo/expression/Apply.hpp"
 
 namespace xo {
+    using xo::ast::Expression;
     using xo::ast::Apply;
 
     namespace scm {
+        const char *
+        optype_descr(optype x) {
+            switch (x) {
+            case optype::invalid:
+                return "?optype";
+            case optype::op_add:
+                return "op+";
+            case optype::op_subtract:
+                return "op-";
+            case optype::op_multiply:
+                return "op*";
+            case optype::op_divide:
+                return "op/";
+            case optype::n_optype:
+                break;
+            }
+            return "???";
+        }
+
         std::unique_ptr<progress_xs>
         progress_xs::make(rp<Expression> valex) {
             return std::make_unique<progress_xs>(progress_xs(std::move(valex)));
@@ -15,7 +35,7 @@ namespace xo {
 
         progress_xs::progress_xs(rp<Expression> valex)
             : exprstate(exprstatetype::expr_progress),
-              gen_expr_{std::move(valex)}
+              lhs_{std::move(valex)}
         {}
 
         bool
@@ -31,48 +51,66 @@ namespace xo {
             this->illegal_input_error(self_name, tk) ;
         }
 
-        void
-        progress_xs::on_expr(ref::brw<Expression> expr,
-                             exprstatestack * p_stack,
-                             rp<Expression> * /*p_emit_expr*/)
-        {
-            constexpr const char * c_self_name = "progress_xs::on_expr";
+        rp<Expression>
+        progress_xs::assemble_expr() {
+            /* need to defer building Apply incase expr followed by higher-precedence operator:
+             * consider input like
+             *   3.14 + 2.0 * ...
+             */
 
-            rp<Expression> result;
-
-            /* consecutive expressions isn't legal */
+            /* consecutive expressions not legal, e.g:
+             *   3.14 6.28
+             * but expressions surrounding an infix operators is:
+             *   3.14 / 6.28
+             */
             switch (op_type_) {
             case optype::invalid:
-                throw std::runtime_error(tostr(c_self_name,
-                                               ": consecutive unseparated exprs not legal"));
-
-                break;
+                return this->lhs_;
 
             case optype::op_add:
-                result = Apply::make_add2_f64(this->gen_expr_ /*lhs*/,
-                                              expr.promote() /*rhs*/);
-                break;
+                return Apply::make_add2_f64(this->lhs_,
+                                            this->rhs_);
 
             case optype::op_subtract:
-                result = Apply::make_sub2_f64(this->gen_expr_ /*lhs*/,
-                                              expr.promote() /*rhs*/);
-                break;
+                return Apply::make_sub2_f64(this->lhs_,
+                                              this->rhs_);
 
             case optype::op_multiply:
-                result = Apply::make_mul2_f64(this->gen_expr_ /*lhs*/,
-                                              expr.promote() /*rhs*/);
-                break;
+                return Apply::make_mul2_f64(this->lhs_,
+                                              this->rhs_);
 
             case optype::op_divide:
-                result = Apply::make_div2_f64(this->gen_expr_ /*lhs*/,
-                                              expr.promote() /*rhs*/);
-                break;
+                return Apply::make_div2_f64(this->lhs_,
+                                            this->rhs_);
 
             case optype::n_optype:
                 /* unreachable */
                 assert(false);
+                return nullptr;
             }
 
+            return nullptr;
+        }
+
+        void
+        progress_xs::on_expr(ref::brw<Expression> expr,
+                             exprstatestack * /*p_stack*/,
+                             rp<Expression> * /*p_emit_expr*/)
+        {
+            /* note: previous token probably an operator,
+             *       handled from progress_xs::on_operator_token(),
+             *       which pushes expect_expr_xs::expect_rhs_expression()
+             */
+
+            constexpr const char * c_self_name = "progress_xs::on_expr";
+
+
+            if (op_type_ == optype::invalid) {
+                throw std::runtime_error(tostr(c_self_name,
+                                               ": consecutive unseparated exprs not legal"));
+            }
+
+#ifdef NOT_QUITE
             assert(result.get());
 
             /* this expression complete.. */
@@ -80,6 +118,9 @@ namespace xo {
 
             /* ..but more operators could follow, so don't commit yet */
             p_stack->push_exprstate(progress_xs::make(result));
+#endif
+
+            this->rhs_ = expr.promote();
         }
 
         void
@@ -116,10 +157,12 @@ namespace xo {
                                         exprstatestack * p_stack,
                                         rp<Expression> * p_emit_expr)
         {
+            /* note: implementation parllels .on_rightparen_token() */
+
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            rp<Expression> expr = this->gen_expr_;
+            rp<Expression> expr = this->assemble_expr();
 
             std::unique_ptr<exprstate> self = p_stack->pop_exprstate();
 
@@ -171,6 +214,9 @@ namespace xo {
                                           exprstatestack * p_stack,
                                           rp<Expression> * p_emit_expr)
          {
+             /* note: implementation parallels .on_semicolon_token() */
+
+
              constexpr bool c_debug_flag = true;
              scope log(XO_DEBUG(c_debug_flag));
 
@@ -188,7 +234,7 @@ namespace xo {
               */
 
              /* right paren confirms stack expression */
-             rp<Expression> expr = this->gen_expr_;
+             rp<Expression> expr = this->assemble_expr();
 
              std::unique_ptr<exprstate> self = p_stack->pop_exprstate();
 
@@ -264,8 +310,12 @@ namespace xo {
         progress_xs::print(std::ostream & os) const {
             os << "<progress_xs"
                << xtag("type", exs_type_);
-            if (gen_expr_)
-                os << xtag("gen_expr", gen_expr_);
+            if (lhs_)
+                os << xtag("lhs", lhs_);
+            if (op_type_ != optype::invalid)
+                os << xtag("op", op_type_);
+            if (rhs_)
+                os << xtag("rhs", rhs_);
             os << ">";
         }
 

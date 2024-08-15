@@ -6,6 +6,7 @@
 #pragma once
 
 #include "exprstate.hpp"
+#include <iostream>
 //#include <cstdint>
 
 namespace xo {
@@ -21,6 +22,15 @@ namespace xo {
 
             n_optype
         };
+
+        extern const char *
+        optype_descr(optype x);
+
+        inline std::ostream &
+        operator<< (std::ostream & os, optype x) {
+            os << optype_descr(x);
+            return os;
+        }
 
         /** @class progress_xs
          *  @brief state machine for parsing a schematica runtime-value-expression
@@ -74,11 +84,25 @@ namespace xo {
             virtual void print(std::ostream & os) const override;
 
         private:
-            /** populate an expression here **/
-            rp<Expression> gen_expr_;
+            /** assemble expression representing
+             *  value of
+             *  @code
+             *    f(lhs_, rhs_)
+             *  @endcode
+             *
+             *  where f determined by @ref op_type_
+             **/
+            rp<Expression> assemble_expr();
+
+        private:
+            /** populate an expression here, may be followed by an operator **/
+            rp<Expression> lhs_;
 
             /** infix operator,  if supplied **/
             optype op_type_ = optype::invalid;
+
+            /** populate an expression here, following infix operator */
+            rp<Expression> rhs_;
         };
     } /*namespace scm*/
 } /*namespace xo*/
