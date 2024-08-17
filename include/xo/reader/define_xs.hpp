@@ -56,18 +56,18 @@ namespace xo {
                                    exprstatestack * p_stack,
                                    rp<Expression> * p_emit_expr) override;
             virtual void on_typedescr(TypeDescr td,
-                                      exprstatestack * /*p_stack*/,
-                                      rp<Expression> * /*p_emit_expr*/) override;
+                                      exprstatestack * p_stack,
+                                      rp<Expression> * p_emit_expr) override;
             virtual void on_colon_token(const token_type & tk,
                                         exprstatestack * p_stack) override;
             virtual void on_semicolon_token(const token_type & tk,
                                             exprstatestack * p_stack,
-                                            rp<Expression> * /*p_emit_expr*/) override;
+                                            rp<Expression> * p_emit_expr) override;
             virtual void on_singleassign_token(const token_type & tk,
                                                exprstatestack * p_stack) override;
             virtual void on_rightparen_token(const token_type & tk,
                                              exprstatestack * p_stack,
-                                             rp<Expression> * /*p_emit_expr*/) override;
+                                             rp<Expression> * p_emit_expr) override;
             virtual void on_f64_token(const token_type & tk,
                                       exprstatestack * p_stack,
                                       rp<Expression> * /*p_emit_expr*/) override;

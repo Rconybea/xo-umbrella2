@@ -18,7 +18,9 @@ namespace xo {
             progress_xs(rp<Expression> valex);
             virtual ~progress_xs() = default;
 
-            static const progress_xs * from(const exprstate * x) { return dynamic_cast<const progress_xs *>(x); }
+            static const progress_xs * from(const exprstate * x) {
+                return dynamic_cast<const progress_xs *>(x);
+            }
 
             static std::unique_ptr<progress_xs> make(rp<Expression> valex);
 

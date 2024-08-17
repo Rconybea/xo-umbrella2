@@ -1,6 +1,8 @@
 /* @file exprstate.cpp */
 
 #include "exprstate.hpp"
+#include "formal_arg.hpp"
+#include <stdexcept>
 //#include "define_xs.hpp"
 //#include "progress_xs.hpp"
 //#include "paren_xs.hpp"
@@ -63,15 +65,45 @@ namespace xo {
         }
 
         void
-        exprstate::on_typedescr(TypeDescr /*td*/,
-                                exprstatestack * /*p_stack*/,
+        exprstate::on_typedescr(TypeDescr td,
+                                exprstatestack * p_stack,
                                 rp<Expression> * /*p_emit_expr*/)
         {
             /* returning type description to something that wants it */
 
-            /* unreachable - implement in derived class */
-            assert(false);
-            return;
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
+            log && log(xtag("exstype",
+                            p_stack->top_exprstate().exs_type()));
+
+            constexpr const char * c_self_name = "exprstate::on_typedescr";
+
+            throw std::runtime_error(tostr(c_self_name,
+                                           ": unexpected typedescr for parsing state",
+                                           xtag("td", td),
+                                           xtag("state", *this)));
+        }
+
+        void
+        exprstate::on_formal(const formal_arg & formal,
+                             exprstatestack * p_stack,
+                             rp<Expression> * /*p_emit_expr*/)
+        {
+            /* returning type description to something that wants it */
+
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
+            log && log(xtag("exstype",
+                            p_stack->top_exprstate().exs_type()));
+
+            constexpr const char * c_self_name = "exprstate::on_formal";
+
+            throw std::runtime_error(tostr(c_self_name,
+                                           ": unexpected formal-arg for parsing state",
+                                           xtag("formal", formal),
+                                           xtag("state", *this)));
         }
 
         void
@@ -254,13 +286,19 @@ namespace xo {
         } /*on_expr*/
 
         void
-        exprstate::on_symbol(const std::string & /*symbol_name*/,
+        exprstate::on_symbol(const std::string & symbol_name,
                              exprstatestack * /*p_stack*/,
                              rp<Expression> * /*p_emit_expr*/)
         {
             /* unreachable - derived class that can receive
              * will override this method
              */
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
+            log && log(xtag("exstype", this->exs_type_),
+                       xtag("symbol_name", symbol_name));
+
             assert(false);
         }
 

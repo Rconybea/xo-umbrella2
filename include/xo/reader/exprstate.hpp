@@ -52,7 +52,7 @@ namespace xo {
 
         class exprstatestack;
 
-        class define_xs;
+        class formal_arg;
 
         /** state associated with a partially-parsed expression.
          **/
@@ -91,6 +91,10 @@ namespace xo {
             virtual void on_typedescr(TypeDescr td,
                                       exprstatestack * p_stack,
                                       rp<Expression> * p_emit_expr);
+            /** update exprstate when expecting a formal parameter **/
+            virtual void on_formal(const formal_arg & formal,
+                                   exprstatestack * p_stack,
+                                   rp<Expression> * p_emit_expr);
             /** print human-readable representation on @p os **/
             virtual void print(std::ostream & os) const;
 
