@@ -255,8 +255,11 @@ namespace xo {
             case tokentype::tk_leftangle:
             case tokentype::tk_rightangle:
             case tokentype::tk_dot:
-            case tokentype::tk_comma:
                 assert(false);
+                return;
+
+            case tokentype::tk_comma:
+                this->on_comma_token(tk, p_stack, p_emit_expr);
                 return;
 
             case tokentype::tk_colon:
