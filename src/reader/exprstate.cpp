@@ -119,6 +119,19 @@ namespace xo {
         }
 
         void
+        exprstate::on_comma_token(const token_type & tk,
+                                  exprstatestack * /*p_stack*/,
+                                  rp<Expression> * /*p_emit_expr*/)
+        {
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
+            constexpr const char * self_name = "exprstate::on_comma";
+
+            this->illegal_input_error(self_name, tk);
+        }
+
+        void
         exprstate::on_semicolon_token(const token_type & tk,
                                       exprstatestack * /*p_stack*/,
                                       rp<Expression> * /*p_emit_expr*/)

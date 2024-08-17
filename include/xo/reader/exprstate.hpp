@@ -107,6 +107,10 @@ namespace xo {
             virtual void on_symbol_token(const token_type & tk,
                                          exprstatestack * p_stack,
                                          rp<Expression> * p_emit_expr);
+            /** handle incoming ',' token **/
+            virtual void on_comma_token(const token_type & tk,
+                                        exprstatestack * p_stack,
+                                        rp<Expression> * p_emit_expr);
             /** handle incoming ':' token **/
             virtual void on_colon_token(const token_type & tk,
                                         exprstatestack * p_stack);
