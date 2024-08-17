@@ -169,6 +169,19 @@ namespace xo {
         }
 
         void
+        exprstate::on_operator_token(const token_type & tk,
+                                     exprstatestack * /*p_stack*/,
+                                     rp<Expression> * /*p_emit_expr*/)
+        {
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
+            constexpr const char * self_name = "exprstate::on_operator_token";
+
+            this->illegal_input_error(self_name, tk);
+        }
+
+        void
         exprstate::on_f64_token(const token_type & tk,
                                 exprstatestack * /*p_stack*/,
                                 rp<Expression> * /*p_emit_expr*/)
@@ -251,6 +264,13 @@ namespace xo {
 
             case tokentype::tk_assign:
             case tokentype::tk_yields:
+
+            case tokentype::tk_plus:
+            case tokentype::tk_minus:
+            case tokentype::tk_star:
+            case tokentype::tk_slash:
+                this->on_operator_token(tk, p_stack, p_emit_expr);
+                return;
 
             case tokentype::tk_type:
             case tokentype::tk_lambda:

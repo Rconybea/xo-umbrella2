@@ -14,7 +14,8 @@ namespace xo {
 
             std::vector<test_case> s_testcase_v = {
                 {"def foo : f64 = 3.14159265;"},
-                {"def foo : f64 = (3.14159265);"}
+                {"def foo : f64 = (3.14159265);"},
+                {"def foo : f64 = 2.0 * 3.14159265;"}
             };
         }
 

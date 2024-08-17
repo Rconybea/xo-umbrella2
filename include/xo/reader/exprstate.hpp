@@ -125,6 +125,10 @@ namespace xo {
             virtual void on_rightparen_token(const token_type & tk,
                                              exprstatestack * p_stack,
                                              rp<Expression> * p_emit_expr);
+            /** handle incoming operator token **/
+            virtual void on_operator_token(const token_type & tk,
+                                           exprstatestack * p_stack,
+                                           rp<Expression> * p_emit_expr);
             /** handle incoming floating-point-literal token **/
             virtual void on_f64_token(const token_type & tk,
                                       exprstatestack * p_stack,
