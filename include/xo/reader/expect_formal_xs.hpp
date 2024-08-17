@@ -17,6 +17,9 @@ namespace xo {
          *  |    formal_1
          *  formal_0
          *
+         *  formal_0 --on_symbol()--> formal_1
+         *  formal_1 --on_colon_token()--> formal_2
+         *  formal_2 --on_typedescr()--> (done)
          **/
         enum class formalstatetype {
             invalid = -1,
@@ -44,6 +47,8 @@ namespace xo {
         public:
             expect_formal_xs() = default;
 
+            static std::unique_ptr<expect_formal_xs> make();
+
             virtual void on_symbol(const std::string & symbol_name,
                                    exprstatestack * p_stack,
                                    rp<Expression> * p_emit_expr) override;
@@ -68,7 +73,7 @@ namespace xo {
 
         private:
             /** parsing state-machine state **/
-            formalstatetype formalxs_type_;
+            formalstatetype formalxs_type_ = formalstatetype::formal_0;
             /** populate with {parameter-name, parameter-type}
              *  as they're encountered
              **/

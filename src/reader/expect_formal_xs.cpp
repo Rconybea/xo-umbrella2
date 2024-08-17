@@ -4,8 +4,10 @@
  */
 
 #include "expect_formal_xs.hpp"
+#include "xo/expression/Variable.hpp"
 
 namespace xo {
+    using xo::ast::Variable;
     using xo::reflect::TypeDescr;
 
     namespace scm{
@@ -24,6 +26,11 @@ namespace xo {
             }
 
             return "???formalstatetype";
+        }
+
+        std::unique_ptr<expect_formal_xs>
+        expect_formal_xs::make() {
+            return std::make_unique<expect_formal_xs>(expect_formal_xs());
         }
 
         void
@@ -64,7 +71,10 @@ namespace xo {
 
                 std::unique_ptr<exprstate> self = p_stack->pop_exprstate();
 
-                //p_stack->top_exprstate().on_formal(result_, p_stack, p_emit_expr);
+                rp<Variable> var = Variable::make(result_.name(),
+                                                  result_.td());
+
+                p_stack->top_exprstate().on_formal(var, p_stack, p_emit_expr);
             } else {
                 exprstate::on_typedescr(td, p_stack, p_emit_expr);
             }

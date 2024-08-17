@@ -24,12 +24,9 @@ namespace xo {
             if (lmxs_type_ == lambdastatetype::lm_0) {
                 this->lmxs_type_ = lambdastatetype::lm_1;
                 p_stack->push_exprstate(expect_formal_arglist_xs::make());
-                return;
+            } else {
+                exprstate::on_lambda_token(tk, p_stack, p_emit_expr);
             }
-
-            exprstate::on_lambda_token(tk,
-                                       p_stack,
-                                       p_emit_expr);
         }
 
         void
@@ -41,12 +38,9 @@ namespace xo {
                 this->lmxs_type_ = lambdastatetype::lm_2;
                 this->argl_ = argl;
                 p_stack->push_exprstate(expect_expr_xs::expect_rhs_expression());
-                return;
+            } else {
+                exprstate::on_formal_arglist(argl, p_stack, p_emit_expr);
             }
-
-            exprstate::on_formal_arglist(argl,
-                                         p_stack,
-                                         p_emit_expr);
         }
 
         void
@@ -57,10 +51,9 @@ namespace xo {
             if (lmxs_type_ == lambdastatetype::lm_2) {
                 this->lmxs_type_ = lambdastatetype::lm_3;
                 this->body_ = expr.promote();
-                return;
+            } else {
+                exprstate::on_expr(expr, p_stack, p_emit_expr);
             }
-
-            exprstate::on_expr(expr, p_stack, p_emit_expr);
         }
 
         void
