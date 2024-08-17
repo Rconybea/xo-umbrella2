@@ -1,0 +1,55 @@
+/* file expect_formal_arglist_xs.hpp
+ *
+ * author: Roland Conybeare, Aug 2024
+ */
+
+#pragma once
+
+#include "exprstate.hpp"
+#include "formal_arg.hpp"
+#include <vector>
+
+namespace xo {
+    namespace scm {
+        enum class formalarglstatetype {
+            invalid = -1,
+
+            argl_0,
+            argl_1,
+
+            n_formalarglstatetype,
+        };
+
+        /** @class expect_formal_arglist
+         *  @brief parser state-machine for a formal parameter list
+         *
+         *   ( name(1) : type(1), ..., )
+         *  ^
+         *  |
+         *  argl_0
+         **/
+        class expect_formal_arglist_xs : public exprstate {
+        public:
+            expect_formal_arglist_xs();
+
+            static std::unique_ptr<expect_formal_arglist_xs> make();
+
+            const std::vector<formal_arg> & argl() const { return argl_; }
+
+            virtual void on_leftparen_token(const token_type & tk,
+                                            exprstatestack * p_stack,
+                                            rp<Expression> * p_emit_expr) override;
+
+        private:
+            /** parsing state-machine state **/
+            formalarglstatetype farglxs_type_;
+            /** populate with (parmaeter-name, parameter-type) list
+             *  as they're encountered
+             **/
+            std::vector<formal_arg> argl_;
+        };
+    } /*namespace scm*/
+} /*namespace xo*/
+
+
+/* end expect_formal_arglist_xs.hpp */

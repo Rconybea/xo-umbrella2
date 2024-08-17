@@ -11,7 +11,9 @@ set(SELF_SRCS
     exprseq_xs.cpp
     expect_expr_xs.cpp
     expect_symbol_xs.cpp
+
     expect_formal_xs.cpp
+    expect_formal_arglist_xs.cpp
     expect_type_xs.cpp
     lambda_xs.cpp)
 

@@ -1,7 +1,9 @@
 /* @file exprstate.cpp */
 
 #include "exprstate.hpp"
-#include "formal_arg.hpp"
+//#include "formal_arg.hpp"
+#include "xo/expression/Variable.hpp"
+#include "xo/indentlog/print/vector.hpp"
 #include <stdexcept>
 //#include "define_xs.hpp"
 //#include "progress_xs.hpp"
@@ -50,6 +52,14 @@ namespace xo {
         }
 
         void
+        exprstate::on_lambda_token(const token_type & tk,
+                                   exprstatestack * /*p_stack*/,
+                                   rp<Expression> * /*p_emit_expr*/)
+        {
+            this->illegal_input_error("exprstate::on_lambda_token", tk);
+        }
+
+        void
         exprstate::on_symbol_token(const token_type & tk,
                                    exprstatestack * p_stack,
                                    rp<Expression> * /*p_emit_expr*/)
@@ -86,7 +96,7 @@ namespace xo {
         }
 
         void
-        exprstate::on_formal(const formal_arg & formal,
+        exprstate::on_formal(const rp<Variable> & formal,
                              exprstatestack * p_stack,
                              rp<Expression> * /*p_emit_expr*/)
         {
@@ -102,7 +112,28 @@ namespace xo {
 
             throw std::runtime_error(tostr(c_self_name,
                                            ": unexpected formal-arg for parsing state",
-                                           xtag("formal", formal),
+                                           xtag("formal", formal.get()),
+                                           xtag("state", *this)));
+        }
+
+        void
+        exprstate::on_formal_arglist(const std::vector<rp<Variable>> & argl,
+                                     exprstatestack * p_stack,
+                                     rp<Expression> * /*p_emit_expr*/)
+        {
+            /* returning type description to something that wants it */
+
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
+            log && log(xtag("exstype",
+                            p_stack->top_exprstate().exs_type()));
+
+            constexpr const char * c_self_name = "exprstate::on_formal_arglist";
+
+            throw std::runtime_error(tostr(c_self_name,
+                                           ": unexpected formal-arg for parsing state",
+                                           xtag("argl", argl),
                                            xtag("state", *this)));
         }
 
@@ -223,6 +254,10 @@ namespace xo {
                 this->on_def_token(tk, p_stack);
                 return;
 
+            case tokentype::tk_lambda:
+                this->on_lambda_token(tk, p_stack, p_emit_expr);
+                return;
+
             case tokentype::tk_i64:
                 assert(false);
                 return;
@@ -289,7 +324,6 @@ namespace xo {
                 return;
 
             case tokentype::tk_type:
-            case tokentype::tk_lambda:
             case tokentype::tk_if:
             case tokentype::tk_let:
 

@@ -59,6 +59,7 @@ namespace xo {
         class exprstate {
         public:
             using Expression = xo::ast::Expression;
+            using Variable = xo::ast::Variable;
             using exprtype = xo::ast::exprtype;
             using token_type = token<char>;
             using TypeDescr = xo::reflect::TypeDescr;
@@ -92,9 +93,13 @@ namespace xo {
                                       exprstatestack * p_stack,
                                       rp<Expression> * p_emit_expr);
             /** update exprstate when expecting a formal parameter **/
-            virtual void on_formal(const formal_arg & formal,
+            virtual void on_formal(const rp<Variable> & formal,
                                    exprstatestack * p_stack,
                                    rp<Expression> * p_emit_expr);
+            /** update expression when epecting a formal parameter list **/
+            virtual void on_formal_arglist(const std::vector<rp<Variable>> & argl,
+                                           exprstatestack * p_stack,
+                                           rp<Expression> * p_emit_expr);
             /** print human-readable representation on @p os **/
             virtual void print(std::ostream & os) const;
 
@@ -103,6 +108,10 @@ namespace xo {
             /** handle incoming 'def' token **/
             virtual void on_def_token(const token_type & tk,
                                       exprstatestack * p_stack);
+            /** handle incoming 'lambda' token **/
+            virtual void on_lambda_token(const token_type & tk,
+                                         exprstatestack * p_stack,
+                                         rp<Expression> * p_emit_expr);
             /** handle incoming symbol token **/
             virtual void on_symbol_token(const token_type & tk,
                                          exprstatestack * p_stack,
