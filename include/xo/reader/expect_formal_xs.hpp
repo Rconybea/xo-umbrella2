@@ -45,7 +45,7 @@ namespace xo {
          **/
         class expect_formal_xs : public exprstate {
         public:
-            expect_formal_xs() = default;
+            expect_formal_xs();
 
             static std::unique_ptr<expect_formal_xs> make();
 

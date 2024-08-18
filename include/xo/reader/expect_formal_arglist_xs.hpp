@@ -71,7 +71,7 @@ namespace xo {
 
         private:
             /** parsing state-machine state **/
-            formalarglstatetype farglxs_type_;
+            formalarglstatetype farglxs_type_ = formalarglstatetype::argl_0;
             /** populate with (parmaeter-name, parameter-type) list
              *  as they're encountered
              **/
