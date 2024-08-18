@@ -57,7 +57,7 @@ namespace xo {
 
         private:
             /** parsing state-machine state **/
-            lambdastatetype lmxs_type_;
+            lambdastatetype lmxs_type_ = lambdastatetype::lm_0;
 
             /** formal parameter list **/
             std::vector<rp<Variable>> argl_;

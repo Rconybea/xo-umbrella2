@@ -14,7 +14,7 @@ namespace xo {
             return std::make_unique<lambda_xs>(lambda_xs());
         }
 
-        lambda_xs::lambda_xs() {}
+        lambda_xs::lambda_xs() : exprstate(exprstatetype::lambdaexpr) {}
 
         void
         lambda_xs::on_lambda_token(const token_type & tk,
