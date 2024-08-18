@@ -37,6 +37,8 @@ namespace xo {
                 return "expect_symbol";
             case exprstatetype::expect_type:
                 return "expect_type";
+            case exprstatetype::expect_formal:
+                return "expect_formal";
             case exprstatetype::expr_progress:
                 return "expr_progress";
             case exprstatetype::n_exprstatetype:

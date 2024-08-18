@@ -36,6 +36,10 @@ namespace xo {
             expect_rhs_expression,
             expect_symbol,
             expect_type,
+            /** handle formal argument
+             *  see @ref expec_formal_xs
+             **/
+            expect_formal,
 
             /** handle expression-in-progress,
              *  in case infix operators to follow
