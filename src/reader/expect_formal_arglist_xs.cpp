@@ -35,7 +35,8 @@ namespace xo {
         }
 
         expect_formal_arglist_xs::expect_formal_arglist_xs()
-            : farglxs_type_{formalarglstatetype::argl_0}
+            : exprstate(exprstatetype::expect_formal_arglist),
+              farglxs_type_{formalarglstatetype::argl_0}
         {}
 
         void
