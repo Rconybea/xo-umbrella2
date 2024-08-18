@@ -36,6 +36,10 @@ namespace xo {
             expect_rhs_expression,
             expect_symbol,
             expect_type,
+            /** handle formal argument list
+             *  see @ref expect_formal_arglist_xs
+             **/
+            expect_formal_arglist,
             /** handle formal argument
              *  see @ref expec_formal_xs
              **/
