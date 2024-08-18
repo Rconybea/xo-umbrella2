@@ -27,6 +27,8 @@ namespace xo {
                 return "expect_toplevel_expression_sequence";
             case exprstatetype::defexpr:
                 return "defexpr";
+            case exprstatetype::lambdaexpr:
+                return "lambdaexpr";
             case exprstatetype::parenexpr:
                 return "parenexpr";
             case exprstatetype::expect_rhs_expression:

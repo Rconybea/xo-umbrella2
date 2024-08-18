@@ -23,6 +23,11 @@ namespace xo {
              **/
             defexpr,
 
+            /** handle lambda-expression
+             *  see @ref lambda_xs
+             **/
+            lambdaexpr,
+
             /** handle parenthesized expression
              *  see @ref paren_xs
              **/
