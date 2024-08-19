@@ -110,9 +110,9 @@ namespace xo {
              *   def pi = 3.14159265;
              *            \---tk---/
              */
-            p_stack->push_exprstate
-                (progress_xs::make
-                 (Constant<double>::make(tk.f64_value())));
+            progress_xs::start
+                (Constant<double>::make(tk.f64_value()),
+                 p_stack);
         }
 
         void

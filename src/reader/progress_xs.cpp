@@ -52,6 +52,16 @@ namespace xo {
             return std::make_unique<progress_xs>(progress_xs(std::move(valex), op));
         }
 
+        void
+        progress_xs::start(rp<Expression> valex, optype op, exprstatestack * p_stack) {
+            p_stack->push_exprstate(progress_xs::make(valex, op));
+        }
+
+        void
+        progress_xs::start(rp<Expression> valex, exprstatestack * p_stack) {
+            p_stack->push_exprstate(progress_xs::make(valex));
+        }
+
         progress_xs::progress_xs(rp<Expression> valex, optype op)
             : exprstate(exprstatetype::expr_progress),
               lhs_{std::move(valex)},

@@ -183,7 +183,7 @@ namespace xo {
             switch (this->parenxs_type_) {
             case parenexprstatetype::lparen_0: {
                 this->parenxs_type_ = parenexprstatetype::lparen_1; /* wants on_rightparen */
-                p_stack->push_exprstate(progress_xs::make(expr.promote()));
+                progress_xs::start(expr.promote(), p_stack);
 
                 return;
             }

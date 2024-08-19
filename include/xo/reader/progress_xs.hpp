@@ -47,8 +47,11 @@ namespace xo {
                 return dynamic_cast<const progress_xs *>(x);
             }
 
-            static std::unique_ptr<progress_xs> make(rp<Expression> valex,
-                                                     optype optype = optype::invalid);
+            static void start(rp<Expression> valex,
+                              optype optype,
+                              exprstatestack * p_stack);
+            static void start(rp<Expression> valex,
+                              exprstatestack * p_stack);
 
             bool admits_f64() const;
 
@@ -88,6 +91,10 @@ namespace xo {
                                       rp<Expression> * /*p_emit_expr*/) override;
 
             virtual void print(std::ostream & os) const override;
+
+        private:
+            static std::unique_ptr<progress_xs> make(rp<Expression> valex,
+                                                     optype optype = optype::invalid);
 
         private:
             /** assemble expression representing
