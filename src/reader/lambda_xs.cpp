@@ -44,15 +44,16 @@ namespace xo {
 
         void
         lambda_xs::on_formal_arglist(const std::vector<rp<Variable>> & argl,
-                                     exprstatestack * p_stack,
-                                     rp<Expression> * p_emit_expr)
+                                     parserstatemachine * p_psm)
         {
+            auto p_stack = p_psm->p_stack_;
+
             if (lmxs_type_ == lambdastatetype::lm_1) {
                 this->lmxs_type_ = lambdastatetype::lm_2;
                 this->argl_ = argl;
                 expect_expr_xs::start(p_stack);
             } else {
-                exprstate::on_formal_arglist(argl, p_stack, p_emit_expr);
+                exprstate::on_formal_arglist(argl, p_psm);
             }
         }
 

@@ -94,13 +94,11 @@ namespace xo {
                                                       parserstatemachine * p_psm)
         {
             auto p_stack = p_psm->p_stack_;
-            auto p_emit_expr = p_psm->p_emit_expr_;
 
             if (farglxs_type_ == formalarglstatetype::argl_1b) {
                 std::unique_ptr<exprstate> self = p_stack->pop_exprstate();
 
-                p_stack->top_exprstate().on_formal_arglist(this->argl_,
-                                                           p_stack, p_emit_expr);
+                p_stack->top_exprstate().on_formal_arglist(this->argl_, p_psm);
             } else {
                 exprstate::on_rightparen_token(tk, p_psm);
             }

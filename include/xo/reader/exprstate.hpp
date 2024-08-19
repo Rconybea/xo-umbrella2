@@ -97,22 +97,26 @@ namespace xo {
             virtual void on_expr(ref::brw<Expression> expr,
                                  exprstatestack * p_stack,
                                  rp<Expression> * p_emit_expr);
+
             /** update exprstate when expecting a symbol **/
             virtual void on_symbol(const std::string & symbol,
                                    exprstatestack * p_stack,
                                    rp<Expression> * p_emit_expr);
+
             /** update exprstate when expeccting a typedescr **/
             virtual void on_typedescr(TypeDescr td,
                                       exprstatestack * p_stack,
                                       rp<Expression> * p_emit_expr);
+
             /** update exprstate when expecting a formal parameter **/
             virtual void on_formal(const rp<Variable> & formal,
                                    exprstatestack * p_stack,
                                    rp<Expression> * p_emit_expr);
+
             /** update expression when epecting a formal parameter list **/
             virtual void on_formal_arglist(const std::vector<rp<Variable>> & argl,
-                                           exprstatestack * p_stack,
-                                           rp<Expression> * p_emit_expr);
+                                           parserstatemachine * p_psm);
+
             /** print human-readable representation on @p os **/
             virtual void print(std::ostream & os) const;
 
