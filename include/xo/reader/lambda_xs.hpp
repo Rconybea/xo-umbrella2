@@ -51,8 +51,7 @@ namespace xo {
                                  exprstatestack * p_stack,
                                  rp<Expression> * p_emit_expr) override;
             virtual void on_semicolon_token(const token_type & tk,
-                                            exprstatestack * p_stack,
-                                            rp<Expression> * p_emit_expr) override;
+                                            parserstatemachine * p_psm) override;
 
         private:
             static std::unique_ptr<lambda_xs> make();

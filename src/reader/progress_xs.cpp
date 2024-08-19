@@ -2,6 +2,7 @@
 
 #include "progress_xs.hpp"
 #include "expect_expr_xs.hpp"
+#include "parserstatemachine.hpp"
 #include "xo/expression/Apply.hpp"
 
 namespace xo {
@@ -183,7 +184,7 @@ namespace xo {
 
         void
         progress_xs::on_colon_token(const token_type & tk,
-                                    exprstatestack * /*p_stack*/)
+                                    parserstatemachine * /*p_psm*/)
         {
             constexpr const char * self_name = "progress_xs::on_colon";
 
@@ -192,13 +193,15 @@ namespace xo {
 
         void
         progress_xs::on_semicolon_token(const token_type & tk,
-                                        exprstatestack * p_stack,
-                                        rp<Expression> * p_emit_expr)
+                                        parserstatemachine * p_psm)
         {
             /* note: implementation parllels .on_rightparen_token() */
 
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
+
+            auto p_stack = p_psm->p_stack_;
+            auto p_emit_expr = p_psm->p_emit_expr_;
 
             rp<Expression> expr = this->assemble_expr();
 
@@ -222,12 +225,12 @@ namespace xo {
              * f. now deliver semicolon;  [lparen_1] rejects
              */
 
-            p_stack->top_exprstate().on_semicolon_token(tk, p_stack, p_emit_expr);
+            p_stack->top_exprstate().on_semicolon_token(tk, p_psm);
         }
 
         void
         progress_xs::on_singleassign_token(const token_type & tk,
-                                           exprstatestack * /*p_stack*/)
+                                           parserstatemachine * /*p_psm*/)
         {
             constexpr const char * self_name = "progress_xs::on_singleassign";
 
@@ -236,8 +239,7 @@ namespace xo {
 
         void
         progress_xs::on_leftparen_token(const token_type & tk,
-                                        exprstatestack * /*p_stack*/,
-                                        rp<Expression> * /*p_emit_expr*/)
+                                        parserstatemachine * /*p_psm*/)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
@@ -249,8 +251,7 @@ namespace xo {
 
          void
          progress_xs::on_rightparen_token(const token_type & tk,
-                                          exprstatestack * p_stack,
-                                          rp<Expression> * p_emit_expr)
+                                          parserstatemachine * p_psm)
          {
              /* note: implementation parallels .on_semicolon_token() */
 
@@ -259,6 +260,9 @@ namespace xo {
              scope log(XO_DEBUG(c_debug_flag));
 
              constexpr const char * self_name = "progress_xs::on_rightparen";
+
+             auto p_stack = p_psm->p_stack_;
+             auto p_emit_expr = p_psm->p_emit_expr_;
 
              /* stack may be something like:
               *
@@ -286,8 +290,7 @@ namespace xo {
              p_stack->top_exprstate().on_expr(expr, p_stack, p_emit_expr);
 
              /* now deliver rightparen */
-             p_stack->top_exprstate().on_rightparen_token(tk, p_stack, p_emit_expr);
-
+             p_stack->top_exprstate().on_rightparen_token(tk, p_psm);
          }
 
         namespace {
@@ -312,10 +315,11 @@ namespace xo {
 
         void
         progress_xs::on_operator_token(const token_type & tk,
-                                       exprstatestack * p_stack,
-                                       rp<Expression> * /*p_emit_expr*/)
+                                       parserstatemachine * p_psm)
         {
             constexpr const char * c_self_name = "progress_xs::on_operator_token";
+
+            auto p_stack = p_psm->p_stack_;
 
             if (op_type_ == optype::invalid) {
                 this->op_type_ = tk2op(tk.tk_type());
@@ -383,8 +387,7 @@ namespace xo {
 
         void
         progress_xs::on_f64_token(const token_type & tk,
-                                  exprstatestack * p_stack,
-                                  rp<Expression> * p_emit_expr)
+                                  parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
@@ -394,8 +397,7 @@ namespace xo {
             if (this->op_type_ == optype::invalid) {
                 this->illegal_input_error(self_name, tk);
             } else {
-                assert(false);
-                exprstate::on_f64_token(tk, p_stack, p_emit_expr);
+                exprstate::on_f64_token(tk, p_psm);
             }
         }
 

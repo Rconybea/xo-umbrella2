@@ -109,29 +109,33 @@ namespace xo {
 
         void
         define_xs::on_colon_token(const token_type & tk,
-                                  exprstatestack * p_stack)
+                                  parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
             //constexpr const char * self_name = "define_xs::on_colon_token";
 
+            auto p_stack = p_psm->p_stack_;
+
             if (this->defxs_type_ == defexprstatetype::def_2) {
                 this->defxs_type_ = defexprstatetype::def_3;
 
                 expect_type_xs::start(p_stack);
             } else {
-                exprstate::on_colon_token(tk, p_stack);
+                exprstate::on_colon_token(tk, p_psm);
             }
         }
 
         void
         define_xs::on_semicolon_token(const token_type & tk,
-                                      exprstatestack * p_stack,
-                                      rp<Expression> * p_emit_expr)
+                                      parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
+
+            auto p_stack = p_psm->p_stack_;
+            auto p_emit_expr = p_psm->p_emit_expr_;
 
             //constexpr const char * self_name = "exprstate::on_semicolon";
 
@@ -144,13 +148,13 @@ namespace xo {
                                                  p_stack,
                                                  p_emit_expr);
             } else {
-                exprstate::on_semicolon_token(tk, p_stack, p_emit_expr);
+                exprstate::on_semicolon_token(tk, p_psm);
             }
         }
 
         void
         define_xs::on_singleassign_token(const token_type & tk,
-                                         exprstatestack * p_stack)
+                                         parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
@@ -177,7 +181,7 @@ namespace xo {
             {
                 this->defxs_type_ = defexprstatetype::def_5;
 
-                expect_expr_xs::start(p_stack);
+                expect_expr_xs::start(p_psm->p_stack_);
             } else {
                 this->illegal_input_error(self_name, tk);
             }
@@ -185,8 +189,7 @@ namespace xo {
 
         void
         define_xs::on_rightparen_token(const token_type & tk,
-                                       exprstatestack * /*p_stack*/,
-                                       rp<Expression> * /*p_emit_expr*/)
+                                       parserstatemachine * /*p_psm*/)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
@@ -198,8 +201,7 @@ namespace xo {
 
         void
         define_xs::on_f64_token(const token_type & tk,
-                                exprstatestack * /*p_stack*/,
-                                rp<Expression> * /*p_emit_expr*/)
+                                parserstatemachine * /*p_psm*/)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));

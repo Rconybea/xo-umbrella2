@@ -129,34 +129,30 @@ namespace xo {
                                          parserstatemachine * p_psm);
             /** handle incoming ',' token **/
             virtual void on_comma_token(const token_type & tk,
-                                        exprstatestack * p_stack,
-                                        rp<Expression> * p_emit_expr);
+                                        parserstatemachine * p_psm);
             /** handle incoming ':' token **/
             virtual void on_colon_token(const token_type & tk,
-                                        exprstatestack * p_stack);
+                                        parserstatemachine * p_psm);
             /** handle incoming ';' token **/
             virtual void on_semicolon_token(const token_type & tk,
-                                            exprstatestack * p_stack,
-                                            rp<Expression> * p_emit_expr);
+                                            parserstatemachine * p_psm);
             /** handle incoming '=' token **/
             virtual void on_singleassign_token(const token_type & tk,
-                                               exprstatestack * p_stack);
+                                               parserstatemachine * p_psm);
             /** handle incoming '(' token **/
             virtual void on_leftparen_token(const token_type & tk,
-                                            exprstatestack * p_stack,
-                                      rp<Expression> * p_emit_expr);
+                                            parserstatemachine * p_psm);
             /** handle incoming ')' token **/
             virtual void on_rightparen_token(const token_type & tk,
-                                             exprstatestack * p_stack,
-                                             rp<Expression> * p_emit_expr);
+                                             parserstatemachine * p_psm);
+
             /** handle incoming operator token **/
             virtual void on_operator_token(const token_type & tk,
-                                           exprstatestack * p_stack,
-                                           rp<Expression> * p_emit_expr);
+                                           parserstatemachine * p_psm);
+
             /** handle incoming floating-point-literal token **/
             virtual void on_f64_token(const token_type & tk,
-                                      exprstatestack * p_stack,
-                                      rp<Expression> * p_emit_expr);
+                                      parserstatemachine * p_psm);
 
         protected:
             /** throw exception when next token is inconsistent with

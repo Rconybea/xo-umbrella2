@@ -6,6 +6,7 @@
 #include "expect_formal_arglist_xs.hpp"
 #include "expect_formal_xs.hpp"
 #include "expect_symbol_xs.hpp"
+#include "parserstatemachine.hpp"
 #include "xo/expression/Variable.hpp"
 #include "xo/indentlog/print/vector.hpp"
 
@@ -48,15 +49,16 @@ namespace xo {
 
         void
         expect_formal_arglist_xs::on_leftparen_token(const token_type & tk,
-                                                     exprstatestack * p_stack,
-                                                     rp<Expression> * p_emit_expr)
+                                                     parserstatemachine * p_psm)
         {
+            auto p_stack = p_psm->p_stack_;
+
             if (farglxs_type_ == formalarglstatetype::argl_0) {
                 this->farglxs_type_ = formalarglstatetype::argl_1a;
                 /* TODO: refactor to have setup method on each exprstate */
                 expect_formal_xs::start(p_stack);
             } else {
-                exprstate::on_leftparen_token(tk, p_stack, p_emit_expr);
+                exprstate::on_leftparen_token(tk, p_psm);
             }
         }
 
@@ -75,29 +77,32 @@ namespace xo {
 
         void
         expect_formal_arglist_xs::on_comma_token(const token_type & tk,
-                                                 exprstatestack * p_stack,
-                                                 rp<Expression> * p_emit_expr)
+                                                 parserstatemachine * p_psm)
         {
+            auto p_stack = p_psm->p_stack_;
+
             if (farglxs_type_ == formalarglstatetype::argl_1b) {
                 this->farglxs_type_ = formalarglstatetype::argl_1a;
                 expect_formal_xs::start(p_stack);
             } else {
-                exprstate::on_comma_token(tk, p_stack, p_emit_expr);
+                exprstate::on_comma_token(tk, p_psm);
             }
         }
 
         void
         expect_formal_arglist_xs::on_rightparen_token(const token_type & tk,
-                                                      exprstatestack * p_stack,
-                                                      rp<Expression> * p_emit_expr)
+                                                      parserstatemachine * p_psm)
         {
+            auto p_stack = p_psm->p_stack_;
+            auto p_emit_expr = p_psm->p_emit_expr_;
+
             if (farglxs_type_ == formalarglstatetype::argl_1b) {
                 std::unique_ptr<exprstate> self = p_stack->pop_exprstate();
 
                 p_stack->top_exprstate().on_formal_arglist(this->argl_,
                                                            p_stack, p_emit_expr);
             } else {
-                exprstate::on_rightparen_token(tk, p_stack, p_emit_expr);
+                exprstate::on_rightparen_token(tk, p_psm);
             }
         }
 

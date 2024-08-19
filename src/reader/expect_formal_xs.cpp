@@ -6,6 +6,7 @@
 #include "expect_formal_xs.hpp"
 #include "expect_symbol_xs.hpp"
 #include "expect_type_xs.hpp"
+#include "parserstatemachine.hpp"
 #include "xo/expression/Variable.hpp"
 
 namespace xo {
@@ -63,16 +64,17 @@ namespace xo {
 
         void
         expect_formal_xs::on_colon_token(const token_type & tk,
-                                         exprstatestack * p_stack
-                                         /* rp<Expression> * p_emit_expr */)
+                                         parserstatemachine * p_psm)
         {
+            auto p_stack = p_psm->p_stack_;
+
             if (this->formalxs_type_ == formalstatetype::formal_1) {
                 this->formalxs_type_ = formalstatetype::formal_2;
                 expect_type_xs::start(p_stack);
                 /* control reenters via expect_formal_xs::on_typedescr() */
             } else {
                 exprstate::on_colon_token(tk,
-                                          p_stack);
+                                          p_psm);
             }
         }
 

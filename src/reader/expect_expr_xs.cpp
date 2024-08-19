@@ -51,13 +51,14 @@ namespace xo {
 
         void
         expect_expr_xs::on_leftparen_token(const token_type & /*tk*/,
-                                           exprstatestack * p_stack,
-                                           rp<Expression> * /*p_emit_expr*/)
+                                           parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
             //constexpr const char * self_name = "exprstate::on_leftparen";
+
+            auto p_stack = p_psm->p_stack_;
 
             /* push lparen_0 to remember to look for subsequent rightparen. */
             paren_xs::start(p_stack);
@@ -99,8 +100,7 @@ namespace xo {
 
         void
         expect_expr_xs::on_f64_token(const token_type & tk,
-                                     exprstatestack * p_stack,
-                                     rp<Expression> * /*p_emit_expr*/)
+                                     parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
@@ -113,7 +113,7 @@ namespace xo {
              */
             progress_xs::start
                 (Constant<double>::make(tk.f64_value()),
-                 p_stack);
+                 p_psm->p_stack_);
         }
 
         void

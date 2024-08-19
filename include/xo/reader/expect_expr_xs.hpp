@@ -21,16 +21,15 @@ namespace xo {
 
             virtual void on_lambda_token(const token_type & tk,
                                          parserstatemachine * p_psm) override;
+
             virtual void on_leftparen_token(const token_type & tk,
-                                            exprstatestack * p_stack,
-                                            rp<Expression> * p_emit_expr) override;
+                                            parserstatemachine * p_psm) override;
 
             virtual void on_symbol_token(const token_type & tk,
                                          parserstatemachine * p_psm) override;
 
             virtual void on_f64_token(const token_type & tk,
-                                      exprstatestack * p_stack,
-                                      rp<Expression> * p_emit_expr) override;
+                                      parserstatemachine * p_psm) override;
 
             /** update exprstate in response to a successfully-parsed subexpression **/
             virtual void on_expr(ref::brw<Expression> expr,

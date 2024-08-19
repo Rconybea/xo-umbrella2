@@ -67,27 +67,22 @@ namespace xo {
             virtual void on_def_token(const token_type & tk,
                                       parserstatemachine * p_psm) override;
             virtual void on_colon_token(const token_type & tk,
-                                        exprstatestack * p_stack) override;
+                                        parserstatemachine * p_psm) override;
             virtual void on_semicolon_token(const token_type & tk,
-                                            exprstatestack * p_stack,
-                                            rp<Expression> * /*p_emit_expr*/) override;
+                                            parserstatemachine * p_psm) override;
             virtual void on_singleassign_token(const token_type & tk,
-                                               exprstatestack * p_stack) override;
+                                               parserstatemachine * p_psm) override;
             virtual void on_leftparen_token(const token_type & tk,
-                                            exprstatestack * p_stack,
-                                            rp<Expression> * /*p_emit_expr*/) override;
+                                            parserstatemachine * p_psm) override;
             virtual void on_rightparen_token(const token_type & tk,
-                                             exprstatestack * p_stack,
-                                             rp<Expression> * /*p_emit_expr*/) override;
+                                             parserstatemachine * p_psm) override;
 
             /* entry point for an infix operator token */
             virtual void on_operator_token(const token_type & tk,
-                                           exprstatestack * p_stack,
-                                           rp<Expression> * p_emit_expr) override;
+                                           parserstatemachine * p_psm) override;
 
             virtual void on_f64_token(const token_type & tk,
-                                      exprstatestack * p_stack,
-                                      rp<Expression> * /*p_emit_expr*/) override;
+                                      parserstatemachine * p_psm) override;
 
             virtual void print(std::ostream & os) const override;
 

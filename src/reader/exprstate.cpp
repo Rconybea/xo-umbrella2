@@ -146,7 +146,7 @@ namespace xo {
 
         void
         exprstate::on_colon_token(const token_type & tk,
-                                  exprstatestack * /*p_stack*/)
+                                  parserstatemachine * /*p_psm*/)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
@@ -158,8 +158,7 @@ namespace xo {
 
         void
         exprstate::on_comma_token(const token_type & tk,
-                                  exprstatestack * /*p_stack*/,
-                                  rp<Expression> * /*p_emit_expr*/)
+                                  parserstatemachine * /*p_psm*/)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
@@ -171,8 +170,7 @@ namespace xo {
 
         void
         exprstate::on_semicolon_token(const token_type & tk,
-                                      exprstatestack * /*p_stack*/,
-                                      rp<Expression> * /*p_emit_expr*/)
+                                      parserstatemachine * /*p_psm*/)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
@@ -184,7 +182,7 @@ namespace xo {
 
         void
         exprstate::on_singleassign_token(const token_type & tk,
-                                         exprstatestack * /*p_stack*/) {
+                                         parserstatemachine * /*p_psm*/) {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
@@ -195,8 +193,7 @@ namespace xo {
 
         void
         exprstate::on_leftparen_token(const token_type & tk,
-                                      exprstatestack * /*p_stack*/,
-                                      rp<Expression> * /*p_emit_expr*/)
+                                      parserstatemachine * /*p_psm*/)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
@@ -208,8 +205,7 @@ namespace xo {
 
         void
         exprstate::on_rightparen_token(const token_type & tk,
-                                       exprstatestack * /*p_stack*/,
-                                       rp<Expression> * /*p_emit_expr*/)
+                                       parserstatemachine * /*p_psm*/)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
@@ -221,8 +217,7 @@ namespace xo {
 
         void
         exprstate::on_operator_token(const token_type & tk,
-                                     exprstatestack * /*p_stack*/,
-                                     rp<Expression> * /*p_emit_expr*/)
+                                     parserstatemachine * /*p_psm*/)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
@@ -234,8 +229,7 @@ namespace xo {
 
         void
         exprstate::on_f64_token(const token_type & tk,
-                                exprstatestack * /*p_stack*/,
-                                rp<Expression> * /*p_emit_expr*/)
+                                parserstatemachine * /*p_psm*/)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
@@ -254,9 +248,6 @@ namespace xo {
             log && log(xtag("tk", tk));
             log && log(xtag("state", *this));
 
-            auto p_stack = p_psm->p_stack_;
-            auto p_emit_expr = p_psm->p_emit_expr_;
-
             switch (tk.tk_type()) {
 
             case tokentype::tk_def:
@@ -272,7 +263,7 @@ namespace xo {
                 return;
 
             case tokentype::tk_f64:
-                this->on_f64_token(tk, p_stack, p_emit_expr);
+                this->on_f64_token(tk, p_psm);
                 return;
 
             case tokentype::tk_string:
@@ -284,11 +275,11 @@ namespace xo {
                 return;
 
             case tokentype::tk_leftparen:
-                this->on_leftparen_token(tk, p_stack, p_emit_expr);
+                this->on_leftparen_token(tk, p_psm);
                 return;
 
             case tokentype::tk_rightparen:
-                this->on_rightparen_token(tk, p_stack, p_emit_expr);
+                this->on_rightparen_token(tk, p_psm);
                 return;
 
             case tokentype::tk_leftbracket:
@@ -303,11 +294,11 @@ namespace xo {
                 return;
 
             case tokentype::tk_comma:
-                this->on_comma_token(tk, p_stack, p_emit_expr);
+                this->on_comma_token(tk, p_psm);
                 return;
 
             case tokentype::tk_colon:
-                this->on_colon_token(tk, p_stack);
+                this->on_colon_token(tk, p_psm);
                 return;
 
             case tokentype::tk_doublecolon:
@@ -315,11 +306,11 @@ namespace xo {
                 return;
 
             case tokentype::tk_semicolon:
-                this->on_semicolon_token(tk, p_stack, p_emit_expr);
+                this->on_semicolon_token(tk, p_psm);
                 return;
 
             case tokentype::tk_singleassign:
-                this->on_singleassign_token(tk, p_stack);
+                this->on_singleassign_token(tk, p_psm);
                 return;
 
             case tokentype::tk_assign:
@@ -329,7 +320,7 @@ namespace xo {
             case tokentype::tk_minus:
             case tokentype::tk_star:
             case tokentype::tk_slash:
-                this->on_operator_token(tk, p_stack, p_emit_expr);
+                this->on_operator_token(tk, p_psm);
                 return;
 
             case tokentype::tk_type:

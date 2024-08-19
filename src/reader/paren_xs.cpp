@@ -101,7 +101,7 @@ namespace xo {
 
         void
         paren_xs::on_colon_token(const token_type & tk,
-                                 exprstatestack * /*p_stack*/)
+                                 parserstatemachine * /*p_psm*/)
         {
             constexpr const char * c_self_name = "paren_xs::on_colon";
 
@@ -110,8 +110,7 @@ namespace xo {
 
         void
         paren_xs::on_semicolon_token(const token_type & tk,
-                                     exprstatestack * /*p_stack*/,
-                                     rp<Expression> * /*p_emit_expr*/)
+                                     parserstatemachine * /*p_psm*/)
         {
             constexpr const char * c_self_name = "paren_xs::on_semicolon";
 
@@ -120,7 +119,7 @@ namespace xo {
 
         void
         paren_xs::on_singleassign_token(const token_type & tk,
-                                        exprstatestack * /*p_stack*/)
+                                        parserstatemachine * /*p_psm*/)
         {
             constexpr const char * c_self_name = "paren_xs::on_singleassign";
 
@@ -129,8 +128,7 @@ namespace xo {
 
         void
         paren_xs::on_leftparen_token(const token_type & tk,
-                                     exprstatestack * /*p_stack*/,
-                                     rp<Expression> * /*p_emit_expr*/)
+                                     parserstatemachine * /*p_psm*/)
         {
             constexpr const char * c_self_name = "paren_xs::on_leftparen";
 
@@ -139,8 +137,7 @@ namespace xo {
 
         void
         paren_xs::on_rightparen_token(const token_type & tk,
-                                      exprstatestack * p_stack,
-                                      rp<Expression> * p_emit_expr)
+                                      parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
@@ -155,6 +152,9 @@ namespace xo {
             if (this->parenxs_type_ == parenexprstatetype::lparen_1) {
                 rp<Expression> expr = this->gen_expr_;
 
+                auto p_stack = p_psm->p_stack_;
+                auto p_emit_expr = p_psm->p_emit_expr_;
+
                 std::unique_ptr<exprstate> self = p_stack->pop_exprstate();
 
                 p_stack->top_exprstate().on_expr(expr, p_stack, p_emit_expr);
@@ -163,20 +163,14 @@ namespace xo {
 
         void
         paren_xs::on_f64_token(const token_type & tk,
-                               exprstatestack * /*p_stack*/,
-                               rp<Expression> * /*p_emit_expr*/)
+                               parserstatemachine * /*p_psm*/)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
             constexpr const char * c_self_name = "paren_xs::on_f64";
 
-            if (!this->admits_f64())
-            {
-                this->illegal_input_error(c_self_name, tk);
-            }
-
-            assert(false);
+            this->illegal_input_error(c_self_name, tk);
         }
 
         void
