@@ -14,10 +14,19 @@ namespace xo {
          **/
         class envframestack {
         public:
+            using Variable = xo::ast::Variable;
+
+        public:
             envframestack() {}
 
             bool empty() const { return stack_.empty(); }
             std::size_t size() const { return stack_.size(); }
+
+            /** lookup variable in environment stack.
+             *  Visit frames in fifo order,  report first match;
+             *  nullptr if no matches.
+             **/
+            rp<Variable> lookup(const std::string & x) const;
 
             envframe & top_envframe();
             void push_envframe(envframe x);

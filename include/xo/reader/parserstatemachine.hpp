@@ -20,6 +20,7 @@ namespace xo {
         class parserstatemachine {
         public:
             using Expression = xo::ast::Expression;
+            using Variable = xo::ast::Variable;
 
         public:
             parserstatemachine(exprstatestack * p_stack,
@@ -32,6 +33,14 @@ namespace xo {
             std::unique_ptr<exprstate> pop_exprstate();
             exprstate & top_exprstate();
             void push_exprstate(std::unique_ptr<exprstate> x);
+
+            /** lookup variable name in lexical context represented by
+             *  this psm.  nullptr if not found
+             **/
+            rp<Variable> lookup_var(const std::string & x) const;
+
+            void push_envframe(envframe x);
+            void pop_envframe();
 
         public:
             /** stack of incomplete parser work.

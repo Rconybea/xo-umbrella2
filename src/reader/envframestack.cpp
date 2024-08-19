@@ -6,6 +6,8 @@
 #include "envframestack.hpp"
 
 namespace xo {
+    using xo::ast::Variable;
+
     namespace scm {
         envframe &
         envframestack::top_envframe() {
@@ -48,6 +50,20 @@ namespace xo {
             } else {
                 //return nullptr;
             }
+        }
+
+        rp<Variable>
+        envframestack::lookup(const std::string & x) const {
+            for (std::size_t i = 0, z = this->size(); i < z; ++i) {
+                const auto & frame = (*this)[i];
+
+                auto retval = frame.lookup(x);
+
+                if (retval)
+                    return retval;
+            }
+
+            return nullptr;
         }
 
         void
