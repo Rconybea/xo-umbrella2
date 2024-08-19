@@ -105,8 +105,7 @@ namespace xo {
 
             /** update exprstate when expeccting a typedescr **/
             virtual void on_typedescr(TypeDescr td,
-                                      exprstatestack * p_stack,
-                                      rp<Expression> * p_emit_expr);
+                                      parserstatemachine * p_psm);
 
             /** update exprstate when expecting a formal parameter **/
             virtual void on_formal(const rp<Variable> & formal,

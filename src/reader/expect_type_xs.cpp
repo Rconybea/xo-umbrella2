@@ -33,7 +33,6 @@ namespace xo {
             const char * c_self_name = "expect_type_xs::on_symbol_token";
 
             auto p_stack = p_psm->p_stack_;
-            auto p_emit_expr = p_psm->p_emit_expr_;
 
             TypeDescr td = nullptr;
 
@@ -59,7 +58,7 @@ namespace xo {
             }
 
             std::unique_ptr<exprstate> self = p_stack->pop_exprstate();
-            p_stack->top_exprstate().on_typedescr(td, p_stack, p_emit_expr);
+            p_stack->top_exprstate().on_typedescr(td, p_psm);
         }
     } /*namespace scm*/
 } /*namespace xo*/

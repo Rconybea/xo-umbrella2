@@ -31,8 +31,7 @@ namespace xo {
             // ----- victory methods -----
 
             virtual void on_typedescr(TypeDescr td,
-                                      exprstatestack * p_stack,
-                                      rp<Expression> * p_emit_expr) override;
+                                      parserstatemachine * p_psm) override;
             virtual void on_expr(ref::brw<Expression> expr,
                                  exprstatestack * p_stack,
                                  rp<Expression> * p_emit_expr) override;

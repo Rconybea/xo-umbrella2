@@ -175,8 +175,7 @@ namespace xo {
 
         void
         progress_xs::on_typedescr(TypeDescr /*td*/,
-                                  exprstatestack * /*p_stack*/,
-                                  rp<Expression> * /*p_emit_expr*/)
+                                  parserstatemachine * /*p_psm*/)
         {
             /* unreachable */
             assert(false);

@@ -83,13 +83,14 @@ namespace xo {
 
         void
         exprstate::on_typedescr(TypeDescr td,
-                                exprstatestack * p_stack,
-                                rp<Expression> * /*p_emit_expr*/)
+                                parserstatemachine * p_psm)
         {
             /* returning type description to something that wants it */
 
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
+
+            auto p_stack = p_psm->p_stack_;
 
             log && log(xtag("exstype",
                             p_stack->top_exprstate().exs_type()));

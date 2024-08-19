@@ -65,8 +65,7 @@ namespace xo {
 #endif
 
             virtual void on_typedescr(TypeDescr td,
-                                      exprstatestack * p_stack,
-                                      rp<Expression> * p_emit_expr) override;
+                                      parserstatemachine * p_psm) override;
 
             virtual void print(std::ostream & os) const override;
 

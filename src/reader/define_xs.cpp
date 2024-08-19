@@ -73,8 +73,7 @@ namespace xo {
 
         void
         define_xs::on_typedescr(TypeDescr td,
-                                exprstatestack * p_stack,
-                                rp<Expression> * p_emit_expr)
+                                parserstatemachine * p_psm)
         {
             if (this->defxs_type_ == defexprstatetype::def_3) {
                 this->defxs_type_ = defexprstatetype::def_4;
@@ -85,7 +84,7 @@ namespace xo {
 
                 return;
             } else {
-                exprstate::on_typedescr(td, p_stack, p_emit_expr);
+                exprstate::on_typedescr(td, p_psm);
             }
         }
 
