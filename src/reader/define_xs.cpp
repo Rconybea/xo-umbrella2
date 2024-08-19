@@ -70,19 +70,10 @@ namespace xo {
 
         void
         define_xs::on_typedescr(TypeDescr td,
-                                exprstatestack * /*p_stack*/,
-                                rp<Expression> * /*p_emit_expr*/)
+                                exprstatestack * p_stack,
+                                rp<Expression> * p_emit_expr)
         {
-            switch (this->defxs_type_) {
-
-            case defexprstatetype::def_0:
-            case defexprstatetype::def_1:
-            case defexprstatetype::def_2:
-                /* NOT IMPLEMENTED (ill-formed program) */
-                assert(false);
-                return;
-
-            case defexprstatetype::def_3:
+            if (this->defxs_type_ == defexprstatetype::def_3) {
                 this->defxs_type_ = defexprstatetype::def_4;
                 this->cvt_expr_ = ConvertExprAccess::make(td /*dest_type*/,
                                                           nullptr /*source_expr*/);
@@ -90,19 +81,8 @@ namespace xo {
                 //this->def_lhs_td_ = td;
 
                 return;
-
-            case defexprstatetype::def_4:
-            case defexprstatetype::def_5:
-            case defexprstatetype::def_6:
-                /* NOT IMPLEMENTED */
-                assert(false);
-                return;
-
-            case defexprstatetype::invalid:
-            case defexprstatetype::n_defexprstatetype:
-                /* unreachable */
-                assert(false);
-                return;
+            } else {
+                exprstate::on_typedescr(td, p_stack, p_emit_expr);
             }
         }
 
