@@ -33,6 +33,7 @@ namespace xo {
         parser::begin_translation_unit() {
             /* note: not using emit expr here */
             parserstatemachine psm(&xs_stack_,
+                                   &env_stack_,
                                    nullptr /*p_emit_expr*/);
 
             exprseq_xs::start(&psm);
@@ -55,7 +56,7 @@ namespace xo {
 
             rp<Expression> retval;
 
-            parserstatemachine psm(&xs_stack_, &retval);
+            parserstatemachine psm(&xs_stack_, &env_stack_, &retval);
 
             xs_stack_.top_exprstate().on_input(tk, &psm);
 
