@@ -26,12 +26,7 @@ namespace xo {
 
             //constexpr const char * c_self_name = "exprseq_xs::on_def_token";
 
-            p_stack->push_exprstate(define_xs::def_0());
-
-            /* todo: replace:
-             *   expect_symbol_or_function_signature()
-             */
-            p_stack->push_exprstate(expect_symbol_xs::expect_symbol_expression());
+            define_xs::start(p_stack);
 
             /* keyword 'def' introduces a definition:
              *   def pi : f64 = 3.14159265
