@@ -6,6 +6,7 @@
 #pragma once
 
 #include "exprstatestack.hpp"
+#include "envframestack.hpp"
 #include <stdexcept>
 
 namespace xo {
@@ -211,6 +212,12 @@ namespace xo {
              *  - top of stack is stack_[N-1]
              **/
             exprstatestack xs_stack_;
+
+            /** environment frames for lexical context.
+             *  push a frame on each nested lambda;
+             *  pop when lambda body goes out of scope
+             **/
+            envframestack env_stack_;
 
         }; /*parser*/
 
