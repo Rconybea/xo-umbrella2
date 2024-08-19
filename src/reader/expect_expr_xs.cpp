@@ -16,9 +16,14 @@ namespace xo {
     namespace scm {
 
         std::unique_ptr<expect_expr_xs>
-        expect_expr_xs::expect_rhs_expression() {
+        expect_expr_xs::make() {
             return std::make_unique<expect_expr_xs>(expect_expr_xs());
 
+        }
+
+        void
+        expect_expr_xs::start(exprstatestack * p_stack) {
+            p_stack->push_exprstate(expect_expr_xs::make());
         }
 
         expect_expr_xs::expect_expr_xs()
@@ -53,7 +58,7 @@ namespace xo {
 
             /* push lparen_0 to remember to look for subsequent rightparen. */
             p_stack->push_exprstate(paren_xs::lparen_0());
-            p_stack->push_exprstate(expect_expr_xs::expect_rhs_expression());
+            expect_expr_xs::start(p_stack);
         }
 
         void

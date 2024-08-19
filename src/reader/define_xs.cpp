@@ -174,7 +174,7 @@ namespace xo {
             {
                 this->defxs_type_ = defexprstatetype::def_5;
 
-                p_stack->push_exprstate(expect_expr_xs::expect_rhs_expression());
+                expect_expr_xs::start(p_stack);
             } else {
                 this->illegal_input_error(self_name, tk);
             }

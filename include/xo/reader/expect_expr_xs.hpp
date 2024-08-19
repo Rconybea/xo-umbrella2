@@ -17,7 +17,7 @@ namespace xo {
         public:
             expect_expr_xs();
 
-            static std::unique_ptr<expect_expr_xs> expect_rhs_expression();
+            static void start(exprstatestack * p_stack);
 
             virtual void on_lambda_token(const token_type & tk,
                                          exprstatestack * p_stack,
@@ -40,6 +40,7 @@ namespace xo {
                                  rp<Expression> * p_emit_expr) override;
 
         private:
+            static std::unique_ptr<expect_expr_xs> make();
         };
 
     } /*namespace scm*/

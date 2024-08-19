@@ -37,7 +37,7 @@ namespace xo {
             if (lmxs_type_ == lambdastatetype::lm_1) {
                 this->lmxs_type_ = lambdastatetype::lm_2;
                 this->argl_ = argl;
-                p_stack->push_exprstate(expect_expr_xs::expect_rhs_expression());
+                expect_expr_xs::start(p_stack);
             } else {
                 exprstate::on_formal_arglist(argl, p_stack, p_emit_expr);
             }
