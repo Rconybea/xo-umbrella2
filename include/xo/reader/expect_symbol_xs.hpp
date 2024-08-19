@@ -18,7 +18,9 @@ namespace xo {
         public:
             expect_symbol_xs();
 
-            static std::unique_ptr<expect_symbol_xs> expect_symbol_expression();
+            static std::unique_ptr<expect_symbol_xs> make();
+
+            static void start(exprstatestack * p_stack);
 
             virtual void on_symbol_token(const token_type & tk,
                                          exprstatestack * p_stack,

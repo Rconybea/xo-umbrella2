@@ -8,8 +8,14 @@
 namespace xo {
     namespace scm {
         std::unique_ptr<expect_symbol_xs>
-        expect_symbol_xs::expect_symbol_expression() {
+        expect_symbol_xs::make() {
             return std::make_unique<expect_symbol_xs>(expect_symbol_xs());
+        }
+
+        void
+        expect_symbol_xs::start(exprstatestack * p_stack)
+        {
+            p_stack->push_exprstate(expect_symbol_xs::make());
         }
 
         expect_symbol_xs::expect_symbol_xs()

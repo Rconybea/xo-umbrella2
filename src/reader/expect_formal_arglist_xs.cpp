@@ -49,7 +49,7 @@ namespace xo {
                 this->farglxs_type_ = formalarglstatetype::argl_1a;
                 /* TODO: refactor to have setup method on each exprstate */
                 p_stack->push_exprstate(expect_formal_xs::make());
-                p_stack->push_exprstate(expect_symbol_xs::expect_symbol_expression());
+                expect_symbol_xs::start(p_stack);
             } else {
                 exprstate::on_leftparen_token(tk, p_stack, p_emit_expr);
             }
