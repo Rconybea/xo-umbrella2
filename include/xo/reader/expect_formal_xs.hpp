@@ -47,7 +47,7 @@ namespace xo {
         public:
             expect_formal_xs();
 
-            static std::unique_ptr<expect_formal_xs> make();
+            static void start(exprstatestack * p_stack);
 
             virtual void on_symbol(const std::string & symbol_name,
                                    exprstatestack * p_stack,
@@ -70,6 +70,9 @@ namespace xo {
                                       rp<Expression> * p_emit_expr) override;
 
             virtual void print(std::ostream & os) const override;
+
+        private:
+            static std::unique_ptr<expect_formal_xs> make();
 
         private:
             /** parsing state-machine state **/

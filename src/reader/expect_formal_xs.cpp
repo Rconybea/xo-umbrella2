@@ -34,6 +34,11 @@ namespace xo {
             return std::make_unique<expect_formal_xs>(expect_formal_xs());
         }
 
+        void
+        expect_formal_xs::start(exprstatestack * p_stack) {
+            p_stack->push_exprstate(expect_formal_xs::make());
+        }
+
         expect_formal_xs::expect_formal_xs()
             : exprstate(exprstatetype::expect_formal)
         {}

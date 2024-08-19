@@ -54,7 +54,7 @@ namespace xo {
             if (farglxs_type_ == formalarglstatetype::argl_0) {
                 this->farglxs_type_ = formalarglstatetype::argl_1a;
                 /* TODO: refactor to have setup method on each exprstate */
-                p_stack->push_exprstate(expect_formal_xs::make());
+                expect_formal_xs::start(p_stack);
                 expect_symbol_xs::start(p_stack);
             } else {
                 exprstate::on_leftparen_token(tk, p_stack, p_emit_expr);
@@ -81,7 +81,7 @@ namespace xo {
         {
             if (farglxs_type_ == formalarglstatetype::argl_1b) {
                 this->farglxs_type_ = formalarglstatetype::argl_1a;
-                p_stack->push_exprstate(expect_formal_xs::make());
+                expect_formal_xs::start(p_stack);
             } else {
                 exprstate::on_comma_token(tk, p_stack, p_emit_expr);
             }
