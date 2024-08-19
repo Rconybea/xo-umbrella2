@@ -56,34 +56,15 @@ namespace xo {
 
         void
         define_xs::on_symbol(const std::string & symbol_name,
-                             exprstatestack * /*p_stack*/,
-                             rp<Expression> * /*p_emit_expr*/)
+                             exprstatestack * p_stack,
+                             rp<Expression> * p_emit_expr)
         {
-            switch (this->defxs_type_) {
-            case defexprstatetype::def_0:
-                assert(false);
-                return;
-
-            case defexprstatetype::def_1:
+            if (this->defxs_type_ == defexprstatetype::def_1) {
                 this->defxs_type_ = defexprstatetype::def_2;
                 this->def_expr_->assign_lhs_name(symbol_name);
-                //this->def_lhs_symbol_ = symbol_name;
-
                 return;
-            case defexprstatetype::def_2:
-            case defexprstatetype::def_3:
-            case defexprstatetype::def_4:
-            case defexprstatetype::def_5:
-            case defexprstatetype::def_6:
-                /* NOT IMPLEMENTED */
-                assert(false);
-                return;
-
-            case defexprstatetype::invalid:
-            case defexprstatetype::n_defexprstatetype:
-                /* unreachable */
-                assert(false);
-                return;
+            } else {
+                exprstate::on_symbol(symbol_name, p_stack, p_emit_expr);
             }
         }
 
