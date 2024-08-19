@@ -1,6 +1,7 @@
 /* @file exprstate.cpp */
 
 #include "exprstate.hpp"
+#include "parserstatemachine.hpp"
 //#include "formal_arg.hpp"
 #include "xo/expression/Variable.hpp"
 #include "xo/indentlog/print/vector.hpp"
@@ -52,7 +53,7 @@ namespace xo {
 
         void
         exprstate::on_def_token(const token_type & tk,
-                                exprstatestack * /*p_stack*/)
+                                parserstatemachine * /*p_psm*/)
         {
             this->illegal_input_error("exprstate::on_def_token", tk);
         }
@@ -254,10 +255,12 @@ namespace xo {
             log && log(xtag("tk", tk));
             log && log(xtag("state", *this));
 
+            parserstatemachine psm(p_stack, p_emit_expr);
+
             switch (tk.tk_type()) {
 
             case tokentype::tk_def:
-                this->on_def_token(tk, p_stack);
+                this->on_def_token(tk, &psm);
                 return;
 
             case tokentype::tk_lambda:

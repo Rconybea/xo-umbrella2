@@ -66,7 +66,7 @@ namespace xo {
                                       rp<Expression> * /*p_emit_expr*/) override;
 
             virtual void on_def_token(const token_type & tk,
-                                      exprstatestack * p_stack) override;
+                                      parserstatemachine * p_psm) override;
             virtual void on_colon_token(const token_type & tk,
                                         exprstatestack * p_stack) override;
             virtual void on_semicolon_token(const token_type & tk,

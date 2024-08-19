@@ -1,6 +1,7 @@
 /* @file define_xs.cpp */
 
 #include "define_xs.hpp"
+#include "parserstatemachine.hpp"
 #include "expect_symbol_xs.hpp"
 #include "expect_expr_xs.hpp"
 #include "expect_type_xs.hpp"
@@ -13,10 +14,12 @@ namespace xo {
         }
 
         void
-        define_xs::start(exprstatestack * p_stack)
+        define_xs::start(parserstatemachine * p_psm)
         {
+            auto p_stack = p_psm->p_stack_;
+
             p_stack->push_exprstate(define_xs::make());
-            p_stack->top_exprstate().on_def_token(token_type::def(), p_stack);
+            p_stack->top_exprstate().on_def_token(token_type::def(), p_psm);
         }
 
         define_xs::define_xs(rp<DefineExprAccess> def_expr)
@@ -88,7 +91,7 @@ namespace xo {
 
         void
         define_xs::on_def_token(const token_type & tk,
-                                exprstatestack * p_stack)
+                                parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
@@ -98,9 +101,9 @@ namespace xo {
             if (this->defxs_type_ == defexprstatetype::def_0) {
                 this->defxs_type_ = defexprstatetype::def_1;
 
-                expect_symbol_xs::start(p_stack);
+                expect_symbol_xs::start(p_psm->p_stack_);
             } else {
-                exprstate::on_def_token(tk, p_stack);
+                exprstate::on_def_token(tk, p_psm);
             }
         }
 

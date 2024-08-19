@@ -73,7 +73,7 @@ namespace xo {
 
         void
         progress_xs::on_def_token(const token_type & tk,
-                                  exprstatestack * /*p_stack*/)
+                                  parserstatemachine * /*p_stack*/)
         {
             constexpr const char * self_name = "progress_xs::on_def";
 

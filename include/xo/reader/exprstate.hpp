@@ -63,6 +63,7 @@ namespace xo {
             return os;
         }
 
+        class parserstatemachine;
         class exprstatestack;
 
         class formal_arg;
@@ -120,7 +121,7 @@ namespace xo {
 
             /** handle incoming 'def' token **/
             virtual void on_def_token(const token_type & tk,
-                                      exprstatestack * p_stack);
+                                      parserstatemachine * p_psm);
             /** handle incoming 'lambda' token **/
             virtual void on_lambda_token(const token_type & tk,
                                          exprstatestack * p_stack,

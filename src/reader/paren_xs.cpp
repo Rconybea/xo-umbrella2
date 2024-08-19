@@ -2,6 +2,7 @@
 
 #include "paren_xs.hpp"
 #include "progress_xs.hpp"
+#include "expect_expr_xs.hpp"
 
 namespace xo {
     namespace scm {
@@ -10,8 +11,15 @@ namespace xo {
         {}
 
         std::unique_ptr<paren_xs>
-        paren_xs::lparen_0() {
+        paren_xs::make() {
             return std::make_unique<paren_xs>(paren_xs());
+        }
+
+        void
+        paren_xs::start(exprstatestack * p_stack)
+        {
+            p_stack->push_exprstate(paren_xs::make());
+            expect_expr_xs::start(p_stack);
         }
 
         bool
@@ -56,7 +64,7 @@ namespace xo {
 
         void
         paren_xs::on_def_token(const token_type & tk,
-                               exprstatestack * /*p_stack*/)
+                               parserstatemachine * /*p_stack*/)
         {
             constexpr const char * c_self_name = "paren_xs::on_def";
 

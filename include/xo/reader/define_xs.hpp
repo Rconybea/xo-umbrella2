@@ -70,7 +70,7 @@ namespace xo {
 
             static const define_xs * from(const exprstate * x) { return dynamic_cast<const define_xs *>(x); }
 
-            static void start(exprstatestack * p_stack);
+            static void start(parserstatemachine * p_psm);
 
             defexprstatetype defxs_type() const { return defxs_type_; }
 
@@ -84,7 +84,7 @@ namespace xo {
                                       exprstatestack * p_stack,
                                       rp<Expression> * p_emit_expr) override;
             virtual void on_def_token(const token_type & tk,
-                                      exprstatestack * p_stack) override;
+                                      parserstatemachine * p_psm) override;
             virtual void on_colon_token(const token_type & tk,
                                         exprstatestack * p_stack) override;
             virtual void on_semicolon_token(const token_type & tk,

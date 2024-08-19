@@ -25,14 +25,14 @@ namespace xo {
 
         void
         exprseq_xs::on_def_token(const token_type & /*tk*/,
-                                 exprstatestack * p_stack)
+                                 parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
             //constexpr const char * c_self_name = "exprseq_xs::on_def_token";
 
-            define_xs::start(p_stack);
+            define_xs::start(p_psm);
 
             /* keyword 'def' introduces a definition:
              *   def pi : f64 = 3.14159265
