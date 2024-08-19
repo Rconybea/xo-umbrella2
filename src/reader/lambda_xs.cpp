@@ -2,6 +2,7 @@
 
 #include "lambda_xs.hpp"
 #include "parserstatemachine.hpp"
+#include "exprstatestack.hpp"
 #include "expect_formal_arglist_xs.hpp"
 #include "expect_expr_xs.hpp"
 #include "xo/expression/Lambda.hpp"

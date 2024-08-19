@@ -1,6 +1,7 @@
 /* @file progress_xs.cpp */
 
 #include "progress_xs.hpp"
+#include "exprstatestack.hpp"
 #include "expect_expr_xs.hpp"
 #include "parserstatemachine.hpp"
 #include "xo/expression/Apply.hpp"

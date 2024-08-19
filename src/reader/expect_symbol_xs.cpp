@@ -5,6 +5,7 @@
 
 #include "expect_symbol_xs.hpp"
 #include "parserstatemachine.hpp"
+#include "exprstatestack.hpp"
 
 namespace xo {
     namespace scm {

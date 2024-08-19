@@ -2,6 +2,7 @@
 
 #include "paren_xs.hpp"
 #include "parserstatemachine.hpp"
+#include "exprstatestack.hpp"
 #include "progress_xs.hpp"
 #include "expect_expr_xs.hpp"
 

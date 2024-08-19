@@ -5,6 +5,7 @@
 
 #include "expect_type_xs.hpp"
 #include "parserstatemachine.hpp"
+#include "exprstatestack.hpp"
 #include "xo/reflect/Reflect.hpp"
 
 namespace xo {

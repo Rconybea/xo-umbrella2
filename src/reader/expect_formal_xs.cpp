@@ -7,6 +7,7 @@
 #include "expect_symbol_xs.hpp"
 #include "expect_type_xs.hpp"
 #include "parserstatemachine.hpp"
+#include "exprstatestack.hpp"
 #include "xo/expression/Variable.hpp"
 
 namespace xo {

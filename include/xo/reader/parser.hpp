@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "exprstate.hpp"
+#include "exprstatestack.hpp"
 #include <stdexcept>
 
 namespace xo {

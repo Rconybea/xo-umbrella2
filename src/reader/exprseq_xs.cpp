@@ -1,9 +1,10 @@
 /* @file exprseq_xs.cpp */
 
 #include "exprseq_xs.hpp"
+#include "parserstatemachine.hpp"
+#include "exprstatestack.hpp"
 #include "define_xs.hpp"
 #include "expect_symbol_xs.hpp"
-#include "parserstatemachine.hpp"
 
 namespace xo {
     namespace scm {

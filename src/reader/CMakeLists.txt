@@ -5,6 +5,7 @@ set(SELF_SRCS
     parser.cpp
     reader.cpp
     exprstate.cpp
+    exprstatestack.cpp
     define_xs.cpp
     progress_xs.cpp
     paren_xs.cpp

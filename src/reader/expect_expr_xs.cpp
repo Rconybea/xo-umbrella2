@@ -5,6 +5,7 @@
 
 #include "expect_expr_xs.hpp"
 #include "parserstatemachine.hpp"
+#include "exprstatestack.hpp"
 #include "lambda_xs.hpp"
 #include "paren_xs.hpp"
 #include "progress_xs.hpp"

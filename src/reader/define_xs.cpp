@@ -1,6 +1,7 @@
 /* @file define_xs.cpp */
 
 #include "define_xs.hpp"
+#include "exprstatestack.hpp"
 #include "parserstatemachine.hpp"
 #include "expect_symbol_xs.hpp"
 #include "expect_expr_xs.hpp"
