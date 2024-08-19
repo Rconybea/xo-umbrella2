@@ -23,8 +23,7 @@ namespace xo {
             static void start(exprstatestack * p_stack);
 
             virtual void on_symbol_token(const token_type & tk,
-                                         exprstatestack * p_stack,
-                                         rp<Expression> * p_emit_expr) override;
+                                         parserstatemachine * p_psm) override;
         };
     } /*namespace scm*/
 } /*namespace xo*/

@@ -4,7 +4,7 @@
  */
 
 #include "expect_type_xs.hpp"
-#include "exprstate.hpp"
+#include "parserstatemachine.hpp"
 #include "xo/reflect/Reflect.hpp"
 
 namespace xo {
@@ -28,10 +28,12 @@ namespace xo {
 
         void
         expect_type_xs::on_symbol_token(const token_type & tk,
-                                        exprstatestack * p_stack,
-                                        rp<Expression> * p_emit_expr)
+                                        parserstatemachine * p_psm)
         {
             const char * c_self_name = "expect_type_xs::on_symbol_token";
+
+            auto p_stack = p_psm->p_stack_;
+            auto p_emit_expr = p_psm->p_emit_expr_;
 
             TypeDescr td = nullptr;
 

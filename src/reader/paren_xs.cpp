@@ -1,6 +1,7 @@
 /* @file paren_xs.cpp */
 
 #include "paren_xs.hpp"
+#include "parserstatemachine.hpp"
 #include "progress_xs.hpp"
 #include "expect_expr_xs.hpp"
 
@@ -64,7 +65,7 @@ namespace xo {
 
         void
         paren_xs::on_def_token(const token_type & tk,
-                               parserstatemachine * /*p_stack*/)
+                               parserstatemachine * /*p_psm*/)
         {
             constexpr const char * c_self_name = "paren_xs::on_def";
 
@@ -73,11 +74,12 @@ namespace xo {
 
         void
         paren_xs::on_symbol_token(const token_type & /*tk*/,
-                                  exprstatestack * p_stack,
-                                  rp<Expression> * /*p_emit_expr*/)
+                                  parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
+
+            auto p_stack = p_psm->p_stack_;
 
             log && log(xtag("exstype", p_stack->top_exprstate().exs_type()));
 

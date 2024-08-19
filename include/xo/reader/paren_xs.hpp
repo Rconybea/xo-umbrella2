@@ -47,8 +47,7 @@ namespace xo {
             virtual void on_def_token(const token_type & tk,
                                       parserstatemachine * p_psm) override;
             virtual void on_symbol_token(const token_type & tk,
-                                         exprstatestack * p_stack,
-                                         rp<Expression> * p_emit_expr) override;
+                                         parserstatemachine * p_psm) override;
             virtual void on_colon_token(const token_type & tk,
                                         exprstatestack * p_stack) override;
             virtual void on_semicolon_token(const token_type & tk,

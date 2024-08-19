@@ -4,6 +4,7 @@
  */
 
 #include "expect_symbol_xs.hpp"
+#include "parserstatemachine.hpp"
 
 namespace xo {
     namespace scm {
@@ -24,13 +25,16 @@ namespace xo {
 
         void
         expect_symbol_xs::on_symbol_token(const token_type & tk,
-                                          exprstatestack * p_stack,
-                                          rp<Expression> * p_emit_expr)
+                                          parserstatemachine * p_psm)
         {
+            auto p_stack = p_psm->p_stack_;
+            auto p_emit_expr = p_psm->p_emit_expr_;
+
             /* have to do pop first, before sending symbol to
              * the o.g. symbol-requester
              */
             std::unique_ptr<exprstate> self = p_stack->pop_exprstate();
+
 
             p_stack->top_exprstate().on_symbol(tk.text(),
                                                p_stack, p_emit_expr);

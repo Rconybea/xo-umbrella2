@@ -65,8 +65,7 @@ namespace xo {
 
         void
         expect_expr_xs::on_symbol_token(const token_type & /*tk*/,
-                                        exprstatestack * /*p_stack*/,
-                                        rp<Expression> * /*p_emit_expr*/)
+                                        parserstatemachine * /*p_psm*/)
         {
             /* todo: treat symbol as variable name */
 
