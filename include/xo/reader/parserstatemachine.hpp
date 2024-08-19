@@ -26,6 +26,7 @@ namespace xo {
                 : p_stack_{p_stack}, p_emit_expr_{p_emit_expr} {}
 
             std::unique_ptr<exprstate> pop_exprstate();
+            exprstate & top_exprstate();
 
         public:
             exprstatestack * p_stack_;

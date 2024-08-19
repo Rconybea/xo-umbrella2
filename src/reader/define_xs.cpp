@@ -20,7 +20,7 @@ namespace xo {
             auto p_stack = p_psm->p_stack_;
 
             p_stack->push_exprstate(define_xs::make());
-            p_stack->top_exprstate().on_def_token(token_type::def(), p_psm);
+            p_psm->top_exprstate().on_def_token(token_type::def(), p_psm);
         }
 
         define_xs::define_xs(rp<DefineExprAccess> def_expr)
@@ -132,8 +132,6 @@ namespace xo {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            auto p_stack = p_psm->p_stack_;
-
             //constexpr const char * self_name = "exprstate::on_semicolon";
 
             if (this->defxs_type_ == defexprstatetype::def_6) {
@@ -141,7 +139,7 @@ namespace xo {
 
                 std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
 
-                p_stack->top_exprstate().on_expr(expr, p_psm);
+                p_psm->top_exprstate().on_expr(expr, p_psm);
             } else {
                 exprstate::on_semicolon_token(tk, p_psm);
             }

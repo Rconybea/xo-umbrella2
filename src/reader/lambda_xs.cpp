@@ -74,8 +74,6 @@ namespace xo {
         lambda_xs::on_semicolon_token(const token_type & tk,
                                       parserstatemachine * p_psm)
         {
-            auto p_stack = p_psm->p_stack_;
-
             if (lmxs_type_ == lambdastatetype::lm_3) {
                 /* done! */
 
@@ -85,8 +83,8 @@ namespace xo {
 
                 rp<Lambda> lm = Lambda::make(name, argl_, body_);
 
-                p_stack->top_exprstate().on_expr(lm, p_psm);
-                p_stack->top_exprstate().on_semicolon_token(tk, p_psm);
+                p_psm->top_exprstate().on_expr(lm, p_psm);
+                p_psm->top_exprstate().on_semicolon_token(tk, p_psm);
 
                 return;
             }

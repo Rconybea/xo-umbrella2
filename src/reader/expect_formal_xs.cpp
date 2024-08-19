@@ -80,8 +80,6 @@ namespace xo {
         expect_formal_xs::on_typedescr(TypeDescr td,
                                        parserstatemachine * p_psm)
         {
-            auto p_stack = p_psm->p_stack_;
-
             if (this->formalxs_type_ == formalstatetype::formal_2) {
                 this->result_.assign_td(td);
 
@@ -90,7 +88,7 @@ namespace xo {
                 rp<Variable> var = Variable::make(result_.name(),
                                                   result_.td());
 
-                p_stack->top_exprstate().on_formal(var, p_psm);
+                p_psm->top_exprstate().on_formal(var, p_psm);
             } else {
                 exprstate::on_typedescr(td, p_psm);
             }

@@ -33,8 +33,6 @@ namespace xo {
         {
             const char * c_self_name = "expect_type_xs::on_symbol_token";
 
-            auto p_stack = p_psm->p_stack_;
-
             TypeDescr td = nullptr;
 
             /* TODO: replace with typetable lookup */
@@ -59,7 +57,7 @@ namespace xo {
             }
 
             std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
-            p_stack->top_exprstate().on_typedescr(td, p_psm);
+            p_psm->top_exprstate().on_typedescr(td, p_psm);
         }
     } /*namespace scm*/
 } /*namespace xo*/

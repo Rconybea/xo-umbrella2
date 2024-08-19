@@ -80,9 +80,7 @@ namespace xo {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            auto p_stack = p_psm->p_stack_;
-
-            log && log(xtag("exstype", p_stack->top_exprstate().exs_type()));
+            log && log(xtag("exstype", p_psm->top_exprstate().exs_type()));
 
             //constexpr const char * self_name = "paren_xs::on_symbol";
 
@@ -152,11 +150,9 @@ namespace xo {
             if (this->parenxs_type_ == parenexprstatetype::lparen_1) {
                 rp<Expression> expr = this->gen_expr_;
 
-                auto p_stack = p_psm->p_stack_;
-
                 std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
 
-                p_stack->top_exprstate().on_expr(expr, p_psm);
+                p_psm->top_exprstate().on_expr(expr, p_psm);
             }
         }
 

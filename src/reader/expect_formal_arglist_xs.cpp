@@ -93,12 +93,10 @@ namespace xo {
         expect_formal_arglist_xs::on_rightparen_token(const token_type & tk,
                                                       parserstatemachine * p_psm)
         {
-            auto p_stack = p_psm->p_stack_;
-
             if (farglxs_type_ == formalarglstatetype::argl_1b) {
                 std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
 
-                p_stack->top_exprstate().on_formal_arglist(this->argl_, p_psm);
+                p_psm->top_exprstate().on_formal_arglist(this->argl_, p_psm);
             } else {
                 exprstate::on_rightparen_token(tk, p_psm);
             }

@@ -73,9 +73,7 @@ namespace xo {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            auto p_stack = p_psm->p_stack_;
-
-            log && log(xtag("exstype", p_stack->top_exprstate().exs_type()));
+            log && log(xtag("exstype", p_psm->top_exprstate().exs_type()));
 
             constexpr const char * c_self_name = "exprstate::on_symbol_token";
 
@@ -91,10 +89,8 @@ namespace xo {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            auto p_stack = p_psm->p_stack_;
-
             log && log(xtag("exstype",
-                            p_stack->top_exprstate().exs_type()));
+                            p_psm->top_exprstate().exs_type()));
 
             constexpr const char * c_self_name = "exprstate::on_typedescr";
 
@@ -113,10 +109,8 @@ namespace xo {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            auto p_stack = p_psm->p_stack_;
-
             log && log(xtag("exstype",
-                            p_stack->top_exprstate().exs_type()));
+                            p_psm->top_exprstate().exs_type()));
 
             constexpr const char * c_self_name = "exprstate::on_formal";
 
@@ -135,10 +129,8 @@ namespace xo {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            auto p_stack = p_psm->p_stack_;
-
             log && log(xtag("exstype",
-                            p_stack->top_exprstate().exs_type()));
+                            p_psm->top_exprstate().exs_type()));
 
             constexpr const char * c_self_name = "exprstate::on_formal_arglist";
 

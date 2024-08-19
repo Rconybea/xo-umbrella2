@@ -46,7 +46,7 @@ namespace xo {
 
             /* push lparen_0 to remember to look for subsequent rightparen. */
             lambda_xs::start(p_stack, p_emit_expr);
-            //p_stack->top_exprstate().on_lambda_token(tk, p_stack, p_emit_expr);
+            //p_psm->top_exprstate().on_lambda_token(tk, p_stack, p_emit_expr);
             //p_stack->push_exprstate(expect_expr_xs::expect_rhs_expression());
         }
 
@@ -92,7 +92,7 @@ namespace xo {
 
 #ifdef LATER
             p_psm->pop_exprstate();
-            p_stack->top_exprstate().on_symbol(tk.text(),
+            p_psm->top_exprstate().on_symbol(tk.text(),
                                                p_stack, p_emit_expr);
 #endif
             return;
@@ -127,11 +127,9 @@ namespace xo {
             log && log(xtag("exstype", this->exs_type_),
                        xtag("expr", expr));
 
-            auto p_stack = p_psm->p_stack_;
-
             std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
 
-            p_stack->top_exprstate().on_expr(expr, p_psm);
+            p_psm->top_exprstate().on_expr(expr, p_psm);
         } /*on_expr*/
 
     } /*namespace scm*/

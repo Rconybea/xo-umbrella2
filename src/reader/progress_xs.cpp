@@ -199,13 +199,11 @@ namespace xo {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            auto p_stack = p_psm->p_stack_;
-
             rp<Expression> expr = this->assemble_expr();
 
             std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
 
-            p_stack->top_exprstate().on_expr(expr, p_psm);
+            p_psm->top_exprstate().on_expr(expr, p_psm);
 
             /* control here on input like:
              *   (1.234;
@@ -222,7 +220,7 @@ namespace xo {
              * f. now deliver semicolon;  [lparen_1] rejects
              */
 
-            p_stack->top_exprstate().on_semicolon_token(tk, p_psm);
+            p_psm->top_exprstate().on_semicolon_token(tk, p_psm);
         }
 
         void
@@ -283,10 +281,10 @@ namespace xo {
 
              log && log(xtag("stack", p_stack));
 
-             p_stack->top_exprstate().on_expr(expr, p_psm);
+             p_psm->top_exprstate().on_expr(expr, p_psm);
 
              /* now deliver rightparen */
-             p_stack->top_exprstate().on_rightparen_token(tk, p_psm);
+             p_psm->top_exprstate().on_rightparen_token(tk, p_psm);
          }
 
         namespace {
