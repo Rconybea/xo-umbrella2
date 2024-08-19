@@ -369,9 +369,9 @@ namespace xo {
                     std::unique_ptr<exprstate> self = p_stack->pop_exprstate();
 
                     /* 1. replace with nested incomplete infix exprs */
-                    p_stack->push_exprstate(progress_xs::make(lhs_, op_type_));
+                    progress_xs::start(lhs_, op_type_, p_stack);
                     expect_expr_xs::start(p_stack);
-                    p_stack->push_exprstate(progress_xs::make(rhs_, op2));
+                    progress_xs::start(rhs_, op2, p_stack);
                     expect_expr_xs::start(p_stack);
                 }
 
