@@ -17,9 +17,7 @@ namespace xo {
         void
         define_xs::start(parserstatemachine * p_psm)
         {
-            auto p_stack = p_psm->p_stack_;
-
-            p_stack->push_exprstate(define_xs::make());
+            p_psm->push_exprstate(define_xs::make());
             p_psm->top_exprstate().on_def_token(token_type::def(), p_psm);
         }
 
