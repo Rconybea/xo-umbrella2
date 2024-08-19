@@ -16,11 +16,14 @@ namespace xo {
         public:
             expect_type_xs();
 
-            static std::unique_ptr<expect_type_xs> make();
+            static void start(exprstatestack * p_stack);
 
             virtual void on_symbol_token(const token_type & tk,
                                          exprstatestack * p_stack,
                                          rp<Expression> * p_emit_expr) override;
+
+        private:
+            static std::unique_ptr<expect_type_xs> make();
         };
     } /*namespace scm*/
 } /*namespace xo*/

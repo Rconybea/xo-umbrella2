@@ -116,7 +116,7 @@ namespace xo {
             if (this->defxs_type_ == defexprstatetype::def_2) {
                 this->defxs_type_ = defexprstatetype::def_3;
 
-                p_stack->push_exprstate(expect_type_xs::make());
+                expect_type_xs::start(p_stack);
             } else {
                 exprstate::on_colon_token(tk, p_stack);
             }

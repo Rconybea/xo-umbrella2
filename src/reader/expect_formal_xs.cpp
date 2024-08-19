@@ -60,7 +60,8 @@ namespace xo {
         {
             if (this->formalxs_type_ == formalstatetype::formal_1) {
                 this->formalxs_type_ = formalstatetype::formal_2;
-                p_stack->push_exprstate(expect_type_xs::make());
+                expect_type_xs::start(p_stack);
+                /* control reenters via expect_formal_xs::on_typedescr() */
             } else {
                 exprstate::on_colon_token(tk,
                                           p_stack);

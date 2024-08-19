@@ -17,6 +17,11 @@ namespace xo {
             return std::make_unique<expect_type_xs>(expect_type_xs());
         }
 
+        void
+        expect_type_xs::start(exprstatestack * p_stack) {
+            p_stack->push_exprstate(expect_type_xs::make());
+        }
+
         expect_type_xs::expect_type_xs()
             : exprstate(exprstatetype::expect_type)
         {}
