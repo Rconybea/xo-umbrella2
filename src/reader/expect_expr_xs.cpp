@@ -57,8 +57,7 @@ namespace xo {
             //constexpr const char * self_name = "exprstate::on_leftparen";
 
             /* push lparen_0 to remember to look for subsequent rightparen. */
-            p_stack->push_exprstate(paren_xs::lparen_0());
-            expect_expr_xs::start(p_stack);
+            paren_xs::start(p_stack);
         }
 
         void

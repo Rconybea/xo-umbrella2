@@ -29,7 +29,7 @@ namespace xo {
 
             static const paren_xs * from(const exprstate * x) { return dynamic_cast<const paren_xs *>(x); }
 
-            static std::unique_ptr<paren_xs> lparen_0();
+            static void start(exprstatestack * p_stack);
 
             bool admits_f64() const;
             bool admits_rightparen() const;
@@ -67,6 +67,9 @@ namespace xo {
                                       rp<Expression> * /*p_emit_expr*/) override;
 
             virtual void print(std::ostream & os) const override;
+
+        private:
+            static std::unique_ptr<paren_xs> make();
 
         private:
             /**
