@@ -58,7 +58,7 @@ namespace xo {
                            xtag("typename", tk.text())));
             }
 
-            std::unique_ptr<exprstate> self = p_stack->pop_exprstate();
+            std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
             p_stack->top_exprstate().on_typedescr(td, p_psm);
         }
     } /*namespace scm*/

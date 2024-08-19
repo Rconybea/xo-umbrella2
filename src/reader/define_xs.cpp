@@ -139,7 +139,7 @@ namespace xo {
             if (this->defxs_type_ == defexprstatetype::def_6) {
                 rp<Expression> expr = this->def_expr_;
 
-                std::unique_ptr<exprstate> self = p_stack->pop_exprstate();
+                std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
 
                 p_stack->top_exprstate().on_expr(expr, p_psm);
             } else {

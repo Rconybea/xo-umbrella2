@@ -96,7 +96,7 @@ namespace xo {
             auto p_stack = p_psm->p_stack_;
 
             if (farglxs_type_ == formalarglstatetype::argl_1b) {
-                std::unique_ptr<exprstate> self = p_stack->pop_exprstate();
+                std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
 
                 p_stack->top_exprstate().on_formal_arglist(this->argl_, p_psm);
             } else {

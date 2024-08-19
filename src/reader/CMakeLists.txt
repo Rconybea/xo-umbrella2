@@ -3,6 +3,7 @@
 set(SELF_LIB xo_reader)
 set(SELF_SRCS
     parser.cpp
+    parserstatemachine.cpp
     reader.cpp
     exprstate.cpp
     exprstatestack.cpp

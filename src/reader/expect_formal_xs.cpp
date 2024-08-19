@@ -85,7 +85,7 @@ namespace xo {
             if (this->formalxs_type_ == formalstatetype::formal_2) {
                 this->result_.assign_td(td);
 
-                std::unique_ptr<exprstate> self = p_stack->pop_exprstate();
+                std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
 
                 rp<Variable> var = Variable::make(result_.name(),
                                                   result_.td());

@@ -91,7 +91,7 @@ namespace xo {
 #endif
 
 #ifdef LATER
-            p_stack->pop_exprstate();
+            p_psm->pop_exprstate();
             p_stack->top_exprstate().on_symbol(tk.text(),
                                                p_stack, p_emit_expr);
 #endif
@@ -129,7 +129,7 @@ namespace xo {
 
             auto p_stack = p_psm->p_stack_;
 
-            std::unique_ptr<exprstate> self = p_stack->pop_exprstate();
+            std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
 
             p_stack->top_exprstate().on_expr(expr, p_psm);
         } /*on_expr*/

@@ -79,7 +79,7 @@ namespace xo {
             if (lmxs_type_ == lambdastatetype::lm_3) {
                 /* done! */
 
-                std::unique_ptr<exprstate> self = p_stack->pop_exprstate();
+                std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
 
                 std::string name = "fixmename";
 

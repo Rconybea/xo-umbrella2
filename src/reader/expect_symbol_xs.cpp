@@ -33,7 +33,7 @@ namespace xo {
             /* have to do pop first, before sending symbol to
              * the o.g. symbol-requester
              */
-            std::unique_ptr<exprstate> self = p_stack->pop_exprstate();
+            std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
 
 
             p_stack->top_exprstate().on_symbol(tk.text(), p_psm);

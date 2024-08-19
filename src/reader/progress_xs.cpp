@@ -154,7 +154,7 @@ namespace xo {
             assert(result.get());
 
             /* this expression complete.. */
-            std::unique_ptr<exprstate> self = p_stack->pop_exprstate();
+            std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
 
             /* ..but more operators could follow, so don't commit yet */
             p_stack->push_exprstate(progress_xs::make(result));
@@ -203,7 +203,7 @@ namespace xo {
 
             rp<Expression> expr = this->assemble_expr();
 
-            std::unique_ptr<exprstate> self = p_stack->pop_exprstate();
+            std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
 
             p_stack->top_exprstate().on_expr(expr, p_psm);
 
@@ -274,7 +274,7 @@ namespace xo {
              /* right paren confirms stack expression */
              rp<Expression> expr = this->assemble_expr();
 
-             std::unique_ptr<exprstate> self = p_stack->pop_exprstate();
+             std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
 
              if (p_stack->empty()) {
                  throw std::runtime_error(tostr(self_name,
@@ -344,7 +344,7 @@ namespace xo {
                     auto expr = this->assemble_expr();
 
                     /* 2. remove from stack */
-                    std::unique_ptr<exprstate> self  = p_stack->pop_exprstate();
+                    std::unique_ptr<exprstate> self  = p_psm->pop_exprstate();
 
                     /* 3. replace with new progress_xs: */
                     progress_xs::start(expr, op2, p_stack);
@@ -365,7 +365,7 @@ namespace xo {
                      *   4. expect_rhs_expression
                      */
 
-                    std::unique_ptr<exprstate> self = p_stack->pop_exprstate();
+                    std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
 
                     /* 1. replace with nested incomplete infix exprs */
                     progress_xs::start(lhs_, op_type_, p_stack);
