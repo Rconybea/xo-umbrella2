@@ -97,7 +97,7 @@ namespace xo {
             if (this->defxs_type_ == defexprstatetype::def_0) {
                 this->defxs_type_ = defexprstatetype::def_1;
 
-                expect_symbol_xs::start(p_psm->p_stack_);
+                expect_symbol_xs::start(p_psm);
             } else {
                 exprstate::on_def_token(tk, p_psm);
             }

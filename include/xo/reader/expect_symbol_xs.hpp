@@ -20,7 +20,7 @@ namespace xo {
 
             static std::unique_ptr<expect_symbol_xs> make();
 
-            static void start(exprstatestack * p_stack);
+            static void start(parserstatemachine * p_psm);
 
             virtual void on_symbol_token(const token_type & tk,
                                          parserstatemachine * p_psm) override;

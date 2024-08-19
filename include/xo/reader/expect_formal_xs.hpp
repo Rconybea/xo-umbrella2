@@ -47,7 +47,7 @@ namespace xo {
         public:
             expect_formal_xs();
 
-            static void start(exprstatestack * p_stack);
+            static void start(parserstatemachine * p_psm);
 
             virtual void on_symbol(const std::string & symbol_name,
                                    parserstatemachine * p_psm) override;

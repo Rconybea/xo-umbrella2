@@ -38,10 +38,10 @@ namespace xo {
         }
 
         void
-        expect_formal_xs::start(exprstatestack * p_stack) {
-            p_stack->push_exprstate(expect_formal_xs::make());
+        expect_formal_xs::start(parserstatemachine * p_psm) {
+            p_psm->push_exprstate(expect_formal_xs::make());
 
-            expect_symbol_xs::start(p_stack);
+            expect_symbol_xs::start(p_psm);
         }
 
         expect_formal_xs::expect_formal_xs()

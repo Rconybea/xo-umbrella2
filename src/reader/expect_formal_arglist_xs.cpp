@@ -52,12 +52,10 @@ namespace xo {
         expect_formal_arglist_xs::on_leftparen_token(const token_type & tk,
                                                      parserstatemachine * p_psm)
         {
-            auto p_stack = p_psm->p_stack_;
-
             if (farglxs_type_ == formalarglstatetype::argl_0) {
                 this->farglxs_type_ = formalarglstatetype::argl_1a;
                 /* TODO: refactor to have setup method on each exprstate */
-                expect_formal_xs::start(p_stack);
+                expect_formal_xs::start(p_psm);
             } else {
                 exprstate::on_leftparen_token(tk, p_psm);
             }
@@ -79,11 +77,9 @@ namespace xo {
         expect_formal_arglist_xs::on_comma_token(const token_type & tk,
                                                  parserstatemachine * p_psm)
         {
-            auto p_stack = p_psm->p_stack_;
-
             if (farglxs_type_ == formalarglstatetype::argl_1b) {
                 this->farglxs_type_ = formalarglstatetype::argl_1a;
-                expect_formal_xs::start(p_stack);
+                expect_formal_xs::start(p_psm);
             } else {
                 exprstate::on_comma_token(tk, p_psm);
             }

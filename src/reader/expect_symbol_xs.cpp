@@ -15,9 +15,9 @@ namespace xo {
         }
 
         void
-        expect_symbol_xs::start(exprstatestack * p_stack)
+        expect_symbol_xs::start(parserstatemachine * p_psm)
         {
-            p_stack->push_exprstate(expect_symbol_xs::make());
+            p_psm->push_exprstate(expect_symbol_xs::make());
         }
 
         expect_symbol_xs::expect_symbol_xs()
