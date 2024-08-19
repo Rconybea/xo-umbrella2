@@ -182,11 +182,9 @@ namespace xo {
                 } else {
                     /* control comes here the first time require<T>() runs */
 
-                    static detail::InvokerAux<T> s_final_invoker;
-
                     auto final_tdx = EstablishTdx<T>::make();
 
-                    retval_td->assign_tdextra(&s_final_invoker,
+                    retval_td->assign_tdextra(Reflect::get_final_invoker<T>(),
                                               std::move(final_tdx));
 
                     /* also need to require for each child */
@@ -222,7 +220,8 @@ namespace xo {
 
                     auto final_tdx = EstablishFunctionTdx<T>::make();
 
-                    retval_td->assign_tdextra(std::move(final_tdx));
+                    retval_td->assign_tdextra(Reflect::get_final_invoker<T>(),
+                                              std::move(final_tdx));
 
                     /* also need to require for each child */
                 }
@@ -254,6 +253,16 @@ namespace xo {
 
             template<typename T>
             static TaggedRcptr make_rctp(T * x) { return TaggedPtrMaker<T>::make_rctp(x); }
+
+        private:
+
+            template <typename T>
+            static detail::InvokerAux<T> * get_final_invoker() {
+                static detail::InvokerAux<T> s_final_invoker;
+
+                return &s_final_invoker;
+            }
+
         }; /*Reflect*/
 
         // ----- MakeTagged -----
