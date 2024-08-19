@@ -3,6 +3,7 @@
 #include "exprseq_xs.hpp"
 #include "define_xs.hpp"
 #include "expect_symbol_xs.hpp"
+#include "parserstatemachine.hpp"
 
 namespace xo {
     namespace scm {
@@ -60,14 +61,15 @@ namespace xo {
 
         void
         exprseq_xs::on_expr(ref::brw<Expression> expr,
-                            exprstatestack * /*p_stack*/,
-                            rp<Expression> * p_emit_expr)
+                            parserstatemachine * p_psm)
         {
             /* toplevel expression sequence accepts an
              * arbitrary number of expressions.
              *
              * parser::include_token() returns
              */
+
+            auto p_emit_expr = p_psm->p_emit_expr_;
 
             *p_emit_expr = expr.promote();
         } /*on_expr*/

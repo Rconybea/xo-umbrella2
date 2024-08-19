@@ -33,8 +33,7 @@ namespace xo {
             virtual void on_typedescr(TypeDescr td,
                                       parserstatemachine * p_psm) override;
             virtual void on_expr(ref::brw<Expression> expr,
-                                 exprstatestack * p_stack,
-                                 rp<Expression> * p_emit_expr) override;
+                                 parserstatemachine * p_psm) override;
 
         private:
             static std::unique_ptr<exprseq_xs> make();

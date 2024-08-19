@@ -30,8 +30,7 @@ namespace xo {
 
         void
         define_xs::on_expr(ref::brw<Expression> expr,
-                           exprstatestack * p_stack,
-                           rp<Expression> * p_emit_expr)
+                           parserstatemachine * p_psm)
         {
             if (this->defxs_type_ == defexprstatetype::def_5) {
                 /* have all the ingredients to create an expression
@@ -54,7 +53,7 @@ namespace xo {
                 return;
             }
 
-            exprstate::on_expr(expr, p_stack, p_emit_expr);
+            exprstate::on_expr(expr, p_psm);
         }
 
         void
@@ -133,7 +132,6 @@ namespace xo {
             scope log(XO_DEBUG(c_debug_flag));
 
             auto p_stack = p_psm->p_stack_;
-            auto p_emit_expr = p_psm->p_emit_expr_;
 
             //constexpr const char * self_name = "exprstate::on_semicolon";
 
@@ -142,9 +140,7 @@ namespace xo {
 
                 std::unique_ptr<exprstate> self = p_stack->pop_exprstate();
 
-                p_stack->top_exprstate().on_expr(expr,
-                                                 p_stack,
-                                                 p_emit_expr);
+                p_stack->top_exprstate().on_expr(expr, p_psm);
             } else {
                 exprstate::on_semicolon_token(tk, p_psm);
             }

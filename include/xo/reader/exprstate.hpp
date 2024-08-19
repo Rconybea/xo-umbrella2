@@ -95,8 +95,7 @@ namespace xo {
 
             /** update exprstate in response to a successfully-parsed subexpression **/
             virtual void on_expr(ref::brw<Expression> expr,
-                                 exprstatestack * p_stack,
-                                 rp<Expression> * p_emit_expr);
+                                 parserstatemachine * p_psm);
 
             /** update exprstate when expecting a symbol **/
             virtual void on_symbol(const std::string & symbol,

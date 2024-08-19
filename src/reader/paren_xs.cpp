@@ -152,11 +152,10 @@ namespace xo {
                 rp<Expression> expr = this->gen_expr_;
 
                 auto p_stack = p_psm->p_stack_;
-                auto p_emit_expr = p_psm->p_emit_expr_;
 
                 std::unique_ptr<exprstate> self = p_stack->pop_exprstate();
 
-                p_stack->top_exprstate().on_expr(expr, p_stack, p_emit_expr);
+                p_stack->top_exprstate().on_expr(expr, p_psm);
             }
         }
 
@@ -174,8 +173,7 @@ namespace xo {
 
         void
         paren_xs::on_expr(ref::brw<Expression> expr,
-                          exprstatestack * p_stack,
-                          rp<Expression> * /*p_emit_expr*/)
+                          parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
@@ -186,6 +184,8 @@ namespace xo {
             switch (this->parenxs_type_) {
             case parenexprstatetype::lparen_0: {
                 this->parenxs_type_ = parenexprstatetype::lparen_1; /* wants on_rightparen */
+                auto p_stack = p_psm->p_stack_;
+
                 progress_xs::start(expr.promote(), p_stack);
 
                 return;

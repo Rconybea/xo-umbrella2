@@ -118,8 +118,7 @@ namespace xo {
 
         void
         expect_expr_xs::on_expr(ref::brw<Expression> expr,
-                                exprstatestack * p_stack,
-                                rp<Expression> * p_emit_expr)
+                                parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
@@ -127,12 +126,11 @@ namespace xo {
             log && log(xtag("exstype", this->exs_type_),
                        xtag("expr", expr));
 
+            auto p_stack = p_psm->p_stack_;
 
             std::unique_ptr<exprstate> self = p_stack->pop_exprstate();
 
-            p_stack->top_exprstate().on_expr(expr,
-                                             p_stack,
-                                             p_emit_expr);
+            p_stack->top_exprstate().on_expr(expr, p_psm);
         } /*on_expr*/
 
     } /*namespace scm*/

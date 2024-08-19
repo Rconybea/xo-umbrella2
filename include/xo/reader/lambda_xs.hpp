@@ -47,8 +47,7 @@ namespace xo {
             virtual void on_formal_arglist(const std::vector<rp<Variable>> & argl,
                                            parserstatemachine * p_psm) override;
             virtual void on_expr(ref::brw<Expression> expr,
-                                 exprstatestack * p_stack,
-                                 rp<Expression> * p_emit_expr) override;
+                                 parserstatemachine * p_psm) override;
             virtual void on_semicolon_token(const token_type & tk,
                                             parserstatemachine * p_psm) override;
 
