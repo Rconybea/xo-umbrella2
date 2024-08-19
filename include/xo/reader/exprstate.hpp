@@ -110,8 +110,7 @@ namespace xo {
 
             /** update exprstate when expecting a formal parameter **/
             virtual void on_formal(const rp<Variable> & formal,
-                                   exprstatestack * p_stack,
-                                   rp<Expression> * p_emit_expr);
+                                   parserstatemachine * p_psm);
 
             /** update expression when epecting a formal parameter list **/
             virtual void on_formal_arglist(const std::vector<rp<Variable>> & argl,

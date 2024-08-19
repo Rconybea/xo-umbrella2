@@ -58,8 +58,7 @@ namespace xo {
             virtual void on_leftparen_token(const token_type & tk,
                                             parserstatemachine * p_psm) override;
             virtual void on_formal(const rp<Variable> & formal,
-                                   exprstatestack * p_stack,
-                                   rp<Expression> * p_emit_expr) override;
+                                   parserstatemachine * p_psm) override;
             virtual void on_comma_token(const token_type & tk,
                                         parserstatemachine * p_psm) override;
             virtual void on_rightparen_token(const token_type & tk,

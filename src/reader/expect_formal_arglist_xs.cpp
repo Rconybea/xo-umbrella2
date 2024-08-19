@@ -64,14 +64,13 @@ namespace xo {
 
         void
         expect_formal_arglist_xs::on_formal(const rp<Variable> & formal,
-                                            exprstatestack * p_stack,
-                                            rp<Expression> * p_emit_expr)
+                                            parserstatemachine * p_psm)
         {
             if (farglxs_type_ == formalarglstatetype::argl_1a) {
                 this->farglxs_type_ = formalarglstatetype::argl_1b;
                 this->argl_.push_back(formal);
             } else {
-                exprstate::on_formal(formal, p_stack, p_emit_expr);
+                exprstate::on_formal(formal, p_psm);
             }
         }
 

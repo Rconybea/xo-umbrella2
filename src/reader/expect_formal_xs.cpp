@@ -91,7 +91,9 @@ namespace xo {
                 rp<Variable> var = Variable::make(result_.name(),
                                                   result_.td());
 
-                p_stack->top_exprstate().on_formal(var, p_stack, p_emit_expr);
+                parserstatemachine psm(p_stack, p_emit_expr);
+
+                p_stack->top_exprstate().on_formal(var, &psm);
             } else {
                 exprstate::on_typedescr(td, p_stack, p_emit_expr);
             }
