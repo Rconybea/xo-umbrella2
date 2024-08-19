@@ -112,12 +112,10 @@ namespace xo {
 
             //constexpr const char * self_name = "define_xs::on_colon_token";
 
-            auto p_stack = p_psm->p_stack_;
-
             if (this->defxs_type_ == defexprstatetype::def_2) {
                 this->defxs_type_ = defexprstatetype::def_3;
 
-                expect_type_xs::start(p_stack);
+                expect_type_xs::start(p_psm);
             } else {
                 exprstate::on_colon_token(tk, p_psm);
             }

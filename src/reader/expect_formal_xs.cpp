@@ -64,11 +64,9 @@ namespace xo {
         expect_formal_xs::on_colon_token(const token_type & tk,
                                          parserstatemachine * p_psm)
         {
-            auto p_stack = p_psm->p_stack_;
-
             if (this->formalxs_type_ == formalstatetype::formal_1) {
                 this->formalxs_type_ = formalstatetype::formal_2;
-                expect_type_xs::start(p_stack);
+                expect_type_xs::start(p_psm);
                 /* control reenters via expect_formal_xs::on_typedescr() */
             } else {
                 exprstate::on_colon_token(tk,

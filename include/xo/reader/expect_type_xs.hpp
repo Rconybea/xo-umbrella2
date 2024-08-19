@@ -16,7 +16,7 @@ namespace xo {
         public:
             expect_type_xs();
 
-            static void start(exprstatestack * p_stack);
+            static void start(parserstatemachine * p_stack);
 
             virtual void on_symbol_token(const token_type & tk,
                                          parserstatemachine * p_psm) override;
