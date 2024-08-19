@@ -40,7 +40,7 @@ namespace xo {
         public:
             lambda_xs();
 
-            static void start(exprstatestack * p_stack, rp<Expression> * p_emit_expr);
+            static void start(parserstatemachine * p_psm);
 
             virtual void on_lambda_token(const token_type & tk,
                                          parserstatemachine * p_psm) override;

@@ -27,6 +27,7 @@ namespace xo {
 
             std::unique_ptr<exprstate> pop_exprstate();
             exprstate & top_exprstate();
+            void push_exprstate(std::unique_ptr<exprstate> x);
 
         public:
             exprstatestack * p_stack_;

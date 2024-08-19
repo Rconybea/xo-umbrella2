@@ -41,13 +41,8 @@ namespace xo {
 
             //constexpr const char * self_name = "exprstate::on_leftparen";
 
-            auto p_stack = p_psm->p_stack_;
-            auto p_emit_expr = p_psm->p_emit_expr_;
-
             /* push lparen_0 to remember to look for subsequent rightparen. */
-            lambda_xs::start(p_stack, p_emit_expr);
-            //p_psm->top_exprstate().on_lambda_token(tk, p_stack, p_emit_expr);
-            //p_stack->push_exprstate(expect_expr_xs::expect_rhs_expression());
+            lambda_xs::start(p_psm);
         }
 
         void
