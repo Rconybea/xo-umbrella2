@@ -4,6 +4,7 @@
  */
 
 #include "parser.hpp"
+#include "parserstatemachine.hpp"
 #include "define_xs.hpp"
 #include "exprseq_xs.hpp"
 #include "xo/expression/DefineExpr.hpp"
@@ -50,7 +51,9 @@ namespace xo {
 
             rp<Expression> retval;
 
-            xs_stack_.top_exprstate().on_input(tk, &xs_stack_, &retval);
+            parserstatemachine psm(&xs_stack_, &retval);
+
+            xs_stack_.top_exprstate().on_input(tk, &psm);
 
             log && log(xtag("retval", retval));
 

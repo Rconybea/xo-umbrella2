@@ -60,8 +60,7 @@ namespace xo {
 
         void
         exprstate::on_lambda_token(const token_type & tk,
-                                   exprstatestack * /*p_stack*/,
-                                   rp<Expression> * /*p_emit_expr*/)
+                                   parserstatemachine * /*p_psm*/)
         {
             this->illegal_input_error("exprstate::on_lambda_token", tk);
         }
@@ -264,7 +263,7 @@ namespace xo {
                 return;
 
             case tokentype::tk_lambda:
-                this->on_lambda_token(tk, p_stack, p_emit_expr);
+                this->on_lambda_token(tk, p_psm);
                 return;
 
             case tokentype::tk_i64:

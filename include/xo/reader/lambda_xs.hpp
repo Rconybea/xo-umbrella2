@@ -43,8 +43,7 @@ namespace xo {
             static void start(exprstatestack * p_stack, rp<Expression> * p_emit_expr);
 
             virtual void on_lambda_token(const token_type & tk,
-                                         exprstatestack * p_stack,
-                                         rp<Expression> * p_emit_expr) override;
+                                         parserstatemachine * p_psm) override;
             virtual void on_formal_arglist(const std::vector<rp<Variable>> & argl,
                                            exprstatestack * p_stack,
                                            rp<Expression> * p_emit_expr) override;

@@ -20,8 +20,7 @@ namespace xo {
             static void start(exprstatestack * p_stack);
 
             virtual void on_lambda_token(const token_type & tk,
-                                         exprstatestack * p_stack,
-                                         rp<Expression> * p_emit_expr) override;
+                                         parserstatemachine * p_psm) override;
             virtual void on_leftparen_token(const token_type & tk,
                                             exprstatestack * p_stack,
                                             rp<Expression> * p_emit_expr) override;

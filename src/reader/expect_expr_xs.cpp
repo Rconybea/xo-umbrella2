@@ -4,6 +4,7 @@
  */
 
 #include "expect_expr_xs.hpp"
+#include "parserstatemachine.hpp"
 #include "lambda_xs.hpp"
 #include "paren_xs.hpp"
 #include "progress_xs.hpp"
@@ -32,13 +33,15 @@ namespace xo {
 
         void
         expect_expr_xs::on_lambda_token(const token_type & /*tk*/,
-                                        exprstatestack * p_stack,
-                                        rp<Expression> * p_emit_expr)
+                                        parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
             //constexpr const char * self_name = "exprstate::on_leftparen";
+
+            auto p_stack = p_psm->p_stack_;
+            auto p_emit_expr = p_psm->p_emit_expr_;
 
             /* push lparen_0 to remember to look for subsequent rightparen. */
             lambda_xs::start(p_stack, p_emit_expr);

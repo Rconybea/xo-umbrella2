@@ -123,8 +123,7 @@ namespace xo {
                                       parserstatemachine * p_psm);
             /** handle incoming 'lambda' token **/
             virtual void on_lambda_token(const token_type & tk,
-                                         exprstatestack * p_stack,
-                                         rp<Expression> * p_emit_expr);
+                                         parserstatemachine * p_psm);
             /** handle incoming symbol token **/
             virtual void on_symbol_token(const token_type & tk,
                                          exprstatestack * p_stack,
