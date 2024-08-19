@@ -59,8 +59,8 @@ namespace xo {
         }
 
         void
-        expect_expr_xs::on_symbol_token(const token_type & /*tk*/,
-                                        parserstatemachine * /*p_psm*/)
+        expect_expr_xs::on_symbol_token(const token_type & tk,
+                                        parserstatemachine * p_psm)
         {
             /* todo: treat symbol as variable name */
 
@@ -75,9 +75,26 @@ namespace xo {
              * and {(2), (3)} (symbol is function call)
              */
 
-            /* have to do pop first, before sending symbol to
-             * the o.g. symbol-requester
+            rp<Variable> var = p_psm->lookup_var(tk.text());
+
+            if (!var) {
+                throw std::runtime_error
+                    (tostr("expect_expr_xs::on_symbol_token",
+                           ": unknown symbol",
+                           xtag("name", tk.text())));
+            }
+
+            /* e.g.
+             *   def pi = 3.14159265;
+             *   def mypi = pi;
+             *              ^
+             *   def pi2 = pi * 2;
+             *             ^
+             *   def y = foo(pi2);
+             *           ^
              */
+            progress_xs::start(var, p_psm);
+
 #ifdef NOT_YET
             p_stack->push_exprstate(exprstate(exprstatetype::expr_progress,
                                               Variable::make(name, type)));
