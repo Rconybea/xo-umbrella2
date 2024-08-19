@@ -18,7 +18,7 @@ namespace xo {
         public:
             exprseq_xs();
 
-            static void start(exprstatestack * p_stack);
+            static void start(parserstatemachine * p_psm);
 
         public:
             // ----- token input methods -----

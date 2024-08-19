@@ -31,7 +31,11 @@ namespace xo {
 
         void
         parser::begin_translation_unit() {
-            exprseq_xs::start(&xs_stack_);
+            /* note: not using emit expr here */
+            parserstatemachine psm(&xs_stack_,
+                                   nullptr /*p_emit_expr*/);
+
+            exprseq_xs::start(&psm);
         }
 
         rp<Expression>

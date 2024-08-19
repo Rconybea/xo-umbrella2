@@ -15,9 +15,9 @@ namespace xo {
         }
 
         void
-        exprseq_xs::start(exprstatestack * p_stack)
+        exprseq_xs::start(parserstatemachine * p_psm)
         {
-            p_stack->push_exprstate(exprseq_xs::make());
+            p_psm->push_exprstate(exprseq_xs::make());
         }
 
         exprseq_xs::exprseq_xs()
