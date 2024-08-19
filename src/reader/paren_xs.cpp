@@ -18,10 +18,10 @@ namespace xo {
         }
 
         void
-        paren_xs::start(exprstatestack * p_stack)
+        paren_xs::start(parserstatemachine * p_psm)
         {
-            p_stack->push_exprstate(paren_xs::make());
-            expect_expr_xs::start(p_stack);
+            p_psm->push_exprstate(paren_xs::make());
+            expect_expr_xs::start(p_psm);
         }
 
         bool

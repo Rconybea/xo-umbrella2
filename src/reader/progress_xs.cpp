@@ -319,7 +319,7 @@ namespace xo {
                 this->op_type_ = tk2op(tk.tk_type());
 
                 /* infix operator must be followed by non-empty expression */
-                expect_expr_xs::start(p_stack);
+                expect_expr_xs::start(p_psm);
             } else if (rhs_) {
                 /* already have complete expression stashed.
                  * behavior depends on operator precedence for tk with stored operator
@@ -348,7 +348,7 @@ namespace xo {
                     progress_xs::start(expr, op2, p_stack);
 
                     /* infix operator must be followed by non-empty expression */
-                    expect_expr_xs::start(p_stack);
+                    expect_expr_xs::start(p_psm);
                 } else {
                     /* e.g.
                      *   6.2 + 4.9 * ...
@@ -367,9 +367,9 @@ namespace xo {
 
                     /* 1. replace with nested incomplete infix exprs */
                     progress_xs::start(lhs_, op_type_, p_stack);
-                    expect_expr_xs::start(p_stack);
+                    expect_expr_xs::start(p_psm);
                     progress_xs::start(rhs_, op2, p_stack);
-                    expect_expr_xs::start(p_stack);
+                    expect_expr_xs::start(p_psm);
                 }
 
             } else {

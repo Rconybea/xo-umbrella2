@@ -29,7 +29,7 @@ namespace xo {
 
             static const paren_xs * from(const exprstate * x) { return dynamic_cast<const paren_xs *>(x); }
 
-            static void start(exprstatestack * p_stack);
+            static void start(parserstatemachine * p_psm);
 
             bool admits_f64() const;
             bool admits_rightparen() const;

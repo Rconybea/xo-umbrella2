@@ -24,8 +24,8 @@ namespace xo {
         }
 
         void
-        expect_expr_xs::start(exprstatestack * p_stack) {
-            p_stack->push_exprstate(expect_expr_xs::make());
+        expect_expr_xs::start(parserstatemachine * p_psm) {
+            p_psm->push_exprstate(expect_expr_xs::make());
         }
 
         expect_expr_xs::expect_expr_xs()
@@ -54,10 +54,8 @@ namespace xo {
 
             //constexpr const char * self_name = "exprstate::on_leftparen";
 
-            auto p_stack = p_psm->p_stack_;
-
             /* push lparen_0 to remember to look for subsequent rightparen. */
-            paren_xs::start(p_stack);
+            paren_xs::start(p_psm);
         }
 
         void

@@ -172,7 +172,7 @@ namespace xo {
             {
                 this->defxs_type_ = defexprstatetype::def_5;
 
-                expect_expr_xs::start(p_psm->p_stack_);
+                expect_expr_xs::start(p_psm);
             } else {
                 this->illegal_input_error(self_name, tk);
             }
