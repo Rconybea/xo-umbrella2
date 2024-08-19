@@ -65,6 +65,9 @@ namespace xo {
             /** -> IRBuilder::CreateFadd (add 2 floating-point numbers) **/
             fp_add,
 
+            /** -> IRBuilder::CreateFsub (subtract 2 floating-pointer numbers) **/
+            fp_sub,
+
             /** -> IRBuilder::CreateFmul (multiply 2 floating-point numbers) **/
             fp_mul,
 
@@ -105,6 +108,7 @@ namespace xo {
             case llvmintrinsic::i_sdiv: return "i_sdiv";
             case llvmintrinsic::i_udiv: return "i_udiv";
             case llvmintrinsic::fp_add: return "fp_add";
+            case llvmintrinsic::fp_sub: return "fp_sub";
             case llvmintrinsic::fp_mul: return "fp_mul";
             case llvmintrinsic::fp_div: return "fp_div";
             case llvmintrinsic::fp_sqrt: return "fp_sqrt";

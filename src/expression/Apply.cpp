@@ -1,6 +1,7 @@
 /* @file Apply.cpp */
 
 #include "Apply.hpp"
+#include "Primitive.hpp"
 #include "xo/indentlog/print/vector.hpp"
 
 namespace xo {
@@ -23,6 +24,38 @@ namespace xo {
             TypeDescr fn_retval_type = fn_valuetype->fn_retval();
 
             return new Apply(fn_retval_type, fn, argv);
+        }
+
+        rp<Apply>
+        Apply::make_add2_f64(const rp<Expression> & lhs,
+                             const rp<Expression> & rhs)
+        {
+            return Apply::make(Primitive_f64::make_add2_f64(),
+                               {lhs, rhs});
+        }
+
+        rp<Apply>
+        Apply::make_sub2_f64(const rp<Expression> & lhs,
+                             const rp<Expression> & rhs)
+        {
+            return Apply::make(Primitive_f64::make_sub2_f64(),
+                               {lhs, rhs});
+        }
+
+        rp<Apply>
+        Apply::make_mul2_f64(const rp<Expression> & lhs,
+                             const rp<Expression> & rhs)
+        {
+            return Apply::make(Primitive_f64::make_mul2_f64(),
+                               {lhs, rhs});
+        }
+
+        rp<Apply>
+        Apply::make_div2_f64(const rp<Expression> & lhs,
+                             const rp<Expression> & rhs)
+        {
+            return Apply::make(Primitive_f64::make_div2_f64(),
+                               {lhs, rhs});
         }
 
         void

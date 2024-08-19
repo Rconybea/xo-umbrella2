@@ -28,6 +28,19 @@ namespace xo {
             static rp<Apply> make(const rp<Expression> & fn,
                                   const std::vector<rp<Expression>> & argv);
 
+            /** create apply-expression to add two 64-bit floating-point numbers **/
+            static rp<Apply> make_add2_f64(const rp<Expression> & lhs,
+                                           const rp<Expression> & rhs);
+            /** create apply-expression to subtract two 64-bit floating-point numbers **/
+            static rp<Apply> make_sub2_f64(const rp<Expression> & lhs,
+                                           const rp<Expression> & rhs);
+            /** create apply-expression to multiply two 64-bit floating-point numbers **/
+            static rp<Apply> make_mul2_f64(const rp<Expression> & lhs,
+                                           const rp<Expression> & rhs);
+            /** create apply-expression to divide two 64-bit floating-point numbers **/
+            static rp<Apply> make_div2_f64(const rp<Expression> & lhs,
+                                           const rp<Expression> & rhs);
+
             /** downcast from Expression **/
             static ref::brw<Apply> from(ref::brw<Expression> x) {
                 return ref::brw<Apply>::from(x);

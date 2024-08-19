@@ -10,6 +10,13 @@
 #include "xo/reflect/Reflect.hpp"
 //#include <cstdint>
 
+extern "C" {
+    /* these symbols needed to link primitives */
+
+    /* see Primitive_f64::make() */
+    double add2_f64(double x, double y);
+};
+
 namespace xo {
     namespace ast {
         /** @class Primitive
@@ -35,6 +42,7 @@ namespace xo {
             using Reflect = xo::reflect::Reflect;
             using TaggedPtr = xo::reflect::TaggedPtr;
             using TypeDescr = xo::reflect::TypeDescr;
+            using fptr_type = FunctionPointer;
 
         public:
             static rp<Primitive> make(const std::string & name,
@@ -46,8 +54,9 @@ namespace xo {
                 return new Primitive(fn_type, name, fnptr, explicit_symbol_def, intrinsic);
             }
 
+            /** see classes below for intrinsics **/
+
             FunctionPointer value() const { return value_; }
-            llvmintrinsic intrinsic() const { return intrinsic_; }
 
             TypeDescr value_td() const { return value_td_; }
             TaggedPtr value_tp() const {
@@ -60,6 +69,7 @@ namespace xo {
 
             // ----- PrimitiveInterface -----
 
+            virtual llvmintrinsic intrinsic() const override { return intrinsic_; }
             virtual bool explicit_symbol_def() const override { return explicit_symbol_def_; }
             virtual void_function_type function_address() const override { return reinterpret_cast<void_function_type>(value_); }
 
@@ -113,7 +123,7 @@ namespace xo {
             /** for LLVM: if true,  use Jit.intern_symbol() to provide explicit binding.
              *
              *  Not obvious what distinguishes functions like ::sin(), ::sqrt()
-             *  (which work without this) from symbols like ::mul_i32(), which do.
+             *  (which work without this) from symbols like ::mul_i32(), which require it.
              **/
             bool explicit_symbol_def_ = false;
             /** invalid:    generate call (IRBuilder::CreateCall)
@@ -132,6 +142,21 @@ namespace xo {
         {
             return Primitive<FunctionPointer>::make(name, x, explicit_symbol_def, intrinsic);
         }
+
+        class Primitive_f64 : public Primitive<double (*)(double, double)> {
+        public:
+            using PrimitiveType = Primitive<double (*)(double, double)>;
+
+        public:
+            /** add2_f64: add two 64-bit floating-point numbers **/
+            static rp<PrimitiveType> make_add2_f64();
+            /** sub2_f64: subtract two 64-bit floating-point numbers **/
+            static rp<PrimitiveType> make_sub2_f64();
+            /** mul2_f64: multiply two 64-bit floating-point numbers **/
+            static rp<PrimitiveType> make_mul2_f64();
+            /** div2_f64: divide two 64-bit floating-point numbers **/
+            static rp<PrimitiveType> make_div2_f64();
+        };
     } /*namespace ast*/
 } /*namespace xo*/
 
