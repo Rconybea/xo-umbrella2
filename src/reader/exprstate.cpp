@@ -247,20 +247,20 @@ namespace xo {
 
         void
         exprstate::on_input(const token_type & tk,
-                            exprstatestack * p_stack,
-                            rp<Expression> * p_emit_expr)
+                            parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
             log && log(xtag("tk", tk));
             log && log(xtag("state", *this));
 
-            parserstatemachine psm(p_stack, p_emit_expr);
+            auto p_stack = p_psm->p_stack_;
+            auto p_emit_expr = p_psm->p_emit_expr_;
 
             switch (tk.tk_type()) {
 
             case tokentype::tk_def:
-                this->on_def_token(tk, &psm);
+                this->on_def_token(tk, p_psm);
                 return;
 
             case tokentype::tk_lambda:

@@ -63,7 +63,7 @@ namespace xo {
             return os;
         }
 
-        class parserstatemachine;
+        class parserstatemachine; /* see parserstatemachine.hpp */
         class exprstatestack;
 
         class formal_arg;
@@ -91,8 +91,7 @@ namespace xo {
              *  forward instructions to parent parser
              **/
             void on_input(const token_type & tk,
-                          exprstatestack * p_stack,
-                          rp<Expression> * p_emit_expr);
+                          parserstatemachine * p_psm);
 
             /** update exprstate in response to a successfully-parsed subexpression **/
             virtual void on_expr(ref::brw<Expression> expr,
