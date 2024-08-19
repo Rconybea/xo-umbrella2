@@ -100,8 +100,7 @@ namespace xo {
 
             /** update exprstate when expecting a symbol **/
             virtual void on_symbol(const std::string & symbol,
-                                   exprstatestack * p_stack,
-                                   rp<Expression> * p_emit_expr);
+                                   parserstatemachine * p_psm);
 
             /** update exprstate when expeccting a typedescr **/
             virtual void on_typedescr(TypeDescr td,

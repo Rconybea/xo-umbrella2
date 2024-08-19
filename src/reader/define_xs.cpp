@@ -59,15 +59,14 @@ namespace xo {
 
         void
         define_xs::on_symbol(const std::string & symbol_name,
-                             exprstatestack * p_stack,
-                             rp<Expression> * p_emit_expr)
+                             parserstatemachine * p_psm)
         {
             if (this->defxs_type_ == defexprstatetype::def_1) {
                 this->defxs_type_ = defexprstatetype::def_2;
                 this->def_expr_->assign_lhs_name(symbol_name);
                 return;
             } else {
-                exprstate::on_symbol(symbol_name, p_stack, p_emit_expr);
+                exprstate::on_symbol(symbol_name, p_psm);
             }
         }
 

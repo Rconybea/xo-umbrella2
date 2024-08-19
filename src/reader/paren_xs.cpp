@@ -207,8 +207,7 @@ namespace xo {
 
         void
         paren_xs::on_symbol(const std::string & /*symbol_name*/,
-                            exprstatestack * /*p_stack*/,
-                            rp<Expression> * /*p_emit_expr*/)
+                            parserstatemachine * /*p_psm*/)
         {
             switch(this->parenxs_type_) {
             case parenexprstatetype::lparen_0:

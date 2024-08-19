@@ -50,8 +50,7 @@ namespace xo {
             static void start(exprstatestack * p_stack);
 
             virtual void on_symbol(const std::string & symbol_name,
-                                   exprstatestack * p_stack,
-                                   rp<Expression> * p_emit_expr) override;
+                                   parserstatemachine * p_psm) override;
 
             virtual void on_colon_token(const token_type & tk,
                                         parserstatemachine * p_psm) override;

@@ -360,8 +360,7 @@ namespace xo {
 
         void
         exprstate::on_symbol(const std::string & symbol_name,
-                             exprstatestack * /*p_stack*/,
-                             rp<Expression> * /*p_emit_expr*/)
+                             parserstatemachine * /*p_psm*/)
         {
             /* unreachable - derived class that can receive
              * will override this method

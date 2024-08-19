@@ -49,16 +49,13 @@ namespace xo {
 
         void
         expect_formal_xs::on_symbol(const std::string & symbol_name,
-                                    exprstatestack * p_stack,
-                                    rp<Expression> * p_emit_expr)
+                                    parserstatemachine * p_psm)
         {
             if (this->formalxs_type_ == formalstatetype::formal_0) {
                 this->formalxs_type_ = formalstatetype::formal_1;
                 this->result_.assign_name(symbol_name);
             } else {
-                exprstate::on_symbol(symbol_name,
-                                     p_stack,
-                                     p_emit_expr);
+                exprstate::on_symbol(symbol_name, p_psm);
             }
         }
 
