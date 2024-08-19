@@ -35,6 +35,12 @@ namespace xo {
                 (expect_formal_arglist_xs());
         }
 
+        void
+        expect_formal_arglist_xs::start(exprstatestack * p_stack)
+        {
+            p_stack->push_exprstate(expect_formal_arglist_xs::make());
+        }
+
         expect_formal_arglist_xs::expect_formal_arglist_xs()
             : exprstate(exprstatetype::expect_formal_arglist),
               farglxs_type_{formalarglstatetype::argl_0}

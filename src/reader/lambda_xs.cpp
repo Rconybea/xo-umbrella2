@@ -23,7 +23,7 @@ namespace xo {
         {
             if (lmxs_type_ == lambdastatetype::lm_0) {
                 this->lmxs_type_ = lambdastatetype::lm_1;
-                p_stack->push_exprstate(expect_formal_arglist_xs::make());
+                expect_formal_arglist_xs::start(p_stack);
             } else {
                 exprstate::on_lambda_token(tk, p_stack, p_emit_expr);
             }
