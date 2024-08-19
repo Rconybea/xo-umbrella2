@@ -7,9 +7,15 @@
 namespace xo {
     namespace scm {
         std::unique_ptr<exprseq_xs>
-        exprseq_xs::expect_toplevel_expression_sequence()
+        exprseq_xs::make()
         {
             return std::make_unique<exprseq_xs>(exprseq_xs());
+        }
+
+        void
+        exprseq_xs::start(exprstatestack * p_stack)
+        {
+            p_stack->push_exprstate(exprseq_xs::make());
         }
 
         exprseq_xs::exprseq_xs()

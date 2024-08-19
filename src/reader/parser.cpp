@@ -30,8 +30,7 @@ namespace xo {
 
         void
         parser::begin_translation_unit() {
-            xs_stack_.push_exprstate
-                (exprseq_xs::expect_toplevel_expression_sequence());
+            exprseq_xs::start(&xs_stack_);
         }
 
         rp<Expression>

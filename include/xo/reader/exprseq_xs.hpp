@@ -18,7 +18,7 @@ namespace xo {
         public:
             exprseq_xs();
 
-            static std::unique_ptr<exprseq_xs> expect_toplevel_expression_sequence();
+            static void start(exprstatestack * p_stack);
 
         public:
             // ----- token input methods -----
@@ -38,6 +38,8 @@ namespace xo {
                                  exprstatestack * p_stack,
                                  rp<Expression> * p_emit_expr) override;
 
+        private:
+            static std::unique_ptr<exprseq_xs> make();
         };
     } /*namespace scm*/
 } /*namespace xo*/
