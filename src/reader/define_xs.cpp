@@ -26,30 +26,6 @@ namespace xo {
         {}
 
         bool
-        define_xs::admits_semicolon() const {
-            switch (defxs_type_) {
-
-            case defexprstatetype::def_0:
-            case defexprstatetype::def_1:
-            case defexprstatetype::def_2:
-            case defexprstatetype::def_3:
-            case defexprstatetype::def_4:
-            case defexprstatetype::def_5:
-                return false;
-            case defexprstatetype::def_6:
-                return true;
-
-            case defexprstatetype::invalid:
-            case defexprstatetype::n_defexprstatetype:
-                /* unreachable */
-                assert(false);
-                return false;
-            }
-
-            return false;
-        }
-
-        bool
         define_xs::admits_rightparen() const {
             switch (defxs_type_) {
 
@@ -228,21 +204,14 @@ namespace xo {
         }
 
         void
-        define_xs::on_semicolon_token(const token_type & /*tk*/,
+        define_xs::on_semicolon_token(const token_type & tk,
                                       exprstatestack * p_stack,
                                       rp<Expression> * p_emit_expr)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            constexpr const char * self_name = "exprstate::on_semicolon";
-
-            if (!this->admits_semicolon())
-            {
-                throw std::runtime_error(tostr(self_name,
-                                               ": unexpected semicolon for parsing state",
-                                               xtag("state", *this)));
-            }
+            //constexpr const char * self_name = "exprstate::on_semicolon";
 
             if (this->defxs_type_ == defexprstatetype::def_6) {
                 rp<Expression> expr = this->def_expr_;
@@ -253,7 +222,7 @@ namespace xo {
                                                  p_stack,
                                                  p_emit_expr);
             } else {
-                assert(false);
+                exprstate::on_semicolon_token(tk, p_stack, p_emit_expr);
             }
         }
 
