@@ -107,7 +107,7 @@ namespace xo {
              */
             progress_xs::start
                 (Constant<double>::make(tk.f64_value()),
-                 p_psm->p_stack_);
+                 p_psm);
         }
 
         void

@@ -55,13 +55,13 @@ namespace xo {
         }
 
         void
-        progress_xs::start(rp<Expression> valex, optype op, exprstatestack * p_stack) {
-            p_stack->push_exprstate(progress_xs::make(valex, op));
+        progress_xs::start(rp<Expression> valex, optype op, parserstatemachine * p_psm) {
+            p_psm->push_exprstate(progress_xs::make(valex, op));
         }
 
         void
-        progress_xs::start(rp<Expression> valex, exprstatestack * p_stack) {
-            p_stack->push_exprstate(progress_xs::make(valex));
+        progress_xs::start(rp<Expression> valex, parserstatemachine * p_psm) {
+            p_psm->push_exprstate(progress_xs::make(valex));
         }
 
         progress_xs::progress_xs(rp<Expression> valex, optype op)
@@ -313,8 +313,6 @@ namespace xo {
         {
             constexpr const char * c_self_name = "progress_xs::on_operator_token";
 
-            auto p_stack = p_psm->p_stack_;
-
             if (op_type_ == optype::invalid) {
                 this->op_type_ = tk2op(tk.tk_type());
 
@@ -345,7 +343,7 @@ namespace xo {
                     std::unique_ptr<exprstate> self  = p_psm->pop_exprstate();
 
                     /* 3. replace with new progress_xs: */
-                    progress_xs::start(expr, op2, p_stack);
+                    progress_xs::start(expr, op2, p_psm);
 
                     /* infix operator must be followed by non-empty expression */
                     expect_expr_xs::start(p_psm);
@@ -366,9 +364,9 @@ namespace xo {
                     std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
 
                     /* 1. replace with nested incomplete infix exprs */
-                    progress_xs::start(lhs_, op_type_, p_stack);
+                    progress_xs::start(lhs_, op_type_, p_psm);
                     expect_expr_xs::start(p_psm);
-                    progress_xs::start(rhs_, op2, p_stack);
+                    progress_xs::start(rhs_, op2, p_psm);
                     expect_expr_xs::start(p_psm);
                 }
 

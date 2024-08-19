@@ -49,9 +49,9 @@ namespace xo {
 
             static void start(rp<Expression> valex,
                               optype optype,
-                              exprstatestack * p_stack);
+                              parserstatemachine * p_psm);
             static void start(rp<Expression> valex,
-                              exprstatestack * p_stack);
+                              parserstatemachine * p_psm);
 
             bool admits_f64() const;
 
