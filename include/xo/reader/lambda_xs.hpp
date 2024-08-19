@@ -40,7 +40,7 @@ namespace xo {
         public:
             lambda_xs();
 
-            static std::unique_ptr<lambda_xs> make();
+            static void start(exprstatestack * p_stack, rp<Expression> * p_emit_expr);
 
             virtual void on_lambda_token(const token_type & tk,
                                          exprstatestack * p_stack,
@@ -54,6 +54,9 @@ namespace xo {
             virtual void on_semicolon_token(const token_type & tk,
                                             exprstatestack * p_stack,
                                             rp<Expression> * p_emit_expr) override;
+
+        private:
+            static std::unique_ptr<lambda_xs> make();
 
         private:
             /** parsing state-machine state **/

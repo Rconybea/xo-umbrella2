@@ -14,6 +14,15 @@ namespace xo {
             return std::make_unique<lambda_xs>(lambda_xs());
         }
 
+        void
+        lambda_xs::start(exprstatestack * p_stack,
+                         rp<Expression> * p_emit_expr)
+        {
+            p_stack->push_exprstate(lambda_xs::make());
+            p_stack->top_exprstate()
+                .on_lambda_token(token_type::lambda(), p_stack, p_emit_expr);
+        }
+
         lambda_xs::lambda_xs() : exprstate(exprstatetype::lambdaexpr) {}
 
         void

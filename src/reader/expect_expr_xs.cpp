@@ -31,7 +31,7 @@ namespace xo {
         {}
 
         void
-        expect_expr_xs::on_lambda_token(const token_type & tk,
+        expect_expr_xs::on_lambda_token(const token_type & /*tk*/,
                                         exprstatestack * p_stack,
                                         rp<Expression> * p_emit_expr)
         {
@@ -41,8 +41,8 @@ namespace xo {
             //constexpr const char * self_name = "exprstate::on_leftparen";
 
             /* push lparen_0 to remember to look for subsequent rightparen. */
-            p_stack->push_exprstate(lambda_xs::make());
-            p_stack->top_exprstate().on_lambda_token(tk, p_stack, p_emit_expr);
+            lambda_xs::start(p_stack, p_emit_expr);
+            //p_stack->top_exprstate().on_lambda_token(tk, p_stack, p_emit_expr);
             //p_stack->push_exprstate(expect_expr_xs::expect_rhs_expression());
         }
 
