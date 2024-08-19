@@ -348,7 +348,7 @@ namespace xo {
                     std::unique_ptr<exprstate> self  = p_stack->pop_exprstate();
 
                     /* 3. replace with new progress_xs: */
-                    p_stack->push_exprstate(progress_xs::make(expr, op2));
+                    progress_xs::start(expr, op2, p_stack);
 
                     /* infix operator must be followed by non-empty expression */
                     expect_expr_xs::start(p_stack);
