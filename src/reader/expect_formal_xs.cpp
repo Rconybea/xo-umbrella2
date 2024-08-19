@@ -4,6 +4,7 @@
  */
 
 #include "expect_formal_xs.hpp"
+#include "expect_symbol_xs.hpp"
 #include "expect_type_xs.hpp"
 #include "xo/expression/Variable.hpp"
 
@@ -37,6 +38,8 @@ namespace xo {
         void
         expect_formal_xs::start(exprstatestack * p_stack) {
             p_stack->push_exprstate(expect_formal_xs::make());
+
+            expect_symbol_xs::start(p_stack);
         }
 
         expect_formal_xs::expect_formal_xs()
