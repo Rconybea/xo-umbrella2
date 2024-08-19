@@ -45,6 +45,9 @@ namespace xo {
             if (lmxs_type_ == lambdastatetype::lm_1) {
                 this->lmxs_type_ = lambdastatetype::lm_2;
                 this->argl_ = argl;
+
+                p_psm->push_envframe(envframe(argl));
+
                 expect_expr_xs::start(p_psm);
             } else {
                 exprstate::on_formal_arglist(argl, p_psm);
@@ -75,6 +78,8 @@ namespace xo {
                 std::string name = "fixmename";
 
                 rp<Lambda> lm = Lambda::make(name, argl_, body_);
+
+                p_psm->pop_envframe();
 
                 p_psm->top_exprstate().on_expr(lm, p_psm);
                 p_psm->top_exprstate().on_semicolon_token(tk, p_psm);
