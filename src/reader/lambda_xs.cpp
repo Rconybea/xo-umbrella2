@@ -30,11 +30,9 @@ namespace xo {
         lambda_xs::on_lambda_token(const token_type & tk,
                                    parserstatemachine * p_psm)
         {
-            auto p_stack = p_psm->p_stack_;
-
             if (lmxs_type_ == lambdastatetype::lm_0) {
                 this->lmxs_type_ = lambdastatetype::lm_1;
-                expect_formal_arglist_xs::start(p_stack);
+                expect_formal_arglist_xs::start(p_psm);
             } else {
                 exprstate::on_lambda_token(tk, p_psm);
             }

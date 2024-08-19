@@ -53,7 +53,7 @@ namespace xo {
         public:
             expect_formal_arglist_xs();
 
-            static void start(exprstatestack * p_stack);
+            static void start(parserstatemachine * p_psm);
 
             virtual void on_leftparen_token(const token_type & tk,
                                             parserstatemachine * p_psm) override;

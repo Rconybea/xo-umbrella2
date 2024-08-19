@@ -38,9 +38,9 @@ namespace xo {
         }
 
         void
-        expect_formal_arglist_xs::start(exprstatestack * p_stack)
+        expect_formal_arglist_xs::start(parserstatemachine * p_psm)
         {
-            p_stack->push_exprstate(expect_formal_arglist_xs::make());
+            p_psm->push_exprstate(expect_formal_arglist_xs::make());
         }
 
         expect_formal_arglist_xs::expect_formal_arglist_xs()
