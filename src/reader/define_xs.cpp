@@ -27,20 +27,10 @@ namespace xo {
 
         void
         define_xs::on_expr(ref::brw<Expression> expr,
-                           exprstatestack * /* p_stack */,
-                           rp<Expression> * /* p_emit_expr */)
+                           exprstatestack * p_stack,
+                           rp<Expression> * p_emit_expr)
         {
-            switch (this->defxs_type_) {
-
-            case defexprstatetype::def_0:
-            case defexprstatetype::def_1:
-            case defexprstatetype::def_2:
-            case defexprstatetype::def_3:
-            case defexprstatetype::def_4:
-                /* NOT IMPLEMENTED */
-                assert(false);
-                return;
-            case defexprstatetype::def_5: {
+            if (this->defxs_type_ == defexprstatetype::def_5) {
                 /* have all the ingredients to create an expression
                  * representing a definition
                  *
@@ -61,16 +51,7 @@ namespace xo {
                 return;
             }
 
-            case defexprstatetype::def_6:
-                assert(false);
-                return;
-
-            case defexprstatetype::invalid:
-            case defexprstatetype::n_defexprstatetype:
-                /* unreachable */
-                assert(false);
-                return;
-            }
+            exprstate::on_expr(expr, p_stack, p_emit_expr);
         }
 
         void
