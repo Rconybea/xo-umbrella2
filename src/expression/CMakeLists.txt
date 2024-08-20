@@ -2,12 +2,14 @@
 
 set(SELF_LIB xo_expression)
 set(SELF_SRCS
+    GeneralizedExpression.cpp
     Expression.cpp
     DefineExpr.cpp
     Apply.cpp
     Lambda.cpp
     Variable.cpp
     IfExpr.cpp
+    Sequence.cpp
     LocalEnv.cpp
     ConvertExpr.cpp
     Primitive.cpp

@@ -5,9 +5,7 @@
 
 #pragma once
 
-#include "xo/reflect/TypeDescr.hpp"
-#include "xo/refcnt/Refcounted.hpp"
-#include "exprtype.hpp"
+#include "GeneralizedExpression.hpp"
 #include <functional>
 #include <set>
 
@@ -33,7 +31,7 @@ namespace xo {
          *
          *  Every expression evaluates to a value with a particular type
          **/
-        class Expression : public ref::Refcount {
+        class Expression : public GeneralizedExpression {
         public:
             using VisitFn = std::function
                 <void (ref::brw<Expression>)>;
@@ -43,10 +41,7 @@ namespace xo {
 
         public:
             explicit Expression(exprtype extype, TypeDescr valuetype)
-                : extype_{extype}, valuetype_{valuetype}{}
-
-            exprtype extype() const { return extype_; }
-            TypeDescr valuetype() const { return valuetype_; }
+                : GeneralizedExpression(extype, valuetype) {}
 
             /** find free named variables in this expression.
              *  comprises the set of names that don't match formal parameters in
@@ -87,29 +82,8 @@ namespace xo {
              **/
             //virtual std::int32_t find_free_vars(std::vector<ref::brw<Lambda>> env) = 0;
 
-            /** write human-readable representation to stream **/
-            virtual void display(std::ostream & os) const = 0;
-            /** human-readable string representation **/
-            virtual std::string display_string() const;
-
-        protected:
-            /** useful when scaffolding expressions in a parser **/
-            void assign_valuetype(TypeDescr x) { valuetype_ = x; }
-
-        private:
-            /** expression type (constant | apply | ..) for this expression **/
-            exprtype extype_ = exprtype::invalid;
-            /** type information (when available) for values produced by this
-             *  expression.
-             **/
-            TypeDescr valuetype_ = nullptr;
         }; /*Expression*/
 
-        inline std::ostream &
-        operator<<(std::ostream & os, const Expression & x) {
-            x.display(os);
-            return os;
-        }
     } /*namespace ast*/
 } /*namespace xo*/
 

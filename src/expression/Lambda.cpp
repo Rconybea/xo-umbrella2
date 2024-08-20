@@ -5,19 +5,21 @@
 #include "xo/reflect/function/FunctionTdx.hpp"
 #include "xo/indentlog/print/vector.hpp"
 #include <map>
+#include <sstream>
 
 namespace xo {
+    using xo::reflect::TypeDescr;
     using xo::reflect::TypeDescrBase;
     using xo::reflect::FunctionTdxInfo;
     using std::stringstream;
 
     namespace ast {
-        rp<Lambda>
-        Lambda::make(const std::string & name,
-                     const std::vector<rp<Variable>> & argv,
-                     const rp<Expression> & body)
+        TypeDescr
+        Lambda::assemble_lambda_td(const std::vector<rp<Variable>> & argv,
+                                   const rp<Expression> & body)
         {
-            using xo::reflect::FunctionTdx;
+            if (!body)
+                return nullptr;
 
             /** assemble function type.
              *
@@ -41,7 +43,38 @@ namespace xo {
             TypeDescr lambda_td
                 = TypeDescrBase::require_by_fn_info(function_info);
 
+            return lambda_td;
+        }
+
+        std::string
+        Lambda::assemble_type_str(TypeDescr lambda_td) {
+            assert(lambda_td);
+
+            std::stringstream ss;
+
+            ss << lambda_td->fn_retval()->short_name()
+               << "(";
+
+            for (std::size_t i = 0, n = lambda_td->n_fn_arg(); i < n; ++i) {
+                if (i > 0)
+                    ss << ",";
+                ss << lambda_td->fn_arg(i)->short_name();
+            }
+            ss << ")";
+
+            return ss.str();
+        }
+
+        rp<Lambda>
+        Lambda::make(const std::string & name,
+                     const std::vector<rp<Variable>> & argv,
+                     const rp<Expression> & body)
+        {
+            using xo::reflect::FunctionTdx;
+
             rp<LocalEnv> env = LocalEnv::make(argv);
+
+            TypeDescr lambda_td = assemble_lambda_td(argv, body);
 
             rp<Lambda> retval
                 = new Lambda(name,
@@ -122,14 +155,15 @@ namespace xo {
         } /*regularize_layer_vars*/
 
         Lambda::Lambda(const std::string & name,
-                       TypeDescr lambda_type,
+                       TypeDescr lambda_td,
                        const rp<LocalEnv> & local_env,
                        const rp<Expression> & body)
-            : FunctionInterface(exprtype::lambda, lambda_type),
+            : FunctionInterface(exprtype::lambda, lambda_td),
               name_{name},
               body_{body},
               local_env_{local_env}
         {
+#ifdef OBSOLETE
             stringstream ss;
             ss << "double";
             ss << "(";
@@ -139,8 +173,10 @@ namespace xo {
                 ss << "double";
             }
             ss << ")";
+#endif
 
-            this->type_str_ = ss.str();
+            if (lambda_td)
+                this->type_str_ = assemble_type_str(lambda_td);
 
             /* ensure variables are unique within layer for this lambda */
             this->layer_var_map_ = this->regularize_layer_vars();
@@ -209,6 +245,28 @@ namespace xo {
                << xtag("body", body_)
                << ">";
         } /*display*/
+
+        // ----- Lambda Access -----
+
+        rp<LambdaAccess>
+        LambdaAccess::make(const std::string & name,
+                           const std::vector<rp<Variable>> & argv,
+                           const rp<Expression> & body)
+        {
+            TypeDescr lambda_td =
+
+            TypeDescr body_valuetype = nullptr;
+
+        }
+
+        rp<LambdaAccess>
+        LambdaAccess::make_empty()
+        {
+            return new LambdaAccess("" /*name*/,
+                                    nullptr /*lambda_td*/,
+                                    nullptr /*local_env*/,
+                                    nullptr /*body*/);
+        }
     } /*namespace ast*/
 } /*namespace xo*/
 

@@ -86,6 +86,18 @@ namespace xo {
 
             virtual void display(std::ostream & os) const override;
 
+        protected:
+            /** create type description for lambda with arguments @p argv
+             *  and body expression @p body
+             **/
+            static TypeDescr assemble_lambda_td(const std::vector<rp<Variable>> & argv,
+                                                const rp<Expression> & body);
+
+            /** create string description for function signature,
+             *  consistent with c++ expectation
+             **/
+            static std::string assemble_type_str(TypeDescr lambda_td);
+
         private:
             /** @param lambda_type.  function type for this lambda.
              *  We arbitrarily choose the form "Retval(*)(Args...)"
@@ -157,6 +169,25 @@ namespace xo {
         {
             return Lambda::make(name, argv, body);
         }
+
+        class LambdaAccess : public Lambda {
+        public:
+            static rp<LambdaAccess> make(const std::string & name,
+                                         const std::vector<rp<Variable>> & argv,
+                                         const rp<Expression> & body);
+            static rp<LambdaAccess> make_empty();
+
+        private:
+            /** lambda_type, body can be null here,
+             *  in which case fill in with assign methods
+             **/
+            LambdaAccess(const std::string & name,
+                         TypeDescr lambda_type,
+                         const rp<LocalEnv> & local_env,
+                         const rp<Expression> & body);
+
+
+        };
     } /*namespace ast*/
 } /*namespace xo*/
 

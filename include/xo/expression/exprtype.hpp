@@ -32,6 +32,8 @@ namespace xo {
             variable,
             /** if-then-else **/
             ifexpr,
+            /** sequence **/
+            sequence,
             /** type conversion **/
             convert,
 
@@ -51,6 +53,7 @@ namespace xo {
             case exprtype::lambda: return "lambda";
             case exprtype::variable: return "variable";
             case exprtype::ifexpr: return "if_expr";
+            case exprtype::sequence: return "sequence";
             case exprtype::convert: return "convert";
             default: break;
             }
