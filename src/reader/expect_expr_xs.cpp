@@ -7,7 +7,9 @@
 #include "parserstatemachine.hpp"
 #include "exprstatestack.hpp"
 #include "lambda_xs.hpp"
+#include "define_xs.hpp"
 #include "paren_xs.hpp"
+#include "sequence_xs.hpp"
 #include "progress_xs.hpp"
 #include "xo/expression/Lambda.hpp"
 #include "xo/expression/Constant.hpp"
@@ -18,19 +20,45 @@ namespace xo {
     namespace scm {
 
         std::unique_ptr<expect_expr_xs>
-        expect_expr_xs::make() {
-            return std::make_unique<expect_expr_xs>(expect_expr_xs());
+        expect_expr_xs::make(bool allow_defs,
+                             bool cxl_on_rightbrace)
+        {
+            return std::make_unique<expect_expr_xs>(expect_expr_xs(allow_defs,
+                                                                   cxl_on_rightbrace));
 
         }
 
         void
-        expect_expr_xs::start(parserstatemachine * p_psm) {
-            p_psm->push_exprstate(expect_expr_xs::make());
+        expect_expr_xs::start(bool allow_defs,
+                              bool cxl_on_rightbrace,
+                              parserstatemachine * p_psm) {
+            p_psm->push_exprstate(expect_expr_xs::make(allow_defs,
+                                                       cxl_on_rightbrace));
         }
 
-        expect_expr_xs::expect_expr_xs()
-            : exprstate(exprstatetype::expect_rhs_expression)
+        void
+        expect_expr_xs::start(parserstatemachine * p_psm) {
+            start(false /*!allow_defs*/,
+                  false /*!cxl_on_rightbrace*/,
+                  p_psm);
+        }
+
+        expect_expr_xs::expect_expr_xs(bool allow_defs,
+                                       bool cxl_on_rightbrace)
+            : exprstate(exprstatetype::expect_rhs_expression),
+              allow_defs_{allow_defs},
+              cxl_on_rightbrace_{cxl_on_rightbrace}
         {}
+
+        void
+        expect_expr_xs::on_def_token(const token_type & tk,
+                                     parserstatemachine * p_psm)
+        {
+            if (allow_defs_)
+                define_xs::start(p_psm);
+            else
+                exprstate::on_def_token(tk, p_psm);
+        }
 
         void
         expect_expr_xs::on_lambda_token(const token_type & /*tk*/,
@@ -41,7 +69,6 @@ namespace xo {
 
             //constexpr const char * self_name = "exprstate::on_leftparen";
 
-            /* push lparen_0 to remember to look for subsequent rightparen. */
             lambda_xs::start(p_psm);
         }
 
@@ -56,6 +83,34 @@ namespace xo {
 
             /* push lparen_0 to remember to look for subsequent rightparen. */
             paren_xs::start(p_psm);
+        }
+
+        void
+        expect_expr_xs::on_leftbrace_token(const token_type & /*tk*/,
+                                           parserstatemachine * p_psm)
+        {
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
+            //constexpr const char * self_name = "exprstate::on_leftparen";
+
+            /* push lparen_0 to remember to look for subsequent rightparen. */
+            sequence_xs::start(p_psm);
+        }
+
+        void
+        expect_expr_xs::on_rightbrace_token(const token_type & tk,
+                                            parserstatemachine * p_psm)
+        {
+            if (cxl_on_rightbrace_) {
+                auto self = p_psm->pop_exprstate();
+
+                /* do not call .on_expr(), since '}' cancelled */
+
+                p_psm->top_exprstate().on_rightbrace_token(tk, p_psm);
+            } else {
+                exprstate::on_rightbrace_token(tk, p_psm);
+            }
         }
 
         void

@@ -33,6 +33,8 @@ namespace xo {
                 return "lambdaexpr";
             case exprstatetype::parenexpr:
                 return "parenexpr";
+            case exprstatetype::sequenceexpr:
+                return "sequenceexpr";
             case exprstatetype::expect_rhs_expression:
                 return "expect_rhs_expression";
             case exprstatetype::expect_symbol:
@@ -207,6 +209,30 @@ namespace xo {
             scope log(XO_DEBUG(c_debug_flag));
 
             constexpr const char * self_name = "exprstate::on_rightparen";
+
+            this->illegal_input_error(self_name, tk);
+        }
+
+        void
+        exprstate::on_leftbrace_token(const token_type & tk,
+                                      parserstatemachine * /*p_psm*/)
+        {
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
+            constexpr const char * self_name = "exprstate::on_leftbrace_token";
+
+            this->illegal_input_error(self_name, tk);
+        }
+
+        void
+        exprstate::on_rightbrace_token(const token_type & tk,
+                                       parserstatemachine * /*p_psm*/)
+        {
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
+            constexpr const char * self_name = "exprstate::on_rightbrace_token";
 
             this->illegal_input_error(self_name, tk);
         }

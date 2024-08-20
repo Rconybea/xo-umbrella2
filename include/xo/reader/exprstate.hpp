@@ -33,6 +33,11 @@ namespace xo {
              **/
             parenexpr,
 
+            /** handle sequence expression (aka block)
+             *  see @ref sequence_xs
+             **/
+            sequenceexpr,
+
             expect_rhs_expression,
             expect_symbol,
             expect_type,
@@ -144,6 +149,14 @@ namespace xo {
                                             parserstatemachine * p_psm);
             /** handle incoming ')' token **/
             virtual void on_rightparen_token(const token_type & tk,
+                                             parserstatemachine * p_psm);
+
+            /** handle incoming '{' token **/
+            virtual void on_leftbrace_token(const token_type & tk,
+                                            parserstatemachine * p_psm);
+
+            /** handle incoming '}' token **/
+            virtual void on_rightbrace_token(const token_type & tk,
                                              parserstatemachine * p_psm);
 
             /** handle incoming operator token **/

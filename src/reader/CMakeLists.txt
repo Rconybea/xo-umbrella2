@@ -10,6 +10,7 @@ set(SELF_SRCS
     define_xs.cpp
     progress_xs.cpp
     paren_xs.cpp
+    sequence_xs.cpp
     exprseq_xs.cpp
     expect_expr_xs.cpp
     expect_symbol_xs.cpp
