@@ -98,7 +98,6 @@ namespace xo {
              **/
             static std::string assemble_type_str(TypeDescr lambda_td);
 
-        private:
             /** @param lambda_type.  function type for this lambda.
              *  We arbitrarily choose the form "Retval(*)(Args...)"
              **/
@@ -107,6 +106,7 @@ namespace xo {
                    const rp<LocalEnv> & local_env,
                    const rp<Expression> & body);
 
+        protected:
             /** compute free-variable set for this lambda **/
             std::set<std::string> calc_free_variables() const;
 
@@ -118,17 +118,17 @@ namespace xo {
              **/
             std::map<std::string, rp<Variable>> regularize_layer_vars();
 
-        private:
             /** lambda name.  Initially supporting only form like
              *    (define (foo x y z)
              *      (+ (* x x) (* y y) (* z z)))
              *
-             *  In any case need to supply names for distinct things-for-which-code-is-generated
-             *  so that they can be linked etc.
+             *  In any case need to supply names for distinct
+             *  things-for-which-code-is-generated so that they can be linked etc.
              **/
             std::string name_;
             /** e.g.
-             *    "double(double,double)"  for function of two doubles that returns a double
+             *    "double(double,double)"  for function of two doubles that
+             *  returns a double
              **/
             std::string type_str_;
             /** function body **/
@@ -176,6 +176,11 @@ namespace xo {
                                          const std::vector<rp<Variable>> & argv,
                                          const rp<Expression> & body);
             static rp<LambdaAccess> make_empty();
+
+            /* TODO: make sure Lambda members that depend on non-emtpy body
+             *       get calc'd
+             */
+            void assign_body(const rp<Expression> & body);
 
         private:
             /** lambda_type, body can be null here,
