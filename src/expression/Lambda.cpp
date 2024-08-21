@@ -253,10 +253,19 @@ namespace xo {
                            const std::vector<rp<Variable>> & argv,
                            const rp<Expression> & body)
         {
-            TypeDescr lambda_td =
+            TypeDescr lambda_td = assemble_lambda_td(argv, body);
+            rp<LocalEnv> env = LocalEnv::make(argv);
 
-            TypeDescr body_valuetype = nullptr;
+            rp<LambdaAccess> retval
+                = new LambdaAccess(name,
+                                   lambda_td,
+                                   env,
+                                   body);
 
+            /* need two-phase construction b/c pointer cycle */
+            env->assign_origin(retval.get());
+
+            return retval;
         }
 
         rp<LambdaAccess>
@@ -267,6 +276,14 @@ namespace xo {
                                     nullptr /*local_env*/,
                                     nullptr /*body*/);
         }
+
+        LambdaAccess::LambdaAccess(const std::string & name,
+                                   TypeDescr lambda_td,
+                                   const rp<LocalEnv> & local_env,
+                                   const rp<Expression> & body)
+            : Lambda(name, lambda_td, local_env, body)
+        {}
+
     } /*namespace ast*/
 } /*namespace xo*/
 
