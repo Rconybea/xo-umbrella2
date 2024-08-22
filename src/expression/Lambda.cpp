@@ -154,6 +154,68 @@ namespace xo {
             return var_map;
         } /*regularize_layer_vars*/
 
+        void
+        Lambda::complete_assembly_from_body() {
+            if (body_) {
+                TypeDescr lambda_td
+                    = assemble_lambda_td(this->local_env_->argv(), body_);
+
+                if (lambda_td)
+                    this->type_str_ = assemble_type_str(lambda_td);
+
+                this->layer_var_map_ = this->regularize_layer_vars();
+
+                this->free_var_set_ = this->calc_free_variables();
+
+                std::map<std::string, ref::brw<Lambda>> nested_lambda_map;
+                {
+                    this->body_->visit_layer
+                        ([&nested_lambda_map]
+                         (ref::brw<Expression> expr)
+                            {
+                                if (expr->extype() == exprtype::lambda) {
+                                    ref::brw<Lambda> lm = Lambda::from(expr);
+
+                                    nested_lambda_map[lm->name()] = lm.get();
+                                }
+                            });
+                }
+                this->nested_lambda_map_ = std::move(nested_lambda_map);
+
+                /* establish the set of captured local vars.
+                 * These are any formal parameters that appear free in
+                 * any layer of a nested lambda.
+                 */
+                std::set<std::string> captured_var_set;
+                {
+                    for (const auto & ix : nested_lambda_map_) {
+                        std::set<std::string> nested_free_var_set
+                            = ix.second->get_free_variables();
+
+                        for (const auto & jx : nested_free_var_set) {
+                            /* check whether variable *jx is one of this lambda's
+                             * formals
+                             */
+                            auto bind = this->local_env_->lookup_local_binding(jx);
+
+                            if (bind.i_link_ == 0) {
+                                /* yup,  it's a formal parameter of this lambda */
+                                captured_var_set.insert(jx);
+                            }
+                        }
+                    }
+                }
+
+                this->captured_var_set_ = std::move(captured_var_set);
+
+                /* in particular:
+                 * - establish binding path (intrusively) for each variable
+                 *   assigns Variable::path_
+                 */
+                this->body_->attach_envs(local_env_);
+            }
+        }
+
         Lambda::Lambda(const std::string & name,
                        TypeDescr lambda_td,
                        const rp<LocalEnv> & local_env,
@@ -209,7 +271,9 @@ namespace xo {
                         = ix.second->get_free_variables();
 
                     for (const auto & jx : nested_free_var_set) {
-                        /* check whether variable *jx is one of this lambda's formals */
+                        /* check whether variable *jx is one of this lambda's
+                         * formals
+                         */
                         auto bind = this->local_env_->lookup_local_binding(jx);
 
                         if (bind.i_link_ == 0) {
@@ -284,6 +348,12 @@ namespace xo {
             : Lambda(name, lambda_td, local_env, body)
         {}
 
+        void
+        LambdaAccess::assign_body(const rp<Expression> & body) {
+            this->body_ = body;
+
+            this->complete_assembly_from_body();
+        }
     } /*namespace ast*/
 } /*namespace xo*/
 

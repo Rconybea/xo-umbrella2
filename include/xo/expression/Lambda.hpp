@@ -106,7 +106,6 @@ namespace xo {
                    const rp<LocalEnv> & local_env,
                    const rp<Expression> & body);
 
-        protected:
             /** compute free-variable set for this lambda **/
             std::set<std::string> calc_free_variables() const;
 
@@ -118,6 +117,14 @@ namespace xo {
              **/
             std::map<std::string, rp<Variable>> regularize_layer_vars();
 
+            /** compute derived members
+             *  (type_str_, free_var_set_, captured_var_set_, layer_var_map_,
+             *   nested_lambda_map_)
+             *  once .body_ is established
+             **/
+            void complete_assembly_from_body();
+
+        protected:
             /** lambda name.  Initially supporting only form like
              *    (define (foo x y z)
              *      (+ (* x x) (* y y) (* z z)))
@@ -177,9 +184,9 @@ namespace xo {
                                          const rp<Expression> & body);
             static rp<LambdaAccess> make_empty();
 
-            /* TODO: make sure Lambda members that depend on non-emtpy body
-             *       get calc'd
-             */
+            /** assign body + compute derived members
+             *  (see complete_assembly_from_body())
+             **/
             void assign_body(const rp<Expression> & body);
 
         private:
