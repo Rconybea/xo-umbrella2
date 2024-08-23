@@ -3,10 +3,12 @@
 #include "sequence_xs.hpp"
 #include "parserstatemachine.hpp"
 #include "expect_expr_xs.hpp"
+#include "let1_xs.hpp"
+#include "xo/expression/DefineExpr.hpp"
 #include "xo/expression/Sequence.hpp"
 
 namespace xo {
-    using xo::ast::Sequence;
+    using xo::ast::DefineExpr;
 
     namespace scm {
         std::unique_ptr<sequence_xs>
@@ -42,19 +44,47 @@ namespace xo {
              *
              * becomes:
              *
+             *   /-- .outer_seq_expr_
+             *   v
              *   Sequence(
              *     ...prefix,
-             *     Apply(Lambda(gen999, [Variable(lhs_name, type(rhs))], sequencify(rest...)),
+             *
+             *           /-- .inner_lm_expr_
+             *           v
+             *     Apply(Lambda(gen999,
+             *                  [Variable(lhs_name, type(rhs))],
+             *                             /-- .expr_v_
+             *                             v
+             *                  sequencify(rest...)),
              *           rhs))
              *
              * so amongst other things,
-             * helpful to have nested seequence_xs that propagates '}' instead of swallowing it.
+             * helpful to have nested seequence_xs that propagates '}'
+             * instead of swallowing it.
              */
+            ref::brw<DefineExpr> def_expr = DefineExpr::from(expr);
 
-            this->expr_v_.push_back(expr.promote());
-            expect_expr_xs::start(true /*allow_defs*/,
-                                  true /*cxl_on_rightbrace*/,
-                                  p_psm);
+            if (def_expr) {
+                /** nested_start: control returns via
+                 *   .on_expr(x)
+                 *      with x something like:
+                 *    Apply(Lambda(gensym(),
+                 *                 [Variable(def_expr->lhs_name(),
+                 *                           def_expr->valuetype())],
+                 *                 body...))
+                 *  followed immediately by
+                 *   .on_rightbrace_token()
+                 **/
+                let1_xs::start(def_expr->lhs_name(),
+                               def_expr->rhs(),
+                               p_psm);
+            } else {
+                this->expr_v_.push_back(expr.promote());
+
+                expect_expr_xs::start(true /*allow_defs*/,
+                                      true /*cxl_on_rightbrace*/,
+                                      p_psm);
+            }
         }
 
         void

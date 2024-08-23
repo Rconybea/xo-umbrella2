@@ -18,6 +18,7 @@ set(SELF_SRCS
     expect_formal_arglist_xs.cpp
     expect_type_xs.cpp
     lambda_xs.cpp
+    let1_xs.cpp
     envframestack.cpp
     envframe.cpp)
 
