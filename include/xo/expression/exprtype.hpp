@@ -24,6 +24,8 @@ namespace xo {
             primitive,
             /** variable/function definition **/
             define,
+            /** variable assignment **/
+            assign,
             /** function call **/
             apply,
             /** function definition **/
@@ -49,6 +51,7 @@ namespace xo {
             case exprtype::constant: return "constant";
             case exprtype::primitive: return "primitive";
             case exprtype::define: return "define";
+            case exprtype::assign: return "assign";
             case exprtype::apply: return "apply";
             case exprtype::lambda: return "lambda";
             case exprtype::variable: return "variable";
