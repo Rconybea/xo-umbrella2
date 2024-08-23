@@ -5,6 +5,7 @@ set(SELF_SRCS
     GeneralizedExpression.cpp
     Expression.cpp
     DefineExpr.cpp
+    AssignExpr.cpp
     Apply.cpp
     Lambda.cpp
     Variable.cpp
