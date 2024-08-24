@@ -154,6 +154,9 @@ namespace xo {
             case '+':
                 /* can't be punctuation -- can appear inside f64 token: e.g. 1.23e+4 */
                 return false;
+            case '*':
+                /* not punctuation -- allowed in symbol */
+                return false;
             case '.':
                 /* can't be punctuation -- can appear inside f64 token: e.g. 1.23 */
                 return false;
@@ -499,6 +502,13 @@ namespace xo {
                 break;
             case ';':
                 tk_type = tokentype::tk_semicolon;
+                ++ix;
+                break;
+            case '*':
+                /* '*' isn't punctuation, since can appear within symbol.
+                 * However it cannot begin a symbol..
+                 */
+                tk_type = tokentype::tk_star;
                 ++ix;
                 break;
             case ':':

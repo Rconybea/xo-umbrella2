@@ -183,6 +183,29 @@ namespace xo {
                   token::singleassign(),
                   token::f64_token("3.141"),
                   token::semicolon()
+                 }},
+                {"def foo = lambda (x : f64) { def y = x * x; y; }",
+                 false,
+                 {token::def(),
+                  token::symbol_token("foo"),
+                  token::singleassign(),
+                  token::lambda(),
+                  token::leftparen(),
+                  token::symbol_token("x"),
+                  token::colon(),
+                  token::symbol_token("f64"),
+                  token::rightparen(),
+                  token::leftbrace(),
+                  token::def(),
+                  token::symbol_token("y"),
+                  token::singleassign(),
+                  token::symbol_token("x"),
+                  token::star_token(),
+                  token::symbol_token("x"),
+                  token::semicolon(),
+                  token::symbol_token("y"),
+                  token::semicolon(),
+                  token::rightbrace()
                  }}
             };
         }

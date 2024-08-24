@@ -80,6 +80,8 @@ namespace xo {
             static token assign_token() { return token(tokentype::tk_assign); }
             static token yields() { return token(tokentype::tk_yields); }
 
+            static token star_token() { return token(tokentype::tk_star); }
+
             static token type() { return token(tokentype::tk_type); }
             static token def() { return token(tokentype::tk_def); }
             static token lambda() { return token(tokentype::tk_lambda); }
