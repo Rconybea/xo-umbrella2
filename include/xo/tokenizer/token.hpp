@@ -77,7 +77,7 @@ namespace xo {
             static token doublecolon() { return token(tokentype::tk_doublecolon); }
             static token semicolon() { return token(tokentype::tk_semicolon); }
             static token singleassign() { return token(tokentype::tk_singleassign); }
-            static token assign() { return token(tokentype::tk_assign); }
+            static token assign_token() { return token(tokentype::tk_assign); }
             static token yields() { return token(tokentype::tk_yields); }
 
             static token type() { return token(tokentype::tk_type); }

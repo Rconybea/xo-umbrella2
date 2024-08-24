@@ -61,10 +61,16 @@ namespace xo {
 
             /** identifies punctuation chars.
              *  These are chars that are not permitted to appear within
-             *  a string/symbol token.  Instead they force completion of
+             *  a symbol token.  Instead they force completion of
              *  a preceding token,  and start a new token with themselves
              **/
-            bool is_punctuation(CharT ch) const;
+            bool is_1char_punctuation(CharT ch) const;
+
+            /** more-relazed version of is_1char_punctuation.
+             *  Chars that are not permitted to appear within a symbol token,
+             *  but may form token combined with next character
+             **/
+            bool is_2char_punctuation(CharT ch) const;
 
             /** true if tokenizer contains stored prefix of
              *  possibly-incomplete token
@@ -115,7 +121,7 @@ namespace xo {
 
         template <typename CharT>
         bool
-        tokenizer<CharT>::is_punctuation(CharT ch) const {
+        tokenizer<CharT>::is_1char_punctuation(CharT ch) const {
             switch(ch) {
             case '<':
                 return true;
@@ -138,18 +144,31 @@ namespace xo {
             case ';':
                 return true;
             case ':':
-                return true;
+                /* can't be 1char punctuation -- can begin assignment token */
+                return false;
             case '=':
                 return true;
             case '-':
-                /* can't be punctuation -- can appear inside f64 token */
+                /* can't be punctuation -- can appear inside f64 token: e.g. 1.23e-9 */
                 return false;
             case '+':
-                /* can't be punctuation -- can appear inside f64 token */
+                /* can't be punctuation -- can appear inside f64 token: e.g. 1.23e+4 */
                 return false;
             case '.':
-                /* can't be punctuation -- can appear inside f64 token */
+                /* can't be punctuation -- can appear inside f64 token: e.g. 1.23 */
                 return false;
+            }
+
+            return false;
+        }
+
+        template <typename CharT>
+        bool
+        tokenizer<CharT>::is_2char_punctuation(CharT ch) const {
+            switch(ch) {
+            case ':':
+                /* can begin := */
+                return true;
             }
 
             return false;
@@ -483,9 +502,19 @@ namespace xo {
                 ++ix;
                 break;
             case ':':
-                tk_type = tokentype::tk_colon;
-                ++ix;
+            {
+                log && log("colon or assignment token");
+
+                if (*(ix + 1) == '=') {
+                    tk_type = tokentype::tk_assign;
+                    ++ix;
+                    ++ix;
+                } else {
+                     tk_type = tokentype::tk_colon;
+                     ++ix;
+                }
                 break;
+            }
             case '=':
                 tk_type = tokentype::tk_singleassign;
                 ++ix;
@@ -575,9 +604,33 @@ namespace xo {
              */
             const CharT * tk_start = ix;
 
-            if (is_punctuation(*ix)) {
+            if (is_1char_punctuation(*ix)) {
                 /* 1-character token */
                 ++ix;
+            } else if (is_2char_punctuation(*ix)) {
+                CharT ch1 = *ix;
+
+                ++ix;
+
+                if (ix == input.hi()) {
+                    /* need more input to know if/when token complete */
+                    this->prefix_ += std::string(tk_start, input.hi());
+
+                    log && log(xtag("captured-prefix", this->prefix_));
+                } else {
+                    CharT ch2 = *ix;
+
+                    if (((ch2 >= '0') && (ch2 <= '9'))
+                        || ((ch2 >= 'A') && (ch2 <= 'Z'))
+                        || ((ch2 >= 'a') && (ch2 <= 'z')))
+                    {
+                        /* treat as 1 char punctuation */
+                        ;
+                    } else {
+                        /* include next char */
+                        ++ix;
+                    }
+                }
             } else if (*ix == '"') {
                 bool complete_flag = false;
 
@@ -618,8 +671,12 @@ namespace xo {
                  * - punctuation
                  */
                 for (; ix != input.hi(); ++ix) {
-                    if (is_whitespace(*ix) || is_punctuation(*ix))
+                    if (is_whitespace(*ix)
+                        || is_1char_punctuation(*ix)
+                        || is_2char_punctuation(*ix))
+                    {
                         break;
+                    }
                 }
 
                 if (ix == input.hi()) {

@@ -99,6 +99,9 @@ namespace xo {
                 {"\"tab to the right [\\t], to the right [\\t]\"", false,
                  token::string_token("tab to the right [\t], to the right [\t]"), true},
 
+                {":", false, token::colon(), true},
+                {":=", false, token::assign_token(), true},
+
                 {"symbol", false, token::symbol_token("symbol"), true},
 
                 {"type", false, token::type(), true},
@@ -161,6 +164,78 @@ namespace xo {
                     REQUIRE(out.second != in_span);
             }
         }
+
+        namespace {
+            struct testcase2_tkz {
+                std::string input_;
+                bool expect_throw_;
+                std::vector<token> expected_tk_v_;
+            };
+
+            std::vector<testcase2_tkz>
+            s_testcase2_v = {
+                {"def foo : f64 = 3.141;",
+                 false,
+                 {token::def(),
+                  token::symbol_token("foo"),
+                  token::colon(),
+                  token::symbol_token("f64"),
+                  token::singleassign(),
+                  token::f64_token("3.141"),
+                  token::semicolon()
+                 }}
+            };
+        }
+
+        TEST_CASE("tokenizer2", "[tokenizer]") {
+            for (std::size_t i_tc = 0, n_tc = s_testcase2_v.size(); i_tc < n_tc; ++i_tc) {
+                const testcase2_tkz & testcase = s_testcase2_v[i_tc];
+
+                INFO(xtag("input", testcase.input_));
+                INFO(xtag("i_tc", i_tc));
+
+                using tokenizer
+                    = xo::scm::tokenizer<char>;
+
+                tokenizer tkz;
+                tokenizer::span_type
+                    in_span(testcase.input_.c_str(),
+                            testcase.input_.c_str() + testcase.input_.size());
+
+                for (int i_tk = 0, n_tk = testcase.expected_tk_v_.size();
+                     i_tk < n_tk; ++i_tk)
+                {
+                    INFO(xtag("i_tk", i_tk));
+
+                    auto res = tkz.scan2(in_span, in_span.empty());
+                    const auto & tk = res.first;
+
+                    if (tk.is_valid())
+                        REQUIRE(tk.tk_type() == testcase.expected_tk_v_[i_tk].tk_type());
+                    if (tk.tk_type() == tokentype::tk_i64)
+                    {
+                        REQUIRE(!tk.text().empty());
+                        REQUIRE(tk.i64_value() == testcase.expected_tk_v_[i_tk].i64_value());
+                    } else if (tk.tk_type() == tokentype::tk_f64)
+                    {
+                        REQUIRE(!tk.text().empty());
+                        REQUIRE(tk.f64_value() == testcase.expected_tk_v_[i_tk].f64_value());
+                    } else if(tk.tk_type() == tokentype::tk_string)
+                    {
+                        /* tk.text() can be empty, consider input "" */
+                        REQUIRE(tk.text() == testcase.expected_tk_v_[i_tk].text());
+                    } else if(tk.tk_type() == tokentype::tk_symbol)
+                    {
+                        REQUIRE(!tk.text().empty());
+                        REQUIRE(tk.text() == testcase.expected_tk_v_[i_tk].text());
+                    } else {
+                        REQUIRE(tk.text().empty());
+                    }
+
+                    in_span = in_span.after_prefix(res.second);
+                }
+            }
+        } /*TEST_CASE(tokenizer2)*/
 
     } /*namespace ut*/
 } /*namespace xo*/
