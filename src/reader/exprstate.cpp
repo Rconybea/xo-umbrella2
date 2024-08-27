@@ -35,6 +35,8 @@ namespace xo {
                 return "parenexpr";
             case exprstatetype::sequenceexpr:
                 return "sequenceexpr";
+            case exprstatetype::let1expr:
+                return "let1expr";
             case exprstatetype::expect_rhs_expression:
                 return "expect_rhs_expression";
             case exprstatetype::expect_symbol:

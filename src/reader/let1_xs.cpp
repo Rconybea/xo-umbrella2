@@ -49,7 +49,8 @@ namespace xo {
 
         let1_xs::let1_xs(std::string lhs_name,
                          rp<Expression> rhs)
-            : lhs_name_{std::move(lhs_name)},
+            : exprstate(),
+              lhs_name_{std::move(lhs_name)},
               rhs_{std::move(rhs)}
         {}
 
@@ -57,6 +58,9 @@ namespace xo {
         let1_xs::on_expr(ref::brw<Expression> expr,
                          parserstatemachine * p_psm)
         {
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
             ref::brw<DefineExpr> def_expr = DefineExpr::from(expr);
 
             if (def_expr) {

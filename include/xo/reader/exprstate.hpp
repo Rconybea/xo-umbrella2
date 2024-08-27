@@ -38,6 +38,11 @@ namespace xo {
              **/
             sequenceexpr,
 
+            /** handle let1 (single local variable)
+             *  see @ref let1_xs
+             **/
+            let1expr,
+
             expect_rhs_expression,
             expect_symbol,
             expect_type,
