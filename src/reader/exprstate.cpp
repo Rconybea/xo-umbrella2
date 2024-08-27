@@ -308,8 +308,16 @@ namespace xo {
 
             case tokentype::tk_leftbracket:
             case tokentype::tk_rightbracket:
+                assert(false);
+                break;
+
             case tokentype::tk_leftbrace:
+                this->on_leftbrace_token(tk, p_psm);
+                return;
+
             case tokentype::tk_rightbrace:
+                this->on_rightbrace_token(tk, p_psm);
+                return;
 
             case tokentype::tk_leftangle:
             case tokentype::tk_rightangle:
