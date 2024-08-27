@@ -32,11 +32,19 @@ namespace xo {
 
         void
         parserstatemachine::push_envframe(envframe x) {
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
+            log && log(xtag("frame", x));
+
             p_env_stack_->push_envframe(std::move(x));
         }
 
         void
         parserstatemachine::pop_envframe() {
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
             p_env_stack_->pop_envframe();
         }
     } /*namespace scm*/

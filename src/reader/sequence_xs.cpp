@@ -35,6 +35,11 @@ namespace xo {
         sequence_xs::on_expr(ref::brw<Expression> expr,
                              parserstatemachine * p_psm)
         {
+             constexpr bool c_debug_flag = true;
+             scope log(XO_DEBUG(c_debug_flag));
+
+             log && log(xtag("expr", expr.promote()));
+
             /* TODO: if expr is a DefineExpr,
              *       then need to rewrite...
              *
