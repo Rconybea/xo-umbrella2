@@ -92,8 +92,6 @@ namespace xo {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            //constexpr const char * self_name = "exprstate::on_leftparen";
-
             /* push lparen_0 to remember to look for subsequent rightparen. */
             sequence_xs::start(p_psm);
         }

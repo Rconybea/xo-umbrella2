@@ -11,7 +11,11 @@
 
 namespace xo {
     namespace scm {
-        /* represent an infix operator */
+        /** represent an infix operator.
+         *
+         *  See @ref progress_xs::assemble_expr() for translation
+         *  to Expression
+         **/
         enum class optype {
             invalid = -1,
 
@@ -26,6 +30,9 @@ namespace xo {
         extern const char *
         optype_descr(optype x);
 
+        /** report operator precedence.
+         *  lowest operator precedence is 1
+         **/
         extern int
         precedence(optype x);
 

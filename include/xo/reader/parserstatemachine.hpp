@@ -50,6 +50,9 @@ namespace xo {
             exprstatestack * p_stack_;
             /** stack of environment frames, one for each enclosing lambda **/
             envframestack * p_env_stack_;
+            /** if non-null,  store next non-nested complete expressions in
+             *  *p_emit_expr
+             **/
             rp<Expression> * p_emit_expr_;
         };
     } /*namespace scm*/
