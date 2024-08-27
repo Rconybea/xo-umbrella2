@@ -188,7 +188,7 @@ namespace xo {
             scope log(XO_DEBUG(c_debug_flag));
 
             log && log(xtag("exstype", this->exs_type_),
-                       xtag("expr", expr));
+                       xtag("expr", expr.promote()));
 
             std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
 
