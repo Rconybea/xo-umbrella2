@@ -4,10 +4,13 @@
 #include "exprstatestack.hpp"
 #include "expect_expr_xs.hpp"
 #include "parserstatemachine.hpp"
+#include "xo/expression/AssignExpr.hpp"
 #include "xo/expression/Apply.hpp"
 
 namespace xo {
     using xo::ast::Expression;
+    using xo::ast::AssignExpr;
+    using xo::ast::Variable;
     using xo::ast::Apply;
 
     namespace scm {
@@ -16,6 +19,8 @@ namespace xo {
             switch (x) {
             case optype::invalid:
                 return "?optype";
+            case optype::op_assign:
+                return "op:=";
             case optype::op_add:
                 return "op+";
             case optype::op_subtract:
@@ -37,13 +42,16 @@ namespace xo {
             case optype::n_optype:
                 return 0;
 
+            case optype::op_assign:
+                return 1;
+
             case optype::op_add:
             case optype::op_subtract:
-                return 1;
+                return 2;
 
             case optype::op_multiply:
             case optype::op_divide:
-                return 2;
+                return 3;
             }
 
             return 0;
@@ -107,6 +115,22 @@ namespace xo {
             switch (op_type_) {
             case optype::invalid:
                 return this->lhs_;
+
+            case optype::op_assign:
+            {
+                ref::brw<Variable> lhs = Variable::from(this->lhs_);
+
+                if (!lhs) {
+                    throw std::runtime_error
+                        (tostr("progress_xs::assemble_expr",
+                               " expect variable on lhs of assignment operator :=",
+                               xtag("lhs", lhs_),
+                               xtag("rhs", rhs_)));
+                }
+
+                return AssignExpr::make(lhs.promote(),
+                                        this->rhs_);
+            }
 
             case optype::op_add:
                 return Apply::make_add2_f64(this->lhs_,
