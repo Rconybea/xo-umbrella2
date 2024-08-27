@@ -51,5 +51,5 @@ $ cmake --build xo-reflect/.build-ccov
 ### LSP support
 ```
 $ cd xo-reflect
-$ ln -s build/compile_commands.json  # lsp will look for compile_commands.json in the root of the source tree
+$ ln -s .build/compile_commands.json  # lsp will look for compile_commands.json in the root of the source tree
 ```
