@@ -101,6 +101,19 @@ namespace xo {
         }
 
         void
+        parserstatemachine::on_operator_token(const token_type & tk)
+        {
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
+            log && log(xtag("tk", tk),
+                       xtag("psm", *this));
+
+            this->p_stack_
+                ->top_exprstate().on_operator_token(tk, this);
+        }
+
+        void
         parserstatemachine::on_leftbrace_token(const token_type & tk)
         {
             constexpr bool c_debug_flag = true;

@@ -28,6 +28,11 @@ namespace xo {
         expect_symbol_xs::on_symbol_token(const token_type & tk,
                                           parserstatemachine * p_psm)
         {
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
+            log && log(xtag("tk", tk));
+
             /* have to do pop first, before sending symbol to
              * the o.g. symbol-requester
              */

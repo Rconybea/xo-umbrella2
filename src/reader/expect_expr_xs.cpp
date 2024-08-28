@@ -55,10 +55,14 @@ namespace xo {
         expect_expr_xs::on_def_token(const token_type & tk,
                                      parserstatemachine * p_psm)
         {
-            if (allow_defs_)
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
+            if (allow_defs_) {
                 define_xs::start(p_psm);
-            else
+            } else {
                 exprstate::on_def_token(tk, p_psm);
+            }
         }
 
         void
@@ -101,6 +105,9 @@ namespace xo {
         expect_expr_xs::on_rightbrace_token(const token_type & tk,
                                             parserstatemachine * p_psm)
         {
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
             if (cxl_on_rightbrace_) {
                 auto self = p_psm->pop_exprstate();
 
@@ -116,7 +123,10 @@ namespace xo {
         expect_expr_xs::on_symbol_token(const token_type & tk,
                                         parserstatemachine * p_psm)
         {
-            /* todo: treat symbol as variable name */
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
+            log && log(xtag("tk", tk));
 
             /* various possibilities when looking for rhs expression:
              *

@@ -332,6 +332,9 @@ namespace xo {
         progress_xs::on_operator_token(const token_type & tk,
                                        parserstatemachine * p_psm)
         {
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
             constexpr const char * c_self_name = "progress_xs::on_operator_token";
 
             if (op_type_ == optype::invalid) {

@@ -394,8 +394,16 @@ namespace xo {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
+            const char * c_self_name = "exprstate::on_expr_with_semicolon";
+
             log && log(xtag("exstype", this->exs_type_),
                        xtag("expr", expr));
+
+            throw std::runtime_error
+                (tostr(c_self_name,
+                       ": unexpected expression for parsing state",
+                       xtag("expr", expr),
+                       xtag("state", *this)));
 
             assert(false);
         } /*on_expr_with_semicolon*/

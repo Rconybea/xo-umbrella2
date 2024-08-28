@@ -52,6 +52,7 @@ namespace xo {
             // ---- parsing inputs -----
 
             void on_semicolon_token(const token_type & tk);
+            void on_operator_token(const token_type & tk);
             void on_leftbrace_token(const token_type & tk);
             void on_rightbrace_token(const token_type & tk);
 
