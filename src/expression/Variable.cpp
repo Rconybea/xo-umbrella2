@@ -18,9 +18,12 @@ namespace xo {
         void
         Variable::display(std::ostream & os) const {
             os << "<Variable"
-               << xtag("name", name_)
-               << xtag("type", this->valuetype()->short_name())
-               << ">";
+               << xtag("name", name_);
+            if (this->valuetype())
+                os << xtag("type", this->valuetype()->short_name());
+            else
+                os << xtag("type", "nullptr");
+            os << ">";
         } /*display*/
     } /*namespace ast*/
 } /*namespace xo*/

@@ -66,10 +66,13 @@ namespace xo {
             }
 
             virtual void display(std::ostream & os) const override {
-                os << "<Constant"
-                   << xtag("type", value_td_->short_name())
-                   << xtag("value", value_)
-                   << ">";
+                os << "<Constant";
+                if (value_td_)
+                    os << xtag("type", value_td_->short_name());
+                else
+                    os << xtag("type", "nullptr");;
+                os << xtag("value", value_);
+                os << ">";
             }
 
         private:
