@@ -49,6 +49,32 @@ namespace xo {
         }
 
         void
+        parserstatemachine::on_expr(ref::brw<Expression> x)
+        {
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
+            log && log(xtag("x", x),
+                       xtag("psm", *this));
+
+            this->p_stack_
+                ->top_exprstate().on_expr(x, this);
+        }
+
+        void
+        parserstatemachine::on_expr_with_semicolon(ref::brw<Expression> x)
+        {
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
+            log && log(xtag("x", x),
+                       xtag("psm", *this));
+
+            this->p_stack_
+                ->top_exprstate().on_expr_with_semicolon(x, this);
+        }
+
+        void
         parserstatemachine::on_symbol(const std::string & x)
         {
             constexpr bool c_debug_flag = true;

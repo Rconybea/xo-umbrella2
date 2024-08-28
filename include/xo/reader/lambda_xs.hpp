@@ -48,6 +48,8 @@ namespace xo {
                                            parserstatemachine * p_psm) override;
             virtual void on_expr(ref::brw<Expression> expr,
                                  parserstatemachine * p_psm) override;
+            virtual void on_expr_with_semicolon(ref::brw<Expression> expr,
+                                                parserstatemachine * p_psm) override;
             virtual void on_semicolon_token(const token_type & tk,
                                             parserstatemachine * p_psm) override;
 

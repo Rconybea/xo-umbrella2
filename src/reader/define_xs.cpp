@@ -88,6 +88,13 @@ namespace xo {
             }
 
             exprstate::on_expr(expr, p_psm);
+        void
+        define_xs::on_expr_with_semicolon(ref::brw<Expression> expr,
+                                          parserstatemachine * p_psm)
+        {
+            this->on_expr(expr, p_psm);
+            /* semicolon is allowed to terminate def expr */
+            this->on_semicolon_token(token_type::semicolon(), p_psm);
         }
 
         void

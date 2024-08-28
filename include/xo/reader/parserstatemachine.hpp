@@ -45,10 +45,13 @@ namespace xo {
 
             // ----- parsing outputs -----
 
+            void on_expr(ref::brw<Expression> expr);
+            void on_expr_with_semicolon(ref::brw<Expression> expr);
             void on_symbol(const std::string & symbol);
 
             // ---- parsing inputs -----
 
+            void on_semicolon_token(const token_type & tk);
             void on_leftbrace_token(const token_type & tk);
             void on_rightbrace_token(const token_type & tk);
 

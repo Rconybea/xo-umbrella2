@@ -195,6 +195,21 @@ namespace xo {
             p_psm->top_exprstate().on_expr(expr, p_psm);
         } /*on_expr*/
 
+        void
+        expect_expr_xs::on_expr_with_semicolon(ref::brw<Expression> expr,
+                                               parserstatemachine * p_psm)
+        {
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
+            log && log(xtag("exstype", this->exs_type_),
+                       xtag("expr", expr.promote()));
+
+            std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
+
+            p_psm->on_expr_with_semicolon(expr);
+        } /*on_expr_with_semicolon*/
+
     } /*namespace scm*/
 } /*namespace xo*/
 

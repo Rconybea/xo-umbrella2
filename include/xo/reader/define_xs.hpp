@@ -81,6 +81,8 @@ namespace xo {
 
             virtual void on_expr(ref::brw<Expression> expr,
                                  parserstatemachine * p_psm) override;
+            virtual void on_expr_with_semicolon(ref::brw<Expression> expr,
+                                                parserstatemachine * p_psm) override;
             virtual void on_symbol(const std::string & symbol_name,
                                    parserstatemachine * p_psm) override;
             virtual void on_typedescr(TypeDescr td,

@@ -107,6 +107,10 @@ namespace xo {
             virtual void on_expr(ref::brw<Expression> expr,
                                  parserstatemachine * p_psm);
 
+            /** update exprstate in response to a successfully-parsed subexpression, that ends with semicolon **/
+            virtual void on_expr_with_semicolon(ref::brw<Expression> expr,
+                                                parserstatemachine * p_psm);
+
             /** update exprstate when expecting a symbol **/
             virtual void on_symbol(const std::string & symbol,
                                    parserstatemachine * p_psm);

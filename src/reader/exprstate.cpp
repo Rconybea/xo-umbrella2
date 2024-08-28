@@ -388,6 +388,19 @@ namespace xo {
         } /*on_expr*/
 
         void
+        exprstate::on_expr_with_semicolon(ref::brw<Expression> expr,
+                                          parserstatemachine * /*p_psm*/)
+        {
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
+            log && log(xtag("exstype", this->exs_type_),
+                       xtag("expr", expr));
+
+            assert(false);
+        } /*on_expr_with_semicolon*/
+
+        void
         exprstate::on_symbol(const std::string & symbol_name,
                              parserstatemachine * /*p_psm*/)
         {

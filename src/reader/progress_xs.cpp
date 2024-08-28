@@ -215,7 +215,7 @@ namespace xo {
         }
 
         void
-        progress_xs::on_semicolon_token(const token_type & tk,
+        progress_xs::on_semicolon_token(const token_type & /*tk*/,
                                         parserstatemachine * p_psm)
         {
             /* note: implementation parllels .on_rightparen_token() */
@@ -227,7 +227,7 @@ namespace xo {
 
             std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
 
-            p_psm->top_exprstate().on_expr(expr, p_psm);
+            p_psm->on_expr_with_semicolon(expr);
 
             /* control here on input like:
              *   (1.234;
