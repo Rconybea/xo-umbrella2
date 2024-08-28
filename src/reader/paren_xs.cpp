@@ -8,8 +8,22 @@
 
 namespace xo {
     namespace scm {
+        const char *
+        parenexprstatetype_descr(parenexprstatetype x)
+        {
+            switch(x) {
+            case parenexprstatetype::invalid: return "invalid";
+            case parenexprstatetype::lparen_0: return "lparen_0";
+            case parenexprstatetype::lparen_1: return "lparen_1";
+            case parenexprstatetype::n_parenexprstatetype: break;
+            }
+
+            return "???parenexprstatetype";
+        }
+
         paren_xs::paren_xs()
-            : parenxs_type_{parenexprstatetype::lparen_0}
+            : exprstate(exprstatetype::parenexpr),
+              parenxs_type_{parenexprstatetype::lparen_0}
         {}
 
         std::unique_ptr<paren_xs>
@@ -221,12 +235,14 @@ namespace xo {
         void
         paren_xs::print(std::ostream & os) const {
             os << "<paren_xs"
-               << xtag("type", exs_type_);
+                //<< xtag("type", exs_type_);
+               << xtag("parenxs_type", parenxs_type_);
+
             if (gen_expr_)
                 os << xtag("gen_expr", gen_expr_);
+
             os << ">";
         }
-
 
     } /*namespace scm*/
 } /*namespace xo*/

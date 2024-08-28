@@ -271,6 +271,7 @@ namespace xo {
             scope log(XO_DEBUG(c_debug_flag));
             log && log(xtag("tk", tk));
             log && log(xtag("state", *this));
+            log && log(xtag("psm", *p_psm));
 
             switch (tk.tk_type()) {
 
@@ -405,6 +406,7 @@ namespace xo {
         void
         exprstate::print(std::ostream & os) const {
             os << "<exprstate"
+               << xtag("this", (void*)this)
                << xtag("type", exs_type_);
             os << ">";
         }

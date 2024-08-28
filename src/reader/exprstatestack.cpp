@@ -23,7 +23,7 @@ namespace xo {
         exprstatestack::push_exprstate(std::unique_ptr<exprstate> exs) {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag),
-                      xtag("exs", *exs));
+                      xtag("exs", exs.get()));
 
             std::size_t z = stack_.size();
 
@@ -59,7 +59,7 @@ namespace xo {
 
             for (std::size_t i = 0, z = stack_.size(); i < z; ++i) {
                 os << "  [" << z-i-1 << "] "
-                   << stack_[i]
+                   << stack_[i].get()
                    << std::endl;
             }
 

@@ -56,6 +56,11 @@ namespace xo {
             n_defexprstatetype,
         };
 
+        extern const char * defexprstatetype_descr(defexprstatetype x);
+
+        std::ostream &
+        operator<<(std::ostream & os, defexprstatetype x);
+
         /** @class define_xs
          *  @brief state to provide parsing of a define-expression
          **/

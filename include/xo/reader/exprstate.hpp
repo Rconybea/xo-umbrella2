@@ -189,6 +189,15 @@ namespace xo {
             x.print(os);
             return os;
         }
+
+        inline std::ostream &
+        operator<< (std::ostream & os, const exprstate * x) {
+            if (x)
+                x->print(os);
+            else
+                os << "nullptr";
+            return os;
+        };
     } /*namespace scm*/
 } /*namespace xo*/
 

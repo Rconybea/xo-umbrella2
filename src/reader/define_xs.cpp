@@ -9,6 +9,33 @@
 
 namespace xo {
     namespace scm {
+        // ----- defexprstatetype -----
+
+        const char *
+        defexprstatetype_descr(defexprstatetype x) {
+            switch(x) {
+            case defexprstatetype::invalid: return "invalid";
+            case defexprstatetype::def_0: return "def_0";
+            case defexprstatetype::def_1: return "def_1";
+            case defexprstatetype::def_2: return "def_2";
+            case defexprstatetype::def_3: return "def_3";
+            case defexprstatetype::def_4: return "def_4";
+            case defexprstatetype::def_5: return "def_5";
+            case defexprstatetype::def_6: return "def_6";
+            case defexprstatetype::n_defexprstatetype: break;
+            }
+
+            return "???defexprstatetype";
+        }
+
+        std::ostream &
+        operator<<(std::ostream & os, defexprstatetype x) {
+            os << defexprstatetype_descr(x);
+            return os;
+        }
+
+        // ----- define_xs -----
+
         std::unique_ptr<define_xs>
         define_xs::make() {
             return std::make_unique<define_xs>(define_xs(DefineExprAccess::make_empty()));
@@ -17,6 +44,9 @@ namespace xo {
         void
         define_xs::start(parserstatemachine * p_psm)
         {
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
             p_psm->push_exprstate(define_xs::make());
             p_psm->top_exprstate().on_def_token(token_type::def(), p_psm);
         }
@@ -31,6 +61,11 @@ namespace xo {
         define_xs::on_expr(ref::brw<Expression> expr,
                            parserstatemachine * p_psm)
         {
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
+            log && log("defxs_type", defxs_type_);
+
             if (this->defxs_type_ == defexprstatetype::def_5) {
                 /* have all the ingredients to create an expression
                  * representing a definition
@@ -59,6 +94,11 @@ namespace xo {
         define_xs::on_symbol(const std::string & symbol_name,
                              parserstatemachine * p_psm)
         {
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
+            log && log("defxs_type", defxs_type_);
+
             if (this->defxs_type_ == defexprstatetype::def_1) {
                 this->defxs_type_ = defexprstatetype::def_2;
                 this->def_expr_->assign_lhs_name(symbol_name);
@@ -72,6 +112,11 @@ namespace xo {
         define_xs::on_typedescr(TypeDescr td,
                                 parserstatemachine * p_psm)
         {
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
+            log && log("defxs_type", defxs_type_);
+
             if (this->defxs_type_ == defexprstatetype::def_3) {
                 this->defxs_type_ = defexprstatetype::def_4;
                 this->cvt_expr_ = ConvertExprAccess::make(td /*dest_type*/,
@@ -92,7 +137,7 @@ namespace xo {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            //constexpr const char * self_name = "define_xs::on_def_token";
+            log && log("defxs_type", defxs_type_);
 
             if (this->defxs_type_ == defexprstatetype::def_0) {
                 this->defxs_type_ = defexprstatetype::def_1;
@@ -110,7 +155,7 @@ namespace xo {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            //constexpr const char * self_name = "define_xs::on_colon_token";
+            log && log("defxs_type", defxs_type_);
 
             if (this->defxs_type_ == defexprstatetype::def_2) {
                 this->defxs_type_ = defexprstatetype::def_3;
@@ -128,7 +173,7 @@ namespace xo {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            //constexpr const char * self_name = "exprstate::on_semicolon";
+            log && log("defxs_type", defxs_type_);
 
             if (this->defxs_type_ == defexprstatetype::def_6) {
                 rp<Expression> expr = this->def_expr_;
@@ -149,6 +194,8 @@ namespace xo {
             scope log(XO_DEBUG(c_debug_flag));
 
             constexpr const char * self_name = "exprstate::on_singleassign";
+
+            log && log("defxs_type", defxs_type_);
 
             /*
              *   def foo       = 1 ;
@@ -203,7 +250,9 @@ namespace xo {
         void
         define_xs::print(std::ostream & os) const {
             os << "<define_xs"
-               << xtag("type", exs_type_);
+                //<< xtag("type", exs_type_)
+               << xtag("defxs_type", defxs_type_);
+
             if (def_expr_)
                 os << xtag("def_expr", def_expr_);
             if (cvt_expr_)

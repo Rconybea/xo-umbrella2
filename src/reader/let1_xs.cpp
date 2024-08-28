@@ -39,8 +39,7 @@ namespace xo {
                        const rp<Expression> & rhs,
                        parserstatemachine * p_psm)
         {
-            p_psm->push_exprstate(let1_xs::make(std::move(lhs_name),
-                                                std::move(rhs)));
+            p_psm->push_exprstate(let1_xs::make(lhs_name, rhs));
 
             expect_expr_xs::start(true /*allow_defs*/,
                                   true /*cxl_on_rightbrace*/,
@@ -111,7 +110,7 @@ namespace xo {
              * -- remember we pushed let1_xs to handle an embedded def-expr
              * in a sequence
              */
-            p_psm->top_exprstate().on_rightbrace_token(tk, p_psm);
+            p_psm->on_rightbrace_token(tk);
         }
     } /*namespace scm*/
 } /*namespace xo*/

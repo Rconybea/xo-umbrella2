@@ -6,6 +6,7 @@
 #pragma once
 
 #include "exprstate.hpp"
+#include "xo/indentlog/print/vector.hpp"
 
 namespace xo {
     namespace scm {

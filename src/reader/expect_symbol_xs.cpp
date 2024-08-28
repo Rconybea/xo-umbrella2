@@ -33,9 +33,7 @@ namespace xo {
              */
             std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
 
-
-            p_psm->top_exprstate().on_symbol(tk.text(), p_psm);
-            return;
+            p_psm->on_symbol(tk.text());
         }
     } /*namespace scm*/
 } /*namespace xo*/

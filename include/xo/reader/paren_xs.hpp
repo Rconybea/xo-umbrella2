@@ -19,6 +19,15 @@ namespace xo {
             n_parenexprstatetype,
         };
 
+        extern const char *
+        parenexprstatetype_descr(parenexprstatetype x);
+
+        inline std::ostream &
+        operator<< (std::ostream & os, parenexprstatetype x) {
+            os << parenexprstatetype_descr(x);
+            return os;
+        }
+
         /** @class paren_xs
          *  @brief state machine for handling parentheses in expressions
          **/

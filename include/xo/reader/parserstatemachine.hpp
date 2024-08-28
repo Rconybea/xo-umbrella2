@@ -21,6 +21,7 @@ namespace xo {
         public:
             using Expression = xo::ast::Expression;
             using Variable = xo::ast::Variable;
+            using token_type = token<char>;
 
         public:
             parserstatemachine(exprstatestack * p_stack,
@@ -42,6 +43,18 @@ namespace xo {
             void push_envframe(envframe x);
             void pop_envframe();
 
+            // ----- parsing outputs -----
+
+            void on_symbol(const std::string & symbol);
+
+            // ---- parsing inputs -----
+
+            void on_leftbrace_token(const token_type & tk);
+            void on_rightbrace_token(const token_type & tk);
+
+            /** write human-readable representation on @p os **/
+            void print(std::ostream & os) const;
+
         public:
             /** stack of incomplete parser work.
              *  generally speaking, push when to start new work for nested content;
@@ -55,6 +68,12 @@ namespace xo {
              **/
             rp<Expression> * p_emit_expr_;
         };
+
+        inline std::ostream &
+        operator<<(std::ostream & os, const parserstatemachine & x) {
+            x.print(os);
+            return os;
+        }
     } /*namespace scm*/
 } /*namespace xo*/
 

@@ -105,7 +105,7 @@ namespace xo {
 
                 /* do not call .on_expr(), since '}' cancelled */
 
-                p_psm->top_exprstate().on_rightbrace_token(tk, p_psm);
+                p_psm->on_rightbrace_token(tk);
             } else {
                 exprstate::on_rightbrace_token(tk, p_psm);
             }
