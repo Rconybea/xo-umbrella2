@@ -235,6 +235,7 @@ namespace xo {
         void
         paren_xs::print(std::ostream & os) const {
             os << "<paren_xs"
+               << xtag("this", (void*)this)
                 //<< xtag("type", exs_type_);
                << xtag("parenxs_type", parenxs_type_);
 

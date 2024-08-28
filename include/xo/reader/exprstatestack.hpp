@@ -57,7 +57,10 @@ namespace xo {
 
         inline std::ostream &
         operator<< (std::ostream & os, const exprstatestack * x) {
-            x->print(os);
+            if (x)
+                x->print(os);
+            else
+                os << "nullptr";
             return os;
         }
     } /*namespace scm*/

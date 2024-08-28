@@ -64,7 +64,7 @@ namespace xo {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            log && log("defxs_type", defxs_type_);
+            log && log(xtag("defxs_type", defxs_type_));
 
             if (this->defxs_type_ == defexprstatetype::def_5) {
                 /* have all the ingredients to create an expression
@@ -84,10 +84,11 @@ namespace xo {
                 rp<Expression> def_expr = this->def_expr_;
 
                 this->defxs_type_ = defexprstatetype::def_6;
-                return;
+            } else {
+                exprstate::on_expr(expr, p_psm);
             }
+        }
 
-            exprstate::on_expr(expr, p_psm);
         void
         define_xs::on_expr_with_semicolon(ref::brw<Expression> expr,
                                           parserstatemachine * p_psm)
@@ -177,6 +178,8 @@ namespace xo {
         define_xs::on_semicolon_token(const token_type & tk,
                                       parserstatemachine * p_psm)
         {
+            /* def expr consumes semicolon */
+
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
@@ -200,7 +203,7 @@ namespace xo {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            constexpr const char * self_name = "exprstate::on_singleassign";
+            constexpr const char * self_name = "define_xs::on_singleassign_token";
 
             log && log("defxs_type", defxs_type_);
 
@@ -237,7 +240,7 @@ namespace xo {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            constexpr const char * self_name = "exprstate::on_rightparen";
+            constexpr const char * self_name = "define_xs::on_rightparen";
 
             this->illegal_input_error(self_name, tk);
         }
@@ -249,7 +252,7 @@ namespace xo {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            constexpr const char * self_name = "exprstate::on_f64";
+            constexpr const char * self_name = "define_xs::on_f64";
 
             this->illegal_input_error(self_name, tk);
         }
@@ -257,13 +260,14 @@ namespace xo {
         void
         define_xs::print(std::ostream & os) const {
             os << "<define_xs"
+               << xtag("this", (void*)this)
                 //<< xtag("type", exs_type_)
                << xtag("defxs_type", defxs_type_);
 
-            if (def_expr_)
-                os << xtag("def_expr", def_expr_);
-            if (cvt_expr_)
-                os << xtag("cvt_expr", cvt_expr_);
+            //if (def_expr_)
+            //    os << xtag("def_expr", def_expr_);
+            //if (cvt_expr_)
+            //    os << xtag("cvt_expr", cvt_expr_);
             os << ">";
         }
     } /*namespace scm*/

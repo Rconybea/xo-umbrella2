@@ -237,14 +237,11 @@ namespace xo {
              * b. 1.234 pushes (in case operators) [lparen_0:expect_rhs_expression:expr_progress]
              *     (see exprstate::on_f64())
              * c. semicolon completes expr_progress [lparen_0:expect_rhs_expression]
-             *     deliver expresssion to expect_rhs_expression.on_expr()
-             *     (see exprstate::on_expr())
+             *     deliver expresssion to expect_rhs_expression.on_expr_with_semicolon()
+             *     (see exprstate::on_expr_with_semicolon())
              * d. expr_rhs_expression forwards expression to [lparen_0]
-             * e. lparen_0 advances to [lparen_1]
-             * f. now deliver semicolon;  [lparen_1] rejects
+             * e. lparen_0 would advance to [lparen_1],  but rejects semicolon
              */
-
-            p_psm->top_exprstate().on_semicolon_token(tk, p_psm);
         }
 
         void
@@ -420,6 +417,7 @@ namespace xo {
         void
         progress_xs::print(std::ostream & os) const {
             os << "<progress_xs"
+               << xtag("this", (void*)this)
                << xtag("type", exs_type_);
             if (lhs_)
                 os << xtag("lhs", lhs_);

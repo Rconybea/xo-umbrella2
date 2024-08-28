@@ -32,6 +32,15 @@ namespace xo {
             n_lambdastatetype
         };
 
+        extern const char *
+        lambdastatetype_descr(lambdastatetype x);
+
+        inline std::ostream &
+        operator<< (std::ostream & os, lambdastatetype x) {
+            os << lambdastatetype_descr(x);
+            return os;
+        }
+
         /** @class lambda_xs
          *  @brief parsing state-machine for a lambda-expression
          *
@@ -52,6 +61,8 @@ namespace xo {
                                                 parserstatemachine * p_psm) override;
             virtual void on_semicolon_token(const token_type & tk,
                                             parserstatemachine * p_psm) override;
+
+            virtual void print(std::ostream & os) const override;
 
         private:
             static std::unique_ptr<lambda_xs> make();

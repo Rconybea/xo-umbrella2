@@ -11,6 +11,22 @@ namespace xo {
     using xo::ast::Lambda;
 
     namespace scm {
+        const char *
+        lambdastatetype_descr(lambdastatetype x) {
+            switch(x) {
+            case lambdastatetype::invalid: return "invalid";
+            case lambdastatetype::lm_0: return "lm_0";
+            case lambdastatetype::lm_1: return "lm_1";
+            case lambdastatetype::lm_2: return "lm_2";
+            case lambdastatetype::lm_3: return "lm_3";
+            default: break;
+            }
+
+            return "???lambdastatetype";
+        }
+
+        // ----- lambda_xs - ----
+
         std::unique_ptr<lambda_xs>
         lambda_xs::make() {
             return std::make_unique<lambda_xs>(lambda_xs());
@@ -97,6 +113,14 @@ namespace xo {
 
             exprstate::on_semicolon_token(tk, p_psm);
         }
+
+        void
+        lambda_xs::print(std::ostream & os) const {
+            os << "<lambda_xs"
+               << xtag("lmxs_type", lmxs_type_)
+               << ">";
+        }
+
     } /*namespace scm*/
 } /*namespace xo*/
 

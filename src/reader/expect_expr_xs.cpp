@@ -31,7 +31,8 @@ namespace xo {
         void
         expect_expr_xs::start(bool allow_defs,
                               bool cxl_on_rightbrace,
-                              parserstatemachine * p_psm) {
+                              parserstatemachine * p_psm)
+        {
             p_psm->push_exprstate(expect_expr_xs::make(allow_defs,
                                                        cxl_on_rightbrace));
         }
@@ -192,7 +193,7 @@ namespace xo {
 
             std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
 
-            p_psm->top_exprstate().on_expr(expr, p_psm);
+            p_psm->on_expr(expr);
         } /*on_expr*/
 
         void
