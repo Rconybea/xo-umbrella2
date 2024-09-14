@@ -21,7 +21,6 @@ namespace xo {
     namespace json {
         using xo::reflect::SelfTagging;
         using xo::reflect::TaggedRcptr;
-        using xo::ref::rp;
         using xo::ref::unowned_ptr;
 
         PYBIND11_MODULE(PYPRINTJSON_MODULE_NAME(), m) {
