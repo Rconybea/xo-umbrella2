@@ -15,7 +15,7 @@ namespace xo {
 
     namespace web {
         /* a function that creates an event subscription */
-        using StreamSubscribeFn = std::function<fn::CallbackId (ref::rp<reactor::AbstractSink> const & ws_sink)>;
+        using StreamSubscribeFn = std::function<fn::CallbackId (rp<reactor::AbstractSink> const & ws_sink)>;
         using StreamUnsubscribeFn = std::function<void (fn::CallbackId id)>;
 
         /* describes a stream endpoint
