@@ -179,13 +179,13 @@ namespace xo {
             using iterator = detail::ExplicitDistIterator;
 
         public:
-            static ref::rp<ExplicitDist> make(Domain bucket_dx, Domain ref_value) {
+            static rp<ExplicitDist> make(Domain bucket_dx, Domain ref_value) {
                 return new ExplicitDist(bucket_dx, ref_value);
             }
             /* create distribution with n buckets of width bucket_dx,
              * covering range [ref_value, ref_value + n * bucket_dx]
              */
-            static ref::rp<ExplicitDist> make_n(size_t n, Domain bucket_dx, Domain ref_value) {
+            static rp<ExplicitDist> make_n(size_t n, Domain bucket_dx, Domain ref_value) {
                 return new ExplicitDist(n, bucket_dx, ref_value);
             }
 
