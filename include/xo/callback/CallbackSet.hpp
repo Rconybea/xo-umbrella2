@@ -286,7 +286,7 @@ namespace xo {
         }; /*CallbackSetImpl*/
 
         template<typename NativeFn>
-        using RpCallbackSet = CallbackSetImpl<xo::ref::rp<NativeFn>>;
+        using RpCallbackSet = CallbackSetImpl<rp<NativeFn>>;
 
         /* like RpCallbackSet<NativeFn>,
          * but also provides overload(s) for operator()(..)
