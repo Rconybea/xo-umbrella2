@@ -41,7 +41,7 @@ namespace xo {
             /* convenience -- shorthand for
              *   .print(obj->self_tp(), p_os)
              */
-            void print_obj(ref::rp<SelfTagging> const & obj, std::ostream * p_os) const;
+            void print_obj(rp<SelfTagging> const & obj, std::ostream * p_os) const;
 
             void provide_printer(TypeId id, std::unique_ptr<JsonPrinter> p) {
                 *(printer_map_.require(id)) = std::move(p);
@@ -74,13 +74,13 @@ namespace xo {
          */
         class PrintJsonSingleton {
         public:
-            static ref::rp<PrintJson> instance();
+            static rp<PrintJson> instance();
 
         private:
             /* we don't need this to be stored as pointer.
              * memory burned if unused will be one empty std::vector<>
              */
-            static ref::rp<PrintJson> s_instance;
+            static rp<PrintJson> s_instance;
         }; /*PrintJsonSingleton*/
 
     } /*namespace json*/

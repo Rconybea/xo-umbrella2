@@ -17,9 +17,8 @@ namespace xo {
     using xo::reflect::TypeDescr;
     using xo::reflect::TaggedPtr;
     using xo::reflect::TaggedRcptr;
-    using xo::print::quoted;
+    using xo::print::quot;
     using xo::time::iso8601;
-    using xo::ref::rp;
     using xo::xtag;
 
     namespace json {
@@ -152,6 +151,13 @@ namespace xo {
                         return;
                     case Metatype::mt_struct:
                         print_generic_struct(*this, tp, p_os);
+                        return;
+                    case Metatype::mt_function:
+                        /** new branch (added for xo-expression / xo-jit) **/
+                        (*p_os) << "<error-json-printer-not-implemented"
+                                << xtag("type", tp.td()->canonical_name())
+                                << xtag("metatype", tp.td()->metatype())
+                                << ">";
                         return;
                     case Metatype::mt_invalid:
                     case Metatype::mt_atomic:
@@ -340,7 +346,7 @@ namespace xo {
 
                 if (x) {
                     /* TODO: escapes special characters */
-                    *p_os << quoted(*x);
+                    *p_os << quot(*x);
                 } else {
                     report_internal_type_consistency_error(Reflect::require<T>(),
                                                            tp.td(),
