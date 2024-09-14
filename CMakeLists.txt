@@ -3,33 +3,17 @@
 cmake_minimum_required(VERSION 3.10)
 
 project(xo_pywebutil VERSION 0.1)
-enable_language(CXX)
 
-# common XO cmake macros (see github.com:Rconybea/xo-cmake)
+include(GNUInstallDirs)
 include(cmake/xo-bootstrap-macros.cmake)
 
-# ----------------------------------------------------------------
-# unit test setup
-
-enable_testing()
-# activate code coverage for all executables + libraries (when configured with -DCODE_COVERAGE=ON)
-add_code_coverage()
-# 1. assuming that /nix/store/ prefixes .hpp files belonging to gcc, catch2 etc.
-#    we're not interested in code coverage for these sources.
-# 2. exclude the utest/ subdir, we don't need coverage on the unit tests themselves;
-#    rather,  want coverage on the code that the unit tests exercise.
-#
-# NOTE: this seems to work only with the 'ccov-all' target.  In particular,  doesn't seem to do anything with the 'ccov' target
-#
-add_code_coverage_all_targets(EXCLUDE /nix/store/* ${PROJECT_SOURCE_DIR}/utest/* ${PROJECT_BINARY_DIR}/local/* ${PROJECT_SOURCE_DIR}/repo/*)
+xo_cxx_toplevel_options3()
 
 # ----------------------------------------------------------------
 # c++ settings (usually temporary)
 
 set(PROJECT_CXX_FLAGS "")
 add_definitions(${PROJECT_CXX_FLAGS})
-
-xo_toplevel_compile_options()
 
 # ----------------------------------------------------------------
 # sources
