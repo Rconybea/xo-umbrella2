@@ -16,7 +16,6 @@
 namespace xo {
     using xo::time::utc_nanos;
     using xo::ref::unowned_ptr;
-    using xo::ref::rp;
     namespace py = pybind11;
 
     namespace reflect {
