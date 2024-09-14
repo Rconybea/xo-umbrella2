@@ -12,7 +12,6 @@ namespace xo {
     using xo::distribution::Normal;
     using xo::distribution::Distribution;
     using xo::distribution::ExplicitDist;
-    using xo::ref::rp;
 
     namespace sim {
         namespace py = pybind11;
