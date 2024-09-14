@@ -17,7 +17,7 @@ namespace xo {
         {
             os << "<SourceTimestamp";
             os << xtag("t0", t0_);
-            os << xtag("src", ref::rp<ReactorSource>(src_));
+            os << xtag("src", rp<ReactorSource>(src_));
             os << ">";
         } /*display*/
 

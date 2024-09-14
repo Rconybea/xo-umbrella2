@@ -24,23 +24,23 @@ namespace xo {
         public:
             ReentrantSimulatorCmd() = default;
             ReentrantSimulatorCmd(SimulatorCmdEnum cmd,
-                                  ref::rp<reactor::ReactorSource> const & src)
+                                  rp<reactor::ReactorSource> const & src)
                 : cmd_{cmd}, src_{src} {}
 
-            static ReentrantSimulatorCmd notify_source_primed(ref::rp<ReactorSource> const & src) {
+            static ReentrantSimulatorCmd notify_source_primed(rp<ReactorSource> const & src) {
                 return ReentrantSimulatorCmd(NotifySourcePrimed, src);
             }
 
-            static ReentrantSimulatorCmd complete_add_source(ref::rp<ReactorSource> const & src) {
+            static ReentrantSimulatorCmd complete_add_source(rp<ReactorSource> const & src) {
                 return ReentrantSimulatorCmd(CompleteAddSource, src);
             }
 
-            static ReentrantSimulatorCmd complete_remove_source(ref::rp<ReactorSource> const & src) {
+            static ReentrantSimulatorCmd complete_remove_source(rp<ReactorSource> const & src) {
                 return ReentrantSimulatorCmd(CompleteRemoveSource, src);
             }
 
             SimulatorCmdEnum cmd() const { return cmd_; }
-            ref::rp<ReactorSource> const & src() const { return src_; }
+            rp<ReactorSource> const & src() const { return src_; }
 
         private:
             /* NotifySourcePrimed:    deferred Simulator.notify_source_primed(.src)
@@ -49,7 +49,7 @@ namespace xo {
              */
             SimulatorCmdEnum cmd_ = NotifySourcePrimed;
             /* if .cmd=NotifySourcePrimed|CompleteAddSource|CompleteRemoveSource:  reactor source */
-            ref::rp<ReactorSource> src_;
+            rp<ReactorSource> src_;
         }; /*ReentrantSimulatorCmd*/
 
         /* Generic simulator
@@ -74,7 +74,7 @@ namespace xo {
         public:
             ~Simulator();
 
-            static ref::rp<Simulator> make(utc_nanos t0);
+            static rp<Simulator> make(utc_nanos t0);
 
             /* value of .t0() is estabished in ctor.
              * it will not change except across call to .advance_one()

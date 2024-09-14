@@ -30,7 +30,7 @@ namespace xo {
             Simulator * sim_ = nullptr;
         }; /*RaiiDeliveryWork*/
 
-        ref::rp<Simulator>
+        rp<Simulator>
         Simulator::make(utc_nanos t0) {
             return new Simulator(t0);
         } /*make*/
