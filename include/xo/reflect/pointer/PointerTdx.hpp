@@ -23,6 +23,12 @@ namespace xo {
 
             virtual Metatype metatype() const override { return Metatype::mt_pointer; }
             virtual uint32_t n_child(void * object) const override = 0;
+
+            /* number of children unknown at compile time.
+             * null-pointer -> 0, non-null pointer -> 1
+             */
+            virtual uint32_t n_child_fixed() const override { return 0; /*unknown*/ }
+
             virtual TaggedPtr child_tp(uint32_t i, void * object) const override = 0;
             /* (forbidden) */
             virtual std::string const & struct_member_name(uint32_t i) const override;
