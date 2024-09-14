@@ -9,7 +9,6 @@
 namespace xo {
     //using xo::web::Alist;
     using xo::web::HttpEndpointDescr;
-    using xo::ref::rp;
     //using xo::time::utc_nanos;
     namespace py = pybind11;
 
