@@ -28,21 +28,34 @@ Relative to `boost::ratio`:
 - [github/rconybea/xo-indentlog](https://github.com/Rconybea/xo-indentlog) logging (used by unit tests)
 - [github/rconybea/xo-randomgen](https://github.com/Rconybea/xo-randomgen) rng (used by unit tests)
 
-### clone xo-ratio
+### copy repository locally
 
+Using `xo-build` (provided by `xo-cmake`):
+```
+$ xo-build --clone xo-ratio`
+```
+
+or equivalently:
 ```
 $ cd ~/proj   # for example
 $ git clone https://github.com/Rconybea/xo-ratio
 ```
 
 ### build + install
+
+Using `xo-build`:
 ```
-$ cd xo-ratio
+$ xo-build --configure --build --install xo-ratio
+```
+
+or equivalently:
+```
 $ PREFIX=/usr/local # for example
 $ BUILDDIR=.build   # for example
-$ mkdir ${BUILDDIR}
-$ cmake --build .build
-$ cmake --install .build
+$ mkdir xo-ratio/${BUILDDIR}
+$ cmake -DCMAKE_INSTALL_PREFIX=${PREFIX} -S xo-ratio -B xo-ratio/${BUILDDIR}
+$ cmake --build xo-ratio/${BUILDDIR}
+$ cmake --install xo-ratio/${BUILDDIR}
 ```
 
 ### build with unit test coverage
