@@ -6,26 +6,16 @@ project(xo_ordinaltree VERSION 0.1)
 enable_language(CXX)
 
 # common XO macros (see github:Rconybea/xo-cmake)
+include(GNUInstallDirs)
 include(cmake/xo-bootstrap-macros.cmake)
 
-# ----------------------------------------------------------------
-# unit test setup
-
-enable_testing()
-# enable code coverage for all executables+libraries
-# (when configured with -DCODE_COVERAGE=ON)
-#
-add_code_coverage()
-add_code_coverage_all_targets(
-  EXCLUDE
-  /nix/store/*
-  ${PROJECT_SOURCE_DIR}/utest/*)
+xo_cxx_toplevel_options3()
 
 # ----------------------------------------------------------------
 # c++ settings
 
-# sets XO_COMPILE_OPTIONS
-xo_toplevel_compile_options()
+set(PROJECT_CXX_FLAGS "")
+add_definitions(${PROJECT_CXX_FLAGS})
 
 # ----------------------------------------------------------------
 # output targets
