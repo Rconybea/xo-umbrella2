@@ -85,7 +85,7 @@ namespace xo {
                                                        xtag("required_hashcode", typeid(Sink1<T>).hash_code()),
                                                        xtag("required_name", typeid(Sink1<T>).name()),
                                                        xtag("src_hashcode", src_hashcode),
-                                                       xtag("sink_hashcode", sink->sink_ev_type()->typeinfo()->hash_code())
+                                                       xtag("sink_hashcode", sink->sink_ev_type()->native_typeinfo()->hash_code())
 #ifdef DEBUG_EVENT_TYPEINFO
                                                        , xtag("sink_hashcode", sink->item_typeinfo()->hash_code())
                                                        , xtag("sink_parent_hashcode", sink_parent_typeinfo->hash_code())
