@@ -4,7 +4,7 @@
 
 namespace xo {
   namespace process {
-    ref::rp<UpxToConsole>
+    rp<UpxToConsole>
     UpxToConsole::make()
     {
       return new UpxToConsole();

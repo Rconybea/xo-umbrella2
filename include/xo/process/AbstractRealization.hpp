@@ -12,7 +12,7 @@ namespace xo {
   namespace process {
     class AbstractRealization : public reflect::SelfTagging {
     public:
-      virtual ref::rp<AbstractStochasticProcess> stochastic_process() const = 0;
+      virtual rp<AbstractStochasticProcess> stochastic_process() const = 0;
     }; /*AbstractRealization*/
   } /*namespace process*/
 } /*namespace xo*/

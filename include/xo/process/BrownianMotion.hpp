@@ -36,7 +36,7 @@ namespace xo {
 
             // ----- needed by Realization2<double> -----
 
-            virtual ref::rp<Realization2<double>> make_realization() override = 0;
+            virtual rp<Realization2<double>> make_realization() override = 0;
 
             // ----- inherited from StochasticProcess<double> -----
 
@@ -83,7 +83,7 @@ namespace xo {
              * seed.  initialize pseudorandom-number generator
              */
             template<class Seed>
-            static ref::rp<BrownianMotion<RngEngine>> make(utc_nanos t0,
+            static rp<BrownianMotion<RngEngine>> make(utc_nanos t0,
                                                            double sdev,
                                                            Seed const & seed)
                 {
@@ -121,7 +121,7 @@ namespace xo {
 
             // ----- inherited from Realizable2Process<> -----
 
-            virtual ref::rp<Realization2<double>> make_realization() override {
+            virtual rp<Realization2<double>> make_realization() override {
                 rstate_type rs0 = std::make_pair(this->t0(),
                                                  this->t0_value());
 

@@ -17,7 +17,7 @@ namespace xo {
         public:
             UpxToConsole();
 
-            static ref::rp<UpxToConsole> make();
+            static rp<UpxToConsole> make();
         }; /*UpxToConsole*/
     } /*namespace process*/
 } /*namespace xo*/

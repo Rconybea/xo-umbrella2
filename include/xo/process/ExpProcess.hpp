@@ -26,7 +26,7 @@ namespace xo {
             using TaggedRcptr = reflect::TaggedRcptr;
 
         public:
-            static ref::rp<ExpProcess> make(double scale,
+            static rp<ExpProcess> make(double scale,
                                             ref::brw<StochasticProcess<double>> exp_proc) {
                 return new ExpProcess(scale, exp_proc);
             } /*make*/
@@ -95,7 +95,7 @@ namespace xo {
              */
             double scale_ = 1.0;
             /* exponentiate this process */
-            ref::rp<StochasticProcess<double>> exponent_process_;
+            rp<StochasticProcess<double>> exponent_process_;
         }; /*ExpProcess*/
     } /*namespace process*/
 } /*namespace xo*/

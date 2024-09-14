@@ -20,7 +20,6 @@ namespace xo {
   using xo::process::BrownianMotion;
   using xo::rng::xoshiro256ss;
   using xo::reactor::SinkToConsole;
-  using xo::ref::rp;
   using xo::time::timeutil;
   using xo::time::seconds;
   using xo::time::utc_nanos;
@@ -98,7 +97,7 @@ namespace xo {
 
           log && log("create brownian motion process 'bm'..");
 
-          ref::rp<BrownianMotion<xoshiro256ss>> bm
+          rp<BrownianMotion<xoshiro256ss>> bm
               = BrownianMotion<xoshiro256ss>::make(t0,
                                                    0.30 /*sdev -- annualized volatility*/,
                                                    12345678UL /*seed*/);

@@ -17,7 +17,7 @@ namespace xo {
      *   one of its own paths
      * - p provides methods to implement such unfolding:
      *   - .make_realization() :: Realization2<T>
-     *      create new realization of p.  
+     *      create new realization of p.
      *   - .rstate_sample(t1,rs0) :: time x Rstate -> Rstate
      *      given runstate rs0 representing process state at some time t0,
      *      sample process at time t1, with t0<=t1
@@ -28,7 +28,7 @@ namespace xo {
      *   - .rstate_insample(t1,rs0,rs2) :: time x Rstate x Rstate -> Rstate
      *     given runstates rs0, rs2 representing process state at two times t0<t2,
      *     sample process at time t1, with t0<=t1<=t2
-     *     
+     *
      * Require:
      * - Rstate.last() :: (time x T)  last process sample represented by Rstate
      *                    if p is a markov process, this is also sufficient to drive
@@ -39,7 +39,7 @@ namespace xo {
     template<typename T>
     class Realizable2Process : public StochasticProcess<T> {
     public:
-      virtual ref::rp<Realization2<T>> make_realization() = 0;
+      virtual rp<Realization2<T>> make_realization() = 0;
       /* make_rstate() will be used to establish nested state when a process is used
        * as input to a transforming process (ex: ExpProcess).
        * in that context the outer process' realization state will
@@ -50,7 +50,7 @@ namespace xo {
       // Rstate rstate_init() const;
       // void rstate_sample_implace(utc_nanos t1, Rstate * p_rs0 const;
     }; /*Realizable2Process*/
-  
+
   } /*namespace process*/
 } /*namespace xo*/
 

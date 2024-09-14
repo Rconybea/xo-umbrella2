@@ -46,13 +46,13 @@ namespace xo {
             using nanos = xo::time::nanos;
 
         public:
-            ProcessRealization2(Rstate const & rstate, ref::rp<Process> const & process)
+            ProcessRealization2(Rstate const & rstate, rp<Process> const & process)
                 : rstate_{rstate}, process_{process} {}
-            ProcessRealization2(Rstate && rstate, ref::rp<Process> const & process)
+            ProcessRealization2(Rstate && rstate, rp<Process> const & process)
                 : rstate_{std::move(rstate)}, process_{process} {}
 
             Rstate const & rstate() const { return rstate_; }
-            ref::rp<Process> const & process() const { return process_; }
+            rp<Process> const & process() const { return process_; }
 
             /* sample process at point .rstate.tk + dt
              * Require:
@@ -64,7 +64,7 @@ namespace xo {
 
             // ----- inherited from AbstractRealization -----
 
-            virtual ref::rp<AbstractStochasticProcess> stochastic_process() const override {
+            virtual rp<AbstractStochasticProcess> stochastic_process() const override {
                 return process_;
             } /*stochastic_process*/
 
@@ -81,7 +81,7 @@ namespace xo {
             /* process (set of paths + probability measure);
              * *this coordinates with .process to constructively samples one such path
              */
-            ref::rp<Process> process_;
+            rp<Process> process_;
         }; /*ProcessRealization2*/
     } /*namespace process*/
 

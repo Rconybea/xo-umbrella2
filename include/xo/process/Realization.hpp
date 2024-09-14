@@ -33,7 +33,7 @@ namespace xo {
             using KnownRange = decltype(std::views::all(KnownMap()));
 
         public:
-            static ref::rp<Realization> make(ref::brw<StochasticProcess<T>> p) {
+            static rp<Realization> make(ref::brw<StochasticProcess<T>> p) {
                 return new Realization(p);
             } /*make*/
 
@@ -58,7 +58,7 @@ namespace xo {
 
         private:
             /* stochastic process from which this realization is sampled */
-            ref::rp<StochasticProcess<T>> process_;
+            rp<StochasticProcess<T>> process_;
 
             /* process value (for this realization) has been established (sampled)
              * at each time t in {.known_map[].first}

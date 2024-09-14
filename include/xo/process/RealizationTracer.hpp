@@ -32,7 +32,7 @@ namespace xo {
             using nanos = xo::time::nanos;
 
         public:
-            static ref::rp<RealizationTracer> make(ref::rp<Process> const & p) {
+            static rp<RealizationTracer> make(rp<Process> const & p) {
                 return new RealizationTracer(p);
             }
 
@@ -40,7 +40,7 @@ namespace xo {
             utc_nanos current_tm() const { return current_.first; }
             /* value of this path at time t */
             T const & current_value() const { return current_.second; }
-            ref::rp<Process> const & process() const { return process_; }
+            rp<Process> const & process() const { return process_; }
 
             /* sample with fixed time:
              * - advance to time t+dt,  where t=.current_tm()
@@ -95,7 +95,7 @@ namespace xo {
 #endif
 
         private:
-            RealizationTracer(ref::rp<Process> const & p)
+            RealizationTracer(rp<Process> const & p)
                 : current_(event_type(p->t0(), p->t0_value())), process_(p) {}
 
         private:
@@ -103,7 +103,7 @@ namespace xo {
             event_type current_;
 
             /* develop a sampled realization of this stochastic process */
-            ref::rp<Process> process_;
+            rp<Process> process_;
         }; /*RealizationTracer*/
 
     } /*namespace process*/

@@ -39,8 +39,8 @@ namespace xo {
                           xtag("p", this));
             } /*dtor*/
 
-            static ref::rp<RealizationSourceBase>
-            make(ref::rp<RealizationTracer<T>> const & tracer,
+            static rp<RealizationSourceBase>
+            make(rp<RealizationTracer<T>> const & tracer,
                  nanos ev_interval_dt,
                  EventSink const & ev_sink)
                 {
@@ -60,7 +60,7 @@ namespace xo {
                 } /*make*/
 
 #ifdef NOT_IN_USE
-            static ref::rp<RealizationSimSource> make(ref::rp<RealizationTracer<T>> tracer,
+            static rp<RealizationSimSource> make(rp<RealizationTracer<T>> tracer,
                                                       nanos ev_interval_dt,
                                                       EventSink && ev_sink)
                 {
@@ -142,7 +142,7 @@ namespace xo {
                 return 1;
             } /*deliver_one*/
 
-            virtual CallbackId attach_sink(ref::rp<reactor::AbstractSink> const & /*sink*/) override {
+            virtual CallbackId attach_sink(rp<reactor::AbstractSink> const & /*sink*/) override {
                 /* see RealizationSource */
                 assert(false);
                 return CallbackId();
@@ -168,13 +168,13 @@ namespace xo {
             }
 
         protected:
-            RealizationSourceBase(ref::rp<RealizationTracer<T>> const & tracer,
+            RealizationSourceBase(rp<RealizationTracer<T>> const & tracer,
                                   nanos ev_interval_dt,
                                   EventSink const & ev_sink)
                 : tracer_{tracer},
                   ev_sink_{std::move(ev_sink)},
                   ev_interval_dt_{ev_interval_dt} {}
-            RealizationSourceBase(ref::rp<RealizationTracer<T>> const & tracer,
+            RealizationSourceBase(rp<RealizationTracer<T>> const & tracer,
                                   nanos ev_interval_dt,
                                   EventSink && ev_sink)
                 : tracer_{tracer},
@@ -192,7 +192,7 @@ namespace xo {
             /* counts lifetime #of events */
             uint32_t n_out_ev_ = 0;
             /* produces events representing realized stochastic-process values */
-            ref::rp<RealizationTracer<T>> tracer_;
+            rp<RealizationTracer<T>> tracer_;
             /* send stochastic-process events to this sink */
             EventSink ev_sink_;
             /* discretize process using this interval:
@@ -218,13 +218,13 @@ namespace xo {
             using nanos = xo::time::nanos;
 
         public:
-            static ref::rp<RealizationSource<EventType, T>> make(ref::rp<RealizationTracer<T>> const & tracer,
+            static rp<RealizationSource<EventType, T>> make(rp<RealizationTracer<T>> const & tracer,
                                                                  nanos ev_interval_dt)
                 {
                     return new RealizationSource<EventType, T>(tracer, ev_interval_dt);
                 } /*make*/
 
-            CallbackId add_callback(ref::rp<reactor::Sink1<EventType>> const & cb) {
+            CallbackId add_callback(rp<reactor::Sink1<EventType>> const & cb) {
                 return this->ev_sink_addr()->add_callback(cb);
             } /*add_callback*/
 
@@ -238,7 +238,7 @@ namespace xo {
              *    .add_callback(sink)    <--> .attach_sink(sink)
              *    .remove_callback(sink) <--> .detach_sink(sink)
              */
-            virtual CallbackId attach_sink(ref::rp<reactor::AbstractSink> const & sink) override {
+            virtual CallbackId attach_sink(rp<reactor::AbstractSink> const & sink) override {
                 /* -------
                  * WARNING
                  * -------
@@ -265,7 +265,7 @@ namespace xo {
                 //scope lscope(c_self_name);
                 //lscope.log(xtag("T", reflect::type_name<T>()));
 
-                ref::rp<reactor::Sink1<EventType>> event_sink
+                rp<reactor::Sink1<EventType>> event_sink
                     = reactor::Sink1<EventType>::require_native(c_self_name, sink);
 
                 return this->add_callback(event_sink);
@@ -296,7 +296,7 @@ namespace xo {
             } /*visit_direct_consumers*/
 
         private:
-            RealizationSource(ref::rp<RealizationTracer<T>> const & tracer,
+            RealizationSource(rp<RealizationTracer<T>> const & tracer,
                               nanos ev_interval_dt)
                 : RealizationSourceBase
                   <EventType, T,
