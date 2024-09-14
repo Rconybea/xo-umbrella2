@@ -20,10 +20,10 @@ namespace xo {
         };
 
         template <typename T>
-        class EventTimeFn<xo::ref::rp<T>> {
+        class EventTimeFn<xo::rp<T>> {
         public:
             using utc_nanos = xo::time::utc_nanos;
-            using event_t = xo::ref::rp<T>;
+            using event_t = xo::rp<T>;
 
         public:
             static utc_nanos event_tm(event_t const & ev) { return ev->tm(); }

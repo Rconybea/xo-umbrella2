@@ -64,7 +64,7 @@ namespace xo {
             /* set .trace_sim_flag */
             virtual void set_debug_sim_flag(bool x) = 0;
 
-            virtual CallbackId attach_sink(ref::rp<AbstractSink> const & sink) = 0;
+            virtual CallbackId attach_sink(rp<AbstractSink> const & sink) = 0;
             virtual void detach_sink(CallbackId id) = 0;
 
             /* endpoint for a websocket subscriber;
@@ -92,7 +92,7 @@ namespace xo {
             std::uint64_t deliver_all();
         }; /*AbstractSource*/
 
-        using AbstractSourcePtr = ref::rp<AbstractSource>;
+        using AbstractSourcePtr = rp<AbstractSource>;
 
     } /*namespace reactor*/
 } /*namespace xo*/

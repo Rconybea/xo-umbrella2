@@ -13,7 +13,6 @@ namespace xo {
     using xo::reactor::PollingReactor;
     using xo::reactor::FifoQueue;
     using xo::reactor::SinkToFunction;
-    using xo::ref::rp;
     using xo::time::timeutil;
     using xo::time::seconds;
     using xo::time::utc_nanos;

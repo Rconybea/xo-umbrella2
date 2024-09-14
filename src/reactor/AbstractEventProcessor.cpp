@@ -6,7 +6,6 @@
 #include <map>
 
 namespace xo {
-    using ref::rp;
     using ref::brw;
     using xo::tostr;
     using std::uint32_t;

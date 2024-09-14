@@ -25,7 +25,7 @@ namespace xo {
             /* find all event processors ep reachable from x (i.e. downstream from x).
              * report each such ep exactly once
              */
-            static std::vector<ref::rp<AbstractEventProcessor>> map_network(ref::rp<AbstractEventProcessor> const & x);
+            static std::vector<rp<AbstractEventProcessor>> map_network(rp<AbstractEventProcessor> const & x);
 
             /* visit direct downstream consumers c[i] of this event processor.
              * call ep(c[i]) for each such consumer.

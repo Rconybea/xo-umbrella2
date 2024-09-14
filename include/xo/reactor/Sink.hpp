@@ -40,8 +40,8 @@ namespace xo {
             /* convenience:  convert abstract sink to Sink1<T>*,
              * or throw
              */
-            static ref::rp<Sink1<T>> require_native(std::string_view caller,
-                                                    ref::rp<AbstractSink> const & sink)
+            static rp<Sink1<T>> require_native(std::string_view caller,
+                                               rp<AbstractSink> const & sink)
                 {
                     using xo::scope;
                     using xo::xtag;
@@ -112,7 +112,7 @@ namespace xo {
             /* Sink1<T> only allows source providing T */
             virtual bool allow_polymorphic_source() const override { return false; }
 
-            virtual void attach_source(ref::rp<AbstractSource> const & src) override {
+            virtual void attach_source(rp<AbstractSource> const & src) override {
                 src->attach_sink(this);
             } /*attach_source*/
 

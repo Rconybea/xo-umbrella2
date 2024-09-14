@@ -123,7 +123,7 @@ namespace xo {
             uint64_t online_advance_until(utc_nanos tm, bool replay_flag);
         }; /*ReactorSource*/
 
-        using ReactorSourcePtr = ref::rp<ReactorSource>;
+        using ReactorSourcePtr = rp<ReactorSource>;
     } /*namespace reactor*/
 } /*namespace xo*/
 

@@ -15,7 +15,7 @@ namespace xo {
             using CallbackId = fn::CallbackId;
 
         public:
-            virtual CallbackId add_callback(ref::rp<Callback> const & cb) = 0;
+            virtual CallbackId add_callback(rp<Callback> const & cb) = 0;
             virtual void remove_callback(CallbackId id) = 0;
         }; /*EventSource*/
 

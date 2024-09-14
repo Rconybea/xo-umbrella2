@@ -13,7 +13,6 @@ namespace xo {
     using xo::reactor::SinkEndpoint;
     using xo::reactor::SinkToConsole;
     using xo::time::utc_nanos;
-    using xo::ref::rp;
 
     namespace {
         class TestSink : public SinkEndpoint<int> {

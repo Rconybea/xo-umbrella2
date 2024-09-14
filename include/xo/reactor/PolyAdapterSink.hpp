@@ -29,10 +29,10 @@ namespace xo {
 
         public:
             /* named ctor idiom */
-            static ref::rp<PolyAdapterSink> make(ref::rp<AbstractSink> poly_sink) {
+            static rp<PolyAdapterSink> make(rp<AbstractSink> poly_sink) {
                 //xo::scope lscope("PolyAdapterSink::make");
 
-                ref::rp<PolyAdapterSink> retval(new PolyAdapterSink(poly_sink));
+                rp<PolyAdapterSink> retval(new PolyAdapterSink(poly_sink));
 
                 //lscope.log("adapter", (void*)retval.get());
 
@@ -80,11 +80,11 @@ namespace xo {
             } /*display*/
 
         private:
-            PolyAdapterSink(ref::rp<AbstractSink> poly_sink) : poly_sink_{std::move(poly_sink)} {}
+            PolyAdapterSink(rp<AbstractSink> poly_sink) : poly_sink_{std::move(poly_sink)} {}
 
         private:
             /* mandate: .poly_sink.allow_polymorphic_source() is true */
-            ref::rp<AbstractSink> poly_sink_;
+            rp<AbstractSink> poly_sink_;
         }; /*PolyAdapterSink*/
     } /*namespace reactor*/
 } /*namespace xo*/

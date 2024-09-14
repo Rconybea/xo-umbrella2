@@ -59,7 +59,7 @@ namespace xo {
        * with a function thats calls a .notify_xxx() method
        * on this Sink
        */
-      virtual void attach_source(ref::rp<AbstractSource> const & src) = 0;
+      virtual void attach_source(rp<AbstractSource> const & src) = 0;
 
       /* accept incoming event,  given by tagged pointer */
       virtual void notify_ev_tp(TaggedPtr const & ev_tp) = 0;

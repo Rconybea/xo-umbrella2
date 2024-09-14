@@ -8,9 +8,6 @@
 namespace xo {
     using xo::web::StreamEndpointDescr;
     using xo::reactor::AbstractSink;
-    using xo::ref::rp;
-    //using xo::scope;
-    //using xo::tostr;
 
     namespace reactor {
         StreamEndpointDescr

@@ -13,7 +13,7 @@ namespace xo {
         class PollingReactor : public Reactor {
         public:
             /* named ctor idiom */
-            static ref::rp<PollingReactor> make() { return new PollingReactor(); }
+            static rp<PollingReactor> make() { return new PollingReactor(); }
 
             // ----- inherited from Reactor -----
 

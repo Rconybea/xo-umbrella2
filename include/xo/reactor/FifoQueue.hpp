@@ -29,7 +29,7 @@ namespace xo {
             using utc_nanos = xo::time::utc_nanos;
 
         public:
-            static ref::rp<FifoQueue> make(EvTimeFn evtm_fn = EvTimeFn()) { return new FifoQueue(evtm_fn); }
+            static rp<FifoQueue> make(EvTimeFn evtm_fn = EvTimeFn()) { return new FifoQueue(evtm_fn); }
 
             // ----- inherited from Sink1<T> -----
 
@@ -141,8 +141,8 @@ namespace xo {
             virtual bool debug_sim_flag() const override { return debug_sim_flag_; }
             virtual void set_debug_sim_flag(bool x) override { this->debug_sim_flag_ = x; }
 
-            virtual CallbackId attach_sink(ref::rp<AbstractSink> const & sink) override {
-                ref::rp<EventSink> native_sink
+            virtual CallbackId attach_sink(rp<AbstractSink> const & sink) override {
+                rp<EventSink> native_sink
                     = EventSink::require_native("FifoQueue::attach_sink", sink);
 
                 if (native_sink) {
@@ -168,7 +168,7 @@ namespace xo {
 
             // ----- inherited from EventSource -----
 
-            virtual CallbackId add_callback(ref::rp<EventSink> const & cb) override {
+            virtual CallbackId add_callback(rp<EventSink> const & cb) override {
                 return this->cb_set_.add_callback(cb);
             }
 
