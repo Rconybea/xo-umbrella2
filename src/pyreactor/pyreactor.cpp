@@ -22,7 +22,6 @@ namespace xo {
     using xo::json::PrintJsonSingleton;
     using xo::fn::CallbackId;
     using xo::ref::Refcount;
-    using xo::ref::rp;
     using xo::time::utc_nanos;
     using xo::tostr;
     namespace py = pybind11;
@@ -42,7 +41,7 @@ namespace xo {
             py::class_<CallbackId>(m, "CallbackId");
 
             py::class_<AbstractEventProcessor,
-                       xo::ref::rp<AbstractEventProcessor>>(m, "AbstractEventProcessor")
+                       xo::rp<AbstractEventProcessor>>(m, "AbstractEventProcessor")
                 .def_property("name",
                               &AbstractEventProcessor::name,
                               &AbstractEventProcessor::set_name)
@@ -53,7 +52,7 @@ namespace xo {
 
             py::class_<AbstractSource,
                        AbstractEventProcessor,
-                       xo::ref::rp<AbstractSource>>(m, "AbstractSource")
+                       xo::rp<AbstractSource>>(m, "AbstractSource")
                 .def_property_readonly("source_ev_type", &AbstractSource::source_ev_type)
                 .def_property_readonly("is_volatile", &AbstractSource::is_volatile)
                 .def_property_readonly("n_out_ev", &AbstractSource::n_out_ev)
@@ -68,7 +67,7 @@ namespace xo {
 
             py::class_<AbstractSink,
                        AbstractEventProcessor,
-                       xo::ref::rp<AbstractSink>>(m, "AbstractSink")
+                       xo::rp<AbstractSink>>(m, "AbstractSink")
                 //.cdef("__repr__", &AbstractSink::display_string)
                 .def_property_readonly("sink_ev_type", &AbstractSink::sink_ev_type)
                 .def_property_readonly("n_in_ev", &AbstractSink::n_in_ev)
@@ -76,7 +75,7 @@ namespace xo {
 
             py::class_<ReactorSource,
                        AbstractSource,
-                       xo::ref::rp<ReactorSource>>
+                       xo::rp<ReactorSource>>
                 (m, "ReactorSource")
                 .def_property_readonly("is_empty", &ReactorSource::is_empty)
                 .def_property_readonly("is_nonempty", &ReactorSource::is_nonempty)
@@ -131,7 +130,7 @@ namespace xo {
 
             py::class_<SinkToConsole<std::pair<utc_nanos, double>>,
                        AbstractSink,
-                       xo::ref::rp<SinkToConsole<std::pair<utc_nanos, double>>>>
+                       xo::rp<SinkToConsole<std::pair<utc_nanos, double>>>>
                 (m, "SinkToConsole");
 #endif
         } /*pyreactor*/
