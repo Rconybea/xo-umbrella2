@@ -213,7 +213,7 @@ namespace xo {
 #ifdef NOT_USING
         class TemporaryTest {
         public:
-            static ref::rp<SinkToConsole<std::pair<xo::time::utc_nanos, double>>> realization_printer();
+            static rp<SinkToConsole<std::pair<xo::time::utc_nanos, double>>> realization_printer();
         }; /*TemporaryTest*/
 #endif
     } /*namespace reactor*/

@@ -38,17 +38,17 @@ namespace xo {
              *   2. provide .last_n(), .last_dt()
              */
 
-            virtual void http_snapshot(ref::rp<PrintJson> const & pjson,
+            virtual void http_snapshot(rp<PrintJson> const & pjson,
                                        std::ostream * p_os) const = 0;
 
             /* http endpoint; generates http output for this eventstore */
-            virtual HttpEndpointDescr http_endpoint_descr(ref::rp<PrintJson> const & pjson,
+            virtual HttpEndpointDescr http_endpoint_descr(rp<PrintJson> const & pjson,
                                                           std::string const & url_prefix) const {
 
                 /* important that lambda contains its own rp<PrintJson>;
                  * reference to stack will not do
                  */
-                ref::rp<PrintJson> pjson_rp = pjson;
+                rp<PrintJson> pjson_rp = pjson;
 
                 auto http_fn = ([this, pjson_rp]
                                 (std::string const & /*uri*/,
@@ -118,7 +118,7 @@ namespace xo {
             using Alist = xo::web::Alist;
             using HttpEndpointDescr = xo::web::HttpEndpointDescr;
 
-            static ref::rp<EventStoreImpl> make() { return new EventStoreImpl(); }
+            static rp<EventStoreImpl> make() { return new EventStoreImpl(); }
 
             /* visit most recent n events in this store.
              * returns #of events actually visited
@@ -206,7 +206,7 @@ namespace xo {
             virtual std::uint32_t size() const override { return tree_.size(); }
 
             /* write http snapshot of current state to *p_os */
-            virtual void http_snapshot(ref::rp<PrintJson> const & pjson, std::ostream * p_os) const override {
+            virtual void http_snapshot(rp<PrintJson> const & pjson, std::ostream * p_os) const override {
                 using xo::reflect::Reflect;
 
                 /* visit last 100 events;

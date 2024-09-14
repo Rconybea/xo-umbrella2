@@ -6,7 +6,7 @@
 namespace xo {
   namespace reactor {
 #ifdef NOT_USING
-    ref::rp<SinkToConsole<std::pair<xo::time::utc_nanos, double>>>
+    rp<SinkToConsole<std::pair<xo::time::utc_nanos, double>>>
     TemporaryTest::realization_printer()
     {
       return new SinkToConsole<std::pair<xo::time::utc_nanos, double>>();

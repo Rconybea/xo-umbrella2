@@ -29,7 +29,7 @@ namespace xo {
         public:
             ~SecondarySource() = default;
 
-            static ref::rp<SecondarySource> make() { return new SecondarySource(); }
+            static rp<SecondarySource> make() { return new SecondarySource(); }
 
             /* last event delivered from this source --
              * i.e. event in most recent call to .deliver_one_aux()
@@ -114,7 +114,7 @@ namespace xo {
 
             // ----- inherited from EventSource -----
 
-            virtual CallbackId add_callback(ref::rp<EventSink> const & cb) override {
+            virtual CallbackId add_callback(rp<EventSink> const & cb) override {
                 return this->cb_set_.add_callback(cb);
             } /*add_callback*/
 
@@ -195,8 +195,8 @@ namespace xo {
             virtual bool debug_sim_flag() const override { return debug_sim_flag_; }
             virtual void set_debug_sim_flag(bool x) override { this->debug_sim_flag_ = x; }
 
-            virtual CallbackId attach_sink(ref::rp<AbstractSink> const & sink) override {
-                ref::rp<EventSink> native_sink
+            virtual CallbackId attach_sink(rp<AbstractSink> const & sink) override {
+                rp<EventSink> native_sink
                     = EventSink::require_native("SecondarySource::attach_sink", sink);
 
                 if (native_sink) {

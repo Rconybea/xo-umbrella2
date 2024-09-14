@@ -13,7 +13,7 @@ namespace xo {
                                              LastReducer<Event,
                                                          StructEventTimeFn<Event>>>;
 
-        /* use when Event is ref::rp<T> for some T */
+        /* use when Event is rp<T> for some T */
         template<typename Event>
         using DirectSourcePtr = SecondarySource<Event,
                                                 LastReducer<Event,
