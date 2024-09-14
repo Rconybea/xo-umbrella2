@@ -14,7 +14,7 @@ namespace xo {
             Normal() = default;
 
             /* N(0,1):  mean 0, sdev 1 */
-            static ref::rp<Normal> unit() { return new Normal(); }
+            static rp<Normal> unit() { return new Normal(); }
 
             /* normal probability density:
              *

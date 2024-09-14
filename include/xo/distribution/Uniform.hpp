@@ -11,7 +11,7 @@ namespace xo {
         public:
             Uniform(double lo, double hi) : lo_(lo), hi_(hi) {}
 
-            static ref::rp<Uniform> unit() { return new Uniform(0.0, 1.0); }
+            static rp<Uniform> unit() { return new Uniform(0.0, 1.0); }
 
             static double density_impl(double lo, double hi, double x) {
                 if (x <= lo)
