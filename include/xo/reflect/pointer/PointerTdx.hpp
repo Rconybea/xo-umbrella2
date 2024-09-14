@@ -28,7 +28,6 @@ namespace xo {
              * null-pointer -> 0, non-null pointer -> 1
              */
             virtual uint32_t n_child_fixed() const override { return 0; /*unknown*/ }
-
             virtual TaggedPtr child_tp(uint32_t i, void * object) const override = 0;
             /* (forbidden) */
             virtual std::string const & struct_member_name(uint32_t i) const override;
@@ -36,7 +35,7 @@ namespace xo {
 
         // ----- RefPointerTdx -----
 
-        /* xo::ref::intrusive_ptr<T> for some T */
+        /* Pointer = xo::ref::intrusive_ptr<T> for some T */
         template<typename Pointer>
         class RefPointerTdx : public PointerTdx {
         public:
@@ -57,6 +56,10 @@ namespace xo {
                 else
                     return 0;
             } /*n_child*/
+
+            virtual TypeDescrBase * fixed_child_td(uint32_t /*i*/) const override {
+                return EstablishTypeDescr::establish<typename Pointer::element_type>();
+            }
 
             virtual TaggedPtr child_tp(uint32_t i, void * object) const override {
                 using xo::tostr;
