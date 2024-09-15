@@ -150,7 +150,7 @@ namespace xo {
                      py::doc("write to console with state of all jit-owned dynamic libraries"))
                 .def("codegen",
                      [](MachPipeline & jit, const rp<Expression> & expr) {
-                         return jit.codegen(expr.borrow());
+                         return jit.codegen_toplevel(expr.borrow());
                      },
                      py::arg("x"),
                      py::doc("generate llvm (IR) code for Expression x"),
