@@ -48,7 +48,6 @@ namespace xo {
     using xo::reactor::ReactorSource;
     using xo::reactor::PtrEventStore;
     using xo::reflect::SelfTagging;
-    using xo::ref::rp;
     using xo::time::utc_nanos;
     using Eigen::VectorXd;
     using Eigen::VectorXi;
@@ -164,7 +163,7 @@ namespace xo {
             // ----- xo::kalman::KalmanFilterStep -----
 
             py::class_<KalmanFilterStep>(m, "KalmanFilterStep")
-                .def(py::init<rp<KalmanFilterState>, KalmanFilterTransition, KalmanFilterObservable, ref::rp<KalmanFilterInput>>(),
+                .def(py::init<rp<KalmanFilterState>, KalmanFilterTransition, KalmanFilterObservable, rp<KalmanFilterInput>>(),
                      py::arg("state"), py::arg("model"), py::arg("obs"), py::arg("input"))
                 .def_property_readonly("state", &KalmanFilterStep::state)
                 .def_property_readonly("model", &KalmanFilterStepBase::model)
