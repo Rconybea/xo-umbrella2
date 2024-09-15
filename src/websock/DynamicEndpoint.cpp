@@ -8,7 +8,6 @@
 namespace xo {
     using xo::web::Alist;
     using xo::fn::CallbackId;
-    using xo::ref::rp;
 
     namespace web {
         DynamicEndpoint::DynamicEndpoint(std::string uri_pattern,

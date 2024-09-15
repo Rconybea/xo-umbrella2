@@ -67,7 +67,7 @@ namespace xo {
              * send output to ws_sink
              */
             CallbackId subscribe(std::string const & incoming_uri,
-                                 ref::rp<AbstractSink> const & ws_sink) const;
+                                 rp<AbstractSink> const & ws_sink) const;
 
             /* unsubscribe stream from this endpoint;
              * reverses the effect of a previous call to .subscribe()

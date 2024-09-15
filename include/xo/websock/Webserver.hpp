@@ -83,8 +83,8 @@ namespace xo {
              *       the underlying libwebsocket library is not advertised to be
              *       threadsafe
              */
-            static ref::rp<Webserver> make(WebserverConfig const & ws_config,
-                                           ref::rp<PrintJson> const & pjson);
+            static rp<Webserver> make(WebserverConfig const & ws_config,
+                                      rp<PrintJson> const & pjson);
 
             /* current state */
             virtual Runstate state() const = 0;

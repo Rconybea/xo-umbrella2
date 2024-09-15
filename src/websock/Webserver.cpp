@@ -34,7 +34,6 @@ namespace xo {
     using xo::reactor::AbstractSink;
     using xo::json::PrintJson;
     using xo::fn::CallbackId;
-    using xo::ref::rp;
     using xo::scope;
     using xo::xtag;
 
