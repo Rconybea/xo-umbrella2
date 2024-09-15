@@ -157,7 +157,6 @@ namespace xo {
             case '*':
                 /* not punctuation -- allowed in symbol */
                 return false;
-            case '*':
             case '/':
                 /* not punctuation -- for symmetry with +,- */
                 return false;
@@ -346,12 +345,20 @@ namespace xo {
                 if (token_text.size() == 1) {
                     /* standalone '*' */
                     tk_type = tokentype::tk_star;
+                    ++ix;
+                } else {
+                    /* '*' isn't punctuation -- but may allow appearance in a longer token
+                     *
+                     * thinking that x*y is a symbol with an embedded '*' character;
+                     * in particular want to support kebab-case symbols like 'foo-config'
+                     */
                 }
                 break;
             case '/':
                 if (token_text.size() == 1) {
                     /* standalone '/' */
                     tk_type = tokentype::tk_slash;
+                    ++ix;
                 }
                 break;
             case '"':
@@ -528,13 +535,6 @@ namespace xo {
                 break;
             case ';':
                 tk_type = tokentype::tk_semicolon;
-                ++ix;
-                break;
-            case '*':
-                /* '*' isn't punctuation, since can appear within symbol.
-                 * However it cannot begin a symbol..
-                 */
-                tk_type = tokentype::tk_star;
                 ++ix;
                 break;
             case ':':
