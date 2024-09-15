@@ -85,7 +85,7 @@ namespace xo {
             utc_nanos tm() const { return state_ext_->tm(); }
             KalmanFilterSpec const & filter_spec() const { return filter_spec_; }
             KalmanFilterStep const & step() const { return step_; }
-            ref::rp<KalmanFilterStateExt> const & state_ext() const { return state_ext_; }
+            rp<KalmanFilterStateExt> const & state_ext() const { return state_ext_; }
 
             /* notify kalman filter with input for time t(k+1) = input_kp1.tkp1()
              * Require: input.tkp1() >= .current_tm()
@@ -95,7 +95,7 @@ namespace xo {
              * - .filter_spec_k, .step_k, .state_k updated
              *   for observations in input_kp1
              */
-            void notify_input(ref::rp<KalmanFilterInput> const & input_kp1);
+            void notify_input(rp<KalmanFilterInput> const & input_kp1);
 
             void display(std::ostream & os) const;
             std::string display_string() const;
@@ -112,7 +112,7 @@ namespace xo {
             /* filter state as of most recent observation;
              * result of applying KalmanFilterEngine::step() to contents of .step
              */
-            ref::rp<KalmanFilterStateExt> state_ext_;
+            rp<KalmanFilterStateExt> state_ext_;
         }; /*KalmanFilter*/
 
         inline std::ostream &

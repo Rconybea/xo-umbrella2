@@ -26,7 +26,7 @@ namespace xo {
     using xo::time::timeutil;
     using xo::time::utc_nanos;
     using xo::time::seconds;
-    using xo::ref::rp;
+    using xo::rp;
     using xo::log_level;
     using logutil::matrix;
     using xo::print::ccs;
@@ -144,7 +144,7 @@ namespace xo {
 
                 z_stats.include_sample(z[0]);
 
-                ref::rp<KalmanFilterInput> inputk
+                rp<KalmanFilterInput> inputk
                     = KalmanFilterInput::make_present(tkp1, z);
 
                 KalmanFilterStep step_spec = spec.make_step(sk, inputk);
@@ -259,7 +259,7 @@ namespace xo {
 
                 z_stats.include_sample(z[0]);
 
-                ref::rp<KalmanFilterInput> inputk
+                rp<KalmanFilterInput> inputk
                     = KalmanFilterInput::make_present(tkp1, z);
 
                 KalmanFilterStep step_spec
@@ -408,7 +408,7 @@ namespace xo {
 
                 INFO(tostr(xtag("i_step", i_step), xtag("z", z)));
 
-                ref::rp<KalmanFilterInput> inputk
+                rp<KalmanFilterInput> inputk
                     = KalmanFilterInput::make_present(tkp1, z);
 
                 KalmanFilterStep step_spec = spec.make_step(sk, inputk);
@@ -571,7 +571,7 @@ namespace xo {
 
                 z_stats.include_sample(z[0]);
 
-                ref::rp<KalmanFilterInput> inputk
+                rp<KalmanFilterInput> inputk
                     = KalmanFilterInput::make_present(tkp1, z);
                 KalmanFilterStep step_spec = spec.make_step(sk, inputk);
                 rp<KalmanFilterStateExt> skp1 = KalmanFilterEngine::step(step_spec);

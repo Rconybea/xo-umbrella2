@@ -13,7 +13,7 @@ namespace xo {
     using Eigen::VectorXd;
 
     namespace kalman {
-        ref::rp<KalmanFilterState>
+        rp<KalmanFilterState>
         KalmanFilterStep::extrapolate() const
         {
             return KalmanFilterEngine::extrapolate(this->tkp1(),
@@ -22,14 +22,14 @@ namespace xo {
         } /*extrapolate*/
 
         MatrixXd
-        KalmanFilterStep::gain(ref::rp<KalmanFilterState> const & skp1_ext) const
+        KalmanFilterStep::gain(rp<KalmanFilterState> const & skp1_ext) const
         {
             return KalmanFilterEngine::kalman_gain(skp1_ext,
                                                    this->obs());
         } /*gain*/
 
         VectorXd
-        KalmanFilterStep::gain1(ref::rp<KalmanFilterState> const & skp1_ext,
+        KalmanFilterStep::gain1(rp<KalmanFilterState> const & skp1_ext,
                                 uint32_t j) const
         {
             return KalmanFilterEngine::kalman_gain1(skp1_ext,
@@ -38,16 +38,16 @@ namespace xo {
 
         } /*gain1*/
 
-        ref::rp<KalmanFilterStateExt>
-        KalmanFilterStep::correct(ref::rp<KalmanFilterState> const & skp1_ext)
+        rp<KalmanFilterStateExt>
+        KalmanFilterStep::correct(rp<KalmanFilterState> const & skp1_ext)
         {
             return KalmanFilterEngine::correct(skp1_ext,
                                                this->obs(),
                                                this->input());
         } /*correct*/
 
-        ref::rp<KalmanFilterStateExt>
-        KalmanFilterStep::correct1(ref::rp<KalmanFilterState> const & skp1_ext,
+        rp<KalmanFilterStateExt>
+        KalmanFilterStep::correct1(rp<KalmanFilterState> const & skp1_ext,
                                    uint32_t j)
         {
             return KalmanFilterEngine::correct1(skp1_ext,

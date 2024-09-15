@@ -3,7 +3,7 @@
 #include "KalmanFilterSvc.hpp"
 
 namespace xo {
-  using xo::ref::rp;
+  using xo::rp;
   using xo::scope;
   using xo::xtag;
 
@@ -19,7 +19,7 @@ namespace xo {
     {}
 
     void
-    KalmanFilterSvc::notify_ev(ref::rp<KalmanFilterInput> const & input_kp1)
+    KalmanFilterSvc::notify_ev(rp<KalmanFilterInput> const & input_kp1)
     {
       this->filter_.notify_input(input_kp1);
 

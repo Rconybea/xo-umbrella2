@@ -19,7 +19,7 @@ namespace xo {
     using std::uint32_t;
 
     namespace kalman {
-        ref::rp<KalmanFilterInput>
+        rp<KalmanFilterInput>
         KalmanFilterInput::make(utc_nanos tkp1,
                                 VectorXb const & presence,
                                 VectorXd const & z,
@@ -28,7 +28,7 @@ namespace xo {
             return new KalmanFilterInput(tkp1, presence, z, Rd);
         } /*make*/
 
-        ref::rp<KalmanFilterInput>
+        rp<KalmanFilterInput>
         KalmanFilterInput::make_present(utc_nanos tkp1,
                                         VectorXd const & z)
         {

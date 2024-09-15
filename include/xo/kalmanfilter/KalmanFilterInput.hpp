@@ -32,13 +32,13 @@ namespace xo {
         public:
             KalmanFilterInput() = default;
 
-            static ref::rp<KalmanFilterInput> make(utc_nanos tkp1,
+            static rp<KalmanFilterInput> make(utc_nanos tkp1,
                                                    VectorXb const & presence,
                                                    VectorXd const & z,
                                                    VectorXd const & Rd);
 
             /* create input,  with all presence bits set + not using Rd */
-            static ref::rp<KalmanFilterInput> make_present(utc_nanos tkp1,
+            static rp<KalmanFilterInput> make_present(utc_nanos tkp1,
                                                            VectorXd const & z);
 
             /* reflect KalmanFilterInput object representation */
@@ -106,7 +106,7 @@ namespace xo {
             VectorXd Rd_;
         }; /*KalmanFilterInput*/
 
-        using KalmanFilterInputPtr = ref::rp<KalmanFilterInput>;
+        using KalmanFilterInputPtr = rp<KalmanFilterInput>;
 
         inline std::ostream &
         operator<<(std::ostream & os, KalmanFilterInput const & x)

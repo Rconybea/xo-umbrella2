@@ -40,15 +40,15 @@ namespace xo {
              *    }
              */
             using MkStepFn = std::function<KalmanFilterStep
-                                           (ref::rp<KalmanFilterState> const & sk,
+                                           (rp<KalmanFilterState> const & sk,
                                             KalmanFilterInputPtr const & zkp1)>;
 
         public:
-            explicit KalmanFilterSpec(ref::rp<KalmanFilterStateExt> s0, MkStepFn mkstepfn)
+            explicit KalmanFilterSpec(rp<KalmanFilterStateExt> s0, MkStepFn mkstepfn)
                 : start_ext_{std::move(s0)},
                   mk_step_fn_{std::move(mkstepfn)} {}
 
-            ref::rp<KalmanFilterStateExt> const & start_ext() const { return start_ext_; }
+            rp<KalmanFilterStateExt> const & start_ext() const { return start_ext_; }
             /* get step parameters (i.e. matrices F, Q, H, R)
              * for step t(k) -> t(k+1).
              *
@@ -56,8 +56,8 @@ namespace xo {
              * - to allow time stepping to be observation-driven
              * - to allow for selective outlier removal
              */
-            KalmanFilterStep make_step(ref::rp<KalmanFilterState> const & sk,
-                                       ref::rp<KalmanFilterInput> const & zkp1) {
+            KalmanFilterStep make_step(rp<KalmanFilterState> const & sk,
+                                       rp<KalmanFilterInput> const & zkp1) {
                 return this->mk_step_fn_(sk, zkp1);
             } /*make_step*/
 
@@ -66,7 +66,7 @@ namespace xo {
 
         private:
             /* starting state */
-            ref::rp<KalmanFilterStateExt> start_ext_;
+            rp<KalmanFilterStateExt> start_ext_;
 
             /* creates kalman filter step object on demand;
              * step object specifies inputs to 1 step in discrete

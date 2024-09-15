@@ -14,7 +14,7 @@ namespace xo {
     using xo::reflect::TaggedRcptr;
     using xo::reflect::StructReflector;
     using xo::time::utc_nanos;
-    using xo::ref::rp;
+    using xo::rp;
     using logutil::matrix;
     using logutil::vector;
     //using xo::scope;
@@ -190,7 +190,7 @@ namespace xo {
 
         // ----- KalmanFilterStateExt -----
 
-        ref::rp<KalmanFilterStateExt>
+        rp<KalmanFilterStateExt>
         KalmanFilterStateExt::initial(utc_nanos t0,
                                       VectorXd x0,
                                       MatrixXd P0)

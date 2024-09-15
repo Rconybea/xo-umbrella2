@@ -24,8 +24,8 @@ namespace xo {
             using uint32_t = std::uint32_t;
 
         public:
-            static ref::rp<KalmanFilterState> make();
-            static ref::rp<KalmanFilterState> make(uint32_t k,
+            static rp<KalmanFilterState> make();
+            static rp<KalmanFilterState> make(uint32_t k,
                                                    utc_nanos tk,
                                                    VectorXd x,
                                                    MatrixXd P,
@@ -100,18 +100,18 @@ namespace xo {
             using int32_t = std::int32_t;
 
         public:
-            static ref::rp<KalmanFilterStateExt> make();
-            static ref::rp<KalmanFilterStateExt> make(uint32_t k,
+            static rp<KalmanFilterStateExt> make();
+            static rp<KalmanFilterStateExt> make(uint32_t k,
                                                       utc_nanos tk,
                                                       VectorXd x,
                                                       MatrixXd P,
                                                       KalmanFilterTransition transition,
                                                       MatrixXd K,
                                                       int32_t j,
-                                                      ref::rp<KalmanFilterInput> zk);
+                                                      rp<KalmanFilterInput> zk);
 
             /* create state object for initial filter state */
-            static ref::rp<KalmanFilterStateExt> initial(utc_nanos t0,
+            static rp<KalmanFilterStateExt> initial(utc_nanos t0,
                                                          VectorXd x0,
                                                          MatrixXd P0);
 
@@ -120,7 +120,7 @@ namespace xo {
 
             int32_t observable() const { return j_; }
             MatrixXd const & gain() const { return K_; }
-            ref::rp<KalmanFilterInput> const & zk() const { return zk_; }
+            rp<KalmanFilterInput> const & zk() const { return zk_; }
 
             virtual void display(std::ostream & os) const override;
 
@@ -137,7 +137,7 @@ namespace xo {
                                  KalmanFilterTransition transition,
                                  MatrixXd K,
                                  int32_t j,
-                                 ref::rp<KalmanFilterInput> zk);
+                                 rp<KalmanFilterInput> zk);
 
         private:
             /* if -1:  not used;
@@ -155,7 +155,7 @@ namespace xo {
             /* input leading to state k.
              * empty for initial state (i.e. when .k is 0)
              */
-            ref::rp<KalmanFilterInput> zk_;
+            rp<KalmanFilterInput> zk_;
         }; /*KalamnFilterStateExt*/
     } /*namespace filter*/
 } /*namespace xo*/

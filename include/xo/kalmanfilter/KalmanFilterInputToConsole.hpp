@@ -8,12 +8,12 @@
 namespace xo {
     namespace kalman {
         class KalmanFilterInputToConsole
-            : public xo::reactor::SinkToConsole<ref::rp<KalmanFilterInput>>
+            : public xo::reactor::SinkToConsole<rp<KalmanFilterInput>>
         {
         public:
             KalmanFilterInputToConsole() = default;
 
-            static ref::rp<KalmanFilterInputToConsole> make();
+            static rp<KalmanFilterInputToConsole> make();
 
             virtual void display(std::ostream & os) const;
             //virtual std::string display_string() const;

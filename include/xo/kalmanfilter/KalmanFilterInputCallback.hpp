@@ -7,7 +7,7 @@
 
 namespace xo {
     namespace kalman {
-        using KalmanFilterInputCallback = reactor::Sink1<ref::rp<KalmanFilterInput>>;
+        using KalmanFilterInputCallback = reactor::Sink1<rp<KalmanFilterInput>>;
     } /*namespace kalman*/
 } /*namespace xo*/
 

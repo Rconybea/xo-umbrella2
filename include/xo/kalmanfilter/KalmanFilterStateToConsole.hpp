@@ -13,7 +13,7 @@ namespace xo {
         public:
             KalmanFilterStateToConsole() = default;
 
-            static ref::rp<KalmanFilterStateToConsole> make();
+            static rp<KalmanFilterStateToConsole> make();
 
             virtual void display(std::ostream & os) const;
             //virtual std::string display_string() const;

@@ -19,9 +19,9 @@ namespace xo {
     namespace kalman {
         // ----- KalmanFilterEngine -----
 
-        ref::rp<KalmanFilterState>
+        rp<KalmanFilterState>
         KalmanFilterEngine::extrapolate(utc_nanos tkp1,
-                                        ref::rp<KalmanFilterState> const & s,
+                                        rp<KalmanFilterState> const & s,
                                         KalmanFilterTransition const & f)
         {
             //constexpr char const * c_self_name
@@ -60,7 +60,7 @@ namespace xo {
         } /*extrapolate*/
 
         VectorXd
-        KalmanFilterEngine::kalman_gain1(ref::rp<KalmanFilterState> const & skp1_ext,
+        KalmanFilterEngine::kalman_gain1(rp<KalmanFilterState> const & skp1_ext,
                                          KalmanFilterObservable const & h,
                                          uint32_t j)
         {
@@ -110,7 +110,7 @@ namespace xo {
         } /*kalman_gain1*/
 
         MatrixXd
-        KalmanFilterEngine::kalman_gain(ref::rp<KalmanFilterState> const & skp1_ext,
+        KalmanFilterEngine::kalman_gain(rp<KalmanFilterState> const & skp1_ext,
                                         KalmanFilterObservable const & h)
         {
             scope log(XO_DEBUG(false /*debug_enabled*/));
@@ -214,10 +214,10 @@ namespace xo {
             return K;
         } /*kalman_gain*/
 
-        ref::rp<KalmanFilterStateExt>
-        KalmanFilterEngine::correct1(ref::rp<KalmanFilterState> const & skp1_ext,
+        rp<KalmanFilterStateExt>
+        KalmanFilterEngine::correct1(rp<KalmanFilterState> const & skp1_ext,
                                      KalmanFilterObservable const & h,
-                                     ref::rp<KalmanFilterInput> const & zkp1,
+                                     rp<KalmanFilterInput> const & zkp1,
                                      uint32_t j)
         {
             uint32_t n = skp1_ext->n_state();
@@ -261,10 +261,10 @@ namespace xo {
                                               zkp1);
         } /*correct1*/
 
-        ref::rp<KalmanFilterStateExt>
-        KalmanFilterEngine::correct(ref::rp<KalmanFilterState> const & skp1_ext,
+        rp<KalmanFilterStateExt>
+        KalmanFilterEngine::correct(rp<KalmanFilterState> const & skp1_ext,
                                     KalmanFilterObservable const & h,
-                                    ref::rp<KalmanFilterInput> const & zkp1)
+                                    rp<KalmanFilterInput> const & zkp1)
         {
             uint32_t n = skp1_ext->n_state();
             /* K :: [n x m] */
@@ -300,23 +300,23 @@ namespace xo {
                                               zkp1);
         } /*correct*/
 
-        ref::rp<KalmanFilterStateExt>
+        rp<KalmanFilterStateExt>
         KalmanFilterEngine::step(utc_nanos tkp1,
-                                 ref::rp<KalmanFilterState> const & sk,
+                                 rp<KalmanFilterState> const & sk,
                                  KalmanFilterTransition const & Fk,
                                  KalmanFilterObservable const & Hkp1,
-                                 ref::rp<KalmanFilterInput> const & zkp1)
+                                 rp<KalmanFilterInput> const & zkp1)
         {
-            ref::rp<KalmanFilterState> skp1_ext
+            rp<KalmanFilterState> skp1_ext
                 = KalmanFilterEngine::extrapolate(tkp1, sk, Fk);
 
-            ref::rp<KalmanFilterStateExt> skp1
+            rp<KalmanFilterStateExt> skp1
                 = KalmanFilterEngine::correct(skp1_ext, Hkp1, zkp1);
 
             return skp1;
         } /*step*/
 
-        ref::rp<KalmanFilterStateExt>
+        rp<KalmanFilterStateExt>
         KalmanFilterEngine::step(KalmanFilterStep const & step_spec)
         {
             return step(step_spec.tkp1(),
@@ -326,24 +326,24 @@ namespace xo {
                         step_spec.input());
         } /*step*/
 
-        ref::rp<KalmanFilterStateExt>
+        rp<KalmanFilterStateExt>
         KalmanFilterEngine::step1(utc_nanos tkp1,
-                                  ref::rp<KalmanFilterState> const & sk,
+                                  rp<KalmanFilterState> const & sk,
                                   KalmanFilterTransition const & Fk,
                                   KalmanFilterObservable const & Hkp1,
-                                  ref::rp<KalmanFilterInput> const & zkp1,
+                                  rp<KalmanFilterInput> const & zkp1,
                                   uint32_t j)
         {
-            ref::rp<KalmanFilterState> skp1_ext
+            rp<KalmanFilterState> skp1_ext
                 = KalmanFilterEngine::extrapolate(tkp1, sk, Fk);
 
-            ref::rp<KalmanFilterStateExt> skp1
+            rp<KalmanFilterStateExt> skp1
                 = KalmanFilterEngine::correct1(skp1_ext, Hkp1, zkp1, j);
 
             return skp1;
         } /*step1*/
 
-        ref::rp<KalmanFilterStateExt>
+        rp<KalmanFilterStateExt>
         KalmanFilterEngine::step1(KalmanFilterStep const & step_spec,
                                   uint32_t j)
         {

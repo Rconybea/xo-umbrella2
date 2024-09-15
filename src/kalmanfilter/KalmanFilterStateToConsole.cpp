@@ -7,7 +7,7 @@ namespace xo {
   using xo::xtag;
 
   namespace kalman {
-    ref::rp<KalmanFilterStateToConsole>
+    rp<KalmanFilterStateToConsole>
     KalmanFilterStateToConsole::make() {
       return new KalmanFilterStateToConsole();
     } /*make*/

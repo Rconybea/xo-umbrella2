@@ -24,7 +24,7 @@ namespace xo {
         {} /*ctor*/
 
         void
-        KalmanFilter::notify_input(ref::rp<KalmanFilterInput> const & input_kp1)
+        KalmanFilter::notify_input(rp<KalmanFilterInput> const & input_kp1)
         {
             scope log(XO_ENTER0(info));
 

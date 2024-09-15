@@ -39,8 +39,8 @@ namespace xo {
              *    retval.x = x(k+1|k)
              *    retval.P = P(k+1|k)
              */
-            static ref::rp<KalmanFilterState> extrapolate(utc_nanos tkp1,
-                                                          ref::rp<KalmanFilterState> const & sk,
+            static rp<KalmanFilterState> extrapolate(utc_nanos tkp1,
+                                                          rp<KalmanFilterState> const & sk,
                                                           KalmanFilterTransition const & Fk);
 
             /* compute kalman gain matrix for filter step t(k) -> t(k+1)
@@ -59,7 +59,7 @@ namespace xo {
              * Hkp1.      relates model state to observable variables,
              *            for step t(k) -> t(k+1)
              */
-            static MatrixXd kalman_gain(ref::rp<KalmanFilterState> const & skp1_ext,
+            static MatrixXd kalman_gain(rp<KalmanFilterState> const & skp1_ext,
                                         KalmanFilterObservable const & Hkp1);
 
             /* compute kalman gain for a single observation z(k)[j].
@@ -80,7 +80,7 @@ namespace xo {
              * amount of innovation in observable #j,  i.e. for difference between
              * expected and actual value for that observable.
              */
-            static VectorXd kalman_gain1(ref::rp<KalmanFilterState> const & skp1_ext,
+            static VectorXd kalman_gain1(rp<KalmanFilterState> const & skp1_ext,
                                          KalmanFilterObservable const & Hkp1,
                                          uint32_t j);
 
@@ -98,9 +98,9 @@ namespace xo {
              *
              * return new filter state+cov
              */
-            static ref::rp<KalmanFilterStateExt> correct(ref::rp<KalmanFilterState> const & skp1_ext,
+            static rp<KalmanFilterStateExt> correct(rp<KalmanFilterState> const & skp1_ext,
                                                          KalmanFilterObservable const & Hkp1,
-                                                         ref::rp<KalmanFilterInput> const & zkp1);
+                                                         rp<KalmanFilterInput> const & zkp1);
 
             /* correct extrapolated filter state for observation
              * of j'th filter observable z(k+1)[j]
@@ -108,9 +108,9 @@ namespace xo {
              * Can use this when observation errors are uncorrelated
              * (i.e. observation error matrix R is diagonal)
              */
-            static ref::rp<KalmanFilterStateExt> correct1(ref::rp<KalmanFilterState> const & skp1_ext,
+            static rp<KalmanFilterStateExt> correct1(rp<KalmanFilterState> const & skp1_ext,
                                                           KalmanFilterObservable const & Hkp1,
-                                                          ref::rp<KalmanFilterInput> const & zkp1,
+                                                          rp<KalmanFilterInput> const & zkp1,
                                                           uint32_t j);
 
             /* step filter from t(k) -> t(k+1)
@@ -123,11 +123,11 @@ namespace xo {
              *            H (coupling matrix), R (error covar matrix)
              * zkp1.      observations z(k+1) for time t(k+1)
              */
-            static ref::rp<KalmanFilterStateExt> step(utc_nanos tkp1,
-                                                      ref::rp<KalmanFilterState> const & sk,
+            static rp<KalmanFilterStateExt> step(utc_nanos tkp1,
+                                                      rp<KalmanFilterState> const & sk,
                                                       KalmanFilterTransition const & Fk,
                                                       KalmanFilterObservable const & Hkp1,
-                                                      ref::rp<KalmanFilterInput> const & zkp1);
+                                                      rp<KalmanFilterInput> const & zkp1);
 
             /* step filter from t(k) -> tk(k+1)
              * same as
@@ -136,7 +136,7 @@ namespace xo {
              * step_spec.  encapsulates Fk (transition-related params)
              *             and Q (system noise covar matrix)
              */
-            static ref::rp<KalmanFilterStateExt> step(KalmanFilterStep const & step_spec);
+            static rp<KalmanFilterStateExt> step(KalmanFilterStep const & step_spec);
 
             /* step filter from t(k) -> t(k+1)
              *
@@ -150,11 +150,11 @@ namespace xo {
              * j.     identifies a single filter observable --
              *        step will only consume observation z(k+1)[j]
              */
-            static ref::rp<KalmanFilterStateExt> step1(utc_nanos tkp1,
-                                                       ref::rp<KalmanFilterState> const & sk,
+            static rp<KalmanFilterStateExt> step1(utc_nanos tkp1,
+                                                       rp<KalmanFilterState> const & sk,
                                                        KalmanFilterTransition const & Fk,
                                                        KalmanFilterObservable const & Hkp1,
-                                                       ref::rp<KalmanFilterInput> const & zkp1,
+                                                       rp<KalmanFilterInput> const & zkp1,
                                                        uint32_t j);
 
             /* step filter from t(k) -> t(k+1)
@@ -176,7 +176,7 @@ namespace xo {
              * j.          identifies a single filter observable --
              *             step will only consume observation z(k+1)[j]
              */
-            static ref::rp<KalmanFilterStateExt> step1(KalmanFilterStep const & step_spec,
+            static rp<KalmanFilterStateExt> step1(KalmanFilterStep const & step_spec,
                                                        uint32_t j);
         }; /*KalmanFilterEngine*/
     } /*namespace kalman*/
