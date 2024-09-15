@@ -17,6 +17,7 @@ namespace xo {
         using xo::ast::llvmintrinsic;
         using xo::pyutil::pycaller_base;
         using xo::pyutil::pycaller;
+        using xo::reflect::Reflect;
         using xo::ref::rp;
         //using xo::ref::Refcount;
         using xo::ref::unowned_ptr;
@@ -53,6 +54,11 @@ namespace xo {
                               const char * prototype_str)
                 {
                     using caller_type = pycaller<Retval, Args...>;
+
+                    /* we want native function type reflected;
+                     * need this so we can declare function-valued variables
+                     */
+                    Reflect::require<typename caller_type::function_type>();
 
                     caller_type::declare_once(m, pycaller_id_str);
 
