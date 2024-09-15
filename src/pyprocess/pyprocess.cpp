@@ -33,7 +33,6 @@ namespace xo {
     using xo::time::utc_nanos;
     using xo::rng::Seed;
     using xo::rng::xoshiro256ss;
-    using xo::ref::rp;
     namespace py = pybind11;
 
     namespace process {
@@ -75,7 +74,7 @@ namespace xo {
                   py::arg("start_tm"), py::arg("start_value"), py::arg("annual_volatility"));
 
             py::class_<StochasticProcess<double>,
-                       xo::ref::rp<StochasticProcess<double>>>(m, "StochasticProcess")
+                       xo::rp<StochasticProcess<double>>>(m, "StochasticProcess")
                 .def_property_readonly("t0", &StochasticProcess<double>::t0)
                 .def_property_readonly("t0_value", &StochasticProcess<double>::t0_value)
                 .def("exterior_sample", &StochasticProcess<double>::exterior_sample)
@@ -83,12 +82,12 @@ namespace xo {
 
             py::class_<BrownianMotion<xoshiro256ss>,
                        StochasticProcess<double>,
-                       xo::ref::rp<BrownianMotion<xoshiro256ss>>>(m, "BrownianMotion");
+                       xo::rp<BrownianMotion<xoshiro256ss>>>(m, "BrownianMotion");
             //.def("exterior_sample", &BrownianMotion<xoshiro256ss>::exterior_sample)
             //.def("__repr__", &BrownianMotion<xoshiro256ss>::display_string);
 
             py::class_<ExpProcess, StochasticProcess<double>,
-                       xo::ref::rp<ExpProcess>>(m, "ExpProcess")
+                       xo::rp<ExpProcess>>(m, "ExpProcess")
                 .def_property_readonly("exponent_process",
                                        [](ExpProcess & self) {
                                            return self.exponent_process().promote();
@@ -98,7 +97,7 @@ namespace xo {
                   &RealizationTracer<double>::make);
 
             py::class_<RealizationTracer<double>,
-                       xo::ref::rp<RealizationTracer<double>>>(m, "RealizationTracer");
+                       xo::rp<RealizationTracer<double>>>(m, "RealizationTracer");
 
             /* e.g.
              *   import datetime as dt
@@ -107,7 +106,7 @@ namespace xo {
              *   s=pyprocess.make_realization_source(ebm, dt.timedelta(seconds=1))
              */
             m.def("make_realization_source",
-                  [](xo::ref::rp<StochasticProcess<double>> p,
+                  [](xo::rp<StochasticProcess<double>> p,
                      xo::time::nanos sample_dt)
                       {
                           auto tracer = RealizationTracer<double>::make(p);
@@ -126,7 +125,7 @@ namespace xo {
 
             py::class_<RealizationSource<UpxEvent, double>,
                        reactor::ReactorSource,
-                       xo::ref::rp<RealizationSource<UpxEvent, double>>>(m, "RealizationSource")
+                       xo::rp<RealizationSource<UpxEvent, double>>>(m, "RealizationSource")
                 .def_property_readonly("current_ev", &RealizationSource<UpxEvent, double>::current_ev);
 
             py::class_<UpxToConsole,
