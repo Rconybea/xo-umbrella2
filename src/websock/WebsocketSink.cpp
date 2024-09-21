@@ -18,7 +18,7 @@ namespace xo {
     using xo::reflect::TypeDescr;
     using xo::ref::rp;
     using xo::ref::brw;
-    using xo::print::quoted;
+    using xo::print::quot;
     using xo::print::qcstr;
     using xo::scope;
     using xo::xtag;
@@ -104,7 +104,7 @@ namespace xo {
             std::stringstream ss;
 
             /* format message envelope */
-            ss << "{" << qcstr("stream") << ": " << quoted(this->stream_name_)
+            ss << "{" << qcstr("stream") << ": " << quot(this->stream_name_)
                << ", " << qcstr("event") << ": ";
 
             /* format event as json */
