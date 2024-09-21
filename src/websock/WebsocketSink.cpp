@@ -16,7 +16,6 @@ namespace xo {
     using xo::reflect::Reflect;
     using xo::reflect::TaggedPtr;
     using xo::reflect::TypeDescr;
-    using xo::ref::rp;
     using xo::ref::brw;
     using xo::print::quot;
     using xo::print::qcstr;
@@ -36,8 +35,8 @@ namespace xo {
             using AbstractSource = reactor::AbstractSource;
 
         public:
-            WebsocketSinkImpl(ref::rp<Webserver> const & websrv,
-                              ref::rp<PrintJson> const & pjson,
+            WebsocketSinkImpl(rp<Webserver> const & websrv,
+                              rp<PrintJson> const & pjson,
                               uint32_t session_id,
                               std::string stream_name)
                 : websrv_{std::move(websrv)},
@@ -56,7 +55,7 @@ namespace xo {
             virtual TypeDescr sink_ev_type() const override;
             virtual bool allow_volatile_source() const override { return true; }
             virtual uint32_t n_in_ev() const override { return n_in_ev_; }
-            virtual void attach_source(ref::rp<AbstractSource> const & src) override;
+            virtual void attach_source(rp<AbstractSource> const & src) override;
             virtual void notify_ev_tp(TaggedPtr const & ev_tp) override;
 
         private:
@@ -66,9 +65,9 @@ namespace xo {
              */
             std::string name_;
             /* webserver implementation */
-            ref::rp<Webserver> websrv_;
+            rp<Webserver> websrv_;
             /* print arbitrary reflected stuff as json */
-            ref::rp<PrintJson> pjson_;
+            rp<PrintJson> pjson_;
             /* websocket session id# - events arriving at this sink
              * will be sent only to the session identified by .session_id
              */

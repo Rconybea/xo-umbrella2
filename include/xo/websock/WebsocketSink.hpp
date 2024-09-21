@@ -17,10 +17,10 @@ namespace xo {
             using PrintJson = xo::json::PrintJson;
 
         public:
-            static ref::rp<WebsocketSink> make(ref::rp<Webserver> const & websrv,
-                                               ref::rp<PrintJson> const & pjson,
-                                               uint32_t session_id,
-                                               std::string const & stream_name);
+            static rp<WebsocketSink> make(rp<Webserver> const & websrv,
+                                          rp<PrintJson> const & pjson,
+                                          uint32_t session_id,
+                                          std::string const & stream_name);
         }; /*WebsocketSink*/
     } /*namespace web*/
 } /*namespace xo*/
