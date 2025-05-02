@@ -52,19 +52,25 @@ namespace ut {
 
             ss << '\\';
 
-            log && log("after: lone escaped backslash");
-            log && log(hex_view(ss.view().begin(), ss.view().end(), true));
+            std::string str = ss.str();
 
-            REQUIRE(ss.view() == std::string_view("\\"));
+            log && log("after: lone escaped backslash");
+            log && log(hex_view(str.data(), str.data() + str.size(), true));
+
+            //REQUIRE(ss.view() == std::string_view("\\"));  // n/avail on osx
+            REQUIRE(str == std::string("\\"));
 
             ss << 'n';
 
+            std::string str2 = ss.str();
+
             log && log("after: lone 'n' char");
-            log && log(hex_view(ss.view().begin(), ss.view().end(), true));
+            log && log(hex_view(str2.data(), str2.data() + str2.size(), true));
 
-            REQUIRE(ss.view() == std::string_view("\\n"));
+            // REQUIRE(ss.view() == std::string_view("\\n"));  // n/avail on osx
+            REQUIRE(str2 == std::string("\\n"));
 
-            log && log("ss.str()=[", ss.str(), "]");
+            log && log("ss.str()=[", str2, "]");
         }
     } /*TEST_CASE(sstream.1char)*/
 
@@ -81,10 +87,12 @@ namespace ut {
 
             ss << "\\\\";
 
-            log && log("after: 2x escaped backslash");
-            log && log(hex_view(ss.view().begin(), ss.view().end(), true));
+            std::string str = ss.str();
 
-            REQUIRE(ss.view() == std::string_view("\\\\"));
+            log && log("after: 2x escaped backslash");
+            log && log(hex_view(str.data(), str.data() + str.size(), true));
+
+            REQUIRE(str == std::string("\\\\"));
 
             log && log("ss.str()=[", ss.str(), "]");
         }
@@ -103,8 +111,10 @@ namespace ut {
 
             ss << "\\n";
 
+            std::string str = ss.str();
+
             log && log("after: '\\n' escaped backslash + n");
-            log && log(hex_view(ss.view().begin(), ss.view().end(), true));
+            log && log(hex_view(str.data(), str.data() + str.size(), true));
         }
     }
 
@@ -123,10 +133,12 @@ namespace ut {
             ss << "\\\\";
             ss << 'n';
 
-            log && log("after: '\\\\n' 2x escaped backslash + n");
-            log && log(hex_view(ss.view().begin(), ss.view().end(), true));
+            std::string str = ss.str();
 
-            REQUIRE(ss.view() == std::string_view("\\\\n"));
+            log && log("after: '\\\\n' 2x escaped backslash + n");
+            log && log(hex_view(str.data(), str.data() + str.size(), true));
+
+            REQUIRE(str == std::string("\\\\n"));
         }
     }
 
@@ -140,7 +152,9 @@ namespace ut {
         std::stringstream ss2;
         ss2 << quot("\\");
 
-        REQUIRE(ss2.view() == std::string_view("\"\\\\\"")); /* ["\\"] */
+        std::string str = ss2.str();
+
+        REQUIRE(str == std::string("\"\\\\\"")); /* ["\\"] */
     }
 
     TEST_CASE("sstream.quot.newline", "[quot]") {
@@ -153,7 +167,9 @@ namespace ut {
         std::stringstream ss2;
         ss2 << quot("\n");
 
-        REQUIRE(ss2.view() == std::string_view("\"\\n\"")); /* ["\n"] */
+        std::string str = ss2.str();
+
+        REQUIRE(str == std::string("\"\\n\"")); /* ["\n"] */
     }
 
     TEST_CASE("sstream.quot.2bslash", "[quot]") {
@@ -166,7 +182,9 @@ namespace ut {
         std::stringstream ss2;
         ss2 << quot("\\\\"); /* quoting string with two backslashes need to give ["\\\\"] */
 
-        REQUIRE(ss2.view() == std::string_view("\"\\\\\\\\\"")); /* rhs is ["\\\\"] */
+        std::string str = ss2.str();
+
+        REQUIRE(str == std::string("\"\\\\\\\\\"")); /* rhs is ["\\\\"] */
     }
 
     TEST_CASE("sstream.quot.2charnewline", "[quot]") {
@@ -179,7 +197,9 @@ namespace ut {
         std::stringstream ss2;
         ss2 << quot("x\n");
 
-        REQUIRE(ss2.view() == std::string_view("\"x\\n\"")); /* ["\n"] */
+        std::string str = ss2.str();
+
+        REQUIRE(str == std::string("\"x\\n\"")); /* ["\n"] */
     }
 
     TEST_CASE("sstream.quot.2char", "[quot]") {
@@ -192,11 +212,13 @@ namespace ut {
         std::stringstream ss2;
         ss2 << quot("\\n");
 
+        std::string str = ss2.str();
+
         //std::cerr << quoted_debug::s_log_last_quoted.view() << std::endl;
 
         //log && log("debug_log=[", quoted_debug::s_log_last_quoted.view() , "]");
 
-        REQUIRE(ss2.view() == std::string_view("\"\\\\n\""));
+        REQUIRE(str == std::string("\"\\\\n\""));
     }
 
     TEST_CASE("sstream.quot.foonewline", "[quot]") {
@@ -207,7 +229,9 @@ namespace ut {
         std::stringstream ss2;
         ss2 << quot("foo\n");
 
-        REQUIRE(ss2.view() == std::string_view("\"foo\\n\"")); /* ["\n"] */
+        std::string str = ss2.str();
+
+        REQUIRE(str == std::string("\"foo\\n\"")); /* ["\n"] */
     }
 
     TEST_CASE("sstream.rest", "[quot]") {
@@ -223,8 +247,10 @@ namespace ut {
 
             ss << quot("\n");
 
+            std::string str = ss.str();
+
             log && log("after: quot('\\n')");
-            log && log(hex_view(ss.view().begin(), ss.view().end(), true));
+            log && log(hex_view(str.data(), str.data() + str.size(), true));
         }
 
         /* testing unexpected sstream behavior */
@@ -235,8 +261,10 @@ namespace ut {
 
             ss << quot("foo\n");
 
+            std::string str = ss.str();
+
             log && log("after: quot(\"foo\n\")");
-            log && log(hex_view(ss.view().begin(), ss.view().end(), true));
+            log && log(hex_view(str.data(), str.data() + str.size(), true));
             log && log("> ss.str ----------------");
             log && log(ss.str());
             log && log("< ss.str ----------------");
@@ -250,8 +278,10 @@ namespace ut {
 
             ss << unq("\n");
 
+            std::string str = ss.str();
+
             log && log("after: unq('\\n')");
-            log && log(hex_view(ss.view().begin(), ss.view().end(), true));
+            log && log(hex_view(str.data(), str.data() + str.size(), true));
         }
 
     } /*TEST_CASE(sstream)*/
@@ -303,11 +333,13 @@ namespace ut {
             else
                 ss << quot(tc.x_);
 
+            std::string str = ss.str();
+
             INFO("tc.s ----------------");
             INFO(tostr("[", tc.s_, "]"));
             INFO("tc.s ----------------");
             INFO("ss.str ----------------");
-            INFO(tostr("[", hex_view(ss.view().begin(), ss.view().end(), true), "]"));
+            INFO(tostr("[", hex_view(str.data(), str.data() + str.size(), true), "]"));
             INFO(tostr("[", ss.str(), "]"));
             INFO("ss.str ----------------");
 
