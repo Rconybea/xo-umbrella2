@@ -13,7 +13,7 @@
 namespace xo {
     namespace py = pybind11;
     using Unit = xo::qty::natural_unit<std::int64_t>;
-    using XoQuantity = xo::qty::Quantity<double, std::int64_t>;
+    using XoQuantity = xo::qty::xquantity<double, std::int64_t>;
 
     namespace qty {
         PYBIND11_MODULE(PYUNIT_MODULE_NAME(), m) {
