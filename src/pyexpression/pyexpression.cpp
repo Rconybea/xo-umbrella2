@@ -33,7 +33,7 @@ namespace xo {
         using xo::ast::IfExpr;
         using xo::ast::make_ifexpr;
         using xo::reflect::TaggedPtr;
-        using xo::ref::rp;
+        using xo::rp;
         namespace py = pybind11;
 
         PYBIND11_MODULE(XO_PYEXPRESSION_MODULE_NAME(), m) {
