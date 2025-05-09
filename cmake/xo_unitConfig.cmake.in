@@ -3,11 +3,7 @@
 include(CMakeFindDependencyMacro)
 
 find_dependency(xo_ratio)
-find_dependency(xo_indentlog)
-#find_dependency(reflect)
-#find_dependency(subsys)
-#find_dependency(Eigen3)
-#find_dependency(webutil)
+find_dependency(indentlog)
 #find_dependency(printjson)
 #find_dependency(callback)
 
