@@ -13,7 +13,7 @@ namespace xo {
     using xo::web::Webserver;
     using xo::web::Runstate;
     using xo::json::PrintJsonSingleton;
-    using xo::ref::rp;
+    using xo::rp;
     namespace py = pybind11;
 
     namespace web {
