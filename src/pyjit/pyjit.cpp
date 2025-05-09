@@ -18,7 +18,7 @@ namespace xo {
         using xo::pyutil::pycaller_base;
         using xo::pyutil::pycaller;
         using xo::reflect::Reflect;
-        using xo::ref::rp;
+        using xo::rp;
         //using xo::ref::Refcount;
         using xo::ref::unowned_ptr;
         namespace py = pybind11;
