@@ -491,7 +491,7 @@ namespace xo {
         ///@}
     };
 
-    /** @brief sentinel type,  for forbidden stringliteral with no space for a null terminator **/
+    /** @brief sentinel type,  for forbidden flatstring with no space for a null terminator **/
     template <>
     struct flatstring<0> { flatstring() = delete; };
 
@@ -584,7 +584,7 @@ namespace xo {
      *
      *  Example:
      *  @code
-     *  constexpr auto cmp = flatstring_compare(stringliteral("foo"), stringliteral("bar"));
+     *  constexpr auto cmp = flatstring_compare(flatstring("foo"), flatstring("bar"));
      *  static_assert(cmp > 0);
      *  @endcode
      **/
@@ -638,4 +638,4 @@ namespace xo {
     ///@}
 } /*namespace xo*/
 
-/** end stringliteral.hpp **/
+/** end flatstring.hpp **/
