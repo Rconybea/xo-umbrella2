@@ -15,41 +15,48 @@ endmacro()
 # deprecated -- prefer xo_cxx_toplevel_options2()
 macro(xo_cxx_toplevel_options)
     message(WARNING "deprecated: prefer xo_cxx_toplevel_options2")
+
+    message("xo_cxx_toplevel_options: PROJECT=${PROJECT_NAME}")
+
     enable_language(CXX)
     xo_toplevel_compile_options()
     xo_toplevel_testing_options()
 
-    add_custom_target(all_executables)
+    add_custom_target(all_executables_${PROJECT_NAME})
     set_property(
-        TARGET all_executables
+        TARGET all_executables_${PROJECT_NAME}
         PROPERTY targets "")
 
-    add_custom_target(all_libraries)
+    add_custom_target(all_libraries_${PROJECT_NAME})
     set_property(
-        TARGET all_libraries
+        TARGET all_libraries_${PROJECT_NAME}
         PROPERTY targets "")
 endmacro()
 
 # deprecated -- prefer xo_cxx_toplevel_options3()
 macro(xo_cxx_toplevel_options2)
-    enable_language(CXX)
-    xo_toplevel_compile_options()
-    enable_testing()
+    if (NOT DEFINED _xo_cxx_toplevel_done)
+        message("xo_cxx_toplevel_options2: PROJECT=${PROJECT_NAME}")
 
-    add_custom_target(all_executables)
-    set_property(
-        TARGET all_executables
-        PROPERTY targets "")
+        enable_language(CXX)
+        xo_toplevel_compile_options()
+        enable_testing()
 
-    add_custom_target(all_libraries)
-    set_property(
-        TARGET all_libraries
-        PROPERTY targets "")
+        add_custom_target(all_executables_${PROJECT_NAME})
+        set_property(
+            TARGET all_executables_${PROJECT_NAME}
+            PROPERTY targets "")
 
-    add_custom_target(all_utest_executables)
-    set_property(
-        TARGET all_utest_executables
-        PROPERTY targets "")
+        add_custom_target(all_libraries_${PROJECT_NAME})
+        set_property(
+            TARGET all_libraries_${PROJECT_NAME}
+            PROPERTY targets "")
+
+        add_custom_target(all_utest_executables_${PROJECT_NAME})
+        set_property(
+            TARGET all_utest_executables_${PROJECT_NAME}
+            PROPERTY targets "")
+    endif()
 endmacro()
 
 macro(xo_cxx_toplevel_options3)
@@ -62,9 +69,9 @@ macro(xo_toplevel_testing_options)
     add_code_coverage()
     add_code_coverage_all_targets(EXCLUDE /nix/store* utest/*)
 
-    add_custom_target(all_utest_executables)
+    add_custom_target(all_utest_executables_${PROJECT_NAME})
     set_property(
-        TARGET all_utest_executables
+        TARGET all_utest_executables_${PROJECT_NAME}
         PROPERTY targets "")
 endmacro()
 
@@ -257,7 +264,7 @@ macro(xo_utest_coverage_config2)
         set(CCOV_INSTALL_DOCDIR ${CMAKE_INSTALL_DOCDIR}/ccov)
 
         # collect utest deps (like xo_doxygen_collect_deps())
-        get_target_property(_all_utests all_utest_executables targets)
+        get_target_property(_all_utests all_utest_executables_${PROJECT_NAME} targets)
         message(DEBUG "_all_utests=${_all_utests}")
 
         # 'test' target should always be out-of-date
@@ -292,9 +299,9 @@ endmacro()
 # all add their target to ALL_LIBRARY_TARGETS.
 #
 macro(xo_doxygen_collect_deps)
-    get_target_property(_all_exes all_executables targets)
-    get_target_property(_all_libs all_libraries targets)
-    get_target_property(_all_utests all_utest_executables targets)
+    get_target_property(_all_exes all_executables_${PROJECT_NAME} targets)
+    get_target_property(_all_libs all_libraries_${PROJECT_NAME} targets)
+    get_target_property(_all_utests all_utest_executables_${PROJECT_NAME} targets)
 
     message(DEBUG "_all_exes=${_all_exes}")
     message(DEBUG "_all_libs=${_all_libs}")
@@ -577,7 +584,7 @@ macro(xo_add_shared_library4 target projectTargets targetversion soversion sourc
     endforeach()
 
     set_property(
-        TARGET all_libraries
+        TARGET all_libraries_${PROJECT_NAME}
         APPEND
         PROPERTY targets ${target})
 
@@ -613,7 +620,7 @@ macro(xo_add_shared_library3 target projectTargets targetversion soversion sourc
     endforeach()
 
     set_property(
-        TARGET all_libraries
+        TARGET all_libraries_${PROJECT_NAME}
         APPEND
         PROPERTY targets ${target})
 
@@ -648,7 +655,7 @@ macro(xo_add_shared_library target targetversion soversion sources)
     endforeach()
 
     set_property(
-        TARGET all_libraries
+        TARGET all_libraries_${PROJECT_NAME}
         APPEND
         PROPERTY targets ${target})
 
@@ -672,7 +679,7 @@ macro(xo_add_headeronly_library4 target projectTargets)
     add_library(${target} INTERFACE)
 
     set_property(
-        TARGET all_libraries
+        TARGET all_libraries_${PROJECT_NAME}
         APPEND
         PROPERTY targets ${target})
 
@@ -695,7 +702,7 @@ macro(xo_add_headeronly_library target)
     add_library(${target} INTERFACE)
 
     set_property(
-        TARGET all_libraries
+        TARGET all_libraries_${PROJECT_NAME}
         APPEND
         PROPERTY targets ${target})
 
@@ -729,7 +736,7 @@ macro(xo_add_executable target sources)
     # such as xo_doxygen_collect_deps()
     #
     set_property(
-        TARGET all_executables
+        TARGET all_executables_${PROJECT_NAME}
         APPEND
         PROPERTY targets ${target})
 endmacro()
@@ -750,7 +757,7 @@ macro(xo_add_utest_executable target sources)
     endforeach()
 
     set_property(
-        TARGET all_utest_executables
+        TARGET all_utest_executables_${PROJECT_NAME}
         APPEND
         PROPERTY targets ${target})
 
@@ -1335,7 +1342,7 @@ macro(xo_pybind11_library target projectTargets source_files)
     pybind11_add_module(${target} MODULE ${source_files})
 
     set_property(
-        TARGET all_libraries
+        TARGET all_libraries_${PROJECT_NAME}
         APPEND
         PROPERTY targets ${target})
 
