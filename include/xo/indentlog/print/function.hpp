@@ -147,7 +147,12 @@ namespace xo {
             /* clang footnote like [CharT = char] instead of [with CharT = char] */
             std::size_t p = s.find(" [");
 #else
+# if (__GNUC__ > 13) || ((__GNUC__ == 13) && (__GNUC_MINOR__ >= 3))
+            /* gcc footnote like [CharT = char] instead of [with CharT = char] starting w/ gcc 13.3 (approximately ?)*/
+            std::size_t p = s.find(" [");
+# else
             std::size_t p = s.find(" [with ");
+# endif
 #endif
 
             return s.substr(0, p);
