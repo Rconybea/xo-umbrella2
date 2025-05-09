@@ -111,6 +111,8 @@ namespace xo {
                 {"let", false, token::let(), true},
                 {"in", false, token::in(), true},
                 {"end", false, token::end(), true},
+
+                {"*", false, token::star_token(), true},
             };
         }
 

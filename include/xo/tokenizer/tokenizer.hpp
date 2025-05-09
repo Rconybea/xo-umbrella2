@@ -646,6 +646,8 @@ namespace xo {
             } else if (is_2char_punctuation(*ix)) {
                 CharT ch1 = *ix;
 
+                (void)ch1;
+
                 ++ix;
 
                 if (ix == input.hi()) {

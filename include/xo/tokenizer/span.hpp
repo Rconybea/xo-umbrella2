@@ -71,7 +71,7 @@ namespace xo {
 
             /** @brief create span with first @p z members of this span removed **/
             span after_prefix(size_type z) const {
-                if (z > hi_ - lo_)
+                if (lo_ + z > hi_)
                     z = hi_ - lo_;
 
                 return span(lo_ + z, hi_);
