@@ -32,6 +32,7 @@ namespace xo {
 
             Lambda * origin() const { return origin_; }
             const std::vector<rp<Variable>> & argv() const { return argv_; }
+            const rp<Variable>& lookup_arg(int i) const { return argv_[i]; }
             int n_arg() const { return argv_.size(); }
             TypeDescr fn_arg(uint32_t i) const { return argv_[i]->valuetype(); }
 

@@ -40,7 +40,9 @@ namespace xo {
             const std::vector<rp<Variable>> & argv() const { return local_env_->argv(); }
             const rp<Expression> & body() const { return body_; }
 
+            const std::string& i_argname(int i_arg) const { return local_env_->lookup_arg(i_arg)->name(); }
             bool needs_closure_flag() const { return !free_var_set_.empty(); }
+            bool is_captured(const std::string& var) const { return (captured_var_set_.find(var) != captured_var_set_.end()); }
 
             // ----- FunctionInterface -----
 
