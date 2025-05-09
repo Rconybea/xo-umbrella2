@@ -1052,13 +1052,14 @@ macro(xo_dependency_helper target visibility dep)
     xo_establish_submodule_build()
 
     if(XO_SUBMODULE_BUILD)
-        if(EXISTS ${XO_UMBRELLA_SOURCE_DIR}/repo/xo-${_nxo_dep})
-            xo_dependency_helper1(${target} ${visibility} repo/xo-${_nxo_dep}/include)
+        if(EXISTS ${XO_UMBRELLA_SOURCE_DIR}/${XO_UMBRELLA_REPO_SUBDIR}/xo-${_nxo_dep})
+            xo_dependency_helper1(${target} ${visibility} ${XO_UMBRELLA_REPO_SUBDIR}/xo-${_nxo_dep}/include)
         endif()
 
-        if(EXISTS ${XO_UMBRELLA_SOURCE_DIR}/repo/${_nxo_dep})
-            xo_dependency_helper1(${target} ${visibility} repo/${_nxo_dep}/include)
+        if(EXISTS ${XO_UMBRELLA_SOURCE_DIR}/${XO_UMBRELLA_REPO_SUBDIR}/${_nxo_dep})
+            xo_dependency_helper1(${target} ${visibility} ${XO_UMBRELLA_REPO_SUBDIR}/${_nxo_dep}/include)
         endif()
+
     else()
        message(STATUS "[${target}] find_package(${dep}) (xo_dependency_helper)")
         find_package(${dep} CONFIG REQUIRED)
@@ -1401,6 +1402,10 @@ macro(xo_pybind11_dependency target dep)
     if(XO_SUBMODULE_BUILD)
         # ok to keep dep libraries on link line in submodule build
         #message("xo_pybind11_dependency: ${target}: don't clobber ${dep}.INTERFACE_LINK_LIBRARIES")
+
+        # looks like also broken in submodule build?
+        #message("-- [${target}] remove ${dep}.INTERFACE_LINK_LIBRARIES to avoid problems with transitive deps (xo_pybind11_dependency)")
+        #set_property(TARGET ${dep} PROPERTY INTERFACE_LINK_LIBRARIES "")
     else()
         message("-- [${target}] remove ${dep}.INTERFACE_LINK_LIBRARIES to avoid problems with transitive deps (xo_pybind11_dependency)")
         set_property(TARGET ${dep} PROPERTY INTERFACE_LINK_LIBRARIES "")
