@@ -1,3 +1,5 @@
+# emacs workspace config
+.projectile
 # lsp keeps state here
 .cache
 # typical build directory

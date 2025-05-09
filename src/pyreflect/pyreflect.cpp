@@ -22,6 +22,17 @@ namespace xo {
     namespace reflect {
         PYBIND11_MODULE(PYREFLECT_MODULE_NAME(), m) {
 
+            m.doc() = "pybind11 plugin for xo-reflect";
+
+            py::enum_<Metatype>(m, "Metatype")
+                .value("invalid", Metatype::mt_invalid)
+                .value("atomic", Metatype::mt_atomic)
+                .value("pointer", Metatype::mt_pointer)
+                .value("vector", Metatype::mt_vector)
+                .value("struct", Metatype::mt_struct)
+                .value("function", Metatype::mt_function)
+                ;
+
             /* note: possibly move this to pytime/  if/when we provide it */
             //py::class_<utc_nanos>(m, "utc_nanos");
 
@@ -34,9 +45,15 @@ namespace xo {
              */
             py::class_<TypeDescrBase,
                        unowned_ptr<TypeDescrBase>>(m, "TypeDescr")
+
+                .def_static("lookup_by_name", &TypeDescrBase::lookup_by_name)
                 .def_static("print_reflected_types",
                             [](){ TypeDescrBase::print_reflected_types(std::cout); })
+
                 .def_property_readonly("canonical_name", &TypeDescrBase::canonical_name)
+                .def_property_readonly("short_name", &TypeDescrBase::short_name)
+                .def_property_readonly("metatype", &TypeDescrBase::metatype)
+                .def_property_readonly("complete_flag", &TypeDescrBase::complete_flag)
                 .def("__repr__", &TypeDescrBase::display_string);
 
             /* note: this means python will use
