@@ -310,6 +310,11 @@ namespace xo {
                 return *this;
             }
 
+            Borrow& operator=(const Borrow& x) {
+                ptr_ = x.get();
+                return *this;
+            }
+
         private:
             T * ptr_ = nullptr;
         }; /*Borrow*/
