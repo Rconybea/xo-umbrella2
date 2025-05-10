@@ -22,7 +22,6 @@ jobs:
         uses: actions/checkout@v4
 
       - name: idInstall cmake+git
-        uses: actions/checkout@v4
         run: |
           sudo apt update
           echo "::group::cmake install"
