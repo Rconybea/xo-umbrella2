@@ -81,5 +81,5 @@ $ git fetch xo-foo
 3. checkout satellite repo
 
 ```
-$ git subtree add --prefix=xo-foo main
+$ git subtree add --prefix=xo-foo xo-foo main
 ```
