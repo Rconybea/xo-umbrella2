@@ -66,7 +66,7 @@ message("-- CMAKE_INSTALL_RPATH=${CMAKE_INSTALL_RPATH}")
 
 add_subdirectory(xo-cmake)
 add_subdirectory(xo-indentlog)
-#add_subdirectory(xo-refcnt)
+add_subdirectory(xo-refcnt)
 #add_subdirectory(xo-subsys)
 #add_subdirectory(xo-randomgen)
 #add_subdirectory(xo-ordinaltree)

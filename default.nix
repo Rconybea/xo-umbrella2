@@ -39,7 +39,7 @@ let
         {
           xo-cmake          = self.callPackage pkgs/xo-cmake.nix          {};
           xo-indentlog      = self.callPackage pkgs/xo-indentlog.nix      {};
-#          xo-refcnt         = self.callPackage pkgs/xo-refcnt.nix         {};
+          xo-refcnt         = self.callPackage pkgs/xo-refcnt.nix         {};
 #          xo-subsys         = self.callPackage pkgs/xo-subsys.nix         {};
 #          xo-randomgen      = self.callPackage pkgs/xo-randomgen.nix      {};
 #          xo-ordinaltree    = self.callPackage pkgs/xo-ordinaltree.nix    {};
