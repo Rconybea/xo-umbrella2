@@ -27,7 +27,7 @@ jobs:
         run: |
           sudo apt-get install -y catch2
           # where did it put the dang thing?
-          find / -name catch.hpp
+          find / -name catch.hpp 2> /dev/null
 
       - name: bootstrap xo-cmake
         run: |
