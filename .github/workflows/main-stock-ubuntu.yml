@@ -39,6 +39,7 @@ jobs:
 
       - name: build xo subprojects
         run: |
+          PREFIX=${{github.workspace}}/local
           PATH=${{github.workspace}}/local/bin:${PATH}
           echo "::group::xo configure"
           cmake -B .build -S . -DCMAKE_INSTALL_PREFIX=${PREFIX}
