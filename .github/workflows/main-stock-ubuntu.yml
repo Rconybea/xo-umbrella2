@@ -32,6 +32,15 @@ jobs:
           echo "::group::xo-cmake install"
           cmake --install .build0
 
+      - name: build xo subprojects
+        run: |
+          echo "::group::xo configure"
+          cmake -B .build -B . -DCMAKE_INSTALL_PREFIX=${PREFIX}
+          echo "::group::xo build"
+          cmake --build .build
+          echo "::gorup::xo install"
+          cmake --install .build
+
       - name: print install path
         run: |
           tree ${{github.workspace}}/local
