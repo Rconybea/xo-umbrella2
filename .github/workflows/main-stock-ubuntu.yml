@@ -59,9 +59,9 @@ jobs:
           PREFIX=${{github.workspace}}/local
           PATH=${{github.workspace}}/local/bin:${PATH}
           echo "::group::xo configure"
-          cmake -B .build -S . -DCMAKE_INSTALL_PREFIX=${PREFIX} -DCMAKE_MODULE_PATH=/usr/local/lib --verbose
+          cmake -B .build -S . -DCMAKE_INSTALL_PREFIX=${PREFIX} -DCMAKE_MODULE_PATH=/usr/local/lib
           echo "::group::xo build"
-          cmake --build .build
+          cmake --build .build --verbose
           echo "::group::xo install"
           cmake --install .build
 
