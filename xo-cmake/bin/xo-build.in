@@ -1,0 +1,220 @@
+#!/usr/bin/env bash
+
+usage() {
+    cat <<EOF
+$0 [-u|--usage|-h|--help]
+    [--list] [-n] [--xoname=NAME]
+    [--repo|--clone|--configure|--build|--install]
+    [-S=SOURCEDIR] [-B=BUILDDIR]
+EOF
+}
+
+help() {
+    usage
+
+    cat <<EOF
+
+fetch and/or build xo component libraries
+
+Options:
+  -u | --usage      brief help message
+  -h | --help       this help message
+  --list            list known xo libraries
+  -n                dry-run: don't actually invoke state-changing commands
+  --xoname=NAME     operate on xo subsystem NAME
+  --repo            report github repo for NAME
+  --clone           git clone xo library NAME in current directory
+  --configure       run cmake for xo library NAME in immediate subdir
+                    Will use NAME/.build as build directory
+  --build           run cmake build for xo library NAME in immediate subdir
+  --install         run cmake install for xo library NAME in immediate subdir
+  -S=SOURCEDIR      override path/to/source
+  -B=BUILDDIR       override path/to/build
+EOF
+}
+
+noop_flag=0
+xoname=
+repo_flag=0
+clone_flag=0
+configure_flag=0
+build_flag=0
+install_flag=0
+pathtosource=
+pathtobuild=
+
+while [[ $# > 0 ]]; do
+    case "$1" in
+        -u | --usage)
+            cmd='usage'
+            ;;
+        -h | --help)
+            cmd='help'
+            ;;
+        -n)
+            noop_flag=1
+            ;;
+        -S)
+            shift
+            pathtosource=$1
+            ;;
+        -S=*)
+            pathtosource="${1#*=}"
+            ;;
+        -B)
+            shift
+            pathtobuild=$1
+            ;;
+        -B=*)
+            pathtobuild="${1#*=}"
+            ;;
+        --list)
+            cmd='list'
+            ;;
+        --xoname=*)
+            xoname="${1#*=}"
+            ;;
+        --repo)
+            repo_flag=1
+            ;;
+        --clone)
+            clone_flag=1
+            ;;
+        --configure|--config)
+            configure_flag=1
+            ;;
+        --build)
+            build_flag=1
+            ;;
+        --install)
+            install_flag=1
+            ;;
+        xo-*)
+            xoname="$1"
+            ;;
+        *)
+            usage
+            exit 1
+            ;;
+    esac
+
+    shift
+done
+
+echo xoname=$xoname pathtosource=$pathtosource pathtobuild=$pathtobuild
+
+if [[ -z "$pathtosource" ]]; then
+    pathtosource=$xoname
+fi
+
+if [[ -z "$pathtobuild" ]]; then
+    pathtobuild=$xoname/.build
+fi
+
+SUBSYSTEMLIST_FILE=@CMAKE_INSTALL_FULL_DATADIR@/etc/xo/subsystem-list
+
+subsystem_list() {
+    cat ${SUBSYSTEMLIST_FILE}
+}
+
+XO_REPO_STEM="https://github.com/Rconybea"
+
+repo() {
+    xoname=$1
+
+    case "$xoname" in
+        xo-indentlog)
+            echo "${XO_REPO_STEM}/indentlog.git"
+            ;;
+        xo-refcnt)
+            echo "${XO_REPO_STEM}/refcnt.git"
+            ;;
+        xo-subsys)
+            echo "${XO_REPO_STEM}/subsys.git"
+            ;;
+        xo-reflect)
+            echo "${XO_REPO_STEM}/reflect.git"
+            ;;
+        *)
+            if grep -q $1 ${SUBSYSTEMLIST_FILE}; then
+                echo "${XO_REPO_STEM}/${1}.git"
+            else
+                >&2 echo "$0: unknown xo component [${xoname}]"
+                return 1
+            fi
+    esac
+
+    return 0
+}
+
+if [[ $cmd == 'usage' ]]; then
+    echo -n "usage: "
+    usage
+    exit 0
+elif [[ $cmd == 'help' ]]; then
+    echo -n "help; "
+    help
+    exit 0
+fi
+
+set -e
+
+if [[ $cmd == 'list' ]]; then
+    subsystem_list
+fi
+
+if [[ $repo_flag -eq 1 ]]; then
+    if [[ -n "$xoname" ]]; then
+        repo $xoname
+    fi
+fi
+
+if [[ $clone_flag -eq 1 ]]; then
+    if [[ -n "$xoname" ]]; then
+        url=$(repo $xoname)
+
+        cmd="git clone $url"
+
+        if [[ $noop_flag -eq 1 ]]; then
+            echo $cmd
+        else
+            $cmd
+        fi
+    fi
+fi
+
+if [[ $configure_flag -eq 1 ]]; then
+    if [[ -n "$xoname" ]]; then
+        cmd="cmake -DCMAKE_INSTALL_PREFIX=@CMAKE_INSTALL_PREFIX@ -S $pathtosource -B $pathtobuild"
+
+        if [[ $noop_flag -eq 1 ]]; then
+            echo $cmd
+        else
+            $cmd
+        fi
+    fi
+fi
+
+if [[ $build_flag -eq 1 ]]; then
+    if [[ -n "$xoname" ]]; then
+        cmd="cmake --build $pathtobuild -j"
+
+        if [[ $noop_flag -eq 1 ]]; then
+            echo $cmd
+        else
+            $cmd
+        fi
+    fi
+fi
+
+if [[ $install_flag -eq 1 ]]; then
+    if [[ -n "$xoname" ]]; then
+        cmd="cmake --install $pathtobuild"
+
+        if [[ $noop_flag -eq 1 ]]; then
+            echo $cmd
+        else
+            $cmd
+        fi
+    fi
+fi

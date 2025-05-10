@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+srcdir=@PROJECT_SOURCE_DIR@
+builddir=@PROJECT_BINARY_DIR@
+
+#lcov=@LCOV_EXECUTABLE@
+#genhtml=@GENHTML_EXECUTABLE@
+#
+#if [[ $lcov == "LCOV_EXECUTABLE-NOTFOUND" ]]; then
+#    echo "gen-ccov: lcov executable not found"
+#    exit 1
+#fi
+#
+#if [[ $genhtml == "GENHTML_EXECUTABLE-NOTFOUND" ]]; then
+#    echo "gen-ccov: genhtml executable not found"
+#    exit 1
+#fi
+
+lcovharness=@XO_CMAKE_LCOV_HARNESS_EXECUTABLE@
+
+if [[ -z $lcovharness ]]; then
+   echo "gen-ccov: lcov-harness executable (XO_CMAKE_LCOV_HARNESS_EXECUTABLE) not configured"
+   echo "gen-ccov: expect value of path/to/xo-cmake-config --lcov-harness-exe"
+   echo "gen-ccov: stored in XO_CMAKE_LCOV_HARNESS_EXECUTABLE by xo_toplevel_testing_options2()"
+   exit 1
+fi
+
+# TODO: allow providing LCOV_EXECUTABLE GENHTML_EXECUTABLE here
+
+$lcovharness $srcdir $builddir
