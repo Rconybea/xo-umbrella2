@@ -23,7 +23,7 @@
 
   # xo dependencies
   xo-cmake,
-#  xo-indentlog,
+  xo-indentlog,
 #  xo-subsys,
 #  xo-refcnt,
 #  xo-randomgen,
@@ -58,7 +58,7 @@
 buildEnv {
   name = "xo-userenv";
   paths = [ xo-cmake
-#            xo-indentlog
+            xo-indentlog
 #            xo-refcnt
 #            xo-subsys
 #            xo-randomgen
