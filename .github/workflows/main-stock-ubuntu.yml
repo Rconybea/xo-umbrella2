@@ -19,16 +19,30 @@ jobs:
 
     steps:
       - name: checkout source
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Install catch2
-        # install catch2.
-        # see [[https://stackoverflow.com/questions/57982945/how-to-apt-get-install-in-a-github-actions-workflow]]
+      - name: idInstall cmake+git
+        uses: actions/checkout@v4
         run: |
-          sudo apt-get install -y catch2
-          # where did it put the dang thing?
-          ls /usr/include
-          #find / -name catch.hpp 2> /dev/null
+          sudo apt update
+          echo "::group::cmake install"
+          sudo apt install -y cmake
+          echo "::group::git install"
+          sudo apt install -y git
+
+      - name: build+install catch2
+        run: |
+          echo "::group::clone catch2"
+          git clone https://github.com/catchorg/Catch2.git
+          cd Catch2
+          git checkout v3.4.0
+          echo "::group::catch2 configure"
+          mkdir .build
+          cmake -B .build -S .
+          echo "::group::catch2 install"
+          sudo cmake --build .build --target install
+
+          # this should be sufficient for find_package(Catch2) to work
 
       - name: bootstrap xo-cmake
         run: |
