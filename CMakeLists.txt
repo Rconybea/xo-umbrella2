@@ -47,6 +47,13 @@ install(
     DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
+install(
+    FILES
+    "etc/xo/subsystem-list"
+    PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/etc/xo
+)
+
 # The cmake template gen-ccov.in should be expanded in downstream project;
 # to pickup downstream project's PROJECT_SOURCE_DIR / PROJECT_BINARY_DIR
 #

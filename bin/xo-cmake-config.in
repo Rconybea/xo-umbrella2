@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 usage() {
-    echo "$0 [-u|--usage|-h|--help|--lcov-exe|--genhtml-exe|--lcov-harness-exe|--gen-ccov-template|--cmake-module-path]" 1>&2
+    echo "$0 [-u|--usage|-h|--help|--lcov-exe|--genhtml-exe|--lcov-harness-exe|--gen-ccov-template|--cmake-module-path|--subsystem-list]" 1>&2
 }
 
 help() {
@@ -20,6 +20,7 @@ Options:
   --lcov-harness-exe  report path to 'xo-cmake-lcov-harness' executable
   --gen-ccov-template report path to 'gen-ccov.in' template
   --doxygen-template  report path to 'Doxyfile.in' template
+  --subsystem-list    report path to 'subsystem-ilst'
 
 EOF
 }
@@ -50,6 +51,9 @@ while [[ $# > 0 ]]; do
         --doxygen-template)
             cmd='doxygen_template'
             ;;
+        --subsystem-list)
+            cmd='subsystem_list'
+            ;;
         *)
             usage
             exit 1
@@ -77,4 +81,6 @@ elif [[ $cmd == 'gen_ccov_template' ]]; then
     echo -n @CMAKE_INSTALL_FULL_DATADIR@/xo-macros/gen-ccov.in
 elif [[ $cmd == 'doxygen_template' ]]; then
     echo -n @CMAKE_INSTALL_FULL_DATADIR@/xo-macros/Doxyfile.in
+elif [[ $cmd == 'subsystem_list' ]]; then
+    echo -n @CMAKE_INSTALL_FULL_DATADIR@/etc/xo/subsystem-list
 fi
