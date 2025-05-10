@@ -26,7 +26,7 @@
   xo-indentlog,
   xo-refcnt,
   xo-subsys,
-#  xo-randomgen,
+  xo-randomgen,
 #  xo-ordinaltree,
 #  xo-flatstring,
 #  xo-reflectutil,
@@ -61,7 +61,7 @@ buildEnv {
             xo-indentlog
             xo-refcnt
             xo-subsys
-#            xo-randomgen
+            xo-randomgen
 #            xo-ordinaltree
 #            xo-pyutil
 #            xo-flatstring

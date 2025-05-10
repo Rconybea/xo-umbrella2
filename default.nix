@@ -41,7 +41,7 @@ let
           xo-indentlog      = self.callPackage pkgs/xo-indentlog.nix      {};
           xo-refcnt         = self.callPackage pkgs/xo-refcnt.nix         {};
           xo-subsys         = self.callPackage pkgs/xo-subsys.nix         {};
-#          xo-randomgen      = self.callPackage pkgs/xo-randomgen.nix      {};
+          xo-randomgen      = self.callPackage pkgs/xo-randomgen.nix      {};
 #          xo-ordinaltree    = self.callPackage pkgs/xo-ordinaltree.nix    {};
 #          xo-pyutil         = self.callPackage pkgs/xo-pyutil.nix         {};
 #          xo-flatstring     = self.callPackage pkgs/xo-flatstring.nix     {};
