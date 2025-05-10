@@ -78,7 +78,7 @@ let
 #          xo-kalmanfilter   = self.callPackage pkgs/xo-kalmanfilter.nix   {};
 #          xo-pykalmanfilter = self.callPackage pkgs/xo-pykalmanfilter.nix {};
 #
-#          xo-userenv        = self.callPackage pkgs/xo-userenv.nix        {};
+          xo-userenv        = self.callPackage pkgs/xo-userenv.nix        {};
 #          xo-userenv-slow   = self.callPackage pkgs/xo-userenv-slow.nix   {};
         };
 

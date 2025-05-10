@@ -42,3 +42,44 @@ It doesn't interact with toplevel `CMakeLists.txt`.
 ```
 $ nix-build -A xo-userenv
 ```
+
+This builds all xo subprojects,  assembles sandbox under `./result`.
+
+```
+$ tree -L 1 ./result
+./result
+├── bin
+│   ├── xo-build
+│   ├── xo-cmake-config
+│   └── xo-cmake-lcov-harness
+└── share
+    ├── cmake
+    │   └── xo_macros
+    │       ├── code-coverage.cmake
+    │       ├── xo-project-macros.cmake
+    │       └── xo_cxx.cmake
+    ├── etc
+    │   └── xo
+    │       └── subsystem-list
+    └── xo-macros
+        ├── Doxyfile.in
+        ├── gen-ccov.in
+        └── xo-bootstrap-macros.cmake
+```
+
+## To add a new satellite repo
+
+1. check clone in clean state (all local changes committed or unwound)
+
+2. add satellite as remote
+
+```
+$ git remote add xo-foo git@github.com:Rconybea/xo-foo.git
+$ git fetch xo-foo
+```
+
+3. checkout satellite repo
+
+```
+$ git subtree add --prefix=xo-foo main
+```
