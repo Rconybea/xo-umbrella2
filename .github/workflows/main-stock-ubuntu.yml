@@ -23,7 +23,7 @@ jobs:
 
       - name: bootstrap xo-cmake
         run: |
-          PREFIX=${{github.workspace}//local
+          PREFIX=${{github.workspace}}//local
           mkdir -p ${PREFIX}
           echo "::group::xo-cmake configure"
           cmake -B .build0 -S xo-cmake -DCMAKE_INSTALL_PREFIX=${PREFIX}
