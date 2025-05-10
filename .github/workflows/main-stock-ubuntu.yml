@@ -61,7 +61,7 @@ jobs:
           echo "::group::xo configure"
           cmake -B .build -S . -DCMAKE_INSTALL_PREFIX=${PREFIX} -DCMAKE_FIND_DEBUG_MODE=ON -DCMAKE_PREFIX_PATH=/usr/local
           echo "::group::xo build"
-          cmake --build .build --verbose
+          cmake --build .build #--verbose
           echo "::group::xo install"
           cmake --install .build
 
