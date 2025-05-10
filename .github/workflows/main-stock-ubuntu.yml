@@ -41,7 +41,7 @@ jobs:
         run: |
           PATH=${{github.workspace}}/local/bin:${PATH}
           echo "::group::xo configure"
-          cmake -B .build -B . -DCMAKE_INSTALL_PREFIX=${PREFIX}
+          cmake -B .build -S . -DCMAKE_INSTALL_PREFIX=${PREFIX}
           echo "::group::xo build"
           cmake --build .build
           echo "::gorup::xo install"
