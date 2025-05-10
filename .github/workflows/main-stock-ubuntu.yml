@@ -31,3 +31,7 @@ jobs:
           cmake --build .build0
           echo "::group::xo-cmake install"
           cmake --install .build0
+
+      - name: print install path
+        run: |
+          tree ${{github.workspace}}/local
