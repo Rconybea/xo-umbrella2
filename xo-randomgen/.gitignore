@@ -1,0 +1,6 @@
+# clangd (run via lsp) keeps state here
+.cache
+# typical build directory
+.build
+# compile_commands.json: symlink to build directory, should be created manually
+compile_commands.json
