@@ -25,7 +25,7 @@
   xo-cmake,
   xo-indentlog,
   xo-refcnt,
-#  xo-subsys,
+  xo-subsys,
 #  xo-randomgen,
 #  xo-ordinaltree,
 #  xo-flatstring,
@@ -60,7 +60,7 @@ buildEnv {
   paths = [ xo-cmake
             xo-indentlog
             xo-refcnt
-#            xo-subsys
+            xo-subsys
 #            xo-randomgen
 #            xo-ordinaltree
 #            xo-pyutil
