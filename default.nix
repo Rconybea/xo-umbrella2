@@ -55,6 +55,7 @@ let
           xo-callback       = self.callPackage pkgs/xo-callback.nix       {};
           xo-webutil        = self.callPackage pkgs/xo-webutil.nix        {};
           xo-pywebutil      = self.callPackage pkgs/xo-pywebutil.nix      {};
+          xo-printjson      = self.callPackage pkgs/xo-printjson.nix      {};
 #
           xo-expression     = self.callPackage pkgs/xo-expression.nix     {};
           xo-pyexpression   = self.callPackage pkgs/xo-pyexpression.nix   {};
@@ -65,7 +66,6 @@ let
                                                                             clang = llvmPackages.clang;
                                                                             llvm = llvmPackages.llvm; };
           xo-pyjit          = self.callPackage pkgs/xo-pyjit.nix          {};
-#          xo-printjson      = self.callPackage pkgs/xo-printjson.nix      {};
 #          xo-pyprintjson    = self.callPackage pkgs/xo-pyprintjson.nix    {};
 #          xo-reactor        = self.callPackage pkgs/xo-reactor.nix        {};
 #          xo-pyreactor      = self.callPackage pkgs/xo-pyreactor.nix      {};
