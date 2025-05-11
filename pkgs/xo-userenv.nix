@@ -45,10 +45,10 @@
   xo-reactor,
   xo-pyreactor,
   xo-websock,
+  xo-pywebsock,
 #  xo-simulator,
 #  xo-pysimulator, xo-distribution, xo-pydistribution, xo-process, xo-pyprocess, xo-statistics, xo-kalmanfilter,
   #  xo-pykalmanfilter,
-#  xo-pywebsock,
 
   xo-expression,
   xo-pyexpression,
@@ -94,7 +94,7 @@ buildEnv {
             xo-reactor
             xo-pyreactor
             xo-websock
-#            xo-pywebsock
+            xo-pywebsock
 #            xo-statistics
 #            xo-distribution
 #            xo-pydistribution

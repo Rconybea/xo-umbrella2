@@ -5,7 +5,7 @@ project(xo_pywebsock VERSION 1.0)
 
 include(cmake/xo-bootstrap-macros.cmake)
 
-xo_cxx_toplevel_options()
+xo_cxx_toplevel_options3()
 
 add_subdirectory(src/pywebsock)
 
