@@ -81,7 +81,7 @@ add_subdirectory(xo-pyunit)
 #
 add_subdirectory(xo-expression)
 add_subdirectory(xo-pyexpression)
-#add_subdirectory(xo-tokenizer)
+add_subdirectory(xo-tokenizer)
 #add_subdirectory(xo-reader)
 #add_subdirectory(xo-jit)
 #add_subdirectory(xo-pyjit)

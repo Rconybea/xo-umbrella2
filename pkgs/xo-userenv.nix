@@ -46,10 +46,11 @@
 #  xo-pyreactor,
 #  xo-simulator,
 #  xo-pysimulator, xo-distribution, xo-pydistribution, xo-process, xo-pyprocess, xo-statistics, xo-kalmanfilter,
-#  xo-pykalmanfilter, xo-websock, xo-pywebsock, xo-tokenizer,
+#  xo-pykalmanfilter, xo-websock, xo-pywebsock,
 
   xo-expression,
   xo-pyexpression,
+  xo-tokenizer,
 # xo-reader,
 #  xo-jit,
 #  xo-pyjit
@@ -78,7 +79,8 @@ buildEnv {
 
             xo-expression
             xo-pyexpression
-#            xo-tokenizer
+            xo-tokenizer
+
 #            xo-reader
 #            xo-jit
 #            xo-pyjit

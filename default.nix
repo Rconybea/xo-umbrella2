@@ -53,8 +53,9 @@ let
           xo-pyunit         = self.callPackage pkgs/xo-pyunit.nix         {};
 
           xo-expression     = self.callPackage pkgs/xo-expression.nix     {};
-#          xo-pyexpression   = self.callPackage pkgs/xo-pyexpression.nix   {};
-#          xo-tokenizer      = self.callPackage pkgs/xo-tokenizer.nix      {};
+          xo-pyexpression   = self.callPackage pkgs/xo-pyexpression.nix   {};
+          xo-tokenizer      = self.callPackage pkgs/xo-tokenizer.nix      {};
+
 #          xo-reader         = self.callPackage pkgs/xo-reader.nix         {};
 #          xo-jit            = self.callPackage pkgs/xo-jit.nix            { stdenv = customStdenv;
 #                                                                            clang = llvmPackages.clang;

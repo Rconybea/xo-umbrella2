@@ -110,6 +110,9 @@ jobs:
           echo "::group::xo-pyexpression build"
           cmake --build .build -- xo-pyexpression
 
+          echo "::group::xo-tokenizer build"
+          cmake --build .build -- xo-tokenizer
+
           ##############
 
           echo "::group::xo build (catch all)"
