@@ -53,7 +53,7 @@
   xo-tokenizer,
   xo-reader,
   xo-jit,
-#  xo-pyjit
+  xo-pyjit
 
   # other args
 

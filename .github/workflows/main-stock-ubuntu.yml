@@ -26,12 +26,16 @@ jobs:
           sudo apt update
           echo "::group::cmake install"
           sudo apt install -y cmake
+          echo "::endgroup"
           echo "::group::git install"
           sudo apt install -y git
+          echo "::endgroup"
           echo "::group::pybind11-dev install"
           sudo apt install -y pybind11-dev
+          echo "::endgroup"
           echo "::group::llvm18 install"
           sudo apt install -y llvm-18-dev
+          echo "::endgroup"
           #echo "::group::clang18 install"
           #sudo apt install -y clang-18
           #echo "::group::lldb18 install"
@@ -48,8 +52,10 @@ jobs:
           echo "::group::catch2 configure"
           mkdir .build
           cmake -B .build -S .
+          echo "::endgroup"
           echo "::group::catch2 install"
           sudo cmake --build .build --target install
+          echo "::endgroup"
 
           # this should be sufficient for find_package(Catch2) to work
 
@@ -63,10 +69,13 @@ jobs:
           mkdir -p ${PREFIX}
           echo "::group::xo-cmake configure"
           cmake -B .build0 -S xo-cmake -DCMAKE_INSTALL_PREFIX=${PREFIX}
+          echo "::endgroup"
           echo "::group::xo-cmake build"
           cmake --build .build0
+          echo "::endgroup"
           echo "::group::xo-cmake install"
           cmake --install .build0
+          echo "::endgroup"
 
       - name: build xo subprojects
         run: |
@@ -74,14 +83,17 @@ jobs:
           PATH=${{github.workspace}}/local/bin:${PATH}
           echo "::group::xo configure"
           cmake -B .build -S . -DCMAKE_INSTALL_PREFIX=${PREFIX} -DCMAKE_PREFIX_PATH=/usr/local # -DCMAKE_FIND_DEBUG_MODE=ON
+          echo "::endgroup"
 
           # note: xo-foo targets exist, but don't build anything
 
           echo "::group::xo build"
           cmake --build .build #--verbose
+          echo "::endgroup"
 
           echo "::group::xo install"
           cmake --install .build
+          echo "::endgroup"
 
       - name: print install path
         run: |
