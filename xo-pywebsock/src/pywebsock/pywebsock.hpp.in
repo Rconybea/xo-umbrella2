@@ -1,0 +1,25 @@
+/* @file pywebsock.hpp
+ *
+ * automatically generated from src/pywebsock/pywebsock.hpp.in
+ * see src/pywebsock/CMakeLists.txt
+ */
+
+/* python requires module name = library name
+ * example:
+ *   PYBIND11_MODULE(PYWEBSOCK_MODULE_NAME(), m) { ... }
+ */
+#define PYWEBSOCK_MODULE_NAME() @SELF_LIB@
+
+/* example:
+ *   py::module_::import(PYWEBSOCK_MODULE_NAME_STR)
+ */
+#define PYWEBSOCK_MODULE_NAME_STR "@SELF_LIB@"
+
+/* example:
+ *   PYWEBSOCK_IMPORT_MODULE()
+ * replaces
+ *   py::module_::import("pywebsock")
+ */
+#define PYWEBSOCK_IMPORT_MODULE() py::module_::import("@SELF_LIB@")
+
+/* end pywebsock.hpp */
