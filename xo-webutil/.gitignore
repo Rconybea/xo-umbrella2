@@ -1,0 +1,6 @@
+# lsp keeps state here
+.cache
+# symlink -> build/compile_commands.json should be created manually
+compile_commands.json
+# typical build directories
+.build*
