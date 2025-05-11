@@ -52,7 +52,7 @@
   xo-pydistribution,
   xo-simulator,
   xo-pysimulator,
-#  xo-process,
+  xo-process,
   #xo-pyprocess,
   #xo-kalmanfilter,
   #  xo-pykalmanfilter,
@@ -100,7 +100,7 @@ buildEnv {
             xo-pydistribution
             xo-simulator
             xo-pysimulator
-#            xo-process
+            xo-process
 #
             xo-expression
             xo-pyexpression
