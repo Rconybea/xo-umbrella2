@@ -49,7 +49,7 @@ let
           xo-reflect        = self.callPackage pkgs/xo-reflect.nix        {};
           xo-pyreflect      = self.callPackage pkgs/xo-pyreflect.nix      {};
           xo-ratio          = self.callPackage pkgs/xo-ratio.nix          {};
-#          xo-unit           = self.callPackage pkgs/xo-unit.nix           {};
+          xo-unit           = self.callPackage pkgs/xo-unit.nix           {};
 #          xo-pyunit         = self.callPackage pkgs/xo-pyunit.nix         {};
 #          xo-expression     = self.callPackage pkgs/xo-expression.nix     {};
 #          xo-pyexpression   = self.callPackage pkgs/xo-pyexpression.nix   {};

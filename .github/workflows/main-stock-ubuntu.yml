@@ -96,6 +96,9 @@ jobs:
           echo "::group::xo-ratio build"
           cmake --build .build -- xo-ratio
 
+          echo "::group::xo-unit build"
+          cmake --build .build -- xo-unit
+
           echo "::group::xo build (catch all)"
           cmake --build .build #--verbose
 

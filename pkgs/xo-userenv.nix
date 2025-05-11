@@ -34,7 +34,7 @@
   xo-reflect,
   xo-pyreflect,
   xo-ratio,
-#  xo-unit,
+  xo-unit,
 #  xo-pyunit,
 #  xo-printjson,
 #  xo-pyprintjson,
@@ -69,7 +69,7 @@ buildEnv {
             xo-reflect
             xo-pyreflect
             xo-ratio
-#            xo-unit
+            xo-unit
 #            xo-pyunit
 #            xo-expression
 #            xo-pyexpression
