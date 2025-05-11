@@ -96,6 +96,7 @@ add_subdirectory(xo-simulator)
 add_subdirectory(xo-pysimulator)
 add_subdirectory(xo-process)
 add_subdirectory(xo-pyprocess)
+add_subdirectory(xo-kalmanfilter)
 #
 add_subdirectory(xo-expression)
 add_subdirectory(xo-pyexpression)
@@ -104,5 +105,4 @@ add_subdirectory(xo-reader)
 add_subdirectory(xo-jit)
 add_subdirectory(xo-pyjit)
 #
-#add_subdirectory(xo-kalmanfilter)
 #add_subdirectory(xo-pykalmanfilter)

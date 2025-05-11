@@ -54,7 +54,7 @@
   xo-pysimulator,
   xo-process,
   xo-pyprocess,
-  #xo-kalmanfilter,
+  xo-kalmanfilter,
   #  xo-pykalmanfilter,
 #
   xo-expression,
@@ -109,7 +109,7 @@ buildEnv {
             xo-reader
             xo-jit
             xo-pyjit
-#            xo-kalmanfilter
+            xo-kalmanfilter
 #            xo-pykalmanfilter
           ];
 }

@@ -69,6 +69,7 @@ let
           xo-pysimulator    = self.callPackage pkgs/xo-pysimulator.nix    {};
           xo-process        = self.callPackage pkgs/xo-process.nix        {};
           xo-pyprocess      = self.callPackage pkgs/xo-pyprocess.nix      {};
+          xo-kalmanfilter   = self.callPackage pkgs/xo-kalmanfilter.nix   {};
 #
           xo-expression     = self.callPackage pkgs/xo-expression.nix     {};
           xo-pyexpression   = self.callPackage pkgs/xo-pyexpression.nix   {};
@@ -80,8 +81,6 @@ let
                                                                             llvm = llvmPackages.llvm; };
           xo-pyjit          = self.callPackage pkgs/xo-pyjit.nix          {};
 
-#          xo-pysimulator    = self.callPackage pkgs/xo-pysimulator.nix    {};
-#          xo-kalmanfilter   = self.callPackage pkgs/xo-kalmanfilter.nix   {};
 #          xo-pykalmanfilter = self.callPackage pkgs/xo-pykalmanfilter.nix {};
 #
           xo-userenv        = self.callPackage pkgs/xo-userenv.nix        {};
