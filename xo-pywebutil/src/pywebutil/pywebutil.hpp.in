@@ -1,0 +1,25 @@
+/* @file pywebutil.hpp
+ *
+ * automatically generated from src/pywebutil/pywebutil.hpp.in
+ * see src/pywebutil/CMakeLists.txt
+ */
+
+/* python requires module name = library name
+ * example:
+ *   PYBIND11_MODULE(PYWEBUTIL_MODULE_NAME(), m) { ... }
+ */
+#define PYWEBUTIL_MODULE_NAME() @SELF_LIB@
+
+/* example:
+ *   py::module_::import(PYWEBUTIL_MODULE_NAME_STR)
+ */
+#define PYWEBUTIL_MODULE_NAME_STR "@SELF_LIB@"
+
+/* example:
+ *   PYWEBUTIL_IMPORT_MODULE()
+ * replaces
+ *   py::module_::import("pywebutil")
+ */
+#define PYWEBUTIL_IMPORT_MODULE() py::module_::import("@SELF_LIB@")
+
+/* end pywebutil.hpp */

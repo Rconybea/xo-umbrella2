@@ -1,0 +1,9 @@
+Creating this pybind11 library to hold low-dependency wrappers
+used for interaction between {websock/, pywebsock/} and other subsystems.
+
+1. This library needs to be a (runtime) dependency of pyxxx libraries that
+   use reactor::EventStore, for example pyprocess/,  to supply wrappers
+   for EndpointDescr and Alist.
+
+2. If we chose to put this code in pywebsock/,   then pywebsock + libwebsocket
+   would become runtime dependencies of libraries like pyprocess/.
