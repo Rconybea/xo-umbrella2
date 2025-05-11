@@ -31,10 +31,10 @@
   xo-flatstring,
   xo-pyutil,
   xo-reflectutil,
+  xo-reflect,
 #  xo-ratio,
 #  xo-unit,
 #  xo-pyunit,
-#  xo-reflect,
 #  xo-pyreflect,
 #  xo-printjson,
 #  xo-pyprintjson,
@@ -66,7 +66,7 @@ buildEnv {
             xo-flatstring
             xo-pyutil
             xo-reflectutil
-#            xo-reflect
+            xo-reflect
 #            xo-pyreflect
 #            xo-ratio
 #            xo-unit
