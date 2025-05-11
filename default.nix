@@ -59,6 +59,7 @@ let
           xo-pyprintjson    = self.callPackage pkgs/xo-pyprintjson.nix    {};
           xo-reactor        = self.callPackage pkgs/xo-reactor.nix        {};
           xo-pyreactor      = self.callPackage pkgs/xo-pyreactor.nix      {};
+          xo-websock        = self.callPackage pkgs/xo-websock.nix        {};
 #
           xo-expression     = self.callPackage pkgs/xo-expression.nix     {};
           xo-pyexpression   = self.callPackage pkgs/xo-pyexpression.nix   {};
@@ -69,7 +70,6 @@ let
                                                                             clang = llvmPackages.clang;
                                                                             llvm = llvmPackages.llvm; };
           xo-pyjit          = self.callPackage pkgs/xo-pyjit.nix          {};
-#          xo-websock        = self.callPackage pkgs/xo-websock.nix        {};
 #          xo-pywebsock      = self.callPackage pkgs/xo-pywebsock.nix      {};
 #          xo-statistics     = self.callPackage pkgs/xo-statistics.nix     {};
 #          xo-distribution   = self.callPackage pkgs/xo-distribution.nix   {};
