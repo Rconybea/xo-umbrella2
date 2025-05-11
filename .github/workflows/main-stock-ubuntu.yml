@@ -53,6 +53,10 @@ jobs:
 
           # this should be sufficient for find_package(Catch2) to work
 
+      - name: list /usr/lib
+        run: |
+          ls /usr/lib
+
       - name: bootstrap xo-cmake
         run: |
           PREFIX=${{github.workspace}}/local
