@@ -45,7 +45,7 @@ let
           xo-ordinaltree    = self.callPackage pkgs/xo-ordinaltree.nix    {};
           xo-flatstring     = self.callPackage pkgs/xo-flatstring.nix     {};
           xo-pyutil         = self.callPackage pkgs/xo-pyutil.nix         {};
-#          xo-reflectutil    = self.callPackage pkgs/xo-reflectutil.nix    {};
+          xo-reflectutil    = self.callPackage pkgs/xo-reflectutil.nix    {};
 #          xo-reflect        = self.callPackage pkgs/xo-reflect.nix        {};
 #          xo-pyreflect      = self.callPackage pkgs/xo-pyreflect.nix      {};
 #          xo-ratio          = self.callPackage pkgs/xo-ratio.nix          {};

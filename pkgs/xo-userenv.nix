@@ -30,7 +30,7 @@
   xo-ordinaltree,
   xo-flatstring,
   xo-pyutil,
-#  xo-reflectutil,
+  xo-reflectutil,
 #  xo-ratio,
 #  xo-unit,
 #  xo-pyunit,
@@ -65,7 +65,7 @@ buildEnv {
             xo-ordinaltree
             xo-flatstring
             xo-pyutil
-#            xo-reflectutil
+            xo-reflectutil
 #            xo-reflect
 #            xo-pyreflect
 #            xo-ratio
