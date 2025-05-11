@@ -27,7 +27,7 @@
   xo-refcnt,
   xo-subsys,
   xo-randomgen,
-#  xo-ordinaltree,
+  xo-ordinaltree,
 #  xo-flatstring,
 #  xo-reflectutil,
 #  xo-ratio,
@@ -62,7 +62,7 @@ buildEnv {
             xo-refcnt
             xo-subsys
             xo-randomgen
-#            xo-ordinaltree
+            xo-ordinaltree
 #            xo-pyutil
 #            xo-flatstring
 #            xo-reflectutil
