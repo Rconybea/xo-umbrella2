@@ -55,7 +55,7 @@
   xo-process,
   xo-pyprocess,
   xo-kalmanfilter,
-  #  xo-pykalmanfilter,
+  xo-pykalmanfilter,
 #
   xo-expression,
   xo-pyexpression,
@@ -95,6 +95,7 @@ buildEnv {
             xo-pyreactor
             xo-websock
             xo-pywebsock
+#
             xo-statistics
             xo-distribution
             xo-pydistribution
@@ -102,6 +103,8 @@ buildEnv {
             xo-pysimulator
             xo-process
             xo-pyprocess
+            xo-kalmanfilter
+            xo-pykalmanfilter
 #
             xo-expression
             xo-pyexpression
@@ -109,7 +112,5 @@ buildEnv {
             xo-reader
             xo-jit
             xo-pyjit
-            xo-kalmanfilter
-#            xo-pykalmanfilter
           ];
 }
