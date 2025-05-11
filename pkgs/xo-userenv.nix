@@ -29,11 +29,11 @@
   xo-randomgen,
   xo-ordinaltree,
   xo-flatstring,
+  xo-pyutil,
 #  xo-reflectutil,
 #  xo-ratio,
 #  xo-unit,
 #  xo-pyunit,
-#  xo-pyutil,
 #  xo-reflect,
 #  xo-pyreflect,
 #  xo-printjson,
@@ -64,7 +64,7 @@ buildEnv {
             xo-randomgen
             xo-ordinaltree
             xo-flatstring
-#            xo-pyutil
+            xo-pyutil
 #            xo-reflectutil
 #            xo-reflect
 #            xo-pyreflect
