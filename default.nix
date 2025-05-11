@@ -62,6 +62,8 @@ let
           xo-websock        = self.callPackage pkgs/xo-websock.nix        {};
           xo-pywebsock      = self.callPackage pkgs/xo-pywebsock.nix      {};
 #
+          xo-statistics     = self.callPackage pkgs/xo-statistics.nix     {};
+#
           xo-expression     = self.callPackage pkgs/xo-expression.nix     {};
           xo-pyexpression   = self.callPackage pkgs/xo-pyexpression.nix   {};
           xo-tokenizer      = self.callPackage pkgs/xo-tokenizer.nix      {};
@@ -71,7 +73,6 @@ let
                                                                             clang = llvmPackages.clang;
                                                                             llvm = llvmPackages.llvm; };
           xo-pyjit          = self.callPackage pkgs/xo-pyjit.nix          {};
-#          xo-statistics     = self.callPackage pkgs/xo-statistics.nix     {};
 #          xo-distribution   = self.callPackage pkgs/xo-distribution.nix   {};
 #          xo-pydistribution = self.callPackage pkgs/xo-pydistribution.nix {};
 #          xo-simulator      = self.callPackage pkgs/xo-simulator.nix      {};
