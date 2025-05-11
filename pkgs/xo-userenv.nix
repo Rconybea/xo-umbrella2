@@ -36,10 +36,10 @@
   xo-ratio,
   xo-unit,
   xo-pyunit,
-
+#
+  xo-callback,
 #  xo-printjson,
 #  xo-pyprintjson,
-#  xo-callback,
 #  xo-webutil,
 #  xo-pywebutil,
 #  xo-reactor,
@@ -76,7 +76,9 @@ buildEnv {
             xo-ratio
             xo-unit
             xo-pyunit
-
+#
+            xo-callback
+#
             xo-expression
             xo-pyexpression
             xo-tokenizer
@@ -84,7 +86,6 @@ buildEnv {
             xo-jit
 
 #            xo-pyjit
-#            xo-callback
 #            xo-webutil
 #            xo-pywebutil
 #            xo-printjson

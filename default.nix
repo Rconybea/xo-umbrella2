@@ -51,7 +51,9 @@ let
           xo-ratio          = self.callPackage pkgs/xo-ratio.nix          {};
           xo-unit           = self.callPackage pkgs/xo-unit.nix           {};
           xo-pyunit         = self.callPackage pkgs/xo-pyunit.nix         {};
-
+#
+          xo-callback       = self.callPackage pkgs/xo-callback.nix       {};
+#
           xo-expression     = self.callPackage pkgs/xo-expression.nix     {};
           xo-pyexpression   = self.callPackage pkgs/xo-pyexpression.nix   {};
           xo-tokenizer      = self.callPackage pkgs/xo-tokenizer.nix      {};
@@ -61,7 +63,6 @@ let
                                                                             clang = llvmPackages.clang;
                                                                             llvm = llvmPackages.llvm; };
           xo-pyjit          = self.callPackage pkgs/xo-pyjit.nix          {};
-#          xo-callback       = self.callPackage pkgs/xo-callback.nix       {};
 #          xo-webutil        = self.callPackage pkgs/xo-webutil.nix        {};
 #          xo-pywebutil      = self.callPackage pkgs/xo-pywebutil.nix      {};
 #          xo-printjson      = self.callPackage pkgs/xo-printjson.nix      {};
