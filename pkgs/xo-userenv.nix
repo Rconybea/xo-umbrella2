@@ -86,7 +86,7 @@ buildEnv {
             xo-tokenizer
             xo-reader
             xo-jit
-#            xo-pyjit
+            xo-pyjit
 #            xo-printjson
 #            xo-pyprintjson
 #            xo-reactor
