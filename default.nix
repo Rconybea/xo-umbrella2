@@ -66,6 +66,7 @@ let
           xo-distribution   = self.callPackage pkgs/xo-distribution.nix   {};
           xo-pydistribution = self.callPackage pkgs/xo-pydistribution.nix {};
           xo-simulator      = self.callPackage pkgs/xo-simulator.nix      {};
+          xo-pysimulator    = self.callPackage pkgs/xo-pysimulator.nix    {};
 #          xo-process        = self.callPackage pkgs/xo-process.nix        {};
 #
           xo-expression     = self.callPackage pkgs/xo-expression.nix     {};
