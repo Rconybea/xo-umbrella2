@@ -84,7 +84,10 @@ let
 
 #
           xo-userenv        = self.callPackage pkgs/xo-userenv.nix        {};
-#          xo-userenv-slow   = self.callPackage pkgs/xo-userenv-slow.nix   {};
+          xo-userenv-slow   = self.callPackage pkgs/xo-userenv-slow.nix   { stdenv = customStdenv;
+                                                                            #clang = llvmPackages.clang;
+                                                                            llvm = llvmPackages.llvm;
+                                                                          };
         };
 
 in
