@@ -70,7 +70,7 @@ buildEnv {
             xo-pyreflect
             xo-ratio
             xo-unit
-#            xo-pyunit
+            xo-pyunit
 #            xo-expression
 #            xo-pyexpression
 #            xo-tokenizer

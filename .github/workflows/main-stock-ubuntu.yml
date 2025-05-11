@@ -99,6 +99,9 @@ jobs:
           echo "::group::xo-unit build"
           cmake --build .build -- xo-unit
 
+          echo "::group::xo-pyunit build"
+          cmake --build .build -- xo-pyunit
+
           echo "::group::xo build (catch all)"
           cmake --build .build #--verbose
 
