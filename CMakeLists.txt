@@ -91,6 +91,7 @@ add_subdirectory(xo-pywebsock)
 #
 add_subdirectory(xo-statistics)
 add_subdirectory(xo-distribution)
+add_subdirectory(xo-pydistribution)
 #
 add_subdirectory(xo-expression)
 add_subdirectory(xo-pyexpression)
@@ -99,7 +100,6 @@ add_subdirectory(xo-reader)
 add_subdirectory(xo-jit)
 add_subdirectory(xo-pyjit)
 #
-#add_subdirectory(xo-pydistribution)
 #add_subdirectory(xo-simulator)
 #add_subdirectory(xo-pysimulator)
 #add_subdirectory(xo-process)
