@@ -1,0 +1,386 @@
+name: build xo-pyprocess + dependencies
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    # The CMake configure and build commands are platform agnostic and should work equally well on Windows or Mac.
+    # You can convert this to a matrix build if you need cross-platform coverage.
+    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: checkout source
+      uses: actions/checkout@v3
+
+    - name: Install catch2
+      # install catch2.  see [[https://stackoverflow.com/questions/57982945/how-to-apt-get-install-in-a-github-actions-workflow]]
+      run: sudo apt-get install -y catch2
+
+    - name: Install pybind11-dev
+      run: sudo apt-get install -y pybind11-dev
+
+    # ----------------------------------------------------------------
+
+    - name: Clone xo-cmake
+      uses: actions/checkout@v3
+      with:
+        repository: Rconybea/xo-cmake
+        path: repo/xo-cmake
+
+    - name: Configure xo-cmake
+      run: cmake -B ${{github.workspace}}/build_xo-cmake -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local repo/xo-cmake
+
+    - name: Build xo-cmake (trivial)
+      run: cmake --build ${{github.workspace}}/build_xo-cmake --config ${{env.BUILD_TYPE}}
+
+    - name: Install xo-cmake
+      run: cmake --install ${{github.workspace}}/build_xo-cmake
+
+    # ----------------------------------------------------------------
+
+    - name: Clone indentlog
+      uses: actions/checkout@v3
+      with:
+        repository: Rconybea/indentlog
+        path: repo/indentlog
+
+    - name: Configure indentlog
+      # configure cmake for indentlog in dedicated build directory.
+      run: cmake -B ${{github.workspace}}/build_indentlog -DCMAKE_MODULE_PATH=${{github.workspace}}/local/share/cmake -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local repo/indentlog
+
+    - name: Build indentlog
+      run: cmake --build ${{github.workspace}}/build_indentlog --config ${{env.BUILD_TYPE}}
+
+    - name: Install indentlog
+      # install into ${{github.workspace}}/local
+      run: cmake --install ${{github.workspace}}/build_indentlog
+
+    # ----------------------------------------------------------------
+
+    - name: Clone subsys
+      uses: actions/checkout@v3
+      with:
+        repository: Rconybea/subsys
+        path: repo/subsys
+
+    - name: Configure subsys
+      # configure cmake for subsys in dedicated build directory.
+      run: cmake -B ${{github.workspace}}/build_subsys -DCMAKE_MODULE_PATH=${{github.workspace}}/local/share/cmake -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local repo/subsys
+
+    - name: Build subsys
+      run: cmake --build ${{github.workspace}}/build_subsys --config ${{env.BUILD_TYPE}}
+
+    - name: Install subsys
+      # install into ${{github.workspace}}/local
+      run: cmake --install ${{github.workspace}}/build_subsys
+
+    # ----------------------------------------------------------------
+
+    - name: Clone refcnt
+      uses: actions/checkout@v3
+      with:
+        repository: Rconybea/refcnt
+        path: repo/refcnt
+
+    - name: Configure refcnt
+      # configure cmake for refcnt in dedicated build directory.
+      run: cmake -B ${{github.workspace}}/build_refcnt -DCMAKE_MODULE_PATH=${{github.workspace}}/local/share/cmake -DCMAKE_PREFIX_PATH=${{github.workspace}}/local -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local repo/refcnt
+
+    - name: Build refcnt
+      run: cmake --build ${{github.workspace}}/build_refcnt --config ${{env.BUILD_TYPE}}
+
+    - name: Install refcnt
+      # install into ${{github.workspace}}/local
+      run: cmake --install ${{github.workspace}}/build_refcnt
+
+    # ----------------------------------------------------------------
+
+    - name: Clone reflect
+      uses: actions/checkout@v3
+      with:
+        repository: Rconybea/reflect
+        path: repo/reflect
+
+    - name: Configure reflect
+      # configure cmake for reflect in dedicated build directory.
+      run: cmake -B ${{github.workspace}}/build_reflect -DCMAKE_MODULE_PATH=${{github.workspace}}/local/share/cmake -DCMAKE_PREFIX_PATH=${{github.workspace}}/local -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local repo/reflect
+
+    - name: Build reflect
+      run: cmake --build ${{github.workspace}}/build_reflect --config ${{env.BUILD_TYPE}}
+
+    - name: Install reflect
+      # install into ${{github.workspace}}/local
+      run: cmake --install ${{github.workspace}}/build_reflect
+
+    # ----------------------------------------------------------------
+
+    - name: Clone callback
+      uses: actions/checkout@v3
+      with:
+        repository: Rconybea/xo-callback
+        path: repo/callback
+
+    - name: Configure callback
+      # configure cmake for callback in dedicated build directory.
+      run: cmake -B ${{github.workspace}}/build_callback -DCMAKE_MODULE_PATH=${{github.workspace}}/local/share/cmake -DCMAKE_PREFIX_PATH=${{github.workspace}}/local -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local repo/callback
+
+    - name: Build callback
+      run: cmake --build ${{github.workspace}}/build_callback --config ${{env.BUILD_TYPE}}
+
+    - name: Install callback
+      # install into ${{github.workspace}}/local
+      run: cmake --install ${{github.workspace}}/build_callback
+
+    # ----------------------------------------------------------------
+
+    - name: Clone webutil
+      uses: actions/checkout@v3
+      with:
+        repository: Rconybea/xo-webutil
+        path: repo/webutil
+
+    - name: Configure webutil
+      # configure cmake for webutil in dedicated build directory.
+      run: cmake -B ${{github.workspace}}/build_webutil -DCMAKE_MODULE_PATH=${{github.workspace}}/local/share/cmake -DCMAKE_PREFIX_PATH=${{github.workspace}}/local -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local repo/webutil
+
+    - name: Build webutil
+      run: cmake --build ${{github.workspace}}/build_webutil --config ${{env.BUILD_TYPE}}
+
+    - name: Install webutil
+      # install into ${{github.workspace}}/local
+      run: cmake --install ${{github.workspace}}/build_webutil
+
+    # ----------------------------------------------------------------
+
+    - name: Clone pyutil
+      uses: actions/checkout@v3
+      with:
+        repository: Rconybea/xo-pyutil
+        path: repo/pyutil
+
+    - name: Configure pyutil
+      # configure cmake for pyutil in dedicated build directory.
+      run: cmake -B ${{github.workspace}}/build_pyutil -DCMAKE_MODULE_PATH=${{github.workspace}}/local/share/cmake -DCMAKE_PREFIX_PATH=${{github.workspace}}/local -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local repo/pyutil
+
+    - name: Build pyutil
+      run: cmake --build ${{github.workspace}}/build_pyutil --config ${{env.BUILD_TYPE}}
+
+    - name: Install pyutil
+      # install into ${{github.workspace}}/local
+      run: cmake --install ${{github.workspace}}/build_pyutil
+
+    # ----------------------------------------------------------------
+
+    - name: Clone pywebutil
+      uses: actions/checkout@v3
+      with:
+        repository: Rconybea/xo-pywebutil
+        path: repo/pywebutil
+
+    - name: Configure pywebutil
+      # configure cmake for pywebutil in dedicated build directory.
+      run: cmake -B ${{github.workspace}}/build_pywebutil -DCMAKE_MODULE_PATH=${{github.workspace}}/local/share/cmake -DCMAKE_PREFIX_PATH=${{github.workspace}}/local -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local repo/pywebutil
+
+    - name: Build pywebutil
+      run: cmake --build ${{github.workspace}}/build_pywebutil --config ${{env.BUILD_TYPE}}
+
+    - name: Install pywebutil
+      # install into ${{github.workspace}}/local
+      run: cmake --install ${{github.workspace}}/build_pywebutil
+
+    # ----------------------------------------------------------------
+
+    - name: Clone printjson
+      uses: actions/checkout@v3
+      with:
+        repository: Rconybea/xo-printjson
+        path: repo/printjson
+
+    - name: Configure printjson
+      # configure cmake for printjson in dedicated build directory.
+      run: cmake -B ${{github.workspace}}/build_printjson -DCMAKE_MODULE_PATH=${{github.workspace}}/local/share/cmake -DCMAKE_PREFIX_PATH=${{github.workspace}}/local -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local repo/printjson
+
+    - name: Build printjson
+      run: cmake --build ${{github.workspace}}/build_printjson --config ${{env.BUILD_TYPE}}
+
+    - name: Install printjson
+      # install into ${{github.workspace}}/local
+      run: cmake --install ${{github.workspace}}/build_printjson
+
+    # ----------------------------------------------------------------
+
+    - name: Clone randomgen
+      uses: actions/checkout@v3
+      with:
+        repository: Rconybea/randomgen
+        path: repo/randomgen
+
+    - name: Configure randomgen
+      # configure cmake for randomgen in dedicated build directory.
+      run: cmake -B ${{github.workspace}}/build_randomgen -DCMAKE_MODULE_PATH=${{github.workspace}}/local/share/cmake -DCMAKE_PREFIX_PATH=${{github.workspace}}/local -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local repo/randomgen
+
+    - name: Build randomgen
+      run: cmake --build ${{github.workspace}}/build_randomgen --config ${{env.BUILD_TYPE}}
+
+    - name: Install randomgen
+      # install into ${{github.workspace}}/local
+      run: cmake --install ${{github.workspace}}/build_randomgen
+
+    # ----------------------------------------------------------------
+
+    - name: Clone ordinaltree
+      uses: actions/checkout@v3
+      with:
+        repository: Rconybea/xo-ordinaltree
+        path: repo/ordinaltree
+
+    - name: Configure ordinaltree
+      # configure cmake for ordinaltree in dedicated build directory.
+      run: cmake -B ${{github.workspace}}/build_ordinaltree -DCMAKE_MODULE_PATH=${{github.workspace}}/local/share/cmake -DCMAKE_PREFIX_PATH=${{github.workspace}}/local -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local repo/ordinaltree
+
+    - name: Build ordinaltree
+      run: cmake --build ${{github.workspace}}/build_ordinaltree --config ${{env.BUILD_TYPE}}
+
+    - name: Install ordinaltree
+      # install into ${{github.workspace}}/local
+      run: cmake --install ${{github.workspace}}/build_ordinaltree
+
+    # ----------------------------------------------------------------
+
+    - name: Clone reactor
+      uses: actions/checkout@v3
+      with:
+        repository: Rconybea/xo-reactor
+        path: repo/reactor
+
+    - name: Configure reactor
+      # configure cmake for reactor in dedicated build directory.
+      run: cmake -B ${{github.workspace}}/build_reactor -DCMAKE_MODULE_PATH=${{github.workspace}}/local/share/cmake -DCMAKE_PREFIX_PATH=${{github.workspace}}/local -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local repo/reactor
+
+    - name: Build reactor
+      run: cmake --build ${{github.workspace}}/build_reactor --config ${{env.BUILD_TYPE}}
+
+    - name: Install reactor
+      # install into ${{github.workspace}}/local
+      run: cmake --install ${{github.workspace}}/build_reactor
+
+    # ----------------------------------------------------------------
+
+    - name: Clone simulator
+      uses: actions/checkout@v3
+      with:
+        repository: Rconybea/xo-simulator
+        path: repo/simulator
+
+    - name: Configure simulator
+      # configure cmake for simulator in dedicated build directory.
+      run: cmake -B ${{github.workspace}}/build_simulator -DCMAKE_MODULE_PATH=${{github.workspace}}/local/share/cmake -DCMAKE_PREFIX_PATH=${{github.workspace}}/local -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local repo/simulator
+
+    - name: Build simulator
+      run: cmake --build ${{github.workspace}}/build_simulator --config ${{env.BUILD_TYPE}}
+
+    - name: Install simulator
+      # install into ${{github.workspace}}/local
+      run: cmake --install ${{github.workspace}}/build_simulator
+
+    # ----------------------------------------------------------------
+
+    - name: Clone process
+      uses: actions/checkout@v3
+      with:
+        repository: Rconybea/xo-process
+        path: repo/process
+
+    - name: Configure process
+      # configure cmake for process in dedicated build directory.
+      run: cmake -B ${{github.workspace}}/build_process -DCMAKE_MODULE_PATH=${{github.workspace}}/local/share/cmake -DCMAKE_PREFIX_PATH=${{github.workspace}}/local -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local repo/process
+
+    - name: Build process
+      run: cmake --build ${{github.workspace}}/build_process --config ${{env.BUILD_TYPE}}
+
+    - name: Install process
+      # install into ${{github.workspace}}/local
+      run: cmake --install ${{github.workspace}}/build_process
+
+    # ----------------------------------------------------------------
+
+    - name: Clone pyreflect
+      uses: actions/checkout@v3
+      with:
+        repository: Rconybea/xo-pyreflect
+        path: repo/pyreflect
+
+    - name: Configure pyreflect
+      # configure cmake for pyreflect in dedicated build directory.
+      run: cmake -B ${{github.workspace}}/build_pyreflect -DCMAKE_MODULE_PATH=${{github.workspace}}/local/share/cmake -DCMAKE_PREFIX_PATH=${{github.workspace}}/local -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local repo/pyreflect
+
+    - name: Build pyreflect
+      run: cmake --build ${{github.workspace}}/build_pyreflect --config ${{env.BUILD_TYPE}}
+
+    - name: Install pyreflect
+      # install into ${{github.workspace}}/local
+      run: cmake --install ${{github.workspace}}/build_pyreflect
+
+    # ----------------------------------------------------------------
+
+    - name: Clone pyprintjson
+      uses: actions/checkout@v3
+      with:
+        repository: Rconybea/xo-pyprintjson
+        path: repo/pyprintjson
+
+    - name: Configure pyprintjson
+      # configure cmake for pyprintjson in dedicated build directory.
+      run: cmake -B ${{github.workspace}}/build_pyprintjson -DCMAKE_MODULE_PATH=${{github.workspace}}/local/share/cmake -DCMAKE_PREFIX_PATH=${{github.workspace}}/local -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local repo/pyprintjson
+
+    - name: Build pyprintjson
+      run: cmake --build ${{github.workspace}}/build_pyprintjson --config ${{env.BUILD_TYPE}}
+
+    - name: Install pyprintjson
+      # install into ${{github.workspace}}/local
+      run: cmake --install ${{github.workspace}}/build_pyprintjson
+
+    # ----------------------------------------------------------------
+
+    - name: Clone pyreactor
+      uses: actions/checkout@v3
+      with:
+        repository: Rconybea/xo-pyreactor
+        path: repo/pyreactor
+
+    - name: Configure pyreactor
+      # configure cmake for pyreactor in dedicated build directory.
+      run: cmake -B ${{github.workspace}}/build_pyreactor -DCMAKE_MODULE_PATH=${{github.workspace}}/local/share/cmake -DCMAKE_PREFIX_PATH=${{github.workspace}}/local -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local repo/pyreactor
+
+    - name: Build pyreactor
+      run: cmake --build ${{github.workspace}}/build_pyreactor --config ${{env.BUILD_TYPE}}
+
+    - name: Install pyreactor
+      # install into ${{github.workspace}}/local
+      run: cmake --install ${{github.workspace}}/build_pyreactor
+
+    # ----------------------------------------------------------------
+
+    - name: Configure self (pyprocess)
+      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
+      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
+      run: cmake -B ${{github.workspace}}/build_pyprocess -DCMAKE_MODULE_PATH=${{github.workspace}}/local/share/cmake -DCMAKE_PREFIX_PATH=${{github.workspace}}/local -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/local -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+
+    - name: Build self (pyprocess)
+      # Build your program with the given configuration
+      run: cmake --build ${{github.workspace}}/build_pyprocess --config ${{env.BUILD_TYPE}}
+
+    - name: Test self (pyprocess)
+      working-directory: ${{github.workspace}}/build_pyprocess
+      # Execute tests defined by the CMake configuration.
+      # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
+      run: ctest -C ${{env.BUILD_TYPE}}
