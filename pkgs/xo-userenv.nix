@@ -43,7 +43,7 @@
   xo-printjson,
   xo-pyprintjson,
   xo-reactor,
-#  xo-pyreactor,
+  xo-pyreactor,
 #  xo-simulator,
 #  xo-pysimulator, xo-distribution, xo-pydistribution, xo-process, xo-pyprocess, xo-statistics, xo-kalmanfilter,
 #  xo-pykalmanfilter, xo-websock, xo-pywebsock,
@@ -90,7 +90,7 @@ buildEnv {
             xo-pyjit
             xo-pyprintjson
             xo-reactor
-#            xo-pyreactor
+            xo-pyreactor
 #            xo-websock
 #            xo-pywebsock
 #            xo-statistics
