@@ -38,9 +38,9 @@
   xo-pyunit,
 #
   xo-callback,
+  xo-webutil,
 #  xo-printjson,
 #  xo-pyprintjson,
-#  xo-webutil,
 #  xo-pywebutil,
 #  xo-reactor,
 #  xo-pyreactor,
@@ -78,6 +78,7 @@ buildEnv {
             xo-pyunit
 #
             xo-callback
+            xo-webutil
 #
             xo-expression
             xo-pyexpression
@@ -86,7 +87,6 @@ buildEnv {
             xo-jit
 
 #            xo-pyjit
-#            xo-webutil
 #            xo-pywebutil
 #            xo-printjson
 #            xo-pyprintjson
