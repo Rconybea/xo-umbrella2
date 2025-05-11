@@ -21,13 +21,15 @@ jobs:
       - name: checkout source
         uses: actions/checkout@v4
 
-      - name: idInstall cmake+git
+      - name: install apt deps
         run: |
           sudo apt update
           echo "::group::cmake install"
           sudo apt install -y cmake
           echo "::group::git install"
           sudo apt install -y git
+          echo "::group::pybind11-dev install"
+          sudo apt install -y pybind11-dev
 
       - name: build+install catch2
         run: |
@@ -60,7 +62,15 @@ jobs:
           PATH=${{github.workspace}}/local/bin:${PATH}
           echo "::group::xo configure"
           cmake -B .build -S . -DCMAKE_INSTALL_PREFIX=${PREFIX} -DCMAKE_PREFIX_PATH=/usr/local # -DCMAKE_FIND_DEBUG_MODE=ON
-          echo "::group::xo build"
+          echo "::group::xo-indentlog build"
+          cmake --build .build -- xo-indentlog
+          echo "::group::xo-refcnt build"
+          cmake --build .build -- refcnt
+          echo "::group::xo-subsys build"
+          cmake --build .build -- xo-subsys
+          #echo "::group::xo-pyreflect build"
+          #cmake --build .build -- xo-pyreflect
+          echo "::group::xo build (catch all)"
           cmake --build .build #--verbose
           echo "::group::xo install"
           cmake --install .build
