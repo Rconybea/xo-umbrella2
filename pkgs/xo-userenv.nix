@@ -51,7 +51,7 @@
   xo-expression,
   xo-pyexpression,
   xo-tokenizer,
-# xo-reader,
+  xo-reader,
 #  xo-jit,
 #  xo-pyjit
 
@@ -80,8 +80,8 @@ buildEnv {
             xo-expression
             xo-pyexpression
             xo-tokenizer
+            xo-reader
 
-#            xo-reader
 #            xo-jit
 #            xo-pyjit
 #            xo-callback

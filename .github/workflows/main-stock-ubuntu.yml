@@ -113,6 +113,9 @@ jobs:
           echo "::group::xo-tokenizer build"
           cmake --build .build -- xo-tokenizer
 
+          echo "::group::xo-reader build"
+          cmake --build .build -- xo-reader
+
           ##############
 
           echo "::group::xo build (catch all)"
