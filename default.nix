@@ -68,6 +68,7 @@ let
           xo-simulator      = self.callPackage pkgs/xo-simulator.nix      {};
           xo-pysimulator    = self.callPackage pkgs/xo-pysimulator.nix    {};
           xo-process        = self.callPackage pkgs/xo-process.nix        {};
+          xo-pyprocess      = self.callPackage pkgs/xo-pyprocess.nix      {};
 #
           xo-expression     = self.callPackage pkgs/xo-expression.nix     {};
           xo-pyexpression   = self.callPackage pkgs/xo-pyexpression.nix   {};
@@ -80,7 +81,6 @@ let
           xo-pyjit          = self.callPackage pkgs/xo-pyjit.nix          {};
 
 #          xo-pysimulator    = self.callPackage pkgs/xo-pysimulator.nix    {};
-#          xo-pyprocess      = self.callPackage pkgs/xo-pyprocess.nix      {};
 #          xo-kalmanfilter   = self.callPackage pkgs/xo-kalmanfilter.nix   {};
 #          xo-pykalmanfilter = self.callPackage pkgs/xo-pykalmanfilter.nix {};
 #
