@@ -62,16 +62,43 @@ jobs:
           PATH=${{github.workspace}}/local/bin:${PATH}
           echo "::group::xo configure"
           cmake -B .build -S . -DCMAKE_INSTALL_PREFIX=${PREFIX} -DCMAKE_PREFIX_PATH=/usr/local # -DCMAKE_FIND_DEBUG_MODE=ON
+
           echo "::group::xo-indentlog build"
           cmake --build .build -- xo-indentlog
+
           echo "::group::xo-refcnt build"
           cmake --build .build -- refcnt
+
           echo "::group::xo-subsys build"
           cmake --build .build -- xo-subsys
-          #echo "::group::xo-pyreflect build"
-          #cmake --build .build -- xo-pyreflect
+
+          echo "::group::xo-randomgen build"
+          cmake --build .build -- xo-randomgen
+
+          echo "::group::xo-ordinaltree build"
+          cmake --build .build -- xo-ordinaltree
+
+          echo "::group::xo-flatstring build"
+          cmake --build .build -- xo-flatstring
+
+          echo "::group::xo-pyutil build"
+          cmake --build .build -- xo-pyutil
+
+          echo "::group::xo-reflectutil build"
+          cmake --build .build -- xo-reflectutil
+
+          echo "::group::xo-reflect build"
+          cmake --build .build -- xo-reflect
+
+          echo "::group::xo-pyreflect build"
+          cmake --build .build -- xo-pyreflect
+
+          #echo "::group::xo-ratio build"
+          #cmake --build .build -- xo-ratio
+
           echo "::group::xo build (catch all)"
           cmake --build .build #--verbose
+
           echo "::group::xo install"
           cmake --install .build
 
