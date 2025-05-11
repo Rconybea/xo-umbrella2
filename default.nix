@@ -57,9 +57,9 @@ let
           xo-tokenizer      = self.callPackage pkgs/xo-tokenizer.nix      {};
           xo-reader         = self.callPackage pkgs/xo-reader.nix         {};
 
-#          xo-jit            = self.callPackage pkgs/xo-jit.nix            { stdenv = customStdenv;
-#                                                                            clang = llvmPackages.clang;
-#                                                                            llvm = llvmPackages.llvm; };
+          xo-jit            = self.callPackage pkgs/xo-jit.nix            { stdenv = customStdenv;
+                                                                            clang = llvmPackages.clang;
+                                                                            llvm = llvmPackages.llvm; };
 #          xo-pyjit          = self.callPackage pkgs/xo-pyjit.nix          {};
 #          xo-callback       = self.callPackage pkgs/xo-callback.nix       {};
 #          xo-webutil        = self.callPackage pkgs/xo-webutil.nix        {};
