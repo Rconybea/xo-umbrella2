@@ -51,7 +51,8 @@ let
           xo-ratio          = self.callPackage pkgs/xo-ratio.nix          {};
           xo-unit           = self.callPackage pkgs/xo-unit.nix           {};
           xo-pyunit         = self.callPackage pkgs/xo-pyunit.nix         {};
-#          xo-expression     = self.callPackage pkgs/xo-expression.nix     {};
+
+          xo-expression     = self.callPackage pkgs/xo-expression.nix     {};
 #          xo-pyexpression   = self.callPackage pkgs/xo-pyexpression.nix   {};
 #          xo-tokenizer      = self.callPackage pkgs/xo-tokenizer.nix      {};
 #          xo-reader         = self.callPackage pkgs/xo-reader.nix         {};

@@ -35,7 +35,8 @@
   xo-pyreflect,
   xo-ratio,
   xo-unit,
-#  xo-pyunit,
+  xo-pyunit,
+
 #  xo-printjson,
 #  xo-pyprintjson,
 #  xo-callback,
@@ -46,7 +47,9 @@
 #  xo-simulator,
 #  xo-pysimulator, xo-distribution, xo-pydistribution, xo-process, xo-pyprocess, xo-statistics, xo-kalmanfilter,
 #  xo-pykalmanfilter, xo-websock, xo-pywebsock, xo-tokenizer,
-#  xo-expression, xo-pyexpression, xo-reader,
+
+  xo-expression,
+  #xo-pyexpression, xo-reader,
 #  xo-jit,
 #  xo-pyjit
 
@@ -71,7 +74,8 @@ buildEnv {
             xo-ratio
             xo-unit
             xo-pyunit
-#            xo-expression
+
+            xo-expression
 #            xo-pyexpression
 #            xo-tokenizer
 #            xo-reader

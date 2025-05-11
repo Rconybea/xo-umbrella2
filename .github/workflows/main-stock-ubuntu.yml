@@ -102,6 +102,11 @@ jobs:
           echo "::group::xo-pyunit build"
           cmake --build .build -- xo-pyunit
 
+          ##############
+
+          echo "::group::xo-expression build"
+          cmake --build .build -- xo-expression
+
           echo "::group::xo build (catch all)"
           cmake --build .build #--verbose
 
