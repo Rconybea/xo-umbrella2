@@ -213,7 +213,7 @@ namespace xo {
                 }
 
                 /** fall through to numeric literal code below **/
-                ;
+                [[fallthrough]];
             case '.':
             case '0':
             case '1':
