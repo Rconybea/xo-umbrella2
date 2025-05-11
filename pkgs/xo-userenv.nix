@@ -49,7 +49,8 @@
 #  xo-pykalmanfilter, xo-websock, xo-pywebsock, xo-tokenizer,
 
   xo-expression,
-  #xo-pyexpression, xo-reader,
+  xo-pyexpression,
+# xo-reader,
 #  xo-jit,
 #  xo-pyjit
 
@@ -76,7 +77,7 @@ buildEnv {
             xo-pyunit
 
             xo-expression
-#            xo-pyexpression
+            xo-pyexpression
 #            xo-tokenizer
 #            xo-reader
 #            xo-jit

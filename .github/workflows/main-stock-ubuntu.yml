@@ -107,6 +107,11 @@ jobs:
           echo "::group::xo-expression build"
           cmake --build .build -- xo-expression
 
+          echo "::group::xo-pyexpression build"
+          cmake --build .build -- xo-pyexpression
+
+          ##############
+
           echo "::group::xo build (catch all)"
           cmake --build .build #--verbose
 
