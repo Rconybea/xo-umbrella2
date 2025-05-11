@@ -1,0 +1,8 @@
+# emacs workspace config
+.projectile
+# lsp keeps state here
+.cache
+# typical build directory
+.build*
+# lsp: symlink to file in build directory (established manually)
+compile_commands.json
