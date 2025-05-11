@@ -33,6 +33,9 @@ jobs:
           echo "::group::pybind11-dev install"
           sudo apt install -y pybind11-dev
           echo "::endgroup"
+          echo "::group::libwebsockets-dev install"
+          sudo apt install -y libwebsockets-dev
+          echo "::endgroup"
           echo "::group::llvm18 install"
           sudo apt install -y llvm-18-dev
           echo "::endgroup"
