@@ -30,6 +30,8 @@ jobs:
           sudo apt install -y git
           echo "::group::pybind11-dev install"
           sudo apt install -y pybind11-dev
+          echo "::group::llvm18 install"
+          sudo apt install -y llvm-18-dev
 
       - name: build+install catch2
         run: |
