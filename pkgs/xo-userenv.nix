@@ -41,7 +41,7 @@
   xo-webutil,
   xo-pywebutil,
   xo-printjson,
-#  xo-pyprintjson,
+  xo-pyprintjson,
 #  xo-reactor,
 #  xo-pyreactor,
 #  xo-simulator,
@@ -88,7 +88,7 @@ buildEnv {
             xo-reader
             xo-jit
             xo-pyjit
-#            xo-pyprintjson
+            xo-pyprintjson
 #            xo-reactor
 #            xo-pyreactor
 #            xo-websock
