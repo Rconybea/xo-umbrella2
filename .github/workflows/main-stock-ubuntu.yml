@@ -93,8 +93,8 @@ jobs:
           echo "::group::xo-pyreflect build"
           cmake --build .build -- xo-pyreflect
 
-          #echo "::group::xo-ratio build"
-          #cmake --build .build -- xo-ratio
+          echo "::group::xo-ratio build"
+          cmake --build .build -- xo-ratio
 
           echo "::group::xo build (catch all)"
           cmake --build .build #--verbose
