@@ -1,0 +1,13 @@
+To run this unit test:
+
+  $ cd path/to/kalman/build/src/websock/utest
+  $ ./utest.websock    # listens for http requests on port 7682
+
+point browser to
+
+  localhost:7682/ex_websock.html
+
+static files served from
+
+  path/to/kalman/build/src/websock/utest/mount-origin
+  
