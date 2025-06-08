@@ -3,8 +3,9 @@
 #  buildInputs = [ pkgs.coreutils ];
 #}
 
-
 {
+  # official 24.05 release
+  #nixpkgs-path ? fetchTarball "https://github.com/NixOS/nixpkgs/archive/nixos-24.05.tar.gz",
   nixpkgs-path ? ../nixpkgs,
 
 #  pkgs ? import (fetchTarball {
@@ -18,22 +19,43 @@ let
   # since absolutely everything has to be rebuilt from source
   #
 
+  # Problem: builds *everything* with llvm18 toolchain, exposes too many compiler nits
   llvm-overlay = self: super: {
     # use 'super' when you want to override the terms of a package.
     # use 'self'  when pointing to an existing package
+    #
 
     llvmPackages = super.llvmPackages_18;
   };
 
   xo-overlay = self: super:
-    let
-      # Choose the LLVM version you want
-      llvmPackages = self.llvmPackages_18;
-    in
+    # use 'super' when you want to override the terms of a package.
+    # use 'self'  when pointing to an existing package
 
+    let
+      # note:
+      # - problems with nix llvm build-from-source w/ gcc 13.3.
+      # - building outside nix following linuxfromscratch instructions, using gcc 12.3, works fine.
+      #
+      llvmXo = self.callPackage pkgs/llvm.nix {};
+
+      # Choose the LLVM version you want
+      llvmPackages1 = super.llvmPackages_18;
+
+      llvmPackages2 = llvmPackages1 // { llvm = llvmPackages1.llvm.overrideAttrs (old: {
+        cmakeFlags = old.cmakeFlags or [] ++ [ "-DCMAKE_VERBOSE_MAKEFILE=1" ];
+        }); };
+    in
       let
-        # Rebuild stdenv to use that LLVM version
-        customStdenv = super.overrideCC super.stdenv llvmPackages.clang;
+
+        # on darwin, rebuild stdenv to use clang tied to that LLVM version.
+        # otherwise we get conflicts since darwin stdenv is using clang+llvm for gcc.
+        #
+        clangStdenv = super.overrideCC super.stdenv llvmPackages2.clang;
+
+        # stdenv to use for xo-jit
+        jitStdenv = if super.stdenv.isDarwin then clangStdenv else super.stdenv;
+
       in
 
         {
@@ -77,17 +99,18 @@ let
           xo-tokenizer      = self.callPackage pkgs/xo-tokenizer.nix      {};
           xo-reader         = self.callPackage pkgs/xo-reader.nix         {};
 
-          xo-jit            = self.callPackage pkgs/xo-jit.nix            { stdenv = customStdenv;
-                                                                            clang = llvmPackages.clang;
-                                                                            llvm = llvmPackages.llvm; };
+          xo-jit            = self.callPackage pkgs/xo-jit.nix            { #stdenv = jitStdenv;
+                                                                            #clang = llvmPackages2.clang;
+                                                                            llvm = llvmPackages2.llvm; };
           xo-pyjit          = self.callPackage pkgs/xo-pyjit.nix          {};
 
 #
           xo-userenv        = self.callPackage pkgs/xo-userenv.nix        {};
-          xo-userenv-slow   = self.callPackage pkgs/xo-userenv-slow.nix   { stdenv = customStdenv;
+          xo-userenv-slow   = self.callPackage pkgs/xo-userenv-slow.nix   { stdenv = jitStdenv;
                                                                             #clang = llvmPackages.clang;
-                                                                            llvm = llvmPackages.llvm;
+                                                                            llvm = llvmPackages2.llvm;
                                                                           };
+          llvmXo = llvmXo;
         };
 
 in
