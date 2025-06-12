@@ -19,14 +19,28 @@ stdenv.mkDerivation (finalattrs:
     src = ../xo-ratio;
 
     cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake"];
+
+    inherit buildDocs;
     doCheck = true;
-    nativeBuildInputs = [ cmake
-                          #catch2
-                          doxygen
-                          sphinx
-#                          python3Packages.sphinx-rtd-theme
-                          xo-cmake
-                          xo-flatstring
-                          xo-reflectutil
-                        ];
+
+    postBuild = lib.optionalString buildDocs ''
+      cmake --build . -- docs
+    '';
+
+    propagatedBuildInputs = [ ];
+
+    nativeBuildInputs = [
+      cmake
+      xo-cmake
+      xo-flatstring
+      xo-reflectutil
+    ]
+    ++ lib.optionals buildDocs [
+      doxygen
+      sphinx
+      graphviz
+      python3Packages.sphinx-rtd-theme
+      python3Packages.breathe
+      python3Packages.sphinxcontrib-ditaa
+    ];
   })
