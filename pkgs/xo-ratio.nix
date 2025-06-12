@@ -1,13 +1,14 @@
 {
   # dependencies
-  stdenv, cmake, #catch2,
-  doxygen,
+  lib, stdenv, cmake, #catch2,
 
   python3Packages,
 
-  sphinx,
+  doxygen, sphinx, graphviz,
 
   xo-cmake, xo-flatstring, xo-reflectutil,
+
+  buildDocs ? false,
 } :
 
 stdenv.mkDerivation (finalattrs:
