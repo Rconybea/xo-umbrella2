@@ -21,6 +21,7 @@
   sphinx,
   python3Packages,
   llvm,
+  which,
 
   # xo dependencies
   xo-cmake, xo-indentlog, xo-subsys, xo-refcnt, xo-randomgen, xo-ordinaltree, xo-flatstring, xo-reflectutil,
@@ -93,6 +94,12 @@ stdenv.mkDerivation (finalattrs:
     cmake --build build/xo-cmake
     cmake --install build/xo-cmake
 
+    bash=$(which bash)
+    xobuild=$(which xo-build)
+    xoconfig=$(which xo-cmake-config)
+
+    sed -i -e "1s:/usr/bin/env bash:$bash:" $xobuild
+    sed -i -e "1s:/usr/bin/env bash:$bash:" $xoconfig
     # xo-build doesn't support the pattern here, maybe fix it
     xo-build --configure -S $xo_indentlog_src      -B build/xo-indentlog      --build --install xo-indentlog
     xo-build --configure -S $xo_subsys_src         -B build/xo-subsys         --build --install xo-subsys
@@ -134,7 +141,7 @@ stdenv.mkDerivation (finalattrs:
 
 '';
 
-    nativeBuildInputs = [ cmake catch2 eigen libwebsockets jsoncpp doxygen sphinx
+    nativeBuildInputs = [ cmake catch2 eigen libwebsockets jsoncpp doxygen sphinx which
                           llvm.dev
                           python3Packages.pybind11
                           python3Packages.sphinx-rtd-theme
