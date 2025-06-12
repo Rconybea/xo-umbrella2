@@ -19,6 +19,22 @@ let
   # since absolutely everything has to be rebuilt from source
   #
 
+  # overlay to fix qrencode (very distant dependency of something pythonic)
+  qrencode-overlay = self: super: {
+    qrencode = super.qrencode.overrideAttrs (old: {
+      nativeBuildInputs = (old.nativeBuildInputs or []) ++ [ self.autoconf self.automake self.libtool ];
+
+      preConfigure = ''
+        autoreconf -fiv
+      '' + (old.preConfigure or "");
+
+      src = self.fetchurl {
+        # looks like no longer at https://fukuchi.org/works/qrencode/qrencode-4.1.1.tar.bz2
+        url = "https://github.com/fukuchi/libqrencode/archive/refs/tags/v${super.qrencode.version}.tar.gz";
+        sha256 = "sha256-U4W8G4wvIPO5HSWL+MzIz2ICOTXfLSZ2tbZwSfMaBJw=";
+      };});
+  };
+
   # Problem: builds *everything* with llvm18 toolchain, exposes too many compiler nits
   llvm-overlay = self: super: {
     # use 'super' when you want to override the terms of a package.
@@ -114,6 +130,7 @@ in
 let
   pkgs = import nixpkgs-path {
     overlays = [
+      qrencode-overlay
 #      llvm-overlay
       xo-overlay
     ];
