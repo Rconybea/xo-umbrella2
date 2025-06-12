@@ -123,6 +123,8 @@ let
                                                                             #clang = llvmPackages.clang;
                                                                             llvm = llvmPackages1.llvm;
                                                                           };
+          # xo-packaged version of llvm; fewer packaging features than nixpkgs
+          # but easier to debug/modify
           llvmXo = llvmXo;
         };
 

@@ -4,8 +4,13 @@
   stdenv, cmake, python3,
 
   enableSharedLibraries ? !stdenv.hostPlatform.isStatic,
+  enableManpages ? false,
+  enablePolly ? true,
 
   libxml2, libffi, libedit, ncurses, zlib,
+  libpfm, valgrind,
+
+  doCheck ? false,
 
   fetchFromGitHub,
 } :
@@ -37,11 +42,12 @@ in {
       # only taking llvm subdir from upstream repo
       sourceRoot = "${src.name}/llvm";
 
+      # don't try multiple outputs, hard to disentangle
       outputs = [ "out" ];
 
-      nativeBuildInputs = [ cmake python3 ];
+      nativeBuildInputs = [ cmake python3
+                          ] ++ lib.optional enableManpages [ python3.pkgs.sphinx ];
 
-      #NIX_CFLAGS_LINK = "-Wl,--no-keep-memory, -Wl,--reduce-memory-overheads";
       #NIX_CFLAGS_LINK = "-fuse-ld=gold"; # or -fuse-ld=lld
 
       buildInputs = [ libxml2
@@ -49,31 +55,72 @@ in {
                       zlib
                       ncurses
                       libedit
-      ];
+                    ] ++ lib.optionals stdenv.hostPlatform.isLinux [
+                      libpfm # performance monitoring
+                      valgrind # debugging
+                    ];
 
       propagatedBuildInputs = [ ncurses zlib ];
 
-      cmakeFlags = [
-        "-DCMAKE_BUILD_TYPE=Release"
+      inherit doCheck;
 
+      cmakeFlags = [
+        # build type and optimization
+        "-DCMAKE_BUILD_TYPE=Release"
+        "-DLLVM_OPTIMIZED_TABLEGEN=ON"
+
+        "-DLLVM_INSTALL_UTILS=ON"
+        "-DLLVM_BUILD_TESTS=${if doCheck then "ON" else "OFF"}"
+
+        # gnuinstalldirs
+        "-DCMAKE_INSTALL_INCLUDEDIR=${placeholder "out"}/include"
+        # -DCMAKE_INSTALL_LIBDIR, -DCMAKE_INSTALL_LIBEXECDIR don't seem to have any effect for llvm build
+
+
+        # target architectures
         "-DLLVM_TARGETS_TO_BUILD=${defaultTargets}"
 
-        "-DLLVM_BUILD_LLVM_DYLIB=${lib.boolToString enableSharedLibraries}"
-        "-DLLVM_LINK_LLVM_DYLIB=${lib.boolToString enableSharedLibraries}"
+        # library settings
+        "-DLLVM_ENABLE_RTTI=ON"
+        "-DLLVM_ENABLE_EH=ON"    # exception handling
+        "-DLLVM_ENABLE_FFI=ON"
+        "-DLLVM_ENABLE_ZLIB=ON"
+        "-DLLVM_ENABLE_TERMINFO=ON"
+        "-DLLVM_ENABLE_DUMP=ON"
 
-        # host configuration
-        "-DLLVM_INSTALL_CMAKE_DIR=${placeholder "bin"}/lib/cmake/llvm"
+        # testing/benchmarks
+        "-DLLVM_BUILD_TESTS=${if doCheck then "ON" else "OFF"}"
+
+        # installation paths using GNUInstallDirs
+        "-DLLVM_INSTALL_PACKAGE_DIR=${placeholder "out"}/lib/cmake/llvm"  # will contain refs back to out
         "-DLLVM_INSTALL_BINUTILS_SYMLINKS=OFF"
 
+        # host configuration
+        "-DLLVM_HOST_TRIPLE=${stdenv.hostPlatform.config}"
+        "-DLLVM_DEFAULT_TARGET_TRIPLE=${stdenv.hostPlatform.config}"
+
+        # polly optimizer
+        (lib.optionalString enablePolly "-DLLVM_ENABLE_PROJECT=polly")
+      ] ++ lib.optionals enableSharedLibraries [
+        # shared libraries
+        "-DLLVM_BUILD_LLVM_DYLIB=${lib.boolToString enableSharedLibraries}"
+        "-DLLVM_LINK_LLVM_DYLIB=${lib.boolToString enableSharedLibraries}"
+      ] ++ lib.optionals enableManpages [
+        # documentation
+        "-DLLVM_BUILD_DOCS=ON"
+        "-DLLVM_ENABLE_SPHINX=ON"
+        "-DSPHINX_OUTPUT_MAN=ON"
+        "-DSPHINX_OUTPUT_HTML=OFF"
+        "-DSPHINX_WARNINGS_AS_ERRORS=OFF"
       ];
 
       buildFlags = [
         "VERBOSE=1"
-        "-j 12"
+        "-j 22"
       ];
 
       # running out of memory!
-      enableParallelBuilding = true;
+     enableParallelBuilding = true;
 
       # for llvm keep debug symbols
       separateDebugInfo = stdenv.isLinux;
@@ -85,14 +132,9 @@ in {
           ln -sf $out/bin/$tool $out/bin/${stdenv.hostPlatform.config}-$tool
         done
 
-#        # dev related files to llvm.dev
-#        moveToOutput "lib/cmake" "$dev"
-#        moveToOutput "include" "$dev"
-#        moveToOutput "lib/*.a" "$dev"
-
-#        # move any shared libraries to llvm.lib
-#        mkdir -p $lib/lib
-#        mv $out/lib/*.so* $lib/lib/ || true
+        echo debug=[$debug]
+        mkdir -p $debug
+        touch $debug/rolandwashere
       '';
 
       passthru = {
