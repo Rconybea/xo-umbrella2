@@ -67,6 +67,34 @@ $ tree -L 1 ./result
         └── xo-bootstrap-macros.cmake
 ```
 
+For completeness' sake: can also use
+```
+$ nix-build -A xo-userenv-slow
+```
+
+Same result as `$nix-build -A xo-userenv`, but builds each package serially
+using `xo-build`.
+
+## To view docs from WSL
+
+1. find wsl IP address
+
+```
+$ hostname -I
+```
+
+2. run nix build
+```
+$ nix-build -A xo-userenv
+```
+
+3. serve docs from some available port
+```
+$ (cd result && python3 -m http.server 3000)
+```
+
+4. browse to "<wsl-ip-address>:3000/share/doc/xo-flatstring/html" from windows
+
 ## To add a new satellite repo
 
 1. check clone in clean state (all local changes committed or unwound)
