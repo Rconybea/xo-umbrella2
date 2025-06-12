@@ -4,7 +4,7 @@
 
   python3Packages,
 
-  sphinx,
+  sphinx, graphviz,
 
   xo-cmake, xo-indentlog,
 
@@ -30,7 +30,13 @@ stdenv.mkDerivation (finalattrs:
     # env.LC_ALL = "en_US.UTF-8";
 
     cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake"];
+
+    inherit buildDocs;
     doCheck = true;
+
+    postBuild = lib.optionalString buildDocs ''
+      cmake --build . -- docs
+    '';
 
     propagatedBuildInputs = [ ];
 
@@ -42,12 +48,13 @@ stdenv.mkDerivation (finalattrs:
       xo-cmake
       xo-indentlog
     ]
-#    + lib.optionals buildDocs [
-#      doxygen
-#      sphinx
-#      python3Packages.sphinx-rtd-theme
-#      python3Packages.breathe
-    #    ]
+    ++ lib.optionals buildDocs [
+      doxygen
+      sphinx
+      graphviz
+      python3Packages.sphinx-rtd-theme
+      python3Packages.breathe
+    ]
     ;
 
   })
