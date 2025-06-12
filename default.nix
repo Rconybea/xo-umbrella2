@@ -42,16 +42,13 @@ let
       # Choose the LLVM version you want
       llvmPackages1 = super.llvmPackages_18;
 
-      llvmPackages2 = llvmPackages1 // { llvm = llvmPackages1.llvm.overrideAttrs (old: {
-        cmakeFlags = old.cmakeFlags or [] ++ [ "-DCMAKE_VERBOSE_MAKEFILE=1" ];
-        }); };
     in
       let
 
         # on darwin, rebuild stdenv to use clang tied to that LLVM version.
         # otherwise we get conflicts since darwin stdenv is using clang+llvm for gcc.
         #
-        clangStdenv = super.overrideCC super.stdenv llvmPackages2.clang;
+        clangStdenv = super.overrideCC super.stdenv llvmPackages1.clang;
 
         # stdenv to use for xo-jit
         jitStdenv = if super.stdenv.isDarwin then clangStdenv else super.stdenv;
@@ -101,14 +98,14 @@ let
 
           xo-jit            = self.callPackage pkgs/xo-jit.nix            { #stdenv = jitStdenv;
                                                                             #clang = llvmPackages2.clang;
-                                                                            llvm = llvmPackages2.llvm; };
+                                                                            llvm = llvmPackages1.llvm; };
           xo-pyjit          = self.callPackage pkgs/xo-pyjit.nix          {};
 
 #
           xo-userenv        = self.callPackage pkgs/xo-userenv.nix        {};
           xo-userenv-slow   = self.callPackage pkgs/xo-userenv-slow.nix   { stdenv = jitStdenv;
                                                                             #clang = llvmPackages.clang;
-                                                                            llvm = llvmPackages2.llvm;
+                                                                            llvm = llvmPackages1.llvm;
                                                                           };
           llvmXo = llvmXo;
         };
