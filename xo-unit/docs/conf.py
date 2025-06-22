@@ -7,7 +7,7 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'xo unit documentation'
-copyright = '2024, Roland Conybeare'
+copyright = '2024,2025, Roland Conybeare'
 author = 'Roland Conybeare'
 
 # -- General configuration ---------------------------------------------------

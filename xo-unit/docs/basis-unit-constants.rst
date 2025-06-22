@@ -44,17 +44,17 @@ Those units are implemented on top of the basis units described here.
 
     using xo::qty::detail::bu;
 
-Mass Units
-----------
+Mass Basis Units
+----------------
 
 .. doxygengroup:: basis-unit-mass-units
 
-Distance Units
---------------
+Distance Basis Units
+--------------------
 
 .. doxygengroup:: basis-unit-distance-units
 
-Time Units
-----------
+Time Basis Units
+----------------
 
 .. doxygengroup:: basis-unit-time-units

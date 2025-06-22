@@ -2,6 +2,7 @@
 
 include(CMakeFindDependencyMacro)
 
+find_dependency(xo_flatstring)
 find_dependency(xo_ratio)
 find_dependency(indentlog)
 #find_dependency(printjson)

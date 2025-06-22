@@ -19,13 +19,13 @@ and (optionally) cmake macros ``xo-cmake``.  These are on github:
 .. _xo-flatstring source: https://github.com/rconybea/xo-flatstring
 .. _xo-cmake source: https://github.com/rconybea/xo-cmake
 
-`xo-cmake` is nccessary to invoke `xo` cmake build for:
+`xo-cmake` is necessary to invoke `xo` cmake build for:
 
 -  site install
 -  example programs
 -  unit tests
 
-Can omit to instead copy `xo_unit`, `xo-ratio` and `xo-flatstring` source trees;
+Can omit to instead copy `xo-unit`, `xo-ratio` and `xo-flatstring` source trees;
 see instructions below for including as git submodule
 
 Implementation relies on some c++20 features (for example class-instances as template arguments).
@@ -145,7 +145,7 @@ Directories under ``PREFIX`` will then contain:
 Use CMake Support
 -----------------
 
-To use built-in cmake suport:
+To use built-in cmake suport, when using ``xo-unit`` from another project:
 
 Make sure ``PREFIX/lib/cmake`` is searched by cmake (if necessary, include it in ``CMAKE_PREFIX_PATH``)
 
