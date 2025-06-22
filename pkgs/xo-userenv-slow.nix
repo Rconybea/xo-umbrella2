@@ -100,19 +100,22 @@ stdenv.mkDerivation (finalattrs:
 
     sed -i -e "1s:/usr/bin/env bash:$bash:" $xobuild
     sed -i -e "1s:/usr/bin/env bash:$bash:" $xoconfig
+
+    echo doxygen_config_template=$(xo-cmake-config --doxygen-template)
+
     # xo-build doesn't support the pattern here, maybe fix it
     xo-build --configure -S $xo_indentlog_src      -B build/xo-indentlog      --build --install xo-indentlog
     xo-build --configure -S $xo_subsys_src         -B build/xo-subsys         --build --install xo-subsys
     xo-build --configure -S $xo_refcnt_src         -B build/xo-refcnt         --build --install xo-refcnt
     xo-build --configure -S $xo_randomgen_src      -B build/xo-randomgen      --build --install xo-randomgen
     xo-build --configure -S $xo_ordinaltree_src    -B build/xo-ordinaltree    --build --install xo-randomgen
-    xo-build --configure -S $xo_flatstring_src     -B build/xo-flatstring     --build --install xo-flatstring
+    xo-build --configure -S $xo_flatstring_src     -B build/xo-flatstring     --build --build-docs --install xo-flatstring
     xo-build --configure -S $xo_reflectutil_src    -B build/xo-reflectutil    --build --install xo-reflectutil
-    xo-build --configure -S $xo_ratio_src          -B build/xo-ratio          --build --install xo-ratio
+    xo-build --configure -S $xo_ratio_src          -B build/xo-ratio          --build --build-docs --install xo-ratio
     xo-build --configure -S $xo_pyutil_src         -B build/xo-pyutil         --build --install xo-pyutil
     xo-build --configure -S $xo_reflect_src        -B build/xo-reflect        --build --install xo-reflect
     xo-build --configure -S $xo_pyreflect_src      -B build/xo-pyreflect      --build --install xo-pyreflect
-    xo-build --configure -S $xo_unit_src           -B build/xo-unit           --build --install xo-unit
+    xo-build --configure -S $xo_unit_src           -B build/xo-unit           --build --build-docs --install xo-unit
     xo-build --configure -S $xo_pyunit_src         -B build/xo-pyunit         --build --install xo-pyunit
     xo-build --configure -S $xo_printjson_src      -B build/xo-printjson      --build --install xo-printjson
     xo-build --configure -S $xo_pyprintjson_src    -B build/xo-pyprintjson    --build --install xo-pyprintjson
@@ -145,6 +148,9 @@ stdenv.mkDerivation (finalattrs:
                           llvm.dev
                           python3Packages.pybind11
                           python3Packages.sphinx-rtd-theme
+                          python3Packages.breathe
+                          python3Packages.sphinxcontrib-ditaa
+                          python3Packages.sphinxcontrib-plantuml
                         ];
 
   # runScript = ...;
