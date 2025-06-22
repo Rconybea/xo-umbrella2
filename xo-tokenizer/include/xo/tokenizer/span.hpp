@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "xo/indentlog/scope.hpp"
 #include <ostream>
 #include <cstdint>
 #include <cassert>
@@ -24,10 +25,42 @@ namespace xo {
             /** @brief create span for the contiguous memory range [@p lo, @p hi) **/
             span(CharT * lo, CharT * hi) : lo_{lo}, hi_{hi} {}
 
+            /** @brief create a null span (i.e. with null @p lo, @p hi pointers) **/
+            static span make_null() { return span(nullptr, nullptr); }
+
             /** @brief create span for C-style string @p cstr **/
             static span from_cstr(const CharT * cstr) {
                 CharT * lo = cstr;
                 CharT * hi = cstr ? cstr + strlen(cstr) : nullptr;
+
+                return span(lo, hi);
+            }
+
+            /** @brief create span from std::string @p str **/
+            static span from_string(const std::string& str) {
+                CharT * lo = &(*str.begin());
+                CharT * hi = &(*str.end());
+
+                return span(lo, hi);
+            }
+
+            /** @brief concatenate two contiguous spans */
+            static span concat(const span & span1, const span & span2) {
+                if (span1.is_null())
+                    return span2;
+                if (span2.is_null())
+                    return span1;
+
+                if (span1.hi() != span2.lo()) {
+                    scope log(XO_DEBUG(true));
+
+                    log && log(xtag("span1.hi", (void*)span1.hi()), xtag("span2.lo", (void*)span2.lo()));
+                }
+
+                assert(span1.hi() == span2.lo());
+
+                CharT * lo = span1.lo();
+                CharT * hi = span2.hi();
 
                 return span(lo, hi);
             }
@@ -96,6 +129,8 @@ namespace xo {
                     return span(hi_, hi_);
             }
 
+            /** @brief true iff this span is null.  distinct from empty. **/
+            bool is_null() const { return lo_ == nullptr && hi_ == nullptr; }
             /** @brief true iff this span is empty (comprises 0 elements). **/
             bool empty() const { return lo_ == hi_; }
             /** @brief report the number of elements (of type CharT) in this span. **/

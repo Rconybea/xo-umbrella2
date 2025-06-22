@@ -15,7 +15,7 @@ namespace xo {
          *
          *  Schematica code examples:
          *
-         *    type point :: { xcoord : f64, ycoord: f64 };
+         *    type point :: { xcoord : f64, ycoord : f64 };
          *    type matrix :: array<double, 2>;  // 2-d array
          *
          *    decl hypot(x : f64, y : f64) -> f64;
@@ -39,7 +39,7 @@ namespace xo {
          *    };
          *
          *    def matrixproduct(x : matrix, y : matrix) {
-         *      [i,j : x.row(i) * y.col(j)];
+         *      [i, j : x.row(i) * y.col(j)];
          *    };
          **/
         enum class tokentype {
@@ -120,7 +120,7 @@ namespace xo {
             /** operator '/' **/
             tk_slash,
 
-            /** keyworkd 'type' **/
+            /** keyword 'type' **/
             tk_type,
 
             /** keyword 'def' **/

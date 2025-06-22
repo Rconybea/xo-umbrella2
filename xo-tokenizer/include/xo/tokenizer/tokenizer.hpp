@@ -7,6 +7,7 @@
 
 #include "token.hpp"
 #include "span.hpp"
+#include "scan_result.hpp"
 #include "xo/indentlog/scope.hpp"
 #include <cassert>
 
@@ -21,7 +22,7 @@ namespace xo {
          *    tokenizer_type tkz;
          *    span_type input = ...;
          *
-         *    while !input.empty() {
+         *    while (!input.empty()) {
          *        auto res = tkz.scan(input);
          *        const auto & tk = res.first;
          *
@@ -39,22 +40,27 @@ namespace xo {
          *    // expect !tkz.has_prefix()
          *
          *  @endcode
+         *
+         * See tokentype.hpp for token types
          **/
         template <typename CharT>
         class tokenizer {
         public:
             using token_type = token<CharT>;
             using span_type = span<const CharT>;
-            using scan_result = std::pair<token_type, span_type>;
+            using result_type = scan_result<CharT>;
 
         public:
-            tokenizer() = default;
+            tokenizer(bool debug_flag = false);
+
+            /** recognize the newline character '\n' **/
+            bool is_newline(CharT ch) const;
 
             /** identifies whitespace chars.
              *  These are chars that do not belong to any token.
              *  They are not permitted to appear within
              *  a symbol or string token.
-             *  Appearance of a whitespace char forces completion of
+             *  Appearance of a whitespace char forces completioon of
              *  preceding token.
              **/
             bool is_whitespace(CharT ch) const;
@@ -77,34 +83,76 @@ namespace xo {
              **/
             bool has_prefix() const { return !prefix_.empty(); }
 
-            /** assemble token from text @p token_text
+            /** assemble token from text @p token_text.
+             *  @p token_text will often but not always represent a subset of @p input.
+             *  (For example consider multi-line string literals)
+             *  Also the span @p token_text may (in uncommon cases)
+             *  have been copied to separate storage from @p input
+             *
+             *  @p initial_whitespace   Amount of whitespace input being consumed from input.
+             *  @p initial_token_prefix_from_input  Amount of non-whitespace input being
+             *  consumed from input. Not counting any stashed-and-already-consumed input
+             *
+             *  retval.consumed will represent some possibly-empty prefix of @p input
              **/
-            token_type assemble_token(const span_type & token_text) const;
+            result_type assemble_token(std::size_t initial_whitespace,
+                                       std::size_t initial_token_prefix_from_input,
+                                       const span_type & token_text,
+                                       const span_type & input) const;
+
+            /** degenerate version of assemble_token() on reaching end-of-file **/
+            result_type assemble_final_token(const span_type & token_text) const;
 
             /** scan for next input token,  given @p input.
-             *  Note tokenizer can consume input (e.g. whitespace)
-             *  without completing a token
+             *  Note:
+             *  - tokenizer can consume input (e.g. whitespace)
+             *    without completing a token
+             *  - input will remember the extent of the last line of input
+             *    for which parsing has begun, but not completed.
+             *    It's required that at least that portion of the input span
+             *    remain valid across scan(), scan2() calls
              *
              *  @return {parsed token, consumed span}
              **/
-            scan_result scan(const span_type & input);
+            result_type scan(const span_type & input);
 
             /** When eof is false, same as scan(input).
              *  When eof is true and scan(input) does not report a token,
              *  return notify_eof()
              **/
-            scan_result scan2(const span_type & input, bool eof);
+            result_type scan2(const span_type & input, bool eof);
 
-            /** notify end of input,  resolve any stored input **/
-            token_type notify_eof();
+            /** notify end of input,  resolving any ambiguous input stashed in .prefix
+             **/
+            result_type notify_eof(const span_type & input);
 
         private:
+            result_type scan_completion(const span_type & whitespace,
+                                        const CharT* token_end,
+                                        const span_type & input);
+
+        private:
+            /** true to log tokenizer activity to stdout **/
+            bool debug_flag_ = false;
+            /** remember start of current line here **/
+            span_type current_line_ = span_type::make_null();
             /** Accumulate partial token here.
              *  This will happen if input sent to @ref tokenizer::scan
              *  ends without a determinate token boundary.
              **/
             std::string prefix_;
         }; /*tokenizer*/
+
+        template <typename CharT>
+        tokenizer<CharT>::tokenizer(bool debug_flag)
+            : debug_flag_{debug_flag}
+        {}
+
+        template <typename CharT>
+        bool
+        tokenizer<CharT>::is_newline(CharT ch) const {
+            return (ch == '\n');
+        }
 
         template <typename CharT>
         bool
@@ -126,7 +174,10 @@ namespace xo {
             case '<':
                 return true;
             case '>':
-                return true;
+                /* can't be punctuation
+                 * - appears in tk_yields token: ->
+                 */
+                return false;
             case '(':
                 return true;
             case ')':
@@ -149,7 +200,10 @@ namespace xo {
             case '=':
                 return true;
             case '-':
-                /* can't be punctuation -- can appear inside f64 token: e.g. 1.23e-9 */
+                /* can't be punctuation
+                 * - can appear inside f64 token: e.g. 1.23e-9.
+                 * - begins tk_yields token: ->
+                 */
                 return false;
             case '+':
                 /* can't be punctuation -- can appear inside f64 token: e.g. 1.23e+4 */
@@ -171,6 +225,10 @@ namespace xo {
         template <typename CharT>
         bool
         tokenizer<CharT>::is_2char_punctuation(CharT ch) const {
+            /* can't put '-' here, because of the way it appears in numeric literals
+             * characters here may not appear in symbol names
+             */
+
             switch(ch) {
             case ':':
                 /* can begin := */
@@ -182,15 +240,19 @@ namespace xo {
 
         template <typename CharT>
         auto
-        tokenizer<CharT>::assemble_token(const span_type & token_text) const -> token_type
+        tokenizer<CharT>::assemble_token(std::size_t initial_whitespace,
+                                         std::size_t initial_token_prefix_from_input,
+                                         const span_type & token_text,
+                                         const span_type & input) const -> result_type
         {
-            constexpr bool c_debug_flag = true;
-
             /* literal|pretty|streamlined */
             log_config::style = function_style::streamlined;
 
-            scope log(XO_DEBUG(c_debug_flag));
-            log && log(xtag("token_text", token_text));
+            scope log(XO_DEBUG(debug_flag_));
+            log && log(xtag("token_text", token_text),
+                       xtag("initial_whitespace", initial_whitespace),
+                       xtag("initial_token_prefix_from_input", initial_token_prefix_from_input),
+                       xtag("input", input));
 
             tokentype tk_type = tokentype::tk_invalid;
             std::string tk_text;
@@ -265,79 +327,89 @@ namespace xo {
                 /* true if at least one digit encountered */
                 bool number_flag = false;
 
-                /* token will be one of: {i64, f64, dot}: */
-                for(; ix != token_text.hi(); ++ix) {
-                    if((*ix == '-') || (*ix == '+')) {
-                        /* sign allowed:
-                         * 1. before period and before first digit
-                         * 2. after exponent
-                         */
-                        if (!period_flag && !number_flag && !sign_flag) {
-                            sign_flag = true;
-                        } else if (exponent_flag && !exponent_digit_flag) {
-                            exponent_sign_flag = true;
-                        } else {
-                            throw std::runtime_error
-                                (tostr("tokenizer::assemble_token",
-                                       ": improperly placed sign indicator",
-                                       xtag("pos", ix - tk_start),
-                                       xtag("char", *ix)));
-                        }
-                    } else if(*ix == '.') {
-                        if (period_flag) {
-                            throw (std::runtime_error
-                                   (tostr("tokenizer::assemble_token",
-                                          ": duplicate decimal point",
-                                          xtag("pos", ix - tk_start),
-                                          xtag("char", *ix))));
-                        }
+                log && log(xtag("*ix", *ix),
+                           xtag("tk.length", token_text.size()));
+                if (log && (ix + 1 < tk_end))
+                    log(xtag("*(ix+1)", *(ix + 1)));
 
-                        period_flag = true;
-                    } else if((*ix == 'e') || (*ix == 'E')) {
-                        if (exponent_flag) {
-                            throw (std::runtime_error
-                                   (tostr("tokenizer::assemble_token",
-                                          ": duplicate exponent marker",
-                                          xtag("pos", ix - tk_start),
-                                          xtag("char", *ix))));
-                        }
-
-                        exponent_flag = true;
-                    } else if(isdigit(*ix)) {
-                        if (exponent_flag) {
-                            /* need digit before exponent to recognize as number */
-                            exponent_digit_flag = true;
-                        } else {
-                            number_flag = true;
-                        }
-                    } else {
-                        /* invalid input */
-                        throw (std::runtime_error
-                               (tostr("tokenizer::assemble_token",
-                                      ": unexpected character in numeric constant",
-                                      xtag("pos", ix - tk_start),
-                                      xtag("char", *ix))));
-                    }
-                }
-
-                if (number_flag) {
-                    if (period_flag || exponent_flag) {
-                        tk_type = tokentype::tk_f64;
-                    } else {
-                        tk_type = tokentype::tk_i64;
-                    }
-                } else if (period_flag && !exponent_flag) {
-                    tk_type = tokentype::tk_dot;
+                if ((*ix == '-') && (ix + 2 == token_text.hi()) && (*(ix + 1) == '>')) {
+                    /* composing exactly '->' */
+                    tk_type = tokentype::tk_yields;
                 } else {
-                    /* not a valid token */
-                }
+                    /* token (if valid) will be one of: {tk_i64, tk_f64, tk_dot}: */
+                    for (; ix != token_text.hi(); ++ix) {
+                        if ((*ix == '-') || (*ix == '+')) {
+                            /* sign allowed:
+                             * 1. before period and before first digit
+                             * 2. after exponent
+                             */
+                            if (!period_flag && !number_flag && !sign_flag) {
+                                sign_flag = true;
+                            } else if (exponent_flag && !exponent_digit_flag) {
+                                exponent_sign_flag = true;
+                            } else {
+                                throw std::runtime_error
+                                    (tostr("tokenizer::assemble_token",
+                                           ": improperly placed sign indicator",
+                                           xtag("pos", ix - tk_start),
+                                           xtag("char", *ix)));
+                            }
+                        } else if (*ix == '.') {
+                            if (period_flag) {
+                                throw (std::runtime_error
+                                       (tostr("tokenizer::assemble_token",
+                                              ": duplicate decimal point",
+                                              xtag("pos", ix - tk_start),
+                                              xtag("char", *ix))));
+                            }
 
-                log && log(xtag("sign_flag", sign_flag));
-                log && log(xtag("period_flag", period_flag),
-                           xtag("exponent_flag", exponent_flag),
-                           xtag("exponent_sign_flag", exponent_sign_flag),
-                           xtag("number_flag", number_flag));
-                log && log(xtag("tk_type", tk_type));
+                            period_flag = true;
+                        } else if ((*ix == 'e') || (*ix == 'E')) {
+                            if (exponent_flag) {
+                                throw (std::runtime_error
+                                       (tostr("tokenizer::assemble_token",
+                                              ": duplicate exponent marker",
+                                              xtag("pos", ix - tk_start),
+                                              xtag("char", *ix))));
+                            }
+
+                            exponent_flag = true;
+                        } else if (isdigit(*ix)) {
+                            if (exponent_flag) {
+                                /* need digit before exponent to recognize as number */
+                                exponent_digit_flag = true;
+                            } else {
+                                number_flag = true;
+                            }
+                        } else {
+                            /* invalid input */
+                            throw (std::runtime_error
+                                   (tostr("tokenizer::assemble_token",
+                                          ": unexpected character in numeric constant",
+                                          xtag("pos", ix - tk_start),
+                                          xtag("char", *ix))));
+                        }
+                    }
+
+                    if (number_flag) {
+                        if (period_flag || exponent_flag) {
+                            tk_type = tokentype::tk_f64;
+                        } else {
+                            tk_type = tokentype::tk_i64;
+                        }
+                    } else if (period_flag && !exponent_flag) {
+                        tk_type = tokentype::tk_dot;
+                    } else {
+                        /* not a valid token */
+                    }
+
+                    log && log(xtag("sign_flag", sign_flag));
+                    log && log(xtag("period_flag", period_flag),
+                               xtag("exponent_flag", exponent_flag),
+                               xtag("exponent_sign_flag", exponent_sign_flag),
+                               xtag("number_flag", number_flag));
+                    log && log(xtag("tk_type", tk_type));
+                }
 
                 break;
             }
@@ -569,7 +641,9 @@ namespace xo {
                 || (tk_type == tokentype::tk_f64)
                 || (tk_type == tokentype::tk_symbol))
             {
-                /* re-parse in token::i64_value() / token::f64_value() */
+                /* note: capturing token text here;
+                 *       for numeric literals will re-parse in token::i64_value() / token::f64_value()
+                 */
                 tk_text = std::string(tk_start, tk_end);
             } else if (tk_type == tokentype::tk_string) {
                 ; /* nothing to do here -- desired tk_text already constructed */
@@ -603,31 +677,85 @@ namespace xo {
                     tk_text.clear();
             }
 
-            return token_type(tk_type, std::move(tk_text));
+            return result_type(token_type(tk_type, std::move(tk_text)),
+                               input.prefix(initial_whitespace + initial_token_prefix_from_input));
         } /*assemble_token*/
 
         template <typename CharT>
         auto
-        tokenizer<CharT>::scan(const span_type & input) -> scan_result
+        tokenizer<CharT>::assemble_final_token(const span_type & token_text) const -> result_type
         {
-            constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            return assemble_token(0 /*initial_whitespace*/,
+                                  0 /*initial_token_prefix_from_input*/,
+                                  token_text,
+                                  span_type::make_null());
+        }
+
+        template <typename CharT>
+        auto
+        tokenizer<CharT>::scan_completion(const span_type & whitespace,
+                                          const CharT* token_end,
+                                          const span_type & input) -> result_type {
+
+            auto token_span = input.after_prefix(whitespace).prefix_upto(token_end);
+
+            if (this->prefix_.empty()) {
+                return assemble_token(whitespace.size(),
+                                      token_span.size() /*initial_token_prefix_from_input*/,
+                                      token_span,
+                                      input);
+            } else {
+                /* whatever we stashed in .prefix_, should be consumed from input.
+                 * control here implies reached end of input with either
+                 * - input for which parsing outcome depends on existence of more input,
+                 *   and presence of eof now resolves
+                 * - malformed input (that might represent prefix of a valid token.  Say "#incl" in C)
+                 *
+                 * That means stashed .prefix will represent copied range of characters that
+                 * ends at the same position as input
+                 */
+                return result_type::make_partial(input);
+            }
+
+        }
+
+        template <typename CharT>
+        auto
+        tokenizer<CharT>::scan(const span_type & input) -> result_type
+        {
+            scope log(XO_DEBUG(debug_flag_));
 
             log && log(xtag("input", input));
 
             const CharT * ix = input.lo();
 
-            /* skip whitespace */
-            while (is_whitespace(*ix) && (ix != input.hi()))
-                ++ix;
+            /* skip whitespace + remember beginning of most recent line */
+            while (is_whitespace(*ix) && (ix != input.hi())) {
+
+                if (is_newline(*ix)) {
+                    ++ix;
+                    /* look ahead to {end of line, end of input}, whichever comes first */
+                    const CharT * sol = ix;
+                    const CharT * eol = ix;
+
+                    while ((eol < input.hi()) && (*eol != '\n'))
+                        ++eol;
+
+                    this->current_line_ = span_type(sol, eol);
+                } else {
+                    ++ix;
+                }
+            }
 
             if(ix == input.hi()) {
                 /* no-op */
-                return {
-                    token_type::invalid(),
-                    input.prefix_upto(ix)
-                };
+                return result_type::make_whitespace(input.prefix_upto(ix));
             }
+
+            // TODO:
+            // 1. hoist complete_flag up here
+            // 2. use in each branch
+            // 3. common check for prefix-capturing after if-cascade below done
 
             /* here: *ix is not whitespace */
 
@@ -635,8 +763,10 @@ namespace xo {
 
             log && log(xtag("whitespace.size", whitespace.size()));
 
-            /* tk_start points to beginning of token
+            /* tk_start points to known beginning of token
              * (after any whitespace)
+             *
+             * goal is to leave ix pointing to 1 char past the end of the token
              */
             const CharT * tk_start = ix;
 
@@ -654,7 +784,7 @@ namespace xo {
                     /* need more input to know if/when token complete */
                     this->prefix_ += std::string(tk_start, input.hi());
 
-                    log && log(xtag("captured-prefix", this->prefix_));
+                    log && log(xtag("captured-prefix1", this->prefix_));
                 } else {
                     CharT ch2 = *ix;
 
@@ -701,9 +831,49 @@ namespace xo {
                     /* need more input to know if/when token complete */
                     this->prefix_ += std::string(tk_start, input.hi());
 
-                    log && log(xtag("captured-prefix", this->prefix_));
+                    log && log(xtag("captured-prefix2", this->prefix_));
                 }
             } else {
+                /* ix is start of some token */
+
+                if (*ix == '-') {
+                    /* this section load-bearing for input '->' scanning from beginning of token */
+                    ++ix;
+
+                    if (ix == input.hi()) {
+                        /* need more input to know if/when token complete -- see captured-prefix5 below */
+                    } else {
+                        CharT ch2 = *ix;
+
+                        if (ch2 == '>') {
+                            /* include next char and complete token */
+                            ++ix;
+
+                            return scan_completion(whitespace, ix /*token_end*/, input);
+                        }
+
+                        /* here: -123, -.5e-21 for example */
+                    }
+                } else if (*ix == '>') {
+                    /* this section load-bearing for input '>=' scanning from beginning of token.
+                     * Need this because '>' necessarily excluded from is_1char_punctuation()
+                     */
+                    ++ix;
+
+                    if (ix == input.hi()) {
+                        /* need more input to know if/when token complete -- see captured-prefix5 below */
+                    } else {
+                        CharT ch2 = *ix;
+
+                        if (ch2 != '=') {
+                            /* ignore next char and complete token */
+                            return scan_completion(whitespace, ix /*token_end*/, input);
+                        }
+
+                        /* here: >= for example */
+                    }
+                }
+
                 /* scan until:
                  * - whitespace
                  * - punctuation
@@ -715,59 +885,85 @@ namespace xo {
                     {
                         break;
                     }
+
+                    /* this section load-bearing for input '>' after beginning of a token, e.g. p> */
+                    if ((ix > tk_start) && (*ix == '>'))
+                        break;
+
+                    /* this section load-bearing for input '->' at the end of another token, e.g. p->q */
+                    if (*ix == '-') {
+                        if (ix + 1 == input.hi()) {
+                            /* need more input to know if/when token complete
+                             *
+                             *   apple-banana   parses as: {tk_symbol: apple-banana}
+                             *   apple->        parses as: {tk_symbol: apple} {tk_yields}
+                             *   apple-         illegal (may not end symbol with '-')
+                             */
+                            break;
+                        }
+
+                        if (*(ix + 1) == '>') {
+                            /* treat '->' as punctuation;  complete preceding token */
+                            break;
+                        }
+                    }
                 }
 
                 if (ix == input.hi()) {
                     /* need more input to know if/when token complete */
                     this->prefix_ += std::string(tk_start, input.hi());
 
-                    log && log(xtag("captured-prefix", this->prefix_));
+                    log && log(xtag("captured-prefix5", this->prefix_));
                 }
             }
 
-            auto token_span = input.after_prefix(whitespace).prefix_upto(ix);
-
-            token tk
-                = (this->prefix_.empty()
-                   ? assemble_token(token_span)
-                   : token_type(tokentype::tk_invalid));
-
-            return scan_result
-                { tk, input.prefix(whitespace.size() + token_span.size()) };
+            return scan_completion(whitespace, ix /*token_end*/, input);
         } /*scan*/
 
         template <typename CharT>
         auto
-        tokenizer<CharT>::scan2(const span_type & input, bool eof) -> scan_result {
+        tokenizer<CharT>::scan2(const span_type & input, bool eof) -> result_type {
+            scope log(XO_DEBUG(debug_flag_));
+
             auto sr = this->scan(input);
 
-            if (!sr.first.is_valid() && eof) {
-                sr.first = this->notify_eof();
-                /* always consume remainder of input here.
-                 * ambiguous prefix can represent at most one token
-                 */
-                sr.second = input;
-            }
+            if (sr.is_token() || sr.is_error() || !eof)
+                return sr;
 
-            return sr;
+            /* control here only if input contains no unambiguous tokens.
+             * This implies it contains _at most one_ final token.
+             */
+
+            span_type input2 = input.after_prefix(sr.consumed());
+
+            /* need to include src.consumed() in retval */
+
+            auto sr2 = this->notify_eof(input2);
+
+            return result_type(sr2.get_token(),
+                               span_type::concat(sr.consumed(), sr2.consumed()),
+                               sr2.error());
         }
 
         template <typename CharT>
         auto
-        tokenizer<CharT>::notify_eof() -> token_type {
-            constexpr bool c_debug_flag = true;
+        tokenizer<CharT>::notify_eof(const span_type & input) -> result_type {
+            scope log(XO_DEBUG(debug_flag_));
 
-            scope log(XO_DEBUG(c_debug_flag));
+            log && log(xtag("prefix_", prefix_), xtag("prefix_.size", prefix_.size()), xtag("input", input));
 
-            token tk
-                = (this->prefix_.empty()
-                   ? token_type(tokentype::tk_invalid)
-                   : assemble_token(span_type(&prefix_[0],
-                                              &prefix_[prefix_.size()])));
+            if (this->prefix_.empty()) {
+                /* almost meretricious to include input here,
+                 * when called from scan2() it can only be whitespace
+                 */
+                return result_type::make_whitespace(input);
+            } else {
+                auto retval = assemble_final_token(span_type::from_string(prefix_));
 
-            this->prefix_.clear();
+                this->prefix_.clear();
 
-            return tk;
+                return retval;
+            }
         } /*notify_eof*/
     } /*namespace scm*/
 } /*namespace xo*/

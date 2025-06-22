@@ -80,7 +80,10 @@ namespace xo {
             static token assign_token() { return token(tokentype::tk_assign); }
             static token yields() { return token(tokentype::tk_yields); }
 
+            static token plus_token() { return token(tokentype::tk_plus); }
+            static token minus_token() { return token(tokentype::tk_minus); }
             static token star_token() { return token(tokentype::tk_star); }
+            static token slash_token() { return token(tokentype::tk_slash); }
 
             static token type() { return token(tokentype::tk_type); }
             static token def() { return token(tokentype::tk_def); }
@@ -354,6 +357,5 @@ namespace xo {
         }
     } /*Namespace scm*/
 } /*namespace xo*/
-
 
 /* end token.hpp */

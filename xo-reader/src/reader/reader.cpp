@@ -32,10 +32,10 @@ namespace xo {
             while (!input.empty()) {
                 /* read one token from input */
                 auto sr = this->tokenizer_.scan2(input, eof);
-                const auto & tk = sr.first;
-                const span_type & used_span = sr.second;
+                const auto & tk = sr.get_token();
+                const span_type & used_span = sr.consumed();
 
-                log && log(xtag("used_span", used_span));
+                log && log(xtag("consumed", used_span));
                 log && log(xtag("input.pre", input));
 
                 input = input.after_prefix(used_span);

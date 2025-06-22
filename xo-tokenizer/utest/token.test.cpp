@@ -12,70 +12,76 @@ namespace xo {
     using xo::scm::tokentype;
 
     namespace ut {
-        struct testcase_i64 {
-            std::string text_;
-            bool expect_throw_;
-            std::int64_t expected_;
-        };
+        // also see tokenizer.test.cpp for syntax
 
-        std::vector<testcase_i64> s_testcase_v = {
-            {"", true, 0},
-            {"0", false, 0},
-            {"-", true, 0},
-            {"+", true, 0},
-            {"-0", false, 0},
-            {"+0", false, 0},
-            {"1", false, 1},
-            {"-1", false, -1},
-            {"9", false, 9},
-            {"-9", false, -9},
-            {"12", false, 12},
-            {"+12", false, 12},
-            {"-12", false, -12},
-            {"99", false, 99},
-            {"-99", false, -99},
-            {"123x", true, 0},
-        };
+        namespace test2 {
+            struct testcase_i64 {
+                std::string text_;
+                bool expect_throw_;
+                std::int64_t expected_;
+            };
 
-        TEST_CASE("parse-i64", "[token]") {
-            for (std::size_t i_tc = 0, n_tc = s_testcase_v.size(); i_tc < n_tc; ++i_tc) {
-                INFO(xtag("i_tc", i_tc));
+            std::vector<testcase_i64> s_testcase_v = {
+                {"", true, 0},
+                {"0", false, 0},
+                {"-", true, 0},
+                {"+", true, 0},
+                {"-0", false, 0},
+                {"+0", false, 0},
+                {"1", false, 1},
+                {"-1", false, -1},
+                {"9", false, 9},
+                {"-9", false, -9},
+                {"12", false, 12},
+                {"+12", false, 12},
+                {"-12", false, -12},
+                {"99", false, 99},
+                {"-99", false, -99},
+                {"123x", true, 0},
+            };
 
-                auto const & testcase = s_testcase_v[i_tc];
+            TEST_CASE("parse-i64", "[token]") {
+                for (std::size_t i_tc = 0, n_tc = s_testcase_v.size(); i_tc < n_tc; ++i_tc) {
+                    INFO(xtag("i_tc", i_tc));
 
-                token tk(tokentype::tk_i64,
-                         testcase.text_);
+                    auto const & testcase = s_testcase_v[i_tc];
 
-                REQUIRE(tk.tk_type() == tokentype::tk_i64);
+                    token tk(tokentype::tk_i64,
+                             testcase.text_);
+
+                    REQUIRE(tk.tk_type() == tokentype::tk_i64);
+
+                    bool throw_flag = false;
+                    try {
+                        std::int64_t x = tk.i64_value();
+
+                        REQUIRE(x == testcase.expected_);
+                    } catch (std::exception & ex) {
+                        throw_flag = true;
+                    }
+
+                    REQUIRE(throw_flag == testcase.expect_throw_);
+                }
+            }
+        }
+
+        namespace test3 {
+            TEST_CASE("error-i64", "[token]") {
+                token tk(tokentype::tk_i64, "+");
 
                 bool throw_flag = false;
-                try {
-                    std::int64_t x = tk.i64_value();
 
-                    REQUIRE(x == testcase.expected_);
-                } catch (std::exception & ex) {
+                try {
+                    tk.i64_value();
+                } catch(std::exception & ex) {
                     throw_flag = true;
                 }
 
-                REQUIRE(throw_flag == testcase.expect_throw_);
+                REQUIRE(throw_flag);
             }
         }
 
-        TEST_CASE("error-i64", "[token]") {
-            token tk(tokentype::tk_i64, "+");
-
-            bool throw_flag = false;
-
-            try {
-                tk.i64_value();
-            } catch(std::exception & ex) {
-                throw_flag = true;
-            }
-
-            REQUIRE(throw_flag);
-        }
-
-        namespace {
+        namespace test4 {
             struct testcase_f64 {
                 std::string text_;
                 bool expect_throw_;

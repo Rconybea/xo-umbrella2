@@ -12,6 +12,79 @@ namespace xo {
     using xo::scm::span;
 
     namespace ut {
+        /** Two-pass test harness.
+         *
+         *   First pass - verify test assertions.
+         *   Second pass only if first pass failed.
+         *   On second pass, enable verbose logging
+         **/
+        struct rehearser {
+            /* expect at most one iterator to exist per TestRehearser instance **/
+            struct iterator {
+                iterator(rehearser* parent, std::uint32_t attention) : parent_{parent}, attention_{attention} {}
+
+                iterator& operator++();
+                std::uint32_t operator*() { return attention_; }
+
+                bool operator==(const iterator& ix2) const {
+                    return (parent_ == ix2.parent_) && (attention_ == ix2.attention_);
+                }
+
+                rehearser* parent_ = nullptr;
+                std::uint32_t attention_ = 0;
+
+            };
+
+            bool is_second_pass() const { return attention_ == 1; }
+            bool enable_debug() const { return is_second_pass(); }
+
+            iterator begin() { return iterator(this, 0); }
+            iterator end()   { return iterator(this, 2); }
+
+        public:
+            /** pass number: 0 or 1 **/
+            std::uint32_t attention_ = 0;
+            /** @brief set to true when test starts; false if first pass fails **/
+            bool ok_flag_ = true;
+        };
+
+        auto rehearser::iterator::operator++() -> iterator&
+        {
+            ++attention_;
+
+            if (parent_->ok_flag_ && attention_ == 1) {
+                /* skip 2nd pass */
+                ++attention_;
+            }
+
+            return *this;
+        }
+
+        /* use this instead of REQUIRE(expr) in context of a test_rehearser */
+#      define REHEARSE(rehearser, expr)           \
+        if (rehearser.is_second_pass()) {         \
+            REQUIRE((expr));                      \
+        } else {                                  \
+            REQUIRE(true);                        \
+            rehearser.ok_flag_ &= (expr);         \
+        }
+
+        /* note: trivial REQUIRE() call in else branch bc we still want
+         *       catch2 to count assertions when verification succeeds
+         */
+#    define REQUIRE_ORCAPTURE(ok_flag, catch_flag, expr) \
+        if (catch_flag) {                                \
+            REQUIRE((expr));                             \
+        } else {                                         \
+            REQUIRE(true);                               \
+            ok_flag &= (expr);                           \
+        }
+
+#    define REQUIRE_ORFAIL(ok_flag, catch_flag, expr)    \
+        REQUIRE_ORCAPTURE(ok_flag, catch_flag, expr);    \
+        if (!ok_flag)                                    \
+            return ok_flag
+
         namespace {
             struct testcase_tkz {
                 std::string input_;
@@ -22,66 +95,73 @@ namespace xo {
 
             std::vector<testcase_tkz>
             s_testcase_v = {
-                {"<", false, token::leftangle(), true},
-                {">", false, token::rightangle(), true},
+                /*
+                 *
+                 *        expect_throw              consume_all
+                 *        v                         v
+                 */
+                {"<",     false, token::leftangle(), true},
+                /* possible prefix of >= */
+                {">",     false, token::rightangle(), true},
+                {"> ",    false, token::rightangle(), false},
 
-                {"(", false, token::leftparen(), true},
-                {")", false, token::rightparen(), true},
+                {"(",     false, token::leftparen(), true},
+                {")",     false, token::rightparen(), true},
 
-                {"[", false, token::leftbracket(), true},
-                {"]", false, token::rightbracket(), true},
+                {"[",     false, token::leftbracket(), true},
+                {"]",     false, token::rightbracket(), true},
 
-                {"{", false, token::leftbrace(), true},
-                {" {", false, token::leftbrace(), true},
+                {"{",     false, token::leftbrace(), true},
+                {" {",    false, token::leftbrace(), true},
 
-                {"\t{", false, token::leftbrace(), true},
-                {"\n{", false, token::leftbrace(), true},
-                {"}", false, token::rightbrace(), true},
+                {"\t{",   false, token::leftbrace(), true},
+                {"\n{",   false, token::leftbrace(), true},
+                {"}",     false, token::rightbrace(), true},
 
-                {"0",  false, token::i64_token("0"), true},
-                {"1",  false, token::i64_token("1"), true},
-                {"12",  false, token::i64_token("12"), true},
-                {"123",  false, token::i64_token("123"), true},
+                {"0",     false, token::i64_token("0"), true},
+                {"1",     false, token::i64_token("1"), true},
+                {"12",    false, token::i64_token("12"), true},
+                {"123",   false, token::i64_token("123"), true},
                 {"1234",  false, token::i64_token("1234"), true},
 
-                {"0 ", false, token::i64_token("0"), false},
-                {"1 ", false, token::i64_token("1"), false},
-                {"12 ", false, token::i64_token("12"), false},
-                {"123 ", false, token::i64_token("123"), false},
+                {"0 ",    false, token::i64_token("0"), false},
+                {"1 ",    false, token::i64_token("1"), false},
+                {"12 ",   false, token::i64_token("12"), false},
+                {"123 ",  false, token::i64_token("123"), false},
                 {"1234 ", false, token::i64_token("1234"), false},
 
-                {"1<", false, token::i64_token("1"), false},
-                {"1>", false, token::i64_token("1"), false},
-                {"1(", false, token::i64_token("1"), false},
-                {"1)", false, token::i64_token("1"), false},
-                {"1[", false, token::i64_token("1"), false},
-                {"1]", false, token::i64_token("1"), false},
-                {"1{", false, token::i64_token("1"), false},
-                {"1}", false, token::i64_token("1"), false},
-                {"1;", false, token::i64_token("1"), false},
-                {"1:", false, token::i64_token("1"), false},
-                {"1,", false, token::i64_token("1"), false},
+                {"1<",    false, token::i64_token("1"), false},
+                {"1>",    false, token::i64_token("1"), false},
+                {"1(",    false, token::i64_token("1"), false},
+                {"1)",    false, token::i64_token("1"), false},
+                {"1[",    false, token::i64_token("1"), false},
+                {"1]",    false, token::i64_token("1"), false},
+                {"1{",    false, token::i64_token("1"), false},
+                {"1}",    false, token::i64_token("1"), false},
+                {"1;",    false, token::i64_token("1"), false},
+                {"1:",    false, token::i64_token("1"), false},
+                {"1,",    false, token::i64_token("1"), false},
 
-                {".1", false, token::f64_token(".1"), true},
-                {".12", false, token::f64_token(".12"), true},
-                {".123", false, token::f64_token(".123"), true},
+                {".1",    false, token::f64_token(".1"), true},
+                {".12",   false, token::f64_token(".12"), true},
+                {".123",  false, token::f64_token(".123"), true},
 
-                {"+.1", false, token::f64_token("+.1"), true},
-                {"+.12", false, token::f64_token("+.12"), true},
+                {"+.1",   false, token::f64_token("+.1"), true},
+                {"+.12",  false, token::f64_token("+.12"), true},
                 {"+.123", false, token::f64_token("+.123"), true},
 
-                {"-.1", false, token::f64_token("-.1"), true},
-                {"-.12", false, token::f64_token("-.12"), true},
+                {"-.1",   false, token::f64_token("-.1"), true},
+                {"-.12",  false, token::f64_token("-.12"), true},
                 {"-.123", false, token::f64_token("-.123"), true},
 
-                {"1.", false, token::f64_token("1."), true},
-                {"1.2", false, token::f64_token("1.2"), true},
-                {"1.23", false, token::f64_token("1.23"), true},
+                {"1.",    false, token::f64_token("1."), true},
+                {"1.2",   false, token::f64_token("1.2"), true},
+                {"1.23",  false, token::f64_token("1.23"), true},
 
-                {"1e0", false, token::f64_token("1e0"), true},
-                {"1e-1", false, token::f64_token("1e-1"), true},
-                {"1e1", false, token::f64_token("1e1"), true},
-                {"1e+1", false, token::f64_token("1e+1"), true},
+                {"1e0",   false, token::f64_token("1e0"), true},
+                {"1e-1",  false, token::f64_token("1e-1"), true},
+                {"1e1",   false, token::f64_token("1e1"), true},
+                {"1e+1",  false, token::f64_token("1e+1"), true},
 
                 {"\"hello\"", false, token::string_token("hello"), true},
                 /* tokenizer sees this input:
@@ -99,10 +179,20 @@ namespace xo {
                 {"\"tab to the right [\\t], to the right [\\t]\"", false,
                  token::string_token("tab to the right [\t], to the right [\t]"), true},
 
+                {".", false, token::dot(), true},
                 {":", false, token::colon(), true},
+                {",", false, token::comma(), true},
+                {"=", false, token::singleassign(), true},
                 {":=", false, token::assign_token(), true},
+                {"->", false, token::yields(), true},
+
+                {"+", false, token::plus_token(), true},
+                {"-", false, token::minus_token(), true},
+                {"*", false, token::star_token(), true},
+                {"/", false, token::slash_token(), true},
 
                 {"symbol", false, token::symbol_token("symbol"), true},
+                {"another-symbol", false, token::symbol_token("another-symbol"), true},
 
                 {"type", false, token::type(), true},
                 {"def", false, token::def(), true},
@@ -112,58 +202,59 @@ namespace xo {
                 {"in", false, token::in(), true},
                 {"end", false, token::end(), true},
 
-                {"*", false, token::star_token(), true},
             };
         }
 
         TEST_CASE("tokenizer", "[tokenizer]") {
             for (std::size_t i_tc = 0, n_tc = s_testcase_v.size(); i_tc < n_tc; ++i_tc) {
+
                 const testcase_tkz & testcase = s_testcase_v[i_tc];
 
-                INFO(xtag("input", testcase.input_));
-                INFO(xtag("i_tc", i_tc));
+                rehearser rh;
 
-                using tokenizer
-                    = xo::scm::tokenizer<char>;
+                for (auto _ : rh) {
+                    scope log(XO_DEBUG2(rh.enable_debug(), "tokenizer"));
 
-                tokenizer tkz;
-                tokenizer::span_type
-                    in_span(testcase.input_.c_str(),
-                            testcase.input_.c_str() + testcase.input_.size());
+                    log && log(xtag("i_tc", i_tc), xtag("input", testcase.input_));
 
-                auto out = tkz.scan(in_span);
+                    using tokenizer
+                        = xo::scm::tokenizer<char>;
 
-                auto tk = out.first;
+                    tokenizer tkz(rh.enable_debug());
+                    tokenizer::span_type
+                        in_span(testcase.input_.c_str(),
+                                testcase.input_.c_str() + testcase.input_.size());
 
-                if (tk.is_invalid())
-                    tk = tkz.notify_eof();
+                    auto sr = tkz.scan2(in_span, true /*eof*/);
 
-                REQUIRE(tk.tk_type() == testcase.expected_tk_.tk_type());
-                if (tk.tk_type() == tokentype::tk_i64)
-                {
-                    REQUIRE(!tk.text().empty());
-                    REQUIRE(tk.i64_value() == testcase.expected_tk_.i64_value());
-                } else if (tk.tk_type() == tokentype::tk_f64)
-                {
-                    REQUIRE(!tk.text().empty());
-                    REQUIRE(tk.f64_value() == testcase.expected_tk_.f64_value());
-                } else if(tk.tk_type() == tokentype::tk_string)
-                {
-                    /* tk.text() can be empty, consider input "" */
-                    REQUIRE(tk.text() == testcase.expected_tk_.text());
-                } else if(tk.tk_type() == tokentype::tk_symbol)
-                {
-                    REQUIRE(!tk.text().empty());
-                    REQUIRE(tk.text() == testcase.expected_tk_.text());
-                } else {
-                    REQUIRE(tk.text().empty());
+                    REHEARSE(rh, sr.get_token().tk_type() == testcase.expected_tk_.tk_type());
+                    if (sr.get_token().tk_type() == tokentype::tk_i64)
+                    {
+                        REHEARSE(rh, !sr.get_token().text().empty());
+                        REHEARSE(rh, sr.get_token().i64_value() == testcase.expected_tk_.i64_value());
+                    } else if (sr.get_token().tk_type() == tokentype::tk_f64)
+                    {
+                        REHEARSE(rh, !sr.get_token().text().empty());
+                        REHEARSE(rh, sr.get_token().f64_value() == testcase.expected_tk_.f64_value());
+                    } else if(sr.get_token().tk_type() == tokentype::tk_string)
+                    {
+                        /* sr.get_token().text() can be empty, consider input "" */
+                        REHEARSE(rh, sr.get_token().text() == testcase.expected_tk_.text());
+                    } else if(sr.get_token().tk_type() == tokentype::tk_symbol)
+                    {
+                        REHEARSE(rh, !sr.get_token().text().empty());
+                        REHEARSE(rh, sr.get_token().text() == testcase.expected_tk_.text());
+                    } else {
+                        REHEARSE(rh, sr.get_token().text().empty());
+                    }
+
+                    /* must consume all input for tests we're doing here */
+                    if (testcase.consume_all_) {
+                        REHEARSE(rh, sr.consumed() == in_span);
+                    } else {
+                        REHEARSE(rh, sr.consumed() != in_span);
+                    }
                 }
-
-                /* must consume all input for tests we're doing here */
-                if (testcase.consume_all_)
-                    REQUIRE(out.second == in_span);
-                else
-                    REQUIRE(out.second != in_span);
             }
         }
 
@@ -208,56 +299,134 @@ namespace xo {
                   token::symbol_token("y"),
                   token::semicolon(),
                   token::rightbrace()
-                 }}
+                 }},
+                {"a.b",
+                 false,
+                 {token::symbol_token("a"),
+                  token::dot(),
+                  token::symbol_token("b")
+                 }},
+                {"a,b",
+                 false,
+                 {token::symbol_token("a"),
+                  token::comma(),
+                  token::symbol_token("b")
+                 }},
+                {"a:b",
+                 false,
+                 {token::symbol_token("a"),
+                  token::colon(),
+                  token::symbol_token("b")
+                 }},
+                {"a;b",
+                 false,
+                 {token::symbol_token("a"),
+                  token::semicolon(),
+                  token::symbol_token("b")
+                 }},
+                {"a:=b",
+                 false,
+                 {token::symbol_token("a"),
+                  token::assign_token(),
+                  token::symbol_token("b")
+                 }},
+                {"a=b",
+                 false,
+                 {token::symbol_token("a"),
+                  token::singleassign(),
+                  token::symbol_token("b")
+                 }},
+                {"p->q",
+                 false,
+                 {token::symbol_token("p"),
+                  token::yields(),
+                  token::symbol_token("q")
+                 }},
+                {"a + b",
+                 false,
+                 {token::symbol_token("a"),
+                  token::plus_token(),
+                  token::symbol_token("b")
+                 }},
+                {"a - b",
+                 false,
+                 {token::symbol_token("a"),
+                  token::minus_token(),
+                  token::symbol_token("b")
+                 }},
+                {"a-b",
+                 false,
+                 {token::symbol_token("a-b"),
+                 }},
+                {"(apple)",
+                 false,
+                 {token::leftparen(),
+                  token::symbol_token("apple"),
+                  token::rightparen()
+                 }},
+                {"<apple>",
+                 false,
+                 {token::leftangle(),
+                  token::symbol_token("apple"),
+                  token::rightangle()
+                 }},
             };
         }
 
         TEST_CASE("tokenizer2", "[tokenizer]") {
+            /* this time testing token sequences */
+
+            using tokenizer = xo::scm::tokenizer<char>;
+
             for (std::size_t i_tc = 0, n_tc = s_testcase2_v.size(); i_tc < n_tc; ++i_tc) {
                 const testcase2_tkz & testcase = s_testcase2_v[i_tc];
 
-                INFO(xtag("input", testcase.input_));
-                INFO(xtag("i_tc", i_tc));
+                rehearser rh;
 
-                using tokenizer
-                    = xo::scm::tokenizer<char>;
+                for (auto _ : rh) {
+                    scope log(XO_DEBUG2(rh.enable_debug(), "tokenizer2"));
 
-                tokenizer tkz;
-                tokenizer::span_type
-                    in_span(testcase.input_.c_str(),
-                            testcase.input_.c_str() + testcase.input_.size());
+                    log && log(xtag("i_tc", i_tc), xtag("input", testcase.input_));
 
-                for (int i_tk = 0, n_tk = testcase.expected_tk_v_.size();
-                     i_tk < n_tk; ++i_tk)
-                {
-                    INFO(xtag("i_tk", i_tk));
+                    tokenizer tkz(rh.enable_debug());
 
-                    auto res = tkz.scan2(in_span, in_span.empty());
-                    const auto & tk = res.first;
+                    tokenizer::span_type
+                        in_span(testcase.input_.c_str(),
+                                testcase.input_.c_str() + testcase.input_.size());
 
-                    if (tk.is_valid())
-                        REQUIRE(tk.tk_type() == testcase.expected_tk_v_[i_tk].tk_type());
-                    if (tk.tk_type() == tokentype::tk_i64)
+                    for (int i_tk = 0, n_tk = testcase.expected_tk_v_.size();
+                         i_tk < n_tk; ++i_tk)
                     {
-                        REQUIRE(!tk.text().empty());
-                        REQUIRE(tk.i64_value() == testcase.expected_tk_v_[i_tk].i64_value());
-                    } else if (tk.tk_type() == tokentype::tk_f64)
-                    {
-                        REQUIRE(!tk.text().empty());
-                        REQUIRE(tk.f64_value() == testcase.expected_tk_v_[i_tk].f64_value());
-                    } else if(tk.tk_type() == tokentype::tk_string)
-                    {
-                        /* tk.text() can be empty, consider input "" */
-                        REQUIRE(tk.text() == testcase.expected_tk_v_[i_tk].text());
-                    } else if(tk.tk_type() == tokentype::tk_symbol)
-                    {
-                        REQUIRE(!tk.text().empty());
-                        REQUIRE(tk.text() == testcase.expected_tk_v_[i_tk].text());
-                    } else {
-                        REQUIRE(tk.text().empty());
+                        log && log(xtag("i_tk", i_tk));
+
+                        auto sr = tkz.scan2(in_span, in_span.empty());
+                        const auto & tk = sr.get_token();
+
+                        if (tk.is_valid()) {
+                            REHEARSE(rh, tk.tk_type() == testcase.expected_tk_v_[i_tk].tk_type());
+                        }
+                        if (tk.tk_type() == tokentype::tk_i64)
+                        {
+                            REHEARSE(rh, !tk.text().empty());
+                            REHEARSE(rh, tk.i64_value() == testcase.expected_tk_v_[i_tk].i64_value());
+                        } else if (tk.tk_type() == tokentype::tk_f64)
+                        {
+                            REHEARSE(rh, !tk.text().empty());
+                            REHEARSE(rh, tk.f64_value() == testcase.expected_tk_v_[i_tk].f64_value());
+                        } else if(tk.tk_type() == tokentype::tk_string)
+                        {
+                            /* tk.text() can be empty, consider input "" */
+                            REHEARSE(rh, tk.text() == testcase.expected_tk_v_[i_tk].text());
+                        } else if(tk.tk_type() == tokentype::tk_symbol)
+                        {
+                            REHEARSE(rh, !tk.text().empty());
+                            REHEARSE(rh, tk.text() == testcase.expected_tk_v_[i_tk].text());
+                        } else {
+                            REHEARSE(rh, tk.text().empty());
+                        }
+
+                        in_span = in_span.after_prefix(sr.consumed());
                     }
-
-                    in_span = in_span.after_prefix(res.second);
                 }
             }
         } /*TEST_CASE(tokenizer2)*/
