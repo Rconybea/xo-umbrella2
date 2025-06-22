@@ -2,10 +2,13 @@
 
 cmake_minimum_required(VERSION 3.10)
 
-project(xo-submodule3 VERSION 1.0)
+project(xo-umbrella VERSION 1.0)
 
 # ----------------------------------------------------------------
 # global build settings
+
+include(GNUInstallDirs)
+include(cmake/xo-bootstrap-macros.cmake)
 
 # Adopting submodule builds directly into this cmake.
 # Submodule builds will pickup dependent xo artifacts directly
@@ -31,15 +34,9 @@ set(XO_UMBRELLA_BINARY_DIR ${CMAKE_BINARY_DIR})
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/xo-cmake/cmake)
 
-# ----------------------------------------------------------------
-# unit test setup
-
-enable_testing()
+xo_cxx_toplevel_options3()
 
 # ----------------------------------------------------------------
-# global c++ settings.
-
-enable_language(CXX)
 
 # temporary compiler flags here
 set(PROJECT_CXX_FLAGS "")
@@ -60,6 +57,14 @@ endif()
 message("-- CMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}")
 message("-- CMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}")
 message("-- CMAKE_INSTALL_RPATH=${CMAKE_INSTALL_RPATH}")
+
+# ----------------------------------------------------------------
+#
+set(DOX_EXCLUDE_PATTERNS [=[
+*/utest/* \
+*/llvm/* \
+*/llvm-c/*
+]=])
 
 # ----------------------------------------------------------------
 # xo satellite projects
@@ -106,3 +111,10 @@ add_subdirectory(xo-reader)
 add_subdirectory(xo-jit)
 add_subdirectory(xo-pyjit)
 #
+
+# ----------------------------------------------------------------
+# documentation.  must follow add_subdirectory() for satellite projects
+
+xo_umbrella_doxygen_deps(xo_flatstring xo_ratio)
+xo_umbrella_doxygen_config()
+xo_umbrella_sphinx_config(index.rst docs/install.rst)

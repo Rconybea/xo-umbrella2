@@ -126,6 +126,7 @@ let
           # xo-packaged version of llvm; fewer packaging features than nixpkgs
           # but easier to debug/modify
           llvmXo = llvmXo;
+
         };
 
 in
@@ -138,4 +139,39 @@ let
     ];
   };
 in
-pkgs
+
+pkgs.mkShell {
+  # maybe should create a python environment:
+  #   let
+  #     pythonenv = pkgs.python3.withPackages (pset: [ pset.sphinx pset.breathe ..etc.. ])
+  #   in
+  #     buildInputs = [ pythonenv ..etc.. ];
+  #
+
+  buildInputs = [
+    pkgs.python3Packages.python
+    pkgs.python3Packages.pybind11
+    pkgs.python3Packages.sphinx-rtd-theme
+    pkgs.python3Packages.breathe
+    pkgs.python3Packages.sphinxcontrib-ditaa
+    pkgs.python3Packages.sphinxcontrib-plantuml
+    pkgs.python3Packages.pillow
+
+    pkgs.cloc
+
+    pkgs.sphinx
+    pkgs.graphviz
+    pkgs.doxygen
+
+    pkgs.llvmPackages_18.llvm.dev
+    pkgs.libwebsockets
+    pkgs.jsoncpp
+    pkgs.eigen
+    pkgs.cmake
+    pkgs.catch2
+  ];
+
+  shellHook = ''
+    echo "xo development environment loaded!"
+  '';
+}
