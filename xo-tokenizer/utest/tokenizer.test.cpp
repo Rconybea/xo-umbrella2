@@ -529,7 +529,7 @@ namespace xo {
 
                 using tokenizer = xo::scm::tokenizer<char>;
 
-                constexpr bool c_force_debug = true;
+                constexpr bool c_force_debug = false;
 
                 for (std::size_t i_tc = 0, n_tc = s_testcase3_v.size(); i_tc < n_tc; ++i_tc) {
                     const testcase_error & testcase = s_testcase3_v[i_tc];
