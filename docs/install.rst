@@ -92,8 +92,11 @@ Aternatively can enter nix environment, then follow instructions for cmake build
     # etc
 
 
+Development
+===========
+
 LSP Setup
-=========
+---------
 
 To setup xo-umbrella2 build to work with a language server:
 
@@ -105,3 +108,13 @@ To setup xo-umbrella2 build to work with a language server:
 
 In this case subsystem LSP setup should be omitted, git root is ``path/to/xo-umbrella2``,
 not ``path/to/xo-umbrella2/xo-ratio`` etc.
+
+Sphinx Autobuild Setup
+----------------------
+
+To serve cache-busting headers
+
+.. code-block::
+
+    $ cd xo-umbrella2
+    $ sphinx-autobuild . .build/sphinx/html --port 3000

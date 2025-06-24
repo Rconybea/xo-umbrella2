@@ -17,5 +17,6 @@ Some features: kalman filters, stochastic processes, complex event processing, s
    xo-unit/docs/index
    xo-tokenizer/docs/index
    xo-jit/docs/index
+   glossary
    genindex
    search

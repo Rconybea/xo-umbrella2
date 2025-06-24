@@ -1,6 +1,6 @@
 .. xo-tokenizer documentation master file.
 
-xo-tokenizer documentation
+Xo-tokenizer documentation
 ==========================
 
 xo-tokenizer provides a tokenizer for the Schematika language.
@@ -15,5 +15,8 @@ may appear in variable names:  ``one-of-those-days`` is an ordinary symbol.
 
    install
    examples
-   genindex
-   search
+   implementation
+   token-class
+   tokenizer-error-class
+   span-class
+   tokentype-enum

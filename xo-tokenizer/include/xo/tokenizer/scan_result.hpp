@@ -10,8 +10,10 @@
 
 namespace xo {
     namespace scm {
-        /** @brief Represent result of parsing one input token.
+        /** @class scan_result
+         *  @brief Represent result of parsing one input token.
          *
+         * @code
          *  Possible outcomes fall into several categories
          *  (with T: @c token_.is_valid(), E: @cerror_.is_error())
          *
@@ -21,6 +23,7 @@ namespace xo {
          *  | true  | false | parsed token in T |
          *  | false | true  | parse error in E  |
          *
+         * @endcode
          **/
         template <typename CharT>
         class scan_result {
@@ -37,6 +40,7 @@ namespace xo {
 
             static scan_result make_whitespace(const span_type & prefix_input);
             static scan_result make_partial(const span_type & prefix_input);
+            static scan_result make_error(const error_type & error);
 
             bool is_eof_or_ambiguous() const { return token_.is_invalid() && error_.is_not_an_error(); }
             bool is_token() const { return token_.is_valid(); }
@@ -65,6 +69,12 @@ namespace xo {
         auto scan_result<CharT>::make_partial(const span_type& prefix_input) -> scan_result
         {
             return scan_result(token_type::invalid(), prefix_input /*consumed*/);
+        }
+
+        template <typename CharT>
+        auto scan_result<CharT>::make_error(const error_type & error) -> scan_result
+        {
+            return scan_result(token_type::invalid(), span_type::make_null(), error);
         }
 
     } /*namespace scm*/

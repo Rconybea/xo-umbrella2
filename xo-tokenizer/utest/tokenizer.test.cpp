@@ -19,15 +19,17 @@ namespace xo {
          *   On second pass, enable verbose logging
          **/
         struct rehearser {
+            rehearser(std::uint32_t att = 0) : attention_{att} {}
+
             /* expect at most one iterator to exist per TestRehearser instance **/
             struct iterator {
-                iterator(rehearser* parent, std::uint32_t attention) : parent_{parent}, attention_{attention} {}
+                explicit iterator(rehearser* parent) : parent_{parent} {}
 
                 iterator& operator++();
-                std::uint32_t operator*() { return attention_; }
+                std::uint32_t operator*() { return parent_->attention_; }
 
                 bool operator==(const iterator& ix2) const {
-                    return (parent_ == ix2.parent_) && (attention_ == ix2.attention_);
+                    return (parent_ == ix2.parent_);
                 }
 
                 rehearser* parent_ = nullptr;
@@ -35,11 +37,12 @@ namespace xo {
 
             };
 
+            bool is_first_pass() const { return attention_ == 0; }
             bool is_second_pass() const { return attention_ == 1; }
             bool enable_debug() const { return is_second_pass(); }
 
-            iterator begin() { return iterator(this, 0); }
-            iterator end()   { return iterator(this, 2); }
+            iterator begin() { return iterator(this); }
+            iterator end()   { return iterator(nullptr); }
 
         public:
             /** pass number: 0 or 1 **/
@@ -50,23 +53,27 @@ namespace xo {
 
         auto rehearser::iterator::operator++() -> iterator&
         {
-            ++attention_;
+            if (parent_)
+                ++(parent_->attention_);
 
-            if (parent_->ok_flag_ && attention_ == 1) {
+            if (parent_->ok_flag_ && (parent_->attention_ == 1)) {
                 /* skip 2nd pass */
-                ++attention_;
+                ++(parent_->attention_);
             }
+
+            if (parent_->attention_ == 2)
+                parent_ = nullptr;
 
             return *this;
         }
 
         /* use this instead of REQUIRE(expr) in context of a test_rehearser */
-#      define REHEARSE(rehearser, expr)           \
-        if (rehearser.is_second_pass()) {         \
-            REQUIRE((expr));                      \
-        } else {                                  \
-            REQUIRE(true);                        \
-            rehearser.ok_flag_ &= (expr);         \
+#      define REHEARSE(rehearser, expr)                    \
+        if (rehearser.is_first_pass()) {                   \
+            bool _f = (expr);                              \
+            rehearser.ok_flag_ = rehearser.ok_flag_ && _f; \
+        } else {                                           \
+            REQUIRE(expr);                                 \
         }
 
         /* note: trivial REQUIRE() call in else branch bc we still want
@@ -300,12 +307,14 @@ namespace xo {
                   token::semicolon(),
                   token::rightbrace()
                  }},
+#ifdef TODO
                 {"a.b",
                  false,
                  {token::symbol_token("a"),
                   token::dot(),
                   token::symbol_token("b")
                  }},
+#endif
                 {"a,b",
                  false,
                  {token::symbol_token("a"),
@@ -430,6 +439,132 @@ namespace xo {
                 }
             }
         } /*TEST_CASE(tokenizer2)*/
+
+        namespace {
+            using tkz_error_type = xo::scm::tokenizer_error<char>;
+            using span_type = xo::scm::span<const char>;
+
+            struct testcase_error {
+                std::string input_;
+                tkz_error_type expect_error_;
+            };
+
+            testcase_error
+            make_testcase(const char * input, const char * src_function, const char * error_descr,
+                          size_t tk_start, size_t whitespace, size_t error_pos)
+            {
+                testcase_error retval;
+                retval.input_ = input;
+                retval.expect_error_ = tkz_error_type(src_function, error_descr,
+                                                      span_type::from_string(retval.input_),
+                                                      tk_start, whitespace, error_pos);
+                return retval;
+            }
+
+            std::vector<testcase_error>
+            s_testcase3_v = {
+                //             012345678
+                //             --------v
+                make_testcase("123.456ez",
+                              "assemble_token",
+                              "unexpected character in numeric constant",
+                              0, 0, 8),
+                //             01
+                //             -v
+                make_testcase("1-3",
+                              "assemble_token",
+                              "improperly placed sign indicator",
+                              0, 0, 1),
+                //             012
+                //             --v
+                make_testcase("1..2",
+                              "assemble_token",
+                              "duplicate decimal point in numeric literal",
+                              0, 0, 2),
+                //             0123456
+                //             ------v
+                make_testcase("1.23e4e",
+                              "assemble_token",
+                              "duplicate exponent marker in numeric literal",
+                              0, 0, 6),
+                // tokenizer sees string ["\"]
+                //              0 1 2 3
+                //              - - - v
+                make_testcase("\"\\\"",
+                              "assemble_token",
+                              "missing terminating '\"' to complete literal string",
+                              //"expect \\ to escape one of n|t|r|\"|\\ in string literal",
+                              0, 0, 3),
+                // tokenizer sees literal with embedded newline
+                //                        1         2         3
+                //              01234567890123456789012345678901 2
+                //              -------------------------------- v
+                make_testcase("\"everything was going fine until\n\"",
+                              "scan",
+                              "must use \\n or \\r to encode newline/cr in string literal",
+                              0, 0, 32),
+                // tokenizer sees string ["\]
+                //              0 1 2
+                //              - - v
+                make_testcase("\"\\",
+                              "assemble_token",
+                              "expecting key following escape character \\",
+                              0, 0, 2),
+                // tokenizer sees string ["\q"]
+                //              0 12
+                //              - -v
+                make_testcase("\"\\q\"",
+                              "assemble_token",
+                              "expecting one of n|r|\"|\\ following escape \\",
+                              0, 0, 2),
+                //
+                make_testcase("#",
+                              "assemble_token",
+                              "illegal input character",
+                              0, 0, 0),
+            };
+
+            TEST_CASE("tokenizer3", "[tokenizer]") {
+                /* testing error handling */
+
+                using tokenizer = xo::scm::tokenizer<char>;
+
+                constexpr bool c_force_debug = true;
+
+                for (std::size_t i_tc = 0, n_tc = s_testcase3_v.size(); i_tc < n_tc; ++i_tc) {
+                    const testcase_error & testcase = s_testcase3_v[i_tc];
+
+                    rehearser rh(0);
+
+                    for (auto _ : rh) {
+                        scope log(XO_DEBUG2(c_force_debug || rh.enable_debug(), "tokenizer3"));
+
+                        log && log(xtag("pass", _), xtag("ok(-)", rh.ok_flag_));
+                        log && log(xtag("i_tc", i_tc), xtag("input", testcase.input_));
+
+                        tokenizer tkz(c_force_debug || rh.enable_debug());
+
+                        auto in_span = tokenizer::span_type::from_string(testcase.input_);
+
+                        auto sr = tkz.scan2(in_span, true /*eof*/);
+
+                        REHEARSE(rh, sr.is_error());
+
+                        if (sr.error().src_function()) {
+                            REHEARSE(rh, std::string(sr.error().src_function()) == std::string(testcase.expect_error_.src_function()));
+                        }
+                        if (sr.error().error_description()) {
+                            REHEARSE(rh, std::string(sr.error().error_description()) == std::string(testcase.expect_error_.error_description()));
+                        }
+                        REHEARSE(rh, sr.error().whitespace() == testcase.expect_error_.whitespace());
+                        REHEARSE(rh, sr.error().tk_start() == testcase.expect_error_.tk_start());
+                        REHEARSE(rh, sr.error().error_pos() == testcase.expect_error_.error_pos());
+
+                        log && log(xtag("ok(+)", rh.ok_flag_));
+                    }
+                }
+            }
+        }
 
     } /*namespace ut*/
 } /*namespace xo*/

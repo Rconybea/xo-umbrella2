@@ -1,6 +1,6 @@
 .. _examples:
 
-.. toctree
+.. toctree::
    :maxdepth: 2
 
 Examples
@@ -31,19 +31,28 @@ See ``xo-tokenizer/examples/tokenrepl`` for (slighly elaborated) version of code
 
             // input may contain multiple tokens
             while (!input.empty()) {
-                auto [tk, nread] = tkz.scan(input);
+                auto [tk, consumed, error] = tkz.scan(input);
 
                 if (tk.is_valid()) {
                     cout << tk;
                 }
 
-                input = input.after_prefix(nread);
+                input = input.after_prefix(consumed.size());
             }
         }
 
-        auto tk = tkz.notify_eof();
+        auto [tk, consumed, error] = tkz.notify_eof(spxn_type::from_string(input_str));
 
         if (tk.is_valid()) {
             cout << tk;
         }
     }
+
+.. code-block::
+   :linenos:
+
+    $ .build/xo-tokenizer/utest/utest.tokenizer
+    > 123
+    <token :type tk_i64 :text 123>
+    > 123e5
+    <token :type tk_f64 :text 123e5>

@@ -41,21 +41,35 @@ main() {
             if (tk.is_valid()) {
                 cout << tk << endl;
             } else if (error.is_error()) {
-                cout << "parsing error: " << error << endl;
-                /* discard remainder of input line */
+                cout << "parsing error: " << endl;
+                error.report(cout);
+
                 break;
             }
 
-            input = input.after_prefix(consumed.size());
+            input = tkz.consume(consumed, input);
+            //input = input.after_prefix(consumed.size());
         }
+
+        /* discard stashed remainder of input line
+         * (for nicely-formatted errors)
+         */
+        tkz.discard_current_line();
     }
 
-    auto [tk, consumed, error] = tkz.notify_eof(span_type::from_string(input_str));
+    {
+        span_type input = span_type::from_string(input_str);
 
-    if (tk.is_valid()) {
-        cout << tk << endl;
-    } else if (error.is_error()) {
-        cout << "parsing error: " << error << endl;
+        auto [tk, consumed, error] = tkz.notify_eof(input);
+
+        input = tkz.consume(consumed, input);
+
+        if (tk.is_valid()) {
+            cout << tk << endl;
+        } else if (error.is_error()) {
+            cout << "parsing error: " << endl;
+            error.report(cout);
+        }
     }
 }
 

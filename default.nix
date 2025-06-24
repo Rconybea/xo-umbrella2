@@ -109,7 +109,7 @@ let
 #
           xo-expression     = self.callPackage pkgs/xo-expression.nix     {};
           xo-pyexpression   = self.callPackage pkgs/xo-pyexpression.nix   {};
-          xo-tokenizer      = self.callPackage pkgs/xo-tokenizer.nix      {};
+          xo-tokenizer      = self.callPackage pkgs/xo-tokenizer.nix      { buildDocs = true; };
           xo-reader         = self.callPackage pkgs/xo-reader.nix         {};
 
           xo-jit            = self.callPackage pkgs/xo-jit.nix            { #stdenv = jitStdenv;
@@ -152,11 +152,18 @@ pkgs.mkShell {
     pkgs.python3Packages.python
     pkgs.python3Packages.pybind11
     pkgs.python3Packages.sphinx-rtd-theme
+    #pkgs.python3Packages.sphinx-autobuild   # needs patch for typeguard; defer for now
     pkgs.python3Packages.breathe
     pkgs.python3Packages.sphinxcontrib-ditaa
     pkgs.python3Packages.sphinxcontrib-plantuml
     pkgs.python3Packages.pillow
 
+    pkgs.gdb
+
+    pkgs.emacs
+    pkgs.ditaa
+    pkgs.ripgrep
+    pkgs.git
     pkgs.cloc
 
     pkgs.sphinx
@@ -169,6 +176,8 @@ pkgs.mkShell {
     pkgs.eigen
     pkgs.cmake
     pkgs.catch2
+    pkgs.zlib
+    pkgs.unzip
   ];
 
   shellHook = ''

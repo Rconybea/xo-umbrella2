@@ -30,7 +30,7 @@ Context
 Introduction
 ------------
 
-.. code-block::cpp
+.. code-block:: cpp
 
     #include <xo/unit/scaled_unit.hpp>
 

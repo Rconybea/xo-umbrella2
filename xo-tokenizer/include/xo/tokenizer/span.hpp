@@ -11,21 +11,32 @@ namespace xo {
     namespace scm {
         /** @class span compression/span.hpp
          *
-         *  @brief Represents a contiguous memory range,  without ownership.
+         *  @brief A contiguous range of characters,  without ownership.
          *
          *  @tparam CharT type for elements referred to by this span.
          **/
         template <typename CharT>
         class span {
         public:
-            /** @brief typealias for span size (in units of CharT) **/
+            /** @defgroup span-type-traits span type traits **/
+            ///@{
+
+            /** typealias for span size (in units of CharT) **/
             using size_type = std::uint64_t;
 
+            ///@}
+
         public:
-            /** @brief create span for the contiguous memory range [@p lo, @p hi) **/
+            /** @defgroup span-ctors span constructors **/
+            ///@{
+
+            /** Create span for the contiguous memory range [@p lo, @p hi) **/
             span(CharT * lo, CharT * hi) : lo_{lo}, hi_{hi} {}
 
-            /** @brief create a null span (i.e. with null @p lo, @p hi pointers) **/
+            /** Create a null span (i.e. with null @p lo, @p hi pointers)
+             *  A null span can be concatenated with any other span
+             *  without triggering matching-endpoint asserts.
+             **/
             static span make_null() { return span(nullptr, nullptr); }
 
             /** @brief create span for C-style string @p cstr **/
@@ -65,16 +76,20 @@ namespace xo {
                 return span(lo, hi);
             }
 
-            ///@{
+            ///@}
 
-            /** @name getters **/
+            /** @defgroup span-access-methods **/
+            ///@{
 
             CharT * lo() const { return lo_; } /* get member span::lo_ */
             CharT * hi() const { return hi_; } /* get member span::hi_ */
 
             ///@}
 
-            /** @brief create new span over supplied type,
+            /** @defgroup span-general-methods **/
+            ///@{
+
+            /** Create new span over supplied type,
              *  with identical (possibly misaligned) endpoints.
              *
              *  @warning
@@ -121,7 +136,9 @@ namespace xo {
                 return after_prefix(prefix.size());
             }
 
-            /** @brief create span starting with position p **/
+            /** Create span starting with position @p p.
+             *  Does boundary checking; will return empty span if @p p is outside @c [lo_,hi)
+             **/
             span suffix_from(CharT * p) const {
                 if ((lo_ <= p) && (p <= hi_))
                     return span(p, hi_);
@@ -129,13 +146,16 @@ namespace xo {
                     return span(hi_, hi_);
             }
 
-            /** @brief true iff this span is null.  distinct from empty. **/
+            /** true iff this span is null.  distinct from empty. **/
             bool is_null() const { return lo_ == nullptr && hi_ == nullptr; }
-            /** @brief true iff this span is empty (comprises 0 elements). **/
+            /** true iff this span is empty (comprises 0 elements). **/
             bool empty() const { return lo_ == hi_; }
-            /** @brief report the number of elements (of type CharT) in this span. **/
+            /** report the number of elements (of type CharT) in this span. **/
             size_type size() const { return hi_ - lo_; }
 
+            /** increase extent of this spans to include @p x.
+             *  Requires @c hi() == @c x.lo()
+             **/
             span & operator+=(const span & x) {
                 if (hi_ == x.lo_) {
                     hi_ = x.hi_;
@@ -154,15 +174,18 @@ namespace xo {
                    << " :text " << xo::print::quot(std::string_view(lo_, hi_))
                    << ">";
             }
+            ///@}
 
         private:
+            /** @defgroup span-instance-vars **/
             ///@{
 
-            /** @brief start of span
+            /** start of span.
                 Span comprises memory address between @p lo (inclusive) and @p hi (exclusive)
             **/
             CharT * lo_ = nullptr;
-            /** @brief end of span
+
+            /** @brief end of span.
                 Span comprises memory address between @p lo (inclusive) and @p hi (exclusive)
             **/
             CharT * hi_ = nullptr;
@@ -170,6 +193,12 @@ namespace xo {
             ///@}
         }; /*span*/
 
+        /** @defgroup span-operators **/
+        ///@{
+
+        /** compare spans for equality.
+         *  Two spans are equal iff both endpoints match exactly.
+         **/
         template <typename CharT>
         inline bool
         operator==(const span<CharT> & lhs, const span<CharT> & rhs) {
@@ -177,6 +206,9 @@ namespace xo {
                     && (lhs.hi() == rhs.hi()));
         }
 
+        /** compare spans for inequality.
+         *  Two spans are unequal if either paired endpoint differs.
+         **/
         template <typename CharT>
         inline bool
         operator!=(const span<CharT> & lhs, const span<CharT> & rhs) {
@@ -184,6 +216,7 @@ namespace xo {
                     || (lhs.hi() != rhs.hi()));
         }
 
+        /** print a summary of @p x on stream @p os. Intended for diagnostics **/
         template <typename CharT>
         inline std::ostream &
         operator<<(std::ostream & os,
@@ -191,5 +224,33 @@ namespace xo {
             x.print(os);
             return os;
         }
+
+        ///@}
     } /*namespace scm*/
+
+    namespace print {
+        template <typename CharT>
+        class printspan_impl {
+        public:
+            printspan_impl(xo::scm::span<CharT> x) : span_{x} {}
+
+            xo::scm::span<CharT> span_;
+        };
+
+        template <typename CharT>
+        printspan_impl<CharT> printspan(const xo::scm::span<CharT>& span) {
+            return printspan_impl<CharT>(span);
+        }
+
+        template <typename CharT>
+        inline std::ostream &
+        operator<< (std::ostream & os,
+                    const printspan_impl<CharT> & x)
+        {
+            for (const CharT * p = x.span_.lo(); p < x.span_.hi(); ++p)
+                os << *p;
+
+            return os;
+        }
+    }
 } /*namespace xo*/

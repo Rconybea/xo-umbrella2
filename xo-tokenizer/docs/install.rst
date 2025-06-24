@@ -1,7 +1,22 @@
 .. _install:
 
-.. toctree
+.. toctree::
    :maxdepth: 2
+
+Source
+======
+
+Souce code lives on github `here`_
+
+.. _here: https://github.com/rconybea/xo-tokenizer
+
+To clone from git:
+
+.. code-block:: bash
+
+    git clone https://github.com/rconybea/xo-tokenizer
+
+Tested with gcc 13.3
 
 Install
 =======

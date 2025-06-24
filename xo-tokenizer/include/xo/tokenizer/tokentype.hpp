@@ -11,10 +11,11 @@
 namespace xo {
     namespace scm {
         /** @enum tokentype
-         *  @brief enum to identify different schematica input token types
+         *  Enum to identify different schematika input token types
          *
          *  Schematica code examples:
          *
+         *  @code
          *    type point :: { xcoord : f64, ycoord : f64 };
          *    type matrix :: array<double, 2>;  // 2-d array
          *
@@ -41,6 +42,7 @@ namespace xo {
          *    def matrixproduct(x : matrix, y : matrix) {
          *      [i, j : x.row(i) * y.col(j)];
          *    };
+         *  @endcode
          **/
         enum class tokentype {
             /** sentinel value **/
@@ -58,52 +60,52 @@ namespace xo {
             /** a symbol **/
             tk_symbol,
 
-            /** left-hand parenthesis '(' **/
+            /** left-hand parenthesis @c '(' **/
             tk_leftparen,
 
-            /** right-hand parenthesis ')' **/
+            /** right-hand parenthesis @c ')' **/
             tk_rightparen,
 
-            /** left-hand bracket '[' **/
+            /** left-hand bracket @c '[' **/
             tk_leftbracket,
 
-            /** right-hand bracket ']' **/
+            /** right-hand bracket @c ']' **/
             tk_rightbracket,
 
-            /** left-hand brace '{' **/
+            /** left-hand brace @c '{' **/
             tk_leftbrace,
 
-            /** right-hand brace '}' **/
+            /** right-hand brace @c '}' **/
             tk_rightbrace,
 
-            /** left-hand angle bracket '<' **/
+            /** left-hand angle bracket @c '<' **/
             tk_leftangle,
 
-            /** right-hand angle bracket '>' **/
+            /** right-hand angle bracket @c '>' **/
             tk_rightangle,
 
-            /** dot '.' **/
+            /** dot @c '.' **/
             tk_dot,
 
-            /** comma ',' **/
+            /** comma @c ',' **/
             tk_comma,
 
-            /** colon ':' **/
+            /** colon @c ':' **/
             tk_colon,
 
-            /** double-colon '::' **/
+            /** double-colon @c '::' **/
             tk_doublecolon,
 
-            /** semi-colon ';' **/
+            /** semi-colon @c ';' **/
             tk_semicolon,
 
-            /** '=' **/
+            /** single equals sign @c '=' **/
             tk_singleassign,
 
-            /** ':=' **/
+            /** assignment @c ':=' **/
             tk_assign,
 
-            /** '->' **/
+            /** indirection @c '->' **/
             tk_yields,
 
             /** note: operators not treated as punctuation
@@ -111,47 +113,53 @@ namespace xo {
              *  as is 'maybe*2', 'maybe+1', 'path/to/foo'
              **/
 
-            /** operator '+' **/
+            /** operator @c '+' **/
             tk_plus,
-            /** operator '-' **/
+            /** operator @c '-' **/
             tk_minus,
-            /** operator '*' **/
+            /** operator @c '*' **/
             tk_star,
-            /** operator '/' **/
+            /** operator @c '/' **/
             tk_slash,
 
-            /** keyword 'type' **/
+            /** keyword @c 'type' **/
             tk_type,
 
-            /** keyword 'def' **/
+            /** keyword @c 'def' **/
             tk_def,
 
-            /** keyword 'lambda' **/
+            /** keyword @c 'lambda' **/
             tk_lambda,
 
-            /** keyword 'if' **/
+            /** keyword @c 'if' **/
             tk_if,
 
-            /** keyword 'let' **/
+            /** keyword @c 'let' **/
             tk_let,
 
-            /** keyword 'in' **/
+            /** keyword @c 'in' **/
             tk_in,
 
-            /** keyword 'end' **/
+            /** keyword @c 'end' **/
             tk_end,
 
-            n_tokentype /* comes last, counts #of entries */
+            /** counts number of entries **/
+            n_tokentype
         }; /*tokentype*/
 
+        /** String representation for enum value.
+         *  For example @c tokentype_descr(tokentype::tk_if) -> @c "if"
+         **/
         extern char const *
         tokentype_descr(tokentype tk_type);
 
+        /** Print enum value for @p tk_type on stream @p os **/
         inline std::ostream &
         operator<< (std::ostream & os, tokentype tk_type) {
             os << tokentype_descr(tk_type);
             return os;
         }
+
     } /*namespace scm*/
 } /*namespace xo*/
 

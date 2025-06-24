@@ -6,8 +6,8 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'xo documentation'
-copyright = '2025, Roland Conybeare'
+project = 'xo tokenizer documentation'
+copyright = '2024-2025, Roland Conybeare'
 author = 'Roland Conybeare'
 
 # -- General configuration ---------------------------------------------------
@@ -18,19 +18,12 @@ extensions = [ "breathe",
                "sphinx.ext.mathjax",     # inline math
                "sphinx.ext.autodoc",     # generate info from docstrings
                "sphinxcontrib.ditaa",    # diagrams-through-ascii-art
-               "sphinxcontrib.plantuml", # text -> uml diagrams
+               "sphinxcontrib.plantuml"  # text -> uml diagrams
               ]
 
 # note: breathe requires doxygen xml output -> must have GENERATE_XML = YES in Doxyfile.in
 #       match project name in Doxyfile.in
 breathe_default_project = "xodoxxml"
-
-# Not sure if we need breather here, since we're composing on top of
-# independent sphinx projects
-#
-# note: breathe requires doxygen xml output -> must have GENERATE_XML = YES in Doxyfile.in
-#       match project name in Doxyfile.in
-#breathe_default_project = "xodoxxml"
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
@@ -44,11 +37,3 @@ pygments_style = 'sphinx'
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 html_favicon = '_static/img/favicon.ico'
-
-# disable caching (at least helpful in development)
-
-html_meta = {
-    'http-equiv=Cache-Control': 'no-cache, no-store, must-revalidate',
-    'http-equiv=Pragma': 'no-cache',
-    'http-equiv=Expires': '0'
-}

@@ -13,9 +13,15 @@
 
 namespace xo {
     namespace scm {
-        /**
+        /** @class tokenizer
+         *  @brief Parse a Schematika character stream into lexical tokens
+         *
          *  Use:
+         *
          *  @code
+         *    // see xo-tokenizer/example/tokenrepl/tokenrepl.cpp
+         *    // for exact working code
+         *
          *    using tokenizer_type = tokenizer<char>;
          *    using span_type = tokenizer_type::span_type;
          *
@@ -24,20 +30,18 @@ namespace xo {
          *
          *    while (!input.empty()) {
          *        auto res = tkz.scan(input);
-         *        const auto & tk = res.first;
+         *        auto [tk, consumed, error] = res.first;
          *
          *        // do something with tk if tk.is_valid()
          *
-         *        input = input.after_prefix(res.second);
+         *        input = tkz.consume(res.second, input);
          *    }
          *
          *    if endofinput {
-         *        auto tk = tzk.notify_eof()
+         *        auto [tk, consumed, error] = tzk.notify_eof()
          *
-         *        // do something with tk if tk.is_valid()
+         *        // do something with (final) tk if tk.is_valid()
          *    }
-         *
-         *    // expect !tkz.has_prefix()
          *
          *  @endcode
          *
@@ -47,6 +51,7 @@ namespace xo {
         class tokenizer {
         public:
             using token_type = token<CharT>;
+            using error_type = tokenizer_error<CharT>;
             using span_type = span<const CharT>;
             using result_type = scan_result<CharT>;
 
@@ -122,11 +127,22 @@ namespace xo {
              **/
             result_type scan2(const span_type & input, bool eof);
 
+            /** @retval span with @p consumed permanently removed from @p input.
+             *
+             *  Purpose of this method is to update @ref current_pos_.
+             **/
+            span_type consume(const span_type & consumed, const span_type & input);
+
+            /** discard current line after error.  Just cleans up error-reporting state **/
+            void discard_current_line();
+
             /** notify end of input,  resolving any ambiguous input stashed in .prefix
              **/
             result_type notify_eof(const span_type & input);
 
         private:
+            void capture_current_line(const span_type & input);
+
             result_type scan_completion(const span_type & whitespace,
                                         const CharT* token_end,
                                         const span_type & input);
@@ -134,8 +150,10 @@ namespace xo {
         private:
             /** true to log tokenizer activity to stdout **/
             bool debug_flag_ = false;
-            /** remember start of current line here **/
+            /** remember current input line.  Used only to report errors **/
             span_type current_line_ = span_type::make_null();
+            /** current input position within @ref current_line_ **/
+            size_t current_pos_ = 0;
             /** Accumulate partial token here.
              *  This will happen if input sent to @ref tokenizer::scan
              *  ends without a determinate token boundary.
@@ -348,29 +366,35 @@ namespace xo {
                             } else if (exponent_flag && !exponent_digit_flag) {
                                 exponent_sign_flag = true;
                             } else {
-                                throw std::runtime_error
-                                    (tostr("tokenizer::assemble_token",
-                                           ": improperly placed sign indicator",
-                                           xtag("pos", ix - tk_start),
-                                           xtag("char", *ix)));
+                                return result_type::make_error
+                                    (error_type(__FUNCTION__ /*src_function*/,
+                                                "improperly placed sign indicator",
+                                                current_line_,
+                                                current_pos_,
+                                                initial_whitespace,
+                                                (ix - tk_start)));
                             }
                         } else if (*ix == '.') {
                             if (period_flag) {
-                                throw (std::runtime_error
-                                       (tostr("tokenizer::assemble_token",
-                                              ": duplicate decimal point",
-                                              xtag("pos", ix - tk_start),
-                                              xtag("char", *ix))));
+                                return result_type::make_error
+                                    (error_type(__FUNCTION__ /*src_function*/,
+                                                "duplicate decimal point in numeric literal",
+                                                current_line_,
+                                                current_pos_,
+                                                initial_whitespace,
+                                                (ix - tk_start)));
                             }
 
                             period_flag = true;
                         } else if ((*ix == 'e') || (*ix == 'E')) {
                             if (exponent_flag) {
-                                throw (std::runtime_error
-                                       (tostr("tokenizer::assemble_token",
-                                              ": duplicate exponent marker",
-                                              xtag("pos", ix - tk_start),
-                                              xtag("char", *ix))));
+                                return result_type::make_error
+                                    (error_type(__FUNCTION__ /*src_function*/,
+                                                "duplicate exponent marker in numeric literal",
+                                                current_line_,
+                                                current_pos_,
+                                                initial_whitespace,
+                                                (ix - tk_start)));
                             }
 
                             exponent_flag = true;
@@ -382,12 +406,13 @@ namespace xo {
                                 number_flag = true;
                             }
                         } else {
-                            /* invalid input */
-                            throw (std::runtime_error
-                                   (tostr("tokenizer::assemble_token",
-                                          ": unexpected character in numeric constant",
-                                          xtag("pos", ix - tk_start),
-                                          xtag("char", *ix))));
+                            return result_type::make_error
+                                (error_type(__FUNCTION__ /*src_function*/,
+                                            "unexpected character in numeric constant" /*error_description*/,
+                                            current_line_,
+                                            current_pos_,
+                                            initial_whitespace,
+                                            (ix - tk_start)));
                         }
                     }
 
@@ -443,10 +468,11 @@ namespace xo {
 
                 ++ix; /*skip initial " char*/
 
+                /* true on final " */
+                bool endofstring = false;
+
                 for (; ix != token_text.hi(); ++ix) {
                     log && log(xtag("*ix", *ix));
-
-                    bool endofstring = false;
 
                     switch(*ix) {
                     case '"':
@@ -461,11 +487,13 @@ namespace xo {
                         ++ix;
 
                         if (ix == token_text.hi()) {
-                            throw std::runtime_error
-                                (tostr("tokenizer::assemble_token",
-                                       ": malformed string literal",
-                                       xtag("input", std::string_view(token_text.lo(),
-                                                                      token_text.hi()))));
+                            return result_type::make_error
+                                (error_type(__FUNCTION__ /*src_function*/,
+                                            "expecting key following escape character \\",
+                                            current_line_,
+                                            current_pos_,
+                                            initial_whitespace,
+                                            (ix - tk_start)));
                         }
 
                         switch(*ix) {
@@ -490,10 +518,13 @@ namespace xo {
                             tk_text.push_back('"');
                             break;
                         default:
-                            throw std::runtime_error
-                                (tostr("tokenizer::assemble_token",
-                                       ": unexpected \\-escaped char",
-                                       xtag("char", *ix)));
+                            return result_type::make_error
+                                (error_type(__FUNCTION__ /*src_function*/,
+                                            "expecting one of n|r|\"|\\ following escape \\",
+                                            current_line_,
+                                            current_pos_,
+                                            initial_whitespace,
+                                            (ix - tk_start)));
                         }
                         break;
                     default:
@@ -505,12 +536,14 @@ namespace xo {
                         break;
                 }
 
-                if (ix != token_text.hi()) {
-                    throw std::runtime_error
-                        (tostr("tokenizer::assemble_token",
-                               ": expected \" to end string literal",
-                               xtag("input", std::string_view(token_text.lo(),
-                                                              token_text.hi()))));
+                if (!endofstring) {
+                    return result_type::make_error
+                        (error_type(__FUNCTION__ /*src_function*/,
+                                    "missing terminating '\"' to complete literal string",
+                                    current_line_,
+                                    current_pos_,
+                                    initial_whitespace,
+                                    (ix - tk_start)));
                 }
 
                 log && log(tostr("tokenizer::assemble_token",
@@ -632,9 +665,13 @@ namespace xo {
             }
 
             if (tk_type == tokentype::tk_invalid) {
-                throw std::runtime_error(tostr("tokenizer::assemble_token",
-                                               ": unexpected input x",
-                                               xtag("x", *ix)));
+                return result_type::make_error
+                    (error_type(__FUNCTION__ /*src_function*/,
+                                "illegal input character",
+                                current_line_,
+                                current_pos_,
+                                initial_whitespace,
+                                (ix - tk_start)));
             }
 
             if ((tk_type == tokentype::tk_i64)
@@ -720,6 +757,27 @@ namespace xo {
         }
 
         template <typename CharT>
+        void
+        tokenizer<CharT>::capture_current_line(const span_type & input)
+        {
+            // see discard_current_line()
+
+            scope log(XO_DEBUG(debug_flag_));
+
+            /* look ahead to {end of line, end of input}, whichever comes first */
+            const CharT * sol = input.lo();
+            const CharT * eol = sol;
+
+            while ((eol < input.hi()) && (*eol != '\n'))
+                ++eol;
+
+            this->current_line_ = span_type(sol, eol);
+            this->current_pos_ = 0;
+
+            log && log(xtag("current_line", print::printspan(current_line_)));
+        }
+
+        template <typename CharT>
         auto
         tokenizer<CharT>::scan(const span_type & input) -> result_type
         {
@@ -729,21 +787,22 @@ namespace xo {
 
             const CharT * ix = input.lo();
 
+            if (this->current_line_.is_null()) {
+                this->capture_current_line(input);
+            }
+
             /* skip whitespace + remember beginning of most recent line */
             while (is_whitespace(*ix) && (ix != input.hi())) {
-
                 if (is_newline(*ix)) {
                     ++ix;
-                    /* look ahead to {end of line, end of input}, whichever comes first */
-                    const CharT * sol = ix;
-                    const CharT * eol = ix;
 
-                    while ((eol < input.hi()) && (*eol != '\n'))
-                        ++eol;
-
-                    this->current_line_ = span_type(sol, eol);
+                    this->capture_current_line(span_type(ix, input.hi()));
                 } else {
                     ++ix;
+
+#ifdef OBSOLETE
+                    ++(this->current_pos_);
+#endif
                 }
             }
 
@@ -818,10 +877,12 @@ namespace xo {
                             break;
                         }
                     } else if ((*ix == '\n') || (*ix == '\r')) {
-                        throw std::runtime_error
-                            (tostr("tokenizer::scan",
-                                   ": must use \\n or \\r to encode newline/cr in"
-                                   " string literal"));
+                        return result_type::make_error
+                            (error_type(__FUNCTION__ /*src_function*/,
+                                        "must use \\n or \\r to encode newline/cr in string literal",
+                                        current_line_, current_pos_,
+                                        whitespace.size(),
+                                        (ix - tk_start)));
                     }
 
                     prev_ch = *ix;
@@ -943,6 +1004,25 @@ namespace xo {
             return result_type(sr2.get_token(),
                                span_type::concat(sr.consumed(), sr2.consumed()),
                                sr2.error());
+        }
+
+        template <typename CharT>
+        auto
+        tokenizer<CharT>::consume(const span_type & consumed, const span_type & input) -> span_type
+        {
+            this->current_pos_ += consumed.size();
+
+            return input.after_prefix(consumed);
+        }
+
+        template <typename CharT>
+        void
+        tokenizer<CharT>::discard_current_line()
+        {
+            // see capture_current_line()
+
+            this->current_line_ = span_type::make_null();
+            this->current_pos_ = 0;
         }
 
         template <typename CharT>
