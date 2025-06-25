@@ -30,14 +30,28 @@ namespace xo {
             /** @defgroup span-ctors span constructors **/
             ///@{
 
+            /** null span **/
+            span() : lo_{nullptr}, hi_{nullptr} {}
+
             /** Create span for the contiguous memory range [@p lo, @p hi) **/
             span(CharT * lo, CharT * hi) : lo_{lo}, hi_{hi} {}
+
+            /** explicit conversion from span<U> **/
+            template<typename CharU>
+            span(const span<CharU> & other,
+                 std::enable_if_t<std::is_convertible_v<CharU*, CharT*>
+                 && !std::is_same_v<CharU, CharT>> * = nullptr)
+                : lo_{other.lo()}, hi_{other.hi()} {}
+
+            /** copy ctor (explicit to avoid ambiguity with template ctor) **/
+            span(const span & other) = default;
+            span & operator=(const span & other) = default;
 
             /** Create a null span (i.e. with null @p lo, @p hi pointers)
              *  A null span can be concatenated with any other span
              *  without triggering matching-endpoint asserts.
              **/
-            static span make_null() { return span(nullptr, nullptr); }
+            static span make_null() { return span(static_cast<CharT*>(nullptr), static_cast<CharT*>(nullptr)); }
 
             /** @brief create span for C-style string @p cstr **/
             static span from_cstr(const CharT * cstr) {

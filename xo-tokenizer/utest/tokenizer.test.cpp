@@ -442,6 +442,7 @@ namespace xo {
 
         namespace {
             using tkz_error_type = xo::scm::tokenizer_error<char>;
+            using input_state_type = xo::scm::input_state<char>;
             using span_type = xo::scm::span<const char>;
 
             struct testcase_error {
@@ -456,8 +457,9 @@ namespace xo {
                 testcase_error retval;
                 retval.input_ = input;
                 retval.expect_error_ = tkz_error_type(src_function, error_descr,
-                                                      span_type::from_string(retval.input_),
-                                                      tk_start, whitespace, error_pos);
+                                                      input_state_type(span_type::from_string(retval.input_),
+                                                                       tk_start, whitespace),
+                                                      error_pos);
                 return retval;
             }
 
@@ -481,7 +483,7 @@ namespace xo {
                               "assemble_token",
                               "duplicate decimal point in numeric literal",
                               0, 0, 2),
-                //             0123456
+                //           o  0123456
                 //             ------v
                 make_testcase("1.23e4e",
                               "assemble_token",

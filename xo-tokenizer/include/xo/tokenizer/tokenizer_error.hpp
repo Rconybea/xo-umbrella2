@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "input_state.hpp"
 #include "tokentype.hpp"
 #include "span.hpp"
 #include <iomanip>
@@ -19,6 +20,7 @@ namespace xo {
         template <typename CharT>
         class tokenizer_error {
         public:
+            using input_state_type = input_state<CharT>;
             using span_type = span<const CharT>;
 
         public:
@@ -29,20 +31,20 @@ namespace xo {
             tokenizer_error() = default;
             /** Constructor to capture parsing error context
              *  @p tk_start   current position on entry to scanner
-             *  @p whitespace number of chars initial whitespace
              *  @p error_pos  error location relative to token start
              **/
             tokenizer_error(const char * src_function,
                             const char * error_description,
-                            span_type input_line,
-                            size_t tk_start,
-                            size_t whitespace,
+                            const input_state_type & input_state,
+                            //span_type input_line,
+                            //size_t tk_start,
+                            //size_t whitespace,
                             size_t error_pos)
                 : src_function_{src_function},
                   error_description_{error_description},
-                  input_line_{input_line},
-                  tk_entry_{tk_start},
-                  whitespace_{whitespace},
+                  input_state_{input_state},
+                  //tk_entry_{tk_start},
+                  //whitespace_{whitespace},
                   error_pos_{error_pos} {}
             ///@}
 
@@ -51,9 +53,13 @@ namespace xo {
 
             const char * src_function() const { return src_function_; }
             const char * error_description() const { return error_description_; }
-            const span_type& input_line() const { return input_line_; }
-            size_t tk_start() const { return tk_entry_; }
-            size_t whitespace() const { return whitespace_; }
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wchanges-meaning"
+            const input_state_type & input_state() const { return input_state_; }
+#pragma GCC diagnostic pop
+            //const span_type& input_line() const { return input_line_; }
+            size_t tk_start() const { return input_state_.current_pos(); }
+            size_t whitespace() const { return input_state_.whitespace(); }
             size_t error_pos() const { return error_pos_; }
 
             ///@}
@@ -84,14 +90,12 @@ namespace xo {
             char const * src_function_ = nullptr;
             /** static error description **/
             char const * error_description_ = nullptr;
-            /** complete current input line (to the extent captured)
-             *  that contains error
+            /** input state associated with this error.
+             *  Sufficient to precisely locate it with context.
              **/
-            span_type input_line_ = span_type::make_null();
+            input_state_type input_state_;
             /** position (relative to line_.lo) of token start where error encountered **/
             size_t tk_entry_ = 0;
-            /** number of characters of initial whitespace skipped before token start **/
-            size_t whitespace_ = 0;
             /** position (relative to @ref tk_entry_) of error **/
             size_t error_pos_ = 0;
 
@@ -104,8 +108,8 @@ namespace xo {
             os << "<tokenizer-error"
                << xtag("src-function", src_function_)
                << xtag("message", error_description_)
-               << xtag("input", input_line_)
-               << xtag("whitespace", whitespace_)
+               << xtag("input", input_state_.current_line())
+               << xtag("whitespace", input_state_.whitespace())
                << xtag("tk-start", tk_entry_)
                << xtag("error-pos", error_pos_)
                << ">";
@@ -118,15 +122,18 @@ namespace xo {
 
             if (error_description_) {
                 const char * prefix = "input: ";
-                const size_t tk_indent = strlen(prefix) + tk_entry_ + whitespace_;
+                const size_t tk_indent = strlen(prefix) + tk_entry_ + input_state_.whitespace();
                 //const size_t msg_length = strlen(error_description_);
 
-                const size_t error_pos = 1 + tk_entry_ + whitespace_ + error_pos_;
+                const size_t error_pos = 1 + tk_entry_ + input_state_.whitespace() + error_pos_;
 
                 os << "char: " << error_pos << endl;
                 os << prefix;
-                for (const char *p = input_line_.lo(), *e = input_line_.hi(); p < e; ++p)
+                for (const char *p = input_state_.current_line().lo(),
+                         *e = input_state_.current_line().hi(); p < e; ++p)
+                {
                     os << *p;
+                }
                 os << endl;
                 os << std::setw(tk_indent) << " ";
 

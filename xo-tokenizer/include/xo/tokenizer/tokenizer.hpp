@@ -6,6 +6,7 @@
 #pragma once
 
 #include "token.hpp"
+#include "input_state.hpp"
 #include "span.hpp"
 #include "scan_result.hpp"
 #include "xo/indentlog/scope.hpp"
@@ -53,6 +54,7 @@ namespace xo {
             using token_type = token<CharT>;
             using error_type = tokenizer_error<CharT>;
             using span_type = span<const CharT>;
+            using input_state_type = input_state<CharT>;
             using result_type = scan_result<CharT>;
 
         public:
@@ -150,10 +152,8 @@ namespace xo {
         private:
             /** true to log tokenizer activity to stdout **/
             bool debug_flag_ = false;
-            /** remember current input line.  Used only to report errors **/
-            span_type current_line_ = span_type::make_null();
-            /** current input position within @ref current_line_ **/
-            size_t current_pos_ = 0;
+            /** track input state (line#,pos,..) for error messages **/
+            input_state_type input_state_;
             /** Accumulate partial token here.
              *  This will happen if input sent to @ref tokenizer::scan
              *  ends without a determinate token boundary.
@@ -369,9 +369,10 @@ namespace xo {
                                 return result_type::make_error
                                     (error_type(__FUNCTION__ /*src_function*/,
                                                 "improperly placed sign indicator",
-                                                current_line_,
-                                                current_pos_,
-                                                initial_whitespace,
+                                                input_state_,
+                                                //current_line_,
+                                                //current_pos_,
+                                                //initial_whitespace,
                                                 (ix - tk_start)));
                             }
                         } else if (*ix == '.') {
@@ -379,9 +380,10 @@ namespace xo {
                                 return result_type::make_error
                                     (error_type(__FUNCTION__ /*src_function*/,
                                                 "duplicate decimal point in numeric literal",
-                                                current_line_,
-                                                current_pos_,
-                                                initial_whitespace,
+                                                input_state_,
+                                                //current_line_,
+                                                //current_pos_,
+                                                //initial_whitespace,
                                                 (ix - tk_start)));
                             }
 
@@ -391,9 +393,10 @@ namespace xo {
                                 return result_type::make_error
                                     (error_type(__FUNCTION__ /*src_function*/,
                                                 "duplicate exponent marker in numeric literal",
-                                                current_line_,
-                                                current_pos_,
-                                                initial_whitespace,
+                                                input_state_,
+                                                //current_line_,
+                                                //current_pos_,
+                                                //initial_whitespace,
                                                 (ix - tk_start)));
                             }
 
@@ -409,9 +412,10 @@ namespace xo {
                             return result_type::make_error
                                 (error_type(__FUNCTION__ /*src_function*/,
                                             "unexpected character in numeric constant" /*error_description*/,
-                                            current_line_,
-                                            current_pos_,
-                                            initial_whitespace,
+                                            input_state_,
+                                            //current_line_,
+                                            //current_pos_,
+                                            //initial_whitespace,
                                             (ix - tk_start)));
                         }
                     }
@@ -490,9 +494,10 @@ namespace xo {
                             return result_type::make_error
                                 (error_type(__FUNCTION__ /*src_function*/,
                                             "expecting key following escape character \\",
-                                            current_line_,
-                                            current_pos_,
-                                            initial_whitespace,
+                                            input_state_,
+                                            //current_line_,
+                                            //current_pos_,
+                                            //initial_whitespace,
                                             (ix - tk_start)));
                         }
 
@@ -521,9 +526,10 @@ namespace xo {
                             return result_type::make_error
                                 (error_type(__FUNCTION__ /*src_function*/,
                                             "expecting one of n|r|\"|\\ following escape \\",
-                                            current_line_,
-                                            current_pos_,
-                                            initial_whitespace,
+                                            input_state_,
+                                            //current_line_,
+                                            //current_pos_,
+                                            //initial_whitespace,
                                             (ix - tk_start)));
                         }
                         break;
@@ -540,9 +546,10 @@ namespace xo {
                     return result_type::make_error
                         (error_type(__FUNCTION__ /*src_function*/,
                                     "missing terminating '\"' to complete literal string",
-                                    current_line_,
-                                    current_pos_,
-                                    initial_whitespace,
+                                    input_state_,
+                                    //current_line_,
+                                    //current_pos_,
+                                    //initial_whitespace,
                                     (ix - tk_start)));
                 }
 
@@ -668,9 +675,10 @@ namespace xo {
                 return result_type::make_error
                     (error_type(__FUNCTION__ /*src_function*/,
                                 "illegal input character",
-                                current_line_,
-                                current_pos_,
-                                initial_whitespace,
+                                input_state_,
+                                //current_line_,
+                                //current_pos_,
+                                //initial_whitespace,
                                 (ix - tk_start)));
             }
 
@@ -760,21 +768,7 @@ namespace xo {
         void
         tokenizer<CharT>::capture_current_line(const span_type & input)
         {
-            // see discard_current_line()
-
-            scope log(XO_DEBUG(debug_flag_));
-
-            /* look ahead to {end of line, end of input}, whichever comes first */
-            const CharT * sol = input.lo();
-            const CharT * eol = sol;
-
-            while ((eol < input.hi()) && (*eol != '\n'))
-                ++eol;
-
-            this->current_line_ = span_type(sol, eol);
-            this->current_pos_ = 0;
-
-            log && log(xtag("current_line", print::printspan(current_line_)));
+            this->input_state_.capture_current_line(input);
         }
 
         template <typename CharT>
@@ -787,9 +781,11 @@ namespace xo {
 
             const CharT * ix = input.lo();
 
-            if (this->current_line_.is_null()) {
+            if (this->input_state_.current_line().is_null()) {
                 this->capture_current_line(input);
             }
+
+            this->input_state_.reset_whitespace();
 
             /* skip whitespace + remember beginning of most recent line */
             while (is_whitespace(*ix) && (ix != input.hi())) {
@@ -797,12 +793,11 @@ namespace xo {
                     ++ix;
 
                     this->capture_current_line(span_type(ix, input.hi()));
+                    this->input_state_.reset_whitespace();
                 } else {
                     ++ix;
 
-#ifdef OBSOLETE
-                    ++(this->current_pos_);
-#endif
+                    this->input_state_.increment_whitespace();
                 }
             }
 
@@ -818,9 +813,9 @@ namespace xo {
 
             /* here: *ix is not whitespace */
 
-            auto whitespace = input.prefix_upto(ix);
+            auto whitespace_span = input.prefix_upto(ix);
 
-            log && log(xtag("whitespace.size", whitespace.size()));
+            log && log(xtag("whitespace.size", input_state_.whitespace()));
 
             /* tk_start points to known beginning of token
              * (after any whitespace)
@@ -880,8 +875,10 @@ namespace xo {
                         return result_type::make_error
                             (error_type(__FUNCTION__ /*src_function*/,
                                         "must use \\n or \\r to encode newline/cr in string literal",
-                                        current_line_, current_pos_,
-                                        whitespace.size(),
+                                        input_state_,
+                                        //current_line_,
+                                        //current_pos_,
+                                        //whitespace.size(),
                                         (ix - tk_start)));
                     }
 
@@ -910,7 +907,7 @@ namespace xo {
                             /* include next char and complete token */
                             ++ix;
 
-                            return scan_completion(whitespace, ix /*token_end*/, input);
+                            return scan_completion(whitespace_span, ix /*token_end*/, input);
                         }
 
                         /* here: -123, -.5e-21 for example */
@@ -928,7 +925,7 @@ namespace xo {
 
                         if (ch2 != '=') {
                             /* ignore next char and complete token */
-                            return scan_completion(whitespace, ix /*token_end*/, input);
+                            return scan_completion(whitespace_span, ix /*token_end*/, input);
                         }
 
                         /* here: >= for example */
@@ -978,7 +975,7 @@ namespace xo {
                 }
             }
 
-            return scan_completion(whitespace, ix /*token_end*/, input);
+            return scan_completion(whitespace_span, ix /*token_end*/, input);
         } /*scan*/
 
         template <typename CharT>
@@ -1010,7 +1007,7 @@ namespace xo {
         auto
         tokenizer<CharT>::consume(const span_type & consumed, const span_type & input) -> span_type
         {
-            this->current_pos_ += consumed.size();
+            this->input_state_.consume(consumed.size());
 
             return input.after_prefix(consumed);
         }
@@ -1021,8 +1018,7 @@ namespace xo {
         {
             // see capture_current_line()
 
-            this->current_line_ = span_type::make_null();
-            this->current_pos_ = 0;
+            this->input_state_.discard_current_line();
         }
 
         template <typename CharT>
