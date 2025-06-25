@@ -20,8 +20,23 @@ namespace xo {
 
         public:
             input_state() = default;
-            explicit input_state(const span<const CharT>& x, size_t cpos, size_t ws)
-                : current_line_{x}, current_pos_{cpos}, whitespace_{ws} {}
+            explicit input_state(bool debug_flag) : debug_flag_{debug_flag} {}
+            /** Create instance with supplied @p current_line, @p current_pos, @p whitespace.
+             *  Introduced for unit tests, not used in tokenizer.
+             **/
+            explicit input_state(const span<const CharT>& current_line, size_t current_pos, size_t whitespace)
+                : current_line_{current_line}, current_pos_{current_pos}, whitespace_{whitespace} {}
+
+            /** recognize the newline character '\n' **/
+            static bool is_newline(CharT ch);
+            /** identifies whitespace chars.
+             *  These are chars that do not belong to any token.
+             *  They are not permitted to appear within
+             *  a symbol or string token.
+             *  Appearance of a whitespace char forces completioon of
+             *  preceding token.
+             **/
+            static bool is_whitespace(CharT ch);
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wchanges-meaning"
@@ -29,14 +44,20 @@ namespace xo {
 #pragma GCC diagnostic pop
             size_t current_pos() const { return current_pos_; }
             size_t whitespace() const { return whitespace_; }
+            bool debug_flag() const { return debug_flag_; }
 
+            /** capture prefix of @p input up to first newline **/
             void capture_current_line(const span_type & input);
+
+            /** reset input state for start of next line **/
             void discard_current_line();
 
             void consume(size_t z) { current_pos_ += z; }
 
-            void reset_whitespace() { whitespace_ = 0; }
-            void increment_whitespace() { ++whitespace_; }
+            const CharT * skip_leading_whitespace(const span_type & input);
+
+        private:
+            //void reset_whitespace() { whitespace_ = 0; }
 
         private:
             /** remember current input line.  Used only to report errors **/
@@ -48,14 +69,35 @@ namespace xo {
              **/
             size_t whitespace_ = 0;
 
+            /** true to log input activity */
             bool debug_flag_ = false;
         };
+
+        template <typename CharT>
+        bool
+        input_state<CharT>::is_newline(CharT ch) {
+            return (ch == '\n');
+        }
+
+        template <typename CharT>
+        bool
+        input_state<CharT>::is_whitespace(CharT ch) {
+            switch(ch) {
+            case ' ': return true;
+            case '\t': return true;
+            case '\n': return true;
+            case '\r': return true;
+            }
+
+            return false;
+        }
 
         template <typename CharT>
         void
         input_state<CharT>::discard_current_line() {
             this->current_line_ = span_type::make_null();
             this->current_pos_ = 0;
+            this->whitespace_ = 0;
         }
 
         template <typename CharT>
@@ -74,9 +116,36 @@ namespace xo {
                 ++eol;
 
             this->current_line_ = span_type(sol, eol);
-//            this->current_pos_ = 0;
 
             log && log(xtag("current_line", print::printspan(current_line_)));
+        }
+
+        template <typename CharT>
+        const CharT *
+        input_state<CharT>::skip_leading_whitespace(const span_type & input)
+        {
+            const CharT * ix = input.lo();
+
+            if (this->current_line().is_null()) {
+                this->capture_current_line(input);
+            }
+
+            this->whitespace_ = 0;
+
+            /* skip whitespace + remember beginning of most recent line */
+            while (is_whitespace(*ix) && (ix != input.hi())) {
+                if (is_newline(*ix)) {
+                    ++ix;
+
+                    this->capture_current_line(span_type(ix, input.hi()));
+                } else {
+                    ++ix;
+
+                    ++(this->whitespace_);
+                }
+            }
+
+            return ix;
         }
     }
 }

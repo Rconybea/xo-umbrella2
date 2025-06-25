@@ -51,6 +51,8 @@ main() {
             //input = input.after_prefix(consumed.size());
         }
 
+        /* here: input.empty() or error encountered */
+
         /* discard stashed remainder of input line
          * (for nicely-formatted errors)
          */

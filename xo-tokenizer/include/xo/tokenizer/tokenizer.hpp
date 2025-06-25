@@ -60,18 +60,6 @@ namespace xo {
         public:
             tokenizer(bool debug_flag = false);
 
-            /** recognize the newline character '\n' **/
-            bool is_newline(CharT ch) const;
-
-            /** identifies whitespace chars.
-             *  These are chars that do not belong to any token.
-             *  They are not permitted to appear within
-             *  a symbol or string token.
-             *  Appearance of a whitespace char forces completioon of
-             *  preceding token.
-             **/
-            bool is_whitespace(CharT ch) const;
-
             /** identifies punctuation chars.
              *  These are chars that are not permitted to appear within
              *  a symbol token.  Instead they force completion of
@@ -143,15 +131,11 @@ namespace xo {
             result_type notify_eof(const span_type & input);
 
         private:
-            void capture_current_line(const span_type & input);
-
             result_type scan_completion(const span_type & whitespace,
                                         const CharT* token_end,
                                         const span_type & input);
 
         private:
-            /** true to log tokenizer activity to stdout **/
-            bool debug_flag_ = false;
             /** track input state (line#,pos,..) for error messages **/
             input_state_type input_state_;
             /** Accumulate partial token here.
@@ -163,27 +147,8 @@ namespace xo {
 
         template <typename CharT>
         tokenizer<CharT>::tokenizer(bool debug_flag)
-            : debug_flag_{debug_flag}
+            : input_state_{debug_flag}
         {}
-
-        template <typename CharT>
-        bool
-        tokenizer<CharT>::is_newline(CharT ch) const {
-            return (ch == '\n');
-        }
-
-        template <typename CharT>
-        bool
-        tokenizer<CharT>::is_whitespace(CharT ch) const {
-            switch(ch) {
-            case ' ': return true;
-            case '\t': return true;
-            case '\n': return true;
-            case '\r': return true;
-            }
-
-            return false;
-        }
 
         template <typename CharT>
         bool
@@ -266,7 +231,7 @@ namespace xo {
             /* literal|pretty|streamlined */
             log_config::style = function_style::streamlined;
 
-            scope log(XO_DEBUG(debug_flag_));
+            scope log(XO_DEBUG(input_state_.debug_flag()));
             log && log(xtag("token_text", token_text),
                        xtag("initial_whitespace", initial_whitespace),
                        xtag("initial_token_prefix_from_input", initial_token_prefix_from_input),
@@ -764,42 +729,24 @@ namespace xo {
 
         }
 
+#ifdef NOT_USING
         template <typename CharT>
         void
         tokenizer<CharT>::capture_current_line(const span_type & input)
         {
             this->input_state_.capture_current_line(input);
         }
+#endif
 
         template <typename CharT>
         auto
         tokenizer<CharT>::scan(const span_type & input) -> result_type
         {
-            scope log(XO_DEBUG(debug_flag_));
+            scope log(XO_DEBUG(input_state_.debug_flag()));
 
             log && log(xtag("input", input));
 
-            const CharT * ix = input.lo();
-
-            if (this->input_state_.current_line().is_null()) {
-                this->capture_current_line(input);
-            }
-
-            this->input_state_.reset_whitespace();
-
-            /* skip whitespace + remember beginning of most recent line */
-            while (is_whitespace(*ix) && (ix != input.hi())) {
-                if (is_newline(*ix)) {
-                    ++ix;
-
-                    this->capture_current_line(span_type(ix, input.hi()));
-                    this->input_state_.reset_whitespace();
-                } else {
-                    ++ix;
-
-                    this->input_state_.increment_whitespace();
-                }
-            }
+            const CharT * ix = this->input_state_.skip_leading_whitespace(input);
 
             if(ix == input.hi()) {
                 /* no-op */
@@ -937,7 +884,7 @@ namespace xo {
                  * - punctuation
                  */
                 for (; ix != input.hi(); ++ix) {
-                    if (is_whitespace(*ix)
+                    if (input_state_type::is_whitespace(*ix)
                         || is_1char_punctuation(*ix)
                         || is_2char_punctuation(*ix))
                     {
@@ -981,7 +928,7 @@ namespace xo {
         template <typename CharT>
         auto
         tokenizer<CharT>::scan2(const span_type & input, bool eof) -> result_type {
-            scope log(XO_DEBUG(debug_flag_));
+            scope log(XO_DEBUG(input_state_.debug_flag()));
 
             auto sr = this->scan(input);
 
@@ -1016,15 +963,13 @@ namespace xo {
         void
         tokenizer<CharT>::discard_current_line()
         {
-            // see capture_current_line()
-
             this->input_state_.discard_current_line();
         }
 
         template <typename CharT>
         auto
         tokenizer<CharT>::notify_eof(const span_type & input) -> result_type {
-            scope log(XO_DEBUG(debug_flag_));
+            scope log(XO_DEBUG(input_state_.debug_flag()));
 
             log && log(xtag("prefix_", prefix_), xtag("prefix_.size", prefix_.size()), xtag("input", input));
 
