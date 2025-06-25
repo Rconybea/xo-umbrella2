@@ -49,15 +49,15 @@ namespace xo {
             /** capture prefix of @p input up to first newline **/
             void capture_current_line(const span_type & input);
 
-            /** reset input state for start of next line **/
+            /** Reset input state for start of next line.
+             *  Expression parser may use this to discard remainder of input line
+             *  after a parsing error.
+             **/
             void discard_current_line();
 
             void consume(size_t z) { current_pos_ += z; }
 
             const CharT * skip_leading_whitespace(const span_type & input);
-
-        private:
-            //void reset_whitespace() { whitespace_ = 0; }
 
         private:
             /** remember current input line.  Used only to report errors **/
