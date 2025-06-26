@@ -48,7 +48,6 @@ main() {
             }
 
             input = tkz.consume(consumed, input);
-            //input = input.after_prefix(consumed.size());
         }
 
         /* here: input.empty() or error encountered */

@@ -38,7 +38,7 @@ namespace xo {
 
             ///@}
 
-            /** @defgroup input-state static methods **/
+            /** @defgroup input-state-static-methods input_state static methods **/
             ///@{
 
             /** recognize the newline character '\n' **/
@@ -80,7 +80,7 @@ namespace xo {
             void discard_current_line();
 
             /** Add @p z to current position **/
-            void consume(size_t z) { current_pos_ += z; }
+            void consume(size_t z);
 
             /** Skip prefix of input comprising whitespace.
              *  Return pointer to first non-whitespace character in @p input,
@@ -91,7 +91,7 @@ namespace xo {
             ///@}
 
         private:
-            /** @defgroup input-state-instance-vars **/
+            /** @defgroup input-state-instance-vars input_state instance variables **/
             ///@{
 
             /** remember current input line.  Used only to report errors **/
@@ -126,6 +126,16 @@ namespace xo {
             }
 
             return false;
+        }
+
+        template <typename CharT>
+        void
+        input_state<CharT>::consume(size_t z) {
+            scope log(XO_DEBUG(debug_flag_));
+
+            this->current_pos_ += z;
+
+            log && log(xtag("z", z), xtag("current_pos", current_pos_));
         }
 
         template <typename CharT>

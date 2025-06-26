@@ -45,14 +45,55 @@ See ``xo-tokenizer/examples/tokenrepl`` for (slighly elaborated) version of code
 
         if (tk.is_valid()) {
             cout << tk;
+        } else if (error.is_error()) {
+            cout << "parsing error: " << endl;
+            error.report(cout);
         }
     }
+
+Reminder: enable building examples with ``cmake -DXO_ENABLE_EXAMPLES=1 ..``
 
 .. code-block::
    :linenos:
 
-    $ .build/xo-tokenizer/utest/utest.tokenizer
+    $ .build/xo-tokenizer/example/tokenrepl/xo_tokenizer_repl
     > 123
     <token :type tk_i64 :text 123>
     > 123e5
     <token :type tk_f64 :text 123e5>
+    > def sq(x: i64) -> i64 { x * x }
+    <token :type tk_def :text "">
+    <token :type tk_symbol :text sq>
+    <token :type tk_leftparen :text "">
+    <token :type tk_symbol :text x>
+    <token :type tk_colon :text "">
+    <token :type tk_symbol :text i64>
+    <token :type tk_rightparen :text "">
+    <token :type tk_yields :text "">
+    <token :type tk_symbol :text i64>
+    <token :type tk_leftbrace :text "">
+    <token :type tk_symbol :text x>
+    <token :type tk_star :text "">
+    <token :type tk_symbol :text x>
+    <token :type tk_rightbrace :text "">
+
+Example of error reporting (via ``error.report(cout)`` above)
+
+.. code-block::
+   :linenos:
+
+    $ .build/xo-tokenizer/example/tokenrepl/xo_tokenizer_repl
+
+    > 123q
+    parsing error:
+    char: 4
+    input: 123q
+           ---^
+    unexpected character in numeric constant
+
+    > (8 * 8 * 123fd)
+    parsing error:
+    char: 13
+    input: (8 * 8 * 123fd)
+                    ---^
+    unexpected character in numeric constant

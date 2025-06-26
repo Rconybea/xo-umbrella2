@@ -57,6 +57,7 @@ endif()
 message("-- CMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}")
 message("-- CMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}")
 message("-- CMAKE_INSTALL_RPATH=${CMAKE_INSTALL_RPATH}")
+message("-- XO_ENABLE_EXAMPLES=${XO_ENABLE_EXAMPLES}")
 
 # ----------------------------------------------------------------
 #

@@ -63,5 +63,4 @@ namespace xo {
     } /*namespace scm*/
 } /*namespace xo*/
 
-
 /* end tokentype.cpp */

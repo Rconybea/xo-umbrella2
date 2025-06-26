@@ -35,9 +35,10 @@ Context
     allowmixing
 
     object tkz1<<tokenizer>>
-    tkz : input_state
+    tkz1 : input_state = ins1
 
     object ins1<<input_state>>
+    ins1 : current_line = (9 * 8)
 
     tkz1 o-- ins1
 
@@ -54,9 +55,14 @@ Class
 Instance Variables
 ------------------
 
-.. doxygenclass:: tokenizer-instance-vars
+.. doxygengroup:: tokenizer-instance-vars
 
 Constructors
 ------------
 
 .. doxygengroup:: tokenizer-ctors
+
+Methods
+-------
+
+.. doxygengroup:: tokenizer-general-methods

@@ -12,7 +12,7 @@ stdenv.mkDerivation (finalattrs:
 
     src = ../xo-tokenizer;
 
-    cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake"];
+    cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake" "-DXO_ENABLE_EXAMPLES"];
     doCheck = true;
     propagatedBuildInputs = [ ];
     nativeBuildInputs = [ cmake catch2

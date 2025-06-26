@@ -36,16 +36,17 @@ namespace xo {
             tokenizer_error(const char * src_function,
                             const char * error_description,
                             const input_state_type & input_state,
-                            //span_type input_line,
-                            //size_t tk_start,
-                            //size_t whitespace,
                             size_t error_pos)
                 : src_function_{src_function},
                   error_description_{error_description},
                   input_state_{input_state},
-                  //tk_entry_{tk_start},
-                  //whitespace_{whitespace},
-                  error_pos_{error_pos} {}
+                  error_pos_{error_pos}
+                {
+                    scope log(XO_DEBUG(input_state.debug_flag()));
+
+                    log && log(xtag("input_state.current_pos", input_state.current_pos()),
+                               xtag("error_pos", error_pos));
+                }
             ///@}
 
             /** @defgroup tokenizer-error-access-methods **/
@@ -57,7 +58,6 @@ namespace xo {
 #pragma GCC diagnostic ignored "-Wchanges-meaning"
             const input_state_type & input_state() const { return input_state_; }
 #pragma GCC diagnostic pop
-            //const span_type& input_line() const { return input_line_; }
             size_t tk_start() const { return input_state_.current_pos(); }
             size_t whitespace() const { return input_state_.whitespace(); }
             size_t error_pos() const { return error_pos_; }
@@ -94,8 +94,6 @@ namespace xo {
              *  Sufficient to precisely locate it with context.
              **/
             input_state_type input_state_;
-            /** position (relative to line_.lo) of token start where error encountered **/
-            size_t tk_entry_ = 0;
             /** position (relative to @ref tk_entry_) of error **/
             size_t error_pos_ = 0;
 
@@ -110,7 +108,6 @@ namespace xo {
                << xtag("message", error_description_)
                << xtag("input", input_state_.current_line())
                << xtag("whitespace", input_state_.whitespace())
-               << xtag("tk-start", tk_entry_)
                << xtag("error-pos", error_pos_)
                << ">";
         }
@@ -122,10 +119,13 @@ namespace xo {
 
             if (error_description_) {
                 const char * prefix = "input: ";
-                const size_t tk_indent = strlen(prefix) + tk_entry_ + input_state_.whitespace();
-                //const size_t msg_length = strlen(error_description_);
-
-                const size_t error_pos = 1 + tk_entry_ + input_state_.whitespace() + error_pos_;
+                /* input_state.current_pos: position of first character following preceding token.
+                 * input_state.whitespace:  whitespace between current_pos and start of failing token
+                 * error_pos:               position (relative to start) at which failure detected
+                 */
+                const size_t tk_start = input_state_.current_pos() + input_state_.whitespace();
+                const size_t tk_indent = (strlen(prefix) + tk_start);
+                const size_t error_pos = 1 + tk_start + error_pos_;
 
                 os << "char: " << error_pos << endl;
                 os << prefix;

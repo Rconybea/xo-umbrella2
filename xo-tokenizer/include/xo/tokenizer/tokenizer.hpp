@@ -58,7 +58,15 @@ namespace xo {
             using result_type = scan_result<CharT>;
 
         public:
+            /** @defgroup tokenizer-ctors tokenizer constructors **/
+            ///@{
+
             tokenizer(bool debug_flag = false);
+
+            ///@}
+
+            /** @defgroup tokenizer-general-methods tokenizer methods **/
+            ///@{
 
             /** identifies punctuation chars.
              *  These are chars that are not permitted to appear within
@@ -130,19 +138,26 @@ namespace xo {
              **/
             result_type notify_eof(const span_type & input);
 
+            ///@}
+
         private:
             result_type scan_completion(const span_type & whitespace,
                                         const CharT* token_end,
                                         const span_type & input);
 
         private:
+            /** @defgroup tokenizer-instance-vars tokenizer instance variables **/
+            ///@{
+
             /** track input state (line#,pos,..) for error messages **/
             input_state_type input_state_;
             /** Accumulate partial token here.
              *  This will happen if input sent to @ref tokenizer::scan
-             *  ends without a determinate token boundary.
+             *  ends without whitespace such that last available token's extent is not determined
              **/
             std::string prefix_;
+
+            ///@}
         }; /*tokenizer*/
 
         template <typename CharT>
@@ -338,7 +353,8 @@ namespace xo {
                                                 //current_line_,
                                                 //current_pos_,
                                                 //initial_whitespace,
-                                                (ix - tk_start)));
+                                                (ix - tk_start)
+                                        ));
                             }
                         } else if (*ix == '.') {
                             if (period_flag) {
@@ -378,9 +394,6 @@ namespace xo {
                                 (error_type(__FUNCTION__ /*src_function*/,
                                             "unexpected character in numeric constant" /*error_description*/,
                                             input_state_,
-                                            //current_line_,
-                                            //current_pos_,
-                                            //initial_whitespace,
                                             (ix - tk_start)));
                         }
                     }
