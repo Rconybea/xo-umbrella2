@@ -16,9 +16,18 @@ namespace xo {
         template <typename CharT>
         class input_state {
         public:
+            /** @defgroup input-state-type-traits input-state type straits **/
+            ///@{
+
+            /** type representing a contiguous span of tokenizer input characters **/
             using span_type = span<const CharT>;
 
+            ///@}
+
         public:
+            /** @defgroup input-state-ctors input_state constructors **/
+            ///@{
+
             input_state() = default;
             explicit input_state(bool debug_flag) : debug_flag_{debug_flag} {}
             /** Create instance with supplied @p current_line, @p current_pos, @p whitespace.
@@ -26,6 +35,11 @@ namespace xo {
              **/
             explicit input_state(const span<const CharT>& current_line, size_t current_pos, size_t whitespace)
                 : current_line_{current_line}, current_pos_{current_pos}, whitespace_{whitespace} {}
+
+            ///@}
+
+            /** @defgroup input-state static methods **/
+            ///@{
 
             /** recognize the newline character '\n' **/
             static bool is_newline(CharT ch);
@@ -38,6 +52,11 @@ namespace xo {
              **/
             static bool is_whitespace(CharT ch);
 
+            ///@}
+
+            /** @defgroup input-state-access-methods **/
+            ///@{
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wchanges-meaning"
             const span_type & current_line() const { return current_line_; }
@@ -45,6 +64,11 @@ namespace xo {
             size_t current_pos() const { return current_pos_; }
             size_t whitespace() const { return whitespace_; }
             bool debug_flag() const { return debug_flag_; }
+
+            ///@}
+
+            /** @defgroup input-state-general-methods **/
+            ///@{
 
             /** capture prefix of @p input up to first newline **/
             void capture_current_line(const span_type & input);
@@ -55,11 +79,21 @@ namespace xo {
              **/
             void discard_current_line();
 
+            /** Add @p z to current position **/
             void consume(size_t z) { current_pos_ += z; }
 
+            /** Skip prefix of input comprising whitespace.
+             *  Return pointer to first non-whitespace character in @p input,
+             *  or @c input.hi if input contains only whitespace
+             **/
             const CharT * skip_leading_whitespace(const span_type & input);
 
+            ///@}
+
         private:
+            /** @defgroup input-state-instance-vars **/
+            ///@{
+
             /** remember current input line.  Used only to report errors **/
             span<const CharT> current_line_ = span<const CharT>();
             /** current input position within @ref current_line_ **/
@@ -71,6 +105,8 @@ namespace xo {
 
             /** true to log input activity */
             bool debug_flag_ = false;
+
+            ///@}
         };
 
         template <typename CharT>

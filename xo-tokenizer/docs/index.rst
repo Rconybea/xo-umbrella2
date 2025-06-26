@@ -16,7 +16,10 @@ may appear in variable names:  ``one-of-those-days`` is an ordinary symbol.
    install
    examples
    implementation
+   tokenizer-class
+   scan-result-class
    token-class
    tokenizer-error-class
+   input-state-class
    span-class
    tokentype-enum

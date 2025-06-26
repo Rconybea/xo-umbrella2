@@ -29,8 +29,10 @@ Abstraction tower for *xo-tokenizer* components:
     |                tokenizer                |          |
     +-----------------------------------------+          |
     |               scan_result               |          |
-    +-----------------+-----------------------+  buffer  |
-    |     token       |    tokenizer_error    |          |
     +-----------------+-----------------------+          |
-    |    tokentype    |          span         |          |
+    |                 |     tokenizer_error   |  buffer  |
+    |     token       +-----------------------+          |
+    |                 |      input_state      |          |
+    +-----------------+-----------------------+          |
+    |     tokentype   |          span         |          |
     +-----------------+-----------------------+----------+

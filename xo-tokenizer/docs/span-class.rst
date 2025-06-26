@@ -16,10 +16,12 @@ Context
     |                tokenizer                |          |
     +-----------------------------------------+          |
     |               scan_result               |          |
-    +-----------------+-----------------------+  buffer  |
-    |     token       |    tokenizer_error    |          |
     +-----------------+-----------------------+          |
-    |    tokentype    |cBLU      span         |          |
+    |                 |     tokenizer_error   |  buffer  |
+    |     token       +-----------------------+          |
+    |                 |      input_state      |          |
+    +-----------------+-----------------------+          |
+    |     tokentype   |cBLU      span         |          |
     +-----------------+-----------------------+----------+
 
 .. code-block:: cpp
@@ -34,11 +36,12 @@ Context
 
     object span1<<span>>
     span1 : lo = p
-    span2 : hi = p+25
+    span1 : hi = p+25
 
     object dest<<memory>>
     dest : def fact(n : i64) { ... }
 
+    span1 o-- dest
 
 - Identify a sequence of characters stored in contiguous memory.
 

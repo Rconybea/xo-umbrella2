@@ -16,8 +16,10 @@ Context
     |                tokenizer                |          |
     +-----------------------------------------+          |
     |               scan_result               |          |
-    +-----------------+-----------------------+  buffer  |
-    |     token       |cBLU tokenizer_error   |          |
+    +-----------------+-----------------------+          |
+    |                 |cBLU tokenizer_error   |  buffer  |
+    |     token       +-----------------------+          |
+    |                 |      input_state      |          |
     +-----------------+-----------------------+          |
     |    tokentype    |          span         |          |
     +-----------------+-----------------------+----------+
@@ -34,7 +36,7 @@ Class
 Instance Variables
 ------------------
 
-.. doxygengroup:: tokenizer-error-instance-vars
+.. doxygengroup:: tokenizer-error-vars
 
 Constructors
 ------------

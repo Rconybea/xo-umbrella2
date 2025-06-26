@@ -188,7 +188,7 @@ namespace xo {
             std::string text_;
 
             ///@}
-        }; /*token*/
+        };
 
         template <typename CharT>
         std::int64_t

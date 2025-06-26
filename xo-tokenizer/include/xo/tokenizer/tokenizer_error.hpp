@@ -83,7 +83,7 @@ namespace xo {
             ///@}
 
         private:
-            /** @defgroup tokenizer-error-instance-vars **/
+            /** @defgroup tokenizer-error-vars **/
             ///@{
 
             /** source location (in tokenizer) at which error identified **/
