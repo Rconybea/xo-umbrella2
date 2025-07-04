@@ -1,4 +1,4 @@
-/** @file tokenrepl.cp **/
+/** @file tokenrepl.cpp **/
 
 #include "xo/tokenizer/tokenizer.hpp"
 #include <iostream>

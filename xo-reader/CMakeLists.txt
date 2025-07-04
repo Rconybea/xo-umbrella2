@@ -19,9 +19,12 @@ add_definitions(${PROJECT_CXX_FLAGS})
 # ----------------------------------------------------------------
 
 add_subdirectory(src/reader)
+add_subdirectory(examples)
 add_subdirectory(utest)
+xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
 
 # ----------------------------------------------------------------
-# provide find_package() support
-
-xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
+# docs targets depends on other library/utest/exec targets,
+# must come after them
+#
+add_subdirectory(docs)
