@@ -265,7 +265,7 @@ namespace xo {
          *  Extending the contents of this store at runtime is not supported,
          *  in favor of preserving constexpr abbreviations.
          **/
-        static constexpr detail::bu_store bu_abbrev_store;
+        static constexpr detail::bu_store bu_abbrev_store = detail::bu_store();
 
         /** @brief get abbreviation for basis-unit @p bu **/
         constexpr bu_abbrev_type
