@@ -4,8 +4,8 @@
 #}
 
 {
-  # official 24.05 release
-  #nixpkgs-path ? fetchTarball "https://github.com/NixOS/nixpkgs/archive/nixos-24.05.tar.gz",
+  # official 24.05 release  # nearly works on macos, clang17, llvm18 except for sphinx-contrib.ditaa
+#  nixpkgs-path ? fetchTarball "https://github.com/NixOS/nixpkgs/archive/nixos-24.05.tar.gz",
   nixpkgs-path ? ../nixpkgs,
 
 #  pkgs ? import (fetchTarball {
