@@ -28,7 +28,7 @@ $ cmake -B .build0 -S xo-cmake -DCMAKE_INSTALL_PREFIX=${PREFIX}
 $ cmake --build .build0
 $ cmake --install .build0
 # phase 2
-$ cmake -B .build -S . -DCMAKE_INSTALL_PREFIX=${PREFIX}
+$ cmake -B .build -S . -DCMAKE_INSTALL_PREFIX=${PREFIX} -DXO_ENABLE_EXAMPLES=1
 $ cmake --build .build
 $ cmake --install .build
 ```
