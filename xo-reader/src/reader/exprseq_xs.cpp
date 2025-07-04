@@ -66,8 +66,6 @@ namespace xo {
         {
             /* toplevel expression sequence accepts an
              * arbitrary number of expressions.
-             *
-             * parser::include_token() returns
              */
 
             auto p_emit_expr = p_psm->p_emit_expr_;

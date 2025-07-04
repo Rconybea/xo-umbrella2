@@ -5,6 +5,14 @@
 #include "xo/expression/llvmintrinsic.hpp"
 #include <iostream>
 #include <cmath>
+#include <math.h>
+
+// address of &sqrt ambiguous on osx/clang
+// (perhaps it's a template..?)
+//
+double xo_sqrt(double x) {
+    return sqrt(x);
+}
 
 int
 main() {
@@ -20,7 +28,7 @@ main() {
 
     {
         auto expr = make_primitive("sqrt",
-                                   &::sqrt,
+                                   &xo_sqrt,
                                    false /*!explicit_symbol_def*/,
                                    llvmintrinsic::fp_sqrt);
 

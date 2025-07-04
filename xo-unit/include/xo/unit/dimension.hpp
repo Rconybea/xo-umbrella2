@@ -2,6 +2,9 @@
 
 #pragma once
 
+#ifdef __APPL__
+# include <vector>  // for std::size_t when building with clang18
+#endif
 #include <cstdint>
 
 namespace xo {
@@ -58,7 +61,7 @@ namespace xo {
         }
 
         /** @brief number of built-in dimensions, convenient for array sizing **/
-        static constexpr std::size_t n_dim = static_cast<std::size_t>(dimension::n_dim);
+        static constexpr std::uint64_t n_dim = static_cast<std::uint64_t>(dimension::n_dim);
     } /*namespace qty*/
 } /*namespace xo*/
 
