@@ -252,6 +252,18 @@ namespace xo {
         }
 
         void
+        exprstate::on_i64_token(const token_type & tk,
+                                parserstatemachine * /*p_psm*/)
+        {
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
+            constexpr const char * self_name = "exprstate::on_i64";
+
+            this->illegal_input_error(self_name, tk);
+        }
+
+        void
         exprstate::on_f64_token(const token_type & tk,
                                 parserstatemachine * /*p_psm*/)
         {
@@ -284,7 +296,7 @@ namespace xo {
                 return;
 
             case tokentype::tk_i64:
-                assert(false);
+                this->on_i64_token(tk, p_psm);
                 return;
 
             case tokentype::tk_f64:

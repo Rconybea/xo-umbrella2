@@ -172,6 +172,17 @@ namespace xo {
             return;
         }
 
+        void
+        expect_expr_xs::on_i64_token(const token_type & tk,
+                                     parserstatemachine * p_psm)
+        {
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
+            progress_xs::start
+                (Constant<int64_t>::make(tk.i64_value()),
+                 p_psm);
+        }
 
         void
         expect_expr_xs::on_f64_token(const token_type & tk,

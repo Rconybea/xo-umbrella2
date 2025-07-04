@@ -30,13 +30,23 @@ namespace xo {
         }
 
         void
+        parser::begin_interactive_session() {
+            /* note: not using emit expr here */
+            parserstatemachine psm(&xs_stack_,
+                                   &env_stack_,
+                                   nullptr /*p_emit_expr*/);
+
+            exprseq_xs::start(exprseqtype::toplevel_interactive, &psm);
+        }
+
+        void
         parser::begin_translation_unit() {
             /* note: not using emit expr here */
             parserstatemachine psm(&xs_stack_,
                                    &env_stack_,
                                    nullptr /*p_emit_expr*/);
 
-            exprseq_xs::start(&psm);
+            exprseq_xs::start(exprseqtype::toplevel_batch, &psm);
         }
 
         rp<Expression>

@@ -67,6 +67,15 @@ namespace xo {
         public:
             reader() = default;
 
+            /** call once before calling .read_expr()
+             *  for a new interactive session
+             **/
+            void begin_interactive_session();
+
+            /** counterpart to .begin_interactive_session()
+             **/
+            reader_result end_interactive_session();
+
             /** call once before calling .read_expr():
              *  1. with new reader
              *  2. if last read_expr() call had eof=true

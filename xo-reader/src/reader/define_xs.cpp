@@ -246,6 +246,18 @@ namespace xo {
         }
 
         void
+        define_xs::on_i64_token(const token_type & tk,
+                                parserstatemachine * /*p_psm*/)
+        {
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
+            constexpr const char * self_name = "define_xs::on_i64";
+
+            this->illegal_input_error(self_name, tk);
+        }
+
+        void
         define_xs::on_f64_token(const token_type & tk,
                                 parserstatemachine * /*p_psm*/)
         {

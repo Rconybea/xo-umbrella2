@@ -12,6 +12,8 @@
 
 namespace xo {
     namespace scm {
+        /** Identify current state in an expression state machine
+         **/
         enum class exprstatetype {
             invalid = -1,
 
@@ -171,6 +173,10 @@ namespace xo {
             /** handle incoming operator token **/
             virtual void on_operator_token(const token_type & tk,
                                            parserstatemachine * p_psm);
+
+            /** handle incoming integer-literal token **/
+            virtual void on_i64_token(const token_type & tk,
+                                      parserstatemachine * p_psm);
 
             /** handle incoming floating-point-literal token **/
             virtual void on_f64_token(const token_type & tk,

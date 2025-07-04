@@ -59,10 +59,16 @@ namespace xo {
          *    }
          *
          * Grammar:
-         *   toplevel-program = $expression(1); ..; $expression(n)
+         *   toplevel-program = $toplevel-expression(1); ..; $toplevel-expression(n)
+         *
+         * if interactive:
+         *   toplevel-expression = expression
+         * else
+         *   toplevel-expression = type-decl | define-expr
          *
          *   type-decl        = decltype $typename [<$tp1 .. $tpn>]
-         *   expression       = define-expr
+         *   expression       = type-decl
+         *                       | define-expr
          *                       | literal-expr
          *                       | variable-expr
          *                       | apply-expr
@@ -184,6 +190,10 @@ namespace xo {
              *  since end of last toplevel expression
              **/
             bool has_incomplete_expr() const;
+
+            /** put parser into state for beginning an interactive session.
+             **/
+            void begin_interactive_session();
 
             /** put parser into state for beginning of a translation unit
              *  (i.e. input stream)

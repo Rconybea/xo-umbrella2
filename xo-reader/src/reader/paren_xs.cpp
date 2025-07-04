@@ -171,6 +171,18 @@ namespace xo {
         }
 
         void
+        paren_xs::on_i64_token(const token_type & tk,
+                               parserstatemachine * /*p_psm*/)
+        {
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
+            constexpr const char * c_self_name = "paren_xs::on_i64";
+
+            this->illegal_input_error(c_self_name, tk);
+        }
+
+        void
         paren_xs::on_f64_token(const token_type & tk,
                                parserstatemachine * /*p_psm*/)
         {

@@ -402,6 +402,22 @@ namespace xo {
         }
 
         void
+        progress_xs::on_i64_token(const token_type & tk,
+                                  parserstatemachine * p_psm)
+        {
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
+            constexpr const char * self_name = "progress_xs::on_i64";
+
+            if (this->op_type_ == optype::invalid) {
+                this->illegal_input_error(self_name, tk);
+            } else {
+                exprstate::on_i64_token(tk, p_psm);
+            }
+        }
+
+        void
         progress_xs::on_f64_token(const token_type & tk,
                                   parserstatemachine * p_psm)
         {
