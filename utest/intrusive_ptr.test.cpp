@@ -129,7 +129,7 @@ namespace xo {
             REQUIRE(p2->reference_counter() == 1);
 
             /* can borrow a non-null intrusive-ptr */
-            brw<JustRefcount> p1_brw = p1.borrow();
+            bp<JustRefcount> p1_brw = p1.borrow();
 
             REQUIRE(p1_brw.get() == p1.get());
 
@@ -139,7 +139,7 @@ namespace xo {
             REQUIRE(p1.get()->reference_counter() == 1);
 
             /* copying borrowed pointer does not touch refcount */
-            brw<JustRefcount> p1_brw2 = p1_brw;
+            bp<JustRefcount> p1_brw2 = p1_brw;
 
             REQUIRE(ctor_count == cc + 2);
             REQUIRE(dtor_count == dc);
