@@ -6,7 +6,6 @@
 #include <map>
 
 namespace xo {
-    using ref::brw;
     using xo::tostr;
     using std::uint32_t;
 
@@ -16,7 +15,7 @@ namespace xo {
              * add to *m;
              */
             void
-            map_network_helper(brw<AbstractEventProcessor> x,
+            map_network_helper(bp<AbstractEventProcessor> x,
                                uint32_t * tsort_ix,
                                std::unordered_map<AbstractEventProcessor*, uint32_t> * m)
             {
@@ -24,7 +23,7 @@ namespace xo {
                     return;
 
                 auto fn = [tsort_ix, m]
-                    (brw<AbstractEventProcessor> ep)
+                    (bp<AbstractEventProcessor> ep)
                     {
                         map_network_helper(ep, tsort_ix, m);
                     };

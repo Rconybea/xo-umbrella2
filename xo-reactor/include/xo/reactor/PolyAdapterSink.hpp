@@ -67,7 +67,7 @@ namespace xo {
 
             virtual std::string const & name() const override { return this->poly_sink_->name(); }
             virtual void set_name(std::string const & x) override { this->poly_sink_->set_name(x); }
-            virtual void visit_direct_consumers(std::function<void (ref::brw<AbstractEventProcessor> ep)> const & fn) override {
+            virtual void visit_direct_consumers(std::function<void (bp<AbstractEventProcessor> ep)> const & fn) override {
                 this->poly_sink_->visit_direct_consumers(fn);
             }
             virtual void display(std::ostream & os) const override {

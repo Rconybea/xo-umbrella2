@@ -17,9 +17,9 @@ namespace xo {
 
             // ----- inherited from Reactor -----
 
-            virtual bool add_source(ref::brw<ReactorSource> src) override;
-            virtual bool remove_source(ref::brw<ReactorSource> src) override;
-            virtual void notify_source_primed(ref::brw<ReactorSource> src) override;
+            virtual bool add_source(bp<ReactorSource> src) override;
+            virtual bool remove_source(bp<ReactorSource> src) override;
+            virtual void notify_source_primed(bp<ReactorSource> src) override;
             virtual std::uint64_t run_one() override;
 
         private:

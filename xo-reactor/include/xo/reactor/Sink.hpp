@@ -141,7 +141,7 @@ namespace xo {
             virtual std::string const & name() const override { return name_; }
             virtual void set_name(std::string const & x) override { name_ = x; }
 
-            virtual void visit_direct_consumers(std::function<void (ref::brw<AbstractEventProcessor>)> const &) override {
+            virtual void visit_direct_consumers(std::function<void (bp<AbstractEventProcessor>)> const &) override {
                 /* *this is not an event source */
             } /*visit_direct_consumers*/
 

@@ -30,7 +30,7 @@ namespace xo {
             /* visit direct downstream consumers c[i] of this event processor.
              * call ep(c[i]) for each such consumer.
              */
-            virtual void visit_direct_consumers(std::function<void (ref::brw<AbstractEventProcessor> ep)> const & fn) = 0;
+            virtual void visit_direct_consumers(std::function<void (bp<AbstractEventProcessor> ep)> const & fn) = 0;
 
             /* write representation to stream */
             virtual void display(std::ostream & os) const = 0;

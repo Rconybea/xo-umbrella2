@@ -3,14 +3,13 @@
 #include "PollingReactor.hpp"
 
 namespace xo {
-    using ref::brw;
     using std::size_t;
     using std::uint64_t;
     using std::int64_t;
 
     namespace reactor {
         bool
-        PollingReactor::add_source(brw<ReactorSource> src)
+        PollingReactor::add_source(bp<ReactorSource> src)
         {
             /* make sure src does not already appear in .source_v[] */
             for(ReactorSourcePtr const & x : this->source_v_) {
@@ -28,7 +27,7 @@ namespace xo {
         } /*add_source*/
 
         bool
-        PollingReactor::remove_source(brw<ReactorSource> src)
+        PollingReactor::remove_source(bp<ReactorSource> src)
         {
             auto ix = std::find(this->source_v_.begin(),
                                 this->source_v_.end(),
@@ -46,7 +45,7 @@ namespace xo {
         } /*remove_source*/
 
         void
-        PollingReactor::notify_source_primed(brw<ReactorSource>) {
+        PollingReactor::notify_source_primed(bp<ReactorSource>) {
             /* nothing to do here -- all sources always checked by polling loop */
         } /*notify_source_primed*/
 
@@ -57,7 +56,7 @@ namespace xo {
 
             /* search sources [ix .. z) */
             for(size_t ix = start_ix; ix < z; ++ix) {
-                brw<ReactorSource> src = this->source_v_[ix];
+                bp<ReactorSource> src = this->source_v_[ix];
 
                 if(src->is_nonempty())
                     return ix;
@@ -65,7 +64,7 @@ namespace xo {
 
             /* search source [0 .. ix) */
             for(size_t ix = 0, n = std::min(start_ix, z); ix < n; ++ix) {
-                brw<ReactorSource> src = this->source_v_[ix];
+                bp<ReactorSource> src = this->source_v_[ix];
 
                 if(src->is_nonempty())
                     return ix;
@@ -86,7 +85,7 @@ namespace xo {
             uint64_t retval = 0;
 
             if(ix >= 0) {
-                brw<ReactorSource> src = this->source_v_[ix];
+                bp<ReactorSource> src = this->source_v_[ix];
 
                 log && log(xtag("src.name", src->name()));
 

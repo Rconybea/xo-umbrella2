@@ -60,7 +60,7 @@ namespace xo {
                 if (reactor) {
                     if (is_priming) {
                         /* reactor/simulator takes delivery/sequencing responsibility from here */
-                        reactor->notify_source_primed(ref::brw<ReactorSource>::from_native(this));
+                        reactor->notify_source_primed(bp<ReactorSource>::from_native(this));
                     }
                 } else {
                     /* if no reactor,  deliver immediately */
@@ -181,7 +181,7 @@ namespace xo {
             virtual std::string const & name() const override { return name_; }
             virtual void set_name(std::string const & x) override { this->name_ = x; }
 
-            virtual void visit_direct_consumers(std::function<void (ref::brw<AbstractEventProcessor> ep)> const & fn) override {
+            virtual void visit_direct_consumers(std::function<void (bp<AbstractEventProcessor> ep)> const & fn) override {
                 for (auto x : this->cb_set_)
                     fn(x.fn_.borrow());
             } /*visit_direct_consumers*/

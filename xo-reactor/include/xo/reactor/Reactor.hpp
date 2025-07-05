@@ -25,7 +25,7 @@ namespace xo {
              *
              * returns true if source added;  false if already present
              */
-            virtual bool add_source(ref::brw<ReactorSource> src) = 0;
+            virtual bool add_source(bp<ReactorSource> src) = 0;
 
             /* remove source src from this reactor.
              * source must previously have been added by
@@ -35,12 +35,12 @@ namespace xo {
              *
              * returns true if source removed;  false if not present
              */
-            virtual bool remove_source(ref::brw<ReactorSource> src) = 0;
+            virtual bool remove_source(bp<ReactorSource> src) = 0;
 
             /* notification when non-primed source (source with no known events)
              * becomes primed (source with at least one event)
              */
-            virtual void notify_source_primed(ref::brw<ReactorSource> src) = 0;
+            virtual void notify_source_primed(bp<ReactorSource> src) = 0;
 
             /* dispatch one reactor event,  borrowing the calling thread
              * amount of work this represents is Source/Sink specific.
