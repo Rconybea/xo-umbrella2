@@ -198,7 +198,7 @@ namespace xo {
         } /*add_source*/
 
         void
-        Simulator::complete_remove_source(brw<ReactorSource> sim_src)
+        Simulator::complete_remove_source(bp<ReactorSource> sim_src)
         {
             /* rebuild .sim_heap,  with sim_src removed */
             std::vector<SourceTimestamp> sim_heap2;
@@ -221,7 +221,7 @@ namespace xo {
         } /*complete_remove_source*/
 
         bool
-        Simulator::remove_source(brw<ReactorSource> sim_src)
+        Simulator::remove_source(bp<ReactorSource> sim_src)
         {
             scope log(XO_DEBUG(sim_src->debug_sim_flag()));
 
