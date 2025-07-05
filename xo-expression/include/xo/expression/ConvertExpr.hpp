@@ -25,8 +25,8 @@ namespace xo {
             static rp<ConvertExpr> make(TypeDescr dest_type,
                                         rp<Expression> arg);
 
-            static ref::brw<ConvertExpr> from(ref::brw<Expression> x) {
-                return ref::brw<ConvertExpr>::from(x);
+            static bp<ConvertExpr> from(bp<Expression> x) {
+                return bp<ConvertExpr>::from(x);
             }
 
             const rp<Expression> & arg() const { return arg_; }
@@ -61,7 +61,7 @@ namespace xo {
                 return xform_fn(this);
             }
 
-            virtual void attach_envs(ref::brw<Environment> p) override {
+            virtual void attach_envs(bp<Environment> p) override {
                 arg_->attach_envs(p);
             }
 

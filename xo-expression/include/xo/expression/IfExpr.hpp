@@ -30,8 +30,8 @@ namespace xo {
                                    const rp<Expression> & when_false);
 
             /** downcast from Expression **/
-            static ref::brw<IfExpr> from(ref::brw<Expression> x) {
-                return ref::brw<IfExpr>::from(x);
+            static bp<IfExpr> from(bp<Expression> x) {
+                return bp<IfExpr>::from(x);
             }
 
             const rp<Expression> & test() const { return test_; }
@@ -87,14 +87,14 @@ namespace xo {
                 return xform_fn(this);
             }
 
-            virtual void attach_envs(ref::brw<Environment> p) override {
+            virtual void attach_envs(bp<Environment> p) override {
                 test_->attach_envs(p);
                 when_true_->attach_envs(p);
                 when_false_->attach_envs(p);
             }
 
 #ifdef NOT_USING
-            virtual std::int32_t find_free_vars(std::set<ref::brw<Variable>> * p_set) override {
+            virtual std::int32_t find_free_vars(std::set<bp<Variable>> * p_set) override {
                 return (test_->find_free_vars(p_set)
                         + when_true_->find_free_vars(p_set)
                         + when_false_->find_free_vars(p_set));

@@ -16,8 +16,8 @@ namespace xo {
             /** create instance.  Probably only need one of these **/
             static rp<GlobalEnv> make() { return new GlobalEnv(); }
 
-            ref::brw<Expression> require_global(const std::string & vname,
-                                                ref::brw<Expression> expr) {
+            bp<Expression> require_global(const std::string & vname,
+                                          bp<Expression> expr) {
                 global_map_[vname] = expr.get();
                 return expr;
             } /*require_global*/
@@ -33,12 +33,12 @@ namespace xo {
                 return { -1, 0 };
             }
 
-            virtual ref::brw<Expression> lookup_var(const std::string & vname) const override {
+            virtual bp<Expression> lookup_var(const std::string & vname) const override {
                 auto ix = global_map_.find(vname);
 
                 if (ix == global_map_.end()) {
                     /* not found */
-                    return ref::brw<Expression>::from_native(nullptr);
+                    return bp<Expression>::from_native(nullptr);
                 }
 
                 return ix->second;

@@ -18,12 +18,12 @@ namespace xo {
             using void_function_type = void (*)();
 
         public:
-            PrimitiveInterface(TypeDescr fn_type)
+            explicit PrimitiveInterface(TypeDescr fn_type)
                 : FunctionInterface(exprtype::primitive, fn_type) {}
 
             /** downcast from Expression **/
-            static ref::brw<PrimitiveInterface> from(ref::brw<Expression> x) {
-                return ref::brw<PrimitiveInterface>::from(x);
+            static bp<PrimitiveInterface> from(bp<Expression> x) {
+                return bp<PrimitiveInterface>::from(x);
             }
 
             /** if true,  Jit will try to explicitly symbol for this primitive
@@ -66,7 +66,7 @@ namespace xo {
                 return xform_fn(this);
             }
 
-            virtual void attach_envs(ref::brw<Environment> /*p*/) override {}
+            virtual void attach_envs(bp<Environment> /*p*/) override {}
 
         private:
         }; /*PrimitiveInterface*/

@@ -25,14 +25,14 @@ namespace xo {
                 return new Variable(name, var_type);
             }
 
-            /** return copy of x:  same var, different object identity **/
-            static rp<Variable> copy(ref::brw<Variable> x) {
+            /** return copy of @p x:  same var, different object identity **/
+            static rp<Variable> copy(bp<Variable> x) {
                 return new Variable(x->name(), x->valuetype());
             }
 
             /** downcast from Expression **/
-            static ref::brw<Variable> from(ref::brw<Expression> x) {
-                return ref::brw<Variable>::from(x);
+            static bp<Variable> from(bp<Expression> x) {
+                return bp<Variable>::from(x);
             }
 
             const std::string & name() const { return name_; }
@@ -57,7 +57,7 @@ namespace xo {
                 return xform_fn(this);
             }
 
-            virtual void attach_envs(ref::brw<Environment> /*p*/) override;
+            virtual void attach_envs(bp<Environment> /*p*/) override;
 
             virtual void display(std::ostream & os) const override;
 

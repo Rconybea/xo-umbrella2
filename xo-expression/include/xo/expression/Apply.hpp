@@ -42,8 +42,8 @@ namespace xo {
                                            const rp<Expression> & rhs);
 
             /** downcast from Expression **/
-            static ref::brw<Apply> from(ref::brw<Expression> x) {
-                return ref::brw<Apply>::from(x);
+            static bp<Apply> from(bp<Expression> x) {
+                return bp<Apply>::from(x);
             }
 
             const rp<Expression> & fn() const { return fn_; }
@@ -98,7 +98,7 @@ namespace xo {
                 return xform_fn(this);
             }
 
-            virtual void attach_envs(ref::brw<Environment> p) override {
+            virtual void attach_envs(bp<Environment> p) override {
                 fn_->attach_envs(p);
 
                 for (const auto & arg : argv_)

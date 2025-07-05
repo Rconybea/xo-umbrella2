@@ -16,8 +16,8 @@ namespace xo {
                 : Expression(extype, fn_type) {}
 
             /** downcast from Expression **/
-            static ref::brw<FunctionInterface> from(ref::brw<Expression> x) {
-                return ref::brw<FunctionInterface>::from(x);
+            static bp<FunctionInterface> from(bp<Expression> x) {
+                return bp<FunctionInterface>::from(x);
             }
 
             virtual const std::string & name() const = 0;
@@ -29,6 +29,5 @@ namespace xo {
         }; /*FunctionInterface*/
     } /*namespace ast*/
 } /*namespace xo*/
-
 
 /** end FunctionInterface.hpp **/

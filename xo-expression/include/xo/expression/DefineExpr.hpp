@@ -28,12 +28,14 @@ namespace xo {
                                        rp<Expression> value);
 
 
-            static ref::brw<DefineExpr> from(ref::brw<Expression> x) {
-                return ref::brw<DefineExpr>::from(x);
+            static bp<DefineExpr> from(bp<Expression> x) {
+                return bp<DefineExpr>::from(x);
             }
 
             const std::string & lhs_name() const { return lhs_name_; }
             const rp<Expression> & rhs() const { return rhs_; }
+
+            rp<Variable> lhs_variable() const;
 
             std::set<std::string> calc_free_variables() const;
 
@@ -69,7 +71,7 @@ namespace xo {
                 return xform_fn(this);
             }
 
-            virtual void attach_envs(ref::brw<Environment> p) override {
+            virtual void attach_envs(bp<Environment> p) override {
                 rhs_->attach_envs(p);
             }
 
@@ -123,6 +125,5 @@ namespace xo {
 
     } /*namespace ast*/
 } /*namespace xo*/
-
 
 /* end DefineExpr.hpp */

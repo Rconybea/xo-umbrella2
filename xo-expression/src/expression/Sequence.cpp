@@ -54,7 +54,7 @@ namespace xo {
         }
 
         void
-        Sequence::attach_envs(ref::brw<Environment> p) {
+        Sequence::attach_envs(bp<Environment> p) {
             for (const auto & x : expr_v_)
                 x->attach_envs(p);
         }

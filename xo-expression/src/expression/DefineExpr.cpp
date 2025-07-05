@@ -4,6 +4,7 @@
  */
 
 #include "DefineExpr.hpp"
+#include "Variable.hpp"
 
 namespace xo {
     namespace ast {
@@ -29,6 +30,12 @@ namespace xo {
               rhs_{std::move(rhs)}
         {
             this->free_var_set_ = this->calc_free_variables();
+        }
+
+        rp<Variable>
+        DefineExpr::lhs_variable() const
+        {
+            return Variable::make(lhs_name(), valuetype());
         }
 
         std::set<std::string>

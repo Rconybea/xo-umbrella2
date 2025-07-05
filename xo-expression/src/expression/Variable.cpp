@@ -6,7 +6,7 @@
 namespace xo {
     namespace ast {
         void
-        Variable::attach_envs(ref::brw<Environment> e) {
+        Variable::attach_envs(bp<Environment> e) {
             /** e makes accessible all enclosing lexical scopes **/
             if (this->path_.i_link_ == -2 /*sentinel*/) {
                 this->path_ = e->lookup_binding(this->name_);

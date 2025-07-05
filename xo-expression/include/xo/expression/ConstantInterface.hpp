@@ -25,8 +25,8 @@ namespace xo {
             ConstantInterface(exprtype extype, TypeDescr valuetype) : Expression{extype, valuetype} {}
 
             /** downcast from Expression **/
-            static ref::brw<ConstantInterface> from(ref::brw<Expression> x) {
-                return ref::brw<ConstantInterface>::from(x);
+            static bp<ConstantInterface> from(bp<Expression> x) {
+                return bp<ConstantInterface>::from(x);
             }
 
             /** type description for representation of literal value **/
@@ -40,8 +40,7 @@ namespace xo {
                 return std::set<std::string>();
             }
 
-            virtual void attach_envs(ref::brw<Environment> /*p*/) override {}
-
+            virtual void attach_envs(bp<Environment> /*p*/) override {}
 
         }; /*ConstantInterface*/
 

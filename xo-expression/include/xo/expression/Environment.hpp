@@ -32,7 +32,7 @@ namespace xo {
             /** lookup variable-expression @p vname in this environment.
              *  returns llvm::Value representing code that produces a value for vname
              **/
-            virtual ref::brw<Expression> lookup_var(const std::string & vname) const = 0;
+            virtual bp<Expression> lookup_var(const std::string & vname) const = 0;
         };
     } /*namespace ast*/
 } /*namespace xo*/

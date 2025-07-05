@@ -32,8 +32,8 @@ namespace xo {
                                    const rp<Expression> & body);
 
             /** downcast from Expression **/
-            static ref::brw<Lambda> from(ref::brw<Expression> x) {
-                return ref::brw<Lambda>::from(x);
+            static bp<Lambda> from(bp<Expression> x) {
+                return bp<Lambda>::from(x);
             }
 
             const std::string & type_str() const { return type_str_; }
@@ -84,7 +84,7 @@ namespace xo {
                 return this;
             }
 
-            virtual void attach_envs(ref::brw<Environment> p) override;
+            virtual void attach_envs(bp<Environment> p) override;
 
             virtual void display(std::ostream & os) const override;
 
@@ -160,7 +160,7 @@ namespace xo {
             std::map<std::string, rp<Variable>> layer_var_map_;
 
             /** all lambdas nested once inside this lambda's body **/
-            std::map<std::string, ref::brw<Lambda>> nested_lambda_map_;
+            std::map<std::string, bp<Lambda>> nested_lambda_map_;
 
             /** established (once) by @ref attach_envs.
              *

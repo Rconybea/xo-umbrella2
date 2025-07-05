@@ -33,7 +33,7 @@ namespace xo {
             /** note: borken if .expr_v_ contains any def-exprs **/
             virtual std::size_t visit_layer(VisitFn visitor_fn) override;
             virtual rp<Expression> xform_layer(TransformFn visitor_fn) override;
-            virtual void attach_envs(ref::brw<Environment> parent) override;
+            virtual void attach_envs(bp<Environment> parent) override;
 
             // ----- from GeneralizedExpression ----
 

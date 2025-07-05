@@ -128,10 +128,10 @@ namespace xo {
 
             this->body_
                 = (body_->xform_layer
-                   ([&var_map](ref::brw<Expression> x) -> rp<Expression>
+                   ([&var_map](bp<Expression> x) -> rp<Expression>
                     {
                         if (x->extype() == exprtype::variable) {
-                            ref::brw<Variable> var = Variable::from(x);
+                            bp<Variable> var = Variable::from(x);
 
                             auto ix = var_map.find(var->name());
                             if (ix == var_map.end()) {
@@ -167,14 +167,14 @@ namespace xo {
 
                 this->free_var_set_ = this->calc_free_variables();
 
-                std::map<std::string, ref::brw<Lambda>> nested_lambda_map;
+                std::map<std::string, bp<Lambda>> nested_lambda_map;
                 {
                     this->body_->visit_layer
                         ([&nested_lambda_map]
-                         (ref::brw<Expression> expr)
+                         (bp<Expression> expr)
                             {
                                 if (expr->extype() == exprtype::lambda) {
-                                    ref::brw<Lambda> lm = Lambda::from(expr);
+                                    bp<Lambda> lm = Lambda::from(expr);
 
                                     nested_lambda_map[lm->name()] = lm.get();
                                 }
@@ -245,14 +245,14 @@ namespace xo {
 
             this->free_var_set_ = this->calc_free_variables();
 
-            std::map<std::string, ref::brw<Lambda>> nested_lambda_map;
+            std::map<std::string, bp<Lambda>> nested_lambda_map;
             {
                 this->body_->visit_layer
                     ([&nested_lambda_map]
-                     (ref::brw<Expression> expr)
+                     (bp<Expression> expr)
                         {
                             if (expr->extype() == exprtype::lambda) {
-                                ref::brw<Lambda> lm = Lambda::from(expr);
+                                bp<Lambda> lm = Lambda::from(expr);
 
                                 nested_lambda_map[lm->name()] = lm.get();
                             }
@@ -295,7 +295,7 @@ namespace xo {
         } /*ctor*/
 
         void
-        Lambda::attach_envs(ref::brw<Environment> p) {
+        Lambda::attach_envs(bp<Environment> p) {
             local_env_->assign_parent(p);
 
             /** establish a binding path for each variable **/

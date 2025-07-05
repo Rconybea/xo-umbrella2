@@ -74,7 +74,7 @@ namespace xo {
         }
 
          void
-         AssignExpr::attach_envs(ref::brw<Environment> p) {
+         AssignExpr::attach_envs(bp<Environment> p) {
              lhs_->attach_envs(p);
              rhs_->attach_envs(p);
          }

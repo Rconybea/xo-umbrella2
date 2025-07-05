@@ -34,9 +34,9 @@ namespace xo {
         class Expression : public GeneralizedExpression {
         public:
             using VisitFn = std::function
-                <void (ref::brw<Expression>)>;
+                <void (bp<Expression>)>;
             using TransformFn = std::function
-                <rp<Expression> (ref::brw<Expression>)>;
+                <rp<Expression> (bp<Expression>)>;
             using TypeDescr = xo::reflect::TypeDescr;
 
         public:
@@ -72,7 +72,7 @@ namespace xo {
              *    from @p X.argv
              *  - resolve free variables from @p parent
              **/
-            virtual void attach_envs(ref::brw<Environment> parent) = 0;
+            virtual void attach_envs(bp<Environment> parent) = 0;
 
             /** append to *p_set the set of free variables in this expression.
              *  returns the number of free variables introduced

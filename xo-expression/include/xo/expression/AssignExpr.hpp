@@ -22,8 +22,8 @@ namespace xo {
             static rp<AssignExpr> make(const rp<Variable> & lhs,
                                        const rp<Expression> & rhs);
 
-            static ref::brw<AssignExpr> from(ref::brw<Expression> x) {
-                return ref::brw<AssignExpr>::from(x);
+            static bp<AssignExpr> from(bp<Expression> x) {
+                return bp<AssignExpr>::from(x);
             }
 
             const rp<Variable> & lhs() const { return lhs_; }
@@ -37,7 +37,7 @@ namespace xo {
             virtual std::size_t visit_preorder(VisitFn visitor_fn) override;
             virtual std::size_t visit_layer(VisitFn visitor_fn) override;
             virtual rp<Expression> xform_layer(TransformFn xform_fn) override;
-            virtual void attach_envs(ref::brw<Environment> p) override;
+            virtual void attach_envs(bp<Environment> p) override;
 
             virtual void display(std::ostream & os) const override;
 
