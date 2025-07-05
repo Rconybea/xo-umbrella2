@@ -106,11 +106,11 @@ namespace xo {
                           parserstatemachine * p_psm);
 
             /** update exprstate in response to a successfully-parsed subexpression **/
-            virtual void on_expr(ref::brw<Expression> expr,
+            virtual void on_expr(bp<Expression> expr,
                                  parserstatemachine * p_psm);
 
             /** update exprstate in response to a successfully-parsed subexpression, that ends with semicolon **/
-            virtual void on_expr_with_semicolon(ref::brw<Expression> expr,
+            virtual void on_expr_with_semicolon(bp<Expression> expr,
                                                 parserstatemachine * p_psm);
 
             /** update exprstate when expecting a symbol **/
@@ -188,6 +188,11 @@ namespace xo {
              **/
             void illegal_input_error(const char * self_name,
                                      const token_type & tk) const;
+
+            /** throw exception when unable to locate definition for a variable
+             **/
+            void unknown_variable_error(const char * self_name,
+                                        const token_type & tk) const;
 
         protected:
             /** explicit subtype: identifies derived class **/

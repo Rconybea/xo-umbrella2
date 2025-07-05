@@ -4,9 +4,11 @@
 #include "parserstatemachine.hpp"
 #include "exprstatestack.hpp"
 #include "exprseq_xs.hpp"
-#include "expect_expr_xs.hpp"
+//#include "expect_expr_xs.hpp"
+#include "progress_xs.hpp"
 #include "define_xs.hpp"
 #include "expect_symbol_xs.hpp"
+#include "xo/expression/Constant.hpp"
 
 namespace xo {
     namespace scm {
@@ -47,17 +49,41 @@ namespace xo {
 
         void
         exprseq_xs::on_symbol_token(const token_type & tk,
-                                    parserstatemachine * /*p_psm*/)
+                                    parserstatemachine * p_psm)
         {
             constexpr const char * c_self_name = "exprseq_xs::on_symbol_token";
 
-            this->illegal_input_error(c_self_name, tk);
+            if (xseqtype_ == exprseqtype::toplevel_interactive)
+            {
+                /* In interactive session, allow top-level variable reference.
+                 * This could be:
+                 *   a;      // variable references
+                 *   a = 1;  // single assignment
+                 *   a == 1; // rhs expression
+                 *   a + b;  // rhs expression
+                 * Variable must have been defined!
+                 */
+                rp<Variable> var = p_psm->lookup_var(tk.text());
+
+                if (var.get()) {
+                    progress_xs::start(var, p_psm);
+                } else {
+                    this->unknown_variable_error(c_self_name, tk);
+                }
+            } else {
+                /* policy: don't allow variable references as toplevel expressions
+                 * unless interactive session
+                 */
+                this->illegal_input_error(c_self_name, tk);
+            }
         }
 
         void
         exprseq_xs::on_i64_token(const token_type & tk,
                                  parserstatemachine * p_psm)
         {
+            using xo::ast::Constant;
+
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
@@ -65,9 +91,11 @@ namespace xo {
 
             if (xseqtype_ == exprseqtype::toplevel_interactive)
             {
-                expect_expr_xs::start(p_psm);
-                p_psm->top_exprstate().on_i64_token(tk, p_psm);
+                progress_xs::start(Constant<int64_t>::make(tk.i64_value()), p_psm);
             } else {
+                /* policy: don't allow literals as toplevel expressions
+                 * unless interactive session.
+                 */
                 this->illegal_input_error(c_self_name, tk);
             }
         }
@@ -82,7 +110,7 @@ namespace xo {
         }
 
         void
-        exprseq_xs::on_expr(ref::brw<Expression> expr,
+        exprseq_xs::on_expr(bp<Expression> expr,
                             parserstatemachine * p_psm)
         {
             /* toplevel expression sequence accepts an
@@ -95,7 +123,7 @@ namespace xo {
         } /*on_expr*/
 
         void
-        exprseq_xs::on_expr_with_semicolon(ref::brw<Expression> expr,
+        exprseq_xs::on_expr_with_semicolon(bp<Expression> expr,
                                            parserstatemachine * p_psm)
         {
             /* toplevel expression sequence accepts an

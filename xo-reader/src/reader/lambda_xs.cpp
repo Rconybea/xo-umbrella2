@@ -71,7 +71,7 @@ namespace xo {
         }
 
         void
-        lambda_xs::on_expr(ref::brw<Expression> expr,
+        lambda_xs::on_expr(bp<Expression> expr,
                            parserstatemachine * p_psm)
         {
             if (lmxs_type_ == lambdastatetype::lm_2) {
@@ -83,7 +83,7 @@ namespace xo {
         }
 
         void
-        lambda_xs::on_expr_with_semicolon(ref::brw<Expression> expr,
+        lambda_xs::on_expr_with_semicolon(bp<Expression> expr,
                                           parserstatemachine * p_psm)
         {
             this->on_expr(expr, p_psm);

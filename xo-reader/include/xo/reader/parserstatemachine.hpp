@@ -40,13 +40,18 @@ namespace xo {
              **/
             rp<Variable> lookup_var(const std::string & x) const;
 
+            /** update/replace binding for variable @p x in lexical context
+             *  represented by this psm.  Always acts on innermost frame.
+             **/
+            void upsert_var(bp<Variable> x);
+
             void push_envframe(envframe x);
             void pop_envframe();
 
             // ----- parsing outputs -----
 
-            void on_expr(ref::brw<Expression> expr);
-            void on_expr_with_semicolon(ref::brw<Expression> expr);
+            void on_expr(bp<Expression> expr);
+            void on_expr_with_semicolon(bp<Expression> expr);
             void on_symbol(const std::string & symbol);
 
             // ---- parsing inputs -----

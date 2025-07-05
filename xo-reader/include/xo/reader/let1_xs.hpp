@@ -25,7 +25,7 @@ namespace xo {
                               const rp<Expression> & rhs,
                               parserstatemachine * p_psm);
 
-            virtual void on_expr(ref::brw<Expression> expr,
+            virtual void on_expr(bp<Expression> expr,
                                  parserstatemachine * p_psm) override;
 
             virtual void on_rightbrace_token(const token_type & tk,

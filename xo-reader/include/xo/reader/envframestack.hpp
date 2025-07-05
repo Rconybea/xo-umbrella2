@@ -28,6 +28,11 @@ namespace xo {
              **/
             rp<Variable> lookup(const std::string & x) const;
 
+            /** update/replace binding for variable @p target.
+             *  New binding may have a different type.
+             **/
+            void upsert(bp<Variable> target);
+
             envframe & top_envframe();
             void push_envframe(envframe x);
             void pop_envframe();

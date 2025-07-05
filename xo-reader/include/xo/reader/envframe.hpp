@@ -25,10 +25,13 @@ namespace xo {
 
             const std::vector<rp<Variable>> & argl() const { return argl_; }
 
-            /** lookup variable by name.  If found, return it.
+            /** lookup variable by @p name.  If found, return it.
              *  Otherwise return nullptr
              **/
             rp<Variable> lookup(const std::string & name) const;
+
+            /** establish (replacing if already exists) binding for variable @p var **/
+            void upsert(bp<Variable> var);
 
             void print (std::ostream & os) const;
 
@@ -43,6 +46,5 @@ namespace xo {
         }
     } /*namespace scm*/
 } /*namespace xo*/
-
 
 /* end envframe.hpp */

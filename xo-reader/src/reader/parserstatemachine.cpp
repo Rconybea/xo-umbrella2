@@ -15,6 +15,11 @@ namespace xo {
             return p_env_stack_->lookup(x);
         }
 
+        void
+        parserstatemachine::upsert_var(bp<Variable> x) {
+            p_env_stack_->upsert(x);
+        }
+
         std::unique_ptr<exprstate>
         parserstatemachine::pop_exprstate() {
             return p_stack_->pop_exprstate();
@@ -49,7 +54,7 @@ namespace xo {
         }
 
         void
-        parserstatemachine::on_expr(ref::brw<Expression> x)
+        parserstatemachine::on_expr(bp<Expression> x)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
@@ -62,7 +67,7 @@ namespace xo {
         }
 
         void
-        parserstatemachine::on_expr_with_semicolon(ref::brw<Expression> x)
+        parserstatemachine::on_expr_with_semicolon(bp<Expression> x)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));

@@ -58,7 +58,7 @@ namespace xo {
         {}
 
         void
-        define_xs::on_expr(ref::brw<Expression> expr,
+        define_xs::on_expr(bp<Expression> expr,
                            parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
@@ -90,7 +90,7 @@ namespace xo {
         }
 
         void
-        define_xs::on_expr_with_semicolon(ref::brw<Expression> expr,
+        define_xs::on_expr_with_semicolon(bp<Expression> expr,
                                           parserstatemachine * p_psm)
         {
             this->on_expr(expr, p_psm);
@@ -186,11 +186,16 @@ namespace xo {
             log && log("defxs_type", defxs_type_);
 
             if (this->defxs_type_ == defexprstatetype::def_6) {
-                rp<Expression> expr = this->def_expr_;
+                rp<DefineExprAccess> def_expr = this->def_expr_;
 
                 std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
 
-                p_psm->top_exprstate().on_expr(expr, p_psm);
+                /* remember variable binding in lexical context,
+                 * so we can refer to it later
+                 */
+                p_psm->upsert_var(def_expr->lhs_variable());
+
+                p_psm->top_exprstate().on_expr(def_expr, p_psm);
             } else {
                 exprstate::on_semicolon_token(tk, p_psm);
             }

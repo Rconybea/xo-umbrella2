@@ -154,7 +154,7 @@ namespace xo {
             /** create parser in initial state;
              *  parser is ready to receive tokens via @ref include_token
              **/
-            parser() = default;
+            parser();
 
             /** for diagnostics: number of entries in parser stack **/
             std::size_t stack_size() const { return xs_stack_.size(); }

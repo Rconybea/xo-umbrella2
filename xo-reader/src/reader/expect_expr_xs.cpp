@@ -203,7 +203,7 @@ namespace xo {
         }
 
         void
-        expect_expr_xs::on_expr(ref::brw<Expression> expr,
+        expect_expr_xs::on_expr(bp<Expression> expr,
                                 parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
@@ -218,7 +218,7 @@ namespace xo {
         } /*on_expr*/
 
         void
-        expect_expr_xs::on_expr_with_semicolon(ref::brw<Expression> expr,
+        expect_expr_xs::on_expr_with_semicolon(bp<Expression> expr,
                                                parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;

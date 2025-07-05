@@ -32,7 +32,7 @@ namespace xo {
         {}
 
         void
-        sequence_xs::on_expr(ref::brw<Expression> expr,
+        sequence_xs::on_expr(bp<Expression> expr,
                              parserstatemachine * p_psm)
         {
              constexpr bool c_debug_flag = true;
@@ -67,7 +67,7 @@ namespace xo {
              * helpful to have nested seequence_xs that propagates '}'
              * instead of swallowing it.
              */
-            ref::brw<DefineExpr> def_expr = DefineExpr::from(expr);
+            bp<DefineExpr> def_expr = DefineExpr::from(expr);
 
             if (def_expr) {
                 /** nested_start: control returns via

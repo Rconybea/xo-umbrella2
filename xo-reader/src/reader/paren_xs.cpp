@@ -195,7 +195,7 @@ namespace xo {
         }
 
         void
-        paren_xs::on_expr(ref::brw<Expression> expr,
+        paren_xs::on_expr(bp<Expression> expr,
                           parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;

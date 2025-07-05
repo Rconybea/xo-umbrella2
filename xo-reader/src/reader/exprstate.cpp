@@ -58,8 +58,13 @@ namespace xo {
 
         void
         exprstate::on_def_token(const token_type & tk,
-                                parserstatemachine * /*p_psm*/)
+                                parserstatemachine * p_psm)
         {
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
+            log && log(xtag("exstype", p_psm->top_exprstate().exs_type()));
+
             this->illegal_input_error("exprstate::on_def_token", tk);
         }
 
@@ -387,7 +392,7 @@ namespace xo {
         }
 
         void
-        exprstate::on_expr(ref::brw<Expression> expr,
+        exprstate::on_expr(bp<Expression> expr,
                            parserstatemachine * /*p_psm*/)
         {
             constexpr bool c_debug_flag = true;
@@ -400,7 +405,7 @@ namespace xo {
         } /*on_expr*/
 
         void
-        exprstate::on_expr_with_semicolon(ref::brw<Expression> expr,
+        exprstate::on_expr_with_semicolon(bp<Expression> expr,
                                           parserstatemachine * /*p_psm*/)
         {
             constexpr bool c_debug_flag = true;
@@ -453,6 +458,16 @@ namespace xo {
                        ": unexpected input token for parsing state",
                        xtag("token", tk),
                        xtag("state", *this)));
+        }
+
+        void
+        exprstate::unknown_variable_error(const char * self_name,
+                                          const token_type & tk) const
+        {
+            throw std::runtime_error
+                (tostr(self_name,
+                       ": unknown variable name",
+                       xtag("var", tk.text())));
         }
     } /*namespace scm*/
 } /*namespace xo*/

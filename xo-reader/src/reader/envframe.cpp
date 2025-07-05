@@ -21,6 +21,20 @@ namespace xo {
         }
 
         void
+        envframe::upsert(bp<Variable> target) {
+            for (auto & var : this->argl_) {
+                if (var->name() == target->name()) {
+                    /* replace existing variable -- may change type */
+                    var = target.promote();
+                    return;
+                }
+            }
+
+            /* here: target not already present in this frame, append it */
+            this->argl_.push_back(target.promote());
+        }
+
+        void
         envframe::print(std::ostream & os) const {
             os << "<envframe"
                << xtag("argl", argl_)

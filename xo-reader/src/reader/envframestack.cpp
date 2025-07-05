@@ -67,6 +67,14 @@ namespace xo {
         }
 
         void
+        envframestack::upsert(bp<Variable> x) {
+            /* upsert should always happen in the innermost lexical context.
+             * We are providing new variable binding (perhaps shadowing an existing binding)
+             */
+            this->top_envframe().upsert(x);
+        }
+
+        void
         envframestack::print(std::ostream & os) const {
             os << "<envframestack"
                << xtag("size", stack_.size())

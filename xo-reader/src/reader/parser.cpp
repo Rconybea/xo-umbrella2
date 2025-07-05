@@ -24,6 +24,15 @@ namespace xo {
     namespace scm {
         // ----- parser -----
 
+        parser::parser()
+            : xs_stack_{}, env_stack_{}
+        {
+            /* top-level environment.  initially empty */
+            envframe toplevel_env;
+
+            this->env_stack_.push_envframe(toplevel_env);
+        }
+
         bool
         parser::has_incomplete_expr() const {
             return !xs_stack_.empty();

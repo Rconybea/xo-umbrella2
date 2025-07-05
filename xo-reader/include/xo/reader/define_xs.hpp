@@ -79,9 +79,9 @@ namespace xo {
 
             defexprstatetype defxs_type() const { return defxs_type_; }
 
-            virtual void on_expr(ref::brw<Expression> expr,
+            virtual void on_expr(bp<Expression> expr,
                                  parserstatemachine * p_psm) override;
-            virtual void on_expr_with_semicolon(ref::brw<Expression> expr,
+            virtual void on_expr_with_semicolon(bp<Expression> expr,
                                                 parserstatemachine * p_psm) override;
             virtual void on_symbol(const std::string & symbol_name,
                                    parserstatemachine * p_psm) override;

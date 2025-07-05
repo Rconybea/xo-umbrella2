@@ -48,12 +48,12 @@ namespace xo {
                                       parserstatemachine * p_psm) override;
 
             /** update exprstate in response to a successfully-parsed subexpression **/
-            virtual void on_expr(ref::brw<Expression> expr,
+            virtual void on_expr(bp<Expression> expr,
                                  parserstatemachine * p_psm) override;
             /** update exprstate in response to a successfully-parsed subexpression,
              *  that's terminated by semicolon ';'
              **/
-            virtual void on_expr_with_semicolon(ref::brw<Expression> expr,
+            virtual void on_expr_with_semicolon(bp<Expression> expr,
                                                 parserstatemachine * p_psm) override;
 
 

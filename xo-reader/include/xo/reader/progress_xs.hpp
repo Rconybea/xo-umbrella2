@@ -47,6 +47,10 @@ namespace xo {
 
         /** @class progress_xs
          *  @brief state machine for parsing a schematica runtime-value-expression
+         *
+         *  Handles an expression that produces a value, for example appearing on the
+         *  right-hand side of a definition.
+         *
          **/
         class progress_xs : public exprstate {
         public:
@@ -65,7 +69,7 @@ namespace xo {
 
             bool admits_f64() const;
 
-            virtual void on_expr(ref::brw<Expression> expr,
+            virtual void on_expr(bp<Expression> expr,
                                  parserstatemachine * p_psm) override;
             virtual void on_symbol_token(const token_type & tk,
                                          parserstatemachine * p_psm) override;

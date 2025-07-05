@@ -118,7 +118,7 @@ namespace xo {
 
             case optype::op_assign:
             {
-                ref::brw<Variable> lhs = Variable::from(this->lhs_);
+                bp<Variable> lhs = Variable::from(this->lhs_);
 
                 if (!lhs) {
                     throw std::runtime_error
@@ -158,7 +158,7 @@ namespace xo {
         }
 
         void
-        progress_xs::on_expr(ref::brw<Expression> expr,
+        progress_xs::on_expr(bp<Expression> expr,
                              parserstatemachine * /*p_psm*/)
         {
             /* note: previous token probably an operator,
@@ -218,7 +218,7 @@ namespace xo {
         progress_xs::on_semicolon_token(const token_type & /*tk*/,
                                         parserstatemachine * p_psm)
         {
-            /* note: implementation parllels .on_rightparen_token() */
+            /* note: implementation parallels .on_rightparen_token() */
 
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));

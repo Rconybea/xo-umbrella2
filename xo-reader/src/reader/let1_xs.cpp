@@ -54,13 +54,13 @@ namespace xo {
         {}
 
         void
-        let1_xs::on_expr(ref::brw<Expression> expr,
+        let1_xs::on_expr(bp<Expression> expr,
                          parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            ref::brw<DefineExpr> def_expr = DefineExpr::from(expr);
+            bp<DefineExpr> def_expr = DefineExpr::from(expr);
 
             if (def_expr) {
                 /** nested_start: control returns via

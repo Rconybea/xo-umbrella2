@@ -43,7 +43,7 @@ namespace xo {
             bool admits_f64() const;
             bool admits_rightparen() const;
 
-            virtual void on_expr(ref::brw<Expression> expr,
+            virtual void on_expr(bp<Expression> expr,
                                  parserstatemachine * p_psm) override;
             virtual void on_symbol(const std::string & symbol,
                                    parserstatemachine * p_psm) override;
