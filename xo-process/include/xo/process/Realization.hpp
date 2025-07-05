@@ -11,18 +11,18 @@
 namespace xo {
     namespace process {
 
-// realization of a stochastic process.
-// interface designed to allow for lazy evaluation.
-//
-// since a process connects a family of random variables,
-// a single process can have a generally unbounded number of distinct realizations.
-//
-// implications:
-// - can only realize (or observe) a finite set of instants.
-// - given process evolves continuously,
-//   want ability to revisit intervals that may already contain some realized instants.
-// - achieve this by allowing for caching behavior
-//
+        /** realization of a stochastic process.
+            interface designed to allow for lazy evaluation.
+
+            since a process connects a family of random variables,
+            a single process can have a generally unbounded number of distinct realizations.
+
+            implications:
+            - can only realize (or observe) a finite set of instants.
+            - given process evolves continuously,
+            want ability to revisit intervals that may already contain some realized instants.
+            - achieve this by allowing for caching behavior
+        **/
         template<typename T>
         class Realization : public ref::Refcount {
         public:
@@ -33,11 +33,11 @@ namespace xo {
             using KnownRange = decltype(std::views::all(KnownMap()));
 
         public:
-            static rp<Realization> make(ref::brw<StochasticProcess<T>> p) {
+            static rp<Realization> make(bp<StochasticProcess<T>> p) {
                 return new Realization(p);
             } /*make*/
 
-            ref::brw<StochasticProcess<T>> process() const { return process_; }
+            bp<StochasticProcess<T>> process() const { return process_; }
 
             utc_nanos t0() const { return process_->t0(); }
 
@@ -54,7 +54,7 @@ namespace xo {
             //   realized_range() -> iterator_range<IT>
 
         private:
-            Realization(ref::brw<StochasticProcess<T>> p) : process_{p} {}
+            Realization(bp<StochasticProcess<T>> p) : process_{p} {}
 
         private:
             /* stochastic process from which this realization is sampled */

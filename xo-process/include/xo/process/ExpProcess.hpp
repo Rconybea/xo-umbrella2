@@ -27,14 +27,14 @@ namespace xo {
 
         public:
             static rp<ExpProcess> make(double scale,
-                                            ref::brw<StochasticProcess<double>> exp_proc) {
+                                       bp<StochasticProcess<double>> exp_proc) {
                 return new ExpProcess(scale, exp_proc);
             } /*make*/
 
             /* reflect ExpProcess object representation */
             static void reflect_self();
 
-            ref::brw<StochasticProcess<double>> exponent_process() const { return exponent_process_.borrow(); }
+            bp<StochasticProcess<double>> exponent_process() const { return exponent_process_.borrow(); }
 
             // ----- inherited from StochasticProcess<...> -----
 
@@ -80,7 +80,7 @@ namespace xo {
             virtual TaggedRcptr self_tp() override;
 
         private:
-            ExpProcess(double scale, ref::brw<StochasticProcess> exp_proc)
+            ExpProcess(double scale, bp<StochasticProcess> exp_proc)
                 : scale_(scale),
                   exponent_process_{exp_proc.get()} {
                 ExpProcess::reflect_self();

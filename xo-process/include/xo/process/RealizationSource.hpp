@@ -163,7 +163,7 @@ namespace xo {
                    << ">";
             } /*display*/
 
-            virtual void visit_direct_consumers(std::function<void (ref::brw<xo::reactor::AbstractEventProcessor>)> const &) override {
+            virtual void visit_direct_consumers(std::function<void (bp<xo::reactor::AbstractEventProcessor>)> const &) override {
                 assert(false);
             }
 
@@ -289,7 +289,7 @@ namespace xo {
 
             // ----- Inherited from AbstractEventProcessor -----
 
-            virtual void visit_direct_consumers(std::function<void (ref::brw<xo::reactor::AbstractEventProcessor>)> const & fn) override {
+            virtual void visit_direct_consumers(std::function<void (bp<xo::reactor::AbstractEventProcessor>)> const & fn) override {
 
                 for(auto const & x : *(this->ev_sink_addr()))
                     fn(x.fn_.borrow());
