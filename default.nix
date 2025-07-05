@@ -170,14 +170,18 @@ pkgs.mkShell {
     pkgs.graphviz
     pkgs.doxygen
 
+
     pkgs.llvmPackages_18.llvm.dev
     pkgs.libwebsockets
+    pkgs.replxx
     pkgs.jsoncpp
     pkgs.eigen
-    pkgs.cmake
     pkgs.catch2
     pkgs.zlib
     pkgs.unzip
+
+    pkgs.cmake
+    pkgs.pkg-config
   ];
 
   shellHook = ''

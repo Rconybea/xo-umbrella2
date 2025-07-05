@@ -4,18 +4,35 @@
 #include <iostream>
 #include <unistd.h> // for isatty
 
-bool repl_getline(bool interactive, std::istream& in, std::ostream& out, std::string& input)
+bool repl_getline(bool interactive, std::size_t parser_stack_size, std::istream& in, std::ostream& out, std::string& input)
 {
+    using namespace std;
+
     if (interactive) {
-        out << "> ";
+        if (parser_stack_size <= 1)
+            out << "> ";
+        else
+            out << ". ";
         std::flush(out);
     }
 
-    bool retval = static_cast<bool>(std::getline(in, input));
+    bool retval = static_cast<bool>(getline(in, input));
 
     if (retval) {
+        cerr << "got reval->true" << endl;
+
+        // interactive only: treat ^@ (C-RET) as ;RET
+        if ((input.size() > 0) && ((*input.rbegin()) == '\0'))
+        {
+            cerr << "got ^@" << endl;
+
+            *input.rbegin() = ';';
+        }
+
         // want reader to see newline, it's syntax
         input.push_back('\n');
+    } else {
+        cerr << "got retval->false" << endl;
     }
 
     return retval;
@@ -38,22 +55,24 @@ main() {
     bool eof = false;
 
     span_type input;
+    std::size_t parser_stack_size = 0;
 
-    while (repl_getline(interactive, cin, cout, input_str)) {
+    while (repl_getline(interactive, parser_stack_size, cin, cout, input_str)) {
         input  = span_type::from_string(input_str);
 
         while (!input.empty()) {
-            auto [expr, consumed] = rdr.read_expr(input, eof);
+            auto [expr, consumed, psz] = rdr.read_expr(input, eof);
 
             if (expr) {
                 cout << expr << endl;
             }
 
             input = input.after_prefix(consumed);
+            parser_stack_size = psz;
         }
     }
 
-    auto [expr, _] = rdr.read_expr(input, true /*eof*/);
+    auto [expr, _1, _2] = rdr.read_expr(input, true /*eof*/);
 
     if (expr) {
         cout << expr << endl;

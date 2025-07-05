@@ -63,7 +63,7 @@ namespace xo {
                                    xtag("expr", expr));
 
                         /* token completes an expression -> victory */
-                        return reader_result(expr, expr_span);
+                        return reader_result(expr, expr_span, parser_.stack_size());
                     } else {
                         /* token did not complete an expression
                          * (e.g. token for '[')
@@ -99,7 +99,7 @@ namespace xo {
 
             log && log(xtag("outcome", "noop"));
 
-            return reader_result(nullptr, expr_span);
+            return reader_result(nullptr, expr_span, parser_.stack_size());
         }
 
     } /*namespace scm*/

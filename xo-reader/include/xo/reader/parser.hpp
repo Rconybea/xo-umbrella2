@@ -156,6 +156,9 @@ namespace xo {
              **/
             parser();
 
+            /** true if parser is at top-level, i.e. ready for next top-level expression **/
+            bool is_at_toplevel() const { return stack_size() == 0; }
+
             /** for diagnostics: number of entries in parser stack **/
             std::size_t stack_size() const { return xs_stack_.size(); }
             /** for diagnostics: exprstatetype at level @p i

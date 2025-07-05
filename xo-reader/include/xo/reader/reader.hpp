@@ -18,8 +18,11 @@ namespace xo {
             using Expression = xo::ast::Expression;
             using span_type = span<const char>;
 
-            reader_result(rp<Expression> expr, span_type rem)
-                : expr_{std::move(expr)}, rem_{rem} {}
+            reader_result(rp<Expression> expr, span_type rem, std::size_t psz)
+                : expr_{std::move(expr)}, rem_{rem}, parser_stack_size_{psz} {}
+
+            /** true if reader parsed a complete expression **/
+            bool expr_complete() const { return expr_.get(); }
 
             /** parsed schematica expression **/
             rp<Expression> expr_;
@@ -28,6 +31,11 @@ namespace xo {
              *  This is the span returned in result of tokenizer<char>::scan()
              **/
             span_type rem_;
+
+            /** parser nesting level when this result delivered
+             *  will be zero whenever @ref expr_ is non-null
+             **/
+            std::size_t parser_stack_size_ = 0;
         };
 
         /**
