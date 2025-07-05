@@ -1,6 +1,6 @@
 {
   # dependencies
-  stdenv, cmake, catch2,
+  stdenv, cmake, catch2, replxx,
 
   xo-cmake, xo-expression, xo-tokenizer
 } :
