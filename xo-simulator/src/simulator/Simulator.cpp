@@ -11,7 +11,6 @@
 
 namespace xo {
     using xo::reactor::ReactorSource;
-    using xo::ref::brw;
     using xo::time::utc_nanos;
     using xo::time::nanos;
 
@@ -58,7 +57,7 @@ namespace xo {
         } /*dtor*/
 
         bool
-        Simulator::is_source_present(brw<ReactorSource> src) const
+        Simulator::is_source_present(bp<ReactorSource> src) const
         {
             for (ReactorSourcePtr const & s : this->src_v_) {
                 if (s == src)
@@ -89,12 +88,12 @@ namespace xo {
         } /*next_src*/
 
         void
-        Simulator::notify_source_primed(brw<ReactorSource> src)
+        Simulator::notify_source_primed(bp<ReactorSource> src)
         {
             scope log(XO_ENTER1(always, src->debug_sim_flag()));
 
-            brw<ReactorSource> sim_src
-                = brw<ReactorSource>::from(src);
+            bp<ReactorSource> sim_src
+                = bp<ReactorSource>::from(src);
 
             log && log(xtag("src", (sim_src.get() != nullptr)),
                        xtag("src.name", src->name()));
@@ -131,7 +130,7 @@ namespace xo {
         } /*notify_source_primed*/
 
         void
-        Simulator::complete_add_source(brw<ReactorSource> src)
+        Simulator::complete_add_source(bp<ReactorSource> src)
         {
             /* also add to simulation heap */
             this->sim_heap_.push_back(SourceTimestamp(src->sim_current_tm(),
@@ -146,7 +145,7 @@ namespace xo {
         } /*complete_add_source*/
 
         bool
-        Simulator::add_source(brw<ReactorSource> sim_src)
+        Simulator::add_source(bp<ReactorSource> sim_src)
         {
             scope log(XO_ENTER1(always, sim_src->debug_sim_flag()));
 

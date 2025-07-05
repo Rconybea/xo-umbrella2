@@ -97,7 +97,7 @@ namespace xo {
             /* true iff src has been added to this simulator
              * (by .add_source())
              */
-            bool is_source_present(ref::brw<ReactorSource> src) const;
+            bool is_source_present(bp<ReactorSource> src) const;
 
             /* promise:
              *   .next_tm() > .t0() || .is_exhausted()
@@ -199,21 +199,21 @@ namespace xo {
 
             /* notification when nonprimed source becomes primed
              */
-            virtual void notify_source_primed(ref::brw<ReactorSource> src) override;
+            virtual void notify_source_primed(bp<ReactorSource> src) override;
 
             /* add a new simulation source.
              * event that precede .t0 will be discarded.
              *
              * returns true if src added;  false if already present
              */
-            virtual bool add_source(ref::brw<ReactorSource> src) override;
+            virtual bool add_source(bp<ReactorSource> src) override;
 
             /* remove simulation source.
              * returns true if src removed;  false if was not present
              *
              * (not typically needed for simulations)
              */
-            virtual bool remove_source(ref::brw<ReactorSource> src) override;
+            virtual bool remove_source(bp<ReactorSource> src) override;
 
             /* synonym for .advance_one_event() */
             virtual std::uint64_t run_one() override;
@@ -245,9 +245,9 @@ namespace xo {
             void complete_delivery_work();
 
             /* complete reentrant call to .add_source() */
-            void complete_add_source(ref::brw<ReactorSource> src);
+            void complete_add_source(bp<ReactorSource> src);
             /* complete reentrant call to .remove_source() */
-            void complete_remove_source(ref::brw<ReactorSource> src);
+            void complete_remove_source(bp<ReactorSource> src);
 
             friend class RaiiDeliveryWork;
 

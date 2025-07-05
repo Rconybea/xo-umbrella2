@@ -9,7 +9,6 @@
 namespace xo {
     using xo::ref::Refcount;
     using xo::ref::Borrow;
-    using xo::ref::brw;
     using xo::ref::intrusive_ptr_refcount;
     using xo::ref::intrusive_ptr_add_ref;
     using xo::ref::intrusive_ptr_release;
@@ -71,8 +70,8 @@ namespace xo {
             intrusive_ptr_release(nullptr);
 
             /* can borrow a null intrusive_ptr */
-            brw<JustRefcount> p1_brw = p1.borrow();
-            brw<JustRefcount> p2_brw = p2.borrow();
+            bp<JustRefcount> p1_brw = p1.borrow();
+            bp<JustRefcount> p2_brw = p2.borrow();
 
             REQUIRE(p1_brw.get() == nullptr);
             REQUIRE(p1_brw.operator->() == nullptr);
