@@ -13,10 +13,16 @@ namespace xo {
     namespace ref {
         template <typename T>
         class intrusive_ptr;
+
+        template <typename T>
+        class Borrow;
     }
 
     template <typename T>
     using rp = ref::intrusive_ptr<T>;
+
+    template <typename T>
+    using bp = ref::Borrow<T>;
 
     namespace ref {
         class Refcount;
