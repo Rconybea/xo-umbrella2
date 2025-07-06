@@ -20,6 +20,9 @@ if (ENABLE_TESTING)
 
     xo_self_dependency(${SELF_EXE} xo_unit)
     xo_headeronly_dependency(${SELF_EXE} xo_ratio)
+    # at least need explicit {indentlog, randomgen} deps in a submodule build
+    xo_headeronly_dependency(${SELF_EXE} indentlog)
+    xo_headeronly_dependency(${SELF_EXE} randomgen)
     xo_external_target_dependency(${SELF_EXE} Catch2 Catch2::Catch2)
 endif()
 
