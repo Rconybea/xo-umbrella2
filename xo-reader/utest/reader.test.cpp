@@ -19,7 +19,7 @@ namespace xo {
                 {"def foo = lambda (x : f64) 3.1415965;"},
                 {"def foo = lambda (x : f64, y : f64) 3.1415965;"},
                 {"def foo = lambda (x : f64) x;"},
-                //{"def foo = lambda (x : f64) { def y = x * x; y; }"},
+                {"def foo = lambda (x : f64) { def y = x * x; y; };"},
             };
         }
 
