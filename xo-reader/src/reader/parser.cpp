@@ -10,11 +10,15 @@
 #include "xo/expression/DefineExpr.hpp"
 #include "xo/expression/Constant.hpp"
 #include "xo/expression/ConvertExpr.hpp"
+//#include "xo/expression/GlobalEnv.hpp"
+#include "xo/expression/LocalEnv.hpp"
 //#include <regex>
 #include <stdexcept>
 
 namespace xo {
     using xo::ast::Expression;
+    //using xo::ast::GlobalEnv;
+    using xo::ast::LocalEnv;
     //using xo::ast::DefineExpr;
     //using xo::ast::ConvertExpr;
     //using xo::ast::Constant;
@@ -28,14 +32,15 @@ namespace xo {
             : xs_stack_{}, env_stack_{}
         {
             /* top-level environment.  initially empty */
-            envframe toplevel_env;
+            rp<LocalEnv> toplevel_env = LocalEnv::make_empty();
 
             this->env_stack_.push_envframe(toplevel_env);
         }
 
         bool
         parser::has_incomplete_expr() const {
-            return !xs_stack_.empty();
+            /* (don't count toplevel exprseq) */
+            return xs_stack_.size() > 1;
         }
 
         void
@@ -72,6 +77,8 @@ namespace xo {
             }
 
             /* stack_ is non-empty */
+
+            log && log(xtag("top", xs_stack_.top_exprstate()));
 
             rp<Expression> retval;
 

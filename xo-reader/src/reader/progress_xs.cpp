@@ -188,6 +188,35 @@ namespace xo {
         }
 
         void
+        progress_xs::on_expr_with_semicolon(bp<Expression> expr,
+                                            parserstatemachine * p_psm)
+        {
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
+            log && log(xtag("lhs", lhs_), xtag("op", op_type_), xtag("expr", expr));
+
+            constexpr const char * c_self_name = "progress_xs::on_expr_with_semicolon";
+
+            if (op_type_ == optype::invalid) {
+                throw std::runtime_error(tostr(c_self_name,
+                                               ": consecutive unseparated exprs not legal"));
+            }
+
+            this->rhs_ = expr.promote();
+
+            // FORBIDDEN, because .on_semicolon_token() destroys *this before returning
+            //   this->on_semicolon_token(token_type::semicolon(), p_psm);
+            // INSTEAD, spell out the body
+
+            rp<Expression> expr2 = this->assemble_expr();
+
+            std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
+
+            p_psm->on_expr_with_semicolon(expr2);
+        }
+
+        void
         progress_xs::on_symbol_token(const token_type & /*tk*/,
                                      parserstatemachine * /*p_psm*/)
         {
@@ -224,6 +253,8 @@ namespace xo {
             scope log(XO_DEBUG(c_debug_flag));
 
             rp<Expression> expr = this->assemble_expr();
+
+            log && log(xtag("assembled-expr", expr));
 
             std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
 

@@ -21,7 +21,7 @@ Tested with gcc 13.3
 Install
 =======
 
-``xo-tokenizer`` uses supporting library ``xo-tokenizer`` and cmake macros ``xo-cmake``.
+``xo-tokenizer`` uses supporting library ``xo-indentlog`` and cmake macros ``xo-cmake``.
 These are on github:
 
 - `xo-tokenizer source`_ (Schematika tokenizer)
@@ -29,7 +29,7 @@ These are on github:
 - `xo-cmake source`_ (shared cmake macros)
 
 .. _xo-tokenizer source: https://github.com/rconybea/xo-tokenizer
-.. _xo-indentlog source: https://github.com/rconybea/xo-indentlog
+.. _xo-indentlog source: https://github.com/rconybea/indentlog
 .. _xo-cmake source: https://github.com/rconybea/xo-cmake
 
 Installing from source

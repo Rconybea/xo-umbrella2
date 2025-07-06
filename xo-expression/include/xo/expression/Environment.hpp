@@ -33,7 +33,15 @@ namespace xo {
              *  returns llvm::Value representing code that produces a value for vname
              **/
             virtual bp<Expression> lookup_var(const std::string & vname) const = 0;
+
+            virtual void print(std::ostream & os) const = 0;
         };
+
+        inline std::ostream &
+        operator<< (std::ostream & os, const Environment & x) {
+            x.print(os);
+            return os;
+        }
     } /*namespace ast*/
 } /*namespace xo*/
 

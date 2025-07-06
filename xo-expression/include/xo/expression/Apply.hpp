@@ -98,12 +98,7 @@ namespace xo {
                 return xform_fn(this);
             }
 
-            virtual void attach_envs(bp<Environment> p) override {
-                fn_->attach_envs(p);
-
-                for (const auto & arg : argv_)
-                    arg->attach_envs(p);
-            }
+            virtual void attach_envs(bp<Environment> p) override;
 
             virtual void display(std::ostream & os) const override;
 

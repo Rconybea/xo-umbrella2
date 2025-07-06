@@ -5,11 +5,15 @@
 
 #pragma once
 
+xxx;
+
 #include "xo/expression/Variable.hpp"
+#include "xo/expression/LocalEnv.hpp"
 #include <vector>
 
 namespace xo {
     namespace scm {
+#ifdef OBSOLETE
         /** @class envframe
          *  @brief names/types of formal paremeters introduced by a function
          *
@@ -17,26 +21,31 @@ namespace xo {
          **/
         class envframe {
         public:
-            using Variable = xo::ast::Variable;
+            using Environment = xo::ast::Environment;
+            using LocalEnv    = xo::ast::LocalEnv;
+            using Variable    = xo::ast::Variable;
 
         public:
             envframe() = default;
-            envframe(const std::vector<rp<Variable>> & argl) : argl_(argl) {}
+            envframe(const std::vector<rp<Variable>> & argl, const rp<Environment> & parent_env);
 
-            const std::vector<rp<Variable>> & argl() const { return argl_; }
+            const std::vector<rp<Variable>> & argl() const { return env_->argv(); }
+            const rp<LocalEnv> & local_env() const { return env_; }
 
             /** lookup variable by @p name.  If found, return it.
              *  Otherwise return nullptr
              **/
-            rp<Variable> lookup(const std::string & name) const;
+            bp<Variable> lookup(const std::string & name) const;
 
-            /** establish (replacing if already exists) binding for variable @p var **/
+            /** establish (replacing if already exists) binding for variable @p var.
+             *  Replacement intended for use in interactive sessions
+             **/
             void upsert(bp<Variable> var);
 
             void print (std::ostream & os) const;
 
         private:
-            std::vector<rp<Variable>> argl_;
+            rp<LocalEnv> env_;
         };
 
         inline std::ostream &
@@ -44,6 +53,7 @@ namespace xo {
             x.print(os);
             return os;
         }
+#endif
     } /*namespace scm*/
 } /*namespace xo*/
 

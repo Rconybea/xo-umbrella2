@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "envframe.hpp"
+#include "xo/expression/LocalEnv.hpp"
 
 namespace xo {
     namespace scm {
@@ -14,6 +14,7 @@ namespace xo {
          **/
         class envframestack {
         public:
+            using LocalEnv = xo::ast::LocalEnv;
             using Variable = xo::ast::Variable;
 
         public:
@@ -26,40 +27,40 @@ namespace xo {
              *  Visit frames in fifo order,  report first match;
              *  nullptr if no matches.
              **/
-            rp<Variable> lookup(const std::string & x) const;
+            bp<Variable> lookup(const std::string & x) const;
 
             /** update/replace binding for variable @p target.
              *  New binding may have a different type.
              **/
             void upsert(bp<Variable> target);
 
-            envframe & top_envframe();
-            void push_envframe(envframe x);
-            void pop_envframe();
+            bp<LocalEnv> top_envframe();
+            void push_envframe(const rp<LocalEnv> & x);
+            rp<LocalEnv> pop_envframe();
 
             /** relative to top-of-stack.
              *  0 -> top (last in),  z-1 -> bottom (first in)
              **/
-            envframe & operator[](std::size_t i) {
+            bp<LocalEnv> operator[](std::size_t i) {
                 std::size_t z = stack_.size();
 
                 assert(i < z);
 
-                return stack_[z - i - 1];
+                return stack_[z - i - 1].get();
             }
 
-            const envframe & operator[](std::size_t i) const {
+            bp<LocalEnv> operator[](std::size_t i) const {
                 std::size_t z = stack_.size();
 
                 assert(i < z);
 
-                return stack_[z - i - 1];
+                return stack_[z - i - 1].get();
             }
 
             void print (std::ostream & os) const;
 
         private:
-            std::vector<envframe> stack_;
+            std::vector<rp<LocalEnv>> stack_;
         };
 
         inline std::ostream &

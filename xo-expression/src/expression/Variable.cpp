@@ -5,6 +5,18 @@
 
 namespace xo {
     namespace ast {
+        std::string
+        Variable::gensym(const std::string & prefix) {
+            static std::size_t s_counter = 0;
+
+            ++s_counter;
+
+            char buf[32];
+            snprintf(buf, sizeof(buf), "%ld", s_counter);
+
+            return prefix + std::string(buf);
+        }
+
         void
         Variable::attach_envs(bp<Environment> e) {
             /** e makes accessible all enclosing lexical scopes **/

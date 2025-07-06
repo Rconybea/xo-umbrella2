@@ -93,6 +93,11 @@ namespace xo {
         define_xs::on_expr_with_semicolon(bp<Expression> expr,
                                           parserstatemachine * p_psm)
         {
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
+            log && log(xtag("defxs_type", defxs_type_));
+
             this->on_expr(expr, p_psm);
             /* semicolon is allowed to terminate def expr */
             this->on_semicolon_token(token_type::semicolon(), p_psm);
@@ -190,10 +195,31 @@ namespace xo {
 
                 std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
 
-                /* remember variable binding in lexical context,
-                 * so we can refer to it later
-                 */
-                p_psm->upsert_var(def_expr->lhs_variable());
+                // if this is a genuine top-level define (i.e. nesting level = 0),
+                // then we need to upsert so we can refer to rhs later.
+                //
+                // In other contexts (e.g. body-of-lambda) will be rewriting
+                //    {
+                //       def y = foo(x,x);
+                //       bar(y,y);
+                //    }
+                // into something like
+                //    {
+                //       (lambda (y123) bar(y123,y123))(foo(x,x));
+                //    }
+                //
+                // This works in the body of lambda, because we don't evaluate anything
+                // until lambda definition is complete.
+                //
+                // For interactive top-level defs we want to evaluate as we go,
+                // so need incremental bindings.
+
+                if (p_psm->env_stack_size() == 1) {
+                    /* remember variable binding in lexical context,
+                     * so we can refer to it later
+                     */
+                    p_psm->upsert_var(def_expr->lhs_variable());
+                }
 
                 p_psm->top_exprstate().on_expr(def_expr, p_psm);
             } else {

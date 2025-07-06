@@ -26,10 +26,21 @@ namespace xo {
              *  @p name   Name for this lambda -- must be unique
              *  @p argv   Formal parameters, in left-to-right order
              *  @p body   Expression for body of this function
+             *  @p parent_env  Environment for enclosing lexical scope
              **/
             static rp<Lambda> make(const std::string & name,
                                    const std::vector<rp<Variable>> & argv,
-                                   const rp<Expression> & body);
+                                   const rp<Expression> & body,
+                                   const rp<Environment> & parent_env);
+
+            /**
+             *  @p name   Name for this lambda -- must be unique
+             *  @p env    Environment with {name,type} for each formal parameter
+             *  @p body   Expression for body of function
+             **/
+            static rp<Lambda> make_from_env(const std::string & name,
+                                            const rp<LocalEnv> & env,
+                                            const rp<Expression> & body);
 
             /** downcast from Expression **/
             static bp<Lambda> from(bp<Expression> x) {
@@ -174,16 +185,18 @@ namespace xo {
         inline rp<Lambda>
         make_lambda(const std::string & name,
                     const std::vector<rp<Variable>> & argv,
-                    const rp<Expression> & body)
+                    const rp<Expression> & body,
+                    const rp<Environment> & parent_env)
         {
-            return Lambda::make(name, argv, body);
+            return Lambda::make(name, argv, body, parent_env);
         }
 
         class LambdaAccess : public Lambda {
         public:
             static rp<LambdaAccess> make(const std::string & name,
                                          const std::vector<rp<Variable>> & argv,
-                                         const rp<Expression> & body);
+                                         const rp<Expression> & body,
+                                         const rp<Environment> & parent_env);
             static rp<LambdaAccess> make_empty();
 
             /** assign body + compute derived members

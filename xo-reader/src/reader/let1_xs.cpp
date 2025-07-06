@@ -17,20 +17,18 @@ namespace xo {
     using Apply = xo::ast::Apply;
     using Lambda = xo::ast::Lambda;
     using LambdaAccess = xo::ast::LambdaAccess;
+    using Environment = xo::ast::Environment;
+    using LocalEnv = xo::ast::LocalEnv;
     using Variable = xo::ast::Variable;
-
-    namespace {
-        std::string gensym() {
-            return "genanotherxx";
-        }
-    }
 
     namespace scm {
         std::unique_ptr<let1_xs>
         let1_xs::make(std::string lhs_name,
+                      rp<LocalEnv> local_env,
                       rp<Expression> rhs)
         {
             return std::make_unique<let1_xs>(let1_xs(std::move(lhs_name),
+                                                     std::move(local_env),
                                                      std::move(rhs)));
         }
 
@@ -39,7 +37,16 @@ namespace xo {
                        const rp<Expression> & rhs,
                        parserstatemachine * p_psm)
         {
-            p_psm->push_exprstate(let1_xs::make(lhs_name, rhs));
+            rp<Environment> parent_env = p_psm->top_envframe().promote();
+            rp<Variable> var1 = Variable::make(lhs_name, rhs->valuetype());
+            rp<LocalEnv> let_env = LocalEnv::make1(var1, parent_env);
+
+            p_psm->push_envframe(let_env);
+
+            // TODO: stash let_env in let1_xs, then pick up directly in .on_rightbrace_token()
+            //       still have to push here so vars can find it
+            //
+            p_psm->push_exprstate(let1_xs::make(lhs_name, let_env, rhs));
 
             expect_expr_xs::start(true /*allow_defs*/,
                                   true /*cxl_on_rightbrace*/,
@@ -47,9 +54,11 @@ namespace xo {
         }
 
         let1_xs::let1_xs(std::string lhs_name,
+                         rp<LocalEnv> local_env,
                          rp<Expression> rhs)
-            : exprstate(),
+            : exprstate(exprstatetype::let1expr),
               lhs_name_{std::move(lhs_name)},
+              local_env_{std::move(local_env)},
               rhs_{std::move(rhs)}
         {}
 
@@ -63,7 +72,8 @@ namespace xo {
             bp<DefineExpr> def_expr = DefineExpr::from(expr);
 
             if (def_expr) {
-                /** nested_start: control returns via
+                /** starting a nested let here:
+                 *  control returns via
                  *   .on_expr(x)
                  *      with x something like:
                  *    Apply(Lambda(gensym(),
@@ -86,6 +96,32 @@ namespace xo {
         }
 
         void
+        let1_xs::on_expr_with_semicolon(bp<Expression> expr,
+                                        parserstatemachine * p_psm)
+        {
+            /* same as on_expr(), since we only use let1_xs inside a block { .. }
+             * This means final ';' is unnecessary
+             */
+
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
+            bp<DefineExpr> def_expr = DefineExpr::from(expr);
+
+            if (def_expr) {
+                let1_xs::start(def_expr->lhs_name(),
+                               def_expr->rhs(),
+                               p_psm);
+            } else {
+                this->expr_v_.push_back(expr.promote());
+
+                expect_expr_xs::start(true /*allow_defs*/,
+                                      true /*cxl_on_rightbvrace*/,
+                                      p_psm);
+            }
+        }
+
+        void
         let1_xs::on_rightbrace_token(const token_type & tk,
                                      parserstatemachine * p_psm)
         {
@@ -93,13 +129,19 @@ namespace xo {
 
             auto expr = Sequence::make(this->expr_v_);
 
-            std::string argname = gensym();
+            /* top env frame was established by let1_xs::start();
+             * now unwind it
+             */
+            p_psm->pop_envframe();
+
+            std::string lambda_name = Variable::gensym("let1");
+
+            rp<Environment> parent_env = p_psm->top_envframe().promote();
 
             rp<Expression> lambda
-                = Lambda::make(this->lhs_name_,
-                               {Variable::make(argname,
-                                               this->rhs_->valuetype())},
-                               expr);
+                = Lambda::make_from_env(lambda_name,
+                                        local_env_,
+                                        expr);
 
             rp<Expression> result
                 = Apply::make(lambda, {this->rhs_});

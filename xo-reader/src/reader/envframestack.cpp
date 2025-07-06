@@ -6,10 +6,11 @@
 #include "envframestack.hpp"
 
 namespace xo {
+    using xo::ast::LocalEnv;
     using xo::ast::Variable;
 
     namespace scm {
-        envframe &
+        bp<LocalEnv>
         envframestack::top_envframe() {
             std::size_t z = stack_.size();
 
@@ -18,11 +19,12 @@ namespace xo {
                     ("parser::top_exprstate: unexpected empty stack");
             }
 
-            return stack_[z-1];
+            return stack_[z-1].get();
         }
 
         void
-        envframestack::push_envframe(envframe frame) {
+        envframestack::push_envframe(const rp<LocalEnv> & frame)
+        {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag),
                       xtag("frame", frame));
@@ -31,10 +33,10 @@ namespace xo {
 
             stack_.resize(z+1);
 
-            stack_[z] = std::move(frame);
+            stack_[z] = frame;
         }
 
-        void
+        rp<LocalEnv>
         envframestack::pop_envframe() {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
@@ -44,26 +46,28 @@ namespace xo {
             if (z > 0) {
                 //std::unique_ptr<exprstate> top = std::move(stack_[z-1]);
 
+                rp<LocalEnv> retval = stack_.at(z-1);
+
                 stack_.resize(z-1);
 
-                //return top;
+                return retval;
             } else {
-                //return nullptr;
+                return nullptr;
             }
         }
 
-        rp<Variable>
+        bp<Variable>
         envframestack::lookup(const std::string & x) const {
             for (std::size_t i = 0, z = this->size(); i < z; ++i) {
                 const auto & frame = (*this)[i];
 
-                auto retval = frame.lookup(x);
+                auto retval = frame->lookup_local(x);
 
                 if (retval)
                     return retval;
             }
 
-            return nullptr;
+            return bp<Variable>::from_native(nullptr);
         }
 
         void
@@ -71,7 +75,7 @@ namespace xo {
             /* upsert should always happen in the innermost lexical context.
              * We are providing new variable binding (perhaps shadowing an existing binding)
              */
-            this->top_envframe().upsert(x);
+            this->top_envframe()->upsert_local(x);
         }
 
         void

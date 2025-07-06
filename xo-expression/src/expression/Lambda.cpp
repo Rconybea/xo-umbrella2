@@ -66,15 +66,11 @@ namespace xo {
         }
 
         rp<Lambda>
-        Lambda::make(const std::string & name,
-                     const std::vector<rp<Variable>> & argv,
-                     const rp<Expression> & body)
+        Lambda::make_from_env(const std::string & name,
+                              const rp<LocalEnv> & env,
+                              const rp<Expression> & body)
         {
-            using xo::reflect::FunctionTdx;
-
-            rp<LocalEnv> env = LocalEnv::make(argv);
-
-            TypeDescr lambda_td = assemble_lambda_td(argv, body);
+            TypeDescr lambda_td = assemble_lambda_td(env->argv(), body);
 
             rp<Lambda> retval
                 = new Lambda(name,
@@ -86,6 +82,17 @@ namespace xo {
             env->assign_origin(retval.get());
 
             return retval;
+        }
+
+        rp<Lambda>
+        Lambda::make(const std::string & name,
+                     const std::vector<rp<Variable>> & argv,
+                     const rp<Expression> & body,
+                     const rp<Environment> & parent_env)
+        {
+            rp<LocalEnv> env = LocalEnv::make(argv, parent_env);
+
+            return make_from_env(name, env, body);
         } /*make*/
 
         std::set<std::string>
@@ -315,10 +322,11 @@ namespace xo {
         rp<LambdaAccess>
         LambdaAccess::make(const std::string & name,
                            const std::vector<rp<Variable>> & argv,
-                           const rp<Expression> & body)
+                           const rp<Expression> & body,
+                           const rp<Environment> & parent_env)
         {
             TypeDescr lambda_td = assemble_lambda_td(argv, body);
-            rp<LocalEnv> env = LocalEnv::make(argv);
+            rp<LocalEnv> env = LocalEnv::make(argv, parent_env);
 
             rp<LambdaAccess> retval
                 = new LambdaAccess(name,

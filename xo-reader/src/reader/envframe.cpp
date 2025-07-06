@@ -10,37 +10,30 @@ namespace xo {
     using xo::ast::Variable;
 
     namespace scm {
-        rp<Variable>
-        envframe::lookup(const std::string & x) const {
-            for (const auto & var : argl_) {
-                if (x == var->name())
-                    return var;
-            }
+#ifdef OBSOLETE
+        envframe::envframe(const std::vector<rp<Variable>> & argl,
+                           const rp<Environment>& parent_env)
+        {
+            this->env_ = LocalEnv::make(argl, parent_env);
+        }
 
-            return nullptr;
+        bp<Variable>
+        envframe::lookup(const std::string & target) const {
+            return env_->lookup_local(target);
         }
 
         void
         envframe::upsert(bp<Variable> target) {
-            for (auto & var : this->argl_) {
-                if (var->name() == target->name()) {
-                    /* replace existing variable -- may change type */
-                    var = target.promote();
-                    return;
-                }
-            }
-
-            /* here: target not already present in this frame, append it */
-            this->argl_.push_back(target.promote());
+            env_->upsert_local(target);
         }
 
         void
         envframe::print(std::ostream & os) const {
             os << "<envframe"
-               << xtag("argl", argl_)
+               << xtag("argv", env_->argv())
                << ">";
         }
-
+#endif
     } /*namespace scm */
 } /*namespace xo*/
 

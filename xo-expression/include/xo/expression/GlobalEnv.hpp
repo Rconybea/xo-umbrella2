@@ -17,10 +17,7 @@ namespace xo {
             static rp<GlobalEnv> make() { return new GlobalEnv(); }
 
             bp<Expression> require_global(const std::string & vname,
-                                          bp<Expression> expr) {
-                global_map_[vname] = expr.get();
-                return expr;
-            } /*require_global*/
+                                          bp<Expression> expr);
 
             // ----- Environment -----
 
@@ -44,8 +41,10 @@ namespace xo {
                 return ix->second;
             }
 
+            virtual void print(std::ostream & os) const override;
+
         private:
-            GlobalEnv() = default;
+            GlobalEnv();
 
         private:
             /* for assignable globals,  need to allocate memory

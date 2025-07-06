@@ -16,6 +16,11 @@ namespace xo {
          **/
         class Variable : public Expression {
         public:
+            /** Generate unique symbol-name beginning with @p prefix.
+             *  Relies on static counter
+             **/
+            static std::string gensym(const std::string & prefix);
+
             /** create expression representing a variable
              *  identified by @p name,  that can take on values
              *  described by @p var_type.

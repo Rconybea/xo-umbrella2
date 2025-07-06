@@ -139,7 +139,7 @@ namespace xo {
              * and {(2), (3)} (symbol is function call)
              */
 
-            rp<Variable> var = p_psm->lookup_var(tk.text());
+            bp<Variable> var = p_psm->lookup_var(tk.text());
 
             if (!var) {
                 throw std::runtime_error
@@ -157,7 +157,7 @@ namespace xo {
              *   def y = foo(pi2);
              *           ^
              */
-            progress_xs::start(var, p_psm);
+            progress_xs::start(var.promote(), p_psm);
 
 #ifdef NOT_YET
             p_stack->push_exprstate(exprstate(exprstatetype::expr_progress,

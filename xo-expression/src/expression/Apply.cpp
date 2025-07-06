@@ -59,6 +59,14 @@ namespace xo {
         }
 
         void
+        Apply::attach_envs(bp<Environment> p) {
+            fn_->attach_envs(p);
+
+            for (const auto & arg : argv_)
+                arg->attach_envs(p);
+        }
+
+        void
         Apply::display(std::ostream & os) const {
             os << "<Apply"
                << xtag("fn", fn_)

@@ -9,6 +9,7 @@
 
 namespace xo {
     using xo::ast::Lambda;
+    using xo::ast::LocalEnv;
 
     namespace scm {
         const char *
@@ -60,9 +61,10 @@ namespace xo {
         {
             if (lmxs_type_ == lambdastatetype::lm_1) {
                 this->lmxs_type_ = lambdastatetype::lm_2;
-                this->argl_ = argl;
+                this->parent_env_ = p_psm->top_envframe().promote();
+                this->local_env_ = LocalEnv::make(argl, parent_env_);
 
-                p_psm->push_envframe(envframe(argl));
+                p_psm->push_envframe(local_env_);
 
                 expect_expr_xs::start(p_psm);
             } else {
@@ -99,11 +101,12 @@ namespace xo {
 
                 std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
 
-                std::string name = "fixmename";
+                std::string name = Variable::gensym("lambda");
 
-                rp<Lambda> lm = Lambda::make(name, argl_, body_);
-
+                /* top env frame recorded arguments to this lambda */
                 p_psm->pop_envframe();
+
+                rp<Lambda> lm = Lambda::make_from_env(name, local_env_, body_);
 
                 p_psm->top_exprstate().on_expr(lm, p_psm);
                 p_psm->top_exprstate().on_semicolon_token(tk, p_psm);

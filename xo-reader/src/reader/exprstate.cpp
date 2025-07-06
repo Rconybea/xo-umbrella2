@@ -289,6 +289,7 @@ namespace xo {
             log && log(xtag("tk", tk));
             log && log(xtag("state", *this));
             log && log(xtag("psm", *p_psm));
+            log && log(xtag("proofoflogging", true));
 
             switch (tk.tk_type()) {
 

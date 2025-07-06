@@ -25,10 +25,13 @@ namespace xo {
             using TypeDescr = xo::reflect::TypeDescr;
 
         public:
+            static rp<LocalEnv> make_empty();
             /** named ctor idiom.  Create instance with local variables per @p argv **/
-            static rp<LocalEnv> make(const std::vector<rp<Variable>> & argv) {
-                return new LocalEnv(argv);
-            }
+            static rp<LocalEnv> make(const std::vector<rp<Variable>> & argv,
+                                     const rp<Environment> & parent_env);
+            /** Create instance with single local variable @ap argv1 **/
+            static rp<LocalEnv> make1(const rp<Variable> & arg1,
+                                      const rp<Environment> & parent_env);
 
             Lambda * origin() const { return origin_; }
             const std::vector<rp<Variable>> & argv() const { return argv_; }
@@ -48,10 +51,14 @@ namespace xo {
             }
 
             /** single-assign this environment's parent **/
-            void assign_parent(bp<Environment> p) {
-                assert(parent_env_.get() == nullptr);
-                parent_env_ = p.get();
-            }
+            void assign_parent(bp<Environment> p);
+
+            /** create/replace local variable @p target.
+             *  Narrow use case: intended for when LocalEnv represents a top-level session environment
+             **/
+            void upsert_local(bp<Variable> target);
+
+            bp<Variable> lookup_local(const std::string & vname) const;
 
             // ----- Environment -----
 
@@ -71,9 +78,10 @@ namespace xo {
                 return parent_env_->lookup_var(target);
             }
 
+            virtual void print(std::ostream & os) const override;
+
         private:
-            LocalEnv(const std::vector<rp<Variable>> & argv)
-                : origin_{nullptr}, argv_(argv) {}
+            LocalEnv(const std::vector<rp<Variable>> & argv, const rp<Environment> & parent_env);
 
         private:
             /** Lambnda for which this environment created.
@@ -93,6 +101,7 @@ namespace xo {
              **/
             rp<Environment> parent_env_;
         };
+
     } /*namespace ast*/
 } /*namespace xo*/
 

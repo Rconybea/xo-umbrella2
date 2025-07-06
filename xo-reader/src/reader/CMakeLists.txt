@@ -19,8 +19,7 @@ set(SELF_SRCS
     expect_type_xs.cpp
     lambda_xs.cpp
     let1_xs.cpp
-    envframestack.cpp
-    envframe.cpp)
+    envframestack.cpp)
 
 xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 ${SELF_SRCS})
 xo_dependency(${SELF_LIB} xo_expression)

@@ -6,6 +6,7 @@
 #pragma once
 
 #include "exprstate.hpp"
+#include "xo/expression/LocalEnv.hpp"
 //#include <cstdint>
 
 namespace xo {
@@ -47,6 +48,10 @@ namespace xo {
          **/
         class lambda_xs : public exprstate {
         public:
+            using Environment = xo::ast::Environment;
+            using LocalEnv = xo::ast::LocalEnv;
+
+        public:
             lambda_xs();
 
             static void start(parserstatemachine * p_psm);
@@ -71,11 +76,15 @@ namespace xo {
             /** parsing state-machine state **/
             lambdastatetype lmxs_type_ = lambdastatetype::lm_0;
 
-            /** formal parameter list **/
-            std::vector<rp<Variable>> argl_;
+            /** lambda environment (for formal parameters) **/
+            rp<LocalEnv> local_env_;
 
             /** body expression **/
             rp<Expression> body_;
+
+            /** parent environment **/
+            rp<Environment> parent_env_;
+
         };
     } /*namespace scm*/
 } /*namespace xo*/

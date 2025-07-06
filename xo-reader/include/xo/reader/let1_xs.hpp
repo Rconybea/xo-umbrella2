@@ -6,14 +6,17 @@
 #pragma once
 
 #include "exprstate.hpp"
+#include "xo/expression/LocalEnv.hpp"
 
 namespace xo {
     namespace scm {
         class let1_xs : public exprstate {
         public:
+            using LocalEnv = xo::ast::LocalEnv;
 
+        public:
             /** given local definition equivalent to
-             *   def lhs_name = rhs
+             *   def lhs_name = rhs;
              *   rest...
              *  parse sequence of incoming expressions rest... (until '}')
              *
@@ -27,21 +30,27 @@ namespace xo {
 
             virtual void on_expr(bp<Expression> expr,
                                  parserstatemachine * p_psm) override;
+            virtual void on_expr_with_semicolon(bp<Expression> expr,
+                                                parserstatemachine * p_psm) override;
 
             virtual void on_rightbrace_token(const token_type & tk,
                                              parserstatemachine * p_psm) override;
 
         private:
             let1_xs(std::string lhs_name,
+                    rp<LocalEnv> local_env,
                     rp<Expression> rhs);
 
             /** named ctor idiom **/
             static std::unique_ptr<let1_xs> make(std::string lhs_name,
+                                                 rp<LocalEnv> local_env,
                                                  rp<Expression> rhs);
 
         private:
             /** name for new local variable **/
             std::string lhs_name_;
+            /** environment. contains just @ref lhs_name_ **/
+            rp<LocalEnv> local_env_;
             /** set initial value for @ref lhs_name_ from value of this expression **/
             rp<Expression> rhs_;
 

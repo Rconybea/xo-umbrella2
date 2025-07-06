@@ -63,10 +63,10 @@ namespace xo {
                  *   a + b;  // rhs expression
                  * Variable must have been defined!
                  */
-                rp<Variable> var = p_psm->lookup_var(tk.text());
+                bp<Variable> var = p_psm->lookup_var(tk.text());
 
                 if (var.get()) {
-                    progress_xs::start(var, p_psm);
+                    progress_xs::start(var.promote(), p_psm);
                 } else {
                     this->unknown_variable_error(c_self_name, tk);
                 }

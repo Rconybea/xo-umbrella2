@@ -9,4 +9,6 @@ xo-reader provides a parser for the Schematika language.
    :maxdepth: 2
    :caption: xo-reader contents
 
+   install
    example
+   implementation

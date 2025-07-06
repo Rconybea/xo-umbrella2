@@ -7,10 +7,11 @@
 #include "exprstatestack.hpp"
 
 namespace xo {
+    using xo::ast::LocalEnv;
     using xo::ast::Variable;
 
     namespace scm {
-        rp<Variable>
+        bp<Variable>
         parserstatemachine::lookup_var(const std::string & x) const {
             return p_env_stack_->lookup(x);
         }
@@ -35,22 +36,27 @@ namespace xo {
             p_stack_->push_exprstate(std::move(x));
         }
 
+        bp<LocalEnv>
+        parserstatemachine::top_envframe() const {
+            return p_env_stack_->top_envframe();
+        }
+
         void
-        parserstatemachine::push_envframe(envframe x) {
+        parserstatemachine::push_envframe(const rp<LocalEnv> & x) {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
             log && log(xtag("frame", x));
 
-            p_env_stack_->push_envframe(std::move(x));
+            p_env_stack_->push_envframe(x);
         }
 
-        void
+        rp<LocalEnv>
         parserstatemachine::pop_envframe() {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            p_env_stack_->pop_envframe();
+            return p_env_stack_->pop_envframe();
         }
 
         void
@@ -74,6 +80,8 @@ namespace xo {
 
             log && log(xtag("x", x),
                        xtag("psm", *this));
+
+            assert(!this->p_stack_->empty());
 
             this->p_stack_
                 ->top_exprstate().on_expr_with_semicolon(x, this);

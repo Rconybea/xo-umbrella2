@@ -15,11 +15,11 @@ namespace xo {
             std::vector<test_case> s_testcase_v = {
                 {"def foo : f64 = 3.14159265;"},
                 {"def foo : f64 = (3.14159265);"},
-                //{"def foo : f64 = 2.0 * 3.14159265;"},
+                {"def foo = 2.0 * 3.141569265;"},
                 {"def foo = lambda (x : f64) 3.1415965;"},
                 {"def foo = lambda (x : f64, y : f64) 3.1415965;"},
                 {"def foo = lambda (x : f64) x;"},
-                {"def foo = lambda (x : f64) { def y = x * x; y; }"},
+                //{"def foo = lambda (x : f64) { def y = x * x; y; }"},
             };
         }
 

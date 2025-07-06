@@ -35,6 +35,8 @@ bool replxx_getline(bool interactive, std::size_t parser_stack_size, replxx::Rep
 
     rx.history_add(input);
 
+    input.push_back('\n');
+
     return retval;
 }
 

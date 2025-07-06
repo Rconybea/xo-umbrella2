@@ -11,6 +11,7 @@ set(SELF_SRCS
     Variable.cpp
     IfExpr.cpp
     Sequence.cpp
+    GlobalEnv.cpp
     LocalEnv.cpp
     ConvertExpr.cpp
     Primitive.cpp

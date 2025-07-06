@@ -51,6 +51,9 @@ namespace xo {
          *  Handles an expression that produces a value, for example appearing on the
          *  right-hand side of a definition.
          *
+         *  Deals with infix operators, handles operator precedence.
+         *  Also generates argument-type-specific arithmetic expressions,
+         *  for example using ``Apply::make_add2_f64()`` when adding floating-point numbers
          **/
         class progress_xs : public exprstate {
         public:
@@ -71,6 +74,8 @@ namespace xo {
 
             virtual void on_expr(bp<Expression> expr,
                                  parserstatemachine * p_psm) override;
+            virtual void on_expr_with_semicolon(bp<Expression> expr,
+                                                parserstatemachine * p_psm) override;
             virtual void on_symbol_token(const token_type & tk,
                                          parserstatemachine * p_psm) override;
             virtual void on_typedescr(TypeDescr td,

@@ -29,7 +29,7 @@ See ``xo-reader/examples`` for built examples
 
             for (auto rem = input; !rem.empty();) {
                 // res: (parsed-expr, used)
-                auto [expr, rem2] = rdr.read_expr(rem, eof);
+                auto [expr, rem2, _] = rdr.read_expr(rem, eof);
 
                 if (expr) {
                      cout << expr << endl;

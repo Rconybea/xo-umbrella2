@@ -21,6 +21,7 @@ namespace xo {
         public:
             using Expression = xo::ast::Expression;
             using Variable = xo::ast::Variable;
+            using LocalEnv = xo::ast::LocalEnv;
             using token_type = token<char>;
 
         public:
@@ -38,15 +39,17 @@ namespace xo {
             /** lookup variable name in lexical context represented by
              *  this psm.  nullptr if not found
              **/
-            rp<Variable> lookup_var(const std::string & x) const;
+            bp<Variable> lookup_var(const std::string & x) const;
 
             /** update/replace binding for variable @p x in lexical context
              *  represented by this psm.  Always acts on innermost frame.
              **/
             void upsert_var(bp<Variable> x);
 
-            void push_envframe(envframe x);
-            void pop_envframe();
+            bp<LocalEnv> top_envframe() const;
+            void push_envframe(const rp<LocalEnv> & x);
+            rp<LocalEnv> pop_envframe();
+            size_t env_stack_size() const { return  p_env_stack_->size(); }
 
             // ----- parsing outputs -----
 
