@@ -1,6 +1,7 @@
 /* @file Refcounted.cpp */
 
 #include "Refcounted.hpp"
+#include "pretty_refcnt.hpp"
 
 namespace xo {
     namespace ref {
