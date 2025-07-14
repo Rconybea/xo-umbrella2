@@ -230,7 +230,7 @@ namespace xo {
         template<typename T>
         inline std::ostream &
         operator<<(std::ostream & os, intrusive_ptr<T> const & x) {
-            if(x.get()) {
+            if (x.get()) {
                 os << *(x.get());
             } else {
                 os << "<nullptr " << reflect::type_name<T>() << ">";
