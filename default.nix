@@ -185,6 +185,9 @@ pkgs.mkShell {
   ];
 
   shellHook = ''
+    # override SOUCE_DATE_EPOCH to current time (otherwise will get 1980)
+    export SOURCE_DATE_EPOCH=$(date +%s)
+
     echo "xo development environment loaded!"
   '';
 }
