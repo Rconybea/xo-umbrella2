@@ -1,6 +1,7 @@
 /* @file Sequence.cpp */
 
 #include "Sequence.hpp"
+#include "pretty_expression.hpp"
 #include <cstddef>
 
 namespace xo {
@@ -70,6 +71,54 @@ namespace xo {
             }
 
             os << ">";
+        }
+
+        std::uint32_t
+        Sequence::pretty_print(ppstate * pps, bool upto) const
+        {
+            if (upto) {
+                std::uint32_t saved = pps->pos();
+
+                if (!pps->has_margin())
+                    return false;
+
+                if (!pps->print_upto("<Sequence"))
+                    return false;
+
+                std::size_t i = 0;
+                for (const auto & expr_i : expr_v_) {
+                    if (!pps->has_margin())
+                        return false;
+
+                    std::string i_str = tostr("[", i, "]");
+
+                    if (!pps->print_upto(xtag(i_str.c_str(), expr_i)))
+                        return false;
+                    ++i;
+                }
+
+                if (!pps->has_margin())
+                    return false;
+
+                return pps->scan_no_newline(saved);
+            } else {
+                std::uint32_t ci0 = pps->lpos();
+                std::uint32_t ci1 = ci0 + pps->indent_width();
+
+                pps->write("<Sequence");
+
+                std::size_t i = 0;
+                for (const auto & expr_i : expr_v_) {
+                    std::string i_str = tostr("[", i, "]");
+
+                    pps->newline_indent(ci1);
+                    pps->pretty(xtag(i_str.c_str(), expr_i));
+                    ++i;
+                }
+
+                pps->write(">");
+                return false;
+            }
         }
     } /*namespace scm*/
 } /*namespace xo*/

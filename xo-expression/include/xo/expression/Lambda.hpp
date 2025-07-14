@@ -98,6 +98,7 @@ namespace xo {
             virtual void attach_envs(bp<Environment> p) override;
 
             virtual void display(std::ostream & os) const override;
+            virtual std::uint32_t pretty_print(ppstate * pps, bool upto) const override;
 
         protected:
             /** create type description for lambda with arguments @p argv

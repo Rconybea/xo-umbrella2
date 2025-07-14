@@ -101,6 +101,7 @@ namespace xo {
             virtual void attach_envs(bp<Environment> p) override;
 
             virtual void display(std::ostream & os) const override;
+            virtual std::uint32_t pretty_print(ppstate * pps, bool upto) const override;
 
         private:
             Apply(TypeDescr apply_valuetype,

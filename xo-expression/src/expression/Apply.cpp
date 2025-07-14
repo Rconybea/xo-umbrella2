@@ -2,7 +2,9 @@
 
 #include "Apply.hpp"
 #include "Primitive.hpp"
+#include "exprtype.hpp"
 #include "xo/indentlog/print/vector.hpp"
+#include <cstdint>
 
 namespace xo {
     namespace ast {
@@ -73,6 +75,43 @@ namespace xo {
                << xtag("argv", argv_)
                << ">";
         }
+
+        std::uint32_t
+        Apply::pretty_print(ppstate * pps, bool upto) const
+        {
+            if (upto) {
+                std::uint32_t saved = pps->pos();
+
+                if (!pps->has_margin())
+                    return false;
+
+                if (!pps->print_upto("<Apply"))
+                    return false;
+
+                if (!pps->print_upto(xtag("fn", fn_)))
+                    return false;
+
+                if (!pps->print_upto(xtag("argv", argv_)))
+                    return false;
+
+                return pps->scan_no_newline(saved);
+            } else {
+                std::uint32_t ci0 = pps->lpos();
+                std::uint32_t ci1 = ci0 + pps->indent_width();
+
+                pps->write("<Apply");
+
+                pps->newline_indent(ci1);
+                pps->pretty(xtag("fn", fn_));
+
+                pps->newline_indent(ci1);
+                pps->pretty(xtag("argv", argv_));
+                pps->write(">");
+
+                return false;
+            }
+        }
+
     } /*namespace ast*/
 } /*namespace xo*/
 

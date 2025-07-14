@@ -5,6 +5,9 @@
 
 #include "DefineExpr.hpp"
 #include "Variable.hpp"
+#include "pretty_expression.hpp"
+#include "xo/indentlog/print/pretty_tag.hpp"
+#include <cstdint>
 
 namespace xo {
     namespace ast {
@@ -60,6 +63,42 @@ namespace xo {
                << xtag("rhs", rhs_)
                << ">";
         } /*display*/
+
+        std::uint32_t
+        DefineExpr::pretty_print(ppstate * pps, bool upto) const
+        {
+            if (upto) {
+                std::uint32_t saved = pps->pos();
+
+                if (!pps->has_margin())
+                    return false;
+
+                if (!pps->print_upto("<Define"))
+                    return false;
+
+                if (!pps->print_upto(xtag("name", lhs_name_)))
+                    return false;
+
+                if (!pps->print_upto(xtag("rhs", rhs_)))
+                    return false;
+
+                return pps->scan_no_newline(saved);
+            } else {
+                std::uint32_t ci0 = pps->lpos();
+                std::uint32_t ci1 = ci0 + pps->indent_width();
+
+                pps->write("<Define");
+
+                pps->newline_indent(ci1);
+                pps->pretty(xtag("name", lhs_name_));
+
+                pps->newline_indent(ci1);
+                pps->pretty(xtag("rhs", rhs_));
+                pps->write(">");
+
+                return false;
+            }
+        }
 
         // ----- DefineExprAccess -----
 

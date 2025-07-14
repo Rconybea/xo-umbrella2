@@ -103,6 +103,12 @@ namespace xo {
         };
 
     } /*namespace ast*/
+
+#ifndef ppdetail_atomic
+    namespace print {
+        PPDETAIL_ATOMIC(xo::ast::LocalEnv);
+    }
+#endif
 } /*namespace xo*/
 
 

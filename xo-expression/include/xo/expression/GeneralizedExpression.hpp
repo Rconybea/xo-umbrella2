@@ -8,7 +8,6 @@
 #include "xo/refcnt/Refcounted.hpp"
 #include "xo/reflect/TypeDescr.hpp"
 #include "exprtype.hpp"
-//#include <cstdint>
 
 namespace xo {
     namespace ast {
@@ -22,6 +21,7 @@ namespace xo {
         class GeneralizedExpression : public ref::Refcount {
         public:
             using TypeDescr = xo::reflect::TypeDescr;
+            using ppstate = xo::print::ppstate;
 
         public:
             GeneralizedExpression(exprtype extype, TypeDescr valuetype)
@@ -34,6 +34,8 @@ namespace xo {
             virtual void display(std::ostream & os) const = 0;
             /** human-readable string representation **/
             virtual std::string display_string() const;
+            /** pretty printing support.  See [xo-indentlog/xo/indentlog/pretty.hpp] **/
+            virtual std::uint32_t pretty_print(ppstate * pps, bool upto) const;
 
         protected:
             /** useful when scaffolding expressions in a parser **/
