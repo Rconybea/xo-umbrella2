@@ -12,6 +12,7 @@ Some features: kalman filters, stochastic processes, complex event processing, s
    :caption: XO contents
 
    docs/install
+   xo-indentlog/docs/index
    xo-flatstring/docs/index
    xo-ratio/docs/index
    xo-unit/docs/index
