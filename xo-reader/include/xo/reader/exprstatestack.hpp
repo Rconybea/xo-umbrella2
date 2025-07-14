@@ -7,6 +7,7 @@
 
 #include "exprstate.hpp"
 #include "xo/indentlog/print/vector.hpp"
+#include "xo/indentlog/print/pretty.hpp"
 
 namespace xo {
     namespace scm {
@@ -64,6 +65,21 @@ namespace xo {
             return os;
         }
     } /*namespace scm*/
+
+#ifndef ppdetail_atomic
+    namespace print {
+        template <>
+        struct ppdetail<xo::scm::exprstatestack *> {
+            static bool print_upto(ppstate * pps, const xo::scm::exprstatestack * x) {
+                return ppdetail_atomic<const xo::scm::exprstatestack *>::print_upto(pps, x);
+            }
+            static void print_pretty(ppstate * pps, const xo::scm::exprstatestack * x) {
+                ppdetail_atomic<const xo::scm::exprstatestack *>::print_pretty(pps, x);
+            }
+        };
+    }
+#endif
+
 } /*namespace xo*/
 
 

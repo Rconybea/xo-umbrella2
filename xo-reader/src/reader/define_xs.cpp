@@ -6,6 +6,7 @@
 #include "expect_symbol_xs.hpp"
 #include "expect_expr_xs.hpp"
 #include "expect_type_xs.hpp"
+#include "pretty_expression.hpp"
 
 namespace xo {
     namespace scm {

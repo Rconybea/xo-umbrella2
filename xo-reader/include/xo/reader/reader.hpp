@@ -7,6 +7,7 @@
 
 #include "parser.hpp"
 #include "xo/expression/Expression.hpp"
+#include "xo/expression/pretty_expression.hpp"
 #include "xo/tokenizer/tokenizer.hpp"
 
 namespace xo {

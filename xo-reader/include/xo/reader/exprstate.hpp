@@ -214,6 +214,13 @@ namespace xo {
             return os;
         };
     } /*namespace scm*/
+
+#ifndef ppdetail_atomic
+    namespace print {
+        PPDETAIL_ATOMIC(xo::scm::exprstatetype);
+        PPDETAIL_ATOMIC(xo::scm::exprstate);
+    } /*namespace print*/
+#endif
 } /*namespace xo*/
 
 /** end exprstate.hpp **/

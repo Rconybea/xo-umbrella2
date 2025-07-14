@@ -5,6 +5,7 @@
 
 #include "parserstatemachine.hpp"
 #include "exprstatestack.hpp"
+#include "xo/expression/pretty_expression.hpp"
 
 namespace xo {
     using xo::ast::LocalEnv;

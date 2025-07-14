@@ -7,6 +7,7 @@
 #include "parserstatemachine.hpp"
 #include "define_xs.hpp"
 #include "exprseq_xs.hpp"
+#include "pretty_expression.hpp"
 #include "xo/expression/DefineExpr.hpp"
 #include "xo/expression/Constant.hpp"
 #include "xo/expression/ConvertExpr.hpp"

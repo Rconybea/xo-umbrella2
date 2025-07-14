@@ -6,6 +6,7 @@
 #include "let1_xs.hpp"
 #include "xo/expression/DefineExpr.hpp"
 #include "xo/expression/Sequence.hpp"
+#include "xo/expression/pretty_expression.hpp"
 
 namespace xo {
     using xo::ast::DefineExpr;

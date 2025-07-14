@@ -61,6 +61,10 @@ int
 main() {
     using namespace replxx;
     using namespace xo::scm;
+    using xo::ast::Expression;
+    using xo::print::ppconfig;
+    using xo::print::ppstate_standalone;
+    using xo::rp;
     using namespace std;
 
     using span_type = xo::scm::span<const char>;
@@ -92,7 +96,10 @@ main() {
             auto [expr, consumed, psz] = rdr.read_expr(input, eof);
 
             if (expr) {
-                cout << expr << endl;
+                ppconfig ppc;
+                ppstate_standalone pps(&cout, 0, &ppc);
+
+                pps.prettyn(expr);
             }
 
             input = input.after_prefix(consumed);
@@ -103,7 +110,10 @@ main() {
     auto [expr, _1, _2] = rdr.read_expr(input, true /*eof*/);
 
     if (expr) {
-        cout << expr << endl;
+        ppconfig ppc;
+        ppstate_standalone pps(&cout, 0, &ppc);
+
+        pps.prettyn<rp<Expression>>(rp<Expression>(expr));
     }
 
     rx.history_save("repl_history.txt");

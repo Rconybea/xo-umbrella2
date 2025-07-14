@@ -5,6 +5,7 @@
 #include "exprstatestack.hpp"
 #include "progress_xs.hpp"
 #include "expect_expr_xs.hpp"
+#include "xo/expression/pretty_expression.hpp"
 
 namespace xo {
     namespace scm {

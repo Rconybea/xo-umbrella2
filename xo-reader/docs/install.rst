@@ -49,8 +49,8 @@ Minimal Dependencies
 .. _xo-subsys source: https://github.com/rconybea/subsys
 .. _xo-cmake source: https://github.com/rconybea/xo-cmake
 
-Installing from source
-----------------------
+Building from source
+--------------------
 
 Install scripts for XO libraries depend on helper scripts installed from `xo-cmake`.
 
@@ -135,12 +135,11 @@ CMake Support
 
 To use built-in cmake support, when using ``xo-reader`` from another project:
 
-Make sure ``PREFIX/lib/cmake`` is searched by cmake (if necessary, include it in ``CMAKE_PREFIX_PATH``)
+Make sure ``PREFIX/lib/cmake`` is searched by cmake (for example include it in ``CMAKE_PREFIX_PATH``)
 
 Add to your ``CMakeLists.txt``:
 
 .. code-block:: cmake
 
     FindPackage(xo_reader CONFIG REQUIRED)
-
     target_link_libraries(mytarget INTERFACE xo_reader)

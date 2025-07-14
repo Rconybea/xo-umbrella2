@@ -132,6 +132,12 @@ namespace xo {
             rp<Expression> rhs_;
         };
     } /*namespace scm*/
+
+#ifndef ppdetail_atomic
+    namespace print {
+        PPDETAIL_ATOMIC(xo::scm::optype);
+    }
+#endif
 } /*namespace xo*/
 
 

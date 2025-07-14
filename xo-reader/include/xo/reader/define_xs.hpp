@@ -8,6 +8,7 @@
 #include "xo/expression/DefineExpr.hpp"
 #include "xo/expression/ConvertExpr.hpp"
 #include "exprstate.hpp"
+#include "xo/indentlog/print/ppdetail_atomic.hpp"
 //#include <cstdint>
 
 namespace xo {
@@ -117,6 +118,12 @@ namespace xo {
             rp<ConvertExprAccess> cvt_expr_;
         };
     } /*namespace scm*/
+
+#ifndef ppdetail_atomic
+    namespace print {
+        PPDETAIL_ATOMIC(xo::scm::defexprstatetype);
+    }
+#endif
 } /*namespace xo*/
 
 

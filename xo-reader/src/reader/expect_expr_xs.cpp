@@ -13,6 +13,7 @@
 #include "progress_xs.hpp"
 #include "xo/expression/Lambda.hpp"
 #include "xo/expression/Constant.hpp"
+#include "xo/expression/pretty_expression.hpp"
 
 namespace xo {
     using xo::ast::Constant;

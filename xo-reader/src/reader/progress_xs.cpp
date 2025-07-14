@@ -6,6 +6,7 @@
 #include "parserstatemachine.hpp"
 #include "xo/expression/AssignExpr.hpp"
 #include "xo/expression/Apply.hpp"
+#include "xo/expression/pretty_expression.hpp"
 
 namespace xo {
     using xo::ast::Expression;
