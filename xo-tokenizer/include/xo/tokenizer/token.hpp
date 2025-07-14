@@ -420,6 +420,13 @@ namespace xo {
             return os;
         }
     } /*Namespace scm*/
+
+#ifndef ppdetail_atomic
+    namespace print {
+        PPDETAIL_ATOMIC(xo::scm::token<char>);
+    }
+#endif
+
 } /*namespace xo*/
 
 /* end token.hpp */

@@ -10,6 +10,7 @@
 #include "span.hpp"
 #include "scan_result.hpp"
 #include "xo/indentlog/scope.hpp"
+#include "xo/indentlog/print/ppdetail_atomic.hpp"
 #include <cassert>
 
 namespace xo {

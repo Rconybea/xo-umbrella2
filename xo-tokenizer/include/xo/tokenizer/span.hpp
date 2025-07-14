@@ -3,6 +3,7 @@
 #pragma once
 
 #include "xo/indentlog/scope.hpp"
+#include "xo/indentlog/print/ppdetail_atomic.hpp"
 #include <ostream>
 #include <cstdint>
 #include <cassert>
@@ -266,5 +267,14 @@ namespace xo {
 
             return os;
         }
+
+#ifndef ppdetail_atomic
+        template <typename CharT>        \
+        PPDETAIL_ATOMIC_BODY(printspan_impl<CharT>);
+
+        template <typename CharT>        \
+        PPDETAIL_ATOMIC_BODY(xo::scm::span<CharT>);
+#endif
+
     }
 } /*namespace xo*/
