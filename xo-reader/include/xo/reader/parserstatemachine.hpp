@@ -87,13 +87,4 @@ namespace xo {
             return os;
         }
     } /*namespace scm*/
-
-#ifndef ppdetail_atomic
-    namespace print {
-        PPDETAIL_ATOMIC(xo::scm::parserstatemachine);
-    }
-#endif
 } /*namespace xo*/
-
-
-/* end parserstatemachine.hpp */

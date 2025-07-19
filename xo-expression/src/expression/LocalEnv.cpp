@@ -4,7 +4,10 @@
  */
 
 #include "LocalEnv.hpp"
+#include "pretty_variable.hpp"
+#include "xo/indentlog/print/pretty_vector.hpp"
 #include "xo/indentlog/print/vector.hpp"
+
 
 namespace xo {
     namespace ast {
@@ -112,6 +115,33 @@ namespace xo {
                << xtag("argv", argv_)
                << ">";
         }
+
+        std::uint32_t
+        LocalEnv::pretty_print(const xo::print::ppindentinfo & ppii) const {
+            using xo::print::ppstate;
+
+            ppstate * pps = ppii.pps();
+
+            if (ppii.upto()) {
+                if (!pps->print_upto("<LocalEnv"))
+                    return false;
+                if (!pps->print_upto_tag("this", (void*)this))
+                    return false;
+                if (!pps->print_upto_tag("argv", argv_))
+                    return false;
+                pps->write(">");
+
+                return true;
+            } else {
+                pps->write("<LocalEnv");
+                pps->newline_pretty_tag(ppii.ci1(), "this", (void*)this);
+                pps->newline_pretty_tag(ppii.ci1(), "argv", argv_);
+                pps->write(">");
+
+                return false;
+            }
+        }
+
     } /*namespace ast*/
 } /*namespace xo*/
 

@@ -543,6 +543,16 @@ namespace xo {
             return n;
         } /*run_throttled_until*/
 
+        void
+        Simulator::display(std::ostream & os) const
+        {
+            os << "<Simulator"
+               << xtag("sim_heap.size", sim_heap_.size())
+               << xtag("n_event", n_event_)
+               << xtag("src_v.size", src_v_.size())
+               << ">";
+        } /*display*/
+
     } /*namespace sim*/
 } /*namespace xo*/
 

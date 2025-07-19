@@ -6,6 +6,7 @@
 #pragma once
 
 #include "ConstantInterface.hpp"
+#include "pretty_expression.hpp"
 #include <type_traits>
 
 namespace xo {
@@ -70,9 +71,15 @@ namespace xo {
                 if (value_td_)
                     os << xtag("type", value_td_->short_name());
                 else
-                    os << xtag("type", "nullptr");;
+                    os << xtag("type", "nullptr");
                 os << xtag("value", value_);
                 os << ">";
+            }
+
+            virtual std::uint32_t pretty_print(const ppindentinfo & ppii) const override {
+                return ppii.pps()->pretty_struct(ppii, "Constant",
+                                                 rtag("type", print::quot(this->valuetype()->short_name())),
+                                                 refrtag("value", value_));
             }
 
         private:

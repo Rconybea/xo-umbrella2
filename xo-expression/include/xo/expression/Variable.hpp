@@ -65,6 +65,7 @@ namespace xo {
             virtual void attach_envs(bp<Environment> /*p*/) override;
 
             virtual void display(std::ostream & os) const override;
+            virtual std::uint32_t pretty_print(const ppindentinfo & ppii) const override;
 
         private:
             Variable(const std::string & name,

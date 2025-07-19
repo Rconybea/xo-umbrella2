@@ -42,6 +42,7 @@ namespace xo {
             }
 
             virtual void print(std::ostream & os) const override;
+            virtual std::uint32_t pretty_print(const xo::print::ppindentinfo & ppii) const override;
 
         private:
             GlobalEnv();

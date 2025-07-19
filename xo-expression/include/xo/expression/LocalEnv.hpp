@@ -79,6 +79,7 @@ namespace xo {
             }
 
             virtual void print(std::ostream & os) const override;
+            virtual std::uint32_t pretty_print(const print::ppindentinfo & ppii) const override;
 
         private:
             LocalEnv(const std::vector<rp<Variable>> & argv, const rp<Environment> & parent_env);
@@ -103,12 +104,6 @@ namespace xo {
         };
 
     } /*namespace ast*/
-
-#ifndef ppdetail_atomic
-    namespace print {
-        PPDETAIL_ATOMIC(xo::ast::LocalEnv);
-    }
-#endif
 } /*namespace xo*/
 
 

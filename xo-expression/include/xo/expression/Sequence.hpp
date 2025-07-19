@@ -6,7 +6,6 @@
 #pragma once
 
 #include "Expression.hpp"
-//#include <cstdint>
 
 namespace xo {
     namespace ast {
@@ -38,7 +37,7 @@ namespace xo {
             // ----- from GeneralizedExpression ----
 
             virtual void display(std::ostream & os) const override;
-            virtual std::uint32_t pretty_print(ppstate * pps, bool upto) const override;
+            virtual std::uint32_t pretty_print(const ppindentinfo & ppii) const override;
 
         private:
             /** sequence of expressions;  evaluate in left-to-right order.
@@ -48,6 +47,5 @@ namespace xo {
     } /*namespace ast*/
 
 } /*namespace xo*/
-
 
 /** end Sequence.hpp **/

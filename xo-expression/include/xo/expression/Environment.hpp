@@ -7,8 +7,10 @@
 
 #include "xo/refcnt/Refcounted.hpp"
 #include "binding_path.hpp"
+#include "xo/indentlog/print/pretty.hpp"
 
 namespace xo {
+
     namespace ast {
         class Expression;
 
@@ -35,6 +37,7 @@ namespace xo {
             virtual bp<Expression> lookup_var(const std::string & vname) const = 0;
 
             virtual void print(std::ostream & os) const = 0;
+            virtual std::uint32_t pretty_print(const xo::print::ppindentinfo & ppii) const = 0;
         };
 
         inline std::ostream &

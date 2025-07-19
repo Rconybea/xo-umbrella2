@@ -4,6 +4,7 @@
  */
 
 #include "ConvertExpr.hpp"
+#include "pretty_expression.hpp"
 
 namespace xo {
     namespace ast {
@@ -29,6 +30,13 @@ namespace xo {
                << xtag("dest_type", this->valuetype()->short_name())
                << xtag("arg", arg_)
                << ">";
+        }
+
+        std::uint32_t
+        ConvertExpr::pretty_print(const ppindentinfo & ppii) const {
+            return ppii.pps()->pretty_struct(ppii, "Convert",
+                                             rtag("dest_type", print::quot(this->valuetype()->short_name())),
+                                             refrtag("arg", arg_));
         }
 
         // ----- ConvertExprAccess -----

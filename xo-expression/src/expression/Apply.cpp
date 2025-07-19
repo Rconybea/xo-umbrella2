@@ -3,7 +3,9 @@
 #include "Apply.hpp"
 #include "Primitive.hpp"
 #include "exprtype.hpp"
+#include "pretty_expression.hpp"
 #include "xo/indentlog/print/vector.hpp"
+#include "xo/indentlog/print/pretty_vector.hpp"
 #include <cstdint>
 
 namespace xo {
@@ -77,39 +79,35 @@ namespace xo {
         }
 
         std::uint32_t
-        Apply::pretty_print(ppstate * pps, bool upto) const
+        Apply::pretty_print(const ppindentinfo & ppii) const
         {
-            if (upto) {
-                std::uint32_t saved = pps->pos();
+            return ppii.pps()->pretty_struct(ppii, "Apply",
+                                             refrtag("fn", fn_),
+                                             refrtag("argv", argv_));
 
-                if (!pps->has_margin())
-                    return false;
+#ifdef OBSOLETE
+            ppstate * pps = ppii.pps();
 
+            if (ppii.upto()) {
                 if (!pps->print_upto("<Apply"))
                     return false;
 
-                if (!pps->print_upto(xtag("fn", fn_)))
+                if (!pps->print_upto_tag("fn", fn_))
                     return false;
 
-                if (!pps->print_upto(xtag("argv", argv_)))
+                if (!pps->print_upto_tag("argv", argv_))
                     return false;
 
-                return pps->scan_no_newline(saved);
+                return true;
             } else {
-                std::uint32_t ci0 = pps->lpos();
-                std::uint32_t ci1 = ci0 + pps->indent_width();
-
                 pps->write("<Apply");
-
-                pps->newline_indent(ci1);
-                pps->pretty(xtag("fn", fn_));
-
-                pps->newline_indent(ci1);
-                pps->pretty(xtag("argv", argv_));
+                pps->newline_pretty_tag(ppii.ci1(), "fn", fn_);
+                pps->newline_pretty_tag(ppii.ci1(), "argv", argv_);
                 pps->write(">");
 
                 return false;
             }
+#endif
         }
 
     } /*namespace ast*/

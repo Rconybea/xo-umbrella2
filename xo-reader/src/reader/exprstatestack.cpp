@@ -4,6 +4,7 @@
  */
 
 #include "exprstatestack.hpp"
+#include <cstdint>
 
 namespace xo {
     namespace scm {
@@ -64,6 +65,48 @@ namespace xo {
             }
 
             os << ">" << std::endl;
+        }
+
+        bool
+        exprstatestack::pretty_print(const ppindentinfo & ppii) const
+        {
+            ppstate * pps = ppii.pps();
+
+            if (ppii.upto()) {
+                if (stack_.size() > 1)
+                    return false;
+
+                if (!pps->print_upto("<exprstatestack"))
+                    return false;
+
+                if (!pps->print_upto_tag("size", stack_.size()))
+                    return false;
+
+                /** always multiple lines if more than one element in stack **/
+                if ((stack_.size() > 0)
+                    && !pps->print_upto_tag("[0]", *stack_[0].get()))
+                {
+                    return false;
+                }
+
+                pps->write(">");
+
+                return true;
+            } else {
+                pps->write("<exprstatestack");
+
+                pps->newline_pretty_tag(ppii.ci1(), "size", stack_.size());
+
+                for (std::size_t i = 0, z = stack_.size(); i < z; ++i) {
+                    std::string i_str = tostr("[", z-i-1, "]");
+
+                    pps->newline_pretty_tag(ppii.ci1(), i_str, *stack_[i].get());
+                }
+
+                pps->write(">");
+
+                return false;
+            }
         }
     } /*namespace scm*/
 } /*namespace xo*/

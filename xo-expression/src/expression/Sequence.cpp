@@ -74,14 +74,11 @@ namespace xo {
         }
 
         std::uint32_t
-        Sequence::pretty_print(ppstate * pps, bool upto) const
+        Sequence::pretty_print(const ppindentinfo & ppii) const
         {
-            if (upto) {
-                std::uint32_t saved = pps->pos();
+            ppstate * pps = ppii.pps();
 
-                if (!pps->has_margin())
-                    return false;
-
+            if (ppii.upto()) {
                 if (!pps->print_upto("<Sequence"))
                     return false;
 
@@ -91,8 +88,7 @@ namespace xo {
                         return false;
 
                     std::string i_str = tostr("[", i, "]");
-
-                    if (!pps->print_upto(xtag(i_str.c_str(), expr_i)))
+                    if (!pps->print_upto_tag(i_str.c_str(), expr_i))
                         return false;
                     ++i;
                 }
@@ -100,19 +96,18 @@ namespace xo {
                 if (!pps->has_margin())
                     return false;
 
-                return pps->scan_no_newline(saved);
-            } else {
-                std::uint32_t ci0 = pps->lpos();
-                std::uint32_t ci1 = ci0 + pps->indent_width();
+                pps->write(">");
 
+                return true;
+            } else {
                 pps->write("<Sequence");
 
                 std::size_t i = 0;
                 for (const auto & expr_i : expr_v_) {
                     std::string i_str = tostr("[", i, "]");
-
-                    pps->newline_indent(ci1);
-                    pps->pretty(xtag(i_str.c_str(), expr_i));
+                    pps->newline_pretty_tag(ppii.ci1(),
+                                            i_str.c_str(),
+                                            expr_i);
                     ++i;
                 }
 

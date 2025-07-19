@@ -3,6 +3,7 @@
 #include "exprstate.hpp"
 #include "exprstatestack.hpp"
 #include "parserstatemachine.hpp"
+#include "pretty_parserstatemachine.hpp"
 #include "pretty_expression.hpp"
 //#include "formal_arg.hpp"
 #include "xo/expression/Variable.hpp"

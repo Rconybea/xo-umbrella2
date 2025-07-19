@@ -20,7 +20,33 @@ namespace xo {
 
         void
         GlobalEnv::print(std::ostream & os) const {
-            os << "<globalenv" << xtag("size", global_map_.size()) << ">";
+            os << "<GlobalEnv"
+               << xtag("size", global_map_.size())
+               << ">";
+        }
+
+        std::uint32_t
+        GlobalEnv::pretty_print(const xo::print::ppindentinfo & ppii) const
+        {
+            using xo::print::ppstate;
+
+            ppstate * pps = ppii.pps();
+
+            if (ppii.upto()) {
+                if (!pps->print_upto("<GlobalEnv"))
+                    return false;
+                if (!pps->print_upto_tag("size", global_map_.size()))
+                    return false;
+                pps->write(">");
+
+                return true;
+            } else {
+                pps->write("<GlobalEnv");
+                pps->newline_pretty_tag(ppii.ci1(), "size", global_map_.size());
+                pps->write(">");
+
+                return false;
+            }
         }
     } /*namespace ast*/
 } /*namespace xo*/

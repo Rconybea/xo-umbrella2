@@ -14,8 +14,10 @@ namespace xo {
          **/
         class envframestack {
         public:
-            using LocalEnv = xo::ast::LocalEnv;
-            using Variable = xo::ast::Variable;
+            using LocalEnv     = xo::ast::LocalEnv;
+            using Variable     = xo::ast::Variable;
+            using ppstate      = xo::print::ppstate;
+            using ppindentinfo = xo::print::ppindentinfo;
 
         public:
             envframestack() {}
@@ -58,6 +60,7 @@ namespace xo {
             }
 
             void print (std::ostream & os) const;
+            bool pretty_print(const ppindentinfo & ppii) const;
 
         private:
             std::vector<rp<LocalEnv>> stack_;

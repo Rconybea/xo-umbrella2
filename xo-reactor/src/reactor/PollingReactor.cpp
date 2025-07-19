@@ -98,6 +98,15 @@ namespace xo {
 
             return retval;
         } /*run_one*/
+
+        void
+        PollingReactor::display(std::ostream & os) const {
+            os << "<PollingReactor"
+               << xtag("next_ix", next_ix_)
+               << xtag("source_v.size", source_v_.size())
+               << ">";
+        }
+
     } /*namespace reactor*/
 } /*namespace xo*/
 

@@ -6,7 +6,6 @@
 #include "DefineExpr.hpp"
 #include "Variable.hpp"
 #include "pretty_expression.hpp"
-#include "xo/indentlog/print/pretty_tag.hpp"
 #include <cstdint>
 
 namespace xo {
@@ -65,39 +64,33 @@ namespace xo {
         } /*display*/
 
         std::uint32_t
-        DefineExpr::pretty_print(ppstate * pps, bool upto) const
+        DefineExpr::pretty_print(const ppindentinfo & ppii) const
         {
-            if (upto) {
-                std::uint32_t saved = pps->pos();
+            return ppii.pps()->pretty_struct(ppii, "Define",
+                                             refrtag("name", lhs_name_),
+                                             refrtag("rhs", rhs_));
 
-                if (!pps->has_margin())
-                    return false;
+#ifdef OBSOLETE
+            ppstate * pps = ppii.pps();
 
+            if (ppii.upto()) {
                 if (!pps->print_upto("<Define"))
                     return false;
-
-                if (!pps->print_upto(xtag("name", lhs_name_)))
+                if (!pps->print_upto_tag("name", lhs_name_))
+                    return false;
+                if (!pps->print_upto_tag("rhs", rhs_))
                     return false;
 
-                if (!pps->print_upto(xtag("rhs", rhs_)))
-                    return false;
-
-                return pps->scan_no_newline(saved);
+                return true;
             } else {
-                std::uint32_t ci0 = pps->lpos();
-                std::uint32_t ci1 = ci0 + pps->indent_width();
-
                 pps->write("<Define");
-
-                pps->newline_indent(ci1);
-                pps->pretty(xtag("name", lhs_name_));
-
-                pps->newline_indent(ci1);
-                pps->pretty(xtag("rhs", rhs_));
+                pps->newline_pretty_tag(ppii.ci1(), "name", lhs_name_);
+                pps->newline_pretty_tag(ppii.ci1(), "rhs", rhs_);
                 pps->write(">");
 
                 return false;
             }
+#endif
         }
 
         // ----- DefineExprAccess -----

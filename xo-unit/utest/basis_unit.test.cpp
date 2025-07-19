@@ -3,6 +3,7 @@
 #include "xo/unit/basis_unit.hpp"
 #include "xo/unit/bu_store.hpp"
 #include "xo/indentlog/scope.hpp"
+#include "xo/flatstring/flatstring_pretty.hpp"
 //#include "xo/indentlog/print/tag.hpp"
 #include <catch2/catch.hpp>
 

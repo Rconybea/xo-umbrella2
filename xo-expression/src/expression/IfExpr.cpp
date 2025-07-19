@@ -1,7 +1,9 @@
 /* @file IfExpr.cpp */
 
 #include "IfExpr.hpp"
-#include "xo/indentlog/print/vector.hpp"
+#include "pretty_expression.hpp"
+#include "pretty_variable.hpp"
+//#include "xo/indentlog/print/vector.hpp"
 
 namespace xo {
     namespace ast {
@@ -38,6 +40,14 @@ namespace xo {
                << xtag("when_false", when_false_)
                << ">";
         } /*display*/
+
+        std::uint32_t
+        IfExpr::pretty_print(const ppindentinfo & ppii) const {
+            return ppii.pps()->pretty_struct(ppii, "IfExpr",
+                                             refrtag("test", test_),
+                                             refrtag("when_true", when_true_),
+                                             refrtag("when_false", when_false_));
+        }
     } /*namespace ast*/
 } /*namespace xo*/
 

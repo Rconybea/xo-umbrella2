@@ -6,7 +6,7 @@
 #pragma once
 
 #include "Expression.hpp"
-#include <vector>
+//#include <vector>
 #include <string>
 //#include <cstdint>
 
@@ -102,6 +102,7 @@ namespace xo {
 #endif
 
             virtual void display(std::ostream & os) const override;
+            virtual std::uint32_t pretty_print(const ppindentinfo & ppi) const override;
 
         private:
             /**

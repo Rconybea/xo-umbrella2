@@ -5,6 +5,9 @@
 
 #include "parserstatemachine.hpp"
 #include "exprstatestack.hpp"
+#include "pretty_parserstatemachine.hpp"
+#include "pretty_envframestack.hpp"
+#include "pretty_localenv.hpp"
 #include "xo/expression/pretty_expression.hpp"
 
 namespace xo {

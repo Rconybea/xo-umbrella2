@@ -1,4 +1,4 @@
-# parser/CMakeLists.txt
+# reader/CMakeLists.txt
 
 set(SELF_LIB xo_reader)
 set(SELF_SRCS
@@ -19,7 +19,9 @@ set(SELF_SRCS
     expect_type_xs.cpp
     lambda_xs.cpp
     let1_xs.cpp
-    envframestack.cpp)
+    envframestack.cpp
+    pretty_parserstatemachine.cpp
+)
 
 xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 ${SELF_SRCS})
 xo_dependency(${SELF_LIB} xo_expression)

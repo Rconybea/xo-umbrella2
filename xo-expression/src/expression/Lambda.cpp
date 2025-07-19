@@ -3,11 +3,11 @@
 #include "Lambda.hpp"
 #include "exprtype.hpp"
 #include "pretty_expression.hpp"
+#include "pretty_variable.hpp"
 #include "xo/reflect/TypeDescr.hpp"
 #include "xo/reflect/function/FunctionTdx.hpp"
 #include "xo/indentlog/print/vector.hpp"
 #include "xo/indentlog/print/pretty_vector.hpp"
-#include "xo/indentlog/print/pretty_tag.hpp"
 #include <map>
 #include <sstream>
 
@@ -322,47 +322,38 @@ namespace xo {
         } /*display*/
 
         std::uint32_t
-        Lambda::pretty_print(ppstate * pps, bool upto) const
+        Lambda::pretty_print(const ppindentinfo & ppii) const
         {
-            if (upto) {
-                std::uint32_t saved = pps->pos();
+            return ppii.pps()->pretty_struct(ppii, "Lambda",
+                                             refrtag("name", name_),
+                                             refrtag("argv", local_env_->argv()),
+                                             refrtag("body", body_));
 
-                if (!pps->has_margin())
-                    return false;
+#ifdef OBSOLETE
+            ppstate * pps = ppii.pps();
 
+            if (ppii.upto()) {
                 if (!pps->print_upto("<Lambda"))
                     return false;
-
-                if (!pps->print_upto(xtag("name", name_)))
+                if (!pps->print_upto_tag("name", name_))
                     return false;
-
-                if (!pps->print_upto(xtag("argv", local_env_->argv())))
+                if (!pps->print_upto_tag("argv", local_env_->argv()))
                     return false;
-
-                if (!pps->print_upto(xtag("body", body_)))
+                if (!pps->print_upto_tag("body", body_))
                     return false;
-
                 pps->write(">");
 
-                return pps->scan_no_newline(saved);
+                return true;
             } else {
-                std::uint32_t ci0 = pps->lpos();
-                std::uint32_t ci1 = ci0 + pps->indent_width();
-
                 pps->write("<Lambda");
-
-                pps->newline_indent(ci1);
-                pps->pretty(xtag("name", name_));
-
-                pps->newline_indent(ci1);
-                pps->pretty(xtag("argv", local_env_->argv()));
-
-                pps->newline_indent(ci1);
-                pps->pretty(xtag("body", body_));
+                pps->newline_pretty_tag(ppii.ci1(), "name", name_);
+                pps->newline_pretty_tag(ppii.ci1(), "argv", local_env_->argv());
+                pps->newline_pretty_tag(ppii.ci1(), "body", body_);
                 pps->write(">");
 
                 return false;
             }
+#endif
         }
 
         // ----- Lambda Access -----
@@ -412,6 +403,5 @@ namespace xo {
         }
     } /*namespace ast*/
 } /*namespace xo*/
-
 
 /* end Lambda.cpp */

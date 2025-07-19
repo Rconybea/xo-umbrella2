@@ -76,7 +76,7 @@ namespace xo {
         }
 
         class parserstatemachine; /* see parserstatemachine.hpp */
-        class exprstatestack;
+        class exprstatestack; /* see exprstatestack.hpp */
 
         class formal_arg;
 

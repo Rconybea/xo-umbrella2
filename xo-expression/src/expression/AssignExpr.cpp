@@ -4,7 +4,10 @@
  */
 
 #include "AssignExpr.hpp"
+#include "pretty_expression.hpp"
+#include "pretty_variable.hpp"
 #include "xo/indentlog/print/tag.hpp"
+#include <cstdint>
 
 namespace xo {
     namespace ast {
@@ -85,6 +88,13 @@ namespace xo {
                << xtag("lhs", lhs_)
                << xtag("rhs", rhs_)
                << ">";
+        }
+
+        std::uint32_t
+        AssignExpr::pretty_print(const ppindentinfo & ppii) const {
+            return ppii.pps()->pretty_struct(ppii, "AssignExpr",
+                                             refrtag("lhs", lhs_),
+                                             refrtag("rhs", rhs_));
         }
     } /*namespace ast*/
 } /*namespace xo*/

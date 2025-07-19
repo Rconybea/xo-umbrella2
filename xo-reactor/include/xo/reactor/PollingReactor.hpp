@@ -22,6 +22,8 @@ namespace xo {
             virtual void notify_source_primed(bp<ReactorSource> src) override;
             virtual std::uint64_t run_one() override;
 
+            virtual void display(std::ostream & os) const override;
+
         private:
             PollingReactor() = default;
 
@@ -42,7 +44,17 @@ namespace xo {
              */
             std::vector<ReactorSourcePtr> source_v_;
         }; /*PollingReactor*/
+
     } /*namespace reactor*/
+
+#ifndef ppdetail_atomic
+    namespace print {
+        using PollingReactorPointer = xo::reactor::PollingReactor*;
+        // placeholder, until we implement pretty-printing
+        PPDETAIL_ATOMIC(xo::reactor::PollingReactor);
+        PPDETAIL_ATOMIC(PollingReactorPointer);
+    }
+#endif
 } /*namespace xo*/
 
 /* end PollingReactor.hpp */

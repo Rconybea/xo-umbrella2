@@ -61,6 +61,10 @@ namespace xo {
              */
             void run() { this->run_n(-1); }
 
+            /** print self human-readably on stream @p os
+             **/
+            virtual void display(std::ostream & os) const = 0;
+
         protected:
             Reactor();
 
@@ -68,6 +72,12 @@ namespace xo {
             /* control logging verbosity */
             log_level loglevel_;
         }; /*Reactor*/
+
+        inline std::ostream &
+        operator<<(std::ostream & os, const Reactor & x) {
+            x.display(os);
+            return os;
+        }
     } /*namespace reactor*/
 } /*namespace xo*/
 

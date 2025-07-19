@@ -4,6 +4,7 @@
 #include "exprstatestack.hpp"
 #include "expect_expr_xs.hpp"
 #include "parserstatemachine.hpp"
+#include "pretty_exprstatestack.hpp"
 #include "xo/expression/AssignExpr.hpp"
 #include "xo/expression/Apply.hpp"
 #include "xo/expression/pretty_expression.hpp"

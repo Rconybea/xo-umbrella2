@@ -20,8 +20,9 @@ namespace xo {
          **/
         class GeneralizedExpression : public ref::Refcount {
         public:
-            using TypeDescr = xo::reflect::TypeDescr;
-            using ppstate = xo::print::ppstate;
+            using TypeDescr    = xo::reflect::TypeDescr;
+            using ppstate      = xo::print::ppstate;
+            using ppindentinfo = xo::print::ppindentinfo;
 
         public:
             GeneralizedExpression(exprtype extype, TypeDescr valuetype)
@@ -35,7 +36,7 @@ namespace xo {
             /** human-readable string representation **/
             virtual std::string display_string() const;
             /** pretty printing support.  See [xo-indentlog/xo/indentlog/pretty.hpp] **/
-            virtual std::uint32_t pretty_print(ppstate * pps, bool upto) const;
+            virtual std::uint32_t pretty_print(const ppindentinfo & ppii) const = 0;
 
         protected:
             /** useful when scaffolding expressions in a parser **/
@@ -59,4 +60,4 @@ namespace xo {
 } /*namespace xo*/
 
 
-/** end GeneralizedExpression.hpp **/
+/* end GeneralizedExpression.hpp */
