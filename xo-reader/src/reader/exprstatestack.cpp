@@ -21,6 +21,11 @@ namespace xo {
         }
 
         void
+        exprstatestack::reset_to_toplevel() {
+            this->stack_.resize(1);
+        }
+
+        void
         exprstatestack::push_exprstate(std::unique_ptr<exprstate> exs) {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag),

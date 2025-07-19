@@ -93,27 +93,41 @@ main() {
         input  = span_type::from_string(input_str);
 
         while (!input.empty()) {
-            auto [expr, consumed, psz] = rdr.read_expr(input, eof);
+            auto [expr, consumed, psz, error] = rdr.read_expr(input, eof);
 
             if (expr) {
                 ppconfig ppc;
                 ppstate_standalone pps(&cout, 0, &ppc);
 
                 pps.prettyn(expr);
+            } else if (error.is_error()) {
+                cout << "parsing error (detected in " << error.src_function() << "): " << endl;
+                error.report(cout);
+                break;
             }
 
             input = input.after_prefix(consumed);
             parser_stack_size = psz;
         }
+
+        /* here: input.empty() or error encountered */
+
+        /* discard stashed remainder of input line
+         * (for nicely-formatted errors)
+         */
+        rdr.reset_to_idle_toplevel();
     }
 
-    auto [expr, _1, _2] = rdr.read_expr(input, true /*eof*/);
+    auto [expr, _1, _2, error] = rdr.read_expr(input, true /*eof*/);
 
     if (expr) {
         ppconfig ppc;
         ppstate_standalone pps(&cout, 0, &ppc);
 
         pps.prettyn<rp<Expression>>(rp<Expression>(expr));
+    } else if (error.is_error()) {
+        cout << "parsing error (detected in " << error.src_function() << "): " << endl;
+        error.report(cout);
     }
 
     rx.history_save("repl_history.txt");

@@ -40,6 +40,8 @@ namespace xo {
             void push_envframe(const rp<LocalEnv> & x);
             rp<LocalEnv> pop_envframe();
 
+            void reset_to_toplevel() { stack_.resize(1); }
+
             /** relative to top-of-stack.
              *  0 -> top (last in),  z-1 -> bottom (first in)
              **/

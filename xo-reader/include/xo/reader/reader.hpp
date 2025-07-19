@@ -6,6 +6,7 @@
 #pragma once
 
 #include "parser.hpp"
+#include "reader_error.hpp"
 #include "xo/expression/Expression.hpp"
 #include "xo/expression/pretty_expression.hpp"
 #include "xo/tokenizer/tokenizer.hpp"
@@ -19,8 +20,8 @@ namespace xo {
             using Expression = xo::ast::Expression;
             using span_type = span<const char>;
 
-            reader_result(rp<Expression> expr, span_type rem, std::size_t psz)
-                : expr_{std::move(expr)}, rem_{rem}, parser_stack_size_{psz} {}
+            reader_result(rp<Expression> expr, span_type rem, std::size_t psz, const reader_error & error)
+                : expr_{std::move(expr)}, rem_{rem}, parser_stack_size_{psz}, error_{error} {}
 
             /** true if reader parsed a complete expression **/
             bool expr_complete() const { return expr_.get(); }
@@ -37,6 +38,9 @@ namespace xo {
              *  will be zero whenever @ref expr_ is non-null
              **/
             std::size_t parser_stack_size_ = 0;
+
+            /** error description, whenever .error_.is_error() is true **/
+            reader_error error_;
         };
 
         /**
@@ -53,7 +57,7 @@ namespace xo {
          *
          *        for (auto rem = input; !rem.empty();) {
          *            // res: (parsed-expr, used)
-         *            auto res = rdr.read_expr(rem, eof);
+         *            auto [expres = rdr.read_expr(rem, eof);
          *
          *            if (res.first) {
          *                // do something with res.first (parsed expr)
@@ -111,6 +115,13 @@ namespace xo {
              *         in @p input.
              **/
             reader_result read_expr(const span_type & input, bool eof);
+
+            /** reset to known starting point after encountering an error.
+             *  - remainder of stashed current line.
+             *    Necesary for well-formatted error reporting.
+             *  - current parsing state
+             **/
+            void reset_to_idle_toplevel();
 
         private:
             /** tokenizer: text -> tokens **/

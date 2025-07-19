@@ -41,7 +41,7 @@ main() {
             if (tk.is_valid()) {
                 cout << tk << endl;
             } else if (error.is_error()) {
-                cout << "parsing error: " << endl;
+                cout << "tokenizer error: " << endl;
                 error.report(cout);
 
                 break;

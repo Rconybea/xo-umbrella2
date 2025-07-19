@@ -104,7 +104,8 @@ namespace xo {
          *                                        $varname(n) : $typename(n)) [-> $typename[ret]]
          *                       body-expr
          *                       [ end $functionname ]
-         *   literal-expr     = integer-literal
+         *   literal-expr     = boolean-literal
+         *                       | integer-literal
          *                       | fp-literal
          *                       | string-literal
          *                       | symbol-literal
@@ -210,6 +211,13 @@ namespace xo {
              *  otherwise nullptr
              **/
             rp<Expression> include_token(const token_type & tk);
+
+            /** reset to starting parsing state.
+             *  use this after encountering an error, to avoid cascade of
+             *  spurious secondary errors..  particularly important when
+             *  invoked asa part of a REPL.
+             **/
+            void reset_to_idle_toplevel();
 
             /** print human-readable representation on stream @p os **/
             void print(std::ostream & os) const;

@@ -31,12 +31,16 @@ namespace xo {
          *    span_type input = ...;
          *
          *    while (!input.empty()) {
-         *        auto res = tkz.scan(input);
-         *        auto [tk, consumed, error] = res.first;
+         *        auto [tk, consumed, error] = tkz.scan(input);
          *
-         *        // do something with tk if tk.is_valid()
+         *        if (tk.is_valid()) {
+         *            // do something with tk
+         *        } else if (error.is_error()) {
+         *            error.report(cout);
+         *            break;
+         *        }
          *
-         *        input = tkz.consume(res.second, input);
+         *        input = tkz.consume(consumed, input);
          *    }
          *
          *    if endofinput {

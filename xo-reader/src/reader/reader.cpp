@@ -40,18 +40,15 @@ namespace xo {
             span_type expr_span = input.prefix(0ul);
 
             while (!input.empty()) {
+                /* each loop iterations reads one token */
+
                 /* read one token from input */
-                auto sr = this->tokenizer_.scan2(input, eof);
-                const auto & tk = sr.get_token();
-                const span_type & used_span = sr.consumed();
+                auto [tk, used_span, error] = this->tokenizer_.scan2(input, eof);
 
                 log && log(xtag("consumed", used_span));
                 log && log(xtag("input.pre", input));
 
-                input = input.after_prefix(used_span);
-
-                log && log(xtag("expr_span.pre", expr_span));
-
+                input = this->tokenizer_.consume(used_span, input);
                 expr_span += used_span;
 
                 if (tk.is_valid()) {
@@ -63,18 +60,33 @@ namespace xo {
                                    xtag("expr", expr));
 
                         /* token completes an expression -> victory */
-                        return reader_result(expr, expr_span, parser_.stack_size());
+                        return reader_result(expr, expr_span, parser_.stack_size(), reader_error());
                     } else {
                         /* token did not complete an expression
                          * (e.g. token for '[')
                          *
-                         * input span may contain more tokens -> iterate
+                         * input span may conotain more tokens -> iterate
                          */
                     }
                 } else {
-                    assert(input.empty());
+                    if (error.is_error()) {
+                        /* tokenizer detected an error */
 
-                    /* no more tokens in input */
+                        std::cout << "tokenizer error pre-report:" << std::endl;
+                        error.report(std::cout);
+
+                        return reader_result(nullptr, expr_span, parser_.stack_size(),
+                                             reader_error(error.src_function(),
+                                                          error.error_description(),
+                                                          error.input_state(),
+                                                          error.error_pos()));
+                    } else {
+                        /* control should not come here */
+
+                        assert(input.empty());
+                    }
+
+                    /* ono more tokens in input */
                     break;
                 }
             }
@@ -99,7 +111,14 @@ namespace xo {
 
             log && log(xtag("outcome", "noop"));
 
-            return reader_result(nullptr, expr_span, parser_.stack_size());
+            return reader_result(nullptr, expr_span, parser_.stack_size(), reader_error());
+        }
+
+        void
+        reader::reset_to_idle_toplevel()
+        {
+            this->tokenizer_.discard_current_line();
+            this->parser_.reset_to_idle_toplevel();
         }
 
     } /*namespace scm*/

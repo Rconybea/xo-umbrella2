@@ -61,10 +61,15 @@ main() {
         input  = span_type::from_string(input_str);
 
         while (!input.empty()) {
-            auto [expr, consumed, psz] = rdr.read_expr(input, eof);
+            auto [expr, consumed, psz, error] = rdr.read_expr(input, eof);
 
             if (expr) {
                 cout << expr << endl;
+            } else if (error.is_error()) {
+                cout << "parsing error: " << endl;
+                error.report(cout);
+
+                break;
             }
 
             input = input.after_prefix(consumed);
@@ -72,9 +77,12 @@ main() {
         }
     }
 
-    auto [expr, _1, _2] = rdr.read_expr(input, true /*eof*/);
+    auto [expr, _1, _2, error] = rdr.read_expr(input, true /*eof*/);
 
     if (expr) {
         cout << expr << endl;
+    } else if (error.is_error()) {
+        cout << "parsing error: " << endl;
+        error.report(cout);
     }
 }

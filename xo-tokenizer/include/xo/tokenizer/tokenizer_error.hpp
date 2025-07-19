@@ -27,7 +27,7 @@ namespace xo {
             /** @defgroup tokenizer-error-ctors **/
             ///@{
 
-            /** Default ctor represent a not-an-error sentinel object **/
+            /** Default ctor represents a not-an-error sentinel object **/
             tokenizer_error() = default;
             /** Constructor to capture parsing error context
              *  @p tk_start   current position on entry to scanner
@@ -69,7 +69,7 @@ namespace xo {
 
             /** true, except for a sentinel error object **/
             bool is_error() const { return error_description_ != nullptr; }
-            /** true except for object in sentinel state **/
+            /** false except for object in sentinel state **/
             bool is_not_an_error() const { return error_description_ == nullptr; }
 
             /** Print representation to stream @p os. Intended for tokenizer diagnostics.

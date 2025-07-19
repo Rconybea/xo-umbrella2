@@ -29,6 +29,8 @@ namespace xo {
             void push_exprstate(std::unique_ptr<exprstate> exs);
             std::unique_ptr<exprstate> pop_exprstate();
 
+            void reset_to_toplevel();
+
             /** relative to top-of-stack.
              *  0 -> top (last in),  z-1 -> bottom (first in)
              **/

@@ -93,6 +93,13 @@ namespace xo {
         } /*include_token*/
 
         void
+        parser::reset_to_idle_toplevel()
+        {
+            xs_stack_.reset_to_toplevel();
+            env_stack_.reset_to_toplevel();
+        } /*discard_current_state*/
+
+        void
         parser::print(std::ostream & os) const {
             os << "<parser"
                << std::endl;

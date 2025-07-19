@@ -104,6 +104,18 @@ namespace xo {
             /** @defgroup span-general-methods **/
             ///@{
 
+            /** @brief strip prefix until first occurence of '\n', including the newline **/
+            void discard_until_newline() {
+                for (const CharT * p = lo_; p < hi_; ++p) {
+                    if (*p == '\n') {
+                        lo_ = p + 1;
+                        return;
+                    }
+                }
+
+                lo_ = hi_;
+            }
+
             /** Create new span over supplied type,
              *  with identical (possibly misaligned) endpoints.
              *
@@ -142,8 +154,7 @@ namespace xo {
 
             /** @brief create span with @p prefix of this span removed **/
             span after_prefix(const span & prefix) const {
-                assert(prefix.lo() == lo_);
-                if (prefix.lo() != lo_) {
+                if (!prefix.is_null() && (prefix.lo() != lo_)) {
                     throw std::runtime_error
                         ("after_prefix: expected prefix of this span");
                 }
@@ -174,7 +185,7 @@ namespace xo {
             span & operator+=(const span & x) {
                 if (hi_ == x.lo_) {
                     hi_ = x.hi_;
-                } else {
+                } else if (!x.is_null()) {
                     assert(false);
                 }
 
