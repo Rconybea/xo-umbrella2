@@ -159,6 +159,12 @@ namespace xo {
             /** true for sentinel token with type tk_invalid **/
             bool is_invalid() const { return tk_type_ == tokentype::tk_invalid; }
 
+            /** true for tokens with variable text.  false for those with fixed textual representation **/
+            bool has_variable_text() const { return (tk_type_ == tokentype::tk_i64
+                                                     || tk_type_ == tokentype::tk_f64
+                                                     || tk_type_ == tokentype::tk_string
+                                                     || tk_type_ == tokentype::tk_symbol); }
+
             /** expect input matching @c "[+|-][0-9][0-9]*" **/
             std::int64_t i64_value() const;
 
@@ -406,9 +412,10 @@ namespace xo {
         void
         token<CharT>::print(std::ostream & os) const {
             os << "<token"
-               << xtag("type", tk_type_)
-               << xtag("text", text_)
-               << ">";
+               << xtag("type", tk_type_);
+            if (has_variable_text())
+                os << xtag("text", text_);
+            os << ">";
         } /*print*/
 
         template <typename CharT>

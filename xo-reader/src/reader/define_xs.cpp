@@ -58,6 +58,47 @@ namespace xo {
               def_expr_{std::move(def_expr)}
         {}
 
+        const char *
+        define_xs::get_expect_str() const
+        {
+            /*
+             *   def foo       = 1 ;
+             *   def foo : f64 = 1 ;
+             *  ^   ^   ^ ^   ^ ^ ^ ^
+             *  |   |   | |   | | | (done)
+             *  |   |   | |   | | def_6
+             *  |   |   | |   | def_5:expect_rhs_expression
+             *  |   |   | |   def_4
+             *  |   |   | def_3:expect_type
+             *  |   |   def_2
+             *  |   def_1:expect_symbol
+             *  expect_toplevel_expression_sequence
+             *
+             * note that we skip from def_2 -> def_5 if '=' instead of ':'
+             */
+            switch (this->defxs_type_) {
+            case defexprstatetype::invalid:
+            case defexprstatetype::def_0:
+            case defexprstatetype::n_defexprstatetype:
+                assert(false);  // impossible
+                return nullptr;
+            case defexprstatetype::def_1:
+                return "symbol";
+            case defexprstatetype::def_2:
+                return "singleassign|colon";
+            case defexprstatetype::def_4:
+                return "singleassign";
+            case defexprstatetype::def_3:
+                return "type";
+            case defexprstatetype::def_5:
+                return "expression";
+            case defexprstatetype::def_6:
+                return "semicolon";
+            }
+
+            return "?expect";
+        }
+
         void
         define_xs::on_expr(bp<Expression> expr,
                            parserstatemachine * p_psm)
@@ -85,9 +126,12 @@ namespace xo {
                 rp<Expression> def_expr = this->def_expr_;
 
                 this->defxs_type_ = defexprstatetype::def_6;
-            } else {
-                exprstate::on_expr(expr, p_psm);
             }
+
+            constexpr const char * c_self_name = "define_xs::on_expr";
+            const char * exp = get_expect_str();
+
+            this->illegal_input_on_expr(c_self_name, expr, exp, p_psm);
         }
 
         void
@@ -117,9 +161,12 @@ namespace xo {
                 this->defxs_type_ = defexprstatetype::def_2;
                 this->def_expr_->assign_lhs_name(symbol_name);
                 return;
-            } else {
-                exprstate::on_symbol(symbol_name, p_psm);
             }
+
+            constexpr const char * c_self_name = "define_xs::on_symbol";
+            const char * exp = this->get_expect_str();
+
+            this->illegal_input_on_symbol(c_self_name, symbol_name, exp, p_psm);
         }
 
         void
@@ -136,12 +183,13 @@ namespace xo {
                 this->cvt_expr_ = ConvertExprAccess::make(td /*dest_type*/,
                                                           nullptr /*source_expr*/);
                 this->def_expr_->assign_rhs(this->cvt_expr_);
-                //this->def_lhs_td_ = td;
-
                 return;
-            } else {
-                exprstate::on_typedescr(td, p_psm);
             }
+
+            constexpr const char * c_self_name = "define_xs::on_symbol";
+            const char * exp = this->get_expect_str();
+
+            this->illegal_input_on_type(c_self_name, td, exp, p_psm);
         }
 
         void
@@ -157,9 +205,13 @@ namespace xo {
                 this->defxs_type_ = defexprstatetype::def_1;
 
                 expect_symbol_xs::start(p_psm);
-            } else {
-                exprstate::on_def_token(tk, p_psm);
+                return;
             }
+
+            constexpr const char * c_self_name = "define_xs::on_symbol";
+            const char * exp = this->get_expect_str();
+
+            this->illegal_input_on_token(c_self_name, tk, exp, p_psm);
         }
 
         void
@@ -175,9 +227,13 @@ namespace xo {
                 this->defxs_type_ = defexprstatetype::def_3;
 
                 expect_type_xs::start(p_psm);
-            } else {
-                exprstate::on_colon_token(tk, p_psm);
+                return;
             }
+
+            constexpr const char * c_self_name = "define_xs::on_symbol";
+            const char * exp = this->get_expect_str();
+
+            this->illegal_input_on_token(c_self_name, tk, exp, p_psm);
         }
 
         void
@@ -223,9 +279,13 @@ namespace xo {
                 }
 
                 p_psm->top_exprstate().on_expr(def_expr, p_psm);
-            } else {
-                exprstate::on_semicolon_token(tk, p_psm);
+                return;
             }
+
+            constexpr const char * c_self_name = "define_xs::on_symbol";
+            const char * exp = this->get_expect_str();
+
+            this->illegal_input_on_token(c_self_name, tk, exp, p_psm);
         }
 
         void
@@ -235,70 +295,59 @@ namespace xo {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            constexpr const char * self_name = "define_xs::on_singleassign_token";
-
             log && log("defxs_type", defxs_type_);
 
-            /*
-             *   def foo       = 1 ;
-             *   def foo : f64 = 1 ;
-             *  ^   ^   ^ ^   ^ ^ ^ ^
-             *  |   |   | |   | | | (done)
-             *  |   |   | |   | | def_6
-             *  |   |   | |   | def_5:expect_rhs_expression
-             *  |   |   | |   def_4
-             *  |   |   | def_3:expect_type
-             *  |   |   def_2
-             *  |   def_1:expect_symbol
-             *  expect_toplevel_expression_sequence
-             *
-             * note that we skip from def_2 -> def_5 if '=' instead of ':'
-             */
             if ((this->defxs_type_ == defexprstatetype::def_2)
                 || (this->defxs_type_ == defexprstatetype::def_4))
             {
                 this->defxs_type_ = defexprstatetype::def_5;
-
                 expect_expr_xs::start(p_psm);
-            } else {
-                this->illegal_input_error(self_name, tk);
+                return;
             }
+
+            constexpr const char * c_self_name = "define_xs::on_singleassign_token";
+            const char * exp = get_expect_str();
+
+            this->illegal_input_on_token(c_self_name, tk, exp, p_psm);
         }
 
         void
         define_xs::on_rightparen_token(const token_type & tk,
-                                       parserstatemachine * /*p_psm*/)
+                                       parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            constexpr const char * self_name = "define_xs::on_rightparen";
+            constexpr const char * c_self_name = "define_xs::on_rightparen";
+            const char * exp = get_expect_str();
 
-            this->illegal_input_error(self_name, tk);
+            this->illegal_input_on_token(c_self_name, tk, exp, p_psm);
         }
 
         void
         define_xs::on_i64_token(const token_type & tk,
-                                parserstatemachine * /*p_psm*/)
+                                parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            constexpr const char * self_name = "define_xs::on_i64";
+            constexpr const char * c_self_name = "define_xs::on_i64";
+            const char * exp = get_expect_str();
 
-            this->illegal_input_error(self_name, tk);
+            this->illegal_input_on_token(c_self_name, tk, exp, p_psm);
         }
 
         void
         define_xs::on_f64_token(const token_type & tk,
-                                parserstatemachine * /*p_psm*/)
+                                parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            constexpr const char * self_name = "define_xs::on_f64";
+            constexpr const char * c_self_name = "define_xs::on_f64";
+            const char * exp = get_expect_str();
 
-            this->illegal_input_error(self_name, tk);
+            this->illegal_input_on_token(c_self_name, tk, exp, p_psm);
         }
 
         void

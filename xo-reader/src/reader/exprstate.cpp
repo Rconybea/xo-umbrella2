@@ -88,8 +88,9 @@ namespace xo {
             log && log(xtag("exstype", p_psm->top_exprstate().exs_type()));
 
             constexpr const char * c_self_name = "exprstate::on_symbol_token";
+            const char * exp = get_expect_str();
 
-            this->illegal_input_error(c_self_name, tk);
+            this->illegal_input_on_token(c_self_name, tk, exp, p_psm);
         }
 
         void
@@ -154,133 +155,144 @@ namespace xo {
 
         void
         exprstate::on_colon_token(const token_type & tk,
-                                  parserstatemachine * /*p_psm*/)
+                                  parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            constexpr const char * self_name = "exprstate::on_colon";
+            constexpr const char * c_self_name = "exprstate::on_colon";
+            const char * exp = get_expect_str();
 
-            this->illegal_input_error(self_name, tk);
+            this->illegal_input_on_token(c_self_name, tk, exp, p_psm);
         }
 
         void
         exprstate::on_comma_token(const token_type & tk,
-                                  parserstatemachine * /*p_psm*/)
+                                  parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            constexpr const char * self_name = "exprstate::on_comma";
+            constexpr const char * c_self_name = "exprstate::on_comma";
+            const char * exp = get_expect_str();
 
-            this->illegal_input_error(self_name, tk);
+            this->illegal_input_on_token(c_self_name, tk, exp, p_psm);
         }
 
         void
         exprstate::on_semicolon_token(const token_type & tk,
-                                      parserstatemachine * /*p_psm*/)
+                                      parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            constexpr const char * self_name = "exprstate::on_semicolon";
+            constexpr const char * c_self_name = "exprstate::on_semicolon";
+            const char * exp = get_expect_str();
 
-            this->illegal_input_error(self_name, tk);
+            this->illegal_input_on_token(c_self_name, tk, exp, p_psm);
         }
 
         void
         exprstate::on_singleassign_token(const token_type & tk,
-                                         parserstatemachine * /*p_psm*/) {
+                                         parserstatemachine * p_psm) {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            constexpr const char * self_name = "exprstate::on_singleassign_token";
+            constexpr const char * c_self_name = "exprstate::on_singleassign_token";
+            const char * exp = get_expect_str();
 
-            this->illegal_input_error(self_name, tk);
+            this->illegal_input_on_token(c_self_name, tk, exp, p_psm);
         }
 
         void
         exprstate::on_leftparen_token(const token_type & tk,
-                                      parserstatemachine * /*p_psm*/)
+                                      parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            constexpr const char * self_name = "exprstate::on_leftparen_token";
+            constexpr const char * c_self_name = "exprstate::on_leftparen_token";
+            const char * exp = get_expect_str();
 
-            this->illegal_input_error(self_name, tk);
+            this->illegal_input_on_token(c_self_name, tk, exp, p_psm);
         }
 
         void
         exprstate::on_rightparen_token(const token_type & tk,
-                                       parserstatemachine * /*p_psm*/)
+                                       parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            constexpr const char * self_name = "exprstate::on_rightparen";
+            constexpr const char * c_self_name = "exprstate::on_rightparen";
+            const char * exp = get_expect_str();
 
-            this->illegal_input_error(self_name, tk);
+            this->illegal_input_on_token(c_self_name, tk, exp, p_psm);
         }
 
         void
         exprstate::on_leftbrace_token(const token_type & tk,
-                                      parserstatemachine * /*p_psm*/)
+                                      parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            constexpr const char * self_name = "exprstate::on_leftbrace_token";
+            constexpr const char * c_self_name = "exprstate::on_leftbrace_token";
+            const char * exp = get_expect_str();
 
-            this->illegal_input_error(self_name, tk);
+            this->illegal_input_on_token(c_self_name, tk, exp, p_psm);
         }
 
         void
         exprstate::on_rightbrace_token(const token_type & tk,
-                                       parserstatemachine * /*p_psm*/)
+                                       parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            constexpr const char * self_name = "exprstate::on_rightbrace_token";
+            constexpr const char * c_self_name = "exprstate::on_rightbrace_token";
+            const char * exp = get_expect_str();
 
-            this->illegal_input_error(self_name, tk);
+            this->illegal_input_on_token(c_self_name, tk, exp, p_psm);
         }
 
         void
         exprstate::on_operator_token(const token_type & tk,
-                                     parserstatemachine * /*p_psm*/)
+                                     parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            constexpr const char * self_name = "exprstate::on_operator_token";
+            constexpr const char * c_self_name = "exprstate::on_operator_token";
+            const char * exp = get_expect_str();
 
-            this->illegal_input_error(self_name, tk);
+            this->illegal_input_on_token(c_self_name, tk, exp, p_psm);
         }
 
         void
         exprstate::on_i64_token(const token_type & tk,
-                                parserstatemachine * /*p_psm*/)
+                                parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            constexpr const char * self_name = "exprstate::on_i64";
+            constexpr const char * c_self_name = "exprstate::on_i64";
+            const char * exp = get_expect_str();
 
-            this->illegal_input_error(self_name, tk);
+            this->illegal_input_on_token(c_self_name, tk, exp, p_psm);
         }
 
         void
         exprstate::on_f64_token(const token_type & tk,
-                                parserstatemachine * /*p_psm*/)
+                                parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            constexpr const char * self_name = "exprstate::on_f64";
+            constexpr const char * c_self_name = "exprstate::on_f64";
+            const char * exp = get_expect_str();
 
-            this->illegal_input_error(self_name, tk);
+            this->illegal_input_on_token(c_self_name, tk, exp, p_psm);
         }
 
         void
@@ -395,9 +407,15 @@ namespace xo {
             assert(false);
         }
 
+        const char *
+        exprstate::get_expect_str() const
+        {
+            return "?expect";
+        }
+
         void
         exprstate::on_expr(bp<Expression> expr,
-                           parserstatemachine * /*p_psm*/)
+                           parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
@@ -405,33 +423,31 @@ namespace xo {
             log && log(xtag("exstype", this->exs_type_),
                        xtag("expr", expr));
 
-            assert(false);
+            constexpr const char * c_self_name = "exprstate::on_expr";
+            const char * exp = get_expect_str();
+
+            this->illegal_input_on_expr(c_self_name, expr, exp, p_psm);
         } /*on_expr*/
 
         void
         exprstate::on_expr_with_semicolon(bp<Expression> expr,
-                                          parserstatemachine * /*p_psm*/)
+                                          parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            const char * c_self_name = "exprstate::on_expr_with_semicolon";
-
             log && log(xtag("exstype", this->exs_type_),
                        xtag("expr", expr));
 
-            throw std::runtime_error
-                (tostr(c_self_name,
-                       ": unexpected expression for parsing state",
-                       xtag("expr", expr),
-                       xtag("state", *this)));
+            constexpr const char * c_self_name = "exprstate::on_expr_with_semicolon";
+            const char * exp = get_expect_str();
 
-            assert(false);
+            this->illegal_input_on_expr(c_self_name, expr, exp, p_psm);
         } /*on_expr_with_semicolon*/
 
         void
         exprstate::on_symbol(const std::string & symbol_name,
-                             parserstatemachine * /*p_psm*/)
+                             parserstatemachine * p_psm)
         {
             /* unreachable - derived class that can receive
              * will override this method
@@ -442,7 +458,10 @@ namespace xo {
             log && log(xtag("exstype", this->exs_type_),
                        xtag("symbol_name", symbol_name));
 
-            assert(false);
+            constexpr const char * c_self_name = "exprstate::on_symbol";
+            const char * exp = get_expect_str();
+
+            this->illegal_input_on_symbol(c_self_name, symbol_name, exp, p_psm);
         }
 
         void
@@ -462,6 +481,63 @@ namespace xo {
                        ": unexpected input token for parsing state",
                        xtag("token", tk),
                        xtag("state", *this)));
+        }
+
+        void
+        exprstate::illegal_input_on_expr(const char * self_name,
+                                        bp<Expression> expr,
+                                        const char * expect_str,
+                                        parserstatemachine * p_psm) const
+        {
+            std::string errmsg = tostr("unexpected expression for parsing state",
+                                       xtag("expecting", expect_str),
+                                       xtag("expr", expr),
+                                       xtag("state", this->exs_type()));
+
+            p_psm->on_error(self_name, std::move(errmsg));
+        }
+
+        void
+        exprstate::illegal_input_on_token(const char * self_name,
+                                          const token_type & tk,
+                                          const char * expect_str,
+                                          parserstatemachine * p_psm) const
+        {
+            std::string errmsg = tostr("unexpected token for parsing state",
+                                       xtag("expecting", expect_str),
+                                       xtag("token", tk.tk_type()),
+                                       xtag("text", tk.text()),
+                                       xtag("state", this->exs_type()));
+
+            p_psm->on_error(self_name, std::move(errmsg));
+        }
+
+        void
+        exprstate::illegal_input_on_symbol(const char * self_name,
+                                           const std::string & symbol,
+                                           const char * expect_str,
+                                           parserstatemachine * p_psm) const
+        {
+            std::string errmsg = tostr("unexpected symbol",
+                                       xtag("expecting", expect_str),
+                                       xtag("symbol", symbol),
+                                       xtag("state", this->exs_type()));
+
+            p_psm->on_error(self_name, std::move(errmsg));
+        }
+
+        void
+        exprstate::illegal_input_on_type(const char * self_name,
+                                         const TypeDescr td,
+                                         const char * expect_str,
+                                         parserstatemachine * p_psm) const
+        {
+            std::string errmsg = tostr("unexpected type",
+                                       xtag("expecting", expect_str),
+                                       xtag("type", td),
+                                       xtag("state", this->exs_type()));
+
+            p_psm->on_error(self_name, std::move(errmsg));
         }
 
         void

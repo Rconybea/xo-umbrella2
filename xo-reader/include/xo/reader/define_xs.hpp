@@ -80,6 +80,9 @@ namespace xo {
 
             defexprstatetype defxs_type() const { return defxs_type_; }
 
+            /** @return expected input in current state **/
+            virtual const char * get_expect_str() const override;
+
             virtual void on_expr(bp<Expression> expr,
                                  parserstatemachine * p_psm) override;
             virtual void on_expr_with_semicolon(bp<Expression> expr,

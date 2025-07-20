@@ -105,6 +105,9 @@ namespace xo {
             void on_input(const token_type & tk,
                           parserstatemachine * p_psm);
 
+            /** @return string describing expected/allowed input in current state **/
+            virtual const char * get_expect_str() const;
+
             /** update exprstate in response to a successfully-parsed subexpression **/
             virtual void on_expr(bp<Expression> expr,
                                  parserstatemachine * p_psm);
@@ -188,6 +191,57 @@ namespace xo {
              **/
             void illegal_input_error(const char * self_name,
                                      const token_type & tk) const;
+
+            /** throw exception when next token is inconsistent with
+             *  parsing state
+             *
+             *  @p self_name   error detected in this (c++) function
+             *  @p expr        offending input expression
+             *  @p expect_str  indicate expected input in this state
+             *  @p p_psm       parser state machine
+             **/
+            void illegal_input_on_expr(const char * self_name,
+                                       bp<Expression> expr,
+                                       const char * expect_str,
+                                       parserstatemachine * p_psm) const;
+
+            /** throw exception when next token is inconsistent with
+             *  parsing state
+             *
+             *  @p self_name   error detected in this (c++) function
+             *  @p tk          offending input token
+             *  @p expect_str  indicate expected input in this state
+             *  @p p_psm       parser state machine
+             **/
+            void illegal_input_on_token(const char * self_name,
+                                        const token_type & tk,
+                                        const char * expect_str,
+                                        parserstatemachine * p_psm) const;
+
+            /** throw exception when next token is inconsistent with
+             *  parsing state
+             *
+             *  @p self_name   error detected in this (c++) function
+             *  @p symbol_name offending symbol name
+             *  @p expect_str  indicate expected input in this state
+             *  @p p_psm       parser state machine
+             **/
+            void illegal_input_on_symbol(const char * self_name,
+                                         const std::string & symbol_name,
+                                         const char * expect_str,
+                                         parserstatemachine * p_psm) const;
+
+            /** error when typename not expected in current parsing state
+             *
+             *  @p self_name   error detected in this (c++) function
+             *  @p symbol_name offending symbol name
+             *  @p expect_str  indicate expected input in this state
+             *  @p p_psm       parser state machine
+             **/
+            void illegal_input_on_type(const char * self_name,
+                                       TypeDescr td,
+                                       const char * expect_str,
+                                       parserstatemachine * p_psm) const;
 
             /** capture error in @p *p_psm when unable to locate definition for a variable **/
             void unknown_variable_error(const char * self_name,
