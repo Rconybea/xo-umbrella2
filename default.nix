@@ -35,6 +35,17 @@ let
       };});
   };
 
+  ccache-overlay = self: super: {
+    ccache = super.ccache.overrideAttrs (old: {
+      src = self.fetchFromGitHub {
+        # nixpkgs sha256 stale for version 4.9.1 asof 20jul2025
+        owner = "ccache";
+        repo = "ccache";
+        rev = "refs/tags/v${super.ccache.version}";
+        sha256 = "sha256-Rhd2cEAEhBYIl5Ej/A5LXRb7aBMLgcwW6zxk4wYCPVM=";
+      };});
+  };
+
   # Problem: builds *everything* with llvm18 toolchain, exposes too many compiler nits
   llvm-overlay = self: super: {
     # use 'super' when you want to override the terms of a package.
@@ -134,6 +145,7 @@ let
   pkgs = import nixpkgs-path {
     overlays = [
       qrencode-overlay
+      ccache-overlay
 #      llvm-overlay
       xo-overlay
     ];
@@ -149,6 +161,19 @@ pkgs.mkShell {
   #
 
   buildInputs = [
+    pkgs.emacs
+    pkgs.which
+    pkgs.man
+    pkgs.man-pages
+    pkgs.less
+    pkgs.nix-tree    # needs GHC...
+    pkgs.ripgrep
+    pkgs.openssh
+    #pkgs.chromium
+    pkgs.notmuch
+    pkgs.emacsPackages.notmuch
+    pkgs.inconsolata-lgc
+
     pkgs.python3Packages.python
     pkgs.python3Packages.pybind11
     pkgs.python3Packages.sphinx-rtd-theme
@@ -159,19 +184,21 @@ pkgs.mkShell {
     pkgs.python3Packages.pillow
 
     pkgs.gdb
+    pkgs.ccache
+    pkgs.distcc
 
-    pkgs.emacs
-    pkgs.ditaa
-    pkgs.ripgrep
     pkgs.git
+    pkgs.lcov
+    pkgs.ditaa
     pkgs.cloc
 
     pkgs.sphinx
     pkgs.graphviz
     pkgs.doxygen
 
-
     pkgs.llvmPackages_18.llvm.dev
+    # pkgs.llvmPackages_18.libllvm
+    # pkgs.llvmPackages_18.bintools
     pkgs.libwebsockets
     pkgs.replxx
     pkgs.jsoncpp
