@@ -43,6 +43,34 @@ namespace xo {
 
         lambda_xs::lambda_xs() : exprstate(exprstatetype::lambdaexpr) {}
 
+        const char *
+        lambda_xs::get_expect_str() const
+        {
+            /*
+             *   lambda (x : f64) { ... } ;
+             *  ^      ^         ^       ^
+             *  |      |         |       lm_3
+             *  |      |         lm_2
+             *  |      lm_1:
+             *  expect_expression
+             */
+             switch (this->lmxs_type_) {
+             case lambdastatetype::invalid:
+             case lambdastatetype::lm_0:
+             case lambdastatetype::n_lambdastatetype:
+                 assert(false); // impossible
+                 return nullptr;
+             case lambdastatetype::lm_1:
+                 return "lambda-params";
+             case lambdastatetype::lm_2:
+                 return "lambda-body";
+             case lambdastatetype::lm_3:
+                 return "semicolon";
+             }
+
+             return "?expect";
+        }
+
         void
         lambda_xs::on_lambda_token(const token_type & tk,
                                    parserstatemachine * p_psm)

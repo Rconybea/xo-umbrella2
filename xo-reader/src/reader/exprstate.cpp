@@ -68,14 +68,20 @@ namespace xo {
 
             log && log(xtag("exstype", p_psm->top_exprstate().exs_type()));
 
-            this->illegal_input_error("exprstate::on_def_token", tk);
+            constexpr const char * c_self_name = "exprstate::on_def_token";
+            const char * exp = get_expect_str();
+
+            this->illegal_input_on_token(c_self_name, tk, exp, p_psm);
         }
 
         void
         exprstate::on_lambda_token(const token_type & tk,
-                                   parserstatemachine * /*p_psm*/)
+                                   parserstatemachine * p_psm)
         {
-            this->illegal_input_error("exprstate::on_lambda_token", tk);
+            constexpr const char * c_self_name = "exprstate::on_lambda_token";
+            const char * exp = this->get_expect_str();
+
+            this->illegal_input_on_token(c_self_name, tk, exp, p_psm);
         }
 
         void
@@ -106,11 +112,9 @@ namespace xo {
                             p_psm->top_exprstate().exs_type()));
 
             constexpr const char * c_self_name = "exprstate::on_typedescr";
+            const char * exp = get_expect_str();
 
-            throw std::runtime_error(tostr(c_self_name,
-                                           ": unexpected typedescr for parsing state",
-                                           xtag("td", td),
-                                           xtag("state", *this)));
+            this->illegal_input_on_type(c_self_name, td, exp, p_psm);
         }
 
         void
@@ -126,11 +130,14 @@ namespace xo {
                             p_psm->top_exprstate().exs_type()));
 
             constexpr const char * c_self_name = "exprstate::on_formal";
+            const char * exp = this->get_expect_str();
 
-            throw std::runtime_error(tostr(c_self_name,
-                                           ": unexpected formal-arg for parsing state",
-                                           xtag("formal", formal.get()),
-                                           xtag("state", *this)));
+            std::string errmsg = tostr("unexpected formal-arg for parsing state",
+                                       xtag("expecting", exp),
+                                       xtag("formal", formal),
+                                       xtag("state", this->exs_type()));
+
+            p_psm->on_error(c_self_name, std::move(errmsg));
         }
 
         void
@@ -146,11 +153,14 @@ namespace xo {
                             p_psm->top_exprstate().exs_type()));
 
             constexpr const char * c_self_name = "exprstate::on_formal_arglist";
+            const char * exp = get_expect_str();
 
-            throw std::runtime_error(tostr(c_self_name,
-                                           ": unexpected formal-arg for parsing state",
-                                           xtag("argl", argl),
-                                           xtag("state", *this)));
+            std::string errmsg = tostr("unexpected formal-arglist for parsing state",
+                                       xtag("expecting", exp),
+                                       xtag("argl", argl),
+                                       xtag("state", this->exs_type()));
+
+            p_psm->on_error(c_self_name, std::move(errmsg));
         }
 
         void
@@ -381,6 +391,8 @@ namespace xo {
 
             case tokentype::tk_assign:
             case tokentype::tk_yields:
+                assert(false);
+                break;
 
             case tokentype::tk_plus:
             case tokentype::tk_minus:

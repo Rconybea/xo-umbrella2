@@ -56,6 +56,8 @@ namespace xo {
 
             static void start(parserstatemachine * p_psm);
 
+            virtual const char * get_expect_str() const override;
+
             virtual void on_lambda_token(const token_type & tk,
                                          parserstatemachine * p_psm) override;
             virtual void on_formal_arglist(const std::vector<rp<Variable>> & argl,
