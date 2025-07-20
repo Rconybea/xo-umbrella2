@@ -72,6 +72,8 @@ namespace xo {
 
             bool admits_f64() const;
 
+            virtual const char * get_expect_str() const override;
+
             virtual void on_expr(bp<Expression> expr,
                                  parserstatemachine * p_psm) override;
             virtual void on_expr_with_semicolon(bp<Expression> expr,

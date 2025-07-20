@@ -83,14 +83,24 @@ namespace xo {
         bool
         progress_xs::admits_f64() const { return false; }
 
+        const char *
+        progress_xs::get_expect_str() const {
+            if (op_type_ == optype::invalid) {
+                return "oper|semicolon|rightparen";
+            } else {
+                return "expr|leftparen";
+            }
+        }
+
         void
         progress_xs::on_def_token(const token_type & tk,
-                                  parserstatemachine * /*p_stack*/)
+                                  parserstatemachine * p_psm)
         {
-            constexpr const char * self_name = "progress_xs::on_def";
+            constexpr const char * c_self_name = "progress_xs::on_def";
+            const char * exp = get_expect_str();
 
             /* nothing here - admits_definition unconditionally false */
-            this->illegal_input_error(self_name, tk) ;
+            this->illegal_input_on_token(c_self_name, tk, exp, p_psm);
         }
 
         rp<Expression>
@@ -161,7 +171,7 @@ namespace xo {
 
         void
         progress_xs::on_expr(bp<Expression> expr,
-                             parserstatemachine * /*p_psm*/)
+                             parserstatemachine * p_psm)
         {
             /* note: previous token probably an operator,
              *       handled from progress_xs::on_operator_token(),
@@ -169,11 +179,10 @@ namespace xo {
              */
 
             constexpr const char * c_self_name = "progress_xs::on_expr";
-
+            const char * exp = get_expect_str();
 
             if (op_type_ == optype::invalid) {
-                throw std::runtime_error(tostr(c_self_name,
-                                               ": consecutive unseparated exprs not legal"));
+                this->illegal_input_on_expr(c_self_name, expr, exp, p_psm);
             }
 
 #ifdef NOT_QUITE
@@ -199,10 +208,10 @@ namespace xo {
             log && log(xtag("lhs", lhs_), xtag("op", op_type_), xtag("expr", expr));
 
             constexpr const char * c_self_name = "progress_xs::on_expr_with_semicolon";
+            const char * exp = get_expect_str();
 
             if (op_type_ == optype::invalid) {
-                throw std::runtime_error(tostr(c_self_name,
-                                               ": consecutive unseparated exprs not legal"));
+                this->illegal_input_on_expr(c_self_name, expr, exp, p_psm);
             }
 
             this->rhs_ = expr.promote();
@@ -238,11 +247,12 @@ namespace xo {
 
         void
         progress_xs::on_colon_token(const token_type & tk,
-                                    parserstatemachine * /*p_psm*/)
+                                    parserstatemachine * p_psm)
         {
-            constexpr const char * self_name = "progress_xs::on_colon";
+            constexpr const char * c_self_name = "progress_xs::on_colon";
+            const char * exp = get_expect_str();
 
-            this->illegal_input_error(self_name, tk);
+            this->illegal_input_on_token(c_self_name, tk, exp, p_psm);
         }
 
         void
@@ -279,23 +289,25 @@ namespace xo {
 
         void
         progress_xs::on_singleassign_token(const token_type & tk,
-                                           parserstatemachine * /*p_psm*/)
+                                           parserstatemachine * p_psm)
         {
-            constexpr const char * self_name = "progress_xs::on_singleassign";
+            constexpr const char * c_self_name = "progress_xs::on_singleassign";
+            const char * exp = get_expect_str();
 
-            this->illegal_input_error(self_name, tk);
+            this->illegal_input_on_token(c_self_name, tk, exp, p_psm);
         }
 
         void
         progress_xs::on_leftparen_token(const token_type & tk,
-                                        parserstatemachine * /*p_psm*/)
+                                        parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            constexpr const char * self_name = "exprstate::on_leftparen";
+            constexpr const char * c_self_name = "exprstate::on_leftparen";
+            const char * exp = get_expect_str();
 
-            this->illegal_input_error(self_name, tk);
+            this->illegal_input_on_token(c_self_name, tk, exp, p_psm);
         }
 
          void
@@ -441,10 +453,11 @@ namespace xo {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            constexpr const char * self_name = "progress_xs::on_i64";
+            constexpr const char * c_self_name = "progress_xs::on_i64";
+            const char * exp = get_expect_str();
 
             if (this->op_type_ == optype::invalid) {
-                this->illegal_input_error(self_name, tk);
+                this->illegal_input_on_token(c_self_name, tk, exp, p_psm);
             } else {
                 exprstate::on_i64_token(tk, p_psm);
             }
@@ -457,10 +470,11 @@ namespace xo {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            constexpr const char * self_name = "progress_xs::on_f64";
+            constexpr const char * c_self_name = "progress_xs::on_f64";
+            const char * exp = get_expect_str();
 
             if (this->op_type_ == optype::invalid) {
-                this->illegal_input_error(self_name, tk);
+                this->illegal_input_on_token(c_self_name, tk, exp, p_psm);
             } else {
                 exprstate::on_f64_token(tk, p_psm);
             }
