@@ -27,6 +27,12 @@ namespace xo {
             : exprstate(exprstatetype::expect_type)
         {}
 
+        const char *
+        expect_type_xs::get_expect_str() const
+        {
+            return "typename";
+        }
+
         void
         expect_type_xs::on_symbol_token(const token_type & tk,
                                         parserstatemachine * p_psm)
@@ -49,11 +55,15 @@ namespace xo {
                 td = Reflect::require<std::int64_t>();
 
             if (!td) {
-                throw std::runtime_error
-                    (tostr(c_self_name,
-                           ": unknown type name",
-                           " (expecting f64|f32|i16|i32|i64)",
-                           xtag("typename", tk.text())));
+                const char * exp = get_expect_str();
+
+                std::string errmsg = tostr("unexpected token for parsing state",
+                                           xtag("expecting", exp),
+                                           xtag("token", tk.tk_type()),
+                                           xtag("text", tk.text()),
+                                           xtag("state", this->exs_type()));
+
+                p_psm->on_error(c_self_name, std::move(errmsg));
             }
 
             std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
@@ -61,6 +71,5 @@ namespace xo {
         }
     } /*namespace scm*/
 } /*namespace xo*/
-
 
 /* end expect_type_xs.cpp */

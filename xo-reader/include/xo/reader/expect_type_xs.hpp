@@ -18,6 +18,8 @@ namespace xo {
 
             static void start(parserstatemachine * p_stack);
 
+            virtual const char * get_expect_str() const override;
+
             virtual void on_symbol_token(const token_type & tk,
                                          parserstatemachine * p_psm) override;
 
