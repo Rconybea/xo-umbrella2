@@ -43,6 +43,24 @@ namespace xo {
             p_psm->push_exprstate(expect_formal_arglist_xs::make());
         }
 
+        const char *
+        expect_formal_arglist_xs::get_expect_str() const {
+            switch (farglxs_type_) {
+            case formalarglstatetype::invalid:
+            case formalarglstatetype::n_formalarglstatetype:
+                assert(false); // impossible
+                break;
+            case formalarglstatetype::argl_0:
+                return "leftparen";
+            case formalarglstatetype::argl_1a:
+                return "formal-name";
+            case formalarglstatetype::argl_1b:
+                return "comma|rightparen";
+            }
+
+            return "?expect";
+        }
+
         expect_formal_arglist_xs::expect_formal_arglist_xs()
             : exprstate(exprstatetype::expect_formal_arglist),
               farglxs_type_{formalarglstatetype::argl_0}

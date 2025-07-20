@@ -16,7 +16,7 @@ namespace xo {
          *  ^ ^                 ^ ^    ^
          *  | |                 | |    |
          *  | |                 | |    argl_1b
-         *  | argl_1a           | argla
+         *  | argl_1a           | argl_1a
          *  argl_0              argl_1b
          *
          *  argl_0 --on_leftparen_token()--> argl_1a
@@ -54,6 +54,8 @@ namespace xo {
             expect_formal_arglist_xs();
 
             static void start(parserstatemachine * p_psm);
+
+            virtual const char * get_expect_str() const override;
 
             virtual void on_leftparen_token(const token_type & tk,
                                             parserstatemachine * p_psm) override;
