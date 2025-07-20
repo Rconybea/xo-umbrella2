@@ -30,7 +30,7 @@ namespace xo {
         // ----- parser -----
 
         parser::parser()
-            : xs_stack_{}, env_stack_{}
+            : xs_stack_{}, env_stack_{}, result_{}
         {
             /* top-level environment.  initially empty */
             rp<LocalEnv> toplevel_env = LocalEnv::make_empty();
@@ -46,25 +46,23 @@ namespace xo {
 
         void
         parser::begin_interactive_session() {
-            /* note: not using emit expr here */
             parserstatemachine psm(&xs_stack_,
                                    &env_stack_,
-                                   nullptr /*p_emit_expr*/);
+                                   &result_);
 
             exprseq_xs::start(exprseqtype::toplevel_interactive, &psm);
         }
 
         void
         parser::begin_translation_unit() {
-            /* note: not using emit expr here */
             parserstatemachine psm(&xs_stack_,
                                    &env_stack_,
-                                   nullptr /*p_emit_expr*/);
+                                   &result_);
 
             exprseq_xs::start(exprseqtype::toplevel_batch, &psm);
         }
 
-        rp<Expression>
+        const parser_result &
         parser::include_token(const token_type & tk)
         {
             constexpr bool c_debug_flag = true;
@@ -81,15 +79,11 @@ namespace xo {
 
             log && log(xtag("top", xs_stack_.top_exprstate()));
 
-            rp<Expression> retval;
-
-            parserstatemachine psm(&xs_stack_, &env_stack_, &retval);
+            parserstatemachine psm(&xs_stack_, &env_stack_, &result_);
 
             xs_stack_.top_exprstate().on_input(tk, &psm);
 
-            log && log(xtag("retval", retval));
-
-            return retval;
+            return result_;
         } /*include_token*/
 
         void
@@ -97,6 +91,7 @@ namespace xo {
         {
             xs_stack_.reset_to_toplevel();
             env_stack_.reset_to_toplevel();
+            result_ = parser_result::none();
         } /*discard_current_state*/
 
         void

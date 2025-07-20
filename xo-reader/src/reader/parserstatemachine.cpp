@@ -157,11 +157,16 @@ namespace xo {
         }
 
         void
+        parserstatemachine::on_error(const char * self_name, std::string errmsg)
+        {
+            *(this->p_result_) = parser_result::error(self_name, std::move(errmsg));
+        }
+
+        void
         parserstatemachine::print(std::ostream & os) const {
             os << "<psm";
             os << xtag("stack", p_stack_);
             os << xtag("env_stack", p_env_stack_);
-            os << xtag("emit_expr", p_emit_expr_);
             os << ">";
         }
     } /*namespace scm*/

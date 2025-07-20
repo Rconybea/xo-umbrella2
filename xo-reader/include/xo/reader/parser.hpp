@@ -7,6 +7,7 @@
 
 #include "exprstatestack.hpp"
 #include "envframestack.hpp"
+#include "parser_result.hpp"
 #include <stdexcept>
 
 namespace xo {
@@ -210,7 +211,7 @@ namespace xo {
              *  @return parsed expression, if @p tk completes an expression.
              *  otherwise nullptr
              **/
-            rp<Expression> include_token(const token_type & tk);
+            const parser_result & include_token(const token_type & tk);
 
             /** reset to starting parsing state.
              *  use this after encountering an error, to avoid cascade of
@@ -240,6 +241,8 @@ namespace xo {
              **/
             envframestack env_stack_;
 
+            /** parser result state **/
+            parser_result result_;
         }; /*parser*/
 
         inline std::ostream &

@@ -29,12 +29,14 @@ namespace xo {
          *  2. top-level batch
          *  3. nested
          *
+         *  @text
          *           1 2 3
          *         +--------
          *  def    | y y y
          *  symbol | y n n         1: evaluate as variable
          *  i64    | y n n         1: evaluate as constant
          *
+         *  @endtext
          **/
         class exprseq_xs : public exprstate {
         public:

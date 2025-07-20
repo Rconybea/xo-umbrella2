@@ -466,12 +466,13 @@ namespace xo {
 
         void
         exprstate::unknown_variable_error(const char * self_name,
-                                          const token_type & tk) const
+                                          const token_type & tk,
+                                          parserstatemachine * p_psm) const
         {
-            throw std::runtime_error
-                (tostr(self_name,
-                       ": unknown variable name",
-                       xtag("var", tk.text())));
+            std::string errmsg = tostr("unknown variable name",
+                                       xtag("var", tk.text()));
+
+            p_psm->on_error(self_name, std::move(errmsg));
         }
     } /*namespace scm*/
 } /*namespace xo*/

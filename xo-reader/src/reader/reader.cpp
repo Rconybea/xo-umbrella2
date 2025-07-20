@@ -43,7 +43,7 @@ namespace xo {
                 /* each loop iterations reads one token */
 
                 /* read one token from input */
-                auto [tk, used_span, error] = this->tokenizer_.scan2(input, eof);
+                auto [tk, used_span, error1] = this->tokenizer_.scan2(input, eof);
 
                 log && log(xtag("consumed", used_span));
                 log && log(xtag("input.pre", input));
@@ -53,45 +53,60 @@ namespace xo {
 
                 if (tk.is_valid()) {
                     /* forward just-read token to parser */
-                    auto expr = this->parser_.include_token(tk);
+                    auto parser_result = this->parser_.include_token(tk);
 
-                    if (expr) {
+                    if (parser_result.is_expression()) {
                         log && log(xtag("outcome", "victory!"),
-                                   xtag("expr", expr));
+                                   xtag("expr", parser_result.result_expr()));
 
                         /* token completes an expression -> victory */
-                        return reader_result(expr, expr_span, parser_.stack_size(), reader_error());
+                        return reader_result(parser_result.result_expr(),
+                                             expr_span, parser_.stack_size(), reader_error());
+                    } else if (parser_result.is_error()) {
+                        /* 1. parser detected error.
+                         * 2. tokenizer_.input_state() refers to position just after offending token
+                         * 3. error_pos here is 0 because error detected at token boundary
+                         */
+                        reader_error error2(parser_result.error_src_function(),
+                                            parser_result.error_description(),
+                                            tokenizer_.input_state().rewind(tk.text().size()),
+                                            0 /*error_pos*/);
+
+                        std::cout << "parser error pre-report:" << std::endl;
+                        error2.report(std::cout);
+
+                        return reader_result(nullptr, expr_span, parser_.stack_size(), error2);
                     } else {
                         /* token did not complete an expression
                          * (e.g. token for '[')
                          *
-                         * input span may conotain more tokens -> iterate
+                         * input span may contain more tokens -> iterate
                          */
                     }
                 } else {
-                    if (error.is_error()) {
+                    if (error1.is_error()) {
                         /* tokenizer detected an error */
 
                         std::cout << "tokenizer error pre-report:" << std::endl;
-                        error.report(std::cout);
+                        error1.report(std::cout);
 
                         return reader_result(nullptr, expr_span, parser_.stack_size(),
-                                             reader_error(error.src_function(),
-                                                          error.error_description(),
-                                                          error.input_state(),
-                                                          error.error_pos()));
+                                             reader_error(error1.src_function(),
+                                                          error1.error_description(),
+                                                          error1.input_state(),
+                                                          error1.error_pos()));
                     } else {
                         /* control should not come here */
 
                         assert(input.empty());
                     }
 
-                    /* ono more tokens in input */
+                    /* need more tokens in input */
                     break;
                 }
             }
 
-            /* control here: either
+            /* control here: eithero
              * 1. input.empty (perhaps ate some whitespace,  ok)
              * 2. missing or incomplete token (ok unless eof)
              */

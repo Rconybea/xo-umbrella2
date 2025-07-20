@@ -37,8 +37,6 @@ namespace xo {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            //constexpr const char * c_self_name = "exprseq_xs::on_def_token";
-
             define_xs::start(p_psm);
 
             /* keyword 'def' introduces a definition:
@@ -68,7 +66,7 @@ namespace xo {
                 if (var.get()) {
                     progress_xs::start(var.promote(), p_psm);
                 } else {
-                    this->unknown_variable_error(c_self_name, tk);
+                    this->unknown_variable_error(c_self_name, tk, p_psm);
                 }
             } else {
                 /* policy: don't allow variable references as toplevel expressions
@@ -117,10 +115,9 @@ namespace xo {
              * arbitrary number of expressions.
              */
 
-            auto p_emit_expr = p_psm->p_emit_expr_;
 
-            *p_emit_expr = expr.promote();
-        } /*on_expr*/
+            *(p_psm->p_result_) = parser_result::expression(expr.promote());
+        }
 
         void
         exprseq_xs::on_expr_with_semicolon(bp<Expression> expr,
@@ -132,9 +129,7 @@ namespace xo {
              * semicolons are sometimes mandatory to avoid ambiguity.
              */
 
-            auto p_emit_expr = p_psm->p_emit_expr_;
-
-            *p_emit_expr = expr.promote();
+            *(p_psm->p_result_) = parser_result::expression(expr.promote());
         }
 
     } /*namespace scm*/

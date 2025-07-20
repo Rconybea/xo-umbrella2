@@ -70,7 +70,12 @@ namespace xo {
             /** @defgroup input-state-general-methods **/
             ///@{
 
-            /** capture prefix of @p input up to first newline **/
+            /** Input state less @p n chars.
+             *  Use to recover input state before a complete but error-triggering token
+             **/
+            input_state rewind(std::size_t n) const;
+
+            /** Capture prefix of @p input up to first newline **/
             void capture_current_line(const span_type & input);
 
             /** Reset input state for start of next line.
@@ -126,6 +131,14 @@ namespace xo {
             }
 
             return false;
+        }
+
+        template <typename CharT>
+        input_state<CharT>
+        input_state<CharT>::rewind(std::size_t n) const {
+            return input_state<CharT>(this->current_line_,
+                                      (n <= current_pos_) ? current_pos_ - n : 0,
+                                      0 /*whitespace*/);
         }
 
         template <typename CharT>

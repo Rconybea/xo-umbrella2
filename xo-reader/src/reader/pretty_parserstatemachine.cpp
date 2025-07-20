@@ -25,15 +25,11 @@ namespace xo {
                 if (!pps->print_upto_tag("env_stack", x.p_env_stack_))
                     return false;
 
-                if (!pps->print_upto_tag("emit_expr", (void*)x.p_emit_expr_))
-                    return false;
-
                 return pps->print_upto(">");
             } else {
                 pps->write("<psm");
                 pps->newline_pretty_tag(ppii.ci1(), "stack", x.p_stack_);
                 pps->newline_pretty_tag(ppii.ci1(), "env_stack", x.p_env_stack_);
-                pps->newline_pretty_tag(ppii.ci1(), "emit_expr", (void*)x.p_emit_expr_);
                 pps->write(">");
 
                 return false;

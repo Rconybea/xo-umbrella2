@@ -555,7 +555,7 @@ namespace xo {
                         if (sr.error().src_function()) {
                             REHEARSE(rh, std::string(sr.error().src_function()) == std::string(testcase.expect_error_.src_function()));
                         }
-                        if (sr.error().error_description()) {
+                        if (!sr.error().error_description().empty()) {
                             REHEARSE(rh, std::string(sr.error().error_description()) == std::string(testcase.expect_error_.error_description()));
                         }
                         REHEARSE(rh, sr.error().whitespace() == testcase.expect_error_.whitespace());

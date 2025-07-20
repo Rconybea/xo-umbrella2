@@ -3,6 +3,8 @@
  * Author: Roland Conybeare, Jul 2025
  */
 
+#pragma once
+
 #include "xo/tokenizer/tokenizer_error.hpp"
 
 namespace xo {
@@ -18,7 +20,7 @@ namespace xo {
              *  @
              **/
             reader_error(const char * src_function,
-                         const char * error_description,
+                         std::string error_description,
                          const input_state_type & input_state,
                          size_t error_pos)
                 : tk_error_{src_function, error_description, input_state, error_pos}

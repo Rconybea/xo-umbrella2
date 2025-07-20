@@ -2,6 +2,7 @@
 
 set(SELF_LIB xo_reader)
 set(SELF_SRCS
+    parser_result.cpp
     parser.cpp
     parserstatemachine.cpp
     reader.cpp

@@ -70,6 +70,16 @@ namespace xo {
 
             ///@}
 
+            /** @defgroup tokenizer-access-methods tokenizer access methods **/
+            ///@{
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wchanges-meaning"
+            const input_state<CharT> & input_state() const { return input_state_; }
+#pragma GCC diagnostic pop
+
+            ///@}
+
             /** @defgroup tokenizer-general-methods tokenizer methods **/
             ///@{
 
@@ -355,9 +365,6 @@ namespace xo {
                                     (error_type(__FUNCTION__ /*src_function*/,
                                                 "improperly placed sign indicator",
                                                 input_state_,
-                                                //current_line_,
-                                                //current_pos_,
-                                                //initial_whitespace,
                                                 (ix - tk_start)
                                         ));
                             }
@@ -367,9 +374,6 @@ namespace xo {
                                     (error_type(__FUNCTION__ /*src_function*/,
                                                 "duplicate decimal point in numeric literal",
                                                 input_state_,
-                                                //current_line_,
-                                                //current_pos_,
-                                                //initial_whitespace,
                                                 (ix - tk_start)));
                             }
 
@@ -380,9 +384,6 @@ namespace xo {
                                     (error_type(__FUNCTION__ /*src_function*/,
                                                 "duplicate exponent marker in numeric literal",
                                                 input_state_,
-                                                //current_line_,
-                                                //current_pos_,
-                                                //initial_whitespace,
                                                 (ix - tk_start)));
                             }
 

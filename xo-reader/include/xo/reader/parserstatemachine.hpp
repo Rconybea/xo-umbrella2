@@ -7,6 +7,7 @@
 
 #include "exprstate.hpp"
 #include "envframestack.hpp"
+#include "parser_result.hpp"
 
 namespace xo {
     namespace scm {
@@ -27,10 +28,17 @@ namespace xo {
         public:
             parserstatemachine(exprstatestack * p_stack,
                                envframestack * p_env_stack,
-                               rp<Expression> * p_emit_expr)
+                               parser_result * p_result)
                 : p_stack_{p_stack},
                   p_env_stack_{p_env_stack},
-                  p_emit_expr_{p_emit_expr} {}
+                  p_result_{p_result}
+                {}
+
+            //const parser_result & result() const { return result_; }
+            //parser_result_state result_state() const { return result_state_; }
+            //const rp<Expression> & result_expr() const { return result_expr_; }
+            //const char * error_src_function() const { return error_src_function_; }
+            //const std::string & error_description() const { return error_description_; }
 
             std::unique_ptr<exprstate> pop_exprstate();
             exprstate & top_exprstate();
@@ -57,12 +65,18 @@ namespace xo {
             void on_expr_with_semicolon(bp<Expression> expr);
             void on_symbol(const std::string & symbol);
 
-            // ---- parsing inputs -----
+            // ----- parsing inputs -----
 
             void on_semicolon_token(const token_type & tk);
             void on_operator_token(const token_type & tk);
             void on_leftbrace_token(const token_type & tk);
             void on_rightbrace_token(const token_type & tk);
+
+            // ----- parsing error -----
+
+            /** @p self_name  location (implementation function) where error detected
+             **/
+            void on_error(const char * self_name, std::string error_description);
 
             /** write human-readable representation on @p os **/
             void print(std::ostream & os) const;
@@ -72,13 +86,11 @@ namespace xo {
              *  generally speaking, push when to start new work for nested content;
              *  pop when work complete
              **/
-            exprstatestack * p_stack_;
+            exprstatestack * p_stack_ = nullptr;
             /** stack of environment frames, one for each enclosing lambda **/
-            envframestack * p_env_stack_;
-            /** if non-null,  store next non-nested complete expressions in
-             *  *p_emit_expr
-             **/
-            rp<Expression> * p_emit_expr_;
+            envframestack * p_env_stack_ = nullptr;
+            /** parser result object **/
+            parser_result * p_result_ = nullptr;
         };
 
         inline std::ostream &

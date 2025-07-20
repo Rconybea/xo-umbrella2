@@ -37,7 +37,11 @@ namespace xo {
                  */
                 {
                     auto r1 = parser.include_token(token_type::def());
-                    REQUIRE(r1.get() == nullptr);
+
+                    REQUIRE(r1.is_none());
+                    REQUIRE(r1.result_expr().get() == nullptr);
+                    REQUIRE(r1.error_src_function() == nullptr);
+                    REQUIRE(r1.error_description().empty());
 
                     /* stack should be:
                      *
@@ -69,7 +73,10 @@ namespace xo {
                     cerr << "parser state after [def foo]" << endl;
                     cerr << parser << endl;
 
-                    REQUIRE(r2.get() == nullptr);
+                    REQUIRE(r2.is_none());
+                    REQUIRE(r2.result_expr().get() == nullptr);
+                    REQUIRE(r2.error_src_function() == nullptr);
+                    REQUIRE(r2.error_description().empty());
 
                     /* stack should be:
                      *
@@ -102,7 +109,10 @@ namespace xo {
                         cerr << "parser state after [def foo :]" << endl;
                         cerr << parser << endl;
 
-                        REQUIRE(r3.get() == nullptr);
+                        REQUIRE(r3.is_none());
+                        REQUIRE(r3.result_expr().get() == nullptr);
+                        REQUIRE(r3.error_src_function() == nullptr);
+                        REQUIRE(r3.error_description().empty());
 
                         /* stack should be:
                          *
@@ -134,7 +144,10 @@ namespace xo {
                         cerr << "parser state after [def foo : f64]" << endl;
                         cerr << parser << endl;
 
-                        REQUIRE(r4.get() == nullptr);
+                        REQUIRE(r4.is_none());
+                        REQUIRE(r4.result_expr().get() == nullptr);
+                        REQUIRE(r4.error_src_function() == nullptr);
+                        REQUIRE(r4.error_description().empty());
 
                         CHECK(parser.stack_size() == 2);
 
@@ -178,7 +191,10 @@ namespace xo {
                     cerr << "parser state after [def foo : f64 =]" << endl;
                     cerr << parser << endl;
 
-                    REQUIRE(r5.get() == nullptr);
+                    REQUIRE(r5.is_none());
+                    REQUIRE(r5.result_expr().get() == nullptr);
+                    REQUIRE(r5.error_src_function() == nullptr);
+                    REQUIRE(r5.error_description().empty());
 
                     CHECK(parser.stack_size() == 3);
 
@@ -219,7 +235,10 @@ namespace xo {
                     cerr << "parser state after [def foo : f64 = 3.14159265]" << endl;
                     cerr << parser << endl;
 
-                    REQUIRE(r6.get() == nullptr);
+                    REQUIRE(r6.is_none());
+                    REQUIRE(r6.result_expr().get() == nullptr);
+                    REQUIRE(r6.error_src_function() == nullptr);
+                    REQUIRE(r6.error_description().empty());
 
                     /* stack should be
                      *
@@ -258,7 +277,10 @@ namespace xo {
                     cerr << "parser state after [def foo : f64 = 3.14159265;]" << endl;
                     cerr << parser << endl;
 
-                    REQUIRE(r7.get() != nullptr);
+                    REQUIRE(r7.is_expression());
+                    REQUIRE(r7.result_expr().get() != nullptr);
+                    REQUIRE(r7.error_src_function() == nullptr);
+                    REQUIRE(r7.error_description().empty());
 
                     CHECK(parser.stack_size() == 1);
 

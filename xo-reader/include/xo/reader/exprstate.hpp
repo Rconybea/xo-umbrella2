@@ -189,10 +189,10 @@ namespace xo {
             void illegal_input_error(const char * self_name,
                                      const token_type & tk) const;
 
-            /** throw exception when unable to locate definition for a variable
-             **/
+            /** capture error in @p *p_psm when unable to locate definition for a variable **/
             void unknown_variable_error(const char * self_name,
-                                        const token_type & tk) const;
+                                        const token_type & tk,
+                                        parserstatemachine * p_psm) const;
 
         protected:
             /** explicit subtype: identifies derived class **/

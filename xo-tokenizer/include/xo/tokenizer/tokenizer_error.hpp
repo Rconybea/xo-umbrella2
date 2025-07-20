@@ -34,11 +34,11 @@ namespace xo {
              *  @p error_pos  error location relative to token start
              **/
             tokenizer_error(const char * src_function,
-                            const char * error_description,
+                            std::string error_description,
                             const input_state_type & input_state,
                             size_t error_pos)
                 : src_function_{src_function},
-                  error_description_{error_description},
+                  error_description_{std::move(error_description)},
                   input_state_{input_state},
                   error_pos_{error_pos}
                 {
@@ -53,7 +53,7 @@ namespace xo {
             ///@{
 
             const char * src_function() const { return src_function_; }
-            const char * error_description() const { return error_description_; }
+            const std::string & error_description() const { return error_description_; }
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wchanges-meaning"
             const input_state_type & input_state() const { return input_state_; }
@@ -68,9 +68,9 @@ namespace xo {
             ///@{
 
             /** true, except for a sentinel error object **/
-            bool is_error() const { return error_description_ != nullptr; }
+            bool is_error() const { return !error_description_.empty(); }
             /** false except for object in sentinel state **/
-            bool is_not_an_error() const { return error_description_ == nullptr; }
+            bool is_not_an_error() const { return error_description_.empty(); }
 
             /** Print representation to stream @p os. Intended for tokenizer diagnostics.
              *  For Schematika errors prefer @ref report
@@ -89,7 +89,7 @@ namespace xo {
             /** source location (in tokenizer) at which error identified **/
             char const * src_function_ = nullptr;
             /** static error description **/
-            char const * error_description_ = nullptr;
+            std::string error_description_;
             /** input state associated with this error.
              *  Sufficient to precisely locate it with context.
              **/
@@ -117,7 +117,7 @@ namespace xo {
         tokenizer_error<CharT>::report(std::ostream & os) const {
             using namespace std;
 
-            if (error_description_) {
+            if (!error_description_.empty()) {
                 const char * prefix = "input: ";
                 /* input_state.current_pos: position of first character following preceding token.
                  * input_state.whitespace:  whitespace between current_pos and start of failing token
