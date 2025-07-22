@@ -17,8 +17,6 @@ namespace xo {
              *  This used for top-level expressions in a translation unit.
              **/
             toplevel_batch,
-            /** nested sequence, for example in function body **/
-            nested,
         };
 
         /** @class exprseq_xs
@@ -27,14 +25,14 @@ namespace xo {
          *  expression sequences come in several types:
          *  1. top-level interactive
          *  2. top-level batch
-         *  3. nested
          *
          *  @text
-         *           1 2 3
-         *         +--------
-         *  def    | y y y
-         *  symbol | y n n         1: evaluate as variable
-         *  i64    | y n n         1: evaluate as constant
+         *           1 2
+         *         +-----
+         *  def    | y y
+         *  if     | y n     1: eval as expression
+         *  symbol | y n     1: evaluate as variable
+         *  i64    | y n     1: evaluate as constant
          *
          *  @endtext
          **/
@@ -45,12 +43,18 @@ namespace xo {
             static void start(exprseqtype seqtype, parserstatemachine * p_psm);
 
         public:
+            virtual const char * get_expect_str() const override;
+
             // ----- token input methods -----
 
             virtual void on_def_token(const token_type & tk,
                                       parserstatemachine * p_psm) override;
+            virtual void on_if_token(const token_type & tk,
+                                     parserstatemachine * p_psm) override;
             virtual void on_symbol_token(const token_type & tk,
                                          parserstatemachine * p_psm) override;
+            virtual void on_bool_token(const token_type & tk,
+                                       parserstatemachine * p_psm) override;
             virtual void on_i64_token(const token_type & tk,
                                       parserstatemachine * p_psm) override;
 

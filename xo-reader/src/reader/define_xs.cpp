@@ -14,7 +14,7 @@ namespace xo {
 
         const char *
         defexprstatetype_descr(defexprstatetype x) {
-            switch(x) {
+            switch (x) {
             case defexprstatetype::invalid: return "invalid";
             case defexprstatetype::def_0: return "def_0";
             case defexprstatetype::def_1: return "def_1";
@@ -208,7 +208,7 @@ namespace xo {
                 return;
             }
 
-            constexpr const char * c_self_name = "define_xs::on_symbol";
+            constexpr const char * c_self_name = "define_xs::on_def_token";
             const char * exp = this->get_expect_str();
 
             this->illegal_input_on_token(c_self_name, tk, exp, p_psm);

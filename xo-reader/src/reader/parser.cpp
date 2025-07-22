@@ -29,8 +29,8 @@ namespace xo {
     namespace scm {
         // ----- parser -----
 
-        parser::parser()
-            : xs_stack_{}, env_stack_{}, result_{}
+        parser::parser(bool debug_flag)
+            : xs_stack_{}, env_stack_{}, result_{}, debug_flag_{debug_flag}
         {
             /* top-level environment.  initially empty */
             rp<LocalEnv> toplevel_env = LocalEnv::make_empty();
@@ -48,7 +48,8 @@ namespace xo {
         parser::begin_interactive_session() {
             parserstatemachine psm(&xs_stack_,
                                    &env_stack_,
-                                   &result_);
+                                   &result_,
+                                   debug_flag_);
 
             exprseq_xs::start(exprseqtype::toplevel_interactive, &psm);
         }
@@ -57,7 +58,8 @@ namespace xo {
         parser::begin_translation_unit() {
             parserstatemachine psm(&xs_stack_,
                                    &env_stack_,
-                                   &result_);
+                                   &result_,
+                                   debug_flag_);
 
             exprseq_xs::start(exprseqtype::toplevel_batch, &psm);
         }
@@ -79,7 +81,7 @@ namespace xo {
 
             log && log(xtag("top", xs_stack_.top_exprstate()));
 
-            parserstatemachine psm(&xs_stack_, &env_stack_, &result_);
+            parserstatemachine psm(&xs_stack_, &env_stack_, &result_, debug_flag_);
 
             xs_stack_.top_exprstate().on_input(tk, &psm);
 

@@ -49,6 +49,9 @@ namespace xo {
             /** sentinel value **/
             tk_invalid = -1,
 
+            /** a boolean constant **/
+            tk_bool,
+
             /** an integer constant (signed 64-bit integer) **/
             tk_i64,
 
@@ -134,6 +137,12 @@ namespace xo {
 
             /** keyword @c 'if' **/
             tk_if,
+
+            /** keyworkd @c 'then' **/
+            tk_then,
+
+            /** keyword @c 'else' **/
+            tk_else,
 
             /** keyword @c 'let' **/
             tk_let,

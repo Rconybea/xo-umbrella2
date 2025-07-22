@@ -38,7 +38,6 @@ namespace xo {
             /** pretty printing support.  See [xo-indentlog/xo/indentlog/pretty.hpp] **/
             virtual std::uint32_t pretty_print(const ppindentinfo & ppii) const = 0;
 
-        protected:
             /** useful when scaffolding expressions in a parser **/
             void assign_valuetype(TypeDescr x) { valuetype_ = x; }
 

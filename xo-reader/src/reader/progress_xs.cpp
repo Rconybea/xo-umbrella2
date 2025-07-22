@@ -104,7 +104,7 @@ namespace xo {
         }
 
         rp<Expression>
-        progress_xs::assemble_expr() {
+        progress_xs::assemble_expr(parserstatemachine * p_psm) {
             /* need to defer building Apply incase expr followed by higher-precedence operator:
              * consider input like
              *   3.14 + 2.0 * ...
@@ -113,10 +113,11 @@ namespace xo {
             constexpr const char * c_self_name = "progress_xs::assemble_expr";
 
             if ((op_type_ != optype::invalid) && (rhs_.get() == nullptr)) {
-                throw std::runtime_error(tostr(c_self_name,
-                                               ": expected expr on rhs of operator",
-                                               xtag("lhs", lhs_),
-                                               xtag("op", op_type_)));
+                std::string errmsg = tostr("expected expression on rhs of operator op",
+                                           xtag("lhs", lhs_),
+                                           xtag("op", op_type_));
+
+                p_psm->on_error(c_self_name, errmsg);
             }
 
             /* consecutive expressions not legal, e.g:
@@ -220,7 +221,7 @@ namespace xo {
             //   this->on_semicolon_token(token_type::semicolon(), p_psm);
             // INSTEAD, spell out the body
 
-            rp<Expression> expr2 = this->assemble_expr();
+            rp<Expression> expr2 = this->assemble_expr(p_psm);
 
             std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
 
@@ -261,10 +262,9 @@ namespace xo {
         {
             /* note: implementation parallels .on_rightparen_token() */
 
-            constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG(p_psm->debug_flag()));
 
-            rp<Expression> expr = this->assemble_expr();
+            rp<Expression> expr = this->assemble_expr(p_psm);
 
             log && log(xtag("assembled-expr", expr));
 
@@ -316,9 +316,7 @@ namespace xo {
          {
              /* note: implementation parallels .on_semicolon_token() */
 
-
-             constexpr bool c_debug_flag = true;
-             scope log(XO_DEBUG(c_debug_flag));
+             scope log(XO_DEBUG(p_psm->debug_flag()));
 
              constexpr const char * self_name = "progress_xs::on_rightparen";
 
@@ -336,7 +334,7 @@ namespace xo {
               */
 
              /* right paren confirms stack expression */
-             rp<Expression> expr = this->assemble_expr();
+             rp<Expression> expr = this->assemble_expr(p_psm);
 
              std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
 
@@ -352,6 +350,49 @@ namespace xo {
              /* now deliver rightparen */
              p_psm->top_exprstate().on_rightparen_token(tk, p_psm);
          }
+
+        void
+        progress_xs::on_then_token(const token_type & tk,
+                                   parserstatemachine * p_psm)
+        {
+            scope log(XO_DEBUG(p_psm->debug_flag()));
+
+            rp<Expression> expr = this->assemble_expr(p_psm);
+
+            log && log(xtag("assembled-expr", expr));
+
+            std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
+
+            p_psm->on_expr(expr);
+            p_psm->on_then_token(tk);
+
+            /* control here on input like:
+             *
+             *   if a > b then..
+             *
+             */
+        }
+
+        void
+        progress_xs::on_else_token(const token_type & tk,
+                                   parserstatemachine * p_psm)
+        {
+            scope log(XO_DEBUG(p_psm->debug_flag()));
+
+            rp<Expression> expr = this->assemble_expr(p_psm);
+
+            log && log(xtag("assembled-expr", expr));
+
+            std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
+
+            p_psm->on_expr(expr);
+            p_psm->on_else_token(tk);
+
+            /* control here on input like:
+             *
+             *   if a > b then c else..
+             */
+        }
 
         namespace {
             optype
@@ -406,7 +447,7 @@ namespace xo {
                      */
 
                     /* 1. instantiate expression for *this */
-                    auto expr = this->assemble_expr();
+                    auto expr = this->assemble_expr(p_psm);
 
                     /* 2. remove from stack */
                     std::unique_ptr<exprstate> self  = p_psm->pop_exprstate();

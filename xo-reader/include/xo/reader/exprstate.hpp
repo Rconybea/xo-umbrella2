@@ -45,6 +45,11 @@ namespace xo {
              **/
             let1expr,
 
+            /** handle if-else expression
+             *  see @ref if_else_xs
+             **/
+            ifexpr,
+
             expect_rhs_expression,
             expect_symbol,
             expect_type,
@@ -176,6 +181,22 @@ namespace xo {
             /** handle incoming operator token **/
             virtual void on_operator_token(const token_type & tk,
                                            parserstatemachine * p_psm);
+
+            /** handle incoming if-keyword token **/
+            virtual void on_if_token(const token_type & tk,
+                                     parserstatemachine * p_psm);
+
+            /** handle incoming then-keyword token **/
+            virtual void on_then_token(const token_type & tk,
+                                       parserstatemachine * p_psm);
+
+            /** handle incoming then-keyword token **/
+            virtual void on_else_token(const token_type & tk,
+                                       parserstatemachine * p_psm);
+
+            /** handle incoming bool-literal token **/
+            virtual void on_bool_token(const token_type & tk,
+                                       parserstatemachine * p_psm);
 
             /** handle incoming integer-literal token **/
             virtual void on_i64_token(const token_type & tk,

@@ -7,6 +7,21 @@
 
 namespace xo {
     namespace ast {
+        auto IfExpr::check_consistent_valuetype(const rp<Expression> & when_true,
+                                                const rp<Expression> & when_false) -> TypeDescr
+        {
+            if (when_true->valuetype() != when_false->valuetype())
+                return nullptr;
+
+            return when_true->valuetype();
+        }
+
+        void IfExpr::establish_valuetype()
+        {
+            if (this->when_true_.get() && this->when_false_.get())
+                this->assign_valuetype(check_consistent_valuetype(this->when_true_, this->when_false_));
+        }
+
         rp<IfExpr>
         IfExpr::make(const rp<Expression> & test,
                      const rp<Expression> & when_true,
@@ -36,9 +51,10 @@ namespace xo {
         IfExpr::display(std::ostream & os) const {
             os << "<IfExpr"
                << xtag("test", test_)
-               << xtag("when_true", when_true_)
-               << xtag("when_false", when_false_)
-               << ">";
+               << xtag("when_true", when_true_);
+            if (when_false_)
+                os << xtag("when_false", when_false_);
+            os << ">";
         } /*display*/
 
         std::uint32_t
@@ -47,6 +63,37 @@ namespace xo {
                                              refrtag("test", test_),
                                              refrtag("when_true", when_true_),
                                              refrtag("when_false", when_false_));
+        }
+
+        rp<IfExprAccess>
+        IfExprAccess::make(rp<Expression> test,
+                           rp<Expression> when_true,
+                           rp<Expression> when_false)
+        {
+            auto ifexpr_type = check_consistent_valuetype(when_true, when_false);
+
+            return new IfExprAccess(ifexpr_type, std::move(test), std::move(when_true), std::move(when_false));
+        }
+
+        rp<IfExprAccess>
+        IfExprAccess::make_empty()
+        {
+            return new IfExprAccess(nullptr /*ifexpr_valuetype*/,
+                                    nullptr /*test*/,
+                                    nullptr /*when_true*/,
+                                    nullptr /*when_false*/);
+        }
+
+        void
+        IfExprAccess::assign_when_true(rp<Expression> x)
+        {
+            this->when_true_ = std::move(x);
+        }
+
+        void
+        IfExprAccess::assign_when_false(rp<Expression> x)
+        {
+            this->when_false_ = std::move(x);
         }
     } /*namespace ast*/
 } /*namespace xo*/

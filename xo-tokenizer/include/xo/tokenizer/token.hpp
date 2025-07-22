@@ -60,6 +60,12 @@ namespace xo {
 
             /** create invalid token (same as null ctor, but explicit) **/
             static token invalid() { return token(); }
+            /** Create token representing a boolean literal from text @p txt
+             *  @p txt must be @c true or @c false
+             **/
+            static token bool_token(const std::string & txt) {
+                return token(tokentype::tk_bool, txt);
+            }
             /** Create token representing 64-bit signed integer literal parsed from decimal @p txt.
              *  The string @p txt must be a decimal integer literal, since @ref i64_value re-parses @p txt.
              **/
@@ -132,6 +138,8 @@ namespace xo {
             static token lambda() { return token(tokentype::tk_lambda); }
             /** token representing keyword @c if **/
             static token if_token() { return token(tokentype::tk_if); }
+            /** token representing keyword @c else **/
+            static token else_token() { return token(tokentype::tk_else); }
             /** token representing keyword @c let **/
             static token let() { return token(tokentype::tk_let); }
             /** token representing keyword @c in **/
@@ -165,10 +173,13 @@ namespace xo {
                                                      || tk_type_ == tokentype::tk_string
                                                      || tk_type_ == tokentype::tk_symbol); }
 
-            /** expect input matching @c "[+|-][0-9][0-9]*" **/
+            /** expect input matching @c true or @c false **/
+            bool bool_value() const;
+
+            /** expect input matching @c [+|-][0-9][0-9]* **/
             std::int64_t i64_value() const;
 
-            /** expect input matching @c "[+|-][0-9]*[.][0-9]*[e|E][+|-][0-9]*" **/
+            /** expect input matching @c [+|-][0-9]*[.][0-9]*[e|E][+|-][0-9]* **/
             double f64_value() const;
 
             /** print human-readable token representation on stream @p os **/
@@ -195,6 +206,29 @@ namespace xo {
 
             ///@}
         };
+
+        template <typename CharT>
+        bool
+        token<CharT>::bool_value() const {
+            if (tk_type_ != tokentype::tk_bool) {
+                throw (std::runtime_error
+                       (tostr("token::bool_value",
+                              ": token with type tk found where tk_bool expected",
+                              xtag("tk", tk_type_))));
+            }
+
+            if (text_ == "true")
+                return true;
+            if (text_ == "false")
+                return false;
+
+            throw (std::runtime_error
+                   (tostr("token::bool_value",
+                          ": unexpected input string tk_bool token",
+                          xtag("text", text_))));
+
+            return false;
+        }
 
         template <typename CharT>
         std::int64_t

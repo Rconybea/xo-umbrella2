@@ -78,7 +78,7 @@ namespace xo {
             using span_type = tokenizer_type::span_type;
 
         public:
-            reader() = default;
+            explicit reader(bool debug_flag);
 
             /** call once before calling .read_expr()
              *  for a new interactive session

@@ -28,10 +28,12 @@ namespace xo {
         public:
             parserstatemachine(exprstatestack * p_stack,
                                envframestack * p_env_stack,
-                               parser_result * p_result)
+                               parser_result * p_result,
+                               bool debug_flag)
                 : p_stack_{p_stack},
                   p_env_stack_{p_env_stack},
-                  p_result_{p_result}
+                  p_result_{p_result},
+                  debug_flag_{debug_flag}
                 {}
 
             //const parser_result & result() const { return result_; }
@@ -44,6 +46,8 @@ namespace xo {
             exprstate & top_exprstate();
             void push_exprstate(std::unique_ptr<exprstate> x);
 
+            bool debug_flag() const { return debug_flag_; }
+
             /** lookup variable name in lexical context represented by
              *  this psm.  nullptr if not found
              **/
@@ -54,9 +58,13 @@ namespace xo {
              **/
             void upsert_var(bp<Variable> x);
 
+            /** @return available variable bindings in current parsing state **/
             bp<LocalEnv> top_envframe() const;
+            /** push frame @p x (with new variable bindings) onto environment stack **/
             void push_envframe(const rp<LocalEnv> & x);
+            /** @return pop innermost environment frame and return it **/
             rp<LocalEnv> pop_envframe();
+            /** @return number of stacked environment frames **/
             size_t env_stack_size() const { return  p_env_stack_->size(); }
 
             // ----- parsing outputs -----
@@ -71,6 +79,8 @@ namespace xo {
             void on_operator_token(const token_type & tk);
             void on_leftbrace_token(const token_type & tk);
             void on_rightbrace_token(const token_type & tk);
+            void on_then_token(const token_type & tk);
+            void on_else_token(const token_type & tk);
 
             // ----- parsing error -----
 
@@ -91,6 +101,8 @@ namespace xo {
             envframestack * p_env_stack_ = nullptr;
             /** parser result object **/
             parser_result * p_result_ = nullptr;
+            /** enable debug logging **/
+            bool debug_flag_ = false;
         };
 
         inline std::ostream &

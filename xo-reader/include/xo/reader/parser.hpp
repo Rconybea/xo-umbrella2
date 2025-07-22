@@ -112,6 +112,9 @@ namespace xo {
          *                       | symbol-literal
          *                       | struct-literal
          *
+         *
+         *   boolean-literal  = true | false
+         *
          *   variable-expr    = $varname
          *   apply-expr       = fn-expr(arg-expr(1), .., arg-expr(n))
          *     fn-expr          = expression
@@ -155,8 +158,10 @@ namespace xo {
         public:
             /** create parser in initial state;
              *  parser is ready to receive tokens via @ref include_token
+             *
+             *  @p debug_flag  true to enable debug logging
              **/
-            parser();
+            explicit parser(bool debug_flag);
 
             /** true if parser is at top-level, i.e. ready for next top-level expression **/
             bool is_at_toplevel() const { return stack_size() == 0; }
@@ -243,6 +248,9 @@ namespace xo {
 
             /** parser result state **/
             parser_result result_;
+
+            /** enable/disable debug logging **/
+            bool debug_flag_;
         }; /*parser*/
 
         inline std::ostream &

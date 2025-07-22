@@ -40,6 +40,8 @@ namespace xo {
                 return "sequenceexpr";
             case exprstatetype::let1expr:
                 return "let1expr";
+            case exprstatetype::ifexpr:
+                return "ifexpr";
             case exprstatetype::expect_rhs_expression:
                 return "expect_rhs_expression";
             case exprstatetype::expect_symbol:
@@ -280,6 +282,55 @@ namespace xo {
         }
 
         void
+        exprstate::on_if_token(const token_type & tk,
+                               parserstatemachine * p_psm)
+        {
+            scope log(XO_DEBUG(p_psm->debug_flag()));
+
+            constexpr const char * c_self_name = "exprstate::on_if_token";
+            const char * exp = get_expect_str();
+
+            this->illegal_input_on_token(c_self_name, tk, exp, p_psm);
+        }
+
+        void
+        exprstate::on_then_token(const token_type & tk,
+                               parserstatemachine * p_psm)
+        {
+            scope log(XO_DEBUG(p_psm->debug_flag()));
+
+            constexpr const char * c_self_name = "exprstate::on_then_token";
+            const char * exp = get_expect_str();
+
+            this->illegal_input_on_token(c_self_name, tk, exp, p_psm);
+        }
+
+        void
+        exprstate::on_else_token(const token_type & tk,
+                               parserstatemachine * p_psm)
+        {
+            scope log(XO_DEBUG(p_psm->debug_flag()));
+
+            constexpr const char * c_self_name = "exprstate::on_else_token";
+            const char * exp = get_expect_str();
+
+            this->illegal_input_on_token(c_self_name, tk, exp, p_psm);
+        }
+
+        void
+        exprstate::on_bool_token(const token_type & tk,
+                                 parserstatemachine * p_psm)
+        {
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
+            constexpr const char * c_self_name = "exprstate::on_bool";
+            const char * exp = get_expect_str();
+
+            this->illegal_input_on_token(c_self_name, tk, exp, p_psm);
+        }
+
+        void
         exprstate::on_i64_token(const token_type & tk,
                                 parserstatemachine * p_psm)
         {
@@ -324,6 +375,10 @@ namespace xo {
 
             case tokentype::tk_lambda:
                 this->on_lambda_token(tk, p_psm);
+                return;
+
+            case tokentype::tk_bool:
+                this->on_bool_token(tk, p_psm);
                 return;
 
             case tokentype::tk_i64:
@@ -402,7 +457,21 @@ namespace xo {
                 return;
 
             case tokentype::tk_type:
+                assert(false);
+                return;
+
             case tokentype::tk_if:
+                this->on_if_token(tk, p_psm);
+                return;
+
+            case tokentype::tk_then:
+                this->on_then_token(tk, p_psm);
+                return;
+
+            case tokentype::tk_else:
+                this->on_else_token(tk, p_psm);
+                return;
+
             case tokentype::tk_let:
 
             case tokentype::tk_in:

@@ -104,7 +104,7 @@ namespace xo {
             virtual void display(std::ostream & os) const override;
             virtual std::uint32_t pretty_print(const ppindentinfo & ppi) const override;
 
-        private:
+        protected:
             /**
              *  @p ifexpr_type  type for value produced by if-expression.
              *                  same as both when_true->valuetype() and
@@ -122,7 +122,13 @@ namespace xo {
                   when_true_{std::move(when_true)},
                   when_false_{std::move(when_false)} {}
 
-        private:
+            static TypeDescr check_consistent_valuetype(const rp<Expression> & when_true,
+                                                        const rp<Expression> & when_false);
+
+            /** determine if-expr valuetype **/
+            void establish_valuetype();
+
+        protected:
             /** if:
              *    (if x y z)
              *
@@ -140,6 +146,28 @@ namespace xo {
         {
             return IfExpr::make(test, when_true, when_false);
         }
+
+        class IfExprAccess : public IfExpr {
+        public:
+            static rp<IfExprAccess> make(rp<Expression> test,
+                                         rp<Expression> when_true,
+                                         rp<Expression> when_false);
+            static rp<IfExprAccess> make_empty();
+
+            void assign_test(rp<Expression> x) { test_ = std::move(x); }
+            void assign_when_true(rp<Expression> x);
+            void assign_when_false(rp<Expression> x);
+
+        private:
+            IfExprAccess(TypeDescr ifexpr_type,
+                         rp<Expression> test,
+                         rp<Expression> when_true,
+                         rp<Expression> when_false)
+                : IfExpr(ifexpr_type,
+                         std::move(test),
+                         std::move(when_true),
+                         std::move(when_false)) {}
+        };
     } /*namespace ast*/
 } /*namespace xo*/
 

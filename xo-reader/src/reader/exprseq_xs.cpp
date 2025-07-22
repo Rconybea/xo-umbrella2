@@ -7,6 +7,7 @@
 //#include "expect_expr_xs.hpp"
 #include "progress_xs.hpp"
 #include "define_xs.hpp"
+#include "if_else_xs.hpp"
 #include "expect_symbol_xs.hpp"
 #include "xo/expression/Constant.hpp"
 
@@ -30,6 +31,24 @@ namespace xo {
         {
         }
 
+        const char *
+        exprseq_xs::get_expect_str() const
+        {
+            /*
+             *   def...
+             *  ^
+             *  exprseq_xs
+             */
+            switch (this->xseqtype_) {
+            case exprseqtype::toplevel_interactive:
+                return "def|expression";
+            case exprseqtype::toplevel_batch:
+                return "def";
+            }
+
+            return "?expect";
+        }
+
         void
         exprseq_xs::on_def_token(const token_type & /*tk*/,
                                  parserstatemachine * p_psm)
@@ -43,6 +62,25 @@ namespace xo {
              *   def pi : f64 = 3.14159265
              *   def sq(x : f64) -> f64 { (x * x) }
              */
+        }
+
+        void
+        exprseq_xs::on_if_token(const token_type & tk,
+                                parserstatemachine * p_psm)
+        {
+            if (xseqtype_ == exprseqtype::toplevel_interactive)
+            {
+                /* in interactive session, allow top-level if-expressions.
+                 * Could be:
+                 *   if sometest() do_something() do_otherthing();
+                 */
+                if_else_xs::start(p_psm);
+            } else {
+                constexpr const char * c_self_name = "exprseq_xs::on_if_token";
+                const char * exp = get_expect_str();
+
+                this->illegal_input_on_token(c_self_name, tk, exp, p_psm);
+            }
         }
 
         void
@@ -72,7 +110,39 @@ namespace xo {
                 /* policy: don't allow variable references as toplevel expressions
                  * unless interactive session
                  */
-                this->illegal_input_error(c_self_name, tk);
+                const char * exp = get_expect_str();
+
+                this->illegal_input_on_token(c_self_name,
+                                             tk,
+                                             exp,
+                                             p_psm);
+            }
+        }
+
+        void
+        exprseq_xs::on_bool_token(const token_type & tk,
+                                  parserstatemachine * p_psm)
+        {
+            using xo::ast::Constant;
+
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
+            constexpr const char * c_self_name = "exprseq_xs::on_bool_token";
+
+            if (xseqtype_ == exprseqtype::toplevel_interactive)
+            {
+                progress_xs::start(Constant<bool>::make(tk.bool_value()), p_psm);
+            } else {
+                /* policy: don't allow literals as toplevel expressions
+                 * unless interactive session
+                 */
+                const char * exp = get_expect_str();
+
+                this->illegal_input_on_token(c_self_name,
+                                             tk,
+                                             exp,
+                                             p_psm);
             }
         }
 
@@ -94,7 +164,12 @@ namespace xo {
                 /* policy: don't allow literals as toplevel expressions
                  * unless interactive session.
                  */
-                this->illegal_input_error(c_self_name, tk);
+                const char * exp = get_expect_str();
+
+                this->illegal_input_on_token(c_self_name,
+                                             tk,
+                                             exp,
+                                             p_psm);
             }
         }
 
@@ -114,7 +189,6 @@ namespace xo {
             /* toplevel expression sequence accepts an
              * arbitrary number of expressions.
              */
-
 
             *(p_psm->p_result_) = parser_result::expression(expr.promote());
         }

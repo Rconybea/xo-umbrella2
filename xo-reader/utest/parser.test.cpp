@@ -21,9 +21,10 @@ namespace xo {
     namespace ut {
         TEST_CASE("parser", "[parser]") {
             for (std::size_t i_tc = 0; i_tc < 2; ++i_tc) {
-                parser_type parser;
-
                 constexpr bool c_debug_flag = true;
+
+                parser_type parser(c_debug_flag);
+
                 scope log(XO_DEBUG(c_debug_flag), xtag("i_tc", i_tc));
 
                 parser.begin_translation_unit();

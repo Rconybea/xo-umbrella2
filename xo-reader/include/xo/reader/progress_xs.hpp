@@ -95,6 +95,10 @@ namespace xo {
                                             parserstatemachine * p_psm) override;
             virtual void on_rightparen_token(const token_type & tk,
                                              parserstatemachine * p_psm) override;
+            virtual void on_then_token(const token_type & tk,
+                                       parserstatemachine * p_psm) override;
+            virtual void on_else_token(const token_type & tk,
+                                       parserstatemachine * p_psm) override;
 
             /* entry point for an infix operator token */
             virtual void on_operator_token(const token_type & tk,
@@ -121,7 +125,7 @@ namespace xo {
              *
              *  where f determined by @ref op_type_
              **/
-            rp<Expression> assemble_expr();
+            rp<Expression> assemble_expr(parserstatemachine * p_psm);
 
         private:
             /** populate an expression here, may be followed by an operator **/

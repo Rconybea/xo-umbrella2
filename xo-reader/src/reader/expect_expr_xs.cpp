@@ -129,6 +129,8 @@ namespace xo {
 
             log && log(xtag("tk", tk));
 
+            constexpr const char * c_self_name = "expect_expr_xs::on_symbol_token";
+
             /* various possibilities when looking for rhs expression:
              *
              *   x := y       // (1)
@@ -143,10 +145,8 @@ namespace xo {
             bp<Variable> var = p_psm->lookup_var(tk.text());
 
             if (!var) {
-                throw std::runtime_error
-                    (tostr("expect_expr_xs::on_symbol_token",
-                           ": unknown symbol",
-                           xtag("name", tk.text())));
+                this->unknown_variable_error(c_self_name, tk, p_psm);
+                return;
             }
 
             /* e.g.
@@ -174,11 +174,21 @@ namespace xo {
         }
 
         void
+        expect_expr_xs::on_bool_token(const token_type & tk,
+                                      parserstatemachine * p_psm)
+        {
+            scope log(XO_DEBUG(p_psm->debug_flag()));
+
+            progress_xs::start
+                (Constant<bool>::make(tk.bool_value()),
+                 p_psm);
+        }
+
+        void
         expect_expr_xs::on_i64_token(const token_type & tk,
                                      parserstatemachine * p_psm)
         {
-            constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG(p_psm->debug_flag()));
 
             progress_xs::start
                 (Constant<int64_t>::make(tk.i64_value()),

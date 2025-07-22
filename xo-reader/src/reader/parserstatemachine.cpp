@@ -146,14 +146,37 @@ namespace xo {
         void
         parserstatemachine::on_rightbrace_token(const token_type & tk)
         {
-            constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG(debug_flag_));
 
             log && log(xtag("tk", tk),
                        xtag("psm", *this));
 
             this->p_stack_
                 ->top_exprstate().on_rightbrace_token(tk, this);
+        }
+
+        void
+        parserstatemachine::on_then_token(const token_type & tk)
+        {
+            scope log(XO_DEBUG(debug_flag_));
+
+            log && log(xtag("tk", tk),
+                       xtag("psm", *this));
+
+            this->p_stack_
+                ->top_exprstate().on_then_token(tk, this);
+        }
+
+        void
+        parserstatemachine::on_else_token(const token_type & tk)
+        {
+            scope log(XO_DEBUG(debug_flag_));
+
+            log && log(xtag("tk", tk),
+                       xtag("psm", *this));
+
+            this->p_stack_
+                ->top_exprstate().on_else_token(tk, this);
         }
 
         void

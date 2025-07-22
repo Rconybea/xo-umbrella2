@@ -9,6 +9,7 @@ set(SELF_SRCS
     exprstate.cpp
     exprstatestack.cpp
     define_xs.cpp
+    if_else_xs.cpp
     progress_xs.cpp
     paren_xs.cpp
     sequence_xs.cpp

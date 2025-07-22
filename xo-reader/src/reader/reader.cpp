@@ -4,6 +4,10 @@
 
 namespace xo {
     namespace scm {
+        reader::reader(bool debug_flag)
+            : parser_{debug_flag}
+        {}
+
         void
         reader::begin_interactive_session() {
             parser_.begin_interactive_session();

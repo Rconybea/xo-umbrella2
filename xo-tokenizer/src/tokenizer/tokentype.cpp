@@ -13,6 +13,7 @@ namespace xo {
 #define CASE(x) case tokentype::x: return STRINGIFY(x)
 
             switch(tk_type) {
+                CASE(tk_bool);
                 CASE(tk_i64);
                 CASE(tk_f64);
                 CASE(tk_string);
@@ -46,6 +47,8 @@ namespace xo {
                 CASE(tk_def);
                 CASE(tk_lambda);
                 CASE(tk_if);
+                CASE(tk_then);
+                CASE(tk_else);
                 CASE(tk_let);
 
                 CASE(tk_in);

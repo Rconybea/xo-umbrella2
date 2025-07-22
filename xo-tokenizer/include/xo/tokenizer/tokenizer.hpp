@@ -479,9 +479,6 @@ namespace xo {
                                 (error_type(__FUNCTION__ /*src_function*/,
                                             "expecting key following escape character \\",
                                             input_state_,
-                                            //current_line_,
-                                            //current_pos_,
-                                            //initial_whitespace,
                                             (ix - tk_start)));
                         }
 
@@ -511,9 +508,6 @@ namespace xo {
                                 (error_type(__FUNCTION__ /*src_function*/,
                                             "expecting one of n|r|\"|\\ following escape \\",
                                             input_state_,
-                                            //current_line_,
-                                            //current_pos_,
-                                            //initial_whitespace,
                                             (ix - tk_start)));
                         }
                         break;
@@ -531,9 +525,6 @@ namespace xo {
                         (error_type(__FUNCTION__ /*src_function*/,
                                     "missing terminating '\"' to complete literal string",
                                     input_state_,
-                                    //current_line_,
-                                    //current_pos_,
-                                    //initial_whitespace,
                                     (ix - tk_start)));
                 }
 
@@ -683,7 +674,10 @@ namespace xo {
 
                 bool keep_text = false;
 
-                if (tk_text == "type") {
+                if ((tk_text == "true") || (tk_text == "false")) {
+                    tk_type = tokentype::tk_bool;
+                    keep_text = true;
+                } else if (tk_text == "type") {
                     tk_type = tokentype::tk_type;
                 } else if (tk_text == "def") {
                     tk_type = tokentype::tk_def;
@@ -691,6 +685,10 @@ namespace xo {
                     tk_type = tokentype::tk_lambda;
                 } else if (tk_text == "if") {
                     tk_type = tokentype::tk_if;
+                } else if (tk_text == "then") {
+                    tk_type = tokentype::tk_then;
+                } else if (tk_text == "else") {
+                    tk_type = tokentype::tk_else;
                 } else if (tk_text == "let") {
                     tk_type = tokentype::tk_let;
                 } else if (tk_text == "in") {
@@ -842,9 +840,6 @@ namespace xo {
                             (error_type(__FUNCTION__ /*src_function*/,
                                         "must use \\n or \\r to encode newline/cr in string literal",
                                         input_state_,
-                                        //current_line_,
-                                        //current_pos_,
-                                        //whitespace.size(),
                                         (ix - tk_start)));
                     }
 

@@ -47,7 +47,9 @@ main() {
 
     bool interactive = isatty(STDIN_FILENO);
 
-    reader rdr;
+    bool c_debug_flag = false;
+
+    reader rdr(c_debug_flag);
     rdr.begin_interactive_session();
 
     string input_str;

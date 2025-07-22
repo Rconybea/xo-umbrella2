@@ -89,7 +89,7 @@ namespace xo {
 
                 /** always multiple lines if more than one element in stack **/
                 if ((stack_.size() > 0)
-                    && !pps->print_upto_tag("[0]", *stack_[0].get()))
+                    && !pps->print_upto_tag("[0]", stack_[0].get()))
                 {
                     return false;
                 }
@@ -105,7 +105,7 @@ namespace xo {
                 for (std::size_t i = 0, z = stack_.size(); i < z; ++i) {
                     std::string i_str = tostr("[", z-i-1, "]");
 
-                    pps->newline_pretty_tag(ppii.ci1(), i_str, *stack_[i].get());
+                    pps->newline_pretty_tag(ppii.ci1(), i_str, stack_[i].get());
                 }
 
                 pps->write(">");

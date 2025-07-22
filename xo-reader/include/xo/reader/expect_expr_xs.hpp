@@ -12,6 +12,18 @@ namespace xo {
 
         /** @class expect_expr_xs
          *  @brief state machine to expect + capture an expression
+         *
+         *  Examples:
+         *  @text
+         *    def x : i64 = 5 ;           // with allow_defs
+         *    lambda (f : x64) { ... } ;
+         *    if (prime(x)) { ... } ;
+         *    5 + x ;
+         *  @endtext
+         *
+         *  top exprstate when expect_expr_xs::start() invoked
+         *  will receive parsed expression via
+         *  exprstate::on_expr() or exprstate::on_expr_with_semicolon().
          **/
         class expect_expr_xs : public exprstate {
         public:
@@ -41,6 +53,9 @@ namespace xo {
             virtual void on_symbol_token(const token_type & tk,
                                          parserstatemachine * p_psm) override;
 
+            virtual void on_bool_token(const token_type & tk,
+                                       parserstatemachine * p_psm) override;
+
             virtual void on_i64_token(const token_type & tk,
                                       parserstatemachine * p_psm) override;
 
@@ -50,7 +65,7 @@ namespace xo {
             /** update exprstate in response to a successfully-parsed subexpression **/
             virtual void on_expr(bp<Expression> expr,
                                  parserstatemachine * p_psm) override;
-            /** update exprstate in response to a successfully-parsed subexpression,
+            /** update exprstate in response to a successfully-parsed subexpression
              *  that's terminated by semicolon ';'
              **/
             virtual void on_expr_with_semicolon(bp<Expression> expr,
