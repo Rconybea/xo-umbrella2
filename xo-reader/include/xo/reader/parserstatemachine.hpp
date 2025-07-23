@@ -6,6 +6,7 @@
 #pragma once
 
 #include "exprstate.hpp"
+#include "exprstatestack.hpp"
 #include "envframestack.hpp"
 #include "parser_result.hpp"
 
@@ -26,14 +27,8 @@ namespace xo {
             using token_type = token<char>;
 
         public:
-            parserstatemachine(exprstatestack * p_stack,
-                               envframestack * p_env_stack,
-                               parser_result * p_result,
-                               bool debug_flag)
-                : p_stack_{p_stack},
-                  p_env_stack_{p_env_stack},
-                  p_result_{p_result},
-                  debug_flag_{debug_flag}
+            explicit parserstatemachine(bool debug_flag)
+                : debug_flag_{debug_flag}
                 {}
 
             //const parser_result & result() const { return result_; }
@@ -65,7 +60,7 @@ namespace xo {
             /** @return pop innermost environment frame and return it **/
             rp<LocalEnv> pop_envframe();
             /** @return number of stacked environment frames **/
-            size_t env_stack_size() const { return  p_env_stack_->size(); }
+            size_t env_stack_size() const { return  env_stack_.size(); }
 
             // ----- parsing outputs -----
 
@@ -92,16 +87,24 @@ namespace xo {
             void print(std::ostream & os) const;
 
         public:
-            /** stack of incomplete parser work.
-             *  generally speaking, push when to start new work for nested content;
-             *  pop when work complete
+            /** state recording state associated with enclosing expressions.
+             *
+             *  Note: at least asof c++23, the std::stack api doesn't support access
+             *  to members other than the top.
+             *
+             *  for stack with N elements (N = stack_.size()):
+             *  - bottom of stack is stack_[0]
+             *  - top of stack is stack_[N-1]
              **/
-            exprstatestack * p_stack_ = nullptr;
-            /** stack of environment frames, one for each enclosing lambda **/
-            envframestack * p_env_stack_ = nullptr;
-            /** parser result object **/
-            parser_result * p_result_ = nullptr;
-            /** enable debug logging **/
+            exprstatestack xs_stack_;
+            /** environment frames for lexical context.
+             *  push a frame on each nested lambda;
+             *  pop when lambda body goes out of scope
+             **/
+            envframestack env_stack_;
+            /** parser result state **/
+            parser_result result_;
+            /** enable/disable debug logging **/
             bool debug_flag_ = false;
         };
 

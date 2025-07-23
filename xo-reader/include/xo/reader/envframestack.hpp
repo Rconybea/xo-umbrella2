@@ -36,7 +36,7 @@ namespace xo {
              **/
             void upsert(bp<Variable> target);
 
-            bp<LocalEnv> top_envframe();
+            bp<LocalEnv> top_envframe() const;
             void push_envframe(const rp<LocalEnv> & x);
             rp<LocalEnv> pop_envframe();
 

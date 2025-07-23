@@ -8,6 +8,7 @@
 #include "exprstatestack.hpp"
 #include "envframestack.hpp"
 #include "parser_result.hpp"
+#include "parserstatemachine.hpp"
 #include <stdexcept>
 
 namespace xo {
@@ -167,17 +168,17 @@ namespace xo {
             bool is_at_toplevel() const { return stack_size() == 0; }
 
             /** for diagnostics: number of entries in parser stack **/
-            std::size_t stack_size() const { return xs_stack_.size(); }
+            std::size_t stack_size() const { return psm_.xs_stack_.size(); }
             /** for diagnostics: exprstatetype at level @p i
              *  (taken relative to top of stack)
              *
              *  @pre 0 <= i < stack_size
              **/
             exprstatetype i_exstype(std::size_t i) const {
-                std::size_t z = xs_stack_.size();
+                std::size_t z = psm_.xs_stack_.size();
 
                 if (i < z) {
-                    return xs_stack_[i]->exs_type();
+                    return psm_.xs_stack_[i]->exs_type();
                 }
 
                 /* out of bounds */
@@ -185,10 +186,10 @@ namespace xo {
             }
 
             exprstate const * i_exstate(std::size_t i) const {
-                std::size_t z = xs_stack_.size();
+                std::size_t z = psm_.xs_stack_.size();
 
                 if (i < z) {
-                    return xs_stack_[i].get();
+                    return psm_.xs_stack_[i].get();
                 }
 
                 /* out of bounds */
@@ -229,28 +230,8 @@ namespace xo {
             void print(std::ostream & os) const;
 
         private:
-            /** state recording state associated with enclosing expressions.
-             *
-             *  Note: at least asof c++23, the std::stack api doesn't support access
-             *  to members other than the top.
-             *
-             *  for stack with N elements (N = stack_.size()):
-             *  - bottom of stack is stack_[0]
-             *  - top of stack is stack_[N-1]
-             **/
-            exprstatestack xs_stack_;
-
-            /** environment frames for lexical context.
-             *  push a frame on each nested lambda;
-             *  pop when lambda body goes out of scope
-             **/
-            envframestack env_stack_;
-
-            /** parser result state **/
-            parser_result result_;
-
-            /** enable/disable debug logging **/
-            bool debug_flag_;
+            /** state machine **/
+            parserstatemachine psm_;
         }; /*parser*/
 
         inline std::ostream &

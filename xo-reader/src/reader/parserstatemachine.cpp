@@ -17,32 +17,32 @@ namespace xo {
     namespace scm {
         bp<Variable>
         parserstatemachine::lookup_var(const std::string & x) const {
-            return p_env_stack_->lookup(x);
+            return env_stack_.lookup(x);
         }
 
         void
         parserstatemachine::upsert_var(bp<Variable> x) {
-            p_env_stack_->upsert(x);
+            env_stack_.upsert(x);
         }
 
         std::unique_ptr<exprstate>
         parserstatemachine::pop_exprstate() {
-            return p_stack_->pop_exprstate();
+            return xs_stack_.pop_exprstate();
         }
 
         exprstate &
         parserstatemachine::top_exprstate() {
-            return p_stack_->top_exprstate();
+            return xs_stack_.top_exprstate();
         }
 
         void
         parserstatemachine::push_exprstate(std::unique_ptr<exprstate> x) {
-            p_stack_->push_exprstate(std::move(x));
+            xs_stack_.push_exprstate(std::move(x));
         }
 
         bp<LocalEnv>
         parserstatemachine::top_envframe() const {
-            return p_env_stack_->top_envframe();
+            return env_stack_.top_envframe();
         }
 
         void
@@ -52,7 +52,7 @@ namespace xo {
 
             log && log(xtag("frame", x));
 
-            p_env_stack_->push_envframe(x);
+            env_stack_.push_envframe(x);
         }
 
         rp<LocalEnv>
@@ -60,7 +60,7 @@ namespace xo {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            return p_env_stack_->pop_envframe();
+            return env_stack_.pop_envframe();
         }
 
         void
@@ -70,10 +70,9 @@ namespace xo {
             scope log(XO_DEBUG(c_debug_flag));
 
             log && log(xtag("x", x),
-                       xtag("psm", *this));
+                       xtag("psm", this));
 
-            this->p_stack_
-                ->top_exprstate().on_expr(x, this);
+            this->xs_stack_.top_exprstate().on_expr(x, this);
         }
 
         void
@@ -83,12 +82,11 @@ namespace xo {
             scope log(XO_DEBUG(c_debug_flag));
 
             log && log(xtag("x", x),
-                       xtag("psm", *this));
+                       xtag("psm", this));
 
-            assert(!this->p_stack_->empty());
+            assert(!this->xs_stack_.empty());
 
-            this->p_stack_
-                ->top_exprstate().on_expr_with_semicolon(x, this);
+            this->xs_stack_.top_exprstate().on_expr_with_semicolon(x, this);
         }
 
         void
@@ -98,10 +96,9 @@ namespace xo {
             scope log(XO_DEBUG(c_debug_flag));
 
             log && log(xtag("x", x),
-                       xtag("psm", *this));
+                       xtag("psm", this));
 
-            this->p_stack_
-                ->top_exprstate().on_symbol(x, this);
+            this->xs_stack_.top_exprstate().on_symbol(x, this);
         }
 
         void
@@ -111,10 +108,9 @@ namespace xo {
             scope log(XO_DEBUG(c_debug_flag));
 
             log && log(xtag("tk", tk),
-                       xtag("psm", *this));
+                       xtag("psm", this));
 
-            this->p_stack_
-                ->top_exprstate().on_semicolon_token(tk, this);
+            this->xs_stack_.top_exprstate().on_semicolon_token(tk, this);
         }
 
         void
@@ -124,10 +120,9 @@ namespace xo {
             scope log(XO_DEBUG(c_debug_flag));
 
             log && log(xtag("tk", tk),
-                       xtag("psm", *this));
+                       xtag("psm", this));
 
-            this->p_stack_
-                ->top_exprstate().on_operator_token(tk, this);
+            this->xs_stack_.top_exprstate().on_operator_token(tk, this);
         }
 
         void
@@ -137,10 +132,9 @@ namespace xo {
             scope log(XO_DEBUG(c_debug_flag));
 
             log && log(xtag("tk", tk),
-                       xtag("psm", *this));
+                       xtag("psm", this));
 
-            this->p_stack_
-                ->top_exprstate().on_leftbrace_token(tk, this);
+            this->xs_stack_.top_exprstate().on_leftbrace_token(tk, this);
         }
 
         void
@@ -149,10 +143,9 @@ namespace xo {
             scope log(XO_DEBUG(debug_flag_));
 
             log && log(xtag("tk", tk),
-                       xtag("psm", *this));
+                       xtag("psm", this));
 
-            this->p_stack_
-                ->top_exprstate().on_rightbrace_token(tk, this);
+            this->xs_stack_.top_exprstate().on_rightbrace_token(tk, this);
         }
 
         void
@@ -161,10 +154,9 @@ namespace xo {
             scope log(XO_DEBUG(debug_flag_));
 
             log && log(xtag("tk", tk),
-                       xtag("psm", *this));
+                       xtag("psm", this));
 
-            this->p_stack_
-                ->top_exprstate().on_then_token(tk, this);
+            this->xs_stack_.top_exprstate().on_then_token(tk, this);
         }
 
         void
@@ -173,23 +165,22 @@ namespace xo {
             scope log(XO_DEBUG(debug_flag_));
 
             log && log(xtag("tk", tk),
-                       xtag("psm", *this));
+                       xtag("psm", this));
 
-            this->p_stack_
-                ->top_exprstate().on_else_token(tk, this);
+            this->xs_stack_.top_exprstate().on_else_token(tk, this);
         }
 
         void
         parserstatemachine::on_error(const char * self_name, std::string errmsg)
         {
-            *(this->p_result_) = parser_result::error(self_name, std::move(errmsg));
+            this->result_ = parser_result::error(self_name, std::move(errmsg));
         }
 
         void
         parserstatemachine::print(std::ostream & os) const {
             os << "<psm";
-            os << xtag("stack", p_stack_);
-            os << xtag("env_stack", p_env_stack_);
+            os << xtag("stack", &xs_stack_);
+            os << xtag("env_stack", &env_stack_);
             os << ">";
         }
     } /*namespace scm*/

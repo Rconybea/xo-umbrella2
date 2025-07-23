@@ -13,7 +13,7 @@ namespace xo {
 
     namespace scm {
         bp<LocalEnv>
-        envframestack::top_envframe() {
+        envframestack::top_envframe() const {
             std::size_t z = stack_.size();
 
             if (z == 0) {

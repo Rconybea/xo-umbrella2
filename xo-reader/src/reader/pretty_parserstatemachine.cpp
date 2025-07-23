@@ -19,17 +19,17 @@ namespace xo {
                 if (!pps->print_upto("<psm"))
                     return false;
 
-                if (!pps->print_upto_tag("stack", x.p_stack_))
+                if (!pps->print_upto_tag("stack", &x.xs_stack_))
                     return false;
 
-                if (!pps->print_upto_tag("env_stack", x.p_env_stack_))
+                if (!pps->print_upto_tag("env_stack", &x.env_stack_))
                     return false;
 
                 return pps->print_upto(">");
             } else {
                 pps->write("<psm");
-                pps->newline_pretty_tag(ppii.ci1(), "stack", x.p_stack_);
-                pps->newline_pretty_tag(ppii.ci1(), "env_stack", x.p_env_stack_);
+                pps->newline_pretty_tag(ppii.ci1(), "stack", &x.xs_stack_);
+                pps->newline_pretty_tag(ppii.ci1(), "env_stack", &x.env_stack_);
                 pps->write(">");
 
                 return false;

@@ -190,7 +190,7 @@ namespace xo {
              * arbitrary number of expressions.
              */
 
-            *(p_psm->p_result_) = parser_result::expression(expr.promote());
+            p_psm->result_ = parser_result::expression(expr.promote());
         }
 
         void
@@ -203,7 +203,7 @@ namespace xo {
              * semicolons are sometimes mandatory to avoid ambiguity.
              */
 
-            *(p_psm->p_result_) = parser_result::expression(expr.promote());
+            p_psm->result_ = parser_result::expression(expr.promote());
         }
 
     } /*namespace scm*/

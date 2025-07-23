@@ -126,6 +126,7 @@ namespace xo {
                 rp<Expression> def_expr = this->def_expr_;
 
                 this->defxs_type_ = defexprstatetype::def_6;
+                return;
             }
 
             constexpr const char * c_self_name = "define_xs::on_expr";
