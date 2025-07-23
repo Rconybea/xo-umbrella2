@@ -105,6 +105,11 @@ main() {
             } else if (error.is_error()) {
                 cout << "parsing error (detected in " << error.src_function() << "): " << endl;
                 error.report(cout);
+
+                /* discard stashed remainder of input line
+                 * (for nicely-formatted errors)
+                 */
+                rdr.reset_to_idle_toplevel();
                 break;
             }
 
@@ -114,10 +119,6 @@ main() {
 
         /* here: input.empty() or error encountered */
 
-        /* discard stashed remainder of input line
-         * (for nicely-formatted errors)
-         */
-        rdr.reset_to_idle_toplevel();
     }
 
     auto [expr, _1, _2, error] = rdr.read_expr(input, true /*eof*/);
