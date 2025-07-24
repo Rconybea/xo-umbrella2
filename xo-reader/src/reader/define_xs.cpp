@@ -153,7 +153,7 @@ namespace xo {
         {
             scope log(XO_DEBUG(p_psm->debug_flag()));
 
-            log && log("defxs_type", defxs_type_);
+            log && log(xtag("defxs_type", defxs_type_), xtag("env_stack_size", p_psm->env_stack_size()));
 
             if (this->defxs_type_ == defexprstatetype::def_1) {
                 this->defxs_type_ = defexprstatetype::def_2;
@@ -178,7 +178,7 @@ namespace xo {
                 // For interactive top-level defs we want to evaluate as we go,
                 // so need incremental bindings.
 
-                if (p_psm->env_stack_size() == 2) {
+                if (p_psm->env_stack_size() == 1) {
                     /* remember variable binding in lexical context,
                      * so we can refer to it later
                      */

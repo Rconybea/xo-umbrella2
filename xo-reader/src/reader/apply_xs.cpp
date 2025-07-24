@@ -107,6 +107,7 @@ namespace xo {
 
             if (this->applyxs_type_ == applyexprstatetype::apply_3) {
                 this->applyxs_type_ = applyexprstatetype::apply_2;
+                expect_expr_xs::start(p_psm);
             } else {
                 constexpr const char * c_self_name = "apply_xs::on_comma_token";
                 const char * exp = this->get_expect_str();
@@ -125,6 +126,7 @@ namespace xo {
 
             if (this->applyxs_type_ == applyexprstatetype::apply_1) {
                 this->applyxs_type_ = applyexprstatetype::apply_2;
+                expect_expr_xs::start(p_psm);
             } else {
                 constexpr const char * c_self_name = "apply_xs::on_leftparen_token";
                 const char * exp = this->get_expect_str();

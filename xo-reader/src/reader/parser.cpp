@@ -64,7 +64,7 @@ namespace xo {
 
             /* stack_ is non-empty */
 
-            log && log(xtag("top", psm_.xs_stack_.top_exprstate()));
+            log && log(xrefrtag("top", psm_.xs_stack_.top_exprstate()));
 
             psm_.xs_stack_.top_exprstate().on_input(tk, &psm_);
 
