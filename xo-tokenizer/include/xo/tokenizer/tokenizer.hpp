@@ -211,7 +211,11 @@ namespace xo {
                 /* can't be 1char punctuation -- can begin assignment token */
                 return false;
             case '=':
-                return true;
+                /* can't be 1char punctuation -- can begin comparison token '==' */
+                return false;
+            case '!':
+                /* can't be 1char punctuation -- can begin comparison token '!=' */
+                return false;
             case '-':
                 /* can't be punctuation
                  * - can appear inside f64 token: e.g. 1.23e-9.
@@ -245,6 +249,12 @@ namespace xo {
             switch(ch) {
             case ':':
                 /* can begin := */
+                return true;
+            case '=':
+                /* can begin == */
+                return true;
+            case '!':
+                /* can begin != */
                 return true;
             }
 
@@ -446,6 +456,30 @@ namespace xo {
                     ++ix;
                 }
                 break;
+            case '=':
+                log && log("singleassign or cmpeq token");
+
+                if (*(ix + 1) == '=') {
+                    tk_type = tokentype::tk_cmpeq;
+                    ++ix;
+                    ++ix;
+                } else {
+                    /* standalone '=' */
+                    tk_type = tokentype::tk_singleassign;
+                    ++ix;
+                }
+                break;
+            case '!':
+                if (*(ix + 1) == '=') {
+                    tk_type = tokentype::tk_cmpne;
+                    ++ix;
+                    ++ix;
+                } else {
+                    /* standlone '!' */
+
+                    // TODO
+                }
+                break;
             case '"':
             {
                 log && log("recognize string-token");
@@ -638,10 +672,6 @@ namespace xo {
                 }
                 break;
             }
-            case '=':
-                tk_type = tokentype::tk_singleassign;
-                ++ix;
-                break;
             default:
                 break;
             }

@@ -43,6 +43,9 @@ namespace xo {
                 CASE(tk_star);
                 CASE(tk_slash);
 
+                CASE(tk_cmpeq);
+                CASE(tk_cmpne);
+
                 CASE(tk_type);
                 CASE(tk_def);
                 CASE(tk_lambda);

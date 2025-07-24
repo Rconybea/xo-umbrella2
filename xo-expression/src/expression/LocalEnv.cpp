@@ -97,7 +97,7 @@ namespace xo {
         LocalEnv::upsert_local(bp<Variable> target) {
             for (auto & var : this->argv_)  {
                 if (var->name() == target->name()) {
-                    /* replace existing variable.  May change its type */
+                    /* replace existing variable.  This may change its type */
                     var = target.promote();
                     return;
                 }

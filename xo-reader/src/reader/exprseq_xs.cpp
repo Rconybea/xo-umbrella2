@@ -72,7 +72,7 @@ namespace xo {
             {
                 /* in interactive session, allow top-level if-expressions.
                  * Could be:
-                 *   if sometest() do_something() do_otherthing();
+                 *   if sometest() then do_something() else do_otherthing();
                  */
                 if_else_xs::start(p_psm);
             } else {

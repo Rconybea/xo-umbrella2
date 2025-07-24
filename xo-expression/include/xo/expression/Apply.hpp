@@ -28,6 +28,13 @@ namespace xo {
             static rp<Apply> make(const rp<Expression> & fn,
                                   const std::vector<rp<Expression>> & argv);
 
+            /** create apply-expression to compare two 64-bit integers **/
+            static rp<Apply> make_cmp_eq_i64(const rp<Expression> & lhs,
+                                             const rp<Expression> & rhs);
+            /** create apply-expression to compare two 64-bit integers **/
+            static rp<Apply> make_cmp_ne_i64(const rp<Expression> & lhs,
+                                             const rp<Expression> & rhs);
+
             /** create apply-expression to add two 64-bit floating-point numbers **/
             static rp<Apply> make_add2_f64(const rp<Expression> & lhs,
                                            const rp<Expression> & rhs);
@@ -103,7 +110,7 @@ namespace xo {
             virtual void display(std::ostream & os) const override;
             virtual std::uint32_t pretty_print(const ppindentinfo & ppii) const override;
 
-        private:
+        protected:
             Apply(TypeDescr apply_valuetype,
                   const rp<Expression> & fn,
                   const std::vector<rp<Expression>> & argv)
@@ -111,7 +118,7 @@ namespace xo {
                   fn_{fn}, argv_(argv)
                 {}
 
-        private:
+        protected:
             /** function to invoke **/
             rp<Expression> fn_;
             /** argument expressions,  in l-to-r order **/
@@ -151,6 +158,33 @@ namespace xo {
             std::vector<rp<Expression>> argv(args);
             return Apply::make(fn, argv);
         } /*make_apply*/
+
+        /** @class ApplyAccess
+         *  @brief Apply with writeable members
+         *
+         *  Convenient when scaffolding a parser,
+         *  e.g. see xo-parser
+         **/
+        class ApplyAccess : public Apply {
+        public:
+            static rp<ApplyAccess> make_empty();
+
+            /** assign function being called to @p fn **/
+            void assign_fn(const rp<Expression>& fn);
+            /** assign expression for argument i, counting from 1.
+             *  can use @p i = 0 as alternative to @ ref assign_fn
+             **/
+            void assign_arg(size_t i, const rp<Expression>& arg);
+
+            // inherited from GeneralizedExpression..
+            // void assign_valuetype(TypeDescr apply_valuetype);
+
+        private:
+            ApplyAccess(TypeDescr apply_valuetype,
+                        const rp<Expression>& fn,
+                        const std::vector<rp<Expression>>& argv)
+                : Apply(apply_valuetype, fn, argv) {}
+        };
 
     } /*namespace ast*/
 } /*namespace xo*/

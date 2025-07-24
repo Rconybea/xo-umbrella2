@@ -3,6 +3,16 @@
 #include "Primitive.hpp"
 
 extern "C" {
+    bool
+    cmp_eq2_i64(std::int64_t x, std::int64_t y) {
+        return x == y;
+    }
+
+    bool
+    cmp_ne2_i64(std::int64_t x, std::int64_t y) {
+        return x != y;
+    }
+
     double
     add2_f64(double x, double y) {
         return x + y;
@@ -26,6 +36,34 @@ extern "C" {
 
 namespace xo {
     namespace ast {
+        auto
+        Primitive_cmp_i64::make_cmp_eq2_i64() -> rp<PrimitiveType>
+        {
+            static rp<PrimitiveType> s_retval;
+
+            if (!s_retval)
+                s_retval = Primitive::make("cmp_eq2_i64",
+                                           &cmp_eq2_i64,
+                                           true /*explicit_symbol_def*/,
+                                           llvmintrinsic::i_eq);
+
+            return s_retval;
+        }
+
+        auto
+        Primitive_cmp_i64::make_cmp_ne2_i64() -> rp<PrimitiveType>
+        {
+            static rp<PrimitiveType> s_retval;
+
+            if (!s_retval)
+                s_retval = Primitive::make("cmp_ne2_i64",
+                                           &cmp_ne2_i64,
+                                           true /*explicit_symbol_def*/,
+                                           llvmintrinsic::i_ne);
+
+            return s_retval;
+        }
+
         auto
         Primitive_f64::make_add2_f64() -> rp<PrimitiveType>
         {

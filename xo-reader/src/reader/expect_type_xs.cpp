@@ -43,7 +43,9 @@ namespace xo {
 
             /* TODO: replace with typetable lookup */
 
-            if (tk.text() == "f64")
+            if (tk.text() == "bool")
+                td = Reflect::require<bool>();
+            else if (tk.text() == "f64")
                 td = Reflect::require<double>();
             else if(tk.text() == "f32")
                 td = Reflect::require<float>();

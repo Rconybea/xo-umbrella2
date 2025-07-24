@@ -128,7 +128,8 @@ namespace xo {
                 }
             }
 
-            log && log(xtag("outcome", "noop"));
+            log && log(xtag("outcome", "noop"),
+                       xtag("parser.stack_size", parser_.stack_size()));
 
             return reader_result(nullptr, expr_span, parser_.stack_size(), reader_error());
         }

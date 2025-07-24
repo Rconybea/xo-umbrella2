@@ -6,8 +6,9 @@
 #include "expect_expr_xs.hpp"
 #include "parserstatemachine.hpp"
 #include "exprstatestack.hpp"
-#include "lambda_xs.hpp"
 #include "define_xs.hpp"
+#include "lambda_xs.hpp"
+#include "if_else_xs.hpp"
 #include "paren_xs.hpp"
 #include "sequence_xs.hpp"
 #include "progress_xs.hpp"
@@ -52,12 +53,21 @@ namespace xo {
               cxl_on_rightbrace_{cxl_on_rightbrace}
         {}
 
+        const char *
+        expect_expr_xs::get_expect_str() const
+        {
+            if (allow_defs_) {
+                return "def|lambda|lparen|lbrace|literal|var";
+            } else {
+                return "lambda|lparen|lbrace|literal|var";
+            }
+        }
+
         void
         expect_expr_xs::on_def_token(const token_type & tk,
                                      parserstatemachine * p_psm)
         {
-            constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG(p_psm->debug_flag()));
 
             if (allow_defs_) {
                 define_xs::start(p_psm);
@@ -70,8 +80,7 @@ namespace xo {
         expect_expr_xs::on_lambda_token(const token_type & /*tk*/,
                                         parserstatemachine * p_psm)
         {
-            constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG(p_psm->debug_flag()));
 
             //constexpr const char * self_name = "exprstate::on_leftparen";
 
@@ -79,11 +88,17 @@ namespace xo {
         }
 
         void
+        expect_expr_xs::on_if_token(const token_type & /*tk*/,
+                                    parserstatemachine * p_psm)
+        {
+            if_else_xs::start(p_psm);
+        }
+
+        void
         expect_expr_xs::on_leftparen_token(const token_type & /*tk*/,
                                            parserstatemachine * p_psm)
         {
-            constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG(p_psm->debug_flag()));
 
             //constexpr const char * self_name = "exprstate::on_leftparen";
 
@@ -95,8 +110,7 @@ namespace xo {
         expect_expr_xs::on_leftbrace_token(const token_type & /*tk*/,
                                            parserstatemachine * p_psm)
         {
-            constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG(p_psm->debug_flag()));
 
             /* push lparen_0 to remember to look for subsequent rightparen. */
             sequence_xs::start(p_psm);
@@ -124,8 +138,7 @@ namespace xo {
         expect_expr_xs::on_symbol_token(const token_type & tk,
                                         parserstatemachine * p_psm)
         {
-            constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG(p_psm->debug_flag()));
 
             log && log(xtag("tk", tk));
 
@@ -199,8 +212,7 @@ namespace xo {
         expect_expr_xs::on_f64_token(const token_type & tk,
                                      parserstatemachine * p_psm)
         {
-            constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG(p_psm->debug_flag()));
 
             //constexpr const char * self_name = "exprstate::on_f64_token";
 
@@ -242,6 +254,14 @@ namespace xo {
 
             p_psm->on_expr_with_semicolon(expr);
         } /*on_expr_with_semicolon*/
+
+        void
+        expect_expr_xs::print(std::ostream & os) const {
+            os << "<expect_expr_xs"
+               << xtag("allow_defs", allow_defs_)
+               << xtag("cxl_on_rightbrace", cxl_on_rightbrace_)
+               << ">";
+        }
 
     } /*namespace scm*/
 } /*namespace xo*/

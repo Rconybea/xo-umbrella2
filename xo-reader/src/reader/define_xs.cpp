@@ -1,7 +1,6 @@
 /* @file define_xs.cpp */
 
 #include "define_xs.hpp"
-#include "exprstatestack.hpp"
 #include "parserstatemachine.hpp"
 #include "expect_symbol_xs.hpp"
 #include "expect_expr_xs.hpp"
@@ -45,8 +44,7 @@ namespace xo {
         void
         define_xs::start(parserstatemachine * p_psm)
         {
-            constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG(p_psm->debug_flag()));
 
             p_psm->push_exprstate(define_xs::make());
             p_psm->top_exprstate().on_def_token(token_type::def(), p_psm);
@@ -103,8 +101,7 @@ namespace xo {
         define_xs::on_expr(bp<Expression> expr,
                            parserstatemachine * p_psm)
         {
-            constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG(p_psm->debug_flag()));
 
             log && log(xtag("defxs_type", defxs_type_));
 
@@ -118,10 +115,12 @@ namespace xo {
                  */
                 rp<Expression> rhs_value = expr.promote();
 
-                if (this->cvt_expr_)
+                if (this->cvt_expr_) {
                     this->cvt_expr_->assign_arg(rhs_value);
-                else
-                    this->def_expr_->assign_rhs(rhs_value);;
+                } else {
+                    /* note: establishes .def_expr_ valuetype */
+                    this->def_expr_->assign_rhs(rhs_value);
+                }
 
                 rp<Expression> def_expr = this->def_expr_;
 
@@ -139,8 +138,7 @@ namespace xo {
         define_xs::on_expr_with_semicolon(bp<Expression> expr,
                                           parserstatemachine * p_psm)
         {
-            constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG(p_psm->debug_flag()));
 
             log && log(xtag("defxs_type", defxs_type_));
 
@@ -153,14 +151,40 @@ namespace xo {
         define_xs::on_symbol(const std::string & symbol_name,
                              parserstatemachine * p_psm)
         {
-            constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG(p_psm->debug_flag()));
 
             log && log("defxs_type", defxs_type_);
 
             if (this->defxs_type_ == defexprstatetype::def_1) {
                 this->defxs_type_ = defexprstatetype::def_2;
                 this->def_expr_->assign_lhs_name(symbol_name);
+
+                // if this is a genuine top-level define (i.e. nesting level = 0),
+                // then we need to upsert so we can refer to rhs later.
+                //
+                // In other contexts (e.g. body-of-lambda) will be rewriting
+                //    {
+                //       def y = foo(x,x);
+                //       bar(y,y);
+                //    }
+                // into something like
+                //    {
+                //       (lambda (y123) bar(y123,y123))(foo(x,x));
+                //    }
+                //
+                // This works in the body of lambda, because we don't evaluate anything
+                // until lambda definition is complete.
+                //
+                // For interactive top-level defs we want to evaluate as we go,
+                // so need incremental bindings.
+
+                if (p_psm->env_stack_size() == 2) {
+                    /* remember variable binding in lexical context,
+                     * so we can refer to it later
+                     */
+                    p_psm->upsert_var(this->def_expr_->lhs_variable());
+                }
+
                 return;
             }
 
@@ -174,8 +198,7 @@ namespace xo {
         define_xs::on_typedescr(TypeDescr td,
                                 parserstatemachine * p_psm)
         {
-            constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG(p_psm->debug_flag()));
 
             log && log("defxs_type", defxs_type_);
 
@@ -183,6 +206,7 @@ namespace xo {
                 this->defxs_type_ = defexprstatetype::def_4;
                 this->cvt_expr_ = ConvertExprAccess::make(td /*dest_type*/,
                                                           nullptr /*source_expr*/);
+                /* note: establishes .def_expr_ valuetype */
                 this->def_expr_->assign_rhs(this->cvt_expr_);
                 return;
             }
@@ -243,8 +267,7 @@ namespace xo {
         {
             /* def expr consumes semicolon */
 
-            constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG(p_psm->debug_flag()));
 
             log && log("defxs_type", defxs_type_);
 
@@ -252,32 +275,6 @@ namespace xo {
                 rp<DefineExprAccess> def_expr = this->def_expr_;
 
                 std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
-
-                // if this is a genuine top-level define (i.e. nesting level = 0),
-                // then we need to upsert so we can refer to rhs later.
-                //
-                // In other contexts (e.g. body-of-lambda) will be rewriting
-                //    {
-                //       def y = foo(x,x);
-                //       bar(y,y);
-                //    }
-                // into something like
-                //    {
-                //       (lambda (y123) bar(y123,y123))(foo(x,x));
-                //    }
-                //
-                // This works in the body of lambda, because we don't evaluate anything
-                // until lambda definition is complete.
-                //
-                // For interactive top-level defs we want to evaluate as we go,
-                // so need incremental bindings.
-
-                if (p_psm->env_stack_size() == 1) {
-                    /* remember variable binding in lexical context,
-                     * so we can refer to it later
-                     */
-                    p_psm->upsert_var(def_expr->lhs_variable());
-                }
 
                 p_psm->top_exprstate().on_expr(def_expr, p_psm);
                 return;
@@ -357,11 +354,6 @@ namespace xo {
                << xtag("this", (void*)this)
                 //<< xtag("type", exs_type_)
                << xtag("defxs_type", defxs_type_);
-
-            //if (def_expr_)
-            //    os << xtag("def_expr", def_expr_);
-            //if (cvt_expr_)
-            //    os << xtag("cvt_expr", cvt_expr_);
             os << ">";
         }
     } /*namespace scm*/

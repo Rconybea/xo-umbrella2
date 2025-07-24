@@ -191,6 +191,19 @@ namespace xo {
             return Primitive<FunctionPointer>::make(name, x, explicit_symbol_def, intrinsic);
         }
 
+        /** builtin primitives :: i64 x i64 -> bool **/
+        class Primitive_cmp_i64 : public Primitive<bool (*)(std::int64_t, std::int64_t)> {
+        public:
+            using PrimitiveType = Primitive<bool (*)(std::int64_t, std::int64_t)>;
+
+        public:
+            /** eq2_i64: compare two 64-bit integers for equality **/
+            static rp<PrimitiveType> make_cmp_eq2_i64();
+            /** ne2_i64: compare two 64-bit integers for inequality **/
+            static rp<PrimitiveType> make_cmp_ne2_i64();
+        };
+
+        /** builtin primitives :: f64 x f64 -> f64 **/
         class Primitive_f64 : public Primitive<double (*)(double, double)> {
         public:
             using PrimitiveType = Primitive<double (*)(double, double)>;

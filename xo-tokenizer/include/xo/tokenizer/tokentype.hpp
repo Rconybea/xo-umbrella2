@@ -126,6 +126,11 @@ namespace xo {
             /** operator @c '/' **/
             tk_slash,
 
+            /** operator @c '==' **/
+            tk_cmpeq,
+            /** operator @c '!=' **/
+            tk_cmpne,
+
             /** keyword @c 'type' **/
             tk_type,
 

@@ -28,17 +28,14 @@ namespace xo {
                                std::string lhs_name,
                                rp<Expression> rhs)
             : Expression(exprtype::define, rhs_valuetype),
-              lhs_name_{std::move(lhs_name)},
+              lhs_var_{Variable::make(lhs_name, rhs_valuetype)},
               rhs_{std::move(rhs)}
         {
             this->free_var_set_ = this->calc_free_variables();
         }
 
-        rp<Variable>
-        DefineExpr::lhs_variable() const
-        {
-            return Variable::make(lhs_name(), valuetype());
-        }
+        const std::string &
+        DefineExpr::lhs_name() const { return lhs_var_->name(); }
 
         std::set<std::string>
         DefineExpr::calc_free_variables() const
@@ -58,7 +55,7 @@ namespace xo {
         void
         DefineExpr::display(std::ostream & os) const {
             os << "<Define"
-               << xtag("name", lhs_name_)
+               << xtag("name", lhs_var_->name())
                << xtag("rhs", rhs_)
                << ">";
         } /*display*/
@@ -67,30 +64,8 @@ namespace xo {
         DefineExpr::pretty_print(const ppindentinfo & ppii) const
         {
             return ppii.pps()->pretty_struct(ppii, "Define",
-                                             refrtag("name", lhs_name_),
+                                             refrtag("name", lhs_var_->name()),
                                              refrtag("rhs", rhs_));
-
-#ifdef OBSOLETE
-            ppstate * pps = ppii.pps();
-
-            if (ppii.upto()) {
-                if (!pps->print_upto("<Define"))
-                    return false;
-                if (!pps->print_upto_tag("name", lhs_name_))
-                    return false;
-                if (!pps->print_upto_tag("rhs", rhs_))
-                    return false;
-
-                return true;
-            } else {
-                pps->write("<Define");
-                pps->newline_pretty_tag(ppii.ci1(), "name", lhs_name_);
-                pps->newline_pretty_tag(ppii.ci1(), "rhs", rhs_);
-                pps->write(">");
-
-                return false;
-            }
-#endif
         }
 
         // ----- DefineExprAccess -----
@@ -118,6 +93,12 @@ namespace xo {
         }
 
         void
+        DefineExprAccess::assign_lhs_name(const std::string & x)
+        {
+            this->lhs_var_->assign_name(x);
+        }
+
+        void
         DefineExprAccess::assign_rhs(const rp<Expression> & x)
         {
             assert(x);
@@ -125,6 +106,10 @@ namespace xo {
             this->rhs_ = x;
 
             if (x) {
+                if (lhs_var_ && !lhs_var_->valuetype()) {
+                    this->lhs_var_->assign_valuetype(x->valuetype());
+                }
+
                 this->assign_valuetype(x->valuetype());
             }
 

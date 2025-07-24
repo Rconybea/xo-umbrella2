@@ -40,6 +40,8 @@ namespace xo {
                 return bp<Variable>::from(x);
             }
 
+            void assign_name(const std::string & name) { name_ = name; }
+
             const std::string & name() const { return name_; }
 
             virtual std::set<std::string> get_free_variables() const override {
@@ -76,8 +78,10 @@ namespace xo {
         private:
             /** variable name **/
             std::string name_;
-            /** navigate environment via this path to find runtime memory
-             *  location for this variable
+            /** Eventually: navigate environment via this path to find runtime memory
+              * location for this variable.
+              *
+              * Establish via @ref attach_envs
              **/
             binding_path path_;
         }; /*Variable*/

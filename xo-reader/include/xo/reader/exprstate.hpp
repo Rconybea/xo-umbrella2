@@ -30,6 +30,11 @@ namespace xo {
              **/
             lambdaexpr,
 
+            /** handle apply expression (aka function call)
+             *  see @ref apply_xs
+             **/
+            applyexpr,
+
             /** handle parenthesized expression
              *  see @ref paren_xs
              **/

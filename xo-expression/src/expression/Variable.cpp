@@ -49,47 +49,6 @@ namespace xo {
                                              rtag("type", print::quot(this->valuetype()
                                                                       ? this->valuetype()->short_name()
                                                                       : "nullptr")));
-
-#ifdef OBSOLETE
-            ppstate * pps = ppii.pps();
-
-            if (ppii.upto()) {
-                if (!pps->print_upto("<Variable"))
-                    return false;
-
-                if (!pps->print_upto_tag("name", name_))
-                    return false;
-
-                if (this->valuetype()) {
-                    if (!pps->print_upto_tag("type", this->valuetype()->short_name()))
-                        return false;
-                } else {
-                    if (!pps->print_upto_tag("type", "nullptr"))
-                        return false;
-                }
-
-                pps->write(">");
-
-                return true;
-            } else {
-                pps->write("<Variable");
-
-                pps->newline_pretty_tag(ppii.ci1(), "name", name_);
-
-                /* use tag instead of rtag for type,
-                 * since not guaranteed to print machine-readably
-                 */
-                if (this->valuetype()) {
-                    pps->newline_indent(ppii.ci1());
-                    pps->pretty(xtag("type", this->valuetype()->short_name()));
-                } else {
-                    pps->newline_pretty_tag(ppii.ci1(), "type", "nullptr");
-                }
-                pps->write(">");
-
-                return false;
-            }
-#endif
         }
     } /*namespace ast*/
 } /*namespace xo*/

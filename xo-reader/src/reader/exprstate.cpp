@@ -34,6 +34,8 @@ namespace xo {
                 return "defexpr";
             case exprstatetype::lambdaexpr:
                 return "lambdaexpr";
+            case exprstatetype::applyexpr:
+                return "applyexpr";
             case exprstatetype::parenexpr:
                 return "parenexpr";
             case exprstatetype::sequenceexpr:
@@ -450,6 +452,8 @@ namespace xo {
             case tokentype::tk_minus:
             case tokentype::tk_star:
             case tokentype::tk_slash:
+            case tokentype::tk_cmpeq:
+            case tokentype::tk_cmpne:
                 this->on_operator_token(tk, p_psm);
                 return;
 

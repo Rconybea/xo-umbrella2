@@ -1,6 +1,7 @@
 /* @file progress_xs.cpp */
 
 #include "progress_xs.hpp"
+#include "apply_xs.hpp"
 #include "exprstatestack.hpp"
 #include "expect_expr_xs.hpp"
 #include "parserstatemachine.hpp"
@@ -23,6 +24,18 @@ namespace xo {
                 return "?optype";
             case optype::op_assign:
                 return "op:=";
+            case optype::op_less:
+                return "op<";
+            case optype::op_less_equal:
+                return "op<=";
+            case optype::op_equal:
+                return "op==";
+            case optype::op_not_equal:
+                return "op!=";
+            case optype::op_great:
+                return "op>";
+            case optype::op_great_equal:
+                return "op>=";
             case optype::op_add:
                 return "op+";
             case optype::op_subtract:
@@ -47,13 +60,21 @@ namespace xo {
             case optype::op_assign:
                 return 1;
 
+            case optype::op_less:
+            case optype::op_less_equal:
+            case optype::op_equal:
+            case optype::op_not_equal:
+            case optype::op_great:
+            case optype::op_great_equal:
+                return 2;
+
             case optype::op_add:
             case optype::op_subtract:
-                return 2;
+                return 3;
 
             case optype::op_multiply:
             case optype::op_divide:
-                return 3;
+                return 4;
             }
 
             return 0;
@@ -145,21 +166,27 @@ namespace xo {
                                         this->rhs_);
             }
 
+            case optype::op_equal:
+                return Apply::make_cmp_eq_i64(lhs_, rhs_);
+
+            case optype::op_less:
+            case optype::op_less_equal:
+            case optype::op_not_equal:
+            case optype::op_great:
+            case optype::op_great_equal:
+                assert(false);
+
             case optype::op_add:
-                return Apply::make_add2_f64(this->lhs_,
-                                            this->rhs_);
+                return Apply::make_add2_f64(lhs_, rhs_);
 
             case optype::op_subtract:
-                return Apply::make_sub2_f64(this->lhs_,
-                                              this->rhs_);
+                return Apply::make_sub2_f64(lhs_, rhs_);
 
             case optype::op_multiply:
-                return Apply::make_mul2_f64(this->lhs_,
-                                              this->rhs_);
+                return Apply::make_mul2_f64(lhs_, rhs_);
 
             case optype::op_divide:
-                return Apply::make_div2_f64(this->lhs_,
-                                            this->rhs_);
+                return Apply::make_div2_f64(lhs_, rhs_);
 
             case optype::n_optype:
                 /* unreachable */
@@ -301,8 +328,25 @@ namespace xo {
         progress_xs::on_leftparen_token(const token_type & tk,
                                         parserstatemachine * p_psm)
         {
-            constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG(p_psm->debug_flag()));
+
+            /* input like:
+             *   'foo(' -> expect function call.  might continue 'foo(a,b,c)'
+             *   'foo+(' -> expect parenthesized expression.  might continue 'foo+(bar/2)'
+             */
+
+            if (op_type_ == optype::invalid) {
+                /* start function call */
+                assert(rhs_.get() == nullptr);
+
+                /* unwind this progress_xs + replace with function call */
+
+                rp<Expression> fn_expr = lhs_;
+                std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
+
+                apply_xs::start(fn_expr, p_psm);
+                return;
+            }
 
             constexpr const char * c_self_name = "exprstate::on_leftparen";
             const char * exp = get_expect_str();
@@ -320,7 +364,7 @@ namespace xo {
 
              constexpr const char * self_name = "progress_xs::on_rightparen";
 
-             auto p_stack = p_psm->p_stack_;
+             auto & xs_stack = p_psm->xs_stack_;
 
              /* stack may be something like:
               *
@@ -338,12 +382,12 @@ namespace xo {
 
              std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
 
-             if (p_stack->empty()) {
+             if (xs_stack.empty()) {
                  throw std::runtime_error(tostr(self_name,
                                                 ": expected non-empty parsing stack"));
              }
 
-             log && log(xtag("stack", p_stack));
+             log && log(xtag("stack", &xs_stack));
 
              p_psm->top_exprstate().on_expr(expr, p_psm);
 
@@ -406,6 +450,10 @@ namespace xo {
                     return optype::op_multiply;
                 case tokentype::tk_slash:
                     return optype::op_divide;
+                case tokentype::tk_cmpeq:
+                    return optype::op_equal;
+                case tokentype::tk_cmpne:
+                    return optype::op_not_equal;
                 default:
                     assert(false);
                     return optype::invalid;
@@ -488,13 +536,29 @@ namespace xo {
         }
 
         void
+        progress_xs::on_bool_token(const token_type & tk,
+                                   parserstatemachine * p_psm)
+        {
+            scope log(XO_DEBUG(p_psm->debug_flag()));
+
+            constexpr const char * c_self_name = "progress_xs::on_bool_token";
+            const char * exp = get_expect_str();
+
+            if (this->op_type_ == optype::invalid) {
+                this->illegal_input_on_token(c_self_name, tk, exp, p_psm);
+            } else {
+                exprstate::on_bool_token(tk, p_psm);
+            }
+        }
+
+        void
         progress_xs::on_i64_token(const token_type & tk,
                                   parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            constexpr const char * c_self_name = "progress_xs::on_i64";
+            constexpr const char * c_self_name = "progress_xs::on_i64_token";
             const char * exp = get_expect_str();
 
             if (this->op_type_ == optype::invalid) {
@@ -511,7 +575,7 @@ namespace xo {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
 
-            constexpr const char * c_self_name = "progress_xs::on_f64";
+            constexpr const char * c_self_name = "progress_xs::on_f64_token";
             const char * exp = get_expect_str();
 
             if (this->op_type_ == optype::invalid) {

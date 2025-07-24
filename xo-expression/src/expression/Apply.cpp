@@ -31,6 +31,22 @@ namespace xo {
         }
 
         rp<Apply>
+        Apply::make_cmp_eq_i64(const rp<Expression> & lhs,
+                               const rp<Expression> & rhs)
+        {
+            return Apply::make(Primitive_cmp_i64::make_cmp_eq2_i64(),
+                               {lhs, rhs});
+        }
+
+        rp<Apply>
+        Apply::make_cmp_ne_i64(const rp<Expression> & lhs,
+                               const rp<Expression> & rhs)
+        {
+            return Apply::make(Primitive_cmp_i64::make_cmp_ne2_i64(),
+                               {lhs, rhs});
+        }
+
+        rp<Apply>
         Apply::make_add2_f64(const rp<Expression> & lhs,
                              const rp<Expression> & rhs)
         {

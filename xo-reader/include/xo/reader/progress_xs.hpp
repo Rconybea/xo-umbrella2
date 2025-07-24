@@ -19,12 +19,30 @@ namespace xo {
         enum class optype {
             invalid = -1,
 
+            /** op:= **/
             op_assign,
 
+            /** op< **/
+            op_less,
+            /** op<= **/
+            op_less_equal,
+            /** op== **/
+            op_equal,
+            /** op!= **/
+            op_not_equal,
+            /** op> **/
+            op_great,
+            /** op>= **/
+            op_great_equal,
+
+            /** op+ **/
             op_add,
+            /** op- **/
             op_subtract,
 
+            /** op* **/
             op_multiply,
+            /** op/ **/
             op_divide,
 
             n_optype
@@ -103,6 +121,9 @@ namespace xo {
             /* entry point for an infix operator token */
             virtual void on_operator_token(const token_type & tk,
                                            parserstatemachine * p_psm) override;
+
+            virtual void on_bool_token(const token_type & tk,
+                                       parserstatemachine * p_psm) override;
 
             virtual void on_i64_token(const token_type & tk,
                                       parserstatemachine * p_psm) override;

@@ -62,6 +62,26 @@ namespace xo {
             /** -> IRBuilder::CreateUdiv (divide 2 unsigned integers) **/
             i_udiv,
 
+            /** -> IRBuilder::CreateICmpEQ (test integers for equality) **/
+            i_eq,
+
+            /** -> IRBuilder::CreateICmpNE (test integers for inequality) **/
+            i_ne,
+
+            /** -> IRBuilder::CreateICmpSGT (test signed integers for greater) **/
+            i_sgt,
+
+            /** -> IRBuilder::CreateICmpSGE (test signed integers for greater-or-equal) **/
+            i_sge,
+
+            /** -> IRBuilder::CreateICmpSLT (test signed integers for lesser) **/
+            i_slt,
+
+            /** -> IRBuilder::CreateCmpSLE (test signed integers for lesser-or-equal) **/
+            i_sle,
+
+            // TODO: unsigned comparisons
+
             /** -> IRBuilder::CreateFadd (add 2 floating-point numbers) **/
             fp_add,
 
@@ -73,6 +93,8 @@ namespace xo {
 
             /** -> IRBuilder::CreateFdiv (divide 2 floating-point numbers) **/
             fp_div,
+
+            // TODO: floating-point comparisons
 
             /**
              *  want to do whatever llvm IR @c llvm.sqrt.f64 and friends do.
@@ -107,6 +129,14 @@ namespace xo {
             case llvmintrinsic::i_mul: return "i_mul";
             case llvmintrinsic::i_sdiv: return "i_sdiv";
             case llvmintrinsic::i_udiv: return "i_udiv";
+
+            case llvmintrinsic::i_eq: return "i_eq";
+            case llvmintrinsic::i_ne: return "i_ne";
+            case llvmintrinsic::i_sgt: return "i_sgt";
+            case llvmintrinsic::i_sge: return "i_sge";
+            case llvmintrinsic::i_slt: return "i_slt";
+            case llvmintrinsic::i_sle: return "i_sle";
+
             case llvmintrinsic::fp_add: return "fp_add";
             case llvmintrinsic::fp_sub: return "fp_sub";
             case llvmintrinsic::fp_mul: return "fp_mul";

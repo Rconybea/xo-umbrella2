@@ -35,8 +35,13 @@ namespace xo {
                               bool cxl_on_rightbrace,
                               parserstatemachine * p_psm);
 
+            virtual const char * get_expect_str() const override;
+
             virtual void on_lambda_token(const token_type & tk,
                                          parserstatemachine * p_psm) override;
+
+            virtual void on_if_token(const token_type & tk,
+                                     parserstatemachine * p_psm) override;
 
             virtual void on_def_token(const token_type & tk,
                                       parserstatemachine * p_psm) override;
@@ -71,20 +76,21 @@ namespace xo {
             virtual void on_expr_with_semicolon(bp<Expression> expr,
                                                 parserstatemachine * p_psm) override;
 
+            virtual void print(std::ostream & os) const override;
 
         private:
             static std::unique_ptr<expect_expr_xs> make(bool allow_defs,
                                                         bool cxl_on_rightbrace);
 
         private:
-            /* if true: allow a define-expression here */
+            /** if true: allow a define-expression here **/
             bool allow_defs_ = false;
-            /* if true: expecting either:
+            /** if true: expecting either:
              *   - expression
              *   - right brace '}',  in which case no expression
              * if false: expecting
              *   - expression
-             */
+             **/
             bool cxl_on_rightbrace_ = false;
         };
 

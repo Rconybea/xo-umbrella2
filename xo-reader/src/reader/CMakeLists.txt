@@ -11,6 +11,7 @@ set(SELF_SRCS
     define_xs.cpp
     if_else_xs.cpp
     progress_xs.cpp
+    apply_xs.cpp
     paren_xs.cpp
     sequence_xs.cpp
     exprseq_xs.cpp

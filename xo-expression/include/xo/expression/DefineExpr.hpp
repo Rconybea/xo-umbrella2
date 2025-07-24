@@ -21,6 +21,10 @@ namespace xo {
          *  is equivalent to
          *
          *    (lambda (foo) body...)(rhsexpr)
+         *
+         * Promise:
+         * - memory location of @ref lhs_var_ is determined when parent DefineExpr
+         *   constructed, and is stable across calls to @ref DefineExpr::assign_lhs_name
          **/
         class DefineExpr : public Expression {
         public:
@@ -32,10 +36,10 @@ namespace xo {
                 return bp<DefineExpr>::from(x);
             }
 
-            const std::string & lhs_name() const { return lhs_name_; }
+            const std::string & lhs_name() const;
             const rp<Expression> & rhs() const { return rhs_; }
 
-            rp<Variable> lhs_variable() const;
+            const rp<Variable>& lhs_variable() const { return lhs_var_; }
 
             std::set<std::string> calc_free_variables() const;
 
@@ -88,7 +92,7 @@ namespace xo {
 
         protected:
             /** symbol name for this definition **/
-            std::string lhs_name_;
+            rp<Variable> lhs_var_;
             /** right-hand side of definition **/
             rp<Expression> rhs_;
 
@@ -108,10 +112,7 @@ namespace xo {
                                              rp<Expression> rhs);
             static rp<DefineExprAccess> make_empty();
 
-            void assign_lhs_name(const std::string & x) {
-                this->lhs_name_ = x;
-            }
-
+            void assign_lhs_name(const std::string & x);
             void assign_rhs(const rp<Expression> & x);
 
         private:
