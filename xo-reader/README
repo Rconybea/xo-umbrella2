@@ -1,0 +1,53 @@
+1. in parser we need.. type unification?
+2. or perhaps just need to introduce type variables.
+
+3. we can't resolve type for a recursive pair of functions until we've seen both of them..
+   tho we could require letrec
+
+def foo = lambda (n : i64) { let (n == 0) then 1 else n * foo(n - 1); };
+
+strategy:
+----------
+
+while parsing def, instead of creating DefineExpr with nullptr TypeDescr:
+a. create DefineExpr with TypeVariable.
+(We have to do this because can't tell nullptr's apart,..)
+
+- generalize xo::reflect::TypeDescrBase
+
+// compose these into Expressions.
+//
+struct TypeTemplateRef {
+  bool is_concrete() const { return td_ && td_->is_concrete(); }
+
+  // generated name, so we can map between types.  Don't want to create TypeDescr
+  // every time we have a typed location. there'd be a lot of them, and hard to collect
+  flatstring<11> id_;
+  // if TypeDescr is concrete (fully described), this describes it
+  TypeDescr td_;
+};
+
+// what we know about a type
+//
+struct TypeTemplate : public Refcounted {
+  static bool equal(bp<TypeTemplate> lhs, bp<TypeTemplate> rhs);
+
+  TypeTemplateRef ref_;
+
+  // additional descriptive info...
+};
+
+// effectively these are constraints?
+//
+using TypeSubstitutionMap = map<string, rp<TypeTemplate>>;
+
+will have typeunifier in parserstatemachine
+
+struct TypeUnifier {
+   // extend as unification proceeds
+   //
+   TypeSubstitutionMap substitutions_;
+};
+
+alt strategy
+-------------
