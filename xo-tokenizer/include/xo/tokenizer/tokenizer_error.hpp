@@ -55,7 +55,9 @@ namespace xo {
             const char * src_function() const { return src_function_; }
             const std::string & error_description() const { return error_description_; }
 #pragma GCC diagnostic push
+#ifndef __APPLE__
 #pragma GCC diagnostic ignored "-Wchanges-meaning"
+#endif
             const input_state_type & input_state() const { return input_state_; }
 #pragma GCC diagnostic pop
             size_t tk_start() const { return input_state_.current_pos(); }

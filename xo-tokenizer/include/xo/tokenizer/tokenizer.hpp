@@ -74,7 +74,9 @@ namespace xo {
             ///@{
 
 #pragma GCC diagnostic push
+#ifndef __APPLE__
 #pragma GCC diagnostic ignored "-Wchanges-meaning"
+#endif
             const input_state<CharT> & input_state() const { return input_state_; }
 #pragma GCC diagnostic pop
 

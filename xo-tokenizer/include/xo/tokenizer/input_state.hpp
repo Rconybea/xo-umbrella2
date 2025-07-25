@@ -58,7 +58,9 @@ namespace xo {
             ///@{
 
 #pragma GCC diagnostic push
+#ifndef __APPLE__
 #pragma GCC diagnostic ignored "-Wchanges-meaning"
+#endif
             const span_type & current_line() const { return current_line_; }
 #pragma GCC diagnostic pop
             size_t current_pos() const { return current_pos_; }
