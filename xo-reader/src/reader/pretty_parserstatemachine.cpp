@@ -36,5 +36,19 @@ namespace xo {
             }
         }
 
+        bool
+        ppdetail<xo::scm::parserstatemachine *>::print_pretty(const ppindentinfo & ppii, const xo::scm::parserstatemachine * x)
+        {
+            if (x) {
+                return ppdetail<xo::scm::parserstatemachine>::print_pretty(ppii, *x);
+            } else {
+                if (ppii.upto()) {
+                    return ppii.pps()->print_upto("<nullptr>");
+                } else {
+                    ppii.pps()->write("<nullptr>");
+                    return false;
+                }
+            }
+        }
     } /*namespace print*/
 } /*namespace xo*/

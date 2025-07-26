@@ -229,8 +229,7 @@ namespace xo {
         expect_expr_xs::on_expr(bp<Expression> expr,
                                 parserstatemachine * p_psm)
         {
-            constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG(p_psm->debug_flag()));
 
             log && log(xtag("exstype", this->exs_type_),
                        xtag("expr", expr.promote()));
@@ -244,8 +243,7 @@ namespace xo {
         expect_expr_xs::on_expr_with_semicolon(bp<Expression> expr,
                                                parserstatemachine * p_psm)
         {
-            constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG(p_psm->debug_flag()));
 
             log && log(xtag("exstype", this->exs_type_),
                        xtag("expr", expr.promote()));

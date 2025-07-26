@@ -14,5 +14,10 @@ namespace xo {
         struct ppdetail<xo::scm::parserstatemachine> {
             static bool print_pretty(const ppindentinfo & ppii, const xo::scm::parserstatemachine & x);
         };
+
+        template<>
+        struct ppdetail<xo::scm::parserstatemachine*> {
+            static bool print_pretty(const ppindentinfo & ppii, const xo::scm::parserstatemachine * x);
+        };
     }
 } /*namespace xo*/

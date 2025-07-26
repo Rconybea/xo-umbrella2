@@ -40,6 +40,7 @@ namespace xo {
              **/
             static rp<Lambda> make_from_env(const std::string & name,
                                             const rp<LocalEnv> & env,
+                                            TypeDescr explicit_return_td,
                                             const rp<Expression> & body);
 
             /** downcast from Expression **/
@@ -105,6 +106,7 @@ namespace xo {
              *  and body expression @p body
              **/
             static TypeDescr assemble_lambda_td(const std::vector<rp<Variable>> & argv,
+                                                TypeDescr explicit_return_td,
                                                 const rp<Expression> & body);
 
             /** create string description for function signature,

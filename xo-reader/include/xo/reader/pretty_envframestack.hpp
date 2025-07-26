@@ -16,5 +16,6 @@ namespace xo {
                 return p->pretty_print(ppii);
             }
         };
+
     } /*namespace print*/
 } /*namespace xo*/

@@ -518,10 +518,20 @@ namespace xo {
         }; /*TypeDescrBase*/
 
         inline std::ostream &
-        operator<<(std::ostream & os, TypeDescrBase const & x) {
+        operator<<(std::ostream & os, const TypeDescrBase & x) {
             x.display(os);
             return os;
         } /*operator<<*/
+
+        inline std::ostream &
+        operator<<(std::ostream & os, const TypeDescrBase * p) {
+            if (p)
+                p->display(os);
+            else
+                os << "<nullptr>";
+            return os;
+        }
+
 
         /* tag to drive overload resolution */
         struct reflected_types_printer {};

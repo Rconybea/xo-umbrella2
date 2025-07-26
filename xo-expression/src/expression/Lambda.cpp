@@ -20,6 +20,7 @@ namespace xo {
     namespace ast {
         TypeDescr
         Lambda::assemble_lambda_td(const std::vector<rp<Variable>> & argv,
+                                   TypeDescr explicit_return_td,
                                    const rp<Expression> & body)
         {
             if (!body)
@@ -39,8 +40,16 @@ namespace xo {
                 }
             }
 
+            if (explicit_return_td && body->valuetype() && (explicit_return_td != body->valuetype())) {
+                throw std::runtime_error(tostr("explicit lambda return type T1 conflicts with lambda body T2",
+                                               xtag("T1", explicit_return_td),
+                                               xtag("T2", body->valuetype())));
+            }
+
+            // TODO: unify(explicit_return_td, body->valuetype())
+
             auto function_info
-                = FunctionTdxInfo(body->valuetype(),
+                = FunctionTdxInfo(explicit_return_td ? explicit_return_td : body->valuetype(),
                                   arg_td_v,
                                   false /*!is_noexcept*/);
 
@@ -72,9 +81,10 @@ namespace xo {
         rp<Lambda>
         Lambda::make_from_env(const std::string & name,
                               const rp<LocalEnv> & env,
+                              TypeDescr explicit_return_td,
                               const rp<Expression> & body)
         {
-            TypeDescr lambda_td = assemble_lambda_td(env->argv(), body);
+            TypeDescr lambda_td = assemble_lambda_td(env->argv(), explicit_return_td, body);
 
             rp<Lambda> retval
                 = new Lambda(name,
@@ -96,7 +106,9 @@ namespace xo {
         {
             rp<LocalEnv> env = LocalEnv::make(argv, parent_env);
 
-            return make_from_env(name, env, body);
+            TypeDescr explicit_return_td = nullptr;
+
+            return make_from_env(name, env, explicit_return_td, body);
         } /*make*/
 
         std::set<std::string>
@@ -168,8 +180,9 @@ namespace xo {
         void
         Lambda::complete_assembly_from_body() {
             if (body_) {
+                TypeDescr explicit_return_td = nullptr;
                 TypeDescr lambda_td
-                    = assemble_lambda_td(this->local_env_->argv(), body_);
+                    = assemble_lambda_td(this->local_env_->argv(), explicit_return_td, body_);
 
                 if (lambda_td)
                     this->type_str_ = assemble_type_str(lambda_td);
@@ -328,32 +341,6 @@ namespace xo {
                                              refrtag("name", name_),
                                              refrtag("argv", local_env_->argv()),
                                              refrtag("body", body_));
-
-#ifdef OBSOLETE
-            ppstate * pps = ppii.pps();
-
-            if (ppii.upto()) {
-                if (!pps->print_upto("<Lambda"))
-                    return false;
-                if (!pps->print_upto_tag("name", name_))
-                    return false;
-                if (!pps->print_upto_tag("argv", local_env_->argv()))
-                    return false;
-                if (!pps->print_upto_tag("body", body_))
-                    return false;
-                pps->write(">");
-
-                return true;
-            } else {
-                pps->write("<Lambda");
-                pps->newline_pretty_tag(ppii.ci1(), "name", name_);
-                pps->newline_pretty_tag(ppii.ci1(), "argv", local_env_->argv());
-                pps->newline_pretty_tag(ppii.ci1(), "body", body_);
-                pps->write(">");
-
-                return false;
-            }
-#endif
         }
 
         // ----- Lambda Access -----
@@ -364,7 +351,8 @@ namespace xo {
                            const rp<Expression> & body,
                            const rp<Environment> & parent_env)
         {
-            TypeDescr lambda_td = assemble_lambda_td(argv, body);
+            TypeDescr explicit_return_td = nullptr;
+            TypeDescr lambda_td = assemble_lambda_td(argv, explicit_return_td, body);
             rp<LocalEnv> env = LocalEnv::make(argv, parent_env);
 
             rp<LambdaAccess> retval

@@ -141,6 +141,7 @@ namespace xo {
             rp<Expression> lambda
                 = Lambda::make_from_env(lambda_name,
                                         local_env_,
+                                        nullptr /*explicit_return_td*/,
                                         expr);
 
             rp<Expression> result

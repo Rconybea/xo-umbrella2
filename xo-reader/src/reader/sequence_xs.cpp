@@ -36,8 +36,7 @@ namespace xo {
         sequence_xs::on_expr(bp<Expression> expr,
                              parserstatemachine * p_psm)
         {
-             constexpr bool c_debug_flag = true;
-             scope log(XO_DEBUG(c_debug_flag));
+             scope log(XO_DEBUG(p_psm->debug_flag()));
 
              log && log(xtag("expr", expr.promote()));
 
@@ -94,6 +93,14 @@ namespace xo {
         }
 
         void
+        sequence_xs::on_expr_with_semicolon(bp<Expression> expr,
+                                            parserstatemachine * p_psm)
+        {
+            /* sequence continues until right brace */
+            this->on_expr(expr, p_psm);
+        }
+
+        void
         sequence_xs::on_rightbrace_token(const token_type & /*tk*/,
                                          parserstatemachine * p_psm)
         {
@@ -105,6 +112,11 @@ namespace xo {
             auto expr = Sequence::make(this->expr_v_);
 
             p_psm->top_exprstate().on_expr(expr, p_psm);
+        }
+
+        void
+        sequence_xs::print(std::ostream & os) const {
+            os << "<sequence_xs" << xtag("expr_v.size", expr_v_.size()) << ">";
         }
 
     } /*namespace scm*/

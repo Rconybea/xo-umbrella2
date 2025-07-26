@@ -31,7 +31,7 @@ namespace xo {
             exprtype extype() const { return extype_; }
             TypeDescr valuetype() const { return valuetype_; }
 
-            /** write human-readable representation to stream **/
+            /** write human-readable representation to stream @p os **/
             virtual void display(std::ostream & os) const = 0;
             /** human-readable string representation **/
             virtual std::string display_string() const;

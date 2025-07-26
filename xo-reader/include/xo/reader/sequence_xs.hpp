@@ -26,9 +26,13 @@ namespace xo {
 
             virtual void on_expr(bp<Expression> expr,
                                  parserstatemachine * p_psm) override;
+            virtual void on_expr_with_semicolon(bp<Expression> expr,
+                                                parserstatemachine * p_psm) override;
 
             virtual void on_rightbrace_token(const token_type & tk,
                                              parserstatemachine * p_psm) override;
+
+            virtual void print(std::ostream & os) const override;
 
         private:
             sequence_xs();

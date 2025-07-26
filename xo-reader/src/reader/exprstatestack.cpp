@@ -4,6 +4,7 @@
  */
 
 #include "exprstatestack.hpp"
+#include "pretty_exprstatestack.hpp"
 #include <cstdint>
 
 namespace xo {

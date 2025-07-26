@@ -17,7 +17,7 @@ a. create DefineExpr with TypeVariable.
 
 // compose these into Expressions.
 //
-struct TypeTemplateRef {
+struct type_ref {
   bool is_concrete() const { return td_ && td_->is_concrete(); }
 
   // generated name, so we can map between types.  Don't want to create TypeDescr
@@ -29,10 +29,10 @@ struct TypeTemplateRef {
 
 // what we know about a type
 //
-struct TypeTemplate : public Refcounted {
+struct TypeBlueprint : public Refcounted {
   static bool equal(bp<TypeTemplate> lhs, bp<TypeTemplate> rhs);
 
-  TypeTemplateRef ref_;
+  type_ref ref_;
 
   // additional descriptive info...
 };

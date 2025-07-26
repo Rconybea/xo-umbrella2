@@ -42,7 +42,7 @@ namespace xo {
             /** formal parameter name **/
             std::string name_;
             /** type description for variable @p name **/
-            TypeDescr td_;
+            TypeDescr td_ = nullptr;
         };
 
         inline std::ostream &
