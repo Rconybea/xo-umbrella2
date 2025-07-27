@@ -257,9 +257,11 @@ namespace xo {
         bool
         TypeDescrBase::is_i64() const
         {
-            static_assert(sizeof(long long) == 8);
+            // FIXME: on apple/clang may need to use long long
 
-            return Reflect::is_native<long long>(this);
+            static_assert(sizeof(std::int64_t) == 8);
+
+            return Reflect::is_native<std::int64_t>(this);
         }
 
         bool
