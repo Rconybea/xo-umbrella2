@@ -72,6 +72,14 @@ namespace xo {
                                {lhs, rhs});
         }
 
+        rp<Apply>
+        Apply::make_cmp_ge_i64(const rp<Expression> & lhs,
+                               const rp<Expression> & rhs)
+        {
+            return Apply::make(Primitive_cmp_i64::make_cmp_ge2_i64(),
+                               {lhs, rhs});
+        }
+
         // ----- integer arithmetic -----
 
         rp<Apply>

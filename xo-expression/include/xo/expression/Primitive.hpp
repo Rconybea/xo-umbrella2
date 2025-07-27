@@ -210,6 +210,8 @@ namespace xo {
             static rp<PrimitiveType> make_cmp_le2_i64();
             /** gt2_i64: compare two 64-bit integers for greaterthan **/
             static rp<PrimitiveType> make_cmp_gt2_i64();
+            /** ge2_i64: compare two 64-bit integers for greaterthan **/
+            static rp<PrimitiveType> make_cmp_ge2_i64();
         };
 
         /** builtin primitives :: i64 x i64 -> i64 **/

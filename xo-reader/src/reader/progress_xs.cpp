@@ -191,6 +191,9 @@ namespace xo {
                 }
                 break;
 
+            case optype::op_not_equal:
+                assert(false);
+
             case optype::op_less:
                 // TODO: floating-point less-than
 
@@ -204,8 +207,14 @@ namespace xo {
                 break;
 
             case optype::op_less_equal:
-            case optype::op_not_equal:
-                assert(false);
+                if (lhs_->valuetype()->is_i64() && rhs_->valuetype()->is_i64()) {
+                    return Apply::make_cmp_le_i64(lhs_, rhs_);
+                } else {
+                    this->apply_type_error(c_self_name,
+                                           op_type_, lhs_, rhs_, p_psm);
+                    return nullptr;
+                }
+                break;
 
             case optype::op_great:
                 if (lhs_->valuetype()->is_i64() && rhs_->valuetype()->is_i64()) {

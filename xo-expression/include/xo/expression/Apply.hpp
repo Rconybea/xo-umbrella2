@@ -43,7 +43,9 @@ namespace xo {
             /** create apply-expression for greater-than comparison of two 64-bit integers **/
             static rp<Apply> make_cmp_gt_i64(const rp<Expression> & lhs,
                                              const rp<Expression> & rhs);
-
+            /** create apply-expression for greater-than-or-equal comparison of two 64-bit integers **/
+            static rp<Apply> make_cmp_ge_i64(const rp<Expression> & lhs,
+                                             const rp<Expression> & rhs);
             /** create apply-expression to add two 64-bit integers **/
             static rp<Apply> make_add2_i64(const rp<Expression> & lhs,
                                            const rp<Expression> & rhs);
