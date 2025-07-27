@@ -254,6 +254,22 @@ namespace xo {
         {
         }
 
+        bool
+        TypeDescrBase::is_i64() const
+        {
+            static_assert(sizeof(long long) == 8);
+
+            return Reflect::is_native<long long>(this);
+        }
+
+        bool
+        TypeDescrBase::is_f64() const
+        {
+            static_assert(sizeof(double) == 8);
+
+            return Reflect::is_native<double>(this);
+        }
+
         TaggedPtr
         TypeDescrBase::most_derived_self_tp(void * object) const
         {
@@ -311,6 +327,11 @@ namespace xo {
 #endif
 
         TypeDescrTable::TypeDescrTable() {
+            /* want long == i64 */
+            static_assert(sizeof(long) == 8);
+            /* want double == f64 */
+            static_assert(sizeof(double) == 8);
+
             Reflect::require<bool>();
             Reflect::require<char>();
             Reflect::require<short>();
