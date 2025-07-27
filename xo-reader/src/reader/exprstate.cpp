@@ -418,6 +418,8 @@ namespace xo {
 
             case tokentype::tk_leftangle:
             case tokentype::tk_rightangle:
+            case tokentype::tk_lessequal:
+            case tokentype::tk_greatequal:
                 this->on_operator_token(tk, p_psm);
                 return;
 

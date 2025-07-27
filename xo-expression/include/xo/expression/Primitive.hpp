@@ -206,6 +206,8 @@ namespace xo {
             static rp<PrimitiveType> make_cmp_ne2_i64();
             /** lt2_i64: compare two 64-bit integers for lessthan **/
             static rp<PrimitiveType> make_cmp_lt2_i64();
+            /** lt2_i64: compare two 64-bit integers for lessthanorequal **/
+            static rp<PrimitiveType> make_cmp_le2_i64();
             /** gt2_i64: compare two 64-bit integers for greaterthan **/
             static rp<PrimitiveType> make_cmp_gt2_i64();
         };

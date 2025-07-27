@@ -186,13 +186,6 @@ namespace xo {
         bool
         tokenizer<CharT>::is_1char_punctuation(CharT ch) const {
             switch(ch) {
-            case '<':
-                return true;
-            case '>':
-                /* can't be punctuation
-                 * - appears in tk_yields token: ->
-                 */
-                return false;
             case '(':
                 return true;
             case ')':
@@ -205,6 +198,14 @@ namespace xo {
                 return true;
             case '}':
                 return true;
+            case '<':
+                /* can't be 1char punctuation -- can begin lessequal token */
+                return false;
+            case '>':
+                /* can't be 1char punctuation -- can begin greatequal token,
+                 * and appears in tk_yields token
+                 */
+                return false;
             case ',':
                 return true;
             case ';':
@@ -249,6 +250,12 @@ namespace xo {
              */
 
             switch(ch) {
+            case '<':
+                /* can begin <= */
+                return true;
+            case '>':
+                /* can begin >= */
+                return true;
             case ':':
                 /* can begin := */
                 return true;
@@ -621,13 +628,33 @@ namespace xo {
                 break;
             }
             case '<':
-                tk_type = tokentype::tk_leftangle;
-                ++ix;
+            {
+                log && log("leftangle or lessequal token");
+
+                if (*(ix + 1) == '=') {
+                    tk_type = tokentype::tk_lessequal;
+                    ++ix;
+                    ++ix;
+                } else {
+                    tk_type = tokentype::tk_leftangle;
+                    ++ix;
+                }
                 break;
+            }
             case '>':
-                tk_type = tokentype::tk_rightangle;
-                ++ix;
+            {
+                log && log("rightangle or greatequal token");
+
+                if (*(ix + 1) == '=') {
+                    tk_type = tokentype::tk_greatequal;
+                    ++ix;
+                    ++ix;
+                } else {
+                    tk_type = tokentype::tk_rightangle;
+                    ++ix;
+                }
                 break;
+            }
             case '(':
                 tk_type = tokentype::tk_leftparen;
                 ++ix;
@@ -683,9 +710,6 @@ namespace xo {
                     (error_type(__FUNCTION__ /*src_function*/,
                                 "illegal input character",
                                 input_state_,
-                                //current_line_,
-                                //current_pos_,
-                                //initial_whitespace,
                                 (ix - tk_start)));
             }
 

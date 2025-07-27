@@ -218,6 +218,15 @@ namespace xo {
                 break;
 
             case optype::op_great_equal:
+                // TODO: upconvert integer->double
+                if (lhs_->valuetype()->is_i64() && rhs_->valuetype()->is_i64()) {
+                    return Apply::make_cmp_ge_i64(lhs_, rhs_);
+                } else {
+                    this->apply_type_error(c_self_name,
+                                           op_type_, lhs_, rhs_, p_psm);
+                    return nullptr;
+                }
+
                 assert(false);
 
             case optype::op_add:
@@ -563,8 +572,12 @@ namespace xo {
                     return optype::op_not_equal;
                 case tokentype::tk_leftangle:
                     return optype::op_less;
+                case tokentype::tk_lessequal:
+                    return optype::op_less_equal;
                 case tokentype::tk_rightangle:
                     return optype::op_great;
+                case tokentype::tk_greatequal:
+                    return optype::op_great_equal;
                 default:
                     assert(false);
                     return optype::invalid;

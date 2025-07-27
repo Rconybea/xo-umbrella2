@@ -28,6 +28,8 @@ namespace xo {
 
                 CASE(tk_leftangle);
                 CASE(tk_rightangle);
+                CASE(tk_lessequal);
+                CASE(tk_greatequal);
                 CASE(tk_dot);
                 CASE(tk_comma);
                 CASE(tk_colon);

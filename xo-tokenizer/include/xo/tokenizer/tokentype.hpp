@@ -88,6 +88,12 @@ namespace xo {
             /** right-hand angle bracket @c '>' **/
             tk_rightangle,
 
+            /** less-equal @c '<=' **/
+            tk_lessequal,
+
+            /** great-equal @c '>=' **/
+            tk_greatequal,
+
             /** dot @c '.' **/
             tk_dot,
 
