@@ -182,12 +182,41 @@ namespace xo {
             }
 
             case optype::op_equal:
-                return Apply::make_cmp_eq_i64(lhs_, rhs_);
+                if (lhs_->valuetype()->is_i64() && rhs_->valuetype()->is_i64()) {
+                    return Apply::make_cmp_eq_i64(lhs_, rhs_);
+                } else {
+                    this->apply_type_error(c_self_name,
+                                           op_type_, lhs_, rhs_, p_psm);
+                    return nullptr;
+                }
+                break;
 
             case optype::op_less:
+                // TODO: floating-point less-than
+
+                if (lhs_->valuetype()->is_i64() && rhs_->valuetype()->is_i64()) {
+                    return Apply::make_cmp_lt_i64(lhs_, rhs_);
+                } else {
+                    this->apply_type_error(c_self_name,
+                                           op_type_, lhs_, rhs_, p_psm);
+                    return nullptr;
+                }
+                break;
+
             case optype::op_less_equal:
             case optype::op_not_equal:
+                assert(false);
+
             case optype::op_great:
+                if (lhs_->valuetype()->is_i64() && rhs_->valuetype()->is_i64()) {
+                    return Apply::make_cmp_gt_i64(lhs_, rhs_);
+                } else {
+                    this->apply_type_error(c_self_name,
+                                           op_type_, lhs_, rhs_, p_psm);
+                    return nullptr;
+                }
+                break;
+
             case optype::op_great_equal:
                 assert(false);
 
@@ -532,6 +561,10 @@ namespace xo {
                     return optype::op_equal;
                 case tokentype::tk_cmpne:
                     return optype::op_not_equal;
+                case tokentype::tk_leftangle:
+                    return optype::op_less;
+                case tokentype::tk_rightangle:
+                    return optype::op_great;
                 default:
                     assert(false);
                     return optype::invalid;

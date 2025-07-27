@@ -22,6 +22,16 @@ extern "C" {
         return x != y;
     }
 
+    bool
+    cmp_lt2_i64(std::int64_t x, std::int64_t y) {
+        return x < y;
+    }
+
+    bool
+    cmp_gt2_i64(std::int64_t x, std::int64_t y) {
+        return x > y;
+    }
+
     std::int64_t
     add2_i64(std::int64_t x, std::int64_t y) {
         return x + y;
@@ -89,6 +99,34 @@ namespace xo {
                                            &cmp_ne2_i64,
                                            true /*explicit_symbol_def*/,
                                            llvmintrinsic::i_ne);
+
+            return s_retval;
+        }
+
+        auto
+        Primitive_cmp_i64::make_cmp_lt2_i64() -> rp<PrimitiveType>
+        {
+            static rp<PrimitiveType> s_retval;
+
+            if (!s_retval)
+                s_retval = Primitive::make("cmp_lt2_i64",
+                                           &cmp_lt2_i64,
+                                           true /*explicit_symbol_def*/,
+                                           llvmintrinsic::i_slt);
+
+            return s_retval;
+        }
+
+        auto
+        Primitive_cmp_i64::make_cmp_gt2_i64() -> rp<PrimitiveType>
+        {
+            static rp<PrimitiveType> s_retval;
+
+            if (!s_retval)
+                s_retval = Primitive::make("cmp_gt2_i64",
+                                           &cmp_gt2_i64,
+                                           true /*explicit_symbol_def*/,
+                                           llvmintrinsic::i_sgt);
 
             return s_retval;
         }

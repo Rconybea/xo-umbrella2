@@ -418,6 +418,9 @@ namespace xo {
 
             case tokentype::tk_leftangle:
             case tokentype::tk_rightangle:
+                this->on_operator_token(tk, p_psm);
+                return;
+
             case tokentype::tk_dot:
                 assert(false);
                 return;
