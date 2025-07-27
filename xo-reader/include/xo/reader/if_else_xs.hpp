@@ -91,7 +91,10 @@ namespace xo {
 
         };
     } /*namespace scm*/
+
+    namespace print {
+        PPDETAIL_ATOMIC(xo::scm::ifexprstatetype);
+    }
 } /*namespace xo*/
 
-
-/** end if_else_xs.hpp **/
+/* end if_else_xs.hpp */

@@ -124,6 +124,21 @@ namespace xo {
             this->illegal_input_on_token(c_self_name, tk, exp, p_psm);
         }
 
+        void
+        progress_xs::apply_type_error(const char * self_name,
+                                      optype op,
+                                      bp<Expression> expr1,
+                                      bp<Expression> expr2,
+                                      parserstatemachine * p_psm) const
+        {
+            std::string errmsg = tostr("incompatible argument types T1,T2 to op",
+                                       xtag("op", op),
+                                       xtag("T1", expr1->valuetype()),
+                                       xtag("T2", expr2->valuetype()));
+
+            p_psm->on_error(self_name, std::move(errmsg));
+        }
+
         rp<Expression>
         progress_xs::assemble_expr(parserstatemachine * p_psm) {
             /* need to defer building Apply incase expr followed by higher-precedence operator:
@@ -177,16 +192,56 @@ namespace xo {
                 assert(false);
 
             case optype::op_add:
-                return Apply::make_add2_f64(lhs_, rhs_);
-
+                // TODO: upconvert integer->double
+                if (lhs_->valuetype()->is_i64() && rhs_->valuetype()->is_i64()) {
+                    return Apply::make_add2_i64(lhs_, rhs_);
+                } else if (lhs_->valuetype()->is_f64() && rhs_->valuetype()->is_f64()) {
+                    return Apply::make_add2_f64(lhs_, rhs_);
+                } else {
+                    this->apply_type_error(c_self_name,
+                                           op_type_, lhs_, rhs_, p_psm);
+                    return nullptr;
+                }
+                break;
             case optype::op_subtract:
-                return Apply::make_sub2_f64(lhs_, rhs_);
+                // TODO: upconvert integer->double
+                if (lhs_->valuetype()->is_i64() && rhs_->valuetype()->is_i64()) {
+                    return Apply::make_sub2_i64(lhs_, rhs_);
+                } else if (lhs_->valuetype()->is_f64() && rhs_->valuetype()->is_f64()) {
+                    return Apply::make_sub2_f64(lhs_, rhs_);
+                } else {
+                    this->apply_type_error(c_self_name,
+                                           op_type_, lhs_, rhs_, p_psm);
+                    return nullptr;
+                }
+                break;
 
             case optype::op_multiply:
-                return Apply::make_mul2_f64(lhs_, rhs_);
+                // TODO: upconvert integer->double
+                if (lhs_->valuetype()->is_i64() && rhs_->valuetype()->is_i64()) {
+                    return Apply::make_mul2_i64(lhs_, rhs_);
+                } else if (lhs_->valuetype()->is_f64() && rhs_->valuetype()->is_f64()) {
+                    return Apply::make_mul2_f64(lhs_, rhs_);
+                } else {
+                    this->apply_type_error(c_self_name,
+                                           op_type_, lhs_, rhs_, p_psm);
+                    return nullptr;
+                }
+
+                break;
 
             case optype::op_divide:
-                return Apply::make_div2_f64(lhs_, rhs_);
+                // TODO: upconvert integer->double
+                if (lhs_->valuetype()->is_i64() && rhs_->valuetype()->is_i64()) {
+                    return Apply::make_div2_i64(lhs_, rhs_);
+                } else if (lhs_->valuetype()->is_f64() && rhs_->valuetype()->is_f64()) {
+                    return Apply::make_div2_f64(lhs_, rhs_);
+                } else {
+                    this->apply_type_error(c_self_name,
+                                           op_type_, lhs_, rhs_, p_psm);
+                    return nullptr;
+                }
+                break;
 
             case optype::n_optype:
                 /* unreachable */
@@ -250,9 +305,11 @@ namespace xo {
 
             rp<Expression> expr2 = this->assemble_expr(p_psm);
 
-            std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
+            if (expr2) {
+                std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
 
-            p_psm->on_expr_with_semicolon(expr2);
+                p_psm->on_expr_with_semicolon(expr2);
+            }
         }
 
         void
@@ -438,6 +495,27 @@ namespace xo {
              */
         }
 
+        void
+        progress_xs::on_rightbrace_token(const token_type & tk,
+                                         parserstatemachine * p_psm)
+        {
+            scope log(XO_DEBUG(p_psm->debug_flag()));
+
+            rp<Expression> expr = this->assemble_expr(p_psm);
+
+            log && log(xtag("assembled-expr", expr));
+
+            std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
+
+            p_psm->on_expr(expr);
+            p_psm->on_rightbrace_token(tk);
+
+            /* control here on input like:
+             *
+             *   { n * n }
+             */
+        }
+
         namespace {
             optype
             tk2op(const tokentype & tktype) {
@@ -599,6 +677,27 @@ namespace xo {
             os << ">";
         }
 
+        bool
+        progress_xs::pretty_print(const xo::print::ppindentinfo & ppii) const
+        {
+            if (ppii.upto()) {
+                return (ppii.pps()->print_upto("<progress_xs")
+                        && (lhs_ ? ppii.pps()->print_upto(refrtag("lhs", lhs_)) : true)
+                        && (op_type_ != optype::invalid ? ppii.pps()->print_upto(refrtag("op", op_type_)) : true)
+                        && (rhs_ ? ppii.pps()->print_upto(refrtag("rhs", rhs_)) : true)
+                        && ppii.pps()->print_upto(">"));
+            } else {
+                ppii.pps()->write("<progress_xs");
+                if (lhs_)
+                    ppii.pps()->pretty(refrtag("lhs", lhs_));
+                if (op_type_ != optype::invalid)
+                    ppii.pps()->pretty(refrtag("op", op_type_));
+                if (rhs_)
+                    ppii.pps()->pretty(refrtag("rhs", rhs_));
+                ppii.pps()->write(">");
+                return false;
+            }
+        }
 
     } /*namespace scm*/
 } /*namespace xo*/

@@ -37,6 +37,8 @@ namespace xo {
          *  NSW stands for 'no signed wrap' -> poison value if overflow (costs more)
          *  NUW stands for 'no unsigned wrap' -> poison value if overflow (costs more)
          *  @endnote
+         *
+         *  See: xo-jit/src/jit/MachPipeline.cpp
          **/
         enum class llvmintrinsic {
             // see /nix/store/x5yz...llvm-18.1.5-dev/include/llvm/IR/IRBuilder.h
@@ -82,16 +84,16 @@ namespace xo {
 
             // TODO: unsigned comparisons
 
-            /** -> IRBuilder::CreateFadd (add 2 floating-point numbers) **/
+            /** -> IRBuilder::CreateFAdd (add 2 floating-point numbers) **/
             fp_add,
 
-            /** -> IRBuilder::CreateFsub (subtract 2 floating-pointer numbers) **/
+            /** -> IRBuilder::CreateFSub (subtract 2 floating-pointer numbers) **/
             fp_sub,
 
-            /** -> IRBuilder::CreateFmul (multiply 2 floating-point numbers) **/
+            /** -> IRBuilder::CreateFMul (multiply 2 floating-point numbers) **/
             fp_mul,
 
-            /** -> IRBuilder::CreateFdiv (divide 2 floating-point numbers) **/
+            /** -> IRBuilder::CreateFDiv (divide 2 floating-point numbers) **/
             fp_div,
 
             // TODO: floating-point comparisons

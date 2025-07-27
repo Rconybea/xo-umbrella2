@@ -6,6 +6,7 @@
 #pragma once
 
 #include "exprstate.hpp"
+#include "xo/reflect/TypeDescr.hpp"
 #include <iostream>
 //#include <cstdint>
 
@@ -90,6 +91,12 @@ namespace xo {
 
             bool admits_f64() const;
 
+            void apply_type_error(const char * self_name,
+                                  optype op,
+                                  bp<Expression> expr1,
+                                  bp<Expression> expr2,
+                                  parserstatemachine * p_psm) const;
+
             virtual const char * get_expect_str() const override;
 
             virtual void on_expr(bp<Expression> expr,
@@ -113,6 +120,8 @@ namespace xo {
                                             parserstatemachine * p_psm) override;
             virtual void on_rightparen_token(const token_type & tk,
                                              parserstatemachine * p_psm) override;
+            virtual void on_rightbrace_token(const token_type & tk,
+                                             parserstatemachine * p_psm) override;
             virtual void on_then_token(const token_type & tk,
                                        parserstatemachine * p_psm) override;
             virtual void on_else_token(const token_type & tk,
@@ -132,6 +141,7 @@ namespace xo {
                                       parserstatemachine * p_psm) override;
 
             virtual void print(std::ostream & os) const override;
+            virtual bool pretty_print(const print::ppindentinfo & ppii) const override;
 
         private:
             static std::unique_ptr<progress_xs> make(rp<Expression> valex,

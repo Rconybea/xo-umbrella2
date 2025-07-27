@@ -57,6 +57,8 @@ namespace xo {
                                        parserstatemachine * p_psm) override;
             virtual void on_i64_token(const token_type & tk,
                                       parserstatemachine * p_psm) override;
+            virtual void on_f64_token(const token_type & tk,
+                                      parserstatemachine * p_psm) override;
 
             // ----- victory methods -----
 

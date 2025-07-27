@@ -212,6 +212,13 @@ namespace xo {
                << ">";
         }
 
+        bool
+        lambda_xs::pretty_print(const xo::print::ppindentinfo & ppii) const
+        {
+            return ppii.pps()->pretty_struct(ppii, "lambda_xs",
+                                             refrtag("lmxs_type", lmxs_type_));
+        }
+
     } /*namespace scm*/
 } /*namespace xo*/
 

@@ -106,8 +106,11 @@ namespace xo {
             /** evaluates to the arguments to pass to @ref fn_ **/
             std::vector<rp<Expression>> args_expr_v_;
         };
-
     } /*namespace scm */
+
+    namespace print {
+        PPDETAIL_ATOMIC(xo::scm::applyexprstatetype);
+    }
 } /*namespace xo*/
 
 /* end apply_xs.hpp */

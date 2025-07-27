@@ -152,14 +152,39 @@ namespace xo {
         {
             using xo::ast::Constant;
 
-            constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG(p_psm->debug_flag()));
 
             constexpr const char * c_self_name = "exprseq_xs::on_i64_token";
 
             if (xseqtype_ == exprseqtype::toplevel_interactive)
             {
                 progress_xs::start(Constant<int64_t>::make(tk.i64_value()), p_psm);
+            } else {
+                /* policy: don't allow literals as toplevel expressions
+                 * unless interactive session.
+                 */
+                const char * exp = get_expect_str();
+
+                this->illegal_input_on_token(c_self_name,
+                                             tk,
+                                             exp,
+                                             p_psm);
+            }
+        }
+
+        void
+        exprseq_xs::on_f64_token(const token_type & tk,
+                                 parserstatemachine * p_psm)
+        {
+            using xo::ast::Constant;
+
+            scope log(XO_DEBUG(p_psm->debug_flag()));
+
+            constexpr const char * c_self_name = "exprseq_xs::on_i64_token";
+
+            if (xseqtype_ == exprseqtype::toplevel_interactive)
+            {
+                progress_xs::start(Constant<double>::make(tk.f64_value()), p_psm);
             } else {
                 /* policy: don't allow literals as toplevel expressions
                  * unless interactive session.

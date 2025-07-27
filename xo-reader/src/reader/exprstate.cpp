@@ -21,6 +21,7 @@ namespace xo {
     //using xo::ast::Constant;
     //using xo::reflect::Reflect;
     using xo::reflect::TypeDescr;
+    using xo::print::ppindentinfo;
 
     namespace scm {
         const char *
@@ -550,6 +551,13 @@ namespace xo {
                << xtag("this", (void*)this)
                << xtag("type", exs_type_);
             os << ">";
+        }
+
+        bool
+        exprstate::pretty_print(const ppindentinfo & ppii) const
+        {
+            return ppii.pps()->pretty_struct(ppii, "exprstate",
+                                             refrtag("type", exs_type_));
         }
 
         void

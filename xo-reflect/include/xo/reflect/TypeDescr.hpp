@@ -240,13 +240,13 @@ namespace xo {
             TypeDescrExtra * tdextra() const { return tdextra_.get(); }
             Metatype metatype() const { return tdextra_->metatype(); }
 
-            /* true iff the type represented by *this is the same as the type
-             * represented by T.
+            /** true iff the type represented by _c *this is the same as the type
+             *  represented by @tparam T
              *
-             * Warning: comparing typeinfo address can give false negatives.
-             *          suspect this is caused by problems coalescing linker symbols
-             *          in the clang toolchain.
-             */
+             *  Warning: comparing typeinfo address can give false negatives.
+             *           suspect this is caused by problems coalescing linker symbols
+             *           in the clang toolchain.
+             **/
             template<typename T>
             [[deprecated]]
             bool is_native() const {
@@ -316,6 +316,10 @@ namespace xo {
                     return nullptr;
                 }
             } /*recover_native2*/
+
+            bool is_i128() const;
+            bool is_i64() const;
+            bool is_f64() const;
 
             bool is_pointer() const { return this->tdextra_->is_pointer(); }
             bool is_vector() const { return this->tdextra_->is_vector(); }

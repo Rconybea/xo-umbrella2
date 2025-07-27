@@ -7,6 +7,7 @@
 
 #include "xo/expression/Expression.hpp"
 #include "xo/tokenizer/token.hpp"
+#include "xo/indentlog/print/ppdetail_atomic.hpp"
 #include <stack>
 //#include <cstdint>
 
@@ -144,6 +145,9 @@ namespace xo {
 
             /** print human-readable representation on @p os **/
             virtual void print(std::ostream & os) const;
+
+            /** pretty-print using @p ppii **/
+            virtual bool pretty_print(const print::ppindentinfo & ppii) const;
 
             // ----- input methods -----
 

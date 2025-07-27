@@ -191,6 +191,9 @@ namespace xo {
             return Primitive<FunctionPointer>::make(name, x, explicit_symbol_def, intrinsic);
         }
 
+        // NOTE: see xo-reader/src/reader/progress_xs.cpp
+        //       binding operators to primitive applications.
+
         /** builtin primitives :: i64 x i64 -> bool **/
         class Primitive_cmp_i64 : public Primitive<bool (*)(std::int64_t, std::int64_t)> {
         public:
@@ -201,6 +204,22 @@ namespace xo {
             static rp<PrimitiveType> make_cmp_eq2_i64();
             /** ne2_i64: compare two 64-bit integers for inequality **/
             static rp<PrimitiveType> make_cmp_ne2_i64();
+        };
+
+        /** builtin primitives :: i64 x i64 -> i64 **/
+        class Primitive_i64 : public Primitive<std::int64_t (*)(std::int64_t, std::int64_t)> {
+        public:
+            using PrimitiveType = Primitive<std::int64_t (*)(std::int64_t, std::int64_t)>;
+
+        public:
+            /** add2_i64: add two 64-bit integers **/
+            static rp<PrimitiveType> make_add2_i64();
+            /** sub2_i64: subtract two 64-bit integers **/
+            static rp<PrimitiveType> make_sub2_i64();
+            /** mul2_i64: multiply two 64-bit integers **/
+            static rp<PrimitiveType> make_mul2_i64();
+            /** div2_i64: divide two 64-bit integers **/
+            static rp<PrimitiveType> make_div2_i64();
         };
 
         /** builtin primitives :: f64 x f64 -> f64 **/

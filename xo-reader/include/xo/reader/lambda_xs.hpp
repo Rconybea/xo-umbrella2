@@ -83,6 +83,7 @@ namespace xo {
                                             parserstatemachine * p_psm) override;
 
             virtual void print(std::ostream & os) const override;
+            virtual bool pretty_print(const print::ppindentinfo & ppii) const override;
 
         private:
             static std::unique_ptr<lambda_xs> make();
@@ -105,6 +106,10 @@ namespace xo {
 
         };
     } /*namespace scm*/
+
+    namespace print {
+        PPDETAIL_ATOMIC(xo::scm::lambdastatetype);
+    }
 } /*namespace xo*/
 
 

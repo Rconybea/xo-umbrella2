@@ -35,6 +35,19 @@ namespace xo {
             static rp<Apply> make_cmp_ne_i64(const rp<Expression> & lhs,
                                              const rp<Expression> & rhs);
 
+            /** create apply-expression to add two 64-bit integers **/
+            static rp<Apply> make_add2_i64(const rp<Expression> & lhs,
+                                           const rp<Expression> & rhs);
+            /** create apply-expression to subtract two 64-bit integers **/
+            static rp<Apply> make_sub2_i64(const rp<Expression> & lhs,
+                                           const rp<Expression> & rhs);
+            /** create apply-expression to multiply two 64-bit integers **/
+            static rp<Apply> make_mul2_i64(const rp<Expression> & lhs,
+                                           const rp<Expression> & rhs);
+            /** create apply-expression to divide two 64-bit integers **/
+            static rp<Apply> make_div2_i64(const rp<Expression> & lhs,
+                                           const rp<Expression> & rhs);
+
             /** create apply-expression to add two 64-bit floating-point numbers **/
             static rp<Apply> make_add2_f64(const rp<Expression> & lhs,
                                            const rp<Expression> & rhs);

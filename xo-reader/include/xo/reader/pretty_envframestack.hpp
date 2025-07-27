@@ -11,6 +11,13 @@
 namespace xo {
     namespace print {
         template <>
+        struct ppdetail<const xo::scm::envframestack*> {
+            static inline bool print_pretty(const ppindentinfo & ppii, const xo::scm::envframestack * p) {
+                return p->pretty_print(ppii);
+            }
+        };
+
+        template <>
         struct ppdetail<xo::scm::envframestack*> {
             static inline bool print_pretty(const ppindentinfo & ppii, const xo::scm::envframestack * p) {
                 return p->pretty_print(ppii);

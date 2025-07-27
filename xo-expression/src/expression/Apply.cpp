@@ -30,6 +30,8 @@ namespace xo {
             return new Apply(fn_retval_type, fn, argv);
         }
 
+        // ----- integer comparison -----
+
         rp<Apply>
         Apply::make_cmp_eq_i64(const rp<Expression> & lhs,
                                const rp<Expression> & rhs)
@@ -45,6 +47,42 @@ namespace xo {
             return Apply::make(Primitive_cmp_i64::make_cmp_ne2_i64(),
                                {lhs, rhs});
         }
+
+        // ----- integer arithmetic -----
+
+        rp<Apply>
+        Apply::make_add2_i64(const rp<Expression> & lhs,
+                             const rp<Expression> & rhs)
+        {
+            return Apply::make(Primitive_i64::make_add2_i64(),
+                               {lhs, rhs});
+        }
+
+        rp<Apply>
+        Apply::make_sub2_i64(const rp<Expression> & lhs,
+                             const rp<Expression> & rhs)
+        {
+            return Apply::make(Primitive_i64::make_sub2_i64(),
+                               {lhs, rhs});
+        }
+
+        rp<Apply>
+        Apply::make_mul2_i64(const rp<Expression> & lhs,
+                             const rp<Expression> & rhs)
+        {
+            return Apply::make(Primitive_i64::make_mul2_i64(),
+                               {lhs, rhs});
+        }
+
+        rp<Apply>
+        Apply::make_div2_i64(const rp<Expression> & lhs,
+                             const rp<Expression> & rhs)
+        {
+            return Apply::make(Primitive_i64::make_div2_i64(),
+                               {lhs, rhs});
+        }
+
+        // ----- floating point arithmetic -----
 
         rp<Apply>
         Apply::make_add2_f64(const rp<Expression> & lhs,

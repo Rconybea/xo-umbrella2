@@ -7,6 +7,7 @@
 //#include "exprstatestack.hpp"
 #include "parserstatemachine.hpp"
 #include "expect_expr_xs.hpp"
+#include "xo/indentlog/print/ppdetail_atomic.hpp"
 
 namespace xo {
     namespace scm {

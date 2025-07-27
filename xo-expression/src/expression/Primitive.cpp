@@ -1,8 +1,17 @@
 /* @file Primitive.cpp */
 
 #include "Primitive.hpp"
+#include <cstdint>
 
 extern "C" {
+    /** code here is used in two context:
+     *  1. Fallback implementation under llvm.
+     *     In practice will use llvm intrinsic instead.
+     *     See xo-jit/src/jit/MachPipeline.cpp
+     *  2. Schematika interpreter (aspirational asof jul 2025)
+     *
+     **/
+
     bool
     cmp_eq2_i64(std::int64_t x, std::int64_t y) {
         return x == y;
@@ -11,6 +20,26 @@ extern "C" {
     bool
     cmp_ne2_i64(std::int64_t x, std::int64_t y) {
         return x != y;
+    }
+
+    std::int64_t
+    add2_i64(std::int64_t x, std::int64_t y) {
+        return x + y;
+    }
+
+    std::int64_t
+    sub2_i64(std::int64_t x, std::int64_t y) {
+        return x - y;
+    }
+
+    std::int64_t
+    mul2_i64(std::int64_t x, std::int64_t y) {
+        return x * y;
+    }
+
+    std::int64_t
+    div2_i64(std::int64_t x, std::int64_t y) {
+        return x / y;
     }
 
     double
@@ -63,6 +92,65 @@ namespace xo {
 
             return s_retval;
         }
+
+        /* TODO: remaining integer arithmetic */
+
+        auto
+        Primitive_i64::make_add2_i64() -> rp<PrimitiveType>
+        {
+            static rp<PrimitiveType> s_retval;
+
+            if (!s_retval)
+                s_retval = Primitive::make("add2_i64",
+                                           &add2_i64,
+                                           true /*explicit_symbol_def*/,
+                                           llvmintrinsic::i_add);
+
+            return s_retval;
+        }
+
+        auto
+        Primitive_i64::make_sub2_i64() -> rp<PrimitiveType>
+        {
+            static rp<PrimitiveType> s_retval;
+
+            if (!s_retval)
+                s_retval = Primitive::make("sub2_i64",
+                                           &sub2_i64,
+                                           true /*explicit_symbol_def*/,
+                                           llvmintrinsic::i_sub);
+
+            return s_retval;
+        }
+
+        auto
+        Primitive_i64::make_mul2_i64() -> rp<PrimitiveType>
+        {
+            static rp<PrimitiveType> s_retval;
+
+            if (!s_retval)
+                s_retval = Primitive::make("mul2_i64",
+                                           &mul2_i64,
+                                           true /*explicit_symbol_def*/,
+                                           llvmintrinsic::i_mul);
+
+            return s_retval;
+        }
+
+        auto
+        Primitive_i64::make_div2_i64() -> rp<PrimitiveType>
+        {
+            static rp<PrimitiveType> s_retval;
+
+            if (!s_retval)
+                s_retval = Primitive::make("div2_i64",
+                                           &div2_i64,
+                                           true /*explicit_symbol+def*/,
+                                           llvmintrinsic::i_sdiv);
+            return s_retval;
+        }
+
+        // ----- floating-point arithmetic -----
 
         auto
         Primitive_f64::make_add2_f64() -> rp<PrimitiveType>

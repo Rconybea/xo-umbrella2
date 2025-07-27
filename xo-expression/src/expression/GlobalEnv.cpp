@@ -3,6 +3,7 @@
  * author: Roland Conybeare, Jul 2025
  */
 
+#include "xo/indentlog/print/ppdetail_atomic.hpp"
 #include "GlobalEnv.hpp"
 #include "Expression.hpp"
 

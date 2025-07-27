@@ -351,11 +351,17 @@ namespace xo {
         void
         define_xs::print(std::ostream & os) const {
             os << "<define_xs"
-               << xtag("this", (void*)this)
-                //<< xtag("type", exs_type_)
                << xtag("defxs_type", defxs_type_);
             os << ">";
         }
+
+        bool
+        define_xs::pretty_print(const xo::print::ppindentinfo & ppii) const
+        {
+            return ppii.pps()->pretty_struct(ppii, "define_xs",
+                                             refrtag("defxs_type", defxs_type_));
+        }
+
     } /*namespace scm*/
 } /*namespace xo*/
 
