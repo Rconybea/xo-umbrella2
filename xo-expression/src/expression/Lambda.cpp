@@ -20,16 +20,9 @@ namespace xo {
     namespace ast {
         TypeDescr
         Lambda::assemble_lambda_td(const std::vector<rp<Variable>> & argv,
-                                   TypeDescr explicit_return_td,
-                                   const rp<Expression> & body)
+                                   TypeDescr return_td)
         {
-            if (!body)
-                return nullptr;
-
-            /** assemble function type.
-             *
-             *  NOTE: need this to be unique!
-             **/
+            assert(return_td != nullptr);
 
             std::vector<TypeDescr> arg_td_v;
             {
@@ -40,6 +33,25 @@ namespace xo {
                 }
             }
 
+            auto function_info
+                = FunctionTdxInfo(return_td,
+                                  arg_td_v,
+                                  false /*!is_noexcept*/);
+
+            TypeDescr lambda_td
+                = TypeDescrBase::require_by_fn_info(function_info);
+
+            return lambda_td;
+        }
+
+        TypeDescr
+        Lambda::assemble_lambda_td(const std::vector<rp<Variable>> & argv,
+                                   TypeDescr explicit_return_td,
+                                   const rp<Expression> & body)
+        {
+            if (!body)
+                return nullptr;
+
             if (explicit_return_td && body->valuetype() && (explicit_return_td != body->valuetype())) {
                 throw std::runtime_error(tostr("explicit lambda return type T1 conflicts with lambda body T2",
                                                xtag("T1", explicit_return_td),
@@ -48,15 +60,9 @@ namespace xo {
 
             // TODO: unify(explicit_return_td, body->valuetype())
 
-            auto function_info
-                = FunctionTdxInfo(explicit_return_td ? explicit_return_td : body->valuetype(),
-                                  arg_td_v,
-                                  false /*!is_noexcept*/);
+            TypeDescr return_td = explicit_return_td ? explicit_return_td : body->valuetype();
 
-            TypeDescr lambda_td
-                = TypeDescrBase::require_by_fn_info(function_info);
-
-            return lambda_td;
+            return assemble_lambda_td(argv, return_td);
         }
 
         std::string
@@ -76,6 +82,15 @@ namespace xo {
             ss << ")";
 
             return ss.str();
+        }
+
+        rp<Lambda>
+        Lambda::make(const std::string & name,
+                     TypeDescr lambda_td,
+                     const rp<LocalEnv> & env,
+                     const rp<Expression> & body)
+        {
+            return new Lambda(name, lambda_td, env, body);
         }
 
         rp<Lambda>

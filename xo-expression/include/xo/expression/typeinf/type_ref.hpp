@@ -13,7 +13,8 @@ namespace xo {
         /** @class type_ref
          *  @brief name and eventual resolution for type associated with an expression.
          *
-         *  Type inference / unification operates on @ref xo::scm::TypeTemplate instances, see also.
+         *  Type inference / unification operates on
+         *  @ref xo::scm::TypeBlueprint instances, see also.
          **/
         class type_ref {
         public:
@@ -22,6 +23,12 @@ namespace xo {
         public:
             type_ref() = default;
             type_ref(const type_var& id, TypeDescr td);
+
+            /** if type not determined (@p td is nullptr),
+             *  -> generate and store type variable name.
+             *  otherwise type already resolvedn
+             **/
+            static type_ref dwim(prefix_type prefix, TypeDescr td);
 
             /** generate a unique type-variable name, that begins with @p prefix **/
             static type_var generate_unique(prefix_type prefix);

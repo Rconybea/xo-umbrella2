@@ -98,6 +98,9 @@ namespace xo {
             /** explicit return type (if supplied) **/
             TypeDescr explicit_return_td_ = nullptr;
 
+            /** lambda signature (when known) **/
+            TypeDescr lambda_td_ = nullptr;
+
             /** body expression **/
             rp<Expression> body_;
 

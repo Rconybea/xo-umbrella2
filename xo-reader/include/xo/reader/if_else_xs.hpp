@@ -73,6 +73,8 @@ namespace xo {
                                        parserstatemachine * p_psm) override;
             virtual void on_semicolon_token(const token_type & tk,
                                             parserstatemachine * p_psm) override;
+            virtual void on_rightbrace_token(const token_type & tk,
+                                             parserstatemachine * p_psm) override;
 
             virtual void on_expr(bp<Expression> expr,
                                  parserstatemachine * p_psm) override;
@@ -83,6 +85,11 @@ namespace xo {
 
         private:
             static std::unique_ptr<if_else_xs> make();
+
+            /** exit this exprstate,
+             *  and deliver @ref if_expr_ to parent exprstate
+             **/
+            void finish_and_continue(parserstatemachine * p_psm);
 
         private:
             ifexprstatetype ifxs_type_;

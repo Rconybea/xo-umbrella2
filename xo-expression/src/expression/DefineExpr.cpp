@@ -64,6 +64,7 @@ namespace xo {
         DefineExpr::pretty_print(const ppindentinfo & ppii) const
         {
             return ppii.pps()->pretty_struct(ppii, "Define",
+                                             //refrtag("type", this->valuetype()), // need pretty
                                              refrtag("name", lhs_var_->name()),
                                              refrtag("rhs", rhs_));
         }

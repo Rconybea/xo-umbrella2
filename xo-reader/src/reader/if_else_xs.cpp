@@ -165,6 +165,30 @@ namespace xo {
         }
 
         void
+        if_else_xs::finish_and_continue(parserstatemachine * p_psm)
+        {
+            rp<IfExprAccess> if_expr = this->if_expr_;
+            std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
+
+            if (this->ifxs_type_ == ifexprstatetype::if_4) {
+                /* if no else-branch, then if-expr can't have valuetype */
+                if_expr->assign_valuetype(nullptr);
+            }
+
+            p_psm->top_exprstate().on_expr(if_expr, p_psm);
+        }
+
+        void
+        if_else_xs::on_rightbrace_token(const token_type & tk,
+                                        parserstatemachine * p_psm)
+        {
+            scope log(XO_DEBUG(p_psm->debug_flag()));
+
+            this->finish_and_continue(p_psm);
+            p_psm->on_rightbrace_token(tk);
+        }
+
+        void
         if_else_xs::on_semicolon_token(const token_type & tk,
                                        parserstatemachine * p_psm)
         {
@@ -180,24 +204,18 @@ namespace xo {
             case ifexprstatetype::n_ifexprstatetype:
                 // unreachable
                 assert(false);
-                return;
+                break;
 
             case ifexprstatetype::if_1:
             case ifexprstatetype::if_2:
             case ifexprstatetype::if_3:
             case ifexprstatetype::if_5:
                 this->illegal_input_on_token(c_self_name, tk, get_expect_str(), p_psm);
-                return;
+                break;
             case ifexprstatetype::if_4:
             case ifexprstatetype::if_6: {
-                rp<IfExprAccess> if_expr = this->if_expr_;
-
-                std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
-                TypeDescr td = nullptr;
-
-                if_expr->assign_valuetype(td);
-                p_psm->top_exprstate().on_expr(if_expr, p_psm);
-                return;
+                this->finish_and_continue(p_psm);
+                break;
             }
             }
         }

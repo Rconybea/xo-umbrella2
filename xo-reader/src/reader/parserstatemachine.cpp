@@ -35,6 +35,11 @@ namespace xo {
             return xs_stack_.top_exprstate();
         }
 
+        const exprstate &
+        parserstatemachine::lookup_exprstate(size_t i) const {
+            return *xs_stack_[i];
+        }
+
         void
         parserstatemachine::push_exprstate(std::unique_ptr<exprstate> x) {
             xs_stack_.push_exprstate(std::move(x));
@@ -43,6 +48,11 @@ namespace xo {
         bp<LocalEnv>
         parserstatemachine::top_envframe() const {
             return env_stack_.top_envframe();
+        }
+
+        bp<LocalEnv>
+        parserstatemachine::lookup_envframe(std::size_t i) const {
+            return env_stack_[i];
         }
 
         void

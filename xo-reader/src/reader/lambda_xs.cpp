@@ -1,6 +1,7 @@
 /* @file lambda_xs.cpp */
 
 #include "lambda_xs.hpp"
+#include "define_xs.hpp"
 #include "parserstatemachine.hpp"
 #include "exprstatestack.hpp"
 #include "expect_formal_arglist_xs.hpp"
@@ -156,9 +157,55 @@ namespace xo {
         {
             constexpr const char * c_self_name = "lambda_xs::on_typedescr";
 
+            assert(td);
+
             if (lmxs_type_ == lambdastatetype::lm_3) {
                 this->lmxs_type_ = lambdastatetype::lm_4;
                 this->explicit_return_td_ = td;
+
+                this->lambda_td_ = Lambda::assemble_lambda_td(local_env_->argv(),
+                                                              explicit_return_td_);
+
+                /* 1. at this point we know function signature (@ref lambda_td_)
+                 * 2. if this lambda appears on the rhs of a define,
+                 *    propagate function signature to the define.
+                 * 3. this makes recursive function definitions like this work
+                 *    without relying on type inference:
+                 *       def fact = lambda (n : i64) : i64 {
+                 *         if (n == 0) then
+                 *           1
+                 *         else
+                 *           n * fact(n - 1)
+                 *       }
+                 * 4. while parsing the body of the lambda, we want environment
+                 *    to already associate the lambda's signature with variable 'fact',
+                 *    so that when parser encounters 'fact(n - 1)' the expression has
+                 *    known valuetype.
+                 */
+
+                if ((p_psm->exprstate_stack_size() >= 3)
+                    && (p_psm->lookup_exprstate(1).exs_type() == exprstatetype::expect_rhs_expression)
+                    && (p_psm->lookup_exprstate(2).exs_type() == exprstatetype::defexpr)
+                    && (p_psm->env_stack_size() >= 2)
+                    )
+                {
+                    bp<LocalEnv> def_env = p_psm->lookup_envframe(1);
+
+                    assert(def_env->n_arg() == 1);
+
+                    bp<Variable> def_var = def_env->lookup_arg(0).get();
+
+                    if (def_var->valuetype() == nullptr) {
+                        def_var->assign_valuetype(lambda_td_);
+                    } else {
+                        /* don't need to unify here.  if def already hasa a type,
+                         * that's because it was explicitly specified.
+                         * will discover any conflict after reporting parsed lambda
+                         * to define_xs
+                         */
+                    }
+                }
+
                 expect_expr_xs::start(p_psm);
                 /* control reenters via .on_expr() or .on_expr_with_semicolon() */
             } else {
@@ -194,7 +241,16 @@ namespace xo {
                 /* top env frame recorded arguments to this lambda */
                 p_psm->pop_envframe();
 
-                rp<Lambda> lm = Lambda::make_from_env(name, local_env_, explicit_return_td_, body_);
+                rp<Lambda> lm;
+
+                /* TODO: unify explicit_return_td_ with body_ */
+
+                if (lambda_td_) {
+                    lm = Lambda::make(name, lambda_td_, local_env_, body_);
+                } else {
+                    lm = Lambda::make_from_env(name, local_env_,
+                                               explicit_return_td_, body_);
+                }
 
                 p_psm->top_exprstate().on_expr(lm, p_psm);
                 p_psm->top_exprstate().on_semicolon_token(tk, p_psm);

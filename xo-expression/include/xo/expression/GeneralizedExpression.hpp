@@ -6,7 +6,8 @@
 #pragma once
 
 #include "xo/refcnt/Refcounted.hpp"
-#include "xo/reflect/TypeDescr.hpp"
+#include "xo/expression/typeinf/type_ref.hpp"
+//#include "xo/reflect/TypeDescr.hpp"
 #include "exprtype.hpp"
 
 namespace xo {
@@ -20,16 +21,25 @@ namespace xo {
          **/
         class GeneralizedExpression : public ref::Refcount {
         public:
+            using type_ref     = xo::scm::type_ref;
+            using prefix_type  = xo::scm::prefix_type;
             using TypeDescr    = xo::reflect::TypeDescr;
             using ppstate      = xo::print::ppstate;
             using ppindentinfo = xo::print::ppindentinfo;
 
         public:
-            GeneralizedExpression(exprtype extype, TypeDescr valuetype)
-                : extype_{extype}, valuetype_{valuetype}{}
+            /** if @p valuetype is null, generate unique type variable
+             *  using prefix derived from @p extype.
+             **/
+            GeneralizedExpression(exprtype extype, TypeDescr valuetype);
+            /** if @p valuetype is null, generate unique type variable
+             *  name, beginning with @p prefix
+             **/
+            GeneralizedExpression(exprtype extype, prefix_type prefix, TypeDescr valuetype);
 
             exprtype extype() const { return extype_; }
-            TypeDescr valuetype() const { return valuetype_; }
+            const type_ref & valuetype_ref() const { return valuetype_ref_; }
+            TypeDescr valuetype() const { return valuetype_ref_.td(); }
 
             /** write human-readable representation to stream @p os **/
             virtual void display(std::ostream & os) const = 0;
@@ -39,7 +49,7 @@ namespace xo {
             virtual std::uint32_t pretty_print(const ppindentinfo & ppii) const = 0;
 
             /** useful when scaffolding expressions in a parser **/
-            void assign_valuetype(TypeDescr x) { valuetype_ = x; }
+            void assign_valuetype(TypeDescr x) { valuetype_ref_.resolve_to(x); }
 
         private:
             /** expression type (constant | apply | ..) for this expression **/
@@ -47,7 +57,7 @@ namespace xo {
             /** type information (when available) for values produced by this
              *  expression.
              **/
-            TypeDescr valuetype_ = nullptr;
+            type_ref valuetype_ref_;
         };
 
         inline std::ostream &

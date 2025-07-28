@@ -23,6 +23,17 @@ namespace xo {
         class Lambda : public FunctionInterface {
         public:
             /**
+             *  @p name.  Name for this lambda -- must be unique
+             *  @p lambda_type.  Function signature
+             *  @p local_env.  Environment with formals as content
+             *  @p body.  Expression for lambda function body
+             **/
+            static rp<Lambda> make(const std::string & name,
+                                   TypeDescr lambda_type,
+                                   const rp<LocalEnv> & local_env,
+                                   const rp<Expression> & body);
+
+            /**
              *  @p name   Name for this lambda -- must be unique
              *  @p argv   Formal parameters, in left-to-right order
              *  @p body   Expression for body of this function
@@ -42,6 +53,21 @@ namespace xo {
                                             const rp<LocalEnv> & env,
                                             TypeDescr explicit_return_td,
                                             const rp<Expression> & body);
+
+            /** create type description for lambda with arguments @p argv
+             *  and return type @p return_td
+             **/
+            static TypeDescr assemble_lambda_td(const std::vector<rp<Variable>> & argv,
+                                                TypeDescr return_td);
+
+            /** create type description for lambda with arguments @p argv
+             *  and body expression @p body.
+             *  @p explicit_return_td will be used if non-null.
+             *  otherwise use @p body valuetype
+             **/
+            static TypeDescr assemble_lambda_td(const std::vector<rp<Variable>> & argv,
+                                                TypeDescr explicit_return_td,
+                                                const rp<Expression> & body);
 
             /** downcast from Expression **/
             static bp<Lambda> from(bp<Expression> x) {
@@ -102,13 +128,6 @@ namespace xo {
             virtual std::uint32_t pretty_print(const ppindentinfo & ppii) const override;
 
         protected:
-            /** create type description for lambda with arguments @p argv
-             *  and body expression @p body
-             **/
-            static TypeDescr assemble_lambda_td(const std::vector<rp<Variable>> & argv,
-                                                TypeDescr explicit_return_td,
-                                                const rp<Expression> & body);
-
             /** create string description for function signature,
              *  consistent with c++ expectation
              **/

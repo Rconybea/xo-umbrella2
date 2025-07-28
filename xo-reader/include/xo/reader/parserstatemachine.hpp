@@ -9,6 +9,7 @@
 #include "exprstatestack.hpp"
 #include "envframestack.hpp"
 #include "parser_result.hpp"
+#include "xo/expression/typeinf/type_unifier.hpp"
 
 namespace xo {
     namespace scm {
@@ -39,7 +40,11 @@ namespace xo {
 
             std::unique_ptr<exprstate> pop_exprstate();
             exprstate & top_exprstate();
+            /** get exprstate @p i levels from the top **/
+            const exprstate & lookup_exprstate(size_t i) const;
             void push_exprstate(std::unique_ptr<exprstate> x);
+            /** @return number of stacked expression states **/
+            size_t exprstate_stack_size() const { return  xs_stack_.size(); }
 
             bool debug_flag() const { return debug_flag_; }
 
@@ -55,6 +60,8 @@ namespace xo {
 
             /** @return available variable bindings in current parsing state **/
             bp<LocalEnv> top_envframe() const;
+            /** @return frame @p i levels from the top **/
+            bp<LocalEnv> lookup_envframe(std::size_t i) const;
             /** push frame @p x (with new variable bindings) onto environment stack **/
             void push_envframe(const rp<LocalEnv> & x);
             /** @return pop innermost environment frame and return it **/
@@ -102,7 +109,11 @@ namespace xo {
              *  pop when lambda body goes out of scope
              **/
             envframestack env_stack_;
-            /** parser result state **/
+            /** type inference/unification.
+             *  apply to unresolved types associated with @ref Expression instances.
+             **/
+            type_unifier unifier_;
+            /** parser result state (as of last call to @ref exprstate::on_input) **/
             parser_result result_;
             /** enable/disable debug logging **/
             bool debug_flag_ = false;

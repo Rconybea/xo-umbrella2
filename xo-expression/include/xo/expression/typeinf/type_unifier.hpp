@@ -49,6 +49,9 @@ namespace xo {
              **/
             unify_result unify(bp<TypeBlueprint> lhs, bp<TypeBlueprint> rhs);
 
+            /** lookup type variable by @p name, to get resolution **/
+            rp<TypeBlueprint> lookup(const type_var & name) const;
+
         private:
             type_substitution_map constraint_map_;
         };

@@ -212,6 +212,18 @@ namespace xo {
             };
         }
 
+        rp<TypeBlueprint>
+        type_unifier::lookup(const type_var & name) const
+        {
+            auto ix = constraint_map_.find(name);
+
+            if (ix != constraint_map_.end()) {
+                return ix->second;
+            } else {
+                return nullptr;
+            }
+        }
+
     } /*namespace scm*/
 } /*namespace xo*/
 

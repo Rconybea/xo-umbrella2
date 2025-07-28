@@ -11,6 +11,18 @@ namespace xo {
 
         bool type_ref::is_concrete() const { return td_ != nullptr; }
 
+        type_ref
+        type_ref::dwim(prefix_type prefix, TypeDescr td)
+        {
+            if (td) {
+                /** type resolved, type variable not needed **/
+                return type_ref(type_var(), td);
+            } else {
+                /** type not resolved, assign a unique type variable **/
+                return type_ref(generate_unique(prefix), td);
+            }
+        }
+
         auto
         type_ref::generate_unique(xo::scm::prefix_type prefix) -> xo::scm::type_var
         {

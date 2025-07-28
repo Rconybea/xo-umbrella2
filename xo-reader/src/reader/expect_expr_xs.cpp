@@ -261,6 +261,14 @@ namespace xo {
                << ">";
         }
 
+        bool
+        expect_expr_xs::pretty_print(const xo::print::ppindentinfo & ppii) const
+        {
+            return ppii.pps()->pretty_struct(ppii, "expect_expr_xs",
+                                             refrtag("allow_defs", allow_defs_),
+                                             refrtag("cxl_on_rightbrace", cxl_on_rightbrace_));
+        }
+
     } /*namespace scm*/
 } /*namespace xo*/
 

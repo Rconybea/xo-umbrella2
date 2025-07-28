@@ -52,8 +52,7 @@ namespace xo {
         const parser_result &
         parser::include_token(const token_type & tk)
         {
-            constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag), xtag("tk", tk));
+            scope log(XO_DEBUG(psm_.debug_flag()), xtag("tk", tk));
 
             if (psm_.xs_stack_.empty()) {
                 throw std::runtime_error(tostr("parser::include_token",
