@@ -219,6 +219,12 @@ namespace xo {
              **/
             const parser_result & include_token(const token_type & tk);
 
+            /** reset parsed result expression; use using return value from
+             *  @ref include_token. Complicating api here to avoid copying parser_result
+             *  on each token
+             **/
+            void reset_result();
+
             /** reset to starting parsing state.
              *  use this after encountering an error, to avoid cascade of
              *  spurious secondary errors..  particularly important when

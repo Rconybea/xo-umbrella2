@@ -63,6 +63,10 @@ namespace xo {
                         log && log(xtag("outcome", "victory!"),
                                    xtag("expr", parser_result.result_expr()));
 
+                        rp<Expression> result_expr = parser_result.result_expr();
+
+                        this->parser_.reset_result();
+
                         /* token completes an expression -> victory */
                         return reader_result(parser_result.result_expr(),
                                              expr_span, parser_.stack_size(), reader_error());

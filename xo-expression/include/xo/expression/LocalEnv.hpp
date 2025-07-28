@@ -32,6 +32,8 @@ namespace xo {
             /** Create instance with single local variable @ap argv1 **/
             static rp<LocalEnv> make1(const rp<Variable> & arg1,
                                       const rp<Environment> & parent_env);
+            /** runtime downcast. nullptr if @p x is not a LocalEnv instance **/
+            static bp<LocalEnv> from(const bp<Environment> & x) { return bp<LocalEnv>::from(x); }
 
             Lambda * origin() const { return origin_; }
             const std::vector<rp<Variable>> & argv() const { return argv_; }
@@ -53,30 +55,37 @@ namespace xo {
             /** single-assign this environment's parent **/
             void assign_parent(bp<Environment> p);
 
-            /** create/replace local variable @p target.
-             *  Narrow use case: intended for when LocalEnv represents a top-level session environment
-             **/
-            void upsert_local(bp<Variable> target);
-
-            bp<Variable> lookup_local(const std::string & vname) const;
-
             // ----- Environment -----
 
             virtual bool is_global_env() const override { return false; }
 
             virtual binding_path lookup_binding(const std::string & vname) const override;
 
-            virtual bp<Expression> lookup_var(const std::string & target) const override {
-                for (const auto & arg : argv_) {
-                    if (arg->name() == target)
-                        return arg;
-                }
+            virtual bp<Expression> lookup_var(const std::string & vname) const override {
+                bp<Expression> retval = this->lookup_local(vname);
+
+                if (retval)
+                    return retval;
 
                 /* here: target not found in local vars,
                  * delegate to innermost ancestor
                  */
-                return parent_env_->lookup_var(target);
+                return parent_env_->lookup_var(vname);
             }
+
+            virtual bp<Expression> lookup_local(const std::string & vname) const override {
+                for (const auto & arg : argv_) {
+                    if (arg->name() == vname)
+                        return arg;
+                }
+
+                return bp<Expression>();
+            }
+
+            /** create/replace local variable @p target.
+             *  Narrow use case: intended for when LocalEnv represents a top-level session environment.
+             **/
+            virtual void upsert_local(bp<Variable> target) override;
 
             virtual void print(std::ostream & os) const override;
             virtual std::uint32_t pretty_print(const print::ppindentinfo & ppii) const override;
@@ -85,7 +94,7 @@ namespace xo {
             LocalEnv(const std::vector<rp<Variable>> & argv, const rp<Environment> & parent_env);
 
         private:
-            /** Lambnda for which this environment created.
+            /** Lambda for which this environment created.
              *
              *  Invariant:
              *  @code

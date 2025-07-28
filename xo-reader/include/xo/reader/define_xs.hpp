@@ -79,6 +79,7 @@ namespace xo {
             static void start(parserstatemachine * p_psm);
 
             defexprstatetype defxs_type() const { return defxs_type_; }
+            bp<Variable> lhs_variable() const { return def_expr_->lhs_variable(); }
 
             /** @return expected input in current state **/
             virtual const char * get_expect_str() const override;

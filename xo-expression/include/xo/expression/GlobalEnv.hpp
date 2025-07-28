@@ -14,7 +14,7 @@ namespace xo {
         class GlobalEnv : public Environment {
         public:
             /** create instance.  Probably only need one of these **/
-            static rp<GlobalEnv> make() { return new GlobalEnv(); }
+            static rp<GlobalEnv> make_empty() { return new GlobalEnv(); }
 
             bp<Expression> require_global(const std::string & vname,
                                           bp<Expression> expr);
@@ -31,15 +31,21 @@ namespace xo {
             }
 
             virtual bp<Expression> lookup_var(const std::string & vname) const override {
+                return this->lookup_local(vname);
+            }
+
+            virtual bp<Expression> lookup_local(const std::string & vname) const override {
                 auto ix = global_map_.find(vname);
 
                 if (ix == global_map_.end()) {
                     /* not found */
-                    return bp<Expression>::from_native(nullptr);
+                    return bp<Variable>::from_native(nullptr);
                 }
 
                 return ix->second;
             }
+
+            virtual void upsert_local(bp<Variable> target) override;
 
             virtual void print(std::ostream & os) const override;
             virtual std::uint32_t pretty_print(const xo::print::ppindentinfo & ppii) const override;

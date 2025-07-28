@@ -59,13 +59,13 @@ namespace xo {
             void upsert_var(bp<Variable> x);
 
             /** @return available variable bindings in current parsing state **/
-            bp<LocalEnv> top_envframe() const;
+            bp<Environment> top_envframe() const;
             /** @return frame @p i levels from the top **/
-            bp<LocalEnv> lookup_envframe(std::size_t i) const;
+            bp<Environment> lookup_envframe(std::size_t i) const;
             /** push frame @p x (with new variable bindings) onto environment stack **/
             void push_envframe(const rp<LocalEnv> & x);
             /** @return pop innermost environment frame and return it **/
-            rp<LocalEnv> pop_envframe();
+            rp<Environment> pop_envframe();
             /** @return number of stacked environment frames **/
             size_t env_stack_size() const { return  env_stack_.size(); }
 

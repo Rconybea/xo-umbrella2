@@ -17,7 +17,7 @@ namespace xo {
     namespace scm {
         bp<Variable>
         parserstatemachine::lookup_var(const std::string & x) const {
-            return env_stack_.lookup(x);
+            return Variable::from(env_stack_.lookup(x));
         }
 
         void
@@ -45,30 +45,28 @@ namespace xo {
             xs_stack_.push_exprstate(std::move(x));
         }
 
-        bp<LocalEnv>
+        bp<Environment>
         parserstatemachine::top_envframe() const {
             return env_stack_.top_envframe();
         }
 
-        bp<LocalEnv>
+        bp<Environment>
         parserstatemachine::lookup_envframe(std::size_t i) const {
             return env_stack_[i];
         }
 
         void
         parserstatemachine::push_envframe(const rp<LocalEnv> & x) {
-            constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG(debug_flag_));
 
             log && log(xtag("frame", x));
 
             env_stack_.push_envframe(x);
         }
 
-        rp<LocalEnv>
+        rp<Environment>
         parserstatemachine::pop_envframe() {
-            constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG(debug_flag_));
 
             return env_stack_.pop_envframe();
         }
@@ -76,8 +74,7 @@ namespace xo {
         void
         parserstatemachine::on_expr(bp<Expression> x)
         {
-            constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG(debug_flag_));
 
             log && log(xtag("x", x),
                        xtag("psm", this));
@@ -88,8 +85,7 @@ namespace xo {
         void
         parserstatemachine::on_expr_with_semicolon(bp<Expression> x)
         {
-            constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG(debug_flag_));
 
             log && log(xtag("x", x),
                        xtag("psm", this));
@@ -102,8 +98,7 @@ namespace xo {
         void
         parserstatemachine::on_symbol(const std::string & x)
         {
-            constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG(debug_flag_));
 
             log && log(xtag("x", x),
                        xtag("psm", this));
@@ -114,8 +109,7 @@ namespace xo {
         void
         parserstatemachine::on_semicolon_token(const token_type & tk)
         {
-            constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG(debug_flag_));
 
             log && log(xtag("tk", tk),
                        xtag("psm", this));
@@ -126,8 +120,7 @@ namespace xo {
         void
         parserstatemachine::on_operator_token(const token_type & tk)
         {
-            constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG(debug_flag_));
 
             log && log(xtag("tk", tk),
                        xtag("psm", this));
@@ -138,8 +131,7 @@ namespace xo {
         void
         parserstatemachine::on_leftbrace_token(const token_type & tk)
         {
-            constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG(debug_flag_));
 
             log && log(xtag("tk", tk),
                        xtag("psm", this));

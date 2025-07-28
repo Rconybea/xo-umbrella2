@@ -12,7 +12,7 @@ namespace xo {
     using xo::scm::Variable;
 
     namespace scm {
-        bp<LocalEnv>
+        bp<Environment>
         envframestack::top_envframe() const {
             std::size_t z = stack_.size();
 
@@ -25,7 +25,7 @@ namespace xo {
         }
 
         void
-        envframestack::push_envframe(const rp<LocalEnv> & frame)
+        envframestack::push_envframe(const rp<Environment> & frame)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag),
@@ -38,7 +38,7 @@ namespace xo {
             stack_[z] = frame;
         }
 
-        rp<LocalEnv>
+        rp<Environment>
         envframestack::pop_envframe() {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
@@ -48,7 +48,7 @@ namespace xo {
             if (z > 0) {
                 //std::unique_ptr<exprstate> top = std::move(stack_[z-1]);
 
-                rp<LocalEnv> retval = stack_.at(z-1);
+                rp<Environment> retval = stack_.at(z-1);
 
                 stack_.resize(z-1);
 
@@ -58,7 +58,7 @@ namespace xo {
             }
         }
 
-        bp<Variable>
+        bp<Expression>
         envframestack::lookup(const std::string & x) const {
             for (std::size_t i = 0, z = this->size(); i < z; ++i) {
                 const auto & frame = (*this)[i];

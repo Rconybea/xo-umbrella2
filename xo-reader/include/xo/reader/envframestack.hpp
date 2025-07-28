@@ -14,8 +14,6 @@ namespace xo {
          **/
         class envframestack {
         public:
-            using LocalEnv     = xo::scm::LocalEnv;
-            using Variable     = xo::scm::Variable;
             using ppstate      = xo::print::ppstate;
             using ppindentinfo = xo::print::ppindentinfo;
 
@@ -29,23 +27,23 @@ namespace xo {
              *  Visit frames in fifo order,  report first match;
              *  nullptr if no matches.
              **/
-            bp<Variable> lookup(const std::string & x) const;
+            bp<Expression> lookup(const std::string & x) const;
 
             /** update/replace binding for variable @p target.
              *  New binding may have a different type.
              **/
             void upsert(bp<Variable> target);
 
-            bp<LocalEnv> top_envframe() const;
-            void push_envframe(const rp<LocalEnv> & x);
-            rp<LocalEnv> pop_envframe();
+            bp<Environment> top_envframe() const;
+            void push_envframe(const rp<Environment> & x);
+            rp<Environment> pop_envframe();
 
             void reset_to_toplevel() { stack_.resize(1); }
 
             /** relative to top-of-stack.
              *  0 -> top (last in),  z-1 -> bottom (first in)
              **/
-            bp<LocalEnv> operator[](std::size_t i) {
+            bp<Environment> operator[](std::size_t i) {
                 std::size_t z = stack_.size();
 
                 assert(i < z);
@@ -53,7 +51,7 @@ namespace xo {
                 return stack_[z - i - 1].get();
             }
 
-            bp<LocalEnv> operator[](std::size_t i) const {
+            bp<Environment> operator[](std::size_t i) const {
                 std::size_t z = stack_.size();
 
                 assert(i < z);
@@ -65,7 +63,7 @@ namespace xo {
             bool pretty_print(const ppindentinfo & ppii) const;
 
         private:
-            std::vector<rp<LocalEnv>> stack_;
+            std::vector<rp<Environment>> stack_;
         };
 
         inline std::ostream &

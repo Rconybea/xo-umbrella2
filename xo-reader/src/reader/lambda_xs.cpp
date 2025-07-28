@@ -156,6 +156,7 @@ namespace xo {
                                 parserstatemachine * p_psm)
         {
             constexpr const char * c_self_name = "lambda_xs::on_typedescr";
+            scope log(XO_DEBUG(p_psm->debug_flag()));
 
             assert(td);
 
@@ -189,13 +190,17 @@ namespace xo {
                     && (p_psm->env_stack_size() >= 2)
                     )
                 {
-                    bp<LocalEnv> def_env = p_psm->lookup_envframe(1);
+                    const define_xs * def_xs = dynamic_cast<const define_xs*>(&(p_psm->lookup_exprstate(2)));
 
-                    assert(def_env->n_arg() == 1);
+                    assert(def_xs);
 
-                    bp<Variable> def_var = def_env->lookup_arg(0).get();
+                    bp<Variable> def_var = def_xs->lhs_variable();
 
                     if (def_var->valuetype() == nullptr) {
+                        log && log("assign discovered lambda type T to enclosing define",
+                                   xtag("lhs", def_var),
+                                   xtag("T", print::unq(this->lambda_td_->canonical_name())));
+
                         def_var->assign_valuetype(lambda_td_);
                     } else {
                         /* don't need to unify here.  if def already hasa a type,

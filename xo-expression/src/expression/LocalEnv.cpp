@@ -70,16 +70,6 @@ namespace xo {
                 return { free.i_link_ + 1, free.j_slot_ };
         } /*lookup_binding*/
 
-        bp<Variable>
-        LocalEnv::lookup_local(const std::string & vname) const {
-            for (const auto & var : this->argv_) {
-                if (var->name() == vname)
-                    return var;
-            }
-
-            return bp<Variable>::from_native(nullptr);
-        }
-
         void
         LocalEnv::assign_parent(bp<Environment> p) {
             if ((parent_env_.get() != nullptr) && (parent_env_.get() != p.get())) {
@@ -110,8 +100,7 @@ namespace xo {
 
         void
         LocalEnv::print(std::ostream& os) const {
-            os << "<localenv"
-               << xtag("this", (void*)this)
+            os << "<LocalEnv"
                << xtag("argv", argv_)
                << ">";
         }
@@ -124,8 +113,6 @@ namespace xo {
 
             if (ppii.upto()) {
                 if (!pps->print_upto("<LocalEnv"))
-                    return false;
-                if (!pps->print_upto_tag("this", (void*)this))
                     return false;
                 if (!pps->print_upto_tag("argv", argv_))
                     return false;

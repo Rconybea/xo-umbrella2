@@ -16,8 +16,16 @@ namespace xo {
                                   bp<Expression> expr)
         {
             this->global_map_[vname] = expr.get();
+
             return expr;
         } /*require_global*/
+
+        void
+        GlobalEnv::upsert_local(bp<Variable> target) {
+            // in practice: paraphrase of .require_global()
+
+            this->global_map_[target->name()] = target.promote();
+        }
 
         void
         GlobalEnv::print(std::ostream & os) const {

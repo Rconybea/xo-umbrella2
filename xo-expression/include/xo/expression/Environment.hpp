@@ -6,6 +6,7 @@
 #pragma once
 
 #include "xo/refcnt/Refcounted.hpp"
+#include "Variable.hpp"
 #include "binding_path.hpp"
 #include "xo/indentlog/print/pretty.hpp"
 
@@ -14,6 +15,13 @@ namespace xo {
     namespace scm {
         class Expression;
 
+        /** @class Environment
+         *  @brief Abstract interface for tracking variable bindings
+         *
+         *  When parsing (see xo-reader): rhs will always be a variable.
+         *  When generating code (see xo-jit): rhs can be any expression,
+         *  for example a Lambda.
+         **/
         class Environment : public ref::Refcount {
         public:
             /** true if this is toplevel (global) environment.
@@ -35,6 +43,14 @@ namespace xo {
              *  returns llvm::Value representing code that produces a value for vname
              **/
             virtual bp<Expression> lookup_var(const std::string & vname) const = 0;
+
+            /** like @ref lookup_var but do not delegate to parent environment **/
+            virtual bp<Expression> lookup_local(const std::string & vname) const = 0;
+
+            /** create/replace local variable @p target.
+             *  Narrow use case: intended for when Environment represents a top-level session environment
+             **/
+            virtual void upsert_local(bp<Variable> target) = 0;
 
             virtual void print(std::ostream & os) const = 0;
             virtual std::uint32_t pretty_print(const xo::print::ppindentinfo & ppii) const = 0;

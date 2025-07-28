@@ -11,8 +11,8 @@
 #include "xo/expression/DefineExpr.hpp"
 #include "xo/expression/Constant.hpp"
 #include "xo/expression/ConvertExpr.hpp"
-//#include "xo/expression/GlobalEnv.hpp"
-#include "xo/expression/LocalEnv.hpp"
+#include "xo/expression/GlobalEnv.hpp"
+//#include "xo/expression/LocalEnv.hpp"
 //#include <regex>
 #include <stdexcept>
 
@@ -28,7 +28,7 @@ namespace xo {
             : psm_{debug_flag}
         {
             /* top-level environment.  initially empty */
-            rp<LocalEnv> toplevel_env = LocalEnv::make_empty();
+            rp<Environment> toplevel_env = GlobalEnv::make_empty();
 
             this->psm_.env_stack_.push_envframe(toplevel_env);
         }
@@ -69,6 +69,12 @@ namespace xo {
 
             return psm_.result_;
         } /*include_token*/
+
+        void
+        parser::reset_result()
+        {
+            psm_.result_ = parser_result::none();
+        }
 
         void
         parser::reset_to_idle_toplevel()
