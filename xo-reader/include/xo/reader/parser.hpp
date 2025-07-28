@@ -54,6 +54,7 @@ namespace xo {
          *
          *    deftype point :: {x : f64, y : f64};
          *    deftype polar :: {arg : f64, mag : f64};
+         *    deftype converter :: (point -> polar);
          *
          *    def polar2rect(pt : polar) -> point {
          *      point(x = pt.mag * cos(arg),

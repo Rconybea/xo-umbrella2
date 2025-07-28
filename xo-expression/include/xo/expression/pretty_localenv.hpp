@@ -9,6 +9,13 @@
 namespace xo {
     namespace print {
         template <>
+        struct ppdetail<xo::scm::Environment> {
+            static bool print_pretty(const ppindentinfo & ppii, const xo::scm::Environment & x) {
+                return x.pretty_print(ppii);
+            }
+        };
+
+        template <>
         struct ppdetail<xo::scm::LocalEnv> {
             static bool print_pretty(const ppindentinfo & ppii, const xo::scm::LocalEnv & x) {
                 return x.pretty_print(ppii);

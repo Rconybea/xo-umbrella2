@@ -56,8 +56,13 @@ namespace xo {
                 expr_span += used_span;
 
                 if (tk.is_valid()) {
+                    log && log("input_state.current_line", tokenizer_.input_state().current_line());
+
                     /* forward just-read token to parser */
                     auto parser_result = this->parser_.include_token(tk);
+
+                    log && log("after parser.include_token");
+                    log && log("input_state.current_line", tokenizer_.input_state().current_line());
 
                     if (parser_result.is_expression()) {
                         log && log(xtag("outcome", "victory!"),

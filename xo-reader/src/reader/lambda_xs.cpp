@@ -7,6 +7,8 @@
 #include "expect_formal_arglist_xs.hpp"
 #include "expect_expr_xs.hpp"
 #include "expect_type_xs.hpp"
+#include "pretty_expression.hpp"
+#include "pretty_variable.hpp"
 #include "xo/expression/Lambda.hpp"
 
 namespace xo {
@@ -198,7 +200,7 @@ namespace xo {
 
                     if (def_var->valuetype() == nullptr) {
                         log && log("assign discovered lambda type T to enclosing define",
-                                   xtag("lhs", def_var),
+                                   xtag("lhs", def_var.get()),
                                    xtag("T", print::unq(this->lambda_td_->canonical_name())));
 
                         def_var->assign_valuetype(lambda_td_);

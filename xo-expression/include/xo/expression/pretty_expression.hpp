@@ -26,5 +26,6 @@ namespace xo {
                 return x.pretty_print(ppii);
             }
         };
+
     }
 }
