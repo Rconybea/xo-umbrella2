@@ -119,6 +119,13 @@ namespace xo {
             os << "<sequence_xs" << xtag("expr_v.size", expr_v_.size()) << ">";
         }
 
+        bool
+        sequence_xs::pretty_print(const xo::print::ppindentinfo & ppii) const
+        {
+            return ppii.pps()->pretty_struct(ppii, "sequence_xs",
+                                             xrefrtag("expr_v.size", expr_v_.size()));
+        }
+
     } /*namespace scm*/
 } /*namespace xo*/
 

@@ -33,6 +33,7 @@ namespace xo {
                                              parserstatemachine * p_psm) override;
 
             virtual void print(std::ostream & os) const override;
+            virtual bool pretty_print(const xo::print::ppindentinfo & ppii) const override;
 
         private:
             sequence_xs();
