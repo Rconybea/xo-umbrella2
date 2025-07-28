@@ -10,7 +10,7 @@
 //#include <cstdint>
 
 namespace xo {
-    namespace ast {
+    namespace scm {
 
         /** @class Apply
          *  @brief syntax for a function call.
@@ -210,7 +210,7 @@ namespace xo {
                 : Apply(apply_valuetype, fn, argv) {}
         };
 
-    } /*namespace ast*/
+    } /*namespace scm*/
 } /*namespace xo*/
 
 

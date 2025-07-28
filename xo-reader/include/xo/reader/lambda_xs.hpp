@@ -55,8 +55,8 @@ namespace xo {
          **/
         class lambda_xs : public exprstate {
         public:
-            using Environment = xo::ast::Environment;
-            using LocalEnv = xo::ast::LocalEnv;
+            using Environment = xo::scm::Environment;
+            using LocalEnv = xo::scm::LocalEnv;
 
         public:
             lambda_xs();
@@ -111,7 +111,9 @@ namespace xo {
     } /*namespace scm*/
 
     namespace print {
+#ifndef ppdetail_atomic
         PPDETAIL_ATOMIC(xo::scm::lambdastatetype);
+#endif
     }
 } /*namespace xo*/
 

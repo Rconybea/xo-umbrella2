@@ -10,7 +10,7 @@
 #include <set>
 
 namespace xo {
-    namespace ast {
+    namespace scm {
         class Variable; /* see Variable.hpp */
         class Lambda;   /* see Lamnbda.hpp */
         class Environment; /* see Environment.hpp */
@@ -84,7 +84,7 @@ namespace xo {
 
         }; /*Expression*/
 
-    } /*namespace ast*/
+    } /*namespace scm*/
 } /*namespace xo*/
 
 /** end Expression.hpp **/

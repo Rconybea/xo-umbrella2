@@ -10,7 +10,7 @@
 
 
 namespace xo {
-    namespace ast {
+    namespace scm {
         rp<LocalEnv>
         LocalEnv::make_empty() {
             return new LocalEnv(std::vector<rp<Variable>>(), nullptr);
@@ -142,7 +142,7 @@ namespace xo {
             }
         }
 
-    } /*namespace ast*/
+    } /*namespace scm*/
 } /*namespace xo*/
 
 

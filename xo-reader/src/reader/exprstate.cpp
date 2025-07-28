@@ -18,7 +18,7 @@
 //#include "xo/reflect/Reflect.hpp"
 
 namespace xo {
-    //using xo::ast::Constant;
+    //using xo::scm::Constant;
     //using xo::reflect::Reflect;
     using xo::reflect::TypeDescr;
     using xo::print::ppindentinfo;

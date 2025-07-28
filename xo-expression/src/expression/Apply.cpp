@@ -9,7 +9,7 @@
 #include <cstdint>
 
 namespace xo {
-    namespace ast {
+    namespace scm {
         rp<Apply>
         Apply::make(const rp<Expression> & fn,
                     const std::vector<rp<Expression>> & argv)
@@ -196,7 +196,7 @@ namespace xo {
 #endif
         }
 
-    } /*namespace ast*/
+    } /*namespace scm*/
 } /*namespace xo*/
 
 

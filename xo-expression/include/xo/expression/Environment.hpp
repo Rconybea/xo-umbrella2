@@ -11,7 +11,7 @@
 
 namespace xo {
 
-    namespace ast {
+    namespace scm {
         class Expression;
 
         class Environment : public ref::Refcount {
@@ -45,7 +45,7 @@ namespace xo {
             x.print(os);
             return os;
         }
-    } /*namespace ast*/
+    } /*namespace scm*/
 } /*namespace xo*/
 
 

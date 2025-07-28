@@ -11,7 +11,7 @@
 #include <type_traits>
 
 namespace xo {
-    namespace ast {
+    namespace scm {
         /** @class ConstantInterface
          *  @brief syntax for a literal constant.
          **/
@@ -44,7 +44,7 @@ namespace xo {
 
         }; /*ConstantInterface*/
 
-    } /*namespace ast*/
+    } /*namespace scm*/
 } /*namespace xo*/
 
 /** end ConstantInterface.hpp **/

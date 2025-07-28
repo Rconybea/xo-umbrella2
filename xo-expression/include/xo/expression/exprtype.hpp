@@ -9,9 +9,9 @@
 //#include <cstdint>
 
 namespace xo {
-    namespace ast {
+    namespace scm {
         /** @enum exprtype
-         *  @brief enum to identify subclasses of xo::ast::Expression.
+         *  @brief enum to identify subclasses of xo::scm::Expression.
          *
          **/
         enum class exprtype {
@@ -74,7 +74,7 @@ namespace xo {
             os << expr2str(x);
             return os;
         }
-    } /*namespace ast*/
+    } /*namespace scm*/
 } /*namespace xo*/
 
 

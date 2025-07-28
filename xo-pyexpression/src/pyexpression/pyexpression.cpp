@@ -17,21 +17,21 @@
 #include <cmath>
 
 namespace xo {
-    namespace ast {
-        using xo::ast::exprtype;
-        using xo::ast::Expression;
-        using xo::ast::make_apply;
-        using xo::ast::PrimitiveInterface;
-        using xo::ast::Primitive;
-        using xo::ast::make_primitive;
-        using xo::ast::ConstantInterface;
-        using xo::ast::Constant;
-        using xo::ast::Variable;
-        using xo::ast::make_var;
-        using xo::ast::Lambda;
-        using xo::ast::make_lambda;
-        using xo::ast::IfExpr;
-        using xo::ast::make_ifexpr;
+    namespace scm {
+        using xo::scm::exprtype;
+        using xo::scm::Expression;
+        using xo::scm::make_apply;
+        using xo::scm::PrimitiveInterface;
+        using xo::scm::Primitive;
+        using xo::scm::make_primitive;
+        using xo::scm::ConstantInterface;
+        using xo::scm::Constant;
+        using xo::scm::Variable;
+        using xo::scm::make_var;
+        using xo::scm::Lambda;
+        using xo::scm::make_lambda;
+        using xo::scm::IfExpr;
+        using xo::scm::make_ifexpr;
         using xo::reflect::TaggedPtr;
         using xo::rp;
         namespace py = pybind11;
@@ -188,7 +188,7 @@ namespace xo {
 
             m.def("make_ifexpr", &make_ifexpr);
         } /*pyexpresion*/
-    } /*namespace ast*/
+    } /*namespace scm*/
 } /*namespace xo*/
 
 /* end pyexpression.cpp */

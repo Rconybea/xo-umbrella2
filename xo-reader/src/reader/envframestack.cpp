@@ -8,8 +8,8 @@
 #include "pretty_localenv.hpp"
 
 namespace xo {
-    using xo::ast::LocalEnv;
-    using xo::ast::Variable;
+    using xo::scm::LocalEnv;
+    using xo::scm::Variable;
 
     namespace scm {
         bp<LocalEnv>

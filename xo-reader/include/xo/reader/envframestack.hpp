@@ -14,8 +14,8 @@ namespace xo {
          **/
         class envframestack {
         public:
-            using LocalEnv     = xo::ast::LocalEnv;
-            using Variable     = xo::ast::Variable;
+            using LocalEnv     = xo::scm::LocalEnv;
+            using Variable     = xo::scm::Variable;
             using ppstate      = xo::print::ppstate;
             using ppindentinfo = xo::print::ppindentinfo;
 

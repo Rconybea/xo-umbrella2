@@ -7,7 +7,7 @@
 #include "pretty_expression.hpp"
 
 namespace xo {
-    namespace ast {
+    namespace scm {
         rp<ConvertExpr>
         ConvertExpr::make(TypeDescr dest_type,
                           rp<Expression> arg)
@@ -54,7 +54,7 @@ namespace xo {
             return new ConvertExprAccess(nullptr /*dest_type*/,
                                          nullptr /*arg*/);
         }
-    } /*namespace ast*/
+    } /*namespace scm*/
 } /*namespace xo*/
 
 

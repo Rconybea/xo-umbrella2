@@ -17,7 +17,7 @@
 #include "xo/expression/pretty_expression.hpp"
 
 namespace xo {
-    using xo::ast::Constant;
+    using xo::scm::Constant;
 
     namespace scm {
 

@@ -11,7 +11,7 @@
 //#include <cstdint>
 
 namespace xo {
-    namespace ast {
+    namespace scm {
         /** @class IfExpr
          *  @brief abstract syntax tree for a function definition
          *
@@ -168,7 +168,7 @@ namespace xo {
                          std::move(when_true),
                          std::move(when_false)) {}
         };
-    } /*namespace ast*/
+    } /*namespace scm*/
 } /*namespace xo*/
 
 /** end IfExpr.hpp **/

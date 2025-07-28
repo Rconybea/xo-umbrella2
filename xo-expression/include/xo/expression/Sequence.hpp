@@ -8,7 +8,7 @@
 #include "Expression.hpp"
 
 namespace xo {
-    namespace ast {
+    namespace scm {
         class Sequence : public Expression {
         public:
             Sequence(const std::vector<rp<Expression>> & xv)
@@ -44,7 +44,7 @@ namespace xo {
              **/
             std::vector<rp<Expression>> expr_v_;
         };
-    } /*namespace ast*/
+    } /*namespace scm*/
 
 } /*namespace xo*/
 

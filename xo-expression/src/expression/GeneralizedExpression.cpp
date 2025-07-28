@@ -5,7 +5,7 @@
 #include <cstdint>
 
 namespace xo {
-    namespace ast {
+    namespace scm {
         namespace {
             using xo::scm::prefix_type;
 
@@ -70,7 +70,7 @@ namespace xo {
             return ppii.upto() ? pps->scan_no_newline(saved) : true;
         }
 #endif
-    } /*namespace ast*/
+    } /*namespace scm*/
 } /*namespace xo*/
 
 /* end GeneralizedExpression.cpp */

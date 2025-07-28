@@ -15,7 +15,7 @@
 //#include <cstdint>
 
 namespace xo {
-    namespace ast {
+    namespace scm {
         /** @class Lambda
          *  @brief abstract syntax tree for a function definition
          *
@@ -237,7 +237,7 @@ namespace xo {
 
 
         };
-    } /*namespace ast*/
+    } /*namespace scm*/
 } /*namespace xo*/
 
 /** end Lambda.hpp **/

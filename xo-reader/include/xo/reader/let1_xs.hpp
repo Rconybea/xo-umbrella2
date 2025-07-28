@@ -12,7 +12,7 @@ namespace xo {
     namespace scm {
         class let1_xs : public exprstate {
         public:
-            using LocalEnv = xo::ast::LocalEnv;
+            using LocalEnv = xo::scm::LocalEnv;
 
         public:
             /** given local definition equivalent to

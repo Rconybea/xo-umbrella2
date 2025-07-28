@@ -17,7 +17,7 @@ namespace xo {
          *  @brief Result object returned from reader::read_expr
          **/
         struct reader_result {
-            using Expression = xo::ast::Expression;
+            using Expression = xo::scm::Expression;
             using span_type = span<const char>;
 
             reader_result(rp<Expression> expr, span_type rem, std::size_t psz, const reader_error & error)

@@ -5,7 +5,7 @@
 #include "pretty_expression.hpp"
 
 namespace xo {
-    namespace ast {
+    namespace scm {
         std::string
         Variable::gensym(const std::string & prefix) {
             static std::size_t s_counter = 0;
@@ -46,11 +46,11 @@ namespace xo {
              */
             return ppii.pps()->pretty_struct(ppii, "Variable",
                                              refrtag("name", name_),
-                                             rtag("type", print::quot(this->valuetype()
+                                             rtag("type", print::unq(this->valuetype()
                                                                       ? this->valuetype()->short_name()
                                                                       : "nullptr")));
         }
-    } /*namespace ast*/
+    } /*namespace scm*/
 } /*namespace xo*/
 
 

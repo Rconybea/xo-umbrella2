@@ -6,7 +6,7 @@
 //#include "xo/indentlog/print/vector.hpp"
 
 namespace xo {
-    namespace ast {
+    namespace scm {
         auto IfExpr::check_consistent_valuetype(const rp<Expression> & when_true,
                                                 const rp<Expression> & when_false) -> TypeDescr
         {
@@ -95,7 +95,7 @@ namespace xo {
         {
             this->when_false_ = std::move(x);
         }
-    } /*namespace ast*/
+    } /*namespace scm*/
 } /*namespace xo*/
 
 

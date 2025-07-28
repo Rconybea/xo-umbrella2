@@ -9,7 +9,7 @@
 #include "Variable.hpp"
 
 namespace xo {
-    namespace ast {
+    namespace scm {
         /** @class AssignExpr
          *  @brief Provide expression for assigning to a variable
          *
@@ -55,7 +55,7 @@ namespace xo {
             /** free variables for this assignment **/
             std::set<std::string> free_var_set_;
         };
-    } /*namespace ast*/
+    } /*namespace scm*/
 } /*namespace xo*/
 
 

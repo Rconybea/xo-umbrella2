@@ -10,7 +10,7 @@
 #include "xo/reflect/TypeDescr.hpp"
 
 namespace xo {
-    namespace ast {
+    namespace scm {
         class Lambda;
 
         /** @brief LocalEnv
@@ -103,7 +103,7 @@ namespace xo {
             rp<Environment> parent_env_;
         };
 
-    } /*namespace ast*/
+    } /*namespace scm*/
 } /*namespace xo*/
 
 

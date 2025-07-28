@@ -16,9 +16,9 @@ double xo_sqrt(double x) {
 
 int
 main() {
-    using xo::ast::make_constant;
-    using xo::ast::make_primitive;
-    using xo::ast::llvmintrinsic;
+    using xo::scm::make_constant;
+    using xo::scm::make_primitive;
+    using xo::scm::llvmintrinsic;
     using std::cout;
     using std::endl;
 

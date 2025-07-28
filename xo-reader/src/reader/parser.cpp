@@ -17,8 +17,8 @@
 #include <stdexcept>
 
 namespace xo {
-    using xo::ast::Expression;
-    using xo::ast::LocalEnv;
+    using xo::scm::Expression;
+    using xo::scm::LocalEnv;
     using xo::reflect::TypeDescr;
 
     namespace scm {

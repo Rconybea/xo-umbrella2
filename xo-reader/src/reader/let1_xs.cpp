@@ -12,14 +12,14 @@
 #include "xo/expression/Lambda.hpp"
 
 namespace xo {
-    using Sequence = xo::ast::Sequence;
-    using DefineExpr = xo::ast::DefineExpr;
-    using Apply = xo::ast::Apply;
-    using Lambda = xo::ast::Lambda;
-    using LambdaAccess = xo::ast::LambdaAccess;
-    using Environment = xo::ast::Environment;
-    using LocalEnv = xo::ast::LocalEnv;
-    using Variable = xo::ast::Variable;
+    using Sequence = xo::scm::Sequence;
+    using DefineExpr = xo::scm::DefineExpr;
+    using Apply = xo::scm::Apply;
+    using Lambda = xo::scm::Lambda;
+    using LambdaAccess = xo::scm::LambdaAccess;
+    using Environment = xo::scm::Environment;
+    using LocalEnv = xo::scm::LocalEnv;
+    using Variable = xo::scm::Variable;
 
     namespace scm {
         std::unique_ptr<let1_xs>

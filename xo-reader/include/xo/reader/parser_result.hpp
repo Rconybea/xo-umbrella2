@@ -19,7 +19,7 @@ namespace xo {
         };
 
         struct parser_result {
-            using Expression = xo::ast::Expression;
+            using Expression = xo::scm::Expression;
 
         public:
             parser_result() = default;

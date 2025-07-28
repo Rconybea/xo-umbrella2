@@ -9,7 +9,7 @@
 #include "binding_path.hpp"
 
 namespace xo {
-    namespace ast {
+    namespace scm {
 
         /** @class Variable
          *  @brief syntax for a variable reference
@@ -91,7 +91,7 @@ namespace xo {
                  reflect::TypeDescr var_type) {
             return Variable::make(name, var_type);
         }
-    } /*namespace ast*/
+    } /*namespace scm*/
 } /*namespace xo*/
 
 

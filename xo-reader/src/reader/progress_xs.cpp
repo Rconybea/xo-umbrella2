@@ -11,10 +11,10 @@
 #include "xo/expression/pretty_expression.hpp"
 
 namespace xo {
-    using xo::ast::Expression;
-    using xo::ast::AssignExpr;
-    using xo::ast::Variable;
-    using xo::ast::Apply;
+    using xo::scm::Expression;
+    using xo::scm::AssignExpr;
+    using xo::scm::Variable;
+    using xo::scm::Apply;
 
     namespace scm {
         const char *

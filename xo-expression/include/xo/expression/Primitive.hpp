@@ -19,7 +19,7 @@ extern "C" {
 };
 
 namespace xo {
-    namespace ast {
+    namespace scm {
         /** @class Primitive
          *  @brief syntax for a constant that refers to a known function.
          *
@@ -245,7 +245,7 @@ namespace xo {
             /** div2_f64: divide two 64-bit floating-point numbers **/
             static rp<PrimitiveType> make_div2_f64();
         };
-    } /*namespace ast*/
+    } /*namespace scm*/
 } /*namespace xo*/
 
 

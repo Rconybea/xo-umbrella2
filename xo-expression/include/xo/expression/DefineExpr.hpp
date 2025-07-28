@@ -8,7 +8,7 @@
 #include "Expression.hpp"
 
 namespace xo {
-    namespace ast {
+    namespace scm {
         /** @class DefineExpr
          *  @brief Provide definition for a constant, variable or function
          *
@@ -125,7 +125,7 @@ namespace xo {
                 {}
         };
 
-    } /*namespace ast*/
+    } /*namespace scm*/
 } /*namespace xo*/
 
 /* end DefineExpr.hpp */

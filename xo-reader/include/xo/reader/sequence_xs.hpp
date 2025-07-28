@@ -9,14 +9,14 @@
 #include <vector>
 
 namespace xo {
-    namespace ast { class Sequence; }
-    namespace ast { class Lambda; }
+    namespace scm { class Sequence; }
+    namespace scm { class Lambda; }
 
     namespace scm {
         class sequence_xs : public exprstate {
         public:
-            using Sequence = xo::ast::Sequence;
-            using Lambda = xo::ast::Lambda;
+            using Sequence = xo::scm::Sequence;
+            using Lambda = xo::scm::Lambda;
 
         public:
             /** start parsing a sequence-expr.

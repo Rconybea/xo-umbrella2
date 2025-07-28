@@ -123,7 +123,7 @@ namespace xo {
         exprseq_xs::on_bool_token(const token_type & tk,
                                   parserstatemachine * p_psm)
         {
-            using xo::ast::Constant;
+            using xo::scm::Constant;
 
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
@@ -150,7 +150,7 @@ namespace xo {
         exprseq_xs::on_i64_token(const token_type & tk,
                                  parserstatemachine * p_psm)
         {
-            using xo::ast::Constant;
+            using xo::scm::Constant;
 
             scope log(XO_DEBUG(p_psm->debug_flag()));
 
@@ -176,7 +176,7 @@ namespace xo {
         exprseq_xs::on_f64_token(const token_type & tk,
                                  parserstatemachine * p_psm)
         {
-            using xo::ast::Constant;
+            using xo::scm::Constant;
 
             scope log(XO_DEBUG(p_psm->debug_flag()));
 

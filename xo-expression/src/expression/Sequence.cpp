@@ -5,7 +5,7 @@
 #include <cstddef>
 
 namespace xo {
-    namespace ast {
+    namespace scm {
         std::set<std::string>
         Sequence::get_free_variables() const {
             std::set<std::string> retval;

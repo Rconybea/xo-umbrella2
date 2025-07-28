@@ -9,7 +9,7 @@
 //#include <cstdint>
 
 namespace xo {
-    namespace ast {
+    namespace scm {
         class FunctionInterface : public Expression {
         public:
             FunctionInterface(exprtype extype, TypeDescr fn_type)
@@ -27,7 +27,7 @@ namespace xo {
 
         private:
         }; /*FunctionInterface*/
-    } /*namespace ast*/
+    } /*namespace scm*/
 } /*namespace xo*/
 
 /** end FunctionInterface.hpp **/

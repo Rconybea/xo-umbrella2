@@ -10,7 +10,7 @@
 #include <type_traits>
 
 namespace xo {
-    namespace ast {
+    namespace scm {
         /** @class Constant
          *  @brief syntax for a literal constant.
          *
@@ -104,7 +104,7 @@ namespace xo {
             return Constant<T>::make(x);
         }
 
-    } /*namespace ast*/
+    } /*namespace scm*/
 } /*namespace xo*/
 
 /** end Constant.hpp **/

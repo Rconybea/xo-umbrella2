@@ -10,7 +10,7 @@
 #include <cstdint>
 
 namespace xo {
-    namespace ast {
+    namespace scm {
         rp<AssignExpr>
         AssignExpr::make(const rp<Variable> & lhs,
                          const rp<Expression> & rhs)
@@ -96,7 +96,7 @@ namespace xo {
                                              refrtag("lhs", lhs_),
                                              refrtag("rhs", rhs_));
         }
-    } /*namespace ast*/
+    } /*namespace scm*/
 } /*namespace xo*/
 
 

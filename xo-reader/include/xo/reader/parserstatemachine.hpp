@@ -22,9 +22,9 @@ namespace xo {
          **/
         class parserstatemachine {
         public:
-            using Expression = xo::ast::Expression;
-            using Variable = xo::ast::Variable;
-            using LocalEnv = xo::ast::LocalEnv;
+            using Expression = xo::scm::Expression;
+            using Variable = xo::scm::Variable;
+            using LocalEnv = xo::scm::LocalEnv;
             using token_type = token<char>;
 
         public:

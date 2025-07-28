@@ -17,7 +17,7 @@ namespace xo {
     using xo::reflect::FunctionTdxInfo;
     using std::stringstream;
 
-    namespace ast {
+    namespace scm {
         TypeDescr
         Lambda::assemble_lambda_td(const std::vector<rp<Variable>> & argv,
                                    TypeDescr return_td)
@@ -404,7 +404,7 @@ namespace xo {
 
             this->complete_assembly_from_body();
         }
-    } /*namespace ast*/
+    } /*namespace scm*/
 } /*namespace xo*/
 
 /* end Lambda.cpp */

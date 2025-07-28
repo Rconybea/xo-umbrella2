@@ -16,7 +16,7 @@ namespace xo {
     using std::cerr;
     using std::endl;
 
-    //using xo::ast::Expression;
+    //using xo::scm::Expression;
 
     namespace ut {
         TEST_CASE("parser", "[parser]") {

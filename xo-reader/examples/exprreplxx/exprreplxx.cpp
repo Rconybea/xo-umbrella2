@@ -61,7 +61,7 @@ int
 main() {
     using namespace replxx;
     using namespace xo::scm;
-    using xo::ast::Expression;
+    using xo::scm::Expression;
     using xo::print::ppconfig;
     using xo::print::ppstate_standalone;
     using xo::rp;

@@ -51,7 +51,7 @@ namespace xo {
          **/
         class if_else_xs : public exprstate {
         public:
-            using IfExprAccess = xo::ast::IfExprAccess;
+            using IfExprAccess = xo::scm::IfExprAccess;
 
         public:
             if_else_xs(rp<IfExprAccess> if_expr);
@@ -100,7 +100,9 @@ namespace xo {
     } /*namespace scm*/
 
     namespace print {
+#ifndef ppdetail_atomic
         PPDETAIL_ATOMIC(xo::scm::ifexprstatetype);
+#endif
     }
 } /*namespace xo*/
 

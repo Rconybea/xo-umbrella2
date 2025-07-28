@@ -67,8 +67,8 @@ namespace xo {
          **/
         class define_xs : public exprstate {
         public:
-            using DefineExprAccess = xo::ast::DefineExprAccess;
-            using ConvertExprAccess = xo::ast::ConvertExprAccess;
+            using DefineExprAccess = xo::scm::DefineExprAccess;
+            using ConvertExprAccess = xo::scm::ConvertExprAccess;
 
         public:
             define_xs(rp<DefineExprAccess> def_expr);

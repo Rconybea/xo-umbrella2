@@ -7,7 +7,7 @@
 #include "xo/indentlog/print/vector.hpp"
 
 namespace xo {
-    using xo::ast::Variable;
+    using xo::scm::Variable;
 
     namespace scm {
 #ifdef OBSOLETE

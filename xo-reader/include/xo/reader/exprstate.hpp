@@ -95,9 +95,9 @@ namespace xo {
          **/
         class exprstate {
         public:
-            using Expression = xo::ast::Expression;
-            using Variable = xo::ast::Variable;
-            using exprtype = xo::ast::exprtype;
+            using Expression = xo::scm::Expression;
+            using Variable = xo::scm::Variable;
+            using exprtype = xo::scm::exprtype;
             using token_type = token<char>;
             using TypeDescr = xo::reflect::TypeDescr;
 

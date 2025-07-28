@@ -12,17 +12,17 @@
 namespace xo {
     namespace print {
         template<>
-        struct ppdetail<xo::ast::GeneralizedExpression> {
+        struct ppdetail<xo::scm::GeneralizedExpression> {
             static bool print_pretty(const ppindentinfo & ppii,
-                                     const xo::ast::GeneralizedExpression & x) {
+                                     const xo::scm::GeneralizedExpression & x) {
                 return x.pretty_print(ppii);
             }
         };
 
         template <>
-        struct ppdetail<xo::ast::Expression> {
+        struct ppdetail<xo::scm::Expression> {
             static bool print_pretty(const ppindentinfo & ppii,
-                                     const xo::ast::Expression & x) {
+                                     const xo::scm::Expression & x) {
                 return x.pretty_print(ppii);
             }
         };

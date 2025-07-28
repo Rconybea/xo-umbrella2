@@ -84,7 +84,7 @@ extern "C" {
 }
 
 namespace xo {
-    namespace ast {
+    namespace scm {
         auto
         Primitive_cmp_i64::make_cmp_eq2_i64() -> rp<PrimitiveType>
         {

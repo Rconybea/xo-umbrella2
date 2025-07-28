@@ -3,8 +3,8 @@
 #include "Expression.hpp"
 
 namespace xo {
-    namespace ast {
-    } /*namespace ast*/
+    namespace scm {
+    } /*namespace scm*/
 } /*namespace xo*/
 
 

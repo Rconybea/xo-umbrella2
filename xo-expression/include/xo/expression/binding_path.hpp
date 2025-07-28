@@ -6,7 +6,7 @@
 #pragma once
 
 namespace xo {
-    namespace ast {
+    namespace scm {
         /** @class path
          *
          *  @brief path from the *use* of a variable to the environment
@@ -22,7 +22,7 @@ namespace xo {
              **/
             int j_slot_ = 0;
         }; /*binding_path*/
-    } /*namespace ast*/
+    } /*namespace scm*/
 } /*namespace xo*/
 
 

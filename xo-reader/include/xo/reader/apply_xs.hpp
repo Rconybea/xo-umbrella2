@@ -57,7 +57,7 @@ namespace xo {
          */
         class apply_xs : public exprstate {
         public:
-            using Apply = xo::ast::Apply;
+            using Apply = xo::scm::Apply;
 
         public:
             explicit apply_xs();
@@ -109,7 +109,9 @@ namespace xo {
     } /*namespace scm */
 
     namespace print {
+#ifndef ppdetail_atomic
         PPDETAIL_ATOMIC(xo::scm::applyexprstatetype);
+#endif
     }
 } /*namespace xo*/
 

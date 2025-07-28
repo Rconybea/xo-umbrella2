@@ -9,7 +9,7 @@
 #include "xo/expression/pretty_expression.hpp"
 
 namespace xo {
-    using xo::ast::DefineExpr;
+    using xo::scm::DefineExpr;
 
     namespace scm {
         std::unique_ptr<sequence_xs>

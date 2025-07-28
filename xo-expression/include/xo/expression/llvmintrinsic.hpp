@@ -8,20 +8,20 @@
 //#include <cstdint>
 
 namespace xo {
-    namespace ast {
+    namespace scm {
         /** @enum llvminstrinsic
          *  @brief enum to identify an LLVM instrinsic, e.g. @c IRBuilder::CreateFAdd
          *
          *  Associate an @c llvminstrinsic with an AST @c Primitive p.
          *  Later, in @c xo::jit::IrPipeline
-         *  - when generating code for @c xo::ast::Apply
+         *  - when generating code for @c xo::scm::Apply
          *  - with *p* is in the function-call position
          *  can use the associated llvm instrinsic instead of generating a function call
          *  @c Primitive::value
          *
          *  @note llvm will still sometimes need to use
          *  @c Primitive::value (and generate a function call sequence),
-         *  for example when handling an @c xo::ast::Apply instance
+         *  for example when handling an @c xo::scm::Apply instance
          *  where the function position is a computed function.
          *  @endnote
          *
@@ -153,7 +153,7 @@ namespace xo {
 
             return "???llvmintrinsic???";
         } /*llvmintrinsic2str*/
-    } /*namespace ast*/
+    } /*namespace scm*/
 } /*namespace xo*/
 
 /** end llvmintrinsic.hpp **/

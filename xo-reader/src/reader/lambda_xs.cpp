@@ -10,8 +10,8 @@
 #include "xo/expression/Lambda.hpp"
 
 namespace xo {
-    using xo::ast::Lambda;
-    using xo::ast::LocalEnv;
+    using xo::scm::Lambda;
+    using xo::scm::LocalEnv;
 
     namespace scm {
         const char *

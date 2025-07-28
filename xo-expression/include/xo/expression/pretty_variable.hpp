@@ -11,8 +11,8 @@
 namespace xo {
     namespace print {
         template <>
-        struct ppdetail<xo::ast::Variable> {
-            static bool print_pretty(const ppindentinfo & ppii, const xo::ast::Expression & x) {
+        struct ppdetail<xo::scm::Variable> {
+            static bool print_pretty(const ppindentinfo & ppii, const xo::scm::Expression & x) {
                 return x.pretty_print(ppii);
             }
         };

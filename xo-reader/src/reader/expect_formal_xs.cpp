@@ -11,7 +11,7 @@
 #include "xo/expression/Variable.hpp"
 
 namespace xo {
-    using xo::ast::Variable;
+    using xo::scm::Variable;
     using xo::reflect::TypeDescr;
 
     namespace scm{

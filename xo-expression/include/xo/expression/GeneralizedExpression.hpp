@@ -11,7 +11,7 @@
 #include "exprtype.hpp"
 
 namespace xo {
-    namespace ast {
+    namespace scm {
         /** @class GeneralizedExpression
          *  @brief abstract syntax tree (non-executable) for schematica
          *
@@ -65,7 +65,7 @@ namespace xo {
             x.display(os);
             return os;
         }
-    } /*namespace ast*/
+    } /*namespace scm*/
 } /*namespace xo*/
 
 

@@ -8,7 +8,7 @@
 #include "Expression.hpp"
 
 namespace xo {
-    namespace ast {
+    namespace scm {
         /** @class Convertexpr
          *  @brief Convenience for automatic type conversion
          *
@@ -103,7 +103,7 @@ namespace xo {
                               std::move(arg))
                 {}
         };
-    } /*namespace ast*/
+    } /*namespace scm*/
 } /*namespace xo*/
 
 

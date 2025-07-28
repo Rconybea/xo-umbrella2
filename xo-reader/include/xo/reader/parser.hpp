@@ -153,7 +153,7 @@ namespace xo {
          **/
         class parser {
         public:
-            using Expression = xo::ast::Expression;
+            using Expression = xo::scm::Expression;
             using token_type = exprstate::token_type; // token<char>;
 
         public:

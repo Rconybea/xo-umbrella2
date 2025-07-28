@@ -11,8 +11,8 @@
 #include "xo/expression/pretty_expression.hpp"
 
 namespace xo {
-    using xo::ast::LocalEnv;
-    using xo::ast::Variable;
+    using xo::scm::LocalEnv;
+    using xo::scm::Variable;
 
     namespace scm {
         bp<Variable>

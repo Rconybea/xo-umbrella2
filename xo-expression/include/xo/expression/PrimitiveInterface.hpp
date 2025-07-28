@@ -12,7 +12,7 @@
 
 #include <type_traits>
 namespace xo {
-    namespace ast {
+    namespace scm {
         class PrimitiveInterface : public FunctionInterface {
         public:
             using void_function_type = void (*)();
@@ -70,7 +70,7 @@ namespace xo {
 
         private:
         }; /*PrimitiveInterface*/
-    } /*namespace ast*/
+    } /*namespace scm*/
 } /*namespace xo*/
 
 

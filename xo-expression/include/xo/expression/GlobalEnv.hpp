@@ -10,7 +10,7 @@
 #include <string>
 
 namespace xo {
-    namespace ast {
+    namespace scm {
         class GlobalEnv : public Environment {
         public:
             /** create instance.  Probably only need one of these **/
@@ -53,7 +53,7 @@ namespace xo {
              */
             std::map<std::string, rp<Expression>> global_map_;
         };
-    } /*namespace ast*/
+    } /*namespace scm*/
 } /*namespace xo*/
 
 

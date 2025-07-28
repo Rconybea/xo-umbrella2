@@ -9,7 +9,7 @@
 #include <cstdint>
 
 namespace xo {
-    namespace ast {
+    namespace scm {
         rp<DefineExpr>
         DefineExpr::make(std::string lhs_name,
                          rp<Expression> rhs)
@@ -117,7 +117,7 @@ namespace xo {
             this->free_var_set_ = this->calc_free_variables();
         }
 
-    } /*namespace ast*/
+    } /*namespace scm*/
 } /*namespace xo*/
 
 

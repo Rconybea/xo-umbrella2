@@ -21,9 +21,9 @@ namespace xo {
          **/
         class envframe {
         public:
-            using Environment = xo::ast::Environment;
-            using LocalEnv    = xo::ast::LocalEnv;
-            using Variable    = xo::ast::Variable;
+            using Environment = xo::scm::Environment;
+            using LocalEnv    = xo::scm::LocalEnv;
+            using Variable    = xo::scm::Variable;
 
         public:
             envframe() = default;

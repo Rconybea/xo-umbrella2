@@ -12,9 +12,9 @@
 
 namespace xo {
     namespace jit {
-        using xo::ast::Expression;
-        using xo::ast::make_primitive;
-        using xo::ast::llvmintrinsic;
+        using xo::scm::Expression;
+        using xo::scm::make_primitive;
+        using xo::scm::llvmintrinsic;
         using xo::pyutil::pycaller_base;
         using xo::pyutil::pycaller;
         using xo::reflect::Reflect;
@@ -105,7 +105,7 @@ namespace xo {
         pycaller_store::s_instance;
 
         PYBIND11_MODULE(XO_PYJIT_MODULE_NAME(), m) {
-            // e.g. for xo::ast::Expression
+            // e.g. for xo::scm::Expression
             XO_PYEXPRESSION_IMPORT_MODULE(); // py::module_::import("pyexpression");
 
             m.doc() = "pybind11 plugin for xo-jit";

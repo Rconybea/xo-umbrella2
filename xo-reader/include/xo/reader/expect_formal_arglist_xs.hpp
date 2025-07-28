@@ -48,7 +48,7 @@ namespace xo {
          **/
         class expect_formal_arglist_xs : public exprstate {
         public:
-            using Variable = xo::ast::Variable;
+            using Variable = xo::scm::Variable;
 
         public:
             expect_formal_arglist_xs();

@@ -8,7 +8,7 @@
 #include "Expression.hpp"
 
 namespace xo {
-    namespace ast {
+    namespace scm {
         GlobalEnv::GlobalEnv() = default;
 
         bp<Expression>
@@ -49,5 +49,5 @@ namespace xo {
                 return false;
             }
         }
-    } /*namespace ast*/
+    } /*namespace scm*/
 } /*namespace xo*/
