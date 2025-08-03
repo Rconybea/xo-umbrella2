@@ -69,6 +69,7 @@ set(DOX_EXCLUDE_PATTERNS [=[
 
 # ----------------------------------------------------------------
 # xo satellite projects
+# in reverse topological order i.e. dependencies first
 
 add_subdirectory(xo-cmake)
 add_subdirectory(xo-indentlog)
@@ -86,6 +87,7 @@ add_subdirectory(xo-unit)
 add_subdirectory(xo-pyunit)
 #
 add_subdirectory(xo-alloc)
+add_subdirectory(xo-object)
 #
 add_subdirectory(xo-callback)
 add_subdirectory(xo-webutil)
@@ -118,6 +120,6 @@ add_subdirectory(xo-pyjit)
 # ----------------------------------------------------------------
 # documentation.  must follow add_subdirectory() for satellite projects
 
-xo_umbrella_doxygen_deps(xo_flatstring xo_ratio xo_unit xo_tokenizer xo_reader xo_jit)
+xo_umbrella_doxygen_deps(xo_alloc xo_flatstring xo_ratio xo_unit xo_tokenizer xo_reader xo_jit)
 xo_umbrella_doxygen_config()
 xo_umbrella_sphinx_config(index.rst docs/install.rst docs/glossary.rst)

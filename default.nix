@@ -206,6 +206,7 @@ pkgs.mkShell {
     pkgs.catch2
     pkgs.zlib
     pkgs.unzip
+    pkgs.libbsd
 
     pkgs.cmake
     pkgs.pkg-config
