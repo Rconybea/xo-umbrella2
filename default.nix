@@ -161,6 +161,7 @@ pkgs.mkShell {
   #
 
   buildInputs = [
+    pkgs.gsettings-desktop-schemas
     pkgs.emacs
     pkgs.which
     pkgs.man
