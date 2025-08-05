@@ -12,7 +12,7 @@ namespace xo {
         public:
             enum Owner { unique, shared };
 
-            /** donwcase from @p x iff x is actually a String. Otherwise nullptr **/
+            /** donwcast from @p x iff x is actually a String. Otherwise nullptr **/
             static gp<String> from(gp<Object> x);
 
             /** create copy of string @p s, using allocator @ref Object::mm **/

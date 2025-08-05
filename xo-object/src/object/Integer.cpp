@@ -15,6 +15,11 @@ namespace xo {
             return new (MMPtr(mm)) Integer(x);
         }
 
+        gp<Integer>
+        Integer::from(gp<Object> x) {
+            return dynamic_cast<Integer*>(x.ptr());
+        }
+
         std::size_t
         Integer::_shallow_size() const {
             return sizeof(Integer);
@@ -23,7 +28,6 @@ namespace xo {
         Object *
         Integer::_shallow_copy() const {
             Cpof cpof(this);
-
             return new (cpof) Integer(*this);
         }
 

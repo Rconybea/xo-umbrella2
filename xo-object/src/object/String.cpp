@@ -31,14 +31,12 @@ namespace xo {
         }
 
         gp<String>
-        String::from(gp<Object> x)
-        {
+        String::from(gp<Object> x) {
             return dynamic_cast<String*>(x.ptr());
         }
 
         gp<String>
-        String::copy(const char * s)
-        {
+        String::copy(const char * s) {
             return copy(Object::mm, s);
         }
 

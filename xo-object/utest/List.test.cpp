@@ -17,6 +17,7 @@ namespace xo {
         using xo::obj::List;
         using xo::obj::String;
         using xo::gc::GC;
+        using xo::gc::generation_result;
         using xo::gc::generation;
 
         namespace {
@@ -117,8 +118,8 @@ namespace xo {
                             REQUIRE(s.ptr());
                             REQUIRE(strcmp(s->c_str(), tc.v_.at(i).at(j).c_str()) == 0);
 
-                            REQUIRE(gc->generation_of(reinterpret_cast<std::byte*>(s.ptr()))
-                                    == generation::nursery);
+                            REQUIRE(gc->tospace_generation_of(reinterpret_cast<std::byte*>(s.ptr()))
+                                    == generation_result::nursery);
                         }
                     }
 
@@ -142,8 +143,8 @@ namespace xo {
                             REQUIRE(s.ptr());
                             REQUIRE(strcmp(s->c_str(), tc.v_.at(i).at(j).c_str()) == 0);
 
-                            REQUIRE(gc->generation_of(reinterpret_cast<std::byte*>(s.ptr()))
-                                    == generation::tenured);
+                            REQUIRE(gc->tospace_generation_of(reinterpret_cast<std::byte*>(s.ptr()))
+                                    == generation_result::tenured);
                         }
                     }
 
@@ -168,8 +169,8 @@ namespace xo {
                             REQUIRE(s.ptr());
                             REQUIRE(strcmp(s->c_str(), tc.v_.at(i).at(j).c_str()) == 0);
 
-                            REQUIRE(gc->generation_of(reinterpret_cast<std::byte*>(s.ptr()))
-                                    == generation::tenured);
+                            REQUIRE(gc->tospace_generation_of(reinterpret_cast<std::byte*>(s.ptr()))
+                                    == generation_result::tenured);
                         }
                     }
 

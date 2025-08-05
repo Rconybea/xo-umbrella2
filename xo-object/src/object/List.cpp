@@ -4,13 +4,14 @@
  **/
 
 #include "List.hpp"
+#include "xo/indentlog/scope.hpp"
 #include <cassert>
 #include <cstddef>
 
 namespace xo {
     namespace obj {
-        List::List(gp<Object> head, gp<List> tail)
-            : head_{head}, tail_{tail} {}
+        List::List(gp<Object> head, gp<List> rest)
+            : head_{head}, rest_{rest} {}
 
         gp<List>
         List::nil = new List(nullptr, nullptr);
@@ -27,7 +28,7 @@ namespace xo {
             gp<const List> l(this);
             while (!l->is_nil()) {
                 ++retval;
-                l = l->tail();
+                l = l->rest();
             }
 
             return retval;
@@ -40,12 +41,24 @@ namespace xo {
             while (i > 0) {
                 assert(!(rem->is_nil()));
 
-                rem = rem->tail();
+                rem = rem->rest();
                 --i;
             }
 
             return rem->head();
 
+        }
+
+        void
+        List::assign_head(gp<Object> head)
+        {
+            Object::assign_member(this, &(this->head_), head);
+        }
+
+        void
+        List::assign_rest(gp<List> tail)
+        {
+            Object::assign_member(this, &(this->rest_), tail);
         }
 
         std::size_t
@@ -55,6 +68,8 @@ namespace xo {
 
         Object *
         List::_shallow_copy() const {
+            scope log(XO_DEBUG(Object::mm->debug_flag()));
+
             assert(!(this->is_nil()));
 
             Cpof cpof(this);
@@ -65,7 +80,7 @@ namespace xo {
         std::size_t
         List::_forward_children() {
             Object::_forward_inplace(head_);
-            Object::_forward_inplace(tail_);
+            Object::_forward_inplace(rest_);
             return List::_shallow_size();
         }
     }

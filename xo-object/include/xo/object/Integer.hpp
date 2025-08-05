@@ -15,7 +15,12 @@ namespace xo {
             Integer() = default;
             explicit Integer(int_type x);
 
+            /** create instance holding integer value @p x **/
             static gp<Integer> make(int_type x);
+            /** downcast from @p x iff x is actually an Integer.  Otherwise nullptr **/
+            static gp<Integer> from(gp<Object> x);
+
+            int_type value() const { return value_; }
 
             // inherited from Object..
             virtual std::size_t _shallow_size() const override;

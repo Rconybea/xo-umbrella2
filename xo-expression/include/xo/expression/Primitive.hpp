@@ -103,39 +103,6 @@ namespace xo {
                                                  refrtag("name", name_),
                                                  rtag("type", print::quot(this->valuetype()->short_name())),
                                                  refrtag("value", (void*)(this->value())));
-
-#ifdef OBSOLETE
-                ppstate * pps = ppii.pps();
-
-                if (ppii.upto()) {
-                    if (!pps->print_upto("<Primitive"))
-                        return false;
-
-                    if (!pps->print_upto_tag("name", name_))
-                        return false;
-
-                    if (!pps->print_upto_tag("type", print::quot(this->value_td()->short_name())))
-                        return false;
-
-                    if (!pps->print_upto_tag("value", (void*)(this->value())))
-                        return false;
-
-                    pps->write(">");
-
-                    return true;
-                } else {
-                    pps->write("<Primitive");
-                    pps->newline_pretty_tag(ppii.ci1(), "name", name_);
-                    pps->newline_pretty_tag(ppii.ci1(), "type", print::quot(this->value_td()->short_name()));
-                    /* don't have pretty printer for native function pointers anyway
-                     * + simplifies ppdetail_atomic
-                     */
-                    pps->newline_pretty_tag(ppii.ci1(), "value", (void*)this->value());
-                    pps->write(">");
-
-                    return false;
-                }
-#endif
             }
 
         private:
