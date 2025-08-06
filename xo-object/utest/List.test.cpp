@@ -103,8 +103,8 @@ namespace xo {
                      */
                     gc->request_gc(generation::nursery);
 
-                    REQUIRE(gc->gc_statistics().gen_v_[gen2int(generation::nursery)].n_gc_ == 1);
-                    REQUIRE(gc->gc_statistics().gen_v_[gen2int(generation::tenured)].n_gc_ == 0);
+                    REQUIRE(gc->native_gc_statistics().gen_v_[gen2int(generation::nursery)].n_gc_ == 1);
+                    REQUIRE(gc->native_gc_statistics().gen_v_[gen2int(generation::tenured)].n_gc_ == 0);
                     REQUIRE(gc->allocated() == expected_alloc_z);
 
                     /* verify GC preserved list structure and contents */
@@ -128,8 +128,8 @@ namespace xo {
                     /* every has survived one GC cycle. collect again should promote */
                     gc->request_gc(generation::nursery);
 
-                    REQUIRE(gc->gc_statistics().gen_v_[gen2int(generation::nursery)].n_gc_ == 2);
-                    REQUIRE(gc->gc_statistics().gen_v_[gen2int(generation::tenured)].n_gc_ == 0);
+                    REQUIRE(gc->native_gc_statistics().gen_v_[gen2int(generation::nursery)].n_gc_ == 2);
+                    REQUIRE(gc->native_gc_statistics().gen_v_[gen2int(generation::tenured)].n_gc_ == 0);
                     REQUIRE(gc->allocated() == expected_alloc_z);
 
                     /* verify GC preserved list structure and contents */
@@ -150,12 +150,12 @@ namespace xo {
                         }
                     }
 
-                    REQUIRE(gc->gc_statistics().total_promoted_ == gc->allocated());
+                    REQUIRE(gc->native_gc_statistics().total_promoted_ == gc->allocated());
 
                     gc->request_gc(generation::tenured);
 
-                    REQUIRE(gc->gc_statistics().gen_v_[gen2int(generation::nursery)].n_gc_ == 2);
-                    REQUIRE(gc->gc_statistics().gen_v_[gen2int(generation::tenured)].n_gc_ == 1);
+                    REQUIRE(gc->native_gc_statistics().gen_v_[gen2int(generation::nursery)].n_gc_ == 2);
+                    REQUIRE(gc->native_gc_statistics().gen_v_[gen2int(generation::tenured)].n_gc_ == 1);
                     REQUIRE(gc->allocated() == expected_alloc_z);
 
                     /* verify GC preserved list structure and contents */
@@ -176,7 +176,7 @@ namespace xo {
                         }
                     }
 
-                    log && log("stats", gc->gc_statistics());
+                    log && log("stats", gc->native_gc_statistics());
                 }
             }
         } /*TEST_CASE(List, ..)*/
@@ -250,8 +250,8 @@ namespace xo {
 
                     gc->request_gc(generation::nursery);
 
-                    REQUIRE(gc->gc_statistics().gen_v_[gen2int(generation::nursery)].n_gc_ == 1);
-                    REQUIRE(gc->gc_statistics().gen_v_[gen2int(generation::tenured)].n_gc_ == 0);
+                    REQUIRE(gc->native_gc_statistics().gen_v_[gen2int(generation::nursery)].n_gc_ == 1);
+                    REQUIRE(gc->native_gc_statistics().gen_v_[gen2int(generation::tenured)].n_gc_ == 0);
                     REQUIRE(gc->allocated() == expected_alloc_z);
 
                     /* verify GC preserved list structure and contents */

@@ -47,8 +47,8 @@ namespace xo {
                     .debug_flag_ = false
                 });
 
-            REQUIRE(gc->gc_statistics().n_mutation_ == 0);
-            REQUIRE(gc->gc_statistics().n_logged_mutation_ == 0);
+            REQUIRE(gc->native_gc_statistics().n_mutation_ == 0);
+            REQUIRE(gc->native_gc_statistics().n_logged_mutation_ == 0);
 
             REQUIRE(gc.get());
 
@@ -82,10 +82,10 @@ namespace xo {
 
             l->assign_head(Integer::make(2));
             {
-                REQUIRE(gc->gc_statistics().n_mutation_ == 1);
-                REQUIRE(gc->gc_statistics().n_logged_mutation_ == 0);
-                REQUIRE(gc->gc_statistics().n_xgen_mutation_ == 0);
-                REQUIRE(gc->gc_statistics().n_xckp_mutation_ == 0);
+                REQUIRE(gc->native_gc_statistics().n_mutation_ == 1);
+                REQUIRE(gc->native_gc_statistics().n_logged_mutation_ == 0);
+                REQUIRE(gc->native_gc_statistics().n_xgen_mutation_ == 0);
+                REQUIRE(gc->native_gc_statistics().n_xckp_mutation_ == 0);
                 REQUIRE(gc->mlog_size() == 0);
 
                 REQUIRE(gc->is_gc_enabled() == true);
@@ -113,10 +113,10 @@ namespace xo {
                 REQUIRE(gc->tospace_generation_of(l->head().ptr()) == generation_result::nursery);
                 REQUIRE(gc->is_before_checkpoint(l->head().ptr()) == false);
 
-                REQUIRE(gc->gc_statistics().n_mutation_ == 2);
-                REQUIRE(gc->gc_statistics().n_logged_mutation_ == 1);
-                REQUIRE(gc->gc_statistics().n_xgen_mutation_ == 0);
-                REQUIRE(gc->gc_statistics().n_xckp_mutation_ == 1);
+                REQUIRE(gc->native_gc_statistics().n_mutation_ == 2);
+                REQUIRE(gc->native_gc_statistics().n_logged_mutation_ == 1);
+                REQUIRE(gc->native_gc_statistics().n_xgen_mutation_ == 0);
+                REQUIRE(gc->native_gc_statistics().n_xckp_mutation_ == 1);
                 REQUIRE(gc->mlog_size() == 1);
             }
 
@@ -132,12 +132,12 @@ namespace xo {
                 REQUIRE(gc->tospace_generation_of(l->head().ptr()) == generation_result::nursery);
                 REQUIRE(gc->is_before_checkpoint(l->head().ptr()));
 
-                REQUIRE(gc->gc_statistics().n_mutation_ == 2);
-                REQUIRE(gc->gc_statistics().n_logged_mutation_ == 1);
+                REQUIRE(gc->native_gc_statistics().n_mutation_ == 2);
+                REQUIRE(gc->native_gc_statistics().n_logged_mutation_ == 1);
                 // counters recorded when mutation created.
                 // not modified by gc
-                REQUIRE(gc->gc_statistics().n_xgen_mutation_ == 0);
-                REQUIRE(gc->gc_statistics().n_xckp_mutation_ == 1);
+                REQUIRE(gc->native_gc_statistics().n_xgen_mutation_ == 0);
+                REQUIRE(gc->native_gc_statistics().n_xckp_mutation_ == 1);
                 REQUIRE(gc->mlog_size() == 1);
             }
 
@@ -356,9 +356,162 @@ namespace xo {
                     this->roots_.push_back(traverse_from_object(x));
             }
 
+            /** Generate some random data + mutations to verify GC behavior
+             *
+             *  To setup for first GC:
+             *    RandomMutationModel model(m, n, r, k);
+             *    model.generate_seed_values();
+             *    model.generate_random_roots(gc, &rgen);
+             *    model.generate_random_mutations(&rgen);
+             *
+             *  To prepare for next GC
+             *    model.rejuvenate_seed_values();
+             *    model.alter_random_roots(&rgen);
+             *    model.generate_random_mutations(&rgen);
+             **/
+            struct RandomMutationModel {
+                RandomMutationModel(std::size_t m, std::size_t n, std::size_t r, std::size_t rr, std::size_t k)
+                    : m_{m}, n_{n}, r_{r}, rr_{rr}, k_{k} {}
+
+                void generate_seed_values();
+                void generate_random_roots(GC * gc, xoshiro256ss * p_rgen);
+                void generate_random_mutations(xoshiro256ss * p_rgen);
+
+                void rejuvenate_seed_values();
+                void alter_random_roots(xoshiro256ss * p_rgen);
+
+                /* create m random list cells */
+                size_t m_ = 0;
+                /** create n random integers, starting with value @ref start_ **/
+                size_t start_ = 0;
+                size_t n_ = 0;
+                /* #of roots */
+                size_t r_ = 0;
+                size_t rr_ = 0;
+                /* #of random mutations */
+                size_t k_ = 0;
+
+                /* w1[] contains some random list cells */
+                std::vector<gp<List>> w1_;
+                /* w2[] has all of w1[], also contains some integers */
+                std::vector<gp<Object>> w2_;
+
+                /* create some random roots. always pick at least one list cell */
+                std::vector<gp<Object>> root_v_;
+            };
+
+            void RandomMutationModel::generate_seed_values()
+            {
+                {
+                    for (size_t i = 0; i < m_; ++i) {
+                        w1_.push_back(List::cons(List::nil, List::nil));
+                    }
+                    REQUIRE(w1_.size() == m_);
+                }
+
+                {
+                    std::copy(w1_.begin(), w1_.end(), std::back_inserter(w2_));
+                    for (size_t j = 0; j < n_; ++j) {
+                        w2_.push_back(Integer::make((this->start_)++));
+                    }
+                    REQUIRE(w2_.size() == m_ + n_);
+                }
+            }
+
+            void RandomMutationModel::generate_random_roots(GC * gc,
+                                                            xoshiro256ss * p_rgen)
+            {
+                std::size_t w1_ix = (*p_rgen)() % n_;
+                {
+                    root_v_.push_back(w2_.at(w1_ix));
+                    for (std::size_t i = 1; i < r_; ++i) {
+                        std::size_t w2_ix = (*p_rgen)() % (m_ + n_);
+
+                        root_v_.push_back(w2_.at(w2_ix));
+                    }
+
+                    REQUIRE(root_v_.size() == r_);
+
+                    for (auto & root : root_v_)
+                        gc->add_gc_root(root.ptr_address());
+                }
+
+            }
+
+            void RandomMutationModel::generate_random_mutations(xoshiro256ss * p_rgen)
+            {
+                for (std::size_t i = 0; i < k_; ++i) {
+                    /* pick a root list cell at random */
+                    gp<List> l1 = w1_.at((*p_rgen)() % w1_.size());
+
+                    if ((*p_rgen)() % 2 == 0) {
+                        /* pick another root list cell at random, and link it to l1 */
+                        gp<List> l2 = w1_.at((*p_rgen)() % w1_.size());
+
+                        l1->assign_rest(l2);
+                    } else {
+                        /* pick a value at random (could be list or integer),
+                         * assign to head
+                         */
+                        gp<Object> x2 = w2_.at((*p_rgen)() % w2_.size());
+
+                        l1->assign_head(x2);
+                    }
+                }
+            }
+
+            void RandomMutationModel::rejuvenate_seed_values()
+            {
+                for (std::size_t i = 0; i < w1_.size(); ++i) {
+                    if (w1_.at(i)->_is_forwarded()) {
+                        /* w[i] survived GC */
+                        w1_[i] = dynamic_cast<List *>(w1_[i]->_destination());
+                    } else {
+                        /* w[i] is garbage, replace */
+                        w1_[i] = List::cons(List::nil, List::nil);
+                    }
+                }
+
+                for (std::size_t j = 0; j < w2_.size(); ++j) {
+                    if (w2_.at(j)->_is_forwarded()) {
+                        /* w2[i] survived GC */
+                        w2_[j] = dynamic_cast<Integer *>(w2_[j]->_destination());
+                    } else {
+                        /* w2[j] is garbage, replace */
+                        w2_[j] = Integer::make((this->start_)++);
+                    }
+                }
+            }
+
+            void RandomMutationModel::alter_random_roots(xoshiro256ss * p_rgen)
+            {
+                /* replace a root value rr times */
+                for (std::size_t i = 0; i < rr_; ++i) {
+                    /* choose new root value at random */
+                    gp<Object> new_root;
+                    {
+                        std::size_t j = (*p_rgen)() % (w1_.size() + w2_.size());
+
+                        if (j < w1_.size())
+                            new_root = w1_.at(j);
+                        else
+                            new_root = w2_.at(j - w1_.size());
+                    }
+
+                    /* choose a root to replace at random */
+                    std::size_t j = (*p_rgen)() % root_v_.size();
+
+                    root_v_[j] = new_root;
+                }
+            }
+
             struct testcase_stresstest {
-                testcase_stresstest(std::size_t nz, std::size_t tz, std::size_t m, std::size_t n, std::size_t r, std::size_t k, bool debug_flag)
-                    : nursery_z_{nz}, tenured_z_{tz}, m_{m}, n_{n}, r_{r}, k_{k}, debug_flag_{debug_flag}
+                testcase_stresstest(std::size_t nz, std::size_t tz,
+                                    std::size_t m, std::size_t n,
+                                    std::size_t r, std::size_t rr, std::size_t k,
+                                    bool gc_stats_flag, bool debug_flag)
+                    : nursery_z_{nz}, tenured_z_{tz}, m_{m}, n_{n}, r_{r}, rr_{rr}, k_{k},
+                      gc_stats_flag_{gc_stats_flag}, debug_flag_{debug_flag}
                     {}
 
                 std::size_t nursery_z_;
@@ -370,15 +523,19 @@ namespace xo {
                 std::size_t n_;
                 /* #of gc roots to create */
                 std::size_t r_;
+                /* #of gc roots to replace between cycles */
+                std::size_t rr_;
                 /* #of random mutations */
                 std::size_t k_;
 
-                bool debug_flag_;
+                bool gc_stats_flag_ = false;
+                bool debug_flag_ = false;
             };
 
             std::vector<testcase_stresstest> s_testcase_v =
             {
-                testcase_stresstest(1024, 1024, 3, 7, 5, 10, true)
+                /*                    nz    tz   m   n   r  rr   k  stats, debug */
+                testcase_stresstest(1024, 1024,  3,  7,  5,  2, 10, true,  false)
             };
         } /*namespace*/
 
@@ -387,7 +544,7 @@ namespace xo {
             for (std::size_t i_tc = 0, n_tc = s_testcase_v.size(); i_tc < n_tc; ++i_tc) {
                 const testcase_stresstest & tc = s_testcase_v[i_tc];
 
-                scope log(XO_DEBUG(tc.debug_flag_));
+                scope log(XO_DEBUG(tc.gc_stats_flag_));
 
                 up<GC> gc = GC::make(
                     {
@@ -396,8 +553,8 @@ namespace xo {
                         .debug_flag_ = tc.debug_flag_
                     });
 
-                REQUIRE(gc->gc_statistics().n_mutation_ == 0);
-                REQUIRE(gc->gc_statistics().n_logged_mutation_ == 0);
+                REQUIRE(gc->native_gc_statistics().n_mutation_ == 0);
+                REQUIRE(gc->native_gc_statistics().n_logged_mutation_ == 0);
 
                 REQUIRE(gc.get());
 
@@ -419,92 +576,50 @@ namespace xo {
                 //std::cerr << "seed=" << seed << std::endl;
                 auto rgen = xoshiro256ss(seed);
 
-                /* create m random list cells */
-                size_t m = tc.m_;
-                /* create n random integers */
-                size_t n = tc.n_;
-                /* #of roots */
-                size_t r = tc.r_;
-                /* #of random mutations */
-                size_t k = tc.k_;
+                REQUIRE(tc.m_ > 0);
+                REQUIRE(tc.n_ > 0);
+                REQUIRE(tc.r_ > 0);
 
-                REQUIRE(m > 0);
-                REQUIRE(n > 0);
+                RandomMutationModel data_model(tc.m_, tc.n_, tc.r_, tc.rr_, tc.k_);
 
-                /* w1[] contains some random list cells */
-                std::vector<gp<List>> w1;
-                {
-                    for (size_t i = 0; i < m; ++i) {
-                        w1.push_back(List::cons(List::nil, List::nil));
-                    }
-                    REQUIRE(w1.size() == m);
-                }
-
-                /* w2[] has all of w1[], also contains some integers */
-                std::vector<gp<Object>> w2;
-                {
-                    std::copy(w1.begin(), w1.end(), std::back_inserter(w2));
-                    for (size_t j = 0; j < n; ++j) {
-                        w2.push_back(Integer::make(j));
-                    }
-                    REQUIRE(w2.size() == m + n);
-                }
-
-                /* create some random roots. always pick at least one list cell */
-                std::vector<gp<Object>> root_v;
-                std::size_t w1_ix = rgen() % n;
-                {
-                    root_v.push_back(w2.at(w1_ix));
-                    for (std::size_t i = 1; i < r; ++i) {
-                        std::size_t w2_ix = rgen() % (m + n);
-
-                        root_v.push_back(w2.at(w2_ix));
+                for (std::size_t cycle = 0; cycle < 2; ++cycle) {
+                    if (cycle == 0) {
+                        data_model.generate_seed_values();
+                        data_model.generate_random_roots(gc.get(), &rgen);
+                    } else {
+                        /* figure out values in {data_model_.w1_, data_model_.w2_} that
+                         * survived GC;  keep these.  Discard the remainder.
+                         * don't want these as roots, because that would alter the behavior of GC.
+                         *
+                         * (For example want to verify behavior of GC w.r.t. cells that are alive only
+                         * because of a mutation)
+                         */
+                        data_model.rejuvenate_seed_values();
+                        data_model.alter_random_roots(&rgen);
                     }
 
-                    for (auto & root : root_v)
-                        gc->add_gc_root(root.ptr_address());
+                    data_model.generate_random_mutations(&rgen);
+
+                    log && log(xtag("cycle", cycle),
+                               xtag("stats.before", gc->get_gc_statistics()));
+
+                    /* make model for contents of w2[] - baseline for post-GC comparison */
+                    ObjectGraphModel from_model;
+                    from_model.from_root_vector(data_model.root_v_);
+
+                    gc->request_gc(generation::nursery);
+
+                    /* collector cycle changed object addresses.
+                     * build a new object model, and verify consistency with from_model
+                     */
+                    ObjectGraphModel to_model;
+                    to_model.from_root_vector(data_model.root_v_);
+
+                    REQUIRE(ObjectGraphModel::verify_equal_models(from_model, to_model));
+
+                    log && log(xtag("cycle", cycle),
+                               xtag("stats.after", gc->get_gc_statistics()));
                 }
-
-                /* random mutations -- these will get logged */
-                {
-                    for (std::size_t i = 0; i < k; ++i) {
-                        /* pick a list cell at random */
-                        gp<List> l1 = w1.at(rgen() % w1.size());
-
-                        if (rgen() % 2 == 0) {
-                            /* pick another list cell at random, and link it to l1 */
-                            gp<List> l2 = w1.at(rgen() % w1.size());
-
-                            l1->assign_rest(l2);
-                        } else {
-                            /* pick a value at random (could be list or integer),
-                             * assign to head
-                             */
-                            gp<Object> x2 = w2.at(rgen() % w2.size());
-
-                            l1->assign_head(x2);
-                        }
-                    }
-                }
-
-                log && log("stats.before", gc->gc_statistics());
-
-                /* make model for contents of w2[] */
-                ObjectGraphModel from_model;
-                from_model.from_root_vector(root_v);
-
-                gc->request_gc(generation::nursery);
-
-                /* collector cycle changed object addresses.
-                 * build a new object model, and verify that they're equivalent
-                 */
-
-                ObjectGraphModel to_model;
-                to_model.from_root_vector(root_v);
-
-                REQUIRE(ObjectGraphModel::verify_equal_models(from_model, to_model));
-
-                log && log("stats.after", gc->gc_statistics());
             }
         }
     } /*namespace ut*/

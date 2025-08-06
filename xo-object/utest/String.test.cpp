@@ -79,10 +79,10 @@ namespace xo {
                     gc->request_gc(generation::nursery);
 
                     REQUIRE(gc->gc_in_progress() == false);
-                    REQUIRE(gc->gc_statistics().gen_v_[gen2int(generation::nursery)].n_gc_ == 1);
-                    REQUIRE(gc->gc_statistics().gen_v_[gen2int(generation::tenured)].n_gc_ == 0);
+                    REQUIRE(gc->native_gc_statistics().gen_v_[gen2int(generation::nursery)].n_gc_ == 1);
+                    REQUIRE(gc->native_gc_statistics().gen_v_[gen2int(generation::tenured)].n_gc_ == 0);
                     REQUIRE(gc->allocated() == 0);
-                    REQUIRE(gc->gc_statistics().total_allocated_ == expected_alloc_z);
+                    REQUIRE(gc->native_gc_statistics().total_allocated_ == expected_alloc_z);
                 }
             }
         }
@@ -140,8 +140,8 @@ namespace xo {
 
                     /* gc has a bunch of string objects; all are roots + should be preserved */
                     gc->request_gc(generation::nursery);
-                    REQUIRE(gc->gc_statistics().gen_v_[gen2int(generation::nursery)].n_gc_ == 1);
-                    REQUIRE(gc->gc_statistics().gen_v_[gen2int(generation::tenured)].n_gc_ == 0);
+                    REQUIRE(gc->native_gc_statistics().gen_v_[gen2int(generation::nursery)].n_gc_ == 1);
+                    REQUIRE(gc->native_gc_statistics().gen_v_[gen2int(generation::tenured)].n_gc_ == 0);
 
                     REQUIRE(gc->allocated() == expected_alloc_z);
 
