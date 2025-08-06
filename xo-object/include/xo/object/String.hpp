@@ -31,10 +31,10 @@ namespace xo {
             std::size_t length() const;
 
             // inherited from Object..
-
-            virtual std::size_t _shallow_size() const override;
-            virtual Object * _shallow_copy() const override;
-            virtual std::size_t _forward_children() override;
+            virtual TaggedPtr self_tp() const final override;
+            virtual std::size_t _shallow_size() const final override;
+            virtual Object * _shallow_copy() const final override;
+            virtual std::size_t _forward_children() final override;
 
         private:
             String(owner owner, std::size_t z, char * s);

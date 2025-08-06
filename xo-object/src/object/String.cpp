@@ -5,12 +5,17 @@
 
 #include "String.hpp"
 #include "GC.hpp"
+#include "TaggedPtr.hpp"
+#include "xo/reflect/Reflect.hpp"
 #include <bsd/string.h>
 #include <cstddef>
 #include <cstring>
 #include <cassert>
 
 namespace xo {
+    using xo::reflect::Reflect;
+    using xo::reflect::TaggedPtr;
+
     namespace obj {
         String::String(owner owner, std::size_t z, char * s)
             : owner_{owner}, z_chars_{z}, chars_{s}
@@ -84,6 +89,11 @@ namespace xo {
         String::length() const
         {
             return ::strlen(chars_);
+        }
+
+        TaggedPtr
+        String::self_tp() const {
+            return Reflect::make_tp(const_cast<String*>(this));
         }
 
         // ----- GC support -----

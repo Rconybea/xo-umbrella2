@@ -4,11 +4,16 @@
  */
 
 #include "Boolean.hpp"
+#include "TaggedPtr.hpp"
+#include "xo/reflect/Reflect.hpp"
 #include <array>
 #include <cassert>
 #include <cstddef>
 
 namespace xo {
+    using xo::reflect::Reflect;
+    using xo::reflect::TaggedPtr;
+
     namespace obj {
         gp<Boolean>
         Boolean::boolean_obj(bool x)
@@ -29,6 +34,12 @@ namespace xo {
         Boolean::false_obj()
         {
             return boolean_obj(false);
+        }
+
+        TaggedPtr
+        Boolean::self_tp() const
+        {
+            return Reflect::make_tp(const_cast<Boolean*>(this));
         }
 
         std::size_t

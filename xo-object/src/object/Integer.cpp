@@ -4,9 +4,13 @@
  */
 
 #include "Integer.hpp"
+#include "xo/reflect/Reflect.hpp"
 #include <cstddef>
 
 namespace xo {
+    using xo::reflect::Reflect;
+    using xo::reflect::TaggedPtr;
+
     namespace obj {
         Integer::Integer(int_type x) : value_{x} {}
 
@@ -18,6 +22,11 @@ namespace xo {
         gp<Integer>
         Integer::from(gp<Object> x) {
             return dynamic_cast<Integer*>(x.ptr());
+        }
+
+        TaggedPtr
+        Integer::self_tp() const {
+            return Reflect::make_tp(const_cast<Integer*>(this));
         }
 
         std::size_t

@@ -4,11 +4,15 @@
  **/
 
 #include "List.hpp"
+#include "xo/reflect/Reflect.hpp"
 #include "xo/indentlog/scope.hpp"
 #include <cassert>
 #include <cstddef>
 
 namespace xo {
+    using xo::reflect::Reflect;
+    using xo::reflect::TaggedPtr;
+
     namespace obj {
         List::List(gp<Object> head, gp<List> rest)
             : head_{head}, rest_{rest} {}
@@ -64,6 +68,11 @@ namespace xo {
         List::assign_rest(gp<List> tail)
         {
             Object::assign_member(this, &(this->rest_), tail);
+        }
+
+        TaggedPtr
+        List::self_tp() const {
+            return Reflect::make_tp(const_cast<List*>(this));
         }
 
         std::size_t
