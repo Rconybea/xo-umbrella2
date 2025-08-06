@@ -110,7 +110,7 @@ namespace xo {
                 {"<",     false, token::leftangle(), true},
                 /* possible prefix of >= */
                 {">",     false, token::rightangle(), true},
-                {"> ",    false, token::rightangle(), false},
+                {"> ",    false, token::rightangle(), true},
 
                 {"(",     false, token::leftparen(), true},
                 {")",     false, token::rightparen(), true},
