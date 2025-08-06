@@ -8,7 +8,9 @@ add_executable(${SELF_EXE} ${SELF_SOURCE_FILES})
 xo_include_options2(${SELF_EXE})
 
 add_test(NAME ${SELF_EXE} COMMAND ${SELF_EXE})
-target_code_coverage(${SELF_EXE} AUTO ALL)
+# need coverage on unit test b/c header-only libraries
+#target_code_coverage(${SELF_EXE} EXCLUDE */nix/store* utest/*)
+#target_code_coverage(${SELF_EXE} AUTO ALL)
 
 # ----------------------------------------------------------------
 # internal dependencies: refcnt, ...
