@@ -92,6 +92,11 @@ Aternatively can enter nix environment, then follow instructions for cmake build
     # etc
 
 
+coverage build
+--------------
+
+See ``Test Coverage Setup`` under ``Development`` below
+
 Development
 ===========
 
@@ -108,6 +113,30 @@ To setup xo-umbrella2 build to work with a language server:
 
 In this case subsystem LSP setup should be omitted, git root is ``path/to/xo-umbrella2``,
 not ``path/to/xo-umbrella2/xo-ratio`` etc.
+
+Test Coverage Setup
+-------------------
+
+To setup a unit test coverage build/ccov/all-merged
+
+.. code-block::
+
+    # can reuse phase 1 cmake-macros-install
+
+    # phase 2
+    $ cmake -B .build -S . -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_BUILD_TYPE=coverage
+
+Then run unit tests
+
+    $ (cd .build && ctest)
+
+To build coverage report
+
+    $ (.build/gen-ccov)
+
+Html report in ``.build/ccov/html/index.html``
+
+
 
 Sphinx Autobuild Setup
 ----------------------

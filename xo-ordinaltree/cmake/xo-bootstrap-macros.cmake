@@ -11,4 +11,4 @@ endif()
 # needs to have been installed somewhere on CMAKE_MODULE_PATH,
 # (e.g. from xo-cmake with the same value for CMAKE_INSTALL_PREFIX)
 #
-include(xo_macros/xo-project-macros)
+include(xo_macros/xo_cxx)

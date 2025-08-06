@@ -19,15 +19,29 @@ namespace xo {
             return s_boolean_v[static_cast<std::size_t>(x)];
         }
 
+        gp<Boolean>
+        Boolean::true_obj()
+        {
+            return boolean_obj(true);
+        }
+
+        gp<Boolean>
+        Boolean::false_obj()
+        {
+            return boolean_obj(false);
+        }
+
         std::size_t
         Boolean::_shallow_size() const
         {
             return sizeof(Boolean);
         }
 
+        // LCOV_EXCL_START
         Object *
         Boolean::_shallow_copy() const
         {
+
             /* Boolean instances not created in GC-owned space,
              * so GC will not traverse them.
              *
@@ -38,14 +52,18 @@ namespace xo {
 
             assert(false);
             return nullptr;
-        }
 
+        }
+        // LCOV_EXCL_STOP
+
+        // LCOV_EXCL_START
         std::size_t
         Boolean::_forward_children()
         {
             assert(false);
             return 0;
         }
+        // LCOV_EXCL_STOP
     }
 } /*namespace xo*/
 

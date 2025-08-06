@@ -17,6 +17,11 @@ namespace xo {
         List::nil = new List(nullptr, nullptr);
 
         gp<List>
+        List::from(gp<Object> x) {
+            return dynamic_cast<List *>(x.ptr());
+        }
+
+        gp<List>
         List::cons(gp<Object> car, gp<List> cdr) {
             return new (MMPtr(mm)) List(car, cdr);
         }

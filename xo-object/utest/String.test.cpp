@@ -5,6 +5,7 @@
 
 #include "xo/object/String.hpp"
 #include "xo/alloc/GC.hpp"
+#include "xo/alloc/ArenaAlloc.hpp"
 #include "xo/indentlog/scope.hpp"
 #include "xo/indentlog/print/quoted.hpp"
 #include <catch2/catch.hpp>
@@ -14,6 +15,7 @@
 namespace xo {
     using xo::gc::IAlloc;
     using xo::gc::GC;
+    using xo::gc::ArenaAlloc;
     using xo::gc::generation;
     using xo::obj::String;
 
@@ -149,6 +151,25 @@ namespace xo {
                     }
                 }
             }
+        }
+
+        TEST_CASE("String.append", "[String]")
+        {
+            const bool c_debug_flag = false;
+            up<ArenaAlloc> arena = ArenaAlloc::make("testarena", 0, 16*1024, c_debug_flag);
+
+            Object::mm = arena.get();
+
+            gp<String> s1 = String::share("the");
+            gp<String> s2 = String::share(" quick");
+
+            gp<String> s3 = String::append(s1, s2);
+
+            REQUIRE(::strcmp(s1->c_str(), "the") == 0);
+            REQUIRE(::strcmp(s2->c_str(), " quick") == 0);
+            REQUIRE(s3.ptr());
+            REQUIRE(s3->length() == s1->length() + s2->length());
+            REQUIRE(::strcmp(s1->c_str(), "the quick"));
         }
 
     } /*namespace ut*/

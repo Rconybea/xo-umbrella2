@@ -75,6 +75,19 @@ $ nix-build -A xo-userenv-slow
 Same result as `$nix-build -A xo-userenv`, but builds each package serially
 using `xo-build`.
 
+### Coverage Build
+
+Prepare build
+```
+# phase 2
+$ cmake -B .build -S . -DCMAKE_INSTALL_PREFIX=${PREFIX} -DCMAKE_BUILD_TYPE=Debug -DCODE_COVERAGE=ON
+```
+
+Build coverage-enabled libraries and executables
+```
+$ (cd .build && make ccov)
+```
+
 ## To view docs from WSL
 
 1. find wsl IP address

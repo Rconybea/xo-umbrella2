@@ -10,11 +10,13 @@ namespace xo {
     namespace obj {
         class String : public Object {
         public:
-            enum Owner { unique, shared };
+            enum class owner { unique, shared };
 
             /** donwcast from @p x iff x is actually a String. Otherwise nullptr **/
             static gp<String> from(gp<Object> x);
 
+            /** create shared string @p s, using allocator @ref Object::mm **/
+            static gp<String> share(const char * s);
             /** create copy of string @p s, using allocator @ref Object::mm **/
             static gp<String> copy(const char * s);
             /** create copy of string @p s, using allocator @p mm **/
@@ -35,14 +37,14 @@ namespace xo {
             virtual std::size_t _forward_children() override;
 
         private:
-            String(Owner owner, std::size_t z, char * s);
+            String(owner owner, std::size_t z, char * s);
             /** create instance, copying string contents (when @p copy_flag is true) using allocator @p mm **/
-            String(gc::IAlloc * mm, Owner owner, std::size_t z, char * s, bool copy);
+            String(gc::IAlloc * mm, owner owner, std::size_t z, char * s);
 
         private:
             /** true iff storage in @ref chars_ is owned by this String.
              **/
-            Owner owner_ = Owner::shared;
+            owner owner_ = owner::shared;
             /** length of @ref chars_ in bytes (storage allocated, not necessarily string length) **/
             std::size_t z_chars_ = 0;
             /** string contents.  always null-terminated **/

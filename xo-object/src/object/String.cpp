@@ -12,14 +12,14 @@
 
 namespace xo {
     namespace obj {
-        String::String(Owner owner, std::size_t z, char * s)
+        String::String(owner owner, std::size_t z, char * s)
             : owner_{owner}, z_chars_{z}, chars_{s}
         {}
 
-        String::String(gc::IAlloc * mm, Owner owner, std::size_t z, char * s, bool copy)
+        String::String(gc::IAlloc * mm, owner owner, std::size_t z, char * s)
             : owner_{owner}, z_chars_{z}
         {
-            if (copy) {
+            if (owner_ == owner::unique) {
                 chars_ = reinterpret_cast<char *>(mm->alloc(z));
 
                 assert(chars_);
@@ -36,6 +36,14 @@ namespace xo {
         }
 
         gp<String>
+        String::share(const char * s) {
+            const char * chars = s ? s : "";
+            std::size_t z = 1 + ::strlen(chars);
+
+            return new (MMPtr(mm)) String(mm, owner::shared, z, const_cast<char *>(chars));
+        }
+
+        gp<String>
         String::copy(const char * s) {
             return copy(Object::mm, s);
         }
@@ -47,13 +55,13 @@ namespace xo {
             const char * chars = s ? s : "";
 
             // const-cast ok since chars copied with Owner::unique
-            return new (MMPtr(mm)) String(mm, Owner::unique, z, const_cast<char *>(chars), true /*copy*/);
+            return new (MMPtr(mm)) String(mm, owner::unique, z, const_cast<char *>(chars));
         }
 
         gp<String>
         String::allocate(std::size_t z)
         {
-            return new (MMPtr(Object::mm)) String(mm, Owner::unique, z, const_cast<char *>(""), true /*copy*/);
+            return new (MMPtr(Object::mm)) String(mm, owner::unique, z, const_cast<char *>(""));
         }
 
         gp<String>
@@ -63,10 +71,11 @@ namespace xo {
             std::size_t z2 = s2->length();
             std::size_t z = z1 + z2;
 
-            gp<String> retval = allocate(z);
+            // +1 for null terminator
+            gp<String> retval = allocate(z+1);
 
-            strlcpy(retval->chars_, s1->chars_, z1);
-            strlcpy(retval->chars_ + z1, s2->chars_, z2);
+            strlcpy(retval->chars_, s1->chars_, z1+1);
+            strlcpy(retval->chars_ + z1, s2->chars_, z2+1);
 
             return retval;
         }
@@ -87,7 +96,7 @@ namespace xo {
              */
             std::size_t retval = gc::IAlloc::with_padding(sizeof(String));
 
-            if (owner_ == Owner::unique)
+            if (owner_ == owner::unique)
                 retval += gc::IAlloc::with_padding(z_chars_);
 
             return retval;
@@ -109,7 +118,7 @@ namespace xo {
             //
             gp<String> copy = new (cpof) String(owner_, z_chars_, chars_);
 
-            if (owner_ == Owner::unique) {
+            if (owner_ == owner::unique) {
                 std::byte * mem = reinterpret_cast<std::byte *>(chars_);
 
                 copy->chars_ = reinterpret_cast<char *>(Object::mm->alloc_gc_copy(z_chars_, mem));

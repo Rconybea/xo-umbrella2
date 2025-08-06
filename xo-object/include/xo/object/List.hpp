@@ -15,6 +15,9 @@ namespace xo {
             /** the empty list. unique sentinel object **/
             static gp<List> nil;
 
+            /** @return non-null iff @p x is actually a List cell (or nil) **/
+            static gp<List> from(gp<Object> x);
+
             /** @return list with first element @p car, and tail @p cdr **/
             static gp<List> cons(gp<Object> car, gp<List> cdr);
 
