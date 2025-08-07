@@ -156,7 +156,11 @@ namespace xo {
         TEST_CASE("String.append", "[String]")
         {
             const bool c_debug_flag = false;
-            up<ArenaAlloc> arena = ArenaAlloc::make("testarena", 0, 16*1024, c_debug_flag);
+            up<ArenaAlloc> arena = ArenaAlloc::make("testarena",
+#ifdef REDLINE_MEMORY
+                                                    0,
+#endif
+                                                    16*1024, c_debug_flag);
 
             Object::mm = arena.get();
 
