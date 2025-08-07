@@ -80,9 +80,13 @@ namespace xo {
             gp<List> l = const_cast<List*>(this);
 
             os << "(";
+            size_t i = 0;
             while (!l->is_nil()) {
+                if (i > 0)
+                    os << " ";
                 os << l->head();
                 l = l->rest();
+                ++i;
             }
             os << ")";
         }

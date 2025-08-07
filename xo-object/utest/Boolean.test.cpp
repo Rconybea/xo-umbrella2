@@ -41,6 +41,21 @@ namespace xo {
             // booleans are global constants
             REQUIRE(gc->tospace_generation_of(btrue.ptr()) == generation_result::not_found);
             REQUIRE(gc->tospace_generation_of(bfalse.ptr()) == generation_result::not_found);
+
+            REQUIRE(btrue->self_tp().td()->short_name() == "Boolean");
+            REQUIRE(bfalse->self_tp().td()->short_name() == "Boolean");
+
+            {
+                std::stringstream ss;
+                ss << btrue;
+                REQUIRE(ss.str() == "#t");
+            }
+
+            {
+                std::stringstream ss;
+                ss << bfalse;
+                REQUIRE(ss.str() == "#f");
+            }
         }
     } /*namespace ut*/
 } /*namespace xo*/

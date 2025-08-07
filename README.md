@@ -80,13 +80,20 @@ using `xo-build`.
 Prepare build
 ```
 # phase 2
-$ cmake -B .build -S . -DCMAKE_INSTALL_PREFIX=${PREFIX} -DCMAKE_BUILD_TYPE=Debug -DCODE_COVERAGE=ON
+$ cmake -B .build -S . -DCMAKE_INSTALL_PREFIX=${PREFIX} -DCMAKE_BUILD_TYPE=coverage
 ```
 
-Build coverage-enabled libraries and executables
+Run coverage-enabled unit tests
 ```
-$ (cd .build && make ccov)
+$ (cd .build && ctest)
 ```
+
+Generate coverage report
+```
+$ .build/gen-ccov
+```
+
+Html report left in ``.build/ccov/html/index.html``
 
 ## To view docs from WSL
 

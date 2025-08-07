@@ -7,6 +7,7 @@
 #include "GC.hpp"
 #include "TaggedPtr.hpp"
 #include "xo/reflect/Reflect.hpp"
+#include "xo/indentlog/print/quoted.hpp"
 #include <bsd/string.h>
 #include <cstddef>
 #include <cstring>
@@ -15,6 +16,7 @@
 namespace xo {
     using xo::reflect::Reflect;
     using xo::reflect::TaggedPtr;
+    using xo::print::quot;
 
     namespace obj {
         String::String(owner owner, std::size_t z, char * s)
@@ -98,9 +100,7 @@ namespace xo {
 
         void
         String::display(std::ostream & os) const {
-            // TODO: print with escapes
-
-            os << "\"" << c_str() << "\"";
+            os << quot(c_str());
         }
 
         // ----- GC support -----

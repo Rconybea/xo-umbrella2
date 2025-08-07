@@ -5,7 +5,9 @@
 
 #include "xo/object/List.hpp"
 #include "xo/object/String.hpp"
+#include "xo/object/Integer.hpp"
 #include "xo/alloc/GC.hpp"
+#include "xo/alloc/ArenaAlloc.hpp"
 #include "xo/indentlog/scope.hpp"
 #include <catch2/catch.hpp>
 #include <ranges>
@@ -16,21 +18,25 @@ namespace xo {
     namespace ut {
         using xo::obj::List;
         using xo::obj::String;
+        using xo::obj::Integer;
         using xo::gc::GC;
         using xo::gc::generation_result;
         using xo::gc::generation;
+        using xo::gc::ArenaAlloc;
 
         namespace {
             struct Testcase_List {
                 Testcase_List(std::size_t nz, std::size_t tz,
                               const std::vector<std::vector<std::string>> & v)
-                : nursery_z_{nz}, tenured_z_{tz}, v_{v}
+                    : nursery_z_{nz}, tenured_z_{tz}, v_{v}
                 {}
 
                 std::size_t nursery_z_;
                 std::size_t tenured_z_;
 
                 std::vector<std::vector<std::string>> v_;
+
+                std::string expect_display_;
             };
 
             std::vector<Testcase_List>
@@ -275,6 +281,24 @@ namespace xo {
                     }
                 }
             }
+        }
+
+        TEST_CASE("List.display", "[List]")
+        {
+            constexpr bool c_debug_flag = false;
+
+            up<ArenaAlloc> alloc = ArenaAlloc::make("arena", 1024, c_debug_flag);
+
+            Object::mm = alloc.get();
+
+            gp<List> l = List::list(Integer::make(1), Integer::make(2), Integer::make(3));
+
+            REQUIRE(l->size() == 3);
+
+            std::stringstream ss;
+            ss << l;
+
+            REQUIRE(ss.str() == "(1 2 3)");
         }
 
     } /*namespace ut*/

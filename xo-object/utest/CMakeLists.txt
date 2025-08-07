@@ -4,6 +4,7 @@ set(UTEST_EXE utest.object)
 set(UTEST_SRCS
     object_utest_main.cpp
     Boolean.test.cpp
+    Integer.test.cpp
     String.test.cpp
     List.test.cpp
     GC.test.cpp)

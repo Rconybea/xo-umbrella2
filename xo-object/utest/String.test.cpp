@@ -157,9 +157,6 @@ namespace xo {
         {
             const bool c_debug_flag = false;
             up<ArenaAlloc> arena = ArenaAlloc::make("testarena",
-#ifdef REDLINE_MEMORY
-                                                    0,
-#endif
                                                     16*1024, c_debug_flag);
 
             Object::mm = arena.get();
@@ -174,7 +171,21 @@ namespace xo {
             REQUIRE(s3.ptr());
             REQUIRE(s3->length() == s1->length() + s2->length());
             REQUIRE(::strcmp(s1->c_str(), "the quick"));
+
+            {
+                std::stringstream ss1;
+                ss1 << s1;
+                REQUIRE(ss1.str() == "\"the\"");
+            }
+
+            /* on printing, escape embedded " chars */
+            {
+                std::stringstream ss4;
+                ss4 << String::share("\"Allo!\", he said");
+                REQUIRE(ss4.str() == "\"\\\"Allo!\\\", he said\"");
+            }
         }
+
 
     } /*namespace ut*/
 } /*namespace xo*/
