@@ -42,6 +42,12 @@ namespace xo {
             return Reflect::make_tp(const_cast<Boolean*>(this));
         }
 
+        void
+        Boolean::display(std::ostream & os) const
+        {
+            os << (value_ ? "#t" : "#f");
+        }
+
         std::size_t
         Boolean::_shallow_size() const
         {

@@ -96,6 +96,13 @@ namespace xo {
             return Reflect::make_tp(const_cast<String*>(this));
         }
 
+        void
+        String::display(std::ostream & os) const {
+            // TODO: print with escapes
+
+            os << "\"" << c_str() << "\"";
+        }
+
         // ----- GC support -----
 
         std::size_t

@@ -75,6 +75,18 @@ namespace xo {
             return Reflect::make_tp(const_cast<List*>(this));
         }
 
+        void
+        List::display(std::ostream & os) const {
+            gp<List> l = const_cast<List*>(this);
+
+            os << "(";
+            while (!l->is_nil()) {
+                os << l->head();
+                l = l->rest();
+            }
+            os << ")";
+        }
+
         std::size_t
         List::_shallow_size() const {
             return sizeof(List);

@@ -251,7 +251,7 @@ namespace xo {
             ObjectGraphModel::verify_equal_models(ObjectGraphModel & from_model,
                                                   ObjectGraphModel &   to_model)
             {
-                REQUIRE(from_model.roots_.size() == to_model.nodes_.size());
+                REQUIRE(from_model.roots_.size() == to_model.roots_.size());
                 REQUIRE(from_model.nodes_.size() == to_model.nodes_.size());
 
                 std::unordered_set<std::uintptr_t> visited_set;
@@ -288,7 +288,7 @@ namespace xo {
                     std::size_t new_index = this->nodes_.size();
                     {
                         if (x_int.is_null() && x_list.is_null())
-                            throw std::runtime_error("expecting object graph containing int|cons only");
+                            throw std::runtime_error(tostr("expecting object graph containing int|cons|nil only", xtag("x", x)));
 
                         if (!x_int.is_null()) {
                             new_model.index_ = new_index;
@@ -402,6 +402,9 @@ namespace xo {
 
             void RandomMutationModel::generate_seed_values()
             {
+                w1_.clear();
+                w2_.clear();
+
                 {
                     for (size_t i = 0; i < m_; ++i) {
                         w1_.push_back(List::cons(List::nil, List::nil));
@@ -443,10 +446,12 @@ namespace xo {
                 for (std::size_t i = 0; i < k_; ++i) {
                     /* pick a root list cell at random */
                     gp<List> l1 = w1_.at((*p_rgen)() % w1_.size());
+                    REQUIRE(l1.ptr());
 
                     if ((*p_rgen)() % 2 == 0) {
                         /* pick another root list cell at random, and link it to l1 */
                         gp<List> l2 = w1_.at((*p_rgen)() % w1_.size());
+                        REQUIRE(l2.ptr());
 
                         l1->assign_rest(l2);
                     } else {
@@ -454,6 +459,7 @@ namespace xo {
                          * assign to head
                          */
                         gp<Object> x2 = w2_.at((*p_rgen)() % w2_.size());
+                        REQUIRE(x2.ptr());
 
                         l1->assign_head(x2);
                     }
@@ -463,6 +469,8 @@ namespace xo {
             void RandomMutationModel::rejuvenate_seed_values()
             {
                 for (std::size_t i = 0; i < w1_.size(); ++i) {
+                    INFO(xtag("i", i));
+
                     if (w1_.at(i)->_is_forwarded()) {
                         /* w[i] survived GC */
                         w1_[i] = dynamic_cast<List *>(w1_[i]->_destination());
@@ -470,15 +478,20 @@ namespace xo {
                         /* w[i] is garbage, replace */
                         w1_[i] = List::cons(List::nil, List::nil);
                     }
+                    REQUIRE(w1_[i].ptr());
                 }
 
                 for (std::size_t j = 0; j < w2_.size(); ++j) {
+                    INFO(xtag("j", j));
+
                     if (w2_.at(j)->_is_forwarded()) {
                         /* w2[i] survived GC */
-                        w2_[j] = dynamic_cast<Integer *>(w2_[j]->_destination());
+                        w2_[j] = w2_[j]->_destination();
+                        REQUIRE(w2_[j].ptr());
                     } else {
                         /* w2[j] is garbage, replace */
                         w2_[j] = Integer::make((this->start_)++);
+                        REQUIRE(w2_[j].ptr());
                     }
                 }
             }
@@ -534,8 +547,17 @@ namespace xo {
 
             std::vector<testcase_stresstest> s_testcase_v =
             {
-                /*                    nz    tz   m   n   r  rr   k  stats, debug */
-                testcase_stresstest(1024, 1024,  3,  7,  5,  2, 10, true,  false)
+                /* nz: nursery size
+                 * tz: tenured size
+                 *  m: #of random list cells to create
+                 *  n: #of random integers to create
+                 *  r: #of gc roots to create
+                 * rr: #of gc roots to replace between iterations
+                 *  k: #of random mutations to apply
+                 *
+                 *                    nz    tz   m   n   r  rr   k  stats, debug */
+                testcase_stresstest(1024, 1024,  5,  1,  5,  2, 10, true,  false),
+                testcase_stresstest(1024, 1024, 10, 10,  5,  2, 10, true,  false)
             };
         } /*namespace*/
 
@@ -550,6 +572,7 @@ namespace xo {
                     {
                         .initial_nursery_z_ = tc.nursery_z_,
                         .initial_tenured_z_ = tc.tenured_z_,
+                        .stats_flag_ = tc.gc_stats_flag_,
                         .debug_flag_ = tc.debug_flag_
                     });
 
@@ -582,7 +605,9 @@ namespace xo {
 
                 RandomMutationModel data_model(tc.m_, tc.n_, tc.r_, tc.rr_, tc.k_);
 
-                for (std::size_t cycle = 0; cycle < 2; ++cycle) {
+                for (std::size_t cycle = 0; cycle < 5; ++cycle) {
+                    INFO(xtag("cycle", cycle));
+
                     if (cycle == 0) {
                         data_model.generate_seed_values();
                         data_model.generate_random_roots(gc.get(), &rgen);

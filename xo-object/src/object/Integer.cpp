@@ -29,6 +29,11 @@ namespace xo {
             return Reflect::make_tp(const_cast<Integer*>(this));
         }
 
+        void
+        Integer::display(std::ostream & os) const {
+            os << value_;
+        }
+
         std::size_t
         Integer::_shallow_size() const {
             return sizeof(Integer);
