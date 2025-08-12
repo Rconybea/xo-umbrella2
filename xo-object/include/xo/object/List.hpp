@@ -3,6 +3,8 @@
  * author: Roland Conybeare, Aug 2025
  */
 
+#pragma once
+
 #include "Sequence.hpp"
 
 namespace xo {

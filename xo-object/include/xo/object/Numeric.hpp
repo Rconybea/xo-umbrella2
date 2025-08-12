@@ -3,6 +3,8 @@
  * author: Roland Conybeare, Aug 2025
  */
 
+#pragma once
+
 #include "xo/alloc/Object.hpp"
 
 namespace xo {
