@@ -35,6 +35,28 @@ let
       };});
   };
 
+  # overlay to fix libconfig (distant dependency of SDL2)
+  libconfig-overlay = self: super: {
+    libconfig = super.libconfig.overrideAttrs (old: {
+      # 1.7.3. no longer at https://hyperrealm.github.io/libconfig/dist/libconfig-1.7.3.tar.gz
+      # (1.8.1 advertised, so perhaps has expired)
+      #
+      src = self.fetchurl {
+        url = "https://github.com/hyperrealm/libconfig/releases/download/v${super.libconfig.version}/libconfig-${super.libconfig.version}.tar.gz";
+        sha256 = "sha256-VFFm1srAN3RDgdHpzFpUBQlOe/rRakEWmbz/QLuzHuc=";
+      };});
+  };
+
+  pipewire-overlay = self: super: {
+    pipewire = super.pipewire.override {
+      # ffado 2.4.8 won't build from source.
+      # needs a patch from a defunct server.
+      # provides sound for firewire devices, which are uncommon-to-rare
+      # these days
+      ffadoSupport = false;
+    };
+  };
+
   ccache-overlay = self: super: {
     ccache = super.ccache.overrideAttrs (old: {
       src = self.fetchFromGitHub {
@@ -45,6 +67,16 @@ let
         sha256 = "sha256-Rhd2cEAEhBYIl5Ej/A5LXRb7aBMLgcwW6zxk4wYCPVM=";
       };});
   };
+
+#  # nixGL not present in my nixpkgs snapshot
+#  nixgl-overlay = self: super: {
+#    nixGL = import (self.fetchFromGitHub {
+#      owner = "nix-community";
+#      repo = "nixGL";
+#      rev = "main";
+#      sha256 = "sha256-Ob/HuUhANoDs+nvYqyTKrkcPXf4ZgXoqMTQoCK0RFgQ=";
+#    }) {pkgs = self; };
+#  };
 
   # Problem: builds *everything* with llvm18 toolchain, exposes too many compiler nits
   llvm-overlay = self: super: {
@@ -145,7 +177,10 @@ let
   pkgs = import nixpkgs-path {
     overlays = [
       qrencode-overlay
+      libconfig-overlay
+      pipewire-overlay
       ccache-overlay
+#      nixgl-overlay
 #      llvm-overlay
       xo-overlay
     ];
@@ -163,6 +198,7 @@ pkgs.mkShell {
   buildInputs = [
     pkgs.gsettings-desktop-schemas
     pkgs.emacs
+    pkgs.nushell
     pkgs.which
     pkgs.man
     pkgs.man-pages
@@ -170,7 +206,6 @@ pkgs.mkShell {
     pkgs.nix-tree    # needs GHC...
     pkgs.ripgrep
     pkgs.openssh
-    #pkgs.chromium
     pkgs.notmuch
     pkgs.emacsPackages.notmuch
     pkgs.inconsolata-lgc
@@ -211,11 +246,54 @@ pkgs.mkShell {
 
     pkgs.cmake
     pkgs.pkg-config
+
+    pkgs.emscripten
+    pkgs.imgui
+    pkgs.SDL2.dev
+    pkgs.glew
+#    pkgs.nixGL.nixGLDefault
+#    pkgs.nixGL.nixGLNvidia
+#    pkgs.nixGL.nixGLMesa
+    pkgs.libGL
+
+    # fonts for imgui
+    pkgs.gucharmap
+    pkgs.fontconfig
+    pkgs.noto-fonts
+    #pkgs.noto-fonts-lgc   # lgc for latin,greek,cyrillic   (but doesn't exist in pinned nixpkgs)
+    #pkgs.noto-fonts-cjk   # cjk for chinese,japanese,korean
+    pkgs.noto-fonts-emoji
+    pkgs.dejavu_fonts
+
+    pkgs.xorg.xclock
   ];
 
   shellHook = ''
     # override SOUCE_DATE_EPOCH to current time (otherwise will get 1980)
     export SOURCE_DATE_EPOCH=$(date +%s)
+
+    export CXENV=$CXENV:xo
+
+    # software-only pipeline
+    #export SDL_VIDEODRIVER=x11
+    #export LIBGL_ALWAYS_SOFTWARE=1
+
+    #export SDL_VIDEO_X11_FORCE_EGL=0
+    export SDL_VIDEO_X11_VISUALID=0x023
+
+    #export LIBGL_ALWAYS_INDIRECT=1
+    #export WSLG_FORCE_EGL=1
+    #export GLFW_USE_EGL=1
+
+    # just for info
+    export mesa_drivers=${pkgs.mesa.drivers}
+
+    export FONTCONFIG_PATH=${pkgs.fontconfig.out}/etc/fonts
+    export NOTO_FONTS_PATH=${pkgs.noto-fonts}/share/fonts
+    export DEJAVU_FONTS_PATH=${pkgs.dejavu_fonts}/share/fonts
+
+    echo "FONTCONFIG_PATH=$FONTCONFIG_PATH"
+    echo "NOTO_FONTS_PATH=$NOTO_FONTS_PATH"
 
     echo "xo development environment loaded!"
   '';
