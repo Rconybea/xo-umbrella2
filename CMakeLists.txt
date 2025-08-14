@@ -116,6 +116,7 @@ add_subdirectory(xo-reader)
 add_subdirectory(xo-jit)
 add_subdirectory(xo-pyjit)
 #
+add_subdirectory(xo-imgui)
 
 # ----------------------------------------------------------------
 # documentation.  must follow add_subdirectory() for satellite projects
