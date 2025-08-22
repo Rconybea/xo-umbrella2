@@ -34,9 +34,9 @@ namespace xo {
             constexpr scaled_unit(const natural_unit<Int> & nat_unit,
                                   OuterScale outer_scale_factor,
                                   double outer_scale_sq)
-                : natural_unit_{nat_unit},
-                  outer_scale_factor_{outer_scale_factor},
-                  outer_scale_sq_{outer_scale_sq}
+                : outer_scale_factor_{outer_scale_factor},
+                  outer_scale_sq_{outer_scale_sq},
+                  natural_unit_{nat_unit}
                 {}
 
             ///@}

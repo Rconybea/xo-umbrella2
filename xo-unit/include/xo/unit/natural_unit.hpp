@@ -21,9 +21,10 @@ namespace xo {
             constexpr void
             push_bpu_array(natural_unit<Int> * p_target, Ts... args);
 
+            /** null base case; nothing to push **/
             template <typename Int>
             constexpr void
-            push_bpu_array(natural_unit<Int> * p_target) {}
+            push_bpu_array(natural_unit<Int> * /*p_target*/) {}
 
             template <typename Int, typename T0, typename... Ts>
             constexpr void

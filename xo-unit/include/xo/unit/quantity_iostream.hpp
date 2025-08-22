@@ -21,6 +21,16 @@ namespace xo {
 
     } /*namespace qty*/
 
+    namespace print {
+        template <auto NaturalUnit, typename Repr>
+        struct ppdetail<xo::qty::quantity<NaturalUnit, Repr>> {
+            using target_type = xo::qty::quantity<NaturalUnit, Repr>;
+            static bool print_pretty(const ppindentinfo & ppii,
+                                     const target_type & x) {
+                return ppdetail_atomic<target_type>::print_pretty(ppii, x);
+            }
+        };
+    } /*namespace print*/
 } /*namespace xo*/
 
 /** end quantity_iostream.hpp **/

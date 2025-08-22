@@ -100,7 +100,7 @@ namespace xo {
                                                    const bu_abbrev_type & abbrev)
                     {
 
-                        std::int32_t i_abbrev = this->abbrev_lub_ix(scalefactor);
+                        std::size_t i_abbrev = this->abbrev_lub_ix(scalefactor);
 
                         auto entry = std::make_pair(scalefactor, abbrev);
 

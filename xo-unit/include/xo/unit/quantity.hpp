@@ -16,15 +16,16 @@ namespace xo {
          *
          *  @brief represent a scalar quantity with associated units.
          *
-         *  - @p NaturalUnit is a non-type template paramoeter
+         *  @tparam ScaledUnit is a non-type template paramoeter
          *    identifying a unit used for this quantity.
          *    In *xo-unit* it will be an instance of @c natural_unit
-         *  - @p Repr is a type used to represent a multiple
-         *    of @p NaturalUnit.
+         *  @tparam Repr is a type used to represent a multiple
+         *    of @p ScaledUnit.
          *
          *  Enforce dimensional consistency at compile time.
          *  sizeof(quantity) == sizeof(Repr).
          *
+         *  Unit information is associated with type, not value.
          *  A quantity's runtime state consists of exactly one @p Repr instance:
          *  @code
          *  sizeof(quantity<NaturalUnit, Repr>) == sizeof(Repr)
@@ -58,6 +59,8 @@ namespace xo {
             constexpr quantity() : scale_{0} {}
             /** @brief create a quantity representing @p scale @c ScaledUnits **/
             explicit constexpr quantity(Repr scale) : scale_{scale} {}
+            /** @brief copy constructor **/
+            constexpr quantity(const quantity &) = default;
             ///@}
 
             /** @defgroup quantity-constants static quantity constants **/
@@ -293,6 +296,7 @@ namespace xo {
             ///@{
 
             /** assignment from quantity with identical units **/
+            constexpr
             quantity & operator=(const quantity & x) {
                 this->scale_ = x.scale_;
                 return *this;
@@ -302,6 +306,7 @@ namespace xo {
             template <typename Q2>
             requires(quantity_concept<Q2>
                      && Q2::always_constexpr_unit)
+            constexpr
             quantity & operator=(const Q2 & x) {
                 auto x2 = x.template rescale_ext<s_scaled_unit>();
 
@@ -936,48 +941,92 @@ namespace xo {
             // ----- time constants ----
 
             /** a quantity representing 1 picosecond of time, with compile-time unit representation **/
-            static constexpr auto picosecond = picoseconds(1);
+            static constexpr auto picosecond = picoseconds(1L);
 
             /** a quantity representing 1 nanosecond of time, with compile-time unit representation **/
-            static constexpr auto nanosecond = nanoseconds(1);
+            static constexpr auto nanosecond = nanoseconds(1L);
 
             /** a quantity representing 1 microsecond of time, with compile-time unit representation **/
-            static constexpr auto microsecond = microseconds(1);
+            static constexpr auto microsecond = microseconds(1L);
 
             /** a quantity representing 1 millisecond of time, with compile-time unit representation **/
-            static constexpr auto millisecond = milliseconds(1);
+            static constexpr auto millisecond = milliseconds(1L);
 
             /** a quantity representing 1 second of time, with compile-time unit representation **/
-            static constexpr auto second = seconds(1);
+            static constexpr auto second = seconds(1L);
 
             /** a quantity representing 1 minute of time, with compile-time unit representation **/
-            static constexpr auto minute = minutes(1);
+            static constexpr auto minute = minutes(1L);
 
             /** a quantity representing 1 hour of time, with compile-time unit representation **/
-            static constexpr auto hour = hours(1);
+            static constexpr auto hour = hours(1L);
 
             /** a quantity representing 1 day of time (exactly 24 hours), with compile-time unit representation **/
-            static constexpr auto day = days(1);
+            static constexpr auto day = days(1L);
 
             /** a quantity representing 1 week of time (7 24-hour days), with compile-time unit representation **/
-            static constexpr auto week = weeks(1);
+            static constexpr auto week = weeks(1L);
 
             /** a quantity representing 1 month of time (30 24-hour days), with compile-time unit representation **/
-            static constexpr auto month = months(1);
+            static constexpr auto month = months(1L);
 
             /** a quantity representing 1 year of time (365.25 24-hour days), with compile-time unit representation **/
-            static constexpr auto year = years(1);
+            static constexpr auto year = years(1L);
 
             /** a quantity representing 1 250-day year of time, with compile-time unit representation **/
-            static constexpr auto year250 = year250s(1);
+            static constexpr auto year250 = year250s(1L);
 
             /** a quantity representing 1 360-day year of time, with compile-time unit representation **/
-            static constexpr auto year360 = year360s(1);
+            static constexpr auto year360 = year360s(1L);
 
             /** a quantity representing 1 365-day year of time, with compile-time unit representation **/
-            static constexpr auto year365 = year365s(1);
+            static constexpr auto year365 = year365s(1L);
 
         } /*namespace qty*/
+
+        namespace type {
+            template <typename Repr>
+            using picoseconds = quantity<u::picosecond, Repr>;
+
+            template <typename Repr>
+            using nanoseconds = quantity<u::nanosecond, Repr>;
+
+            template <typename Repr>
+            using microseconds = quantity<u::microsecond, Repr>;
+
+            template <typename Repr>
+            using milliseconds = quantity<u::millisecond, Repr>;
+
+            template <typename Repr>
+            using seconds = quantity<u::second, Repr>;
+
+            template <typename Repr>
+            using minutes = quantity<u::minute, Repr>;
+
+            template <typename Repr>
+            using hours = quantity<u::hour, Repr>;
+
+            template <typename Repr>
+            using days = quantity<u::day, Repr>;
+
+            template <typename Repr>
+            using weeks = quantity<u::week, Repr>;
+
+            template <typename Repr>
+            using months = quantity<u::month, Repr>;
+
+            template <typename Repr>
+            using years = quantity<u::year, Repr>;
+
+            template <typename Repr>
+            using years250 = quantity<u::year250, Repr>;
+
+            template <typename Repr>
+            using years360 = quantity<u::year360, Repr>;
+
+            template <typename Repr>
+            using years365 = quantity<u::year365, Repr>;
+        } /*namespace type*/
 
         namespace qty {
             // ----- currency -----
