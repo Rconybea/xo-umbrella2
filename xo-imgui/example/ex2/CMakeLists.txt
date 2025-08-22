@@ -58,5 +58,6 @@ if (XO_ENABLE_EXAMPLES)
 
     xo_dependency(${SELF_EXE} xo_object)
     xo_dependency(${SELF_EXE} randomgen)
+    xo_dependency(${SELF_EXE} xo_flatstring)
     xo_dependency(${SELF_EXE} xo_alloc)
 endif()
