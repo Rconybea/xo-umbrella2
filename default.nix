@@ -187,6 +187,16 @@ let
   };
 in
 
+let
+  fonts = pkgs.makeFontsConf {
+    fontDirectories = [
+      pkgs.inconsolata-lgc
+      pkgs.noto-fonts
+      pkgs.noto-fonts-emoji
+      pkgs.dejavu_fonts
+    ];
+  };
+in
 pkgs.mkShell {
   # maybe should create a python environment:
   #   let
@@ -255,6 +265,8 @@ pkgs.mkShell {
 #    pkgs.nixGL.nixGLNvidia
 #    pkgs.nixGL.nixGLMesa
     pkgs.libGL
+    pkgs.stdenv.cc.cc.lib
+    pkgs.glibc
 
     # fonts for imgui
     pkgs.gucharmap
@@ -288,9 +300,13 @@ pkgs.mkShell {
     # just for info
     export mesa_drivers=${pkgs.mesa.drivers}
 
+    export FONTCONFIG_FILE=${fonts}
     export FONTCONFIG_PATH=${pkgs.fontconfig.out}/etc/fonts
     export NOTO_FONTS_PATH=${pkgs.noto-fonts}/share/fonts
     export DEJAVU_FONTS_PATH=${pkgs.dejavu_fonts}/share/fonts
+
+    # refresh font cache
+    ${pkgs.fontconfig}/bin/fc-cache -fv
 
     echo "FONTCONFIG_PATH=$FONTCONFIG_PATH"
     echo "NOTO_FONTS_PATH=$NOTO_FONTS_PATH"
