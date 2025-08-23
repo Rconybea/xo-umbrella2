@@ -642,13 +642,13 @@ enum class gc_history_headline {
     N
 };
 
-xo::flatstring<256>
+xo::flatstring<512>
 write_gc_history_tooltip(gc_history_headline headline,
                          const GcStatisticsHistoryItem & stats)
 {
-    xo::flatstring<256> retval;
+    xo::flatstring<512> retval;
 
-    xo::flatstring<256> headline_str;
+    xo::flatstring<512> headline_str;
     switch (headline) {
     case gc_history_headline::survive:
         snprintf(headline_str.data(), headline_str.capacity(),
@@ -685,6 +685,8 @@ write_gc_history_tooltip(gc_history_headline headline,
         break;
     }
 
+
+
     snprintf(retval.data(), retval.capacity(),
              "%s\n"
              "\n"
@@ -697,7 +699,8 @@ write_gc_history_tooltip(gc_history_headline headline,
              " garbage\u2080: %lu\n" /*garbage0*/
              " garbage\u2081: %lu\n" /*garbage1*/
              " garbage\u2099: %lu\n" /*garbageN*/
-             " effort: %lu dt: %.1lfus\n",
+             " effort: %lu dt: %.1lfus\n"
+             " copy efficiency: %.1lf%% collection rate: %.0lf bytes/sec",
              headline_str.c_str(),
              stats.gc_seq_,
              (stats.upto_ == generation::nursery) ? "incremental" : "FULL",
@@ -709,7 +712,9 @@ write_gc_history_tooltip(gc_history_headline headline,
              stats.garbage1_z_,
              stats.garbageN_z_,
              stats.effort_z_,
-             1e-3 * stats.dt_.scale()
+             1e-3 * stats.dt_.scale(),
+             100.0 * stats.efficiency(),
+             stats.collection_rate()
         );
 
     return retval.ensure_final_null();
@@ -815,7 +820,7 @@ draw_gc_history(const GcStateDescription & gcstate,
             float ypsz_lo = (y_zero
                              - (display_h * stats.persist_z_ / y_scale));
             {
-                xo::flatstring<256> tt = write_gc_history_tooltip(gc_history_headline::persist, stats);
+                xo::flatstring<512> tt = write_gc_history_tooltip(gc_history_headline::persist, stats);
 
                 draw_filled_rect(tt.c_str(),
                                  ImRect::from_xy_span(x_span, ImVec2(ypsz_lo, y_zero)),
@@ -827,7 +832,7 @@ draw_gc_history(const GcStateDescription & gcstate,
             float yp_lo = (yp_hi
                            - (display_h * stats.promote_z_ / y_scale));
             {
-                xo::flatstring<256> tt = write_gc_history_tooltip(gc_history_headline::promote, stats);
+                xo::flatstring<512> tt = write_gc_history_tooltip(gc_history_headline::promote, stats);
 
                 draw_filled_rect(tt.c_str(),
                                  ImRect::from_xy_span(x_span, ImVec2(yp_lo, yp_hi)),
@@ -839,7 +844,7 @@ draw_gc_history(const GcStateDescription & gcstate,
             float ys_hi = yp_lo;
             float ys_lo = (ys_hi - (display_h * stats.survive_z_ / y_scale));
             {
-                xo::flatstring<256> tt = write_gc_history_tooltip(gc_history_headline::survive, stats);
+                xo::flatstring<512> tt = write_gc_history_tooltip(gc_history_headline::survive, stats);
 
                 draw_filled_rect(tt.c_str(),
                                  ImRect::from_xy_span(x_span, ImVec2(ys_lo, ys_hi)),
@@ -854,7 +859,7 @@ draw_gc_history(const GcStateDescription & gcstate,
             float ygN_hi = (y_zero
                             + (display_h * stats.garbageN_z_ / y_scale));
             {
-                xo::flatstring<256> tt = write_gc_history_tooltip(gc_history_headline::garbageN, stats);
+                xo::flatstring<512> tt = write_gc_history_tooltip(gc_history_headline::garbageN, stats);
 
                 draw_filled_rect(tt.c_str(),
                                  ImRect::from_xy_span(x_span, ImVec2(ygN_lo, ygN_hi)),
@@ -867,7 +872,7 @@ draw_gc_history(const GcStateDescription & gcstate,
             float yg1_hi = (yg1_lo
                             + (display_h * stats.garbage1_z_ / y_scale));
             {
-                xo::flatstring<256> tt = write_gc_history_tooltip(gc_history_headline::garbage1, stats);
+                xo::flatstring<512> tt = write_gc_history_tooltip(gc_history_headline::garbage1, stats);
 
                 draw_filled_rect(tt.c_str(),
                                  ImRect(ImVec2(x_lo, yg1_lo), ImVec2(x_hi, yg1_hi)),
@@ -880,7 +885,7 @@ draw_gc_history(const GcStateDescription & gcstate,
             float yg0_hi = (yg0_lo
                             + (display_h * stats.garbage0_z_ / y_scale));
             {
-                xo::flatstring<256> tt = write_gc_history_tooltip(gc_history_headline::garbage0, stats);
+                xo::flatstring<512> tt = write_gc_history_tooltip(gc_history_headline::garbage0, stats);
 
                 draw_filled_rect(tt.c_str(),
                                  ImRect(ImVec2(x_lo, yg0_lo), ImVec2(x_hi, yg0_hi)),
