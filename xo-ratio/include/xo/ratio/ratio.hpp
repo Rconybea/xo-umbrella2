@@ -220,8 +220,6 @@ namespace xo {
              **/
             constexpr ratio power(int p) const {
 
-                constexpr ratio retval = ratio(1, 1);
-
                 if (p == 0)
                     return ratio(1, 1);
 
