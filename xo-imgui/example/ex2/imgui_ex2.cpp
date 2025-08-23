@@ -78,9 +78,11 @@ struct ImRect {
  */
 struct GcGenerationDescription {
     GcGenerationDescription() = default;
-    GcGenerationDescription(const char * mnemonic, std::size_t before_ckp, std::size_t after_ckp,
+    GcGenerationDescription(const char * mnemonic, std::size_t tospace_scale,
+                            std::size_t before_ckp, std::size_t after_ckp,
                             std::size_t reserved, std::size_t committed, std::size_t gc_threshold)
-        : mnemonic_{mnemonic}, before_checkpoint_{before_ckp}, after_checkpoint_{after_ckp},
+        : mnemonic_{mnemonic}, tospace_scale_{tospace_scale},
+          before_checkpoint_{before_ckp}, after_checkpoint_{after_ckp},
           reserved_{reserved}, committed_{committed},
           gc_threshold_{gc_threshold} {}
 
@@ -88,6 +90,13 @@ struct GcGenerationDescription {
     std::size_t scale() const { return std::max(committed_, gc_threshold_); }
 
     const char * mnemonic_ = nullptr;
+
+    /** size of to-space in bytes represented on screen.
+     *  (note however when we animate GC, space roles have already reversed,
+     *   so then this will refer to old to-space = new from-space)
+     **/
+    std::size_t tospace_scale_ = 0;
+
     std::size_t before_checkpoint_ = 0;
     std::size_t after_checkpoint_ = 0;
     std::size_t reserved_ = 0;
@@ -161,6 +170,22 @@ using xo::obj::Integer;
 using xo::rng::xoshiro256ss;
 using xo::rng::Seed;
 
+/** details of a single copy event performed by GC **/
+struct GcCopyDetail {
+    GcCopyDetail(std::size_t z, generation src, std::size_t src_offset, std::size_t src_space_z)
+        : z_{z}, src_gen_{src}, src_offset_{src_offset}, src_space_z_{src_space_z}
+        {}
+
+    /** object size in bytes **/
+    std::size_t z_ = 0;
+    /** source location **/
+    generation src_gen_;
+    /** offset from start of allocator **/
+    std::size_t src_offset_ = 0;
+    /** size of source space.  could store this separately **/
+    std::size_t src_space_z_ = 0;
+};
+
 struct AppState {
     using GC = xo::gc::GC;
 
@@ -180,6 +205,8 @@ public:
     std::vector<gp<Object>> gc_root_v_{100};
     Seed<xoshiro256ss> seed_;
     xoshiro256ss rng_{seed_};
+    /** remember details for each object copied by GC, so we can animate **/
+    std::vector<GcCopyDetail> copy_detail_v_;
 };
 
 AppState::AppState()
@@ -225,6 +252,7 @@ GcStateDescription
 AppState::snapshot_gc_state() const {
     return GcStateDescription(GcGenerationDescription
                               ("N",
+                               this->nursery_tospace_scale(),
                                gc_->nursery_before_checkpoint(),
                                gc_->nursery_after_checkpoint(),
                                gc_->nursery_to_reserved(),
@@ -232,6 +260,7 @@ AppState::snapshot_gc_state() const {
                                gc_->nursery_before_checkpoint() + gc_->config().incr_gc_threshold_),
                               GcGenerationDescription
                               ("T",
+                               this->tenured_tospace_scale(),
                                gc_->tenured_before_checkpoint(),
                                gc_->tenured_after_checkpoint(),
                                gc_->tenured_to_reserved(),
@@ -874,7 +903,8 @@ draw_gc_state(const AppState & app_state,
               const GcStateDescription & gcstate,
               const ImRect & canvas_rect,
               ImDrawList * draw_list,
-              ImRect * p_nursery_alloc_rect)
+              ImRect * p_nursery_alloc_rect,
+              ImRect * p_tenured_alloc_rect)
 {
     float lm = 50;
     float rm = 70;
@@ -892,7 +922,7 @@ draw_gc_state(const AppState & app_state,
                                canvas_rect.y_lo() + tm),
                         ImVec2(canvas_rect.x_hi() - rm,
                                canvas_rect.y_lo() + tm + h + est_chart_text_height));
-    /* rectangle representing allocated nursery range*/
+    /* rectangle representing allocated nursery range */
     ImRect N_alloc_rect;
     float N_x1 = 0.0;
 
@@ -907,7 +937,7 @@ draw_gc_state(const AppState & app_state,
         *p_nursery_alloc_rect = N_alloc_rect;
 
     /* N0_to_size..N_to_scale: in bytes */
-    std::size_t N_to_scale = app_state.nursery_tospace_scale();
+    std::size_t N_to_scale = gcstate.gen_state_v_[gen2int(generation::nursery)].tospace_scale_;
 
     /* display_w .. N0_h : viewportcoords */
     std::size_t display_w = canvas_rect.width() - lm - rm;
@@ -919,7 +949,7 @@ draw_gc_state(const AppState & app_state,
 
     // now turn to Tenured space
 
-    std::size_t T_to_scale = app_state.tenured_tospace_scale();
+    std::size_t T_to_scale = gcstate.gen_state_v_[gen2int(generation::tenured)].tospace_scale_;
     std::size_t T1_h = h;
 
     /* want to put to-scale image of nursery next to to-scale image of tenured;
@@ -959,6 +989,8 @@ draw_gc_state(const AppState & app_state,
                      nullptr);
     }
 
+    /* rectangle representing allocated tenured range */
+    ImRect T_alloc_rect;
     std::size_t h_y0 = t_y1 + est_chart_text_height;
 
     draw_tenured(gcstate,
@@ -967,8 +999,11 @@ draw_gc_state(const AppState & app_state,
                         ImVec2(x0 + (adj_display_w * (T_to_scale/TplusN_to_scale)) - TplusN_spacer,
                                h_y0)),
                  draw_list,
-                 nullptr,
+                 &T_alloc_rect,
                  nullptr);
+
+    if (p_tenured_alloc_rect)
+        *p_tenured_alloc_rect = T_alloc_rect;
 
     /* just incremental (nursery) collections */
     draw_gc_history(gcstate,
@@ -1013,20 +1048,83 @@ struct AnimateGcCopyCb : public xo::gc::GcCopyCallback {
     DrawState * p_draw_state_ = nullptr;
 };
 
+enum class draw_state_type {
+    alloc,
+    animate_gc
+};
+
 struct DrawState {
     up<xo::gc::GcCopyCallback> make_gc_copy_animation(AppState * app_state) {
         return std::make_unique<AnimateGcCopyCb>(app_state, this);
     }
 
+    draw_state_type state_type_ = draw_state_type::alloc;
+
+    /** when animating copy step, display objects from AppState::copy_detail_v_[i]
+     *  where i < .animate_copy_hi_ / 100 * AppState::copy_detail_v_.size()
+     **/
+    float animate_copy_hi_pct_ = 0;
+
     ImDrawList * gcw_draw_list_ = nullptr;
 
-    /* draw area */
+    /** draw area **/
     ImVec2 gcw_canvas_p0_;
     ImVec2 gcw_canvas_p1_;
 
     /** rect displaying allocated nursery space **/
     ImRect gcw_nursery_alloc_rect_;
+    /** rect displaying allocated tenured space **/
+    ImRect gcw_tenured_alloc_rect_;
 };
+
+ImRect map_src_alloc_to_screen(const GcCopyDetail & copy_detail,
+                               const ImRect & space_rect)
+{
+    // TODO: methods on copy_detail / and/or ImPoint
+
+    auto [x_coord_lo, x_coord_hi] = space_rect.x_span();
+
+    double w0 = copy_detail.src_offset_ / static_cast<double>(copy_detail.src_space_z_);
+    float src0_x = ((1.0 - w0) * x_coord_lo) + (w0 * x_coord_hi);
+
+    double w1 = ((copy_detail.src_offset_ + copy_detail.z_)
+                 / static_cast<double>(copy_detail.src_space_z_));
+    float src1_x = ((1.0 - w1) * x_coord_lo) + (w1 * x_coord_hi);
+
+    return space_rect.with_x_span(src0_x, src1_x);
+}
+
+void animate_gc_copy(const AppState & app_state,
+                     const DrawState & draw_state,
+                     ImDrawList * draw_list)
+{
+    const ImRect & nursery_rect = draw_state.gcw_nursery_alloc_rect_;
+    const ImRect & tenured_rect = draw_state.gcw_tenured_alloc_rect_;
+
+    //auto [x_coord_lo, x_coord_hi] = nursery_rect.x_span();
+
+    std::size_t i_copy = 0;
+    for (const auto & copy_detail : app_state.copy_detail_v_) {
+        ImRect src_rect;
+
+        if (copy_detail.src_gen_ == generation::nursery) {
+            src_rect = map_src_alloc_to_screen(copy_detail, nursery_rect);
+        } else {
+            src_rect = map_src_alloc_to_screen(copy_detail, tenured_rect);
+        }
+
+        float hi_copy = 0.01 * draw_state.animate_copy_hi_pct_ * app_state.copy_detail_v_.size();
+        float wt = i_copy / hi_copy;
+        ImU32 color = IM_COL32(64, 255, static_cast<int>(64 + (128 * wt)), 255);
+
+        draw_list->AddRectFilled(src_rect.top_left(),
+                                 src_rect.bottom_right(),
+                                 color);
+
+        if (++i_copy >= hi_copy)
+            break;
+    }
+}
 
 void
 AnimateGcCopyCb::notify_gc_copy(std::size_t z,
@@ -1038,6 +1136,7 @@ AnimateGcCopyCb::notify_gc_copy(std::size_t z,
     using xo::scope;
     using xo::xtag;
     using xo::gc::generation_result;
+    using xo::gc::generation;
     using xo::gc::role;
 
     scope log(XO_DEBUG(false),
@@ -1046,10 +1145,6 @@ AnimateGcCopyCb::notify_gc_copy(std::size_t z,
               xtag("dest", dest_addr),
               xtag("src_gen", src_gen),
               xtag("dest_gen", dest_gen));
-
-    const ImRect & nursery_rect = p_draw_state_->gcw_nursery_alloc_rect_;
-
-    auto [x_coord_lo, x_coord_hi] = nursery_rect.x_span();
 
     auto [gen, offset, alloc] = p_app_state_->gc_->fromspace_location_of(src_addr);
 
@@ -1061,17 +1156,9 @@ AnimateGcCopyCb::notify_gc_copy(std::size_t z,
         assert(false);
     }
 
-    double w0 = offset / static_cast<double>(alloc);
-    float src0_x = ((1.0 - w0) * x_coord_lo) + (w0 * x_coord_hi);
+    generation valid_gen = xo::gc::valid_genresult2gen(gen);
 
-    double w1 = (offset + z) / static_cast<double>(alloc);
-    float src1_x = ((1.0 - w1) * x_coord_lo) + (w1 * x_coord_hi);
-
-    ImRect src_rect = nursery_rect.with_x_span(src0_x, src1_x);
-
-    p_draw_state_->gcw_draw_list_->AddRectFilled(src_rect.top_left(),
-                                                 src_rect.bottom_right(),
-                                                 IM_COL32(255, 128, 128, 255));
+    p_app_state_->copy_detail_v_.push_back(GcCopyDetail(z, valid_gen, offset, alloc));
 }
 
 int main(int, char **)
@@ -1230,6 +1317,7 @@ int main(int, char **)
 
     AppState app_state;
     DrawState draw_state;
+    GcStateDescription gcstate = app_state.snapshot_gc_state();
 
     app_state.gc_->add_gc_copy_callback(draw_state.make_gc_copy_animation(&app_state));
 
@@ -1237,10 +1325,41 @@ int main(int, char **)
     bool done = false;
 
     while (!done) {
-        /** generate random alloc **/
-        app_state.generate_random_mutation();
+        /** on each draw cycle, app state falls into categories:
+         *  1. allocation
+         *     multiple draw cycles because many allocations per gc.
+         *  2. garbage collection
+         *     multiple draw cycles to animate copying process
+         *     Settle conflict between {GC, imgui} as to who drives event loop,
+         *     in favor of imgui; achieve this by copying what GC did,
+         *     so that we can animate it over multiple draw cycles
+         **/
 
-        GcStateDescription gcstate = app_state.snapshot_gc_state();
+        switch (draw_state.state_type_) {
+        case draw_state_type::alloc:
+        {
+            /** generate random alloc **/
+            app_state.generate_random_mutation();
+
+            gcstate = app_state.snapshot_gc_state();
+
+            /* GC may run here, in which case control reenters via AnimateGcCopyCb;
+             * that callback captures copy details (per object!) in AppState
+             */
+            if (app_state.gc_->enable_gc_once())
+                draw_state.state_type_ = draw_state_type::animate_gc;
+
+            break;
+        }
+        case draw_state_type::animate_gc:
+        {
+            /* don't update gcstate while animating,
+             * that would use post-GC space sizing
+             */
+
+            break;
+        }
+        }
 
         /** poll + handle events */
         SDL_Event event;
@@ -1310,8 +1429,10 @@ int main(int, char **)
                         gcstate.gc_allocated_,
                         gcstate.gc_available_);
             //ImGui::NewLine();
-            ImGui::Text("promoted [%lu]",
-                        gcstate.total_promoted_);
+            ImGui::Text("promoted [%lu] copy animation [%lu / %lu]",
+                        gcstate.total_promoted_,
+                        static_cast<std::size_t>(draw_state.animate_copy_hi_pct_ * app_state.copy_detail_v_.size() / 100),
+                        app_state.copy_detail_v_.size());
 
             ImGui::Text("mutation [%lu] mlog [%lu]",
                         gcstate.total_n_mutation_,
@@ -1335,12 +1456,21 @@ int main(int, char **)
                           gcstate,
                           ImRect(canvas_p0, canvas_p1),
                           draw_list,
-                          &draw_state.gcw_nursery_alloc_rect_);
+                          &draw_state.gcw_nursery_alloc_rect_,
+                          &draw_state.gcw_tenured_alloc_rect_);
 
-            /* GC may run here, in which case control reenters via AnimateGcCopyCb;
-             * callback will rely on loop assignments to draw_area members.
-             */
-            app_state.gc_->enable_gc_once();
+            if (draw_state.state_type_ == draw_state_type::animate_gc) {
+                draw_state.animate_copy_hi_pct_ += 0.25;
+                animate_gc_copy(app_state,
+                                draw_state,
+                                draw_list);
+
+                if (draw_state.animate_copy_hi_pct_ >= 100) {
+                    draw_state.state_type_ = draw_state_type::alloc;
+                    draw_state.animate_copy_hi_pct_ = 0;
+                    app_state.copy_detail_v_.clear();
+                }
+            }
 
             ImGui::End();
         }
