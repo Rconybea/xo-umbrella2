@@ -1427,6 +1427,8 @@ int main(int, char **)
                     int w, h;
                     SDL_GetWindowSize(window, &w, &h);
                     glViewport(0, 0, w, h);
+
+                    break;  // to force render during resize
                 }
             }
         }
