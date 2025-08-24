@@ -73,6 +73,16 @@ struct ImRect {
         return ImRect(ImVec2(top_left_.x, y0), ImVec2(bottom_right_.x, y1));
     }
 
+    /** Require: 0.0 <= p <= 1.0 **/
+    ImRect top_fraction(float p) const {
+        return ImRect(top_left_, ImVec2(this->x_hi(), ((1.0 - p) * this->y_lo()) + (p * this->y_hi())));
+    }
+
+    /** Require: 0.0 <= p <= 1.0 **/
+    ImRect bottom_fraction(float p) const {
+        return ImRect(ImVec2(this->x_lo(), (p * this->y_lo()) + ((1.0 - p) * this->y_hi())), bottom_right_);
+    }
+
     ImVec2 top_left_{0, 0};
     ImVec2 bottom_right_{0, 0};
 };
@@ -724,7 +734,9 @@ write_gc_history_tooltip(gc_history_headline headline,
     return retval.ensure_final_null();
 }
 
-/** @param gen  if @ref generation::nursery, only display nursery collections.
+/** stacked bar chart
+ *
+ *  @param gen  if @ref generation::nursery, only display nursery collections.
  *              otherwise display both
  **/
 void
@@ -778,7 +790,8 @@ draw_gc_history(const GcStateDescription & gcstate,
     float y_scale = yplus_scale + yminus_scale;
 
     /* width of 1 bar in screen coords */
-    float bar_w = display_w / gc_history.capacity();
+    constexpr float c_min_bar_w = 5.0;
+    float bar_w = std::max(c_min_bar_w, display_w / gc_history.capacity());
 
     /* 2nd loop: draw bars */
     std::size_t i = 0;
@@ -908,6 +921,100 @@ draw_gc_history(const GcStateDescription & gcstate,
 }
 
 void
+draw_gc_efficiency(const GcStateDescription & gcstate,
+                   //generation gen,
+                   const GcStatisticsHistory & gc_history,
+                   const ImRect & bounding_rect,
+                   bool debug_flag,
+                   ImDrawList * draw_list)
+{
+    scope log(XO_DEBUG(debug_flag));
+
+    float lm = 10;
+    float tm = 25;
+
+    /* we're going to make a level chart */
+
+    /* x_scale,y_scale in GC units (i.e. bytes) */
+    size_t x_scale = gc_history.capacity();
+    size_t yplus_scale = 1;
+    size_t yminus_scale = 0;
+
+    float display_w = bounding_rect.width()  - lm;
+    float display_h = bounding_rect.height() - tm;
+
+#ifdef NOPE // don't need this.  y-scale is [0.0, 1.0]
+    /* 1st loop: figure out max y scale */
+    for (const GcStatisticsHistoryItem & stats : gc_history) {
+        if ((gen == stats.upto_) || (gen == generation::tenured))
+        {
+            //size_t  na = stats.new_alloc_z_ - stats.survive_z_; /*new allocs, but dont' double-count survive_z*/
+            size_t  sz = stats.survive_z_; /*survive 1st gc */
+            size_t  pz = stats.promote_z_; /*survive 2nd gc */
+            size_t psz = stats.persist_z_; /*survive 3+ gc */
+            size_t g0z = stats.garbage0_z_;
+            size_t g1z = stats.garbage1_z_;
+            size_t gNz = stats.garbageN_z_;
+
+            if (yplus_scale < sz + pz + psz)
+                yplus_scale = sz + pz + psz;
+
+            if (yminus_scale < g0z + g1z + gNz)
+                yminus_scale = g0z + g1z + gNz;
+        } else {
+            ;
+        }
+    }
+#endif
+
+    /* y-coord of x-axis */
+    float y_zero = bounding_rect.y_lo() + tm + display_h;
+    //float y_zero = bounding_rect.y_lo() + tm + (display_h * yplus_scale) / (yplus_scale + yminus_scale);
+
+    float y_scale = 1.0;
+
+    /* width of 1 bar in screen coords */
+    constexpr float c_min_bar_w = 5.0;
+    float bar_w = std::max(c_min_bar_w, display_w / gc_history.capacity());
+
+    /* TODO: use temporary arena */
+    std::vector<ImVec2> line_points;
+    line_points.reserve(gc_history.size());
+
+    ImU32 average_color = IM_COL32(255, 255,  64, 255); /*solid yellow*/
+    ImU32  sample_color = IM_COL32(255, 255, 255, 255); /*white*/
+
+    /* 2nd loop: draw levels */
+    std::size_t i = 0;
+    for (const GcStatisticsHistoryItem & stats : gc_history)
+    {
+        //std::vector<ImVec2> line_points = { /* your points */ };
+        //draw_list->AddPolyline(line_points.data(), line_points.size(),
+        //                       IM_COL32(255, 255, 0, 255), false, 2.0f);
+
+        float y = y_zero - display_h * stats.efficiency();
+        float y_mean = y_zero - display_h * stats.average_efficiency();
+
+        /* x-coordinates of point */
+        float x = bounding_rect.x_lo() + lm + i * bar_w + 0.5 * bar_w;
+
+        line_points.push_back(ImVec2(x, y_mean));
+
+        draw_list->AddCircleFilled(ImVec2(x, y), 2.0f, sample_color);
+
+        ++i;
+    }
+
+    draw_list->AddPolyline(line_points.data(),
+                           line_points.size(),
+                           average_color,
+                           false,
+                           1.0f /*line width?*/);
+
+    log && log(xtag("i", i));
+} /*draw_gc_efficiency*/
+
+void
 draw_gc_alloc_state(const GcStateDescription & gcstate,
                     const ImRect & canvas_rect,
                     ImDrawList * draw_list,
@@ -1024,52 +1131,79 @@ draw_gc_state(const AppState & app_state,
                        IM_COL32(255, 255, 255, 255));
 
     /* TODO: does this reset coord space? */
-    ImGui::BeginChild("top pane", ImVec2(0, 105), ImGuiChildFlags_Border | ImGuiChildFlags_ResizeY);
+    ImRect alloc_rect;
+    {
+        ImGui::BeginChild("top pane", ImVec2(0, 105), ImGuiChildFlags_Border | ImGuiChildFlags_ResizeY);
 
-    ImRect alloc_rect(canvas_rect.top_left() + ImGui::GetWindowContentRegionMin(),
-                      canvas_rect.top_left() + ImGui::GetWindowContentRegionMax());
+        alloc_rect = ImRect(canvas_rect.top_left() + ImGui::GetWindowContentRegionMin(),
+                            canvas_rect.top_left() + ImGui::GetWindowContentRegionMax());
 
-    draw_list->PushClipRect(alloc_rect.top_left(), alloc_rect.bottom_right());
+        draw_list->PushClipRect(alloc_rect.top_left(), alloc_rect.bottom_right());
 
-    draw_gc_alloc_state(gcstate,
-                        alloc_rect,
-                        draw_list,
-                        p_nursery_alloc_rect,
-                        p_tenured_alloc_rect);
+        draw_gc_alloc_state(gcstate,
+                            alloc_rect,
+                            draw_list,
+                            p_nursery_alloc_rect,
+                            p_tenured_alloc_rect);
 
-    draw_list->PopClipRect();
+        draw_list->PopClipRect();
 
-    ImGui::EndChild();
+        ImGui::EndChild();
+    }
+
+    ImRect history_rect;
+    {
+        ImGui::BeginChild("left pane", ImVec2(800, 0), ImGuiChildFlags_Border | ImGuiChildFlags_ResizeX);
+
+         history_rect = ImRect(alloc_rect.bottom_left() + ImGui::GetWindowContentRegionMin(),
+                               alloc_rect.bottom_left() + ImGui::GetWindowContentRegionMax());
+
+         draw_list->PushClipRect(history_rect.top_left(), history_rect.bottom_right());
+
+         float lm = 50;
+         float rm = 70;
+         float tm = 10;
+         std::size_t x0 = history_rect.x_lo() + lm;
+         std::size_t x1 = history_rect.x_hi() - rm;
+         std::size_t h_y0 = history_rect.y_lo() + tm;
+
+         /* just incremental (nursery) collections */
+         ImRect incremental_rect = history_rect.top_fraction(0.33);
+
+         draw_gc_history(gcstate,
+                         generation::nursery,
+                         app_state.gc_->gc_history(),
+                         incremental_rect,
+                         false /*debug_flag*/,
+                         draw_list);
+
+         /* just full (nursery+tenured) collections */
+         ImRect full_rect = history_rect.bottom_fraction(0.67).top_fraction(0.5);
+
+         /* both nursery + full collections */
+         draw_gc_history(gcstate,
+                         generation::tenured,
+                         app_state.gc_->gc_history(),
+                         full_rect,
+                         false /*debug_flag*/,
+                         draw_list);
+
+         ImRect efficiency_rect = history_rect.bottom_fraction(0.67).bottom_fraction(0.5);
+
+         draw_gc_efficiency(gcstate,
+                            app_state.gc_->gc_history(),
+                            efficiency_rect,
+                            false /*debug_flag*/,
+                            draw_list);
+
+         draw_list->PopClipRect();
+
+         ImGui::EndChild();
+    }
+
+    ImGui::Text("placeholder text");
 
     /* BeginChild() again ? */
-
-    ImRect history_rect(alloc_rect.bottom_left() + ImGui::GetWindowContentRegionMin(),
-                        alloc_rect.bottom_left() + ImGui::GetWindowContentRegionMax());
-
-    float lm = 50;
-    float rm = 70;
-    float tm = 10;
-    std::size_t x0 = history_rect.x_lo() + lm;
-    std::size_t x1 = history_rect.x_hi() - rm;
-    std::size_t h_y0 = history_rect.y_lo() + tm;
-
-    /* just incremental (nursery) collections */
-    draw_gc_history(gcstate,
-                    generation::nursery,
-                    app_state.gc_->gc_history(),
-                    ImRect(ImVec2(x0, h_y0),
-                           ImVec2(x1, h_y0 + 250)),
-                    false /*debug_flag*/,
-                    draw_list);
-
-    /* both nursery + full collections */
-    draw_gc_history(gcstate,
-                    generation::tenured,
-                    app_state.gc_->gc_history(),
-                    ImRect(ImVec2(x0, h_y0 + 250),
-                           ImVec2(x1, h_y0 + 500)),
-                    false /*debug_flag*/,
-                    draw_list);
 
 #ifdef NOPE
     draw_list->AddCircleFilled(ImVec2(canvas_p0.x + 50, canvas_p0.y + 50),
