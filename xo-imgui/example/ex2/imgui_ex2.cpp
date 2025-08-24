@@ -211,8 +211,10 @@ public:
     GcStateDescription snapshot_gc_state() const;
 
     void generate_random_mutation();
+    void generate_random_mutations();
 
 public:
+    int alloc_per_cycle_ = 1;
     up<GC> gc_;
     std::size_t next_int_ = 0;
     std::size_t next_root_ = 0;
@@ -328,6 +330,13 @@ AppState::generate_random_mutation() {
     }
     if (next_root_ >= gc_root_v_.size())
         this->next_root_ = 0;
+}
+
+void
+AppState::generate_random_mutations() {
+    for (int i = 0; i < this->alloc_per_cycle_; ++i) {
+        this->generate_random_mutation();
+    }
 }
 
 void
@@ -1242,6 +1251,10 @@ struct DrawState {
 
     draw_state_type state_type_ = draw_state_type::alloc;
 
+    /** budgeted time period over which to animate gc copy **/
+    int animate_copy_budget_ms_ = 2000;
+    /** start time of current copy animation **/
+    std::chrono::steady_clock::time_point animate_copy_t0_;
     /** when animating copy step, display objects from AppState::copy_detail_v_[i]
      *  where i < .animate_copy_hi_ / 100 * AppState::copy_detail_v_.size()
      **/
@@ -1521,15 +1534,17 @@ int main(int, char **)
         case draw_state_type::alloc:
         {
             /** generate random alloc **/
-            app_state.generate_random_mutation();
+            app_state.generate_random_mutations();
 
             gcstate = app_state.snapshot_gc_state();
 
             /* GC may run here, in which case control reenters via AnimateGcCopyCb;
              * that callback captures copy details (per object!) in AppState
              */
-            if (app_state.gc_->enable_gc_once())
+            if (app_state.gc_->enable_gc_once()) {
                 draw_state.state_type_ = draw_state_type::animate_gc;
+                draw_state.animate_copy_t0_ = std::chrono::steady_clock::now();
+            }
 
             break;
         }
@@ -1598,15 +1613,17 @@ int main(int, char **)
             static int counter = 0;
 
             ImGui::Begin("Hello, world!");
-            ImGui::Text("This is totes useful text...");
+            //ImGui::Text("This is totes useful text...");
             ImGui::Checkbox("demo window", &show_demo_window);
-            ImGui::Checkbox("second window", &show_another_window);
+            //ImGui::Checkbox("second window", &show_another_window);
 
-            ImGui::SliderFloat("float", &counter_value, 0.0f, 1.0f);
-            ImGui::ColorEdit3("clear color", (float*)&clear_color);
+            ImGui::SliderInt("alloc/cycle", &app_state.alloc_per_cycle_, 1, 100);
+            ImGui::SliderInt("copy animation budget", &draw_state.animate_copy_budget_ms_, 10, 5000);
+            //ImGui::SliderFloat("alloc/cycle", &alloc_per_cycle, 0.0f, 1.0f);
+            //ImGui::ColorEdit3("clear color", (float*)&clear_color);
 
-            if (ImGui::Button("Button"))
-                ++counter;
+            //if (ImGui::Button("Button"))
+            //  ++counter;
             ImGui::NewLine(); // ImGui::SameLine()
             /* N\u2080 = N0, N\u2081 = N1 */
             ImGui::Text("alloc [%lu] avail [%lu] ",
@@ -1644,7 +1661,11 @@ int main(int, char **)
                           &draw_state.gcw_tenured_alloc_rect_);
 
             if (draw_state.state_type_ == draw_state_type::animate_gc) {
-                draw_state.animate_copy_hi_pct_ += 0.25;
+                auto animate_copy_t1 = std::chrono::steady_clock::now();
+                auto animate_dt = animate_copy_t1 - draw_state.animate_copy_t0_;
+                float animate_fraction_spent = std::chrono::duration_cast<std::chrono::milliseconds>(animate_dt).count() / static_cast<float>(draw_state.animate_copy_budget_ms_);
+
+                draw_state.animate_copy_hi_pct_ = 100.0 * animate_fraction_spent;
                 animate_gc_copy(app_state,
                                 draw_state,
                                 draw_list);
