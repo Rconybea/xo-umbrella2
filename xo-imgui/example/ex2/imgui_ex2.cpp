@@ -41,6 +41,7 @@ ImVec2 operator+(const ImVec2 & p1, const ImVec2 & p2) {
 struct ImRect {
     ImRect() = default;
     ImRect(const ImVec2 & tl, const ImVec2 & br) : top_left_{tl}, bottom_right_{br} {}
+    ImRect(float x_lo, float y_lo, float x_hi, float y_hi) : top_left_{x_lo, y_lo}, bottom_right_{x_hi, y_hi} {}
 
     static ImRect from_xy_span(const ImVec2 & x_span, const ImVec2 & y_span) {
         return ImRect(ImVec2{x_span.x, y_span.x}, ImVec2{x_span.y, y_span.y});
@@ -71,6 +72,13 @@ struct ImRect {
     }
     ImRect with_y_span(float y0, float y1) const {
         return ImRect(ImVec2(top_left_.x, y0), ImVec2(bottom_right_.x, y1));
+    }
+
+    ImRect within_margin(const ImRect & margin) const {
+        return ImRect(this->x_lo() + margin.x_lo(),
+                      this->y_lo() + margin.y_lo(),
+                      this->x_hi() - margin.x_hi(),
+                      this->y_hi() - margin.y_hi());
     }
 
     /** Require: 0.0 <= p <= 1.0 **/
@@ -1023,6 +1031,7 @@ draw_gc_efficiency(const GcStateDescription & gcstate,
     log && log(xtag("i", i));
 } /*draw_gc_efficiency*/
 
+
 void
 draw_gc_alloc_state(const GcStateDescription & gcstate,
                     const ImRect & canvas_rect,
@@ -1030,9 +1039,10 @@ draw_gc_alloc_state(const GcStateDescription & gcstate,
                     ImRect * p_nursery_alloc_rect,
                     ImRect * p_tenured_alloc_rect)
 {
-    float lm = 50;
-    float rm = 70;
-    float tm = 10;
+    float lm = 0;
+    float rm = 0;
+    float tm = 0;
+    float bm = 0;
     float est_chart_text_height = 14;
     float h = 20;  // chart bar height
 
@@ -1146,11 +1156,12 @@ draw_gc_state(const AppState & app_state,
 
         alloc_rect = ImRect(canvas_rect.top_left() + ImGui::GetWindowContentRegionMin(),
                             canvas_rect.top_left() + ImGui::GetWindowContentRegionMax());
+        ImRect draw_rect = alloc_rect.within_margin(ImRect(50, 10, 70, 10));
 
-        draw_list->PushClipRect(alloc_rect.top_left(), alloc_rect.bottom_right());
+        draw_list->PushClipRect(draw_rect.top_left(), draw_rect.bottom_right());
 
         draw_gc_alloc_state(gcstate,
-                            alloc_rect,
+                            draw_rect,
                             draw_list,
                             p_nursery_alloc_rect,
                             p_tenured_alloc_rect);
@@ -1354,6 +1365,8 @@ AnimateGcCopyCb::notify_gc_copy(std::size_t z,
     generation valid_gen = xo::gc::valid_genresult2gen(gen);
 
     p_app_state_->copy_detail_v_.push_back(GcCopyDetail(z, valid_gen, offset, alloc));
+
+    /* will be animated across frames, see animate_gc_copy() */
 }
 
 int main(int, char **)
