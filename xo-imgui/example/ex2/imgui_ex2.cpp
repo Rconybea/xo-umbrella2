@@ -34,6 +34,10 @@
 
 using xo::gc::generation;
 
+ImVec2 operator+(const ImVec2 & p1, const ImVec2 & p2) {
+    return ImVec2(p1.x + p2.x, p1.y + p2.y);
+}
+
 struct ImRect {
     ImRect() = default;
     ImRect(const ImVec2 & tl, const ImVec2 & br) : top_left_{tl}, bottom_right_{br} {}
@@ -904,23 +908,17 @@ draw_gc_history(const GcStateDescription & gcstate,
 }
 
 void
-draw_gc_state(const AppState & app_state,
-              const GcStateDescription & gcstate,
-              const ImRect & canvas_rect,
-              ImDrawList * draw_list,
-              ImRect * p_nursery_alloc_rect,
-              ImRect * p_tenured_alloc_rect)
+draw_gc_alloc_state(const GcStateDescription & gcstate,
+                    const ImRect & canvas_rect,
+                    ImDrawList * draw_list,
+                    ImRect * p_nursery_alloc_rect,
+                    ImRect * p_tenured_alloc_rect)
 {
     float lm = 50;
     float rm = 70;
     float tm = 10;
     float est_chart_text_height = 14;
     float h = 20;  // chart bar height
-
-    // draw stuff
-    draw_list->AddRect(canvas_rect.top_left(),
-                       canvas_rect.bottom_right(),
-                       IM_COL32(255, 255, 255, 255));
 
     /* bounding rectange for nursery display */
     ImRect N_space_rect(ImVec2(canvas_rect.x_lo() + lm,
@@ -1009,6 +1007,51 @@ draw_gc_state(const AppState & app_state,
 
     if (p_tenured_alloc_rect)
         *p_tenured_alloc_rect = T_alloc_rect;
+
+} /*draw_gc_alloc_state*/
+
+void
+draw_gc_state(const AppState & app_state,
+              const GcStateDescription & gcstate,
+              const ImRect & canvas_rect,
+              ImDrawList * draw_list,
+              ImRect * p_nursery_alloc_rect,
+              ImRect * p_tenured_alloc_rect)
+{
+    // draw stuff
+    draw_list->AddRect(canvas_rect.top_left(),
+                       canvas_rect.bottom_right(),
+                       IM_COL32(255, 255, 255, 255));
+
+    /* TODO: does this reset coord space? */
+    ImGui::BeginChild("top pane", ImVec2(0, 105), ImGuiChildFlags_Border | ImGuiChildFlags_ResizeY);
+
+    ImRect alloc_rect(canvas_rect.top_left() + ImGui::GetWindowContentRegionMin(),
+                      canvas_rect.top_left() + ImGui::GetWindowContentRegionMax());
+
+    draw_list->PushClipRect(alloc_rect.top_left(), alloc_rect.bottom_right());
+
+    draw_gc_alloc_state(gcstate,
+                        alloc_rect,
+                        draw_list,
+                        p_nursery_alloc_rect,
+                        p_tenured_alloc_rect);
+
+    draw_list->PopClipRect();
+
+    ImGui::EndChild();
+
+    /* BeginChild() again ? */
+
+    ImRect history_rect(alloc_rect.bottom_left() + ImGui::GetWindowContentRegionMin(),
+                        alloc_rect.bottom_left() + ImGui::GetWindowContentRegionMax());
+
+    float lm = 50;
+    float rm = 70;
+    float tm = 10;
+    std::size_t x0 = history_rect.x_lo() + lm;
+    std::size_t x1 = history_rect.x_hi() - rm;
+    std::size_t h_y0 = history_rect.y_lo() + tm;
 
     /* just incremental (nursery) collections */
     draw_gc_history(gcstate,
@@ -1217,7 +1260,7 @@ int main(int, char **)
     SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &major);
     SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &minor);
 
-    std::cerr << "Requested OpenGL version: " << major << "." << minor << std::endl;
+    std::cerr << "Requested OpenGL vtersion: " << major << "." << minor << std::endl;
 
     if (gl_context) {
         std::cerr << "SDL_GL_CreateContext done" << std::endl;
