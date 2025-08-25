@@ -158,11 +158,13 @@ struct ImRect {
  */
 struct GcGenerationDescription {
     GcGenerationDescription() = default;
-    GcGenerationDescription(const char * mnemonic, std::uint8_t polarity,
+    GcGenerationDescription(generation gen,
+                            const char * name, const char * mnemonic, const char * gc_type,
+                            std::uint8_t polarity,
                             std::size_t tospace_scale,
                             std::size_t before_ckp, std::size_t after_ckp,
                             std::size_t reserved, std::size_t committed, std::size_t gc_threshold)
-        : mnemonic_{mnemonic}, polarity_{polarity},
+        : name_{name}, mnemonic_{mnemonic}, gc_type_{gc_type}, polarity_{polarity},
           tospace_scale_{tospace_scale},
           before_checkpoint_{before_ckp}, after_checkpoint_{after_ckp},
           reserved_{reserved}, committed_{committed},
@@ -171,8 +173,17 @@ struct GcGenerationDescription {
     /** scale (in bytes) for drawing space **/
     std::size_t scale() const { return std::max(committed_, gc_threshold_); }
 
+    /** nursery or tenured **/
+    generation generation_;
+
+    /** "nursery" or "tenured" **/
+    const char * name_ = nullptr;
+
     /** "N" or "T" **/
     const char * mnemonic_ = nullptr;
+
+    /** "incremental" or "full" **/
+    const char * gc_type_ = nullptr;
 
     /** alternates between {0, 1} on each GC **/
     std::uint8_t polarity_ = 0;
@@ -207,6 +218,8 @@ struct GcStateDescription {
                        std::size_t total_promoted,
                        std::size_t total_n_mutation
         );
+
+    const GcGenerationDescription & get_gendescr(generation g) const { return gen_state_v_[gen2int(g)]; }
 
     std::array<GcGenerationDescription, static_cast<std::size_t>(generation::N)> gen_state_v_;
 
@@ -339,7 +352,10 @@ AppState::tenured_tospace_scale() const {
 GcStateDescription
 AppState::snapshot_gc_state() const {
     return GcStateDescription(GcGenerationDescription
-                              ("N",
+                              (generation::nursery,
+                               "nursery",
+                               "N",
+                               "incremental",
                                gc_->nursery_polarity(),
                                this->nursery_tospace_scale(),
                                gc_->nursery_before_checkpoint(),
@@ -348,7 +364,10 @@ AppState::snapshot_gc_state() const {
                                gc_->nursery_to_committed(),
                                gc_->nursery_before_checkpoint() + gc_->config().incr_gc_threshold_),
                               GcGenerationDescription
-                              ("T",
+                              (generation::tenured,
+                               "tenured",
+                               "T",
+                               "full",
                                gc_->tenured_polarity(),
                                this->tenured_tospace_scale(),
                                gc_->tenured_before_checkpoint(),
@@ -500,9 +519,12 @@ using std::size_t;
  *
  **/
 struct GenerationLayout {
+    GenerationLayout() = default;
     GenerationLayout(const GcGenerationDescription & gendescr, const ImRect & br, bool with_labels);
 
+    const char * name() const { return gendescr_.name_; }
     const char * mnemonic() const { return gendescr_.mnemonic_; }
+    const char * gc_type() const { return gendescr_.gc_type_; }
     std::size_t to_G1_size() const { return gendescr_.before_checkpoint_; }
     std::size_t to_G0_size() const { return gendescr_.after_checkpoint_; }
     std::size_t to_gc_threhsold() const { return gendescr_.gc_threshold_; }
@@ -516,6 +538,9 @@ struct GenerationLayout {
     ImRect to_g0_rect() const {
         return mem_rect_to_.mid_x_fraction(this->to_G1_size() / this->to_scale(),
                                            (this->to_G1_size() + this->to_G0_size()) / this->to_scale());
+    }
+    ImRect to_alloc_rect() const {
+        return mem_rect_to_.left_fraction((this->to_G1_size() + this->to_G0_size()) / this->to_scale());
     }
 
     /** size-related statistics for generation to be displayed **/
@@ -585,17 +610,12 @@ GenerationLayout::GenerationLayout(const GcGenerationDescription & gendescr,
 
 /**
  *  @p polarity  0 -> draw from-space above to-space; 1 -> draw from-space below to-space
- *  @p p_alloc_to_rect on exit, contains rectangle depicting to-space memory range
  *  @p p_x1    On exit *p_x1 contains x-coord of right-hand edge of rectangle
  *             depicting potential memory range
  **/
 void
-draw_generation(const GcStateDescription & gcdescr,
-                xo::gc::generation gen,
-                const GenerationLayout & layout,
-                ImDrawList * draw_list,
-                ImRect * p_alloc_to_rect,
-                float * p_x1)
+draw_generation(const GenerationLayout & layout,
+                ImDrawList * draw_list)
 {
     //scope log(XO_DEBUG(with_labels));
 
@@ -604,11 +624,9 @@ draw_generation(const GcStateDescription & gcdescr,
     /* next GC trigges when G0_to_size reaches this threshold */
     std::size_t G_to_gc_threshold = 0;
 
-    const GcGenerationDescription & gendescr = gcdescr.gen_state_v_[gen2int(gen)];
+    G_to_gc_threshold = layout.gendescr_.gc_threshold_;
 
-    G_to_gc_threshold = gendescr.gc_threshold_;
-
-    std::size_t G_to_scale = gendescr.scale();
+    std::size_t G_to_scale = layout.gendescr_.scale();
 
     /*
      * committed: G_to_committed
@@ -655,10 +673,12 @@ draw_generation(const GcStateDescription & gcdescr,
     if (layout.with_labels_) {
         snprintf(g1_buf, sizeof(g1_buf),
                  "reserved: %lu bytes; committed: %lu bytes; %s\u2081: %lu bytes; %s\u2080: %lu bytes",
-                 gendescr.reserved_, gendescr.committed_, gendescr.mnemonic_,
-                 gendescr.before_checkpoint_,
-                 gendescr.mnemonic_,
-                 gendescr.after_checkpoint_);
+                 layout.gendescr_.reserved_,
+                 layout.gendescr_.committed_,
+                 layout.mnemonic(),
+                 layout.gendescr_.before_checkpoint_,
+                 layout.mnemonic(),
+                 layout.gendescr_.after_checkpoint_);
 
         draw_list->AddText(layout.bounding_rect_.top_left(),
                            label_color,
@@ -706,7 +726,7 @@ draw_generation(const GcStateDescription & gcdescr,
                  "%s\u2081: %lu - %s survivor size in bytes",
                  layout.mnemonic(),
                  layout.to_G1_size(),
-                 ((gen == xo::gc::generation::nursery) ? "nursery" : "tenured"));
+                 layout.name());
 
         draw_filled_rect_with_label(layout.with_labels_ ? buf : nullptr,
                                     tooltip,
@@ -726,13 +746,15 @@ draw_generation(const GcStateDescription & gcdescr,
         char buf[255];
 
         if (layout.with_labels_)
-            snprintf(buf, sizeof(buf), "%s\u2080: %luk", layout.mnemonic(), layout.to_G0_size() / 1024); /* N(0) */
+            snprintf(buf, sizeof(buf), "%s\u2080: %luk",
+                     layout.mnemonic(),
+                     layout.to_G0_size() / 1024); /* N(0) */
 
         char tooltip[255];
         snprintf(tooltip, sizeof(tooltip),
                  "%s\u2080: %lu - %s new alloc size in bytes",
                  layout.mnemonic(), layout.to_G0_size(),
-                 ((gen == xo::gc::generation::nursery) ? "nursery" : "tenured"));
+                 layout.name());
 
         draw_filled_rect_with_label(layout.with_labels_ ? buf : nullptr,
                                     tooltip,
@@ -746,7 +768,7 @@ draw_generation(const GcStateDescription & gcdescr,
     if (layout.with_labels_) {
         const char * uparrow = reinterpret_cast<const char *>(u8"\u25b3");
 
-        float ngc_w = (display_w * gendescr.gc_threshold_) / G_to_scale;
+        float ngc_w = (display_w * layout.gendescr_.gc_threshold_) / G_to_scale;
 
         auto tmp = ImGui::CalcTextSize(uparrow);
         std::size_t uparrow_w = tmp.x;
@@ -764,18 +786,16 @@ draw_generation(const GcStateDescription & gcdescr,
             char marker_tt_buf[255];
             snprintf(marker_tt_buf, sizeof(marker_tt_buf),
                      "Next %s GC when size(%s) >= %lu bytes",
-                     (gen == generation::nursery ? "incremental" : "full"),
-                     (gen == generation::nursery ? "nursery" : "tenured"),
-                     gendescr.gc_threshold_);
+                     layout.gc_type(),
+                     layout.name(),
+                     layout.gendescr_.gc_threshold_);
 
             ImGui::SetTooltip("%s", marker_tt_buf);
         }
     }
 
-    if (p_alloc_to_rect)
-        *p_alloc_to_rect = layout.mem_rect_to_.with_x_span(G1_rect.x_lo(), G0_rect.x_hi());
-    if (p_x1)
-        *p_x1 = layout.chart_withlabel_rect_.x_hi() - layout.rh_text_dx_;
+//    if (p_x1)
+//        *p_x1 = layout.chart_nolabel_rect_.x_hi();
 } /*draw_generation*/
 
 void
@@ -783,17 +803,18 @@ draw_nursery(const GcStateDescription & gcstate,
              bool with_labels,
              const ImRect & rect,
              ImDrawList * draw_list,
-             ImRect * p_alloc_rect,
-             float * p_x1)
+             GenerationLayout * p_layout)
 {
     using xo::gc::generation;
 
-    draw_generation(gcstate,
-                    generation::nursery,
-                    GenerationLayout(gcstate.gen_state_v_[gen2int(generation::nursery)], rect, with_labels),
-                    draw_list,
-                    p_alloc_rect,
-                    p_x1);
+    const GcGenerationDescription & gendescr = gcstate.get_gendescr(generation::nursery);
+
+    GenerationLayout layout(gendescr, rect, with_labels);
+
+    draw_generation(layout, draw_list);
+
+    if (p_layout)
+        *p_layout = layout;
 }
 
 void
@@ -801,17 +822,18 @@ draw_tenured(const GcStateDescription & gcstate,
              bool with_labels,
              const ImRect & rect,
              ImDrawList * draw_list,
-             ImRect * p_alloc_rect,
-             float * p_x1)
+             GenerationLayout * p_layout)
 {
     using xo::gc::generation;
 
-    draw_generation(gcstate,
-                    generation::tenured,
-                    GenerationLayout(gcstate.gen_state_v_[gen2int(generation::tenured)], rect, with_labels),
-                    draw_list,
-                    p_alloc_rect,
-                    p_x1);
+    const GcGenerationDescription & gendescr = gcstate.get_gendescr(generation::tenured);
+
+    GenerationLayout layout(gendescr, rect, with_labels);
+
+    draw_generation(layout, draw_list);
+
+    if (p_layout)
+        *p_layout = layout;
 }
 
 /** for history tooltip, choose which statistic to headline **/
@@ -1204,18 +1226,19 @@ draw_gc_alloc_state(const GcStateDescription & gcstate,
     //assert(N_space_rect.height() <= c_max_h + c_est_chart_text_height);
 
     /* rectangle representing allocated nursery range */
-    ImRect N_alloc_rect;
-    float N_x1 = 0.0;
+    //float N_x1 = 0.0;
+    GenerationLayout N_layout;
 
     draw_nursery(gcstate,
                  true /*with_labels*/,
                  N_space_rect,
                  draw_list,
-                 &N_alloc_rect,
-                 &N_x1);
+                 &N_layout);
+
+    float N_x1 = N_layout.chart_nolabel_rect_.x_hi();
 
     if (p_nursery_alloc_rect)
-        *p_nursery_alloc_rect = N_alloc_rect;
+        *p_nursery_alloc_rect = N_layout.to_alloc_rect();
 
     /* N0_to_size..N_to_scale: in bytes */
     std::size_t N_to_scale = gcstate.gen_state_v_[gen2int(generation::nursery)].tospace_scale_;
@@ -1273,14 +1296,13 @@ draw_gc_alloc_state(const GcStateDescription & gcstate,
 
         draw_nursery(gcstate,
                      false /*no labels*/,
-                     np_rect, //ImRect(ImVec2(np_x0, np_y0), ImVec2(np_x1, np_y1)),
+                     np_rect,
                      draw_list,
-                     nullptr,
                      nullptr);
     }
 
     /* rectangle representing allocated tenured range */
-    ImRect T_alloc_rect;
+    GenerationLayout T_layout;
 
     draw_tenured(gcstate,
                  true /*with labels*/,
@@ -1288,11 +1310,10 @@ draw_gc_alloc_state(const GcStateDescription & gcstate,
                         ImVec2(x0 + (adj_display_w * (T_to_scale/TplusN_to_scale)) - TplusN_spacer,
                                T_space_rect.y_hi())),
                  draw_list,
-                 &T_alloc_rect,
-                 nullptr);
+                 &T_layout);
 
     if (p_tenured_alloc_rect)
-        *p_tenured_alloc_rect = T_alloc_rect;
+        *p_tenured_alloc_rect = T_layout.to_alloc_rect();
 
 } /*draw_gc_alloc_state*/
 
