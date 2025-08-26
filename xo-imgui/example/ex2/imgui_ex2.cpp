@@ -1652,7 +1652,9 @@ void animate_gc_copy(const AppState & app_state,
                                    nursery_dest_rect.y_mid() - 0.5 * textz.y);
 
         if (text_pos.x < nursery_dest_rect.x_lo())
-            text_pos.x = last_nursery_dest_rect.x_hi() + 2;
+            text_pos.x = nursery_dest_rect.x_lo() + 2;
+        else if (text_pos.x < nursery_dest_rect.x_lo() + 0.5 * textz.x)
+            text_pos.x = nursery_dest_rect.x_lo() + 0.5 * textz.x;
 
         draw_list->AddText(text_pos, text_color, buf);
 
@@ -1671,13 +1673,15 @@ void animate_gc_copy(const AppState & app_state,
         auto textz = ImGui::CalcTextSize(buf);
 
         ImU32  text_color = IM_COL32(255, 255, 255, 255); /*black*/
-        ImVec2 text_pos   = ImVec2(0.5 * (first_tenured_dest_rect.x_lo()
-                                          + last_tenured_dest_rect.x_hi()
-                                          - textz.x),
+        float x0 = first_tenured_dest_rect.x_lo();
+        float x1 = last_tenured_dest_rect.x_hi();
+        ImVec2 text_pos   = ImVec2(0.5 * (x0 + x1 - textz.x),
                                    tenured_dest_rect.y_mid() - 0.5 * textz.y);
 
-        if (text_pos.x < first_tenured_dest_rect.x_lo())
-            text_pos.x = last_tenured_dest_rect.x_hi() + 2;
+        if (text_pos.x < x0 + 2)
+            text_pos.x = x0 + 2;
+        else if (text_pos.x < x0 + 0.5 * textz.x)
+            text_pos.x = x0 + 0.5 * textz.x;
 
         draw_list->AddText(text_pos, text_color, buf);
     }
