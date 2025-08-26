@@ -271,8 +271,12 @@ using xo::rng::Seed;
 
 /** details of a single copy event performed by GC **/
 struct GcCopyDetail {
-    GcCopyDetail(std::size_t z, generation src, std::size_t src_offset, std::size_t src_space_z)
-        : z_{z}, src_gen_{src}, src_offset_{src_offset}, src_space_z_{src_space_z}
+    GcCopyDetail(std::size_t z,
+                 generation src, std::size_t src_offset, std::size_t src_space_z,
+                 generation dest, std::size_t dest_offset, std::size_t dest_z)
+        : z_{z},
+          src_gen_{src}, src_offset_{src_offset}, src_space_z_{src_space_z},
+          dest_gen_{dest}, dest_offset_{dest_offset}, dest_z_{dest_z}
         {}
 
     /** object size in bytes **/
@@ -283,6 +287,13 @@ struct GcCopyDetail {
     std::size_t src_offset_ = 0;
     /** size of source space.  could store this separately **/
     std::size_t src_space_z_ = 0;
+
+    /** destination location **/
+    generation dest_gen_;
+    /** offset from start of allocator **/
+    std::size_t dest_offset_ = 0;
+    /** size of destination space. (could store this separately). **/
+    std::size_t dest_z_ = 0;
 };
 
 struct AppState {
@@ -300,6 +311,8 @@ public:
 
 public:
     int alloc_per_cycle_ = 1;
+    /** if gc triggered, remembers which whether incremental or full **/
+    generation upto_ = generation::nursery;
     up<GC> gc_;
     std::size_t next_int_ = 0;
     std::size_t next_root_ = 0;
@@ -308,6 +321,11 @@ public:
     xoshiro256ss rng_{seed_};
     /** remember details for each object copied by GC, so we can animate **/
     std::vector<GcCopyDetail> copy_detail_v_;
+    /** max offset for destination, given copied to nursery **/
+    std::size_t copy_detail_max_nursery_dest_offset_ = 0;
+    std::size_t copy_detail_nursery_dest_size_ = 0;
+    std::size_t copy_detail_max_tenured_dest_offset_ = 0;
+    std::size_t copy_detail_tenured_dest_size_ = 0;
 };
 
 AppState::AppState()
@@ -351,6 +369,16 @@ AppState::tenured_tospace_scale() const {
 
 GcStateDescription
 AppState::snapshot_gc_state() const {
+    /** NOTE: this gets invoked before GC gets opportunity to run.
+     *        in the event that GC does run, from- and to- spaces will
+     *        have been reversed (near beginning of GC phase)
+     *
+     *        This means that nursery_to_reserved() etc. actually refer to from-space
+     *        *during gc*
+     **/
+
+    // TOOD: may want to use GC::get_gc_statistics() to replace multiple round trips
+
     return GcStateDescription(GcGenerationDescription
                               (generation::nursery,
                                "nursery",
@@ -442,7 +470,7 @@ draw_filled_rect_with_label(const char * text,
 {
     draw_list->AddRectFilled(rect.top_left(),
                              rect.bottom_right(),
-                             fillcolor); //IM_COL32(0, 128, 0, 255) /*darker green*/);
+                             fillcolor);
 
     if ((rect.width() > 0.0) && (rect.height() > 0.0)) {
         ImGui::SetCursorScreenPos(rect.top_left());
@@ -541,6 +569,11 @@ struct GenerationLayout {
     }
     ImRect to_alloc_rect() const {
         return mem_rect_to_.left_fraction((this->to_G1_size() + this->to_G0_size()) / this->to_scale());
+    }
+
+    ImRect from_alloc_rect() const {
+        /* use the same sizing as for source generation */
+        return mem_rect_from_.left_fraction((this->to_G1_size() + this->to_G0_size()) / this->to_scale());
     }
 
     /** size-related statistics for generation to be displayed **/
@@ -719,7 +752,8 @@ draw_generation(const GenerationLayout & layout,
         char buf[255];
 
         if (layout.with_labels_)
-            snprintf(buf, sizeof(buf), "%s\u2081: %luk", layout.mnemonic(), layout.to_G1_size() / 1024); /* N1 / T1 */
+            snprintf(buf, sizeof(buf), "%s\u2081: %luk",
+                     layout.mnemonic(), layout.to_G1_size() / 1024); /* N1 / T1 */
 
         char tooltip[255];
         snprintf(tooltip, sizeof(tooltip),
@@ -793,9 +827,6 @@ draw_generation(const GenerationLayout & layout,
             ImGui::SetTooltip("%s", marker_tt_buf);
         }
     }
-
-//    if (p_x1)
-//        *p_x1 = layout.chart_nolabel_rect_.x_hi();
 } /*draw_generation*/
 
 void
@@ -1210,8 +1241,11 @@ void
 draw_gc_alloc_state(const GcStateDescription & gcstate,
                     const ImRect & canvas_rect,
                     ImDrawList * draw_list,
-                    ImRect * p_nursery_alloc_rect,
-                    ImRect * p_tenured_alloc_rect)
+                    GenerationLayout * p_nursery_layout,
+                    GenerationLayout * p_tenured_layout
+                    //ImRect * p_nursery_alloc_rect,
+                    //ImRect * p_tenured_alloc_rect
+    )
 {
     constexpr float c_est_chart_text_height = 14.0;
     constexpr float c_min_h =  7;  // chart bar height
@@ -1237,8 +1271,11 @@ draw_gc_alloc_state(const GcStateDescription & gcstate,
 
     float N_x1 = N_layout.chart_nolabel_rect_.x_hi();
 
-    if (p_nursery_alloc_rect)
-        *p_nursery_alloc_rect = N_layout.to_alloc_rect();
+    if (p_nursery_layout)
+        *p_nursery_layout = N_layout;
+
+//    if (p_nursery_alloc_rect)
+//        *p_nursery_alloc_rect = N_layout.to_alloc_rect();
 
     /* N0_to_size..N_to_scale: in bytes */
     std::size_t N_to_scale = gcstate.gen_state_v_[gen2int(generation::nursery)].tospace_scale_;
@@ -1312,8 +1349,11 @@ draw_gc_alloc_state(const GcStateDescription & gcstate,
                  draw_list,
                  &T_layout);
 
-    if (p_tenured_alloc_rect)
-        *p_tenured_alloc_rect = T_layout.to_alloc_rect();
+    if (p_tenured_layout)
+        *p_tenured_layout = T_layout;
+
+//    if (p_tenured_alloc_rect)
+//        *p_tenured_alloc_rect = T_layout.to_alloc_rect();
 
 } /*draw_gc_alloc_state*/
 
@@ -1322,8 +1362,10 @@ draw_gc_state(const AppState & app_state,
               const GcStateDescription & gcstate,
               const ImRect & canvas_rect,
               ImDrawList * draw_list,
-              ImRect * p_nursery_alloc_rect,
-              ImRect * p_tenured_alloc_rect,
+              GenerationLayout * p_nursery_layout,
+              GenerationLayout * p_tenured_layout,
+              //ImRect * p_nursery_alloc_rect,
+              //ImRect * p_tenured_alloc_rect,
               ImRect * p_history_rect)
 {
     // draw stuff
@@ -1345,8 +1387,11 @@ draw_gc_state(const AppState & app_state,
         draw_gc_alloc_state(gcstate,
                             draw_rect,
                             draw_list,
-                            p_nursery_alloc_rect,
-                            p_tenured_alloc_rect);
+                            p_nursery_layout,
+                            p_tenured_layout
+                            //p_nursery_alloc_rect,
+                            //p_tenured_alloc_rect
+            );
 
         draw_list->PopClipRect();
 
@@ -1463,10 +1508,10 @@ struct DrawState {
     ImVec2 gcw_canvas_p0_;
     ImVec2 gcw_canvas_p1_;
 
-    /** rect displaying allocated nursery space **/
-    ImRect gcw_nursery_alloc_rect_;
-    /** rect displaying allocated tenured space **/
-    ImRect gcw_tenured_alloc_rect_;
+    /** layout for nursery display **/
+    GenerationLayout gcw_nursery_layout_;
+    /** layout for tenured display **/
+    GenerationLayout gcw_tenured_layout_;
 
     /** rect displaying gc history (strip charts) **/
     ImRect gcw_history_rect_;
@@ -1489,35 +1534,152 @@ ImRect map_src_alloc_to_screen(const GcCopyDetail & copy_detail,
     return space_rect.with_x_span(src0_x, src1_x);
 }
 
+ImRect map_dest_alloc_to_screen(const GcCopyDetail & copy_detail,
+                                const ImRect & space_rect)
+{
+    /* for from-space, want to use full width of memory space */
+
+    auto [x_coord_lo, x_coord_hi] = space_rect.x_span();
+
+    // dest_space_z_ ?
+
+    double w0 = copy_detail.dest_offset_ / static_cast<double>(copy_detail.dest_z_);
+    float dest0_x = ((1.0 - w0) * x_coord_lo) + (w0 * x_coord_hi);
+
+    double w1 = ((copy_detail.dest_offset_ + copy_detail.z_)
+                 / static_cast<double>(copy_detail.dest_z_));
+    float dest1_x = ((1.0 - w1) * x_coord_lo) + (w1 * x_coord_hi);
+
+    return space_rect.with_x_span(dest0_x, dest1_x);
+}
+
+/* editor bait: animate_copy() */
 void animate_gc_copy(const AppState & app_state,
                      const DrawState & draw_state,
                      ImDrawList * draw_list)
 {
-    const ImRect & nursery_rect = draw_state.gcw_nursery_alloc_rect_;
-    const ImRect & tenured_rect = draw_state.gcw_tenured_alloc_rect_;
+    /* NOTE: this only runs during GC copy.
+     *       draw_state.gcw_nursery_layout_ and gcw_tenured_layout_
+     *       are taken from snapshots made before GC began,
+     *       ergo before to/from spaces were swapped
+     */
+    ImRect nursery_src_rect = draw_state.gcw_nursery_layout_.to_alloc_rect();
+    ImRect tenured_src_rect = draw_state.gcw_tenured_layout_.to_alloc_rect();
 
-    //auto [x_coord_lo, x_coord_hi] = nursery_rect.x_span();
+    ImRect nursery_dest_rect = draw_state.gcw_nursery_layout_.mem_rect_from_;
+    ImRect tenured_dest_rect;
+
+    if (app_state.upto_ == generation::nursery) {
+        tenured_dest_rect = draw_state.gcw_tenured_layout_.mem_rect_to_;
+    } else {
+        tenured_dest_rect = draw_state.gcw_tenured_layout_.mem_rect_from_;
+    }
+
+    std::size_t n_copy = app_state.copy_detail_v_.size();
+    /* grade from black-to-white between lo_copy and hi_copy.
+     * Note we allow animate_copy_hi_pct_ > 100.0
+     */
+    float lo_copy = 0.01 * std::max(0.0, draw_state.animate_copy_hi_pct_ - 14.0) * n_copy;
+    float hi_copy = 0.01 * draw_state.animate_copy_hi_pct_ * n_copy;
+
+    /* remember max copy offset seen in {nursery, tenured} space respectively,
+     * so we can label it
+     */
+    std::size_t last_nursery_dest_offset = 0;
+    ImRect last_nursery_dest_rect;
+    std::size_t first_tenured_dest_offset = 0;
+    ImRect first_tenured_dest_rect;
+    std::size_t last_tenured_dest_offset = 0;
+    ImRect last_tenured_dest_rect;
 
     std::size_t i_copy = 0;
     for (const auto & copy_detail : app_state.copy_detail_v_) {
-        ImRect src_rect;
+        /* cutout for each copied object */
+        {
+            float wt = (i_copy > lo_copy) ? static_cast<float>(i_copy) / hi_copy : 0.0;
+            /* grey fading to black */
+            //ImU32 color = IM_COL32(wt*128, 64+wt*64, wt*128, 255);
+            ImU32 color = IM_COL32( 96, 224, 255, 255);
 
-        if (copy_detail.src_gen_ == generation::nursery) {
-            src_rect = map_src_alloc_to_screen(copy_detail, nursery_rect);
-        } else {
-            src_rect = map_src_alloc_to_screen(copy_detail, tenured_rect);
+            ImRect src_rect;
+
+            if (copy_detail.src_gen_ == generation::nursery) {
+                src_rect = map_src_alloc_to_screen(copy_detail, nursery_src_rect);
+            } else {
+                src_rect = map_src_alloc_to_screen(copy_detail, tenured_src_rect);
+            }
+
+            draw_list->AddRectFilled(src_rect.top_left(),
+                                     src_rect.bottom_right(),
+                                     color);
         }
 
-        float hi_copy = 0.01 * draw_state.animate_copy_hi_pct_ * app_state.copy_detail_v_.size();
-        float wt = i_copy / hi_copy;
-        ImU32 color = IM_COL32(64, 255, static_cast<int>(64 + (128 * wt)), 255);
+        if (copy_detail.dest_gen_ == generation::nursery) {
+            last_nursery_dest_rect = map_dest_alloc_to_screen(copy_detail, nursery_dest_rect);
+            last_nursery_dest_offset = copy_detail.dest_offset_;
+        } else if (copy_detail.dest_gen_ == generation::tenured) {
+            last_tenured_dest_rect = map_dest_alloc_to_screen(copy_detail, tenured_dest_rect);
+            last_tenured_dest_offset = copy_detail.dest_offset_;
 
-        draw_list->AddRectFilled(src_rect.top_left(),
-                                 src_rect.bottom_right(),
+            if (first_tenured_dest_rect.width() == 0) {
+                first_tenured_dest_rect = last_tenured_dest_rect;
+                first_tenured_dest_offset = copy_detail.dest_offset_;
+            }
+        }
+
+        if (++i_copy >= hi_copy) {
+            break;
+        }
+    }
+
+    if (last_nursery_dest_rect.width() > 0.0) {
+        //ImU32 color = IM_COL32(64, 255, static_cast<int>(64 + (128 * wt)), 255);
+        ImU32 color = IM_COL32(  0, 96, 192, 255);
+
+        draw_list->AddRectFilled(nursery_dest_rect.top_left(),
+                                 last_nursery_dest_rect.bottom_right(),
                                  color);
 
-        if (++i_copy >= hi_copy)
-            break;
+        char buf[255];
+        snprintf(buf, sizeof(buf), "N\u2081: %luk", last_nursery_dest_offset / 1024);
+
+        auto textz = ImGui::CalcTextSize(buf);
+
+        ImU32  text_color = IM_COL32(255, 255, 255, 255); /*black*/
+        ImVec2 text_pos   = ImVec2(0.5 * (nursery_dest_rect.x_lo()
+                                          + last_nursery_dest_rect.x_hi()
+                                          - textz.x),
+                                   nursery_dest_rect.y_mid() - 0.5 * textz.y);
+
+        if (text_pos.x < nursery_dest_rect.x_lo())
+            text_pos.x = last_nursery_dest_rect.x_hi() + 2;
+
+        draw_list->AddText(text_pos, text_color, buf);
+
+    }
+
+    if (last_tenured_dest_rect.width() > 0.0) {
+        ImU32 color = IM_COL32(  0,  96, 192, 255);
+
+        draw_list->AddRectFilled(first_tenured_dest_rect.top_left(),
+                                 last_tenured_dest_rect.bottom_right(),
+                                 color);
+
+        char buf[255];
+        snprintf(buf, sizeof(buf), "+%luk", (last_tenured_dest_offset - first_tenured_dest_offset) / 1024);
+
+        auto textz = ImGui::CalcTextSize(buf);
+
+        ImU32  text_color = IM_COL32(255, 255, 255, 255); /*black*/
+        ImVec2 text_pos   = ImVec2(0.5 * (first_tenured_dest_rect.x_lo()
+                                          + last_tenured_dest_rect.x_hi()
+                                          - textz.x),
+                                   tenured_dest_rect.y_mid() - 0.5 * textz.y);
+
+        if (text_pos.x < first_tenured_dest_rect.x_lo())
+            text_pos.x = last_tenured_dest_rect.x_hi() + 2;
+
+        draw_list->AddText(text_pos, text_color, buf);
     }
 }
 
@@ -1541,9 +1703,9 @@ AnimateGcCopyCb::notify_gc_copy(std::size_t z,
               xtag("src_gen", src_gen),
               xtag("dest_gen", dest_gen));
 
-    auto [gen, offset, alloc] = p_app_state_->gc_->fromspace_location_of(src_addr);
+    auto [src_gen2, src_offset, src_alloc, src_size] = p_app_state_->gc_->fromspace_location_of(src_addr);
 
-    if (gen == generation_result::not_found) {
+    if (src_gen2 == generation_result::not_found) {
         auto [lo, hi] = p_app_state_->gc_->nursery_span(role::from_space);
 
         log && log(xtag("N.from.lo", (void*)lo), xtag("N.from.hi", (void*)hi));
@@ -1551,9 +1713,27 @@ AnimateGcCopyCb::notify_gc_copy(std::size_t z,
         assert(false);
     }
 
-    generation valid_gen = xo::gc::valid_genresult2gen(gen);
+    generation src_valid_gen = xo::gc::valid_genresult2gen(src_gen2);
 
-    p_app_state_->copy_detail_v_.push_back(GcCopyDetail(z, valid_gen, offset, alloc));
+    auto [dest_gen2, dest_offset, _, dest_size] = p_app_state_->gc_->tospace_location_of(dest_addr);
+
+    generation dest_valid_gen = xo::gc::valid_genresult2gen(dest_gen2);
+
+    p_app_state_->copy_detail_v_.push_back(GcCopyDetail(z,
+                                                        src_valid_gen, src_offset, src_alloc,
+                                                        dest_valid_gen, dest_offset, dest_size));
+
+    if (dest_valid_gen == generation::nursery) {
+        p_app_state_->copy_detail_max_nursery_dest_offset_
+            = std::max(p_app_state_->copy_detail_max_nursery_dest_offset_, dest_offset);
+        p_app_state_->copy_detail_nursery_dest_size_
+            = std::max(p_app_state_->copy_detail_nursery_dest_size_, dest_size);
+    } else if (dest_valid_gen == generation::tenured) {
+        p_app_state_->copy_detail_max_tenured_dest_offset_
+            = std::max(p_app_state_->copy_detail_max_tenured_dest_offset_, dest_offset);
+        p_app_state_->copy_detail_tenured_dest_size_
+            = std::max(p_app_state_->copy_detail_tenured_dest_size_, dest_size);
+    }
 
     /* will be animated across frames, see animate_gc_copy() */
 }
@@ -1562,11 +1742,13 @@ int main(int, char **)
 {
     using namespace std;
 
+    scope log(XO_DEBUG(true));
+
     std::cout << "Hello, world!" << std::endl;
 
     SDL_SetHint(SDL_HINT_VIDEO_X11_FORCE_EGL, "0");
 
-    SDL_Init(SDL_INIT_VIDEO);
+   SDL_Init(SDL_INIT_VIDEO);
 
     SDL_version compiled;
     SDL_VERSION(&compiled);
@@ -1714,6 +1896,7 @@ int main(int, char **)
 
     AppState app_state;
     DrawState draw_state;
+    /* note: during gc copy animation, this records state _before_ gc was triggered */
     GcStateDescription gcstate = app_state.snapshot_gc_state();
 
     app_state.gc_->add_gc_copy_callback(draw_state.make_gc_copy_animation(&app_state));
@@ -1740,10 +1923,16 @@ int main(int, char **)
 
             gcstate = app_state.snapshot_gc_state();
 
+            app_state.upto_ = (app_state.gc_->is_full_gc_pending()
+                               ? generation::tenured
+                               : generation::nursery);
+
             /* GC may run here, in which case control reenters via AnimateGcCopyCb;
              * that callback captures copy details (per object!) in AppState
              */
             if (app_state.gc_->enable_gc_once()) {
+                log && log(xtag("gc-type", (app_state.upto_ == generation::tenured) ? "full" : "incremental"));
+
                 draw_state.state_type_ = draw_state_type::animate_gc;
                 draw_state.animate_copy_t0_ = std::chrono::steady_clock::now();
             }
@@ -1820,7 +2009,7 @@ int main(int, char **)
             //ImGui::Checkbox("second window", &show_another_window);
 
             ImGui::SliderInt("alloc/cycle", &app_state.alloc_per_cycle_, 1, 100);
-            ImGui::SliderInt("copy animation budget", &draw_state.animate_copy_budget_ms_, 10, 5000);
+            ImGui::SliderInt("copy animation budget", &draw_state.animate_copy_budget_ms_, 10, 10000);
             //ImGui::SliderFloat("alloc/cycle", &alloc_per_cycle, 0.0f, 1.0f);
             //ImGui::ColorEdit3("clear color", (float*)&clear_color);
 
@@ -1844,11 +2033,29 @@ int main(int, char **)
             ImGui::Text("appl average %.3f ms/frame (%.1f fps)",
                         1000.0f / io.Framerate, io.Framerate);
 
-            ImGui::Text("layout: history rect [%.1f %.1f %.1f %.1f]",
+            ImGui::Text("layout:"
+                        " nursery-src alloc rect [%.1f %.1f %.1f %.1f]"
+                        " nursery-dest alloc rect [%.1f %.1f %.1f %.1f]"
+                        " history rect [%.1f %.1f %.1f %.1f]",
+                        draw_state.gcw_nursery_layout_.to_alloc_rect().x_lo(),
+                        draw_state.gcw_nursery_layout_.to_alloc_rect().y_lo(),
+                        draw_state.gcw_nursery_layout_.to_alloc_rect().x_hi(),
+                        draw_state.gcw_nursery_layout_.to_alloc_rect().y_hi(),
+                        draw_state.gcw_nursery_layout_.from_alloc_rect().x_lo(),
+                        draw_state.gcw_nursery_layout_.from_alloc_rect().y_lo(),
+                        draw_state.gcw_nursery_layout_.from_alloc_rect().x_hi(),
+                        draw_state.gcw_nursery_layout_.from_alloc_rect().y_hi(),
                         draw_state.gcw_history_rect_.x_lo(),
                         draw_state.gcw_history_rect_.y_lo(),
                         draw_state.gcw_history_rect_.x_hi(),
                         draw_state.gcw_history_rect_.y_hi());
+            ImGui::Text("nursery-dest copy offset [%lu] / size [%lu]"
+                        " tenured-dest copy offset [%lu] / size [%lu]",
+                        app_state.copy_detail_max_nursery_dest_offset_,
+                        app_state.copy_detail_nursery_dest_size_,
+                        app_state.copy_detail_max_tenured_dest_offset_,
+                        app_state.copy_detail_tenured_dest_size_
+                );
 
             ImDrawList * draw_list = ImGui::GetWindowDrawList();
 
@@ -1865,24 +2072,33 @@ int main(int, char **)
                           gcstate,
                           ImRect(canvas_p0, canvas_p1),
                           draw_list,
-                          &draw_state.gcw_nursery_alloc_rect_,
-                          &draw_state.gcw_tenured_alloc_rect_,
+                          &draw_state.gcw_nursery_layout_,
+                          &draw_state.gcw_tenured_layout_,
+                          //nullptr,
+                          //&draw_state.gcw_tenured_alloc_rect_,
                           &draw_state.gcw_history_rect_);
 
             if (draw_state.state_type_ == draw_state_type::animate_gc) {
                 auto animate_copy_t1 = std::chrono::steady_clock::now();
                 auto animate_dt = animate_copy_t1 - draw_state.animate_copy_t0_;
-                float animate_fraction_spent = std::chrono::duration_cast<std::chrono::milliseconds>(animate_dt).count() / static_cast<float>(draw_state.animate_copy_budget_ms_);
+                float animate_fraction_spent
+                    = (std::chrono::duration_cast<std::chrono::milliseconds>(animate_dt).count()
+                       / static_cast<float>(draw_state.animate_copy_budget_ms_));
 
                 draw_state.animate_copy_hi_pct_ = 100.0 * animate_fraction_spent;
                 animate_gc_copy(app_state,
                                 draw_state,
                                 draw_list);
 
-                if (draw_state.animate_copy_hi_pct_ >= 100) {
+                /* see 25.0 constant in animate_gc_copy() */
+                if (draw_state.animate_copy_hi_pct_ >= 114) {
                     draw_state.state_type_ = draw_state_type::alloc;
                     draw_state.animate_copy_hi_pct_ = 0;
                     app_state.copy_detail_v_.clear();
+                    app_state.copy_detail_max_nursery_dest_offset_ = 0;
+                    app_state.copy_detail_nursery_dest_size_ = 0;
+                    app_state.copy_detail_max_tenured_dest_offset_ = 0;
+                    app_state.copy_detail_tenured_dest_size_ = 0;
                 }
             }
 
