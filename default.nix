@@ -267,6 +267,11 @@ pkgs.mkShell {
     pkgs.libGL
     pkgs.stdenv.cc.cc.lib
     pkgs.glibc
+    # try vulkan instead of opengl (at least on OSX)
+    pkgs.vulkan-loader
+    pkgs.vulkan-headers
+    pkgs.vulkan-validation-layers
+    pkgs.darwin.moltenvk
 
     # fonts for imgui
     pkgs.gucharmap
@@ -296,6 +301,11 @@ pkgs.mkShell {
     #export LIBGL_ALWAYS_INDIRECT=1
     #export WSLG_FORCE_EGL=1
     #export GLFW_USE_EGL=1
+
+    # for Vulkan on OSX
+    export VULKAN_SDK=${pkgs.vulkan-headers}
+    export VK_ICD_FILENAMES=${pkgs.darwin.moltenvk}/share/vulkan/icd.d/MoltenVK_icd.json
+    export VK_LAYER_PATH=${pkgs.vulkan-validation-layers}/share/vulkan/explicit_layer.d
 
     # just for info
     export mesa_drivers=${pkgs.mesa.drivers}

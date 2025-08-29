@@ -1752,7 +1752,7 @@ int main(int, char **)
 
     SDL_SetHint(SDL_HINT_VIDEO_X11_FORCE_EGL, "0");
 
-   SDL_Init(SDL_INIT_VIDEO);
+    SDL_Init(SDL_INIT_VIDEO);
 
     SDL_version compiled;
     SDL_VERSION(&compiled);
@@ -1812,7 +1812,7 @@ int main(int, char **)
         return -1;
     }
 
-    SDL_GL_SetSwapInterval(1); // enable vsync
+    SDL_GL_SetSwapInterval(0); // disable vsync
 
     GLenum glew_status = glewInit();
     if (glew_status == GLEW_OK) {
