@@ -206,6 +206,8 @@ pkgs.mkShell {
   #
 
   buildInputs = [
+    pkgs.nix
+
     pkgs.gsettings-desktop-schemas
     pkgs.emacs
     pkgs.nushell
@@ -225,7 +227,7 @@ pkgs.mkShell {
     pkgs.python3Packages.sphinx-rtd-theme
     #pkgs.python3Packages.sphinx-autobuild   # needs patch for typeguard; defer for now
     pkgs.python3Packages.breathe
-    pkgs.python3Packages.sphinxcontrib-ditaa
+    #pkgs.python3Packages.sphinxcontrib-ditaa
     pkgs.python3Packages.sphinxcontrib-plantuml
     pkgs.python3Packages.pillow
 
@@ -257,7 +259,7 @@ pkgs.mkShell {
     pkgs.cmake
     pkgs.pkg-config
 
-    pkgs.emscripten
+#    pkgs.emscripten
     pkgs.imgui
     pkgs.SDL2.dev
     pkgs.glew
@@ -265,8 +267,9 @@ pkgs.mkShell {
 #    pkgs.nixGL.nixGLNvidia
 #    pkgs.nixGL.nixGLMesa
     pkgs.libGL
-    pkgs.stdenv.cc.cc.lib
-    pkgs.glibc
+#    pkgs.stdenv.cc.cc.lib
+#    pkgs.glibc
+
     # try vulkan instead of opengl (at least on OSX)
     pkgs.vulkan-loader
     pkgs.vulkan-headers
@@ -274,7 +277,7 @@ pkgs.mkShell {
     pkgs.darwin.moltenvk
 
     # fonts for imgui
-    pkgs.gucharmap
+#    pkgs.gucharmap
     pkgs.fontconfig
     pkgs.noto-fonts
     #pkgs.noto-fonts-lgc   # lgc for latin,greek,cyrillic   (but doesn't exist in pinned nixpkgs)
