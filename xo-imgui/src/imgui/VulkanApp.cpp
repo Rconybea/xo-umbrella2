@@ -9,6 +9,12 @@
 constexpr std::size_t c_max_frames_in_flight = 2;
 
 void
+VulkanApp::assign_imgui_draw_frame(ImguiDrawFn fn)
+{
+    this->imgui_draw_frame_ = std::move(fn);
+}
+
+void
 VulkanApp::run() {
     this->init_window();
     this->init_vulkan();

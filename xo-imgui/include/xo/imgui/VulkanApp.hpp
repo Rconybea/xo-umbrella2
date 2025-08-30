@@ -16,6 +16,9 @@ public:
 public:
     VulkanApp() = default;
 
+    /** set imgui draw function **/
+    void assign_imgui_draw_frame(ImguiDrawFn fn);
+
     void run();
 
 private:
@@ -72,6 +75,9 @@ private:
     uint32_t current_frame_ = 0;
     uint32_t graphics_queue_family_ = 0;
     bool quit_ = false;
+
+    /** draw imgui **/
+    ImguiDrawFn imgui_draw_frame_;
 };
 
 /* end VulkanApp.hpp */
