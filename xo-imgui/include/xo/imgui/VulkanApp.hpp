@@ -2,13 +2,20 @@
 
 #pragma once
 
-#include <vulkan/vulkan.h>
 #include <SDL.h>
+#include <imgui.h>
+#include <vulkan/vulkan.h>
 //#include <SDL_vulkan.h>
 #include <vector>
+#include <functional>
 
 class VulkanApp {
 public:
+    using ImguiDrawFn = std::function<ImDrawData * (ImGuiContext *)>;
+
+public:
+    VulkanApp() = default;
+
     void run();
 
 private:
@@ -39,6 +46,7 @@ private:
 
 private:
     SDL_Window* window = nullptr;
+    ImGuiContext* imgui_cx_ = nullptr;
     VkInstance instance;
     VkPhysicalDevice physical_device_;
     VkDevice device_;

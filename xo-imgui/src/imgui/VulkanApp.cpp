@@ -2,7 +2,6 @@
 
 #include "VulkanApp.hpp"
 #include <SDL_vulkan.h>
-#include <imgui.h>
 #include <backends/imgui_impl_sdl2.h>
 #include <backends/imgui_impl_vulkan.h>
 #include <cstdint>
@@ -419,7 +418,8 @@ VulkanApp::init_imgui()
 {
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
+    this->imgui_cx_ = ImGui::CreateContext();
+
     ImGuiIO& io = ImGui::GetIO(); (void)io;
 
     // Setup Dear ImGui style
@@ -564,33 +564,33 @@ VulkanApp::draw_frame()
 
     vkQueuePresentKHR(graphics_queue_, &presentInfo);
 
-    current_frame_ = (current_frame_ + 1) % c_max_frames_in_flight;
+    this->current_frame_ = (current_frame_ + 1) % c_max_frames_in_flight;
 } /*draw_frame*/
 
 void
 VulkanApp::record_command_buffer(VkCommandBuffer commandBuffer,
                                  uint32_t imageIndex)
 {
-    VkCommandBufferBeginInfo beginInfo{};
-    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    VkCommandBufferBeginInfo begin_info{};
+    begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
-    if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS) {
+    if (vkBeginCommandBuffer(commandBuffer, &begin_info) != VK_SUCCESS) {
         throw std::runtime_error("Failed to begin recording command buffer!");
     }
 
-    VkRenderPassBeginInfo renderPassInfo{};
-    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    renderPassInfo.renderPass = render_pass_;
-    renderPassInfo.framebuffer = framebuffers_[imageIndex];
-    renderPassInfo.renderArea.offset = {0, 0};
-    renderPassInfo.renderArea.extent = swapchain_extent_;
+    VkRenderPassBeginInfo render_pass_info{};
+    render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    render_pass_info.renderPass = render_pass_;
+    render_pass_info.framebuffer = framebuffers_[imageIndex];
+    render_pass_info.renderArea.offset = {0, 0};
+    render_pass_info.renderArea.extent = swapchain_extent_;
 
-    VkClearValue clearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
-    renderPassInfo.clearValueCount = 1;
-    renderPassInfo.pClearValues = &clearColor;
+    VkClearValue clear_color = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
+    render_pass_info.clearValueCount = 1;
+    render_pass_info.pClearValues = &clear_color;
 
     vkCmdBeginRenderPass(commandBuffer,
-                         &renderPassInfo,
+                         &render_pass_info,
                          VK_SUBPASS_CONTENTS_INLINE);
 
     // Start the Dear ImGui frame
