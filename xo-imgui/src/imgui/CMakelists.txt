@@ -13,6 +13,7 @@ endif()
 set(SELF_LIB xo_imgui)
 set(SELF_SRCS
     VulkanApp.cpp
+    ImRect.cpp
         ${IMGUI_INCLUDE_DIR}/imgui/imgui.cpp
         ${IMGUI_INCLUDE_DIR}/imgui/imgui_demo.cpp
         ${IMGUI_INCLUDE_DIR}/imgui/imgui_draw.cpp
@@ -38,4 +39,4 @@ xo_external_pkgconfig_dependency(${SELF_LIB} SDL2 sdl2)
 #
 target_include_directories(${SELF_LIB} PUBLIC ${IMGUI_INCLUDE_DIR}/imgui)
 
-#xo_dependency(${SELF_LIB} reflect)
+xo_dependency(${SELF_LIB} indentlog)

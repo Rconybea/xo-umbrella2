@@ -15,15 +15,20 @@ if (XO_ENABLE_EXAMPLES)
 
     set(SELF_EXE imgui_ex4)
     add_executable(${SELF_EXE} imgui_ex4.cpp
-        ${IMGUI_INCLUDE_DIR}/imgui/imgui.cpp
-        ${IMGUI_INCLUDE_DIR}/imgui/imgui_demo.cpp
-        ${IMGUI_INCLUDE_DIR}/imgui/imgui_draw.cpp
-        ${IMGUI_INCLUDE_DIR}/imgui/imgui_widgets.cpp
-        ${IMGUI_INCLUDE_DIR}/imgui/imgui_tables.cpp
-        ${IMGUI_INCLUDE_DIR}/imgui/backends/imgui_impl_sdl2.cpp
+        AppState.cpp
+        DrawState.cpp
+        GcStateDescription.cpp
+        AnimateGcCopyCb.cpp
+        GenerationLayout.cpp
+#        ${IMGUI_INCLUDE_DIR}/imgui/imgui.cpp
+#        ${IMGUI_INCLUDE_DIR}/imgui/imgui_demo.cpp
+#        ${IMGUI_INCLUDE_DIR}/imgui/imgui_draw.cpp
+#        ${IMGUI_INCLUDE_DIR}/imgui/imgui_widgets.cpp
+#        ${IMGUI_INCLUDE_DIR}/imgui/imgui_tables.cpp
+#        ${IMGUI_INCLUDE_DIR}/imgui/backends/imgui_impl_sdl2.cpp
         #${IMGUI_INCLUDE_DIR}/imgui/backends/imgui_impl_opengl3.cpp
         #${IMGUI_INCLUDE_DIR}/imgui/backends/imgui_impl_glfw.cpp
-        ${IMGUI_INCLUDE_DIR}/imgui/backends/imgui_impl_vulkan.cpp
+#        ${IMGUI_INCLUDE_DIR}/imgui/backends/imgui_impl_vulkan.cpp
     )
     xo_include_options2(${SELF_EXE})
 

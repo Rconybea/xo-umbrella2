@@ -14,12 +14,21 @@ public:
     using ImguiDrawFn = std::function<ImDrawData * (ImGuiContext *)>;
 
 public:
-    VulkanApp() = default;
+    VulkanApp(ImguiDrawFn fn);
 
+#ifdef NOPE
     /** set imgui draw function **/
     void assign_imgui_draw_frame(ImguiDrawFn fn);
+#endif
 
+    /** equivalent to sequence setup(), main_loop(), cleanup() **/
     void run();
+
+    /** setup before main loop.  idempotent **/
+    void setup(std::function<void (ImGuiContext *)> load_fonts);
+    void main_loop();
+    /** cleanup before shutdown.  idempotent **/
+    void cleanup();
 
 private:
     void init_window();
@@ -36,18 +45,18 @@ private:
     void create_command_buffers();
     void create_sync_objects();
     void create_descriptor_pool();
-    void init_imgui();
+    void init_imgui(std::function<void (ImGuiContext *)> load_fonts);
     VkCommandBuffer begin_single_time_commands();
     void end_single_time_commands(VkCommandBuffer commandBuffer);
     void record_command_buffer(VkCommandBuffer commandBuffer,
                                uint32_t imageIndex);
-    void cleanup();
-
     /** TODO: replace with some generic mechanism **/
-    void main_loop();
     void draw_frame();
 
 private:
+    bool setup_done_ = false;
+    bool cleanup_done_ = false;
+
     SDL_Window* window = nullptr;
     ImGuiContext* imgui_cx_ = nullptr;
     VkInstance instance;
@@ -77,7 +86,7 @@ private:
     bool quit_ = false;
 
     /** draw imgui **/
-    ImguiDrawFn imgui_draw_frame_;
+    const ImguiDrawFn imgui_draw_frame_;
 };
 
 /* end VulkanApp.hpp */

@@ -1,24 +1,37 @@
 /* file VulkanApp.cpp */
 
 #include "VulkanApp.hpp"
+#include "xo/indentlog/scope.hpp"
 #include <SDL_vulkan.h>
 #include <backends/imgui_impl_sdl2.h>
 #include <backends/imgui_impl_vulkan.h>
 #include <cstdint>
 
+using xo::scope;
+using xo::xtag;
+
 constexpr std::size_t c_max_frames_in_flight = 2;
 
-void
-VulkanApp::assign_imgui_draw_frame(ImguiDrawFn fn)
+VulkanApp::VulkanApp(ImguiDrawFn draw_fn)
+    : imgui_draw_frame_{
+            draw_fn
+        }
 {
-    this->imgui_draw_frame_ = std::move(fn);
+}
+
+void
+VulkanApp::setup(std::function<void (ImGuiContext *)> load_fonts) {
+    if (!setup_done_) {
+        this->init_window();
+        this->init_vulkan();
+        this->init_imgui(load_fonts);
+        this->setup_done_ = true;
+    }
 }
 
 void
 VulkanApp::run() {
-    this->init_window();
-    this->init_vulkan();
-    this->init_imgui();
+    this->setup(nullptr);
     this->main_loop();
     this->cleanup();
 }
@@ -420,13 +433,20 @@ VulkanApp::create_descriptor_pool() {
 }
 
 void
-VulkanApp::init_imgui()
+VulkanApp::init_imgui(std::function<void (ImGuiContext *)> load_fonts)
 {
+    scope log(XO_DEBUG(true));
+
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     this->imgui_cx_ = ImGui::CreateContext();
 
+    log && log(xtag("imgui_cx", (void*)imgui_cx_));
+
     ImGuiIO& io = ImGui::GetIO(); (void)io;
+
+    if (load_fonts)
+        load_fonts(imgui_cx_);
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
@@ -456,7 +476,7 @@ VulkanApp::init_imgui()
     ImGui_ImplVulkan_CreateFontsTexture();
     this->end_single_time_commands(command_buffer);
 
-    //ImGui_ImplVulkan_DestroyFontUploadObjects();
+    ImGui_ImplVulkan_DestroyFontsTexture();
 } /*init_imgui*/
 
 VkCommandBuffer
@@ -508,6 +528,25 @@ VulkanApp::main_loop()
             if (event.type == SDL_QUIT) {
                 this->quit_ = true;
             }
+
+#ifdef NOT_YET
+            if (event.type == SDL_WINDOWEVENT) {
+                if (event.window.event == SDL_WINDOWEVENT_CLOSE) {
+                    if (event.window.windowID == SDL_GetWindowID(window))
+                    {
+                        done = true;
+                    }
+                } else if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
+                    // handle resize immediately
+                    int w, h;
+                    SDL_GetWindowSize(window, &w, &h);
+                    glViewport(0, 0, w, h);
+
+                    break;  // to force render during resize
+                }
+            }
+
+#endif
         }
 
         this->draw_frame();
@@ -599,28 +638,8 @@ VulkanApp::record_command_buffer(VkCommandBuffer commandBuffer,
                          &render_pass_info,
                          VK_SUBPASS_CONTENTS_INLINE);
 
-    // Start the Dear ImGui frame
-    ImGui_ImplVulkan_NewFrame();
-    ImGui_ImplSDL2_NewFrame();
-    ImGui::NewFrame();
+    ImDrawData * draw_data = this->imgui_draw_frame_(imgui_cx_);
 
-    // Create a simple ImGui window
-    ImGui::Begin("Hello, Vulkan + SDL2!");
-    ImGui::Text("This is a minimal ImGui + Vulkan + SDL2 example!");
-    static float f = 0.0f;
-    static int counter = 0;
-    ImGui::SliderFloat("float", &f, 0.0f, 1.0f);
-    if (ImGui::Button("Button"))
-        ++counter;
-    ImGui::SameLine();
-    ImGui::Text("counter = %d", counter);
-    ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
-                1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-    ImGui::End();
-
-    // Rendering
-    ImGui::Render();
-    ImDrawData* draw_data = ImGui::GetDrawData();
     ImGui_ImplVulkan_RenderDrawData(draw_data, commandBuffer);
 
     vkCmdEndRenderPass(commandBuffer);
@@ -633,6 +652,11 @@ VulkanApp::record_command_buffer(VkCommandBuffer commandBuffer,
 void
 VulkanApp::cleanup()
 {
+    if (cleanup_done_)
+        return;
+
+    this->cleanup_done_ = true;
+
     ImGui_ImplVulkan_Shutdown();
     ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();
@@ -663,6 +687,7 @@ VulkanApp::cleanup()
 
     SDL_DestroyWindow(window);
     SDL_Quit();
+
 }
 
 /* end VulkanApp.cpp */
