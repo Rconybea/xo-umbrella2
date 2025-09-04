@@ -57,6 +57,10 @@ jobs:
           sudo apt install -y sphinx
           echo "::endgroup"
 
+          echo "::group::imgui install"
+          sudo apt install -y imgui
+          echo "::endgroup"
+
           #echo "::group::clang18 install"
           #sudo apt install -y clang-18
           #echo "::group::lldb18 install"
