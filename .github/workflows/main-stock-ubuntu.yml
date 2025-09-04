@@ -49,6 +49,10 @@ jobs:
           sudo apt install -y llvm-18-dev
           echo "::endgroup"
 
+          echo "::group::doxygen install"
+          sudo apt install -y doxygen
+          echo "::endgroup"
+
           #echo "::group::clang18 install"
           #sudo apt install -y clang-18
           #echo "::group::lldb18 install"
