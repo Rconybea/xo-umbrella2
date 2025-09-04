@@ -22,6 +22,7 @@ namespace xo {
     } /*namespace qty*/
 
     namespace print {
+#ifndef ppdetail_atomic
         template <auto NaturalUnit, typename Repr>
         struct ppdetail<xo::qty::quantity<NaturalUnit, Repr>> {
             using target_type = xo::qty::quantity<NaturalUnit, Repr>;
@@ -30,6 +31,7 @@ namespace xo {
                 return ppdetail_atomic<target_type>::print_pretty(ppii, x);
             }
         };
+#endif
     } /*namespace print*/
 } /*namespace xo*/
 
