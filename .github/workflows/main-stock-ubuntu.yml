@@ -73,6 +73,10 @@ jobs:
           sudo apt install -y vulkan-utility-libraries-dev
           echo "::endgroup"
 
+          echo "::group::libsdl2-dev"
+          sudo apt install -y libsdl2-dev
+          ehco "::endgroup"
+
           #echo "::group::clang18 install"
           #sudo apt install -y clang-18
           #echo "::group::lldb18 install"
