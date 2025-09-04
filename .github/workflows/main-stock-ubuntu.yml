@@ -69,8 +69,8 @@ jobs:
           sudo apt install -y vulkan-tools
           echo "::endgroup"
 
-          echo "::group::vulkan-validationlayers-dev install"
-          sudo apt install -y vulkan-validationlayers-dev
+          echo "::group::vulkan-utility-libraries-dev install"
+          sudo apt install -y vulkan-utility-libraries-dev
           echo "::endgroup"
 
           #echo "::group::clang18 install"
