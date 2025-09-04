@@ -2,6 +2,7 @@
 
 find_path(IMGUI_INCLUDE_DIR
     NAMES imgui/imgui.h
+    HINTS ${XO_UMBRELLA_SOURCE_DIR}/
     DOC "path to imgui header")
 if (IMGUI_INCLUDE_DIR)
     message(STATUS
