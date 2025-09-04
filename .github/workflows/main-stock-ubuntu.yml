@@ -57,8 +57,20 @@ jobs:
           sudo apt install -y sphinx
           echo "::endgroup"
 
-          echo "::group::imgui install"
+          echo "::group::libimgui-dev install"
           sudo apt install -y libimgui-dev
+          echo "::endgroup"
+
+          echo "::group::libvulkan-dev install"
+          sudo apt install -y libvulkan-dev
+          echo "::endgroup"
+
+          echo "::group::vulkan-tools install"
+          sudo apt install -y vulkan-tools
+          echo "::endgroup"
+
+          echo "::group::vulkan-validationlayers-dev install"
+          sudo apt install -y vulkan-validationlayers-dev
           echo "::endgroup"
 
           #echo "::group::clang18 install"
