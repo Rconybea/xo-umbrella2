@@ -58,7 +58,7 @@ jobs:
           echo "::endgroup"
 
           echo "::group::imgui install"
-          sudo apt install -y imgui
+          sudo apt install -y libimgui-dev
           echo "::endgroup"
 
           #echo "::group::clang18 install"
