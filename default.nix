@@ -77,14 +77,6 @@ let
 
       in
         {
-          xo-userenv-slow   = self.callPackage pkgs/xo-userenv-slow.nix   { stdenv = jitStdenv;
-                                                                            #clang = llvmPackages.clang;
-                                                                            llvm = llvmPackages1.llvm;
-                                                                          };
-          # xo-packaged version of llvm; fewer packaging features than nixpkgs
-          # but easier to debug/modify
-          llvmXo = llvmXo;
-
             xo-cmake          = self.callPackage pkgs/xo-cmake.nix          {};
             xo-indentlog      = self.callPackage pkgs/xo-indentlog.nix      { buildDocs = true; buildExamples = true; };
             xo-refcnt         = self.callPackage pkgs/xo-refcnt.nix         {};
@@ -131,20 +123,28 @@ let
                                                                               #clang = llvmPackages2.clang;
                                                                               llvm = llvmPackages1.llvm; };
             xo-pyjit          = self.callPackage pkgs/xo-pyjit.nix          {};
+
             #
             xo-userenv        = self.callPackage pkgs/xo-userenv.nix        {};
+            xo-userenv-slow   = self.callPackage pkgs/xo-userenv-slow.nix   { stdenv = jitStdenv;
+                                                                              #clang = llvmPackages.clang;
+                                                                              llvm = llvmPackages1.llvm;
+                                                                            };
+            # xo-packaged version of llvm; fewer packaging features than nixpkgs
+            # but easier to debug/modify
+            llvmXo = llvmXo;
         };
 
 in
 let
   pkgs = import nixpkgs-path {
     overlays = [
-#      nixgl-overlay
       #qrencode-overlay    # not needed 4sep2025 nixpkgs (? might have src in nix store)
       #libconfig-overlay   # not needed 4sep2025 nixpkgs (? might have src in nix store)
       #pipewire-overlay    # not needed 4sep2025 nixpkgs ?
       #ccache-overlay   # not needed 4sep2025 nixpkgs
       amf-headers-overlay
+      nixgl-overlay
 #      llvm-overlay
       xo-overlay
     ];
