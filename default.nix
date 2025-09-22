@@ -77,11 +77,6 @@ let
 
       in
         {
-          xo-jit            = self.callPackage pkgs/xo-jit.nix            { #stdenv = jitStdenv;
-                                                                            #clang = llvmPackages2.clang;
-                                                                            llvm = llvmPackages1.llvm; };
-
-#
           xo-userenv-slow   = self.callPackage pkgs/xo-userenv-slow.nix   { stdenv = jitStdenv;
                                                                             #clang = llvmPackages.clang;
                                                                             llvm = llvmPackages1.llvm;
@@ -131,6 +126,10 @@ let
             xo-tokenizer      = self.callPackage pkgs/xo-tokenizer.nix      { buildDocs = true; buildExamples = true; };
             xo-reader         = self.callPackage pkgs/xo-reader.nix         { buildDocs = true; buildExamples = true; };
 
+            xo-jit            = self.callPackage pkgs/xo-jit.nix            { buildDocs = true; buildExamples = true;
+                                                                              #stdenv = jitStdenv;
+                                                                              #clang = llvmPackages2.clang;
+                                                                              llvm = llvmPackages1.llvm; };
             xo-pyjit          = self.callPackage pkgs/xo-pyjit.nix          {};
             #
             xo-userenv        = self.callPackage pkgs/xo-userenv.nix        {};
