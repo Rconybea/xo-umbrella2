@@ -77,7 +77,6 @@ let
 
       in
         {
-          xo-expression     = self.callPackage pkgs/xo-expression.nix     {};
           xo-tokenizer      = self.callPackage pkgs/xo-tokenizer.nix      { buildDocs = true; };
           xo-reader         = self.callPackage pkgs/xo-reader.nix         {};
 
@@ -130,6 +129,7 @@ let
             xo-pykalmanfilter = self.callPackage pkgs/xo-pykalmanfilter.nix {};
             #
 
+            xo-expression     = self.callPackage pkgs/xo-expression.nix     {                   buildExamples = true; };
             xo-pyexpression   = self.callPackage pkgs/xo-pyexpression.nix   {};
             xo-pyjit          = self.callPackage pkgs/xo-pyjit.nix          {};
             #

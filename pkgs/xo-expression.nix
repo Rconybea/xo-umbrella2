@@ -1,8 +1,11 @@
 {
   # dependencies
-  stdenv, cmake, catch2,
+  lib, stdenv, cmake, catch2,
 
-  xo-cmake, xo-reflect,
+  xo-cmake, xo-reflect, xo-flatstring,
+
+  buildDocs ? false,
+  buildExamples ? false,
 } :
 
 stdenv.mkDerivation (finalattrs:
@@ -12,10 +15,19 @@ stdenv.mkDerivation (finalattrs:
 
     src = ../xo-expression;
 
-    cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake"];
+    cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake"]
+                 ++ lib.optionals buildExamples ["-DXO_ENABLE_EXAMPLES=on"];
+
+    inherit buildDocs;
+    inherit buildExamples;
+
     doCheck = true;
-    propagatedBuildInputs = [ xo-reflect ];
-    nativeBuildInputs = [ cmake catch2
+
+    propagatedBuildInputs = [ xo-reflect
+                              xo-flatstring
+                            ];
+    nativeBuildInputs = [ cmake
+                          catch2
                           xo-cmake
                         ];
   })
