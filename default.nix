@@ -77,7 +77,6 @@ let
 
       in
         {
-          xo-tokenizer      = self.callPackage pkgs/xo-tokenizer.nix      { buildDocs = true; };
           xo-reader         = self.callPackage pkgs/xo-reader.nix         {};
 
           xo-jit            = self.callPackage pkgs/xo-jit.nix            { #stdenv = jitStdenv;
@@ -131,6 +130,7 @@ let
 
             xo-expression     = self.callPackage pkgs/xo-expression.nix     {                   buildExamples = true; };
             xo-pyexpression   = self.callPackage pkgs/xo-pyexpression.nix   {};
+            xo-tokenizer      = self.callPackage pkgs/xo-tokenizer.nix      { buildDocs = true; buildExamples = true; };
             xo-pyjit          = self.callPackage pkgs/xo-pyjit.nix          {};
             #
             xo-userenv        = self.callPackage pkgs/xo-userenv.nix        {};
