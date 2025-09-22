@@ -6,9 +6,10 @@
 
   doxygen, sphinx, graphviz,
 
-  xo-cmake, xo-ratio, xo-flatstring,
+  xo-cmake, xo-ratio, xo-flatstring, xo-indentlog,
 
   buildDocs ? false,
+  buildExamples ? false,
 } :
 
 stdenv.mkDerivation (finalattrs:
@@ -18,9 +19,13 @@ stdenv.mkDerivation (finalattrs:
 
     src = ../xo-unit;
 
-    cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake"];
+    cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake"]
+                 ++ lib.optionals buildDocs ["-DXO_ENABLE_DOCS=on"]
+                 ++ lib.optionals buildExamples ["-DXO_ENABLE_EXAMPLES=on"];
 
     inherit buildDocs;
+    inherit buildExamples;
+
     doCheck = true;
 
     postBuild = lib.optionalString buildDocs ''
@@ -33,6 +38,9 @@ stdenv.mkDerivation (finalattrs:
       cmake
       catch2
       xo-cmake
+    ]
+    ++ lib.optionals buildExamples [
+      xo-indentlog
     ]
     ++ lib.optionals buildDocs [
       doxygen
