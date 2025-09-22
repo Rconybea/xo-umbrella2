@@ -19,52 +19,15 @@ let
   # since absolutely everything has to be rebuilt from source
   #
 
-  # overlay to fix qrencode (very distant dependency of something pythonic)
-  qrencode-overlay = self: super: {
-    qrencode = super.qrencode.overrideAttrs (old: {
-      nativeBuildInputs = (old.nativeBuildInputs or []) ++ [ self.autoconf self.automake self.libtool ];
-
-      preConfigure = ''
-        autoreconf -fiv
-      '' + (old.preConfigure or "");
-
-      src = self.fetchurl {
-        # looks like no longer at https://fukuchi.org/works/qrencode/qrencode-4.1.1.tar.bz2
-        url = "https://github.com/fukuchi/libqrencode/archive/refs/tags/v${super.qrencode.version}.tar.gz";
-        sha256 = "sha256-U4W8G4wvIPO5HSWL+MzIz2ICOTXfLSZ2tbZwSfMaBJw=";
-      };});
-  };
-
-  # overlay to fix libconfig (distant dependency of SDL2)
-  libconfig-overlay = self: super: {
-    libconfig = super.libconfig.overrideAttrs (old: {
-      # 1.7.3. no longer at https://hyperrealm.github.io/libconfig/dist/libconfig-1.7.3.tar.gz
-      # (1.8.1 advertised, so perhaps has expired)
-      #
-      src = self.fetchurl {
-        url = "https://github.com/hyperrealm/libconfig/releases/download/v${super.libconfig.version}/libconfig-${super.libconfig.version}.tar.gz";
-        sha256 = "sha256-VFFm1srAN3RDgdHpzFpUBQlOe/rRakEWmbz/QLuzHuc=";
-      };});
-  };
-
-  pipewire-overlay = self: super: {
-    pipewire = super.pipewire.override {
-      # ffado 2.4.8 won't build from source.
-      # needs a patch from a defunct server.
-      # provides sound for firewire devices, which are uncommon-to-rare
-      # these days
-      ffadoSupport = false;
-    };
-  };
-
-  ccache-overlay = self: super: {
-    ccache = super.ccache.overrideAttrs (old: {
+  amf-headers-overlay = self: super: {
+    amf-headers = super.amf-headers.overrideAttrs (old: {
       src = self.fetchFromGitHub {
-        # nixpkgs sha256 stale for version 4.9.1 asof 20jul2025
-        owner = "ccache";
-        repo = "ccache";
-        rev = "refs/tags/v${super.ccache.version}";
-        sha256 = "sha256-Rhd2cEAEhBYIl5Ej/A5LXRb7aBMLgcwW6zxk4wYCPVM=";
+        # nixpkgs sha256 stale for version 1.4.36 asof 4sep2025
+        owner = "GPUOpen-LibrariesAndSDKs";
+        repo = "AMF";
+        rev = "v${old.version}";
+        sha256 = "sha256-0PgWEq+329/EhI0/CgPsCkJ4CiTsFe56w2O+AcjVUdc=";
+        #sha256 = "sha256-u6gvdc1acemd01TO5EbuF3H7HkEJX4GUx73xCo71yPY=";
       };});
   };
 
@@ -176,11 +139,12 @@ in
 let
   pkgs = import nixpkgs-path {
     overlays = [
-      qrencode-overlay
-      libconfig-overlay
-      pipewire-overlay
-      ccache-overlay
 #      nixgl-overlay
+      #qrencode-overlay    # not needed 4sep2025 nixpkgs (? might have src in nix store)
+      #libconfig-overlay   # not needed 4sep2025 nixpkgs (? might have src in nix store)
+      #pipewire-overlay    # not needed 4sep2025 nixpkgs ?
+      #ccache-overlay   # not needed 4sep2025 nixpkgs
+      amf-headers-overlay
 #      llvm-overlay
       xo-overlay
     ];
