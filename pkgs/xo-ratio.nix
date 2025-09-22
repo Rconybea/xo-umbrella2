@@ -6,9 +6,10 @@
 
   doxygen, sphinx, graphviz,
 
-  xo-cmake, xo-flatstring, xo-reflectutil,
+  xo-cmake, xo-flatstring, xo-reflectutil, xo-indentlog,
 
   buildDocs ? false,
+  buildExamples ? false,
 } :
 
 stdenv.mkDerivation (finalattrs:
@@ -18,9 +19,13 @@ stdenv.mkDerivation (finalattrs:
 
     src = ../xo-ratio;
 
-    cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake"];
+    cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake"]
+                 ++ lib.optionals buildDocs ["-DXO_ENABLE_DOCS=on"]
+                 ++ lib.optionals buildExamples ["-DXO_ENABLE_EXAMPLES=on"];
 
     inherit buildDocs;
+    inherit buildExamples;
+
     doCheck = true;
 
     postBuild = lib.optionalString buildDocs ''
@@ -35,6 +40,9 @@ stdenv.mkDerivation (finalattrs:
       xo-flatstring
       xo-reflectutil
     ]
+    ++ lib.optionals buildExamples [
+      xo-indentlog
+    ]
     ++ lib.optionals buildDocs [
       doxygen
       sphinx
@@ -42,5 +50,6 @@ stdenv.mkDerivation (finalattrs:
       python3Packages.sphinx-rtd-theme
       python3Packages.breathe
       python3Packages.sphinxcontrib-ditaa
+      #python3Packages.sphinxcontrib-plantuml
     ];
   })

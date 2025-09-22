@@ -77,7 +77,6 @@ let
 
       in
         {
-          xo-ratio          = self.callPackage pkgs/xo-ratio.nix          { buildDocs = true; };
           xo-unit           = self.callPackage pkgs/xo-unit.nix           { buildDocs = true; };
 #
           xo-expression     = self.callPackage pkgs/xo-expression.nix     {};
@@ -108,6 +107,7 @@ let
             xo-reflectutil    = self.callPackage pkgs/xo-reflectutil.nix    {};
             xo-reflect        = self.callPackage pkgs/xo-reflect.nix        {};
             xo-pyreflect      = self.callPackage pkgs/xo-pyreflect.nix      {};
+            xo-ratio          = self.callPackage pkgs/xo-ratio.nix          { buildDocs = true; buildExamples = true; };
             xo-pyunit         = self.callPackage pkgs/xo-pyunit.nix         {};
             #
             xo-callback       = self.callPackage pkgs/xo-callback.nix       {};
