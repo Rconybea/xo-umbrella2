@@ -77,7 +77,6 @@ let
 
       in
         {
-          xo-flatstring     = self.callPackage pkgs/xo-flatstring.nix     { buildDocs = true; };
           xo-ratio          = self.callPackage pkgs/xo-ratio.nix          { buildDocs = true; };
           xo-unit           = self.callPackage pkgs/xo-unit.nix           { buildDocs = true; };
 #
@@ -104,6 +103,7 @@ let
             xo-subsys         = self.callPackage pkgs/xo-subsys.nix         {};
             xo-randomgen      = self.callPackage pkgs/xo-randomgen.nix      {                   buildExamples = true; };
             xo-ordinaltree    = self.callPackage pkgs/xo-ordinaltree.nix    {};
+            xo-flatstring     = self.callPackage pkgs/xo-flatstring.nix     { buildDocs = true; buildExamples = true; };
             xo-pyutil         = self.callPackage pkgs/xo-pyutil.nix         {};
             xo-reflectutil    = self.callPackage pkgs/xo-reflectutil.nix    {};
             xo-reflect        = self.callPackage pkgs/xo-reflect.nix        {};

@@ -9,6 +9,7 @@
   xo-cmake, xo-indentlog,
 
   buildDocs ? false,
+  buildExamples ? false,
 } :
 
 stdenv.mkDerivation (finalattrs:
@@ -29,9 +30,13 @@ stdenv.mkDerivation (finalattrs:
     # guessing may need this for doxygen etc
     # env.LC_ALL = "en_US.UTF-8";
 
-    cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake"];
+    cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake"]
+                 ++ lib.optionals buildDocs ["-DXO_ENABLE_DOCS=on"]
+                 ++ lib.optionals buildExamples ["-DXO_ENABLE_EXAMPLES=on"];
 
     inherit buildDocs;
+    inherit buildExamples;
+
     doCheck = true;
 
     postBuild = lib.optionalString buildDocs ''
@@ -54,7 +59,8 @@ stdenv.mkDerivation (finalattrs:
       graphviz
       python3Packages.sphinx-rtd-theme
       python3Packages.breathe
-    ]
-    ;
+      python3Packages.sphinxcontrib-ditaa
+      python3Packages.sphinxcontrib-plantuml
+    ];
 
   })
