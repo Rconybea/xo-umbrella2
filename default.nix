@@ -77,51 +77,20 @@ let
 
       in
         {
-          xo-refcnt         = self.callPackage pkgs/xo-refcnt.nix         {};
-          xo-subsys         = self.callPackage pkgs/xo-subsys.nix         {};
           xo-randomgen      = self.callPackage pkgs/xo-randomgen.nix      {};
-          xo-ordinaltree    = self.callPackage pkgs/xo-ordinaltree.nix    {};
           xo-flatstring     = self.callPackage pkgs/xo-flatstring.nix     { buildDocs = true; };
-          xo-pyutil         = self.callPackage pkgs/xo-pyutil.nix         {};
-          xo-reflectutil    = self.callPackage pkgs/xo-reflectutil.nix    {};
-          xo-reflect        = self.callPackage pkgs/xo-reflect.nix        {};
-          xo-pyreflect      = self.callPackage pkgs/xo-pyreflect.nix      {};
           xo-ratio          = self.callPackage pkgs/xo-ratio.nix          { buildDocs = true; };
           xo-unit           = self.callPackage pkgs/xo-unit.nix           { buildDocs = true; };
-          xo-pyunit         = self.callPackage pkgs/xo-pyunit.nix         {};
-#
-          xo-callback       = self.callPackage pkgs/xo-callback.nix       {};
-          xo-webutil        = self.callPackage pkgs/xo-webutil.nix        {};
-          xo-pywebutil      = self.callPackage pkgs/xo-pywebutil.nix      {};
-          xo-printjson      = self.callPackage pkgs/xo-printjson.nix      {};
-          xo-pyprintjson    = self.callPackage pkgs/xo-pyprintjson.nix    {};
-          xo-reactor        = self.callPackage pkgs/xo-reactor.nix        {};
-          xo-pyreactor      = self.callPackage pkgs/xo-pyreactor.nix      {};
-          xo-websock        = self.callPackage pkgs/xo-websock.nix        {};
-          xo-pywebsock      = self.callPackage pkgs/xo-pywebsock.nix      {};
-#
-          xo-statistics     = self.callPackage pkgs/xo-statistics.nix     {};
-          xo-distribution   = self.callPackage pkgs/xo-distribution.nix   {};
-          xo-pydistribution = self.callPackage pkgs/xo-pydistribution.nix {};
-          xo-simulator      = self.callPackage pkgs/xo-simulator.nix      {};
-          xo-pysimulator    = self.callPackage pkgs/xo-pysimulator.nix    {};
-          xo-process        = self.callPackage pkgs/xo-process.nix        {};
-          xo-pyprocess      = self.callPackage pkgs/xo-pyprocess.nix      {};
-          xo-kalmanfilter   = self.callPackage pkgs/xo-kalmanfilter.nix   {};
-          xo-pykalmanfilter = self.callPackage pkgs/xo-pykalmanfilter.nix {};
 #
           xo-expression     = self.callPackage pkgs/xo-expression.nix     {};
-          xo-pyexpression   = self.callPackage pkgs/xo-pyexpression.nix   {};
           xo-tokenizer      = self.callPackage pkgs/xo-tokenizer.nix      { buildDocs = true; };
           xo-reader         = self.callPackage pkgs/xo-reader.nix         {};
 
           xo-jit            = self.callPackage pkgs/xo-jit.nix            { #stdenv = jitStdenv;
                                                                             #clang = llvmPackages2.clang;
                                                                             llvm = llvmPackages1.llvm; };
-          xo-pyjit          = self.callPackage pkgs/xo-pyjit.nix          {};
 
 #
-          xo-userenv        = self.callPackage pkgs/xo-userenv.nix        {};
           xo-userenv-slow   = self.callPackage pkgs/xo-userenv-slow.nix   { stdenv = jitStdenv;
                                                                             #clang = llvmPackages.clang;
                                                                             llvm = llvmPackages1.llvm;
@@ -132,6 +101,40 @@ let
 
             xo-cmake          = self.callPackage pkgs/xo-cmake.nix          {};
             xo-indentlog      = self.callPackage pkgs/xo-indentlog.nix      { buildDocs = true; buildExamples = true; };
+            xo-refcnt         = self.callPackage pkgs/xo-refcnt.nix         {};
+            xo-subsys         = self.callPackage pkgs/xo-subsys.nix         {};
+            xo-ordinaltree    = self.callPackage pkgs/xo-ordinaltree.nix    {};
+            xo-pyutil         = self.callPackage pkgs/xo-pyutil.nix         {};
+            xo-reflectutil    = self.callPackage pkgs/xo-reflectutil.nix    {};
+            xo-reflect        = self.callPackage pkgs/xo-reflect.nix        {};
+            xo-pyreflect      = self.callPackage pkgs/xo-pyreflect.nix      {};
+            xo-pyunit         = self.callPackage pkgs/xo-pyunit.nix         {};
+            #
+            xo-callback       = self.callPackage pkgs/xo-callback.nix       {};
+            xo-webutil        = self.callPackage pkgs/xo-webutil.nix        {};
+            xo-pywebutil      = self.callPackage pkgs/xo-pywebutil.nix      {};
+            xo-printjson      = self.callPackage pkgs/xo-printjson.nix      {};
+            xo-pyprintjson    = self.callPackage pkgs/xo-pyprintjson.nix    {};
+            xo-reactor        = self.callPackage pkgs/xo-reactor.nix        {};
+            xo-pyreactor      = self.callPackage pkgs/xo-pyreactor.nix      {};
+            xo-websock        = self.callPackage pkgs/xo-websock.nix        {};
+            xo-pywebsock      = self.callPackage pkgs/xo-pywebsock.nix      {};
+            #
+            xo-statistics     = self.callPackage pkgs/xo-statistics.nix     {};
+            xo-distribution   = self.callPackage pkgs/xo-distribution.nix   {};
+            xo-pydistribution = self.callPackage pkgs/xo-pydistribution.nix {};
+            xo-simulator      = self.callPackage pkgs/xo-simulator.nix      {};
+            xo-pysimulator    = self.callPackage pkgs/xo-pysimulator.nix    {};
+            xo-process        = self.callPackage pkgs/xo-process.nix        {};
+            xo-pyprocess      = self.callPackage pkgs/xo-pyprocess.nix      {};
+            xo-kalmanfilter   = self.callPackage pkgs/xo-kalmanfilter.nix   {};
+            xo-pykalmanfilter = self.callPackage pkgs/xo-pykalmanfilter.nix {};
+            #
+
+            xo-pyexpression   = self.callPackage pkgs/xo-pyexpression.nix   {};
+            xo-pyjit          = self.callPackage pkgs/xo-pyjit.nix          {};
+            #
+            xo-userenv        = self.callPackage pkgs/xo-userenv.nix        {};
         };
 
 in
