@@ -17,6 +17,7 @@ stdenv.mkDerivation (finalattrs:
     src = ../xo-ordinaltree;
 
     cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake"];
+
     doCheck = true;
     nativeBuildInputs = [
       cmake catch2 xo-cmake
