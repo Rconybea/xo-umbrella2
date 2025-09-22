@@ -29,6 +29,12 @@ add_subdirectory(example)
 add_subdirectory(utest)
 
 # ----------------------------------------------------------------
+
+if (XO_ENABLE_EXAMPLES)
+    install(TARGETS xo_expression_ex1 DESTINATION bin/xo/example)
+endif()
+
+# ----------------------------------------------------------------
 # docs targets depend on all the other library/utest targets
 #
 #add_subdirectory(docs)
