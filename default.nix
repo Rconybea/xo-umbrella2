@@ -152,6 +152,8 @@ let
 in
 
 let
+  xo_topdir = toString ./.;
+
   fonts = pkgs.makeFontsConf {
     fontDirectories = [
       pkgs.inconsolata-lgc
@@ -160,119 +162,519 @@ let
       pkgs.dejavu_fonts
     ];
   };
-in
-pkgs.mkShell {
-  # maybe should create a python environment:
-  #   let
-  #     pythonenv = pkgs.python3.withPackages (pset: [ pset.sphinx pset.breathe ..etc.. ])
-  #   in
-  #     buildInputs = [ pythonenv ..etc.. ];
-  #
 
-  buildInputs = [
-    pkgs.nix
+  # xo deps
+  xodeps = [
+    pkgs.python3Packages.python
+    pkgs.python3Packages.pybind11
+    pkgs.llvmPackages_18.llvm.dev
+    pkgs.replxx
+    pkgs.libwebsockets
+    pkgs.jsoncpp
+    pkgs.eigen
+    pkgs.zlib
+    pkgs.libbsd
+  ];
 
+  # xo ide utils
+  ideutils = [
     pkgs.gsettings-desktop-schemas
     pkgs.emacs
-    pkgs.nushell
+    pkgs.notmuch
+    pkgs.emacsPackages.notmuch
+    pkgs.inconsolata-lgc
+    pkgs.fontconfig
+  ];
+
+  # xo general-purpose devutils
+  devutils = [
+    pkgs.nix-tree  # note: needs GHC
+
+    pkgs.git
+    pkgs.cloc
+
+    pkgs.lcov
+    pkgs.catch2
+    pkgs.gdb
+    pkgs.strace
+
     pkgs.which
     pkgs.man
     pkgs.man-pages
     pkgs.less
-    pkgs.nix-tree    # needs GHC...
     pkgs.ripgrep
     pkgs.openssh
-    pkgs.notmuch
-    pkgs.emacsPackages.notmuch
-    pkgs.inconsolata-lgc
 
-    pkgs.python3Packages.python
-    pkgs.python3Packages.pybind11
-    pkgs.python3Packages.sphinx-rtd-theme
-    #pkgs.python3Packages.sphinx-autobuild   # needs patch for typeguard; defer for now
-    pkgs.python3Packages.breathe
-    #pkgs.python3Packages.sphinxcontrib-ditaa
-    pkgs.python3Packages.sphinxcontrib-plantuml
-    pkgs.python3Packages.pillow
-
-    pkgs.gdb
     pkgs.ccache
     pkgs.distcc
-
-    pkgs.git
-    pkgs.lcov
-    pkgs.ditaa
-    pkgs.cloc
-
-    pkgs.sphinx
-    pkgs.graphviz
-    pkgs.doxygen
-
-    pkgs.llvmPackages_18.llvm.dev
-    # pkgs.llvmPackages_18.libllvm
-    # pkgs.llvmPackages_18.bintools
-    pkgs.libwebsockets
-    pkgs.replxx
-    pkgs.jsoncpp
-    pkgs.eigen
-    pkgs.catch2
-    pkgs.zlib
-    pkgs.unzip
-    pkgs.libbsd
-
     pkgs.cmake
     pkgs.pkg-config
-
-#    pkgs.emscripten
-    pkgs.imgui
-    pkgs.SDL2.dev
-    pkgs.glew
-#    pkgs.nixGL.nixGLDefault
-#    pkgs.nixGL.nixGLNvidia
-#    pkgs.nixGL.nixGLMesa
-    pkgs.libGL
-#    pkgs.stdenv.cc.cc.lib
-#    pkgs.glibc
-
-    # try vulkan instead of opengl (at least on OSX)
-    pkgs.vulkan-loader
-    pkgs.vulkan-headers
-    pkgs.vulkan-validation-layers
-    pkgs.darwin.moltenvk
-
-    # fonts for imgui
-#    pkgs.gucharmap
-    pkgs.fontconfig
-    pkgs.noto-fonts
-    #pkgs.noto-fonts-lgc   # lgc for latin,greek,cyrillic   (but doesn't exist in pinned nixpkgs)
-    #pkgs.noto-fonts-cjk   # cjk for chinese,japanese,korean
-    pkgs.noto-fonts-emoji
-    pkgs.dejavu_fonts
-
-    pkgs.xorg.xclock
+    pkgs.unzip
   ];
 
-  shellHook = ''
+  # xo docutils
+  docutils =
+    pkgs.lib.optionals pkgs.stdenv.isLinux [
+      pkgs.python3Packages.sphinxcontrib-ditaa
+    ] ++
+    [
+      pkgs.python3Packages.python
+      pkgs.python3Packages.pillow
+      pkgs.python3Packages.breathe
+      #pkgs.python3Packages.sphinx-autobuild   # needs patch for typeguard; defer for now
+      pkgs.python3Packages.sphinx-rtd-theme
+      pkgs.python3Packages.sphinxcontrib-plantuml
+      pkgs.doxygen
+      pkgs.graphviz
+      pkgs.ditaa
+      pkgs.sphinx
+    ];
+
+  # xo x11utils
+  x11utils =
+    [
+      pkgs.xorg.xcbutil
+      pkgs.xorg.xcbutilwm     # xcb window manager utilities
+      pkgs.xorg.xcbutilimage
+      pkgs.xorg.xclock
+      pkgs.xorg.xdpyinfo
+    ];
+
+  # xo opengl utils
+  gldeps =
+    [
+      # glew: used for opengl apps;  not needed for vulkan apps (even when those apps use opengl)
+      pkgs.glew
+      pkgs.mesa-demos
+      pkgs.libGL
+    ];
+
+  vkdeps =
+    [
+      pkgs.vulkan-tools
+      pkgs.vulkan-loader
+      pkgs.vulkan-headers
+      pkgs.vulkan-validation-layers
+    ];
+
+  imguideps =
+    [
+#      pkgs.imgui     # incorporated directly into xo dev tree, see xo-imgui/include/imgui
+      pkgs.SDL2.dev
+      pkgs.xorg.libX11.dev  # e.g. for X11/Xlib.h; needed by SDL2
+
+      pkgs.dejavu_fonts     # also must set DEJAVU_FONTS_PATH for imgui_ex2
+    ];
+
+in
+{
+  pkgs = pkgs;
+  xo = {
+    cmake          = pkgs.xo-cmake;
+    indentlog      = pkgs.xo-indentlog;
+    refcnt         = pkgs.xo-refcnt;
+    subsys         = pkgs.xo-subsys;
+    randomgen      = pkgs.xo-randomgen;
+    ordinaltree    = pkgs.xo-ordinaltree;
+    flatstring     = pkgs.xo-flatstring;
+    pyutil         = pkgs.xo-pyutil;
+    reflectutil    = pkgs.xo-reflectutil;
+    reflect        = pkgs.xo-reflect;
+    pyreflect      = pkgs.xo-pyreflect;
+    ratio          = pkgs.xo-ratio;
+    unit           = pkgs.xo-unit;
+    pyunit         = pkgs.xo-pyunit;
+    callback       = pkgs.xo-callback;
+    webutil        = pkgs.xo-webutil;
+    pywebutil      = pkgs.xo-pywebutil;
+    printjson      = pkgs.xo-printjson;
+    pyprintjson    = pkgs.xo-pyprintjson;
+    reactor        = pkgs.xo-reactor;
+    pyreactor      = pkgs.xo-pyreactor;
+    websock        = pkgs.xo-websock;
+    pywebsock      = pkgs.xo-pywebsock;
+    statistics     = pkgs.xo-statistics;
+    distribution   = pkgs.xo-distribution;
+    pydistribution = pkgs.xo-pydistribution;
+    simulator      = pkgs.xo-simulator;
+    pysimulator    = pkgs.xo-pysimulator;
+    process        = pkgs.xo-process;
+    pyprocess      = pkgs.xo-pyprocess;
+    kalmanfilter   = pkgs.xo-kalmanfilter;
+    pykalmanfilter = pkgs.xo-pykalmanfilter;
+    expression     = pkgs.xo-expression;
+    pyexpression   = pkgs.xo-pyexpression;
+    tokenizer      = pkgs.xo-tokenizer;
+    reader         = pkgs.xo-reader;
+    jit            = pkgs.xo-jit;
+    pyjit          = pkgs.xo-pyjit;
+  };
+
+  # minimal shell - just enough to verify gcc works.
+  # not sufficient to build xo
+  #
+  shell0 = pkgs.mkShell {
+    buildInputs = devutils;
+
+    # includes stdenv, so will have gcc,gawk,tar,gzip etc
+    shellHook = ''
+      # CXENV: cosmetic: coordinates with ~/proj/env/dotfiles/bashrc to drive PS1
+      export CXENV=$CXENV:xo0
+
+      # override SOUCE_DATE_EPOCH to current time (otherwise will get 1980)
+      export SOURCE_DATE_EPOCH=$(date +%s)
+      '';
+  };
+
+  # stable shell.  can build xo without docs
+  shell1a = pkgs.mkShell {
+    buildInputs = xodeps ++ devutils;
+
+    shellHook = ''
+      # CXENV: cosmetic: coordinates with ~/proj/env/dotfiles/bashrc to drive PS1
+      export CXENV=$CXENV:xo1a
+
+      # override SOUCE_DATE_EPOCH to current time (otherwise will get 1980)
+      export SOURCE_DATE_EPOCH=$(date +%s)
+      '';
+  };
+
+  # minimal shell, intended to be stable
+  shell1 = pkgs.mkShell {
+    buildInputs = docutils ++ xodeps ++ devutils;
+
+    # includes stdenv, so will have gcc,gawk,tar,gzip etc
+    shellHook = ''
+      # CXENV: cosmetic: coordinates with ~/proj/env/dotfiles/bashrc to drive PS1
+      export CXENV=$CXENV:xo1
+
+      # override SOUCE_DATE_EPOCH to current time (otherwise will get 1980)
+      export SOURCE_DATE_EPOCH=$(date +%s)
+      '';
+  };
+
+  # minimal shell + ide stuff, intended to be stable
+  shell2 = pkgs.mkShell {
+    buildInputs = docutils ++ xodeps ++ devutils ++ ideutils;
+
+    # includes stdenv, so will have gcc,gawk,tar,gzip etc
+    shellHook = ''
+      # CXENV: cosmetic: coordinates with ~/proj/env/dotfiles/bashrc to drive PS1
+      export CXENV=$CXENV:xo2
+
+      # override SOUCE_DATE_EPOCH to current time (otherwise will get 1980)
+      export SOURCE_DATE_EPOCH=$(date +%s)
+
+      export FONTCONFIG_FILE=${fonts}
+      export FONTCONFIG_PATH=${pkgs.fontconfig.out}/etc/fonts
+      ${pkgs.fontconfig}/bin/fc-cache -f
+      '';
+  };
+
+  # xo shell with opengl support
+  shell3 = pkgs.mkShell {
+    buildInputs = docutils ++ xodeps ++ devutils ++ ideutils ++ x11utils ++ gldeps ++ vkdeps ++ imguideps;
+
+    shellHook =
+      let
+        # dependencies of host system libraries
+        # (e.g. from /usr/lib/x86_64-linux-gnu) that we want to satisfy from nix;
+        # sufficient for glxgears
+        #
+        # be careful here: easy to insert something that breaks xo cmake build
+        #
+        # with minimal list
+        #   (libXau, libXdmcp, libX11, libXext, libXfixes, libXxf86vm, libxml2, libffi,
+        #    elfutils, ncurses, expat, zstd, zlib, libbsd, gcc.cc.lib)
+        #   glxgears runs at ~170fps
+        #
+        glpath = pkgs.lib.makeLibraryPath [
+          pkgs.wayland         # for libwayland-client.so
+
+          pkgs.xorg.libXau
+          pkgs.xorg.libXdmcp
+          pkgs.xorg.libX11     # e.g. for libX11-xcb.so
+          pkgs.xorg.libXext
+          pkgs.xorg.libXfixes
+          pkgs.xorg.libXxf86vm
+
+          pkgs.libxml2
+          pkgs.libffi
+
+          pkgs.elfutils        # for libelf.so
+          pkgs.ncurses         # for libtinfo.so
+          pkgs.expat
+          pkgs.zstd
+          pkgs.zlib            # for libz.so
+          pkgs.libbsd
+
+          pkgs.gcc.cc.lib      # for libstdc++.so  (won't blow up cmake, only touching LD_LIBRARY_PATH)
+        ];
+      in
+        ''
+        # CXENV: cosmetic: coordinates with ~/proj/env/dotfiles/bashrc to drive PS1
+        export CXENV=$CXENV:xo3
+
+        # override SOUCE_DATE_EPOCH to current time (otherwise will get 1980)
+        export SOURCE_DATE_EPOCH=$(date +%s)
+
+        # fonts
+        export FONTCONFIG_FILE=${fonts}
+        export FONTCONFIG_PATH=${pkgs.fontconfig.out}/etc/fonts
+        ${pkgs.fontconfig}/bin/fc-cache -f
+
+        # nix-provided GPU libraries only work out-of-the-box on nixos.
+        # For non-nixos build, need to use host-provided versions of these libraries.
+        # Complications:
+        # 1. host location is likely something like /usr/lib/x86_64-linux-gnu,
+        #    in which case interposing that directly will change link behavior for unrelated shared libraries
+        #    (e.g. risk getting stale non-nix libc.so etc).  Use a curated symlink directory to finesse.
+        # 2. host-installed libraries may not set RUNPATH (they don't need to if installed in system-wide default location).
+        #    We need to also add nix-store LD_LIBRARY_PATH entries for indirect dependencies of system-provided libraries.
+        #
+        export LD_LIBRARY_PATH=/usr/lib/wsl/lib:${xo_topdir}/etc/hostwsl:${glpath}:$LD_LIBRARY_PATH
+
+        # for vulkan on wsl, need to use llvm pipe rendering.
+        # (asof sep 2025 hardware rendering is supported, but with compute-only in mind i.e. for cuda)
+        # export VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/lvp_icd.x86_64.json
+        export VK_ICD_FILENAMES="${pkgs.mesa}/share/vulkan/icd.d/dzn_icd.x86_64.json"
+
+        # need this on OSX, + claude wants it for wsl2.  but looks sketchy to me
+        export VK_LAYER_PATH=${pkgs.vulkan-validation-layers}/share/vulkan/explicit_layer.d
+
+        # hardware acceleration
+        export LIBGL_ALWAYS_SOFTWARE=0
+        export MESA_LOADER_DRIVER_OVERRIDE=""
+
+        # wsl2-specific gpu setup
+        export MESA_D3D12_DEFAULT_ADAPTER_NAME=DX
+
+        echo "using d3d12 vulkan driver: $VK_ICD_FILENAMES"
+        '';
+
+    # TODO: consider a nix project to generate this directory. nixwsl
+  };
+
+  # vkcube works here
+  shell4 = pkgs.mkShell {
+    buildInputs = docutils ++ xodeps ++ devutils ++ ideutils ++ x11utils ++ gldeps ++ vkdeps ++ imguideps;
+
+    shellHook =
+      let
+        # dependencies of host system libraries
+        # (e.g. from /usr/lib/x86_64-linux-gnu) that we want to satisfy from nix;
+        # sufficient for glxgears
+        #
+        # be careful here: easy to insert something that breaks xo cmake build
+        #
+        # with minimal list
+        #   (libXau, libXdmcp, libX11, libXext, libXfixes, libXxf86vm, libxml2, libffi,
+        #    elfutils, ncurses, expat, zstd, zlib, libbsd, gcc.cc.lib)
+        #   glxgears runs at ~170fps
+        #
+        glpath = pkgs.lib.makeLibraryPath [
+          pkgs.wayland         # for libwayland-client.so
+
+          pkgs.xorg.libXau
+          pkgs.xorg.libXdmcp
+          pkgs.xorg.libX11     # e.g. for libX11-xcb.so
+          pkgs.xorg.libXext
+          pkgs.xorg.libXfixes
+          pkgs.xorg.libXxf86vm
+          pkgs.xorg.libxcb
+
+          pkgs.libxml2
+          pkgs.libffi
+
+          pkgs.elfutils        # for libelf.so
+          pkgs.ncurses         # for libtinfo.so
+          pkgs.expat
+          pkgs.zstd
+          pkgs.zlib            # for libz.so
+          pkgs.libbsd
+
+          pkgs.gcc.cc.lib      # for libstdc++.so  (won't blow up cmake, only touching LD_LIBRARY_PATH)
+        ];
+      in
+        ''
+        # CXENV: cosmetic: coordinates with ~/proj/env/dotfiles/bashrc to drive PS1
+        export CXENV=$CXENV:xo4
+
+        # override SOUCE_DATE_EPOCH to current time (otherwise will get 1980)
+        export SOURCE_DATE_EPOCH=$(date +%s)
+
+        # fonts
+        export FONTCONFIG_FILE=${fonts}
+        export FONTCONFIG_PATH=${pkgs.fontconfig.out}/etc/fonts
+        export DEJAVU_FONTS_PATH=${pkgs.dejavu_fonts}/share/fonts
+        ${pkgs.fontconfig}/bin/fc-cache -f
+
+        # nix-provided GPU libraries only work out-of-the-box on nixos.
+        # For non-nixos build, need to use host-provided versions of these libraries.
+        # Complications:
+        # 1. host location is likely something like /usr/lib/x86_64-linux-gnu,
+        #    in which case interposing that directly will change link behavior for unrelated shared libraries
+        #    (e.g. risk getting stale non-nix libc.so etc).  Use a curated symlink directory to finesse.
+        # 2. host-installed libraries may not set RUNPATH (they don't need to if installed in system-wide default location).
+        #    We need to also add nix-store LD_LIBRARY_PATH entries for indirect dependencies of system-provided libraries.
+        #
+        export LD_LIBRARY_PATH=${pkgs.mesa}/lib:/usr/lib/wsl/lib:${xo_topdir}/etc/hostwsl2:${glpath}:$LD_LIBRARY_PATH
+
+        export VK_ICD_FILENAMES="${pkgs.mesa}/share/vulkan/icd.d/dzn_icd.x86_64.json"
+
+        # need this on OSX, + claude wants it for wsl2.  but looks sketchy to me
+        export VK_LAYER_PATH=${pkgs.vulkan-validation-layers}/share/vulkan/explicit_layer.d
+
+        # hardware acceleration
+        export LIBGL_ALWAYS_SOFTWARE=0
+        export MESA_LOADER_DRIVER_OVERRIDE=""
+
+        # wsl2-specific gpu setup.
+        export MESA_D3D12_DEFAULT_ADAPTER_NAME=DX
+
+        echo "using d3d12 vulkan driver: $VK_ICD_FILENAMES"
+
+        echo "nix_mesa=${pkgs.mesa}"
+        nix_mesa=${pkgs.mesa}
+        '';
+
+    # TODO: consider a nix project to generate this directory. nixwsl
+  };
+
+  # Old shell from failed vulkan-on-wsl attempts.
+  # Descends from working OSX though, so keep until we coordinate with that
+  #
+  shell = pkgs.mkShell {
+    # maybe should create a python environment:
+    #   let
+    #     pythonenv = pkgs.python3.withPackages (pset: [ pset.sphinx pset.breathe ..etc.. ])
+    #   in
+    #     buildInputs = [ pythonenv ..etc.. ];
+    #
+
+    buildInputs = [
+      #pkgs.nix
+
+      pkgs.nushell
+    ]
+    ++ docutils
+    ++ devutils
+    ++ xodeps
+    ++ ideutils
+    ++ (if pkgs.stdenv.isLinux then [ pkgs.emscripten ] else [])
+    ++ x11utils
+    ++ gldeps
+    ++ imguideps
+    ++
+    [
+      #     pkgs.nixgl.auto.nixGLDefault  # this + libGL + mesa-demos -> 'nixGL glxgears' works out-of-the-box
+      #    pkgs.nixgl.auto.nixGLNvidia
+      #    pkgs.nixgl.nixVulkanIntel  # mesa+vulkan
+      #     pkgs.nixgl.nixGLMesa
+      #    pkgs.nixgl.nixGLNvidia   # try this explicitly for wsl2
+      # *might* also need xorg.libXext.dev, xorg.libXrender.dev, xorg.xorgproto
+    ]
+    ++ (if pkgs.stdenv.isLinux then [ pkgs.stdenv.cc.cc.lib pkgs.glibc ] else [])
+    ++ vkdeps
+    ++ (if pkgs.stdenv.isDarwin then [ pkgs.darwin.moltenvk ] else [])
+    ++ [
+      pkgs.xorg.xcbutil
+      pkgs.xorg.xcbutilwm     # xcb window manager utilities
+      pkgs.xorg.xcbutilimage
+
+      # fonts for imgui
+      #    pkgs.gucharmap
+      pkgs.noto-fonts
+      #pkgs.noto-fonts-lgc   # lgc for latin,greek,cyrillic   (but doesn't exist in pinned nixpkgs)
+      #pkgs.noto-fonts-cjk   # cjk for chinese,japanese,korean
+      pkgs.noto-fonts-emoji
+      pkgs.dejavu_fonts
+    ];
+
+    shellHook = ''
+    # CXENV: cosmetic: coordinates with ~/proj/env/dotfiles/bashrc to drive PS1
+    export CXENV=$CXENV:xo
+
     # override SOUCE_DATE_EPOCH to current time (otherwise will get 1980)
     export SOURCE_DATE_EPOCH=$(date +%s)
-
-    export CXENV=$CXENV:xo
 
     # software-only pipeline
     #export SDL_VIDEODRIVER=x11
     #export LIBGL_ALWAYS_SOFTWARE=1
 
     #export SDL_VIDEO_X11_FORCE_EGL=0
-    export SDL_VIDEO_X11_VISUALID=0x023
+    #export SDL_VIDEO_X11_VISUALID=0x023
 
     #export LIBGL_ALWAYS_INDIRECT=1
     #export WSLG_FORCE_EGL=1
     #export GLFW_USE_EGL=1
 
-    # for Vulkan on OSX
     export VULKAN_SDK=${pkgs.vulkan-headers}
+
+    # for Vulkan on OSX only..
+    ${pkgs.lib.optionalString pkgs.stdenv.isDarwin ''
     export VK_ICD_FILENAMES=${pkgs.darwin.moltenvk}/share/vulkan/icd.d/MoltenVK_icd.json
     export VK_LAYER_PATH=${pkgs.vulkan-validation-layers}/share/vulkan/explicit_layer.d
+    ''}
+
+    # do need VK_LAYER_PATH on OSX.  Not sure if we need it on wsl2
+    #export VK_LAYER_PATH=${pkgs.vulkan-validation-layers}/share/vulkan/explicit_layer.d
+
+    # nixGL experiment (on wsl2).  Doesn't work out of the box, but maybe with some help..
+    # TODO: put this in its own generated wrapper.
+    # TODO: if/when this works, refactor to use something like
+    #    let vklibpath = pkgs.lib.makeLibraryPath [ pkgs.foo pkgs.libffi pkgs.glibc ... ];
+    #  with
+    #    export LD_LIBRARY_PATH="$vklibpath:$LD_LIBRARY_PATH"
+    # NOTE: nixGL doesn't really know how to handle a wsl2 host, in particular doesn't know
+    #       about /usr/lib/wsl/lib
+    #
+    ${pkgs.lib.optionalString pkgs.stdenv.isLinux ''
+#    export LD_LIBRARY_PATH=${pkgs.glibc}:$LD_LIBRARY_PATH
+#    export LD_LIBRARY_PATH=${xo_topdir}/etc/hostwsl:$LD_LIBRARY_PATH
+#    export LD_LIBRARY_PATH=${pkgs.vulkan-loader}/lib:$LD_LIBRARY_PATH
+#    export LD_LIBRARY_PATH=/usr/lib/wsl/lib:$LD_LIBRARY_PATH
+#    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${pkgs.mesa}/lib
+#    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${pkgs.libffi}/lib
+#    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${pkgs.wayland}/lib
+#    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${pkgs.xorg.libXext}/lib
+#    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${pkgs.xorg.libXau}/lib
+#    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${pkgs.xorg.libXdmcp}/lib
+#    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${pkgs.xorg.libXfixes}/lib
+#    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${pkgs.xorg.libXxf86vm}/lib
+#    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${pkgs.xorg.libX11}/lib
+#    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${pkgs.gcc.cc.lib}/lib
+#    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${pkgs.ncurses}/lib
+#    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${pkgs.expat}/lib
+#    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${pkgs.elfutils.out}/lib
+#    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${pkgs.libxml2.out}/lib
+#    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${pkgs.icu}/lib
+#    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${pkgs.libmd}
+#    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${pkgs.xz.out}/lib
+#    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${pkgs.zstd.out}/lib
+#    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${pkgs.zlib}/lib
+#    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${pkgs.libbsd}/lib
+#    #export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${pkgs.libedit}/lib   # gets libedit.so.0, but system wants libedit.so.2
+#    #export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${pkgs.lm_sensors}    # wanted libsensors.so.5, this package doesn't provide it
+
+    export VK_INSTANCE_LAYERS=VK_LAYER_KHRONOS_validation
+
+    # lvp_icd.x86_64.json: llvm pipe rendering (software)
+    export VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/lvp_icd.x86_64.json
+
+    export VK_LD_PRELOAD=${pkgs.vulkan-loader}/lib/libvulkan.so.1
+
+    ## mesa software rendering settings
+    # export GALLIUM_DRIVER=llvmpipe
+    # export MESA_GL_VERSION_OVERRIDE=3.3
+    # export LIBGL_ALWAYS_SOFTWARE=1
+
+    # export VK_LOADER_DEBUG=all   # or info
+    # export MESA_DEBUG=1
+    # export EGL_LOG_LEVEL=debug
+    # export LIBGL_DEBUG=verbose
+    # vkcube --wsi xcb
+    ''}
 
     # just for info
     export mesa_drivers=${pkgs.mesa.drivers}
@@ -290,4 +692,5 @@ pkgs.mkShell {
 
     echo "xo development environment loaded!"
   '';
+  };
 }

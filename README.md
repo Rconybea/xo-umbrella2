@@ -12,6 +12,18 @@ Intended for local development work, with source in immediate subdirectories.
 
 ## Getting Started
 
+### Nix shell (reproducible development environment)
+
+If `nix` is available, can get several reproducible build environments
+
+```
+$ cd xo-umbrella2
+$ nix-shell -A shell0  # just nix stdenv: make,gcc,bash etc.
+$ nix-shell -A shell1  # stable environment
+$ nix-shell -A shell2  # stable environment + emacs + lsp
+$ nix-shell -A shell   # bleeding edge environment
+```
+
 ### Cmake build
 
 If `nix` is available, you probably prefer the nix build.
