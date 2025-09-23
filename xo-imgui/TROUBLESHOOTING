@@ -2,7 +2,7 @@
 
    $ nixGL glxgears
 
-2. does vulkaninf work ?
+2. does vulkaninfo work ?
 
 
 For WSL2 (nvidia GPU)

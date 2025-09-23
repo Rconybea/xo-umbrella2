@@ -1,11 +1,16 @@
 /* imgui_ex4.cpp */
 
 #include "xo/imgui/VulkanApp.hpp"
+#ifdef TEMPORARILY_REMOVE
 #include "xo/imgui/ImRect.hpp"
+#endif
 #include "AppState.hpp"
 #include "DrawState.hpp"
 #include <backends/imgui_impl_sdl2.h>
 #include <backends/imgui_impl_vulkan.h>
+
+#include "xo/indentlog/scope.hpp"
+
 #include <iostream>
 #include <fstream>
 
@@ -13,6 +18,7 @@ namespace {
     using xo::gc::generation;
     using xo::scope;
     using xo::xtag;
+
 
     void
     app_duty_cycle_top(AppState * p_app_state,
@@ -173,6 +179,11 @@ namespace {
 }
 
 int main() {
+    printf("Hello world\n");
+
+    scope log(XO_DEBUG(true));
+    log && log("starting main");
+
     AppState app_state;
     DrawState draw_state;
     draw_state.gcstate_ = app_state.snapshot_gc_state();

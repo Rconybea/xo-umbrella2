@@ -24,7 +24,7 @@ add_definitions(${PROJECT_CXX_FLAGS})
 
 set(XO_EXAMPLE_INSTALL_DIR bin/xo/imgui/example)
 
-#add_subdirectory(src/imgui)
+add_subdirectory(src/imgui)
 add_subdirectory(example)
 # add_subdirectory(utest)
 

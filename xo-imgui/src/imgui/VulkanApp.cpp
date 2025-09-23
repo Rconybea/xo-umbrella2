@@ -6,6 +6,10 @@
 #include <backends/imgui_impl_sdl2.h>
 #include <backends/imgui_impl_vulkan.h>
 #include <cstdint>
+#include <vulkan/vulkan_core.h>
+#ifdef __linux__
+# include <vulkan/vulkan_wayland.h>
+#endif
 
 using xo::scope;
 using xo::xtag;
@@ -38,6 +42,12 @@ VulkanApp::run() {
 
 void
 VulkanApp::init_window() {
+#ifdef __linux__
+    // on linux (at least for wsl2) force x11 with xlib instead of xcb
+    // alternatively could set env var SDL_VIDEODRIVER
+    SDL_SetHint(SDL_HINT_VIDEODRIVER, "x11");
+#endif
+
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         throw std::runtime_error("Failed to initialize SDL!");
     }
@@ -97,8 +107,21 @@ VulkanApp::create_instance()
         throw std::runtime_error("Failed to get SDL Vulkan extensions!");
     }
 
+#ifdef __APPLE__
     // Add portability extension for MoltenVK (macOS)
     extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+    // claude.ai says:
+    //  extensions.push_back("VK_KHR_get_physical_device_properties2")
+#endif
+
+#ifdef __linux__
+    extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
+    // native wayland drivers.  or use VK_KHR_XLIB_SURFACE_EXTENSION_NAME here
+    //extensions.push_back(VK_KHR_XLIB_SURFACE_EXTENSION_NAME);
+    //extensions.push_back(VK_KHR_WAYLAND_SURFACE_EXTENSION_NAME);
+#endif
+
+    extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 
     createInfo.enabledExtensionCount = extensions.size();
     createInfo.ppEnabledExtensionNames = extensions.data();

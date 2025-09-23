@@ -1,5 +1,7 @@
 /* GenerationLayout.hpp */
 
+#pragma once
+
 #include "GcGenerationDescription.hpp"
 #include "xo/imgui/ImRect.hpp"
 
@@ -89,5 +91,6 @@ struct GenerationLayout {
     /** rectangle representing to-space memory range **/
     ImRect mem_rect_to_;
 };
+
 
 /* GenerationLayout.hpp */

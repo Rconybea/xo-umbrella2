@@ -26,7 +26,12 @@ int main(int, char **)
 
     std::cout << "Hello, world!" << std::endl;
 
-    SDL_SetHint(SDL_HINT_VIDEO_X11_FORCE_EGL, "1");
+    // 500fps with no hint
+    // 60gps with hint
+    //
+    // presumably GLX optimized relative to EGL
+
+    //SDL_SetHint(SDL_HINT_VIDEO_X11_FORCE_EGL, "1");
 
     SDL_Init(SDL_INIT_VIDEO);
 

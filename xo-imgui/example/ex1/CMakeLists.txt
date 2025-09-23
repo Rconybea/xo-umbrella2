@@ -3,7 +3,7 @@ if (XO_ENABLE_EXAMPLES)
 
     if (XO_ENABLE_OPENGL)
 
-        # TODO: maybe at some point incorporate imgui sources directly into xo source tree
+        # TODO: maybe incorporate imgui sources into xo-imgui library
         find_path(IMGUI_INCLUDE_DIR
             NAMES imgui/imgui.h
             DOC "path to imgui header"
