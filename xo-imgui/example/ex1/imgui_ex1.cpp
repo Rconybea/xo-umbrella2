@@ -26,7 +26,7 @@ int main(int, char **)
 
     std::cout << "Hello, world!" << std::endl;
 
-    SDL_SetHint(SDL_HINT_VIDEO_X11_FORCE_EGL, "0");
+    SDL_SetHint(SDL_HINT_VIDEO_X11_FORCE_EGL, "1");
 
     SDL_Init(SDL_INIT_VIDEO);
 
@@ -94,7 +94,19 @@ int main(int, char **)
     if (glew_status == GLEW_OK) {
         std::cerr << "glewInit done" << std::endl;
     } else {
-        std::cerr << "glewInit failed: [" << glewGetErrorString(glew_status) << std::endl;
+        std::cerr << "glewInit failed: [" << glewGetErrorString(glew_status) << "]" << std::endl;
+        return -1;
+    }
+
+    GLenum gl_error = glGetError();
+
+    if (gl_error != GL_NO_ERROR) {
+        std::cerr << "OpenGL error after glewInit: [" << gl_error << "]" << std::endl;
+        return -1;
+    }
+
+    if (!glGetString(GL_VENDOR)) {
+        std::cerr << "No valid OpenGL context" << std::endl;
         return -1;
     }
 
@@ -117,104 +129,108 @@ int main(int, char **)
     ImGui::StyleColorsDark();
 
     ImGui_ImplSDL2_InitForOpenGL(window, gl_context);
-    ImGui_ImplOpenGL3_Init("#version 330");
 
-    bool show_demo_window = true;
-    bool show_another_window = false;
-    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-    float counter_value = 0.0f;
+    if (ImGui_ImplOpenGL3_Init("#version 330")) {
+        bool show_demo_window = true;
+        bool show_another_window = false;
+        ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+        float counter_value = 0.0f;
 
-    // Main Loop
-    bool done = false;
+        // Main Loop
+        bool done = false;
 
-    while (!done) {
-        /** poll + handle events */
-        SDL_Event event;
+        while (!done) {
+            /** poll + handle events */
+            SDL_Event event;
 
-        while (SDL_PollEvent(&event)) {
-            ImGui_ImplSDL2_ProcessEvent(&event);
-            if (event.type == SDL_QUIT)
-                done = true;
+            while (SDL_PollEvent(&event)) {
+                ImGui_ImplSDL2_ProcessEvent(&event);
+                if (event.type == SDL_QUIT)
+                    done = true;
 
-            if ((event.type == SDL_WINDOWEVENT)
-                && (event.window.event == SDL_WINDOWEVENT_CLOSE)
-                && (event.window.windowID == SDL_GetWindowID(window)))
-            {
-                done = true;
+                if ((event.type == SDL_WINDOWEVENT)
+                    && (event.window.event == SDL_WINDOWEVENT_CLOSE)
+                    && (event.window.windowID == SDL_GetWindowID(window)))
+                {
+                    done = true;
+                }
             }
-        }
 
-        int w, h;
-        SDL_GetWindowSize(window, &w, &h);
-        glViewport(0, 0, w, h);
-        glClearColor(clear_color.x * clear_color.w,
-                     clear_color.y * clear_color.w,
-                     clear_color.z * clear_color.w,
-                     clear_color.w);
-        glClear(GL_COLOR_BUFFER_BIT);
+            int w, h;
+            SDL_GetWindowSize(window, &w, &h);
+            glViewport(0, 0, w, h);
+            glClearColor(clear_color.x * clear_color.w,
+                         clear_color.y * clear_color.w,
+                         clear_color.z * clear_color.w,
+                         clear_color.w);
+            glClear(GL_COLOR_BUFFER_BIT);
 
-        // draw dear imgui frame
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplSDL2_NewFrame();
-        ImGui::NewFrame();
+            // draw dear imgui frame
+            ImGui_ImplOpenGL3_NewFrame();
+            ImGui_ImplSDL2_NewFrame();
+            ImGui::NewFrame();
 
-        ImGui::SetNextWindowPos(ImVec2(0, 0));
-        ImGui::SetNextWindowSize(io.DisplaySize);
-        ImGui::Begin("Background", nullptr,
-                     ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize
-                     | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus
-                     | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoDecoration);
-        ImGui::End();
-
-        // 1. big demo window
-        if (show_demo_window)
-            ImGui::ShowDemoWindow(&show_demo_window);
-
-        // 2. show window that we create ourselves
-        {
-            static int counter = 0;
-
-            ImGui::Begin("Hello, world!");
-            ImGui::Text("This is totes useful text...");
-            ImGui::Checkbox("demo window", &show_demo_window);
-            ImGui::Checkbox("second window", &show_another_window);
-
-            ImGui::SliderFloat("float", &counter_value, 0.0f, 1.0f);
-            ImGui::ColorEdit3("clear color", (float*)&clear_color);
-
-            if (ImGui::Button("Button"))
-                ++counter;
-            ImGui::SameLine();
-            ImGui::Text("counter = %d", counter);
-
-            ImGui::Text("appl average %.3f ms/frame (%.1f fps)",
-                        1000.0f / io.Framerate, io.Framerate);
-
+            ImGui::SetNextWindowPos(ImVec2(0, 0));
+            ImGui::SetNextWindowSize(io.DisplaySize);
+            ImGui::Begin("Background", nullptr,
+                         ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize
+                         | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBringToFrontOnFocus
+                         | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoDecoration);
             ImGui::End();
+
+            // 1. big demo window
+            if (show_demo_window)
+                ImGui::ShowDemoWindow(&show_demo_window);
+
+            // 2. show window that we create ourselves
+            {
+                static int counter = 0;
+
+                ImGui::Begin("Hello, world!");
+                ImGui::Text("This is totes useful text...");
+                ImGui::Checkbox("demo window", &show_demo_window);
+                ImGui::Checkbox("second window", &show_another_window);
+
+                ImGui::SliderFloat("float", &counter_value, 0.0f, 1.0f);
+                ImGui::ColorEdit3("clear color", (float*)&clear_color);
+
+                if (ImGui::Button("Button"))
+                    ++counter;
+                ImGui::SameLine();
+                ImGui::Text("counter = %d", counter);
+
+                ImGui::Text("appl average %.3f ms/frame (%.1f fps)",
+                            1000.0f / io.Framerate, io.Framerate);
+
+                ImGui::End();
+            }
+
+            // 3. another window
+            if (show_another_window) {
+                ImGui::Begin("another window", &show_another_window);
+
+                ImGui::Text("hello from second window");
+                if (ImGui::Button("close me"))
+                    show_another_window = false;
+
+                ImGui::End();
+            }
+
+            // rendering
+            ImGui::Render();
+
+            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+            SDL_GL_SwapWindow(window);
         }
 
-        // 3. another window
-        if (show_another_window) {
-            ImGui::Begin("another window", &show_another_window);
+        std::cerr << "Shutting down.." << std::endl;
 
-            ImGui::Text("hello from second window");
-            if (ImGui::Button("close me"))
-                show_another_window = false;
-
-            ImGui::End();
-        }
-
-        // rendering
-        ImGui::Render();
-
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-        SDL_GL_SwapWindow(window);
+        ImGui_ImplOpenGL3_Shutdown();
+    } else {
+        std::cerr << "Failed to initialize imgui opengl3 backend, shutting down.." << std::endl;
     }
 
-    std::cerr << "cleanup.." << std::endl;
-
-    ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplSDL2_Shutdown();
     ImGui::DestroyContext();
 
@@ -222,7 +238,7 @@ int main(int, char **)
     SDL_DestroyWindow(window);
     SDL_Quit();
 
-    std::cerr << "All done, goodbye..." << std::endl;
+    std::cerr << "Shutdown complete, goodbye..." << std::endl;
 
     return 0;
 
