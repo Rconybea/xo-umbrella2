@@ -541,6 +541,91 @@ in
     # TODO: consider a nix project to generate this directory. nixwsl
   };
 
+  # like shell4 but drop etc/hostwsl2
+  shell5 = pkgs.mkShell {
+    buildInputs = docutils ++ xodeps ++ devutils ++ ideutils ++ x11utils ++ gldeps ++ vkdeps ++ imguideps;
+
+    shellHook =
+      let
+        # dependencies of host system libraries
+        # (e.g. from /usr/lib/x86_64-linux-gnu) that we want to satisfy from nix;
+        # sufficient for glxgears
+        #
+        # be careful here: easy to insert something that breaks xo cmake build
+        #
+        # with minimal list
+        #   (libXau, libXdmcp, libX11, libXext, libXfixes, libXxf86vm, libxml2, libffi,
+        #    elfutils, ncurses, expat, zstd, zlib, libbsd, gcc.cc.lib)
+        #   glxgears runs at ~170fps
+        #
+        glpath = pkgs.lib.makeLibraryPath [
+          pkgs.wayland         # for libwayland-client.so
+
+          pkgs.mesa
+
+          pkgs.xorg.libXau
+          pkgs.xorg.libXdmcp
+          pkgs.xorg.libX11     # e.g. for libX11-xcb.so
+          pkgs.xorg.libXext
+          pkgs.xorg.libXfixes
+          pkgs.xorg.libXxf86vm
+          pkgs.xorg.libxcb
+
+          pkgs.libxml2
+          pkgs.libffi
+
+          pkgs.elfutils        # for libelf.so
+          pkgs.ncurses         # for libtinfo.so
+          pkgs.expat
+          pkgs.zstd
+          pkgs.zlib            # for libz.so
+          pkgs.libbsd
+
+          pkgs.gcc.cc.lib      # for libstdc++.so  (won't blow up cmake, only touching LD_LIBRARY_PATH)
+        ];
+      in
+        ''
+        # CXENV: cosmetic: coordinates with ~/proj/env/dotfiles/bashrc to drive PS1
+        export CXENV=$CXENV:xo5
+
+        # override SOUCE_DATE_EPOCH to current time (otherwise will get 1980)
+        export SOURCE_DATE_EPOCH=$(date +%s)
+
+        # fonts
+        export FONTCONFIG_FILE=${fonts}
+        export FONTCONFIG_PATH=${pkgs.fontconfig.out}/etc/fonts
+        export DEJAVU_FONTS_PATH=${pkgs.dejavu_fonts}/share/fonts
+        ${pkgs.fontconfig}/bin/fc-cache -f
+
+        # works but only get glx using llvmpipe.
+        # vkcube uses d3d12 however!
+        export LD_LIBRARY_PATH=/usr/lib/wsl/lib:${glpath}:$LD_LIBRARY_PATH
+
+        # need this on OSX, + claude wants it for wsl2.  but looks sketchy to me
+        export VK_LAYER_PATH=${pkgs.vulkan-validation-layers}/share/vulkan/explicit_layer.d
+        export VK_ICD_FILENAMES="${pkgs.mesa}/share/vulkan/icd.d/dzn_icd.x86_64.json"
+
+        # hardware acceleration (not sure if we need this)
+        export LIBGL_ALWAYS_SOFTWARE=0
+        export MESA_LOADER_DRIVER_OVERRIDE="d3d12"
+
+        # wsl2-specific gpu setup (doubt this is effective)
+        export MESA_D3D12_DEFAULT_ADAPTER_NAME=DX
+
+        echo "using d3d12 vulkan driver: $VK_ICD_FILENAMES"
+
+        echo "nix_mesa=${pkgs.mesa}"
+        nix_mesa=${pkgs.mesa}
+
+        echo "nix_libgl=${pkgs.libGL}"
+        nix_libgl=${pkgs.libGL}
+
+        # don't seem to need this -- doesn't invoke mesa hardware accel
+        #echo "nix_nixgl=${pkgs.nixgl.nixGLMesa}"
+        #nix_nixgl=${pkgs.nixgl.nixGLMesa}
+        '';
+  };
+
   # Old shell from failed vulkan-on-wsl attempts.
   # Descends from working OSX though, so keep until we coordinate with that
   #
