@@ -52,15 +52,13 @@ VulkanApp::init_window() {
         throw std::runtime_error("Failed to initialize SDL!");
     }
 
-    window = SDL_CreateWindow(
-        "Xo ImGui Vulkan SDL2 Frame",
-        SDL_WINDOWPOS_CENTERED,
-        SDL_WINDOWPOS_CENTERED,
-        800, 600,
-        SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE
-        );
+    this->window_ = SDL_CreateWindow("Xo ImGui Vulkan SDL2 Frame",
+                                     SDL_WINDOWPOS_CENTERED,
+                                     SDL_WINDOWPOS_CENTERED,
+                                     800, 600,
+                                     SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE);
 
-    if (!window) {
+    if (!window_) {
         throw std::runtime_error("Failed to create SDL window!");
     }
 }
@@ -72,7 +70,7 @@ VulkanApp::init_vulkan()
     this->create_surface();
     this->pick_physical_device();
     this->create_logical_device();
-    this->create_swap_chain();
+    this->create_swapchain();
     this->create_image_views();
     this->create_render_pass();
     this->create_framebuffers();
@@ -98,12 +96,12 @@ VulkanApp::create_instance()
     createInfo.pApplicationInfo = &appInfo;
 
     uint32_t extensionCount = 0;
-    if (!SDL_Vulkan_GetInstanceExtensions(window, &extensionCount, nullptr)) {
+    if (!SDL_Vulkan_GetInstanceExtensions(window_, &extensionCount, nullptr)) {
         throw std::runtime_error("Failed to get SDL Vulkan extensions!");
     }
 
     std::vector<const char*> extensions(extensionCount);
-    if (!SDL_Vulkan_GetInstanceExtensions(window, &extensionCount, extensions.data())) {
+    if (!SDL_Vulkan_GetInstanceExtensions(window_, &extensionCount, extensions.data())) {
         throw std::runtime_error("Failed to get SDL Vulkan extensions!");
     }
 
@@ -137,7 +135,7 @@ VulkanApp::create_instance()
 
 void
 VulkanApp::create_surface() {
-    if (!SDL_Vulkan_CreateSurface(window, instance, &(this->surface_))) {
+    if (!SDL_Vulkan_CreateSurface(window_, instance, &(this->surface_))) {
         throw std::runtime_error("Failed to create SDL Vulkan surface!");
     }
 }
@@ -208,7 +206,7 @@ VulkanApp::create_logical_device()
 }
 
 void
-VulkanApp::create_swap_chain()
+VulkanApp::create_swapchain()
 {
     VkSurfaceCapabilitiesKHR capabilities;
     vkGetPhysicalDeviceSurfaceCapabilitiesKHR
@@ -224,7 +222,7 @@ VulkanApp::create_swap_chain()
     swapchain_image_format_ = surfaceFormat.format;
 
     int width, height;
-    SDL_Vulkan_GetDrawableSize(window, &width, &height);
+    SDL_Vulkan_GetDrawableSize(window_, &width, &height);
     swapchain_extent_ =
         {
             static_cast<uint32_t>(width),
@@ -475,7 +473,7 @@ VulkanApp::init_imgui(std::function<void (ImGuiContext *)> load_fonts)
     ImGui::StyleColorsDark();
 
     // Setup Platform/Renderer backends
-    ImGui_ImplSDL2_InitForVulkan(window);
+    ImGui_ImplSDL2_InitForVulkan(window_);
     ImGui_ImplVulkan_InitInfo init_info = {};
     init_info.Instance = instance;
     init_info.PhysicalDevice = physical_device_;
@@ -540,11 +538,88 @@ VulkanApp::end_single_time_commands(VkCommandBuffer commandBuffer)
 }
 
 void
+VulkanApp::cleanup_framebuffers()
+{
+    // cleanup framebuffers
+    for (size_t i = 0; i < framebuffers_.size(); ++i) {
+        vkDestroyFramebuffer(device_, framebuffers_[i], nullptr);
+    }
+    framebuffers_.resize(0);
+}
+
+void
+VulkanApp::cleanup_render_pass()
+{
+    // cleanup render pass (see also .create_render_pass())
+    vkDestroyRenderPass(device_, render_pass_, nullptr);
+}
+
+void
+VulkanApp::cleanup_image_views()
+{
+    // cleanup swapchain image views
+    for (size_t i = 0; i < swapchain_image_views_.size(); ++i) {
+        vkDestroyImageView(device_, swapchain_image_views_[i], nullptr);
+    }
+}
+
+void
+VulkanApp::cleanup_swapchain()
+{
+    vkDestroySwapchainKHR(device_, swapchain_, nullptr);
+}
+
+void
+VulkanApp::cleanup_swapchain_deps()
+{
+    // destroy in reverse order w.r.t create
+    this->cleanup_framebuffers();
+    this->cleanup_render_pass();
+    this->cleanup_image_views();
+    this->cleanup_swapchain();
+}
+
+void
+VulkanApp::recreate_swapchain_deps()
+{
+    // handle possibly-minimzed window
+    {
+        int width = 0, height = 0;
+        SDL_GetWindowSize(window_, &width, &height);
+        while (width == 0 || height == 0) {
+            SDL_GetWindowSize(window_, &width, &height);
+            SDL_WaitEvent(nullptr);
+        }
+    }
+
+    vkDeviceWaitIdle(device_);
+
+    // retire old swapchain
+    this->cleanup_swapchain_deps();
+
+    // recreate swapchain
+    //this->create_instance();
+    //this->create_surface();
+    //this->pick_physical_device();
+    //this->create_logical_device();
+    this->create_swapchain();
+    this->create_image_views();
+    this->create_render_pass();
+    this->create_framebuffers();
+    //this->create_command_pool();
+    //this->create_command_buffers();
+    //this->create_sync_objects();
+    //this->create_descriptor_pool();
+}
+
+void
 VulkanApp::main_loop()
 {
     SDL_Event event;
 
     while (!quit_) {
+        bool resize_pending = false;
+
         while (SDL_PollEvent(&event)) {
             ImGui_ImplSDL2_ProcessEvent(&event);
 
@@ -552,24 +627,23 @@ VulkanApp::main_loop()
                 this->quit_ = true;
             }
 
-#ifdef NOT_YET
             if (event.type == SDL_WINDOWEVENT) {
                 if (event.window.event == SDL_WINDOWEVENT_CLOSE) {
+#ifdef NOT_YET
                     if (event.window.windowID == SDL_GetWindowID(window))
                     {
                         done = true;
                     }
+#endif
                 } else if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
-                    // handle resize immediately
-                    int w, h;
-                    SDL_GetWindowSize(window, &w, &h);
-                    glViewport(0, 0, w, h);
-
-                    break;  // to force render during resize
+                    resize_pending = true;
                 }
             }
+        }
 
-#endif
+        if (resize_pending) {
+            vkDeviceWaitIdle(device_);
+            this->recreate_swapchain_deps();
         }
 
         this->draw_frame();
@@ -639,6 +713,8 @@ void
 VulkanApp::record_command_buffer(VkCommandBuffer commandBuffer,
                                  uint32_t imageIndex)
 {
+    // as long as we do this per-frame, independent of swapchain
+
     VkCommandBufferBeginInfo begin_info{};
     begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
@@ -692,6 +768,9 @@ VulkanApp::cleanup()
 
     vkDestroyCommandPool(device_, command_pool_, nullptr);
 
+    this->cleanup_swapchain_deps();
+
+#ifdef OBSOLETE
     for (auto framebuffer : framebuffers_) {
         vkDestroyFramebuffer(device_, framebuffer, nullptr);
     }
@@ -703,12 +782,14 @@ VulkanApp::cleanup()
     }
 
     vkDestroySwapchainKHR(device_, swapchain_, nullptr);
+#endif
+
     vkDestroyDescriptorPool(device_, descriptor_pool_, nullptr);
     vkDestroyDevice(device_, nullptr);
     vkDestroySurfaceKHR(instance, surface_, nullptr);
     vkDestroyInstance(instance, nullptr);
 
-    SDL_DestroyWindow(window);
+    SDL_DestroyWindow(window_);
     SDL_Quit();
 
 }

@@ -37,7 +37,7 @@ private:
     void create_surface();
     void pick_physical_device();
     void create_logical_device();
-    void create_swap_chain();
+    void create_swapchain();
     void create_image_views();
     void create_render_pass();
     void create_framebuffers();
@@ -45,6 +45,15 @@ private:
     void create_command_buffers();
     void create_sync_objects();
     void create_descriptor_pool();
+
+    void cleanup_framebuffers();
+    void cleanup_render_pass();
+    void cleanup_image_views();
+    void cleanup_swapchain();
+
+    void cleanup_swapchain_deps();
+    void recreate_swapchain_deps();
+
     void init_imgui(std::function<void (ImGuiContext *)> load_fonts);
     VkCommandBuffer begin_single_time_commands();
     void end_single_time_commands(VkCommandBuffer commandBuffer);
@@ -57,7 +66,7 @@ private:
     bool setup_done_ = false;
     bool cleanup_done_ = false;
 
-    SDL_Window* window = nullptr;
+    SDL_Window* window_ = nullptr;
     ImGuiContext* imgui_cx_ = nullptr;
     VkInstance instance;
     VkPhysicalDevice physical_device_;

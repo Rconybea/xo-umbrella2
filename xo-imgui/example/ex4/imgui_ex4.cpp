@@ -112,6 +112,7 @@ namespace {
                 // Create a simple ImGui window
                 ImGui::Begin("Hello, Vulkan + SDL2!");
                 ImGui::Text("This is a minimal ImGui + Vulkan + SDL2 example!");
+                ImGui::Checkbox("demo window", &p_draw_state->show_demo_window_);
                 ImGui::SliderFloat("float", p_f, 0.0f, 1.0f);
                 if (ImGui::Button("Button"))
                     ++(*p_counter);
@@ -120,6 +121,11 @@ namespace {
                 ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
                             1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
                 ImGui::End();
+
+                // 1. big demo window
+                if (p_draw_state->show_demo_window_)
+                    ImGui::ShowDemoWindow(&p_draw_state->show_demo_window_);
+
                 // Rendering
                 ImGui::Render();
                 return ImGui::GetDrawData();
