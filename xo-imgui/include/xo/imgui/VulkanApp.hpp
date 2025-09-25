@@ -6,12 +6,14 @@
 #include <imgui.h>
 #include <vulkan/vulkan.h>
 //#include <SDL_vulkan.h>
+#include <chrono>
 #include <vector>
 #include <functional>
 
 class VulkanApp {
 public:
     using ImguiDrawFn = std::function<ImDrawData * (ImGuiContext *)>;
+    using time_point = std::chrono::steady_clock::time_point;
 
 public:
     VulkanApp(ImguiDrawFn fn);
@@ -20,6 +22,9 @@ public:
     /** set imgui draw function **/
     void assign_imgui_draw_frame(ImguiDrawFn fn);
 #endif
+
+    /** frames per second since inception **/
+    float lifetime_fps() const;
 
     /** equivalent to sequence setup(), main_loop(), cleanup() **/
     void run();
@@ -88,6 +93,15 @@ private:
     std::vector<VkSemaphore> render_finished_semaphores_;
     std::vector<VkFence> in_flight_fences_;
     VkDescriptorPool descriptor_pool_;
+
+    /** frame counter, monotonic **/
+    uint32_t n_frame_ = 0;
+    /** VulkanApp start time. Captured in 1st render loop, see @ref record_command_buffer **/
+    time_point start_tm_;
+    /** time asof most recent render loop **/
+    time_point now_tm_;
+    /** time of last console report of fps **/
+    time_point last_log_fps_tm_;
 
     /** image index of current frame **/
     uint32_t current_frame_ = 0;

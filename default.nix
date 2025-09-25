@@ -541,7 +541,10 @@ in
     # TODO: consider a nix project to generate this directory. nixwsl
   };
 
-  # like shell4 but drop etc/hostwsl2
+  # like shell4 but drop etc/hostwsl2 symlink dir.
+  # looks like nixpkgs mesa not built for wsl2 dxg
+  # works with opengl (llvmpipe) and vulkan
+  #
   shell5 = pkgs.mkShell {
     buildInputs = docutils ++ xodeps ++ devutils ++ ideutils ++ x11utils ++ gldeps ++ vkdeps ++ imguideps;
 
@@ -598,18 +601,18 @@ in
         ${pkgs.fontconfig}/bin/fc-cache -f
 
         # works but only get glx using llvmpipe.
-        # vkcube uses d3d12 however!
+        # vkcube uses dzn (see VK_ICD_FILENAMES) however!
         export LD_LIBRARY_PATH=/usr/lib/wsl/lib:${glpath}:$LD_LIBRARY_PATH
 
         # need this on OSX, + claude wants it for wsl2.  but looks sketchy to me
         export VK_LAYER_PATH=${pkgs.vulkan-validation-layers}/share/vulkan/explicit_layer.d
         export VK_ICD_FILENAMES="${pkgs.mesa}/share/vulkan/icd.d/dzn_icd.x86_64.json"
 
-        # hardware acceleration (not sure if we need this)
+        # hardware acceleration (so far ineffective w/ nixpkgs mesa)
         export LIBGL_ALWAYS_SOFTWARE=0
         export MESA_LOADER_DRIVER_OVERRIDE="d3d12"
 
-        # wsl2-specific gpu setup (doubt this is effective)
+        # wsl2-specific gpu setup (so far ineffective w/ nixpkgs mesa)
         export MESA_D3D12_DEFAULT_ADAPTER_NAME=DX
 
         echo "using d3d12 vulkan driver: $VK_ICD_FILENAMES"
@@ -619,6 +622,9 @@ in
 
         echo "nix_libgl=${pkgs.libGL}"
         nix_libgl=${pkgs.libGL}
+
+        echo "nix_vk_validation: VK_LAYER_PATH=${pkgs.vulkan-validation-layers}/share/vulkan/explicit_layer.d"
+        nix_vk_validation=${pkgs.vulkan-validation-layers}/share/vulkan/explicit_layer.d
 
         # don't seem to need this -- doesn't invoke mesa hardware accel
         #echo "nix_nixgl=${pkgs.nixgl.nixGLMesa}"
