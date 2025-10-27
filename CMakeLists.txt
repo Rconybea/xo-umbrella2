@@ -57,7 +57,10 @@ endif()
 message("-- CMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}")
 message("-- CMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}")
 message("-- CMAKE_INSTALL_RPATH=${CMAKE_INSTALL_RPATH}")
+message("-- XO_ENABLE_DOCS=${XO_ENABLE_DOCS}")
 message("-- XO_ENABLE_EXAMPLES=${XO_ENABLE_EXAMPLES}")
+message("-- XO_ENABLE_VULKAN=${XO_ENABLE_VULKAN}")
+message("-- XO_ENABLE_OPENGL=${XO_ENABLE_OPENGL}")
 
 # ----------------------------------------------------------------
 #
@@ -121,6 +124,6 @@ add_subdirectory(xo-imgui)
 # ----------------------------------------------------------------
 # documentation.  must follow add_subdirectory() for satellite projects
 
-xo_umbrella_doxygen_deps(xo_alloc xo_flatstring xo_ratio xo_unit xo_tokenizer xo_reader xo_jit)
+xo_umbrella_doxygen_deps(xo_alloc xo_indentlog xo_flatstring xo_ratio xo_unit xo_tokenizer xo_reader xo_jit)
 xo_umbrella_doxygen_config()
 xo_umbrella_sphinx_config(index.rst docs/install.rst docs/glossary.rst)

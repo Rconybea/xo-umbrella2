@@ -32,6 +32,7 @@ namespace xo {
 
             char buf [type_var::fixed_capacity];
             int n = snprintf(buf, sizeof(buf), "%s:%u", prefix.c_str(), s_counter);
+            (void)n;
 
             assert(n < static_cast<int>(type_var::fixed_capacity));
 

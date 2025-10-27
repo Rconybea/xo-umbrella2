@@ -23,6 +23,10 @@ add_subdirectory(example)
 add_subdirectory(utest)
 xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
 
+if (XO_ENABLE_EXAMPLES)
+    install(TARGETS xo_tokenizer_repl DESTINATION bin/xo/example/tokenizer)
+endif()
+
 # ----------------------------------------------------------------
 # docs targets depend on all the other library/utest targets
 #

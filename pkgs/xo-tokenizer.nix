@@ -1,8 +1,15 @@
 {
   # dependencies
-  stdenv, cmake, catch2,
+  lib, stdenv, cmake, catch2,
 
-  xo-cmake, xo-indentlog
+  python3Packages,
+
+  doxygen, sphinx, graphviz,
+
+  xo-cmake, xo-indentlog,
+
+  buildDocs ? false,
+  buildExamples ? false,
 } :
 
 stdenv.mkDerivation (finalattrs:
@@ -12,11 +19,32 @@ stdenv.mkDerivation (finalattrs:
 
     src = ../xo-tokenizer;
 
-    cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake" "-DXO_ENABLE_EXAMPLES"];
+    cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake"]
+                 ++ lib.optionals buildDocs ["-DXO_ENABLE_DOCS=on"]
+                 ++ lib.optionals buildExamples ["-DXO_ENABLE_EXAMPLES=on"];
+
+    inherit buildDocs;
+    inherit buildExamples;
+
     doCheck = true;
+
     propagatedBuildInputs = [ ];
+
+    postBuild = lib.optionalString buildDocs ''
+      cmake --build . -- docs
+    '';
+
     nativeBuildInputs = [ cmake catch2
                           xo-cmake
                           xo-indentlog
-                        ];
+                        ]
+    ++ lib.optionals buildDocs [
+      doxygen
+      sphinx
+      graphviz
+      python3Packages.sphinx-rtd-theme
+      python3Packages.breathe
+      python3Packages.sphinxcontrib-ditaa
+      python3Packages.sphinxcontrib-plantuml
+    ];
   })

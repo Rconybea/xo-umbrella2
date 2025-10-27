@@ -4365,17 +4365,23 @@ private:
             throw std::runtime_error("Failed to get SDL Vulkan extensions!");
         }
 
+#ifdef __apple__
         // Add portability extension for MoltenVK (macOS)
         extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+#endif
 
         createInfo.enabledExtensionCount = extensions.size();
         createInfo.ppEnabledExtensionNames = extensions.data();
         createInfo.enabledLayerCount = 0;
 
+#ifdef __apple__
         // CRITICAL: Enable portability enumeration flag for MoltenVK
         createInfo.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+#endif
 
-        if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
+        int result = vkCreateInstance(&createInfo, nullptr, &instance);
+        if (result != VK_SUCCESS) {
+            printf("vkCreateInstance failed with error: %d\n", result);
             throw std::runtime_error("Failed to create instance!");
         }
     }

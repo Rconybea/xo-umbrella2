@@ -251,7 +251,7 @@ DrawState::write_gc_history_tooltip(gc_history_headline headline,
 {
     xo::flatstring<512> retval;
 
-    xo::flatstring<512> headline_str;
+    xo::flatstring<256> headline_str;
     switch (headline) {
     case gc_history_headline::survive:
         snprintf(headline_str.data(), headline_str.capacity(),
@@ -288,10 +288,8 @@ DrawState::write_gc_history_tooltip(gc_history_headline headline,
         break;
     }
 
-
-
     snprintf(retval.data(), retval.capacity(),
-             "%s\n"
+             "%.*s\n"
              "\n"
              " gcseq: %lu\n"
              " type: %s\n"
@@ -304,7 +302,7 @@ DrawState::write_gc_history_tooltip(gc_history_headline headline,
              " garbage\u2099: %lu\n" /*garbageN*/
              " effort: %lu dt: %.1lfus\n"
              " copy efficiency: %.1lf%% collection rate: %.0lf bytes/sec",
-             headline_str.c_str(),
+             static_cast<int>(headline_str.capacity()), headline_str.c_str(),
              stats.gc_seq_,
              (stats.upto_ == generation::nursery) ? "incremental" : "FULL",
              stats.new_alloc_z_,

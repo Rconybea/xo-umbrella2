@@ -83,6 +83,9 @@ struct DrawState {
                                 ImDrawList * draw_list);
 
 public:
+    /** when true display imgui demo window **/
+    bool show_demo_window_ = false;
+
     draw_state_type state_type_ = draw_state_type::alloc;
 
     /** note: during gc copy animation,

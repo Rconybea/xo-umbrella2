@@ -1,0 +1,63 @@
+1. does opengl work ?
+
+   $ nixGL glxgears
+
+2. does vulkaninfo work ?
+
+
+For WSL2 (nvidia GPU)
+
+3. basic GPU access
+
+   $ nvidia-smi
+
+   Thu Sep 18 14:45:54 2025
+   +-----------------------------------------------------------------------------------------+
+   | NVIDIA-SMI 580.76.04              Driver Version: 580.97         CUDA Version: 13.0     |
+   +-----------------------------------------+------------------------+----------------------+
+   | GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+   | Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+   |                                         |                        |               MIG M. |
+   |=========================================+========================+======================|
+   |   0  NVIDIA GeForce RTX 4070        On  |   00000000:05:00.0  On |                  N/A |
+   |  0%   51C    P8             13W /  200W |    2119MiB /  12282MiB |     15%      Default |
+   |                                         |                        |                  N/A |
+   +-----------------------------------------+------------------------+----------------------+
+
+   +-----------------------------------------------------------------------------------------+
+   | Processes:                                                                              |
+   |  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+   |        ID   ID                                                               Usage      |
+   |=========================================================================================|
+   |  No running processes found                                                             |
+   +-----------------------------------------------------------------------------------------+
+
+   $ nixGL gxinfo | grep 'OpenGL vendor'
+   OpenGL vendor string: Mesa
+
+4. check WSL driver
+
+   $ cat /proc/version
+   Linux version 6.6.87.2-microsoft-standard-WSL2 (root@439a258ad544) (gcc (GCC) 11.2.0, GNU ld (GNU Binutils) 2.37) #1 SMP PREEMPT_DYNAMIC Thu Jun  5 18:30:46 UTC 2025
+
+   (not sure how this helps)
+
+5. can vulkan start?
+
+   $ vulkaninfo
+
+   (fails to find .so libs, e.g. libLLVM-15.so.1)
+
+   $ nixGLNvidia vulkaninfo
+
+6. if something doesn't run,  try running with LD_DEBUG=libs
+
+   LD_DEBUG=libs vkcube
+
+or similarly
+
+   strace -f -e trace=openat nixGL vkcube 2>&1 | grep -E "(surface|wayland|xcb|X11)"
+
+7. Can look at exact symbol resolution
+
+   nixGLMesa vkcube 2>&1 | grep -A5 -B5 vkGetDeviceProcAddr

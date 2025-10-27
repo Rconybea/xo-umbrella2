@@ -8,7 +8,7 @@
 namespace xo {
     namespace scm {
         using prefix_type = xo::flatstring<8>;
-        using type_var = xo::flatstring<16>;
+        using type_var = xo::flatstring<20>;
 
         /** @class type_ref
          *  @brief name and eventual resolution for type associated with an expression.

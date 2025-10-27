@@ -6,6 +6,10 @@
 #include <backends/imgui_impl_sdl2.h>
 #include <backends/imgui_impl_vulkan.h>
 #include <cstdint>
+#include <vulkan/vulkan_core.h>
+#ifdef __linux__
+# include <vulkan/vulkan_wayland.h>
+#endif
 
 using xo::scope;
 using xo::xtag;
@@ -17,6 +21,17 @@ VulkanApp::VulkanApp(ImguiDrawFn draw_fn)
             draw_fn
         }
 {
+}
+
+float
+VulkanApp::lifetime_fps() const {
+    if (n_frame_ > 0) {
+        float elapsed_sec = 1.0e-3f * std::chrono::duration_cast<std::chrono::milliseconds>(now_tm_ - start_tm_).count();
+
+        return n_frame_ / elapsed_sec;
+    } else {
+        return 0.0;
+    }
 }
 
 void
@@ -38,19 +53,24 @@ VulkanApp::run() {
 
 void
 VulkanApp::init_window() {
+#ifdef __linux__
+    // on linux (at least for wsl2) force x11 with xlib instead of xcb
+    // alternatively could set env var SDL_VIDEODRIVER
+    SDL_SetHint(SDL_HINT_VIDEODRIVER, "x11");
+#endif
+
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         throw std::runtime_error("Failed to initialize SDL!");
     }
 
-    window = SDL_CreateWindow(
-        "Xo ImGui Vulkan SDL2 Frame",
-        SDL_WINDOWPOS_CENTERED,
-        SDL_WINDOWPOS_CENTERED,
-        800, 600,
-        SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE
-        );
+    this->window_ = SDL_CreateWindow("Xo ImGui Vulkan SDL2 Frame",
+                                     SDL_WINDOWPOS_CENTERED,
+                                     SDL_WINDOWPOS_CENTERED,
+                                     600, 600,
+                                     //1250, 1200,
+                                     SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE);
 
-    if (!window) {
+    if (!window_) {
         throw std::runtime_error("Failed to create SDL window!");
     }
 }
@@ -62,7 +82,7 @@ VulkanApp::init_vulkan()
     this->create_surface();
     this->pick_physical_device();
     this->create_logical_device();
-    this->create_swap_chain();
+    this->create_swapchain();
     this->create_image_views();
     this->create_render_pass();
     this->create_framebuffers();
@@ -75,6 +95,8 @@ VulkanApp::init_vulkan()
 void
 VulkanApp::create_instance()
 {
+    scope log(XO_DEBUG(true));
+
     VkApplicationInfo appInfo{};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
     appInfo.pApplicationName = "ImGui Vulkan App";
@@ -88,17 +110,30 @@ VulkanApp::create_instance()
     createInfo.pApplicationInfo = &appInfo;
 
     uint32_t extensionCount = 0;
-    if (!SDL_Vulkan_GetInstanceExtensions(window, &extensionCount, nullptr)) {
+    if (!SDL_Vulkan_GetInstanceExtensions(window_, &extensionCount, nullptr)) {
         throw std::runtime_error("Failed to get SDL Vulkan extensions!");
     }
 
     std::vector<const char*> extensions(extensionCount);
-    if (!SDL_Vulkan_GetInstanceExtensions(window, &extensionCount, extensions.data())) {
+    if (!SDL_Vulkan_GetInstanceExtensions(window_, &extensionCount, extensions.data())) {
         throw std::runtime_error("Failed to get SDL Vulkan extensions!");
     }
 
+#ifdef __APPLE__
     // Add portability extension for MoltenVK (macOS)
     extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+    // claude.ai says:
+    //  extensions.push_back("VK_KHR_get_physical_device_properties2")
+#endif
+
+#ifdef __linux__
+    extensions.push_back(VK_KHR_SURFACE_EXTENSION_NAME);
+    // native wayland drivers.  or use VK_KHR_XLIB_SURFACE_EXTENSION_NAME here
+    //extensions.push_back(VK_KHR_XLIB_SURFACE_EXTENSION_NAME);
+    //extensions.push_back(VK_KHR_WAYLAND_SURFACE_EXTENSION_NAME);
+#endif
+
+    extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 
     createInfo.enabledExtensionCount = extensions.size();
     createInfo.ppEnabledExtensionNames = extensions.data();
@@ -107,6 +142,11 @@ VulkanApp::create_instance()
     // CRITICAL: Enable portability enumeration flag for MoltenVK
     createInfo.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
 
+    log && log(xtag("vkCreateInstance.layers", createInfo.enabledLayerCount));
+    for (uint32_t i = 0; i < createInfo.enabledLayerCount; ++i) {
+        log && log(xtag("i", i), xtag("layer[i]", createInfo.ppEnabledLayerNames[i]));
+    }
+
     if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
         throw std::runtime_error("Failed to create instance!");
     }
@@ -114,7 +154,7 @@ VulkanApp::create_instance()
 
 void
 VulkanApp::create_surface() {
-    if (!SDL_Vulkan_CreateSurface(window, instance, &(this->surface_))) {
+    if (!SDL_Vulkan_CreateSurface(window_, instance, &(this->surface_))) {
         throw std::runtime_error("Failed to create SDL Vulkan surface!");
     }
 }
@@ -184,9 +224,27 @@ VulkanApp::create_logical_device()
     vkGetDeviceQueue(device_, graphics_queue_family_, 0, &graphics_queue_);
 }
 
+const char *
+present_mode_descr(VkPresentModeKHR m) {
+    switch(m) {
+    case VK_PRESENT_MODE_IMMEDIATE_KHR:                 return "immediate";
+    case VK_PRESENT_MODE_MAILBOX_KHR:                   return "mailbox";
+    case VK_PRESENT_MODE_FIFO_KHR:                      return "fifo";
+    case VK_PRESENT_MODE_FIFO_RELAXED_KHR:              return "fifo-relaxed";
+    case VK_PRESENT_MODE_SHARED_DEMAND_REFRESH_KHR:     return "shared-demand-refresh";
+    case VK_PRESENT_MODE_SHARED_CONTINUOUS_REFRESH_KHR: return "shared-continuous-refresh";
+    case VK_PRESENT_MODE_FIFO_LATEST_READY_EXT:         return "fifo-latest-ready";
+    case VK_PRESENT_MODE_MAX_ENUM_KHR:                  break;
+    }
+
+    return "?present-mode";
+}
+
 void
-VulkanApp::create_swap_chain()
+VulkanApp::create_swapchain()
 {
+    scope log(XO_DEBUG(true));
+
     VkSurfaceCapabilitiesKHR capabilities;
     vkGetPhysicalDeviceSurfaceCapabilitiesKHR
         (physical_device_, surface_, &capabilities);
@@ -201,7 +259,7 @@ VulkanApp::create_swap_chain()
     swapchain_image_format_ = surfaceFormat.format;
 
     int width, height;
-    SDL_Vulkan_GetDrawableSize(window, &width, &height);
+    SDL_Vulkan_GetDrawableSize(window_, &width, &height);
     swapchain_extent_ =
         {
             static_cast<uint32_t>(width),
@@ -211,6 +269,40 @@ VulkanApp::create_swap_chain()
     uint32_t imageCount = capabilities.minImageCount + 1;
     if (capabilities.maxImageCount > 0 && imageCount > capabilities.maxImageCount) {
         imageCount = capabilities.maxImageCount;
+    }
+
+    VkPresentModeKHR present_mode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+    {
+        uint32_t n_avail_mode = 0;
+        vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device_, surface_, &n_avail_mode, nullptr);
+
+        std::vector<VkPresentModeKHR> avail_mode_v(n_avail_mode);
+        vkGetPhysicalDeviceSurfacePresentModesKHR(physical_device_, surface_, &n_avail_mode, avail_mode_v.data());
+
+        if (log) {
+            log(xtag("n_avail_present_mode", n_avail_mode));
+            for (uint32_t i = 0; i < n_avail_mode; ++i)
+                log(xtag("i", i), xtag("avail_mode_v[i]", present_mode_descr(avail_mode_v[i])));
+        }
+
+        std::vector<VkPresentModeKHR> prefer_mode_v = {
+            VK_PRESENT_MODE_IMMEDIATE_KHR,
+            VK_PRESENT_MODE_MAILBOX_KHR,
+            VK_PRESENT_MODE_FIFO_KHR       // forces vsync, v.slow on wsl
+        };
+
+        bool found_flag = false;
+        for (uint32_t i = 0; i < prefer_mode_v.size() && !found_flag; ++i) {
+            for (uint32_t j = 0; j < avail_mode_v.size() && !found_flag; ++j) {
+                if (prefer_mode_v[i] == avail_mode_v[j]) {
+                    present_mode = prefer_mode_v[i];
+                    found_flag = true;
+
+                }
+            }
+        }
+
+        log && log(xtag("present_mode", present_mode_descr(present_mode)));
     }
 
     VkSwapchainCreateInfoKHR createInfo{};
@@ -225,7 +317,7 @@ VulkanApp::create_swap_chain()
     createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
     createInfo.preTransform = capabilities.currentTransform;
     createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-    createInfo.presentMode = VK_PRESENT_MODE_FIFO_KHR;
+    createInfo.presentMode = present_mode;
     createInfo.clipped = VK_TRUE;
 
     if (vkCreateSwapchainKHR
@@ -452,7 +544,7 @@ VulkanApp::init_imgui(std::function<void (ImGuiContext *)> load_fonts)
     ImGui::StyleColorsDark();
 
     // Setup Platform/Renderer backends
-    ImGui_ImplSDL2_InitForVulkan(window);
+    ImGui_ImplSDL2_InitForVulkan(window_);
     ImGui_ImplVulkan_InitInfo init_info = {};
     init_info.Instance = instance;
     init_info.PhysicalDevice = physical_device_;
@@ -517,11 +609,88 @@ VulkanApp::end_single_time_commands(VkCommandBuffer commandBuffer)
 }
 
 void
+VulkanApp::cleanup_framebuffers()
+{
+    // cleanup framebuffers
+    for (size_t i = 0; i < framebuffers_.size(); ++i) {
+        vkDestroyFramebuffer(device_, framebuffers_[i], nullptr);
+    }
+    framebuffers_.resize(0);
+}
+
+void
+VulkanApp::cleanup_render_pass()
+{
+    // cleanup render pass (see also .create_render_pass())
+    vkDestroyRenderPass(device_, render_pass_, nullptr);
+}
+
+void
+VulkanApp::cleanup_image_views()
+{
+    // cleanup swapchain image views
+    for (size_t i = 0; i < swapchain_image_views_.size(); ++i) {
+        vkDestroyImageView(device_, swapchain_image_views_[i], nullptr);
+    }
+}
+
+void
+VulkanApp::cleanup_swapchain()
+{
+    vkDestroySwapchainKHR(device_, swapchain_, nullptr);
+}
+
+void
+VulkanApp::cleanup_swapchain_deps()
+{
+    // destroy in reverse order w.r.t create
+    this->cleanup_framebuffers();
+    this->cleanup_render_pass();
+    this->cleanup_image_views();
+    this->cleanup_swapchain();
+}
+
+void
+VulkanApp::recreate_swapchain_deps()
+{
+    // handle possibly-minimzed window
+    {
+        int width = 0, height = 0;
+        SDL_GetWindowSize(window_, &width, &height);
+        while (width == 0 || height == 0) {
+            SDL_GetWindowSize(window_, &width, &height);
+            SDL_WaitEvent(nullptr);
+        }
+    }
+
+    vkDeviceWaitIdle(device_);
+
+    // retire old swapchain
+    this->cleanup_swapchain_deps();
+
+    // recreate swapchain
+    //this->create_instance();
+    //this->create_surface();
+    //this->pick_physical_device();
+    //this->create_logical_device();
+    this->create_swapchain();
+    this->create_image_views();
+    this->create_render_pass();
+    this->create_framebuffers();
+    //this->create_command_pool();
+    //this->create_command_buffers();
+    //this->create_sync_objects();
+    //this->create_descriptor_pool();
+}
+
+void
 VulkanApp::main_loop()
 {
     SDL_Event event;
 
     while (!quit_) {
+        bool resize_pending = false;
+
         while (SDL_PollEvent(&event)) {
             ImGui_ImplSDL2_ProcessEvent(&event);
 
@@ -529,24 +698,23 @@ VulkanApp::main_loop()
                 this->quit_ = true;
             }
 
-#ifdef NOT_YET
             if (event.type == SDL_WINDOWEVENT) {
                 if (event.window.event == SDL_WINDOWEVENT_CLOSE) {
+#ifdef NOT_YET
                     if (event.window.windowID == SDL_GetWindowID(window))
                     {
                         done = true;
                     }
+#endif
                 } else if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
-                    // handle resize immediately
-                    int w, h;
-                    SDL_GetWindowSize(window, &w, &h);
-                    glViewport(0, 0, w, h);
-
-                    break;  // to force render during resize
+                    resize_pending = true;
                 }
             }
+        }
 
-#endif
+        if (resize_pending) {
+            vkDeviceWaitIdle(device_);
+            this->recreate_swapchain_deps();
         }
 
         this->draw_frame();
@@ -613,13 +781,18 @@ VulkanApp::draw_frame()
 } /*draw_frame*/
 
 void
-VulkanApp::record_command_buffer(VkCommandBuffer commandBuffer,
+VulkanApp::record_command_buffer(VkCommandBuffer command_buffer,
                                  uint32_t imageIndex)
 {
+    // as long as we do this per-frame, independent of swapchain
+    if (n_frame_ == 0) {
+        this->start_tm_ = std::chrono::steady_clock::now();
+    }
+
     VkCommandBufferBeginInfo begin_info{};
     begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
-    if (vkBeginCommandBuffer(commandBuffer, &begin_info) != VK_SUCCESS) {
+    if (vkBeginCommandBuffer(command_buffer, &begin_info) != VK_SUCCESS) {
         throw std::runtime_error("Failed to begin recording command buffer!");
     }
 
@@ -634,17 +807,34 @@ VulkanApp::record_command_buffer(VkCommandBuffer commandBuffer,
     render_pass_info.clearValueCount = 1;
     render_pass_info.pClearValues = &clear_color;
 
-    vkCmdBeginRenderPass(commandBuffer,
+    vkCmdBeginRenderPass(command_buffer,
                          &render_pass_info,
                          VK_SUBPASS_CONTENTS_INLINE);
 
-    ImDrawData * draw_data = this->imgui_draw_frame_(imgui_cx_);
+    ImDrawData * draw_data = this->imgui_draw_frame_(imgui_cx_); (void)draw_data;
 
-    ImGui_ImplVulkan_RenderDrawData(draw_data, commandBuffer);
+#ifdef TEMPORARILY_REMOVE
+    ImGui_ImplVulkan_RenderDrawData(draw_data, command_buffer);
+#endif
 
-    vkCmdEndRenderPass(commandBuffer);
+    vkCmdEndRenderPass(command_buffer);
 
-    if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {
+    {
+        ++(this->n_frame_);
+        this->now_tm_ = std::chrono::steady_clock::now();
+
+        if ((this->n_frame_ == 1)
+            || (std::chrono::duration_cast<std::chrono::seconds>(now_tm_ - last_log_fps_tm_).count() > 1))
+        {
+            this->last_log_fps_tm_ = now_tm_;
+
+            scope log(XO_DEBUG(true));
+
+            log && log(xtag("lifetime_fps", this->lifetime_fps()));
+        }
+    }
+
+    if (vkEndCommandBuffer(command_buffer) != VK_SUCCESS) {
         throw std::runtime_error("Failed to record command buffer!");
     }
 }
@@ -669,6 +859,9 @@ VulkanApp::cleanup()
 
     vkDestroyCommandPool(device_, command_pool_, nullptr);
 
+    this->cleanup_swapchain_deps();
+
+#ifdef OBSOLETE
     for (auto framebuffer : framebuffers_) {
         vkDestroyFramebuffer(device_, framebuffer, nullptr);
     }
@@ -680,12 +873,14 @@ VulkanApp::cleanup()
     }
 
     vkDestroySwapchainKHR(device_, swapchain_, nullptr);
+#endif
+
     vkDestroyDescriptorPool(device_, descriptor_pool_, nullptr);
     vkDestroyDevice(device_, nullptr);
     vkDestroySurfaceKHR(instance, surface_, nullptr);
     vkDestroyInstance(instance, nullptr);
 
-    SDL_DestroyWindow(window);
+    SDL_DestroyWindow(window_);
     SDL_Quit();
 
 }

@@ -5,7 +5,7 @@ set(SELF_SRCS exprreplxx.cpp)
 
 if (XO_ENABLE_EXAMPLES)
     xo_add_executable(${SELF_EXE} ${SELF_SRCS})
-    xo_dependency(${SELF_EXE} xo_reader)
+    xo_self_dependency(${SELF_EXE} xo_reader)
     xo_external_target_dependency(${SELF_EXE} replxx replxx::replxx)
 
     find_package(Threads REQUIRED)

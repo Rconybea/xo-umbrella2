@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 usage() {
     cat <<EOF
 $0 [-u|--usage|-h|--help]
     [--list] [-n|--dry-run] [--xoname=NAME]
     [--repo|--clone|--configure|--build|--install]
     [--with-examples] [--with-utests] [--debug-build]
+    [--with-opengl=GLFLAG] [--with-vulkan=VKFLAG]
     [-S=SOURCEDIR] [-B=BUILDDIR]
 EOF
 }
@@ -18,41 +21,49 @@ help() {
 fetch and/or build xo component libraries
 
 Options:
-  -u | --usage      brief help message
-  -h | --help       this help message
-  --list            list known xo libraries
-  -n | --dry-run    dry-run: don't actually invoke state-changing commands
-  --xoname=NAME     operate on xo subsystem NAME
-  --repo            report github repo for NAME
-  --clone           git clone xo library NAME in current directory
-  --configure       run cmake for xo library NAME in immediate subdir
-                    Will use NAME/.build as build directory
-  --build           run cmake build for xo library NAME in immediate subdir
-  --build-docs      build documentation for xo library NAME in immediate subdir
-  --install         run cmake install for xo library NAME in immediate subdir
+  -u | --usage         brief help message
+  -h | --help          this help message
+  --list               list known xo libraries
+  -n | --dry-run       dry-run: don't actually invoke state-changing commands
+  --xoname=NAME        operate on xo subsystem NAME
+  --repo               report github repo for NAME
+  --clone              git clone xo library NAME in current directory
+  --configure          run cmake for xo library NAME in immediate subdir
+                       Will use NAME/.build as build directory
+  --build              run cmake build for xo library NAME in immediate subdir
+  --build-docs         build documentation for xo library NAME in immediate subdir
+  --install            run cmake install for xo library NAME in immediate subdir
+  --realclean          nuke build directory
 
-  -S=SOURCEDIR      override path/to/source
-  -B=BUILDDIR       override path/to/build
+  -S=SOURCEDIR         override path/to/source
+  -B=BUILDDIR          override path/to/build
 
-  --with-examples   in configure step, set -DXO_ENABLE_EXAMPLES=1
-  --with-utests     in configure step, set -DENABLE_TESTING=1
-  --debug-build     in configure step, set -DCMAKE_BUILD_TYPE=Debug
+  --with-examples      in configure step, set -DXO_ENABLE_EXAMPLES=1
+  --with-utests        in configure step, set -DENABLE_TESTING=1
+  --debug-build        in configure step, set -DCMAKE_BUILD_TYPE=Debug
+  --with-opengl=GLFLAG in configure step, set -DXO_ENABLE_OPENGL=GLFLAG [ON]
+  --with-vulkan=VKFLAG in configure step, set -DXO_ENABLE_VULKAN=VKFLAG [OFF]
 
 EOF
 }
 
+cmd=
 noop_flag=0
 xoname=
 repo_flag=0
 clone_flag=0
 configure_flag=0
 build_flag=0
+build_docs_flag=0
 install_flag=0
+realclean_flag=0
 pathtosource=
 pathtobuild=
 with_examples=0
 with_utests=0
 debug_build=0
+with_opengl=
+with_vulkan=
 
 while [[ $# > 0 ]]; do
     case "$1" in
@@ -103,6 +114,9 @@ while [[ $# > 0 ]]; do
         --install)
             install_flag=1
             ;;
+        --realclean)
+            realclean_flag=1
+            ;;
         --with-examples)
             with_examples=1
             ;;
@@ -111,6 +125,12 @@ while [[ $# > 0 ]]; do
             ;;
         --debug-build)
             debug_build=1
+            ;;
+        --with-opengl=*)
+            with_opengl="${1#*=}"
+            ;;
+        --with-vulkan=*)
+            with_vulkan="${1#*=}"
             ;;
         xo-*)
             xoname="$1"
@@ -131,7 +151,11 @@ if [[ -z "$pathtosource" ]]; then
 fi
 
 if [[ -z "$pathtobuild" ]]; then
-    pathtobuild=$xoname/.build
+    if [[ -n $xoname ]]; then
+        pathtobuild=$xoname/.build
+    else
+        pathtobuild=.build
+    fi
 fi
 
 SUBSYSTEMLIST_FILE=@CMAKE_INSTALL_FULL_DATADIR@/etc/xo/subsystem-list
@@ -142,7 +166,7 @@ subsystem_list() {
 
 XO_REPO_STEM="https://github.com/Rconybea"
 
-repo() {
+printrepo() {
     xoname=$1
 
     case "$xoname" in
@@ -189,13 +213,13 @@ fi
 
 if [[ $repo_flag -eq 1 ]]; then
     if [[ -n "$xoname" ]]; then
-        repo $xoname
+        printrepo $xoname
     fi
 fi
 
 if [[ $clone_flag -eq 1 ]]; then
     if [[ -n "$xoname" ]]; then
-        url=$(repo $xoname)
+        url=$(printrepo $xoname)
 
         cmd="git clone $url"
 
@@ -224,11 +248,35 @@ if [[ $configure_flag -eq 1 ]]; then
             cmakebuildtype="-DCMAKE_BUILD_TYPE=Debug"
         fi
 
-        cmd="cmake -DCMAKE_INSTALL_PREFIX=@CMAKE_INSTALL_PREFIX@ -DCMAKE_MODULE_PATH=@CMAKE_INSTALL_PREFIX@/share/cmake -S $pathtosource -B $pathtobuild ${testingarg} ${examplearg} ${cmakebuildtype}"
+        openglarg=
+        if [[ -n ${with_opengl} ]]; then
+            openglarg="-DXO_ENABLE_OPENGL=${with_opengl}"
+        fi
+
+        vulkanarg=
+        if [[ -n ${with_vulkan} ]]; then
+            vulkanarg="-DXO_ENABLE_VULKAN=${with_vulkan}"
+        fi
+
+        cmd="cmake -DCMAKE_INSTALL_PREFIX=@CMAKE_INSTALL_PREFIX@ -DCMAKE_MODULE_PATH=@CMAKE_INSTALL_PREFIX@/share/cmake -S $pathtosource -B $pathtobuild ${testingarg} ${examplearg} ${openglarg} ${vulkanarg} ${cmakebuildtype}"
 
         if [[ $noop_flag -eq 1 ]]; then
             echo $cmd
         else
+            cwd=$(pwd)
+            # write script to re-run cmake later
+            rebootcmake=$pathtobuild/rebootcmake
+
+            mkdir -p $(dirname ${rebootcmake})
+
+            cat > ${rebootcmake} <<EOF
+#!/usr/bin/env bash
+
+cd ${cwd} && ${cmd}
+
+EOF
+            chmod +rx ${rebootcmake}
+
             $cmd
         fi
     fi
@@ -267,5 +315,13 @@ if [[ $install_flag -eq 1 ]]; then
         else
             $cmd
         fi
+    fi
+fi
+
+if [[ $realclean_flag -eq 1 ]]; then
+    if [[ $noop_flag -eq 1 ]]; then
+        echo "rm -rf $pathtobuild"
+    else
+        rm -rf "${pathtobuild}"
     fi
 fi
