@@ -2,9 +2,10 @@
 
 find_path(IMGUI_INCLUDE_DIR
     NAMES imgui/imgui.h
-    DOC "path to imgui header"
-    HINTS ${PROJECT_SOURCE_DIR}/include
-)
+#    HINTS ${PROJECT_SOURCE_DIR}/include   # merge loser
+    HINTS ${XO_UMBRELLA_SOURCE_DIR}
+    DOC "path to imgui header")
+
 if (IMGUI_INCLUDE_DIR)
     message(STATUS
         "found imgui/imgui.h in IMGUI_INCLUDE_DIR=[${IMGUI_INCLUDE_DIR}]")
