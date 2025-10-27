@@ -5,6 +5,7 @@
 
 {
   # official 24.05 release  # nearly works on macos, clang17, llvm18 except for sphinx-contrib.ditaa
+# probably whould be nixos-25.05.tar.gz here
 #  nixpkgs-path ? fetchTarball "https://github.com/NixOS/nixpkgs/archive/nixos-24.05.tar.gz",
   nixpkgs-path ? ../nixpkgs,
 
