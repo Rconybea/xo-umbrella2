@@ -19,6 +19,7 @@ if (XO_ENABLE_EXAMPLES)
 
         set(SELF_EXE imgui_ex4a)
         add_executable(${SELF_EXE} imgui_ex4a.cpp
+            VulkanApp.cpp
                     ${IMGUI_INCLUDE_DIR}/imgui/imgui.cpp
                     ${IMGUI_INCLUDE_DIR}/imgui/imgui_demo.cpp
                     ${IMGUI_INCLUDE_DIR}/imgui/imgui_draw.cpp
