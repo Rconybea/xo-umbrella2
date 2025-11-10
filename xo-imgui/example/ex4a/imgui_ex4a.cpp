@@ -4375,7 +4375,7 @@ private:
         createInfo.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
 #endif
 
-        int result = vkCreateInstance(&createInfo, nullptr, &instance);
+        int result = vkCreateInstance(&createInfo, nullptr, &(this->instance_));
         if (result != VK_SUCCESS) {
             printf("vkCreateInstance failed with error: %d\n", result);
             throw std::runtime_error("Failed to create instance!");
@@ -4383,21 +4383,21 @@ private:
     }
 
     void createSurface() {
-        if (!SDL_Vulkan_CreateSurface(window_, instance, &surface)) {
+        if (!SDL_Vulkan_CreateSurface(window_, instance_, &surface)) {
             throw std::runtime_error("Failed to create SDL Vulkan surface!");
         }
     }
 
     void pickPhysicalDevice() {
         uint32_t deviceCount = 0;
-        vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
+        vkEnumeratePhysicalDevices(instance_, &deviceCount, nullptr);
 
         if (deviceCount == 0) {
             throw std::runtime_error("Failed to find GPUs with Vulkan support!");
         }
 
         std::vector<VkPhysicalDevice> devices(deviceCount);
-        vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data());
+        vkEnumeratePhysicalDevices(instance_, &deviceCount, devices.data());
 
         physicalDevice = devices[0]; // Just pick the first one for simplicity
 
@@ -4664,7 +4664,7 @@ private:
         // Setup Platform/Renderer backends
         ImGui_ImplSDL2_InitForVulkan(window_);
         ImGui_ImplVulkan_InitInfo init_info = {};
-        init_info.Instance = instance;
+        init_info.Instance = instance_;
         init_info.PhysicalDevice = physicalDevice;
         init_info.Device = device;
         init_info.QueueFamily = graphicsQueueFamily;
@@ -4931,8 +4931,9 @@ private:
         vkDestroyRenderPass(device, renderPass, nullptr);
         vkDestroyDescriptorPool(device, descriptorPool, nullptr);
         vkDestroyDevice(device, nullptr);
-        vkDestroySurfaceKHR(instance, surface, nullptr);
-        vkDestroyInstance(instance, nullptr);
+        vkDestroySurfaceKHR(instance_, surface, nullptr);
+        vkDestroyInstance(instance_, nullptr);
+        this->instance_ = nullptr;
 
         SDL_DestroyWindow(window_);
         this->window_ = nullptr;
@@ -4943,7 +4944,7 @@ private:
 private:
     SDL_Window* window_ = nullptr;
 
-    VkInstance instance;
+    VkInstance instance_;
     VkPhysicalDevice physicalDevice;
     VkDevice device;
     VkQueue graphicsQueue;
