@@ -32,18 +32,18 @@ MinimalImGuiVulkan::init_sdl_window() {
 
 void
 MinimalImGuiVulkan::init_vulkan() {
-    createInstance();
-    createSurface();
-    pickPhysicalDevice();
-    createLogicalDevice();
+    this->create_instance();
+    this->create_surface();
+    this->pick_physical_device();
+    this->create_logical_device();
     this->createSwapchain();
     this->createImageViews();
     this->createRenderPass();   // must come before createFrameBuffers
     this->createFramebuffers();
-    createCommandPool();
-    createCommandBuffers();
-    createSyncObjects();
-    createDescriptorPool();
+    this->create_command_pool();
+    this->create_command_buffers();
+    this->create_sync_objects();
+    this->create_descriptor_pool();
 }
 
 /* end VulkanApp.cpp */

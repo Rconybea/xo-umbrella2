@@ -26,7 +26,7 @@ private:
     /* setup vulkan state. swapchain, command buffers etc */
     void init_vulkan();
 
-    void createInstance() {
+    void create_instance() {
         VkApplicationInfo appInfo{};
         appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
         appInfo.pApplicationName = "ImGui Vulkan App";
@@ -70,13 +70,13 @@ private:
         }
     }
 
-    void createSurface() {
+    void create_surface() {
         if (!SDL_Vulkan_CreateSurface(window_, instance_, &surface)) {
             throw std::runtime_error("Failed to create SDL Vulkan surface!");
         }
     }
 
-    void pickPhysicalDevice() {
+    void pick_physical_device() {
         uint32_t deviceCount = 0;
         vkEnumeratePhysicalDevices(instance_, &deviceCount, nullptr);
 
@@ -107,7 +107,7 @@ private:
         }
     }
 
-    void createLogicalDevice() {
+    void create_logical_device() {
         VkDeviceQueueCreateInfo queueCreateInfo{};
         queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
         queueCreateInfo.queueFamilyIndex = graphicsQueueFamily;
@@ -267,7 +267,7 @@ private:
         }
     }
 
-    void createCommandPool() {
+    void create_command_pool() {
         VkCommandPoolCreateInfo poolInfo{};
         poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
         poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
@@ -278,7 +278,7 @@ private:
         }
     }
 
-    void createCommandBuffers() {
+    void create_command_buffers() {
         commandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
 
         VkCommandBufferAllocateInfo allocInfo{};
@@ -292,7 +292,7 @@ private:
         }
     }
 
-    void createSyncObjects() {
+    void create_sync_objects() {
         imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
         renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
         inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
@@ -313,7 +313,7 @@ private:
         }
     }
 
-    void createDescriptorPool() {
+    void create_descriptor_pool() {
         VkDescriptorPoolSize pool_sizes[] = {
             { VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
             { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
