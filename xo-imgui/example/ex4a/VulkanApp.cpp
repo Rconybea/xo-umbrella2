@@ -4,10 +4,10 @@
 
 void MinimalImGuiVulkan::run()
 {
-    this->initWindow();
-    this->initVulkan();
-    this->initImGui();
-    this->mainLoop();
+    this->init_window();
+    this->init_vulkan();
+    this->init_imgui();
+    this->main_loop();
     this->cleanup();
 }
 

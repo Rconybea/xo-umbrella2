@@ -18,22 +18,7 @@ public:
     void run();
 
 private:
-    void initVulkan() {
-        createInstance();
-        createSurface();
-        pickPhysicalDevice();
-        createLogicalDevice();
-        this->createSwapchain();
-        this->createImageViews();
-        this->createRenderPass();   // must come before createFrameBuffers
-        this->createFramebuffers();
-        createCommandPool();
-        createCommandBuffers();
-        createSyncObjects();
-        createDescriptorPool();
-    }
-
-    void initWindow() {
+    void init_window() {
         if (SDL_Init(SDL_INIT_VIDEO) != 0) {
             throw std::runtime_error("Failed to initialize SDL!");
         }
@@ -49,6 +34,21 @@ private:
         if (!window_) {
             throw std::runtime_error("Failed to create SDL window!");
         }
+    }
+
+    void init_vulkan() {
+        createInstance();
+        createSurface();
+        pickPhysicalDevice();
+        createLogicalDevice();
+        this->createSwapchain();
+        this->createImageViews();
+        this->createRenderPass();   // must come before createFrameBuffers
+        this->createFramebuffers();
+        createCommandPool();
+        createCommandBuffers();
+        createSyncObjects();
+        createDescriptorPool();
     }
 
     void createInstance() {
@@ -365,7 +365,7 @@ private:
         }
     }
 
-    void initImGui() {
+    void init_imgui() {
         // Setup Dear ImGui context
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
@@ -435,7 +435,7 @@ private:
         vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
     }
 
-    void mainLoop() {
+    void main_loop() {
         SDL_Event event;
 
         while (!quit) {
