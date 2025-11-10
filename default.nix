@@ -32,6 +32,33 @@ let
       };});
   };
 
+  # complains about 'no more ptys'
+  dejagnu-overlay = self: super: {
+    dejagnu = super.dejagnu.overrideAttrs (old: {
+      doCheck = false;
+    });
+  };
+
+  swtpm-overlay = self: super: {
+    swtpm = super.swtpm.overrideAttrs (old: {
+      doCheck = false;
+    });
+  };
+
+  # libffi tests run, but only if sandbox disabled
+  libffi-overlay = self: super: {
+    libffi = super.libffi.overrideAttrs (old: {
+      doCheck = false;
+    });
+  };
+
+  # libqmi test seems to stall on ubuntu
+  libqmi-overlay = self: super: {
+    libqmi = super.libqmi.overrideAttrs (old: {
+      doCheck = false;
+    });
+  };
+
 #  # nixGL not present in my nixpkgs snapshot
 #  nixgl-overlay = self: super: {
 #    nixGL = import (self.fetchFromGitHub {
@@ -49,6 +76,20 @@ let
     #
 
     llvmPackages = super.llvmPackages_18;
+  };
+
+  # tests excruciatingly slow
+  mailutils-overlay = self: super: {
+    mailutils = super.mailutils.overrideAttrs (old: {
+      doCheck = false;
+    });
+  };
+
+  # 2 tests fail with 25.05
+  notmuch-overlay = self: super: {
+    notmuch = super.notmuch.overrideAttrs (old: {
+      doCheck = false;
+    });
   };
 
   xo-overlay = self: super:
@@ -145,7 +186,13 @@ let
       #pipewire-overlay    # not needed 4sep2025 nixpkgs ?
       #ccache-overlay   # not needed 4sep2025 nixpkgs
       amf-headers-overlay
-      nixgl-overlay
+      dejagnu-overlay
+      libffi-overlay
+      libqmi-overlay
+      swtpm-overlay
+      mailutils-overlay
+      notmuch-overlay
+#      nixgl-overlay
 #      llvm-overlay
       xo-overlay
     ];
@@ -167,6 +214,8 @@ let
   # xo deps
   xodeps = [
     pkgs.python3Packages.python
+    # note: pybind11 won't build on roly-chicago-24a in nix sandbox, runs out of pty devices
+    #
     pkgs.python3Packages.pybind11
     pkgs.llvmPackages_18.llvm.dev
     pkgs.replxx
@@ -311,8 +360,47 @@ in
     pyjit          = pkgs.xo-pyjit;
   };
 
+  # works, but only if build with --option sandbox=false
+  # to workaround pcre broken. overlay above does work,
+  # but is not applied to stdenv devs
+  #
+  shellpre = pkgs.mkShell {
+    buildInputs = [
+      # NOTE: pkgs.pcre2, pkgs.dejagnu, pkgs.libffi
+      # also won't build in genuine sandbox
+
+      pkgs.nix-tree   # needs GHC btw
+      pkgs.git
+      pkgs.openssh
+      pkgs.cloc
+      pkgs.lcov
+      pkgs.gdb
+      pkgs.strace
+
+      pkgs.ripgrep
+
+      pkgs.clang    # 19.1.7
+      pkgs.ninja    # will this work? tbd
+      pkgs.cmake
+      pkgs.distcc
+      pkgs.pkg-config
+      pkgs.unzip
+    ];
+
+    # includes stdenv, so will have gcc,gawk,tar,gzip etc.
+    shellHook = ''
+      # CXENV: cosmetic: coordinates with ~/proj/env/dotfiles/bashrc to drive PS1
+      export CXENV=$CXENV:xopre
+
+      # override SOURCE_DATE_EPOCH to current time (otherwise will get 1980)
+      export SOURCE_DATE_EPOCH=$(date +%s)
+      '';
+  };
+
   # minimal shell - just enough to verify gcc works.
   # not sufficient to build xo
+  #
+  # $ nix-shell -A shell0  # requires nixpkgs.runCommand
   #
   shell0 = pkgs.mkShell {
     buildInputs = devutils;
@@ -322,12 +410,13 @@ in
       # CXENV: cosmetic: coordinates with ~/proj/env/dotfiles/bashrc to drive PS1
       export CXENV=$CXENV:xo0
 
-      # override SOUCE_DATE_EPOCH to current time (otherwise will get 1980)
+      # override SOURCE_DATE_EPOCH to current time (otherwise will get 1980)
       export SOURCE_DATE_EPOCH=$(date +%s)
       '';
   };
 
   # stable shell.  can build xo without docs
+  #
   shell1a = pkgs.mkShell {
     buildInputs = xodeps ++ devutils;
 
@@ -626,11 +715,11 @@ in
 
         echo "nix_vk_validation: VK_LAYER_PATH=${pkgs.vulkan-validation-layers}/share/vulkan/explicit_layer.d"
         nix_vk_validation=${pkgs.vulkan-validation-layers}/share/vulkan/explicit_layer.d
+        '';
 
         # don't seem to need this -- doesn't invoke mesa hardware accel
         #echo "nix_nixgl=${pkgs.nixgl.nixGLMesa}"
         #nix_nixgl=${pkgs.nixgl.nixGLMesa}
-        '';
   };
 
   # Old shell from failed vulkan-on-wsl attempts.
