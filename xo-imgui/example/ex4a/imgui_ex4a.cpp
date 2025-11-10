@@ -4282,7 +4282,7 @@ int main(int, char **)
 }
 
 /* imgui_ex4a.cpp */
-#endif
+#endif //DEBUG
 
 #include <vulkan/vulkan.h>
 #include <SDL.h>
@@ -4325,7 +4325,7 @@ private:
             throw std::runtime_error("Failed to initialize SDL!");
         }
 
-        window = SDL_CreateWindow(
+        this->window_ = SDL_CreateWindow(
             "ImGui Vulkan SDL2 Example",
             SDL_WINDOWPOS_CENTERED,
             SDL_WINDOWPOS_CENTERED,
@@ -4333,7 +4333,7 @@ private:
             SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE
         );
 
-        if (!window) {
+        if (!window_) {
             throw std::runtime_error("Failed to create SDL window!");
         }
     }
@@ -4352,12 +4352,12 @@ private:
         createInfo.pApplicationInfo = &appInfo;
 
         uint32_t extensionCount = 0;
-        if (!SDL_Vulkan_GetInstanceExtensions(window, &extensionCount, nullptr)) {
+        if (!SDL_Vulkan_GetInstanceExtensions(window_, &extensionCount, nullptr)) {
             throw std::runtime_error("Failed to get SDL Vulkan extensions!");
         }
 
         std::vector<const char*> extensions(extensionCount);
-        if (!SDL_Vulkan_GetInstanceExtensions(window, &extensionCount, extensions.data())) {
+        if (!SDL_Vulkan_GetInstanceExtensions(window_, &extensionCount, extensions.data())) {
             throw std::runtime_error("Failed to get SDL Vulkan extensions!");
         }
 
@@ -4383,7 +4383,7 @@ private:
     }
 
     void createSurface() {
-        if (!SDL_Vulkan_CreateSurface(window, instance, &surface)) {
+        if (!SDL_Vulkan_CreateSurface(window_, instance, &surface)) {
             throw std::runtime_error("Failed to create SDL Vulkan surface!");
         }
     }
@@ -4459,7 +4459,7 @@ private:
         swapchainImageFormat = surfaceFormat.format;
 
         int width, height;
-        SDL_Vulkan_GetDrawableSize(window, &width, &height);
+        SDL_Vulkan_GetDrawableSize(window_, &width, &height);
         swapchainExtent = {static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
 
         uint32_t imageCount = capabilities.minImageCount + 1;
@@ -4662,7 +4662,7 @@ private:
         ImGui::StyleColorsDark();
 
         // Setup Platform/Renderer backends
-        ImGui_ImplSDL2_InitForVulkan(window);
+        ImGui_ImplSDL2_InitForVulkan(window_);
         ImGui_ImplVulkan_InitInfo init_info = {};
         init_info.Instance = instance;
         init_info.PhysicalDevice = physicalDevice;
@@ -4873,9 +4873,9 @@ private:
         // handle window minimization: wait until window has valid size
         int width = 0;
         int height = 0;
-        SDL_GetWindowSize(window, &width, &height);
+        SDL_GetWindowSize(window_, &width, &height);
         while (width == 0 || height == 0) {
-            SDL_GetWindowSize(window, &width, &height);
+            SDL_GetWindowSize(window_, &width, &height);
             SDL_WaitEvent(nullptr);
         }
 
@@ -4934,12 +4934,15 @@ private:
         vkDestroySurfaceKHR(instance, surface, nullptr);
         vkDestroyInstance(instance, nullptr);
 
-        SDL_DestroyWindow(window);
+        SDL_DestroyWindow(window_);
+        this->window_ = nullptr;
+
         SDL_Quit();
     }
 
 private:
-    SDL_Window* window;
+    SDL_Window* window_ = nullptr;
+
     VkInstance instance;
     VkPhysicalDevice physicalDevice;
     VkDevice device;
