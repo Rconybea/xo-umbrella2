@@ -4399,18 +4399,18 @@ private:
         std::vector<VkPhysicalDevice> devices(deviceCount);
         vkEnumeratePhysicalDevices(instance_, &deviceCount, devices.data());
 
-        physicalDevice = devices[0]; // Just pick the first one for simplicity
+        this->physical_device_ = devices[0]; // Just pick the first one for simplicity
 
         // Find graphics queue family
         uint32_t queueFamilyCount = 0;
-        vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, nullptr);
+        vkGetPhysicalDeviceQueueFamilyProperties(physical_device_, &queueFamilyCount, nullptr);
         std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
-        vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, queueFamilies.data());
+        vkGetPhysicalDeviceQueueFamilyProperties(physical_device_, &queueFamilyCount, queueFamilies.data());
 
         for (uint32_t i = 0; i < queueFamilies.size(); i++) {
             if (queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
                 VkBool32 presentSupport = false;
-                vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, surface, &presentSupport);
+                vkGetPhysicalDeviceSurfaceSupportKHR(physical_device_, i, surface, &presentSupport);
                 if (presentSupport) {
                     graphicsQueueFamily = i;
                     break;
@@ -4439,7 +4439,7 @@ private:
         createInfo.enabledExtensionCount = 1;
         createInfo.ppEnabledExtensionNames = deviceExtensions;
 
-        if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &device) != VK_SUCCESS) {
+        if (vkCreateDevice(physical_device_, &createInfo, nullptr, &device) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create logical device!");
         }
 
@@ -4448,12 +4448,12 @@ private:
 
     void createSwapchain() {
         VkSurfaceCapabilitiesKHR capabilities;
-        vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &capabilities);
+        vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device_, surface, &capabilities);
 
         uint32_t formatCount;
-        vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, nullptr);
+        vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device_, surface, &formatCount, nullptr);
         std::vector<VkSurfaceFormatKHR> formats(formatCount);
-        vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, formats.data());
+        vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device_, surface, &formatCount, formats.data());
 
         VkSurfaceFormatKHR surfaceFormat = formats[0];
         swapchainImageFormat = surfaceFormat.format;
@@ -4664,19 +4664,19 @@ private:
         // Setup Platform/Renderer backends
         ImGui_ImplSDL2_InitForVulkan(window_);
         ImGui_ImplVulkan_InitInfo init_info = {};
-        init_info.Instance = instance_;
-        init_info.PhysicalDevice = physicalDevice;
-        init_info.Device = device;
-        init_info.QueueFamily = graphicsQueueFamily;
-        init_info.Queue = graphicsQueue;
-        init_info.PipelineCache = VK_NULL_HANDLE;
-        init_info.DescriptorPool = descriptorPool;
-        init_info.RenderPass = renderPass;
-        init_info.Subpass = 0;
-        init_info.MinImageCount = MAX_FRAMES_IN_FLIGHT;
-        init_info.ImageCount = static_cast<uint32_t>(swapchainImages.size());
-        init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
-        init_info.Allocator = nullptr;
+        init_info.Instance        = instance_;
+        init_info.PhysicalDevice  = physical_device_;
+        init_info.Device          = device;
+        init_info.QueueFamily     = graphicsQueueFamily;
+        init_info.Queue           = graphicsQueue;
+        init_info.PipelineCache   = VK_NULL_HANDLE;
+        init_info.DescriptorPool  = descriptorPool;
+        init_info.RenderPass      = renderPass;
+        init_info.Subpass         = 0;
+        init_info.MinImageCount   = MAX_FRAMES_IN_FLIGHT;
+        init_info.ImageCount      = static_cast<uint32_t>(swapchainImages.size());
+        init_info.MSAASamples     = VK_SAMPLE_COUNT_1_BIT;
+        init_info.Allocator       = nullptr;
         init_info.CheckVkResultFn = nullptr;
         ImGui_ImplVulkan_Init(&init_info);
         //ImGui_ImplVulkan_Init(&init_info, renderPass);
@@ -4945,7 +4945,7 @@ private:
     SDL_Window* window_ = nullptr;
 
     VkInstance instance_;
-    VkPhysicalDevice physicalDevice;
+    VkPhysicalDevice physical_device_;
     VkDevice device;
     VkQueue graphicsQueue;
     VkSurfaceKHR surface;
