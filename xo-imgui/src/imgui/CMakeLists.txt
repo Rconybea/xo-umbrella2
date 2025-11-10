@@ -2,15 +2,16 @@
 
 find_path(IMGUI_INCLUDE_DIR
     NAMES imgui/imgui.h
-#    HINTS ${PROJECT_SOURCE_DIR}/include   # merge loser
-    HINTS ${XO_UMBRELLA_SOURCE_DIR}
+    HINTS ${PROJECT_SOURCE_DIR}/include
+#    HINTS ${XO_UMBRELLA_SOURCE_DIR}/xo-imgui/include
     DOC "path to imgui header")
 
 if (IMGUI_INCLUDE_DIR)
     message(STATUS
         "found imgui/imgui.h in IMGUI_INCLUDE_DIR=[${IMGUI_INCLUDE_DIR}]")
 else()
-    message(FATAL_ERROR "unable to find imgui.h")
+    message(FATAL_ERROR
+        "unable to find imgui.h XO_UMBRELLA_SOURCE_DIR=[${XO_UMBRELLA_SOURCE_DIR}]")
 endif()
 
 if (XO_ENABLE_VULKAN)

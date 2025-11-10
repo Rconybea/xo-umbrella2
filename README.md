@@ -14,14 +14,27 @@ Intended for local development work, with source in immediate subdirectories.
 
 ### Nix shell (reproducible development environment)
 
-If `nix` is available, can get several reproducible build environments
+If `nix` is available, can get several reproducible build environments.
+
+Pick one for a session:
 
 ```
 $ cd xo-umbrella2
 $ nix-shell -A shell0  # just nix stdenv: make,gcc,bash etc.
 $ nix-shell -A shell1  # stable environment
 $ nix-shell -A shell2  # stable environment + emacs + lsp
-$ nix-shell -A shell   # bleeding edge environment
+$ nix-shell -A shell3  # stable environment + emacs + lsp + xorg/opengl/vulkan/imgui stack (wsl2-only)
+$ nix-shell -A shell4  # wsl2-specific. like shell3, vkcube works (at least on WSL)
+$ nix-shell -A shell5  # wsl2-specific. uses dxg driver for "hardware acceleration"
+$ nix-shell -A shell   # (deprecated) bleeding edge environment
+```
+
+Run emacs (for example) from within chosen seesion.
+We need this ordering because nix-shell determines vital details like location of shared libraries,
+including libraries used by running IDE.
+
+```
+$ emacs
 ```
 
 ### Cmake build
@@ -41,9 +54,16 @@ $ cmake --build .build0
 $ cmake --install .build0
 # phase 2
 $ cmake -B .build -S . -DCMAKE_INSTALL_PREFIX=${PREFIX} -DXO_ENABLE_EXAMPLES=1
-$ cmake --build .build
+$ cmake --build .build --verbose
 $ cmake --install .build
 ```
+
+or with Vulkan examples
+```
+# at start of phase 2
+$ cmake -B .build -S . -DCMAKE_INSTALL_PREFIX=${PREFIX} -DXO_ENABLE_EXAMPLES=1 -DXO_ENABLE_VULKAN=1
+```
+
 
 ### Nix Build
 
@@ -86,6 +106,24 @@ $ nix-build -A xo-userenv-slow
 
 Same result as `$nix-build -A xo-userenv`, but builds each package serially
 using `xo-build`.
+
+#### Nix + Vulkan
+
+Currently (Nov 2025) only affects `xo-umbrella2/xo-imgui`.
+
+Non-trivial, because:
+1. must use host OS for gpu drivers.  nixpkgs has drivers, but they're setup to work from nixos.
+2. want to use nixpkgs for the GPU-independent portion of graphics stack.
+
+Complication because host gpu drivers in a "big swimming pool" such as `/usr/lib/x86_64-linux-gnu/`
+that contains both libraries that must come from host OS (e.g. `libGLX_nvidia`) and libraries
+that must come from nixpkgs (e.g. `libc`)
+
+Finesse by introducing a directory-of-symlinks, see `xo-umbrella2/etc/{hostegl, hostubuntu}`.
+These currently setup by hand, so likely to need manual attention on another host.
+
+An ordinary cmake build may cheerfully use the host-provided graphics stack,
+in return for higher risk of DLL hell.
 
 ### Coverage Build
 

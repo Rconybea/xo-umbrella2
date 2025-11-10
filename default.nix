@@ -316,6 +316,91 @@ let
       pkgs.dejavu_fonts     # also must set DEJAVU_FONTS_PATH for imgui_ex2
     ];
 
+  shell4-assembly =
+    { ld-library-path-before,
+      vk-icd-filenames,
+      shell-hook-text-after,
+    } :
+
+    pkgs.mkShell {
+      buildInputs = docutils ++ xodeps ++ devutils ++ ideutils ++ x11utils ++ gldeps ++ vkdeps ++ imguideps;
+
+      shellHook =
+        let
+          # dependencies of host system libraries
+          # (e.g. from /usr/lib/x86_64-linux-gnu) that we want to satisfy from nix;
+          # sufficient for glxgears
+          #
+          # be careful here: easy to insert something that breaks xo cmake build
+          #
+          # with minimal list
+          #   (libXau, libXdmcp, libX11, libXext, libXfixes, libXxf86vm, libxml2, libffi,
+          #    elfutils, ncurses, expat, zstd, zlib, libbsd, gcc.cc.lib)
+          #   glxgears runs at ~170fps
+          #
+          glpath = pkgs.lib.makeLibraryPath [
+            pkgs.wayland         # for libwayland-client.so
+
+            pkgs.xorg.libXau
+            pkgs.xorg.libXdmcp
+            pkgs.xorg.libX11     # e.g. for libX11-xcb.so
+            pkgs.xorg.libXext
+            pkgs.xorg.libXfixes
+            pkgs.xorg.libXxf86vm
+            pkgs.xorg.libxcb
+
+            pkgs.libxml2
+            pkgs.libffi
+
+            pkgs.elfutils        # for libelf.so
+            pkgs.ncurses         # for libtinfo.so
+            pkgs.expat
+            pkgs.zstd
+            pkgs.zlib            # for libz.so
+            pkgs.libbsd
+
+            pkgs.gcc.cc.lib      # for libstdc++.so  (won't blow up cmake, only touching LD_LIBRARY_PATH)
+          ];
+        in
+          ''
+        # CXENV: cosmetic: coordinates with ~/proj/env/dotfiles/bashrc to drive PS1
+        export CXENV=$CXENV:xo4
+
+        # override SOUCE_DATE_EPOCH to current time (otherwise will get 1980)
+        export SOURCE_DATE_EPOCH=$(date +%s)
+
+        # fonts
+        export FONTCONFIG_FILE=${fonts}
+        export FONTCONFIG_PATH=${pkgs.fontconfig.out}/etc/fonts
+        export DEJAVU_FONTS_PATH=${pkgs.dejavu_fonts}/share/fonts
+        ${pkgs.fontconfig}/bin/fc-cache -f
+
+        # nix-provided GPU libraries only work out-of-the-box on nixos.
+        # For non-nixos build, need to use host-provided versions of these libraries.
+        # Complications:
+        # 1. host location is likely something like /usr/lib/x86_64-linux-gnu,
+        #    in which case interposing that directly will change link behavior for unrelated shared libraries
+        #    (e.g. risk getting stale non-nix libc.so etc).  Use a curated symlink directory to finesse.
+        # 2. host-installed libraries may not set RUNPATH (they don't need to if installed in system-wide default location).
+        #    We need to also add nix-store LD_LIBRARY_PATH entries for indirect dependencies of system-provided libraries.
+        #
+        export LD_LIBRARY_PATH=${ld-library-path-before}:${glpath}:$LD_LIBRARY_PATH
+
+        export VK_ICD_FILENAMES="${vk-icd-filenames}"
+
+        # need this on OSX, + claude wants it for both wsl2, ubuntu
+        export VK_LAYER_PATH=${pkgs.vulkan-validation-layers}/share/vulkan/explicit_layer.d
+
+        # hardware acceleration
+        export LIBGL_ALWAYS_SOFTWARE=0
+        export MESA_LOADER_DRIVER_OVERRIDE=""
+
+        echo "nix_mesa=${pkgs.mesa}"
+        nix_mesa=${pkgs.mesa}
+
+        ${shell-hook-text-after}
+        '';
+    };
 in
 {
   pkgs = pkgs;
@@ -546,89 +631,24 @@ in
   };
 
   # vkcube works here
-  shell4 = pkgs.mkShell {
-    buildInputs = docutils ++ xodeps ++ devutils ++ ideutils ++ x11utils ++ gldeps ++ vkdeps ++ imguideps;
+  shell4-wsl = shell4-assembly {
+    ld-library-path-before = "${pkgs.mesa}/lib:/usr/lib/wsl/lib:${xo_topdir}/etc/hostwsl2";
+    vk-icd-filenames = "${pkgs.mesa}/share/vulkan/icd.d/dzn_icd.x86_64.json";
+    shell-hook-text-after = ''
+      export MESA_D3D12_DEFAULT_ADAPTER_NAME=DX
+      echo "using d3d12 vulkan driver: $VK_ICD_FILENAMES"
+    '';
+  };
 
-    shellHook =
-      let
-        # dependencies of host system libraries
-        # (e.g. from /usr/lib/x86_64-linux-gnu) that we want to satisfy from nix;
-        # sufficient for glxgears
-        #
-        # be careful here: easy to insert something that breaks xo cmake build
-        #
-        # with minimal list
-        #   (libXau, libXdmcp, libX11, libXext, libXfixes, libXxf86vm, libxml2, libffi,
-        #    elfutils, ncurses, expat, zstd, zlib, libbsd, gcc.cc.lib)
-        #   glxgears runs at ~170fps
-        #
-        glpath = pkgs.lib.makeLibraryPath [
-          pkgs.wayland         # for libwayland-client.so
-
-          pkgs.xorg.libXau
-          pkgs.xorg.libXdmcp
-          pkgs.xorg.libX11     # e.g. for libX11-xcb.so
-          pkgs.xorg.libXext
-          pkgs.xorg.libXfixes
-          pkgs.xorg.libXxf86vm
-          pkgs.xorg.libxcb
-
-          pkgs.libxml2
-          pkgs.libffi
-
-          pkgs.elfutils        # for libelf.so
-          pkgs.ncurses         # for libtinfo.so
-          pkgs.expat
-          pkgs.zstd
-          pkgs.zlib            # for libz.so
-          pkgs.libbsd
-
-          pkgs.gcc.cc.lib      # for libstdc++.so  (won't blow up cmake, only touching LD_LIBRARY_PATH)
-        ];
-      in
-        ''
-        # CXENV: cosmetic: coordinates with ~/proj/env/dotfiles/bashrc to drive PS1
-        export CXENV=$CXENV:xo4
-
-        # override SOUCE_DATE_EPOCH to current time (otherwise will get 1980)
-        export SOURCE_DATE_EPOCH=$(date +%s)
-
-        # fonts
-        export FONTCONFIG_FILE=${fonts}
-        export FONTCONFIG_PATH=${pkgs.fontconfig.out}/etc/fonts
-        export DEJAVU_FONTS_PATH=${pkgs.dejavu_fonts}/share/fonts
-        ${pkgs.fontconfig}/bin/fc-cache -f
-
-        # nix-provided GPU libraries only work out-of-the-box on nixos.
-        # For non-nixos build, need to use host-provided versions of these libraries.
-        # Complications:
-        # 1. host location is likely something like /usr/lib/x86_64-linux-gnu,
-        #    in which case interposing that directly will change link behavior for unrelated shared libraries
-        #    (e.g. risk getting stale non-nix libc.so etc).  Use a curated symlink directory to finesse.
-        # 2. host-installed libraries may not set RUNPATH (they don't need to if installed in system-wide default location).
-        #    We need to also add nix-store LD_LIBRARY_PATH entries for indirect dependencies of system-provided libraries.
-        #
-        export LD_LIBRARY_PATH=${pkgs.mesa}/lib:/usr/lib/wsl/lib:${xo_topdir}/etc/hostwsl2:${glpath}:$LD_LIBRARY_PATH
-
-        export VK_ICD_FILENAMES="${pkgs.mesa}/share/vulkan/icd.d/dzn_icd.x86_64.json"
-
-        # need this on OSX, + claude wants it for wsl2.  but looks sketchy to me
-        export VK_LAYER_PATH=${pkgs.vulkan-validation-layers}/share/vulkan/explicit_layer.d
-
-        # hardware acceleration
-        export LIBGL_ALWAYS_SOFTWARE=0
-        export MESA_LOADER_DRIVER_OVERRIDE=""
-
-        # wsl2-specific gpu setup.
-        export MESA_D3D12_DEFAULT_ADAPTER_NAME=DX
-
-        echo "using d3d12 vulkan driver: $VK_ICD_FILENAMES"
-
-        echo "nix_mesa=${pkgs.mesa}"
-        nix_mesa=${pkgs.mesa}
-        '';
-
-    # TODO: consider a nix project to generate this directory. nixwsl
+  # nov 2025 - try to get xo-imgui working on native ubuntu
+  shell4-nvidia = shell4-assembly {
+    ld-library-path-before = "${xo_topdir}/etc/hostubuntu:${pkgs.mesa}/lib";
+    vk-icd-filenames = "/usr/share/vulkan/icd.d/nvidia_icd.json";
+    shell-hook-text-after = ''
+      export __GLX_VENDOR_LIBRARY_NAME=nvidia
+      #export __EGL_VENDOR_LIBRARY_DIRS=/usr/share/glvnd/egl_vendor.d  # maybe
+      echo "using nvidia for libglvnd"
+    '';
   };
 
   # like shell4 but drop etc/hostwsl2 symlink dir.

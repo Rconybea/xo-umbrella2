@@ -35,17 +35,55 @@ For WSL2 (nvidia GPU)
    $ nixGL gxinfo | grep 'OpenGL vendor'
    OpenGL vendor string: Mesa
 
-4. check WSL driver
+3a. on ubuntu
+
+    $ cat /proc/driver/nvidia/version  # for kernel module version
+    [xo-umbrella2:main :nixcpp:nxfs proj/xo-umbrella2]$ cat /proc/driver/nvidia/version
+    NVRM version: NVIDIA UNIX Open Kernel Module for x86_64  580.65.06  Release Build  (dvs-builder@U22-I3-AF03-09-1)  Sun Jul 27 06:54:38 UTC 2025
+    GCC version:  gcc version 13.3.0 (Ubuntu 13.3.0-6ubuntu2~24.04)
+
+    $ nvidia-smi --version
+    NVML library version: 580.95
+
+3b. on windows11+wsl2:
+
+   check WSL driver
 
    $ cat /proc/version
    Linux version 6.6.87.2-microsoft-standard-WSL2 (root@439a258ad544) (gcc (GCC) 11.2.0, GNU ld (GNU Binutils) 2.37) #1 SMP PREEMPT_DYNAMIC Thu Jun  5 18:30:46 UTC 2025
 
    (not sure how this helps)
 
+4. is GLX setup?
+
+   $ glxinfo | head -20
+
+   $ ldd $(which glxinfo)   # will stop at libglvnd.so, though
+
+   $ strace -e openat glxinfo 2>&1
+
+   look for libraries that aren't found.
+
+4a. on ubuntu
+
+   want xo-umbrella2/etc/hostubuntu with host symlinks for:
+
+   libEGL_nvidia, libGLX_nvidia, libGL, libGLX_indirect, libGLX_nvidia, libGLX,
+   libnvidia-glcore, libnvidia-glsi, libnvidia-gpucomp, libnvidia-tls
+
+   $ __GL_SYNC_TO_VBLANK=0 glxgears
+   57207 frames in 5.0 seconds = 11441.171 FPS
+
 5. can vulkan start?
 
-   $ vulkaninfo
+   $ vulkaninfo --summary
+   $ vkcube
 
+5a. on ubuntu
+
+   works, needed libnvidia-glvkspirv.so
+
+5b. on WSL
    (fails to find .so libs, e.g. libLLVM-15.so.1)
 
    $ nixGLNvidia vulkaninfo
@@ -61,3 +99,28 @@ or similarly
 7. Can look at exact symbol resolution
 
    nixGLMesa vkcube 2>&1 | grep -A5 -B5 vkGetDeviceProcAddr
+
+8. once glxgears and vkcube run, try building + running
+
+   xo-imgui/example/ex1    # imgui demo app, opengl
+   xo-imgui/example/ex2    # imgui incremental GC demo
+
+   [xo-umbrella2:main :nixcpp:nxfs:xo4 proj/xo-umbrella2]$  .build/xo-imgui/example/ex2/imgui_ex2
+   14:23:32.933846 +(0) main
+   Hello, world!
+   SDL version: 2.32.56
+   SDL video driver: x11
+   SDL_CreateWindow done
+   Requested OpenGL vtersion: 3.0
+   SDL_GL_CreateContext done
+   glewInit done
+   OpenGL version: [4.6.0 NVIDIA 580.95.05]
+   loading font [/home/roland/nixroot/nix/store/if267lm2m7q7gs1gjvlkc1i69cs3ipg9-dejavu-fonts-2.37/share/fonts/truetype/DejaVuSans.ttf]
+   font loaded
+
+9. to build vulkan examples set XO_ENABLE_VULKAN
+
+   cmake -B .build -DCMAKE_INSTALL_PREFIX=$PREFIX -DXO_ENABLE_EXAMPLES=1 -DXO_ENABLE_VULKAN=1
+
+   xo-imgui/example/ex3    # imgui demo app, using vulkan
+   xo-imgui/example/ex4    # NOT WORKING ON UBUNTU nov 2025
