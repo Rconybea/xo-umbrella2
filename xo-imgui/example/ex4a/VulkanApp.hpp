@@ -18,38 +18,13 @@ public:
     void run();
 
 private:
-    void init_window() {
-        if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-            throw std::runtime_error("Failed to initialize SDL!");
-        }
+    /* create SDL window for application.
+     * populates @p window_
+     */
+    void init_sdl_window();
 
-        this->window_ = SDL_CreateWindow(
-            "ImGui Vulkan SDL2 Example",
-            SDL_WINDOWPOS_CENTERED,
-            SDL_WINDOWPOS_CENTERED,
-            800, 600,
-            SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE
-        );
-
-        if (!window_) {
-            throw std::runtime_error("Failed to create SDL window!");
-        }
-    }
-
-    void init_vulkan() {
-        createInstance();
-        createSurface();
-        pickPhysicalDevice();
-        createLogicalDevice();
-        this->createSwapchain();
-        this->createImageViews();
-        this->createRenderPass();   // must come before createFrameBuffers
-        this->createFramebuffers();
-        createCommandPool();
-        createCommandBuffers();
-        createSyncObjects();
-        createDescriptorPool();
-    }
+    /* setup vulkan state. swapchain, command buffers etc */
+    void init_vulkan();
 
     void createInstance() {
         VkApplicationInfo appInfo{};
