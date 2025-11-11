@@ -165,4 +165,54 @@ MinimalImGuiVulkan::create_logical_device()
     vkGetDeviceQueue(device_, graphics_queue_family_, 0, &graphics_queue_);
 }
 
+void
+MinimalImGuiVulkan::create_swapchain()
+{
+    VkSurfaceCapabilitiesKHR capabilities;
+    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device_, surface_, &capabilities);
+
+    uint32_t n_format;
+    vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device_, surface_, &n_format, nullptr);
+    std::vector<VkSurfaceFormatKHR> formats(n_format);
+    vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device_, surface_, &n_format, formats.data());
+
+    VkSurfaceFormatKHR surface_format = formats[0];
+    this->swapchain_image_format_ = surface_format.format;
+
+    int width, height;
+    SDL_Vulkan_GetDrawableSize(window_, &width, &height);
+    this->swapchain_extent_ = {
+        static_cast<uint32_t>(width),
+        static_cast<uint32_t>(height)
+    };
+
+    uint32_t n_image = capabilities.minImageCount + 1;
+    if (capabilities.maxImageCount > 0 && n_image > capabilities.maxImageCount) {
+        n_image = capabilities.maxImageCount;
+    }
+
+    VkSwapchainCreateInfoKHR create_info{};
+    create_info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+    create_info.surface = surface_;
+    create_info.minImageCount = n_image;
+    create_info.imageFormat = surface_format.format;
+    create_info.imageColorSpace = surface_format.colorSpace;
+    create_info.imageExtent = swapchain_extent_;
+    create_info.imageArrayLayers = 1;
+    create_info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+    create_info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    create_info.preTransform = capabilities.currentTransform;
+    create_info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+    create_info.presentMode = VK_PRESENT_MODE_FIFO_KHR;
+    create_info.clipped = VK_TRUE;
+
+    if (vkCreateSwapchainKHR(device_, &create_info, nullptr, &(this->swapchain_)) != VK_SUCCESS) {
+        throw std::runtime_error("Failed to create swap chain!");
+    }
+
+    vkGetSwapchainImagesKHR(device_, swapchain_, &n_image, nullptr);
+    this->swapchain_images_.resize(n_image);
+    vkGetSwapchainImagesKHR(device_, swapchain_, &n_image, this->swapchain_images_.data());
+}
+
 /* end VulkanApp.cpp */

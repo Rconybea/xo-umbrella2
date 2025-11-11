@@ -47,60 +47,20 @@ private:
      */
     void create_logical_device();
 
-    void create_swapchain() {
-        VkSurfaceCapabilitiesKHR capabilities;
-        vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device_, surface_, &capabilities);
-
-        uint32_t formatCount;
-        vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device_, surface_, &formatCount, nullptr);
-        std::vector<VkSurfaceFormatKHR> formats(formatCount);
-        vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device_, surface_, &formatCount, formats.data());
-
-        VkSurfaceFormatKHR surfaceFormat = formats[0];
-        swapchainImageFormat = surfaceFormat.format;
-
-        int width, height;
-        SDL_Vulkan_GetDrawableSize(window_, &width, &height);
-        swapchainExtent = {static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
-
-        uint32_t imageCount = capabilities.minImageCount + 1;
-        if (capabilities.maxImageCount > 0 && imageCount > capabilities.maxImageCount) {
-            imageCount = capabilities.maxImageCount;
-        }
-
-        VkSwapchainCreateInfoKHR createInfo{};
-        createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-        createInfo.surface = surface_;
-        createInfo.minImageCount = imageCount;
-        createInfo.imageFormat = surfaceFormat.format;
-        createInfo.imageColorSpace = surfaceFormat.colorSpace;
-        createInfo.imageExtent = swapchainExtent;
-        createInfo.imageArrayLayers = 1;
-        createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-        createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
-        createInfo.preTransform = capabilities.currentTransform;
-        createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-        createInfo.presentMode = VK_PRESENT_MODE_FIFO_KHR;
-        createInfo.clipped = VK_TRUE;
-
-        if (vkCreateSwapchainKHR(device_, &createInfo, nullptr, &swapchain) != VK_SUCCESS) {
-            throw std::runtime_error("Failed to create swap chain!");
-        }
-
-        vkGetSwapchainImagesKHR(device_, swapchain, &imageCount, nullptr);
-        swapchainImages.resize(imageCount);
-        vkGetSwapchainImagesKHR(device_, swapchain, &imageCount, swapchainImages.data());
-    }
+    /*
+     * populates @ref swapchain_, @ref swapchain_images_
+     */
+    void create_swapchain();
 
     void create_image_views() {
-        swapchainImageViews.resize(swapchainImages.size());
+        swapchainImageViews.resize(swapchain_images_.size());
 
-        for (size_t i = 0; i < swapchainImages.size(); i++) {
+        for (size_t i = 0; i < swapchain_images_.size(); i++) {
             VkImageViewCreateInfo createInfo{};
             createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-            createInfo.image = swapchainImages[i];
+            createInfo.image = swapchain_images_[i];
             createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-            createInfo.format = swapchainImageFormat;
+            createInfo.format = swapchain_image_format_;
             createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
             createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
             createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
@@ -119,7 +79,7 @@ private:
 
     void create_render_pass() {
         VkAttachmentDescription colorAttachment{};
-        colorAttachment.format = swapchainImageFormat;
+        colorAttachment.format = swapchain_image_format_;
         colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
         colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -170,8 +130,8 @@ private:
             framebufferInfo.renderPass = renderPass;
             framebufferInfo.attachmentCount = 1;
             framebufferInfo.pAttachments = attachments;
-            framebufferInfo.width = swapchainExtent.width;
-            framebufferInfo.height = swapchainExtent.height;
+            framebufferInfo.width = swapchain_extent_.width;
+            framebufferInfo.height = swapchain_extent_.height;
             framebufferInfo.layers = 1;
 
             if (vkCreateFramebuffer(device_, &framebufferInfo, nullptr, &framebuffers[i]) != VK_SUCCESS) {
@@ -275,7 +235,7 @@ private:
         init_info.RenderPass      = renderPass;
         init_info.Subpass         = 0;
         init_info.MinImageCount   = MAX_FRAMES_IN_FLIGHT;
-        init_info.ImageCount      = static_cast<uint32_t>(swapchainImages.size());
+        init_info.ImageCount      = static_cast<uint32_t>(swapchain_images_.size());
         init_info.MSAASamples     = VK_SAMPLE_COUNT_1_BIT;
         init_info.Allocator       = nullptr;
         init_info.CheckVkResultFn = nullptr;
@@ -345,7 +305,7 @@ private:
         vkWaitForFences(device_, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
         uint32_t imageIndex;
-        VkResult result = vkAcquireNextImageKHR(device_, swapchain, UINT64_MAX,
+        VkResult result = vkAcquireNextImageKHR(device_, swapchain_, UINT64_MAX,
                                                 imageAvailableSemaphores[currentFrame],
                                                 VK_NULL_HANDLE, &imageIndex);
 
@@ -393,7 +353,7 @@ private:
         presentInfo.waitSemaphoreCount = 1;
         presentInfo.pWaitSemaphores = signalSemaphores;
 
-        VkSwapchainKHR swapChains[] = {swapchain};
+        VkSwapchainKHR swapChains[] = {swapchain_};
         presentInfo.swapchainCount = 1;
         presentInfo.pSwapchains = swapChains;
 
@@ -432,7 +392,7 @@ private:
         renderPassInfo.renderPass = renderPass;
         renderPassInfo.framebuffer = framebuffers[imageIndex];
         renderPassInfo.renderArea.offset = {0, 0};
-        renderPassInfo.renderArea.extent = swapchainExtent;
+        renderPassInfo.renderArea.extent = swapchain_extent_;
 
         VkClearValue clearColor = {{{0.0f, 0.0f, 0.0f, 1.0f}}};
         renderPassInfo.clearValueCount = 1;
@@ -509,7 +469,7 @@ private:
     }
 
     void cleanupSwapchain() {
-        vkDestroySwapchainKHR(device_, swapchain, nullptr);
+        vkDestroySwapchainKHR(device_, this->swapchain_, nullptr);
     }
 
     void cleanup() {
@@ -558,10 +518,10 @@ private:
     VkDevice device_;
     VkQueue graphics_queue_;
 
-    VkSwapchainKHR swapchain;
-    VkFormat swapchainImageFormat;
-    VkExtent2D swapchainExtent;
-    std::vector<VkImage> swapchainImages;
+    VkSwapchainKHR swapchain_;
+    VkFormat swapchain_image_format_;
+    VkExtent2D swapchain_extent_;
+    std::vector<VkImage> swapchain_images_;
     std::vector<VkImageView> swapchainImageViews;
     VkRenderPass renderPass;
     std::vector<VkFramebuffer> framebuffers;
