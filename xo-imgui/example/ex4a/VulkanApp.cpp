@@ -422,11 +422,32 @@ MinimalImGuiVulkan::init_imgui()
     //ImGui_ImplVulkan_Init(&init_info, render_pass_);
 
     // Upload Fonts
-    VkCommandBuffer command_buffer = beginSingleTimeCommands();
+    VkCommandBuffer command_buffer = begin_single_time_commands();
     ImGui_ImplVulkan_CreateFontsTexture();
     endSingleTimeCommands(command_buffer);
 
     //ImGui_ImplVulkan_DestroyFontUploadObjects();
+}
+
+VkCommandBuffer
+MinimalImGuiVulkan::begin_single_time_commands()
+{
+    VkCommandBufferAllocateInfo alloc_info{};
+    alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    alloc_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    alloc_info.commandPool = command_pool_;
+    alloc_info.commandBufferCount = 1;
+
+    VkCommandBuffer cmdbuf;
+    vkAllocateCommandBuffers(device_, &alloc_info, &cmdbuf);
+
+    VkCommandBufferBeginInfo begin_info{};
+    begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+    vkBeginCommandBuffer(cmdbuf, &begin_info);
+
+    return cmdbuf;
 }
 
 /* end VulkanApp.cpp */
