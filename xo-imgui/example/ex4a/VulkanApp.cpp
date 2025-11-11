@@ -493,10 +493,10 @@ MinimalImGuiVulkan::draw_frame()
 {
     vkWaitForFences(device_, 1, &inflight_fences_[current_frame_], VK_TRUE, UINT64_MAX);
 
-    uint32_t imageIndex;
+    uint32_t image_ix = 0;
     VkResult result = vkAcquireNextImageKHR(device_, swapchain_, UINT64_MAX,
                                             image_available_semaphores_[current_frame_],
-                                            VK_NULL_HANDLE, &imageIndex);
+                                            VK_NULL_HANDLE, &image_ix);
 
     switch (result) {
     case VK_SUCCESS:
@@ -514,7 +514,7 @@ MinimalImGuiVulkan::draw_frame()
     vkResetFences(device_, 1, &inflight_fences_[current_frame_]);
 
     vkResetCommandBuffer(command_buffers_[current_frame_], 0);
-    recordCommandBuffer(command_buffers_[current_frame_], imageIndex);
+    this->record_command_buffer(command_buffers_[current_frame_], image_ix);
 
     VkSubmitInfo submitInfo{};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -546,7 +546,7 @@ MinimalImGuiVulkan::draw_frame()
     presentInfo.swapchainCount = 1;
     presentInfo.pSwapchains = swapChains;
 
-    presentInfo.pImageIndices = &imageIndex;
+    presentInfo.pImageIndices = &image_ix;
 
     result = vkQueuePresentKHR(graphics_queue_, &presentInfo);
 
