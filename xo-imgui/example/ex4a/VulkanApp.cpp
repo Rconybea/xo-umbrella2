@@ -338,4 +338,27 @@ MinimalImGuiVulkan::create_command_buffers()
     }
 }
 
+void
+MinimalImGuiVulkan::create_sync_objects()
+{
+    this->image_available_semaphores_.resize(MAX_FRAMES_IN_FLIGHT);
+    this->render_finished_semaphores_.resize(MAX_FRAMES_IN_FLIGHT);
+    this->inflight_fences_.resize(MAX_FRAMES_IN_FLIGHT);
+
+    VkSemaphoreCreateInfo semaphore_info{};
+    semaphore_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+    VkFenceCreateInfo fence_info{};
+    fence_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+    fence_info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+        if (vkCreateSemaphore(device_, &semaphore_info, nullptr, &(this->image_available_semaphores_[i])) != VK_SUCCESS ||
+            vkCreateSemaphore(device_, &semaphore_info, nullptr, &(this->render_finished_semaphores_[i])) != VK_SUCCESS ||
+            vkCreateFence(device_, &fence_info, nullptr, &(this->inflight_fences_[i])) != VK_SUCCESS) {
+            throw std::runtime_error("Failed to create synchronization objects!");
+        }
+    }
+}
+
 /* end VulkanApp.cpp */
