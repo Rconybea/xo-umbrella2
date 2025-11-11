@@ -31,11 +31,10 @@ private:
      */
     void create_instance();
 
-    void create_surface() {
-        if (!SDL_Vulkan_CreateSurface(window_, instance_, &surface)) {
-            throw std::runtime_error("Failed to create SDL Vulkan surface!");
-        }
-    }
+    /* create vulkan surface.
+     * populates @ref surface_
+     */
+    void create_surface();
 
     void pick_physical_device() {
         uint32_t deviceCount = 0;
@@ -59,7 +58,7 @@ private:
         for (uint32_t i = 0; i < queueFamilies.size(); i++) {
             if (queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
                 VkBool32 presentSupport = false;
-                vkGetPhysicalDeviceSurfaceSupportKHR(physical_device_, i, surface, &presentSupport);
+                vkGetPhysicalDeviceSurfaceSupportKHR(physical_device_, i, surface_, &presentSupport);
                 if (presentSupport) {
                     graphicsQueueFamily = i;
                     break;
@@ -97,12 +96,12 @@ private:
 
     void create_swapchain() {
         VkSurfaceCapabilitiesKHR capabilities;
-        vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device_, surface, &capabilities);
+        vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device_, surface_, &capabilities);
 
         uint32_t formatCount;
-        vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device_, surface, &formatCount, nullptr);
+        vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device_, surface_, &formatCount, nullptr);
         std::vector<VkSurfaceFormatKHR> formats(formatCount);
-        vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device_, surface, &formatCount, formats.data());
+        vkGetPhysicalDeviceSurfaceFormatsKHR(physical_device_, surface_, &formatCount, formats.data());
 
         VkSurfaceFormatKHR surfaceFormat = formats[0];
         swapchainImageFormat = surfaceFormat.format;
@@ -118,7 +117,7 @@ private:
 
         VkSwapchainCreateInfoKHR createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-        createInfo.surface = surface;
+        createInfo.surface = surface_;
         createInfo.minImageCount = imageCount;
         createInfo.imageFormat = surfaceFormat.format;
         createInfo.imageColorSpace = surfaceFormat.colorSpace;
@@ -580,7 +579,7 @@ private:
         vkDestroyRenderPass(device, renderPass, nullptr);
         vkDestroyDescriptorPool(device, descriptorPool, nullptr);
         vkDestroyDevice(device, nullptr);
-        vkDestroySurfaceKHR(instance_, surface, nullptr);
+        vkDestroySurfaceKHR(instance_, this->surface_, nullptr);
         vkDestroyInstance(instance_, nullptr);
         this->instance_ = nullptr;
 
@@ -594,10 +593,10 @@ private:
     SDL_Window* window_ = nullptr;
 
     VkInstance instance_;
+    VkSurfaceKHR surface_;
     VkPhysicalDevice physical_device_;
     VkDevice device;
     VkQueue graphicsQueue;
-    VkSurfaceKHR surface;
     VkSwapchainKHR swapchain;
     VkFormat swapchainImageFormat;
     VkExtent2D swapchainExtent;

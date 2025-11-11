@@ -3,7 +3,8 @@
 #include "VulkanApp.hpp"
 
 void
-MinimalImGuiVulkan::run() {
+MinimalImGuiVulkan::run()
+{
     this->init_sdl_window();
     this->init_vulkan();
     this->init_imgui();
@@ -12,7 +13,8 @@ MinimalImGuiVulkan::run() {
 }
 
 void
-MinimalImGuiVulkan::init_sdl_window() {
+MinimalImGuiVulkan::init_sdl_window()
+{
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         throw std::runtime_error("Failed to initialize SDL!");
     }
@@ -31,7 +33,8 @@ MinimalImGuiVulkan::init_sdl_window() {
 }
 
 void
-MinimalImGuiVulkan::init_vulkan() {
+MinimalImGuiVulkan::init_vulkan()
+{
     this->create_instance();
     this->create_surface();
     this->pick_physical_device();
@@ -47,7 +50,8 @@ MinimalImGuiVulkan::init_vulkan() {
 }
 
 void
-MinimalImGuiVulkan::create_instance() {
+MinimalImGuiVulkan::create_instance()
+{
     VkApplicationInfo appInfo{};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
     appInfo.pApplicationName = "ImGui Vulkan App";
@@ -88,6 +92,14 @@ MinimalImGuiVulkan::create_instance() {
     if (result != VK_SUCCESS) {
         printf("vkCreateInstance failed with error: %d\n", result);
         throw std::runtime_error("Failed to create instance!");
+    }
+}
+
+void
+MinimalImGuiVulkan::create_surface()
+{
+    if (!SDL_Vulkan_CreateSurface(window_, instance_, &(this->surface_))) {
+        throw std::runtime_error("Failed to create SDL Vulkan surface!");
     }
 }
 
