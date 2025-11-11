@@ -57,47 +57,10 @@ private:
      */
     void create_image_views();
 
-    void create_render_pass() {
-        VkAttachmentDescription colorAttachment{};
-        colorAttachment.format = swapchain_image_format_;
-        colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-        colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-        colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
-        VkAttachmentReference colorAttachmentRef{};
-        colorAttachmentRef.attachment = 0;
-        colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-        VkSubpassDescription subpass{};
-        subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-        subpass.colorAttachmentCount = 1;
-        subpass.pColorAttachments = &colorAttachmentRef;
-
-        VkSubpassDependency dependency{};
-        dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-        dependency.dstSubpass = 0;
-        dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        dependency.srcAccessMask = 0;
-        dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-
-        VkRenderPassCreateInfo renderPassInfo{};
-        renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-        renderPassInfo.attachmentCount = 1;
-        renderPassInfo.pAttachments = &colorAttachment;
-        renderPassInfo.subpassCount = 1;
-        renderPassInfo.pSubpasses = &subpass;
-        renderPassInfo.dependencyCount = 1;
-        renderPassInfo.pDependencies = &dependency;
-
-        if (vkCreateRenderPass(device_, &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS) {
-            throw std::runtime_error("Failed to create render pass!");
-        }
-    }
+    /*
+     * populate @ref render_pass_
+     */
+    void create_render_pass();
 
     void create_framebuffers() {
         framebuffers.resize(swapchain_image_views_.size());
@@ -107,7 +70,7 @@ private:
 
             VkFramebufferCreateInfo framebufferInfo{};
             framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-            framebufferInfo.renderPass = renderPass;
+            framebufferInfo.renderPass = render_pass_;
             framebufferInfo.attachmentCount = 1;
             framebufferInfo.pAttachments = attachments;
             framebufferInfo.width = swapchain_extent_.width;
@@ -212,7 +175,7 @@ private:
         init_info.Queue           = graphics_queue_;
         init_info.PipelineCache   = VK_NULL_HANDLE;
         init_info.DescriptorPool  = descriptorPool;
-        init_info.RenderPass      = renderPass;
+        init_info.RenderPass      = render_pass_;
         init_info.Subpass         = 0;
         init_info.MinImageCount   = MAX_FRAMES_IN_FLIGHT;
         init_info.ImageCount      = static_cast<uint32_t>(swapchain_images_.size());
@@ -220,7 +183,7 @@ private:
         init_info.Allocator       = nullptr;
         init_info.CheckVkResultFn = nullptr;
         ImGui_ImplVulkan_Init(&init_info);
-        //ImGui_ImplVulkan_Init(&init_info, renderPass);
+        //ImGui_ImplVulkan_Init(&init_info, render_pass_);
 
         // Upload Fonts
         VkCommandBuffer command_buffer = beginSingleTimeCommands();
@@ -369,7 +332,7 @@ private:
 
         VkRenderPassBeginInfo renderPassInfo{};
         renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        renderPassInfo.renderPass = renderPass;
+        renderPassInfo.renderPass = render_pass_;
         renderPassInfo.framebuffer = framebuffers[imageIndex];
         renderPassInfo.renderArea.offset = {0, 0};
         renderPassInfo.renderArea.extent = swapchain_extent_;
@@ -469,7 +432,7 @@ private:
         this->cleanupImageViews();
         this->cleanupSwapchain();
 
-        vkDestroyRenderPass(device_, renderPass, nullptr);
+        vkDestroyRenderPass(device_, render_pass_, nullptr);
         vkDestroyDescriptorPool(device_, descriptorPool, nullptr);
         vkDestroyDevice(device_, nullptr);
         vkDestroySurfaceKHR(instance_, this->surface_, nullptr);
@@ -505,7 +468,9 @@ private:
     std::vector<VkImage> swapchain_images_;
 
     std::vector<VkImageView> swapchain_image_views_;
-    VkRenderPass renderPass;
+
+    VkRenderPass render_pass_;
+
     std::vector<VkFramebuffer> framebuffers;
     VkCommandPool commandPool;
     std::vector<VkCommandBuffer> commandBuffers;
