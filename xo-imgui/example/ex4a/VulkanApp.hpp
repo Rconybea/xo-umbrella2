@@ -52,30 +52,10 @@ private:
      */
     void create_swapchain();
 
-    void create_image_views() {
-        swapchainImageViews.resize(swapchain_images_.size());
-
-        for (size_t i = 0; i < swapchain_images_.size(); i++) {
-            VkImageViewCreateInfo createInfo{};
-            createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-            createInfo.image = swapchain_images_[i];
-            createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-            createInfo.format = swapchain_image_format_;
-            createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-            createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-            createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-            createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-            createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-            createInfo.subresourceRange.baseMipLevel = 0;
-            createInfo.subresourceRange.levelCount = 1;
-            createInfo.subresourceRange.baseArrayLayer = 0;
-            createInfo.subresourceRange.layerCount = 1;
-
-            if (vkCreateImageView(device_, &createInfo, nullptr, &swapchainImageViews[i]) != VK_SUCCESS) {
-                throw std::runtime_error("Failed to create image views!");
-            }
-        }
-    }
+    /*
+     * populate @ref swapchain_image_views_
+     */
+    void create_image_views();
 
     void create_render_pass() {
         VkAttachmentDescription colorAttachment{};
@@ -120,10 +100,10 @@ private:
     }
 
     void create_framebuffers() {
-        framebuffers.resize(swapchainImageViews.size());
+        framebuffers.resize(swapchain_image_views_.size());
 
-        for (size_t i = 0; i < swapchainImageViews.size(); i++) {
-            VkImageView attachments[] = { swapchainImageViews[i] };
+        for (size_t i = 0; i < swapchain_image_views_.size(); i++) {
+            VkImageView attachments[] = { swapchain_image_views_[i] };
 
             VkFramebufferCreateInfo framebufferInfo{};
             framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
@@ -462,10 +442,10 @@ private:
     }
 
     void cleanupImageViews() {
-            for (auto imageView : swapchainImageViews) {
+            for (auto imageView : swapchain_image_views_) {
                 vkDestroyImageView(device_, imageView, nullptr);
             }
-            swapchainImageViews.clear();
+            swapchain_image_views_.clear();
     }
 
     void cleanupSwapchain() {
@@ -518,11 +498,13 @@ private:
     VkDevice device_;
     VkQueue graphics_queue_;
 
-    VkSwapchainKHR swapchain_;
+    /* drawing state, dependent on window size */
     VkFormat swapchain_image_format_;
     VkExtent2D swapchain_extent_;
+    VkSwapchainKHR swapchain_;
     std::vector<VkImage> swapchain_images_;
-    std::vector<VkImageView> swapchainImageViews;
+
+    std::vector<VkImageView> swapchain_image_views_;
     VkRenderPass renderPass;
     std::vector<VkFramebuffer> framebuffers;
     VkCommandPool commandPool;
