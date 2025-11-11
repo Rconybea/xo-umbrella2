@@ -136,4 +136,33 @@ MinimalImGuiVulkan::pick_physical_device()
     }
 }
 
+void
+MinimalImGuiVulkan::create_logical_device()
+{
+    VkDeviceQueueCreateInfo queue_create_info{};
+    queue_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+    queue_create_info.queueFamilyIndex = graphics_queue_family_;
+    queue_create_info.queueCount = 1;
+    float queuePriority = 1.0f;
+    queue_create_info.pQueuePriorities = &queuePriority;
+
+    VkPhysicalDeviceFeatures deviceFeatures{};
+
+    VkDeviceCreateInfo create_info{};
+    create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+    create_info.pQueueCreateInfos = &queue_create_info;
+    create_info.queueCreateInfoCount = 1;
+    create_info.pEnabledFeatures = &deviceFeatures;
+
+    const char* deviceExtensions[] = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
+    create_info.enabledExtensionCount = 1;
+    create_info.ppEnabledExtensionNames = deviceExtensions;
+
+    if (vkCreateDevice(physical_device_, &create_info, nullptr, &(this->device_)) != VK_SUCCESS) {
+        throw std::runtime_error("Failed to create logical device!");
+    }
+
+    vkGetDeviceQueue(device_, graphics_queue_family_, 0, &graphics_queue_);
+}
+
 /* end VulkanApp.cpp */
