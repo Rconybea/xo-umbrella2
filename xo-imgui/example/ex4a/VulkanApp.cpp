@@ -36,14 +36,59 @@ MinimalImGuiVulkan::init_vulkan() {
     this->create_surface();
     this->pick_physical_device();
     this->create_logical_device();
-    this->createSwapchain();
-    this->createImageViews();
-    this->createRenderPass();   // must come before createFrameBuffers
-    this->createFramebuffers();
+    this->create_swapchain();
+    this->create_image_views();
+    this->create_render_pass();   // must come before createFrameBuffers
+    this->create_framebuffers();
     this->create_command_pool();
     this->create_command_buffers();
     this->create_sync_objects();
     this->create_descriptor_pool();
+}
+
+void
+MinimalImGuiVulkan::create_instance() {
+    VkApplicationInfo appInfo{};
+    appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+    appInfo.pApplicationName = "ImGui Vulkan App";
+    appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
+    appInfo.pEngineName = "No Engine";
+    appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
+    appInfo.apiVersion = VK_API_VERSION_1_0;
+
+    VkInstanceCreateInfo createInfo{};
+    createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+    createInfo.pApplicationInfo = &appInfo;
+
+    uint32_t extensionCount = 0;
+    if (!SDL_Vulkan_GetInstanceExtensions(window_, &extensionCount, nullptr)) {
+        throw std::runtime_error("Failed to get SDL Vulkan extensions!");
+    }
+
+    std::vector<const char*> extensions(extensionCount);
+    if (!SDL_Vulkan_GetInstanceExtensions(window_, &extensionCount, extensions.data())) {
+        throw std::runtime_error("Failed to get SDL Vulkan extensions!");
+    }
+
+#ifdef __apple__
+    // Add portability extension for MoltenVK (macOS)
+    extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+#endif
+
+    createInfo.enabledExtensionCount = extensions.size();
+    createInfo.ppEnabledExtensionNames = extensions.data();
+    createInfo.enabledLayerCount = 0;
+
+#ifdef __apple__
+    // CRITICAL: Enable portability enumeration flag for MoltenVK
+    createInfo.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+#endif
+
+    int result = vkCreateInstance(&createInfo, nullptr, &(this->instance_));
+    if (result != VK_SUCCESS) {
+        printf("vkCreateInstance failed with error: %d\n", result);
+        throw std::runtime_error("Failed to create instance!");
+    }
 }
 
 /* end VulkanApp.cpp */

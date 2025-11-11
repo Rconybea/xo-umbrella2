@@ -19,56 +19,17 @@ public:
 
 private:
     /* create SDL window for application.
-     * populates @p window_
+     * populates @ref window_
      */
     void init_sdl_window();
 
     /* setup vulkan state. swapchain, command buffers etc */
     void init_vulkan();
 
-    void create_instance() {
-        VkApplicationInfo appInfo{};
-        appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-        appInfo.pApplicationName = "ImGui Vulkan App";
-        appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-        appInfo.pEngineName = "No Engine";
-        appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-        appInfo.apiVersion = VK_API_VERSION_1_0;
-
-        VkInstanceCreateInfo createInfo{};
-        createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-        createInfo.pApplicationInfo = &appInfo;
-
-        uint32_t extensionCount = 0;
-        if (!SDL_Vulkan_GetInstanceExtensions(window_, &extensionCount, nullptr)) {
-            throw std::runtime_error("Failed to get SDL Vulkan extensions!");
-        }
-
-        std::vector<const char*> extensions(extensionCount);
-        if (!SDL_Vulkan_GetInstanceExtensions(window_, &extensionCount, extensions.data())) {
-            throw std::runtime_error("Failed to get SDL Vulkan extensions!");
-        }
-
-#ifdef __apple__
-        // Add portability extension for MoltenVK (macOS)
-        extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
-#endif
-
-        createInfo.enabledExtensionCount = extensions.size();
-        createInfo.ppEnabledExtensionNames = extensions.data();
-        createInfo.enabledLayerCount = 0;
-
-#ifdef __apple__
-        // CRITICAL: Enable portability enumeration flag for MoltenVK
-        createInfo.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
-#endif
-
-        int result = vkCreateInstance(&createInfo, nullptr, &(this->instance_));
-        if (result != VK_SUCCESS) {
-            printf("vkCreateInstance failed with error: %d\n", result);
-            throw std::runtime_error("Failed to create instance!");
-        }
-    }
+    /* create vulkan instance.
+     * populates @ref instance_
+     */
+    void create_instance();
 
     void create_surface() {
         if (!SDL_Vulkan_CreateSurface(window_, instance_, &surface)) {
@@ -134,7 +95,7 @@ private:
         vkGetDeviceQueue(device, graphicsQueueFamily, 0, &graphicsQueue);
     }
 
-    void createSwapchain() {
+    void create_swapchain() {
         VkSurfaceCapabilitiesKHR capabilities;
         vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physical_device_, surface, &capabilities);
 
@@ -179,7 +140,7 @@ private:
         vkGetSwapchainImagesKHR(device, swapchain, &imageCount, swapchainImages.data());
     }
 
-    void createImageViews() {
+    void create_image_views() {
         swapchainImageViews.resize(swapchainImages.size());
 
         for (size_t i = 0; i < swapchainImages.size(); i++) {
@@ -204,7 +165,7 @@ private:
         }
     }
 
-    void createRenderPass() {
+    void create_render_pass() {
         VkAttachmentDescription colorAttachment{};
         colorAttachment.format = swapchainImageFormat;
         colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -246,7 +207,7 @@ private:
         }
     }
 
-    void createFramebuffers() {
+    void create_framebuffers() {
         framebuffers.resize(swapchainImageViews.size());
 
         for (size_t i = 0; i < swapchainImageViews.size(); i++) {
@@ -441,7 +402,7 @@ private:
         case VK_SUBOPTIMAL_KHR:
             break;
         case VK_ERROR_OUT_OF_DATE_KHR:
-            recreateSwapchain();
+            recreate_swapchain();
             // deliberate earlyexit
             return;
         default:
@@ -497,7 +458,7 @@ private:
         case VK_ERROR_OUT_OF_DATE_KHR:
         case VK_SUBOPTIMAL_KHR:
             framebuffer_resized_flag_ = false;
-            this->recreateSwapchain();
+            this->recreate_swapchain();
             break;
         default:
             throw std::runtime_error("failed to present swapchain image!");
@@ -557,7 +518,7 @@ private:
         }
     }
 
-    void recreateSwapchain() {
+    void recreate_swapchain() {
         // handle window minimization: wait until window has valid size
         int width = 0;
         int height = 0;
@@ -576,9 +537,9 @@ private:
         this->cleanupSwapchain();
 
         // create new swapchain
-        this->createSwapchain();
-        this->createImageViews();
-        this->createFramebuffers();
+        this->create_swapchain();
+        this->create_image_views();
+        this->create_framebuffers();
     }
 
     void cleanupFrameBuffers() {
