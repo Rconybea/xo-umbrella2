@@ -473,12 +473,12 @@ MinimalImGuiVulkan::main_loop()
 {
     SDL_Event event;
 
-    while (!quit) {
+    while (!quit_flag_) {
         while (SDL_PollEvent(&event)) {
             ImGui_ImplSDL2_ProcessEvent(&event);
 
             if (event.type == SDL_QUIT) {
-                quit = true;
+                this->quit_flag_ = true;
             }
         }
 

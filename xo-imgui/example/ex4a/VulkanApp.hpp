@@ -284,5 +284,5 @@ private:
      * until swapchain in consistent state.
      */
     bool framebuffer_resized_flag_ = false;
-    bool quit = false;
+    bool quit_flag_ = false;
 }; /*MinimalImGuiVulkan*/
