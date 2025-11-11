@@ -67,23 +67,17 @@ private:
      */
     void create_framebuffers();
 
-    void create_command_pool() {
-        VkCommandPoolCreateInfo poolInfo{};
-        poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-        poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-        poolInfo.queueFamilyIndex = graphics_queue_family_;
-
-        if (vkCreateCommandPool(device_, &poolInfo, nullptr, &commandPool) != VK_SUCCESS) {
-            throw std::runtime_error("Failed to create command pool!");
-        }
-    }
+    /*
+     * populate @ref command_pool_
+     */
+    void create_command_pool();
 
     void create_command_buffers() {
         commandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
 
         VkCommandBufferAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        allocInfo.commandPool = commandPool;
+        allocInfo.commandPool = command_pool_;
         allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
         allocInfo.commandBufferCount = static_cast<uint32_t>(commandBuffers.size());
 
@@ -181,7 +175,7 @@ private:
         VkCommandBufferAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        allocInfo.commandPool = commandPool;
+        allocInfo.commandPool = command_pool_;
         allocInfo.commandBufferCount = 1;
 
         VkCommandBuffer commandBuffer;
@@ -207,7 +201,7 @@ private:
         vkQueueSubmit(graphics_queue_, 1, &submitInfo, VK_NULL_HANDLE);
         vkQueueWaitIdle(graphics_queue_);
 
-        vkFreeCommandBuffers(device_, commandPool, 1, &commandBuffer);
+        vkFreeCommandBuffers(device_, command_pool_, 1, &commandBuffer);
     }
 
     void main_loop() {
@@ -410,7 +404,7 @@ private:
             vkDestroyFence(device_, inFlightFences[i], nullptr);
         }
 
-        vkDestroyCommandPool(device_, commandPool, nullptr);
+        vkDestroyCommandPool(device_, command_pool_, nullptr);
 
         this->cleanupFrameBuffers();
         this->cleanupImageViews();
@@ -457,7 +451,8 @@ private:
 
     std::vector<VkFramebuffer> framebuffers_;
 
-    VkCommandPool commandPool;
+    VkCommandPool command_pool_;
+
     std::vector<VkCommandBuffer> commandBuffers;
     std::vector<VkSemaphore> imageAvailableSemaphores;
     std::vector<VkSemaphore> renderFinishedSemaphores;

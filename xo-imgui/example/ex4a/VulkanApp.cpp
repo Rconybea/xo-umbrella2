@@ -309,4 +309,17 @@ MinimalImGuiVulkan::create_framebuffers()
     }
 }
 
+void
+MinimalImGuiVulkan::create_command_pool()
+{
+    VkCommandPoolCreateInfo poolInfo{};
+    poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+    poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+    poolInfo.queueFamilyIndex = graphics_queue_family_;
+
+    if (vkCreateCommandPool(device_, &poolInfo, nullptr, &(this->command_pool_)) != VK_SUCCESS) {
+        throw std::runtime_error("Failed to create command pool!");
+    }
+}
+
 /* end VulkanApp.cpp */
