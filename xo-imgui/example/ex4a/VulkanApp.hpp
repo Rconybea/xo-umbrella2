@@ -103,101 +103,19 @@ private:
      */
     void end_single_time_commands(VkCommandBuffer commandBuffer);
 
-    void main_loop() {
-        SDL_Event event;
+    /* borrow calling thread, run until application end
+     * Require: app state initialized. see init_sdl_window(), init_vulkan(), init_imgui()
+     */
+    void main_loop();
 
-        while (!quit) {
-            while (SDL_PollEvent(&event)) {
-                ImGui_ImplSDL2_ProcessEvent(&event);
-
-                if (event.type == SDL_QUIT) {
-                    quit = true;
-                }
-            }
-
-            drawFrame();
-        }
-
-        vkDeviceWaitIdle(device_);
-    }
-
-    void drawFrame() {
-        vkWaitForFences(device_, 1, &inflight_fences_[currentFrame], VK_TRUE, UINT64_MAX);
-
-        uint32_t imageIndex;
-        VkResult result = vkAcquireNextImageKHR(device_, swapchain_, UINT64_MAX,
-                                                image_available_semaphores_[currentFrame],
-                                                VK_NULL_HANDLE, &imageIndex);
-
-        switch (result) {
-        case VK_SUCCESS:
-        case VK_SUBOPTIMAL_KHR:
-            break;
-        case VK_ERROR_OUT_OF_DATE_KHR:
-            recreate_swapchain();
-            // deliberate earlyexit
-            return;
-        default:
-            throw std::runtime_error("failed to acquire swapchain image!");
-            break;
-        }
-
-        vkResetFences(device_, 1, &inflight_fences_[currentFrame]);
-
-        vkResetCommandBuffer(command_buffers_[currentFrame], 0);
-        recordCommandBuffer(command_buffers_[currentFrame], imageIndex);
-
-        VkSubmitInfo submitInfo{};
-        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-
-        VkSemaphore waitSemaphores[] = {image_available_semaphores_[currentFrame]};
-        VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
-        submitInfo.waitSemaphoreCount = 1;
-        submitInfo.pWaitSemaphores = waitSemaphores;
-        submitInfo.pWaitDstStageMask = waitStages;
-
-        submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = &command_buffers_[currentFrame];
-
-        VkSemaphore signalSemaphores[] = {render_finished_semaphores_[currentFrame]};
-        submitInfo.signalSemaphoreCount = 1;
-        submitInfo.pSignalSemaphores = signalSemaphores;
-
-        if (vkQueueSubmit(graphics_queue_, 1, &submitInfo, inflight_fences_[currentFrame]) != VK_SUCCESS) {
-            throw std::runtime_error("Failed to submit draw command buffer!");
-        }
-
-        VkPresentInfoKHR presentInfo{};
-        presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-
-        presentInfo.waitSemaphoreCount = 1;
-        presentInfo.pWaitSemaphores = signalSemaphores;
-
-        VkSwapchainKHR swapChains[] = {swapchain_};
-        presentInfo.swapchainCount = 1;
-        presentInfo.pSwapchains = swapChains;
-
-        presentInfo.pImageIndices = &imageIndex;
-
-        result = vkQueuePresentKHR(graphics_queue_, &presentInfo);
-
-        if (framebuffer_resized_flag_)
-            result = VK_ERROR_OUT_OF_DATE_KHR;
-
-        switch (result) {
-        case VK_SUCCESS:
-            break;
-        case VK_ERROR_OUT_OF_DATE_KHR:
-        case VK_SUBOPTIMAL_KHR:
-            framebuffer_resized_flag_ = false;
-            this->recreate_swapchain();
-            break;
-        default:
-            throw std::runtime_error("failed to present swapchain image!");
-        }
-
-        currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
-    }
+    /* Accumulate drawing command for next frame.
+     * Reserves and modifies the @ref current_frame_ element of
+     *   @ref command_buffers_
+     *   @ref image_available_semaphores_
+     *   @ref inflight_fences_
+     * Advances current_frame_ so that it refers to available resources
+     */
+    void draw_frame();
 
     void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
         VkCommandBufferBeginInfo beginInfo{};
@@ -360,7 +278,7 @@ private:
 
     VkDescriptorPool descriptor_pool_;
 
-    uint32_t currentFrame = 0;
+    uint32_t current_frame_ = 0;
     const int MAX_FRAMES_IN_FLIGHT = 2;
     /* true when window resize behavior detected,
      * until swapchain in consistent state.

@@ -8,7 +8,9 @@ MinimalImGuiVulkan::run()
     this->init_sdl_window();
     this->init_vulkan();
     this->init_imgui();
+
     this->main_loop();
+
     this->cleanup();
 }
 
@@ -464,6 +466,106 @@ MinimalImGuiVulkan::end_single_time_commands(VkCommandBuffer commandBuffer)
     vkQueueWaitIdle(graphics_queue_);
 
     vkFreeCommandBuffers(device_, command_pool_, 1, &commandBuffer);
+}
+
+void
+MinimalImGuiVulkan::main_loop()
+{
+    SDL_Event event;
+
+    while (!quit) {
+        while (SDL_PollEvent(&event)) {
+            ImGui_ImplSDL2_ProcessEvent(&event);
+
+            if (event.type == SDL_QUIT) {
+                quit = true;
+            }
+        }
+
+        this->draw_frame();
+    }
+
+    vkDeviceWaitIdle(device_);
+}
+
+void
+MinimalImGuiVulkan::draw_frame()
+{
+    vkWaitForFences(device_, 1, &inflight_fences_[current_frame_], VK_TRUE, UINT64_MAX);
+
+    uint32_t imageIndex;
+    VkResult result = vkAcquireNextImageKHR(device_, swapchain_, UINT64_MAX,
+                                            image_available_semaphores_[current_frame_],
+                                            VK_NULL_HANDLE, &imageIndex);
+
+    switch (result) {
+    case VK_SUCCESS:
+    case VK_SUBOPTIMAL_KHR:
+        break;
+    case VK_ERROR_OUT_OF_DATE_KHR:
+        recreate_swapchain();
+        // deliberate earlyexit
+        return;
+    default:
+        throw std::runtime_error("failed to acquire swapchain image!");
+        break;
+    }
+
+    vkResetFences(device_, 1, &inflight_fences_[current_frame_]);
+
+    vkResetCommandBuffer(command_buffers_[current_frame_], 0);
+    recordCommandBuffer(command_buffers_[current_frame_], imageIndex);
+
+    VkSubmitInfo submitInfo{};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+    VkSemaphore waitSemaphores[] = {image_available_semaphores_[current_frame_]};
+    VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+    submitInfo.waitSemaphoreCount = 1;
+    submitInfo.pWaitSemaphores = waitSemaphores;
+    submitInfo.pWaitDstStageMask = waitStages;
+
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &command_buffers_[current_frame_];
+
+    VkSemaphore signalSemaphores[] = {render_finished_semaphores_[current_frame_]};
+    submitInfo.signalSemaphoreCount = 1;
+    submitInfo.pSignalSemaphores = signalSemaphores;
+
+    if (vkQueueSubmit(graphics_queue_, 1, &submitInfo, inflight_fences_[current_frame_]) != VK_SUCCESS) {
+        throw std::runtime_error("Failed to submit draw command buffer!");
+    }
+
+    VkPresentInfoKHR presentInfo{};
+    presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+
+    presentInfo.waitSemaphoreCount = 1;
+    presentInfo.pWaitSemaphores = signalSemaphores;
+
+    VkSwapchainKHR swapChains[] = {swapchain_};
+    presentInfo.swapchainCount = 1;
+    presentInfo.pSwapchains = swapChains;
+
+    presentInfo.pImageIndices = &imageIndex;
+
+    result = vkQueuePresentKHR(graphics_queue_, &presentInfo);
+
+    if (framebuffer_resized_flag_)
+        result = VK_ERROR_OUT_OF_DATE_KHR;
+
+    switch (result) {
+    case VK_SUCCESS:
+        break;
+    case VK_ERROR_OUT_OF_DATE_KHR:
+    case VK_SUBOPTIMAL_KHR:
+        framebuffer_resized_flag_ = false;
+        this->recreate_swapchain();
+        break;
+    default:
+        throw std::runtime_error("failed to present swapchain image!");
+    }
+
+    this->current_frame_ = (current_frame_ + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
 /* end VulkanApp.cpp */
