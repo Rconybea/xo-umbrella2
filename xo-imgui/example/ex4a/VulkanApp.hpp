@@ -122,21 +122,15 @@ private:
 
     void recreate_swapchain() {
         // handle window minimization: wait until window has valid size
-        int width = 0;
-        int height = 0;
-        SDL_GetWindowSize(window_, &width, &height);
-        while (width == 0 || height == 0) {
-            SDL_GetWindowSize(window_, &width, &height);
-            SDL_WaitEvent(nullptr);
-        }
+        this->wait_not_minimized();
 
         // wait until device idle before cleaning up resources
         vkDeviceWaitIdle(device_);
 
         // cleanup old swapchain
-        this->cleanupFrameBuffers();
-        this->cleanupImageViews();
-        this->cleanupSwapchain();
+        this->cleanup_framebuffers();
+        this->cleanup_image_views();
+        this->cleanup_swapchain();
 
         // create new swapchain
         this->create_swapchain();
@@ -144,21 +138,31 @@ private:
         this->create_framebuffers();
     }
 
-    void cleanupFrameBuffers() {
+    void wait_not_minimized() {
+        int width = 0;
+        int height = 0;
+        SDL_GetWindowSize(window_, &width, &height);
+        while (width == 0 || height == 0) {
+            SDL_GetWindowSize(window_, &width, &height);
+            SDL_WaitEvent(nullptr);
+        }
+    }
+
+    void cleanup_framebuffers() {
             for (auto framebuffer : framebuffers_) {
                 vkDestroyFramebuffer(device_, framebuffer, nullptr);
             }
             framebuffers_.clear();
     }
 
-    void cleanupImageViews() {
+    void cleanup_image_views() {
             for (auto imageView : swapchain_image_views_) {
                 vkDestroyImageView(device_, imageView, nullptr);
             }
             swapchain_image_views_.clear();
     }
 
-    void cleanupSwapchain() {
+    void cleanup_swapchain() {
         vkDestroySwapchainKHR(device_, this->swapchain_, nullptr);
     }
 
@@ -175,9 +179,9 @@ private:
 
         vkDestroyCommandPool(device_, command_pool_, nullptr);
 
-        this->cleanupFrameBuffers();
-        this->cleanupImageViews();
-        this->cleanupSwapchain();
+        this->cleanup_framebuffers();
+        this->cleanup_image_views();
+        this->cleanup_swapchain();
 
         vkDestroyRenderPass(device_, render_pass_, nullptr);
         vkDestroyDescriptorPool(device_, descriptor_pool_, nullptr);
