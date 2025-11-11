@@ -103,4 +103,37 @@ MinimalImGuiVulkan::create_surface()
     }
 }
 
+void
+MinimalImGuiVulkan::pick_physical_device()
+{
+    uint32_t n_device = 0;
+    vkEnumeratePhysicalDevices(instance_, &n_device, nullptr);
+
+    if (n_device == 0) {
+        throw std::runtime_error("Failed to find GPUs with Vulkan support!");
+    }
+
+    std::vector<VkPhysicalDevice> devices(n_device);
+    vkEnumeratePhysicalDevices(instance_, &n_device, devices.data());
+
+    this->physical_device_ = devices[0]; // Just pick the first one for simplicity
+
+    // Find graphics queue family
+    uint32_t n_queue_family = 0;
+    vkGetPhysicalDeviceQueueFamilyProperties(physical_device_, &n_queue_family, nullptr);
+    std::vector<VkQueueFamilyProperties> queue_families(n_queue_family);
+    vkGetPhysicalDeviceQueueFamilyProperties(physical_device_, &n_queue_family, queue_families.data());
+
+    for (uint32_t i = 0; i < queue_families.size(); i++) {
+        if (queue_families[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+            VkBool32 present_support = false;
+            vkGetPhysicalDeviceSurfaceSupportKHR(physical_device_, i, surface_, &present_support);
+            if (present_support) {
+                this->graphics_queue_family_ = i;
+                break;
+            }
+        }
+    }
+}
+
 /* end VulkanApp.cpp */

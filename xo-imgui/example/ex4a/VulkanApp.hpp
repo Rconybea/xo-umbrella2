@@ -36,41 +36,18 @@ private:
      */
     void create_surface();
 
-    void pick_physical_device() {
-        uint32_t deviceCount = 0;
-        vkEnumeratePhysicalDevices(instance_, &deviceCount, nullptr);
+    /* choose physical device (1:1 with graphics card, presumably)
+     * populates @ref physical_device_, @ref graphics_queue_family_
+     */
+    void pick_physical_device();
 
-        if (deviceCount == 0) {
-            throw std::runtime_error("Failed to find GPUs with Vulkan support!");
-        }
-
-        std::vector<VkPhysicalDevice> devices(deviceCount);
-        vkEnumeratePhysicalDevices(instance_, &deviceCount, devices.data());
-
-        this->physical_device_ = devices[0]; // Just pick the first one for simplicity
-
-        // Find graphics queue family
-        uint32_t queueFamilyCount = 0;
-        vkGetPhysicalDeviceQueueFamilyProperties(physical_device_, &queueFamilyCount, nullptr);
-        std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
-        vkGetPhysicalDeviceQueueFamilyProperties(physical_device_, &queueFamilyCount, queueFamilies.data());
-
-        for (uint32_t i = 0; i < queueFamilies.size(); i++) {
-            if (queueFamilies[i].queueFlags & VK_QUEUE_GRAPHICS_BIT) {
-                VkBool32 presentSupport = false;
-                vkGetPhysicalDeviceSurfaceSupportKHR(physical_device_, i, surface_, &presentSupport);
-                if (presentSupport) {
-                    graphicsQueueFamily = i;
-                    break;
-                }
-            }
-        }
-    }
-
+    /*
+     * require: pick_physical_device() has run successfully
+     */
     void create_logical_device() {
         VkDeviceQueueCreateInfo queueCreateInfo{};
         queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-        queueCreateInfo.queueFamilyIndex = graphicsQueueFamily;
+        queueCreateInfo.queueFamilyIndex = graphics_queue_family_;
         queueCreateInfo.queueCount = 1;
         float queuePriority = 1.0f;
         queueCreateInfo.pQueuePriorities = &queuePriority;
@@ -91,7 +68,7 @@ private:
             throw std::runtime_error("Failed to create logical device!");
         }
 
-        vkGetDeviceQueue(device, graphicsQueueFamily, 0, &graphicsQueue);
+        vkGetDeviceQueue(device, graphics_queue_family_, 0, &graphicsQueue);
     }
 
     void create_swapchain() {
@@ -231,7 +208,7 @@ private:
         VkCommandPoolCreateInfo poolInfo{};
         poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
         poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-        poolInfo.queueFamilyIndex = graphicsQueueFamily;
+        poolInfo.queueFamilyIndex = graphics_queue_family_;
 
         if (vkCreateCommandPool(device, &poolInfo, nullptr, &commandPool) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create command pool!");
@@ -315,7 +292,7 @@ private:
         init_info.Instance        = instance_;
         init_info.PhysicalDevice  = physical_device_;
         init_info.Device          = device;
-        init_info.QueueFamily     = graphicsQueueFamily;
+        init_info.QueueFamily     = graphics_queue_family_;
         init_info.Queue           = graphicsQueue;
         init_info.PipelineCache   = VK_NULL_HANDLE;
         init_info.DescriptorPool  = descriptorPool;
@@ -593,9 +570,17 @@ private:
     SDL_Window* window_ = nullptr;
 
     VkInstance instance_;
+
+    /* abstraction for presentation area (?) */
     VkSurfaceKHR surface_;
+
+    /* physical device (graphics card) */
     VkPhysicalDevice physical_device_;
+    uint32_t graphics_queue_family_ = 0;
+
+    /* logical device (graphics card, abstract api (?)) */
     VkDevice device;
+
     VkQueue graphicsQueue;
     VkSwapchainKHR swapchain;
     VkFormat swapchainImageFormat;
@@ -613,7 +598,6 @@ private:
 
     uint32_t currentFrame = 0;
     const int MAX_FRAMES_IN_FLIGHT = 2;
-    uint32_t graphicsQueueFamily = 0;
     /* true when window resize behavior detected,
      * until swapchain in consistent state.
      */
