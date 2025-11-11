@@ -98,19 +98,10 @@ private:
      */
     VkCommandBuffer begin_single_time_commands();
 
-    void endSingleTimeCommands(VkCommandBuffer commandBuffer) {
-        vkEndCommandBuffer(commandBuffer);
-
-        VkSubmitInfo submitInfo{};
-        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-        submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = &commandBuffer;
-
-        vkQueueSubmit(graphics_queue_, 1, &submitInfo, VK_NULL_HANDLE);
-        vkQueueWaitIdle(graphics_queue_);
-
-        vkFreeCommandBuffers(device_, command_pool_, 1, &commandBuffer);
-    }
+    /* complete command buffer begun with begin_single_time_commands();
+     * also submit, wait for completion + cleanup
+     */
+    void end_single_time_commands(VkCommandBuffer commandBuffer);
 
     void main_loop() {
         SDL_Event event;
