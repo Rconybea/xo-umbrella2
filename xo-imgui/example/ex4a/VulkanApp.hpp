@@ -62,26 +62,10 @@ private:
      */
     void create_render_pass();
 
-    void create_framebuffers() {
-        framebuffers.resize(swapchain_image_views_.size());
-
-        for (size_t i = 0; i < swapchain_image_views_.size(); i++) {
-            VkImageView attachments[] = { swapchain_image_views_[i] };
-
-            VkFramebufferCreateInfo framebufferInfo{};
-            framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-            framebufferInfo.renderPass = render_pass_;
-            framebufferInfo.attachmentCount = 1;
-            framebufferInfo.pAttachments = attachments;
-            framebufferInfo.width = swapchain_extent_.width;
-            framebufferInfo.height = swapchain_extent_.height;
-            framebufferInfo.layers = 1;
-
-            if (vkCreateFramebuffer(device_, &framebufferInfo, nullptr, &framebuffers[i]) != VK_SUCCESS) {
-                throw std::runtime_error("Failed to create framebuffer!");
-            }
-        }
-    }
+    /*
+     * populate @ref framebuffers_
+     */
+    void create_framebuffers();
 
     void create_command_pool() {
         VkCommandPoolCreateInfo poolInfo{};
@@ -333,7 +317,7 @@ private:
         VkRenderPassBeginInfo renderPassInfo{};
         renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
         renderPassInfo.renderPass = render_pass_;
-        renderPassInfo.framebuffer = framebuffers[imageIndex];
+        renderPassInfo.framebuffer = framebuffers_[imageIndex];
         renderPassInfo.renderArea.offset = {0, 0};
         renderPassInfo.renderArea.extent = swapchain_extent_;
 
@@ -398,10 +382,10 @@ private:
     }
 
     void cleanupFrameBuffers() {
-            for (auto framebuffer : framebuffers) {
+            for (auto framebuffer : framebuffers_) {
                 vkDestroyFramebuffer(device_, framebuffer, nullptr);
             }
-            framebuffers.clear();
+            framebuffers_.clear();
     }
 
     void cleanupImageViews() {
@@ -471,7 +455,8 @@ private:
 
     VkRenderPass render_pass_;
 
-    std::vector<VkFramebuffer> framebuffers;
+    std::vector<VkFramebuffer> framebuffers_;
+
     VkCommandPool commandPool;
     std::vector<VkCommandBuffer> commandBuffers;
     std::vector<VkSemaphore> imageAvailableSemaphores;

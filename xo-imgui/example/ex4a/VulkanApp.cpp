@@ -286,4 +286,27 @@ MinimalImGuiVulkan::create_render_pass()
     }
 }
 
+void
+MinimalImGuiVulkan::create_framebuffers()
+{
+    framebuffers_.resize(swapchain_image_views_.size());
+
+    for (size_t i = 0; i < swapchain_image_views_.size(); i++) {
+        VkImageView attachments[] = { swapchain_image_views_[i] };
+
+        VkFramebufferCreateInfo framebuffer_info{};
+        framebuffer_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+        framebuffer_info.renderPass = render_pass_;
+        framebuffer_info.attachmentCount = 1;
+        framebuffer_info.pAttachments = attachments;
+        framebuffer_info.width = swapchain_extent_.width;
+        framebuffer_info.height = swapchain_extent_.height;
+        framebuffer_info.layers = 1;
+
+        if (vkCreateFramebuffer(device_, &framebuffer_info, nullptr, &(this->framebuffers_[i])) != VK_SUCCESS) {
+            throw std::runtime_error("Failed to create framebuffer!");
+        }
+    }
+}
+
 /* end VulkanApp.cpp */
