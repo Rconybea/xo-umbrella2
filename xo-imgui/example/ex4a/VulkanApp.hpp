@@ -85,32 +85,10 @@ private:
      */
     void create_sync_objects();
 
-    void create_descriptor_pool() {
-        VkDescriptorPoolSize pool_sizes[] = {
-            { VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
-            { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
-            { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
-            { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000 },
-            { VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
-            { VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
-            { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
-            { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
-            { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
-            { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
-            { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 }
-        };
-
-        VkDescriptorPoolCreateInfo pool_info = {};
-        pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-        pool_info.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
-        pool_info.maxSets = 1000 * IM_ARRAYSIZE(pool_sizes);
-        pool_info.poolSizeCount = (uint32_t)IM_ARRAYSIZE(pool_sizes);
-        pool_info.pPoolSizes = pool_sizes;
-
-        if (vkCreateDescriptorPool(device_, &pool_info, nullptr, &descriptorPool) != VK_SUCCESS) {
-            throw std::runtime_error("Failed to create descriptor pool!");
-        }
-    }
+    /*
+     * populate @ref descriptor_pool_
+     */
+    void create_descriptor_pool();
 
     void init_imgui() {
         // Setup Dear ImGui context
@@ -130,7 +108,7 @@ private:
         init_info.QueueFamily     = graphics_queue_family_;
         init_info.Queue           = graphics_queue_;
         init_info.PipelineCache   = VK_NULL_HANDLE;
-        init_info.DescriptorPool  = descriptorPool;
+        init_info.DescriptorPool  = descriptor_pool_;
         init_info.RenderPass      = render_pass_;
         init_info.Subpass         = 0;
         init_info.MinImageCount   = MAX_FRAMES_IN_FLIGHT;
@@ -389,7 +367,7 @@ private:
         this->cleanupSwapchain();
 
         vkDestroyRenderPass(device_, render_pass_, nullptr);
-        vkDestroyDescriptorPool(device_, descriptorPool, nullptr);
+        vkDestroyDescriptorPool(device_, descriptor_pool_, nullptr);
         vkDestroyDevice(device_, nullptr);
         vkDestroySurfaceKHR(instance_, this->surface_, nullptr);
         vkDestroyInstance(instance_, nullptr);
@@ -436,7 +414,8 @@ private:
     std::vector<VkSemaphore> image_available_semaphores_;
     std::vector<VkSemaphore> render_finished_semaphores_;
     std::vector<VkFence> inflight_fences_;
-    VkDescriptorPool descriptorPool;
+
+    VkDescriptorPool descriptor_pool_;
 
     uint32_t currentFrame = 0;
     const int MAX_FRAMES_IN_FLIGHT = 2;
