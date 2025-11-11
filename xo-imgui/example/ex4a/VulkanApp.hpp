@@ -120,81 +120,25 @@ private:
     /* record draw instructions into cmdbuf, framebuffers_[image_ix] */
     void record_command_buffer(VkCommandBuffer commandBuffer, uint32_t image_ix);
 
-    void recreate_swapchain() {
-        // handle window minimization: wait until window has valid size
-        this->wait_not_minimized();
+    /* Teardown + create swapchain (swapchain + framebuffers + image views).
+     * Need this after window size changes
+     */
+    void recreate_swapchain();
 
-        // wait until device idle before cleaning up resources
-        vkDeviceWaitIdle(device_);
+    /* wait until non-minimized window */
+    void wait_not_minimized();
 
-        // cleanup old swapchain
-        this->cleanup_framebuffers();
-        this->cleanup_image_views();
-        this->cleanup_swapchain();
+    /* orderly disposal of @ref framebuffers_ */
+    void cleanup_framebuffers();
 
-        // create new swapchain
-        this->create_swapchain();
-        this->create_image_views();
-        this->create_framebuffers();
-    }
+    /* orderly disposal of @ref swapchain_image_views_ */
+    void cleanup_image_views();
 
-    void wait_not_minimized() {
-        int width = 0;
-        int height = 0;
-        SDL_GetWindowSize(window_, &width, &height);
-        while (width == 0 || height == 0) {
-            SDL_GetWindowSize(window_, &width, &height);
-            SDL_WaitEvent(nullptr);
-        }
-    }
+    /* orderly disposal of @ref swapchain_ */
+    void cleanup_swapchain();
 
-    void cleanup_framebuffers() {
-            for (auto framebuffer : framebuffers_) {
-                vkDestroyFramebuffer(device_, framebuffer, nullptr);
-            }
-            framebuffers_.clear();
-    }
-
-    void cleanup_image_views() {
-            for (auto imageView : swapchain_image_views_) {
-                vkDestroyImageView(device_, imageView, nullptr);
-            }
-            swapchain_image_views_.clear();
-    }
-
-    void cleanup_swapchain() {
-        vkDestroySwapchainKHR(device_, this->swapchain_, nullptr);
-    }
-
-    void cleanup() {
-        ImGui_ImplVulkan_Shutdown();
-        ImGui_ImplSDL2_Shutdown();
-        ImGui::DestroyContext();
-
-        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-            vkDestroySemaphore(device_, render_finished_semaphores_[i], nullptr);
-            vkDestroySemaphore(device_, image_available_semaphores_[i], nullptr);
-            vkDestroyFence(device_, inflight_fences_[i], nullptr);
-        }
-
-        vkDestroyCommandPool(device_, command_pool_, nullptr);
-
-        this->cleanup_framebuffers();
-        this->cleanup_image_views();
-        this->cleanup_swapchain();
-
-        vkDestroyRenderPass(device_, render_pass_, nullptr);
-        vkDestroyDescriptorPool(device_, descriptor_pool_, nullptr);
-        vkDestroyDevice(device_, nullptr);
-        vkDestroySurfaceKHR(instance_, this->surface_, nullptr);
-        vkDestroyInstance(instance_, nullptr);
-        this->instance_ = nullptr;
-
-        SDL_DestroyWindow(window_);
-        this->window_ = nullptr;
-
-        SDL_Quit();
-    }
+    /* orderly shutdown */
+    void cleanup();
 
 private:
     SDL_Window* window_ = nullptr;
