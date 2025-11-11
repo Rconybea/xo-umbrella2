@@ -390,4 +390,43 @@ MinimalImGuiVulkan::create_descriptor_pool()
     }
 }
 
+void
+MinimalImGuiVulkan::init_imgui()
+{
+    // Setup Dear ImGui context
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+
+    // Setup Dear ImGui style
+    ImGui::StyleColorsDark();
+
+    // Setup Platform/Renderer backends
+    ImGui_ImplSDL2_InitForVulkan(window_);
+    ImGui_ImplVulkan_InitInfo init_info = {};
+    init_info.Instance        = instance_;
+    init_info.PhysicalDevice  = physical_device_;
+    init_info.Device          = device_;
+    init_info.QueueFamily     = graphics_queue_family_;
+    init_info.Queue           = graphics_queue_;
+    init_info.PipelineCache   = VK_NULL_HANDLE;
+    init_info.DescriptorPool  = descriptor_pool_;
+    init_info.RenderPass      = render_pass_;
+    init_info.Subpass         = 0;
+    init_info.MinImageCount   = MAX_FRAMES_IN_FLIGHT;
+    init_info.ImageCount      = static_cast<uint32_t>(swapchain_images_.size());
+    init_info.MSAASamples     = VK_SAMPLE_COUNT_1_BIT;
+    init_info.Allocator       = nullptr;
+    init_info.CheckVkResultFn = nullptr;
+    ImGui_ImplVulkan_Init(&init_info);
+    //ImGui_ImplVulkan_Init(&init_info, render_pass_);
+
+    // Upload Fonts
+    VkCommandBuffer command_buffer = beginSingleTimeCommands();
+    ImGui_ImplVulkan_CreateFontsTexture();
+    endSingleTimeCommands(command_buffer);
+
+    //ImGui_ImplVulkan_DestroyFontUploadObjects();
+}
+
 /* end VulkanApp.cpp */
