@@ -1,9 +1,6 @@
 /* imgui_ex4.cpp */
 
 #include "xo/imgui/VulkanApp.hpp"
-#ifdef TEMPORARILY_REMOVE
-#include "xo/imgui/ImRect.hpp"
-#endif
 #include "AppState.hpp"
 #include "DrawState.hpp"
 #include <backends/imgui_impl_sdl2.h>
@@ -87,9 +84,7 @@ namespace {
             {
                 scope log(XO_DEBUG(false));
 
-#ifdef TEMPORARILY_REMOVE
                 app_duty_cycle_top(p_app_state, p_draw_state);
-#endif
 
                 log && log(xtag("imgui_cx", (void*)ImGui::GetCurrentContext()));
 
@@ -98,7 +93,6 @@ namespace {
                 ImGui_ImplSDL2_NewFrame();
                 ImGui::NewFrame();
 
-#ifdef TEMPORARILY_REMOVE
                 log && log("after NewFrame", xtag("imgui_cx", (void*)ImGui::GetCurrentContext()));
 
                 ImGuiIO & io = ImGui::GetIO(); (void)io;
@@ -113,12 +107,10 @@ namespace {
                              | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoDecoration);
                 ImGui::End();
 # endif
-#endif
 
                 // 1. create a simple ImGui window
                 ImGui::Begin("Hello, Vulkan + SDL2!");
                 ImGui::Text("This is a minimal ImGui + Vulkan + SDL2 example!");
-#ifdef TEMPORARILY_REMOVE
                 ImGui::Text("appl average %.3f ms/frame (%.1f fps)",
                             1000.0f / io.Framerate, io.Framerate);
 
@@ -212,15 +204,12 @@ namespace {
                         p_app_state->copy_detail_tenured_dest_size_       = 0;
                     }
                 }
-#endif
 
                 ImGui::End();
 
-#ifdef TEMPORARILY_REMOVE
                 // 2. big demo window
                 if (p_draw_state->show_demo_window_)
                     ImGui::ShowDemoWindow(&p_draw_state->show_demo_window_);
-#endif
 
                 // Rendering
                 ImGui::Render();
@@ -296,13 +285,10 @@ int main() {
         = make_imgui_draw_frame(&app_state, &draw_state, &f, &counter);
     VulkanApp vk_app(draw_fn);
 
-    /* establishes imgui context */
     vk_app.setup(app_imgui_load_fonts);
 
-#ifdef NOT_YET
     app_state.gc_->add_gc_copy_callback
         (draw_state.make_gc_copy_animation(&app_state));
-#endif
 
     try {
         vk_app.main_loop();

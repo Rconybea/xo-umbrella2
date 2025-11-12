@@ -47,6 +47,12 @@ private:
      */
     void create_logical_device();
 
+    /* populates @ref swapchain_, @ref swapchain_images_,
+     * @ref swapchain_image_views_, @ref framebuffers_.
+     * Also $ref render_pass_ iff @p create_render_pass_flag
+     */
+    void create_xswapchain(bool create_render_pass_flag);
+
     /*
      * populates @ref swapchain_, @ref swapchain_images_
      */
@@ -123,10 +129,13 @@ private:
     /* Teardown + create swapchain (swapchain + framebuffers + image views).
      * Need this after window size changes
      */
-    void recreate_swapchain();
+    void recreate_xswapchain();
 
     /* wait until non-minimized window */
     void wait_not_minimized();
+
+    /* orderly disposal of swapchin + image_views + framebuffers */
+    void cleanup_xswapchain();
 
     /* orderly disposal of @ref framebuffers_ */
     void cleanup_framebuffers();

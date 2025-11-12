@@ -41,10 +41,7 @@ MinimalImGuiVulkan::init_vulkan()
     this->create_surface();
     this->pick_physical_device();
     this->create_logical_device();
-    this->create_swapchain();
-    this->create_image_views();
-    this->create_render_pass();   // must come before createFrameBuffers
-    this->create_framebuffers();
+    this->create_xswapchain(true /*create_render_pass_flag*/);
     this->create_command_pool();
     this->create_command_buffers();
     this->create_sync_objects();
@@ -503,7 +500,7 @@ MinimalImGuiVulkan::draw_frame()
     case VK_SUBOPTIMAL_KHR:
         break;
     case VK_ERROR_OUT_OF_DATE_KHR:
-        recreate_swapchain();
+        this->recreate_xswapchain();
         // deliberate earlyexit
         return;
     default:
@@ -559,7 +556,7 @@ MinimalImGuiVulkan::draw_frame()
     case VK_ERROR_OUT_OF_DATE_KHR:
     case VK_SUBOPTIMAL_KHR:
         framebuffer_resized_flag_ = false;
-        this->recreate_swapchain();
+        this->recreate_xswapchain();
         break;
     default:
         throw std::runtime_error("failed to present swapchain image!");
@@ -624,7 +621,25 @@ MinimalImGuiVulkan::record_command_buffer(VkCommandBuffer cmdbuf, uint32_t image
 }
 
 void
-MinimalImGuiVulkan::recreate_swapchain()
+MinimalImGuiVulkan::create_xswapchain(bool create_render_pass_flag)
+{
+    this->create_swapchain();
+    this->create_image_views();
+    if(create_render_pass_flag)
+        this->create_render_pass();
+    this->create_framebuffers();
+}
+
+void
+MinimalImGuiVulkan::cleanup_xswapchain()
+{
+    this->cleanup_framebuffers();
+    this->cleanup_image_views();
+    this->cleanup_swapchain();
+}
+
+void
+MinimalImGuiVulkan::recreate_xswapchain()
 {
     // handle window minimization: wait until window has valid size
     this->wait_not_minimized();
@@ -632,15 +647,11 @@ MinimalImGuiVulkan::recreate_swapchain()
     // wait until device idle before cleaning up resources
     vkDeviceWaitIdle(device_);
 
-    // cleanup old swapchain
-    this->cleanup_framebuffers();
-    this->cleanup_image_views();
-    this->cleanup_swapchain();
+    // cleanup old xswapchain
+    this->cleanup_xswapchain();
 
     // create new swapchain
-    this->create_swapchain();
-    this->create_image_views();
-    this->create_framebuffers();
+    this->create_xswapchain(false);
 }
 
 void
@@ -694,9 +705,7 @@ MinimalImGuiVulkan::cleanup()
 
     vkDestroyCommandPool(device_, command_pool_, nullptr);
 
-    this->cleanup_framebuffers();
-    this->cleanup_image_views();
-    this->cleanup_swapchain();
+    this->cleanup_xswapchain();
 
     vkDestroyRenderPass(device_, render_pass_, nullptr);
     vkDestroyDescriptorPool(device_, descriptor_pool_, nullptr);
