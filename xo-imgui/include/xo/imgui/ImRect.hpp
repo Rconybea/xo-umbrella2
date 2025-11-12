@@ -51,6 +51,8 @@ struct ImRect {
     ImVec2 bottom_left() const { return ImVec2(x_lo(), y_hi()); }
     ImVec2 top_right() const { return ImVec2(x_hi(), y_lo()); }
 
+    bool is_nonempty() const { return (width() > 0.0) && (height() > 0.0); }
+
     ImRect with_x_span(float x0, float x1) const {
         return ImRect(ImVec2(x0, top_left_.y), ImVec2(x1, bottom_right_.y));
     }

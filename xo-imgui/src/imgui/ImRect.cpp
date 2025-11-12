@@ -18,7 +18,9 @@ ImRect::draw_filled_rect_with_label(const char * text,
         ImGui::SetCursorScreenPos(rect.top_left());
         ImGui::InvisibleButton("ttbutton", ImVec2(rect.width(), rect.height()));
         if (ImGui::IsItemHovered()) {
-            ImGui::SetTooltip("%s", tooltip);
+            ImGui::BeginTooltip();
+            ImGui::Text("%s", tooltip);
+            ImGui::EndTooltip();
         }
     }
 

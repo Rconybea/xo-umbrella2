@@ -75,12 +75,11 @@ namespace {
     VulkanApp::ImguiDrawFn
     make_imgui_draw_frame(AppState * p_app_state,
                           DrawState * p_draw_state,
-                          float * p_f, int * p_counter)
+                          int * p_counter)
     {
-        *p_f = 0.0f;
         *p_counter = 0;
 
-        return [p_app_state, p_draw_state, p_f, p_counter](VulkanApp * vulkan_app, ImGuiContext * imgui_cx)
+        return [p_app_state, p_draw_state, p_counter](VulkanApp * vulkan_app, ImGuiContext * imgui_cx)
             {
                 scope log(XO_DEBUG(false));
 
@@ -123,7 +122,7 @@ namespace {
 
                 // 1. create a simple ImGui window
                 ImGui::Begin("Hello, Vulkan + SDL2!");
-                ImGui::Text("This is a minimal ImGui + Vulkan + SDL2 example!");
+                ImGui::Text("Incremental GC demo, using ImGui + Vulkan + SDL2");
                 ImGui::Text("appl average %.3f ms/frame (%.1f fps)",
                             1000.0f / io.Framerate, io.Framerate);
 
@@ -133,7 +132,9 @@ namespace {
                 ImGui::SliderInt("copy animation budget", &p_draw_state->animate_copy_budget_ms_, 10, 10000);
                 ImGui::NewLine();
 
-                /* N\u2080 = N0, N\u2081 = N1 */
+                /* N\u2080 -> N0, but with the 0 subscripted,
+                 * N\u2081 -> N1, but with the 1 subscripted
+                 */
                 ImGui::Text("alloc [%lu] avail [%lu] ",
                             p_draw_state->gcstate_.gc_allocated_,
                             p_draw_state->gcstate_.gc_available_);
@@ -292,10 +293,9 @@ int main() {
     DrawState draw_state;
     draw_state.gcstate_ = app_state.snapshot_gc_state();
 
-    float f = 0.0;
     int counter = 0;
     VulkanApp::ImguiDrawFn draw_fn
-        = make_imgui_draw_frame(&app_state, &draw_state, &f, &counter);
+        = make_imgui_draw_frame(&app_state, &draw_state, &counter);
     VulkanApp vk_app(draw_fn);
 
     vk_app.setup(app_imgui_load_fonts);

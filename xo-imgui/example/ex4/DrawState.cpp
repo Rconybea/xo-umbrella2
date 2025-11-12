@@ -244,82 +244,92 @@ DrawState::draw_tenured(const GcStateDescription & gcstate,
         *p_layout = layout;
 }
 
-auto
-DrawState::write_gc_history_tooltip(gc_history_headline headline,
-                                    const GcStatisticsHistoryItem & stats)
-    -> TooltipText
+#ifdef nope
+                ImRect::draw_filled_rect
+                    (tt.c_str(),
+                     ImRect::from_xy_span(x_span, ImVec2(ypsz_lo, y_zero)),
+                     persist_color,
+                     draw_list);
+#endif
+
+void
+DrawState::write_gc_history_bar(const char * idname,
+                                gc_history_headline headline,
+                                const GcStatisticsHistoryItem & stats,
+                                const ImRect & bar_rect,
+                                ImU32 fill_color,
+                                ImDrawList * draw_list)
 {
-    xo::flatstring<512> retval;
+    draw_list->AddRectFilled(bar_rect.top_left(), bar_rect.bottom_right(), fill_color);
 
-    xo::flatstring<256> headline_str;
-    switch (headline) {
-    case gc_history_headline::survive:
-        snprintf(headline_str.data(), headline_str.capacity(),
-                 "survive: %lu: bytes surviving 1st GC after allocation",
-                 stats.survive_z_);
-        break;
-    case gc_history_headline::promote:
-        snprintf(headline_str.data(), headline_str.capacity(),
-                 "promote: %lu: bytes surviving 2nd GC; if nursery promote to tenured",
-                 stats.promote_z_);
-        break;
-    case gc_history_headline::persist:
-        snprintf(headline_str.data(), headline_str.capacity(),
-                 "persist: %lu: bytes surviving 3+ GCs. Only non-zero for full collections",
-                 stats.persist_z_);
-        break;
-    case gc_history_headline::garbage0:
-        snprintf(headline_str.data(), headline_str.capacity(),
-                 "garbage\u2080: %lu: bytes collected on 1st GC after allocation",
-                 stats.garbage0_z_);
-        break;
-    case gc_history_headline::garbage1:
-        snprintf(headline_str.data(), headline_str.capacity(),
-                 "garbage\u2081: %lu: bytes collected on 2nd GC after allocation",
-                 stats.garbage1_z_);
-        break;
-    case gc_history_headline::garbageN:
-        snprintf(headline_str.data(), headline_str.capacity(),
-                 "garbage\u2099: %lu: bytes collected on 3rd or later GC after allocation",
-                 stats.garbageN_z_);
-        break;
-    case gc_history_headline::N:
-        assert(false);
-        break;
+    if (bar_rect.is_nonempty()) {
+        ImGui::SetCursorScreenPos(bar_rect.top_left());
+        ImGui::InvisibleButton(idname, ImVec2(bar_rect.width(), bar_rect.height()));
+        if (ImGui::IsItemHovered()) {
+            ImGui::BeginTooltip();
+
+            /* choose text here */
+            switch(headline) {
+            case gc_history_headline::survive:
+                ImGui::Text("survive: %lu: bytes surviving 1st GC after allocation",
+                            stats.survive_z_);
+                break;
+            case gc_history_headline::promote:
+                ImGui::Text("promote: %lu: bytes surviving 2nd GC; if nursery promote to tenured",
+                            stats.promote_z_);
+                break;
+            case gc_history_headline::persist:
+                ImGui::Text("persist: %lu: bytes surviving 3+ GCs. Only non-zero for full collections",
+                            stats.persist_z_);
+                break;
+            case gc_history_headline::garbage0:
+                ImGui::Text("garbage\u2080: %lu: bytes collected on 1st GC after allocation",
+                            stats.garbage0_z_);
+                break;
+            case gc_history_headline::garbage1:
+                ImGui::Text("garbage\u2081: %lu: bytes collected on 2nd GC after allocation",
+                            stats.garbage1_z_);
+                break;
+            case gc_history_headline::garbageN:
+                ImGui::Text("garbage\u2099: %lu: bytes collected on 3rd or later GC after allocation",
+                            stats.garbageN_z_);
+                break;
+            case gc_history_headline::N:
+                assert(false);
+                break;
+            }
+
+            ImGui::Text("\n"
+                        " gcseq: %lu\n"
+                        " type: %s\n"
+                        " alloc: %lu\n"
+                        " survive: %lu\n"
+                        " promote: %lu\n"
+                        " persist: %lu\n"
+                        " garbage\u2080: %lu\n" /*garbage0*/
+                        " garbage\u2081: %lu\n" /*garbage1*/
+                        " garbage\u2099: %lu\n" /*garbageN*/
+                        " effort: %lu dt: %.1lfus\n"
+                        " copy efficiency: %.1lf%% collection rate: %.0lf bytes/sec",
+                        stats.gc_seq_,
+                        (stats.upto_ == generation::nursery) ? "incremental" : "FULL",
+                        stats.new_alloc_z_,
+                        stats.survive_z_,
+                        stats.promote_z_,
+                        stats.persist_z_,
+                        stats.garbage0_z_,
+                        stats.garbage1_z_,
+                        stats.garbageN_z_,
+                        stats.effort_z_,
+                        1e-3 * stats.dt_.scale(),
+                        100.0 * stats.efficiency(),
+                        stats.collection_rate()
+                );
+
+            ImGui::EndTooltip();
+        }
     }
-
-    snprintf(retval.data(), retval.capacity(),
-             "%.*s\n"
-             "\n"
-             " gcseq: %lu\n"
-             " type: %s\n"
-             " alloc: %lu\n"
-             " survive: %lu\n"
-             " promote: %lu\n"
-             " persist: %lu\n"
-             " garbage\u2080: %lu\n" /*garbage0*/
-             " garbage\u2081: %lu\n" /*garbage1*/
-             " garbage\u2099: %lu\n" /*garbageN*/
-             " effort: %lu dt: %.1lfus\n"
-             " copy efficiency: %.1lf%% collection rate: %.0lf bytes/sec",
-             static_cast<int>(headline_str.capacity()), headline_str.c_str(),
-             stats.gc_seq_,
-             (stats.upto_ == generation::nursery) ? "incremental" : "FULL",
-             stats.new_alloc_z_,
-             stats.survive_z_,
-             stats.promote_z_,
-             stats.persist_z_,
-             stats.garbage0_z_,
-             stats.garbage1_z_,
-             stats.garbageN_z_,
-             stats.effort_z_,
-             1e-3 * stats.dt_.scale(),
-             100.0 * stats.efficiency(),
-             stats.collection_rate()
-        );
-
-    return retval.ensure_final_null();
-} /*write_gc_history_tooltip*/
+} /*write_gc_history_bar*/
 
 /** stacked bar chart
  *
@@ -384,6 +394,8 @@ DrawState::draw_gc_history(const GcStateDescription & gcstate,
     std::size_t i = 0;
     for (const GcStatisticsHistoryItem & stats : gc_history)
     {
+        ImGui::PushID(i);
+
         if ((gen == stats.upto_) || (gen == generation::tenured))
         {
             /*
@@ -424,39 +436,36 @@ DrawState::draw_gc_history(const GcStateDescription & gcstate,
             float ypsz_lo = (y_zero
                              - (display_h * stats.persist_z_ / y_scale));
             {
-                xo::flatstring<512> tt = write_gc_history_tooltip(gc_history_headline::persist, stats);
-
-                ImRect::draw_filled_rect
-                    (tt.c_str(),
-                     ImRect::from_xy_span(x_span, ImVec2(ypsz_lo, y_zero)),
-                     persist_color,
-                     draw_list);
+                write_gc_history_bar("##persist",
+                                     gc_history_headline::persist,
+                                     stats,
+                                     ImRect::from_xy_span(x_span, ImVec2(ypsz_lo, y_zero)),
+                                     persist_color,
+                                     draw_list);
             }
             /* y-coordinates of promote bar (survived 2nd GC) */
             float yp_hi = ypsz_lo;
             float yp_lo = (yp_hi
                            - (display_h * stats.promote_z_ / y_scale));
             {
-                xo::flatstring<512> tt = write_gc_history_tooltip(gc_history_headline::promote, stats);
-
-                ImRect::draw_filled_rect
-                    (tt.c_str(),
-                     ImRect::from_xy_span(x_span, ImVec2(yp_lo, yp_hi)),
-                     promote_color,
-                     draw_list);
+                write_gc_history_bar("##promote",
+                                     gc_history_headline::promote,
+                                     stats,
+                                     ImRect::from_xy_span(x_span, ImVec2(yp_lo, yp_hi)),
+                                     promote_color,
+                                     draw_list);
             }
 
             /* y-coordinates of survivor bar (survived 1st GC) */
             float ys_hi = yp_lo;
             float ys_lo = (ys_hi - (display_h * stats.survive_z_ / y_scale));
             {
-                xo::flatstring<512> tt = write_gc_history_tooltip(gc_history_headline::survive, stats);
-
-                ImRect::draw_filled_rect
-                    (tt.c_str(),
-                     ImRect::from_xy_span(x_span, ImVec2(ys_lo, ys_hi)),
-                     survive_color,
-                     draw_list);
+                write_gc_history_bar("##survivor",
+                                     gc_history_headline::survive,
+                                     stats,
+                                     ImRect::from_xy_span(x_span, ImVec2(ys_lo, ys_hi)),
+                                     survive_color,
+                                     draw_list);
             }
 
             // -----------------------------------------------------------
@@ -466,13 +475,12 @@ DrawState::draw_gc_history(const GcStateDescription & gcstate,
             float ygN_hi = (y_zero
                             + (display_h * stats.garbageN_z_ / y_scale));
             {
-                xo::flatstring<512> tt = write_gc_history_tooltip(gc_history_headline::garbageN, stats);
-
-                ImRect::draw_filled_rect
-                    (tt.c_str(),
-                     ImRect::from_xy_span(x_span, ImVec2(ygN_lo, ygN_hi)),
-                     garbageN_color,
-                     draw_list);
+                write_gc_history_bar("##garbageN",
+                                     gc_history_headline::garbageN,
+                                     stats,
+                                     ImRect::from_xy_span(x_span, ImVec2(ygN_lo, ygN_hi)),
+                                     garbageN_color,
+                                     draw_list);
             }
 
             /* y-coordinates of garbage1 bar (killed on 2nd GC) */
@@ -480,13 +488,12 @@ DrawState::draw_gc_history(const GcStateDescription & gcstate,
             float yg1_hi = (yg1_lo
                             + (display_h * stats.garbage1_z_ / y_scale));
             {
-                TooltipText tt = write_gc_history_tooltip(gc_history_headline::garbage1, stats);
-
-                ImRect::draw_filled_rect
-                    (tt.c_str(),
-                     ImRect(ImVec2(x_lo, yg1_lo), ImVec2(x_hi, yg1_hi)),
-                     garbage1_color,
-                     draw_list);
+                write_gc_history_bar("##garbage1",
+                                     gc_history_headline::garbage1,
+                                     stats,
+                                     ImRect(ImVec2(x_lo, yg1_lo), ImVec2(x_hi, yg1_hi)),
+                                     garbage1_color,
+                                     draw_list);
             }
 
             /* y-coordinates of garbage0 bar (killed on 1st GC) */
@@ -494,13 +501,12 @@ DrawState::draw_gc_history(const GcStateDescription & gcstate,
             float yg0_hi = (yg0_lo
                             + (display_h * stats.garbage0_z_ / y_scale));
             {
-                TooltipText tt = write_gc_history_tooltip(gc_history_headline::garbage0, stats);
-
-                ImRect::draw_filled_rect
-                    (tt.c_str(),
-                     ImRect(ImVec2(x_lo, yg0_lo), ImVec2(x_hi, yg0_hi)),
-                     garbage0_color,
-                     draw_list);
+                write_gc_history_bar("##garbage0",
+                                     gc_history_headline::garbage0,
+                                     stats,
+                                     ImRect(ImVec2(x_lo, yg0_lo), ImVec2(x_hi, yg0_hi)),
+                                     garbage0_color,
+                                     draw_list);
             }
         } else {
             /* draw nothing */
@@ -508,6 +514,8 @@ DrawState::draw_gc_history(const GcStateDescription & gcstate,
         }
 
         ++i;
+
+        ImGui::PopID();
     }
 
     log && log(xtag("i", i));
