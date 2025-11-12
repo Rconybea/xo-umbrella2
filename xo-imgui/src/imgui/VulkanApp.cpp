@@ -216,7 +216,7 @@ VulkanApp::create_swapchain()
     create_info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
     create_info.preTransform = capabilities.currentTransform;
     create_info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-    create_info.presentMode = VK_PRESENT_MODE_FIFO_KHR;
+    create_info.presentMode = (vsync_enabled_flag_ ? VK_PRESENT_MODE_FIFO_KHR : VK_PRESENT_MODE_IMMEDIATE_KHR);
     create_info.clipped = VK_TRUE;
 
     if (vkCreateSwapchainKHR(device_, &create_info, nullptr, &(this->swapchain_)) != VK_SUCCESS) {
@@ -564,7 +564,7 @@ VulkanApp::draw_frame()
 
     result = vkQueuePresentKHR(graphics_queue_, &presentInfo);
 
-    if (framebuffer_resized_flag_)
+    if (xswapchain_recreate_flag_)
         result = VK_ERROR_OUT_OF_DATE_KHR;
 
     switch (result) {
@@ -572,7 +572,6 @@ VulkanApp::draw_frame()
         break;
     case VK_ERROR_OUT_OF_DATE_KHR:
     case VK_SUBOPTIMAL_KHR:
-        framebuffer_resized_flag_ = false;
         this->recreate_xswapchain();
         break;
     default:
@@ -580,6 +579,12 @@ VulkanApp::draw_frame()
     }
 
     this->current_frame_ = (current_frame_ + 1) % c_max_frames_in_flight;
+}
+
+void
+VulkanApp::update_vsync_enabled(bool flag) {
+    this->vsync_enabled_flag_ = flag;
+    this->xswapchain_recreate_flag_ = true;
 }
 
 void
@@ -633,7 +638,7 @@ VulkanApp::record_command_buffer(VkCommandBuffer cmdbuf, uint32_t image_ix)
     }
 #endif
 
-    ImDrawData * draw_data = imgui_draw_frame_(imgui_cx_); (void)draw_data;
+    ImDrawData * draw_data = imgui_draw_frame_(this, imgui_cx_);
 
     ImGui_ImplVulkan_RenderDrawData(draw_data, cmdbuf);
 
@@ -671,11 +676,14 @@ VulkanApp::recreate_xswapchain()
     // wait until device idle before cleaning up resources
     vkDeviceWaitIdle(device_);
 
+    // remember consistent swapchain state restored
+    this->xswapchain_recreate_flag_ = false;
+
     // cleanup old xswapchain
     this->cleanup_xswapchain();
 
     // create new swapchain
-    this->create_xswapchain(false);
+    this->create_xswapchain(false /*create_render_pass_flag*/);
 }
 
 void

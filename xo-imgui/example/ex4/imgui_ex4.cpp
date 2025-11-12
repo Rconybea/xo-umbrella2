@@ -80,7 +80,7 @@ namespace {
         *p_f = 0.0f;
         *p_counter = 0;
 
-        return [p_app_state, p_draw_state, p_f, p_counter](ImGuiContext * imgui_cx)
+        return [p_app_state, p_draw_state, p_f, p_counter](VulkanApp * vulkan_app, ImGuiContext * imgui_cx)
             {
                 scope log(XO_DEBUG(false));
 
@@ -107,6 +107,19 @@ namespace {
                              | ImGuiWindowFlags_NoNavFocus | ImGuiWindowFlags_NoDecoration);
                 ImGui::End();
 # endif
+
+                // 0. main menubar
+                if (ImGui::BeginMainMenuBar()) {
+                    if (ImGui::BeginMenu("View")) {
+                        bool x = vulkan_app->vsync_enabled_flag();
+
+                        if (ImGui::MenuItem("vsync", nullptr, &x)) {
+                            vulkan_app->update_vsync_enabled(x);
+                        }
+                        ImGui::EndMenu();
+                    }
+                    ImGui::EndMainMenuBar();
+                }
 
                 // 1. create a simple ImGui window
                 ImGui::Begin("Hello, Vulkan + SDL2!");

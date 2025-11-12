@@ -85,6 +85,8 @@ struct DrawState {
 public:
     /** when true display imgui demo window **/
     bool show_demo_window_ = false;
+    /** whether vsync feature enabled (throttle to ~60 fps) **/
+    bool vsync_enabled_ = true;
 
     draw_state_type state_type_ = draw_state_type::alloc;
 

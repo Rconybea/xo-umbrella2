@@ -13,7 +13,7 @@
 
 class VulkanApp {
 public:
-    using ImguiDrawFn = std::function<ImDrawData * (ImGuiContext *)>;
+    using ImguiDrawFn = std::function<ImDrawData * (VulkanApp *, ImGuiContext *)>;
 
 public:
     /* create single-window vulkan application;
@@ -21,9 +21,17 @@ public:
      */
     VulkanApp(ImguiDrawFn fn);
 
+    bool vsync_enabled_flag() const { return vsync_enabled_flag_; }
+
+    /* update vsync enabled (will recreate xswapchain at next opportunity)
+     */
+    void update_vsync_enabled(bool flag);
+
     /* run application; borrows calling thread for event loop,
      * until application exit.
      * Invoke load_fonts once imgui context established
+     * @ref vsync_enabled_flag_. true for VK_PRESENT_MODE_FIFO_KHR;
+     * false for VK_PRESENT_MODE_IMMEDIATE_KHR
      */
     void run(std::function<void (ImGuiContext *)> load_fonts);
 
@@ -47,7 +55,10 @@ private:
      */
     void init_sdl_window();
 
-    /* setup vulkan state. swapchain, command buffers etc */
+    /* setup vulkan state. swapchain, command buffers etc
+     * @ref vsync_enabled_flag_. true for VK_PRESENT_MODE_FIFO_KHR;
+     * false for VK_PRESENT_MODE_IMMEDIATE_KHR
+     */
     void init_vulkan();
 
     /* create vulkan instance.
@@ -74,6 +85,8 @@ private:
     /* populates @ref swapchain_, @ref swapchain_images_,
      * @ref swapchain_image_views_, @ref framebuffers_.
      * Also $ref render_pass_ iff @p create_render_pass_flag
+     * @ref vsync_enabled_flag_. true for VK_PRESENT_MODE_FIFO_KHR;
+     * false for VK_PRESENT_MODE_IMMEDIATE_KHR
      */
     void create_xswapchain(bool create_render_pass_flag);
 
@@ -175,6 +188,10 @@ private:
 
     /* abstraction for presentation area (?) */
     VkSurfaceKHR surface_;
+    /* true -> VK_PRESENT_MODE_FIFO_KHR
+     * false -> VK_PRESENT_MODE_IMMEDIATE_KHR
+     */
+    bool vsync_enabled_flag_ = true;
 
     /* physical device (graphics card) */
     VkPhysicalDevice physical_device_;
@@ -210,10 +227,14 @@ private:
     const size_t c_max_frames_in_flight = 2;
     /* true iff @ref setup has been called */
     bool setup_flag_ = false;
-    /* true when window resize behavior detected,
-     * until swapchain in consistent state.
+    /* true if xswapchain is out-of-date.
+     * reset when xswapchain recreated (and therefore in consistent state).
+     *
+     * Triggered by:
+     * - window resize
+     * - vsync toggled
      */
-    bool framebuffer_resized_flag_ = false;
+    bool xswapchain_recreate_flag_ = false;
     bool quit_flag_ = false;
 
     /** draw imgui **/

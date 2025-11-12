@@ -741,7 +741,7 @@ DrawState::draw_gc_state(const AppState & app_state,
     /* TODO: does this reset coord space? */
     ImRect alloc_rect;
     {
-        ImGui::BeginChild("top pane", ImVec2(0, 105), ImGuiChildFlags_Border | ImGuiChildFlags_ResizeY);
+        ImGui::BeginChild("top pane", ImVec2(0, 200), ImGuiChildFlags_Border | ImGuiChildFlags_ResizeY);
 
         alloc_rect = ImRect(canvas_rect.top_left() + ImGui::GetWindowContentRegionMin(),
                             canvas_rect.top_left() + ImGui::GetWindowContentRegionMax());
@@ -817,7 +817,7 @@ DrawState::draw_gc_state(const AppState & app_state,
          ImGui::EndChild();
     }
 
-    ImGui::Text("placeholder text");
+    //ImGui::Text("placeholder text"); // appears below history_rect
 
     /* BeginChild() again ? */
 
