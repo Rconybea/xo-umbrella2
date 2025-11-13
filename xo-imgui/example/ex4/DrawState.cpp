@@ -3,6 +3,7 @@
 #include "DrawState.hpp"
 #include "AnimateGcCopyCb.hpp"
 #include "GcStatistics.hpp"
+#include "xo/imgui/ImScale.hpp"
 #include "xo/indentlog/scope.hpp"
 
 using xo::gc::GcStatisticsHistory;
@@ -415,18 +416,27 @@ DrawState::draw_gc_history(const GcStateDescription & gcstate,
 {
     scope log(XO_DEBUG(debug_flag));
 
+    if (gc_history.empty())
+        return;
+
     float lm = 10;
     float tm = 25;
+    float rm = 0;
+    float bm = 0;
+
+    ImRect chart_rect = bounding_rect.within_margin(ImRect(lm, tm, rm, bm));
 
     /* we're going to make a bar chart */
 
     /* x_scale,y_scale in GC units (i.e. bytes) */
     size_t x_scale = gc_history.capacity();
-    size_t yplus_scale = 0;
-    size_t yminus_scale = 0;
+    /* in bytes. +ve values for bytes survivingK */
+    size_t yplus_range = 0;
+    /* in bytes. -ve values for bytes collected */
+    size_t yminus_range = 0;
 
-    float display_w = bounding_rect.width()  - lm;
-    float display_h = bounding_rect.height() - tm;
+    float display_w = chart_rect.width();
+    float display_h = chart_rect.height();
 
     /* 1st loop: figure out max y scale */
     for (const GcStatisticsHistoryItem & stats : gc_history) {
@@ -440,20 +450,34 @@ DrawState::draw_gc_history(const GcStateDescription & gcstate,
             size_t g1z = stats.garbage1_z_;
             size_t gNz = stats.garbageN_z_;
 
-            if (yplus_scale < sz + pz + psz)
-                yplus_scale = sz + pz + psz;
+            if (yplus_range < sz + pz + psz)
+                yplus_range = sz + pz + psz;
 
-            if (yminus_scale < g0z + g1z + gNz)
-                yminus_scale = g0z + g1z + gNz;
+            if (yminus_range < g0z + g1z + gNz)
+                yminus_range = g0z + g1z + gNz;
         } else {
             ;
         }
     }
 
-    /* y-coord of x-axis */
-    float y_zero = bounding_rect.y_lo() + tm + (display_h * yplus_scale) / (yplus_scale + yminus_scale);
+    float y_range = yplus_range + yminus_range;
 
-    float y_scale = yplus_scale + yminus_scale;
+    /* native->screen conversion in y direction */
+    ImScale y_scale{ImVec2(0.0 - yminus_range, chart_rect.y_hi()), ImVec2(yplus_range, chart_rect.y_lo())};
+
+    /* screen y-coord of x-axis */
+    float y_zero = y_scale(0);
+
+    if ((y_zero < chart_rect.y_lo()) || (y_zero > chart_rect.y_hi())) {
+        throw std::runtime_error(tostr("expected y_zero within chart range [y_lo,y_hi]",
+                                       xtag("y_lo", chart_rect.y_lo()),
+                                       xtag("y_zero", y_zero),
+                                       xtag("y_hi", chart_rect.y_hi())));
+
+    }
+
+    assert(y_zero >= chart_rect.y_lo());
+    assert(y_zero <= chart_rect.y_hi());
 
     /* width of 1 bar in screen coords */
     constexpr float c_min_bar_w = 5.0;
@@ -468,25 +492,25 @@ DrawState::draw_gc_history(const GcStateDescription & gcstate,
         if ((gen == stats.upto_) || (gen == generation::tenured))
         {
             /*
-             *     ys_lo   +--+
-             *             |  |   survive_z  (survived 1st GC)
-             *             |  |
-             *     yp_lo   +--+
-             *             |  |   promote_z  (sruvived 2nd GC)
-             *             |  |
-             *   ypsz_lo   +--+
-             *             |  |   persist_z  (survived 3+ GCs)
-             *             |  |
-             *    y_zero   +--+
-             *             |  |   gN  (killed on 3+ GC)
-             *             |  |
-             *    ygN_hi   +--+
-             *             |  |   g1  (killed on 2nd GC)
-             *             |  |
-             *    yg1_hi   +--+
-             *             |  |   g0  (killed on 1st GC)
-             *             |  |
-             *    yg0_hi   +--+
+             *     ys_span.y   +--+
+             *                 |  |   survive_z  (survived 1st GC)
+             *                 |  |
+             *     yp_span.y   +--+
+             *                 |  |   promote_z  (sruvived 2nd GC)
+             *                 |  |
+             *   ypsz_span.y   +--+
+             *                 |  |   persist_z  (survived 3+ GCs)
+             *                 |  |
+             *        y_zero   +--+ ---------------------------------------- x-axis
+             *                 |  |   gN  (killed on 3+ GC)
+             *                 |  |
+             *    ygN_span.x   +--+
+             *                 |  |   g1  (killed on 2nd GC)
+             *                 |  |
+             *    yg1_span.x   +--+
+             *                 |  |   g0  (killed on 1st GC)
+             *                 |  |
+             *    yg0_span.x   +--+
              */
 
             /* x-coordinates of bar */
@@ -494,74 +518,85 @@ DrawState::draw_gc_history(const GcStateDescription & gcstate,
             float x_hi = x_lo + bar_w - 1;
             ImVec2 x_span{x_lo, x_hi};
 
-            /* y-coordinates of persist bar (survived 3+ GCs) */
-            float ypsz_lo = (y_zero
-                             - (display_h * stats.persist_z_ / y_scale));
+            /* screen y-coordinates of persist bar (survived 3+ GCs) */
+            ImVec2 ypsz_span = y_scale.map_span(0, stats.persist_z_);
+            //float ypsz_lo = (y_zero - (display_h * stats.persist_z_ / y_range));
             {
                 write_gc_history_bar("##persist",
                                      gc_history_headline::persist,
                                      stats,
-                                     ImRect::from_xy_span(x_span, ImVec2(ypsz_lo, y_zero)),
+                                     ImRect::from_xy_span(x_span, ypsz_span),
                                      draw_list);
             }
+            /* screen y-coordinates of promote bar (survived 2nd GC) */
+            ImVec2 yp_span = y_scale.map_span(stats.persist_z_,
+                                              stats.persist_z_ + stats.promote_z_);
             /* y-coordinates of promote bar (survived 2nd GC) */
-            float yp_hi = ypsz_lo;
-            float yp_lo = (yp_hi
-                           - (display_h * stats.promote_z_ / y_scale));
+            //float yp_hi = ypsz_lo;
+            //float yp_lo = (yp_hi - (display_h * stats.promote_z_ / y_range));
             {
                 write_gc_history_bar("##promote",
                                      gc_history_headline::promote,
                                      stats,
-                                     ImRect::from_xy_span(x_span, ImVec2(yp_lo, yp_hi)),
+                                     ImRect::from_xy_span(x_span, yp_span),
                                      draw_list);
             }
 
+            /* screen y-coordinates of surive bar (survived 1st GC) */
+            ImVec2 ys_span = y_scale.map_span(stats.persist_z_ + stats.promote_z_,
+                                              stats.persist_z_ + stats.promote_z_ + stats.survive_z_);
             /* y-coordinates of survivor bar (survived 1st GC) */
-            float ys_hi = yp_lo;
-            float ys_lo = (ys_hi - (display_h * stats.survive_z_ / y_scale));
+            //float ys_hi = yp_lo;
+            //float ys_lo = (ys_hi - (display_h * stats.survive_z_ / y_range));
             {
                 write_gc_history_bar("##survivor",
                                      gc_history_headline::survive,
                                      stats,
-                                     ImRect::from_xy_span(x_span, ImVec2(ys_lo, ys_hi)),
+                                     ImRect::from_xy_span(x_span, ys_span),
                                      draw_list);
             }
 
             // -----------------------------------------------------------
 
+            /* screen y-coordinates of garbageN bar (killed on 3+ GC) */
+            ImVec2 ygN_span = y_scale.map_span(0.0 - stats.garbageN_z_, 0.0);
             /* y-coordinates of garbageN bar (killed on 3+ GC) */
-            float ygN_lo = y_zero;
-            float ygN_hi = (y_zero
-                            + (display_h * stats.garbageN_z_ / y_scale));
+            //float ygN_lo = y_zero;
+            //float ygN_hi = (y_zero + (display_h * stats.garbageN_z_ / y_range));
             {
                 write_gc_history_bar("##garbageN",
                                      gc_history_headline::garbageN,
                                      stats,
-                                     ImRect::from_xy_span(x_span, ImVec2(ygN_lo, ygN_hi)),
+                                     ImRect::from_xy_span(x_span, ygN_span),
                                      draw_list);
             }
 
             /* y-coordinates of garbage1 bar (killed on 2nd GC) */
-            float yg1_lo = ygN_hi;
-            float yg1_hi = (yg1_lo
-                            + (display_h * stats.garbage1_z_ / y_scale));
+            ImVec2 yg1_span = y_scale.map_span(0.0 - stats.garbageN_z_ - stats.garbage1_z_,
+                                               0.0 - stats.garbageN_z_);
+            /* y-coordinates of garbage1 bar (killed on 2nd GC) */
+            //float yg1_lo = ygN_hi;
+            //float yg1_hi = (yg1_lo + (display_h * stats.garbage1_z_ / y_range));
             {
                 write_gc_history_bar("##garbage1",
                                      gc_history_headline::garbage1,
                                      stats,
-                                     ImRect(ImVec2(x_lo, yg1_lo), ImVec2(x_hi, yg1_hi)),
+                                     ImRect::from_xy_span(x_span, yg1_span),
                                      draw_list);
             }
 
             /* y-coordinates of garbage0 bar (killed on 1st GC) */
-            float yg0_lo = yg1_hi;
-            float yg0_hi = (yg0_lo
-                            + (display_h * stats.garbage0_z_ / y_scale));
+            ImVec2 yg0_span = y_scale.map_span(0.0 - stats.garbageN_z_ - stats.garbage1_z_ - stats.garbage0_z_,
+                                               0.0 - stats.garbageN_z_ - stats.garbage1_z_);
+
+            /* y-coordinates of garbage0 bar (killed on 1st GC) */
+            //float yg0_lo = yg1_hi;
+            //float yg0_hi = (yg0_lo + (display_h * stats.garbage0_z_ / y_range));
             {
                 write_gc_history_bar("##garbage0",
                                      gc_history_headline::garbage0,
                                      stats,
-                                     ImRect(ImVec2(x_lo, yg0_lo), ImVec2(x_hi, yg0_hi)),
+                                     ImRect::from_xy_span(x_span, yg0_span),
                                      draw_list);
             }
         } else {
