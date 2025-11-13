@@ -252,14 +252,56 @@ DrawState::draw_tenured(const GcStateDescription & gcstate,
                      draw_list);
 #endif
 
+ImU32 DrawState::headline_color(gc_history_headline headline)
+{
+    constexpr ImU32 sentinel_color = IM_COL32(255, 255, 255, 255);
+    constexpr ImU32  persist_color = IM_COL32(  0,  64, 192, 255); /*darker blue*/
+    ImU32  promote_color = IM_COL32(  0, 128,   0, 255); /*darker green*/
+    ImU32  survive_color = IM_COL32( 32, 192,  32, 255); /*lighter green*/
+    ImU32 garbageN_color = IM_COL32(255, 128,  64, 255); /*darker orange*/
+    ImU32 garbage1_color = IM_COL32(255, 192, 128, 255); /*medium orange*/
+    ImU32 garbage0_color = IM_COL32(255, 255, 192, 255); /*pale yellow*/
+
+    switch(headline) {
+    case gc_history_headline::survive: return survive_color;
+    case gc_history_headline::promote: return promote_color;
+    case gc_history_headline::persist: return persist_color;
+    case gc_history_headline::garbage0: return garbage0_color;
+    case gc_history_headline::garbage1: return garbage1_color;
+    case gc_history_headline::garbageN: return garbageN_color;
+    case gc_history_headline::N:
+        assert(false);
+        break;
+    }
+
+    return sentinel_color;
+}
+
+void
+DrawState::draw_text_bullet(ImU32 fill_color,
+                            ImDrawList * draw_list)
+{
+    float tx_h = ImGui::GetTextLineHeight();
+    ImVec2 cursor_pos = ImGui::GetCursorScreenPos();
+    ImVec2 circle_pos = cursor_pos;
+    float circle_radius = 0.2 * tx_h;
+
+    draw_list->AddCircleFilled(ImVec2(circle_pos.x,
+                                      circle_pos.y + 0.5 * tx_h),
+                               circle_radius, fill_color);
+
+    ImGui::SetCursorScreenPos(ImVec2(cursor_pos.x + circle_radius, cursor_pos.y));
+}
+
 void
 DrawState::write_gc_history_bar(const char * idname,
                                 gc_history_headline headline,
                                 const GcStatisticsHistoryItem & stats,
                                 const ImRect & bar_rect,
-                                ImU32 fill_color,
                                 ImDrawList * draw_list)
 {
+    ImU32 fill_color = headline_color(headline);
+
     draw_list->AddRectFilled(bar_rect.top_left(), bar_rect.bottom_right(), fill_color);
 
     if (bar_rect.is_nonempty()) {
@@ -267,6 +309,10 @@ DrawState::write_gc_history_bar(const char * idname,
         ImGui::InvisibleButton(idname, ImVec2(bar_rect.width(), bar_rect.height()));
         if (ImGui::IsItemHovered()) {
             ImGui::BeginTooltip();
+
+            ImDrawList * tt_draw_list = ImGui::GetWindowDrawList();
+
+            draw_text_bullet(fill_color, tt_draw_list);
 
             /* choose text here */
             switch(headline) {
@@ -299,27 +345,50 @@ DrawState::write_gc_history_bar(const char * idname,
                 break;
             }
 
-            ImGui::Text("\n"
-                        " gcseq: %lu\n"
+            ImGui::Separator();
+
+            ImGui::Text(" gcseq: %lu\n"
                         " type: %s\n"
-                        " alloc: %lu\n"
-                        " survive: %lu\n"
-                        " promote: %lu\n"
-                        " persist: %lu\n"
-                        " garbage\u2080: %lu\n" /*garbage0*/
-                        " garbage\u2081: %lu\n" /*garbage1*/
-                        " garbage\u2099: %lu\n" /*garbageN*/
-                        " effort: %lu dt: %.1lfus\n"
-                        " copy efficiency: %.1lf%% collection rate: %.0lf bytes/sec",
+                        " alloc: %lu\n",
                         stats.gc_seq_,
                         (stats.upto_ == generation::nursery) ? "incremental" : "FULL",
-                        stats.new_alloc_z_,
-                        stats.survive_z_,
-                        stats.promote_z_,
-                        stats.persist_z_,
-                        stats.garbage0_z_,
-                        stats.garbage1_z_,
-                        stats.garbageN_z_,
+                        stats.new_alloc_z_);
+
+            {
+                draw_text_bullet(headline_color(gc_history_headline::survive), tt_draw_list);
+                ImGui::Text(" survive: %lu - survived 1 gc cycle", stats.survive_z_);
+            }
+
+            {
+                draw_text_bullet(headline_color(gc_history_headline::promote), tt_draw_list);
+                ImGui::Text(" promote: %lu - survived 2 gc cycles", stats.promote_z_);
+            }
+
+            {
+                draw_text_bullet(headline_color(gc_history_headline::persist), tt_draw_list);
+                ImGui::Text(" persist: %lu - survived 3+ gc cycles\n", stats.persist_z_);
+            }
+
+            {
+                draw_text_bullet(headline_color(gc_history_headline::garbage0), tt_draw_list);
+                /* "garbage0", but with "0" subscripted */
+                ImGui::Text(" garbage\u2080: %lu - survived 0 gc cycles", stats.garbage0_z_);
+            }
+
+            {
+                draw_text_bullet(headline_color(gc_history_headline::garbage1), tt_draw_list);
+                /* "garbage1" but with "1" subscripted */
+                ImGui::Text(" garbage\u2081: %lu - survived 1 gc cycles", stats.garbage1_z_);
+            }
+
+            {
+                draw_text_bullet(headline_color(gc_history_headline::garbageN), tt_draw_list);
+                /* "garbageN" but with "N" subscripted */
+                ImGui::Text(" garbage\u2099: %lu - survived 2+ gc cycles", stats.garbageN_z_);
+            }
+
+            ImGui::Text(" effort: %lu dt: %.1lfus\n"
+                        " copy efficiency: %.1lf%% collection rate: %.0lf bytes/sec",
                         stats.effort_z_,
                         1e-3 * stats.dt_.scale(),
                         100.0 * stats.efficiency(),
@@ -420,13 +489,6 @@ DrawState::draw_gc_history(const GcStateDescription & gcstate,
              *    yg0_hi   +--+
              */
 
-            ImU32  persist_color = IM_COL32(  0,  64, 192, 255); /*darker blue*/
-            ImU32  promote_color = IM_COL32(  0, 128,   0, 255); /*darker green*/
-            ImU32  survive_color = IM_COL32( 32, 192,  32, 255); /*lighter green*/
-            ImU32 garbageN_color = IM_COL32(255, 128,  64, 255); /*darker orange*/
-            ImU32 garbage1_color = IM_COL32(255, 192, 128, 255); /*medium orange*/
-            ImU32 garbage0_color = IM_COL32(255, 255, 192, 255); /*pale yellow*/
-
             /* x-coordinates of bar */
             float x_lo = bounding_rect.x_lo() + lm + i * bar_w;
             float x_hi = x_lo + bar_w - 1;
@@ -440,7 +502,6 @@ DrawState::draw_gc_history(const GcStateDescription & gcstate,
                                      gc_history_headline::persist,
                                      stats,
                                      ImRect::from_xy_span(x_span, ImVec2(ypsz_lo, y_zero)),
-                                     persist_color,
                                      draw_list);
             }
             /* y-coordinates of promote bar (survived 2nd GC) */
@@ -452,7 +513,6 @@ DrawState::draw_gc_history(const GcStateDescription & gcstate,
                                      gc_history_headline::promote,
                                      stats,
                                      ImRect::from_xy_span(x_span, ImVec2(yp_lo, yp_hi)),
-                                     promote_color,
                                      draw_list);
             }
 
@@ -464,7 +524,6 @@ DrawState::draw_gc_history(const GcStateDescription & gcstate,
                                      gc_history_headline::survive,
                                      stats,
                                      ImRect::from_xy_span(x_span, ImVec2(ys_lo, ys_hi)),
-                                     survive_color,
                                      draw_list);
             }
 
@@ -479,7 +538,6 @@ DrawState::draw_gc_history(const GcStateDescription & gcstate,
                                      gc_history_headline::garbageN,
                                      stats,
                                      ImRect::from_xy_span(x_span, ImVec2(ygN_lo, ygN_hi)),
-                                     garbageN_color,
                                      draw_list);
             }
 
@@ -492,7 +550,6 @@ DrawState::draw_gc_history(const GcStateDescription & gcstate,
                                      gc_history_headline::garbage1,
                                      stats,
                                      ImRect(ImVec2(x_lo, yg1_lo), ImVec2(x_hi, yg1_hi)),
-                                     garbage1_color,
                                      draw_list);
             }
 
@@ -505,7 +562,6 @@ DrawState::draw_gc_history(const GcStateDescription & gcstate,
                                      gc_history_headline::garbage0,
                                      stats,
                                      ImRect(ImVec2(x_lo, yg0_lo), ImVec2(x_hi, yg0_hi)),
-                                     garbage0_color,
                                      draw_list);
             }
         } else {

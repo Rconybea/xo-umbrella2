@@ -47,6 +47,13 @@ struct DrawState {
                              const ImRect & rect,
                              ImDrawList * draw_list,
                              GenerationLayout * p_layout);
+    static ImU32 headline_color(gc_history_headline headline);
+
+    /**
+     * display colored bullet (at current cursor position) for a text item
+     **/
+    static void draw_text_bullet(ImU32 fill_color,
+                                 ImDrawList * draw_list);
     /**
      * display one bar in bar strip chart displaying gc statistics
      *
@@ -54,14 +61,12 @@ struct DrawState {
      * @p headline : purpose of rectangle
      * @p stats : gc statistics for this bar.
      * @p bar_rect : rectangle representing quantity in bytes
-     * @p fill_color : rectangle fill color
      * @p draw_list : draw list for current frame
      **/
     static void write_gc_history_bar(const char * idname,
                                      gc_history_headline headline,
                                      const GcStatisticsHistoryItem & stats,
                                      const ImRect & bar_rect,
-                                     ImU32 fill_color,
                                      ImDrawList * draw_list);
     static void draw_gc_history(const GcStateDescription & gcstate,
                                 generation gen,
