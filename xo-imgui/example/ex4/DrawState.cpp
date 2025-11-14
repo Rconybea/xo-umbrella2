@@ -492,23 +492,26 @@ DrawState::draw_gc_history(const GcStateDescription & gcstate,
         if ((gen == stats.upto_) || (gen == generation::tenured))
         {
             /*
-             *     ys_span.y   +--+
-             *                 |  |   survive_z  (survived 1st GC)
+             *    screen              native
+             *    coords              coords
+             *
+             *     ys_span.y   +--+   ypsz_nat.y
+             *                 |  |                survive_z  (survived 1st GC)
              *                 |  |
              *     yp_span.y   +--+
-             *                 |  |   promote_z  (sruvived 2nd GC)
+             *                 |  |                promote_z  (sruvived 2nd GC)
              *                 |  |
              *   ypsz_span.y   +--+
-             *                 |  |   persist_z  (survived 3+ GCs)
+             *                 |  |                persist_z  (survived 3+ GCs)
              *                 |  |
-             *        y_zero   +--+ ---------------------------------------- x-axis
-             *                 |  |   gN  (killed on 3+ GC)
+             *        y_zero   +--+ ---------------------------------------------- x-axis
+             *                 |  |                gN  (killed on 3+ GC)
              *                 |  |
              *    ygN_span.x   +--+
-             *                 |  |   g1  (killed on 2nd GC)
+             *                 |  |                g1  (killed on 2nd GC)
              *                 |  |
              *    yg1_span.x   +--+
-             *                 |  |   g0  (killed on 1st GC)
+             *                 |  |                g0  (killed on 1st GC)
              *                 |  |
              *    yg0_span.x   +--+
              */
@@ -516,87 +519,95 @@ DrawState::draw_gc_history(const GcStateDescription & gcstate,
             /* x-coordinates of bar */
             float x_lo = bounding_rect.x_lo() + lm + i * bar_w;
             float x_hi = x_lo + bar_w - 1;
-            ImVec2 x_span{x_lo, x_hi};
+            ImSpan x_span{x_lo, x_hi};
 
-            /* screen y-coordinates of persist bar (survived 3+ GCs) */
-            ImVec2 ypsz_span = y_scale.map_span(0, stats.persist_z_);
-            //float ypsz_lo = (y_zero - (display_h * stats.persist_z_ / y_range));
+            /* native y-coordinates of persist bar */
+            ImSpan ypsz_nat(0, stats.persist_z_);
             {
+                /* screen y-coordinates of persist bar (survived 3+ GCs) */
+                ImSpan ypsz_span = y_scale.map_span(ypsz_nat);
+
                 write_gc_history_bar("##persist",
                                      gc_history_headline::persist,
                                      stats,
-                                     ImRect::from_xy_span(x_span, ypsz_span),
-                                     draw_list);
-            }
-            /* screen y-coordinates of promote bar (survived 2nd GC) */
-            ImVec2 yp_span = y_scale.map_span(stats.persist_z_,
-                                              stats.persist_z_ + stats.promote_z_);
-            /* y-coordinates of promote bar (survived 2nd GC) */
-            //float yp_hi = ypsz_lo;
-            //float yp_lo = (yp_hi - (display_h * stats.promote_z_ / y_range));
-            {
-                write_gc_history_bar("##promote",
-                                     gc_history_headline::promote,
-                                     stats,
-                                     ImRect::from_xy_span(x_span, yp_span),
+                                     ImRect::from_xy_span(x_span, ypsz_span.normalize()),
                                      draw_list);
             }
 
-            /* screen y-coordinates of surive bar (survived 1st GC) */
-            ImVec2 ys_span = y_scale.map_span(stats.persist_z_ + stats.promote_z_,
-                                              stats.persist_z_ + stats.promote_z_ + stats.survive_z_);
-            /* y-coordinates of survivor bar (survived 1st GC) */
-            //float ys_hi = yp_lo;
-            //float ys_lo = (ys_hi - (display_h * stats.survive_z_ / y_range));
+            /* native y-coordinates of promote bar */
+            ImSpan yp_nat(ypsz_nat.hi(), ypsz_nat.hi() + stats.promote_z_);
+
+            /* y-coordinates of promote bar (survived 2nd GC) */
             {
+                /* screen y-coordinates of promote bar (survived 2nd GC) */
+                ImSpan yp_span = y_scale.map_span(yp_nat);
+
+                write_gc_history_bar("##promote",
+                                     gc_history_headline::promote,
+                                     stats,
+                                     ImRect::from_xy_span(x_span, yp_span.normalize()),
+                                     draw_list);
+            }
+
+            /* native y-coordinates of survive bar */
+            ImSpan ys_nat(yp_nat.hi(), yp_nat.hi() + stats.survive_z_);
+
+            /* y-coordinates of survivor bar (survived 1st GC) */
+            {
+                /* screen y-coordinates of surive bar (survived 1st GC) */
+                ImSpan ys_span = y_scale.map_span(ys_nat);
+
                 write_gc_history_bar("##survivor",
                                      gc_history_headline::survive,
                                      stats,
-                                     ImRect::from_xy_span(x_span, ys_span),
+                                     ImRect::from_xy_span(x_span, ys_span.normalize()),
                                      draw_list);
             }
 
             // -----------------------------------------------------------
 
-            /* screen y-coordinates of garbageN bar (killed on 3+ GC) */
-            ImVec2 ygN_span = y_scale.map_span(0.0 - stats.garbageN_z_, 0.0);
+            /* native y-coordinates of garbageN bar */
+            ImSpan ygN_nat(0.0 - stats.garbageN_z_, 0.0);
+
             /* y-coordinates of garbageN bar (killed on 3+ GC) */
-            //float ygN_lo = y_zero;
-            //float ygN_hi = (y_zero + (display_h * stats.garbageN_z_ / y_range));
             {
+                /* screen y-coordinates of garbageN bar (killed on 3+ GC) */
+                ImSpan ygN_span = y_scale.map_span(ygN_nat);
+
                 write_gc_history_bar("##garbageN",
                                      gc_history_headline::garbageN,
                                      stats,
-                                     ImRect::from_xy_span(x_span, ygN_span),
+                                     ImRect::from_xy_span(x_span, ygN_span.normalize()),
                                      draw_list);
             }
 
+            /* native y-coordinates of garbage1 bar */
+            ImSpan yg1_nat(ygN_nat.lo() - stats.garbage1_z_, ygN_nat.lo());
+
             /* y-coordinates of garbage1 bar (killed on 2nd GC) */
-            ImVec2 yg1_span = y_scale.map_span(0.0 - stats.garbageN_z_ - stats.garbage1_z_,
-                                               0.0 - stats.garbageN_z_);
-            /* y-coordinates of garbage1 bar (killed on 2nd GC) */
-            //float yg1_lo = ygN_hi;
-            //float yg1_hi = (yg1_lo + (display_h * stats.garbage1_z_ / y_range));
             {
+                /* y-coordinates of garbage1 bar (killed on 2nd GC) */
+                ImSpan yg1_span = y_scale.map_span(yg1_nat);
+
                 write_gc_history_bar("##garbage1",
                                      gc_history_headline::garbage1,
                                      stats,
-                                     ImRect::from_xy_span(x_span, yg1_span),
+                                     ImRect::from_xy_span(x_span, yg1_span.normalize()),
                                      draw_list);
             }
 
-            /* y-coordinates of garbage0 bar (killed on 1st GC) */
-            ImVec2 yg0_span = y_scale.map_span(0.0 - stats.garbageN_z_ - stats.garbage1_z_ - stats.garbage0_z_,
-                                               0.0 - stats.garbageN_z_ - stats.garbage1_z_);
+            /* native y-coordinates of garbage0 bar */
+            ImSpan yg0_nat(yg1_nat.lo() - stats.garbage0_z_, yg1_nat.lo());
 
             /* y-coordinates of garbage0 bar (killed on 1st GC) */
-            //float yg0_lo = yg1_hi;
-            //float yg0_hi = (yg0_lo + (display_h * stats.garbage0_z_ / y_range));
             {
+                /* y-coordinates of garbage0 bar (killed on 1st GC) */
+                ImSpan yg0_span = y_scale.map_span(yg0_nat);
+
                 write_gc_history_bar("##garbage0",
                                      gc_history_headline::garbage0,
                                      stats,
-                                     ImRect::from_xy_span(x_span, yg0_span),
+                                     ImRect::from_xy_span(x_span, yg0_span.normalize()),
                                      draw_list);
             }
         } else {

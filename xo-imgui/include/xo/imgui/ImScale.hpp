@@ -3,6 +3,7 @@
 #pragma once
 
 #include "imgui.h"
+#include "ImSpan.hpp"
 
 /** Linear scale for transforming between two coordinate systems.
  *    f(x) = m.(x - x0) + y0
@@ -31,6 +32,7 @@ public:
     /** construct inverse function inv(f) **/
     ImScale inverse() const { return ImScale(ImVec2(ref_.y, ref_.x), 1.0 / scale_); }
 
+    ImSpan map_span(ImSpan x_span) const { return ImSpan(at(x_span.lo()), at(x_span.hi())); }
     ImVec2 map_span(ImVec2 x_span) const { return ImVec2(at(x_span.x), at(x_span.y)); }
     ImVec2 map_span(float x1, float x2) const { return map_span(ImVec2(x1, x2)); }
 

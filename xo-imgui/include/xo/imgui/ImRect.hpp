@@ -3,6 +3,7 @@
 #pragma once
 
 #include "imgui.h"
+#include "ImSpan.hpp"
 #include <algorithm>
 #include <utility>
 
@@ -16,7 +17,13 @@ struct ImRect {
     ImRect(float x_lo, float y_lo, float x_hi, float y_hi) : top_left_{x_lo, y_lo}, bottom_right_{x_hi, y_hi} {}
 
     static ImRect from_xy_span(const ImVec2 & x_span, const ImVec2 & y_span) {
-        return ImRect(ImVec2{x_span.x, y_span.x}, ImVec2{x_span.y, y_span.y});
+        return ImRect(ImVec2{x_span.x, y_span.x},
+                      ImVec2{x_span.y, y_span.y});
+    }
+
+    static ImRect from_xy_span(const ImSpan & x_span, const ImSpan & y_span) {
+        return ImRect(ImVec2{x_span.lo(), y_span.lo()},
+                      ImVec2{x_span.hi(), y_span.hi()});
     }
 
     static void draw_filled_rect_with_label(const char * text,
@@ -34,8 +41,8 @@ struct ImRect {
     std::pair<float, float> x_span() const { return std::make_pair(top_left_.x, bottom_right_.x); }
     std::pair<float, float> y_span() const { return std::make_pair(top_left_.y, bottom_right_.y); }
 
-    const ImVec2 & top_left() const { return top_left_; }
-    const ImVec2 & bottom_right() const { return bottom_right_; }
+    ImVec2 top_left() const { return top_left_; }
+    ImVec2 bottom_right() const { return bottom_right_; }
 
     float x_lo() const { return top_left_.x; }
     float x_hi() const { return bottom_right_.x; }
