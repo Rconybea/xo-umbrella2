@@ -61,10 +61,15 @@ The first phase bootstraps some generated helper scripts used in the second phas
     $ cmake --install .build0
 
     # phase 2 -- build XO, using helpers installed in phase 1.
-    $ cmake -B .build -S . -DCMAKE_INSTALL_PREFIX=$PREFIX
+
+    # -DXO_ENABLE_DOCS=1 : builds documentation; or 0 to skip
+    # -DXO_ENABLE_EXAMPLES=1 : builds example; or 0 to skipos
+    # -DXO_ENABLE_VULKAN=1 : builds vulkan-dependent graphics pipeline for imgui; or 0 to skip
+
+    $ cmake -B .build -S . -DCMAKE_INSTALL_PREFIX=$PREFIX -DXO_ENABLE_DOCS=1 -DXO_ENABLE_EXAMPLES=1 -DXO_ENABLE_VULKAN=1
     $ cmake --build .build -j
 
-    # optionally build docs
+    # optionally build docs (requires -DXO_ENABLE_DOCS in phase2 config)
     $ cmake --build .build -- docs
 
     $ cmake --install .build
@@ -99,6 +104,50 @@ See ``Test Coverage Setup`` under ``Development`` below
 
 Development
 ===========
+
+Environment
+-----------
+
+If nix is available, can use `nix-shell` to get a reproducible development environment for XO work.
+Run `nix-shell` from the top-level `xo-umbrella2` directory.
+
+.. list-table::
+    :header-rows: 1
+    :widths: 20 60 30
+
+   * - command
+     - sufficient for
+     - platform
+   * - `nix-shell -A shell1a`
+     - `cmake -DXO_ENABLE_DOCS=0 -DXO_ENABLE_OPENGL=0 -DXO_ENABLE_VULKAN=0`
+     -
+   * - `nix-shell -A shell1`
+     - `cmake -DXO_ENABLE_DOCS=1`
+     -
+   * - `nix-shell -A shell3`
+     - `cmake -DXO_ENABLE_OPENGL=1`
+     -
+   * - `nix-shell -A shell4-wsl`
+     - `cmake -DXO_ENABLE_VULKAN=1`
+     - wsl2 on windows11
+   * - `nix-shell -A shell4-nvidia`
+     - `cmake -DXO_ENABLE_VULKAN=1`
+     - nvidia GPU on linux
+   * - `nix-shell -A shell4-osx`
+     - `cmake -DXO_ENABLE_VULKAN=1`
+     - mac osx
+
+For example
+
+.. code-block::
+
+    $ cd xo-umbrella2
+    $ nix-shell -A shell4-nvidia
+    $ echo $VK_ICD_FILENAMES
+    /usr/share/vulkan/icd.d/nvidia_icd.json   # point to library to use for nvidia gpu on this host
+    $ which doxygen
+    /home/roland/nixroot/nix/store/cb78mifxvic291rcb2qlbpxgl29f5pzf-doxygen-1.13.2/bin/doxygen
+    # etc.
 
 LSP Setup
 ---------
@@ -135,7 +184,6 @@ To build coverage report
     $ (.build/gen-ccov)
 
 Html report in ``.build/ccov/html/index.html``
-
 
 
 Sphinx Autobuild Setup

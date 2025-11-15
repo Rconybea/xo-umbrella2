@@ -12,6 +12,8 @@ Intended for local development work, with source in immediate subdirectories.
 
 ## Getting Started
 
+(Alternatively, see `xo-umbrella2/docs/install.rst` for similar content)
+
 ### Nix shell (reproducible development environment)
 
 If `nix` is available, can get several reproducible build environments.
@@ -37,9 +39,12 @@ including libraries used by running IDE.
 $ emacs
 ```
 
+Can use `nix-shell` to get reproducible environment for cmake build, see `Cmake Build`.
+Alternatively can use full nix build, see `Nix Build`
+
 ### Cmake build
 
-If `nix` is available, you probably prefer the nix build.
+If `nix` is available, you probably prefer the nix build, unless working on XO itself.
 Otherwise continue reading..
 
 The cmake build has two phases, because it needs to bootstrap
@@ -53,7 +58,7 @@ $ cmake -B .build0 -S xo-cmake -DCMAKE_INSTALL_PREFIX=${PREFIX}
 $ cmake --build .build0
 $ cmake --install .build0
 # phase 2
-$ cmake -B .build -S . -DCMAKE_INSTALL_PREFIX=${PREFIX} -DXO_ENABLE_EXAMPLES=1 -DCMAKE_BUILD_TYPE=debug
+$ cmake -B .build -S . -DCMAKE_INSTALL_PREFIX=${PREFIX} -DXO_ENABLE_EXAMPLES=1 -DXO_ENABLE_DOCS=1 -DCMAKE_BUILD_TYPE=debug
 $ cmake --build .build --verbose
 $ cmake --install .build
 ```
@@ -64,6 +69,37 @@ or with Vulkan examples
 $ cmake -B .build -S . -DCMAKE_INSTALL_PREFIX=${PREFIX} -DXO_ENABLE_EXAMPLES=1 -DXO_ENABLE_VULKAN=1
 ```
 
+### Cmake build documentation
+
+Documentation relies on doxygen, sphinx and breathe.
+```
+# phase 2
+$ cd xo-umbrella2
+$ cmake -B .build -S . -DXO_ENABLE_DOCS=1
+$ cmake --build .build -- docs
+```
+
+Create Html docs in `.build/sphinx/html/index.html`
+
+### Cmake build with coverage
+
+Prepare build
+```
+# phase 2
+$ cmake -B .build -S . -DCMAKE_INSTALL_PREFIX=${PREFIX} -DCMAKE_BUILD_TYPE=coverage
+```
+
+Run coverage-enabled unit tests
+```
+$ (cd .build && ctest)
+```
+
+Generate coverage report
+```
+$ .build/gen-ccov
+```
+
+Html report left in ``.build/ccov/html/index.html``
 
 ### Nix Build
 
@@ -107,11 +143,19 @@ $ nix-build -A xo-userenv-slow
 Same result as `$nix-build -A xo-userenv`, but builds each package serially
 using `xo-build`.
 
-#### Nix + Vulkan
+#### Nix + SDL2 + Vulkan + ImGui
 
 Currently (Nov 2025) only affects `xo-umbrella2/xo-imgui`.
 
-Non-trivial, because:
+For OSX, imgui works with assistance from motlenvk.
+Build `xo-imgui` with
+
+```
+$ cd xo-umbrella2
+$ nix-shell -A shell4-osx   # see xo-umrbella2/default.nix for impl
+```
+
+For linux and/or wsl build need extra care:
 1. must use host OS for gpu drivers.  nixpkgs has drivers, but they're setup to work from nixos.
 2. want to use nixpkgs for the GPU-independent portion of graphics stack.
 
@@ -125,25 +169,23 @@ These currently setup by hand, so likely to need manual attention on another hos
 An ordinary cmake build may cheerfully use the host-provided graphics stack,
 in return for higher risk of DLL hell.
 
-### Coverage Build
-
-Prepare build
+To build for ubuntu with nvidia gpu:
 ```
-# phase 2
-$ cmake -B .build -S . -DCMAKE_INSTALL_PREFIX=${PREFIX} -DCMAKE_BUILD_TYPE=coverage
-```
-
-Run coverage-enabled unit tests
-```
-$ (cd .build && ctest)
+$ cd xo-umbrella2
+$ nix-shell -A shell4-nvidia
+# then regular cmake:
+$ cmake -B .build -S . -DXO_ENABLE_VULKAN=1 -DXO_ENABLE_EXAMPLES=1 -DCMAKE_INSTALL_PREFIX=$PREFIX
 ```
 
-Generate coverage report
+To build for wsl:
 ```
-$ .build/gen-ccov
+$ cd xo-umbrella2
+$ nix-shell -A shell4-wsl
+# then regular cmake:
+$ cmake -B .build -S . -DXO_ENABLE_VULKAN=1 -DXO_ENABLE_EXAMPLES=1 -DCMAKE_INSTALL_PREFIX=$PREFIX
 ```
 
-Html report left in ``.build/ccov/html/index.html``
+Currently not supporting a nix sandbox build for xo-imgui
 
 ## To view docs from WSL
 
