@@ -17,6 +17,8 @@ namespace xo {
 
             /** create shared string @p s, using allocator @ref Object::mm **/
             static gp<String> share(const char * s);
+            /** create shared string @p s, using allocator @p mm **/
+            static gp<String> share(gc::IAlloc * mm, const char * s);
             /** create copy of string @p s, using allocator @ref Object::mm **/
             static gp<String> copy(const char * s);
             /** create copy of string @p s, using allocator @p mm **/

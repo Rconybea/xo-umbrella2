@@ -7,7 +7,7 @@
 def foo = lambda (n : i64) { let (n == 0) then 1 else n * foo(n - 1); };
 
 strategy:
-----------
+--------
 
 while parsing def, instead of creating DefineExpr with nullptr TypeDescr:
 a. create DefineExpr with TypeVariable.

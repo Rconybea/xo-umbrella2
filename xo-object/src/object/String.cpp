@@ -44,6 +44,12 @@ namespace xo {
 
         gp<String>
         String::share(const char * s) {
+            return share(Object::mm, s);
+        }
+
+        gp<String>
+        String::share(gc::IAlloc * mm, const char * s)
+        {
             const char * chars = s ? s : "";
             std::size_t z = 1 + ::strlen(chars);
 

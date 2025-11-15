@@ -9,9 +9,13 @@
 
 namespace xo {
     namespace fn {
+        /** callback set using unique pointers to store callbacks **/
         template <typename NativeFn>
         using UpCallbackSet = CallbackSetImpl<std::unique_ptr<NativeFn>>;
 
+        /** callback set that invokes a specific member function on
+         *  registered callback objects.
+         **/
         template <typename NativeFn, typename MemberFn>
         requires(callback_concept<NativeFn>)
         class UpNotifyCallbackSet : public UpCallbackSet<NativeFn> {
