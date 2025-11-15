@@ -215,7 +215,7 @@ $ (cd result && python3 -m http.server 3000)
 
 ```
 $ git remote add xo-foo git@github.com:Rconybea/xo-foo.git
-$ git fetch xo-foo
+$ git fetch xo-foo main
 ```
 
 3. checkout satellite repo
