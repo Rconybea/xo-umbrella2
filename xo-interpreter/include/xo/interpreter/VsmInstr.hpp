@@ -1,8 +1,8 @@
-/** @file VmInstr.hpp **/
+/** @file VsmInstr.hpp **/
 
 #pragma once
 
-#include <string>
+#include <string_view>
 
 namespace xo {
     namespace scm {
@@ -13,16 +13,16 @@ namespace xo {
          *
          *  A vsm instruction acts on a virtual schematika machine instance.
          **/
-        class VmInstr
+        class VsmInstr
         {
         public:
             using ActionFn = void (*)(VirtualSchematikaMachine * vm);
 
         private:
-            std::string name_;
+            std::string_view name_;
             ActionFn action_;
         };
     }
 }
 
-/* end VmInstr.hpp */
+/* end VsmInstr.hpp */

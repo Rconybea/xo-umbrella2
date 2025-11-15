@@ -2,17 +2,26 @@
 
 #pragma once
 
-#include "VmInstr.hpp"
+#include "VsmInstr.hpp"
 
 namespace xo {
     namespace scm {
         /** @class VirtualSchematikaMachine
          *  @brief Virtual machine implementing a Schematika interpreter
+         *
          **/
         class VirtualSchematikaMachine {
         public:
+            VirtualSchematikaMachine();
+
+
         private:
+            /** program counter **/
+            const VsmInstr * pc_ = nullptr;
+
+
         };
+
     } /*namespace scm*/
 } /*namespace xo*/
 
