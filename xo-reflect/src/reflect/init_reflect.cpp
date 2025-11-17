@@ -7,17 +7,17 @@
 #include "xo/subsys/Subsystem.hpp"
 
 namespace xo {
-  void
-  InitSubsys<S_reflect_tag>::init()
-  {
-    /* placeholder -- expecting there to be non-trivial content soon */
-  } /*init*/
+    void
+    InitSubsys<S_reflect_tag>::init()
+    {
+        /* placeholder -- expecting there to be non-trivial content soon */
+    } /*init*/
 
-  InitEvidence
-  InitSubsys<S_reflect_tag>::require()
-  {
-    return Subsystem::provide<S_reflect_tag>("reflect", &init);
-  } /*require*/
+    InitEvidence
+    InitSubsys<S_reflect_tag>::require()
+    {
+        return Subsystem::provide<S_reflect_tag>("reflect", &init);
+    } /*require*/
 } /*namespace xo*/
 
 /* end init_reflect.cpp */

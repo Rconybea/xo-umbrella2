@@ -130,7 +130,7 @@ namespace xo {
         {
             // Reminder: String must come before secondary allocation,
 
-            Cpof cpof(this);
+            Cpof cpof(Object::mm, this);
 
             // might expect to write:
             //  gp<String> copy = new (gcm) String(Object::mm, owner_, z_chars_, chars_);

@@ -24,12 +24,13 @@ Install
 One-step Install
 ----------------
 
-Install along with the rest of *XO* from `xo-umbrella2 source`_
+Install along with the rest of *XO* from `xo-umbrella2 source`_:
+see install instructions for xo-umrbella2
 
 .. _xo-umbrella2 source: https://github.com/rconybea/xo-umbrella2
 
-Minimal Dependencies
---------------------
+Essential Xo Dependencies
+-------------------------
 
 ``xo-reader`` uses several supporting libraries from the *XO* project:
 

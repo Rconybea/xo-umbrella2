@@ -20,13 +20,12 @@ add_definitions(${PROJECT_CXX_FLAGS})
 
 # note on ordering: must read .cmake defn of lib before configuring any examples
 add_subdirectory(src/interpreter)
-
 xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
 
 # ----------------------------------------------------------------
 
 #add_subdirectory(example)
-#add_subdirectory(utest)
+add_subdirectory(utest)
 
 # ----------------------------------------------------------------
 

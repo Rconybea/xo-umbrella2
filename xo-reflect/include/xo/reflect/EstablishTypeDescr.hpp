@@ -39,10 +39,10 @@ namespace xo {
 
             template<typename T>
             static TypeDescrW establish() {
-                TypeDescrW td = TypeDescrBase::require(&typeid(T),
-                                                       std::string(type_name<T>()),
-                                                       nullptr /*tdextra*/,
-                                                       nullptr /*invoker*/);
+                static TypeDescrW td = TypeDescrBase::require(&typeid(T),
+                                                              std::string(type_name<T>()),
+                                                              nullptr /*tdextra*/,
+                                                              nullptr /*invoker*/);
 
 #ifdef NOT_USING
                 std::function<TaggedPtr (void *)> to_self_tp;

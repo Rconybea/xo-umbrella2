@@ -55,10 +55,10 @@ namespace xo {
             /* use gc for all Object allocs */
             Object::mm = gc.get();
 
-            gp<List> l = List::list(Integer::make(1));
+            gp<List> l = List::list(Integer::make(gc.get(), 1));
             gc->add_gc_root(reinterpret_cast<Object**>(l.ptr_address()));
 
-            gp<List> l2 = List::list(Integer::make(10));
+            gp<List> l2 = List::list(Integer::make(gc.get(), 10));
             gc->add_gc_root(reinterpret_cast<Object**>(l2.ptr_address()));
 
             {
@@ -80,7 +80,7 @@ namespace xo {
 
             // mutation, but not {xgen, xckp} since parent,child both in N0
 
-            l->assign_head(Integer::make(2));
+            l->assign_head(Integer::make(gc.get(), 2));
             {
                 REQUIRE(gc->native_gc_statistics().n_mutation_ == 1);
                 REQUIRE(gc->native_gc_statistics().n_logged_mutation_ == 0);
@@ -106,7 +106,7 @@ namespace xo {
 
             // mutation, xckp since parent in N1, child in N0
 
-            l->assign_head(Integer::make(3));
+            l->assign_head(Integer::make(gc.get(), 3));
             {
                 REQUIRE(Integer::from(l->head())->value() == 3);
 
@@ -373,11 +373,11 @@ namespace xo {
                 RandomMutationModel(std::size_t m, std::size_t n, std::size_t r, std::size_t rr, std::size_t k)
                     : m_{m}, n_{n}, r_{r}, rr_{rr}, k_{k} {}
 
-                void generate_seed_values();
+                void generate_seed_values(GC * gc);
                 void generate_random_roots(GC * gc, xoshiro256ss * p_rgen);
                 void generate_random_mutations(xoshiro256ss * p_rgen);
 
-                void rejuvenate_seed_values();
+                void rejuvenate_seed_values(GC * gc);
                 void alter_random_roots(xoshiro256ss * p_rgen);
 
                 /* create m random list cells */
@@ -400,7 +400,7 @@ namespace xo {
                 std::vector<gp<Object>> root_v_;
             };
 
-            void RandomMutationModel::generate_seed_values()
+            void RandomMutationModel::generate_seed_values(GC * gc)
             {
                 w1_.clear();
                 w2_.clear();
@@ -415,7 +415,7 @@ namespace xo {
                 {
                     std::copy(w1_.begin(), w1_.end(), std::back_inserter(w2_));
                     for (size_t j = 0; j < n_; ++j) {
-                        w2_.push_back(Integer::make((this->start_)++));
+                        w2_.push_back(Integer::make(gc, (this->start_)++));
                     }
                     REQUIRE(w2_.size() == m_ + n_);
                 }
@@ -468,7 +468,7 @@ namespace xo {
                 }
             }
 
-            void RandomMutationModel::rejuvenate_seed_values()
+            void RandomMutationModel::rejuvenate_seed_values(GC * gc)
             {
                 for (std::size_t i = 0; i < w1_.size(); ++i) {
                     INFO(xtag("i", i));
@@ -492,7 +492,7 @@ namespace xo {
                         REQUIRE(w2_[j].ptr());
                     } else {
                         /* w2[j] is garbage, replace */
-                        w2_[j] = Integer::make((this->start_)++);
+                        w2_[j] = Integer::make(gc, (this->start_)++);
                         REQUIRE(w2_[j].ptr());
                     }
                 }
@@ -616,7 +616,7 @@ namespace xo {
                     INFO(xtag("cycle", cycle));
 
                     if (cycle == 0) {
-                        data_model.generate_seed_values();
+                        data_model.generate_seed_values(gc.get());
                         data_model.generate_random_roots(gc.get(), &rgen);
                     } else {
                         /* figure out values in {data_model_.w1_, data_model_.w2_} that
@@ -626,7 +626,7 @@ namespace xo {
                          * (For example want to verify behavior of GC w.r.t. cells that are alive only
                          * because of a mutation)
                          */
-                        data_model.rejuvenate_seed_values();
+                        data_model.rejuvenate_seed_values(gc.get());
                         data_model.alter_random_roots(&rgen);
                     }
 

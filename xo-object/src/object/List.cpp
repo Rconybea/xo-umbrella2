@@ -102,7 +102,7 @@ namespace xo {
 
             assert(!(this->is_nil()));
 
-            Cpof cpof(this);
+            Cpof cpof(Object::mm, this);
 
             return new (cpof) List(*this);
         }

@@ -306,8 +306,8 @@ public:
     std::size_t tenured_tospace_scale() const;
     GcStateDescription snapshot_gc_state() const;
 
-    void generate_random_mutation();
-    void generate_random_mutations();
+    void generate_random_mutation(GC * gc);
+    void generate_random_mutations(GC * gc);
 
 public:
     int alloc_per_cycle_ = 1;
@@ -415,10 +415,10 @@ AppState::snapshot_gc_state() const {
 }
 
 void
-AppState::generate_random_mutation() {
+AppState::generate_random_mutation(GC * gc) {
     if (rng_() % 1000 > (5 * 1000) / 7) {
         /* p=16% integer */
-        gc_root_v_[next_root_++] = Integer::make(next_int_);
+        gc_root_v_[next_root_++] = Integer::make(gc, next_int_);
     } else if (rng_() % 1000 > (3 * 1000) / 7) {
         /* p=16% cons */
         gp<Object> random_car = gc_root_v_.at(rng_() % gc_root_v_.size());
@@ -454,9 +454,9 @@ AppState::generate_random_mutation() {
 }
 
 void
-AppState::generate_random_mutations() {
+AppState::generate_random_mutations(GC * gc) {
     for (int i = 0; i < this->alloc_per_cycle_; ++i) {
-        this->generate_random_mutation();
+        this->generate_random_mutation(gc);
     }
 }
 
@@ -1921,7 +1921,7 @@ int main(int, char **)
         case draw_state_type::alloc:
         {
             /** generate random alloc **/
-            app_state.generate_random_mutations();
+            app_state.generate_random_mutations(app_state.gc_.get());
 
             gcstate = app_state.snapshot_gc_state();
 

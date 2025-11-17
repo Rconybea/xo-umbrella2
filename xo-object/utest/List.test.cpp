@@ -289,9 +289,10 @@ namespace xo {
 
             up<ArenaAlloc> alloc = ArenaAlloc::make("arena", 1024, c_debug_flag);
 
-            Object::mm = alloc.get();
+            ArenaAlloc * mm = alloc.get();
+            Object::mm = mm;
 
-            gp<List> l = List::list(Integer::make(1), Integer::make(2), Integer::make(3));
+            gp<List> l = List::list(Integer::make(mm, 1), Integer::make(mm, 2), Integer::make(mm, 3));
 
             REQUIRE(l->size() == 3);
 

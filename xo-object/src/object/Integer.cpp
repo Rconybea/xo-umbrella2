@@ -10,12 +10,13 @@
 namespace xo {
     using xo::reflect::Reflect;
     using xo::reflect::TaggedPtr;
+    using xo::gc::IAlloc;
 
     namespace obj {
         Integer::Integer(int_type x) : value_{x} {}
 
         gp<Integer>
-        Integer::make(int_type x) {
+        Integer::make(IAlloc * mm, int_type x) {
             return new (MMPtr(mm)) Integer(x);
         }
 
@@ -41,7 +42,7 @@ namespace xo {
 
         Object *
         Integer::_shallow_copy() const {
-            Cpof cpof(this);
+            Cpof cpof(Object::mm, this);
             return new (cpof) Integer(*this);
         }
 

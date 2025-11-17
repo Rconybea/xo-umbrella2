@@ -11,6 +11,7 @@ namespace xo {
     namespace obj {
         class Integer : public Number  {
         public:
+            using IAlloc = xo::gc::IAlloc;
             using int_type = long long;
 
         public:
@@ -18,7 +19,7 @@ namespace xo {
             explicit Integer(int_type x);
 
             /** create instance holding integer value @p x **/
-            static gp<Integer> make(int_type x);
+            static gp<Integer> make(IAlloc * mm, int_type x);
             /** downcast from @p x iff x is actually an Integer.  Otherwise nullptr **/
             static gp<Integer> from(gp<Object> x);
 

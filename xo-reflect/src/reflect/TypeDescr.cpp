@@ -57,6 +57,10 @@ namespace xo {
                                detail::Invoker * invoker,
                                std::unique_ptr<TypeDescrExtra> tdextra)
         {
+            scope log(XO_DEBUG(false));
+
+            log && log(xtag("canonical_name", canonical_name));
+
             if (native_tinfo) {
                 /* 1. lookup by tinfo hash_code in s_type_table_map
                  *    Not available for manually-constructed type descriptions.
@@ -64,18 +68,28 @@ namespace xo {
                 {
                     auto ix = s_native_type_table_map.find(TypeInfoRef(native_tinfo));
 
-                    if ((ix != s_native_type_table_map.end()) && ix->second)
+                    if ((ix != s_native_type_table_map.end()) && ix->second) {
+                        log && log("TypeDescrBase::require"
+                                   ": using s_native_type_table_map[TypeInfoRef(native_tinfo)]");
+
                         return ix->second;
+                    }
                 }
 
                 /* 2. lookup by tinfo hash_code in s_coalesced_type_table_map */
                 {
                     auto ix = s_coalesced_type_table_map.find(TypeInfoRef(native_tinfo));
 
-                    if ((ix != s_coalesced_type_table_map.end()) && ix->second)
+                    if ((ix != s_coalesced_type_table_map.end()) && ix->second) {
+                        log && log("TypeDescrBase::require"
+                                   ": using s_coalesced_type_table_map[TypeInfoRef(native_tinfo)]");
+
                         return ix->second;
+                    }
                 }
             }
+
+            log && log("TypeDescrBase::require: try lookup by canonical name");
 
             /* 3. lookup by canonical_name,  before we create a new slot.
              *
@@ -85,6 +99,7 @@ namespace xo {
                 auto ix = s_canonical_type_table_map.find(canonical_name);
 
                 if (ix != s_canonical_type_table_map.end()) {
+
                     /** assume existing slot, with same canonical name,
                      *  represents the same type as native_tinfo
                      **/
@@ -144,6 +159,8 @@ namespace xo {
             /* allocate slot for a new TypeDescr instance: */
 
             TypeId new_td_id = TypeId::allocate();
+
+            log && log("TypeDescrBase::require", xtag("new_td_id", new_td_id));
 
             if (s_type_table_v.size() <= new_td_id.id())
                 s_type_table_v.resize(new_td_id.id() + 1);

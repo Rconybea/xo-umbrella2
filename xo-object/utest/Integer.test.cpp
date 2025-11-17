@@ -24,8 +24,8 @@ namespace xo {
 
             Object::mm = gc.get();
 
-            gp<Integer> i1 = Integer::make(123);
-            gp<Integer> i2 = Integer::make(-321);
+            gp<Integer> i1 = Integer::make(gc.get(), 123);
+            gp<Integer> i2 = Integer::make(gc.get(), -321);
 
             REQUIRE(i1->value() == 123);
             REQUIRE(i2->value() == -321);

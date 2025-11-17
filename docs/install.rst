@@ -177,14 +177,30 @@ To setup a unit test coverage build/ccov/all-merged
 
 Then run unit tests
 
+.. code-block::
+
     $ (cd .build && ctest)
 
 To build coverage report
+
+.. code-block::
 
     $ (.build/gen-ccov)
 
 Html report in ``.build/ccov/html/index.html``
 
+
+Address Sanitizer Setup
+-----------------------
+
+To run address sanitizer
+
+.. code-block::
+
+    # can reuse phase 1 cmake-macros-install
+
+    # phase 2
+    $ cmake -B .build -S . -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_BUILD_TYPE=asan
 
 Sphinx Autobuild Setup
 ----------------------
