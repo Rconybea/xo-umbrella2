@@ -229,7 +229,11 @@ let
   # xo ide utils
   ideutils = [
     pkgs.gsettings-desktop-schemas
-    pkgs.emacs
+    pkgs.emacs30
+#    (pkgs.emacs.pkgs.withPackages (epkgs: [
+#    ]))
+    # pkgs.emacs-pgtk  # wayland with treesitter; alternatively pkgs.emacs30 for emacs+tree-sitter
+    pkgs.tree-sitter # CLI tool, but not grammars
     pkgs.notmuch
     pkgs.emacsPackages.notmuch
     pkgs.inconsolata-lgc
@@ -241,6 +245,7 @@ let
     pkgs.nix-tree  # note: needs GHC
 
     pkgs.git
+    pkgs.gh    # github cli
     pkgs.cloc
 
     pkgs.lcov
@@ -374,7 +379,7 @@ let
         # CXENV: cosmetic: coordinates with ~/proj/env/dotfiles/bashrc to drive PS1
         export CXENV=$CXENV:xo4
 
-        # override SOUCE_DATE_EPOCH to current time (otherwise will get 1980)
+        # override SOURCE_DATE_EPOCH to current time (otherwise will get 1980)
         export SOURCE_DATE_EPOCH=$(date +%s)
 
         # fonts
@@ -403,6 +408,8 @@ let
         export LIBGL_ALWAYS_SOFTWARE=0
         export MESA_LOADER_DRIVER_OVERRIDE=""
 
+        echo "tree_sitter=${pkgs.tree-sitter}"
+        tree_sitter=${pkgs.tree-sitter}
         echo "nix_mesa=${pkgs.mesa}"
         nix_mesa=${pkgs.mesa}
 
