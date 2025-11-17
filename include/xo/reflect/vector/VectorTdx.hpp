@@ -17,7 +17,7 @@ namespace xo {
             /* named ctor idiom.  create new instance for a vector type */
             //static std::unique_ptr<VectorTdx> make();
 
-            /** @brief true if array elements are stored at regularly-spaced offsetts **/
+            /** @brief true if array elements are stored at regularly-spaced offsets **/
             virtual bool has_contiguous_storage() const = 0;
 
             // ----- Inherited from TypeDescrExtra -----

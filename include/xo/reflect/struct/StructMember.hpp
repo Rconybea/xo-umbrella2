@@ -61,8 +61,9 @@ namespace xo {
             using Memptr = MemberT OwnerT::*;
 
         public:
-            GeneralStructMemberAccessor(Memptr memptr) : member_td_{EstablishTypeDescr::establish<MemberT>()},
-                                                         memptr_{memptr} {}
+            GeneralStructMemberAccessor(Memptr memptr)
+                : member_td_{EstablishTypeDescr::establish<MemberT>()},
+                  memptr_{memptr} {}
             GeneralStructMemberAccessor(GeneralStructMemberAccessor const & x) = default;
             virtual ~GeneralStructMemberAccessor() = default;
 
@@ -214,8 +215,8 @@ namespace xo {
             } /*for_descendant*/
 
             StructMember & operator=(StructMember && x) {
-                member_name_ = std::move(x.member_name_);
-                accessor_ = std::move(x.accessor_);
+                this->member_name_ = std::move(x.member_name_);
+                this->accessor_ = std::move(x.accessor_);
                 return *this;
             }
 
