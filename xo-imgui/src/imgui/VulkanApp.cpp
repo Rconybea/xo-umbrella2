@@ -87,18 +87,22 @@ VulkanApp::create_instance()
         throw std::runtime_error("Failed to get SDL Vulkan extensions!");
     }
 
-#ifdef __apple__
+#ifdef __APPLE__
     // Add portability extension for MoltenVK (macOS)
     extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+#else
+    static_assert(false, "expecting apple build");
 #endif
 
     createInfo.enabledExtensionCount = extensions.size();
     createInfo.ppEnabledExtensionNames = extensions.data();
     createInfo.enabledLayerCount = 0;
 
-#ifdef __apple__
+#ifdef __APPLE__
     // CRITICAL: Enable portability enumeration flag for MoltenVK
     createInfo.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+#else
+    static_assert(false, "expecting apple build");
 #endif
 
     int result = vkCreateInstance(&createInfo, nullptr, &(this->instance_));
@@ -670,6 +674,11 @@ VulkanApp::cleanup_xswapchain()
 void
 VulkanApp::recreate_xswapchain()
 {
+#ifdef __APPLE__
+    // wait one frame. Apple window manager needs time to complete resize
+    SDL_Delay(16);
+#endif
+
     // handle window minimization: wait until window has valid size
     this->wait_not_minimized();
 
