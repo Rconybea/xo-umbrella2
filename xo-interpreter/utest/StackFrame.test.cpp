@@ -101,7 +101,7 @@ namespace xo {
                     REQUIRE(gc->tospace_generation_of(frame.ptr()) == generation_result::nursery);
 
                     for (std::size_t i = 0; i < n; ++i)
-                        frame->lookup(i) = Integer::make(mm, tc.contents_.at(i));
+                        (*frame)[i] = Integer::make(mm, tc.contents_.at(i));
 
                     std::size_t expected_alloc_z = frame->_shallow_size();
                     REQUIRE(expected_alloc_z >= sizeof(StackFrame) + n * sizeof(gp<Object>));
@@ -116,7 +116,7 @@ namespace xo {
 
                     /* verify StackFrame preserved across gc */
                     REQUIRE(gc->tospace_generation_of(frame.ptr()) == generation_result::nursery);
-                    REQUIRE(frame->n_slot() == n);
+                    REQUIRE(frame->size() == n);
                     for (std::size_t i = 0; i < n; ++i) {
                         //REQUIRE(Integer::from(frame->lookup(i)).ptr());
                         //REQUIRE(Integer::from(frame->lookup(i))->value() == tc.contents_.at(i));

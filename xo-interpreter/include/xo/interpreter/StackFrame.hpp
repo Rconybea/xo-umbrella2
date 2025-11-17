@@ -2,10 +2,41 @@
 
 #include "xo/alloc/IAlloc.hpp"
 #include "xo/alloc/Object.hpp"
+#include <cstddef>
 #include <cstdint>
 
 namespace xo {
     namespace scm {
+        /** gc-only vector
+         **/
+        template <typename ElementType>
+        class CVector {
+        public:
+            using value_type = ElementType;
+
+        public:
+            CVector(gc::IAlloc * mm, std::size_t n)
+                : n_{n}, v_{nullptr}
+                {
+                    if (n_ > 0) {
+                        std::byte * mem = mm->alloc(n_ * sizeof(ElementType));
+                        this->v_ = new (mem) ElementType[n];
+                    }
+                }
+
+            std::size_t size() const { return n_; }
+
+            ElementType operator[](std::size_t i) const { return v_[i]; }
+            ElementType & operator[](std::size_t i) { return v_[i]; }
+
+            friend class StackFrame;
+        private:
+            /** number of elements in @ref v_ **/
+            std::size_t n_ = 0;
+            /** contiguous array of pointers **/
+            ElementType * v_ = nullptr;
+        };
+
         /** @class StackFrame
          *  @brief Represent a single runtime stack frame for a Schematika function
          *
@@ -15,26 +46,26 @@ namespace xo {
          *
          *  memory layout:
          *
-         *     +------------+
-         *     | vtable     |
-         *     +------------+
-         *     | .n_        |
-         *     +------------+
-         *     | .v_      +------\
-         *     +------------+ <--/
-         *     | .v_[0]     |
-         *     +------------+
-         *     .     ..     .
-         *     +------------+
-         *     | .v_[.n_-1] |
-         *     +------------+
+         *     +-----------------------+
+         *     | vtable                |
+         *     +------------+----------+
+         *     | .slot_v_   | .n_      |
+         *     |            +----------+
+         *     |            | .v_    +------\
+         *     +------------+----------+ <--/
+         *     | .v_[0]                |
+         *     +-----------------------+
+         *     .            ..         .
+         *     +-----------------------+
+         *     | .v_[.n_-1]            |
+         *     +-----------------------+
          **/
         class StackFrame : public Object {
         public:
             using TaggedPtr = xo::reflect::TaggedPtr;
 
         public:
-            StackFrame(gc::IAlloc * mm, std::size_t n_slot);
+            StackFrame(gc::IAlloc * mm, std::size_t n) : slot_v_{mm, n} {}
 
             /** create frame using allocator @p mm,
              *  with exactly @p n_slot object pointers
@@ -44,12 +75,10 @@ namespace xo {
             /** reflect StackFrame object representation **/
             static void reflect_self();
 
-            std::size_t n_slot() const { return n_slot_; }
-            gp<Object> lookup(std::size_t i) const { return v_[i]; }
-            gp<Object> & lookup(std::size_t i) { return v_[i]; }
+            std::size_t size() const { return slot_v_.size(); }
 
-            gp<Object> operator[](std::size_t i) const { return lookup(i); }
-            gp<Object> & operator[](std::size_t i) { return lookup(i); }
+            gp<Object> operator[](std::size_t i) const { return slot_v_[i]; }
+            gp<Object> & operator[](std::size_t i) { return slot_v_[i]; }
 
             // inherited from Object..
             virtual TaggedPtr self_tp() const final override;
@@ -59,10 +88,8 @@ namespace xo {
             virtual std::size_t _forward_children() final override;
 
         private:
-            /** number of elements in frame **/
-            std::size_t n_slot_ = 0;
-            /** contiguous array of object pointers: v[0] .. v[n-1] **/
-            gp<Object> * v_ = nullptr;
+            /** stack frame contents **/
+            CVector<gp<Object>> slot_v_;
         };
     } /*namespace scm*/
 } /*namespace xo*/

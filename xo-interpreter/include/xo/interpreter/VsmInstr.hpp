@@ -20,7 +20,7 @@ namespace xo {
 
         private:
             std::string_view name_;
-            ActionFn action_;
+            //ActionFn action_;
         };
     }
 }

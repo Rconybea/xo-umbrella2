@@ -254,15 +254,12 @@ namespace xo {
             template<typename T>
             static TaggedRcptr make_rctp(T * x) { return TaggedPtrMaker<T>::make_rctp(x); }
 
-        private:
-
             template <typename T>
             static detail::InvokerAux<T> * get_final_invoker() {
                 static detail::InvokerAux<T> s_final_invoker;
 
                 return &s_final_invoker;
             }
-
         }; /*Reflect*/
 
         // ----- MakeTagged -----

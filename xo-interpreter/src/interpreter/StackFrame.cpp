@@ -8,7 +8,11 @@
 namespace xo {
     using xo::reflect::Reflect;
     using xo::reflect::StructReflector;
+    using xo::reflect::TypeDescrW;
     using xo::reflect::TaggedPtr;
+    using xo::reflect::TypeDescrExtra;
+    using xo::reflect::EstablishTypeDescr;
+    using xo::reflect::StlVectorTdx;
     using xo::print::quot;
 
     namespace scm {
@@ -19,20 +23,10 @@ namespace xo {
             }
         }
 
-        StackFrame::StackFrame(gc::IAlloc * mm, std::size_t n_slot)
-            : n_slot_{n_slot}, v_{nullptr}
-        {
-            if (n_slot > 0) {
-                std::byte * mem = mm->alloc(slot_array_size(n_slot));
-
-                this->v_ = new (mem) gp<Object>[n_slot];
-            }
-        }
-
         gp<StackFrame>
-        StackFrame::make(gc::IAlloc * mm, std::size_t n_slot)
+        StackFrame::make(gc::IAlloc * mm, std::size_t n)
         {
-            return new (MMPtr(mm)) StackFrame(mm, n_slot);
+            return new (MMPtr(mm)) StackFrame(mm, n);
         }
 
         TaggedPtr
@@ -45,7 +39,7 @@ namespace xo {
         StackFrame::display(std::ostream & os) const
         {
             os << "<stack-frame"
-               << xtag("n_slot", n_slot_);
+               << xtag("n", slot_v_.size());
 
 #ifdef NOT_YET
             for (std::size_t i = 0, n = n_slot(); i < n; ++i) {
@@ -64,7 +58,7 @@ namespace xo {
         {
             std::size_t retval = sizeof(StackFrame);
 
-            retval += gc::IAlloc::with_padding(slot_array_size(n_slot_));
+            retval += gc::IAlloc::with_padding(slot_array_size(slot_v_.size()));
 
             return retval;
         }
@@ -74,12 +68,14 @@ namespace xo {
         {
             Cpof cpof(Object::mm, this);
 
-            StackFrame * copy = new (cpof) StackFrame(cpof.mm_, n_slot_);
+            size_t z = size();
 
-            void * v_dest = copy->v_;
+            StackFrame * copy = new (cpof) StackFrame(cpof.mm_, z);
 
-            if (v_) {
-                ::memcpy(v_dest, v_, slot_array_size(n_slot_));
+            void * v_dest = copy->slot_v_.v_;
+
+            if (slot_v_.v_) {
+                ::memcpy(v_dest, slot_v_.v_, slot_array_size(z));
             }
 
 #ifdef OBSOLETE
@@ -94,8 +90,8 @@ namespace xo {
         std::size_t
         StackFrame::_forward_children()
         {
-            for (std::size_t i = 0, n = n_slot_; i < n; ++i) {
-                Object::_forward_inplace(lookup(i));
+            for (std::size_t i = 0, n = slot_v_.size(); i < n; ++i) {
+                Object::_forward_inplace((*this)[i]);
             }
 
             return _shallow_size();
@@ -107,11 +103,24 @@ namespace xo {
             StructReflector<StackFrame> sr;
 
             if (sr.is_incomplete()) {
-                REFLECT_MEMBER(sr, n_slot);
+                /* reflect CVector<gp<Object>>
+                 *
+                 * note: placement here works b/c CVector<T> not used anywhere else
+                 */
+                using VectorType = CVector<gp<Object>>;
 
-                // non-trivial to reflect frame members,
-                // effectively need separate reflection for each cardinality;
-                // or: reflect .v_[] as nested element
+                /* custom reflection for array of Object pointers.
+                 * Can use StlVectorTdx here, treating CVector<T> as a vector
+                 * via .size() and .operator[] members
+                 */
+                std::unique_ptr<TypeDescrExtra> tdx1
+                    = std::make_unique<StlVectorTdx<VectorType>>();
+                TypeDescrW td1
+                    = EstablishTypeDescr::establish<VectorType>();
+                td1->assign_tdextra(Reflect::get_final_invoker<VectorType>(),
+                                    std::move(tdx1));
+
+                REFLECT_MEMBER(sr, slot_v);
             }
         }
     } /*namespace scm*/

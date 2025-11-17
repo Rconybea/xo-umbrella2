@@ -98,7 +98,7 @@ void
 AppState::generate_random_mutation() {
     if (rng_() % 1000 > (5 * 1000) / 7) {
         /* p=16% integer */
-        gc_root_v_[next_root_++] = Integer::make(next_int_);
+        gc_root_v_[next_root_++] = Integer::make(gc_.get(), next_int_);
     } else if (rng_() % 1000 > (3 * 1000) / 7) {
         /* p=16% cons */
         gp<Object> random_car = gc_root_v_.at(rng_() % gc_root_v_.size());

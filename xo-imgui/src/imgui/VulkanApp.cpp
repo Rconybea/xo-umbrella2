@@ -691,9 +691,9 @@ VulkanApp::wait_not_minimized()
 {
     int width = 0;
     int height = 0;
-    SDL_GetWindowSize(window_, &width, &height);
+    SDL_Vulkan_GetDrawableSize(window_, &width, &height);
     while (width == 0 || height == 0) {
-        SDL_GetWindowSize(window_, &width, &height);
+        SDL_Vulkan_GetDrawableSize(window_, &width, &height);
         SDL_WaitEvent(nullptr);
     }
 }
