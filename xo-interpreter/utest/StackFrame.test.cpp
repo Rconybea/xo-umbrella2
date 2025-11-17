@@ -33,6 +33,7 @@ namespace xo {
                 Testcase_StackFrame({}),
                 Testcase_StackFrame({}),
                 Testcase_StackFrame({111}),
+                Testcase_StackFrame({111, 222}),
             };
         }
 
