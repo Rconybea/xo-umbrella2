@@ -246,8 +246,11 @@ let
     pkgs.lcov
     pkgs.catch2
     pkgs.gdb
+  ]
+  ++ (if pkgs.stdenv.isLinux then [
     pkgs.strace
-
+  ] else [])
+  ++ [
     pkgs.which
     pkgs.man
     pkgs.man-pages
@@ -295,11 +298,16 @@ let
     [
       # glew: used for opengl apps;  not needed for vulkan apps (even when those apps use opengl)
       pkgs.glew
+    ] ++ pkgs.lib.optionals pkgs.stdenv.isLinux [
       pkgs.mesa-demos
+    ] ++ [
       pkgs.libGL
     ];
 
   vkdeps =
+    pkgs.lib.optionals pkgs.stdenv.isDarwin [
+      pkgs.darwin.moltenvk
+    ] ++
     [
       pkgs.vulkan-tools
       pkgs.vulkan-loader
@@ -651,12 +659,44 @@ in
     '';
   };
 
+  # nov 2025 - try to get xo-imgui working on osx again
+  # WIP !  plan:
+  #  1 - get this to work as standalone copy of shell4-assembly
+  #  2 - merge to look like shell4-wsl / shell4-nvidia
+  #
+  shell4-osx = pkgs.mkShell {
+    buildInputs = docutils ++ xodeps ++ devutils ++ ideutils ++ x11utils ++ gldeps ++ vkdeps ++ imguideps;
+
+    shellHook =
+      ''
+      export CXENV=$CXENV:xo4-WIP
+
+        # override SOUCE_DATE_EPOCH to current time (otherwise will get 1980)
+        export SOURCE_DATE_EPOCH=$(date +%s)
+
+        # fonts
+        export FONTCONFIG_FILE=${fonts}
+        export FONTCONFIG_PATH=${pkgs.fontconfig.out}/etc/fonts
+        export DEJAVU_FONTS_PATH=${pkgs.dejavu_fonts}/share/fonts
+        ${pkgs.fontconfig}/bin/fc-cache -f
+
+      # would set vk-icd-filename to this + call shell4-assembly
+      export VK_ICD_FILENAMES=${pkgs.darwin.moltenvk}/share/vulkan/icd.d/MoltenVK_icd.json
+
+      # already baked in to shell4-assembly
+      export VK_LAYER_PATH=${pkgs.vulkan-validation-layers}/share/vulkan/explicit_layer.d
+
+      # dependencies on host system libraries
+      # glpath = pkgs.lib.makeLibraryPath [ ];
+      '';
+  };
+
   # like shell4 but drop etc/hostwsl2 symlink dir.
   # looks like nixpkgs mesa not built for wsl2 dxg
   # works with opengl (llvmpipe) and vulkan
   #
   shell5 = pkgs.mkShell {
-    buildInputs = docutils ++ xodeps ++ devutils ++ ideutils ++ x11utils ++ gldeps ++ vkdeps ++ imguideps;
+    buildInputs = docutils ++ xodeps ++ devutils ++ ideutils ++ x11utils ++ gldeps ++ vkdeps ++ imguideps ++ imguideps;
 
     shellHook =
       let
