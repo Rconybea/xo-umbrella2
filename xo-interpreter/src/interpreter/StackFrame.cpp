@@ -24,9 +24,9 @@ namespace xo {
         }
 
         gp<StackFrame>
-        StackFrame::make(gc::IAlloc * mm, std::size_t n)
+        StackFrame::make(gc::IAlloc * mm, gp<StackFrame> p, std::size_t n)
         {
-            return new (MMPtr(mm)) StackFrame(mm, n);
+            return new (MMPtr(mm)) StackFrame(mm, p, n);
         }
 
         TaggedPtr
@@ -70,7 +70,7 @@ namespace xo {
 
             size_t z = size();
 
-            StackFrame * copy = new (cpof) StackFrame(cpof.mm_, z);
+            StackFrame * copy = new (cpof) StackFrame(cpof.mm_, parent_, z);
 
             void * v_dest = copy->slot_v_.v_;
 
@@ -90,6 +90,7 @@ namespace xo {
         std::size_t
         StackFrame::_forward_children()
         {
+            Object::_forward_inplace(parent_);
             for (std::size_t i = 0, n = slot_v_.size(); i < n; ++i) {
                 Object::_forward_inplace((*this)[i]);
             }
@@ -120,6 +121,7 @@ namespace xo {
                 td1->assign_tdextra(Reflect::get_final_invoker<VectorType>(),
                                     std::move(tdx1));
 
+                REFLECT_MEMBER(sr, parent);
                 REFLECT_MEMBER(sr, slot_v);
             }
         }

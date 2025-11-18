@@ -12,4 +12,4 @@ xo_headeronly_dependency(${SELF_LIB} xo_reflectutil)
 xo_headeronly_dependency(${SELF_LIB} xo_unit)
 xo_headeronly_dependency(${SELF_LIB} callback)
 xo_dependency(${SELF_LIB} xo_alloc)
-xo_dependency(${SELF_LIB} reflect)
+#xo_dependency(${SELF_LIB} reflect)  # should be able to get this indirectly via xo_alloc

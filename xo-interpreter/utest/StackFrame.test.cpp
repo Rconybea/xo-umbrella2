@@ -53,7 +53,7 @@ namespace xo {
                 Object::mm = alloc.get();
 
                 std::size_t n = tc.contents_.size();
-                gp<StackFrame> frame = StackFrame::make(alloc.get(), n);
+                gp<StackFrame> frame = StackFrame::make(alloc.get(), nullptr /*parent*/, n);
 
                 TaggedPtr tp = frame->self_tp();
 
@@ -94,7 +94,7 @@ namespace xo {
                     gc->add_gc_root(reinterpret_cast<Object **>(&x));
                     REQUIRE(gc->tospace_generation_of(x.ptr()) == generation_result::nursery);
 
-                    gp<StackFrame> frame = StackFrame::make(gc.get(), n);
+                    gp<StackFrame> frame = StackFrame::make(gc.get(), nullptr /*parent*/, n);
                     StackFrame ** frame_pp = frame.ptr_address();
                     gc->add_gc_root(reinterpret_cast<Object **>(frame_pp));
 

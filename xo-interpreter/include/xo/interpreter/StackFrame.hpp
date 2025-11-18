@@ -1,7 +1,7 @@
 /** @file StackFrame.hpp **/
 
 #include "xo/alloc/IAlloc.hpp"
-#include "xo/alloc/Object.hpp"
+#include "Env.hpp"
 #include <cstddef>
 #include <cstdint>
 
@@ -45,19 +45,21 @@ namespace xo {
          *  @ref StackFrame class
          *
          *  memory layout:
-         *
-         *     +-----------------------+
-         *     | vtable                |
+         *                                  ^
+         *     +-----------------------+    |
+         *     | vtable                |    |
+         *     +-----------------------+    |
+         *     | .parent             +------/
          *     +------------+----------+
          *     | .slot_v_   | .n_      |
          *     |            +----------+
          *     |            | .v_    +------\
          *     +------------+----------+ <--/
-         *     | .v_[0]                |
+         *     | .v_[0]              +---------> Object(1)
          *     +-----------------------+
          *     .            ..         .
          *     +-----------------------+
-         *     | .v_[.n_-1]            |
+         *     | .v_[.n_-1]          +---------> Object(n)
          *     +-----------------------+
          **/
         class StackFrame : public Object {
@@ -65,16 +67,17 @@ namespace xo {
             using TaggedPtr = xo::reflect::TaggedPtr;
 
         public:
-            StackFrame(gc::IAlloc * mm, std::size_t n) : slot_v_{mm, n} {}
+            StackFrame(gc::IAlloc * mm, gp<StackFrame> p, std::size_t n) : parent_{p}, slot_v_{mm, n} {}
 
             /** create frame using allocator @p mm,
-             *  with exactly @p n_slot object pointers
+             *  with parent @p p and exactly @p n_slot object pointers
              **/
-            static gp<StackFrame> make(gc::IAlloc * mm, std::size_t n_slot);
+            static gp<StackFrame> make(gc::IAlloc * mm, gp<StackFrame> p, std::size_t n_slot);
 
             /** reflect StackFrame object representation **/
             static void reflect_self();
 
+            gp<StackFrame> parent() const { return parent_; }
             std::size_t size() const { return slot_v_.size(); }
 
             gp<Object> operator[](std::size_t i) const { return slot_v_[i]; }
@@ -88,6 +91,8 @@ namespace xo {
             virtual std::size_t _forward_children() final override;
 
         private:
+            /** parent stack frame **/
+            gp<StackFrame> parent_;
             /** stack frame contents **/
             CVector<gp<Object>> slot_v_;
         };
