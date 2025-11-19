@@ -3,18 +3,38 @@
  *  @author Roland Conybeare, Nov 2025
  **/
 
-#pramga once
+#pragma once
 
-
+#include "xo/alloc/IAlloc.hpp"
 
 namespace xo {
     namespace scm {
-
         /** @class Schematika
          *  @brief schematika interpreter state
          **/
         class Schematika {
         public:
+            class Impl;
+
+            struct Config {
+                /** true to enable welcome message **/
+                bool welcome_flag_ = true;
+                /** number of command history items to preserve **/
+                std::size_t history_size = 100;
+                /** on startup: load command history from this file;
+                    persist last @ref history_size commands to the same file
+                 **/
+                std::string history_file = "scm_history.txt";
+                /** when true enable console logging for repl internals **/
+                bool debug_flag = false;
+            };
+
+        public:
+            ~Schematika();
+
+            /** create instance with configuration @p cfg **/
+            static Schematika make(const Config & cfg);
+
             /** interactive read-eval-print loop.
              *  Uses replxx to read from stdin.
              *  If stdin is interactive, accepts line editing commands:
@@ -31,8 +51,10 @@ namespace xo {
             void interactive_repl();
 
         private:
-            class Impl;
-            std::unique_ptr<Impl> p_impl_;
+            Schematika(const Config & cfg);
+
+        private:
+            up<Impl> p_impl_;
         };
     }
 }
