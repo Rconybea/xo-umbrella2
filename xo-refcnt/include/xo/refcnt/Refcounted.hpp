@@ -80,6 +80,11 @@ namespace xo {
                 x.ptr_ = nullptr;
             }
 
+            /** convenience tests for static_assert() **/
+            static constexpr bool is_rc_ptr = true;
+            /** see also: xo/alloc/Object.hpp **/
+            static constexpr bool is_gc_ptr = false;
+
             /* aliasing ctor.  see ctor (8) here:
              *   [[https://en.cppreference.com/w/cpp/memory/shared_ptr/shared_ptr]]
              * and this dicsussion:
