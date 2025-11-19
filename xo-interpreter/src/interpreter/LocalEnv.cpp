@@ -1,4 +1,4 @@
-s/** @file LocalEnv.cpp **/
+/** @file LocalEnv.cpp **/
 
 #include "LocalEnv.hpp"
 #include "xo/reflect/Reflect.hpp"
