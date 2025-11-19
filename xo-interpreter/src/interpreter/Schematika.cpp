@@ -4,6 +4,7 @@
  **/
 
 #include "Schematika.hpp"
+#include "VirtualSchematikaMachine.hpp"
 #include "xo/reader/reader.hpp"
 #include <replxx.hxx>
 #include <ostream>
@@ -35,6 +36,8 @@ namespace xo {
         private:
             /** configuration **/
             Config config_;
+            /** schematika interpreter **/
+            VirtualSchematikaMachine vsm_;
         };
 
         void
@@ -151,7 +154,23 @@ namespace xo {
                         ppconfig ppc;
                         ppstate_standalone pps(&cout, 0, &ppc);
 
-                        pps.prettyn(expr);
+                        //pps.prettyn(expr);
+
+                        // TODO:
+                        auto [ value, scm_error ] = this->vsm_.eval(expr);
+
+                        if (scm_error.is_error()) {
+                            /* print error */
+
+                            cout << "scm error: " << scm_error.what() << endl;
+                            cout << "top-level expression: " << expr << endl;
+                        } else {
+                            /* print value */
+
+                            cout << "scm result:" << endl;
+                            pps.pretty(value);
+                        }
+
                     } else if (error.is_error()) {
                         cout << "parsing error (detected in " << error.src_function() << "): " << endl << endl;
                         error.report(cout);

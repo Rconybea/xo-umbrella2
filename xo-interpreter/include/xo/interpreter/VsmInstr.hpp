@@ -16,9 +16,29 @@ namespace xo {
         class VsmInstr
         {
         public:
-            using ActionFn = void (*)(VirtualSchematikaMachine * vm);
+            enum class Opcode {
+                /** Halt virtual schematika machine **/
+                halt,
+
+                /** Evaluate a schematika expression.
+                 *  See VirtualSchematikaMachine::eval()
+                 **/
+                eval,
+
+                N_Opcode
+            };
+
+            //using ActionFn = void (*)(VirtualSchematikaMachine * vm);
+
+        public:
+            VsmInstr(Opcode opcode, std::string_view name);
+
+            Opcode opcode() const { return opcode_; }
 
         private:
+            /** unique opcode for this instruction **/
+            Opcode opcode_;
+            /** **/
             std::string_view name_;
             //ActionFn action_;
         };

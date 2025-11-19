@@ -7,6 +7,7 @@ set(SELF_SRCS
     LocalEnv.cpp
     GlobalEnv.cpp
     VirtualSchematikaMachine.cpp
+    VsmInstr.cpp
 )
 
 find_package(Threads REQUIRED)
