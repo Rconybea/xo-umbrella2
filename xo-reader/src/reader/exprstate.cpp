@@ -68,8 +68,7 @@ namespace xo {
         exprstate::on_def_token(const token_type & tk,
                                 parserstatemachine * p_psm)
         {
-            constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG(p_psm->debug_flag()));
 
             log && log(xtag("exstype", p_psm->top_exprstate().exs_type()));
 
@@ -357,8 +356,7 @@ namespace xo {
         exprstate::on_input(const token_type & tk,
                             parserstatemachine * p_psm)
         {
-            constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG(p_psm->debug_flag()));
             log && log(xtag("tk", tk));
             log && log(xtag("state", *this));
             log && log(xtag("psm", p_psm));

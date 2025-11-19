@@ -1,16 +1,16 @@
-/** @file exprreplxx.cpp **/
+/** @file replxx.cpp **/
 
 #include "xo/reader/reader.hpp"
 #include <replxx.hxx>
 #include <iostream>
 #include <unistd.h> // for isatty
 
-// presumeably replxx assumes input is a tty
+// similar helper in exprreplxx.cpp
 //
 bool replxx_getline(bool interactive,
                     std::size_t parser_stack_size,
                     replxx::Replxx & rx,
-                    std::string& input)
+                    std::string & input)
 {
     using namespace std;
 
@@ -23,17 +23,14 @@ bool replxx_getline(bool interactive,
             prompt = ". ";
     }
 
+    /* input_cstr: next line of input from replxx library */
     const char * input_cstr = rx.input(prompt);
 
     bool retval = (input_cstr != nullptr);
 
     if (retval) {
-        //cerr << "got reval->true" << endl;
-
+        /* got new input */
         input = input_cstr;
-
-    } else {
-        //cerr << "got retval->false" << endl;
     }
 
     rx.history_add(input);
@@ -44,7 +41,7 @@ bool replxx_getline(bool interactive,
 }
 
 void
-welcome(std::ostream& os)
+welcome(std::ostream & os)
 {
     using namespace std;
 
@@ -81,7 +78,7 @@ main()
 //    rx.bind_key_internal(Replxx::KEY::control('p'), "history_previous");
 //    rx.bind_key_internal(Replxx::KEY::control('n'), "history_next");
 
-    constexpr bool c_debug_flag = true;
+    constexpr bool c_debug_flag = false;
 
     reader rdr(c_debug_flag);
     rdr.begin_interactive_session();
@@ -139,3 +136,5 @@ main()
 
     rx.history_save("repl_history.txt");
 }
+
+/* end replxx.cpp */

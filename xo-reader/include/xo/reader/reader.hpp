@@ -80,6 +80,8 @@ namespace xo {
         public:
             explicit reader(bool debug_flag);
 
+            bool debug_flag() const { return parser_.debug_flag(); }
+
             /** call once before calling .read_expr()
              *  for a new interactive session
              **/

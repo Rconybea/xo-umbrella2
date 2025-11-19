@@ -339,8 +339,7 @@ namespace xo {
         progress_xs::on_expr_with_semicolon(bp<Expression> expr,
                                             parserstatemachine * p_psm)
         {
-            constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG(p_psm->debug_flag()));
 
             log && log(xtag("lhs", lhs_), xtag("op", op_type_), xtag("expr", expr));
 
@@ -606,8 +605,7 @@ namespace xo {
         progress_xs::on_operator_token(const token_type & tk,
                                        parserstatemachine * p_psm)
         {
-            constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG(p_psm->debug_flag()));
 
             constexpr const char * c_self_name = "progress_xs::on_operator_token";
 
