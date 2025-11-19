@@ -18,7 +18,7 @@ namespace xo {
          **/
         class Env : public Object {
         public:
-            //gp<Object> lookup_symbol(xxx);
+            //gp<Object> lookup_symbol(const std::string & name) const;
         };
     } /*namespace scm*/
 } /*namespace xo*/

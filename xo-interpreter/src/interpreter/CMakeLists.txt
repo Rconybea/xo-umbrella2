@@ -3,8 +3,9 @@
 set(SELF_LIB xo_interpreter)
 set(SELF_SRCS
     init_interpreter.cpp
-    StackFrame.cpp
     Schematika.cpp
+    LocalEnv.cpp
+    GlobalEnv.cpp
     VirtualSchematikaMachine.cpp
 )
 
