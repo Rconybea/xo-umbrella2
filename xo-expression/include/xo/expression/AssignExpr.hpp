@@ -37,7 +37,7 @@ namespace xo {
             virtual std::size_t visit_preorder(VisitFn visitor_fn) override;
             virtual std::size_t visit_layer(VisitFn visitor_fn) override;
             virtual rp<Expression> xform_layer(TransformFn xform_fn) override;
-            virtual void attach_envs(bp<Environment> p) override;
+            virtual void attach_envs(bp<SymbolTable> p) override;
 
             virtual void display(std::ostream & os) const override;
             virtual std::uint32_t pretty_print(const ppindentinfo & ppii) const override;

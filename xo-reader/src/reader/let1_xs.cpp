@@ -17,8 +17,8 @@ namespace xo {
     using Apply = xo::scm::Apply;
     using Lambda = xo::scm::Lambda;
     using LambdaAccess = xo::scm::LambdaAccess;
-    using Environment = xo::scm::Environment;
-    using LocalEnv = xo::scm::LocalEnv;
+    using Environment = xo::scm::SymbolTable;
+    using LocalEnv = xo::scm::LocalSymtab;
     using Variable = xo::scm::Variable;
 
     namespace scm {
@@ -37,7 +37,7 @@ namespace xo {
                        const rp<Expression> & rhs,
                        parserstatemachine * p_psm)
         {
-            rp<Environment> parent_env = p_psm->top_envframe().promote();
+            rp<SymbolTable> parent_env = p_psm->top_envframe().promote();
             rp<Variable> var1 = Variable::make(lhs_name, rhs->valuetype());
             rp<LocalEnv> let_env = LocalEnv::make1(var1, parent_env);
 
@@ -136,7 +136,7 @@ namespace xo {
 
             std::string lambda_name = Variable::gensym("let1");
 
-            rp<Environment> parent_env = p_psm->top_envframe().promote();
+            rp<SymbolTable> parent_env = p_psm->top_envframe().promote();
 
             rp<Expression> lambda
                 = Lambda::make_from_env(lambda_name,

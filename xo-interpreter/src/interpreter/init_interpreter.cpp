@@ -4,16 +4,16 @@
  */
 
 #include "init_interpreter.hpp"
-#include "StackFrame.hpp"
+#include "LocalEnv.hpp"
 #include "xo/subsys/Subsystem.hpp"
 
 namespace xo {
-    using xo::scm::StackFrame;
+    using xo::scm::LocalEnv;
 
     void
     InitSubsys<S_interpreter_tag>::init()
     {
-        StackFrame::reflect_self();
+        LocalEnv::reflect_self();
     }
 
     InitEvidence

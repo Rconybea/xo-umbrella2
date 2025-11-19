@@ -8,7 +8,7 @@
 xxx;
 
 #include "xo/expression/Variable.hpp"
-#include "xo/expression/LocalEnv.hpp"
+#include "xo/expression/LocalSymtab.hpp"
 #include <vector>
 
 namespace xo {

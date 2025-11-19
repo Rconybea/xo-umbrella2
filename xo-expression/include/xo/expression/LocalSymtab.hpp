@@ -1,11 +1,11 @@
-/* file LocalEnv.hpp
+/* file LocalSymtab.hpp
  *
  * author: Roland Conybeare, Jun 2024
  */
 
 #pragma once
 
-#include "Environment.hpp"
+#include "SymbolTable.hpp"
 #include "Variable.hpp"
 #include "xo/reflect/TypeDescr.hpp"
 
@@ -20,20 +20,20 @@ namespace xo {
          *  parameters,  but also links to @ref Environment for
          *  innermost enclosing @ref Lambda.
          **/
-        class LocalEnv : public Environment {
+        class LocalSymtab : public SymbolTable {
         public:
             using TypeDescr = xo::reflect::TypeDescr;
 
         public:
-            static rp<LocalEnv> make_empty();
+            static rp<LocalSymtab> make_empty();
             /** named ctor idiom.  Create instance with local variables per @p argv **/
-            static rp<LocalEnv> make(const std::vector<rp<Variable>> & argv,
-                                     const rp<Environment> & parent_env);
+            static rp<LocalSymtab> make(const std::vector<rp<Variable>> & argv,
+                                        const rp<SymbolTable> & parent_env);
             /** Create instance with single local variable @ap argv1 **/
-            static rp<LocalEnv> make1(const rp<Variable> & arg1,
-                                      const rp<Environment> & parent_env);
+            static rp<LocalSymtab> make1(const rp<Variable> & arg1,
+                                         const rp<SymbolTable> & parent_env);
             /** runtime downcast. nullptr if @p x is not a LocalEnv instance **/
-            static bp<LocalEnv> from(const bp<Environment> & x) { return bp<LocalEnv>::from(x); }
+            static bp<LocalSymtab> from(const bp<SymbolTable> & x) { return bp<LocalSymtab>::from(x); }
 
             Lambda * origin() const { return origin_; }
             const std::vector<rp<Variable>> & argv() const { return argv_; }
@@ -53,7 +53,7 @@ namespace xo {
             }
 
             /** single-assign this environment's parent **/
-            void assign_parent(bp<Environment> p);
+            void assign_parent(bp<SymbolTable> p);
 
             // ----- Environment -----
 
@@ -91,7 +91,7 @@ namespace xo {
             virtual std::uint32_t pretty_print(const print::ppindentinfo & ppii) const override;
 
         private:
-            LocalEnv(const std::vector<rp<Variable>> & argv, const rp<Environment> & parent_env);
+            LocalSymtab(const std::vector<rp<Variable>> & argv, const rp<SymbolTable> & parent_env);
 
         private:
             /** Lambda for which this environment created.
@@ -103,17 +103,21 @@ namespace xo {
              **/
             Lambda * origin_ = nullptr;
 
-            /** formal argument names **/
+            /** formal argument names.
+             *  all variables in @ref argv_ have distinct names.
+             *  if @c .lookup_binding(vname) returns a binding path with @c .i_link=0 and @c .j_slot=j
+             *  then @c argv_[j]->name_ is @c vname.
+             **/
             std::vector<rp<Variable>> argv_;
 
             /** parent environment.  A free variable in this lambda's
              *  body will be resolved by referring them to @ref parent_env_.
              **/
-            rp<Environment> parent_env_;
+            rp<SymbolTable> parent_env_;
         };
 
     } /*namespace scm*/
 } /*namespace xo*/
 
 
-/* end LocalEnv.hpp */
+/* end LocalSymtab.hpp */

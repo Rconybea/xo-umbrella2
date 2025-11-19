@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "xo/expression/LocalEnv.hpp"
+#include "xo/expression/LocalSymtab.hpp"
 
 namespace xo {
     namespace scm {
@@ -34,16 +34,16 @@ namespace xo {
              **/
             void upsert(bp<Variable> target);
 
-            bp<Environment> top_envframe() const;
-            void push_envframe(const rp<Environment> & x);
-            rp<Environment> pop_envframe();
+            bp<SymbolTable> top_envframe() const;
+            void push_envframe(const rp<SymbolTable> & x);
+            rp<SymbolTable> pop_envframe();
 
             void reset_to_toplevel() { stack_.resize(1); }
 
             /** relative to top-of-stack.
              *  0 -> top (last in),  z-1 -> bottom (first in)
              **/
-            bp<Environment> operator[](std::size_t i) {
+            bp<SymbolTable> operator[](std::size_t i) {
                 std::size_t z = stack_.size();
 
                 assert(i < z);
@@ -51,7 +51,7 @@ namespace xo {
                 return stack_[z - i - 1].get();
             }
 
-            bp<Environment> operator[](std::size_t i) const {
+            bp<SymbolTable> operator[](std::size_t i) const {
                 std::size_t z = stack_.size();
 
                 assert(i < z);
@@ -63,7 +63,7 @@ namespace xo {
             bool pretty_print(const ppindentinfo & ppii) const;
 
         private:
-            std::vector<rp<Environment>> stack_;
+            std::vector<rp<SymbolTable>> stack_;
         };
 
         inline std::ostream &

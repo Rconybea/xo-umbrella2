@@ -6,13 +6,13 @@
 #pragma once
 
 #include "exprstate.hpp"
-#include "xo/expression/LocalEnv.hpp"
+#include "xo/expression/LocalSymtab.hpp"
 
 namespace xo {
     namespace scm {
         class let1_xs : public exprstate {
         public:
-            using LocalEnv = xo::scm::LocalEnv;
+            using LocalEnv = xo::scm::LocalSymtab;
 
         public:
             /** given local definition equivalent to

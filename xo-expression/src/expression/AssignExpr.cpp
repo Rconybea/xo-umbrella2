@@ -77,7 +77,7 @@ namespace xo {
         }
 
          void
-         AssignExpr::attach_envs(bp<Environment> p) {
+         AssignExpr::attach_envs(bp<SymbolTable> p) {
              lhs_->attach_envs(p);
              rhs_->attach_envs(p);
          }

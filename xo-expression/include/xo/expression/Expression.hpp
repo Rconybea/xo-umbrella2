@@ -13,7 +13,7 @@ namespace xo {
     namespace scm {
         class Variable; /* see Variable.hpp */
         class Lambda;   /* see Lamnbda.hpp */
-        class Environment; /* see Environment.hpp */
+        class SymbolTable; /* see SymbolTable.hpp */
 
         /** @class Expression
          *  @brief abstract syntax tree for an EGAD program
@@ -72,7 +72,7 @@ namespace xo {
              *    from @p X.argv
              *  - resolve free variables from @p parent
              **/
-            virtual void attach_envs(bp<Environment> parent) = 0;
+            virtual void attach_envs(bp<SymbolTable> parent) = 0;
 
             /** append to *p_set the set of free variables in this expression.
              *  returns the number of free variables introduced

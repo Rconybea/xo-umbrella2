@@ -11,7 +11,7 @@
 #include "xo/expression/pretty_expression.hpp"
 
 namespace xo {
-    using xo::scm::LocalEnv;
+    using xo::scm::LocalSymtab;
     using xo::scm::Variable;
 
     namespace scm {
@@ -45,12 +45,12 @@ namespace xo {
             xs_stack_.push_exprstate(std::move(x));
         }
 
-        bp<Environment>
+        bp<SymbolTable>
         parserstatemachine::top_envframe() const {
             return env_stack_.top_envframe();
         }
 
-        bp<Environment>
+        bp<SymbolTable>
         parserstatemachine::lookup_envframe(std::size_t i) const {
             return env_stack_[i];
         }
@@ -64,7 +64,7 @@ namespace xo {
             env_stack_.push_envframe(x);
         }
 
-        rp<Environment>
+        rp<SymbolTable>
         parserstatemachine::pop_envframe() {
             scope log(XO_DEBUG(debug_flag_));
 

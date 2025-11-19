@@ -149,7 +149,7 @@ namespace xo {
         }
 
         void
-        Apply::attach_envs(bp<Environment> p) {
+        Apply::attach_envs(bp<SymbolTable> p) {
             fn_->attach_envs(p);
 
             for (const auto & arg : argv_)

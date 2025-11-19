@@ -13,7 +13,7 @@
 
 namespace xo {
     using xo::scm::Lambda;
-    using xo::scm::LocalEnv;
+    using xo::scm::LocalSymtab;
 
     namespace scm {
         const char *

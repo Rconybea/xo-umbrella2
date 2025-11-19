@@ -11,8 +11,8 @@ set(SELF_SRCS
     Variable.cpp
     IfExpr.cpp
     Sequence.cpp
-    GlobalEnv.cpp
-    LocalEnv.cpp
+    GlobalSymtab.cpp
+    LocalSymtab.cpp
     ConvertExpr.cpp
     Primitive.cpp
     typeinf/type_ref.cpp

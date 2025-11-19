@@ -8,11 +8,11 @@
 #include "pretty_localenv.hpp"
 
 namespace xo {
-    using xo::scm::LocalEnv;
+    using xo::scm::LocalSymtab;
     using xo::scm::Variable;
 
     namespace scm {
-        bp<Environment>
+        bp<SymbolTable>
         envframestack::top_envframe() const {
             std::size_t z = stack_.size();
 
@@ -25,7 +25,7 @@ namespace xo {
         }
 
         void
-        envframestack::push_envframe(const rp<Environment> & frame)
+        envframestack::push_envframe(const rp<SymbolTable> & frame)
         {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag),
@@ -38,7 +38,7 @@ namespace xo {
             stack_[z] = frame;
         }
 
-        rp<Environment>
+        rp<SymbolTable>
         envframestack::pop_envframe() {
             constexpr bool c_debug_flag = true;
             scope log(XO_DEBUG(c_debug_flag));
@@ -48,7 +48,7 @@ namespace xo {
             if (z > 0) {
                 //std::unique_ptr<exprstate> top = std::move(stack_[z-1]);
 
-                rp<Environment> retval = stack_.at(z-1);
+                rp<SymbolTable> retval = stack_.at(z-1);
 
                 stack_.resize(z-1);
 

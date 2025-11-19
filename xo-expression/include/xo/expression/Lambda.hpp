@@ -8,7 +8,7 @@
 #include "Expression.hpp"
 #include "FunctionInterface.hpp"
 #include "Variable.hpp"
-#include "LocalEnv.hpp"
+#include "LocalSymtab.hpp"
 #include <map>
 #include <vector>
 #include <string>
@@ -30,7 +30,7 @@ namespace xo {
              **/
             static rp<Lambda> make(const std::string & name,
                                    TypeDescr lambda_type,
-                                   const rp<LocalEnv> & local_env,
+                                   const rp<LocalSymtab> & local_env,
                                    const rp<Expression> & body);
 
             /**
@@ -42,7 +42,7 @@ namespace xo {
             static rp<Lambda> make(const std::string & name,
                                    const std::vector<rp<Variable>> & argv,
                                    const rp<Expression> & body,
-                                   const rp<Environment> & parent_env);
+                                   const rp<SymbolTable> & parent_env);
 
             /**
              *  @p name   Name for this lambda -- must be unique
@@ -50,7 +50,7 @@ namespace xo {
              *  @p body   Expression for body of function
              **/
             static rp<Lambda> make_from_env(const std::string & name,
-                                            const rp<LocalEnv> & env,
+                                            const rp<LocalSymtab> & env,
                                             TypeDescr explicit_return_td,
                                             const rp<Expression> & body);
 
@@ -122,7 +122,7 @@ namespace xo {
                 return this;
             }
 
-            virtual void attach_envs(bp<Environment> p) override;
+            virtual void attach_envs(bp<SymbolTable> p) override;
 
             virtual void display(std::ostream & os) const override;
             virtual std::uint32_t pretty_print(const ppindentinfo & ppii) const override;
@@ -138,7 +138,7 @@ namespace xo {
              **/
             Lambda(const std::string & name,
                    TypeDescr lambda_type,
-                   const rp<LocalEnv> & local_env,
+                   const rp<LocalSymtab> & local_env,
                    const rp<Expression> & body);
 
             /** compute free-variable set for this lambda **/
@@ -201,14 +201,14 @@ namespace xo {
              * when Lambda constructor runs,  so we need to assign @ref local_env_
              * later.
              **/
-            rp<LocalEnv> local_env_;
+            rp<LocalSymtab> local_env_;
         }; /*Lambda*/
 
         inline rp<Lambda>
         make_lambda(const std::string & name,
                     const std::vector<rp<Variable>> & argv,
                     const rp<Expression> & body,
-                    const rp<Environment> & parent_env)
+                    const rp<SymbolTable> & parent_env)
         {
             return Lambda::make(name, argv, body, parent_env);
         }
@@ -218,7 +218,7 @@ namespace xo {
             static rp<LambdaAccess> make(const std::string & name,
                                          const std::vector<rp<Variable>> & argv,
                                          const rp<Expression> & body,
-                                         const rp<Environment> & parent_env);
+                                         const rp<SymbolTable> & parent_env);
             static rp<LambdaAccess> make_empty();
 
             /** assign body + compute derived members
@@ -232,7 +232,7 @@ namespace xo {
              **/
             LambdaAccess(const std::string & name,
                          TypeDescr lambda_type,
-                         const rp<LocalEnv> & local_env,
+                         const rp<LocalSymtab> & local_env,
                          const rp<Expression> & body);
 
 

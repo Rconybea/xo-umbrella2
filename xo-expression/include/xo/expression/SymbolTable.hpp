@@ -1,4 +1,4 @@
-/* file Environment.hpp
+/* file SymbolTable.hpp
  *
  * author: Roland Conybeare, Jun 2024
  */
@@ -22,7 +22,7 @@ namespace xo {
          *  When generating code (see xo-jit): rhs can be any expression,
          *  for example a Lambda.
          **/
-        class Environment : public ref::Refcount {
+        class SymbolTable : public ref::Refcount {
         public:
             /** true if this is toplevel (global) environment.
              *  Toplevel environment doesn't have slot numbers.
@@ -57,7 +57,7 @@ namespace xo {
         };
 
         inline std::ostream &
-        operator<< (std::ostream & os, const Environment & x) {
+        operator<< (std::ostream & os, const SymbolTable & x) {
             x.print(os);
             return os;
         }
@@ -65,4 +65,4 @@ namespace xo {
 } /*namespace xo*/
 
 
-/* end Environment.hpp */
+/* end SymbolTable.hpp */

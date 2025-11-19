@@ -1,9 +1,9 @@
-/* file LocalEnv.cpp
+/* file LocalSymtab.cpp
  *
  * author: Roland Conybeare
  */
 
-#include "LocalEnv.hpp"
+#include "LocalSymtab.hpp"
 #include "pretty_variable.hpp"
 #include "xo/indentlog/print/pretty_vector.hpp"
 #include "xo/indentlog/print/vector.hpp"
@@ -11,29 +11,29 @@
 
 namespace xo {
     namespace scm {
-        rp<LocalEnv>
-        LocalEnv::make_empty() {
-            return new LocalEnv(std::vector<rp<Variable>>(), nullptr);
+        rp<LocalSymtab>
+        LocalSymtab::make_empty() {
+            return new LocalSymtab(std::vector<rp<Variable>>(), nullptr);
         }
 
-        rp<LocalEnv>
-        LocalEnv::make(const std::vector<rp<Variable>> & argv,
-                       const rp<Environment> & parent_env)
+        rp<LocalSymtab>
+        LocalSymtab::make(const std::vector<rp<Variable>> & argv,
+                       const rp<SymbolTable> & parent_env)
         {
-            return new LocalEnv(argv, parent_env);
+            return new LocalSymtab(argv, parent_env);
         }
 
-        rp<LocalEnv>
-        LocalEnv::make1(const rp<Variable> & arg1,
-                        const rp<Environment> & parent_env)
+        rp<LocalSymtab>
+        LocalSymtab::make1(const rp<Variable> & arg1,
+                        const rp<SymbolTable> & parent_env)
         {
             std::vector<rp<Variable>> argv = { arg1 };
 
             return make(argv, parent_env);
         }
 
-        LocalEnv::LocalEnv(const std::vector<rp<Variable>> & argv,
-                           const rp<Environment> & parent_env)
+        LocalSymtab::LocalSymtab(const std::vector<rp<Variable>> & argv,
+                           const rp<SymbolTable> & parent_env)
             : origin_{nullptr},
               argv_(argv),
               parent_env_{parent_env}
@@ -43,7 +43,7 @@ namespace xo {
         }
 
         binding_path
-        LocalEnv::lookup_local_binding(const std::string & vname) const {
+        LocalSymtab::lookup_local_binding(const std::string & vname) const {
             int j_slot = 0;
             for (const auto & arg : argv_) {
                 if (arg->name() == vname)
@@ -55,7 +55,7 @@ namespace xo {
         } /*lookup_local_binding*/
 
         binding_path
-        LocalEnv::lookup_binding(const std::string & vname) const {
+        LocalSymtab::lookup_binding(const std::string & vname) const {
             {
                 auto local = this->lookup_local_binding(vname);
                 if (local.i_link_ == 0)
@@ -71,9 +71,9 @@ namespace xo {
         } /*lookup_binding*/
 
         void
-        LocalEnv::assign_parent(bp<Environment> p) {
+        LocalSymtab::assign_parent(bp<SymbolTable> p) {
             if ((parent_env_.get() != nullptr) && (parent_env_.get() != p.get())) {
-                throw std::runtime_error(tostr("LocalEnv::assign_parent(P2): already have established parent P1",
+                throw std::runtime_error(tostr("LocalSymtab::assign_parent(P2): already have established parent P1",
                                                xtag("P1", parent_env_),
                                                xtag("P2", p)));
 
@@ -84,7 +84,7 @@ namespace xo {
         }
 
         void
-        LocalEnv::upsert_local(bp<Variable> target) {
+        LocalSymtab::upsert_local(bp<Variable> target) {
             for (auto & var : this->argv_)  {
                 if (var->name() == target->name()) {
                     /* replace existing variable.  This may change its type */
@@ -99,20 +99,20 @@ namespace xo {
         }
 
         void
-        LocalEnv::print(std::ostream& os) const {
-            os << "<LocalEnv"
+        LocalSymtab::print(std::ostream& os) const {
+            os << "<LocalSymtab"
                << xtag("argv", argv_)
                << ">";
         }
 
         std::uint32_t
-        LocalEnv::pretty_print(const xo::print::ppindentinfo & ppii) const {
+        LocalSymtab::pretty_print(const xo::print::ppindentinfo & ppii) const {
             using xo::print::ppstate;
 
             ppstate * pps = ppii.pps();
 
             if (ppii.upto()) {
-                if (!pps->print_upto("<LocalEnv"))
+                if (!pps->print_upto("<LocalSymtab"))
                     return false;
                 if (!pps->print_upto_tag("argv", argv_))
                     return false;
@@ -120,7 +120,7 @@ namespace xo {
 
                 return true;
             } else {
-                pps->write("<LocalEnv");
+                pps->write("<LocalSymtab");
                 pps->newline_pretty_tag(ppii.ci1(), "this", (void*)this);
                 pps->newline_pretty_tag(ppii.ci1(), "argv", argv_);
                 pps->write(">");
@@ -132,5 +132,4 @@ namespace xo {
     } /*namespace scm*/
 } /*namespace xo*/
 
-
-/* end LocalEnv.cpp */
+/* end LocalSymtab.cpp */

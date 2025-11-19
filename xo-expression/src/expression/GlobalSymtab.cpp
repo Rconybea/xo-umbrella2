@@ -4,15 +4,15 @@
  */
 
 #include "xo/indentlog/print/ppdetail_atomic.hpp"
-#include "GlobalEnv.hpp"
+#include "GlobalSymtab.hpp"
 #include "Expression.hpp"
 
 namespace xo {
     namespace scm {
-        GlobalEnv::GlobalEnv() = default;
+        GlobalSymtab::GlobalSymtab() = default;
 
         bp<Expression>
-        GlobalEnv::require_global(const std::string & vname,
+        GlobalSymtab::require_global(const std::string & vname,
                                   bp<Expression> expr)
         {
             this->global_map_[vname] = expr.get();
@@ -21,21 +21,21 @@ namespace xo {
         } /*require_global*/
 
         void
-        GlobalEnv::upsert_local(bp<Variable> target) {
+        GlobalSymtab::upsert_local(bp<Variable> target) {
             // in practice: paraphrase of .require_global()
 
             this->global_map_[target->name()] = target.promote();
         }
 
         void
-        GlobalEnv::print(std::ostream & os) const {
+        GlobalSymtab::print(std::ostream & os) const {
             os << "<GlobalEnv"
                << xtag("size", global_map_.size())
                << ">";
         }
 
         std::uint32_t
-        GlobalEnv::pretty_print(const xo::print::ppindentinfo & ppii) const
+        GlobalSymtab::pretty_print(const xo::print::ppindentinfo & ppii) const
         {
             using xo::print::ppstate;
 

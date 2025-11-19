@@ -40,7 +40,7 @@ namespace xo {
                 return std::set<std::string>();
             }
 
-            virtual void attach_envs(bp<Environment> /*p*/) override {}
+            virtual void attach_envs(bp<SymbolTable> /*p*/) override {}
 
         }; /*ConstantInterface*/
 

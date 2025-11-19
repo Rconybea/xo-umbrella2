@@ -1,7 +1,7 @@
 /* @file Variable.cpp */
 
 #include "Variable.hpp"
-#include "Environment.hpp"
+#include "SymbolTable.hpp"
 #include "pretty_expression.hpp"
 
 namespace xo {
@@ -19,7 +19,7 @@ namespace xo {
         }
 
         void
-        Variable::attach_envs(bp<Environment> e) {
+        Variable::attach_envs(bp<SymbolTable> e) {
             /** e makes accessible all enclosing lexical scopes **/
             if (this->path_.i_link_ == -2 /*sentinel*/) {
                 this->path_ = e->lookup_binding(this->name_);

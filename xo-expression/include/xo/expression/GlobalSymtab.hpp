@@ -1,20 +1,20 @@
-/* file GlobalEnv.hpp
+/* file GlobalSymtab.hpp
  *
  * author: Roland Conybeare, Jun 2024
  */
 
 #pragma once
 
-#include "Environment.hpp"
+#include "SymbolTable.hpp"
 #include <map>
 #include <string>
 
 namespace xo {
     namespace scm {
-        class GlobalEnv : public Environment {
+        class GlobalSymtab : public SymbolTable {
         public:
             /** create instance.  Probably only need one of these **/
-            static rp<GlobalEnv> make_empty() { return new GlobalEnv(); }
+            static rp<GlobalSymtab> make_empty() { return new GlobalSymtab(); }
 
             bp<Expression> require_global(const std::string & vname,
                                           bp<Expression> expr);
@@ -51,7 +51,7 @@ namespace xo {
             virtual std::uint32_t pretty_print(const xo::print::ppindentinfo & ppii) const override;
 
         private:
-            GlobalEnv();
+            GlobalSymtab();
 
         private:
             /* for assignable globals,  need to allocate memory
@@ -63,4 +63,4 @@ namespace xo {
 } /*namespace xo*/
 
 
-/* end GlobalEnv.hpp */
+/* end GlobalSymtab.hpp */

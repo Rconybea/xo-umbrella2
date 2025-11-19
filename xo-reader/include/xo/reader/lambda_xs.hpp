@@ -6,7 +6,7 @@
 #pragma once
 
 #include "exprstate.hpp"
-#include "xo/expression/LocalEnv.hpp"
+#include "xo/expression/LocalSymtab.hpp"
 //#include <cstdint>
 
 namespace xo {
@@ -55,8 +55,8 @@ namespace xo {
          **/
         class lambda_xs : public exprstate {
         public:
-            using Environment = xo::scm::Environment;
-            using LocalEnv = xo::scm::LocalEnv;
+            using Environment = xo::scm::SymbolTable;
+            using LocalEnv = xo::scm::LocalSymtab;
 
         public:
             lambda_xs();

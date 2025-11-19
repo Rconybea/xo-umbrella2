@@ -87,7 +87,7 @@ namespace xo {
                 return xform_fn(this);
             }
 
-            virtual void attach_envs(bp<Environment> p) override {
+            virtual void attach_envs(bp<SymbolTable> p) override {
                 test_->attach_envs(p);
                 when_true_->attach_envs(p);
                 when_false_->attach_envs(p);

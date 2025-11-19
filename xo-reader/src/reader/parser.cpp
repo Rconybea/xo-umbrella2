@@ -11,14 +11,14 @@
 #include "xo/expression/DefineExpr.hpp"
 #include "xo/expression/Constant.hpp"
 #include "xo/expression/ConvertExpr.hpp"
-#include "xo/expression/GlobalEnv.hpp"
-//#include "xo/expression/LocalEnv.hpp"
+#include "xo/expression/GlobalSymtab.hpp"
+//#include "xo/expression/LocalSymtab.hpp"
 //#include <regex>
 #include <stdexcept>
 
 namespace xo {
     using xo::scm::Expression;
-    using xo::scm::LocalEnv;
+    using xo::scm::LocalSymtab;
     using xo::reflect::TypeDescr;
 
     namespace scm {
@@ -28,7 +28,7 @@ namespace xo {
             : psm_{debug_flag}
         {
             /* top-level environment.  initially empty */
-            rp<Environment> toplevel_env = GlobalEnv::make_empty();
+            rp<SymbolTable> toplevel_env = GlobalSymtab::make_empty();
 
             this->psm_.env_stack_.push_envframe(toplevel_env);
         }

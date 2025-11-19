@@ -66,7 +66,7 @@ namespace xo {
                 return xform_fn(this);
             }
 
-            virtual void attach_envs(bp<Environment> /*p*/) override {}
+            virtual void attach_envs(bp<SymbolTable> /*p*/) override {}
 
         private:
         }; /*PrimitiveInterface*/

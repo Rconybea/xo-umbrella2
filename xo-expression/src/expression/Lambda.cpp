@@ -87,7 +87,7 @@ namespace xo {
         rp<Lambda>
         Lambda::make(const std::string & name,
                      TypeDescr lambda_td,
-                     const rp<LocalEnv> & env,
+                     const rp<LocalSymtab> & env,
                      const rp<Expression> & body)
         {
             return new Lambda(name, lambda_td, env, body);
@@ -95,7 +95,7 @@ namespace xo {
 
         rp<Lambda>
         Lambda::make_from_env(const std::string & name,
-                              const rp<LocalEnv> & env,
+                              const rp<LocalSymtab> & env,
                               TypeDescr explicit_return_td,
                               const rp<Expression> & body)
         {
@@ -117,9 +117,9 @@ namespace xo {
         Lambda::make(const std::string & name,
                      const std::vector<rp<Variable>> & argv,
                      const rp<Expression> & body,
-                     const rp<Environment> & parent_env)
+                     const rp<SymbolTable> & parent_env)
         {
-            rp<LocalEnv> env = LocalEnv::make(argv, parent_env);
+            rp<LocalSymtab> env = LocalSymtab::make(argv, parent_env);
 
             TypeDescr explicit_return_td = nullptr;
 
@@ -257,7 +257,7 @@ namespace xo {
 
         Lambda::Lambda(const std::string & name,
                        TypeDescr lambda_td,
-                       const rp<LocalEnv> & local_env,
+                       const rp<LocalSymtab> & local_env,
                        const rp<Expression> & body)
             : FunctionInterface(exprtype::lambda, lambda_td),
               name_{name},
@@ -334,7 +334,7 @@ namespace xo {
         } /*ctor*/
 
         void
-        Lambda::attach_envs(bp<Environment> p) {
+        Lambda::attach_envs(bp<SymbolTable> p) {
             local_env_->assign_parent(p);
 
             /** establish a binding path for each variable **/
@@ -364,11 +364,11 @@ namespace xo {
         LambdaAccess::make(const std::string & name,
                            const std::vector<rp<Variable>> & argv,
                            const rp<Expression> & body,
-                           const rp<Environment> & parent_env)
+                           const rp<SymbolTable> & parent_env)
         {
             TypeDescr explicit_return_td = nullptr;
             TypeDescr lambda_td = assemble_lambda_td(argv, explicit_return_td, body);
-            rp<LocalEnv> env = LocalEnv::make(argv, parent_env);
+            rp<LocalSymtab> env = LocalSymtab::make(argv, parent_env);
 
             rp<LambdaAccess> retval
                 = new LambdaAccess(name,
@@ -393,7 +393,7 @@ namespace xo {
 
         LambdaAccess::LambdaAccess(const std::string & name,
                                    TypeDescr lambda_td,
-                                   const rp<LocalEnv> & local_env,
+                                   const rp<LocalSymtab> & local_env,
                                    const rp<Expression> & body)
             : Lambda(name, lambda_td, local_env, body)
         {}

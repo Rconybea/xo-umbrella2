@@ -55,7 +55,7 @@ namespace xo {
         }
 
         void
-        Sequence::attach_envs(bp<Environment> p) {
+        Sequence::attach_envs(bp<SymbolTable> p) {
             for (const auto & x : expr_v_)
                 x->attach_envs(p);
         }

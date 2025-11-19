@@ -129,7 +129,7 @@ namespace xo {
                 return xform_fn(this);
             }
 
-            virtual void attach_envs(bp<Environment> p) override;
+            virtual void attach_envs(bp<SymbolTable> p) override;
 
             virtual void display(std::ostream & os) const override;
             virtual std::uint32_t pretty_print(const ppindentinfo & ppii) const override;

@@ -3,7 +3,7 @@
 set(UTEST_EXE utest.interpreter)
 set(UTEST_SRCS
     interpreter_utest_main.cpp
-    StackFrame.test.cpp
+    LocalEnv.test.cpp
 )
 
 xo_add_utest_executable(${UTEST_EXE} ${UTEST_SRCS})
