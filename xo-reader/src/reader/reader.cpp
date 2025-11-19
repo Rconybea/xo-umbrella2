@@ -31,8 +31,7 @@ namespace xo {
         reader_result
         reader::read_expr(const span_type & input_arg, bool eof)
         {
-            constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG(this->debug_flag()));
 
             span_type input = input_arg;
 

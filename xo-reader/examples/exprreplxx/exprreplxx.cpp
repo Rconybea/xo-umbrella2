@@ -7,7 +7,10 @@
 
 // presumeably replxx assumes input is a tty
 //
-bool replxx_getline(bool interactive, std::size_t parser_stack_size, replxx::Replxx & rx, std::string& input)
+bool replxx_getline(bool interactive,
+                    std::size_t parser_stack_size,
+                    replxx::Replxx & rx,
+                    std::string& input)
 {
     using namespace std;
 
@@ -58,7 +61,8 @@ welcome(std::ostream& os)
 }
 
 int
-main() {
+main()
+{
     using namespace replxx;
     using namespace xo::scm;
     using xo::scm::Expression;

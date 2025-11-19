@@ -165,7 +165,11 @@ namespace xo {
              **/
             explicit parser(bool debug_flag);
 
-            /** true if parser is at top-level, i.e. ready for next top-level expression **/
+            bool debug_flag() const { return psm_.debug_flag(); }
+
+            /** true if parser is at top-level,
+             *  i.e. ready for next top-level expression
+             **/
             bool is_at_toplevel() const { return stack_size() == 0; }
 
             /** for diagnostics: number of entries in parser stack **/

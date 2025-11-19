@@ -28,7 +28,7 @@ namespace xo {
 
         void
         exprstatestack::push_exprstate(std::unique_ptr<exprstate> exs) {
-            constexpr bool c_debug_flag = true;
+            constexpr bool c_debug_flag = false;
             scope log(XO_DEBUG(c_debug_flag),
                       xtag("exs", exs.get()));
 
@@ -41,7 +41,7 @@ namespace xo {
 
         std::unique_ptr<exprstate>
         exprstatestack::pop_exprstate() {
-            constexpr bool c_debug_flag = true;
+            constexpr bool c_debug_flag = false;
             scope log(XO_DEBUG(c_debug_flag),
                       xtag("top.exstype", top_exprstate().exs_type()));
 
