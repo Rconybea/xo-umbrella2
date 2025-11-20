@@ -14,21 +14,24 @@ namespace xo {
         template<typename Value>
         class TypeDrivenMap {
         public:
-            Value const * lookup(TypeId id) const { return this->lookup_slot(id); }
+            TypeDrivenMap() = default;
+
+            const Value * lookup(TypeId id) const { return this->lookup_slot(id); }
+            const Value * lookup(TypeDescr td) { return this->lookup_slot(td->id()); }
 
             Value * require(TypeId id) { return this->require_slot(id); }
             Value * require(TypeDescr td) { return this->require_slot(td->id()); }
 
         private:
-            Value const * lookup_slot(TypeId id) const {
-                if (this->contents_v_.size() <= id.id())
+            const Value * lookup_slot(TypeId id) const {
+                if (contents_v_.size() <= id.id())
                     return nullptr;
 
                 return &(this->contents_v_[id.id()]);
             } /*lookup_slot*/
 
             Value * require_slot(TypeId id) {
-                if (this->contents_v_.size() <= id.id())
+                if (contents_v_.size() <= id.id())
                     this->contents_v_.resize(id.id() + 1);
 
                 return &(this->contents_v_[id.id()]);

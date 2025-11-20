@@ -7,7 +7,7 @@
 /** continue after completing a VSM instruction;
  *  achieve by jumping to continuation.
  **/
-//#define VSM_CONTINUE() this->pc_ = this->cont_; return;
+#define VSM_CONTINUE() this->pc_ = this->cont_; return;
 
 
 namespace xo {
@@ -34,15 +34,28 @@ namespace xo {
         VirtualSchematikaMachine::VirtualSchematikaMachine()
         {}
 
+        std::pair<gp<Object>,
+                  SchematikaError>
+        VirtualSchematikaMachine::eval(bp<Expression> expr)
+        {
+            this->pc_   = &VsmOps::eval_op;
+            this->expr_ = expr.promote();
+            this->cont_ = &VsmOps::halt_op;
+
+            this->run();
+
+            return std::make_pair(this->value_, this->error_);
+        }
+
         void
         VirtualSchematikaMachine::run()
         {
             for (const VsmInstr * pc = pc_; pc; pc = pc_)
-                this->execute_vsm(pc);
+                this->execute_one(pc);
         }
 
         void
-        VirtualSchematikaMachine::execute_vsm(const VsmInstr * instr)
+        VirtualSchematikaMachine::execute_one(const VsmInstr * instr)
         {
             using Opcode = VsmInstr::Opcode;
 
@@ -60,8 +73,11 @@ namespace xo {
                     /* generally speaking: opcode will be 1:1 with extypes */
 
                     switch (expr_->extype()) {
-                    case exprtype::invalid:
                     case exprtype::constant:
+                        this->constant_op();
+                        break;
+
+                    case exprtype::invalid:
                     case exprtype::primitive:
                     case exprtype::define:
                     case exprtype::assign:
@@ -88,19 +104,11 @@ namespace xo {
             }
         }
 
-        std::pair<gp<Object>,
-                  SchematikaError>
-        VirtualSchematikaMachine::eval(bp<Expression> expr)
+        void
+        VirtualSchematikaMachine::constant_op()
         {
-            this->pc_   = &VsmOps::eval_op;
-            this->expr_ = expr.promote();
-            this->cont_ = &VsmOps::halt_op;
-
-            this->run();
-
-            return std::make_pair(this->value_, this->error_);
+            this->value_ = expr_->value_tp();
         }
-
 
     } /*namespace scm*/
 } /*namespace xo*/

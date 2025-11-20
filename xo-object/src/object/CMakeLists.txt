@@ -2,6 +2,7 @@
 
 set(SELF_LIB xo_object)
 set(SELF_SRCS
+    ObjectConverter.cpp
     Boolean.cpp
     String.cpp
     List.cpp

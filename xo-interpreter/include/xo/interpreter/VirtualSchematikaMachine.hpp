@@ -9,6 +9,12 @@
 
 namespace xo {
     namespace scm {
+        /** @brief state that may be shared across VirtualSchematikaMachine instances **/
+        struct VirtualSchematikaMachineFlyweight {
+            /** convert TaggedPtr->Object **/
+            ObjectConverter object_converter_;
+        };
+
         /** @class VirtualSchematikaMachine
          *  @brief Virtual machine implementing a Schematika interpreter
          *
@@ -34,7 +40,7 @@ namespace xo {
             /** execute vsm instruction @p pc
              *  Note: may possibly be able to replace with just opcode
              **/
-            void execute_vsm(const VsmInstr * pc);
+            void execute_one(const VsmInstr * pc);
 
             /** implementation class; contains instruction implementations **/
             friend class VsmOps;
@@ -58,6 +64,9 @@ namespace xo {
              *  (Perhaps replace with VsmInstr::Opcode ?)
              **/
             const VsmInstr * cont_ = nullptr;
+
+            /** possibly-shared data **/
+            VirtualSchemtikaMachineFlyweight flyweight_;
         };
 
     } /*namespace scm*/
