@@ -90,21 +90,16 @@ namespace xo {
              *  a symbol token.  Instead they force completion of
              *  a preceding token,  and start a new token with themselves
              **/
-            bool is_1char_punctuation(CharT ch) const;
+            static bool is_1char_punctuation(CharT ch);
 
             /** more-relazed version of is_1char_punctuation.
              *  Chars that are not permitted to appear within a symbol token,
              *  but may form token combined with next character
              **/
-            bool is_2char_punctuation(CharT ch) const;
-
-            /** true if tokenizer contains stored prefix of
-             *  possibly-incomplete token
-             **/
-            bool has_prefix() const { return !prefix_.empty(); }
+            static bool is_2char_punctuation(CharT ch);
 
             /** assemble token from text @p token_text.
-             *  @p token_text will often but not always represent a subset of @p input.
+             *  @p token_text will often (but not always) represent a subset of @p input.
              *  (For example consider multi-line string literals)
              *  Also the span @p token_text may (in uncommon cases)
              *  have been copied to separate storage from @p input
@@ -115,13 +110,20 @@ namespace xo {
              *
              *  retval.consumed will represent some possibly-empty prefix of @p input
              **/
-            result_type assemble_token(std::size_t initial_whitespace,
-                                       std::size_t initial_token_prefix_from_input,
-                                       const span_type & token_text,
-                                       const span_type & input) const;
+            static result_type assemble_token(std::size_t initial_whitespace,
+                                              std::size_t initial_token_prefix_from_input,
+                                              const span_type & token_text,
+                                              const span_type & input,
+                                              const input_state_type & input_state);
 
             /** degenerate version of assemble_token() on reaching end-of-file **/
-            result_type assemble_final_token(const span_type & token_text) const;
+            static result_type assemble_final_token(const span_type & token_text,
+                                                    const input_state_type & input_state);
+
+            /** true if tokenizer contains stored prefix of
+             *  possibly-incomplete token
+             **/
+            bool has_prefix() const { return !prefix_.empty(); }
 
             /** scan for next input token,  given @p input.
              *  Note:
@@ -160,7 +162,8 @@ namespace xo {
         private:
             result_type scan_completion(const span_type & whitespace,
                                         const CharT* token_end,
-                                        const span_type & input);
+                                        const span_type & input,
+                                        const input_state_type & input_state);
 
         private:
             /** @defgroup tokenizer-instance-vars tokenizer instance variables **/
@@ -168,7 +171,11 @@ namespace xo {
 
             /** track input state (line#,pos,..) for error messages.
              *  There's an ordering problem here:
-             *  1. input_state_.skip_leading_whitespace() advances current line when it sees newline.
+             *  1. input_state_.skip_leading_whitespace() advances current line automagically
+             *     when it sees \n
+             *  2. need to capture value of @ref input_state_ _before_ newline
+             *  3. but neeed newline to end token
+             *  Also recall input_state_type needed for reporting errors.
              **/
             input_state_type input_state_;
             /** Accumulate partial token here.
@@ -187,7 +194,7 @@ namespace xo {
 
         template <typename CharT>
         bool
-        tokenizer<CharT>::is_1char_punctuation(CharT ch) const {
+        tokenizer<CharT>::is_1char_punctuation(CharT ch) {
             switch(ch) {
             case '(':
                 return true;
@@ -247,7 +254,7 @@ namespace xo {
 
         template <typename CharT>
         bool
-        tokenizer<CharT>::is_2char_punctuation(CharT ch) const {
+        tokenizer<CharT>::is_2char_punctuation(CharT ch) {
             /* can't put '-' here, because of the way it appears in numeric literals
              * characters here may not appear in symbol names
              */
@@ -278,12 +285,13 @@ namespace xo {
         tokenizer<CharT>::assemble_token(std::size_t initial_whitespace,
                                          std::size_t initial_token_prefix_from_input,
                                          const span_type & token_text,
-                                         const span_type & input) const -> result_type
+                                         const span_type & input,
+                                         const input_state_type & input_state) -> result_type
         {
             /* literal|pretty|streamlined */
             log_config::style = function_style::streamlined;
 
-            scope log(XO_DEBUG(input_state_.debug_flag()));
+            scope log(XO_DEBUG(input_state.debug_flag()));
             log && log(xtag("token_text", token_text),
                        xtag("initial_whitespace", initial_whitespace),
                        xtag("initial_token_prefix_from_input", initial_token_prefix_from_input),
@@ -386,7 +394,7 @@ namespace xo {
                                 return result_type::make_error
                                     (error_type(__FUNCTION__ /*src_function*/,
                                                 "improperly placed sign indicator",
-                                                input_state_,
+                                                input_state,
                                                 (ix - tk_start)
                                         ));
                             }
@@ -395,7 +403,7 @@ namespace xo {
                                 return result_type::make_error
                                     (error_type(__FUNCTION__ /*src_function*/,
                                                 "duplicate decimal point in numeric literal",
-                                                input_state_,
+                                                input_state,
                                                 (ix - tk_start)));
                             }
 
@@ -405,7 +413,7 @@ namespace xo {
                                 return result_type::make_error
                                     (error_type(__FUNCTION__ /*src_function*/,
                                                 "duplicate exponent marker in numeric literal",
-                                                input_state_,
+                                                input_state,
                                                 (ix - tk_start)));
                             }
 
@@ -421,7 +429,7 @@ namespace xo {
                             return result_type::make_error
                                 (error_type(__FUNCTION__ /*src_function*/,
                                             "unexpected character in numeric constant" /*error_description*/,
-                                            input_state_,
+                                            input_state,
                                             (ix - tk_start)));
                         }
                     }
@@ -524,7 +532,7 @@ namespace xo {
                             return result_type::make_error
                                 (error_type(__FUNCTION__ /*src_function*/,
                                             "expecting key following escape character \\",
-                                            input_state_,
+                                            input_state,
                                             (ix - tk_start)));
                         }
 
@@ -553,7 +561,7 @@ namespace xo {
                             return result_type::make_error
                                 (error_type(__FUNCTION__ /*src_function*/,
                                             "expecting one of n|r|\"|\\ following escape \\",
-                                            input_state_,
+                                            input_state,
                                             (ix - tk_start)));
                         }
                         break;
@@ -570,7 +578,7 @@ namespace xo {
                     return result_type::make_error
                         (error_type(__FUNCTION__ /*src_function*/,
                                     "missing terminating '\"' to complete literal string",
-                                    input_state_,
+                                    input_state,
                                     (ix - tk_start)));
                 }
 
@@ -712,7 +720,7 @@ namespace xo {
                 return result_type::make_error
                     (error_type(__FUNCTION__ /*src_function*/,
                                 "illegal input character",
-                                input_state_,
+                                input_state,
                                 (ix - tk_start)));
             }
 
@@ -767,21 +775,26 @@ namespace xo {
                                input.prefix(initial_whitespace + initial_token_prefix_from_input));
         } /*assemble_token*/
 
+        /* TODO: input_state_ as argument ? */
         template <typename CharT>
         auto
-        tokenizer<CharT>::assemble_final_token(const span_type & token_text) const -> result_type
+        tokenizer<CharT>::assemble_final_token(const span_type & token_text,
+                                               const input_state_type & input_state) -> result_type
         {
             return assemble_token(0 /*initial_whitespace*/,
                                   0 /*initial_token_prefix_from_input*/,
                                   token_text,
-                                  span_type::make_null());
+                                  span_type::make_null(),
+                                  input_state);
         }
 
+        /* TODO: prefix_, input_state_ as arguments */
         template <typename CharT>
         auto
         tokenizer<CharT>::scan_completion(const span_type & whitespace,
                                           const CharT* token_end,
-                                          const span_type & input) -> result_type {
+                                          const span_type & input,
+                                          const input_state_type & input_state) -> result_type {
 
             auto token_span = input.after_prefix(whitespace).prefix_upto(token_end);
 
@@ -789,7 +802,8 @@ namespace xo {
                 return assemble_token(whitespace.size(),
                                       token_span.size() /*initial_token_prefix_from_input*/,
                                       token_span,
-                                      input);
+                                      input,
+                                      input_state);
             } else {
                 /* whatever we stashed in .prefix_, should be consumed from input.
                  * control here implies reached end of input with either
@@ -927,7 +941,8 @@ namespace xo {
                             /* include next char and complete token */
                             ++ix;
 
-                            return scan_completion(whitespace_span, ix /*token_end*/, input);
+                            return scan_completion(whitespace_span, ix /*token_end*/, input,
+                                                   this->input_state_);
                         }
 
                         /* here: -123, -.5e-21 for example */
@@ -945,7 +960,8 @@ namespace xo {
 
                         if (ch2 != '=') {
                             /* ignore next char and complete token */
-                            return scan_completion(whitespace_span, ix /*token_end*/, input);
+                            return scan_completion(whitespace_span, ix /*token_end*/, input,
+                                                   this->input_state_);
                         }
 
                         /* here: >= for example */
@@ -995,7 +1011,8 @@ namespace xo {
                 }
             }
 
-            return scan_completion(whitespace_span, ix /*token_end*/, input);
+            return scan_completion(whitespace_span, ix /*token_end*/, input,
+                                   this->input_state_);
         } /*scan*/
 
         template <typename CharT>
@@ -1052,7 +1069,8 @@ namespace xo {
                  */
                 return result_type::make_whitespace(input);
             } else {
-                auto retval = assemble_final_token(span_type::from_string(prefix_));
+                auto retval = assemble_final_token(span_type::from_string(prefix_),
+                                                   this->input_state_);
 
                 this->prefix_.clear();
 

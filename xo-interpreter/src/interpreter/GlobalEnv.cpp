@@ -17,7 +17,8 @@ namespace xo {
         }
 
         GlobalEnv::GlobalEnv(gc::IAlloc * mm,
-                             const rp<GlobalSymtab> & symtab) : mm_{mm}, symtab_{symtab}
+                             const rp<GlobalSymtab> & symtab) : mm_{mm},
+                                                                symtab_{symtab}
         {}
 
         TaggedPtr

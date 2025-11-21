@@ -91,7 +91,11 @@ namespace xo {
 
             /** Skip prefix of input comprising whitespace.
              *  Return pointer to first non-whitespace character in @p input,
-             *  or @c input.hi if input contains only whitespace
+             *  or @c input.hi if input contains only whitespace.
+             *
+             *  if @p input contains any newlines, preserves suffix after last
+             *  such newilne in @p current_line_
+             *
              **/
             const CharT * skip_leading_whitespace(const span_type & input);
 
@@ -105,7 +109,7 @@ namespace xo {
             span<const CharT> current_line_ = span<const CharT>();
             /** current input position within @ref current_line_ **/
             size_t current_pos_ = 0;
-            /** whitespace since end of preceding token,
+            /** number of whitespace chars since end of preceding token,
              *  or last newline, whichever is less
              **/
             size_t whitespace_ = 0;
@@ -114,7 +118,7 @@ namespace xo {
             bool debug_flag_ = false;
 
             ///@}
-        };
+        }; /*input_state*/
 
         template <typename CharT>
         bool

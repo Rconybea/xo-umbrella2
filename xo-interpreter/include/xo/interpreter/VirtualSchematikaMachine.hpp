@@ -57,7 +57,7 @@ namespace xo {
             void report_error(const std::string & err);
 
             /** implementation class; contains instruction implementations **/
-            friend class VsmOps;
+            friend struct VsmOps;
 
         private:
             /** program counter.

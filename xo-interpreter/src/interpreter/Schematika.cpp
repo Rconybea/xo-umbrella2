@@ -8,6 +8,7 @@
 #include "xo/reader/reader.hpp"
 #include <replxx.hxx>
 #include <ostream>
+#include <unistd.h> // for STDIN_FILENO on OSX
 
 namespace xo {
     using xo::gc::IAlloc;
@@ -231,7 +232,7 @@ namespace xo {
 
         // ----- Schematika -----
 
-        Schematika::Schematika(const Config & cfg) : p_impl_{std::move(Impl::make(cfg))}
+        Schematika::Schematika(const Config & cfg) : p_impl_{Impl::make(cfg)}
         {}
 
         Schematika::~Schematika()

@@ -16,7 +16,10 @@ namespace xo {
             /** Create top-level global environment, allocating via @p mm.
              *  Expect one of these per interpreter session.
              **/
-            static gp<GlobalEnv> make_empty(gc::IAlloc * mm, const rp<GlobalSymtab> & symtab);
+            static gp<GlobalEnv> make_empty(gc::IAlloc * mm,
+                                            const rp<GlobalSymtab> & symtab);
+
+            gc::IAlloc * get_mm() const { return mm_; }
 
             // inherited from Object..
             virtual TaggedPtr self_tp() const final override;
@@ -30,7 +33,7 @@ namespace xo {
 
         private:
             /** memory manager to use **/
-            gc::IAlloc * mm_;
+            gc::IAlloc * mm_ = nullptr;
 
             /** global symbol table.
              *  variables known to @c symtab_ are represented by
