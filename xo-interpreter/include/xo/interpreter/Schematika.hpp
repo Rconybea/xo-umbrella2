@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "xo/alloc/IAlloc.hpp"
+#include "xo/alloc/GC.hpp"
 
 namespace xo {
     namespace scm {
@@ -27,7 +27,12 @@ namespace xo {
                 std::string history_file = "scm_history.txt";
                 /** when true enable console logging for repl internals **/
                 bool debug_flag = false;
+
+                /** garbage collector configuration **/
+                gc::Config gc_config_;
             };
+
+            using IAlloc = xo::gc::IAlloc;
 
         public:
             ~Schematika();
@@ -51,7 +56,7 @@ namespace xo {
             void interactive_repl();
 
         private:
-            Schematika(const Config & cfg);
+            explicit Schematika(const Config & cfg);
 
         private:
             up<Impl> p_impl_;

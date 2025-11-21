@@ -1,14 +1,17 @@
 /** @file VirtualSchematikaMachine.cpp **/
 
 #include "VirtualSchematikaMachine.hpp"
-
 #include "VsmInstr.hpp"
+#include "xo/expression/ConstantInterface.hpp"
 
 /** continue after completing a VSM instruction;
  *  achieve by jumping to continuation.
  **/
 #define VSM_CONTINUE() this->pc_ = this->cont_; return;
 
+/** report error and terminate VSM execution
+ **/
+#define VSM_ERROR(msg) report_error(msg); return;
 
 namespace xo {
     namespace scm {
@@ -31,7 +34,15 @@ namespace xo {
         VsmInstr
         VsmOps::eval_op{VsmInstr::Opcode::eval, "eval"};
 
-        VirtualSchematikaMachine::VirtualSchematikaMachine()
+        // ----- VirtualSchematikaMachineFlyweight -----
+
+        VirtualSchematikaMachineFlyweight::VirtualSchematikaMachineFlyweight(gc::IAlloc * mm) :
+            object_mm_{mm}
+        {}
+
+        // ----- VirtualSchematikaMachine -----
+
+        VirtualSchematikaMachine::VirtualSchematikaMachine(gc::IAlloc * mm) : flyweight_{mm}
         {}
 
         std::pair<gp<Object>,
@@ -50,16 +61,16 @@ namespace xo {
         void
         VirtualSchematikaMachine::run()
         {
-            for (const VsmInstr * pc = pc_; pc; pc = pc_)
-                this->execute_one(pc);
+            while(pc_)
+                this->execute_one();
         }
 
         void
-        VirtualSchematikaMachine::execute_one(const VsmInstr * instr)
+        VirtualSchematikaMachine::execute_one()
         {
             using Opcode = VsmInstr::Opcode;
 
-            switch (instr->opcode()) {
+            switch (pc_->opcode()) {
 
             case Opcode::halt:
                 {
@@ -105,9 +116,39 @@ namespace xo {
         }
 
         void
+        VirtualSchematikaMachine::report_error(const std::string & err)
+        {
+            /* error short-circuits vsm operation */
+
+            this->pc_ = nullptr;
+            this->value_ = nullptr;
+            this->error_ = SchematikaError(err);
+            this->cont_ = nullptr;
+        }
+
+        void
         VirtualSchematikaMachine::constant_op()
         {
-            this->value_ = expr_->value_tp();
+            scope log(XO_DEBUG(true));
+
+            using xo::scm::ConstantInterface;
+
+            bp<ConstantInterface> expr = ConstantInterface::from(expr_);
+
+            assert(expr);
+
+            this->value_ = flyweight_.object_converter_.tp_to_object(flyweight_.object_mm_,
+                                                                     expr->value_tp(),
+                                                                     false);
+            if (this->value_.ptr()) {
+                log && log("got object: ", xtag("value", value_));
+
+                VSM_CONTINUE();
+            } else {
+                VSM_ERROR(tostr("constant_op: unable to convert native value to object",
+                                xtag("id", expr->value_tp().td()->id()),
+                                xtag("short_name", expr->value_tp().td()->short_name())));
+            }
         }
 
     } /*namespace scm*/

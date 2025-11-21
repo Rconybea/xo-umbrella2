@@ -166,7 +166,10 @@ namespace xo {
             /** @defgroup tokenizer-instance-vars tokenizer instance variables **/
             ///@{
 
-            /** track input state (line#,pos,..) for error messages **/
+            /** track input state (line#,pos,..) for error messages.
+             *  There's an ordering problem here:
+             *  1. input_state_.skip_leading_whitespace() advances current line when it sees newline.
+             **/
             input_state_type input_state_;
             /** Accumulate partial token here.
              *  This will happen if input sent to @ref tokenizer::scan

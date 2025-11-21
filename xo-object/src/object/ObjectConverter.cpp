@@ -27,6 +27,28 @@ namespace xo {
         ObjectConverter::ObjectConverter()
         {
             this->establish_conversion<std::int32_t>(&int_to_object<std::int32_t>);
+            this->establish_conversion<std::int64_t>(&int_to_object<std::int32_t>);
+        }
+
+        gp<Object>
+        ObjectConverter::tp_to_object(IAlloc * mm, const TaggedPtr & x_tp, bool throw_flag)
+        {
+            using xo::reflect::Reflect;
+            using xo::reflect::TaggedPtr;
+
+            const Converter * cvt = cvt_.lookup(x_tp.td());
+
+            if (cvt) {
+                return (cvt->cvt_to_object_)(mm, x_tp);
+            } else {
+                if (throw_flag) {
+                    throw std::runtime_error(tostr("no object-converter available for instance of type",
+                                                   xtag("id", x_tp.td()->id()),
+                                                   xtag("name", x_tp.td()->short_name())));
+                }
+
+                return nullptr;
+            }
         }
     }
 }

@@ -10,6 +10,8 @@
 #include <ostream>
 
 namespace xo {
+    using xo::gc::IAlloc;
+    using xo::gc::GC;
     using xo::print::ppconfig;
     using xo::print::ppstate_standalone;
     using replxx::Replxx;
@@ -19,7 +21,14 @@ namespace xo {
 
         class Schematika::Impl {
         public:
-            Impl(const Config & config) : config_{config} {}
+            /** note: choosing to have Schemtika::Impl
+             *        rather than VirtualSchematikaMachine to own allocator
+             *        to preserve option to share it
+             **/
+            Impl(const Config & config, up<IAlloc> mm) : config_{config}, vsm_{mm.get()}, mm_{std::move(mm)} {}
+
+            /** create instance + allocator **/
+            static up<Impl> make(const Config & cfg);
 
             /** borrow calling thread to run interactive read-eval-print loop;
              *  input from stdin, output to stdout.
@@ -38,7 +47,20 @@ namespace xo {
             Config config_;
             /** schematika interpreter **/
             VirtualSchematikaMachine vsm_;
+            /** ownership for memory allocator / garbage collector;
+             *  @ref vsm_ holds naked pointer, so this could in principle be nullptr
+             *  in case want to maintain allocator ownership from outside.
+             **/
+            up<IAlloc> mm_;
         };
+
+        up<Schematika::Impl>
+        Schematika::Impl::make(const Config & cfg)
+        {
+            up<IAlloc> mm = GC::make(cfg.gc_config_);
+
+            return std::make_unique<Impl>(cfg, std::move(mm));
+        }
 
         void
         Schematika::Impl::welcome(std::ostream & os)
@@ -106,7 +128,8 @@ namespace xo {
             //    rx.bind_key_internal(Replxx::KEY::control('p'), "history_previous");
             //    rx.bind_key_internal(Replxx::KEY::control('n'), "history_next");
 
-            reader rdr(config_.debug_flag);
+            //reader rdr(config_.debug_flag);
+            reader rdr(true);
             rdr.begin_interactive_session();
 
             string input_str;
@@ -168,7 +191,8 @@ namespace xo {
                             /* print value */
 
                             cout << "scm result:" << endl;
-                            pps.pretty(value);
+                            cout << value << endl;
+                            //pps.pretty(value);
                         }
 
                     } else if (error.is_error()) {
@@ -207,8 +231,7 @@ namespace xo {
 
         // ----- Schematika -----
 
-        Schematika::Schematika(const Config & cfg) :
-            p_impl_{new Impl(cfg)}
+        Schematika::Schematika(const Config & cfg) : p_impl_{std::move(Impl::make(cfg))}
         {}
 
         Schematika::~Schematika()

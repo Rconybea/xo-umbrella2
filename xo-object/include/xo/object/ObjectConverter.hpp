@@ -12,11 +12,15 @@
 
 namespace xo {
     namespace obj {
+        /* Convert between xo::reflect::TaggedPtr and xo::Object for
+         * a particular wrapped c++ type
+         */
         struct Converter {
             using TaggedPtr = xo::reflect::TaggedPtr;
             using ConvertToObjectFn = gp<Object> (*)(gc::IAlloc *, const TaggedPtr &);
 
         public:
+            Converter() = default;
             explicit Converter(ConvertToObjectFn f) : cvt_to_object_{f} {}
 
             /** convert tagged pointer @p tp to new object,
@@ -25,7 +29,7 @@ namespace xo {
              *  Conversion will typically be for some specific type;
              *  see @ref ObjectConverter
              **/
-            ConvertToObjectFn cvt_to_object_;
+            ConvertToObjectFn cvt_to_object_ = nullptr;
         };
 
         /** @class ObjectConverter
@@ -48,6 +52,7 @@ namespace xo {
          **/
         class ObjectConverter {
         public:
+            using TaggedPtr = xo::reflect::TaggedPtr;
             using IAlloc = xo::gc::IAlloc;
 
             /** sets up standard conversions **/
@@ -56,6 +61,12 @@ namespace xo {
             /** establish conversion: use @p fn to convert values of type @tparam T. **/
             template <typename T>
             void establish_conversion(Converter::ConvertToObjectFn fn);
+
+            /** convert tagged poitner @p tp to object.  allocates memory only from @p mm.
+             *  return nullptr if no converter available and @p throw_flag not set.
+             *  throw exception if no converter available and @p throw_flag set.
+             **/
+            gp<Object> tp_to_object(IAlloc * mm, const TaggedPtr & tp, bool throw_flag);
 
             /** convert @p x to object.
              *  return converted object; if allocated, using only memory from @p mm.
@@ -92,19 +103,8 @@ namespace xo {
             using xo::reflect::TaggedPtr;
 
             TaggedPtr x_tp = Reflect::make_tp(&x);
-            Converter * cvt = cvt_.lookup(x_tp.td());
 
-            if (cvt) {
-                return (cvt->cvt_to_object_)(mm, x_tp);
-            } else {
-                if (throw_flag) {
-                    throw std::runtime_error(tostr("no object-converter available for instance of type",
-                                                   xtag("id", x_tp.td()->id()),
-                                                   xtag("name", x_tp.td()->short_name())));
-                }
-
-                return nullptr;
-            }
+            return tp_to_object(mm, x_tp, throw_flag);
         }
     }
 }

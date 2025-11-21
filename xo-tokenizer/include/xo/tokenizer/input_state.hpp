@@ -177,14 +177,18 @@ namespace xo {
                 ++eol;
 
             this->current_line_ = span_type(sol, eol);
+            this->current_pos_ = 0;
 
-            log && log(xtag("current_line", print::printspan(current_line_)));
+            log && log(xtag("current_line", print::printspan(current_line_)),
+                       xtag("current_pos", current_pos_));
         }
 
         template <typename CharT>
         const CharT *
         input_state<CharT>::skip_leading_whitespace(const span_type & input)
         {
+            scope log(XO_DEBUG(debug_flag_));
+
             const CharT * ix = input.lo();
 
             if (this->current_line().is_null()) {

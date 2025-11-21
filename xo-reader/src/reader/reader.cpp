@@ -4,8 +4,8 @@
 
 namespace xo {
     namespace scm {
-        reader::reader(bool debug_flag)
-            : parser_{debug_flag}
+        reader::reader(bool debug_flag) :
+            tokenizer_{debug_flag}, parser_{debug_flag}
         {}
 
         void
@@ -118,7 +118,7 @@ namespace xo {
                 }
             }
 
-            /* control here: eithero
+            /* control here: either
              * 1. input.empty (perhaps ate some whitespace,  ok)
              * 2. missing or incomplete token (ok unless eof)
              */
