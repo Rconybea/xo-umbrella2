@@ -121,22 +121,22 @@ namespace xo {
 
             if (!error_description_.empty()) {
                 const char * prefix = "input: ";
-                /* input_state.current_pos: position of first character following preceding token.
-                 * input_state.whitespace:  whitespace between current_pos and start of failing token
+                /* input_state.tk_start:    position of first character in token
+                 * input_state.current_pos: position of first character following preceding token.
                  * error_pos:               position (relative to start) at which failure detected
                  */
-                const size_t tk_start = input_state_.current_pos() + input_state_.whitespace();
+                const size_t tk_start = input_state_.tk_start();
                 const size_t tk_indent = (strlen(prefix) + tk_start);
                 const size_t error_pos = 1 + tk_start + error_pos_;
 
-                os << "char: " << error_pos << endl;
+                os << "token col: " << tk_start << ", error col: " << error_pos << "\n";
                 os << prefix;
                 for (const char *p = input_state_.current_line().lo(),
                          *e = input_state_.current_line().hi(); p < e; ++p)
                 {
                     os << *p;
                 }
-                os << endl;
+                //os << endl;
                 os << std::setw(tk_indent) << " ";
 
                 for (size_t i = 0; i < error_pos_; ++i) {

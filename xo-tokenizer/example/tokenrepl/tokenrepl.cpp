@@ -29,6 +29,10 @@ main() {
     tokenizer_type tkz(xo::log_config::min_log_level <= xo::log_level::info);
     string input_str;
 
+    size_t line_no = 1;
+
+    constexpr std::size_t c_maxlines = 25;
+
     while (repl_getline(interactive, cin, cout, input_str)) {
         // we want tokenizer to see newline, it's syntax
         input_str.push_back('\n');
@@ -36,7 +40,7 @@ main() {
 
         // reminder: input may contain multiple tokens
         while (!input.empty()) {
-            auto [tk, consumed, error] = tkz.scan(input);
+            auto [tk, consumed, error] = tkz.scan(input, false /*!eof*/);
 
             if (tk.is_valid()) {
                 cout << tk << endl;
@@ -47,29 +51,16 @@ main() {
                 break;
             }
 
-            input = tkz.consume(consumed, input);
+            input = input.after_prefix(consumed);
         }
 
         /* here: input.empty() or error encountered */
 
-        /* discard stashed remainder of input line
-         * (for nicely-formatted errors)
-         */
-        tkz.discard_current_line();
-    }
+        ++line_no;
 
-    {
-        span_type input = span_type::from_string(input_str);
-
-        auto [tk, consumed, error] = tkz.notify_eof(input);
-
-        input = tkz.consume(consumed, input);
-
-        if (tk.is_valid()) {
-            cout << tk << endl;
-        } else if (error.is_error()) {
-            cout << "parsing error: " << endl;
-            error.report(cout);
+        if (line_no > c_maxlines) {
+            cout << "always exit after " << c_maxlines << " lines of input" << endl;
+            break;
         }
     }
 }

@@ -5,7 +5,8 @@
 namespace xo {
     namespace scm {
         reader::reader(bool debug_flag) :
-            tokenizer_{debug_flag}, parser_{debug_flag}
+            tokenizer_{debug_flag},
+            parser_{debug_flag}
         {}
 
         void
@@ -29,7 +30,7 @@ namespace xo {
         }
 
         reader_result
-        reader::read_expr(const span_type & input_arg, bool eof)
+        reader::read_expr(const span_type & input_arg, bool eof_flag)
         {
             scope log(XO_DEBUG(this->debug_flag()));
 
@@ -38,20 +39,25 @@ namespace xo {
             /* input text-span consumed by this call.
              * Always comprises some number (possibly 0)
              * of complete tokens,  along with any leading
-             * whitespace
+             * whitespace.
+             *
+             * expr_span may also begin and end part way through
+             * distinct input lines
              */
             span_type expr_span = input.prefix(0ul);
 
             while (!input.empty()) {
-                /* each loop iterations reads one token */
+                /* each loop iteration reads one token */
 
-                /* read one token from input */
-                auto [tk, used_span, error1] = this->tokenizer_.scan2(input, eof);
+                /* read one token from input.
+                 * tokenizer stashes one line at a time, but used_span only
+                 * reports in used_span the portion representing the first token.
+                 */
+                auto [tk, used_span, error1] = this->tokenizer_.scan(input, eof_flag);
 
                 log && log(xtag("consumed", used_span));
                 log && log(xtag("input.pre", input));
 
-                input = this->tokenizer_.consume(used_span, input);
                 expr_span += used_span;
 
                 if (tk.is_valid()) {
@@ -76,7 +82,7 @@ namespace xo {
                                              expr_span, parser_.stack_size(), reader_error());
                     } else if (parser_result.is_error()) {
                         /* 1. parser detected error.
-                         * 2. tokenizer_.input_state() refers to position just after offending token
+                         * 2. tokenizer_.input_state().current_pos refers to position just after offending token
                          * 3. error_pos here is 0 because error detected at token boundary
                          */
                         reader_error error2(parser_result.error_src_function(),
@@ -122,7 +128,7 @@ namespace xo {
              * 1. input.empty (perhaps ate some whitespace,  ok)
              * 2. missing or incomplete token (ok unless eof)
              */
-            if (eof) {
+            if (eof_flag) {
                 if (parser_.has_incomplete_expr()) {
                     throw std::runtime_error
                         ("reader::read_expr"

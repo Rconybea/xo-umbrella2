@@ -232,7 +232,7 @@ namespace xo {
                         in_span(testcase.input_.c_str(),
                                 testcase.input_.c_str() + testcase.input_.size());
 
-                    auto sr = tkz.scan2(in_span, true /*eof*/);
+                    auto sr = tkz.scan(in_span, true /*eof*/);
 
                     REHEARSE(rh, sr.get_token().tk_type() == testcase.expected_tk_.tk_type());
                     if (sr.get_token().tk_type() == tokentype::tk_i64)
@@ -408,7 +408,7 @@ namespace xo {
                     {
                         log && log(xtag("i_tk", i_tk));
 
-                        auto sr = tkz.scan2(in_span, in_span.empty());
+                        auto sr = tkz.scan(in_span, in_span.empty());
                         const auto & tk = sr.get_token();
 
                         if (tk.is_valid()) {
@@ -454,6 +454,8 @@ namespace xo {
             make_testcase(const char * input, const char * src_function, const char * error_descr,
                           size_t tk_start, size_t whitespace, size_t error_pos)
             {
+                size_t line_no = 1;
+
                 testcase_error retval;
                 retval.input_ = input;
                 retval.expect_error_ = tkz_error_type(src_function, error_descr,
@@ -548,7 +550,7 @@ namespace xo {
 
                         auto in_span = tokenizer::span_type::from_string(testcase.input_);
 
-                        auto sr = tkz.scan2(in_span, true /*eof*/);
+                        auto sr = tkz.scan(in_span, true /*eof*/);
 
                         REHEARSE(rh, sr.is_error());
 

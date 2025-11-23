@@ -9,9 +9,50 @@
 
 namespace xo {
     namespace scm {
+        /** enum to report outcome of @ref capture_current_line **/
+        enum class input_error {
+            /** normal return, input line successfully identified and captured **/
+            ok = 0,
+            /** incomplete input; should not have been submitted to @ref capture_current_line.
+             *  note: submit last line of input with eof_flag=true
+             **/
+            incomplete,
+            N
+        };
+
         /** @class input_state
          *  @brief Track detailed input position for use in error messages
          *
+         *  input characters fall into two categories:
+         *  - consumed: memory can be reclaimed/recycled
+         *  - buffered: memory will be retained unaltered until consumed
+         *
+         *  remarks:
+         *  - always in one of two states:
+         *    - empty
+         *    - contains exactly one line of input
+         *  - also record current input position.
+         *    Use this for example to identify where tokenizer rejected input.
+         *  - .current_pos advances by one token
+         *
+         *  - buffered characters always form a single contiguous range.
+         *  - input_state does not own any storage; storage is owned elsewhere
+         *
+         *  @text
+         *
+         *    <------------------.current_line------------------>
+         *                                   >  <-- .whitespace
+         *    cccccccccccccccccccccccccccccccc__TTTTTTTTxxxxxxxxx
+         *    ^                                 ^                ^
+         *    .current_line.lo                  |                .current_line.hi
+         *                           .current_pos
+         *
+         *    <----prev_line----> <----current_line---->
+         *                                   >  <--whitespace
+         *    ppppppppppppppppppp cccccccccccc__TTTTTTTT
+         *    ^
+         *
+         *  @endtext
          **/
         template <typename CharT>
         class input_state {
@@ -33,8 +74,11 @@ namespace xo {
             /** Create instance with supplied @p current_line, @p current_pos, @p whitespace.
              *  Introduced for unit tests, not used in tokenizer.
              **/
-            explicit input_state(const span<const CharT>& current_line, size_t current_pos, size_t whitespace)
-                : current_line_{current_line}, current_pos_{current_pos}, whitespace_{whitespace} {}
+            explicit input_state(const span<const CharT>& current_line,
+                                 size_t current_pos,
+                                 size_t whitespace) : current_line_{current_line},
+                                                      current_pos_{current_pos},
+                                                      whitespace_{whitespace} {}
 
             ///@}
 
@@ -63,6 +107,7 @@ namespace xo {
 #endif
             const span_type & current_line() const { return current_line_; }
 #pragma GCC diagnostic pop
+            size_t tk_start() const { return tk_start_; }
             size_t current_pos() const { return current_pos_; }
             size_t whitespace() const { return whitespace_; }
             bool debug_flag() const { return debug_flag_; }
@@ -77,27 +122,65 @@ namespace xo {
              **/
             input_state rewind(std::size_t n) const;
 
-            /** Capture prefix of @p input up to first newline **/
-            void capture_current_line(const span_type & input);
+            /** Capture prefix of @p input up to first newline.
+             *  Set read position to start of line.
+             *
+             *  Alters:
+             *    .current_line
+             *    .current_pos
+             *
+             * Return pair comprising error code and input span representing first line
+             * (including trailing newline) from @p input.
+             **/
+            std::pair<input_error, span_type> capture_current_line(const span_type & input,
+                                                                   bool eof_flag);
+
+            /** atomically return current line while discarding it from input state
+             *
+             *  Alters
+             *    .current_line
+             *    .current_pos
+             *    .whitespace
+             **/
+            span_type consume_current_line();
 
             /** Reset input state for start of next line.
              *  Expression parser may use this to discard remainder of input line
              *  after a parsing error.
+             *
+             * Alters:
+             *   .current_line
+             *   .current_pos
+             *   .whitespace
              **/
             void discard_current_line();
 
-            /** Add @p z to current position **/
-            void consume(size_t z);
-
-            /** Skip prefix of input comprising whitespace.
-             *  Return pointer to first non-whitespace character in @p input,
-             *  or @c input.hi if input contains only whitespace.
+            /** Advance input position by @p z
              *
-             *  if @p input contains any newlines, preserves suffix after last
-             *  such newilne in @p current_line_
-             *
+             *  Alters:
+             *   .current_pos
              **/
-            const CharT * skip_leading_whitespace(const span_type & input);
+            void advance(size_t z);
+
+            /** Advance .current_pos to pos.
+             *  Require: pos in @ref current_line_
+             **/
+            void advance_until(const CharT * pos);
+
+            /** Skip prefix of input, starting at current read position,
+             *  comprising only whitespace.
+             *
+             *  Presume input position is at end of token;
+             *  on return @ref whitespace_ counts number of whitespace characters
+             *  skipped.
+             *
+             *  Return pointer to first non-whitespace character after @ref current_pos_
+             *  or @ref current_line_.hi if reached end of buffered line.
+             *
+             *  Alters:
+             *    .whitespace
+             **/
+            const CharT * skip_leading_whitespace();
 
             ///@}
 
@@ -107,7 +190,9 @@ namespace xo {
 
             /** remember current input line.  Used only to report errors **/
             span<const CharT> current_line_ = span<const CharT>();
-            /** current input position within @ref current_line_ **/
+            /** start of last token within @ref current_line_ **/
+            size_t tk_start_ = 0;
+            /** input position within @ref current_line_ **/
             size_t current_pos_ = 0;
             /** number of whitespace chars since end of preceding token,
              *  or last newline, whichever is less
@@ -149,12 +234,34 @@ namespace xo {
 
         template <typename CharT>
         void
-        input_state<CharT>::consume(size_t z) {
+        input_state<CharT>::advance(size_t z) {
             scope log(XO_DEBUG(debug_flag_));
 
             this->current_pos_ += z;
 
             log && log(xtag("z", z), xtag("current_pos", current_pos_));
+        }
+
+        template <typename CharT>
+        void
+        input_state<CharT>::advance_until(const CharT * pos) {
+            scope log(XO_DEBUG(debug_flag_));
+
+            assert(current_line_.lo() <= pos && pos < current_line_.hi());
+
+            this->current_pos_ = pos - current_line_.lo();
+
+            log && log(xtag("current_pos", current_pos_));
+        }
+
+        template <typename CharT>
+        auto
+        input_state<CharT>::consume_current_line() -> span_type {
+            span_type retval = current_line_;
+
+            this->discard_current_line();
+
+            return retval;
         }
 
         template <typename CharT>
@@ -166,10 +273,14 @@ namespace xo {
         }
 
         template <typename CharT>
-        void
-        input_state<CharT>::capture_current_line(const span_type & input)
+        auto
+        input_state<CharT>::capture_current_line(const span_type & input,
+                                                 bool eof_flag) -> std::pair<input_error, span_type>
         {
             // see also discard_current_line()
+            // note: must capture entirety of first line,
+            //       for example including leading whitespace.
+            //       See discussion in tokenizer scan() method
 
             scope log(XO_DEBUG(debug_flag_));
 
@@ -177,44 +288,76 @@ namespace xo {
             const CharT * sol = input.lo();
             const CharT * eol = sol;
 
+            if (sol == current_line_.lo()) {
+                log && log("short-circuit - current line already stashed");
+
+                /* nothing to do here */
+                return std::make_pair(input_error::ok, current_line_);
+            }
+
             while ((eol < input.hi()) && (*eol != '\n'))
                 ++eol;
 
+            if (*eol == '\n') {
+                /* include \n at end-of-line */
+                ++eol;
+            } else {
+                if (!eof_flag) {
+                    /* caller expected to provide complete line of input. complain and ignore */
+                    return std::make_pair(input_error::incomplete,
+                                          input.prefix(0ul));
+                }
+            }
+
             this->current_line_ = span_type(sol, eol);
             this->current_pos_ = 0;
+            this->whitespace_ = 0;
 
             log && log(xtag("current_line", print::printspan(current_line_)),
                        xtag("current_pos", current_pos_));
+
+            return std::make_pair(input_error::ok,
+                                  span_type(sol, eol));
         }
 
         template <typename CharT>
         const CharT *
-        input_state<CharT>::skip_leading_whitespace(const span_type & input)
+        input_state<CharT>::skip_leading_whitespace()
         {
             scope log(XO_DEBUG(debug_flag_));
 
-            const CharT * ix = input.lo();
-
-            if (this->current_line().is_null()) {
-                this->capture_current_line(input);
-            }
+            const CharT * ix = current_line_.lo() + current_pos_;
 
             this->whitespace_ = 0;
 
             /* skip whitespace + remember beginning of most recent line */
-            while (is_whitespace(*ix) && (ix != input.hi())) {
-                if (is_newline(*ix)) {
-                    ++ix;
+            while (is_whitespace(*ix) && (ix != current_line_.hi())) {
+                ++ix;
 
-                    this->capture_current_line(span_type(ix, input.hi()));
-                } else {
-                    ++ix;
-
-                    ++(this->whitespace_);
-                }
+                ++(this->whitespace_);
             }
 
+            this->tk_start_ = ix - current_line_.lo();
+            this->current_pos_ = ix - current_line_.lo();
+
             return ix;
+        }
+
+        template <typename CharT>
+        inline std::ostream &
+        operator<<(std::ostream & os,
+                   const input_state<CharT>& x)
+        {
+            using xo::print::unq;
+
+            os << "<input_state"
+            << xtag("tk", x.tk_start())
+            << xtag("pos", x.current_pos())
+            << xtag("line", unq(std::string_view(x.current_line().lo(), x.current_line().hi())))
+            << xtag("whitespace", x.whitespace())
+            << ">";
+
+            return os;
         }
     }
 }
