@@ -6,7 +6,9 @@ set(SELF_SRCS
     Boolean.cpp
     String.cpp
     List.cpp
-    Integer.cpp)
+    Integer.cpp
+    Float.cpp
+)
 
 xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 ${SELF_SRCS})
 xo_headeronly_dependency(${SELF_LIB} xo_reflectutil)

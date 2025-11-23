@@ -5,6 +5,7 @@
 
 #include "ObjectConverter.hpp"
 #include "Integer.hpp"
+#include "Float.hpp"
 
 namespace xo {
     using xo::reflect::TaggedPtr;
@@ -22,12 +23,25 @@ namespace xo {
 
                 return Integer::make(mm, *native);
             }
+
+            template <typename T>
+            gp<Object>
+            float_to_object(IAlloc * mm, const TaggedPtr & src)
+            {
+                T * native = src.recover_native<T>();
+
+                assert(native);
+
+                return Float::make(mm, *native);
+            }
         }
 
         ObjectConverter::ObjectConverter()
         {
             this->establish_conversion<std::int32_t>(&int_to_object<std::int32_t>);
-            this->establish_conversion<std::int64_t>(&int_to_object<std::int32_t>);
+            this->establish_conversion<std::int64_t>(&int_to_object<std::int64_t>);
+
+            this->establish_conversion<double>(&float_to_object<double>);
         }
 
         gp<Object>

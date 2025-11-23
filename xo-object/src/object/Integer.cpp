@@ -13,6 +13,8 @@ namespace xo {
     using xo::gc::IAlloc;
 
     namespace obj {
+        static_assert(sizeof(Integer::int_type) == 8, "expected 64-bit representation for xo::obj::Integer");
+
         Integer::Integer(int_type x) : value_{x} {}
 
         gp<Integer>

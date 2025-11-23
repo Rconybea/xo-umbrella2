@@ -145,6 +145,8 @@ namespace xo {
 
                 VSM_CONTINUE();
             } else {
+                /* see ObjectConverter::ctor to add more builtin types */
+
                 VSM_ERROR(tostr("constant_op: unable to convert native value to object",
                                 xtag("id", expr->value_tp().td()->id()),
                                 xtag("short_name", expr->value_tp().td()->short_name())));
