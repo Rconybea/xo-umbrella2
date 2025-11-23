@@ -129,8 +129,7 @@ namespace xo {
             //    rx.bind_key_internal(Replxx::KEY::control('p'), "history_previous");
             //    rx.bind_key_internal(Replxx::KEY::control('n'), "history_next");
 
-            //reader rdr(config_.debug_flag);
-            reader rdr(true);
+            reader rdr(config_.debug_flag);
             rdr.begin_interactive_session();
 
             string input_str;
