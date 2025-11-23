@@ -22,7 +22,7 @@ main() {
     using tokenizer_type = tokenizer<char>;
     using span_type = tokenizer_type::span_type;
 
-    xo::log_config::min_log_level = xo::log_level::info;
+    xo::log_config::min_log_level = xo::log_level::severe;
 
     bool interactive = isatty(STDIN_FILENO);
 
