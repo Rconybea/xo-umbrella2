@@ -53,7 +53,8 @@ namespace xo {
                  * tokenizer stashes one line at a time, but used_span only
                  * reports in used_span the portion representing the first token.
                  */
-                auto [tk, used_span, error1] = this->tokenizer_.scan(input, eof_flag);
+                auto [tk, used_span, error1]
+                    = this->tokenizer_.scan(input, eof_flag);
 
                 log && log(xtag("consumed", used_span));
                 log && log(xtag("input.pre", input));
@@ -101,7 +102,7 @@ namespace xo {
                          * input span may contain more tokens -> iterate
                          */
                     }
-                } else {
+                } else /*invalid token*/ {
                     if (error1.is_error()) {
                         /* tokenizer detected an error */
 
@@ -113,15 +114,19 @@ namespace xo {
                                                           error1.error_description(),
                                                           error1.input_state(),
                                                           error1.error_pos()));
+                    } else if (used_span.size() > 0) {
+                        /* control here on reaching the last token in input line;
+                         * used_span will be the entire line
+                         */
                     } else {
-                        /* control should not come here */
-
+                        /* control should not come here: invalid token with no error
+                         */
                         assert(input.empty());
+                        break;
                     }
-
-                    /* need more tokens in input */
-                    break;
                 }
+
+                input = input.after_prefix(used_span);
             }
 
             /* control here: either

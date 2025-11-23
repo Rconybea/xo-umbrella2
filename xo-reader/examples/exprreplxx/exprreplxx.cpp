@@ -96,7 +96,7 @@ main()
     welcome(cerr);
 
     while (replxx_getline(interactive, parser_stack_size, rx, input_str)) {
-        input  = span_type::from_string(input_str);
+        input = span_type::from_string(input_str);
 
         while (!input.empty()) {
             auto [expr, consumed, psz, error] = rdr.read_expr(input, eof);
