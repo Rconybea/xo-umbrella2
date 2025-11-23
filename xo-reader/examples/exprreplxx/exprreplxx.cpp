@@ -81,7 +81,7 @@ main()
 //    rx.bind_key_internal(Replxx::KEY::control('p'), "history_previous");
 //    rx.bind_key_internal(Replxx::KEY::control('n'), "history_next");
 
-    constexpr bool c_debug_flag = true;
+    constexpr bool c_debug_flag = false;
 
     reader rdr(c_debug_flag);
     rdr.begin_interactive_session();
