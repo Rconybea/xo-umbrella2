@@ -360,32 +360,28 @@ namespace xo {
                             } else if (exponent_flag && !exponent_digit_flag) {
                                 exponent_sign_flag = true;
                             } else {
-                                return result_type::make_error
-                                    (error_type(__FUNCTION__ /*src_function*/,
-                                                "improperly placed sign indicator",
-                                                input_state_ref,
-                                                (ix - tk_start)
-                                                ),
+                                return result_type::make_error_consume_current_line
+                                    (__FUNCTION__ /*src_function*/,
+                                     "improperly placed sign indicator",
+                                     (ix - tk_start),
                                      input_state_ref);
                             }
                         } else if (*ix == '.') {
                             if (period_flag) {
-                                return result_type::make_error
-                                    (error_type(__FUNCTION__ /*src_function*/,
-                                                "duplicate decimal point in numeric literal",
-                                                input_state_ref,
-                                                (ix - tk_start)),
+                                return result_type::make_error_consume_current_line
+                                    (__FUNCTION__ /*src_function*/,
+                                     "duplicate decimal point in numeric literal",
+                                     (ix - tk_start),
                                      input_state_ref);
                             }
 
                             period_flag = true;
                         } else if ((*ix == 'e') || (*ix == 'E')) {
                             if (exponent_flag) {
-                                return result_type::make_error
-                                    (error_type(__FUNCTION__ /*src_function*/,
-                                                "duplicate exponent marker in numeric literal",
-                                                input_state_ref,
-                                                (ix - tk_start)),
+                                return result_type::make_error_consume_current_line
+                                    (__FUNCTION__ /*src_function*/,
+                                     "duplicate exponent marker in numeric literal",
+                                     (ix - tk_start),
                                      input_state_ref);
                             }
 
@@ -398,11 +394,10 @@ namespace xo {
                                 number_flag = true;
                             }
                         } else {
-                            return result_type::make_error
-                                (error_type(__FUNCTION__ /*src_function*/,
-                                            "unexpected character in numeric constant" /*error_description*/,
-                                            input_state_ref,
-                                            (ix - tk_start)),
+                            return result_type::make_error_consume_current_line
+                                (__FUNCTION__ /*src_function*/,
+                                 "unexpected character in numeric constant" /*error_description*/,
+                                 (ix - tk_start),
                                  input_state_ref);
                         }
                     }
@@ -502,11 +497,10 @@ namespace xo {
                         ++ix;
 
                         if (ix == token_text.hi()) {
-                            return result_type::make_error
-                                (error_type(__FUNCTION__ /*src_function*/,
-                                            "expecting key following escape character \\",
-                                            input_state_ref,
-                                            (ix - tk_start)),
+                            return result_type::make_error_consume_current_line
+                                (__FUNCTION__ /*src_function*/,
+                                 "expecting key following escape character \\",
+                                 (ix - tk_start),
                                  input_state_ref);
                         }
 
@@ -532,11 +526,10 @@ namespace xo {
                             tk_text.push_back('"');
                             break;
                         default:
-                            return result_type::make_error
-                                (error_type(__FUNCTION__ /*src_function*/,
-                                            "expecting one of n|r|\"|\\ following escape \\",
-                                            input_state_ref,
-                                            (ix - tk_start)),
+                            return result_type::make_error_consume_current_line
+                                (__FUNCTION__ /*src_function*/,
+                                 "expecting one of n|r|\"|\\ following escape \\",
+                                 (ix - tk_start),
                                  input_state_ref);
                         }
                         break;
@@ -550,11 +543,10 @@ namespace xo {
                 }
 
                 if (!endofstring) {
-                    return result_type::make_error
-                        (error_type(__FUNCTION__ /*src_function*/,
-                                    "missing terminating '\"' to complete literal string",
-                                    input_state_ref,
-                                    (ix - tk_start)),
+                    return result_type::make_error_consume_current_line
+                        (__FUNCTION__ /*src_function*/,
+                         "missing terminating '\"' to complete literal string",
+                         (ix - tk_start),
                          input_state_ref);
                 }
 
@@ -693,11 +685,10 @@ namespace xo {
             }
 
             if (tk_type == tokentype::tk_invalid) {
-                return result_type::make_error
-                    (error_type(__FUNCTION__ /*src_function*/,
-                                "illegal input character",
-                                input_state_ref,
-                                (ix - tk_start)),
+                return result_type::make_error_consume_current_line
+                    (__FUNCTION__ /*src_function*/,
+                     "illegal input character",
+                     (ix - tk_start),
                      input_state_ref);
             }
 
@@ -768,7 +759,8 @@ namespace xo {
 
         template <typename CharT>
         auto
-        tokenizer<CharT>::scan(const span_type & input, bool eof_flag) -> result_type
+        tokenizer<CharT>::scan(const span_type & input,
+                               bool eof_flag) -> result_type
         {
             scope log(XO_DEBUG(input_state_.debug_flag()));
 
@@ -871,11 +863,10 @@ namespace xo {
                     } else if ((*ix == '\n') || (*ix == '\r')) {
                         log && log ("string literal with naked newline or CR");
 
-                        return result_type::make_error
-                            (error_type(__FUNCTION__ /*src_function*/,
-                                        "must use \\n or \\r to encode newline/cr in string literal",
-                                        input_state_,
-                                        (ix - tk_start)),
+                        return result_type::make_error_consume_current_line
+                            (__FUNCTION__ /*src_function*/,
+                             "must use \\n or \\r to encode newline/cr in string literal",
+                             (ix - tk_start),
                              this->input_state_);
                     }
 
@@ -885,11 +876,10 @@ namespace xo {
                 if (!complete_flag) {
                     log && log("unterminated string literal");
 
-                    return result_type::make_error
-                               (error_type(__FUNCTION__ /*src_function*/,
-                                           "unterminated string literal",
-                                           input_state_,
-                                           (ix - tk_start)),
+                    return result_type::make_error_consume_current_line
+                               (__FUNCTION__ /*src_function*/,
+                                "unterminated string literal",
+                                (ix - tk_start),
                                 this->input_state_);
                 }
             } else {

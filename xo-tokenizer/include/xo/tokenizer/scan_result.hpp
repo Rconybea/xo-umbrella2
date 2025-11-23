@@ -42,8 +42,17 @@ namespace xo {
 
             static scan_result make_whitespace(const span_type & prefix_input);
             static scan_result make_partial(const span_type & prefix_input);
-            static scan_result make_error(const error_type & error,
-                                          input_state_type & input_state_ref);
+            /**
+             *  @p error_src can be __FUNCTION__ from site where error generated.
+             *  @p error_msg error message
+             *  @p error_pos error position, relative to start of token
+             *  @p input_state_ref input state object;
+             *  copied into scan_result, and leaving input_state_ref.current_line cleared
+             **/
+            static scan_result make_error_consume_current_line(const char * error_src,
+                                                               std::string error_msg,
+                                                               size_t error_pos,
+                                                               input_state_type & input_state_ref);
 
             bool is_eof_or_ambiguous() const { return token_.is_invalid() && error_.is_not_an_error(); }
             bool is_token() const { return token_.is_valid(); }
@@ -78,14 +87,23 @@ namespace xo {
         }
 
         template <typename CharT>
-        auto scan_result<CharT>::make_error(const error_type & error,
-                                            input_state_type & input_state_ref) -> scan_result
+        auto
+        scan_result<CharT>::make_error_consume_current_line(const char * error_src,
+                                                            std::string error_msg,
+                                                            size_t error_pos,
+                                                            input_state_type & input_state_ref) -> scan_result
         {
             /* report+consume entire input line */
 
+            /* copy before altered by .consume_current_line() */
+            input_state_type input_state_copy = input_state_ref;
+
             return scan_result(token_type::invalid(),
                                input_state_ref.consume_current_line(),
-                               error);
+                               error_type(error_src,
+                                          error_msg,
+                                          input_state_copy,
+                                          error_pos));
         }
 
     } /*namespace scm*/
