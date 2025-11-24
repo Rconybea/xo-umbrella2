@@ -44,6 +44,24 @@ namespace xo {
                                             slot_v_{mm, n}
         {}
 
+        bool
+        LocalEnv::local_contains_var(const std::string & vname) const
+        {
+            assert(symtab_.get());
+
+            return symtab_->lookup_local(vname);
+        }
+
+        void
+        LocalEnv::establish_var(bp<Variable> v)
+        {
+            assert(v);
+
+            throw std::runtime_error(tostr("LocalEnv::establish_var:"
+                                           " inserting new variables not supported for LocalEnv",
+                                           xtag("v.name", v->name())));
+        }
+
         TaggedPtr
         LocalEnv::self_tp() const
         {

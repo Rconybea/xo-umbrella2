@@ -3,6 +3,7 @@
 #include "VirtualSchematikaMachine.hpp"
 #include "VsmInstr.hpp"
 #include "xo/expression/ConstantInterface.hpp"
+#include "xo/alloc/GC.hpp"
 
 /** continue after completing a VSM instruction;
  *  achieve by jumping to continuation.
@@ -14,6 +15,8 @@
 #define VSM_ERROR(msg) report_error(msg); return;
 
 namespace xo {
+    using xo::gc::GC;
+
     namespace scm {
         struct VsmOps {
             /** halt virtual scheme machine.
@@ -36,21 +39,60 @@ namespace xo {
 
         // ----- VirtualSchematikaMachineFlyweight -----
 
-        VirtualSchematikaMachineFlyweight::VirtualSchematikaMachineFlyweight(gc::IAlloc * mm) :
-            object_mm_{mm}
+        VirtualSchematikaMachineFlyweight::VirtualSchematikaMachineFlyweight(gc::IAlloc * mm,
+                                                                             gp<Env> env) :
+            object_mm_{mm},
+            toplevel_env_{env}
         {}
 
         // ----- VirtualSchematikaMachine -----
 
-        VirtualSchematikaMachine::VirtualSchematikaMachine(gc::IAlloc * mm) : flyweight_{mm}
-        {}
+        VirtualSchematikaMachine::VirtualSchematikaMachine(gc::IAlloc * mm, gp<Env> env) : flyweight_{mm, env}
+        {
+            // gc roots
+            gc::GC * gc = GC::from(mm);
+
+            if (gc) {
+                assert((gc->gc_in_progress() == false) && "cannot add roots while GC running");
+
+                gc->add_gc_root_dwim(&env_);
+                gc->add_gc_root_dwim(&value_);
+            } else {
+                // Want to support VSM with arena-allocator-only;
+                // if only for unit testing.
+            }
+
+            // TODO: install builtin primitives here
+        }
+
+        VirtualSchematikaMachine::~VirtualSchematikaMachine()
+        {
+            gc::GC * gc = GC::from(flyweight_.object_mm_);
+
+            if (gc) {
+                assert((gc->gc_in_progress() == false) && "cannot remove roots while GC running");
+
+                gc->remove_gc_root_dwim(&env_);
+                gc->remove_gc_root_dwim(&value_);
+            } else {
+                // nothing to do in arena-only mode
+            }
+        }
 
         std::pair<gp<Object>,
                   SchematikaError>
-        VirtualSchematikaMachine::eval(bp<Expression> expr)
+        VirtualSchematikaMachine::toplevel_eval(bp<Expression> expr)
+        {
+            return this->eval(expr, this->env_);
+        }
+
+        std::pair<gp<Object>,
+                  SchematikaError>
+        VirtualSchematikaMachine::eval(bp<Expression> expr, gp<Env> env)
         {
             this->pc_   = &VsmOps::eval_op;
             this->expr_ = expr.promote();
+            this->env_  = env;
             this->cont_ = &VsmOps::halt_op;
 
             this->run();
@@ -101,7 +143,7 @@ namespace xo {
                     case exprtype::n_expr:
                         this->pc_ = nullptr;
                         this->value_ = nullptr;
-                        this->error_ = SchematikaError(tostr("execute_vsm: not implmented",
+                        this->error_ = SchematikaError(tostr("execute_vsm: not implemented",
                                                              xtag("extype", expr_->extype())));
                         this->cont_ = nullptr;
                         break;
@@ -129,9 +171,9 @@ namespace xo {
         void
         VirtualSchematikaMachine::constant_op()
         {
-            scope log(XO_DEBUG(true));
-
             using xo::scm::ConstantInterface;
+
+            scope log(XO_DEBUG(true));
 
             bp<ConstantInterface> expr = ConstantInterface::from(expr_);
 
@@ -152,6 +194,30 @@ namespace xo {
                                 xtag("short_name", expr->value_tp().td()->short_name())));
             }
         }
+
+        // placeholder: primitive_op
+
+#ifdef NOT_YET
+        void
+        VirtualSchematikaMachine::define_op()
+        {
+            using xo::scm::DefineExpr;
+
+            bp<DefineExpr> expr = DefineExpr::from(expr_);
+
+            assert(expr);
+
+            // note: establish lhs_var first, to allow for recursion, for example:
+            //        def fact(n: i64) { if (n == 0) then 1; else n * fact(n-1); }
+
+            /** remembers promised variable type **/
+            env_->establish_var(expr->lhs_variable());
+
+            /* lhs_var
+             * rhs
+             */
+        }
+#endif
 
     } /*namespace scm*/
 } /*namespace xo*/

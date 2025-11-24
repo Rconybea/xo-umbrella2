@@ -5,6 +5,7 @@
 
 #include "Schematika.hpp"
 #include "VirtualSchematikaMachine.hpp"
+#include "GlobalEnv.hpp"
 #include "xo/reader/reader.hpp"
 #include <replxx.hxx>
 #include <ostream>
@@ -26,7 +27,8 @@ namespace xo {
              *        rather than VirtualSchematikaMachine to own allocator
              *        to preserve option to share it
              **/
-            Impl(const Config & config, up<IAlloc> mm) : config_{config}, vsm_{mm.get()}, mm_{std::move(mm)} {}
+            Impl(const Config & config, up<IAlloc> mm, gp<Env> toplevel_env) :
+                config_{config}, vsm_{mm.get(), toplevel_env}, mm_{std::move(mm)} {}
 
             /** create instance + allocator **/
             static up<Impl> make(const Config & cfg);
@@ -59,8 +61,10 @@ namespace xo {
         Schematika::Impl::make(const Config & cfg)
         {
             up<IAlloc> mm = GC::make(cfg.gc_config_);
+            rp<GlobalSymtab> symtab = GlobalSymtab::make_empty();
+            gp<Env> env = GlobalEnv::make_empty(mm.get(), symtab);
 
-            return std::make_unique<Impl>(cfg, std::move(mm));
+            return std::make_unique<Impl>(cfg, std::move(mm), env);
         }
 
         void
@@ -180,7 +184,7 @@ namespace xo {
                         //pps.prettyn(expr);
 
                         // TODO:
-                        auto [ value, scm_error ] = this->vsm_.eval(expr);
+                        auto [ value, scm_error ] = this->vsm_.toplevel_eval(expr);
 
                         if (scm_error.is_error()) {
                             /* print error */

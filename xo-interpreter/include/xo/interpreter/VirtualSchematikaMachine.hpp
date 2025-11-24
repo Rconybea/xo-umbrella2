@@ -4,6 +4,7 @@
 
 #include "VsmInstr.hpp"
 #include "SchematikaError.hpp"
+#include "Env.hpp"
 #include "xo/expression/Expression.hpp"
 #include "xo/object/ObjectConverter.hpp"
 #include "xo/alloc/Object.hpp"
@@ -12,10 +13,13 @@ namespace xo {
     namespace scm {
         /** @brief state that may be shared across VirtualSchematikaMachine instances **/
         struct VirtualSchematikaMachineFlyweight {
-            explicit VirtualSchematikaMachineFlyweight(gc::IAlloc * mm);
+            explicit VirtualSchematikaMachineFlyweight(gc::IAlloc * mm,
+                                                       gp<Env> env);
 
             /** memory allocator for interpreter operation. **/
             gc::IAlloc * object_mm_ = nullptr;
+            /** global environment **/
+            gp<Env> toplevel_env_;
             /** convert TaggedPtr->Object **/
             xo::obj::ObjectConverter object_converter_;
         };
@@ -29,17 +33,30 @@ namespace xo {
             using IAlloc = xo::gc::IAlloc;
 
         public:
-            VirtualSchematikaMachine(IAlloc * mm);
+            VirtualSchematikaMachine(IAlloc * mm, gp<Env> toplevel_env);
+            ~VirtualSchematikaMachine();
 
             /** evaluate expression @p expr.
              *  borrows calling thread until completion
              *  return [value, error]. error ignored unless value is nullptr.
              *  conversely when value is nullptr, error gives details of original
              *  error.
+             *
+             *  Evaluate schematika expression @p expr in environment @p env
              **/
-            std::pair<gp<Object>, SchematikaError> eval(bp<Expression> expr);
+            std::pair<gp<Object>, SchematikaError> eval(bp<Expression> expr, gp<Env> env);
+
+            /** evaluate expression @p expr in toplevel environment **/
+            std::pair<gp<Object>, SchematikaError> toplevel_eval(bp<Expression> expr);
 
         private:
+            /** Not moveable or copyable.
+             *  One constraint is member variables added to flyweight_.object_mm_
+             *  as GC roots, with no provision for unwinding later.
+             **/
+            VirtualSchematikaMachine(const VirtualSchematikaMachine &) = delete;
+            VirtualSchematikaMachine(VirtualSchematikaMachine &&) = delete;
+
             /** borrow calling thread to run schematika machine
              *  indefinitely, or until null continuation
              **/
@@ -67,6 +84,8 @@ namespace xo {
 
             /** expression **/
             rp<Expression> expr_;
+            /** holds bindings for all schematika variables **/
+            gp<Env> env_;
 
             /** non-error result value from eval() / apply() **/
             gp<Object> value_;

@@ -39,7 +39,7 @@ namespace xo {
 
                 if (ix == global_map_.end()) {
                     /* not found */
-                    return bp<Variable>::from_native(nullptr);
+                    return bp<Variable>();
                 }
 
                 return ix->second;

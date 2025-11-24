@@ -21,6 +21,10 @@ namespace xo {
 
             gc::IAlloc * get_mm() const { return mm_; }
 
+            // inherited from Env..
+            virtual bool local_contains_var(const std::string & vname) const final override;
+            virtual void establish_var(bp<Variable> var) final override;
+
             // inherited from Object..
             virtual TaggedPtr self_tp() const final override;
             virtual void display(std::ostream & os) const final override;

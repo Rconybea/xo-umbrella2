@@ -42,7 +42,7 @@ namespace xo {
          *  @brief Represent a single runtime stack frame for a Schematika function
          *
          *  LocalEnv intended to be used for interpreted functions.
-            *
+         *
          *  Compiled functions will still likely have stack frames, but need not use the
          *  @ref LocalEnv class
          *
@@ -88,6 +88,15 @@ namespace xo {
 
             gp<Object> operator[](std::size_t i) const { return slot_v_[i]; }
             gp<Object> & operator[](std::size_t i) { return slot_v_[i]; }
+
+            // inherited from Env..
+
+            virtual bool local_contains_var(const std::string & vname) const final override;
+
+            /** LocalEnv policy is that variable can be established once only.
+             *  For example function arguments must all have distinct names
+             **/
+            virtual void establish_var(bp<Variable> v) final override;
 
             // inherited from Object..
             virtual TaggedPtr self_tp() const final override;
