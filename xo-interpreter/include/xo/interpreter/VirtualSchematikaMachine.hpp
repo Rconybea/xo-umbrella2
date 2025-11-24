@@ -68,7 +68,7 @@ namespace xo {
             void execute_one();
 
             /** interpret literal constant expression **/
-            void constant_op();
+            void eval_constant_op();
 
             /** goto error state with message @p err **/
             void report_error(const std::string & err);

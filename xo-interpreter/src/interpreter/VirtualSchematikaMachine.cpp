@@ -127,7 +127,7 @@ namespace xo {
 
                     switch (expr_->extype()) {
                     case exprtype::constant:
-                        this->constant_op();
+                        this->eval_constant_op();
                         break;
 
                     case exprtype::invalid:
@@ -169,7 +169,7 @@ namespace xo {
         }
 
         void
-        VirtualSchematikaMachine::constant_op()
+        VirtualSchematikaMachine::eval_constant_op()
         {
             using xo::scm::ConstantInterface;
 
@@ -212,6 +212,8 @@ namespace xo {
 
             /** remembers promised variable type **/
             env_->establish_var(expr->lhs_variable());
+
+
 
             /* lhs_var
              * rhs
