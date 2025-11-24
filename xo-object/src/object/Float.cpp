@@ -42,8 +42,8 @@ namespace xo {
         }
 
         Object *
-        Float::_shallow_copy() const {
-            Cpof cpof(Object::mm, this);
+        Float::_shallow_copy(gc::IAlloc * mm) const {
+            Cpof cpof(mm, this);
             return new (cpof) Float(*this);
         }
 

@@ -56,7 +56,7 @@ namespace xo {
 
         // LCOV_EXCL_START
         Object *
-        Boolean::_shallow_copy() const
+        Boolean::_shallow_copy(gc::IAlloc *) const
         {
 
             /* Boolean instances not created in GC-owned space,

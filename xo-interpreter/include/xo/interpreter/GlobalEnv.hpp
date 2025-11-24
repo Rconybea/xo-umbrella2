@@ -13,13 +13,18 @@ namespace xo {
          **/
         class GlobalEnv : public Env {
         public:
+            using map_type = std::map<std::string, gp<Object>>;
+
+        public:
             /** Create top-level global environment, allocating via @p mm.
              *  Expect one of these per interpreter session.
              **/
             static gp<GlobalEnv> make_empty(gc::IAlloc * mm,
                                             const rp<GlobalSymtab> & symtab);
 
+#ifdef NOT_USING
             gc::IAlloc * get_mm() const { return mm_; }
+#endif
 
             // inherited from Env..
             virtual bool local_contains_var(const std::string & vname) const final override;
@@ -29,10 +34,11 @@ namespace xo {
             virtual TaggedPtr self_tp() const final override;
             virtual void display(std::ostream & os) const final override;
             virtual std::size_t _shallow_size() const final override;
-            virtual Object * _shallow_copy() const final override;
+            virtual Object * _shallow_copy(gc::IAlloc * mm) const final override;
             virtual std::size_t _forward_children() final override;
 
         private:
+            GlobalEnv(const GlobalEnv & x);
             GlobalEnv(gc::IAlloc * mm, const rp<GlobalSymtab> & symtab);
 
         private:
@@ -56,7 +62,7 @@ namespace xo {
              *  TODO: probably want to hash here instead.
              *        May also want lhs names to be separately hashed symbols
              **/
-            std::map<std::string, gp<Object>> slot_map_;
+            up<map_type> slot_map_;
         };
     } /*namespace scm*/
 } /*namespace xo*/

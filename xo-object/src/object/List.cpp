@@ -97,12 +97,12 @@ namespace xo {
         }
 
         Object *
-        List::_shallow_copy() const {
-            scope log(XO_DEBUG(Object::mm->debug_flag()));
+        List::_shallow_copy(gc::IAlloc * mm) const {
+            scope log(XO_DEBUG(mm->debug_flag()));
 
             assert(!(this->is_nil()));
 
-            Cpof cpof(Object::mm, this);
+            Cpof cpof(mm, this);
 
             return new (cpof) List(*this);
         }

@@ -43,8 +43,8 @@ namespace xo {
         }
 
         Object *
-        Integer::_shallow_copy() const {
-            Cpof cpof(Object::mm, this);
+        Integer::_shallow_copy(gc::IAlloc * mm) const {
+            Cpof cpof(mm, this);
             return new (cpof) Integer(*this);
         }
 

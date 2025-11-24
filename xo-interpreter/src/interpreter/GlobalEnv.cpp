@@ -16,9 +16,17 @@ namespace xo {
              return new GlobalEnv(mm, symtab);
         }
 
+        GlobalEnv::GlobalEnv(const GlobalEnv & x)
+            : mm_{x.mm_},
+              symtab_{x.symtab_},
+              slot_map_{std::make_unique<map_type>(*x.slot_map_)}
+        {
+        }
+
         GlobalEnv::GlobalEnv(gc::IAlloc * mm,
                              const rp<GlobalSymtab> & symtab) : mm_{mm},
-                                                                symtab_{symtab}
+                                                                symtab_{symtab},
+                                                                slot_map_{std::make_unique<map_type>()}
         {}
 
         bool
@@ -52,7 +60,7 @@ namespace xo {
 
             this->symtab_->require_global(var->name(), var);
 
-            this->slot_map_[var->name()] = gp<Object>();
+            (*this->slot_map_)[var->name()] = gp<Object>();
         }
 
         TaggedPtr
@@ -64,31 +72,29 @@ namespace xo {
         void
         GlobalEnv::display(std::ostream & os) const
         {
-            os << "<global-env" << xtag("n", slot_map_.size()) << ">";
+            os << "<global-env" << xtag("n", slot_map_->size()) << ">";
         }
 
         std::size_t
         GlobalEnv::_shallow_size() const
         {
-            /** 0: since not allocated in gc-space */
-            return 0;
+            return sizeof(GlobalEnv);
         }
 
         Object *
-        GlobalEnv::_shallow_copy() const
+        GlobalEnv::_shallow_copy(gc::IAlloc * mm) const
         {
-            /* by design, don't copy; not subject to GC */
-            return const_cast<GlobalEnv *>(this);
+            Cpof cpof(mm, this);
+
+            return new (cpof) GlobalEnv(*this);
         }
 
         std::size_t
         GlobalEnv::_forward_children()
         {
-            /* All global slots are treated as GC roots; this means we
-             * don't have to forward them
-             *
-             * This works only as long as global env is immortal.
-             */
+            for (auto & ix : *slot_map_) {
+                Object::_forward_inplace(ix.second);
+            }
             return _shallow_size();
         }
     } /*namespace scm*/

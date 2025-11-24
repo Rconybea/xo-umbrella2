@@ -126,11 +126,11 @@ namespace xo {
         }
 
         Object *
-        String::_shallow_copy() const
+        String::_shallow_copy(gc::IAlloc * mm) const
         {
             // Reminder: String must come before secondary allocation,
 
-            Cpof cpof(Object::mm, this);
+            Cpof cpof(mm, this);
 
             // might expect to write:
             //  gp<String> copy = new (gcm) String(Object::mm, owner_, z_chars_, chars_);

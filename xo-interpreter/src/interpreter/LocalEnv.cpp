@@ -97,9 +97,9 @@ namespace xo {
         }
 
         Object *
-        LocalEnv::_shallow_copy() const
+        LocalEnv::_shallow_copy(gc::IAlloc * mm) const
         {
-            Cpof cpof(Object::mm, this);
+            Cpof cpof(mm, this);
 
             size_t z = size();
 
