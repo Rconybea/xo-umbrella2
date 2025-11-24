@@ -5,9 +5,11 @@
 int
 main(int argc, char ** argv)
 {
+    using xo::log_level;
     using xo::scm::Schematika;
 
     Schematika::Config cfg;
+    cfg.vsm_log_level_ = log_level::verbose;
     Schematika scm = Schematika::make(cfg);
 
     scm.interactive_repl();

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "VsmInstr.hpp"
+#include "VsmStackFrame.hpp"
 #include "SchematikaError.hpp"
 #include "Env.hpp"
 #include "xo/expression/Expression.hpp"
@@ -14,7 +15,8 @@ namespace xo {
         /** @brief state that may be shared across VirtualSchematikaMachine instances **/
         struct VirtualSchematikaMachineFlyweight {
             explicit VirtualSchematikaMachineFlyweight(gc::IAlloc * mm,
-                                                       gp<Env> env);
+                                                       gp<Env> env,
+                                                       log_level log_level);
 
             /** memory allocator for interpreter operation. **/
             gc::IAlloc * object_mm_ = nullptr;
@@ -22,6 +24,8 @@ namespace xo {
             gp<Env> toplevel_env_;
             /** convert TaggedPtr->Object **/
             xo::obj::ObjectConverter object_converter_;
+            /** control logging level. higher values -> more logging **/
+            log_level log_level_;
         };
 
         /** @class VirtualSchematikaMachine
@@ -33,7 +37,7 @@ namespace xo {
             using IAlloc = xo::gc::IAlloc;
 
         public:
-            VirtualSchematikaMachine(IAlloc * mm, gp<Env> toplevel_env);
+            VirtualSchematikaMachine(IAlloc * mm, gp<Env> toplevel_env, log_level log_level);
             ~VirtualSchematikaMachine();
 
             /** evaluate expression @p expr.
@@ -64,11 +68,24 @@ namespace xo {
 
             /** execute vsm instruction in program counter.
              *  Note: may possibly be able to replace with just opcode
+             *
+             *  Registers:
+             *  - expr_  input, caller saves
+             *  - env_   input, caller saves
+             *  - cont_  input, caller saves
+             *  - value_ output
+             *  - error_ output
              **/
             void execute_one();
 
             /** interpret literal constant expression **/
             void eval_constant_op();
+
+            /** interpret define expression **/
+            void eval_define_op();
+
+            /** continue after establishing value fo rhs of define exprsssion **/
+            void do_defexpr_assign_op();
 
             /** goto error state with message @p err **/
             void report_error(const std::string & err);
@@ -82,19 +99,38 @@ namespace xo {
              **/
             const VsmInstr * pc_ = nullptr;
 
-            /** expression **/
+            /** register to hold Schematika expression to drive @ref execute_one.
+             *
+             *  caller saves!
+             **/
             rp<Expression> expr_;
-            /** holds bindings for all schematika variables **/
+            /** holds bindings for all schematika variables, to drive @ref execute_one.
+             *  execute_one will not save this
+             *
+             *  caller saves!
+             **/
             gp<Env> env_;
 
-            /** non-error result value from eval() / apply() **/
+            /** vsm stack.  callee saves!
+             **/
+            gp<VsmStackFrame> stack_;
+
+            /** non-error result value from eval() / apply()
+             *
+             *  output register: caller must save
+             **/
             gp<Object> value_;
 
-            /** error result value from eval() / apply() **/
+            /** error result value from eval() / apply()
+             *
+             *  output regisetr: caller must save
+             **/
             SchematikaError error_;
 
             /** continuation
              *  (Perhaps replace with VsmInstr::Opcode ?)
+             *
+             *  input register: callee saves!
              **/
             const VsmInstr * cont_ = nullptr;
 

@@ -28,7 +28,9 @@ namespace xo {
              *        to preserve option to share it
              **/
             Impl(const Config & config, up<IAlloc> mm, gp<Env> toplevel_env) :
-                config_{config}, vsm_{mm.get(), toplevel_env}, mm_{std::move(mm)} {}
+                config_{config},
+                vsm_{mm.get(), toplevel_env, config.vsm_log_level_},
+                mm_{std::move(mm)} {}
 
             /** create instance + allocator **/
             static up<Impl> make(const Config & cfg);

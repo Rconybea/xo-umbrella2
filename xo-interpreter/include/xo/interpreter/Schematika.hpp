@@ -30,6 +30,9 @@ namespace xo {
 
                 /** garbage collector configuration **/
                 gc::Config gc_config_;
+
+                /** control schematika vsm logging **/
+                log_level vsm_log_level_;
             };
 
             using IAlloc = xo::gc::IAlloc;

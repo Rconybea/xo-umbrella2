@@ -25,6 +25,15 @@ namespace xo {
                  **/
                 eval,
 
+                /** assign to variable + continue
+                 *
+                 *  stack: frame with:
+                 *    [0] lhs : variable to assign
+                 *    [1] cont : continuation after assignment
+                 *    ... maybe other vsm state that must be saved
+                 **/
+                defexpr_assign,
+
                 N_Opcode
             };
 

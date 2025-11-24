@@ -8,6 +8,8 @@ set(SELF_SRCS
     GlobalEnv.cpp
     VirtualSchematikaMachine.cpp
     VsmInstr.cpp
+    VsmStackFrame.cpp
+    ExpressionBoxed.cpp
 )
 
 find_package(Threads REQUIRED)

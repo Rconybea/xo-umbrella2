@@ -1,9 +1,11 @@
-/** @file LocalEnv.cpp **/
+/** @file VsmStackFrame.cpp
+ *
+ *  @author Roland Conybeare, Nov 2025
+ **/
 
-#include "LocalEnv.hpp"
+#include "VsmStackFrame.hpp"
 #include "xo/reflect/Reflect.hpp"
 #include "xo/reflect/StructReflector.hpp"
-#include <cstring>
 
 namespace xo {
     using xo::reflect::Reflect;
@@ -13,65 +15,48 @@ namespace xo {
     using xo::reflect::TypeDescrExtra;
     using xo::reflect::EstablishTypeDescr;
     using xo::reflect::StlVectorTdx;
-    using xo::print::quot;
 
     namespace scm {
         namespace {
+            // TOOD: move into CVector
+
             std::size_t
             slot_array_size(std::size_t n) {
                 return n * sizeof(gp<Object>);
             }
         }
 
-        gp<LocalEnv>
-        LocalEnv::make(gc::IAlloc * mm,
-                       gp<LocalEnv> p,
-                       const rp<LocalSymtab> & s,
-                       std::size_t n)
-        {
-            if (s) {
-                assert(static_cast<int>(n) == s->n_arg());
-            }
-
-            return new (MMPtr(mm)) LocalEnv(mm, p, s, n);
-        }
-
-        LocalEnv::LocalEnv(gc::IAlloc * mm,
-                           gp<LocalEnv> p,
-                           const rp<LocalSymtab> & s,
-                           std::size_t n) : parent_{p},
-                                            symtab_{s},
-                                            slot_v_{mm, n}
+        VsmStackFrame::VsmStackFrame(gc::IAlloc * mm,
+                                     gp<VsmStackFrame> p,
+                                     std::size_t n,
+                                     const VsmInstr * cont) : parent_{p},
+                                                              slot_v_{mm, n},
+                                                              cont_{cont}
         {}
 
-        bool
-        LocalEnv::local_contains_var(const std::string & vname) const
+        gp<VsmStackFrame>
+        VsmStackFrame::push1(gc::IAlloc * mm,
+                             gp<VsmStackFrame> p,
+                             gp<Object> s0,
+                             const VsmInstr * cont)
         {
-            assert(symtab_.get());
+            gp<VsmStackFrame> retval = new (MMPtr(mm)) VsmStackFrame(mm, p, 1, cont);
 
-            return symtab_->lookup_local(vname);
-        }
+            (*retval)[0] = s0;
 
-        void
-        LocalEnv::establish_var(bp<Variable> v)
-        {
-            assert(v);
-
-            throw std::runtime_error(tostr("LocalEnv::establish_var:"
-                                           " inserting new variables not supported for LocalEnv",
-                                           xtag("v.name", v->name())));
+            return retval;
         }
 
         TaggedPtr
-        LocalEnv::self_tp() const
+        VsmStackFrame::self_tp() const
         {
-            return Reflect::make_tp(const_cast<LocalEnv *>(this));
+            return Reflect::make_tp(const_cast<VsmStackFrame *>(this));
         }
 
         void
-        LocalEnv::display(std::ostream & os) const
+        VsmStackFrame::display(std::ostream & os) const
         {
-            os << "<local-env"
+            os << "<vsm-stack-frame"
                << xtag("n", slot_v_.size());
 
 #ifdef NOT_YET
@@ -87,9 +72,9 @@ namespace xo {
         }
 
         std::size_t
-        LocalEnv::_shallow_size() const
+        VsmStackFrame::_shallow_size() const
         {
-            std::size_t retval = sizeof(LocalEnv);
+            std::size_t retval = sizeof(VsmStackFrame);
 
             retval += gc::IAlloc::with_padding(slot_array_size(slot_v_.size()));
 
@@ -97,18 +82,18 @@ namespace xo {
         }
 
         Object *
-        LocalEnv::_shallow_copy(gc::IAlloc * mm) const
+        VsmStackFrame::_shallow_copy(gc::IAlloc * mm) const
         {
             Cpof cpof(mm, this);
 
-            size_t z = this->size();
+            size_t n = this->size();
 
-            LocalEnv * copy = new (cpof) LocalEnv(cpof.mm_, parent_, symtab_, z);
+            VsmStackFrame * copy = new (cpof) VsmStackFrame(cpof.mm_, parent_, n, cont_);
 
             void * v_dest = copy->slot_v_.v_;
 
             if (slot_v_.v_) {
-                ::memcpy(v_dest, slot_v_.v_, slot_array_size(z));
+                ::memcpy(v_dest, slot_v_.v_, slot_array_size(n));
             }
 
 #ifdef OBSOLETE
@@ -116,17 +101,14 @@ namespace xo {
                 copy->v_[i] = v_[i];
             }
 #endif
-
             return copy;
         }
 
         std::size_t
-        LocalEnv::_forward_children(gc::IAlloc * gc)
+        VsmStackFrame::_forward_children(gc::IAlloc * gc)
         {
-            static_assert(decltype(symtab_)::is_gc_ptr == false);
-
             Object::_forward_inplace(parent_, gc);
-            // Object::_forward_inplace(symtab_);  // not a gp yet
+
             for (std::size_t i = 0, n = slot_v_.size(); i < n; ++i) {
                 Object::_forward_inplace((*this)[i], gc);
             }
@@ -135,14 +117,13 @@ namespace xo {
         }
 
         void
-        LocalEnv::reflect_self()
+        VsmStackFrame::reflect_self()
         {
-            StructReflector<LocalEnv> sr;
+            StructReflector<VsmStackFrame> sr;
 
-            if (sr.is_incomplete()) {
-                /* reflect CVector<gp<Object>>
-                 *
-                 * note: placement here works b/c CVector<T> not used anywhere else
+            if (sr.is_incomplete() ) {
+                /* reflect CVector<gp<Object>>.
+                 * duplicates similar code in LocalEnv::reflect_self()
                  */
                 using VectorType = CVector<gp<Object>>;
 
@@ -164,4 +145,4 @@ namespace xo {
     } /*namespace scm*/
 } /*namespace xo*/
 
-/* end LocalEnv.cpp */
+/* end VsmStackFrame.cpp */

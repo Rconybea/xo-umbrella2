@@ -1,6 +1,7 @@
 /** @file LocalEnv.hpp **/
 
 #include "Env.hpp"
+#include "CVector.hpp"
 #include "xo/alloc/IAlloc.hpp"
 #include "xo/expression/LocalSymtab.hpp"
 #include <cstddef>
@@ -8,36 +9,6 @@
 
 namespace xo {
     namespace scm {
-        /** gc-only vector
-         **/
-        template <typename ElementType>
-        class CVector {
-        public:
-            using value_type = ElementType;
-
-        public:
-            CVector(gc::IAlloc * mm, std::size_t n)
-                : n_{n}, v_{nullptr}
-                {
-                    if (n_ > 0) {
-                        std::byte * mem = mm->alloc(n_ * sizeof(ElementType));
-                        this->v_ = new (mem) ElementType[n];
-                    }
-                }
-
-            std::size_t size() const { return n_; }
-
-            ElementType operator[](std::size_t i) const { return v_[i]; }
-            ElementType & operator[](std::size_t i) { return v_[i]; }
-
-            friend class LocalEnv;
-        private:
-            /** number of elements in @ref v_ **/
-            std::size_t n_ = 0;
-            /** contiguous array of pointers **/
-            ElementType * v_ = nullptr;
-        };
-
         /** @class LocalEnv
          *  @brief Represent a single runtime stack frame for a Schematika function
          *
