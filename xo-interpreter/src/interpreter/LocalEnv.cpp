@@ -121,14 +121,14 @@ namespace xo {
         }
 
         std::size_t
-        LocalEnv::_forward_children()
+        LocalEnv::_forward_children(gc::GC * gc)
         {
             static_assert(decltype(symtab_)::is_gc_ptr == false);
 
-            Object::_forward_inplace(parent_);
+            Object::_forward_inplace(parent_, gc);
             // Object::_forward_inplace(symtab_);  // not a gp yet
             for (std::size_t i = 0, n = slot_v_.size(); i < n; ++i) {
-                Object::_forward_inplace((*this)[i]);
+                Object::_forward_inplace((*this)[i], gc);
             }
 
             return _shallow_size();

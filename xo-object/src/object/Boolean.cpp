@@ -75,7 +75,7 @@ namespace xo {
 
         // LCOV_EXCL_START
         std::size_t
-        Boolean::_forward_children()
+        Boolean::_forward_children(gc::GC *)
         {
             assert(false);
             return 0;

@@ -49,7 +49,7 @@ namespace xo {
         }
 
         std::size_t
-        Integer::_forward_children() {
+        Integer::_forward_children(gc::GC * /*gc*/) {
             return Integer::_shallow_size();
         }
 

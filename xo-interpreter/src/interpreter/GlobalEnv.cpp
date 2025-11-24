@@ -90,10 +90,10 @@ namespace xo {
         }
 
         std::size_t
-        GlobalEnv::_forward_children()
+        GlobalEnv::_forward_children(gc::GC * gc)
         {
             for (auto & ix : *slot_map_) {
-                Object::_forward_inplace(ix.second);
+                Object::_forward_inplace(ix.second, gc);
             }
             return _shallow_size();
         }

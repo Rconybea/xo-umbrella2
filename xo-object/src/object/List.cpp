@@ -71,12 +71,14 @@ namespace xo {
         }
 
         TaggedPtr
-        List::self_tp() const {
+        List::self_tp() const
+        {
             return Reflect::make_tp(const_cast<List*>(this));
         }
 
         void
-        List::display(std::ostream & os) const {
+        List::display(std::ostream & os) const
+        {
             gp<List> l = const_cast<List*>(this);
 
             os << "(";
@@ -92,25 +94,26 @@ namespace xo {
         }
 
         std::size_t
-        List::_shallow_size() const {
+        List::_shallow_size() const
+        {
             return sizeof(List);
         }
 
         Object *
-        List::_shallow_copy(gc::IAlloc * mm) const {
-            scope log(XO_DEBUG(mm->debug_flag()));
-
+        List::_shallow_copy(gc::IAlloc * gc) const
+        {
             assert(!(this->is_nil()));
 
-            Cpof cpof(mm, this);
+            Cpof cpof(gc, this);
 
             return new (cpof) List(*this);
         }
 
         std::size_t
-        List::_forward_children() {
-            Object::_forward_inplace(head_);
-            Object::_forward_inplace(rest_);
+        List::_forward_children(gc::GC * gc)
+        {
+            Object::_forward_inplace(head_, gc);
+            Object::_forward_inplace(rest_, gc);
             return List::_shallow_size();
         }
     }

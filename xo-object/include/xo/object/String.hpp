@@ -36,8 +36,8 @@ namespace xo {
             virtual TaggedPtr self_tp() const final override;
             virtual void display(std::ostream & os) const final override;
             virtual std::size_t _shallow_size() const final override;
-            virtual Object * _shallow_copy(gc::IAlloc * mm) const final override;
-            virtual std::size_t _forward_children() final override;
+            virtual Object * _shallow_copy(gc::IAlloc * gc) const final override;
+            virtual std::size_t _forward_children(gc::GC * gc) final override;
 
         private:
             String(owner owner, std::size_t z, char * s);
