@@ -152,7 +152,7 @@ namespace xo {
         }
 
         std::size_t
-        String::_forward_children(gc::GC *)
+        String::_forward_children(gc::IAlloc *)
         {
             return this->_shallow_size();
         }

@@ -110,7 +110,7 @@ namespace xo {
         }
 
         std::size_t
-        List::_forward_children(gc::GC * gc)
+        List::_forward_children(gc::IAlloc * gc)
         {
             Object::_forward_inplace(head_, gc);
             Object::_forward_inplace(rest_, gc);

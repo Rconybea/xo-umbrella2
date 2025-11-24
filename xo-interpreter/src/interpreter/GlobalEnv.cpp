@@ -90,7 +90,7 @@ namespace xo {
         }
 
         std::size_t
-        GlobalEnv::_forward_children(gc::GC * gc)
+        GlobalEnv::_forward_children(gc::IAlloc * gc)
         {
             for (auto & ix : *slot_map_) {
                 Object::_forward_inplace(ix.second, gc);

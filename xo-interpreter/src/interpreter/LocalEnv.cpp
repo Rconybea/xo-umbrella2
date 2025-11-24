@@ -121,7 +121,7 @@ namespace xo {
         }
 
         std::size_t
-        LocalEnv::_forward_children(gc::GC * gc)
+        LocalEnv::_forward_children(gc::IAlloc * gc)
         {
             static_assert(decltype(symtab_)::is_gc_ptr == false);
 

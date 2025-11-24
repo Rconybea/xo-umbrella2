@@ -48,7 +48,7 @@ namespace xo {
         }
 
         std::size_t
-        Float::_forward_children(gc::GC * /*gc*/) {
+        Float::_forward_children(gc::IAlloc * /*gc*/) {
             return Float::_shallow_size();
         }
     }
