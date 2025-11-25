@@ -13,7 +13,7 @@ namespace xo {
 
         bp<Expression>
         GlobalSymtab::require_global(const std::string & vname,
-                                  bp<Expression> expr)
+                                     bp<Expression> expr)
         {
             this->global_map_[vname] = expr.get();
 

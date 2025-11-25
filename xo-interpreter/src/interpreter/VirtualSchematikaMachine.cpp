@@ -149,18 +149,24 @@ namespace xo {
 
             case Opcode::eval:
                 {
-                    log && log("eval");
+                    log && log("Opcode::eval");
 
                     /* generally speaking: opcode will be 1:1 with extypes */
 
                     switch (expr_->extype()) {
                     case exprtype::constant:
+                        log && log("eval -> constant");
                         this->eval_constant_op();
                         break;
 
-
                     case exprtype::define:
+                        log && log("eval -> define");
                         this->eval_define_op();
+                        break;
+
+                    case exprtype::variable:
+                        log && log("eval -> variable");
+                        this->eval_variable_op();
                         break;
 
                     case exprtype::invalid:
@@ -169,7 +175,6 @@ namespace xo {
                     case exprtype::assign:
                     case exprtype::apply:
                     case exprtype::lambda:
-                    case exprtype::variable:
                     case exprtype::ifexpr:
                     case exprtype::sequence:
                     case exprtype::convert:
@@ -266,27 +271,86 @@ namespace xo {
             /* when control arrives at .cont_, will have:
              *   .value_ -> result of evaluating expr->rhs()
              */
-
             this->stack_ = VsmStackFrame::push1(mm, this->stack_, lhs_0, cont_);
+
+            /* .stack_:
+             *   frame
+             *     [0] = lhs_0 (boxed lhs Variable)
+             */
+
             this->cont_ = &VsmOps::defexpr_assign_op;
         }
 
         void
         VirtualSchematikaMachine::do_defexpr_assign_op()
         {
+            scope log(XO_DEBUG(true));
+
             /*
              * - value: contains result of evaluating rhs of define
              * - stack: top frame has 1 slot, holds variable to receive assignment
              */
             assert(value_.get());
             assert(stack_.get());
+            assert(env_.get());
 
             gp<VsmStackFrame> sp0 = this->stack_;
+
+            bp<Variable> var = Variable::from(ExpressionBoxed::from((*sp0)[0])->contents());
+
+            assert(var.get());
+
+            gp<Object> * slot = this->env_->establish_var(var);
+            assert(slot);
+
+            *slot = this->value_;
 
             //this->value_ = this->value_; // preserve value from rhs of defexpr
 
             this->stack_ = sp0->parent();
             this->pc_ = this->cont_ = sp0->continuation();
+        }
+
+        void
+        VirtualSchematikaMachine::eval_variable_op()
+        {
+            using xo::scm::Variable;
+
+            scope log(XO_DEBUG(true));
+
+            bp<Variable> var = Variable::from(expr_);
+
+            assert(var.get());
+            assert(env_.get());
+
+            const gp<Object> * slot = env_->lookup_slot(var->name());
+
+            if (slot) {
+                this->value_ = *slot;
+                this->pc_ = cont_;
+            } else {
+                /* Unknown variable error will often be recognized in expression parser,
+                 * in such cases this path won't be used.
+                 *
+                 * In interactive environment will need some kind of support for modifying
+                 * code (e.g. replacing top-level functions/variables), and in particular,
+                 * replacements may have different type signature.
+                 * It's possible that allowing for such replacements winds up giving up
+                 * typesafety guarantees. In that case this path may get activated after
+                 * all.
+                 */
+
+                std::string err = tostr("no binding for variable", xtag("name", var->name()));
+
+                this->value_ = nullptr;
+                this->error_ = SchematikaError(err);
+
+                /* note: poor man's exception */
+                this->pc_ = nullptr;
+                this->cont_ = nullptr;
+
+                this->pc_ = cont_;
+            }
         }
 
     } /*namespace scm*/

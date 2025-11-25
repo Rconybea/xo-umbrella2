@@ -35,9 +35,28 @@ namespace xo {
             return symtab_->lookup_local(vname).get();
         }
 
-        void
+        gp<Object> *
+        GlobalEnv::lookup_slot(const std::string & vname)
+        {
+            scope log(XO_DEBUG(true), xtag("name", vname));
+
+            assert(slot_map_.get());
+
+            auto ix = slot_map_->find(vname);
+
+            if (ix == slot_map_->end()) {
+                return nullptr;
+            } else {
+                log && log("binding found", xtag("vname", vname));
+                return &(ix->second);
+            }
+        }
+
+        gp<Object> *
         GlobalEnv::establish_var(bp<Variable> var)
         {
+            scope log(XO_DEBUG(true), xtag("name", var->name()), xtag("type", var->valuetype()));
+
             // Warning: altering declared type for an already-existing variable
             // invalidates any type checking that relied on that variable.
             //
@@ -60,7 +79,12 @@ namespace xo {
 
             this->symtab_->require_global(var->name(), var);
 
-            (*this->slot_map_)[var->name()] = gp<Object>();
+            gp<Object> &slot = (*this->slot_map_)[var->name()];
+
+            /* discard any pre-existing value, we're redefining a variable */
+            slot = gp<Object>();
+
+            return &slot;
         }
 
         TaggedPtr

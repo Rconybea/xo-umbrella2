@@ -64,10 +64,12 @@ namespace xo {
 
             virtual bool local_contains_var(const std::string & vname) const final override;
 
+            virtual gp<Object> * lookup_slot(const std::string & vname) final override;
+
             /** LocalEnv policy is that variable can be established once only.
-             *  For example function arguments must all have distinct names
+             *  For example function arguments must all have distinct names.
              **/
-            virtual void establish_var(bp<Variable> v) final override;
+            virtual gp<Object> * establish_var(bp<Variable> v) final override;
 
             // inherited from Object..
             virtual TaggedPtr self_tp() const final override;

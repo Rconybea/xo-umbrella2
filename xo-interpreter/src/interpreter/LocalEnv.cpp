@@ -52,7 +52,25 @@ namespace xo {
             return symtab_->lookup_local(vname);
         }
 
-        void
+        gp<Object> *
+        LocalEnv::lookup_slot(const std::string & vname)
+        {
+            binding_path b = symtab_->lookup_local_binding(vname);
+
+            if (b.i_link_ == 0) {
+                assert((b.j_slot_ >= 0) && (static_cast<size_t>(b.j_slot_) < slot_v_.size()));
+
+                return &(slot_v_[b.j_slot_]);
+            }
+
+            if (parent_.get()) {
+                return parent_->lookup_slot(vname);
+            }
+
+            return nullptr;
+        }
+
+        gp<Object> *
         LocalEnv::establish_var(bp<Variable> v)
         {
             assert(v);

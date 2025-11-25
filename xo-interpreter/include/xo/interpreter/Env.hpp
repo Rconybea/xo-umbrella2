@@ -24,6 +24,11 @@ namespace xo {
             /** true iff @p vname is present in Symtab for innermost environment **/
             virtual bool local_contains_var(const std::string & vname) const = 0;
 
+            /** Fetch storage location for innermost binding of variable with name @p vname.
+             *  nullptr if not found
+             **/
+            virtual gp<Object> * lookup_slot(const std::string & vname) = 0;
+
             /** require storage for variable @p v.
              *  will also establish binding path.
              *
@@ -31,8 +36,10 @@ namespace xo {
              *  replacing any previous variable with the same name.
              *
              *  Beware of invalidating type correctness
+             *
+             *  @return slot address for runtime value of @p v
              **/
-            virtual void establish_var(bp<Variable> v) = 0;
+            virtual gp<Object> * establish_var(bp<Variable> v) = 0;
 
             //gp<Object> lookup_symbol(const std::string & name) const;
         };

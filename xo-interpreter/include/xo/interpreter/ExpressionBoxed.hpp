@@ -21,6 +21,11 @@ namespace xo {
             static gp<ExpressionBoxed> make(gc::IAlloc * mm,
                                             bp<Expression> c);
 
+            /** runtime downcast **/
+            static gp<ExpressionBoxed> from(gp<Object> x) {
+                return gp<ExpressionBoxed>::from(x);
+            }
+
             const rp<Expression> & contents() const { return contents_; }
 
             // inherited from Object

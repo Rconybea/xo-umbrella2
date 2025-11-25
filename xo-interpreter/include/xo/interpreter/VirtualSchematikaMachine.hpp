@@ -83,9 +83,11 @@ namespace xo {
 
             /** interpret define expression **/
             void eval_define_op();
-
             /** continue after establishing value fo rhs of define exprsssion **/
             void do_defexpr_assign_op();
+
+            /** interpret variable expression **/
+            void eval_variable_op();
 
             /** goto error state with message @p err **/
             void report_error(const std::string & err);
