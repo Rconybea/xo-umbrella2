@@ -29,8 +29,9 @@ namespace xo {
              **/
             Impl(const Config & config, up<IAlloc> mm, gp<Env> toplevel_env) :
                 config_{config},
-                vsm_{mm.get(), toplevel_env, config.vsm_log_level_},
-                mm_{std::move(mm)} {}
+                mm_{std::move(mm)},
+                vsm_{mm_.get(), toplevel_env, config.vsm_log_level_} {}
+            ~Impl();
 
             /** create instance + allocator **/
             static up<Impl> make(const Config & cfg);
@@ -50,14 +51,18 @@ namespace xo {
         private:
             /** configuration **/
             Config config_;
-            /** schematika interpreter **/
-            VirtualSchematikaMachine vsm_;
             /** ownership for memory allocator / garbage collector;
              *  @ref vsm_ holds naked pointer, so this could in principle be nullptr
              *  in case want to maintain allocator ownership from outside.
+             *
+             *  note: must appear before @ref vsm_, so latter gets destroyed first
              **/
             up<IAlloc> mm_;
+            /** schematika interpreter **/
+            VirtualSchematikaMachine vsm_;
         };
+
+        Schematika::Impl::~Impl() = default;
 
         up<Schematika::Impl>
         Schematika::Impl::make(const Config & cfg)
@@ -218,6 +223,7 @@ namespace xo {
 
                 /* here: input.empty() or error encountered */
 
+                cerr << endl;
             }
 
             auto [expr, _1, _2, error] = rdr.read_expr(input, true /*eof*/);
