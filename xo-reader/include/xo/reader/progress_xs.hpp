@@ -97,7 +97,7 @@ namespace xo {
                                   bp<Expression> expr2,
                                   parserstatemachine * p_psm) const;
 
-            virtual const char * get_expect_str() const override;
+            virtual const char * get_expect_str() const final override;
 
             virtual void on_expr(bp<Expression> expr,
                                  parserstatemachine * p_psm) override;
@@ -116,6 +116,8 @@ namespace xo {
                                             parserstatemachine * p_psm) override;
             virtual void on_singleassign_token(const token_type & tk,
                                                parserstatemachine * p_psm) override;
+            virtual void on_assign_token(const token_type & tk,
+                                         parserstatemachine * p_psm) final override;
             virtual void on_leftparen_token(const token_type & tk,
                                             parserstatemachine * p_psm) override;
             virtual void on_rightparen_token(const token_type & tk,
@@ -129,7 +131,7 @@ namespace xo {
 
             /* entry point for an infix operator token */
             virtual void on_operator_token(const token_type & tk,
-                                           parserstatemachine * p_psm) override;
+                                           parserstatemachine * p_psm) final override;
 
             virtual void on_bool_token(const token_type & tk,
                                        parserstatemachine * p_psm) override;

@@ -435,6 +435,13 @@ namespace xo {
         }
 
         void
+        progress_xs::on_assign_token(const token_type & tk,
+                                     parserstatemachine * p_psm)
+        {
+            this->on_operator_token(tk, p_psm);
+        }
+
+        void
         progress_xs::on_leftparen_token(const token_type & tk,
                                         parserstatemachine * p_psm)
         {
@@ -573,6 +580,8 @@ namespace xo {
             optype
             tk2op(const tokentype & tktype) {
                 switch (tktype) {
+                case tokentype::tk_assign:
+                    return optype::op_assign;
                 case tokentype::tk_plus:
                     return optype::op_add;
                 case tokentype::tk_minus:

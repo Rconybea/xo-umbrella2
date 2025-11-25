@@ -32,7 +32,7 @@ namespace xo {
                  *    [1] cont : continuation after assignment
                  *    ... maybe other vsm state that must be saved
                  **/
-                defexpr_assign,
+                complete_assign,
 
                 N_Opcode
             };

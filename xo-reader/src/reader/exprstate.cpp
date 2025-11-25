@@ -217,6 +217,20 @@ namespace xo {
         }
 
         void
+        exprstate::on_assign_token(const token_type & tk,
+                                   parserstatemachine * p_psm)
+        {
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag));
+
+            constexpr const char * c_self_name = "exprstate::on_assign_token";
+            const char * exp = get_expect_str();
+
+            this->illegal_input_on_token(c_self_name, tk, exp, p_psm);
+        }
+
+
+        void
         exprstate::on_leftparen_token(const token_type & tk,
                                       parserstatemachine * p_psm)
         {
@@ -445,6 +459,9 @@ namespace xo {
                 return;
 
             case tokentype::tk_assign:
+                this->on_assign_token(tk, p_psm);
+                return;
+
             case tokentype::tk_yields:
                 assert(false);
                 break;

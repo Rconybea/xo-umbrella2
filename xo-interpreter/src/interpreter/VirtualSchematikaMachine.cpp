@@ -5,6 +5,7 @@
 #include "ExpressionBoxed.hpp"
 #include "xo/expression/ConstantInterface.hpp"
 #include "xo/expression/DefineExpr.hpp"
+#include "xo/expression/AssignExpr.hpp"
 #include "xo/expression/Variable.hpp"
 #include "xo/alloc/GC.hpp"
 
@@ -35,11 +36,11 @@ namespace xo {
              **/
             static VsmInstr eval_op;
 
-            /** assign variable after evaluating rhs of a define-expression
+            /** assign variable after evaluating rhs of a define-expression or assign-expression
              *  - opcode is Opcode::defexpr_assign
              *  - top stack frame contains {lhs, cont}
              */
-            static VsmInstr defexpr_assign_op;
+            static VsmInstr complete_assign_op;
         };
 
         VsmInstr
@@ -49,7 +50,7 @@ namespace xo {
         VsmOps::eval_op{VsmInstr::Opcode::eval, "eval"};
 
         VsmInstr
-        VsmOps::defexpr_assign_op{VsmInstr::Opcode::defexpr_assign, "defexpr-assign"};
+        VsmOps::complete_assign_op{VsmInstr::Opcode::complete_assign, "complete-assign"};
 
         // ----- VirtualSchematikaMachineFlyweight -----
 
@@ -164,6 +165,11 @@ namespace xo {
                         this->eval_define_op();
                         break;
 
+                    case exprtype::assign:
+                        log && log("eval -> assign");
+                        this->eval_assign_op();
+                        break;
+
                     case exprtype::variable:
                         log && log("eval -> variable");
                         this->eval_variable_op();
@@ -172,7 +178,6 @@ namespace xo {
                     case exprtype::invalid:
                     case exprtype::primitive:
 
-                    case exprtype::assign:
                     case exprtype::apply:
                     case exprtype::lambda:
                     case exprtype::ifexpr:
@@ -189,8 +194,8 @@ namespace xo {
                 }
                 break;
 
-            case Opcode::defexpr_assign:
-                this->do_defexpr_assign_op();
+            case Opcode::complete_assign:
+                this->do_complete_assign_op();
                 break;
 
             case Opcode::N_Opcode:
@@ -276,13 +281,65 @@ namespace xo {
             /* .stack_:
              *   frame
              *     [0] = lhs_0 (boxed lhs Variable)
+             *   ..
              */
 
-            this->cont_ = &VsmOps::defexpr_assign_op;
+            this->cont_ = &VsmOps::complete_assign_op;
         }
 
         void
-        VirtualSchematikaMachine::do_defexpr_assign_op()
+        VirtualSchematikaMachine::eval_assign_op()
+        {
+            using xo::scm::AssignExpr;
+
+            scope log(XO_DEBUG(true));
+
+            auto mm = flyweight_.object_mm_;
+
+            bp<AssignExpr> assign = AssignExpr::from(expr_);
+
+            assert(assign.get());
+            assert(env_.get());
+
+            assert(assign->lhs().get());
+            assert(assign->rhs().get());
+
+            /* verify slot exists, before we evaluate rhs */
+            gp<Object> * slot = env_->lookup_slot(assign->lhs()->name());
+
+            if (slot) {
+                /** must promote rp<Expression> -> gp<ExpressionBoxed> **/
+                gp<ExpressionBoxed> lhs = ExpressionBoxed::make(mm, assign->lhs());
+
+                this->pc_ = &VsmOps::eval_op;
+                this->expr_ = assign->rhs();
+
+                /* when control arrives at .cont_, will have:
+                 *   .value_ -> result of evaluating assign->rhs()
+                 */
+                this->stack_ = VsmStackFrame::push1(mm, this->stack_, lhs, cont_);
+
+                /* .stack_:
+                 *   frame
+                 *     [0] = lhs (boxed lhs Variable)
+                 *   ..
+                 */
+
+                this->cont_ = &VsmOps::complete_assign_op;
+            } else {
+                std::string err = tostr("no binding for lhs of assignment", xtag("name", assign->lhs()->name()));
+
+                this->value_ = nullptr;
+                this->error_ = SchematikaError(err);
+
+                /* note: poor man's exception */
+                this->pc_ = nullptr;
+                this->cont_ = nullptr;
+            }
+        }
+
+        void
+        VirtualSchematikaMachine::do_complete_assign_op()
         {
             scope log(XO_DEBUG(true));
 
@@ -348,8 +405,6 @@ namespace xo {
                 /* note: poor man's exception */
                 this->pc_ = nullptr;
                 this->cont_ = nullptr;
-
-                this->pc_ = cont_;
             }
         }
 

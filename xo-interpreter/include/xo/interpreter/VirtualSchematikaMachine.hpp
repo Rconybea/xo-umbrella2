@@ -81,10 +81,12 @@ namespace xo {
             /** interpret literal constant expression **/
             void eval_constant_op();
 
-            /** interpret define expression **/
+            /** execute define expression (finished in do_complete_assign_op()) **/
             void eval_define_op();
+            /** execute assign expression (finishes in do_complete_assign_op()) **/
+            void eval_assign_op();
             /** continue after establishing value fo rhs of define exprsssion **/
-            void do_defexpr_assign_op();
+            void do_complete_assign_op();
 
             /** interpret variable expression **/
             void eval_variable_op();

@@ -172,6 +172,9 @@ namespace xo {
             /** handle incoming '=' token **/
             virtual void on_singleassign_token(const token_type & tk,
                                                parserstatemachine * p_psm);
+            /** handle incoming ':=' token **/
+            virtual void on_assign_token(const token_type & tk,
+                                         parserstatemachine * p_psm);
             /** handle incoming '(' token **/
             virtual void on_leftparen_token(const token_type & tk,
                                             parserstatemachine * p_psm);
