@@ -16,6 +16,7 @@ namespace xo {
             static gp<Boolean> boolean_obj(bool x);
             static gp<Boolean> true_obj();
             static gp<Boolean> false_obj();
+            static gp<Boolean> from(gp<Object> x) { return gp<Boolean>::from(x); }
 
             bool value() const { return value_; }
 

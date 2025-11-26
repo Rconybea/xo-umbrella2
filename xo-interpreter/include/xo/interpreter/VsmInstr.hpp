@@ -29,11 +29,19 @@ namespace xo {
                  *
                  *  stack: frame with:
                  *    [0] lhs : variable to assign
-                 *    [1] cont : continuation after assignment
-                 *    ... maybe other vsm state that must be saved
                  **/
                 complete_assign,
 
+                /** execute ifexpr branch, given
+                 *  result of test expression has been established
+                 **/
+                complete_ifexpr,
+
+                /** choose branch of if-expression + continue
+                 *
+                 *  stack: frame with
+                 *    [0] ifexpr : original if-expression
+                 **/
                 N_Opcode
             };
 

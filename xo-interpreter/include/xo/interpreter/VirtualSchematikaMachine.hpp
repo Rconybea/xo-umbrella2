@@ -91,6 +91,11 @@ namespace xo {
             /** interpret variable expression **/
             void eval_variable_op();
 
+            /** interpret if-expression **/
+            void eval_ifexpr_op();
+            /** continue after establish value of test expression **/
+            void do_complete_ifexpr_op();
+
             /** goto error state with message @p err **/
             void report_error(const std::string & err);
 

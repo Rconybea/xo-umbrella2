@@ -7,6 +7,8 @@
 #include "xo/expression/DefineExpr.hpp"
 #include "xo/expression/AssignExpr.hpp"
 #include "xo/expression/Variable.hpp"
+#include "xo/expression/IfExpr.hpp"
+#include "xo/object/Boolean.hpp"
 #include "xo/alloc/GC.hpp"
 
 /** continue after completing a VSM instruction;
@@ -22,6 +24,7 @@
 
 namespace xo {
     using xo::gc::GC;
+    using xo::obj::Boolean;
 
     namespace scm {
         struct VsmOps {
@@ -37,10 +40,16 @@ namespace xo {
             static VsmInstr eval_op;
 
             /** assign variable after evaluating rhs of a define-expression or assign-expression
-             *  - opcode is Opcode::defexpr_assign
+             *  - opcode is Opcode::complete_assign
              *  - top stack frame contains {lhs, cont}
-             */
+             **/
             static VsmInstr complete_assign_op;
+
+            /** choose branch of if-expr after evaluating test condition.
+             *  - opcode is Opcode::complete_ifexpr
+             *  - top stack frame contains {ifexpr, cont}
+             **/
+            static VsmInstr complete_ifexpr_op;
         };
 
         VsmInstr
@@ -51,6 +60,9 @@ namespace xo {
 
         VsmInstr
         VsmOps::complete_assign_op{VsmInstr::Opcode::complete_assign, "complete-assign"};
+
+        VsmInstr
+        VsmOps::complete_ifexpr_op{VsmInstr::Opcode::complete_ifexpr, "complete-ifexpr"};
 
         // ----- VirtualSchematikaMachineFlyweight -----
 
@@ -175,12 +187,16 @@ namespace xo {
                         this->eval_variable_op();
                         break;
 
+                    case exprtype::ifexpr:
+                        log && log("eval -> ifexpr");
+                        this->eval_ifexpr_op();
+                        break;
+
                     case exprtype::invalid:
                     case exprtype::primitive:
 
                     case exprtype::apply:
                     case exprtype::lambda:
-                    case exprtype::ifexpr:
                     case exprtype::sequence:
                     case exprtype::convert:
                     case exprtype::n_expr:
@@ -196,6 +212,10 @@ namespace xo {
 
             case Opcode::complete_assign:
                 this->do_complete_assign_op();
+                break;
+
+            case Opcode::complete_ifexpr:
+                this->do_complete_ifexpr_op();
                 break;
 
             case Opcode::N_Opcode:
@@ -398,6 +418,85 @@ namespace xo {
                  */
 
                 std::string err = tostr("no binding for variable", xtag("name", var->name()));
+
+                this->value_ = nullptr;
+                this->error_ = SchematikaError(err);
+
+                /* note: poor man's exception */
+                this->pc_ = nullptr;
+                this->cont_ = nullptr;
+            }
+        }
+
+        void
+        VirtualSchematikaMachine::eval_ifexpr_op()
+        {
+            using xo::scm::IfExpr;
+
+            scope log(XO_DEBUG(true));
+
+            gc::IAlloc * mm = flyweight_.object_mm_;
+
+            /** must promote bp<IfExpr> -> gp<ExpressionBoxed> **/
+            gp<ExpressionBoxed> ifexpr_boxed = ExpressionBoxed::make(mm, expr_);
+            bp<IfExpr> ifexpr = IfExpr::from(expr_);
+
+            assert(ifexpr.get());
+            assert(env_.get());
+
+            this->pc_ = &VsmOps::eval_op;
+            this->expr_ = ifexpr->test();
+
+
+            /* when control arrives at .cont_ will have:
+             *   .value_ -> result of evaluating ifexpr->test()
+             */
+            this->stack_ = VsmStackFrame::push1(mm, this->stack_, ifexpr_boxed, cont_);
+
+            /* .stack_:
+             *   frame
+             *     [0] = ifexpr (boxed expression)
+             */
+
+            this->cont_ = &VsmOps::complete_ifexpr_op;
+        }
+
+        void
+        VirtualSchematikaMachine::do_complete_ifexpr_op()
+        {
+            using xo::scm::IfExpr;
+
+            scope log(XO_DEBUG(true));
+
+            /*
+             * - value: contains result of evaluating test condition of if-expr
+             * - stack: top frame has 1 slot, holds (boxed) if-expr itself
+             */
+            assert(value_.get());
+            assert(stack_.get());
+            assert(env_.get());
+
+            gp<Boolean> test_value = gp<Boolean>::from(value_);
+
+            if (test_value.get()) {
+                gp<VsmStackFrame> sp0 = this->stack_;
+
+                bp<IfExpr> ifexpr = IfExpr::from(ExpressionBoxed::from((*sp0)[0])->contents());
+
+                assert(ifexpr.get());
+
+                this->pc_ = &VsmOps::eval_op;
+
+                if (test_value->value()) {
+                    this->expr_ = ifexpr->when_true();
+                } else {
+                    this->expr_ = ifexpr->when_false();
+                }
+
+                this->stack_ = sp0->parent();
+                this->cont_ = sp0->continuation();
+            } else {
+                std::string err = tostr("expect boolean value for result of if-expr test", xtag("value", test_value));
 
                 this->value_ = nullptr;
                 this->error_ = SchematikaError(err);
