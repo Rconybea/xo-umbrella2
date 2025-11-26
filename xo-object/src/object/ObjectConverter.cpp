@@ -6,6 +6,7 @@
 #include "ObjectConverter.hpp"
 #include "Integer.hpp"
 #include "Float.hpp"
+#include "Boolean.hpp"
 
 namespace xo {
     using xo::reflect::TaggedPtr;
@@ -34,6 +35,16 @@ namespace xo {
 
                 return Float::make(mm, *native);
             }
+
+            gp<Object>
+            bool_to_object(IAlloc * /*mm*/, const TaggedPtr & src)
+            {
+                bool * native = src.recover_native<bool>();
+
+                assert(native);
+
+                return Boolean::boolean_obj(*native);
+            }
         }
 
         ObjectConverter::ObjectConverter()
@@ -42,6 +53,8 @@ namespace xo {
             this->establish_conversion<std::int64_t>(&int_to_object<std::int64_t>);
 
             this->establish_conversion<double>(&float_to_object<double>);
+
+            this->establish_conversion<bool>(&bool_to_object);
         }
 
         gp<Object>
