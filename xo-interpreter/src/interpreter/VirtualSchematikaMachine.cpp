@@ -3,11 +3,13 @@
 #include "VirtualSchematikaMachine.hpp"
 #include "VsmInstr.hpp"
 #include "ExpressionBoxed.hpp"
-#include "xo/expression/ConstantInterface.hpp"
+#include "xo/expression/Constant.hpp"
 #include "xo/expression/DefineExpr.hpp"
 #include "xo/expression/AssignExpr.hpp"
 #include "xo/expression/Variable.hpp"
 #include "xo/expression/IfExpr.hpp"
+#include "xo/expression/Sequence.hpp"
+#include "xo/object/Integer.hpp"
 #include "xo/object/Boolean.hpp"
 #include "xo/alloc/GC.hpp"
 
@@ -24,6 +26,7 @@
 
 namespace xo {
     using xo::gc::GC;
+    using xo::obj::Integer;
     using xo::obj::Boolean;
 
     namespace scm {
@@ -50,6 +53,12 @@ namespace xo {
              *  - top stack frame contains {ifexpr, cont}
              **/
             static VsmInstr complete_ifexpr_op;
+
+            /** proceed to next element of sequence-expr.
+             *  - opcode is Opcode::complete_sequence
+             *  - top stack fram contains {seq, next, cont}
+             */
+            static VsmInstr complete_sequence_op;
         };
 
         VsmInstr
@@ -63,6 +72,9 @@ namespace xo {
 
         VsmInstr
         VsmOps::complete_ifexpr_op{VsmInstr::Opcode::complete_ifexpr, "complete-ifexpr"};
+
+        VsmInstr
+        VsmOps::complete_sequence_op{VsmInstr::Opcode::complete_sequence, "complete-sequence"};
 
         // ----- VirtualSchematikaMachineFlyweight -----
 
@@ -192,12 +204,16 @@ namespace xo {
                         this->eval_ifexpr_op();
                         break;
 
+                    case exprtype::sequence:
+                        log && log("eval -> sequence");
+                        this->eval_sequence_op();
+                        break;
+
                     case exprtype::invalid:
                     case exprtype::primitive:
 
                     case exprtype::apply:
                     case exprtype::lambda:
-                    case exprtype::sequence:
                     case exprtype::convert:
                     case exprtype::n_expr:
                         this->pc_ = nullptr;
@@ -216,6 +232,10 @@ namespace xo {
 
             case Opcode::complete_ifexpr:
                 this->do_complete_ifexpr_op();
+                break;
+
+            case Opcode::complete_sequence:
+                this->do_complete_sequence_op();
                 break;
 
             case Opcode::N_Opcode:
@@ -490,7 +510,12 @@ namespace xo {
                 if (test_value->value()) {
                     this->expr_ = ifexpr->when_true();
                 } else {
-                    this->expr_ = ifexpr->when_false();
+                    if (ifexpr->when_false()) {
+                        this->expr_ = ifexpr->when_false();
+                    } else {
+                        /* 1-sided if-expr; evaluate to false */
+                        this->expr_ = Constant<bool>::make(false);
+                    }
                 }
 
                 this->stack_ = sp0->parent();
@@ -507,6 +532,96 @@ namespace xo {
             }
         }
 
+        void
+        VirtualSchematikaMachine::eval_sequence_op()
+        {
+            using xo::scm::Sequence;
+
+            scope log(XO_DEBUG(true));
+
+            gc::IAlloc * mm = flyweight_.object_mm_;
+
+            /** must promote bp<Sequence> -> gp<ExpressionBoxed> **/
+            gp<ExpressionBoxed> seq_boxed = ExpressionBoxed::make(mm, expr_);
+            bp<Sequence> seq = Sequence::from(expr_);
+
+            assert(seq.get());
+            assert(env_.get());
+
+            this->pc_ = &VsmOps::eval_op;
+
+            if (seq->size() == 0) {
+                /* for 0-size sequence, invent an expression */
+                this->expr_ = Constant<bool>::make(false);
+            } else {
+                this->expr_ = (*seq)[0];
+            }
+
+            if (seq->size() > 1) {
+                /* remainder */
+
+                gp<Integer> next = Integer::make(mm, 1);
+
+                /* when control arrives at .cont_ will have:
+                 *   .value_ -> result of evaluating last expr in seq
+                 */
+                this->stack_ = VsmStackFrame::push2(mm, stack_, seq_boxed, next, cont_);
+
+                /* .stack_:
+                 *   frame
+                 *     [0] = seq (boxed sequence)
+                 *     [1] = next (index of next seq member to evaluate)
+                 *   ..
+                 */
+
+                this->cont_ = &VsmOps::complete_sequence_op;
+            } else {
+                /* sequence completes when expr_ evaluated
+                 * -> proceed with o.g. cont_
+                 */
+            }
+        }
+
+        void
+        VirtualSchematikaMachine::do_complete_sequence_op()
+        {
+            using xo::scm::Sequence;
+
+            scope log(XO_DEBUG(true));
+
+            /* - stack: top frame has 2 slots:
+             *    [0] : seq (boxed Sequence)
+             *    [1] : next (index of next seq element to eval
+             */
+
+            assert(value_.get());
+            assert(stack_.get());
+
+            gp<VsmStackFrame> sp0 = this->stack_;
+
+            assert(sp0->size() == 2);
+
+            bp<Sequence> seq = Sequence::from(ExpressionBoxed::from((*sp0)[0])->contents());
+            gp<Integer> next_obj = Integer::from((*sp0)[1]);
+            size_t i_next = next_obj->value();
+
+            assert(i_next < seq->size());
+
+            this->pc_ = &VsmOps::eval_op;
+            this->expr_ = (*seq)[i_next];
+
+            if (i_next + 1 == seq->size()) {
+                /* last member of sequence -> tail call optimization */
+                this->stack_ = sp0->parent();
+                this->cont_ = sp0->continuation();
+            } else {
+                /* we can modify next_obj in place,
+                 * since it's unique to frame sp0
+                 */
+                next_obj->assign_value(i_next + 1);
+                this->cont_ = &VsmOps::complete_sequence_op;
+            }
+        }
     } /*namespace scm*/
 } /*namespace xo*/
 

@@ -25,6 +25,8 @@ namespace xo {
 
             int_type value() const { return value_; }
 
+            void assign_value(int_type x) { value_ = x; }
+
             // inherited from Object..
             virtual TaggedPtr self_tp() const final override;
             virtual void display(std::ostream & os) const final override;

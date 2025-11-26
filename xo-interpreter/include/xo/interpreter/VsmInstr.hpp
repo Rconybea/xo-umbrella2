@@ -37,6 +37,10 @@ namespace xo {
                  **/
                 complete_ifexpr,
 
+                /** execute remainder of expression sequence
+                 **/
+                complete_sequence,
+
                 /** choose branch of if-expression + continue
                  *
                  *  stack: frame with

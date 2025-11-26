@@ -17,6 +17,10 @@ namespace xo {
                   expr_v_(xv) {}
 
             static rp<Sequence> make(const std::vector<rp<Expression>> & xv) { return new Sequence(xv); }
+            /** downcast from Expression **/
+            static bp<Sequence> from(bp<Expression> x) {
+                return bp<Sequence>::from(x);
+            }
 
             std::size_t size() const { return expr_v_.size(); }
             const rp<Expression> & operator[](std::size_t i) const { return expr_v_[i]; }

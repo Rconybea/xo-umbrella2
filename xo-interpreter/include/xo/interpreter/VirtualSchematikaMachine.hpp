@@ -96,6 +96,11 @@ namespace xo {
             /** continue after establish value of test expression **/
             void do_complete_ifexpr_op();
 
+            /** interprete sequence **/
+            void eval_sequence_op();
+            /** continue after establishing value for a sequence element **/
+            void do_complete_sequence_op();
+
             /** goto error state with message @p err **/
             void report_error(const std::string & err);
 

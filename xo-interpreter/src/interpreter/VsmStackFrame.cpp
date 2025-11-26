@@ -47,6 +47,21 @@ namespace xo {
             return retval;
         }
 
+        gp<VsmStackFrame>
+        VsmStackFrame::push2(gc::IAlloc * mm,
+                             gp<VsmStackFrame> p,
+                             gp<Object> s0,
+                             gp<Object> s1,
+                             const VsmInstr * cont)
+        {
+            gp<VsmStackFrame> retval = new (MMPtr(mm)) VsmStackFrame(mm, p, 2, cont);
+
+            (*retval)[0] = s0;
+            (*retval)[1] = s1;
+
+            return retval;
+        }
+
         TaggedPtr
         VsmStackFrame::self_tp() const
         {

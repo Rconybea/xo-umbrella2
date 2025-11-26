@@ -34,11 +34,20 @@ namespace xo {
 #endif
 
             /** create new stack frame using allocator @p mm,
-             *  with parent frame @p p; new frame contains values @p s0, @p s1
+             *  with parent frame @p p; new frame contains values @p s0
              **/
             static gp<VsmStackFrame> push1(gc::IAlloc * mm,
                                            gp<VsmStackFrame> p,
                                            gp<Object> s0,
+                                           const VsmInstr * cont);
+
+            /** create new stack frame using allocator @p mm,
+             *  with parent frame @p p; new frame contains values @p s0, @p s1
+             **/
+            static gp<VsmStackFrame> push2(gc::IAlloc * mm,
+                                           gp<VsmStackFrame> p,
+                                           gp<Object> s0,
+                                           gp<Object> s1,
                                            const VsmInstr * cont);
 
 
