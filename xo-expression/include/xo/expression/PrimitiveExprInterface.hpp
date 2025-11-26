@@ -1,29 +1,27 @@
-/** @file PrimitiveInterface.hpp
+/** @file PrimitiveExprInterface.hpp
  *
  *  Author: Roland Conybeare
  **/
 
 #pragma once
 
-#include "FunctionInterface.hpp"
+#include "FunctionExprInterface.hpp"
 #include "llvmintrinsic.hpp"
-
-//#include <cstdint>
-
 #include <type_traits>
+
 namespace xo {
     namespace scm {
-        class PrimitiveInterface : public FunctionInterface {
+        class PrimitiveExprInterface : public FunctionExprInterface {
         public:
             using void_function_type = void (*)();
 
         public:
-            explicit PrimitiveInterface(TypeDescr fn_type)
-                : FunctionInterface(exprtype::primitive, fn_type) {}
+            explicit PrimitiveExprInterface(TypeDescr fn_type)
+                : FunctionExprInterface(exprtype::primitive, fn_type) {}
 
             /** downcast from Expression **/
-            static bp<PrimitiveInterface> from(bp<Expression> x) {
-                return bp<PrimitiveInterface>::from(x);
+            static bp<PrimitiveExprInterface> from(bp<Expression> x) {
+                return bp<PrimitiveExprInterface>::from(x);
             }
 
             /** if true,  Jit will try to explicitly symbol for this primitive

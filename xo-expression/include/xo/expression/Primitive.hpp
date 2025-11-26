@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "PrimitiveInterface.hpp"
+#include "PrimitiveExprInterface.hpp"
 #include "pretty_expression.hpp"
 #include "llvmintrinsic.hpp"
 #include "xo/reflect/Reflect.hpp"
@@ -38,7 +38,7 @@ namespace xo {
          *          won't work here.
          **/
         template <typename FunctionPointer>
-        class Primitive: public PrimitiveInterface {
+        class Primitive: public PrimitiveExprInterface {
         public:
             using Reflect = xo::reflect::Reflect;
             using TaggedPtr = xo::reflect::TaggedPtr;
@@ -111,7 +111,7 @@ namespace xo {
                       FunctionPointer fnptr,
                       bool explicit_symbol_def,
                       llvmintrinsic intrinsic)
-                : PrimitiveInterface(fn_type),
+                : PrimitiveExprInterface(fn_type),
                   name_{name},
                   value_td_{Reflect::require_function<FunctionPointer>()},
                   value_{fnptr},

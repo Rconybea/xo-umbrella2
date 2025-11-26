@@ -10,14 +10,14 @@
 
 namespace xo {
     namespace scm {
-        class FunctionInterface : public Expression {
+        class FunctionExprInterface : public Expression {
         public:
-            FunctionInterface(exprtype extype, TypeDescr fn_type)
+            FunctionExprInterface(exprtype extype, TypeDescr fn_type)
                 : Expression(extype, fn_type) {}
 
             /** downcast from Expression **/
-            static bp<FunctionInterface> from(bp<Expression> x) {
-                return bp<FunctionInterface>::from(x);
+            static bp<FunctionExprInterface> from(bp<Expression> x) {
+                return bp<FunctionExprInterface>::from(x);
             }
 
             virtual const std::string & name() const = 0;

@@ -4,7 +4,7 @@
 #include "xo/pyreflect/pyreflect.hpp"
 #include "xo/expression/Expression.hpp"
 #include "xo/expression/Apply.hpp"
-#include "xo/expression/PrimitiveInterface.hpp"
+#include "xo/expression/PrimitiveExprInterface.hpp"
 #include "xo/expression/Primitive.hpp"
 #include "xo/expression/ConstantInterface.hpp"
 #include "xo/expression/Constant.hpp"
@@ -21,7 +21,7 @@ namespace xo {
         using xo::scm::exprtype;
         using xo::scm::Expression;
         using xo::scm::make_apply;
-        using xo::scm::PrimitiveInterface;
+        using xo::scm::PrimitiveExprInterface;
         using xo::scm::Primitive;
         using xo::scm::make_primitive;
         using xo::scm::ConstantInterface;
@@ -95,24 +95,24 @@ namespace xo {
 
             // ----- Primitives -----
 
-            py::class_<PrimitiveInterface,
+            py::class_<PrimitiveExprInterface,
                        Expression,
-                       rp<PrimitiveInterface>>(m, "PrimitiveInterface")
-                .def("name", &PrimitiveInterface::name,
+                       rp<PrimitiveExprInterface>>(m, "PrimitiveInterface")
+                .def("name", &PrimitiveExprInterface::name,
                      py::doc("name of this primitive function;  use this name to invoke the function"))
-                .def("n_arg", &PrimitiveInterface::n_arg,
+                .def("n_arg", &PrimitiveExprInterface::n_arg,
                      py::doc("number of arguments to this function (not counting return value)"))
                 ;
 
             using int32_t = std::int32_t;
 
             py::class_<Primitive<int32_t (*)(int32_t, int32_t)>,
-                       PrimitiveInterface,
+                       PrimitiveExprInterface,
                        rp<Primitive<int32_t (*)(int32_t, int32_t)>>>(m, "Primitive_i32_i32")
                 ;
 
             py::class_<Primitive<double (*)(double)>,
-                       PrimitiveInterface,
+                       PrimitiveExprInterface,
                        rp<Primitive<double (*)(double)>>>(m, "Primitive_double_double")
                 ;
             using Fn_dbl_dbl_type = double (*)(double);
@@ -136,7 +136,7 @@ namespace xo {
                   py::doc("create primitive representing the ::cos() function"));
 
             py::class_<Primitive<double (*)(double, double)>,
-                       PrimitiveInterface,
+                       PrimitiveExprInterface,
                        rp<Primitive<double (*)(double, double)>>>(m, "Primitive_double_double_double")
                 ;
 

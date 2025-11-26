@@ -6,13 +6,12 @@
 #pragma once
 
 #include "Expression.hpp"
-#include "FunctionInterface.hpp"
+#include "FunctionExprInterface.hpp"
 #include "Variable.hpp"
 #include "LocalSymtab.hpp"
 #include <map>
 #include <vector>
 #include <string>
-//#include <cstdint>
 
 namespace xo {
     namespace scm {
@@ -20,7 +19,7 @@ namespace xo {
          *  @brief abstract syntax tree for a function definition
          *
          **/
-        class Lambda : public FunctionInterface {
+        class Lambda : public FunctionExprInterface {
         public:
             /**
              *  @p name.  Name for this lambda -- must be unique
