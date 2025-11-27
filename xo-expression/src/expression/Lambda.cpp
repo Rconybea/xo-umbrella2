@@ -259,7 +259,7 @@ namespace xo {
                        TypeDescr lambda_td,
                        const rp<LocalSymtab> & local_env,
                        const rp<Expression> & body)
-            : FunctionExprInterface(exprtype::lambda, lambda_td),
+            : ProcedureExprInterface(exprtype::lambda, lambda_td),
               name_{name},
               body_{body},
               local_env_{local_env}

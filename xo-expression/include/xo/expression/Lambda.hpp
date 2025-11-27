@@ -6,7 +6,7 @@
 #pragma once
 
 #include "Expression.hpp"
-#include "FunctionExprInterface.hpp"
+#include "ProcedureExprInterface.hpp"
 #include "Variable.hpp"
 #include "LocalSymtab.hpp"
 #include <map>
@@ -19,7 +19,7 @@ namespace xo {
          *  @brief abstract syntax tree for a function definition
          *
          **/
-        class Lambda : public FunctionExprInterface {
+        class Lambda : public ProcedureExprInterface {
         public:
             /**
              *  @p name.  Name for this lambda -- must be unique

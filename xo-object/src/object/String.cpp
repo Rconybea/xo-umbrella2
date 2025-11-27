@@ -144,7 +144,7 @@ namespace xo {
             if (owner_ == owner::unique) {
                 std::byte * mem = reinterpret_cast<std::byte *>(chars_);
 
-                copy->chars_ = reinterpret_cast<char *>(Object::mm->alloc_gc_copy(z_chars_, mem));
+                copy->chars_ = reinterpret_cast<char *>(mm->alloc_gc_copy(z_chars_, mem));
                 strlcpy(copy->chars_, chars_, z_chars_);
             }
 

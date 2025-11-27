@@ -1,4 +1,4 @@
-/** @file ProcedureExprInterface.hpp
+/** @file FunctionExprInterface.hpp
  *
  *  Author: Roland Conybeare
  **/
@@ -30,4 +30,4 @@ namespace xo {
     } /*namespace scm*/
 } /*namespace xo*/
 
-/** end ProcedureExprInterface.hpp **/
+/** end FunctionExprInterface.hpp **/

@@ -1,7 +1,7 @@
-/* @file List.hpp
+/** @file List.hpp
  *
- * author: Roland Conybeare, Aug 2025
- */
+ *  @author: Roland Conybeare, Aug 2025
+ **/
 
 #pragma once
 
@@ -70,3 +70,5 @@ namespace xo {
         };
     }
 } /*namespace xo*/
+
+/* end List.hpp */

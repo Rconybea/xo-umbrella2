@@ -18,10 +18,11 @@ namespace xo {
         struct Converter {
             using TaggedPtr = xo::reflect::TaggedPtr;
             using ConvertToObjectFn = gp<Object> (*)(gc::IAlloc *, const TaggedPtr &);
+            using ConvertFromObjectFn = TaggedPtr (*)(gc::IAlloc *, gp<Object> obj);
 
         public:
             Converter() = default;
-            explicit Converter(ConvertToObjectFn f) : cvt_to_object_{f} {}
+            explicit Converter(ConvertToObjectFn to, ConvertFromObjectFn from) : cvt_to_object_{to}, cvt_from_object_{from} {}
 
             /** convert tagged pointer @p tp to new object,
              *  allocated via @p mm.
@@ -30,6 +31,14 @@ namespace xo {
              *  see @ref ObjectConverter
              **/
             ConvertToObjectFn cvt_to_object_ = nullptr;
+
+            /** convert object to tagged pointer @p,
+             *  allocated via @p mm.
+             *
+             *  Conversion will typically be for some specific type;
+             *  see @ref ObjectConverter
+             **/
+            ConvertFromObjectFn cvt_from_object_ = nullptr;
         };
 
         /** @class ObjectConverter
@@ -53,6 +62,7 @@ namespace xo {
         class ObjectConverter {
         public:
             using TaggedPtr = xo::reflect::TaggedPtr;
+            using TypeId = xo::reflect::TypeId;
             using IAlloc = xo::gc::IAlloc;
 
             /** sets up standard conversions **/
@@ -60,7 +70,7 @@ namespace xo {
 
             /** establish conversion: use @p fn to convert values of type @tparam T. **/
             template <typename T>
-            void establish_conversion(Converter::ConvertToObjectFn fn);
+            void establish_conversion(Converter::ConvertToObjectFn to, Converter::ConvertFromObjectFn from);
 
             /** convert tagged poitner @p tp to object.  allocates memory only from @p mm.
              *  return nullptr if no converter available and @p throw_flag not set.
@@ -76,6 +86,13 @@ namespace xo {
             template <typename T>
             gp<Object> to_object(IAlloc * mm, const T & x, bool throw_flag);
 
+            /** convert object @p obj to tagged pointer, with typeid @target_id.
+             *  Allocates memory only from @p mm.
+             *  return null TaggedPtr if no converter available and @p throw_flag not set.
+             *  Throw exception if no converter available and @p throw_flag set.
+             **/
+            TaggedPtr tp_from_object(IAlloc * mm, gp<Object> & obj, TypeId target_id, bool throw_flag);
+
         private:
             /** expandable type-driven conversion table.
              **/
@@ -84,7 +101,8 @@ namespace xo {
 
         template <typename T>
         void
-        ObjectConverter::establish_conversion(Converter::ConvertToObjectFn fn)
+        ObjectConverter::establish_conversion(Converter::ConvertToObjectFn to,
+                                              Converter::ConvertFromObjectFn from)
         {
             using xo::reflect::TypeDescrW;
             using xo::reflect::Reflect;
@@ -92,7 +110,7 @@ namespace xo {
             TypeDescrW td = Reflect::require<T>();
             Converter * cvt = cvt_.require(td);
 
-            *cvt = Converter(fn);
+            *cvt = Converter(to, from);
         }
 
         template <typename T>

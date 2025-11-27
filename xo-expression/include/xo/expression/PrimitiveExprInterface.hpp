@@ -5,19 +5,19 @@
 
 #pragma once
 
-#include "FunctionExprInterface.hpp"
+#include "ProcedureExprInterface.hpp"
 #include "llvmintrinsic.hpp"
 #include <type_traits>
 
 namespace xo {
     namespace scm {
-        class PrimitiveExprInterface : public FunctionExprInterface {
+        class PrimitiveExprInterface : public ProcedureExprInterface {
         public:
             using void_function_type = void (*)();
 
         public:
             explicit PrimitiveExprInterface(TypeDescr fn_type)
-                : FunctionExprInterface(exprtype::primitive, fn_type) {}
+                : ProcedureExprInterface(exprtype::primitive, fn_type) {}
 
             /** downcast from Expression **/
             static bp<PrimitiveExprInterface> from(bp<Expression> x) {
