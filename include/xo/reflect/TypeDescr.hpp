@@ -99,19 +99,26 @@ namespace xo {
              *
              *  Example
              *    T * p = new T(...);
-             *    DestructorAux<T>::dtor(p);
+             *    InvokerAux<T>::dtor(p);
              **/
             template <typename T>
             struct InvokerAux : public Invoker {
                 virtual void dtor(void * addr) const override {
-                    T * obj = static_cast<T *>(addr);
+                    T * obj = reinterpret_cast<T *>(addr);
 
                     obj->~T();
                 }
             };
 
+            /** no dtor for void **/
             template<>
             struct InvokerAux<void> : public Invoker {
+                virtual void dtor(void *) const override {}
+            };
+
+            /** no dtor for function types **/
+            template <typename Ret, typename... Args>
+            struct InvokerAux<Ret(Args...)> : public Invoker {
                 virtual void dtor(void *) const override {}
             };
         } /*namespace detail*/
