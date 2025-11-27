@@ -6,6 +6,7 @@
 #pragma once
 
 #include "Procedure.hpp"
+#include "String.hpp"
 #include "ObjectConversion.hpp"
 #include "xo/reflect/Reflect.hpp"
 
@@ -26,7 +27,7 @@ namespace xo {
             using function_type = Fn;
 
         public:
-            explicit PrimitiveBase(Fn impl) : impl_{std::move(impl)} {}
+            explicit PrimitiveBase(std::string_view name, Fn impl) : name_{name}, impl_{std::move(impl)} {}
 
             // inherited from Procedure..
 
@@ -34,6 +35,9 @@ namespace xo {
             virtual gp<Object> apply_nocheck(gc::IAlloc * mm, const CVector<gp<Object>> & args) override = 0;
 
         protected:
+            /** name for this primitive **/
+            std::string_view name_;
+            /** implementation **/
             Fn impl_;
         };
 
@@ -49,7 +53,8 @@ namespace xo {
             using TaggedPtr = xo::reflect::TaggedPtr;
 
         public:
-            explicit Primitive(function_type fn) : PrimitiveBase<Ret (*)(Arg1, Arg2)>{fn} {}
+            explicit Primitive(std::string_view name,
+                               function_type fn) : PrimitiveBase<Ret (*)(Arg1, Arg2)>{name, fn} {}
 
             // inherited from Procedure..
 
@@ -76,7 +81,7 @@ namespace xo {
                 return Reflect::make_tp(const_cast<Primitive*>(this));
             }
             virtual void display(std::ostream & os) const final override {
-                os << "<primitive>";
+                os << "<primitive" << xtag("name", Super::name_) << ">";
             }
             virtual std::size_t _shallow_size() const final override {
                 return sizeof(*this);
@@ -92,8 +97,8 @@ namespace xo {
 
         template <typename Fn>
         gp<Primitive<Fn>>
-        make_primitive(gc::IAlloc * mm, Fn fn) {
-            return new (MMPtr(mm)) Primitive<Fn>(fn);
+        make_primitive(gc::IAlloc * mm, std::string_view name, Fn fn) {
+            return new (MMPtr(mm)) Primitive<Fn>(name, fn);
         }
     }
 }

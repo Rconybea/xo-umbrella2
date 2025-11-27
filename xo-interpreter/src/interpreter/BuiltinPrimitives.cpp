@@ -28,7 +28,7 @@ namespace xo {
 
             // add(x,y)
             {
-                gp<Object> rhs = xo::obj::make_primitive(mm, add64);
+                gp<Object> rhs = xo::obj::make_primitive(mm, "add", add64);
                 TypeDescr td = Reflect::require<decltype(add64)>();
                 rp<Variable> lhs = Variable::make("add", td);
                 gp<Object> * addr = env->establish_var(lhs.borrow());
