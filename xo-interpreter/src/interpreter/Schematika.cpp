@@ -28,7 +28,7 @@ namespace xo {
              *        rather than VirtualSchematikaMachine to own allocator
              *        to preserve option to share it
              **/
-            Impl(const Config & config, up<IAlloc> mm, gp<Env> toplevel_env) :
+            Impl(const Config & config, up<IAlloc> mm, gp<GlobalEnv> toplevel_env) :
                 config_{config},
                 mm_{std::move(mm)},
                 vsm_{mm_.get(), toplevel_env, config.vsm_log_level_} {}
@@ -44,6 +44,11 @@ namespace xo {
 
             void welcome(std::ostream & os);
 
+            /** get one line of input. prompt if @p interactive,
+             *  with prompt depending on @p parser_stack_size.
+             *  Use @p rx to perform line editing (when @p interactive).
+             *  Store completed line in @p input.
+             **/
             bool replxx_getline(bool interactive,
                                 std::size_t parser_stack_size,
                                 replxx::Replxx & rx,
@@ -133,6 +138,8 @@ namespace xo {
         void
         Schematika::Impl::interactive_repl()
         {
+            scope log(XO_DEBUG(true));
+
             using span_type = xo::scm::span<const char>;
 
             bool interactive = isatty(STDIN_FILENO);
@@ -143,7 +150,7 @@ namespace xo {
             //    rx.bind_key_internal(Replxx::KEY::control('p'), "history_previous");
             //    rx.bind_key_internal(Replxx::KEY::control('n'), "history_next");
 
-            reader rdr(config_.debug_flag);
+            reader rdr(vsm_.toplevel_env()->symtab(), config_.debug_flag);
             rdr.begin_interactive_session();
 
             string input_str;

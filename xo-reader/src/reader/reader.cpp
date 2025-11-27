@@ -4,9 +4,9 @@
 
 namespace xo {
     namespace scm {
-        reader::reader(bool debug_flag) :
+        reader::reader(const rp<GlobalSymtab> & toplevel_symtab, bool debug_flag) :
             tokenizer_{debug_flag},
-            parser_{debug_flag}
+            parser_{toplevel_symtab, debug_flag}
         {}
 
         void

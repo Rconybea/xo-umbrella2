@@ -9,6 +9,7 @@
 #include "envframestack.hpp"
 #include "parser_result.hpp"
 #include "parserstatemachine.hpp"
+#include "xo/expression/GlobalSymtab.hpp"
 #include <stdexcept>
 
 namespace xo {
@@ -161,9 +162,12 @@ namespace xo {
             /** create parser in initial state;
              *  parser is ready to receive tokens via @ref include_token
              *
+             *  At least for xo-interpreter will have non-empty symbol table.
+             *
+             *  @p toplevel_symtab  symbol table.
              *  @p debug_flag  true to enable debug logging
              **/
-            explicit parser(bool debug_flag);
+            parser(const rp<GlobalSymtab> & toplevel_symtab, bool debug_flag);
 
             bool debug_flag() const { return psm_.debug_flag(); }
 

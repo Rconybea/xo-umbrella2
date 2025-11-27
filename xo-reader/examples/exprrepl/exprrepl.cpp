@@ -46,10 +46,11 @@ main() {
     using span_type = xo::scm::span<const char>;
 
     bool interactive = isatty(STDIN_FILENO);
-
     bool c_debug_flag = false;
 
-    reader rdr(c_debug_flag);
+    auto toplevel_symtab = GlobalSymtab::make_empty();
+
+    reader rdr(toplevel_symtab, c_debug_flag);
     rdr.begin_interactive_session();
 
     string input_str;

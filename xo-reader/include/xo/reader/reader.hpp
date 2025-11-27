@@ -8,6 +8,7 @@
 #include "parser.hpp"
 #include "reader_error.hpp"
 #include "xo/expression/Expression.hpp"
+#include "xo/expression/GlobalSymtab.hpp"
 #include "xo/expression/pretty_expression.hpp"
 #include "xo/tokenizer/tokenizer.hpp"
 
@@ -78,7 +79,7 @@ namespace xo {
             using span_type = tokenizer_type::span_type;
 
         public:
-            explicit reader(bool debug_flag);
+            reader(const rp<GlobalSymtab> & toplevel_symtab, bool debug_flag);
 
             bool debug_flag() const { return parser_.debug_flag(); }
 

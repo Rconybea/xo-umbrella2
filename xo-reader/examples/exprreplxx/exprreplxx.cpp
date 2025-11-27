@@ -83,7 +83,9 @@ main()
 
     constexpr bool c_debug_flag = false;
 
-    reader rdr(c_debug_flag);
+    rp<GlobalSymtab> toplevel_symtab = GlobalSymtab::make_empty();
+
+    reader rdr(toplevel_symtab, c_debug_flag);
     rdr.begin_interactive_session();
 
     string input_str;

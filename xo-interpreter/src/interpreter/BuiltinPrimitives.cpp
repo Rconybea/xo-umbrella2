@@ -24,6 +24,9 @@ namespace xo {
         void
         BuiltinPrimitives::install(gc::IAlloc * mm, gp<GlobalEnv> env)
         {
+            scope log(XO_DEBUG(true));
+
+            // add(x,y)
             {
                 gp<Object> rhs = xo::obj::make_primitive(mm, add64);
                 TypeDescr td = Reflect::require<decltype(add64)>();

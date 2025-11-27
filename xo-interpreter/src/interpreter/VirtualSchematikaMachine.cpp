@@ -79,7 +79,7 @@ namespace xo {
         // ----- VirtualSchematikaMachineFlyweight -----
 
         VirtualSchematikaMachineFlyweight::VirtualSchematikaMachineFlyweight(gc::IAlloc * mm,
-                                                                             gp<Env> env,
+                                                                             gp<GlobalEnv> env,
                                                                              log_level ll) :
             object_mm_{mm},
             toplevel_env_{env},
@@ -89,9 +89,11 @@ namespace xo {
         // ----- VirtualSchematikaMachine -----
 
         VirtualSchematikaMachine::VirtualSchematikaMachine(gc::IAlloc * mm,
-                                                           gp<Env> env,
+                                                           gp<GlobalEnv> env,
                                                            log_level ll) : flyweight_{mm, env, ll}
         {
+            scope log(XO_DEBUG(true), xtag("env", env), xtag("symtab", env->symtab()));
+
             this->env_ = env;
 
             // gc roots
@@ -133,8 +135,10 @@ namespace xo {
 
         std::pair<gp<Object>,
                   SchematikaError>
-        VirtualSchematikaMachine::eval(bp<Expression> expr, gp<Env> env)
+        VirtualSchematikaMachine::eval(bp<Expression> expr, gp<GlobalEnv> env)
         {
+            scope log(XO_DEBUG(true), xtag("env", env), xtag("symtab", env->symtab()));
+
             this->pc_    = &VsmOps::eval_op;
             this->expr_  = expr.promote();
             this->env_   = env;

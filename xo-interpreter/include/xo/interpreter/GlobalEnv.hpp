@@ -26,6 +26,8 @@ namespace xo {
             gc::IAlloc * get_mm() const { return mm_; }
 #endif
 
+            const rp<GlobalSymtab> & symtab() const { return symtab_; }
+
             // inherited from Env..
             virtual bool local_contains_var(const std::string & vname) const final override;
             virtual gp<Object> * lookup_slot(const std::string & vname) final override;

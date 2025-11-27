@@ -5,7 +5,7 @@
 #include "VsmInstr.hpp"
 #include "VsmStackFrame.hpp"
 #include "SchematikaError.hpp"
-#include "Env.hpp"
+#include "GlobalEnv.hpp"
 #include "xo/expression/Expression.hpp"
 #include "xo/object/ObjectConverter.hpp"
 #include "xo/alloc/Object.hpp"
@@ -15,13 +15,13 @@ namespace xo {
         /** @brief state that may be shared across VirtualSchematikaMachine instances **/
         struct VirtualSchematikaMachineFlyweight {
             explicit VirtualSchematikaMachineFlyweight(gc::IAlloc * mm,
-                                                       gp<Env> env,
+                                                       gp<GlobalEnv> env,
                                                        log_level log_level);
 
             /** memory allocator for interpreter operation. **/
             gc::IAlloc * object_mm_ = nullptr;
             /** global environment **/
-            gp<Env> toplevel_env_;
+            gp<GlobalEnv> toplevel_env_;
             /** convert TaggedPtr->Object **/
             xo::obj::ObjectConverter object_converter_;
             /** control logging level. higher values -> more logging **/
@@ -37,8 +37,10 @@ namespace xo {
             using IAlloc = xo::gc::IAlloc;
 
         public:
-            VirtualSchematikaMachine(IAlloc * mm, gp<Env> toplevel_env, log_level log_level);
+            VirtualSchematikaMachine(IAlloc * mm, gp<GlobalEnv> toplevel_env, log_level log_level);
             ~VirtualSchematikaMachine();
+
+            gp<GlobalEnv> toplevel_env() const { return flyweight_.toplevel_env_; }
 
             /** evaluate expression @p expr.
              *  borrows calling thread until completion
@@ -48,7 +50,7 @@ namespace xo {
              *
              *  Evaluate schematika expression @p expr in environment @p env
              **/
-            std::pair<gp<Object>, SchematikaError> eval(bp<Expression> expr, gp<Env> env);
+            std::pair<gp<Object>, SchematikaError> eval(bp<Expression> expr, gp<GlobalEnv> env);
 
             /** evaluate expression @p expr in toplevel environment **/
             std::pair<gp<Object>, SchematikaError> toplevel_eval(bp<Expression> expr);
@@ -123,7 +125,7 @@ namespace xo {
              *
              *  caller saves!
              **/
-            gp<Env> env_;
+            gp<GlobalEnv> env_;
 
             /** vsm stack.  callee saves!
              **/

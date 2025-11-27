@@ -24,13 +24,15 @@ namespace xo {
     namespace scm {
         // ----- parser -----
 
-        parser::parser(bool debug_flag)
+        parser::parser(const rp<GlobalSymtab> & toplevel_symtab, bool debug_flag)
             : psm_{debug_flag}
         {
+#ifdef OBSOLETE
             /* top-level environment.  initially empty */
             rp<SymbolTable> toplevel_env = GlobalSymtab::make_empty();
+#endif
 
-            this->psm_.env_stack_.push_envframe(toplevel_env);
+            this->psm_.env_stack_.push_envframe(toplevel_symtab);
         }
 
         bool

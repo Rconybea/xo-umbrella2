@@ -5,6 +5,7 @@
 
 namespace xo {
     using xo::scm::reader;
+    using xo::scm::GlobalSymtab;
 
     namespace ut {
         namespace {
@@ -30,7 +31,9 @@ namespace xo {
             for (std::size_t i_tc = 0; i_tc < s_testcase_v.size(); ++i_tc) {
                 const test_case & tc = s_testcase_v[i_tc];
 
-                reader rdr(c_debug_flag);
+                rp<GlobalSymtab> toplevel_symtab = GlobalSymtab::make_empty();
+
+                reader rdr(toplevel_symtab, c_debug_flag);
 
                 scope log(XO_ENTER2(always, c_debug_flag, "reader.testcase"),
                            xtag("i_tc", i_tc));
