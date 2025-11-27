@@ -87,7 +87,7 @@ namespace xo {
              **/
             rp<LocalSymtab> symtab_;
             /** environment contents **/
-            CVector<gp<Object>> slot_v_;
+            obj::CVector<gp<Object>> slot_v_;
         };
     } /*namespace scm*/
 } /*namespace xo*/

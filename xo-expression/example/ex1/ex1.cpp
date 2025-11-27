@@ -1,7 +1,7 @@
 /** @file ex1.cpp **/
 
 #include "xo/expression/Constant.hpp"
-#include "xo/expression/Primitive.hpp"
+#include "xo/expression/PrimitiveExpr.hpp"
 #include "xo/expression/llvmintrinsic.hpp"
 #include <iostream>
 #include <cmath>

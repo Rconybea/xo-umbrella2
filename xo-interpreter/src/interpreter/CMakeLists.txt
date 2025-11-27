@@ -4,6 +4,7 @@ set(SELF_LIB xo_interpreter)
 set(SELF_SRCS
     init_interpreter.cpp
     Schematika.cpp
+    BuiltinPrimitives.cpp
     LocalEnv.cpp
     GlobalEnv.cpp
     VirtualSchematikaMachine.cpp

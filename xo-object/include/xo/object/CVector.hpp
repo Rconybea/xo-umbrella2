@@ -9,7 +9,7 @@
 #include <cstdint>
 
 namespace xo {
-    namespace scm {
+    namespace obj {
         /** gc-only vector.
          *  Used in both LocalEnv and VsmStackFrame
          **/
@@ -33,18 +33,13 @@ namespace xo {
             ElementType operator[](std::size_t i) const { return v_[i]; }
             ElementType & operator[](std::size_t i) { return v_[i]; }
 
-            friend class LocalEnv;
-            friend class VsmStackFrame;
-
-        private:
+        public:
             /** number of elements in @ref v_ **/
             std::size_t n_ = 0;
             /** contiguous array of pointers **/
             ElementType * v_ = nullptr;
         };
-
-
-    } /*namespace scm*/
+    } /*namespace obj*/
 } /*namespace xo*/
 
 /* end CVector.hpp */

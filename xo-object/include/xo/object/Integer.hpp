@@ -6,6 +6,8 @@
 #pragma once
 
 #include "Number.hpp"
+#include "ObjectConversion.hpp"
+#include "xo/indentlog/print/tag.hpp"
 
 namespace xo {
     namespace obj {
@@ -37,6 +39,29 @@ namespace xo {
         private:
             int_type value_ = 0;
         };
+
+        template <typename IntType>
+        struct ObjectConversion_Integer {
+            static gp<Object> to_object(gc::IAlloc * mm, IntType x) {
+                return new (MMPtr(mm)) Integer(x);
+            }
+            static IntType from_object(gc::IAlloc *, gp<Object> x) {
+                gp<Integer> x_int = Integer::from(x);
+                if (x_int.get()) {
+                    return x_int->value();
+                } else {
+                    throw std::runtime_error(tostr("ObjectConversion_Integer: x found where Integer expected", xtag("x", x)));
+                }
+            }
+        };
+
+        template <>
+        struct ObjectConversion<int64_t> : public ObjectConversion_Integer<int64_t> {};
+        template <>
+        struct ObjectConversion<int32_t> : public ObjectConversion_Integer<int32_t> {};
+        template <>
+        struct ObjectConversion<int16_t> : public ObjectConversion_Integer<int16_t> {};
+
     } /*namespace obj*/
 } /*namespace xo*/
 

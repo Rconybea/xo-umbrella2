@@ -6,8 +6,11 @@
 #pragma once
 
 #include "Object.hpp"
+#include "CVector.hpp"
 
 namespace xo {
+    namespace gc { class IAlloc; }; // see xo-alloc: xo/alloc/IAlloc.hpp
+
     namespace obj {
         /** @class ProcedureInterface
          *  @brief Interface to a dynamically-typed procedure
@@ -15,7 +18,7 @@ namespace xo {
         class Procedure : public Object {
         public:
             virtual std::size_t n_args() const = 0;
-            virtual gp<Object> apply_nocheck(const CVector<gp<Object>> & args) = 0;
+            virtual gp<Object> apply_nocheck(gc::IAlloc * mm, const CVector<gp<Object>> & args) = 0;
 
             // inherited from Object..
 

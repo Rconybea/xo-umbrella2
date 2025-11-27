@@ -1,6 +1,6 @@
-/* @file Primitive.cpp */
+/* @file PrimitiveExpr.cpp */
 
-#include "Primitive.hpp"
+#include "PrimitiveExpr.hpp"
 #include <cstdint>
 
 extern "C" {
@@ -86,12 +86,12 @@ extern "C" {
 namespace xo {
     namespace scm {
         auto
-        Primitive_cmp_i64::make_cmp_eq2_i64() -> rp<PrimitiveType>
+        PrimitiveExpr_cmp_i64::make_cmp_eq2_i64() -> rp<PrimitiveExprType>
         {
-            static rp<PrimitiveType> s_retval;
+            static rp<PrimitiveExprType> s_retval;
 
             if (!s_retval)
-                s_retval = Primitive::make("cmp_eq2_i64",
+                s_retval = PrimitiveExpr::make("cmp_eq2_i64",
                                            &cmp_eq2_i64,
                                            true /*explicit_symbol_def*/,
                                            llvmintrinsic::i_eq);
@@ -100,12 +100,12 @@ namespace xo {
         }
 
         auto
-        Primitive_cmp_i64::make_cmp_ne2_i64() -> rp<PrimitiveType>
+        PrimitiveExpr_cmp_i64::make_cmp_ne2_i64() -> rp<PrimitiveExprType>
         {
-            static rp<PrimitiveType> s_retval;
+            static rp<PrimitiveExprType> s_retval;
 
             if (!s_retval)
-                s_retval = Primitive::make("cmp_ne2_i64",
+                s_retval = PrimitiveExpr::make("cmp_ne2_i64",
                                            &cmp_ne2_i64,
                                            true /*explicit_symbol_def*/,
                                            llvmintrinsic::i_ne);
@@ -114,12 +114,12 @@ namespace xo {
         }
 
         auto
-        Primitive_cmp_i64::make_cmp_lt2_i64() -> rp<PrimitiveType>
+        PrimitiveExpr_cmp_i64::make_cmp_lt2_i64() -> rp<PrimitiveExprType>
         {
-            static rp<PrimitiveType> s_retval;
+            static rp<PrimitiveExprType> s_retval;
 
             if (!s_retval)
-                s_retval = Primitive::make("cmp_lt2_i64",
+                s_retval = PrimitiveExpr::make("cmp_lt2_i64",
                                            &cmp_lt2_i64,
                                            true /*explicit_symbol_def*/,
                                            llvmintrinsic::i_slt);
@@ -128,12 +128,12 @@ namespace xo {
         }
 
         auto
-        Primitive_cmp_i64::make_cmp_le2_i64() -> rp<PrimitiveType>
+        PrimitiveExpr_cmp_i64::make_cmp_le2_i64() -> rp<PrimitiveExprType>
         {
-            static rp<PrimitiveType> s_retval;
+            static rp<PrimitiveExprType> s_retval;
 
             if (!s_retval)
-                s_retval = Primitive::make("cmp_le2_i64",
+                s_retval = PrimitiveExpr::make("cmp_le2_i64",
                                            &cmp_le2_i64,
                                            true /*explicit_symbol_def*/,
                                            llvmintrinsic::i_sle);
@@ -142,12 +142,12 @@ namespace xo {
         }
 
         auto
-        Primitive_cmp_i64::make_cmp_gt2_i64() -> rp<PrimitiveType>
+        PrimitiveExpr_cmp_i64::make_cmp_gt2_i64() -> rp<PrimitiveExprType>
         {
-            static rp<PrimitiveType> s_retval;
+            static rp<PrimitiveExprType> s_retval;
 
             if (!s_retval)
-                s_retval = Primitive::make("cmp_gt2_i64",
+                s_retval = PrimitiveExpr::make("cmp_gt2_i64",
                                            &cmp_gt2_i64,
                                            true /*explicit_symbol_def*/,
                                            llvmintrinsic::i_sgt);
@@ -156,12 +156,12 @@ namespace xo {
         }
 
         auto
-        Primitive_cmp_i64::make_cmp_ge2_i64() -> rp<PrimitiveType>
+        PrimitiveExpr_cmp_i64::make_cmp_ge2_i64() -> rp<PrimitiveExprType>
         {
-            static rp<PrimitiveType> s_retval;
+            static rp<PrimitiveExprType> s_retval;
 
             if (!s_retval)
-                s_retval = Primitive::make("cmp_ge2_i64",
+                s_retval = PrimitiveExpr::make("cmp_ge2_i64",
                                            &cmp_ge2_i64,
                                            true /*explicit_symbol_def*/,
                                            llvmintrinsic::i_sge);
@@ -172,12 +172,12 @@ namespace xo {
         /* TODO: remaining integer arithmetic */
 
         auto
-        Primitive_i64::make_add2_i64() -> rp<PrimitiveType>
+        PrimitiveExpr_i64::make_add2_i64() -> rp<PrimitiveExprType>
         {
-            static rp<PrimitiveType> s_retval;
+            static rp<PrimitiveExprType> s_retval;
 
             if (!s_retval)
-                s_retval = Primitive::make("add2_i64",
+                s_retval = PrimitiveExpr::make("add2_i64",
                                            &add2_i64,
                                            true /*explicit_symbol_def*/,
                                            llvmintrinsic::i_add);
@@ -186,12 +186,12 @@ namespace xo {
         }
 
         auto
-        Primitive_i64::make_sub2_i64() -> rp<PrimitiveType>
+        PrimitiveExpr_i64::make_sub2_i64() -> rp<PrimitiveExprType>
         {
-            static rp<PrimitiveType> s_retval;
+            static rp<PrimitiveExprType> s_retval;
 
             if (!s_retval)
-                s_retval = Primitive::make("sub2_i64",
+                s_retval = PrimitiveExpr::make("sub2_i64",
                                            &sub2_i64,
                                            true /*explicit_symbol_def*/,
                                            llvmintrinsic::i_sub);
@@ -200,12 +200,12 @@ namespace xo {
         }
 
         auto
-        Primitive_i64::make_mul2_i64() -> rp<PrimitiveType>
+        PrimitiveExpr_i64::make_mul2_i64() -> rp<PrimitiveExprType>
         {
-            static rp<PrimitiveType> s_retval;
+            static rp<PrimitiveExprType> s_retval;
 
             if (!s_retval)
-                s_retval = Primitive::make("mul2_i64",
+                s_retval = PrimitiveExpr::make("mul2_i64",
                                            &mul2_i64,
                                            true /*explicit_symbol_def*/,
                                            llvmintrinsic::i_mul);
@@ -214,12 +214,12 @@ namespace xo {
         }
 
         auto
-        Primitive_i64::make_div2_i64() -> rp<PrimitiveType>
+        PrimitiveExpr_i64::make_div2_i64() -> rp<PrimitiveExprType>
         {
-            static rp<PrimitiveType> s_retval;
+            static rp<PrimitiveExprType> s_retval;
 
             if (!s_retval)
-                s_retval = Primitive::make("div2_i64",
+                s_retval = PrimitiveExpr::make("div2_i64",
                                            &div2_i64,
                                            true /*explicit_symbol+def*/,
                                            llvmintrinsic::i_sdiv);
@@ -229,12 +229,12 @@ namespace xo {
         // ----- floating-point arithmetic -----
 
         auto
-        Primitive_f64::make_add2_f64() -> rp<PrimitiveType>
+        PrimitiveExpr_f64::make_add2_f64() -> rp<PrimitiveExprType>
         {
-            static rp<PrimitiveType> s_retval;
+            static rp<PrimitiveExprType> s_retval;
 
             if (!s_retval)
-                s_retval = Primitive::make("add2_f64",
+                s_retval = PrimitiveExpr::make("add2_f64",
                                            &add2_f64,
                                            true /*explicit_symbol_def*/,
                                            llvmintrinsic::fp_add);
@@ -243,12 +243,12 @@ namespace xo {
         }
 
         auto
-        Primitive_f64::make_sub2_f64() -> rp<PrimitiveType>
+        PrimitiveExpr_f64::make_sub2_f64() -> rp<PrimitiveExprType>
         {
-            static rp<PrimitiveType> s_retval;
+            static rp<PrimitiveExprType> s_retval;
 
             if (!s_retval)
-                s_retval = Primitive::make("sub2_f64",
+                s_retval = PrimitiveExpr::make("sub2_f64",
                                            &sub2_f64,
                                            true /*explicit_symbol_def*/,
                                            llvmintrinsic::fp_sub);
@@ -257,12 +257,12 @@ namespace xo {
         }
 
         auto
-        Primitive_f64::make_mul2_f64() -> rp<PrimitiveType>
+        PrimitiveExpr_f64::make_mul2_f64() -> rp<PrimitiveExprType>
         {
-            static rp<PrimitiveType> s_retval;
+            static rp<PrimitiveExprType> s_retval;
 
             if (!s_retval)
-                s_retval = Primitive::make("mul2_f64",
+                s_retval = PrimitiveExpr::make("mul2_f64",
                                            &mul2_f64,
                                            true /*explicit_symbol_def*/,
                                            llvmintrinsic::fp_mul);
@@ -271,12 +271,12 @@ namespace xo {
         }
 
         auto
-        Primitive_f64::make_div2_f64() -> rp<PrimitiveType>
+        PrimitiveExpr_f64::make_div2_f64() -> rp<PrimitiveExprType>
         {
-            static rp<PrimitiveType> s_retval;
+            static rp<PrimitiveExprType> s_retval;
 
             if (!s_retval)
-                s_retval = Primitive::make("div2_f64",
+                s_retval = PrimitiveExpr::make("div2_f64",
                                            &div2_f64,
                                            true /*explicit_symbol_def*/,
                                            llvmintrinsic::fp_div);
@@ -288,4 +288,4 @@ namespace xo {
 } /*namespace xo*/
 
 
-/* end Primitive.cpp */
+/* end PrimitiveExpr.cpp */

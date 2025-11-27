@@ -14,7 +14,7 @@ set(SELF_SRCS
     GlobalSymtab.cpp
     LocalSymtab.cpp
     ConvertExpr.cpp
-    Primitive.cpp
+    PrimitiveExpr.cpp
     typeinf/type_ref.cpp
     typeinf/type_unifier.cpp
     typeinf/TypeBlueprint.cpp

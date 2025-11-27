@@ -5,6 +5,7 @@
 
 #include "Schematika.hpp"
 #include "VirtualSchematikaMachine.hpp"
+#include "BuiltinPrimitives.hpp"
 #include "GlobalEnv.hpp"
 #include "xo/reader/reader.hpp"
 #include <replxx.hxx>
@@ -69,7 +70,9 @@ namespace xo {
         {
             up<IAlloc> mm = GC::make(cfg.gc_config_);
             rp<GlobalSymtab> symtab = GlobalSymtab::make_empty();
-            gp<Env> env = GlobalEnv::make_empty(mm.get(), symtab);
+            gp<GlobalEnv> env = GlobalEnv::make_empty(mm.get(), symtab);
+
+            BuiltinPrimitives::install(mm.get(), env);
 
             return std::make_unique<Impl>(cfg, std::move(mm), env);
         }

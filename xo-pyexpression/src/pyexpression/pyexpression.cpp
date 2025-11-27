@@ -5,7 +5,7 @@
 #include "xo/expression/Expression.hpp"
 #include "xo/expression/Apply.hpp"
 #include "xo/expression/PrimitiveExprInterface.hpp"
-#include "xo/expression/Primitive.hpp"
+#include "xo/expression/PrimitiveExpr.hpp"
 #include "xo/expression/ConstantInterface.hpp"
 #include "xo/expression/Constant.hpp"
 #include "xo/expression/Variable.hpp"
@@ -22,7 +22,7 @@ namespace xo {
         using xo::scm::Expression;
         using xo::scm::make_apply;
         using xo::scm::PrimitiveExprInterface;
-        using xo::scm::Primitive;
+        using xo::scm::PrimitiveExpr;
         using xo::scm::make_primitive;
         using xo::scm::ConstantInterface;
         using xo::scm::Constant;
@@ -106,14 +106,14 @@ namespace xo {
 
             using int32_t = std::int32_t;
 
-            py::class_<Primitive<int32_t (*)(int32_t, int32_t)>,
+            py::class_<PrimitiveExpr<int32_t (*)(int32_t, int32_t)>,
                        PrimitiveExprInterface,
-                       rp<Primitive<int32_t (*)(int32_t, int32_t)>>>(m, "Primitive_i32_i32")
+                       rp<PrimitiveExpr<int32_t (*)(int32_t, int32_t)>>>(m, "PrimitiveExpr_i32_i32")
                 ;
 
-            py::class_<Primitive<double (*)(double)>,
+            py::class_<PrimitiveExpr<double (*)(double)>,
                        PrimitiveExprInterface,
-                       rp<Primitive<double (*)(double)>>>(m, "Primitive_double_double")
+                       rp<PrimitiveExpr<double (*)(double)>>>(m, "PrimitiveExpr_double_double")
                 ;
             using Fn_dbl_dbl_type = double (*)(double);
 
@@ -135,9 +135,9 @@ namespace xo {
                                                                 llvmintrinsic::fp_cos); },
                   py::doc("create primitive representing the ::cos() function"));
 
-            py::class_<Primitive<double (*)(double, double)>,
+            py::class_<PrimitiveExpr<double (*)(double, double)>,
                        PrimitiveExprInterface,
-                       rp<Primitive<double (*)(double, double)>>>(m, "Primitive_double_double_double")
+                       rp<PrimitiveExpr<double (*)(double, double)>>>(m, "PrimitiveExpr_double_double_double")
                 ;
 
             m.def("make_pow_pm",

@@ -4,7 +4,7 @@
 #include "xo/pyexpression/pyexpression.hpp"
 #include "xo/jit/MachPipeline.hpp"
 #include "xo/jit/intrinsics.hpp"
-#include "xo/expression/Primitive.hpp"
+#include "xo/expression/PrimitiveExpr.hpp"
 #include "xo/pyutil/pycaller.hpp"
 #include "xo/pyutil/pyutil.hpp"
 #include <llvm/Config/llvm-config.h>

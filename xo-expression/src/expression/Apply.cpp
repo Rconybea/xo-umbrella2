@@ -1,7 +1,7 @@
 /* @file Apply.cpp */
 
 #include "Apply.hpp"
-#include "Primitive.hpp"
+#include "PrimitiveExpr.hpp"
 #include "exprtype.hpp"
 #include "pretty_expression.hpp"
 #include "xo/indentlog/print/vector.hpp"
@@ -36,7 +36,7 @@ namespace xo {
         Apply::make_cmp_eq_i64(const rp<Expression> & lhs,
                                const rp<Expression> & rhs)
         {
-            return Apply::make(Primitive_cmp_i64::make_cmp_eq2_i64(),
+            return Apply::make(PrimitiveExpr_cmp_i64::make_cmp_eq2_i64(),
                                {lhs, rhs});
         }
 
@@ -44,7 +44,7 @@ namespace xo {
         Apply::make_cmp_ne_i64(const rp<Expression> & lhs,
                                const rp<Expression> & rhs)
         {
-            return Apply::make(Primitive_cmp_i64::make_cmp_ne2_i64(),
+            return Apply::make(PrimitiveExpr_cmp_i64::make_cmp_ne2_i64(),
                                {lhs, rhs});
         }
 
@@ -52,7 +52,7 @@ namespace xo {
         Apply::make_cmp_lt_i64(const rp<Expression> & lhs,
                                const rp<Expression> & rhs)
         {
-            return Apply::make(Primitive_cmp_i64::make_cmp_lt2_i64(),
+            return Apply::make(PrimitiveExpr_cmp_i64::make_cmp_lt2_i64(),
                                {lhs, rhs});
         }
 
@@ -60,7 +60,7 @@ namespace xo {
         Apply::make_cmp_le_i64(const rp<Expression> & lhs,
                                const rp<Expression> & rhs)
         {
-            return Apply::make(Primitive_cmp_i64::make_cmp_le2_i64(),
+            return Apply::make(PrimitiveExpr_cmp_i64::make_cmp_le2_i64(),
                                {lhs, rhs});
         }
 
@@ -68,7 +68,7 @@ namespace xo {
         Apply::make_cmp_gt_i64(const rp<Expression> & lhs,
                                const rp<Expression> & rhs)
         {
-            return Apply::make(Primitive_cmp_i64::make_cmp_gt2_i64(),
+            return Apply::make(PrimitiveExpr_cmp_i64::make_cmp_gt2_i64(),
                                {lhs, rhs});
         }
 
@@ -76,7 +76,7 @@ namespace xo {
         Apply::make_cmp_ge_i64(const rp<Expression> & lhs,
                                const rp<Expression> & rhs)
         {
-            return Apply::make(Primitive_cmp_i64::make_cmp_ge2_i64(),
+            return Apply::make(PrimitiveExpr_cmp_i64::make_cmp_ge2_i64(),
                                {lhs, rhs});
         }
 
@@ -86,7 +86,7 @@ namespace xo {
         Apply::make_add2_i64(const rp<Expression> & lhs,
                              const rp<Expression> & rhs)
         {
-            return Apply::make(Primitive_i64::make_add2_i64(),
+            return Apply::make(PrimitiveExpr_i64::make_add2_i64(),
                                {lhs, rhs});
         }
 
@@ -94,7 +94,7 @@ namespace xo {
         Apply::make_sub2_i64(const rp<Expression> & lhs,
                              const rp<Expression> & rhs)
         {
-            return Apply::make(Primitive_i64::make_sub2_i64(),
+            return Apply::make(PrimitiveExpr_i64::make_sub2_i64(),
                                {lhs, rhs});
         }
 
@@ -102,7 +102,7 @@ namespace xo {
         Apply::make_mul2_i64(const rp<Expression> & lhs,
                              const rp<Expression> & rhs)
         {
-            return Apply::make(Primitive_i64::make_mul2_i64(),
+            return Apply::make(PrimitiveExpr_i64::make_mul2_i64(),
                                {lhs, rhs});
         }
 
@@ -110,7 +110,7 @@ namespace xo {
         Apply::make_div2_i64(const rp<Expression> & lhs,
                              const rp<Expression> & rhs)
         {
-            return Apply::make(Primitive_i64::make_div2_i64(),
+            return Apply::make(PrimitiveExpr_i64::make_div2_i64(),
                                {lhs, rhs});
         }
 
@@ -120,7 +120,7 @@ namespace xo {
         Apply::make_add2_f64(const rp<Expression> & lhs,
                              const rp<Expression> & rhs)
         {
-            return Apply::make(Primitive_f64::make_add2_f64(),
+            return Apply::make(PrimitiveExpr_f64::make_add2_f64(),
                                {lhs, rhs});
         }
 
@@ -128,7 +128,7 @@ namespace xo {
         Apply::make_sub2_f64(const rp<Expression> & lhs,
                              const rp<Expression> & rhs)
         {
-            return Apply::make(Primitive_f64::make_sub2_f64(),
+            return Apply::make(PrimitiveExpr_f64::make_sub2_f64(),
                                {lhs, rhs});
         }
 
@@ -136,7 +136,7 @@ namespace xo {
         Apply::make_mul2_f64(const rp<Expression> & lhs,
                              const rp<Expression> & rhs)
         {
-            return Apply::make(Primitive_f64::make_mul2_f64(),
+            return Apply::make(PrimitiveExpr_f64::make_mul2_f64(),
                                {lhs, rhs});
         }
 
@@ -144,7 +144,7 @@ namespace xo {
         Apply::make_div2_f64(const rp<Expression> & lhs,
                              const rp<Expression> & rhs)
         {
-            return Apply::make(Primitive_f64::make_div2_f64(),
+            return Apply::make(PrimitiveExpr_f64::make_div2_f64(),
                                {lhs, rhs});
         }
 

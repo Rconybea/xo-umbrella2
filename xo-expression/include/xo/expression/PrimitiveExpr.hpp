@@ -1,4 +1,4 @@
-/** @file Primitive.hpp
+/** @file PrimitiveExpr.hpp
  *
  *  Author: Roland Conybeare
  **/
@@ -20,7 +20,7 @@ extern "C" {
 
 namespace xo {
     namespace scm {
-        /** @class Primitive
+        /** @class PrimitiveExpr
          *  @brief syntax for a constant that refers to a known function.
          *
          *  Two cases here:
@@ -38,7 +38,7 @@ namespace xo {
          *          won't work here.
          **/
         template <typename FunctionPointer>
-        class Primitive: public PrimitiveExprInterface {
+        class PrimitiveExpr: public PrimitiveExprInterface {
         public:
             using Reflect = xo::reflect::Reflect;
             using TaggedPtr = xo::reflect::TaggedPtr;
@@ -46,13 +46,13 @@ namespace xo {
             using fptr_type = FunctionPointer;
 
         public:
-            static rp<Primitive> make(const std::string & name,
+            static rp<PrimitiveExpr> make(const std::string & name,
                                       FunctionPointer fnptr,
                                       bool explicit_symbol_def,
                                       llvmintrinsic intrinsic) {
                 TypeDescr fn_type = Reflect::require<FunctionPointer>();
 
-                return new Primitive(fn_type, name, fnptr, explicit_symbol_def, intrinsic);
+                return new PrimitiveExpr(fn_type, name, fnptr, explicit_symbol_def, intrinsic);
             }
 
             /** see classes below for intrinsics **/
@@ -68,7 +68,7 @@ namespace xo {
                 return TaggedPtr(value_td_, erased_ptr);
             }
 
-            // ----- PrimitiveInterface -----
+            // ----- PrimitiveExprInterface -----
 
             virtual llvmintrinsic intrinsic() const override { return intrinsic_; }
             virtual bool explicit_symbol_def() const override { return explicit_symbol_def_; }
@@ -84,7 +84,7 @@ namespace xo {
             // ----- Expression -----
 
             virtual void display(std::ostream & os) const override {
-                os << "<Primitive"
+                os << "<PrimitiveExpr"
                    << xtag("name", name_)
                    << xtag("type", this->value_td()->short_name())
                    << xtag("value", this->value())
@@ -99,14 +99,14 @@ namespace xo {
                  *    we don't have pretty printer for native function pointers anyway
                  *    + simplifies ppdetail_atomic
                  */
-                return ppii.pps()->pretty_struct(ppii, "Primitive",
+                return ppii.pps()->pretty_struct(ppii, "PrimitiveExpr",
                                                  refrtag("name", name_),
                                                  rtag("type", print::quot(this->valuetype()->short_name())),
                                                  refrtag("value", (void*)(this->value())));
             }
 
         private:
-            Primitive(TypeDescr fn_type,
+            PrimitiveExpr(TypeDescr fn_type,
                       const std::string & name,
                       FunctionPointer fnptr,
                       bool explicit_symbol_def,
@@ -119,9 +119,9 @@ namespace xo {
                   intrinsic_{intrinsic}
                 {
                     if (!value_td_->is_function())
-                        throw std::runtime_error("Primitive: expected function pointer");
+                        throw std::runtime_error("PrimitiveExpr: expected function pointer");
                     if (!value_td_->fn_retval())
-                        throw std::runtime_error("Primitive: expected non-null function return value");
+                        throw std::runtime_error("PrimitiveExpr: expected non-null function return value");
                 }
 
 
@@ -145,75 +145,75 @@ namespace xo {
              *  all others: generate direct use of LLVM intrinsic
              **/
             llvmintrinsic intrinsic_;
-        }; /*Primitive*/
+        }; /*PrimitiveExpr*/
 
         /** adopt function @p x as a callable primitive function named @p name **/
         template <typename FunctionPointer>
-        rp<Primitive<FunctionPointer>>
+        rp<PrimitiveExpr<FunctionPointer>>
         make_primitive(const std::string & name,
                        FunctionPointer x,
                        bool explicit_symbol_def,
                        llvmintrinsic intrinsic)
         {
-            return Primitive<FunctionPointer>::make(name, x, explicit_symbol_def, intrinsic);
+            return PrimitiveExpr<FunctionPointer>::make(name, x, explicit_symbol_def, intrinsic);
         }
 
         // NOTE: see xo-reader/src/reader/progress_xs.cpp
         //       binding operators to primitive applications.
 
         /** builtin primitives :: i64 x i64 -> bool **/
-        class Primitive_cmp_i64 : public Primitive<bool (*)(std::int64_t, std::int64_t)> {
+        class PrimitiveExpr_cmp_i64 : public PrimitiveExpr<bool (*)(std::int64_t, std::int64_t)> {
         public:
-            using PrimitiveType = Primitive<bool (*)(std::int64_t, std::int64_t)>;
+            using PrimitiveExprType = PrimitiveExpr<bool (*)(std::int64_t, std::int64_t)>;
 
         public:
             /** eq2_i64: compare two 64-bit integers for equality **/
-            static rp<PrimitiveType> make_cmp_eq2_i64();
+            static rp<PrimitiveExprType> make_cmp_eq2_i64();
             /** ne2_i64: compare two 64-bit integers for inequality **/
-            static rp<PrimitiveType> make_cmp_ne2_i64();
+            static rp<PrimitiveExprType> make_cmp_ne2_i64();
             /** lt2_i64: compare two 64-bit integers for lessthan **/
-            static rp<PrimitiveType> make_cmp_lt2_i64();
+            static rp<PrimitiveExprType> make_cmp_lt2_i64();
             /** lt2_i64: compare two 64-bit integers for lessthanorequal **/
-            static rp<PrimitiveType> make_cmp_le2_i64();
+            static rp<PrimitiveExprType> make_cmp_le2_i64();
             /** gt2_i64: compare two 64-bit integers for greaterthan **/
-            static rp<PrimitiveType> make_cmp_gt2_i64();
+            static rp<PrimitiveExprType> make_cmp_gt2_i64();
             /** ge2_i64: compare two 64-bit integers for greaterthan **/
-            static rp<PrimitiveType> make_cmp_ge2_i64();
+            static rp<PrimitiveExprType> make_cmp_ge2_i64();
         };
 
         /** builtin primitives :: i64 x i64 -> i64 **/
-        class Primitive_i64 : public Primitive<std::int64_t (*)(std::int64_t, std::int64_t)> {
+        class PrimitiveExpr_i64 : public PrimitiveExpr<std::int64_t (*)(std::int64_t, std::int64_t)> {
         public:
-            using PrimitiveType = Primitive<std::int64_t (*)(std::int64_t, std::int64_t)>;
+            using PrimitiveExprType = PrimitiveExpr<std::int64_t (*)(std::int64_t, std::int64_t)>;
 
         public:
             /** add2_i64: add two 64-bit integers **/
-            static rp<PrimitiveType> make_add2_i64();
+            static rp<PrimitiveExprType> make_add2_i64();
             /** sub2_i64: subtract two 64-bit integers **/
-            static rp<PrimitiveType> make_sub2_i64();
+            static rp<PrimitiveExprType> make_sub2_i64();
             /** mul2_i64: multiply two 64-bit integers **/
-            static rp<PrimitiveType> make_mul2_i64();
+            static rp<PrimitiveExprType> make_mul2_i64();
             /** div2_i64: divide two 64-bit integers **/
-            static rp<PrimitiveType> make_div2_i64();
+            static rp<PrimitiveExprType> make_div2_i64();
         };
 
         /** builtin primitives :: f64 x f64 -> f64 **/
-        class Primitive_f64 : public Primitive<double (*)(double, double)> {
+        class PrimitiveExpr_f64 : public PrimitiveExpr<double (*)(double, double)> {
         public:
-            using PrimitiveType = Primitive<double (*)(double, double)>;
+            using PrimitiveExprType = PrimitiveExpr<double (*)(double, double)>;
 
         public:
             /** add2_f64: add two 64-bit floating-point numbers **/
-            static rp<PrimitiveType> make_add2_f64();
+            static rp<PrimitiveExprType> make_add2_f64();
             /** sub2_f64: subtract two 64-bit floating-point numbers **/
-            static rp<PrimitiveType> make_sub2_f64();
+            static rp<PrimitiveExprType> make_sub2_f64();
             /** mul2_f64: multiply two 64-bit floating-point numbers **/
-            static rp<PrimitiveType> make_mul2_f64();
+            static rp<PrimitiveExprType> make_mul2_f64();
             /** div2_f64: divide two 64-bit floating-point numbers **/
-            static rp<PrimitiveType> make_div2_f64();
+            static rp<PrimitiveExprType> make_div2_f64();
         };
     } /*namespace scm*/
 } /*namespace xo*/
 
 
-/** end Primitive.hpp **/
+/** end PrimitiveExpr.hpp **/

@@ -6,7 +6,7 @@
 #pragma once
 
 #include "VsmInstr.hpp"
-#include "CVector.hpp"
+#include "xo/object/CVector.hpp"
 #include "xo/alloc/Object.hpp"
 
 namespace xo {
@@ -73,7 +73,7 @@ namespace xo {
             gp<VsmStackFrame> parent_;
 
             /** stored state **/
-            CVector<gp<Object>> slot_v_;
+            obj::CVector<gp<Object>> slot_v_;
 
             /** proceed to this continuation when popping this frame **/
             const VsmInstr * cont_ = nullptr;

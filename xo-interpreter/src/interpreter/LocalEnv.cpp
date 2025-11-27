@@ -162,7 +162,7 @@ namespace xo {
                  *
                  * note: placement here works b/c CVector<T> not used anywhere else
                  */
-                using VectorType = CVector<gp<Object>>;
+                using VectorType = obj::CVector<gp<Object>>;
 
                 /* custom reflection for array of Object pointers.
                  * Can use StlVectorTdx here, treating CVector<T> as a vector
