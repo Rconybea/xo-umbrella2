@@ -83,6 +83,7 @@ namespace xo {
             void on_rightbrace_token(const token_type & tk);
             void on_then_token(const token_type & tk);
             void on_else_token(const token_type & tk);
+            void on_f64_token(const token_type & tk);
 
             // ----- parsing error -----
 

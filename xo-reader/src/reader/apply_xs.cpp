@@ -76,13 +76,16 @@ namespace xo {
                 // unreachable
                 break;
             case applyexprstatetype::apply_0:
+                log && log("stash fn -> new state apply_1");
                 this->fn_expr_ = expr.promote();
                 this->applyxs_type_ = applyexprstatetype::apply_1;
                 return;
             case applyexprstatetype::apply_1:
+                log && log("error: was expecting lparen");
                 // error, expecting lparen
                 break;
             case applyexprstatetype::apply_2:
+                log && log(xtag("expr", expr), xtag("do", "stash expr -> new state apply_3"));
                 this->args_expr_v_.push_back(expr.promote());
                 this->applyxs_type_ = applyexprstatetype::apply_3;
                 return;
@@ -145,6 +148,7 @@ namespace xo {
 
             if (this->applyxs_type_ == applyexprstatetype::apply_3) {
                 /* (done) state */
+                log("apply complete -> pop + send expr");
 
                 rp<Apply> apply_expr = Apply::make(this->fn_expr_, this->args_expr_v_);
 
@@ -167,6 +171,15 @@ namespace xo {
                << xtag("this", (void*)this)
                << xtag("applyxs_type", applyxs_type_);
             os << ">";
+        }
+
+        bool
+        apply_xs::pretty_print(const xo::print::ppindentinfo & ppii) const
+        {
+            return ppii.pps()->pretty_struct(ppii, "apply_xs",
+                                             refrtag("applyxs_type", applyxs_type_),
+                                             refrtag("fn_expr", fn_expr_),
+                                             refrtag("args_expr_v", args_expr_v_));
         }
 
     } /*namespace scm*/

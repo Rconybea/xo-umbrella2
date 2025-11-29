@@ -15,6 +15,7 @@ namespace xo {
          *
          *  Examples:
          *  @text
+         *    add (1, 2) ;
          *    def x : i64 = 5 ;           // with allow_defs
          *    lambda (f : x64) { ... } ;
          *    if (prime(x)) { ... } ;

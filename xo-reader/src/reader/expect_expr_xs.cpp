@@ -201,7 +201,9 @@ namespace xo {
         expect_expr_xs::on_i64_token(const token_type & tk,
                                      parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG(p_psm->debug_flag()),
+                      xtag("tk", tk),
+                      xtag("do", "push progress xs w/ tk value"));
 
             progress_xs::start
                 (Constant<int64_t>::make(tk.i64_value()),
@@ -233,6 +235,7 @@ namespace xo {
 
             log && log(xtag("exstype", this->exs_type_),
                        xtag("expr", expr.promote()));
+            log && log("pop expect_expr_xs, forward to parent");
 
             std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
 
@@ -247,6 +250,7 @@ namespace xo {
 
             log && log(xtag("exstype", this->exs_type_),
                        xtag("expr", expr.promote()));
+            log && log("pop expect_expr_xs, forward to parent");
 
             std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
 

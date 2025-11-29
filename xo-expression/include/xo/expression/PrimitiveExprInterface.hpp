@@ -7,12 +7,14 @@
 
 #include "ProcedureExprInterface.hpp"
 #include "llvmintrinsic.hpp"
+#include "xo/reflect/TaggedPtr.hpp"
 #include <type_traits>
 
 namespace xo {
     namespace scm {
         class PrimitiveExprInterface : public ProcedureExprInterface {
         public:
+            using TaggedPtr = xo::reflect::TaggedPtr;
             using void_function_type = void (*)();
 
         public:
@@ -23,6 +25,11 @@ namespace xo {
             static bp<PrimitiveExprInterface> from(bp<Expression> x) {
                 return bp<PrimitiveExprInterface>::from(x);
             }
+
+            /** @return executable function as tagged pointer.
+             *  Load-bearing for xo-interpreter.
+             **/
+            virtual TaggedPtr value_tp() const = 0;
 
             /** if true,  Jit will try to explicitly symbol for this primitive
              *  (instead of looking it up in host process).

@@ -73,6 +73,10 @@ namespace xo {
          *  Deals with infix operators, handles operator precedence.
          *  Also generates argument-type-specific arithmetic expressions,
          *  for example using ``Apply::make_add2_f64()`` when adding floating-point numbers
+         *
+         *  One reason for this to exist is to simulate one-token lookahead.
+         *  To look at but not consume a token T, can push a progress_xs instance P,
+         *  then send T to P.
          **/
         class progress_xs : public exprstate {
         public:
@@ -105,6 +109,8 @@ namespace xo {
                                                 parserstatemachine * p_psm) override;
             virtual void on_symbol_token(const token_type & tk,
                                          parserstatemachine * p_psm) override;
+            virtual void on_comma_token(const token_type & tk,
+                                        parserstatemachine * p_psm) final override;
             virtual void on_typedescr(TypeDescr td,
                                       parserstatemachine * p_psm) override;
 

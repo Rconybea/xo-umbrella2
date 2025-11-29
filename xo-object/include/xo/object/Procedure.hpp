@@ -17,6 +17,9 @@ namespace xo {
          **/
         class Procedure : public Object {
         public:
+            /** downcast from @p x iff x is actually a Procedure. Otherwise nullptr **/
+            static gp<Procedure> from(gp<Object> x) { return gp<Procedure>::from(x); }
+
             virtual std::size_t n_args() const = 0;
             virtual gp<Object> apply_nocheck(gc::IAlloc * mm, const CVector<gp<Object>> & args) = 0;
 

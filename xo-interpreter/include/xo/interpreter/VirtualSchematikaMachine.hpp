@@ -75,13 +75,29 @@ namespace xo {
              *  - expr_  input, caller saves
              *  - env_   input, caller saves
              *  - cont_  input, caller saves
+             *  - stack_ input, caller saves
              *  - value_ output
              *  - error_ output
+             *
              **/
             void execute_one();
 
+            /* design note:
+             * - eval_xxx_op() methods are primary VSM transitions,
+             *   in the sense that they begin a sequence of transitions to interpret a
+             *   particular kind of expression
+             * - do_xxx_op() methods represent secondary VSM transitions,
+             *   that continue an instruction sequence that was initiated by a preceding
+             *   eval_xxx_op() method
+             */
+
             /** interpret literal constant expression **/
             void eval_constant_op();
+
+            /** interpreter literal primitive expression
+             *  (these appear implicitly as result of builtin operators like {+, ==, ..})
+             **/
+            void eval_primitive_op();
 
             /** execute define expression (finished in do_complete_assign_op()) **/
             void eval_define_op();
@@ -98,10 +114,21 @@ namespace xo {
             /** continue after establish value of test expression **/
             void do_complete_ifexpr_op();
 
-            /** interprete sequence **/
+            /** interpret sequence **/
             void eval_sequence_op();
             /** continue after establishing value for a sequence element **/
             void do_complete_sequence_op();
+
+            /** interpret apply-expression (i.e. function call) **/
+            void eval_apply_op();
+            /** continue assembling args for a function call;
+             *  transition to (interpretation of) called function once all arguments
+             *  are evaluated.
+             **/
+            void do_complete_evalargs_op();
+
+            /** execute function application, given actuals in top stack frame **/
+            void apply_op();
 
             /** goto error state with message @p err **/
             void report_error(const std::string & err);

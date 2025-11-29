@@ -56,6 +56,8 @@ namespace xo {
             explicit Primitive(std::string_view name,
                                function_type fn) : PrimitiveBase<Ret (*)(Arg1, Arg2)>{name, fn} {}
 
+            /** see also AdoptPrimitiveExpr::adopt() in xo-interpreter/AdoptPrimitiveExpr.hp **/
+
             // inherited from Procedure..
 
             virtual std::size_t n_args() const final override { return 2; }
@@ -100,6 +102,7 @@ namespace xo {
         make_primitive(gc::IAlloc * mm, std::string_view name, Fn fn) {
             return new (MMPtr(mm)) Primitive<Fn>(name, fn);
         }
+
     }
 }
 

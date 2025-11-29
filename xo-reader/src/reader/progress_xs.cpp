@@ -310,6 +310,8 @@ namespace xo {
         progress_xs::on_expr(bp<Expression> expr,
                              parserstatemachine * p_psm)
         {
+            scope log(XO_DEBUG(p_psm->debug_flag()), xtag("expr", expr));
+
             /* note: previous token probably an operator,
              *       handled from progress_xs::on_operator_token(),
              *       which pushes expect_expr_xs::expect_rhs_expression()
@@ -318,21 +320,33 @@ namespace xo {
             constexpr const char * c_self_name = "progress_xs::on_expr";
             const char * exp = get_expect_str();
 
-            if (op_type_ == optype::invalid) {
-                this->illegal_input_on_expr(c_self_name, expr, exp, p_psm);
-            }
+            if (lhs_) {
+                if (op_type_ == optype::invalid) {
+                    /* two consecutive expression without an operator */
+                    this->illegal_input_on_expr(c_self_name, expr, exp, p_psm);
+                }
 
 #ifdef NOT_QUITE
-            assert(result.get());
+                assert(result.get());
 
-            /* this expression complete.. */
-            std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
+                /* this expression complete.. */
+                std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
 
-            /* ..but more operators could follow, so don't commit yet */
-            p_stack->push_exprstate(progress_xs::make(result));
+                /* ..but more operators could follow, so don't commit yet */
+                p_stack->push_exprstate(progress_xs::make(result));
 #endif
 
-            this->rhs_ = expr.promote();
+                this->rhs_ = expr.promote();
+            } else {
+                /* control here on input like
+                 *   add(1,2)...
+                 *
+                 * add(1,2) needs to be handled inside a progress_xs
+                 * instance because may be followed by an operator:
+                 *   add(1,2) + ...
+                 */
+                this->lhs_ = expr.promote();
+            }
         }
 
         void
@@ -373,6 +387,46 @@ namespace xo {
              *   foo bar
              */
             assert(false);
+        }
+
+        void
+        progress_xs::on_comma_token(const token_type & tk,
+                                    parserstatemachine * p_psm)
+        {
+            /* note: implementation parllels .on_semicolon_token(), .on_rightparen_token() */
+
+            scope log(XO_DEBUG(p_psm->debug_flag()));
+
+            constexpr const char * self_name = "progress::xs::on_comma_token";
+
+            auto & xs_stack = p_psm->xs_stack_;
+
+            /* stack may be something like
+             *
+             *   applyexpr
+             *   expect_expr_xs
+             *   progress_xs
+             *                  <-- comma
+             *
+             * 1. comma completes expression-in-progress
+             */
+
+            /* comma confirms stack expression */
+            rp<Expression> expr = this->assemble_expr(p_psm);
+
+            std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
+
+            if (xs_stack.empty()) {
+                throw std::runtime_error(tostr(self_name,
+                                               ": expected non-empty parsing state"));
+            }
+
+            log && log(xtag("stack", &xs_stack));
+
+            p_psm->top_exprstate().on_expr(expr, p_psm);
+
+            /* now deliver comma */
+            p_psm->top_exprstate().on_comma_token(tk, p_psm);
         }
 
         void
@@ -441,6 +495,7 @@ namespace xo {
             this->on_operator_token(tk, p_psm);
         }
 
+        /* editor bait: on_lparen */
         void
         progress_xs::on_leftparen_token(const token_type & tk,
                                         parserstatemachine * p_psm)
@@ -456,12 +511,24 @@ namespace xo {
                 /* start function call */
                 assert(rhs_.get() == nullptr);
 
-                /* unwind this progress_xs + replace with function call */
-
                 rp<Expression> fn_expr = lhs_;
+
+                /* reset this progress_xs back to empty state;
+                 * apply_xs will be responsible for lhs_.
+                 */
+                lhs_ = nullptr;
+
+#ifdef OBSOLETE
+                /* don't unwind! want to handle input like
+                 *   f(x,y)+g(z)
+                 */
+                /* unwind this progress_xs + replace with function call */
                 std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
+#endif
 
                 apply_xs::start(fn_expr, p_psm);
+
+                /* control will reenter progress_xs via .on_expr() */
                 return;
             }
 
@@ -486,7 +553,7 @@ namespace xo {
              /* stack may be something like:
               *
               *   lparen_0
-              *   expect_rhs_expression
+              *   expect_expr_xs
               *   expr_progress
               *                   <-- rightparen
               *
@@ -496,6 +563,9 @@ namespace xo {
 
              /* right paren confirms stack expression */
              rp<Expression> expr = this->assemble_expr(p_psm);
+
+             log && log(xtag("expr", expr),
+                        xtag("do", "pop self + send {expr, rparen} -> parent"));
 
              std::unique_ptr<exprstate> self = p_psm->pop_exprstate();
 
@@ -756,7 +826,7 @@ namespace xo {
                         && (rhs_ ? ppii.pps()->print_upto(refrtag("rhs", rhs_)) : true)
                         && ppii.pps()->print_upto(">"));
             } else {
-                ppii.pps()->write("<progress_xs");
+                ppii.pps()->write("<progress_xs ");
                 if (lhs_)
                     ppii.pps()->pretty(refrtag("lhs", lhs_));
                 if (op_type_ != optype::invalid)

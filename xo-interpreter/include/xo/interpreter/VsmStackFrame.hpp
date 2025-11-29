@@ -23,15 +23,13 @@ namespace xo {
         public:
             VsmStackFrame(gc::IAlloc * mm, gp<VsmStackFrame> p, std::size_t n, const VsmInstr * cont);
 
-#ifdef NOT_YET
             /** create frame using allocator @p mm,
              *  with parent @p p and exactly @p n_slot object pointers.
              **/
             static gp<VsmStackFrame> make(gc::IAlloc * mm,
                                           gp<VsmStackFrame> p,
-                                          const VsmInstr * cont,
-                                          std::size_t n_slot);
-#endif
+                                          std::size_t n_slot,
+                                          const VsmInstr * cont);
 
             /** create new stack frame using allocator @p mm,
              *  with parent frame @p p; new frame contains values @p s0
@@ -56,6 +54,7 @@ namespace xo {
 
             gp<VsmStackFrame> parent() const { return parent_; }
             std::size_t size() const { return slot_v_.size(); }
+            const obj::CVector<gp<Object>> & argv() const { return slot_v_; }
             const VsmInstr * continuation() const { return cont_; }
 
             gp<Object> operator[](std::size_t i) const { return slot_v_[i]; }

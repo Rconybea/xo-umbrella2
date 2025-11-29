@@ -94,6 +94,7 @@ namespace xo {
                                              parserstatemachine * p_psm) override;
 
             virtual void print(std::ostream & os) const override;
+            virtual bool pretty_print(const print::ppindentinfo & ppii) const final override;
 
         private:
             static std::unique_ptr<apply_xs> make();

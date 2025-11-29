@@ -24,7 +24,7 @@ namespace xo {
 
         gp<Integer>
         Integer::from(gp<Object> x) {
-            return dynamic_cast<Integer*>(x.ptr());
+            return gp<Integer>::from(x);
         }
 
         TaggedPtr

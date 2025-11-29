@@ -55,8 +55,8 @@ namespace xo {
          **/
         class lambda_xs : public exprstate {
         public:
-            using Environment = xo::scm::SymbolTable;
-            using LocalEnv = xo::scm::LocalSymtab;
+            using SymbolTable = xo::scm::SymbolTable;
+            using LocalSymtab = xo::scm::LocalSymtab;
 
         public:
             lambda_xs();
@@ -81,6 +81,8 @@ namespace xo {
                                         parserstatemachine * p_psm) override;
             virtual void on_semicolon_token(const token_type & tk,
                                             parserstatemachine * p_psm) override;
+            virtual void on_f64_token(const token_type & tk,
+                                      parserstatemachine * p_psm) final override;
 
             virtual void print(std::ostream & os) const override;
             virtual bool pretty_print(const print::ppindentinfo & ppii) const override;
@@ -93,7 +95,7 @@ namespace xo {
             lambdastatetype lmxs_type_ = lambdastatetype::lm_0;
 
             /** lambda environment (for formal parameters) **/
-            rp<LocalEnv> local_env_;
+            rp<LocalSymtab> local_env_;
 
             /** explicit return type (if supplied) **/
             TypeDescr explicit_return_td_ = nullptr;
@@ -105,7 +107,7 @@ namespace xo {
             rp<Expression> body_;
 
             /** parent environment **/
-            rp<Environment> parent_env_;
+            rp<SymbolTable> parent_env_;
 
         };
     } /*namespace scm*/

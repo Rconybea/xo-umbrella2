@@ -47,9 +47,9 @@ namespace xo {
 
         public:
             static rp<PrimitiveExpr> make(const std::string & name,
-                                      FunctionPointer fnptr,
-                                      bool explicit_symbol_def,
-                                      llvmintrinsic intrinsic) {
+                                          FunctionPointer fnptr,
+                                          bool explicit_symbol_def,
+                                          llvmintrinsic intrinsic) {
                 TypeDescr fn_type = Reflect::require<FunctionPointer>();
 
                 return new PrimitiveExpr(fn_type, name, fnptr, explicit_symbol_def, intrinsic);
@@ -60,16 +60,16 @@ namespace xo {
             FunctionPointer value() const { return value_; }
 
             TypeDescr value_td() const { return value_td_; }
-            TaggedPtr value_tp() const {
+
+            // ----- PrimitiveExprInterface -----
+
+            virtual TaggedPtr value_tp() const final override {
                 /* note: idk why,  but need to spell this out in two steps with gcc 13.2 */
                 const void * erased_cptr = &value_;
                 void * erased_ptr = const_cast<void*>(erased_cptr);
 
                 return TaggedPtr(value_td_, erased_ptr);
             }
-
-            // ----- PrimitiveExprInterface -----
-
             virtual llvmintrinsic intrinsic() const override { return intrinsic_; }
             virtual bool explicit_symbol_def() const override { return explicit_symbol_def_; }
             virtual void_function_type function_address() const override { return reinterpret_cast<void_function_type>(value_); }

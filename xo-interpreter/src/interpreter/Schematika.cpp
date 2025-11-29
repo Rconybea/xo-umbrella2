@@ -28,10 +28,7 @@ namespace xo {
              *        rather than VirtualSchematikaMachine to own allocator
              *        to preserve option to share it
              **/
-            Impl(const Config & config, up<IAlloc> mm, gp<GlobalEnv> toplevel_env) :
-                config_{config},
-                mm_{std::move(mm)},
-                vsm_{mm_.get(), toplevel_env, config.vsm_log_level_} {}
+            Impl(const Config & config, up<IAlloc> mm, gp<GlobalEnv> toplevel_env);
             ~Impl();
 
             /** create instance + allocator **/
@@ -68,6 +65,14 @@ namespace xo {
             VirtualSchematikaMachine vsm_;
         };
 
+        Schematika::Impl::Impl(const Config & config, up<IAlloc> mm, gp<GlobalEnv> toplevel_env) :
+            config_{config},
+            mm_{std::move(mm)},
+            vsm_{mm_.get(), toplevel_env, config.vsm_log_level_}
+        {
+
+        }
+
         Schematika::Impl::~Impl() = default;
 
         up<Schematika::Impl>
@@ -77,6 +82,9 @@ namespace xo {
             rp<GlobalSymtab> symtab = GlobalSymtab::make_empty();
             gp<GlobalEnv> env = GlobalEnv::make_empty(mm.get(), symtab);
 
+            /* also see VirtualSchematikaMachineFlyweight::Impl::Impl,
+             * for BuiltinPrimitives::install_interpreter_conversions()
+             */
             BuiltinPrimitives::install(mm.get(), env);
 
             return std::make_unique<Impl>(cfg, std::move(mm), env);

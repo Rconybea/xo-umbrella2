@@ -97,6 +97,7 @@ namespace xo {
                  *   a = 1;  // single assignment
                  *   a == 1; // rhs expression
                  *   a + b;  // rhs expression
+                 *   a(1,2); // apply expression
                  * Variable must have been defined!
                  */
                 bp<Variable> var = p_psm->lookup_var(tk.text());

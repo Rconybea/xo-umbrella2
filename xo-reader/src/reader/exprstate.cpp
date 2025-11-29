@@ -610,7 +610,7 @@ namespace xo {
                                           const char * expect_str,
                                           parserstatemachine * p_psm) const
         {
-            std::string errmsg = tostr("unexpected token for parsing state",
+            std::string errmsg = tostr("exprstate::illegal_input_on_token: unexpected token for parsing state",
                                        xtag("expecting", expect_str),
                                        xtag("token", tk.tk_type()),
                                        xtag("text", tk.text()),

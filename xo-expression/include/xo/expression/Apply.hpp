@@ -80,6 +80,9 @@ namespace xo {
             const rp<Expression> & fn() const { return fn_; }
             const std::vector<rp<Expression>> & argv() const { return argv_; }
 
+            std::size_t n_arg() const { return argv_.size(); }
+            const rp<Expression> & lookup_arg(size_t i) const { return argv_.at(i); }
+
             virtual std::set<std::string> get_free_variables() const override {
                 std::set<std::string> retval = fn_->get_free_variables();
 

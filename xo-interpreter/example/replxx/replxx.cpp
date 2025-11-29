@@ -9,6 +9,7 @@ main(int argc, char ** argv)
     using xo::scm::Schematika;
 
     Schematika::Config cfg;
+    cfg.debug_flag = true;
     cfg.vsm_log_level_ = log_level::verbose;
     Schematika scm = Schematika::make(cfg);
 

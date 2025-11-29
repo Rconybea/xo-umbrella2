@@ -102,7 +102,7 @@ namespace xo {
             if (lmxs_type_ == lambdastatetype::lm_1) {
                 this->lmxs_type_ = lambdastatetype::lm_2;
                 this->parent_env_ = p_psm->top_envframe().promote();
-                this->local_env_ = LocalEnv::make(argl, parent_env_);
+                this->local_env_ = LocalSymtab::make(argl, parent_env_);
 
                 p_psm->push_envframe(local_env_);
 
@@ -269,6 +269,31 @@ namespace xo {
         }
 
         void
+        lambda_xs::on_f64_token(const token_type & tk,
+                                parserstatemachine * p_psm)
+        {
+            constexpr const char * c_self_name = "lambda_xs::on_f64_token";
+
+            /* f64 literal can begin lambda body, otherwise illegal.
+             * for example:
+             *   def foo = lambda (x: bool) 3.14;
+             */
+            if (lmxs_type_ == lambdastatetype::lm_2) {
+                /* omitting return type.
+                 * omitting left brace.
+                 */
+                this->lmxs_type_ = lambdastatetype::lm_4;
+
+                expect_expr_xs::start(p_psm);
+                p_psm->on_f64_token(tk);
+            } else {
+                this->illegal_input_on_token(c_self_name, tk, this->get_expect_str(), p_psm);
+            }
+        }
+
+        // TODO: on_i64_token, on_bool token
+
+        void
         lambda_xs::print(std::ostream & os) const {
             os << "<lambda_xs"
                << xtag("lmxs_type", lmxs_type_)
@@ -279,7 +304,8 @@ namespace xo {
         lambda_xs::pretty_print(const xo::print::ppindentinfo & ppii) const
         {
             return ppii.pps()->pretty_struct(ppii, "lambda_xs",
-                                             refrtag("lmxs_type", lmxs_type_));
+                                             refrtag("lmxs_type", lmxs_type_),
+                                             refrtag("body", body_));
         }
 
     } /*namespace scm*/

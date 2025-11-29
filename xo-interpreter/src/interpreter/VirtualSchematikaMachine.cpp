@@ -2,13 +2,18 @@
 
 #include "VirtualSchematikaMachine.hpp"
 #include "VsmInstr.hpp"
+#include "BuiltinPrimitives.hpp"
 #include "ExpressionBoxed.hpp"
 #include "xo/expression/Constant.hpp"
+#include "xo/expression/PrimitiveExprInterface.hpp"
 #include "xo/expression/DefineExpr.hpp"
 #include "xo/expression/AssignExpr.hpp"
 #include "xo/expression/Variable.hpp"
 #include "xo/expression/IfExpr.hpp"
 #include "xo/expression/Sequence.hpp"
+#include "xo/expression/Apply.hpp"
+#include "xo/object/Procedure.hpp"
+#include "xo/object/Primitive.hpp"
 #include "xo/object/Integer.hpp"
 #include "xo/object/Boolean.hpp"
 #include "xo/alloc/GC.hpp"
@@ -26,6 +31,7 @@
 
 namespace xo {
     using xo::gc::GC;
+    using xo::obj::Procedure;
     using xo::obj::Integer;
     using xo::obj::Boolean;
 
@@ -56,9 +62,22 @@ namespace xo {
 
             /** proceed to next element of sequence-expr.
              *  - opcode is Opcode::complete_sequence
-             *  - top stack fram contains {seq, next, cont}
+             *  - top stack frame contains {seq, next, cont}
              */
             static VsmInstr complete_sequence_op;
+
+            /** proceed to next argument in apply-expr
+             *  - opcode is Opcode::eval_collect_args
+             *  - top stack frame contains {apply, targetarg, cont}
+             */
+            static VsmInstr complete_evalargs_op;
+
+            /** call a procedure, where evaluated arguments (including target function)
+             *  are in top stack frame.
+             *  - opcode is Opcode::apply
+             *  - top stack frame contains evaluated arguments.
+             **/
+            static VsmInstr apply_op;
         };
 
         VsmInstr
@@ -76,6 +95,12 @@ namespace xo {
         VsmInstr
         VsmOps::complete_sequence_op{VsmInstr::Opcode::complete_sequence, "complete-sequence"};
 
+        VsmInstr
+        VsmOps::complete_evalargs_op{VsmInstr::Opcode::complete_evalargs, "complete-evalargs"};
+
+        VsmInstr
+        VsmOps::apply_op{VsmInstr::Opcode::apply, "apply"};
+
         // ----- VirtualSchematikaMachineFlyweight -----
 
         VirtualSchematikaMachineFlyweight::VirtualSchematikaMachineFlyweight(gc::IAlloc * mm,
@@ -84,7 +109,9 @@ namespace xo {
             object_mm_{mm},
             toplevel_env_{env},
             log_level_{ll}
-        {}
+        {
+            BuiltinPrimitives::install_interpreter_conversions(&object_converter_);
+        }
 
         // ----- VirtualSchematikaMachine -----
 
@@ -188,6 +215,11 @@ namespace xo {
                         this->eval_constant_op();
                         break;
 
+                    case exprtype::primitive:
+                        log && log("eval -> primitive");
+                        this->eval_primitive_op();
+                        break;
+
                     case exprtype::define:
                         log && log("eval -> define");
                         this->eval_define_op();
@@ -213,10 +245,13 @@ namespace xo {
                         this->eval_sequence_op();
                         break;
 
-                    case exprtype::invalid:
-                    case exprtype::primitive:
-
                     case exprtype::apply:
+                        log && log("eval -> apply");
+                        this->eval_apply_op();
+                        break;
+
+                    case exprtype::invalid:
+
                     case exprtype::lambda:
                     case exprtype::convert:
                     case exprtype::n_expr:
@@ -240,6 +275,14 @@ namespace xo {
 
             case Opcode::complete_sequence:
                 this->do_complete_sequence_op();
+                break;
+
+            case Opcode::complete_evalargs:
+                this->do_complete_evalargs_op();
+                break;
+
+            case Opcode::apply:
+                this->apply_op();
                 break;
 
             case Opcode::N_Opcode:
@@ -286,7 +329,32 @@ namespace xo {
             }
         }
 
-        // placeholder: primitive_op
+        void
+        VirtualSchematikaMachine::eval_primitive_op()
+        {
+            using xo::obj::Primitive;
+            using xo::reflect::TaggedPtr;
+
+            scope log(XO_DEBUG(true));
+
+            bp<PrimitiveExprInterface> expr = PrimitiveExprInterface::from(expr_);
+
+            const gp<Object> * slot = env_->lookup_slot(expr->name());
+
+            if (slot) {
+                this->value_ = *slot;
+                this->pc_ = cont_;
+            } else {
+                std::string err = tostr("no binding for primitive", xtag("name", expr->name()));
+
+                this->value_ = nullptr;
+                this->error_ = SchematikaError(err);
+
+                /* note: poor man's exception */
+                this->pc_ = nullptr;
+                this->cont_ = nullptr;
+            }
+        }
 
         void
         VirtualSchematikaMachine::eval_define_op()
@@ -626,6 +694,163 @@ namespace xo {
                 this->cont_ = &VsmOps::complete_sequence_op;
             }
         }
+
+        void
+        VirtualSchematikaMachine::eval_apply_op()
+        {
+            /* strategy:
+             * 1. calling sequence will involve two stack frames.
+             *    1a. the outer frame will hold 'final evaluated arguments'
+             *        to the called function.  When control transfers to that
+             *        function, this frame will be at the top of stack_
+             *    1b. innert frame will be used by eval_apply_op() and
+             *        helper do_eval_collect_args() to evaluate function
+             *        arguments, and populate the outer frame.
+             */
+
+            using xo::scm::Apply;
+
+            scope log(XO_DEBUG(true));
+
+            gc::IAlloc * mm = flyweight_.object_mm_;
+
+            /** must promote bp<Apply> -> gp<ExpressionBoxed> **/
+            gp<ExpressionBoxed> apply_boxed = ExpressionBoxed::make(mm, expr_);
+            bp<Apply> apply = Apply::from(expr_);
+
+            assert(apply.get());
+
+            size_t n = apply->n_arg() + 1;
+
+            /* reminder: argument 0 refers to the function being called */
+            gp<Integer> targetarg = Integer::make(mm, 0);
+
+            /* outer frame */
+            gp<VsmStackFrame> argstack = VsmStackFrame::make(mm, stack_, n, cont_);
+
+            /* scratch frame during call sequence.
+             * probably collect->cont_ will not be used?
+             */
+            gp<VsmStackFrame> collect = VsmStackFrame::push2(mm,
+                                                             argstack,
+                                                             apply_boxed,
+                                                             targetarg,
+                                                             &VsmOps::complete_evalargs_op);
+
+            this->pc_ = &VsmOps::eval_op;
+            this->expr_ = apply->fn();
+            this->stack_ = collect;
+            this->cont_ = &VsmOps::complete_evalargs_op;
+        }
+
+        void
+        VirtualSchematikaMachine::do_complete_evalargs_op()
+        {
+            using xo::scm::Apply;
+
+            scope log(XO_DEBUG(true));
+
+            /* - stack: top frame has 2 slots
+             *    [0] : apply (boxed Apply)
+             *    [1] : targetarg index of next evaluated argument to deliver.
+             *          (to corresponding slot in 2nd frame)
+             * - 2nd frame has n slots, where n = #of arguments at this site
+             *    [0] : actual #0
+             *    ..
+             *    [targetarg-1] : actual #{targetarg-1}
+             */
+
+            assert(value_.get());
+            assert(stack_.get());
+
+            gp<VsmStackFrame> sp0 = this->stack_;
+
+            assert(sp0.get());
+            assert(sp0->size() == 2);
+
+            bp<Apply> apply = Apply::from(ExpressionBoxed::from((*sp0)[0])->contents());
+            assert(apply.get());
+            gp<Integer> targetarg_obj = Integer::from((*stack_)[1]);
+            size_t targetarg = targetarg_obj->value();
+
+            /* note: apply->n_arg() doesn't count function itself */
+            assert(targetarg < apply->n_arg() + 1);
+
+            gp<VsmStackFrame> argstack = sp0->parent();
+
+            assert(argstack.get());
+
+            /* storing actual parameter in its correct position in call stackframe */
+            (*argstack)[targetarg] = value_;
+
+            ++targetarg;
+
+            if (targetarg < apply->n_arg() + 1) {
+                /*
+                 * arguments 0 .. #targetarg-1 already present in argstack
+                 * arguments #targetarg .. #n still need to be evaluated
+                 */
+
+                /* ok to update in place, since Integer in sp0 is unique */
+                targetarg_obj->assign_value(targetarg);
+
+                rp<Expression> targetexpr = apply->lookup_arg(targetarg - 1);
+
+                this->pc_ = &VsmOps::eval_op;
+                this->expr_ = targetexpr;
+                assert(this->stack_.get() == sp0.get());
+                this->cont_ = &VsmOps::complete_evalargs_op;
+            } else {
+                /* all args evaluated: proceed to invoke evaluated function */
+
+                this->pc_ = &VsmOps::apply_op;
+                this->expr_ = nullptr;
+                this->stack_ = argstack;
+                /* unnecessary - will actually be set by apply_op() */
+                this->cont_ = argstack->continuation();
+            }
+        }
+
+        void
+        VirtualSchematikaMachine::apply_op()
+        {
+            scope log(XO_DEBUG(true));
+
+            auto mm = flyweight_.object_mm_;
+
+            // NOTE: Closures will have special handling.
+            //       Could alternatively forward the whole problem
+            //       (along with VSM state) to procedure implementation
+
+            /* stack: top frame has n slots for procedure with n canonical args */
+
+            gp<VsmStackFrame> sp0 = stack_;
+
+            assert(sp0->size() > 0);
+
+            gp<Procedure> fn = Procedure::from((*sp0)[0]);
+
+            if (fn->n_args() + 1 != sp0->size()) {
+                throw std::runtime_error(tostr("VirtualSchematikaMachine::apply_op:"
+                                               " argument mismatch in apply"
+                                               ": k arguments supplied where n expected",
+                                               xtag("k", sp0->size() - 1),
+                                               xtag("n", fn->n_args())));
+            }
+
+            /* todo:
+             *  check function signature?
+             *  should have been guaranteed by expression parser,
+             *  but complications in interactive session when variables redefined.
+             */
+
+            gp<Object> retval = fn->apply_nocheck(mm, sp0->argv());
+
+            this->pc_ = this->cont_;
+            this->stack_ = sp0->parent();
+            this->value_ = retval;
+        }
+
     } /*namespace scm*/
 } /*namespace xo*/
 

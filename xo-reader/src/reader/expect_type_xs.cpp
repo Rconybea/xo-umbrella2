@@ -59,7 +59,7 @@ namespace xo {
             if (!td) {
                 const char * exp = get_expect_str();
 
-                std::string errmsg = tostr("unexpected token for parsing state",
+                std::string errmsg = tostr("expect_type_xs: unexpected token for parsing state",
                                            xtag("expecting", exp),
                                            xtag("token", tk.tk_type()),
                                            xtag("text", tk.text()),

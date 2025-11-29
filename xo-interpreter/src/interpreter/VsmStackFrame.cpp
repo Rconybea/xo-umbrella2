@@ -35,6 +35,20 @@ namespace xo {
         {}
 
         gp<VsmStackFrame>
+        VsmStackFrame::make(gc::IAlloc * mm,
+                            gp<VsmStackFrame> p,
+                            std::size_t n,
+                            const VsmInstr * cont)
+        {
+            gp<VsmStackFrame> retval = new (MMPtr(mm)) VsmStackFrame(mm, p, n, cont);
+
+            for (std::size_t i = 0; i < n; ++i)
+                (*retval)[i] = nullptr;
+
+            return retval;
+        }
+
+        gp<VsmStackFrame>
         VsmStackFrame::push1(gc::IAlloc * mm,
                              gp<VsmStackFrame> p,
                              gp<Object> s0,

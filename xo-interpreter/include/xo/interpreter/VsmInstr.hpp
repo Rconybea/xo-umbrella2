@@ -41,6 +41,17 @@ namespace xo {
                  **/
                 complete_sequence,
 
+                /** execute remainder of argument sequence evaluation;
+                 *  subsidiary to marshalling a function call
+                 **/
+                complete_evalargs,
+
+                /** Call a function.  Arguments have been evaluated
+                 *  and are in top stack frame, in order,
+                 *  starting with target function itself
+                 **/
+                apply,
+
                 /** choose branch of if-expression + continue
                  *
                  *  stack: frame with

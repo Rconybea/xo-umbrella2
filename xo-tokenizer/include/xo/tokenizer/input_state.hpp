@@ -247,7 +247,7 @@ namespace xo {
         input_state<CharT>::advance_until(const CharT * pos) {
             scope log(XO_DEBUG(debug_flag_));
 
-            assert(current_line_.lo() <= pos && pos < current_line_.hi());
+            assert(current_line_.lo() <= pos && pos <= current_line_.hi());
 
             this->current_pos_ = pos - current_line_.lo();
 

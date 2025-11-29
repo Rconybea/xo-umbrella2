@@ -21,6 +21,7 @@ namespace xo {
                 {"def foo = lambda (x : f64, y : f64) 3.1415965;"},
                 {"def foo = lambda (x : f64) x;"},
                 {"def foo = lambda (x : f64) { def y = x * x; y; };"},
+                {"add(1,2);"},
             };
         }
 
@@ -50,11 +51,13 @@ namespace xo {
 
                     log && log(xtag("expr", rr.expr_));
 
+#ifdef OBSOLETE // input not consumed until next line presented
                     input = input.after_prefix(rr.rem_);
 
                     log && log(xtag("post.input", input));
+#endif
 
-                    REQUIRE(input.empty());
+                    //REQUIRE(input.empty());
                 } catch (std::exception & ex) {
                     log && log(ex.what());
 

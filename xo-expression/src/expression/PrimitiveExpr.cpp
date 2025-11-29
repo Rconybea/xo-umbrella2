@@ -8,8 +8,11 @@ extern "C" {
      *  1. Fallback implementation under llvm.
      *     In practice will use llvm intrinsic instead.
      *     See xo-jit/src/jit/MachPipeline.cpp
-     *  2. Schematika interpreter (aspirational asof jul 2025)
-     *
+     *  2. Schematika interpreter (aspirational asof jul 2025, wip nov 2025)
+     *     For schematika interpreter need to uplift
+     *     these to obj::Primitive.
+     *     See BuiltinPrimitives::install_interpreter_conversions()
+     *     in xo-interpreter/src/BuiltinPrimitives.cpp
      **/
 
     bool
