@@ -17,7 +17,9 @@ namespace xo {
         {
             up<GC> gc = GC::make(
                 { .initial_nursery_z_ = 1024,
-                  .initial_tenured_z_ = 1024
+                  .initial_tenured_z_ = 2048,
+                  .incr_gc_threshold_ = 512,
+                  .full_gc_threshold_ = 512,
                 });
 
             REQUIRE(gc.get());

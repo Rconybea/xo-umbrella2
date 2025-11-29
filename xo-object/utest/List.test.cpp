@@ -9,6 +9,8 @@
 #include "xo/alloc/GC.hpp"
 #include "xo/alloc/ArenaAlloc.hpp"
 #include "xo/indentlog/scope.hpp"
+#include "xo/indentlog/print/vector.hpp"
+#include "xo/indentlog/print/tag.hpp"
 #include <catch2/catch.hpp>
 #include <ranges>
 #include <vector>
@@ -26,13 +28,15 @@ namespace xo {
 
         namespace {
             struct Testcase_List {
-                Testcase_List(std::size_t nz, std::size_t tz,
+                Testcase_List(std::size_t nz, std::size_t tz, std::size_t ngct, std::size_t tgct,
                               const std::vector<std::vector<std::string>> & v)
-                    : nursery_z_{nz}, tenured_z_{tz}, v_{v}
+                : nursery_z_{nz}, tenured_z_{tz}, incr_gc_threshold_{ngct}, full_gc_threshold_{tgct}, v_{v}
                 {}
 
                 std::size_t nursery_z_;
                 std::size_t tenured_z_;
+                std::size_t incr_gc_threshold_;
+                std::size_t full_gc_threshold_;
 
                 std::vector<std::vector<std::string>> v_;
 
@@ -41,10 +45,10 @@ namespace xo {
 
             std::vector<Testcase_List>
             s_testcase_v = {
-                Testcase_List( 512, 1024, {{}}),
-                Testcase_List( 512, 1024, {{"hello", ", ", " world!"}}),
-                Testcase_List(1024, 2048, {{"the", " quick", " brown", "fox", "jumps"},
-                                           {"over", " the", " lazy", " dog!"}})
+                Testcase_List(1024, 2048, 512, 1024, {{}}),
+                Testcase_List(2048, 4096, 512, 1024, {{"hello", ", ", " world!"}}),
+                Testcase_List(2048, 4096, 512, 1024, {{"the", " quick", " brown", "fox", "jumps"},
+                                                      {"over", " the", " lazy", " dog!"}})
             };
         }
 
@@ -58,7 +62,10 @@ namespace xo {
                 up<GC> gc = GC::make(
                     {.initial_nursery_z_ = tc.nursery_z_,
                      .initial_tenured_z_ = tc.tenured_z_,
-                    .debug_flag_ = c_debug_flag});
+                     .incr_gc_threshold_ = tc.incr_gc_threshold_,
+                     .full_gc_threshold_ = tc.full_gc_threshold_,
+                     .debug_flag_ = c_debug_flag});
+                gc->disable_gc();
 
                 REQUIRE(gc.get());
 
@@ -72,24 +79,45 @@ namespace xo {
                     std::vector<gp<List>> root_v(tc.v_.size());
                     std::size_t i = 0;
 
+                    /* auditing List::_shallow_size(), String::_shallow_size()
+                     * vs GC::allocated()
+                     */
                     std::size_t expected_alloc_z = 0;
 
                     // TODO: consolidate: root setup shared with "List" unit test
 
+                    REQUIRE(gc->allocated() == expected_alloc_z);
+
                     /* construct example Lists from testcase info */
                     for (const std::vector<std::string> & v : tc.v_)
                     {
+                        INFO(xtag("v", v));
+
                         /* building l1 in reverse order */
                         gp<List> l1 = List::nil;
+
                         for (std::size_t ip1 = v.size(); ip1 > 0; --ip1) {
+                            INFO(xtag("ip1", ip1));
+
                             const std::string & si = v.at(ip1 - 1);
+
                             log && log(xtag("i", ip1-1), xtag("si", si));
+
                             gp<String> sobj = String::copy(si.c_str());
+
+                            std::size_t sobj_z = sobj->_shallow_size();
+                            expected_alloc_z += sobj_z;
+
+                            REQUIRE(gc->allocated() == expected_alloc_z);
+
                             l1 = List::cons(sobj, l1);
+
                             log && log(xtag("l1.size", l1->size()));
 
-                            std::size_t alloc_z = l1->_shallow_size() + l1->head()->_shallow_size();
-                            expected_alloc_z += alloc_z;
+                            std::size_t l1_z = l1->_shallow_size();
+                            expected_alloc_z += l1_z;
+
+                            REQUIRE(gc->allocated() == expected_alloc_z);
                         }
 
                         REQUIRE(l1->is_nil() == (v.size() == 0));
@@ -108,6 +136,7 @@ namespace xo {
                      * all are roots and should be preserved
                      */
                     gc->request_gc(generation::nursery);
+                    gc->enable_gc_once();
 
                     REQUIRE(gc->native_gc_statistics().gen_v_[gen2int(generation::nursery)].n_gc_ == 1);
                     REQUIRE(gc->native_gc_statistics().gen_v_[gen2int(generation::tenured)].n_gc_ == 0);
@@ -133,6 +162,7 @@ namespace xo {
 
                     /* every has survived one GC cycle. collect again should promote */
                     gc->request_gc(generation::nursery);
+                    gc->enable_gc_once();
 
                     REQUIRE(gc->native_gc_statistics().gen_v_[gen2int(generation::nursery)].n_gc_ == 2);
                     REQUIRE(gc->native_gc_statistics().gen_v_[gen2int(generation::tenured)].n_gc_ == 0);
@@ -159,6 +189,7 @@ namespace xo {
                     REQUIRE(gc->native_gc_statistics().total_promoted_ == gc->allocated());
 
                     gc->request_gc(generation::tenured);
+                    gc->enable_gc_once();
 
                     REQUIRE(gc->native_gc_statistics().gen_v_[gen2int(generation::nursery)].n_gc_ == 2);
                     REQUIRE(gc->native_gc_statistics().gen_v_[gen2int(generation::tenured)].n_gc_ == 1);
@@ -197,9 +228,13 @@ namespace xo {
                 up<GC> gc = GC::make(
                     {.initial_nursery_z_ = tc.nursery_z_,
                      .initial_tenured_z_ = tc.tenured_z_,
+                     .incr_gc_threshold_ = tc.incr_gc_threshold_,
+                     .full_gc_threshold_ = tc.full_gc_threshold_,
                     .debug_flag_ = c_debug_flag});
 
                 REQUIRE(gc.get());
+
+                gc->disable_gc();
 
                 /* use gc for all Object allocs */
                 Object::mm = gc.get();
@@ -224,10 +259,14 @@ namespace xo {
 
                         for (std::size_t ip1 = v.size(); ip1 > 0; --ip1) {
                             const std::string & si = v.at(ip1 - 1);
+
                             log && log(xtag("i", ip1-1), xtag("si", si));
                             gp<String> sobj = String::copy(si.c_str());
+
                             l1 = List::cons(sobj, l1);
+
                             log && log(xtag("l1.size", l1->size()));
+
                             if (ip1 == v.size()) {
                                 // capture last
                                 last = l1;
@@ -255,6 +294,7 @@ namespace xo {
                     }
 
                     gc->request_gc(generation::nursery);
+                    gc->enable_gc_once();
 
                     REQUIRE(gc->native_gc_statistics().gen_v_[gen2int(generation::nursery)].n_gc_ == 1);
                     REQUIRE(gc->native_gc_statistics().gen_v_[gen2int(generation::tenured)].n_gc_ == 0);

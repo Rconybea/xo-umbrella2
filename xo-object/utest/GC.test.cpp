@@ -42,10 +42,13 @@ namespace xo {
         {
             up<GC> gc = GC::make(
                 {
-                    .initial_nursery_z_ = 1024,
-                    .initial_tenured_z_ = 2048,
+                    .initial_nursery_z_ = 2024,
+                    .initial_tenured_z_ = 4048,
+                    .incr_gc_threshold_ = 512,
+                    .full_gc_threshold_ = 1024,
                     .debug_flag_ = false
                 });
+            gc->disable_gc();
 
             REQUIRE(gc->native_gc_statistics().n_mutation_ == 0);
             REQUIRE(gc->native_gc_statistics().n_logged_mutation_ == 0);
@@ -88,11 +91,13 @@ namespace xo {
                 REQUIRE(gc->native_gc_statistics().n_xckp_mutation_ == 0);
                 REQUIRE(gc->mlog_size() == 0);
 
-                REQUIRE(gc->is_gc_enabled() == true);
+                REQUIRE(gc->is_gc_enabled() == false);
 
             }
 
             gc->request_gc(generation::nursery);
+            gc->enable_gc_once();
+
             {
                 REQUIRE(gc->is_before_checkpoint(l.ptr()) == true);
                 REQUIRE(gc->is_before_checkpoint(l->head().ptr()) == true);
@@ -123,6 +128,7 @@ namespace xo {
             // gc promotes parent, still need mutation log for xgen ptr
 
             gc->request_gc(generation::nursery);
+            gc->enable_gc_once();
             {
                 REQUIRE(l->size() == 1);
                 REQUIRE(Integer::from(l->head()).ptr());
@@ -144,6 +150,7 @@ namespace xo {
             // gc promotes child, no longer need mutation log entry
 
             gc->request_gc(generation::nursery);
+            gc->enable_gc_once();
             {
                 REQUIRE(l->size() == 1);
                 REQUIRE(Integer::from(l->head()).ptr());
@@ -522,15 +529,19 @@ namespace xo {
 
             struct testcase_stresstest {
                 testcase_stresstest(std::size_t nz, std::size_t tz,
+                                    std::size_t ngct, std::size_t tgct,
                                     std::size_t m, std::size_t n,
                                     std::size_t r, std::size_t rr, std::size_t k,
                                     bool gc_stats_flag, bool debug_flag)
-                    : nursery_z_{nz}, tenured_z_{tz}, m_{m}, n_{n}, r_{r}, rr_{rr}, k_{k},
-                      gc_stats_flag_{gc_stats_flag}, debug_flag_{debug_flag}
-                    {}
+                : nursery_z_{nz}, tenured_z_{tz}, nursery_gc_threshold_{ngct}, tenured_gc_threshold_{tgct},
+                  m_{m}, n_{n}, r_{r}, rr_{rr}, k_{k},
+                  gc_stats_flag_{gc_stats_flag}, debug_flag_{debug_flag}
+                {}
 
                 std::size_t nursery_z_;
                 std::size_t tenured_z_;
+                std::size_t nursery_gc_threshold_;
+                std::size_t tenured_gc_threshold_;
 
                 /* #of random list cells to create */
                 std::size_t m_;
@@ -553,18 +564,19 @@ namespace xo {
 
                 /* nz: nursery size
                  * tz: tenured size
+                 * ngct: nursery gc threshold
+                 * tgct: tenured gc threshold
                  *  m: #of random list cells to create
                  *  n: #of random integers to create
                  *  r: #of gc roots to create
                  * rr: #of gc roots to replace between iterations
                  *  k: #of random mutations to apply
                  *
-                 *                    nz    tz   m   n   r  rr   k  stats, debug */
-                testcase_stresstest(  16, 1024,  2,  0,  0,  0,  0, false,  false),
-                testcase_stresstest(  32, 1024,  2,  1,  5,  0,  0, false,  false),
-                testcase_stresstest(  64, 1024,  5,  2,  5,  2, 10, false,  false),
-                // testcase_stresstest( 128, 1024,  5,  2,  5,  2, 10, true,  true),  // segfault bad list cell
-                testcase_stresstest(1024, 1024, 10, 10,  5,  2, 10, true,  false)
+                 *                    nz    tz  ngct  tgct   m   n   r  rr   k  stats, debug */
+                testcase_stresstest(1024, 2048,  256, 1024,  2,  0,  0,  0,  0, false, false),
+                testcase_stresstest(1024, 2048,  256, 1024,  2,  1,  5,  0,  0, false, false),
+                testcase_stresstest(1024, 2048,  256, 1024,  5,  2,  5,  2, 10, false, false),
+                testcase_stresstest(1024, 2048,  256, 1024, 10, 10,  5,  2, 10, false, false)
             };
         } /*namespace*/
 
@@ -579,9 +591,12 @@ namespace xo {
                     {
                         .initial_nursery_z_ = tc.nursery_z_,
                         .initial_tenured_z_ = tc.tenured_z_,
+                        .incr_gc_threshold_ = tc.nursery_gc_threshold_,
+                        .full_gc_threshold_ = tc.tenured_gc_threshold_,
                         .stats_flag_ = tc.gc_stats_flag_,
                         .debug_flag_ = tc.debug_flag_
                     });
+                gc->disable_gc();
 
                 REQUIRE(gc->native_gc_statistics().n_mutation_ == 0);
                 REQUIRE(gc->native_gc_statistics().n_logged_mutation_ == 0);
@@ -594,7 +609,7 @@ namespace xo {
                 // Plan:
                 // - create vector of m cons cells w1[].
                 // - prepend w1[] to a vector of n integers; call this w2[].
-                // - create vector root_v[] of r  gc roots.  Assign each root_v[j] to some random w2[i]
+                // - create vector root_v[] of r gc roots.  Assign each root_v[j] to some random w2[i]
                 // - make some random mutations.
                 // - traverse root_v[] to construct model from_model for reachable objects
                 // - run gc
@@ -610,6 +625,7 @@ namespace xo {
                 //REQUIRE(tc.n_ > 0);
                 //REQUIRE(tc.r_ > 0);
 
+                // data_model: generate some random data, to exercise GC
                 RandomMutationModel data_model(tc.m_, tc.n_, tc.r_, tc.rr_, tc.k_);
 
                 for (std::size_t cycle = 0; cycle < 3; ++cycle) {
@@ -640,6 +656,7 @@ namespace xo {
                     from_model.from_root_vector(data_model.root_v_);
 
                     gc->request_gc(generation::nursery);
+                    gc->enable_gc_once();
 
                     /* collector cycle changed object addresses.
                      * build a new object model, and verify consiste1ncy with from_model

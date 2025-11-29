@@ -23,20 +23,28 @@ namespace xo {
 
         namespace {
             struct Testcase_String {
-                Testcase_String(std::size_t nz, std::size_t tz,
-                                   const std::vector<std::string> & v)
-                    : nursery_z_{nz}, tenured_z_{tz}, v_{v} {}
+                Testcase_String(std::size_t nz,
+                                std::size_t tz,
+                                std::size_t ngct,
+                                std::size_t tgct,
+                                const std::vector<std::string> & v) : nursery_z_{nz},
+                                                                      tenured_z_{tz},
+                                                                      incr_gc_threshold_{ngct},
+                                                                      full_gc_threshold_{tgct},
+                                                                      v_{v} {}
 
                 std::size_t nursery_z_;
                 std::size_t tenured_z_;
+                std::size_t incr_gc_threshold_;
+                std::size_t full_gc_threshold_;
 
                 std::vector<std::string> v_;
             };
 
             std::vector<Testcase_String>
             s_testcase_v = {
-                Testcase_String(1024, 4096, {"hello"}),
-                Testcase_String(1024, 4096, {"hello", ", world!"})
+                Testcase_String(1024, 4096, 512, 512, {"hello"}),
+                Testcase_String(1024, 4096, 512, 512, {"hello", ", world!"})
             };
         }
 
@@ -48,9 +56,13 @@ namespace xo {
                 up<GC> gc = GC::make(
                     {.initial_nursery_z_ = tc.nursery_z_,
                      .initial_tenured_z_ = tc.tenured_z_,
+                     .incr_gc_threshold_ = tc.incr_gc_threshold_,
+                     .full_gc_threshold_ = tc.full_gc_threshold_,
                     .debug_flag_ = false});
 
                 REQUIRE(gc.get());
+
+                gc->disable_gc();
 
                 /* use gc for all Object allocs */
                 Object::mm = gc.get();
@@ -77,6 +89,7 @@ namespace xo {
 
                     /* gc has n_string objects.  Nothing refers to them, so gc going to kill all */
                     gc->request_gc(generation::nursery);
+                    gc->enable_gc_once();
 
                     REQUIRE(gc->gc_in_progress() == false);
                     REQUIRE(gc->native_gc_statistics().gen_v_[gen2int(generation::nursery)].n_gc_ == 1);
@@ -95,6 +108,8 @@ namespace xo {
                 up<GC> gc = GC::make(
                     {.initial_nursery_z_ = tc.nursery_z_,
                      .initial_tenured_z_ = tc.tenured_z_,
+                     .incr_gc_threshold_ = tc.incr_gc_threshold_,
+                     .full_gc_threshold_ = tc.full_gc_threshold_,
                     .debug_flag_ = false});
 
                 REQUIRE(gc.get());
