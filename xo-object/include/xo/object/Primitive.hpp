@@ -6,7 +6,9 @@
 #pragma once
 
 #include "Procedure.hpp"
+#include "Float.hpp"
 #include "String.hpp"
+#include "Boolean.hpp"
 #include "ObjectConversion.hpp"
 #include "xo/reflect/Reflect.hpp"
 

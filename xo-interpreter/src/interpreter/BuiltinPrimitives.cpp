@@ -46,20 +46,53 @@ namespace xo {
                 *addr = rhs;
             }
 
+            // i64 comparisons
+
+            // @cmp_eq2_i64
+            install_pm(mm, PrimitiveExpr_cmp_i64::make_cmp_eq2_i64(), env);
+
+            // @cmp_ne2_i64
+            install_pm(mm, PrimitiveExpr_cmp_i64::make_cmp_ne2_i64(), env);
+
+            // @cmp_lt2_i64
+            install_pm(mm, PrimitiveExpr_cmp_i64::make_cmp_lt2_i64(), env);
+
+            // @cmp_le2_i64
+            install_pm(mm, PrimitiveExpr_cmp_i64::make_cmp_le2_i64(), env);
+
+            // @cmp_gt2_i64
+            install_pm(mm, PrimitiveExpr_cmp_i64::make_cmp_gt2_i64(), env);
+
+            // @cmp_ge2_i64
+            install_pm(mm, PrimitiveExpr_cmp_i64::make_cmp_ge2_i64(), env);
+
+            // i64 arithmetic
+
             // @add2_i64
-            {
-                auto pm_expr = PrimitiveExpr_i64::make_add2_i64();
+            install_pm(mm, PrimitiveExpr_i64::make_add2_i64(), env);
 
-                gp<Object> rhs = xo::obj::make_primitive(mm, pm_expr->name(), pm_expr->value());
-
-                rp<Variable> lhs = Variable::make(pm_expr->name(), pm_expr->value_td());
-                gp<Object> * addr = env->establish_var(lhs.borrow());
-
-                *addr = rhs;
-            }
+            // @sub2_i64
+            install_pm(mm, PrimitiveExpr_i64::make_sub2_i64(), env);
 
             // @mul2_i64
             install_pm(mm, PrimitiveExpr_i64::make_mul2_i64(), env);
+
+            // @div2_i64
+            install_pm(mm, PrimitiveExpr_i64::make_div2_i64(), env);
+
+            // ----------------------------------------------------------------
+
+            // @add2_f64
+            install_pm(mm, PrimitiveExpr_f64::make_add2_f64(), env);
+
+            // @sub2_f64
+            install_pm(mm, PrimitiveExpr_f64::make_sub2_f64(), env);
+
+            // @mul2_f64
+            install_pm(mm, PrimitiveExpr_f64::make_mul2_f64(), env);
+
+            // @div2_f64
+            install_pm(mm, PrimitiveExpr_f64::make_div2_f64(), env);
         }
     }
 }

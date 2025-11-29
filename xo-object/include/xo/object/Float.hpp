@@ -6,6 +6,8 @@
 #pragma once
 
 #include "Number.hpp"
+#include "ObjectConversion.hpp"
+#include "xo/indentlog/print/tag.hpp"
 
 namespace xo {
     namespace obj {
@@ -35,6 +37,26 @@ namespace xo {
         private:
             float_type value_ = 0.0;
         };
+
+        template <typename FloatType>
+        struct ObjectConversion_Float {
+            static gp<Object> to_object(gc::IAlloc * mm, FloatType x) {
+                return new (MMPtr(mm)) Float(x);
+            }
+            static FloatType from_object(gc::IAlloc *, gp<Object> x) {
+                gp<Float> x_int = Float::from(x);
+                if (x_int.get()) {
+                    return x_int->value();
+                } else {
+                    throw std::runtime_error(tostr("ObjectConversion_Float: x found where Float expected", xtag("x", x)));
+                }
+            }
+        };
+
+        template <>
+        struct ObjectConversion<double> : public ObjectConversion_Float<double> {};
+        template <>
+        struct ObjectConversion<float> : public ObjectConversion_Float<float> {};
     }
 }
 

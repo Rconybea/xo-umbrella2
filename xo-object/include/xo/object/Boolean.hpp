@@ -3,7 +3,11 @@
  * author: Roland Conybeare, Aug 2025
  */
 
+#pragma once
+
 #include "xo/alloc/Object.hpp"
+#include "ObjectConversion.hpp"
+#include "xo/indentlog/print/tag.hpp"
 
 namespace xo {
     namespace obj {
@@ -34,6 +38,24 @@ namespace xo {
         private:
             bool value_;
         };
+
+        template <typename BoolType>
+        struct ObjectConversion_Boolean {
+            static gp<Object> to_object(gc::IAlloc * /*mm*/, BoolType x) {
+                return Boolean::boolean_obj(x);
+            }
+            static BoolType from_object(gc::IAlloc *, gp<Object> x) {
+                gp<Boolean> x_bool = Boolean::from(x);
+                if (x_bool.get()) {
+                    return x_bool->value();
+                } else {
+                    throw std::runtime_error(tostr("ObjectConversion_Boolean: x found where Boolean expected", xtag("x", x)));
+                }
+            }
+        };
+
+        template <>
+        struct ObjectConversion<bool> : public ObjectConversion_Boolean<bool> {};
     }
 }
 
