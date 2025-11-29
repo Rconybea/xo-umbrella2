@@ -180,10 +180,10 @@ namespace xo {
             static rp<PrimitiveExprType> s_retval;
 
             if (!s_retval)
-                s_retval = PrimitiveExpr::make("add2_i64",
-                                           &add2_i64,
-                                           true /*explicit_symbol_def*/,
-                                           llvmintrinsic::i_add);
+                s_retval = PrimitiveExpr::make("@add2_i64",
+                                               &add2_i64,
+                                               true /*explicit_symbol_def*/,
+                                               llvmintrinsic::i_add);
 
             return s_retval;
         }
@@ -208,10 +208,10 @@ namespace xo {
             static rp<PrimitiveExprType> s_retval;
 
             if (!s_retval)
-                s_retval = PrimitiveExpr::make("mul2_i64",
-                                           &mul2_i64,
-                                           true /*explicit_symbol_def*/,
-                                           llvmintrinsic::i_mul);
+                s_retval = PrimitiveExpr::make("@mul2_i64",
+                                               &mul2_i64,
+                                               true /*explicit_symbol_def*/,
+                                               llvmintrinsic::i_mul);
 
             return s_retval;
         }

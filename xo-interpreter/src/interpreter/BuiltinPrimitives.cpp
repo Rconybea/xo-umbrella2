@@ -46,7 +46,7 @@ namespace xo {
                 *addr = rhs;
             }
 
-            // add2_i64
+            // @add2_i64
             {
                 auto pm_expr = PrimitiveExpr_i64::make_add2_i64();
 
@@ -57,6 +57,9 @@ namespace xo {
 
                 *addr = rhs;
             }
+
+            // @mul2_i64
+            install_pm(mm, PrimitiveExpr_i64::make_mul2_i64(), env);
         }
     }
 }
