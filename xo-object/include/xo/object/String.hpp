@@ -6,6 +6,7 @@
 #include "xo/alloc/Object.hpp"
 #include "ObjectConversion.hpp"
 #include "xo/alloc/IAlloc.hpp"
+#include "xo/indentlog/print/tag.hpp"
 
 namespace xo {
     namespace obj {
@@ -114,7 +115,12 @@ namespace xo {
                      *       memory is dropped).
                      */
                     return std::string(x_str->c_str());
+                } else {
+                    throw std::runtime_error
+                        (tostr("ObjectConversion_String"
+                               ": x found where string expected", xtag("x", x)));
                 }
+
             }
         };
 

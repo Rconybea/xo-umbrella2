@@ -153,7 +153,8 @@ namespace {
   } /*random_updates_1*/
 
     TEST_CASE("rbtree", "[redblacktree]") {
-        RbTree rbtree;
+        constexpr bool c_debug_flag = false;
+        RbTree rbtree{c_debug_flag};
 
         std::uint64_t seed = 14950349842636922572UL;
         /* can reseed from /dev/urandom with: */

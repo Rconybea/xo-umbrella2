@@ -69,7 +69,7 @@ namespace utest {
         {
             bool ok_flag = true;
 
-            REQUIRE_ORFAIL(ok_flag, catch_flag, p_tree->verify_ok());
+            REQUIRE_ORFAIL(ok_flag, catch_flag, p_tree->verify_ok(catch_flag));
 
             p_tree->clear();
 
@@ -95,7 +95,7 @@ namespace utest {
 
             xo::scope log(XO_DEBUG(catch_flag));
 
-            REQUIRE_ORFAIL(ok_flag, catch_flag, p_tree->verify_ok());
+            REQUIRE_ORFAIL(ok_flag, catch_flag, p_tree->verify_ok(catch_flag));
 
             /* n keys 0..n-1 */
             std::vector<std::uint32_t> u(n);

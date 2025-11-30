@@ -100,7 +100,7 @@ namespace xo {
             class Node {
             public:
                 using ReducedValue = typename Reduce::value_type;
-                using ContentsType = std::pair<Key, Value>;
+                using ContentsType = std::pair<Key const, Value>;
                 using value_type = std::pair<Key const , Value>;
 
             public:
@@ -189,6 +189,75 @@ namespace xo {
                         x->parent_ = nullptr;
                 } /*replace_root_reparent*/
 
+                /** swap values of all members except @ref contents_
+                 *  between @p *lhs and @p *rhs
+                 **/
+                static void swap_locations(Node * lhs, Node * rhs, bool debug_flag) {
+                    scope log(XO_DEBUG(debug_flag));
+
+                    assert(lhs->parent() != rhs->parent());
+
+                    Node * lhs_parent = lhs->parent();
+                    Node * rhs_parent = rhs->parent();
+
+                    /* can have null parent if either {lhs, rhs} is root node */
+
+                    if (log) {
+                        log("pre", xtag("lhs", lhs), xtag("rhs", rhs));
+                        log(xtag("lhs.left", lhs->left_child()),
+                            xtag("lhs.right", lhs->right_child()));
+                        log(xtag("rhs.left", rhs->left_child()),
+                            xtag("rhs.right", rhs->right_child()));
+                    }
+
+                    assert(lhs != rhs->left_child() && "not implemented");
+                    assert(rhs != lhs->right_child() && "not implemented");
+                    assert(rhs != lhs->left_child() && "expected left-to-right key order");
+                    assert(lhs != rhs->right_child() && "expected left-to-right key order");
+
+                    if (lhs_parent)
+                        lhs_parent->replace_child_reparent(lhs, rhs);
+
+                    /* now have:
+                     * - rhs->parent() = lhs_parent
+                     * - lhs->parent() = nullptr
+                     */
+
+                    if (rhs_parent)
+                        rhs_parent->replace_child_reparent(rhs, lhs);
+
+                    /* now have:
+                     * - lhs->parent() = rhs_parent
+                     * - rhs->parent() = lhs_parent
+                     */
+
+                    assert(lhs->parent() == rhs_parent);
+                    assert(rhs->parent() == lhs_parent);
+                    assert(lhs->parent() != lhs);
+                    assert(rhs->parent() != rhs);
+
+                    std::swap(lhs->color_, rhs->color_);
+                    std::swap(lhs->size_, rhs->size_);
+                    // preserve lhs->contents_, rhs->contents_
+                    // don't bother fixing reduced_, will fixup that separately
+                    //std::swap(lhs->reduced_, rhs->reduced_);
+
+                    Node * lhs_left = lhs->left_child();
+                    Node * lhs_right = lhs->right_child();
+
+                    Node * rhs_left = rhs->left_child();
+                    Node * rhs_right = rhs->right_child();
+
+                    lhs->assign_child_reparent(D_Left, rhs_left);
+                    lhs->assign_child_reparent(D_Right, rhs_right);
+                    rhs->assign_child_reparent(D_Left, lhs_left);
+                    rhs->assign_child_reparent(D_Right, lhs_right);
+
+                    //std::swap(lhs->child_v_, rhs->child_v_);
+
+                    /* also need to reparent */
+                } /*swap_locations*/
+
                 size_t size() const { return size_; }
                 /* const access */
                 ContentsType const & contents() const { return contents_; }
@@ -203,10 +272,10 @@ namespace xo {
                  */
                 ContentsType & contents() { return contents_; }
 
-                Node *parent() const { return parent_; }
-                Node *child(Direction d) const { return child_v_[d]; }
-                Node *left_child() const { return child_v_[0]; }
-                Node *right_child() const { return child_v_[1]; }
+                Node * parent() const { return parent_; }
+                Node * child(Direction d) const { return child_v_[d]; }
+                Node * left_child() const { return child_v_[0]; }
+                Node * right_child() const { return child_v_[1]; }
                 ReducedValue const & reduced1() const { return reduced_.first; }
                 ReducedValue const & reduced2() const { return reduced_.second; }
 
@@ -220,7 +289,7 @@ namespace xo {
                  * - x != nullptr
                  * - x is either this->left_child() or this->right_child()
                  */
-                Direction child_direction(Node *x) {
+                Direction child_direction(Node * x) const {
                     if (x == this->left_child())
                         return D_Left;
                     else if (x == this->right_child())
@@ -262,7 +331,6 @@ namespace xo {
                     using xo::scope;
                     using xo::xtag;
 
-                    //constexpr char const * c_self = "Node::local_recalc_size";
                     constexpr bool c_logging_enabled = false;
 
                     scope log(XO_DEBUG(c_logging_enabled));
@@ -331,9 +399,9 @@ namespace xo {
                 Color color_ = C_Red;
                 /* size of subtree (#of key/value pairs) rooted at this node */
                 size_t size_ = 0;
-                /* .first        = key   associated with this node
-                 * .second       = value associated with this node
-                 * .third       = reduced value
+                /* .first  = key   associated with this node
+                 * .second = value associated with this node
+                 * .third  = reduced value
                  */
                 ContentsType contents_;
                 /* accumulator for some binary function of Values.
@@ -896,10 +964,17 @@ namespace xo {
                 /* fixup size in N and all ancestors of N,
                  * after insert/remove affecting N
                  */
-                static void fixup_ancestor_size(Reduce const & reduce_fn, RbNode *N) {
-                    while (N) {
+                static void fixup_ancestor_size(Reduce const & reduce_fn, RbNode *N, bool debug_flag) {
+                    scope log(XO_DEBUG(debug_flag));
+                    size_t depth = 0;
+                    for (; N && depth < 128; ++depth) {
+                        log && log("fixup size: ", xtag("N", N), xtag("ancestors", depth));
                         N->local_recalc_size(reduce_fn);
                         N = N->parent();
+                    }
+
+                    if (N) {
+                        throw std::runtime_error("fixup_ancestor_size: excessive depth -> infinite loop?");
                     }
                 } /*fixup_ancestor_size*/
 
@@ -1163,6 +1238,7 @@ namespace xo {
                     {
                         using xo::xtag;
 
+                        constexpr bool c_debug_flag = false;
                         //XO_SCOPE2(log, true /*debug_flag*/);
 
                         RbNode * N = *pp_root;
@@ -1181,7 +1257,7 @@ namespace xo {
                                 /* after modifying a node n,  must recalculate reductions
                                  * along path [root .. n]
                                  */
-                                RbTreeUtil::fixup_ancestor_size(reduce_fn, N);
+                                RbTreeUtil::fixup_ancestor_size(reduce_fn, N, c_debug_flag);
 
                                 //log && log(xtag("path", (char const *)"A"));
 
@@ -1213,7 +1289,7 @@ namespace xo {
                             assert(is_red(N->child(d)));
 
                             /* recalculate Node sizes on path [root .. N] */
-                            RbTreeUtil::fixup_ancestor_size(reduce_fn, N);
+                            RbTreeUtil::fixup_ancestor_size(reduce_fn, N, c_debug_flag);
                             /* after adding a node,  must rebalance to restore RB-shape */
                             RbTreeUtil::fixup_red_shape(d, N, reduce_fn, pp_root);
 
@@ -1257,6 +1333,7 @@ namespace xo {
                  */
                 static void remove_black_leaf(RbNode *N,
                                               Reduce const & reduce_fn,
+                                              bool debug_flag,
                                               RbNode **pp_root)
                     {
                         using xo::scope;
@@ -1264,9 +1341,8 @@ namespace xo {
                         using xo::print::ccs;
 
                         //constexpr char const *c_self = "RbTreeUtil::remove_black_leaf";
-                        constexpr bool c_logging_enabled = false;
 
-                        scope log(XO_DEBUG(c_logging_enabled));
+                        scope log(XO_DEBUG(debug_flag));
 
                         assert(pp_root);
 
@@ -1294,7 +1370,7 @@ namespace xo {
                         /* fixup sizes on path root..P
                          * subsequent rebalancing rotations will preserve correct .size values
                          */
-                        RbTreeUtil::fixup_ancestor_size(reduce_fn, P);
+                        RbTreeUtil::fixup_ancestor_size(reduce_fn, P, debug_flag);
 
                         /* other_d, S, C, D will be assigned by loop below
                          *
@@ -1709,19 +1785,17 @@ namespace xo {
                  * return true if a node was removed;  false otherwise.
                  */
                 static bool erase_aux(Key const &k,
-                                       Reduce const & reduce_fn,
-                                       RbNode **pp_root) {
+                                      Reduce const & reduce_fn,
+                                      bool debug_flag,
+                                      RbNode **pp_root) {
                     using xo::scope;
                     using xo::xtag;
 
-                    //constexpr char const *c_self = "RbTreeUtil::erase_aux";
-                    constexpr bool c_logging_enabled = false;
-
-                    scope log(XO_DEBUG(c_logging_enabled));
+                    scope log(XO_DEBUG(debug_flag));
 
                     RbNode *N = *pp_root;
 
-                    log && log("enter", xtag("N", N));
+                    log && log("enter", xtag("root", N));
 
                     /*
                      * here the triangle ascii art indicates a tree structure,
@@ -1729,13 +1803,18 @@ namespace xo {
                      *
                      *       o <- this
                      *      / \
-                     *     o-N-o
+                     *     o-P-o
+                     *       |
+                     *       N
                      *      / \
-                     *     X
+                     *     X   Y
                      *    / \
                      *   o---R
+                     *      / .
+                     *     W
                      */
 
+                    /* N is the candidate target node we will be deleting */
                     N = RbTreeUtil::find_glb(N, k, true /*is_closed*/);
 
                     if (!N || (N->key() != k)) {
@@ -1743,32 +1822,180 @@ namespace xo {
                         return false;
                     }
 
-                    if (c_logging_enabled)
-                        log && log("got lower bound", xtag("N", N),
-                                   xtag("N.key", N->key()));
+                    if (log) {
+                        log("got lower bound",
+                            xtag("N", N),
+                            xtag("N.key", N->key()));
+                        RbTreeUtil::display_aux(D_Invalid, N, 0 /*depth*/, &log);
+                    }
 
                     /* first step is to simplify problem so that we're removing
                      * a node with 0 or 1 children.
                      */
 
-                    RbNode *X = N->left_child();
+                    RbNode * P = N->parent();
+                    RbNode * X = N->left_child();
+                    RbNode * Y = N->right_child();
+
+                    log && log(xtag("P", P),
+                               xtag("X", X),
+                               xtag("Y", Y));
 
                     if (X == nullptr) {
                         /* N has 0 or 1 children */
-                        ;
+                        erase_1child_aux(N, reduce_fn, debug_flag, pp_root);
                     } else {
-                        /* R will be 'replacement node' for N */
-                        RbNode *R = RbTreeUtil::find_rightmost(X);
+                        /* R->right_child() is nil by definition */
 
-                        /* R->right_child() is nil by definition
-                         *
-                         * copy R's (key + value) into N;
-                         * N now serves as container for information previously
-                         * represented by R.
+                        RbNode * R = RbTreeUtil::find_rightmost(X);
+                        assert(R);
+                        assert(R->right_child() == nullptr);
+
+                        RbNode * W = R->left_child();
+
+                        log && log(xtag("R", R), xtag("W", W));
+
+                        if (P == nullptr) {
+                            /* R will replace N -> becomes new root */
+                            *pp_root = R;
+                        }
+
+                        if (R == N->left_child()) {
+                            /*
+                             * here the triangle ascii art indicates a tree structure,
+                             * of arbitrary size
+                             *
+                             *       o <- this
+                             *      / \
+                             *     o-P-o
+                             *       |
+                             *       N
+                             *      / \
+                             *     R   Y
+                             *    / .
+                             *   W
+                             */
+                            if (P)
+                                P->replace_child_reparent(N, R);
+
+                            /*
+                             * here the triangle ascii art indicates a tree structure,
+                             * of arbitrary size
+                             *
+                             *       o <- this
+                             *      / \
+                             *     o-P-o
+                             *       |      N
+                             *       R     / \
+                             *      / .   R   Y
+                             *     W
+                             */
+                            R->assign_child_reparent(D_Left, N);
+                            R->assign_child_reparent(D_Right, Y);
+                            /*
+                             * here the triangle ascii art indicates a tree structure,
+                             * of arbitrary size
+                             *
+                             *       o <- this
+                             *      / \
+                             *     o-P-o
+                             *       |
+                             *       R
+                             *      / \
+                             *     N   Y
+                             *    / \
+                             *   R   Y
+                             */
+                            N->assign_child_reparent(D_Left, W);
+                            N->assign_child_reparent(D_Right, nullptr);
+                            /*
+                             * here the triangle ascii art indicates a tree structure,
+                             * of arbitrary size
+                             *
+                             *       o <- this
+                             *      / \
+                             *     o-P-o
+                             *       |
+                             *       R
+                             *      / \
+                             *     N   Y
+                             *    / \
+                             *   W   .
+                             */
+
+                            /* need also to swap other node attributes:
+                             *   RbNode .color_ .size_ .reduced_
+                             */
+                            std::swap(R->color_, N->color_);
+                            std::swap(N->size_, N->size_);
+
+                            if (log) {
+                                log("after swapping N,R locations:");
+                                RbTreeUtil::display_aux(D_Invalid, R, 0 /*depth*/, &log);
+                            }
+
+                            erase_1child_aux(N, reduce_fn, debug_flag, pp_root);
+                        } else {
+                            /*
+                             * here the triangle ascii art indicates a tree structure,
+                             * of arbitrary size
+                             *
+                             *       o <- this
+                             *      / \
+                             *     o-P-o
+                             *       |
+                             *       N
+                             *      / \
+                             *     X   Y
+                             *    / \
+                             *   o---R
+                             *      / .
+                             *     W
+                             */
+
+                            /* will be swapping info in {R, N}:
+                             * everything except RbNode.contents_
+                             */
+                            RbNode::swap_locations(R, N, debug_flag);
+
+                            /* swapping locations invalidates RbNode.reduced_.
+                             * But correctness will be restored in erase_1child_aux()
+                             */
+
+                            /*
+                             * here the triangle ascii art indicates a tree structure,
+                             * of arbitrary size
+                             *
+                             *       o <- this
+                             *      / \
+                             *     o-P-o
+                             *       |
+                             *       R
+                             *      / \
+                             *     X   Y
+                             *    / \
+                             *   o---N
+                             *      / .
+                             *     W
+                             */
+                            erase_1child_aux(N, reduce_fn, debug_flag, pp_root);
+                        }
+
+#ifdef GOING_AWAY
+                        /* would be convenient to just make this assignment,
+                         * but several disadvantages:
+                         * 1. invalidates an iterator pointing to R
+                         *    when nearby-in-key-space N gets deleted
+                         * 2. gives up key constness
                          */
-
                         N->contents_ = R->contents_;
-                        /* (preserving N->parent_, N->child_v_[]) */
+                        /* (preserving
+                         *   N->color_,
+                         *   N->size_,
+                         *   N->parent_,
+                         *   N->reduced_,
+                         *   N->child_v_[])
+                         */
 
                         /* now relabel N as new R (R'),
                          * and relabel R as new N (N').
@@ -1780,18 +2007,20 @@ namespace xo {
                          */
                         N = R;
                         /* (preserving R->parent_, R->child_v_[]) */
-
-                        /*       o
-                         *      / \
-                         *     o-R'o
-                         *      /
-                         *     X
-                         *    / \
-                         *   o---N'
-                         */
+#endif
                     }
 
-                    RbNode *P = N->parent();
+                    return true;
+                } /*erase_aux*/
+
+                static void erase_1child_aux(RbNode * N,
+                                             Reduce const & reduce_fn,
+                                             bool debug_flag,
+                                             RbNode ** pp_root) {
+
+                    scope log(XO_DEBUG(debug_flag));
+
+                    RbNode * P = N->parent();
 
                     /* N has 0 or 1 children
                      *
@@ -1815,14 +2044,16 @@ namespace xo {
 
                             if (P) {
                                 P->replace_child_reparent(N, nullptr);
-                                RbTreeUtil::fixup_ancestor_size(reduce_fn, P);
+
+                                log && log("fixup_ancestor_size starting at P");
+                                RbTreeUtil::fixup_ancestor_size(reduce_fn, P, debug_flag);
                             } else {
                                 /* N was sole root node;  tree will be empty after removing it */
+                                log && log("deleting last node -> *pp_root=nullptr");
                                 *pp_root = nullptr;
                             }
 
-                            if (c_logging_enabled)
-                                log && log("delete node", xtag("addr", N));
+                            log && log("delete red root node", xtag("addr", N));
                             delete N;
                         } else {
                             assert(false);
@@ -1849,14 +2080,14 @@ namespace xo {
 
                             if (P) {
                                 P->replace_child_reparent(N, R);
-                                RbTreeUtil::fixup_ancestor_size(reduce_fn, P);
+                                log && log("fixup_ancestor_size starting at P");
+                                RbTreeUtil::fixup_ancestor_size(reduce_fn, P, debug_flag);
                             } else {
                                 /* N was root node */
                                 RbNode::replace_root_reparent(R, pp_root);
                             }
 
-                            if (c_logging_enabled)
-                                log && log("delete node", xtag("addr", N));
+                            log && log("delete node", xtag("addr", N));
                             delete N;
                         } else {
                             /* N is black with no children,
@@ -1864,19 +2095,17 @@ namespace xo {
                              */
 
                             if (P) {
-                                RbTreeUtil::remove_black_leaf(N, reduce_fn, pp_root);
+                                RbTreeUtil::remove_black_leaf(N, reduce_fn, debug_flag, pp_root);
                             } else {
                                 /* N was root node */
                                 *pp_root = nullptr;
 
-                                log && log("delete node", xtag("addr", N));
+                                log && log("delete black root node", xtag("addr", N));
                                 delete N;
                             }
                         }
                     }
-
-                    return true;
-                } /*erase_aux*/
+                }
 
                 /* verify that subtree at N is in RB-shape.
                  * will cover subset of RedBlackTree class invariants:
@@ -2045,9 +2274,9 @@ namespace xo {
                         return i_node;
                     } /*verify_subtree_ok*/
 
-                /* display tree structure,  1 line per node.
-                 * indent by node depth + d
-                 */
+                /** display tree structure,  1 line per node.
+                 *  indent by node depth @p d
+                 **/
                 static void display_aux(Direction side, RbNode const *N, uint32_t d,
                                         xo::scope *p_scope) {
                     using xo::pad;
@@ -2072,6 +2301,9 @@ namespace xo {
                     }
                 } /*display_aux*/
 
+                /**
+                 *  indent by node depth @p d
+                 **/
                 static void display(RbNode const *N, uint32_t d) {
                     using xo::scope;
 
@@ -2160,6 +2392,8 @@ namespace xo {
                 RedBlackTreeLhs & operator=(mapped_type const & v) {
                     using xo::tostr;
 
+                    constexpr bool c_debug_flag = false;
+
                     if(this->p_tree_) {
                         if(this->node_) {
                             this->node_->contents().second = v;
@@ -2168,7 +2402,8 @@ namespace xo {
                              * must recalculate reductions along path [root .. n]
                              */
                             RbUtil::fixup_ancestor_size(this->p_tree_->reduce_fn(),
-                                                        this->node_);
+                                                        this->node_,
+                                                        c_debug_flag);
                         } else {
                             /* insert (key, v) pair into this tree */
                             this->p_tree_->insert(value_type(this->key_, v));
@@ -2693,7 +2928,7 @@ namespace xo {
             using const_iterator = detail::ConstIterator<Key, Value, Reduce>;
 
         public:
-            RedBlackTree() = default;
+            explicit RedBlackTree(bool debug_flag = false) : debug_flag_{debug_flag} {}
 
             bool empty() const { return size_ == 0; }
             size_type size() const { return size_; }
@@ -3041,12 +3276,22 @@ namespace xo {
             } /*insert*/
 
             bool erase(Key const & k) {
+                scope log(XO_DEBUG(debug_flag_), xtag("size", size_));
+                if (log) {
+                    log("pre", xtag("tree", *this));
+                }
+
                 bool retval = RbUtil::erase_aux(k,
                                                 this->reduce_fn_,
+                                                debug_flag_,
                                                 &(this->root_));
 
                 if (retval)
                     --(this->size_);
+
+                if (log) {
+                    log("post", xtag("tree", *this));
+                }
 
                 return retval;
             } /*erase*/
@@ -3127,6 +3372,8 @@ namespace xo {
             RbNode * root_ = nullptr;
             /* .reduce_fn :: (Accumulator x Key) -> Accumulator */
             Reduce reduce_fn_;
+            /* true to enable debug logging */
+            bool debug_flag_ = false;
         }; /*RedBlackTree*/
 
         template <typename Key,
