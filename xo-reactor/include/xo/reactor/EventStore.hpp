@@ -9,6 +9,7 @@
 #include "xo/printjson/PrintJson.hpp"
 #include "xo/reflect/Reflect.hpp"
 #include "xo/ordinaltree/RedBlackTree.hpp"
+#include "xo/ordinaltree/rbtree/OrdinalReduce.hpp"
 
 namespace xo {
     namespace reactor {
