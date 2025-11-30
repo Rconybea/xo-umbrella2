@@ -88,7 +88,7 @@ namespace xo {
                   value_td_{Reflect::require<T>()},
                   value_(x)
                 {
-                    static_assert(std::is_standard_layout_v<T> && std::is_trivial_v<T>);
+                    //static_assert(std::is_standard_layout_v<T> && std::is_trivial_v<T>);
                 }
 
         private:

@@ -24,12 +24,6 @@ namespace xo {
         }
 
         void
-        BuiltinPrimitives::install_interpreter_conversions(ObjectConverter * /*target*/)
-        {
-            /* abandoning this path */
-        }
-
-        void
         BuiltinPrimitives::install(gc::IAlloc * mm, gp<GlobalEnv> env)
         {
             scope log(XO_DEBUG(true));

@@ -181,11 +181,49 @@ namespace xo {
 
             scope log(XO_DEBUG(p_psm->debug_flag()));
 
-            constexpr const char * c_self_name = "exprseq_xs::on_i64_token";
+            constexpr const char * c_self_name = "exprseq_xs::on_f64_token";
 
             if (xseqtype_ == exprseqtype::toplevel_interactive)
             {
                 progress_xs::start(Constant<double>::make(tk.f64_value()), p_psm);
+            } else {
+                /* policy: don't allow literals as toplevel expressions
+                 * unless interactive session.
+                 */
+                const char * exp = get_expect_str();
+
+                this->illegal_input_on_token(c_self_name,
+                                             tk,
+                                             exp,
+                                             p_psm);
+            }
+        }
+
+        void
+        exprseq_xs::on_string_token(const token_type & tk,
+                                    parserstatemachine * p_psm)
+        {
+            using xo::scm::Constant;
+
+            scope log(XO_DEBUG(p_psm->debug_flag()));
+
+            constexpr const char * c_self_name = "exprseq_xs::on_string_token";
+
+            if (xseqtype_ == exprseqtype::toplevel_interactive)
+            {
+                // remark:
+                // 1. Constant is an expression. At present (nov 2025) these are
+                //    reference-counted (+ leak in xo-interpreter).
+                // 2. Could fix leak by adding a finalization feature to GC.
+                //    Do intend to eventually support finalization,
+                //    but not to use it here.
+                // 3. Instead mean to change allocation strategy for Expression
+                //    to use GC instead.
+                // 4. As intermediate step try migrating Expression hierarchy
+                //    to support arena allocation.
+                //    See xo/alloc/ArenaAllocT.hpp + assoc'd unit test
+                //
+                progress_xs::start(Constant<std::string>::make(tk.text()), p_psm);
             } else {
                 /* policy: don't allow literals as toplevel expressions
                  * unless interactive session.

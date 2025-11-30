@@ -338,7 +338,7 @@ namespace xo {
                 ContentsType contents_;
                 /* accumulator for some binary function of Values.
                  * must be associative,  since value will be produced
-                 * by any testing of calls to Reduce::combine().
+                 * by any ordering of calls to Reduce::combine().
                  *
                  * e.g. {a, b, c, d} could be reduced by:
                  *   r(r(a,b), r(c,d))

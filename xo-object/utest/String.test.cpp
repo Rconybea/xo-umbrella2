@@ -44,6 +44,9 @@ namespace xo {
             std::vector<Testcase_String>
             s_testcase_v = {
                 Testcase_String(1024, 4096, 512, 512, {"hello"}),
+                // in emacs: C-x 8 RET lambda
+                //
+                Testcase_String(1024, 4096, 512, 512, {"λ"}),
                 Testcase_String(1024, 4096, 512, 512, {"hello", ", world!"})
             };
         }
@@ -166,6 +169,31 @@ namespace xo {
                     }
                 }
             }
+        }
+
+        TEST_CASE("String.columns", "[String][unicode]")
+        {
+            const bool c_debug_flag = false;
+            up<ArenaAlloc> arena = ArenaAlloc::make("testarena",
+                                                    16*1024, c_debug_flag);
+
+            Object::mm = arena.get();
+
+            gp<String> s0 = String::copy("");
+
+            REQUIRE(s0->columns() == 0);
+            REQUIRE(s0->length() == 0);
+
+            gp<String> s1 = String::copy("l");
+
+            REQUIRE(s1->columns() == 1);
+            REQUIRE(s1->length() == 1);
+
+            gp<String> s2 = String::copy("λ");
+
+            REQUIRE(s2->columns() == 1);
+            /* two code units in code point */
+            REQUIRE(s2->length() == 2);
         }
 
         TEST_CASE("String.append", "[String]")

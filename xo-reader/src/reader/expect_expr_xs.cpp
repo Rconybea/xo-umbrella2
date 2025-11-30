@@ -173,7 +173,7 @@ namespace xo {
              */
             progress_xs::start(var.promote(), p_psm);
 
-#ifdef NOT_YET
+ #ifdef NOT_YET
             p_stack->push_exprstate(exprstate(exprstatetype::expr_progress,
                                               Variable::make(name, type)));
 #endif
@@ -224,6 +224,21 @@ namespace xo {
              */
             progress_xs::start
                 (Constant<double>::make(tk.f64_value()),
+                 p_psm);
+        }
+
+        void
+        expect_expr_xs::on_string_token(const token_type & tk,
+                                        parserstatemachine * p_psm)
+        {
+            scope log(XO_DEBUG(p_psm->debug_flag()));
+
+            /* e.g.
+             *   def msg = "hello, world";
+             *              \----tk----/
+             */
+            progress_xs::start
+                (Constant<std::string>::make(tk.text()),
                  p_psm);
         }
 

@@ -14,19 +14,6 @@ namespace xo {
         public:
             using ObjectConverter = xo::obj::ObjectConverter;
 
-            /** install conversions for PrimitiveExpr<Fn> -> Primitive<Fn>
-             *  for particular function pointer types Fn.
-             *
-             *  Source type from xo-expression
-             *  Dest type from xo-object.
-             *
-             *  Module dependence goes the other way
-             *  i.e. xo-interpreter -uses-> xo-expression
-             *                      -uses-> xo-object
-             *  For this reason rejected adding a virtual method to PrimitiveExprInterface
-             **/
-            static void install_interpreter_conversions(ObjectConverter * target);
-
             template <typename Expr>
             static void install_pm(gc::IAlloc * mm, rp<Expr> pm_expr, gp<GlobalEnv> env) {
                 gp<Object> rhs

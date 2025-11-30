@@ -45,6 +45,8 @@ namespace xo {
 
             if (tk.text() == "bool")
                 td = Reflect::require<bool>();
+            else if (tk.text() == "str")
+                td = Reflect::require<std::string>();
             else if (tk.text() == "f64")
                 td = Reflect::require<double>();
             else if(tk.text() == "f32")

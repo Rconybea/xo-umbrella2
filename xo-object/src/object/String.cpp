@@ -99,6 +99,22 @@ namespace xo {
             return ::strlen(chars_);
         }
 
+        std::size_t
+        String::columns() const
+        {
+            size_t retval = 0;
+
+            for (const char * p = chars_, * e = chars_ + z_chars_; *p && (p < e); ++p) {
+                if ((*p & 0xc0) == 0x80) {
+                    /* continuation byte -> ignore */
+                } else {
+                    ++retval;
+                }
+            }
+
+            return retval;
+        }
+
         TaggedPtr
         String::self_tp() const {
             return Reflect::make_tp(const_cast<String*>(this));

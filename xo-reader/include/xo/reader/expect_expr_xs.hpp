@@ -68,6 +68,9 @@ namespace xo {
             virtual void on_f64_token(const token_type & tk,
                                       parserstatemachine * p_psm) override;
 
+            virtual void on_string_token(const token_type & tk,
+                                         parserstatemachine * p_psm) final override;
+
             /** update exprstate in response to a successfully-parsed subexpression **/
             virtual void on_expr(bp<Expression> expr,
                                  parserstatemachine * p_psm) override;

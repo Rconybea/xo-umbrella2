@@ -110,7 +110,6 @@ namespace xo {
             toplevel_env_{env},
             log_level_{ll}
         {
-            BuiltinPrimitives::install_interpreter_conversions(&object_converter_);
         }
 
         // ----- VirtualSchematikaMachine -----
@@ -321,7 +320,15 @@ namespace xo {
 
                 VSM_CONTINUE();
             } else {
-                /* see ObjectConverter::ctor to add more builtin types */
+                /* see ObjectConverter::ctor to add more builtin types
+                 *
+                 * generally conversion for a type Foo will appear in Foo.hpp
+                 * see
+                 *   xo/object/Boolean.hpp
+                 *   xo/object/Integer.hpp
+                 *   xo/object/Float.hpp
+                 *   xo/object/String.hpp
+                 */
 
                 VSM_ERROR(tostr("constant_op: unable to convert native value to object",
                                 xtag("id", expr->value_tp().td()->id()),

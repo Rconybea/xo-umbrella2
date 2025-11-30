@@ -336,7 +336,7 @@ namespace xo {
         {
             scope log(XO_DEBUG(p_psm->debug_flag()));
 
-            constexpr const char * c_self_name = "exprstate::on_bool";
+            constexpr const char * c_self_name = "exprstate::on_bool_token";
             const char * exp = get_expect_str();
 
             this->illegal_input_on_token(c_self_name, tk, exp, p_psm);
@@ -348,7 +348,7 @@ namespace xo {
         {
             scope log(XO_DEBUG(p_psm->debug_flag()));
 
-            constexpr const char * c_self_name = "exprstate::on_i64";
+            constexpr const char * c_self_name = "exprstate::on_i64_token";
             const char * exp = get_expect_str();
 
             this->illegal_input_on_token(c_self_name, tk, exp, p_psm);
@@ -360,7 +360,19 @@ namespace xo {
         {
             scope log(XO_DEBUG(p_psm->debug_flag()));
 
-            constexpr const char * c_self_name = "exprstate::on_f64";
+            constexpr const char * c_self_name = "exprstate::on_f64_token";
+            const char * exp = get_expect_str();
+
+            this->illegal_input_on_token(c_self_name, tk, exp, p_psm);
+        }
+
+        void
+        exprstate::on_string_token(const token_type & tk,
+                                   parserstatemachine * p_psm)
+        {
+            scope log(XO_DEBUG(p_psm->debug_flag()));
+
+            constexpr const char * c_self_name = "exprstate::on_string_token";
             const char * exp = get_expect_str();
 
             this->illegal_input_on_token(c_self_name, tk, exp, p_psm);
@@ -399,7 +411,7 @@ namespace xo {
                 return;
 
             case tokentype::tk_string:
-                assert(false);
+                this->on_string_token(tk, p_psm);
                 return;
 
             case tokentype::tk_symbol:

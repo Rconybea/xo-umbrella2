@@ -7,6 +7,7 @@
 #include "Integer.hpp"
 #include "Float.hpp"
 #include "Boolean.hpp"
+#include "String.hpp"
 #include "TaggedPtr.hpp"
 #include "xo/alloc/Blob.hpp"
 
@@ -121,6 +122,30 @@ namespace xo {
 
                 return Reflect::make_tp(bool_obj->value() ? &s_true : &s_false);
             }
+
+            gp<Object>
+            string_to_object(IAlloc * mm, const TaggedPtr & src)
+            {
+                std::string * native = src.recover_native<std::string>();
+
+                assert(native);
+
+                return String::copy(mm, native->c_str());
+            }
+
+            TaggedPtr
+            object_to_string(IAlloc * /*mm*/, gp<Object> obj)
+            {
+                gp<String> string_obj = String::from(obj);
+
+                if (!string_obj.get()) {
+                    throw std::runtime_error(tostr("Object obj founcd where String expected",
+                                                   xtag("obj", obj)));
+                }
+
+                // still don't have good solver for this yet
+                assert(false);
+            }
         }
 
         ObjectConverter::ObjectConverter()
@@ -131,6 +156,8 @@ namespace xo {
             this->establish_conversion<double>(&float_to_object<double>, &object_to_float<double>);
 
             this->establish_conversion<bool>(&bool_to_object, &object_to_bool);
+
+            this->establish_conversion<std::string>(&string_to_object, &object_to_string);
         }
 
         gp<Object>

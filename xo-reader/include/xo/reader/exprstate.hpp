@@ -218,6 +218,10 @@ namespace xo {
             virtual void on_f64_token(const token_type & tk,
                                       parserstatemachine * p_psm);
 
+            /** handle incoming string-literal token **/
+            virtual void on_string_token(const token_type & tk,
+                                         parserstatemachine * p_psm);
+
         protected:
             /** throw exception when next token is inconsistent with
              *  parsing state
