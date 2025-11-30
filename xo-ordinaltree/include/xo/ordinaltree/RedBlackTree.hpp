@@ -72,7 +72,10 @@ namespace xo {
          * - Reduce.operator() :: (Accumulator x Key) -> Accumulator
          * - Reduce.operator() :: (Accumulator x Accumulator) -> Accumulator
          */
-        template <typename Key, typename Value, typename Reduce = NullReduce<Key>>
+        template <typename Key,
+                  typename Value,
+                  typename Reduce = NullReduce<Key>,
+                  typename Allocator = std::allocator<std::pair<const Key, Value>>>
         class RedBlackTree;
 
         namespace detail {
@@ -114,10 +117,24 @@ namespace xo {
                       contents_{std::move(kv_pair)},
                       reduced_{std::move(r)} {}
 
-                static Node * make_leaf(value_type const & kv_pair,
+                template <typename NodeAllocator>
+                static Node * make_leaf(NodeAllocator& alloc,
+                                        value_type const & kv_pair,
                                         ReducedValue const & leaf_rv) {
-                    return new Node(kv_pair,
-                                    std::pair<ReducedValue, ReducedValue>(leaf_rv, leaf_rv));
+                    using traits = std::allocator_traits<NodeAllocator>;
+
+                    // get memory
+                    Node * node = traits::allocate(alloc, 1);
+                    try {
+                        // placemenent new
+                        traits::construct(alloc, node, kv_pair,
+                                          std::pair<ReducedValue, ReducedValue>(leaf_rv, leaf_rv));
+                        return node;
+                    } catch(...) {
+                        traits::deallocate(alloc, node, 1);
+                        throw;
+
+                    }
                 } /*make_leaf*/
 
                 static Node * make_leaf(value_type && kv_pair,
@@ -260,7 +277,7 @@ namespace xo {
 
                 size_t size() const { return size_; }
                 /* const access */
-                ContentsType const & contents() const { return contents_; }
+                value_type const & contents() const { return contents_; }
                 /* non-const value access.
                  *
                  * editorial: would prefer to return
@@ -270,7 +287,7 @@ namespace xo {
                  * is considered unrelated to std::pair<Key, Value>,
                  * so l-value conversion not allowed
                  */
-                ContentsType & contents() { return contents_; }
+                value_type & contents() { return contents_; }
 
                 Node * parent() const { return parent_; }
                 Node * child(Direction d) const { return child_v_[d]; }
@@ -403,7 +420,7 @@ namespace xo {
                  * .second = value associated with this node
                  * .third  = reduced value
                  */
-                ContentsType contents_;
+                value_type contents_;
                 /* accumulator for some binary function of Values.
                  * must be associative,  since value will be produced
                  * by any ordering of calls to Reduce::combine().
@@ -1230,8 +1247,10 @@ namespace xo {
                  * - f=false for existing node (k already in tree before this call)
                  * - n=node containing key k
                  */
+                template<typename NodeAllocator>
                 static std::pair<bool, RbNode *>
-                insert_aux(value_type const & kv_pair,
+                insert_aux(NodeAllocator & alloc,
+                           value_type const & kv_pair,
                            bool allow_replace_flag,
                            Reduce const & reduce_fn,
                            RbNode ** pp_root)
@@ -1281,7 +1300,9 @@ namespace xo {
                         /* invariant: N->child(d) is nil */
 
                         if (N) {
-                            RbNode * new_node = RbNode::make_leaf(kv_pair,
+                            RbNode * new_node = RbNode::make_leaf(alloc,
+                                                                  kv_pair,
+
                                                                   reduce_fn.leaf(kv_pair.second));
 
                             N->assign_child_reparent(d, new_node);
@@ -1300,7 +1321,8 @@ namespace xo {
                              */
                             return std::make_pair(true, new_node);
                         } else {
-                            *pp_root = RbNode::make_leaf(kv_pair,
+                            *pp_root = RbNode::make_leaf(alloc,
+                                                         kv_pair,
                                                          reduce_fn.leaf(kv_pair.second));
 
                             /* tree with a single node might as well be black */
@@ -1331,7 +1353,9 @@ namespace xo {
                  * - N has no child nodes
                  * - N->parent() != nullptr
                  */
-                static void remove_black_leaf(RbNode *N,
+                template <typename NodeAllocator>
+                static void remove_black_leaf(NodeAllocator & alloc,
+                                              RbNode *N,
                                               Reduce const & reduce_fn,
                                               bool debug_flag,
                                               RbNode **pp_root)
@@ -1339,6 +1363,8 @@ namespace xo {
                         using xo::scope;
                         using xo::xtag;
                         using xo::print::ccs;
+
+                        using traits = std::allocator_traits<NodeAllocator>;
 
                         //constexpr char const *c_self = "RbTreeUtil::remove_black_leaf";
 
@@ -1351,7 +1377,7 @@ namespace xo {
                         if (!P) {
                             /* N was the root node,  tree now empty */
                             *pp_root = nullptr;
-                            delete N;
+                            traits::deallocate(alloc, N, 1);
                             return;
                         }
 
@@ -1360,7 +1386,7 @@ namespace xo {
                          */
                         Direction d = P->replace_child_reparent(N, nullptr);
 
-                        delete N;
+                        traits::deallocate(alloc, N, 1);
 
                         /* need to delay this assignment until
                          * we've determined d
@@ -1784,16 +1810,18 @@ namespace xo {
                  *
                  * return true if a node was removed;  false otherwise.
                  */
-                static bool erase_aux(Key const &k,
+                template<typename NodeAllocator>
+                static bool erase_aux(NodeAllocator & alloc,
+                                      Key const & k,
                                       Reduce const & reduce_fn,
                                       bool debug_flag,
-                                      RbNode **pp_root) {
+                                      RbNode ** pp_root) {
                     using xo::scope;
                     using xo::xtag;
 
                     scope log(XO_DEBUG(debug_flag));
 
-                    RbNode *N = *pp_root;
+                    RbNode * N = *pp_root;
 
                     log && log("enter", xtag("root", N));
 
@@ -1843,7 +1871,7 @@ namespace xo {
 
                     if (X == nullptr) {
                         /* N has 0 or 1 children */
-                        erase_1child_aux(N, reduce_fn, debug_flag, pp_root);
+                        erase_1child_aux(alloc, N, reduce_fn, debug_flag, pp_root);
                     } else {
                         /* R->right_child() is nil by definition */
 
@@ -1934,7 +1962,7 @@ namespace xo {
                                 RbTreeUtil::display_aux(D_Invalid, R, 0 /*depth*/, &log);
                             }
 
-                            erase_1child_aux(N, reduce_fn, debug_flag, pp_root);
+                            erase_1child_aux(alloc, N, reduce_fn, debug_flag, pp_root);
                         } else {
                             /*
                              * here the triangle ascii art indicates a tree structure,
@@ -1954,7 +1982,8 @@ namespace xo {
                              */
 
                             /* will be swapping info in {R, N}:
-                             * everything except RbNode.contents_
+                             * everything except RbNode.contents_.
+                             * Annoying but necessary to have stable Node memory locations
                              */
                             RbNode::swap_locations(R, N, debug_flag);
 
@@ -1978,47 +2007,33 @@ namespace xo {
                              *      / .
                              *     W
                              */
-                            erase_1child_aux(N, reduce_fn, debug_flag, pp_root);
+                            erase_1child_aux(alloc, N, reduce_fn, debug_flag, pp_root);
                         }
 
-#ifdef GOING_AWAY
+#ifdef OBSOLETE
                         /* would be convenient to just make this assignment,
                          * but several disadvantages:
                          * 1. invalidates an iterator pointing to R
                          *    when nearby-in-key-space N gets deleted
                          * 2. gives up key constness
                          */
-                        N->contents_ = R->contents_;
-                        /* (preserving
-                         *   N->color_,
-                         *   N->size_,
-                         *   N->parent_,
-                         *   N->reduced_,
-                         *   N->child_v_[])
-                         */
-
-                        /* now relabel N as new R (R'),
-                         * and relabel R as new N (N').
-                         * Then go to work on reduced problem of deleting N'.
-                         * Problem is redueced since now  N' has 0 or 1 child.
-                         *
-                         * (Doesn't matter that N' contains key,values of R,
-                         *  since we're going to delete it anyway)
-                         */
-                        N = R;
-                        /* (preserving R->parent_, R->child_v_[]) */
+                        N->contents_ = R->contents_; N = R;
 #endif
                     }
 
                     return true;
                 } /*erase_aux*/
 
-                static void erase_1child_aux(RbNode * N,
+                template <typename NodeAllocator>
+                static void erase_1child_aux(NodeAllocator & alloc,
+                                             RbNode * N,
                                              Reduce const & reduce_fn,
                                              bool debug_flag,
                                              RbNode ** pp_root) {
 
                     scope log(XO_DEBUG(debug_flag));
+
+                    using traits = std::allocator_traits<NodeAllocator>;
 
                     RbNode * P = N->parent();
 
@@ -2054,7 +2069,7 @@ namespace xo {
                             }
 
                             log && log("delete red root node", xtag("addr", N));
-                            delete N;
+                            traits::deallocate(alloc, N, 1);
                         } else {
                             assert(false);
 
@@ -2088,24 +2103,24 @@ namespace xo {
                             }
 
                             log && log("delete node", xtag("addr", N));
-                            delete N;
+                            traits::deallocate(alloc, N, 1);
                         } else {
                             /* N is black with no children,
                              * may need rebalance here
                              */
 
                             if (P) {
-                                RbTreeUtil::remove_black_leaf(N, reduce_fn, debug_flag, pp_root);
+                                RbTreeUtil::remove_black_leaf(alloc, N, reduce_fn, debug_flag, pp_root);
                             } else {
                                 /* N was root node */
                                 *pp_root = nullptr;
 
                                 log && log("delete black root node", xtag("addr", N));
-                                delete N;
+                                traits::deallocate(alloc, N, 1);
                             }
                         }
                     }
-                }
+                } /*erase_1child_aux*/
 
                 /* verify that subtree at N is in RB-shape.
                  * will cover subset of RedBlackTree class invariants:
@@ -2120,6 +2135,7 @@ namespace xo {
                  *       f(f(L, Node::value), R)
                  *      where: L is reduced-value for left child,
                  *             R is reduced-value for right child
+                 * RB8. inorder traversal visits all the keys in subtree
                  *
                  * returns the #of nodes in subtree rooted at N.
                  */
@@ -2270,6 +2286,14 @@ namespace xo {
 
                         if (p_black_height)
                             *p_black_height = black_height;
+
+                        /* RB8. inorder traversal visits all the nodes */
+                        std::size_t subtree_z = N ? N->size() : 0ul;
+
+                        XO_EXPECT(i_node == subtree_z,
+                                  tostr(c_self, ": expect visit count = node.size",
+                                        xtag("visit_count", i_node),
+                                        xtag("node.size", 0)));
 
                         return i_node;
                     } /*verify_subtree_ok*/
@@ -2477,7 +2501,7 @@ namespace xo {
             struct NodeTypeTraits<Key, Value, Reduce, false> {
                 using NativeNodeType = Node<Key, Value, Reduce>;
                 using NodeType = NativeNodeType;
-                using ContentsType = typename NodeType::ContentsType;
+                using ContentsType = typename NodeType::value_type;
                 using NodePtrType = NodeType *;
             };
 
@@ -2487,7 +2511,7 @@ namespace xo {
             struct NodeTypeTraits<Key, Value, Reduce, true> {
                 using NativeNodeType = Node<Key, Value, Reduce>;
                 using NodeType = NativeNodeType const;
-                using ContentsType = typename NodeType::ContentsType const;
+                using ContentsType = typename NodeType::value_type const;
                 using NodePtrType = NodeType const *;
             };
 
@@ -2905,9 +2929,29 @@ namespace xo {
             bool is_equal(value_type const & x, value_type const & y) const { return x == y; }
         }; /*SumReduce*/
 
-        /* red-black tree with order statistics
-         */
-        template <typename Key, typename Value, typename Reduce>
+        /** @class RedBlackTree
+         *  @brief red-black tree with order statistics
+         *
+         *  Lazily balanced. Longest path to a leaf is at most 2x the length of shortest path.
+         *
+         *  Maintains order statistics. Accumulates some associative relation on key,value pairs.
+         *
+         *  Can obtain iterator to k'th element of a tree with n nodes in log(n) time.
+         *  Allows behaving as a weak random-access iterator with log(n) cost per query
+         *
+         *  Missing Features:
+         *  1. efficient iterator arithmetic
+         *  2. pretty printing
+         *  3. reflection support
+         *  4. custom allocation support [WIP]
+         *  5. custom key compare
+         *  6. garbage collector integration
+         *  7. std library integration
+         **/
+        template <typename Key,
+                  typename Value,
+                  typename Reduce,
+                  typename Allocator>
         class RedBlackTree {
             static_assert(ReduceConcept<Reduce, Value>);
             //static_assert(requires(Reduce r) { r.nil(); }, "missing .nil() method");
@@ -2916,11 +2960,20 @@ namespace xo {
             using key_type = Key;
             using mapped_type = Value;
             using value_type = std::pair<Key const, Value>;
+            // using key_compare = Compare // not yet
+            using allocator_type = Allocator;
+            using allocator_traits = std::allocator_traits<Allocator>;
+
             using ReducedValue = typename Reduce::value_type;
             using RbTreeLhs = detail::RedBlackTreeLhs<RedBlackTree<Key, Value, Reduce>>;
             using RbTreeConstLhs = detail::RedBlackTreeConstLhs<RedBlackTree<Key, Value, Reduce>>;
             using RbUtil = detail::RbTreeUtil<Key, Value, Reduce>;
             using RbNode = detail::Node<Key, Value, Reduce>;
+
+            using node_type = RbNode;
+            using node_allocator_type = typename std::allocator_traits<Allocator>::template rebind_alloc<node_type>;
+            using node_allocator_traits = std::allocator_traits<node_allocator_type>;
+
             using Direction = detail::Direction;
             using size_type = std::size_t;
             using difference_type = std::ptrdiff_t;
@@ -2928,7 +2981,32 @@ namespace xo {
             using const_iterator = detail::ConstIterator<Key, Value, Reduce>;
 
         public:
-            explicit RedBlackTree(bool debug_flag = false) : debug_flag_{debug_flag} {}
+            explicit RedBlackTree(const allocator_type & alloc = allocator_type{},
+                                  bool debug_flag = false) :
+                                      node_alloc_{alloc},
+                                      debug_flag_{debug_flag} {}
+#ifdef NOT_YET
+            RedBlackTree(const RedBlackTree & other) :
+                node_alloc_{node_allocator_traits::select_on_container_copy_construction(other.node_alloc_)}
+            //, compare_{other.compare_}
+            {
+                copy_from(other);
+            }
+
+            // similar: copy constructor with explicit alloc
+            RedBlackTree(const RedBlackTree & other, const allocator_type & alloc) :
+                node_alloc_{alloc}
+            {
+                copy_from(other);
+            }
+
+            // move ctor
+            RedBlackTree(RedBlackTree && other) noexcept :
+                node_alloc_{std::move(other.node_alloc_)},
+                root_{other.root_}, size_{other.size}
+            // , compare_{other.compare_)}
+            {}
+#endif
 
             bool empty() const { return size_ == 0; }
             size_type size() const { return size_; }
@@ -3145,10 +3223,11 @@ namespace xo {
              */
             RbTreeLhs operator[](Key const & k) {
                 std::pair<bool, RbNode *> insert_result
-                    = RbUtil::insert_aux(value_type(k, Value() /*used iff creating new node*/),
-                                         false /*allow_replace_flag*/,
-                                         this->reduce_fn_,
-                                         &(this->root_));
+                    = RbUtil::template insert_aux<node_allocator_type>(this->node_alloc_,
+                                                                       value_type(k, Value() /*used iff creating new node*/),
+                                                                       false /*allow_replace_flag*/,
+                                                                       this->reduce_fn_,
+                                                                       &(this->root_));
 
                 return RbTreeLhs(this, insert_result.second, k);
             } /*operator[]*/
@@ -3260,7 +3339,8 @@ namespace xo {
                 scope log(XO_DEBUG(c_logging_enabled));
 
                 std::pair<bool, RbNode *> insert_result
-                    = RbUtil::insert_aux(std::move(kv_pair),
+                    = RbUtil::insert_aux(this->node_alloc_,
+                                         std::move(kv_pair),
                                          true /*allow_replace_flag*/,
                                          this->reduce_fn_,
                                          &(this->root_));
@@ -3275,13 +3355,14 @@ namespace xo {
                          insert_result.first));
             } /*insert*/
 
-            bool erase(Key const & k) {
+            bool erase(Key const & key) {
                 scope log(XO_DEBUG(debug_flag_), xtag("size", size_));
                 if (log) {
-                    log("pre", xtag("tree", *this));
+                    log("pre", xtag("key", key), xtag("tree", *this));
                 }
 
-                bool retval = RbUtil::erase_aux(k,
+                bool retval = RbUtil::erase_aux(this->node_alloc_,
+                                                key,
                                                 this->reduce_fn_,
                                                 debug_flag_,
                                                 &(this->root_));
@@ -3321,9 +3402,8 @@ namespace xo {
                 using xo::xtag;
 
                 constexpr const char *c_self = "RedBlackTree::verify_ok";
-                constexpr bool c_logging_enabled = false;
 
-                scope log(XO_DEBUG(c_logging_enabled));
+                scope log(XO_DEBUG(debug_flag_));
 
                 /* RB0. */
                 if (root_ == nullptr) {
@@ -3356,7 +3436,7 @@ namespace xo {
                                 xtag("self.size", size_),
                                 xtag("n", n_node)));
 
-                if (c_logging_enabled)
+                if (debug_flag_)
                     log && log(xtag("size", this->size_),
                                xtag("blackheight", black_height));
 
@@ -3366,13 +3446,21 @@ namespace xo {
             void display() const { RbUtil::display(this->root_, 0); } /*display*/
 
         private:
-            /* #of key/value pairs in this tree */
+
+
+        private:
+            /** allocator state **/
+            node_allocator_type node_alloc_;
+            /** number of nodes in this tree. Each node holds one (key,value) pair **/
             size_t size_ = 0;
-            /* root of red/black tree */
+            /** root of red/black tree. Empty tree has null root. **/
             RbNode * root_ = nullptr;
-            /* .reduce_fn :: (Accumulator x Key) -> Accumulator */
+            /** accumulates custom order statistics;
+             *  for example partial sums of @tparam Values
+             *  reduce_fn_:: (Accumulator x Key) -> Accumulator
+             **/
             Reduce reduce_fn_;
-            /* true to enable debug logging */
+            /** true to enable debug logging **/
             bool debug_flag_ = false;
         }; /*RedBlackTree*/
 

@@ -154,7 +154,7 @@ namespace {
 
     TEST_CASE("rbtree", "[redblacktree]") {
         constexpr bool c_debug_flag = false;
-        RbTree rbtree{c_debug_flag};
+        RbTree rbtree{RbTree::allocator_type{}, c_debug_flag};
 
         std::uint64_t seed = 14950349842636922572UL;
         /* can reseed from /dev/urandom with: */
