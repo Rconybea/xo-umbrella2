@@ -6,12 +6,15 @@
 #pragma once
 
 #include "Node.hpp"
+#include "xo/indentlog/scope.hpp"
 
 namespace xo {
     namespace tree {
         namespace detail {
             /* require:
              * - Reduce::value_type
+             *
+             * matches forward tmplate decl in Node.hpp
              */
             template <typename Key,
                       typename Value,
