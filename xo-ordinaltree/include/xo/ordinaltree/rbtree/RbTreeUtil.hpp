@@ -896,7 +896,7 @@ namespace xo {
                         using xo::xtag;
                         using xo::print::ccs;
 
-                        using traits = std::allocator_traits<NodeAllocator>;
+                        using traits = xo::gc::gc_allocator_traits<NodeAllocator>;
 
                         //constexpr char const *c_self = "RbTreeUtil::remove_black_leaf";
 
@@ -1565,7 +1565,7 @@ namespace xo {
 
                     scope log(XO_DEBUG(debug_flag));
 
-                    using traits = std::allocator_traits<NodeAllocator>;
+                    using traits = xo::gc::gc_allocator_traits<NodeAllocator>;
 
                     RbNode * P = N->parent();
 

@@ -278,8 +278,8 @@ namespace xo {
             // allocator_type
             using reference = value_type &;
             using const_reference = value_type const &;
-            // pointer = std::allocator_traits<Allocator>::pointer;
-            // const_pointer = std::allocator_traits<Allocator>::const_pointer;
+            // pointer = xo::gc::gc_allocator_traits<Allocator>::pointer;
+            // const_pointer = xo::gc::gc_allocator_traits<Allocator>::const_pointer;
             using const_iterator = detail::ConstIterator<Key, Value, Properties>;
             // reverse_iterator
             // const_reverse_iterator

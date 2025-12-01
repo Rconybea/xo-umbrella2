@@ -109,7 +109,7 @@ namespace xo {
             using value_type = std::pair<Key const, Value>;
             // using key_compare = Compare // not yet
             using allocator_type = Allocator;
-            using allocator_traits = std::allocator_traits<Allocator>;
+            using allocator_traits = xo::gc::gc_allocator_traits<Allocator>;
 
             using ReducedValue = typename Reduce::value_type;
             using RbUtil = detail::RbTreeUtil<Key, Value, Reduce>;
@@ -118,8 +118,8 @@ namespace xo {
             using RbTreeConstLhs = detail::RedBlackTreeConstLhs<RedBlackTree>;
 
             using node_type = RbNode;
-            using node_allocator_type = typename std::allocator_traits<Allocator>::template rebind_alloc<node_type>;
-            using node_allocator_traits = std::allocator_traits<node_allocator_type>;
+            using node_allocator_type = typename xo::gc::gc_allocator_traits<Allocator>::template rebind_alloc<node_type>;
+            using node_allocator_traits = xo::gc::gc_allocator_traits<node_allocator_type>;
 
             using Direction = detail::Direction;
             using size_type = std::size_t;

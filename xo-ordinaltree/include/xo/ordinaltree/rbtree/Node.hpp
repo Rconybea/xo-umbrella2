@@ -47,7 +47,7 @@ namespace xo {
                 static Node * make_leaf(NodeAllocator& alloc,
                                         value_type const & kv_pair,
                                         ReducedValue const & leaf_rv) {
-                    using traits = std::allocator_traits<NodeAllocator>;
+                    using traits = xo::gc::gc_allocator_traits<NodeAllocator>;
 
                     // get memory
                     Node * node = traits::allocate(alloc, 1);
