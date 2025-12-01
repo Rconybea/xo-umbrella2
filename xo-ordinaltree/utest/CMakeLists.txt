@@ -15,6 +15,7 @@ add_test(NAME ${SELF_EXE} COMMAND ${SELF_EXE})
 # ----------------------------------------------------------------
 # internal dependencies: refcnt, ...
 
+xo_self_dependency(${SELF_EXE} xo_ordinaltree)
 xo_dependency(${SELF_EXE} refcnt)
 xo_dependency(${SELF_EXE} indentlog)
 xo_dependency(${SELF_EXE} randomgen)

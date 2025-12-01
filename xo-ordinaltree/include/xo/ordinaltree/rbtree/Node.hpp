@@ -6,6 +6,7 @@
 #pragma once
 
 #include "RbTypes.hpp"
+#include "xo/allocutil/gc_allocator_traits.hpp"
 #include <utility>
 
 namespace xo {
@@ -62,11 +63,13 @@ namespace xo {
                     }
                 } /*make_leaf*/
 
+#ifdef OBSOLETE
                 static Node * make_leaf(value_type && kv_pair,
                                         ReducedValue const & leaf_rv) {
                     return new Node(kv_pair,
                                     std::pair<ReducedValue, ReducedValue>(leaf_rv, leaf_rv));
                 } /*make_leaf*/
+#endif
 
                 /* return #of key/vaue pairs in tree rooted at x. */
                 static size_t tree_size(Node *x) {

@@ -76,6 +76,7 @@ set(DOX_EXCLUDE_PATTERNS [=[
 
 add_subdirectory(xo-cmake)
 add_subdirectory(xo-indentlog)
+add_subdirectory(xo-allocutil)
 add_subdirectory(xo-refcnt)
 add_subdirectory(xo-subsys)
 add_subdirectory(xo-randomgen)
@@ -90,7 +91,6 @@ add_subdirectory(xo-unit)
 add_subdirectory(xo-pyunit)
 add_subdirectory(xo-callback)
 #
-add_subdirectory(xo-allocutil)
 add_subdirectory(xo-alloc)
 add_subdirectory(xo-object)
 #

@@ -16,15 +16,41 @@ namespace xo {
          *  for garbage-collector-enabled allocators
          *
          *  allocator A can identify itself as a copying collector:
+         *
          *  1. provide A::object_interface
-         *       A::object_interface = xo::Object
-         *  2. provide A::is_incremental_collector
-         *       A::is_incremental_collector = std::true_type
-         *     Collectible objects must:
+         *     per-object header interface: tells garbage collector
+         *     how to navigate object graph.
+         *       A::gc_object_interface = xo::IObject
+         *     contains virtual methods; classes that can be garbage
+         *     collected should inherit this interface
+         *
+         *  2. provide A::has_incremental_gc_interface
+         *       A::has_incremental_gc_interface = std::true_type
+         *     This doesn't imply A is a garbage-collecting allocator;
+         *     it just implies that it supports a collection api.
+         *     - xo::gc::ArenaAlloc has a collection API, but does not
+         *       provide garbage collection
+         *     - xo::gc::GC has a collection API and also provides
+         *       garbage collection
+         *     
+         *     GC-allocated objects must:
          *     2a. inherit A::object_interface
          *     2b. implement A::object_interface::_shallow_size()
          *     2c. implement A::object_interface::_shallow_copy(alloc)
          *     2d. implement A::object_interface::_forward_children(alloc)
+         *     in multiple inheritance scenarios
+         *     2e. implement A::object_interface::_offset_destination(src)
+         *     
+         *  Design Notes:
+         *  - virtual-method choice requires vtable pointer per object;
+         *    but zero *marginal* space cost for types that would have
+         *    a vtable pointer anyway.
+         *  - can still handle non-vtable objects, by providing a
+         *    object-interface-inheriting wrapper.
+         *  - less-intrusive (though less space-efficient) alternative
+         *    would be to use a type-registration system;
+         *    then GC hooks could be setup independently of a subject type.
+         *    (watch out for pimpl implementations though!)
          **/
         template <typename Allocator>
         struct gc_allocator_traits : std::allocator_traits<Allocator> {
@@ -34,15 +60,15 @@ namespace xo {
 
             // default: allocator A fallback to standard non-gc allocator behavior
             template <typename A, typename = void>
-            struct is_incremental_collector : std::false_type {};
+            struct has_incremental_gc_interface : std::false_type {};
 
-            // opt-in: A provides nested type 'is_incremental_collector':
+            // opt-in: A provides nested type 'has_incremental_collector_interface':
             // struct A {
             //   using is_incremental_collector = std::true_type;
             // };
             template <typename A>
-            struct is_incremental_collector<A, std::void_t<typename A::is_incremental_collector>> :
-                A::is_incremental_collector {};
+            struct has_incremental_gc_interface<A, std::void_t<typename A::has_incremental_gc_interface>> :
+                A::has_incremental_gc_interface {};
 
             // default: empty object interface.
             // classes that want to conditionally support GC
@@ -63,10 +89,10 @@ namespace xo {
              *  allocator will include:
              *
              *  struct GC {
-             *    using is_incremental_collector = std::true_type;
+             *    using has_incremental_gc_interface = std::true_type;
              *  };
              **/
-            static inline constexpr bool is_incremental_collector_v = is_incremental_collector<Allocator>::value;
+            static inline constexpr bool has_incremental_gc_interface_v = has_incremental_gc_interface<Allocator>::value;
 
         };
     } /*namespace gc*/

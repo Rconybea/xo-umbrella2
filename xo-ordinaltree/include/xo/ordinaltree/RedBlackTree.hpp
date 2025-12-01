@@ -112,10 +112,10 @@ namespace xo {
             using allocator_traits = std::allocator_traits<Allocator>;
 
             using ReducedValue = typename Reduce::value_type;
-            using RbTreeLhs = detail::RedBlackTreeLhs<RedBlackTree<Key, Value, Reduce>>;
-            using RbTreeConstLhs = detail::RedBlackTreeConstLhs<RedBlackTree<Key, Value, Reduce>>;
             using RbUtil = detail::RbTreeUtil<Key, Value, Reduce>;
             using RbNode = detail::Node<Key, Value, Reduce>;
+            using RbTreeLhs = detail::RedBlackTreeLhs<RedBlackTree>;
+            using RbTreeConstLhs = detail::RedBlackTreeConstLhs<RedBlackTree>;
 
             using node_type = RbNode;
             using node_allocator_type = typename std::allocator_traits<Allocator>::template rebind_alloc<node_type>;
@@ -442,13 +442,14 @@ namespace xo {
             } /*find_sum_glb*/
 
             void clear() {
-                auto visitor_fn = [](RbNode const * x, uint32_t /*d*/) {
+                auto visitor_fn = [this](RbNode const * x, uint32_t /*d*/) {
                     /* RbUtil.postorder_node_visitor() isn't expecting us to
                      * alter node,  but will not examine it after it's deleted
                      */
                     RbNode * xx = const_cast<RbNode *>(x);
 
-                    delete xx;
+                    node_allocator_traits::deallocate(node_alloc_, xx, 1);
+                    // delete x
                 };
 
                 RbUtil::postorder_node_visitor(this->root_,

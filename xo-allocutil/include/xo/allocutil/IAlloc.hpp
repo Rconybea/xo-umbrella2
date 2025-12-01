@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "gc_allocator_traits.hpp"
 #include <memory>
 #include <cstdint>
 
@@ -25,8 +26,17 @@ namespace xo {
          *
          *  See class GC for copying incremental collector.
          *  See class ArenaAlloc for arena allocator
+         *
+         *  In either case deallocation is trivial
          **/
         class IAlloc {
+        public:
+            using pointer_type = std::byte *;
+            using size_type = std::size_t;
+            /** traits: see gc_allocator_traits<IAlloc> **/
+            using gc_object_interface = xo::IObject;
+            using has_incremental_gc_interface = std::true_type;
+
         public:
             virtual ~IAlloc() {}
 
@@ -54,6 +64,23 @@ namespace xo {
             static inline std::size_t with_padding(std::size_t z) {
                 return z + alloc_padding(z);
             }
+
+            // ----- std::allocator interface -----
+
+            std::byte * allocate(std::size_t n) {
+                return this->alloc(n);
+            }
+                
+            /** std::allocator locality hint. Not used for now **/
+            std::byte * allocate(std::size_t n, const void * hint) {
+                (void)hint;
+                return this->alloc(n);
+            }
+
+            /** deallocation trivial for IAlloc **/
+            void deallocate(std::byte *, std::size_t) {}
+
+            // ----- IAlloc methods -----
 
             /** optional name for this allocator; labelling for diagnostics **/
             virtual const std::string & name() const = 0;

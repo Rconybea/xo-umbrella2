@@ -779,7 +779,6 @@ namespace xo {
                  * - f=false for existing node (k already in tree before this call)
                  * - n=node containing key k
                  */
-                template<typename NodeAllocator>
                 static std::pair<bool, RbNode *>
                 insert_aux(NodeAllocator & alloc,
                            value_type const & kv_pair,
@@ -885,7 +884,6 @@ namespace xo {
                  * - N has no child nodes
                  * - N->parent() != nullptr
                  */
-                template <typename NodeAllocator>
                 static void remove_black_leaf(NodeAllocator & alloc,
                                               RbNode *N,
                                               Reduce const & reduce_fn,
@@ -1342,7 +1340,6 @@ namespace xo {
                  *
                  * return true if a node was removed;  false otherwise.
                  */
-                template<typename NodeAllocator>
                 static bool erase_aux(NodeAllocator & alloc,
                                       Key const & k,
                                       Reduce const & reduce_fn,
@@ -1556,7 +1553,6 @@ namespace xo {
                     return true;
                 } /*erase_aux*/
 
-                template <typename NodeAllocator>
                 static void erase_1child_aux(NodeAllocator & alloc,
                                              RbNode * N,
                                              Reduce const & reduce_fn,
