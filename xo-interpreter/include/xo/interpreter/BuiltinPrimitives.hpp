@@ -4,7 +4,7 @@
  **/
 
 #include "xo/object/ObjectConverter.hpp"
-#include "xo/alloc/IAlloc.hpp"
+#include "xo/allocutil/IAlloc.hpp"
 #include "Primitive.hpp"
 #include "GlobalEnv.hpp"
 

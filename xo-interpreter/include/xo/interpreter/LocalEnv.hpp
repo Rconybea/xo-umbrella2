@@ -2,7 +2,7 @@
 
 #include "Env.hpp"
 #include "CVector.hpp"
-#include "xo/alloc/IAlloc.hpp"
+#include "xo/allocutil/IAlloc.hpp"
 #include "xo/expression/LocalSymtab.hpp"
 #include <cstddef>
 #include <cstdint>

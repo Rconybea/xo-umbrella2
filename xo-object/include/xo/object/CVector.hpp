@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "xo/alloc/IAlloc.hpp"
+#include "xo/allocutil/IAlloc.hpp"
 #include <cstdint>
 
 namespace xo {

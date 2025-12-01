@@ -263,6 +263,7 @@ GcStateDescription::GcStateDescription(const GcGenerationDescription & nursery,
 
 using xo::gp;
 using xo::up;
+using xo::IObject;
 using xo::Object;
 using xo::obj::List;
 using xo::obj::Integer;
@@ -342,7 +343,7 @@ AppState::AppState()
     Object::mm = gc_.get();
 
     for (auto & x: gc_root_v_)
-        gc_->add_gc_root(x.ptr_address());
+        gc_->add_gc_root(reinterpret_cast<IObject **>(x.ptr_address()));
 
     gc_->disable_gc();
 }

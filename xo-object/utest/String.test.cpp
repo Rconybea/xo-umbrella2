@@ -145,7 +145,7 @@ namespace xo {
                                    xtag("alloc_z", alloc_z));
                         log && log(xtag("expected_alloc_z", expected_alloc_z));
 
-                        gc->add_gc_root(reinterpret_cast<Object **>(sv[i].ptr_address()));
+                        gc->add_gc_root(reinterpret_cast<IObject **>(sv[i].ptr_address()));
 
                         REQUIRE(gc->allocated() % sizeof(std::uintptr_t) == 0);
                         REQUIRE(gc->allocated() == expected_alloc_z);

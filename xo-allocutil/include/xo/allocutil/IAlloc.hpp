@@ -1,7 +1,7 @@
-/* file IAlloc.hpp
+/** @file IAlloc.hpp
  *
- * author: Roland Conybeare, Jul 2025
- */
+ *  @author: Roland Conybeare, Jul 2025
+ **/
 
 #pragma once
 
@@ -12,11 +12,11 @@ namespace xo {
     template <typename T>
     using up = std::unique_ptr<T>;
 
-    class Object;
+    class IObject;
 
     namespace gc {
         /** @class IAllocator
-         *  @brief arena allocation interface with limited garbage collector support
+         *  @brief Abstract API for allocation interface
          *
          *  Garbage collector support methods:
          *  - checkpoint()
@@ -30,12 +30,30 @@ namespace xo {
         public:
             virtual ~IAlloc() {}
 
-            /** compute padding to add to an allocation of size z to bring it up to
-             *  a multiple of word size (8 bytes on x86_64)
-             **/
-            static std::uint32_t alloc_padding(std::size_t z);
-            /** z + alloc_padding(z) **/
-            static std::size_t with_padding(std::size_t z);
+            static inline std::uint32_t alloc_padding(std::size_t z) {
+                /* word size for alignment */
+                constexpr uint32_t c_bpw = sizeof(std::uintptr_t);
+
+                /* round up to multiple of c_bpw, but map 0 -> 0
+                 * (table assuming c_bpw==8)
+                 *
+                 *   z%c_bpw   dz
+                 *   ------------
+                 *         0    0
+                 *         1    7
+                 *         2    6
+                 *        ..   ..
+                 *         7    1
+                 */
+                std::uint32_t dz = (c_bpw - (z % c_bpw)) % c_bpw;
+                z += dz;
+
+                return dz;
+            }
+
+            static inline std::size_t with_padding(std::size_t z) {
+                return z + alloc_padding(z);
+            }
 
             /** optional name for this allocator; labelling for diagnostics **/
             virtual const std::string & name() const = 0;
@@ -81,23 +99,30 @@ namespace xo {
             /** true iff this allocator owns object at address @p src.
              *  Use to assist Object::_shallow_move
              **/
-            virtual bool check_owned(Object * src) const;
+            virtual bool check_owned(IObject * /*src*/) const { return false; }
             /** true iff object at address @p src must move as part of
              *  in-progress collection phase
              **/
-            virtual bool check_move(Object * src) const;
-            /** perform assignment
+            virtual bool check_move(IObject * /*src*/) const { return false; }
+            /** write barrier for collector.  perform assignment
              *    @code
              *    *lhs = rhs
              *    @endcode
              *  plus additional book keeping if needed (e.g. in @ref GC)
              *  Default implementation just does the assignment.
              **/
-            virtual void assign_member(Object * parent, Object ** lhs, Object * rhs);
+            virtual void assign_member(IObject * /*parent*/,
+                                       IObject ** lhs,
+                                       IObject * rhs) { *lhs = rhs; }
             /** allocate @p z bytes for copy of object at @p src.
              *  Only used in @ref GC.  Default implementation asserts and returns nullptr
              **/
-            virtual std::byte * alloc_gc_copy(std::size_t z, const void * src);
+            virtual std::byte * alloc_gc_copy(std::size_t /*z*/, const void * /*src*/) {
+                // LCOV_EXCL_START
+                //assert(false);
+                return nullptr;
+                // LCOV_EXCL_STOP
+            }
         };
     } /*namespace gc*/
 

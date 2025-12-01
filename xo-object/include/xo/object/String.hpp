@@ -5,7 +5,7 @@
 
 #include "xo/alloc/Object.hpp"
 #include "ObjectConversion.hpp"
-#include "xo/alloc/IAlloc.hpp"
+#include "xo/allocutil/IAlloc.hpp"
 #include "xo/indentlog/print/tag.hpp"
 
 namespace xo {

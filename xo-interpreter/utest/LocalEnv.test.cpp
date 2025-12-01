@@ -91,12 +91,12 @@ namespace xo {
                     std::size_t n = tc.contents_.size();
 
                     gp<Integer> x = Integer::make(gc.get(), 42);
-                    gc->add_gc_root(reinterpret_cast<Object **>(&x));
+                    gc->add_gc_root(reinterpret_cast<IObject **>(&x));
                     REQUIRE(gc->tospace_generation_of(x.ptr()) == generation_result::nursery);
 
                     gp<LocalEnv> frame = LocalEnv::make(gc.get(), nullptr /*parent*/, nullptr /*symtab*/, n);
                     LocalEnv ** frame_pp = frame.ptr_address();
-                    gc->add_gc_root(reinterpret_cast<Object **>(frame_pp));
+                    gc->add_gc_root(reinterpret_cast<IObject **>(frame_pp));
 
                     /* verifying allocated in N1 */
                     REQUIRE(gc->tospace_generation_of(frame.ptr()) == generation_result::nursery);

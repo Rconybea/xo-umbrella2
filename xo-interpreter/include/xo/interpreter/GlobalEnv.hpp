@@ -3,7 +3,7 @@
 #pragma once
 
 #include "Env.hpp"
-#include "xo/alloc/IAlloc.hpp"
+#include "xo/allocutil/IAlloc.hpp"
 #include "xo/expression/GlobalSymtab.hpp"
 
 namespace xo {

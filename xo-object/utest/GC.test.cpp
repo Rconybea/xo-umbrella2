@@ -59,10 +59,10 @@ namespace xo {
             Object::mm = gc.get();
 
             gp<List> l = List::list(Integer::make(gc.get(), 1));
-            gc->add_gc_root(reinterpret_cast<Object**>(l.ptr_address()));
+            gc->add_gc_root(reinterpret_cast<IObject**>(l.ptr_address()));
 
             gp<List> l2 = List::list(Integer::make(gc.get(), 10));
-            gc->add_gc_root(reinterpret_cast<Object**>(l2.ptr_address()));
+            gc->add_gc_root(reinterpret_cast<IObject**>(l2.ptr_address()));
 
             {
                 REQUIRE(l->size() == 1);
@@ -447,7 +447,7 @@ namespace xo {
                 REQUIRE(root_v_.size() == r_);
 
                 for (auto & root : root_v_)
-                    gc->add_gc_root(root.ptr_address());
+                    gc->add_gc_root(reinterpret_cast<IObject**>(root.ptr_address()));
             }
 
             void RandomMutationModel::generate_random_mutations(xoshiro256ss * p_rgen)
@@ -495,7 +495,7 @@ namespace xo {
 
                     if (w2_.at(j)->_is_forwarded()) {
                         /* w2[i] survived GC */
-                        w2_[j] = w2_[j]->_destination();
+                        w2_[j] = Object::from(w2_[j]->_destination());
                         REQUIRE(w2_[j].ptr());
                     } else {
                         /* w2[j] is garbage, replace */

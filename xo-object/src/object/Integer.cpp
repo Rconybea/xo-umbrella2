@@ -23,7 +23,7 @@ namespace xo {
         }
 
         gp<Integer>
-        Integer::from(gp<Object> x) {
+        Integer::from(gp<IObject> x) {
             return gp<Integer>::from(x);
         }
 

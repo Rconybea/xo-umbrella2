@@ -23,7 +23,7 @@ namespace xo {
             /** create instance holding integer value @p x **/
             static gp<Integer> make(IAlloc * mm, int_type x);
             /** downcast from @p x iff x is actually an Integer.  Otherwise nullptr **/
-            static gp<Integer> from(gp<Object> x);
+            static gp<Integer> from(gp<IObject> x);
 
             int_type value() const { return value_; }
 

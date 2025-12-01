@@ -21,7 +21,7 @@ namespace xo {
         List::nil = new List(nullptr, nullptr);
 
         gp<List>
-        List::from(gp<Object> x) {
+        List::from(gp<IObject> x) {
             return dynamic_cast<List *>(x.ptr());
         }
 
@@ -99,7 +99,7 @@ namespace xo {
             return sizeof(List);
         }
 
-        Object *
+        IObject *
         List::_shallow_copy(gc::IAlloc * gc) const
         {
             assert(!(this->is_nil()));

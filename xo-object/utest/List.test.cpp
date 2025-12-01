@@ -124,7 +124,7 @@ namespace xo {
                         REQUIRE(l1->size() == v.size());
 
                         root_v[i] = l1;
-                        gc->add_gc_root(reinterpret_cast<Object **>(root_v[i].ptr_address()));
+                        gc->add_gc_root(reinterpret_cast<IObject **>(root_v[i].ptr_address()));
 
                         REQUIRE(gc->allocated() % sizeof(std::uintptr_t) == 0);
                         REQUIRE(gc->allocated() == expected_alloc_z);
@@ -285,7 +285,7 @@ namespace xo {
                         //REQUIRE(l1->size() == v.size());  // lwill loop forever
 
                         root_v[i] = l1;
-                        gc->add_gc_root(reinterpret_cast<Object **>(root_v[i].ptr_address()));
+                        gc->add_gc_root(reinterpret_cast<IObject **>(root_v[i].ptr_address()));
 
                         REQUIRE(gc->allocated() % sizeof(std::uintptr_t) == 0);
                         REQUIRE(gc->allocated() == expected_alloc_z);

@@ -90,6 +90,7 @@ add_subdirectory(xo-unit)
 add_subdirectory(xo-pyunit)
 add_subdirectory(xo-callback)
 #
+add_subdirectory(xo-allocutil)
 add_subdirectory(xo-alloc)
 add_subdirectory(xo-object)
 #

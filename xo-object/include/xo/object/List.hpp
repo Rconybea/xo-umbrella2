@@ -18,7 +18,7 @@ namespace xo {
             static gp<List> nil;
 
             /** @return non-null iff @p x is actually a List cell (or nil) **/
-            static gp<List> from(gp<Object> x);
+            static gp<List> from(gp<IObject> x);
 
             /** @return list with first element @p car, and tail @p cdr **/
             static gp<List> cons(gp<Object> car, gp<List> cdr);
@@ -44,7 +44,7 @@ namespace xo {
             /** @return first element in list; synonym for @ref head **/
             gp<Object> car() const { return head_; }
             /** @return remainder of list after first element; synonym for @ref rest **/
-            gp<Object> cdr() const { return rest_; }
+            gp<List> cdr() const { return rest_; }
 
             /** @return number of top-level elements in this list **/
             std::size_t size() const;
@@ -58,7 +58,7 @@ namespace xo {
             virtual TaggedPtr self_tp() const final override;
             virtual void display(std::ostream & os) const final override;
             virtual std::size_t _shallow_size() const final override;
-            virtual Object * _shallow_copy(gc::IAlloc * gc) const final override;
+            virtual IObject * _shallow_copy(gc::IAlloc * gc) const final override;
             virtual std::size_t _forward_children(gc::IAlloc * gc) final override;
 
         private:
