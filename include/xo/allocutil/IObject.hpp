@@ -92,6 +92,20 @@ namespace xo {
          **/
         virtual std::size_t _forward_children(gc::IAlloc * gc) = 0;
     };
+
+    /** @class Cpof
+     *  @brief argument to operator new used for garbage collector evacuation phase
+     *
+     *  Tag overloaded operator new to activate allocation policy based on location
+     *  in memory of source object.
+     **/
+    class Cpof {
+    public:
+        explicit Cpof(gc::IAlloc * mm, const IObject * src) : mm_{mm}, src_{src} {}
+
+        gc::IAlloc * mm_ = nullptr;
+        const void * src_ = nullptr;
+    };
 }
 
 /* end IObject.hpp */
