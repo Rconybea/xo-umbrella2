@@ -46,9 +46,11 @@ namespace xo {
         public:
             virtual ~IAlloc() {}
 
+            /** word size for alignment **/
+            static constexpr uint32_t c_alloc_alignment = sizeof(std::uintptr_t);
+
             static inline std::uint32_t alloc_padding(std::size_t z) {
-                /* word size for alignment */
-                constexpr uint32_t c_bpw = sizeof(std::uintptr_t);
+                constexpr uint32_t c_bpw = c_alloc_alignment;
 
                 /* round up to multiple of c_bpw, but map 0 -> 0
                  * (table assuming c_bpw==8)
