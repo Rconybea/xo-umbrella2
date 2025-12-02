@@ -18,10 +18,11 @@ namespace xo {
              */
             template <typename Key,
                       typename Value,
-                      typename Reduce>
+                      typename Reduce,
+                      typename GcObjectInterface>
             class RbTreeUtil {
             public:
-                using RbNode = Node<Key, Value, Reduce>;
+                using RbNode = Node<Key, Value, Reduce, GcObjectInterface>;
                 using ReducedValue = typename Reduce::value_type;
                 using value_type = std::pair<Key const, Value>;
 

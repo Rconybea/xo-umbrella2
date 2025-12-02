@@ -2,7 +2,7 @@
 
 # note: tests in this directory use Catch2-provided main
 set(SELF_EXE utest.tree)
-set(SELF_SOURCE_FILES tree_utest_main.cpp redblacktree.cpp bplustree.cpp)
+set(SELF_SOURCE_FILES tree_utest_main.cpp redblacktree.cpp bplustree.cpp RedBlackTree-gc.test.cpp)
 
 add_executable(${SELF_EXE} ${SELF_SOURCE_FILES})
 xo_include_options2(${SELF_EXE})
@@ -16,6 +16,7 @@ add_test(NAME ${SELF_EXE} COMMAND ${SELF_EXE})
 # internal dependencies: refcnt, ...
 
 xo_self_dependency(${SELF_EXE} xo_ordinaltree)
+xo_dependency(${SELF_EXE} xo_alloc)
 xo_dependency(${SELF_EXE} refcnt)
 xo_dependency(${SELF_EXE} indentlog)
 xo_dependency(${SELF_EXE} randomgen)

@@ -6,14 +6,18 @@
 #pragma once
 
 #include "RbTypes.hpp"
+#include "xo/reflect/Reflect.hpp"
+#include "xo/indentlog/scope.hpp"
+#include "xo/allocutil/IObject.hpp"
 #include "xo/allocutil/gc_allocator_traits.hpp"
+#include <cassert>
 #include <utility>
 
 namespace xo {
     namespace tree {
         namespace detail {
             /** see xo/ordinaltree/rbtree/RbTreeUtil.hpp */
-            template <typename Key, typename Value, typename Reduce>
+            template <typename Key, typename Value, typename Reduce, typename GcObjectInterface>
             class RbTreeUtil;
 
             /* xo::tree::detail::Node
@@ -25,19 +29,23 @@ namespace xo {
              */
             template <typename Key,
                       typename Value,
-                      typename Reduce>
-            class Node {
+                      typename Reduce,
+                      typename GcObjectInterface>
+            class Node : public GcObjectInterface {
             public:
                 using ReducedValue = typename Reduce::value_type;
                 using ContentsType = std::pair<Key const, Value>;
                 using value_type = std::pair<Key const , Value>;
+                using Reflect = xo::reflect::Reflect;
+                using TaggedPtr = xo::reflect::TaggedPtr;
+                using IObject = xo::IObject;
 
             public:
                 Node() = default;
                 Node(value_type const & kv_pair,
                      std::pair<ReducedValue, ReducedValue> const & r)
                     : color_(C_Red), size_(1), contents_{kv_pair}, reduced_(r) {}
-                Node(value_type && kv_pair,
+                 Node(value_type && kv_pair,
                      std::pair<ReducedValue, ReducedValue> && r)
                     : color_(C_Red), size_(1),
                       contents_{std::move(kv_pair)},
@@ -115,8 +123,7 @@ namespace xo {
                 static std::pair<ReducedValue,
                                  ReducedValue> reduced_pair(Reduce r, Node const * x)
                     {
-                        if(!x)
-                            assert(false);
+                        assert(x != nullptr);
 
                         ReducedValue r1 = r(reduce_aux(r, x->left_child()),
                                             x->value());
@@ -294,7 +301,7 @@ namespace xo {
                                xtag("r2", this->reduced2()));
                 } /*local_recalc_size*/
 
-            private:
+            private: 
                 void assign_color(Color x) { this->color_ = x; }
                 void assign_size(size_t z) { this->size_ = z; }
 
@@ -336,8 +343,24 @@ namespace xo {
                     }
                 } /*replace_child_reparent*/
 
-                friend class RbTreeUtil<Key, Value, Reduce>;
-                friend class xo::tree::RedBlackTree<Key, Value, Reduce>;
+                // ----- (possibly) inherited from GcObjectInterface -----
+                virtual TaggedPtr self_tp() const { return Reflect::make_tp(const_cast<Node*>(this)); }
+                virtual void display(std::ostream & os) const { os << "<Node>"; }
+                virtual std::size_t _shallow_size() const { return sizeof(*this); }
+                /* note: only relevant when GcObjectInterface is xo::IObject */
+
+                template <typename T = GcObjectInterface>
+                virtual IObject * _shallow_copy(gc::IAlloc * gc) const
+                -> std::enable_if_t<std::is_base_of_v<xo::IObject:
+                {
+                    /* assert appropriate here. code will be present but dead when assert fails */
+                    xo::Cpof cpof(gc, this);
+                    return new (cpof) Node(*this);
+                }
+
+                friend class RbTreeUtil<Key, Value, Reduce, GcObjectInterface>;
+                template <typename Key1, typename Value1, typename Reduce1, typename Allocator>
+                friend class xo::tree::RedBlackTree;
 
             private:
                 /* red | black */

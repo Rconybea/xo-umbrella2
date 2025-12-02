@@ -111,21 +111,22 @@ namespace xo {
             using allocator_type = Allocator;
             using allocator_traits = xo::gc::gc_allocator_traits<Allocator>;
 
+            using GcObjectInterface = allocator_traits::template object_interface<Allocator>;
             using ReducedValue = typename Reduce::value_type;
-            using RbUtil = detail::RbTreeUtil<Key, Value, Reduce>;
-            using RbNode = detail::Node<Key, Value, Reduce>;
+            using RbUtil = detail::RbTreeUtil<Key, Value, Reduce, GcObjectInterface>;
+            using RbNode = detail::Node<Key, Value, Reduce, GcObjectInterface>;
             using RbTreeLhs = detail::RedBlackTreeLhs<RedBlackTree>;
             using RbTreeConstLhs = detail::RedBlackTreeConstLhs<RedBlackTree>;
 
             using node_type = RbNode;
-            using node_allocator_type = typename xo::gc::gc_allocator_traits<Allocator>::template rebind_alloc<node_type>;
+            using node_allocator_type = allocator_traits::template rebind_alloc<node_type>;
             using node_allocator_traits = xo::gc::gc_allocator_traits<node_allocator_type>;
 
             using Direction = detail::Direction;
             using size_type = std::size_t;
             using difference_type = std::ptrdiff_t;
-            using iterator = detail::Iterator<Key, Value, Reduce>;
-            using const_iterator = detail::ConstIterator<Key, Value, Reduce>;
+            using iterator = detail::Iterator<Key, Value, Reduce, GcObjectInterface>;
+            using const_iterator = detail::ConstIterator<Key, Value, Reduce, GcObjectInterface>;
 
         public:
             explicit RedBlackTree(const allocator_type & alloc = allocator_type{},
@@ -614,10 +615,11 @@ namespace xo {
 
         template <typename Key,
                   typename Value,
-                  typename Reduce>
+                  typename Reduce,
+                  typename Allocator>
         inline std::ostream &
-        operator<<(std::ostream &os,
-                   RedBlackTree<Key, Value, Reduce> const &tree)
+        operator<<(std::ostream & os,
+                   RedBlackTree<Key, Value, Reduce, Allocator> const & tree)
         {
             tree.display();
             return os;
@@ -626,10 +628,11 @@ namespace xo {
         template <typename Key,
                   typename Value,
                   typename Reduce,
+                  typename GcObjectInterface,
                   bool IsConst>
         inline std::ostream &
         operator<<(std::ostream & os,
-                   detail::IteratorBase<Key, Value, Reduce, IsConst> const & iter)
+                   detail::IteratorBase<Key, Value, Reduce, GcObjectInterface, IsConst> const & iter)
         {
             iter.print(os);
             return os;

@@ -14,6 +14,7 @@ namespace xo {
     using up = std::unique_ptr<T>;
 
     class IObject;
+    class Object;
 
     namespace gc {
         /** @class IAllocator
@@ -31,10 +32,15 @@ namespace xo {
          **/
         class IAlloc {
         public:
+            /** type-erased allocator **/
+            using value_type = std::byte;
             using pointer_type = std::byte *;
             using size_type = std::size_t;
-            /** traits: see gc_allocator_traits<IAlloc> **/
-            using gc_object_interface = xo::IObject;
+            /** traits: see gc_allocator_traits<IAlloc>
+             *
+             *  want Object here (not IObject) to get Object::_forward_to()
+             **/
+            using gc_object_interface = xo::Object;
             using has_incremental_gc_interface = std::true_type;
 
         public:
@@ -151,6 +157,66 @@ namespace xo {
                 // LCOV_EXCL_STOP
             }
         };
+
+        /** allocator wrapper (in the style of std::allocator)
+         **/
+        template <typename T>
+        struct allocator {
+        public:
+            using value_type = T;
+            using pointer = T *;
+            using const_pointer = const T *;
+            using reference = T &;
+            using const_reference = const T &;
+            using size_type = IAlloc::size_type;
+            using difference_type = std::ptrdiff_t;
+            
+            using gc_object_interface = IAlloc::gc_object_interface;
+            using has_incremental_gc_interface = IAlloc::has_incremental_gc_interface;
+
+            /** rebind is for typed allocators. since IAlloc is untyped,
+             *  we want degenerate version
+             **/
+            template <typename U>
+            struct rebind {
+                using other = allocator<U>;
+            };
+
+        public:
+            explicit allocator(IAlloc * mm) : mm_{mm} {}
+
+            allocator(const allocator &) = default;
+            allocator & operator=(const allocator &) = default;
+
+            template <typename U>
+            allocator(const allocator<U> & other) : mm_{other.mm_} {}
+
+            pointer allocate(size_type n) {
+                std::byte * raw = mm_->allocate(n * sizeof(T));
+
+                return reinterpret_cast<pointer>(raw);
+            }
+
+            void deallocate(pointer p, size_type n) {
+                std::byte * raw = reinterpret_cast<std::byte *>(p);
+
+                mm_->deallocate(raw, n * sizeof(T));
+            }
+
+            // optional construct, destroy (but allocator_traits provides defaults)
+
+            /** required! otherwise allocator<T>, allocator<U> with the same IAlloc*
+             *  would be considered to own disjoin memory addresses
+             **/
+            template <typename U>
+            bool operator==(const allocator<U> & other) const noexcept {
+                return mm_ == other.mm_;
+            }
+
+        public:
+            IAlloc * mm_ = nullptr;
+        };
+
     } /*namespace gc*/
 
     class MMPtr {

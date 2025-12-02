@@ -57,6 +57,10 @@ namespace xo {
             using super = std::allocator_traits<Allocator>;
             using pointer = typename super::pointer;
             using value_type = typename super::value_type;
+            using super::construct;
+            using super::destroy;
+            using super::allocate;
+            using super::deallocate;
 
             // default: allocator A fallback to standard non-gc allocator behavior
             template <typename A, typename = void>

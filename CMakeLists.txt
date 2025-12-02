@@ -80,7 +80,6 @@ add_subdirectory(xo-allocutil)
 add_subdirectory(xo-refcnt)
 add_subdirectory(xo-subsys)
 add_subdirectory(xo-randomgen)
-add_subdirectory(xo-ordinaltree)
 add_subdirectory(xo-flatstring)
 add_subdirectory(xo-pyutil)
 add_subdirectory(xo-reflectutil)
@@ -90,8 +89,9 @@ add_subdirectory(xo-ratio)
 add_subdirectory(xo-unit)
 add_subdirectory(xo-pyunit)
 add_subdirectory(xo-callback)
-#
 add_subdirectory(xo-alloc)
+add_subdirectory(xo-ordinaltree)
+#
 add_subdirectory(xo-object)
 #
 add_subdirectory(xo-webutil)

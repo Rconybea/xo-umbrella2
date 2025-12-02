@@ -16,14 +16,16 @@ namespace xo {
             template <typename Key,
                       typename Value,
                       typename Reduce,
+                      typename GcObjectInterface,
                       bool IsConst>
             struct NodeTypeTraits { using NodeType = void; };
 
             template <typename Key,
                       typename Value,
-                      typename Reduce>
-            struct NodeTypeTraits<Key, Value, Reduce, false> {
-                using NativeNodeType = Node<Key, Value, Reduce>;
+                      typename Reduce,
+                      typename GcObjectInterface>
+            struct NodeTypeTraits<Key, Value, Reduce, GcObjectInterface, false> {
+                using NativeNodeType = Node<Key, Value, Reduce, GcObjectInterface>;
                 using NodeType = NativeNodeType;
                 using ContentsType = typename NodeType::value_type;
                 using NodePtrType = NodeType *;
@@ -31,9 +33,10 @@ namespace xo {
 
             template <typename Key,
                       typename Value,
-                      typename Reduce>
-            struct NodeTypeTraits<Key, Value, Reduce, true> {
-                using NativeNodeType = Node<Key, Value, Reduce>;
+                      typename Reduce,
+                      typename GcObjectInterface>
+            struct NodeTypeTraits<Key, Value, Reduce, GcObjectInterface, true> {
+                using NativeNodeType = Node<Key, Value, Reduce, GcObjectInterface>;
                 using NodeType = NativeNodeType const;
                 using ContentsType = typename NodeType::value_type const;
                 using NodePtrType = NodeType const *;
@@ -48,12 +51,13 @@ namespace xo {
             template <typename Key,
                       typename Value,
                       typename Reduce,
+                      typename GcObjectInterface,
                       bool IsConst>
             class IteratorBase {
             public:
-                using RbUtil = RbTreeUtil<Key, Value, Reduce>;
-                using RbNode = Node<Key, Value, Reduce>;
-                using Traits = NodeTypeTraits<Key, Value, Reduce, IsConst>;
+                using RbUtil = RbTreeUtil<Key, Value, Reduce, GcObjectInterface>;
+                using RbNode = Node<Key, Value, Reduce, GcObjectInterface>;
+                using Traits = NodeTypeTraits<Key, Value, Reduce, GcObjectInterface, IsConst>;
                 using ReducedValue = typename Reduce::value_type;
                 using RbNativeNodeType = typename Traits::NativeNodeType;
                 using RbNodePtrType = typename Traits::NodePtrType;
@@ -233,12 +237,17 @@ namespace xo {
              */
             template <typename Key,
                       typename Value,
-                      typename Reduce>
-            class Iterator : public IteratorBase<Key, Value, Reduce, false /*!IsConst*/> {
+                      typename Reduce,
+                      typename GcObjectInterface>
+            class Iterator : public IteratorBase<Key,
+                                                 Value,
+                                                 Reduce,
+                                                 GcObjectInterface,
+                                                 false /*!IsConst*/> {
             public:
                 using iterator_concept = std::bidirectional_iterator_tag;
 
-                using RbIteratorBase = IteratorBase<Key, Value, Reduce, false /*!IsConst*/>;
+                using RbIteratorBase = IteratorBase<Key, Value, Reduce, GcObjectInterface, false /*!IsConst*/>;
                 using RbNode = typename RbIteratorBase::RbNode;
                 using RbUtil = typename RbIteratorBase::RbUtil;
                 using ReducedValue = typename Reduce::value_type;
@@ -298,12 +307,13 @@ namespace xo {
              */
             template <typename Key,
                       typename Value,
-                      typename Reduce>
-            class ConstIterator : public IteratorBase<Key, Value, Reduce, true /*IsConst*/> {
+                      typename Reduce,
+                      typename GcObjectInterface>
+            class ConstIterator : public IteratorBase<Key, Value, Reduce, GcObjectInterface, true /*IsConst*/> {
             public:
                 using iterator_concept = std::bidirectional_iterator_tag;
 
-                using RbIteratorBase = IteratorBase<Key, Value, Reduce, true /*IsConst*/>;
+                using RbIteratorBase = IteratorBase<Key, Value, Reduce, GcObjectInterface, true /*IsConst*/>;
                 using RbNode = typename RbIteratorBase::RbNode;
                 using RbUtil = typename RbIteratorBase::RbUtil;
                 using ReducedValue = typename Reduce::value_type;
