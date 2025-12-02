@@ -32,7 +32,7 @@ namespace xo {
          *       provide garbage collection
          *     - xo::gc::GC has a collection API and also provides
          *       garbage collection
-         *     
+         *
          *     GC-allocated objects must:
          *     2a. inherit A::object_interface
          *     2b. implement A::object_interface::_shallow_size()
@@ -40,7 +40,7 @@ namespace xo {
          *     2d. implement A::object_interface::_forward_children(alloc)
          *     in multiple inheritance scenarios
          *     2e. implement A::object_interface::_offset_destination(src)
-         *     
+         *
          *  Design Notes:
          *  - virtual-method choice requires vtable pointer per object;
          *    but zero *marginal* space cost for types that would have
@@ -82,12 +82,16 @@ namespace xo {
             //   gc_allocator_traits<Allocator>::template object_interface<Allocator>
             //
             template <typename A, typename = void>
-            struct object_interface {};
+            struct object_interface {
+                /** see also IObject::_requires_gc_hooks **/
+                static constexpr bool _requires_gc_hooks = false;
+            };
 
             // specialization when A provides gc_object_interface
             template <typename A>
             struct object_interface<A, std::void_t<typename A::gc_object_interface>>
-                : A::gc_object_interface {};
+                : public A::gc_object_interface {
+            };
 
             /** true iff this allocator advertises itself as an incremental collector
              *  allocator will include:
@@ -97,7 +101,6 @@ namespace xo {
              *  };
              **/
             static inline constexpr bool has_incremental_gc_interface_v = has_incremental_gc_interface<Allocator>::value;
-
         };
     } /*namespace gc*/
 } /*namespace xo*/

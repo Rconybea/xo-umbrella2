@@ -76,7 +76,7 @@ namespace xo {
             std::byte * allocate(std::size_t n) {
                 return this->alloc(n);
             }
-                
+
             /** std::allocator locality hint. Not used for now **/
             std::byte * allocate(std::size_t n, const void * hint) {
                 (void)hint;
@@ -147,6 +147,8 @@ namespace xo {
             virtual void assign_member(IObject * /*parent*/,
                                        IObject ** lhs,
                                        IObject * rhs) { *lhs = rhs; }
+            /** if GC: evacuate @p *lhs and replace with forwarding pointer **/
+            virtual void forward_inplace(IObject ** lhs) { (void)lhs; }
             /** allocate @p z bytes for copy of object at @p src.
              *  Only used in @ref GC.  Default implementation asserts and returns nullptr
              **/
@@ -170,7 +172,7 @@ namespace xo {
             using const_reference = const T &;
             using size_type = IAlloc::size_type;
             using difference_type = std::ptrdiff_t;
-            
+
             using gc_object_interface = IAlloc::gc_object_interface;
             using has_incremental_gc_interface = IAlloc::has_incremental_gc_interface;
 
