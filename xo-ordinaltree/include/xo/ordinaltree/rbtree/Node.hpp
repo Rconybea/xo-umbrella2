@@ -8,6 +8,7 @@
 #include "RbTypes.hpp"
 #include "xo/reflect/Reflect.hpp"
 #include "xo/indentlog/scope.hpp"
+#include "xo/allocutil/IAlloc.hpp"
 #include "xo/allocutil/IObject.hpp"
 #include "xo/allocutil/gc_allocator_traits.hpp"
 #include <cassert>
@@ -301,7 +302,7 @@ namespace xo {
                                xtag("r2", this->reduced2()));
                 } /*local_recalc_size*/
 
-            private: 
+            private:
                 void assign_color(Color x) { this->color_ = x; }
                 void assign_size(size_t z) { this->size_ = z; }
 
@@ -344,20 +345,49 @@ namespace xo {
                 } /*replace_child_reparent*/
 
                 // ----- (possibly) inherited from GcObjectInterface -----
-                virtual TaggedPtr self_tp() const { return Reflect::make_tp(const_cast<Node*>(this)); }
-                virtual void display(std::ostream & os) const { os << "<Node>"; }
-                virtual std::size_t _shallow_size() const { return sizeof(*this); }
-                /* note: only relevant when GcObjectInterface is xo::IObject */
 
-                template <typename T = GcObjectInterface>
-                virtual IObject * _shallow_copy(gc::IAlloc * gc) const
-                -> std::enable_if_t<std::is_base_of_v<xo::IObject:
-                {
-                    /* assert appropriate here. code will be present but dead when assert fails */
-                    xo::Cpof cpof(gc, this);
-                    return new (cpof) Node(*this);
+                virtual TaggedPtr self_tp() const {
+                    return Reflect::make_tp(const_cast<Node *>(this));
+                }
+                virtual void display(std::ostream & os) const {
+                    os << "<Node>";
                 }
 
+                virtual std::size_t _shallow_size() const { return sizeof(*this); }
+                /* note: only relevant when GcObjectInterface is xo::IObject */
+                virtual IObject * _shallow_copy(gc::IAlloc * gc) const {
+                    if constexpr (GcObjectInterface::_requires_gc_hooks) {
+                        xo::Cpof cpof(gc, this);
+                        return new (cpof) Node(*this);
+                    } else {
+                        assert(false && "_shallow_copy assumes gc enabled");
+                        return nullptr;
+                    }
+                }
+
+                virtual std::size_t _forward_children(gc::IAlloc * gc) {
+                    if constexpr (GcObjectInterface::_requires_gc_hooks) {
+                        static_assert(std::is_convertible_v<decltype(parent_), IObject *>,
+                                      "parent_ must be convertible to IObject*");
+                        static_assert(std::is_convertible_v<decltype(child_v_[0]), IObject *>,
+                                      "child_v_[0] must be convertible to IObject*");
+
+                        gc->forward_inplace(reinterpret_cast<IObject **>(&parent_));
+                        gc->forward_inplace(reinterpret_cast<IObject **>(&child_v_[0]));
+                        gc->forward_inplace(reinterpret_cast<IObject **>(&child_v_[1]));
+
+                        // how do we tell if any of
+                        //   {value_type, ReducedValue}
+                        // also contain pointers that need forwarding?
+
+                        return Node::_shallow_size();
+                    } else {
+                        assert(false && "_forward_children assumes gc enabled");
+                        return 0ul;
+                    }
+                }
+
+            private:
                 friend class RbTreeUtil<Key, Value, Reduce, GcObjectInterface>;
                 template <typename Key1, typename Value1, typename Reduce1, typename Allocator>
                 friend class xo::tree::RedBlackTree;

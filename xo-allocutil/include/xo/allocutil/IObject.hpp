@@ -19,6 +19,9 @@ namespace xo {
      **/
     class IObject {
     public:
+        /** impl inheriting this class must provide gc hooks **/
+        static constexpr bool _requires_gc_hooks = true;
+
         /** true iff this object represents a forwarding pointer.
          *  Forwarding pointers are exclusively created by the garbage collector;
          *  forwarding pointers (and only forwarding pointers) return true here.
