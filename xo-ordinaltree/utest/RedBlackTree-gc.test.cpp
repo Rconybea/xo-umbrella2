@@ -74,18 +74,23 @@ namespace xo {
                                              }
                                              );
 
-                        xo::gc::allocator<RbTree::value_type> allocator(gc.get());
+                        xo::gc::allocator<RbTree::node_type> allocator(gc.get());
 
-                        /* verify that we can construct a tree node */
-                        RbTree::RbNode node;
-
-#ifdef NOT_YET
-                        RedBlackTree::node_allocator_traits::construct(allocator, &node,
-                                                                       {0, 0.0},
-                                                                       {0.0, 0.0});
-#endif
+                        /* 1. verify that tree node can be constructed.
+                         *    if it can't be constructed, the immediately-following construct
+                         *    will fail in a non-transparent way.
+                         */
+                        RbTree::RbNode test_node;
 
 #ifdef NOT_YET
+                        /* 2. verify that tree node can be constructed via
+                         *    allocator traits
+                         */
+                        RbTree::node_allocator_traits::construct(allocator,
+                                                                 &test_node,
+                                                                 {0, 0.0},
+                                                                 {0.0, 0.0});
+
                         RbTree rbtree(allocator, c_debug_flag);
 
                         /* insert [0..n-1] in random order **/

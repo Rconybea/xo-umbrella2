@@ -10,6 +10,7 @@
 #include "xo/indentlog/scope.hpp"
 #include "xo/allocutil/IAlloc.hpp"
 #include "xo/allocutil/IObject.hpp"
+#include "xo/allocutil/ObjectVisitor.hpp"
 #include "xo/allocutil/gc_allocator_traits.hpp"
 #include <cassert>
 #include <utility>
@@ -344,7 +345,7 @@ namespace xo {
                     }
                 } /*replace_child_reparent*/
 
-                // ----- (possibly) inherited from GcObjectInterface -----
+                // ----- inherited from GcObjectInterface -----
 
                 virtual TaggedPtr self_tp() const {
                     return Reflect::make_tp(const_cast<Node *>(this));
@@ -367,6 +368,8 @@ namespace xo {
 
                 virtual std::size_t _forward_children(gc::IAlloc * gc) {
                     if constexpr (GcObjectInterface::_requires_gc_hooks) {
+                        using xo::gc::ObjectVisitor;
+
                         static_assert(std::is_convertible_v<decltype(parent_), IObject *>,
                                       "parent_ must be convertible to IObject*");
                         static_assert(std::is_convertible_v<decltype(child_v_[0]), IObject *>,
@@ -376,9 +379,18 @@ namespace xo {
                         gc->forward_inplace(reinterpret_cast<IObject **>(&child_v_[0]));
                         gc->forward_inplace(reinterpret_cast<IObject **>(&child_v_[1]));
 
-                        // how do we tell if any of
-                        //   {value_type, ReducedValue}
-                        // also contain pointers that need forwarding?
+                        /* must cast away const so we can forward */
+                        Key & key = const_cast<Key &>(contents_.first);
+                        ObjectVisitor<Key>::forward_children(key, gc);
+
+                        Value & value = contents_.second;
+                        ObjectVisitor<Value>::forward_children(value, gc);
+
+                        ReducedValue & rv1 = reduced_.first;
+                        ObjectVisitor<ReducedValue>::forward_children(rv1, gc);
+
+                        ReducedValue & rv2 = reduced_.second;
+                        ObjectVisitor<ReducedValue>::forward_children(rv2, gc);
 
                         return Node::_shallow_size();
                     } else {
@@ -397,9 +409,8 @@ namespace xo {
                 Color color_ = C_Red;
                 /* size of subtree (#of key/value pairs) rooted at this node */
                 size_t size_ = 0;
-                /* .first  = key   associated with this node
+                /* .first  = key   associated with this node (const!)
                  * .second = value associated with this node
-                 * .third  = reduced value
                  */
                 value_type contents_;
                 /* accumulator for some binary function of Values.
@@ -432,7 +443,7 @@ namespace xo {
                  */
                 std::array<Node *, 2> child_v_ = {nullptr, nullptr};
             }; /*Node*/
-    } /*namespace detail*/
+        } /*namespace detail*/
     } /*namespace tree*/
 } /*namespace xo*/
 
