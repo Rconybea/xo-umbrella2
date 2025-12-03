@@ -2,6 +2,8 @@
  *
  **/
 
+#pragma once
+
 #include "IAlloc.hpp"
 #include <cstdint>
 
