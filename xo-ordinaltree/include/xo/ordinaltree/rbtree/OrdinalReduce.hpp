@@ -37,8 +37,17 @@ namespace xo {
             value_type combine(value_type x, value_type y) const { return x + y; }
             bool is_equal(value_type x, value_type y) const { return x == y; }
         }; /*OrdinalReduce*/
-
     } /*namespace tree*/
+
+    namespace gc {
+        template <typename Value>
+        class ObjectVisitor<xo::tree::OrdinalReduce<Value>> {
+        public:
+            static_assert(std::is_empty_v<xo::tree::OrdinalReduce<Value>>);
+
+            static void forward_children(xo::tree::OrdinalReduce<Value> &, xo::gc::IAlloc *) {}
+        };
+    } /*namespace gc*/
 } /*namespace xo*/
 
 /* end OrdinalReduce.hpp */

@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "xo/allocutil/ObjectVisitor.hpp"
 #include <ostream>
 
 namespace xo {
@@ -34,12 +35,22 @@ namespace xo {
         }; /*NullReduce*/
 
         inline std::ostream & operator<<(std::ostream & os,
-                                         null_reduce_value /*x*/)
+                                     null_reduce_value /*x*/)
         {
             os << "{}";
             return os;
         } /*operator<<*/
     } /*namespace tree*/
+
+    namespace gc {
+        template <typename Value>
+        class ObjectVisitor<xo::tree::NullReduce<Value>> {
+        public:
+            static_assert(std::is_empty_v<xo::tree::NullReduce<Value>>);
+
+            static void forward_children(xo::tree::NullReduce<Value> &, xo::gc::IAlloc *) {}
+        };
+    } /*namespace gc*/
 } /*namespace xo*/
 
 /* end NullReduce.hpp */

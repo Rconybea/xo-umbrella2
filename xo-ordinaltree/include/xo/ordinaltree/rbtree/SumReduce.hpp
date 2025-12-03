@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include "xo/allocutil/ObjectVisitor.hpp"
 #include <limits>
 
 namespace xo {
@@ -48,7 +49,18 @@ namespace xo {
 
             bool is_equal(value_type const & x, value_type const & y) const { return x == y; }
         }; /*SumReduce*/
-    }
+    } /*namespace tree*/
+
+    namespace gc {
+        template <typename Value>
+        class ObjectVisitor<xo::tree::SumReduce<Value>> {
+        public:
+            static_assert(std::is_empty_v<xo::tree::SumReduce<Value>>);
+
+            /* trivial, since SumReduce<Value> is stateless */
+            static void forward_children(xo::tree::SumReduce<Value> &, xo::gc::IAlloc *) {}
+        };
+    } /*namespace gc*/
 }
 
 /* end SumReduce.hpp */

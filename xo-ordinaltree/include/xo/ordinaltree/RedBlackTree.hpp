@@ -58,7 +58,7 @@ namespace xo {
                   typename Value,
                   typename Reduce,
                   typename Allocator>
-        class RedBlackTree {
+        class RedBlackTree : public xo::gc::gc_allocator_traits<Allocator>::template object_interface<Allocator> {
             static_assert(ordered_key<Key>);
             static_assert(valid_rbtree_reduce_functor<Reduce, Value>);
 
@@ -87,6 +87,9 @@ namespace xo {
             using iterator = detail::Iterator<Key, Value, Reduce, GcObjectInterface>;
             using const_iterator = detail::ConstIterator<Key, Value, Reduce, GcObjectInterface>;
 
+            using Reflect = xo::reflect::Reflect;
+            using TaggedPtr = xo::reflect::TaggedPtr;
+
         public:
             explicit RedBlackTree(const allocator_type & alloc = allocator_type{},
                                   bool debug_flag = false) :
@@ -114,6 +117,21 @@ namespace xo {
             // , compare_{other.compare_)}
             {}
 #endif
+
+            static RedBlackTree * make(const allocator_type & alloc = allocator_type{},
+                                       bool debug_flag = false)
+            {
+                RedBlackTree * tree = allocator_traits::allocate(alloc, 1);
+                try {
+                    // placement new
+                    allocator_traits::construct(alloc, tree, alloc, debug_flag);
+                    return tree;
+                } catch(...) {
+                    allocator_traits::deallocate(alloc, tree, 1);
+                }
+
+                return nullptr;
+            }
 
             bool empty() const { return size_ == 0; }
             size_type size() const { return size_; }
@@ -551,23 +569,52 @@ namespace xo {
                 return true;
             } /*verify_ok*/
 
-            void display() const { RbUtil::display(this->root_, 0); } /*display*/
+            void display_to_log() const { RbUtil::display(this->root_, 0); } /*display*/
 
-        private:
+            // ----- Inherited from GcObjectInterface -----
 
+            virtual TaggedPtr self_tp() const {
+                return Reflect::make_tp(const_cast<RedBlackTree *>(this));
+            }
+            virtual void display(std::ostream & os) const {
+                os << "<RedBlackTree>";
+            }
+            virtual std::size_t _shallow_size() const { return sizeof(*this); }
+            virtual IObject * _shallow_copy(gc::IAlloc * gc) const {
+                if constexpr (GcObjectInterface::_requires_gc_hooks) {
+                    xo::Cpof cpof(gc, this);
+                    return new (cpof) RedBlackTree(*this);
+                } else {
+                    assert(false && "_shallow_copy assumes gc enabled");
+                    return nullptr;
+                }
+            }
+            virtual std::size_t _forward_children(gc::IAlloc * gc) {
+                if constexpr (GcObjectInterface::_requires_gc_hooks) {
+                    using xo::gc::ObjectVisitor;
+
+                    ObjectVisitor<Reduce>::forward_children(reduce_fn_, gc);
+                    gc->forward_inplace(reinterpret_cast<IObject **>(&root_));
+
+                    return RedBlackTree::_shallow_size();
+                } else {
+                    assert(false && "_forward_children assumes gc enabled");
+                    return 0ul;
+                }
+            }
 
         private:
             /** allocator state **/
             node_allocator_type node_alloc_;
             /** number of nodes in this tree. Each node holds one (key,value) pair **/
             size_t size_ = 0;
-            /** root of red/black tree. Empty tree has null root. **/
-            RbNode * root_ = nullptr;
             /** accumulates custom order statistics;
              *  for example partial sums of @tparam Values
              *  reduce_fn_:: (Accumulator x Key) -> Accumulator
              **/
             Reduce reduce_fn_;
+            /** root of red/black tree. Empty tree has null root. **/
+            RbNode * root_ = nullptr;
             /** true to enable debug logging **/
             bool debug_flag_ = false;
         }; /*RedBlackTree*/
@@ -580,7 +627,7 @@ namespace xo {
         operator<<(std::ostream & os,
                    RedBlackTree<Key, Value, Reduce, Allocator> const & tree)
         {
-            tree.display();
+            tree.display(os);
             return os;
         } /*operator<<*/
 
