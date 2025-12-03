@@ -12,6 +12,7 @@
 #include "xo/allocutil/IObject.hpp"
 #include "xo/allocutil/ObjectVisitor.hpp"
 #include "xo/allocutil/gc_allocator_traits.hpp"
+#include <concepts>
 #include <cassert>
 #include <utility>
 
@@ -33,11 +34,13 @@ namespace xo {
                       typename Value,
                       typename Reduce,
                       typename GcObjectInterface>
+            requires valid_rbtree_node_params<Key, Value, Reduce, GcObjectInterface>
             class Node : public GcObjectInterface {
             public:
                 using ReducedValue = typename Reduce::value_type;
                 using ContentsType = std::pair<Key const, Value>;
                 using value_type = std::pair<Key const , Value>;
+                using rvpair_type = std::pair<ReducedValue, ReducedValue>;
                 using Reflect = xo::reflect::Reflect;
                 using TaggedPtr = xo::reflect::TaggedPtr;
                 using IObject = xo::IObject;
@@ -45,13 +48,14 @@ namespace xo {
             public:
                 Node() = default;
                 Node(value_type const & kv_pair,
-                     std::pair<ReducedValue, ReducedValue> const & r)
-                    : color_(C_Red), size_(1), contents_{kv_pair}, reduced_(r) {}
+                     rvpair_type const & rv_pair)
+                    : color_(C_Red), size_(1), contents_{kv_pair}, reduced_(rv_pair) {}
                  Node(value_type && kv_pair,
-                     std::pair<ReducedValue, ReducedValue> && r)
+                      rvpair_type && rv_pair)
                     : color_(C_Red), size_(1),
                       contents_{std::move(kv_pair)},
-                      reduced_{std::move(r)} {}
+                      reduced_{std::move(rv_pair)} {}
+
 
                 template <typename NodeAllocator>
                 static Node * make_leaf(NodeAllocator& alloc,
@@ -59,12 +63,17 @@ namespace xo {
                                         ReducedValue const & leaf_rv) {
                     using traits = xo::gc::gc_allocator_traits<NodeAllocator>;
 
+                    /* verify Node is constructible. instead of relying on traits::construct */
+                    static_assert(std::is_constructible_v<Node,
+                                                          value_type const &,
+                                                          rvpair_type const &>);
+
                     // get memory
                     Node * node = traits::allocate(alloc, 1);
                     try {
                         // placemenent new
                         traits::construct(alloc, node, kv_pair,
-                                          std::pair<ReducedValue, ReducedValue>(leaf_rv, leaf_rv));
+                                          rvpair_type(leaf_rv, leaf_rv));
                         return node;
                     } catch(...) {
                         traits::deallocate(alloc, node, 1);
@@ -303,6 +312,60 @@ namespace xo {
                                xtag("r2", this->reduced2()));
                 } /*local_recalc_size*/
 
+                // ----- inherited from GcObjectInterface -----
+
+                virtual TaggedPtr self_tp() const {
+                    return Reflect::make_tp(const_cast<Node *>(this));
+                }
+                virtual void display(std::ostream & os) const {
+                    os << "<Node>";
+                }
+
+                virtual std::size_t _shallow_size() const { return sizeof(*this); }
+                /* note: only relevant when GcObjectInterface is xo::IObject */
+                virtual IObject * _shallow_copy(gc::IAlloc * gc) const {
+                    if constexpr (GcObjectInterface::_requires_gc_hooks) {
+                        xo::Cpof cpof(gc, this);
+                        return new (cpof) Node(*this);
+                    } else {
+                        assert(false && "_shallow_copy assumes gc enabled");
+                        return nullptr;
+                    }
+                }
+
+                virtual std::size_t _forward_children(gc::IAlloc * gc) {
+                    if constexpr (GcObjectInterface::_requires_gc_hooks) {
+                        using xo::gc::ObjectVisitor;
+
+                        static_assert(std::is_convertible_v<decltype(parent_), IObject *>,
+                                      "parent_ must be convertible to IObject*");
+                        static_assert(std::is_convertible_v<decltype(child_v_[0]), IObject *>,
+                                      "child_v_[0] must be convertible to IObject*");
+
+                        gc->forward_inplace(reinterpret_cast<IObject **>(&parent_));
+                        gc->forward_inplace(reinterpret_cast<IObject **>(&child_v_[0]));
+                        gc->forward_inplace(reinterpret_cast<IObject **>(&child_v_[1]));
+
+                        /* for key, must cast away const so we can forward */
+                        Key & key = const_cast<Key &>(contents_.first);
+                        ObjectVisitor<Key>::forward_children(key, gc);
+
+                        Value & value = contents_.second;
+                        ObjectVisitor<Value>::forward_children(value, gc);
+
+                        ReducedValue & rv1 = reduced_.first;
+                        ObjectVisitor<ReducedValue>::forward_children(rv1, gc);
+
+                        ReducedValue & rv2 = reduced_.second;
+                        ObjectVisitor<ReducedValue>::forward_children(rv2, gc);
+
+                        return Node::_shallow_size();
+                    } else {
+                        assert(false && "_forward_children assumes gc enabled");
+                        return 0ul;
+                    }
+                }
+
             private:
                 void assign_color(Color x) { this->color_ = x; }
                 void assign_size(size_t z) { this->size_ = z; }
@@ -344,60 +407,6 @@ namespace xo {
                         return D_Invalid;
                     }
                 } /*replace_child_reparent*/
-
-                // ----- inherited from GcObjectInterface -----
-
-                virtual TaggedPtr self_tp() const {
-                    return Reflect::make_tp(const_cast<Node *>(this));
-                }
-                virtual void display(std::ostream & os) const {
-                    os << "<Node>";
-                }
-
-                virtual std::size_t _shallow_size() const { return sizeof(*this); }
-                /* note: only relevant when GcObjectInterface is xo::IObject */
-                virtual IObject * _shallow_copy(gc::IAlloc * gc) const {
-                    if constexpr (GcObjectInterface::_requires_gc_hooks) {
-                        xo::Cpof cpof(gc, this);
-                        return new (cpof) Node(*this);
-                    } else {
-                        assert(false && "_shallow_copy assumes gc enabled");
-                        return nullptr;
-                    }
-                }
-
-                virtual std::size_t _forward_children(gc::IAlloc * gc) {
-                    if constexpr (GcObjectInterface::_requires_gc_hooks) {
-                        using xo::gc::ObjectVisitor;
-
-                        static_assert(std::is_convertible_v<decltype(parent_), IObject *>,
-                                      "parent_ must be convertible to IObject*");
-                        static_assert(std::is_convertible_v<decltype(child_v_[0]), IObject *>,
-                                      "child_v_[0] must be convertible to IObject*");
-
-                        gc->forward_inplace(reinterpret_cast<IObject **>(&parent_));
-                        gc->forward_inplace(reinterpret_cast<IObject **>(&child_v_[0]));
-                        gc->forward_inplace(reinterpret_cast<IObject **>(&child_v_[1]));
-
-                        /* must cast away const so we can forward */
-                        Key & key = const_cast<Key &>(contents_.first);
-                        ObjectVisitor<Key>::forward_children(key, gc);
-
-                        Value & value = contents_.second;
-                        ObjectVisitor<Value>::forward_children(value, gc);
-
-                        ReducedValue & rv1 = reduced_.first;
-                        ObjectVisitor<ReducedValue>::forward_children(rv1, gc);
-
-                        ReducedValue & rv2 = reduced_.second;
-                        ObjectVisitor<ReducedValue>::forward_children(rv2, gc);
-
-                        return Node::_shallow_size();
-                    } else {
-                        assert(false && "_forward_children assumes gc enabled");
-                        return 0ul;
-                    }
-                }
 
             private:
                 friend class RbTreeUtil<Key, Value, Reduce, GcObjectInterface>;
@@ -443,6 +452,7 @@ namespace xo {
                  */
                 std::array<Node *, 2> child_v_ = {nullptr, nullptr};
             }; /*Node*/
+
         } /*namespace detail*/
     } /*namespace tree*/
 } /*namespace xo*/

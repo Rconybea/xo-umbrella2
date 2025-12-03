@@ -25,47 +25,6 @@
 namespace xo {
     namespace tree {
 
-        /* concept for the 'Reduce' argument to RedBlackTree<...>
-         *
-         * here:
-         *   T             = class implementing reduce feature,  e.g. SumReduce<...>
-         *   T::value_type = type for output of reduce function.
-         *
-         *   Value         = value_type for rb-tree that supports ordinal statistics
-         *
-         * e.g.
-         *   struct ReduceCountAndSum {
-         *     using value_type = std::pair<uint32_t, int64_t>:
-         *
-         *     value_type nil() { return value_type(0, 0); }
-         *     value_type operator()(value_type const & acc, int64_t val)
-         *       { return value_type(acc.first + val.first, acc.second + val.second); }
-         *     value_type operator()(value_type const & a1, value_type const & a2)
-         *       { return value_type(a1.first + a2.first, a1.second + a2.second); }
-         *   };
-         *
-         *   Reduce.nil() -> nominal reduction i.e. reduce on empty set
-         *   Reduce.leaf(v) -> reduction on set {v}
-         *
-         * in general: at some internal node, tree splits set of key/value pairs on some key k1,
-         * with a left subtree lh,  and a right subtree rh.
-         *
-         * for a binary tree we want to maintain:
-         * - r1: reduce applied to collection
-         *    lh + {k1} = reduce(reduce(lh), k1)
-         * - r2: reduce applied to collection
-         *    lh + {k1} + rh = reduce.combine(r1, reduce(r2))
-         *
-         */
-        template <class T, typename Value>
-        concept ReduceConcept = requires(T r, Value v, typename T::value_type a) {
-            typename T::value_type;
-            { r.nil() } -> std::same_as<typename T::value_type>;
-            { r.leaf(v) } -> std::same_as<typename T::value_type>;
-            { r(a, v) } -> std::same_as<typename T::value_type>;
-            { r.combine(a, a) } -> std::same_as<typename T::value_type>;
-        };
-
         /** @class RedBlackTree
          *  @brief red-black tree with order statistics
          *
@@ -100,8 +59,8 @@ namespace xo {
                   typename Reduce,
                   typename Allocator>
         class RedBlackTree {
-            static_assert(ReduceConcept<Reduce, Value>);
-            //static_assert(requires(Reduce r) { r.nil(); }, "missing .nil() method");
+            static_assert(ordered_key<Key>);
+            static_assert(valid_rbtree_reduce_functor<Reduce, Value>);
 
         public:
             using key_type = Key;

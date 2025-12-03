@@ -25,7 +25,7 @@ namespace xo {
                                                     tenured_z_{tz},
                                                     incr_gc_threshold_{ngct},
                                                     full_gc_threshold_{tgct} {}
-                                                                      
+
 
                 std::size_t nursery_z_;
                 std::size_t tenured_z_;
@@ -37,6 +37,70 @@ namespace xo {
             s_testcase_v = {
                 Testcase_RbTree(1024, 4096, 512, 512),
             };
+        }
+
+        TEST_CASE("rbnode-gc-1", "[gc][redblacktree]")
+        {
+            using RbTree = RedBlackTree<int,
+                                        double,
+                                        SumReduce<double>,
+                                        xo::gc::allocator<std::pair<const int, double>>>;
+
+            constexpr bool c_debug_flag = false;
+
+            for (std::size_t i_tc = 0, n_tc = s_testcase_v.size(); i_tc < n_tc; ++i_tc) {
+                const Testcase_RbTree & tc = s_testcase_v[i_tc];
+
+                std::uint64_t seed = 8813374093428528487ULL;
+                auto rgen = xo::rng::xoshiro256ss(seed);
+
+                for (std::uint32_t n=0; n<1; ++n) {
+                    scope log(XO_DEBUG2(c_debug_flag, "rbtree-gc-1"));
+
+                    up<GC> gc = GC::make(
+                                         {
+                                             .initial_nursery_z_ = tc.nursery_z_,
+                                             .initial_tenured_z_ = tc.tenured_z_,
+                                             .incr_gc_threshold_ = tc.incr_gc_threshold_,
+                                             .full_gc_threshold_ = tc.full_gc_threshold_,
+                                             .debug_flag_ = c_debug_flag
+                                         }
+                                         );
+
+                    xo::gc::allocator<RbTree::node_type> allocator(gc.get());
+
+                    /* 1. verify that tree node can be constructed.
+                     *    if it can't be constructed, the immediately-following construct
+                     *    will fail in a non-transparent way.
+                     */
+                    RbTree::RbNode test_node;
+
+                    RbTree::RbNode * test_node_ptr = new (MMPtr(gc.get())) RbTree::RbNode();
+                    REQUIRE(test_node_ptr);
+
+                    if (false) {
+                        // this will compile, but can't will not run unless GC in progress
+                        IObject * copy_ptr = test_node_ptr->_shallow_copy(gc.get());
+                    }
+
+                    /* 2. verify that tree node can be constructed via
+                     *    allocator traits.
+                     *
+                     *    Reminder: {} expressions won't deduce template arguments
+                     */
+                    RbTree::node_allocator_traits::construct(allocator,
+                                                             &test_node,
+                                                             RbTree::RbNode::value_type{0, 0.0},
+                                                             RbTree::RbNode::rvpair_type{0.0, 0.0});
+
+                    /* 3. verify that RbNode::make_leaf() runs */
+                    RbTree::RbNode * test2_node_ptr
+                        = RbTree::RbNode::make_leaf(allocator,
+                                                    RbTree::RbNode::value_type{0, 0.0},
+                                                    0.0);
+                    REQUIRE(test2_node_ptr);
+                }
+            }
         }
 
         TEST_CASE("rbtree-gc-1", "[gc][redblacktree]")
@@ -76,23 +140,9 @@ namespace xo {
 
                         xo::gc::allocator<RbTree::node_type> allocator(gc.get());
 
-                        /* 1. verify that tree node can be constructed.
-                         *    if it can't be constructed, the immediately-following construct
-                         *    will fail in a non-transparent way.
-                         */
-                        RbTree::RbNode test_node;
-
-#ifdef NOT_YET
-                        /* 2. verify that tree node can be constructed via
-                         *    allocator traits
-                         */
-                        RbTree::node_allocator_traits::construct(allocator,
-                                                                 &test_node,
-                                                                 {0, 0.0},
-                                                                 {0.0, 0.0});
-
                         RbTree rbtree(allocator, c_debug_flag);
 
+#ifdef NOT_YET
                         /* insert [0..n-1] in random order **/
                         ok_flag &= TreeUtil<RbTree>::random_inserts(n, debug_flag, &rgen, &rbtree);
 #endif
@@ -106,4 +156,3 @@ namespace xo {
 } /*namesapce xo*/
 
 /* end RedBlackTree-gc.test.cpp */
-

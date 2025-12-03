@@ -96,6 +96,8 @@ namespace xo {
         virtual std::size_t _forward_children(gc::IAlloc * gc) = 0;
     };
 
+    static_assert(std::is_destructible_v<IObject>, "IObject must be destructible");
+
     /** @class Cpof
      *  @brief argument to operator new used for garbage collector evacuation phase
      *

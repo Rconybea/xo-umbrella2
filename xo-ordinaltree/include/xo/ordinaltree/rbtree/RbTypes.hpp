@@ -62,6 +62,69 @@ namespace xo {
                 IL_AfterEnd,
             }; /*IteratorLocation*/
         } /*namespace detail*/
+
+        template <typename Key>
+        concept ordered_key = (std::copyable<Key>
+                               && std::default_initializable<Key>
+                               && std::totally_ordered<Key>);
+
+        template <typename Value>
+        concept valid_rbtree_node_value = (std::copyable<Value>
+                                           && std::default_initializable<Value>);
+
+        /* concept for the 'Reduce' argument to RedBlackTree<...>
+         *
+         * here:
+         *   T             = class implementing reduce feature,  e.g. SumReduce<...>
+         *   T::value_type = type for output of reduce function.
+         *
+         *   Value         = value_type for rb-tree that supports ordinal statistics
+         *
+         * e.g.
+         *   struct ReduceCountAndSum {
+         *     using value_type = std::pair<uint32_t, int64_t>:
+         *
+         *     value_type nil() { return value_type(0, 0); }
+         *     value_type operator()(value_type const & acc, int64_t val)
+         *       { return value_type(acc.first + val.first, acc.second + val.second); }
+         *     value_type operator()(value_type const & a1, value_type const & a2)
+         *       { return value_type(a1.first + a2.first, a1.second + a2.second); }
+         *   };
+         *
+         *   Reduce.nil() -> nominal reduction i.e. reduce on empty set
+         *   Reduce.leaf(v) -> reduction on set {v}
+         *
+         * in general: at some internal node, tree splits set of key/value pairs on some key k1,
+         * with a left subtree lh,  and a right subtree rh.
+         *
+         * for a binary tree we want to maintain:
+         * - r1: reduce applied to collection
+         *    lh + {k1} = reduce(reduce(lh), k1)
+         * - r2: reduce applied to collection
+         *    lh + {k1} + rh = reduce.combine(r1, reduce(r2))
+         *
+         */
+        template <typename Reduce, typename Value>
+        concept valid_rbtree_reduce_functor = requires(const Reduce & reduce,
+                                                       const Value & value,
+                                                       typename Reduce::value_type const & rv1,
+                                                       typename Reduce::value_type const & rv2)
+        {
+            typename Reduce::value_type;
+
+            { reduce.nil() } -> std::convertible_to<typename Reduce::value_type>;
+            { reduce.leaf(value) } -> std::convertible_to<typename Reduce::value_type>;
+            { reduce.combine(rv1, rv2) } -> std::convertible_to<typename Reduce::value_type>;
+
+            requires std::default_initializable<Reduce>;
+        };
+
+        template <typename Key, typename Value, typename Reduce, typename GcObjectInterface>
+        concept valid_rbtree_node_params = (ordered_key<Key>
+                                            && valid_rbtree_node_value<Value>
+                                            && valid_rbtree_reduce_functor<Reduce, Value>
+                                            );
+
     } /*namespace tree*/
 } /*namespace xo*/
 
