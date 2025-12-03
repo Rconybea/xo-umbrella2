@@ -34,7 +34,7 @@ namespace xo {
          **/
         template <typename T>
         class ObjectVisitor {
-            //void forward_children(T & target, IAlloc * gc) { (void)target; (void)gc; }
+            void forward_children(T & target, IAlloc * gc) { (void)target; (void)gc; }
         };
 
 #define XO_TRIVIAL_OBJECT_VISITOR(TYPE)                       \
