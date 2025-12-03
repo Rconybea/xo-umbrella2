@@ -35,6 +35,7 @@ namespace xo {
              **/
             TypeId type_id_;
         };
+
     } /*namespace obj*/
 } /*namespace xo*/
 
