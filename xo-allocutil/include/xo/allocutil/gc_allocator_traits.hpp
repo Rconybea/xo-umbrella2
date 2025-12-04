@@ -93,6 +93,14 @@ namespace xo {
                 : public A::gc_object_interface {
             };
 
+            // classes that want to conditionally support GC
+            // (e.g. see xo::tree::RedBlackTree, xo::tree::Node
+            //       in xo-ordinal-tree)
+            // can inherit
+            //   gc_allocator_traits<Allocator>::object_interface_type
+            //
+            using object_interface_type = object_interface<Allocator>;
+
             /** true iff this allocator advertises itself as an incremental collector
              *  allocator will include:
              *
