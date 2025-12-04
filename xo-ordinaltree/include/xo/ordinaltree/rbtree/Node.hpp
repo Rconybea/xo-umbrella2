@@ -371,18 +371,48 @@ namespace xo {
                 void assign_size(size_t z) { this->size_ = z; }
 
                 void assign_child_reparent(Direction d, Node *new_x) {
-                    Node *old_x = this->child_v_[d];
+                    Node * old_x = this->child_v_[d];
 
                     // trying to fix old_x can be counterproductive,
                     // since old_x->parent_ may already have been corrected,
                     //
-                    if (old_x && (old_x->parent_ == this))
+                    if (old_x && (old_x->parent_ == this)) {
                         old_x->parent_ = nullptr;
+                    }
 
                     this->child_v_[d] = new_x;
 
                     if (new_x) {
                         new_x->parent_ = this;
+                    }
+                } /*assign_child_reparent*/
+
+                template <typename NodeAllocator>
+                void assign_child_reparent_2(NodeAllocator & alloc,
+                                             Direction d,
+                                             Node * new_x)
+                {
+                    Node * old_x = this->child_v_[d];
+
+                    using node_allocator_traits = xo::gc::gc_allocator_traits<NodeAllocator>;
+                    using kvpair_allocator_type = node_allocator_traits::template rebind_alloc<value_type>;
+
+                    kvpair_allocator_type assign_alloc(alloc);
+
+                    // trying to fix old_x can be counterproductive,
+                    // since old_x->parent_ may already have been corrected,
+                    //
+                    if (old_x && (old_x->parent_ == this)) {
+                        old_x->parent_ = nullptr;
+                    }
+
+                    Node ** child_addr = &(this->child_v_[d]);
+                    this->_gc_assign_member(child_addr, new_x, assign_alloc);
+                    //this->child_v_[d] = new_x;
+
+                    if (new_x) {
+                        this->_gc_assign_member(&(new_x->parent_), this, assign_alloc);
+                        //new_x->parent_ = this;
                     }
                 } /*assign_child_reparent*/
 

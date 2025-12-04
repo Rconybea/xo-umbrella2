@@ -822,7 +822,7 @@ namespace xo {
                             d = ((kv_pair.first < N->key()) ? D_Left : D_Right);
 
                             /* insert into left subtree somewhere */
-                            RbNode *C = N->child(d);
+                            RbNode * C = N->child(d);
 
                             if (!C)
                                 break;
@@ -835,10 +835,11 @@ namespace xo {
                         if (N) {
                             RbNode * new_node = RbNode::make_leaf(alloc,
                                                                   kv_pair,
-
                                                                   reduce_fn.leaf(kv_pair.second));
 
-                            N->assign_child_reparent(d, new_node);
+                            N->assign_child_reparent_2(alloc,
+                                                       d,
+                                                       new_node);
 
                             assert(is_red(N->child(d)));
 

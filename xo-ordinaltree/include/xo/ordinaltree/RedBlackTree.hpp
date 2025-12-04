@@ -71,6 +71,9 @@ namespace xo {
             using allocator_type = Allocator;
             using allocator_traits = xo::gc::gc_allocator_traits<Allocator>;
 
+            /** WARNING:
+             *  - GcObjectInterface is typed + assoc type is pair<Key const, Value>.
+             **/
             using GcObjectInterface = allocator_traits::object_interface_type;
             using ReducedValue = typename Reduce::value_type;
             using RbUtil = detail::RbTreeUtil<Key, Value, Reduce, GcObjectInterface>;
