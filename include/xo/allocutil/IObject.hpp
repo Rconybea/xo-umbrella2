@@ -21,6 +21,24 @@ namespace xo {
     public:
         /** impl inheriting this class must provide gc hooks **/
         static constexpr bool _requires_gc_hooks = true;
+        /** impl inheriting this class must use write barriers
+         *  (so that GC allocator can remember cross-generational pointers)
+         **/
+        static constexpr bool _requires_write_barrier = true;
+
+        /** GC write barrier:
+         *  assign value @p rhs to member @p *lhs of @p parent.
+         *  Identifiy and remember cross-generational pointers.
+         **/
+        template <typename T, typename Allocator>
+        void _gc_assign_member(T ** lhs,
+                               T * rhs,
+                               Allocator & alloc)
+        {
+            static_assert(std::is_convertible_v<decltype(*lhs), IObject*>);
+
+            alloc.mm_->assign_member(this, reinterpret_cast<IObject **>(lhs), rhs);
+        }
 
         /** true iff this object represents a forwarding pointer.
          *  Forwarding pointers are exclusively created by the garbage collector;

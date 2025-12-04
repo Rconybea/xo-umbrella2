@@ -7,6 +7,7 @@
 
 #include <type_traits>
 #include <memory>
+#include <cassert>
 
 namespace xo {
     namespace gc {
@@ -15,7 +16,18 @@ namespace xo {
          *  Introduces additional i/face methods
          *  for garbage-collector-enabled allocators
          *
-         *  allocator A can identify itself as a copying collector:
+         *  Use Cases:
+         *  1. drop-in replacement for std::allocator_traits<Allocator>
+         *     with non-gc-aware allocators.
+         *  2. allows a gc-aware template class to activate
+         *     gc support when used with a collecting allocator
+         *     (i.e. xo::gc::allocator<xo::gc::GC>)
+         *  3. allows a gc-aware template class T to fallback
+         *     to ordinary allocator-aware behavior for non-gc
+         *     allocators, such as std::allocator<T>,
+         *     but also pool allocators etc.
+         *
+         *  An allocator A can identify itself as a copying collector:
          *
          *  1. provide A::object_interface
          *     per-object header interface: tells garbage collector
@@ -33,13 +45,46 @@ namespace xo {
          *     - xo::gc::GC has a collection API and also provides
          *       garbage collection
          *
-         *     GC-allocated objects must:
+         *     GC object model
+         *     2a. A GC-allocated object is an object that GC manages
+         *         atomically. All memory associated with a GC-allocated
+         *         object has the same lifetime.
+         *     2b. A GC-allocation is 1:1 with a GC-allocated object
+         *     2c. A GC-allocated object may have internal pointers.
+         *         These are pointer interior to the same original
+         *         allocation. It's the responsibility of the object to update these
+         *         (if/when GC moves said object) via GC hooks.
+         *     2d. A GC-allocated object may have external pointers
+         *         to other GC-allocated objects. Managing these is split
+         *         between GC and object itself. GC takes responsibility
+         *         for moving the destination objects.
+         *         Object is responsible for telling GC about such pointers
+         *         and changes to their values
+         *         (e.g. IObject::_forward_children())
+         *
+         *     GC object implementation: gc objects must:
          *     2a. inherit A::object_interface
          *     2b. implement A::object_interface::_shallow_size()
          *     2c. implement A::object_interface::_shallow_copy(alloc)
          *     2d. implement A::object_interface::_forward_children(alloc)
          *     in multiple inheritance scenarios
          *     2e. implement A::object_interface::_offset_destination(src)
+         *
+         *  3. write barrier support:
+         *     A generational GC needs to track changes that create or modify
+         *     inter-generational pointers.
+         *
+         *     GC-aware classes could write:
+         *       MyClass::update_pointer_state(IObject *new_value, gc::IAlloc *gc) {
+         *         if constexpr (GcObjectInterface::_requires_write_barrier) {
+         *           gc->assign_member(this, &some_member_, new_value);
+         *         } else {
+         *           this->some_member_ = new_value;
+         *         }
+         *       }
+         *
+         *     but simpler:
+         *       GcObjectInterface::_gc_assign_member(this, &some_member_, new_value, alloc_);
          *
          *  Design Notes:
          *  - virtual-method choice requires vtable pointer per object;
@@ -68,7 +113,7 @@ namespace xo {
 
             // opt-in: A provides nested type 'has_incremental_collector_interface':
             // struct A {
-            //   using is_incremental_collector = std::true_type;
+            //   using has_incremental_collector = std::true_type;
             // };
             template <typename A>
             struct has_incremental_gc_interface<A, std::void_t<typename A::has_incremental_gc_interface>> :
@@ -110,6 +155,8 @@ namespace xo {
                     *lhs = rhs;
                 }
 
+                virtual bool _is_forwarded() const { return false; }
+                virtual std::size_t _shallow_size() const { assert(false); return 0; }
             };
 
             // specialization when A provides gc_object_interface
