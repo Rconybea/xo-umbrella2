@@ -37,7 +37,7 @@ namespace xo {
 
                     if (!this->node_) {
                         throw std::runtime_error
-                            (tostr("rbtree: attempt to use empty lhs object as rvalue"));
+                            (tostr("RedBlackTreeLhsBase: attempt to use empty lhs object as rvalue"));
                     }
 
                     return this->node_->contents().second;

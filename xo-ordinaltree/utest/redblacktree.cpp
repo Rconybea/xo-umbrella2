@@ -44,119 +44,92 @@ namespace {
   } /*check_ordinal_lookup*/
 #endif
 
-  /* check that RedBlackTree<>::find_sum_glb() works as advertised.
-   *
-   * partial sums of v[j] for j<=i will be:
-   *
-   *        (i+1) . i
-   *   10 . ---------  + ((i+1) . dvalue)
-   *            2
-   *
-   *  = (i+1).(5.i + dvalue)
-   *
-   * Require:
-   * - rbtree has keys [0..n-1],  where n=rbtree.size()
-   * - rbtree value at key k is dvalue+10*k
-   */
-  void
-  check_reduced_sum(uint32_t dvalue,
-            RbTree const & rbtree)
-  {
-    size_t const n = rbtree.size();
+    /* check that RedBlackTree<>::find_sum_glb() works as advertised.
+     *
+     * partial sums of v[j] for j<=i will be:
+     *
+     *        (i+1) . i
+     *   10 . ---------  + ((i+1) . dvalue)
+     *            2
+     *
+     *  = (i+1).(5.i + dvalue)
+     *
+     * Require:
+     * - rbtree has keys [0..n-1],  where n=rbtree.size()
+     * - rbtree value at key k is dvalue+10*k
+     */
+    void
+    check_reduced_sum(uint32_t dvalue,
+                      RbTree const & rbtree)
+    {
+        size_t const n = rbtree.size();
 
-    for(size_t i = 0; i < n; ++i) {
-      /* compute reduction up to key=i */
-      double reduced_upto
-    = rbtree.reduce_lub(i /*key*/,
-                true /*is_closed*/);
+        for(size_t i = 0; i < n; ++i) {
+            /* compute reduction up to key=i */
+            double reduced_upto
+                = rbtree.reduce_lub(i /*key*/,
+                                    true /*is_closed*/);
 
-      double reduced = (i+1) * (5*i + dvalue);
+            double reduced = (i+1) * (5*i + dvalue);
 
-      INFO(tostr(xtag("i", i), xtag("n", n),
-         xtag("tree.reduced_upto", reduced_upto),
-         xtag("reduced", reduced),
-         xtag("dvalue", dvalue)));
+            INFO(tostr(xtag("i", i), xtag("n", n),
+                       xtag("tree.reduced_upto", reduced_upto),
+                       xtag("reduced", reduced),
+                       xtag("dvalue", dvalue)));
 
-      auto glb_ix = rbtree.cfind_sum_glb(reduced);
+            auto glb_ix = rbtree.cfind_sum_glb(reduced);
 
-      REQUIRE(reduced_upto == reduced);
+            REQUIRE(reduced_upto == reduced);
 
-      REQUIRE(glb_ix.is_dereferenceable());
-      /* glb_ix is truth-y */
-      REQUIRE(glb_ix);
+            REQUIRE(glb_ix.is_dereferenceable());
+            /* glb_ix is truth-y */
+            REQUIRE(glb_ix);
 
-      REQUIRE(glb_ix->first == i);
-    }
-  } /*check_reduced_sum*/
+            REQUIRE(glb_ix->first == i);
+        }
+    } /*check_reduced_sum*/
 
-#ifdef OBSOLETE
-  /* Require:
-   * - *p_rbtree has keys [0..n-1],  where n=rbtree.size()
-   * - for each key k,  associated value is 10*k
-   */
-  void
-  random_lookups(RbTree const & rbtree,
-         xoshiro256ss * p_rgen)
-  {
-    REQUIRE(rbtree.verify_ok());
+    /* Require:
+     * - *p_rbtree has keys [0..n-1],  where n=rbtree.size()
+     * - for each key k,  associated value is 10*k
+     *
+     * Promise:
+     * - for each key k,  associated value is dvalue + 10*k
+     */
+    void
+    random_updates(uint32_t dvalue,
+                   RbTree * p_rbtree,
+                   xoshiro256ss * p_rgen)
+    {
+        REQUIRE(p_rbtree->verify_ok());
 
-    size_t n = rbtree.size();
-    std::vector<uint32_t> u
-        = Util::random_permutation(n, p_rgen);
+        std::size_t n = p_rbtree->size();
+        std::vector<uint32_t> u
+            = Util::random_permutation(n, p_rgen);
 
-    /* lookup keys in permutation order */
-    uint32_t i = 1;
-    for (uint32_t x : u) {
-      INFO(tostr(xtag("i", i), xtag("n", n), xtag("x", x)));
+        /* update key/value pairs in permutation order */
+        uint32_t i = 1;
+        for (uint32_t x : u) {
+            REQUIRE((*p_rbtree)[x] == x*10);
 
-      REQUIRE(rbtree[x] == x*10);
-      REQUIRE(rbtree.verify_ok());
-      REQUIRE(rbtree.size() == n);
-      ++i;
-    }
+            (*p_rbtree)[x] = dvalue + 10*x;
 
-    REQUIRE(rbtree.size() == n);
-  } /*random_lookups*/
-#endif
+            REQUIRE((*p_rbtree)[x] == dvalue + 10*x);
+            REQUIRE(p_rbtree->verify_ok());
+            /* assignment to existing key does not change tree size */
+            REQUIRE(p_rbtree->size() == n);
+            ++i;
+        }
 
-  /* Require:
-   * - *p_rbtree has keys [0..n-1],  where n=rbtree.size()
-   * - for each key k,  associated value is 10*k
-   *
-   * Promise:
-   * - for each key k,  associated value is dvalue + 10*k
-   */
-  void
-  random_updates(uint32_t dvalue,
-                 RbTree * p_rbtree,
-                 xoshiro256ss * p_rgen)
-  {
-    REQUIRE(p_rbtree->verify_ok());
+        REQUIRE(p_rbtree->size() == n);
+    } /*random_updates*/
 
-    std::size_t n = p_rbtree->size();
-    std::vector<uint32_t> u
-        = Util::random_permutation(n, p_rgen);
-
-    /* update key/value pairs in permutation order */
-    uint32_t i = 1;
-    for (uint32_t x : u) {
-      REQUIRE((*p_rbtree)[x] == x*10);
-
-      (*p_rbtree)[x] = dvalue + 10*x;
-
-      REQUIRE((*p_rbtree)[x] == dvalue + 10*x);
-      REQUIRE(p_rbtree->verify_ok());
-      /* assignment to existing key does not change tree size */
-      REQUIRE(p_rbtree->size() == n);
-      ++i;
-    }
-
-    REQUIRE(p_rbtree->size() == n);
-  } /*random_updates_1*/
-
-    TEST_CASE("rbtree", "[redblacktree]") {
+    TEST_CASE("rbtree", "[redblacktree]")
+    {
         constexpr bool c_debug_flag = false;
         RbTree rbtree{RbTree::allocator_type{}, c_debug_flag};
+
+        REQUIRE(rbtree.size() == 0);
 
         std::uint64_t seed = 14950349842636922572UL;
         /* can reseed from /dev/urandom with: */
@@ -216,6 +189,7 @@ namespace {
                                                                       debug_flag,
                                                                       rbtree);
 
+                    /* similarly reverify end-to-end iteration */
                     ok_flag &= TreeUtil<RbTree>::check_bidirectional_iterator(0,
                                                                               debug_flag,
                                                                               rbtree);
@@ -235,6 +209,7 @@ namespace {
                     check_reduced_sum(10000, rbtree);
                     /* verify behavior of read/write variant of operator[] */
                     ok_flag &= TreeUtil<RbTree>::random_removes(debug_flag, &rgen, &rbtree);
+
                 }
 
                 log.end_scope();

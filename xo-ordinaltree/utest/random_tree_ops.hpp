@@ -80,11 +80,16 @@ namespace utest {
             return ok_flag;
         } /*test_clear*/
 
-        /* do n random inserts (taken from *p_rgen) into *p_rbtreẹ
-         * inserted keys will be distinct values in [0, .., n-1]
+        /* do
+         *   n = (hi - lo) / k
+         * random inserts (taken from *p_rgen) into *p_rbtreẹ
+         * inserted keys will comprise the distinct values
+         *   {lo, lo+k, lo+2k, ..., lo+n.k}
          */
         static bool
-        random_inserts(std::uint32_t n,
+        random_inserts(std::uint32_t lo,
+                       std::uint32_t hi,
+                       std::uint32_t k,
                        bool catch_flag,
                        xo::rng::xoshiro256ss * p_rgen,
                        Tree * p_tree)
@@ -93,17 +98,24 @@ namespace utest {
 
             bool ok_flag = true;
 
-            xo::scope log(XO_DEBUG(catch_flag));
+            xo::scope log(XO_DEBUG(catch_flag), xtag("lo", lo), xtag("hi", hi), xtag("k", k));
 
             REQUIRE_ORFAIL(ok_flag, catch_flag, p_tree->verify_ok(catch_flag));
+
+            if ((hi <= lo) || (k == 0))
+                return true;
+
+            uint32_t n = (hi - lo) / k;
 
             /* n keys 0..n-1 */
             std::vector<std::uint32_t> u(n);
             for(std::uint32_t i=0; i<n; ++i)
-                u[i] = i;
+                u[i] = lo + i*k;
 
             /* shuffle to get unpredictable insert order */
             std::shuffle(u.begin(), u.end(), *p_rgen);
+
+            size_t tree_z0 = p_tree->size();
 
             /* insert keys according to permutation u */
             uint32_t i = 1;
@@ -126,10 +138,19 @@ namespace utest {
                 ++i;
             }
 
-            REQUIRE_ORFAIL(ok_flag, catch_flag, p_tree->size() == n);
+            REQUIRE_ORFAIL(ok_flag, catch_flag, p_tree->size() == tree_z0 + n);
 
             return ok_flag;
         } /*random_inserts*/
+
+        static bool
+        random_inserts(std::uint32_t n,
+                       bool catch_flag,
+                       xo::rng::xoshiro256ss * p_rgen,
+                       Tree * p_tree)
+        {
+            return random_inserts(0, n, 1, catch_flag, p_rgen, p_tree);
+        }
 
         /* do n random removes (taken from *p_rgen) from *p_rbtree;
          * assumes *p_rbtree has keys [0 .. n-1] where n=p_rbtreẹsize
@@ -444,6 +465,102 @@ namespace utest {
 
             return ok_flag;
         } /*check_bidirectional_iterator*/
+
+        /** Require:
+         *  - tree has keys [0..n-1], where n=treesize()
+         *  - tree valu at key k is dvalue+10*k
+         *
+         *  @p catch_flag. control behavior at each test assertion.
+         *  true -> log to console + interact with catch2
+         *  false -> verify iteration behavior for return code.
+         *
+         **/
+        static bool
+        check_reduced_sum(uint32_t dvalue,
+                          bool catch_flag,
+                          Tree const & rbtree)
+        {
+            using xo::scope;
+            using xo::xtag;
+
+            scope log(XO_DEBUG(catch_flag));
+
+            /* -> false if/when check fails */
+            bool ok_flag = true;
+
+            size_t const n = rbtree.size();
+
+            for(size_t i = 0; i < n; ++i) {
+                /* compute reduction up to key=i */
+                double reduced_upto
+                    = rbtree.reduce_lub(i /*key*/,
+                                        true /*is_closed*/);
+
+                double reduced = (i+1) * (5*i + dvalue);
+
+                INFO(tostr(xtag("i", i), xtag("n", n),
+                           xtag("tree.reduced_upto", reduced_upto),
+                           xtag("reduced", reduced),
+                           xtag("dvalue", dvalue)));
+
+                auto glb_ix = rbtree.cfind_sum_glb(reduced);
+
+                REQUIRE_ORFAIL(ok_flag, catch_flag, reduced_upto == reduced);
+                REQUIRE_ORFAIL(ok_flag, catch_flag, glb_ix.is_dereferenceable());
+                /* glb_ix is truth-y */
+                REQUIRE_ORFAIL(ok_flag, catch_flag, glb_ix);
+
+                REQUIRE_ORFAIL(ok_flag, catch_flag, glb_ix->first == i);
+            }
+
+            return ok_flag;
+        } /*check_reduced_sum*/
+
+        /* Require:
+         * - *p_rbtree has keys [0..n-1],  where n=rbtree.size()
+         * - for each key k,  associated value is 10*k
+         *
+         * Promise:
+         * - for each key k,  associated value is dvalue + 10*k
+         */
+        static bool
+        random_updates(uint32_t dvalue,
+                       bool catch_flag,
+                       Tree * p_rbtree,
+                       xo::rng::xoshiro256ss * p_rgen)
+        {
+            using xo::scope;
+            using xo::xtag;
+
+            scope log(XO_DEBUG(catch_flag));
+
+            /* -> false if/when check fails */
+            bool ok_flag = true;
+
+            REQUIRE_ORFAIL(ok_flag, catch_flag, p_rbtree->verify_ok());
+
+            std::size_t n = p_rbtree->size();
+            std::vector<uint32_t> u
+                = Util::random_permutation(n, p_rgen);
+
+            /* update key/value pairs in permutation order */
+            uint32_t i = 1;
+            for (uint32_t x : u) {
+                REQUIRE_ORFAIL(ok_flag, catch_flag, (*p_rbtree)[x] == x*10);
+
+                (*p_rbtree)[x] = dvalue + 10*x;
+
+                REQUIRE_ORFAIL(ok_flag, catch_flag, (*p_rbtree)[x] == dvalue + 10*x);
+                REQUIRE_ORFAIL(ok_flag, catch_flag, p_rbtree->verify_ok());
+                /* assignment to existing key does not change tree size */
+                REQUIRE_ORFAIL(ok_flag, catch_flag, p_rbtree->size() == n);
+                ++i;
+            }
+
+            REQUIRE(p_rbtree->size() == n);
+
+            return ok_flag;
+        } /*random_updates*/
     }; /*TreeUtil*/
 } /*namespace utest*/
 

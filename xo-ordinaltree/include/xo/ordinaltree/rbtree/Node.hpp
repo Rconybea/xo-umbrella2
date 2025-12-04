@@ -321,7 +321,7 @@ namespace xo {
                     os << "<Node>";
                 }
 
-                virtual std::size_t _shallow_size() const { return sizeof(*this); }
+                virtual std::size_t _shallow_size() const final override { return sizeof(*this); }
                 /* note: only relevant when GcObjectInterface is xo::IObject */
                 virtual IObject * _shallow_copy(gc::IAlloc * gc) const {
                     if constexpr (GcObjectInterface::_requires_gc_hooks) {

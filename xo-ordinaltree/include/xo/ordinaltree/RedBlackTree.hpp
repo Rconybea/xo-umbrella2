@@ -66,6 +66,7 @@ namespace xo {
             using key_type = Key;
             using mapped_type = Value;
             using value_type = std::pair<Key const, Value>;
+
             // using key_compare = Compare // not yet
             using allocator_type = Allocator;
             using allocator_traits = xo::gc::gc_allocator_traits<Allocator>;
@@ -80,6 +81,10 @@ namespace xo {
             using node_type = RbNode;
             using node_allocator_type = allocator_traits::template rebind_alloc<node_type>;
             using node_allocator_traits = xo::gc::gc_allocator_traits<node_allocator_type>;
+
+            /* for make() factory method */
+            using tree_allocator_type = allocator_traits::template rebind_alloc<RedBlackTree>;
+            using tree_allocator_traits = xo::gc::gc_allocator_traits<tree_allocator_type>;
 
             using Direction = detail::Direction;
             using size_type = std::size_t;
@@ -118,16 +123,19 @@ namespace xo {
             {}
 #endif
 
-            static RedBlackTree * make(const allocator_type & alloc = allocator_type{},
+            static RedBlackTree * make(allocator_type kvpair_alloc = allocator_type{},
                                        bool debug_flag = false)
             {
-                RedBlackTree * tree = allocator_traits::allocate(alloc, 1);
+                tree_allocator_type tree_alloc(kvpair_alloc);
+
+                RedBlackTree * tree = tree_allocator_traits::allocate(tree_alloc, 1);
+
                 try {
                     // placement new
-                    allocator_traits::construct(alloc, tree, alloc, debug_flag);
+                    tree_allocator_traits::construct(tree_alloc, tree, kvpair_alloc, debug_flag);
                     return tree;
                 } catch(...) {
-                    allocator_traits::deallocate(alloc, tree, 1);
+                    tree_allocator_traits::deallocate(tree_alloc, tree, 1);
                 }
 
                 return nullptr;
@@ -314,6 +322,8 @@ namespace xo {
              */
             RbTreeConstLhs operator[](Key const & k) const
                 {
+                    //scope log(XO_DEBUG(true), xtag("variant", "readonly"), xtag("key", k));
+
                     RbNode const * node = RbUtil::find(this->root_, k);
 
                     return RbTreeConstLhs(this, node);
@@ -347,11 +357,14 @@ namespace xo {
              *                 // v.node contents may have been copied and v.node deleted
              */
             RbTreeLhs operator[](Key const & k) {
+                //scope log(XO_DEBUG(true), tag("variant", "autoinsert"), tag("key", k));
+
                 std::pair<bool, RbNode *> insert_result
                     = RbUtil::template insert_aux<node_allocator_type>(this->node_alloc_,
                                                                        value_type(k, Value() /*used iff creating new node*/),
                                                                        false /*allow_replace_flag*/,
                                                                        this->reduce_fn_,
+                                                                       this->debug_flag_,
                                                                        &(this->root_));
 
                 return RbTreeLhs(this, insert_result.second, k);
@@ -609,7 +622,7 @@ namespace xo {
             virtual void display(std::ostream & os) const {
                 os << "<RedBlackTree>";
             }
-            virtual std::size_t _shallow_size() const { return sizeof(*this); }
+            virtual std::size_t _shallow_size() const final override { return sizeof(*this); }
             virtual IObject * _shallow_copy(gc::IAlloc * gc) const {
                 if constexpr (GcObjectInterface::_requires_gc_hooks) {
                     xo::Cpof cpof(gc, this);

@@ -786,12 +786,12 @@ namespace xo {
                            value_type const & kv_pair,
                            bool allow_replace_flag,
                            Reduce const & reduce_fn,
+                           bool debug_flag,
                            RbNode ** pp_root)
                     {
                         using xo::xtag;
 
-                        constexpr bool c_debug_flag = false;
-                        //XO_SCOPE2(log, true /*debug_flag*/);
+                        scope log(XO_DEBUG(debug_flag));
 
                         RbNode * N = *pp_root;
 
@@ -809,7 +809,7 @@ namespace xo {
                                 /* after modifying a node n,  must recalculate reductions
                                  * along path [root .. n]
                                  */
-                                RbTreeUtil::fixup_ancestor_size(reduce_fn, N, c_debug_flag);
+                                RbTreeUtil::fixup_ancestor_size(reduce_fn, N, debug_flag);
 
                                 //log && log(xtag("path", (char const *)"A"));
 
@@ -843,7 +843,7 @@ namespace xo {
                             assert(is_red(N->child(d)));
 
                             /* recalculate Node sizes on path [root .. N] */
-                            RbTreeUtil::fixup_ancestor_size(reduce_fn, N, c_debug_flag);
+                            RbTreeUtil::fixup_ancestor_size(reduce_fn, N, debug_flag);
                             /* after adding a node,  must rebalance to restore RB-shape */
                             RbTreeUtil::fixup_red_shape(d, N, reduce_fn, pp_root);
 
@@ -1700,19 +1700,40 @@ namespace xo {
                                           &black_height] (RbNode const *x,
                                                           uint32_t bd)
                             {
+                                XO_EXPECT(x->_is_forwarded() == false,
+                                          tostr(c_self, (": stray forwarding pointer where node expected"),
+                                                xtag("i", i_node), xtag("node[i]", x)
+                                                ));
+
                                 /* RB2. if c=x->child(d), then c->parent()=x */
 
                                 if (x->left_child()) {
+                                    XO_EXPECT(x->left_child()->_is_forwarded() == false,
+                                              tostr(c_self, (": forwarding pointer where left child expected"),
+                                                    xtag("i", i_node), xtag("node[i]", x),
+                                                    xtag("key[i]", x->key()),
+                                                    xtag("child", x->left_child())
+                                                    ));
+
                                     XO_EXPECT(x == x->left_child()->parent(),
                                               tostr(c_self, (": expect symmetric child/parent pointers"),
                                                     xtag("i", i_node), xtag("node[i]", x),
                                                     xtag("key[i]", x->key()),
                                                     xtag("child", x->left_child()),
                                                     xtag("child.key", x->left_child()->key()),
-                                                    xtag("child.parent", x->left_child()->parent_)));
+                                                    xtag("child.parent", x->left_child()->parent_),
+                                                    xtag("child.parent._is_forwarded", x->left_child()->parent_->_is_forwarded())
+                                                    ));
                                 }
 
                                 if (x->right_child()) {
+                                    XO_EXPECT(x->right_child()->_is_forwarded() == false,
+                                              tostr(c_self, (": forwarding pointer where right child expected"),
+                                                    xtag("i", i_node), xtag("node[i]", x),
+                                                    xtag("key[i]", x->key()),
+                                                    xtag("child", x->right_child())
+                                                    ));
+
                                     XO_EXPECT(x == x->right_child()->parent(),
                                               tostr(c_self, ": expect symmetric child/parent pointers",
                                                     xtag("i", i_node),
@@ -1720,7 +1741,9 @@ namespace xo {
                                                     xtag("key[i]", x->key()),
                                                     xtag("child", x->right_child()),
                                                     xtag("child.key", x->right_child()->key()),
-                                                    xtag("child.parent", x->right_child()->parent_)));
+                                                    xtag("child.parent", x->right_child()->parent_),
+                                                    xtag("child.parent._is_forwarded", x->right_child()->parent_->_is_forwarded())
+                                                    ));
                                 }
 
                                 /* RB3. all nodes have the same black-height */
