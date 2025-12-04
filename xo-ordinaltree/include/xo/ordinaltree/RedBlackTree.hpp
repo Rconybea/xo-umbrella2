@@ -58,7 +58,7 @@ namespace xo {
                   typename Value,
                   typename Reduce,
                   typename Allocator>
-        class RedBlackTree : public xo::gc::gc_allocator_traits<Allocator>::template object_interface<Allocator> {
+        class RedBlackTree : public xo::gc::gc_allocator_traits<Allocator>::object_interface_type {
             static_assert(ordered_key<Key>);
             static_assert(valid_rbtree_reduce_functor<Reduce, Value>);
 
@@ -70,7 +70,7 @@ namespace xo {
             using allocator_type = Allocator;
             using allocator_traits = xo::gc::gc_allocator_traits<Allocator>;
 
-            using GcObjectInterface = allocator_traits::template object_interface<Allocator>;
+            using GcObjectInterface = allocator_traits::object_interface_type;
             using ReducedValue = typename Reduce::value_type;
             using RbUtil = detail::RbTreeUtil<Key, Value, Reduce, GcObjectInterface>;
             using RbNode = detail::Node<Key, Value, Reduce, GcObjectInterface>;
