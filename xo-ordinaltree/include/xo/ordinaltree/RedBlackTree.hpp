@@ -420,19 +420,26 @@ namespace xo {
             } /*find_sum_glb*/
 
             void clear() {
-                auto visitor_fn = [this](RbNode const * x, uint32_t /*d*/) {
-                    /* RbUtil.postorder_node_visitor() isn't expecting us to
-                     * alter node,  but will not examine it after it's deleted
-                     */
-                    RbNode * xx = const_cast<RbNode *>(x);
+                if constexpr (node_allocator_traits::has_trivial_deallocate_v) {
+                    // nothing to do since trivial deallocator
+                } else {
+                    // visitor to delete all Nodes
+                    auto visitor_fn = [this](RbNode const * x, uint32_t depth) {
+                        (void)depth;
 
-                    node_allocator_traits::deallocate(node_alloc_, xx, 1);
-                    // delete x
+                        /* RbUtil.postorder_node_visitor() isn't expecting us to
+                         * alter node,  but will not examine it after it's deleted
+                         */
+                        RbNode * xx = const_cast<RbNode *>(x);
+
+                        node_allocator_traits::deallocate(node_alloc_, xx, 1);
+                    };
+
+                    RbUtil::postorder_node_visitor(this->root_,
+                                                   0 /*depth -- ignored by lambda*/,
+                                                   visitor_fn);
+
                 };
-
-                RbUtil::postorder_node_visitor(this->root_,
-                                               0 /*depth -- ignored by lambda*/,
-                                               visitor_fn);
 
                 this->size_ = 0;
                 this->root_ = nullptr;
@@ -440,14 +447,25 @@ namespace xo {
 
             std::pair<iterator, bool>
             insert(std::pair<Key const, Value> const & kv_pair) {
+                RbNode * adj_root = this->root_;
+
                 std::pair<bool, RbNode *> insert_result
                     = RbUtil::insert_aux(kv_pair,
                                          true /*allow_replace_flag*/,
                                          this->reduce_fn_,
-                                         &(this->root_));
+                                         &adj_root);
 
-                if (insert_result.first)
+                if (insert_result.first) {
                     ++(this->size_);
+
+                    if (adj_root != root_) {
+                        allocator_type alloc = node_alloc_;
+
+                        this->_gc_assign_member(&(this->root_), adj_root, alloc);
+                    }
+                } else {
+                    assert(adj_root == root_);
+                }
 
                 return (std::pair<iterator, bool>
                         (iterator(detail::ID_Forward,
@@ -464,15 +482,27 @@ namespace xo {
                 constexpr bool c_logging_enabled = false;
                 scope log(XO_DEBUG(c_logging_enabled));
 
+                RbNode * adj_root = this->root_;
+
                 std::pair<bool, RbNode *> insert_result
                     = RbUtil::insert_aux(this->node_alloc_,
                                          std::move(kv_pair),
                                          true /*allow_replace_flag*/,
                                          this->reduce_fn_,
-                                         &(this->root_));
+                                         this->debug_flag_,
+                                         &adj_root);
 
-                if (insert_result.first)
+                if (insert_result.first) {
                     ++(this->size_);
+
+                    if (adj_root != root_) {
+                        allocator_type alloc = node_alloc_;
+
+                        this->_gc_assign_member(&(this->root_), adj_root, alloc);
+                    }
+                } else {
+                    assert(adj_root == root_);
+                }
 
                 return (std::pair<iterator, bool>
                         (iterator(detail::ID_Forward,

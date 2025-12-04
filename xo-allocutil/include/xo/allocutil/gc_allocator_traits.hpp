@@ -74,7 +74,20 @@ namespace xo {
             struct has_incremental_gc_interface<A, std::void_t<typename A::has_incremental_gc_interface>> :
                 A::has_incremental_gc_interface {};
 
+            // default: allocate A fallback to standard non-GC allocator behavior
+            template <typename A, typename = void>
+            struct has_trivial_deallocate : std::false_type {};
+
+            // opt-in: A provides nested type 'has_trivial_deallocate':
+            // struct A {
+            //   using has_trivial_deallocate = std::true_type;
+            // };
+            template <typename A>
+            struct has_trivial_deallocate<A, std::void_t<typename A::has_trivial_deallocate>> :
+                A::has_trivial_deallocate {};
+
             // default: empty object interface.
+            //
             // classes that want to conditionally support GC
             // (e.g. see xo::tree::RedBlackTree, xo::tree::Node
             //       in xo-ordinal-tree)
@@ -85,13 +98,24 @@ namespace xo {
             struct object_interface {
                 /** see also IObject::_requires_gc_hooks **/
                 static constexpr bool _requires_gc_hooks = false;
+                /** see also IObject::_requires_write_barrier **/
+                static constexpr bool _requires_write_barrier = false;
+
+                /** see also IObject::_gc_assign_member **/
+                template <typename T>
+                void _gc_assign_member(T ** lhs,
+                                       T * rhs,
+                                       A & alloc)
+                {
+                    *lhs = rhs;
+                }
+
             };
 
             // specialization when A provides gc_object_interface
             template <typename A>
             struct object_interface<A, std::void_t<typename A::gc_object_interface>>
-                : public A::gc_object_interface {
-            };
+                : public A::gc_object_interface {};
 
             // classes that want to conditionally support GC
             // (e.g. see xo::tree::RedBlackTree, xo::tree::Node
@@ -101,14 +125,23 @@ namespace xo {
             //
             using object_interface_type = object_interface<Allocator>;
 
-            /** true iff this allocator advertises itself as an incremental collector
-             *  allocator will include:
+            /** true iff this allocator advertises itself as an incremental collector.
+             *  Allocator will include:
              *
-             *  struct GC {
+             *  struct IAlloc {
              *    using has_incremental_gc_interface = std::true_type;
              *  };
              **/
             static inline constexpr bool has_incremental_gc_interface_v = has_incremental_gc_interface<Allocator>::value;
+
+            /** true iff this allocator advertises trivial deallocate
+             *  Allocate will include:
+             *
+             *  struct IAlloc {
+             *    using has_trivial_deallocate = std::true_type;
+             *  };
+             **/
+            static inline constexpr bool has_trivial_deallocate_v = has_trivial_deallocate<Allocator>::value;
         };
     } /*namespace gc*/
 } /*namespace xo*/

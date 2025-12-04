@@ -42,6 +42,7 @@ namespace xo {
              **/
             using gc_object_interface = xo::Object;
             using has_incremental_gc_interface = std::true_type;
+            using has_trivial_deallocate = std::true_type;
 
         public:
             virtual ~IAlloc() {}
