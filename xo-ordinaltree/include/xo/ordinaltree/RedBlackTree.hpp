@@ -619,14 +619,16 @@ namespace xo {
 
             // ----- Inherited from GcObjectInterface -----
 
+#ifdef SET_ASIDE
             virtual TaggedPtr self_tp() const {
                 return Reflect::make_tp(const_cast<RedBlackTree *>(this));
             }
-            virtual void display(std::ostream & os) const {
+#endif
+            virtual void display(std::ostream & os) const final override {
                 os << "<RedBlackTree>";
             }
             virtual std::size_t _shallow_size() const final override { return sizeof(*this); }
-            virtual IObject * _shallow_copy(gc::IAlloc * gc) const {
+            virtual IObject * _shallow_copy(gc::IAlloc * gc) const final override {
                 if constexpr (GcObjectInterface::_requires_gc_hooks) {
                     xo::Cpof cpof(gc, this);
                     return new (cpof) RedBlackTree(*this);
@@ -635,7 +637,7 @@ namespace xo {
                     return nullptr;
                 }
             }
-            virtual std::size_t _forward_children(gc::IAlloc * gc) {
+            virtual std::size_t _forward_children(gc::IAlloc * gc) final override {
                 if constexpr (GcObjectInterface::_requires_gc_hooks) {
                     using xo::gc::ObjectVisitor;
 
