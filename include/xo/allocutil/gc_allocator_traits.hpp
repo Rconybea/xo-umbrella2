@@ -40,6 +40,19 @@ namespace xo {
             virtual std::size_t _forward_children(gc::IAlloc *) { assert(false); return 0; }
         };
 
+        /** dummy GC interface.
+         *  non-empty intersection with IAlloc
+         **/
+        template <typename GcObjectInterface>
+        struct FallbackGcInterface {
+            template <typename Allocator>
+            FallbackGcInterface(Allocator & alloc) {}
+
+            bool check_write_barrier(const void * parent,
+                                     const void * const * lhs,
+                                     bool may_throw) { return true; };
+        };
+
         /** Extended version of
          *    std::allocator_traits<Allocator>
          *  Introduces additional i/face methods
@@ -136,6 +149,8 @@ namespace xo {
             using super::allocate;
             using super::deallocate;
 
+            // ----------------------------------------------------------------
+
             // default: allocator A fallback to standard non-gc allocator behavior
             template <typename A, typename = void>
             struct has_incremental_gc_interface : std::false_type {};
@@ -148,6 +163,19 @@ namespace xo {
             struct has_incremental_gc_interface<A, std::void_t<typename A::has_incremental_gc_interface>> :
                 A::has_incremental_gc_interface {};
 
+            /** true iff this allocator advertises itself as an incremental collector.
+             *  Allocator will include:
+             *
+             *  struct IAlloc {
+             *    using has_incremental_gc_interface = std::true_type;
+             *  };
+             **/
+            static inline constexpr
+            bool
+            has_incremental_gc_interface_v = has_incremental_gc_interface<Allocator>::value;
+
+            // ----------------------------------------------------------------
+
             // default: allocate A fallback to standard non-GC allocator behavior
             template <typename A, typename = void>
             struct has_trivial_deallocate : std::false_type {};
@@ -159,6 +187,19 @@ namespace xo {
             template <typename A>
             struct has_trivial_deallocate<A, std::void_t<typename A::has_trivial_deallocate>> :
                 A::has_trivial_deallocate {};
+
+            /** true iff this allocator advertises trivial deallocate
+             *  Allocate will include:
+             *
+             *  struct IAlloc {
+             *    using has_trivial_deallocate = std::true_type;
+             *  };
+             **/
+            static inline constexpr
+            bool
+            has_trivial_deallocate_v = has_trivial_deallocate<Allocator>::value;
+
+            // ----------------------------------------------------------------
 
             // default: empty object interface.
             //
@@ -187,27 +228,32 @@ namespace xo {
             //
             using object_interface_type = object_interface<Allocator>;
 
-            /** true iff this allocator advertises itself as an incremental collector.
-             *  Allocator will include:
-             *
-             *  struct IAlloc {
-             *    using has_incremental_gc_interface = std::true_type;
-             *  };
-             **/
-            static inline constexpr
-            bool
-            has_incremental_gc_interface_v = has_incremental_gc_interface<Allocator>::value;
+            // ----------------------------------------------------------------
 
-            /** true iff this allocator advertises trivial deallocate
-             *  Allocate will include:
-             *
-             *  struct IAlloc {
-             *    using has_trivial_deallocate = std::true_type;
-             *  };
-             **/
-            static inline constexpr
-            bool
-            has_trivial_deallocate_v = has_trivial_deallocate<Allocator>::value;
+            // default: minimal garbage collector interface.
+            //
+            // Use in allocator-aware components that need conditionally
+            // to engage with GC functionality.
+            // For example in RedBlackTree::verify_ok() want to check
+            // cross-generational pointers.
+            //
+            // gc_interface gc
+            //   - gc_interface(A & alloc)
+            //   - gc.check_write_barrier(const object_interface_type * p,
+            //                            const object_interface_type * const * lhs,
+            //                            bool may_throw)
+            //
+            template <typename A, typename = void>
+            struct gc_interface : public FallbackGcInterface<object_interface_type> {};
+
+            // allocator opt-in by providing a gc_interface type
+            template <typename A>
+            struct gc_interface<A, std::void_t<typename A::gc_interface>> : public A::gc_interface {};
+
+            // interface for (narrow) GC interaction.
+            // Construct from allocator
+            using gc_interface_type = gc_interface<Allocator>;
+
         };
     } /*namespace gc*/
 } /*namespace xo*/

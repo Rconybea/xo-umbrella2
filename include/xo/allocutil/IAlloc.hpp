@@ -143,8 +143,8 @@ namespace xo {
             /** check write barrier (if impl has write barrier)
              *  given an object @p parent that contains object pointer @p lhs.
              **/
-            virtual bool check_write_barrier(IObject * /*parent*/,
-                                             IObject ** /*lhs*/,
+            virtual bool check_write_barrier(const void * /*parent*/,
+                                             const void * const * /*lhs*/,
                                              bool /*may_throw*/) const { return true; };
             /** write barrier for collector.  perform assignment
              *    @code
@@ -169,6 +169,16 @@ namespace xo {
             }
         };
 
+        /** for gc_allocator_traits, want an allocator pointer we can inherit from **/
+        struct IAllocPtr {
+        public:
+            inline bool check_write_barrier(const void * parent, const void * const * lhs, bool may_throw) const {
+                return mm_->check_write_barrier(parent, lhs, may_throw);
+            }
+
+            IAlloc * mm_ = nullptr;
+        };
+
         /** allocator wrapper (in the style of std::allocator)
          **/
         template <typename T>
@@ -183,10 +193,11 @@ namespace xo {
             using difference_type = std::ptrdiff_t;
 
             using gc_object_interface = IAlloc::gc_object_interface;
+            using gc_interface = IAllocPtr;
             using has_incremental_gc_interface = IAlloc::has_incremental_gc_interface;
 
             /** rebind is for typed allocators. since IAlloc is untyped,
-             *  we want degenerate version
+             *  rebind is almost trivial
              **/
             template <typename U>
             struct rebind {
@@ -194,16 +205,16 @@ namespace xo {
             };
 
         public:
-            explicit allocator(IAlloc * mm) : mm_{mm} {}
+            explicit allocator(IAlloc * mm) : impl_{mm} {}
 
             allocator(const allocator &) = default;
             allocator & operator=(const allocator &) = default;
 
             template <typename U>
-            allocator(const allocator<U> & other) : mm_{other.mm_} {}
+            allocator(const allocator<U> & other) : impl_{other.impl_.mm_} {}
 
             pointer allocate(size_type n) {
-                std::byte * raw = mm_->allocate(n * sizeof(T));
+                std::byte * raw = impl_.mm_->allocate(n * sizeof(T));
 
                 return reinterpret_cast<pointer>(raw);
             }
@@ -211,7 +222,7 @@ namespace xo {
             void deallocate(pointer p, size_type n) {
                 std::byte * raw = reinterpret_cast<std::byte *>(p);
 
-                mm_->deallocate(raw, n * sizeof(T));
+                impl_.mm_->deallocate(raw, n * sizeof(T));
             }
 
             // optional construct, destroy (but allocator_traits provides defaults)
@@ -221,11 +232,14 @@ namespace xo {
              **/
             template <typename U>
             bool operator==(const allocator<U> & other) const noexcept {
-                return mm_ == other.mm_;
+                return impl_.mm_ == other.impl_.mm_;
             }
 
+            /** gc_interface=IAlloc **/
+            operator gc_interface () const { return impl_; }
+
         public:
-            IAlloc * mm_ = nullptr;
+            IAllocPtr impl_;
         };
 
     } /*namespace gc*/
