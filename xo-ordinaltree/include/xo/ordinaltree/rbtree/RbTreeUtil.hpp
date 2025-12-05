@@ -355,8 +355,10 @@ namespace xo {
                  * (so any key k' in x satisfies k' > h->key)
                  *
                  */
-                static RbNode *find_glb_aux(RbNode *x, RbNode *h, Key const &k,
-                                            bool is_closed) {
+                static RbNode * find_glb_aux(RbNode * x,
+                                             RbNode * h,
+                                             Key const & k,
+                                             bool is_closed) {
                     for (;;) {
                         if (!x)
                             return h;
@@ -458,24 +460,25 @@ namespace xo {
                  *     / \                    / \
                  *    T   S                  S   R
                  */
-                static RbNode *rotate(Direction d, RbNode *A,
-                                      Reduce const & reduce_fn,
-                                      RbNode **pp_root) {
+                template <typename NodeAllocator>
+                static RbNode * rotate(NodeAllocator & alloc,
+                                       Direction d,
+                                       RbNode * A,
+                                       Reduce const & reduce_fn,
+                                       bool debug_flag,
+                                       RbNode ** pp_root) {
                     using xo::scope;
                     using xo::xtag;
 
-                    //constexpr char const *c_self = "RbTreeUtil::rotate";
-                    constexpr bool c_logging_enabled = false;
-
-                    scope log(XO_DEBUG(c_logging_enabled));
+                    scope log(XO_DEBUG(debug_flag));
 
                     Direction other_d = other(d);
 
-                    RbNode *G = A->parent();
-                    RbNode *B = A->child(other_d);
-                    //RbNode *R = A->child(d);        // not using
-                    RbNode *S = B->child(d);
-                    //RbNode *T = B->child(other_d);  // not using
+                    RbNode * G = A->parent();
+                    RbNode * B = A->child(other_d);
+                    //RbNode * R = A->child(d);        // not using
+                    RbNode * S = B->child(d);
+                    //RbNode * T = B->child(other_d);  // not using
 
                     if (log.enabled()) {
                         log("rotate-", (d == D_Left) ? "left" : "right",
@@ -493,14 +496,14 @@ namespace xo {
                     }
 
                     /* note: this will set A's old child B to have null parent ptr */
-                    A->assign_child_reparent(other_d, S);
+                    A->assign_child_reparent(alloc, other_d, S);
                     A->local_recalc_size(reduce_fn);
 
-                    B->assign_child_reparent(d, A);
+                    B->assign_child_reparent(alloc, d, A);
                     B->local_recalc_size(reduce_fn);
 
                     if (G) {
-                        G->replace_child_reparent(A, B);
+                        G->replace_child_reparent(alloc, A, B);
                         assert(B->parent() == G);
 
                         /* note: G.size not affected by rotation */
@@ -550,18 +553,20 @@ namespace xo {
                  * Promise:
                  * - tree is in RB-shape
                  */
-                static void fixup_red_shape(Direction d, RbNode *G,
+                template <typename NodeAllocator>
+                static void fixup_red_shape(NodeAllocator & alloc,
+                                            Direction d,
+                                            RbNode * G,
                                             Reduce const & reduce_fn,
-                                            RbNode **pp_root) {
+                                            bool debug_flag,
+                                            RbNode ** pp_root) {
                     using xo::scope;
                     using xo::xtag;
                     using xo::print::ccs;
 
-                    //constexpr char const *c_self = "RbTreeUtil::fixup_red_shape";
-                    constexpr bool c_logging_enabled = false;
                     constexpr bool c_excessive_verify_enabled = false;
 
-                    scope log(XO_DEBUG(c_logging_enabled));
+                    scope log(XO_DEBUG(debug_flag));
 
                     RbNode *P = G->child(d);
 
@@ -712,7 +717,7 @@ namespace xo {
                              *                          / \
                              *                         R
                              */
-                            RbTreeUtil::rotate(d, P, reduce_fn, pp_root);
+                            RbTreeUtil::rotate(alloc, d, P, reduce_fn, debug_flag, pp_root);
 
                             if (c_excessive_verify_enabled)
                                 RbTreeUtil::verify_subtree_ok(reduce_fn, S, nullptr /*&black_height*/);
@@ -739,7 +744,7 @@ namespace xo {
                                    (other_d == D_Left) ? "left" : "right", " at G",
                                    xtag("G", G), xtag("G.key", G->key()));
 
-                        RbTreeUtil::rotate(other_d, G, reduce_fn, pp_root);
+                        RbTreeUtil::rotate(alloc, other_d, G, reduce_fn, debug_flag, pp_root);
 
                         if (c_excessive_verify_enabled) {
                             RbNode *GG = G ? G->parent() : G;
@@ -759,7 +764,7 @@ namespace xo {
 
                         return;
                     } /*walk toward root until red violation fixed*/
-                }   /*fixup_red_shape*/
+                } /*fixup_red_shape*/
 
                 /* insert key-value pair (key, value) into *pp_root.
                  * on exit *pp_root contains new tree with (key, value) inserted.
@@ -837,16 +842,16 @@ namespace xo {
                                                                   kv_pair,
                                                                   reduce_fn.leaf(kv_pair.second));
 
-                            N->assign_child_reparent_2(alloc,
-                                                       d,
-                                                       new_node);
+                            N->assign_child_reparent(alloc,
+                                                     d,
+                                                     new_node);
 
                             assert(is_red(N->child(d)));
 
                             /* recalculate Node sizes on path [root .. N] */
                             RbTreeUtil::fixup_ancestor_size(reduce_fn, N, debug_flag);
                             /* after adding a node,  must rebalance to restore RB-shape */
-                            RbTreeUtil::fixup_red_shape(d, N, reduce_fn, pp_root);
+                            RbTreeUtil::fixup_red_shape(alloc, d, N, reduce_fn, debug_flag, pp_root);
 
                             //log && log(xtag("path", (char const *)"B"));
 
@@ -918,7 +923,7 @@ namespace xo {
                         /* d: direction in P to immediate child N;
                          * also sets N.parent to nil
                          */
-                        Direction d = P->replace_child_reparent(N, nullptr);
+                        Direction d = P->replace_child_reparent(alloc, N, nullptr);
 
                         traits::deallocate(alloc, N, 1);
 
@@ -1100,7 +1105,7 @@ namespace xo {
                             assert(is_black(P));
                             assert(is_black(N));
 
-                            RbTreeUtil::rotate(d, P, reduce_fn, pp_root);
+                            RbTreeUtil::rotate(alloc, d, P, reduce_fn, debug_flag, pp_root);
 
                             /* after rotation d at P:
                              *
@@ -1217,7 +1222,8 @@ namespace xo {
                              * - D at h
                              */
 
-                            RbTreeUtil::rotate(other_d, S, reduce_fn, pp_root);
+                            RbTreeUtil::rotate(alloc,
+                                               other_d, S, reduce_fn, debug_flag, pp_root);
 
                             assert(P->child(other_d) == C);
 
@@ -1292,7 +1298,7 @@ namespace xo {
                              * - S   (+also C,D) at h
                              */
 
-                            RbTreeUtil::rotate(d, P, reduce_fn, pp_root);
+                            RbTreeUtil::rotate(alloc, d, P, reduce_fn, debug_flag, pp_root);
 
                             /* after rotate at P toward d: *
                              *
@@ -1438,7 +1444,7 @@ namespace xo {
                              *   W
                              */
                             if (P)
-                                P->replace_child_reparent(N, R);
+                                P->replace_child_reparent(alloc, N, R);
 
                             /*
                              * here the triangle ascii art indicates a tree structure,
@@ -1452,8 +1458,8 @@ namespace xo {
                              *      / .   R   Y
                              *     W
                              */
-                            R->assign_child_reparent(D_Left, N);
-                            R->assign_child_reparent(D_Right, Y);
+                            R->assign_child_reparent(alloc, D_Left, N);
+                            R->assign_child_reparent(alloc, D_Right, Y);
                             /*
                              * here the triangle ascii art indicates a tree structure,
                              * of arbitrary size
@@ -1468,8 +1474,8 @@ namespace xo {
                              *    / \
                              *   R   Y
                              */
-                            N->assign_child_reparent(D_Left, W);
-                            N->assign_child_reparent(D_Right, nullptr);
+                            N->assign_child_reparent(alloc, D_Left, W);
+                            N->assign_child_reparent(alloc, D_Right, nullptr);
                             /*
                              * here the triangle ascii art indicates a tree structure,
                              * of arbitrary size
@@ -1519,7 +1525,7 @@ namespace xo {
                              * everything except RbNode.contents_.
                              * Annoying but necessary to have stable Node memory locations
                              */
-                            RbNode::swap_locations(R, N, debug_flag);
+                            RbNode::swap_locations(alloc, R, N, debug_flag);
 
                             /* swapping locations invalidates RbNode.reduced_.
                              * But correctness will be restored in erase_1child_aux()
@@ -1592,7 +1598,7 @@ namespace xo {
                             /* replace pointer to N with nil in N's parent. */
 
                             if (P) {
-                                P->replace_child_reparent(N, nullptr);
+                                P->replace_child_reparent(alloc, N, nullptr);
 
                                 log && log("fixup_ancestor_size starting at P");
                                 RbTreeUtil::fixup_ancestor_size(reduce_fn, P, debug_flag);
@@ -1613,7 +1619,7 @@ namespace xo {
                              */
                         }
                     } else /*N->is_black()*/ {
-                        RbNode *R = N->left_child();
+                        RbNode * R = N->left_child();
 
                         if (!R)
                             R = N->right_child();
@@ -1628,7 +1634,7 @@ namespace xo {
                             R->assign_color(C_Black);
 
                             if (P) {
-                                P->replace_child_reparent(N, R);
+                                P->replace_child_reparent(alloc, N, R);
                                 log && log("fixup_ancestor_size starting at P");
                                 RbTreeUtil::fixup_ancestor_size(reduce_fn, P, debug_flag);
                             } else {

@@ -82,14 +82,6 @@ namespace xo {
                     }
                 } /*make_leaf*/
 
-#ifdef OBSOLETE
-                static Node * make_leaf(value_type && kv_pair,
-                                        ReducedValue const & leaf_rv) {
-                    return new Node(kv_pair,
-                                    std::pair<ReducedValue, ReducedValue>(leaf_rv, leaf_rv));
-                } /*make_leaf*/
-#endif
-
                 /* return #of key/vaue pairs in tree rooted at x. */
                 static size_t tree_size(Node *x) {
                     if (x)
@@ -146,7 +138,7 @@ namespace xo {
                 /* replace root pointer *pp_root with x;
                  * set x parent pointer to nil
                  */
-                static void replace_root_reparent(Node *x, Node **pp_root) {
+                static void replace_root_reparent(Node * x, Node ** pp_root) {
                     *pp_root = x;
                     if (x)
                         x->parent_ = nullptr;
@@ -155,7 +147,11 @@ namespace xo {
                 /** swap values of all members except @ref contents_
                  *  between @p *lhs and @p *rhs
                  **/
-                static void swap_locations(Node * lhs, Node * rhs, bool debug_flag) {
+                template <typename NodeAllocator>
+                static void swap_locations(NodeAllocator & alloc,
+                                           Node * lhs,
+                                           Node * rhs,
+                                           bool debug_flag) {
                     scope log(XO_DEBUG(debug_flag));
 
                     assert(lhs->parent() != rhs->parent());
@@ -179,7 +175,7 @@ namespace xo {
                     assert(lhs != rhs->right_child() && "expected left-to-right key order");
 
                     if (lhs_parent)
-                        lhs_parent->replace_child_reparent(lhs, rhs);
+                        lhs_parent->replace_child_reparent(alloc, lhs, rhs);
 
                     /* now have:
                      * - rhs->parent() = lhs_parent
@@ -187,7 +183,7 @@ namespace xo {
                      */
 
                     if (rhs_parent)
-                        rhs_parent->replace_child_reparent(rhs, lhs);
+                        rhs_parent->replace_child_reparent(alloc, rhs, lhs);
 
                     /* now have:
                      * - lhs->parent() = rhs_parent
@@ -211,10 +207,10 @@ namespace xo {
                     Node * rhs_left = rhs->left_child();
                     Node * rhs_right = rhs->right_child();
 
-                    lhs->assign_child_reparent(D_Left, rhs_left);
-                    lhs->assign_child_reparent(D_Right, rhs_right);
-                    rhs->assign_child_reparent(D_Left, lhs_left);
-                    rhs->assign_child_reparent(D_Right, lhs_right);
+                    lhs->assign_child_reparent(alloc, D_Left, rhs_left);
+                    lhs->assign_child_reparent(alloc, D_Right, rhs_right);
+                    rhs->assign_child_reparent(alloc, D_Left, lhs_left);
+                    rhs->assign_child_reparent(alloc, D_Right, lhs_right);
 
                     //std::swap(lhs->child_v_, rhs->child_v_);
 
@@ -318,10 +314,10 @@ namespace xo {
                 virtual TaggedPtr self_tp() const {
                     return Reflect::make_tp(const_cast<Node *>(this));
                 }
-#endif
                 virtual void display(std::ostream & os) const final override {
                     os << "<Node>";
                 }
+#endif
 
                 virtual std::size_t _shallow_size() const final override { return sizeof(*this); }
                 /* note: only relevant when GcObjectInterface is xo::IObject */
@@ -372,27 +368,10 @@ namespace xo {
                 void assign_color(Color x) { this->color_ = x; }
                 void assign_size(size_t z) { this->size_ = z; }
 
-                void assign_child_reparent(Direction d, Node *new_x) {
-                    Node * old_x = this->child_v_[d];
-
-                    // trying to fix old_x can be counterproductive,
-                    // since old_x->parent_ may already have been corrected,
-                    //
-                    if (old_x && (old_x->parent_ == this)) {
-                        old_x->parent_ = nullptr;
-                    }
-
-                    this->child_v_[d] = new_x;
-
-                    if (new_x) {
-                        new_x->parent_ = this;
-                    }
-                } /*assign_child_reparent*/
-
                 template <typename NodeAllocator>
-                void assign_child_reparent_2(NodeAllocator & alloc,
-                                             Direction d,
-                                             Node * new_x)
+                void assign_child_reparent(NodeAllocator & alloc,
+                                           Direction d,
+                                           Node * new_x)
                 {
                     Node * old_x = this->child_v_[d];
 
@@ -429,11 +408,14 @@ namespace xo {
                  * - x is nullptr or x.parent is nullptr
                  * - x_new is nullptr or x_new.parent is this
                  */
-                Direction replace_child_reparent(Node *x, Node *x_new) {
+                template <typename NodeAllocator>
+                Direction replace_child_reparent(NodeAllocator & alloc,
+                                                   Node * x,
+                                                   Node * x_new) {
                     Direction d = this->child_direction(x);
 
-                    if (d == D_Left || d == D_Right) {
-                        this->assign_child_reparent(d, x_new);
+                    if ((d == D_Left) || (d == D_Right)) {
+                        this->assign_child_reparent(alloc, d, x_new);
                         return d;
                     } else {
                         return D_Invalid;

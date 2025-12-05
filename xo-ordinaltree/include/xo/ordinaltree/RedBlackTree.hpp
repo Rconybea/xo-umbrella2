@@ -466,10 +466,11 @@ namespace xo {
                 RbNode * adj_root = this->root_;
 
                 std::pair<bool, RbNode *> insert_result
-                    = RbUtil::insert_aux(kv_pair,
-                                         true /*allow_replace_flag*/,
-                                         this->reduce_fn_,
-                                         &adj_root);
+                    = RbUtil::template insert_aux<node_allocator_type>(this->node_alloc_,
+                                                                       kv_pair,
+                                                                       true /*allow_replace_flag*/,
+                                                                       this->reduce_fn_,
+                                                                       &adj_root);
 
                 if (insert_result.first) {
                     ++(this->size_);
@@ -623,10 +624,10 @@ namespace xo {
             virtual TaggedPtr self_tp() const {
                 return Reflect::make_tp(const_cast<RedBlackTree *>(this));
             }
-#endif
             virtual void display(std::ostream & os) const final override {
                 os << "<RedBlackTree>";
             }
+#endif
             virtual std::size_t _shallow_size() const final override { return sizeof(*this); }
             virtual IObject * _shallow_copy(gc::IAlloc * gc) const final override {
                 if constexpr (GcObjectInterface::_requires_gc_hooks) {
