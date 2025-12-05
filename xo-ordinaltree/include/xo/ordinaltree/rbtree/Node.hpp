@@ -392,7 +392,7 @@ namespace xo {
                     //this->child_v_[d] = new_x;
 
                     if (new_x) {
-                        this->_gc_assign_member(&(new_x->parent_), this, assign_alloc);
+                        new_x->_gc_assign_member(&(new_x->parent_), this, assign_alloc);
                         //new_x->parent_ = this;
                     }
                 } /*assign_child_reparent*/
