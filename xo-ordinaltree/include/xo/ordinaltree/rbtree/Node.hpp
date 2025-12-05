@@ -266,8 +266,8 @@ namespace xo {
                 /* true if this node is red,  and either child is red */
                 bool is_red_violation() const {
                     if (this->color_ == C_Red) {
-                        Node *left = this->left_child();
-                        Node *right = this->right_child();
+                        Node *  left = this->left_child();
+                        Node * right = this->right_child();
 
                         if (left && left->is_red())
                             return true;
@@ -455,7 +455,7 @@ namespace xo {
                  */
                 std::pair<ReducedValue, ReducedValue> reduced_;
                 /* pointer to parent node,  nullptr iff this is the root node */
-                Node *parent_ = nullptr;
+                Node * parent_ = nullptr;
                 /*
                  * .child_v[0] = left child
                  * .child_v[1] = right child

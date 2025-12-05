@@ -534,14 +534,25 @@ namespace xo {
                     log("pre", xtag("key", key), xtag("tree", *this));
                 }
 
+                RbNode * adj_root = this->root_;
+
                 bool retval = RbUtil::erase_aux(this->node_alloc_,
                                                 key,
                                                 this->reduce_fn_,
                                                 debug_flag_,
-                                                &(this->root_));
+                                                &adj_root);
 
-                if (retval)
+                if (retval) {
                     --(this->size_);
+
+                    if (adj_root != root_) {
+                        allocator_type alloc = node_alloc_;
+
+                        this->_gc_assign_member(&(this->root_), adj_root, alloc);
+                    }
+                } else {
+                    assert(adj_root == root_);
+                }
 
                 if (log) {
                     log("post", xtag("tree", *this));

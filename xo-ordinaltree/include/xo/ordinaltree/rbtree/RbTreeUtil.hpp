@@ -317,7 +317,7 @@ namespace xo {
                  */
                 static RbNode * find_rightmost(RbNode *N) {
                     while(N) {
-                        RbNode *S = N->right_child();
+                        RbNode * S = N->right_child();
 
                         if (!S)
                             break;
@@ -417,7 +417,7 @@ namespace xo {
                             return x;
                         }
 
-                        RbNode *y = find_lub(x->left_child(), k, is_closed);
+                        RbNode * y = find_lub(x->left_child(), k, is_closed);
 
                         if (y) {
                             /* found better upper bound in left subtree */
@@ -911,7 +911,7 @@ namespace xo {
 
                         assert(pp_root);
 
-                        RbNode *P = N->parent();
+                        RbNode * P = N->parent();
 
                         if (!P) {
                             /* N was the root node,  tree now empty */
@@ -948,9 +948,9 @@ namespace xo {
                          *       C   D
                          */
                         Direction other_d;
-                        RbNode *S = nullptr;
-                        RbNode *C = nullptr;
-                        RbNode *D = nullptr;
+                        RbNode * S = nullptr;
+                        RbNode * C = nullptr;
+                        RbNode * D = nullptr;
 
                         /* table of outcomes as a function of node color
                          *

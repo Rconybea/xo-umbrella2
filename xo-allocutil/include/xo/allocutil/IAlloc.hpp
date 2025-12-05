@@ -140,6 +140,12 @@ namespace xo {
              *  in-progress collection phase
              **/
             virtual bool check_move(IObject * /*src*/) const { return false; }
+            /** check write barrier (if impl has write barrier)
+             *  given an object @p parent that contains object pointer @p lhs.
+             **/
+            virtual bool check_write_barrier(IObject * /*parent*/,
+                                             IObject ** /*lhs*/,
+                                             bool /*may_throw*/) const { return true; };
             /** write barrier for collector.  perform assignment
              *    @code
              *    *lhs = rhs
