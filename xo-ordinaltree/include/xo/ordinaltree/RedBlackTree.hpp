@@ -580,14 +580,19 @@ namespace xo {
              *             R is reduced-value for right child
              * RB8. RedBlackTree.size() equals the #of nodes in tree
              */
-            bool verify_ok(bool /*throw_flag_not_implemented*/ = true) const {
+            bool verify_ok(bool /*throw_flag_not_implemented*/ = true) const
+            {
                 using xo::scope;
                 using xo::tostr;
                 using xo::xtag;
 
                 constexpr const char *c_self = "RedBlackTree::verify_ok";
 
-                scope log(XO_DEBUG(debug_flag_));
+                scope log(XO_DEBUG(debug_flag_), xtag("size", size_));
+                if (debug_flag_) {
+                    // look forward to upgrading this to pp
+                    this->display_to_log();
+                }
 
                 /* RB0. */
                 if (root_ == nullptr) {
@@ -610,7 +615,8 @@ namespace xo {
                 int32_t black_height = 0;
 
                 /* n_node: #of nodes in this->root_ */
-                size_t n_node = RbUtil::verify_subtree_ok(this->reduce_fn_,
+                size_t n_node = RbUtil::verify_subtree_ok(this->node_alloc_,
+                                                          this->reduce_fn_,
                                                           this->root_,
                                                           &black_height);
 

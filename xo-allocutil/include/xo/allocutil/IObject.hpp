@@ -29,6 +29,8 @@ namespace xo {
         /** GC write barrier:
          *  assign value @p rhs to member @p *lhs of @p parent.
          *  Identifiy and remember cross-generational pointers.
+         *
+         *  Expect Allocator is xo::gc::allocator<T> (see IAlloc.hpp)
          **/
         template <typename T, typename Allocator>
         void _gc_assign_member(T ** lhs,
@@ -37,7 +39,7 @@ namespace xo {
         {
             static_assert(std::is_convertible_v<decltype(*lhs), IObject*>);
 
-            alloc.mm_->assign_member(this, reinterpret_cast<IObject **>(lhs), rhs);
+            alloc.impl_.mm_->assign_member(this, reinterpret_cast<IObject **>(lhs), rhs);
         }
 
         /** true iff this object represents a forwarding pointer.

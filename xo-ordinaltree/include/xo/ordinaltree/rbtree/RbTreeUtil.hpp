@@ -572,7 +572,7 @@ namespace xo {
 
                     for (uint32_t iter = 0;; ++iter) {
                         if (c_excessive_verify_enabled)
-                            RbTreeUtil::verify_subtree_ok(reduce_fn, G, nullptr /*&black_height*/);
+                            RbTreeUtil::verify_subtree_ok(alloc, reduce_fn, G, nullptr /*&black_height*/);
 
                         if (log.enabled()) {
                             if (G) {
@@ -720,7 +720,7 @@ namespace xo {
                             RbTreeUtil::rotate(alloc, d, P, reduce_fn, debug_flag, pp_root);
 
                             if (c_excessive_verify_enabled)
-                                RbTreeUtil::verify_subtree_ok(reduce_fn, S, nullptr /*&black_height*/);
+                                RbTreeUtil::verify_subtree_ok(alloc, reduce_fn, S, nullptr /*&black_height*/);
 
                             /* (relabel S->P etc. for merged control flow below) */
                             R = P;
@@ -755,7 +755,7 @@ namespace xo {
                                 log("verify subtree at GG", xtag("GG", GG),
                                     xtag("GG.key", GG->key()));
 
-                                RbTreeUtil::verify_subtree_ok(reduce_fn, GG, nullptr /*&black_height*/);
+                                RbTreeUtil::verify_subtree_ok(alloc, reduce_fn, GG, nullptr /*&black_height*/);
                                 RbTreeUtil::display_aux(D_Invalid, GG, 0 /*depth*/, &log);
 
                                 log("fixup complete");
@@ -841,10 +841,27 @@ namespace xo {
                             RbNode * new_node = RbNode::make_leaf(alloc,
                                                                   kv_pair,
                                                                   reduce_fn.leaf(kv_pair.second));
+                            log && log(xtag("act", "N gets new leaf"),
+                                       xtag("N", N),
+                                       xtag("d", d),
+                                       xtag("new_node", new_node));
 
                             N->assign_child_reparent(alloc,
                                                      d,
                                                      new_node);
+
+                            {
+                                using allocator_traits = xo::gc::gc_allocator_traits<NodeAllocator>;
+                                typename allocator_traits::gc_interface_type gc(alloc);
+
+                                const void * src = N;
+                                const void * const * lhs
+                                    = reinterpret_cast<const void * const *>(&(N->child_v_[0]));
+
+                                XO_EXPECT(gc.check_write_barrier(src, lhs, false),
+                                          tostr("RbTreeUtil::insert_aux",
+                                                ": expect mlog entry for xgen child pointer"));
+                            }
 
                             assert(is_red(N->child(d)));
 
@@ -1679,13 +1696,16 @@ namespace xo {
                  *
                  * returns the #of nodes in subtree rooted at N.
                  */
-                static size_t verify_subtree_ok(Reduce const & reduce_fn,
+                template <typename NodeAllocator>
+                static size_t verify_subtree_ok(NodeAllocator & alloc,
+                                                Reduce const & reduce_fn,
                                                 RbNode const * N,
                                                 int32_t * p_black_height)
                     {
                         using xo::scope;
                         using xo::xtag;
                         using xo::print::ccs;
+                        using allocator_traits = xo::gc::gc_allocator_traits<NodeAllocator>;
 
                         constexpr char const *c_self = "RbTreeUtil::verify_subtree_ok";
 
@@ -1699,18 +1719,32 @@ namespace xo {
                         /* establish on first leaf node encountered */
                         uint32_t black_height = 0;
 
+                        typename allocator_traits::gc_interface_type gc(alloc);
+
                         auto verify_fn = [c_self,
+                                          &gc,
                                           &reduce_fn,
                                           &i_node,
                                           &last_key,
                                           &i_black_height,
-                                          &black_height] (RbNode const *x,
+                                          &black_height] (RbNode const * x,
                                                           uint32_t bd)
                             {
                                 XO_EXPECT(x->_is_forwarded() == false,
                                           tostr(c_self, (": stray forwarding pointer where node expected"),
                                                 xtag("i", i_node), xtag("node[i]", x)
                                                 ));
+
+                                if (x->parent()) {
+                                    const void * src = x;
+                                    const void * const * lhs = reinterpret_cast<const void * const *>(&(x->parent_));
+
+                                    XO_EXPECT(gc.check_write_barrier(src, lhs, false),
+                                              tostr(c_self, (": expect mlog entry for xgen parent pointer"),
+                                                    xtag("i", i_node), xtag("node[i]", x),
+                                                    xtag("key[i]", x->key()),
+                                                    xtag("parent", x->parent())));
+                                }
 
                                 /* RB2. if c=x->child(d), then c->parent()=x */
 
@@ -1721,6 +1755,17 @@ namespace xo {
                                                     xtag("key[i]", x->key()),
                                                     xtag("child", x->left_child())
                                                     ));
+                                    
+                                    {
+                                        const void * parent = x;
+                                        const void * const * lhs = reinterpret_cast<const void * const *>(&(x->child_v_[0]));
+
+                                        XO_EXPECT(gc.check_write_barrier(parent, lhs, false),
+                                                  tostr(c_self, (": expect mlog entry for xgen left child pointer"),
+                                                        xtag("i", i_node), xtag("node[i]", x),
+                                                        xtag("key[i]", x->key()),
+                                                        xtag("child", x->left_child())));
+                                    }
 
                                     XO_EXPECT(x == x->left_child()->parent(),
                                               tostr(c_self, (": expect symmetric child/parent pointers"),
@@ -1731,6 +1776,7 @@ namespace xo {
                                                     xtag("child.parent", x->left_child()->parent_),
                                                     xtag("child.parent._is_forwarded", x->left_child()->parent_->_is_forwarded())
                                                     ));
+
                                 }
 
                                 if (x->right_child()) {
@@ -1740,6 +1786,17 @@ namespace xo {
                                                     xtag("key[i]", x->key()),
                                                     xtag("child", x->right_child())
                                                     ));
+
+                                    {
+                                        const void * parent = x;
+                                        const void * const * lhs = reinterpret_cast<const void * const *>(&(x->child_v_[1]));
+
+                                        XO_EXPECT(gc.check_write_barrier(parent, lhs, false),
+                                                  tostr(c_self, (": expect mlog entry for xgen right child pointer"),
+                                                        xtag("i", i_node), xtag("node[i]", x),
+                                                        xtag("key[i]", x->key()),
+                                                        xtag("child", x->right_child())));
+                                    }
 
                                     XO_EXPECT(x == x->right_child()->parent(),
                                               tostr(c_self, ": expect symmetric child/parent pointers",
@@ -1897,6 +1954,8 @@ namespace xo {
                     scope log(XO_DEBUG(true /*debug_flag*/));
 
                     display_aux(D_Invalid, N, d, &log);
+
+                    assert(false);
                 } /*display*/
             }; /*RbTreeUtil*/
     } /*namespace detail*/

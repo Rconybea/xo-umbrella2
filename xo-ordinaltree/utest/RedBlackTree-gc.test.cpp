@@ -1,4 +1,6 @@
 /** @file RedBlackTree-gc.test.cpp
+ *
+ *  @author Roland Conybeare, Dec 2025
  **/
 
 #include "random_tree_ops.hpp"
@@ -38,7 +40,7 @@ namespace xo {
 
             std::vector<Testcase_RbTree>
             s_testcase_v = {
-                //Testcase_RbTree(1024, 4096, 512, 512, false),
+                Testcase_RbTree(1024, 4096, 512, 512, false),
                 Testcase_RbTree(1024, 4096, 512, 512, true),
             };
         }
@@ -129,8 +131,7 @@ namespace xo {
                 std::uint64_t seed = 8813374093428528487ULL;
                 auto rgen = xo::rng::xoshiro256ss(seed);
 
-                //for (std::uint32_t n=0; n<1024; ++n)
-                for (std::uint32_t n=0; n<=128;) {
+                for (std::uint32_t n=0; n<=1024;) {
                     bool ok_flag = false;
 
                     for (std::uint32_t attention = 0; !ok_flag && (attention < 2); ++attention) {
@@ -191,26 +192,29 @@ namespace xo {
                                 REQUIRE(gc->enable_gc_once());
                                 REQUIRE(gc->gc_in_progress() == false);
                             }
+
+                            REQUIRE(rbtree->verify_ok(debug_flag));
+                            
                         }
 
                         if (n > 0) {
-                            {
-                                INFO("insert phase B - random_inserts(1, n+1, ..)");
+                            INFO("insert phase B - random_inserts(1, n+1, ..)");
 
-                                /* insert odd integers in [1, n+1), in random order **/
-                                ok_flag &= TreeUtil<RbTree>::random_inserts(1, n+1, 2,
-                                                                            debug_flag,
-                                                                            &rgen,
-                                                                            rbtree.get());
+                            /* insert odd integers in [1, n+1), in random order **/
+                            ok_flag &= TreeUtil<RbTree>::random_inserts(1, n+1, 2,
+                                                                        debug_flag,
+                                                                        &rgen,
+                                                                        rbtree.get());
 
-                                if (tc.do_extra_gc_) {
-                                    REQUIRE(gc->gc_in_progress() == false);
-                                    gc->request_gc(gc::generation::nursery);
-                                    REQUIRE(gc->is_gc_pending());
-                                    REQUIRE(gc->enable_gc_once());
-                                    REQUIRE(gc->gc_in_progress() == false);
-                                }
+                            if (tc.do_extra_gc_) {
+                                REQUIRE(gc->gc_in_progress() == false);
+                                gc->request_gc(gc::generation::nursery);
+                                REQUIRE(gc->is_gc_pending());
+                                REQUIRE(gc->enable_gc_once());
+                                REQUIRE(gc->gc_in_progress() == false);
                             }
+
+                            REQUIRE(rbtree->verify_ok(debug_flag));
                         }
 
                         /* check iterator traverses [0..n-1] in both directions */
@@ -250,7 +254,9 @@ namespace xo {
                                                                     debug_flag,
                                                                     rbtree.get(),
                                                                     &rgen);
+                        REQUIRE(rbtree->verify_ok(debug_flag));
 
+                        
                         if (tc.do_extra_gc_) {
                             REQUIRE(gc->gc_in_progress() == false);
                             gc->request_gc(gc::generation::nursery);
@@ -258,6 +264,8 @@ namespace xo {
                             REQUIRE(gc->enable_gc_once());
                             REQUIRE(gc->gc_in_progress() == false);
                         }
+
+                        REQUIRE(rbtree->verify_ok(debug_flag));
 
                         /* verify that updates changed tree contents in expected way */
                         ok_flag &= TreeUtil<RbTree>::check_ordinal_lookup(10000 /*dvalue*/,
