@@ -10,7 +10,36 @@
 #include <cassert>
 
 namespace xo {
+    class IObject;
+
     namespace gc {
+        class IAlloc;
+
+        /** object interface for allocators A that don't provide A::gc_object_interface.
+         *  See gc_allocator_traits<A>
+         **/
+        struct FallbackObjectInterface {
+            /** see also IObject::_requires_gc_hooks **/
+            static constexpr bool _requires_gc_hooks = false;
+            /** see also IObject::_requires_write_barrier **/
+            static constexpr bool _requires_write_barrier = false;
+
+            /** see also IObject::_gc_assign_member **/
+            template <typename T, typename AA>
+            void _gc_assign_member(T ** lhs,
+                                   T * rhs,
+                                   AA & alloc) {
+                (void)alloc;
+                *lhs = rhs;
+            }
+
+            virtual void display(std::ostream &) const {}
+            virtual bool _is_forwarded() const { return false; }
+            virtual std::size_t _shallow_size() const { assert(false); return 0; }
+            virtual IObject * _shallow_copy(gc::IAlloc *) const { assert(false); return nullptr; }
+            virtual std::size_t _forward_children(gc::IAlloc *) { assert(false); return 0; }
+        };
+
         /** Extended version of
          *    std::allocator_traits<Allocator>
          *  Introduces additional i/face methods
@@ -140,26 +169,12 @@ namespace xo {
             //   gc_allocator_traits<Allocator>::template object_interface<Allocator>
             //
             template <typename A, typename = void>
-            struct object_interface {
-                /** see also IObject::_requires_gc_hooks **/
-                static constexpr bool _requires_gc_hooks = false;
-                /** see also IObject::_requires_write_barrier **/
-                static constexpr bool _requires_write_barrier = false;
+            struct object_interface : public FallbackObjectInterface {};
 
-                /** see also IObject::_gc_assign_member **/
-                template <typename T>
-                void _gc_assign_member(T ** lhs,
-                                       T * rhs,
-                                       A & alloc)
-                {
-                    *lhs = rhs;
-                }
-
-                virtual bool _is_forwarded() const { return false; }
-                virtual std::size_t _shallow_size() const { assert(false); return 0; }
-            };
-
-            // specialization when A provides gc_object_interface
+            // specialization when an allocator A
+            // (which will actuallly be Allocator via SFINAE)
+            // provides gc_object_interface
+            //
             template <typename A>
             struct object_interface<A, std::void_t<typename A::gc_object_interface>>
                 : public A::gc_object_interface {};
@@ -179,7 +194,9 @@ namespace xo {
              *    using has_incremental_gc_interface = std::true_type;
              *  };
              **/
-            static inline constexpr bool has_incremental_gc_interface_v = has_incremental_gc_interface<Allocator>::value;
+            static inline constexpr
+            bool
+            has_incremental_gc_interface_v = has_incremental_gc_interface<Allocator>::value;
 
             /** true iff this allocator advertises trivial deallocate
              *  Allocate will include:
@@ -188,7 +205,9 @@ namespace xo {
              *    using has_trivial_deallocate = std::true_type;
              *  };
              **/
-            static inline constexpr bool has_trivial_deallocate_v = has_trivial_deallocate<Allocator>::value;
+            static inline constexpr
+            bool
+            has_trivial_deallocate_v = has_trivial_deallocate<Allocator>::value;
         };
     } /*namespace gc*/
 } /*namespace xo*/
