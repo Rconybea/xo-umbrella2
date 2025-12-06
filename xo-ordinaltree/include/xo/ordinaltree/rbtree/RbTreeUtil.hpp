@@ -103,7 +103,7 @@ namespace xo {
                         return find_ith(L, i);
                     else if(i == n_left)
                         return N;
-                    else if(i < N->size_)
+                    else if(i < N->size())
                         return find_ith(N->right_child(), i - (n_left + 1));
                     else
                         return nullptr;
@@ -636,26 +636,26 @@ namespace xo {
 
                         Direction other_d = other(d);
 
-                        RbNode *R = P->child(d);
-                        RbNode *S = P->child(other_d);
-                        RbNode *U = G->child(other_d);
+                        RbNode * R = P->child(d);
+                        RbNode * S = P->child(other_d);
+                        RbNode * U = G->child(other_d);
 
                         if (log.enabled()) {
                             log("got R,S,U", xtag("R", R), xtag("S", S),
                                 xtag("U", U));
                             if (R) {
                                 log("with",
-                                    xtag("R.col", ccs(R->color_ == C_Black ? "B" : "r")),
+                                    xtag("R.col", color2str(R->color())),
                                     xtag("R.key", R->key()));
                             }
                             if (S) {
                                 log("with",
-                                    xtag("S.col", ccs(S->color_ == C_Black ? "B" : "r")),
+                                    xtag("S.col", ccs(S->color() == C_Black ? "B" : "r")),
                                     xtag("S.key", S->key()));
                             }
                             if (U) {
                                 log("with",
-                                    xtag("U.col", ccs(U->color_ == C_Black ? "B" : "r")),
+                                    xtag("U.col", ccs(U->color() == C_Black ? "B" : "r")),
                                     xtag("U.key", U->key()));
                             }
                         }
@@ -808,7 +808,7 @@ namespace xo {
                                     /* match on this key already present in tree
                                      *  -> just update assoc'd value
                                      */
-                                    N->contents_.second = kv_pair.second;
+                                    N->_assign_contents(kv_pair.second);
                                 }
 
                                 /* after modifying a node n,  must recalculate reductions
@@ -856,7 +856,7 @@ namespace xo {
 
                                 const void * src = N;
                                 const void * const * lhs
-                                    = reinterpret_cast<const void * const *>(&(N->child_v_[0]));
+                                    = reinterpret_cast<const void * const *>(N->_child_addr(Direction::D_Left));
 
                                 XO_EXPECT(gc.check_write_barrier(src, lhs, false),
                                           tostr("RbTreeUtil::insert_aux",
@@ -1511,8 +1511,7 @@ namespace xo {
                             /* need also to swap other node attributes:
                              *   RbNode .color_ .size_ .reduced_
                              */
-                            std::swap(R->color_, N->color_);
-                            std::swap(N->size_, N->size_);
+                            RbNode::swap_color_size(R, N);
 
                             if (log) {
                                 log("after swapping N,R locations:");
@@ -1737,7 +1736,7 @@ namespace xo {
 
                                 if (x->parent()) {
                                     const void * src = x;
-                                    const void * const * lhs = reinterpret_cast<const void * const *>(&(x->parent_));
+                                    const void * const * lhs = reinterpret_cast<const void * const *>(x->_parent_addr());
 
                                     XO_EXPECT(gc.check_write_barrier(src, lhs, false),
                                               tostr(c_self, (": expect mlog entry for xgen parent pointer"),
@@ -1755,10 +1754,10 @@ namespace xo {
                                                     xtag("key[i]", x->key()),
                                                     xtag("child", x->left_child())
                                                     ));
-                                    
+
                                     {
                                         const void * parent = x;
-                                        const void * const * lhs = reinterpret_cast<const void * const *>(&(x->child_v_[0]));
+                                        const void * const * lhs = reinterpret_cast<const void * const *>(x->_child_addr(detail::Direction(0)));
 
                                         XO_EXPECT(gc.check_write_barrier(parent, lhs, false),
                                                   tostr(c_self, (": expect mlog entry for xgen left child pointer"),
@@ -1773,8 +1772,9 @@ namespace xo {
                                                     xtag("key[i]", x->key()),
                                                     xtag("child", x->left_child()),
                                                     xtag("child.key", x->left_child()->key()),
-                                                    xtag("child.parent", x->left_child()->parent_),
-                                                    xtag("child.parent._is_forwarded", x->left_child()->parent_->_is_forwarded())
+                                                    xtag("child.parent", x->left_child()->parent()),
+                                                    xtag("child.parent._is_forwarded",
+                                                         x->left_child()->parent()->_is_forwarded())
                                                     ));
 
                                 }
@@ -1789,7 +1789,8 @@ namespace xo {
 
                                     {
                                         const void * parent = x;
-                                        const void * const * lhs = reinterpret_cast<const void * const *>(&(x->child_v_[1]));
+                                        const void * const * lhs
+                                            = reinterpret_cast<const void * const *>(x->_child_addr(Direction::D_Right));
 
                                         XO_EXPECT(gc.check_write_barrier(parent, lhs, false),
                                                   tostr(c_self, (": expect mlog entry for xgen right child pointer"),
@@ -1805,8 +1806,8 @@ namespace xo {
                                                     xtag("key[i]", x->key()),
                                                     xtag("child", x->right_child()),
                                                     xtag("child.key", x->right_child()->key()),
-                                                    xtag("child.parent", x->right_child()->parent_),
-                                                    xtag("child.parent._is_forwarded", x->right_child()->parent_->_is_forwarded())
+                                                    xtag("child.parent", x->right_child()->parent()),
+                                                    xtag("child.parent._is_forwarded", x->right_child()->parent()->_is_forwarded())
                                                     ));
                                 }
 
@@ -1843,10 +1844,10 @@ namespace xo {
                                           ccs(": expect RB-shape tree to have no red violations but "
                                               "red y is child of red x"),
                                           xtag("i", i_node), xtag("x.addr", x),
-                                          xtag("x.col", ccs((x->color_ == C_Black) ? "B" : "r")),
+                                          xtag("x.col", ccs((x->color() == C_Black) ? "B" : "r")),
                                           xtag("x.key", x->key()),
                                           xtag("y.addr", red_child),
-                                          xtag("y.col", ccs((red_child->color_ == C_Black) ? "B" : "r")),
+                                          xtag("y.col", ccs((red_child->color() == C_Black) ? "B" : "r")),
                                           xtag("y.key", red_child->key())));
 
                                 /* RB5.  inorder traversal visits nodes in strictly increasing key order */

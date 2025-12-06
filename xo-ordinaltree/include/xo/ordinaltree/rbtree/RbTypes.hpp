@@ -21,13 +21,32 @@ namespace xo {
         template <typename Key,
                   typename Value,
                   typename Reduce = NullReduce<Key>,
+                  //typename Compare = std::less<Key>,
                   typename Allocator = std::allocator<std::pair<const Key, Value>>>
         class RedBlackTree;
 
         namespace detail {
-            enum Color { C_Invalid = -1, C_Black, C_Red, N_Color };
+            enum Color {
+                C_Invalid = -1,
+                C_Black,
+                C_Red,
+                N_Color };
 
-            enum Direction { D_Invalid = -1, D_Left, D_Right, N_Direction };
+            inline const char *
+            color2str(Color x) {
+                switch(x) {
+                case C_Black: return "B";
+                case C_Red: return "r";
+                default: return "?color";
+                }
+            }
+
+            enum Direction {
+                D_Invalid = -1,
+                D_Left,
+                D_Right,
+                N_Direction
+            };
 
             inline Direction other(Direction d) {
                 return static_cast<Direction>(1 - d);

@@ -144,6 +144,12 @@ namespace xo {
                         x->parent_ = nullptr;
                 } /*replace_root_reparent*/
 
+                static void swap_color_size(Node * lhs,
+                                            Node * rhs) {
+                    std::swap(lhs->color_, rhs->color_);
+                    std::swap(lhs->size_, rhs->size_);
+                }
+
                 /** swap values of all members except @ref contents_
                  *  between @p *lhs and @p *rhs
                  **/
@@ -195,8 +201,8 @@ namespace xo {
                     assert(lhs->parent() != lhs);
                     assert(rhs->parent() != rhs);
 
-                    std::swap(lhs->color_, rhs->color_);
-                    std::swap(lhs->size_, rhs->size_);
+                    swap_color_size(lhs, rhs);
+
                     // preserve lhs->contents_, rhs->contents_
                     // don't bother fixing reduced_, will fixup that separately
                     //std::swap(lhs->reduced_, rhs->reduced_);
@@ -283,6 +289,12 @@ namespace xo {
                 Key const & key() const { return contents_.first; }
                 Value const & value() const { return contents_.second; }
 
+                void assign_color(Color x) { this->color_ = x; }
+                void assign_size(size_t z) { this->size_ = z; }
+                void _assign_contents(const Value & x) { contents_.second = x; }
+                Node * const * _parent_addr() const { return &parent_; }
+                Node * const * _child_addr(Direction d) const { return &child_v_[d]; }
+
                 /* recalculate size from immediate childrens' sizes
                  * editor bait: recalc_local_size()
                  */
@@ -364,10 +376,6 @@ namespace xo {
                     }
                 }
 
-            private:
-                void assign_color(Color x) { this->color_ = x; }
-                void assign_size(size_t z) { this->size_ = z; }
-
                 template <typename NodeAllocator>
                 void assign_child_reparent(NodeAllocator & alloc,
                                            Direction d,
@@ -421,14 +429,6 @@ namespace xo {
                         return D_Invalid;
                     }
                 } /*replace_child_reparent*/
-
-            private:
-                friend class RbTreeUtil<Key, Value, Reduce, GcObjectInterface>;
-
-#ifdef REMOVING
-                template <typename Key1, typename Value1, typename Reduce1, typename Allocator>
-                friend class xo::tree::RedBlackTree;
-#endif
 
             private:
                 /* red | black */
