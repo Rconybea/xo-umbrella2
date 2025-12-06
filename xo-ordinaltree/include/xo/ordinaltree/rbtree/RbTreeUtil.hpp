@@ -788,7 +788,8 @@ namespace xo {
                  */
                 template <typename NodeAllocator>
                 static std::pair<bool, RbNode *>
-                insert_aux(NodeAllocator & alloc,
+                insert_aux(Compare const & key_cmp,
+                           NodeAllocator & alloc,
                            value_type const & kv_pair,
                            bool allow_replace_flag,
                            Reduce const & reduce_fn,
@@ -804,7 +805,9 @@ namespace xo {
                         Direction d = D_Invalid;
 
                         while (N) {
-                            if (kv_pair.first == N->key()) {
+                            auto cmp = key_cmp(kv_pair.first, N->key());
+
+                            if (cmp == 0) { // kv_pair.first == N->key()) {
                                 if(allow_replace_flag) {
                                     /* match on this key already present in tree
                                      *  -> just update assoc'd value
@@ -825,7 +828,7 @@ namespace xo {
                                 return std::make_pair(false, N);
                             }
 
-                            d = ((kv_pair.first < N->key()) ? D_Left : D_Right);
+                            d = (cmp < 0 /*(kv_pair.first < N->key())*/ ? D_Left : D_Right);
 
                             /* insert into left subtree somewhere */
                             RbNode * C = N->child(d);

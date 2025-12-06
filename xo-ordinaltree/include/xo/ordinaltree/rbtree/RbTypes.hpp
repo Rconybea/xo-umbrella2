@@ -6,22 +6,44 @@
 #pragma once
 
 #include "NullReduce.hpp"
+#include <compare>
 
 namespace xo {
     namespace tree {
-        /* red-black tree with order statistics
+        /**
+         * Wrapper to workaround concept requirements that prevent
+         * std::compare_three_way working with const references
+         **/
+        struct DefaultThreeWayCompare {
+#ifdef NOT_YET // not working with clang 16.0.6
+            template <typename T>
+            auto operator()(const T & a, const T & b) const {
+                return a <=> b;
+            }
+#endif
+
+            template <typename T>
+            auto operator()(const T& a, const T& b) const -> std::strong_ordering {
+                if (a < b) return std::strong_ordering::less;
+                if (b < a) return std::strong_ordering::greater;
+                return std::strong_ordering::equal;
+            }
+        };
+
+        /**
+         * Red-black tree with order statistics
          *
-         * require:
+         * Require:
          * - Key is equality comparable
          * - Key, Value, Reduce are copyable and null-constructible
          * - Reduce.value_type = Accumulator
          * - Reduce.operator() :: (Accumulator x Key) -> Accumulator
          * - Reduce.operator() :: (Accumulator x Accumulator) -> Accumulator
-         */
+         **/
         template <typename Key,
                   typename Value,
                   typename Reduce = NullReduce<Key>,
-                  typename Compare = std::less<Key>,
+                  typename Compare = DefaultThreeWayCompare, //std::compare_three_way, //std::less<Key>,
                   typename Allocator = std::allocator<std::pair<const Key, Value>>>
         class RedBlackTree;
 
@@ -86,6 +108,16 @@ namespace xo {
         concept ordered_key = (std::copyable<Key>
                                && std::default_initializable<Key>
                                && std::totally_ordered<Key>);
+
+
+        template <typename Compare,
+                  typename Key>
+        concept three_way_comparator = requires(const Compare& comp,
+                                                const Key& a,
+                                                const Key& b)
+        {
+            { comp(a, b) } -> std::same_as<std::strong_ordering>;
+        };
 
         template <typename Value>
         concept valid_rbtree_node_value = (std::copyable<Value>

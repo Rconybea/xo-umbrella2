@@ -62,7 +62,7 @@ namespace xo {
         class RedBlackTree : public xo::gc::gc_allocator_traits<Allocator>::object_interface_type {
             static_assert(ordered_key<Key>);
             static_assert(std::default_initializable<Compare>);
-            static_assert(std::predicate<Compare, Key, Key>);
+            //static_assert(three_way_comparator<Compare, Key>);  // std::less doesn't deliver this
             static_assert(valid_rbtree_reduce_functor<Reduce, Value>);
 
         public:
@@ -373,7 +373,8 @@ namespace xo {
                 //scope log(XO_DEBUG(true), tag("variant", "autoinsert"), tag("key", k));
 
                 std::pair<bool, RbNode *> insert_result
-                    = RbUtil::template insert_aux<node_allocator_type>(this->node_alloc_,
+                    = RbUtil::template insert_aux<node_allocator_type>(this->compare_,
+                                                                       this->node_alloc_,
                                                                        value_type(k, Value() /*used iff creating new node*/),
                                                                        false /*allow_replace_flag*/,
                                                                        this->reduce_fn_,
@@ -512,7 +513,8 @@ namespace xo {
                 RbNode * adj_root = this->root_;
 
                 std::pair<bool, RbNode *> insert_result
-                    = RbUtil::insert_aux(this->node_alloc_,
+                    = RbUtil::insert_aux(this->compare_,
+                                         this->node_alloc_,
                                          std::move(kv_pair),
                                          true /*allow_replace_flag*/,
                                          this->reduce_fn_,

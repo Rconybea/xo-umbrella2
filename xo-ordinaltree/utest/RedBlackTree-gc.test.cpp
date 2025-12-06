@@ -56,7 +56,7 @@ namespace xo {
             using RbTree = RedBlackTree<int,
                                         double,
                                         SumReduce<double>,
-                                        std::less<int>,
+                                        std::compare_three_way,
                                         xo::gc::allocator<std::pair<const int, double>>>;
 
             constexpr bool c_debug_flag = false;
@@ -125,7 +125,7 @@ namespace xo {
             using RbTree = RedBlackTree<int,
                                         double,
                                         SumReduce<double>,
-                                        std::less<int>,
+                                        std::compare_three_way, //std::less<int>,
                                         xo::gc::allocator<std::pair<const int, double>>>;
 
             constexpr bool c_debug_flag = false;
