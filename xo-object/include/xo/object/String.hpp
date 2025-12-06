@@ -77,6 +77,24 @@ namespace xo {
              **/
             std::size_t columns() const;
 
+            std::strong_ordering operator<=>(const String & other) const {
+                size_t len1 = std::strlen(chars_);
+                size_t len2 = std::strlen(other.chars_);
+
+                return std::lexicographical_compare_three_way(chars_, chars_ + len1,
+                                                              other.chars_, other.chars_ + len2);
+            }
+
+            bool operator==(const String & other) const {
+                size_t len1 = std::strlen(chars_);
+                size_t len2 = std::strlen(other.chars_);
+
+                if (len1 != len2)
+                    return false;
+
+                return std::memcmp(chars_, other.chars_, len1) == 0;
+            }
+
             // inherited from Object..
             virtual TaggedPtr self_tp() const final override;
             virtual void display(std::ostream & os) const final override;
@@ -128,6 +146,7 @@ namespace xo {
 
         template <>
         struct ObjectConversion<std::string> : public ObjectConversion_String {};
+
     } /*namespace obj*/
 } /*namespace xo*/
 
