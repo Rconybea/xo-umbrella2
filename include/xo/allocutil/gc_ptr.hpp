@@ -69,6 +69,18 @@ namespace xo {
         T * operator->() const { return ptr_; }
         T & operator*() const { return *ptr_; }
 
+        auto operator<=>(gc_ptr<T> other) const
+        requires std::three_way_comparable<T>
+        {
+            return *ptr_ <=> *other.ptr_;
+        }
+
+        bool operator==(gc_ptr<T> other) const
+        requires std::equality_comparable<T>
+        {
+            return *ptr_ == *other.ptr_;
+        }
+
     private:
         T * ptr_ = nullptr;
     };
