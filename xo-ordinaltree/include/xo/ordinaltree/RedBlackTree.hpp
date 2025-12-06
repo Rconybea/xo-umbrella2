@@ -53,6 +53,9 @@ namespace xo {
          *  5. custom key compare
          *  6. garbage collector integration
          *  7. std library integration
+         *
+         *  @tparam Compare : default to xo::tree::DefaultThreeWayCompare.
+         *    std::three_way_compare rejects const ref arguments
          **/
         template <typename Key,
                   typename Value,
@@ -280,7 +283,7 @@ namespace xo {
              * on failure,  return this->end()
              */
             const_iterator find(Key const & x) const {
-                RbNode * node = RbUtil::find(this->root_, x);
+                RbNode * node = RbUtil::find(this->root_, x, this->compare_);
 
                 if(node) {
                     return const_iterator(detail::ID_Forward, detail::IL_Regular, node);
@@ -290,7 +293,7 @@ namespace xo {
             } /*find*/
 
             iterator find(Key const & x) {
-                RbNode * node = RbUtil::find(this->root_, x);
+                RbNode * node = RbUtil::find(this->root_, x, this->compare_);
 
                 if (node) {
                     return const_iterator(detail::ID_Forward, detail::IL_Regular, node);
@@ -313,8 +316,11 @@ namespace xo {
              *
              * even when ix.is_dereferenceable() is false
              */
-            const_iterator find_glb(Key const & k, bool is_closed) const {
-                RbNode * node = RbUtil::find_glb(this->root_, k, is_closed);
+            const_iterator find_glb(Key const & key, bool is_closed) const {
+                RbNode * node = RbUtil::find_glb(this->root_,
+                                                 key,
+                                                 this->compare_,
+                                                 is_closed);
 
                 if (node) {
                     return const_iterator(detail::ID_Forward,
@@ -337,7 +343,7 @@ namespace xo {
                 {
                     //scope log(XO_DEBUG(true), xtag("variant", "readonly"), xtag("key", k));
 
-                    RbNode const * node = RbUtil::find(this->root_, k);
+                    RbNode const * node = RbUtil::find(this->root_, k, this->compare_);
 
                     return RbTreeConstLhs(this, node);
                 } /*operator[]*/
@@ -391,7 +397,8 @@ namespace xo {
              * return reduce_fn.nil() if K is empty
              */
             ReducedValue reduce_lub(Key const &lub_key, bool is_closed) const {
-                return RbUtil::reduce_lub(lub_key,
+                return RbUtil::reduce_lub(this->compare_,
+                                          lub_key,
                                           this->reduce_fn_,
                                           is_closed,
                                           this->root_);
@@ -548,7 +555,8 @@ namespace xo {
 
                 RbNode * adj_root = this->root_;
 
-                bool retval = RbUtil::erase_aux(this->node_alloc_,
+                bool retval = RbUtil::erase_aux(this->compare_,
+                                                this->node_alloc_,
                                                 key,
                                                 this->reduce_fn_,
                                                 debug_flag_,

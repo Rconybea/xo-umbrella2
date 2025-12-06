@@ -198,13 +198,14 @@ namespace xo {
                     return nullptr;
                 } /*prev_inorder_node*/
 
-                /* compute value of reduce applied to the set K of all keys k[j] in subtree N
-                 * with:
+                /* compute value of reduce applied to the set K of all keys k[j]
+                 * in subtree N with:
                  *   k[j] <= lub_key  if is_closed = true
                  *   k[j] <  lub_key  if is_closed = false
                  * return reduce_fn.nil() if K is empty
                  */
-                static ReducedValue reduce_lub(Key const & lub_key,
+                static ReducedValue reduce_lub(Compare const & key_cmp,
+                                               Key const & lub_key,
                                                Reduce const & reduce_fn,
                                                bool is_closed,
                                                RbNode * N)
@@ -215,7 +216,9 @@ namespace xo {
                             if (!N)
                                 return retval;
 
-                            if ((N->key() < lub_key) || (is_closed && (N->key() == lub_key))) {
+                            auto cmp = key_cmp(N->key(), lub_key);
+
+                            if ((cmp < 0) || (is_closed && (cmp == 0))) {
                                 /* all keys k[i] in left subtree of N satisfy k[i] < lub_key
                                  * apply reduce to:
                                  * - left subtree of N
@@ -332,15 +335,17 @@ namespace xo {
                 /* find node in x with key k
                  * return nullptr iff no such node exists.
                  */
-                static RbNode * find(RbNode * x, Key const & k) {
+                static RbNode * find(RbNode * x, Key const & k, Compare const & key_cmp) {
                     for (;;) {
                         if (!x)
                             return nullptr;
 
-                        if (k < x->key()) {
+                        auto cmp = key_cmp(k, x->key());
+
+                        if (cmp < 0) {
                             /* search in left subtree */
                             x = x->left_child();
-                        } else if (k == x->key()) {
+                        } else if (cmp == 0) {
                             return x;
                         } else /* k > x->key() */ {
                             x = x->right_child();
@@ -359,12 +364,15 @@ namespace xo {
                 static RbNode * find_glb_aux(RbNode * x,
                                              RbNode * h,
                                              Key const & k,
+                                             Compare const & key_cmp,
                                              bool is_closed) {
                     for (;;) {
                         if (!x)
                             return h;
 
-                        if (x->key() < k) {
+                        auto cmp = key_cmp(x->key(), k);
+
+                        if (cmp < 0) {
                             /* x.key is a lower bound for k */
 
                             if (x->right_child() == nullptr) {
@@ -380,7 +388,7 @@ namespace xo {
                             h = x;
                             x = x->right_child();
                             continue;
-                        } else if (is_closed && (x->key() == k)) {
+                        } else if (is_closed && (cmp == 0)) {
                             /* x.key is exact match */
                             return x;
                         } else {
@@ -400,8 +408,8 @@ namespace xo {
                  * is_open.  if true,  allow result with N->key = k exactly
                  *           if false,  require N->key < k
                  */
-                static RbNode * find_glb(RbNode * x, Key const & k, bool is_closed) {
-                    return find_glb_aux(x, nullptr, k, is_closed);
+                static RbNode * find_glb(RbNode * x, const Key & k, const Compare & key_cmp, bool is_closed) {
+                    return find_glb_aux(x, nullptr, k, key_cmp, is_closed);
                 } /*find_glb*/
 
 #ifdef NOT_IN_USE
@@ -410,7 +418,9 @@ namespace xo {
                  * is_open.  if true,  allow result with N->key = k exactly
                  *           if false,  require N->key > k
                  */
-                static RbNode *find_lub(RbNode *x, Key const &k, bool is_closed) {
+                static RbNode *find_lub(RbNode * x, const Key & k, const Compare & key_cmp, bool is_closed) {
+                    auto cmp = key_cmp(x->key(), k);
+
                     if (x->key() > k) {
                         /* x.key is an upper bound for k */
                         if (x->left_child() == nullptr) {
@@ -828,7 +838,7 @@ namespace xo {
                                 return std::make_pair(false, N);
                             }
 
-                            d = (cmp < 0 /*(kv_pair.first < N->key())*/ ? D_Left : D_Right);
+                            d = ((cmp < 0 /*(kv_pair.first < N->key())*/) ? D_Left : D_Right);
 
                             /* insert into left subtree somewhere */
                             RbNode * C = N->child(d);
@@ -1372,7 +1382,8 @@ namespace xo {
                  * return true if a node was removed;  false otherwise.
                  */
                 template <typename NodeAllocator>
-                static bool erase_aux(NodeAllocator & alloc,
+                static bool erase_aux(Compare const & key_cmp,
+                                      NodeAllocator & alloc,
                                       Key const & k,
                                       Reduce const & reduce_fn,
                                       bool debug_flag,
@@ -1404,9 +1415,11 @@ namespace xo {
                      */
 
                     /* N is the candidate target node we will be deleting */
-                    N = RbTreeUtil::find_glb(N, k, true /*is_closed*/);
+                    N = RbTreeUtil::find_glb(N, k, key_cmp, true /*is_closed*/);
 
-                    if (!N || (N->key() != k)) {
+                    auto cmp = key_cmp(N->key(), k);
+
+                    if (!N || (cmp != 0)) {
                         /* no node with .key = k present,  so cannot remove it */
                         return false;
                     }

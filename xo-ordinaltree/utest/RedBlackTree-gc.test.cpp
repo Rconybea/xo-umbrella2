@@ -324,18 +324,48 @@ namespace xo {
                                      .initial_tenured_z_ = 4096,
                                      .incr_gc_threshold_ = 512,
                                      .full_gc_threshold_ = 512,
-                                     .debug_flag_ = true
+                                     .debug_flag_ = false
                                  }
                                  );
+
+            REQUIRE(gc.get());
+            gc->disable_gc();
+
+            REQUIRE(gc->native_gc_statistics().n_gc() == 0);
 
             gp<String> s0 = String::copy(gc.get(), "hello");
             REQUIRE(s0->length() == 5);
 
+            gp<String> s1 = String::copy(gc.get(), "world!");
+
+            /* gp<String> comparison */
+            REQUIRE(s0 == s0);
+            REQUIRE((s0 != s0) == false);
+            REQUIRE((s0 >= s0) == true);
+            REQUIRE((s0 > s0) == false);
+            REQUIRE((s0 < s0) == false);
+            REQUIRE((s0 <= s0) == true);
+
+            REQUIRE((s0 == s1) == false);
+            REQUIRE(s0 != s1);
+            REQUIRE(s0 < s1);
+            REQUIRE(s0 <= s1);
+            REQUIRE((s0 > s1) == false);
+            REQUIRE((s0 >= s1) == false);
+
+            /* verify that we can allocate gp<Strings> through gc::allocator template.
+             */
+
+            static_assert(std::is_constructible_v<gp<String>>);
+
             //using Allocator = xo::gc::allocator<gp<String>>;
+
+
             //using NodeAllocator = xo::gc::allocator<std::pair<const gp<String>, int>>;
             //using RbNode = Node<gp<String>, int, SumReduce<int>, NodeAllocator>;
 
-            REQUIRE(true);
+            
+
         }
 
     } /*namespace ut*/

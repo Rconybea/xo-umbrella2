@@ -65,7 +65,7 @@ namespace xo {
                                         ReducedValue const & leaf_rv) {
                     using traits = xo::gc::gc_allocator_traits<NodeAllocator>;
 
-                    /* verify Node is constructible. instead of relying on traits::construct */
+                    /* verify Node is constructible. instead of immediately attempting traits::construct */
                     static_assert(std::is_constructible_v<Node,
                                                           value_type const &,
                                                           rvpair_type const &>);
