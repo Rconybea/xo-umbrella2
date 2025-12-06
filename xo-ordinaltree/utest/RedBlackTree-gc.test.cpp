@@ -6,13 +6,16 @@
 #include "random_tree_ops.hpp"
 #include "xo/ordinaltree/RedBlackTree.hpp"
 #include "xo/ordinaltree/rbtree/SumReduce.hpp"
+#include "xo/object/String.hpp"
 #include "xo/alloc/GC.hpp"
 #include <catch2/catch.hpp>
 
 namespace xo {
     using xo::gc::GC;
+    using xo::obj::String;
     using xo::tree::RedBlackTree;
     using xo::tree::SumReduce;
+    using xo::tree::detail::Node;
 
     using utest::TreeUtil;
 
@@ -308,6 +311,28 @@ namespace xo {
                 }
             }
 
+        } // TEST_CASE(rbtree-gc-1)
+
+        TEST_CASE("gp-string-key-allocate", "[gc]")
+        {
+            up<GC> gc = GC::make(
+                                 {
+                                     .initial_nursery_z_ = 1024,
+                                     .initial_tenured_z_ = 4096,
+                                     .incr_gc_threshold_ = 512,
+                                     .full_gc_threshold_ = 512,
+                                     .debug_flag_ = true
+                                 }
+                                 );
+
+            gp<String> s0 = String::copy(gc.get(), "hello");
+            REQUIRE(s0->length() == 5);
+
+            //using Allocator = xo::gc::allocator<gp<String>>;
+            //using NodeAllocator = xo::gc::allocator<std::pair<const gp<String>, int>>;
+            //using RbNode = Node<gp<String>, int, SumReduce<int>, NodeAllocator>;
+
+            REQUIRE(true);
         }
 
     } /*namespace ut*/

@@ -90,9 +90,8 @@ add_subdirectory(xo-unit)
 add_subdirectory(xo-pyunit)
 add_subdirectory(xo-callback)
 add_subdirectory(xo-alloc)
-add_subdirectory(xo-ordinaltree)
-#
 add_subdirectory(xo-object)
+add_subdirectory(xo-ordinaltree)
 #
 add_subdirectory(xo-webutil)
 add_subdirectory(xo-pywebutil)

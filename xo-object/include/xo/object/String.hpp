@@ -69,6 +69,8 @@ namespace xo {
              *  and 2nd-highest bit clear.
              *
              *  @text
+             *         1 byte
+             *        <------>
              *  bits: 76543210
              *        10______
              *  @endtext
