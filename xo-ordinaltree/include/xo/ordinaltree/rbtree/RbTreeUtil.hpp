@@ -19,6 +19,7 @@ namespace xo {
             template <typename Key,
                       typename Value,
                       typename Reduce,
+                      typename Compare,
                       typename GcObjectInterface>
             class RbTreeUtil {
             public:

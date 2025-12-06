@@ -127,7 +127,7 @@ namespace {
     TEST_CASE("rbtree", "[redblacktree]")
     {
         constexpr bool c_debug_flag = false;
-        RbTree rbtree{RbTree::allocator_type{}, c_debug_flag};
+        RbTree rbtree{RbTree::key_compare{}, RbTree::allocator_type{}, c_debug_flag};
 
         REQUIRE(rbtree.size() == 0);
 

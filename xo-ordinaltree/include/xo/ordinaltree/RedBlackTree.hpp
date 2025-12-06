@@ -57,9 +57,12 @@ namespace xo {
         template <typename Key,
                   typename Value,
                   typename Reduce,
+                  typename Compare,
                   typename Allocator>
         class RedBlackTree : public xo::gc::gc_allocator_traits<Allocator>::object_interface_type {
             static_assert(ordered_key<Key>);
+            static_assert(std::default_initializable<Compare>);
+            static_assert(std::predicate<Compare, Key, Key>);
             static_assert(valid_rbtree_reduce_functor<Reduce, Value>);
 
         public:
@@ -67,7 +70,7 @@ namespace xo {
             using mapped_type = Value;
             using value_type = std::pair<Key const, Value>;
 
-            // using key_compare = Compare // not yet
+            using key_compare = Compare;
             using allocator_type = Allocator;
             using allocator_traits = xo::gc::gc_allocator_traits<Allocator>;
 
@@ -76,7 +79,7 @@ namespace xo {
              **/
             using GcObjectInterface = allocator_traits::object_interface_type;
             using ReducedValue = typename Reduce::value_type;
-            using RbUtil = detail::RbTreeUtil<Key, Value, Reduce, GcObjectInterface>;
+            using RbUtil = detail::RbTreeUtil<Key, Value, Reduce, Compare, GcObjectInterface>;
             using RbNode = detail::Node<Key, Value, Reduce, GcObjectInterface>;
             using RbTreeLhs = detail::RedBlackTreeLhs<RedBlackTree>;
             using RbTreeConstLhs = detail::RedBlackTreeConstLhs<RedBlackTree>;
@@ -92,15 +95,21 @@ namespace xo {
             using Direction = detail::Direction;
             using size_type = std::size_t;
             using difference_type = std::ptrdiff_t;
-            using iterator = detail::Iterator<Key, Value, Reduce, GcObjectInterface>;
-            using const_iterator = detail::ConstIterator<Key, Value, Reduce, GcObjectInterface>;
+            using iterator = detail::Iterator<Key, Value,
+                                              Reduce, Compare,
+                                              GcObjectInterface>;
+            using const_iterator = detail::ConstIterator<Key, Value,
+                                                         Reduce, Compare,
+                                                         GcObjectInterface>;
 
             using Reflect = xo::reflect::Reflect;
             using TaggedPtr = xo::reflect::TaggedPtr;
 
         public:
-            explicit RedBlackTree(const allocator_type & alloc = allocator_type{},
+            explicit RedBlackTree(const key_compare & compare = key_compare{},
+                                  const allocator_type & alloc = allocator_type{},
                                   bool debug_flag = false) :
+                compare_{compare},
                                       node_alloc_{alloc},
                                       debug_flag_{debug_flag} {}
 #ifdef NOT_YET // need copy_from
@@ -126,7 +135,8 @@ namespace xo {
             {}
 #endif
 
-            static RedBlackTree * make(allocator_type kvpair_alloc = allocator_type{},
+            static RedBlackTree * make(key_compare compare = key_compare{},
+                                       allocator_type kvpair_alloc = allocator_type{},
                                        bool debug_flag = false)
             {
                 tree_allocator_type tree_alloc(kvpair_alloc);
@@ -135,7 +145,7 @@ namespace xo {
 
                 try {
                     // placement new
-                    tree_allocator_traits::construct(tree_alloc, tree, kvpair_alloc, debug_flag);
+                    tree_allocator_traits::construct(tree_alloc, tree, compare, kvpair_alloc, debug_flag);
                     return tree;
                 } catch(...) {
                     tree_allocator_traits::deallocate(tree_alloc, tree, 1);
@@ -670,6 +680,8 @@ namespace xo {
             }
 
         private:
+            /** key comparison */
+            key_compare compare_;
             /** allocator state **/
             node_allocator_type node_alloc_;
             /** number of nodes in this tree. Each node holds one (key,value) pair **/
@@ -688,10 +700,11 @@ namespace xo {
         template <typename Key,
                   typename Value,
                   typename Reduce,
+                  typename Compare,
                   typename Allocator>
         inline std::ostream &
         operator<<(std::ostream & os,
-                   RedBlackTree<Key, Value, Reduce, Allocator> const & tree)
+                   RedBlackTree<Key, Value, Reduce, Compare, Allocator> const & tree)
         {
             tree.display(os);
             return os;
@@ -700,11 +713,12 @@ namespace xo {
         template <typename Key,
                   typename Value,
                   typename Reduce,
+                  typename Compare,
                   typename GcObjectInterface,
                   bool IsConst>
         inline std::ostream &
         operator<<(std::ostream & os,
-                   detail::IteratorBase<Key, Value, Reduce, GcObjectInterface, IsConst> const & iter)
+                   detail::IteratorBase<Key, Value, Reduce, Compare, GcObjectInterface, IsConst> const & iter)
         {
             iter.print(os);
             return os;

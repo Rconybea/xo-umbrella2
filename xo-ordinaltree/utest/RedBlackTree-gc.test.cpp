@@ -56,6 +56,7 @@ namespace xo {
             using RbTree = RedBlackTree<int,
                                         double,
                                         SumReduce<double>,
+                                        std::less<int>,
                                         xo::gc::allocator<std::pair<const int, double>>>;
 
             constexpr bool c_debug_flag = false;
@@ -124,6 +125,7 @@ namespace xo {
             using RbTree = RedBlackTree<int,
                                         double,
                                         SumReduce<double>,
+                                        std::less<int>,
                                         xo::gc::allocator<std::pair<const int, double>>>;
 
             constexpr bool c_debug_flag = false;
@@ -160,9 +162,10 @@ namespace xo {
 
                         REQUIRE(gc->native_gc_statistics().n_gc() == 0);
 
+                        RbTree::key_compare compare;
                         xo::gc::allocator<RbTree> allocator(gc.get());
 
-                        gp<RbTree> rbtree = RbTree::make(allocator, c_debug_flag);
+                        gp<RbTree> rbtree = RbTree::make(compare, allocator, c_debug_flag);
 
                         gc->add_gc_root_dwim(&rbtree);
 
@@ -197,7 +200,7 @@ namespace xo {
                             }
 
                             REQUIRE(rbtree->verify_ok(debug_flag));
-                            
+
                         }
 
                         if (n > 0) {
@@ -259,7 +262,7 @@ namespace xo {
                                                                     &rgen);
                         REQUIRE(rbtree->verify_ok(debug_flag));
 
-                        
+
                         if (tc.do_extra_gc_) {
                             REQUIRE(gc->gc_in_progress() == false);
                             gc->request_gc(gc::generation::nursery);

@@ -20,7 +20,9 @@ namespace xo {
     namespace tree {
         namespace detail {
             /** see xo/ordinaltree/rbtree/RbTreeUtil.hpp */
-            template <typename Key, typename Value, typename Reduce, typename GcObjectInterface>
+            template <typename Key, typename Value,
+                      typename Reduce, typename Compare,
+                      typename GcObjectInterface>
             class RbTreeUtil;
 
             /* xo::tree::detail::Node

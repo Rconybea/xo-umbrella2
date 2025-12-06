@@ -21,7 +21,7 @@ namespace xo {
         template <typename Key,
                   typename Value,
                   typename Reduce = NullReduce<Key>,
-                  //typename Compare = std::less<Key>,
+                  typename Compare = std::less<Key>,
                   typename Allocator = std::allocator<std::pair<const Key, Value>>>
         class RedBlackTree;
 
