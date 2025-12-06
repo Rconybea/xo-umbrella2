@@ -291,9 +291,9 @@ namespace xo {
 
                 void assign_color(Color x) { this->color_ = x; }
                 void assign_size(size_t z) { this->size_ = z; }
-                void _assign_contents(const Value & x) { contents_.second = x; }
-                Node * const * _parent_addr() const { return &parent_; }
-                Node * const * _child_addr(Direction d) const { return &child_v_[d]; }
+                void assign_contents(const Value & x) { this->contents_.second = x; }
+                Node * const * parent_addr() const { return &parent_; }
+                Node * const * child_addr(Direction d) const { return &child_v_[d]; }
 
                 /* recalculate size from immediate childrens' sizes
                  * editor bait: recalc_local_size()

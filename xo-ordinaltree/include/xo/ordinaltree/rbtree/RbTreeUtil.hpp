@@ -808,7 +808,7 @@ namespace xo {
                                     /* match on this key already present in tree
                                      *  -> just update assoc'd value
                                      */
-                                    N->_assign_contents(kv_pair.second);
+                                    N->assign_contents(kv_pair.second);
                                 }
 
                                 /* after modifying a node n,  must recalculate reductions
@@ -856,7 +856,7 @@ namespace xo {
 
                                 const void * src = N;
                                 const void * const * lhs
-                                    = reinterpret_cast<const void * const *>(N->_child_addr(Direction::D_Left));
+                                    = reinterpret_cast<const void * const *>(N->child_addr(Direction::D_Left));
 
                                 XO_EXPECT(gc.check_write_barrier(src, lhs, false),
                                           tostr("RbTreeUtil::insert_aux",
@@ -1736,7 +1736,7 @@ namespace xo {
 
                                 if (x->parent()) {
                                     const void * src = x;
-                                    const void * const * lhs = reinterpret_cast<const void * const *>(x->_parent_addr());
+                                    const void * const * lhs = reinterpret_cast<const void * const *>(x->parent_addr());
 
                                     XO_EXPECT(gc.check_write_barrier(src, lhs, false),
                                               tostr(c_self, (": expect mlog entry for xgen parent pointer"),
@@ -1757,7 +1757,7 @@ namespace xo {
 
                                     {
                                         const void * parent = x;
-                                        const void * const * lhs = reinterpret_cast<const void * const *>(x->_child_addr(detail::Direction(0)));
+                                        const void * const * lhs = reinterpret_cast<const void * const *>(x->child_addr(detail::Direction(0)));
 
                                         XO_EXPECT(gc.check_write_barrier(parent, lhs, false),
                                                   tostr(c_self, (": expect mlog entry for xgen left child pointer"),
@@ -1790,7 +1790,7 @@ namespace xo {
                                     {
                                         const void * parent = x;
                                         const void * const * lhs
-                                            = reinterpret_cast<const void * const *>(x->_child_addr(Direction::D_Right));
+                                            = reinterpret_cast<const void * const *>(x->child_addr(Direction::D_Right));
 
                                         XO_EXPECT(gc.check_write_barrier(parent, lhs, false),
                                                   tostr(c_self, (": expect mlog entry for xgen right child pointer"),
