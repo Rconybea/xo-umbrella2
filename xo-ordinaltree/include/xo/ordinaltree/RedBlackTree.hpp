@@ -602,13 +602,13 @@ namespace xo {
 
                 /* RB1. */
                 if (root_ != nullptr) {
-                    XO_EXPECT(root_->parent_ == nullptr,
+                    XO_EXPECT(root_->parent() == nullptr,
                               tostr(c_self, ": expect root->parent=nullptr",
-                                    xtag("parent", root_->parent_)));
-                    XO_EXPECT(root_->size_ == this->size_,
+                                    xtag("parent", root_->parent())));
+                    XO_EXPECT(root_->size() == this->size_,
                               tostr(c_self, ": expect self.size=root.size",
                                     xtag("self.size", size_),
-                                    xtag("root.size", root_->size_)));
+                                    xtag("root.size", root_->size())));
                 }
 
                 /* height (counting only black nodes) of tree */

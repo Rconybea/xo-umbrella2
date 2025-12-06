@@ -46,11 +46,11 @@ namespace xo {
         template <typename GcObjectInterface>
         struct FallbackGcInterface {
             template <typename Allocator>
-            FallbackGcInterface(Allocator & alloc) {}
+            FallbackGcInterface(Allocator & /*alloc*/) {}
 
-            bool check_write_barrier(const void * parent,
-                                     const void * const * lhs,
-                                     bool may_throw) { return true; };
+            bool check_write_barrier(const void * /*parent*/,
+                                     const void * const * /*lhs*/,
+                                     bool /*may_throw*/) { return true; };
         };
 
         /** Extended version of

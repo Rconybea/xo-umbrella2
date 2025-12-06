@@ -424,8 +424,11 @@ namespace xo {
 
             private:
                 friend class RbTreeUtil<Key, Value, Reduce, GcObjectInterface>;
+
+#ifdef REMOVING
                 template <typename Key1, typename Value1, typename Reduce1, typename Allocator>
                 friend class xo::tree::RedBlackTree;
+#endif
 
             private:
                 /* red | black */
