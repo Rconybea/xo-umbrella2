@@ -24,9 +24,13 @@ namespace xo {
 
             template <typename T>
             auto operator()(const T& a, const T& b) const -> std::strong_ordering {
-                if (a < b) return std::strong_ordering::less;
-                if (b < a) return std::strong_ordering::greater;
-                return std::strong_ordering::equal;
+                if constexpr (std::three_way_comparable<T>) {
+                    return a <=> b;
+                } else {
+                    if (a < b) return std::strong_ordering::less;
+                    if (b < a) return std::strong_ordering::greater;
+                    return std::strong_ordering::equal;
+                }
             }
         };
 

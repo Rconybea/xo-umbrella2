@@ -80,6 +80,59 @@ namespace utest {
             return ok_flag;
         } /*test_clear*/
 
+        static bool
+        random_inserts(const std::vector<typename Tree::key_type> & keys,
+                       bool catch_flag,
+                       xo::rng::xoshiro256ss * p_rgen,
+                       Tree * p_tree)
+        {
+            bool ok_flag = true;
+
+            xo::scope log(XO_DEBUG(catch_flag), xtag("n-keys", keys.size()));
+
+            REQUIRE_ORFAIL(ok_flag, catch_flag, p_tree->verify_ok(catch_flag));
+
+            /* n keys */
+            std::size_t n = keys.size();
+            /* permute keys, remembering original position */
+            std::vector<std::pair<std::size_t, typename Tree::key_type>> permuted_keys(n);
+            uint32_t i = 0;
+            for (const auto & x : keys) {
+                permuted_keys[i] = std::make_pair(i, x);
+            }
+            /* shuffle to get unpredictable insert order */
+            std::shuffle(keys.begin(), keys.end(), *p_rgen);
+
+            size_t tree_z0 = p_tree->size();
+
+            /* insert keys in permuted order */
+            uint32_t i = 1;
+            for(const auto & pr_i : permuted_keys) {
+                log && log(xtag("i", i), xtag("ord", pr_i.first), xtag("n", n), xtag("key", pr_i.second));
+
+                /* .first:  iterator @ insert position
+                 * .second: true if insert occurred (ịẹ tree size incremented)
+                 */
+                auto insert_result = p_tree->insert(typename Tree::value_type(pr_i.second, 10.0 * i));
+
+                REQUIRE_ORFAIL(ok_flag, catch_flag, p_tree->verify_ok(catch_flag));
+
+                REQUIRE_ORFAIL(ok_flag, catch_flag, insert_result.second);
+
+                /* verify: iterator returned by Treẹinsert(),  refers to inserted key,value pair */
+                log && log(xtag("iter.node", insert_result.first.node()));
+
+                REQUIRE_ORFAIL(ok_flag, catch_flag, insert_result.first->first == pr_i.second);
+                REQUIRE_ORFAIL(ok_flag, catch_flag, insert_result.first->second == 10.0 * i);
+
+                ++i;
+            }
+
+            REQUIRE_ORFAIL(ok_flag, catch_flag, p_tree->size() == tree_z0 + n);
+
+            return ok_flag;
+        }
+
         /* do
          *   n = (hi - lo) / k
          * random inserts (taken from *p_rgen) into *p_rbtreẹ
@@ -94,6 +147,8 @@ namespace utest {
                        xo::rng::xoshiro256ss * p_rgen,
                        Tree * p_tree)
         {
+            // TODO: rewrite in terms of 'random_inserts with explicit vector'.
+
             using xo::xtag;
 
             bool ok_flag = true;
