@@ -23,6 +23,50 @@
  *  2. representation struct names follow pattern DRepr, e.g. DPolar, DRect.
  *     Don't require "intended primary interface" in the name,
  *     since we're seeking ability to attach the same data to different interfaces
+ *
+ *  Example Class Diagram
+ *
+ *                                   AComplex
+ *                                      ^
+ *                                      |
+ *             /------------------------+--------------------\
+ *             |                        |                    |
+ *    IComplex_DRectCoords   IComplex_DPolarCoords     IComplex_Any
+ *     = IComplex_Specific    = IComplex_Specific
+ *       <DRectCoords>          <DPolarCoords>
+ *                                      ^
+ *                                      |
+ *                            OUniqueBox
+ *                              <AComplex,DPolarCoords>
+ *                                      ^
+ *                                      |
+ *                            RComplex<AComplex>
+ *                             = RoutingFor<AComplex,OUniqueBox..>
+ *                                      ^
+ *                                      |
+ *                             ubox<AComplex,
+ *                                  DPolarCoords>
+ *
+ *  AComplex:              abstract interface
+ *  DPolarCoords:          passive representation
+ *  IComplex_DPolarCoords: implement AComplex interface for representation DPolarCoords
+ *
+ *  OUniqueBox<AComplex,DPolarCoords>:
+ *                         a self-sufficient object, associating
+ *                         interface AComplex with representation DPolarCoords
+ *
+ *  RComplex<AComplex>:    convenience interface for OUniqueBox
+ *
+ *  ubox<AComplex,DPolarCOords>:
+ *                         self-sufficent object with convenient interface
+ *
+ *  Application code will deal with ubox<AComplex,DPolarCoords>
+ *
+ *
+ *
+ *
+ *
+ *
  **/
 
 #include <catch2/catch.hpp>
@@ -193,10 +237,15 @@ namespace xo {
                 using RoutingType = RComplex<Object>;
             };
 
+            /** boxed object, held by unique pointer
+             *
+             *  Example:
+             *    ubox<AComplex, DRectCoords> z1 = ..;
+             *    z1.xcoord();
+             **/
             template <typename AInterface, typename Data>
-            struct ubox : public RoutingFor<AInterface, Data>::typename RoutingType { }
-        }
-
+            struct ubox : public RoutingFor<AInterface, Data>::typename RoutingType {
+            }
         }
     }
 }
