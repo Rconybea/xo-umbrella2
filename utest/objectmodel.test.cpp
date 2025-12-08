@@ -41,19 +41,28 @@
  *                                      ^
  *                                      |
  *                            RComplex<AComplex>
- *                             = RoutingFor<AComplex,OUniqueBox..>
+ *                             = RoutingFor<AComplex,OUniqueBox..>::RoutingType
  *                                      ^
  *                                      |
  *                             ubox<AComplex,
  *                                  DPolarCoords>
  *
- *  AComplex:              abstract interface
+ *  AComplex:              abstract interface.
+ *                         explicit, type-erased, data pointer argument
+ *                           virtual AComplex::xcoord(void * data)
+ *
  *  DPolarCoords:          passive representation
+ *
  *  IComplex_DPolarCoords: implement AComplex interface for representation DPolarCoords
+ *                         static methods with typed data pointer argument
+ *                           IComplex_DPolarCoords::xcoord(void * data)
+ *                           IComplex_DPolarCoords::_xcoord(DPolarCoords * data)
  *
  *  OUniqueBox<AComplex,DPolarCoords>:
  *                         a self-sufficient object, associating
  *                         interface AComplex with representation DPolarCoords
+ *                           OUniqueBox .data() method is DPolarCoord*
+ *                         'impure' in the sense that it mixes code+data
  *
  *  RComplex<AComplex>:    convenience interface for OUniqueBox
  *
@@ -110,10 +119,10 @@ namespace xo {
 
             template <typename Repr>
             struct IComplex_Specific : public AComplex {
-                double _xcoord(Repr *) const;
-                double _ycoord(Repr *) const;
-                double _argument(Repr *) const;
-                double _magnitude(Repr *) const;
+                static double _xcoord(Repr *);
+                static double _ycoord(Repr *);
+                static double _argument(Repr *);
+                static double _magnitude(Repr *);
 
                 virtual double xcoord(void * data) const final override { return _xcoord((Repr*)data); }
                 virtual double ycoord(void * data) const final override { return _ycoord((Repr*)data); }
@@ -132,25 +141,28 @@ namespace xo {
             };
 
             /** implementation of AComplex interface with representation DPolarCoords **/
-            using struct IComplex_DPolarCoords = IComplex_Specific<DPolarCoords>;
+            using IComplex_DPolarCoords = IComplex_Specific<DPolarCoords>;
 
             template <>
-            IComplex_Specific<DPolarCoords>::_xcoord(DPolarCoords * data) const {
+            double
+            IComplex_Specific<DPolarCoords>::_xcoord(DPolarCoords * data) {
                 return data->mag_ * std::cos(data->arg_);
             };
 
             template <>
-            IComplex_Specific<DPolarCoords>::_ycoord(DPolarCoords * data) const {
+            double IComplex_Specific<DPolarCoords>::_ycoord(DPolarCoords * data) {
                 return data->mag_ * std::sin(data->arg_);
             };
 
             template <>
-            IComplex_Specific<DPolarCoords>::_argument(DPolarCoords * data) const {
+            double
+            IComplex_Specific<DPolarCoords>::_argument(DPolarCoords * data) {
                 return data->arg_;
             }
 
             template <>
-            IComplex_Specific<DPolarCoords>::_magnitude(DPolarCoords * data) const {
+            double
+            IComplex_Specific<DPolarCoords>::_magnitude(DPolarCoords * data) {
                 return data->mag_;
             }
 
@@ -170,32 +182,34 @@ namespace xo {
             };
 
             /** implementation of AComplex interface with representation DRectCoords **/
-            using struct IComplex_DRectCoords = IComplex_Specific<DRectCoords>;
+            using IComplex_DRectCoords = IComplex_Specific<DRectCoords>;
 
             template <>
-            IComplex_Specific<DRectCoords>::_xcoord(DRectCoords * data) const {
-                return data->mag_ * std::cos(data->arg_);
+            double
+            IComplex_Specific<DRectCoords>::_xcoord(DRectCoords * data) {
+                return data->x_;
             };
 
             template <>
-            IComplex_Specific<DRectCoords>::_ycoord(DRectCoords * data) const {
-                return data->mag_ * std::sin(data->arg_);
+            double
+            IComplex_Specific<DRectCoords>::_ycoord(DRectCoords * data) {
+                return data->y_;
             };
 
             template <>
-            IComplex_Specific<DRectCoords>::_argument(DRectCoords * data) const {
-                return data->arg_;
+            double
+            IComplex_Specific<DRectCoords>::_argument(DRectCoords * data) {
+                return std::atan(data->y_ / data->x_);
             }
 
             template <>
-            IComplex_Specific<DRectCoords>::_magnitude(DRectCoords * data) const {
-                return data->mag_;
-            }
+            double
+            IComplex_Specific<DRectCoords>::_magnitude(DRectCoords * data) {
+                double x = data->x_;
+                double y = data->y_;
 
-            template <>
-            struct ISpecificFor<AComplex, DRectCoords> {
-                using ImplType = IComplex_Specific<DRectCoords>;
-            };
+                return std::sqrt(x*x + y*y);
+            }
 
             template <>
             struct ISpecificFor<AComplex, DRectCoords> {
@@ -204,8 +218,18 @@ namespace xo {
 
             // ----- box with unique pointer -----
 
-            /** u for unique, b for box. Using lowercase for unobtrusiveness,
-             *  so that in ub<MyType>, MyType is naturally emphasized
+            /**
+             *  Creates a 'classic object-oriented'
+             *  instance that has both interface+data.
+             *
+             *  OUniqueBox uses a unique_ptr to hold data,
+             *  so lifetime ends (unless moved) when this OUniqueBox
+             *  goes out of scope
+             *
+             *  policy:
+             *  In our object model, these are not intended to be used
+             *  for state; instead create them just-in-time.
+             *
              *
              *  @tparam ISpecific will be a specific interface,
              *  such as ISpecificFor<AComplex, DRectCoords>
@@ -215,19 +239,26 @@ namespace xo {
              *    z1._xcoord(z1.data());
              **/
             template <typename AInterface, typename Data>
-            struct OUniqueBox : ISpecificFor<AInterface, Data>::typename ImplType {
+            struct OUniqueBox : ISpecificFor<AInterface, Data>::ImplType {
+                using DataType = Data;
+                using DataBox = std::unique_ptr<Data>;
+
+                explicit OUniqueBox(DataBox d) : data_{std::move(d)} {}
+
                 Data * data() const { return data_.get(); }
 
-                up<Data> data_;
+                DataBox data_;
             };
 
             template <typename Object>
             struct RComplex : public Object {
-                double xcoord() const { return _xcoord(data()); }
-                double ycoord() const { return _ycoord(data()); }
-                double argument() const { return _argument(data()); }
-                double magnitude() const { return _magnitude(data()); }
-            }
+                RComplex(Object::DataBox data) : Object{std::move(data)} {}
+
+                double xcoord() const { return Object::_xcoord(Object::data()); }
+                double ycoord() const { return Object::_ycoord(Object::data()); }
+                double argument() const { return Object::_argument(Object::data()); }
+                double magnitude() const { return Object::_magnitude(Object::data()); }
+            };
 
             template <typename AInterface, typename Object>
             struct RoutingFor;
@@ -237,6 +268,9 @@ namespace xo {
                 using RoutingType = RComplex<Object>;
             };
 
+            template <typename AInterface, typename Object>
+            using RoutingType = RoutingFor<AComplex, Object>::RoutingType;
+
             /** boxed object, held by unique pointer
              *
              *  Example:
@@ -244,8 +278,92 @@ namespace xo {
              *    z1.xcoord();
              **/
             template <typename AInterface, typename Data>
-            struct ubox : public RoutingFor<AInterface, Data>::typename RoutingType {
-            }
+            struct ubox : public RoutingType<AComplex, OUniqueBox<AComplex, Data>> {
+                using Super = RoutingType<AComplex, OUniqueBox<AComplex, Data>>;
+
+                explicit ubox(Super::DataBox d) : Super{std::move(d)} {}
+            };
+        } /*namespace*/
+
+        TEST_CASE("objectmodel-specific-1", "[objectmodel]")
+        {
+            /* arg=0, mag=1 -> 1+0i */
+            DPolarCoords polar{0.0, 1.0};
+            IComplex_Specific<DPolarCoords> polar_iface;
+
+            REQUIRE(polar_iface._xcoord(&polar) == 1.0);
+            REQUIRE(polar_iface._ycoord(&polar) == 0.0);
+            REQUIRE(polar_iface._argument(&polar) == 0.0);
+            REQUIRE(polar_iface._magnitude(&polar) == 1.0);
         }
-    }
-}
+
+        TEST_CASE("objectmodel-specific-2", "[objectmodel]")
+        {
+            /* arg=0, mag=1 -> 1+0i */
+            DRectCoords rect{1.0, 0.0};
+            IComplex_Specific<DRectCoords> rect_iface;
+
+            REQUIRE(rect_iface._xcoord(&rect) == 1.0);
+            REQUIRE(rect_iface._ycoord(&rect) == 0.0);
+            REQUIRE(rect_iface._argument(&rect) == 0.0);
+            REQUIRE(rect_iface._magnitude(&rect) == 1.0);
+        }
+
+        TEST_CASE("uniquebox-1", "[objectmodel]")
+        {
+            OUniqueBox<AComplex, DPolarCoords> box
+                {std::make_unique<DPolarCoords>(0.0, 1.0)};
+
+            REQUIRE(box.xcoord(box.data()) == 1.0);
+            REQUIRE(box.ycoord(box.data()) == 0.0);
+            REQUIRE(box.argument(box.data()) == 0.0);
+            REQUIRE(box.magnitude(box.data()) == 1.0);
+        }
+
+        TEST_CASE("router-1", "[objectmodel]")
+        {
+            using Object = OUniqueBox<AComplex, DPolarCoords>;
+
+            RComplex<Object> box{std::make_unique<DPolarCoords>(0.0, 1.0)};
+
+            REQUIRE(box.xcoord() == 1.0);
+            REQUIRE(box.ycoord() == 0.0);
+            REQUIRE(box.argument() == 0.0);
+            REQUIRE(box.magnitude() == 1.0);
+        }
+
+        TEST_CASE("routing-type-1", "[objectmodel]")
+        {
+            using Object = OUniqueBox<AComplex, DPolarCoords>;
+
+            RoutingType<AComplex, Object> box{std::make_unique<DPolarCoords>(0.0, 1.0)};
+
+            REQUIRE(box.xcoord() == 1.0);
+            REQUIRE(box.ycoord() == 0.0);
+            REQUIRE(box.argument() == 0.0);
+            REQUIRE(box.magnitude() == 1.0);
+        }
+
+        TEST_CASE("ubox-1", "[objectmodel]")
+        {
+            ubox<AComplex,DPolarCoords> box{std::make_unique<DPolarCoords>(0.0, 1.0)};
+
+            REQUIRE(box.xcoord() == 1.0);
+            REQUIRE(box.ycoord() == 0.0);
+            REQUIRE(box.argument() == 0.0);
+            REQUIRE(box.magnitude() == 1.0);
+        }
+
+        TEST_CASE("ubox-2", "[objectmodel]")
+        {
+            ubox<AComplex,DRectCoords> box{std::make_unique<DRectCoords>(1.0, 0.0)};
+
+            REQUIRE(box.xcoord() == 1.0);
+            REQUIRE(box.ycoord() == 0.0);
+            REQUIRE(box.argument() == 0.0);
+            REQUIRE(box.magnitude() == 1.0);
+        }
+    } /*namespace ut*/
+} /*namespace xo*/
+
+/* end objectmodel.test.cp */
