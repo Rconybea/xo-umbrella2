@@ -199,6 +199,18 @@ namespace xo {
                 return true;
             }
 
+            template <typename RRouter>
+            consteval bool valid_object_router()
+            {
+                static_assert(requires { typename RRouter::ObjectType; },
+                              "Router type must provide typename Router::ObjectType");
+                static_assert(valid_object_traits<RRouter::ObjectType>,
+                              "Router::ObjectType must satisfy objectmodel traits");
+                static_assert(std::is_standard_layout_v<RRouter>,
+                              "Router must have standard laayout, i.e. no virtual methods. Virtual methods belong in OObject::AbstractInterface*>");
+                return true;
+            };
+
             // ----------------------------------------------------------------
 
             /** Associates an interface with an representation.
@@ -459,6 +471,8 @@ namespace xo {
              **/
             template <typename Object>
             struct RComplex : public Object {
+                using ObjectType = Object;
+
                 RComplex() {}
                 RComplex(Object::DataBox data) : Object{std::move(data)} {}
 
@@ -466,9 +480,17 @@ namespace xo {
                 double ycoord() const { return Object::iface()->ycoord(Object::data()); }
                 double argument() const { return Object::iface()->argument(Object::data()); }
                 double magnitude() const { return Object::iface()->magnitude(Object::data()); }
+
+                /** note: would prefer this to be constexpr, but seems infeasible asof gcc 14.3 **/
+                static bool _valid;
             };
 
+            template <typename Object>
+            bool
+            RComplex<Object>::_valid = valid_object_router<Object>();
+
             template <typename AInterface, typename Object>
+            requires abstract_interface<AInterface>
             struct RoutingFor;
 
             template <typename Object>
@@ -481,7 +503,11 @@ namespace xo {
 
             // ----- unique any; coordinates with OUniqueBox -----
 
-            /** boxed object, held by unique-pointer equiavelent.
+            /** boxed object, held by unique-pointer equivalent.
+             *  - With default Data argument:
+             *    type-erased polymorphic container
+             *  - with specific Data argument:
+             *    typed container. Trivially de-virtualizable
              *
              *  Example:
              *    std::unique_ptr<DRectCoords> z1_in
