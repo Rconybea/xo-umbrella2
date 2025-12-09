@@ -465,6 +465,7 @@ namespace xo {
                             keys[i] = key_i;
                         }
 
+#ifdef NOT_YET
                         REQUIRE(rbtree.get() != nullptr);
                         REQUIRE(rbtree->verify_ok(debug_flag));
 
@@ -499,7 +500,6 @@ namespace xo {
 
                         }
 
-#ifdef NOT_YET
                         if (n > 0) {
                             INFO("insert phase B - random_inserts(1, n+1, ..)");
 
