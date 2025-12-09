@@ -81,6 +81,7 @@
 #include <catch2/catch.hpp>
 #include <cmath>
 #include <cassert>
+#include <cstring>
 
 namespace xo {
     namespace ut {
