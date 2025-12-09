@@ -81,8 +81,26 @@ namespace xo {
                 size_t len1 = std::strlen(chars_);
                 size_t len2 = std::strlen(other.chars_);
 
+#              if defined(__cpp_lib_three_way_comparison) && __cpp_lib_three_way_comparison >= 201907L
                 return std::lexicographical_compare_three_way(chars_, chars_ + len1,
                                                               other.chars_, other.chars_ + len2);
+#              else
+                /* lexicographical_compare_three_way n/avail in clang 16.0.6 */
+                {
+                    // Compare common prefix
+                    size_t min_len = std::min(len1, len2);
+                    int cmp = std::memcmp(chars_, other.chars_, min_len);
+
+                    if (cmp < 0) return std::strong_ordering::less;
+                    if (cmp > 0) return std::strong_ordering::greater;
+
+                    // Common prefix is equal, compare lengths
+                    if (len1 < len2) return std::strong_ordering::less;
+                    if (len1 > len2) return std::strong_ordering::greater;
+
+                    return std::strong_ordering::equal;
+                }
+#              endif
             }
 
             bool operator==(const String & other) const {
