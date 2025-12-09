@@ -34,9 +34,9 @@
  *    IComplex_DRectCoords   IComplex_DPolarCoords     IComplex_Any
  *     = IComplex_Specific    = IComplex_Specific
  *       <DRectCoords>          <DPolarCoords>
- *                                      ^
- *                                      |
- *                            OUniqueBox
+ *             ^                        ^
+ *             |                        |
+ *            ...             OUniqueBox
  *                              <AComplex,DPolarCoords>
  *                                      ^
  *                                      |
@@ -104,6 +104,8 @@ namespace xo {
                 virtual double ycoord(void * data) const = 0;
                 virtual double argument(void * data) const = 0;
                 virtual double magnitude(void * data) const = 0;
+
+                virtual void destruct(void * data) const = 0;
             };
 
             /** type-erased implementation of AComplex, for runtime polymorphism
@@ -115,6 +117,8 @@ namespace xo {
                 virtual double ycoord(void *) const final override { assert(false); return 0.0; }
                 virtual double argument(void *) const final override { assert(false); return 0.0; }
                 virtual double magnitude(void *) const final override { assert(false); return 0.0; }
+
+                virtual void destruct(void *) const final override { assert(false); }
             };
 
             template <typename Repr>
@@ -123,11 +127,26 @@ namespace xo {
                 static double _ycoord(Repr *);
                 static double _argument(Repr *);
                 static double _magnitude(Repr *);
+                static void _destruct(Repr *);
 
                 virtual double xcoord(void * data) const final override { return _xcoord((Repr*)data); }
                 virtual double ycoord(void * data) const final override { return _ycoord((Repr*)data); }
                 virtual double argument(void * data) const final override { return _argument((Repr*)data); }
                 virtual double magnitude(void * data) const final override { return _magnitude((Repr*)data); }
+                virtual void destruct(void * data) const final override { _destruct((Repr*)data); }
+            };
+
+            // ----- Placeholder for opaque data -----
+
+            // Placeholder used for template specialization
+
+            struct DOpaquePlaceholder {};
+
+            using IComplex_DOpaquePlaceholder = IComplex_Any;
+
+            template <>
+            struct ISpecificFor<AComplex, DOpaquePlaceholder> {
+                using ImplType = IComplex_Any;
             };
 
             // ----- Polar Coordinates -----
@@ -164,6 +183,12 @@ namespace xo {
             double
             IComplex_Specific<DPolarCoords>::_magnitude(DPolarCoords * data) {
                 return data->mag_;
+            }
+
+            template <>
+            void
+            IComplex_Specific<DPolarCoords>::_destruct(DPolarCoords *) {
+                /*trivial*/
             }
 
             template <>
@@ -212,6 +237,12 @@ namespace xo {
             }
 
             template <>
+            void
+            IComplex_Specific<DRectCoords>::_destruct(DRectCoords * /*data*/) {
+                /*trivial*/
+            }
+
+            template <>
             struct ISpecificFor<AComplex, DRectCoords> {
                 using ImplType = IComplex_Specific<DRectCoords>;
             };
@@ -250,8 +281,49 @@ namespace xo {
                 DataBox data_;
             };
 
+            // ----- polymorphic box -----
+
+            /**
+             *  Unqiuely-owned instance with runtime polymorphism.
+             *
+             *  Unlike OUniqueBox<AInterface, ..> can use for variant data
+             *  without additional overhead. Tradeoff is that avoiding such
+             *  overhead excludes std::unique_ptr.
+             *
+             *  We're going to instead rely on AInterface providing a destruct() method,
+             *  so in practice get the deleter from interface state.
+             *
+             *  Possibly means we need all abstract interfaces to share a common base
+             **/
+            template <typename AInterface, typename Data = DOpaquePlaceholder>
+            struct OUniqueAny : ISpecificFor<AInterface, Data>::ImplType {
+                /* note: Data can be void here */
+                using DataType = Data;
+                using DataBox = Data*;
+
+                explicit OUniqueAny() {}
+                /* unsatisfactory b/c doesn't enforce that @p d is heap-allocated */
+                explicit OUniqueAny(DataBox d) : data_{std::move(d)} {}
+
+                ~OUniqueAny() {
+                    if (data_ != nullptr) {
+                        this->destruct(data_);
+                        delete data_;
+                        this->data_ = nullptr;
+                    }
+                }
+
+                /** note: load-bearing for routing classes such as RComplex<OUniqueAny> **/
+                Data * data() const { return data_; }
+
+                DataBox data_ = nullptr;
+            };
+
+            // ----- Router; RFoo pairs with AFoo -----
+
             template <typename Object>
             struct RComplex : public Object {
+                RComplex() {}
                 RComplex(Object::DataBox data) : Object{std::move(data)} {}
 
                 double xcoord() const { return Object::_xcoord(Object::data()); }
@@ -271,6 +343,8 @@ namespace xo {
             template <typename AInterface, typename Object>
             using RoutingType = RoutingFor<AComplex, Object>::RoutingType;
 
+            // ----- unique box; coordinates with OUniqueBox -----
+
             /** boxed object, held by unique pointer
              *
              *  Example:
@@ -283,7 +357,43 @@ namespace xo {
 
                 explicit ubox(Super::DataBox d) : Super{std::move(d)} {}
             };
+
+            // ----- unique any; coordinates with OUniqueAny -----
+
+            /** boxed object, held by unique-pointer equiavelent.
+             *
+             *  Example:
+             *    std::unique_ptr<DRectCoords> z1_in = std::make_unique<DRectCoords>(1.0, 0.0):
+             *    uany<AComplex> z1{z1_in.release()};
+             *
+             *    z1.xcoord();
+             **/
+            template <typename AInterface, typename Data = DOpaquePlaceholder>
+            struct uany : public RoutingType<AComplex, OUniqueAny<AComplex, Data>> {
+                using Super = RoutingType<AComplex, OUniqueAny<AComplex, Data>>;
+
+                uany() {}
+                explicit uany(Super::DataBox d) : Super(d) {}
+
+                /** move constructor from a different representation.
+                 *  allowed given:
+                 *  - same abstract interface
+                 *  - same strategy (unique / refcounted / ..)
+                 **/
+                template <typename Data2>
+                uany(uany<AInterface, Data2> && other)
+                    requires (std::is_same_v<Data, DOpaquePlaceholder>
+                              || std::is_convertible_v<Data2*, Data>)
+                : Super(reinterpret_cast<other.data_)
+                {
+                    /* necessary, so other's dtor is compliant */
+                    other.data_ = nullptr;
+                }
+            };
+
         } /*namespace*/
+
+        // ----- UNIT TESTS -----
 
         TEST_CASE("objectmodel-specific-1", "[objectmodel]")
         {
@@ -362,6 +472,32 @@ namespace xo {
             REQUIRE(box.ycoord() == 0.0);
             REQUIRE(box.argument() == 0.0);
             REQUIRE(box.magnitude() == 1.0);
+        }
+
+        TEST_CASE("uany-1", "[objectmodel]")
+        {
+            /* default ctor */
+            uany<AComplex> any;
+        }
+
+        TEST_CASE("uany-2", "[objectmodel]")
+        {
+            /* equivalent to ubox<AComplex,DRectCoords>, but impl doesn't use std::unique_ptr */
+            uany<AComplex,DRectCoords> any{new DRectCoords{1.0, 0.0}};
+
+            REQUIRE(any.xcoord() == 1.0);
+            REQUIRE(any.ycoord() == 0.0);
+            REQUIRE(any.argument() == 0.0);
+            REQUIRE(any.magnitude() == 1.0);
+        }
+
+        TEST_CASE("uany-3", "[objectmodel]")
+        {
+            /* equivalent to ubox<AComplex,DRectCoords>, but impl doesn't use std::unique_ptr */
+            uany<AComplex,DRectCoords> z1{new DRectCoords{1.0, 0.0}};
+
+            /* should be able to assign to a variant uany */
+            uany<AComplex> uany = std::move(z1);
         }
     } /*namespace ut*/
 } /*namespace xo*/
