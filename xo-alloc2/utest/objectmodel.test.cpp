@@ -114,7 +114,7 @@ namespace xo {
              *  such as IComplex_RectCoords or IComplex_PolarCoords.
              **/
             struct IComplex_Any : public AComplex {
-                virtual double xcoord(void *) const final override { assert(false); return 0.0; }
+                 virtual double xcoord(void *) const final override { assert(false); return 0.0; }
                 virtual double ycoord(void *) const final override { assert(false); return 0.0; }
                 virtual double argument(void *) const final override { assert(false); return 0.0; }
                 virtual double magnitude(void *) const final override { assert(false); return 0.0; }
@@ -327,10 +327,10 @@ namespace xo {
                 RComplex() {}
                 RComplex(Object::DataBox data) : Object{std::move(data)} {}
 
-                double xcoord() const { return Object::_xcoord(Object::data()); }
-                double ycoord() const { return Object::_ycoord(Object::data()); }
-                double argument() const { return Object::_argument(Object::data()); }
-                double magnitude() const { return Object::_magnitude(Object::data()); }
+                double xcoord() const { return Object::xcoord(Object::data()); }
+                double ycoord() const { return Object::ycoord(Object::data()); }
+                double argument() const { return Object::argument(Object::data()); }
+                double magnitude() const { return Object::magnitude(Object::data()); }
             };
 
             template <typename AInterface, typename Object>
@@ -364,10 +364,32 @@ namespace xo {
             /** boxed object, held by unique-pointer equiavelent.
              *
              *  Example:
-             *    std::unique_ptr<DRectCoords> z1_in = std::make_unique<DRectCoords>(1.0, 0.0):
+             *    std::unique_ptr<DRectCoords> z1_in
+             *      = std::make_unique<DRectCoords>(1.0, 0.0):
              *    uany<AComplex> z1{z1_in.release()};
-             *
              *    z1.xcoord();
+             *
+             *
+             *            +-----+             +-----------------+
+             *  Interface |   x-------------->| vtable for      |
+             *            +-----+             | some descendant |
+             *       Data |   x--------\      | of AInterface   |
+             *            +-----+      |      |                 |
+             *                         |      +-----------------+
+             *                         |
+             *                         |      +--------------+
+             *                         \----->| data :: Repr |
+             *                                +--------------+
+             *
+             *  Binary representaiton of unay<AInterface, Data>
+             *  is compatible for different values of @tparam Data
+             *  as long as vtable pointer moves along with data pointer.
+             *
+             *  In particular binary representation for
+             *  uany<AInterface,D> is as if it inherited uany<AInterface>
+             *  (even though it does not as far as compiler is concerned)
+             *
+             *  This is load-bearing for @ref move2any see below
              **/
             template <typename AInterface, typename Data = DOpaquePlaceholder>
             struct uany : public RoutingType<AComplex, OUniqueAny<AComplex, Data>> {
@@ -375,6 +397,18 @@ namespace xo {
 
                 uany() {}
                 explicit uany(Super::DataBox d) : Super(d) {}
+
+                /** copy contents of this instance into *dest.
+                 **/
+                void move2any(uany<AInterface> * dest) {
+                    static_assert(sizeof(uany<AInterface>)
+                                  == sizeof(uany<AInterface, Data>));
+
+                    ::memcpy((void*)dest, (void*)this, sizeof(uany<AInterface>));
+                    // this is almost right. But doesn't copy vtable pointer
+                    //*dest = *(reinterpret_cast<uany<AInterface>*>(this));
+                    this->data_ = nullptr;
+                }
 
                 /** move constructor from a different representation.
                  *  allowed given:
@@ -385,10 +419,14 @@ namespace xo {
                 uany(uany<AInterface, Data2> && other)
                     requires (std::is_same_v<Data, DOpaquePlaceholder>
                               || std::is_convertible_v<Data2*, Data>)
-                : Super(reinterpret_cast<other.data_)
+                    : Super()
                 {
-                    /* necessary, so other's dtor is compliant */
-                    other.data_ = nullptr;
+                    static_assert(sizeof(uany<AInterface, Data2>)
+                                  == sizeof(uany<AInterface, Data>));
+
+                    other.move2any(this);
+
+                    assert(other.data_ = nullptr);
                 }
             };
 
@@ -497,8 +535,23 @@ namespace xo {
             /* equivalent to ubox<AComplex,DRectCoords>, but impl doesn't use std::unique_ptr */
             uany<AComplex,DRectCoords> z1{new DRectCoords{1.0, 0.0}};
 
-            /* should be able to assign to a variant uany */
-            uany<AComplex> uany = std::move(z1);
+            DRectCoords * z1_data = z1.data();
+
+            REQUIRE(z1.data() != nullptr);
+            REQUIRE(z1.xcoord() == 1.0);
+
+            /* can type-erase */
+            uany<AComplex> z1_any;
+
+            REQUIRE(z1_any.data() == nullptr);
+
+            z1.move2any(&z1_any);
+
+            /* z1 should be empty, it moved itself */
+            REQUIRE(z1.data() == nullptr);
+            REQUIRE((void*)z1_any.data() == (void*)z1_data);
+
+            REQUIRE(z1_any.xcoord() == 1.0);
         }
     } /*namespace ut*/
 } /*namespace xo*/
