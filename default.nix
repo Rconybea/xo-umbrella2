@@ -421,6 +421,7 @@ in
   pkgs = pkgs;
   xo = {
     cmake          = pkgs.xo-cmake;
+#    facet          = pkgs.xo-facet;
     indentlog      = pkgs.xo-indentlog;
     refcnt         = pkgs.xo-refcnt;
     subsys         = pkgs.xo-subsys;

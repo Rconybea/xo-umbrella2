@@ -75,6 +75,7 @@ set(DOX_EXCLUDE_PATTERNS [=[
 # in reverse topological order i.e. dependencies first
 
 add_subdirectory(xo-cmake)
+add_subdirectory(xo-facet)
 add_subdirectory(xo-indentlog)
 add_subdirectory(xo-allocutil)
 add_subdirectory(xo-refcnt)

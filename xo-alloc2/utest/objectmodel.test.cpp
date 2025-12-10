@@ -261,7 +261,7 @@ namespace xo {
             };
 
             bool
-            IComplex_Any::_valid = valid_interface_implementation<AComplex, IComplex_Any>;
+            IComplex_Any::_valid = valid_interface_implementation<AComplex, IComplex_Any>();
 
             // ----------------------------------------------------------------
 
