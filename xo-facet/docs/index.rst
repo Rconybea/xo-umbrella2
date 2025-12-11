@@ -49,6 +49,7 @@ This gives us several benefits:
    :maxdepth: 2
    :caption: xo-facet contents
 
+   implementation
    glossary
    genindex
    search

@@ -7,7 +7,7 @@ xo_docdir_sphinx_config(
     glossary.rst
     #install.rst
     #introduction.rst
-    #implementation.rst
+    implementation.rst
 )
 
 # see xo-reader/doc or xo-unit/doc for working examples

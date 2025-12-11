@@ -17,7 +17,7 @@ author = 'Roland Conybeare'
 extensions = [ "breathe",
                "sphinx.ext.mathjax",     # inline math
                "sphinx.ext.autodoc",     # generate info from docstrings
-#               "sphinxcontrib.ditaa",    # diagrams-through-ascii-art
+               "sphinxcontrib.ditaa",    # diagrams-through-ascii-art
                "sphinxcontrib.plantuml", # text -> uml diagrams
               ]
 

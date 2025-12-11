@@ -7,10 +7,16 @@
 
 #include <concepts>
 #include <type_traits>
+#include <cstdint>
 
 namespace xo {
     namespace facet {
+        // ----- abstract facet -----
+
         namespace detail {
+            /** aux class to support facet validation
+             *  see @ref abstract_facet, @ref valid_abstract_facet
+             **/
             struct PlaceholderAbstractInterface {
                 virtual double foo(void * data) const = 0;
             };
@@ -35,10 +41,13 @@ namespace xo {
         /** Use: when defining an abstract facet AMyFacet
          *
          *    struct AMyFacet {
-         *        virtual void foo(void * data) const = 0;
+         *        virtual void something(void * data) const = 0;
+         *        virtual int andalso(void * data, double somearg) const = 0;
+         *
+         *        static bool _valid;
          *    };
          *
-         *    static_assert(valid_abstract_facet<AMyFacet>());
+         *    bool AMyFacet::_valid = valid_abstract_facet<AMyFacet>();
          *
          **/
         template <typename T>
@@ -59,6 +68,10 @@ namespace xo {
             static_assert
                 (std::is_trivially_destructible_v<T>,
                  "Abstract facet expected to have trivial dtor since no state");
+            static_assert
+                (requires(const T & facet) {
+                   { facet._typeseq() } -> std::convertible_to<std::int32_t>; },
+                    "Abstract facet must provide a _typeseq() method for safe downcasting");
             return true;
         };
 
