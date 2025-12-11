@@ -77,12 +77,6 @@
  *                         self-sufficent object with convenient interface
  *
  *  Application code will deal with ubox<AComplex,DPolarCoords>
- *
- *
- *
- *
- *
- *
  **/
 
 #include <catch2/catch.hpp>
