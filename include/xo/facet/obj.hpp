@@ -52,16 +52,15 @@ namespace xo {
 
             /** copy constructor **/
             template <typename DOther>
-            obj(const obj<AFacet, DOther> && other) : Super()
+            obj(const obj<AFacet, DOther> && other)
+                requires (std::is_convertible_v<DRepr, DOther>
+                          || std::is_same_v<DRepr, DVariantPlaceholder>)
+                : Super()
             {
                 if constexpr (std::is_convertible_v<DRepr, DOther>) {
                     this->data_ = other.data_;
-                } else if constexpr (std::is_same_v<DRepr, DVariantPlaceholder>) {
-                    this->from_data(other.data_);
                 } else {
-                    /* still need something for downcasting */
-
-                    static_assert(false, "expect DOther compatible with DRepr");
+                    this->from_data(other.data_);
                 }
             }
 

@@ -59,11 +59,9 @@ namespace xo {
         // parallel interface to AComplex, but with specific data type
         using Impl = IComplex_Impl<DRepr>;
 
-        // from FacetRttiShim<AComplex>
-
-        virtual int32_t _typeseq() const { return s_typeseq; }
-
         // from AComplex
+
+        virtual int32_t _typeseq() const final override { return s_typeseq; }
 
         virtual double xcoord(void * data) const final override { return Impl::xcoord(*(DRepr*)data); }
         virtual double ycoord(void * data) const final override { return Impl::ycoord(*(DRepr*)data); }
@@ -98,7 +96,7 @@ namespace xo {
      *  such as IComplex_RectCoords or IComplex_PolarCoords.
      **/
     struct IComplex_Any : public AComplex {
-        virtual int32_t _typeseq() const { return s_typeseq; }
+        virtual int32_t _typeseq() const final override { return s_typeseq; }
 
         virtual double xcoord(void *) const final override { assert(false); return 0.0; }
         virtual double ycoord(void *) const final override { assert(false); return 0.0; }
