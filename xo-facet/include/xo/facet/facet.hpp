@@ -69,7 +69,7 @@ namespace xo {
                 (std::is_trivially_destructible_v<T>,
                  "Abstract facet expected to have trivial dtor since no state");
             static_assert
-                (requires(const T & facet) {
+                (requires(T & facet) {
                    { facet._typeseq() } -> std::convertible_to<std::int32_t>; },
                     "Abstract facet must provide a _typeseq() method for safe downcasting");
             return true;

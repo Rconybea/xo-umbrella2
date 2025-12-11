@@ -23,7 +23,13 @@ add_definitions(${PROJECT_CXX_FLAGS})
 add_subdirectory(utest)
 #xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
 
+set(SELF_LIB xo_facet)
+xo_add_headeronly_library(${SELF_LIB})
+xo_install_library4(${SELF_LIB} ${PROJECT_NAME}Targets)
+xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
+
 # ----------------------------------------------------------------
+
 # docs targets depend on other library/utest/exec targets above,
 # --> must come after them.
 #
