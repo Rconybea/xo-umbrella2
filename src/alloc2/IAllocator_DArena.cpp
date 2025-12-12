@@ -148,18 +148,13 @@ namespace xo {
         {
             scope log(XO_DEBUG(s.config_.debug_flag_));
 
-            /* word size for alignment (8 bytes) */
-            constexpr size_t c_bpw = sizeof(std::uintptr_t);
+            assert(padding::is_aligned((size_t)s.free_));
 
-            std::uintptr_t free_u64 = reinterpret_cast<std::uintptr_t>(s.free_);
-
-            assert(free_u64 % c_bpw == 0ul);
-
-            /* dz: pad req_z to multiple c_bpw */
+            /* dz: pad req_z to alignment size (multiple of 8 bytes, probably) */
             size_t dz = padding::alloc_padding(req_z);
             size_t z1 = req_z + dz;
 
-            assert(z1 % c_bpw == 0ul);
+            assert(padding::is_aligned(z1));
 
             if (expand(s, allocated(s) + z1)) [[likely]] {
                 byte * mem = s.free_;
