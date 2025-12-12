@@ -16,44 +16,44 @@ namespace xo {
     namespace mm {
 
         const std::string &
-        IAllocator_DArena::name(const DArena & s) {
+        IAllocator_DArena::name(const DArena & s) noexcept {
             return s.config_.name_;
         }
 
         size_t
-        IAllocator_DArena::reserved(const DArena & s) {
+        IAllocator_DArena::reserved(const DArena & s) noexcept {
             return s.hi_ - s.lo_;
         }
 
         size_t
-        IAllocator_DArena::size(const DArena & s) {
+        IAllocator_DArena::size(const DArena & s) noexcept {
             return s.limit_ - s.lo_;
         }
 
         size_t
-        IAllocator_DArena::committed(const DArena & s) {
+        IAllocator_DArena::committed(const DArena & s) noexcept {
             return s.committed_z_;
         }
 
         size_t
-        IAllocator_DArena::available(const DArena & s) {
+        IAllocator_DArena::available(const DArena & s) noexcept {
             return s.limit_ - s.free_;
         }
 
         size_t
-        IAllocator_DArena::allocated(const DArena & s) {
+        IAllocator_DArena::allocated(const DArena & s) noexcept {
             return s.free_ - s.lo_;
         }
 
         bool
         IAllocator_DArena::contains(const DArena & s,
-                                          const void * p)
+                                    const void * p) noexcept
         {
             return (s.lo_ <= p) && (p < s.hi_);
         }
 
         bool
-        IAllocator_DArena::expand(DArena & s, size_t target_z)
+        IAllocator_DArena::expand(DArena & s, size_t target_z) noexcept
         {
             scope log(XO_DEBUG(s.config_.debug_flag_),
                       xtag("target_z", target_z),
