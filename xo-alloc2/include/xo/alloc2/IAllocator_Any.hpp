@@ -36,6 +36,7 @@ namespace xo {
             [[noreturn]] size_type           size(Copaque) const override { _fatal(); }
             [[noreturn]] size_type      committed(Copaque) const override { _fatal(); }
             [[noreturn]] size_type      available(Copaque) const override { _fatal(); }
+            [[noreturn]] size_type      allocated(Copaque) const override { _fatal(); }
             [[noreturn]] bool            contains(Copaque, const void *) const override { _fatal(); }
 
             [[noreturn]] bool              expand(Opaque, std::size_t) const override { _fatal(); }

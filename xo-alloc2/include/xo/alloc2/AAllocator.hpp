@@ -19,6 +19,12 @@ namespace xo {
          *
          **/
         struct AAllocator {
+            /** @defgroup mm-allocator-type-traits allocator type traits **/
+            ///@{
+            /** @brief type used for allocation amounts **/
+            using size_type = std::size_t;
+            ///@}
+
             /*
              *    <----------------------------size-------------------------->
              *    <------------committed-----------><-------uncommitted------>
@@ -44,19 +50,20 @@ namespace xo {
              *  Includes committed + uncommitted memory.
              *  Cannot be increased.
              **/
-            virtual std::size_t reserved(Copaque d) const = 0;
-            /** allocator size in bytes (up to reserved limit)
-             *  for allocator @p d.
-             *  Includes all committed memory.
+            virtual size_type reserved(Copaque d) const = 0;
+            /** Synonym for @ref committed.
              *  Can increase on @ref alloc
              **/
-            virtual std::size_t size(Copaque d) const = 0;
+            virtual size_type size(Copaque d) const = 0;
             /** committed size (physical addresses obtained)
              *  for allocator @p d.
+             *  @ref alloc may auto-increase this
              **/
-            virtual std::size_t committed(Copaque d) const = 0;
+            virtual size_type committed(Copaque d) const = 0;
             /** unallocated (but committed) size in bytes for allocator @p d **/
-            virtual std::size_t available(Copaque d) const = 0;
+            virtual size_type available(Copaque d) const = 0;
+            /** allocated (i.e. in-use) amount in bytes for allocator @p d **/
+            virtual size_type allocated(Copaque d) const = 0;
             /** true iff allocator @p d is responsible for memory at address @p p.
              **/
             virtual bool contains(Copaque d, const void * p) const = 0;

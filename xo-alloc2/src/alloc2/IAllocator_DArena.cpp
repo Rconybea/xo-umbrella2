@@ -40,6 +40,11 @@ namespace xo {
             return s.limit_ - s.free_;
         }
 
+        size_t
+        IAllocator_DArena::allocated(const DArena & s) {
+            return s.free_ - s.lo_;
+        }
+
         bool
         IAllocator_DArena::contains(const DArena & s,
                                           const void * p)

@@ -35,6 +35,7 @@ namespace xo {
             static size_type size(const DArena &);
             static size_type committed(const DArena &);
             static size_type available(const DArena &);
+            static size_type allocated(const DArena &);
             static bool contains(const DArena &, const void * p);
 
             /** expand committed space in arena @p d
