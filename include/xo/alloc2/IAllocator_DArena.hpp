@@ -21,12 +21,25 @@ namespace xo {
     }
 
     namespace mm {
+        /* changes here coordinate with:
+         *  AAllocator      AAllocator.hpp
+         *  IAllocator_Any  IAllocator_Any.hpp
+         *  IAllocator_Xfer IAllocator_Xfer.hpp
+         *  RAllocator      RAllocator.hpp
+         */
         struct IAllocator_DArena {
             static const std::string & name(const DArena &);
             static std::size_t reserved(const DArena &);
             static std::size_t size(const DArena &);
             static std::size_t committed(const DArena &);
             static bool contains(const DArena &, const void * p);
+
+            /** expand committed space in arena @p d
+             *  to size at least @p z
+             *  In practice will round up to a multiple of @ref page_z_.
+             **/
+            static bool expand(DArena & d, std::size_t z);
+
             static std::byte * alloc(const DArena &, std::size_t z);
             static void clear(DArena &);
             static void destruct_data(DArena &);

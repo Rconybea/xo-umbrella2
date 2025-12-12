@@ -21,22 +21,30 @@ namespace xo {
     }
 
     namespace mm {
+        /** @class IAllocator_Any
+         *  @brief Allocator implementation for variant instance.
+         **/
         struct IAllocator_Any : public AAllocator {
             //using Impl = IAllocator_ImplType<xo::facet::DVariantPlaceholder>;
 
             // from AAllocator
             int32_t _typeseq() const override { return s_typeseq; }
 
-            const std::string & name(Copaque) const override { assert(false); static std::string * x; return *x; }
-            std::size_t     reserved(Copaque) const override { assert(false); return 0ul; }
-            std::size_t         size(Copaque) const override { assert(false); return 0ul; }
-            std::size_t    committed(Copaque) const override { assert(false); return 0ul; }
-            bool            contains(Copaque, const void *) const override { assert(false); return false; }
+            [[noreturn]] const std::string & name(Copaque) const override { _fatal(); }
+            [[noreturn]] std::size_t     reserved(Copaque) const override { _fatal(); }
+            [[noreturn]] std::size_t         size(Copaque) const override { _fatal(); }
+            [[noreturn]] std::size_t    committed(Copaque) const override { _fatal(); }
+            [[noreturn]] bool            contains(Copaque, const void *) const override { _fatal(); }
 
-            std::byte *        alloc(Opaque, std::size_t) const override { assert(false); return nullptr; }
-            void               clear(Opaque) const override { assert(false); }
-            void       destruct_data(Opaque) const override { assert(false); }
+            [[noreturn]] bool              expand(Opaque, std::size_t) const override { _fatal(); }
+            [[noreturn]] std::byte *        alloc(Opaque, std::size_t) const override { _fatal(); }
+            [[noreturn]] void               clear(Opaque) const override { _fatal(); }
+            [[noreturn]] void       destruct_data(Opaque) const override { _fatal(); }
 
+        private:
+            [[noreturn]] static void _fatal();
+
+        public:
             static int32_t s_typeseq;
             static bool _valid;
         };

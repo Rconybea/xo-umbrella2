@@ -10,6 +10,9 @@
 namespace xo {
     namespace mm {
         /** @class IAllocator_Xfer
+         *
+         *  Adapts typed allocator implementation @tparam IAllocator_DRepr
+         *  to type-erased @ref AAllocator interface
          **/
         template <typename DRepr, typename IAllocator_DRepr>
         struct IAllocator_Xfer : public AAllocator {
@@ -17,18 +20,38 @@ namespace xo {
             using Impl = IAllocator_DRepr;
 
             static const DRepr & _dcast(Copaque d) { return *(const DRepr *)d; }
+            static DRepr & _dcast(Opaque d) { return *(DRepr *)d; }
 
             // from AAllocator
             int32_t _typeseq() const override { return s_typeseq; }
-            const std::string & name(Copaque d) const override { return Impl::name(_dcast(d)); }
-            std::size_t     reserved(Copaque d) const override { return Impl::reserved(*(DRepr*)d); }
-            std::size_t         size(Copaque d) const override { return Impl::size(*(DRepr*)d); }
-            std::size_t    committed(Copaque d) const override { return Impl::committed(*(DRepr*)d); }
-            bool            contains(Copaque d, const void * p) const override { return Impl::contains(*(DRepr*)d, p); }
+            const std::string & name(Copaque d) const override {
+                return Impl::name(_dcast(d));
+            }
+            std::size_t     reserved(Copaque d) const override {
+                return Impl::reserved(_dcast(d));
+            }
+            std::size_t         size(Copaque d) const override {
+                return Impl::size(_dcast(d));
+            }
+            std::size_t    committed(Copaque d) const override {
+                return Impl::committed(_dcast(d));
+            }
+            bool            contains(Copaque d, const void * p) const override {
+                return Impl::contains(_dcast(d), p);
+            }
 
-            std::byte *        alloc(Opaque d, std::size_t z) const override { return Impl::alloc(*(DRepr*)d, z); }
-            void               clear(Opaque d) const override { return Impl::clear(*(DRepr*)d); }
-            void       destruct_data(Opaque d) const override { return Impl::destruct_data(*(DRepr*)d); }
+            bool              expand(Opaque d, std::size_t z) const override {
+                return Impl::expand(_dcast(d), z);
+            }
+            std::byte *        alloc(Opaque d, std::size_t z) const override {
+                return Impl::alloc(*(DRepr*)d, z);
+            }
+            void               clear(Opaque d) const override {
+                return Impl::clear(*(DRepr*)d);
+            }
+            void       destruct_data(Opaque d) const override {
+                return Impl::destruct_data(*(DRepr*)d);
+            }
 
             static int32_t s_typeseq;
             static bool _valid;

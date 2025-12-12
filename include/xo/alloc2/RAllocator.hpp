@@ -28,6 +28,7 @@ namespace xo {
             size_type size() const { return O::iface()->size(O::data()); }
             size_type committed() const { return O::iface()->committed(O::data()); }
             bool contains(const void * p) const { return O::iface()->contains(O::data(), p); }
+            bool expand(size_type z) { return O::iface()->expand(O::data(), z); }
             std::byte * alloc(size_type z) { return O::iface()->alloc(O::data(), z); }
 
             static bool _valid;

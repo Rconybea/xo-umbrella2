@@ -59,6 +59,11 @@ namespace xo {
              **/
             virtual bool contains(Copaque d, const void * p) const = 0;
 
+            /** expand committed space in arena @p d
+             *  to size at least @p z
+             *  In practice will round up to a multiple of hugepage size (2MB)
+             **/
+            virtual bool expand(Opaque d, std::size_t z) const = 0;
             /** allocate @p z bytes of memory from allocator @p d. **/
             virtual std::byte * alloc(Opaque d, std::size_t z) const = 0;
             /** reset allocator @p d to empty state **/
