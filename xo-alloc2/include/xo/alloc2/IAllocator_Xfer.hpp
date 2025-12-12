@@ -24,42 +24,29 @@ namespace xo {
             static DRepr & _dcast(Opaque d) { return *(DRepr *)d; }
 
             // from AAllocator
+
+            // const methods
+
             int32_t _typeseq() const noexcept override { return s_typeseq; }
-            const std::string & name(Copaque d) const noexcept override {
-                return Impl::name(_dcast(d));
-            }
-            size_type       reserved(Copaque d) const noexcept override {
-                return Impl::reserved(_dcast(d));
-            }
-            size_type           size(Copaque d) const noexcept override {
-                return Impl::size(_dcast(d));
-            }
-            size_type      committed(Copaque d) const noexcept override {
-                return Impl::committed(_dcast(d));
-            }
-            size_type      available(Copaque d) const noexcept override {
-                return I::available(_dcast(d));
-            }
-            size_type      allocated(Copaque d) const noexcept override {
-                return I::allocated(_dcast(d));
-            }
-
+            const std::string & name(Copaque d) const noexcept override { return I::name(_dcast(d)); }
+            size_type       reserved(Copaque d) const noexcept override { return I::reserved(_dcast(d)); }
+            size_type           size(Copaque d) const noexcept override { return I::size(_dcast(d)); }
+            size_type      committed(Copaque d) const noexcept override { return I::committed(_dcast(d)); }
+            size_type      available(Copaque d) const noexcept override { return I::available(_dcast(d)); }
+            size_type      allocated(Copaque d) const noexcept override { return I::allocated(_dcast(d)); }
             bool            contains(Copaque d, const void * p) const noexcept override {
-                return Impl::contains(_dcast(d), p);
+                return I::contains(_dcast(d), p);
             }
+            AllocatorError last_error(Copaque d) const noexcept override { return I::last_error(_dcast(d)); }
 
-            bool              expand(Opaque d, std::size_t z) const noexcept override {
-                return Impl::expand(_dcast(d), z);
-            }
-            std::byte *        alloc(Opaque d, std::size_t z) const override {
-                return Impl::alloc(*(DRepr*)d, z);
-            }
-            void               clear(Opaque d) const override {
-                return Impl::clear(*(DRepr*)d);
-            }
-            void       destruct_data(Opaque d) const override {
-                return Impl::destruct_data(*(DRepr*)d);
-            }
+            // non-const methods
+
+            bool              expand(Opaque d,
+                                     std::size_t z) const noexcept override { return I::expand(_dcast(d), z); }
+            std::byte *        alloc(Opaque d,
+                                     std::size_t z) const override { return I::alloc(_dcast(d), z); }
+            void               clear(Opaque d) const override { return I::clear(_dcast(d)); }
+            void       destruct_data(Opaque d) const override { return I::destruct_data(_dcast(d)); }
 
         private:
             using I = Impl;

@@ -30,11 +30,15 @@ namespace xo {
             using value_type = std::byte*;
 
             AllocatorError() = default;
-            explicit AllocatorError(error err) : error_{err} {}
+            explicit AllocatorError(error err,
+                                    uint32_t seq) : error_{err},
+                                                    error_seq_{seq} {}
             AllocatorError(error err,
+                           uint32_t seq,
                            size_type req_z,
                            size_type com_z,
                            size_type rsv_z) : error_{err},
+                                              error_seq_{seq},
                                               request_z_{req_z},
                                               committed_z_{com_z},
                                               reserved_z_{rsv_z} {}
@@ -42,6 +46,10 @@ namespace xo {
             /** error code **/
             error error_ = error::none;
 
+            /** sequence# of this error.
+             *  Each error event within an allocator gets next sequence number
+             **/
+            uint32_t error_seq_ = 0;
             /** reqeust size assoc'd with errror **/
             size_type request_z_ = 0;
             /** committed allocator memory at time of error **/
@@ -103,6 +111,9 @@ namespace xo {
             /** true iff allocator @p d is responsible for memory at address @p p.
              **/
             virtual bool contains(Copaque d, const void * p) const noexcept = 0;
+
+            /** report last error **/
+            virtual AllocatorError last_error(Copaque d) const noexcept = 0;
 
             /** expand committed space in arena @p d
              *  to size at least @p z
