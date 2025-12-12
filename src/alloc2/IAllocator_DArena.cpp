@@ -66,10 +66,16 @@ namespace xo {
                 return true;
             }
 
-            if (s.lo_ + target_z > s.hi_) {
+            if (s.lo_ + target_z > s.hi_) [[unlikely]] {
+                ++(s.error_count_);
+                s.last_error_ = AllocatorError(error::reserve_exhausted,
+                                               target_z, s.committed_z_, reserved(s));
+
+#ifdef OBSOLETE
                 throw std::runtime_error(tostr("ArenaAlloc::expand: requested size exceeds reserved size",
                                                xtag("requested", target_z),
                                                xtag("reserved", reserved(s))));
+#endif
                 return false;
             }
 
@@ -107,11 +113,15 @@ namespace xo {
 //                       xtag("add_commit_z", add_commit_z),
 //                       xtag("commit_end", commit_start + add_commit_z));
 
-            if (::mprotect(commit_start, add_commit_z, PROT_READ | PROT_WRITE) != 0) {
-                assert(false);
-//                throw std::runtime_error(tostr("ArenaAlloc::expand: commit failure",
-//                                               xtag("committed_z", committed_z_),
-//                                               xtag("add_commit_z", add_commit_z)));
+            if (::mprotect(commit_start, add_commit_z, PROT_READ | PROT_WRITE) != 0) [[unlikely]] {
+                ++(s.error_count_);
+                s.last_error_ = AllocatorError(error::commit_failed,
+                                               add_commit_z, s.committed_z_, reserved(s));
+#ifdef OBSOLETE
+                throw std::runtime_error(tostr("ArenaAlloc::expand: commit failure",
+                                               xtag("committed_z", s.committed_z_),
+                                               xtag("add_commit_z", add_commit_z)));
+#endif
                 return false;
             }
 
