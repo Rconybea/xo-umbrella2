@@ -9,6 +9,7 @@ set(UTEST_SRCS
 
 if (ENABLE_TESTING)
     xo_add_utest_executable(${UTEST_EXE} ${UTEST_SRCS})
+    xo_self_dependency(${UTEST_EXE} xo_alloc2)
     xo_headeronly_dependency(${UTEST_EXE} xo_facet)
     xo_external_target_dependency(${UTEST_EXE} Catch2 Catch2::Catch2)
 endif()

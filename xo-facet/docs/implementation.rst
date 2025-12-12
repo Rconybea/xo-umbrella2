@@ -19,57 +19,39 @@ Abstraction tower for *xo-facet* components.
     :--scale: 0.85
 
     +--------------------------------+
-    |              obj(A,D)          |
+    |             obj(A,D)           |
     +--------------------------------+
-    |          RRouter(A,D)          |
+    |           RRouter(A,D)         |
     +--------------------------------+
-    |          OObject(A,D)          |
+    |           OObject(A,D)         |
     +--------------------------------+
-    |   FacetImplmentationType(A,D)  |
+    |        FacetImplType(A,D)      |
     +----------------+---------------+
     |     facet  [A] |     data  [D] |
     +----------------+---------------+
 
-
-Decorated with sample method calls, to reveal type recovery
-
-.. ditaa::
-    :--scale: 0.85
-
-    +--------------------------------+
-    |              obj(A,D)          |   x.foo()
-    +--------------------------------+
-    |          RRouter(A,D)          |   x.foo()
-    +--------------------------------+
-    |          OObject(A,D)          |   x.iface_.foo(x.data_)
-    +--------------------------------+
-    |   FacetImplmentationType(A,D)  |   x.foo(void*data)
-    +----------------+---------------+
-    |     facet   A  |     data   D  |   virtual x.foo(void* data)
-    +----------------+---------------+
-
 .. list-table:: Descriptions
    :header-rows: 1
-   :widths: 30 30 60
+   :widths: 18 30 50
 
    * - Component
      - Use
      - Description
-   * - obj<A,D>
-     - x.foo()
+   * - ``obj<A,D>``
+     - ``x.foo()``
      - convenience wrapper with interface A, with state D*
-   * - RRouter<A,D>
-     - x.foo()
+   * - ``RRouter<A,D>``
+     - ``x.foo()``
      - auto injects data pointer
-   * - OObject<A,D>
-     - x.iface()->foo(x.data(), ..)
+   * - ``OObject<A,D>``
+     - ``x.iface()->foo(x.data(), ..)``
      - fat object pointer. combine i/face + data pointer.
-   * - FacetImplementationType<A,D>
-     - x.foo(void* data, ..)
+   * - ``FacetImplType<A,D>``
+     - ``x.foo(void* data, ..)``
      - implement facet for a particular state datatype;
        explicit type-erased state
    * - facet
-     - x.foo(void* data, ..)=0
+     - ``x.foo(void* data, ..)=0``
      - fully abstract interface; explicit type-erased state
 
 .. uml::

@@ -187,6 +187,40 @@ $ cmake -B .build -S . -DXO_ENABLE_VULKAN=1 -DXO_ENABLE_EXAMPLES=1 -DCMAKE_INSTA
 
 Currently not supporting a nix sandbox build for xo-imgui
 
+## Directory Layout
+
+(not in alphabetical order)
+
+```
+xo-umbrella2/
+|
++- CMakeLists.txt                 top-level cmake config
++- cmake
+|  \- xo-bootstrap-macros.cmake   configure xo cmake support for build
++- compile_commands.json          symlink to path/to/build/compile_commands.json for LSP
+|
++- conf.py                        sphinx config for project documentation
++- index.rst                      root of xo-umbrella2 doc tree
++- Doxyfile.in                    doxygen config template; cmake will prepare Doxyfile in build dir
++- _static/                       static inputs to sphinx
+|
++- etc
+|  +- hostegl/                    sample video driver symlinks for WSL2
+|  \- hostubuntu/                 sample video driver symlinks for ubuntu
+|
++- default.nix                    top-level nix build (works w/ stock nixpkgs 25.05)
++- pkgs/                          per-satellite nix builds. see xo-umbrella2/default.nix
+|  +- xo-callback.nix             nix build for xo-umbrella2/xo-callback
+|  ..etc..
+|  \- xo-webutil.nix
+|
++- xo-alloc/                      xo-alloc subproject. independent git repo, using git subtree
++- xo-alloc2/                     xo-alloc2 subproject.
+..etc..
+\- xo-webutil/
+
+```
+
 ## To view docs from WSL
 
 1. find wsl IP address

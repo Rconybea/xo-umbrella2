@@ -13,6 +13,7 @@ Some features: kalman filters, stochastic processes, complex event processing, s
 
    docs/install
    xo-facet/docs/index
+   xo-alloc2/docs/index
    xo-alloc/docs/index
    xo-indentlog/docs/index
    xo-flatstring/docs/index

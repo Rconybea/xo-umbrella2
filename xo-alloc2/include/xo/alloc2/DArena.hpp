@@ -10,12 +10,17 @@
 namespace xo {
     namespace mm {
 
-        /** ArenaConfig
+        /** @class ArenaConfig
+         *
+         *  @brief configuration for a @ref DArena instance
          **/
         struct ArenaConfig {
+            /** @defgroup mm-arenaconfig-instance-vars ArenaConfig members **/
+            ///@{
+
             /** optional name, for diagnostics **/
             std::string name_;
-            /** arena size -- hard max = reserved virtual memory **/
+            /** desired arena size -- hard max = reserved virtual memory **/
             std::size_t size_;
             /** hugepage size -- using huge pages relieves some TLB pressure
              *  (provided you use their full extent :)
@@ -23,31 +28,70 @@ namespace xo {
             std::size_t hugepage_z_ = 2 * 1024 * 1024;
             /** true to enable debug logging **/
             bool debug_flag_ = false;
+
+            ///@}
         };
 
-        /** Arena allocator state
+        /** @class DArena
          *
-         *    <----------------------------size-------------------------->
-         *    <------------committed-----------><-------uncommitted------>
-         *    <--allocated-->
+         *  @brief represent arena allocator state
          *
-         *    XXXXXXXXXXXXXXX___________________..........................
-         *
-         *    allocated:   in use
-         *    committed:   physical memory obtained
-         *    uncommitted: mapped in virtual memory, not backed by memory
+         *  Provides minimal RAII functionality around memory mapping.
+         *  For allocation see @ref IAllocator_DArena
          **/
         struct DArena {
-            /** [lo, hi) already-mapped address range **/
-            DArena(const ArenaConfig & cfg,
-                   std::byte * lo,
-                   std::byte * hi);
+            /*
+             *    <----------------------------size-------------------------->
+             *    <------------committed-----------><-------uncommitted------>
+             *    <--allocated-->
+             *
+             *    XXXXXXXXXXXXXXX___________________..........................
+             *
+             *    [X] allocated:   in use
+             *    [_] committed:   physical memory obtained
+             *    [.] uncommitted: mapped in virtual memory, not backed by memory
+             */
 
+            /** @defgroup mm-arena-traits arena type traits **/
+            ///@{
+
+            /** @brief an amount of memory **/
+            using size_type = std::size_t;
+            /** @brief a contiguous memory range **/
+            using range_type = std::pair<std::byte*,std::byte*>;
+
+            ///@}
+
+            /** @defgroup mm-arena-ctors arena constructors and destructors **/
+            ///@{
+
+            /** create arena per configuration @p cfg. **/
+            static DArena map(const ArenaConfig & cfg);
+
+            /** ctor from already-mapped (but not committed) address range **/
+            DArena(const ArenaConfig & cfg, size_type page_z, std::byte * lo, std::byte * hi);
+            /** DArena is not copyable **/
+            DArena(const DArena & other) = delete;
+            /** move ctor **/
+            DArena(DArena && other);
+            /** dtor releases mapped memory **/
             ~DArena();
 
+            ///@}
+
+            /** obtain uncommitted contiguous memory range comprising
+             *  a whole multiple of @p hugepage_z bytes, of at least size @p req_z,
+             *  aligned on a @p hugepage_z boundary
+             **/
+            static range_type map_aligned_range(size_type req_z, size_type hugepage_z);
+
+            /** @defgroup mm-arena-instance-vars **/
+            ///@{
+
+            /** arena configuration **/
             ArenaConfig config_;
 
-            /** size of a VM page (via getpagesize()). Likely 4k **/
+            /** size of a VM page (obtained automatically via getpagesize()). Likely 4k **/
             std::size_t page_z_ = 0;
 
             /** arena owns memory in range [@ref lo_, @ref hi_)
@@ -74,6 +118,8 @@ namespace xo {
              *  Memory in range [@ref limit_, @ref hi_) is uncommitted
              **/
             std::byte * hi_ = nullptr;
+
+            ///@}
         };
 
     } /*namespace mm*/

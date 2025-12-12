@@ -9,12 +9,8 @@
 namespace xo {
     namespace mm {
 
-        template <>
-        struct IAllocator_Impl<DArena> {
-            static const std::string & name(const DArena & s) {
-                return s.name_;
-            }
-
+        struct IAllocator_DArena {
+            static const std::string & name(const DArena & s);
             static std::size_t size(const DArena & s);
             static std::size_t committed(const DArena & s);
             static bool contains(const DArena & s, const void * p);
@@ -23,6 +19,10 @@ namespace xo {
             static void destruct_data(DArena & s);
         };
 
+        template <>
+        struct IAllocator_Impl<DArena> {
+            using ImplType = IAllocator_DArena;
+        };
 
     } /*namespace mm*/
 } /*namespace xo*/

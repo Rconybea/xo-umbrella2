@@ -4,27 +4,29 @@
 set(SELF_EXE utest.tree)
 set(SELF_SOURCE_FILES tree_utest_main.cpp redblacktree.cpp bplustree.cpp RedBlackTree-gc.test.cpp)
 
-add_executable(${SELF_EXE} ${SELF_SOURCE_FILES})
-xo_include_options2(${SELF_EXE})
+if (ENABLE_TESTING)
+    add_executable(${SELF_EXE} ${SELF_SOURCE_FILES})
+    xo_include_options2(${SELF_EXE})
 
-add_test(NAME ${SELF_EXE} COMMAND ${SELF_EXE})
-# need coverage on unit test b/c header-only libraries
-#target_code_coverage(${SELF_EXE} EXCLUDE */nix/store* utest/*)
-#target_code_coverage(${SELF_EXE} AUTO ALL)
+    add_test(NAME ${SELF_EXE} COMMAND ${SELF_EXE})
+    # need coverage on unit test b/c header-only libraries
+    #target_code_coverage(${SELF_EXE} EXCLUDE */nix/store* utest/*)
+    #target_code_coverage(${SELF_EXE} AUTO ALL)
 
-# ----------------------------------------------------------------
-# internal dependencies: refcnt, ...
+    # ----------------------------------------------------------------
+    # internal dependencies: refcnt, ...
 
-xo_self_dependency(${SELF_EXE} xo_ordinaltree)
-xo_dependency(${SELF_EXE} xo_object)
-xo_dependency(${SELF_EXE} xo_alloc)
-xo_dependency(${SELF_EXE} refcnt)
-xo_dependency(${SELF_EXE} indentlog)
-xo_dependency(${SELF_EXE} randomgen)
+    xo_self_dependency(${SELF_EXE} xo_ordinaltree)
+    xo_dependency(${SELF_EXE} xo_object)
+    xo_dependency(${SELF_EXE} xo_alloc)
+    xo_dependency(${SELF_EXE} refcnt)
+    xo_dependency(${SELF_EXE} indentlog)
+    xo_dependency(${SELF_EXE} randomgen)
 
-# ----------------------------------------------------------------
-# 3rd part dependency: catch2:
+    # ----------------------------------------------------------------
+    # 3rd part dependency: catch2:
 
-xo_external_target_dependency(${SELF_EXE} Catch2 Catch2::Catch2)
+    xo_external_target_dependency(${SELF_EXE} Catch2 Catch2::Catch2)
+endif()
 
 # end ordinaltree/utest/CMakeLists.txt
