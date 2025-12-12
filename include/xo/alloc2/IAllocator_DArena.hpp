@@ -30,7 +30,7 @@ namespace xo {
         struct IAllocator_DArena {
             using size_type = std::size_t;
 
-            static const std::string & name(const DArena &) noexcept;
+            static std::string_view name(const DArena &) noexcept;
             static size_type reserved(const DArena &) noexcept;
             static size_type size(const DArena &) noexcept;
             static size_type committed(const DArena &) noexcept;

@@ -16,7 +16,7 @@ namespace xo {
 
     namespace mm {
 
-        const std::string &
+        std::string_view
         IAllocator_DArena::name(const DArena & s) noexcept {
             return s.config_.name_;
         }

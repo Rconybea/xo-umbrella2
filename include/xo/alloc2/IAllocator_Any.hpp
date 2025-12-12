@@ -31,7 +31,7 @@ namespace xo {
             // from AAllocator
             int32_t _typeseq() const noexcept  override { return s_typeseq; }
 
-            [[noreturn]] const std::string &  name(Copaque) const noexcept override { _fatal(); }
+            [[noreturn]] std::string_view     name(Copaque) const noexcept override { _fatal(); }
             [[noreturn]] size_type        reserved(Copaque) const noexcept override { _fatal(); }
             [[noreturn]] size_type            size(Copaque) const noexcept override { _fatal(); }
             [[noreturn]] size_type       committed(Copaque) const noexcept override { _fatal(); }
