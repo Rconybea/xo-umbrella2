@@ -55,6 +55,8 @@ namespace xo {
              *  for allocator @p d.
              **/
             virtual std::size_t committed(Copaque d) const = 0;
+            /** unallocated (but committed) size in bytes for allocator @p d **/
+            virtual std::size_t available(Copaque d) const = 0;
             /** true iff allocator @p d is responsible for memory at address @p p.
              **/
             virtual bool contains(Copaque d, const void * p) const = 0;

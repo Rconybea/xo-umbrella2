@@ -26,14 +26,16 @@ namespace xo {
          **/
         struct IAllocator_Any : public AAllocator {
             //using Impl = IAllocator_ImplType<xo::facet::DVariantPlaceholder>;
+            using size_type = std::size_t;
 
             // from AAllocator
             int32_t _typeseq() const override { return s_typeseq; }
 
             [[noreturn]] const std::string & name(Copaque) const override { _fatal(); }
-            [[noreturn]] std::size_t     reserved(Copaque) const override { _fatal(); }
-            [[noreturn]] std::size_t         size(Copaque) const override { _fatal(); }
-            [[noreturn]] std::size_t    committed(Copaque) const override { _fatal(); }
+            [[noreturn]] size_type       reserved(Copaque) const override { _fatal(); }
+            [[noreturn]] size_type           size(Copaque) const override { _fatal(); }
+            [[noreturn]] size_type      committed(Copaque) const override { _fatal(); }
+            [[noreturn]] size_type      available(Copaque) const override { _fatal(); }
             [[noreturn]] bool            contains(Copaque, const void *) const override { _fatal(); }
 
             [[noreturn]] bool              expand(Opaque, std::size_t) const override { _fatal(); }

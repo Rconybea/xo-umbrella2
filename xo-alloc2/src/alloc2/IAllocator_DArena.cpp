@@ -11,6 +11,8 @@
 #include <sys/mman.h>
 
 namespace xo {
+    using std::size_t;
+
     namespace mm {
 
         const std::string &
@@ -18,19 +20,24 @@ namespace xo {
             return s.config_.name_;
         }
 
-        std::size_t
+        size_t
         IAllocator_DArena::reserved(const DArena & s) {
             return s.hi_ - s.lo_;
         }
 
-        std::size_t
+        size_t
         IAllocator_DArena::size(const DArena & s) {
             return s.limit_ - s.lo_;
         }
 
-        std::size_t
+        size_t
         IAllocator_DArena::committed(const DArena & s) {
             return s.committed_z_;
+        }
+
+        size_t
+        IAllocator_DArena::available(const DArena & s) {
+            return s.limit_ - s.free_;
         }
 
         bool

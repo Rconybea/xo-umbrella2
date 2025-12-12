@@ -114,6 +114,8 @@ namespace xo {
             DArena arena = DArena::map(cfg);
             obj<AAllocator, DArena> a1o{&arena};
 
+            REQUIRE(a1o.available() == 0);
+
             size_t z2 = 512;
             REQUIRE(a1o.expand(z2));
 
@@ -122,6 +124,8 @@ namespace xo {
             REQUIRE(a1o.committed() % cfg.hugepage_z_ == 0);
             /* .size() is synonym for .committed() */
             REQUIRE(a1o.size() == a1o.committed());
+            REQUIRE(a1o.available() >= z2);
+            REQUIRE(a1o.available() == a1o.committed());
 
 #ifdef NOPE
             byte * m = a1o.alloc(1);

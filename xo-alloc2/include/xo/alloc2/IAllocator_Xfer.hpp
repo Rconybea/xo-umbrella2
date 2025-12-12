@@ -18,6 +18,7 @@ namespace xo {
         struct IAllocator_Xfer : public AAllocator {
             // parallel interface to AAllocator, with specific data type
             using Impl = IAllocator_DRepr;
+            using size_type = std::size_t;
 
             static const DRepr & _dcast(Copaque d) { return *(const DRepr *)d; }
             static DRepr & _dcast(Opaque d) { return *(DRepr *)d; }
@@ -27,15 +28,19 @@ namespace xo {
             const std::string & name(Copaque d) const override {
                 return Impl::name(_dcast(d));
             }
-            std::size_t     reserved(Copaque d) const override {
+            size_type       reserved(Copaque d) const override {
                 return Impl::reserved(_dcast(d));
             }
-            std::size_t         size(Copaque d) const override {
+            size_type           size(Copaque d) const override {
                 return Impl::size(_dcast(d));
             }
-            std::size_t    committed(Copaque d) const override {
+            size_type      committed(Copaque d) const override {
                 return Impl::committed(_dcast(d));
             }
+            size_type      available(Copaque d) const override {
+                return I::available(_dcast(d));
+            }
+
             bool            contains(Copaque d, const void * p) const override {
                 return Impl::contains(_dcast(d), p);
             }
@@ -53,6 +58,10 @@ namespace xo {
                 return Impl::destruct_data(*(DRepr*)d);
             }
 
+        private:
+            using I = Impl;
+
+        public:
             static int32_t s_typeseq;
             static bool _valid;
         };
