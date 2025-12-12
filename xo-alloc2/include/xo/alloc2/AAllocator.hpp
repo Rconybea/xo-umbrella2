@@ -35,90 +35,61 @@ namespace xo {
             ///@{
 
             /** RTTI: unique id# for actual runtime data representation **/
-            virtual int32_t _typeseq() = 0;
+            virtual int32_t _typeseq() const = 0;
             /** optional name for allocator @p d
              *  Labeling, for diagnostics.
              **/
-            virtual const std::string & name(Copaque d) = 0;
+            virtual const std::string & name(Copaque d) const = 0;
+            /** reserved size in bytes for allocator @p d.
+             *  Includes committed + uncommitted memory.
+             *  Cannot be increased.
+             **/
+            virtual std::size_t reserved(Copaque d) const = 0;
             /** allocator size in bytes (up to reserved limit)
              *  for allocator @p d.
-             *  Includes allocated and uncomitted memory
+             *  Includes all committed memory.
+             *  Can increase on @ref alloc
              **/
-            virtual std::size_t size(Copaque d) = 0;
+            virtual std::size_t size(Copaque d) const = 0;
             /** committed size (physical addresses obtained)
              *  for allocator @p d.
              **/
-            virtual std::size_t committed(Copaque d) = 0;
+            virtual std::size_t committed(Copaque d) const = 0;
             /** true iff allocator @p d is responsible for memory at address @p p.
              **/
-            virtual bool contains(Copaque d, const void * p) = 0;
+            virtual bool contains(Copaque d, const void * p) const = 0;
 
             /** allocate @p z bytes of memory from allocator @p d. **/
-            virtual std::byte * alloc(Opaque d, std::size_t z) = 0;
+            virtual std::byte * alloc(Opaque d, std::size_t z) const = 0;
             /** reset allocator @p d to empty state **/
-            virtual void clear(Opaque d) = 0;
+            virtual void clear(Opaque d) const = 0;
             /** destruct allocator @p d **/
-            virtual void destruct_data(Opaque d) = 0;
+            virtual void destruct_data(Opaque d) const = 0;
 
             ///@}
         }; /*AAllocator*/
 
+        // implementation IAllocator_DRepr of AAllocator for state DRepr
+        // should provide a specialization:
+        //
+        //   template <>
+        //   struct xo::facet::FacetImplementation<AAllocator, DRepr> {
+        //       using ImplType = IAllocator_DRepr;
+        //   };
+        //
+        //   then IAllocator_ImplType<DRepr> --> IAllocator_DRepr
+        //
         template <typename DRepr>
-        struct IAllocator_Impl;
+        using IAllocator_ImplType = xo::facet::FacetImplType<AAllocator, DRepr>;
 
-        template <typename DRepr>
-        using IAllocator_ImplType = IAllocator_Impl<DRepr>::ImplType;
+// can't we do this with FacetImplementation<AAllocator, DRepr>
+//
+//        template <typename DRepr>
+//        struct IAllocator_Impl {};
 
-        struct IAllocator_Any : public AAllocator {
-            using Impl = Allocator_ImplType<xo::facet::DVariantPlaceholder>;
+//        template <typename DRepr>
+//        using IAllocator_ImplType = IAllocator_Impl<DRepr>::ImplType;
 
-            // from AAllocator
-            int32_t _typeseq() override { return s_typeseq; }
-
-            const std::string & name(Copaque d) override { assert(false); static std::string x; return x; }
-            std::size_t         size(Copaque d) override { assert(false); return 0ul; }
-            std::size_t    committed(Copaque d) override { assert(false); reutrn 0ul; }
-            bool            contains(Copaque d, const void * p) override { assert(false); return false; }
-
-            std::byte *        alloc(Opaque d, std::size_t z) override { assert(false); return nullptr; }
-            void               clear(Opaque d) override { assert(false); }
-            void       destruct_data(Opaque d) override { assert(false); }
-
-            static int32_t s_typeseq;
-            static bool _valid;
-        }
-
-        /** @class IAllocator_Xfer
-         **/
-        template <typename DRepr>
-        struct IAllocator_Xfer : public AAllocator {
-            // parallel interface to AAllocator, with specific data type
-            using Impl = IAllocator_ImplType<DRepr>;
-
-            static const DRepr & _dcast(Copaque d) { return *(const DRepr *)d; }
-
-            // from AAllocator
-            int32_t _typeseq() override { return s_typeseq; }
-            const std::string & name(Copaque d) override { return Impl::name(_dcast(d)); }
-            std::size_t         size(Copaque d) override { return Impl::size(*(DRepr*)d); }
-            std::size_t    committed(Copaque d) override { return Impl::committed(*(DRepr*)d); }
-            bool            contains(Copaque d, const void * p) override { return Impl::contains(*(DRepr*)d, p); }
-
-            std::byte *        alloc(Opaque d, std::size_t z) override { return Impl::alloc(*(DRepr*)d, z); }
-            void               clear(Opaque d) override { return Impl::clear(*(DRepr*)d); }
-            void       destruct_data(Opaque d) override { return Impl::destruct_data(*(DRepr*)d); }
-
-            static int32_t s_typeseq;
-            static bool _valid;
-        };
-
-        template <typename DRepr>
-        int32_t
-        IAllocator_Xfer<DRepr>::s_typeseq = facet::typeseq::id<DRepr>();
-
-        template <typename DRepr>
-        bool
-        IAllocator_Xfer<DRepr>::_valid = facet::valid_facet_implementation<AAllocator, IAllocator_Xfer>();
     } /*namespace mm*/
 } /*namespace xo*/
 

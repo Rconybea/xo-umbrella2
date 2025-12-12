@@ -4,7 +4,9 @@
  **/
 
 #include "xo/alloc2/AAllocator.hpp"
-#include "xo/alloc2/DArena.hpp"
+#include "xo/alloc2/IAllocator_Any.hpp"
+#include "xo/alloc2/IAllocator_Xfer.hpp"
+//#include "xo/alloc2/DArena.hpp"
 #include "xo/alloc2/IAllocator_DArena.hpp"
 #include "xo/alloc2/RAllocator.hpp"
 #include "xo/alloc2/padding.hpp"
@@ -13,6 +15,7 @@
 
 namespace xo {
     using xo::mm::AAllocator;
+    using xo::mm::IAllocator_DArena;
     using xo::mm::IAllocator_Xfer;
     using xo::mm::DArena;
     using xo::mm::ArenaConfig;
@@ -23,9 +26,9 @@ namespace xo {
     namespace ut {
         TEST_CASE("IAllocator_Xfer_DArena", "[alloc2]")
         {
-            IAllocator_Xfer<DArena> xfer;
+            IAllocator_Xfer<DArena, IAllocator_DArena> xfer;
 
-            REQUIRE(IAllocator_Xfer<DArena>::_valid);
+            REQUIRE(IAllocator_Xfer<DArena, IAllocator_DArena>::_valid);
         }
 
         TEST_CASE("DArena", "[alloc2][DArena]")
@@ -73,18 +76,36 @@ namespace xo {
 
         TEST_CASE("allocator-any-1", "[alloc2][AAllocator]")
         {
-#ifdef NOPE
-            ArenaConfig cfg { .name_ = "testarena",
-                              .size_ = 1 };
-            DArena arena = DArena::map(cfg);
-#endif
-
             /* empty allocator */
             obj<AAllocator> alloc1;
 
             REQUIRE(!alloc1);
             REQUIRE(alloc1.iface() != nullptr);
             REQUIRE(alloc1.data() == nullptr);
+
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 1 };
+            DArena arena = DArena::map(cfg);
+            obj<AAllocator, DArena> a1o{&arena};
+
+            REQUIRE(a1o);
+            REQUIRE(a1o.iface() != nullptr);
+            REQUIRE(a1o.data() != nullptr);
+
+            REQUIRE(a1o._typeseq()
+                    == xo::facet::FacetImplType<AAllocator, DArena>::s_typeseq);
+            REQUIRE(a1o.name() == cfg.name_);
+            REQUIRE(a1o.reserved() >= cfg.size_);
+            REQUIRE(a1o.reserved() < cfg.size_ + cfg.hugepage_z_);
+            REQUIRE(a1o.reserved() % cfg.hugepage_z_ == 0);
+            REQUIRE(a1o.size() == 0);
+            REQUIRE(a1o.committed() == 0);
+
+#ifdef NOPE
+            byte * m = a1o.alloc(1);
+
+            REQUIRE(m);
+#endif
         }
     } /*namespace ut*/
 } /*namespace xo*/

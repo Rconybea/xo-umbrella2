@@ -5,6 +5,7 @@
 
 #include "IAllocator_DArena.hpp"
 #include <cassert>
+#include <cstddef>
 
 namespace xo {
     namespace mm {
@@ -12,6 +13,11 @@ namespace xo {
         const std::string &
         IAllocator_DArena::name(const DArena & s) {
             return s.config_.name_;
+        }
+
+        std::size_t
+        IAllocator_DArena::reserved(const DArena & s) {
+            return s.hi_ - s.lo_;
         }
 
         std::size_t
