@@ -48,7 +48,7 @@ namespace xo {
                 return Impl::contains(_dcast(d), p);
             }
 
-            bool              expand(Opaque d, std::size_t z) const override {
+            bool              expand(Opaque d, std::size_t z) const noexcept override {
                 return Impl::expand(_dcast(d), z);
             }
             std::byte *        alloc(Opaque d, std::size_t z) const override {

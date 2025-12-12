@@ -39,7 +39,7 @@ namespace xo {
             [[noreturn]] size_type      allocated(Copaque) const noexcept override { _fatal(); }
             [[noreturn]] bool            contains(Copaque, const void *) const noexcept override { _fatal(); }
 
-            [[noreturn]] bool              expand(Opaque, std::size_t) const override { _fatal(); }
+            [[noreturn]] bool              expand(Opaque, std::size_t) const noexcept override { _fatal(); }
             [[noreturn]] std::byte *        alloc(Opaque, std::size_t) const override { _fatal(); }
             [[noreturn]] void               clear(Opaque) const override { _fatal(); }
             [[noreturn]] void       destruct_data(Opaque) const override { _fatal(); }

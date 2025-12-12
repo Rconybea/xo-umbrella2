@@ -30,19 +30,19 @@ namespace xo {
         struct IAllocator_DArena {
             using size_type = std::size_t;
 
-            static const std::string & name(const DArena &);
-            static size_type reserved(const DArena &);
-            static size_type size(const DArena &);
-            static size_type committed(const DArena &);
-            static size_type available(const DArena &);
-            static size_type allocated(const DArena &);
-            static bool contains(const DArena &, const void * p);
+            static const std::string & name(const DArena &) noexcept;
+            static size_type reserved(const DArena &) noexcept;
+            static size_type size(const DArena &) noexcept;
+            static size_type committed(const DArena &) noexcept;
+            static size_type available(const DArena &) noexcept;
+            static size_type allocated(const DArena &) noexcept;
+            static bool contains(const DArena &, const void * p) noexcept;
 
             /** expand committed space in arena @p d
              *  to size at least @p z
              *  In practice will round up to a multiple of @ref page_z_.
              **/
-            static bool expand(DArena & d, std::size_t z);
+            static bool expand(DArena & d, std::size_t z) noexcept;
 
             static std::byte * alloc(const DArena &, std::size_t z);
             static void clear(DArena &);
