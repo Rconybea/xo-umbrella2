@@ -18,8 +18,11 @@ namespace xo {
     using xo::mm::AAllocator;
     using xo::mm::IAllocator_DArena;
     using xo::mm::IAllocator_Xfer;
+    using xo::mm::AllocatorError;
     using xo::mm::DArena;
     using xo::mm::ArenaConfig;
+    using xo::mm::padding;
+    using xo::mm::error;
     using xo::facet::obj;
     using xo::scope;
     using std::byte;
@@ -130,11 +133,76 @@ namespace xo {
             REQUIRE(a1o.available() == a1o.committed());
             REQUIRE(a1o.allocated() == 0);
 
-#ifdef NOPE
-            byte * m = a1o.alloc(1);
+        }
 
-            REQUIRE(m);
-#endif
+        TEST_CASE("allocator-alloc-1", "[alloc2][AAllocator]")
+        {
+            /* typed allocator a1o */
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 64*1024,
+                              .debug_flag_ = false };
+            DArena arena = DArena::map(cfg);
+            obj<AAllocator, DArena> a1o{&arena};
+
+            REQUIRE(a1o.reserved() >= cfg.size_);
+            REQUIRE(a1o.committed() == 0);
+            REQUIRE(a1o.available() == 0);
+            REQUIRE(a1o.allocated() == 0);
+
+            size_t z0 = 1;
+            byte * m0 = a1o.alloc(1);
+
+            REQUIRE(m0);
+            REQUIRE(a1o.last_error().error_ == error::none);
+            REQUIRE(a1o.last_error().error_seq_ == 0);
+            REQUIRE(a1o.allocated() >= z0);
+            REQUIRE(a1o.allocated() < z0 + padding::c_alloc_alignment );
+            REQUIRE(a1o.allocated() <= a1o.committed());
+            REQUIRE(a1o.allocated() + a1o.available() == a1o.committed());
+            REQUIRE(a1o.committed() <= a1o.reserved());
+
+            size_t z1 = 16;
+            byte * m1 = a1o.alloc(z1);
+
+            REQUIRE(m1);
+            REQUIRE(a1o.last_error().error_ == error::none);
+            REQUIRE(a1o.last_error().error_seq_ == 0);
+            REQUIRE(a1o.allocated() >= z0 + z1);
+            REQUIRE(a1o.allocated() < z0 + z1 + 2 * padding::c_alloc_alignment );
+            REQUIRE(a1o.allocated() <= a1o.committed());
+            REQUIRE(a1o.allocated() + a1o.available() == a1o.committed());
+            REQUIRE(a1o.committed() <= a1o.reserved());
+        }
+
+        TEST_CASE("allocator-fail-1", "[alloc2][AAllocator]")
+        {
+            /* typed allocator a1o */
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 64*1024,
+                              .debug_flag_ = false };
+            DArena arena = DArena::map(cfg);
+            obj<AAllocator, DArena> a1o{&arena};
+
+            REQUIRE(cfg.size_ <= cfg.hugepage_z_);
+
+            REQUIRE(a1o.reserved() >= cfg.size_);
+            REQUIRE(a1o.committed() == 0);
+            REQUIRE(a1o.available() == 0);
+            REQUIRE(a1o.allocated() == 0);
+
+            size_t z0 = cfg.hugepage_z_ + 1;
+            byte * m0 = a1o.alloc(z0);
+
+            REQUIRE(!m0);
+
+            AllocatorError err = a1o.last_error();
+
+            REQUIRE(err.error_ == error::reserve_exhausted);
+            REQUIRE(err.error_seq_ == 1);
+            REQUIRE(err.request_z_ >= z0);
+            REQUIRE(err.request_z_ < z0 + padding::c_alloc_alignment);
+            REQUIRE(err.committed_z_ == 0);
+            REQUIRE(err.reserved_z_ == cfg.hugepage_z_);
         }
     } /*namespace ut*/
 } /*namespace xo*/

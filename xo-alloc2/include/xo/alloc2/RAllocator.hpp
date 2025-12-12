@@ -30,6 +30,8 @@ namespace xo {
             size_type available() const { return O::iface()->available(O::data()); }
             size_type allocated() const { return O::iface()->allocated(O::data()); }
             bool contains(const void * p) const { return O::iface()->contains(O::data(), p); }
+            AllocatorError last_error() const { return O::iface()->last_error(O::data()); }
+
             bool expand(size_type z) { return O::iface()->expand(O::data(), z); }
             std::byte * alloc(size_type z) { return O::iface()->alloc(O::data(), z); }
 

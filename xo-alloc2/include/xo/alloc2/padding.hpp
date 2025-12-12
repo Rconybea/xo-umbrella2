@@ -15,6 +15,11 @@ namespace xo {
             /** word size for alignment**/
             static constexpr std::size_t c_alloc_alignment = sizeof(std::uintptr_t);
 
+            static inline std::size_t is_aligned(std::size_t n,
+                                                 std::size_t align = c_alloc_alignment) {
+                return n % align == 0;
+            }
+
             /** how much to add to @p z to get a multiple of
              *  @ref c_alloc_alignment
              **/
