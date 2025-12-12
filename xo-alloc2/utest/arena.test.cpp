@@ -10,6 +10,7 @@
 #include "xo/alloc2/IAllocator_DArena.hpp"
 #include "xo/alloc2/RAllocator.hpp"
 #include "xo/alloc2/padding.hpp"
+#include "xo/indentlog/scope.hpp"
 #include "xo/facet/obj.hpp"
 #include <catch2/catch.hpp>
 
@@ -20,6 +21,7 @@ namespace xo {
     using xo::mm::DArena;
     using xo::mm::ArenaConfig;
     using xo::facet::obj;
+    using xo::scope;
     using std::byte;
     using std::size_t;
 
@@ -107,13 +109,19 @@ namespace xo {
         {
             /* typed allocator a1o */
             ArenaConfig cfg { .name_ = "testarena",
-                              .size_ = 1 };
+                              .size_ = 1,
+                              .debug_flag_ = false };
             DArena arena = DArena::map(cfg);
             obj<AAllocator, DArena> a1o{&arena};
 
-            a1o.expand(3*1024*1024);
+            size_t z2 = 512;
+            REQUIRE(a1o.expand(z2));
 
             REQUIRE(a1o.reserved() % cfg.hugepage_z_ == 0);
+            REQUIRE(a1o.committed() >= z2);
+            REQUIRE(a1o.committed() % cfg.hugepage_z_ == 0);
+            /* .size() is synonym for .committed() */
+            REQUIRE(a1o.size() == a1o.committed());
 
 #ifdef NOPE
             byte * m = a1o.alloc(1);
