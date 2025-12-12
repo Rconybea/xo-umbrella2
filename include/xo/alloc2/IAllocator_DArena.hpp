@@ -45,7 +45,7 @@ namespace xo {
              **/
             static bool expand(DArena & d, std::size_t z) noexcept;
 
-            static std::byte * alloc(const DArena &, std::size_t z);
+            static std::byte * alloc(DArena &, std::size_t z);
             static void clear(DArena &);
             static void destruct_data(DArena &);
         };
