@@ -28,10 +28,13 @@ namespace xo {
          *  RAllocator      RAllocator.hpp
          */
         struct IAllocator_DArena {
+            using size_type = std::size_t;
+
             static const std::string & name(const DArena &);
-            static std::size_t reserved(const DArena &);
-            static std::size_t size(const DArena &);
-            static std::size_t committed(const DArena &);
+            static size_type reserved(const DArena &);
+            static size_type size(const DArena &);
+            static size_type committed(const DArena &);
+            static size_type available(const DArena &);
             static bool contains(const DArena &, const void * p);
 
             /** expand committed space in arena @p d
