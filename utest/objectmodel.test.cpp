@@ -396,6 +396,11 @@ namespace xo {
             REQUIRE(!var1);
             REQUIRE(var1.iface() != nullptr);
             REQUIRE(var1.data() == nullptr);
+
+            DRectCoords z1{1.0, 0.0};
+            obj<AComplex, DRectCoords> z1o(&z1);
+
+            REQUIRE(z1o);
         }
     }
 }
