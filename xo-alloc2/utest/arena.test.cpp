@@ -76,13 +76,14 @@ namespace xo {
 
         TEST_CASE("allocator-any-1", "[alloc2][AAllocator]")
         {
-            /* empty allocator */
+            /* empty allocator alloc1 */
             obj<AAllocator> alloc1;
 
             REQUIRE(!alloc1);
             REQUIRE(alloc1.iface() != nullptr);
             REQUIRE(alloc1.data() == nullptr);
 
+            /* typed allocator a1o */
             ArenaConfig cfg { .name_ = "testarena",
                               .size_ = 1 };
             DArena arena = DArena::map(cfg);
@@ -100,6 +101,19 @@ namespace xo {
             REQUIRE(a1o.reserved() % cfg.hugepage_z_ == 0);
             REQUIRE(a1o.size() == 0);
             REQUIRE(a1o.committed() == 0);
+        }
+
+        TEST_CASE("allocator-expand-1", "[alloc2][AAllocator]")
+        {
+            /* typed allocator a1o */
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 1 };
+            DArena arena = DArena::map(cfg);
+            obj<AAllocator, DArena> a1o{&arena};
+
+            a1o.expand(3*1024*1024);
+
+            REQUIRE(a1o.reserved() % cfg.hugepage_z_ == 0);
 
 #ifdef NOPE
             byte * m = a1o.alloc(1);
