@@ -37,6 +37,7 @@ namespace xo {
             static size_type available(const DArena &) noexcept;
             static size_type allocated(const DArena &) noexcept;
             static bool contains(const DArena &, const void * p) noexcept;
+            static AllocatorError last_error(const DArena &) noexcept;
 
             /** expand committed space in arena @p d
              *  to size at least @p z

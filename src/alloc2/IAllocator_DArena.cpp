@@ -52,6 +52,11 @@ namespace xo {
             return (s.lo_ <= p) && (p < s.hi_);
         }
 
+        AllocatorError
+        IAllocator_DArena::last_error(const DArena & s) noexcept {
+            return s.last_error_;
+        }
+
         bool
         IAllocator_DArena::expand(DArena & s, size_t target_z) noexcept
         {
@@ -69,6 +74,7 @@ namespace xo {
             if (s.lo_ + target_z > s.hi_) [[unlikely]] {
                 ++(s.error_count_);
                 s.last_error_ = AllocatorError(error::reserve_exhausted,
+                                               s.error_count_,
                                                target_z, s.committed_z_, reserved(s));
 
 #ifdef OBSOLETE
@@ -116,6 +122,7 @@ namespace xo {
             if (::mprotect(commit_start, add_commit_z, PROT_READ | PROT_WRITE) != 0) [[unlikely]] {
                 ++(s.error_count_);
                 s.last_error_ = AllocatorError(error::commit_failed,
+                                               s.error_count_,
                                                add_commit_z, s.committed_z_, reserved(s));
 #ifdef OBSOLETE
                 throw std::runtime_error(tostr("ArenaAlloc::expand: commit failure",
