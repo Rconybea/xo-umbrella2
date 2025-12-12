@@ -103,6 +103,7 @@ namespace xo {
             REQUIRE(a1o.reserved() % cfg.hugepage_z_ == 0);
             REQUIRE(a1o.size() == 0);
             REQUIRE(a1o.committed() == 0);
+            REQUIRE(a1o.allocated() == 0);
         }
 
         TEST_CASE("allocator-expand-1", "[alloc2][AAllocator]")
@@ -115,6 +116,7 @@ namespace xo {
             obj<AAllocator, DArena> a1o{&arena};
 
             REQUIRE(a1o.available() == 0);
+            REQUIRE(a1o.allocated() == 0);
 
             size_t z2 = 512;
             REQUIRE(a1o.expand(z2));
@@ -126,6 +128,7 @@ namespace xo {
             REQUIRE(a1o.size() == a1o.committed());
             REQUIRE(a1o.available() >= z2);
             REQUIRE(a1o.available() == a1o.committed());
+            REQUIRE(a1o.allocated() == 0);
 
 #ifdef NOPE
             byte * m = a1o.alloc(1);

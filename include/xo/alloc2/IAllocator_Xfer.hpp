@@ -40,6 +40,9 @@ namespace xo {
             size_type      available(Copaque d) const override {
                 return I::available(_dcast(d));
             }
+            size_type      allocated(Copaque d) const override {
+                return I::allocated(_dcast(d));
+            }
 
             bool            contains(Copaque d, const void * p) const override {
                 return Impl::contains(_dcast(d), p);
