@@ -14,52 +14,86 @@ namespace xo {
         using Copaque = const void *;
         using Opaque = void *;
 
-
-        /** Abstract facet for allocation
+        /** @class AAllocator
+         *  @brief Abstract facet for allocation
          *
-         *    <----------------------------size-------------------------->
-         *    <------------committed-----------><-------uncommitted------>
-         *    <--allocated-->
-         *
-         *    XXXXXXXXXXXXXXX___________________..........................
-         *
-         *    allocated:   in use
-         *    committed:   physical memory obtained
-         *    uncommitted: mapped in virtual memory, not backed by memory
          **/
         struct AAllocator {
-            /** RTTI: unique id# for actual runtime data repr **/
+            /*
+             *    <----------------------------size-------------------------->
+             *    <------------committed-----------><-------uncommitted------>
+             *    <--allocated-->
+             *
+             *    XXXXXXXXXXXXXXX___________________..........................
+             *
+             *    allocated:   in use
+             *    committed:   physical memory obtained
+             *    uncommitted: mapped in virtual memory, not backed by memory
+             */
+
+            /** @defgroup mm-allocator-methods Allocator methods **/
+            ///@{
+
+            /** RTTI: unique id# for actual runtime data representation **/
             virtual int32_t _typeseq() = 0;
-            /** optional name for this allocator.
+            /** optional name for allocator @p d
              *  Labeling, for diagnostics.
              **/
             virtual const std::string & name(Copaque d) = 0;
             /** allocator size in bytes (up to reserved limit)
-             *  includes allocated and uncomitted memory
+             *  for allocator @p d.
+             *  Includes allocated and uncomitted memory
              **/
             virtual std::size_t size(Copaque d) = 0;
             /** committed size (physical addresses obtained)
+             *  for allocator @p d.
              **/
             virtual std::size_t committed(Copaque d) = 0;
-            /** true iff pointer @p in range of this allocator
+            /** true iff allocator @p d is responsible for memory at address @p p.
              **/
             virtual bool contains(Copaque d, const void * p) = 0;
 
-            /** allocate @p z bytes of memory. **/
+            /** allocate @p z bytes of memory from allocator @p d. **/
             virtual std::byte * alloc(Opaque d, std::size_t z) = 0;
-            /** reset allocator to empty state **/
+            /** reset allocator @p d to empty state **/
             virtual void clear(Opaque d) = 0;
-            /** **/
+            /** destruct allocator @p d **/
             virtual void destruct_data(Opaque d) = 0;
-        };
+
+            ///@}
+        }; /*AAllocator*/
 
         template <typename DRepr>
         struct IAllocator_Impl;
 
         template <typename DRepr>
+        using IAllocator_ImplType = IAllocator_Impl<DRepr>::ImplType;
+
+        struct IAllocator_Any : public AAllocator {
+            using Impl = Allocator_ImplType<xo::facet::DVariantPlaceholder>;
+
+            // from AAllocator
+            int32_t _typeseq() override { return s_typeseq; }
+
+            const std::string & name(Copaque d) override { assert(false); static std::string x; return x; }
+            std::size_t         size(Copaque d) override { assert(false); return 0ul; }
+            std::size_t    committed(Copaque d) override { assert(false); reutrn 0ul; }
+            bool            contains(Copaque d, const void * p) override { assert(false); return false; }
+
+            std::byte *        alloc(Opaque d, std::size_t z) override { assert(false); return nullptr; }
+            void               clear(Opaque d) override { assert(false); }
+            void       destruct_data(Opaque d) override { assert(false); }
+
+            static int32_t s_typeseq;
+            static bool _valid;
+        }
+
+        /** @class IAllocator_Xfer
+         **/
+        template <typename DRepr>
         struct IAllocator_Xfer : public AAllocator {
             // parallel interface to AAllocator, with specific data type
-            using Impl = IAllocator_Impl<DRepr>;
+            using Impl = IAllocator_ImplType<DRepr>;
 
             static const DRepr & _dcast(Copaque d) { return *(const DRepr *)d; }
 

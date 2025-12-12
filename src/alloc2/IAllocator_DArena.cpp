@@ -9,25 +9,30 @@
 namespace xo {
     namespace mm {
 
+        const std::string &
+        IAllocator_DArena::name(const DArena & s) {
+            return s.config_.name_;
+        }
+
         std::size_t
-        IAllocator_Impl<DArena>::size(const DArena & s) {
+        IAllocator_DArena::size(const DArena & s) {
             return s.limit_ - s.lo_;
         }
 
         std::size_t
-        IAllocator_Impl<DArena>::committed(const DArena & s) {
+        IAllocator_DArena::committed(const DArena & s) {
             return s.committed_z_;
         }
 
         bool
-        IAllocator_Impl<DArena>::contains(const DArena & s,
+        IAllocator_DArena::contains(const DArena & s,
                                           const void * p)
         {
             return (s.lo_ <= p) && (p < s.hi_);
         }
 
         std::byte *
-        IAllocator_Impl<DArena>::alloc(const DArena & s,
+        IAllocator_DArena::alloc(const DArena & s,
                                        std::size_t z)
         {
             (void)s;
@@ -39,14 +44,14 @@ namespace xo {
         }
 
         void
-        IAllocator_Impl<DArena>::clear(DArena & s)
+        IAllocator_DArena::clear(DArena & s)
         {
             s.free_ = s.lo_;
             //s.checkpoint_ = s.lo_;
         }
 
          void
-         IAllocator_Impl<DArena>::destruct_data(DArena & s)
+         IAllocator_DArena::destruct_data(DArena & s)
          {
              s.~DArena();
          }

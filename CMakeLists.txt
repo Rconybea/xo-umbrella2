@@ -27,6 +27,6 @@ add_subdirectory(utest)
 # docs targets depend on other library/utest/exec targets above,
 # --> must come after them.
 #
-#add_subdirectory(docs)
+add_subdirectory(docs)
 
 # end CMakeLists.txt

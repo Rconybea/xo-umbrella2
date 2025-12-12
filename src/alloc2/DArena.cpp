@@ -9,107 +9,135 @@
 #include <cassert>
 #include <sys/mman.h> // for ::munmap()
 #include <unistd.h> // for ::getpagesize()
+#include <string.h> // for ::memset()
 
 namespace xo {
     using std::byte;
+    using std::size_t;
 
     namespace mm {
 
-        DArena::DArena(const ArenaConfig & cfg,
-                       std::byte * lo,
-                       std::byte * hi
-            )
+        /** Map a contiguous uncommitted memory range comprising
+         *  a whole multiple of @p hugepage_z, with at least
+         *  @p req_z bytes.
+         *
+         *  Memory will also be aligned on @p hugepage_z boundary
+         *  (2MB in practice)
+         *
+         *  - @p req_z is rounded up to a multiple of @p hugepage_z
+         *  - Resulting uncommitted address range not backed by
+         *    physical memory.
+         *  - since hugpage-aligned, can find base of mapped range
+         *    by masking off the bottom log2(align_z) bits.
+         *    May rely on this for GC metadata
+         *  - opt-in to transparent huge pages (THP).
+         *    Reduces page-fault time by a lot, in return for
+         *    lower VM granularity
+         * - rejecting inferior MAP_HUGETLB|MAP_HUGE_2MB flags on ::mmap here:
+         *    - requires previously-reserved memory in /proc/sys/vm/nr_hugepages
+         *    - reserved pages permenently resident in RAM, never swapped
+         *    - memory cost incurred even if no application is using said pages
+         *
+         * TODO: for OSX -> need something else here.
+         *       MAP_ALIGNED_SUPER with mmap() and/or
+         *       use mach_vm_allocate()
+         *
+         *  @return pair giving mapped address range [lo, hi)
+         **/
+        auto
+        DArena::map_aligned_range(size_t req_z, size_t hugepage_z) -> range_type
         {
-            //scope log(XO_DEBUG(debug_flag), xtag("name", name));
+            // 1. round up to multiple of hugepage_z
+            size_t target_z = padding::with_padding(req_z, hugepage_z); // 4.
 
-            this->page_z_     = getpagesize();
-
-            // 1. need k pagetable entries where k is lub {k | k * .page_z >= z}
-            // 2. base will be aligned with .page_z but likely not with .hugepage_z
-            // 3. bad to have misalignment, because misaligned {prefix, suffix} of [base, base+z)
-            //    will use 4k pages instead of 2mb pages
+            // 2. mmap() will give us page-aligned memory,
+            //    but not hugepage-aligned.
             //
-            // strategy:
-            // 4. round up z to multiple of hugepage_z_
-            // 5. over-request so reserved range contains an aligned subrange of size z
-            // 6. unmap misaligned prefix
-            // 7. unmap misaligned suffix.
-            // 8. enable huge pages for now-aligned remainder of reserved range
+            //    Over-request by hugepage_z to ensure
+            //    hugepage-aligned subrange of size target_z
             //
-            // Z. note: rejecting inferior MAP_HUGETLB|MAP_HUGE_2MB flags on ::mmap here:
-            //    Za. requires previously-reserved memory in /proc/sys/vm/nr_hugepages
-            //    Zb. reserved pages permenently resident in RAM, never swapped
-            //    Zc. memory cost incurred even if no application is using said pages
+            byte * base = (byte *)(::mmap(nullptr,
+                                          target_z + hugepage_z,
+                                          PROT_NONE,
+                                          MAP_PRIVATE | MAP_ANONYMOUS,
+                                          -1, 0));
 
-            std::size_t z = cfg.size_;
-
-            z = padding::with_padding(z, config_.hugepage_z_); // 4.
-
-            // 5.
-            byte * base = reinterpret_cast<byte *>(
-                ::mmap(nullptr,
-                       z + config_.hugepage_z_,
-                       PROT_NONE,
-                       MAP_PRIVATE | MAP_ANONYMOUS,
-                       -1, 0));
+            // on mmap success: upper limit of mapped address range
+            byte * hi = base + (target_z + hugepage_z);
+            // lowest hugepage-aligned address in [base, hi)
+            byte * aligned_base = (byte *)(padding::with_padding((size_t)base, hugepage_z));
+            // end of hugeppage-aligned range starting at aligned_base
+            byte * aligned_hi = aligned_base + target_z;
 
 #ifdef NOT_YET
             log && log("acquired memory [lo,hi) using mmap",
                        xtag("lo", base),
-                       xtag("z", z),
-                       xtag("hi", reinterpret_cast<byte *>(base) + z));
+                       xtag("req_z", req_z),
+                       xtag("target_z", target_z),
+                       xtag("hi", (byte *)(base) + z));
 #endif
 
-            if (base == MAP_FAILED) {
-                assert(false);
+
+            // 3. assess mmap success
+            {
+                if (base == MAP_FAILED) {
+                    assert(false);
 #ifdef NOPE
-                throw std::runtime_error(tostr("ArenaAlloc: uncommitted allocation failed",
-                                               xtag("size", z)));
+                    throw std::runtime_error(tostr("ArenaAlloc: uncommitted allocation failed",
+                                                   xtag("size", z)));
 #endif
+                }
+
+                assert((size_t)aligned_base % hugepage_z == 0);
+                assert(aligned_base >= base);
+                assert(aligned_base < base + hugepage_z);
             }
 
-            byte * aligned_base = reinterpret_cast<byte *>
-                (padding::with_padding(reinterpret_cast<size_t>(base),
-                                       config_.hugepage_z_));
-
-            assert(reinterpret_cast<size_t>(aligned_base) % config_.hugepage_z_ == 0);
-            assert(aligned_base >= base);
-            assert(aligned_base < base + config_.hugepage_z_);
-
+            // 4. release unaligned prefix
             if (base < aligned_base) {
-                size_t prefix = aligned_base - base;
+                size_t ua_prefix = aligned_base - base;
 
-                ::munmap(base, prefix); // 6.
+                ::munmap(base, ua_prefix);
             }
 
-            byte * aligned_hi = aligned_base + z;
-            byte * hi = base + z + config_.hugepage_z_;
-
+            // 5. release unaligned suffix
             if (aligned_hi < hi) {
                 size_t suffix = hi - aligned_hi;
 
-                ::munmap(aligned_hi, suffix); // 7.
+                ::munmap(aligned_hi, suffix);
             }
 
 #ifdef __linux__
-            /** opt-in to huge pages, provided they're available.
-             *  otherwise fallback gracefully
+            /** linux:
+             *    opt-in to transparent huge pages (THP)
+             *    provided OS configured to support them.
+             *    otherwise fallback gracefully.
+             *
+             *    Huge pages -> use fewer TLB entries + faster
+             *    shorter path through page table.
+             *
+             *    When we commit (i.e. obtain physical memory on page fault),
+             *    typically expect to pay ~1us per superpage.
+             *    Much better than ~500us to commit 512 4k VM pages.
+             *
+             *    But wasted if we don't use the memory.
              **/
-            ::madvise(aligned_base, z, MADV_HUGEPAGE); // 8.
+            ::madvise(aligned_base, target_z, MADV_HUGEPAGE); // 8.
 #endif
-            // TODO: for OSX -> need something else here.
-            //       MAP_ALIGNED_SUPER with mmap() and/or
-            //       use mach_vm_allocate()
-            //
 
-            this->lo_          = aligned_base;
-            this->committed_z_ = 0;
-            //this->checkpoint_  = lo_;
-            this->free_        = lo_;
-            this->limit_       = lo_;
-            this->hi_          = lo_ + z;
+            return std::make_pair(aligned_base, aligned_hi);
+        }
 
-            if (!lo_) {
+        DArena
+        DArena::map(const ArenaConfig & cfg)
+        {
+            //scope log(XO_DEBUG(debug_flag), xtag("name", name));
+
+            auto [lo, hi]     = map_aligned_range(cfg.size_, cfg.hugepage_z_);
+
+            if (!lo) {
+                // control here implies mmap() failed silently
+
                 assert(false);
 #ifdef NOPE
                 throw std::runtime_error(tostr("ArenaAlloc: allocation failed",
@@ -117,11 +145,47 @@ namespace xo {
 #endif
             }
 
+            size_t page_z = getpagesize();
+
+
 #ifdef NOPE
             log && log(xtag("lo", (void*)lo_),
                        xtag("page_z", page_z_),
                        xtag("hugepage_z", hugepage_z_));
 #endif
+
+            return DArena(cfg, page_z, lo, hi);
+        } /*map*/
+
+        DArena::DArena(const ArenaConfig & cfg,
+                       size_type page_z,
+                       byte * lo,
+                       byte * hi) : config_{cfg},
+                                    page_z_{page_z},
+                                    lo_{lo},
+                                    committed_z_{0},
+                                    free_{lo},
+                                    limit_{lo},
+                                    hi_{hi}
+        {
+            //retval.checkpoint_  = lo_;
+        }
+
+        DArena::DArena(DArena && other) {
+            config_            = other.config_;
+            page_z_            = other.page_z_;
+            lo_                = other.lo_;
+            committed_z_       = other.committed_z_;
+            free_              = other.free_;
+            limit_             = other.limit_;
+            hi_                = other.hi_;
+
+            other.config_      = ArenaConfig();
+            other.lo_          = nullptr;
+            other.committed_z_ = 0;
+            other.free_        = nullptr;
+            other.limit_       = nullptr;
+            other.hi_          = nullptr;
         }
 
         DArena::~DArena()
@@ -136,12 +200,12 @@ namespace xo {
             }
 
             // hygiene
-            lo_ = nullptr;
-            committed_z_ = 0;
+            this->lo_            = nullptr;
+            this->committed_z_   = 0;
             // checkpoint_ = nullptr;
-            free_ = nullptr;
-            limit_ = nullptr;
-            hi_ = nullptr;
+            this->free_          = nullptr;
+            this->limit_         = nullptr;
+            this->hi_            = nullptr;
         }
     }
 } /*namespace xo*/
