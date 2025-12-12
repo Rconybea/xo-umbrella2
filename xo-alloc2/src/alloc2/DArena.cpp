@@ -6,6 +6,7 @@
 #include "xo/alloc2/AAllocator.hpp"
 #include "xo/alloc2/DArena.hpp"
 #include "xo/alloc2/padding.hpp"
+#include "xo/indentlog/print/tag.hpp"
 #include <cassert>
 #include <sys/mman.h> // for ::munmap()
 #include <unistd.h> // for ::getpagesize()
@@ -81,11 +82,8 @@ namespace xo {
             // 3. assess mmap success
             {
                 if (base == MAP_FAILED) {
-                    assert(false);
-#ifdef NOPE
                     throw std::runtime_error(tostr("ArenaAlloc: uncommitted allocation failed",
-                                                   xtag("size", z)));
-#endif
+                                                   xtag("size", req_z)));
                 }
 
                 assert((size_t)aligned_base % hugepage_z == 0);
@@ -138,11 +136,8 @@ namespace xo {
             if (!lo) {
                 // control here implies mmap() failed silently
 
-                assert(false);
-#ifdef NOPE
                 throw std::runtime_error(tostr("ArenaAlloc: allocation failed",
-                                               xtag("size", z)));
-#endif
+                                               xtag("size", cfg.size_)));
             }
 
             size_t page_z = getpagesize();
@@ -166,7 +161,9 @@ namespace xo {
                                     committed_z_{0},
                                     free_{lo},
                                     limit_{lo},
-                                    hi_{hi}
+                                    hi_{hi},
+                                    error_count_{0},
+                                    last_error_{}
         {
             //retval.checkpoint_  = lo_;
         }
@@ -179,6 +176,8 @@ namespace xo {
             free_              = other.free_;
             limit_             = other.limit_;
             hi_                = other.hi_;
+            error_count_       = other.error_count_;
+            last_error_        = other.last_error_;
 
             other.config_      = ArenaConfig();
             other.lo_          = nullptr;
@@ -186,6 +185,8 @@ namespace xo {
             other.free_        = nullptr;
             other.limit_       = nullptr;
             other.hi_          = nullptr;
+            other.error_count_ = 0;
+            other.last_error_  = AllocatorError();
         }
 
         DArena::~DArena()
@@ -200,12 +201,14 @@ namespace xo {
             }
 
             // hygiene
-            this->lo_            = nullptr;
-            this->committed_z_   = 0;
+            lo_            = nullptr;
+            committed_z_   = 0;
             // checkpoint_ = nullptr;
-            this->free_          = nullptr;
-            this->limit_         = nullptr;
-            this->hi_            = nullptr;
+            free_          = nullptr;
+            limit_         = nullptr;
+            hi_            = nullptr;
+            error_count_   = 0;
+            last_error_    = AllocatorError();
         }
     }
 } /*namespace xo*/

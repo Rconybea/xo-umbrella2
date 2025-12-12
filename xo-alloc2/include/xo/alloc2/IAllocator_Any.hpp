@@ -29,15 +29,15 @@ namespace xo {
             using size_type = std::size_t;
 
             // from AAllocator
-            int32_t _typeseq() const override { return s_typeseq; }
+            int32_t _typeseq() const noexcept  override { return s_typeseq; }
 
-            [[noreturn]] const std::string & name(Copaque) const override { _fatal(); }
-            [[noreturn]] size_type       reserved(Copaque) const override { _fatal(); }
-            [[noreturn]] size_type           size(Copaque) const override { _fatal(); }
-            [[noreturn]] size_type      committed(Copaque) const override { _fatal(); }
-            [[noreturn]] size_type      available(Copaque) const override { _fatal(); }
-            [[noreturn]] size_type      allocated(Copaque) const override { _fatal(); }
-            [[noreturn]] bool            contains(Copaque, const void *) const override { _fatal(); }
+            [[noreturn]] const std::string & name(Copaque) const noexcept override { _fatal(); }
+            [[noreturn]] size_type       reserved(Copaque) const noexcept override { _fatal(); }
+            [[noreturn]] size_type           size(Copaque) const noexcept override { _fatal(); }
+            [[noreturn]] size_type      committed(Copaque) const noexcept override { _fatal(); }
+            [[noreturn]] size_type      available(Copaque) const noexcept override { _fatal(); }
+            [[noreturn]] size_type      allocated(Copaque) const noexcept override { _fatal(); }
+            [[noreturn]] bool            contains(Copaque, const void *) const noexcept override { _fatal(); }
 
             [[noreturn]] bool              expand(Opaque, std::size_t) const override { _fatal(); }
             [[noreturn]] std::byte *        alloc(Opaque, std::size_t) const override { _fatal(); }

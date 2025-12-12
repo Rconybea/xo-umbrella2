@@ -37,7 +37,7 @@ namespace xo {
          *  @brief represent arena allocator state
          *
          *  Provides minimal RAII functionality around memory mapping.
-         *  For allocation see @ref IAllocator_DArena
+         *  For allocation implementation see @ref IAllocator_DArena
          **/
         struct DArena {
             /*
@@ -92,7 +92,7 @@ namespace xo {
             ArenaConfig config_;
 
             /** size of a VM page (obtained automatically via getpagesize()). Likely 4k **/
-            std::size_t page_z_ = 0;
+            size_type page_z_ = 0;
 
             /** arena owns memory in range [@ref lo_, @ref hi_)
              **/
@@ -101,7 +101,7 @@ namespace xo {
             /** prefix of this size is committed.
              *  Remainder mapped but uncommitted.
              **/
-            std::size_t committed_z_ = 0;
+            size_type committed_z_ = 0;
 
             /** free pointer.
              *  Memory in range [@ref lo_, @ref free_) current in use
@@ -118,6 +118,12 @@ namespace xo {
              *  Memory in range [@ref limit_, @ref hi_) is uncommitted
              **/
             std::byte * hi_ = nullptr;
+
+            /** count runtime errors. Each error updates @ref last_error_ **/
+            uint32_t error_count_ = 0;
+
+            /** capture some error details if/when error **/
+            AllocatorError last_error_;
 
             ///@}
         };

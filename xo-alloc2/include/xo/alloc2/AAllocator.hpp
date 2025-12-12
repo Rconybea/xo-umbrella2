@@ -14,6 +14,42 @@ namespace xo {
         using Copaque = const void *;
         using Opaque = void *;
 
+        enum class error : int32_t {
+            /** sentinel **/
+            invalid = -1,
+            /** not an error **/
+            none,
+            /** reserved size exhauged **/
+            reserve_exhausted,
+            /** unable to commit (i.e. mprotect failure) **/
+            commit_failed,
+        };
+
+        struct AllocatorError {
+            using size_type = std::size_t;
+            using value_type = std::byte*;
+
+            AllocatorError() = default;
+            explicit AllocatorError(error err) : error_{err} {}
+            AllocatorError(error err,
+                           size_type req_z,
+                           size_type com_z,
+                           size_type rsv_z) : error_{err},
+                                              request_z_{req_z},
+                                              committed_z_{com_z},
+                                              reserved_z_{rsv_z} {}
+
+            /** error code **/
+            error error_ = error::none;
+
+            /** reqeust size assoc'd with errror **/
+            size_type request_z_ = 0;
+            /** committed allocator memory at time of error **/
+            size_type committed_z_ = 0;
+            /** reserved allocator memory at time of error **/
+            size_type reserved_z_ = 0;
+        };
+
         /** @class AAllocator
          *  @brief Abstract facet for allocation
          *
@@ -41,32 +77,32 @@ namespace xo {
             ///@{
 
             /** RTTI: unique id# for actual runtime data representation **/
-            virtual int32_t _typeseq() const = 0;
+            virtual int32_t _typeseq() const noexcept = 0;
             /** optional name for allocator @p d
              *  Labeling, for diagnostics.
              **/
-            virtual const std::string & name(Copaque d) const = 0;
+            virtual const std::string & name(Copaque d) const noexcept = 0;
             /** reserved size in bytes for allocator @p d.
              *  Includes committed + uncommitted memory.
              *  Cannot be increased.
              **/
-            virtual size_type reserved(Copaque d) const = 0;
+            virtual size_type reserved(Copaque d) const noexcept = 0;
             /** Synonym for @ref committed.
              *  Can increase on @ref alloc
              **/
-            virtual size_type size(Copaque d) const = 0;
+            virtual size_type size(Copaque d) const noexcept = 0;
             /** committed size (physical addresses obtained)
              *  for allocator @p d.
              *  @ref alloc may auto-increase this
              **/
-            virtual size_type committed(Copaque d) const = 0;
+            virtual size_type committed(Copaque d) const noexcept = 0;
             /** unallocated (but committed) size in bytes for allocator @p d **/
-            virtual size_type available(Copaque d) const = 0;
+            virtual size_type available(Copaque d) const noexcept = 0;
             /** allocated (i.e. in-use) amount in bytes for allocator @p d **/
-            virtual size_type allocated(Copaque d) const = 0;
+            virtual size_type allocated(Copaque d) const noexcept = 0;
             /** true iff allocator @p d is responsible for memory at address @p p.
              **/
-            virtual bool contains(Copaque d, const void * p) const = 0;
+            virtual bool contains(Copaque d, const void * p) const noexcept = 0;
 
             /** expand committed space in arena @p d
              *  to size at least @p z

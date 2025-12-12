@@ -24,27 +24,27 @@ namespace xo {
             static DRepr & _dcast(Opaque d) { return *(DRepr *)d; }
 
             // from AAllocator
-            int32_t _typeseq() const override { return s_typeseq; }
-            const std::string & name(Copaque d) const override {
+            int32_t _typeseq() const noexcept override { return s_typeseq; }
+            const std::string & name(Copaque d) const noexcept override {
                 return Impl::name(_dcast(d));
             }
-            size_type       reserved(Copaque d) const override {
+            size_type       reserved(Copaque d) const noexcept override {
                 return Impl::reserved(_dcast(d));
             }
-            size_type           size(Copaque d) const override {
+            size_type           size(Copaque d) const noexcept override {
                 return Impl::size(_dcast(d));
             }
-            size_type      committed(Copaque d) const override {
+            size_type      committed(Copaque d) const noexcept override {
                 return Impl::committed(_dcast(d));
             }
-            size_type      available(Copaque d) const override {
+            size_type      available(Copaque d) const noexcept override {
                 return I::available(_dcast(d));
             }
-            size_type      allocated(Copaque d) const override {
+            size_type      allocated(Copaque d) const noexcept override {
                 return I::allocated(_dcast(d));
             }
 
-            bool            contains(Copaque d, const void * p) const override {
+            bool            contains(Copaque d, const void * p) const noexcept override {
                 return Impl::contains(_dcast(d), p);
             }
 
