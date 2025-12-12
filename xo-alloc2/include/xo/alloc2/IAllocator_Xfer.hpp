@@ -28,7 +28,7 @@ namespace xo {
             // const methods
 
             int32_t _typeseq() const noexcept override { return s_typeseq; }
-            const std::string & name(Copaque d) const noexcept override { return I::name(_dcast(d)); }
+            std::string_view    name(Copaque d) const noexcept override { return I::name(_dcast(d)); }
             size_type       reserved(Copaque d) const noexcept override { return I::reserved(_dcast(d)); }
             size_type           size(Copaque d) const noexcept override { return I::size(_dcast(d)); }
             size_type      committed(Copaque d) const noexcept override { return I::committed(_dcast(d)); }

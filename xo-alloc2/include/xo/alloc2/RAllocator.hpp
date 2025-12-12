@@ -23,7 +23,7 @@ namespace xo {
             RAllocator(Object::DataPtr data) : Object{std::move(data)} {}
 
             int32_t _typeseq() const { return O::iface()->_typeseq(); }
-            const std::string & name() const { return O::iface()->name(O::data()); }
+            std::string_view name() const { return O::iface()->name(O::data()); }
             size_type reserved() const { return O::iface()->reserved(O::data()); }
             size_type size() const { return O::iface()->size(O::data()); }
             size_type committed() const { return O::iface()->committed(O::data()); }

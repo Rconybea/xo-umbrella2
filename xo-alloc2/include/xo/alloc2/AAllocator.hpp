@@ -89,7 +89,7 @@ namespace xo {
             /** optional name for allocator @p d
              *  Labeling, for diagnostics.
              **/
-            virtual const std::string & name(Copaque d) const noexcept = 0;
+            virtual std::string_view name(Copaque d) const noexcept = 0;
             /** reserved size in bytes for allocator @p d.
              *  Includes committed + uncommitted memory.
              *  Cannot be increased.
