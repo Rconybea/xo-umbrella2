@@ -5,6 +5,7 @@
 
 #include "IAllocator_DArena.hpp"
 #include "padding.hpp"
+#include "xo/indentlog/scope.hpp"
 #include <cassert>
 #include <cstddef>
 #include <sys/mman.h>
@@ -42,20 +43,21 @@ namespace xo {
         bool
         IAllocator_DArena::expand(DArena & s, size_t target_z)
         {
-//            scope log(XO_DEBUG(debug_flag_),
-//                      xtag("offset_z", offset_z),
-//                      xtag("committed_z", committed_z_));
+            scope log(XO_DEBUG(s.config_.debug_flag_),
+                      xtag("target_z", target_z),
+                      xtag("committed_z", s.committed_z_));
 
             if (target_z <= s.committed_z_) {
-//                log && log("trivial success, offset within committed range",
-//                           xtag("offset_z", offset_z),
-//                           xtag("committed_z", committed_z_));
+                log && log("trivial success, offset within committed range",
+                           xtag("target_z", target_z),
+                           xtag("committed_z", s.committed_z_));
                 return true;
             }
 
             if (s.lo_ + target_z > s.hi_) {
-//                throw std::runtime_error(tostr("ArenaAlloc::expand: requested size exceeds reserved size",
-//                                               xtag("requested", offset_z), xtag("reserved", reserved())));
+                throw std::runtime_error(tostr("ArenaAlloc::expand: requested size exceeds reserved size",
+                                               xtag("requested", target_z),
+                                               xtag("reserved", reserved(s))));
                 return false;
             }
 
