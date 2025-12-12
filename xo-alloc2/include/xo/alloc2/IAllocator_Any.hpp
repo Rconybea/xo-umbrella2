@@ -31,13 +31,13 @@ namespace xo {
             // from AAllocator
             int32_t _typeseq() const noexcept  override { return s_typeseq; }
 
-            [[noreturn]] const std::string & name(Copaque) const noexcept override { _fatal(); }
-            [[noreturn]] size_type       reserved(Copaque) const noexcept override { _fatal(); }
-            [[noreturn]] size_type           size(Copaque) const noexcept override { _fatal(); }
-            [[noreturn]] size_type      committed(Copaque) const noexcept override { _fatal(); }
-            [[noreturn]] size_type      available(Copaque) const noexcept override { _fatal(); }
-            [[noreturn]] size_type      allocated(Copaque) const noexcept override { _fatal(); }
-            [[noreturn]] bool            contains(Copaque, const void *) const noexcept override { _fatal(); }
+            [[noreturn]] const std::string &  name(Copaque) const noexcept override { _fatal(); }
+            [[noreturn]] size_type        reserved(Copaque) const noexcept override { _fatal(); }
+            [[noreturn]] size_type            size(Copaque) const noexcept override { _fatal(); }
+            [[noreturn]] size_type       committed(Copaque) const noexcept override { _fatal(); }
+            [[noreturn]] size_type       available(Copaque) const noexcept override { _fatal(); }
+            [[noreturn]] size_type       allocated(Copaque) const noexcept override { _fatal(); }
+            [[noreturn]] bool             contains(Copaque, const void *) const noexcept override { _fatal(); }
             [[noreturn]] AllocatorError last_error(Copaque) const noexcept override { _fatal(); }
 
             [[noreturn]] bool              expand(Opaque, std::size_t) const noexcept override { _fatal(); }

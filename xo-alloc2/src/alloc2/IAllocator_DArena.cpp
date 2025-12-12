@@ -12,6 +12,7 @@
 
 namespace xo {
     using std::size_t;
+    using std::byte;
 
     namespace mm {
 
@@ -64,7 +65,7 @@ namespace xo {
                       xtag("target_z", target_z),
                       xtag("committed_z", s.committed_z_));
 
-            if (target_z <= s.committed_z_) {
+            if (target_z <= s.committed_z_) [[likely]] {
                 log && log("trivial success, offset within committed range",
                            xtag("target_z", target_z),
                            xtag("committed_z", s.committed_z_));
@@ -142,15 +143,41 @@ namespace xo {
         }
 
         std::byte *
-        IAllocator_DArena::alloc(const DArena & s,
-                                       std::size_t z)
+        IAllocator_DArena::alloc(DArena & s,
+                                 std::size_t req_z)
         {
-            (void)s;
-            (void)z;
+            scope log(XO_DEBUG(s.config_.debug_flag_));
 
-            // scope log(XO_DEBUG(config_.debug_flag_));
+            /* word size for alignment (8 bytes) */
+            constexpr size_t c_bpw = sizeof(std::uintptr_t);
 
-            assert(false);
+            std::uintptr_t free_u64 = reinterpret_cast<std::uintptr_t>(s.free_);
+
+            assert(free_u64 % c_bpw == 0ul);
+
+            /* dz: pad req_z to multiple c_bpw */
+            size_t dz = padding::alloc_padding(req_z);
+            size_t z1 = req_z + dz;
+
+            assert(z1 % c_bpw == 0ul);
+
+            if (expand(s, allocated(s) + z1)) [[likely]] {
+                byte * mem = s.free_;
+
+                s.free_ += z1;
+
+                log && log(xtag("self", s.config_.name_),
+                           xtag("z0", req_z),
+                           xtag("+pad", dz),
+                           xtag("z1", z1),
+                           xtag("size", size(s)),
+                           xtag("avail", available(s)));
+
+                return mem;
+            } else {
+                /* error already captured */
+                return nullptr;
+            }
         }
 
         void
@@ -160,11 +187,11 @@ namespace xo {
             //s.checkpoint_ = s.lo_;
         }
 
-         void
-         IAllocator_DArena::destruct_data(DArena & s)
-         {
-             s.~DArena();
-         }
+        void
+        IAllocator_DArena::destruct_data(DArena & s)
+        {
+            s.~DArena();
+        }
     } /*namespace mm*/
 } /*namespace xo*/
 
