@@ -146,22 +146,193 @@ namespace xo {
         IAllocator_DArena::alloc(DArena & s,
                                  std::size_t req_z)
         {
+            /* - primary allocation path:
+             *   exactly 1 header per alloc() call.
+             * - store_header_flag follows configuration
+             */
+
+            return _alloc(s, req_z,
+                          alloc_mode::standard);
+        }
+
+        std::byte *
+        IAllocator_DArena::super_alloc(DArena & s,
+                                       std::size_t req_z)
+        {
+            /* - (uncommon) pattern for parent alloc immediately followed by
+             *   zero-or-more susidiary allocs, all sharing a single header.
+             * - collapses into alloc() behavior when
+             *   ArenaConfig.store_header_flag_ disabled
+             */
+
+            bool remember_header_flag = s.config_.store_header_flag_;
+
+            return _alloc(s, req_z,
+                          alloc_mode::super);
+        }
+
+        std::byte *
+        IAllocator_DArena::sub_alloc(DArena & s,
+                                     std::size_t req_z,
+                                     bool complete_flag)
+        {
+            /* - (uncommon) pattern for subsidiary allocs:
+             *   that piggyback onto preceding super_alloc()
+             * - collapses into alloc() behavior when
+             *   ArenaConfig.store_header_flag_ disabled
+             */
+
+            return _alloc(s, req_z,
+                          (complete_flag
+                           ? alloc_mode::sub_complete
+                           : alloc_mode::sub_incomplete));
+
+#ifdef OBSOLETE
+            if ((req_z == 0) && complete_flag) [[unlikely]] {
+                /** use zero req_z with complete_flag to clear s.last_header_ **/
+
+                if (s.config_.store_header_flag_) {
+                    if (!s.last_header_) [[unlikely]] {
+                        ++(s.error_count_);
+                        s.last_error_ = AllocatorError(error::orphan_sub_alloc,
+                                                       s.error_count_,
+                                                       0 /*add_commit_z*/, s.committed_z_, reserved(s));
+                    } else {
+                        s.last_header_ = nullptr;
+                    }
+                }
+
+                return nullptr;
+            }
+
+            byte * free0 = s.free_;
+            byte * mem = _alloc(s, req_z,
+                                complete_flag ? alloc_mode::sub_complete : alloc_mode::sub,
+                                false /*!store_header_flag*/,
+                                false /*!remember_header_flag*/);
+
+            if (!mem) [[unlikely]] {
+                /* error already captured */
+                return nullptr;
+            }
+
+            byte * free1 = s.free_;
+            /* used: accounting for padding applied to req_z */
+            size_t z0 = (free1 - free0);
+
+            assert(z0 > 0);
+
+            if (s.config_.store_header_flag_) {
+                if (!s.last_header_) [[unlikely]] {
+                    ++(s.error_count_);
+                    s.last_error_ = AllocatorError(error::orphan_sub_alloc,
+                                                   s.error_count_,
+                                                   0 /*add_commit_z*/, s.committed_z_, reserved(s));
+                    return nullptr;
+                }
+
+                /* s.last_header_ holds aggregate size of preceding super_alloc
+                 * (+ any sub-alloc's).
+                 *
+                 * Accumulate allocation size
+                 */
+                uint64_t header = *s.last_header_;
+
+                if ((header & s.config_.header_size_mask_ & z0) != z0) [[unlikely]] {
+                    /* cumulative alloc size doesn't fit in configured header_size_mask bits */
+                    ++(s.error_count_);
+                    s.last_error_ = AllocatorError(error::header_size_mask,
+                                                   s.error_count_,
+                                                   0 /*add_commit_z*/, s.committed_z_, reserved(s));
+                    return nullptr;
+                }
+
+                *s.last_header_ = ((header & ~s.config_.header_size_mask_) | z0);
+
+                if (complete_flag) {
+                    s.last_header_ = nullptr;
+                }
+            }
+
+            return mem;
+#endif
+        }
+
+        std::byte *
+        IAllocator_DArena::_alloc(DArena & s,
+                                  std::size_t req_z,
+                                  bool store_header_flag,
+                                  bool remember_header_flag)
+        {
             scope log(XO_DEBUG(s.config_.debug_flag_));
 
             assert(padding::is_aligned((size_t)s.free_));
+            /* remember_header_flag -implies-> store_header_flag */
+            assert(store_header_flag || !remember_header_flag);
 
+            /*
+             *                    free_(pre)
+             *                    v
+             *
+             *                    <-------------z1--------------->
+             *           < guard ><  hz  ><     req_z     >< dz  >< guard >
+             *
+             * used <==  +++++++++0000zzzz@@@@@@@@@@@@@@@@@ppppppp+++++++++ ==> unallocated
+             *
+             *                    ^       ^                                ^
+             *                    header  mem                              |
+             *                    ^                                        |
+             *                    last_header_                   free_(post)
+             *
+             *            [+] guard after each allocation, for simple sanitize checks
+             *            [0] unused header bits (avail to application)
+             *            [z] record allocation size
+             *            [@] new allocated memory
+             *            [p] padding (to uintptr_t alignment)
+             */
+
+            /* non-zero if header feature enabled */
+            size_t hz = 0;
             /* dz: pad req_z to alignment size (multiple of 8 bytes, probably) */
             size_t dz = padding::alloc_padding(req_z);
-            size_t z1 = req_z + dz;
+            size_t z0 = req_z + dz;
+            /* if non-zero: will store padded alloc size at the beginning of each allocation
+             * reminder: important to store padded size for correct arena iteration
+             */
+            uint64_t header = req_z + dz;
+
+            if (store_header_flag) {
+                if ((s.config_.header_size_mask_ & z0) == z0) [[likely]] {
+                    hz = sizeof(header);
+                } else {
+                    /* req_z doesn't fit in configured header_size_mask bits */
+                    ++(s.error_count_);
+                    s.last_error_ = AllocatorError(error::header_size_mask,
+                                                   s.error_count_,
+                                                   0 /*add_commit_z*/, s.committed_z_, reserved(s));
+                    return nullptr;
+                }
+            }
+
+            size_t z1 = hz + z0;
 
             assert(padding::is_aligned(z1));
 
             if (expand(s, allocated(s) + z1)) [[likely]] {
-                byte * mem = s.free_;
+                if (store_header_flag) {
+                    (*(uint64_t *)s.free_) = header;
+
+                    if (remember_header_flag) {
+                        s.last_header_ = (uint64_t *)s.free_;
+                    }
+                }
+
+                byte * mem = s.free_ + hz;
 
                 s.free_ += z1;
 
                 log && log(xtag("self", s.config_.name_),
+                           xtag("hz", hz),
                            xtag("z0", req_z),
                            xtag("+pad", dz),
                            xtag("z1", z1),

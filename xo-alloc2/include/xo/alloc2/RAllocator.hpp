@@ -18,6 +18,7 @@ namespace xo {
         public:
             using ObjectType = Object;
             using size_type = std::size_t;
+            using value_type = std::byte *;
 
             RAllocator() {}
             RAllocator(Object::DataPtr data) : Object{std::move(data)} {}
@@ -33,7 +34,11 @@ namespace xo {
             AllocatorError last_error() const { return O::iface()->last_error(O::data()); }
 
             bool expand(size_type z) { return O::iface()->expand(O::data(), z); }
-            std::byte * alloc(size_type z) { return O::iface()->alloc(O::data(), z); }
+            value_type alloc(size_type z) { return O::iface()->alloc(O::data(), z); }
+            value_type super_alloc(size_type z) { return O::iface()->super_alloc(O::data(), z); }
+            value_type sub_alloc(size_type z,
+                                 bool complete_flag) { return O::iface()->sub_alloc(O::data(),
+                                                                                    z, complete_flag); }
 
             static bool _valid;
         };

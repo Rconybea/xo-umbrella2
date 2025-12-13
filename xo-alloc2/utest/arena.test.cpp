@@ -174,6 +174,44 @@ namespace xo {
             REQUIRE(a1o.committed() <= a1o.reserved());
         }
 
+        TEST_CASE("allocator-alloc-2", "[alloc2][Allocator]")
+        {
+            using header_type = AAllocator::header_type;
+
+            /* typed allocator a1o, with object header */
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 64*1024,
+                              .store_header_flag_ = true,
+                              /* up to 4GB */
+                              .header_size_mask_ = 0xffffffff,
+                              .debug_flag_ = false,
+            };
+            DArena arena = DArena::map(cfg);
+            obj<AAllocator, DArena> a1o{&arena};
+
+            REQUIRE(a1o.reserved() >= cfg.size_);
+            REQUIRE(a1o.committed() == 0);
+            REQUIRE(a1o.available() == 0);
+            REQUIRE(a1o.allocated() == 0);
+
+            size_t z0 = 1;
+            byte * m0 = a1o.alloc(1);
+
+            REQUIRE(m0);
+
+            header_type* header = (header_type*)(m0 - sizeof(header_type));
+
+            REQUIRE(a1o.contains(header));
+            REQUIRE(((*header) & cfg.header_size_mask_) == padding::with_padding(z0));
+            REQUIRE(a1o.last_error().error_ == error::none);
+            REQUIRE(a1o.last_error().error_seq_ == 0);
+            REQUIRE(a1o.allocated() >= z0);
+            REQUIRE(a1o.allocated() < sizeof(AAllocator::header_type) + z0 + padding::c_alloc_alignment );
+            REQUIRE(a1o.allocated() <= a1o.committed());
+            REQUIRE(a1o.allocated() + a1o.available() == a1o.committed());
+            REQUIRE(a1o.committed() <= a1o.reserved());
+        }
+
         TEST_CASE("allocator-fail-1", "[alloc2][AAllocator]")
         {
             /* typed allocator a1o */

@@ -41,7 +41,9 @@ namespace xo {
             [[noreturn]] AllocatorError last_error(Copaque) const noexcept override { _fatal(); }
 
             [[noreturn]] bool              expand(Opaque, std::size_t) const noexcept override { _fatal(); }
-            [[noreturn]] std::byte *        alloc(Opaque, std::size_t) const override { _fatal(); }
+            [[noreturn]] value_type         alloc(Opaque, std::size_t) const override { _fatal(); }
+            [[noreturn]] value_type   super_alloc(Opaque, std::size_t) const override { _fatal(); }
+            [[noreturn]] value_type     sub_alloc(Opaque, std::size_t, bool) const override { _fatal(); }
             [[noreturn]] void               clear(Opaque) const override { _fatal(); }
             [[noreturn]] void       destruct_data(Opaque) const override { _fatal(); }
 

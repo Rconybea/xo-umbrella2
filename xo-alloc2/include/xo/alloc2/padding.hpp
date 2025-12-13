@@ -50,7 +50,7 @@ namespace xo {
              **/
             static inline
             std::size_t with_padding(std::size_t z,
-                                     std::size_t align)
+                                     std::size_t align = c_alloc_alignment)
                 {
                     return z + alloc_padding(z, align);
                 }

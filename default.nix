@@ -247,6 +247,7 @@ let
     pkgs.git
     pkgs.gh    # github cli
     pkgs.cloc
+    pkgs.bloaty
 
     pkgs.lcov
     pkgs.catch2
