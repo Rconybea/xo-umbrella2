@@ -23,6 +23,10 @@ namespace xo {
             reserve_exhausted,
             /** unable to commit (i.e. mprotect failure) **/
             commit_failed,
+            /** allocation size too big (See @ref ArenaConfig::header_size_mask_) **/
+            header_size_mask,
+            /** sub_alloc not preceded by super alloc (or another sub_alloc) **/
+            orphan_sub_alloc,
         };
 
         struct AllocatorError {
@@ -67,6 +71,10 @@ namespace xo {
             ///@{
             /** @brief type used for allocation amounts **/
             using size_type = std::size_t;
+            /** @brief type used for allocation responses **/
+            using value_type = std::byte *;
+            /** object header, if configured **/
+            using header_type = std::uint64_t;
             ///@}
 
             /*
@@ -121,7 +129,19 @@ namespace xo {
              **/
             virtual bool expand(Opaque d, std::size_t z) const noexcept = 0;
             /** allocate @p z bytes of memory from allocator @p d. **/
-            virtual std::byte * alloc(Opaque d, std::size_t z) const = 0;
+            virtual value_type alloc(Opaque d, size_type z) const = 0;
+            /** like @ref alloc, but follow with one or more consecutive
+             *  @ref sub_alloc() calls. This sequence of allocs will share
+             *  the initial allocation header.
+             **/
+            virtual value_type super_alloc(Opaque d, size_type z) const = 0;
+            /** follow a preceding @ref super_alloc call with additional
+             *  subsidiary allocs that share the same object header.
+             *  Must finish sequence with exactly one sub_alloc call
+             *  with @p complete_flag set. This sub_alloc call may have
+             *  zero @p z
+             **/
+            virtual value_type sub_alloc(Opaque d, size_type z, bool complete_flag) const = 0;
             /** reset allocator @p d to empty state **/
             virtual void clear(Opaque d) const = 0;
             /** destruct allocator @p d **/

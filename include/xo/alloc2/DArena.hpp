@@ -26,6 +26,22 @@ namespace xo {
              *  (provided you use their full extent :)
              **/
             std::size_t hugepage_z_ = 2 * 1024 * 1024;
+            /** true to store header (8 bytes) at the beginning of each allocation.
+             *  necessary and sufficient to allows iterating over allocs
+             *  present in arena
+             **/
+            bool store_header_flag_ = false;
+            /** if non-zero, allocate extra space between allocs, and fill
+             *  with fixed test-pattern contents. Allows for simple
+             *  runtime arena sanitizing checks.
+             *  Will be rounded up to multiple of @ref padding::c_alloc_alignment
+             **/
+            std::size_t guard_z_ = 0;
+            /** if store_header_flag_ is true: mask bits for allocation size.
+             *  remaining bits can be stolen for other purposes
+             *  otherwise ignored
+             **/
+            std::uint64_t header_size_mask_ = 0xffffffff;
             /** true to enable debug logging **/
             bool debug_flag_ = false;
 
@@ -59,6 +75,8 @@ namespace xo {
             using size_type = std::size_t;
             /** @brief a contiguous memory range **/
             using range_type = std::pair<std::byte*,std::byte*>;
+            /** @brief type for allocation header (if enabled) **/
+            using header_type = std::uint64_t;
 
             ///@}
 
@@ -102,6 +120,11 @@ namespace xo {
              *  Remainder mapped but uncommitted.
              **/
             size_type committed_z_ = 0;
+
+            /** if config_.store_header_flag_:
+             *  Pointer to header for last allocation.
+             **/
+            header_type * last_header_ = nullptr;
 
             /** free pointer.
              *  Memory in range [@ref lo_, @ref free_) current in use

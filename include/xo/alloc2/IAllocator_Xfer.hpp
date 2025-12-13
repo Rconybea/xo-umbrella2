@@ -18,7 +18,8 @@ namespace xo {
         struct IAllocator_Xfer : public AAllocator {
             // parallel interface to AAllocator, with specific data type
             using Impl = IAllocator_DRepr;
-            using size_type = std::size_t;
+            using size_type = AAllocator::size_type;
+            using value_type = AAllocator::value_type;
 
             static const DRepr & _dcast(Copaque d) { return *(const DRepr *)d; }
             static DRepr & _dcast(Opaque d) { return *(DRepr *)d; }
@@ -43,8 +44,15 @@ namespace xo {
 
             bool              expand(Opaque d,
                                      std::size_t z) const noexcept override { return I::expand(_dcast(d), z); }
-            std::byte *        alloc(Opaque d,
+            value_type         alloc(Opaque d,
                                      std::size_t z) const override { return I::alloc(_dcast(d), z); }
+            value_type   super_alloc(Opaque d,
+                                     std::size_t z) const override { return I::super_alloc(_dcast(d), z); }
+            value_type     sub_alloc(Opaque d,
+                                     std::size_t z,
+                                     bool complete_flag) const override {
+                return I::sub_alloc(_dcast(d), z, complete_flag);
+            }
             void               clear(Opaque d) const override { return I::clear(_dcast(d)); }
             void       destruct_data(Opaque d) const override { return I::destruct_data(_dcast(d)); }
 

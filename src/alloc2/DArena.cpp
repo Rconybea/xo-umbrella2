@@ -166,6 +166,9 @@ namespace xo {
                                     last_error_{}
         {
             //retval.checkpoint_  = lo_;
+
+            /** make sure guard size is aligned **/
+            config_.guard_z_ = padding::with_padding(config_.guard_z_);
         }
 
         DArena::DArena(DArena && other) {
