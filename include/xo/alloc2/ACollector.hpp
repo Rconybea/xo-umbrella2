@@ -3,6 +3,14 @@
  *  @author Roland Conybeare, Dec 2025
  **/
 
+#pragma once
+
+#include "IGCObject_Any.hpp"
+
+#include <xo/facet/facet_implementation.hpp>
+#include <xo/facet/typeseq.hpp>
+#include <xo/facet/obj.hpp>
+
 #include "gc/generation.hpp"
 #include "gc/role.hpp"
 
@@ -13,6 +21,8 @@ namespace xo {
     namespace mm {
         using Copaque = const void *;
         using Opaque = void *;
+
+        struct IGCObject_Any; // see IGCObject_Any.hpp
 
         /** @class ACollector
          *  @brief Abstract facet for the XO garbage collector
@@ -37,8 +47,13 @@ namespace xo {
              *  in which case calls through @c std::launder(&iface)
              *  will properly act on @c DFoo.
              **/
-            virtual void install_type(Opaque d, int32_t tseq, AGCObject_Any & iface);
-            virtual void add_gc_root(Opaque d, int32_t tid, Opaque * root) = 0;
+            virtual void install_type(Opaque d, int32_t tseq, IGCObject_Any & iface);
+            virtual void add_gc_root(Opaque d, int32_t tseq, Opaque * root) = 0;
+
+            /** evacuate @p *lhs to to-space and replace with forwarding pointer
+             *  Require: gc in progress
+             **/
+            virtual void forward_inplace(Opaque d, obj<AGCObject> * lhs) = 0;
         };
     }
 

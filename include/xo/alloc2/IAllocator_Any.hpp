@@ -31,6 +31,7 @@ namespace xo {
             // from AAllocator
             int32_t _typeseq() const noexcept  override { return s_typeseq; }
 
+            // const methods
             [[noreturn]] std::string_view     name(Copaque) const noexcept override { _fatal(); }
             [[noreturn]] size_type        reserved(Copaque) const noexcept override { _fatal(); }
             [[noreturn]] size_type            size(Copaque) const noexcept override { _fatal(); }
@@ -40,6 +41,7 @@ namespace xo {
             [[noreturn]] bool             contains(Copaque, const void *) const noexcept override { _fatal(); }
             [[noreturn]] AllocatorError last_error(Copaque) const noexcept override { _fatal(); }
 
+            // non-const methods
             [[noreturn]] bool              expand(Opaque, std::size_t) const noexcept override { _fatal(); }
             [[noreturn]] value_type         alloc(Opaque, std::size_t) const override { _fatal(); }
             [[noreturn]] value_type   super_alloc(Opaque, std::size_t) const override { _fatal(); }

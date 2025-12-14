@@ -9,7 +9,7 @@
 #include "RAllocator.hpp"
 #include "xo/facet/facet_implementation.hpp"
 #include "xo/facet/typeseq.hpp"
-#include "xo/facet/obj.hpp"
+#include "xo/facet/obj.hpp"   // for obj<AAllocator> in shallow_copy
 #include <cstdint>
 #include <cstddef>
 
