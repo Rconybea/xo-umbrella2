@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "AAllocator.hpp"
 #include "xo/facet/RRouter.hpp"
 #include <string>
 

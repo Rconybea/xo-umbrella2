@@ -93,6 +93,7 @@ add_subdirectory(xo-callback)
 add_subdirectory(xo-alloc)
 add_subdirectory(xo-alloc2)  # experiment w/ sep iface,data
 add_subdirectory(xo-object)
+add_subdirectory(xo-object2)  # experiment w/ facet object model
 add_subdirectory(xo-ordinaltree)
 #
 add_subdirectory(xo-webutil)

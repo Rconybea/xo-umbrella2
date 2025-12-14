@@ -95,6 +95,8 @@ namespace xo {
             return obj<AFacet, DRepr>(data);
         }
     } /*namespace facet*/
+
+    using facet::obj;
 } /*namespace xo*/
 
 /* end obj.hpp */
