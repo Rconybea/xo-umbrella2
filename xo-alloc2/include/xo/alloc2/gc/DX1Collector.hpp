@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "ArenaConfig.hpp"
-#include "DArena.hpp"
+#include "arena/ArenaConfig.hpp"
+#include "arena/DArena.hpp"
 #include "gc/generation.hpp"
 #include "gc/role.hpp"
 #include <memory>
