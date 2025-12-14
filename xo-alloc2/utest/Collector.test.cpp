@@ -7,7 +7,7 @@
  *        see xo-object2/utest
  **/
 
-#include "gc/Collector.hpp"
+#include "Collector.hpp"
 #include "gc/DX1Collector.hpp"
 #include <xo/indentlog/print/tag.hpp>
 #include <catch2/catch.hpp>
