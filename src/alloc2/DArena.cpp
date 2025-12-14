@@ -4,7 +4,7 @@
  **/
 
 #include "xo/alloc2/AAllocator.hpp"
-#include "xo/alloc2/DArena.hpp"
+#include "arena/DArena.hpp"
 #include "xo/alloc2/padding.hpp"
 #include "xo/indentlog/print/tag.hpp"
 #include <cassert>
