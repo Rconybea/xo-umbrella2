@@ -3,7 +3,7 @@
  *  @author Roland Conybeare, Dec 2025
  **/
 
-#include "IAllocator_DArena.hpp"
+#include "arena/IAllocator_DArena.hpp"
 #include "padding.hpp"
 #include "xo/indentlog/scope.hpp"
 #include <cassert>

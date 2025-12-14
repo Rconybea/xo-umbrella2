@@ -1,0 +1,4 @@
+AAllocator |<-- IAllocator_Any (D=DVariantPlaceholder)
+           |<-- IAllocator_Xfer<D,..>
+
+OObject<AAllocator,D> |<-- RAllocator<O>

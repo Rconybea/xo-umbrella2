@@ -1,6 +1,6 @@
 /** @file AAllocator.cpp **/
 
-#include "xo/alloc2/AAllocator.hpp"
+#include "alloc/AAllocator.hpp"
 
 namespace xo {
     namespace mm {

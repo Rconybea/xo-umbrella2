@@ -5,10 +5,10 @@
 
 #include "xo/alloc2/Allocator.hpp"
 //#include "xo/alloc2/IAllocator_Any.hpp"
-#include "xo/alloc2/IAllocator_Xfer.hpp"
+#include "xo/alloc2/alloc/IAllocator_Xfer.hpp"
 //#include "xo/alloc2/DArena.hpp"
-#include "xo/alloc2/IAllocator_DArena.hpp"
-#include "xo/alloc2/RAllocator.hpp"
+#include "xo/alloc2/arena/IAllocator_DArena.hpp"
+//#include "xo/alloc2/alloc/RAllocator.hpp"
 #include "xo/alloc2/padding.hpp"
 #include "xo/indentlog/scope.hpp"
 #include "xo/facet/obj.hpp"

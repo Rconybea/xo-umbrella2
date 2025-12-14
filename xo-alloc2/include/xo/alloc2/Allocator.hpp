@@ -5,8 +5,9 @@
 
 #pragma once
 
-#include "AAllocator.hpp"
-#include "IAllocator_Any.hpp"
-#include "RAllocator.hpp"
+#include "alloc/AAllocator.hpp"
+#include "alloc/IAllocator_Any.hpp"
+#include "alloc/IAllocator_Xfer.hpp"
+#include "alloc/RAllocator.hpp"
 
 /* end Allocator.hpp */
