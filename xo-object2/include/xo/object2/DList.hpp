@@ -3,8 +3,8 @@
  *  @author Roland Conybeare, Dec 2025
  **/
 
-#include "xo/alloc2/RGCObject.hpp"
-#include "xo/alloc2/IGCObject_Any.hpp"
+#include "xo/alloc2/gc/RGCObject.hpp"
+#include "xo/alloc2/gc/IGCObject_Any.hpp"
 #include "xo/facet/obj.hpp"
 
 namespace xo {

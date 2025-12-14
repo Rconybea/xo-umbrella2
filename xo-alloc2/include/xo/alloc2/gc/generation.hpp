@@ -19,9 +19,11 @@ namespace xo {
         struct generation {
             using value_type = std::uint32_t;
 
-            explicit generation(value_type x) : value_{x} {}
+            explicit constexpr generation(value_type x) : value_{x} {}
 
-            operator value_type() const { return value_; }
+            constexpr operator value_type() const { return value_; }
+
+            generation & operator++() { ++value_; return *this; }
 
             std::uint32_t value_;
         };

@@ -6,8 +6,8 @@
 #pragma once
 
 #include "xo/alloc2/AAllocator.hpp"
-#include "xo/alloc2/AGCObject.hpp"
-#include "xo/alloc2/IGCObject_Xfer.hpp"
+#include <xo/alloc2/gc/AGCObject.hpp>
+#include <xo/alloc2/gc/IGCObject_Xfer.hpp>
 #include "DInteger.hpp"
 
 namespace xo {

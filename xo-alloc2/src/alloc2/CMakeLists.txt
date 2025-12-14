@@ -9,8 +9,10 @@ set(SELF_SRCS
     IAllocator_DArena.cpp
 
     ICollector_Any.cpp
-
     IGCObject_Any.cpp
+
+    DX1Collector.cpp
+
     )
 
 xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 ${SELF_SRCS})
