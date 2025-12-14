@@ -1,0 +1,45 @@
+/** @file IGCObject_DList.cpp
+ *
+ *  @author Roland Conybeare, Dec 2025
+ **/
+
+#include "IGCObject_DList.hpp"
+
+namespace xo {
+    using xo::mm::AAllocator;
+    using xo::facet::obj;
+    using std::size_t;
+
+    namespace scm {
+        size_t
+        IGCObject_DList::shallow_size(const DList &) noexcept
+        {
+            return sizeof(DList);
+        }
+
+        DList *
+        IGCObject_DList::shallow_copy(const DList & src,
+                                      obj<AAllocator> mm) noexcept
+        {
+            DList * copy = (DList *)mm.alloc(sizeof(DList));
+
+            if (copy)
+                *copy = src;
+
+            return copy;
+        }
+
+        size_t
+        IGCObject_DList::forward_children(DList & src,
+                                          obj<ACollector> gc) noexcept
+        {
+            gc.forward_inplace(&src.head_);
+            gc.forward_inplace(&src.rest_);
+
+            return shallow_size(src);
+        }
+
+    } /*namespace scm*/
+} /*namespace xo*/
+
+/* end IGCObject_DList.cpp */
