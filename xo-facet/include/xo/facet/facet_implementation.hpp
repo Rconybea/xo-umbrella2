@@ -88,7 +88,9 @@ namespace xo {
          *
          **/
         template <typename AFacet, typename DRepr>
-        struct FacetImplementation {};
+        struct FacetImplementation {
+            static_assert(false && "expect specialization <AFacet,DRepr> which should provide ImplType trait");
+        };
 
         /**  Retrieve facet implementation for a (facet, datatype) pair **/
         template <typename AFacet, typename DRepr>

@@ -7,6 +7,7 @@
 
 #include "gc/ACollector.hpp"
 #include "gc/ICollector_Any.hpp"
+#include "gc/ICollector_Xfer.hpp"
 #include "gc/RCollector.hpp"
 
 /* end Collector.hpp */

@@ -85,6 +85,7 @@ namespace xo {
         struct DX1Collector {
             explicit DX1Collector(const CollectorConfig & cfg);
 
+            const DArena * get_space(role r, generation g) const { return space_[r][g]; }
             DArena * get_space(role r, generation g) { return space_[r][g]; }
             DArena * from_space(generation g) { return get_space(role::from_space(), g); }
             DArena * to_space(generation g) { return get_space(role::to_space(), g); }

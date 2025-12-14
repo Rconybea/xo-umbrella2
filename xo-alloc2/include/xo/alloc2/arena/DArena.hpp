@@ -64,6 +64,8 @@ namespace xo {
 
             ///@}
 
+            size_type allocated() const { return free_ - lo_; }
+
             /** obtain uncommitted contiguous memory range comprising
              *  a whole multiple of @p hugepage_z bytes, of at least size @p req_z,
              *  aligned on a @p hugepage_z boundary
