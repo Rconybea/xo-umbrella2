@@ -3,7 +3,7 @@
  *  @author Roland Conybeare, Dec 2025
  **/
 
-#include "xo/alloc2/AAllocator.hpp"
+#include "alloc/AAllocator.hpp"
 #include "arena/DArena.hpp"
 #include "xo/alloc2/padding.hpp"
 #include "xo/indentlog/print/tag.hpp"

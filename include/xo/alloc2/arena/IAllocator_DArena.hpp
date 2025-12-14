@@ -3,8 +3,8 @@
  *  @author Roland Conybeare, Dec 2025
  **/
 
-#include "AAllocator.hpp"
-#include "IAllocator_Xfer.hpp"
+#include "alloc/AAllocator.hpp"
+#include "alloc/IAllocator_Xfer.hpp"
 #include "arena/DArena.hpp"
 
 namespace xo {
