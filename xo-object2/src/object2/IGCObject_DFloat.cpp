@@ -1,0 +1,44 @@
+/** @file IGCObject_DFloat.cpp
+ *
+ *  @author Roland Conybeare, Dec 2025
+ **/
+
+#include "IGCObject_DFloat.hpp"
+#include "AAllocator.hpp"
+#include "xo/facet/obj.hpp"
+#include <cstddef>
+
+namespace xo {
+    using xo::mm::AAllocator;
+    using xo::facet::obj;
+    using std::size_t;
+
+    namespace scm {
+        size_t
+        IGCObject_DFloat::shallow_size(const DFloat &) noexcept
+        {
+            return sizeof(DFloat);
+        }
+
+        DFloat *
+        IGCObject_DFloat::shallow_copy(const DFloat & src,
+                                       obj<AAllocator> mm) noexcept
+        {
+            DFloat * copy = (DFloat *)mm.alloc(sizeof(DFloat));
+
+            if (copy)
+                *copy = src;
+
+            return copy;
+        }
+
+        size_t
+        IGCObject_DFloat::forward_children(DFloat &) noexcept
+        {
+            return sizeof(DFloat);
+        }
+
+    } /*namespace scm*/
+} /*namespace xo*/
+
+/* end IGCObject_DFloat.cpp */
