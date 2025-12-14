@@ -4,7 +4,7 @@
  **/
 
 #include "IGCObject_DInteger.hpp"
-#include "AAllocator.hpp"
+#include "xo/alloc2/alloc/AAllocator.hpp"
 #include "xo/facet/obj.hpp"
 #include <cstddef>
 

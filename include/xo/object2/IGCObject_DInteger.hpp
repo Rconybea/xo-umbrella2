@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "xo/alloc2/AAllocator.hpp"
+#include "xo/alloc2/alloc/AAllocator.hpp"
 #include <xo/alloc2/gc/AGCObject.hpp>
 #include <xo/alloc2/gc/IGCObject_Xfer.hpp>
 #include "DInteger.hpp"
