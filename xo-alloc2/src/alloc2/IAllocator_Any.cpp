@@ -20,7 +20,10 @@ namespace xo {
              * e.g. IAllocator_Xfer<DArena>
              */
 
-            std::cerr << "fatal: attempt to call uninitialized IAllocator_Any" << std::endl;
+            std::cerr << "fatal"
+                      << ": attempt to call uninitialized"
+                      << " IAllocator_Any method"
+                      << std::endl;
             std::terminate();
         }
 

@@ -8,6 +8,7 @@
 #include "xo/indentlog/scope.hpp"
 #include <cassert>
 #include <cstddef>
+#include <cstring>
 #include <sys/mman.h>
 
 namespace xo {
@@ -77,12 +78,6 @@ namespace xo {
                 s.last_error_ = AllocatorError(error::reserve_exhausted,
                                                s.error_count_,
                                                target_z, s.committed_z_, reserved(s));
-
-#ifdef OBSOLETE
-                throw std::runtime_error(tostr("ArenaAlloc::expand: requested size exceeds reserved size",
-                                               xtag("requested", target_z),
-                                               xtag("reserved", reserved(s))));
-#endif
                 return false;
             }
 
@@ -114,13 +109,15 @@ namespace xo {
 
 //            log && log(xtag("aligned_offset_z", aligned_offset_z),
 //                       xtag("add_commit_z", add_commit_z));
-
 //            log && log("expand committed range",
 //                       xtag("commit_start", commit_start),
 //                       xtag("add_commit_z", add_commit_z),
 //                       xtag("commit_end", commit_start + add_commit_z));
 
-            if (::mprotect(commit_start, add_commit_z, PROT_READ | PROT_WRITE) != 0) [[unlikely]] {
+            if (::mprotect(commit_start,
+                           add_commit_z,
+                           PROT_READ | PROT_WRITE) != 0) [[unlikely]]
+            {
                 ++(s.error_count_);
                 s.last_error_ = AllocatorError(error::commit_failed,
                                                s.error_count_,
@@ -136,11 +133,22 @@ namespace xo {
             s.committed_z_ = aligned_target_z;
             s.limit_ = s.lo_ + s.committed_z_;
 
+            if (commit_start == s.lo_) [[unlikely]]
+            {
+                /* first expand() for this allocator - start with guard_z_ bytes */
+
+                ::memset(s.free_,
+                         s.config_.guard_byte_,
+                         s.config_.guard_z_);
+
+                s.free_ += s.config_.guard_z_;
+            }
+
             assert(s.committed_z_ % s.config_.hugepage_z_ == 0);
             assert(reinterpret_cast<size_t>(s.limit_) % s.config_.hugepage_z_ == 0);
 
             return true;
-        }
+        } /*expand*/
 
         std::byte *
         IAllocator_DArena::alloc(DArena & s,
@@ -164,8 +172,6 @@ namespace xo {
              * - collapses into alloc() behavior when
              *   ArenaConfig.store_header_flag_ disabled
              */
-
-            bool remember_header_flag = s.config_.store_header_flag_;
 
             return _alloc(s, req_z,
                           alloc_mode::super);
@@ -258,17 +264,37 @@ namespace xo {
 #endif
         }
 
-        std::byte *
+        byte *
         IAllocator_DArena::_alloc(DArena & s,
                                   std::size_t req_z,
-                                  bool store_header_flag,
-                                  bool remember_header_flag)
+                                  alloc_mode mode)
         {
             scope log(XO_DEBUG(s.config_.debug_flag_));
 
+            /*
+             *                                                     sub_complete
+             *                                            sub_incomplete      |
+             *                                    standard  super      |      |
+             *                                           v      v      v      v
+             */
+            std::array<bool, 4>  store_header_v = {{  true,  true, false, false }};
+            std::array<bool, 4> retain_header_v = {{ false,  true, false, false }};
+            std::array<bool, 4>   store_guard_v = {{  true, false, false,  true }};
+
+            /* -> write header at s.free_ */
+            bool store_header_flag = false;
+            /* -> stash s.last_header_*/
+            bool retain_header_flag = false;
+            /* -> write guard bytes */
+            bool store_guard = false;
+
+            if (s.config_.store_header_flag_) {
+                store_header_flag  = store_header_v[(int)mode];
+                retain_header_flag = retain_header_v[(int)mode];
+                store_guard        = store_guard_v[(int)mode];
+            }
+
             assert(padding::is_aligned((size_t)s.free_));
-            /* remember_header_flag -implies-> store_header_flag */
-            assert(store_header_flag || !remember_header_flag);
 
             /*
              *                    free_(pre)
@@ -277,7 +303,7 @@ namespace xo {
              *                    <-------------z1--------------->
              *           < guard ><  hz  ><     req_z     >< dz  >< guard >
              *
-             * used <==  +++++++++0000zzzz@@@@@@@@@@@@@@@@@ppppppp+++++++++ ==> unallocated
+             * used <==  +++++++++0000zzzz@@@@@@@@@@@@@@@@@ppppppp+++++++++ ==> avail
              *
              *                    ^       ^                                ^
              *                    header  mem                              |
@@ -296,12 +322,15 @@ namespace xo {
             /* dz: pad req_z to alignment size (multiple of 8 bytes, probably) */
             size_t dz = padding::alloc_padding(req_z);
             size_t z0 = req_z + dz;
-            /* if non-zero: will store padded alloc size at the beginning of each allocation
-             * reminder: important to store padded size for correct arena iteration
+            /* if non-zero:
+             *  will store padded alloc size at the beginning of each allocation
+             * reminder:
+             *  important to store padded size for correct arena iteration
              */
             uint64_t header = req_z + dz;
 
-            if (store_header_flag) {
+            if (store_header_flag)
+            {
                 if ((s.config_.header_size_mask_ & z0) == z0) [[likely]] {
                     hz = sizeof(header);
                 } else {
@@ -309,7 +338,9 @@ namespace xo {
                     ++(s.error_count_);
                     s.last_error_ = AllocatorError(error::header_size_mask,
                                                    s.error_count_,
-                                                   0 /*add_commit_z*/, s.committed_z_, reserved(s));
+                                                   0 /*add_commit_z*/,
+                                                   s.committed_z_,
+                                                   reserved(s));
                     return nullptr;
                 }
             }
@@ -318,32 +349,45 @@ namespace xo {
 
             assert(padding::is_aligned(z1));
 
-            if (expand(s, allocated(s) + z1)) [[likely]] {
-                if (store_header_flag) {
-                    (*(uint64_t *)s.free_) = header;
-
-                    if (remember_header_flag) {
-                        s.last_header_ = (uint64_t *)s.free_;
-                    }
-                }
-
-                byte * mem = s.free_ + hz;
-
-                s.free_ += z1;
-
-                log && log(xtag("self", s.config_.name_),
-                           xtag("hz", hz),
-                           xtag("z0", req_z),
-                           xtag("+pad", dz),
-                           xtag("z1", z1),
-                           xtag("size", size(s)),
-                           xtag("avail", available(s)));
-
-                return mem;
-            } else {
-                /* error already captured */
+            if (!expand(s, allocated(s) + z1)) [[unlikely]] {
+                /* (error state already captured) */
                 return nullptr;
             }
+
+            if (store_header_flag) {
+                /* capturing header */
+                *(uint64_t *)s.free_ = header;
+
+                if (retain_header_flag) {
+                    /* and rembering for subsequent
+                     *   sub_alloc()
+                     */
+                    s.last_header_ = (uint64_t *)s.free_;
+                }
+            }
+
+            byte * mem = s.free_ + hz;
+
+            s.free_ += z1;
+
+            if (store_guard) {
+                /* write guard bytes for overrun detection */
+                ::memset(s.free_,
+                         s.config_.guard_byte_,
+                         s.config_.guard_z_);
+
+                s.free_ += s.config_.guard_z_;
+            }
+
+            log && log(xtag("self", s.config_.name_),
+                       xtag("hz", hz),
+                       xtag("z0", req_z),
+                       xtag("+pad", dz),
+                       xtag("z1", z1),
+                       xtag("size", size(s)),
+                       xtag("avail", available(s)));
+
+            return mem;
         }
 
         void

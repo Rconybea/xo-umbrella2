@@ -34,7 +34,7 @@ namespace xo {
             enum class alloc_mode : uint8_t {
                 standard,
                 super,
-                sub,
+                sub_incomplete,
                 sub_complete,
             };
 
@@ -75,10 +75,7 @@ namespace xo {
             /** alloc driver. shared by alloc(), super_alloc(), sub_alloc() **/
             static value_type _alloc(DArena &,
                                      size_type z,
-                                     alloc_mode mode,
-                                     bool store_header_flag,
-                                     bool remember_header_flag);
-
+                                     alloc_mode mode);
         };
 
 //        template <>

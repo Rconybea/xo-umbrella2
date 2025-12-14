@@ -212,6 +212,59 @@ namespace xo {
             REQUIRE(a1o.committed() <= a1o.reserved());
         }
 
+        TEST_CASE("allocator-alloc-3", "[alloc2][Allocator]")
+        {
+            using header_type = AAllocator::header_type;
+
+            /* typed allocator a1o, with object header + guard bytes */
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 64*1024,
+                              .guard_z_ = 8,
+                              .guard_byte_ = 0xfd,
+                              .store_header_flag_ = true,
+                              /* up to 4GB */
+                              .header_size_mask_ = 0xffffffff,
+                              .debug_flag_ = false,
+            };
+            DArena arena = DArena::map(cfg);
+            obj<AAllocator, DArena> a1o{&arena};
+
+            REQUIRE(a1o.reserved() >= cfg.size_);
+            REQUIRE(a1o.committed() == 0);
+            REQUIRE(a1o.available() == 0);
+            REQUIRE(a1o.allocated() == 0);
+
+            size_t z0 = 1;
+            byte * m0 = a1o.alloc(1);
+
+            REQUIRE(m0);
+
+            //
+            //                > <
+            //  < guard><header> < pad >< guard>
+            //  ++++++++0000zzzzXppppppp++++++++
+            //  ^       ^       ^       ^
+            //  guard0  header  m0      guard1
+            //
+
+            byte * guard0 = m0 - sizeof(header_type) - cfg.guard_z_;
+            header_type* header = (header_type*)(m0 - sizeof(header_type));
+            size_t pad = padding::with_padding(z0) - z0;
+            byte * guard1 = m0 + z0 + pad;
+
+            REQUIRE(a1o.contains(guard0));
+            REQUIRE(a1o.contains(header));
+            REQUIRE(((*header) & cfg.header_size_mask_) == padding::with_padding(z0));
+
+            REQUIRE(a1o.last_error().error_ == error::none);
+            REQUIRE(a1o.last_error().error_seq_ == 0);
+
+            REQUIRE(a1o.allocated() == cfg.guard_z_ + sizeof(header_type) + z0 + pad + cfg.guard_z_);
+            REQUIRE(a1o.allocated() <= a1o.committed());
+            REQUIRE(a1o.allocated() + a1o.available() == a1o.committed());
+            REQUIRE(a1o.committed() <= a1o.reserved());
+        }
+
         TEST_CASE("allocator-fail-1", "[alloc2][AAllocator]")
         {
             /* typed allocator a1o */
