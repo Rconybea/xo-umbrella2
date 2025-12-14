@@ -9,9 +9,7 @@
 #include <cassert>
 
 namespace xo {
-    namespace mm {
-        struct IAllocator_Any;
-    }
+    namespace mm { struct IAllocator_Any; }
 
     namespace facet {
         template <>
@@ -22,11 +20,13 @@ namespace xo {
 
     namespace mm {
         /** @class IAllocator_Any
-         *  @brief Allocator implementation for variant instance.
+         *  @brief Allocator implementation for empty variant instance.
          **/
         struct IAllocator_Any : public AAllocator {
             //using Impl = IAllocator_ImplType<xo::facet::DVariantPlaceholder>;
             using size_type = std::size_t;
+
+            const AAllocator * iface() const { return std::launder(this); }
 
             // from AAllocator
             int32_t _typeseq() const noexcept  override { return s_typeseq; }

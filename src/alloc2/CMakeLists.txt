@@ -2,10 +2,13 @@
 
 set(SELF_LIB xo_alloc2)
 set(SELF_SRCS
+
     AAllocator.cpp
     DArena.cpp
     IAllocator_Any.cpp
     IAllocator_DArena.cpp
+
+    IGCObject_Any.cpp
     )
 
 xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 ${SELF_SRCS})
