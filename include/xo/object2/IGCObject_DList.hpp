@@ -7,12 +7,12 @@
 
 #include <xo/alloc2/alloc/AAllocator.hpp>
 #include <xo/alloc2/alloc/RAllocator.hpp>
-#include <xo/alloc2/gc/Collector.hpp>
+#include <xo/alloc2/Collector.hpp>
 //#include <xo/alloc2/gc/ACollector.hpp>
 //#include <xo/alloc2/gc/ICollector_Any.hpp>
 //#include <xo/alloc2/gc/RCollector.hpp>
-#include <xo/alloc2/gc/AGCObject.hpp>
-#include <xo/alloc2/gc/IGCObject_Xfer.hpp>
+#include <xo/alloc2/gcobject/AGCObject.hpp>
+#include <xo/alloc2/gcobject/IGCObject_Xfer.hpp>
 #include "DList.hpp"
 
 namespace xo {
