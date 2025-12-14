@@ -4,8 +4,11 @@ Glossary
 --------
 
 .. glossary::
-   b/c
+    b/c
       | abbreviation for ``because``
+
+    dwim
+      | abbreviation for ``do what I mean``
 
     iff
       | abbreviation for ``if, and only if``

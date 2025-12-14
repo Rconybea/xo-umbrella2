@@ -5,9 +5,11 @@
 
 #pragma once
 
+#include <cstdint>
+
 namespace xo {
     namespace scm {
-        using DInteger = double;
+        using DInteger = std::int64_t;
     } /*nmaespace obj*/
 } /*namespace xo*/
 

@@ -12,6 +12,10 @@ namespace xo {
         template <typename RRouter>
         consteval bool valid_object_router()
         {
+            static_assert(sizeof(RRouter) >= sizeof(RRouter::ObjectType),
+                              "Router type must inherit Router::ObjectType");
+            static_assert(std::is_convertible_v<RRouter, typename RRouter::ObjectType>,
+                              "Router type must inherit Router::ObjectType");
             static_assert(requires { typename RRouter::ObjectType; },
                               "Router type must provide typename Router::ObjectType");
             static_assert(valid_object_traits<RRouter::ObjectType>,

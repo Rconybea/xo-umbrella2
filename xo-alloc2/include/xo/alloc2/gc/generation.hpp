@@ -3,6 +3,8 @@
  *  @author Roland Conybeare, Dec 2025
  **/
 
+#pragma once
+
 #include <cstddef>
 #include <cstdint>
 

@@ -8,6 +8,8 @@ set(SELF_SRCS
     IAllocator_Any.cpp
     IAllocator_DArena.cpp
 
+    ICollector_Any.cpp
+
     IGCObject_Any.cpp
     )
 
