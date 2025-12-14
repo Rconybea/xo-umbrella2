@@ -72,6 +72,8 @@ namespace xo {
             /** OObject is truthy **/
             operator bool() const { return data_ != nullptr; }
 
+            // ----- iface() for variant fat pointer -----
+
             /** interface pointer for variant OObject instances.
              *  These instance support runtime polymorphism.
              **/
@@ -88,6 +90,18 @@ namespace xo {
                 return std::launder(&iface_);
             }
 
+            /** non-const verison. Technically all interface methods are const.
+             *  But counterintuitive to have to mark interface methods const
+             *  that are dedicated to mutable data.
+             **/
+            FacetType * iface()
+                requires std::is_same_v<DataType, DVariantPlaceholder>
+            {
+                return std::launder(&iface_);
+            }
+
+            // ----- iface() for typed fat pointer -----
+
             /** interface pointer for OObject instance with representation
              *  known at compile time.
              *
@@ -99,6 +113,16 @@ namespace xo {
                 /* don't use std::launder: want compiler to devirtualize
                  * calls to virtual @ref iface_ methods
                  */
+                return &iface_;
+            }
+
+            /** non-const verison. Technically all interface methods are const.
+             *  But counterintuitive to have to mark interface methods const
+             *  that are dedicated to mutable data.
+             **/
+            FacetType * iface()
+                requires(!std::is_same_v<DataType, DVariantPlaceholder>)
+            {
                 return &iface_;
             }
 
