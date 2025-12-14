@@ -3,7 +3,7 @@
  *  @author Roland Conybeare, Dec 2025
  **/
 
-#include "gc/IGCObject_Any.hpp"
+#include "gcobject/IGCObject_Any.hpp"
 #include <iostream>
 
 namespace xo {

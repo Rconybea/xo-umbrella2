@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "ACollector.hpp"
-#include "ICollector_Any.hpp"
-#include "RCollector.hpp"
+#include "gc/ACollector.hpp"
+#include "gc/ICollector_Any.hpp"
+#include "gc/RCollector.hpp"
 
 /* end Collector.hpp */

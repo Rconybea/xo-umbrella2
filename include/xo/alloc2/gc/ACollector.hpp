@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "IGCObject_Any.hpp"
+#include "gcobject/IGCObject_Any.hpp"
 
 #include <xo/facet/facet_implementation.hpp>
 #include <xo/facet/typeseq.hpp>
