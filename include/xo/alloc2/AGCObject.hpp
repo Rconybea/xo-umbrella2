@@ -5,8 +5,11 @@
 
 #pragma once
 
+#include "IAllocator_Any.hpp"
+#include "RAllocator.hpp"
 #include "xo/facet/facet_implementation.hpp"
 #include "xo/facet/typeseq.hpp"
+#include "xo/facet/obj.hpp"
 #include <cstdint>
 #include <cstddef>
 
@@ -28,7 +31,8 @@ namespace xo {
             virtual int32_t _typeseq() const noexcept = 0;
 
             virtual size_type shallow_size(Copaque d) const noexcept = 0;
-            virtual Opaque * shallow_copy(Copaque d) const noexcept = 0;
+            virtual Opaque * shallow_copy(Copaque d,
+                                          obj<AAllocator> mm) const noexcept = 0;
             virtual size_type forward_children(Opaque d) const noexcept = 0;
         };
 

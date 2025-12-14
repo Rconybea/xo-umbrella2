@@ -30,8 +30,8 @@ namespace xo {
             size_type shallow_size(Copaque d) const noexcept override {
                 return I::shallow_copy(_dcast(d));
             }
-            Opaque * shallow_copy(Copaque d) const noexcept override {
-                return I::shallow_size(_dcast(d));
+            Opaque * shallow_copy(Copaque d, obj<AAllocator> mm) const noexcept override {
+                return I::shallow_size(_dcast(d), mm);
             }
 
             // non-const methods
