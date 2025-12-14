@@ -44,7 +44,7 @@ namespace xo {
 
         size_t
         IAllocator_DArena::allocated(const DArena & s) noexcept {
-            return s.free_ - s.lo_;
+            return s.allocated();
         }
 
         bool

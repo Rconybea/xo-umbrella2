@@ -8,7 +8,8 @@
  **/
 
 #include "Collector.hpp"
-#include "gc/DX1Collector.hpp"
+#include "gc/ICollector_DX1Collector.hpp"
+//#include "gc/DX1Collector.hpp"
 #include <xo/indentlog/print/tag.hpp>
 #include <catch2/catch.hpp>
 
@@ -25,7 +26,7 @@ namespace xo {
         // - obj<ACollector> constructible [ ]
         //   - obj<ACollector> truthy      [ ]
 
-        TEST_CASE("collector-any-null", "[alloc2][ACollector]")
+        TEST_CASE("collector-any-null", "[alloc2][gc][ACollector]")
         {
             /* empty variant collector */
             obj<ACollector> gc1;
@@ -35,7 +36,7 @@ namespace xo {
             REQUIRE(gc1.data() == nullptr);
         }
 
-        TEST_CASE("DX1Collector-1", "[alloc2][DX1Collector]")
+        TEST_CASE("DX1Collector-1", "[alloc2][gc][DX1Collector]")
         {
             ArenaConfig arena_cfg = { .name_ = "_test_unused",
                                       .size_ = 4*1024*1024,
@@ -77,6 +78,26 @@ namespace xo {
                 REQUIRE(!gc.space_storage_[0][gi].is_mapped());
                 REQUIRE(!gc.space_storage_[1][gi].is_mapped());
             }
+        }
+
+        TEST_CASE("collector-x1-obj", "[alloc2][gc]")
+        {
+            ArenaConfig arena_cfg = { .name_ = "_test_unused",
+                                      .size_ = 4*1024*1024,
+                                      .store_header_flag_ = true,
+                                      .header_size_mask_ = 0x0000ffff, };
+            CollectorConfig cfg = { .arena_config_ = arena_cfg,
+                                    .n_generation_ = 2,
+                                    .gc_trigger_v_ = {{64*1024, 1024*1024, 0, 0,
+                                                       0, 0, 0, 0,
+                                                       0, 0, 0, 0,
+                                                       0, 0, 0, 0}} };
+
+            DX1Collector gc = DX1Collector{cfg};
+
+            /* typed collector */
+            obj<ACollector, DX1Collector> x1(&gc);
+
         }
     }
 }

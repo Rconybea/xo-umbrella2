@@ -8,9 +8,7 @@
 #include "arena/DArena.hpp"
 
 namespace xo {
-    namespace mm {
-        struct IAllocator_DArena;
-    }
+    namespace mm { struct IAllocator_DArena; }
 
     namespace facet {
         template <>
