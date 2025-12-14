@@ -192,6 +192,31 @@ namespace xo {
             other.last_error_  = AllocatorError();
         }
 
+        DArena &
+        DArena::operator=(DArena && other)
+        {
+            config_            = other.config_;
+            page_z_            = other.page_z_;
+            lo_                = other.lo_;
+            committed_z_       = other.committed_z_;
+            free_              = other.free_;
+            limit_             = other.limit_;
+            hi_                = other.hi_;
+            error_count_       = other.error_count_;
+            last_error_        = other.last_error_;
+
+            other.config_      = ArenaConfig();
+            other.lo_          = nullptr;
+            other.committed_z_ = 0;
+            other.free_        = nullptr;
+            other.limit_       = nullptr;
+            other.hi_          = nullptr;
+            other.error_count_ = 0;
+            other.last_error_  = AllocatorError();
+
+            return *this;
+        }
+
         DArena::~DArena()
         {
             if (lo_) {

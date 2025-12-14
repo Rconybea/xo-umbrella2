@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "AllocatorError.hpp"
 #include <string>
 #include <cstdint>
 

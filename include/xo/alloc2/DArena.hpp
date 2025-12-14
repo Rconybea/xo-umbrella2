@@ -48,6 +48,8 @@ namespace xo {
             /** create arena per configuration @p cfg. **/
             static DArena map(const ArenaConfig & cfg);
 
+            /** null ctor **/
+            DArena() = default;
             /** ctor from already-mapped (but not committed) address range **/
             DArena(const ArenaConfig & cfg, size_type page_z, std::byte * lo, std::byte * hi);
             /** DArena is not copyable **/
@@ -57,6 +59,9 @@ namespace xo {
             /** dtor releases mapped memory **/
             ~DArena();
 
+            /** move-assignment **/
+            DArena & operator=(DArena && other);
+
             ///@}
 
             /** obtain uncommitted contiguous memory range comprising
@@ -64,6 +69,14 @@ namespace xo {
              *  aligned on a @p hugepage_z boundary
              **/
             static range_type map_aligned_range(size_type req_z, size_type hugepage_z);
+
+            /** @defgroup mm-arena-methods **/
+            ///@{
+
+            /** true if arena is mapped i.e. has a reserved address range **/
+            bool is_mapped() const { return (lo_ != nullptr) && (hi_ != nullptr); }
+
+            ///@}
 
             /** @defgroup mm-arena-instance-vars **/
             ///@{

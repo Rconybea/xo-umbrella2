@@ -9,23 +9,20 @@
 
 namespace xo {
     namespace mm {
-        enum class role {
-            /** GC will keep one to-space for each generation.
-             *  Application allocs always happen in to-space.
-             **/
-            to_space,
-            /** During normal operation from-space is empty.
-             *  During collection phase itself,
-             *  to-space and from-space are exchanged,
-             *  with from-space becoming the space to be collected
-             **/
-            from_space,
-            /** counts entries **/
-            N
+        static constexpr uint32_t c_n_role = 2;
+
+        struct role {
+            using value_type = std::uint32_t;
+
+            explicit constexpr role(value_type x) : role_{x} {}
+
+            static constexpr role to_space() { return role{0}; }
+            static constexpr role from_space() { return role{1}; }
+
+            operator value_type() const { return role_; }
+
+            std::uint32_t role_;
         };
-
-        constexpr uint32_t role2int(role x) { return static_cast<uint32_t>(x); }
-
     } /*namespace mm*/
 } /*namespace xo*/
 

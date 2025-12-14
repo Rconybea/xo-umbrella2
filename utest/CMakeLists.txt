@@ -5,7 +5,9 @@ set(UTEST_EXE utest.alloc2)
 set(UTEST_SRCS
     alloc2_utest_main.cpp
     arena.test.cpp
-    objectmodel.test.cpp)
+    objectmodel.test.cpp
+    Collector.test.cpp
+)
 
 if (ENABLE_TESTING)
     xo_add_utest_executable(${UTEST_EXE} ${UTEST_SRCS})

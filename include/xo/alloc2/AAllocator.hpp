@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "AllocatorError.hpp"
 #include "xo/facet/facet_implementation.hpp"
 #include "xo/facet/typeseq.hpp"
 #include <string>
@@ -13,54 +14,6 @@ namespace xo {
     namespace mm {
         using Copaque = const void *;
         using Opaque = void *;
-
-        enum class error : int32_t {
-            /** sentinel **/
-            invalid = -1,
-            /** not an error **/
-            none,
-            /** reserved size exhauged **/
-            reserve_exhausted,
-            /** unable to commit (i.e. mprotect failure) **/
-            commit_failed,
-            /** allocation size too big (See @ref ArenaConfig::header_size_mask_) **/
-            header_size_mask,
-            /** sub_alloc not preceded by super alloc (or another sub_alloc) **/
-            orphan_sub_alloc,
-        };
-
-        struct AllocatorError {
-            using size_type = std::size_t;
-            using value_type = std::byte*;
-
-            AllocatorError() = default;
-            explicit AllocatorError(error err,
-                                    uint32_t seq) : error_{err},
-                                                    error_seq_{seq} {}
-            AllocatorError(error err,
-                           uint32_t seq,
-                           size_type req_z,
-                           size_type com_z,
-                           size_type rsv_z) : error_{err},
-                                              error_seq_{seq},
-                                              request_z_{req_z},
-                                              committed_z_{com_z},
-                                              reserved_z_{rsv_z} {}
-
-            /** error code **/
-            error error_ = error::none;
-
-            /** sequence# of this error.
-             *  Each error event within an allocator gets next sequence number
-             **/
-            uint32_t error_seq_ = 0;
-            /** reqeust size assoc'd with errror **/
-            size_type request_z_ = 0;
-            /** committed allocator memory at time of error **/
-            size_type committed_z_ = 0;
-            /** reserved allocator memory at time of error **/
-            size_type reserved_z_ = 0;
-        };
 
         /** @class AAllocator
          *  @brief Abstract facet for allocation
