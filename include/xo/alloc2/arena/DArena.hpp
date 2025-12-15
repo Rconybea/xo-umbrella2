@@ -64,7 +64,15 @@ namespace xo {
 
             ///@}
 
+            /** @defgroup mm-arena-methods **/
+            ///@{
+
+            size_type reserved() const { return hi_ - lo_; }
             size_type allocated() const { return free_ - lo_; }
+            size_type committed() const { return committed_z_; }
+            size_type available() const { return limit_ - free_; }
+
+            bool contains(void * addr) const { return (lo_ <= addr) && (addr < hi_); }
 
             /** obtain uncommitted contiguous memory range comprising
              *  a whole multiple of @p hugepage_z bytes, of at least size @p req_z,
@@ -72,11 +80,11 @@ namespace xo {
              **/
             static range_type map_aligned_range(size_type req_z, size_type hugepage_z);
 
-            /** @defgroup mm-arena-methods **/
-            ///@{
-
             /** true if arena is mapped i.e. has a reserved address range **/
             bool is_mapped() const { return (lo_ != nullptr) && (hi_ != nullptr); }
+
+            /** get header from allocated object address **/
+            header_type * obj2hdr(void * obj);
 
             ///@}
 

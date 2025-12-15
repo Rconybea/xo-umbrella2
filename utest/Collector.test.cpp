@@ -98,6 +98,9 @@ namespace xo {
             /* typed collector */
             obj<ACollector, DX1Collector> x1(&gc);
 
+            REQUIRE(x1.iface());
+            REQUIRE(x1.data());
+
         }
     }
 }

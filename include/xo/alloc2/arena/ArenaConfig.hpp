@@ -47,7 +47,9 @@ namespace xo {
              *  present in arena
              **/
             bool store_header_flag_ = false;
-            std::uint64_t header_size_mask_ = 0xffffffff;
+            /** number of bits to represent allocation size **/
+            std::uint64_t header_size_bits_ = 32;
+            std::uint64_t header_size_mask_ = (1ul << header_size_bits_) - 1;
             /** true to enable debug logging **/
             bool debug_flag_ = false;
 

@@ -40,15 +40,44 @@ namespace xo {
         struct CollectorConfig {
             using size_type = std::size_t;
 
+            /*
+             * alloc header
+             *  TTTTTTTTTTTTGGGGGZZZZZZZZZZZZ
+             *  <   tseq   ><gen><   size   >
+             *
+             * masking
+             *
+             *  ..432107654321076543210 bit
+             *
+             *                 >       <  .gen_bits
+             *  0..............01111111   gen_mask_unshifted
+             *  0..011111110..........0   gen_mask_shifted
+             *             >           <  gen_shift
+             */
+            //constexpr std::uint64_t gen_mult() const;
+            constexpr std::uint64_t gen_shift() const;
+            constexpr std::uint64_t gen_mask_unshifted() const;
+            constexpr std::uint64_t gen_mask_shifted() const;
+
+            //constexpr std::uint64_t tseq_mult() const;
+            constexpr std::uint64_t tseq_shift() const;
+            constexpr std::uint64_t tseq_mask_unshifted() const;
+            constexpr std::uint64_t tseq_mask_shifted() const;
+
             /** Configuration for collector spaces.
              *  Will have at least {nursery,tenured} x {from,to} spaces.
              *  Not using name_ member.
              *
              *  REQUIRE:
              *  - arena_config_.store_header_flag_ must be true
-             *  - arena_config_.header_size_mask_ must be 0x0000ffff
              **/
             ArenaConfig arena_config_;
+
+            /** number of bits to represent generation **/
+            std::uint64_t gen_bits_ = 8;
+
+            /** number of bits to represent tseq **/
+            std::uint64_t tseq_bits_ = 24;
 
             /** Number of generations.
              *  Must be at least 2.
@@ -82,7 +111,32 @@ namespace xo {
             bool debug_flag_ = false;
         };
 
+        // ----- GCRunState -----
+
+        /** @class GCRunState
+         *  @brief encapsulate state needed while GC is running
+         **/
+        struct GCRunState {
+            GCRunState() : gc_upto_{0} {}
+            explicit GCRunState(generation gc_upto);
+
+            static GCRunState gc_not_running();
+            static GCRunState gc_upto(generation g);
+
+            bool is_running() const { return gc_upto_ > 0; }
+
+            generation gc_upto() const { return gc_upto_; }
+
+        private:
+            /** running gc collecting all generations gi < gc_upto **/
+            generation gc_upto_;
+        };
+
+        // ----- DX1Collector -----
+
         struct DX1Collector {
+            using header_type = DArena::header_type;
+
             explicit DX1Collector(const CollectorConfig & cfg);
 
             const DArena * get_space(role r, generation g) const { return space_[r][g]; }
@@ -90,11 +144,30 @@ namespace xo {
             DArena * from_space(generation g) { return get_space(role::from_space(), g); }
             DArena * to_space(generation g) { return get_space(role::to_space(), g); }
 
+            /** true iff address @p addr allocated from this collector
+             *  in role @p r (according to current GC state)
+             **/
+            bool contains(role r, void * addr) const;
+
+            /** get allocation size from header **/
+            std::size_t header2size(header_type hdr) const;
+            /** get generation counter from alloc header **/
+            generation header2gen(header_type hdr) const;
+            /** get tseq from alloc header **/
+            uint32_t header2tseq(header_type hdr) const;
+
+            /** true iff original alloc has been replaced by a forwarding pointer **/
+            bool is_forwarding_header(header_type hdr) const;
+
             /** reverse to-space and from-space roles for generation g **/
             void reverse_roles(generation g);
 
+        public:
             /** garbage collector configuration **/
             CollectorConfig config_;
+
+            /** current gc state **/
+            GCRunState runstate_;
 
             /** collector-managed memory here.
              *  - space_[1] is from-space

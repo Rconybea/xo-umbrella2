@@ -35,22 +35,22 @@ namespace xo {
                 return I::allocated(_dcast(d), g, r);
             }
             size_type reserved(Copaque d, generation g, role r) const noexcept override {
-                return I::reserved(d,g,r);
+                return I::reserved(_dcast(d), g, r);
             }
             size_type committed(Copaque d, generation g, role r) const noexcept override {
-                return I::committed(d,g,r);
+                return I::committed(_dcast(d), g, r);
             }
 
             // non-const methods
 
             void install_type(Opaque d, int32_t tseq, IGCObject_Any & iface) override {
-                I::install_type(d, tseq, iface);
+                I::install_type(_dcast(d), tseq, iface);
             }
             void add_gc_root(Opaque d, int32_t tseq, Opaque * root) override {
-                I::add_gc_root(d, tseq, root);
+                I::add_gc_root(_dcast(d), tseq, root);
             }
             void forward_inplace(Opaque d, obj<AGCObject> * lhs) override {
-                I::forward_inplace(d, lhs);
+                I::forward_inplace(_dcast(d), lhs);
             }
 
         private:

@@ -23,12 +23,12 @@ namespace xo {
             RCollector(DataPtr data) : Object{std::move(data)} {}
 
             int32_t _typeseq() const noexcept { return O::iface()->_typeseq(); }
-            size_type allocated(generation g, role r) const noexcept { return O::iface()->allocated(O::data()); }
-            size_type reserved(generation g, role r) const noexcept { return O::iface()->reserved(O::data()); }
-            size_type committed(generation g, role r) const noexcept { return O::iface()->committed(O::data()); }
+            size_type allocated(generation g, role r) const noexcept { return O::iface()->allocated(O::data(), g, r); }
+            size_type reserved(generation g, role r) const noexcept { return O::iface()->reserved(O::data(), g, r); }
+            size_type committed(generation g, role r) const noexcept { return O::iface()->committed(O::data(), g, r); }
 
-            void install_type(int32_t tseq, IGCObject_Any & iface) { return O::iface()->install_type(O::data()); }
-            void add_gc_root(int32_t tseq, Opaque * root) { O::iface()->add_gc_root(O::data()); }
+            void install_type(int32_t tseq, IGCObject_Any & iface) { return O::iface()->install_type(O::data(), tseq, iface); }
+            void add_gc_root(int32_t tseq, Opaque * root) { O::iface()->add_gc_root(O::data(), tseq, root); }
 
             void forward_inplace(obj<AGCObject> * lhs) { O::iface()->forward_inplace(O::data(), lhs); }
 
