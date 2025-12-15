@@ -24,7 +24,7 @@ namespace xo {
 
         size_t
         IAllocator_DArena::reserved(const DArena & s) noexcept {
-            return s.hi_ - s.lo_;
+            return s.reserved();
         }
 
         size_t
@@ -34,12 +34,12 @@ namespace xo {
 
         size_t
         IAllocator_DArena::committed(const DArena & s) noexcept {
-            return s.committed_z_;
+            return s.committed();
         }
 
         size_t
         IAllocator_DArena::available(const DArena & s) noexcept {
-            return s.limit_ - s.free_;
+            return s.available();
         }
 
         size_t

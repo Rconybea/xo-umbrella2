@@ -238,6 +238,16 @@ namespace xo {
             error_count_   = 0;
             last_error_    = AllocatorError();
         }
+
+        DArena::header_type *
+        DArena::obj2hdr(void * obj)
+        {
+            assert(config_.store_header_flag_);
+
+            return (header_type *)((byte *)obj - sizeof(header_type));
+        }
+
+
     }
 } /*namespace xo*/
 

@@ -29,14 +29,14 @@ namespace xo {
             int32_t _typeseq() const noexcept override { return s_typeseq; }
 
             // const methods
-            [[noreturn]] size_type allocated(Copaque, generation, role) const noexcept { _fatal(); }
-            [[noreturn]] size_type reserved(Copaque, generation, role) const noexcept { _fatal(); }
-            [[noreturn]] size_type committed(Copaque, generation, role) const noexcept { _fatal(); }
+            [[noreturn]] size_type allocated(Copaque, generation, role) const noexcept override { _fatal(); }
+            [[noreturn]] size_type reserved(Copaque, generation, role) const noexcept override { _fatal(); }
+            [[noreturn]] size_type committed(Copaque, generation, role) const noexcept override { _fatal(); }
 
             // non-const methods
-            [[noreturn]] void install_type(Opaque, int32_t, IGCObject_Any &) noexcept { _fatal(); }
-            [[noreturn]] void add_gc_root(Opaque, int32_t, Opaque *) { _fatal(); }
-            [[noreturn]] void forward_inplace(Opaque, obj<AGCObject> *) { _fatal(); }
+            [[noreturn]] void install_type(Opaque, int32_t, IGCObject_Any &) noexcept override { _fatal(); }
+            [[noreturn]] void add_gc_root(Opaque, int32_t, Opaque *) override { _fatal(); }
+            [[noreturn]] void forward_inplace(Opaque, obj<AGCObject> *) override { _fatal(); }
 
         private:
             [[noreturn]] static void _fatal();

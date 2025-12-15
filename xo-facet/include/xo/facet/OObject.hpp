@@ -62,6 +62,7 @@ namespace xo {
             using ISpecific = FacetImplType<AFacet, DRepr>;
             using DataType = DRepr;
             using DataPtr = DRepr*;
+            using Opaque = void *;
 
             explicit OObject() {}
             explicit OObject(DataPtr d) : data_{d} {}
@@ -127,8 +128,10 @@ namespace xo {
             }
 
             DataPtr data() const { return data_; }
+            Opaque opaque_data() const { return data_; }
 
             void reset() { data_ = nullptr; }
+            void reset_opaque(Opaque data) { data_ = (DataPtr)data; }
 
             /**
              *  We're either:

@@ -10,6 +10,7 @@ set(SELF_SRCS
 
     ICollector_Any.cpp
     IGCObject_Any.cpp
+    IAllocator_DX1Collector.cpp
     ICollector_DX1Collector.cpp
 
     DX1Collector.cpp

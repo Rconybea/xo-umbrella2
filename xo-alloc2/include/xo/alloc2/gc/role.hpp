@@ -21,9 +21,9 @@ namespace xo {
 
             operator value_type() const { return role_; }
 
-            std::uint32_t role_;
+            value_type role_ = 0;
         };
     } /*namespace mm*/
 } /*namespace xo*/
 
-/* end role,hpp */
+/* end role.hpp */
