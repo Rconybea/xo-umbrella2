@@ -189,7 +189,7 @@ namespace xo {
             other.limit_       = nullptr;
             other.hi_          = nullptr;
             other.error_count_ = 0;
-            other.last_error_  = AllocatorError();
+            other.last_error_  = AllocError();
         }
 
         DArena &
@@ -212,7 +212,7 @@ namespace xo {
             other.limit_       = nullptr;
             other.hi_          = nullptr;
             other.error_count_ = 0;
-            other.last_error_  = AllocatorError();
+            other.last_error_  = AllocError();
 
             return *this;
         }
@@ -236,7 +236,7 @@ namespace xo {
             limit_         = nullptr;
             hi_            = nullptr;
             error_count_   = 0;
-            last_error_    = AllocatorError();
+            last_error_    = AllocError();
         }
 
         DArena::header_type *
@@ -252,11 +252,11 @@ namespace xo {
         {
             if (!config_.store_header_flag_) [[unlikely]] {
                 ++(error_count_);
-                last_error_ = AllocatorError(error::alloc_info_disabled,
-                                             error_count_,
-                                             0 /*add_commit_z*/,
-                                             committed_z_,
-                                             this->reserved());
+                last_error_ = AllocError(error::alloc_info_disabled,
+                                         error_count_,
+                                         0 /*add_commit_z*/,
+                                         committed_z_,
+                                         this->reserved());
 
                 return AllocInfo::error_not_configured(&config_.header_);
             }
@@ -265,11 +265,11 @@ namespace xo {
 
             if (!this->contains(header_mem)) {
                 ++(error_count_);
-                last_error_ = AllocatorError(error::alloc_info_address,
-                                             error_count_,
-                                             0 /*add_commit_z*/,
-                                             committed_z_,
-                                             this->reserved());
+                last_error_ = AllocError(error::alloc_info_address,
+                                         error_count_,
+                                         0 /*add_commit_z*/,
+                                         committed_z_,
+                                         this->reserved());
             }
 
             return AllocInfo(&config_.header_, (AllocHeader *)header_mem);

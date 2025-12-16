@@ -152,7 +152,7 @@ namespace xo {
             uint32_t error_count_ = 0;
 
             /** capture some error details if/when error **/
-            AllocatorError last_error_;
+            AllocError last_error_;
 
             ///@}
         };

@@ -55,7 +55,7 @@ namespace xo {
             return d.contains(role::to_space(), addr);
         }
 
-        AllocatorError
+        AllocError
         IAllocator_DX1Collector::last_error(const DX1Collector & d) noexcept
         {
             return d.last_error();

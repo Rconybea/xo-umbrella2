@@ -18,7 +18,7 @@ namespace xo {
     using xo::mm::AAllocator;
     using xo::mm::IAllocator_DArena;
     using xo::mm::IAllocator_Xfer;
-    using xo::mm::AllocatorError;
+    using xo::mm::AllocError;
     using xo::mm::DArena;
     using xo::mm::AllocHeaderConfig;
     using xo::mm::ArenaConfig;
@@ -290,7 +290,7 @@ namespace xo {
 
             REQUIRE(!m0);
 
-            AllocatorError err = a1o.last_error();
+            AllocError err = a1o.last_error();
 
             REQUIRE(err.error_ == error::reserve_exhausted);
             REQUIRE(err.error_seq_ == 1);

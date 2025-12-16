@@ -33,7 +33,7 @@ namespace xo {
             size_type    available() const noexcept { return O::iface()->available(O::data()); }
             size_type    allocated() const noexcept { return O::iface()->allocated(O::data()); }
             bool          contains(const void * p) const noexcept { return O::iface()->contains(O::data(), p); }
-            AllocatorError last_error() const noexcept { return O::iface()->last_error(O::data()); }
+            AllocError  last_error() const noexcept { return O::iface()->last_error(O::data()); }
 
             value_type       alloc(size_type z) noexcept { return O::iface()->alloc(O::data(), z); }
             value_type super_alloc(size_type z) noexcept { return O::iface()->super_alloc(O::data(), z); }
