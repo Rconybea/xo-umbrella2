@@ -64,6 +64,12 @@ namespace xo {
             constexpr std::uint64_t tseq_mask_unshifted() const;
             constexpr std::uint64_t tseq_mask_shifted() const;
 
+        public:
+            // ----- Instance Variables -----
+
+            /** optional name, for diagnostics **/
+            std::string name_;
+
             /** Configuration for collector spaces.
              *  Will have at least {nursery,tenured} x {from,to} spaces.
              *  Not using name_ member.
@@ -135,32 +141,75 @@ namespace xo {
         // ----- DX1Collector -----
 
         struct DX1Collector {
+            using size_type = DArena::size_type;
+            using value_type = DArena::value_type;
             using header_type = DArena::header_type;
 
             explicit DX1Collector(const CollectorConfig & cfg);
 
-            const DArena * get_space(role r, generation g) const { return space_[r][g]; }
-            DArena * get_space(role r, generation g) { return space_[r][g]; }
-            DArena * from_space(generation g) { return get_space(role::from_space(), g); }
-            DArena * to_space(generation g) { return get_space(role::to_space(), g); }
+            const DArena * get_space(role r, generation g) const noexcept { return space_[r][g]; }
+            DArena * get_space(role r, generation g) noexcept { return space_[r][g]; }
+            DArena * from_space(generation g) noexcept { return get_space(role::from_space(), g); }
+            DArena * to_space(generation g) noexcept { return get_space(role::to_space(), g); }
+            DArena * new_space() noexcept { return to_space(generation{0}); }
+
+            /** total reserved memory in bytes, across all {role, generation} **/
+            size_type reserved_total() const noexcept;
+            /** total size in bytes (same as committed_total()) **/
+            size_type size_total() const noexcept;
+            /** total committed memory in bytes, across all {role, generation} **/
+            size_type committed_total() const noexcept;
+            /** total available memory in bytes, across all {role, generation} **/
+            size_type available_total() const noexcept;
+            /** total allocated memory in bytes, across all {role, generation} **/
+            size_type allocated_total() const noexcept;
 
             /** true iff address @p addr allocated from this collector
              *  in role @p r (according to current GC state)
              **/
-            bool contains(role r, void * addr) const;
+            bool contains(role r, const void * addr) const noexcept;
+
+            /** return details from last error (will be in gen0 to-space) **/
+            AllocatorError last_error() const noexcept;
 
             /** get allocation size from header **/
-            std::size_t header2size(header_type hdr) const;
+            std::size_t header2size(header_type hdr) const noexcept;
             /** get generation counter from alloc header **/
-            generation header2gen(header_type hdr) const;
+            generation header2gen(header_type hdr) const noexcept;
             /** get tseq from alloc header **/
-            uint32_t header2tseq(header_type hdr) const;
+            uint32_t header2tseq(header_type hdr) const noexcept;
 
             /** true iff original alloc has been replaced by a forwarding pointer **/
-            bool is_forwarding_header(header_type hdr) const;
+            bool is_forwarding_header(header_type hdr) const noexcept;
+
+            // ----- allocation -----
+
+            /** simple allocation. new allocs always in gen0 to-space **/
+            value_type alloc(size_type z) noexcept;
+            /** compound allocation. To be followed immediately by:
+             *  1. zero or more calls to sub_alloc(zi, complete=false), then
+             *  2. exactly one call to sub_alloc(zi, complete=true)
+             *  all the allocs in a compound allocation share the same
+             *  allocation header. End state is equivalent to a single
+             *  allocation with size z + sum(zi).
+             *  New allocs always in gen0 to-space
+             **/
+            value_type super_alloc(size_type z) noexcept;
+            /** sub-allocation with preceding compound allocation.
+             *  New allocs always in gen0 to-space
+             **/
+            value_type sub_alloc(size_type z, bool complete) noexcept;
+            /** expand gen0 committed size to at least @p z.
+             **/
+            bool expand(size_type z) noexcept;
+
+            // ----- book-keeping -----
 
             /** reverse to-space and from-space roles for generation g **/
-            void reverse_roles(generation g);
+            void reverse_roles(generation g) noexcept;
+
+            /** discard all allocated memory **/
+            void clear() noexcept;
 
         public:
             /** garbage collector configuration **/

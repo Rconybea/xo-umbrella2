@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <array>
 #include <cstdint>
 
 namespace xo {
@@ -18,6 +19,11 @@ namespace xo {
 
             static constexpr role to_space() { return role{0}; }
             static constexpr role from_space() { return role{1}; }
+
+            static constexpr std::array<role, c_n_role> all() { return {{to_space(), from_space()}}; }
+
+            static constexpr role begin() { return role{0}; }
+            static constexpr role end() { return role{2}; }
 
             operator value_type() const { return role_; }
 
