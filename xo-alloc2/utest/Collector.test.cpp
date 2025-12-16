@@ -25,6 +25,7 @@ namespace xo {
     using xo::mm::CollectorConfig;
     using xo::mm::DX1Collector;
     using xo::mm::ArenaConfig;
+    using xo::mm::AllocHeaderConfig;
     using xo::mm::generation;
     using xo::mm::c_max_generation;
     using xo::facet::with_facet;
@@ -53,7 +54,7 @@ namespace xo {
             ArenaConfig arena_cfg = { .name_ = "_test_unused",
                                       .size_ = 4*1024*1024,
                                       .store_header_flag_ = true,
-                                      .header_size_mask_ = 0x0000ffff, };
+                                      .header_ = AllocHeaderConfig(0, 0, 16), };
             CollectorConfig cfg = { .arena_config_ = arena_cfg,
                                     .n_generation_ = 2,
                                     .gc_trigger_v_ = {{64*1024, 1024*1024, 0, 0,
@@ -97,7 +98,7 @@ namespace xo {
             ArenaConfig arena_cfg = { .name_ = "_test_unused",
                                       .size_ = 4*1024*1024,
                                       .store_header_flag_ = true,
-                                      .header_size_mask_ = 0x0000ffff, };
+                                      .header_ = AllocHeaderConfig(0, 0, 16), };
             CollectorConfig cfg = { .arena_config_ = arena_cfg,
                                     .n_generation_ = 2,
                                     .gc_trigger_v_ = {{64*1024, 1024*1024, 0, 0,
@@ -119,7 +120,7 @@ namespace xo {
             ArenaConfig arena_cfg = { .name_ = "_test_unused",
                                       .size_ = 4*1024*1024,
                                       .store_header_flag_ = true,
-                                      .header_size_mask_ = 0x0000ffff, };
+                                      .header_ = AllocHeaderConfig(0, 0, 16), };
             CollectorConfig cfg = { .arena_config_ = arena_cfg,
                                     .n_generation_ = 2,
                                     .gc_trigger_v_ = {{64*1024, 1024*1024, 0, 0,
@@ -141,7 +142,7 @@ namespace xo {
             ArenaConfig arena_cfg = { .name_ = "_test_unused",
                                       .size_ = 4*1024*1024,
                                       .store_header_flag_ = true,
-                                      .header_size_mask_ = 0x0000ffff, };
+                                      .header_ = AllocHeaderConfig(0, 0, 16), };
 
             /* collector with one generation collapses to a non-generational copying collector */
             CollectorConfig cfg = { .arena_config_ = arena_cfg,

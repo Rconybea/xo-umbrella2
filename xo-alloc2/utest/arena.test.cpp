@@ -20,7 +20,9 @@ namespace xo {
     using xo::mm::IAllocator_Xfer;
     using xo::mm::AllocatorError;
     using xo::mm::DArena;
+    using xo::mm::AllocHeaderConfig;
     using xo::mm::ArenaConfig;
+    using xo::mm::AllocHeader;
     using xo::mm::padding;
     using xo::mm::error;
     using xo::facet::obj;
@@ -176,14 +178,14 @@ namespace xo {
 
         TEST_CASE("allocator-alloc-2", "[alloc2][Allocator]")
         {
-            using header_type = AAllocator::header_type;
+            using header_type = AllocHeader;
 
             /* typed allocator a1o, with object header */
             ArenaConfig cfg { .name_ = "testarena",
                               .size_ = 64*1024,
                               .store_header_flag_ = true,
                               /* up to 4GB */
-                              .header_size_mask_ = 0xffffffff,
+                              .header_ = AllocHeaderConfig(0, 0, 32),
                               .debug_flag_ = false,
             };
             DArena arena = DArena::map(cfg);
@@ -202,7 +204,8 @@ namespace xo {
             header_type* header = (header_type*)(m0 - sizeof(header_type));
 
             REQUIRE(a1o.contains(header));
-            REQUIRE(((*header) & cfg.header_size_mask_) == padding::with_padding(z0));
+            REQUIRE(cfg.header_.size(*header) == padding::with_padding(z0));
+            //REQUIRE(((*header) & cfg.header_size_mask_) == padding::with_padding(z0));
             REQUIRE(a1o.last_error().error_ == error::none);
             REQUIRE(a1o.last_error().error_seq_ == 0);
             REQUIRE(a1o.allocated() >= z0);
@@ -214,7 +217,7 @@ namespace xo {
 
         TEST_CASE("allocator-alloc-3", "[alloc2][Allocator]")
         {
-            using header_type = AAllocator::header_type;
+            using header_type = AllocHeader;
 
             /* typed allocator a1o, with object header + guard bytes */
             ArenaConfig cfg { .name_ = "testarena",
@@ -223,7 +226,7 @@ namespace xo {
                               .guard_byte_ = 0xfd,
                               .store_header_flag_ = true,
                               /* up to 4GB */
-                              .header_size_mask_ = 0xffffffff,
+                              .header_ = AllocHeaderConfig(0, 0, 32),
                               .debug_flag_ = false,
             };
             DArena arena = DArena::map(cfg);
@@ -254,7 +257,8 @@ namespace xo {
 
             REQUIRE(a1o.contains(guard0));
             REQUIRE(a1o.contains(header));
-            REQUIRE(((*header) & cfg.header_size_mask_) == padding::with_padding(z0));
+            REQUIRE(cfg.header_.size(*header) == padding::with_padding(z0));
+            //REQUIRE(((*header) & cfg.header_size_mask_) == padding::with_padding(z0));
 
             REQUIRE(a1o.last_error().error_ == error::none);
             REQUIRE(a1o.last_error().error_seq_ == 0);

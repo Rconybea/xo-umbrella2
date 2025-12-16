@@ -331,7 +331,7 @@ namespace xo {
 
             if (store_header_flag)
             {
-                if ((s.config_.header_size_mask_ & z0) == z0) [[likely]] {
+                if (s.config_.header_.is_size_enabled()) [[likely]] {
                     hz = sizeof(header);
                 } else {
                     /* req_z doesn't fit in configured header_size_mask bits */
@@ -362,7 +362,7 @@ namespace xo {
                     /* and rembering for subsequent
                      *   sub_alloc()
                      */
-                    s.last_header_ = (uint64_t *)s.free_;
+                    s.last_header_ = (AllocHeader *)s.free_;
                 }
             }
 

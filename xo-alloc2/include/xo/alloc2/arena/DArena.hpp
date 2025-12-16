@@ -10,17 +10,6 @@
 namespace xo {
     namespace mm {
 
-        /** **/
-        struct AllocHeader {
-            using repr_type = std::uint64_t;
-
-            explicit AllocHeader(repr_type x) : repr_{x} {}
-
-            repr_type repr_;
-        };
-
-        static_assert(sizeof(AllocHeader) == sizeof(AllocHeader::repr_type));
-
         /** @class DArena
          *
          *  @brief represent arena allocator state
@@ -51,7 +40,7 @@ namespace xo {
             /** @brief a contiguous memory range **/
             using range_type = std::pair<value_type, value_type>;
             /** @brief type for allocation header (if enabled) **/
-            using header_type = std::uint64_t;
+            using header_type = AllocHeader; //std::uint64_t;
 
             ///@}
 
