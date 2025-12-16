@@ -52,9 +52,9 @@ namespace xo {
 
             /** copy constructor **/
             template <typename DOther>
-            obj(const obj<AFacet, DOther> && other)
-                requires (std::is_convertible_v<DRepr, DOther>
-                          || std::is_same_v<DRepr, DVariantPlaceholder>)
+            obj(const obj<AFacet, DOther> & other)
+                requires (std::is_same_v<DRepr, DVariantPlaceholder>
+                          || std::is_convertible_v<DRepr, DOther>)
                 : Super()
             {
                 if constexpr (std::is_convertible_v<DRepr, DOther>) {
@@ -89,11 +89,22 @@ namespace xo {
             }
         };
 
+        /** Use:
+         *    auto o = with_facet<AAllocator>::obj(&data);
+         **/
+        template <typename AFacet>
+        struct with_facet {
+            template <typename DRepr>
+            static obj<AFacet, DRepr> mkobj(DRepr * data) { obj<AFacet, DRepr> x(data); return x; }
+        };
+
+#ifdef DEPRECATED
         template <typename AFacet, typename DRepr>
         inline obj<AFacet, DRepr>
         with_facet(DRepr * data) {
             return obj<AFacet, DRepr>(data);
         }
+#endif
     } /*namespace facet*/
 
     using facet::obj;

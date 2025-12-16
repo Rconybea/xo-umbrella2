@@ -353,7 +353,7 @@ namespace xo {
         TEST_CASE("obj-rect-1", "[facet]")
         {
             DRectCoords z1{1.0, 0.0};
-            auto z1o = with_facet<AComplex>(&z1);
+            auto z1o = with_facet<AComplex>::mkobj(&z1);
 
             static_assert(std::is_same_v<decltype(z1o)::FacetType, AComplex>);
             static_assert(std::is_same_v<decltype(z1o)::DataType, DRectCoords>);
