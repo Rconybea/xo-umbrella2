@@ -48,7 +48,7 @@ namespace xo {
             /** true iff address @p p comes from collector @p d **/
             static bool contains(const DX1Collector & d, const void * p) noexcept;
             /** report last error, if any, for collector @p d **/
-            static AllocatorError last_error(const DX1Collector &) noexcept;
+            static AllocError last_error(const DX1Collector &) noexcept;
 
             /** always alloc in gen0 to-space **/
             static value_type alloc(DX1Collector & d, size_type z) noexcept;

@@ -43,7 +43,7 @@ namespace xo {
             static size_type available(const DArena &) noexcept;
             static size_type allocated(const DArena &) noexcept;
             static bool contains(const DArena &, const void * p) noexcept;
-            static AllocatorError last_error(const DArena &) noexcept;
+            static AllocError last_error(const DArena &) noexcept;
 
             /** retrieve allocation bookkeeping info for @p mem from arena @p d **/
             static AllocInfo alloc_info(DArena &, value_type mem) noexcept;

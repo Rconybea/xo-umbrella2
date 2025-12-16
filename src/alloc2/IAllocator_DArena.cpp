@@ -54,7 +54,7 @@ namespace xo {
             return (s.lo_ <= p) && (p < s.hi_);
         }
 
-        AllocatorError
+        AllocError
         IAllocator_DArena::last_error(const DArena & s) noexcept {
             return s.last_error_;
         }
@@ -66,11 +66,11 @@ namespace xo {
 
             if (!s.config_.store_header_flag_) [[unlikely]] {
                 ++(s.error_count_);
-                s.last_error_ = AllocatorError(error::alloc_info_disabled,
-                                               s.error_count_,
-                                               0 /*add_commit_z*/,
-                                               s.committed_z_,
-                                               reserved(s));
+                s.last_error_ = AllocError(error::alloc_info_disabled,
+                                           s.error_count_,
+                                           0 /*add_commit_z*/,
+                                           s.committed_z_,
+                                           reserved(s));
 
                 return AllocInfo::error_not_configured(&s.config_.header_);
             }
@@ -79,11 +79,11 @@ namespace xo {
 
             if (!s.contains(header_mem)) {
                 ++(s.error_count_);
-                s.last_error_ = AllocatorError(error::alloc_info_address,
-                                               s.error_count_,
-                                               0 /*add_commit_z*/,
-                                               s.committed_z_,
-                                               reserved(s));
+                s.last_error_ = AllocError(error::alloc_info_address,
+                                           s.error_count_,
+                                           0 /*add_commit_z*/,
+                                           s.committed_z_,
+                                           reserved(s));
             }
 
             return AllocInfo(&s.config_.header_, (AllocHeader*)header_mem);
@@ -105,9 +105,9 @@ namespace xo {
 
             if (s.lo_ + target_z > s.hi_) [[unlikely]] {
                 ++(s.error_count_);
-                s.last_error_ = AllocatorError(error::reserve_exhausted,
-                                               s.error_count_,
-                                               target_z, s.committed_z_, reserved(s));
+                s.last_error_ = AllocError(error::reserve_exhausted,
+                                           s.error_count_,
+                                           target_z, s.committed_z_, reserved(s));
                 return false;
             }
 
@@ -137,35 +137,35 @@ namespace xo {
 
             assert(s.limit_ == s.lo_ + s.committed_z_);
 
-//            log && log(xtag("aligned_offset_z", aligned_offset_z),
-//                       xtag("add_commit_z", add_commit_z));
-//            log && log("expand committed range",
-//                       xtag("commit_start", commit_start),
-//                       xtag("add_commit_z", add_commit_z),
-//                       xtag("commit_end", commit_start + add_commit_z));
+            //            log && log(xtag("aligned_offset_z", aligned_offset_z),
+            //                       xtag("add_commit_z", add_commit_z));
+            //            log && log("expand committed range",
+            //                       xtag("commit_start", commit_start),
+            //                       xtag("add_commit_z", add_commit_z),
+            //                       xtag("commit_end", commit_start + add_commit_z));
 
             if (::mprotect(commit_start,
                            add_commit_z,
                            PROT_READ | PROT_WRITE) != 0) [[unlikely]]
-            {
-                ++(s.error_count_);
-                s.last_error_ = AllocatorError(error::commit_failed,
-                                               s.error_count_,
-                                               add_commit_z, s.committed_z_, reserved(s));
+                {
+                    ++(s.error_count_);
+                    s.last_error_ = AllocError(error::commit_failed,
+                                                   s.error_count_,
+                                                   add_commit_z, s.committed_z_, reserved(s));
 #ifdef OBSOLETE
-                throw std::runtime_error(tostr("ArenaAlloc::expand: commit failure",
-                                               xtag("committed_z", s.committed_z_),
-                                               xtag("add_commit_z", add_commit_z)));
+                    throw std::runtime_error(tostr("ArenaAlloc::expand: commit failure",
+                                                   xtag("committed_z", s.committed_z_),
+                                                   xtag("add_commit_z", add_commit_z)));
 #endif
-                return false;
-            }
+                    return false;
+                }
 
             s.committed_z_ = aligned_target_z;
             s.limit_ = s.lo_ + s.committed_z_;
 
             if (commit_start == s.lo_) [[unlikely]]
-            {
-                /* first expand() for this allocator - start with guard_z_ bytes */
+                {
+/* first expand() for this allocator - start with guard_z_ bytes */
 
                 ::memset(s.free_,
                          s.config_.guard_byte_,
@@ -230,7 +230,7 @@ namespace xo {
                 if (s.config_.store_header_flag_) {
                     if (!s.last_header_) [[unlikely]] {
                         ++(s.error_count_);
-                        s.last_error_ = AllocatorError(error::orphan_sub_alloc,
+                        s.last_error_ = AllocError(error::orphan_sub_alloc,
                                                        s.error_count_,
                                                        0 /*add_commit_z*/, s.committed_z_, reserved(s));
                     } else {
@@ -261,7 +261,7 @@ namespace xo {
             if (s.config_.store_header_flag_) {
                 if (!s.last_header_) [[unlikely]] {
                     ++(s.error_count_);
-                    s.last_error_ = AllocatorError(error::orphan_sub_alloc,
+                    s.last_error_ = AllocError(error::orphan_sub_alloc,
                                                    s.error_count_,
                                                    0 /*add_commit_z*/, s.committed_z_, reserved(s));
                     return nullptr;
@@ -277,7 +277,7 @@ namespace xo {
                 if ((header & s.config_.header_size_mask_ & z0) != z0) [[unlikely]] {
                     /* cumulative alloc size doesn't fit in configured header_size_mask bits */
                     ++(s.error_count_);
-                    s.last_error_ = AllocatorError(error::header_size_mask,
+                    s.last_error_ = AllocError(error::header_size_mask,
                                                    s.error_count_,
                                                    0 /*add_commit_z*/, s.committed_z_, reserved(s));
                     return nullptr;
@@ -366,7 +366,7 @@ namespace xo {
                 } else {
                     /* req_z doesn't fit in configured header_size_mask bits */
                     ++(s.error_count_);
-                    s.last_error_ = AllocatorError(error::header_size_mask,
+                    s.last_error_ = AllocError(error::header_size_mask,
                                                    s.error_count_,
                                                    0 /*add_commit_z*/,
                                                    s.committed_z_,

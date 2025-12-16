@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "AllocatorError.hpp"
+#include "AllocError.hpp"
 #include "AllocInfo.hpp"
 #include "xo/facet/facet_implementation.hpp"
 #include "xo/facet/typeseq.hpp"
@@ -74,7 +74,7 @@ namespace xo {
              **/
             virtual bool contains(Copaque d, const void * p) const noexcept = 0;
             /** report last error **/
-            virtual AllocatorError last_error(Copaque d) const noexcept = 0;
+            virtual AllocError last_error(Copaque d) const noexcept = 0;
             /** fetch alloc info: given memory @p mem previously obtained
              *  from {@ref alloc, @ref super_alloc}, get {tseq, age, size} details
              *  for that allocation.

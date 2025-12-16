@@ -120,7 +120,7 @@ namespace xo {
             return false;
         }
 
-        AllocatorError
+        AllocError
         DX1Collector::last_error() const noexcept
         {
             // TODO:

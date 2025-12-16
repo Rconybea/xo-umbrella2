@@ -1,4 +1,4 @@
-/** @file AllocatorError.hpp
+/** @file AllocError.hpp
  *
  *  @author Roland Conybeare, Dec 2025
  **/
@@ -31,15 +31,15 @@ namespace xo {
             alloc_info_address,
         };
 
-        struct AllocatorError {
+        struct AllocError {
             using size_type = std::size_t;
             using value_type = std::byte*;
 
-            AllocatorError() = default;
-            explicit AllocatorError(error err,
+            AllocError() = default;
+            explicit AllocError(error err,
                                     uint32_t seq) : error_{err},
                                                     error_seq_{seq} {}
-            AllocatorError(error err,
+            AllocError(error err,
                            uint32_t seq,
                            size_type req_z,
                            size_type com_z,
@@ -66,4 +66,4 @@ namespace xo {
     } /*namespace mm*/
 } /*namespace xo*/
 
-/* end AllocatorError.hpp */
+/* end AllocError.hpp */

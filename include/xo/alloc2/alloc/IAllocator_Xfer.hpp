@@ -38,7 +38,7 @@ namespace xo {
             bool            contains(Copaque d, const void * p) const noexcept override {
                 return I::contains(_dcast(d), p);
             }
-            AllocatorError last_error(Copaque d) const noexcept override { return I::last_error(_dcast(d)); }
+            AllocError    last_error(Copaque d) const noexcept override { return I::last_error(_dcast(d)); }
 
             // non-const methods
 

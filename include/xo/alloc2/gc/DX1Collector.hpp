@@ -177,7 +177,7 @@ namespace xo {
             bool contains(role r, const void * addr) const noexcept;
 
             /** return details from last error (will be in gen0 to-space) **/
-            AllocatorError last_error() const noexcept;
+            AllocError last_error() const noexcept;
 
             /** get allocation size from header **/
             std::size_t header2size(header_type hdr) const noexcept;

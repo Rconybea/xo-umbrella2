@@ -39,7 +39,7 @@ namespace xo {
             [[noreturn]] size_type       available(Copaque) const noexcept override { _fatal(); }
             [[noreturn]] size_type       allocated(Copaque) const noexcept override { _fatal(); }
             [[noreturn]] bool             contains(Copaque, const void *) const noexcept override { _fatal(); }
-            [[noreturn]] AllocatorError last_error(Copaque) const noexcept override { _fatal(); }
+            [[noreturn]] AllocError     last_error(Copaque) const noexcept override { _fatal(); }
 
             // non-const methods
             [[noreturn]] AllocInfo      alloc_info(Opaque, value_type) const noexcept override { _fatal(); }

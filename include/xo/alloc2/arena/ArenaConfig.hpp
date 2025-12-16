@@ -6,7 +6,7 @@
 #pragma once
 
 #include "alloc/AllocHeader.hpp"
-#include "alloc/AllocatorError.hpp"
+#include "alloc/AllocError.hpp"
 #include <string>
 #include <cstdint>
 
