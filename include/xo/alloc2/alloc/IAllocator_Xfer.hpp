@@ -42,6 +42,9 @@ namespace xo {
 
             // non-const methods
 
+            AllocInfo      alloc_info(Opaque d, value_type mem) const noexcept override {
+                return I::alloc_info(_dcast(d), mem);
+            }
             bool              expand(Opaque d,
                                      std::size_t z) const noexcept override { return I::expand(_dcast(d), z); }
             value_type         alloc(Opaque d,

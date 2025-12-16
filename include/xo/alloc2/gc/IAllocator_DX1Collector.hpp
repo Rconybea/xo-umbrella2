@@ -56,6 +56,8 @@ namespace xo {
             static value_type sub_alloc(DX1Collector & d, size_type z, bool complete) noexcept;
             /** expand gen0 spaces (both from-space and to-space) **/
             static bool expand(DX1Collector & d, size_type z) noexcept;
+            /** fetch allocation bookkeeping info **/
+            static AllocInfo alloc_info(DX1Collector & d, value_type mem) noexcept;
 
             /** reset to empty state; clears all generations **/
             static void clear(DX1Collector & d);

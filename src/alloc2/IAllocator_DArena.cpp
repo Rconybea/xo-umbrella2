@@ -59,6 +59,36 @@ namespace xo {
             return s.last_error_;
         }
 
+        AllocInfo
+        IAllocator_DArena::alloc_info(DArena & s, value_type mem) noexcept
+        {
+            return s.alloc_info(mem);
+
+            if (!s.config_.store_header_flag_) [[unlikely]] {
+                ++(s.error_count_);
+                s.last_error_ = AllocatorError(error::alloc_info_disabled,
+                                               s.error_count_,
+                                               0 /*add_commit_z*/,
+                                               s.committed_z_,
+                                               reserved(s));
+
+                return AllocInfo::error_not_configured(&s.config_.header_);
+            }
+
+            byte * header_mem = mem - sizeof(AllocHeader);
+
+            if (!s.contains(header_mem)) {
+                ++(s.error_count_);
+                s.last_error_ = AllocatorError(error::alloc_info_address,
+                                               s.error_count_,
+                                               0 /*add_commit_z*/,
+                                               s.committed_z_,
+                                               reserved(s));
+            }
+
+            return AllocInfo(&s.config_.header_, (AllocHeader*)header_mem);
+        }
+
         bool
         IAllocator_DArena::expand(DArena & s, size_t target_z) noexcept
         {

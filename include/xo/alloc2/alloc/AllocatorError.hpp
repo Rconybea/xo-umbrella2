@@ -23,6 +23,12 @@ namespace xo {
             header_size_mask,
             /** sub_alloc not preceded by super alloc (or another sub_alloc) **/
             orphan_sub_alloc,
+            /** attempt to call alloc_info for allocator with alloc header feature disabled
+             *  (e.g. @ref see ArenaConfig::store_header_flag_)
+             **/
+            alloc_info_disabled,
+            /** attempt to call alloc_info for address not owned by allocator **/
+            alloc_info_address,
         };
 
         struct AllocatorError {

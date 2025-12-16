@@ -148,19 +148,6 @@ namespace xo {
             std::uint8_t size_bits_ = 32;
         };
 
-        struct AllocInfo {
-            using size_type = AllocHeader::size_type;
-
-            AllocInfo(const AllocHeaderConfig * p_cfg, const AllocHeader * p_hdr)
-                : p_config_{p_cfg}, p_header_{p_hdr} {}
-
-            std::uint32_t tseq() const noexcept { return p_config_->tseq(*p_header_); }
-            std::uint32_t  age() const noexcept { return p_config_->age (*p_header_); }
-            size_type     size() const noexcept { return p_config_->size(*p_header_); }
-
-            const AllocHeaderConfig * p_config_ = nullptr;
-            const AllocHeader *       p_header_ = nullptr;
-        };
     }
 }
 

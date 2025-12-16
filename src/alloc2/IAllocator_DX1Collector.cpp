@@ -85,6 +85,12 @@ namespace xo {
             return d.expand(z);
         }
 
+        AllocInfo
+        IAllocator_DX1Collector::alloc_info(DX1Collector & d, value_type mem) noexcept
+        {
+            return d.alloc_info(mem);
+        }
+
         void
         IAllocator_DX1Collector::clear(DX1Collector & d)
         {

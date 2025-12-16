@@ -247,6 +247,34 @@ namespace xo {
             return (header_type *)((byte *)obj - sizeof(header_type));
         }
 
+        AllocInfo
+        DArena::alloc_info(value_type mem) noexcept
+        {
+            if (!config_.store_header_flag_) [[unlikely]] {
+                ++(error_count_);
+                last_error_ = AllocatorError(error::alloc_info_disabled,
+                                             error_count_,
+                                             0 /*add_commit_z*/,
+                                             committed_z_,
+                                             this->reserved());
+
+                return AllocInfo::error_not_configured(&config_.header_);
+            }
+
+            byte * header_mem = mem - sizeof(AllocHeader);
+
+            if (!this->contains(header_mem)) {
+                ++(error_count_);
+                last_error_ = AllocatorError(error::alloc_info_address,
+                                             error_count_,
+                                             0 /*add_commit_z*/,
+                                             committed_z_,
+                                             this->reserved());
+            }
+
+            return AllocInfo(&config_.header_, (AllocHeader *)header_mem);
+        }
+
         void
         DArena::clear() noexcept
         {

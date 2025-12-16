@@ -239,6 +239,24 @@ namespace xo {
             return false;
         }
 
+        AllocInfo
+        DX1Collector::alloc_info(value_type mem) noexcept {
+            for (role ri : role::all()) {
+                for (generation gj{0}; gj < config_.n_generation_; ++gj) {
+                    DArena * arena = this->get_space(ri, gj);
+
+                    assert(arena);
+
+                    if (arena->contains(mem)) {
+                        return arena->alloc_info(mem);
+                    }
+                }
+            }
+
+            // deliberately attempt on nursery to-space, to capture error info + return sentinel
+            return this->new_space()->alloc_info(mem);
+        }
+
         void
         DX1Collector::reverse_roles(generation g) noexcept {
             assert(g < config_.n_generation_);
