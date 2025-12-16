@@ -118,7 +118,7 @@ namespace xo {
             DArena::header_type alloc_hdr = *p_header;
 
             /* recover allocation size */
-            std::size_t alloc_z = some_arena->config_.header_size_mask_ & alloc_hdr;
+            std::size_t alloc_z = some_arena->config_.header_.size(alloc_hdr);
 
             /* need to be able to fit forwarding pointer
              * in place of forwarded object.
@@ -176,7 +176,9 @@ namespace xo {
             // reversed: forwarding pointers are located in from-space and
             // refer to to-space.
 
-            generation g = d.header2gen(alloc_hdr);
+            object_age age = d.header2age(alloc_hdr);
+
+            generation g = d.config_.age2gen(age);
 
             assert(d.runstate_.is_running());
 

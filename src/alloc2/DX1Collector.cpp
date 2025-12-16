@@ -7,6 +7,7 @@
 #include "arena/IAllocator_DArena.hpp"
 #include "gc/DX1Collector.hpp"
 #include "gc/generation.hpp"
+#include "gc/object_age.hpp"
 #include <xo/facet/obj.hpp>
 #include <cassert>
 #include <cstdint>
@@ -23,6 +24,7 @@ namespace xo {
         }
 #endif
 
+#ifdef OBSOLETE
         constexpr std::uint64_t
         CollectorConfig::gen_shift() const {
             return arena_config_.header_size_bits_;
@@ -37,6 +39,7 @@ namespace xo {
         CollectorConfig::gen_mask_shifted() const {
             return gen_mask_unshifted() << arena_config_.header_size_bits_;
         }
+#endif
 
 #ifdef NOT_USING
         constexpr std::uint64_t
@@ -45,6 +48,7 @@ namespace xo {
         }
 #endif
 
+#ifdef OBSOLETE
         constexpr std::uint64_t
         CollectorConfig::tseq_shift() const {
             return gen_bits_ + arena_config_.header_size_bits_;
@@ -59,6 +63,7 @@ namespace xo {
         CollectorConfig::tseq_mask_shifted() const {
             return tseq_mask_unshifted() << (gen_bits_ + arena_config_.header_size_bits_);
         }
+#endif
 
         // ----- GCRunState -----
 
@@ -84,7 +89,9 @@ namespace xo {
 
         DX1Collector::DX1Collector(const CollectorConfig & cfg) : config_{cfg}
         {
-            assert(config_.arena_config_.header_size_bits_ + config_.gen_bits_ + config_.tseq_bits_ <= 64);
+            assert(config_.arena_config_.header_.size_bits_ +
+                   config_.arena_config_.header_.age_bits_ +
+                   config_.arena_config_.header_.tseq_bits_ <= 64);
 
             for (uint32_t igen = 0, ngen = cfg.n_generation_; igen < ngen; ++igen) {
                 space_storage_[0][igen] = DArena::map(cfg.arena_config_);
@@ -177,25 +184,25 @@ namespace xo {
         size_type
         DX1Collector::header2size(header_type hdr) const noexcept
         {
-            uint32_t z = (hdr & config_.arena_config_.header_size_mask_);
+            uint32_t z = config_.arena_config_.header_.size(hdr);
 
             return z;
         }
 
-        generation
-        DX1Collector::header2gen(header_type hdr) const noexcept
+        object_age
+        DX1Collector::header2age(header_type hdr) const noexcept
         {
-            uint32_t g = (hdr & config_.gen_mask_shifted()) >> config_.gen_shift();
+            uint32_t age = config_.arena_config_.header_.age(hdr);
 
-            assert(g < c_max_generation);
+            assert(age < c_max_object_age);
 
-            return generation(g);
+            return object_age(age);
         }
 
         uint32_t
         DX1Collector::header2tseq(header_type hdr) const noexcept
         {
-            uint32_t tseq = (hdr & config_.tseq_mask_shifted()) >> config_.tseq_shift();
+            uint32_t tseq = config_.arena_config_.header_.tseq(hdr);
 
             return tseq;
         }
@@ -203,8 +210,8 @@ namespace xo {
         bool
         DX1Collector::is_forwarding_header(header_type hdr) const noexcept
         {
-            /** all 1 bits to flag forwarding pointer **/
-            return header2tseq(hdr) == config_.tseq_mask_shifted();
+            /** forwarding pointer encoded as sentinel tseq **/
+            return config_.arena_config_.header_.is_forwarding_tseq(hdr);
         }
 
         auto

@@ -8,6 +8,7 @@
 #include "arena/ArenaConfig.hpp"
 #include "arena/DArena.hpp"
 #include "gc/generation.hpp"
+#include "gc/object_age.hpp"
 #include "gc/role.hpp"
 #include <memory>
 #include <array>
@@ -40,6 +41,7 @@ namespace xo {
         struct CollectorConfig {
             using size_type = std::size_t;
 
+#ifdef OBSOLETE // get from arena_config_.header_
             /*
              * alloc header
              *  TTTTTTTTTTTTGGGGGZZZZZZZZZZZZ
@@ -63,6 +65,11 @@ namespace xo {
             constexpr std::uint64_t tseq_shift() const;
             constexpr std::uint64_t tseq_mask_unshifted() const;
             constexpr std::uint64_t tseq_mask_shifted() const;
+#endif
+
+            generation age2gen(object_age age) const noexcept {
+                return generation(age % n_survive_threshold_);
+            }
 
         public:
             // ----- Instance Variables -----
@@ -175,7 +182,7 @@ namespace xo {
             /** get allocation size from header **/
             std::size_t header2size(header_type hdr) const noexcept;
             /** get generation counter from alloc header **/
-            generation header2gen(header_type hdr) const noexcept;
+            object_age header2age(header_type hdr) const noexcept;
             /** get tseq from alloc header **/
             uint32_t header2tseq(header_type hdr) const noexcept;
 
