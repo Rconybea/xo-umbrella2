@@ -88,6 +88,18 @@ namespace xo {
             /** get header from allocated object address **/
             header_type * obj2hdr(void * obj) noexcept;
 
+            /** report alloc book-keeping info for allocation at @p mem
+             *
+             *  Require:
+             *  1. @p mem is address returned by allocation on this arena
+             *     i.e. by @ref IAllocator_DArena::alloc() or @ref IAllocator_DArena::alloc_super()
+             *  2. @p mem has not been invalidated since it was allocated
+             *     i.e. by call to @ref DArena::clear
+             *
+             *  Note: non-const, may stash error details
+             **/
+            AllocInfo alloc_info(value_type mem) noexcept;
+
             /** discard all allocated memory, return to empty state
              *  Promise:
              *  - committed memory unchanged

@@ -209,6 +209,8 @@ namespace xo {
             /** expand gen0 committed size to at least @p z.
              **/
             bool expand(size_type z) noexcept;
+            /** Retreive bookkeeping info for allocation at @p mem. **/
+            AllocInfo alloc_info(value_type mem) noexcept;
 
             // ----- book-keeping -----
 

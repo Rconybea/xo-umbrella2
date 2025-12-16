@@ -4,12 +4,15 @@
  **/
 
 #include "random_allocs.hpp"
+#include "padding.hpp"
 #include <xo/indentlog/scope.hpp>
 #include <xo/indentlog/print/tag.hpp>
 #include <catch2/catch.hpp>
 #include <map>
 
 namespace utest {
+    using xo::mm::AllocInfo;
+    using xo::mm::padding;
     using xo::rng::xoshiro256ss;
     using xo::facet::obj;
     using xo::scope;
@@ -20,9 +23,9 @@ namespace utest {
     /* remember an allocation result.
      * application owns memory in [lo, lo+z)
      */
-    struct AllocInfo {
-        AllocInfo() = default;
-        AllocInfo(byte * lo, size_t z) : lo_{lo}, z_{z} {}
+    struct Alloc {
+        Alloc() = default;
+        Alloc(byte * lo, size_t z) : lo_{lo}, z_{z} {}
 
         byte * lo() const { return lo_; }
         byte * hi() const { return lo_ + z_; }
@@ -44,11 +47,11 @@ namespace utest {
          *  - allocs have valid alloc header
          *  - allocs surrounded by guard bytes
          *
-         * allocs sorted on AllocInfo::lo
+         * allocs sorted on Alloc::lo
          */
-        std::map<byte *, AllocInfo> allocs_by_lo_map;
-        /* allocs sorted on AllocInfo::hi */
-        std::map<byte *, AllocInfo*> allocs_by_hi_map;
+        std::map<byte *, Alloc> allocs_by_lo_map;
+        /* allocs sorted on Alloc::hi */
+        std::map<byte *, Alloc*> allocs_by_hi_map;
 
         for (uint32_t i_alloc = 0; i_alloc < n_alloc; ++i_alloc) {
             std::normal_distribution<double> ngen{5.0, 1.5};
@@ -90,10 +93,18 @@ namespace utest {
                 }
             }
 
-            allocs_by_lo_map[mem] = AllocInfo(mem, z);
+            allocs_by_lo_map[mem] = Alloc(mem, z);
             allocs_by_hi_map[mem + z] = &(allocs_by_lo_map[mem]);
 
+            /* verify we can recover alloc info */
+            AllocInfo info = mm.alloc_info(mem);
 
+            REQUIRE_ORFAIL(ok_flag, catch_flag, info.is_valid());
+            REQUIRE_ORFAIL(ok_flag, catch_flag, info.size() == padding::with_padding(z));
+            /* age isn't configured -> 0 = sentinel */
+            REQUIRE_ORFAIL(ok_flag, catch_flag, info.age() == 0);
+            /* tseq isn't confrigured -> 0 = sentinel */
+            REQUIRE_ORFAIL(ok_flag, catch_flag, info.tseq() == 0);
         }
 
         return true;

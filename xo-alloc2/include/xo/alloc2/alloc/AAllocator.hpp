@@ -6,6 +6,7 @@
 #pragma once
 
 #include "AllocatorError.hpp"
+#include "AllocInfo.hpp"
 #include "xo/facet/facet_implementation.hpp"
 #include "xo/facet/typeseq.hpp"
 #include <string>
@@ -72,9 +73,15 @@ namespace xo {
             /** true iff allocator @p d is responsible for memory at address @p p.
              **/
             virtual bool contains(Copaque d, const void * p) const noexcept = 0;
-
             /** report last error **/
             virtual AllocatorError last_error(Copaque d) const noexcept = 0;
+            /** fetch alloc info: given memory @p mem previously obtained
+             *  from {@ref alloc, @ref super_alloc}, get {tseq, age, size} details
+             *  for that allocation.
+             *
+             *  Non-const @p d because may stash error details
+             **/
+            virtual AllocInfo alloc_info(Opaque d, value_type mem) const noexcept = 0;
 
             /** expand committed space in arena @p d
              *  to size at least @p z
