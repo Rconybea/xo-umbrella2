@@ -5,8 +5,7 @@
 
 #pragma once
 
-#include "alloc2/alloc/Allocator.hpp"
-#include "alloc2/alloc/IAllocator_Xfer.hpp"
+#include "Allocator.hpp"
 #include "DX1Collector.hpp"
 
 namespace xo {
@@ -38,6 +37,7 @@ namespace xo {
             static std::string_view name(const DX1Collector &) noexcept;
             /** reserved memory across all {roles, generations}  **/
             static size_type reserved(const DX1Collector &) noexcept;
+            /** 'size'. synonym for committed size **/
             static size_type size(const DX1Collector &) noexcept;
             /** committed size accross all {roles, generations} **/
             static size_type committed(const DX1Collector &) noexcept;
@@ -50,13 +50,12 @@ namespace xo {
             /** report last error, if any, for collector @p d **/
             static AllocatorError last_error(const DX1Collector &) noexcept;
 
+            /** always alloc in gen0 to-space **/
+            static value_type alloc(DX1Collector & d, size_type z) noexcept;
+            static value_type super_alloc(DX1Collector & d, size_type z) noexcept;
+            static value_type sub_alloc(DX1Collector & d, size_type z, bool complete) noexcept;
             /** expand gen0 spaces (both from-space and to-space) **/
             static bool expand(DX1Collector & d, size_type z) noexcept;
-
-            /** always alloc in gen0 to-space **//
-            static value_type alloc(DX1Collector & d, size_type z);
-            static value_type super_alloc(DX1Collector & d, size_type z);
-            static value_type sub_alloc(DX1Collector & d, size_type z, bool complete);
 
             /** reset to empty state; clears all generations **/
             static void clear(DX1Collector & d);

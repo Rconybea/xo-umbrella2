@@ -393,7 +393,7 @@ namespace xo {
         void
         IAllocator_DArena::clear(DArena & s)
         {
-            s.free_ = s.lo_;
+            s.clear();
             //s.checkpoint_ = s.lo_;
         }
 

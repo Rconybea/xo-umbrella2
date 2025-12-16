@@ -3,13 +3,18 @@
  *  @author Roland Conybeare, Dec 2025
  **/
 
+#include "Allocator.hpp"
+#include "arena/IAllocator_DArena.hpp"
 #include "gc/DX1Collector.hpp"
 #include "gc/generation.hpp"
-#include <_types/_uint32_t.h>
+#include <xo/facet/obj.hpp>
 #include <cassert>
 #include <cstdint>
 
 namespace xo {
+    using xo::mm::AAllocator;
+    using xo::facet::with_facet;
+
     namespace mm {
 #ifdef NOT_USING
         constexpr std::uint64_t
@@ -75,6 +80,8 @@ namespace xo {
 
         // ----- DX1Collector -----
 
+        using size_type = xo::mm::DX1Collector::size_type;
+
         DX1Collector::DX1Collector(const CollectorConfig & cfg) : config_{cfg}
         {
             assert(config_.arena_config_.header_size_bits_ + config_.gen_bits_ + config_.tseq_bits_ <= 64);
@@ -94,18 +101,81 @@ namespace xo {
         }
 
         bool
-        DX1Collector::contains(role r, void * addr) const
+        DX1Collector::contains(role r, const void * addr) const noexcept
         {
             for (generation gi{0}; gi < config_.n_generation_; ++gi) {
-                if (get_space(r, gi)->contains(addr))
+                const DArena * arena = get_space(r, gi);
+
+                if (arena->contains(addr))
                     return true;
             }
 
             return false;
         }
 
-        std::size_t
-        DX1Collector::header2size(header_type hdr) const
+        AllocatorError
+        DX1Collector::last_error() const noexcept
+        {
+            // TODO:
+            // need to adjust here if runtime errors
+            // encountered during gc.
+
+            return get_space(role::to_space(), generation::nursery())->last_error_;
+        }
+
+        namespace {
+            size_type
+            accumulate_total_aux(const DX1Collector & d,
+                                 size_t (DArena::* get_stat_fn)() const) noexcept
+            {
+                size_t z = 0;
+
+                for (role ri : role::all()) {
+                    for (generation gj{0}; gj < d.config_.n_generation_; ++gj) {
+                        const DArena * arena = d.get_space(ri, gj);
+
+                        assert(arena);
+
+                        z += (arena->*get_stat_fn)();
+                    }
+                }
+
+                return z;
+            }
+        }
+
+        size_type
+        DX1Collector::reserved_total() const noexcept
+        {
+            return accumulate_total_aux(*this, &DArena::reserved);
+        }
+
+        size_type
+        DX1Collector::size_total() const noexcept
+        {
+            return committed_total();
+        }
+
+        size_type
+        DX1Collector::committed_total() const noexcept
+        {
+            return accumulate_total_aux(*this, &DArena::committed);
+        }
+
+        size_type
+        DX1Collector::available_total() const noexcept
+        {
+            return accumulate_total_aux(*this, &DArena::available);
+        }
+
+        size_type
+        DX1Collector::allocated_total() const noexcept
+        {
+            return accumulate_total_aux(*this, &DArena::allocated);
+        }
+
+        size_type
+        DX1Collector::header2size(header_type hdr) const noexcept
         {
             uint32_t z = (hdr & config_.arena_config_.header_size_mask_);
 
@@ -113,7 +183,7 @@ namespace xo {
         }
 
         generation
-        DX1Collector::header2gen(header_type hdr) const
+        DX1Collector::header2gen(header_type hdr) const noexcept
         {
             uint32_t g = (hdr & config_.gen_mask_shifted()) >> config_.gen_shift();
 
@@ -123,7 +193,7 @@ namespace xo {
         }
 
         uint32_t
-        DX1Collector::header2tseq(header_type hdr) const
+        DX1Collector::header2tseq(header_type hdr) const noexcept
         {
             uint32_t tseq = (hdr & config_.tseq_mask_shifted()) >> config_.tseq_shift();
 
@@ -131,17 +201,55 @@ namespace xo {
         }
 
         bool
-        DX1Collector::is_forwarding_header(header_type hdr) const
+        DX1Collector::is_forwarding_header(header_type hdr) const noexcept
         {
             /** all 1 bits to flag forwarding pointer **/
             return header2tseq(hdr) == config_.tseq_mask_shifted();
         }
 
+        auto
+        DX1Collector::alloc(size_type z) noexcept -> value_type
+        {
+            return with_facet<AAllocator>::mkobj(new_space()).alloc(z);
+        }
+
+        auto
+        DX1Collector::super_alloc(size_type z) noexcept -> value_type {
+            return with_facet<AAllocator>::mkobj(new_space()).super_alloc(z);
+        }
+
+        auto
+        DX1Collector::sub_alloc(size_type z, bool complete) noexcept -> value_type {
+            return with_facet<AAllocator>::mkobj(new_space()).sub_alloc(z, complete);
+        }
+
+        bool
+        DX1Collector::expand(size_type z) noexcept
+        {
+            if (with_facet<AAllocator>::mkobj(to_space(generation{0})).expand(z))
+                return with_facet<AAllocator>::mkobj(from_space(generation{0})).expand(z);
+
+            return false;
+        }
+
         void
-        DX1Collector::reverse_roles(generation g) {
+        DX1Collector::reverse_roles(generation g) noexcept {
             assert(g < config_.n_generation_);
 
             std::swap(space_[0][g], space_[1][g]);
+        }
+
+        void
+        DX1Collector::clear() noexcept {
+            for (role ri : role::all()) {
+                for (generation gj{0}; gj < config_.n_generation_; ++gj) {
+                    DArena * arena = this->get_space(ri, gj);
+
+                    assert(arena);
+
+                    arena->clear();
+                }
+            }
         }
     } /*namespace mm*/
 } /*namespace xo*/

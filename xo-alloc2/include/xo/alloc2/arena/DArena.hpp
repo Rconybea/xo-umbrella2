@@ -10,6 +10,17 @@
 namespace xo {
     namespace mm {
 
+        /** **/
+        struct AllocHeader {
+            using repr_type = std::uint64_t;
+
+            explicit AllocHeader(repr_type x) : repr_{x} {}
+
+            repr_type repr_;
+        };
+
+        static_assert(sizeof(AllocHeader) == sizeof(AllocHeader::repr_type));
+
         /** @class DArena
          *
          *  @brief represent arena allocator state
@@ -35,8 +46,10 @@ namespace xo {
 
             /** @brief an amount of memory **/
             using size_type = std::size_t;
+            /** @brief allocation pointer; use for allocation results  **/
+            using value_type = std::byte*;
             /** @brief a contiguous memory range **/
-            using range_type = std::pair<std::byte*,std::byte*>;
+            using range_type = std::pair<value_type, value_type>;
             /** @brief type for allocation header (if enabled) **/
             using header_type = std::uint64_t;
 
@@ -51,7 +64,7 @@ namespace xo {
             /** null ctor **/
             DArena() = default;
             /** ctor from already-mapped (but not committed) address range **/
-            DArena(const ArenaConfig & cfg, size_type page_z, std::byte * lo, std::byte * hi);
+            DArena(const ArenaConfig & cfg, size_type page_z, value_type lo, value_type hi);
             /** DArena is not copyable **/
             DArena(const DArena & other) = delete;
             /** move ctor **/
@@ -67,12 +80,12 @@ namespace xo {
             /** @defgroup mm-arena-methods **/
             ///@{
 
-            size_type reserved() const { return hi_ - lo_; }
-            size_type allocated() const { return free_ - lo_; }
-            size_type committed() const { return committed_z_; }
-            size_type available() const { return limit_ - free_; }
+            size_type reserved() const noexcept { return hi_ - lo_; }
+            size_type allocated() const noexcept { return free_ - lo_; }
+            size_type committed() const noexcept { return committed_z_; }
+            size_type available() const noexcept { return limit_ - free_; }
 
-            bool contains(void * addr) const { return (lo_ <= addr) && (addr < hi_); }
+            bool contains(const void * addr) const noexcept { return (lo_ <= addr) && (addr < hi_); }
 
             /** obtain uncommitted contiguous memory range comprising
              *  a whole multiple of @p hugepage_z bytes, of at least size @p req_z,
@@ -81,10 +94,17 @@ namespace xo {
             static range_type map_aligned_range(size_type req_z, size_type hugepage_z);
 
             /** true if arena is mapped i.e. has a reserved address range **/
-            bool is_mapped() const { return (lo_ != nullptr) && (hi_ != nullptr); }
+            bool is_mapped() const noexcept { return (lo_ != nullptr) && (hi_ != nullptr); }
 
             /** get header from allocated object address **/
-            header_type * obj2hdr(void * obj);
+            header_type * obj2hdr(void * obj) noexcept;
+
+            /** discard all allocated memory, return to empty state
+             *  Promise:
+             *  - committed memory unchanged
+             *  - available memory = committed memory
+             **/
+            void clear() noexcept;
 
             ///@}
 

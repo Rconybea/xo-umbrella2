@@ -21,6 +21,8 @@ namespace xo {
 
             explicit constexpr generation(value_type x) : value_{x} {}
 
+            static generation nursery() { return generation{0}; }
+
             constexpr operator value_type() const { return value_; }
 
             generation & operator++() { ++value_; return *this; }

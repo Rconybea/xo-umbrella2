@@ -240,14 +240,18 @@ namespace xo {
         }
 
         DArena::header_type *
-        DArena::obj2hdr(void * obj)
+        DArena::obj2hdr(void * obj) noexcept
         {
             assert(config_.store_header_flag_);
 
             return (header_type *)((byte *)obj - sizeof(header_type));
         }
 
-
+        void
+        DArena::clear() noexcept
+        {
+            this->free_ = lo_;
+        }
     }
 } /*namespace xo*/
 

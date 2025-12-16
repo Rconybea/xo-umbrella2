@@ -1,6 +1,8 @@
 /** @file ICollector_DX1Collector.cpp
  *
  *  @author Roland Conybeare, Dec 2025
+ *
+ *  See also IAllocator_DX1Collector.cpp for allocator facet
  **/
 
 #include "gc/ICollector_DX1Collector.hpp"

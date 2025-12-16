@@ -86,7 +86,8 @@ Create Html docs in `.build/sphinx/html/index.html`
 Prepare build
 ```
 # phase 2
-$ cmake -B .build -S . -DCMAKE_INSTALL_PREFIX=${PREFIX} -DCMAKE_BUILD_TYPE=coverage
+$ cmake -B .build -S . -DCMAKE_INSTALL_PREFIX=${PREFIX} -DCMAKE_BUILD_TYPE=coverage -DENABLE_TESTING=1
+$ cmake --build .build --
 ```
 
 Run coverage-enabled unit tests

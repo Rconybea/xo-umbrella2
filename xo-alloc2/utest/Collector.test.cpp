@@ -7,24 +7,36 @@
  *        see xo-object2/utest
  **/
 
+#include "Allocator.hpp"
 #include "Collector.hpp"
+#include "random_allocs.hpp"
 #include "gc/ICollector_DX1Collector.hpp"
+#include "gc/IAllocator_DX1Collector.hpp"
 //#include "gc/DX1Collector.hpp"
+#include <xo/randomgen/xoshiro256.hpp>
+#include <xo/randomgen/random_seed.hpp>
 #include <xo/indentlog/print/tag.hpp>
+#include <xo/indentlog/print/array.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {
+    using xo::mm::AAllocator;
     using xo::mm::ACollector;
     using xo::mm::CollectorConfig;
     using xo::mm::DX1Collector;
     using xo::mm::ArenaConfig;
     using xo::mm::generation;
     using xo::mm::c_max_generation;
+    using xo::facet::with_facet;
 
     namespace ut {
         // checklist
-        // - obj<ACollector> constructible [ ]
-        //   - obj<ACollector> truthy      [ ]
+        // - obj<ACollector> constructible              [ ]
+        //   - obj<ACollector> truthy                   [ ]
+        // - obj<ACollector,DX1Collector> constructible [ ]
+        //
+        // - obj<AAllocator,DX1Collector> constructible [ ]
+        // - obj<AAllocator,DX1Collector> allocation
 
         TEST_CASE("collector-any-null", "[alloc2][gc][ACollector]")
         {
@@ -95,12 +107,68 @@ namespace xo {
 
             DX1Collector gc = DX1Collector{cfg};
 
-            /* typed collector */
+            /* typed collector -- repr known at compile time */
             obj<ACollector, DX1Collector> x1(&gc);
 
             REQUIRE(x1.iface());
             REQUIRE(x1.data());
+        }
 
+        TEST_CASE("collector-x1-facet-mkobj", "[alloc2][gc]")
+        {
+            ArenaConfig arena_cfg = { .name_ = "_test_unused",
+                                      .size_ = 4*1024*1024,
+                                      .store_header_flag_ = true,
+                                      .header_size_mask_ = 0x0000ffff, };
+            CollectorConfig cfg = { .arena_config_ = arena_cfg,
+                                    .n_generation_ = 2,
+                                    .gc_trigger_v_ = {{64*1024, 1024*1024, 0, 0,
+                                                       0, 0, 0, 0,
+                                                       0, 0, 0, 0,
+                                                       0, 0, 0, 0}} };
+
+            DX1Collector gc = DX1Collector{cfg};
+
+            /* typed collector -- repr inferred at compile time */
+            auto x1 = with_facet<ACollector>::mkobj(&gc);
+
+            REQUIRE(x1.iface());
+            REQUIRE(x1.data());
+        }
+
+        TEST_CASE("collector-x1-alloc", "[alloc2][gc]")
+        {
+            ArenaConfig arena_cfg = { .name_ = "_test_unused",
+                                      .size_ = 4*1024*1024,
+                                      .store_header_flag_ = true,
+                                      .header_size_mask_ = 0x0000ffff, };
+
+            /* collector with one generation collapses to a non-generational copying collector */
+            CollectorConfig cfg = { .arena_config_ = arena_cfg,
+                                    .n_generation_ = 1,
+                                    .gc_trigger_v_ = {{64*1024, 0, 0, 0,
+                                                       0, 0, 0, 0,
+                                                       0, 0, 0, 0,
+                                                       0, 0, 0, 0}} };
+
+            DX1Collector x1state = DX1Collector{cfg};
+
+            /* typed collector */
+            auto x1gc = with_facet<ACollector>::mkobj(&x1state);
+            auto x1alloc = with_facet<AAllocator>::mkobj(&x1state);
+
+            REQUIRE(x1gc.iface());
+            REQUIRE(x1gc.data());
+
+            REQUIRE(x1alloc.iface());
+            REQUIRE(x1alloc.data());
+
+            rng::Seed<rng::xoshiro256ss> seed;
+            std::cerr << "ratio: seed=" << seed << std::endl;
+
+            auto rng = rng::xoshiro256ss(seed);
+
+            utest::AllocUtil::random_allocs(25, true, &rng, x1alloc);
         }
     }
 }
