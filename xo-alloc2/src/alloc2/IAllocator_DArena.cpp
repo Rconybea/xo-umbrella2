@@ -63,30 +63,6 @@ namespace xo {
         IAllocator_DArena::alloc_info(DArena & s, value_type mem) noexcept
         {
             return s.alloc_info(mem);
-
-            if (!s.config_.store_header_flag_) [[unlikely]] {
-                ++(s.error_count_);
-                s.last_error_ = AllocError(error::alloc_info_disabled,
-                                           s.error_count_,
-                                           0 /*add_commit_z*/,
-                                           s.committed_z_,
-                                           reserved(s));
-
-                return AllocInfo::error_not_configured(&s.config_.header_);
-            }
-
-            byte * header_mem = mem - sizeof(AllocHeader);
-
-            if (!s.contains(header_mem)) {
-                ++(s.error_count_);
-                s.last_error_ = AllocError(error::alloc_info_address,
-                                           s.error_count_,
-                                           0 /*add_commit_z*/,
-                                           s.committed_z_,
-                                           reserved(s));
-            }
-
-            return AllocInfo(&s.config_.header_, (AllocHeader*)header_mem);
         }
 
         bool
@@ -163,15 +139,14 @@ namespace xo {
             s.committed_z_ = aligned_target_z;
             s.limit_ = s.lo_ + s.committed_z_;
 
-            if (commit_start == s.lo_) [[unlikely]]
-                {
-/* first expand() for this allocator - start with guard_z_ bytes */
+            if (commit_start == s.lo_) [[unlikely]] {
+                /* first expand() for this allocator - start with guard_z_ bytes */
 
                 ::memset(s.free_,
-                         s.config_.guard_byte_,
-                         s.config_.guard_z_);
+                         s.config_.header_.guard_byte_,
+                         s.config_.header_.guard_z_);
 
-                s.free_ += s.config_.guard_z_;
+                s.free_ += s.config_.header_.guard_z_;
             }
 
             assert(s.committed_z_ % s.config_.hugepage_z_ == 0);
@@ -403,10 +378,10 @@ namespace xo {
             if (store_guard) {
                 /* write guard bytes for overrun detection */
                 ::memset(s.free_,
-                         s.config_.guard_byte_,
-                         s.config_.guard_z_);
+                         s.config_.header_.guard_byte_,
+                         s.config_.header_.guard_z_);
 
-                s.free_ += s.config_.guard_z_;
+                s.free_ += s.config_.header_.guard_z_;
             }
 
             log && log(xtag("self", s.config_.name_),

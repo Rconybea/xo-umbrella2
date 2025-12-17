@@ -54,7 +54,11 @@ namespace xo {
             ArenaConfig arena_cfg = { .name_ = "_test_unused",
                                       .size_ = 4*1024*1024,
                                       .store_header_flag_ = true,
-                                      .header_ = AllocHeaderConfig(0, 0, 16), };
+                                      .header_ = AllocHeaderConfig(0 /*guard_z*/,
+                                                                   0xfd /*guard_byte*/,
+                                                                   0 /*tseq_bits*/,
+                                                                   0 /*age_bits*/,
+                                                                   16 /*size_bits*/), };
             CollectorConfig cfg = { .arena_config_ = arena_cfg,
                                     .n_generation_ = 2,
                                     .gc_trigger_v_ = {{64*1024, 1024*1024, 0, 0,
@@ -98,7 +102,11 @@ namespace xo {
             ArenaConfig arena_cfg = { .name_ = "_test_unused",
                                       .size_ = 4*1024*1024,
                                       .store_header_flag_ = true,
-                                      .header_ = AllocHeaderConfig(0, 0, 16), };
+                                      .header_ = AllocHeaderConfig(0 /*guard_z*/,
+                                                                   0xfd /*guard_byte*/,
+                                                                   0 /*tseq_bits*/,
+                                                                   0 /*age_bits*/,
+                                                                   16 /*size_bits*/), };
             CollectorConfig cfg = { .arena_config_ = arena_cfg,
                                     .n_generation_ = 2,
                                     .gc_trigger_v_ = {{64*1024, 1024*1024, 0, 0,
@@ -120,7 +128,11 @@ namespace xo {
             ArenaConfig arena_cfg = { .name_ = "_test_unused",
                                       .size_ = 4*1024*1024,
                                       .store_header_flag_ = true,
-                                      .header_ = AllocHeaderConfig(0, 0, 16), };
+                                      .header_ = AllocHeaderConfig(0 /*guard_z*/,
+                                                                   0xfd /*guard_byte*/,
+                                                                   0 /*tseq-bits*/,
+                                                                   0 /*age-bits*/,
+                                                                   16 /*size-bits*/), };
             CollectorConfig cfg = { .arena_config_ = arena_cfg,
                                     .n_generation_ = 2,
                                     .gc_trigger_v_ = {{64*1024, 1024*1024, 0, 0,
@@ -142,7 +154,11 @@ namespace xo {
             ArenaConfig arena_cfg = { .name_ = "_test_unused",
                                       .size_ = 4*1024*1024,
                                       .store_header_flag_ = true,
-                                      .header_ = AllocHeaderConfig(0, 0, 16), };
+                                      .header_ = AllocHeaderConfig(0 /*guard_z*/,
+                                                                   0xfd /*guard-byte*/,
+                                                                   0 /*tseq-bits*/,
+                                                                   0 /*age-bits*/,
+                                                                   16 /*size-bits*/), };
 
             /* collector with one generation collapses to a non-generational copying collector */
             CollectorConfig cfg = { .arena_config_ = arena_cfg,
