@@ -187,6 +187,47 @@ namespace xo {
 
             utest::AllocUtil::random_allocs(25, true, &rng, x1alloc);
         }
+
+        TEST_CASE("collector-x1-alloc2", "[alloc2][gc]")
+        {
+            ArenaConfig arena_cfg = { .name_ = "_test_unused",
+                                      .size_ = 4*1024*1024,
+                                      .store_header_flag_ = true,
+                                      .header_ = AllocHeaderConfig(8 /*guard_z*/,
+                                                                   0xfd /*guard-byte*/,
+                                                                   0 /*tseq-bits*/,
+                                                                   0 /*age-bits*/,
+                                                                   16 /*size-bits*/), };
+
+            /* collector with one generation collapses to a non-generational copying collector */
+            CollectorConfig cfg = { .arena_config_ = arena_cfg,
+                                    .n_generation_ = 1,
+                                    .gc_trigger_v_ = {{64*1024, 0, 0, 0,
+                                                       0, 0, 0, 0,
+                                                       0, 0, 0, 0,
+                                                       0, 0, 0, 0}} };
+
+            /* X1 allocator+collector */
+            DX1Collector x1state = DX1Collector{cfg};
+
+            /* typed collector i/face */
+            auto x1gc = with_facet<ACollector>::mkobj(&x1state);
+            /* typed allocator i/face */
+            auto x1alloc = with_facet<AAllocator>::mkobj(&x1state);
+
+            REQUIRE(x1gc.iface());
+            REQUIRE(x1gc.data());
+
+            REQUIRE(x1alloc.iface());
+            REQUIRE(x1alloc.data());
+
+            rng::Seed<rng::xoshiro256ss> seed;
+            std::cerr << "ratio: seed=" << seed << std::endl;
+
+            auto rng = rng::xoshiro256ss(seed);
+
+            utest::AllocUtil::random_allocs(25, true, &rng, x1alloc);
+        }
     }
 }
 
