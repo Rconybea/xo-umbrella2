@@ -48,6 +48,10 @@ namespace xo {
             size_type     size() const noexcept { return p_config_->size(*p_header_); }
             /** Guard bytes immediately following allocation **/
             span_type guard_hi() const noexcept;
+            /** Number of guard bytes **/
+            size_type  guard_z() const noexcept { return p_config_->guard_z_; }
+            /** Value (fixed test pattern) of guard byte **/
+            char guard_byte() const noexcept { return p_config_->guard_byte_; }
 
             const AllocHeaderConfig * p_config_ = nullptr;
             const byte *            p_guard_lo_ = nullptr;

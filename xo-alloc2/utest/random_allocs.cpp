@@ -100,11 +100,68 @@ namespace utest {
             AllocInfo info = mm.alloc_info(mem);
 
             REQUIRE_ORFAIL(ok_flag, catch_flag, info.is_valid());
-            REQUIRE_ORFAIL(ok_flag, catch_flag, info.size() == padding::with_padding(z));
+
+            REQUIRE_ORFAIL(ok_flag, catch_flag,
+                           info.size() == padding::with_padding(z));
+
             /* age isn't configured -> 0 = sentinel */
             REQUIRE_ORFAIL(ok_flag, catch_flag, info.age() == 0);
-            /* tseq isn't confrigured -> 0 = sentinel */
+            /* tseq isn't configured -> 0 = sentinel */
             REQUIRE_ORFAIL(ok_flag, catch_flag, info.tseq() == 0);
+
+            if ((info.p_config_->guard_z_ > 0)
+                || info.guard_lo().first
+                || info.guard_lo().second
+                || info.guard_hi().first
+                || info.guard_hi().second)
+            {
+                REQUIRE_ORFAIL(ok_flag, catch_flag,
+                               info.guard_lo().first != nullptr);
+                REQUIRE_ORFAIL(ok_flag, catch_flag,
+                               info.guard_lo().second != nullptr);
+                REQUIRE_ORFAIL(ok_flag, catch_flag,
+                               info.guard_lo().first + info.guard_z()
+                               == info.guard_lo().second);
+
+                for (const byte * p = info.guard_lo().first;
+                     p != info.guard_lo().second; ++p)
+                {
+                    REQUIRE_ORFAIL(ok_flag, catch_flag, (char)*p == info.guard_byte());
+                }
+
+                REQUIRE_ORFAIL(ok_flag, catch_flag,
+                               info.guard_hi().first != nullptr);
+                REQUIRE_ORFAIL(ok_flag, catch_flag,
+                               info.guard_hi().second != nullptr);
+                REQUIRE_ORFAIL(ok_flag, catch_flag,
+                               info.guard_hi().first + info.guard_z()
+                               == info.guard_hi().second);
+
+                for (const byte * p = info.guard_hi().first;
+                     p != info.guard_hi().second; ++p)
+                {
+                    REQUIRE_ORFAIL(ok_flag, catch_flag, (char)*p == info.guard_byte());
+                }
+
+
+            } else {
+                /* control here only if all of:
+                 *  - guard_z is zero
+                 *  - guard_lo empty
+                 *  - guard_hi empty
+                 */
+
+                REQUIRE_ORFAIL(ok_flag, catch_flag,
+                               info.guard_lo().first == nullptr);
+                REQUIRE_ORFAIL(ok_flag, catch_flag,
+                               info.guard_lo().second == nullptr);
+
+                REQUIRE_ORFAIL(ok_flag, catch_flag,
+                               info.guard_hi().first == nullptr);
+                REQUIRE_ORFAIL(ok_flag, catch_flag,
+                               info.guard_hi().second == nullptr);
+
+            }
         }
 
         return true;
