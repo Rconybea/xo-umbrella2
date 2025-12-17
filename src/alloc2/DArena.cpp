@@ -168,7 +168,8 @@ namespace xo {
             //retval.checkpoint_  = lo_;
 
             /** make sure guard size is aligned **/
-            config_.guard_z_ = padding::with_padding(config_.guard_z_);
+            config_.header_.guard_z_
+                = padding::with_padding(config_.header_.guard_z_);
         }
 
         DArena::DArena(DArena && other) {
@@ -272,7 +273,17 @@ namespace xo {
                                          this->reserved());
             }
 
-            return AllocInfo(&config_.header_, (AllocHeader *)header_mem);
+            AllocHeader * header = (AllocHeader *)header_mem;
+
+            const byte * guard_lo
+                = header_mem - config_.header_.guard_z_;
+            const byte * guard_hi
+                = mem + config_.header_.size(*header);
+
+            return AllocInfo(&config_.header_,
+                             guard_lo,
+                             (AllocHeader *)header_mem,
+                             guard_hi);
         }
 
         void

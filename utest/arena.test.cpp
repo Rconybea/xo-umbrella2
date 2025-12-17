@@ -185,7 +185,11 @@ namespace xo {
                               .size_ = 64*1024,
                               .store_header_flag_ = true,
                               /* up to 4GB */
-                              .header_ = AllocHeaderConfig(0, 0, 32),
+                              .header_ = AllocHeaderConfig(0 /*guard_z*/,
+                                                           0xfd /*guard_byte*/,
+                                                           0 /*tseq-bits*/,
+                                                           0 /*age-bits*/,
+                                                           32 /*size-bits*/),
                               .debug_flag_ = false,
             };
             DArena arena = DArena::map(cfg);
@@ -222,11 +226,13 @@ namespace xo {
             /* typed allocator a1o, with object header + guard bytes */
             ArenaConfig cfg { .name_ = "testarena",
                               .size_ = 64*1024,
-                              .guard_z_ = 8,
-                              .guard_byte_ = 0xfd,
                               .store_header_flag_ = true,
                               /* up to 4GB */
-                              .header_ = AllocHeaderConfig(0, 0, 32),
+                              .header_ = AllocHeaderConfig(8 /*guard_z*/,
+                                                           0xfd /*guard-byte*/,
+                                                           0 /*tseq-bits*/,
+                                                           0 /*age-bits*/,
+                                                           32 /*size-bits*/),
                               .debug_flag_ = false,
             };
             DArena arena = DArena::map(cfg);
@@ -250,7 +256,7 @@ namespace xo {
             //  guard0  header  m0      guard1
             //
 
-            byte * guard0 = m0 - sizeof(header_type) - cfg.guard_z_;
+            byte * guard0 = m0 - sizeof(header_type) - cfg.header_.guard_z_;
             header_type* header = (header_type*)(m0 - sizeof(header_type));
             size_t pad = padding::with_padding(z0) - z0;
             byte * guard1 = m0 + z0 + pad;
@@ -263,7 +269,7 @@ namespace xo {
             REQUIRE(a1o.last_error().error_ == error::none);
             REQUIRE(a1o.last_error().error_seq_ == 0);
 
-            REQUIRE(a1o.allocated() == cfg.guard_z_ + sizeof(header_type) + z0 + pad + cfg.guard_z_);
+            REQUIRE(a1o.allocated() == cfg.header_.guard_z_ + sizeof(header_type) + z0 + pad + cfg.header_.guard_z_);
             REQUIRE(a1o.allocated() <= a1o.committed());
             REQUIRE(a1o.allocated() + a1o.available() == a1o.committed());
             REQUIRE(a1o.committed() <= a1o.reserved());

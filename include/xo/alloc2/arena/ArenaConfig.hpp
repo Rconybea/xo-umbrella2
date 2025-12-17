@@ -29,20 +29,6 @@ namespace xo {
              *  (provided you use their full extent :)
              **/
             std::size_t hugepage_z_ = 2 * 1024 * 1024;
-            /** if non-zero, allocate extra space between allocs, and fill
-             *  with fixed test-pattern contents. Allows for simple
-             *  runtime arena sanitizing checks.
-             *  Will be rounded up to multiple of @ref padding::c_alloc_alignment
-             **/
-            std::size_t guard_z_ = 0;
-            /** if guard_z_ > 0, write at least that many copies
-             *  of this guard byte following each complete allocation
-             **/
-            std::uint8_t guard_byte_ = 0xfd;
-            /** if store_header_flag_ is true: mask bits for allocation size.
-             *  remaining bits can be stolen for other purposes
-             *  otherwise ignored
-             **/
             /** true to store header (8 bytes) at the beginning of each allocation.
              *  necessary and sufficient to allows iterating over allocs
              *  present in arena
