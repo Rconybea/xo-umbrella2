@@ -10,6 +10,8 @@ set(SELF_SRCS
     IAllocator_Any.cpp
     IAllocator_DArena.cpp
 
+    IAllocIterator_Any.cpp
+
     ICollector_Any.cpp
     IGCObject_Any.cpp
     IAllocator_DX1Collector.cpp
