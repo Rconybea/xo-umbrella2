@@ -3,6 +3,8 @@
 set(SELF_LIB xo_alloc2)
 set(SELF_SRCS
 
+    AllocInfo.cpp
+
     AAllocator.cpp
     DArena.cpp
     IAllocator_Any.cpp

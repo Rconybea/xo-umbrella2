@@ -39,29 +39,15 @@ namespace xo {
             bool is_valid() const { return (p_config_ != nullptr) && (p_header_ != nullptr); }
 
             /** Guard bytes preceding allocation-header **/
-            span_type guard_lo() const noexcept {
-                if (!p_guard_lo_)
-                    return span_type(nullptr, nullptr);
-
-                return span_type(p_guard_lo_,
-                                 p_guard_lo_ + p_config_->guard_z_);
-            }
-
+            span_type guard_lo() const noexcept;
             /** Type sequence number in garbage collector **/
             std::uint32_t tseq() const noexcept { return p_config_->tseq(*p_header_); }
             /** Allocation age in garbage collector **/
             std::uint32_t  age() const noexcept { return p_config_->age (*p_header_); }
             /** Allocation size (including allocator-supplied padding) **/
             size_type     size() const noexcept { return p_config_->size(*p_header_); }
-
             /** Guard bytes immediately following allocation **/
-            span_type guard_hi() const noexcept {
-                if (!p_guard_hi_)
-                    return span_type(nullptr, nullptr);
-
-                return span_type(p_guard_hi_,
-                                 p_guard_hi_ + p_config_->guard_z_);
-            }
+            span_type guard_hi() const noexcept;
 
             const AllocHeaderConfig * p_config_ = nullptr;
             const byte *            p_guard_lo_ = nullptr;
