@@ -80,10 +80,7 @@ namespace xo {
             }
 
             if (s.lo_ + target_z > s.hi_) [[unlikely]] {
-                ++(s.error_count_);
-                s.last_error_ = AllocError(error::reserve_exhausted,
-                                           s.error_count_,
-                                           target_z, s.committed_z_, reserved(s));
+                s.capture_error(error::reserve_exhausted, target_z);
                 return false;
             }
 
@@ -124,15 +121,7 @@ namespace xo {
                            add_commit_z,
                            PROT_READ | PROT_WRITE) != 0) [[unlikely]]
                 {
-                    ++(s.error_count_);
-                    s.last_error_ = AllocError(error::commit_failed,
-                                                   s.error_count_,
-                                                   add_commit_z, s.committed_z_, reserved(s));
-#ifdef OBSOLETE
-                    throw std::runtime_error(tostr("ArenaAlloc::expand: commit failure",
-                                                   xtag("committed_z", s.committed_z_),
-                                                   xtag("add_commit_z", add_commit_z)));
-#endif
+                    s.capture_error(error::commit_failed, add_commit_z);
                     return false;
                 }
 
@@ -198,75 +187,6 @@ namespace xo {
                            ? alloc_mode::sub_complete
                            : alloc_mode::sub_incomplete));
 
-#ifdef OBSOLETE
-            if ((req_z == 0) && complete_flag) [[unlikely]] {
-                /** use zero req_z with complete_flag to clear s.last_header_ **/
-
-                if (s.config_.store_header_flag_) {
-                    if (!s.last_header_) [[unlikely]] {
-                        ++(s.error_count_);
-                        s.last_error_ = AllocError(error::orphan_sub_alloc,
-                                                       s.error_count_,
-                                                       0 /*add_commit_z*/, s.committed_z_, reserved(s));
-                    } else {
-                        s.last_header_ = nullptr;
-                    }
-                }
-
-                return nullptr;
-            }
-
-            byte * free0 = s.free_;
-            byte * mem = _alloc(s, req_z,
-                                complete_flag ? alloc_mode::sub_complete : alloc_mode::sub,
-                                false /*!store_header_flag*/,
-                                false /*!remember_header_flag*/);
-
-            if (!mem) [[unlikely]] {
-                /* error already captured */
-                return nullptr;
-            }
-
-            byte * free1 = s.free_;
-            /* used: accounting for padding applied to req_z */
-            size_t z0 = (free1 - free0);
-
-            assert(z0 > 0);
-
-            if (s.config_.store_header_flag_) {
-                if (!s.last_header_) [[unlikely]] {
-                    ++(s.error_count_);
-                    s.last_error_ = AllocError(error::orphan_sub_alloc,
-                                                   s.error_count_,
-                                                   0 /*add_commit_z*/, s.committed_z_, reserved(s));
-                    return nullptr;
-                }
-
-                /* s.last_header_ holds aggregate size of preceding super_alloc
-                 * (+ any sub-alloc's).
-                 *
-                 * Accumulate allocation size
-                 */
-                uint64_t header = *s.last_header_;
-
-                if ((header & s.config_.header_size_mask_ & z0) != z0) [[unlikely]] {
-                    /* cumulative alloc size doesn't fit in configured header_size_mask bits */
-                    ++(s.error_count_);
-                    s.last_error_ = AllocError(error::header_size_mask,
-                                                   s.error_count_,
-                                                   0 /*add_commit_z*/, s.committed_z_, reserved(s));
-                    return nullptr;
-                }
-
-                *s.last_header_ = ((header & ~s.config_.header_size_mask_) | z0);
-
-                if (complete_flag) {
-                    s.last_header_ = nullptr;
-                }
-            }
-
-            return mem;
-#endif
         }
 
         byte *
@@ -340,12 +260,7 @@ namespace xo {
                     hz = sizeof(header);
                 } else {
                     /* req_z doesn't fit in configured header_size_mask bits */
-                    ++(s.error_count_);
-                    s.last_error_ = AllocError(error::header_size_mask,
-                                                   s.error_count_,
-                                                   0 /*add_commit_z*/,
-                                                   s.committed_z_,
-                                                   reserved(s));
+                    s.capture_error(error::header_size_mask);
                     return nullptr;
                 }
             }
@@ -391,6 +306,8 @@ namespace xo {
                        xtag("z1", z1),
                        xtag("size", size(s)),
                        xtag("avail", available(s)));
+            log && log(xtag("mem", mem),
+                       xtag("free", s.free_));
 
             return mem;
         }

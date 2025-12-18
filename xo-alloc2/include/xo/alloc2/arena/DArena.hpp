@@ -6,9 +6,11 @@
 #pragma once
 
 #include "ArenaConfig.hpp"
+#include "alloc/AllocInfo.hpp"
 
 namespace xo {
     namespace mm {
+        struct DArenaIterator; // see DArenaIterator.hpp
 
         /** @class DArena
          *
@@ -85,6 +87,11 @@ namespace xo {
             /** true if arena is mapped i.e. has a reserved address range **/
             bool is_mapped() const noexcept { return (lo_ != nullptr) && (hi_ != nullptr); }
 
+            /** @ret iterator pointing to the first allocation in this arena **/
+            DArenaIterator begin() const noexcept;
+            /** @ret iterator pointing to just after the last allocation in this arena **/
+            DArenaIterator end() const noexcept;
+
             /** get header from allocated object address **/
             header_type * obj2hdr(void * obj) noexcept;
 
@@ -98,7 +105,11 @@ namespace xo {
              *
              *  Note: non-const, may stash error details
              **/
-            AllocInfo alloc_info(value_type mem) noexcept;
+            AllocInfo alloc_info(value_type mem) const noexcept;
+
+            /** capture error information: advance error count + set last_error **/
+            void capture_error(error err,
+                               size_type target_z = 0) const;
 
             /** discard all allocated memory, return to empty state
              *  Promise:

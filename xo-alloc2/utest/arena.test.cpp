@@ -269,7 +269,11 @@ namespace xo {
             REQUIRE(a1o.last_error().error_ == error::none);
             REQUIRE(a1o.last_error().error_seq_ == 0);
 
-            REQUIRE(a1o.allocated() == cfg.header_.guard_z_ + sizeof(header_type) + z0 + pad + cfg.header_.guard_z_);
+            REQUIRE(a1o.allocated() == (cfg.header_.guard_z_
+                                        + sizeof(header_type)
+                                        + z0
+                                        + pad
+                                        + cfg.header_.guard_z_));
             REQUIRE(a1o.allocated() <= a1o.committed());
             REQUIRE(a1o.allocated() + a1o.available() == a1o.committed());
             REQUIRE(a1o.committed() <= a1o.reserved());

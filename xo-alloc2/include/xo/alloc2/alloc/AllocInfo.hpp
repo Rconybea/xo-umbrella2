@@ -31,7 +31,11 @@ namespace xo {
                                                  p_guard_hi_{p_guard_hi} {}
 
             /** error when alloc-header not configured **/
-            static AllocInfo error_not_configured(AllocHeaderConfig * p_cfg) {
+            static AllocInfo error_not_configured(const AllocHeaderConfig * p_cfg) {
+                return AllocInfo(p_cfg, nullptr, nullptr, nullptr);
+            }
+            /** error on deref empty iterator **/
+            static AllocInfo error_invalid_iterator(const AllocHeaderConfig * p_cfg) {
                 return AllocInfo(p_cfg, nullptr, nullptr, nullptr);
             }
 
@@ -46,6 +50,8 @@ namespace xo {
             std::uint32_t  age() const noexcept { return p_config_->age (*p_header_); }
             /** Allocation size (including allocator-supplied padding) **/
             size_type     size() const noexcept { return p_config_->size(*p_header_); }
+            /** Payload for this allocation. This is the memory available to application **/
+            span_type  payload() const noexcept;
             /** Guard bytes immediately following allocation **/
             span_type guard_hi() const noexcept;
             /** Number of guard bytes **/

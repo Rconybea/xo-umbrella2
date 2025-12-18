@@ -3,6 +3,8 @@
  *  @author Roland Conybeare, Dec 2025
  **/
 
+#pragma once
+
 #include "AAllocIterator.hpp"
 
 namespace xo {
@@ -27,15 +29,14 @@ namespace xo {
             int32_t _typeseq() const noexcept override { return s_typeseq; }
             AllocInfo deref(Copaque d)
                 const noexcept override { return I::deref(_dcast(d)); }
-            int compare(Copaque d,
-                        const obj_AAllocIterator & other)
+            cmpresult compare(Copaque d,
+                              const obj_AAllocIterator & other)
                 const noexcept override
                 { return I::compare(_dcast(d), other); }
 
             // non-const methods
 
-            void next(Opaque d) const noexcept override { I::prev(_dcast(d)); }
-            void prev(Opaque d) const noexcept override { I::next(_dcast(d)); }
+            void next(Opaque d) const noexcept override { I::next(_dcast(d)); }
 
         private:
             using I = Impl;

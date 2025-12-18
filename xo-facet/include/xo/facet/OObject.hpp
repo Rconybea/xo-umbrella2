@@ -171,7 +171,7 @@ namespace xo {
              *  concerned.
              **/
             template <typename DOther>
-            DOther * downcast()
+            DOther * downcast() const
                 requires (std::is_same_v<DataType, DVariantPlaceholder>)
             {
                 if (data_ && (typeseq::id<DOther>() == this->iface()->_typeseq())) {

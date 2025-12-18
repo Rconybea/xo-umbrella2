@@ -11,13 +11,17 @@ set(SELF_SRCS
     IAllocator_DArena.cpp
 
     IAllocIterator_Any.cpp
+    DArenaIterator.cpp
+    IAllocIterator_DArenaIterator.cpp
 
     ICollector_Any.cpp
     IGCObject_Any.cpp
     IAllocator_DX1Collector.cpp
     ICollector_DX1Collector.cpp
+    IAllocIterator_DX1CollectorIterator.cpp
 
     DX1Collector.cpp
+    DX1CollectorIterator.cpp
 
     )
 

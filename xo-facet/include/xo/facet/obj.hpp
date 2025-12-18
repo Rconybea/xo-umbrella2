@@ -50,7 +50,13 @@ namespace xo {
             obj() {}
             explicit obj(Super::DataPtr d) : Super(d) {}
 
-            /** copy constructor **/
+            /** copy constructor
+             *
+             *  Intended for use cases:
+             *    obj<AFoo, DRepr> lhs = obj<AFoo, DRepr>   // same type on rhs
+             *    obj<AFoo> lhs = obj<AFoo, DRepr>          // variant lhs, typed rhs
+             *    obj<Afoo> lhs = obj<AFoo>                 // variant on both sides
+             **/
             template <typename DOther>
             obj(const obj<AFacet, DOther> & other)
                 requires (std::is_same_v<DRepr, DVariantPlaceholder>
@@ -98,13 +104,6 @@ namespace xo {
             static obj<AFacet, DRepr> mkobj(DRepr * data) { obj<AFacet, DRepr> x(data); return x; }
         };
 
-#ifdef DEPRECATED
-        template <typename AFacet, typename DRepr>
-        inline obj<AFacet, DRepr>
-        with_facet(DRepr * data) {
-            return obj<AFacet, DRepr>(data);
-        }
-#endif
     } /*namespace facet*/
 
     using facet::obj;
