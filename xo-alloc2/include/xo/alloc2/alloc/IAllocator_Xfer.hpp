@@ -39,12 +39,13 @@ namespace xo {
                 return I::contains(_dcast(d), p);
             }
             AllocError    last_error(Copaque d) const noexcept override { return I::last_error(_dcast(d)); }
-
-            // non-const methods
-
             AllocInfo     alloc_info(Copaque d, value_type mem) const noexcept override {
                 return I::alloc_info(_dcast(d), mem);
             }
+            range_type   alloc_range(Copaque d, DArena & mm) const noexcept override { return I::alloc_range(_dcast(d), mm); }
+
+            // non-const methods
+
             bool              expand(Opaque d,
                                      std::size_t z) const noexcept override { return I::expand(_dcast(d), z); }
             value_type         alloc(Opaque d,

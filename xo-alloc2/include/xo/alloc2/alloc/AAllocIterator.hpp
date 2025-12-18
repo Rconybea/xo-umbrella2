@@ -37,4 +37,4 @@ namespace xo {
     } /*namespace mm*/
 } /*namespace xo*/
 
-/* end AllocIterator.hpp */
+/* end AAllocIterator.hpp */

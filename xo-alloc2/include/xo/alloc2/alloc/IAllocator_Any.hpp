@@ -45,6 +45,7 @@ namespace xo {
             [[noreturn]] AllocInfo      alloc_info(Copaque, value_type) const noexcept override { _fatal(); }
             // defn in .cpp - problematic to require compiler know vt<AAllocIterator> defn here
             //[[noreturn]] facet::vt<AAllocIterator> begin(Copaque, DArena &) const noexcept override; // { _fatal(); }
+            [[noreturn]] range_type    alloc_range(Copaque, DArena &) const noexcept override { _fatal(); }
 
             // non-const methods
             [[noreturn]] bool               expand(Opaque, std::size_t) const noexcept override { _fatal(); }

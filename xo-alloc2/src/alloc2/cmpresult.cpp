@@ -14,12 +14,14 @@ namespace xo {
         {
             switch (x) {
             case comparison::invalid:
-                return "?comparison";
+                break;
             case comparison::comparable:
                 return "cmp";
             case comparison::incomparable:
                 return "!cmp";
             }
+
+            return "?comparison";
         }
 
         void

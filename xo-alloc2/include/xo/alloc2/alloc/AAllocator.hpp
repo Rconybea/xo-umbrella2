@@ -7,8 +7,10 @@
 
 #include "AllocError.hpp"
 #include "AllocInfo.hpp"
-#include "xo/facet/facet_implementation.hpp"
-#include "xo/facet/typeseq.hpp"
+#include "AllocIterator.hpp"
+#include <xo/facet/obj.hpp>
+#include <xo/facet/facet_implementation.hpp>
+#include <xo/facet/typeseq.hpp>
 #include <string>
 
 namespace xo {
@@ -32,6 +34,8 @@ namespace xo {
             using value_type = std::byte *;
             /** object header, if configured **/
             using header_type = std::uint64_t;
+            /** iterator range. These are forward iterators over allocs **/
+            using range_type = std::pair<obj<AAllocIterator>, obj<AAllocIterator>>;
             ///@}
 
             /*
@@ -85,20 +89,21 @@ namespace xo {
              *  Non-const @p d because may stash error details
              **/
             virtual AllocInfo alloc_info(Copaque d, value_type mem) const noexcept = 0;
-            /** Ideally we want to control allocation for iterator here.
-             *  Awkward to describe to compiler since we don't have vt<AAllocator> yet.
-             *  OTOH iteration over allocs is a niche feature.
-             *  Consider alternatives:
+            /** Ideally we want to control allocator for iterator here.
+             *  Awkward to supply to compiler since we don't have obj<AAllocator> yet.
+             *  OTOH iteration over allocs is a super-niche feature.
+             *
+             *  Rejected alternatives:
              *  - put begin/end in separate interface. e.g. extend AAllocator
              *  - layer of indirection: begin/end return iterator factory.
              *    Then allocator can be passed to iterator factory separately.
              *    Helps because factory can be static
              *  - abandon allocator support in this case. Instead will need to
              *    reinstate uvt<AAllocIterator> (unique variant), use heap
-             *  - just pass DArena& for alloc-iterator-allocation
+             *
+             *  @p mm is allocator for resulting iterator range
              **/
-            //virtual facet::vt<AAllocIterator> begin(Copaque d, DArena & ialloc) const noexcept;
-            // virtual obj<AAllocIterator> end() const noexcept = 0;
+            virtual range_type alloc_range(Copaque d, DArena & mm) const noexcept = 0;
 
             /** expand committed space in arena @p d
              *  to size at least @p z
