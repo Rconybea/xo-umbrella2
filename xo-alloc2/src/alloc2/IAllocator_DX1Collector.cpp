@@ -86,7 +86,7 @@ namespace xo {
         }
 
         AllocInfo
-        IAllocator_DX1Collector::alloc_info(DX1Collector & d, value_type mem) noexcept
+        IAllocator_DX1Collector::alloc_info(const DX1Collector & d, value_type mem) noexcept
         {
             return d.alloc_info(mem);
         }

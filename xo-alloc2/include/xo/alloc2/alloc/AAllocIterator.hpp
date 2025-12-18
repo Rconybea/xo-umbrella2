@@ -14,9 +14,6 @@ namespace xo {
         using Copaque = const void *;
         using Opaque = void *;
 
-        /** forward decl for obj<AAllocIterator> **/
-        struct ObjAllocIterator;
-
         /** @class AAllocIterator
          *  @brief Abstract facet for iterating over allocs
          *

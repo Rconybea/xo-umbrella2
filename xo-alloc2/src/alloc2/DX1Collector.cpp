@@ -10,6 +10,7 @@
 #include "gc/generation.hpp"
 #include "gc/object_age.hpp"
 #include <xo/facet/obj.hpp>
+#include <xo/indentlog/scope.hpp>
 #include <cassert>
 #include <cstdint>
 
@@ -207,10 +208,10 @@ namespace xo {
         }
 
         AllocInfo
-        DX1Collector::alloc_info(value_type mem) noexcept {
+        DX1Collector::alloc_info(value_type mem) const noexcept {
             for (role ri : role::all()) {
                 for (generation gj{0}; gj < config_.n_generation_; ++gj) {
-                    DArena * arena = this->get_space(ri, gj);
+                    const DArena * arena = this->get_space(ri, gj);
 
                     assert(arena);
 
@@ -221,21 +222,29 @@ namespace xo {
             }
 
             // deliberately attempt on nursery to-space, to capture error info + return sentinel
-            return this->new_space()->alloc_info(mem);
+            return this->get_space(role::to_space(), generation{0})->alloc_info(mem);
         }
 
         DX1CollectorIterator
         DX1Collector::begin() const noexcept
         {
+            scope log(XO_DEBUG(false));
+
+            const DArena * arena
+                = get_space(role::to_space(),
+                            generation{0});
+
             return DX1CollectorIterator(this,
                                         generation{0},
                                         generation{config_.n_generation_},
-                                        DArenaIterator(),
-                                        DArenaIterator());
+                                        arena->begin(),
+                                        arena->end());
         }
 
         DX1CollectorIterator
         DX1Collector::end() const noexcept {
+            scope log(XO_DEBUG(false));
+
             generation gen_hi = generation{config_.n_generation_};
 
             /** valid iterator for end points to end of last DArena.

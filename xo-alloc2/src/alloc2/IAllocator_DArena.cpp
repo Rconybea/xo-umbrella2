@@ -60,7 +60,7 @@ namespace xo {
         }
 
         AllocInfo
-        IAllocator_DArena::alloc_info(DArena & s, value_type mem) noexcept
+        IAllocator_DArena::alloc_info(const DArena & s, value_type mem) noexcept
         {
             return s.alloc_info(mem);
         }

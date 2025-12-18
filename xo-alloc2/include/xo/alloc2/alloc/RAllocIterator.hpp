@@ -22,6 +22,10 @@ namespace xo {
             RAllocIterator(Object::DataPtr data) : Object{std::move(data)} {}
 
             int32_t _typeseq() const noexcept { return O::iface()->_typeseq(); }
+            AllocInfo deref() const noexcept { return O::iface()->deref(O::data()); }
+            cmpresult compare(const obj<AAllocIterator> & other) const noexcept {
+                return O::iface()->compare(O::data(), other); }
+            void next() noexcept { O::iface()->next(O::data()); }
 
             static bool _valid;
         };
@@ -36,6 +40,21 @@ namespace xo {
         struct RoutingFor<xo::mm::AAllocIterator, Object> {
             using RoutingType = xo::mm::RAllocIterator<Object>;
         };
+
+        /* also provide comparison */
+        template <typename DRepr1, typename DRepr2>
+        inline bool operator==(obj<xo::mm::AAllocIterator, DRepr1> lhs,
+                               obj<xo::mm::AAllocIterator, DRepr2> rhs)
+        {
+            return lhs.compare(rhs).is_equal();
+        }
+
+        template <typename DRepr1, typename DRepr2>
+        inline bool operator!=(obj<xo::mm::AAllocIterator, DRepr1> lhs,
+                               obj<xo::mm::AAllocIterator, DRepr2> rhs)
+        {
+            return !lhs.compare(rhs).is_equal();
+        }
     }
 } /*namespace xo*/
 

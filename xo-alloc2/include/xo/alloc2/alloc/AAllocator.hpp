@@ -16,6 +16,9 @@ namespace xo {
         using Copaque = const void *;
         using Opaque = void *;
 
+        // see DArena.hpp
+        struct DArena;
+
         /** @class AAllocator
          *  @brief Abstract facet for allocation
          *
@@ -81,7 +84,21 @@ namespace xo {
              *
              *  Non-const @p d because may stash error details
              **/
-            virtual AllocInfo alloc_info(Opaque d, value_type mem) const noexcept = 0;
+            virtual AllocInfo alloc_info(Copaque d, value_type mem) const noexcept = 0;
+            /** Ideally we want to control allocation for iterator here.
+             *  Awkward to describe to compiler since we don't have vt<AAllocator> yet.
+             *  OTOH iteration over allocs is a niche feature.
+             *  Consider alternatives:
+             *  - put begin/end in separate interface. e.g. extend AAllocator
+             *  - layer of indirection: begin/end return iterator factory.
+             *    Then allocator can be passed to iterator factory separately.
+             *    Helps because factory can be static
+             *  - abandon allocator support in this case. Instead will need to
+             *    reinstate uvt<AAllocIterator> (unique variant), use heap
+             *  - just pass DArena& for alloc-iterator-allocation
+             **/
+            //virtual facet::vt<AAllocIterator> begin(Copaque d, DArena & ialloc) const noexcept;
+            // virtual obj<AAllocIterator> end() const noexcept = 0;
 
             /** expand committed space in arena @p d
              *  to size at least @p z

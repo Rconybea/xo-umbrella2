@@ -46,7 +46,12 @@ namespace xo {
             /** print to stream **/
             void display(std::ostream & os) const;
 
-            bool is_equal() const { return (err_ == comparison::comparable) && (cmp_ == 0); }
+            bool is_lesser() const {
+                return (err_ == comparison::comparable) && (cmp_ < 0);
+            }
+            bool is_equal() const {
+                return (err_ == comparison::comparable) && (cmp_ == 0);
+            }
 
             /* -1 -> invalid (sentinel)
              *  0 -> comparable

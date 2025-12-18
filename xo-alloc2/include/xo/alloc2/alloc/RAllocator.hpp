@@ -6,6 +6,7 @@
 #pragma once
 
 #include "AAllocator.hpp"
+#include "AllocIterator.hpp"
 #include <xo/facet/RRouter.hpp>
 #include <string>
 

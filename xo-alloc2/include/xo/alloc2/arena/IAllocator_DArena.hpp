@@ -46,7 +46,7 @@ namespace xo {
             static AllocError last_error(const DArena &) noexcept;
 
             /** retrieve allocation bookkeeping info for @p mem from arena @p d **/
-            static AllocInfo alloc_info(DArena &, value_type mem) noexcept;
+            static AllocInfo alloc_info(const DArena &, value_type mem) noexcept;
             /** expand committed space in arena @p d
              *  to size at least @p z
              *  In practice will round up to a multiple of @ref page_z_.

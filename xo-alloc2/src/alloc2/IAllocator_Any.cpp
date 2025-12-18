@@ -27,6 +27,14 @@ namespace xo {
             std::terminate();
         }
 
+#ifdef NOPE
+        vt<AAllocIterator>
+        IAllocator_Any::begin(Copaque, DArena &) const noexcept
+        {
+            _fatal();
+        }
+#endif
+
         int32_t
         IAllocator_Any::s_typeseq = typeseq::id<DVariantPlaceholder>();
 

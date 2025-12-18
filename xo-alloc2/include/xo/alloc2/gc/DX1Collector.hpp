@@ -191,6 +191,9 @@ namespace xo {
             /** true iff original alloc has been replaced by a forwarding pointer **/
             bool is_forwarding_header(header_type hdr) const noexcept;
 
+            /** Retreive bookkeeping info for allocation at @p mem. **/
+            AllocInfo alloc_info(value_type mem) const noexcept;
+
             // ----- allocation -----
 
             /** simple allocation. new allocs always in gen0 to-space **/
@@ -211,8 +214,6 @@ namespace xo {
             /** expand gen0 committed size to at least @p z.
              **/
             bool expand(size_type z) noexcept;
-            /** Retreive bookkeeping info for allocation at @p mem. **/
-            AllocInfo alloc_info(value_type mem) noexcept;
 
             // ----- iteration -----
 
