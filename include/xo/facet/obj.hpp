@@ -6,6 +6,8 @@
 #pragma once
 
 #include "RRouter.hpp"
+#include <utility>
+#include <cassert>
 
 namespace xo {
     namespace facet {
@@ -64,8 +66,13 @@ namespace xo {
                 : Super()
             {
                 if constexpr (std::is_convertible_v<DRepr, DOther>) {
+                    /* preserving .iface */
                     this->data_ = other.data_;
                 } else {
+                    /* replacing .iface_
+                     *
+                     * WARNING: only works if .data_ is POD
+                     */
                     this->from_data(other.data_);
                 }
             }
@@ -78,15 +85,18 @@ namespace xo {
             template <typename DOther>
             obj(const obj<AFacet, DOther> && other)
                     requires (std::is_same_v<DRepr, DVariantPlaceholder>
-                              || std::is_convertible_v<DOther*, DRepr>)
+                              || std::is_convertible_v<DRepr, DOther>)
               : Super()
             {
-                static_assert(sizeof(obj<AFacet, DOther>)
-                              == sizeof(obj<AFacet, DRepr>));
+                if constexpr (std::is_convertible_v<DRepr, DOther>) {
+                    /* move .data_, keeping .iface_ */
+                    this->data_ = std::move(other.data_);
+                } else {
+                    // TODO: instead, have other move itself,
 
-                other.move2any(this);
-
-                assert(other.data_ = nullptr);
+                    /* replacing .iface_ + .data_ */
+                    this->from_data(other.data_);
+                }
             }
 
             /** safe downcast from variant. null if downcast fails **/
@@ -99,7 +109,7 @@ namespace xo {
         using vt = obj<AFacet, DVariantPlaceholder>;
 
         /** Use:
-         *    auto o = with_facet<AAllocator>::obj(&data);
+         *    auto o = with_facet<AAllocator>::mkobj(&data);
          **/
         template <typename AFacet>
         struct with_facet {

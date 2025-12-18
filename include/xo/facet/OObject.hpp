@@ -145,10 +145,15 @@ namespace xo {
                               || std::is_convertible_v<DOther*, DRepr*>);
 
                 if constexpr (std::is_convertible_v<DOther*, DRepr*>) {
-                    /** assigning from data with same representation **/
+                    /* assigning from data with same representation,
+                     * keep .iface_ pointer
+                     */
                     this->data_ = other;
                 } else /*DRepr is DVariantPlaceholder*/ {
-                    /** assigning to variant **/
+                    /** assigning to variant
+                     *
+                     *  This implementation only valid for POD pointers.
+                     **/
 
                     /* acquire fat object pointer for (AFacet, DOther) */
                     OObject<AFacet, DOther> oother(other);
