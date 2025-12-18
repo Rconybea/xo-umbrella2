@@ -87,6 +87,12 @@ namespace xo {
         cmpresult
         DArenaIterator::compare(const DArenaIterator & other_ix) const noexcept
         {
+            scope log(XO_DEBUG(false),
+                      xtag("arena", arena_),
+                      xtag("pos", pos_),
+                      xtag("other.arena", other_ix.arena_),
+                      xtag("other.pos", other_ix.pos_));
+
             if (is_invalid() || (arena_ != other_ix.arena_))
                 return cmpresult::incomparable();
 

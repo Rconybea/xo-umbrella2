@@ -4,6 +4,7 @@ set(SELF_LIB xo_alloc2)
 set(SELF_SRCS
 
     AllocInfo.cpp
+    cmpresult.cpp
 
     AAllocator.cpp
     DArena.cpp

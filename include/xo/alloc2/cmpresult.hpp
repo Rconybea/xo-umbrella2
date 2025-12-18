@@ -16,6 +16,14 @@ namespace xo {
             incomparable = 1,
         };
 
+        extern const char * comparison2str(comparison x);
+
+        inline std::ostream &
+        operator<<(std::ostream & os, comparison x) {
+            os << comparison2str(x);
+            return os;
+        }
+
         struct cmpresult {
             cmpresult() : err_{comparison::invalid}, cmp_{0} {}
             cmpresult(comparison err, std::int16_t cmp) : err_{err}, cmp_{cmp} {}
@@ -35,6 +43,8 @@ namespace xo {
                     return cmpresult::greater();
             }
 
+            /** print to stream **/
+            void display(std::ostream & os) const;
 
             bool is_equal() const { return (err_ == comparison::comparable) && (cmp_ == 0); }
 
@@ -50,7 +60,8 @@ namespace xo {
         inline std::ostream & operator<<(std::ostream & os,
                                          const cmpresult & x)
         {
-            os << "<cmpresult " << xtag("err", x.err_) << xtag("cmp", x.cmp_) << ">";
+            x.display(os);
+            return os;
         }
 
     } /*namespace mm*/
