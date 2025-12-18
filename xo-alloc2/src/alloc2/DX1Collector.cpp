@@ -238,11 +238,21 @@ namespace xo {
         DX1Collector::end() const noexcept {
             generation gen_hi = generation{config_.n_generation_};
 
+            /** valid iterator for end points to end of last DArena.
+             *  otherwise will interfere with working compare
+             *  (since invalid iterators are incomparable)
+             **/
+
+            const DArena * arena
+                = get_space(role::to_space(),
+                            generation(config_.n_generation_ - 1));
+            DArenaIterator arena_end = arena->end();
+
             return DX1CollectorIterator(this,
                                         gen_hi,
                                         gen_hi,
-                                        DArenaIterator(),
-                                        DArenaIterator());
+                                        arena_end,
+                                        arena_end);
         }
 
         void

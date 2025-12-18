@@ -51,7 +51,7 @@ namespace xo {
         cmpresult
         DX1CollectorIterator::compare(const DX1CollectorIterator & other_ix) const noexcept
         {
-            scope log(XO_DEBUG(true),
+            scope log(XO_DEBUG(false),
                       xtag("is_valid", is_valid()),
                       xtag("other_ix.is_valid", other_ix.is_valid()) );
 
@@ -71,7 +71,11 @@ namespace xo {
             /* both iterators refer to the same arena,
              * so can compare their arena iterators directly
              */
-            return arena_ix_.compare(other_ix.arena_ix_);
+            cmpresult retval = arena_ix_.compare(other_ix.arena_ix_);
+
+            log && log(xtag("retval", retval));
+
+            return retval;
         }
 
         void
