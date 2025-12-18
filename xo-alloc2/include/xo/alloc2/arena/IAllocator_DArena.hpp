@@ -34,13 +34,6 @@ namespace xo {
             using range_type = std::pair<obj<AAllocIterator>,
                                          obj<AAllocIterator>>;
 
-            enum class alloc_mode : uint8_t {
-                standard,
-                super,
-                sub_incomplete,
-                sub_complete,
-            };
-
             static std::string_view name(const DArena &) noexcept;
             static size_type reserved(const DArena &) noexcept;
             static size_type size(const DArena &) noexcept;
@@ -84,7 +77,7 @@ namespace xo {
             /** alloc driver. shared by alloc(), super_alloc(), sub_alloc() **/
             static value_type _alloc(DArena &,
                                      size_type z,
-                                     alloc_mode mode);
+                                     DArena::alloc_mode mode);
         };
 
 //        template <>
