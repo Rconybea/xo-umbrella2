@@ -49,6 +49,8 @@ namespace xo {
             static bool contains(const DX1Collector & d, const void * p) noexcept;
             /** report last error, if any, for collector @p d **/
             static AllocError last_error(const DX1Collector &) noexcept;
+            /** fetch allocation bookkeeping info **/
+            static AllocInfo alloc_info(const DX1Collector & d, value_type mem) noexcept;
 
             /** always alloc in gen0 to-space **/
             static value_type alloc(DX1Collector & d, size_type z) noexcept;
@@ -56,8 +58,6 @@ namespace xo {
             static value_type sub_alloc(DX1Collector & d, size_type z, bool complete) noexcept;
             /** expand gen0 spaces (both from-space and to-space) **/
             static bool expand(DX1Collector & d, size_type z) noexcept;
-            /** fetch allocation bookkeeping info **/
-            static AllocInfo alloc_info(DX1Collector & d, value_type mem) noexcept;
 
             /** reset to empty state; clears all generations **/
             static void clear(DX1Collector & d);

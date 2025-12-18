@@ -10,6 +10,8 @@
 #include "gc/IAllocIterator_DX1CollectorIterator.hpp"
 #include "arena/ArenaConfig.hpp"
 #include "padding.hpp"
+#include <xo/indentlog/scope.hpp>
+#include <xo/indentlog/print/tag.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {
@@ -22,6 +24,10 @@ namespace xo {
     using xo::mm::CollectorConfig;
     using xo::mm::ArenaConfig;
     using xo::mm::AllocHeaderConfig;
+    using xo::mm::cmpresult;
+    using xo::mm::padding;
+    using xo::facet::with_facet;
+    using std::byte;
 
     namespace ut {
         TEST_CASE("IAllocIterator_Xfer_DX1CollectorIterator", "[alloc2]")
@@ -31,7 +37,7 @@ namespace xo {
             REQUIRE(IAllocIterator_Xfer<DX1CollectorIterator, IAllocIterator_DX1CollectorIterator>::_valid);
         }
 
-        TEST_CASE("DX1CollectorIterator", "[alloc2][gc][DX1Collector]")
+        TEST_CASE("DX1CollectorIterator-1", "[alloc2][gc][DX1Collector]")
         {
             ArenaConfig arena_cfg = { .name_ = "_test_unused",
                                       .size_ = 4*1024*1024,
@@ -55,8 +61,89 @@ namespace xo {
 
             REQUIRE(ix.is_valid());
             REQUIRE(end_ix.is_valid());
-
             REQUIRE(ix == end_ix);
+
+            /* verify obj 'fat pointer' packaging */
+            obj<AAllocIterator,DX1CollectorIterator> ix_vt{&ix};
+            obj<AAllocIterator,DX1CollectorIterator> end_ix_vt{&end_ix};
+
+            REQUIRE(ix_vt.iface());
+            REQUIRE(ix_vt.data());
+            REQUIRE(end_ix_vt.iface());
+            REQUIRE(end_ix_vt.data());
+
+            cmpresult cmp = ix_vt.compare(end_ix_vt);
+
+            REQUIRE(cmp.is_equal());
+            REQUIRE(ix_vt == end_ix_vt);
+        }
+
+        TEST_CASE("DX1CollectorIterator-2", "[alloc2][gc][DX1Collector]")
+        {
+            scope log(XO_DEBUG(false));
+
+            ArenaConfig arena_cfg = { .name_ = "_test_unused",
+                                      .size_ = 4*1024*1024,
+                                      .store_header_flag_ = true,
+                                      .header_ = AllocHeaderConfig(0 /*guard_z*/,
+                                                                   0xfd /*guard_byte*/,
+                                                                   0 /*tseq_bits*/,
+                                                                   0 /*age_bits*/,
+                                                                   16 /*size_bits*/), };
+            CollectorConfig cfg = { .arena_config_ = arena_cfg,
+                                    .n_generation_ = 2,
+                                    .gc_trigger_v_ = {{64*1024, 1024*1024, 0, 0,
+                                                       0, 0, 0, 0,
+                                                       0, 0, 0, 0,
+                                                       0, 0, 0, 0}} };
+
+            DX1Collector gc = DX1Collector{cfg};
+
+            size_t z = 13;
+            byte * mem = gc.alloc(z);
+
+            REQUIRE(mem != nullptr);
+
+            log && log("should have iterators separated by one alloc");
+
+            auto     ix = gc.begin();
+            auto end_ix = gc.end();
+
+            REQUIRE(ix.is_valid());
+            REQUIRE(end_ix.is_valid());
+            REQUIRE(ix != end_ix);
+
+            /* verify obj 'fat pointer' packaging */
+            auto     ix_vt = with_facet<AAllocIterator>::mkobj(&ix);
+            auto end_ix_vt = with_facet<AAllocIterator>::mkobj(&end_ix);
+
+            REQUIRE(ix_vt.iface());
+            REQUIRE(ix_vt.data());
+            REQUIRE(end_ix_vt.iface());
+            REQUIRE(end_ix_vt.data());
+
+            cmpresult cmp = ix_vt.compare(end_ix_vt);
+
+            REQUIRE(cmp.is_lesser());
+            REQUIRE(ix_vt != end_ix_vt);
+
+            /* we only did one alloc, should be able
+             * to visit it
+             */
+            auto info = ix_vt.deref();
+
+            REQUIRE(info.is_valid());
+            REQUIRE(info.payload().first == mem);
+            REQUIRE(info.size() == padding::with_padding(z));
+
+            ix_vt.next();
+
+            log && log(xtag("ix.gen", ix.gen_ix()),
+                       xtag("ix.arena_ix.arena", ix.arena_ix().arena_));
+            log && log(xtag("end_ix.gen", end_ix.gen_ix()),
+                       xtag("end_ix.arena_ix.arena", end_ix.arena_ix().arena_));
+
+            REQUIRE(ix_vt == end_ix_vt);
         }
     } /*namespace ut*/
 } /*namespace xo*/

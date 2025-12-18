@@ -6,6 +6,8 @@
 #pragma once
 
 #include "AAllocator.hpp"
+#include "AllocIterator.hpp"
+#include <xo/facet/obj.hpp>
 #include <cassert>
 
 namespace xo {
@@ -40,9 +42,11 @@ namespace xo {
             [[noreturn]] size_type       allocated(Copaque) const noexcept override { _fatal(); }
             [[noreturn]] bool             contains(Copaque, const void *) const noexcept override { _fatal(); }
             [[noreturn]] AllocError     last_error(Copaque) const noexcept override { _fatal(); }
+            [[noreturn]] AllocInfo      alloc_info(Copaque, value_type) const noexcept override { _fatal(); }
+            // defn in .cpp - problematic to require compiler know vt<AAllocIterator> defn here
+            //[[noreturn]] facet::vt<AAllocIterator> begin(Copaque, DArena &) const noexcept override; // { _fatal(); }
 
             // non-const methods
-            [[noreturn]] AllocInfo      alloc_info(Opaque, value_type) const noexcept override { _fatal(); }
             [[noreturn]] bool               expand(Opaque, std::size_t) const noexcept override { _fatal(); }
             [[noreturn]] value_type          alloc(Opaque, std::size_t) const override { _fatal(); }
             [[noreturn]] value_type    super_alloc(Opaque, std::size_t) const override { _fatal(); }

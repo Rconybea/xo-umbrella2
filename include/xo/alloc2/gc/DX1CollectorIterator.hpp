@@ -42,6 +42,11 @@ namespace xo {
             bool is_valid() const noexcept { return (gc_ != nullptr); }
             bool is_invalid() const noexcept { return !is_valid(); }
 
+            generation gen_ix() const { return gen_ix_; }
+            generation gen_hi() const { return gen_hi_; }
+            DArenaIterator arena_ix() const { return arena_ix_; }
+            DArenaIterator arena_hi() const { return arena_hi_; }
+
             /** fetch contents at current iterator position **/
             AllocInfo deref() const noexcept;
             /** compare two iterators. To be comparable,

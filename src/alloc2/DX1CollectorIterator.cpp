@@ -26,19 +26,39 @@ namespace xo {
         void
         DX1CollectorIterator::normalize() noexcept
         {
+            scope log(XO_DEBUG(false),
+                      xtag("gen_ix", gen_ix_),
+                      xtag("gen_hi", gen_hi_),
+                      xtag("arena_ix.pos", arena_ix_.pos_),
+                      xtag("arena_hi.pos", arena_hi_.pos_));
+
             /* normalize: find lowest generation with non-empty to-space */
+            if (arena_ix_.pos_ == arena_hi_.pos_) {
+                log && log(xtag("action", "look-lub-nonempty-gen"));
 
-            for (; gen_ix_ < gen_hi_; ++gen_ix_) {
-                const DArena * arena
-                    = gc_->get_space(role::to_space(), gen_ix_);
+                if (gen_ix_ < gen_hi_)
+                    ++gen_ix_;
 
-                arena_ix_ = arena->begin();
-                arena_hi_ = arena->end();
+                for (; gen_ix_ < gen_hi_; ++gen_ix_) {
+                    const DArena * arena
+                        = gc_->get_space(role::to_space(), gen_ix_);
 
-                if (arena_ix_ != arena_hi_) {
-                    // normalization achieved!
-                    break;
+                    assert(arena);
+
+                    arena_ix_ = arena->begin();
+                    arena_hi_ = arena->end();
+
+                    if (arena_ix_ != arena_hi_) {
+                        // normalization achieved!
+                        break;
+                    }
                 }
+
+                log && log(xtag("gen_ix", gen_ix_),
+                           xtag("arena_ix.pos", arena_ix_.pos_),
+                           xtag("arena_hi.pos", arena_hi_.pos_));
+            } else {
+                log && log(xtag("action", "noop"));
             }
         }
 
@@ -81,9 +101,23 @@ namespace xo {
         void
         DX1CollectorIterator::next() noexcept
         {
+            scope log(XO_DEBUG(false),
+                      xtag("arena_ix.arena", arena_ix_.arena_),
+                      xtag("arena_ix.pos", arena_ix_.pos_),
+                      xtag("arena_hi.arena", arena_hi_.arena_),
+                      xtag("arena_hi.pos", arena_hi_.pos_));
+
             if (arena_ix_ != arena_hi_) {
                 ++arena_ix_;
+
+                log && log(xtag("++arena_ix.pos", arena_ix_.pos_));
+
                 this->normalize();
+
+                log && log(xtag("arena_ix.arena", arena_ix_.arena_),
+                           xtag("arena_ix.pos", arena_ix_.pos_));
+            } else {
+                log && log(xtag("action", "arena-at-end"));
             }
         }
     } /*namespace mm*/
