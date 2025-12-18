@@ -95,6 +95,9 @@ namespace xo {
             }
         };
 
+        template <typename AFacet>
+        using vt = obj<AFacet, DVariantPlaceholder>;
+
         /** Use:
          *    auto o = with_facet<AAllocator>::obj(&data);
          **/
@@ -107,6 +110,7 @@ namespace xo {
     } /*namespace facet*/
 
     using facet::obj;
+    using facet::vt;
 } /*namespace xo*/
 
 /* end obj.hpp */
