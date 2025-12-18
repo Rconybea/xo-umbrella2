@@ -19,16 +19,10 @@ namespace xo {
             constexpr bool c_debug_flag = false;
             scope log(XO_DEBUG(c_debug_flag));
 
-            assert(arena);
+            AllocHeader * begin_hdr = begin_header(arena);
 
-            if (arena->config_.store_header_flag_ == false) {
-                arena->capture_error(error::alloc_iterator_not_supported);
-
+            if (!begin_hdr)
                 return DArenaIterator::invalid();
-            }
-
-            byte *       begin_byte = arena->lo_;
-            AllocHeader * begin_hdr = (AllocHeader *)begin_byte;
 
             log && log(xtag("begin_hdr", begin_hdr));
 
@@ -41,20 +35,48 @@ namespace xo {
             constexpr bool c_debug_flag = false;
             scope log(XO_DEBUG(c_debug_flag));
 
+            AllocHeader * end_hdr = end_header(arena);
+
+            if (!end_hdr)
+                return DArenaIterator::invalid();
+
+            log && log(xtag("end_hdr", end_hdr));
+
+            return DArenaIterator(arena, end_hdr);
+        }
+
+        AllocHeader *
+        DArenaIterator::begin_header(const DArena * arena)
+        {
             assert(arena);
 
             if (arena->config_.store_header_flag_ == false) {
                 arena->capture_error(error::alloc_iterator_not_supported);
 
-                return DArenaIterator::invalid();
+                return nullptr;
+            }
+
+            byte *       begin_byte = arena->lo_;
+            AllocHeader * begin_hdr = (AllocHeader *)begin_byte;
+
+            return begin_hdr;
+        }
+
+        AllocHeader *
+        DArenaIterator::end_header(const DArena * arena)
+        {
+            assert(arena);
+
+            if (arena->config_.store_header_flag_ == false) {
+                arena->capture_error(error::alloc_iterator_not_supported);
+
+                return nullptr;
             }
 
             byte *       end_byte = arena->free_;
             AllocHeader * end_hdr = (AllocHeader *)end_byte;
 
-            log && log(xtag("end_hdr", end_hdr));
-
-            return DArenaIterator(arena, end_hdr);
+            return end_hdr;
         }
 
         AllocInfo

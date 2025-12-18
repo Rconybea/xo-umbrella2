@@ -6,9 +6,14 @@
  **/
 
 #include "gc/IAllocator_DX1Collector.hpp"
+#include "gc/IAllocIterator_DX1CollectorIterator.hpp"
+#include "gc/DX1CollectorIterator.hpp"
+#include "arena/IAllocator_DArena.hpp"
 
 namespace xo {
+    using xo::facet::with_facet;
     using std::size_t;
+    using std::byte;
 
     namespace mm {
         using value_type = IAllocator_DX1Collector::value_type;
@@ -59,6 +64,29 @@ namespace xo {
         IAllocator_DX1Collector::last_error(const DX1Collector & d) noexcept
         {
             return d.last_error();
+        }
+
+        auto
+        IAllocator_DX1Collector::alloc_range(const DX1Collector & d,
+                                             DArena & ialloc) noexcept -> range_type
+        {
+            byte * begin_mem = IAllocator_DArena::alloc(ialloc,
+                                                        sizeof(DX1CollectorIterator));
+            byte *   end_mem = IAllocator_DArena::alloc(ialloc,
+                                                        sizeof(DX1CollectorIterator));
+
+            assert(begin_mem);
+            assert(end_mem);
+
+            DX1CollectorIterator * begin_ix
+                = new (begin_mem) DX1CollectorIterator(d.begin());
+            DX1CollectorIterator *   end_ix
+                = new (  end_mem) DX1CollectorIterator(d.end());
+
+            obj<AAllocIterator> begin_obj = with_facet<AAllocIterator>::mkobj(begin_ix);
+            obj<AAllocIterator>   end_obj = with_facet<AAllocIterator>::mkobj(  end_ix);
+
+            return std::make_pair(begin_obj, end_obj);
         }
 
         auto

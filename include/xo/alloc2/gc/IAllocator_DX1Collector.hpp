@@ -31,6 +31,8 @@ namespace xo {
         struct IAllocator_DX1Collector {
             using size_type = std::size_t;
             using value_type = std::byte *;
+            using range_type = std::pair<obj<AAllocIterator>,
+                                         obj<AAllocIterator>>;
 
             // todo: available()
 
@@ -51,6 +53,10 @@ namespace xo {
             static AllocError last_error(const DX1Collector &) noexcept;
             /** fetch allocation bookkeeping info **/
             static AllocInfo alloc_info(const DX1Collector & d, value_type mem) noexcept;
+            /** create alloc-iterator range over allocs in @d,
+             *  with iterator working storage obtained from @p ialloc
+             **/
+            static range_type alloc_range(const DX1Collector & d, DArena & ialloc) noexcept;
 
             /** always alloc in gen0 to-space **/
             static value_type alloc(DX1Collector & d, size_type z) noexcept;

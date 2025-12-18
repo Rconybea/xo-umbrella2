@@ -59,6 +59,14 @@ namespace xo {
              **/
             static DArenaIterator   end(const DArena * arena);
 
+            /** Address of allocation header for beginning of alloc range in @p arena **/
+            static AllocHeader * begin_header(const DArena * arena);
+            /** Address of allocation header for end of alloc range.
+             *  This is the address of header for _next_ allocation in @p arena
+             *  i.e. free pointer
+             **/
+            static AllocHeader *   end_header(const DArena * arena);
+
             /** A valid iterator can be compared, at least with itself
              *  It can be dereferenced if is also non-empty
              **/

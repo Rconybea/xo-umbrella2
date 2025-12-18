@@ -19,15 +19,20 @@ namespace xo {
     }
 
     namespace mm {
-        /* changes here coordinate with:
-         *  AAllocator      AAllocator.hpp
-         *  IAllocator_Any  IAllocator_Any.hpp
-         *  IAllocator_Xfer IAllocator_Xfer.hpp
-         *  RAllocator      RAllocator.hpp
-         */
+        /** @class IAllocator_DArena
+         *  @brief Provide AAllocator interface for DArena state
+         **/
         struct IAllocator_DArena {
+            /* changes here coordinate with:
+             *  AAllocator      AAllocator.hpp
+             *  IAllocator_Any  IAllocator_Any.hpp
+             *  IAllocator_Xfer IAllocator_Xfer.hpp
+             *  RAllocator      RAllocator.hpp
+             */
             using size_type = std::size_t;
             using value_type = std::byte *;
+            using range_type = std::pair<obj<AAllocIterator>,
+                                         obj<AAllocIterator>>;
 
             enum class alloc_mode : uint8_t {
                 standard,
@@ -44,9 +49,13 @@ namespace xo {
             static size_type allocated(const DArena &) noexcept;
             static bool contains(const DArena &, const void * p) noexcept;
             static AllocError last_error(const DArena &) noexcept;
-
             /** retrieve allocation bookkeeping info for @p mem from arena @p d **/
             static AllocInfo alloc_info(const DArena &, value_type mem) noexcept;
+            /** create alloc-iterator range over allocs on @d,
+             *  Iterators themselves allocated from @p ialloc.
+             **/
+            static range_type alloc_range(const DArena & d, DArena & ialloc) noexcept;
+
             /** expand committed space in arena @p d
              *  to size at least @p z
              *  In practice will round up to a multiple of @ref page_z_.

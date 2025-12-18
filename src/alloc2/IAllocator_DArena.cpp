@@ -3,15 +3,20 @@
  *  @author Roland Conybeare, Dec 2025
  **/
 
+#include "AllocIterator.hpp"
 #include "arena/IAllocator_DArena.hpp"
+#include "arena/IAllocIterator_DArenaIterator.hpp" // for alloc_range
+#include "arena/DArenaIterator.hpp"
 #include "padding.hpp"
-#include "xo/indentlog/scope.hpp"
+#include <xo/facet/obj.hpp>
+#include <xo/indentlog/scope.hpp>
 #include <cassert>
 #include <cstddef>
 #include <cstring>
 #include <sys/mman.h>
 
 namespace xo {
+    using xo::facet::with_facet;
     using std::size_t;
     using std::byte;
 
@@ -63,6 +68,35 @@ namespace xo {
         IAllocator_DArena::alloc_info(const DArena & s, value_type mem) noexcept
         {
             return s.alloc_info(mem);
+        }
+
+        void dummy(const DArena & s) {
+            byte * begin_mem = nullptr;
+            DArenaIterator * ix = new (begin_mem) DArenaIterator(&s, DArenaIterator::begin_header(&s));
+            obj<AAllocIterator,DArenaIterator> ix_vt{ix};
+
+
+        }
+
+        auto
+        IAllocator_DArena::alloc_range(const DArena & s,
+                                       DArena & ialloc) noexcept -> range_type
+        {
+            byte * begin_mem = IAllocator_DArena::alloc(ialloc,
+                                                        sizeof(DArenaIterator));
+            byte *   end_mem = IAllocator_DArena::alloc(ialloc,
+                                                        sizeof(DArenaIterator));
+
+            assert(begin_mem);
+            assert(end_mem);
+
+            DArenaIterator * begin_ix = new (begin_mem) DArenaIterator(&s, DArenaIterator::begin_header(&s));
+            DArenaIterator *   end_ix = new (  end_mem) DArenaIterator(&s, DArenaIterator::end_header(&s));
+
+            obj<AAllocIterator> begin_obj = with_facet<AAllocIterator>::mkobj(begin_ix);
+            obj<AAllocIterator>   end_obj = with_facet<AAllocIterator>::mkobj(  end_ix);
+
+            return std::make_pair(begin_obj, end_obj);
         }
 
         bool

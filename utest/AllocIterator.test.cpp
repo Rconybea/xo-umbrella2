@@ -110,7 +110,14 @@ namespace xo {
             REQUIRE(ix.is_valid());
             REQUIRE(end_ix.is_valid());
 
-            /* iteration not supported since we did not set */
+            /* verify obj 'fat pointer' packaging */
+            obj<AAllocIterator,DArenaIterator> ix_vt{&ix};
+            obj<AAllocIterator,DArenaIterator> end_ix_vt{&end_ix};
+
+            REQUIRE(ix_vt.iface());
+            REQUIRE(ix_vt.data());
+            REQUIRE(end_ix_vt.iface());
+            REQUIRE(end_ix_vt.data());
 
             /* arena is empty, so begin==end */
             REQUIRE(ix == end_ix);
