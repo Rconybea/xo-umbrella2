@@ -162,6 +162,19 @@ namespace utest {
                                info.guard_hi().second == nullptr);
 
             }
+
+#ifdef NOT_YET // to verify iteration here, need iterator support in AAllocator
+
+            /* verify iteration visits all the allocs, exactly once */
+            {
+                auto alloc_map = allocs_by_lo_map;
+
+                for (AllocInfo info : mm) {
+                }
+
+            }
+#endif
+
         }
 
         return true;

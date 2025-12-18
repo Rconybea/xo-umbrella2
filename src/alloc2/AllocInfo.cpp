@@ -7,7 +7,6 @@
 
 namespace xo {
     namespace mm {
-
         auto
         AllocInfo::guard_lo() const noexcept -> span_type
         {
@@ -16,6 +15,18 @@ namespace xo {
 
             return span_type(p_guard_lo_,
                              p_guard_lo_ + p_config_->guard_z_);
+        }
+
+        auto
+        AllocInfo::payload() const noexcept -> span_type
+        {
+            if (!p_header_)
+                return span_type(nullptr, nullptr);
+
+            byte * lo = (byte *)(p_header_ + 1);
+            size_type z = this->size();
+
+            return span_type(lo, lo+z);
         }
 
         auto

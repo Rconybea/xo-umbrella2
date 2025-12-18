@@ -145,6 +145,8 @@ namespace xo {
             generation gc_upto_;
         };
 
+        struct DX1CollectorIterator;
+
         // ----- DX1Collector -----
 
         struct DX1Collector {
@@ -211,6 +213,15 @@ namespace xo {
             bool expand(size_type z) noexcept;
             /** Retreive bookkeeping info for allocation at @p mem. **/
             AllocInfo alloc_info(value_type mem) noexcept;
+
+            // ----- iteration -----
+
+            /** alloc iterator at begin position **/
+            DX1CollectorIterator begin() const noexcept;
+            /** alloc iterator at end position
+             *  (valid, but cannot be dereferenced)
+             **/
+            DX1CollectorIterator end() const noexcept;
 
             // ----- book-keeping -----
 

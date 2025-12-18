@@ -4,7 +4,7 @@
  **/
 
 #include "AAllocIterator.hpp"
-#include <xo/facet/RRouter.hpp"
+#include <xo/facet/RRouter.hpp>
 //#include <string>
 
 namespace xo {

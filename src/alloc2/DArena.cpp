@@ -5,6 +5,7 @@
 
 #include "alloc/AAllocator.hpp"
 #include "arena/DArena.hpp"
+#include "arena/DArenaIterator.hpp"
 #include "xo/alloc2/padding.hpp"
 #include "xo/indentlog/print/tag.hpp"
 #include <cassert>
@@ -249,15 +250,10 @@ namespace xo {
         }
 
         AllocInfo
-        DArena::alloc_info(value_type mem) noexcept
+        DArena::alloc_info(value_type mem) const noexcept
         {
             if (!config_.store_header_flag_) [[unlikely]] {
-                ++(error_count_);
-                last_error_ = AllocError(error::alloc_info_disabled,
-                                         error_count_,
-                                         0 /*add_commit_z*/,
-                                         committed_z_,
-                                         this->reserved());
+                this->capture_error(error::alloc_info_disabled);
 
                 return AllocInfo::error_not_configured(&config_.header_);
             }
@@ -265,12 +261,7 @@ namespace xo {
             byte * header_mem = mem - sizeof(AllocHeader);
 
             if (!this->contains(header_mem)) {
-                ++(error_count_);
-                last_error_ = AllocError(error::alloc_info_address,
-                                         error_count_,
-                                         0 /*add_commit_z*/,
-                                         committed_z_,
-                                         this->reserved());
+                this->capture_error(error::alloc_info_address);
             }
 
             AllocHeader * header = (AllocHeader *)header_mem;
@@ -284,6 +275,32 @@ namespace xo {
                              guard_lo,
                              (AllocHeader *)header_mem,
                              guard_hi);
+        }
+
+        DArenaIterator
+        DArena::begin() const noexcept
+        {
+            return DArenaIterator::begin(this);
+        }
+
+        DArenaIterator
+        DArena::end() const noexcept
+        {
+            return DArenaIterator::end(this);
+        }
+
+        void
+        DArena::capture_error(error err,
+                              size_type target_z) const
+        {
+            DArena * self = const_cast<DArena *>(this);
+
+            ++(self->error_count_);
+            self->last_error_ = AllocError(err,
+                                           error_count_,
+                                           target_z,
+                                           committed_z_,
+                                           reserved());
         }
 
         void

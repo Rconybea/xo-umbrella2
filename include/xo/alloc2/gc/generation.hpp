@@ -19,6 +19,7 @@ namespace xo {
         struct generation {
             using value_type = std::uint32_t;
 
+            constexpr generation() = default;
             explicit constexpr generation(value_type x) : value_{x} {}
 
             static generation nursery() { return generation{0}; }
@@ -27,7 +28,7 @@ namespace xo {
 
             generation & operator++() { ++value_; return *this; }
 
-            std::uint32_t value_;
+            std::uint32_t value_ = 0;
         };
     }
 }

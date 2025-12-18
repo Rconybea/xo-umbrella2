@@ -29,6 +29,14 @@ namespace xo {
             alloc_info_disabled,
             /** attempt to call alloc_info for address not owned by allocator **/
             alloc_info_address,
+            /** for example: alloc iteration not supported in arenas with
+             *  AllocConfig.store_header_flag_ = false
+             **/
+            alloc_iterator_not_supported,
+            /** attempt to deref an iterator that does not refer to an alloc **/
+            alloc_iterator_deref,
+            /** attempt to advance an iterator that does not refer to an alloc **/
+            alloc_iterator_next,
         };
 
         struct AllocError {

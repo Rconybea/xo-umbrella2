@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "alloc/AllocHeader.hpp"
+#include "alloc/AllocHeaderConfig.hpp"
 #include "alloc/AllocError.hpp"
 #include <string>
 #include <cstdint>
@@ -34,11 +34,6 @@ namespace xo {
              *  present in arena
              **/
             bool store_header_flag_ = false;
-#ifdef OBSOLETE
-            /** number of bits to represent allocation size **/
-            std::uint64_t header_size_bits_ = 32;
-            std::uint64_t header_size_mask_ = (1ul << header_size_bits_) - 1;
-#endif
             /** configuration for per-alloc header **/
             AllocHeaderConfig header_;
             /** true to enable debug logging **/

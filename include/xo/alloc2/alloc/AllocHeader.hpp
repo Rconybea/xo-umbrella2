@@ -17,20 +17,6 @@ namespace xo {
 
             explicit AllocHeader(repr_type x) : repr_{x} {}
 
-#ifdef OBSOLETE
-            std::uint32_t tseq(const AllocHeaderConfig & cfg) const noexcept {
-                return cfg.tseq(repr_);
-            }
-
-            std::uint32_t age(const AllocHeaderConfig & cfg) const noexcept {
-                return cfg.age(repr_);
-            }
-
-            size_type size(const AllocHeaderConfig & cfg) const noexcept {
-                return cfg.size(repr_);
-            }
-#endif
-
             repr_type repr_;
         };
 

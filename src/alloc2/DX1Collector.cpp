@@ -6,6 +6,7 @@
 #include "Allocator.hpp"
 #include "arena/IAllocator_DArena.hpp"
 #include "gc/DX1Collector.hpp"
+#include "gc/DX1CollectorIterator.hpp"
 #include "gc/generation.hpp"
 #include "gc/object_age.hpp"
 #include <xo/facet/obj.hpp>
@@ -24,44 +25,10 @@ namespace xo {
         }
 #endif
 
-#ifdef OBSOLETE
-        constexpr std::uint64_t
-        CollectorConfig::gen_shift() const {
-            return arena_config_.header_size_bits_;
-        }
-
-        constexpr std::uint64_t
-        CollectorConfig::gen_mask_unshifted() const {
-            return (1ul << gen_bits_) - 1;
-        }
-
-        constexpr std::uint64_t
-        CollectorConfig::gen_mask_shifted() const {
-            return gen_mask_unshifted() << arena_config_.header_size_bits_;
-        }
-#endif
-
 #ifdef NOT_USING
         constexpr std::uint64_t
         CollectorConfig::tseq_mult() const {
             return 1ul << (gen_bits_ + arena_config_.header_size_bits_);
-        }
-#endif
-
-#ifdef OBSOLETE
-        constexpr std::uint64_t
-        CollectorConfig::tseq_shift() const {
-            return gen_bits_ + arena_config_.header_size_bits_;
-        }
-
-        constexpr std::uint64_t
-        CollectorConfig::tseq_mask_unshifted() const {
-            return (1ul << tseq_bits_) - 1;
-        }
-
-        constexpr std::uint64_t
-        CollectorConfig::tseq_mask_shifted() const {
-            return tseq_mask_unshifted() << (gen_bits_ + arena_config_.header_size_bits_);
         }
 #endif
 
@@ -255,6 +222,27 @@ namespace xo {
 
             // deliberately attempt on nursery to-space, to capture error info + return sentinel
             return this->new_space()->alloc_info(mem);
+        }
+
+        DX1CollectorIterator
+        DX1Collector::begin() const noexcept
+        {
+            return DX1CollectorIterator(this,
+                                        generation{0},
+                                        generation{config_.n_generation_},
+                                        DArenaIterator(),
+                                        DArenaIterator());
+        }
+
+        DX1CollectorIterator
+        DX1Collector::end() const noexcept {
+            generation gen_hi = generation{config_.n_generation_};
+
+            return DX1CollectorIterator(this,
+                                        gen_hi,
+                                        gen_hi,
+                                        DArenaIterator(),
+                                        DArenaIterator());
         }
 
         void

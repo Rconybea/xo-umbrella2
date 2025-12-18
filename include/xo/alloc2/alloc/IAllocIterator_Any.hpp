@@ -27,12 +27,11 @@ namespace xo {
 
             // const methods
             [[noreturn]] AllocInfo deref(Copaque) const noexcept override { _fatal(); }
-            [[noreturn]] int compare(Copaque,
-                                     const obj_AAllocIterator &) const noexcept override { _fatal(); }
+            [[noreturn]] cmpresult compare(Copaque,
+                                           const obj_AAllocIterator &) const noexcept override { _fatal(); }
 
             // non-const methods
             [[noreturn]] void next(Opaque) const noexcept override { _fatal(); }
-            [[noreturn]] void prev(Opaque) const noexcept override { _fatal(); }
 
         private:
             [[noreturn]] static void _fatal();

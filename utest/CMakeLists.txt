@@ -4,9 +4,11 @@
 set(UTEST_EXE utest.alloc2)
 set(UTEST_SRCS
     alloc2_utest_main.cpp
-    arena.test.cpp
     objectmodel.test.cpp
+    arena.test.cpp
+    AllocIterator.test.cpp
     Collector.test.cpp
+    DX1CollectorIterator.test.cpp
     random_allocs.cpp
 )
 
@@ -18,6 +20,5 @@ if (ENABLE_TESTING)
     xo_headeronly_dependency(${UTEST_EXE} xo_facet)
     xo_external_target_dependency(${UTEST_EXE} Catch2 Catch2::Catch2)
 endif()
-
 
 # end CMakeLists.txt
