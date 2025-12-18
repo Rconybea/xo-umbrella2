@@ -44,6 +44,14 @@ namespace xo {
             /** @brief type for allocation header (if enabled) **/
             using header_type = AllocHeader; //std::uint64_t;
 
+            /** @brief mode argument for @ref _alloc **/
+            enum class alloc_mode : uint8_t {
+                standard,
+                super,
+                sub_incomplete,
+                sub_complete,
+            };
+
             ///@}
 
             /** @defgroup mm-arena-ctors arena constructors and destructors **/
@@ -107,9 +115,41 @@ namespace xo {
              **/
             AllocInfo alloc_info(value_type mem) const noexcept;
 
+            /** allocate at least @p z bytes of memory.
+             *  Return nullptr and capture error if unable to satisfy request.
+             *  May expand committed memory, as long as resulting committed size
+             *  is no larger than reserved size
+             **/
+            value_type alloc(size_type z);
+
+            /** when store_header_flag enabled:
+             *   like alloc(), but combine memory consumed by this alloc
+             *   plus following consecutive sub_alloc()'s into a single header.
+             *  otherwise equivalent to alloc()
+             **/
+            value_type super_alloc(size_type z);
+
+            /** when store_header_flag enabled:
+             *  follow preceding super_alloc() by one or more sub_allocs().
+             *  accumulate total allocated size (including padding) into
+             *  single header. All sub_allocs() except the last must set
+             *  @p complete_flag to false. The last sub_alloc() must set
+             *  @p complete_flag to true.
+             **/
+            value_type sub_alloc(size_type z, bool complete_flag);
+
             /** capture error information: advance error count + set last_error **/
             void capture_error(error err,
                                size_type target_z = 0) const;
+
+            /** alloc driver. shared by alloc(), super_alloc(), sub_alloc() **/
+            value_type _alloc(std::size_t req_z, alloc_mode mode);
+
+            /** expand committed space in arena @p d
+             *  to size at least @p z
+             *  In practice will round up to a multiple of @ref page_z_.
+             **/
+            bool expand(size_type z) noexcept;
 
             /** discard all allocated memory, return to empty state
              *  Promise:

@@ -70,14 +70,6 @@ namespace xo {
             return s.alloc_info(mem);
         }
 
-        void dummy(const DArena & s) {
-            byte * begin_mem = nullptr;
-            DArenaIterator * ix = new (begin_mem) DArenaIterator(&s, DArenaIterator::begin_header(&s));
-            obj<AAllocIterator,DArenaIterator> ix_vt{ix};
-
-
-        }
-
         auto
         IAllocator_DArena::alloc_range(const DArena & s,
                                        DArena & ialloc) noexcept -> range_type
@@ -102,107 +94,21 @@ namespace xo {
         bool
         IAllocator_DArena::expand(DArena & s, size_t target_z) noexcept
         {
-            scope log(XO_DEBUG(s.config_.debug_flag_),
-                      xtag("target_z", target_z),
-                      xtag("committed_z", s.committed_z_));
-
-            if (target_z <= s.committed_z_) [[likely]] {
-                log && log("trivial success, offset within committed range",
-                           xtag("target_z", target_z),
-                           xtag("committed_z", s.committed_z_));
-                return true;
-            }
-
-            if (s.lo_ + target_z > s.hi_) [[unlikely]] {
-                s.capture_error(error::reserve_exhausted, target_z);
-                return false;
-            }
-
-            /*
-             * pre:
-             *
-             *   _______________...................................
-             *   ^              ^                                  ^
-             *   lo         limit                                 hi
-             *
-             *   < committed_z >
-             *   <----------target_z----------->
-             *                                 >     <- z: 0 <= z < hugepage_z
-             *   <---------aligned_target_z--------->
-             *                  <--- add_commit_z -->
-             *
-             * post:
-             *   ____________________________________..............
-             *   ^                                   ^             ^
-             *   lo                              limit            hi
-             *
-             */
-
-            std::size_t aligned_target_z = padding::with_padding(target_z, s.config_.hugepage_z_);
-            std::byte * commit_start = s.limit_; // = s.lo_ + s.committed_z_;
-            std::size_t add_commit_z = aligned_target_z - s.committed_z_;
-
-            assert(s.limit_ == s.lo_ + s.committed_z_);
-
-            //            log && log(xtag("aligned_offset_z", aligned_offset_z),
-            //                       xtag("add_commit_z", add_commit_z));
-            //            log && log("expand committed range",
-            //                       xtag("commit_start", commit_start),
-            //                       xtag("add_commit_z", add_commit_z),
-            //                       xtag("commit_end", commit_start + add_commit_z));
-
-            if (::mprotect(commit_start,
-                           add_commit_z,
-                           PROT_READ | PROT_WRITE) != 0) [[unlikely]]
-                {
-                    s.capture_error(error::commit_failed, add_commit_z);
-                    return false;
-                }
-
-            s.committed_z_ = aligned_target_z;
-            s.limit_ = s.lo_ + s.committed_z_;
-
-            if (commit_start == s.lo_) [[unlikely]] {
-                /* first expand() for this allocator - start with guard_z_ bytes */
-
-                ::memset(s.free_,
-                         s.config_.header_.guard_byte_,
-                         s.config_.header_.guard_z_);
-
-                s.free_ += s.config_.header_.guard_z_;
-            }
-
-            assert(s.committed_z_ % s.config_.hugepage_z_ == 0);
-            assert(reinterpret_cast<size_t>(s.limit_) % s.config_.hugepage_z_ == 0);
-
-            return true;
+            return s.expand(target_z);
         } /*expand*/
 
         std::byte *
         IAllocator_DArena::alloc(DArena & s,
                                  std::size_t req_z)
         {
-            /* - primary allocation path:
-             *   exactly 1 header per alloc() call.
-             * - store_header_flag follows configuration
-             */
-
-            return _alloc(s, req_z,
-                          alloc_mode::standard);
+            return s.alloc(req_z);
         }
 
         std::byte *
         IAllocator_DArena::super_alloc(DArena & s,
                                        std::size_t req_z)
         {
-            /* - (uncommon) pattern for parent alloc immediately followed by
-             *   zero-or-more susidiary allocs, all sharing a single header.
-             * - collapses into alloc() behavior when
-             *   ArenaConfig.store_header_flag_ disabled
-             */
-
-            return _alloc(s, req_z,
-                          alloc_mode::super);
+            return s.super_alloc(req_z);
         }
 
         std::byte *
@@ -210,140 +116,15 @@ namespace xo {
                                      std::size_t req_z,
                                      bool complete_flag)
         {
-            /* - (uncommon) pattern for subsidiary allocs:
-             *   that piggyback onto preceding super_alloc()
-             * - collapses into alloc() behavior when
-             *   ArenaConfig.store_header_flag_ disabled
-             */
-
-            return _alloc(s, req_z,
-                          (complete_flag
-                           ? alloc_mode::sub_complete
-                           : alloc_mode::sub_incomplete));
-
+            return s.sub_alloc(req_z, complete_flag);
         }
 
         byte *
         IAllocator_DArena::_alloc(DArena & s,
                                   std::size_t req_z,
-                                  alloc_mode mode)
+                                  DArena::alloc_mode mode)
         {
-            scope log(XO_DEBUG(s.config_.debug_flag_));
-
-            /*
-             *                                                     sub_complete
-             *                                            sub_incomplete      |
-             *                                    standard  super      |      |
-             *                                           v      v      v      v
-             */
-            std::array<bool, 4>  store_header_v = {{  true,  true, false, false }};
-            std::array<bool, 4> retain_header_v = {{ false,  true, false, false }};
-            std::array<bool, 4>   store_guard_v = {{  true, false, false,  true }};
-
-            /* -> write header at s.free_ */
-            bool store_header_flag = false;
-            /* -> stash s.last_header_*/
-            bool retain_header_flag = false;
-            /* -> write guard bytes */
-            bool store_guard = false;
-
-            if (s.config_.store_header_flag_) {
-                store_header_flag  = store_header_v[(int)mode];
-                retain_header_flag = retain_header_v[(int)mode];
-                store_guard        = store_guard_v[(int)mode];
-            }
-
-            assert(padding::is_aligned((size_t)s.free_));
-
-            /*
-             *                    free_(pre)
-             *                    v
-             *
-             *                    <-------------z1--------------->
-             *           < guard ><  hz  ><     req_z     >< dz  >< guard >
-             *
-             * used <==  +++++++++0000zzzz@@@@@@@@@@@@@@@@@ppppppp+++++++++ ==> avail
-             *
-             *                    ^       ^                                ^
-             *                    header  mem                              |
-             *                    ^                                        |
-             *                    last_header_                   free_(post)
-             *
-             *            [+] guard after each allocation, for simple sanitize checks
-             *            [0] unused header bits (avail to application)
-             *            [z] record allocation size
-             *            [@] new allocated memory
-             *            [p] padding (to uintptr_t alignment)
-             */
-
-            /* non-zero if header feature enabled */
-            size_t hz = 0;
-            /* dz: pad req_z to alignment size (multiple of 8 bytes, probably) */
-            size_t dz = padding::alloc_padding(req_z);
-            size_t z0 = req_z + dz;
-            /* if non-zero:
-             *  will store padded alloc size at the beginning of each allocation
-             * reminder:
-             *  important to store padded size for correct arena iteration
-             */
-            uint64_t header = req_z + dz;
-
-            if (store_header_flag)
-            {
-                if (s.config_.header_.is_size_enabled()) [[likely]] {
-                    hz = sizeof(header);
-                } else {
-                    /* req_z doesn't fit in configured header_size_mask bits */
-                    s.capture_error(error::header_size_mask);
-                    return nullptr;
-                }
-            }
-
-            size_t z1 = hz + z0;
-
-            assert(padding::is_aligned(z1));
-
-            if (!expand(s, allocated(s) + z1)) [[unlikely]] {
-                /* (error state already captured) */
-                return nullptr;
-            }
-
-            if (store_header_flag) {
-                /* capturing header */
-                *(uint64_t *)s.free_ = header;
-
-                if (retain_header_flag) {
-                    /* and rembering for subsequent
-                     *   sub_alloc()
-                     */
-                    s.last_header_ = (AllocHeader *)s.free_;
-                }
-            }
-
-            byte * mem = s.free_ + hz;
-
-            s.free_ += z1;
-
-            if (store_guard) {
-                /* write guard bytes for overrun detection */
-                ::memset(s.free_,
-                         s.config_.header_.guard_byte_,
-                         s.config_.header_.guard_z_);
-
-                s.free_ += s.config_.header_.guard_z_;
-            }
-
-            log && log(xtag("self", s.config_.name_),
-                       xtag("hz", hz),
-                       xtag("z0", req_z),
-                       xtag("+pad", dz),
-                       xtag("z1", z1),
-                       xtag("size", size(s)),
-                       xtag("avail", available(s)));
-            log && log(xtag("mem", mem),
-                       xtag("free", s.free_));
-
-            return mem;
+            return s._alloc(req_z, mode);
         }
 
         void
