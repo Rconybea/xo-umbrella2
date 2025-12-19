@@ -133,6 +133,28 @@ namespace xo {
             void reset() { data_ = nullptr; }
             void reset_opaque(Opaque data) { data_ = (DataPtr)data; }
 
+            template <typename DOther>
+            OObject & from_obj(const OObject<AFacet, DOther> & other) {
+                if constexpr (std::is_same_v<DRepr, DVariantPlaceholder>) {
+                    /* Actual runtime type of other encoded in other.iface()
+                     * (whether or not DOther says other is variant).
+                     * Either way need to force vtable replacement, hence memcpy here
+                     */
+                    ::memcpy((void*)this, (void*)&other, sizeof(*this));
+                } else if constexpr (std::is_convertible_v<DRepr, DOther>) {
+                    /* other is typed, consistently with *this */
+                    this->from_data(other.data());
+                } else
+                {
+                    // downcast from variant must be explicit
+                    //  + may fail at runtime
+
+                    static_assert(std::is_same_v<DRepr, DVariantPlaceholder>
+                                  || std::is_convertible_v<DRepr, DOther>);
+                }
+                return *this;
+            }
+
             /**
              *  We're either:
              *  - assigning from pointer with compatible representation
@@ -144,8 +166,10 @@ namespace xo {
                 static_assert(std::is_same_v<DRepr, DVariantPlaceholder>
                               || std::is_convertible_v<DOther*, DRepr*>);
 
-                if constexpr (std::is_convertible_v<DOther*, DRepr*>) {
-                    /* assigning from data with same representation,
+                if constexpr (!std::is_same_v<DRepr, DVariantPlaceholder>
+                              && std::is_convertible_v<DOther*, DRepr*>)
+                {
+                    /* assigning typed data with consistent representation
                      * keep .iface_ pointer
                      */
                     this->data_ = other;
