@@ -49,10 +49,14 @@ namespace xo {
         struct obj : public RoutingType<AFacet, OObject<AFacet, DRepr>> {
             using Super = RoutingType<AFacet, OObject<AFacet, DRepr>>;
 
-            obj() {}
+            obj() : Super() {}
             explicit obj(Super::DataPtr d) : Super(d) {}
 
-            /** copy constructor
+            obj(const obj & rhs) : Super() {
+                this->from_data(rhs.data_);
+            }
+
+            /** pseudo copy constructor
              *
              *  Intended for use cases:
              *    obj<AFoo, DRepr> lhs = obj<AFoo, DRepr>   // same type on rhs
@@ -65,16 +69,7 @@ namespace xo {
                           || std::is_convertible_v<DRepr, DOther>)
                 : Super()
             {
-                if constexpr (std::is_convertible_v<DRepr, DOther>) {
-                    /* preserving .iface */
-                    this->data_ = other.data_;
-                } else {
-                    /* replacing .iface_
-                     *
-                     * WARNING: only works if .data_ is POD
-                     */
-                    this->from_data(other.data_);
-                }
+                this->from_obj(other);
             }
 
             /** move constructor from a different representation.
@@ -88,21 +83,22 @@ namespace xo {
                               || std::is_convertible_v<DRepr, DOther>)
               : Super()
             {
-                if constexpr (std::is_convertible_v<DRepr, DOther>) {
-                    /* move .data_, keeping .iface_ */
-                    this->data_ = std::move(other.data_);
-                } else {
-                    // TODO: instead, have other move itself,
+                /* replacing .iface_ along w/ .data_ */
+                this->from_obj(other);
+            }
 
-                    /* replacing .iface_ + .data_ */
-                    this->from_data(other.data_);
-                }
+            obj & operator=(const obj & rhs) {
+                /* ensure we replace .iface_ along w/ .ata_ */
+                this->from_obj(rhs);
+                return *this;
             }
 
             /** safe downcast from variant. null if downcast fails **/
             static obj from(const OObject<AFacet> & other) {
                 return obj(other.template downcast<DRepr>());
             }
+
+            obj & operator++() noexcept { this->_preincrement(); return *this; }
         };
 
         template <typename AFacet>

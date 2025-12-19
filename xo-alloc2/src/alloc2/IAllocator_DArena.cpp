@@ -74,13 +74,46 @@ namespace xo {
         IAllocator_DArena::alloc_range(const DArena & s,
                                        DArena & ialloc) noexcept -> range_type
         {
+            scope log(XO_DEBUG(true));
+
             DArenaIterator * begin_ix = construct_with<DArenaIterator>(ialloc, &s, s.begin_header());
             DArenaIterator *   end_ix = construct_with<DArenaIterator>(ialloc, &s, s.end_header());
 
-            obj<AAllocIterator> begin_obj = with_facet<AAllocIterator>::mkobj(begin_ix);
-            obj<AAllocIterator>   end_obj = with_facet<AAllocIterator>::mkobj(  end_ix);
+            obj<AAllocIterator,DArenaIterator> begin_obj = with_facet<AAllocIterator>::mkobj(begin_ix);
+            obj<AAllocIterator,DArenaIterator>   end_obj = with_facet<AAllocIterator>::mkobj(  end_ix);
 
-            return std::make_pair(begin_obj, end_obj);
+            log && log(xtag("begin_obj.typeseq", begin_obj._typeseq()));
+
+            obj<AAllocIterator> begin_vt = begin_obj;
+            obj<AAllocIterator>   end_vt =   end_obj;
+
+            log && log(xtag("begin_vt.typeseq", begin_vt._typeseq()));
+
+            log && log(xtag("begin_ix", begin_ix),
+                       xtag("begin_ix.arena", begin_ix->arena_),
+                       xtag("begin_ix.pos", begin_ix->pos_));
+
+            range_type retval = std::make_pair(begin_vt, end_vt);
+
+            log && log(xtag("1.retval.first.typeseq", retval.first._typeseq()));
+
+            retval.first.from_obj(begin_vt);
+            retval.second.from_obj(end_vt);
+
+            // this gets correct typeseq.  so first.from_obj() works
+            log && log(xtag("2.retval.first.typeseq", retval.first._typeseq()));
+
+            obj<AAllocIterator> begin_vt2;
+
+            begin_vt2 = retval.first;
+
+            log && log(xtag("3.begin_vt2.typeseq", begin_vt2._typeseq()));
+
+            retval = std::make_pair(begin_vt2, begin_vt2);
+
+            log && log(xtag("4.retval.first.typeseq", retval.first._typeseq()));
+
+            return retval;
         }
 
         bool

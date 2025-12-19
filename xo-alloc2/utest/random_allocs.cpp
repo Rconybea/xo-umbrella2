@@ -170,7 +170,7 @@ namespace utest {
             DArena scratch_mm = DArena::map(ArenaConfig{.name_ = "scratch",
                                                         .size_ = 4*1024,
                                                         .hugepage_z_ = 4*1024 });
-
+            auto range = mm.alloc_range(scratch_mm);
 
 #ifdef NOT_YET // to verify iteration here, need iterator support in AAllocator
 

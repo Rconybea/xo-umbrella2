@@ -5,6 +5,7 @@
 
 #include "arena/IAllocIterator_DArenaIterator.hpp"
 #include "AllocIterator.hpp"
+#include <xo/indentlog/scope.hpp>
 #include <cassert>
 
 namespace xo {
@@ -21,6 +22,10 @@ namespace xo {
         IAllocIterator_DArenaIterator::compare(const DArenaIterator & ix,
                                                const obj<AAllocIterator> & other_arg) noexcept
         {
+            scope log(XO_DEBUG(true),
+                      xtag("&ix", &ix),
+                      xtag("ix.arena", ix.arena_), xtag("ix.pos", ix.pos_));
+
             /* downcast from variant */
             auto other = obj<AAllocIterator, DArenaIterator>::from(other_arg);
 
@@ -28,6 +33,10 @@ namespace xo {
                 return cmpresult::incomparable();
 
             DArenaIterator & other_ix = *other;
+
+            log && log(xtag("&other_ix", &other_ix),
+                       xtag("other_ix.arena", other_ix.arena_),
+                       xtag("other_ix.pos", other_ix.pos_));
 
             return ix.compare(other_ix);
         }

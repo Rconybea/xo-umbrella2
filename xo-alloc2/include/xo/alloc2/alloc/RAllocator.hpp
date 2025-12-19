@@ -22,6 +22,7 @@ namespace xo {
             using DataPtr = Object::DataPtr;
             using size_type = std::size_t;
             using value_type = std::byte *;
+            using range_type = AAllocator::range_type;
 
             RAllocator() {}
             RAllocator(Object::DataPtr data) : Object{std::move(data)} {}
@@ -36,7 +37,7 @@ namespace xo {
             bool          contains(const void * p) const noexcept { return O::iface()->contains(O::data(), p); }
             AllocError  last_error() const noexcept { return O::iface()->last_error(O::data()); }
             AllocInfo   alloc_info(value_type mem) const noexcept { return O::iface()->alloc_info(O::data(), mem); }
-            //range_type alloc_range(DArena & mm)
+            range_type alloc_range(DArena & mm) const noexcept { return O::iface()->alloc_range(O::data(), mm); }
 
             value_type       alloc(size_type z) noexcept { return O::iface()->alloc(O::data(), z); }
             value_type super_alloc(size_type z) noexcept { return O::iface()->super_alloc(O::data(), z); }
