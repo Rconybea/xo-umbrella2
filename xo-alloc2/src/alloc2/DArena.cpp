@@ -290,6 +290,30 @@ namespace xo {
             return DArenaIterator::end(this);
         }
 
+        AllocHeader *
+        DArena::begin_header() const noexcept
+        {
+            if (config_.store_header_flag_ == false) {
+                this->capture_error(error::alloc_iterator_not_supported);
+
+                return nullptr;
+            }
+
+            return (AllocHeader *)lo_;
+        }
+
+        AllocHeader *
+        DArena::end_header() const noexcept
+        {
+            if (config_.store_header_flag_ == false) {
+                this->capture_error(error::alloc_iterator_not_supported);
+
+                return nullptr;
+            }
+
+            return (AllocHeader *)free_;
+        }
+
         std::byte *
         DArena::alloc(std::size_t req_z)
         {

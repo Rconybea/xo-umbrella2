@@ -100,6 +100,13 @@ namespace xo {
             /** @ret iterator pointing to just after the last allocation in this arena **/
             DArenaIterator end() const noexcept;
 
+            /** @ret header for first allocation in this arena **/
+            AllocHeader * begin_header() const noexcept;
+            /** @ret location of header for next (not yet performed!)
+             *  allocation in this arena
+             **/
+            AllocHeader * end_header() const noexcept;
+
             /** get header from allocated object address **/
             header_type * obj2hdr(void * obj) noexcept;
 
@@ -207,6 +214,22 @@ namespace xo {
 
             ///@}
         };
+
+        /** construct a @tparam T instance from arguments @p args
+         *  using memory obtained from arena @p ialloc
+         **/
+        template <typename T,
+                  typename... Args>
+        static T *
+        construct_with(DArena & ialloc, Args&&... args)
+        {
+            std::byte * mem = ialloc.alloc(sizeof(T));
+
+            if (mem)
+                return new (mem) T(std::forward<Args>(args)...);
+
+            return nullptr;
+        }
 
     } /*namespace mm*/
 } /*namespace xo*/
