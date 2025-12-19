@@ -8,6 +8,8 @@
 #include "arena/IAllocator_DArena.hpp"
 #include "arena/IAllocIterator_DArenaIterator.hpp"
 #include "padding.hpp"
+#include <xo/indentlog/scope.hpp>
+#include <xo/indentlog/print/tag.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {
@@ -26,6 +28,10 @@ namespace xo {
 
     using xo::mm::padding;
     using xo::mm::error;
+
+    using xo::facet::DVariantPlaceholder;
+    using xo::facet::obj;
+    using xo::facet::typeseq;
 
     using std::byte;
 
@@ -146,6 +152,8 @@ namespace xo {
 
         TEST_CASE("IAllocIterator-singlearena", "[alloc2]")
         {
+            scope log(XO_DEBUG(true));
+
             ArenaConfig cfg { .name_              = "testarena",
                               .size_              = 64*1024,
                               .store_header_flag_ = true,
@@ -166,37 +174,80 @@ namespace xo {
             REQUIRE(arena.error_count_ == 0);
             REQUIRE(mem != nullptr);
 
-            DArenaIterator     ix = arena.begin();
-            DArenaIterator end_ix = arena.end();
-
-            REQUIRE(ix.is_valid());
-            REQUIRE(end_ix.is_valid());
-
-            /* arena is non-empty, so begin!=end */
-            REQUIRE (ix != end_ix);
-
-            REQUIRE(arena.error_count_ == 0);
-
-            /* valid iterator can be dereferenced */
             {
-                AllocInfo info = *ix;
+                DArenaIterator     ix = arena.begin();
+                DArenaIterator end_ix = arena.end();
+
+                REQUIRE(ix.is_valid());
+                REQUIRE(end_ix.is_valid());
+
+                /* arena is non-empty, so begin!=end */
+                REQUIRE (ix != end_ix);
 
                 REQUIRE(arena.error_count_ == 0);
-                REQUIRE(info.is_valid());
-                REQUIRE(info.size() == padding::with_padding(req_z));
 
-                auto [payload_lo, payload_hi] = info.payload();
+                /* valid iterator can be dereferenced */
+                {
+                    AllocInfo info = *ix;
 
-                REQUIRE(payload_lo == mem);
-                REQUIRE(payload_hi == mem + info.size());
+                    REQUIRE(arena.error_count_ == 0);
+                    REQUIRE(info.is_valid());
+                    REQUIRE(info.size() == padding::with_padding(req_z));
+
+                    auto [payload_lo, payload_hi] = info.payload();
+
+                    REQUIRE(payload_lo == mem);
+                    REQUIRE(payload_hi == mem + info.size());
+                }
+
+                /* valid iterator can be advanced */
+                {
+                    ix.next();
+
+                    REQUIRE(arena.error_count_ == 0);
+                    REQUIRE(ix == end_ix);
+                }
             }
 
-            /* valid iterator can be advanced */
+            // repeat, this time with generic iterators
             {
-                ix.next();
+                log && log(xtag("section", "obj<AAllocIterator>"),
+                           xtag("arena", &arena),
+                           xtag("arena.lo", arena.lo_),
+                           xtag("arena.free", arena.free_));
 
-                REQUIRE(arena.error_count_ == 0);
-                REQUIRE(ix == end_ix);
+                DArena scratch_mm
+                    = DArena::map(
+                        ArenaConfig{
+                            .size_ = 4*1024,
+                            .hugepage_z_ = 4*1024});
+
+                auto range = a1o.alloc_range(scratch_mm);
+
+                obj<AAllocIterator> ix = range.first;
+                obj<AAllocIterator> end_ix = range.second;
+
+                REQUIRE(ix.iface());
+                REQUIRE(ix.data());
+                REQUIRE(end_ix.iface());
+                REQUIRE(end_ix.data());
+
+                REQUIRE(scratch_mm.allocated() >= 2*sizeof(DArenaIterator));
+                REQUIRE(scratch_mm.available() > 0);
+
+                log && log(xtag("ix._typeseq", ix._typeseq()),
+                           xtag("ix.data", ix.data()));
+
+                log && log(xtag("typeseq<DArena>",
+                                typeseq::id<DArena>()));
+                log && log(xtag("typeseq<DArenaIterator>",
+                                typeseq::id<DArenaIterator>()));
+                log && log(xtag("typeseq<DVariantPlaceholder>",
+                                typeseq::id<DVariantPlaceholder>()));
+
+                REQUIRE(ix.compare(ix).is_equal());
+
+                //REQUIRE(ix.compare(end_ix).is_equal());
             }
         }
 
