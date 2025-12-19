@@ -74,16 +74,8 @@ namespace xo {
         IAllocator_DArena::alloc_range(const DArena & s,
                                        DArena & ialloc) noexcept -> range_type
         {
-            byte * begin_mem = IAllocator_DArena::alloc(ialloc,
-                                                        sizeof(DArenaIterator));
-            byte *   end_mem = IAllocator_DArena::alloc(ialloc,
-                                                        sizeof(DArenaIterator));
-
-            assert(begin_mem);
-            assert(end_mem);
-
-            DArenaIterator * begin_ix = new (begin_mem) DArenaIterator(&s, DArenaIterator::begin_header(&s));
-            DArenaIterator *   end_ix = new (  end_mem) DArenaIterator(&s, DArenaIterator::end_header(&s));
+            DArenaIterator * begin_ix = construct_with<DArenaIterator>(ialloc, &s, s.begin_header());
+            DArenaIterator *   end_ix = construct_with<DArenaIterator>(ialloc, &s, s.end_header());
 
             obj<AAllocIterator> begin_obj = with_facet<AAllocIterator>::mkobj(begin_ix);
             obj<AAllocIterator>   end_obj = with_facet<AAllocIterator>::mkobj(  end_ix);

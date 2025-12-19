@@ -50,16 +50,7 @@ namespace xo {
         {
             assert(arena);
 
-            if (arena->config_.store_header_flag_ == false) {
-                arena->capture_error(error::alloc_iterator_not_supported);
-
-                return nullptr;
-            }
-
-            byte *       begin_byte = arena->lo_;
-            AllocHeader * begin_hdr = (AllocHeader *)begin_byte;
-
-            return begin_hdr;
+            return arena->begin_header();
         }
 
         AllocHeader *
@@ -67,16 +58,7 @@ namespace xo {
         {
             assert(arena);
 
-            if (arena->config_.store_header_flag_ == false) {
-                arena->capture_error(error::alloc_iterator_not_supported);
-
-                return nullptr;
-            }
-
-            byte *       end_byte = arena->free_;
-            AllocHeader * end_hdr = (AllocHeader *)end_byte;
-
-            return end_hdr;
+            return arena->end_header();
         }
 
         AllocInfo

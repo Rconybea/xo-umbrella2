@@ -70,18 +70,8 @@ namespace xo {
         IAllocator_DX1Collector::alloc_range(const DX1Collector & d,
                                              DArena & ialloc) noexcept -> range_type
         {
-            byte * begin_mem = IAllocator_DArena::alloc(ialloc,
-                                                        sizeof(DX1CollectorIterator));
-            byte *   end_mem = IAllocator_DArena::alloc(ialloc,
-                                                        sizeof(DX1CollectorIterator));
-
-            assert(begin_mem);
-            assert(end_mem);
-
-            DX1CollectorIterator * begin_ix
-                = new (begin_mem) DX1CollectorIterator(d.begin());
-            DX1CollectorIterator *   end_ix
-                = new (  end_mem) DX1CollectorIterator(d.end());
+            DX1CollectorIterator * begin_ix = construct_with<DX1CollectorIterator>(ialloc, d.begin());
+            DX1CollectorIterator *   end_ix = construct_with<DX1CollectorIterator>(ialloc, d.end());
 
             obj<AAllocIterator> begin_obj = with_facet<AAllocIterator>::mkobj(begin_ix);
             obj<AAllocIterator>   end_obj = with_facet<AAllocIterator>::mkobj(  end_ix);
