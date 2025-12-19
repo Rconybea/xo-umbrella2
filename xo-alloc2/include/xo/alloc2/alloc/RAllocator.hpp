@@ -35,6 +35,8 @@ namespace xo {
             size_type    allocated() const noexcept { return O::iface()->allocated(O::data()); }
             bool          contains(const void * p) const noexcept { return O::iface()->contains(O::data(), p); }
             AllocError  last_error() const noexcept { return O::iface()->last_error(O::data()); }
+            AllocInfo   alloc_info(value_type mem) const noexcept { return O::iface()->alloc_info(O::data(), mem); }
+            //range_type alloc_range(DArena & mm)
 
             value_type       alloc(size_type z) noexcept { return O::iface()->alloc(O::data(), z); }
             value_type super_alloc(size_type z) noexcept { return O::iface()->super_alloc(O::data(), z); }
@@ -42,7 +44,6 @@ namespace xo {
                                    bool complete_flag) noexcept { return O::iface()->sub_alloc(O::data(),
                                                                                              z, complete_flag); }
             bool            expand(size_type z) { return O::iface()->expand(O::data(), z); }
-            AllocInfo   alloc_info(value_type mem) { return O::iface()->alloc_info(O::data(), mem); }
 
             static bool _valid;
         };

@@ -4,6 +4,7 @@
  **/
 
 #include "random_allocs.hpp"
+#include "arena/DArena.hpp"
 #include "padding.hpp"
 #include <xo/indentlog/scope.hpp>
 #include <xo/indentlog/print/tag.hpp>
@@ -12,6 +13,8 @@
 
 namespace utest {
     using xo::mm::AllocInfo;
+    using xo::mm::DArena;
+    using xo::mm::ArenaConfig;
     using xo::mm::padding;
     using xo::rng::xoshiro256ss;
     using xo::facet::obj;
@@ -162,6 +165,12 @@ namespace utest {
                                info.guard_hi().second == nullptr);
 
             }
+
+            /** scratch arena for iterators **/
+            DArena scratch_mm = DArena::map(ArenaConfig{.name_ = "scratch",
+                                                        .size_ = 4*1024,
+                                                        .hugepage_z_ = 4*1024 });
+
 
 #ifdef NOT_YET // to verify iteration here, need iterator support in AAllocator
 
