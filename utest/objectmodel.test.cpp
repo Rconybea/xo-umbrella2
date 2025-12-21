@@ -380,7 +380,7 @@ namespace xo {
             REQUIRE(z1o.argument() == 0.25 * std::numbers::pi);
             REQUIRE(z1o.magnitude() == 1.0);
 
-            *z1o = z1;
+            *z1o.data() = z1;
 
             REQUIRE(z1o.data() == &z2);
             REQUIRE(z1o.xcoord() == 1.0);

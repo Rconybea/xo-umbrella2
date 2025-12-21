@@ -235,7 +235,9 @@ namespace xo {
                 //iface_ = *std::launder(&iface_);
             }
 
+#ifdef NOPE
             DRepr & operator*() { return *data_; }
+#endif
 
             OObject & operator=(const OObject & oother) {
                 if (this != &oother) {
