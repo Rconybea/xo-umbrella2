@@ -74,13 +74,15 @@ namespace xo {
         IAllocator_DArena::alloc_range(const DArena & s,
                                        DArena & ialloc) noexcept -> range_type
         {
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG(false));
 
             DArenaIterator * begin_ix = construct_with<DArenaIterator>(ialloc, &s, s.begin_header());
             DArenaIterator *   end_ix = construct_with<DArenaIterator>(ialloc, &s, s.end_header());
 
-            obj<AAllocIterator,DArenaIterator> begin_obj = with_facet<AAllocIterator>::mkobj(begin_ix);
-            obj<AAllocIterator,DArenaIterator>   end_obj = with_facet<AAllocIterator>::mkobj(  end_ix);
+            obj<AAllocIterator,DArenaIterator> begin_obj
+                = with_facet<AAllocIterator>::mkobj(begin_ix);
+            obj<AAllocIterator,DArenaIterator>   end_obj
+                = with_facet<AAllocIterator>::mkobj(  end_ix);
 
             log && log(xtag("begin_obj.typeseq", begin_obj._typeseq()));
 
@@ -93,25 +95,10 @@ namespace xo {
                        xtag("begin_ix.arena", begin_ix->arena_),
                        xtag("begin_ix.pos", begin_ix->pos_));
 
-            range_type retval = std::make_pair(begin_vt, end_vt);
+            range_type retval = range_type(std::make_pair(begin_vt, end_vt));
 
-            log && log(xtag("1.retval.first.typeseq", retval.first._typeseq()));
-
-            retval.first.from_obj(begin_vt);
-            retval.second.from_obj(end_vt);
-
-            // this gets correct typeseq.  so first.from_obj() works
-            log && log(xtag("2.retval.first.typeseq", retval.first._typeseq()));
-
-            obj<AAllocIterator> begin_vt2;
-
-            begin_vt2 = retval.first;
-
-            log && log(xtag("3.begin_vt2.typeseq", begin_vt2._typeseq()));
-
-            retval = std::make_pair(begin_vt2, begin_vt2);
-
-            log && log(xtag("4.retval.first.typeseq", retval.first._typeseq()));
+            log && log(xtag("1.retval.first.typeseq",
+                            retval.begin()._typeseq()));
 
             return retval;
         }

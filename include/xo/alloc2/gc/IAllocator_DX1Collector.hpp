@@ -31,8 +31,7 @@ namespace xo {
         struct IAllocator_DX1Collector {
             using size_type = std::size_t;
             using value_type = std::byte *;
-            using range_type = std::pair<obj<AAllocIterator>,
-                                         obj<AAllocIterator>>;
+            using range_type = AAllocator::range_type;
 
             // todo: available()
 

@@ -169,8 +169,8 @@ namespace xo {
 
             /* arbitrary alloc size */
             size_t req_z = 13;
-
             byte * mem = a1o.alloc(req_z);
+
             REQUIRE(arena.error_count_ == 0);
             REQUIRE(mem != nullptr);
 
@@ -180,7 +180,6 @@ namespace xo {
 
                 REQUIRE(ix.is_valid());
                 REQUIRE(end_ix.is_valid());
-
                 /* arena is non-empty, so begin!=end */
                 REQUIRE (ix != end_ix);
 
@@ -224,8 +223,8 @@ namespace xo {
 
                 auto range = a1o.alloc_range(scratch_mm);
 
-                obj<AAllocIterator> ix = range.first;
-                obj<AAllocIterator> end_ix = range.second;
+                obj<AAllocIterator> ix = range.begin();
+                obj<AAllocIterator> end_ix = range.end();
 
                 REQUIRE(ix.iface());
                 REQUIRE(ix.data());
@@ -248,6 +247,27 @@ namespace xo {
                 REQUIRE(ix.compare(ix).is_equal());
 
                 //REQUIRE(ix.compare(end_ix).is_equal());
+
+                REQUIRE(ix != end_ix);
+
+                {
+                    REQUIRE(arena.error_count_ == 0);
+                    REQUIRE(ix.deref().is_valid());
+                    REQUIRE(ix.deref().size() == padding::with_padding(req_z));
+
+                    auto [payload_lo, payload_hi] = ix.deref().payload();
+
+                    REQUIRE(payload_lo == mem);
+                    REQUIRE(payload_hi == mem + ix.deref().size());
+                }
+
+                /* valid iterator can be advanced + reaches end */
+                {
+                    ix.next();
+
+                    REQUIRE(arena.error_count_ == 0);
+                    REQUIRE(ix == end_ix);
+                }
             }
         }
 

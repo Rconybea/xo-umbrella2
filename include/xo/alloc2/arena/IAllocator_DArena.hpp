@@ -31,8 +31,7 @@ namespace xo {
              */
             using size_type = std::size_t;
             using value_type = std::byte *;
-            using range_type = std::pair<obj<AAllocIterator>,
-                                         obj<AAllocIterator>>;
+            using range_type = AAllocator::range_type;
 
             static std::string_view name(const DArena &) noexcept;
             static size_type reserved(const DArena &) noexcept;

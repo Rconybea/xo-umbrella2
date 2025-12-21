@@ -7,7 +7,8 @@
 
 #include "AllocError.hpp"
 #include "AllocInfo.hpp"
-#include "AllocIterator.hpp"
+//#include "AllocIterator.hpp"
+#include "AllocRange.hpp"
 #include <xo/facet/obj.hpp>
 #include <xo/facet/facet_implementation.hpp>
 #include <xo/facet/typeseq.hpp>
@@ -35,7 +36,7 @@ namespace xo {
             /** object header, if configured **/
             using header_type = std::uint64_t;
             /** iterator range. These are forward iterators over allocs **/
-            using range_type = std::pair<obj<AAllocIterator>, obj<AAllocIterator>>;
+            using range_type = AllocRange;
             ///@}
 
             /*
