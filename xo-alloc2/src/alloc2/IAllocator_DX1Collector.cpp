@@ -76,7 +76,7 @@ namespace xo {
             obj<AAllocIterator> begin_obj = with_facet<AAllocIterator>::mkobj(begin_ix);
             obj<AAllocIterator>   end_obj = with_facet<AAllocIterator>::mkobj(  end_ix);
 
-            return std::make_pair(begin_obj, end_obj);
+            return AllocRange(std::make_pair(begin_obj, end_obj));
         }
 
         auto

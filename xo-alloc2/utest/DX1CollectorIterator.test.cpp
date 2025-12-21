@@ -15,12 +15,15 @@
 #include <catch2/catch.hpp>
 
 namespace xo {
+    using xo::mm::AAllocator;
     using xo::mm::AAllocIterator;
     using xo::mm::IAllocIterator_Any;
     using xo::mm::IAllocIterator_Xfer;
     using xo::mm::IAllocIterator_DX1CollectorIterator;
     using xo::mm::DX1Collector;
     using xo::mm::DX1CollectorIterator;
+    using xo::mm::DArena;
+    using xo::mm::DArenaIterator;
     using xo::mm::CollectorConfig;
     using xo::mm::ArenaConfig;
     using xo::mm::AllocHeaderConfig;
@@ -98,52 +101,103 @@ namespace xo {
                                                        0, 0, 0, 0}} };
 
             DX1Collector gc = DX1Collector{cfg};
+            obj<AAllocator, DX1Collector> a1o{&gc};
 
-            size_t z = 13;
-            byte * mem = gc.alloc(z);
+            REQUIRE(a1o.reserved() >= arena_cfg.size_);
+            REQUIRE(a1o.committed() == 0);
+            REQUIRE(a1o.available() == 0);
+            REQUIRE(a1o.allocated() == 0);
+
+            size_t req_z = 13;
+            byte * mem = gc.alloc(req_z);
 
             REQUIRE(mem != nullptr);
 
             log && log("should have iterators separated by one alloc");
 
-            auto     ix = gc.begin();
-            auto end_ix = gc.end();
+            {
+                auto     ix = gc.begin();
+                auto end_ix = gc.end();
 
-            REQUIRE(ix.is_valid());
-            REQUIRE(end_ix.is_valid());
-            REQUIRE(ix != end_ix);
+                REQUIRE(ix.is_valid());
+                REQUIRE(end_ix.is_valid());
+                REQUIRE(ix != end_ix);
 
-            /* verify obj 'fat pointer' packaging */
-            auto     ix_vt = with_facet<AAllocIterator>::mkobj(&ix);
-            auto end_ix_vt = with_facet<AAllocIterator>::mkobj(&end_ix);
+                /* verify obj 'fat pointer' packaging */
+                auto     ix_vt = with_facet<AAllocIterator>::mkobj(&ix);
+                auto end_ix_vt = with_facet<AAllocIterator>::mkobj(&end_ix);
 
-            REQUIRE(ix_vt.iface());
-            REQUIRE(ix_vt.data());
-            REQUIRE(end_ix_vt.iface());
-            REQUIRE(end_ix_vt.data());
+                REQUIRE(ix_vt.iface());
+                REQUIRE(ix_vt.data());
+                REQUIRE(end_ix_vt.iface());
+                REQUIRE(end_ix_vt.data());
 
-            cmpresult cmp = ix_vt.compare(end_ix_vt);
+                cmpresult cmp = ix_vt.compare(end_ix_vt);
 
-            REQUIRE(cmp.is_lesser());
-            REQUIRE(ix_vt != end_ix_vt);
+                REQUIRE(cmp.is_lesser());
+                REQUIRE(ix_vt != end_ix_vt);
 
-            /* we only did one alloc, should be able
-             * to visit it
-             */
-            auto info = ix_vt.deref();
+                /* we only did one alloc, should be able
+                 * to visit it
+                 */
+                auto info = ix_vt.deref();
 
-            REQUIRE(info.is_valid());
-            REQUIRE(info.payload().first == mem);
-            REQUIRE(info.size() == padding::with_padding(z));
+                REQUIRE(info.is_valid());
+                REQUIRE(info.payload().first == mem);
+                REQUIRE(info.size() == padding::with_padding(req_z));
 
-            ix_vt.next();
+                ix_vt.next();
 
-            log && log(xtag("ix.gen", ix.gen_ix()),
-                       xtag("ix.arena_ix.arena", ix.arena_ix().arena_));
-            log && log(xtag("end_ix.gen", end_ix.gen_ix()),
-                       xtag("end_ix.arena_ix.arena", end_ix.arena_ix().arena_));
+                log && log(xtag("ix.gen", ix.gen_ix()),
+                           xtag("ix.arena_ix.arena", ix.arena_ix().arena_));
+                log && log(xtag("end_ix.gen", end_ix.gen_ix()),
+                           xtag("end_ix.arena_ix.arena", end_ix.arena_ix().arena_));
 
-            REQUIRE(ix_vt == end_ix_vt);
+                REQUIRE(ix_vt == end_ix_vt);
+            }
+
+            {
+                //auto range = gc.alloc_range
+
+                DArena scratch_mm
+                    = DArena::map(
+                        ArenaConfig{
+                            .size_ = 4*1024,
+                            .hugepage_z_ = 4*1024});
+
+                auto range = a1o.alloc_range(scratch_mm);
+
+                obj<AAllocIterator> ix = range.begin();
+                obj<AAllocIterator> end_ix = range.end();
+
+                REQUIRE(ix.iface());
+                REQUIRE(ix.data());
+                REQUIRE(end_ix.iface());
+                REQUIRE(end_ix.data());
+
+                REQUIRE(scratch_mm.allocated() >= 2*sizeof(DArenaIterator));
+                REQUIRE(scratch_mm.available() > 0);
+
+                REQUIRE(ix.compare(ix).is_equal());
+
+                REQUIRE(ix != end_ix);
+
+                {
+                    REQUIRE(ix.deref().is_valid());
+                    REQUIRE(ix.deref().size() == padding::with_padding(req_z));
+
+                    auto [payload_lo, payload_hi] = ix.deref().payload();
+
+                    REQUIRE(payload_lo == mem);
+                    REQUIRE(payload_hi == mem + ix.deref().size());
+                }
+
+                {
+                    ix.next();
+
+                    REQUIRE(ix == end_ix);
+                }
+            }
         }
     } /*namespace ut*/
 } /*namespace xo*/
