@@ -25,7 +25,7 @@ namespace xo {
             if (!other)
                 return cmpresult::incomparable();
 
-            DX1CollectorIterator & other_ix = *other;
+            DX1CollectorIterator & other_ix = *other.data();
 
             return ix.compare(other_ix);
         }

@@ -96,6 +96,12 @@ namespace xo {
                 return obj(other.template downcast<DRepr>());
             }
 
+            /** enabled when RRouter<AFacet> provides _preincrement.
+             *  Note we don't need this trick for comparison operators,
+             *  since return type is fixed.
+             *
+             *  For example see comparison overloads in RAllocIterator.hpp
+             **/
             obj & operator++() noexcept { this->_preincrement(); return *this; }
         };
 

@@ -32,7 +32,7 @@ namespace xo {
             if (!other)
                 return cmpresult::incomparable();
 
-            DArenaIterator & other_ix = *other;
+            DArenaIterator & other_ix = *other.data();
 
             log && log(xtag("&other_ix", &other_ix),
                        xtag("other_ix.arena", other_ix.arena_),

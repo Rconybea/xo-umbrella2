@@ -269,6 +269,22 @@ namespace xo {
                     REQUIRE(ix == end_ix);
                 }
             }
+
+            // repeat, this time using range iteration
+            {
+                DArena scratch_mm
+                    = DArena::map(
+                        ArenaConfig{
+                            .size_ = 4*1024,
+                            .hugepage_z_ = 4*1024});
+
+                for (const auto & info : a1o.alloc_range(scratch_mm)) {
+                    REQUIRE(info.is_valid());
+                    REQUIRE(info.size() == padding::with_padding(req_z));
+                    REQUIRE(info.payload().first == mem);
+                    REQUIRE(info.payload().second == mem + info.size());
+                }
+            }
         }
 
     } /*namespace ut*/

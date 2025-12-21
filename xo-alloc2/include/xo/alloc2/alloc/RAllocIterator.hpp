@@ -27,6 +27,8 @@ namespace xo {
                 return O::iface()->compare(O::data(), other); }
             void next() noexcept { O::iface()->next(O::data()); }
 
+            AllocInfo operator*() const noexcept { return deref(); }
+
             /** triggers operator++ in obj<RAllocIterator<Object>> **/
             void _preincrement() noexcept { this->next(); }
 
