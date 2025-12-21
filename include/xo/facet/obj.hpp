@@ -52,9 +52,7 @@ namespace xo {
             obj() : Super() {}
             explicit obj(Super::DataPtr d) : Super(d) {}
 
-            obj(const obj & rhs) : Super() {
-                this->from_data(rhs.data_);
-            }
+            obj(const obj & rhs) = default;
 
             /** pseudo copy constructor
              *

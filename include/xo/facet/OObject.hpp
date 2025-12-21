@@ -64,8 +64,24 @@ namespace xo {
             using DataPtr = DRepr*;
             using Opaque = void *;
 
-            explicit OObject() {}
-            explicit OObject(DataPtr d) : data_{d} {}
+            /* required for vtable swapping to work */
+            //static_assert(std::is_trivially_copyable_v<AFacet>);
+
+            explicit OObject() {
+                ISpecific tmp;
+                memcpy(&(iface_[0]), (void*)&tmp, sizeof(ISpecific));
+            }
+            explicit OObject(DataPtr d) : data_{d} {
+                ISpecific tmp;
+                memcpy(&(iface_[0]), (void*)&tmp, sizeof(ISpecific));
+            }
+
+            OObject(const OObject & oother) {
+                _launder_from(oother);
+            }
+            OObject(OObject && oother) {
+                _launder_from(oother);
+            }
 
             /** trivial: nothing to do for @ref iface_ and does not own @ref data_ **/
             ~OObject() = default;
@@ -88,7 +104,7 @@ namespace xo {
                  * calls to ISpecific methods, based on mistaken belief that
                  * vtable pointer is known at compile time.
                  */
-                return std::launder(&iface_);
+                return std::launder((FacetType *)(&iface_[0]));
             }
 
             /** non-const verison. Technically all interface methods are const.
@@ -98,7 +114,7 @@ namespace xo {
             FacetType * iface()
                 requires std::is_same_v<DataType, DVariantPlaceholder>
             {
-                return std::launder(&iface_);
+                return std::launder((FacetType *)(&iface_[0]));
             }
 
             // ----- iface() for typed fat pointer -----
@@ -114,7 +130,7 @@ namespace xo {
                 /* don't use std::launder: want compiler to devirtualize
                  * calls to virtual @ref iface_ methods
                  */
-                return &iface_;
+                return std::launder((FacetType *)(&iface_[0]));
             }
 
             /** non-const verison. Technically all interface methods are const.
@@ -124,7 +140,7 @@ namespace xo {
             FacetType * iface()
                 requires(!std::is_same_v<DataType, DVariantPlaceholder>)
             {
-                return &iface_;
+                return std::launder((FacetType *)&(iface_[0]));
             }
 
             DataPtr data() const { return data_; }
@@ -134,16 +150,16 @@ namespace xo {
             void reset_opaque(Opaque data) { data_ = (DataPtr)data; }
 
             template <typename DOther>
-            OObject & from_obj(const OObject<AFacet, DOther> & other) {
+            OObject & from_obj(const OObject<AFacet, DOther> & oother) {
                 if constexpr (std::is_same_v<DRepr, DVariantPlaceholder>) {
                     /* Actual runtime type of other encoded in other.iface()
                      * (whether or not DOther says other is variant).
                      * Either way need to force vtable replacement, hence memcpy here
                      */
-                    ::memcpy((void*)this, (void*)&other, sizeof(*this));
+                    _launder_from(oother);
                 } else if constexpr (std::is_convertible_v<DRepr, DOther>) {
                     /* other is typed, consistently with *this */
-                    this->from_data(other.data());
+                    this->from_data(oother.data());
                 } else
                 {
                     // downcast from variant must be explicit
@@ -169,8 +185,8 @@ namespace xo {
                 if constexpr (!std::is_same_v<DRepr, DVariantPlaceholder>
                               && std::is_convertible_v<DOther*, DRepr*>)
                 {
-                    /* assigning typed data with consistent representation
-                     * keep .iface_ pointer
+                    /* assigning to typed data, from something with consistent
+                     * representation keep .iface_ pointer
                      */
                     this->data_ = other;
                 } else /*DRepr is DVariantPlaceholder*/ {
@@ -184,7 +200,7 @@ namespace xo {
 
                     static_assert(sizeof(*this) == sizeof(oother));
 
-                    ::memcpy((void*)this, (void*)&oother, sizeof(*this));
+                    _launder_from(oother);
                 }
 
                 return *this;
@@ -213,7 +229,27 @@ namespace xo {
                 }
             }
 
+            template <typename DOther>
+            void _launder_from(const OObject<AFacet, DOther> & oother) {
+                ::memcpy((void*)this, &oother, sizeof(*this));
+                //iface_ = *std::launder(&iface_);
+            }
+
             DRepr & operator*() { return *data_; }
+
+            OObject & operator=(const OObject & oother) {
+                if (this != &oother) {
+                    _launder_from(oother);
+                }
+                return *this;
+            }
+
+            OObject & operator=(OObject && oother) {
+                if (this != &oother) {
+                    _launder_from(oother);
+                }
+                return *this;
+            }
 
 #ifdef NOT_IN_USE
             // not sure if this is a good idea. could just as well write
@@ -233,8 +269,12 @@ namespace xo {
             /** fetch data pointer.  load-bearing for routing classes **/
             static bool _valid;
 
-            /** runtime interface for this object **/
-            ISpecific iface_;
+            /** runtime interface for this object.
+             *  use byte array to make sure compiler doesn't get clever
+             *  (but mistaken) ideas
+             **/
+            alignas(ISpecific) std::byte iface_[sizeof(ISpecific)]; //ISpecific iface_;
+
             /** runtime state for this object **/
             DataPtr data_ = nullptr;
         };
