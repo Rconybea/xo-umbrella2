@@ -193,7 +193,7 @@ namespace xo {
                 }
 
                 {
-                    ix.next();
+                    ++ix;
 
                     REQUIRE(ix == end_ix);
                 }

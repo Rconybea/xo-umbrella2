@@ -263,7 +263,7 @@ namespace xo {
 
                 /* valid iterator can be advanced + reaches end */
                 {
-                    ix.next();
+                    ++ix; //ix.next();
 
                     REQUIRE(arena.error_count_ == 0);
                     REQUIRE(ix == end_ix);
