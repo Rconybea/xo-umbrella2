@@ -48,7 +48,7 @@ namespace xo {
             std::uint32_t tseq() const noexcept { return p_config_->tseq(*p_header_); }
             /** Allocation age in garbage collector **/
             std::uint32_t  age() const noexcept { return p_config_->age (*p_header_); }
-            /** Allocation size (including allocator-supplied padding) **/
+            /** Allocation size (including allocator-supplied padding, excluding alloc header) **/
             size_type     size() const noexcept { return p_config_->size(*p_header_); }
             /** Payload for this allocation. This is the memory available to application **/
             span_type  payload() const noexcept;

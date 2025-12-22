@@ -15,6 +15,7 @@
 //#include "gc/DX1Collector.hpp"
 #include <xo/randomgen/xoshiro256.hpp>
 #include <xo/randomgen/random_seed.hpp>
+#include <xo/indentlog/scope.hpp>
 #include <xo/indentlog/print/tag.hpp>
 #include <xo/indentlog/print/array.hpp>
 #include <catch2/catch.hpp>
@@ -29,6 +30,7 @@ namespace xo {
     using xo::mm::generation;
     using xo::mm::c_max_generation;
     using xo::facet::with_facet;
+    using xo::scope;
 
     namespace ut {
         // checklist
@@ -151,6 +153,8 @@ namespace xo {
 
         TEST_CASE("collector-x1-alloc", "[alloc2][gc]")
         {
+            scope log(XO_DEBUG(true), "DX1Collector alloc test");
+
             ArenaConfig arena_cfg = { .name_ = "_test_unused",
                                       .size_ = 4*1024*1024,
                                       .store_header_flag_ = true,
@@ -190,14 +194,17 @@ namespace xo {
 
         TEST_CASE("collector-x1-alloc2", "[alloc2][gc]")
         {
+            scope log(XO_DEBUG(true), "DX1Collector alloc test2");
+
             ArenaConfig arena_cfg = { .name_ = "_test_unused",
                                       .size_ = 4*1024*1024,
                                       .store_header_flag_ = true,
-                                      .header_ = AllocHeaderConfig(8 /*guard_z*/,
+                                      .header_ = AllocHeaderConfig(8    /*guard_z*/,
                                                                    0xfd /*guard-byte*/,
-                                                                   0 /*tseq-bits*/,
-                                                                   0 /*age-bits*/,
-                                                                   16 /*size-bits*/), };
+                                                                   0    /*tseq-bits*/,
+                                                                   0    /*age-bits*/,
+                                                                   16   /*size-bits*/),
+            };
 
             /* collector with one generation collapses to a non-generational copying collector */
             CollectorConfig cfg = { .arena_config_ = arena_cfg,
@@ -222,7 +229,7 @@ namespace xo {
             REQUIRE(x1alloc.data());
 
             rng::Seed<rng::xoshiro256ss> seed;
-            std::cerr << "ratio: seed=" << seed << std::endl;
+            log && log("ratio: seed=", seed);
 
             auto rng = rng::xoshiro256ss(seed);
 
