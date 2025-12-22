@@ -22,7 +22,7 @@ namespace xo {
         IAllocIterator_DArenaIterator::compare(const DArenaIterator & ix,
                                                const obj<AAllocIterator> & other_arg) noexcept
         {
-            scope log(XO_DEBUG(true),
+            scope log(XO_DEBUG(false),
                       xtag("&ix", &ix),
                       xtag("ix.arena", ix.arena_), xtag("ix.pos", ix.pos_));
 

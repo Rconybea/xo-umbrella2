@@ -152,7 +152,7 @@ namespace xo {
 
         TEST_CASE("IAllocIterator-singlearena", "[alloc2]")
         {
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG(false));
 
             ArenaConfig cfg { .name_              = "testarena",
                               .size_              = 64*1024,
