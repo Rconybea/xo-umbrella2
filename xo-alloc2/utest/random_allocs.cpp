@@ -52,9 +52,9 @@ namespace utest {
          *
          * allocs sorted on Alloc::lo
          */
-        std::map<byte *, Alloc> allocs_by_lo_map;
+        std::map<const byte *, Alloc> allocs_by_lo_map;
         /* allocs sorted on Alloc::hi */
-        std::map<byte *, Alloc*> allocs_by_hi_map;
+        std::map<const byte *, Alloc*> allocs_by_hi_map;
 
         for (uint32_t i_alloc = 0; i_alloc < n_alloc; ++i_alloc) {
             std::normal_distribution<double> ngen{5.0, 1.5};
@@ -172,18 +172,41 @@ namespace utest {
                                                         .hugepage_z_ = 4*1024 });
             auto range = mm.alloc_range(scratch_mm);
 
-#ifdef NOT_YET // to verify iteration here, need iterator support in AAllocator
-
-            /* verify iteration visits all the allocs, exactly once */
+            /* limit iteration test to a few cases:
+             *  - 1st loop
+             *  - median loop
+             *  - last loop
+             */
+            if (i_alloc == 0 || i_alloc == n_alloc || 2*i_alloc == n_alloc)
             {
+                /* verify iteration visits all the allocs, exactly once */
+
+                /* temp copy; remove allocs from this map as we encounter
+                 * them via range iteration below
+                 */
                 auto alloc_map = allocs_by_lo_map;
 
-                for (AllocInfo info : mm) {
+                if (log || true) {
+                    log(xtag("allocs_by_lo_map.size", allocs_by_lo_map.size()));
+
+                    for (auto & kv : allocs_by_lo_map) {
+                        log(xtag("key", kv.first), xtag("value", kv.second.lo()), xtag("hi", kv.second.hi()));
+                    }
                 }
 
-            }
-#endif
+                for (AllocInfo info : range) {
+                    INFO(tostr(xtag("alloc_map.size", alloc_map.size()),
+                               xtag("i_alloc", i_alloc)));
+                    INFO(tostr(xtag("payload.first", info.payload().first)));
 
+                    const std::byte * alloc_lo = info.payload().first;
+
+                    REQUIRE_ORFAIL(ok_flag, catch_flag,
+                                   alloc_map.find(alloc_lo) != alloc_map.end());
+
+                    alloc_map.erase(alloc_lo);
+                }
+            }
         }
 
         return true;
