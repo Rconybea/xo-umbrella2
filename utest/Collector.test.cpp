@@ -153,7 +153,7 @@ namespace xo {
 
         TEST_CASE("collector-x1-alloc", "[alloc2][gc]")
         {
-            scope log(XO_DEBUG(true), "DX1Collector alloc test");
+            scope log(XO_DEBUG(false), "DX1Collector alloc test");
 
             ArenaConfig arena_cfg = { .name_ = "_test_unused",
                                       .size_ = 4*1024*1024,
@@ -185,16 +185,18 @@ namespace xo {
             REQUIRE(x1alloc.data());
 
             rng::Seed<rng::xoshiro256ss> seed;
-            std::cerr << "ratio: seed=" << seed << std::endl;
+            log && log(xtag("seed", seed));
 
             auto rng = rng::xoshiro256ss(seed);
 
-            utest::AllocUtil::random_allocs(25, true, &rng, x1alloc);
+            bool catch_flag = false;
+            REQUIRE(utest::AllocUtil::random_allocs(25, catch_flag, &rng, x1alloc));
         }
 
         TEST_CASE("collector-x1-alloc2", "[alloc2][gc]")
         {
-            scope log(XO_DEBUG(true), "DX1Collector alloc test2");
+            scope log(XO_DEBUG(false),
+                      "DX1Collector alloc test2");
 
             ArenaConfig arena_cfg = { .name_ = "_test_unused",
                                       .size_ = 4*1024*1024,
@@ -233,7 +235,7 @@ namespace xo {
 
             auto rng = rng::xoshiro256ss(seed);
 
-            utest::AllocUtil::random_allocs(25, true, &rng, x1alloc);
+            REQUIRE(utest::AllocUtil::random_allocs(25, false, &rng, x1alloc));
         }
     }
 }

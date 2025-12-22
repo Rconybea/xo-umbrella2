@@ -66,6 +66,7 @@ namespace utest {
             bool ok_flag = true;
 
             std::byte * mem = mm.alloc(z);
+
             log && log(xtag("i_alloc", i_alloc),
                        xtag("si", si),
                        xtag("zi", zi),
@@ -186,7 +187,7 @@ namespace utest {
                  */
                 auto alloc_map = allocs_by_lo_map;
 
-                if (log || true) {
+                if (log) {
                     log(xtag("allocs_by_lo_map.size", allocs_by_lo_map.size()));
 
                     for (auto & kv : allocs_by_lo_map) {
