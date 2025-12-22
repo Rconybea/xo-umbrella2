@@ -299,7 +299,7 @@ namespace xo {
                 return nullptr;
             }
 
-            return (AllocHeader *)lo_;
+            return (AllocHeader *)(lo_ + config_.header_.guard_z_);
         }
 
         AllocHeader *
