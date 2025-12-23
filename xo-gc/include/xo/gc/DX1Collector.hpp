@@ -7,9 +7,9 @@
 
 #include "arena/ArenaConfig.hpp"
 #include "arena/DArena.hpp"
-#include "gc/generation.hpp"
-#include "gc/object_age.hpp"
-#include "gc/role.hpp"
+#include "generation.hpp"
+#include "object_age.hpp"
+#include "role.hpp"
 #include <memory>
 #include <array>
 

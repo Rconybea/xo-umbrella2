@@ -3,11 +3,11 @@
  *  @author Roland Conybeare, Dec 2025
  **/
 
-#include "Allocator.hpp"
+#include <xo/alloc2/Allocator.hpp>
 #include "AllocIterator.hpp"
-#include "gc/DX1CollectorIterator.hpp"
-#include "gc/IAllocator_DX1Collector.hpp"
-#include "gc/IAllocIterator_DX1CollectorIterator.hpp"
+#include "DX1CollectorIterator.hpp"
+#include "detail/IAllocator_DX1Collector.hpp"
+#include "detail/IAllocIterator_DX1CollectorIterator.hpp"
 #include "arena/ArenaConfig.hpp"
 #include "padding.hpp"
 #include <xo/indentlog/scope.hpp>
@@ -17,7 +17,7 @@
 namespace xo {
     using xo::mm::AAllocator;
     using xo::mm::AAllocIterator;
-    using xo::mm::IAllocIterator_Any;
+//    using xo::mm::IAllocIterator_Any;
     using xo::mm::IAllocIterator_Xfer;
     using xo::mm::IAllocIterator_DX1CollectorIterator;
     using xo::mm::DX1Collector;

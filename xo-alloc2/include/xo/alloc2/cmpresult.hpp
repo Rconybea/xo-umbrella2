@@ -11,9 +11,9 @@
 namespace xo {
     namespace mm {
         enum class comparison : int32_t {
-            invalid = -1,
-            comparable = 0,
-            incomparable = 1,
+            invalid      = -1,
+            comparable   =  0,
+            incomparable = +1,
         };
 
         extern const char * comparison2str(comparison x);
@@ -55,7 +55,7 @@ namespace xo {
 
             /* -1 -> invalid (sentinel)
              *  0 -> comparable
-             *  1 -> incomparable (e.g. iterators from different arenas)
+             * +1 -> incomparable (e.g. iterators from different arenas)
              */
             comparison   err_ = comparison::invalid;
             /* <0 -> lesser; 0 -> equal, >0 -> greater */

@@ -15,15 +15,6 @@ set(SELF_SRCS
     DArenaIterator.cpp
     IAllocIterator_DArenaIterator.cpp
 
-    ICollector_Any.cpp
-    IGCObject_Any.cpp
-    IAllocator_DX1Collector.cpp
-    ICollector_DX1Collector.cpp
-    IAllocIterator_DX1CollectorIterator.cpp
-
-    DX1Collector.cpp
-    DX1CollectorIterator.cpp
-
     )
 
 xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 ${SELF_SRCS})

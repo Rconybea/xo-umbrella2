@@ -5,10 +5,10 @@
  *  See also ICollector_DX1Collector.cpp for collector facet
  **/
 
-#include "gc/IAllocator_DX1Collector.hpp"
-#include "gc/IAllocIterator_DX1CollectorIterator.hpp"
-#include "gc/DX1CollectorIterator.hpp"
-#include "arena/IAllocator_DArena.hpp"
+#include "detail/IAllocator_DX1Collector.hpp"
+#include "detail/IAllocIterator_DX1CollectorIterator.hpp"
+#include "DX1CollectorIterator.hpp"
+#include <xo/alloc2/arena/IAllocator_DArena.hpp>
 
 namespace xo {
     using xo::facet::with_facet;

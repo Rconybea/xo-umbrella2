@@ -5,10 +5,10 @@
 
 #include "Allocator.hpp"
 #include "arena/IAllocator_DArena.hpp"
-#include "gc/DX1Collector.hpp"
-#include "gc/DX1CollectorIterator.hpp"
-#include "gc/generation.hpp"
-#include "gc/object_age.hpp"
+#include "xo/gc/DX1Collector.hpp"
+#include "xo/gc/DX1CollectorIterator.hpp"
+#include "generation.hpp"
+#include "object_age.hpp"
 #include <xo/facet/obj.hpp>
 #include <xo/indentlog/scope.hpp>
 #include <cassert>

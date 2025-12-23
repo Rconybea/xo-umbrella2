@@ -3,7 +3,7 @@
  *  @author Roland Conybeare, Dec 2025
  **/
 
-#include "gc/ICollector_Any.hpp"
+#include "detail/ICollector_Any.hpp"
 #include <iostream>
 
 namespace xo {

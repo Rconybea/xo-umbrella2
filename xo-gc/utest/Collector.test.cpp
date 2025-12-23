@@ -7,11 +7,11 @@
  *        see xo-object2/utest
  **/
 
-#include "Allocator.hpp"
+#include <xo/alloc2/Allocator.hpp>
 #include "Collector.hpp"
 #include "random_allocs.hpp"
-#include "gc/ICollector_DX1Collector.hpp"
-#include "gc/IAllocator_DX1Collector.hpp"
+#include "detail/ICollector_DX1Collector.hpp"
+#include "detail/IAllocator_DX1Collector.hpp"
 //#include "gc/DX1Collector.hpp"
 #include <xo/randomgen/xoshiro256.hpp>
 #include <xo/randomgen/random_seed.hpp>

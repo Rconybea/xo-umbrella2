@@ -3,7 +3,7 @@
  *  @author Roland Conybeare, Dec 2025
  **/
 
-#include "xo/alloc2/GCObject.hpp"
+#include "xo/gc/GCObject.hpp"
 //#include "xo/alloc2/gcobject/RGCObject.hpp"
 #include "xo/facet/obj.hpp"
 

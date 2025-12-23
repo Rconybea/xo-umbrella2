@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "alloc/AllocInfo.hpp"
-#include "gc/generation.hpp"
+#include "AllocInfo.hpp"
+#include "generation.hpp"
 #include "arena/DArenaIterator.hpp"
 #include "cmpresult.hpp"
 

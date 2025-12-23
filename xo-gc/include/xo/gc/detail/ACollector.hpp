@@ -11,8 +11,8 @@
 #include <xo/facet/typeseq.hpp>
 #include <xo/facet/obj.hpp>
 
-#include "gc/generation.hpp"
-#include "gc/role.hpp"
+#include "generation.hpp"
+#include "role.hpp"
 
 #include <cstdint>
 #include <cstddef>

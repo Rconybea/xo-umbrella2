@@ -3,7 +3,7 @@
  *  @author Roland Conybeare, Dec 2025
  **/
 
-#include "gc/IAllocIterator_DX1CollectorIterator.hpp"
+#include "xo/gc/detail/IAllocIterator_DX1CollectorIterator.hpp"
 #include "AllocIterator.hpp"
 //#include <cassert>
 

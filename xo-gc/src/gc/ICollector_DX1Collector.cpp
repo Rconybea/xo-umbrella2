@@ -5,7 +5,7 @@
  *  See also IAllocator_DX1Collector.cpp for allocator facet
  **/
 
-#include "gc/ICollector_DX1Collector.hpp"
+#include "xo/gc/detail/ICollector_DX1Collector.hpp"
 #include "GCObject.hpp"
 
 namespace xo {

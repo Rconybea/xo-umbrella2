@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "alloc/AllocHeaderConfig.hpp"
+#include "AllocHeaderConfig.hpp"
 //#include "alloc/AllocError.hpp"
 #include <string>
 #include <cstdint>
