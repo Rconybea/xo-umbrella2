@@ -56,6 +56,11 @@ Class
 
 .. doxygenclass:: xo::mm::AAllocator
 
+Types
+-----
+
+.. doxygengroup:: mm-allocator-type-traits
+
 Methods
 -------
 

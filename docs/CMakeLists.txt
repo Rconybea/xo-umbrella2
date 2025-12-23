@@ -6,6 +6,7 @@ xo_docdir_sphinx_config(
     index.rst
     glossary.rst
     implementation.rst
+    AAllocator-reference.rst
     ArenaConfig-reference.rst
     DArena-reference.rst
     #install.rst
