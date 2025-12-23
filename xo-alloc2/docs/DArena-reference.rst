@@ -28,20 +28,43 @@ Context
     #include <xo/alloc2/DArena.hpp>
 
 
-Arena memory layout::
+Arena memory layout
+.. code-block:: text
 
-    <----------------------------size-------------------------->
-    <------------committed-----------><-------uncommitted------>
-    <--allocated-->
+      <----------------------------size-------------------------->
+      <------------committed-----------><-------uncommitted------>
+      <--allocated-->
 
-    XXXXXXXXXXXXXXX___________________..........................
-   ^               ^                  ^                         ^
-   lo              free               limit                     hi
+      XXXXXXXXXXXXXXX___________________..........................
+     ^               ^                  ^                         ^
+     lo              free               limit                     hi
 
-    [X] allocated:   in use
-    [_] committed:   physical memory obtained
-    [.] uncommitted: mapped in virtual memory, not backed by memory
+      [X] allocated:   in use
+      [_] committed:   physical memory obtained
+      [.] uncommitted: mapped in virtual memory, not backed by memory
 
+
+Allocation layout
+.. code-block:: text
+
+                     free_(pre)
+                         v
+
+                         <-------------z1--------------->
+                < guard ><  hz  ><     req_z     >< dz  >< guard >
+
+      used <==  +++++++++0000zzzz@@@@@@@@@@@@@@@@@ppppppp+++++++++ ==> avail
+
+                         ^       ^                                ^
+                         header  mem                              |
+                         ^                                        |
+                         last_header_                   free_(post)
+
+                 [+] guard after each allocation, for simple sanitize checks
+                 [0] unused header bits (avail to application)
+                 [z] record allocation size
+                 [@] new allocated memory
+                 [p] padding (to uintptr_t alignment)
 
 Class
 -----

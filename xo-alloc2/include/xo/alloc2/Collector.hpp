@@ -1,5 +1,5 @@
 /** @file Collector.hpp
-*
+ *
  *  @author Roland Conybeare, Dec 2025
  **/
 
