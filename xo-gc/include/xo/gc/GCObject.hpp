@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include "gcobject/AGCObject.hpp"
-#include "gcobject/IGCObject_Any.hpp"
-#include "gcobject/IGCObject_Xfer.hpp"
-#include "gcobject/RGCObject.hpp"
+#include "AGCObject.hpp"
+#include "detail/IGCObject_Any.hpp"
+#include "detail/IGCObject_Xfer.hpp"
+#include "detail/RGCObject.hpp"
 
 /* end GCObject.hpp */

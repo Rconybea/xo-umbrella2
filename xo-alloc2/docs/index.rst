@@ -5,13 +5,11 @@ xo-alloc2 documentation
 
 xo-alloc2 is intended to provide fast vm-aware arena allocation.
 Next-generation version of xo-alloc.
-At present (Dec 2025) xo-alloc is fully functional,
-while xo-alloc2 is aspirational.
 
 Features:
 
 * allocates uncommitted virtual memory, and commits on demand.
-* ses THP (Transparent Huge Pages) when available.
+* uses THP (Transparent Huge Pages) when available.
 
 Implemented using FOMO (faceted rust-like object model) from xo-facet
 

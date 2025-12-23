@@ -11,7 +11,7 @@ Library dependency tower for *xo-tokenizer*:
 .. ditaa::
 
     +-----------------+
-    |     xo_unit     |
+    |  xo_tokenizer   |
     +-----------------+
     |  xo_indentlog   |
     +-----------------+

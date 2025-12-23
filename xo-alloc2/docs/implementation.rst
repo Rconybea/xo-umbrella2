@@ -24,8 +24,7 @@ Abstraction tower for *xo-alloc2* components
     |      IAllocator_DArena         |
     +--------------------------------+
     |      IAllocator_Xfer           |
-    +--------------------------------+
-    |      IAllocator_ImplType       |
+    |      IAllocator_Any            |
     +--------------+-----------------+
     |              |    DArena       |
     |  AAllocator  +-----------------+

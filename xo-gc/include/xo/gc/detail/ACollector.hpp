@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "gcobject/IGCObject_Any.hpp"
+#include "IGCObject_Any.hpp"
 
 #include <xo/facet/facet_implementation.hpp>
 #include <xo/facet/typeseq.hpp>
@@ -34,9 +34,12 @@ namespace xo {
 
             virtual int32_t _typeseq() const noexcept = 0;
 
-            virtual size_type allocated(Copaque d, generation g, role r) const noexcept = 0;
-            virtual size_type reserved(Copaque d, generation g, role r) const noexcept = 0;
-            virtual size_type committed(Copaque d, generation g, role r) const noexcept = 0;
+            virtual size_type allocated(Copaque d,
+                                        generation g, role r) const noexcept = 0;
+            virtual size_type  reserved(Copaque d,
+                                        generation g, role r) const noexcept = 0;
+            virtual size_type committed(Copaque d,
+                                        generation g, role r) const noexcept = 0;
 
             /** install interface @p iface for representation with typeseq @p tseq
              *  in collector @p d.
