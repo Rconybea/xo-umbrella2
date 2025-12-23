@@ -6,8 +6,8 @@
 #pragma once
 
 #include "ArenaConfig.hpp"
-#include "alloc/AllocError.hpp"
-#include "alloc/AllocInfo.hpp"
+#include "AllocError.hpp"
+#include "AllocInfo.hpp"
 
 namespace xo {
     namespace mm {

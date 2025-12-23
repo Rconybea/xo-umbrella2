@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "alloc/AllocInfo.hpp"
+#include "AllocInfo.hpp"
 #include "cmpresult.hpp"
 #include <xo/facet/obj.hpp>
 

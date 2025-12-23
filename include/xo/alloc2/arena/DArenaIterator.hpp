@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "alloc/AllocInfo.hpp"
-#include "alloc/AllocHeader.hpp"
+#include "AllocInfo.hpp"
+#include "AllocHeader.hpp"
 #include "cmpresult.hpp"
 
 namespace xo {

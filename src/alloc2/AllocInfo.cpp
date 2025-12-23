@@ -3,7 +3,7 @@
  *  @author Roland Conybeare, Dec 2025
  **/
 
-#include "alloc/AllocInfo.hpp"
+#include "AllocInfo.hpp"
 
 namespace xo {
     namespace mm {
