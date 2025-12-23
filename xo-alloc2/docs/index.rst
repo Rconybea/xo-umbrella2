@@ -3,13 +3,17 @@
 xo-alloc2 documentation
 =======================
 
-xo-alloc2 is intended to provide fast vm-aware arena allocation.
-Next-generation version of xo-alloc.
+xo-alloc2 provides:
 
-Features:
+* Fast vm-aware arena allocation.
+* Allocates uncommitted virtual memory, and commits on demand.
+* When available, uses THP (Transparent Huge Pages) to mitigate pagetable pressure.
+* Optional GC support, with per-alloc header.
 
-* allocates uncommitted virtual memory, and commits on demand.
-* uses THP (Transparent Huge Pages) when available.
+Diagnostic features:
+
+* with alloc headers: forward iterators over individual allocations
+* configurable guard memory between allocations.
 
 Implemented using FOMO (faceted rust-like object model) from xo-facet
 
@@ -17,6 +21,7 @@ Implemented using FOMO (faceted rust-like object model) from xo-facet
     :maxdepth: 2
     :caption: xo-alloc2 contents
 
+    examples
     implementation
     AAllocator-reference
     ArenaConfig-reference
