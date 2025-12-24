@@ -11,15 +11,24 @@ namespace xo {
     namespace mm {
         /** @class IAllocator_Xfer
          *
-         *  Adapts typed allocator implementation @tparam IAllocator_DRepr
+         *  @tparam DRepr target representation
+         *  @tparam IAllocator_DRepr typed interface for @p DRepr
+         *
+         *  Adapts typed allocator implementation @p IAllocator_DRepr
          *  to type-erased @ref AAllocator interface
          **/
         template <typename DRepr, typename IAllocator_DRepr>
         struct IAllocator_Xfer : public AAllocator {
+            /** @defgroup mm-allocator-xfer-types **/
+            ///@{
             // parallel interface to AAllocator, with specific data type
             using Impl = IAllocator_DRepr;
             using size_type = AAllocator::size_type;
             using value_type = AAllocator::value_type;
+            ///@}
+
+            /** @defgroup mm-allocator-xfer-methods IAllocator_Xfer methods **/
+            ///@{
 
             static const DRepr & _dcast(Copaque d) { return *(const DRepr *)d; }
             static DRepr & _dcast(Opaque d) { return *(DRepr *)d; }
@@ -28,6 +37,7 @@ namespace xo {
 
             // const methods
 
+            /** return typeseq for @tparam DRepr **/
             int32_t _typeseq() const noexcept override { return s_typeseq; }
             std::string_view    name(Copaque d) const noexcept override { return I::name(_dcast(d)); }
             size_type       reserved(Copaque d) const noexcept override { return I::reserved(_dcast(d)); }
@@ -59,6 +69,7 @@ namespace xo {
             }
             void               clear(Opaque d) const override { return I::clear(_dcast(d)); }
             void       destruct_data(Opaque d) const override { return I::destruct_data(_dcast(d)); }
+            ///@}
 
         private:
             using I = Impl;

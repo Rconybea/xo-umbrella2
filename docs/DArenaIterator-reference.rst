@@ -1,9 +1,9 @@
-.. _ArenaConfig-reference:
+.. _DArenaIterator-reference:
 
-ArenaConfig Reference
-=====================
+DArenaIterator
+==============
 
-Configuration for an arena allocator
+Iterator for allocs obtained from a :cpp:class:`DArena`.
 
 Context
 -------
@@ -15,12 +15,12 @@ Context
     |        RAllocator    |   RAllocIterator        |       IAllocator_DArena           |
     |                      |                         |   IAllocIterator_DArenaIterator   |
     +----------------------+-------------------------+-----------------------------------+
-    |    IAllocator_Xfer   |  IAllocIterator_Xfer    |              DArena               |
-    |    IAllocator_Any    |  IAllocIterator_Any     |          DArenaIterator           |
-    | IAllocator_Impltype  | IAllocIterator_Impltype |                                   |
-    |                      |                         |                                   |
+    |    IAllocator_Xfer   |   IAllocIterator_Xfer   |              DArena               |
+    |    IAllocator_Any    |   IAllocIterator_Any    +-----------------------------------+
+    | IAllocator_Impltype  | IAllocIterator_Impltype |          DArenaIterator           |
+    |                      |                         |                               cBLU|
     +----------------------+-------------------------+-----------------------------------+
-    |       AAllocator     |    AAllocIterator       |            ArenaConfig        cBLU|
+    |       AAllocator     |    AAllocIterator       |            ArenaConfig            |
     +----------------------+-------------------------+-----------------------------------+
     +-----------------+----------------------------------------------+-------------------+
     |                 |                    AllocInfo                 |                   |
@@ -30,31 +30,26 @@ Context
     |                 |                  AllocHeader                 |                   |
     +-----------------+----------------------------------------------+-------------------+
 
-.. uml::
-    :caption: example arena config
-    :scale: 99%
-    :align: center
-
-    object cfg<<AreanConfig>>
-    cfg : name = "tmp"
-    cfg : size = 128MB
-    cfg : hugepage_z = 2MB
-    cfg : guard_z = 8
-    cfg : guard_byte = 0xfd
-    cfg : store_header_flag = true
-    cfg : header_size_mask = 0xffffffff
-    cfg : debug_flag = false
-
 .. code-block:: cpp
 
-    #include <xo/alloc2/ArenaConfig.hpp>
+    #include <xo/alloc2/DArenaIterator.hpp>
 
 Class
 -----
 
-.. doxygenclass:: xo::mm::ArenaConfig
+.. doxygenclass:: xo::mm::DArenaIterator
 
-Instance Variables
-------------------
+Member Variables
+----------------
 
-.. doxygengroup:: mm-arenaconfig-instance-vars
+.. doxygengroup:: mm-arenaiterator-instance-vars
+
+Constructors
+------------
+
+.. doxygengroup:: mm-arenaiterator-ctors
+
+Methods
+-------
+
+.. doxygengroup:: mm-arenaiterator-methods

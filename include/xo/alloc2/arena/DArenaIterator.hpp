@@ -18,7 +18,7 @@ namespace xo {
          *
          *  Map showing an arena allocation:
          *
-         *  @pre
+         *  @verbatim
          *
          *                    <-------------z1--------------->
          *           < guard ><  hz  ><     req_z     >< dz  >< guard >
@@ -37,9 +37,11 @@ namespace xo {
          *        dz  [p] padding (to uintptr_t alignment.  req_z+dz recorded in header)
          *     free_      DArena::free_ just after guard bytes for last allocation
          *
-         *  @endpre
+         *  @endverbatim
          **/
         struct DArenaIterator {
+            /** @defgroup mm-arenaiterator-ctors DArenaIterator instance vars **/
+            ///@{
             DArenaIterator() = default;
             DArenaIterator(const DArena * arena,
                            AllocHeader * pos) : arena_{arena},
@@ -58,7 +60,10 @@ namespace xo {
              *  an iterator error in @p *arena
              **/
             static DArenaIterator   end(const DArena * arena);
+            ///@}
 
+            /** @defgroup mm-arenaiterator-methods DArenaIterator methods **/
+            ///@{
             /** Address of allocation header for beginning of alloc range in @p arena **/
             static AllocHeader * begin_header(const DArena * arena);
             /** Address of allocation header for end of alloc range.
@@ -71,6 +76,9 @@ namespace xo {
              *  It can be dereferenced if is also non-empty
              **/
             bool is_valid() const noexcept { return (arena_ != nullptr) && (pos_ != nullptr); }
+            /** An invalid (or sentinel) iterator is incomparable with all
+             *  iterators including itself
+             **/
             bool is_invalid() const noexcept { return !is_valid(); }
 
             /** fetch contents at current iterator position **/
@@ -82,26 +90,35 @@ namespace xo {
             /** advance iterator to next allocation **/
             void next() noexcept;
 
+            /** cast iterator position to byte* */
             std::byte * pos_as_byte() const { return (std::byte *)pos_; }
 
             /** *ix synonym for ix.deref() **/
             AllocInfo operator*() const noexcept { return this->deref(); }
             /** ++ix synonym for ix.next() **/
             DArenaIterator & operator++() noexcept { this->next(); return *this; }
+            ///@}
 
+            /** @defgroup mm-arenaiterator-instance-vars **/
+            ///@{
             /** iterator visits allocations from this arena **/
             const DArena * arena_ = nullptr;
             /** current iterator position **/
             AllocHeader * pos_ = nullptr;
+            ///@}
         };
 
         inline bool
-        operator==(const DArenaIterator & x, const DArenaIterator & y) {
+        operator==(const DArenaIterator & x,
+                   const DArenaIterator & y)
+        {
             return x.compare(y).is_equal();
         }
 
         inline bool
-        operator!=(const DArenaIterator & x, const DArenaIterator & y) {
+        operator!=(const DArenaIterator & x,
+                   const DArenaIterator & y)
+        {
             return !x.compare(y).is_equal();
         }
     } /*namespace mm*/

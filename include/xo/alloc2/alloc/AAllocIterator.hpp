@@ -23,6 +23,8 @@ namespace xo {
         struct AAllocIterator {
             using obj_AAllocIterator = xo::facet::obj<AAllocIterator>;
 
+            /** @defgroup mm-allociterator-methods AllocIterator methods **/
+            ///@{
             /** RTTI: unique id# for actual runtime *data* representation **/
             virtual int32_t _typeseq() const noexcept = 0;
             /** retrieve AllocInfo for current iterator position
@@ -33,6 +35,7 @@ namespace xo {
                                       const obj_AAllocIterator & other) const noexcept = 0;
             /** advance iterator to next position **/
             virtual void next(Opaque d) const noexcept = 0;
+            ///@}
         };
     } /*namespace mm*/
 } /*namespace xo*/

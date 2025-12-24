@@ -8,9 +8,12 @@ xo_docdir_sphinx_config(
     examples.rst
     implementation.rst
     AAllocator-reference.rst
+    IAllocator_Xfer-reference.rst
+    AAllocIterator-reference.rst
     ArenaConfig-reference.rst
     DArena-reference.rst
     AllocInfo-reference.rst
+    cmpresult-reference.rst
     #install.rst
     #introduction.rst
     #implementation.rst
