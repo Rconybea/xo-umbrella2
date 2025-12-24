@@ -1,9 +1,17 @@
-.. _ArenaConfig-reference:
+.. _AAllocIterator-reference:
 
-ArenaConfig Reference
-=====================
+AAllocIterator Reference
+========================
 
-Configuration for an arena allocator
+Abstract interface facet for an alloc iterator.
+
+Base class for runtime polymorphism over alloc-iterator implementations,
+using faceted object model.
+
+* runtime size consists of vtable pointer only.
+
+* per FOMO principles, runtime state is stored separately.
+  Classes that inherit AAllocIterator will not add state.
 
 Context
 -------
@@ -20,7 +28,7 @@ Context
     | IAllocator_Impltype  | IAllocIterator_Impltype |                                   |
     |                      |                         |                                   |
     +----------------------+-------------------------+-----------------------------------+
-    |       AAllocator     |    AAllocIterator       |            ArenaConfig        cBLU|
+    |       AAllocator     |    AAllocIterator   cBLU|            ArenaConfig            |
     +----------------------+-------------------------+-----------------------------------+
     +-----------------+----------------------------------------------+-------------------+
     |                 |                    AllocInfo                 |                   |
@@ -30,31 +38,30 @@ Context
     |                 |                  AllocHeader                 |                   |
     +-----------------+----------------------------------------------+-------------------+
 
-.. uml::
-    :caption: example arena config
-    :scale: 99%
-    :align: center
-
-    object cfg<<AreanConfig>>
-    cfg : name = "tmp"
-    cfg : size = 128MB
-    cfg : hugepage_z = 2MB
-    cfg : guard_z = 8
-    cfg : guard_byte = 0xfd
-    cfg : store_header_flag = true
-    cfg : header_size_mask = 0xffffffff
-    cfg : debug_flag = false
+Application code will likely use:
 
 .. code-block:: cpp
 
-    #include <xo/alloc2/ArenaConfig.hpp>
+    #include <xo/alloc2/AllocIterator.hpp>
+
+to get definitions for cooperating AllocIterator classes
+:cpp:class:`xo::mm::AAllocIterator`,
+:cpp:class:`xo::mm::IAllocIterator_Any`,
+:cpp:class:`xo::mm::IAllocIterator_Xfer`,
+:cpp:class:`xo::mm::RAllocator`
+
+Instead, to get just :cpp:class:`xo::mm::AAllocIterator` definition:
+
+.. code-block:: cpp
+
+    #include <xo/alloc2/AAllocIterator.hpp>
 
 Class
 -----
 
-.. doxygenclass:: xo::mm::ArenaConfig
+.. doxygenclass:: xo::mm::AAllocIterator
 
-Instance Variables
-------------------
+Methods
+-------
 
-.. doxygengroup:: mm-arenaconfig-instance-vars
+.. doxygengroup:: mm-allociterator-methods

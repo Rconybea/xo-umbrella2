@@ -24,9 +24,13 @@ Implemented using FOMO (faceted rust-like object model) from xo-facet
     examples
     implementation
     AAllocator-reference
+    IAllocator_Xfer-reference
+    AAllocIterator-reference
     ArenaConfig-reference
     DArena-reference
+    DArenaIterator-reference
     AllocInfo-reference
+    cmpresult-reference
     glossary
     genindex
     search

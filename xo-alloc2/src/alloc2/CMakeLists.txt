@@ -8,6 +8,7 @@ set(SELF_SRCS
     cmpresult.cpp
 
     AAllocator.cpp
+    ArenaConfig.cpp
     DArena.cpp
     IAllocator_Any.cpp
     IAllocator_DArena.cpp

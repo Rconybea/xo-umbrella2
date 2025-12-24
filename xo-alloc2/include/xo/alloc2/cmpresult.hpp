@@ -24,7 +24,11 @@ namespace xo {
             return os;
         }
 
+        /** Result of a generic comparison operation
+         **/
         struct cmpresult {
+            /** @defgroup mm-cmpresult-ctors cmpresult ctors **/
+            ///@{
             cmpresult() : err_{comparison::invalid}, cmp_{0} {}
             cmpresult(comparison err, std::int16_t cmp) : err_{err}, cmp_{cmp} {}
 
@@ -32,7 +36,6 @@ namespace xo {
             static cmpresult       lesser() { return cmpresult(comparison::comparable,   -1); }
             static cmpresult        equal() { return cmpresult(comparison::comparable,    0); }
             static cmpresult      greater() { return cmpresult(comparison::comparable,   +1); }
-
             template<typename T>
             static cmpresult from_cmp(T && x, T && y) {
                 if (x < y)
@@ -43,6 +46,11 @@ namespace xo {
                     return cmpresult::greater();
             }
 
+            ///@}
+
+            /** @defgroup mm-cmpresult-methods cmpresult methods **/
+            ///@{
+
             /** print to stream **/
             void display(std::ostream & os) const;
 
@@ -52,14 +60,18 @@ namespace xo {
             bool is_equal() const {
                 return (err_ == comparison::comparable) && (cmp_ == 0);
             }
+            ///@}
 
-            /* -1 -> invalid (sentinel)
-             *  0 -> comparable
-             * +1 -> incomparable (e.g. iterators from different arenas)
-             */
+            /** @defgroup mm-cmpresult-instance-vars cmpresult instance vars **/
+            ///@{
+            /** -1 -> invalid (sentinel)
+             *   0 -> comparable
+             *  +1 -> incomparable (e.g. iterators from different arenas)
+             **/
             comparison   err_ = comparison::invalid;
-            /* <0 -> lesser; 0 -> equal, >0 -> greater */
+            /** <0 -> lesser; 0 -> equal, >0 -> greater **/
             std::int16_t cmp_ = 0;
+            ///@}
         };
 
         inline std::ostream & operator<<(std::ostream & os,

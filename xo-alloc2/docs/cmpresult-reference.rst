@@ -1,9 +1,9 @@
-.. _ArenaConfig-reference:
+.. _cmpresult-reference:
 
-ArenaConfig Reference
-=====================
+cmpresult
+=========
 
-Configuration for an arena allocator
+Represent the result of a partially ordered comparison
 
 Context
 -------
@@ -20,41 +20,36 @@ Context
     | IAllocator_Impltype  | IAllocIterator_Impltype |                                   |
     |                      |                         |                                   |
     +----------------------+-------------------------+-----------------------------------+
-    |       AAllocator     |    AAllocIterator       |            ArenaConfig        cBLU|
+    |       AAllocator     |    AAllocIterator       |            ArenaConfig            |
     +----------------------+-------------------------+-----------------------------------+
     +-----------------+----------------------------------------------+-------------------+
     |                 |                    AllocInfo                 |                   |
     |                 +----------------------------------------------+                   |
     |    AllocError   |                AllocHeaderConfig             |     cmpresult     |
     |                 +----------------------------------------------+                   |
-    |                 |                  AllocHeader                 |                   |
+    |                 |                  AllocHeader                 |              cBLU |
     +-----------------+----------------------------------------------+-------------------+
-
-.. uml::
-    :caption: example arena config
-    :scale: 99%
-    :align: center
-
-    object cfg<<AreanConfig>>
-    cfg : name = "tmp"
-    cfg : size = 128MB
-    cfg : hugepage_z = 2MB
-    cfg : guard_z = 8
-    cfg : guard_byte = 0xfd
-    cfg : store_header_flag = true
-    cfg : header_size_mask = 0xffffffff
-    cfg : debug_flag = false
 
 .. code-block:: cpp
 
-    #include <xo/alloc2/ArenaConfig.hpp>
+    #include <xo/alloc2/cmpresult.hpp>
 
 Class
 -----
 
-.. doxygenclass:: xo::mm::ArenaConfig
+.. doxygenclass:: xo::mm::cmpresult
 
-Instance Variables
-------------------
+Constructors
+------------
 
-.. doxygengroup:: mm-arenaconfig-instance-vars
+.. doxgyengroup:: mm-cmpresult-ctors
+
+Methods
+-------
+
+.. doxygengroup:: mm-cmpresult-methods
+
+Member Variables
+----------------
+
+.. doxygengroup:: mm-cmpresult-instance-vars

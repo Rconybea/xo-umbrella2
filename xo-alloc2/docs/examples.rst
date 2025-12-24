@@ -84,6 +84,17 @@ Given a successful allocation:
     info.guard_lo(); // guard bytes preceding alloc
     info.guard_hi(); // guard bytes following alloc
 
+Can alternatively scan all live allocs in arena:
+
+.. code-block:: cpp
+
+    for (AllocInfo info : arena) {
+        info.payload();  // allocated memory range
+        info.is_valid(); // true
+        info.guard_lo(); // guard bytes preceding alloc
+        info.guard_hi(); // guard bytes following alloc
+    }
+
 Recycling memory
 ----------------
 
@@ -102,8 +113,10 @@ Recycling memory
     arena.allocated();  // 0k
     arena.available();  // 8k
 
-Memory released by @ref Darena::clear is still committed.
-It's in use as far as operating system is concerned.
+Memory recycled by :cpp:func:`DArena::clear()`
+is available for reuse by application; it's still owned by arena.
+We're just resetting the free pointer back to the beginning of arena
+memory.
 
 To release memory to the operating system, destroy arena:
 

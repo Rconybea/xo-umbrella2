@@ -1,9 +1,9 @@
 .. _DArena-reference:
 
-DArena Reference
-================
+DArena
+======
 
-Native representation for arena allocator
+Native arena allocator
 
 Context
 -------
@@ -33,7 +33,6 @@ Context
 .. code-block:: cpp
 
     #include <xo/alloc2/DArena.hpp>
-
 
 Arena memory layout
 ~~~~~~~~~~~~~~~~~~~

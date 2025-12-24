@@ -200,6 +200,9 @@ namespace xo {
              **/
             bool expand(size_type z) noexcept;
 
+            /** create initial guard **/
+            void establish_initial_guard() noexcept;
+
             /** discard all allocated memory, return to empty state
              *  Promise:
              *  - committed memory unchanged

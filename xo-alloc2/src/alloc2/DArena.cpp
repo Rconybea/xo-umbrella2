@@ -81,8 +81,8 @@ namespace xo {
                 ::munmap(aligned_hi, suffix);
             }
 
-#ifdef __linux__
             if (enable_hugepage_flag) {
+#ifdef __linux__
                 /** linux:
                  *    opt-in to transparent huge pages (THP)
                  *    provided OS configured to support them.
@@ -100,8 +100,8 @@ namespace xo {
                  *    Page table has a handful of levels
                  **/
                 ::madvise(aligned_base, target_z, MADV_HUGEPAGE); // 8.
-            }
 #endif
+            }
 
             return std::make_pair(aligned_base, aligned_hi);
         }
@@ -483,6 +483,18 @@ namespace xo {
             return mem;
         }
 
+        void
+        DArena::establish_initial_guard() noexcept
+        {
+            assert(free_ == lo_);
+
+            ::memset(this->free_,
+                     config_.header_.guard_byte_,
+                     config_.header_.guard_z_);
+
+            this->free_ += config_.header_.guard_z_;
+        }
+
         bool
         DArena::expand(size_t target_z) noexcept
         {
@@ -551,11 +563,7 @@ namespace xo {
             if (commit_start == lo_) [[unlikely]] {
                 /* first expand() for this allocator - start with guard_z_ bytes */
 
-                ::memset(free_,
-                         config_.header_.guard_byte_,
-                         config_.header_.guard_z_);
-
-                free_ += config_.header_.guard_z_;
+                this->establish_initial_guard();
             }
 
             assert(committed_z_ % arena_align_z_ == 0);
@@ -568,6 +576,7 @@ namespace xo {
         DArena::clear() noexcept
         {
             this->free_ = lo_;
+            this->establish_initial_guard();
         }
     }
 } /*namespace xo*/
