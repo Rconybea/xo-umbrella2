@@ -5,10 +5,12 @@ xo_docdir_doxygen_config()
 xo_docdir_sphinx_config(
     index.rst
     glossary.rst
+    examples.rst
     implementation.rst
     AAllocator-reference.rst
     ArenaConfig-reference.rst
     DArena-reference.rst
+    AllocInfo-reference.rst
     #install.rst
     #introduction.rst
     #implementation.rst

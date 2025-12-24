@@ -47,9 +47,15 @@ namespace xo {
 
             /** @brief mode argument for @ref _alloc **/
             enum class alloc_mode : uint8_t {
+                /** ordinary alloc. Most common mode **/
                 standard,
+                /** begin a sequence of suballocs that share a single alloc header **/
                 super,
+                /** make a subsidiary allocation on behalf of a preceding super alloc.
+                 *  Will be followed by at least one more suballoc call.
+                 **/
                 sub_incomplete,
+                /** make a subsidiary allocation that completes preceding super alloc. **/
                 sub_complete,
             };
 
@@ -64,7 +70,11 @@ namespace xo {
             /** null ctor **/
             DArena() = default;
             /** ctor from already-mapped (but not committed) address range **/
-            DArena(const ArenaConfig & cfg, size_type page_z, value_type lo, value_type hi);
+            DArena(const ArenaConfig & cfg,
+                   size_type page_z,
+                   size_type arena_align_z,
+                   value_type lo,
+                   value_type hi);
             /** DArena is not copyable **/
             DArena(const DArena & other) = delete;
             /** move ctor **/
@@ -80,18 +90,49 @@ namespace xo {
             /** @defgroup mm-arena-methods **/
             ///@{
 
+            /** Reserved memory, in bytes. This is the maximum size of this arena. **/
             size_type reserved() const noexcept { return hi_ - lo_; }
+            /** Allocated memory in bytes: memory consumed by allocs from this arena,
+             *  including administrative overhead (alloc headers + guard bytes)
+             **/
             size_type allocated() const noexcept { return free_ - lo_; }
+            /** Committed memory in bytes: amount of memory actually backed by physical memory **/
             size_type committed() const noexcept { return committed_z_; }
+            /** Available committed memory.
+             *  This is the amount of memory guaranteed to be usable for future allocs from this arena.
+             **/
             size_type available() const noexcept { return limit_ - free_; }
 
+            /** True iff address @p addr is owned by this arena,
+             *  i.e. falls within [@ref lo_, @ref hi_)
+             **/
             bool contains(const void * addr) const noexcept { return (lo_ <= addr) && (addr < hi_); }
 
             /** obtain uncommitted contiguous memory range comprising
-             *  a whole multiple of @p hugepage_z bytes, of at least size @p req_z,
-             *  aligned on a @p hugepage_z boundary
+             *  a whole multiple of @p align_z bytes, of at least size @p req_z,
+             *  aligned on a @p align_z boundary.  Uncommitted memory is not (yet)
+             *  backed by physical memory.
+             *
+             *  If @p enable_hugepage_flag is true and THP
+             *  (transparent huge pages) are available, use THP for arena memory.
+             *  This relieves TLB and page table memory when @p req_z is a lot larger than
+             *  page size (likely 4KB).  Cost is that arena will consum physical memory in unit
+             *  of @p align_z.  Arena may waste up to @p align_z bytes of memory as a result.
+             *
+             *  If @p enable_hugepage_flag is true, @p align_z should be huge page size
+             *  (probably 2MB) for optimal performance.
+             *
+             *  At present the THP feature is not supported on OSX.
+             *  May be supportable through mach_vm_allocate().
+             *
+             *  Note that we reject MAP_HUGETLB|MAP_HUGE_2MB flags to mmap here,
+             *  since requires previously-reserved memory in /proc/sys/vm/nr_hugepages.
+             *
+             *  @return pair giving reserved memory address range [lo,hi)
              **/
-            static range_type map_aligned_range(size_type req_z, size_type hugepage_z);
+            static range_type map_aligned_range(size_type req_z,
+                                                size_type align_z,
+                                                bool enable_hugepage_flag);
 
             /** true if arena is mapped i.e. has a reserved address range **/
             bool is_mapped() const noexcept { return (lo_ != nullptr) && (hi_ != nullptr); }
@@ -176,6 +217,9 @@ namespace xo {
 
             /** size of a VM page (obtained automatically via getpagesize()). Likely 4k **/
             size_type page_z_ = 0;
+
+            /** alignment for this arena.  In practice will be either page_z_ or cfg.hugepage_z_ **/
+            size_type arena_align_z_ = 0;
 
             /** arena owns memory in range [@ref lo_, @ref hi_)
              **/

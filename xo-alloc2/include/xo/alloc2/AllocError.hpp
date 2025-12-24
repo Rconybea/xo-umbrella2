@@ -14,7 +14,7 @@ namespace xo {
             /** sentinel **/
             invalid = -1,
             /** not an error **/
-            none,
+            ok,
             /** reserved size exhauged **/
             reserve_exhausted,
             /** unable to commit (i.e. mprotect failure) **/
@@ -57,8 +57,10 @@ namespace xo {
                                               committed_z_{com_z},
                                               reserved_z_{rsv_z} {}
 
+            static const char * error_description(error x);
+
             /** error code **/
-            error error_ = error::none;
+            error error_ = error::ok;
 
             /** sequence# of this error.
              *  Each error event within an allocator gets next sequence number

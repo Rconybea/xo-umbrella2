@@ -18,9 +18,17 @@ namespace xo {
          *
          **/
         struct AllocInfo {
+            /** @defgroup mm-allocinfo-traits **/
+            ///@{
+
             using size_type = AllocHeader::size_type;
             using byte = std::byte;
             using span_type = std::pair<const byte *, const byte *>;
+
+            ///@}
+
+            /** @defgroup mm-allocinfo-ctors **/
+            ///@{
 
             AllocInfo(const AllocHeaderConfig * p_cfg,
                       const byte * p_guard_lo,
@@ -38,6 +46,11 @@ namespace xo {
             static AllocInfo error_invalid_iterator(const AllocHeaderConfig * p_cfg) {
                 return AllocInfo(p_cfg, nullptr, nullptr, nullptr);
             }
+
+            ///@}
+
+            /** @defgroup mm-allocinfo-methods **/
+            ///@{
 
             /** true for non-sentinel AllocInfo instance **/
             bool is_valid() const { return (p_config_ != nullptr) && (p_header_ != nullptr); }
@@ -59,10 +72,17 @@ namespace xo {
             /** Value (fixed test pattern) of guard byte **/
             char guard_byte() const noexcept { return p_config_->guard_byte_; }
 
+            ///@}
+
+            /** @defgroup mm-allocinfo-instance-vars **/
+            ///@{
+
             const AllocHeaderConfig * p_config_ = nullptr;
             const byte *            p_guard_lo_ = nullptr;
             const AllocHeader *       p_header_ = nullptr;
             const byte *            p_guard_hi_ = nullptr;
+
+            ///@}
         };
     } /*namespace mm*/
 } /*namespace xo*/

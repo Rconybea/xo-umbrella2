@@ -11,17 +11,24 @@ Context
 .. ditaa::
     :--scale: 0.99
 
-    +--------------------------------+
-    |      IAllocator_DArena         |
-    +--------------------------------+
-    |      IAllocator_Xfer           |
-    +--------------------------------+
-    |      IAllocator_ImplType       |
-    +--------------+-----------------+
-    |              |    DArena   cBLU|
-    |   AAllocator +-----------------+
-    |              | ArenaConfig     |
-    +--------------+-----------------+
+    +----------------------+-------------------------+-----------------------------------+
+    |        RAllocator    |   RAllocIterator        |       IAllocator_DArena           |
+    |                      |                         |   IAllocIterator_DArenaIterator   |
+    +----------------------+-------------------------+-----------------------------------+
+    |    IAllocator_Xfer   |   IAllocIterator_Xfer   |              DArena          cBLU |
+    |    IAllocator_Any    |   IAllocIterator_Any    +-----------------------------------+
+    | IAllocator_Impltype  | IAllocIterator_Impltype |          DArenaIterator           |
+    |                      |                         |                                   |
+    +----------------------+-------------------------+-----------------------------------+
+    |       AAllocator     |    AAllocIterator       |            ArenaConfig            |
+    +----------------------+-------------------------+-----------------------------------+
+    +-----------------+----------------------------------------------+-------------------+
+    |                 |                    AllocInfo                 |                   |
+    |                 +----------------------------------------------+                   |
+    |    AllocError   |                AllocHeaderConfig             |     cmpresult     |
+    |                 +----------------------------------------------+                   |
+    |                 |                  AllocHeader                 |                   |
+    +-----------------+----------------------------------------------+-------------------+
 
 .. code-block:: cpp
 
@@ -29,11 +36,13 @@ Context
 
 
 Arena memory layout
+~~~~~~~~~~~~~~~~~~~
+
 .. code-block:: text
 
-      <----------------------------size-------------------------->
+      <------------------------reserved-------------------------->
       <------------committed-----------><-------uncommitted------>
-      <--allocated-->
+      <--allocated--><----available---->
 
       XXXXXXXXXXXXXXX___________________..........................
      ^               ^                  ^                         ^
@@ -44,7 +53,9 @@ Arena memory layout
       [.] uncommitted: mapped in virtual memory, not backed by memory
 
 
-Allocation layout
+Representation for a single allocation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 .. code-block:: text
 
                      free_(pre)
@@ -60,8 +71,8 @@ Allocation layout
                          ^                                        |
                          last_header_                   free_(post)
 
-                 [+] guard after each allocation, for simple sanitize checks
-                 [0] unused header bits (avail to application)
+                 [+] guard surrounding each allocation, for simple sanitize checks
+                 [0] unused header bits (available for application metadata)
                  [z] record allocation size
                  [@] new allocated memory
                  [p] padding (to uintptr_t alignment)
@@ -85,3 +96,8 @@ Constructors
 ------------
 
 .. doxygengroup:: mm-arena-ctors
+
+Methods
+-------
+
+.. doxygengroup:: mm-arena-methods

@@ -8,9 +8,10 @@
 //#include "xo/alloc2/DArena.hpp"
 #include "xo/alloc2/arena/IAllocator_DArena.hpp"
 //#include "xo/alloc2/alloc/RAllocator.hpp"
+#include "xo/alloc2/print.hpp"
 #include "xo/alloc2/padding.hpp"
-#include "xo/indentlog/scope.hpp"
-#include "xo/facet/obj.hpp"
+#include <xo/facet/obj.hpp>
+#include <xo/indentlog/scope.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {
@@ -37,7 +38,7 @@ namespace xo {
             REQUIRE(IAllocator_Xfer<DArena, IAllocator_DArena>::_valid);
         }
 
-        TEST_CASE("DArena", "[alloc2][DArena]")
+        TEST_CASE("DArena-tiny", "[alloc2][DArena]")
         {
             ArenaConfig cfg { .name_ = "testarena",
                               .size_ = 1 };
@@ -49,10 +50,53 @@ namespace xo {
             REQUIRE(arena.limit_ == arena.lo_);
             REQUIRE(arena.hi_ != nullptr);
             REQUIRE(arena.hi_ > arena.lo_);
+            REQUIRE(((size_t)arena.hi_ - (size_t)arena.lo_) % arena.page_z_ == 0);
+            REQUIRE(arena.lo_ + cfg.size_ <= arena.hi_);
+
+            /* verify arena.lo_ is aligned on a page boundary */
+            REQUIRE(((size_t)(arena.lo_) & (arena.page_z_ - 1)) == 0);
+
+            /* verify arena.hi_ is aligned on a hugepage boundary */
+            REQUIRE(((size_t)(arena.hi_) & (arena.page_z_ - 1)) == 0);
+
+            byte * lo = arena.lo_;
+            byte * free = arena.free_;
+            byte * limit = arena.limit_;
+            byte * hi = arena.hi_;
+            size_t committed_z = arena.committed_z_;
+
+            DArena arena2 = std::move(arena);
+
+            REQUIRE(arena.lo_ == nullptr);
+            REQUIRE(arena.free_ == nullptr);
+            REQUIRE(arena.limit_ == nullptr);
+            REQUIRE(arena.hi_ == nullptr);
+            REQUIRE(arena.committed_z_ == 0);
+
+            REQUIRE(arena.lo_ == nullptr);
+            REQUIRE(arena2.lo_ == lo);
+            REQUIRE(arena2.free_ == free);
+            REQUIRE(arena2.limit_ == limit);
+            REQUIRE(arena2.hi_ == hi);
+            REQUIRE(arena2.committed_z_ == committed_z);
+        }
+
+        TEST_CASE("DArena-medium", "[alloc2][DArena]")
+        {
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 10*1024*1024 };
+            DArena arena = DArena::map(cfg);
+
+            REQUIRE(arena.config_.name_ == cfg.name_);
+            REQUIRE(arena.lo_ != nullptr);
+            REQUIRE(arena.free_ == arena.lo_);
+            REQUIRE(arena.limit_ == arena.lo_);
+            REQUIRE(arena.hi_ != nullptr);
+            REQUIRE(arena.hi_ > arena.lo_);
             REQUIRE(((size_t)arena.hi_ - (size_t)arena.lo_) % cfg.hugepage_z_ == 0);
             REQUIRE(arena.lo_ + cfg.size_ <= arena.hi_);
 
-            /* verify arena.lo_ is aligned on a hugepage boundary */
+            /* verify arena.lo_ is aligned on a page boundary */
             REQUIRE(((size_t)(arena.lo_) & (cfg.hugepage_z_ - 1)) == 0);
 
             /* verify arena.hi_ is aligned on a hugepage boundary */
@@ -103,8 +147,8 @@ namespace xo {
                     == xo::facet::FacetImplType<AAllocator, DArena>::s_typeseq);
             REQUIRE(a1o.name() == cfg.name_);
             REQUIRE(a1o.reserved() >= cfg.size_);
-            REQUIRE(a1o.reserved() < cfg.size_ + cfg.hugepage_z_);
-            REQUIRE(a1o.reserved() % cfg.hugepage_z_ == 0);
+            REQUIRE(a1o.reserved() < cfg.size_ + a1o.data()->page_z_);
+            REQUIRE(a1o.reserved() % a1o.data()->page_z_ == 0);
             REQUIRE(a1o.size() == 0);
             REQUIRE(a1o.committed() == 0);
             REQUIRE(a1o.allocated() == 0);
@@ -123,11 +167,15 @@ namespace xo {
             REQUIRE(a1o.allocated() == 0);
 
             size_t z2 = 512;
-            REQUIRE(a1o.expand(z2));
+            bool ok = a1o.expand(z2);
 
-            REQUIRE(a1o.reserved() % cfg.hugepage_z_ == 0);
+            INFO(xtag("last_error", a1o.last_error()));
+
+            REQUIRE(ok);
+
+            REQUIRE(a1o.reserved() % a1o.data()->page_z_ == 0);
             REQUIRE(a1o.committed() >= z2);
-            REQUIRE(a1o.committed() % cfg.hugepage_z_ == 0);
+            REQUIRE(a1o.committed() % a1o.data()->page_z_ == 0);
             /* .size() is synonym for .committed() */
             REQUIRE(a1o.size() == a1o.committed());
             REQUIRE(a1o.available() >= z2);
@@ -154,7 +202,7 @@ namespace xo {
             byte * m0 = a1o.alloc(1);
 
             REQUIRE(m0);
-            REQUIRE(a1o.last_error().error_ == error::none);
+            REQUIRE(a1o.last_error().error_ == error::ok);
             REQUIRE(a1o.last_error().error_seq_ == 0);
             REQUIRE(a1o.allocated() >= z0);
             REQUIRE(a1o.allocated() < z0 + padding::c_alloc_alignment );
@@ -166,7 +214,7 @@ namespace xo {
             byte * m1 = a1o.alloc(z1);
 
             REQUIRE(m1);
-            REQUIRE(a1o.last_error().error_ == error::none);
+            REQUIRE(a1o.last_error().error_ == error::ok);
             REQUIRE(a1o.last_error().error_seq_ == 0);
             REQUIRE(a1o.allocated() >= z0 + z1);
             REQUIRE(a1o.allocated() < z0 + z1 + 2 * padding::c_alloc_alignment );
@@ -209,7 +257,7 @@ namespace xo {
             REQUIRE(a1o.contains(header));
             REQUIRE(cfg.header_.size(*header) == padding::with_padding(z0));
             //REQUIRE(((*header) & cfg.header_size_mask_) == padding::with_padding(z0));
-            REQUIRE(a1o.last_error().error_ == error::none);
+            REQUIRE(a1o.last_error().error_ == error::ok);
             REQUIRE(a1o.last_error().error_seq_ == 0);
             REQUIRE(a1o.allocated() >= z0);
             REQUIRE(a1o.allocated() < sizeof(AAllocator::header_type) + z0 + padding::c_alloc_alignment );
@@ -265,7 +313,7 @@ namespace xo {
             REQUIRE(cfg.header_.size(*header) == padding::with_padding(z0));
             //REQUIRE(((*header) & cfg.header_size_mask_) == padding::with_padding(z0));
 
-            REQUIRE(a1o.last_error().error_ == error::none);
+            REQUIRE(a1o.last_error().error_ == error::ok);
             REQUIRE(a1o.last_error().error_seq_ == 0);
 
             REQUIRE(a1o.allocated() == (cfg.header_.guard_z_
@@ -306,7 +354,7 @@ namespace xo {
             REQUIRE(err.request_z_ >= z0);
             REQUIRE(err.request_z_ < z0 + padding::c_alloc_alignment);
             REQUIRE(err.committed_z_ == 0);
-            REQUIRE(err.reserved_z_ == cfg.hugepage_z_);
+            REQUIRE(err.reserved_z_ == arena.reserved());
         }
     } /*namespace ut*/
 } /*namespace xo*/

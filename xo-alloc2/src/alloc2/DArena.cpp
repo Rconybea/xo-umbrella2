@@ -19,56 +19,30 @@ namespace xo {
     using std::size_t;
 
     namespace mm {
-
-        /** Map a contiguous uncommitted memory range comprising
-         *  a whole multiple of @p hugepage_z, with at least
-         *  @p req_z bytes.
-         *
-         *  Memory will also be aligned on @p hugepage_z boundary
-         *  (2MB in practice)
-         *
-         *  - @p req_z is rounded up to a multiple of @p hugepage_z
-         *  - Resulting uncommitted address range not backed by
-         *    physical memory.
-         *  - since hugpage-aligned, can find base of mapped range
-         *    by masking off the bottom log2(align_z) bits.
-         *    May rely on this for GC metadata
-         *  - opt-in to transparent huge pages (THP).
-         *    Reduces page-fault time by a lot, in return for
-         *    lower VM granularity
-         * - rejecting inferior MAP_HUGETLB|MAP_HUGE_2MB flags on ::mmap here:
-         *    - requires previously-reserved memory in /proc/sys/vm/nr_hugepages
-         *    - reserved pages permenently resident in RAM, never swapped
-         *    - memory cost incurred even if no application is using said pages
-         *
-         * TODO: for OSX -> need something else here.
-         *       MAP_ALIGNED_SUPER with mmap() and/or
-         *       use mach_vm_allocate()
-         *
-         *  @return pair giving mapped address range [lo, hi)
-         **/
         auto
-        DArena::map_aligned_range(size_t req_z, size_t hugepage_z) -> range_type
+        DArena::map_aligned_range(size_t req_z,
+                                  size_t align_z,
+                                  bool enable_hugepage_flag) -> range_type
         {
-            // 1. round up to multiple of hugepage_z
-            size_t target_z = padding::with_padding(req_z, hugepage_z); // 4.
+            // 1. round up to multiple of align_z
+            size_t target_z = padding::with_padding(req_z, align_z); // 4.
 
             // 2. mmap() will give us page-aligned memory,
             //    but not hugepage-aligned.
             //
-            //    Over-request by hugepage_z to ensure
-            //    hugepage-aligned subrange of size target_z
+            //    Over-request by align_z to ensure
+            //    aligned subrange of size target_z
             //
             byte * base = (byte *)(::mmap(nullptr,
-                                          target_z + hugepage_z,
+                                          target_z + align_z,
                                           PROT_NONE,
                                           MAP_PRIVATE | MAP_ANONYMOUS,
                                           -1, 0));
 
             // on mmap success: upper limit of mapped address range
-            byte * hi = base + (target_z + hugepage_z);
+            byte * hi = base + (target_z + align_z);
             // lowest hugepage-aligned address in [base, hi)
-            byte * aligned_base = (byte *)(padding::with_padding((size_t)base, hugepage_z));
+            byte * aligned_base = (byte *)(padding::with_padding((size_t)base, align_z));
             // end of hugeppage-aligned range starting at aligned_base
             byte * aligned_hi = aligned_base + target_z;
 
@@ -88,9 +62,9 @@ namespace xo {
                                                    xtag("size", req_z)));
                 }
 
-                assert((size_t)aligned_base % hugepage_z == 0);
+                assert((size_t)aligned_base % align_z == 0);
                 assert(aligned_base >= base);
-                assert(aligned_base < base + hugepage_z);
+                assert(aligned_base < base + align_z);
             }
 
             // 4. release unaligned prefix
@@ -108,21 +82,25 @@ namespace xo {
             }
 
 #ifdef __linux__
-            /** linux:
-             *    opt-in to transparent huge pages (THP)
-             *    provided OS configured to support them.
-             *    otherwise fallback gracefully.
-             *
-             *    Huge pages -> use fewer TLB entries + faster
-             *    shorter path through page table.
-             *
-             *    When we commit (i.e. obtain physical memory on page fault),
-             *    typically expect to pay ~1us per superpage.
-             *    Much better than ~500us to commit 512 4k VM pages.
-             *
-             *    But wasted if we don't use the memory.
-             **/
-            ::madvise(aligned_base, target_z, MADV_HUGEPAGE); // 8.
+            if (enable_hugepage_flag) {
+                /** linux:
+                 *    opt-in to transparent huge pages (THP)
+                 *    provided OS configured to support them.
+                 *    otherwise fallback gracefully.
+                 *
+                 *    Huge pages -> use fewer TLB entries + faster
+                 *    shorter path through page table.
+                 *
+                 *    When we commit (i.e. obtain physical memory on page fault),
+                 *    typically expect to pay ~1us per superpage.
+                 *    Much better than ~500us to commit 512 4k VM pages.
+                 *
+                 *    But wasted if we don't use the memory.
+                 *
+                 *    Page table has a handful of levels
+                 **/
+                ::madvise(aligned_base, target_z, MADV_HUGEPAGE); // 8.
+            }
 #endif
 
             return std::make_pair(aligned_base, aligned_hi);
@@ -133,7 +111,20 @@ namespace xo {
         {
             //scope log(XO_DEBUG(debug_flag), xtag("name", name));
 
-            auto [lo, hi]     = map_aligned_range(cfg.size_, cfg.hugepage_z_);
+            /* vm page size. 4KB, probably */
+            size_t page_z = getpagesize();
+
+            bool enable_hugepage_flag = (cfg.size_ >= cfg.hugepage_z_);
+
+            /* Align start of arena memory on this boundary.
+             * Will use THP (transparent huge pages) if available
+             * and arena size is at least as large as hugepage size (2MB, probably)
+             */
+            size_t align_z = (enable_hugepage_flag ? cfg.hugepage_z_ : page_z);
+
+            auto [lo, hi] = map_aligned_range(cfg.size_,
+                                              align_z,
+                                              enable_hugepage_flag);
 
             if (!lo) {
                 // control here implies mmap() failed silently
@@ -142,8 +133,6 @@ namespace xo {
                                                xtag("size", cfg.size_)));
             }
 
-            size_t page_z = getpagesize();
-
 
 #ifdef NOPE
             log && log(xtag("lo", (void*)lo_),
@@ -151,14 +140,16 @@ namespace xo {
                        xtag("hugepage_z", hugepage_z_));
 #endif
 
-            return DArena(cfg, page_z, lo, hi);
+            return DArena(cfg, page_z, align_z, lo, hi);
         } /*map*/
 
         DArena::DArena(const ArenaConfig & cfg,
                        size_type page_z,
+                       size_type arena_align_z,
                        byte * lo,
                        byte * hi) : config_{cfg},
                                     page_z_{page_z},
+                                    arena_align_z_{arena_align_z},
                                     lo_{lo},
                                     committed_z_{0},
                                     free_{lo},
@@ -177,6 +168,7 @@ namespace xo {
         DArena::DArena(DArena && other) {
             config_            = other.config_;
             page_z_            = other.page_z_;
+            arena_align_z_     = other.arena_align_z_;
             lo_                = other.lo_;
             committed_z_       = other.committed_z_;
             free_              = other.free_;
@@ -200,6 +192,7 @@ namespace xo {
         {
             config_            = other.config_;
             page_z_            = other.page_z_;
+            arena_align_z_     = other.arena_align_z_;
             lo_                = other.lo_;
             committed_z_       = other.committed_z_;
             free_              = other.free_;
@@ -529,23 +522,25 @@ namespace xo {
              *
              */
 
-            std::size_t aligned_target_z = padding::with_padding(target_z, config_.hugepage_z_);
+            std::size_t aligned_target_z = padding::with_padding(target_z, arena_align_z_);
             std::byte * commit_start = limit_; // = lo_ + committed_z_;
             std::size_t add_commit_z = aligned_target_z - committed_z_;
 
             assert(limit_ == lo_ + committed_z_);
 
-            //            log && log(xtag("aligned_offset_z", aligned_offset_z),
-            //                       xtag("add_commit_z", add_commit_z));
-            //            log && log("expand committed range",
-            //                       xtag("commit_start", commit_start),
-            //                       xtag("add_commit_z", add_commit_z),
-            //                       xtag("commit_end", commit_start + add_commit_z));
-
             if (::mprotect(commit_start,
                            add_commit_z,
                            PROT_READ | PROT_WRITE) != 0) [[unlikely]]
                 {
+                    if (log) {
+                        log("commit failed!");
+                        log(xtag("aligned_target_z", aligned_target_z),
+                            xtag("commit_start", commit_start),
+                            xtag("add_commit_z", add_commit_z),
+                            xtag("commit_end", commit_start + add_commit_z)
+                            );
+                    }
+
                     capture_error(error::commit_failed, add_commit_z);
                     return false;
                 }
@@ -563,8 +558,8 @@ namespace xo {
                 free_ += config_.header_.guard_z_;
             }
 
-            assert(committed_z_ % config_.hugepage_z_ == 0);
-            assert(reinterpret_cast<size_t>(limit_) % config_.hugepage_z_ == 0);
+            assert(committed_z_ % arena_align_z_ == 0);
+            assert(reinterpret_cast<size_t>(limit_) % arena_align_z_ == 0);
 
             return true;
         } /*expand*/

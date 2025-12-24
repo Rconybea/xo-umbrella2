@@ -3,6 +3,7 @@
 set(SELF_LIB xo_alloc2)
 set(SELF_SRCS
 
+    AllocError.cpp
     AllocInfo.cpp
     cmpresult.cpp
 

@@ -26,6 +26,7 @@ Implemented using FOMO (faceted rust-like object model) from xo-facet
     AAllocator-reference
     ArenaConfig-reference
     DArena-reference
+    AllocInfo-reference
     glossary
     genindex
     search
