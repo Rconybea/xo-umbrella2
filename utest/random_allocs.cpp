@@ -80,7 +80,7 @@ namespace utest {
             REQUIRE_ORFAIL(ok_flag, catch_flag, mem != nullptr);
             REQUIRE_ORFAIL(ok_flag, catch_flag, mm.contains(mem));
             REQUIRE_ORFAIL(ok_flag, catch_flag, mm.last_error().error_seq_ == 0);
-            REQUIRE_ORFAIL(ok_flag, catch_flag, mm.last_error().error_ == xo::mm::error::none);
+            REQUIRE_ORFAIL(ok_flag, catch_flag, mm.last_error().error_ == xo::mm::error::ok);
 
             {
                 auto ix = allocs_by_lo_map.lower_bound(mem);
