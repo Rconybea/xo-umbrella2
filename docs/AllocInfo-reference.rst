@@ -1,17 +1,9 @@
-.. _AAllocator-reference:
+.. _AllocInfo-reference:
 
-AAllocator Reference
-====================
+AllocInfo Reference
+===================
 
-Abstract interface facet for an allocator.
-
-Base class for runtime polymorphism over allocator implementations,
-using faceted object model.
-
-* runtime size consists of vtable pointer only.
-
-* per FOMO prinicples, runtime state is stored separately.
-  Classes that inherit ``AAllocator`` will not add state
+Information, including alloc metadata, pertaining to a particular allocation.
 
 Context
 -------
@@ -23,12 +15,12 @@ Context
     |        RAllocator    |   RAllocIterator        |       IAllocator_DArena           |
     |                      |                         |   IAllocIterator_DArenaIterator   |
     +----------------------+-------------------------+-----------------------------------+
-    |    IAllocator_Xfer   |  IAllocIterator_Xfer    |              DArena               |
-    |    IAllocator_Any    |  IAllocIterator_Any     |          DArenaIterator           |
+    |    IAllocator_Xfer   |   IAllocIterator_Xfer   |              DArena               |
+    |    IAllocator_Any    |   IAllocIterator_Any    |          DArenaIterator           |
     | IAllocator_Impltype  | IAllocIterator_Impltype |                                   |
     |                      |                         |                                   |
     +----------------------+-------------------------+-----------------------------------+
-    |cBLU   AAllocator     |    AAllocIterator       |            ArenaConfig            |
+    |       AAllocator     |    AAllocIterator       |            ArenaConfig       cBLU |
     +----------------------+-------------------------+-----------------------------------+
     +-----------------+----------------------------------------------+-------------------+
     |                 |                    AllocInfo                 |                   |
@@ -40,19 +32,30 @@ Context
 
 .. code-block:: cpp
 
-    #include <xo/alloc2/AAllocator.hpp>
+    #include <xo/alloc2/DArena.hpp>
+
 
 Class
 -----
 
-.. doxygenclass:: xo::mm::AAllocator
+.. doxygenclass:: xo::mm::AllocInfo
 
-Types
------
+Member Variables
+----------------
 
-.. doxygengroup:: mm-allocator-type-traits
+.. doxygengroup:: mm-allocinfo-instance-vars
+
+Type Traits
+-----------
+
+.. doxygengroup:: mm-allocinfo-traits
+
+Constructors
+------------
+
+.. doxygengroup:: mm-allocinfo-ctors
 
 Methods
 -------
 
-.. doxygengroup:: mm-allocator-methods
+.. doxygengroup:: mm-allocinfo-methods

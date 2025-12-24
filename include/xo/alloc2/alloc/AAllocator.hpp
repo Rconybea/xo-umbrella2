@@ -25,6 +25,9 @@ namespace xo {
         /** @class AAllocator
          *  @brief Abstract facet for allocation
          *
+         *  Methods take a opaque data pointer.
+         *  Implementations of AAllocator will downcast to a
+         *  to some specific representation.
          **/
         struct AAllocator {
             /** @defgroup mm-allocator-type-traits allocator type traits **/
@@ -56,17 +59,16 @@ namespace xo {
 
             /** RTTI: unique id# for actual runtime data representation **/
             virtual int32_t _typeseq() const noexcept = 0;
-            /** optional name for allocator @p d
-             *  Labeling, for diagnostics.
+            /** optional name for allocator @p d .
+             *  Allows labeling allocators, for diagnostics/instrumentation.
              **/
             virtual std::string_view name(Copaque d) const noexcept = 0;
             /** reserved size in bytes for allocator @p d.
              *  Includes committed + uncommitted memory.
-             *  Cannot be increased.
              **/
             virtual size_type reserved(Copaque d) const noexcept = 0;
             /** Synonym for @ref committed.
-             *  Can increase on @ref alloc
+             *  Can increase automatically on @ref alloc
              **/
             virtual size_type size(Copaque d) const noexcept = 0;
             /** committed size (physical addresses obtained)
@@ -74,14 +76,22 @@ namespace xo {
              *  @ref alloc may auto-increase this
              **/
             virtual size_type committed(Copaque d) const noexcept = 0;
-            /** unallocated (but committed) size in bytes for allocator @p d **/
+            /** unallocated (but committed) size in bytes for allocator @p d.
+             *  An alloc request up to this size (including guard / header)
+             *  is guaranteed to succeed.
+             *  An alloc request of more than this size may still succeed,
+             *  if allocator can automatically extend committed memory.
+             *  This is the case for the @ref xo::mm::DArena allocator
+             **/
             virtual size_type available(Copaque d) const noexcept = 0;
-            /** allocated (i.e. in-use) amount in bytes for allocator @p d **/
+            /** allocated (i.e. currently in-use) amount in bytes for allocator @p d.
+             *  Includes alloc headers and guard regions
+             **/
             virtual size_type allocated(Copaque d) const noexcept = 0;
             /** true iff allocator @p d is responsible for memory at address @p p.
              **/
             virtual bool contains(Copaque d, const void * p) const noexcept = 0;
-            /** report last error **/
+            /** report details of last error for allocator @p d. **/
             virtual AllocError last_error(Copaque d) const noexcept = 0;
             /** fetch alloc info: given memory @p mem previously obtained
              *  from {@ref alloc, @ref super_alloc}, get {tseq, age, size} details
@@ -90,28 +100,23 @@ namespace xo {
              *  Non-const @p d because may stash error details
              **/
             virtual AllocInfo alloc_info(Copaque d, value_type mem) const noexcept = 0;
-            /** Ideally we want to control allocator for iterator here.
-             *  Awkward to supply to compiler since we don't have obj<AAllocator> yet.
-             *  OTOH iteration over allocs is a super-niche feature.
-             *
-             *  Rejected alternatives:
-             *  - put begin/end in separate interface. e.g. extend AAllocator
-             *  - layer of indirection: begin/end return iterator factory.
-             *    Then allocator can be passed to iterator factory separately.
-             *    Helps because factory can be static
-             *  - abandon allocator support in this case. Instead will need to
-             *    reinstate uvt<AAllocIterator> (unique variant), use heap
-             *
-             *  @p mm is allocator for resulting iterator range
+            /**
+             *  Create an iterator range for allocator @p d.
+             *  An iterator range has begin and end methods, so supports c++ range iteration.
+             *  Memory for iterator state will be obtained from @p mm.
              **/
             virtual range_type alloc_range(Copaque d, DArena & mm) const noexcept = 0;
 
             /** expand committed space in arena @p d
-             *  to size at least @p z
-             *  In practice will round up to a multiple of hugepage size (2MB)
+             *  to size at least @p z.
+             *  In practice will round up to a multiple of page size (4K) or hugepage size (2MB)
+             *  depending on configuration.
              **/
             virtual bool expand(Opaque d, std::size_t z) const noexcept = 0;
-            /** allocate @p z bytes of memory from allocator @p d. **/
+            /** attempt to allocate @p z bytes of memory from allocator @p d.
+             *  If allocation fails returns nullptr. In this case error details may be retrieved
+             *  using last error
+             **/
             virtual value_type alloc(Opaque d, size_type z) const = 0;
             /** like @ref alloc, but follow with one or more consecutive
              *  @ref sub_alloc() calls. This sequence of allocs will share
@@ -125,9 +130,11 @@ namespace xo {
              *  zero @p z
              **/
             virtual value_type sub_alloc(Opaque d, size_type z, bool complete_flag) const = 0;
-            /** reset allocator @p d to empty state **/
+            /** reset allocator @p d to empty state. **/
             virtual void clear(Opaque d) const = 0;
-            /** destruct allocator @p d **/
+            /** Destruct allocator @p d.
+             *  Releases allocator memory to operating system.
+             **/
             virtual void destruct_data(Opaque d) const = 0;
 
             ///@}
