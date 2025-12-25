@@ -32,6 +32,9 @@ def format_args(args, include_names=True):
     else:
         return ', '.join(p['type'] for p in args)
 
+def format_args_nonames(args):
+    return format_args(args, False)
+
 def format_arg_names(args):
     """ Format argument names, for forwarding
     """
@@ -61,6 +64,7 @@ def main():
     # custom filters
     env.filters['qualifiers'] = format_method_qualifiers
     env.filters['args'] = format_args
+    env.filters['argtypes'] = format_args_nonames
     env.filters['argnames'] = format_arg_names
 
     facet_includes = idl['includes']
@@ -69,12 +73,29 @@ def main():
     facet_name = idl['facet']          # e.g. Sequence
     facet_brief = idl['brief']
     facet_doc = '\n'.join(idl['doc'])
-    methods = idl['methods']
-    for method in methods:
-        method['doc'] = '\n'.join(method['doc'])
+
+    types = idl['types']
+    for ty in types:
+        ty['doc'] = '\n'.join(ty['doc'])
+
+    const_methods = idl['const_methods']
+    for md in const_methods:
+        md['args'] = [{'type': "Copaque", 'name': "data"}] + md['args']
+        md['doc'] = '\n'.join(md['doc'])
+
+    nonconst_methods = idl['nonconst_methods']
+    for md in nonconst_methods:
+        md['args'] = [{'type': "Opaque", 'name': "data"}] + md['args']
+        md['doc'] = '\n'.join(md['doc'])
 
     abstract_facet = f'A{facet_name}'
     abstract_facet_fname = f'{abstract_facet}.hpp'
+    #
+    iface_facet = f'I{facet_name}'
+    iface_facet_impltype = f'{iface_facet}_ImplType'
+    #
+    iface_facet_any = f'{iface_facet}_Any'
+    iface_facet_any_fname = f'{iface_facet_any}.hpp'
 
     context = {
         'genfacet': __file__,
@@ -91,13 +112,25 @@ def main():
         'abstract_facet_fname': abstract_facet_fname,
         'abstract_facet_doc': facet_doc,
         #
-        'methods': methods
+        'iface_facet': iface_facet,
+        'iface_facet_impltype': iface_facet_impltype,
+        #
+        'iface_facet_any': iface_facet_any,
+        'iface_facet_any_hpp_j2': 'iface_facet_any.hpp.j2',
+        'iface_facet_any_fname': iface_facet_any_fname,
+        #
+        'types': types,
+        #
+        'const_methods': const_methods,
+        #
+        'nonconst_methods': nonconst_methods,
     }
 
     # generate .hpp files
 
     templates = {}
     templates[abstract_facet_fname] = context['abstract_facet_hpp_j2']
+    templates[iface_facet_any_fname] = context['iface_facet_any_hpp_j2']
 
     for output_file, template_name in templates.items():
         print(f'output_file: [{output_file}]')
@@ -105,11 +138,10 @@ def main():
 
         template = env.get_template(template_name)
         content = template.render(**context)
-        
+
         (output_dir / output_file).write_text(content)
         print(f"Generated {output_dir}/{output_file}")
 
 
 if __name__ == '__main__':
     main()
-    

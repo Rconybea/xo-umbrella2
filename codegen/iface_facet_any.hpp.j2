@@ -1,0 +1,72 @@
+/** @file {{iface_facet_any_fname}}
+ *
+ *  Generated automagically from ingredients:
+ *  1. code generator:
+ *       [{{genfacet}}]
+ *     arguments:
+ *       --input [{{genfacet_input}}]
+ *  2. jinja2 template for abstract facet .hpp file:
+ *       [{{ iface_facet_any_hpp_j2 }}]
+ *  3. idl for facet methods
+ *       [{{ idl_fname }}]
+ **/
+
+#pragma once
+
+#include "{{abstract_facet_fname}}"
+#include <xo/facet/obj.hpp>
+
+namespace {{facet_ns1}} { namespace {{facet_ns2}} { class {{iface_facet_any}}; } }
+
+namespace xo {
+namespace facet {
+
+template <>
+struct FacetImplementation<{{facet_ns1}}::{{facet_ns2}}::{{abstract_facet}},
+                           DVariantPlaceholder>
+{
+    using ImplType = {{facet_ns1}}::{{facet_ns2}}::{{iface_facet_any}};
+};
+
+}
+}
+
+namespace {{facet_ns1}} {
+namespace {{facet_ns2}} {
+
+/** @class {{iface_facet_any}}
+ *  @brief {{abstract_facet}} implementation for empty variant instance
+ **/
+class {{iface_facet_any}} : public {{abstract_facet}} {
+public:
+    {% for ty in types %}
+    using {{ty.name}} = {{abstract_facet}}::{{ty.name}};
+    {% endfor %}
+
+    const {{abstract_facet}} * iface() const { return std::launder(this); }
+
+    // from {{abstract_facet}}
+
+    // const methods
+    int32_t _typeseq() const noexcept override { return s_typeseq; }
+    {% for md in const_methods %}
+    [[noreturn]] {{md.return_type}} {{md.name}}({{md.args | argtypes}}) {{md | qualifiers}} override { _fatal(); }
+    {% endfor %}
+
+    // nonconst methods
+    {% for md in nonconst_methods %}
+    [[noreturn]] {{md.return_type}} {{md.name}}({{md.args | argtypes}}) {{md | qualifiers}} override { _fatail(); }
+    {% endfor %}
+
+private:
+    [[noreturn]] static void _fatal();
+
+public:
+    static int32_t s_typeseq;
+    static bool _valid;
+};
+
+} /*namespace {{facet_ns2}} */
+} /*namespace {{facet_ns1}} */
+
+/* {{iface_facet_any_fname}} */
