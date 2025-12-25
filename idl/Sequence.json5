@@ -4,6 +4,7 @@
     namespace2: "scm",
     facet: "Sequence",
     brief: "an ordered collection of variants",
+    using_doxygen: true,
     doc: [
         "Elements appear in some determinstic order.",
         "Sequence is GC-aware --> elements must be GC-aware"
