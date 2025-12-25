@@ -1,0 +1,47 @@
+{
+    includes: ["<xo/gc/GCObject.hpp>"],
+    namespace1: "xo",
+    namespace2: "scm",
+    facet: "Sequence",
+    brief: "an ordered collection of variants",
+    doc: [
+        "Elements appear in some determinstic order.",
+        "Sequence is GC-aware --> elements must be GC-aware"
+    ],
+    methods: [
+        // bool is_empty() const noexcept
+        {
+            name: "is_empty",
+            doc: ["true iff sequence is empty"],
+            return_type: "bool",
+            args: [],
+            const: true,
+            noexcept: true,
+            attributes: [],
+        },
+
+        // bool is_finite() const noexcept
+        {
+            name: "is_finite",
+            doc: ["true iff sequence is finite"],
+            return_type: "bool",
+            args: [],
+            const: true,
+            noexcept: true,
+            attributes: [],
+        },
+
+        // obj<AGCObject> at(size_type index) const;
+        {
+            name: "at",
+            doc: ["return element @p index of this sequence"],
+            return_type: "obj<AGCObject>",
+            args: [
+                {type: "size_type", name: "index"},
+            ],
+            const: true,
+            noexcept: false,
+            attributes: [],
+        },
+    ],
+}

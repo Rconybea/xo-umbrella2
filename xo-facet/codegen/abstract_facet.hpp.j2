@@ -1,0 +1,40 @@
+/** @file {{ abstract_facet_fname }}
+ *
+ *  Generated automagically from ingredients:
+ *  1. code generator:
+ *       [{{genfacet}}]
+ *     arguments:
+ *       --input [{{genfacet_input}}]
+ *  2. jinja2 template for abstract facet .hpp file:
+ *       [{{ abstract_facet_hpp_j2 }}]
+ *  3. idl for facet methods
+ *       [{{ idl_fname }}]
+ **/
+
+#pragma once
+
+// includes (via {facet_includes})
+{% for include_fname in facet_includes %}
+#include {{include_fname}}
+{% endfor %}
+
+namespace {{facet_ns1}} {
+namespace {{facet_ns2}} {
+
+/**
+{{abstract_facet_doc}}
+**/
+class {{abstract_facet}} {
+public:
+    {% for method in methods %}
+
+    /** {{method.doc}} **/
+    virtual {{method.return_type}} {{method.name}}({{method.args | args}}) {{method | qualifiers}} = 0;
+
+    {% endfor %}
+}; /*{{abstract_facet}}*/
+
+template <typename DRepr>
+
+} /*namespace {{facet_ns2}}*/
+} /*namespace {{facet_ns1}}*/
