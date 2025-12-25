@@ -90,6 +90,7 @@ def main():
     # true to insert doxygen markup in generated .hpp/.cpp files
     using_dox = idl['using_doxygen']
 
+    # extra include files (or perhaps other definitions)
     facet_includes = idl['includes']
     facet_ns1 = idl['namespace1']
     facet_ns2 = idl['namespace2']
@@ -112,21 +113,34 @@ def main():
         md['args'] = [{'type': "Opaque", 'name': "data"}] + md['args']
         md['doc'] = '\n'.join(md['doc'])
 
+    # Foo.hpp
+    facet_hpp_fname = f'{facet_name}.hpp'
+    # AFoo
     abstract_facet = f'A{facet_name}'
+    # AFoo.hpp
     abstract_facet_fname = f'{abstract_facet}.hpp'
-    #
+    # IFoo
     iface_facet = f'I{facet_name}'
+    # IFoo_ImplType
     iface_facet_impltype = f'{iface_facet}_ImplType'
     #
+    # IFoo_Any
     iface_facet_any = f'{iface_facet}_Any'
+    # IFoo_Any.hpp
     iface_facet_any_hpp_fname = f'{iface_facet_any}.hpp'
+    # IFoo_Any.cpp
     iface_facet_any_cpp_fname = f'{iface_facet_any}.cpp'
     #
+    # IFoo_Xfer
     iface_facet_xfer = f'{iface_facet}_Xfer'
+    # IFoo_Xfer.hpp
     iface_facet_xfer_hpp_fname = f'{iface_facet_xfer}.hpp'
+    # IFoo_Xfer.cpp
     iface_facet_xfer_cpp_fname = f'{iface_facet_xfer}.cpp'
     #
+    # RFoo
     router_facet = f'R{facet_name}'
+    # RFoo.hpp
     router_facet_hpp_fname = f'{router_facet}.hpp'
 
     context = {
@@ -134,10 +148,12 @@ def main():
         'genfacet_input': args.input,
         'using_dox': using_dox,
         #
+        'facet_hpp_j2': 'facet.hpp.j2',
         'facet_includes': facet_includes,
         'facet_ns1': facet_ns1,
         'facet_ns2': facet_ns2,
         'facet_name_lc': facet_name_lc,
+        'facet_hpp_fname': facet_hpp_fname,
         #'name': facet_name,
         'idl_fname': idl_fname,
         #
@@ -175,6 +191,8 @@ def main():
     # generate .hpp files
 
     templates = {}
+    templates[facet_hpp_fname] = [output_hpp_dir,
+                                  context['facet_hpp_j2']]
     templates[abstract_facet_fname] = [output_hpp_dir,
                                        context['abstract_facet_hpp_j2']]
     templates[iface_facet_any_hpp_fname] = [output_hpp_dir,
