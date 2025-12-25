@@ -1,0 +1,38 @@
+/** @file {{iface_facet_any_cpp_fname}}
+ *
+ **/
+
+#include "{{iface_facet_any_hpp_fname}}"
+#include <iostream>
+
+namespace {{facet_ns1}} {
+namespace {{facet_ns2}} {
+
+using xo::facet::DVariantPlaceholder;
+using xo::facet::typeseq;
+using xo::facet::valid_facet_implementation;
+
+void
+{{iface_facet_any}}::_fatal()
+{
+    /* control here on uninitialized IAllocator_Any.
+     * Initialized instance will have specific implementation type
+     */
+    std::cerr << "fatal"
+              << ": attempt to call uninitialized"
+              << " {{iface_facet_any}} method"
+              << std::endl;
+    std::terminate();
+}
+
+int32_t
+{{iface_facet_any}}::s_typeseq = typeseq::id<DVariantPlaceholder>();
+
+bool
+{{iface_facet_any}}::_valid
+  = valid_facet_implementation<{{abstract_facet}}, {{iface_facet_any}}>();
+
+} /*namespace {{facet_ns2}}*/
+} /*namespace {{facet_ns1}}*/
+
+/* end {{iface_facet_any_cpp_fname}} */

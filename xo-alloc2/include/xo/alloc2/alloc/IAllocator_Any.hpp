@@ -8,7 +8,6 @@
 #include "AAllocator.hpp"
 #include "AllocIterator.hpp"
 #include <xo/facet/obj.hpp>
-#include <cassert>
 
 namespace xo {
     namespace mm { struct IAllocator_Any; }

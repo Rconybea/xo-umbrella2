@@ -5,6 +5,7 @@ set(SELF_SRCS
     IGCObject_DFloat.cpp
     IGCObject_DInteger.cpp
     IGCObject_DList.cpp
+    ISequence_Any.cpp
     )
 
 xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 ${SELF_SRCS})
