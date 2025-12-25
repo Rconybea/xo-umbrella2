@@ -3,7 +3,7 @@
 DArenaIterator
 ==============
 
-Iterator for allocs obtained from a :cpp:class:`DArena`.
+Iterator for allocs obtained from a :cpp:class:`xo::mm::DArena`.
 
 Context
 -------

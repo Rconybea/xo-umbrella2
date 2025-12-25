@@ -6,6 +6,9 @@ IAllocator_Xfer
 IAllocator_Xfer provides a type-erased interface to a specific native allocator
 implementation.
 
+It supports runtime polymorphism for the cpp:class:`xo::mm::AAllocator` facet.
+Application code iis unlikely to directly interact with this class
+
 Context
 -------
 
