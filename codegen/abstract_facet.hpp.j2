@@ -32,12 +32,23 @@ using Opaque = void *;
 **/
 class {{abstract_facet}} {
 public:
+    {% if using_dox %}
+    /** @defgroup {{facet_ns2}}-{{facet_name_lc}}-type-traits **/
+    ///@{
+    {% endif %}
     // types
     {% for ty in types %}
     /** {{ty.doc}} **/
     using {{ty.name}} = {{ty.definition}};
     {% endfor %}
+    {% if using_dox %}
+    ///@}
+    {% endif %}
 
+    {% if using_dox %}
+    /** @defgroup {{facet_ns2}}-{{facet_name_lc}}-methods **/
+    ///@{
+    {% endif %}
     // const methods
     /** RTTI: unique id# for actual runtime data representation **/
     virtual int32_t _typeseq() const noexcept = 0;
@@ -51,6 +62,9 @@ public:
     /** {{md.doc}} **/
     virtual {{md.return_type}} {{md.name}}({{md.args | args}}) {{md | qualifiers}} = 0;
     {% endfor %}
+    {% if using_dox %}
+    ///@}
+    {% endif %}
 }; /*{{abstract_facet}}*/
 
 /** Implementation {{iface_facet}}_DRepr of {{abstract_facet}} for state DRepr

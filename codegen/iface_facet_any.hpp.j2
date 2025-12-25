@@ -1,4 +1,4 @@
-/** @file {{iface_facet_any_fname}}
+/** @file {{iface_facet_any_hpp_fname}}
  *
  *  Generated automagically from ingredients:
  *  1. code generator:
@@ -34,39 +34,74 @@ struct FacetImplementation<{{facet_ns1}}::{{facet_ns2}}::{{abstract_facet}},
 namespace {{facet_ns1}} {
 namespace {{facet_ns2}} {
 
-/** @class {{iface_facet_any}}
- *  @brief {{abstract_facet}} implementation for empty variant instance
- **/
-class {{iface_facet_any}} : public {{abstract_facet}} {
-public:
-    {% for ty in types %}
-    using {{ty.name}} = {{abstract_facet}}::{{ty.name}};
-    {% endfor %}
+    /** @class {{iface_facet_any}}
+     *  @brief {{abstract_facet}} implementation for empty variant instance
+     **/
+    class {{iface_facet_any}} : public {{abstract_facet}} {
+    public:
+        {% if using_dox %}
+        /** @defgroup {{facet_ns2}}-{{facet_name_lc}}-any-type-traits **/
+        ///@{
+        {% endif %}
 
-    const {{abstract_facet}} * iface() const { return std::launder(this); }
+        {% for ty in types %}
+        using {{ty.name}} = {{abstract_facet}}::{{ty.name}};
+        {% endfor %}
 
-    // from {{abstract_facet}}
+        {% if using_dox %}
+        ///@}
+        {% endif %}
+        {% if using_dox %}
+        /** @defgroup {{facet_ns2}}-{{facet_name_lc}}-any-methods **/
+        ///@{
+        {% endif %}
 
-    // const methods
-    int32_t _typeseq() const noexcept override { return s_typeseq; }
-    {% for md in const_methods %}
-    [[noreturn]] {{md.return_type}} {{md.name}}({{md.args | argtypes}}) {{md | qualifiers}} override { _fatal(); }
-    {% endfor %}
+        const {{abstract_facet}} * iface() const { return std::launder(this); }
 
-    // nonconst methods
-    {% for md in nonconst_methods %}
-    [[noreturn]] {{md.return_type}} {{md.name}}({{md.args | argtypes}}) {{md | qualifiers}} override { _fatail(); }
-    {% endfor %}
+        // from {{abstract_facet}}
 
-private:
-    [[noreturn]] static void _fatal();
+        // const methods
+        int32_t _typeseq() const noexcept override { return s_typeseq; }
+        {% for md in const_methods %}
+        [[noreturn]] {{md.return_type}} {{md.name}}({{md.args | argtypes}}) {{md | qualifiers}} override { _fatal(); }
+        {% endfor %}
 
-public:
-    static int32_t s_typeseq;
-    static bool _valid;
-};
+        // nonconst methods
+        {% for md in nonconst_methods %}
+        [[noreturn]] {{md.return_type}} {{md.name}}({{md.args | argtypes}}) {{md | qualifiers}} override { _fatail(); }
+        {% endfor %}
+
+        {% if using_dox %}
+        ///@}
+        {% endif %}
+
+    private:
+        {% if using_dox %}
+        /** @defgraoup {{facet_ns2}}-{{facet_name_lc}}-any-private-methods **/
+        ///@{
+        {% endif %}
+
+        [[noreturn]] static void _fatal();
+
+        {% if using_dox %}
+        ///@}
+        {% endif %}
+
+    public:
+        {% if using_dox %}
+        /** @defgraoup {{facet_ns2}}-{{facet_name_lc}}-any-member-vars **/
+        ///@{
+        {% endif %}
+
+        static int32_t s_typeseq;
+        static bool _valid;
+
+        {% if using_dox %}
+        ///@}
+        {% endif %}
+    };
 
 } /*namespace {{facet_ns2}} */
 } /*namespace {{facet_ns1}} */
 
-/* {{iface_facet_any_fname}} */
+/* {{iface_facet_any_hpp_fname}} */

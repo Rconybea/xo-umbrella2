@@ -1,0 +1,94 @@
+/** @file {{router_facet_hpp_fname}}
+ *
+ *  Generated automagically from ingredients:
+ *  1. code generator:
+ *       [{{genfacet}}]
+ *     arguments:
+ *       --input [{{genfacet_input}}]
+ *  2. jinja2 template for abstract facet .hpp file:
+ *       [{{ iface_facet_any_hpp_j2 }}]
+ *  3. idl for facet methods
+ *       [{{ idl_fname }}]
+ **/
+
+#pragma once
+
+#include "{{abstract_facet_fname}}"
+
+namespace {{facet_ns1}} {
+namespace {{facet_ns2}} {
+
+/** @class {{router_facet}}
+ **/
+template <typename Object>
+class {{router_facet}} : public Object {
+private:
+    using O = Object;
+
+public:
+    {% if using_dox %}
+    /** @defgroup {{facet_ns2}}-{{facet_name_lc}}-router-type-traits **/
+    ///@{
+    {% endif %}
+    using ObjectType = Object;
+    using DataPtr = Object::DataPtr;
+    {% for ty in types %}
+    using {{ty.name}} = {{abstract_facet}}::{{ty.name}};
+    {% endfor %}
+    {% if using_dox %}
+    ///@}
+    {% endif %}
+
+    {% if using_dox %}
+    /** @defgroup {{facet_ns2}}-{{facet_name_lc}}-router-ctors **/
+    ///@{
+    {% endif %}
+    {{router_facet}}() {}
+    {{router_facet}}(Object::DataPtr data) : Object{std::move(data)} {}
+
+    {% if using_dox %}
+    ///@}
+    /** @defgroup {{facet_ns2}}-{{facet_name_lc}}-router-methods **/
+    ///@{
+    {% endif %}
+
+    // const methods
+    int32_t _typeseq() const noexcept { return O::iface()->_typeseq(); }
+    {% for md in const_methods %}
+    {{md.return_type}} {{md.name}}({{md.args | argsnodata}}) {{md | qualifiers}} override {
+        return O::iface()->{{md.name}}({{md.args | argrouting}});
+    }
+    {% endfor %}
+
+    // non-const methods
+    // << do something for non-const methods >>
+    //
+
+    {% if using_dox %}
+    ///@}
+    /** @defgroup {{facet_ns2}}-{{facet_name_lc}}-member-vars **/
+    ///@{
+    {% endif %}
+
+    static bool _valid;
+
+    {% if using_dox %}
+    ///@}
+    {% endif %}
+};
+
+template <typename Object>
+bool
+{{router_facet}}<Object>::_valid = xo::facet::valid_object_router<Object>();
+
+} /*namespace {{facet_ns2}}*/
+} /*namespace {{facet_ns1}}*/
+
+namespace xo { namespace facet {
+    template <typename Object>
+    struct RoutingFor<{{facet_ns1}}::{{facet_ns2}}::{{abstract_facet}}, Object> {
+        using RoutingType = {{facet_ns1}}::{{facet_ns2}}::{{router_facet}}<Object>;
+    };
+} }
+
+/* end {{router_facet_hpp_fname}} */

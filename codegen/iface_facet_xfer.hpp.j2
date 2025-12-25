@@ -1,0 +1,99 @@
+/** @file {{iface_facet_xfer_hpp_fname}}
+ *
+ *  Generated automagically from ingredients:
+ *  1. code generator:
+ *       [{{genfacet}}]
+ *     arguments:
+ *       --input [{{genfacet_input}}]
+ *  2. jinja2 template for abstract facet .hpp file:
+ *       [{{ iface_facet_any_hpp_j2 }}]
+ *  3. idl for facet methods
+ *       [{{ idl_fname }}]
+ **/
+
+#pragma once
+
+#include "{{abstract_facet_fname}}"
+
+namespace {{facet_ns1}} {
+namespace {{facet_ns2}} {
+    /** @class {{iface_facet_xfer}}
+     **/
+    template <typename DRepr, typename {{iface_facet}}_DRepr>
+    class {{iface_facet_xfer}} : public {{abstract_facet}} {
+    public:
+        {% if using_dox %}
+        /** @defgroup {{facet_ns2}}-{{facet_name_lc}}-xfer-type-traits **/
+        ///@{
+        {% endif %}
+        using Impl = {{iface_facet}}_DRepr;
+        {% for ty in types %}
+        using {{ty.name}} = {{abstract_facet}}::{{ty.name}};
+        {% endfor %}
+        {% if using_dox %}
+        ///@}
+        {% endif %}
+
+        {% if using_dox %}
+        /** @defgroup {{facet_ns2}}-{{facet_name_lc}}-xfer-methods **/
+        ///@{
+        {% endif %}
+
+        static const DRepr & _dcast(Copaque d) { return *(const DRepr *)d; }
+        static DRepr & _dcast(Opaque d) { return *(DRepr *)d; }
+
+        // from {{abstract_facet}}
+
+        // const methods
+        int32_t _typeseq() const noexcept override { return s_typeseq; }
+        {% for md in const_methods %}
+        {{md.return_type}} {{md.name}}({{md.args | args}}) {{md | qualifiers}} override {
+            return I::{{md.name}}({{md.args | argnames}});
+        }
+        {% endfor %}
+
+        // non-const methods
+        {% for md in nonconst_methods %}
+        {{md.return_type}} {{md.name}}({{md.args | args}}) {{md | qualifiers}} override {
+            return I::{{md.name}}({{md.args | argnames}});
+        }
+        {% endfor %}
+
+        {% if using_dox %}
+        ///@}
+        {% endif %}
+
+    private:
+        using I = Impl;
+
+    public:
+        {% if using_dox %}
+        /** @defgraoup {{facet_ns2}}-{{facet_name_lc}}-xfer-member-vars **/
+        ///@{
+        {% endif %}
+
+        /** typeseq for template parameter DRepr **/
+        static int32_t s_typeseq;
+        /** true iff satisfies facet implementation **/
+        static bool _valid;
+
+        {% if using_dox %}
+        ///@}
+        {% endif %}
+    };
+
+    template <typename DRepr, typename {{iface_facet}}_DRepr>
+    int32_t
+    {{iface_facet_xfer}}<DRepr, {{iface_facet}}_DRepr>::s_typeseq
+      = xo::facet::typeseq::id<DRepr>();
+
+    template <typename DRepr, typename {{iface_facet}}_DRepr>
+    bool
+    {{iface_facet_xfer}}<DRepr, {{iface_facet}}_DRepr>::_valid
+      = xo::facet::valid_facet_implementation<{{abstract_facet}},
+                                              {{iface_facet_xfer}}>();
+
+} /*namespace {{facet_ns2}} */
+} /*namespace {{facet_ns1}}*/
+
+/* end {{iface_facet_xfer_hpp_fname}} */
