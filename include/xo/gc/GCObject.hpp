@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "AGCObject.hpp"
+#include "detail/AGCObject.hpp"
 #include "detail/IGCObject_Any.hpp"
 #include "detail/IGCObject_Xfer.hpp"
 #include "detail/RGCObject.hpp"

@@ -27,7 +27,7 @@ namespace xo {
         /** @class ACollector
          *  @brief Abstract facet for the XO garbage collector
          *
-         *  Collector also supports the @ref AAllocator facet, see also
+         *  A collector implementation will also support the @ref AAllocator facet, see also
          **/
         struct ACollector {
             using size_type = std::size_t;
