@@ -55,6 +55,7 @@ def format_args_routing(args):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--input', required=True, help='input IDL JSON5 file')
+    parser.add_argument('--output-impl-hpp', required=True, help='.hpp detail subdir')
     parser.add_argument('--output-hpp', required=True, help='.hpp output directory')
     parser.add_argument('--output-cpp', required=True, help='.cpp output directory')
 
@@ -65,6 +66,10 @@ def main():
     #
     output_hpp_dir = Path(args.output_hpp)
     output_hpp_dir.mkdir(parents=False, exist_ok=True)
+    #
+    output_impl_hpp_subdir = Path(args.output_impl_hpp)
+    output_impl_hpp_dir = Path(args.output_hpp) / output_impl_hpp_subdir
+    output_impl_hpp_dir.mkdir(parents=False, exist_ok=True)
     #
     output_cpp_dir = Path(args.output_cpp)
     output_cpp_dir.mkdir(parents=False, exist_ok=True)
@@ -147,6 +152,7 @@ def main():
         'genfacet': __file__,
         'genfacet_input': args.input,
         'using_dox': using_dox,
+        'impl_hpp_subdir': output_impl_hpp_subdir,
         #
         'facet_hpp_j2': 'facet.hpp.j2',
         'facet_includes': facet_includes,
@@ -193,15 +199,15 @@ def main():
     templates = {}
     templates[facet_hpp_fname] = [output_hpp_dir,
                                   context['facet_hpp_j2']]
-    templates[abstract_facet_fname] = [output_hpp_dir,
+    templates[abstract_facet_fname] = [output_impl_hpp_dir,
                                        context['abstract_facet_hpp_j2']]
-    templates[iface_facet_any_hpp_fname] = [output_hpp_dir,
+    templates[iface_facet_any_hpp_fname] = [output_impl_hpp_dir,
                                             context['iface_facet_any_hpp_j2']]
     templates[iface_facet_any_cpp_fname] = [output_cpp_dir,
                                             context['iface_facet_any_cpp_j2']]
-    templates[iface_facet_xfer_hpp_fname] = [output_hpp_dir,
+    templates[iface_facet_xfer_hpp_fname] = [output_impl_hpp_dir,
                                              context['iface_facet_xfer_hpp_j2']]
-    templates[router_facet_hpp_fname] = [output_hpp_dir,
+    templates[router_facet_hpp_fname] = [output_impl_hpp_dir,
                                          context['router_facet_hpp_j2']]
 
     for out_file, record in templates.items():
