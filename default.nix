@@ -217,6 +217,8 @@ let
     # note: pybind11 won't build on roly-chicago-24a in nix sandbox, runs out of pty devices
     #
     pkgs.python3Packages.pybind11
+    pkgs.python3Packages.json5
+    pkgs.python3Packages.jinja2
     pkgs.llvmPackages_18.llvm.dev
     pkgs.replxx
     pkgs.libwebsockets

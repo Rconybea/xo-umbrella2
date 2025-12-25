@@ -9,7 +9,7 @@ namespace xo {
         ArenaConfig
         ArenaConfig::simple(std::size_t z)
         {
-            return ArenaConfig { .size_ = z };
+            return ArenaConfig { .name_ = "anonymous", .size_ = z };
         }
     }
 }

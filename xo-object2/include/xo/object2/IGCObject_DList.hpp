@@ -8,7 +8,7 @@
 #include <xo/alloc2/alloc/AAllocator.hpp>
 #include <xo/alloc2/alloc/RAllocator.hpp>
 #include <xo/gc/Collector.hpp>
-#include <xo/gc/AGCObject.hpp>
+#include <xo/gc/detail/AGCObject.hpp>
 #include <xo/gc/detail/IGCObject_Xfer.hpp>
 #include "DList.hpp"
 
