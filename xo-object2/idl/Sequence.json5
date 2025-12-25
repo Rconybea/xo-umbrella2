@@ -8,7 +8,21 @@
         "Elements appear in some determinstic order.",
         "Sequence is GC-aware --> elements must be GC-aware"
     ],
-    methods: [
+    types: [
+        // using size_type = std::size_t
+        {
+            name: "size_type",
+            doc: ["type for length of a sequence"],
+            definition: "std::size_t",
+        },
+        // using AGCObject = xo::mm::AGCObject
+        {
+            name: "AGCObject",
+            doc: ["facet for types with GC support"],
+            definition: "xo::mm::AGCObject",
+        }
+    ],
+    const_methods: [
         // bool is_empty() const noexcept
         {
             name: "is_empty",
@@ -43,5 +57,7 @@
             noexcept: false,
             attributes: [],
         },
+    ],
+    nonconst_methods: [
     ],
 }
