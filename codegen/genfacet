@@ -1,6 +1,5 @@
 #! /usr/bin/env python3
 #
-# genfacet.py
 
 import json5
 import argparse
@@ -54,6 +53,7 @@ def format_args_routing(args):
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument('--templates', required=True, help='.j2 template directory')
     parser.add_argument('--input', required=True, help='input IDL JSON5 file')
     parser.add_argument('--output-impl-hpp', required=True, help='.hpp detail subdir')
     parser.add_argument('--output-hpp', required=True, help='.hpp output directory')
@@ -75,7 +75,8 @@ def main():
     output_cpp_dir.mkdir(parents=False, exist_ok=True)
 
     # setup jinja2
-    template_dir = Path(__file__).parent
+    template_dir = Path(args.templates)
+    #template_dir = Path(__file__).parent
     #template_dir = Path(__file__).parent / 'codegen'
 
     print(f'template_dir: [{template_dir}]')

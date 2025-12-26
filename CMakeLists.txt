@@ -30,6 +30,23 @@ xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets
 
 # ----------------------------------------------------------------
 
+# Install the generator script
+install(
+    PROGRAMS codegen/genfacet
+    DESTINATION share/xo-facet/codegen
+    COMPONENT codegen
+)
+
+# Install all .j2 template files
+install(
+    DIRECTORY codegen/
+    DESTINATION share/xo-facet/codegen
+    COMPONENT codegen
+    FILES_MATCHING PATTERN "*.j2"
+)
+
+# ----------------------------------------------------------------
+
 # docs targets depend on other library/utest/exec targets above,
 # --> must come after them.
 #
