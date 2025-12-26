@@ -18,6 +18,17 @@ add_definitions(${PROJECT_CXX_FLAGS})
 
 # ----------------------------------------------------------------
 
+xo_add_genfacet(
+    TARGET xo-object2-facet-sequence
+    FACET Sequence
+    INPUT idl/Sequence.json5
+    OUTPUT_HPP_DIR include/xo/object2
+    OUTPUT_IMPL_SUBDIR sequence
+    OUTPUT_CPP_DIR src/object2
+)
+
+# ----------------------------------------------------------------
+
 # must complete definition of expression lib before configuring examples
 add_subdirectory(src/object2)
 #add_subdirectory(utest)
