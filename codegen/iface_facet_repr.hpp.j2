@@ -1,0 +1,70 @@
+/** @file {{iface_facet_repr_hpp_fname}}
+ *
+ *  Generated automagically from ingredients:
+ *  1. code generator:
+ *       [{{genfacet}}]
+ *     arguments:
+ *       --input [{{genfacet_input}}]
+ *  2. jinja2 template for abstract facet .hpp file:
+ *       [{{ iface_facet_any_hpp_j2 }}]
+ *  3. idl for facet methods
+ *       [{{ idl_fname }}]
+ **/
+
+#pragma once
+
+#include "{{facet_hpp_fname}}"
+#include "{{facet_detail_subdir}}/{{iface_facet_xfer_hpp_fname}}"
+#include "{{data_repr_hpp_fname}}"
+
+namespace {{repr_ns1}} { namespace {{repr_ns2}} { class {{iface_facet_repr}}; } }
+
+namespace xo {
+    namespace facet {
+        template <>
+        struct FacetImplementation<{{facet_ns1}}::{{facet_ns2}}::{{abstract_facet}},
+                                   {{repr_ns1}}::{{repr_ns2}}::{{data_repr}}>
+        {
+            using ImplType = {{facet_ns1}}::{{facet_ns2}}::{{iface_facet_xfer}}
+              <{{repr_ns1}}::{{repr_ns2}}::{{data_repr}},
+               {{repr_ns1}}::{{repr_ns2}}::{{iface_facet_repr}}>;
+        };
+    }
+}
+
+namespace {{repr_ns1}} {
+    namespace {{repr_ns2}} {
+        /** @class {{iface_facet_repr}}
+         **/
+        class {{iface_facet_repr}} {
+        public:
+            {% if using_dox %}
+            /** @defgroup {{repr_ns2}}-{{facet_name_lc}}-{{data_repr_lc}}-type-traits **/
+            ///@{
+            {% endif %}
+            {% for ty in types %}
+            using {{ty.name}} = {{abstract_facet}}::{{ty.name}};
+            {% endfor %}
+            {% if using_dox %}
+            ///@}
+            /** @defgroup {{repr_ns2}}-{{facet_name_lc}}-{{data_repr_lc}}-methods **/
+            ///@{
+            {% endif %}
+            {% for md in const_methods %}
+            /** {{md.doc}} **/
+            static {{md.return_type}} {{md.name}}({{md.args | argimpl(data_repr)}}){{md | staticqual}};
+            {% endfor %}
+
+            {% for md in methods %}
+            /** {{md.doc}} **/
+            static {{md.return_type}} {{md.name}}({{md.args | argimpl(data_repr)}}){{md | staticqual}};
+            {% endfor %}
+            {% if using_dox %}
+            ///@}
+            {% endif %}
+        };
+
+    } /*namespace {{repr_ns2}}*/
+} /*namespace {{repr_ns1}}*/
+
+/* end */
