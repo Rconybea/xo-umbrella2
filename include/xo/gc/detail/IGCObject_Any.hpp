@@ -6,6 +6,7 @@
 #pragma once
 
 #include "AGCObject.hpp"
+#include "Collector.hpp"
 #include <new>
 
 namespace xo {
@@ -31,9 +32,10 @@ namespace xo {
             int32_t _typeseq() const noexcept override { return s_typeseq; }
 
             [[noreturn]] size_type shallow_size(Copaque) const noexcept override { _fatal(); }
-            [[noreturn]] Opaque * shallow_copy(Copaque,
-                                               obj<AAllocator>) const noexcept override { _fatal(); }
-            [[noreturn]] size_type forward_children(Opaque) const noexcept override { _fatal(); }
+            [[noreturn]] Opaque shallow_copy(Copaque,
+                                             obj<AAllocator>) const noexcept override { _fatal(); }
+            [[noreturn]] size_type forward_children(Opaque,
+                                                    obj<ACollector>) const noexcept override { _fatal(); }
 
         private:
             [[noreturn]] static void _fatal();

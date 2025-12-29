@@ -25,7 +25,7 @@ namespace xo {
 
             int32_t _typeseq() const noexcept { return O::iface()->_typeseq(); }
             size_type shallow_size() const noexcept { O::iface()->shallow_size(O::data()); }
-            Opaque * shallow_copy(obj<AAllocator> mm) const noexcept { O::iface()->shallow_copy(O::data(), mm); }
+            Opaque shallow_copy(obj<AAllocator> mm) const noexcept { O::iface()->shallow_copy(O::data(), mm); }
             size_type forward_children() noexcept { O::iface()->forward_children(O::data()); }
 
             static bool _valid;
