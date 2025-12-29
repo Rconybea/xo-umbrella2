@@ -27,6 +27,16 @@ xo_add_genfacet(
     OUTPUT_CPP_DIR src/object2
 )
 
+xo_add_genfacetimpl(
+    TARGET xo-object2-facetimpl-sequence-list
+    FACET Sequence
+    REPR List
+    INPUT idl/ISequence_DList.json5
+    OUTPUT_HPP_DIR include/xo/object2
+    OUTPUT_IMPL_SUBDIR sequence
+    OUTPUT_CPP_DIR src/object2
+)
+
 # ----------------------------------------------------------------
 
 # must complete definition of expression lib before configuring examples

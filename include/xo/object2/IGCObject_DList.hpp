@@ -13,6 +13,19 @@
 #include "DList.hpp"
 
 namespace xo {
+    namespace scm { struct IGCObject_DList; }
+
+    namespace facet {
+        template <>
+        struct FacetImplementation<xo::mm::AGCObject,
+                                   xo::scm::DList>
+        {
+            using ImplType = xo::mm::IGCObject_Xfer
+                <xo::scm::DList,
+                 xo::scm::IGCObject_DList>;
+        };
+    }
+
     namespace scm {
         /* changes here coordinate with:
          *  IGCObject_XFer
