@@ -73,8 +73,10 @@ namespace xo {
 
         void
         ICollector_DX1Collector::forward_inplace(DX1Collector & d,
-                                                 obj<AGCObject> * lhs)
+                                                 AGCObject * lhs_iface,
+                                                 void ** lhs_data)
         {
+            (void)lhs_iface;
             assert(d.runstate_.is_running());
 
             /*
@@ -90,7 +92,7 @@ namespace xo {
              *                                    +----------+
              */
 
-            void * object_data = (byte *)(*lhs).opaque_data();
+            void * object_data = (byte *)lhs_data;
 
             if (!d.contains(role::from_space(), object_data)) {
                 /* *lhs isn't in GC-allocated space.
@@ -143,7 +145,7 @@ namespace xo {
                 void * dest = *(void**)object_data;
 
                 /* update *lhs in-place */
-                (*lhs).reset_opaque(dest);
+                *lhs_data = dest;
             } else if (check_move_policy(d, alloc_hdr, object_data)) {
                 /* copy object *lhs + replace with forwarding pointer */
 

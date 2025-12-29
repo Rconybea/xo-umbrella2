@@ -6,6 +6,7 @@
 #pragma once
 
 #include "AGCObject.hpp"
+#include "ACollector.hpp"
 
 namespace xo {
     namespace mm {
@@ -28,16 +29,17 @@ namespace xo {
 
             int32_t _typeseq() const noexcept override { return s_typeseq; }
             size_type shallow_size(Copaque d) const noexcept override {
-                return I::shallow_copy(_dcast(d));
+                return I::shallow_size(_dcast(d));
             }
-            Opaque * shallow_copy(Copaque d, obj<AAllocator> mm) const noexcept override {
-                return I::shallow_size(_dcast(d), mm);
+            Opaque shallow_copy(Copaque d, obj<AAllocator> mm) const noexcept override {
+                return I::shallow_copy(_dcast(d), mm);
             }
 
             // non-const methods
 
-            size_type forward_children(Opaque d) const noexcept override {
-                return I::forward_children(d);
+            size_type forward_children(Opaque d,
+                                       obj<ACollector> gc) const noexcept override {
+                return I::forward_children(_dcast(d), gc);
             }
 
         private:

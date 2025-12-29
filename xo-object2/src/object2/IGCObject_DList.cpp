@@ -6,7 +6,9 @@
 #include "IGCObject_DList.hpp"
 
 namespace xo {
+    using xo::mm::AGCObject;
     using xo::mm::AAllocator;
+    using xo::facet::with_facet;
     using xo::facet::obj;
     using std::size_t;
 
@@ -33,8 +35,11 @@ namespace xo {
         IGCObject_DList::forward_children(DList & src,
                                           obj<ACollector> gc) noexcept
         {
-            gc.forward_inplace(&src.head_);
-            gc.forward_inplace(&src.rest_);
+            gc.forward_inplace(src.head_.iface(), (void **)&(src.head_.data_));
+
+            //auto rest = with_facet<AGCObject>::mkobj(src.rest_);
+            xo::facet::FacetImplementation<xo::mm::AGCObject, DList>::ImplType iface;
+            gc.forward_inplace(&iface, (void **)(&src.rest_));
 
             return shallow_size(src);
         }

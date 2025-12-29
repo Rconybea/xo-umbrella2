@@ -1,0 +1,34 @@
+/** @file {{iface_facet_repr_cpp_fname}}
+ *
+ *  Generated automagically from ingredients:
+ *  1. code generator:
+ *       [{{genfacet}}]
+ *     arguments:
+ *       --input [{{genfacet_input}}]
+ *  2. jinja2 template for abstract facet .hpp file:
+ *       [{{ iface_facet_any_hpp_j2 }}]
+ *  3. idl for facet methods
+ *       [{{ idl_fname }}]
+**/
+
+#include "{{iface_facet_repr_hpp_fname}}"
+
+namespace {{repr_ns1}} {
+    namespace {{repr_ns2}} {
+        {% for md in const_methods %}
+        auto
+        {{iface_facet_repr}}::{{md.name}}({{md.args | argimpl(data_repr)}}){{md | staticqual}} -> {{md.return_type}}
+        {
+            {% if md.return_type == "void" %}
+            self.{{md.name}}({{md.args | argnamesnodata}});
+            {% else %}
+            return self.{{md.name}}({{md.args | argnamesnodata}});
+            {% endif %}
+        }
+
+        {% endfor %}
+
+    } /*namespace {{repr_ns2}}*/
+} /*namespace {{repr_ns1}}*/
+
+/* end {{iface_facet_repr_cpp_fname}} */

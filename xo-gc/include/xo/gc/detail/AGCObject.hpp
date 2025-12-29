@@ -17,6 +17,8 @@ namespace xo {
         using Copaque = const void *;
         using Opaque = void *;
 
+        struct ACollector;
+
         /** @class AObject
          *  @brief Abstract facet for collector-eligible data
          *
@@ -30,9 +32,10 @@ namespace xo {
             virtual int32_t _typeseq() const noexcept = 0;
 
             virtual size_type shallow_size(Copaque d) const noexcept = 0;
-            virtual Opaque * shallow_copy(Copaque d,
-                                          obj<AAllocator> mm) const noexcept = 0;
-            virtual size_type forward_children(Opaque d) const noexcept = 0;
+            virtual Opaque shallow_copy(Copaque d,
+                                        obj<AAllocator> mm) const noexcept = 0;
+            virtual size_type forward_children(Opaque d,
+                                               obj<ACollector>) const noexcept = 0;
         };
 
         // implementation IGCObject_DRepr of AGCObject for state DRepr

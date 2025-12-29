@@ -1,0 +1,12 @@
+{
+    mode: "implementation",
+    includes: [],
+    namespace1: "xo",
+    namespace2: "scm",
+    facet_idl: "idl/Sequence.json5",
+    brief: "provide ASequence interface for DList state",
+    using_doxygen: true,
+    repr: "DList",
+    doc: [ "doc for something or other"
+    ],
+}

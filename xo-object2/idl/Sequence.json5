@@ -1,8 +1,10 @@
 {
+    mode: "facet",
     includes: ["<xo/gc/GCObject.hpp>"],
     namespace1: "xo",
     namespace2: "scm",
     facet: "Sequence",
+    detail_subdir: "sequence",
     brief: "an ordered collection of variants",
     using_doxygen: true,
     doc: [

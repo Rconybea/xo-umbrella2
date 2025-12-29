@@ -11,13 +11,23 @@ namespace xo {
     namespace scm {
 
         struct DList {
+            using size_type = std::size_t;
             using AGCObject = xo::mm::AGCObject;
 
             DList(xo::obj<AGCObject> h,
-                  xo::obj<AGCObject> r) : head_{h}, rest_{r} {}
+                  DList * r) : head_{h}, rest_{r} {}
+
+            /** DList length is at least 1 **/
+            bool is_empty() const noexcept { return false; };
+            /** DList models a finite sequence **/
+            bool is_finite() const noexcept { return true; };
+            /** return number of elements in this DList **/
+            size_type size() const noexcept;
+            /** return element at 0-based index @p ix **/
+            obj<AGCObject> at(size_type ix) const;
 
             obj<AGCObject> head_;
-            obj<AGCObject> rest_;
+            DList * rest_ = nullptr;
         };
 
     } /*namespace scm*/

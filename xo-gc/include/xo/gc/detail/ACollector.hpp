@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "IGCObject_Any.hpp"
+//#include "IGCObject_Any.hpp"
 
 #include <xo/facet/facet_implementation.hpp>
 #include <xo/facet/typeseq.hpp>
@@ -22,6 +22,7 @@ namespace xo {
         using Copaque = const void *;
         using Opaque = void *;
 
+        struct AGCObject;
         struct IGCObject_Any; // see IGCObject_Any.hpp
 
         /** @class ACollector
@@ -53,10 +54,12 @@ namespace xo {
             virtual void install_type(Opaque d, int32_t tseq, IGCObject_Any & iface) = 0;
             virtual void add_gc_root(Opaque d, int32_t tseq, Opaque * root) = 0;
 
-            /** evacuate @p *lhs to to-space and replace with forwarding pointer
+            /** evacuate @p *lhs, that refers to state with interface @p lhs_iface,
+             *  to collector @p d's to-space. Replace *lhs_data with forwarding pointer
+             *
              *  Require: gc in progress
              **/
-            virtual void forward_inplace(Opaque d, obj<AGCObject> * lhs) = 0;
+            virtual void forward_inplace(Opaque d, AGCObject * lhs_iface, void ** lhs_data) = 0;
         };
     }
 

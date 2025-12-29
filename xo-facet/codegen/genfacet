@@ -15,11 +15,21 @@ def format_method_qualifiers(method):
     """
     quals = []
     if method.get('const', False):
-        quals.append('const')
+        quals.append(' const')
     if method.get('noexcept', False):
-        quals.append('noexcept')
+        quals.append(' noexcept')
 
     return ' '.join(quals)
+
+def format_method_staticqual(method):
+    """ Build qualifier string for a static method: noexcet
+    """
+    quals = []
+    if method.get('noexcept', False):
+        quals.append(' noexcept')
+
+    return ' '.join(quals)
+
 
 def format_args(args, include_names=True):
     """ Format argument list for a method
@@ -40,6 +50,12 @@ def format_arg_names(args):
     names = [p['name'] for p in args]
     return ', '.join([f"_dcast({names[0]})"] + names[1:])
 
+def format_arg_names_nodata(args):
+    """ Format argument names for forwarding, omit data ('self') arg
+    """
+    names = [p['name'] for p in args[1:]]
+    return ', '.join(names)
+
 def format_args_nodata(args):
     """ Format arguments, but exclude data arg
     """
@@ -51,46 +67,21 @@ def format_args_routing(args):
     names = [p['name'] for p in args]
     return ', '.join([f"O::data()"] + names[1:])
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--input', required=True, help='input IDL JSON5 file')
-    parser.add_argument('--output-impl-hpp', required=True, help='.hpp detail subdir')
-    parser.add_argument('--output-hpp', required=True, help='.hpp output directory')
-    parser.add_argument('--output-cpp', required=True, help='.cpp output directory')
+def format_args_impl(args, drepr):
+    """ Format argument names, for implementation (IFoo_DRepr)
+    """
+    names = [f"{p['type']} {p['name']}" for p in args]
+    return ', '.join([f"const {drepr} & self"] + names[1:])
 
-    args = parser.parse_args()
 
-    idl_fname = args.input
-    idl = load_idl(idl_fname)
-    #
-    output_hpp_dir = Path(args.output_hpp)
-    output_hpp_dir.mkdir(parents=False, exist_ok=True)
-    #
-    output_impl_hpp_subdir = Path(args.output_impl_hpp)
-    output_impl_hpp_dir = Path(args.output_hpp) / output_impl_hpp_subdir
-    output_impl_hpp_dir.mkdir(parents=False, exist_ok=True)
-    #
-    output_cpp_dir = Path(args.output_cpp)
-    output_cpp_dir.mkdir(parents=False, exist_ok=True)
+def gen_facet(env,
+              idl_fname,
+              idl,
+              input_json5,
+              output_hpp_dir,
+              output_impl_hpp_dir,
+              output_cpp_dir):
 
-    # setup jinja2
-    #template_dir = Path(args.templates)
-    template_dir = Path(__file__).parent
-    #template_dir = Path(__file__).parent / 'codegen'
-
-    print(f'template_dir: [{template_dir}]')
-
-    env = Environment(loader = FileSystemLoader(template_dir),
-                      trim_blocks = True,
-                      lstrip_blocks = True)
-
-    # custom filters
-    env.filters['qualifiers'] = format_method_qualifiers
-    env.filters['args'] = format_args
-    env.filters['argtypes'] = format_args_nonames
-    env.filters['argnames'] = format_arg_names
-    env.filters['argsnodata'] = format_args_nodata
-    env.filters['argrouting'] = format_args_routing
 
     # true to insert doxygen markup in generated .hpp/.cpp files
     using_dox = idl['using_doxygen']
@@ -150,7 +141,7 @@ def main():
 
     context = {
         'genfacet': __file__,
-        'genfacet_input': args.input,
+        'genfacet_input': idl_fname,
         'using_dox': using_dox,
         'impl_hpp_subdir': output_impl_hpp_subdir,
         #
@@ -224,6 +215,283 @@ def main():
         (out_dir / out_file).write_text(content)
         print(f"Generated {out_dir}/{out_file}")
 
+
+
+def gen_facet_impl(env,
+                   idl_fname,
+                   idl,
+                   facet_idl,
+                   output_hpp_dir,
+                   output_impl_hpp_subdir,
+                   output_cpp_dir):
+
+
+    # true to insert doxygen markup in generated .hpp/.cpp files
+    using_dox = idl['using_doxygen']
+
+    # extra include files (or perhaps other definitions)
+
+    # facet_includes: include section for AFoo.hpp:
+    # <xo/gc/GCObject.hpp>
+    facet_includes = facet_idl['includes']
+    # sequence
+    facet_detail_subdir = facet_idl['detail_subdir']
+    # xo - facet_ns1: outer namespace for facet [e.g. xo]
+    facet_ns1 = facet_idl['namespace1']
+    # scm - facet_ns2: nested namespace for facet [e.g. scm]
+    facet_ns2 = facet_idl['namespace2']
+
+    # Sequence - facet_name: facet name
+    facet_name = facet_idl['facet']
+    # sequence - facet_name_lc: lower case [e.g. sequence]
+    facet_name_lc = facet_name.lower()
+    # brief doc for facet
+    facet_brief = idl['brief']
+    # doc section for facet
+    facet_doc = '\n'.join(idl['doc'])
+
+    types = facet_idl['types']
+    for ty in types:
+        ty['doc'] = '\n'.join(ty['doc'])
+
+    const_methods = facet_idl['const_methods']
+    for md in const_methods:
+        md['args'] = [{'type': "Copaque",
+                       'name': "data"}] + md['args']
+        md['doc'] = '\n'.join(md['doc'])
+
+    nonconst_methods = facet_idl['nonconst_methods']
+    for md in nonconst_methods:
+        md['args'] = [{'type': "Opaque",
+                       'name': "data"}] + md['args']
+        md['doc'] = '\n'.join(md['doc'])
+
+    # Foo.hpp
+    facet_hpp_fname = f'{facet_name}.hpp'
+    # AFoo
+    abstract_facet = f'A{facet_name}'
+    # AFoo.hpp
+    abstract_facet_fname = f'{abstract_facet}.hpp'
+    # IFoo
+    iface_facet = f'I{facet_name}'
+    # IFoo_ImplType
+    iface_facet_impltype = f'{iface_facet}_ImplType'
+    #
+    # IFoo_Any
+    iface_facet_any = f'{iface_facet}_Any'
+    # IFoo_Any.hpp
+    iface_facet_any_hpp_fname = f'{iface_facet_any}.hpp'
+    # IFoo_Any.cpp
+    iface_facet_any_cpp_fname = f'{iface_facet_any}.cpp'
+    #
+    # IFoo_Xfer
+    iface_facet_xfer = f'{iface_facet}_Xfer'
+    # IFoo_Xfer.hpp
+    iface_facet_xfer_hpp_fname = f'{iface_facet_xfer}.hpp'
+    # IFoo_Xfer.cpp
+    iface_facet_xfer_cpp_fname = f'{iface_facet_xfer}.cpp'
+    #
+    # RFoo
+    router_facet = f'R{facet_name}'
+    # RFoo.hpp
+    router_facet_hpp_fname = f'{router_facet}.hpp'
+
+    # ================================================================
+    # vars for IFacet_DRepr
+    # ----------------------------------------------------------------
+
+    # DList
+    data_repr = idl['repr']
+    # dlist
+    data_repr_lc = data_repr.lower()
+    # DList.hpp
+    data_repr_hpp_fname = f'{data_repr}.hpp'
+
+    # repr_ns1: outer namespace for repr [e.g. xo].
+    #           (need not match facet)
+    repr_ns1 = idl['namespace1']
+    # repr_ns2: nested namespace for repr [e.g. scm].
+    repr_ns2 = idl['namespace2']
+
+
+    # iface_facet_repr: IFoo_DRepr
+    iface_facet_repr = f'{iface_facet}_{data_repr}'
+    # iface_facet_repr_hpp_fname: IFoo_DRepr.hpp
+    iface_facet_repr_hpp_fname = f'{iface_facet_repr}.hpp'
+    # iface_facet_repr_cpp_fname: IFoo_DRepr.cpp
+    iface_facet_repr_cpp_fname = f'{iface_facet_repr}.cpp'
+
+    # ================================================================
+
+    context = {
+        'genfacet': __file__,
+        'genfacet_input': idl_fname,
+        'using_dox': using_dox,
+        'impl_hpp_subdir': output_impl_hpp_subdir,
+        #
+        'facet_hpp_j2': 'facet.hpp.j2',
+        'facet_includes': facet_includes,
+        'facet_detail_subdir': facet_detail_subdir,
+        'facet_ns1': facet_ns1,
+        'facet_ns2': facet_ns2,
+        'facet_name': facet_name,
+        'facet_name_lc': facet_name_lc,
+        'facet_hpp_fname': facet_hpp_fname,
+        #'name': facet_name,
+        'idl_fname': idl_fname,
+        #
+        'abstract_facet_hpp_j2': 'abstract_facet.hpp.j2',
+        'abstract_facet': abstract_facet,
+        'abstract_facet_fname': abstract_facet_fname,
+        'abstract_facet_doc': facet_doc,
+        #
+        'iface_facet': iface_facet,
+        'iface_facet_impltype': iface_facet_impltype,
+        #
+        'iface_facet_any': iface_facet_any,
+        'iface_facet_any_hpp_j2': 'iface_facet_any.hpp.j2',
+        'iface_facet_any_cpp_j2': 'iface_facet_any.cpp.j2',
+        'iface_facet_any_hpp_fname': iface_facet_any_hpp_fname,
+        'iface_facet_any_cpp_fname': iface_facet_any_cpp_fname,
+        #
+        'iface_facet_xfer': iface_facet_xfer,
+        'iface_facet_xfer_hpp_j2': 'iface_facet_xfer.hpp.j2',
+        'iface_facet_xfer_cpp_j2': 'iface_facet_xfer.cpp.j2',
+        'iface_facet_xfer_hpp_fname': iface_facet_xfer_hpp_fname,
+        'iface_facet_xfer_cpp_fname': iface_facet_xfer_cpp_fname,
+        #
+        'router_facet': router_facet,
+        'router_facet_hpp_j2': 'router_facet.hpp.j2',
+        'router_facet_hpp_fname': router_facet_hpp_fname,
+        #
+        'types': types,
+        #
+        'const_methods': const_methods,
+        #
+        'nonconst_methods': nonconst_methods,
+
+        # ----------------------------------------------------------------
+        # vars for IFacet_DRepr
+        # ----------------------------------------------------------------
+
+        'repr_ns1': repr_ns1,
+        'repr_ns2': repr_ns2,
+        #
+        'data_repr': data_repr,
+        'data_repr_lc': data_repr_lc,
+        'data_repr_hpp_fname': data_repr_hpp_fname,
+        #
+        'iface_facet_repr': iface_facet_repr,
+        'iface_facet_repr_hpp_j2': 'iface_facet_repr.hpp.j2',
+        'iface_facet_repr_hpp_fname': iface_facet_repr_hpp_fname,
+        'iface_facet_repr_cpp_j2': 'iface_facet_repr.cpp.j2',
+        'iface_facet_repr_cpp_fname': iface_facet_repr_cpp_fname,
+        #
+
+    }
+
+    # generate .hpp files
+
+    templates = {}
+    templates[iface_facet_repr_hpp_fname] = [output_hpp_dir,
+                                             context['iface_facet_repr_hpp_j2']]
+    templates[iface_facet_repr_cpp_fname] = [output_cpp_dir,
+                                             context['iface_facet_repr_cpp_j2']]
+
+#    templates[facet_hpp_fname] = [output_hpp_dir,
+#                                  context['facet_hpp_j2']]
+#    templates[abstract_facet_fname] = [output_impl_hpp_dir,
+#                                       context['abstract_facet_hpp_j2']]
+#    templates[iface_facet_any_hpp_fname] = [output_impl_hpp_dir,
+#                                            context['iface_facet_any_hpp_j2']]
+#    templates[iface_facet_any_cpp_fname] = [output_cpp_dir,
+#                                            context['iface_facet_any_cpp_j2']]
+#    templates[iface_facet_xfer_hpp_fname] = [output_impl_hpp_dir,
+#                                             context['iface_facet_xfer_hpp_j2']]
+#    templates[router_facet_hpp_fname] = [output_impl_hpp_dir,
+#                                         context['router_facet_hpp_j2']]
+
+    for out_file, record in templates.items():
+        out_dir = record[0]
+        template_name = record[1]
+
+        print(f'out_dir: [{out_dir}]')
+        print(f'out_file: [{out_file}]')
+        print(f'template_name: [{template_name}]')
+
+        template = env.get_template(template_name)
+        content = template.render(**context)
+
+        (out_dir / out_file).write_text(content)
+        print(f"Generated {out_dir}/{out_file}")
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--input', required=True, help='input IDL JSON5 file')
+    # --output-impl-hpp: putting this in .json5, will be able to drop this.
+    parser.add_argument('--output-impl-hpp', required=True, help='.hpp detail subdir')
+    parser.add_argument('--output-hpp', required=True, help='.hpp output directory')
+    parser.add_argument('--output-cpp', required=True, help='.cpp output directory')
+
+    args = parser.parse_args()
+
+    idl_fname = args.input
+    idl = load_idl(idl_fname)
+
+    output_hpp_dir = Path(args.output_hpp)
+    output_hpp_dir.mkdir(parents=False, exist_ok=True)
+
+    # TODO: output_impl_hpp_subdir: use idl['detail_subdir'] instead
+    output_impl_hpp_subdir = Path(args.output_impl_hpp)
+    output_impl_hpp_dir = Path(args.output_hpp) / output_impl_hpp_subdir
+    output_impl_hpp_dir.mkdir(parents=False, exist_ok=True)
+
+    output_cpp_dir = Path(args.output_cpp)
+    output_cpp_dir.mkdir(parents=False, exist_ok=True)
+
+    # setup jinja2
+    #template_dir = Path(args.templates)
+    template_dir = Path(__file__).parent
+    #template_dir = Path(__file__).parent / 'codegen'
+
+    print(f'template_dir: [{template_dir}]')
+
+    env = Environment(loader = FileSystemLoader(template_dir),
+                      trim_blocks = True,
+                      lstrip_blocks = True)
+
+    # custom filters.
+    # A filter 'foo' provides ability to write '{{var | foo}}' to expand
+    # j2 variable 'var' to 'filters[foo](var)'
+    #
+    env.filters['qualifiers'] = format_method_qualifiers
+    env.filters['staticqual'] = format_method_staticqual
+    env.filters['args'] = format_args
+    env.filters['argtypes'] = format_args_nonames
+    env.filters['argnames'] = format_arg_names
+    env.filters['argnamesnodata'] = format_arg_names_nodata
+    env.filters['argsnodata'] = format_args_nodata
+    env.filters['argrouting'] = format_args_routing
+    env.filters['argimpl'] = format_args_impl
+
+    if idl['mode'] == 'facet':
+        gen_facet(env,
+                  idl_fname,
+                  idl,
+                  output_hpp_dir,
+                  output_impl_hpp_dir,
+                  output_cpp_dir)
+    elif idl['mode'] == 'implementation':
+        facet_idl_fname = idl['facet_idl']
+        facet_idl = load_idl(facet_idl_fname)
+
+        gen_facet_impl(env,
+                       idl_fname,
+                       idl,
+                       facet_idl,
+                       output_hpp_dir,
+                       output_impl_hpp_dir,
+                       output_cpp_dir)
 
 if __name__ == '__main__':
     main()

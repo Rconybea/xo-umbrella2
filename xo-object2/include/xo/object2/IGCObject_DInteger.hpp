@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <xo/gc/Collector.hpp>
 #include "xo/alloc2/alloc/AAllocator.hpp"
 #include <xo/gc/detail/AGCObject.hpp>
 #include <xo/gc/detail/IGCObject_Xfer.hpp>
