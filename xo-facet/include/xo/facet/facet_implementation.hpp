@@ -96,6 +96,17 @@ namespace xo {
         template <typename AFacet, typename DRepr>
         using FacetImplType = FacetImplementation<AFacet, DRepr>::ImplType;
 
+        /** Use:
+         *    auto iface = xo::facet::impl_for<AGCObject, DList>();
+         *  if compiles, then iface is AGCObject interface with state DList.
+         **/
+        template <typename AFacet, typename DRepr>
+        inline auto impl_for() {
+            FacetImplType<AFacet, DRepr> iface;
+
+            return iface;
+        }
+
         /** Data type for facet implementation that supports runtime polymorphism.
          *  Implementation will stub all methods, since they will never be invoked.
          *

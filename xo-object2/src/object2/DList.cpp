@@ -7,7 +7,42 @@
 #include <xo/indentlog/print/tag.hpp>
 
 namespace xo {
+    using xo::mm::AGCObject;
+
     namespace scm {
+        static DList s_null(obj<AGCObject>(), nullptr);
+
+        DList *
+        DList::null()
+        {
+            return &s_null;
+        }
+
+        DList *
+        DList::list(obj<AAllocator> mm,
+                    obj<AGCObject> h1)
+        {
+            void * mem = mm.alloc(sizeof(DList));
+
+            return new (mem) DList(h1, DList::null());
+        }
+
+        DList *
+        DList::list(obj<AAllocator> mm,
+                    obj<AGCObject> h1,
+                    obj<AGCObject> h2)
+        {
+            void * mem = mm.alloc(sizeof(DList));
+
+            return new (mem) DList(h1, DList::list(mm, h2));
+        }
+
+        bool
+        DList::is_empty() const noexcept
+        {
+            return this != &s_null;
+        }
+
         auto
         DList::size() const noexcept -> size_type
         {
@@ -15,7 +50,7 @@ namespace xo {
 
             size_type z = 0;
 
-            while (l) {
+            while (l && l != &s_null) {
                 ++z;
                 l = l->rest_;
             }

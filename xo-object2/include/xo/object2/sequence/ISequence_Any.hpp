@@ -14,6 +14,7 @@
 #pragma once
 
 #include "ASequence.hpp"
+#include <xo/facet/typeseq.hpp>
 #include <xo/facet/obj.hpp>
 
 namespace xo { namespace scm { class ISequence_Any; } }
@@ -42,6 +43,7 @@ namespace scm {
         /** @defgroup scm-sequence-any-type-traits **/
         ///@{
 
+        using typeseq = xo::facet::typeseq;
         using size_type = ASequence::size_type;
         using AGCObject = ASequence::AGCObject;
 
@@ -54,7 +56,7 @@ namespace scm {
         // from ASequence
 
         // const methods
-        int32_t _typeseq() const noexcept override { return s_typeseq; }
+        typeseq _typeseq() const noexcept override { return s_typeseq; }
         [[noreturn]] bool is_empty(Copaque) const noexcept override { _fatal(); }
         [[noreturn]] bool is_finite(Copaque) const noexcept override { _fatal(); }
         [[noreturn]] obj<AGCObject> at(Copaque, size_type) const override { _fatal(); }
@@ -75,7 +77,7 @@ namespace scm {
         /** @defgraoup scm-sequence-any-member-vars **/
         ///@{
 
-        static int32_t s_typeseq;
+        static typeseq s_typeseq;
         static bool _valid;
 
         ///@}

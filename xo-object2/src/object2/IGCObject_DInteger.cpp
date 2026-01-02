@@ -33,9 +33,10 @@ namespace xo {
         }
 
         size_t
-        IGCObject_DInteger::forward_children(DInteger &) noexcept
+        IGCObject_DInteger::forward_children(DInteger & src,
+                                             obj<ACollector>) noexcept
         {
-            return sizeof(DInteger);
+            return shallow_size(src);
         }
 
     } /*namespace scm*/

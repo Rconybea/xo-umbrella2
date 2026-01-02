@@ -5,11 +5,13 @@
 
 #pragma once
 
-#include "arena/ArenaConfig.hpp"
-#include "arena/DArena.hpp"
+#include "GCObject.hpp"
 #include "generation.hpp"
 #include "object_age.hpp"
 #include "role.hpp"
+#include <xo/alloc2/Allocator.hpp>
+#include <xo/alloc2/arena/ArenaConfig.hpp>
+#include <xo/alloc2/arena/DArena.hpp>
 #include <memory>
 #include <array>
 
@@ -86,6 +88,9 @@ namespace xo {
              **/
             ArenaConfig arena_config_;
 
+            /** storage for N object types requires 8*N bytes **/
+            std::size_t object_types_z_ = 2*1024*1024;
+
             /** number of bits to represent generation **/
             std::uint64_t gen_bits_ = 8;
 
@@ -154,8 +159,15 @@ namespace xo {
             using value_type = DArena::value_type;
             using header_type = DArena::header_type;
 
+            /** hard max typeseq for collector-registered types **/
+            static constexpr size_t c_max_typeseq = 4096;
+
+            /** Create X1 collector instance. **/
             explicit DX1Collector(const CollectorConfig & cfg);
 
+            std::string_view name() const { return config_.name_; }
+
+            const DArena * get_object_types() const noexcept { return &object_types_; }
             const DArena * get_space(role r, generation g) const noexcept { return space_[r][g]; }
             DArena * get_space(role r, generation g) noexcept { return space_[r][g]; }
             DArena * from_space(generation g) noexcept { return get_space(role::from_space(), g); }
@@ -193,6 +205,14 @@ namespace xo {
 
             /** Retreive bookkeeping info for allocation at @p mem. **/
             AllocInfo alloc_info(value_type mem) const noexcept;
+
+            // ----- type registration -----
+
+            /** Register object type with this collector.
+             *  Provides shallow copy and pointer forwarding for instances of this
+             *  type.
+             **/
+            bool install_type(const AGCObject & meta) noexcept;
 
             // ----- allocation -----
 
@@ -238,6 +258,11 @@ namespace xo {
 
             /** current gc state **/
             GCRunState runstate_;
+
+            /** (ab)using arena to get an extensible array of object types.
+             *  For each type need to store one (8-byte) IGCObject_Any instance,
+             **/
+            DArena object_types_;
 
             /** collector-managed memory here.
              *  - space_[1] is from-space
