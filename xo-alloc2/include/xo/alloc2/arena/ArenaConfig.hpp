@@ -24,7 +24,7 @@ namespace xo {
             /** optional name, for diagnostics **/
             std::string name_;
             /** desired arena size -- hard max = reserved virtual memory **/
-            std::size_t size_;
+            std::size_t size_ = 0;
             /** hugepage size -- using huge pages relieves some TLB pressure
              *  (provided you use their full extent :)
              **/

@@ -46,14 +46,13 @@ namespace xo {
             // end of hugeppage-aligned range starting at aligned_base
             byte * aligned_hi = aligned_base + target_z;
 
-#ifdef NOT_YET
             log && log("acquired memory [lo,hi) using mmap",
                        xtag("lo", base),
+                       xtag("aligned_lo", aligned_base),
                        xtag("req_z", req_z),
                        xtag("target_z", target_z),
-                       xtag("hi", (byte *)(base) + z));
-#endif
-
+                       xtag("aligned_hi", aligned_hi),
+                       xtag("hi", hi));
 
             // 3. assess mmap success
             {
@@ -109,7 +108,7 @@ namespace xo {
         DArena
         DArena::map(const ArenaConfig & cfg)
         {
-            //scope log(XO_DEBUG(debug_flag), xtag("name", name));
+            scope log(XO_DEBUG(true));
 
             /* vm page size. 4KB, probably */
             size_t page_z = getpagesize();
@@ -121,6 +120,9 @@ namespace xo {
              * and arena size is at least as large as hugepage size (2MB, probably)
              */
             size_t align_z = (enable_hugepage_flag ? cfg.hugepage_z_ : page_z);
+
+            log && log(xtag("page_z", page_z),
+                       xtag("align_z", align_z));
 
             auto [lo, hi] = map_aligned_range(cfg.size_,
                                               align_z,

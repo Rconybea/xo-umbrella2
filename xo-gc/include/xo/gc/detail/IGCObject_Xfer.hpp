@@ -27,7 +27,7 @@ namespace xo {
 
             // const methods
 
-            int32_t _typeseq() const noexcept override { return s_typeseq; }
+            typeseq _typeseq() const noexcept override { return s_typeseq; }
             size_type shallow_size(Copaque d) const noexcept override {
                 return I::shallow_size(_dcast(d));
             }
@@ -46,12 +46,12 @@ namespace xo {
             using I = Impl;
 
         public:
-            static int32_t s_typeseq;
+            static typeseq s_typeseq;
             static bool _valid;
         };
 
         template <typename DRepr, typename IGCObject_DRepr>
-        int32_t
+        xo::facet::typeseq
         IGCObject_Xfer<DRepr, IGCObject_DRepr>::s_typeseq = facet::typeseq::id<DRepr>();
 
         template <typename DRepr, typename IGCObject_DRepr>

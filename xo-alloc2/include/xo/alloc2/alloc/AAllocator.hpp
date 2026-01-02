@@ -9,6 +9,7 @@
 #include "AllocInfo.hpp"
 //#include "AllocIterator.hpp"
 #include "AllocRange.hpp"
+#include "typeseq.hpp"
 #include <xo/facet/obj.hpp>
 #include <xo/facet/facet_implementation.hpp>
 #include <xo/facet/typeseq.hpp>
@@ -40,6 +41,8 @@ namespace xo {
             using header_type = std::uint64_t;
             /** iterator range. These are forward iterators over allocs **/
             using range_type = AllocRange;
+            /** sequence number identifying a datatype **/
+            using typeseq = xo::facet::typeseq;
             ///@}
 
             /*
@@ -58,7 +61,7 @@ namespace xo {
             ///@{
 
             /** RTTI: unique id# for actual runtime data representation **/
-            virtual int32_t _typeseq() const noexcept = 0;
+            virtual typeseq _typeseq() const noexcept = 0;
             /** optional name for allocator @p d .
              *  Allows labeling allocators, for diagnostics/instrumentation.
              **/

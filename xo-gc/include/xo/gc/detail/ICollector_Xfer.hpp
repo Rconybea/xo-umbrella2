@@ -6,6 +6,7 @@
 #pragma once
 
 #include "ACollector.hpp"
+#include "AGCObject.hpp"
 
 namespace xo {
     namespace mm {
@@ -30,7 +31,7 @@ namespace xo {
 
             // const methods
 
-            int32_t _typeseq() const noexcept override { return s_typeseq; }
+            typeseq _typeseq() const noexcept override { return s_typeseq; }
             size_type allocated(Copaque d, generation g, role r) const noexcept override {
                 return I::allocated(_dcast(d), g, r);
             }
@@ -43,8 +44,8 @@ namespace xo {
 
             // non-const methods
 
-            void install_type(Opaque d, int32_t tseq, IGCObject_Any & iface) override {
-                I::install_type(_dcast(d), tseq, iface);
+            bool install_type(Opaque d, const AGCObject & iface) override {
+                return I::install_type(_dcast(d), iface);
             }
             void add_gc_root(Opaque d, int32_t tseq, Opaque * root) override {
                 I::add_gc_root(_dcast(d), tseq, root);
@@ -57,12 +58,12 @@ namespace xo {
             using I = Impl;
 
         public:
-            static int32_t s_typeseq;
+            static typeseq s_typeseq;
             static bool _valid;
         };
 
         template <typename DRepr, typename ICollector_DRepr>
-        int32_t
+        xo::facet::typeseq
         ICollector_Xfer<DRepr, ICollector_DRepr>::s_typeseq = facet::typeseq::id<DRepr>();
 
         template <typename DRepr, typename ICollector_DRepr>

@@ -7,6 +7,7 @@
 
 #include "AllocInfo.hpp"
 #include "cmpresult.hpp"
+#include "typeseq.hpp"
 #include <xo/facet/obj.hpp>
 
 namespace xo {
@@ -22,11 +23,12 @@ namespace xo {
          **/
         struct AAllocIterator {
             using obj_AAllocIterator = xo::facet::obj<AAllocIterator>;
+            using typeseq = xo::facet::typeseq;
 
             /** @defgroup mm-allociterator-methods AllocIterator methods **/
             ///@{
             /** RTTI: unique id# for actual runtime *data* representation **/
-            virtual int32_t _typeseq() const noexcept = 0;
+            virtual typeseq _typeseq() const noexcept = 0;
             /** retrieve AllocInfo for current iterator position
              **/
             virtual AllocInfo deref(Copaque d) const noexcept = 0;

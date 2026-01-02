@@ -7,6 +7,7 @@
 
 #include "AAllocator.hpp"
 #include "AllocIterator.hpp"
+#include "typeseq.hpp"
 #include <xo/facet/obj.hpp>
 
 namespace xo {
@@ -30,7 +31,7 @@ namespace xo {
             const AAllocator * iface() const { return std::launder(this); }
 
             // from AAllocator
-            int32_t _typeseq() const noexcept  override { return s_typeseq; }
+            typeseq _typeseq() const noexcept  override { return s_typeseq; }
 
             // const methods
             [[noreturn]] std::string_view     name(Copaque) const noexcept override { _fatal(); }
@@ -58,7 +59,7 @@ namespace xo {
             [[noreturn]] static void _fatal();
 
         public:
-            static int32_t s_typeseq;
+            static typeseq s_typeseq;
             static bool _valid;
         };
     }

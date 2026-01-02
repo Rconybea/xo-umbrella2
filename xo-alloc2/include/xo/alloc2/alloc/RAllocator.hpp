@@ -20,6 +20,7 @@ namespace xo {
         public:
             using ObjectType = Object;
             using DataPtr = Object::DataPtr;
+            using typeseq = xo::facet::typeseq;
             using size_type = std::size_t;
             using value_type = std::byte *;
             using range_type = AAllocator::range_type;
@@ -27,7 +28,7 @@ namespace xo {
             RAllocator() {}
             RAllocator(Object::DataPtr data) : Object{std::move(data)} {}
 
-            int32_t       _typeseq() const noexcept { return O::iface()->_typeseq(); }
+            typeseq       _typeseq() const noexcept { return O::iface()->_typeseq(); }
             std::string_view  name() const noexcept { return O::iface()->name(O::data()); }
             size_type     reserved() const noexcept { return O::iface()->reserved(O::data()); }
             size_type         size() const noexcept  { return O::iface()->size(O::data()); }

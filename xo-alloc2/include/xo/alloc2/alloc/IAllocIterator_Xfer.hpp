@@ -18,6 +18,7 @@ namespace xo {
                   typename IAllocIterator_DRepr>
         struct IAllocIterator_Xfer : public AAllocIterator {
             using Impl = IAllocIterator_DRepr;
+            using typeseq = xo::facet::typeseq;
 
             static const DRepr & _dcast(Copaque d) { return *(const DRepr *)d; }
             static DRepr & _dcast(Opaque d) { return *(DRepr *)d; }
@@ -26,7 +27,7 @@ namespace xo {
 
             // const methods
 
-            int32_t _typeseq() const noexcept override { return s_typeseq; }
+            typeseq _typeseq() const noexcept override { return s_typeseq; }
             AllocInfo deref(Copaque d)
                 const noexcept override { return I::deref(_dcast(d)); }
             cmpresult compare(Copaque d,
@@ -42,12 +43,12 @@ namespace xo {
             using I = Impl;
 
         public:
-            static int32_t s_typeseq;
+            static typeseq s_typeseq;
             static bool _valid;
         };
 
         template <typename DRepr, typename IAllocIterator_DRepr>
-        int32_t
+        xo::facet::typeseq
         IAllocIterator_Xfer<DRepr, IAllocIterator_DRepr>::s_typeseq
         = facet::typeseq::id<DRepr>();
 

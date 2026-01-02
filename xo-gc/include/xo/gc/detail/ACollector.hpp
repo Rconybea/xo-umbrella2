@@ -31,9 +31,10 @@ namespace xo {
          *  A collector implementation will also support the @ref AAllocator facet, see also
          **/
         struct ACollector {
+            using typeseq = xo::facet::typeseq;
             using size_type = std::size_t;
 
-            virtual int32_t _typeseq() const noexcept = 0;
+            virtual typeseq _typeseq() const noexcept = 0;
 
             virtual size_type allocated(Copaque d,
                                         generation g, role r) const noexcept = 0;
@@ -50,8 +51,10 @@ namespace xo {
              *    @c AGCObject_Xfer<DFoo,AGCObject_DFoo> for some @c DFoo
              *  in which case calls through @c std::launder(&iface)
              *  will properly act on @c DFoo.
+             *
+             *  Return false if installation fails (e.g. memory exhausted)
              **/
-            virtual void install_type(Opaque d, int32_t tseq, IGCObject_Any & iface) = 0;
+            virtual bool install_type(Opaque d, const AGCObject & iface) = 0;
             virtual void add_gc_root(Opaque d, int32_t tseq, Opaque * root) = 0;
 
             /** evacuate @p *lhs, that refers to state with interface @p lhs_iface,

@@ -13,9 +13,12 @@
 #include <xo/indentlog/scope.hpp>
 #include <cassert>
 #include <cstdint>
+#include <sys/mman.h>
+#include <unistd.h> // for ::getpagesize()
 
 namespace xo {
     using xo::mm::AAllocator;
+    using xo::facet::typeseq;
     using xo::facet::with_facet;
 
     namespace mm {
@@ -61,6 +64,19 @@ namespace xo {
                    config_.arena_config_.header_.age_bits_ +
                    config_.arena_config_.header_.tseq_bits_ <= 64);
 
+            size_t page_z = getpagesize();
+
+            /* 1MB reserved address space enough for up to 128k distinct types.
+             * In this case don't want to use hugepages since actual #of types
+             * likely << .size/8
+             */
+            object_types_ = DArena::map(
+                ArenaConfig{
+                    .name_ = "x1-object-types",
+                    .size_ = cfg.object_types_z_,
+                    .hugepage_z_ = page_z,
+                    .store_header_flag_ = false});
+
             for (uint32_t igen = 0, ngen = cfg.n_generation_; igen < ngen; ++igen) {
                 space_storage_[0][igen] = DArena::map(cfg.arena_config_);
                 space_storage_[1][igen] = DArena::map(cfg.arena_config_);
@@ -103,7 +119,7 @@ namespace xo {
             accumulate_total_aux(const DX1Collector & d,
                                  size_t (DArena::* get_stat_fn)() const) noexcept
             {
-                size_t z = 0;
+                size_t z = (d.object_types_.*get_stat_fn)();
 
                 for (role ri : role::all()) {
                     for (generation gj{0}; gj < d.config_.n_generation_; ++gj) {
@@ -180,6 +196,23 @@ namespace xo {
         {
             /** forwarding pointer encoded as sentinel tseq **/
             return config_.arena_config_.header_.is_forwarding_tseq(hdr);
+        }
+
+        bool
+        DX1Collector::install_type(const AGCObject & meta) noexcept
+        {
+            typeseq tseq = meta._typeseq();
+
+            bool ok = object_types_.expand(sizeof(AGCObject) * (tseq.seqno() + 1));
+            if (!ok)
+                return false;
+
+            AGCObject * v = reinterpret_cast<AGCObject *>(object_types_.lo_);
+
+            /* explicitly copying vtable pointer here */
+            std::memcpy((void*)&(v[tseq.seqno()]), (void*)&meta, sizeof(AGCObject));
+
+            return true;
         }
 
         auto

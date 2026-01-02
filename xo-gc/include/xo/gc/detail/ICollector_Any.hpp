@@ -6,6 +6,7 @@
 #pragma once
 
 #include "ACollector.hpp"
+#include "AGCObject.hpp"
 //#include <cassert>
 
 namespace xo {
@@ -34,7 +35,7 @@ namespace xo {
             [[noreturn]] size_type committed(Copaque, generation, role) const noexcept override { _fatal(); }
 
             // non-const methods
-            [[noreturn]] void install_type(Opaque, int32_t, IGCObject_Any &) noexcept override { _fatal(); }
+            [[noreturn]] bool install_type(Opaque, const AGCObject &) noexcept override { _fatal(); }
             [[noreturn]] void add_gc_root(Opaque, int32_t, Opaque *) override { _fatal(); }
             [[noreturn]] void forward_inplace(Opaque, AGCObject *, void **) override { _fatal(); }
 
@@ -42,7 +43,7 @@ namespace xo {
             [[noreturn]] static void _fatal();
 
         public:
-            static int32_t s_typeseq;
+            static typeseq s_typeseq;
             static bool _valid;
         };
     } /*namespace mm*/

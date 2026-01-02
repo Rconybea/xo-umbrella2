@@ -24,12 +24,13 @@ namespace xo {
          *  @brief AGCObject implementation for empty variant instance
          **/
         struct IGCObject_Any : public AGCObject {
+            using typeseq = xo::facet::typeseq;
             using size_type = std::size_t;
 
             const AGCObject * iface() const { return std::launder(this); }
 
             // from AGCObject
-            int32_t _typeseq() const noexcept override { return s_typeseq; }
+            typeseq _typeseq() const noexcept override { return s_typeseq; }
 
             [[noreturn]] size_type shallow_size(Copaque) const noexcept override { _fatal(); }
             [[noreturn]] Opaque shallow_copy(Copaque,
@@ -41,7 +42,7 @@ namespace xo {
             [[noreturn]] static void _fatal();
 
         public:
-            static int32_t s_typeseq;
+            static typeseq s_typeseq;
             static bool _valid;
         };
     } /*namespace mm*/

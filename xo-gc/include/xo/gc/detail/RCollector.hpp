@@ -27,7 +27,7 @@ namespace xo {
             size_type reserved(generation g, role r) const noexcept { return O::iface()->reserved(O::data(), g, r); }
             size_type committed(generation g, role r) const noexcept { return O::iface()->committed(O::data(), g, r); }
 
-            void install_type(int32_t tseq, IGCObject_Any & iface) { return O::iface()->install_type(O::data(), tseq, iface); }
+            bool install_type(const AGCObject & iface) { return O::iface()->install_type(O::data(), iface); }
             void add_gc_root(int32_t tseq, Opaque * root) { O::iface()->add_gc_root(O::data(), tseq, root); }
 
             void forward_inplace(AGCObject * lhs_iface, void ** lhs_data) { O::iface()->forward_inplace(O::data(), lhs_iface, lhs_data); }

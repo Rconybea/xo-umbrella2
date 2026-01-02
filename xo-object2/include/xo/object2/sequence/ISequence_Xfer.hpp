@@ -38,7 +38,7 @@ namespace scm {
         // from ASequence
 
         // const methods
-        int32_t _typeseq() const noexcept override { return s_typeseq; }
+        typeseq _typeseq() const noexcept override { return s_typeseq; }
         bool is_empty(Copaque data) const noexcept override {
             return I::is_empty(_dcast(data));
         }
@@ -61,7 +61,7 @@ namespace scm {
         ///@{
 
         /** typeseq for template parameter DRepr **/
-        static int32_t s_typeseq;
+        static typeseq s_typeseq;
         /** true iff satisfies facet implementation **/
         static bool _valid;
 
@@ -69,7 +69,7 @@ namespace scm {
     };
 
     template <typename DRepr, typename ISequence_DRepr>
-    int32_t
+    xo::facet::typeseq
     ISequence_Xfer<DRepr, ISequence_DRepr>::s_typeseq
       = xo::facet::typeseq::id<DRepr>();
 
