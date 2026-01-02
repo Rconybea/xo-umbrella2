@@ -8,6 +8,7 @@
 
 namespace xo {
     using xo::mm::AGCObject;
+    using xo::facet::typeseq;
 
     namespace scm {
         static DList s_null(obj<AGCObject>(), nullptr);
@@ -22,7 +23,7 @@ namespace xo {
         DList::list(obj<AAllocator> mm,
                     obj<AGCObject> h1)
         {
-            void * mem = mm.alloc(sizeof(DList));
+            void * mem = mm.alloc(typeseq::id<DList>(), sizeof(DList));
 
             return new (mem) DList(h1, DList::null());
         }
@@ -32,7 +33,7 @@ namespace xo {
                     obj<AGCObject> h1,
                     obj<AGCObject> h2)
         {
-            void * mem = mm.alloc(sizeof(DList));
+            void * mem = mm.alloc(typeseq::id<DList>(), sizeof(DList));
 
             return new (mem) DList(h1, DList::list(mm, h2));
         }

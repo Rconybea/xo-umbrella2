@@ -26,6 +26,7 @@ namespace xo {
          **/
         struct IAllocator_Any : public AAllocator {
             //using Impl = IAllocator_ImplType<xo::facet::DVariantPlaceholder>;
+            using typeseq = xo::facet::typeseq;
             using size_type = std::size_t;
 
             const AAllocator * iface() const { return std::launder(this); }
@@ -49,8 +50,8 @@ namespace xo {
 
             // non-const methods
             [[noreturn]] bool               expand(Opaque, std::size_t) const noexcept override { _fatal(); }
-            [[noreturn]] value_type          alloc(Opaque, std::size_t) const override { _fatal(); }
-            [[noreturn]] value_type    super_alloc(Opaque, std::size_t) const override { _fatal(); }
+            [[noreturn]] value_type          alloc(Opaque, typeseq, std::size_t) const override { _fatal(); }
+            [[noreturn]] value_type    super_alloc(Opaque, typeseq, std::size_t) const override { _fatal(); }
             [[noreturn]] value_type      sub_alloc(Opaque, std::size_t, bool) const override { _fatal(); }
             [[noreturn]] void                clear(Opaque) const override { _fatal(); }
             [[noreturn]] void        destruct_data(Opaque) const override { _fatal(); }

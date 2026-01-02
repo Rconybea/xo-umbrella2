@@ -8,8 +8,9 @@
 namespace xo {
     using xo::mm::AGCObject;
     using xo::mm::AAllocator;
-    using xo::facet::with_facet;
+    //using xo::facet::with_facet;
     using xo::facet::obj;
+    using xo::facet::typeseq;
     using std::size_t;
 
     namespace scm {
@@ -23,7 +24,8 @@ namespace xo {
         IGCObject_DList::shallow_copy(const DList & src,
                                       obj<AAllocator> mm) noexcept
         {
-            DList * copy = (DList *)mm.alloc(sizeof(DList));
+            /* FIXME: need to supply object age here */
+            DList * copy = (DList *)mm.alloc(typeseq::id<DList>(), sizeof(DList));
 
             if (copy)
                 *copy = src;

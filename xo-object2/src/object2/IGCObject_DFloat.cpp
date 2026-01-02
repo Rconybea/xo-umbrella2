@@ -11,6 +11,7 @@
 namespace xo {
     using xo::mm::AAllocator;
     using xo::facet::obj;
+    using xo::facet::typeseq;
     using std::size_t;
 
     namespace scm {
@@ -24,7 +25,8 @@ namespace xo {
         IGCObject_DFloat::shallow_copy(const DFloat & src,
                                        obj<AAllocator> mm) noexcept
         {
-            DFloat * copy = (DFloat *)mm.alloc(sizeof(DFloat));
+            DFloat * copy = (DFloat *)mm.alloc(typeseq::id<DFloat>(),
+                                               sizeof(DFloat));
 
             if (copy)
                 *copy = src;

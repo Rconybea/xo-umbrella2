@@ -8,6 +8,7 @@
 #include "ArenaConfig.hpp"
 #include "AllocError.hpp"
 #include "AllocInfo.hpp"
+#include <xo/facet/typeseq.hpp>
 
 namespace xo {
     namespace mm {
@@ -43,7 +44,9 @@ namespace xo {
             /** @brief a contiguous memory range **/
             using range_type = std::pair<value_type, value_type>;
             /** @brief type for allocation header (if enabled) **/
-            using header_type = AllocHeader; //std::uint64_t;
+            using header_type = AllocHeader;
+            /** integer identifying a type (see xo::facet::typeid<T>()) **/
+            using typeseq = xo::facet::typeseq;
 
             /** @brief mode argument for @ref _alloc **/
             enum class alloc_mode : uint8_t {
@@ -169,14 +172,14 @@ namespace xo {
              *  May expand committed memory, as long as resulting committed size
              *  is no larger than reserved size
              **/
-            value_type alloc(size_type z);
+            value_type alloc(typeseq t, size_type z);
 
             /** when store_header_flag enabled:
              *   like alloc(), but combine memory consumed by this alloc
              *   plus following consecutive sub_alloc()'s into a single header.
              *  otherwise equivalent to alloc()
              **/
-            value_type super_alloc(size_type z);
+            value_type super_alloc(typeseq t, size_type z);
 
             /** when store_header_flag enabled:
              *  follow preceding super_alloc() by one or more sub_allocs().
@@ -271,7 +274,10 @@ namespace xo {
         static T *
         construct_with(DArena & ialloc, Args&&... args)
         {
-            std::byte * mem = ialloc.alloc(sizeof(T));
+            using xo::facet::typeseq;
+
+            typeseq t = typeseq::id<T>();
+            std::byte * mem = ialloc.alloc(t, sizeof(T));
 
             if (mem)
                 return new (mem) T(std::forward<Args>(args)...);

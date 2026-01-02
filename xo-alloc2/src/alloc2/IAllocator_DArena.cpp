@@ -111,16 +111,18 @@ namespace xo {
 
         std::byte *
         IAllocator_DArena::alloc(DArena & s,
+                                 typeseq t,
                                  std::size_t req_z)
         {
-            return s.alloc(req_z);
+            return s.alloc(t, req_z);
         }
 
         std::byte *
         IAllocator_DArena::super_alloc(DArena & s,
+                                       typeseq t,
                                        std::size_t req_z)
         {
-            return s.super_alloc(req_z);
+            return s.super_alloc(t, req_z);
         }
 
         std::byte *

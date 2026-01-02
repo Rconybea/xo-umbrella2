@@ -216,14 +216,14 @@ namespace xo {
         }
 
         auto
-        DX1Collector::alloc(size_type z) noexcept -> value_type
+        DX1Collector::alloc(typeseq t, size_type z) noexcept -> value_type
         {
-            return with_facet<AAllocator>::mkobj(new_space()).alloc(z);
+            return with_facet<AAllocator>::mkobj(new_space()).alloc(t, z);
         }
 
         auto
-        DX1Collector::super_alloc(size_type z) noexcept -> value_type {
-            return with_facet<AAllocator>::mkobj(new_space()).super_alloc(z);
+        DX1Collector::super_alloc(typeseq t, size_type z) noexcept -> value_type {
+            return with_facet<AAllocator>::mkobj(new_space()).super_alloc(t, z);
         }
 
         auto

@@ -44,6 +44,13 @@ namespace xo {
 
             }
 
+            /** 'anonymous' sentinel type.
+             *  Niche uses for this, e.g. untyped allocator
+             **/
+            static typeseq_impl<Tag> anon() {
+                return typeseq_impl(-1);
+            }
+
             int32_t seqno() const { return seqno_; }
 
         private:

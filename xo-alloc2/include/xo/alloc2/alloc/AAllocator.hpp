@@ -117,20 +117,22 @@ namespace xo {
              **/
             virtual bool expand(Opaque d, std::size_t z) const noexcept = 0;
             /** attempt to allocate @p z bytes of memory from allocator @p d.
+             *  for object with type @p t.
+             *  (DX1collector cares about @p t, DArena does not)
              *  If allocation fails returns nullptr. In this case error details may be retrieved
              *  using last error
              **/
-            virtual value_type alloc(Opaque d, size_type z) const = 0;
+            virtual value_type alloc(Opaque d, typeseq t, size_type z) const = 0;
             /** like @ref alloc, but follow with one or more consecutive
              *  @ref sub_alloc() calls. This sequence of allocs will share
              *  the initial allocation header.
              **/
-            virtual value_type super_alloc(Opaque d, size_type z) const = 0;
+            virtual value_type super_alloc(Opaque d, typeseq t, size_type z) const = 0;
             /** follow a preceding @ref super_alloc call with additional
              *  subsidiary allocs that share the same object header.
              *  Must finish sequence with exactly one sub_alloc call
              *  with @p complete_flag set. This sub_alloc call may have
-             *  zero @p z
+             *  zero @p z.
              **/
             virtual value_type sub_alloc(Opaque d, size_type z, bool complete_flag) const = 0;
             /** reset allocator @p d to empty state. **/
