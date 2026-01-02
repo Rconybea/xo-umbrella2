@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <iostream>
 #include <cstdint>
 
 namespace xo {
@@ -15,6 +16,8 @@ namespace xo {
          */
         template<typename Tag = class typeseq_tag>
         struct typeseq_impl {
+            explicit typeseq_impl(int32_t s) : seqno_{s} {}
+
             /** Can't have this be constexpr.
              *  We need ids in shared libraries to be generated
              *  at load time to avoid false positives
@@ -28,7 +31,7 @@ namespace xo {
              *  when using clang.
              **/
             template <typename T>
-            static int32_t id() {
+            static typeseq_impl<Tag> id() {
                 static bool armed = true;
                 static int32_t id = 0;
 
@@ -37,14 +40,39 @@ namespace xo {
                     id = ++s_next_id;
                 }
 
-                return id;
+                return typeseq_impl(id);
+
             }
 
+            int32_t seqno() const { return seqno_; }
+
+        private:
             static int32_t s_next_id;
+
+            int32_t seqno_;
         };
 
         template <typename Tag>
         int32_t typeseq_impl<Tag>::s_next_id = 0;
+
+        template <typename Tag>
+        inline bool
+        operator==(const typeseq_impl<Tag> & lhs, const typeseq_impl<Tag> & rhs) {
+            return lhs.seqno() == rhs.seqno();
+        }
+
+        template <typename Tag>
+        inline bool
+        operator!=(const typeseq_impl<Tag> & lhs, const typeseq_impl<Tag> & rhs) {
+            return lhs.seqno() != rhs.seqno();
+        }
+
+        template <typename Tag>
+        inline std::ostream &
+        operator<<(std::ostream & s, const typeseq_impl<Tag> & x) {
+            s << x.seqno();
+            return s;
+        }
 
         using typeseq = typeseq_impl<>;
     }

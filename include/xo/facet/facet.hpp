@@ -70,7 +70,7 @@ namespace xo {
                  "Abstract facet expected to have trivial dtor since no state");
             static_assert
                 (requires(T & facet) {
-                   { facet._typeseq() } -> std::convertible_to<std::int32_t>; },
+                    { facet._typeseq().seqno() } -> std::convertible_to<std::int32_t>; },
                     "Abstract facet must provide a _typeseq() method for safe downcasting");
             return true;
         };

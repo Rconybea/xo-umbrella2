@@ -34,7 +34,7 @@ namespace xo {
         using TypeErasedIface = struct IComplex_Any;
 
         /** RTTI: reports unique id# for actual runtime data representation **/
-        virtual int32_t _typeseq() const = 0;
+        virtual typeseq _typeseq() const = 0;
 
         virtual double xcoord(void * data) const = 0;
         virtual double ycoord(void * data) const = 0;
@@ -61,7 +61,7 @@ namespace xo {
 
         // from AComplex
 
-        virtual int32_t _typeseq() const final override { return s_typeseq; }
+        virtual typeseq _typeseq() const final override { return s_typeseq; }
 
         virtual double xcoord(void * data) const final override { return Impl::xcoord(*(DRepr*)data); }
         virtual double ycoord(void * data) const final override { return Impl::ycoord(*(DRepr*)data); }
@@ -70,12 +70,12 @@ namespace xo {
 
         virtual void destruct_data(void * data) const final override { Impl::destruct_data(*(DRepr*)data); }
 
-        static int32_t s_typeseq;
+        static typeseq s_typeseq;
         static bool _valid;
     };
 
     template <typename DRepr>
-    int32_t
+    typeseq
     IComplex_Xfer<DRepr>::s_typeseq = typeseq::id<DRepr>();
 
     template <typename DRepr>
@@ -96,7 +96,7 @@ namespace xo {
      *  such as IComplex_RectCoords or IComplex_PolarCoords.
      **/
     struct IComplex_Any : public AComplex {
-        virtual int32_t _typeseq() const final override { return s_typeseq; }
+        virtual typeseq _typeseq() const final override { return s_typeseq; }
 
         virtual double xcoord(void *) const final override { assert(false); return 0.0; }
         virtual double ycoord(void *) const final override { assert(false); return 0.0; }
@@ -105,11 +105,11 @@ namespace xo {
 
         virtual void destruct_data(void *) const final override { assert(false); }
 
-        static int32_t s_typeseq;
+        static typeseq s_typeseq;
         static bool _valid;
     };
 
-    int32_t
+    typeseq
     IComplex_Any::s_typeseq = typeseq::id<DVariantPlaceholder>();
 
     bool
@@ -190,7 +190,7 @@ namespace xo {
         RComplex() {}
         RComplex(Object::DataPtr data) : Object{std::move(data)} {}
 
-        int32_t _typeseq() const { return Object::iface()->_typeseq(); }
+        typeseq _typeseq() const { return Object::iface()->_typeseq(); }
         double xcoord() const { return Object::iface()->xcoord(Object::data()); }
         double ycoord() const { return Object::iface()->ycoord(Object::data()); }
         double argument() const { return Object::iface()->argument(Object::data()); }
