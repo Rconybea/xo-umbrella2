@@ -29,6 +29,7 @@ namespace xo {
              *  IAllocator_Xfer IAllocator_Xfer.hpp
              *  RAllocator      RAllocator.hpp
              */
+            using typeseq = xo::facet::typeseq;
             using size_type = std::size_t;
             using value_type = std::byte *;
             using range_type = AAllocator::range_type;
@@ -54,13 +55,13 @@ namespace xo {
              **/
             static bool expand(DArena & d, size_type z) noexcept;
 
-            static value_type alloc(DArena &, size_type z);
+            static value_type alloc(DArena &, typeseq t, size_type z);
             /** when store_header_flag enabled:
              *   like alloc(), but combine memory consumed by this alloc
              *   plus following consecutive sub_alloc()'s into a single header.
              *  otherwise equivalent to alloc()
              **/
-            static value_type super_alloc(DArena &, size_type z);
+            static value_type super_alloc(DArena &, typeseq t, size_type z);
             /** when store_header_flag enabled:
              *  follow preceding super_alloc() by one or more sub_allocs().
              *  accumulate total allocated size (including padding) into

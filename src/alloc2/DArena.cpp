@@ -15,6 +15,7 @@
 #include <string.h> // for ::memset()
 
 namespace xo {
+    using xo::facet::typeseq;
     using std::byte;
     using std::size_t;
 
@@ -313,24 +314,28 @@ namespace xo {
         }
 
         std::byte *
-        DArena::alloc(std::size_t req_z)
+        DArena::alloc(typeseq t, std::size_t req_z)
         {
             /* - primary allocation path:
              *   exactly 1 header per alloc() call.
              * - store_header_flag follows configuration
              */
 
+            (void)t;
+
             return _alloc(req_z, alloc_mode::standard);
         }
 
         std::byte *
-        DArena::super_alloc(std::size_t req_z)
+        DArena::super_alloc(typeseq t, std::size_t req_z)
         {
             /* - (uncommon) pattern for parent alloc immediately followed by
              *   zero-or-more susidiary allocs, all sharing a single header.
              * - collapses into alloc() behavior when
              *   ArenaConfig.store_header_flag_ disabled
              */
+
+            (void)t;
 
             return _alloc(req_z,
                           alloc_mode::super);

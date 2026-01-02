@@ -60,9 +60,11 @@ namespace xo {
             bool              expand(Opaque d,
                                      std::size_t z) const noexcept override { return I::expand(_dcast(d), z); }
             value_type         alloc(Opaque d,
-                                     std::size_t z) const override { return I::alloc(_dcast(d), z); }
+                                     typeseq t,
+                                     std::size_t z) const override { return I::alloc(_dcast(d), t, z); }
             value_type   super_alloc(Opaque d,
-                                     std::size_t z) const override { return I::super_alloc(_dcast(d), z); }
+                                     typeseq t,
+                                     std::size_t z) const override { return I::super_alloc(_dcast(d), t, z); }
             value_type     sub_alloc(Opaque d,
                                      std::size_t z,
                                      bool complete_flag) const override {

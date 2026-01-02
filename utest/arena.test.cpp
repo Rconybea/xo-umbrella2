@@ -26,6 +26,7 @@ namespace xo {
     using xo::mm::padding;
     using xo::mm::error;
     using xo::facet::obj;
+    using xo::facet::typeseq;
     using xo::scope;
     using std::byte;
     using std::size_t;
@@ -199,7 +200,7 @@ namespace xo {
             REQUIRE(a1o.allocated() == 0);
 
             size_t z0 = 1;
-            byte * m0 = a1o.alloc(1);
+            byte * m0 = a1o.alloc(typeseq::anon(), 1);
 
             REQUIRE(m0);
             REQUIRE(a1o.last_error().error_ == error::ok);
@@ -211,7 +212,7 @@ namespace xo {
             REQUIRE(a1o.committed() <= a1o.reserved());
 
             size_t z1 = 16;
-            byte * m1 = a1o.alloc(z1);
+            byte * m1 = a1o.alloc(typeseq::anon(), z1);
 
             REQUIRE(m1);
             REQUIRE(a1o.last_error().error_ == error::ok);
@@ -248,7 +249,7 @@ namespace xo {
             REQUIRE(a1o.allocated() == 0);
 
             size_t z0 = 1;
-            byte * m0 = a1o.alloc(1);
+            byte * m0 = a1o.alloc(typeseq::anon(), 1);
 
             REQUIRE(m0);
 
@@ -291,7 +292,7 @@ namespace xo {
             REQUIRE(a1o.allocated() == 0);
 
             size_t z0 = 1;
-            byte * m0 = a1o.alloc(1);
+            byte * m0 = a1o.alloc(typeseq::anon(), 1);
 
             REQUIRE(m0);
 
@@ -343,7 +344,7 @@ namespace xo {
             REQUIRE(a1o.allocated() == 0);
 
             size_t z0 = cfg.hugepage_z_ + 1;
-            byte * m0 = a1o.alloc(z0);
+            byte * m0 = a1o.alloc(typeseq::anon(), z0);
 
             REQUIRE(!m0);
 

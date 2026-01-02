@@ -40,8 +40,8 @@ namespace xo {
             AllocInfo   alloc_info(value_type mem) const noexcept { return O::iface()->alloc_info(O::data(), mem); }
             range_type alloc_range(DArena & mm) const noexcept { return O::iface()->alloc_range(O::data(), mm); }
 
-            value_type       alloc(size_type z) noexcept { return O::iface()->alloc(O::data(), z); }
-            value_type super_alloc(size_type z) noexcept { return O::iface()->super_alloc(O::data(), z); }
+            value_type       alloc(typeseq t, size_type z) noexcept { return O::iface()->alloc(O::data(), t, z); }
+            value_type super_alloc(typeseq t, size_type z) noexcept { return O::iface()->super_alloc(O::data(), t, z); }
             value_type   sub_alloc(size_type z,
                                    bool complete_flag) noexcept { return O::iface()->sub_alloc(O::data(),
                                                                                              z, complete_flag); }

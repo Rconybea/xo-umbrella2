@@ -169,7 +169,7 @@ namespace xo {
 
             /* arbitrary alloc size */
             size_t req_z = 13;
-            byte * mem = a1o.alloc(req_z);
+            byte * mem = a1o.alloc(typeseq::anon(), req_z);
 
             REQUIRE(arena.error_count_ == 0);
             REQUIRE(mem != nullptr);
