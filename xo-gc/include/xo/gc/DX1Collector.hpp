@@ -237,6 +237,11 @@ namespace xo {
              *  New allocs always in gen0 to-space
              **/
             value_type sub_alloc(size_type z, bool complete) noexcept;
+            /** Allocate copy of source object at @p src.
+             *  Source must be owned by this collector instance.
+             *  Copy will have incremented age.
+             **/
+            value_type alloc_copy(value_type src) noexcept;
             /** expand gen0 committed size to at least @p z.
              **/
             bool expand(size_type z) noexcept;

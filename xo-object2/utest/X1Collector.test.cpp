@@ -3,17 +3,35 @@
  *  @author Roland Conybeare, Dec 2025
  **/
 
+#include "DFloat.hpp"
+#include "DList.hpp"
+
+#include "IGCObject_DFloat.hpp"
+#include "IGCObject_DList.hpp"
+
 #include <xo/gc/Collector.hpp>
 #include <xo/gc/DX1Collector.hpp>
+#include <xo/gc/detail/IAllocator_DX1Collector.hpp>
+#include <xo/alloc2/AllocInfo.hpp>
+#include <xo/alloc2/padding.hpp>
+
 #include <catch2/catch.hpp>
 
 namespace ut {
+    using xo::scm::DList;
+    using xo::scm::DFloat;
+    using xo::mm::AAllocator;
+    using xo::mm::AllocInfo;
+    using xo::mm::AGCObject;
     using xo::mm::DX1Collector;
     using xo::mm::DArena;
     using xo::mm::CollectorConfig;
     using xo::mm::ArenaConfig;
     using xo::mm::generation;
     using xo::mm::role;
+    using xo::mm::padding;
+    using xo::facet::with_facet;
+    using xo::facet::typeseq;
 
     namespace {
         struct testcase_x1 {
@@ -61,6 +79,7 @@ namespace ut {
 
                 DX1Collector gc(cfg);
 
+                /* verify initial collector state */
                 {
                     REQUIRE(gc.name() == "x1_test");
 
@@ -105,6 +124,43 @@ namespace ut {
                 }
 
                 /* attempt allocation */
+                auto gc_o = with_facet<AAllocator>::mkobj(&gc);
+
+                DFloat * x0 = DFloat::make(gc_o, 3.1415927);
+                auto x0_o = with_facet<AGCObject>::mkobj(x0);
+
+                DList * l0 = DList::list(gc_o, x0_o);
+                auto l0_o = with_facet<AGCObject>::mkobj(l0);
+
+                {
+                    {
+                        REQUIRE(x0_o.iface() != nullptr);
+                        REQUIRE(x0_o.data() != nullptr);
+                        REQUIRE(gc.contains(role::to_space(), x0_o.data()));
+
+                        /* check alloc info for newly-allocated object */
+                        AllocInfo info = gc.alloc_info((std::byte *)x0_o.data());
+
+                        REQUIRE(info.age() == 0);
+                        REQUIRE(info.tseq() == typeseq::id<DFloat>().seqno());
+                        REQUIRE(info.size() >= sizeof(DFloat));
+                        REQUIRE(info.size() < sizeof(DFloat) + padding::c_alloc_alignment);
+                    }
+
+                    {
+                        REQUIRE(l0_o.iface() != nullptr);
+                        REQUIRE(l0_o.data() != nullptr);
+                        REQUIRE(gc.contains(role::to_space(), l0_o.data()));
+
+                        AllocInfo info = gc.alloc_info((std::byte *)l0_o.data());
+
+                        REQUIRE(info.age() == 0);
+                        REQUIRE(info.tseq() == typeseq::id<DList>().seqno());
+                        REQUIRE(info.size() >= sizeof(DList));
+                        REQUIRE(info.size() < sizeof(DList) + padding::c_alloc_alignment);
+
+                    }
+                }
 
             } catch (std::exception & ex) {
                 std::cerr << "caught exception: " << ex.what() << std::endl;

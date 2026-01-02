@@ -62,6 +62,7 @@ namespace xo {
             static value_type alloc(DX1Collector & d, typeseq t, size_type z) noexcept;
             static value_type super_alloc(DX1Collector & d, typeseq t, size_type z) noexcept;
             static value_type sub_alloc(DX1Collector & d, size_type z, bool complete) noexcept;
+            static value_type alloc_copy(DX1Collector & d, value_type src) noexcept;
             /** expand gen0 spaces (both from-space and to-space) **/
             static bool expand(DX1Collector & d, size_type z) noexcept;
 

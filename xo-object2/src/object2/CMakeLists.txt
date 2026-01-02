@@ -8,6 +8,7 @@ set(SELF_SRCS
     ISequence_Any.cpp
     ISequence_DList.cpp
     DList.cpp
+    DFloat.cpp
     object2_register_types.cpp
     )
 

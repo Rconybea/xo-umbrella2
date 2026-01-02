@@ -17,6 +17,8 @@
 namespace xo {
     using xo::facet::typeseq;
     using std::byte;
+    using std::cerr;
+    using std::endl;
     using std::size_t;
 
     namespace mm {
@@ -241,8 +243,8 @@ namespace xo {
             last_error_    = AllocError();
         }
 
-        DArena::header_type *
-        DArena::obj2hdr(void * obj) noexcept
+        auto
+        DArena::obj2hdr(void * obj) noexcept -> header_type *
         {
             assert(config_.store_header_flag_);
 
@@ -260,9 +262,11 @@ namespace xo {
 
             byte * header_mem = mem - sizeof(AllocHeader);
 
+#ifdef OBSOLETE // relying on cross-alloc header shenanigans in DX1Collector
             if (!this->contains(header_mem)) {
                 this->capture_error(error::alloc_info_address);
             }
+#endif
 
             AllocHeader * header = (AllocHeader *)header_mem;
 
@@ -320,10 +324,7 @@ namespace xo {
              *   exactly 1 header per alloc() call.
              * - store_header_flag follows configuration
              */
-
-            (void)t;
-
-            return _alloc(req_z, alloc_mode::standard);
+            return _alloc(req_z, alloc_mode::standard, t, 0 /*age*/);
         }
 
         std::byte *
@@ -338,7 +339,9 @@ namespace xo {
             (void)t;
 
             return _alloc(req_z,
-                          alloc_mode::super);
+                          alloc_mode::super,
+                          t,
+                          0 /*age*/);
         }
 
         std::byte *
@@ -354,8 +357,29 @@ namespace xo {
             return _alloc(req_z,
                           (complete_flag
                            ? alloc_mode::sub_complete
-                           : alloc_mode::sub_incomplete));
+                           : alloc_mode::sub_incomplete),
+                          typeseq::anon() /*typeseq: ignored*/,
+                          0 /*age - ignored */);
+        }
 
+        std::byte *
+        DArena::alloc_copy(std::byte * src)
+        {
+            /* NOTE: allocator that owns src must have the same header configuration */
+
+            assert(config_.store_header_flag_);
+
+            /* src will come from an allocator other than this one;
+             * we rely on header layout from destination
+             * allocator -> assumes compatible header config
+             */
+            AllocInfo src_info = alloc_info(src);
+
+            size_t req_z = src_info.size();
+            typeseq tseq = typeseq(src_info.tseq());
+            uint32_t age = src_info.age();
+
+            return _alloc(req_z, alloc_mode::standard, tseq, age + 1);
         }
 
         void
@@ -373,7 +397,10 @@ namespace xo {
         }
 
         byte *
-        DArena::_alloc(std::size_t req_z, alloc_mode mode)
+        DArena::_alloc(std::size_t req_z,
+                       alloc_mode mode,
+                       typeseq tseq,
+                       uint32_t age)
         {
             scope log(XO_DEBUG(config_.debug_flag_));
 
@@ -433,11 +460,12 @@ namespace xo {
              * reminder:
              *  important to store padded size for correct arena iteration
              */
-            uint64_t header = req_z + dz;
+            uint64_t header = (req_z + dz);
 
             if (store_header_flag)
             {
                 if (config_.header_.is_size_enabled()) [[likely]] {
+                    header = this->config_.header_.mkheader(tseq.seqno(), age, req_z + dz);
                     hz = sizeof(header);
                 } else {
                     /* req_z doesn't fit in configured header_size_mask bits */

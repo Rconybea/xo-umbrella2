@@ -231,6 +231,11 @@ namespace xo {
             return with_facet<AAllocator>::mkobj(new_space()).sub_alloc(z, complete);
         }
 
+        auto
+        DX1Collector::alloc_copy(value_type src) noexcept -> value_type {
+            return with_facet<AAllocator>::mkobj(new_space()).alloc_copy(src);
+        }
+
         bool
         DX1Collector::expand(size_type z) noexcept
         {

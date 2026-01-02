@@ -70,6 +70,8 @@ namespace xo {
                                      bool complete_flag) const override {
                 return I::sub_alloc(_dcast(d), z, complete_flag);
             }
+            value_type    alloc_copy(Opaque d,
+                                     value_type src) const override { return I::alloc_copy(_dcast(d), src); }
             void               clear(Opaque d) const override { return I::clear(_dcast(d)); }
             void       destruct_data(Opaque d) const override { return I::destruct_data(_dcast(d)); }
             ///@}

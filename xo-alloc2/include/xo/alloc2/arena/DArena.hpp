@@ -190,12 +190,18 @@ namespace xo {
              **/
             value_type sub_alloc(size_type z, bool complete_flag);
 
+            /** alloc copy of @p src **/
+            value_type alloc_copy(value_type src);
+
             /** capture error information: advance error count + set last_error **/
             void capture_error(error err,
                                size_type target_z = 0) const;
 
             /** alloc driver. shared by alloc(), super_alloc(), sub_alloc() **/
-            value_type _alloc(std::size_t req_z, alloc_mode mode);
+            value_type _alloc(std::size_t req_z,
+                              alloc_mode mode,
+                              typeseq tseq,
+                              uint32_t age);
 
             /** expand committed space in arena @p d
              *  to size at least @p z

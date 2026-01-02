@@ -53,6 +53,7 @@ namespace xo {
             [[noreturn]] value_type          alloc(Opaque, typeseq, std::size_t) const override { _fatal(); }
             [[noreturn]] value_type    super_alloc(Opaque, typeseq, std::size_t) const override { _fatal(); }
             [[noreturn]] value_type      sub_alloc(Opaque, std::size_t, bool) const override { _fatal(); }
+            [[noreturn]] value_type     alloc_copy(Opaque, value_type) const override { _fatal(); }
             [[noreturn]] void                clear(Opaque) const override { _fatal(); }
             [[noreturn]] void        destruct_data(Opaque) const override { _fatal(); }
 

@@ -102,6 +102,12 @@ namespace xo {
             return d.sub_alloc(z, complete);
         }
 
+        auto
+        IAllocator_DX1Collector::alloc_copy(DX1Collector & d, value_type src) noexcept -> value_type
+        {
+            return d.alloc_copy(src);
+        }
+
         bool
         IAllocator_DX1Collector::expand(DX1Collector & d, size_type z) noexcept
         {

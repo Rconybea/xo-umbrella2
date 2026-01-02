@@ -45,6 +45,7 @@ namespace xo {
             value_type   sub_alloc(size_type z,
                                    bool complete_flag) noexcept { return O::iface()->sub_alloc(O::data(),
                                                                                              z, complete_flag); }
+            value_type  alloc_copy(value_type src) noexcept { return O::iface()->alloc_copy(O::data(), src); }
             bool            expand(size_type z) { return O::iface()->expand(O::data(), z); }
 
             static bool _valid;
