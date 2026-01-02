@@ -24,10 +24,11 @@ namespace xo {
          *  @brief Stub Collector Implementation for empty variant instance
          **/
         struct ICollector_Any : public ACollector {
+            using typeseq = xo::facet::typeseq;
             using size_type = std::size_t;
 
             // from ACollector
-            int32_t _typeseq() const noexcept override { return s_typeseq; }
+            typeseq _typeseq() const noexcept override { return s_typeseq; }
 
             // const methods
             [[noreturn]] size_type allocated(Copaque, generation, role) const noexcept override { _fatal(); }
