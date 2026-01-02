@@ -24,6 +24,9 @@ namespace xo {
                                   size_t align_z,
                                   bool enable_hugepage_flag) -> range_type
         {
+            scope log(XO_DEBUG(true),
+                      xtag("req_z", req_z), xtag("align_z", align_z));
+
             // 1. round up to multiple of align_z
             size_t target_z = padding::with_padding(req_z, align_z); // 4.
 
