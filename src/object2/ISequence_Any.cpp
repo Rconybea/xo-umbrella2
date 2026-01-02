@@ -25,7 +25,7 @@ ISequence_Any::_fatal()
     std::terminate();
 }
 
-int32_t
+typeseq
 ISequence_Any::s_typeseq = typeseq::id<DVariantPlaceholder>();
 
 bool

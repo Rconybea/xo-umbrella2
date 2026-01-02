@@ -34,6 +34,8 @@ public:
     /** @defgroup scm-sequence-type-traits **/
     ///@{
     // types
+    /** integer identifying a type **/
+    using typeseq = xo::facet::typeseq;
     /** type for length of a sequence **/
     using size_type = std::size_t;
     /** facet for types with GC support **/
@@ -44,7 +46,7 @@ public:
     ///@{
     // const methods
     /** RTTI: unique id# for actual runtime data representation **/
-    virtual int32_t _typeseq() const noexcept = 0;
+    virtual typeseq _typeseq() const noexcept = 0;
     /** true iff sequence is empty **/
     virtual bool is_empty(Copaque data) const noexcept = 0;
     /** true iff sequence is finite **/
