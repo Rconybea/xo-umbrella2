@@ -29,6 +29,7 @@ namespace xo {
          *  RAllocator      RCollector.hpp
          */
         struct IAllocator_DX1Collector {
+            using typeseq = xo::facet::typeseq;
             using size_type = std::size_t;
             using value_type = std::byte *;
             using range_type = AAllocator::range_type;
@@ -58,8 +59,8 @@ namespace xo {
             static range_type alloc_range(const DX1Collector & d, DArena & ialloc) noexcept;
 
             /** always alloc in gen0 to-space **/
-            static value_type alloc(DX1Collector & d, size_type z) noexcept;
-            static value_type super_alloc(DX1Collector & d, size_type z) noexcept;
+            static value_type alloc(DX1Collector & d, typeseq t, size_type z) noexcept;
+            static value_type super_alloc(DX1Collector & d, typeseq t, size_type z) noexcept;
             static value_type sub_alloc(DX1Collector & d, size_type z, bool complete) noexcept;
             /** expand gen0 spaces (both from-space and to-space) **/
             static bool expand(DX1Collector & d, size_type z) noexcept;

@@ -12,6 +12,7 @@
 
 namespace xo {
     using xo::facet::with_facet;
+    using xo::facet::typeseq;
     using std::size_t;
     using std::byte;
 
@@ -80,15 +81,19 @@ namespace xo {
         }
 
         auto
-        IAllocator_DX1Collector::alloc(DX1Collector & d, size_type z) noexcept -> value_type
+        IAllocator_DX1Collector::alloc(DX1Collector & d,
+                                       typeseq t,
+                                       size_type z) noexcept -> value_type
         {
-            return d.alloc(z);
+            return d.alloc(t, z);
         }
 
         auto
-        IAllocator_DX1Collector::super_alloc(DX1Collector & d, size_type z) noexcept -> value_type
+        IAllocator_DX1Collector::super_alloc(DX1Collector & d,
+                                             typeseq t,
+                                             size_type z) noexcept -> value_type
         {
-            return d.super_alloc(z);
+            return d.super_alloc(t, z);
         }
 
         auto

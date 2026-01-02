@@ -43,6 +43,8 @@ namespace utest {
                              xoshiro256ss * p_rgen,
                              obj<AAllocator> mm)
     {
+        using xo::facet::typeseq;
+
         scope log(XO_DEBUG(catch_flag), xtag("n-alloc", n_alloc));
 
         /* track allocs. verify:
@@ -65,7 +67,7 @@ namespace utest {
 
             bool ok_flag = true;
 
-            std::byte * mem = mm.alloc(z);
+            std::byte * mem = mm.alloc(typeseq::anon(), z);
 
             log && log(xtag("i_alloc", i_alloc),
                        xtag("si", si),

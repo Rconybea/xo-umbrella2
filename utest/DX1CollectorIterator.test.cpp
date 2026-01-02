@@ -30,6 +30,7 @@ namespace xo {
     using xo::mm::cmpresult;
     using xo::mm::padding;
     using xo::facet::with_facet;
+    using xo::facet::typeseq;
     using std::byte;
 
     namespace ut {
@@ -109,7 +110,7 @@ namespace xo {
             REQUIRE(a1o.allocated() == 0);
 
             size_t req_z = 13;
-            byte * mem = gc.alloc(req_z);
+            byte * mem = gc.alloc(typeseq::anon(), req_z);
 
             REQUIRE(mem != nullptr);
 

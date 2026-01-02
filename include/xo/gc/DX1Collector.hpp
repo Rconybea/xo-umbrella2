@@ -155,6 +155,7 @@ namespace xo {
         // ----- DX1Collector -----
 
         struct DX1Collector {
+            using typeseq = xo::facet::typeseq;
             using size_type = DArena::size_type;
             using value_type = DArena::value_type;
             using header_type = DArena::header_type;
@@ -216,9 +217,14 @@ namespace xo {
 
             // ----- allocation -----
 
-            /** simple allocation. new allocs always in gen0 to-space **/
-            value_type alloc(size_type z) noexcept;
-            /** compound allocation. To be followed immediately by:
+            /** simple allocation. allocate @p z bytes of memory
+             *  for an object of type @p t.
+             *  New allocs always in gen0 to-space
+             **/
+            value_type alloc(typeseq t, size_type z) noexcept;
+            /** compound allocation. Allocate @p z bytes of memory
+             *  for an object of type @p t.
+             *  To be followed immediately by:
              *  1. zero or more calls to sub_alloc(zi, complete=false), then
              *  2. exactly one call to sub_alloc(zi, complete=true)
              *  all the allocs in a compound allocation share the same
@@ -226,7 +232,7 @@ namespace xo {
              *  allocation with size z + sum(zi).
              *  New allocs always in gen0 to-space
              **/
-            value_type super_alloc(size_type z) noexcept;
+            value_type super_alloc(typeseq t, size_type z) noexcept;
             /** sub-allocation with preceding compound allocation.
              *  New allocs always in gen0 to-space
              **/
