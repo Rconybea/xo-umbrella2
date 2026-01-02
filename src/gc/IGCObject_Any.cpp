@@ -22,7 +22,7 @@ namespace xo {
             std::terminate();
         }
 
-        int32_t
+        typeseq
         IGCObject_Any::s_typeseq = typeseq::id<DVariantPlaceholder>();
 
         bool

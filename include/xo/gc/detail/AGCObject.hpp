@@ -26,10 +26,11 @@ namespace xo {
          *  by ACollector
          **/
         struct AGCObject {
+            using typeseq = xo::facet::typeseq;
             using size_type = std::size_t;
 
             /** RTTI: unique id# for actual runtime data representation **/
-            virtual int32_t _typeseq() const noexcept = 0;
+            virtual typeseq _typeseq() const noexcept = 0;
 
             virtual size_type shallow_size(Copaque d) const noexcept = 0;
             virtual Opaque shallow_copy(Copaque d,

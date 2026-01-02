@@ -18,12 +18,13 @@ namespace xo {
         public:
             using ObjectType = Object;
             using DataPtr = Object::DataPtr;
+            using typeseq = xo::facet::typeseq;
             using size_type = std::size_t;
 
             RGCObject() = default;
             RGCObject(Object::DataPtr data) : Object{std::move(data)} {}
 
-            int32_t _typeseq() const noexcept { return O::iface()->_typeseq(); }
+            typeseq _typeseq() const noexcept { return O::iface()->_typeseq(); }
             size_type shallow_size() const noexcept { O::iface()->shallow_size(O::data()); }
             Opaque shallow_copy(obj<AAllocator> mm) const noexcept { O::iface()->shallow_copy(O::data(), mm); }
             size_type forward_children() noexcept { O::iface()->forward_children(O::data()); }

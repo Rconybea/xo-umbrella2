@@ -47,16 +47,11 @@ namespace xo {
             return stat_helper(d, &DArena::committed, g, r);
         }
 
-        void
+        bool
         ICollector_DX1Collector::install_type(DX1Collector & d,
-                                              std::int32_t tseq,
-                                              IGCObject_Any & iface)
+                                              const AGCObject & iface)
         {
-            (void)d;
-            (void)tseq;
-            (void)iface;
-
-            assert(false);
+            return d.install_type(iface);
         }
 
         void
