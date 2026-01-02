@@ -37,8 +37,7 @@ namespace xo {
         {
             gc.forward_inplace(src.head_.iface(), (void **)&(src.head_.data_));
 
-            //auto rest = with_facet<AGCObject>::mkobj(src.rest_);
-            xo::facet::FacetImplementation<xo::mm::AGCObject, DList>::ImplType iface;
+            auto iface = xo::facet::impl_for<AGCObject, DList>();
             gc.forward_inplace(&iface, (void **)(&src.rest_));
 
             return shallow_size(src);

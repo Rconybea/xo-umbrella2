@@ -33,9 +33,10 @@ namespace xo {
         }
 
         size_t
-        IGCObject_DFloat::forward_children(DFloat &) noexcept
+        IGCObject_DFloat::forward_children(DFloat & src,
+                                           obj<ACollector>) noexcept
         {
-            return sizeof(DFloat);
+            return shallow_size(src);
         }
 
     } /*namespace scm*/
