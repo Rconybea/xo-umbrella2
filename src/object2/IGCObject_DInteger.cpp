@@ -11,6 +11,7 @@
 namespace xo {
     using xo::mm::AAllocator;
     using xo::facet::obj;
+    using xo::facet::typeseq;
     using std::size_t;
 
     namespace scm {
@@ -24,7 +25,8 @@ namespace xo {
         IGCObject_DInteger::shallow_copy(const DInteger & src,
                                        obj<AAllocator> mm) noexcept
         {
-            DInteger * copy = (DInteger *)mm.alloc(sizeof(DInteger));
+            DInteger * copy = (DInteger *)mm.alloc(typeseq::id<DInteger>(),
+                                                   sizeof(DInteger));
 
             if (copy)
                 *copy = src;
