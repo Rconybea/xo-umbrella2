@@ -3,9 +3,11 @@
  *  @author Roland Conybeare, Dec 2025
  **/
 
-#include "xo/gc/GCObject.hpp"
+#pragma once
+
+#include <xo/gc/GCObject.hpp>
 //#include "xo/alloc2/gcobject/RGCObject.hpp"
-#include "xo/facet/obj.hpp"
+#include <xo/facet/obj.hpp>
 
 namespace xo {
     namespace scm {
