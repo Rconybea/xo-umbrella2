@@ -25,6 +25,7 @@ namespace xo {
             using Impl = IAllocator_DRepr;
             using size_type = AAllocator::size_type;
             using value_type = AAllocator::value_type;
+            using typeseq = AAllocator::typeseq;
             ///@}
 
             /** @defgroup mm-allocator-xfer-methods IAllocator_Xfer methods **/
@@ -38,7 +39,7 @@ namespace xo {
             // const methods
 
             /** return typeseq for @tparam DRepr **/
-            int32_t _typeseq() const noexcept override { return s_typeseq; }
+            typeseq _typeseq() const noexcept override { return s_typeseq; }
             std::string_view    name(Copaque d) const noexcept override { return I::name(_dcast(d)); }
             size_type       reserved(Copaque d) const noexcept override { return I::reserved(_dcast(d)); }
             size_type           size(Copaque d) const noexcept override { return I::size(_dcast(d)); }
@@ -75,12 +76,12 @@ namespace xo {
             using I = Impl;
 
         public:
-            static int32_t s_typeseq;
+            static xo::facet::typeseq s_typeseq;
             static bool _valid;
         };
 
         template <typename DRepr, typename IAllocator_DRepr>
-        int32_t
+        xo::facet::typeseq
         IAllocator_Xfer<DRepr, IAllocator_DRepr>::s_typeseq = facet::typeseq::id<DRepr>();
 
         template <typename DRepr, typename IAllocator_DRepr>

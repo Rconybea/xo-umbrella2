@@ -26,7 +26,7 @@ namespace xo {
             std::terminate();
         }
 
-        int32_t
+        typeseq
         IAllocIterator_Any::s_typeseq = typeseq::id<DVariantPlaceholder>();
 
         bool

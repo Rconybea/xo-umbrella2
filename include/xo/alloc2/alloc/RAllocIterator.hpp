@@ -17,11 +17,12 @@ namespace xo {
         public:
             using ObjectType = Object;
             using DataPtr = Object::DataPtr;
+            using typeseq = xo::facet::typeseq;
 
             RAllocIterator() {}
             RAllocIterator(Object::DataPtr data) : Object{std::move(data)} {}
 
-            int32_t _typeseq() const noexcept { return O::iface()->_typeseq(); }
+            typeseq _typeseq() const noexcept { return O::iface()->_typeseq(); }
             AllocInfo deref() const noexcept { return O::iface()->deref(O::data()); }
             cmpresult compare(const obj<AAllocIterator> & other) const noexcept {
                 return O::iface()->compare(O::data(), other); }
