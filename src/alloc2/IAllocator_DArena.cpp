@@ -133,12 +133,11 @@ namespace xo {
             return s.sub_alloc(req_z, complete_flag);
         }
 
-        byte *
-        IAllocator_DArena::_alloc(DArena & s,
-                                  std::size_t req_z,
-                                  DArena::alloc_mode mode)
+        std::byte *
+        IAllocator_DArena::alloc_copy(DArena &s,
+                                      value_type src)
         {
-            return s._alloc(req_z, mode);
+            return s.alloc_copy(src);
         }
 
         void

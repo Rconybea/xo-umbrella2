@@ -70,14 +70,10 @@ namespace xo {
              *  @p complete_flag to true.
              **/
             static value_type sub_alloc(DArena &, size_type z, bool complete_flag);
+            /** allocate copy of @p src in arena @p d. **/
+            static value_type alloc_copy(DArena & d, value_type src);
             static void clear(DArena &);
             static void destruct_data(DArena &);
-
-        private:
-            /** alloc driver. shared by alloc(), super_alloc(), sub_alloc() **/
-            static value_type _alloc(DArena &,
-                                     size_type z,
-                                     DArena::alloc_mode mode);
         };
 
 //        template <>

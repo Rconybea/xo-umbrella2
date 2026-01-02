@@ -51,6 +51,19 @@ namespace xo {
                                                          age_bits_{a},
                                                          size_bits_{z} {}
 
+            /** create header tuple (@p t, @p a, @p z)
+             *  with typeseq @p t, age @p a, size @p z
+             **/
+            std::uint64_t mkheader(std::uint64_t t,
+                                   std::uint64_t a,
+                                   std::uint64_t z) const noexcept {
+                uint64_t tseq_bits = (t << (age_bits_ + size_bits_)) & tseq_mask();
+                uint64_t age_bits = (a << size_bits_) & age_mask();
+                uint64_t size_bits = z & size_mask();;
+
+                return (tseq_bits | age_bits | size_bits);
+            }
+
             std::uint64_t tseq_mask() const noexcept {
                 // e.g.
                 //   FF FF FF 00 00 00 00 00
