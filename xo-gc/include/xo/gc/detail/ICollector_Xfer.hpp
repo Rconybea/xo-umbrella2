@@ -53,7 +53,11 @@ namespace xo {
             void add_gc_root(Opaque d, int32_t tseq, Opaque * root) override {
                 I::add_gc_root(_dcast(d), tseq, root);
             }
-            void forward_inplace(Opaque d, AGCObject * lhs_iface, void ** lhs_data) override {
+            void request_gc(Opaque d, generation upto) override {
+                I::request_gc(_dcast(d), upto);
+            }
+            void forward_inplace(Opaque d,
+                                 AGCObject * lhs_iface, void ** lhs_data) override {
                 I::forward_inplace(_dcast(d), lhs_iface, lhs_data);
             }
 

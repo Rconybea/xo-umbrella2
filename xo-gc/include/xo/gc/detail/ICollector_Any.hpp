@@ -39,6 +39,7 @@ namespace xo {
             // non-const methods
             [[noreturn]] bool install_type(Opaque, const AGCObject &) noexcept override { _fatal(); }
             [[noreturn]] void add_gc_root(Opaque, int32_t, Opaque *) override { _fatal(); }
+            [[noreturn]] void request_gc(Opaque, generation) override { _fatal(); }
             [[noreturn]] void forward_inplace(Opaque, AGCObject *, void **) override { _fatal(); }
 
         private:

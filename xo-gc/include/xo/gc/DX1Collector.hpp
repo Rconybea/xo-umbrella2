@@ -221,6 +221,22 @@ namespace xo {
              **/
             bool install_type(const AGCObject & meta) noexcept;
 
+            /** add GC root at @p root_addr, with type @p typeseq **/
+            void add_gc_root(typeseq tseq, Opaque * root_addr) noexcept;
+
+            /** Request immediate collection.
+             *  1. if collection is enabled, immediately collect all generations
+             *     up to (but not including) g
+             *  2. may nevertheless escalate to older generations,
+             *     depending on collector state.
+             *  3. if collection is currently disabled,
+             *     collection will trigger the next time gc is enabled.
+             **/
+            void request_gc(generation upto) noexcept;
+
+            /** Execute gc immediately, for all generations < @p upto **/
+            void execute_gc(generation upto) noexcept;
+
             // ----- allocation -----
 
             /** simple allocation. allocate @p z bytes of memory
@@ -269,6 +285,12 @@ namespace xo {
             /** discard all allocated memory **/
             void clear() noexcept;
 
+        private:
+            /** swap from- and to- roles for all generations < @p upto **/
+            void swap_roles(generation upto) noexcept;
+            /** copy roots + everything reachable from them, to to-space **/
+            void copy_roots(generation upto) noexcept;
+
         public:
             /** garbage collector configuration **/
             CollectorConfig config_;
@@ -280,6 +302,11 @@ namespace xo {
              *  For each type need to store one (8-byte) IGCObject_Any instance,
              **/
             DArena object_types_;
+
+            /** gc disabled whenever gc_blocked_ > 0 **/
+            uint32_t gc_blocked_ = 0;
+            /** if > 0: need gc for all generations < gc_pending_upto_ **/
+            generation gc_pending_upto_;
 
             /** collector-managed memory here.
              *  - space_[1] is from-space

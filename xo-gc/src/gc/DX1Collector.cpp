@@ -228,6 +228,65 @@ namespace xo {
             return true;
         }
 
+        void
+        DX1Collector::add_gc_root(typeseq tseq,
+                                  Opaque * root) noexcept
+        {
+            (void)tseq;
+            (void)root;
+        }
+
+        void
+        DX1Collector::request_gc(generation upto) noexcept
+        {
+            if (gc_blocked_ > 0) {
+                if (gc_pending_upto_ < upto) {
+                    this->gc_pending_upto_ = upto;
+                }
+
+                /* intend collecting later */
+            } else {
+                this->execute_gc(upto);
+            }
+        }
+
+        void
+        DX1Collector::execute_gc(generation upto) noexcept
+        {
+            scope log(XO_DEBUG(true), xtag("upto", upto));
+
+            //auto t0 = std::chrono::steady_clock::now();
+
+            log && log("step 0a : [STUB] snapshot alloc state");
+
+            log && log("step 0b : [STUB] scan for object statistics");
+
+            log && log("step 1  : swap from/to roles");
+            this->swap_roles(upto);
+
+            log && log("step 2a : copy roots");
+            this->copy_roots(upto);
+
+            log && log("step 2b : [STUB] copy pinned");
+            log && log("step 3a : [STUB] run destructors");
+            log && log("step 3b : [STUB] keep reachable weak pointers");
+            log && log("step 4  : [STUB] cleanup");
+        }
+
+        void
+        DX1Collector::swap_roles(generation upto) noexcept
+        {
+            for (generation g = generation{0}; g < upto; ++g) {
+                std::swap(space_[role::to_space()][g], space_[role::from_space()][g]);
+            }
+        }
+
+        void
+        DX1Collector::copy_roots(generation upto) noexcept
+        {
+            scope log(XO_DEBUG(true), "STUB", xtag("upto", upto));
+        }
+
         auto
         DX1Collector::alloc(typeseq t, size_type z) noexcept -> value_type
         {

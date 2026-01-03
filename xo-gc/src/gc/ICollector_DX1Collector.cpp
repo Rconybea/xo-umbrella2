@@ -65,11 +65,14 @@ namespace xo {
                                              int32_t tseq,
                                              Opaque * root)
         {
-            (void)d;
-            (void)tseq;
-            (void)root;
+            d.add_gc_root(typeseq(tseq), root);
+        }
 
-            assert(false);
+        void
+        ICollector_DX1Collector::request_gc(DX1Collector & d,
+                                            generation upto)
+        {
+            d.request_gc(upto);
         }
 
         void

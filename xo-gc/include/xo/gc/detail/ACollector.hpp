@@ -59,6 +59,16 @@ namespace xo {
             virtual bool install_type(Opaque d, const AGCObject & iface) = 0;
             virtual void add_gc_root(Opaque d, int32_t tseq, Opaque * root) = 0;
 
+            /** Request immediate collection.
+             *  1. if collection is enabled, immediately collect all generations
+             *     up to (but not including) g
+             *  2. may nevertheless escalate to older generations,
+             *     depending on collector state.
+             *  3. if collection is currently disabled,
+             *     collection will trigger the next time gc is enabled.
+             **/
+            virtual void request_gc(Opaque d, generation upto) = 0;
+
             /** evacuate @p *lhs, that refers to state with interface @p lhs_iface,
              *  to collector @p d's to-space. Replace *lhs_data with forwarding pointer
              *
