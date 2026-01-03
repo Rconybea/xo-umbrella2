@@ -35,7 +35,7 @@ namespace xo {
              **/
             bool store_header_flag_ = false;
             /** configuration for per-alloc header **/
-            AllocHeaderConfig header_;
+            AllocHeaderConfig header_{};
             /** true to enable debug logging **/
             bool debug_flag_ = false;
 
