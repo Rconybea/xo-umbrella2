@@ -45,6 +45,7 @@ namespace xo {
 
             static bool install_type(DX1Collector & d, const AGCObject & iface);
             static void add_gc_root(DX1Collector & d, int32_t tseq, Opaque * root);
+            static void request_gc(DX1Collector & d, generation upto);
             static void forward_inplace(DX1Collector & d, AGCObject * lhs_iface, void ** lhs_data);
 
             static int32_t s_typeseq;

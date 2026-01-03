@@ -31,7 +31,7 @@ namespace xo {
 
             bool install_type(const AGCObject & iface) { return O::iface()->install_type(O::data(), iface); }
             void add_gc_root(int32_t tseq, Opaque * root) { O::iface()->add_gc_root(O::data(), tseq, root); }
-
+            void request_gc(generation g) { O::iface()->request_gc(O::data(), g); }
             void forward_inplace(AGCObject * lhs_iface, void ** lhs_data) { O::iface()->forward_inplace(O::data(), lhs_iface, lhs_data); }
 
             static bool _valid;
