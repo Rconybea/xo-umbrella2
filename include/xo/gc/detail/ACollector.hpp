@@ -57,7 +57,8 @@ namespace xo {
              *  Return false if installation fails (e.g. memory exhausted)
              **/
             virtual bool install_type(Opaque d, const AGCObject & iface) = 0;
-            virtual void add_gc_root(Opaque d, int32_t tseq, Opaque * root) = 0;
+            virtual void add_gc_root_poly(Opaque d, obj<AGCObject> * p_root) = 0;
+            //virtual void add_gc_root_typed(Opaque d, typeseq tseq, Opaque * root) = 0;
 
             /** Request immediate collection.
              *  1. if collection is enabled, immediately collect all generations

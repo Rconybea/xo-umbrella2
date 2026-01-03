@@ -61,11 +61,10 @@ namespace xo {
         }
 
         void
-        ICollector_DX1Collector::add_gc_root(DX1Collector & d,
-                                             int32_t tseq,
-                                             Opaque * root)
+        ICollector_DX1Collector::add_gc_root_poly(DX1Collector & d,
+                                                  obj<AGCObject> * p_root)
         {
-            d.add_gc_root(typeseq(tseq), root);
+            d.add_gc_root_poly(p_root);
         }
 
         void

@@ -222,7 +222,7 @@ namespace xo {
             bool install_type(const AGCObject & meta) noexcept;
 
             /** add GC root at @p root_addr, with type @p typeseq **/
-            void add_gc_root(typeseq tseq, Opaque * root_addr) noexcept;
+            void add_gc_root_poly(obj<AGCObject> * p_root) noexcept;
 
             /** Request immediate collection.
              *  1. if collection is enabled, immediately collect all generations
