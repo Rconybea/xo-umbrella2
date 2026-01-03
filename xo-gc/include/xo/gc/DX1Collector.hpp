@@ -91,6 +91,9 @@ namespace xo {
             /** storage for N object types requires 8*N bytes **/
             std::size_t object_types_z_ = 2*1024*1024;
 
+            /** storage for N object roots requires 8*N bytes **/
+            std::size_t object_roots_z_ = 16*1024;
+
             /** number of bits to represent generation **/
             std::uint64_t gen_bits_ = 8;
 
@@ -169,6 +172,7 @@ namespace xo {
             std::string_view name() const { return config_.name_; }
 
             const DArena * get_object_types() const noexcept { return &object_types_; }
+            const DArena * get_roots() const noexcept { return &roots_; }
             const DArena * get_space(role r, generation g) const noexcept { return space_[r][g]; }
             DArena * get_space(role r, generation g) noexcept { return space_[r][g]; }
             DArena * from_space(generation g) noexcept { return get_space(role::from_space(), g); }
@@ -307,6 +311,11 @@ namespace xo {
             uint32_t gc_blocked_ = 0;
             /** if > 0: need gc for all generations < gc_pending_upto_ **/
             generation gc_pending_upto_;
+
+            /** (ab)using arena to get extensible list of root objects.
+             *  For each root store one address (type obj<AGCObject>*)
+             **/
+            DArena roots_;
 
             /** collector-managed memory here.
              *  - space_[1] is from-space

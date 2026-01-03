@@ -77,6 +77,13 @@ namespace xo {
                     .hugepage_z_ = page_z,
                     .store_header_flag_ = false});
 
+            roots_ = DArena::map(
+                ArenaConfig{
+                    .name_ = "x1-object-roots",
+                    .size_ = cfg.object_roots_z_,
+                    .hugepage_z_ = page_z,
+                    .store_header_flag_ = false});
+
             for (uint32_t igen = 0, ngen = cfg.n_generation_; igen < ngen; ++igen) {
                 space_storage_[0][igen] = DArena::map(cfg.arena_config_);
                 space_storage_[1][igen] = DArena::map(cfg.arena_config_);
@@ -119,7 +126,10 @@ namespace xo {
             accumulate_total_aux(const DX1Collector & d,
                                  size_t (DArena::* get_stat_fn)() const) noexcept
             {
-                size_t z = (d.object_types_.*get_stat_fn)();
+                size_t z1 = (d.object_types_.*get_stat_fn)();
+                size_t z2 = (d.roots_.*get_stat_fn)();
+
+                size_t z3 = 0;
 
                 for (role ri : role::all()) {
                     for (generation gj{0}; gj < d.config_.n_generation_; ++gj) {
@@ -127,11 +137,11 @@ namespace xo {
 
                         assert(arena);
 
-                        z += (arena->*get_stat_fn)();
+                        z3 += (arena->*get_stat_fn)();
                     }
                 }
 
-                return z;
+                return z1 + z2 + z3;
             }
         }
 
@@ -231,7 +241,12 @@ namespace xo {
         void
         DX1Collector::add_gc_root_poly(obj<AGCObject> * p_root) noexcept
         {
-            (void)p_root;
+            std::byte * mem
+                = roots_.alloc(typeseq::anon(),
+                               sizeof(obj<AGCObject>*));
+            assert(mem);
+
+            *(obj<AGCObject> **)mem = p_root;
         }
 
         void

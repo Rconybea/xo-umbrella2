@@ -98,7 +98,13 @@ namespace ut {
                     REQUIRE(otypes->reserved() >= cfg.object_types_z_);
                     REQUIRE(otypes->reserved() < cfg.object_types_z_ + otypes->page_z_);
 
-                    DArena * from_0 = gc.get_space(role::from_space(), generation{0});
+                    const DArena * roots = gc.get_roots();
+
+                    REQUIRE(roots != nullptr);
+                    REQUIRE(roots->reserved() >= cfg.object_roots_z_);
+                    REQUIRE(roots->reserved() < cfg.object_roots_z_ + roots->page_z_);
+
+                    const DArena * from_0 = gc.get_space(role::from_space(), generation{0});
 
                     REQUIRE(from_0 != nullptr);
                     REQUIRE(from_0->reserved() >= tc.tenured_z_);
@@ -106,7 +112,7 @@ namespace ut {
                     REQUIRE(from_0->reserved() % from_0->page_z_ == 0);
                     REQUIRE(from_0->allocated() == 0);
 
-                    DArena * from_1 = gc.get_space(role::from_space(), generation{1});
+                    const DArena * from_1 = gc.get_space(role::from_space(), generation{1});
 
                     REQUIRE(from_1 != nullptr);
                     REQUIRE(from_1->reserved() == from_0->reserved());
@@ -118,22 +124,22 @@ namespace ut {
                     REQUIRE(to_0->reserved() == from_0->reserved());
                     REQUIRE(to_0->allocated() == 0);
 
-                    DArena * to_1 = gc.get_space(role::to_space(), generation{1});
+                    const DArena * to_1 = gc.get_space(role::to_space(), generation{1});
 
                     REQUIRE(to_1 != nullptr);
                     REQUIRE(to_1->reserved() == to_0->reserved());
                     REQUIRE(to_1->allocated() == 0);
 
-                    DArena * from_2 = gc.get_space(role::from_space(), generation{2});
+                    const DArena * from_2 = gc.get_space(role::from_space(), generation{2});
 
                     REQUIRE(from_2 == nullptr);
 
-                    DArena * to_2 = gc.get_space(role::to_space(), generation{2});
+                    const DArena * to_2 = gc.get_space(role::to_space(), generation{2});
 
                     REQUIRE(to_2 == nullptr);
 
                     REQUIRE(gc.reserved_total()
-                            == otypes->reserved() + 4 * from_0->reserved());
+                            == otypes->reserved() + roots->reserved() + 4 * from_0->reserved());
                 }
 
                 /* attempt allocation */
@@ -147,18 +153,17 @@ namespace ut {
 
                 ok = c_o.is_type_installed(typeseq::id<DFloat>());
                 REQUIRE(ok);
-
                 ok = c_o.is_type_installed(typeseq::id<DList>());
                 REQUIRE(ok);
 
                 DFloat * x0 = DFloat::make(gc_o, 3.1415927);
                 auto x0_o = with_facet<AGCObject>::mkobj(x0);
-
+                c_o.add_gc_root(&x0_o);
                 REQUIRE(to_0->allocated() == sizeof(AllocHeader) + sizeof(DFloat));
 
                 DList * l0 = DList::list(gc_o, x0_o);
                 auto l0_o = with_facet<AGCObject>::mkobj(l0);
-
+                c_o.add_gc_root(&l0_o);
                 REQUIRE(to_0->allocated() == (sizeof(AllocHeader) + sizeof(DFloat)
                                               + sizeof(AllocHeader) + sizeof(DList)));
 
@@ -195,6 +200,8 @@ namespace ut {
 
                 /* no GC roots, so GC is trivial */
                 c_o.request_gc(generation{1});
+
+
             } catch (std::exception & ex) {
                 std::cerr << "caught exception: " << ex.what() << std::endl;
                 REQUIRE(false);
