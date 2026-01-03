@@ -194,6 +194,7 @@ namespace ut {
                 }
 
                 /* no GC roots, so GC is trivial */
+                c_o.request_gc(generation{1});
             } catch (std::exception & ex) {
                 std::cerr << "caught exception: " << ex.what() << std::endl;
                 REQUIRE(false);
