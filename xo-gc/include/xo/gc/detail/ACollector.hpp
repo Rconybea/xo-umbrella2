@@ -42,6 +42,8 @@ namespace xo {
                                         generation g, role r) const noexcept = 0;
             virtual size_type committed(Copaque d,
                                         generation g, role r) const noexcept = 0;
+            virtual bool is_type_installed(Copaque d,
+                                           typeseq tseq) const noexcept = 0;
 
             /** install interface @p iface for representation with typeseq @p tseq
              *  in collector @p d.

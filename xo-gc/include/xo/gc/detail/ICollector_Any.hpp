@@ -34,6 +34,7 @@ namespace xo {
             [[noreturn]] size_type allocated(Copaque, generation, role) const noexcept override { _fatal(); }
             [[noreturn]] size_type reserved(Copaque, generation, role) const noexcept override { _fatal(); }
             [[noreturn]] size_type committed(Copaque, generation, role) const noexcept override { _fatal(); }
+            [[noreturn]] bool is_type_installed(Copaque, typeseq) const noexcept override { _fatal(); }
 
             // non-const methods
             [[noreturn]] bool install_type(Opaque, const AGCObject &) noexcept override { _fatal(); }

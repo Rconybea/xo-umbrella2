@@ -5,22 +5,29 @@
 
 #include "DFloat.hpp"
 #include "DList.hpp"
+#include "object2_register_types.hpp"
 
 #include "IGCObject_DFloat.hpp"
 #include "IGCObject_DList.hpp"
 
 #include <xo/gc/Collector.hpp>
 #include <xo/gc/DX1Collector.hpp>
+
 #include <xo/gc/detail/IAllocator_DX1Collector.hpp>
+#include <xo/gc/detail/ICollector_DX1Collector.hpp>
+
 #include <xo/alloc2/AllocInfo.hpp>
 #include <xo/alloc2/padding.hpp>
 
 #include <catch2/catch.hpp>
 
 namespace ut {
+    using xo::scm::object2_register_types;
     using xo::scm::DList;
     using xo::scm::DFloat;
     using xo::mm::AAllocator;
+    using xo::mm::ACollector;
+    using xo::mm::AllocHeader;
     using xo::mm::AllocInfo;
     using xo::mm::AGCObject;
     using xo::mm::DX1Collector;
@@ -79,6 +86,8 @@ namespace ut {
 
                 DX1Collector gc(cfg);
 
+                DArena * to_0 = nullptr;
+
                 /* verify initial collector state */
                 {
                     REQUIRE(gc.name() == "x1_test");
@@ -95,21 +104,25 @@ namespace ut {
                     REQUIRE(from_0->reserved() >= tc.tenured_z_);
                     REQUIRE(from_0->reserved() < tc.tenured_z_ + from_0->page_z_);
                     REQUIRE(from_0->reserved() % from_0->page_z_ == 0);
+                    REQUIRE(from_0->allocated() == 0);
 
                     DArena * from_1 = gc.get_space(role::from_space(), generation{1});
 
                     REQUIRE(from_1 != nullptr);
                     REQUIRE(from_1->reserved() == from_0->reserved());
+                    REQUIRE(from_1->allocated() == 0);
 
-                    DArena * to_0 = gc.get_space(role::to_space(), generation{0});
+                    to_0 = gc.get_space(role::to_space(), generation{0});
 
                     REQUIRE(to_0 != nullptr);
                     REQUIRE(to_0->reserved() == from_0->reserved());
+                    REQUIRE(to_0->allocated() == 0);
 
                     DArena * to_1 = gc.get_space(role::to_space(), generation{1});
 
                     REQUIRE(to_1 != nullptr);
                     REQUIRE(to_1->reserved() == to_0->reserved());
+                    REQUIRE(to_1->allocated() == 0);
 
                     DArena * from_2 = gc.get_space(role::from_space(), generation{2});
 
@@ -125,12 +138,29 @@ namespace ut {
 
                 /* attempt allocation */
                 auto gc_o = with_facet<AAllocator>::mkobj(&gc);
+                auto c_o = with_facet<ACollector>::mkobj(&gc);
+
+                /* register object types */
+                bool ok = object2_register_types(c_o);
+
+                REQUIRE(ok);
+
+                ok = c_o.is_type_installed(typeseq::id<DFloat>());
+                REQUIRE(ok);
+
+                ok = c_o.is_type_installed(typeseq::id<DList>());
+                REQUIRE(ok);
 
                 DFloat * x0 = DFloat::make(gc_o, 3.1415927);
                 auto x0_o = with_facet<AGCObject>::mkobj(x0);
 
+                REQUIRE(to_0->allocated() == sizeof(AllocHeader) + sizeof(DFloat));
+
                 DList * l0 = DList::list(gc_o, x0_o);
                 auto l0_o = with_facet<AGCObject>::mkobj(l0);
+
+                REQUIRE(to_0->allocated() == (sizeof(AllocHeader) + sizeof(DFloat)
+                                              + sizeof(AllocHeader) + sizeof(DList)));
 
                 {
                     {
@@ -152,6 +182,7 @@ namespace ut {
                         REQUIRE(l0_o.data() != nullptr);
                         REQUIRE(gc.contains(role::to_space(), l0_o.data()));
 
+                        /* check alloc info for newly-allocated object */
                         AllocInfo info = gc.alloc_info((std::byte *)l0_o.data());
 
                         REQUIRE(info.age() == 0);
@@ -162,6 +193,7 @@ namespace ut {
                     }
                 }
 
+                /* no GC roots, so GC is trivial */
             } catch (std::exception & ex) {
                 std::cerr << "caught exception: " << ex.what() << std::endl;
                 REQUIRE(false);

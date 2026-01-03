@@ -204,6 +204,12 @@ namespace xo {
             /** true iff original alloc has been replaced by a forwarding pointer **/
             bool is_forwarding_header(header_type hdr) const noexcept;
 
+            /** true iff type with id @p tseq has known metadata
+             *  (i.e. has appeared in preceding call to install_type
+             *   for this collector)
+             **/
+            bool is_type_installed(typeseq tseq) const noexcept;
+
             /** Retreive bookkeeping info for allocation at @p mem. **/
             AllocInfo alloc_info(value_type mem) const noexcept;
 

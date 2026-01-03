@@ -199,6 +199,19 @@ namespace xo {
         }
 
         bool
+        DX1Collector::is_type_installed(typeseq tseq) const noexcept
+        {
+            if (object_types_.committed() < sizeof(AGCObject) * (tseq.seqno() + 1))
+                return false;
+
+            AGCObject * v = reinterpret_cast<AGCObject *>(object_types_.lo_);
+
+            void * vtable = *(void **)&(v[tseq.seqno()]);
+
+            return (vtable != nullptr);
+        }
+
+        bool
         DX1Collector::install_type(const AGCObject & meta) noexcept
         {
             typeseq tseq = meta._typeseq();

@@ -30,6 +30,7 @@ namespace xo {
         struct ICollector_DX1Collector {
             using size_type = std::size_t;
             using header_type = DArena::header_type;
+            using typeseq = xo::facet::typeseq;
 
             static bool check_move_policy(const DX1Collector & d,
                                           header_type alloc_hdr,
@@ -40,6 +41,7 @@ namespace xo {
             static size_type allocated(const DX1Collector & d, generation g, role r);
             static size_type reserved(const DX1Collector & d, generation g, role r);
             static size_type committed(const DX1Collector & d, generation g, role r);
+            static bool is_type_installed(const DX1Collector & d, typeseq tseq);
 
             static bool install_type(DX1Collector & d, const AGCObject & iface);
             static void add_gc_root(DX1Collector & d, int32_t tseq, Opaque * root);

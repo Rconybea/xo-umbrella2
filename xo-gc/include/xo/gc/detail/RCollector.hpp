@@ -17,6 +17,7 @@ namespace xo {
             using ObjectType = Object;
             using DataPtr = Object::DataPtr;
             using size_type = std::size_t;
+            using typeseq = ACollector::typeseq;
             //using value_type = std::byte *;
 
             RCollector() = default;
@@ -26,6 +27,7 @@ namespace xo {
             size_type allocated(generation g, role r) const noexcept { return O::iface()->allocated(O::data(), g, r); }
             size_type reserved(generation g, role r) const noexcept { return O::iface()->reserved(O::data(), g, r); }
             size_type committed(generation g, role r) const noexcept { return O::iface()->committed(O::data(), g, r); }
+            bool is_type_installed(typeseq tseq) const noexcept { return O::iface()->is_type_installed(O::data(), tseq); }
 
             bool install_type(const AGCObject & iface) { return O::iface()->install_type(O::data(), iface); }
             void add_gc_root(int32_t tseq, Opaque * root) { O::iface()->add_gc_root(O::data(), tseq, root); }

@@ -41,6 +41,9 @@ namespace xo {
             size_type committed(Copaque d, generation g, role r) const noexcept override {
                 return I::committed(_dcast(d), g, r);
             }
+            bool is_type_installed(Copaque d, typeseq tseq) const noexcept override {
+                return I::is_type_installed(_dcast(d), tseq);
+            }
 
             // non-const methods
 
