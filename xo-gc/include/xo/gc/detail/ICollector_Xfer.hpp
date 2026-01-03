@@ -50,8 +50,8 @@ namespace xo {
             bool install_type(Opaque d, const AGCObject & iface) override {
                 return I::install_type(_dcast(d), iface);
             }
-            void add_gc_root(Opaque d, int32_t tseq, Opaque * root) override {
-                I::add_gc_root(_dcast(d), tseq, root);
+            void add_gc_root_poly(Opaque d, obj<AGCObject> * p_root) override {
+                I::add_gc_root_poly(_dcast(d), p_root);
             }
             void request_gc(Opaque d, generation upto) override {
                 I::request_gc(_dcast(d), upto);

@@ -229,11 +229,9 @@ namespace xo {
         }
 
         void
-        DX1Collector::add_gc_root(typeseq tseq,
-                                  Opaque * root) noexcept
+        DX1Collector::add_gc_root_poly(obj<AGCObject> * p_root) noexcept
         {
-            (void)tseq;
-            (void)root;
+            (void)p_root;
         }
 
         void
