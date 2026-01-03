@@ -48,6 +48,12 @@ namespace xo {
         }
 
         bool
+        ICollector_DX1Collector::is_type_installed(const DX1Collector & d, typeseq tseq)
+        {
+            return d.is_type_installed(tseq);
+        }
+
+        bool
         ICollector_DX1Collector::install_type(DX1Collector & d,
                                               const AGCObject & iface)
         {
