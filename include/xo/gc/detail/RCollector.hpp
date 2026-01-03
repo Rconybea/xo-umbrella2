@@ -30,9 +30,15 @@ namespace xo {
             bool is_type_installed(typeseq tseq) const noexcept { return O::iface()->is_type_installed(O::data(), tseq); }
 
             bool install_type(const AGCObject & iface) { return O::iface()->install_type(O::data(), iface); }
-            void add_gc_root_poly(obj<AGCObject> * p_root) { O::iface()->add_gc_root(O::data(), p_root); }
+            void add_gc_root_poly(obj<AGCObject> * p_root) { O::iface()->add_gc_root_poly(O::data(), p_root); }
             void request_gc(generation g) { O::iface()->request_gc(O::data(), g); }
             void forward_inplace(AGCObject * lhs_iface, void ** lhs_data) { O::iface()->forward_inplace(O::data(), lhs_iface, lhs_data); }
+
+            /** add root @p p_root **/
+            template<typename DRepr>
+            void add_gc_root(obj<AGCObject, DRepr> * p_root) {
+                O::iface()->add_gc_root_poly(O::data(), (obj<AGCObject> *)p_root);
+            }
 
             static bool _valid;
         };
