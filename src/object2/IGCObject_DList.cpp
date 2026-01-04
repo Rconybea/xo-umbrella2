@@ -4,6 +4,7 @@
  **/
 
 #include "IGCObject_DList.hpp"
+#include <xo/indentlog/scope.hpp>
 
 namespace xo {
     using xo::mm::AGCObject;
@@ -36,6 +37,8 @@ namespace xo {
         IGCObject_DList::forward_children(DList & src,
                                           obj<ACollector> gc) noexcept
         {
+            scope log(XO_DEBUG(true));
+
             gc.forward_inplace(src.head_.iface(), (void **)&(src.head_.data_));
 
             auto iface = xo::facet::impl_for<AGCObject, DList>();
