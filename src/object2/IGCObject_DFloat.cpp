@@ -25,8 +25,7 @@ namespace xo {
         IGCObject_DFloat::shallow_copy(const DFloat & src,
                                        obj<AAllocator> mm) noexcept
         {
-            DFloat * copy = (DFloat *)mm.alloc(typeseq::id<DFloat>(),
-                                               sizeof(DFloat));
+            DFloat * copy = (DFloat *)mm.alloc_copy((std::byte *)&src);
 
             if (copy)
                 *copy = src;

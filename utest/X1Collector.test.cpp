@@ -194,13 +194,13 @@ namespace ut {
                         REQUIRE(info.tseq() == typeseq::id<DList>().seqno());
                         REQUIRE(info.size() >= sizeof(DList));
                         REQUIRE(info.size() < sizeof(DList) + padding::c_alloc_alignment);
-
                     }
                 }
 
+
+
                 /* no GC roots, so GC is trivial */
                 c_o.request_gc(generation{1});
-
 
             } catch (std::exception & ex) {
                 std::cerr << "caught exception: " << ex.what() << std::endl;
