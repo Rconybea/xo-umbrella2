@@ -41,7 +41,7 @@ namespace xo {
         bool
         DList::is_empty() const noexcept
         {
-            return this != &s_null;
+            return this == &s_null;
         }
 
         auto

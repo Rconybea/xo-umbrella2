@@ -19,6 +19,9 @@
 #include <xo/alloc2/AllocInfo.hpp>
 #include <xo/alloc2/padding.hpp>
 
+#include <xo/indentlog/scope.hpp>
+#include <xo/indentlog/print/tag.hpp>
+
 #include <catch2/catch.hpp>
 
 namespace ut {
@@ -39,6 +42,8 @@ namespace ut {
     using xo::mm::padding;
     using xo::facet::with_facet;
     using xo::facet::typeseq;
+    using xo::scope;
+    using xo::xtag;
 
     namespace {
         struct testcase_x1 {
@@ -69,6 +74,9 @@ namespace ut {
 
     TEST_CASE("x1", "[gc][x1]")
     {
+        constexpr bool c_debug_flag = true;
+        scope log(XO_DEBUG(c_debug_flag));
+
         for (std::size_t i_tc = 0, n_tc = s_testcase_v.size(); i_tc < n_tc; ++i_tc) {
             try {
                 const testcase_x1 & tc = s_testcase_v[i_tc];
@@ -82,6 +90,7 @@ namespace ut {
                     .gc_trigger_v_{{
                             tc.incr_gc_threshold_,
                             tc.full_gc_threshold_}},
+                    .debug_flag_ = c_debug_flag,
                 };
 
                 DX1Collector gc(cfg);
@@ -140,6 +149,8 @@ namespace ut {
 
                     REQUIRE(gc.reserved_total()
                             == otypes->reserved() + roots->reserved() + 4 * from_0->reserved());
+
+                    log && log(xtag("from_0", from_0->lo_), xtag("to_0", to_0->lo_));
                 }
 
                 /* attempt allocation */
@@ -197,10 +208,21 @@ namespace ut {
                     }
                 }
 
-
-
                 /* no GC roots, so GC is trivial */
                 c_o.request_gc(generation{1});
+
+                log && log(xtag("l0_o.data()", l0_o.data()));
+                log && log(xtag("l0_o.data()->head_.data()", l0_o.data()->head_.data()));
+                log && log(xtag("x0_o.data()", x0_o.data()));
+
+                REQUIRE(!gc.contains(role::from_space(), x0_o.data()));
+                REQUIRE(gc.contains(role::to_space(), x0_o.data()));
+                REQUIRE(x0_o.data()->value() == 3.1415927);
+                REQUIRE(!gc.contains(role::from_space(), l0_o.data()));
+                REQUIRE(gc.contains(role::to_space(), l0_o.data()));
+                REQUIRE(l0_o.data()->is_empty() == false);
+
+                REQUIRE((void*)l0_o.data()->head_.data() == (void*)x0_o.data());
 
             } catch (std::exception & ex) {
                 std::cerr << "caught exception: " << ex.what() << std::endl;
