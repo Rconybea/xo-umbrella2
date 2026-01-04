@@ -293,6 +293,9 @@ namespace xo {
             log && log("step 1  : swap from/to roles");
             this->swap_roles(upto);
 
+            log && log(xtag("from_0", get_space(role::from_space(), generation{0})->lo_),
+                       xtag("to_0", get_space(role::to_space(), generation{0})->lo_));
+
             log && log("step 2a : copy roots");
             this->copy_roots(upto);
 
@@ -305,7 +308,11 @@ namespace xo {
         void
         DX1Collector::swap_roles(generation upto) noexcept
         {
+            scope log(XO_DEBUG(true), xtag("upto", upto));
+
             for (generation g = generation{0}; g < upto; ++g) {
+                log && log("swap roles", xtag("g", g));
+
                 std::swap(space_[role::to_space()][g], space_[role::from_space()][g]);
             }
         }
@@ -345,6 +352,7 @@ namespace xo {
                  *
                  * Coordinates with forward_inplace()
                  */
+                log && log("disposition: already forwarded");
 
                 return *(void **)from_src;
             }
@@ -353,6 +361,8 @@ namespace xo {
 
             if (!this->check_move_policy(hdr, from_src)) {
                 /* object at from_src in generation that is not being collected */
+                log && log("disposition: not moving from_src");
+
                 return from_src;
             }
 
@@ -418,6 +428,8 @@ namespace xo {
              *
              **/
 
+            log && log("disposition: move subtree");
+
             /* TODO: AllocIterator pointing to free pointer */
             std::array<std::byte *, c_max_generation> gray_lo_v;
             {
@@ -462,16 +474,24 @@ namespace xo {
                 }
             } while (fixup_work > 0);
 
+            log && log(xtag("to_dest", to_dest));
+
             return to_dest;
         }
 
         void
         DX1Collector::copy_roots(generation upto) noexcept
         {
+            scope log(XO_DEBUG(true));
+
             for (obj<AGCObject> ** p_root = (obj<AGCObject> **)roots_.lo_;
                  p_root < (obj<AGCObject> **)roots_.free_; ++p_root)
             {
+                log && log("copy root", xtag("**p_root.data.pre", (**p_root).data_));
+
                 (*p_root)->reset_opaque(this->deep_move((*p_root)->data_, upto));
+
+                log && log(xtag("**p_root.data.post", (**p_root).data_));
             }
         }
 
@@ -479,6 +499,10 @@ namespace xo {
         DX1Collector::forward_inplace(AGCObject * lhs_iface,
                                       void ** lhs_data)
         {
+            scope log(XO_DEBUG(config_.debug_flag_),
+                      xtag("lhs_data", lhs_data),
+                      xtag("*lhs_data", *lhs_data));
+
             /* coordinates with DX1Collector::_deep_move() */
 
             (void)lhs_iface;
@@ -497,28 +521,31 @@ namespace xo {
              *                                    +----------+
              */
 
-            void * object_data = (std::byte *)lhs_data;
+            void * object_data = (std::byte *)*lhs_data;
 
             if (!this->contains(role::from_space(), object_data)) {
-                /* *lhs isn't in GC-allocated space.
+                /* *lhs_data either:
+                 * 1. already in to-space
+                 * 2. not in GC-allocated space at all
+                 *    (small number of niche examples of this)
                  *
-                 * This happens for a modest number of global
-                 * constants, for example DBoolean {true, false}.
-                 *
-                 * It's important we recognize these up front.
+                 * It's important we recognize case (2) up front.
                  * Since not allocated from GC, they don't have
                  * an alloc-header.
                  */
+                log && log("disposition: not in from-space");
+
                 return;
             }
 
+            log && log("disposition: in from-space");
+
             /** NOTE: for form's sake:
-             *        better to lookup actual arena that
+             *        lookup actual arena that
              *        allocated object data.
              *        Only using this to get alloc header
-             *
              **/
-            DArena * some_arena = this->to_space(generation(0));
+            DArena * some_arena = this->from_space(generation(0));
 
             DArena::header_type * p_header
                 = some_arena->obj2hdr(object_data);
@@ -528,37 +555,96 @@ namespace xo {
             /* recover allocation size */
             std::size_t alloc_z = some_arena->config_.header_.size_with_padding(alloc_hdr);
 
+            log && log(xtag("some_arena.lo", some_arena->lo_),
+                       xtag("p_header", p_header),
+                       xtag("alloc_z", alloc_z));
+
             /* need to be able to fit forwarding pointer
              * in place of forwarded object.
              *
              * This is guaranteed anyway, by alignment rules
              */
-            assert(alloc_z > sizeof(uintptr_t));
+            assert(alloc_z >= sizeof(uintptr_t));
 
             if (this->is_forwarding_header(alloc_hdr)) {
-                /* *lhs already refers to a forwarding pointer */
+                /* *lhs_data already refers to a forwarding pointer */
 
                 /*
-                 *   lhs   obj<AGCObject>
+                 *   lhs   obj<AGCObject>             (from-space)
                  *    |    +---------+                +---+-+----+
                  *    \--->| .iface  |                |FWD|G|size| alloc_hdr
                  *         +---------+  object_data   +---+-+----+
-                 *         | .data x----------------->|     x-------->
-                 *         +---------+                |          |  dest
+                 *         | .data x----------------->|     x--------\
+                 *         +---------+                |          |   | dest
+                 *                                    |          |   |
+                 *                                    +----------+   |
+                 *                                                   |
+                 *                                    (to-space)     |
+                 *                                    +---+-+----+   |
+                 *                                    |FWD|G|size|<--/
+                 *                                    +---+-+----+
+                 *                                    |          |
+                 *                                    |          |
                  *                                    |          |
                  *                                    +----------+
                  */
                 void * dest = *(void**)object_data;
 
-                /* update *lhs in-place */
                 *lhs_data = dest;
+                /*
+                 *   lhs   obj<AGCObject>
+                 *    |    +---------+
+                 *    \--->| .iface  |
+                 *         +---------+
+                 *         | .data x------------\
+                 *         +---------+          |
+                 *                              | dest
+                 *                              |
+                 *                              |
+                 *                              |     (to-space)
+                 *                              |     +---+-+----+
+                 *                              \---->|FWD|G|size|
+                 *                                    +---+-+----+
+                 *                                    |          |
+                 *                                    |          |
+                 *                                    |          |
+                 *                                    +----------+
+                 */
             } else if (this->check_move_policy(alloc_hdr, object_data)) {
                 /* copy object *lhs + replace with forwarding pointer */
 
-                /* which arena are we writing to? need allocator interface */
+                /*
+                 *   lhs   obj<AGCObject>             (from-space)
+                 *    |    +---------+                +---+-+----+
+                 *    \--->| .iface  |                |FWD|G|size| alloc_hdr
+                 *         +---------+  object_data   +---+-+----+
+                 *         | .data x----------------->|          |
+                 *         +---------+                |          |
+                 *                                    |          |
+                 *                                    +----------+
+                 */
 
                 *lhs_data = this->shallow_move(lhs_iface, *lhs_data);
 
+                /*
+                 *   lhs   obj<AGCObject>             (from-space)
+                 *    |    +---------+                +---+-+----+
+                 *    \--->| .iface  |                |FWD|G|SIZE|
+                 *         +---------+                +---+-+----+
+                 *         | .data x------------\     |     x--------\
+                 *         +---------+          |     |          |   |
+                 *                              |     |          |   |
+                 *                         dest |     +----------+   |
+                 *                              |                    |
+                 *                              |     (to-space)     |
+                 *                              |     +---+-+----+   |
+                 *                              \---->|FWD|G|size|<--/
+                 *                                    +---+-+----+
+                 *                                    |          |
+                 *                                    |          |
+                 *                                    |          |
+                 *                                    +----------+
+                 */
             } else {
                 /* object doesn't need to move.
                  * e.g. incremental collection + object is tenured
@@ -569,10 +655,14 @@ namespace xo {
         void *
         DX1Collector::shallow_move(const AGCObject * iface, void * from_src)
         {
+            scope log(XO_DEBUG(config_.debug_flag_));
+
             AllocInfo info = this->alloc_info((std::byte *)from_src);
             obj<AAllocator, DX1Collector> alloc(this);
 
             void * to_dest = iface->shallow_copy(from_src, alloc);
+
+            log && log(xtag("from_src", from_src), xtag("to_dest", to_dest));
 
             if(to_dest == from_src) {
                 assert(false);
@@ -699,7 +789,7 @@ namespace xo {
         DX1Collector::reverse_roles(generation g) noexcept {
             assert(g < config_.n_generation_);
 
-            std::swap(space_[0][g], space_[1][g]);
+            std::swap(space_[role::from_space()][g], space_[role::to_space()][g]);
         }
 
         void
