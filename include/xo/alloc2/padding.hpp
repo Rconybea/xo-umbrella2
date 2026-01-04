@@ -40,8 +40,6 @@ namespace xo {
                      */
                     std::size_t dz = (align - (z % align)) % align;
 
-                    z += dz;
-
                     return dz;
                 }
 

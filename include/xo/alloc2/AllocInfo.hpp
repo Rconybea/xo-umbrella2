@@ -52,8 +52,15 @@ namespace xo {
             /** @defgroup mm-allocinfo-methods **/
             ///@{
 
+            AllocHeader header() const noexcept { return *p_header_; }
+
             /** true for non-sentinel AllocInfo instance **/
-            bool is_valid() const { return (p_config_ != nullptr) && (p_header_ != nullptr); }
+            bool is_valid() const noexcept { return ((p_config_ != nullptr)
+                                            && (p_header_ != nullptr)); }
+            /** true iff sentinel tseq, flagging a forwarding pointer **/
+            bool is_forwarding_tseq() const noexcept {
+                return p_config_->is_forwarding_tseq(*p_header_);
+            }
 
             /** Guard bytes preceding allocation-header **/
             span_type guard_lo() const noexcept;
