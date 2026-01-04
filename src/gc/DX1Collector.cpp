@@ -4,6 +4,8 @@
  **/
 
 #include "Allocator.hpp"
+#include "detail/IAllocator_DX1Collector.hpp"
+#include "detail/ICollector_DX1Collector.hpp"
 #include "arena/IAllocator_DArena.hpp"
 #include "xo/gc/DX1Collector.hpp"
 #include "xo/gc/DX1CollectorIterator.hpp"
@@ -221,6 +223,15 @@ namespace xo {
             return (vtable != nullptr);
         }
 
+        const AGCObject *
+        DX1Collector::lookup_type(typeseq tseq) const noexcept
+        {
+            AGCObject * v = reinterpret_cast<AGCObject *>(object_types_.lo_);
+
+            return &(v[tseq.seqno()]);
+        }
+
+        /* editor bait: register_type */
         bool
         DX1Collector::install_type(const AGCObject & meta) noexcept
         {
@@ -268,7 +279,12 @@ namespace xo {
         {
             scope log(XO_DEBUG(true), xtag("upto", upto));
 
+            assert(!runstate_.is_running());
+
             //auto t0 = std::chrono::steady_clock::now();
+
+            log && log("step 0a : update run state");
+            this->runstate_ = GCRunState::gc_upto(upto);
 
             log && log("step 0a : [STUB] snapshot alloc state");
 
@@ -294,10 +310,302 @@ namespace xo {
             }
         }
 
+        /*
+         * rules:
+         * - from_src must be in from-space
+         * - object type stored in alloc header
+         * - return value is new location in to-space
+         *
+         * - preserving i/face pointer
+         * - replace destination with forwarding pointer
+         *
+         * EDITOR: gc -> self
+         */
+        void *
+        DX1Collector::deep_move(void * from_src, generation upto)
+        {
+            scope log(XO_DEBUG(config_.debug_flag_));
+
+            if (!from_src)
+                return nullptr;
+
+            if (!this->contains(role::from_space(), from_src)) {
+                /* presumeably memory not owned by collector
+                 * (e.g. Boolean {true, false})
+                 */
+                return from_src;
+            }
+
+            AllocInfo info = this->alloc_info((std::byte *)from_src);
+            AllocHeader hdr = info.header();
+            typeseq tseq(info.tseq());
+
+            if (is_forwarding_header(hdr)) {
+                /* already forwarded - pickup destination
+                 *
+                 * Coordinates with forward_inplace()
+                 */
+
+                return *(void **)from_src;
+            }
+
+            /* here: object at from_src not already forwarded */
+
+            if (!this->check_move_policy(hdr, from_src)) {
+                /* object at from_src in generation that is not being collected */
+                return from_src;
+            }
+
+            /**
+             *  To-space:
+             *
+             *     to_lo = start of to-space
+             *     w,W   = white objects. An object x is white if x
+             *             + all immediate children of x are in to-space
+             *             (also implies this GC cycle put it there)
+             *     g,G   = grey  objects. An object x is gray if it's in to-space,
+             *             but possibly has >0 black children
+             *     _     = free to-space memory
+             *     N     = nursery space (generation{0})
+             *     T     = tenured space (generation{1})
+             *
+             *     wwwwwwwwwwwwwwwwwwwggggggggggggggggggggg_________________...
+             *     ^                  ^                    ^
+             *     to_lo              grey_lo(N)           free_ptr(N)
+             *
+             *  After moving children of one object,
+             *  advancing {nursery_grey_lo, nursery_free_ptr}
+             *
+             *     wwwwwwwwwwwwwwwwwwwWWWWgggggggggggggggggGGGGGGGGGGG______...
+             *     ^                      ^                           ^
+             *     to_lo                  grey_lo(N)                  free_ptr(N)
+             *
+             *  Invariant:
+             *
+             *     objects in [to_lo, gray_lo) are white.
+             *     all gray objects are in [gray_lo, free_ptr)
+             *     memory starting at free_ptr is free.
+             *
+             *  deep_move terminates when gray_lo catches up to free_ptr
+             *
+             *  Above is simplified. Complication is that GC (including incremental) may
+             *  promote objects from nursery (N) to tenured (T)
+             *
+             *  So more accurate before/after picture
+             *
+             *  N  wwwwwwwwwwwwwwwwwwwggggggggggggggggggggg_________________...
+             *     ^                  ^                    ^
+             *     to_lo(N)           grey_lo(N)           free_ptr(N)
+             *
+             *  T  wwwwwwwwwwwwwwgggggggggggg_______________________________...
+             *     ^             ^           ^
+             *     to_lo(T)      grey_lo(T)  free_ptr(N)
+             *
+             *  After moving children of one object,
+             *  advancing {nursery_grey_lo, nursery_free_ptr}
+             *
+             *  N  wwwwwwwwwwwwwwwwwwwWWWWgggggggggggggggggGGGGGGGGGGG_____...
+             *     ^                      ^                           ^
+             *     to_lo(N)               grey_lo(N)                  free_ptr(N)
+             *
+             *  T  wwwwwwwwwwwwwwggggggggggggGGGGG_________________________...
+             *     ^             ^                ^
+             *     to_lo(T)      grey_lo(T)       free_ptr(T)
+             *
+             *  deep_move terminates when both:
+             *  - gray_lo(N) catches up with free_ptr(N)
+             *  - gray_lo(T) catches up with free_ptr(T)
+             *
+             **/
+
+            /* TODO: AllocIterator pointing to free pointer */
+            std::array<std::byte *, c_max_generation> gray_lo_v;
+            {
+                for (uint32_t g = 0; g < upto; ++g) {
+                    gray_lo_v[g] = this->to_space(generation{g})->free_;
+                }
+            }
+
+            obj<AAllocator, DX1Collector> alloc(this);
+            const AGCObject * iface = lookup_type(tseq);
+            void * to_dest = this->shallow_move(iface, from_src);
+
+            std::size_t fixup_work = 0;
+
+            /* TODO:
+             * - loop here is bad for memory locality
+             * - replace with depth-first traversal
+             */
+            do {
+                fixup_work = 0;
+
+                for (generation g = generation{0}; g < upto; ++g) {
+                    /* TODO: use AllocIterator here */
+                    while(gray_lo_v[g] < to_space(g)->free_) {
+                        AllocHeader * hdr = (AllocHeader *)gray_lo_v[g];
+                        void * src = (hdr + 1);
+
+                        log && log("fwd children", xtag("src", src));
+
+                        const auto & hdr_cfg = config_.arena_config_.header_;
+                        typeseq tseq = typeseq(hdr_cfg.tseq(*hdr));
+                        size_t z = hdr_cfg.size_with_padding(*hdr);
+
+                        const AGCObject * iface = this->lookup_type(tseq);
+                        obj<ACollector, DX1Collector> gc(this);
+
+                        iface->forward_children(src, gc);
+
+                        gray_lo_v[g] = ((std::byte *)src) + z;
+                        ++fixup_work;
+                    }
+                }
+            } while (fixup_work > 0);
+
+            return to_dest;
+        }
+
         void
         DX1Collector::copy_roots(generation upto) noexcept
         {
-            scope log(XO_DEBUG(true), "STUB", xtag("upto", upto));
+            for (obj<AGCObject> ** p_root = (obj<AGCObject> **)roots_.lo_;
+                 p_root < (obj<AGCObject> **)roots_.free_; ++p_root)
+            {
+                (*p_root)->reset_opaque(this->deep_move((*p_root)->data_, upto));
+            }
+        }
+
+        void
+        DX1Collector::forward_inplace(AGCObject * lhs_iface,
+                                      void ** lhs_data)
+        {
+            /* coordinates with DX1Collector::_deep_move() */
+
+            (void)lhs_iface;
+            assert(runstate_.is_running());
+
+            /*
+             *   lhs   obj<AGCObject>
+             *    |    +---------+                +---+-+----+
+             *    \--->| .iface  |                | T |G|size| header
+             *         +---------+  object_data   +---+-+----+
+             *         | .data x----------------->| alloc    |
+             *         +---------+                | data     |
+             *                                    | for      |
+             *                                    | instance |
+             *                                    | ...      |
+             *                                    +----------+
+             */
+
+            void * object_data = (std::byte *)lhs_data;
+
+            if (!this->contains(role::from_space(), object_data)) {
+                /* *lhs isn't in GC-allocated space.
+                 *
+                 * This happens for a modest number of global
+                 * constants, for example DBoolean {true, false}.
+                 *
+                 * It's important we recognize these up front.
+                 * Since not allocated from GC, they don't have
+                 * an alloc-header.
+                 */
+                return;
+            }
+
+            /** NOTE: for form's sake:
+             *        better to lookup actual arena that
+             *        allocated object data.
+             *        Only using this to get alloc header
+             *
+             **/
+            DArena * some_arena = this->to_space(generation(0));
+
+            DArena::header_type * p_header
+                = some_arena->obj2hdr(object_data);
+
+            DArena::header_type alloc_hdr = *p_header;
+
+            /* recover allocation size */
+            std::size_t alloc_z = some_arena->config_.header_.size_with_padding(alloc_hdr);
+
+            /* need to be able to fit forwarding pointer
+             * in place of forwarded object.
+             *
+             * This is guaranteed anyway, by alignment rules
+             */
+            assert(alloc_z > sizeof(uintptr_t));
+
+            if (this->is_forwarding_header(alloc_hdr)) {
+                /* *lhs already refers to a forwarding pointer */
+
+                /*
+                 *   lhs   obj<AGCObject>
+                 *    |    +---------+                +---+-+----+
+                 *    \--->| .iface  |                |FWD|G|size| alloc_hdr
+                 *         +---------+  object_data   +---+-+----+
+                 *         | .data x----------------->|     x-------->
+                 *         +---------+                |          |  dest
+                 *                                    |          |
+                 *                                    +----------+
+                 */
+                void * dest = *(void**)object_data;
+
+                /* update *lhs in-place */
+                *lhs_data = dest;
+            } else if (this->check_move_policy(alloc_hdr, object_data)) {
+                /* copy object *lhs + replace with forwarding pointer */
+
+                /* which arena are we writing to? need allocator interface */
+
+                *lhs_data = this->shallow_move(lhs_iface, *lhs_data);
+
+            } else {
+                /* object doesn't need to move.
+                 * e.g. incremental collection + object is tenured
+                 */
+            }
+        } /*forward_inplace*/
+
+        void *
+        DX1Collector::shallow_move(const AGCObject * iface, void * from_src)
+        {
+            AllocInfo info = this->alloc_info((std::byte *)from_src);
+            obj<AAllocator, DX1Collector> alloc(this);
+
+            void * to_dest = iface->shallow_copy(from_src, alloc);
+
+            if(to_dest == from_src) {
+                assert(false);
+            } else {
+                *(const_cast<AllocHeader*>(info.p_header_))
+                    = AllocHeader(config_
+                                  .arena_config_
+                                  .header_
+                                  .mark_forwarding_tseq(*info.p_header_));
+
+                *(void **)from_src = to_dest;
+            }
+
+            return to_dest;
+        }
+
+        bool
+        DX1Collector::check_move_policy(header_type alloc_hdr,
+                                        void * object_data) const noexcept
+        {
+            (void)object_data;
+
+            // when gc is moving objects, to- and from- spaces have been
+            // reversed: forwarding pointers are located in from-space and
+            // refer to to-space.
+
+            object_age age = this->header2age(alloc_hdr);
+
+            generation g = config_.age2gen(age);
+
+            assert(runstate_.is_running());
+
+            return (g < runstate_.gc_upto());
         }
 
         auto

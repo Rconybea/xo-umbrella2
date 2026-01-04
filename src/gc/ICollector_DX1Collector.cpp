@@ -79,95 +79,7 @@ namespace xo {
                                                  AGCObject * lhs_iface,
                                                  void ** lhs_data)
         {
-            (void)lhs_iface;
-            assert(d.runstate_.is_running());
-
-            /*
-             *   lhs   obj<AGCObject>
-             *    |    +---------+                +---+-+----+
-             *    \--->| .iface  |                | T |G|size| header
-             *         +---------+  object_data   +---+-+----+
-             *         | .data x----------------->| alloc    |
-             *         +---------+                | data     |
-             *                                    | for      |
-             *                                    | instance |
-             *                                    | ...      |
-             *                                    +----------+
-             */
-
-            void * object_data = (byte *)lhs_data;
-
-            if (!d.contains(role::from_space(), object_data)) {
-                /* *lhs isn't in GC-allocated space.
-                 *
-                 * This happens for a modest number of global
-                 * constant, for example DBoolean {true, false}.
-                 *
-                 * It's important we recognize these up front.
-                 * Since not allocated from GC, they don't have
-                 * an alloc-header.
-                 */
-                return;
-            }
-
-            /** NOTE: for form's sake:
-             *        better to lookup actual arena that
-             *        allocated object data.
-             *
-             **/
-            DArena * some_arena = d.to_space(generation(0));
-
-            DArena::header_type * p_header
-                = some_arena->obj2hdr(object_data);
-
-            DArena::header_type alloc_hdr = *p_header;
-
-            /* recover allocation size */
-            std::size_t alloc_z = some_arena->config_.header_.size(alloc_hdr);
-
-            /* need to be able to fit forwarding pointer
-             * in place of forwarded object.
-             *
-             * This is guaranteed anyway, by alignment rules
-             */
-            assert(alloc_z > sizeof(uintptr_t));
-
-            if (d.is_forwarding_header(alloc_hdr)) {
-                /* *lhs already refers to a forwarding pointer */
-
-                /*
-                 *   lhs   obj<AGCObject>
-                 *    |    +---------+                +---+-+----+
-                 *    \--->| .iface  |                |FWD|G|size| alloc_hdr
-                 *         +---------+  object_data   +---+-+----+
-                 *         | .data x----------------->|     x-------->
-                 *         +---------+                |          |  dest
-                 *                                    |          |
-                 *                                    +----------+
-                 */
-                void * dest = *(void**)object_data;
-
-                /* update *lhs in-place */
-                *lhs_data = dest;
-            } else if (check_move_policy(d, alloc_hdr, object_data)) {
-                /* copy object *lhs + replace with forwarding pointer */
-
-                /* which arena are we writing to? need allocator interface */
-
-                assert(false);
-
-#ifdef NOT_YET
-                // to do this need IAllocator_DX1Collector fully implemented
-
-                void * copy = (*lhs).shallow_copy(xxx);
-
-                    xxx mm xxx;
-#endif
-            } else {
-                /* object doesn't need to move.
-                 * e.g. incremental collection + object is tenured
-                 */
-            }
+            d.forward_inplace(lhs_iface, lhs_data);
         }
 
         bool
@@ -175,19 +87,7 @@ namespace xo {
                                                    header_type alloc_hdr,
                                                    void * object_data)
         {
-            (void)object_data;
-
-            // when gc is moving objects, to- and from- spaces have been
-            // reversed: forwarding pointers are located in from-space and
-            // refer to to-space.
-
-            object_age age = d.header2age(alloc_hdr);
-
-            generation g = d.config_.age2gen(age);
-
-            assert(d.runstate_.is_running());
-
-            return (g < d.runstate_.gc_upto());
+            return d.check_move_policy(alloc_hdr, object_data);
         }
 
     } /*namespace mm*/

@@ -144,9 +144,9 @@ namespace xo {
             static GCRunState gc_not_running();
             static GCRunState gc_upto(generation g);
 
-            bool is_running() const { return gc_upto_ > 0; }
-
             generation gc_upto() const { return gc_upto_; }
+
+            bool is_running() const { return gc_upto_ > 0; }
 
         private:
             /** running gc collecting all generations gi < gc_upto **/
@@ -217,7 +217,12 @@ namespace xo {
             /** Retreive bookkeeping info for allocation at @p mem. **/
             AllocInfo alloc_info(value_type mem) const noexcept;
 
-            // ----- type registration -----
+            // ----- app memory model -----
+
+            /** lookup interface from type sequence
+             *  (can use tseq = typeseq::id<T>() for type T)
+             **/
+            const AGCObject * lookup_type(typeseq tseq) const noexcept;
 
             /** Register object type with this collector.
              *  Provides shallow copy and pointer forwarding for instances of this
@@ -227,6 +232,8 @@ namespace xo {
 
             /** add GC root at @p root_addr, with type @p typeseq **/
             void add_gc_root_poly(obj<AGCObject> * p_root) noexcept;
+
+            // ----- collection -----
 
             /** Request immediate collection.
              *  1. if collection is enabled, immediately collect all generations
@@ -240,6 +247,23 @@ namespace xo {
 
             /** Execute gc immediately, for all generations < @p upto **/
             void execute_gc(generation upto) noexcept;
+
+            /** Evacuate object at @p *lhs_data to to-space.
+             *  Replace original with forwarding pointer to new location
+             **/
+            void forward_inplace(AGCObject * lhs_iface, void ** lhs_data);
+
+            /** evacuate object with type @p iface at address @p from_src
+             *  to to-space. Return new to-space location.
+             **/
+            void * shallow_move(const AGCObject * iface, void * from_src);
+
+            /** true iff {alloc_hdr, object_data} should move for
+             *  currently-running collection.
+             *
+             *  Require: runstate_.is_running()
+             **/
+            bool check_move_policy(header_type alloc_hdr, void * object_data) const noexcept;
 
             // ----- allocation -----
 
@@ -294,6 +318,12 @@ namespace xo {
             void swap_roles(generation upto) noexcept;
             /** copy roots + everything reachable from them, to to-space **/
             void copy_roots(generation upto) noexcept;
+
+            /** move subgraph at @p from_src to to-space.
+             *
+             *  Require: runstate_.is_running()
+             **/
+            void * deep_move(void * from_src, generation upto);
 
         public:
             /** garbage collector configuration **/
