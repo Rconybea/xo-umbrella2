@@ -23,10 +23,9 @@ namespace xo {
 
         DInteger *
         IGCObject_DInteger::shallow_copy(const DInteger & src,
-                                       obj<AAllocator> mm) noexcept
+                                         obj<AAllocator> mm) noexcept
         {
-            DInteger * copy = (DInteger *)mm.alloc(typeseq::id<DInteger>(),
-                                                   sizeof(DInteger));
+            DInteger * copy = (DInteger *)mm.alloc_copy((std::byte *)&src);
 
             if (copy)
                 *copy = src;

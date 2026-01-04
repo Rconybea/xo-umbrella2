@@ -6,6 +6,7 @@
 #pragma once
 
 #include "AllocHeader.hpp"
+#include "padding.hpp"
 #include <utility>
 
 namespace xo {
@@ -121,6 +122,11 @@ namespace xo {
                 return (hdr.repr_ & size_mask());
             }
 
+            /** extract padded size from alloc header @p hdr **/
+            std::size_t size_with_padding(repr_type hdr) const noexcept {
+                return padding::with_padding(this->size(hdr));
+            }
+
             /** true iff sentinel tseq, flagging a forwarding pointer **/
             bool is_forwarding_tseq(repr_type hdr) const noexcept {
                 // e.g.
@@ -133,6 +139,11 @@ namespace xo {
             }
 
             bool is_size_enabled() const noexcept { return size_bits_ > 0; }
+
+            /** construct alloc header for a forwarding object **/
+            AllocHeader mark_forwarding_tseq(AllocHeader hdr) const noexcept {
+                return AllocHeader((hdr.repr_ & ~tseq_mask()) | tseq_mask());
+            }
 
             /** if non-zero, allocate extra space between allocs, and fill
              *  with fixed test-pattern contents. Allows for simple

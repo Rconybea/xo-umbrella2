@@ -24,8 +24,7 @@ namespace xo {
         IGCObject_DList::shallow_copy(const DList & src,
                                       obj<AAllocator> mm) noexcept
         {
-            /* FIXME: need to supply object age here */
-            DList * copy = (DList *)mm.alloc(typeseq::id<DList>(), sizeof(DList));
+            DList * copy = (DList *)mm.alloc_copy((std::byte *)&src);
 
             if (copy)
                 *copy = src;
