@@ -2,7 +2,7 @@
  *
  *  Generated automagically from ingredients:
  *  1. code generator:
- *       [/home/roland/proj/xo-umbrella2/xo-facet/codegen/genfacet]
+ *       [/Users/roland/proj/xo-umbrella2/xo-facet/codegen/genfacet]
  *     arguments:
  *       --input [idl/Printable.json5]
  *  2. jinja2 template for abstract facet .hpp file:
@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "APrintable.hpp"
+#include <xo/indentlog/print/ppindentinfo.hpp>
 
 namespace xo {
 namespace print {
@@ -24,7 +24,11 @@ namespace print {
     public:
         /** @defgroup print-printable-xfer-type-traits **/
         ///@{
+        /** actual implementation (not generated; often delegates to DRepr) **/
         using Impl = IPrintable_DRepr;
+        /** integer identifying a type **/
+        using typeseq = APrintable::typeseq;
+        using ppindentinfo = APrintable::ppindentinfo;
         ///@}
 
         /** @defgroup print-printable-xfer-methods **/
@@ -36,7 +40,7 @@ namespace print {
         // from APrintable
 
         // const methods
-        int32_t _typeseq() const noexcept override { return s_typeseq; }
+        typeseq _typeseq() const noexcept override { return s_typeseq; }
         bool pretty(Copaque data, const ppindentinfo & ppii)  override {
             return I::pretty(_dcast(data), ppii);
         }
@@ -49,11 +53,11 @@ namespace print {
         using I = Impl;
 
     public:
-        /** @defgraoup print-printable-xfer-member-vars **/
+        /** @defgroup print-printable-xfer-member-vars **/
         ///@{
 
         /** typeseq for template parameter DRepr **/
-        static int32_t s_typeseq;
+        static typeseq s_typeseq;
         /** true iff satisfies facet implementation **/
         static bool _valid;
 
@@ -61,7 +65,7 @@ namespace print {
     };
 
     template <typename DRepr, typename IPrintable_DRepr>
-    int32_t
+    xo::facet::typeseq
     IPrintable_Xfer<DRepr, IPrintable_DRepr>::s_typeseq
       = xo::facet::typeseq::id<DRepr>();
 

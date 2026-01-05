@@ -2,7 +2,7 @@
  *
  *  Generated automagically from ingredients:
  *  1. code generator:
- *       [/home/roland/proj/xo-umbrella2/xo-facet/codegen/genfacet]
+ *       [/Users/roland/proj/xo-umbrella2/xo-facet/codegen/genfacet]
  *     arguments:
  *       --input [idl/Printable.json5]
  *  2. jinja2 template for abstract facet .hpp file:
@@ -35,6 +35,8 @@ public:
     // types
     /** integer identifying a type **/
     using typeseq = xo::facet::typeseq;
+    /** dynamic pretty-printing state during layout **/
+    using ppindentinfo = xo::print::ppindentinfo;
     ///@}
 
     /** @defgroup print-printable-methods **/
@@ -43,7 +45,8 @@ public:
     /** RTTI: unique id# for actual runtime data representation **/
     virtual typeseq _typeseq() const noexcept = 0;
     /** Pretty-printing support for this object.
-See [xo-indentlog/xo/indentlog/pretty.hpp] **/
+        See [xo-indentlog/xo/indentlog/pretty.hpp]
+    **/
     virtual bool pretty(Copaque data, const ppindentinfo & ppii)  = 0;
 
     // nonconst methods

@@ -10,7 +10,14 @@
     doc: [
         "Trait for data types that support pretty-printing"
     ],
-    types: [],
+    types: [
+        // using ppindentinfo = xo::print::ppindentinfo
+        {
+            name: "ppindentinfo",
+            doc:  ["dynamic pretty-printing state during layout"],
+            definition: "xo::print::ppindentinfo",
+        },
+    ],
     const_methods: [
         // bool pretty(const ppindentinfo & ppii) const
         {

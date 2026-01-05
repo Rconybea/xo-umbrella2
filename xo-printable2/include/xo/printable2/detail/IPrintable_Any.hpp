@@ -2,7 +2,7 @@
  *
  *  Generated automagically from ingredients:
  *  1. code generator:
- *       [/home/roland/proj/xo-umbrella2/xo-facet/codegen/genfacet]
+ *       [/Users/roland/proj/xo-umbrella2/xo-facet/codegen/genfacet]
  *     arguments:
  *       --input [idl/Printable.json5]
  *  2. jinja2 template for abstract facet .hpp file:
@@ -44,6 +44,7 @@ namespace print {
 
         /** integer identifying a type **/
         using typeseq = xo::facet::typeseq;
+        using ppindentinfo = APrintable::ppindentinfo;
 
         ///@}
         /** @defgroup print-printable-any-methods **/
@@ -70,7 +71,7 @@ namespace print {
         ///@}
 
     public:
-        /** @defgraoup print-printable-any-member-vars **/
+        /** @defgroup print-printable-any-member-vars **/
         ///@{
 
         static typeseq s_typeseq;

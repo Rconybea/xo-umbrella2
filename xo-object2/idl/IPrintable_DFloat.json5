@@ -1,8 +1,9 @@
 {
     mode: "implementation",
-    includes: [],
+    includes: [ "<xo/printable2/Printable.hpp>",
+                "<xo/printable2/detail/IPrintable_Xfer.hpp>" ],
     namespace1: "xo",
-    namespace2: "print",
+    namespace2: "scm",
     facet_idl: "idl/Printable.json5",
     brief: "provide APrintable interface for DFloat",
     using_doxygen: true,

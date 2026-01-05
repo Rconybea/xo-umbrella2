@@ -2,7 +2,7 @@
  *
  *  Generated automagically from ingredients:
  *  1. code generator:
- *       [/home/roland/proj/xo-umbrella2/xo-facet/codegen/genfacet]
+ *       [/Users/roland/proj/xo-umbrella2/xo-facet/codegen/genfacet]
  *     arguments:
  *       --input [idl/Printable.json5]
  *  2. jinja2 template for abstract facet .hpp file:
@@ -30,6 +30,7 @@ public:
     ///@{
     using ObjectType = Object;
     using DataPtr = Object::DataPtr;
+    using ppindentinfo = APrintable::ppindentinfo;
     ///@}
 
     /** @defgroup print-printable-router-ctors **/
