@@ -44,6 +44,8 @@ namespace {{facet_ns2}} {
         ///@{
         {% endif %}
 
+        /** integer identifying a type **/
+        using typeseq = xo::facet::typeseq;
         {% for ty in types %}
         using {{ty.name}} = {{abstract_facet}}::{{ty.name}};
         {% endfor %}
@@ -61,14 +63,14 @@ namespace {{facet_ns2}} {
         // from {{abstract_facet}}
 
         // const methods
-        int32_t _typeseq() const noexcept override { return s_typeseq; }
+        typeseq _typeseq() const noexcept override { return s_typeseq; }
         {% for md in const_methods %}
         [[noreturn]] {{md.return_type}} {{md.name}}({{md.args | argtypes}}) {{md | qualifiers}} override { _fatal(); }
         {% endfor %}
 
         // nonconst methods
         {% for md in nonconst_methods %}
-        [[noreturn]] {{md.return_type}} {{md.name}}({{md.args | argtypes}}) {{md | qualifiers}} override { _fatail(); }
+        [[noreturn]] {{md.return_type}} {{md.name}}({{md.args | argtypes}}) {{md | qualifiers}} override { _fatal(); }
         {% endfor %}
 
         {% if using_dox %}
@@ -89,11 +91,11 @@ namespace {{facet_ns2}} {
 
     public:
         {% if using_dox %}
-        /** @defgraoup {{facet_ns2}}-{{facet_name_lc}}-any-member-vars **/
+        /** @defgroup {{facet_ns2}}-{{facet_name_lc}}-any-member-vars **/
         ///@{
         {% endif %}
 
-        static int32_t s_typeseq;
+        static typeseq s_typeseq;
         static bool _valid;
 
         {% if using_dox %}

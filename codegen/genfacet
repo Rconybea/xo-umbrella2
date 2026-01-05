@@ -77,9 +77,8 @@ def format_args_impl(args, drepr):
 def gen_facet(env,
               idl_fname,
               idl,
-              input_json5,
               output_hpp_dir,
-              output_impl_hpp_dir,
+              #output_impl_hpp_subdir,
               output_cpp_dir):
 
 
@@ -88,12 +87,16 @@ def gen_facet(env,
 
     # extra include files (or perhaps other definitions)
     facet_includes = idl['includes']
+    # detail
+    facet_detail_subdir = idl['detail_subdir']
     facet_ns1 = idl['namespace1']
     facet_ns2 = idl['namespace2']
     facet_name = idl['facet']          # e.g. Sequence
     facet_name_lc = facet_name.lower()
     facet_brief = idl['brief']
     facet_doc = '\n'.join(idl['doc'])
+
+    output_impl_hpp_dir = output_hpp_dir / facet_detail_subdir
 
     types = idl['types']
     for ty in types:
@@ -143,7 +146,7 @@ def gen_facet(env,
         'genfacet': __file__,
         'genfacet_input': idl_fname,
         'using_dox': using_dox,
-        'impl_hpp_subdir': output_impl_hpp_subdir,
+        'impl_hpp_subdir': facet_detail_subdir,
         #
         'facet_hpp_j2': 'facet.hpp.j2',
         'facet_includes': facet_includes,
@@ -475,23 +478,23 @@ def main():
     env.filters['argimpl'] = format_args_impl
 
     if idl['mode'] == 'facet':
-        gen_facet(env,
-                  idl_fname,
-                  idl,
-                  output_hpp_dir,
-                  output_impl_hpp_dir,
-                  output_cpp_dir)
+        gen_facet(env=env,
+                  idl_fname=idl_fname,
+                  idl=idl,
+                  output_hpp_dir=output_hpp_dir,
+                  #output_impl_hpp_dir=output_impl_hpp_dir,
+                  output_cpp_dir=output_cpp_dir)
     elif idl['mode'] == 'implementation':
         facet_idl_fname = idl['facet_idl']
         facet_idl = load_idl(facet_idl_fname)
 
-        gen_facet_impl(env,
-                       idl_fname,
-                       idl,
-                       facet_idl,
-                       output_hpp_dir,
-                       output_impl_hpp_dir,
-                       output_cpp_dir)
+        gen_facet_impl(env=env,
+                       idl_fname=idl_fname,
+                       idl=idl,
+                       facet_idl=facet_idl,
+                       output_hpp_dir=output_hpp_dir,
+                       output_impl_hpp_dir=output_impl_hpp_dir,
+                       output_cpp_dir=output_cpp_dir)
 
 if __name__ == '__main__':
     main()
