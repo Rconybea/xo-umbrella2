@@ -57,7 +57,7 @@ namespace scm {
         using I = Impl;
 
     public:
-        /** @defgraoup scm-sequence-xfer-member-vars **/
+        /** @defgroup scm-sequence-xfer-member-vars **/
         ///@{
 
         /** typeseq for template parameter DRepr **/

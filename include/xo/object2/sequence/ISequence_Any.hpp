@@ -66,7 +66,7 @@ namespace scm {
         ///@}
 
     private:
-        /** @defgraoup scm-sequence-any-private-methods **/
+        /** @defgroup scm-sequence-any-private-methods **/
         ///@{
 
         [[noreturn]] static void _fatal();
@@ -74,7 +74,7 @@ namespace scm {
         ///@}
 
     public:
-        /** @defgraoup scm-sequence-any-member-vars **/
+        /** @defgroup scm-sequence-any-member-vars **/
         ///@{
 
         static typeseq s_typeseq;

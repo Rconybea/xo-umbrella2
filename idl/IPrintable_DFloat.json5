@@ -1,0 +1,11 @@
+{
+    mode: "implementation",
+    includes: [],
+    namespace1: "xo",
+    namespace2: "print",
+    facet_idl: "idl/Printable.json5",
+    brief: "provide APrintable interface for DFloat",
+    using_doxygen: true,
+    repr: "DFloat",
+    doc: [ "doc for something or other" ],
+}
