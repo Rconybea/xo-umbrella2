@@ -4,9 +4,11 @@
  **/
 
 #include "DFloat.hpp"
+#include <xo/indentlog/print/pretty.hpp>
 
 namespace xo {
     using xo::facet::typeseq;
+    using xo::print::ppdetail_atomic;
 
     namespace scm {
         DFloat *
@@ -17,6 +19,12 @@ namespace xo {
                                   sizeof(DFloat));
 
             return new (mem) DFloat(x);
+        }
+
+        bool
+        DFloat::pretty(const ppindentinfo & ppii) const
+        {
+            return ppdetail_atomic<double>::print_pretty(ppii, value_);
         }
     } /*namespace scm*/
 } /*namespace xo*/

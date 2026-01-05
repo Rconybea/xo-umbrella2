@@ -37,11 +37,12 @@ xo_add_genfacetimpl(
     OUTPUT_CPP_DIR src/object2
 )
 
-get_target_property(xo_printable2_src_dir xo-printable2 xo_srcdir)
-message(STATUS "xo_printable2_src_dir=${xo_printable_src_dir}")
+get_target_property(xo_printable2_dir share_xo_printable2 path)
+message(STATUS "xo_printable2_dir=${xo_printable2_dir}")
 
 xo_add_genfacetimpl(
     TARGET xo-object2-facetimpl-printable-float
+    FACET_DIR ${xo_printable2_dir}
     FACET Printable
     REPR Float
     INPUT idl/IPrintable_DFloat.json5

@@ -6,11 +6,13 @@
 #pragma once
 
 #include <xo/alloc2/Allocator.hpp>
+#include <xo/indentlog/print/ppindentinfo.hpp>
 
 namespace xo {
     namespace scm {
         struct DFloat {
             using AAllocator = xo::mm::AAllocator;
+            using ppindentinfo = xo::print::ppindentinfo;
 
             explicit DFloat(double x) : value_{x} {}
 
@@ -19,6 +21,8 @@ namespace xo {
                                  double x);
 
             double value() const noexcept { return value_; }
+
+            bool pretty(const ppindentinfo & ppii) const;
 
             operator double() const noexcept { return value_; }
 
