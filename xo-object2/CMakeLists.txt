@@ -29,6 +29,7 @@ xo_add_genfacet(
 
 xo_add_genfacetimpl(
     TARGET xo-object2-facetimpl-sequence-list
+    FACET_PKG xo_object2
     FACET Sequence
     REPR List
     INPUT idl/ISequence_DList.json5
@@ -37,12 +38,13 @@ xo_add_genfacetimpl(
     OUTPUT_CPP_DIR src/object2
 )
 
-get_target_property(xo_printable2_dir share_xo_printable2 path)
-message(STATUS "xo_printable2_dir=${xo_printable2_dir}")
+#get_target_property(xo_printable2_dir share_xo_printable2 path)
+#message(STATUS "xo_printable2_dir=${xo_printable2_dir}")
 
 xo_add_genfacetimpl(
     TARGET xo-object2-facetimpl-printable-float
-    FACET_DIR ${xo_printable2_dir}
+    FACET_PKG xo_printable2
+#    FACET_DIR ${xo_printable2_dir}
     FACET Printable
     REPR Float
     INPUT idl/IPrintable_DFloat.json5

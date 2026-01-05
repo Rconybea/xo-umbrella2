@@ -2,7 +2,7 @@
  *
  *  Generated automagically from ingredients:
  *  1. code generator:
- *       [/Users/roland/proj/xo-umbrella2/xo-facet/codegen/genfacet]
+ *       [/home/roland/proj/xo-umbrella2/xo-facet/codegen/genfacet]
  *     arguments:
  *       --input [idl/IPrintable_DFloat.json5]
  *  2. jinja2 template for abstract facet .hpp file:
@@ -45,8 +45,7 @@ namespace xo {
             /** @defgroup scm-printable-dfloat-methods **/
             ///@{
             /** Pretty-printing support for this object.
-                See [xo-indentlog/xo/indentlog/pretty.hpp]
-            **/
+See [xo-indentlog/xo/indentlog/pretty.hpp] **/
             static bool pretty(const DFloat & self, const ppindentinfo & ppii);
 
             ///@}
