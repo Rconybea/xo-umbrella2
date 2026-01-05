@@ -13,8 +13,9 @@
 
 #pragma once
 
-#include "{{facet_hpp_fname}}"
-#include "{{facet_detail_subdir}}/{{iface_facet_xfer_hpp_fname}}"
+{% for include_fname in facet_includes %}
+#include {{include_fname}}
+{% endfor %}
 #include "{{data_repr_hpp_fname}}"
 
 namespace {{repr_ns1}} { namespace {{repr_ns2}} { class {{iface_facet_repr}}; } }
@@ -43,7 +44,7 @@ namespace {{repr_ns1}} {
             ///@{
             {% endif %}
             {% for ty in types %}
-            using {{ty.name}} = {{abstract_facet}}::{{ty.name}};
+            using {{ty.name}} = {{facet_ns1}}::{{facet_ns2}}::{{abstract_facet}}::{{ty.name}};
             {% endfor %}
             {% if using_dox %}
             ///@}
