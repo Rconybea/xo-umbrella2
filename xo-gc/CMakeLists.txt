@@ -21,7 +21,8 @@ add_definitions(${PROJECT_CXX_FLAGS})
 # must complete definition of expression lib before configuring examples
 add_subdirectory(src/gc)
 add_subdirectory(utest)
-#xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
+
+xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
 
 # ----------------------------------------------------------------
 # docs targets depend on other library/utest/exec targets above,

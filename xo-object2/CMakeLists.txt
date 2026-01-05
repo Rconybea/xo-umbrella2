@@ -37,12 +37,26 @@ xo_add_genfacetimpl(
     OUTPUT_CPP_DIR src/object2
 )
 
+get_target_property(xo_printable2_src_dir xo-printable2 xo_srcdir)
+message(STATUS "xo_printable2_src_dir=${xo_printable_src_dir}")
+
+xo_add_genfacetimpl(
+    TARGET xo-object2-facetimpl-printable-float
+    FACET Printable
+    REPR Float
+    INPUT idl/IPrintable_DFloat.json5
+    OUTPUT_HPP_DIR include/xo/object2
+    OUTPUT_IMPL_SUBDIR .
+    OUTPUT_CPP_DIR src/object2
+)
+
 # ----------------------------------------------------------------
 
 # must complete definition of expression lib before configuring examples
 add_subdirectory(src/object2)
 add_subdirectory(utest)
-#xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
+
+xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
 
 # ----------------------------------------------------------------
 # docs targets depend on other library/utest/exec targets above,

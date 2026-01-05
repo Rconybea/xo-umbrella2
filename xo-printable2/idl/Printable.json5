@@ -1,0 +1,29 @@
+{
+    mode: "facet",
+    includes: ["<xo/indentlog/print/ppindentinfo.hpp>"],
+    namespace1: "xo",
+    namespace2: "print",
+    facet: "Printable",
+    detail_subdir: "detail",
+    brief: "pretty-printable objects",
+    using_doxygen: true,
+    doc: [
+        "Trait for data types that support pretty-printing"
+    ],
+    types: [],
+    const_methods: [
+        // bool pretty(const ppindentinfo & ppii) const
+        {
+            name: "pretty",
+            doc: [
+                "Pretty-printing support for this object.",
+                "See [xo-indentlog/xo/indentlog/pretty.hpp]",
+            ],
+            return_type: "bool",
+            args: [
+                {type: "const ppindentinfo &", name: "ppii"},
+            ],
+        },
+    ],
+    nonconst_methods: [],
+}
