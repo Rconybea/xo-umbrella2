@@ -5,8 +5,8 @@
     namespace1: "xo",
     namespace2: "scm",
     facet_idl: "idl/Printable.json5",
-    brief: "provide APrintable interface for DFloat",
+    brief: "provide APrintable interface for DList",
     using_doxygen: true,
-    repr: "DFloat",
-    doc: [ "implement APrintable for DFloat" ],
+    repr: "DList",
+    doc: [ "implement APrintable for DList" ],
 }

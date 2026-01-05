@@ -27,6 +27,7 @@ xo_add_genfacet(
     OUTPUT_CPP_DIR src/object2
 )
 
+# note: manual target; generated code committed to git
 xo_add_genfacetimpl(
     TARGET xo-object2-facetimpl-sequence-list
     FACET_PKG xo_object2
@@ -38,16 +39,25 @@ xo_add_genfacetimpl(
     OUTPUT_CPP_DIR src/object2
 )
 
-#get_target_property(xo_printable2_dir share_xo_printable2 path)
-#message(STATUS "xo_printable2_dir=${xo_printable2_dir}")
-
+# note: manual target; generated code committed to git
 xo_add_genfacetimpl(
     TARGET xo-object2-facetimpl-printable-float
     FACET_PKG xo_printable2
-#    FACET_DIR ${xo_printable2_dir}
     FACET Printable
     REPR Float
     INPUT idl/IPrintable_DFloat.json5
+    OUTPUT_HPP_DIR include/xo/object2
+    OUTPUT_IMPL_SUBDIR .
+    OUTPUT_CPP_DIR src/object2
+)
+
+# note: manual target; generated code committed to git
+xo_add_genfacetimpl(
+    TARGET xo-object2-facetimpl-printable-list
+    FACET_PKG xo_printable2
+    FACET Printable
+    REPR List
+    INPUT idl/IPrintable_DList.json5
     OUTPUT_HPP_DIR include/xo/object2
     OUTPUT_IMPL_SUBDIR .
     OUTPUT_CPP_DIR src/object2

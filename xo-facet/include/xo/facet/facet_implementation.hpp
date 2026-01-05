@@ -92,7 +92,7 @@ namespace xo {
             //static_assert(false && "expect specialization <AFacet,DRepr> which should provide ImplType trait");
         };
 
-        /**  Retrieve facet implementation for a (facet, datatype) pair **/
+        /** Retrieve facet implementation for a (facet, datatype) pair **/
         template <typename AFacet, typename DRepr>
         using FacetImplType = FacetImplementation<AFacet, DRepr>::ImplType;
 
@@ -123,11 +123,6 @@ namespace xo {
          *      = valid_facet_implementation<AMyFacet, IMyFacet_Any>();
          **/
         struct DVariantPlaceholder {};
-
-        /** PLAN:
-         *  expect also will need runtime version of FacetImplementation.
-         **/
-
     } /*namespace facet*/
 } /*namespace xo*/
 
