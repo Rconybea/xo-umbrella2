@@ -84,6 +84,31 @@ namespace xo {
             return l->head_;
         }
 
+#ifdef NOT_YET
+        bool
+        DList::pretty(const ppindentinfo & ppii) const
+        {
+            /* adapted from ppstate.pretty_struct(), see also */
+
+            using xo::print::ppstate;
+
+            ppstate * pps = ppii.pps();
+
+            if (ppii.upto()) {
+/* perhaps print on one line */
+                if (!pps->print_upto("(")
+                    return false;
+
+                /* TODO: probably use iterators here, when available */
+                const DList * l = this;
+                while (!l->is_empty()) {
+                    obj<APrintable>(l->head_.data());
+
+                }
+            }
+        }
+#endif
+
     } /*namespace scm*/
 } /*namespace xo*/
 

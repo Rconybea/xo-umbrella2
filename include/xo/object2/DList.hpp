@@ -40,6 +40,9 @@ namespace xo {
             /** return element at 0-based index @p ix **/
             obj<AGCObject> at(size_type ix) const;
 
+            /** pretty-printing driver; combine layout+printing **/
+            bool pretty(const ppindentinfo & ppii) const;
+
             /** first member of list **/
             obj<AGCObject> head_;
             /** remainder of list **/
