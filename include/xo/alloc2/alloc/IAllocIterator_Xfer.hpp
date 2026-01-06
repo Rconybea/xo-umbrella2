@@ -18,7 +18,7 @@ namespace xo {
                   typename IAllocIterator_DRepr>
         struct IAllocIterator_Xfer : public AAllocIterator {
             using Impl = IAllocIterator_DRepr;
-            using typeseq = xo::facet::typeseq;
+            using typeseq = xo::reflect::typeseq;
 
             static const DRepr & _dcast(Copaque d) { return *(const DRepr *)d; }
             static DRepr & _dcast(Opaque d) { return *(DRepr *)d; }
@@ -48,9 +48,9 @@ namespace xo {
         };
 
         template <typename DRepr, typename IAllocIterator_DRepr>
-        xo::facet::typeseq
+        xo::reflect::typeseq
         IAllocIterator_Xfer<DRepr, IAllocIterator_DRepr>::s_typeseq
-        = facet::typeseq::id<DRepr>();
+        = reflect::typeseq::id<DRepr>();
 
         template <typename DRepr, typename IAllocIterator_DRepr>
         bool

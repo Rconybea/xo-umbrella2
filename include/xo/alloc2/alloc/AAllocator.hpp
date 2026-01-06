@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "AllocError.hpp"
+#include <xo/arena/AllocError.hpp>
 #include "AllocInfo.hpp"
 //#include "AllocIterator.hpp"
 #include "AllocRange.hpp"

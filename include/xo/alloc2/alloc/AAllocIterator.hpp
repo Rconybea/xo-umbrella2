@@ -23,7 +23,7 @@ namespace xo {
          **/
         struct AAllocIterator {
             using obj_AAllocIterator = xo::facet::obj<AAllocIterator>;
-            using typeseq = xo::facet::typeseq;
+            using typeseq = xo::reflect::typeseq;
 
             /** @defgroup mm-allociterator-methods AllocIterator methods **/
             ///@{
