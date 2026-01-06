@@ -12,6 +12,7 @@ Some features: kalman filters, stochastic processes, complex event processing, s
    :caption: XO contents
 
    docs/install
+   xo-arena/docs/index
    xo-facet/docs/index
    xo-alloc2/docs/index
    xo-alloc/docs/index

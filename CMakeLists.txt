@@ -132,6 +132,20 @@ add_subdirectory(xo-imgui)
 # ----------------------------------------------------------------
 # documentation.  must follow add_subdirectory() for satellite projects
 
-xo_umbrella_doxygen_deps(xo_facet xo_alloc2 indentlog xo_flatstring xo_ratio xo_unit xo_tokenizer xo_reader xo_interpreter xo_jit)
+xo_umbrella_doxygen_deps(
+    xo_arena
+    xo_facet
+    xo_alloc2
+    indentlog
+    xo_flatstring
+    xo_ratio
+    xo_unit
+    xo_tokenizer
+    xo_reader
+    xo_interpreter
+    xo_jit)
 xo_umbrella_doxygen_config()
-xo_umbrella_sphinx_config(index.rst docs/install.rst docs/glossary.rst)
+xo_umbrella_sphinx_config(
+    index.rst
+    docs/install.rst
+    docs/glossary.rst)
