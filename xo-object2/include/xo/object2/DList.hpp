@@ -8,6 +8,7 @@
 #include <xo/gc/GCObject.hpp>
 //#include "xo/alloc2/gcobject/RGCObject.hpp"
 #include <xo/facet/obj.hpp>
+#include <xo/indentlog/print/ppindentinfo.hpp>
 
 namespace xo {
     namespace scm {
@@ -16,6 +17,7 @@ namespace xo {
             using size_type = std::size_t;
             using AGCObject = xo::mm::AGCObject;
             using AAllocator = xo::mm::AAllocator;
+            using ppindentinfo = xo::print::ppindentinfo;
 
             DList(xo::obj<AGCObject> h,
                   DList * r) : head_{h}, rest_{r} {}
@@ -40,8 +42,10 @@ namespace xo {
             /** return element at 0-based index @p ix **/
             obj<AGCObject> at(size_type ix) const;
 
+#ifdef NOT_YET
             /** pretty-printing driver; combine layout+printing **/
             bool pretty(const ppindentinfo & ppii) const;
+#endif
 
             /** first member of list **/
             obj<AGCObject> head_;

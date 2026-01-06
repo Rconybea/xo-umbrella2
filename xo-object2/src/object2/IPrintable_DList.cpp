@@ -18,7 +18,13 @@ namespace xo {
         auto
         IPrintable_DList::pretty(const DList & self, const ppindentinfo & ppii) -> bool
         {
+            (void)self;
+            (void)ppii;
+
+            return false;
+#ifdef NOT_YET
             return self.pretty(ppii);
+#endif
         }
 
 

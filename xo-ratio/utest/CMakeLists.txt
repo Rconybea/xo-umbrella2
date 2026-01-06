@@ -20,6 +20,7 @@ if (ENABLE_TESTING)
     xo_headeronly_dependency(${SELF_EXE} xo_reflectutil)
     xo_dependency(${SELF_EXE} randomgen)
     xo_dependency(${SELF_EXE} indentlog)
+    xo_dependency(${SELF_EXE} xo_flatstring)
     xo_external_target_dependency(${SELF_EXE} Catch2 Catch2::Catch2)
 endif()
 
