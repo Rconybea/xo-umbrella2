@@ -68,8 +68,8 @@ namespace xo {
             const_iterator cend() const noexcept { return this->_address_of(size_); }
             const_iterator end() const noexcept { return this->cend(); }
 
-            constexpr T * data() { return store_.lo_; }
-            constexpr const T * data() const { return store_.lo_; }
+            constexpr T * data() { return reinterpret_cast<T*>(store_.lo_); }
+            constexpr const T * data() const { return reinterpret_cast<const T*>(store_.lo_); }
 
             void reserve(size_type z);
             void resize(size_type z);
@@ -82,8 +82,8 @@ namespace xo {
             void swap(DArenaVector & other) noexcept;
 
         private:
-            T * _address_of(size_type i) { return *((T *)store_.lo_) + i; }
-            const T * _address_of(size_type i) const { return *((const T *)store_.lo_) + i; }
+            T * _address_of(size_type i) { return ((T *)store_.lo_) + i; }
+            const T * _address_of(size_type i) const { return ((const T *)store_.lo_) + i; }
 
             void _check_valid_index(size_type i) const;
 
@@ -201,7 +201,7 @@ namespace xo {
 
             store_.expand(req_z);
 
-            T * addr = this->address_of(size_);
+            T * addr = this->_address_of(size_);
 
             new (addr) T{std::move(x)};
 
@@ -211,9 +211,13 @@ namespace xo {
         template <typename T>
         void
         DArenaVector<T>::push_back(const T & x) {
-            size_type z = size_;
-            this->resize(z + 1);
-            (*this)[z] = x;
+            size_type z = size_ + 1;
+            store_.expand(z * sizeof(T));
+
+            T * addr = this->_address_of(size_);
+            new (addr) T{x};
+
+            size_ = z;
         }
 
         template <typename T>
