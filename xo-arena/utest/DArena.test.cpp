@@ -10,6 +10,8 @@
 
 namespace xo {
     using xo::mm::DArena;
+    using xo::mm::AllocHeader;
+    using xo::mm::AllocHeaderConfig;
     using xo::mm::ArenaConfig;
     using xo::mm::padding;
     using xo::mm::error;
@@ -164,6 +166,48 @@ namespace xo {
             REQUIRE(arena.last_error().error_seq_ == 0);
             REQUIRE(arena.allocated() >= z0 + z1);
             REQUIRE(arena.allocated() < z0 + z1 + 2 * padding::c_alloc_alignment );
+            REQUIRE(arena.allocated() <= arena.committed());
+            REQUIRE(arena.allocated() + arena.available() == arena.committed());
+            REQUIRE(arena.committed() <= arena.reserved());
+        }
+
+        TEST_CASE("arena-alloc-2", "[arena][DArena]")
+        {
+            using header_type = AllocHeader;
+
+            /* typed allocator a1o, with object header */
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 64*1024,
+                              .store_header_flag_ = true,
+                              /* up to 4GB */
+                              .header_ = AllocHeaderConfig(0 /*guard_z*/,
+                                                           0xfd /*guard_byte*/,
+                                                           0 /*tseq-bits*/,
+                                                           0 /*age-bits*/,
+                                                           32 /*size-bits*/),
+                              .debug_flag_ = false,
+            };
+            DArena arena = DArena::map(cfg);
+
+            REQUIRE(arena.reserved() >= cfg.size_);
+            REQUIRE(arena.committed() == 0);
+            REQUIRE(arena.available() == 0);
+            REQUIRE(arena.allocated() == 0);
+
+            size_t z0 = 1;
+            byte * m0 = arena.alloc(typeseq::anon(), 1);
+
+            REQUIRE(m0);
+
+            header_type* header = (header_type*)(m0 - sizeof(header_type));
+
+            REQUIRE(arena.contains(header));
+            REQUIRE(cfg.header_.size(*header) == padding::with_padding(z0));
+            //REQUIRE(((*header) & cfg.header_size_mask_) == padding::with_padding(z0));
+            REQUIRE(arena.last_error().error_ == error::ok);
+            REQUIRE(arena.last_error().error_seq_ == 0);
+            REQUIRE(arena.allocated() >= z0);
+            REQUIRE(arena.allocated() < sizeof(DArena::header_type) + z0 + padding::c_alloc_alignment );
             REQUIRE(arena.allocated() <= arena.committed());
             REQUIRE(arena.allocated() + arena.available() == arena.committed());
             REQUIRE(arena.committed() <= arena.reserved());
