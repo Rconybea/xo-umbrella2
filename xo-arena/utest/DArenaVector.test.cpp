@@ -110,6 +110,117 @@ namespace xo {
             // index > size is invalid
             REQUIRE_THROWS_AS(vec.at(100), std::out_of_range);
         }
+
+        TEST_CASE("DArenaVector-resize-expand", "[arena][DArenaVector]")
+        {
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 4096 };
+            DArenaVector<double> vec = DArenaVector<double>::map(cfg);
+
+            REQUIRE(vec.size() == 0);
+
+            // resize from 0 to 5
+            vec.resize(5);
+            REQUIRE(vec.size() == 5);
+
+            // can write to all indices
+            for (size_t i = 0; i < 5; ++i) {
+                vec[i] = static_cast<double>(i * 10);
+            }
+
+            REQUIRE(vec[0] == 0.0);
+            REQUIRE(vec[1] == 10.0);
+            REQUIRE(vec[2] == 20.0);
+            REQUIRE(vec[3] == 30.0);
+            REQUIRE(vec[4] == 40.0);
+
+            // resize to larger
+            vec.resize(8);
+            REQUIRE(vec.size() == 8);
+
+            // original values preserved
+            REQUIRE(vec[0] == 0.0);
+            REQUIRE(vec[1] == 10.0);
+            REQUIRE(vec[4] == 40.0);
+        }
+
+        TEST_CASE("DArenaVector-resize-shrink", "[arena][DArenaVector]")
+        {
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 4096 };
+            DArenaVector<double> vec = DArenaVector<double>::map(cfg);
+
+            vec.push_back(1.0);
+            vec.push_back(2.0);
+            vec.push_back(3.0);
+            vec.push_back(4.0);
+            vec.push_back(5.0);
+
+            REQUIRE(vec.size() == 5);
+
+            // shrink to 3
+            vec.resize(3);
+            REQUIRE(vec.size() == 3);
+
+            // first 3 elements preserved
+            REQUIRE(vec[0] == 1.0);
+            REQUIRE(vec[1] == 2.0);
+            REQUIRE(vec[2] == 3.0);
+
+            // index 3 now out of bounds
+            REQUIRE_THROWS_AS(vec.at(3), std::out_of_range);
+
+            // shrink to 0
+            vec.resize(0);
+            REQUIRE(vec.size() == 0);
+            REQUIRE(vec.empty());
+        }
+
+        TEST_CASE("DArenaVector-resize-same", "[arena][DArenaVector]")
+        {
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 4096 };
+            DArenaVector<double> vec = DArenaVector<double>::map(cfg);
+
+            vec.push_back(10.0);
+            vec.push_back(20.0);
+            vec.push_back(30.0);
+
+            REQUIRE(vec.size() == 3);
+
+            // resize to same size
+            vec.resize(3);
+            REQUIRE(vec.size() == 3);
+
+            // values unchanged
+            REQUIRE(vec[0] == 10.0);
+            REQUIRE(vec[1] == 20.0);
+            REQUIRE(vec[2] == 30.0);
+        }
+
+        TEST_CASE("DArenaVector-clear", "[arena][DArenaVector]")
+        {
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 4096 };
+            DArenaVector<double> vec = DArenaVector<double>::map(cfg);
+
+            vec.push_back(1.0);
+            vec.push_back(2.0);
+            vec.push_back(3.0);
+
+            REQUIRE(vec.size() == 3);
+            REQUIRE(!vec.empty());
+
+            vec.clear();
+
+            REQUIRE(vec.size() == 0);
+            REQUIRE(vec.empty());
+
+            // can still push after clear
+            vec.push_back(99.0);
+            REQUIRE(vec.size() == 1);
+            REQUIRE(vec[0] == 99.0);
+        }
     }
 }
 
