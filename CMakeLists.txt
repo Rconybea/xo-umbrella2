@@ -20,22 +20,12 @@ add_definitions(${PROJECT_CXX_FLAGS})
 # ----------------------------------------------------------------
 # output targets
 
+add_subdirectory(src/arena)
 #add_subdirectory(utest)
 
 # ----------------------------------------------------------------
-# header-only library
+# cmake export
 
-set(SELF_LIB xo_arena)
-xo_add_headeronly_library(${SELF_LIB})
-xo_install_library4(${SELF_LIB} ${PROJECT_NAME}Targets)
 xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
-
-# ----------------------------------------------------------------
-# input dependencies
-#
-# NOTE: dependency set here must be kept consistent with
-#       xo-arena/cmake/xo_arenaConfig.cmake.in
-
-#xo_headeronly_dependency(${SELF_LIB} xo_flatstring)
 
 # end CMakeLists.txt
