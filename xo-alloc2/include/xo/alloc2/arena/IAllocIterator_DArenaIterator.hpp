@@ -6,7 +6,7 @@
 #pragma once
 
 #include "alloc/IAllocIterator_Xfer.hpp"
-#include "arena/DArenaIterator.hpp"
+#include <xo/arena/DArenaIterator.hpp>
 
 namespace xo {
     namespace mm { struct IAllocIterator_DArenaIterator; }

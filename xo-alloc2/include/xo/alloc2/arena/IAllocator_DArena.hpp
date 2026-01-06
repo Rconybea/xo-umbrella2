@@ -5,7 +5,7 @@
 
 #include "alloc/AAllocator.hpp"
 #include "alloc/IAllocator_Xfer.hpp"
-#include "arena/DArena.hpp"
+#include <xo/arena/DArena.hpp>
 
 namespace xo {
     namespace mm { struct IAllocator_DArena; }

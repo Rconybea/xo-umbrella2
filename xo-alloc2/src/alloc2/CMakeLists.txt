@@ -9,12 +9,12 @@ set(SELF_SRCS
 
     AAllocator.cpp
 #    ArenaConfig.cpp
-    DArena.cpp
+#    DArena.cpp
     IAllocator_Any.cpp
     IAllocator_DArena.cpp
 
     IAllocIterator_Any.cpp
-    DArenaIterator.cpp
+#    DArenaIterator.cpp
     IAllocIterator_DArenaIterator.cpp
 
     )

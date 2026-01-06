@@ -2,9 +2,11 @@
 
 set(SELF_LIB xo_arena)
 set(SELF_SRCS
+    cmpresult.cpp
     AllocError.cpp
     AllocInfo.cpp
-    cmpresult.cpp
+    DArena.cpp
+    DArenaIterator.cpp
 )
 
 xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 ${SELF_SRCS})

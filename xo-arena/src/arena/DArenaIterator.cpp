@@ -3,8 +3,8 @@
  *  @author Roland Conybeare, Dec 2025
  **/
 
-#include "arena/DArenaIterator.hpp"
-#include "arena/DArena.hpp"
+#include "DArenaIterator.hpp"
+#include "DArena.hpp"
 #include <xo/indentlog/scope.hpp>
 #include <xo/indentlog/print/tag.hpp>
 #include <cassert>

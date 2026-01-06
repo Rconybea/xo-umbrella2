@@ -6,8 +6,8 @@
 #include "AllocIterator.hpp"
 #include "arena/IAllocator_DArena.hpp"
 #include "arena/IAllocIterator_DArenaIterator.hpp" // for alloc_range
-#include "arena/DArenaIterator.hpp"
-#include "padding.hpp"
+#include <xo/arena/DArenaIterator.hpp>
+#include <xo/arena/padding.hpp>
 #include <xo/facet/obj.hpp>
 #include <xo/indentlog/scope.hpp>
 #include <cassert>

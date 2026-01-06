@@ -7,8 +7,8 @@
 
 #include "AllocInfo.hpp"
 #include "generation.hpp"
-#include "arena/DArenaIterator.hpp"
-#include "cmpresult.hpp"
+#include <xo/arena/DArenaIterator.hpp>
+#include <xo/arena/cmpresult.hpp>
 
 namespace xo {
     namespace mm {

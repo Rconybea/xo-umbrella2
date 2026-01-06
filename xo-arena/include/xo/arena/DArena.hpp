@@ -8,7 +8,7 @@
 #include "ArenaConfig.hpp"
 #include "AllocError.hpp"
 #include "AllocInfo.hpp"
-#include <xo/facet/typeseq.hpp>
+#include <xo/reflectutil/typeseq.hpp>
 
 namespace xo {
     namespace mm {
@@ -46,7 +46,7 @@ namespace xo {
             /** @brief type for allocation header (if enabled) **/
             using header_type = AllocHeader;
             /** integer identifying a type (see xo::facet::typeid<T>()) **/
-            using typeseq = xo::facet::typeseq;
+            using typeseq = xo::reflect::typeseq;
 
             /** @brief mode argument for @ref _alloc **/
             enum class alloc_mode : uint8_t {
@@ -280,7 +280,7 @@ namespace xo {
         static T *
         construct_with(DArena & ialloc, Args&&... args)
         {
-            using xo::facet::typeseq;
+            using xo::reflect::typeseq;
 
             typeseq t = typeseq::id<T>();
             std::byte * mem = ialloc.alloc(t, sizeof(T));
