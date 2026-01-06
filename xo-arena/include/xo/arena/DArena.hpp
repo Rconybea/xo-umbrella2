@@ -219,6 +219,9 @@ namespace xo {
              **/
             void clear() noexcept;
 
+            /** swap contents (including configuration) with another arena **/
+            void swap(DArena & other) noexcept;
+
             ///@}
 
             /** @defgroup mm-arena-instance-vars **/

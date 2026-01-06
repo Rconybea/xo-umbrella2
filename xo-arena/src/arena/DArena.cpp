@@ -616,6 +616,22 @@ namespace xo {
             this->free_ = lo_;
             this->establish_initial_guard();
         }
+
+        void
+        DArena::swap(DArena & other) noexcept
+        {
+            std::swap(config_, other.config_);
+            std::swap(page_z_, other.page_z_);
+            std::swap(arena_align_z_, other.arena_align_z_);
+            std::swap(lo_, other.lo_);
+            std::swap(committed_z_, other.committed_z_);
+            std::swap(last_header_, other.last_header_);
+            std::swap(free_, other.free_);
+            std::swap(limit_, other.limit_);
+            std::swap(hi_, other.hi_);
+            std::swap(error_count_, other.error_count_);
+            std::swap(last_error_, other.last_error_);
+        }
     }
 } /*namespace xo*/
 

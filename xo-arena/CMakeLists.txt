@@ -21,7 +21,7 @@ add_definitions(${PROJECT_CXX_FLAGS})
 # output targets
 
 add_subdirectory(src/arena)
-#add_subdirectory(utest)
+add_subdirectory(utest)
 
 # ----------------------------------------------------------------
 # cmake export
