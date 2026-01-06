@@ -5,7 +5,7 @@ set(SELF_SRCS
 
 #    AllocError.cpp
 #    AllocInfo.cpp
-    cmpresult.cpp
+#    cmpresult.cpp
 
     AAllocator.cpp
 #    ArenaConfig.cpp
