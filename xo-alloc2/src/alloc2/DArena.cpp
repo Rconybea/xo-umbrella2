@@ -6,9 +6,9 @@
 #include "alloc/AAllocator.hpp"
 #include "arena/DArena.hpp"
 #include "arena/DArenaIterator.hpp"
-#include "xo/alloc2/padding.hpp"
-#include "xo/indentlog/scope.hpp"
-#include "xo/indentlog/print/tag.hpp"
+#include <xo/arena/padding.hpp>
+#include <xo/indentlog/scope.hpp>
+#include <xo/indentlog/print/tag.hpp>
 #include <cassert>
 #include <sys/mman.h> // for ::munmap()
 #include <unistd.h> // for ::getpagesize()

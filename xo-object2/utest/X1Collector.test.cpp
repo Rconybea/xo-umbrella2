@@ -17,7 +17,8 @@
 #include <xo/gc/detail/ICollector_DX1Collector.hpp>
 
 #include <xo/alloc2/AllocInfo.hpp>
-#include <xo/alloc2/padding.hpp>
+
+#include <xo/arena/padding.hpp>
 
 #include <xo/indentlog/scope.hpp>
 #include <xo/indentlog/print/tag.hpp>

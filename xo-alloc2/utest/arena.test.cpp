@@ -5,11 +5,9 @@
 
 #include "xo/alloc2/Allocator.hpp"
 #include "xo/alloc2/alloc/IAllocator_Xfer.hpp"
-//#include "xo/alloc2/DArena.hpp"
 #include "xo/alloc2/arena/IAllocator_DArena.hpp"
-//#include "xo/alloc2/alloc/RAllocator.hpp"
 #include "xo/alloc2/print.hpp"
-#include "xo/alloc2/padding.hpp"
+#include "xo/arena/padding.hpp"
 #include <xo/facet/obj.hpp>
 #include <xo/indentlog/scope.hpp>
 #include <catch2/catch.hpp>
