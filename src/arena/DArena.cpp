@@ -27,7 +27,7 @@ namespace xo {
                                   size_t align_z,
                                   bool enable_hugepage_flag) -> range_type
         {
-            scope log(XO_DEBUG(true),
+            scope log(XO_DEBUG(false),
                       xtag("req_z", req_z), xtag("align_z", align_z));
 
             // 1. round up to multiple of align_z
@@ -114,7 +114,7 @@ namespace xo {
         DArena
         DArena::map(const ArenaConfig & cfg)
         {
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG(cfg.debug_flag_));
 
             /* vm page size. 4KB, probably */
             size_t page_z = getpagesize();
