@@ -90,8 +90,6 @@ VulkanApp::create_instance()
 #ifdef __APPLE__
     // Add portability extension for MoltenVK (macOS)
     extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
-#else
-    static_assert(false, "expecting apple build");
 #endif
 
     createInfo.enabledExtensionCount = extensions.size();
@@ -101,8 +99,6 @@ VulkanApp::create_instance()
 #ifdef __APPLE__
     // CRITICAL: Enable portability enumeration flag for MoltenVK
     createInfo.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
-#else
-    static_assert(false, "expecting apple build");
 #endif
 
     int result = vkCreateInstance(&createInfo, nullptr, &(this->instance_));
