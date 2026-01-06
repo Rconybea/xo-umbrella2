@@ -221,6 +221,83 @@ namespace xo {
             REQUIRE(vec.size() == 1);
             REQUIRE(vec[0] == 99.0);
         }
+
+        TEST_CASE("DArenaVector-iterators", "[arena][DArenaVector]")
+        {
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 4096 };
+            DArenaVector<double> vec = DArenaVector<double>::map(cfg);
+
+            vec.push_back(10.0);
+            vec.push_back(20.0);
+            vec.push_back(30.0);
+
+            // begin/end
+            REQUIRE(vec.begin() != vec.end());
+            REQUIRE(vec.end() - vec.begin() == 3);
+
+            // iterate with pointer arithmetic
+            auto it = vec.begin();
+            REQUIRE(*it == 10.0);
+            ++it;
+            REQUIRE(*it == 20.0);
+            ++it;
+            REQUIRE(*it == 30.0);
+            ++it;
+            REQUIRE(it == vec.end());
+
+            // modify through iterator
+            *vec.begin() = 15.0;
+            REQUIRE(vec[0] == 15.0);
+        }
+
+        TEST_CASE("DArenaVector-const-iterators", "[arena][DArenaVector]")
+        {
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 4096 };
+            DArenaVector<double> vec = DArenaVector<double>::map(cfg);
+
+            vec.push_back(1.0);
+            vec.push_back(2.0);
+            vec.push_back(3.0);
+
+            const DArenaVector<double> & cvec = vec;
+
+            REQUIRE(cvec.cbegin() != cvec.cend());
+            REQUIRE(cvec.begin() == cvec.cbegin());
+            REQUIRE(cvec.end() == cvec.cend());
+
+            auto it = cvec.cbegin();
+            REQUIRE(*it == 1.0);
+            ++it;
+            REQUIRE(*it == 2.0);
+        }
+
+        TEST_CASE("DArenaVector-range-for", "[arena][DArenaVector]")
+        {
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 4096 };
+            DArenaVector<double> vec = DArenaVector<double>::map(cfg);
+
+            vec.push_back(1.0);
+            vec.push_back(2.0);
+            vec.push_back(3.0);
+
+            // read via range-for
+            double sum = 0.0;
+            for (double x : vec) {
+                sum += x;
+            }
+            REQUIRE(sum == 6.0);
+
+            // modify via range-for
+            for (double & x : vec) {
+                x *= 2.0;
+            }
+            REQUIRE(vec[0] == 2.0);
+            REQUIRE(vec[1] == 4.0);
+            REQUIRE(vec[2] == 6.0);
+        }
     }
 }
 
