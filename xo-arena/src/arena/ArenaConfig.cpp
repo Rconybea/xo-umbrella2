@@ -4,6 +4,7 @@
  **/
 
 #include "ArenaConfig.hpp"
+
 namespace xo {
     namespace mm {
         ArenaConfig
