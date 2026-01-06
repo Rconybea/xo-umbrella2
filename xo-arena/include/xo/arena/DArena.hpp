@@ -105,6 +105,10 @@ namespace xo {
              *  This is the amount of memory guaranteed to be usable for future allocs from this arena.
              **/
             size_type available() const noexcept { return limit_ - free_; }
+            /** VM page size for this arena (likely 4KB) **/
+            size_type page_z() const noexcept { return page_z_; }
+            /** Last error encountered by this arena **/
+            const AllocError & last_error() const noexcept { return last_error_; }
 
             /** True iff address @p addr is owned by this arena,
              *  i.e. falls within [@ref lo_, @ref hi_)

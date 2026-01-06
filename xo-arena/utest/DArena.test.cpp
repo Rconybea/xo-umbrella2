@@ -3,12 +3,15 @@
  *  @author Roland Conybeare, Jan 2026
  **/
 
-#include "xo/arena/DArena.hpp"
+#include "DArena.hpp"
+#include "print.hpp"
+#include <xo/indentlog/print/tag.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {
     using xo::mm::DArena;
     using xo::mm::ArenaConfig;
+    using xo::xtag;
     using std::byte;
 
     namespace ut {
@@ -96,6 +99,33 @@ namespace xo {
             REQUIRE(arena2.limit_ == limit);
             REQUIRE(arena2.hi_ == hi);
             REQUIRE(arena2.committed_z_ == committed_z);
+        }
+
+        TEST_CASE("arena-expand-1", "[arena][DArena]")
+        {
+            /* typed allocator a1o */
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 1,
+                              .debug_flag_ = false };
+            DArena arena = DArena::map(cfg);
+
+            REQUIRE(arena.available() == 0);
+            REQUIRE(arena.allocated() == 0);
+
+            size_t z2 = 512;
+            bool ok = arena.expand(z2);
+
+            INFO(xtag("last_error", arena.last_error()));
+
+            REQUIRE(ok);
+
+            REQUIRE(arena.reserved() % arena.page_z() == 0);
+            REQUIRE(arena.committed() >= z2);
+            REQUIRE(arena.committed() % arena.page_z() == 0);
+            REQUIRE(arena.available() >= z2);
+            REQUIRE(arena.available() == arena.committed());
+            REQUIRE(arena.allocated() == 0);
+
         }
 
     }
