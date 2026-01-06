@@ -8,7 +8,7 @@
 #include "DX1CollectorIterator.hpp"
 #include "detail/IAllocator_DX1Collector.hpp"
 #include "detail/IAllocIterator_DX1CollectorIterator.hpp"
-#include "arena/ArenaConfig.hpp"
+#include <xo/arena/ArenaConfig.hpp>
 #include "padding.hpp"
 #include <xo/indentlog/scope.hpp>
 #include <xo/indentlog/print/tag.hpp>

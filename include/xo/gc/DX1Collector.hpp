@@ -10,8 +10,8 @@
 #include "object_age.hpp"
 #include "role.hpp"
 #include <xo/alloc2/Allocator.hpp>
-#include <xo/alloc2/arena/ArenaConfig.hpp>
 #include <xo/alloc2/arena/DArena.hpp>
+#include <xo/arena/ArenaConfig.hpp>
 #include <memory>
 #include <array>
 
