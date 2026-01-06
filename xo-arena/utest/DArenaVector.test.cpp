@@ -400,6 +400,34 @@ namespace xo {
             REQUIRE(cptr[1] == 99.0);
             REQUIRE(cptr[2] == 3.0);
         }
+
+        TEST_CASE("DArenaVector-move-ctor", "[arena][DArenaVector]")
+        {
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 4096 };
+            DArenaVector<double> vec1 = DArenaVector<double>::map(cfg);
+
+            vec1.push_back(10.0);
+            vec1.push_back(20.0);
+            vec1.push_back(30.0);
+
+            double * original_data = vec1.data();
+            size_t original_size = vec1.size();
+
+            // move construct vec2 from vec1
+            DArenaVector<double> vec2(std::move(vec1));
+
+            // vec2 has the data
+            REQUIRE(vec2.size() == original_size);
+            REQUIRE(vec2.data() == original_data);
+            REQUIRE(vec2[0] == 10.0);
+            REQUIRE(vec2[1] == 20.0);
+            REQUIRE(vec2[2] == 30.0);
+
+            // vec1 is in valid but moved-from state
+            REQUIRE(vec1.size() == 0);
+            REQUIRE(vec1.empty());
+        }
     }
 }
 
