@@ -6,6 +6,7 @@ set(UTEST_SRCS
     arena_utest_main.cpp
 #    objectmodel.test.cpp
     DArena.test.cpp
+    DArenaVector.test.cpp
 #    DArenaIterator.test.cpp
 #    Collector.test.cpp
 #    DX1CollectorIterator.test.cpp
