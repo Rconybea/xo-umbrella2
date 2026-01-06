@@ -3,19 +3,19 @@
  *  @author Roland Conybeare, Dec 2025
  **/
 
-#include "alloc/AAllocator.hpp"
-#include "arena/DArena.hpp"
-#include "arena/DArenaIterator.hpp"
-#include "xo/alloc2/padding.hpp"
-#include "xo/indentlog/scope.hpp"
-#include "xo/indentlog/print/tag.hpp"
+//#include "alloc/AAllocator.hpp"
+#include "DArena.hpp"
+#include "DArenaIterator.hpp"
+#include <xo/arena/padding.hpp>
+#include <xo/indentlog/scope.hpp>
+#include <xo/indentlog/print/tag.hpp>
 #include <cassert>
 #include <sys/mman.h> // for ::munmap()
 #include <unistd.h> // for ::getpagesize()
 #include <string.h> // for ::memset()
 
 namespace xo {
-    using xo::facet::typeseq;
+    using xo::reflect::typeseq;
     using std::byte;
     using std::cerr;
     using std::endl;

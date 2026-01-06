@@ -17,7 +17,7 @@ namespace xo {
         public:
             using ObjectType = Object;
             using DataPtr = Object::DataPtr;
-            using typeseq = xo::facet::typeseq;
+            using typeseq = xo::reflect::typeseq;
 
             RAllocIterator() {}
             RAllocIterator(Object::DataPtr data) : Object{std::move(data)} {}

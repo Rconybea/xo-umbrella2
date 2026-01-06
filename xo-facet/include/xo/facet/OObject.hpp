@@ -6,7 +6,7 @@
 #pragma once
 
 #include "facet_implementation.hpp"
-#include "typeseq.hpp"
+#include <xo/reflectutil/typeseq.hpp>
 #include <new>
 #include <cstring>
 #include <cstddef>
@@ -64,6 +64,7 @@ namespace xo {
             using DataType = DRepr;
             using DataPtr = DRepr*;
             using Opaque = void *;
+            using typeseq = xo::reflect::typeseq;
 
             /* required for vtable swapping to work */
             //static_assert(std::is_trivially_copyable_v<AFacet>);

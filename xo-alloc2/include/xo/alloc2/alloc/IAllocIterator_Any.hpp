@@ -20,7 +20,7 @@ namespace xo {
          *  @brief AllocIterator implementation for empty variant instance
          **/
         struct IAllocIterator_Any : public AAllocIterator {
-            using typeseq = xo::facet::typeseq;
+            using typeseq = xo::reflect::typeseq;
 
             const AAllocIterator * iface() const { return std::launder(this); }
 

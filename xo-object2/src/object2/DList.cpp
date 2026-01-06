@@ -4,6 +4,7 @@
  **/
 
 #include "DList.hpp"
+#include <xo/indentlog/print/pretty.hpp>
 #include <xo/indentlog/print/tag.hpp>
 
 namespace xo {
@@ -84,7 +85,6 @@ namespace xo {
             return l->head_;
         }
 
-#ifdef NOT_YET
         bool
         DList::pretty(const ppindentinfo & ppii) const
         {
@@ -95,19 +95,24 @@ namespace xo {
             ppstate * pps = ppii.pps();
 
             if (ppii.upto()) {
-/* perhaps print on one line */
-                if (!pps->print_upto("(")
+                /* perhaps print on one line */
+                if (!pps->print_upto("(...)"))
                     return false;
 
+#ifdef NOT_YET
                 /* TODO: probably use iterators here, when available */
                 const DList * l = this;
                 while (!l->is_empty()) {
                     obj<APrintable>(l->head_.data());
 
                 }
+#endif
+                return true;
+            } else {
+                pps->write("(...)");
+                return false;
             }
         }
-#endif
 
     } /*namespace scm*/
 } /*namespace xo*/

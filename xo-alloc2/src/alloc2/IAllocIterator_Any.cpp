@@ -9,8 +9,8 @@
 namespace xo {
     namespace mm {
         using xo::facet::DVariantPlaceholder;
-        using xo::facet::typeseq;
         using xo::facet::valid_facet_implementation;
+        using xo::reflect::typeseq;
 
         void
         IAllocIterator_Any::_fatal() {
