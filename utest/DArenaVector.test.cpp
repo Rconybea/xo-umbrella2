@@ -428,6 +428,111 @@ namespace xo {
             REQUIRE(vec1.size() == 0);
             REQUIRE(vec1.empty());
         }
+
+        // Helper class to track ctor/dtor calls
+        struct LifetimeTracker {
+            static int ctor_count;
+            static int dtor_count;
+
+            static void reset() {
+                ctor_count = 0;
+                dtor_count = 0;
+            }
+
+            int value;
+
+            LifetimeTracker() : value{0} { ++ctor_count; }
+            LifetimeTracker(int v) : value{v} { ++ctor_count; }
+            LifetimeTracker(const LifetimeTracker & other) : value{other.value} { ++ctor_count; }
+            LifetimeTracker(LifetimeTracker && other) : value{other.value} { ++ctor_count; other.value = 0; }
+            ~LifetimeTracker() { ++dtor_count; }
+
+            LifetimeTracker & operator=(const LifetimeTracker &) = default;
+            LifetimeTracker & operator=(LifetimeTracker &&) = default;
+        };
+
+        int LifetimeTracker::ctor_count = 0;
+        int LifetimeTracker::dtor_count = 0;
+
+        TEST_CASE("DArenaVector-nontrivial-dtor", "[arena][DArenaVector]")
+        {
+            LifetimeTracker::reset();
+
+            {
+                ArenaConfig cfg { .name_ = "testarena",
+                                  .size_ = 4096 };
+                DArenaVector<LifetimeTracker> vec = DArenaVector<LifetimeTracker>::map(cfg);
+
+                vec.push_back(LifetimeTracker{1});
+                vec.push_back(LifetimeTracker{2});
+                vec.push_back(LifetimeTracker{3});
+
+                // 3 temp objects created, 3 moved into vector
+                // temps destroyed after push_back
+                REQUIRE(vec.size() == 3);
+                REQUIRE(LifetimeTracker::ctor_count == 6);  // 3 temps + 3 moves
+                REQUIRE(LifetimeTracker::dtor_count == 3);  // 3 temps destroyed
+
+                // verify values
+                REQUIRE(vec[0].value == 1);
+                REQUIRE(vec[1].value == 2);
+                REQUIRE(vec[2].value == 3);
+            }
+            // vec destroyed, should call dtor for all 3 elements
+            REQUIRE(LifetimeTracker::dtor_count == 6);
+        }
+
+        TEST_CASE("DArenaVector-nontrivial-resize-shrink", "[arena][DArenaVector]")
+        {
+            LifetimeTracker::reset();
+
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 4096 };
+            DArenaVector<LifetimeTracker> vec = DArenaVector<LifetimeTracker>::map(cfg);
+
+            vec.push_back(LifetimeTracker{1});
+            vec.push_back(LifetimeTracker{2});
+            vec.push_back(LifetimeTracker{3});
+            vec.push_back(LifetimeTracker{4});
+            vec.push_back(LifetimeTracker{5});
+
+            REQUIRE(vec.size() == 5);
+            int dtors_before_shrink = LifetimeTracker::dtor_count;
+
+            // shrink from 5 to 2
+            vec.resize(2);
+
+            REQUIRE(vec.size() == 2);
+            // should have called dtor for 3 elements (indices 2,3,4)
+            REQUIRE(LifetimeTracker::dtor_count == dtors_before_shrink + 3);
+
+            // remaining elements intact
+            REQUIRE(vec[0].value == 1);
+            REQUIRE(vec[1].value == 2);
+        }
+
+        TEST_CASE("DArenaVector-nontrivial-clear", "[arena][DArenaVector]")
+        {
+            LifetimeTracker::reset();
+
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 4096 };
+            DArenaVector<LifetimeTracker> vec = DArenaVector<LifetimeTracker>::map(cfg);
+
+            vec.push_back(LifetimeTracker{1});
+            vec.push_back(LifetimeTracker{2});
+            vec.push_back(LifetimeTracker{3});
+
+            REQUIRE(vec.size() == 3);
+            int dtors_before_clear = LifetimeTracker::dtor_count;
+
+            vec.clear();
+
+            REQUIRE(vec.size() == 0);
+            REQUIRE(vec.empty());
+            // should have called dtor for all 3 elements
+            REQUIRE(LifetimeTracker::dtor_count == dtors_before_clear + 3);
+        }
     }
 }
 
