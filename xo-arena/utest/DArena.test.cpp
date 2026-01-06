@@ -11,6 +11,9 @@
 namespace xo {
     using xo::mm::DArena;
     using xo::mm::ArenaConfig;
+    using xo::mm::padding;
+    using xo::mm::error;
+    using xo::reflect::typeseq;
     using xo::xtag;
     using std::byte;
 
@@ -101,7 +104,7 @@ namespace xo {
             REQUIRE(arena2.committed_z_ == committed_z);
         }
 
-        TEST_CASE("arena-expand-1", "[arena][DArena]")
+        TEST_CASE("DArena-expand-1", "[arena][DArena]")
         {
             /* typed allocator a1o */
             ArenaConfig cfg { .name_ = "testarena",
@@ -126,6 +129,44 @@ namespace xo {
             REQUIRE(arena.available() == arena.committed());
             REQUIRE(arena.allocated() == 0);
 
+        }
+
+        TEST_CASE("arena-alloc-1", "[arena][DArena]")
+        {
+            /* typed allocator a1o */
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 64*1024,
+                              .debug_flag_ = false };
+            DArena arena = DArena::map(cfg);
+
+            REQUIRE(arena.reserved() >= cfg.size_);
+            REQUIRE(arena.committed() == 0);
+            REQUIRE(arena.available() == 0);
+            REQUIRE(arena.allocated() == 0);
+
+            size_t z0 = 1;
+            byte * m0 = arena.alloc(typeseq::anon(), 1);
+
+            REQUIRE(m0);
+            REQUIRE(arena.last_error().error_ == error::ok);
+            REQUIRE(arena.last_error().error_seq_ == 0);
+            REQUIRE(arena.allocated() >= z0);
+            REQUIRE(arena.allocated() < z0 + padding::c_alloc_alignment );
+            REQUIRE(arena.allocated() <= arena.committed());
+            REQUIRE(arena.allocated() + arena.available() == arena.committed());
+            REQUIRE(arena.committed() <= arena.reserved());
+
+            size_t z1 = 16;
+            byte * m1 = arena.alloc(typeseq::anon(), z1);
+
+            REQUIRE(m1);
+            REQUIRE(arena.last_error().error_ == error::ok);
+            REQUIRE(arena.last_error().error_seq_ == 0);
+            REQUIRE(arena.allocated() >= z0 + z1);
+            REQUIRE(arena.allocated() < z0 + z1 + 2 * padding::c_alloc_alignment );
+            REQUIRE(arena.allocated() <= arena.committed());
+            REQUIRE(arena.allocated() + arena.available() == arena.committed());
+            REQUIRE(arena.committed() <= arena.reserved());
         }
 
     }
