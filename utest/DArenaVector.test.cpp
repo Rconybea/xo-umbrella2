@@ -368,6 +368,38 @@ namespace xo {
             REQUIRE(vec2[0] == 1.0);
             REQUIRE(vec2[1] == 2.0);
         }
+
+        TEST_CASE("DArenaVector-data", "[arena][DArenaVector]")
+        {
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 4096 };
+            DArenaVector<double> vec = DArenaVector<double>::map(cfg);
+
+            vec.push_back(1.0);
+            vec.push_back(2.0);
+            vec.push_back(3.0);
+
+            double * ptr = vec.data();
+
+            // data() points to first element
+            REQUIRE(ptr == &vec[0]);
+
+            // can read via pointer
+            REQUIRE(ptr[0] == 1.0);
+            REQUIRE(ptr[1] == 2.0);
+            REQUIRE(ptr[2] == 3.0);
+
+            // can write via pointer
+            ptr[1] = 99.0;
+            REQUIRE(vec[1] == 99.0);
+
+            // const version
+            const DArenaVector<double> & cvec = vec;
+            const double * cptr = cvec.data();
+            REQUIRE(cptr[0] == 1.0);
+            REQUIRE(cptr[1] == 99.0);
+            REQUIRE(cptr[2] == 3.0);
+        }
     }
 }
 
