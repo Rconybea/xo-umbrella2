@@ -104,7 +104,9 @@ namespace xo {
         template <typename T>
         DArenaVector<T>::DArenaVector(DArenaVector && other)
                 : size_{other.size_}, store_{std::move(other.store_)}
-        {}
+        {
+            other.size_ = 0;
+        }
 
         template <typename T>
         DArenaVector<T>::~DArenaVector()
