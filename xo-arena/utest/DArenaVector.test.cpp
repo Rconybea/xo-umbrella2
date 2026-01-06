@@ -333,6 +333,41 @@ namespace xo {
             REQUIRE(vec[1] == 2.0);
             REQUIRE(vec[2] == 3.0);
         }
+
+        TEST_CASE("DArenaVector-swap", "[arena][DArenaVector]")
+        {
+            ArenaConfig cfg1 { .name_ = "testarena1",
+                               .size_ = 4096 };
+            ArenaConfig cfg2 { .name_ = "testarena2",
+                               .size_ = 4096 };
+
+            DArenaVector<double> vec1 = DArenaVector<double>::map(cfg1);
+            DArenaVector<double> vec2 = DArenaVector<double>::map(cfg2);
+
+            vec1.push_back(1.0);
+            vec1.push_back(2.0);
+
+            vec2.push_back(10.0);
+            vec2.push_back(20.0);
+            vec2.push_back(30.0);
+
+            REQUIRE(vec1.size() == 2);
+            REQUIRE(vec2.size() == 3);
+
+            vec1.swap(vec2);
+
+            // sizes swapped
+            REQUIRE(vec1.size() == 3);
+            REQUIRE(vec2.size() == 2);
+
+            // contents swapped
+            REQUIRE(vec1[0] == 10.0);
+            REQUIRE(vec1[1] == 20.0);
+            REQUIRE(vec1[2] == 30.0);
+
+            REQUIRE(vec2[0] == 1.0);
+            REQUIRE(vec2[1] == 2.0);
+        }
     }
 }
 
