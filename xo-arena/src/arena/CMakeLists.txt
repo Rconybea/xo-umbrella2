@@ -3,6 +3,7 @@
 set(SELF_LIB xo_arena)
 set(SELF_SRCS
     AllocError.cpp
+    AllocInfo.cpp
 )
 
 xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 ${SELF_SRCS})
