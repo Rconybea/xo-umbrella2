@@ -298,6 +298,41 @@ namespace xo {
             REQUIRE(vec[1] == 4.0);
             REQUIRE(vec[2] == 6.0);
         }
+
+        TEST_CASE("DArenaVector-reserve", "[arena][DArenaVector]")
+        {
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 4096 };
+            DArenaVector<double> vec = DArenaVector<double>::map(cfg);
+
+            REQUIRE(vec.size() == 0);
+            REQUIRE(vec.capacity() > 0);
+
+            size_t initial_capacity = vec.capacity();
+
+            // reserve doesn't change size
+            vec.reserve(100);
+            REQUIRE(vec.size() == 0);
+            REQUIRE(vec.capacity() >= 100);
+
+            // add some elements
+            vec.push_back(1.0);
+            vec.push_back(2.0);
+            vec.push_back(3.0);
+
+            REQUIRE(vec.size() == 3);
+            size_t cap_after_push = vec.capacity();
+
+            // reserve more space
+            vec.reserve(200);
+            REQUIRE(vec.size() == 3);
+            REQUIRE(vec.capacity() >= 200);
+
+            // values still intact
+            REQUIRE(vec[0] == 1.0);
+            REQUIRE(vec[1] == 2.0);
+            REQUIRE(vec[2] == 3.0);
+        }
     }
 }
 
