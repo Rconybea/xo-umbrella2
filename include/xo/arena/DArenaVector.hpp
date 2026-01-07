@@ -3,6 +3,8 @@
  *  @author Roland Conybeare, Jan 2026
  **/
 
+#pragma once
+
 #include "DArena.hpp"
 #include <stdexcept>
 
