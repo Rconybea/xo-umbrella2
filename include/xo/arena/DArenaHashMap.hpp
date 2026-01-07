@@ -512,6 +512,21 @@ namespace xo {
                 }
             }
 
+            /* SM4.1.1: if control_[i] is non-sentinel, control_[i] = hash_(slots_[i].first) & 0x7f */
+            for (size_type i = 0; i < n_slot_; ++i) {
+                uint8_t c = control_[i];
+                if ((c != c_empty_slot) && (c != c_tombstone)) {
+                    uint8_t expected_h2 = hash_(slots_[i].first) & 0x7f;
+                    if (c != expected_h2) {
+                        return policy.report_error(log,
+                                                   c_self, ": expect control[i] = hash(key) & 0x7f",
+                                                   xtag("i", i),
+                                                   xtag("control[i]", c),
+                                                   xtag("expected_h2", expected_h2));
+                    }
+                }
+            }
+
             return true;
         }
     }
