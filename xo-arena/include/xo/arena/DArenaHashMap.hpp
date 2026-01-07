@@ -10,6 +10,101 @@
 
 namespace xo {
     namespace mm {
+        struct DArenaHashMapUtil {
+            using size_type = std::size_t;
+            using control_type = std::uint8_t;
+
+            /** control: sentinel for empty slot **/
+            static constexpr uint8_t c_empty_slot = 0xFF;
+            /** control: tombstone for deleted slot **/
+            static constexpr uint8_t c_tombstone = 0xFE;
+
+            /** group size **/
+            static constexpr size_type c_group_size = 16;
+
+            /** find smallest multiple k : k * c_group_size >= n **/
+            static size_type lub_group_mult(size_t n) {
+                return (n + c_group_size - 1) / c_group_size;
+            }
+
+            /** find smallest x such that 2^x >= n. Return {x, 2^x} **/
+            static std::pair<size_type, size_type> lub_exp2(size_t n) {
+                size_type ngx = 0;
+                size_type ng = 1;
+
+                while (ng < n) {
+                    ++ngx;
+                    ng *= 2;
+                }
+
+                return std::make_pair(ngx, ng);;
+            }
+        };
+
+        namespace detail {
+            /** @brief 16x 8-bit control bytes.
+             *
+             *  Support optimization using SIMD operations
+             **/
+            struct Group {
+                std::array<uint8_t, DArenaHashMapUtil::c_group_size> ctrl_;
+
+                explicit Group(uint8_t * lo) {
+                    std::memcpy(ctrl_.data(), lo, DArenaHashMapUtil::c_group_size);
+                }
+
+                /** find all exact matches in ctrl_[0..15] for @p h2.
+                 *  for each match set corresponding bit in return value.
+                 *  Bits {0x1, 0x2, 0x4, ...} set iff exact match on
+                 *  {ctrl_[0], ctrl_[1], ctrl_2[], ...} respectively
+                 **/
+                uint16_t all_matches(uint8_t h2) const {
+                    uint16_t retval = 0;
+                    uint16_t bit = 1;
+                    for (auto xi : ctrl_) {
+                        if (xi == h2)
+                            retval |= bit;
+                        bit = bit << 1;
+                    }
+
+                    return retval;
+                }
+
+                /** find all empty sentinels in ctrl_[0..15].
+                 *  for each empty, set corresponding bit in return value.
+                 *  Bits {0x1, 0x2, 0x4, ...} set iff empty spot
+                 *  {ctrl_[0], ctrl_[1], ctrl_[2], ...} respectively
+                 **/
+                uint16_t empty_matches() const {
+                    uint16_t retval = 0;
+                    uint16_t bit = 1;
+                    for (auto xi : ctrl_) {
+                        if (xi == DArenaHashMapUtil::c_empty_slot)
+                            retval |= bit;
+                        bit = bit << 1;
+                    }
+
+                    return retval;
+                }
+
+#ifdef NOT_YET
+                __m128i ctrl;  // 16 bytes loaded via SSE2
+
+                // Find all slots matching h2
+                uint16_t Match(uint8_t h2) const {
+                    __m128i pattern = _mm_set1_epi8(h2);
+                    __m128i result = _mm_cmpeq_epi8(ctrl, pattern);
+                    return _mm_movemask_epi8(result);  // 16-bit mask
+                }
+
+                // Find all empty slots (0xFF)
+                uint16_t MatchEmpty() const {
+                    return _mm_movemask_epi8(_mm_cmpeq_epi8(ctrl, _mm_set1_epi8(0xFF)));
+                }
+#endif
+            };
+        }
+
         /** @brief flat hash map of key-value pairs using dedicated DArenas for storage
          *
          *  Replicates (to the extent feasible) std::unordered_map<K,V>
@@ -21,15 +116,16 @@ namespace xo {
                   typename Value,
                   typename Hash = std::hash<Key>,
                   typename Equal = std::equal_to<void>>
-        struct DArenaHashMap {
+        struct DArenaHashMap : DArenaHashMapUtil {
         public:
-            using size_type = std::size_t;
+            using size_type = DArenaHashMapUtil::size_type;
             using key_type = Key;
             using mapped_type = Value;
             using value_type = std::pair<const Key, Value>;
             using key_hash = Hash;
             using key_equal = Equal;
             using byte = std::byte;
+            using group_type = detail::Group;
 
             /** create hash map **/
             DArenaHashMap(size_type hint_max_capacity,
@@ -39,29 +135,31 @@ namespace xo {
                           size_type hint_max_capacity = 0,
                           bool debug_flag = false);
 
-            /** find smallest x such that 2^x >= n. Return {x, 2^x} **/
-            static std::pair<size_type, size_type> lub_exp2(size_t n);
-            static constexpr size_type group_size() { return c_group_size; }
-#ifdef NOT_YET
-            static size_type min_groups();
-            static size_type min_size() { return min_groups() * c_group_size; }
-#endif
-
             size_type empty() const noexcept { return size_ == 0; }
+            size_type groups() const noexcept { return n_group_; }
+            size_type size() const noexcept { return size_; }
             size_type capacity() const noexcept { return n_group_ * c_group_size; }
 
-#ifdef NOT_YET
-            // TODO: std::pair<iterator, bool>
-            void
-            insert(std::pair<const Key, Value> & kv_pair) {
-                uint64_t h = hash_(kv_pair.first);
-            }
-#endif
+            /** insert @p kv_pair into hash map. replaces any previous value
+             *  stored under the same key.
+             *
+             *  Return true if size incremented; false if value updated
+             *  for existing key
+             **/
+            bool insert(const std::pair<const Key, Value> & kv_pair);
 
         private:
-            /** group size **/
-            static constexpr std::size_t c_group_size = 16;
+            /** load group abstraction from control bytes starting at @p ix **/
+            group_type _load_group(size_type ix) const {
+                return group_type(&control_[ix]);
+            }
 
+            /** like ctrl_[ix] = h2, but maintain overflow copy
+             *  at end of ctrl_[] array
+             **/
+            void _update_control(size_type ix, uint8_t h2);
+
+        private:
             /** hash function **/
             key_hash hash_;
             /** key equal **/
@@ -74,8 +172,11 @@ namespace xo {
              *  number of slots is n_group_ * c_group_size
              **/
             std::size_t n_group_ = 1 << n_group_exponent_;
-            /** control_[] partitioned into groups of c_group_size (16) consecutive elements **/
-            DArenaVector<byte> control_;
+            /** table has capacity for this number of {key,value} pairs **/
+            std::size_t n_slot_ = n_group_ * c_group_size;
+            /** control_[] partitioned into groups of c_group_size (16) consecutive elements
+             **/
+            DArenaVector<uint8_t> control_;
             /** slots_[] holds {key,value} pairs **/
             DArenaVector<value_type> slots_;
             /** true to enable debug logging **/
@@ -89,6 +190,10 @@ namespace xo {
         {
         }
 
+        /* remarks:
+         * - control: extra 16 slots for safe wraparound.
+         *   last 16 bytes will be copy of first 16 bytes
+         */
         template <typename Key, typename Value, typename Hash, typename Equal>
         DArenaHashMap<Key, Value, Hash, Equal>::DArenaHashMap(Hash && hash,
                                                               Equal && eq,
@@ -97,53 +202,123 @@ namespace xo {
         : hash_{std::move(hash)},
           equal_{std::move(eq)},
           size_{0},
-          n_group_exponent_{lub_exp2(hint_max_capacity).first},
-          n_group_{lub_exp2(hint_max_capacity).second},
-          control_{DArenaVector<byte>::map(ArenaConfig{.size_ = n_group_})},
-          slots_{DArenaVector<value_type>::map(ArenaConfig{.size_ = n_group_ * sizeof(value_type)})},
+          n_group_exponent_{lub_exp2(lub_group_mult(hint_max_capacity)).first},
+          n_group_{lub_exp2(lub_group_mult(hint_max_capacity)).second},
+          n_slot_{n_group_ * c_group_size},
+          control_{DArenaVector<uint8_t>::map(ArenaConfig{.size_ = n_slot_ + c_group_size})},
+          slots_{DArenaVector<value_type>::map(ArenaConfig{.size_ = n_slot_ * sizeof(value_type)})},
           debug_flag_{debug_flag}
         {
         }
 
+
         template <typename Key, typename Value, typename Hash, typename Equal>
-        auto
-        DArenaHashMap<Key, Value, Hash, Equal>::lub_exp2(size_t n) -> std::pair<size_type, size_type>
-
+        void
+        DArenaHashMap<Key, Value, Hash, Equal>::_update_control(size_type ix, uint8_t h2)
         {
-            size_type ngx = 0;
-            size_type ng = 1;
+            this->control_[ix] = h2;
 
-            while (ng < n) {
-                ++ngx;
-                ng *= 2;
+            if (ix < c_group_size) {
+                size_type N = this->capacity();
+
+                // refresh end-of-array copy
+                std::memcpy(&(control_[N]), &(control_[0]), c_group_size);
             }
-
-            return std::make_pair(ngx, ng);;
         }
 
-#ifdef NOT_YET
         template <typename Key, typename Value, typename Hash, typename Equal>
-        auto
-        DArenaHashMap<Key, Value, Hash, Equal>::min_groups() -> size_type
+        bool
+        DArenaHashMap<Key, Value, Hash, Equal>::insert(const std::pair<const Key, Value> & kv_pair)
         {
-            size_type page_z = getpagesize();
+            size_type h = hash_(kv_pair.first);
+            // h1: hi bits: probe sequence
+            size_type h1 = h >> 7;
+            // h2: lo bits: store in control byte
+            uint8_t h2 = h & 0x7f;
 
-            // 1 page of slots
-            size_type n_slot = page_z / sizeof(value_type);
+            size_type N = this->capacity();
 
-            // 1 page of groups
-            size_type n_group = n_slot / c_group_size;
+            // same as:
+            //   ix = h1 % N
+            // since N is power of 2
+            size_type ix = h1 & (N - 1);
 
-            // glb power of 2, but at least 1
-            size_type ng = 1;
+            // will make series of probes
+            for (;;) {
+                auto grp = _load_group(ix);
 
-            while (2 * ng < n_group)
-                ng *= 2;
+                {
+                    // look for matching slot to update
+                    uint16_t m = grp.all_matches(h2);
 
-            return ng;
+                    // process each match.
+                    // matches are encountered in the same order they
+                    // appear in ctrl_[]
+                    while (m) {
+                        // zeroes: #of 0 before least-significant 1 bit
+                        int skip = __builtin_ctz(m);
+                        size_type slot_ix = (ix + skip) & (N - 1);
+
+                        // invariant: slot_ix in [0 .. N)
+
+                        auto & slot = slots_[slot_ix];
+
+                        if (slot.first == kv_pair.first) {
+                            // we have match on existing key;
+                            // replace associated value
+                            slot.second = kv_pair.second;
+
+                            // false: did not change table size
+                            return false;
+                        }
+
+                        // e.g:
+                        //             /-- lowest 1 bit gets cleared
+                        //             v
+                        //  m   = b01101000
+                        //  m-1 = b01100111
+                        //  &   = b01100000
+
+                        m &= (m - 1);
+                    }
+                }
+
+                {
+                    // look for empty slot to insert
+                    uint16_t e = grp.empty_matches();
+
+                    // process each empty slot
+                    if (e) {
+                        // zeroes: #of 0 before least significant 1 bit
+                        int skip = __builtin_ctz(e);
+                        size_type slot_ix = (ix + skip) & (N - 1);
+
+                        // invariant: slot_ix in [0 .. N)
+
+                        auto & slot = slots_[slot_ix];
+
+                        // mark slot occupied in control space;
+                        // maintain copy-at-end for overflow
+                        this->update_control(slot_ix, h2);
+                        new (&slot) value_type(kv_pair);
+
+                        ++(this->size_);
+
+                        // true: increased table size
+                        return true;
+                    }
+                }
+
+                // slot range associated with grp
+                // has no room, and does not contain target key
+                // -> move on to next group.
+                //
+                // note: relying on c_group_size overflow bytes here
+                // when ix is close to N
+
+                ix = (ix + c_group_size) & (N - 1);
+            }
         }
-#endif
-
     }
 } /*namespace xo*/
 
