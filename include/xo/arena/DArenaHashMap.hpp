@@ -452,6 +452,14 @@ namespace xo {
                                            xtag("n_slot", n_slot_));
             }
 
+            /* SM1.3: n_group_ consistent with n_group_exponent_ */
+            if (n_group_ != (size_type{1} << n_group_exponent_)) {
+                return policy.report_error(log,
+                                           c_self, ": expect .n_group = 2^.n_group_exponent",
+                                           xtag("n_group", n_group_),
+                                           xtag("n_group_exponent", n_group_exponent_));
+            }
+
             return true;
         }
     }
