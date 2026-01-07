@@ -197,7 +197,9 @@ namespace utest {
 
             xo::scope log(XO_DEBUG(catch_flag), xtag("lo", lo), xtag("hi", hi), xtag("k", k));
 
-            REQUIRE_ORFAIL(ok_flag, catch_flag, p_map->verify_ok(catch_flag));
+            auto policy = xo::verify_policy::chatty();
+
+            REQUIRE_ORFAIL(ok_flag, catch_flag, p_map->verify_ok(policy));
 
             if ((hi <= lo) || (k == 0))
                 return true;
@@ -223,7 +225,7 @@ namespace utest {
                  */
                 auto insert_result = p_map->try_insert(typename HashMap::value_type(x, 10 * x));
 
-                REQUIRE_ORFAIL(ok_flag, catch_flag, p_map->verify_ok(catch_flag));
+                REQUIRE_ORFAIL(ok_flag, catch_flag, p_map->verify_ok(policy));
 
                 REQUIRE_ORFAIL(ok_flag, catch_flag, insert_result.second);
 
