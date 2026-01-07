@@ -484,6 +484,17 @@ namespace xo {
                                            xtag("c_max_load_factor", c_max_load_factor));
             }
 
+            /* SM3.1: control_[N+i] = control_[i] for i in [0, c_group_size) */
+            for (size_type i = 0; i < c_group_size; ++i) {
+                if (control_[n_slot_ + i] != control_[i]) {
+                    return policy.report_error(log,
+                                               c_self, ": expect control_[N+i] = control_[i]",
+                                               xtag("i", i),
+                                               xtag("control_[i]", control_[i]),
+                                               xtag("control_[N+i]", control_[n_slot_ + i]));
+                }
+            }
+
             return true;
         }
     }
