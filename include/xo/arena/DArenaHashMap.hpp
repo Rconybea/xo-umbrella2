@@ -476,6 +476,14 @@ namespace xo {
                                            xtag("n_slot", n_slot_));
             }
 
+            /* SM2.1: load_factor() <= c_max_load_factor */
+            if (load_factor() > c_max_load_factor) {
+                return policy.report_error(log,
+                                           c_self, ": expect .load_factor <= c_max_load_factor",
+                                           xtag("load_factor", load_factor()),
+                                           xtag("c_max_load_factor", c_max_load_factor));
+            }
+
             return true;
         }
     }
