@@ -7,6 +7,7 @@
 
 #include "DArena.hpp"
 #include <stdexcept>
+#include <cstring>  // for ::memset()
 
 namespace xo {
     namespace mm {
@@ -153,8 +154,7 @@ namespace xo {
 
                 // run ctors
                 if constexpr (std::is_trivially_constructible_v<T>) {
-                    // nothing to do
-                    ;
+                    ::memset(this->_address_of(size_), 0, req_z - (size_ * sizeof(T)));
                 } else {
                     for (size_type i = size_; i < z; ++i) {
                         void * addr = &(*this)[i];

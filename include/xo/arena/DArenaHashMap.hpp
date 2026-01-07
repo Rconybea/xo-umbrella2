@@ -6,10 +6,22 @@
 #pragma once
 
 #include "DArenaVector.hpp"
+#include <algorithm>
+#include <array>
 #include <utility>
+#include <cstring>
 
 namespace xo {
     namespace mm {
+#ifdef NOT_YET
+        enum class insert_error : int32_t {
+            /** sentinel **/
+            invalid = -1,
+            /** not an error **/
+            ok,
+        };
+#endif
+
         struct DArenaHashMapUtil {
             using size_type = std::size_t;
             using control_type = std::uint8_t;
@@ -21,6 +33,9 @@ namespace xo {
 
             /** group size **/
             static constexpr size_type c_group_size = 16;
+
+            /** max load factor **/
+            static constexpr float c_max_load_factor = 0.875;
 
             /** find smallest multiple k : k * c_group_size >= n **/
             static size_type lub_group_mult(size_t n) {
@@ -50,7 +65,7 @@ namespace xo {
                 std::array<uint8_t, DArenaHashMapUtil::c_group_size> ctrl_;
 
                 explicit Group(uint8_t * lo) {
-                    std::memcpy(ctrl_.data(), lo, DArenaHashMapUtil::c_group_size);
+                    ::memcpy(ctrl_.data(), lo, DArenaHashMapUtil::c_group_size);
                 }
 
                 /** find all exact matches in ctrl_[0..15] for @p h2.
@@ -140,18 +155,26 @@ namespace xo {
             size_type size() const noexcept { return size_; }
             size_type capacity() const noexcept { return n_group_ * c_group_size; }
 
+            float load_factor() const noexcept { return size_ / static_cast<float>(n_slot_); }
+
             /** insert @p kv_pair into hash map. replaces any previous value
              *  stored under the same key.
              *
-             *  Return true if size incremented; false if value updated
-             *  for existing key
+             *  Return pair retval with:
+             *  reval.first: true if size incremented;
+             *  retval.second: address of slots_[p] at which pair inserted/updated
+             *
+             *  When table is full retval.second will be nullptr,
+             *  with error captured in last_error_
              **/
-            bool insert(const std::pair<const Key, Value> & kv_pair);
+            std::pair<value_type *, bool> try_insert(const std::pair<const Key, Value> & kv_pair);
+
+            bool verify_ok(bool /*throw_flag_not_implemented*/ = true) const;
 
         private:
             /** load group abstraction from control bytes starting at @p ix **/
-            group_type _load_group(size_type ix) const {
-                return group_type(&control_[ix]);
+            group_type _load_group(size_type ix) {
+                return group_type(&(control_[ix]));
             }
 
             /** like ctrl_[ix] = h2, but maintain overflow copy
@@ -165,15 +188,15 @@ namespace xo {
             /** key equal **/
             key_equal equal_;
             /** number of pairs in this table **/
-            std::size_t size_ = 0;
+            size_type size_ = 0;
             /** base-2 logarithm of n_group_ **/
-            std::size_t n_group_exponent_ = 0;
+            size_type n_group_exponent_ = 0;
             /** table has capacity for this number of groups. always an exact power of two.
              *  number of slots is n_group_ * c_group_size
              **/
-            std::size_t n_group_ = 1 << n_group_exponent_;
+            size_type n_group_ = (1 << n_group_exponent_);
             /** table has capacity for this number of {key,value} pairs **/
-            std::size_t n_slot_ = n_group_ * c_group_size;
+            size_type n_slot_ = n_group_ * c_group_size;
             /** control_[] partitioned into groups of c_group_size (16) consecutive elements
              **/
             DArenaVector<uint8_t> control_;
@@ -209,8 +232,14 @@ namespace xo {
           slots_{DArenaVector<value_type>::map(ArenaConfig{.size_ = n_slot_ * sizeof(value_type)})},
           debug_flag_{debug_flag}
         {
-        }
+            /* invariant: arenas have allocated address range, but no committed memory yet */
+            this->control_.resize(n_slot_ + c_group_size);
 
+            /* all slots marked empty initially */
+            std::fill(this->control_.begin(), this->control_.end(), c_empty_slot);
+
+            this->slots_.resize(n_slot_);
+        }
 
         template <typename Key, typename Value, typename Hash, typename Equal>
         void
@@ -227,8 +256,8 @@ namespace xo {
         }
 
         template <typename Key, typename Value, typename Hash, typename Equal>
-        bool
-        DArenaHashMap<Key, Value, Hash, Equal>::insert(const std::pair<const Key, Value> & kv_pair)
+        auto
+        DArenaHashMap<Key, Value, Hash, Equal>::try_insert(const std::pair<const Key, Value> & kv_pair) -> std::pair<value_type *, bool>
         {
             size_type h = hash_(kv_pair.first);
             // h1: hi bits: probe sequence
@@ -269,7 +298,7 @@ namespace xo {
                             slot.second = kv_pair.second;
 
                             // false: did not change table size
-                            return false;
+                            return std::make_pair(&slot, false);
                         }
 
                         // e.g:
@@ -289,6 +318,14 @@ namespace xo {
 
                     // process each empty slot
                     if (e) {
+                        // check that table is below max load factor (0.875).
+                        // Check here so that table can stay at max load factor
+                        // indefinitely as long as updates only
+                        //
+                        if (load_factor() >= c_max_load_factor) {
+                            return std::make_pair(nullptr, false);
+                        }
+
                         // zeroes: #of 0 before least significant 1 bit
                         int skip = __builtin_ctz(e);
                         size_type slot_ix = (ix + skip) & (N - 1);
@@ -299,13 +336,13 @@ namespace xo {
 
                         // mark slot occupied in control space;
                         // maintain copy-at-end for overflow
-                        this->update_control(slot_ix, h2);
+                        this->_update_control(slot_ix, h2);
                         new (&slot) value_type(kv_pair);
 
                         ++(this->size_);
 
                         // true: increased table size
-                        return true;
+                        return std::make_pair(&slot, true);
                     }
                 }
 
@@ -318,6 +355,36 @@ namespace xo {
 
                 ix = (ix + c_group_size) & (N - 1);
             }
+        }
+
+        /**
+         *  Verify DArenaHashMap class invariants.
+         *
+         *  SM1. size consistency
+         *   - SM1.1 size_ <= n_slot_
+         *   - SM1.2 control_[] size consistent with slots_[] size
+         *   - SM1.3 n_group_ consistent with n_group_exponent_
+         *   - SM1.4 n_slot_ consistent with n_group_
+         *   - SM1.5 n_slot_ a power of 2
+         *  SM2. load factor
+         *   - SM2.1 load_factor() <= c_max_load_factor
+         *  SM3. control_
+         *   - SM3.1 control_[N+i] = control_[i] for i in [0, c_group_size)
+         *   - SM3.2 {number of control_[i] spots with non-sentinel values} = size_
+         *  SM4. slots_
+         *   - SM4.1 if control_[i] is non-sentinel:
+         *     - SM4.1.1 control_[i] = hash_(slots_[i].first) & 0x7f
+         *     - SM4.1.2 all slots in range [h .. i] are non-empty,
+         *       where h is hash_(slots_[i].first >> 7
+         *   - SM4.2 if control_[i] is empty or tombstone:
+         *     - slots_[i].first = key_type()
+         *
+         **/
+        template <typename Key, typename Value, typename Hash, typename Equal>
+        bool
+        DArenaHashMap<Key, Value, Hash, Equal>::verify_ok(bool /*throw_flag_not_implemented*/) const
+        {
+            return true;
         }
     }
 } /*namespace xo*/
