@@ -469,6 +469,13 @@ namespace xo {
                                            xtag("c_group_size", c_group_size));
             }
 
+            /* SM1.5: n_slot_ a power of 2 */
+            if ((n_slot_ & (n_slot_ - 1)) != 0) {
+                return policy.report_error(log,
+                                           c_self, ": expect .n_slot is power of 2",
+                                           xtag("n_slot", n_slot_));
+            }
+
             return true;
         }
     }
