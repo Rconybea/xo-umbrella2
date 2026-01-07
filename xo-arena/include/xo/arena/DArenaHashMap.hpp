@@ -432,8 +432,23 @@ namespace xo {
             /* SM1.1: size_ <= n_slot_ */
             if (size_ > n_slot_) {
                 return policy.report_error(log,
-                                           c_self, ": expect .size < .n_slot",
+                                           c_self, ": expect .size <= .n_slot",
                                            xtag("size", size_),
+                                           xtag("n_slot", n_slot_));
+            }
+
+            /* SM1.2: control_[] size consistent with slots_[] size */
+            if (control_.size() != n_slot_ + c_group_size) {
+                return policy.report_error(log,
+                                           c_self, ": expect .control_.size = .n_slot + c_group_size",
+                                           xtag("control_.size", control_.size()),
+                                           xtag("n_slot", n_slot_),
+                                           xtag("c_group_size", c_group_size));
+            }
+            if (slots_.size() != n_slot_) {
+                return policy.report_error(log,
+                                           c_self, ": expect .slots_.size = .n_slot",
+                                           xtag("slots_.size", slots_.size()),
                                            xtag("n_slot", n_slot_));
             }
 
