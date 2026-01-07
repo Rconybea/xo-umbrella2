@@ -527,6 +527,29 @@ namespace xo {
                 }
             }
 
+            /* SM4.1.2: if control_[i] is non-sentinel, all slots in range [h .. i] are non-empty,
+             *          where h = (hash_(slots_[i].first) >> 7) & (n_slot_ - 1)
+             */
+            for (size_type i = 0; i < n_slot_; ++i) {
+                uint8_t c = control_[i];
+                if ((c != c_empty_slot) && (c != c_tombstone)) {
+                    size_type h = (hash_(slots_[i].first) >> 7) & (n_slot_ - 1);
+                    size_type j = h;
+                    while (j != i) {
+                        uint8_t cj = control_[j];
+                        if ((cj == c_empty_slot) || (cj == c_tombstone)) {
+                            return policy.report_error(log,
+                                                       c_self, ": expect non-empty slot in probe range [h..i]",
+                                                       xtag("i", i),
+                                                       xtag("h", h),
+                                                       xtag("j", j),
+                                                       xtag("control[j]", cj));
+                        }
+                        j = (j + 1) & (n_slot_ - 1);
+                    }
+                }
+            }
+
             return true;
         }
     }
