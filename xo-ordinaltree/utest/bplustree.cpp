@@ -3,11 +3,11 @@
 #define CATCH_CONFIG_ENABLE_BENCHMARKING
 
 #include "random_tree_ops.hpp"
-#include "xo/ordinaltree/BplusTree.hpp"
-#include "xo/randomgen/random_seed.hpp"
-#include "xo/randomgen/print.hpp"
-#include "xo/indentlog/scope.hpp"
-#include "catch2/catch.hpp"
+#include "BplusTree.hpp"
+#include <xo/randomgen/random_seed.hpp>
+#include <xo/indentlog/print/array.hpp>
+#include <xo/indentlog/scope.hpp>
+#include <catch2/catch.hpp>
 
 namespace {
     using xo::tree::BplusTree;

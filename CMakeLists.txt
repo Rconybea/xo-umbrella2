@@ -77,12 +77,13 @@ set(DOX_EXCLUDE_PATTERNS [=[
 add_subdirectory(xo-cmake)
 add_subdirectory(xo-indentlog)
 add_subdirectory(xo-reflectutil)  # header-only reflect support
+add_subdirectory(xo-randomgen)    # xoshiro256ss
 add_subdirectory(xo-arena)   # arena allocator (DArena)
 add_subdirectory(xo-facet)   # sep iface,data
 add_subdirectory(xo-allocutil)
 add_subdirectory(xo-refcnt)
 add_subdirectory(xo-subsys)
-add_subdirectory(xo-randomgen)
+#add_subdirectory(xo-randomgen)
 add_subdirectory(xo-flatstring)
 add_subdirectory(xo-pyutil)
 add_subdirectory(xo-reflect)
