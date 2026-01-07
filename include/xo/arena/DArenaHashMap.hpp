@@ -495,6 +495,23 @@ namespace xo {
                 }
             }
 
+            /* SM3.2: {number of control_[i] spots with non-sentinel values} = size_ */
+            {
+                size_type occupied_count = 0;
+                for (size_type i = 0; i < n_slot_; ++i) {
+                    uint8_t c = control_[i];
+                    if ((c != c_empty_slot) && (c != c_tombstone)) {
+                        ++occupied_count;
+                    }
+                }
+                if (occupied_count != size_) {
+                    return policy.report_error(log,
+                                               c_self, ": expect occupied control count = size",
+                                               xtag("occupied_count", occupied_count),
+                                               xtag("size", size_));
+                }
+            }
+
             return true;
         }
     }
