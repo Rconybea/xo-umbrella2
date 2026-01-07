@@ -550,6 +550,19 @@ namespace xo {
                 }
             }
 
+            /* SM4.2: if control_[i] is empty or tombstone, slots_[i].first = key_type() */
+            for (size_type i = 0; i < n_slot_; ++i) {
+                uint8_t c = control_[i];
+                if ((c == c_empty_slot) || (c == c_tombstone)) {
+                    if (!(slots_[i].first == key_type())) {
+                        return policy.report_error(log,
+                                                   c_self, ": expect empty/tombstone slot has default key",
+                                                   xtag("i", i),
+                                                   xtag("control[i]", c));
+                    }
+                }
+            }
+
             return true;
         }
     }
