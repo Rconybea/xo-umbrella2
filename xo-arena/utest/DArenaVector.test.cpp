@@ -3,7 +3,7 @@
  *  @author Roland Conybeare, Jan 2026
  **/
 
-#include "xo/arena/DArenaVector.hpp"
+#include "DArenaVector.hpp"
 #include <catch2/catch.hpp>
 
 namespace xo {

@@ -7,6 +7,7 @@ set(UTEST_SRCS
 #    objectmodel.test.cpp
     DArena.test.cpp
     DArenaVector.test.cpp
+    DArenaHashMap.test.cpp
 #    DArenaIterator.test.cpp
 #    Collector.test.cpp
 #    DX1CollectorIterator.test.cpp
