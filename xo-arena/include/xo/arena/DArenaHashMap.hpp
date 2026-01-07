@@ -460,6 +460,15 @@ namespace xo {
                                            xtag("n_group_exponent", n_group_exponent_));
             }
 
+            /* SM1.4: n_slot_ consistent with n_group_ */
+            if (n_slot_ != n_group_ * c_group_size) {
+                return policy.report_error(log,
+                                           c_self, ": expect .n_slot = .n_group * c_group_size",
+                                           xtag("n_slot", n_slot_),
+                                           xtag("n_group", n_group_),
+                                           xtag("c_group_size", c_group_size));
+            }
+
             return true;
         }
     }
