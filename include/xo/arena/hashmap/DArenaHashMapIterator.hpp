@@ -8,7 +8,7 @@
 #include "hashmap/DArenaHashMapUtil.hpp"
 
 namespace xo {
-    namespace mm {
+    namespace map {
         namespace detail {
 
             template <typename Key,
@@ -76,7 +76,7 @@ namespace xo {
             };
 
         }
-    } /*namespace mm*/
+    } /*namespace map*/
 } /*namespace xo*/
 
 /* end DArenaHashMapIterator.hpp */
