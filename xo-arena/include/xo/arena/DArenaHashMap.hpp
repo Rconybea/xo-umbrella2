@@ -162,6 +162,7 @@ namespace xo {
             struct HashMapStore : DArenaHashMapUtil {
             public:
                 using value_type = std::pair<const Key, Value>;
+                using group_type = detail::Group;
 
             public:
                 /** group_exp2: number of groups {x, 2^x} **/
@@ -175,23 +176,85 @@ namespace xo {
                   slots_{DArenaVector<value_type>::map(ArenaConfig{.size_ = n_slot_ * sizeof(value_type)})}
                 {}
 
+                size_type empty() const noexcept { return size_ == 0; }
+                size_type capacity() const noexcept { return n_group_ * c_group_size; }
+                float load_factor() const noexcept { return size_ / static_cast<float>(n_slot_); }
+
+                group_type _load_group(size_type ix) {
+                    return group_type(&(control_[ix]));
+                }
+
+                void _update_control(size_type ix, uint8_t h2) {
+                    this->control_[ix] = h2;
+
+                    if (ix < c_group_size) {
+                        size_type N = this->capacity();
+
+                        // refresh end-of-array copy
+                        std::memcpy(&(control_[N]), &(control_[0]), c_group_size);
+                    }
+                }
+
             public:
                 /** number of pairs in this table **/
                 size_type size_ = 0;
                 /** base-2 logarithm of n_group_ **/
                 size_type n_group_exponent_ = 0;
-                /** table has capacity for this number of groups. always an exact power of two.
+                /** table has capacity for this number of groups.
+                 *  always an exact power of two.
                  *  number of slots is n_group_ * c_group_size
                  **/
                 size_type n_group_ = (1 << n_group_exponent_);
                 /** table has capacity for this number of {key,value} pairs **/
                 size_type n_slot_ = n_group_ * c_group_size;
-                /** control_[] partitioned into groups of c_group_size (16) consecutive elements
+                /** control_[] partitioned into groups of
+                 *  c_group_size (16) consecutive elements
                  **/
                 DArenaVector<uint8_t> control_;
                 /** slots_[] holds {key,value} pairs **/
                 DArenaVector<value_type> slots_;
             };
+
+            template <typename Key,
+                      typename Value>
+            struct DArenaHashMapIterator : public DArenaHashMapUtil {
+                using value_type = std::pair<const Key, Value>;
+
+            public:
+                DArenaHashMapIterator(uint8_t * c, uint8_t * e, value_type * p)
+                    : ctrl_{c}, ctrl_end_{e}, pos_{p} {}
+
+                value_type & operator*() const { return *pos_; }
+                value_type * operator->() const { return pos_; }
+
+                bool operator==(const DArenaHashMapIterator & x) const {
+                    return this->pos_ == x.pos_;
+                }
+
+                bool operator!=(const DArenaHashMapIterator & x) const {
+                    return this->pos_ != x.pos_;
+                }
+
+                DArenaHashMapIterator & operator++() {
+                    do {
+                        ++ctrl_;
+                        ++pos_;
+                    } while ((ctrl_ != ctrl_end_) && this->is_sentinel());
+
+                    return *this;
+                }
+
+                bool is_sentinel() const {
+                    return ((*ctrl_ == c_tombstone) || (*ctrl_ == c_empty_slot));
+                }
+
+            private:
+                uint8_t * ctrl_ = nullptr;
+                uint8_t * ctrl_end_ = nullptr;
+
+                value_type * pos_ = nullptr;
+            };
+
         }
 
         /** @brief flat hash map of key-value pairs using dedicated DArenas for storage
@@ -215,6 +278,9 @@ namespace xo {
             using key_equal = Equal;
             using byte = std::byte;
             using group_type = detail::Group;
+            using store_type = detail::HashMapStore<Key, Value>;
+            using insert_value_type = std::pair<value_type *, bool>;
+            using iterator = detail::DArenaHashMapIterator<Key, Value>;
 
             /** create hash map **/
             DArenaHashMap(size_type hint_max_capacity,
@@ -224,12 +290,32 @@ namespace xo {
                           size_type hint_max_capacity = 0,
                           bool debug_flag = false);
 
-            size_type empty() const noexcept { return store_.size_ == 0; }
+            size_type empty() const noexcept { return store_.empty(); }
             size_type groups() const noexcept { return store_.n_group_; }
             size_type size() const noexcept { return store_.size_; }
-            size_type capacity() const noexcept { return store_.n_group_ * c_group_size; }
+            size_type capacity() const noexcept { return store_.capacity(); }
+            float load_factor() const noexcept { return store_.load_factor(); }
 
-            float load_factor() const noexcept { return store_.size_ / static_cast<float>(store_.n_slot_); }
+            iterator begin() {
+                iterator ix(&(store_.control_[0]),
+                            &(store_.control_[store_.capacity()]),
+                            &(store_.slots_[0]));
+
+                if (ix.is_sentinel()) {
+                    /* first occupied position in table */
+                    ++ix;
+                }
+
+                return ix;
+            }
+
+            iterator end() {
+                iterator ix(&(store_.control_[store_.capacity()]),
+                            &(store_.control_[store_.capacity()]),
+                            &(store_.slots_[store_.capacity()]));
+
+                return ix;
+            }
 
             /** insert @p kv_pair into hash map.
              *  Replaces any previous value stored under the same key.
@@ -241,54 +327,43 @@ namespace xo {
              *  When table is full retval.second will be nullptr,
              *  with error captured in last_error_
              **/
-            std::pair<value_type *, bool> try_insert(const std::pair<const Key, Value> & kv_pair);
+            insert_value_type try_insert(const value_type & kv_pair);
 
             /** insert @p kv_pair into hash map.
              *  Increase table size if necessary
              **/
-            bool insert(const std::pair<const Key, Value> & kv_pair);
+            bool insert(const value_type & kv_pair);
 
             bool verify_ok(verify_policy p = verify_policy::throw_only()) const;
 
         private:
+            /** insert @p kv_pair,
+             *  where key hashes to @p hash_value, into @p *store
+             **/
+            insert_value_type _try_insert_aux(size_type hash_value,
+                                              const value_type & kv_pair,
+                                              store_type * p_store);
+
             /** increase hash table size (invoke when max load factor reached) **/
             bool _try_grow();
 
             /** load group abstraction from control bytes starting at @p ix **/
-            group_type _load_group(size_type ix) {
-                return group_type(&(store_.control_[ix]));
-            }
+            group_type _load_group(size_type ix) { return store_._load_group(ix); }
 
             /** like ctrl_[ix] = h2, but maintain overflow copy
              *  at end of ctrl_[] array
              **/
-            void _update_control(size_type ix, uint8_t h2);
+            void _update_control(size_type ix, uint8_t h2) {
+                return store_._update_control(ix, h2);
+            }
 
         private:
             /** hash function **/
             key_hash hash_;
             /** key equal **/
             key_equal equal_;
-
             /** hash table state contents + size-related attributes **/
-            detail::HashMapStore<Key, Value> store_;
-#ifdef OBSOLETE
-            /** number of pairs in this table **/
-            size_type size_ = 0;
-            /** base-2 logarithm of n_group_ **/
-            size_type n_group_exponent_ = 0;
-            /** table has capacity for this number of groups. always an exact power of two.
-             *  number of slots is n_group_ * c_group_size
-             **/
-            size_type n_group_ = (1 << n_group_exponent_);
-            /** table has capacity for this number of {key,value} pairs **/
-            size_type n_slot_ = n_group_ * c_group_size;
-            /** control_[] partitioned into groups of c_group_size (16) consecutive elements
-             **/
-            DArenaVector<uint8_t> control_;
-            /** slots_[] holds {key,value} pairs **/
-            DArenaVector<value_type> slots_;
-#endif
+            store_type store_;
             /** true to enable debug logging **/
             bool debug_flag_ = false;
         };
@@ -318,36 +393,46 @@ namespace xo {
             this->store_.control_.resize(store_.n_slot_ + c_group_size);
 
             /* all slots marked empty initially */
-            std::fill(this->store_.control_.begin(), this->store_.control_.end(), c_empty_slot);
+            std::fill(this->store_.control_.begin(),
+                      this->store_.control_.end(),
+                      c_empty_slot);
 
             this->store_.slots_.resize(store_.n_slot_);
         }
 
         template <typename Key, typename Value, typename Hash, typename Equal>
-        void
-        DArenaHashMap<Key, Value, Hash, Equal>::_update_control(size_type ix, uint8_t h2)
-        {
-            this->store_.control_[ix] = h2;
-
-            if (ix < c_group_size) {
-                size_type N = this->capacity();
-
-                // refresh end-of-array copy
-                std::memcpy(&(store_.control_[N]), &(store_.control_[0]), c_group_size);
-            }
-        }
-
-        template <typename Key, typename Value, typename Hash, typename Equal>
         auto
-        DArenaHashMap<Key, Value, Hash, Equal>::try_insert(const std::pair<const Key, Value> & kv_pair) -> std::pair<value_type *, bool>
+        DArenaHashMap<Key,
+                      Value,
+                      Hash,
+                      Equal>::try_insert(const value_type & kv_pair) -> insert_value_type
         {
             size_type h = hash_(kv_pair.first);
+
+            return _try_insert_aux(h, kv_pair, &store_);
+        }
+
+        template <typename Key,
+                  typename Value,
+                  typename Hash,
+                  typename Equal>
+        auto
+        DArenaHashMap<Key,
+                      Value,
+                      Hash,
+                      Equal>::_try_insert_aux(size_type hash_value,
+                                              const std::pair<const Key, Value> & kv_pair,
+                                              store_type * p_store)
+            -> std::pair<value_type *, bool>
+
+        {
+            size_type h = hash_value;
             // h1: hi bits: probe sequence
             size_type h1 = h >> 7;
             // h2: lo bits: store in control byte
             uint8_t h2 = h & 0x7f;
 
-            size_type N = this->capacity();
+            size_type N = p_store->capacity();
 
             // same as:
             //   ix = h1 % N
@@ -356,7 +441,7 @@ namespace xo {
 
             // will make series of probes
             for (;;) {
-                auto grp = _load_group(ix);
+                auto grp = p_store->_load_group(ix);
 
                 {
                     // look for matching slot to update
@@ -372,7 +457,7 @@ namespace xo {
 
                         // invariant: slot_ix in [0 .. N)
 
-                        auto & slot = store_.slots_[slot_ix];
+                        auto & slot = p_store->slots_[slot_ix];
 
                         if (equal_(slot.first, kv_pair.first)) {
                             // we have match on existing key;
@@ -404,7 +489,7 @@ namespace xo {
                         // Check here so that table can stay at max load factor
                         // indefinitely as long as updates only
                         //
-                        if (load_factor() >= c_max_load_factor) {
+                        if (p_store->load_factor() >= c_max_load_factor) {
                             return std::make_pair(nullptr, false);
                         }
 
@@ -414,14 +499,14 @@ namespace xo {
 
                         // invariant: slot_ix in [0 .. N)
 
-                        auto & slot = store_.slots_[slot_ix];
+                        auto & slot = p_store->slots_[slot_ix];
 
                         // mark slot occupied in control space;
                         // maintain copy-at-end for overflow
-                        this->_update_control(slot_ix, h2);
+                        p_store->_update_control(slot_ix, h2);
                         new (&slot) value_type(kv_pair);
 
-                        ++(this->store_.size_);
+                        ++(p_store->size_);
 
                         // true: increased table size
                         return std::make_pair(&slot, true);
@@ -443,23 +528,49 @@ namespace xo {
         bool
         DArenaHashMap<Key, Value, Hash, Equal>::_try_grow()
         {
-#ifdef NOT_YET
-            size_type n_group_exponent_2x = n_group_exponent_ + 1;
-            size_type n_group_2x = n_group_ * 2;
-            size_type n_slot_2x_ = n_group_2x * c_group_size;
+            size_type n_group_exponent_2x = store_.n_group_exponent_ + 1;
+            size_type n_group_2x = store_.n_group_ * 2;
 
-            auto control_2x = DArenaVector<uint8_t>::map(ArenaConfig{.size_ = n_slot_2x_ + c_group_size});
-            auto slot_2x = DArenaVector<value_type>::map(ArenaConfig{.size_ = n_slot_2x_ * sizeof(value_type));
-#endif
+            detail::HashMapStore<Key, Value> store_2x(std::make_pair(n_group_exponent_2x,
+                                                                     n_group_2x));
+            /* rehash everything in store_,
+             * into store_2x
+             */
 
-            /* rehash contents -> [control_2x, slot_2x] */
+            for (size_type i = 0, n = store_.capacity(); i < n; ++i) {
+                uint8_t ctrl = store_.control_[i];
+                value_type & kv_pair = store_.slots_[i];
 
-            return false;
+                if ((ctrl != c_empty_slot)
+                    && (ctrl != c_tombstone))
+                {
+                    size_type h = hash_(kv_pair.first);
+                    auto chk = this->_try_insert_aux(h, kv_pair, &store_2x);
+
+                    if (!chk.second) {
+                        // shenanigans - something isn't right.
+                        // - may have run out of memory
+                        assert(false);
+
+                        return false;
+                    }
+                }
+            }
+
+            this->store_ = std::move(store_2x);
+
+            return true;
         }
 
-        template <typename Key, typename Value, typename Hash, typename Equal>
+        template <typename Key,
+                  typename Value,
+                  typename Hash,
+                  typename Equal>
         bool
-        DArenaHashMap<Key, Value, Hash, Equal>::insert(const std::pair<const Key, Value> & kv_pair)
+        DArenaHashMap<Key,
+                      Value,
+                      Hash,
+                      Equal>::insert(const std::pair<const Key, Value> & kv_pair)
         {
             auto [slot_addr, ins_flag] = this->try_insert(kv_pair);
 
