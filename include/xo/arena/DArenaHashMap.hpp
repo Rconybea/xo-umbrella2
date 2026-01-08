@@ -70,6 +70,10 @@ namespace xo {
             static constexpr uint8_t c_empty_slot = 0xFF;
             /** control: tombstone for deleted slot **/
             static constexpr uint8_t c_tombstone = 0xFE;
+            /** control: bookends around control array,
+             *  for iterator edge support
+             **/
+            static constexpr uint8_t c_iterator_bookend = 0xF0;
 
             /** group size **/
             static constexpr size_type c_group_size = 16;
@@ -237,8 +241,13 @@ namespace xo {
                 void _init() {
                     this->control_.resize(control_size(n_slot_));
 
-                    /* all slots marked empty initially */
+                    /* front stub: iterator bookend */
                     std::fill(this->control_.begin(),
+                              this->control_.begin() + c_control_stub,
+                              c_iterator_bookend);
+
+                    /* all slots marked empty initially */
+                    std::fill(this->control_.begin() + c_control_stub,
                               this->control_.end(),
                               c_empty_slot);
 
@@ -708,8 +717,9 @@ namespace xo {
          *  SM2. load factor
          *   - SM2.1 load_factor() <= c_max_load_factor
          *  SM3. control_
-         *   - SM3.1 control_[N+i] = control_[i] for i in [0, c_group_size)
-         *   - SM3.2 {number of control_[i] spots with non-sentinel values} = size_
+         *   - SM3.1 control_[i] = c_iterator_bookend
+         *   - SM3.2 control_[N+i] = control_[i] for i in [0, c_group_size)
+         *   - SM3.3 {number of control_[i] spots with non-sentinel values} = size_
          *  SM4. slots_
          *   - SM4.1 if control_[i] is non-sentinel:
          *     - SM4.1.1 control_[i] = hash_(slots_[i].first) & 0x7f
@@ -788,7 +798,18 @@ namespace xo {
                                            xtag("c_max_load_factor", c_max_load_factor));
             }
 
-            /* SM3.1: control_[N+i] = control_[i] for i in [0, c_group_size) */
+            /* SM3.1: control_[i] = c_iterator_bookend for i in [0, c_control_stub) */
+            for (size_type i = 0; i < c_control_stub; ++i) {
+                if (store_.control_[i] != c_iterator_bookend) {
+                    return policy.report_error(log,
+                                               c_self, ": expect control_[i] = c_iterator_bookend for front stub",
+                                               xtag("i", i),
+                                               xtag("control_[i]", (int)(store_.control_[i])),
+                                               xtag("c_iterator_bookend", (int)c_iterator_bookend));
+                }
+            }
+
+            /* SM3.2: control_[N+i] = control_[i] for i in [0, c_group_size) */
             for (size_type i = 0; i < c_group_size; ++i) {
                 if (store_.control_[store_.n_slot_ + i + c_control_stub] != store_.control_[i + c_control_stub]) {
                     return policy.report_error(log,
@@ -799,7 +820,7 @@ namespace xo {
                 }
             }
 
-            /* SM3.2: {number of control_[i] spots with non-sentinel values} = size_ */
+            /* SM3.3: {number of control_[i] spots with non-sentinel values} = size_ */
             {
                 size_type occupied_count = 0;
                 for (size_type i = 0; i < store_.n_slot_; ++i) {
