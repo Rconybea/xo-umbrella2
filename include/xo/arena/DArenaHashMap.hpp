@@ -98,7 +98,7 @@ namespace xo {
 
             /** control: compute size of control array for swiss hash map with @p n_slot cells **/
             static constexpr size_type control_size(size_type n_slot) {
-                return n_slot + c_group_size + 12 * c_control_stub;
+                return n_slot + c_group_size + 2 * c_control_stub;
             }
 
             /** find smallest multiple k : k * c_group_size >= n **/
@@ -248,6 +248,11 @@ namespace xo {
 
                     /* all slots marked empty initially */
                     std::fill(this->control_.begin() + c_control_stub,
+                              this->control_.end() - c_control_stub,
+                              c_empty_slot);
+
+                    /* end stub: iterator bookend */
+                    std::fill(this->control_.end() - c_control_stub,
                               this->control_.end(),
                               c_empty_slot);
 
@@ -717,9 +722,10 @@ namespace xo {
          *  SM2. load factor
          *   - SM2.1 load_factor() <= c_max_load_factor
          *  SM3. control_
-         *   - SM3.1 control_[i] = c_iterator_bookend
-         *   - SM3.2 control_[N+i] = control_[i] for i in [0, c_group_size)
+         *   - SM3.1 control_[i] = c_iterator_bookend for i in [0, c_control_stub)
+         *   - SM3.2 control_[stub+i] = control_[stub+N+i] for i in [0, c_group_size)
          *   - SM3.3 {number of control_[i] spots with non-sentinel values} = size_
+         *   - SM3.4 control_[stub+N+c_group_size+i] = c_iterator_bookend for i in [0, c_control_stub)
          *  SM4. slots_
          *   - SM4.1 if control_[i] is non-sentinel:
          *     - SM4.1.1 control_[i] = hash_(slots_[i].first) & 0x7f
@@ -834,6 +840,19 @@ namespace xo {
                                                c_self, ": expect occupied control count = size",
                                                xtag("occupied_count", occupied_count),
                                                xtag("size", store_.size_));
+                }
+            }
+
+            /* SM3.4: control_[stub+N+c_group_size+i] = c_iterator_bookend for i in [0, c_control_stub) */
+            for (size_type i = 0; i < c_control_stub; ++i) {
+                size_type ix = c_control_stub + store_.n_slot_ + c_group_size + i;
+                if (store_.control_[ix] != c_iterator_bookend) {
+                    return policy.report_error(log,
+                                               c_self, ": expect control_[stub+N+group+i] = c_iterator_bookend for end stub",
+                                               xtag("i", i),
+                                               xtag("ix", ix),
+                                               xtag("control_[ix]", (int)(store_.control_[ix])),
+                                               xtag("c_iterator_bookend", (int)c_iterator_bookend));
                 }
             }
 
