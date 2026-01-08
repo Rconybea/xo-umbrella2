@@ -17,10 +17,11 @@ namespace xo {
              *
              *  Support optimization using SIMD operations
              **/
-            struct Group {
+            struct ControlGroup {
                 std::array<uint8_t, DArenaHashMapUtil::c_group_size> ctrl_;
 
-                explicit Group(uint8_t * lo) {
+                /** Require: lo is aligned on c_group_size (probably 16 bytes) **/
+                explicit ControlGroup(uint8_t * lo) {
                     ::memcpy(ctrl_.data(), lo, DArenaHashMapUtil::c_group_size);
                 }
 

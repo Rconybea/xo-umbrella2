@@ -68,7 +68,7 @@ namespace xo {
             struct HashMapStore : DArenaHashMapUtil {
             public:
                 using value_type = std::pair<const Key, Value>;
-                using group_type = detail::Group;
+                using group_type = detail::ControlGroup;
 
             public:
                 /** group_exp2: number of groups {x, 2^x} **/
@@ -264,7 +264,7 @@ namespace xo {
             using key_hash = Hash;
             using key_equal = Equal;
             using byte = std::byte;
-            using group_type = detail::Group;
+            using group_type = detail::ControlGroup;
             using store_type = detail::HashMapStore<Key, Value>;
             using insert_value_type = std::pair<value_type *, bool>;
             using iterator = detail::DArenaHashMapIterator<Key, Value>;
