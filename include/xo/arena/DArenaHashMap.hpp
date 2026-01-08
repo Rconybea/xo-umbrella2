@@ -64,6 +64,8 @@ namespace xo {
             using size_type = std::size_t;
             using control_type = std::uint8_t;
 
+            /** control: mask for sentinel states **/
+            static constexpr uint8_t c_sentinel_mask = 0xF0;
             /** control: sentinel for empty slot **/
             static constexpr uint8_t c_empty_slot = 0xFF;
             /** control: tombstone for deleted slot **/
@@ -74,6 +76,16 @@ namespace xo {
 
             /** max load factor **/
             static constexpr float c_max_load_factor = 0.875;
+
+            /** control: true for sentinel values **/
+            static constexpr bool is_sentinel(control_type ctrl) {
+                return ctrl & c_sentinel_mask;
+            }
+
+            /** control; true for non-sentinel values **/
+            static constexpr bool is_data(control_type ctrl) {
+                return 0 == (ctrl & c_sentinel_mask);
+            }
 
             /** find smallest multiple k : k * c_group_size >= n **/
             static size_type lub_group_mult(size_t n) {
@@ -288,7 +300,7 @@ namespace xo {
                 }
 
                 bool is_sentinel() const {
-                    return ((*ctrl_ == c_tombstone) || (*ctrl_ == c_empty_slot));
+                    return DArenaHashMapUtil::is_sentinel(*ctrl_);
                 }
 
             private:
@@ -605,20 +617,18 @@ namespace xo {
                     uint8_t ctrl = store_.control_[i];
                     value_type & kv_pair = store_.slots_[i];
 
-                    if ((ctrl != c_empty_slot)
-                        && (ctrl != c_tombstone))
-                        {
-                            size_type h = hash_(kv_pair.first);
-                            auto chk = this->_try_insert_aux(h, kv_pair, &store_2x);
+                    if (DArenaHashMapUtil::is_data(ctrl)) {
+                        size_type h = hash_(kv_pair.first);
+                        auto chk = this->_try_insert_aux(h, kv_pair, &store_2x);
 
-                            if (!chk.second) {
-                                // shenanigans - something isn't right.
-                                // - may have run out of memory
-                                assert(false);
+                        if (!chk.second) {
+                            // shenanigans - something isn't right.
+                            // - may have run out of memory
+                            assert(false);
 
-                                return false;
-                            }
+                            return false;
                         }
+                    }
                 }
 
                 this->store_ = std::move(store_2x);
@@ -778,7 +788,7 @@ namespace xo {
                 size_type occupied_count = 0;
                 for (size_type i = 0; i < store_.n_slot_; ++i) {
                     uint8_t c = store_.control_[i];
-                    if ((c != c_empty_slot) && (c != c_tombstone)) {
+                    if (DArenaHashMapUtil::is_data(c)) {
                         ++occupied_count;
                     }
                 }
@@ -793,7 +803,7 @@ namespace xo {
             /* SM4.1.1: if control_[i] is non-sentinel, control_[i] = hash_(slots_[i].first) & 0x7f */
             for (size_type i = 0; i < store_.n_slot_; ++i) {
                 uint8_t c = store_.control_[i];
-                if ((c != c_empty_slot) && (c != c_tombstone)) {
+                if (DArenaHashMapUtil::is_data(c)) {
                     uint8_t expected_h2 = hash_(store_.slots_[i].first) & 0x7f;
                     if (c != expected_h2) {
                         return policy.report_error(log,
@@ -810,12 +820,12 @@ namespace xo {
              */
             for (size_type i = 0; i < store_.n_slot_; ++i) {
                 uint8_t c = store_.control_[i];
-                if ((c != c_empty_slot) && (c != c_tombstone)) {
+                if (DArenaHashMapUtil::is_data(c)) {
                     size_type h = (hash_(store_.slots_[i].first) >> 7) & (store_.n_slot_ - 1);
                     size_type j = h;
                     while (j != i) {
                         uint8_t cj = store_.control_[j];
-                        if ((cj == c_empty_slot) || (cj == c_tombstone)) {
+                        if (DArenaHashMapUtil::is_sentinel(cj)) {
                             return policy.report_error(log,
                                                        c_self, ": expect non-empty slot in probe range [h..i]",
                                                        xtag("i", i),
@@ -831,7 +841,7 @@ namespace xo {
             /* SM4.2: if control_[i] is empty or tombstone, slots_[i].first = key_type() */
             for (size_type i = 0; i < store_.n_slot_; ++i) {
                 uint8_t c = store_.control_[i];
-                if ((c == c_empty_slot) || (c == c_tombstone)) {
+                if (DArenaHashMapUtil::is_sentinel(c)) {
                     if (!(store_.slots_[i].first == key_type())) {
                         return policy.report_error(log,
                                                    c_self, ": expect empty/tombstone slot has default key",
