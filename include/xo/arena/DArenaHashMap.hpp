@@ -156,6 +156,42 @@ namespace xo {
                 }
 #endif
             };
+
+            template <typename Key,
+                      typename Value>
+            struct HashMapStore : DArenaHashMapUtil {
+            public:
+                using value_type = std::pair<const Key, Value>;
+
+            public:
+                /** group_exp2: number of groups {x, 2^x} **/
+                explicit HashMapStore(const std::pair<size_type,
+                                                      size_type> & group_exp2)
+                : size_{0},
+                  n_group_exponent_{group_exp2.first},
+                  n_group_{group_exp2.second},
+                  n_slot_{group_exp2.second * c_group_size},
+                  control_{DArenaVector<uint8_t>::map(ArenaConfig{.size_ = n_slot_ + c_group_size})},
+                  slots_{DArenaVector<value_type>::map(ArenaConfig{.size_ = n_slot_ * sizeof(value_type)})}
+                {}
+
+            public:
+                /** number of pairs in this table **/
+                size_type size_ = 0;
+                /** base-2 logarithm of n_group_ **/
+                size_type n_group_exponent_ = 0;
+                /** table has capacity for this number of groups. always an exact power of two.
+                 *  number of slots is n_group_ * c_group_size
+                 **/
+                size_type n_group_ = (1 << n_group_exponent_);
+                /** table has capacity for this number of {key,value} pairs **/
+                size_type n_slot_ = n_group_ * c_group_size;
+                /** control_[] partitioned into groups of c_group_size (16) consecutive elements
+                 **/
+                DArenaVector<uint8_t> control_;
+                /** slots_[] holds {key,value} pairs **/
+                DArenaVector<value_type> slots_;
+            };
         }
 
         /** @brief flat hash map of key-value pairs using dedicated DArenas for storage
@@ -188,15 +224,15 @@ namespace xo {
                           size_type hint_max_capacity = 0,
                           bool debug_flag = false);
 
-            size_type empty() const noexcept { return size_ == 0; }
-            size_type groups() const noexcept { return n_group_; }
-            size_type size() const noexcept { return size_; }
-            size_type capacity() const noexcept { return n_group_ * c_group_size; }
+            size_type empty() const noexcept { return store_.size_ == 0; }
+            size_type groups() const noexcept { return store_.n_group_; }
+            size_type size() const noexcept { return store_.size_; }
+            size_type capacity() const noexcept { return store_.n_group_ * c_group_size; }
 
-            float load_factor() const noexcept { return size_ / static_cast<float>(n_slot_); }
+            float load_factor() const noexcept { return store_.size_ / static_cast<float>(store_.n_slot_); }
 
-            /** insert @p kv_pair into hash map. replaces any previous value
-             *  stored under the same key.
+            /** insert @p kv_pair into hash map.
+             *  Replaces any previous value stored under the same key.
              *
              *  Return pair retval with:
              *  reval.first: true if size incremented;
@@ -207,12 +243,20 @@ namespace xo {
              **/
             std::pair<value_type *, bool> try_insert(const std::pair<const Key, Value> & kv_pair);
 
+            /** insert @p kv_pair into hash map.
+             *  Increase table size if necessary
+             **/
+            bool insert(const std::pair<const Key, Value> & kv_pair);
+
             bool verify_ok(verify_policy p = verify_policy::throw_only()) const;
 
         private:
+            /** increase hash table size (invoke when max load factor reached) **/
+            bool _try_grow();
+
             /** load group abstraction from control bytes starting at @p ix **/
             group_type _load_group(size_type ix) {
-                return group_type(&(control_[ix]));
+                return group_type(&(store_.control_[ix]));
             }
 
             /** like ctrl_[ix] = h2, but maintain overflow copy
@@ -225,6 +269,10 @@ namespace xo {
             key_hash hash_;
             /** key equal **/
             key_equal equal_;
+
+            /** hash table state contents + size-related attributes **/
+            detail::HashMapStore<Key, Value> store_;
+#ifdef OBSOLETE
             /** number of pairs in this table **/
             size_type size_ = 0;
             /** base-2 logarithm of n_group_ **/
@@ -240,6 +288,7 @@ namespace xo {
             DArenaVector<uint8_t> control_;
             /** slots_[] holds {key,value} pairs **/
             DArenaVector<value_type> slots_;
+#endif
             /** true to enable debug logging **/
             bool debug_flag_ = false;
         };
@@ -262,34 +311,29 @@ namespace xo {
                                                               bool debug_flag)
         : hash_{std::move(hash)},
           equal_{std::move(eq)},
-          size_{0},
-          n_group_exponent_{lub_exp2(lub_group_mult(hint_max_capacity)).first},
-          n_group_{lub_exp2(lub_group_mult(hint_max_capacity)).second},
-          n_slot_{n_group_ * c_group_size},
-          control_{DArenaVector<uint8_t>::map(ArenaConfig{.size_ = n_slot_ + c_group_size})},
-          slots_{DArenaVector<value_type>::map(ArenaConfig{.size_ = n_slot_ * sizeof(value_type)})},
+          store_{lub_exp2(lub_group_mult(hint_max_capacity))},
           debug_flag_{debug_flag}
         {
             /* invariant: arenas have allocated address range, but no committed memory yet */
-            this->control_.resize(n_slot_ + c_group_size);
+            this->store_.control_.resize(store_.n_slot_ + c_group_size);
 
             /* all slots marked empty initially */
-            std::fill(this->control_.begin(), this->control_.end(), c_empty_slot);
+            std::fill(this->store_.control_.begin(), this->store_.control_.end(), c_empty_slot);
 
-            this->slots_.resize(n_slot_);
+            this->store_.slots_.resize(store_.n_slot_);
         }
 
         template <typename Key, typename Value, typename Hash, typename Equal>
         void
         DArenaHashMap<Key, Value, Hash, Equal>::_update_control(size_type ix, uint8_t h2)
         {
-            this->control_[ix] = h2;
+            this->store_.control_[ix] = h2;
 
             if (ix < c_group_size) {
                 size_type N = this->capacity();
 
                 // refresh end-of-array copy
-                std::memcpy(&(control_[N]), &(control_[0]), c_group_size);
+                std::memcpy(&(store_.control_[N]), &(store_.control_[0]), c_group_size);
             }
         }
 
@@ -328,9 +372,9 @@ namespace xo {
 
                         // invariant: slot_ix in [0 .. N)
 
-                        auto & slot = slots_[slot_ix];
+                        auto & slot = store_.slots_[slot_ix];
 
-                        if (slot.first == kv_pair.first) {
+                        if (equal_(slot.first, kv_pair.first)) {
                             // we have match on existing key;
                             // replace associated value
                             slot.second = kv_pair.second;
@@ -370,14 +414,14 @@ namespace xo {
 
                         // invariant: slot_ix in [0 .. N)
 
-                        auto & slot = slots_[slot_ix];
+                        auto & slot = store_.slots_[slot_ix];
 
                         // mark slot occupied in control space;
                         // maintain copy-at-end for overflow
                         this->_update_control(slot_ix, h2);
                         new (&slot) value_type(kv_pair);
 
-                        ++(this->size_);
+                        ++(this->store_.size_);
 
                         // true: increased table size
                         return std::make_pair(&slot, true);
@@ -392,6 +436,46 @@ namespace xo {
                 // when ix is close to N
 
                 ix = (ix + c_group_size) & (N - 1);
+            }
+        }
+
+        template <typename Key, typename Value, typename Hash, typename Equal>
+        bool
+        DArenaHashMap<Key, Value, Hash, Equal>::_try_grow()
+        {
+#ifdef NOT_YET
+            size_type n_group_exponent_2x = n_group_exponent_ + 1;
+            size_type n_group_2x = n_group_ * 2;
+            size_type n_slot_2x_ = n_group_2x * c_group_size;
+
+            auto control_2x = DArenaVector<uint8_t>::map(ArenaConfig{.size_ = n_slot_2x_ + c_group_size});
+            auto slot_2x = DArenaVector<value_type>::map(ArenaConfig{.size_ = n_slot_2x_ * sizeof(value_type));
+#endif
+
+            /* rehash contents -> [control_2x, slot_2x] */
+
+            return false;
+        }
+
+        template <typename Key, typename Value, typename Hash, typename Equal>
+        bool
+        DArenaHashMap<Key, Value, Hash, Equal>::insert(const std::pair<const Key, Value> & kv_pair)
+        {
+            auto [slot_addr, ins_flag] = this->try_insert(kv_pair);
+
+            if (slot_addr)
+                return ins_flag;
+
+            assert((store_.size_ + 1) / static_cast<float>(store_.n_slot_) >= c_max_load_factor);
+
+            if (this->_try_grow()) {
+                /* retry insert, with bigger table */
+                auto [slot_addr, ins_flag] = this->try_insert(kv_pair);
+
+                return ins_flag;
+            } else {
+                // TODO: set last error.  Presumeably reached max size
+                return false;
             }
         }
 
@@ -427,53 +511,54 @@ namespace xo {
             using xo::xtag;
 
             constexpr const char * c_self = "DArenaHashMap::verify_ok";
-            scope log(XO_DEBUG(debug_flag_), xtag("size", size_));
+            scope log(XO_DEBUG(debug_flag_),
+                      xtag("size", store_.size_));
 
             /* SM1.1: size_ <= n_slot_ */
-            if (size_ > n_slot_) {
+            if (store_.size_ > store_.n_slot_) {
                 return policy.report_error(log,
                                            c_self, ": expect .size <= .n_slot",
-                                           xtag("size", size_),
-                                           xtag("n_slot", n_slot_));
+                                           xtag("size", store_.size_),
+                                           xtag("n_slot", store_.n_slot_));
             }
 
             /* SM1.2: control_[] size consistent with slots_[] size */
-            if (control_.size() != n_slot_ + c_group_size) {
+            if (store_.control_.size() != store_.n_slot_ + c_group_size) {
                 return policy.report_error(log,
                                            c_self, ": expect .control_.size = .n_slot + c_group_size",
-                                           xtag("control_.size", control_.size()),
-                                           xtag("n_slot", n_slot_),
+                                           xtag("control_.size", store_.control_.size()),
+                                           xtag("n_slot", store_.n_slot_),
                                            xtag("c_group_size", c_group_size));
             }
-            if (slots_.size() != n_slot_) {
+            if (store_.slots_.size() != store_.n_slot_) {
                 return policy.report_error(log,
                                            c_self, ": expect .slots_.size = .n_slot",
-                                           xtag("slots_.size", slots_.size()),
-                                           xtag("n_slot", n_slot_));
+                                           xtag("slots_.size", store_.slots_.size()),
+                                           xtag("n_slot", store_.n_slot_));
             }
 
             /* SM1.3: n_group_ consistent with n_group_exponent_ */
-            if (n_group_ != (size_type{1} << n_group_exponent_)) {
+            if (store_.n_group_ != (size_type{1} << store_.n_group_exponent_)) {
                 return policy.report_error(log,
                                            c_self, ": expect .n_group = 2^.n_group_exponent",
-                                           xtag("n_group", n_group_),
-                                           xtag("n_group_exponent", n_group_exponent_));
+                                           xtag("n_group", store_.n_group_),
+                                           xtag("n_group_exponent", store_.n_group_exponent_));
             }
 
             /* SM1.4: n_slot_ consistent with n_group_ */
-            if (n_slot_ != n_group_ * c_group_size) {
+            if (store_.n_slot_ != store_.n_group_ * c_group_size) {
                 return policy.report_error(log,
                                            c_self, ": expect .n_slot = .n_group * c_group_size",
-                                           xtag("n_slot", n_slot_),
-                                           xtag("n_group", n_group_),
+                                           xtag("n_slot", store_.n_slot_),
+                                           xtag("n_group", store_.n_group_),
                                            xtag("c_group_size", c_group_size));
             }
 
             /* SM1.5: n_slot_ a power of 2 */
-            if ((n_slot_ & (n_slot_ - 1)) != 0) {
+            if ((store_.n_slot_ & (store_.n_slot_ - 1)) != 0) {
                 return policy.report_error(log,
                                            c_self, ": expect .n_slot is power of 2",
-                                           xtag("n_slot", n_slot_));
+                                           xtag("n_slot", store_.n_slot_));
             }
 
             /* SM2.1: load_factor() <= c_max_load_factor */
@@ -486,37 +571,37 @@ namespace xo {
 
             /* SM3.1: control_[N+i] = control_[i] for i in [0, c_group_size) */
             for (size_type i = 0; i < c_group_size; ++i) {
-                if (control_[n_slot_ + i] != control_[i]) {
+                if (store_.control_[store_.n_slot_ + i] != store_.control_[i]) {
                     return policy.report_error(log,
                                                c_self, ": expect control_[N+i] = control_[i]",
                                                xtag("i", i),
-                                               xtag("control_[i]", control_[i]),
-                                               xtag("control_[N+i]", control_[n_slot_ + i]));
+                                               xtag("control_[i]", store_.control_[i]),
+                                               xtag("control_[N+i]", store_.control_[store_.n_slot_ + i]));
                 }
             }
 
             /* SM3.2: {number of control_[i] spots with non-sentinel values} = size_ */
             {
                 size_type occupied_count = 0;
-                for (size_type i = 0; i < n_slot_; ++i) {
-                    uint8_t c = control_[i];
+                for (size_type i = 0; i < store_.n_slot_; ++i) {
+                    uint8_t c = store_.control_[i];
                     if ((c != c_empty_slot) && (c != c_tombstone)) {
                         ++occupied_count;
                     }
                 }
-                if (occupied_count != size_) {
+                if (occupied_count != store_.size_) {
                     return policy.report_error(log,
                                                c_self, ": expect occupied control count = size",
                                                xtag("occupied_count", occupied_count),
-                                               xtag("size", size_));
+                                               xtag("size", store_.size_));
                 }
             }
 
             /* SM4.1.1: if control_[i] is non-sentinel, control_[i] = hash_(slots_[i].first) & 0x7f */
-            for (size_type i = 0; i < n_slot_; ++i) {
-                uint8_t c = control_[i];
+            for (size_type i = 0; i < store_.n_slot_; ++i) {
+                uint8_t c = store_.control_[i];
                 if ((c != c_empty_slot) && (c != c_tombstone)) {
-                    uint8_t expected_h2 = hash_(slots_[i].first) & 0x7f;
+                    uint8_t expected_h2 = hash_(store_.slots_[i].first) & 0x7f;
                     if (c != expected_h2) {
                         return policy.report_error(log,
                                                    c_self, ": expect control[i] = hash(key) & 0x7f",
@@ -530,13 +615,13 @@ namespace xo {
             /* SM4.1.2: if control_[i] is non-sentinel, all slots in range [h .. i] are non-empty,
              *          where h = (hash_(slots_[i].first) >> 7) & (n_slot_ - 1)
              */
-            for (size_type i = 0; i < n_slot_; ++i) {
-                uint8_t c = control_[i];
+            for (size_type i = 0; i < store_.n_slot_; ++i) {
+                uint8_t c = store_.control_[i];
                 if ((c != c_empty_slot) && (c != c_tombstone)) {
-                    size_type h = (hash_(slots_[i].first) >> 7) & (n_slot_ - 1);
+                    size_type h = (hash_(store_.slots_[i].first) >> 7) & (store_.n_slot_ - 1);
                     size_type j = h;
                     while (j != i) {
-                        uint8_t cj = control_[j];
+                        uint8_t cj = store_.control_[j];
                         if ((cj == c_empty_slot) || (cj == c_tombstone)) {
                             return policy.report_error(log,
                                                        c_self, ": expect non-empty slot in probe range [h..i]",
@@ -545,16 +630,16 @@ namespace xo {
                                                        xtag("j", j),
                                                        xtag("control[j]", cj));
                         }
-                        j = (j + 1) & (n_slot_ - 1);
+                        j = (j + 1) & (store_.n_slot_ - 1);
                     }
                 }
             }
 
             /* SM4.2: if control_[i] is empty or tombstone, slots_[i].first = key_type() */
-            for (size_type i = 0; i < n_slot_; ++i) {
-                uint8_t c = control_[i];
+            for (size_type i = 0; i < store_.n_slot_; ++i) {
+                uint8_t c = store_.control_[i];
                 if ((c == c_empty_slot) || (c == c_tombstone)) {
-                    if (!(slots_[i].first == key_type())) {
+                    if (!(store_.slots_[i].first == key_type())) {
                         return policy.report_error(log,
                                                    c_self, ": expect empty/tombstone slot has default key",
                                                    xtag("i", i),
