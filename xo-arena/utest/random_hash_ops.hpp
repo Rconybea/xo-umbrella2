@@ -597,58 +597,6 @@ namespace utest {
 #endif
 
 #ifdef NOT_YET
-        /** Require:
-         *  - tree has keys [0..n-1], where n=treesize()
-         *  - tree valu at key k is dvalue+10*k
-         *
-         *  @p catch_flag. control behavior at each test assertion.
-         *  true -> log to console + interact with catch2
-         *  false -> verify iteration behavior for return code.
-         *
-         **/
-        static bool
-        check_reduced_sum(uint32_t dvalue,
-                          bool catch_flag,
-                          Tree const & rbtree)
-        {
-            using xo::scope;
-            using xo::xtag;
-
-            scope log(XO_DEBUG(catch_flag));
-
-            /* -> false if/when check fails */
-            bool ok_flag = true;
-
-            size_t const n = rbtree.size();
-
-            for(size_t i = 0; i < n; ++i) {
-                /* compute reduction up to key=i */
-                double reduced_upto
-                    = rbtree.reduce_lub(i /*key*/,
-                                        true /*is_closed*/);
-
-                double reduced = (i+1) * (5*i + dvalue);
-
-                INFO(tostr(xtag("i", i), xtag("n", n),
-                           xtag("tree.reduced_upto", reduced_upto),
-                           xtag("reduced", reduced),
-                           xtag("dvalue", dvalue)));
-
-                auto glb_ix = rbtree.cfind_sum_glb(reduced);
-
-                REQUIRE_ORFAIL(ok_flag, catch_flag, reduced_upto == reduced);
-                REQUIRE_ORFAIL(ok_flag, catch_flag, glb_ix.is_dereferenceable());
-                /* glb_ix is truth-y */
-                REQUIRE_ORFAIL(ok_flag, catch_flag, glb_ix);
-
-                REQUIRE_ORFAIL(ok_flag, catch_flag, glb_ix->first == i);
-            }
-
-            return ok_flag;
-        } /*check_reduced_sum*/
-#endif
-
-#ifdef NOT_YET
         /* Require:
          * - *p_rbtree has keys [0..n-1],  where n=rbtree.size()
          * - for each key k,  associated value is 10*k
