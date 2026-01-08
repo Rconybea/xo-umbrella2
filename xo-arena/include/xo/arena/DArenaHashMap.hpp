@@ -80,7 +80,7 @@ namespace xo {
             /** Iterator sentinel at begin/end of control array.
              *  Load-bearing for bidirectional iterator implementation
              **/
-            static constexpr size_type c_control_stub = 0; //c_group_size;
+            static constexpr size_type c_control_stub = c_group_size; //c_group_size;
 
             /** control: true for sentinel values **/
             static constexpr bool is_sentinel(control_type ctrl) {
@@ -194,7 +194,7 @@ namespace xo {
                   n_group_exponent_{group_exp2.first},
                   n_group_{group_exp2.second},
                   n_slot_{group_exp2.second * c_group_size},
-                  control_{DArenaVector<uint8_t>::map(ArenaConfig{.size_ = n_slot_ + c_group_size})},
+                  control_{DArenaVector<uint8_t>::map(ArenaConfig{.size_ = control_size(n_slot_)})},
                   slots_{DArenaVector<value_type>::map(ArenaConfig{.size_ = n_slot_ * sizeof(value_type)})}
                 {
                     /* here: arenas have allocated address range, but no committed memory yet */
@@ -235,7 +235,7 @@ namespace xo {
 
             public:
                 void _init() {
-                    this->control_.resize(n_slot_ + c_group_size);
+                    this->control_.resize(control_size(n_slot_));
 
                     /* all slots marked empty initially */
                     std::fill(this->control_.begin(),
@@ -790,12 +790,12 @@ namespace xo {
 
             /* SM3.1: control_[N+i] = control_[i] for i in [0, c_group_size) */
             for (size_type i = 0; i < c_group_size; ++i) {
-                if (store_.control_[store_.n_slot_ + i + c_control_stub] != store_.control_[i] + c_control_stub) {
+                if (store_.control_[store_.n_slot_ + i + c_control_stub] != store_.control_[i + c_control_stub]) {
                     return policy.report_error(log,
                                                c_self, ": expect control_[N+i] = control_[i]",
                                                xtag("i", i),
-                                               xtag("control_[i]", store_.control_[i]),
-                                               xtag("control_[N+i]", store_.control_[store_.n_slot_ + i]));
+                                               xtag("control_[i]", (int)(store_.control_[i + c_control_stub])),
+                                               xtag("control_[N+i]", (int)(store_.control_[store_.n_slot_ + i + c_control_stub])));
                 }
             }
 
