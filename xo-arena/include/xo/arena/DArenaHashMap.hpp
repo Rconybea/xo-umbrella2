@@ -339,11 +339,14 @@ namespace xo {
                 using value_type = std::pair<const Key, Value>;
 
             public:
-                DArenaHashMapIterator(uint8_t * c, uint8_t * e, value_type * p)
-                    : ctrl_{c}, ctrl_end_{e}, pos_{p} {}
+                DArenaHashMapIterator(uint8_t * c, value_type * p)
+                    : ctrl_{c}, pos_{p} {}
 
                 value_type & operator*() const { return *pos_; }
                 value_type * operator->() const { return pos_; }
+
+                /** true iff iterator at sentinel position (not dereferencable state !) **/
+                bool _at_slot_sentinel() const { return is_sentinel(*ctrl_) && (*ctrl_ != c_iterator_bookend); }
 
                 bool operator==(const DArenaHashMapIterator & x) const {
                     return this->pos_ == x.pos_;
@@ -357,19 +360,27 @@ namespace xo {
                     do {
                         ++ctrl_;
                         ++pos_;
-                    } while ((ctrl_ != ctrl_end_) && this->is_sentinel());
+
+                        /** end condition: iterator ends at last non-wrapped position.
+                         *  relyin on bookend sentinel values at known offset from 'wrap' section
+                         *
+                         *                                        ctrl_       ctrl_ + c_group_size
+                         *                                            |       |
+                         *                                            v       v
+                         *   <----------------- control_size(n_slot) ---------------->
+                         *   <-stub-> <----------- n_slot ----------> <group> <-stub->
+                         *  +--------+-------------------------------+-------+--------+
+                         *  | 0xF0   | empty / data / tombstone      | wrap  | 0xF0   |
+                         *  +--------+-------------------------------+-------+--------+
+                         **/
+                    } while (is_sentinel(*ctrl_)
+                             && (*(ctrl_ + c_group_size) != c_iterator_bookend));
 
                     return *this;
                 }
 
-                bool is_sentinel() const {
-                    return DArenaHashMapUtil::is_sentinel(*ctrl_);
-                }
-
             private:
                 uint8_t * ctrl_ = nullptr;
-                uint8_t * ctrl_end_ = nullptr;
-
                 value_type * pos_ = nullptr;
             };
 
@@ -417,12 +428,15 @@ namespace xo {
             bool verify_ok(verify_policy p = verify_policy::throw_only()) const;
 
             iterator begin() {
+                if (this->empty()) [[unlikely]] {
+                    return this->end();
+                }
+
                 iterator ix(&(store_.control_[c_control_stub]),
-                            &(store_.control_[c_control_stub + store_.capacity()]),
                             &(store_.slots_[0]));
 
-                if (ix.is_sentinel()) {
-                    /* first occupied position in table */
+                if (ix._at_slot_sentinel()) {
+                    /* advance to first occupied position in table */
                     ++ix;
                 }
 
@@ -431,7 +445,6 @@ namespace xo {
 
             iterator end() {
                 iterator ix(&(store_.control_[c_control_stub + store_.capacity()]),
-                            &(store_.control_[c_control_stub + store_.capacity()]),
                             &(store_.slots_[store_.capacity()]));
 
                 return ix;
@@ -783,7 +796,6 @@ namespace xo {
 
                         if (equal_(slot.first, key)) {
                             return iterator(&(store_.control_[c_control_stub + slot_ix]),
-                                            &(store_.control_[c_control_stub + N]),
                                             &slot);
                         }
 
