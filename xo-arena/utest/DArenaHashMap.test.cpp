@@ -208,6 +208,9 @@ namespace xo {
                         ok_flag &= HashMapUtil<HashMap>::check_forward_iterator(0.0 /*dvalue*/,
                                                                                 dbg_flag, hash_map);
 
+                        ok_flag &= HashMapUtil<HashMap>::random_lookups(0.0 /*dvalue*/,
+                                                                        dbg_flag, &rgen, hash_map);
+
                         return ok_flag;
                     };
 

@@ -457,6 +457,11 @@ namespace xo {
             /** reset to empty state **/
             void clear();
 
+            /** find element with key @p key.
+             *  @return iterator to element if found, end() otherwise
+             **/
+            iterator find(const key_type & key);
+
         private:
             /** insert @p kv_pair,
              *  where key hashes to @p hash_value, into @p *store
@@ -743,6 +748,59 @@ namespace xo {
         DArenaHashMap<Key, Value, Hash, Equal>::clear()
         {
             this->store_.clear();
+        }
+
+        template <typename Key,
+                  typename Value,
+                  typename Hash,
+                  typename Equal>
+        auto
+        DArenaHashMap<Key, Value, Hash, Equal>::find(const key_type & key) -> iterator
+        {
+            size_type N = store_.capacity();
+
+            if (N == 0) [[unlikely]] {
+                return this->end();
+            }
+
+            size_type h = hash_(key);
+            size_type h1 = h >> 7;
+            uint8_t h2 = h & 0x7f;
+
+            size_type ix = h1 & (N - 1);
+
+            for (;;) {
+                auto grp = store_._load_group(ix);
+
+                {
+                    uint16_t m = grp.all_matches(h2);
+
+                    while (m) {
+                        int skip = __builtin_ctz(m);
+                        size_type slot_ix = (ix + skip) & (N - 1);
+
+                        auto & slot = store_.slots_[slot_ix];
+
+                        if (equal_(slot.first, key)) {
+                            return iterator(&(store_.control_[c_control_stub + slot_ix]),
+                                            &(store_.control_[c_control_stub + N]),
+                                            &slot);
+                        }
+
+                        m &= (m - 1);
+                    }
+                }
+
+                {
+                    uint16_t e = grp.empty_matches();
+
+                    if (e) {
+                        return this->end();
+                    }
+                }
+
+                ix = (ix + c_group_size) & (N - 1);
+            }
         }
 
         /**

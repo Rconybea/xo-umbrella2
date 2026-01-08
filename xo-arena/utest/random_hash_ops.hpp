@@ -329,15 +329,15 @@ namespace utest {
         } /*random_removes*/
 #endif
 
-#ifdef NOT_YET
         /* Require:
-         * - tree has keys [0..n-1],  where n=treẹsize()
-         * - for each key k,  associated value is 10*k
+         * - map has keys [0..n-1], where n=map.size()
+         * - for each key k, associated value is dvalue+10*k
          */
         static bool
-        random_lookups(bool catch_flag,
-                       Tree const & tree,
-                       xo::rng::xoshiro256ss * p_rgen)
+        random_lookups(uint32_t dvalue,
+                       bool catch_flag,
+                       xo::rng::xoshiro256ss * p_rgen,
+                       HashMap & map)
         {
             using xo::scope;
             using xo::xtag;
@@ -347,9 +347,9 @@ namespace utest {
             /* -> false if/when verification fails */
             bool ok_flag = true;
 
-            REQUIRE_ORFAIL(ok_flag, catch_flag, tree.verify_ok(catch_flag));
+            REQUIRE_ORFAIL(ok_flag, catch_flag, map.verify_ok());
 
-            size_t n = tree.size();
+            size_t n = map.size();
             std::vector<std::uint32_t> u
                 = random_permutation(n, p_rgen);
 
@@ -358,27 +358,23 @@ namespace utest {
             for (std::uint32_t x : u) {
                 INFO(tostr(xtag("i", i), xtag("n", n), xtag("x", x)));
 
-                REQUIRE_ORFAIL(ok_flag, catch_flag, tree[x] == x*10);
-                REQUIRE_ORFAIL(ok_flag, catch_flag, tree.verify_ok(catch_flag));
-                REQUIRE_ORFAIL(ok_flag, catch_flag, tree.size() == n);
+                auto find_ix = map.find(x);
 
-                /* also test treẹfind() */
-                auto find_ix = tree.find(x);
-
-                REQUIRE_ORFAIL(ok_flag, catch_flag, find_ix != tree.end());
+                REQUIRE_ORFAIL(ok_flag, catch_flag, find_ix != map.end());
                 REQUIRE_ORFAIL(ok_flag, catch_flag, find_ix->first == x);
-                REQUIRE_ORFAIL(ok_flag, catch_flag, find_ix->second == x*10);
+                REQUIRE_ORFAIL(ok_flag, catch_flag, find_ix->second == dvalue + x*10);
+                REQUIRE_ORFAIL(ok_flag, catch_flag, map.verify_ok());
+                REQUIRE_ORFAIL(ok_flag, catch_flag, map.size() == n);
 
                 ++i;
             }
 
-            REQUIRE_ORFAIL(ok_flag, catch_flag, tree.size() == n);
+            REQUIRE_ORFAIL(ok_flag, catch_flag, map.size() == n);
 
             log.end_scope();
 
             return ok_flag;
         } /*random_lookups*/
-#endif
 
         /* Require:
          * - hash has keys [0..n-1] where n=map size
