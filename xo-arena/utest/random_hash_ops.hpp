@@ -452,8 +452,6 @@ namespace utest {
                                 bool catch_flag,
                                 HashMap & map)
         {
-            catch_flag=true;
-
             using xo::scope;
             using xo::xtag;
 
