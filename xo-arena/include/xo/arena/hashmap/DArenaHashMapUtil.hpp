@@ -3,6 +3,10 @@
  *  @author Roland Conybeare, Jan 2026
  **/
 
+#pragma once
+
+#include <cstdint>
+
 namespace xo {
     namespace mm {
         /** @class DArenaHashMapUtil
