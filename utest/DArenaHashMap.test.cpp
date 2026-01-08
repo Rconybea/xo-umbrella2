@@ -65,6 +65,17 @@ namespace xo {
                 REQUIRE(map.groups() == 1);
                 REQUIRE(map.capacity() == DArenaHashMapUtil::c_group_size);
                 REQUIRE(map.load_factor() == 1/16.0);
+
+                /* verify iteration */
+                {
+                    size_t n = 0;
+                    for (auto & ix : map) {
+                        REQUIRE(ix.first == 1);
+                        REQUIRE(ix.second == 11);
+                        ++n;
+                    }
+                    REQUIRE(n == map.size());
+                }
             }
 
             {
@@ -77,6 +88,15 @@ namespace xo {
                 REQUIRE(map.groups() == 1);
                 REQUIRE(map.capacity() == DArenaHashMapUtil::c_group_size);
                 REQUIRE(map.load_factor() == 2/16.0);
+
+                /* verify iteration */
+                {
+                    size_t n = 0;
+                    for (auto & ix : map) {
+                        ++n;
+                    }
+                    REQUIRE(n == map.size());
+                }
             }
 
             {
@@ -89,6 +109,28 @@ namespace xo {
                 REQUIRE(map.groups() == 1);
                 REQUIRE(map.capacity() == DArenaHashMapUtil::c_group_size);
                 REQUIRE(map.load_factor() == 3/16.0);
+
+                /* verify iteration */
+                {
+                    size_t n = 0;
+                    for (auto & ix : map) {
+                        switch (ix.first) {
+                        case 1:
+                            REQUIRE(ix.second == 11);
+                            break;
+                        case 2:
+                            REQUIRE(ix.second == 9);
+                            break;
+                        case 259:
+                            REQUIRE(ix.second == 12);
+                            break;
+                        default:
+                            REQUIRE(false);
+                        }
+                        ++n;
+                    }
+                    REQUIRE(n == map.size());
+                }
             }
         }
 
