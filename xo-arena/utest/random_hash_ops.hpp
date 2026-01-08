@@ -378,7 +378,7 @@ namespace utest {
 
         /* Require:
          * - hash has keys [0..n-1] where n=map size
-         * - tree value at key k is dvalue+10*k
+         * - hash value at key k is dvalue+10*k
          */
         static bool
         check_forward_iterator(uint32_t dvalue,
@@ -436,6 +436,73 @@ namespace utest {
                 /* should have visited exactly n locations */
                 REQUIRE_ORFAIL(ok_flag, catch_flag, map.size() == keys.size());
                 REQUIRE_ORFAIL(ok_flag, catch_flag, ix == end_ix);
+
+                //log && log(xtag("ix", ix), xtag("begin_ix", begin_ix));
+            }
+
+            return ok_flag;
+        }
+
+        /* Require:
+         * - hash has keys [0..n-1] where n=map size
+         * - hash value at key k is dvalue+10*k
+         */
+        static bool
+        check_backward_iterator(uint32_t dvalue,
+                                bool catch_flag,
+                                HashMap & map)
+        {
+            catch_flag=true;
+
+            using xo::scope;
+            using xo::xtag;
+
+            /* -> flase if/when verification fails */
+            bool ok_flag = true;
+
+            std::size_t const n = map.size();
+
+            scope log(XO_DEBUG(catch_flag));
+
+            log && log("map with size n", xtag("n", n));
+
+            std::unordered_set<std::size_t> keys;
+
+            {
+                auto end_ix = map.end();
+
+                //log && log(xtag("end_ix", end_ix));
+
+                auto begin_ix = map.begin();
+                auto ix = end_ix;
+
+                if (ix == begin_ix) [[unlikely]] {
+                    return ok_flag;
+                }
+
+                while (ix != begin_ix) {
+                    log && log("backward loop top",
+                               xtag("n", n)
+                               );
+
+                    --ix;
+
+                    /* verify: keys in map are in [0 .. n) */
+                    REQUIRE_ORFAIL(ok_flag, catch_flag, 0 <= ix->first);
+                    REQUIRE_ORFAIL(ok_flag, catch_flag, ix->first < n);
+
+                    log && log(xtag("ix->first", ix->first));
+
+                    /* verify: keys in map are unique */
+                    REQUIRE_ORFAIL(ok_flag, catch_flag, !keys.contains(ix->first));
+                    keys.insert(ix->first);
+
+                    REQUIRE_ORFAIL(ok_flag, catch_flag, ix->second == dvalue + 10 * ix->first);
+                }
+
+                /* should have visited exactly n locations */
+                REQUIRE_ORFAIL(ok_flag, catch_flag, map.size() == keys.size());
+                REQUIRE_ORFAIL(ok_flag, catch_flag, ix == begin_ix);
 
                 //log && log(xtag("ix", ix), xtag("begin_ix", begin_ix));
             }

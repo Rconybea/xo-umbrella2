@@ -207,6 +207,9 @@ namespace xo {
 
                         ok_flag &= HashMapUtil<HashMap>::check_forward_iterator(0.0 /*dvalue*/,
                                                                                 dbg_flag, hash_map);
+                        /* regular forward iterator, but start at hash_map.end() and use operator-- */
+                        ok_flag &= HashMapUtil<HashMap>::check_backward_iterator(0.0 /*dvalue*/,
+                                                                                 dbg_flag, hash_map);
 
                         ok_flag &= HashMapUtil<HashMap>::random_lookups(0.0 /*dvalue*/,
                                                                         dbg_flag, &rgen, hash_map);
