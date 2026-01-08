@@ -84,6 +84,8 @@ namespace xo {
 
             void swap(DArenaVector & other) noexcept;
 
+            DArenaVector & operator=(DArenaVector && x) noexcept;
+
         private:
             T * _address_of(size_type i) { return ((T *)store_.lo_) + i; }
             const T * _address_of(size_type i) const { return ((const T *)store_.lo_) + i; }
@@ -124,6 +126,18 @@ namespace xo {
                     x.~T();
                 }
             }
+        }
+
+        template <typename T>
+        DArenaVector<T> &
+        DArenaVector<T>::operator=(DArenaVector && other) noexcept
+        {
+            this->size_ = other.size_;
+            this->store_ = std::move(other.store_);
+
+            other.size_ = 0;
+
+            return *this;
         }
 
         template <typename T>

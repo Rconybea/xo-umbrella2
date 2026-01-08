@@ -174,11 +174,54 @@ namespace xo {
                   n_slot_{group_exp2.second * c_group_size},
                   control_{DArenaVector<uint8_t>::map(ArenaConfig{.size_ = n_slot_ + c_group_size})},
                   slots_{DArenaVector<value_type>::map(ArenaConfig{.size_ = n_slot_ * sizeof(value_type)})}
-                {}
+                {
+                    /* here: arenas have allocated address range, but no committed memory yet */
+
+                    this->_init();
+                }
 
                 size_type empty() const noexcept { return size_ == 0; }
                 size_type capacity() const noexcept { return n_group_ * c_group_size; }
                 float load_factor() const noexcept { return size_ / static_cast<float>(n_slot_); }
+
+                void resize_from_empty(const std::pair<size_type,
+                                                       size_type> & group_exp2)
+                {
+                    assert(size_ == 0);
+
+                    this->n_group_exponent_ = group_exp2.first;
+                    this->n_group_ = group_exp2.second;
+                    this->n_slot_ = group_exp2.second * c_group_size;
+
+                    this->_init();
+                }
+
+                void clear() {
+                    /* remark: discontinuity in the sense that we lose n_group_ = 2 ^ n_group_epxonent_
+                     *
+                     * juice may not be worth the squeeze here,
+                     * since DArena doesn't yet (Jan 2026) unmap on clear
+                     */
+
+                    this->size_ = 0;
+                    this->n_group_exponent_ = 0;
+                    this->n_group_ = 0;
+                    this->n_slot_ = 0;
+                    this->control_.resize(0);
+                    this->slots_.resize(0);
+                }
+
+            public:
+                void _init() {
+                    this->control_.resize(n_slot_ + c_group_size);
+
+                    /* all slots marked empty initially */
+                    std::fill(this->control_.begin(),
+                              this->control_.end(),
+                              c_empty_slot);
+
+                    this->slots_.resize(n_slot_);
+                }
 
                 group_type _load_group(size_type ix) {
                     return group_type(&(control_[ix]));
@@ -296,6 +339,8 @@ namespace xo {
             size_type capacity() const noexcept { return store_.capacity(); }
             float load_factor() const noexcept { return store_.load_factor(); }
 
+            bool verify_ok(verify_policy p = verify_policy::throw_only()) const;
+
             iterator begin() {
                 iterator ix(&(store_.control_[0]),
                             &(store_.control_[store_.capacity()]),
@@ -334,7 +379,8 @@ namespace xo {
              **/
             bool insert(const value_type & kv_pair);
 
-            bool verify_ok(verify_policy p = verify_policy::throw_only()) const;
+            /** reset to empty state **/
+            void clear();
 
         private:
             /** insert @p kv_pair,
@@ -389,15 +435,6 @@ namespace xo {
           store_{lub_exp2(lub_group_mult(hint_max_capacity))},
           debug_flag_{debug_flag}
         {
-            /* invariant: arenas have allocated address range, but no committed memory yet */
-            this->store_.control_.resize(store_.n_slot_ + c_group_size);
-
-            /* all slots marked empty initially */
-            std::fill(this->store_.control_.begin(),
-                      this->store_.control_.end(),
-                      c_empty_slot);
-
-            this->store_.slots_.resize(store_.n_slot_);
         }
 
         template <typename Key, typename Value, typename Hash, typename Equal>
@@ -426,6 +463,8 @@ namespace xo {
             -> std::pair<value_type *, bool>
 
         {
+            scope log(XO_DEBUG(false));
+
             size_type h = hash_value;
             // h1: hi bits: probe sequence
             size_type h1 = h >> 7;
@@ -433,6 +472,10 @@ namespace xo {
             uint8_t h2 = h & 0x7f;
 
             size_type N = p_store->capacity();
+
+            if (N == 0) [[unlikely]] {
+                return std::make_pair(nullptr, false);
+            }
 
             // same as:
             //   ix = h1 % N
@@ -528,36 +571,58 @@ namespace xo {
         bool
         DArenaHashMap<Key, Value, Hash, Equal>::_try_grow()
         {
-            size_type n_group_exponent_2x = store_.n_group_exponent_ + 1;
-            size_type n_group_2x = store_.n_group_ * 2;
+            scope log(XO_DEBUG(false));
 
-            detail::HashMapStore<Key, Value> store_2x(std::make_pair(n_group_exponent_2x,
-                                                                     n_group_2x));
-            /* rehash everything in store_,
-             * into store_2x
-             */
+            size_type n_group_exponent_2x = 0;
+            size_type n_group_2x = 0;
 
-            for (size_type i = 0, n = store_.capacity(); i < n; ++i) {
-                uint8_t ctrl = store_.control_[i];
-                value_type & kv_pair = store_.slots_[i];
-
-                if ((ctrl != c_empty_slot)
-                    && (ctrl != c_tombstone))
-                {
-                    size_type h = hash_(kv_pair.first);
-                    auto chk = this->_try_insert_aux(h, kv_pair, &store_2x);
-
-                    if (!chk.second) {
-                        // shenanigans - something isn't right.
-                        // - may have run out of memory
-                        assert(false);
-
-                        return false;
-                    }
-                }
+            if (store_.n_group_ == 0) [[unlikely]] {
+                // special case: grow from hard empty state
+                n_group_exponent_2x = 0;
+                n_group_2x = 1;
+            } else {
+                n_group_exponent_2x = store_.n_group_exponent_ + 1;
+                n_group_2x = 2 * n_group_exponent_2x;
             }
 
-            this->store_ = std::move(store_2x);
+            // optimization when table is empty.  in that case can resize
+            // arenas in place
+
+            if (this->empty()) {
+                log && log("resize-from-empty branch");
+
+                this->store_.resize_from_empty(std::make_pair(n_group_exponent_2x, n_group_2x));
+            } else {
+                log && log("duplicate-and-replace branch");
+
+                detail::HashMapStore<Key, Value> store_2x(std::make_pair(n_group_exponent_2x,
+                                                                         n_group_2x));
+                /* rehash everything in store_,
+                 * into store_2x
+                 */
+
+                for (size_type i = 0, n = store_.capacity(); i < n; ++i) {
+                    uint8_t ctrl = store_.control_[i];
+                    value_type & kv_pair = store_.slots_[i];
+
+                    if ((ctrl != c_empty_slot)
+                        && (ctrl != c_tombstone))
+                        {
+                            size_type h = hash_(kv_pair.first);
+                            auto chk = this->_try_insert_aux(h, kv_pair, &store_2x);
+
+                            if (!chk.second) {
+                                // shenanigans - something isn't right.
+                                // - may have run out of memory
+                                assert(false);
+
+                                return false;
+                            }
+                        }
+                }
+
+                this->store_ = std::move(store_2x);
+            }
 
             return true;
         }
@@ -572,10 +637,15 @@ namespace xo {
                       Hash,
                       Equal>::insert(const std::pair<const Key, Value> & kv_pair)
         {
+            scope log(XO_DEBUG(false));
+
             auto [slot_addr, ins_flag] = this->try_insert(kv_pair);
 
-            if (slot_addr)
+            if (slot_addr) {
+                log && log("fast", xtag("slot_addr", (void*)slot_addr), xtag("ins_flag", ins_flag));
+
                 return ins_flag;
+            }
 
             assert((store_.size_ + 1) / static_cast<float>(store_.n_slot_) >= c_max_load_factor);
 
@@ -585,9 +655,21 @@ namespace xo {
 
                 return ins_flag;
             } else {
+                assert(false);
+
                 // TODO: set last error.  Presumeably reached max size
                 return false;
             }
+        }
+
+        template <typename Key,
+                  typename Value,
+                  typename Hash,
+                  typename Equal>
+        void
+        DArenaHashMap<Key, Value, Hash, Equal>::clear()
+        {
+            this->store_.clear();
         }
 
         /**

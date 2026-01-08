@@ -132,6 +132,48 @@ namespace xo {
                     REQUIRE(n == map.size());
                 }
             }
+
+            {
+                map.clear();
+
+                REQUIRE(map.empty());
+                REQUIRE(map.size() == 0);
+                REQUIRE(map.groups() == 0);
+                REQUIRE(map.capacity() == 0);
+            }
+
+            /* slightly different starting point, 0 capacity! */
+            {
+                auto x = map.try_insert(std::make_pair(1, 11));
+
+                /* try_insert should fail - no capacity */
+                REQUIRE(!x.first);
+                REQUIRE(!x.second);
+            }
+
+            {
+                /* insert will grow hash table */
+                auto x = map.insert(std::make_pair(1, 11));
+
+                CHECK(x);
+                REQUIRE(!map.empty());
+                REQUIRE(map.size() == 1);
+                REQUIRE(map.groups() == 1);
+                REQUIRE(map.capacity() == DArenaHashMapUtil::c_group_size);
+                REQUIRE(map.load_factor() == 1/16.0);
+
+                /* verify iteration */
+                {
+                    size_t n = 0;
+                    for (auto & ix : map) {
+                        REQUIRE(ix.first == 1);
+                        REQUIRE(ix.second == 11);
+                        ++n;
+                    }
+                    REQUIRE(n == map.size());
+                }
+            }
+
         }
 
         TEST_CASE("DArenaHashMap-try-insert2", "[arena][DArenaHashMap]")
@@ -153,7 +195,7 @@ namespace xo {
              *       observes test failure
              */
 
-            for (std::uint32_t n = 0; n <= 2; ) {
+            for (std::uint32_t n = 0; n <= 8; ) {
                 HashMap hash_map;
 
                 auto test_fn = [&rgen, &hash_map](bool dbg_flag,
@@ -162,6 +204,9 @@ namespace xo {
                         bool ok_flag = true;
 
                         ok_flag &= HashMapUtil<HashMap>::random_inserts(n, dbg_flag, &rgen, &hash_map);
+
+                        ok_flag &= HashMapUtil<HashMap>::check_forward_iterator(0.0 /*dvalue*/,
+                                                                                dbg_flag, hash_map);
 
                         return ok_flag;
                     };
