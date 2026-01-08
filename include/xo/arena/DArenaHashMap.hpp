@@ -379,6 +379,19 @@ namespace xo {
                     return *this;
                 }
 
+                DArenaHashMapIterator & operator--() {
+                    /* simpler than forward iteration, since bookend immediately
+                     * precedes control byte for first slot
+                     */
+                    do {
+                        --ctrl_;
+                        --pos_;
+                    } while (is_sentinel(*ctrl_)
+                             && (*ctrl_ != c_iterator_bookend));
+
+                    return *this;
+                }
+
             private:
                 uint8_t * ctrl_ = nullptr;
                 value_type * pos_ = nullptr;
