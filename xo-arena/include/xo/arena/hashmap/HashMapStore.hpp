@@ -9,7 +9,7 @@
 #include "hashmap/ControlGroup.hpp"
 
 namespace xo {
-    namespace mm {
+    namespace map {
         namespace detail {
             template <typename Key,
                       typename Value>
@@ -17,6 +17,8 @@ namespace xo {
             public:
                 using value_type = std::pair<const Key, Value>;
                 using group_type = detail::ControlGroup;
+                using control_vector_type = xo::mm::DArenaVector<uint8_t>;
+                using slot_vector_type = xo::mm::DArenaVector<value_type>;
 
             public:
                 /** group_exp2: number of groups {x, 2^x} **/
@@ -26,8 +28,8 @@ namespace xo {
                   n_group_exponent_{group_exp2.first},
                   n_group_{group_exp2.second},
                   n_slot_{group_exp2.second * c_group_size},
-                  control_{DArenaVector<uint8_t>::map(ArenaConfig{.size_ = control_size(n_slot_)})},
-                  slots_{DArenaVector<value_type>::map(ArenaConfig{.size_ = n_slot_ * sizeof(value_type)})}
+                  control_{control_vector_type::map(xo::mm::ArenaConfig{.size_ = control_size(n_slot_)})},
+                  slots_{slot_vector_type::map(xo::mm::ArenaConfig{.size_ = n_slot_ * sizeof(value_type)})}
                 {
                     /* here: arenas have allocated address range, but no committed memory yet */
 
@@ -121,12 +123,12 @@ namespace xo {
                 /** control_[] partitioned into groups of
                  *  c_group_size (16) consecutive elements
                  **/
-                DArenaVector<uint8_t> control_;
+                control_vector_type control_;
                 /** slots_[] holds {key,value} pairs **/
-                DArenaVector<value_type> slots_;
+                slot_vector_type slots_;
             };
         }
-    } /*namespace mm*/
+    } /*namespace map*/
 } /*namespace xo*/
 
 /* end HashMapStore.hpp */

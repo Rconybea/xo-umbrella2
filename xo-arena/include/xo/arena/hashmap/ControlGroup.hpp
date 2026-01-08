@@ -11,7 +11,7 @@
 #include <cstring>
 
 namespace xo {
-    namespace mm {
+    namespace map {
         namespace detail {
             /** @brief 16x 8-bit control bytes.
              *
@@ -77,7 +77,7 @@ namespace xo {
 #endif
             };
         }
-    } /*namespace mm*/
+    } /*namespace map*/
 } /*namespace xo*/
 
 /* end ControlGroup.hpp */

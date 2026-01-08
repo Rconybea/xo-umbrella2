@@ -11,8 +11,8 @@
 #include <catch2/catch.hpp>
 
 namespace xo {
-    using xo::mm::DArenaHashMapUtil;
-    using xo::mm::DArenaHashMap;
+    using xo::map::DArenaHashMapUtil;
+    using xo::map::DArenaHashMap;
     using xo::rng::random_seed;
     using xo::rng::xoshiro256ss;
     using utest::UtestTools;

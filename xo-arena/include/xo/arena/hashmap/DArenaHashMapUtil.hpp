@@ -8,7 +8,7 @@
 #include <cstdint>
 
 namespace xo {
-    namespace mm {
+    namespace map {
         /** @class DArenaHashMapUtil
          *
          *  @pre
@@ -103,7 +103,7 @@ namespace xo {
                 return std::make_pair(ngx, ng);;
             }
         };
-    } /*namespace mm*/
+    } /*namespace map*/
 } /*namespace xo*/
 
 /* end DArenaHashMapUtil.hpp */

@@ -16,7 +16,7 @@
 #include <cstring>
 
 namespace xo {
-    namespace mm {
+    namespace map {
 #ifdef NOT_YET
         enum class insert_error : int32_t {
             /** sentinel **/
@@ -654,7 +654,7 @@ namespace xo {
 
             return true;
         }
-    }
+    } /*namespace map*/
 } /*namespace xo*/
 
 /* end DArenaHashMap.hpp */
