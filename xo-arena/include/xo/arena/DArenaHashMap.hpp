@@ -77,6 +77,11 @@ namespace xo {
             /** max load factor **/
             static constexpr float c_max_load_factor = 0.875;
 
+            /** Iterator sentinel at begin/end of control array.
+             *  Load-bearing for bidirectional iterator implementation
+             **/
+            static constexpr size_type c_control_stub = 0; //c_group_size;
+
             /** control: true for sentinel values **/
             static constexpr bool is_sentinel(control_type ctrl) {
                 return ctrl & c_sentinel_mask;
@@ -85,6 +90,11 @@ namespace xo {
             /** control; true for non-sentinel values **/
             static constexpr bool is_data(control_type ctrl) {
                 return 0 == (ctrl & c_sentinel_mask);
+            }
+
+            /** control: compute size of control array for swiss hash map with @p n_slot cells **/
+            static constexpr size_type control_size(size_type n_slot) {
+                return n_slot + c_group_size + 12 * c_control_stub;
             }
 
             /** find smallest multiple k : k * c_group_size >= n **/
@@ -235,18 +245,22 @@ namespace xo {
                     this->slots_.resize(n_slot_);
                 }
 
+                /** load control group for slot range [ix .. ix+c_group_size) **/
                 group_type _load_group(size_type ix) {
-                    return group_type(&(control_[ix]));
+                    return group_type(&(control_[ix + c_control_stub]));
                 }
 
+                /** update control group for slot number @p ix, replace with @p h2 **/
                 void _update_control(size_type ix, uint8_t h2) {
-                    this->control_[ix] = h2;
+                    this->control_[ix + c_control_stub] = h2;
 
                     if (ix < c_group_size) {
                         size_type N = this->capacity();
 
                         // refresh end-of-array copy
-                        std::memcpy(&(control_[N]), &(control_[0]), c_group_size);
+                        std::memcpy(&(control_[N + c_control_stub]),
+                                    &(control_[c_control_stub]),
+                                    c_group_size);
                     }
                 }
 
@@ -354,8 +368,8 @@ namespace xo {
             bool verify_ok(verify_policy p = verify_policy::throw_only()) const;
 
             iterator begin() {
-                iterator ix(&(store_.control_[0]),
-                            &(store_.control_[store_.capacity()]),
+                iterator ix(&(store_.control_[c_control_stub]),
+                            &(store_.control_[c_control_stub + store_.capacity()]),
                             &(store_.slots_[0]));
 
                 if (ix.is_sentinel()) {
@@ -367,8 +381,8 @@ namespace xo {
             }
 
             iterator end() {
-                iterator ix(&(store_.control_[store_.capacity()]),
-                            &(store_.control_[store_.capacity()]),
+                iterator ix(&(store_.control_[c_control_stub + store_.capacity()]),
+                            &(store_.control_[c_control_stub + store_.capacity()]),
                             &(store_.slots_[store_.capacity()]));
 
                 return ix;
@@ -614,7 +628,7 @@ namespace xo {
                  */
 
                 for (size_type i = 0, n = store_.capacity(); i < n; ++i) {
-                    uint8_t ctrl = store_.control_[i];
+                    uint8_t ctrl = store_.control_[c_control_stub + i];
                     value_type & kv_pair = store_.slots_[i];
 
                     if (DArenaHashMapUtil::is_data(ctrl)) {
@@ -726,12 +740,14 @@ namespace xo {
             }
 
             /* SM1.2: control_[] size consistent with slots_[] size */
-            if (store_.control_.size() != store_.n_slot_ + c_group_size) {
-                return policy.report_error(log,
-                                           c_self, ": expect .control_.size = .n_slot + c_group_size",
-                                           xtag("control_.size", store_.control_.size()),
-                                           xtag("n_slot", store_.n_slot_),
-                                           xtag("c_group_size", c_group_size));
+            if (store_.control_.size() != control_size(store_.n_slot_)) {
+                return policy.report_error
+                           (log,
+                            c_self, ": expect .control_.size = .n_slot + c_group_size + 2 * c_control_stub",
+                            xtag("control_.size", store_.control_.size()),
+                            xtag("n_slot", store_.n_slot_),
+                            xtag("c_group_size", c_group_size),
+                            xtag("c_control_stub", c_control_stub));
             }
             if (store_.slots_.size() != store_.n_slot_) {
                 return policy.report_error(log,
@@ -774,7 +790,7 @@ namespace xo {
 
             /* SM3.1: control_[N+i] = control_[i] for i in [0, c_group_size) */
             for (size_type i = 0; i < c_group_size; ++i) {
-                if (store_.control_[store_.n_slot_ + i] != store_.control_[i]) {
+                if (store_.control_[store_.n_slot_ + i + c_control_stub] != store_.control_[i] + c_control_stub) {
                     return policy.report_error(log,
                                                c_self, ": expect control_[N+i] = control_[i]",
                                                xtag("i", i),
@@ -787,7 +803,7 @@ namespace xo {
             {
                 size_type occupied_count = 0;
                 for (size_type i = 0; i < store_.n_slot_; ++i) {
-                    uint8_t c = store_.control_[i];
+                    uint8_t c = store_.control_[i + c_control_stub];
                     if (DArenaHashMapUtil::is_data(c)) {
                         ++occupied_count;
                     }
@@ -802,14 +818,14 @@ namespace xo {
 
             /* SM4.1.1: if control_[i] is non-sentinel, control_[i] = hash_(slots_[i].first) & 0x7f */
             for (size_type i = 0; i < store_.n_slot_; ++i) {
-                uint8_t c = store_.control_[i];
+                uint8_t c = store_.control_[i + c_control_stub];
                 if (DArenaHashMapUtil::is_data(c)) {
                     uint8_t expected_h2 = hash_(store_.slots_[i].first) & 0x7f;
                     if (c != expected_h2) {
                         return policy.report_error(log,
                                                    c_self, ": expect control[i] = hash(key) & 0x7f",
                                                    xtag("i", i),
-                                                   xtag("control[i]", c),
+                                                   xtag("control[i+stub]", c),
                                                    xtag("expected_h2", expected_h2));
                     }
                 }
@@ -819,19 +835,19 @@ namespace xo {
              *          where h = (hash_(slots_[i].first) >> 7) & (n_slot_ - 1)
              */
             for (size_type i = 0; i < store_.n_slot_; ++i) {
-                uint8_t c = store_.control_[i];
+                uint8_t c = store_.control_[i + c_control_stub];
                 if (DArenaHashMapUtil::is_data(c)) {
                     size_type h = (hash_(store_.slots_[i].first) >> 7) & (store_.n_slot_ - 1);
                     size_type j = h;
                     while (j != i) {
-                        uint8_t cj = store_.control_[j];
+                        uint8_t cj = store_.control_[j + c_control_stub];
                         if (DArenaHashMapUtil::is_sentinel(cj)) {
                             return policy.report_error(log,
                                                        c_self, ": expect non-empty slot in probe range [h..i]",
                                                        xtag("i", i),
                                                        xtag("h", h),
                                                        xtag("j", j),
-                                                       xtag("control[j]", cj));
+                                                       xtag("control[j+stub]", cj));
                         }
                         j = (j + 1) & (store_.n_slot_ - 1);
                     }
@@ -840,13 +856,13 @@ namespace xo {
 
             /* SM4.2: if control_[i] is empty or tombstone, slots_[i].first = key_type() */
             for (size_type i = 0; i < store_.n_slot_; ++i) {
-                uint8_t c = store_.control_[i];
+                uint8_t c = store_.control_[i + c_control_stub];
                 if (DArenaHashMapUtil::is_sentinel(c)) {
                     if (!(store_.slots_[i].first == key_type())) {
                         return policy.report_error(log,
                                                    c_self, ": expect empty/tombstone slot has default key",
                                                    xtag("i", i),
-                                                   xtag("control[i]", c));
+                                                   xtag("control[i+stub]", c));
                     }
                 }
             }
