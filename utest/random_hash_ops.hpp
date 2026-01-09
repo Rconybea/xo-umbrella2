@@ -76,6 +76,10 @@ namespace utest {
          *
          *  test function should use REQUIRE_ORCAPTURE() / REQUIRE_ORFAIL().
          *  It should *not* use REQUIRE() or CHECK().
+         *
+         *  @p test_name  banner for initial log message (only printed on 2nd pass)
+         *  @p test_fn    function to invoke test pass.
+         *  @p n          test size/id (cosmetic - printed in log messages)
          **/
         static inline bool bimodal_test(std::string test_name,
                                         std::function<bool (bool dbg_flag, std::uint32_t n)> test_fn,
