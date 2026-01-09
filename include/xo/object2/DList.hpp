@@ -13,6 +13,7 @@
 namespace xo {
     namespace scm {
 
+        // TODO: consider renaming to DCons
         struct DList {
             using size_type = std::size_t;
             using AGCObject = xo::mm::AGCObject;
@@ -22,8 +23,27 @@ namespace xo {
             DList(xo::obj<AGCObject> h,
                   DList * r) : head_{h}, rest_{r} {}
 
+            template <typename AConsFacet = AGCObject>
+            static obj<AConsFacet,DList> nil();
+
+            /** shortcut for
+             *    cons(mm, cdr, cdr.data())
+             **/
+            template <typename AConsFacet = AGCObject, typename ACdrFacet = AGCObject>
+            static obj<AConsFacet,DList> cons(obj<AAllocator> mm,
+                                              obj<AGCObject> car,
+                                              obj<ACdrFacet,DList> cdr);
+
             /** sentinel for null list **/
-            static DList * null();
+            static DList * _nil();
+
+            /** list with first element @p car,
+             *  followed by contents of list @p cdr.
+             *  Shares structure with @p cdr
+             **/
+            static DList * _cons(obj<AAllocator> mm,
+                                 obj<AGCObject> car,
+                                 DList * cdr);
 
             /** list with one element @p h1, allocated from @p mm **/
             static DList * list(obj<AAllocator> mm,
@@ -50,6 +70,22 @@ namespace xo {
             /** remainder of list **/
             DList * rest_ = nullptr;
         };
+
+        template <typename AConsFacet>
+        obj<AConsFacet,DList>
+        DList::nil()
+        {
+            return obj<AConsFacet,DList>(DList::_nil());
+        }
+
+        template <typename AConsFacet, typename ACdrFacet>
+        obj<AConsFacet,DList>
+        DList::cons(obj<AAllocator> mm,
+                    obj<AGCObject> car,
+                    obj<ACdrFacet,DList> cdr)
+        {
+            return obj<AConsFacet,DList>(DList::_cons(mm, car, cdr.data()));
+        }
 
     } /*namespace scm*/
 } /*namespace xo*/

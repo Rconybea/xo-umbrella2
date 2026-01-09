@@ -13,6 +13,9 @@ namespace xo {
          *  Return true iff all types register successfully.
          **/
         bool object2_register_types(obj<xo::mm::ACollector> gc);
+
+        /** Register object2 (facet,impl) combinations with FacetRegistry **/
+        bool object2_register_facets();
     }
 }
 

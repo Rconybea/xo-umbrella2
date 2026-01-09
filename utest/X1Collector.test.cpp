@@ -74,7 +74,7 @@ namespace ut {
 
     TEST_CASE("x1", "[gc][x1]")
     {
-        constexpr bool c_debug_flag = true;
+        constexpr bool c_debug_flag = false;
         scope log(XO_DEBUG(c_debug_flag));
 
         for (std::size_t i_tc = 0, n_tc = s_testcase_v.size(); i_tc < n_tc; ++i_tc) {

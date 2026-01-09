@@ -4,6 +4,7 @@ set(UTEST_EXE utest.object2)
 set(UTEST_SRCS
     object2_utest_main.cpp
     X1Collector.test.cpp
+    Printable.test.cpp
 )
 
 xo_add_utest_executable(${UTEST_EXE} ${UTEST_SRCS})
