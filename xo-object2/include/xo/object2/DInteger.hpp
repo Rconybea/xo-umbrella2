@@ -7,6 +7,7 @@
 
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/indentlog/print/ppindentinfo.hpp>
+#include <xo/facet/obj.hpp>
 #include <cstdint>
 
 namespace xo {
@@ -17,9 +18,12 @@ namespace xo {
 
             explicit DInteger(long x) : value_{x} {}
 
+            /** will likely want this to default to ANumeric, once we have it **/
+            template <typename AFacet>
+            static obj<AFacet, DInteger> box(obj<AAllocator> mm, long x);
+
             /** allocate boxed value @p x using memory from @p mm **/
-            static DInteger * make(obj<AAllocator> mm,
-                                   long x);
+            static DInteger * _box(obj<AAllocator> mm, long x);
 
             double value() const noexcept { return value_; }
 
@@ -31,6 +35,13 @@ namespace xo {
             /** boxed integer value **/
             long value_;
         };
+
+        template <typename AFacet>
+        obj<AFacet, DInteger>
+        DInteger::box(obj<AAllocator> mm, long x) {
+            return obj<AFacet,DInteger>(_box(mm, x));
+        }
+
     } /*nmaespace obj*/
 } /*namespace xo*/
 

@@ -112,9 +112,7 @@ namespace ut {
                 c_o.add_gc_root(&l0_o);
 
                 for(int ip1 = tc.list_.size(); ip1 > 0; --ip1) {
-                    // auto xi_o = Integer::make(g_o, ...);
-                    DInteger * xi = DInteger::make(gc_o, tc.list_[ip1 - 1]);
-                    auto xi_o = with_facet<AGCObject>::mkobj(xi);
+                    auto xi_o = DInteger::box<AGCObject>(gc_o, tc.list_[ip1 - 1]);
 
                     l0_o  = DList::cons(gc_o, xi_o, l0_o);
                 }
