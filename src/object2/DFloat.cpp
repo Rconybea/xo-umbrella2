@@ -12,8 +12,7 @@ namespace xo {
 
     namespace scm {
         DFloat *
-        DFloat::make(obj<AAllocator> mm,
-                     double x)
+        DFloat::_box(obj<AAllocator> mm, double x)
         {
             void * mem = mm.alloc(typeseq::id<DFloat>(),
                                   sizeof(DFloat));
