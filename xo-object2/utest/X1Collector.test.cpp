@@ -167,8 +167,7 @@ namespace ut {
                 ok = c_o.is_type_installed(typeseq::id<DList>());
                 REQUIRE(ok);
 
-                DFloat * x0 = DFloat::make(gc_o, 3.1415927);
-                auto x0_o = with_facet<AGCObject>::mkobj(x0);
+                auto x0_o = DFloat::box<AGCObject>(gc_o, 3.1415927);
                 c_o.add_gc_root(&x0_o);
                 REQUIRE(to_0->allocated() == sizeof(AllocHeader) + sizeof(DFloat));
 
