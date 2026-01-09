@@ -10,6 +10,8 @@ Library dependency tower for *xo-facet*:
     +-----------------+
     |    xo_facet     |
     +-----------------+
+    |    xo_arena     |
+    +-----------------+
     |    xo_cmake     |
     +-----------------+
 
@@ -18,6 +20,8 @@ Abstraction tower for *xo-facet* components.
 .. ditaa::
     :--scale: 0.85
 
+    +--------------------------------+
+    |          FacetRegistry         |
     +--------------------------------+
     |             obj(A,D)           |
     +--------------------------------+
@@ -37,9 +41,12 @@ Abstraction tower for *xo-facet* components.
    * - Component
      - Use
      - Description
+   * - ``FacetRegistry``
+     - ``FacetRegistry::convert_to<ATo>(obj<AFrom>)``
+     - polymorphic conversion between facets
    * - ``obj<A,D>``
      - ``x.foo()``
-     - convenience wrapper with interface A, with state D*
+     - convenience wrapper for interface A, with state D*
    * - ``RRouter<A,D>``
      - ``x.foo()``
      - auto injects data pointer

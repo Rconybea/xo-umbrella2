@@ -9,6 +9,7 @@
 
 #include "facet_implementation.hpp"
 #include "typeseq.hpp"
+#include "obj.hpp"
 #include <unordered_map>
 #include <utility>
 
@@ -88,7 +89,8 @@ namespace xo {
             bool contains(typeseq facet_id,
                           typeseq repr_id) const
             {
-                return registry_.find(key_type(facet_id, repr_id)) != registry_.end();
+                return (registry_.find(key_type(facet_id, repr_id))
+                        != registry_.end());
             }
 
             /** Type-safe lookup
@@ -99,7 +101,37 @@ namespace xo {
              **/
             template <typename AFacet>
             const AFacet * lookup(typeseq repr_id) const {
-                return static_cast<const AFacet *>(this->_lookup(typeseq::id<AFacet>(), repr_id));
+                return static_cast<const AFacet *>
+                    (this->_lookup(typeseq::id<AFacet>(), repr_id));
+            }
+
+            /** Runtime polymorphism:
+             *  Switch @param from from interface @tp AFrom to interface @tp ATo.
+             *
+             *  Use:
+             *    obj<AFoo> foo
+             *      = ...;  // Foo instance with variant impl
+             *    obj<ABar> bar
+             *      = FacetRegistry::variant<ABar,AFoo>(foo);
+             **/
+            template <typename ATo, typename AFrom>
+            obj<ATo> variant(obj<AFrom> from) {
+                return variant<ATo>(from._typeseq(), from.data());
+            }
+
+            /** Runtime polymorphism:
+             *  Create variant from representation @p data
+             *  with actual type @p repr_id.
+             *
+             *  Use:
+             *    obj<AFoo> foo = ...;  // Foo instance with variant impl
+             *    obj<ABar> bar
+             *      = FacetRegistry::variant<ABar>(foo._typeseq(), foo.opaque_data());
+             **/
+            template <typename AFacet>
+            obj<AFacet> variant(typeseq repr_id, void * data) {
+                const AFacet * iface = this->lookup<AFacet>(repr_id);
+                return obj<AFacet>::variant(iface, data);;
             }
 
         private:
@@ -134,6 +166,7 @@ namespace xo {
         private:
             FacetRegistry() = default;
 
+            /** runtime lookup table (AFacet,DRepr) -> impl **/
             std::unordered_map<key_type, const void *, KeyHash> registry_;
         };
 

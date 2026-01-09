@@ -78,6 +78,22 @@ namespace xo {
                 memcpy(&(iface_[0]), (void*)&tmp, sizeof(ISpecific));
             }
 
+            /**
+             *  Runtime polymorphism:
+             *  Create variant for specific interface @p impl
+             *  with type-erased data @p data.
+             *
+             *  Implements
+             *    obj<AFacet>::variant(iface, data)
+             **/
+            OObject(const AFacet * impl, void * data)
+                requires std::is_same_v<DRepr, DVariantPlaceholder>
+            : data_{reinterpret_cast<DVariantPlaceholder*>(data)}
+                {
+                    static_assert(sizeof(ISpecific) == sizeof(impl));
+                    memcpy(&(iface_[0]), (void*)impl, sizeof(ISpecific));
+                }
+
             OObject(const OObject & oother) {
                 _launder_from(oother);
             }
