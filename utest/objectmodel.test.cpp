@@ -5,6 +5,7 @@
 
 #include "xo/facet/facet.hpp"
 #include "xo/facet/facet_implementation.hpp"
+#include "xo/facet/FacetRegistry.hpp"
 #include "xo/facet/OObject.hpp"
 #include "xo/facet/RRouter.hpp"
 #include "xo/facet/typeseq.hpp"
@@ -19,6 +20,9 @@ namespace xo {
     using xo::facet::valid_abstract_facet;
     using xo::facet::valid_facet_implementation;
     using xo::facet::FacetImplementation;
+    using xo::facet::FacetRegistry;
+    using xo::facet::runtime_impl_for;
+    using xo::facet::register_facet_impl;
     using xo::facet::DVariantPlaceholder;
     using xo::facet::OObject;
     using xo::facet::valid_object_router;
@@ -401,6 +405,89 @@ namespace xo {
             obj<AComplex, DRectCoords> z1o(&z1);
 
             REQUIRE(z1o);
+        }
+
+        TEST_CASE("registry-1", "[facet][registry]")
+        {
+            auto & registry = FacetRegistry::instance();
+
+            // register implementations
+            register_facet_impl<AComplex, DRectCoords>();
+            register_facet_impl<AComplex, DPolarCoords>();
+
+            REQUIRE(registry.contains(typeseq::id<AComplex>(),
+                                       typeseq::id<DRectCoords>()));
+            REQUIRE(registry.contains(typeseq::id<AComplex>(),
+                                       typeseq::id<DPolarCoords>()));
+        }
+
+        TEST_CASE("registry-lookup-1", "[facet][registry]")
+        {
+            // ensure registered
+            register_facet_impl<AComplex, DRectCoords>();
+            register_facet_impl<AComplex, DPolarCoords>();
+
+            // runtime lookup using typeseq
+            typeseq rect_id = typeseq::id<DRectCoords>();
+            typeseq polar_id = typeseq::id<DPolarCoords>();
+
+            const AComplex * rect_impl = runtime_impl_for<AComplex>(rect_id);
+            const AComplex * polar_impl = runtime_impl_for<AComplex>(polar_id);
+
+            REQUIRE(rect_impl != nullptr);
+            REQUIRE(polar_impl != nullptr);
+
+            // use implementations
+            DRectCoords z1{1.0, 0.0};
+            DPolarCoords z2{0.0, 1.0};
+
+            REQUIRE(rect_impl->xcoord(&z1) == 1.0);
+            REQUIRE(rect_impl->ycoord(&z1) == 0.0);
+
+            REQUIRE(polar_impl->xcoord(&z2) == 1.0);
+            REQUIRE(polar_impl->ycoord(&z2) == 0.0);
+        }
+
+        TEST_CASE("registry-cross-facet", "[facet][registry]")
+        {
+            // simulate the DList::pretty() use case:
+            // given obj<AComplex> with unknown repr type,
+            // look up implementation at runtime
+
+            register_facet_impl<AComplex, DRectCoords>();
+            register_facet_impl<AComplex, DPolarCoords>();
+
+            // create type-erased objects
+            DRectCoords z1{1.0, 0.0};
+            DPolarCoords z2{0.0, 2.0};
+
+            obj<AComplex, DRectCoords> obj1(&z1);
+            obj<AComplex, DPolarCoords> obj2(&z2);
+
+            // simulate: only know typeseq at runtime
+            typeseq repr1 = obj1._typeseq();
+            typeseq repr2 = obj2._typeseq();
+
+            // lookup implementations
+            const AComplex * impl1 = runtime_impl_for<AComplex>(repr1);
+            const AComplex * impl2 = runtime_impl_for<AComplex>(repr2);
+
+            REQUIRE(impl1 != nullptr);
+            REQUIRE(impl2 != nullptr);
+
+            // use via runtime-looked-up implementation
+            REQUIRE(impl1->magnitude(obj1.data()) == 1.0);
+            REQUIRE(impl2->magnitude(obj2.data()) == 2.0);
+        }
+
+        TEST_CASE("registry-not-found", "[facet][registry]")
+        {
+            // lookup for unregistered type returns nullptr
+            struct DUnknown {};
+
+            const AComplex * impl = runtime_impl_for<AComplex>(typeseq::id<DUnknown>());
+
+            REQUIRE(impl == nullptr);
         }
     }
 }
