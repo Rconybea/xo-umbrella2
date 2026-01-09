@@ -12,8 +12,7 @@ namespace xo {
 
     namespace scm {
         DInteger *
-        DInteger::make(obj<AAllocator> mm,
-                       long x)
+        DInteger::_box(obj<AAllocator> mm, long x)
         {
             void * mem = mm.alloc(typeseq::id<DInteger>(),
                                   sizeof(DInteger));
