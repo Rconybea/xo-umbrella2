@@ -45,6 +45,7 @@ This gives us several benefits:
   simpler that the pathway for a data pointer. This increases scope for
   devirtualization.
 
+
 .. toctree::
    :maxdepth: 2
    :caption: xo-facet contents

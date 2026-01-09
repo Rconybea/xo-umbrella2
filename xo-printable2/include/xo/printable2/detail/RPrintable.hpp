@@ -37,6 +37,9 @@ public:
     ///@{
     RPrintable() {}
     RPrintable(Object::DataPtr data) : Object{std::move(data)} {}
+    RPrintable(const APrintable * iface, void * data)
+        requires std::is_same_v<typename Object::DataType, xo::facet::DVariantPlaceholder>
+    : Object(iface, data) {}
 
     ///@}
     /** @defgroup print-printable-router-methods **/
@@ -44,7 +47,7 @@ public:
 
     // const methods
     int32_t _typeseq() const noexcept { return O::iface()->_typeseq(); }
-    bool pretty(const ppindentinfo & ppii)  override {
+    bool pretty(const ppindentinfo & ppii) {
         return O::iface()->pretty(O::data(), ppii);
     }
 

@@ -54,6 +54,18 @@ namespace xo {
 
             obj(const obj & rhs) = default;
 
+            /** Runtime polymorphism:
+             *  assemble variant from specific interface @p iface
+             *  and type-erased representation @p data.
+             *
+             *  Implements
+             *    obj<AFacet>::variant(iface, data)
+             **/
+            obj(const AFacet * iface, void * data)
+                requires std::is_same_v<DRepr, DVariantPlaceholder>
+            : Super(iface, data)
+                {}
+
             /** pseudo copy constructor
              *
              *  Intended for use cases:
@@ -95,6 +107,20 @@ namespace xo {
             static obj from(const OObject<AFacet> & other) {
                 return obj(other.template downcast<DRepr>());
             }
+
+            /** Runtime polymorphism.
+             *  Create variant given interface @p iface,
+             *  type-erased represention @p data
+             *
+             *  Use:
+             *    AFoo * impl = ....;
+             *    auto x = obj<AFoo>::variant(impl, data)
+             **/
+            static obj variant(const AFacet * iface, void * data)
+                requires std::is_same_v<DRepr, DVariantPlaceholder>
+                {
+                    return obj(iface, data);
+                }
 
             /** enabled when RRouter<AFacet> provides _preincrement.
              *  Note we don't need this trick for comparison operators,
