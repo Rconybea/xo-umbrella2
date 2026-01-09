@@ -4,11 +4,15 @@
  **/
 
 #include "DList.hpp"
+#include <xo/printable2/Printable.hpp>
+#include <xo/facet/FacetRegistry.hpp>
 #include <xo/indentlog/print/pretty.hpp>
 #include <xo/indentlog/print/tag.hpp>
 
 namespace xo {
+    using xo::print::APrintable;
     using xo::mm::AGCObject;
+    using xo::facet::FacetRegistry;
     using xo::facet::typeseq;
 
     namespace scm {
@@ -96,17 +100,28 @@ namespace xo {
 
             if (ppii.upto()) {
                 /* perhaps print on one line */
-                if (!pps->print_upto("(...)"))
-                    return false;
+                pps->write("(");
 
-#ifdef NOT_YET
                 /* TODO: probably use iterators here, when available */
                 const DList * l = this;
-                while (!l->is_empty()) {
-                    obj<APrintable>(l->head_.data());
 
+                size_t i = 0;
+                while (!l->is_empty()) {
+                    if (i > 0)
+                        pps->write(" ");
+
+                    obj<APrintable> elt
+                        = FacetRegistry::instance().variant<APrintable, AGCObject>(l->head_);
+                    // what if no converter registered ?
+
+                    if (!pps->print_upto(elt))
+                        return false;
+
+                    l = l->rest_;
+                    ++i;
                 }
-#endif
+
+                pps->write(")");
                 return true;
             } else {
                 pps->write("(...)");
