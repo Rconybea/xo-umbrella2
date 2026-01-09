@@ -53,16 +53,6 @@ namespace xo {
                 return s_instance;
             }
 
-            /** Number of registered (facet, repr) pairs **/
-            std::size_t size() const { return registry_.size(); }
-
-            /** Check if implementation is registered **/
-            bool contains(typeseq facet_id,
-                          typeseq repr_id) const
-            {
-                return registry_.find(key_type(facet_id, repr_id)) != registry_.end();
-            }
-
             /** Type-safe registration
              *
              *  Registers the compile-time FacetImplementation<AFacet, DRepr>
@@ -72,12 +62,33 @@ namespace xo {
              *  @tparam DRepr   data representation type
              **/
             template <typename AFacet, typename DRepr>
-            void register_impl() {
+            static void register_impl() {
                 static FacetImplType<AFacet, DRepr> impl;
 
-                this->_register_impl(typeseq::id<AFacet>(),
-                                     typeseq::id<DRepr>(),
-                                     &impl);
+                instance()._register_impl(typeseq::id<AFacet>(),
+                                          typeseq::id<DRepr>(),
+                                          &impl);
+            }
+
+            /** Convenience function for runtime lookup
+             *
+             *  @tparam AFacet  abstract facet type
+             *  @param repr_id  typeseq for data representation
+             *  @return pointer to AFacet implementation, or nullptr
+             **/
+            template <typename AFacet>
+            static inline const AFacet * impl_for(typeseq repr_id) {
+                return FacetRegistry::instance().lookup<AFacet>(repr_id);
+            }
+
+            /** Number of registered (facet, repr) pairs **/
+            std::size_t size() const { return registry_.size(); }
+
+            /** Check if implementation is registered **/
+            bool contains(typeseq facet_id,
+                          typeseq repr_id) const
+            {
+                return registry_.find(key_type(facet_id, repr_id)) != registry_.end();
             }
 
             /** Type-safe lookup
@@ -125,27 +136,6 @@ namespace xo {
 
             std::unordered_map<key_type, const void *, KeyHash> registry_;
         };
-
-        /** Convenience function for runtime lookup
-         *
-         *  @tparam AFacet  abstract facet type
-         *  @param repr_id  typeseq for data representation
-         *  @return pointer to AFacet implementation, or nullptr
-         **/
-        template <typename AFacet>
-        inline const AFacet * runtime_impl_for(typeseq repr_id) {
-            return FacetRegistry::instance().lookup<AFacet>(repr_id);
-        }
-
-        /** Convenience function for registration
-         *
-         *  @tparam AFacet  abstract facet type
-         *  @tparam DRepr   data representation type
-         **/
-        template <typename AFacet, typename DRepr>
-        inline void register_facet_impl() {
-            FacetRegistry::instance().register_impl<AFacet, DRepr>();
-        }
 
     } /*namespace facet*/
 } /*namespace xo*/
