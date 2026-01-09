@@ -31,6 +31,7 @@ public:
     using ObjectType = Object;
     using DataPtr = Object::DataPtr;
     using ppindentinfo = APrintable::ppindentinfo;
+    using typeseq = xo::facet::typeseq;
     ///@}
 
     /** @defgroup print-printable-router-ctors **/
@@ -46,8 +47,8 @@ public:
     ///@{
 
     // const methods
-    int32_t _typeseq() const noexcept { return O::iface()->_typeseq(); }
-    bool pretty(const ppindentinfo & ppii) {
+    typeseq _typeseq() const noexcept { return O::iface()->_typeseq(); }
+    bool pretty(const ppindentinfo & ppii) const {
         return O::iface()->pretty(O::data(), ppii);
     }
 

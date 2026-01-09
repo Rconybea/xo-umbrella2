@@ -18,4 +18,7 @@
 #include "detail/IPrintable_Xfer.hpp"
 #include "detail/RPrintable.hpp"
 
+// todo: additional includes in idl above
+#include "detail/ppdetail_Printable.hpp"
+
 /* end Printable.hpp */

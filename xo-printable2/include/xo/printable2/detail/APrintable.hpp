@@ -47,7 +47,7 @@ public:
     /** Pretty-printing support for this object.
         See [xo-indentlog/xo/indentlog/pretty.hpp]
     **/
-    virtual bool pretty(Copaque data, const ppindentinfo & ppii)  = 0;
+    virtual bool pretty(Copaque data, const ppindentinfo & ppii) const = 0;
 
     // nonconst methods
     ///@}

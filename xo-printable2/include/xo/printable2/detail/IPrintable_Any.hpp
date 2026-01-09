@@ -56,7 +56,7 @@ namespace print {
 
         // const methods
         typeseq _typeseq() const noexcept override { return s_typeseq; }
-        [[noreturn]] bool pretty(Copaque, const ppindentinfo &)  override { _fatal(); }
+        [[noreturn]] bool pretty(Copaque, const ppindentinfo &) const override { _fatal(); }
 
         // nonconst methods
 

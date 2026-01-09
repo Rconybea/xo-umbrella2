@@ -19,9 +19,19 @@ namespace xo {
         static DList s_null(obj<AGCObject>(), nullptr);
 
         DList *
-        DList::null()
+        DList::_nil()
         {
             return &s_null;
+        }
+
+        DList *
+        DList::_cons(obj<AAllocator> mm,
+                     obj<AGCObject> car,
+                     DList * cdr)
+        {
+            void * mem = mm.alloc(typeseq::id<DList>(), sizeof(DList));
+
+            return new (mem) DList(car, cdr);
         }
 
         DList *
@@ -30,7 +40,7 @@ namespace xo {
         {
             void * mem = mm.alloc(typeseq::id<DList>(), sizeof(DList));
 
-            return new (mem) DList(h1, DList::null());
+            return new (mem) DList(h1, DList::_nil());
         }
 
         DList *
@@ -112,7 +122,8 @@ namespace xo {
 
                     obj<APrintable> elt
                         = FacetRegistry::instance().variant<APrintable, AGCObject>(l->head_);
-                    // what if no converter registered ?
+
+                    assert(elt);
 
                     if (!pps->print_upto(elt))
                         return false;

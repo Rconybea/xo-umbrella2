@@ -10,6 +10,8 @@
 #include "facet_implementation.hpp"
 #include "typeseq.hpp"
 #include "obj.hpp"
+#include <xo/indentlog/scope.hpp>
+#include <xo/indentlog/print/tostr.hpp>
 #include <unordered_map>
 #include <utility>
 
@@ -36,6 +38,7 @@ namespace xo {
          **/
         class FacetRegistry {
         public:
+            using typeseq = xo::reflect::typeseq;
             using key_type = std::pair<typeseq, typeseq>;
 
             /** hash function for key_type **/
@@ -102,7 +105,7 @@ namespace xo {
             template <typename AFacet>
             const AFacet * lookup(typeseq repr_id) const {
                 return static_cast<const AFacet *>
-                    (this->_lookup(typeseq::id<AFacet>(), repr_id));
+                                      (this->_lookup(typeseq::id<AFacet>(), repr_id));
             }
 
             /** Runtime polymorphism:
@@ -113,10 +116,40 @@ namespace xo {
              *      = ...;  // Foo instance with variant impl
              *    obj<ABar> bar
              *      = FacetRegistry::variant<ABar,AFoo>(foo);
+             *
+             *    // exception thrown if bar has null data
+             *
+             *    assert(bar);
              **/
             template <typename ATo, typename AFrom>
             obj<ATo> variant(obj<AFrom> from) {
-                return variant<ATo>(from._typeseq(), from.data());
+                auto retval = try_variant<ATo>(from);
+
+                if (!retval)
+                    throw std::runtime_error(tostr("FacetRegistry::try_variant failed",
+                                                   xtag("AFrom.tseq", typeseq::id<AFrom>()),
+                                                   xtag("ATo.tseq", typeseq::id<ATo>())));
+
+                return retval;
+            }
+
+            /** Runtime polymorphism:
+             *  Switch @param from from interface @tp AFrom to interface @tp ATo.
+             *
+             *  Use:
+             *    obj<AFoo> foo
+             *      = ...;  // Foo instance with variant impl
+             *    obj<ABar> bar
+             *      = FacetRegistry::try_variant<ABar,AFoo>(foo);
+             *    if (bar) {
+             *       // success
+             *    } else {
+             *       // foo::DataType doesn't appear to support ABar
+             *    }
+             **/
+            template <typename ATo, typename AFrom>
+            obj<ATo> try_variant(obj<AFrom> from) {
+                return try_variant<ATo>(from._typeseq(), from.data());
             }
 
             /** Runtime polymorphism:
@@ -129,9 +162,24 @@ namespace xo {
              *      = FacetRegistry::variant<ABar>(foo._typeseq(), foo.opaque_data());
              **/
             template <typename AFacet>
-            obj<AFacet> variant(typeseq repr_id, void * data) {
+            obj<AFacet> try_variant(typeseq repr_id, void * data) {
                 const AFacet * iface = this->lookup<AFacet>(repr_id);
-                return obj<AFacet>::variant(iface, data);;
+
+                if (iface)
+                    return obj<AFacet>(iface, data);
+                else
+                    return obj<AFacet>();
+            }
+
+            void dump(std::ostream * p_out) {
+                (*p_out) << std::endl;
+                (*p_out) << "<FacetRegistry" << std::endl;
+                for (auto & kv : registry_) {
+                    (*p_out)
+                    << "  [" << kv.first.first << "," << kv.first.second << "]"
+                    << " -> " << kv.second << std::endl;
+                }
+                (*p_out) << ">" << std::endl;
             }
 
         private:
@@ -142,8 +190,8 @@ namespace xo {
              *  @param impl      pointer to stateless implementation instance
              **/
             void _register_impl(typeseq facet_id,
-                               typeseq repr_id,
-                               const void * impl)
+                                typeseq repr_id,
+                                const void * impl)
             {
                 registry_[key_type(facet_id, repr_id)] = impl;
             }
@@ -155,12 +203,20 @@ namespace xo {
             const void * _lookup(typeseq facet_id,
                                  typeseq repr_id) const
             {
+                scope log(XO_DEBUG(false));
+                log && log(xtag("facet_id", facet_id),
+                           xtag("repr_id", repr_id));
+
                 auto ix = registry_.find(key_type(facet_id, repr_id));
 
-                if (ix == registry_.end())
-                    return nullptr;
-                else
-                    return ix->second;
+                const void *retval = nullptr;
+
+                if (ix != registry_.end())
+                    retval = ix->second;
+
+                log && log(xtag("retval", retval));
+
+                return retval;
             }
 
         private:

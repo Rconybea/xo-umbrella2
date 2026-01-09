@@ -7,10 +7,12 @@ set(SELF_SRCS
     IGCObject_DList.cpp
     ISequence_Any.cpp
     ISequence_DList.cpp
-    IPrintable_DFloat.cpp
     IPrintable_DList.cpp
+    IPrintable_DFloat.cpp
+    IPrintable_DInteger.cpp
     DList.cpp
     DFloat.cpp
+    DInteger.cpp
     object2_register_types.cpp
     )
 

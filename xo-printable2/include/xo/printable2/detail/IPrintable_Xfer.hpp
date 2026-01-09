@@ -41,7 +41,7 @@ namespace print {
 
         // const methods
         typeseq _typeseq() const noexcept override { return s_typeseq; }
-        bool pretty(Copaque data, const ppindentinfo & ppii)  override {
+        bool pretty(Copaque data, const ppindentinfo & ppii) const override {
             return I::pretty(_dcast(data), ppii);
         }
 

@@ -32,6 +32,7 @@ public:
     {% endif %}
     using ObjectType = Object;
     using DataPtr = Object::DataPtr;
+    using typeseq = xo::reflect::typeseq;
     {% for ty in types %}
     using {{ty.name}} = {{abstract_facet}}::{{ty.name}};
     {% endfor %}
@@ -53,7 +54,7 @@ public:
     {% endif %}
 
     // const methods
-    int32_t _typeseq() const noexcept { return O::iface()->_typeseq(); }
+    typeseq _typeseq() const noexcept { return O::iface()->_typeseq(); }
     {% for md in const_methods %}
     {{md.return_type}} {{md.name}}({{md.args | argsnodata}}) {{md | qualifiers}} override {
         return O::iface()->{{md.name}}({{md.args | argrouting}});
