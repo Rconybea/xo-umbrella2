@@ -4,7 +4,10 @@
 #include <iostream>
 #include <unistd.h> // for isatty
 
-bool repl_getline(bool interactive, std::istream& in, std::ostream& out, std::string& input)
+bool repl_getline(bool interactive,
+                  std::istream & in,
+                  std::ostream & out,
+                  std::string & input)
 {
     if (interactive) {
         out << "> ";
