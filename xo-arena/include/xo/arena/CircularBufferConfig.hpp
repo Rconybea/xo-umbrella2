@@ -20,6 +20,7 @@ namespace xo {
             /** optional name, for diagnostics **/
             std::string name_;
             /** hard maximum buffer size = reserved virtual memory.
+             *  However actual max will be this value rounded up to at least page size.
              *  Buffer will generally map much less than this amount of memory
              **/
             std::size_t max_capacity_ = 0;

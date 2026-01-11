@@ -10,6 +10,9 @@
 #include <sys/mman.h>
 
 namespace xo {
+    using xo::print::operator<<;
+    using xo::print::printspan;
+
     namespace mm {
 
         DCircularBuffer::DCircularBuffer(DCircularBuffer && other)
@@ -152,6 +155,7 @@ namespace xo {
             ::memcpy(occupied_range_.hi(), src.lo(), copy_z);
 
             this->occupied_range_ += span_type(dest.lo(), copy_z);
+            this->input_range_ += span_type(dest.lo(), copy_z);
 
             return src.after_prefix(copy_z);
         }
@@ -198,30 +202,49 @@ namespace xo {
         }
 
         void
-        DCircularBuffer::consume(span_type r)
+        DCircularBuffer::consume(const_span_type input)
         {
-            if (r.lo() != input_range_.lo()) {
+            scope log(XO_DEBUG(false), xtag("input", input.to_string_view()));
+
+            if (input.lo() != input_range_.lo()) {
                 assert(false);
 
                 return;
             }
 
-            if (r.hi() > occupied_range_.hi()) {
+            if (input.hi() > occupied_range_.hi()) {
                 assert(false);
 
                 return;
             }
 
             if (occupied_range_.lo() < input_range_.lo()) {
+                log && log("pinned range prevents shrinking occupied range");
+
                 /* here: a pinned range prevents shrinking occupied_range */
 
-                this->input_range_ = input_range_.suffix_from(r.hi());
+                this->input_range_
+                    = input_range_.suffix_from((span_type::value_type *)input.hi());
             } else {
+                log && log(xtag("msg", "will shrink occupied range"),
+                           xtag("input.lo", (void*)input.lo()),
+                           xtag("input.hi", (void*)input.hi()),
+                           xtag("stored.lo", (void*)input_range_.lo()),
+                           xtag("stored.hi", (void*)input_range_.hi())
+                           );
+
                 /* here: input; recompute occupied boundary */
 
-                this->input_range_ = input_range_.suffix_from(r.hi());
+                this->input_range_
+                    = input_range_.suffix_from((span_type::value_type *)input.hi());
+
+                log && log(xtag("occupied", occupied_range_.size()),
+                           xtag("input", input_range_.size()));
 
                 this->_shrink_occupied_to_fit();
+
+                log && log(xtag("occupied", occupied_range_.size()),
+                           xtag("input", input_range_.size()));
             }
 
             this->_check_reset_map_start();

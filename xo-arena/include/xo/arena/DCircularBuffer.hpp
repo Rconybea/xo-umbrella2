@@ -79,6 +79,7 @@ namespace xo {
             const_span_type reserved_range() const noexcept { return reserved_range_; }
             const_span_type   mapped_range() const noexcept { return mapped_range_; }
             const_span_type occupied_range() const noexcept { return occupied_range_; }
+            const_span_type    input_range() const noexcept { return input_range_; }
 
             /** verify DCircularBuffer invariants.
              *  Act on failure according to policy @p p
@@ -97,6 +98,8 @@ namespace xo {
 
             /** @defgroup mm-circularbuffer-nonconst-methods CircularBuffer non-const methods **/
             ///@{
+
+            span_type input_range() noexcept { return input_range_; }
 
             /** copy memory in span @p r into buffer starting at the end of
              *  @ref occupied_range_. Map new physical memory as needed.
@@ -139,7 +142,7 @@ namespace xo {
              *  Caller represents that it won't need to read this memory again
              *  unless overlaps with a pinned span.
              **/
-            void consume(span_type r);
+            void consume(const_span_type input);
 
             /** pin memory range @p r. circular buffer will not touch
              *  addresses that appear in any pinned range.
