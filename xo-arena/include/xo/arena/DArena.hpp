@@ -115,6 +115,7 @@ namespace xo {
              **/
             bool contains(const void * addr) const noexcept { return (lo_ <= addr) && (addr < hi_); }
 
+#ifdef OBSOLETE
             /** obtain uncommitted contiguous memory range comprising
              *  a whole multiple of @p align_z bytes, of at least size @p req_z,
              *  aligned on a @p align_z boundary.  Uncommitted memory is not (yet)
@@ -140,6 +141,7 @@ namespace xo {
             static range_type map_aligned_range(size_type req_z,
                                                 size_type align_z,
                                                 bool enable_hugepage_flag);
+#endif
 
             /** true if arena is mapped i.e. has a reserved address range **/
             bool is_mapped() const noexcept { return (lo_ != nullptr) && (hi_ != nullptr); }
