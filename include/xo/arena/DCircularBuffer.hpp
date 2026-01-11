@@ -58,8 +58,10 @@ namespace xo {
                             size_type page_z,
                             size_type buffer_align_z,
                             span_type reserved_range);
+#ifdef NOT_YET
             /** constructor */
             DCircularBuffer(const CircularBufferConfig & config);
+#endif
             /** non-copyable **/
             DCircularBuffer(const DCircularBuffer & other) = delete;
             /** move ctor **/
@@ -107,7 +109,7 @@ namespace xo {
              *  If buffer memory exhausted, may copy a prefix of @p r.
              *  In that case returns the remaining suffix of @p r.
              **/
-            span_type append(span_type r);
+            const_span_type append(const_span_type r);
 
             /** DMA version of @ref append_span : get mapped span A at which
              *  buffer will receive new content. Upstream may write into

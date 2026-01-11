@@ -146,7 +146,7 @@ namespace xo {
         }
 
         auto
-        DCircularBuffer::append(span_type src) -> span_type
+        DCircularBuffer::append(const_span_type src) -> const_span_type
         {
             span_type dest = get_append_span(src.size());
 
