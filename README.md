@@ -47,17 +47,9 @@ Alternatively can use full nix build, see `Nix Build`
 If `nix` is available, you probably prefer the nix build, unless working on XO itself.
 Otherwise continue reading..
 
-The cmake build has two phases, because it needs to bootstrap
-generated `xo-cmake-config`, `xo-build` helpers.
-
 ```
 $ cd xo
 $ PREFIX=/path/to/say/usr/local
-# phase 1
-$ cmake -B .build0 -S xo-cmake -DCMAKE_INSTALL_PREFIX=${PREFIX}
-$ cmake --build .build0
-$ cmake --install .build0
-# phase 2
 $ cmake -B .build -S . -DCMAKE_INSTALL_PREFIX=${PREFIX} -DXO_ENABLE_EXAMPLES=1 -DXO_ENABLE_DOCS=1 -DCMAKE_BUILD_TYPE=debug
 $ cmake --build .build --verbose
 $ cmake --install .build
@@ -65,8 +57,14 @@ $ cmake --install .build
 
 or with Vulkan examples
 ```
-# at start of phase 2
 $ cmake -B .build -S . -DCMAKE_INSTALL_PREFIX=${PREFIX} -DXO_ENABLE_EXAMPLES=1 -DXO_ENABLE_VULKAN=1
+```
+
+### Re-run cmake
+
+```
+$ cd xo
+$ .build/reconfigure.sh
 ```
 
 ### Cmake build documentation
