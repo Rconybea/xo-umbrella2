@@ -18,6 +18,7 @@ add_definitions(${PROJECT_CXX_FLAGS})
 
 # ----------------------------------------------------------------
 
+# note: manual target; generated code committed to git
 xo_add_genfacet(
     TARGET xo-object2-facet-sequence
     FACET Sequence
