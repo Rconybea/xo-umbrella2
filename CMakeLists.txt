@@ -61,6 +61,7 @@ message("-- XO_ENABLE_DOCS=${XO_ENABLE_DOCS}")
 message("-- XO_ENABLE_EXAMPLES=${XO_ENABLE_EXAMPLES}")
 message("-- XO_ENABLE_VULKAN=${XO_ENABLE_VULKAN}")
 message("-- XO_ENABLE_OPENGL=${XO_ENABLE_OPENGL}")
+message("-- XO_ENABLE_ASM=${XO_ENABLE_ASM}")
 
 # ----------------------------------------------------------------
 #
