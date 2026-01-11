@@ -171,8 +171,9 @@ namespace ut {
                 c_o.add_gc_root(&x0_o);
                 REQUIRE(to_0->allocated() == sizeof(AllocHeader) + sizeof(DFloat));
 
-                DList * l0 = DList::list(gc_o, x0_o);
-                auto l0_o = with_facet<AGCObject>::mkobj(l0);
+                //DList * l0 = DList::list(gc_o, x0_o);
+                //auto l0_o = with_facet<AGCObject>::mkobj(l0);
+                auto l0_o = DList::list(gc_o, x0_o);
                 c_o.add_gc_root(&l0_o);
                 REQUIRE(to_0->allocated() == (sizeof(AllocHeader) + sizeof(DFloat)
                                               + sizeof(AllocHeader) + sizeof(DList)));

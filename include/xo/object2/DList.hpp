@@ -34,6 +34,17 @@ namespace xo {
                                               obj<AGCObject> car,
                                               obj<ACdrFacet,DList> cdr);
 
+            /** list with one element @p e1, allocated from @p mm **/
+            template <typename AListFacet = AGCObject>
+            static obj<AListFacet,DList> list(obj<AAllocator> mm,
+                                              obj<AGCObject> e1);
+
+            /** list with two element @p e1, @p e2, allocated from @p mm **/
+            template <typename AListFacet = AGCObject>
+            static obj<AListFacet,DList> list(obj<AAllocator> mm,
+                                              obj<AGCObject> e1,
+                                              obj<AGCObject> e2);
+
             /** sentinel for null list **/
             static DList * _nil();
 
@@ -45,6 +56,7 @@ namespace xo {
                                  obj<AGCObject> car,
                                  DList * cdr);
 
+#ifdef OBSOLETE
             /** list with one element @p h1, allocated from @p mm **/
             static DList * list(obj<AAllocator> mm,
                                 obj<AGCObject> h1);
@@ -52,6 +64,7 @@ namespace xo {
             static DList * list(obj<AAllocator> mm,
                                 obj<AGCObject> h1,
                                 obj<AGCObject> h2);
+#endif
 
             /** DList length is at least 1 **/
             bool is_empty() const noexcept;
@@ -85,6 +98,23 @@ namespace xo {
                     obj<ACdrFacet,DList> cdr)
         {
             return obj<AConsFacet,DList>(DList::_cons(mm, car, cdr.data()));
+        }
+
+        template <typename AListFacet>
+        obj<AListFacet,DList>
+        DList::list(obj<AAllocator> mm,
+                    obj<AGCObject> e1)
+        {
+            return cons(mm, e1, nil());
+        }
+
+        template <typename AListFacet>
+        obj<AListFacet,DList>
+        DList::list(obj<AAllocator> mm,
+                    obj<AGCObject> e1,
+                    obj<AGCObject> e2)
+        {
+            return cons(mm, e1, list(mm, e2));
         }
 
     } /*namespace scm*/
