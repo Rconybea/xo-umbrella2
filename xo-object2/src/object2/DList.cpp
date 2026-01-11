@@ -34,6 +34,7 @@ namespace xo {
             return new (mem) DList(car, cdr);
         }
 
+#ifdef OBSOLETE
         DList *
         DList::list(obj<AAllocator> mm,
                     obj<AGCObject> h1)
@@ -52,6 +53,7 @@ namespace xo {
 
             return new (mem) DList(h1, DList::list(mm, h2));
         }
+#endif
 
         bool
         DList::is_empty() const noexcept
