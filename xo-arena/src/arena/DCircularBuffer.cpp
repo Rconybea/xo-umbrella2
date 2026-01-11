@@ -171,7 +171,7 @@ namespace xo {
             }
 
             /* establish mapped range at least to dest.hi */
-            this->expand_to(dest.hi());
+            this->_expand_to(dest.hi());
 
             /* report available memory */
             return span_type(occupied_range_.hi(), mapped_range_.hi());
@@ -250,38 +250,6 @@ namespace xo {
             this->_check_reset_map_start();
         }
 
-        bool
-        DCircularBuffer::expand_to(byte * hi) {
-            scope log(XO_DEBUG(config_.debug_flag_));
-
-            if (hi < mapped_range_.hi()) {
-                /* nothing todo */
-                return true;
-            }
-
-            size_t add_z = hi - mapped_range_.hi();
-            size_t add_commit_z = padding::with_padding(add_z, buffer_align_z_);
-            byte * commit_start = mapped_range_.hi();
-
-            if (::mprotect(commit_start,
-                           add_commit_z,
-                           PROT_READ | PROT_WRITE) != 0)
-                {
-                    if (log) {
-                        log("commit failed");
-                        log(xtag("commit_start", commit_start),
-                            xtag("add_z", add_z),
-                            xtag("add_commit_z", add_commit_z));
-                    }
-
-                    // this->capture_error(error::commit_failed, add_commit_z);
-                    return false;
-                }
-
-            this->mapped_range_ += span(commit_start, add_commit_z);
-            return true;
-        }
-
         void
         DCircularBuffer::pin_range(span_type r)
         {
@@ -331,6 +299,38 @@ namespace xo {
                     }
                 }
             }
+        }
+
+        bool
+        DCircularBuffer::_expand_to(byte * hi) {
+            scope log(XO_DEBUG(config_.debug_flag_));
+
+            if (hi < mapped_range_.hi()) {
+                /* nothing todo */
+                return true;
+            }
+
+            size_t add_z = hi - mapped_range_.hi();
+            size_t add_commit_z = padding::with_padding(add_z, buffer_align_z_);
+            byte * commit_start = mapped_range_.hi();
+
+            if (::mprotect(commit_start,
+                           add_commit_z,
+                           PROT_READ | PROT_WRITE) != 0)
+                {
+                    if (log) {
+                        log("commit failed");
+                        log(xtag("commit_start", commit_start),
+                            xtag("add_z", add_z),
+                            xtag("add_commit_z", add_commit_z));
+                    }
+
+                    // this->capture_error(error::commit_failed, add_commit_z);
+                    return false;
+                }
+
+            this->mapped_range_ += span(commit_start, add_commit_z);
+            return true;
         }
 
         void

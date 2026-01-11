@@ -132,12 +132,6 @@ namespace xo {
              **/
             void report_append(span_type r);
 
-            /** expand hi end of mapped memory range to at least @p hi.
-             *
-             *  Require: @p hi < @ref reserved_range_.hi
-             **/
-            bool expand_to(byte * hi);
-
             /** consume span (or prefix thereof) previously obtained from @ref occupied_range()
              *  Caller represents that it won't need to read this memory again
              *  unless overlaps with a pinned span.
@@ -161,6 +155,12 @@ namespace xo {
 
             /** @defgroup mm-circularbuffer-private-methods CircularBuffer non-const methods **/
             ///@{
+
+            /** expand hi end of mapped memory range to at least @p hi.
+             *
+             *  Require: @p hi < @ref reserved_range_.hi
+             **/
+            bool _expand_to(byte * hi);
 
             /** shrink occupied rnage to the smallest contiguous range that contains both:
              *  all of .input_range_, and all pinned ranges in .pinned_spans_
