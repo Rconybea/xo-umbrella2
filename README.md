@@ -64,7 +64,22 @@ $ cmake -B .build -S . -DCMAKE_INSTALL_PREFIX=${PREFIX} -DXO_ENABLE_EXAMPLES=1 -
 
 ```
 $ cd xo
-$ .build/reconfigure.sh
+$ .build/reconfigure -n
+cmake -B /home/roland/proj/xo-umbrella2-claude1/.build -S /home/roland/proj/xo-umbrella2-claude1 \
+    -DCMAKE_BUILD_TYPE=debug \
+    -DCMAKE_INSTALL_PREFIX=/home/roland/local \
+    -DCMAKE_INSTALL_DOCDIR=share/doc/xo-umbrella \
+    -DCMAKE_MODULE_PATH=/home/roland/proj/xo-umbrella2/xo-cmake/cmake \
+    -DCMAKE_PREFIX_PATH= \
+    -DCMAKE_CXX_STANDARD=20 \
+    -DXO_CMAKE_CONFIG_EXECUTABLE=/home/roland/local/bin/xo-cmake-config \
+    -DENABLE_TESTING=1 \
+    -DXO_ENABLE_DOCS=1 \
+    -DXO_ENABLE_ASM=1 \
+    -DXO_ENABLE_EXAMPLES=1 \
+    -DXO_ENABLE_VULKAN=1 \
+    -DXO_ENABLE_OPENGL=ON
+$ .build/reconfigure  # to rerun cmake
 ```
 
 ### Cmake build documentation
