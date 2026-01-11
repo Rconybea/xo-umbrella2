@@ -65,6 +65,10 @@ namespace xo {
             size_type capacity() const noexcept { return store_.capacity(); }
             float load_factor() const noexcept { return store_.load_factor(); }
 
+            /** verify DArenaHashMap invariants
+             *  Act on failure according to policy @p
+             *  (combination of throw|log bits)
+             **/
             bool verify_ok(verify_policy p = verify_policy::throw_only()) const;
 
             iterator begin() {
