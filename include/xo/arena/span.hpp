@@ -28,6 +28,9 @@ namespace xo {
             /** typealias for span size (in units of CharT) **/
             using size_type = std::uint64_t;
 
+            /** typealias for span elements **/
+            using value_type = CharT;
+
             ///@}
 
         public:
@@ -58,7 +61,8 @@ namespace xo {
              *  A null span can be concatenated with any other span
              *  without triggering matching-endpoint asserts.
              **/
-            static span make_null() { return span(static_cast<CharT*>(nullptr), static_cast<CharT*>(nullptr)); }
+            static span make_null() { return span(static_cast<CharT*>(nullptr),
+                                                  static_cast<CharT*>(nullptr)); }
 
             /** @brief create span for C-style string @p cstr **/
             static span from_cstr(const CharT * cstr) {
@@ -69,9 +73,17 @@ namespace xo {
             }
 
             /** @brief create span from std::string @p str **/
-            static span from_string(const std::string& str) {
+            static span from_string(const std::string & str) {
                 CharT * lo = &(*str.begin());
                 CharT * hi = &(*str.end());
+
+                return span(lo, hi);
+            }
+
+            /** @brief create span from std::string @p str **/
+            static span from_string_view(const std::string_view & sv) {
+                CharT * lo = &(*sv.begin());
+                CharT * hi = &(*sv.end());
 
                 return span(lo, hi);
             }
@@ -117,6 +129,11 @@ namespace xo {
              **/
             bool is_subspan_of(const span & other) const noexcept {
                 return (other.lo() <= lo_) && (hi_ <= other.hi());
+            }
+
+            /** convert to string view **/
+            std::string_view to_string_view() const {
+                return std::string_view((const char *)lo_, (const char *)hi_);
             }
 
             ///@}

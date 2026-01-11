@@ -8,9 +8,8 @@ set(UTEST_SRCS
     DArena.test.cpp
     DArenaVector.test.cpp
     DArenaHashMap.test.cpp
+    DCircularBuffer.test.cpp
 #    DArenaIterator.test.cpp
-#    Collector.test.cpp
-#    DX1CollectorIterator.test.cpp
 #    random_allocs.cpp
 )
 
