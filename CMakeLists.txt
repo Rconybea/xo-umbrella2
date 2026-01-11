@@ -4,13 +4,10 @@ cmake_minimum_required(VERSION 3.10)
 
 project(xo-umbrella VERSION 1.0)
 
-# ----------------------------------------------------------------
-# global build settings
-
-include(GNUInstallDirs)
-include(cmake/xo-bootstrap-macros.cmake)
-
 # Adopting submodule builds directly into this cmake.
+# Want this before including bootstrap macros,
+# so local ./xo-cmake supersedes installed version
+#
 # Submodule builds will pickup dependent xo artifacts directly
 # from sibling build dirs.
 # (Contrast with a build that relies on install step).
@@ -25,6 +22,12 @@ include(cmake/xo-bootstrap-macros.cmake)
 #    we need build location
 #
 set(XO_SUBMODULE_BUILD True)
+
+# ----------------------------------------------------------------
+# global build settings
+
+include(GNUInstallDirs)
+include(cmake/xo-bootstrap-macros.cmake)
 
 # toplevel source directory;  used only with XO_SUBMODULE_BUILD
 set(XO_UMBRELLA_SOURCE_DIR ${CMAKE_SOURCE_DIR})
