@@ -55,6 +55,8 @@ namespace xo {
 
             REQUIRE(buf.occupied_range().to_string_view() == std::string_view("defghijklmnopq"));
         }
+
+        // TODO: test pin_range() / unpin_range()
     } /*namespace ut*/
 } /*namespace xo*/
 
