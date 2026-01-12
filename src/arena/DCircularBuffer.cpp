@@ -8,6 +8,7 @@
 #include <xo/indentlog/scope.hpp>
 #include <xo/indentlog/print/tostr.hpp>
 #include <sys/mman.h>
+#include <unistd.h>  // for ::getpagesize() on osx
 
 namespace xo {
     using xo::print::operator<<;
