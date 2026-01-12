@@ -141,7 +141,6 @@ namespace xo {
                 return false;
             }
         }
-
     } /*namespace scm*/
 } /*namespace xo*/
 

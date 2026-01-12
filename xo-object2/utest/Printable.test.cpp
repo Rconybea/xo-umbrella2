@@ -3,8 +3,10 @@
  *  @author Roland Conybeare, Jan 2026
  **/
 
+#include "ListOps.hpp"
 #include "DList.hpp"
 #include "object2_register_types.hpp"
+#include "object2_register_facets.hpp"
 
 #include <xo/object2/DList.hpp>
 #include <xo/object2/IGCObject_DList.hpp>
@@ -30,6 +32,7 @@
 namespace ut {
     using xo::scm::object2_register_types;
     using xo::scm::object2_register_facets;
+    using xo::scm::ListOps;
     using xo::scm::DList;
     using xo::scm::DInteger;
     using xo::mm::AAllocator;
@@ -107,14 +110,14 @@ namespace ut {
                 bool ok = object2_register_types(c_o);
                 REQUIRE(ok);
 
-                auto l0_o = DList::nil();
+                auto l0_o = ListOps::nil();
 
                 c_o.add_gc_root(&l0_o);
 
                 for(int ip1 = tc.list_.size(); ip1 > 0; --ip1) {
                     auto xi_o = DInteger::box<AGCObject>(gc_o, tc.list_[ip1 - 1]);
 
-                    l0_o  = DList::cons(gc_o, xi_o, l0_o);
+                    l0_o  = ListOps::cons(gc_o, xi_o, l0_o);
                 }
 
                 // TODO: log_streambuf using DArena

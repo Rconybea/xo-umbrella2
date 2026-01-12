@@ -14,6 +14,7 @@ set(SELF_SRCS
     DFloat.cpp
     DInteger.cpp
     object2_register_types.cpp
+    object2_register_facets.cpp
     )
 
 xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 ${SELF_SRCS})

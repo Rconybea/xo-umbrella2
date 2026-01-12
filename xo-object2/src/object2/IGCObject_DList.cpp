@@ -4,6 +4,7 @@
  **/
 
 #include "IGCObject_DList.hpp"
+#include "DList.hpp"
 #include <xo/indentlog/scope.hpp>
 
 namespace xo {
@@ -46,7 +47,6 @@ namespace xo {
 
             return shallow_size(src);
         }
-
     } /*namespace scm*/
 } /*namespace xo*/
 

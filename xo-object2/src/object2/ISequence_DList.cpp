@@ -11,6 +11,7 @@
  *       [idl/ISequence_DList.json5]
 **/
 
+#include "IGCObject_DList.hpp"  // apparently need this with clang 15
 #include "ISequence_DList.hpp"
 
 namespace xo {

@@ -9,10 +9,11 @@
 #include <xo/gc/Collector.hpp>
 #include <xo/gc/detail/AGCObject.hpp>
 #include <xo/gc/detail/IGCObject_Xfer.hpp>
-#include "DList.hpp"
+//#include "DList.hpp" // circular
 
 namespace xo {
     namespace scm { struct IGCObject_DList; }
+    namespace scm { struct DList; }
 
     namespace facet {
         template <>
