@@ -34,18 +34,16 @@ namespace xo {
             REQUIRE(buf.occupied_range().size() == 0);
             REQUIRE(buf.input_range().size() == 0);
 
-            std::string_view s0 = "abcdefghijk";
+            auto s0 = DCircularBuffer::const_span_type::from_cstr("abcdefghijk");
             /* return value is unaccepted suffix of input */
-            REQUIRE(buf.append(DCircularBuffer::span_type((byte *)s0.begin(),
-                                                          (byte *)s0.end())).empty());
+            REQUIRE(buf.append(s0).empty());
             REQUIRE(buf.verify_ok(verify_policy::log_only()));
             REQUIRE(buf.mapped_range().size() == getpagesize());
             REQUIRE(buf.occupied_range().size() == s0.size());
             REQUIRE(buf.input_range().size() == s0.size());
 
-            std::string_view s1 = "lmnopq";
-            REQUIRE(buf.append(DCircularBuffer::span_type((byte *)s1.begin(),
-                                                          (byte *)s1.end())).empty());
+            auto s1 = DCircularBuffer::const_span_type::from_cstr("lmnopq");
+            REQUIRE(buf.append(s1).empty());
             REQUIRE(buf.mapped_range().size() == getpagesize());
             REQUIRE(buf.occupied_range().size() == s0.size() + s1.size());
 

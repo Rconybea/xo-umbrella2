@@ -48,17 +48,19 @@ namespace xo {
             log && log(xtag("page_z", page_z),
                        xtag("align_z", align_z));
 
-            auto span = mmap_util::map_aligned_range(config.max_capacity_,
-                                                     align_z,
-                                                     enable_hugepage_flag,
-                                                     config.debug_flag_);
+            auto mapped_span
+                = span<char>::from_memory(mmap_util::map_aligned_range
+                                              (config.max_capacity_,
+                                               align_z,
+                                               enable_hugepage_flag,
+                                               config.debug_flag_));
 
-            if (!span.lo()) {
+            if (!mapped_span.lo()) {
                 throw std::runtime_error(tostr("DCircularBuffer: reserve address range failed",
                                                xtag("size", config.max_capacity_)));
             }
 
-            return DCircularBuffer(config, page_z, align_z, span);
+            return DCircularBuffer(config, page_z, align_z, mapped_span);
         }
 
         DCircularBuffer::DCircularBuffer(const CircularBufferConfig & config,
@@ -302,7 +304,8 @@ namespace xo {
         }
 
         bool
-        DCircularBuffer::_expand_to(byte * hi) {
+        DCircularBuffer::_expand_to(char * hi)
+        {
             scope log(XO_DEBUG(config_.debug_flag_));
 
             if (hi < mapped_range_.hi()) {
@@ -312,7 +315,7 @@ namespace xo {
 
             size_t add_z = hi - mapped_range_.hi();
             size_t add_commit_z = padding::with_padding(add_z, buffer_align_z_);
-            byte * commit_start = mapped_range_.hi();
+            char * commit_start = mapped_range_.hi();
 
             if (::mprotect(commit_start,
                            add_commit_z,

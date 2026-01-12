@@ -88,6 +88,14 @@ namespace xo {
                 return span(lo, hi);
             }
 
+            /** @brief create span from raw memory **/
+            static span from_memory(span<std::byte> span_memory) {
+                CharT * lo = (CharT *)span_memory.lo();
+                CharT * hi = (CharT *)span_memory.hi();
+
+                return span(lo, hi);
+            }
+
             /** @brief concatenate two contiguous spans */
             static span concat(const span & span1, const span & span2) {
                 if (span1.is_null())
