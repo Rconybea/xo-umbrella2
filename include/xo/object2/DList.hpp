@@ -6,7 +6,6 @@
 #pragma once
 
 #include <xo/gc/GCObject.hpp>
-//#include "xo/alloc2/gcobject/RGCObject.hpp"
 #include <xo/facet/obj.hpp>
 #include <xo/indentlog/print/ppindentinfo.hpp>
 
@@ -14,6 +13,8 @@ namespace xo {
     namespace scm {
 
         // TODO: consider renaming to DCons
+        // See also ListOps in ListOps.hpp
+        //
         struct DList {
             using size_type = std::size_t;
             using AGCObject = xo::mm::AGCObject;
@@ -22,28 +23,6 @@ namespace xo {
 
             DList(xo::obj<AGCObject> h,
                   DList * r) : head_{h}, rest_{r} {}
-
-            template <typename AConsFacet = AGCObject>
-            static obj<AConsFacet,DList> nil();
-
-            /** shortcut for
-             *    cons(mm, cdr, cdr.data())
-             **/
-            template <typename AConsFacet = AGCObject, typename ACdrFacet = AGCObject>
-            static obj<AConsFacet,DList> cons(obj<AAllocator> mm,
-                                              obj<AGCObject> car,
-                                              obj<ACdrFacet,DList> cdr);
-
-            /** list with one element @p e1, allocated from @p mm **/
-            template <typename AListFacet = AGCObject>
-            static obj<AListFacet,DList> list(obj<AAllocator> mm,
-                                              obj<AGCObject> e1);
-
-            /** list with two element @p e1, @p e2, allocated from @p mm **/
-            template <typename AListFacet = AGCObject>
-            static obj<AListFacet,DList> list(obj<AAllocator> mm,
-                                              obj<AGCObject> e1,
-                                              obj<AGCObject> e2);
 
             /** sentinel for null list **/
             static DList * _nil();
@@ -83,39 +62,6 @@ namespace xo {
             /** remainder of list **/
             DList * rest_ = nullptr;
         };
-
-        template <typename AConsFacet>
-        obj<AConsFacet,DList>
-        DList::nil()
-        {
-            return obj<AConsFacet,DList>(DList::_nil());
-        }
-
-        template <typename AConsFacet, typename ACdrFacet>
-        obj<AConsFacet,DList>
-        DList::cons(obj<AAllocator> mm,
-                    obj<AGCObject> car,
-                    obj<ACdrFacet,DList> cdr)
-        {
-            return obj<AConsFacet,DList>(DList::_cons(mm, car, cdr.data()));
-        }
-
-        template <typename AListFacet>
-        obj<AListFacet,DList>
-        DList::list(obj<AAllocator> mm,
-                    obj<AGCObject> e1)
-        {
-            return cons(mm, e1, nil());
-        }
-
-        template <typename AListFacet>
-        obj<AListFacet,DList>
-        DList::list(obj<AAllocator> mm,
-                    obj<AGCObject> e1,
-                    obj<AGCObject> e2)
-        {
-            return cons(mm, e1, list(mm, e2));
-        }
 
     } /*namespace scm*/
 } /*namespace xo*/

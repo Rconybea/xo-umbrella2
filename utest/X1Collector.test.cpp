@@ -3,6 +3,7 @@
  *  @author Roland Conybeare, Dec 2025
  **/
 
+#include "ListOps.hpp"
 #include "DFloat.hpp"
 #include "DList.hpp"
 #include "object2_register_types.hpp"
@@ -26,6 +27,7 @@
 
 namespace ut {
     using xo::scm::object2_register_types;
+    using xo::scm::ListOps;
     using xo::scm::DList;
     using xo::scm::DFloat;
     using xo::mm::AAllocator;
@@ -173,7 +175,7 @@ namespace ut {
 
                 //DList * l0 = DList::list(gc_o, x0_o);
                 //auto l0_o = with_facet<AGCObject>::mkobj(l0);
-                auto l0_o = DList::list(gc_o, x0_o);
+                auto l0_o = ListOps::list(gc_o, x0_o);
                 c_o.add_gc_root(&l0_o);
                 REQUIRE(to_0->allocated() == (sizeof(AllocHeader) + sizeof(DFloat)
                                               + sizeof(AllocHeader) + sizeof(DList)));
