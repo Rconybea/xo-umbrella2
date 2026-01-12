@@ -39,8 +39,8 @@ namespace xo {
             using size_type = std::size_t;
             using byte = std::byte;
             /** a contiguous addres range **/
-            using span_type = span<byte>;
-            using const_span_type = span<const byte>;
+            using span_type = span<char>;
+            using const_span_type = span<const char>;
 
             ///@}
 
@@ -162,7 +162,7 @@ namespace xo {
              *
              *  Require: @p hi < @ref reserved_range_.hi
              **/
-            bool _expand_to(byte * hi);
+            bool _expand_to(char * hi);
 
             /** shrink occupied rnage to the smallest contiguous range that contains both:
              *  all of .input_range_, and all pinned ranges in .pinned_spans_
