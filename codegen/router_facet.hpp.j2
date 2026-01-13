@@ -56,7 +56,7 @@ public:
     // const methods
     typeseq _typeseq() const noexcept { return O::iface()->_typeseq(); }
     {% for md in const_methods %}
-    {{md.return_type}} {{md.name}}({{md.args | argsnodata}}) {{md | qualifiers}} override {
+    {{md.return_type}} {{md.name}}({{md.args | argsnodata}}) {{md | qualifiers}} {
         return O::iface()->{{md.name}}({{md.args | argrouting}});
     }
     {% endfor %}
