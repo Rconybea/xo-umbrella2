@@ -67,11 +67,17 @@ def format_args_routing(args):
     names = [p['name'] for p in args]
     return ', '.join([f"O::data()"] + names[1:])
 
-def format_args_impl(args, drepr):
+def format_args_impl_const(args, drepr):
     """ Format argument names, for implementation (IFoo_DRepr)
     """
     names = [f"{p['type']} {p['name']}" for p in args]
     return ', '.join([f"const {drepr} & self"] + names[1:])
+
+def format_args_impl_nonconst(args, drepr):
+    """ Format argument names, for implementation (IFoo_DRepr)
+    """
+    names = [f"{p['type']} {p['name']}" for p in args]
+    return ', '.join([f"{drepr} & self"] + names[1:])
 
 
 def gen_facet(env,
@@ -480,7 +486,8 @@ def main():
     env.filters['argnamesnodata'] = format_arg_names_nodata
     env.filters['argsnodata'] = format_args_nodata
     env.filters['argrouting'] = format_args_routing
-    env.filters['argimpl'] = format_args_impl
+    env.filters['argimplconst'] = format_args_impl_const
+    env.filters['argimplnonconst'] = format_args_impl_nonconst
 
     if idl['mode'] == 'facet':
         gen_facet(env=env,

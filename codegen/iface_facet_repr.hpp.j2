@@ -51,14 +51,16 @@ namespace {{repr_ns1}} {
             /** @defgroup {{repr_ns2}}-{{facet_name_lc}}-{{data_repr_lc}}-methods **/
             ///@{
             {% endif %}
+            // const methods
             {% for md in const_methods %}
             /** {{md.doc}} **/
-            static {{md.return_type}} {{md.name}}({{md.args | argimpl(data_repr)}}){{md | staticqual}};
+            static {{md.return_type}} {{md.name}}({{md.args | argimplconst(data_repr)}}){{md | staticqual}};
             {% endfor %}
 
-            {% for md in methods %}
+            // non-const methods
+            {% for md in nonconst_methods %}
             /** {{md.doc}} **/
-            static {{md.return_type}} {{md.name}}({{md.args | argimpl(data_repr)}}){{md | staticqual}};
+            static {{md.return_type}} {{md.name}}({{md.args | argimplnonconst(data_repr)}}){{md | staticqual}};
             {% endfor %}
             {% if using_dox %}
             ///@}
