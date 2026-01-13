@@ -15,6 +15,7 @@ namespace xo {
         struct DInteger {
             using AAllocator = xo::mm::AAllocator;
             using ppindentinfo = xo::print::ppindentinfo;
+            using value_type = long;
 
             explicit DInteger(long x) : value_{x} {}
 
