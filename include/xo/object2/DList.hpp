@@ -25,26 +25,19 @@ namespace xo {
             DList(xo::obj<AGCObject> h,
                   DList * r) : head_{h}, rest_{r} {}
 
-            /** sentinel for null list **/
+            /** sentinel for null list.
+             *  Application code may prefer ListOps::nil()
+             **/
             static DList * _nil();
 
             /** list with first element @p car,
              *  followed by contents of list @p cdr.
              *  Shares structure with @p cdr
+             *  Application code may prefer ListOps::cons()
              **/
             static DList * _cons(obj<AAllocator> mm,
                                  obj<AGCObject> car,
                                  DList * cdr);
-
-#ifdef OBSOLETE
-            /** list with one element @p h1, allocated from @p mm **/
-            static DList * list(obj<AAllocator> mm,
-                                obj<AGCObject> h1);
-            /** list with two elements @p h1, @p h2, allocated from @p mm **/
-            static DList * list(obj<AAllocator> mm,
-                                obj<AGCObject> h1,
-                                obj<AGCObject> h2);
-#endif
 
             /** DList length is at least 1 **/
             bool is_empty() const noexcept;

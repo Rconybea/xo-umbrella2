@@ -13,6 +13,7 @@ set(SELF_SRCS
     DList.cpp
     DFloat.cpp
     DInteger.cpp
+    DString.cpp
     object2_register_types.cpp
     object2_register_facets.cpp
     )
