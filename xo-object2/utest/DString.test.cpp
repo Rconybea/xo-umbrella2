@@ -47,6 +47,38 @@ namespace xo {
             REQUIRE(s->size() == 11);
             REQUIRE(std::strcmp(s->chars(), cstr) == 0);
         }
+
+        TEST_CASE("DString-assign", "[object2][DString]")
+        {
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 4*1024 };
+            DArena arena = DArena::map(cfg);
+            auto alloc = with_facet<AAllocator>::mkobj(&arena);
+
+            DString * src = DString::from_cstr(alloc, "hello");
+            DString * dst = DString::empty(alloc, 16);
+
+            dst->assign(*src);
+
+            REQUIRE(dst->size() == 5);
+            REQUIRE(std::strcmp(dst->chars(), "hello") == 0);
+        }
+
+        TEST_CASE("DString-assign-truncate", "[object2][DString]")
+        {
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 4*1024 };
+            DArena arena = DArena::map(cfg);
+            auto alloc = with_facet<AAllocator>::mkobj(&arena);
+
+            DString * src = DString::from_cstr(alloc, "hello world");
+            DString * dst = DString::empty(alloc, 6);
+
+            dst->assign(*src);
+
+            REQUIRE(dst->size() == 5);
+            REQUIRE(std::strcmp(dst->chars(), "hello") == 0);
+        }
     } /*namespace ut*/
 } /*namespace xo*/
 
