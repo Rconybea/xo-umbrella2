@@ -23,6 +23,7 @@ namespace xo {
     using xo::mm::AllocHeader;
     using xo::mm::padding;
     using xo::mm::error;
+    using xo::facet::with_facet;
     using xo::facet::obj;
     using xo::facet::typeseq;
     using xo::scope;
@@ -93,7 +94,8 @@ namespace xo {
             ArenaConfig cfg { .name_ = "testarena",
                               .size_ = 1 };
             DArena arena = DArena::map(cfg);
-            obj<AAllocator, DArena> a1o{&arena};
+            //obj<AAllocator, DArena> a1o{&arena};
+            auto a1o = with_facet<AAllocator>::mkobj(&arena);
 
             REQUIRE(a1o);
             REQUIRE(a1o.iface() != nullptr);
@@ -117,7 +119,8 @@ namespace xo {
                               .size_ = 1,
                               .debug_flag_ = false };
             DArena arena = DArena::map(cfg);
-            obj<AAllocator, DArena> a1o{&arena};
+            //obj<AAllocator, DArena> a1o{&arena};
+            auto a1o = with_facet<AAllocator>::mkobj(&arena);
 
             REQUIRE(a1o.available() == 0);
             REQUIRE(a1o.allocated() == 0);
@@ -147,7 +150,8 @@ namespace xo {
                               .size_ = 64*1024,
                               .debug_flag_ = false };
             DArena arena = DArena::map(cfg);
-            obj<AAllocator, DArena> a1o{&arena};
+            //obj<AAllocator, DArena> a1o{&arena};
+            auto a1o = with_facet<AAllocator>::mkobj(&arena);
 
             REQUIRE(a1o.reserved() >= cfg.size_);
             REQUIRE(a1o.committed() == 0);
@@ -196,7 +200,8 @@ namespace xo {
                               .debug_flag_ = false,
             };
             DArena arena = DArena::map(cfg);
-            obj<AAllocator, DArena> a1o{&arena};
+            //obj<AAllocator, DArena> a1o{&arena};
+            auto a1o = with_facet<AAllocator>::mkobj(&arena);
 
             REQUIRE(a1o.reserved() >= cfg.size_);
             REQUIRE(a1o.committed() == 0);
@@ -239,7 +244,8 @@ namespace xo {
                               .debug_flag_ = false,
             };
             DArena arena = DArena::map(cfg);
-            obj<AAllocator, DArena> a1o{&arena};
+            //obj<AAllocator, DArena> a1o{&arena};
+            auto a1o = with_facet<AAllocator>::mkobj(&arena);
 
             REQUIRE(a1o.reserved() >= cfg.size_);
             REQUIRE(a1o.committed() == 0);
@@ -289,7 +295,8 @@ namespace xo {
                               .size_ = 64*1024,
                               .debug_flag_ = false };
             DArena arena = DArena::map(cfg);
-            obj<AAllocator, DArena> a1o{&arena};
+            auto a1o = with_facet<AAllocator>::mkobj(&arena);
+            //obj<AAllocator, DArena> a1o{&arena};
 
             REQUIRE(cfg.size_ <= cfg.hugepage_z_);
 
