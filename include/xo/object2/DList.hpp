@@ -21,6 +21,7 @@ namespace xo {
             using AAllocator = xo::mm::AAllocator;
             using ppindentinfo = xo::print::ppindentinfo;
 
+        public:
             DList(xo::obj<AGCObject> h,
                   DList * r) : head_{h}, rest_{r} {}
 
