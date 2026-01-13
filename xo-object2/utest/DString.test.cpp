@@ -79,6 +79,104 @@ namespace xo {
             REQUIRE(dst->size() == 5);
             REQUIRE(std::strcmp(dst->chars(), "hello") == 0);
         }
+
+        TEST_CASE("DString-data", "[object2][DString]")
+        {
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 4*1024 };
+            DArena arena = DArena::map(cfg);
+            auto alloc = with_facet<AAllocator>::mkobj(&arena);
+
+            DString * s = DString::empty(alloc, 16);
+            char * p = s->data();
+            std::strcpy(p, "test");
+            s->fixup_size();
+
+            REQUIRE(s->size() == 4);
+            REQUIRE(std::strcmp(s->chars(), "test") == 0);
+        }
+
+        TEST_CASE("DString-operator-bracket", "[object2][DString]")
+        {
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 4*1024 };
+            DArena arena = DArena::map(cfg);
+            auto alloc = with_facet<AAllocator>::mkobj(&arena);
+
+            DString * s = DString::from_cstr(alloc, "hello");
+
+            REQUIRE((*s)[0] == 'h');
+            REQUIRE((*s)[4] == 'o');
+
+            (*s)[0] = 'H';
+            REQUIRE(std::strcmp(s->chars(), "Hello") == 0);
+        }
+
+        TEST_CASE("DString-clear", "[object2][DString]")
+        {
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 4*1024 };
+            DArena arena = DArena::map(cfg);
+            auto alloc = with_facet<AAllocator>::mkobj(&arena);
+
+            DString * s = DString::from_cstr(alloc, "hello");
+            REQUIRE(s->size() == 5);
+
+            s->clear();
+
+            REQUIRE(s->size() == 0);
+            REQUIRE(s->chars()[0] == '\0');
+            REQUIRE(s->capacity() == 6);
+        }
+
+        TEST_CASE("DString-fixup_size", "[object2][DString]")
+        {
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 4*1024 };
+            DArena arena = DArena::map(cfg);
+            auto alloc = with_facet<AAllocator>::mkobj(&arena);
+
+            DString * s = DString::empty(alloc, 16);
+            char * p = s->data();
+            p[0] = 'a';
+            p[1] = 'b';
+            p[2] = 'c';
+            p[3] = '\0';
+
+            REQUIRE(s->size() == 0);
+
+            auto new_size = s->fixup_size();
+
+            REQUIRE(new_size == 3);
+            REQUIRE(s->size() == 3);
+        }
+
+        TEST_CASE("DString-string_view", "[object2][DString]")
+        {
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 4*1024 };
+            DArena arena = DArena::map(cfg);
+            auto alloc = with_facet<AAllocator>::mkobj(&arena);
+
+            DString * s = DString::from_cstr(alloc, "hello");
+            std::string_view sv = *s;
+
+            REQUIRE(sv == "hello");
+            REQUIRE(sv.size() == 5);
+        }
+
+        TEST_CASE("DString-cstr-conversion", "[object2][DString]")
+        {
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 4*1024 };
+            DArena arena = DArena::map(cfg);
+            auto alloc = with_facet<AAllocator>::mkobj(&arena);
+
+            DString * s = DString::from_cstr(alloc, "hello");
+            const char * cstr = *s;
+
+            REQUIRE(std::strcmp(cstr, "hello") == 0);
+        }
     } /*namespace ut*/
 } /*namespace xo*/
 
