@@ -106,6 +106,7 @@ add_subdirectory(xo-ordinaltree)
 #
 add_subdirectory(xo-tokenizer2)  # schematika tokenizer (fomo)
 add_subdirectory(xo-expression2)  # schematika expressions (fomo)
+add_subdirectory(xo-interpreter2)  # schematika interpreter (fomo)
 #
 add_subdirectory(xo-webutil)
 add_subdirectory(xo-pywebutil)

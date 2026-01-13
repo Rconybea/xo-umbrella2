@@ -14,6 +14,7 @@ namespace xo {
         struct DFloat {
             using AAllocator = xo::mm::AAllocator;
             using ppindentinfo = xo::print::ppindentinfo;
+            using value_type = double;
 
             explicit DFloat(double x) : value_{x} {}
 
