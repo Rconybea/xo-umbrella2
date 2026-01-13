@@ -25,9 +25,21 @@ namespace xo {
          **/
         struct DString {
         public:
+            /** @defgroup dstring-types type traits **/
+            ///@{
+            /** character traits for this DString **/
+            using traits_type = std::char_traits<char>;
+            /** type of each character in this DString **/
+            using value_type = char;
             using size_type = std::uint32_t;
+            /** representation for a read/write iterator **/
+            using iterator = char *;
+            /** representation for a readonly iterator **/
+            using const_iterator = const char *;
+            /** xo allocator **/
             using AAllocator = xo::mm::AAllocator;
 
+            ///@}
             /** @defgroup dstring-ctors constructors **/
             ///@{
 
@@ -66,6 +78,13 @@ namespace xo {
             ///@}
             /** @defgroup dstring-iterators iterators **/
             ///@{
+            iterator begin() noexcept { return &chars_[0]; }
+            iterator end() noexcept { return &chars_[size_]; }
+
+            const_iterator cbegin() const noexcept { return &chars_[0]; }
+            const_iterator cend() const noexcept { return &chars_[size_]; }
+            const_iterator begin() const noexcept { return cbegin(); }
+            const_iterator end() const noexcept { return cend(); }
 
             ///@}
             /** @defgroup dstring-assign assignment **/
