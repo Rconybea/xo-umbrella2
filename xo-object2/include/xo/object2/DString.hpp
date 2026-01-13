@@ -48,6 +48,17 @@ namespace xo {
             /** @defgroup dstring-access access methods **/
             ///@{
 
+            /** get writeable access to string representation.
+             *  Caller responsible for calling fixup() if string length modified
+             **/
+            char * data() noexcept { return chars_; }
+
+            /** return char at position @p pos in this string, counting from zero.
+             *  Does not check bounds. Undefined behavior if @p pos = @ref capacity_
+             **/
+            char & operator[](size_type pos) noexcept { return chars_[pos]; }
+            const char & operator[](size_type pos) const noexcept { return chars_[pos]; }
+
             size_type capacity() const noexcept { return capacity_; }
             size_type size() const noexcept { return size_; }
             const char * chars() const noexcept { return chars_; }
@@ -89,6 +100,11 @@ namespace xo {
             // contains
             // substr
 
+            /** recalculate string size if string contents modified without
+             *  through side effects
+             **/
+            size_type fixup_size() noexcept;
+
             ///@}
             /** @defgroup dstring-conversion-operators conversion operators **/
             ///@{
@@ -108,12 +124,17 @@ namespace xo {
             ///@}
 
         private:
+            /** @defgroup dstring-instance-variables instance variables **/
+            ///@{
+
             /** extent of @ref chars_ array **/
             size_type capacity_ = 0;
             /** null terminator at @c chars_[size_] **/
             size_type size_ = 0;
             /** string contents **/
             char chars_[];
+
+            ///@}
         };
     } /*namespace scm*/
 } /*namespace xo*/

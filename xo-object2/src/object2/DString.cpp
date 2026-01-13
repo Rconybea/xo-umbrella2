@@ -63,6 +63,14 @@ namespace xo {
             return *this;
         }
 
+        auto
+        DString::fixup_size() noexcept -> size_type
+        {
+            this->chars_[capacity_ - 1] = '\0';
+            this->size_ = ::strlen(chars_);
+            return this->size_;
+        }
+
     } /*namespace scm*/
 } /*namespace xo*/
 
