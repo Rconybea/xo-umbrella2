@@ -6,7 +6,9 @@
 #include <xo/object2/DString.hpp>
 #include <xo/alloc2/arena/IAllocator_DArena.hpp>
 #include <catch2/catch.hpp>
+#include <cctype>
 #include <cstring>
+#include <string>
 
 namespace xo {
     using xo::scm::DString;
@@ -176,6 +178,70 @@ namespace xo {
             const char * cstr = *s;
 
             REQUIRE(std::strcmp(cstr, "hello") == 0);
+        }
+
+        TEST_CASE("DString-begin-end", "[object2][DString]")
+        {
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 4*1024 };
+            DArena arena = DArena::map(cfg);
+            auto alloc = with_facet<AAllocator>::mkobj(&arena);
+
+            DString * s = DString::from_cstr(alloc, "hello");
+
+            REQUIRE(s->begin() == s->chars());
+            REQUIRE(s->end() == s->chars() + 5);
+            REQUIRE(s->end() - s->begin() == 5);
+
+            *s->begin() = 'H';
+            REQUIRE(std::strcmp(s->chars(), "Hello") == 0);
+        }
+
+        TEST_CASE("DString-cbegin-cend", "[object2][DString]")
+        {
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 4*1024 };
+            DArena arena = DArena::map(cfg);
+            auto alloc = with_facet<AAllocator>::mkobj(&arena);
+
+            DString * s = DString::from_cstr(alloc, "hello");
+
+            REQUIRE(s->cbegin() == s->chars());
+            REQUIRE(s->cend() == s->chars() + 5);
+            REQUIRE(s->cend() - s->cbegin() == 5);
+        }
+
+        TEST_CASE("DString-range-for", "[object2][DString]")
+        {
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 4*1024 };
+            DArena arena = DArena::map(cfg);
+            auto alloc = with_facet<AAllocator>::mkobj(&arena);
+
+            DString * s = DString::from_cstr(alloc, "hello");
+
+            std::string result;
+            for (char c : *s) {
+                result += c;
+            }
+
+            REQUIRE(result == "hello");
+        }
+
+        TEST_CASE("DString-iterator-modify", "[object2][DString]")
+        {
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 4*1024 };
+            DArena arena = DArena::map(cfg);
+            auto alloc = with_facet<AAllocator>::mkobj(&arena);
+
+            DString * s = DString::from_cstr(alloc, "hello");
+
+            for (auto it = s->begin(); it != s->end(); ++it) {
+                *it = std::toupper(*it);
+            }
+
+            REQUIRE(std::strcmp(s->chars(), "HELLO") == 0);
         }
     } /*namespace ut*/
 } /*namespace xo*/
