@@ -133,8 +133,8 @@ add_subdirectory(xo-tokenizer)
 add_subdirectory(xo-reader)
 #add_subdirectory(xo-symboltable)
 add_subdirectory(xo-interpreter)
-add_subdirectory(xo-jit)
-add_subdirectory(xo-pyjit)
+#add_subdirectory(xo-jit)     # removing temporarily - link issue
+#add_subdirectory(xo-pyjit)   # removing temporarily
 #
 add_subdirectory(xo-imgui)
 
