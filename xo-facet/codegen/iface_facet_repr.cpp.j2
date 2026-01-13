@@ -17,7 +17,7 @@ namespace {{repr_ns1}} {
     namespace {{repr_ns2}} {
         {% for md in const_methods %}
         auto
-        {{iface_facet_repr}}::{{md.name}}({{md.args | argimpl(data_repr)}}){{md | staticqual}} -> {{md.return_type}}
+        {{iface_facet_repr}}::{{md.name}}({{md.args | argimplconst(data_repr)}}){{md | staticqual}} -> {{md.return_type}}
         {
             {% if md.return_type == "void" %}
             self.{{md.name}}({{md.args | argnamesnodata}});
@@ -26,6 +26,17 @@ namespace {{repr_ns1}} {
             {% endif %}
         }
 
+        {% endfor %}
+        {% for md in nonconst_methods %}
+        auto
+        {{iface_facet_repr}}::{{md.name}}({{md.args | argimplnonconst(data_repr)}}){{md | staticqual}} -> {{md.return_type}}
+        {
+            {% if md.return_type == "void" %}
+            self.{{md.name}}({{md.args | argnamesnodata}});
+            {% else %}
+            return self.{{md.name}}({{md.args | argnamesnodata}});
+            {% endif %}
+        }
         {% endfor %}
 
     } /*namespace {{repr_ns2}}*/
