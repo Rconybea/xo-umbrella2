@@ -4,6 +4,7 @@
  **/
 
 #include "DString.hpp"
+#include <cstring>
 
 namespace xo {
     using xo::facet::typeseq;
@@ -28,6 +29,24 @@ namespace xo {
                     result->chars_[0] = '\0';
                 }
             }
+
+            return result;
+        }
+
+        DString *
+        DString::from_cstr(obj<AAllocator> mm,
+                           const char * cstr)
+        {
+            size_type len = std::strlen(cstr);
+            size_type cap = len + 1;
+
+            void * mem = mm.alloc(typeseq::id<DString>(),
+                                  sizeof(DString) + cap);
+
+            DString * result = new (mem) DString();
+            result->capacity_ = cap;
+            result->size_ = len;
+            std::memcpy(result->chars_, cstr, cap);
 
             return result;
         }
