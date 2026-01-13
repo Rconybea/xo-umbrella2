@@ -4,6 +4,7 @@
  **/
 
 #include "DString.hpp"
+#include <algorithm>
 #include <cstring>
 
 namespace xo {
@@ -50,6 +51,18 @@ namespace xo {
 
             return result;
         }
+
+        DString &
+        DString::assign(const DString & other)
+        {
+            size_type n = std::min(other.size_, capacity_ - 1);
+            std::memcpy(chars_, other.chars_, n);
+            chars_[n] = '\0';
+            size_ = n;
+
+            return *this;
+        }
+
     } /*namespace scm*/
 } /*namespace xo*/
 
