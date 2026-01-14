@@ -3,6 +3,7 @@
  *  @author Roland Conybeare, Dec 2025
  **/
 
+#include "Collector.hpp"
 #include "xo/gc/DX1CollectorIterator.hpp"
 #include "xo/gc/DX1Collector.hpp"
 #include <xo/indentlog/scope.hpp>

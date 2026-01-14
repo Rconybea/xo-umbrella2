@@ -6,6 +6,7 @@
 #pragma once
 
 #include "Allocator.hpp"
+#include "Collector.hpp"
 #include "DX1Collector.hpp"
 
 namespace xo {

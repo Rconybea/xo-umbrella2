@@ -5,6 +5,7 @@
  *  See also ICollector_DX1Collector.cpp for collector facet
  **/
 
+#include "Collector.hpp" // for obj<ACollector> argument to GCObject.forward_children()
 #include "detail/IAllocator_DX1Collector.hpp"
 #include "detail/IAllocIterator_DX1CollectorIterator.hpp"
 #include "DX1CollectorIterator.hpp"

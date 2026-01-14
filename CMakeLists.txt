@@ -18,6 +18,18 @@ add_definitions(${PROJECT_CXX_FLAGS})
 
 # ----------------------------------------------------------------
 
+# note: manual target; generated code committed to git
+xo_add_genfacet(
+    TARGET xo-gc-facet-gcobject
+    FACET GCObject
+    INPUT idl/GCObject.json5
+    OUTPUT_HPP_DIR include/xo/gc
+    OUTPUT_IMPL_SUBDIR detail
+    OUTPUT_CPP_DIR src/gc
+)
+
+# ----------------------------------------------------------------
+
 # must complete definition of expression lib before configuring examples
 add_subdirectory(src/gc)
 add_subdirectory(utest)

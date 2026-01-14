@@ -22,8 +22,8 @@ namespace xo {
         using Copaque = const void *;
         using Opaque = void *;
 
-        struct AGCObject;
-        struct IGCObject_Any; // see IGCObject_Any.hpp
+        class AGCObject;
+        class IGCObject_Any; // see IGCObject_Any.hpp
 
         /** @class ACollector
          *  @brief Abstract facet for the XO garbage collector

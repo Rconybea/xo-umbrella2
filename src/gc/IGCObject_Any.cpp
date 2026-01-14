@@ -1,34 +1,47 @@
 /** @file IGCObject_Any.cpp
  *
- *  @author Roland Conybeare, Dec 2025
  **/
 
 #include "detail/IGCObject_Any.hpp"
 #include <iostream>
 
 namespace xo {
-    using xo::facet::DVariantPlaceholder;
-    using xo::facet::typeseq;
-    using xo::facet::valid_facet_implementation;
+namespace mm {
 
-    namespace mm {
+using xo::facet::DVariantPlaceholder;
+using xo::facet::typeseq;
+using xo::facet::valid_facet_implementation;
 
-        void
-        IGCObject_Any::_fatal() {
-            std::cerr << "fatal"
-                      << ": attempt to call uninitialized"
-                      << " IGCObject_Any method"
-                      << std::endl;
-            std::terminate();
-        }
+void
+IGCObject_Any::_fatal()
+{
+    /* control here on uninitialized IAllocator_Any.
+     * Initialized instance will have specific implementation type
+     */
+    std::cerr << "fatal"
+              << ": attempt to call uninitialized"
+              << " IGCObject_Any method"
+              << std::endl;
+    std::terminate();
+}
 
-        typeseq
-        IGCObject_Any::s_typeseq = typeseq::id<DVariantPlaceholder>();
+typeseq
+IGCObject_Any::s_typeseq = typeseq::id<DVariantPlaceholder>();
 
-        bool
-        IGCObject_Any::_valid = valid_facet_implementation<AGCObject, IGCObject_Any>();
+bool
+IGCObject_Any::_valid
+  = valid_facet_implementation<AGCObject, IGCObject_Any>();
 
-    } /*namespace mm*/
+// nonconst methods
+
+auto
+IGCObject_Any::forward_children(Opaque, obj<ACollector>)  const  noexcept -> size_type
+{
+    _fatal();
+}
+
+
+} /*namespace mm*/
 } /*namespace xo*/
 
 /* end IGCObject_Any.cpp */
