@@ -1,64 +1,90 @@
 /** @file IGCObject_Xfer.hpp
  *
- *  @author Roland Conybeare, Dec 2025
+ *  Generated automagically from ingredients:
+ *  1. code generator:
+ *       [/Users/roland/proj/xo-umbrella2/xo-facet/codegen/genfacet]
+ *     arguments:
+ *       --input [idl/GCObject.json5]
+ *  2. jinja2 template for abstract facet .hpp file:
+ *       [iface_facet_any.hpp.j2]
+ *  3. idl for facet methods
+ *       [idl/GCObject.json5]
  **/
 
 #pragma once
 
-#include "AGCObject.hpp"
-#include "ACollector.hpp"
+#include <xo/alloc2/Allocator.hpp>
+#include <xo/gc/Collector.hpp>
+#include <cstdint>
+#include <cstddef>
 
 namespace xo {
-    namespace mm {
-        /** @class IGCObject_Xfer
-         *
-         *  Adapts typed GC object implementation @tparam IGCObject_DRepr
-         *  to type-erased @ref AGCObject interface
-         **/
-        template <typename DRepr, typename IGCObject_DRepr>
-        struct IGCObject_Xfer : public AGCObject {
-            using Impl = IGCObject_DRepr;
-            using size_type = AGCObject::size_type;
+namespace mm {
+    /** @class IGCObject_Xfer
+     **/
+    template <typename DRepr, typename IGCObject_DRepr>
+    class IGCObject_Xfer : public AGCObject {
+    public:
+        /** @defgroup mm-gcobject-xfer-type-traits **/
+        ///@{
+        /** actual implementation (not generated; often delegates to DRepr) **/
+        using Impl = IGCObject_DRepr;
+        /** integer identifying a type **/
+        using typeseq = AGCObject::typeseq;
+        using size_type = AGCObject::size_type;
+        ///@}
 
-            static const DRepr & _dcast(Copaque d) { return *(const DRepr *)d; }
-            static DRepr & _dcast(Opaque d) { return *(DRepr *)d; }
+        /** @defgroup mm-gcobject-xfer-methods **/
+        ///@{
 
-            // from AGCObject
+        static const DRepr & _dcast(Copaque d) { return *(const DRepr *)d; }
+        static DRepr & _dcast(Opaque d) { return *(DRepr *)d; }
 
-            // const methods
+        // from AGCObject
 
-            typeseq _typeseq() const noexcept override { return s_typeseq; }
-            size_type shallow_size(Copaque d) const noexcept override {
-                return I::shallow_size(_dcast(d));
-            }
-            Opaque shallow_copy(Copaque d, obj<AAllocator> mm) const noexcept override {
-                return I::shallow_copy(_dcast(d), mm);
-            }
+        // const methods
+        typeseq _typeseq() const noexcept override { return s_typeseq; }
+        size_type shallow_size(Copaque data)  const  noexcept override {
+            return I::shallow_size(_dcast(data));
+        }
+        Opaque shallow_copy(Copaque data, obj<AAllocator> mm)  const  noexcept override {
+            return I::shallow_copy(_dcast(data), mm);
+        }
 
-            // non-const methods
+        // non-const methods
+        size_type forward_children(Opaque data, obj<ACollector> gc)  const  noexcept override {
+            return I::forward_children(_dcast(data), gc);
+        }
 
-            size_type forward_children(Opaque d,
-                                       obj<ACollector> gc) const noexcept override {
-                return I::forward_children(_dcast(d), gc);
-            }
+        ///@}
 
-        private:
-            using I = Impl;
+    private:
+        using I = Impl;
 
-        public:
-            static typeseq s_typeseq;
-            static bool _valid;
-        };
+    public:
+        /** @defgroup mm-gcobject-xfer-member-vars **/
+        ///@{
 
-        template <typename DRepr, typename IGCObject_DRepr>
-        xo::facet::typeseq
-        IGCObject_Xfer<DRepr, IGCObject_DRepr>::s_typeseq = facet::typeseq::id<DRepr>();
+        /** typeseq for template parameter DRepr **/
+        static typeseq s_typeseq;
+        /** true iff satisfies facet implementation **/
+        static bool _valid;
 
-        template <typename DRepr, typename IGCObject_DRepr>
-        bool
-        IGCObject_Xfer<DRepr, IGCObject_DRepr>::_valid = facet::valid_facet_implementation<AGCObject, IGCObject_Xfer>();
+        ///@}
+    };
 
-    } /*namespace mm*/
+    template <typename DRepr, typename IGCObject_DRepr>
+    xo::facet::typeseq
+    IGCObject_Xfer<DRepr, IGCObject_DRepr>::s_typeseq
+      = xo::facet::typeseq::id<DRepr>();
+
+    template <typename DRepr, typename IGCObject_DRepr>
+    bool
+    IGCObject_Xfer<DRepr, IGCObject_DRepr>::_valid
+      = xo::facet::valid_facet_implementation<AGCObject,
+                                              IGCObject_Xfer>();
+
+} /*namespace mm */
 } /*namespace xo*/
 
 /* end IGCObject_Xfer.hpp */

@@ -62,8 +62,11 @@ public:
     {% endfor %}
 
     // non-const methods
-    // << do something for non-const methods >>
-    //
+    {% for md in nonconst_methods %}
+    {{md.return_type}} {{md.name}}({{md.args | argsnodata}}) {{md | staticqual}} {
+        return O::iface()->{{md.name}}({{md.args | argrouting}});
+    }
+    {% endfor %}
 
     {% if using_dox %}
     ///@}

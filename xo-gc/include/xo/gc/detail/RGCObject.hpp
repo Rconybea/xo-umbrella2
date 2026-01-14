@@ -1,48 +1,83 @@
 /** @file RGCObject.hpp
  *
- *  @author Roland Conybeare, Dec 2025
+ *  Generated automagically from ingredients:
+ *  1. code generator:
+ *       [/Users/roland/proj/xo-umbrella2/xo-facet/codegen/genfacet]
+ *     arguments:
+ *       --input [idl/GCObject.json5]
+ *  2. jinja2 template for abstract facet .hpp file:
+ *       [iface_facet_any.hpp.j2]
+ *  3. idl for facet methods
+ *       [idl/GCObject.json5]
  **/
 
 #pragma once
 
 #include "AGCObject.hpp"
-#include <xo/facet/RRouter.hpp>
 
 namespace xo {
-    namespace mm {
-        /** @class RGCObject **/
-        template <typename Object>
-        struct RGCObject : public Object {
-        private:
-            using O = Object;
-        public:
-            using ObjectType = Object;
-            using DataPtr = Object::DataPtr;
-            using typeseq = xo::facet::typeseq;
-            using size_type = std::size_t;
+namespace mm {
 
-            RGCObject() = default;
-            RGCObject(Object::DataPtr data) : Object{std::move(data)} {}
+/** @class RGCObject
+ **/
+template <typename Object>
+class RGCObject : public Object {
+private:
+    using O = Object;
 
-            typeseq _typeseq() const noexcept { return O::iface()->_typeseq(); }
-            size_type shallow_size() const noexcept { O::iface()->shallow_size(O::data()); }
-            Opaque shallow_copy(obj<AAllocator> mm) const noexcept { O::iface()->shallow_copy(O::data(), mm); }
-            size_type forward_children() noexcept { O::iface()->forward_children(O::data()); }
+public:
+    /** @defgroup mm-gcobject-router-type-traits **/
+    ///@{
+    using ObjectType = Object;
+    using DataPtr = Object::DataPtr;
+    using typeseq = xo::reflect::typeseq;
+    using size_type = AGCObject::size_type;
+    ///@}
 
-            static bool _valid;
-        };
+    /** @defgroup mm-gcobject-router-ctors **/
+    ///@{
+    RGCObject() {}
+    RGCObject(Object::DataPtr data) : Object{std::move(data)} {}
 
-        template <typename Object>
-        bool
-        RGCObject<Object>::_valid = facet::valid_object_router<RGCObject>();
-    } /*namespace mm*/
+    ///@}
+    /** @defgroup mm-gcobject-router-methods **/
+    ///@{
 
-    namespace facet {
-        template <typename Object>
-        struct RoutingFor<xo::mm::AGCObject, Object> {
-            using RoutingType = xo::mm::RGCObject<Object>;
-        };
+    // const methods
+    typeseq _typeseq() const noexcept { return O::iface()->_typeseq(); }
+    size_type shallow_size()  const  noexcept {
+        return O::iface()->shallow_size(O::data());
     }
+    Opaque shallow_copy(obj<AAllocator> mm)  const  noexcept {
+        return O::iface()->shallow_copy(O::data(), mm);
+    }
+
+    // non-const methods
+    size_type forward_children(obj<ACollector> gc)  noexcept {
+        return O::iface()->forward_children(O::data(), gc);
+    }
+
+    ///@}
+    /** @defgroup mm-gcobject-member-vars **/
+    ///@{
+
+    static bool _valid;
+
+    ///@}
+};
+
+template <typename Object>
+bool
+RGCObject<Object>::_valid = xo::facet::valid_object_router<Object>();
+
+} /*namespace mm*/
 } /*namespace xo*/
+
+namespace xo { namespace facet {
+    template <typename Object>
+    struct RoutingFor<xo::mm::AGCObject, Object> {
+        using RoutingType = xo::mm::RGCObject<Object>;
+    };
+} }
 
 /* end RGCObject.hpp */

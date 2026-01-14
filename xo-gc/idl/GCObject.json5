@@ -1,0 +1,67 @@
+{
+    mode: "facet",
+    includes: [
+        "<xo/alloc2/Allocator.hpp>",
+        "<xo/gc/Collector.hpp>",
+        "<cstdint>",
+        "<cstddef>",
+    ],
+    pretext: [
+        "namespace xo { namespace mm { struct ACollector; }}",
+    ],
+    namespace1: "xo",
+    namespace2: "mm",
+    facet: "GCObject",
+    detail_subdir: "detail",
+    brief: "xxx",
+    using_doxygen: true,
+    doc: [
+        "GC hooks for collector-aware data"
+    ],
+    types: [
+        // using size_type = std::size_t
+        {
+            name: "size_type",
+            doc: ["type for an amount of memory"],
+            definition: "std::size_t",
+        },
+    ],
+    const_methods: [
+        // size_type shallow_size() const noexcept
+        {
+            name: "shallow_size",
+            doc: ["memory consumption for this instance"],
+            return_type: "size_type",
+            args: [],
+            const: true,
+            noexcept: true,
+            attributes: [],
+        },
+        // Opaque shallow_copy(obj<AAllocator>>) const noexcept
+        {
+            name: "shallow_copy",
+            doc: ["copy instance using allocator"],
+            return_type: "Opaque",
+            args:[
+                {type: "obj<AAllocator>", name: "mm"},
+            ],
+            const: true,
+            noexcept: true,
+            attributes: [],
+        },
+    ],
+    nonconst_methods: [
+        // size_type forward_children(obj<ACollector>) const noexcept
+        {
+            name: "forward_children",
+            doc: ["during GC: forward immdiate children"],
+            return_type: "size_type",
+            args: [
+                {type: "obj<ACollector>", name: "gc"},
+            ],
+            const: true,
+            noexcept: true,
+            attributes: [],
+        },
+    ],
+}

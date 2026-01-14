@@ -1,6 +1,14 @@
 /** @file GCObject.hpp
  *
- *  @author Roland Conybeare, Dec 2025
+ *  Generated automagically from ingredients:
+ *  1. code generator:
+ *       [/Users/roland/proj/xo-umbrella2/xo-facet/codegen/genfacet]
+ *     arguments:
+ *       --input [idl/GCObject.json5]
+ *  2. jinja2 template for facet .hpp file:
+ *       [facet.hpp.j2]
+ *  3. idl for facet methods
+ *       [idl/GCObject.json5]
  **/
 
 #pragma once
