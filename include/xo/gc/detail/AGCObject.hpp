@@ -2,7 +2,7 @@
  *
  *  Generated automagically from ingredients:
  *  1. code generator:
- *       [/Users/roland/proj/xo-umbrella2/xo-facet/codegen/genfacet]
+ *       [/home/roland/proj/xo-umbrella2-claude1/xo-facet/codegen/genfacet]
  *     arguments:
  *       --input [idl/GCObject.json5]
  *  2. jinja2 template for abstract facet .hpp file:
@@ -40,8 +40,14 @@ public:
     // types
     /** integer identifying a type **/
     using typeseq = xo::facet::typeseq;
+    using Copaque = const void *;
+    using Opaque = void *;
     /** type for an amount of memory **/
     using size_type = std::size_t;
+    /** fomo allocator type **/
+    using AAllocator = xo::mm::AAllocator;
+    /** fomo collector type **/
+    using ACollector = xo::mm::ACollector;
     ///@}
 
     /** @defgroup mm-gcobject-methods **/

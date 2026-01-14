@@ -25,6 +25,16 @@
             doc: ["type for an amount of memory"],
             definition: "std::size_t",
         },
+        {
+            name: "AAllocator",
+            doc: ["fomo allocator type"],
+            definition: "xo::mm::AAllocator",
+        },
+        {
+            name: "ACollector",
+            doc: ["fomo collector type"],
+            definition: "xo::mm::ACollector",
+        },
     ],
     const_methods: [
         // size_type shallow_size() const noexcept
