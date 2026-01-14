@@ -52,6 +52,22 @@ namespace xo {
             return result;
         }
 
+        DString *
+        DString::clone(obj<AAllocator> mm, const DString * src)
+        {
+            size_type cap = src->capacity_;
+
+            void * mem = mm.alloc(typeseq::id<DString>(),
+                                  sizeof(DString) + cap);
+
+            DString * result = new (mem) DString();
+            result->capacity_ = cap;
+            result->size_ = src->size_;
+            std::memcpy(result->chars_, src->chars_, cap);
+
+            return result;
+        }
+
         DString &
         DString::assign(const DString & other)
         {
@@ -69,6 +85,32 @@ namespace xo {
             this->chars_[capacity_ - 1] = '\0';
             this->size_ = ::strlen(chars_);
             return this->size_;
+        }
+
+        auto
+        DString::shallow_size() const noexcept -> size_type
+        {
+            return sizeof(DString) + capacity_;
+        }
+
+        DString *
+        DString::shallow_copy(obj<AAllocator> mm) const noexcept
+        {
+            DString * copy = (DString *)mm.alloc_copy((std::byte *)this);
+
+            if (copy) {
+                copy->capacity_ = capacity_;
+                copy->size_ = size_;
+                ::memcpy(copy->chars_, chars_, capacity_);
+            }
+
+            return copy;
+        }
+
+        auto
+        DString::forward_children(obj<ACollector>) noexcept -> size_type
+        {
+            return shallow_size();
         }
 
     } /*namespace scm*/

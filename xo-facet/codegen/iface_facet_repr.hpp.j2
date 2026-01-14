@@ -46,6 +46,11 @@ namespace {{repr_ns1}} {
             {% for ty in types %}
             using {{ty.name}} = {{facet_ns1}}::{{facet_ns2}}::{{abstract_facet}}::{{ty.name}};
             {% endfor %}
+            using Copaque = {{facet_ns1}}::{{facet_ns2}}::{{abstract_facet}}::Copaque;
+            using Opaque = {{facet_ns1}}::{{facet_ns2}}::{{abstract_facet}}::Opaque;
+            {% for ty in local_types %}
+            using {{ty.name}} = {{ty.definition}};
+            {% endfor %}
             {% if using_dox %}
             ///@}
             /** @defgroup {{repr_ns2}}-{{facet_name_lc}}-{{data_repr_lc}}-methods **/

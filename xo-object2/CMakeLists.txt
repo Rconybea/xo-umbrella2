@@ -64,6 +64,18 @@ xo_add_genfacetimpl(
     OUTPUT_CPP_DIR src/object2
 )
 
+# note: manual target; generated code committed to git
+xo_add_genfacetimpl(
+    TARGET xo-object2-facetimpl-gcobject-string
+    FACET_PKG xo_gc
+    FACET GCObject
+    REPR String
+    INPUT idl/IGCObject_DString.json5
+    OUTPUT_HPP_DIR include/xo/object2
+    OUTPUT_IMPL_SUBDIR string
+    OUTPUT_CPP_DIR src/object2
+)
+
 # ----------------------------------------------------------------
 
 # must complete definition of expression lib before configuring examples

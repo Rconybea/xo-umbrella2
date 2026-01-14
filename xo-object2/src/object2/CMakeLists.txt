@@ -5,6 +5,7 @@ set(SELF_SRCS
     IGCObject_DFloat.cpp
     IGCObject_DInteger.cpp
     IGCObject_DList.cpp
+    IGCObject_DString.cpp
     ISequence_Any.cpp
     ISequence_DList.cpp
     IPrintable_DList.cpp

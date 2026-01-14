@@ -43,6 +43,8 @@ public:
     // types
     /** integer identifying a type **/
     using typeseq = xo::facet::typeseq;
+    using Copaque = const void *;
+    using Opaque = void *;
     {% for ty in types %}
     /** {{ty.doc}} **/
     using {{ty.name}} = {{ty.definition}};
