@@ -81,6 +81,24 @@ namespace xo {
                                     DString * s2);
 #endif
 
+            /** create string using printf-style formatting.
+             *  Use memory from allocator @p mm with capacity @p cap.
+             *  Truncates if result exceeds capacity.
+             *  @return pointer to newly created DString
+             **/
+            template <typename... Args>
+            static DString * snprintf(obj<AAllocator> mm,
+                                      size_type cap,
+                                      const char * fmt,
+                                      Args&&... args)
+            {
+                DString * result = DString::empty(mm, cap);
+                if (result) {
+                    result->sprintf(fmt, std::forward<Args>(args)...);
+                }
+                return result;
+            }
+
             ///@}
             /** @defgroup dstring-access access methods **/
             ///@{
