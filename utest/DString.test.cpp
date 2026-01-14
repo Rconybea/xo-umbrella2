@@ -260,6 +260,38 @@ namespace xo {
             REQUIRE(copy->capacity() == src->capacity());
             REQUIRE(std::strcmp(copy->chars(), src->chars()) == 0);
         }
+
+        TEST_CASE("DString-sprintf", "[object2][DString]")
+        {
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 4*1024 };
+            DArena arena = DArena::map(cfg);
+            auto alloc = with_facet<AAllocator>::mkobj(&arena);
+
+            DString * s = DString::empty(alloc, 32);
+
+            auto n = s->sprintf("hello %s %d", "world", 42);
+
+            REQUIRE(n == 14);
+            REQUIRE(s->size() == 14);
+            REQUIRE(std::strcmp(s->chars(), "hello world 42") == 0);
+        }
+
+        TEST_CASE("DString-sprintf-truncate", "[object2][DString]")
+        {
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 4*1024 };
+            DArena arena = DArena::map(cfg);
+            auto alloc = with_facet<AAllocator>::mkobj(&arena);
+
+            DString * s = DString::empty(alloc, 8);
+
+            auto n = s->sprintf("hello world");
+
+            REQUIRE(n == 7);
+            REQUIRE(s->size() == 7);
+            REQUIRE(std::strcmp(s->chars(), "hello w") == 0);
+        }
     } /*namespace ut*/
 } /*namespace xo*/
 
