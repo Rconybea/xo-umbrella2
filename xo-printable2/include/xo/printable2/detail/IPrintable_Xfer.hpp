@@ -2,7 +2,7 @@
  *
  *  Generated automagically from ingredients:
  *  1. code generator:
- *       [/Users/roland/proj/xo-umbrella2/xo-facet/codegen/genfacet]
+ *       [/home/roland/proj/xo-umbrella2-claude1/xo-facet/codegen/genfacet]
  *     arguments:
  *       --input [idl/Printable.json5]
  *  2. jinja2 template for abstract facet .hpp file:
@@ -41,7 +41,7 @@ namespace print {
 
         // const methods
         typeseq _typeseq() const noexcept override { return s_typeseq; }
-        bool pretty(Copaque data, const ppindentinfo & ppii) const override {
+        bool pretty(Copaque data, const ppindentinfo & ppii)  const override {
             return I::pretty(_dcast(data), ppii);
         }
 

@@ -2,7 +2,7 @@
  *
  *  Generated automagically from ingredients:
  *  1. code generator:
- *       [/Users/roland/proj/xo-umbrella2/xo-facet/codegen/genfacet]
+ *       [/home/roland/proj/xo-umbrella2-claude1/xo-facet/codegen/genfacet]
  *     arguments:
  *       --input [idl/Printable.json5]
  *  2. jinja2 template for abstract facet .hpp file:
@@ -18,6 +18,7 @@
 #include <xo/facet/obj.hpp>
 #include <xo/facet/facet_implementation.hpp>
 #include <xo/facet/typeseq.hpp>
+
 
 namespace xo {
 namespace print {
@@ -35,6 +36,8 @@ public:
     // types
     /** integer identifying a type **/
     using typeseq = xo::facet::typeseq;
+    using Copaque = const void *;
+    using Opaque = void *;
     /** dynamic pretty-printing state during layout **/
     using ppindentinfo = xo::print::ppindentinfo;
     ///@}
@@ -45,9 +48,8 @@ public:
     /** RTTI: unique id# for actual runtime data representation **/
     virtual typeseq _typeseq() const noexcept = 0;
     /** Pretty-printing support for this object.
-        See [xo-indentlog/xo/indentlog/pretty.hpp]
-    **/
-    virtual bool pretty(Copaque data, const ppindentinfo & ppii) const = 0;
+See [xo-indentlog/xo/indentlog/pretty.hpp] **/
+    virtual bool pretty(Copaque data, const ppindentinfo & ppii)  const = 0;
 
     // nonconst methods
     ///@}
@@ -69,4 +71,4 @@ using IPrintable_ImplType = xo::facet::FacetImplType<APrintable, DRepr>;
 } /*namespace print*/
 } /*namespace xo*/
 
-/*  */
+/* APrintable.hpp */

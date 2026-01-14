@@ -1,8 +1,11 @@
 {
     mode: "facet",
     includes: ["<xo/indentlog/print/ppindentinfo.hpp>"],
+    // extra includes in Printable.hpp
+    user_hpp_includes: ["\"detail/ppdetail_Printable.hpp\""],
     namespace1: "xo",
     namespace2: "print",
+    pretext: [],
     facet: "Printable",
     detail_subdir: "detail",
     brief: "pretty-printable objects",
@@ -30,6 +33,7 @@
             args: [
                 {type: "const ppindentinfo &", name: "ppii"},
             ],
+            const: true,
         },
     ],
     nonconst_methods: [],

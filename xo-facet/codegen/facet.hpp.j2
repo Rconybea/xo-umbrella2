@@ -18,4 +18,8 @@
 #include "{{impl_hpp_subdir}}/{{iface_facet_xfer_hpp_fname}}"
 #include "{{impl_hpp_subdir}}/{{router_facet_hpp_fname}}"
 
+{% for include_fname in user_hpp_includes %}
+#include {{include_fname}}
+{% endfor %}
+
 /* end {{facet_hpp_fname}} */

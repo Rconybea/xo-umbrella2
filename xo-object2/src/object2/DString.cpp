@@ -4,11 +4,13 @@
  **/
 
 #include "DString.hpp"
+#include <xo/indentlog/print/pretty.hpp>
 #include <algorithm>
 #include <cstring>
 
 namespace xo {
     using xo::facet::typeseq;
+    using xo::print::ppdetail_atomic;
 
     namespace scm {
         DString *
@@ -111,6 +113,12 @@ namespace xo {
         DString::forward_children(obj<ACollector>) noexcept -> size_type
         {
             return shallow_size();
+        }
+
+        bool
+        DString::pretty(const ppindentinfo & ppii) const
+        {
+            return ppdetail_atomic<const char *>::print_pretty(ppii, &(chars_[0]));
         }
 
     } /*namespace scm*/

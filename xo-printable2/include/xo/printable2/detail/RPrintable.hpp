@@ -2,7 +2,7 @@
  *
  *  Generated automagically from ingredients:
  *  1. code generator:
- *       [/Users/roland/proj/xo-umbrella2/xo-facet/codegen/genfacet]
+ *       [/home/roland/proj/xo-umbrella2-claude1/xo-facet/codegen/genfacet]
  *     arguments:
  *       --input [idl/Printable.json5]
  *  2. jinja2 template for abstract facet .hpp file:
@@ -30,8 +30,8 @@ public:
     ///@{
     using ObjectType = Object;
     using DataPtr = Object::DataPtr;
+    using typeseq = xo::reflect::typeseq;
     using ppindentinfo = APrintable::ppindentinfo;
-    using typeseq = xo::facet::typeseq;
     ///@}
 
     /** @defgroup print-printable-router-ctors **/
@@ -39,8 +39,8 @@ public:
     RPrintable() {}
     RPrintable(Object::DataPtr data) : Object{std::move(data)} {}
     RPrintable(const APrintable * iface, void * data)
-        requires std::is_same_v<typename Object::DataType, xo::facet::DVariantPlaceholder>
-    : Object(iface, data) {}
+      requires std::is_same_v<typename Object::DataType, xo::facet::DVariantPlaceholder>
+      : Object(iface, data) {}
 
     ///@}
     /** @defgroup print-printable-router-methods **/
@@ -48,13 +48,11 @@ public:
 
     // const methods
     typeseq _typeseq() const noexcept { return O::iface()->_typeseq(); }
-    bool pretty(const ppindentinfo & ppii) const {
+    bool pretty(const ppindentinfo & ppii)  const {
         return O::iface()->pretty(O::data(), ppii);
     }
 
-    // non-const methods
-    // << do something for non-const methods >>
-    //
+    // non-const methods (still const in router!)
 
     ///@}
     /** @defgroup print-printable-member-vars **/

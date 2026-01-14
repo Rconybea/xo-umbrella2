@@ -32,6 +32,9 @@ bool
 IPrintable_Any::_valid
   = valid_facet_implementation<APrintable, IPrintable_Any>();
 
+// nonconst methods
+
+
 } /*namespace print*/
 } /*namespace xo*/
 

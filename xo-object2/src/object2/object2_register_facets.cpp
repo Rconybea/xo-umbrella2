@@ -13,6 +13,7 @@
 #include <xo/object2/IPrintable_DList.hpp>
 #include <xo/object2/IPrintable_DFloat.hpp>
 #include <xo/object2/IPrintable_DInteger.hpp>
+#include <xo/object2/string/IPrintable_DString.hpp>
 
 #include <xo/printable2/detail/APrintable.hpp>
 #include <xo/alloc2/alloc/AAllocator.hpp>
@@ -45,6 +46,7 @@ namespace xo {
             FacetRegistry::register_impl<APrintable, DInteger>();
 
             FacetRegistry::register_impl<AGCObject, DString>();
+            FacetRegistry::register_impl<APrintable, DString>();
 
             log && log(xtag("DList.tseq", typeseq::id<DList>()));
             log && log(xtag("DFloat.tseq", typeseq::id<DFloat>()));

@@ -93,6 +93,8 @@ def gen_facet(env,
 
     # extra include files (or perhaps other definitions)
     facet_includes = idl['includes']
+    # extra (post) includes for user .hpp e.g. Sequence.hpp
+    user_hpp_includes = idl['user_hpp_includes']
     # arbitrary text after includes, before opening namespaces
     facet_pretext = idl['pretext']
     # detail
@@ -163,6 +165,8 @@ def gen_facet(env,
         'facet_ns2': facet_ns2,
         'facet_name_lc': facet_name_lc,
         'facet_hpp_fname': facet_hpp_fname,
+        #
+        'user_hpp_includes': user_hpp_includes,
         #'name': facet_name,
         'idl_fname': idl_fname,
         #

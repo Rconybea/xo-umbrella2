@@ -2,7 +2,7 @@
  *
  *  Generated automagically from ingredients:
  *  1. code generator:
- *       [/Users/roland/proj/xo-umbrella2/xo-facet/codegen/genfacet]
+ *       [/home/roland/proj/xo-umbrella2-claude1/xo-facet/codegen/genfacet]
  *     arguments:
  *       --input [idl/Printable.json5]
  *  2. jinja2 template for facet .hpp file:
@@ -18,7 +18,6 @@
 #include "detail/IPrintable_Xfer.hpp"
 #include "detail/RPrintable.hpp"
 
-// todo: additional includes in idl above
 #include "detail/ppdetail_Printable.hpp"
 
 /* end Printable.hpp */
