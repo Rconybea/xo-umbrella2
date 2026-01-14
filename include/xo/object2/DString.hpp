@@ -87,10 +87,10 @@ namespace xo {
              *  @return pointer to newly created DString
              **/
             template <typename... Args>
-            static DString * snprintf(obj<AAllocator> mm,
-                                      size_type cap,
-                                      const char * fmt,
-                                      Args&&... args)
+            static DString * printf(obj<AAllocator> mm,
+                                    size_type cap,
+                                    const char * fmt,
+                                    Args&&... args)
             {
                 DString * result = DString::empty(mm, cap);
                 if (result) {
@@ -148,7 +148,12 @@ namespace xo {
              **/
             template <typename... Args>
             size_type sprintf(const char * fmt, Args&&... args) {
-                int n = std::snprintf(chars_, capacity_, fmt, std::forward<Args>(args)...);
+                int n;
+                if constexpr (sizeof...(Args) == 0) {
+                    n = std::snprintf(chars_, capacity_, "%s", fmt);
+                } else {
+                    n = std::snprintf(chars_, capacity_, fmt, std::forward<Args>(args)...);
+                }
                 if (n < 0) {
                     size_ = 0;
                     chars_[0] = '\0';
