@@ -11,6 +11,7 @@
 #include <xo/indentlog/print/ppindentinfo.hpp>
 #include <string_view>
 #include <cstdint>
+#include <cstdio>
 
 namespace xo {
     namespace scm {
@@ -119,6 +120,25 @@ namespace xo {
 
             /** replace contents with @p other, or prefix of up to @p capacity - 1 chars **/
             DString & assign(const DString & other);
+            ///@}
+            /** @defgroup dstring-general general methods **/
+            ///@{
+
+            /** format string into this DString using printf-style formatting.
+             *  Truncates if result exceeds capacity.
+             *  @return number of characters written (excluding null terminator)
+             **/
+            template <typename... Args>
+            size_type sprintf(const char * fmt, Args&&... args) {
+                int n = std::snprintf(chars_, capacity_, fmt, std::forward<Args>(args)...);
+                if (n < 0) {
+                    size_ = 0;
+                    chars_[0] = '\0';
+                } else {
+                    size_ = (n < static_cast<int>(capacity_)) ? n : capacity_ - 1;
+                }
+                return size_;
+            }
 
             // TODO - behave like std::string, to the extent feasible
             //   insert
