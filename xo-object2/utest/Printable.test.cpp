@@ -12,6 +12,10 @@
 #include <xo/object2/IGCObject_DList.hpp>
 #include <xo/object2/IPrintable_DList.hpp>
 
+#include <xo/object2/DString.hpp>
+#include <xo/object2/string/IGCObject_DString.hpp>
+#include <xo/object2/string/IPrintable_DString.hpp>
+
 #include <xo/object2/DInteger.hpp>
 #include <xo/object2/IGCObject_DInteger.hpp>
 
@@ -35,6 +39,7 @@ namespace ut {
     using xo::scm::ListOps;
     using xo::scm::DList;
     using xo::scm::DInteger;
+    using xo::scm::DString;
     using xo::mm::AAllocator;
     using xo::mm::ACollector;
     using xo::mm::AGCObject;
@@ -70,10 +75,10 @@ namespace ut {
         std::vector<testcase_pp>
         s_testcase_v = {
             testcase_pp(16384, 8192, 0, "()"),
-            testcase_pp(16384, 8192, 1, "(1000)"),
-            testcase_pp(16384, 8192, 2, "(1000 1197)"),
-            testcase_pp(16384, 8192, 5, "(1000 1197 1394 1591 1788)"),
-            testcase_pp(16384, 8192, 10, "(1000 1197 1394 1591 1788 1985 2182 2379 2576 2773)"),
+            testcase_pp(16384, 8192, 1, "(01000)"),
+            testcase_pp(16384, 8192, 2, "(01000 1197)"),
+            testcase_pp(16384, 8192, 5, "(01000 1197 01394 1591 01788)"),
+            testcase_pp(16384, 8192, 10, "(01000 1197 01394 1591 01788 1985 02182 2379 02576 2773)"),
             testcase_pp(16384, 8192, 20, "(...)"),
         };
     }
@@ -117,9 +122,17 @@ namespace ut {
                 c_o.add_gc_root(&l0_o);
 
                 for(int ip1 = tc.list_.size(); ip1 > 0; --ip1) {
-                    auto xi_o = DInteger::box<AGCObject>(gc_o, tc.list_[ip1 - 1]);
+                    obj<AGCObject> elt;
 
-                    l0_o  = ListOps::cons(gc_o, xi_o, l0_o);
+                    //elt = DInteger::box<AGCObject>(gc_o, tc.list_[ip1 - 1]);
+
+                    if (ip1 % 2 == 0) {
+                        elt = DInteger::box<AGCObject>(gc_o, tc.list_[ip1 - 1]);
+                    } else {
+                        elt = obj<AGCObject,DString>(DString::printf(gc_o, 80, "%05d", tc.list_[ip1 - 1]));
+                    }
+
+                    l0_o  = ListOps::cons(gc_o, elt, l0_o);
                 }
 
                 // TODO: log_streambuf using DArena
