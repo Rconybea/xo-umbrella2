@@ -265,8 +265,8 @@ def gen_facet_impl(env,
     # doc section for facet
     facet_doc = '\n'.join(idl['doc'])
 
-    types = facet_idl['types']
-    for ty in types:
+    facet_types = facet_idl['types']
+    for ty in facet_types:
         ty['doc'] = '\n'.join(ty['doc'])
 
     const_methods = facet_idl['const_methods']
@@ -328,6 +328,8 @@ def gen_facet_impl(env,
     # repr_ns2: nested namespace for repr [e.g. scm].
     repr_ns2 = idl['namespace2']
 
+    # local_types: addition type defs (e.g. repr_ns2 != facet_ns2)
+    local_types = idl['local_types']
 
     # iface_facet_repr: IFoo_DRepr
     iface_facet_repr = f'{iface_facet}_{data_repr}'
@@ -379,7 +381,8 @@ def gen_facet_impl(env,
         'router_facet_hpp_j2': 'router_facet.hpp.j2',
         'router_facet_hpp_fname': router_facet_hpp_fname,
         #
-        'types': types,
+        'types': facet_types,
+        'local_types': local_types,
         #
         'const_methods': const_methods,
         #
