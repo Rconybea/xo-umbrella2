@@ -4,6 +4,8 @@
  **/
 
 #include "DList.hpp"
+#include "IPrintable_DList.hpp"
+#include <xo/gc/GCObject.hpp>
 #include <xo/printable2/Printable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/indentlog/print/pretty.hpp>
@@ -125,7 +127,9 @@ namespace xo {
                     obj<APrintable> elt
                         = FacetRegistry::instance().variant<APrintable, AGCObject>(l->head_);
 
-                    assert(elt);
+
+
+                    assert(elt.data());
 
                     if (!pps->print_upto(elt))
                         return false;

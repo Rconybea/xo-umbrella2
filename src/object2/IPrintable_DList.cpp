@@ -12,6 +12,7 @@
 **/
 
 #include "IPrintable_DList.hpp"
+#include <xo/indentlog/scope.hpp>
 
 namespace xo {
     namespace scm {

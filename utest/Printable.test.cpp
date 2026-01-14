@@ -89,6 +89,8 @@ namespace ut {
         FacetRegistry::instance().dump(&std::cerr);
 
         for (std::size_t i_tc = 0, n_tc = s_testcase_v.size(); i_tc < n_tc; ++i_tc) {
+            log && log("printable1 test:", xtag("i_tc", i_tc));
+
             try {
                 const testcase_pp & tc = s_testcase_v[i_tc];
 
@@ -130,7 +132,7 @@ namespace ut {
 
                 pps.pretty(l0_po);
 
-                REQUIRE(ss.str() == string(tc.expected_));
+                CHECK(ss.str() == string(tc.expected_));
             } catch (std::exception & ex) {
                 std::cerr << "caught exception: " << ex.what() << std::endl;
                 REQUIRE(false);
