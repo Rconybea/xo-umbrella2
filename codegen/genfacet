@@ -22,7 +22,7 @@ def format_method_qualifiers(method):
     return ' '.join(quals)
 
 def format_method_staticqual(method):
-    """ Build qualifier string for a static method: noexcet
+    """ Build qualifier string for a static method: noexcept
     """
     quals = []
     if method.get('noexcept', False):
@@ -93,6 +93,8 @@ def gen_facet(env,
 
     # extra include files (or perhaps other definitions)
     facet_includes = idl['includes']
+    # arbitrary text after includes, before opening namespaces
+    facet_pretext = idl['pretext']
     # detail
     facet_detail_subdir = idl['detail_subdir']
     facet_ns1 = idl['namespace1']
@@ -156,6 +158,7 @@ def gen_facet(env,
         #
         'facet_hpp_j2': 'facet.hpp.j2',
         'facet_includes': facet_includes,
+        'facet_pretext': facet_pretext,
         'facet_ns1': facet_ns1,
         'facet_ns2': facet_ns2,
         'facet_name_lc': facet_name_lc,

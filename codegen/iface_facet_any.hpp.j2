@@ -70,7 +70,7 @@ namespace {{facet_ns2}} {
 
         // nonconst methods
         {% for md in nonconst_methods %}
-        [[noreturn]] {{md.return_type}} {{md.name}}({{md.args | argtypes}}) {{md | qualifiers}} override { _fatal(); }
+        [[noreturn]] {{md.return_type}} {{md.name}}({{md.args | argtypes}}) {{md | qualifiers}} override;
         {% endfor %}
 
         {% if using_dox %}

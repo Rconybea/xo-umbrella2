@@ -21,6 +21,10 @@
 #include <xo/facet/facet_implementation.hpp>
 #include <xo/facet/typeseq.hpp>
 
+{% for line in facet_pretext %}
+{{line}}
+{% endfor %}
+
 namespace {{facet_ns1}} {
 namespace {{facet_ns2}} {
 
@@ -85,4 +89,4 @@ using {{iface_facet_impltype}} = xo::facet::FacetImplType<{{abstract_facet}}, DR
 } /*namespace {{facet_ns2}}*/
 } /*namespace {{facet_ns1}}*/
 
-/* {{abstract_face_fname}} */
+/* {{abstract_facet_fname}} */

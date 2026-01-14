@@ -32,6 +32,17 @@ bool
 {{iface_facet_any}}::_valid
   = valid_facet_implementation<{{abstract_facet}}, {{iface_facet_any}}>();
 
+// nonconst methods
+
+{% for md in nonconst_methods %}
+auto
+{{iface_facet_any}}::{{md.name}}({{md.args | argtypes}}) {{md | qualifiers}} -> {{md.return_type}}
+{
+    _fatal();
+}
+
+{% endfor %}
+
 } /*namespace {{facet_ns2}}*/
 } /*namespace {{facet_ns1}}*/
 
