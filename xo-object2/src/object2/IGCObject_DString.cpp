@@ -11,7 +11,7 @@
  *       [idl/IGCObject_DString.json5]
 **/
 
-#include "IGCObject_DString.hpp"
+#include "string/IGCObject_DString.hpp"
 
 namespace xo {
     namespace scm {
