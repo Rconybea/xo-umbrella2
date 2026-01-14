@@ -243,6 +243,23 @@ namespace xo {
 
             REQUIRE(std::strcmp(s->chars(), "HELLO") == 0);
         }
+
+        TEST_CASE("DString-clone", "[object2][DString]")
+        {
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 4*1024 };
+            DArena arena = DArena::map(cfg);
+            auto alloc = with_facet<AAllocator>::mkobj(&arena);
+
+            DString * src = DString::from_cstr(alloc, "hello world");
+            DString * copy = DString::clone(alloc, src);
+
+            REQUIRE(copy != nullptr);
+            REQUIRE(copy != src);
+            REQUIRE(copy->size() == src->size());
+            REQUIRE(copy->capacity() == src->capacity());
+            REQUIRE(std::strcmp(copy->chars(), src->chars()) == 0);
+        }
     } /*namespace ut*/
 } /*namespace xo*/
 

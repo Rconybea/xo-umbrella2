@@ -4,9 +4,11 @@
  **/
 
 #include "object2_register_facets.hpp"
+
 #include <xo/object2/IGCObject_DList.hpp>
 #include <xo/object2/IGCObject_DFloat.hpp>
 #include <xo/object2/IGCObject_DInteger.hpp>
+#include <xo/object2/IGCObject_DString.hpp>
 
 #include <xo/object2/IPrintable_DList.hpp>
 #include <xo/object2/IPrintable_DFloat.hpp>
@@ -23,6 +25,7 @@ namespace xo {
     using xo::mm::AGCObject;
     using xo::scm::DList;
     using xo::scm::DFloat;
+    using xo::scm::DString;
     using xo::facet::FacetRegistry;
     using xo::facet::typeseq;
 
@@ -41,9 +44,12 @@ namespace xo {
             FacetRegistry::register_impl<AGCObject, DInteger>();
             FacetRegistry::register_impl<APrintable, DInteger>();
 
+            FacetRegistry::register_impl<AGCObject, DString>();
+
             log && log(xtag("DList.tseq", typeseq::id<DList>()));
             log && log(xtag("DFloat.tseq", typeseq::id<DFloat>()));
             log && log(xtag("DInteger.tseq", typeseq::id<DInteger>()));
+            log && log(xtag("DString.tseq", typeseq::id<DString>()));
 
             log && log(xtag("AAllocator.tseq", typeseq::id<AAllocator>()));
             log && log(xtag("APrintable.tseq", typeseq::id<APrintable>()));

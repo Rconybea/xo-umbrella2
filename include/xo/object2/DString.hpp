@@ -6,7 +6,9 @@
 #pragma once
 
 #include <xo/alloc2/Allocator.hpp>
+#include <xo/gc/Collector.hpp>
 #include <xo/facet/obj.hpp>
+#include <xo/indentlog/print/ppindentinfo.hpp>
 #include <string_view>
 #include <cstdint>
 
@@ -38,10 +40,21 @@ namespace xo {
             using const_iterator = const char *;
             /** xo allocator **/
             using AAllocator = xo::mm::AAllocator;
-
+            /** garbage collector **/
+            using ACollector = xo::mm::ACollector;
+            /** ppindentinfo for APrintable **/
+            using ppindentinfo = xo::print::ppindentinfo;
             ///@}
             /** @defgroup dstring-ctors constructors **/
             ///@{
+
+            /** default ctor **/
+            DString() = default;
+
+            /** not simply copyable, because of flexible array.
+             *  Need allocator
+             **/
+            DString(const DString &) = delete;
 
             /** create empty string with space for @cap chars
              *  (including null terminator).
@@ -55,6 +68,17 @@ namespace xo {
              **/
             static DString * from_cstr(obj<AAllocator> mm,
                                        const char * cstr);
+
+            /** clone existing string **/
+            static DString * clone(obj<AAllocator> mm,
+                                   const DString * src);
+
+#ifdef NOT_YET
+            /** **/
+            static DString * concat(obj<AAllocator> mm,
+                                    DString * s1,
+                                    DString * s2);
+#endif
 
             ///@}
             /** @defgroup dstring-access access methods **/
@@ -139,6 +163,24 @@ namespace xo {
              *  @endcode
              **/
             operator const char * () const noexcept { return &(chars_[0]); }
+
+            ///@}
+            /** @defgroup dstring-printable-methods printable facet methods **/
+            ///@{
+
+            bool pretty(const ppindentinfo & ppii) const;
+
+            ///@}
+            /** @defgroup dstring-gcobject-methods gcobject facet methods **/
+            ///@{
+
+            size_type shallow_size() const noexcept;
+
+            /** clone string, using memory from allocator @p mm **/
+            DString * shallow_copy(obj<AAllocator> mm) const noexcept;
+
+            /** fixup child pointers (trivial for DString, no children) **/
+            size_type forward_children(obj<ACollector> gc) noexcept;
 
             ///@}
 
