@@ -1,6 +1,7 @@
 {
     mode: "implementation",
-    includes: [ "<xo/gc/GCObject.hpp>",
+    includes: [
+        "<xo/gc/GCObject.hpp>",
         "<xo/alloc2/Allocator.hpp>"
     ],
     local_types: [ ],

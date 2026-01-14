@@ -8,7 +8,7 @@
 #include <xo/object2/IGCObject_DList.hpp>
 #include <xo/object2/IGCObject_DFloat.hpp>
 #include <xo/object2/IGCObject_DInteger.hpp>
-#include <xo/object2/IGCObject_DString.hpp>
+#include <xo/object2/string/IGCObject_DString.hpp>
 
 #include <xo/object2/IPrintable_DList.hpp>
 #include <xo/object2/IPrintable_DFloat.hpp>
