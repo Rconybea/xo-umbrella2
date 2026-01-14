@@ -46,6 +46,9 @@ public:
     {% endif %}
     {{router_facet}}() {}
     {{router_facet}}(Object::DataPtr data) : Object{std::move(data)} {}
+    {{router_facet}}(const {{abstract_facet}} * iface, void * data)
+      requires std::is_same_v<typename Object::DataType, xo::facet::DVariantPlaceholder>
+      : Object(iface, data) {}
 
     {% if using_dox %}
     ///@}
@@ -61,7 +64,7 @@ public:
     }
     {% endfor %}
 
-    // non-const methods
+    // non-const methods (still const in router!)
     {% for md in nonconst_methods %}
     {{md.return_type}} {{md.name}}({{md.args | argsnodata}}) {{md | staticqual}} {
         return O::iface()->{{md.name}}({{md.args | argrouting}});
