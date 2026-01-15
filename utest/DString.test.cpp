@@ -292,6 +292,25 @@ namespace xo {
             REQUIRE(s->size() == 7);
             REQUIRE(std::strcmp(s->chars(), "hello w") == 0);
         }
+
+        TEST_CASE("DString-compare", "[object2][DString]")
+        {
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 4*1024 };
+            DArena arena = DArena::map(cfg);
+            auto alloc = with_facet<AAllocator>::mkobj(&arena);
+
+            DString * s1 = DString::from_cstr(alloc, "apple");
+            DString * s2 = DString::from_cstr(alloc, "apple");
+            DString * s3 = DString::from_cstr(alloc, "banana");
+            DString * s4 = DString::from_cstr(alloc, "aardvark");
+
+            REQUIRE(DString::compare(*s1, *s2) == 0);
+            REQUIRE(DString::compare(*s1, *s3) < 0);
+            REQUIRE(DString::compare(*s3, *s1) > 0);
+            REQUIRE(DString::compare(*s1, *s4) > 0);
+            REQUIRE(DString::compare(*s4, *s1) < 0);
+        }
     } /*namespace ut*/
 } /*namespace xo*/
 

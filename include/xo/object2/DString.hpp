@@ -164,6 +164,11 @@ namespace xo {
                 return size_;
             }
 
+            /** lexicographically compare two strings.
+             *  @return <0 if lhs < rhs, 0 if equal, >0 if lhs > rhs
+             **/
+            static int compare(const DString & lhs, const DString & rhs) noexcept;
+
             // TODO - behave like std::string, to the extent feasible
             //   insert
             //   insert_range
@@ -181,7 +186,6 @@ namespace xo {
             // find_first_not_of
             // find_last_of
             // find_last_not_of
-            // compare
             // starts_with
             // end_with
             // contains
