@@ -5,6 +5,7 @@
 
 #include "object2_register_facets.hpp"
 
+#include <xo/object2/array/IGCObject_DArray.hpp>
 #include <xo/object2/list/IGCObject_DList.hpp>
 #include <xo/object2/number/IGCObject_DFloat.hpp>
 #include <xo/object2/number/IGCObject_DInteger.hpp>
@@ -53,6 +54,7 @@ namespace xo {
             FacetRegistry::register_impl<AGCObject, DString>();
             FacetRegistry::register_impl<APrintable, DString>();
 
+            FacetRegistry::register_impl<AGCObject, DArray>();
             FacetRegistry::register_impl<ASequence, DArray>();
 
             log && log(xtag("DList.tseq", typeseq::id<DList>()));
