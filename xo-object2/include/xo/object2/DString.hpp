@@ -10,6 +10,7 @@
 #include <xo/facet/obj.hpp>
 #include <xo/indentlog/print/ppindentinfo.hpp>
 #include <string_view>
+#include <functional>
 #include <cstdint>
 //#include <cstdio>
 
@@ -169,6 +170,11 @@ namespace xo {
              **/
             static int compare(const DString & lhs, const DString & rhs) noexcept;
 
+            /** compute hash of string contents **/
+            std::size_t hash() const noexcept {
+                return std::hash<std::string_view>{}(std::string_view(chars_, size_));
+            }
+
             // TODO - behave like std::string, to the extent feasible
             //   insert
             //   insert_range
@@ -272,5 +278,14 @@ namespace xo {
 
     } /*namespace scm*/
 } /*namespace xo*/
+
+namespace std {
+    template <>
+    struct hash<xo::scm::DString> {
+        std::size_t operator()(const xo::scm::DString & x) const noexcept {
+            return x.hash();
+        }
+    };
+} /*namespace std*/
 
 /* end DString.hpp */
