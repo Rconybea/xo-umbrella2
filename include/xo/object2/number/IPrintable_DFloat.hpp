@@ -2,17 +2,18 @@
  *
  *  Generated automagically from ingredients:
  *  1. code generator:
- *       [/home/roland/proj/xo-umbrella2/xo-facet/codegen/genfacet]
+ *       [/Users/roland/proj/xo-umbrella2/xo-facet/codegen/genfacet]
  *     arguments:
  *       --input [idl/IPrintable_DFloat.json5]
  *  2. jinja2 template for abstract facet .hpp file:
- *       [iface_facet_any.hpp.j2]
+ *       [iface_facet_repr.hpp.j2]
  *  3. idl for facet methods
  *       [idl/IPrintable_DFloat.json5]
  **/
 
 #pragma once
 
+#include "Printable.hpp"
 #include <xo/printable2/Printable.hpp>
 #include <xo/printable2/detail/IPrintable_Xfer.hpp>
 #include "DFloat.hpp"
@@ -41,13 +42,17 @@ namespace xo {
             /** @defgroup scm-printable-dfloat-type-traits **/
             ///@{
             using ppindentinfo = xo::print::APrintable::ppindentinfo;
+            using Copaque = xo::print::APrintable::Copaque;
+            using Opaque = xo::print::APrintable::Opaque;
             ///@}
             /** @defgroup scm-printable-dfloat-methods **/
             ///@{
+            // const methods
             /** Pretty-printing support for this object.
 See [xo-indentlog/xo/indentlog/pretty.hpp] **/
             static bool pretty(const DFloat & self, const ppindentinfo & ppii);
 
+            // non-const methods
             ///@}
         };
 
