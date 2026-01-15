@@ -311,6 +311,53 @@ namespace xo {
             REQUIRE(DString::compare(*s1, *s4) > 0);
             REQUIRE(DString::compare(*s4, *s1) < 0);
         }
+
+        TEST_CASE("DString-comparison-operators", "[object2][DString]")
+        {
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 4*1024 };
+            DArena arena = DArena::map(cfg);
+            auto alloc = with_facet<AAllocator>::mkobj(&arena);
+
+            DString * apple1 = DString::from_cstr(alloc, "apple");
+            DString * apple2 = DString::from_cstr(alloc, "apple");
+            DString * banana = DString::from_cstr(alloc, "banana");
+
+            // operator==
+            REQUIRE(*apple1 == *apple1);
+            REQUIRE(*apple2 == *apple2);
+            REQUIRE(*banana == *banana);
+            REQUIRE(*apple1 == *apple2);
+
+            REQUIRE_FALSE(*apple1 == *banana);
+
+            // operator!=
+            REQUIRE(*apple1 != *banana);
+            REQUIRE_FALSE(*apple1 != *apple1);
+            REQUIRE_FALSE(*apple2 != *apple2);
+            REQUIRE_FALSE(*apple1 != *apple2);
+            REQUIRE_FALSE(*banana != *banana);
+
+            // operator<
+            REQUIRE(*apple1 < *banana);
+            REQUIRE_FALSE(*banana < *apple1);
+            REQUIRE_FALSE(*apple1 < *apple2);
+
+            // operator<=
+            REQUIRE(*apple1 <= *banana);
+            REQUIRE(*apple1 <= *apple2);
+            REQUIRE_FALSE(*banana <= *apple1);
+
+            // operator>
+            REQUIRE(*banana > *apple1);
+            REQUIRE_FALSE(*apple1 > *banana);
+            REQUIRE_FALSE(*apple1 > *apple2);
+
+            // operator>=
+            REQUIRE(*banana >= *apple1);
+            REQUIRE(*apple1 >= *apple2);
+            REQUIRE_FALSE(*apple1 >= *banana);
+        }
     } /*namespace ut*/
 } /*namespace xo*/
 
