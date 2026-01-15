@@ -168,7 +168,7 @@ namespace xo {
         auto
         DList::forward_children(obj<ACollector> gc) noexcept -> size_type
         {
-            scope log(XO_DEBUG(true));
+            //scope log(XO_DEBUG(true));
 
             gc.forward_inplace(head_.iface(), (void **)&(head_.data_));
 
