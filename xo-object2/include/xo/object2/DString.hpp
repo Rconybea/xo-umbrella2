@@ -245,6 +245,11 @@ namespace xo {
 
             ///@}
         };
+
+        inline bool operator==(const DString & lhs, const DString & rhs) {
+            return DString::compare(lhs, rhs) == 0;
+        }
+
     } /*namespace scm*/
 } /*namespace xo*/
 
