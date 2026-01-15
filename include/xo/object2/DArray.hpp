@@ -10,6 +10,7 @@
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/facet/obj.hpp>
 #include <xo/indentlog/print/ppindentinfo.hpp>
+#include <concepts>
 #include <cstdint>
 
 namespace xo {
@@ -57,6 +58,12 @@ namespace xo {
             static DArray * empty(obj<AAllocator> mm,
                                   size_type cap);
 
+            /** create array containing elements @p args, using memory from @p mm.
+             *  Nullptr if space exhausted.
+             **/
+            template <typename... Args>
+                requires (std::same_as<Args, obj<AGCObject>> && ...)
+            static DArray * array(obj<AAllocator> mm, Args... args);
 
             ///@}
             /** @defgroup darray-access acecss methods **/
@@ -124,6 +131,18 @@ namespace xo {
 
             ///@}
         };
+
+        template <typename... Args>
+            requires (std::same_as<Args, obj<DArray::AGCObject>> && ...)
+        DArray *
+        DArray::array(obj<AAllocator> mm, Args... args)
+        {
+            DArray * result = empty(mm, sizeof...(args));
+            if (result) {
+                (result->push_back(args), ...);
+            }
+            return result;
+        }
 
     } /*namespace scm*/
 } /*namespace xo*/
