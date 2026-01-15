@@ -1,43 +1,36 @@
 /** @file IGCObject_DInteger.cpp
  *
- *  @author Roland Conybeare, Dec 2025
- **/
+ *  Generated automagically from ingredients:
+ *  1. code generator:
+ *       [/Users/roland/proj/xo-umbrella2/xo-facet/codegen/genfacet]
+ *     arguments:
+ *       --input [idl/IGCObject_DInteger.json5]
+ *  2. jinja2 template for abstract facet .hpp file:
+ *       [iface_facet_any.hpp.j2]
+ *  3. idl for facet methods
+ *       [idl/IGCObject_DInteger.json5]
+**/
 
-#include "IGCObject_DInteger.hpp"
-#include "xo/alloc2/alloc/AAllocator.hpp"
-#include "xo/facet/obj.hpp"
-#include <cstddef>
+#include "number/IGCObject_DInteger.hpp"
 
 namespace xo {
-    using xo::mm::AAllocator;
-    using xo::facet::obj;
-    using xo::facet::typeseq;
-    using std::size_t;
-
     namespace scm {
-        size_t
-        IGCObject_DInteger::shallow_size(const DInteger &) noexcept
+        auto
+        IGCObject_DInteger::shallow_size(const DInteger & self) noexcept -> size_type
         {
-            return sizeof(DInteger);
+            return self.shallow_size();
         }
 
-        DInteger *
-        IGCObject_DInteger::shallow_copy(const DInteger & src,
-                                         obj<AAllocator> mm) noexcept
+        auto
+        IGCObject_DInteger::shallow_copy(const DInteger & self, obj<AAllocator> mm) noexcept -> Opaque
         {
-            DInteger * copy = (DInteger *)mm.alloc_copy((std::byte *)&src);
-
-            if (copy)
-                *copy = src;
-
-            return copy;
+            return self.shallow_copy(mm);
         }
 
-        size_t
-        IGCObject_DInteger::forward_children(DInteger & src,
-                                             obj<ACollector>) noexcept
+        auto
+        IGCObject_DInteger::forward_children(DInteger & self, obj<ACollector> gc) noexcept -> size_type
         {
-            return shallow_size(src);
+            return self.forward_children(gc);
         }
 
     } /*namespace scm*/

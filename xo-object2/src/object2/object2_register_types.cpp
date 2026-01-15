@@ -7,7 +7,7 @@
 
 #include "list/IGCObject_DList.hpp"
 #include "number/IGCObject_DFloat.hpp"
-#include "IGCObject_DInteger.hpp"
+#include "number/IGCObject_DInteger.hpp"
 #include "string/IGCObject_DString.hpp"
 
 #include "list/IPrintable_DList.hpp"
