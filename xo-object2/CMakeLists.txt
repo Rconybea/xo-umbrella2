@@ -36,7 +36,7 @@ xo_add_genfacetimpl(
     REPR List
     INPUT idl/ISequence_DList.json5
     OUTPUT_HPP_DIR include/xo/object2
-    OUTPUT_IMPL_SUBDIR sequence
+    OUTPUT_IMPL_SUBDIR list
     OUTPUT_CPP_DIR src/object2
 )
 

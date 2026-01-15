@@ -5,7 +5,8 @@
     user_hpp_includes: ["\"detail/ppdetail_Printable.hpp\""],
     namespace1: "xo",
     namespace2: "print",
-    pretext: [],
+    // text after includes, before APrintable
+    pretext: [ "// {pretext} here" ],
     facet: "Printable",
     detail_subdir: "detail",
     brief: "pretty-printable objects",

@@ -2,19 +2,18 @@
  *
  *  Generated automagically from ingredients:
  *  1. code generator:
- *       [/Users/roland/proj/xo-umbrella2/xo-object2/../xo-facet/codegen/genfacet]
+ *       [/Users/roland/proj/xo-umbrella2/xo-facet/codegen/genfacet]
  *     arguments:
- *       --input [./idl/Sequence.json5]
+ *       --input [idl/Sequence.json5]
  *  2. jinja2 template for abstract facet .hpp file:
  *       [iface_facet_any.hpp.j2]
  *  3. idl for facet methods
- *       [./idl/Sequence.json5]
+ *       [idl/Sequence.json5]
  **/
 
 #pragma once
 
 #include "ASequence.hpp"
-#include <xo/facet/typeseq.hpp>
 #include <xo/facet/obj.hpp>
 
 namespace xo { namespace scm { class ISequence_Any; } }
@@ -43,6 +42,7 @@ namespace scm {
         /** @defgroup scm-sequence-any-type-traits **/
         ///@{
 
+        /** integer identifying a type **/
         using typeseq = xo::facet::typeseq;
         using size_type = ASequence::size_type;
         using AGCObject = ASequence::AGCObject;
@@ -57,16 +57,16 @@ namespace scm {
 
         // const methods
         typeseq _typeseq() const noexcept override { return s_typeseq; }
-        [[noreturn]] bool is_empty(Copaque) const noexcept override { _fatal(); }
-        [[noreturn]] bool is_finite(Copaque) const noexcept override { _fatal(); }
-        [[noreturn]] obj<AGCObject> at(Copaque, size_type) const override { _fatal(); }
+        [[noreturn]] bool is_empty(Copaque)  const  noexcept override { _fatal(); }
+        [[noreturn]] bool is_finite(Copaque)  const  noexcept override { _fatal(); }
+        [[noreturn]] obj<AGCObject> at(Copaque, size_type)  const override { _fatal(); }
 
         // nonconst methods
 
         ///@}
 
     private:
-        /** @defgroup scm-sequence-any-private-methods **/
+        /** @defgraoup scm-sequence-any-private-methods **/
         ///@{
 
         [[noreturn]] static void _fatal();

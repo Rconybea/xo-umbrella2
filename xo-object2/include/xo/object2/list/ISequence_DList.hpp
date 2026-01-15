@@ -6,7 +6,7 @@
  *     arguments:
  *       --input [idl/ISequence_DList.json5]
  *  2. jinja2 template for abstract facet .hpp file:
- *       [iface_facet_any.hpp.j2]
+ *       [iface_facet_repr.hpp.j2]
  *  3. idl for facet methods
  *       [idl/ISequence_DList.json5]
  **/
@@ -14,7 +14,7 @@
 #pragma once
 
 #include "Sequence.hpp"
-#include "sequence/ISequence_Xfer.hpp"
+#include <xo/printable2/Printable.hpp>
 #include "DList.hpp"
 
 namespace xo { namespace scm { class ISequence_DList; } }
@@ -40,11 +40,14 @@ namespace xo {
         public:
             /** @defgroup scm-sequence-dlist-type-traits **/
             ///@{
-            using size_type = ASequence::size_type;
-            using AGCObject = ASequence::AGCObject;
+            using size_type = xo::scm::ASequence::size_type;
+            using AGCObject = xo::scm::ASequence::AGCObject;
+            using Copaque = xo::scm::ASequence::Copaque;
+            using Opaque = xo::scm::ASequence::Opaque;
             ///@}
             /** @defgroup scm-sequence-dlist-methods **/
             ///@{
+            // const methods
             /** true iff sequence is empty **/
             static bool is_empty(const DList & self) noexcept;
             /** true iff sequence is finite **/
@@ -52,6 +55,7 @@ namespace xo {
             /** return element @p index of this sequence **/
             static obj<AGCObject> at(const DList & self, size_type index);
 
+            // non-const methods
             ///@}
         };
 

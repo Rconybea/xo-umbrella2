@@ -2,13 +2,13 @@
  *
  *  Generated automagically from ingredients:
  *  1. code generator:
- *       [/Users/roland/proj/xo-umbrella2/xo-object2/../xo-facet/codegen/genfacet]
+ *       [/Users/roland/proj/xo-umbrella2/xo-facet/codegen/genfacet]
  *     arguments:
- *       --input [./idl/Sequence.json5]
+ *       --input [idl/Sequence.json5]
  *  2. jinja2 template for abstract facet .hpp file:
  *       [iface_facet_any.hpp.j2]
  *  3. idl for facet methods
- *       [./idl/Sequence.json5]
+ *       [idl/Sequence.json5]
  **/
 
 #pragma once
@@ -30,6 +30,7 @@ public:
     ///@{
     using ObjectType = Object;
     using DataPtr = Object::DataPtr;
+    using typeseq = xo::reflect::typeseq;
     using size_type = ASequence::size_type;
     using AGCObject = ASequence::AGCObject;
     ///@}
@@ -38,26 +39,27 @@ public:
     ///@{
     RSequence() {}
     RSequence(Object::DataPtr data) : Object{std::move(data)} {}
+    RSequence(const ASequence * iface, void * data)
+      requires std::is_same_v<typename Object::DataType, xo::facet::DVariantPlaceholder>
+      : Object(iface, data) {}
 
     ///@}
     /** @defgroup scm-sequence-router-methods **/
     ///@{
 
     // const methods
-    int32_t _typeseq() const noexcept { return O::iface()->_typeseq(); }
-    bool is_empty() const noexcept override {
+    typeseq _typeseq() const noexcept { return O::iface()->_typeseq(); }
+    bool is_empty()  const  noexcept {
         return O::iface()->is_empty(O::data());
     }
-    bool is_finite() const noexcept override {
+    bool is_finite()  const  noexcept {
         return O::iface()->is_finite(O::data());
     }
-    obj<AGCObject> at(size_type index) const override {
+    obj<AGCObject> at(size_type index)  const {
         return O::iface()->at(O::data(), index);
     }
 
-    // non-const methods
-    // << do something for non-const methods >>
-    //
+    // non-const methods (still const in router!)
 
     ///@}
     /** @defgroup scm-sequence-member-vars **/

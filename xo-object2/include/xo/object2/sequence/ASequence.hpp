@@ -2,13 +2,13 @@
  *
  *  Generated automagically from ingredients:
  *  1. code generator:
- *       [/Users/roland/proj/xo-umbrella2/xo-object2/../xo-facet/codegen/genfacet]
+ *       [/Users/roland/proj/xo-umbrella2/xo-facet/codegen/genfacet]
  *     arguments:
- *       --input [./idl/Sequence.json5]
+ *       --input [idl/Sequence.json5]
  *  2. jinja2 template for abstract facet .hpp file:
  *       [abstract_facet.hpp.j2]
  *  3. idl for facet methods
- *       [./idl/Sequence.json5]
+ *       [idl/Sequence.json5]
  **/
 
 #pragma once
@@ -18,6 +18,8 @@
 #include <xo/facet/obj.hpp>
 #include <xo/facet/facet_implementation.hpp>
 #include <xo/facet/typeseq.hpp>
+
+// {pretext} here
 
 namespace xo {
 namespace scm {
@@ -36,6 +38,8 @@ public:
     // types
     /** integer identifying a type **/
     using typeseq = xo::facet::typeseq;
+    using Copaque = const void *;
+    using Opaque = void *;
     /** type for length of a sequence **/
     using size_type = std::size_t;
     /** facet for types with GC support **/
@@ -48,11 +52,11 @@ public:
     /** RTTI: unique id# for actual runtime data representation **/
     virtual typeseq _typeseq() const noexcept = 0;
     /** true iff sequence is empty **/
-    virtual bool is_empty(Copaque data) const noexcept = 0;
+    virtual bool is_empty(Copaque data)  const  noexcept = 0;
     /** true iff sequence is finite **/
-    virtual bool is_finite(Copaque data) const noexcept = 0;
+    virtual bool is_finite(Copaque data)  const  noexcept = 0;
     /** return element @p index of this sequence **/
-    virtual obj<AGCObject> at(Copaque data, size_type index) const = 0;
+    virtual obj<AGCObject> at(Copaque data, size_type index)  const = 0;
 
     // nonconst methods
     ///@}
@@ -74,4 +78,4 @@ using ISequence_ImplType = xo::facet::FacetImplType<ASequence, DRepr>;
 } /*namespace scm*/
 } /*namespace xo*/
 
-/*  */
+/* ASequence.hpp */
