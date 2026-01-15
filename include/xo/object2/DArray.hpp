@@ -64,6 +64,10 @@ namespace xo {
             bool is_empty() const noexcept { return size_ == 0; }
             /** only support finite arrays :-) **/
             bool is_finite() const noexcept { return true; }
+            /** array capacity **/
+            size_type capacity() const noexcept { return capacity_; }
+            /** current array size (number of elements) **/
+            size_type size() const noexcept { return size_; }
             /** return element @p index of this array (0-based) **/
             obj<AGCObject> at(size_type index) const;
             ///@}

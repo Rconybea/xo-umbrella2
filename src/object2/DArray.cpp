@@ -4,6 +4,8 @@
  **/
 
 #include "DArray.hpp"
+#include <xo/indentlog/print/tostr.hpp>
+#include <xo/indentlog/print/tag.hpp>
 
 namespace xo {
     using xo::mm::AGCObject;
@@ -31,6 +33,19 @@ namespace xo {
             }
 
             return result;
+        }
+
+        obj<AGCObject>
+        DArray::at(size_type ix) const
+        {
+            if (ix < size_) {
+                return elts_[ix];
+            } else {
+                throw std::runtime_error(tostr("DArray::at: out-of-range index where [0..z) expected",
+                                               xtag("index", ix),
+                                               xtag("z", this->size())));
+                return obj<AGCObject>();
+            }
         }
 
         bool
