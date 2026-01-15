@@ -57,6 +57,7 @@ namespace xo {
             static DArray * empty(obj<AAllocator> mm,
                                   size_type cap);
 
+
             ///@}
             /** @defgroup darray-access acecss methods **/
             ///@{
