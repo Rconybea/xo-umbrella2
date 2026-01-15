@@ -5,7 +5,7 @@
 
 #include "object2_register_facets.hpp"
 
-#include <xo/object2/IGCObject_DList.hpp>
+#include <xo/object2/list/IGCObject_DList.hpp>
 #include <xo/object2/IGCObject_DFloat.hpp>
 #include <xo/object2/IGCObject_DInteger.hpp>
 #include <xo/object2/string/IGCObject_DString.hpp>

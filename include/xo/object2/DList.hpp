@@ -19,6 +19,7 @@ namespace xo {
             using size_type = std::size_t;
             using AGCObject = xo::mm::AGCObject;
             using AAllocator = xo::mm::AAllocator;
+            using ACollector = xo::mm::ACollector;
             using ppindentinfo = xo::print::ppindentinfo;
 
         public:
@@ -50,6 +51,12 @@ namespace xo {
 
             /** pretty-printing driver; combine layout+printing **/
             bool pretty(const ppindentinfo & ppii) const;
+
+            // GCObject facet
+
+            size_type shallow_size() const noexcept;
+            DList * shallow_copy(obj<AAllocator> mm) const noexcept;
+            size_type forward_children(obj<ACollector> gc) noexcept;
 
             /** first member of list **/
             obj<AGCObject> head_;

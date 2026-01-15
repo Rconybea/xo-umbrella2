@@ -1,52 +1,38 @@
 /** @file IGCObject_DList.cpp
  *
- *  @author Roland Conybeare, Dec 2025
- **/
+ *  Generated automagically from ingredients:
+ *  1. code generator:
+ *       [/Users/roland/proj/xo-umbrella2/xo-facet/codegen/genfacet]
+ *     arguments:
+ *       --input [idl/IGCObject_DList.json5]
+ *  2. jinja2 template for abstract facet .hpp file:
+ *       [iface_facet_any.hpp.j2]
+ *  3. idl for facet methods
+ *       [idl/IGCObject_DList.json5]
+**/
 
-#include "IGCObject_DList.hpp"
-#include "DList.hpp"
-#include <xo/indentlog/scope.hpp>
+#include "list/IGCObject_DList.hpp"
 
 namespace xo {
-    using xo::mm::AGCObject;
-    using xo::mm::AAllocator;
-    //using xo::facet::with_facet;
-    using xo::facet::obj;
-    using xo::facet::typeseq;
-    using std::size_t;
-
     namespace scm {
-        size_t
-        IGCObject_DList::shallow_size(const DList &) noexcept
+        auto
+        IGCObject_DList::shallow_size(const DList & self) noexcept -> size_type
         {
-            return sizeof(DList);
+            return self.shallow_size();
         }
 
-        DList *
-        IGCObject_DList::shallow_copy(const DList & src,
-                                      obj<AAllocator> mm) noexcept
+        auto
+        IGCObject_DList::shallow_copy(const DList & self, obj<AAllocator> mm) noexcept -> Opaque
         {
-            DList * copy = (DList *)mm.alloc_copy((std::byte *)&src);
-
-            if (copy)
-                *copy = src;
-
-            return copy;
+            return self.shallow_copy(mm);
         }
 
-        size_t
-        IGCObject_DList::forward_children(DList & src,
-                                          obj<ACollector> gc) noexcept
+        auto
+        IGCObject_DList::forward_children(DList & self, obj<ACollector> gc) noexcept -> size_type
         {
-            scope log(XO_DEBUG(true));
-
-            gc.forward_inplace(src.head_.iface(), (void **)&(src.head_.data_));
-
-            auto iface = xo::facet::impl_for<AGCObject, DList>();
-            gc.forward_inplace(&iface, (void **)(&src.rest_));
-
-            return shallow_size(src);
+            return self.forward_children(gc);
         }
+
     } /*namespace scm*/
 } /*namespace xo*/
 

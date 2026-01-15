@@ -5,9 +5,11 @@
 
 #include "DList.hpp"
 #include "list/IPrintable_DList.hpp"
+#include "list/IGCObject_DList.hpp"
 #include <xo/gc/GCObject.hpp>
 #include <xo/printable2/Printable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
+#include <xo/facet/facet_implementation.hpp>
 #include <xo/indentlog/print/pretty.hpp>
 #include <xo/indentlog/print/tag.hpp>
 
@@ -144,6 +146,36 @@ namespace xo {
                 pps->write("(...)");
                 return false;
             }
+        }
+
+        auto
+        DList::shallow_size() const noexcept -> size_type
+        {
+            return sizeof(DList);
+        }
+
+        DList *
+        DList::shallow_copy(obj<AAllocator> mm) const noexcept
+        {
+            DList * copy = (DList *)mm.alloc_copy((std::byte *)this);
+
+            if (copy)
+                *copy = *this;
+
+            return copy;
+        }
+
+        auto
+        DList::forward_children(obj<ACollector> gc) noexcept -> size_type
+        {
+            scope log(XO_DEBUG(true));
+
+            gc.forward_inplace(head_.iface(), (void **)&(head_.data_));
+
+            auto iface = xo::facet::impl_for<AGCObject,DList>();
+            gc.forward_inplace(&iface, (void **)(&rest_));
+
+            return shallow_size();
         }
     } /*namespace scm*/
 } /*namespace xo*/
