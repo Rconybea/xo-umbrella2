@@ -4,7 +4,7 @@
  **/
 
 #include "DList.hpp"
-#include "IPrintable_DList.hpp"
+#include "list/IPrintable_DList.hpp"
 #include <xo/gc/GCObject.hpp>
 #include <xo/printable2/Printable.hpp>
 #include <xo/facet/FacetRegistry.hpp>

@@ -10,7 +10,7 @@
 #include "IGCObject_DInteger.hpp"
 #include "string/IGCObject_DString.hpp"
 
-#include "IPrintable_DList.hpp"
+#include "list/IPrintable_DList.hpp"
 //#include "IPrintable_DFloat.hpp"
 #include "IPrintable_DInteger.hpp"
 

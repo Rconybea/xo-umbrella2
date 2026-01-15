@@ -10,7 +10,7 @@
 
 #include <xo/object2/DList.hpp>
 #include <xo/object2/IGCObject_DList.hpp>
-#include <xo/object2/IPrintable_DList.hpp>
+#include <xo/object2/list/IPrintable_DList.hpp>
 
 #include <xo/object2/DString.hpp>
 #include <xo/object2/string/IGCObject_DString.hpp>
