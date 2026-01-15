@@ -2,7 +2,7 @@
  *
  *  Generated automagically from ingredients:
  *  1. code generator:
- *       [/home/roland/proj/xo-umbrella2/xo-facet/codegen/genfacet]
+ *       [/Users/roland/proj/xo-umbrella2/xo-facet/codegen/genfacet]
  *     arguments:
  *       --input [idl/IPrintable_DInteger.json5]
  *  2. jinja2 template for abstract facet .hpp file:
@@ -11,7 +11,7 @@
  *       [idl/IPrintable_DInteger.json5]
 **/
 
-#include "IPrintable_DInteger.hpp"
+#include "number/IPrintable_DInteger.hpp"
 
 namespace xo {
     namespace scm {

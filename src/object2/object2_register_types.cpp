@@ -12,7 +12,7 @@
 
 #include "list/IPrintable_DList.hpp"
 //#include "IPrintable_DFloat.hpp"
-#include "IPrintable_DInteger.hpp"
+#include "number/IPrintable_DInteger.hpp"
 
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/indentlog/scope.hpp>

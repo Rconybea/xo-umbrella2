@@ -90,6 +90,18 @@ xo_add_genfacetimpl(
 
 # note: manual target; generated code committed to git
 xo_add_genfacetimpl(
+    TARGET xo-object2-facetimpl-printable-integer
+    FACET_PKG xo_printable2
+    FACET Printable
+    REPR Integer
+    INPUT idl/IPrintable_DInteger.json5
+    OUTPUT_HPP_DIR include/xo/object2
+    OUTPUT_IMPL_SUBDIR number
+    OUTPUT_CPP_DIR src/object2
+)
+
+# note: manual target; generated code committed to git
+xo_add_genfacetimpl(
     TARGET xo-object2-facetimpl-gcobject-integer
     FACET_PKG xo_gc
     FACET GCObject
