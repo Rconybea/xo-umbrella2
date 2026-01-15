@@ -1,43 +1,36 @@
 /** @file IGCObject_DFloat.cpp
  *
- *  @author Roland Conybeare, Dec 2025
- **/
+ *  Generated automagically from ingredients:
+ *  1. code generator:
+ *       [/Users/roland/proj/xo-umbrella2/xo-facet/codegen/genfacet]
+ *     arguments:
+ *       --input [idl/IGCObject_DFloat.json5]
+ *  2. jinja2 template for abstract facet .hpp file:
+ *       [iface_facet_any.hpp.j2]
+ *  3. idl for facet methods
+ *       [idl/IGCObject_DFloat.json5]
+**/
 
-#include "IGCObject_DFloat.hpp"
-#include "xo/alloc2/alloc/AAllocator.hpp"
-#include "xo/facet/obj.hpp"
-#include <cstddef>
+#include "number/IGCObject_DFloat.hpp"
 
 namespace xo {
-    using xo::mm::AAllocator;
-    using xo::facet::obj;
-    using xo::facet::typeseq;
-    using std::size_t;
-
     namespace scm {
-        size_t
-        IGCObject_DFloat::shallow_size(const DFloat &) noexcept
+        auto
+        IGCObject_DFloat::shallow_size(const DFloat & self) noexcept -> size_type
         {
-            return sizeof(DFloat);
+            return self.shallow_size();
         }
 
-        DFloat *
-        IGCObject_DFloat::shallow_copy(const DFloat & src,
-                                       obj<AAllocator> mm) noexcept
+        auto
+        IGCObject_DFloat::shallow_copy(const DFloat & self, obj<AAllocator> mm) noexcept -> Opaque
         {
-            DFloat * copy = (DFloat *)mm.alloc_copy((std::byte *)&src);
-
-            if (copy)
-                *copy = src;
-
-            return copy;
+            return self.shallow_copy(mm);
         }
 
-        size_t
-        IGCObject_DFloat::forward_children(DFloat & src,
-                                           obj<ACollector>) noexcept
+        auto
+        IGCObject_DFloat::forward_children(DFloat & self, obj<ACollector> gc) noexcept -> size_type
         {
-            return shallow_size(src);
+            return self.forward_children(gc);
         }
 
     } /*namespace scm*/

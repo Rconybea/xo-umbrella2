@@ -8,7 +8,7 @@
 #include "DList.hpp"
 #include "object2_register_types.hpp"
 
-#include "IGCObject_DFloat.hpp"
+#include "number/IGCObject_DFloat.hpp"
 #include "list/IGCObject_DList.hpp"
 
 #include <xo/gc/Collector.hpp>

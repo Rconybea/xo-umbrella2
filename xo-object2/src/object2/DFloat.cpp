@@ -9,6 +9,7 @@
 namespace xo {
     using xo::facet::typeseq;
     using xo::print::ppdetail_atomic;
+    using std::size_t;
 
     namespace scm {
         DFloat *
@@ -25,6 +26,30 @@ namespace xo {
         {
             return ppdetail_atomic<double>::print_pretty(ppii, value_);
         }
+
+        size_t
+        DFloat::shallow_size() const noexcept
+        {
+            return sizeof(DFloat);
+        }
+
+        DFloat *
+        DFloat::shallow_copy(obj<AAllocator> mm) const noexcept
+        {
+            DFloat * copy = (DFloat *)mm.alloc_copy((std::byte *)this);
+
+            if (copy)
+                *copy = *this;
+
+            return copy;
+        }
+
+        size_t
+        DFloat::forward_children(obj<ACollector>) noexcept
+        {
+            return shallow_size();
+        }
+
     } /*namespace scm*/
 } /*namespace xo*/
 

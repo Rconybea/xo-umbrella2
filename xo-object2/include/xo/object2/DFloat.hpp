@@ -6,6 +6,7 @@
 #pragma once
 
 #include <xo/alloc2/Allocator.hpp>
+#include <xo/gc/Collector.hpp>
 #include <xo/facet/obj.hpp>
 #include <xo/indentlog/print/ppindentinfo.hpp>
 
@@ -13,6 +14,7 @@ namespace xo {
     namespace scm {
         struct DFloat {
             using AAllocator = xo::mm::AAllocator;
+            using ACollector = xo::mm::ACollector;
             using ppindentinfo = xo::print::ppindentinfo;
             using value_type = double;
 
@@ -27,9 +29,14 @@ namespace xo {
 
             double value() const noexcept { return value_; }
 
+            operator double() const noexcept { return value_; }
+
             bool pretty(const ppindentinfo & ppii) const;
 
-            operator double() const noexcept { return value_; }
+            // GCObject facet
+            std::size_t shallow_size() const noexcept;
+            DFloat * shallow_copy(obj<AAllocator> mm) const noexcept;
+            std::size_t forward_children(obj<ACollector> gc) noexcept;
 
         private:
 
