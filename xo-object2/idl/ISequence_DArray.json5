@@ -1,0 +1,12 @@
+{
+    mode: "implementation",
+    includes: [ ],
+    local_types: [ ],
+    namespace1: "xo",
+    namespace2: "scm",
+    facet_idl: "idl/Sequence.json5",
+    brief: "provide ASequence interface for DArray state",
+    using_doxygen: true,
+    repr: "DArray",
+    doc: [ "implement ASequence for DArray" ],
+}
