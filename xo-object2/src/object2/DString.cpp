@@ -84,6 +84,12 @@ namespace xo {
             return *this;
         }
 
+        int
+        DString::compare(const DString & lhs, const DString & rhs) noexcept
+        {
+            return ::strcmp(lhs.chars_, rhs.chars_);
+        }
+
         auto
         DString::fixup_size() noexcept -> size_type
         {
