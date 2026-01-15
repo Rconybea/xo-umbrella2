@@ -358,6 +358,35 @@ namespace xo {
             REQUIRE(*apple1 >= *apple2);
             REQUIRE_FALSE(*apple1 >= *banana);
         }
+
+        TEST_CASE("DString-hash", "[object2][DString]")
+        {
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 4*1024 };
+            DArena arena = DArena::map(cfg);
+            auto alloc = with_facet<AAllocator>::mkobj(&arena);
+
+            DString * s1 = DString::from_cstr(alloc, "hello");
+            DString * s2 = DString::from_cstr(alloc, "hello");
+            DString * s3 = DString::from_cstr(alloc, "world");
+            DString * empty1 = DString::empty(alloc, 16);
+            DString * empty2 = DString::empty(alloc, 32);
+
+            // same content produces same hash
+            REQUIRE(s1->hash() == s2->hash());
+
+            // empty strings have same hash
+            REQUIRE(empty1->hash() == empty2->hash());
+
+            // different content produces different hash (not guaranteed, but highly likely)
+            REQUIRE(s1->hash() != s3->hash());
+
+            // std::hash specialization works
+            std::hash<DString> hasher;
+            REQUIRE(hasher(*s1) == s1->hash());
+            REQUIRE(hasher(*s2) == s2->hash());
+            REQUIRE(hasher(*s1) == hasher(*s2));
+        }
     } /*namespace ut*/
 } /*namespace xo*/
 
