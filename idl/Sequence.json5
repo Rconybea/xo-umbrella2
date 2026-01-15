@@ -1,8 +1,12 @@
 {
     mode: "facet",
     includes: ["<xo/gc/GCObject.hpp>"],
+    // extra includes in Sequence.hpp, if any
+    user_hpp_includes: [],
     namespace1: "xo",
     namespace2: "scm",
+    // text after includes, before ASequence
+    pretext: [ "// {pretext} here" ],
     facet: "Sequence",
     detail_subdir: "sequence",
     brief: "an ordered collection of variants",

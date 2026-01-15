@@ -1,6 +1,7 @@
 {
     mode: "implementation",
     includes: [ "<xo/printable2/Printable.hpp>" ],
+    local_types: [ ],
     namespace1: "xo",
     namespace2: "scm",
     facet_idl: "idl/Sequence.json5",

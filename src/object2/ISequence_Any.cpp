@@ -32,6 +32,9 @@ bool
 ISequence_Any::_valid
   = valid_facet_implementation<ASequence, ISequence_Any>();
 
+// nonconst methods
+
+
 } /*namespace scm*/
 } /*namespace xo*/
 
