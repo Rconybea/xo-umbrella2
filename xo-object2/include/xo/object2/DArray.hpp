@@ -60,6 +60,9 @@ namespace xo {
 
             /** create array containing elements @p args, using memory from @p mm.
              *  Nullptr if space exhausted.
+             *
+             *  Use:
+             *    Darray * v = DArray::array(mm, e1, e2, e3);
              **/
             template <typename... Args>
                 requires (std::same_as<Args, obj<AGCObject>> && ...)
