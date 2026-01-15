@@ -17,7 +17,7 @@
 #include <xo/object2/string/IPrintable_DString.hpp>
 
 #include <xo/object2/DInteger.hpp>
-#include <xo/object2/IGCObject_DInteger.hpp>
+#include <xo/object2/number/IGCObject_DInteger.hpp>
 
 #include <xo/gc/Collector.hpp>
 #include <xo/gc/DX1Collector.hpp>

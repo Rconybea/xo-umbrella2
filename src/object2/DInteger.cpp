@@ -26,6 +26,31 @@ namespace xo {
         {
             return ppdetail_atomic<long>::print_pretty(ppii, value_);
         }
+
+        size_t
+        DInteger::shallow_size() const noexcept
+        {
+            return sizeof(DInteger);
+        }
+
+        DInteger *
+        DInteger::shallow_copy(obj<AAllocator> mm) const noexcept
+        {
+            DInteger * copy = (DInteger *)mm.alloc_copy((std::byte *)this);
+
+            if (copy)
+                *copy = *this;
+
+            return copy;
+        }
+
+        size_t
+        DInteger::forward_children(obj<ACollector>) noexcept
+        {
+            return shallow_size();
+        }
+
+
     } /*namespace scm*/
 } /*namespace xo*/
 

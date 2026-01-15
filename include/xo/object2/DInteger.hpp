@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <xo/gc/Collector.hpp>
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/indentlog/print/ppindentinfo.hpp>
 #include <xo/facet/obj.hpp>
@@ -14,6 +15,7 @@ namespace xo {
     namespace scm {
         struct DInteger {
             using AAllocator = xo::mm::AAllocator;
+            using ACollector = xo::mm::ACollector;
             using ppindentinfo = xo::print::ppindentinfo;
             using value_type = long;
 
@@ -31,6 +33,12 @@ namespace xo {
             bool pretty(const ppindentinfo & ppii) const;
 
             operator long() const noexcept { return value_; }
+
+            // GCObject facet
+
+            std::size_t shallow_size() const noexcept;
+            DInteger * shallow_copy(obj<AAllocator> mm) const noexcept;
+            std::size_t forward_children(obj<ACollector> gc) noexcept;
 
         private:
             /** boxed integer value **/
