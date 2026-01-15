@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "IGCObject_DList.hpp"
+#include "list/IGCObject_DList.hpp"
 #include "DList.hpp"
 
 namespace xo {

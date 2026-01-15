@@ -9,7 +9,7 @@
 #include "object2_register_facets.hpp"
 
 #include <xo/object2/DList.hpp>
-#include <xo/object2/IGCObject_DList.hpp>
+#include <xo/object2/list/IGCObject_DList.hpp>
 #include <xo/object2/list/IPrintable_DList.hpp>
 
 #include <xo/object2/DString.hpp>

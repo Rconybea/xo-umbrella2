@@ -5,7 +5,7 @@
 
 #include "object2_register_types.hpp"
 
-#include "IGCObject_DList.hpp"
+#include "list/IGCObject_DList.hpp"
 #include "IGCObject_DFloat.hpp"
 #include "IGCObject_DInteger.hpp"
 #include "string/IGCObject_DString.hpp"
