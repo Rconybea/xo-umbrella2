@@ -11,7 +11,7 @@
 #include <xo/indentlog/print/ppindentinfo.hpp>
 #include <string_view>
 #include <cstdint>
-#include <cstdio>
+//#include <cstdio>
 
 namespace xo {
     namespace scm {
@@ -34,6 +34,7 @@ namespace xo {
             using traits_type = std::char_traits<char>;
             /** type of each character in this DString **/
             using value_type = char;
+            /** type for string index / size **/
             using size_type = std::uint32_t;
             /** representation for a read/write iterator **/
             using iterator = char *;
@@ -57,7 +58,7 @@ namespace xo {
              **/
             DString(const DString &) = delete;
 
-            /** create empty string with space for @cap chars
+            /** create empty string with space for @p cap chars
              *  (including null terminator).
              *  Use memory from allocator @p mm
              **/

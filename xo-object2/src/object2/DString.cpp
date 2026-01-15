@@ -26,6 +26,9 @@ namespace xo {
                                       sizeof(DString) + cap);
 
                 result = new (mem) DString();
+
+                assert(result);
+
                 result->capacity_ = cap;
                 result->size_ = 0;
                 if (cap > 0) {
