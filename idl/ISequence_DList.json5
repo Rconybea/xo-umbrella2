@@ -8,6 +8,5 @@
     brief: "provide ASequence interface for DList state",
     using_doxygen: true,
     repr: "DList",
-    doc: [ "doc for something or other"
-    ],
+    doc: [ "implement ASequence for DList" ],
 }
