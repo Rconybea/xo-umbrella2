@@ -64,6 +64,23 @@ namespace xo {
             REQUIRE(s.data()->size() == 11);
             REQUIRE(std::strcmp(s.data()->chars(), cstr) == 0);
         }
+
+        TEST_CASE("StringOps-clone", "[object2][StringOps]")
+        {
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 4*1024 };
+            DArena arena = DArena::map(cfg);
+            auto alloc = with_facet<AAllocator>::mkobj(&arena);
+
+            auto src = StringOps::from_cstr(alloc, "hello world");
+            auto copy = StringOps::clone(alloc, src);
+
+            REQUIRE(copy.data() != nullptr);
+            REQUIRE(copy.data() != src.data());
+            REQUIRE(copy.data()->size() == src.data()->size());
+            REQUIRE(copy.data()->capacity() == src.data()->capacity());
+            REQUIRE(std::strcmp(copy.data()->chars(), src.data()->chars()) == 0);
+        }
     } /*namespace ut*/
 } /*namespace xo*/
 
