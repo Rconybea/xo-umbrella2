@@ -296,25 +296,27 @@ namespace xo {
             size_type z = size_ + 1;
             size_type req_z = z * sizeof(T);
 
-            this->store_.expand(req_z);
+            if (this->store_.expand(req_z)) {
+                T * addr = this->_address_of(size_);
 
-            T * addr = this->_address_of(size_);
+                new (addr) T{std::move(x)};
 
-            new (addr) T{std::move(x)};
-
-            this->size_ = z;
+                this->size_ = z;
+            }
         }
 
         template <typename T>
         void
         DArenaVector<T>::push_back(const T & x) {
             size_type z = size_ + 1;
-            store_.expand(z * sizeof(T));
 
-            T * addr = this->_address_of(size_);
-            new (addr) T{x};
+            if (this->store_.expand(z * sizeof(T))) {
+                T * addr = this->_address_of(size_);
 
-            size_ = z;
+                new (addr) T{x};
+
+                this->size_ = z;
+            }
         }
 
         template <typename T>
