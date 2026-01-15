@@ -34,6 +34,13 @@ namespace xo {
                       typename ASrcFacet = AGCObject>
             static obj<AFacet,DString> clone(obj<AAllocator> mm,
                                              obj<ASrcFacet,DString> src);
+
+            /** wrapper for DString.printf() **/
+            template <typename AFacet = AGCObject, typename... Args>
+            static obj<AFacet,DString> printf(obj<AAllocator> mm,
+                                              size_type cap,
+                                              const char * fmt,
+                                              Args&&... args);
         };
 
         template <typename AFacet>
@@ -55,6 +62,17 @@ namespace xo {
         StringOps::clone(obj<AAllocator> mm, obj<ASrcFacet,DString> src)
         {
             return obj<AFacet,DString>(DString::clone(mm, src.data()));
+        }
+
+        template <typename AFacet, typename... Args>
+        obj<AFacet,DString>
+        StringOps::printf(obj<AAllocator> mm,
+                          size_type cap,
+                          const char * fmt,
+                          Args&&... args)
+        {
+            return obj<AFacet,DString>(DString::printf(mm, cap, fmt,
+                                                       std::forward<Args>(args)...));
         }
     }
 }

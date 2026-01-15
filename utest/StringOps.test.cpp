@@ -81,6 +81,21 @@ namespace xo {
             REQUIRE(copy.data()->capacity() == src.data()->capacity());
             REQUIRE(std::strcmp(copy.data()->chars(), src.data()->chars()) == 0);
         }
+
+        TEST_CASE("StringOps-printf", "[object2][StringOps]")
+        {
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 4*1024 };
+            DArena arena = DArena::map(cfg);
+            auto alloc = with_facet<AAllocator>::mkobj(&arena);
+
+            auto s = StringOps::printf(alloc, 32, "hello %s %d", "world", 42);
+
+            REQUIRE(s.data() != nullptr);
+            REQUIRE(s.data()->capacity() == 32);
+            REQUIRE(s.data()->size() == 14);
+            REQUIRE(std::strcmp(s.data()->chars(), "hello world 42") == 0);
+        }
     } /*namespace ut*/
 } /*namespace xo*/
 
