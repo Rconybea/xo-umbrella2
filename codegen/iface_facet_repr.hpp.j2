@@ -6,13 +6,14 @@
  *     arguments:
  *       --input [{{genfacet_input}}]
  *  2. jinja2 template for abstract facet .hpp file:
- *       [{{ iface_facet_any_hpp_j2 }}]
+ *       [{{ iface_facet_repr_hpp_j2 }}]
  *  3. idl for facet methods
  *       [{{ idl_fname }}]
  **/
 
 #pragma once
 
+#include "{{facet_hpp_fname}}"
 {% for include_fname in facet_includes %}
 #include {{include_fname}}
 {% endfor %}

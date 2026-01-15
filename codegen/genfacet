@@ -504,7 +504,6 @@ def main():
                   idl_fname=idl_fname,
                   idl=idl,
                   output_hpp_dir=output_hpp_dir,
-                  #output_impl_hpp_dir=output_impl_hpp_dir,
                   output_cpp_dir=output_cpp_dir)
     elif idl['mode'] == 'implementation':
         # idl:   json5 for (iface, data) combination
@@ -517,7 +516,7 @@ def main():
                        idl_fname=idl_fname,
                        idl=idl,
                        facet_idl=facet_idl,
-                       output_hpp_dir=output_hpp_dir,
+                       output_hpp_dir=output_impl_hpp_dir,
                        output_impl_hpp_subdir=output_impl_hpp_subdir,
                        output_cpp_dir=output_cpp_dir)
 
