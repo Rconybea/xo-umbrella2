@@ -17,21 +17,17 @@ namespace xo {
         DArray::empty(obj<AAllocator> mm,
                       size_type cap)
         {
-            assert(cap > 0);
-
             DArray * result = nullptr;
 
-            if (cap > 0) {
-                void * mem = mm.alloc(typeseq::id<DArray>(),
-                                      sizeof(DArray) + cap * sizeof(obj<AGCObject>));
+            void * mem = mm.alloc(typeseq::id<DArray>(),
+                                  sizeof(DArray) + cap * sizeof(obj<AGCObject>));
 
-                result = new (mem) DArray();
+            result = new (mem) DArray();
 
-                assert(result);
+            assert(result);
 
-                result->capacity_ = cap;
-                result->size_ = 0;
-            }
+            result->capacity_ = cap;
+            result->size_ = 0;
 
             return result;
         }

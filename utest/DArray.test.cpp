@@ -153,6 +153,44 @@ namespace xo {
             REQUIRE(arr->at(2).data() == e2.data());
         }
 
+        TEST_CASE("DArray-array", "[object2][DArray]")
+        {
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 4*1024 };
+            DArena arena = DArena::map(cfg);
+            auto alloc = with_facet<AAllocator>::mkobj(&arena);
+
+            obj<AGCObject> e0 = DInteger::box<AGCObject>(alloc, 10);
+            obj<AGCObject> e1 = DInteger::box<AGCObject>(alloc, 20);
+            obj<AGCObject> e2 = DInteger::box<AGCObject>(alloc, 30);
+
+            DArray * arr = DArray::array(alloc, e0, e1, e2);
+
+            REQUIRE(arr != nullptr);
+            REQUIRE(arr->size() == 3);
+            REQUIRE(arr->capacity() == 3);
+            REQUIRE(arr->is_empty() == false);
+
+            REQUIRE(arr->at(0).data() == e0.data());
+            REQUIRE(arr->at(1).data() == e1.data());
+            REQUIRE(arr->at(2).data() == e2.data());
+        }
+
+        TEST_CASE("DArray-array-empty", "[object2][DArray]")
+        {
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 4*1024 };
+            DArena arena = DArena::map(cfg);
+            auto alloc = with_facet<AAllocator>::mkobj(&arena);
+
+            DArray * arr = DArray::array(alloc);
+
+            REQUIRE(arr != nullptr);
+            REQUIRE(arr->size() == 0);
+            REQUIRE(arr->capacity() == 0);
+            REQUIRE(arr->is_empty() == true);
+        }
+
     } /*namespace ut*/
 } /*namespace xo*/
 
