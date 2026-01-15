@@ -12,6 +12,7 @@ set(SELF_SRCS
     IPrintable_DFloat.cpp
     IPrintable_DInteger.cpp
     IPrintable_DString.cpp
+    DArray.cpp
     DList.cpp
     DFloat.cpp
     DInteger.cpp
