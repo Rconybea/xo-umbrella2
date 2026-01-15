@@ -22,6 +22,10 @@ namespace xo {
             template <typename AFacet = AGCObject>
             static obj<AFacet,DString> empty(obj<AAllocator> mm,
                                              size_type cap);
+
+            template <typename AFacet = AGCObject>
+            static obj<AFacet,DString> from_cstr(obj<AAllocator> mm,
+                                                 const char * cstr);
         };
 
         template <typename AFacet>
@@ -29,6 +33,13 @@ namespace xo {
         StringOps::empty(obj<AAllocator> mm, size_type cap)
         {
             return obj<AFacet,DString>(DString::empty(mm, cap));
+        }
+
+        template <typename AFacet>
+        obj<AFacet,DString>
+        StringOps::from_cstr(obj<AAllocator> mm, const char * cstr)
+        {
+            return obj<AFacet,DString>(DString::from_cstr(mm, cstr));
         }
     }
 }
