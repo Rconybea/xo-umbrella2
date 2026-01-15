@@ -2,6 +2,7 @@
 
 set(SELF_LIB xo_object2)
 set(SELF_SRCS
+    IGCObject_DArray.cpp
     IGCObject_DFloat.cpp
     IGCObject_DInteger.cpp
     IGCObject_DList.cpp
