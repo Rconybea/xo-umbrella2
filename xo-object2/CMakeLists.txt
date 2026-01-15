@@ -72,7 +72,7 @@ xo_add_genfacetimpl(
     REPR Float
     INPUT idl/IPrintable_DFloat.json5
     OUTPUT_HPP_DIR include/xo/object2
-    OUTPUT_IMPL_SUBDIR .
+    OUTPUT_IMPL_SUBDIR number
     OUTPUT_CPP_DIR src/object2
 )
 
