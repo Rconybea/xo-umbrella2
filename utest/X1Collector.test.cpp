@@ -5,10 +5,13 @@
 
 #include "ListOps.hpp"
 #include "DFloat.hpp"
+#include "DInteger.hpp"
 #include "DList.hpp"
+#include "DArray.hpp"
 #include "object2_register_types.hpp"
 
 #include "number/IGCObject_DFloat.hpp"
+#include "number/IGCObject_DInteger.hpp"
 #include "list/IGCObject_DList.hpp"
 
 #include <xo/gc/Collector.hpp>
@@ -29,7 +32,9 @@ namespace ut {
     using xo::scm::object2_register_types;
     using xo::scm::ListOps;
     using xo::scm::DList;
+    using xo::scm::DArray;
     using xo::scm::DFloat;
+    using xo::scm::DInteger;
     using xo::mm::AAllocator;
     using xo::mm::ACollector;
     using xo::mm::AllocHeader;
@@ -76,6 +81,10 @@ namespace ut {
 
     TEST_CASE("x1", "[gc][x1]")
     {
+        /**
+         *  This is a basic Collector test for xo-object2 data types
+         **/
+
         constexpr bool c_debug_flag = false;
         scope log(XO_DEBUG(c_debug_flag));
 
@@ -166,18 +175,28 @@ namespace ut {
 
                 ok = c_o.is_type_installed(typeseq::id<DFloat>());
                 REQUIRE(ok);
+                ok = c_o.is_type_installed(typeseq::id<DInteger>());
+                REQUIRE(ok);
                 ok = c_o.is_type_installed(typeseq::id<DList>());
+                REQUIRE(ok);
+                ok = c_o.is_type_installed(typeseq::id<DArray>());
                 REQUIRE(ok);
 
                 auto x0_o = DFloat::box<AGCObject>(gc_o, 3.1415927);
                 c_o.add_gc_root(&x0_o);
                 REQUIRE(to_0->allocated() == sizeof(AllocHeader) + sizeof(DFloat));
 
+                auto n1_o = DInteger::box<AGCObject>(gc_o, 42);
+                c_o.add_gc_root(&n1_o);
+                REQUIRE(to_0->allocated() == (sizeof(AllocHeader) + sizeof(DFloat)
+                                              + sizeof(AllocHeader) + sizeof(DInteger)));
+
                 //DList * l0 = DList::list(gc_o, x0_o);
                 //auto l0_o = with_facet<AGCObject>::mkobj(l0);
                 auto l0_o = ListOps::list(gc_o, x0_o);
                 c_o.add_gc_root(&l0_o);
                 REQUIRE(to_0->allocated() == (sizeof(AllocHeader) + sizeof(DFloat)
+                                              + sizeof(AllocHeader) + sizeof(DInteger)
                                               + sizeof(AllocHeader) + sizeof(DList)));
 
                 {
@@ -193,6 +212,20 @@ namespace ut {
                         REQUIRE(info.tseq() == typeseq::id<DFloat>().seqno());
                         REQUIRE(info.size() >= sizeof(DFloat));
                         REQUIRE(info.size() < sizeof(DFloat) + padding::c_alloc_alignment);
+                    }
+
+                    {
+                        REQUIRE(n1_o.iface() != nullptr);
+                        REQUIRE(n1_o.data() != nullptr);
+                        REQUIRE(gc.contains(role::to_space(), n1_o.data()));
+
+                        /* check alloc info for newly-allocated object */
+                        AllocInfo info = gc.alloc_info((std::byte *)n1_o.data());
+
+                        REQUIRE(info.age() == 0);
+                        REQUIRE(info.tseq() == typeseq::id<DInteger>().seqno());
+                        REQUIRE(info.size() >= sizeof(DInteger));
+                        REQUIRE(info.size() < sizeof(DInteger) + padding::c_alloc_alignment);
                     }
 
                     {
@@ -220,11 +253,17 @@ namespace ut {
                 REQUIRE(!gc.contains(role::from_space(), x0_o.data()));
                 REQUIRE(gc.contains(role::to_space(), x0_o.data()));
                 REQUIRE(x0_o.data()->value() == 3.1415927);
+
+                REQUIRE(!gc.contains(role::from_space(), n1_o.data()));
+                REQUIRE(gc.contains(role::to_space(), n1_o.data()));
+                REQUIRE(n1_o.data()->value() == 42);
+
                 REQUIRE(!gc.contains(role::from_space(), l0_o.data()));
                 REQUIRE(gc.contains(role::to_space(), l0_o.data()));
                 REQUIRE(l0_o.data()->is_empty() == false);
 
                 REQUIRE((void*)l0_o.data()->head_.data() == (void*)x0_o.data());
+                REQUIRE((void*)l0_o.data()->rest_ == (void*)DList::_nil());
 
             } catch (std::exception & ex) {
                 std::cerr << "caught exception: " << ex.what() << std::endl;

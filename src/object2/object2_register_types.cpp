@@ -5,14 +5,15 @@
 
 #include "object2_register_types.hpp"
 
-#include "list/IGCObject_DList.hpp"
 #include "number/IGCObject_DFloat.hpp"
 #include "number/IGCObject_DInteger.hpp"
 #include "string/IGCObject_DString.hpp"
+#include "list/IGCObject_DList.hpp"
+#include "array/IGCObject_DArray.hpp"
 
-#include "list/IPrintable_DList.hpp"
+//#include "list/IPrintable_DList.hpp"
 //#include "IPrintable_DFloat.hpp"
-#include "number/IPrintable_DInteger.hpp"
+//#include "number/IPrintable_DInteger.hpp"
 
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/indentlog/scope.hpp>
@@ -32,13 +33,15 @@ namespace xo {
 
             bool ok = true;
 
-            ok &= gc.install_type(impl_for<AGCObject, DList>());
-
             ok &= gc.install_type(impl_for<AGCObject, DFloat>());
 
             ok &= gc.install_type(impl_for<AGCObject, DInteger>());
 
             ok &= gc.install_type(impl_for<AGCObject, DString>());
+
+            ok &= gc.install_type(impl_for<AGCObject, DList>());
+
+            ok &= gc.install_type(impl_for<AGCObject, DArray>());
 
             return ok;
         }
