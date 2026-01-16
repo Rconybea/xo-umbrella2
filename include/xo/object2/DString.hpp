@@ -72,6 +72,12 @@ namespace xo {
             static DString * from_cstr(obj<AAllocator> mm,
                                        const char * cstr);
 
+            /** create string containing a copy of @p sv.
+             *  Use memory from allocator @p mm
+             **/
+            static DString * from_view(obj<AAllocator> mm,
+                                       std::string_view sv);
+
             /** clone existing string **/
             static DString * clone(obj<AAllocator> mm,
                                    const DString * src);
