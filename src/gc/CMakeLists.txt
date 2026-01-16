@@ -3,8 +3,11 @@
 set(SELF_LIB xo_gc)
 set(SELF_SRCS
 
+    CollectorTypeRegistry.cpp
+
     ICollector_Any.cpp
     IGCObject_Any.cpp
+
     IAllocator_DX1Collector.cpp
     ICollector_DX1Collector.cpp
     IAllocIterator_DX1CollectorIterator.cpp
