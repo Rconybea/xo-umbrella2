@@ -91,7 +91,7 @@ namespace xo {
                 }
 
                 /** load control group for slot range [ix .. ix+c_group_size) **/
-                group_type _load_group(size_type ix) {
+                group_type _load_group(size_type ix) const {
                     return group_type(&(control_[ix + c_control_stub]));
                 }
 

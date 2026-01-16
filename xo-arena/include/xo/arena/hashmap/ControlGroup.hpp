@@ -21,7 +21,7 @@ namespace xo {
                 std::array<uint8_t, DArenaHashMapUtil::c_group_size> ctrl_;
 
                 /** Require: lo is aligned on c_group_size (probably 16 bytes) **/
-                explicit ControlGroup(uint8_t * lo) {
+                explicit ControlGroup(const uint8_t * lo) {
                     ::memcpy(ctrl_.data(), lo, DArenaHashMapUtil::c_group_size);
                 }
 
