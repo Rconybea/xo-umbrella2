@@ -49,7 +49,7 @@ namespace xo {
             using control_type = std::uint8_t;
 
             /** control: mask for sentinel states **/
-            static constexpr uint8_t c_sentinel_mask = 0xF0;
+            static constexpr uint8_t c_sentinel_mask = 0x80;
             /** control: sentinel for empty slot **/
             static constexpr uint8_t c_empty_slot = 0xFF;
             /** control: tombstone for deleted slot **/
@@ -82,7 +82,15 @@ namespace xo {
 
             /** control: compute size of control array for swiss hash map with @p n_slot cells **/
             static constexpr size_type control_size(size_type n_slot) {
-                return n_slot + c_group_size + 2 * c_control_stub;
+                if (n_slot == 0)
+                    return 0;
+
+                /* control:
+                 *  - c_group_size overflow slots
+                 *  - 2x c_control_stub begin/end sentinels
+                 */
+
+                return n_slot + c_group_size + (2 * c_control_stub);
             }
 
             /** find smallest multiple k : k * c_group_size >= n **/
