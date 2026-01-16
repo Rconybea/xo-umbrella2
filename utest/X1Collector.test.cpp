@@ -3,6 +3,7 @@
  *  @author Roland Conybeare, Dec 2025
  **/
 
+#include "init_object2.hpp"
 #include "ListOps.hpp"
 #include "DFloat.hpp"
 #include "DInteger.hpp"
@@ -14,6 +15,7 @@
 #include "number/IGCObject_DInteger.hpp"
 #include "list/IGCObject_DList.hpp"
 
+#include <xo/gc/CollectorTypeRegistry.hpp>
 #include <xo/gc/Collector.hpp>
 #include <xo/gc/DX1Collector.hpp>
 
@@ -23,18 +25,22 @@
 #include <xo/arena/AllocInfo.hpp>
 #include <xo/arena/padding.hpp>
 
+#include <xo/subsys/Subsystem.hpp>
+
 #include <xo/indentlog/scope.hpp>
 #include <xo/indentlog/print/tag.hpp>
 
 #include <catch2/catch.hpp>
 
 namespace ut {
+    using xo::S_object2_tag;
     using xo::scm::object2_register_types;
     using xo::scm::ListOps;
     using xo::scm::DList;
     using xo::scm::DArray;
     using xo::scm::DFloat;
     using xo::scm::DInteger;
+    using xo::mm::CollectorTypeRegistry;
     using xo::mm::AAllocator;
     using xo::mm::ACollector;
     using xo::mm::AllocHeader;
@@ -49,6 +55,9 @@ namespace ut {
     using xo::mm::padding;
     using xo::facet::with_facet;
     using xo::facet::typeseq;
+    using xo::Subsystem;
+    using xo::InitEvidence;
+    using xo::InitSubsys;
     using xo::scope;
     using xo::xtag;
 
@@ -79,8 +88,13 @@ namespace ut {
         };
     }
 
+    static InitEvidence s_init = (InitSubsys<S_object2_tag>::require());
+
     TEST_CASE("x1", "[gc][x1]")
     {
+        // real purpose: ensure s_init survives static linking
+        REQUIRE(s_init.evidence());
+
         /**
          *  This is a basic Collector test for xo-object2 data types
          **/
@@ -89,6 +103,8 @@ namespace ut {
         scope log(XO_DEBUG(c_debug_flag));
 
         for (std::size_t i_tc = 0, n_tc = s_testcase_v.size(); i_tc < n_tc; ++i_tc) {
+            scope log(XO_DEBUG(true), xtag("i_tc", i_tc));
+
             try {
                 const testcase_x1 & tc = s_testcase_v[i_tc];
 
@@ -169,7 +185,7 @@ namespace ut {
                 auto c_o = with_facet<ACollector>::mkobj(&gc);
 
                 /* register object types */
-                bool ok = object2_register_types(c_o);
+                bool ok = CollectorTypeRegistry::instance().install_types(c_o);
 
                 REQUIRE(ok);
 
