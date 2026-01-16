@@ -98,8 +98,8 @@ namespace xo {
              *  Replaces any previous value stored under the same key.
              *
              *  Return pair retval with:
-             *  reval.first: true if size incremented;
-             *  retval.second: address of slots_[p] at which pair inserted/updated
+             *  retval.first: address of slots_[p] at which pair inserted/updated
+             *  retval.second: true if size incremented;
              *
              *  When table is full retval.second will be nullptr,
              *  with error captured in last_error_
@@ -118,6 +118,9 @@ namespace xo {
              *  @return iterator to element if found, end() otherwise
              **/
             iterator find(const key_type & key);
+
+            /** establish kv pair for @p key in this table; return address of value part **/
+            mapped_type & operator[](const key_type & key);
 
         private:
             /** insert @p kv_pair,
@@ -169,7 +172,7 @@ namespace xo {
                                                               bool debug_flag)
         : hash_{std::move(hash)},
           equal_{std::move(eq)},
-          store_{lub_exp2(lub_group_mult(hint_max_capacity))},
+          store_{"arenahashmap", lub_exp2(lub_group_mult(hint_max_capacity))},
           debug_flag_{debug_flag}
         {
         }
@@ -332,7 +335,8 @@ namespace xo {
             } else {
                 log && log("duplicate-and-replace branch");
 
-                detail::HashMapStore<Key, Value> store_2x(std::make_pair(n_group_exponent_2x,
+                detail::HashMapStore<Key, Value> store_2x("arenahashmap",
+                                                          std::make_pair(n_group_exponent_2x,
                                                                          n_group_2x));
                 /* rehash everything in store_,
                  * into store_2x
@@ -457,6 +461,42 @@ namespace xo {
 
                 ix = (ix + c_group_size) & (N - 1);
             }
+        }
+
+        template <typename Key,
+                  typename Value,
+                  typename Hash,
+                  typename Equal>
+        auto
+        DArenaHashMap<Key, Value, Hash, Equal>::operator[](const key_type & key) -> mapped_type &
+        {
+            {
+                auto ix = this->find(key);
+
+                if (ix != this->end())
+                    return ix->second;
+            }
+
+            // key-value pair
+            value_type kv_pair = std::make_pair(key, mapped_type{});
+
+            auto [slot_addr, ins_flag] = this->try_insert(kv_pair);
+
+            if (slot_addr)
+                return slot_addr->second;
+
+            if (!this->_try_grow()) {
+                // we are out of room
+
+                throw std::runtime_error("DArenaHashMap::operator[]: table capacity exhausted");
+            }
+
+            /* retry insert, now with bigger capacity */
+            std::tie(slot_addr, ins_flag) = this->try_insert(kv_pair);
+
+            assert(slot_addr);
+
+            return slot_addr->second;
         }
 
         /**

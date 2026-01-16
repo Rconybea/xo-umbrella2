@@ -226,6 +226,54 @@ namespace xo {
             }
         }
 
+        TEST_CASE("DArenaHashMap-operator-bracket", "[arena][DArenaHashMap]")
+        {
+            using HashMap = DArenaHashMap<int, int>;
+
+            HashMap map;
+
+            // insert via operator[]
+            map[1] = 100;
+            map[2] = 200;
+            map[3] = 300;
+
+            REQUIRE(map.size() == 3);
+
+            // read back via operator[]
+            REQUIRE(map[1] == 100);
+            REQUIRE(map[2] == 200);
+            REQUIRE(map[3] == 300);
+
+            // update via operator[]
+            map[2] = 250;
+            REQUIRE(map[2] == 250);
+            REQUIRE(map.size() == 3);  // size unchanged
+
+            // verify via find
+            {
+                auto it = map.find(1);
+                REQUIRE(it != map.end());
+                REQUIRE(it->second == 100);
+            }
+            {
+                auto it = map.find(2);
+                REQUIRE(it != map.end());
+                REQUIRE(it->second == 250);
+            }
+            {
+                auto it = map.find(3);
+                REQUIRE(it != map.end());
+                REQUIRE(it->second == 300);
+            }
+
+            // operator[] on non-existent key creates default entry
+            int & val = map[999];
+            REQUIRE(map.size() == 4);
+            REQUIRE(val == 0);  // default-initialized
+            val = 999;
+            REQUIRE(map[999] == 999);
+        }
+
         // TODO:
         //  - let's try getting lcov to work in xo-umbrella2
     }
