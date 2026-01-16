@@ -73,10 +73,17 @@ namespace xo {
                                        const char * cstr);
 
             /** create string containing a copy of @p sv.
-             *  Use memory from allocator @p mm
+             *  Use memory from allocator @p mm.
              **/
             static DString * from_view(obj<AAllocator> mm,
                                        std::string_view sv);
+
+            /** create string containing a copy of @p sv.
+             *  Use memory from allocator @p mm via sub_alloc.
+             *  (load-bearing for StringTable)
+             **/
+            static DString * from_view_suballoc(obj<AAllocator> mm,
+                                                std::string_view sv);
 
             /** clone existing string **/
             static DString * clone(obj<AAllocator> mm,
@@ -241,6 +248,20 @@ namespace xo {
 
             /** fixup child pointers (trivial for DString, no children) **/
             size_type forward_children(obj<ACollector> gc) noexcept;
+
+            ///@}
+
+        private:
+            /** @defgroup dstring-impl-methods implementation methods **/
+            ///@{
+
+            /** create instance from view @p sv, using memory from @p mm.
+             *  @p suballoc_flag chooses whether to use alloc() or suballoc().
+             *  Load-bearing for StringTable
+             **/
+            static DString * _from_view_aux(obj<AAllocator> mm,
+                                            std::string_view sv,
+                                            bool suballoc_flag);
 
             ///@}
 

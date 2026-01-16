@@ -58,22 +58,44 @@ namespace xo {
         }
 
         DString *
-        DString::from_view(obj<AAllocator> mm,
-                           std::string_view sv)
+        DString::_from_view_aux(obj<AAllocator> mm,
+                                std::string_view sv,
+                                bool suballoc_flag)
         {
             size_type len = sv.size();
             size_type cap = len + 1;
 
-            void * mem = mm.alloc(typeseq::id<DString>(),
-                                  sizeof(DString) + cap);
+            auto tseq = typeseq::id<DString>();
+            void * mem = nullptr;
+            size_type mem_z = sizeof(DString) + cap;
+
+            if (suballoc_flag)
+                mem = mm.sub_alloc(mem_z, false /*!complete_flag*/);
+            else
+                mem = mm.alloc(tseq, mem_z);
 
             DString * result = new (mem) DString();
+
             result->capacity_ = cap;
             result->size_ = len;
             std::memcpy(result->chars_, sv.data(), len);
             result->chars_[len] = '\0';
 
             return result;
+        }
+
+        DString *
+        DString::from_view(obj<AAllocator> mm,
+                           std::string_view sv)
+        {
+            return _from_view_aux(mm, sv, false /*!suballoc_flag*/);
+        }
+
+        DString *
+        DString::from_view_suballoc(obj<AAllocator> mm,
+                                    std::string_view sv)
+        {
+            return _from_view_aux(mm, sv, true /*suballoc_flag*/);
         }
 
         DString *

@@ -338,7 +338,7 @@ namespace xo {
 
             if (!this->contains(role::from_space(), from_src)) {
                 /* presumeably memory not owned by collector
-                 * (e.g. Boolean {true, false})
+                 * (e.g. DBoolean {true, false}, DUniqueString {owned by StringTable} etc.)
                  */
                 return from_src;
             }
