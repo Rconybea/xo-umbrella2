@@ -50,7 +50,9 @@ namespace xo {
             using store_type = detail::HashMapStore<Key, Value>;
             using insert_value_type = std::pair<value_type *, bool>;
             using iterator = detail::DArenaHashMapIterator<Key, Value>;
+            using const_iterator = detail::DArenaHashMapConstIterator<Key, Value>;
 
+        public:
             /** create hash map **/
             DArenaHashMap(size_type hint_max_capacity,
                           bool debug_flag = false);
@@ -71,28 +73,14 @@ namespace xo {
              **/
             bool verify_ok(verify_policy p = verify_policy::throw_only()) const;
 
-            iterator begin() {
-                if (this->empty()) [[unlikely]] {
-                    return this->end();
-                }
+            const_iterator cbegin() const { return this->_begin_aux(); }
+            const_iterator cend() const { return this->_end_aux(); }
 
-                iterator ix(&(store_.control_[c_control_stub]),
-                            &(store_.slots_[0]));
+            const_iterator begin() const { return this->_begin_aux(); }
+            const_iterator end() const { return this->_end_aux(); }
 
-                if (ix._at_slot_sentinel()) {
-                    /* advance to first occupied position in table */
-                    ++ix;
-                }
-
-                return ix;
-            }
-
-            iterator end() {
-                iterator ix(&(store_.control_[c_control_stub + store_.capacity()]),
-                            &(store_.slots_[store_.capacity()]));
-
-                return ix;
-            }
+            iterator begin() { return _promote_iterator(_begin_aux()); }
+            iterator end() { return _promote_iterator(_end_aux()); }
 
             /** insert @p kv_pair into hash map.
              *  Replaces any previous value stored under the same key.
@@ -117,12 +105,46 @@ namespace xo {
             /** find element with key @p key.
              *  @return iterator to element if found, end() otherwise
              **/
-            iterator find(const key_type & key);
+            const_iterator find(const key_type & key) const { return _find(key); }
+            iterator find(const key_type & key) { return _promote_iterator(_find(key)); }
 
             /** establish kv pair for @p key in this table; return address of value part **/
             mapped_type & operator[](const key_type & key);
 
         private:
+            iterator _promote_iterator(const_iterator ix) {
+                return iterator(const_cast<uint8_t *>(ix._ctrl()),
+                                const_cast<value_type *>(ix._pos()));
+            }
+
+            const_iterator _begin_aux() const {
+                if (this->empty()) [[unlikely]] {
+                    return this->end();
+                }
+
+                const_iterator ix(&(store_.control_[c_control_stub]),
+                                  &(store_.slots_[0]));
+
+                if (ix._at_slot_sentinel()) {
+                    /* advance to first occupied position in table */
+                    ++ix;
+                }
+
+                return ix;
+            }
+
+            const_iterator _end_aux() const {
+                const_iterator ix(&(store_.control_[c_control_stub + store_.capacity()]),
+                                  &(store_.slots_[store_.capacity()]));
+
+                return ix;
+            }
+
+            /** search hash map on key @p key, return iterator to table member.
+             *  return end-iterator if @p key not found
+             **/
+            const_iterator _find(const key_type & key) const;
+
             /** insert @p kv_pair,
              *  where key hashes to @p hash_value, into @p *store
              **/
@@ -416,12 +438,12 @@ namespace xo {
                   typename Hash,
                   typename Equal>
         auto
-        DArenaHashMap<Key, Value, Hash, Equal>::find(const key_type & key) -> iterator
+        DArenaHashMap<Key, Value, Hash, Equal>::_find(const key_type & key) const -> const_iterator
         {
             size_type N = store_.capacity();
 
             if (N == 0) [[unlikely]] {
-                return this->end();
+                return this->cend();
             }
 
             size_type h = hash_(key);
@@ -443,8 +465,8 @@ namespace xo {
                         auto & slot = store_.slots_[slot_ix];
 
                         if (equal_(slot.first, key)) {
-                            return iterator(&(store_.control_[c_control_stub + slot_ix]),
-                                            &slot);
+                            return const_iterator(&(store_.control_[c_control_stub + slot_ix]),
+                                                  &slot);
                         }
 
                         m &= (m - 1);
