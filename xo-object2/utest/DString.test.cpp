@@ -3,7 +3,8 @@
  *  @author Roland Conybeare, Jan 2026
  **/
 
-#include <xo/object2/StringOps.hpp>
+#include "init_object2.hpp"
+#include "StringOps.hpp"
 #include <xo/alloc2/arena/IAllocator_DArena.hpp>
 #include <catch2/catch.hpp>
 #include <cctype>
@@ -19,6 +20,14 @@ namespace xo {
     using xo::facet::obj;
 
     namespace ut {
+        static InitEvidence s_init = (InitSubsys<S_object2_tag>::require());
+
+        TEST_CASE("DString-init", "[object2][DString]")
+        {
+            // real purpose: ensure s_init survives static linking
+            REQUIRE(s_init.evidence());
+        }
+
         TEST_CASE("DString-empty", "[object2][DString]")
         {
             ArenaConfig cfg { .name_ = "testarena",
