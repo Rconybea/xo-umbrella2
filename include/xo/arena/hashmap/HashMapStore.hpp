@@ -22,14 +22,15 @@ namespace xo {
 
             public:
                 /** group_exp2: number of groups {x, 2^x} **/
-                explicit HashMapStore(const std::pair<size_type,
+                explicit HashMapStore(const std::string & name,
+                                      const std::pair<size_type,
                                                       size_type> & group_exp2)
                 : size_{0},
                   n_group_exponent_{group_exp2.first},
                   n_group_{group_exp2.second},
                   n_slot_{group_exp2.second * c_group_size},
-                  control_{control_vector_type::map(xo::mm::ArenaConfig{.size_ = control_size(n_slot_)})},
-                  slots_{slot_vector_type::map(xo::mm::ArenaConfig{.size_ = n_slot_ * sizeof(value_type)})}
+                  control_{control_vector_type::map(xo::mm::ArenaConfig{.name_ = name, .size_ = control_size(n_slot_)})},
+                  slots_{slot_vector_type::map(xo::mm::ArenaConfig{.name_ = name, .size_ = n_slot_ * sizeof(value_type)})}
                 {
                     /* here: arenas have allocated address range, but no committed memory yet */
 
