@@ -274,6 +274,24 @@ namespace xo {
             REQUIRE(map[999] == 999);
         }
 
+        TEST_CASE("DArenaHashMap-string_view-key", "[arena][DArenaHashMap]")
+        {
+            using HashMap = DArenaHashMap<std::string_view, int>;
+
+            HashMap map(1024);
+
+            map["hello"] = 42;
+            REQUIRE(map.size() == 1);
+            REQUIRE(map.verify_ok());
+
+            map["world"] = 100;
+            REQUIRE(map.size() == 2);
+            REQUIRE(map.verify_ok());
+
+            REQUIRE(map["hello"] == 42);
+            REQUIRE(map["world"] == 100);
+        }
+
         // TODO:
         //  - let's try getting lcov to work in xo-umbrella2
     }
