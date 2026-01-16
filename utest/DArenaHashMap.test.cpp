@@ -8,6 +8,7 @@
 #include <xo/randomgen/random_seed.hpp>
 #include <xo/indentlog/scope.hpp>
 #include <xo/indentlog/print/tag.hpp>
+#include <xo/indentlog/print/hex.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {
@@ -76,6 +77,8 @@ namespace xo {
                     }
                     REQUIRE(n == map.size());
                 }
+
+                REQUIRE(map.verify_ok(verify_policy::chatty()));
             }
 
             {
@@ -97,6 +100,8 @@ namespace xo {
                     }
                     REQUIRE(n == map.size());
                 }
+
+                REQUIRE(map.verify_ok(verify_policy::chatty()));
             }
 
             {
@@ -131,6 +136,8 @@ namespace xo {
                     }
                     REQUIRE(n == map.size());
                 }
+
+                REQUIRE(map.verify_ok(verify_policy::chatty()));
             }
 
             {
@@ -140,6 +147,8 @@ namespace xo {
                 REQUIRE(map.size() == 0);
                 REQUIRE(map.groups() == 0);
                 REQUIRE(map.capacity() == 0);
+
+                REQUIRE(map.verify_ok(verify_policy::chatty()));
             }
 
             /* slightly different starting point, 0 capacity! */
@@ -149,6 +158,8 @@ namespace xo {
                 /* try_insert should fail - no capacity */
                 REQUIRE(!x.first);
                 REQUIRE(!x.second);
+
+                REQUIRE(map.verify_ok(verify_policy::chatty()));
             }
 
             {
@@ -172,6 +183,8 @@ namespace xo {
                     }
                     REQUIRE(n == map.size());
                 }
+
+                REQUIRE(map.verify_ok(verify_policy::chatty()));
             }
 
         }
@@ -228,14 +241,27 @@ namespace xo {
 
         TEST_CASE("DArenaHashMap-operator-bracket", "[arena][DArenaHashMap]")
         {
+            scope log(XO_DEBUG(false));
+
             using HashMap = DArenaHashMap<int, int>;
 
             HashMap map;
 
+            // copy keys here so we can print stuff
+            std::vector<int> key_v;
+
             // insert via operator[]
             map[1] = 100;
+            key_v.push_back(1);
+            REQUIRE(map.verify_ok(verify_policy::chatty()));
+
             map[2] = 200;
+            key_v.push_back(2);
+            REQUIRE(map.verify_ok(verify_policy::chatty()));
+
             map[3] = 300;
+            key_v.push_back(3);
+            REQUIRE(map.verify_ok(verify_policy::chatty()));
 
             REQUIRE(map.size() == 3);
 
@@ -248,6 +274,7 @@ namespace xo {
             map[2] = 250;
             REQUIRE(map[2] == 250);
             REQUIRE(map.size() == 3);  // size unchanged
+            REQUIRE(map.verify_ok(verify_policy::chatty()));
 
             // verify via find
             {
@@ -265,9 +292,40 @@ namespace xo {
                 REQUIRE(it != map.end());
                 REQUIRE(it->second == 300);
             }
+            {
+                auto it = map.find(4);
+                REQUIRE(it == map.end());
+            }
+
+            REQUIRE(map.verify_ok(verify_policy::chatty()));
 
             // operator[] on non-existent key creates default entry
             int & val = map[999];
+            key_v.push_back(999);
+
+            for (uint64_t i_slot = 0, N = map._store()->n_slot_; i_slot < N; ++i_slot) {
+                auto key = map._store()->slots_[i_slot].first;
+                auto ctrl = map._store()->control_
+                    [i_slot + DArenaHashMapUtil::c_control_stub];
+                auto isdata = DArenaHashMapUtil::is_data(ctrl);
+                auto [h1,h2] = map._hash(key);
+
+                if ((key != 0)
+                    || (h1 != 0)
+                    || (h2 != 0)
+                    || (ctrl != DArenaHashMapUtil::c_empty_slot)
+                    || isdata
+                    ) {
+                log && log(xtag("i", i_slot),
+                           xtag("key[i]", key),
+                           xtag("h1", h1), xtag("h2", h2),
+                           xtag("ctrl[i]", (int)ctrl),
+                           xtag("isdata", isdata));
+                }
+            }
+
+            REQUIRE(map.verify_ok(verify_policy::chatty()));
+
             REQUIRE(map.size() == 4);
             REQUIRE(val == 0);  // default-initialized
             val = 999;
@@ -279,6 +337,8 @@ namespace xo {
             using HashMap = DArenaHashMap<std::string_view, int>;
 
             HashMap map(1024);
+
+            REQUIRE(map.verify_ok());
 
             map["hello"] = 42;
             REQUIRE(map.size() == 1);

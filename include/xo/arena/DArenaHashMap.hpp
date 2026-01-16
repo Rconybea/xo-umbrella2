@@ -67,12 +67,6 @@ namespace xo {
             size_type capacity() const noexcept { return store_.capacity(); }
             float load_factor() const noexcept { return store_.load_factor(); }
 
-            /** verify DArenaHashMap invariants
-             *  Act on failure according to policy @p
-             *  (combination of throw|log bits)
-             **/
-            bool verify_ok(verify_policy p = verify_policy::throw_only()) const;
-
             const_iterator cbegin() const { return this->_begin_aux(); }
             const_iterator cend() const { return this->_end_aux(); }
 
@@ -110,6 +104,26 @@ namespace xo {
 
             /** establish kv pair for @p key in this table; return address of value part **/
             mapped_type & operator[](const key_type & key);
+
+            /** verify DArenaHashMap invariants
+             *  Act on failure according to policy @p
+             *  (combination of throw|log bits)
+             **/
+            bool verify_ok(verify_policy p = verify_policy::throw_only()) const;
+
+            store_type * _store() noexcept { return &store_; }
+
+            auto _hash(const key_type & key) const {
+                size_type h = hash_(key);
+                size_type h1 = h >> 7;    // slot#
+                size_type h2 = h % 0x7f;  // fingerprint
+
+                size_type N = store_.capacity();
+
+                size_type slot_ix = h1 % (N - 1);
+
+                return std::make_pair(slot_ix, h2);
+            }
 
         private:
             iterator _promote_iterator(const_iterator ix) {
@@ -584,7 +598,9 @@ namespace xo {
             }
 
             /* SM1.3: n_group_ consistent with n_group_exponent_ */
-            if (store_.n_group_ != (size_type{1} << store_.n_group_exponent_)) {
+            if ((store_.n_group_ > 0)
+                && (store_.n_group_ != (size_type{1} << store_.n_group_exponent_)))
+            {
                 return policy.report_error(log,
                                            c_self, ": expect .n_group = 2^.n_group_exponent",
                                            xtag("n_group", store_.n_group_),
@@ -655,15 +671,19 @@ namespace xo {
             }
 
             /* SM3.4: control_[stub+N+c_group_size+i] = c_iterator_bookend for i in [0, c_control_stub) */
-            for (size_type i = 0; i < c_control_stub; ++i) {
-                size_type ix = c_control_stub + store_.n_slot_ + c_group_size + i;
-                if (store_.control_[ix] != c_iterator_bookend) {
-                    return policy.report_error(log,
-                                               c_self, ": expect control_[stub+N+group+i] = c_iterator_bookend for end stub",
-                                               xtag("i", i),
-                                               xtag("ix", ix),
-                                               xtag("control_[ix]", (int)(store_.control_[ix])),
-                                               xtag("c_iterator_bookend", (int)c_iterator_bookend));
+            if (store_.n_slot_ > 0) {
+                for (size_type i = 0; i < c_control_stub; ++i) {
+                    size_type ix = c_control_stub + store_.n_slot_ + c_group_size + i;
+                    if (store_.control_[ix] != c_iterator_bookend) {
+                        return policy.report_error
+                            (log,
+                             c_self, ": expect control_[stub+N+group+i] = c_iterator_bookend for end stub",
+                             xtag("i", i),
+                             xtag("N", store_.n_slot_),
+                             xtag("ix", ix),
+                             xtag("control_[ix]", (int)(store_.control_[ix])),
+                             xtag("c_iterator_bookend", (int)c_iterator_bookend));
+                    }
                 }
             }
 

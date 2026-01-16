@@ -29,8 +29,14 @@ namespace xo {
                   n_group_exponent_{group_exp2.first},
                   n_group_{group_exp2.second},
                   n_slot_{group_exp2.second * c_group_size},
-                  control_{control_vector_type::map(xo::mm::ArenaConfig{.name_ = name, .size_ = control_size(n_slot_)})},
-                  slots_{slot_vector_type::map(xo::mm::ArenaConfig{.name_ = name, .size_ = n_slot_ * sizeof(value_type)})}
+                  control_{control_vector_type::map
+                    (xo::mm::ArenaConfig{
+                        .name_ = name,
+                        .size_ = control_size(n_slot_)})},
+                  slots_{slot_vector_type::map
+                    (xo::mm::ArenaConfig{
+                        .name_ = name,
+                        .size_ = n_slot_ * sizeof(value_type)})}
                 {
                     /* here: arenas have allocated address range, but no committed memory yet */
 
@@ -64,6 +70,7 @@ namespace xo {
                     this->n_group_exponent_ = 0;
                     this->n_group_ = 0;
                     this->n_slot_ = 0;
+
                     this->control_.resize(0);
                     this->slots_.resize(0);
                 }
