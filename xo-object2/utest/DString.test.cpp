@@ -50,6 +50,31 @@ namespace xo {
             REQUIRE(std::strcmp(s->chars(), cstr) == 0);
         }
 
+        TEST_CASE("DString-from_view", "[object2][DString]")
+        {
+            ArenaConfig cfg { .name_ = "testarena",
+                              .size_ = 4*1024 };
+            DArena arena = DArena::map(cfg);
+            auto alloc = with_facet<AAllocator>::mkobj(&arena);
+
+            std::string_view sv = "hello world";
+            DString * s = DString::from_view(alloc, sv);
+
+            REQUIRE(s != nullptr);
+            REQUIRE(s->capacity() == 12);
+            REQUIRE(s->size() == 11);
+            REQUIRE(std::strcmp(s->chars(), "hello world") == 0);
+
+            // test with substring (not null-terminated)
+            std::string_view sub = sv.substr(0, 5);
+            DString * s2 = DString::from_view(alloc, sub);
+
+            REQUIRE(s2 != nullptr);
+            REQUIRE(s2->capacity() == 6);
+            REQUIRE(s2->size() == 5);
+            REQUIRE(std::strcmp(s2->chars(), "hello") == 0);
+        }
+
         TEST_CASE("DString-assign", "[object2][DString]")
         {
             ArenaConfig cfg { .name_ = "testarena",

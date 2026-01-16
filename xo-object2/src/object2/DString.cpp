@@ -58,6 +58,25 @@ namespace xo {
         }
 
         DString *
+        DString::from_view(obj<AAllocator> mm,
+                           std::string_view sv)
+        {
+            size_type len = sv.size();
+            size_type cap = len + 1;
+
+            void * mem = mm.alloc(typeseq::id<DString>(),
+                                  sizeof(DString) + cap);
+
+            DString * result = new (mem) DString();
+            result->capacity_ = cap;
+            result->size_ = len;
+            std::memcpy(result->chars_, sv.data(), len);
+            result->chars_[len] = '\0';
+
+            return result;
+        }
+
+        DString *
         DString::clone(obj<AAllocator> mm, const DString * src)
         {
             size_type cap = src->capacity_;
