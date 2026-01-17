@@ -20,9 +20,17 @@ namespace xo {
             REQUIRE(td->metatype() == xo::reflect::Metatype::mt_struct);
             REQUIRE(td->n_child(nullptr) == 2);
             REQUIRE(td->struct_member(0).member_name() == "num");
+#if defined(__APPLE__)
+            REQUIRE(td->struct_member(0).get_member_td()->short_name() == "long long");
+#else
             REQUIRE(td->struct_member(0).get_member_td()->short_name() == "long int");
+#endif
             REQUIRE(td->struct_member(1).member_name() == "den");
+#if defined(__APPLE__)
+            REQUIRE(td->struct_member(1).get_member_td()->short_name() == "long long");
+#else
             REQUIRE(td->struct_member(1).get_member_td()->short_name() == "long int");
+#endif
 
             TypeDescrBase::print_reflected_types(std::cerr);
         }
