@@ -64,8 +64,9 @@ namespace xo {
 
             /** @brief Checkpoint for unwinding arena state **/
             struct Checkpoint {
+                Checkpoint() = default;
                 explicit Checkpoint(std::byte * x) : free_{x} {}
-                std::byte * free_;
+                std::byte * free_ = nullptr;
             };
 
             ///@}
