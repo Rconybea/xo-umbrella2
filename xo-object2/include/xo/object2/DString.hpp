@@ -279,6 +279,15 @@ namespace xo {
             ///@}
         };
 
+        inline std::ostream & operator<<(std::ostream & os, const DString * x) {
+            if (x) {
+                os << std::string_view(*x);
+            } else {
+                os << "nullptr";
+            }
+            return os;
+        }
+
         inline bool operator==(const DString & lhs, const DString & rhs) {
             return DString::compare(lhs, rhs) == 0;
         }
