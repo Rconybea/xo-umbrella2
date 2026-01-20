@@ -115,7 +115,7 @@ namespace xo {
              *    obj<AFoo> foo
              *      = ...;  // Foo instance with variant impl
              *    obj<ABar> bar
-             *      = FacetRegistry::variant<ABar,AFoo>(foo);
+             *      = FacetRegistry::instance().variant<ABar,AFoo>(foo);
              *
              *    // exception thrown if bar has null data
              *
@@ -140,7 +140,7 @@ namespace xo {
              *    obj<AFoo> foo
              *      = ...;  // Foo instance with variant impl
              *    obj<ABar> bar
-             *      = FacetRegistry::try_variant<ABar,AFoo>(foo);
+             *      = FacetRegistry::instance().try_variant<ABar,AFoo>(foo);
              *    if (bar) {
              *       // success
              *    } else {
