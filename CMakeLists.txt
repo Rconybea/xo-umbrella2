@@ -119,8 +119,8 @@ xo_add_genfacetimpl(
     FACET Printable
     REPR String
     INPUT idl/IPrintable_DString.json5
-    OUTPUT_HPP_DIR include/xo/object2/string
-    OUTPUT_IMPL_SUBDIR .
+    OUTPUT_HPP_DIR include/xo/object2
+    OUTPUT_IMPL_SUBDIR string
     OUTPUT_CPP_DIR src/object2
 )
 
@@ -131,8 +131,8 @@ xo_add_genfacetimpl(
     FACET GCObject
     REPR String
     INPUT idl/IGCObject_DString.json5
-    OUTPUT_HPP_DIR include/xo/object2/string
-    OUTPUT_IMPL_SUBDIR .
+    OUTPUT_HPP_DIR include/xo/object2
+    OUTPUT_IMPL_SUBDIR string
     OUTPUT_CPP_DIR src/object2
 )
 
