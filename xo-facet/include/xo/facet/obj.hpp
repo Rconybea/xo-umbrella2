@@ -103,7 +103,12 @@ namespace xo {
                 return *this;
             }
 
-            /** safe downcast from variant. null if downcast fails **/
+            /** safe downcast from variant. null if downcast fails
+             *
+             *  Use:
+             *    obj<AFoo> x = ...;
+             *    obj<AFoo,DQuux> quux = obj<AFoo,DQuux>::from(x);
+             **/
             static obj from(const OObject<AFacet> & other) {
                 return obj(other.template downcast<DRepr>());
             }
