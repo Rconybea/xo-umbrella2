@@ -160,6 +160,8 @@ xo_add_genfacetimpl(
     OUTPUT_CPP_DIR src/object2
 )
 
+xo_add_genfacet_all(xo-object2-genfacet-all)
+
 # ----------------------------------------------------------------
 
 # must complete definition of expression lib before configuring examples
