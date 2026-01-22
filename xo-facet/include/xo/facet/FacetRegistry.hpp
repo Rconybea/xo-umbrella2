@@ -128,7 +128,8 @@ namespace xo {
                 if (!retval)
                     throw std::runtime_error(tostr("FacetRegistry::try_variant failed",
                                                    xtag("AFrom.tseq", typeseq::id<AFrom>()),
-                                                   xtag("ATo.tseq", typeseq::id<ATo>())));
+                                                   xtag("ATo.tseq", typeseq::id<ATo>()),
+                                                   xtag("DRepr", from._typeseq())));
 
                 return retval;
             }
