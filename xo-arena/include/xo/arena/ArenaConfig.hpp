@@ -17,6 +17,14 @@ namespace xo {
          *  @brief configuration for a @ref DArena instance
          **/
         struct ArenaConfig {
+            /** @defgroup mm-arenaconfig-ctors **/
+
+            ArenaConfig with_size(std::size_t z) {
+                ArenaConfig copy(*this);
+                copy.size_ = z;
+                return copy;
+            }
+
             /** @defgroup mm-arenaconfig-instance-vars ArenaConfig members **/
             ///@{
 
