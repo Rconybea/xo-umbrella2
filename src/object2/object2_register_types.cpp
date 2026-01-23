@@ -5,6 +5,7 @@
 
 #include "object2_register_types.hpp"
 
+#include "boolean/IGCObject_DBoolean.hpp"
 #include "number/IGCObject_DFloat.hpp"
 #include "number/IGCObject_DInteger.hpp"
 #include "string/IGCObject_DString.hpp"
@@ -32,6 +33,8 @@ namespace xo {
             scope log(XO_DEBUG(true));
 
             bool ok = true;
+
+            ok &= gc.install_type(impl_for<AGCObject, DBoolean>());
 
             ok &= gc.install_type(impl_for<AGCObject, DFloat>());
 
