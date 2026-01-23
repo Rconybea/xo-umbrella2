@@ -42,7 +42,7 @@ namespace xo {
 
         private:
             /** boxed boolean value **/
-            bool value_;
+            bool value_ = false;
         };
 
         template <typename AFacet>

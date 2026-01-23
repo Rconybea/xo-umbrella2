@@ -67,7 +67,7 @@ namespace xo {
             log && log(xtag("DVariantPlaceholder.tseq", typeseq::id<DVariantPlaceholder>()));
 
             log && log(xtag("DList.tseq", typeseq::id<DList>()));
-            log && log(xtag("DBoolean.tseq", typeseq::id<DFloat>()));
+            log && log(xtag("DBoolean.tseq", typeseq::id<DBoolean>()));
             log && log(xtag("DFloat.tseq", typeseq::id<DFloat>()));
             log && log(xtag("DInteger.tseq", typeseq::id<DInteger>()));
             log && log(xtag("DString.tseq", typeseq::id<DString>()));
