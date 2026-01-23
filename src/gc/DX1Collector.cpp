@@ -24,6 +24,15 @@ namespace xo {
     using xo::facet::with_facet;
 
     namespace mm {
+
+        CollectorConfig
+        CollectorConfig::with_size(std::size_t gen_z)
+        {
+            CollectorConfig copy = *this;
+            copy.arena_config_ = arena_config_.with_size(gen_z);
+            return copy;
+        }
+
 #ifdef NOT_USING
         constexpr std::uint64_t
         CollectorConfig::gen_mult() const {

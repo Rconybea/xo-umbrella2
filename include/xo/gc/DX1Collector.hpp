@@ -69,6 +69,12 @@ namespace xo {
             constexpr std::uint64_t tseq_mask_shifted() const;
 #endif
 
+
+            /** copy of this config,
+             *  with @c arena_config_.size_ set to @p gen_z
+             **/
+            CollectorConfig with_size(std::size_t gen_z);
+
             generation age2gen(object_age age) const noexcept {
                 return generation(age % n_survive_threshold_);
             }
@@ -168,6 +174,11 @@ namespace xo {
 
             /** Create X1 collector instance. **/
             explicit DX1Collector(const CollectorConfig & cfg);
+
+            /** create instance with default configuration,
+             *  generation size @p gen_z
+             **/
+            DX1Collector make_std(std::size_t gen_z);
 
             std::string_view name() const { return config_.name_; }
 
