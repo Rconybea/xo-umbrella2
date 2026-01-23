@@ -24,7 +24,9 @@ namespace xo {
         bool
         DBoolean::pretty(const ppindentinfo & ppii) const
         {
-            return ppdetail_atomic<long>::print_pretty(ppii, value_);
+            return ppdetail_atomic<bool>::print_pretty
+                       (ppii,
+                        (value_ ? "true" : "false"));
         }
 
         size_t
