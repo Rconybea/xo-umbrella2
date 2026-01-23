@@ -4,6 +4,7 @@ set(SELF_LIB xo_object2)
 set(SELF_SRCS
     IGCObject_DArray.cpp
     IGCObject_DFloat.cpp
+    IGCObject_DBoolean.cpp
     IGCObject_DInteger.cpp
     IGCObject_DList.cpp
     IGCObject_DString.cpp
@@ -11,6 +12,7 @@ set(SELF_SRCS
     ISequence_DArray.cpp
     ISequence_DList.cpp
     IPrintable_DList.cpp
+    IPrintable_DBoolean.cpp
     IPrintable_DFloat.cpp
     IPrintable_DInteger.cpp
     IPrintable_DString.cpp
@@ -18,6 +20,7 @@ set(SELF_SRCS
     DList.cpp
     DFloat.cpp
     DInteger.cpp
+    DBoolean.cpp
     DString.cpp
     init_object2.cpp
     object2_register_types.cpp

@@ -28,6 +28,8 @@ xo_add_genfacet(
     OUTPUT_CPP_DIR src/object2
 )
 
+# ----------------------------------------------------------------
+
 # note: manual target; generated code committed to git
 xo_add_genfacetimpl(
     TARGET xo-object2-facetimpl-sequence-list
@@ -64,6 +66,34 @@ xo_add_genfacetimpl(
     OUTPUT_CPP_DIR src/object2
 )
 
+# ----------------------------------------------------------------
+
+# note: manual target; generated code committed to git
+xo_add_genfacetimpl(
+    TARGET xo-object2-facetimpl-printable-boolean
+    FACET_PKG xo_printable2
+    FACET Printable
+    REPR Boolean
+    INPUT idl/IPrintable_DBoolean.json5
+    OUTPUT_HPP_DIR include/xo/object2
+    OUTPUT_IMPL_SUBDIR boolean
+    OUTPUT_CPP_DIR src/object2
+)
+
+# note: manual target; generated code committed to git
+xo_add_genfacetimpl(
+    TARGET xo-object2-facetimpl-gcobject-boolean
+    FACET_PKG xo_gc
+    FACET GCObject
+    REPR Boolean
+    INPUT idl/IGCObject_DBoolean.json5
+    OUTPUT_HPP_DIR include/xo/object2
+    OUTPUT_IMPL_SUBDIR boolean
+    OUTPUT_CPP_DIR src/object2
+)
+
+# ----------------------------------------------------------------
+
 # note: manual target; generated code committed to git
 xo_add_genfacetimpl(
     TARGET xo-object2-facetimpl-printable-float
@@ -87,6 +117,8 @@ xo_add_genfacetimpl(
     OUTPUT_IMPL_SUBDIR number
     OUTPUT_CPP_DIR src/object2
 )
+
+# ----------------------------------------------------------------
 
 # note: manual target; generated code committed to git
 xo_add_genfacetimpl(
@@ -112,6 +144,8 @@ xo_add_genfacetimpl(
     OUTPUT_CPP_DIR src/object2
 )
 
+# ----------------------------------------------------------------
+
 # note: manual target; generated code committed to git
 xo_add_genfacetimpl(
     TARGET xo-object2-facetimpl-printable-string
@@ -135,6 +169,8 @@ xo_add_genfacetimpl(
     OUTPUT_IMPL_SUBDIR string
     OUTPUT_CPP_DIR src/object2
 )
+
+# ----------------------------------------------------------------
 
 # note: manual target; generated code committed to git
 xo_add_genfacetimpl(
