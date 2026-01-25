@@ -78,6 +78,12 @@ namespace xo {
             static DString * from_view(obj<AAllocator> mm,
                                        std::string_view sv);
 
+            /** create string containing a copy @p str.
+             *  Use memory from allocator @p mm.
+             **/
+            static DString * from_str(obj<AAllocator> mm,
+                                      const std::string & str);
+
             /** create string containing a copy of @p sv.
              *  Use memory from allocator @p mm via sub_alloc.
              *  (load-bearing for StringTable)
