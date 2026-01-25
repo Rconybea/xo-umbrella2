@@ -1,6 +1,7 @@
 @PACKAGE_INIT@
 
 include(CMakeFindDependencyMacro)
+find_dependency(reflect)
 find_dependency(xo_gc)
 find_dependency(xo_printable2)
 find_dependency(subsys)
