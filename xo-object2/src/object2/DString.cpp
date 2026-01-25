@@ -92,6 +92,15 @@ namespace xo {
         }
 
         DString *
+        DString::from_str(obj<AAllocator> mm,
+                          const std::string & str)
+        {
+            return _from_view_aux(mm,
+                                  std::string_view(str),
+                                  false /*!suballoc_flag*/);
+        }
+
+        DString *
         DString::from_view_suballoc(obj<AAllocator> mm,
                                     std::string_view sv)
         {
