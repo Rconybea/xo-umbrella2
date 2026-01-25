@@ -24,7 +24,7 @@ namespace xo {
          *    ObjectConversion<int16_t>
          * in object/Integer.hpp
          **/
-    }
-}
+    } /*namespace obj*/
+} /*namespace xo*/
 
 /* end ObjectConversion.hpp */
