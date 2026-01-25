@@ -17,7 +17,7 @@ namespace xo {
             TypeDrivenMap() = default;
 
             const Value * lookup(TypeId id) const { return this->lookup_slot(id); }
-            const Value * lookup(TypeDescr td) { return this->lookup_slot(td->id()); }
+            const Value * lookup(TypeDescr td) const { return this->lookup_slot(td->id()); }
 
             Value * require(TypeId id) { return this->require_slot(id); }
             Value * require(TypeDescr td) { return this->require_slot(td->id()); }
