@@ -1,0 +1,58 @@
+{
+    mode: "facet",
+    // includes in ASyntaxStateMachine.hpp
+    includes: [
+    ],
+    // extra includes in SyntaxStateMachine.hpp, if any
+    user_hpp_includes: [
+    ],
+    namespace1: "xo",
+    namespace2: "scm",
+    // text after includes, before ASyntaxStateMachine
+    pretext: [ "// {pretex} here" ],
+    facet: "Procedure",
+    detail_subdir: "detail",
+    brief: "abstraction for a schematika procedure i.e. something callable",
+    using_doxygen: true,
+    doc: [
+        "Abstraction for a schematika procedure"
+    ],
+    types: [
+        { name: "AGCObject",
+          definition: "xo::mm::AGCObject",
+          doc: [ "a gc-aware object" ],
+        },
+        // { name: string, doc: [ string ], definition: string },
+    ],
+    const_methods: [
+        {
+            name: "is_nary",
+            doc: [ "true iff procedure takes n arguments" ],
+            return_type: "bool",
+            args: [],
+            const: true,
+            noexcept: true,
+            attributes: []
+        },
+        {
+            name: "n_args",
+            doc: ["number of arguments. -1 for n-ary" ],
+            return_type: "std::int32_t",
+            args: [],
+            const: true,
+            noexcept: true,
+            attributes: []
+        }
+    ],
+    nonconst_methods: [
+        {
+            name: "apply_nocheck",
+            doc: ["invoke procedure; assume arguments satisfy type system" ],
+            return_type: "obj<AGCObject>",
+            args: [
+                {type: "obj<AAllocator>", name: "mm"},
+                {type: "const DArray *", name: "args"},
+            ]
+        }
+    ],
+}
