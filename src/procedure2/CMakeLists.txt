@@ -1,0 +1,26 @@
+# xo-procedure2/src/CMakeLists.txt
+
+set(SELF_LIB xo_procedure2)
+set(SELF_SRCS
+    init_procedure2.cpp
+    init_primitives.cpp
+    DPrimitive.cpp
+    # Add source files here, e.g.:
+    # procedure2.cpp
+)
+
+xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 ${SELF_SRCS})
+xo_install_include_tree3(include/xo/procedure2)
+
+# ----------------------------------------------------------------
+# input dependencies
+#
+# NOTE: dependency set here must be kept consistent with
+#       xo-procedure2/cmake/xo_procedure2Config.cmake.in
+
+xo_dependency(${SELF_LIB} xo_object2)
+xo_dependency(${SELF_LIB} xo_gc)
+xo_dependency(${SELF_LIB} subsys)
+#xo_dependency(${SELF_LIB} xo_indentlog)
+
+# end src/CMakeLists.txt
