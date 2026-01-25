@@ -150,14 +150,19 @@ namespace xo {
 
         ObjectConverter::ObjectConverter()
         {
-            this->establish_conversion<std::int32_t>(&int_to_object<std::int32_t>, &object_to_int<std::int32_t>);
-            this->establish_conversion<std::int64_t>(&int_to_object<std::int64_t>, &object_to_int<std::int64_t>);
+            this->establish_conversion<std::int32_t>(&int_to_object<std::int32_t>,
+                                                     &object_to_int<std::int32_t>);
+            this->establish_conversion<std::int64_t>(&int_to_object<std::int64_t>,
+                                                     &object_to_int<std::int64_t>);
 
-            this->establish_conversion<double>(&float_to_object<double>, &object_to_float<double>);
+            this->establish_conversion<double>(&float_to_object<double>,
+                                               &object_to_float<double>);
 
-            this->establish_conversion<bool>(&bool_to_object, &object_to_bool);
+            this->establish_conversion<bool>(&bool_to_object,
+                                             &object_to_bool);
 
-            this->establish_conversion<std::string>(&string_to_object, &object_to_string);
+            this->establish_conversion<std::string>(&string_to_object,
+                                                    &object_to_string);
         }
 
         gp<Object>
