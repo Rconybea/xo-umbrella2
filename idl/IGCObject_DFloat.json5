@@ -1,6 +1,7 @@
 {
     mode: "implementation",
     includes: [
+        "<xo/object2/number/GCObjectConversion_DFloat.hpp>",
         "<xo/gc/GCObject.hpp>",
         "<xo/alloc2/Allocator.hpp>"
     ],
