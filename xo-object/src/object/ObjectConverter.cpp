@@ -177,9 +177,10 @@ namespace xo {
                 return (cvt->cvt_to_object_)(mm, x_tp);
             } else {
                 if (throw_flag) {
-                    throw std::runtime_error(tostr("no to-object-converter available for instance of type",
-                                                   xtag("id", x_tp.td()->id()),
-                                                   xtag("name", x_tp.td()->short_name())));
+                    throw std::runtime_error
+                        (tostr("no to-object-converter available for instance of type",
+                               xtag("id", x_tp.td()->id()),
+                               xtag("name", x_tp.td()->short_name())));
                 }
 
                 return nullptr;
