@@ -3,6 +3,9 @@
  *  @author Roland Conybeare, Jan 2026
  **/
 
+#include "DSimpleRcx.hpp"
+#include "detail/IRuntimeContext_DSimpleRcx.hpp"
+
 #include "DPrimitive_gco_2_gco_gco.hpp"
 #include "detail/IGCObject_DPrimitive_gco_2_gco_gco.hpp"
 
@@ -20,8 +23,11 @@ namespace xo {
         {
             scope log(XO_DEBUG(true));
 
+            FacetRegistry::register_impl<ARuntimeContext, DSimpleRcx>();
+
             FacetRegistry::register_impl<AGCObject, DPrimitive_gco_2_gco_gco>();
 
+            log && log(xtag("DSimpleRcx.tseq", typeseq::id<DSimpleRcx>()));
             log && log(xtag("DPrimitive_gco_2_gco_gco.tseq", typeseq::id<DPrimitive_gco_2_gco_gco>()));
 
             return true;
