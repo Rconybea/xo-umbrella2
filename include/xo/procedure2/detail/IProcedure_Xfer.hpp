@@ -2,7 +2,7 @@
  *
  *  Generated automagically from ingredients:
  *  1. code generator:
- *       [/Users/roland/proj/xo-umbrella2/xo-facet/codegen/genfacet]
+ *       [/home/roland/proj/xo-umbrella2-claude1/xo-facet/codegen/genfacet]
  *     arguments:
  *       --input [idl/Procedure.json5]
  *  2. jinja2 template for abstract facet .hpp file:
@@ -50,8 +50,8 @@ namespace scm {
         }
 
         // non-const methods
-        obj<AGCObject> apply_nocheck(Opaque data, const DArray * args)  override {
-            return I::apply_nocheck(_dcast(data), args);
+        obj<AGCObject> apply_nocheck(Opaque data, obj<ARuntimeContext> rcx, const DArray * args)  override {
+            return I::apply_nocheck(_dcast(data), rcx, args);
         }
 
         ///@}
