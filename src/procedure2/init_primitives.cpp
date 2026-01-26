@@ -5,10 +5,23 @@
 
 #include "init_primitives.hpp"
 #include "DPrimitive.hpp"
+#include <xo/object2/DFloat.hpp>
+#include <xo/object2/number/IGCObject_DFloat.hpp>
+#include <xo/object2/DInteger.hpp>
+#include <xo/object2/number/IGCObject_DInteger.hpp>
+#include <xo/gc/GCObjectConversion.hpp>
+#include <xo/object2/number/GCObjectConversion_DFloat.hpp>
+#include <xo/object2/number/GCObjectConversion_DInteger.hpp>
+#include <xo/facet/facet.hpp>
 #include <cmath>
 
 namespace xo {
+    using xo::mm::AAllocator;
+    using xo::scm::DFloat;
+    using xo::facet::with_facet;
+
     namespace scm {
+#ifdef NOT_YET
         double
         neg_f64(double x) {
             return -x;
@@ -23,11 +36,17 @@ namespace xo {
         sub_f64_f64(double x, double y) {
             return x - y;
         }
+#endif
 
-#ifdef NOT_YET
         obj<AGCObject>
-        mul_any_any(obj<AGCObject> x_gco, obj<AGCObject> y_gco)
+        mul_gco_gco(obj<ARuntimeContext> rcx,
+                    obj<AGCObject> x_gco,
+                    obj<AGCObject> y_gco)
         {
+            using xo::reflect::typeseq;
+
+            obj<AAllocator> mm = rcx.allocator();
+
             // PLACEHOLDER
 
             // TODO:
@@ -44,20 +63,45 @@ namespace xo {
 
             // FOR NOW: just test runtime values
             //
-            if (x_tseq == typeseq::id<DFloat>()) {
-                if (y_tseq == typeseq::id<DFloat>()) {
-                    // unusable placeholder allocator;
-                    obj<AAllocator> placeholder_mm;
+            if (x_tseq == typeseq::id<DInteger>()) {
+                // i64 * ..
+                long   x = GCObjectConversion<long>::from_gco(mm, x_gco);
 
+                if (y_tseq == typeseq::id<DInteger>()) {
+                    // i64 * i64
+                    long   y = GCObjectConversion<long>::from_gco(mm, y_gco);
+
+                    return DInteger::box<AGCObject>(mm, x * y);
+                } else if (y_tseq == typeseq::id<DFloat>()) {
+                    // i64 * f64
+                    double y = GCObjectConversion<double>::from_gco(mm, y_gco);
+
+                    return DFloat::box<AGCObject>(mm, x * y);
+                }
+            } else if (x_tseq == typeseq::id<DFloat>()) {
+                if (y_tseq == typeseq::id<DInteger>()) {
+                    // f64 * i64.
+                    double x = GCObjectConversion<double>::from_gco(mm, x_gco);
+                    long   y = GCObjectConversion<long>::from_gco(mm, y_gco);
+
+                    return DFloat::box<AGCObject>(mm, x * y);
+                } else if (y_tseq == typeseq::id<DFloat>()) {
                     // f64 * f64.
-                    double x = GCObjectConversion<double>::from_gco(placeholder_mm, x_gco);
-                    double y = GCObjectConversion<double>::from_gco(placeholder_mm, y_gco);
+                    double x = GCObjectConversion<double>::from_gco(mm, x_gco);
+                    double y = GCObjectConversion<double>::from_gco(mm, y_gco);
 
+                    return DFloat::box<AGCObject>(mm, x * y);
+                }
+            }
 
-
+            // here: error
+            throw std::runtime_error(tostr("mul_gco_gco: unexpected argument types xt,yt",
+                                           xtag("x.tseq", x_tseq),
+                                           xtag("y.tseq", y_tseq)));
+            return obj<AGCObject>();
         }
-#endif
 
+#ifdef NOT_YET
         double
         mul_f64_f64(double x, double y) {
             return x * y;
@@ -92,7 +136,12 @@ namespace xo {
         tan_f64(double x) {
             return ::tan(x);
         }
+#endif
 
+        DPrimitive_gco_2_gco_gco
+        Primitives::s_mul_gco_gco_pm("_mul", &mul_gco_gco);
+
+#ifdef NOT_YET
         Primitive_f64_1_f64
         Primitives::s_neg_f64_pm("_neg_d",
                                  &neg_f64);
@@ -123,6 +172,7 @@ namespace xo {
 
         Primitive_f64_1_f64
         Primitives::s_tan_f64_pm("_tan_d", &tan_f64);
+#endif
 
     } /*namespace scm*/
 } /*namespace xo*/
