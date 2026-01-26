@@ -9,6 +9,7 @@
 #include <xo/object2/DArray.hpp>
 #include <xo/gc/GCObjectConversion.hpp>
 #include <xo/gc/GCObject.hpp>
+#include <xo/reflect/Reflect.hpp>
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 
@@ -58,14 +59,22 @@ namespace xo {
         template <typename Fn>
         class Primitive {
         public:
+            using Traits = detail::PmFnTraits<Fn>;
+
             using ACollector = xo::mm::ACollector;
             using AAllocator = xo::mm::AAllocator;
             using AGCObject = xo::mm::AGCObject;
             using DArray = xo::scm::DArray;
-            using Traits = detail::PmFnTraits<Fn>;
+            using Reflect = xo::reflect::Reflect;
+            using TypeDescr = xo::reflect::TypeDescr;
+            using ppindentinfo = xo::print::ppindentinfo;
 
         public:
-            Primitive(std::string_view name, Fn fn) : name_{name}, fn_{fn} {}
+            Primitive(std::string_view name, Fn fn) : name_{name},
+                                                      fn_td_{Reflect::require<Fn>()},
+                                                      fn_{fn} {}
+
+            TypeDescr fn_td() const noexcept { return fn_td_; }
 
             bool is_nary() const noexcept { return false; }
             static constexpr std::int32_t n_args() noexcept { return Traits::n_args; }
@@ -75,6 +84,12 @@ namespace xo {
                                       std::make_index_sequence<Traits::n_args>{});
             }
 
+            /** @defgroup scm-primitive-printable-facet **/
+            ///@{
+
+            bool pretty(const ppindentinfo & ppii) const;
+
+            ///@}
             /** @defgroup scm-primitive-gcobject-facet **/
             ///@{
             std::size_t shallow_size() const noexcept;
@@ -107,9 +122,28 @@ namespace xo {
         private:
             /** name of this primitive **/
             std::string_view name_;
+
+            /** type description for function
+             *  Note that this type description will have additional first argument
+             *  for obj<ARuntimeContext>
+             **/
+            TypeDescr fn_td_;
+
             /** function implementation **/
             Fn fn_;
         }; /*Primitive*/
+
+        template <typename Fn>
+        bool
+        Primitive<Fn>::pretty(const ppindentinfo & ppii) const
+        {
+            return ppii.pps()->pretty_struct
+                       (ppii,
+                        "Primitive<Fn>",
+                        refrtag("name", name_),
+                        refrtag("td", fn_td_),
+                        refrtag("fn", fn_));
+        }
 
         template <typename Fn>
         std::size_t

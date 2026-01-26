@@ -12,6 +12,7 @@ set(SELF_SRCS
     DPrimitive.cpp
     IGCObject_DPrimitive_gco_2_gco_gco.cpp
     IProcedure_DPrimitive_gco_2_gco_gco.cpp
+    IPrintable_DPrimitive_gco_2_gco_gco.cpp
     # Add source files here, e.g.:
     # procedure2.cpp
 )

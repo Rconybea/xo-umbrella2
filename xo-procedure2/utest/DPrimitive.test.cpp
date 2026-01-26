@@ -7,13 +7,17 @@
 #include <xo/procedure2/init_primitives.hpp>
 #include <xo/procedure2/DSimpleRcx.hpp>
 #include <xo/procedure2/detail/IRuntimeContext_DSimpleRcx.hpp>
+#include <xo/procedure2/detail/IPrintable_DPrimitive_gco_2_gco_gco.hpp>
 #include <xo/object2/DFloat.hpp>
 #include <xo/object2/DInteger.hpp>
 #include <xo/object2/DArray.hpp>
 #include <xo/object2/number/IGCObject_DFloat.hpp>
 #include <xo/object2/number/IGCObject_DInteger.hpp>
 #include <xo/alloc2/arena/IAllocator_DArena.hpp>
+#include <xo/printable2/Printable.hpp>
+#include <xo/indentlog/scope.hpp>
 #include <catch2/catch.hpp>
+#include <sstream>
 
 namespace xo {
     using xo::scm::Primitives;
@@ -22,12 +26,17 @@ namespace xo {
     using xo::scm::DFloat;
     using xo::scm::DInteger;
     using xo::scm::DArray;
+    using xo::scm::DPrimitive_gco_2_gco_gco;
     using xo::mm::AAllocator;
     using xo::mm::AGCObject;
     using xo::mm::DArena;
     using xo::mm::ArenaConfig;
+    using xo::print::APrintable;
+    using xo::print::ppstate_standalone;
+    using xo::print::ppconfig;
     using xo::facet::with_facet;
     using xo::facet::obj;
+    using xo::scope;
 
     namespace ut {
         static InitEvidence s_init = InitSubsys<S_procedure2_tag>::require();
@@ -109,6 +118,24 @@ namespace xo {
             auto result_float = obj<AGCObject,DFloat>::from(result);
             REQUIRE(result_float);
             REQUIRE(result_float.data()->value() == 21.0);
+        }
+
+        TEST_CASE("DPrimitive-pretty", "[procedure2][DPrimitive][pp]")
+        {
+            scope log(XO_DEBUG(false));
+
+            std::stringstream ss;
+            ppconfig ppc;
+            ppstate_standalone pps(&ss, 0, &ppc);
+
+            obj<APrintable,DPrimitive_gco_2_gco_gco> prim_pr(&Primitives::s_mul_gco_gco_pm);
+            pps.pretty(prim_pr);
+
+            std::string output = ss.str();
+
+            log && log(output);
+
+            CHECK(output.find("_mul") != std::string::npos);
         }
 
     } /*namespace ut*/
