@@ -4,6 +4,7 @@ set(UTEST_EXE utest.procedure2)
 set(UTEST_SRCS
     procedure2_utest_main.cpp
     DPrimitive.test.cpp
+    DSimpleRcx.test.cpp
 )
 
 xo_add_utest_executable(${UTEST_EXE} ${UTEST_SRCS})
