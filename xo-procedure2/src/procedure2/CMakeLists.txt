@@ -27,4 +27,12 @@ xo_dependency(${SELF_LIB} xo_gc)
 xo_dependency(${SELF_LIB} subsys)
 #xo_dependency(${SELF_LIB} xo_indentlog)
 
+xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
+
+# ----------------------------------------------------------------
+# docs targets depend on other library/utest/exec targets above,
+# --> must come after them.
+#
+#add_subdirectory(docs)
+
 # end src/CMakeLists.txt
