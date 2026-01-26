@@ -19,7 +19,7 @@ namespace xo {
             using AGCObject = xo::mm::AGCObject;
             using AAllocator = xo::mm::AAllocator;
 
-            static obj<AGCObject> to_gco(obj<AAllocator> mm, const double & x);
+            static obj<AGCObject> to_gco(obj<AAllocator> mm, double x);
             static double from_gco(obj<AAllocator> mm, obj<AGCObject> gco);
         };
 

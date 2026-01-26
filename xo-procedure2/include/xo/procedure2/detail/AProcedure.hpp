@@ -2,7 +2,7 @@
  *
  *  Generated automagically from ingredients:
  *  1. code generator:
- *       [/home/roland/proj/xo-umbrella2-claude1/xo-facet/codegen/genfacet]
+ *       [/Users/roland/proj/xo-umbrella2/xo-facet/codegen/genfacet]
  *     arguments:
  *       --input [idl/Procedure.json5]
  *  2. jinja2 template for abstract facet .hpp file:
@@ -56,7 +56,7 @@ public:
 
     // nonconst methods
     /** invoke procedure; assume arguments satisfy type system **/
-    virtual obj<AGCObject> apply_nocheck(Opaque data, obj<ARuntimeContext> rcx, const DArray * args)  = 0;
+    virtual obj<AGCObject> apply_nocheck(Opaque data, const DArray * args)  = 0;
     ///@}
 }; /*AProcedure*/
 

@@ -2,7 +2,7 @@
  *
  *  Generated automagically from ingredients:
  *  1. code generator:
- *       [/home/roland/proj/xo-umbrella2-claude1/xo-facet/codegen/genfacet]
+ *       [/Users/roland/proj/xo-umbrella2/xo-facet/codegen/genfacet]
  *     arguments:
  *       --input [idl/IProcedure_DPrimitive_gco_2_gco_gco.json5]
  *  2. jinja2 template for abstract facet .hpp file:
@@ -57,7 +57,7 @@ namespace xo {
 
             // non-const methods
             /** invoke procedure; assume arguments satisfy type system **/
-            static obj<AGCObject> apply_nocheck(DPrimitive_gco_2_gco_gco & self, obj<ARuntimeContext> rcx, const DArray * args);
+            static obj<AGCObject> apply_nocheck(DPrimitive_gco_2_gco_gco & self, const DArray * args);
             ///@}
         };
 

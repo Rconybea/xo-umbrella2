@@ -13,7 +13,7 @@ namespace xo {
 
         obj<AGCObject>
         GCObjectConversion<double>::to_gco(obj<AAllocator> mm,
-                                           const double & x)
+                                           double x)
         {
             return DFloat::box<AGCObject>(mm, x);
         }

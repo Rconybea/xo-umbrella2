@@ -6,6 +6,7 @@ set(SELF_SRCS
     object2_register_types.cpp
     object2_register_facets.cpp
     GCObjectConversion_DFloat.cpp
+    GCObjectConversion_DInteger.cpp
     IGCObject_DArray.cpp
     IGCObject_DFloat.cpp
     IGCObject_DBoolean.cpp

@@ -56,7 +56,6 @@
             doc: ["invoke procedure; assume arguments satisfy type system" ],
             return_type: "obj<AGCObject>",
             args: [
-                {type: "obj<ARuntimeContext>", name: "rcx"},
                 {type: "const DArray *", name: "args"},
             ]
         }
