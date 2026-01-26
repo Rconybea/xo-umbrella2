@@ -7,12 +7,19 @@
 
 namespace xo {
     namespace scm {
+/** TODO: move this into xo-reader2 ? **/
+
 #ifdef NOT_YET
         using Primitive_f64_1_f64 = Primitive<double (*)(double)>;
         using Primitive_f64_2_f64_f64 = Primitive<double (*)(double, double)>;
 #endif
 
         struct Primitives {
+            /** polymorphich multiply
+             *
+             *  TODO: this will want to move to xo-numeric/
+             *        so we can dispatch on vector, matrix, function types
+             **/
             static DPrimitive_gco_2_gco_gco s_mul_gco_gco_pm;
 
 #ifdef NOT_YET

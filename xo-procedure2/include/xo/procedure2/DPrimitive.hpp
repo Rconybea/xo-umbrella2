@@ -58,6 +58,7 @@ namespace xo {
         template <typename Fn>
         class Primitive {
         public:
+            using ACollector = xo::mm::ACollector;
             using AAllocator = xo::mm::AAllocator;
             using AGCObject = xo::mm::AGCObject;
             using DArray = xo::scm::DArray;
@@ -73,6 +74,13 @@ namespace xo {
                 return _apply_nocheck(rcx, args,
                                       std::make_index_sequence<Traits::n_args>{});
             }
+
+            /** @defgroup scm-primitive-gcobject-facet **/
+            ///@{
+            std::size_t shallow_size() const noexcept;
+            Primitive * shallow_copy(obj<AAllocator> mm) const noexcept;
+            std::size_t forward_children(obj<ACollector> gc) noexcept;
+            ///@}
 
         private:
             template <std::size_t... Is>
@@ -102,6 +110,31 @@ namespace xo {
             /** function implementation **/
             Fn fn_;
         }; /*Primitive*/
+
+        template <typename Fn>
+        std::size_t
+        Primitive<Fn>::shallow_size() const noexcept {
+            return sizeof(*this);
+        }
+
+        template <typename Fn>
+        Primitive<Fn> *
+        Primitive<Fn>::shallow_copy(obj<AAllocator> mm) const noexcept {
+            void * mem = mm.alloc_copy((std::byte *)this);
+
+            if (mem) {
+                return new (mem) Primitive(*this);
+            }
+
+            return nullptr;
+        }
+
+        template <typename Fn>
+        std::size_t
+        Primitive<Fn>::forward_children(obj<ACollector>) noexcept {
+            // Primitive holds no GC refs (just string_view + function pointer)
+            return this->shallow_size();
+        }
 
     } /*namespace scm*/
 } /*namespace xo*/
