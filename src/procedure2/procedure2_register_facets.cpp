@@ -1,0 +1,33 @@
+/** @file procedure2_register_facets.cpp
+ *
+ *  @author Roland Conybeare, Jan 2026
+ **/
+
+#include "DPrimitive_gco_2_gco_gco.hpp"
+#include "detail/IGCObject_DPrimitive_gco_2_gco_gco.hpp"
+
+#include <xo/gc/GCObject.hpp>
+#include <xo/facet/FacetRegistry.hpp>
+#include <xo/indentlog/scope.hpp>
+
+namespace xo {
+    using xo::facet::FacetRegistry;
+    using xo::facet::typeseq;
+
+    namespace scm {
+        bool
+        procedure2_register_facets()
+        {
+            scope log(XO_DEBUG(true));
+
+            FacetRegistry::register_impl<AGCObject, DPrimitive_gco_2_gco_gco>();
+
+            log && log(xtag("DPrimitive_gco_2_gco_gco.tseq", typeseq::id<DPrimitive_gco_2_gco_gco>()));
+
+            return true;
+        }
+
+    } /*namespace scm*/
+} /*namespace xo*/
+
+/* end procedure2_register_facets.cpp */
