@@ -23,6 +23,8 @@ namespace xo {
 
             bool ok = true;
 
+            // (note: don't currently intend to support AGCObject for DSimpleRcx)
+
             ok &= gc.install_type(impl_for<AGCObject, DPrimitive_gco_2_gco_gco>());
 
             return ok;
