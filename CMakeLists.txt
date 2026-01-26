@@ -30,8 +30,35 @@ xo_add_genfacet(
     OUTPUT_CPP_DIR src/procedure2
     )
 
+# note: manual target; generated code committed to git
+xo_add_genfacet(
+    TARGET xo-procedure2-facet-runtimecontext
+    FACET RuntimeContext
+    INPUT idl/RuntimeContext.json5
+    OUTPUT_HPP_DIR include/xo/procedure2
+    OUTPUT_IMPL_SUBDIR detail
+    OUTPUT_CPP_DIR src/procedure2
+    )
+
+# ----------------------------------------------------------------
+
+xo_add_genfacetimpl(
+    TARGET xo-procedure2-facetimpl-procedure2-primitive_gco_2_gco_gco
+    FACET_PKG xo_procedure2
+    FACET Procedure
+    REPR DPrimitive_gco_2_gco_gco
+    INPUT idl/IProcedure_DPrimitive_gco_2_gco_gco.json5
+    OUTPUT_HPP_DIR include/xo/procedure2
+    OUTPUT_IMPL_SUBDIR detail
+    OUTPUT_CPP_DIR src/procedure2
+)
+
 add_subdirectory(src/procedure2)
 #add_subdirectory(utest)
+
+# ----------------------------------------------------------------
+
+xo_add_genfacet_all(xo-procedure2-genfacet-all)
 
 # ----------------------------------------------------------------
 # cmake export

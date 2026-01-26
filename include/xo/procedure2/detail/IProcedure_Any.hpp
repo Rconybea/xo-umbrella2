@@ -2,7 +2,7 @@
  *
  *  Generated automagically from ingredients:
  *  1. code generator:
- *       [/Users/roland/proj/xo-umbrella2/xo-facet/codegen/genfacet]
+ *       [/home/roland/proj/xo-umbrella2-claude1/xo-facet/codegen/genfacet]
  *     arguments:
  *       --input [idl/Procedure.json5]
  *  2. jinja2 template for abstract facet .hpp file:
@@ -60,7 +60,7 @@ namespace scm {
         [[noreturn]] std::int32_t n_args(Copaque)  const  noexcept override { _fatal(); }
 
         // nonconst methods
-        [[noreturn]] obj<AGCObject> apply_nocheck(Opaque, obj<AAllocator>, const DArray *)  override;
+        [[noreturn]] obj<AGCObject> apply_nocheck(Opaque, obj<ARuntimeContext>, const DArray *)  override;
 
         ///@}
 

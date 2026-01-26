@@ -2,7 +2,7 @@
  *
  *  Generated automagically from ingredients:
  *  1. code generator:
- *       [/Users/roland/proj/xo-umbrella2/xo-facet/codegen/genfacet]
+ *       [/home/roland/proj/xo-umbrella2-claude1/xo-facet/codegen/genfacet]
  *     arguments:
  *       --input [idl/Procedure.json5]
  *  2. jinja2 template for abstract facet .hpp file:
@@ -56,8 +56,8 @@ public:
     }
 
     // non-const methods (still const in router!)
-    obj<AGCObject> apply_nocheck(obj<AAllocator> mm, const DArray * args)  {
-        return O::iface()->apply_nocheck(O::data(), mm, args);
+    obj<AGCObject> apply_nocheck(obj<ARuntimeContext> rcx, const DArray * args)  {
+        return O::iface()->apply_nocheck(O::data(), rcx, args);
     }
 
     ///@}

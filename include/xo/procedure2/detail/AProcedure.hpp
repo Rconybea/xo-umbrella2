@@ -2,7 +2,7 @@
  *
  *  Generated automagically from ingredients:
  *  1. code generator:
- *       [/Users/roland/proj/xo-umbrella2/xo-facet/codegen/genfacet]
+ *       [/home/roland/proj/xo-umbrella2-claude1/xo-facet/codegen/genfacet]
  *     arguments:
  *       --input [idl/Procedure.json5]
  *  2. jinja2 template for abstract facet .hpp file:
@@ -14,11 +14,13 @@
 #pragma once
 
 // includes (via {facet_includes})
+#include "RuntimeContext.hpp"
+#include <xo/gc/GCObject.hpp>
 #include <xo/facet/obj.hpp>
 #include <xo/facet/facet_implementation.hpp>
 #include <xo/facet/typeseq.hpp>
 
-// {pretex} here
+namespace xo { namespace scm { class DArray; } }
 
 namespace xo {
 namespace scm {
@@ -54,7 +56,7 @@ public:
 
     // nonconst methods
     /** invoke procedure; assume arguments satisfy type system **/
-    virtual obj<AGCObject> apply_nocheck(Opaque data, obj<AAllocator> mm, const DArray * args)  = 0;
+    virtual obj<AGCObject> apply_nocheck(Opaque data, obj<ARuntimeContext> rcx, const DArray * args)  = 0;
     ///@}
 }; /*AProcedure*/
 
