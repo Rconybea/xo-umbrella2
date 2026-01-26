@@ -23,7 +23,7 @@ namespace xo {
          *  fixed at construction time, but not part of type.
          *  Can reallocate to change
          **/
-        struct DArray {
+        class DArray {
         public:
             /** @defgroup darray-types type traits **/
             ///@{
