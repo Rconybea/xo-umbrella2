@@ -53,6 +53,18 @@ xo_add_genfacetimpl(
     OUTPUT_CPP_DIR src/procedure2
 )
 
+# note: manual target; generated code committed to git
+xo_add_genfacetimpl(
+    TARGET xo-procedure2-facetimpl-gcobject-primitive_gco_2_gco_gco
+    FACET_PKG xo_gc
+    FACET GCObject
+    REPR Primitive_gco_2_gco_gco
+    INPUT idl/IGCObject_DPrimitive_gco_2_gco_gco.json5
+    OUTPUT_HPP_DIR include/xo/procedure2
+    OUTPUT_IMPL_SUBDIR detail
+    OUTPUT_CPP_DIR src/procedure2
+)
+
 add_subdirectory(src/procedure2)
 #add_subdirectory(utest)
 
