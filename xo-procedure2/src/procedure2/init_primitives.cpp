@@ -5,6 +5,7 @@
 
 #include "init_primitives.hpp"
 #include "DPrimitive.hpp"
+#include <cmath>
 
 namespace xo {
     namespace scm {
@@ -22,6 +23,40 @@ namespace xo {
         sub_f64_f64(double x, double y) {
             return x - y;
         }
+
+#ifdef NOT_YET
+        obj<AGCObject>
+        mul_any_any(obj<AGCObject> x_gco, obj<AGCObject> y_gco)
+        {
+            // PLACEHOLDER
+
+            // TODO:
+            // 1. move this to xo-numeric2/ when available
+            // 2. at that point will require polymorphic dispatch
+            //    on argument representations, analogous to dispatch
+            //    in FacetRegistry
+            // 3. Need concept of a 'runtime context'.
+            //    This will need to be part of the AProcedure api
+            //    e.g. passed to apply_nocheck
+
+            typeseq x_tseq = x_gco._typeseq();
+            typeseq y_tseq = y_gco._typeseq();
+
+            // FOR NOW: just test runtime values
+            //
+            if (x_tseq == typeseq::id<DFloat>()) {
+                if (y_tseq == typeseq::id<DFloat>()) {
+                    // unusable placeholder allocator;
+                    obj<AAllocator> placeholder_mm;
+
+                    // f64 * f64.
+                    double x = GCObjectConversion<double>::from_gco(placeholder_mm, x_gco);
+                    double y = GCObjectConversion<double>::from_gco(placeholder_mm, y_gco);
+
+
+
+        }
+#endif
 
         double
         mul_f64_f64(double x, double y) {

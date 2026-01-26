@@ -2,14 +2,19 @@
     mode: "facet",
     // includes in ASyntaxStateMachine.hpp
     includes: [
+        "\"RuntimeContext.hpp\"",
+        "<xo/gc/GCObject.hpp>",
     ],
-    // extra includes in SyntaxStateMachine.hpp, if any
+    // extra includes in Procedure.hpp, if any
     user_hpp_includes: [
     ],
     namespace1: "xo",
     namespace2: "scm",
     // text after includes, before ASyntaxStateMachine
-    pretext: [ "// {pretex} here" ],
+    pretext: [
+        //"namespace xo { namespace scm { class ARuntimeContext; } }",
+        "namespace xo { namespace scm { class DArray; } }",
+    ],
     facet: "Procedure",
     detail_subdir: "detail",
     brief: "abstraction for a schematika procedure i.e. something callable",
@@ -18,9 +23,10 @@
         "Abstraction for a schematika procedure"
     ],
     types: [
-        { name: "AGCObject",
-          definition: "xo::mm::AGCObject",
-          doc: [ "a gc-aware object" ],
+        {
+            name: "AGCObject",
+            definition: "xo::mm::AGCObject",
+            doc: [ "a gc-aware object" ],
         },
         // { name: string, doc: [ string ], definition: string },
     ],
@@ -50,7 +56,7 @@
             doc: ["invoke procedure; assume arguments satisfy type system" ],
             return_type: "obj<AGCObject>",
             args: [
-                {type: "obj<AAllocator>", name: "mm"},
+                {type: "obj<ARuntimeContext>", name: "rcx"},
                 {type: "const DArray *", name: "args"},
             ]
         }

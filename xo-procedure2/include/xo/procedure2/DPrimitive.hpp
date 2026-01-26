@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "RuntimeContext.hpp"
 #include <xo/object2/DArray.hpp>
 #include <xo/gc/GCObjectConversion.hpp>
 #include <xo/gc/GCObject.hpp>
@@ -61,22 +62,24 @@ namespace xo {
             bool is_nary() const noexcept { return false; }
             static constexpr std::int32_t n_args() noexcept { return Traits::n_args; }
 
-            obj<AGCObject> apply_nocheck(obj<AAllocator> mm, const DArray * args) {
-                return _apply_nocheck(mm, args,
-                                  std::make_index_sequence<Traits::n_args>{});
+            obj<AGCObject> apply_nocheck(obj<ARuntimeContext> rcx, const DArray * args) {
+                return _apply_nocheck(rcx, args,
+                                      std::make_index_sequence<Traits::n_args>{});
             }
 
         private:
             template <std::size_t... Is>
-            obj<AGCObject> _apply_nocheck(obj<AAllocator> mm,
+            obj<AGCObject> _apply_nocheck(obj<ARuntimeContext> rcx,
                                           const DArray * args,
                                           std::index_sequence<Is...>)
             {
                 using R = typename Traits::return_type;
 
+                obj<AAllocator> mm = rcx.allocator();
+
                 R result
-                    = fn_(GCObjectConversion<typename Traits::template arg_type<Is>>::from_gco(mm, args->at(Is))...
-                );
+                    = fn_(rcx,
+                          GCObjectConversion<typename Traits::template arg_type<Is>>::from_gco(mm, args->at(Is))... );
 
                 return GCObjectConversion<R>::to_gco(mm, result);
             }

@@ -1,0 +1,43 @@
+{
+    mode: "facet",
+    // includes in ARuntimeContext.hpp
+    includes: [
+        "<xo/alloc2/Allocator.hpp>"
+    ],
+    // extra includes in RuntimeContext.hpp, if any
+    user_hpp_includes: [
+    ],
+    namespace1: "xo",
+    namespace2: "scm",
+    // text after includes, before ARuntimeContext
+    pretext: [
+        //"namespace xo { namespace mm { class AAllocator; } }",
+    ],
+    facet: "RuntimeContext",
+    detail_subdir: "detail",
+    brief: "runtime context for application code. At minimum provides allocator",
+    using_doxygen: true,
+    doc: [
+        "Runtime application context"
+    ],
+    types: [
+        {
+            name: "AAllocator",
+            definition: "xo::mm::AAllocator",
+            doc: [ "xo memory allocator" ],
+        },
+    ],
+    const_methods: [
+        {
+            name: "allocator",
+            doc: [ "default allocator to use for objects" ],
+            return_type: "obj<AAllocator>",
+            args: [],
+            const: true,
+            noexcept: true,
+            attributes: [],
+        },
+    ],
+    nonconst_methods: [
+    ],
+}

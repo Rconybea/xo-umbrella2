@@ -1,8 +1,8 @@
-/** @file IProcedure_Any.cpp
+/** @file IRuntimeContext_Any.cpp
  *
  **/
 
-#include "detail/IProcedure_Any.hpp"
+#include "detail/IRuntimeContext_Any.hpp"
 #include <iostream>
 
 namespace xo {
@@ -13,35 +13,29 @@ using xo::facet::typeseq;
 using xo::facet::valid_facet_implementation;
 
 void
-IProcedure_Any::_fatal()
+IRuntimeContext_Any::_fatal()
 {
     /* control here on uninitialized IAllocator_Any.
      * Initialized instance will have specific implementation type
      */
     std::cerr << "fatal"
               << ": attempt to call uninitialized"
-              << " IProcedure_Any method"
+              << " IRuntimeContext_Any method"
               << std::endl;
     std::terminate();
 }
 
 typeseq
-IProcedure_Any::s_typeseq = typeseq::id<DVariantPlaceholder>();
+IRuntimeContext_Any::s_typeseq = typeseq::id<DVariantPlaceholder>();
 
 bool
-IProcedure_Any::_valid
-  = valid_facet_implementation<AProcedure, IProcedure_Any>();
+IRuntimeContext_Any::_valid
+  = valid_facet_implementation<ARuntimeContext, IRuntimeContext_Any>();
 
 // nonconst methods
-
-auto
-IProcedure_Any::apply_nocheck(Opaque, obj<ARuntimeContext>, const DArray *)  -> obj<AGCObject>
-{
-    _fatal();
-}
 
 
 } /*namespace scm*/
 } /*namespace xo*/
 
-/* end IProcedure_Any.cpp */
+/* end IRuntimeContext_Any.cpp */
