@@ -35,7 +35,7 @@ IProcedure_Any::_valid
 // nonconst methods
 
 auto
-IProcedure_Any::apply_nocheck(Opaque, const DArray *)  -> obj<AGCObject>
+IProcedure_Any::apply_nocheck(Opaque, obj<ARuntimeContext>, const DArray *)  -> obj<AGCObject>
 {
     _fatal();
 }

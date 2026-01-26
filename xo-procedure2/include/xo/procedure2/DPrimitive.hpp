@@ -19,43 +19,49 @@
 
 namespace xo {
     namespace scm {
-        /** @brief Extract return type and argument types from a function type.
-         *
-         *  Primary template (undefined) - specializations handle specific cases
+        namespace detail {
+            /** @brief Extract return type and argument types from a function type.
+             *
+             *  Primary template (undefined) - specializations handle specific cases
+             **/
+            template <typename Fn>
+            struct PmFnTraits;
+
+            /** specialization for function pointers **/
+            template <typename R, typename... Args>
+            struct PmFnTraits<R(*)(obj<ARuntimeContext> rcx, Args...)> {
+                /** function return type **/
+                using return_type = R;
+                /** tuple type for function arguments (except for runtime context) **/
+                using args_tuple = std::tuple<Args...>;
+                /** number of arguments (except for runtime context) **/
+                static constexpr std::size_t n_args = sizeof...(Args);
+
+                /** arg_type<i> is the type of the i'th argument to Fn.
+                 *  (starting from argument after runtime context)
+                 **/
+                template <std::size_t I>
+                using arg_type = std::tuple_element_t<I, args_tuple>;
+            };
+
+            /** specialization for function references **/
+            template <typename R, typename... Args>
+            struct PmFnTraits<R(&)(obj<ARuntimeContext>, Args...)> : PmFnTraits<R(*)(obj<ARuntimeContext>, Args...)> {};
+
+            /** specialization for plain function types **/
+            template <typename R, typename... Args>
+            struct PmFnTraits<R(obj<ARuntimeContext>, Args...)> : PmFnTraits<R(*)(obj<ARuntimeContext>, Args...)> {};
+        }
+
+        /** @brief Schematika primitive with fixed number of arguments
          **/
-        template <typename Fn>
-        struct FnTraits;
-
-        /** specialization for function pointers **/
-        template <typename R, typename... Args>
-        struct FnTraits<R(*)(Args...)> {
-            /** function return type **/
-            using return_type = R;
-            /** tuple type for function arguments **/
-            using args_tuple = std::tuple<Args...>;
-            /** number of arguments **/
-            static constexpr std::size_t n_args = sizeof...(Args);
-
-            /** arg_type<i> is the type of the i'th argument to Fn **/
-            template <std::size_t I>
-            using arg_type = std::tuple_element_t<I, args_tuple>;
-        };
-
-        /** specialization for function references **/
-        template <typename R, typename... Args>
-        struct FnTraits<R(&)(Args...)> : FnTraits<R(*)(Args...)> {};
-
-        /** specialization for plain function types **/
-        template <typename R, typename... Args>
-        struct FnTraits<R(Args...)> : FnTraits<R(*)(Args...)> {};
-
         template <typename Fn>
         class Primitive {
         public:
             using AAllocator = xo::mm::AAllocator;
             using AGCObject = xo::mm::AGCObject;
             using DArray = xo::scm::DArray;
-            using Traits = FnTraits<Fn>;
+            using Traits = detail::PmFnTraits<Fn>;
 
         public:
             Primitive(std::string_view name, Fn fn) : name_{name}, fn_{fn} {}
@@ -63,14 +69,15 @@ namespace xo {
             bool is_nary() const noexcept { return false; }
             static constexpr std::int32_t n_args() noexcept { return Traits::n_args; }
 
-            obj<AGCObject> apply_nocheck(const DArray * args) {
-                return _apply_nocheck(args,
+            obj<AGCObject> apply_nocheck(obj<ARuntimeContext> rcx, const DArray * args) {
+                return _apply_nocheck(rcx, args,
                                       std::make_index_sequence<Traits::n_args>{});
             }
 
         private:
             template <std::size_t... Is>
-            obj<AGCObject> _apply_nocheck(const DArray * args,
+            obj<AGCObject> _apply_nocheck(obj<ARuntimeContext> rcx,
+                                          const DArray * args,
                                           std::index_sequence<Is...>)
             {
                 using xo::facet::FacetRegistry;
@@ -80,12 +87,11 @@ namespace xo {
                 assert(args);
                 assert(args->size() > 0);
 
-                obj<ARuntimeContext> rcx
-                    = FacetRegistry::instance().variant<ARuntimeContext>(args->at(0));
                 obj<AAllocator> mm = rcx.allocator();
 
                 R result
-                    = fn_(GCObjectConversion<typename Traits::template arg_type<Is>>::from_gco(mm, args->at(Is))... );
+                    = fn_(rcx,
+                          GCObjectConversion<typename Traits::template arg_type<Is>>::from_gco(mm, args->at(Is))... );
 
                 return GCObjectConversion<R>::to_gco(mm, result);
             }

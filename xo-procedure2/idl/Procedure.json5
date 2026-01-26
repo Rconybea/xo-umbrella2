@@ -1,3 +1,7 @@
+// can regenerate downstream .*pp files with either:
+//   cmake --build -- xo-procedure2-facet-procedure
+//   cmake --build -- xo-procedure2-genfacet-all
+
 {
     mode: "facet",
     // includes in ASyntaxStateMachine.hpp
@@ -56,6 +60,7 @@
             doc: ["invoke procedure; assume arguments satisfy type system" ],
             return_type: "obj<AGCObject>",
             args: [
+                {type: "obj<ARuntimeContext>", name: "rcx"},
                 {type: "const DArray *", name: "args"},
             ]
         }

@@ -1,3 +1,8 @@
+/** @file DPrimitive_gco_2_gco_gco.hpp
+ *
+ *  @author Roland Conybeare, Jan 2026
+ **/
+
 #pragma once
 
 #include <xo/gc/GCObject.hpp>
@@ -13,3 +18,5 @@ namespace xo {
                                                                       obj<AGCObject>)>;
     }
 }
+
+/* end DPrimitive_gco_2_gco_gco.hpp */

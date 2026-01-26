@@ -2,7 +2,7 @@
  *
  *  Generated automagically from ingredients:
  *  1. code generator:
- *       [/Users/roland/proj/xo-umbrella2/xo-facet/codegen/genfacet]
+ *       [/home/roland/proj/xo-umbrella2-claude1/xo-facet/codegen/genfacet]
  *     arguments:
  *       --input [idl/IProcedure_DPrimitive_gco_2_gco_gco.json5]
  *  2. jinja2 template for abstract facet .hpp file:
@@ -28,9 +28,9 @@ namespace xo {
         }
 
         auto
-        IProcedure_DPrimitive_gco_2_gco_gco::apply_nocheck(DPrimitive_gco_2_gco_gco & self, const DArray * args) -> obj<AGCObject>
+        IProcedure_DPrimitive_gco_2_gco_gco::apply_nocheck(DPrimitive_gco_2_gco_gco & self, obj<ARuntimeContext> rcx, const DArray * args) -> obj<AGCObject>
         {
-            return self.apply_nocheck(args);
+            return self.apply_nocheck(rcx, args);
         }
 
     } /*namespace scm*/
