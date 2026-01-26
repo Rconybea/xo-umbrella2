@@ -6,9 +6,10 @@ set(SELF_SRCS
     init_primitives.cpp
     procedure2_register_types.cpp
     procedure2_register_facets.cpp
-    DPrimitive.cpp
     IRuntimeContext_Any.cpp
+    IRuntimeContext_DSimpleRcx.cpp
     IProcedure_Any.cpp
+    DPrimitive.cpp
     IGCObject_DPrimitive_gco_2_gco_gco.cpp
     IProcedure_DPrimitive_gco_2_gco_gco.cpp
     # Add source files here, e.g.:
