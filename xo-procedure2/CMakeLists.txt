@@ -79,7 +79,7 @@ xo_add_genfacetimpl(
 )
 
 add_subdirectory(src/procedure2)
-#add_subdirectory(utest)
+add_subdirectory(utest)
 
 # ----------------------------------------------------------------
 
