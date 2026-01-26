@@ -43,7 +43,20 @@ xo_add_genfacet(
 # ----------------------------------------------------------------
 
 xo_add_genfacetimpl(
-    TARGET xo-procedure2-facetimpl-procedure2-primitive_gco_2_gco_gco
+    TARGET xo-procedure2-facetimpl-runtimecontext-simplercx
+    FACET_PKG xo_procedure2
+    FACET RuntimeContext
+    REPR DSimpleRcx
+    INPUT idl/IRuntimeContext_DSimpleRcx.json5
+    OUTPUT_HPP_DIR include/xo/procedure2
+    OUTPUT_IMPL_SUBDIR detail
+    OUTPUT_CPP_DIR src/procedure2
+    )
+
+# ----------------------------------------------------------------
+
+xo_add_genfacetimpl(
+    TARGET xo-procedure2-facetimpl-procedure-primitive_gco_2_gco_gco
     FACET_PKG xo_procedure2
     FACET Procedure
     REPR DPrimitive_gco_2_gco_gco
