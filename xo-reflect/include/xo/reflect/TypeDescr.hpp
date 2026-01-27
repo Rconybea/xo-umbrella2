@@ -16,8 +16,6 @@
 #include <cassert>
 
 namespace xo {
-    namespace print { class ppindentinfo; }
-
     namespace reflect {
         class TaggedPtr;  /* see [reflect/TaggedPtr.hpp] */
 
