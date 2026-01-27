@@ -301,6 +301,19 @@ namespace xo {
             return this->tdextra_->child_tp(i, object);
         } /*child_tp*/
 
+        bool
+        TypeDescrBase::pretty(const ppindentinfo & ppii) const
+        {
+            return ppii.pps()->pretty_struct
+                       (ppii,
+                        "TypeDescr",
+                        refrtag("id", id_),
+                        refrtag("canonical_name", canonical_name_),
+                        refrtag("complete", complete_flag_),
+                        refrtag("metatype", this->metatype()));
+
+        }
+
         void
         TypeDescrBase::display(std::ostream & os) const
         {
