@@ -108,6 +108,9 @@ namespace xo {
             /** @defgroup darray-printable-methods **/
             ///@{
 
+            /** pretty-printing support **/
+            bool pretty(const ppindentinfo & ppii) const;
+
             ///@}
             /** @defgroup darray-gcobject-methods **/
             ///@{
