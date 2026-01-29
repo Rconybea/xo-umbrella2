@@ -4,11 +4,16 @@
  **/
 
 #include "DArray.hpp"
+#include <xo/printable2/Printable.hpp>
+#include <xo/facet/FacetRegistry.hpp>
+#include <xo/indentlog/print/pretty.hpp>
 #include <xo/indentlog/print/tostr.hpp>
 #include <xo/indentlog/print/tag.hpp>
 #include <cstdint>
 
 namespace xo {
+    using xo::print::APrintable;
+    using xo::facet::FacetRegistry;
     using xo::mm::AGCObject;
     using xo::facet::typeseq;
 
@@ -59,6 +64,42 @@ namespace xo {
                 ++(this->size_);
 
                 return true;
+            }
+        }
+
+        // printing support
+
+        bool
+        DArray::pretty(const ppindentinfo & ppii) const
+        {
+            using xo::print::ppstate;
+
+            ppstate * pps = ppii.pps();
+
+            if (ppii.upto()) {
+                /* perhaps print on one line */
+                pps->write("[");
+
+                for (size_t i = 0, n = this->size(); i < n; ++i ) {
+                    if (i > 0)
+                        pps->write(" ");
+
+                    obj<APrintable> elt
+                        = FacetRegistry::instance().variant<APrintable,AGCObject>(this->at(i));
+
+                    assert(elt.data());
+
+                    if (!pps->print_upto(elt))
+                        return false;
+
+                    ++i;
+                }
+
+                pps->write("]");
+                return true;
+            } else {
+                pps->write("[...]");
+                return false;
             }
         }
 

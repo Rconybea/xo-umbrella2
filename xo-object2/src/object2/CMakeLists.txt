@@ -16,6 +16,7 @@ set(SELF_SRCS
     ISequence_Any.cpp
     ISequence_DArray.cpp
     ISequence_DList.cpp
+    IPrintable_DArray.cpp
     IPrintable_DList.cpp
     IPrintable_DBoolean.cpp
     IPrintable_DFloat.cpp
