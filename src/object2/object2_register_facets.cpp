@@ -12,6 +12,7 @@
 #include <xo/object2/number/IGCObject_DInteger.hpp>
 #include <xo/object2/string/IGCObject_DString.hpp>
 
+#include <xo/object2/array/IPrintable_DArray.hpp>
 #include <xo/object2/list/IPrintable_DList.hpp>
 #include <xo/object2/boolean/IPrintable_DBoolean.hpp>
 #include <xo/object2/number/IPrintable_DFloat.hpp>
@@ -62,6 +63,7 @@ namespace xo {
             FacetRegistry::register_impl<APrintable, DString>();
 
             FacetRegistry::register_impl<AGCObject, DArray>();
+            FacetRegistry::register_impl<APrintable, DArray>();
             FacetRegistry::register_impl<ASequence, DArray>();
 
             log && log(xtag("DVariantPlaceholder.tseq", typeseq::id<DVariantPlaceholder>()));
