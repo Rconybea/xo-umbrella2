@@ -482,7 +482,8 @@ def main():
 
     env = Environment(loader = FileSystemLoader(template_dir),
                       trim_blocks = True,
-                      lstrip_blocks = True)
+                      lstrip_blocks = True,
+                      keep_trailing_newline = True)
 
     # custom filters.
     # A filter 'foo' provides ability to write '{{var | foo}}' to expand
