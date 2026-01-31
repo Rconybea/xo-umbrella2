@@ -91,8 +91,6 @@ namespace xo {
 
                     if (!pps->print_upto(elt))
                         return false;
-
-                    ++i;
                 }
 
                 pps->write("]");
