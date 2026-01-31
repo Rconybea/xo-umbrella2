@@ -2,7 +2,7 @@
  *
  *  Generated automagically from ingredients:
  *  1. code generator:
- *       [/home/roland/proj/xo-umbrella2-claude1/xo-facet/codegen/genfacet]
+ *       [/Users/roland/proj/xo-umbrella2/xo-facet/codegen/genfacet]
  *     arguments:
  *       --input [idl/GCObject.json5]
  *  2. jinja2 template for facet .hpp file:
@@ -17,5 +17,6 @@
 #include "detail/IGCObject_Any.hpp"
 #include "detail/IGCObject_Xfer.hpp"
 #include "detail/RGCObject.hpp"
+
 
 /* end GCObject.hpp */

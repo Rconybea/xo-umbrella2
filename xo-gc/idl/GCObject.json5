@@ -6,11 +6,13 @@
         "<cstdint>",
         "<cstddef>",
     ],
+    // extra includes in GCObject.hpp, if any
+    user_hpp_includes: [],
+    namespace1: "xo",
+    namespace2: "mm",
     pretext: [
         "namespace xo { namespace mm { struct ACollector; }}",
     ],
-    namespace1: "xo",
-    namespace2: "mm",
     facet: "GCObject",
     detail_subdir: "detail",
     brief: "xxx",
