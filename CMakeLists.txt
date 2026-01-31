@@ -30,6 +30,10 @@ xo_add_genfacet(
 
 # ----------------------------------------------------------------
 
+xo_add_genfacet_all(xo-gc-genfacet-all)
+
+# ----------------------------------------------------------------
+
 # must complete definition of expression lib before configuring examples
 add_subdirectory(src/gc)
 add_subdirectory(utest)
