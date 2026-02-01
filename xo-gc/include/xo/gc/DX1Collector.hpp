@@ -175,10 +175,16 @@ namespace xo {
             /** Create X1 collector instance. **/
             explicit DX1Collector(const CollectorConfig & cfg);
 
+            /** faceted object pointer to this instance */
+            template <typename AFacet = AAllocator>
+            obj<AFacet,DX1Collector> ref() { return obj<AFacet,DX1Collector>(this); }
+            
+#ifdef NOT_YET
             /** create instance with default configuration,
              *  generation size @p gen_z
              **/
-            DX1Collector make_std(std::size_t gen_z);
+            static DX1Collector make_std(std::size_t gen_z);
+#endif
 
             std::string_view name() const { return config_.name_; }
 
