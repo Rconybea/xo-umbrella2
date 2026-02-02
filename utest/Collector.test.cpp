@@ -23,7 +23,7 @@
 namespace xo {
     using xo::mm::AAllocator;
     using xo::mm::ACollector;
-    using xo::mm::CollectorConfig;
+    using xo::mm::X1CollectorConfig;
     using xo::mm::DX1Collector;
     using xo::mm::ArenaConfig;
     using xo::mm::AllocHeaderConfig;
@@ -61,12 +61,12 @@ namespace xo {
                                                                    0 /*tseq_bits*/,
                                                                    0 /*age_bits*/,
                                                                    16 /*size_bits*/), };
-            CollectorConfig cfg = { .arena_config_ = arena_cfg,
-                                    .n_generation_ = 2,
-                                    .gc_trigger_v_ = {{64*1024, 1024*1024, 0, 0,
-                                                       0, 0, 0, 0,
-                                                       0, 0, 0, 0,
-                                                       0, 0, 0, 0}} };
+            X1CollectorConfig cfg = { .arena_config_ = arena_cfg,
+                                      .n_generation_ = 2,
+                                      .gc_trigger_v_ = {{64*1024, 1024*1024, 0, 0,
+                                                         0, 0, 0, 0,
+                                                         0, 0, 0, 0,
+                                                         0, 0, 0, 0}} };
 
             DX1Collector gc = DX1Collector{cfg};
 
@@ -109,12 +109,12 @@ namespace xo {
                                                                    0 /*tseq_bits*/,
                                                                    0 /*age_bits*/,
                                                                    16 /*size_bits*/), };
-            CollectorConfig cfg = { .arena_config_ = arena_cfg,
-                                    .n_generation_ = 2,
-                                    .gc_trigger_v_ = {{64*1024, 1024*1024, 0, 0,
-                                                       0, 0, 0, 0,
-                                                       0, 0, 0, 0,
-                                                       0, 0, 0, 0}} };
+            X1CollectorConfig cfg = { .arena_config_ = arena_cfg,
+                                      .n_generation_ = 2,
+                                      .gc_trigger_v_ = {{64*1024, 1024*1024, 0, 0,
+                                                         0, 0, 0, 0,
+                                                         0, 0, 0, 0,
+                                                         0, 0, 0, 0}} };
 
             DX1Collector gc = DX1Collector{cfg};
 
@@ -135,12 +135,12 @@ namespace xo {
                                                                    0 /*tseq-bits*/,
                                                                    0 /*age-bits*/,
                                                                    16 /*size-bits*/), };
-            CollectorConfig cfg = { .arena_config_ = arena_cfg,
-                                    .n_generation_ = 2,
-                                    .gc_trigger_v_ = {{64*1024, 1024*1024, 0, 0,
-                                                       0, 0, 0, 0,
-                                                       0, 0, 0, 0,
-                                                       0, 0, 0, 0}} };
+            X1CollectorConfig cfg = { .arena_config_ = arena_cfg,
+                                      .n_generation_ = 2,
+                                      .gc_trigger_v_ = {{64*1024, 1024*1024, 0, 0,
+                                                         0, 0, 0, 0,
+                                                         0, 0, 0, 0,
+                                                         0, 0, 0, 0}} };
 
             DX1Collector gc = DX1Collector{cfg};
 
@@ -165,12 +165,12 @@ namespace xo {
                                                                    16 /*size-bits*/), };
 
             /* collector with one generation collapses to a non-generational copying collector */
-            CollectorConfig cfg = { .arena_config_ = arena_cfg,
-                                    .n_generation_ = 1,
-                                    .gc_trigger_v_ = {{64*1024, 0, 0, 0,
-                                                       0, 0, 0, 0,
-                                                       0, 0, 0, 0,
-                                                       0, 0, 0, 0}} };
+            X1CollectorConfig cfg = { .arena_config_ = arena_cfg,
+                                      .n_generation_ = 1,
+                                      .gc_trigger_v_ = {{64*1024, 0, 0, 0,
+                                                         0, 0, 0, 0,
+                                                         0, 0, 0, 0,
+                                                         0, 0, 0, 0}} };
 
             DX1Collector x1state = DX1Collector{cfg};
 
@@ -209,12 +209,12 @@ namespace xo {
             };
 
             /* collector with one generation collapses to a non-generational copying collector */
-            CollectorConfig cfg = { .arena_config_ = arena_cfg,
-                                    .n_generation_ = 1,
-                                    .gc_trigger_v_ = {{64*1024, 0, 0, 0,
-                                                       0, 0, 0, 0,
-                                                       0, 0, 0, 0,
-                                                       0, 0, 0, 0}} };
+            X1CollectorConfig cfg = { .arena_config_ = arena_cfg,
+                                      .n_generation_ = 1,
+                                      .gc_trigger_v_ = {{64*1024, 0, 0, 0,
+                                                         0, 0, 0, 0,
+                                                         0, 0, 0, 0,
+                                                         0, 0, 0, 0}} };
 
             /* X1 allocator+collector */
             DX1Collector x1state = DX1Collector{cfg};

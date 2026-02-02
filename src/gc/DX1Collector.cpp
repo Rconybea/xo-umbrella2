@@ -25,24 +25,24 @@ namespace xo {
 
     namespace mm {
 
-        CollectorConfig
-        CollectorConfig::with_size(std::size_t gen_z)
+        X1CollectorConfig
+        X1CollectorConfig::with_size(std::size_t gen_z)
         {
-            CollectorConfig copy = *this;
+            X1CollectorConfig copy = *this;
             copy.arena_config_ = arena_config_.with_size(gen_z);
             return copy;
         }
 
 #ifdef NOT_USING
         constexpr std::uint64_t
-        CollectorConfig::gen_mult() const {
+        X1CollectorConfig::gen_mult() const {
             return 1ul << arena_config_.header_size_bits_;
         }
 #endif
 
 #ifdef NOT_USING
         constexpr std::uint64_t
-        CollectorConfig::tseq_mult() const {
+        X1CollectorConfig::tseq_mult() const {
             return 1ul << (gen_bits_ + arena_config_.header_size_bits_);
         }
 #endif
@@ -69,7 +69,7 @@ namespace xo {
 
         using size_type = xo::mm::DX1Collector::size_type;
 
-        DX1Collector::DX1Collector(const CollectorConfig & cfg) : config_{cfg}
+        DX1Collector::DX1Collector(const X1CollectorConfig & cfg) : config_{cfg}
         {
             assert(config_.arena_config_.header_.size_bits_ +
                    config_.arena_config_.header_.age_bits_ +

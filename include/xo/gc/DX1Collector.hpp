@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "X1CollectorConfig.hpp"
 #include "GCObject.hpp"
 #include "generation.hpp"
 #include "object_age.hpp"
@@ -39,104 +40,6 @@ namespace xo {
             up<DArena> to_space_;
         };
 #endif
-
-        struct CollectorConfig {
-            using size_type = std::size_t;
-
-#ifdef OBSOLETE // get from arena_config_.header_
-            /*
-             * alloc header
-             *  TTTTTTTTTTTTGGGGGZZZZZZZZZZZZ
-             *  <   tseq   ><gen><   size   >
-             *
-             * masking
-             *
-             *  ..432107654321076543210 bit
-             *
-             *                 >       <  .gen_bits
-             *  0..............01111111   gen_mask_unshifted
-             *  0..011111110..........0   gen_mask_shifted
-             *             >           <  gen_shift
-             */
-            //constexpr std::uint64_t gen_mult() const;
-            constexpr std::uint64_t gen_shift() const;
-            constexpr std::uint64_t gen_mask_unshifted() const;
-            constexpr std::uint64_t gen_mask_shifted() const;
-
-            //constexpr std::uint64_t tseq_mult() const;
-            constexpr std::uint64_t tseq_shift() const;
-            constexpr std::uint64_t tseq_mask_unshifted() const;
-            constexpr std::uint64_t tseq_mask_shifted() const;
-#endif
-
-
-            /** copy of this config,
-             *  with @c arena_config_.size_ set to @p gen_z
-             **/
-            CollectorConfig with_size(std::size_t gen_z);
-
-            generation age2gen(object_age age) const noexcept {
-                return generation(age % n_survive_threshold_);
-            }
-
-        public:
-            // ----- Instance Variables -----
-
-            /** optional name, for diagnostics **/
-            std::string name_;
-
-            /** Configuration for collector spaces.
-             *  Will have at least {nursery,tenured} x {from,to} spaces.
-             *  Not using name_ member.
-             *
-             *  REQUIRE:
-             *  - arena_config_.store_header_flag_ must be true
-             **/
-            ArenaConfig arena_config_;
-
-            /** storage for N object types requires 8*N bytes **/
-            std::size_t object_types_z_ = 2*1024*1024;
-
-            /** storage for N object roots requires 8*N bytes **/
-            std::size_t object_roots_z_ = 16*1024;
-
-            /** number of bits to represent generation **/
-            std::uint64_t gen_bits_ = 8;
-
-            /** number of bits to represent tseq **/
-            std::uint64_t tseq_bits_ = 24;
-
-            /** Number of generations.
-             *  Must be at least 2.
-             **/
-            uint32_t n_generation_ = 2;
-
-            /** Number of promotion steps.
-             *  An object that survives this number of collections
-             *  advances to the next generation.
-             **/
-            uint32_t n_survive_threshold_ = 2;
-
-            /** Trigger garbage collection when to-space allocation for
-             *  generation g reaches gc_trigger_v_[g]
-             **/
-            std::array<size_type, c_max_generation> gc_trigger_v_;
-
-            /** true -> enable incremental collection.
-             *  false -> only do full collection.
-             *
-             *  Incremental collection requires mutation logs.
-             **/
-            bool allow_incremental_gc_ = true;
-
-            /** If non-zero remember statistics for
-             *  the last @p stats_history_z_ collections.
-             **/
-            uint32_t stats_history_z_ = false;
-
-            /** true to enable debug logging **/
-            bool debug_flag_ = false;
-        };
 
         // ----- GCRunState -----
 
@@ -173,7 +76,7 @@ namespace xo {
             static constexpr size_t c_max_typeseq = 4096;
 
             /** Create X1 collector instance. **/
-            explicit DX1Collector(const CollectorConfig & cfg);
+            explicit DX1Collector(const X1CollectorConfig & cfg);
 
             /** faceted object pointer to this instance */
             template <typename AFacet = AAllocator>
@@ -344,7 +247,7 @@ namespace xo {
 
         public:
             /** garbage collector configuration **/
-            CollectorConfig config_;
+            X1CollectorConfig config_;
 
             /** current gc state **/
             GCRunState runstate_;
