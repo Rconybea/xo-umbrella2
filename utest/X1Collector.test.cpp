@@ -48,7 +48,7 @@ namespace ut {
     using xo::mm::AGCObject;
     using xo::mm::DX1Collector;
     using xo::mm::DArena;
-    using xo::mm::CollectorConfig;
+    using xo::mm::X1CollectorConfig;
     using xo::mm::ArenaConfig;
     using xo::mm::generation;
     using xo::mm::role;
@@ -108,16 +108,15 @@ namespace ut {
             try {
                 const testcase_x1 & tc = s_testcase_v[i_tc];
 
-                CollectorConfig cfg{
-                    .name_ = "x1_test",
-                    .arena_config_ = ArenaConfig{
-                        .size_ = tc.tenured_z_,
-                        .store_header_flag_ = true},
-                    .object_types_z_ = 16384,
-                    .gc_trigger_v_{{
-                            tc.incr_gc_threshold_,
-                            tc.full_gc_threshold_}},
-                    .debug_flag_ = c_debug_flag,
+                X1CollectorConfig cfg{ .name_ = "x1_test",
+                                       .arena_config_ = ArenaConfig{
+                                           .size_ = tc.tenured_z_,
+                                           .store_header_flag_ = true},
+                                       .object_types_z_ = 16384,
+                                       .gc_trigger_v_{{
+                                           tc.incr_gc_threshold_,
+                                           tc.full_gc_threshold_}},
+                                       .debug_flag_ = c_debug_flag,
                 };
 
                 DX1Collector gc(cfg);
