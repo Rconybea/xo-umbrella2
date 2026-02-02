@@ -46,7 +46,7 @@ namespace xo {
             box(box<AFacet, DOther> && other)
             requires (std::is_same_v<DRepr, DVariantPlaceholder>
                       || std::is_same_v<DRepr, DOther>)
-            : obj<AFacet,DRepr>()
+            : RoutingType<AFacet,OObject<AFacet,DRepr>>()
             {
                 /* replacing .iface_ along w/ .data_ */
                 this->from_obj(other);
@@ -55,8 +55,10 @@ namespace xo {
             }
 
             /** explicit conversion to obj<AFacet,DRepr> **/
-            obj<AFacet, DRepr> to_op() const noexcept { return obj<AFacet, DRepr>(this->iface(), this->data()); }
-            
+            obj<AFacet, DRepr> to_op() const noexcept {
+                return obj<AFacet, DRepr>(this->iface(), this->data());
+            }
+
             /** Take ownership from unowned object **/
             template <typename DOther>
             box & adopt(const obj<AFacet, DOther> & other)
@@ -65,11 +67,11 @@ namespace xo {
             {
                 /* replace .iface_ along w/ .data_ */
                 this->from_obj(other);
-                
+
                 return *this;
             }
 
-            ~box() { 
+            ~box() {
                 auto p = this->data();
                 this->_drop();
                 ::operator delete(p);

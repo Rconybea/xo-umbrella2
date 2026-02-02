@@ -27,6 +27,9 @@ namespace xo {
 
             RAllocator() {}
             RAllocator(Object::DataPtr data) : Object{std::move(data)} {}
+            RAllocator(const AAllocator * iface, void * data)
+                requires std::is_same_v<typename Object::DataType, xo::facet::DVariantPlaceholder>
+            : Object(iface, data) {}
 
             typeseq       _typeseq() const noexcept { return O::iface()->_typeseq(); }
             void             _drop() const noexcept { O::iface()->_drop(O::data()); }
