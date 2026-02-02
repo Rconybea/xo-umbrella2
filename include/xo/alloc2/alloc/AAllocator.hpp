@@ -62,6 +62,10 @@ namespace xo {
 
             /** RTTI: unique id# for actual runtime data representation **/
             virtual typeseq _typeseq() const noexcept = 0;
+            /** destroy instance @p d. Calls c++ destructor for actual runtime type.
+             *  does not recover memory.
+             **/
+            virtual void _drop(Opaque d) const noexcept = 0;
             /** optional name for allocator @p d .
              *  Allows labeling allocators, for diagnostics/instrumentation.
              **/
@@ -142,10 +146,12 @@ namespace xo {
             virtual value_type alloc_copy(Opaque d, value_type src) const = 0;
             /** reset allocator @p d to empty state. **/
             virtual void clear(Opaque d) const = 0;
+#ifdef OBSOLETE
             /** Destruct allocator @p d.
              *  Releases allocator memory to operating system.
              **/
             virtual void destruct_data(Opaque d) const = 0;
+#endif
 
             ///@}
         }; /*AAllocator*/

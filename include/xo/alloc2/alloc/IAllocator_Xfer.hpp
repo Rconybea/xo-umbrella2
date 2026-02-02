@@ -36,10 +36,14 @@ namespace xo {
 
             // from AAllocator
 
-            // const methods
-
+            // builtin methods
             /** return typeseq for @tparam DRepr **/
             typeseq _typeseq() const noexcept override { return s_typeseq; }
+            /** invoke native c++ dtor **/
+            void _drop(Opaque d) const noexcept override { _dcast(d).~DRepr(); }
+            
+            // const methods
+
             std::string_view    name(Copaque d) const noexcept override { return I::name(_dcast(d)); }
             size_type       reserved(Copaque d) const noexcept override { return I::reserved(_dcast(d)); }
             size_type           size(Copaque d) const noexcept override { return I::size(_dcast(d)); }
@@ -73,7 +77,6 @@ namespace xo {
             value_type    alloc_copy(Opaque d,
                                      value_type src) const override { return I::alloc_copy(_dcast(d), src); }
             void               clear(Opaque d) const override { return I::clear(_dcast(d)); }
-            void       destruct_data(Opaque d) const override { return I::destruct_data(_dcast(d)); }
             ///@}
 
         private:

@@ -29,6 +29,7 @@ namespace xo {
             RAllocator(Object::DataPtr data) : Object{std::move(data)} {}
 
             typeseq       _typeseq() const noexcept { return O::iface()->_typeseq(); }
+            void             _drop() const noexcept { O::iface()->_drop(O::data()); }
             std::string_view  name() const noexcept { return O::iface()->name(O::data()); }
             size_type     reserved() const noexcept { return O::iface()->reserved(O::data()); }
             size_type         size() const noexcept  { return O::iface()->size(O::data()); }
