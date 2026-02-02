@@ -24,7 +24,7 @@ namespace xo {
     using xo::mm::DX1CollectorIterator;
     using xo::mm::DArena;
     using xo::mm::DArenaIterator;
-    using xo::mm::CollectorConfig;
+    using xo::mm::X1CollectorConfig;
     using xo::mm::ArenaConfig;
     using xo::mm::AllocHeaderConfig;
     using xo::mm::cmpresult;
@@ -51,12 +51,12 @@ namespace xo {
                                                                    0 /*tseq_bits*/,
                                                                    0 /*age_bits*/,
                                                                    16 /*size_bits*/), };
-            CollectorConfig cfg = { .arena_config_ = arena_cfg,
-                                    .n_generation_ = 2,
-                                    .gc_trigger_v_ = {{64*1024, 1024*1024, 0, 0,
-                                                       0, 0, 0, 0,
-                                                       0, 0, 0, 0,
-                                                       0, 0, 0, 0}} };
+            X1CollectorConfig cfg = { .arena_config_ = arena_cfg,
+                                      .n_generation_ = 2,
+                                      .gc_trigger_v_ = {{64*1024, 1024*1024, 0, 0,
+                                                         0, 0, 0, 0,
+                                                         0, 0, 0, 0,
+                                                         0, 0, 0, 0}} };
 
             DX1Collector gc = DX1Collector{cfg};
 
@@ -94,12 +94,12 @@ namespace xo {
                                                                    0 /*tseq_bits*/,
                                                                    0 /*age_bits*/,
                                                                    16 /*size_bits*/), };
-            CollectorConfig cfg = { .arena_config_ = arena_cfg,
-                                    .n_generation_ = 2,
-                                    .gc_trigger_v_ = {{64*1024, 1024*1024, 0, 0,
-                                                       0, 0, 0, 0,
-                                                       0, 0, 0, 0,
-                                                       0, 0, 0, 0}} };
+            X1CollectorConfig cfg = { .arena_config_ = arena_cfg,
+                                      .n_generation_ = 2,
+                                      .gc_trigger_v_ = {{64*1024, 1024*1024, 0, 0,
+                                                         0, 0, 0, 0,
+                                                         0, 0, 0, 0,
+                                                         0, 0, 0, 0}} };
 
             DX1Collector gc = DX1Collector{cfg};
             obj<AAllocator, DX1Collector> a1o{&gc};
