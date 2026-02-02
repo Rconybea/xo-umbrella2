@@ -12,9 +12,9 @@
 namespace xo {
     namespace facet {
         /** object with borrowed state pointer
-         *  - With default Data argument:
+         *  - With default DRepr argument:
          *    type-erased polymorphic container
-         *  - with specific Data argument:
+         *  - with specific DRepr argument:
          *    typed container. Trivially de-virtualizable
          *
          *  Example:
@@ -88,7 +88,7 @@ namespace xo {
              *  - same strategy for holding state (naked / unique / refcounted ...)
              **/
             template <typename DOther>
-            obj(const obj<AFacet, DOther> && other)
+            obj(obj<AFacet, DOther> && other)
                     requires (std::is_same_v<DRepr, DVariantPlaceholder>
                               || std::is_convertible_v<DRepr, DOther>)
               : Super()
@@ -98,7 +98,7 @@ namespace xo {
             }
 
             obj & operator=(const obj & rhs) {
-                /* ensure we replace .iface_ along w/ .ata_ */
+                /* ensure we replace .iface_ along w/ .data_ */
                 this->from_obj(rhs);
                 return *this;
             }
