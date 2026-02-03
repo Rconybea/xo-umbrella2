@@ -30,8 +30,10 @@ namespace xo {
          *
          *  Replicates (to the extent feasible) std::unordered_map<K,V>
          *
-         *  @tparam K key type.
-         *  @tparam V value type.
+         *  @tparam Key key type.
+         *  @tparam Value value type.
+         *  @tparam Hash hash function for keys
+         *  @tparam Equal equality function for keys
          **/
         template <typename Key,
                   typename Value,

@@ -114,6 +114,7 @@ namespace xo {
         private:
             size_type size_ = 0;
             DArena store_;
+            DArena::Checkpoint zero_ckp_;
         };
 
         template <typename T>
@@ -122,14 +123,16 @@ namespace xo {
                                       size_type arena_align_z,
                                       DArena::value_type lo,
                                       DArena::value_type hi)
-                : store_{cfg, page_z, arena_align_z, lo, hi}
+        : store_{cfg, page_z, arena_align_z, lo, hi},
+          zero_ckp_{store_.checkpoint()}
         {}
 
         template <typename T>
         DArenaVector<T>::DArenaVector(DArenaVector && other)
-                : size_{other.size_}, store_{std::move(other.store_)}
+        : size_{other.size_}, store_{std::move(other.store_)}, zero_ckp_{std::move(other.zero_ckp_)}
         {
             other.size_ = 0;
+            other.zero_ckp_ = DArena::Checkpoint();
         }
 
         template <typename T>
@@ -153,8 +156,10 @@ namespace xo {
         {
             this->size_ = other.size_;
             this->store_ = std::move(other.store_);
+            this->zero_ckp_ = std::move(other.zero_ckp_);
 
             other.size_ = 0;
+            other.zero_ckp_ = DArena::Checkpoint();
 
             return *this;
         }
@@ -166,6 +171,7 @@ namespace xo {
             DArenaVector<T> retval;
 
             retval.store_ = std::move(DArena::map(cfg));
+            retval.zero_ckp_ = retval.store_.checkpoint();
 
             return retval;
         }
@@ -179,9 +185,11 @@ namespace xo {
         template <typename T>
         void
         DArenaVector<T>::resize(size_type z) {
+            // new arena size in bytes
+            size_t req_z = z * sizeof(T);
+
             if (z > size_) {
                 // expand arena to accomodate
-                size_t req_z = z * sizeof(T);
 
                 store_.expand(req_z);
 
@@ -208,6 +216,14 @@ namespace xo {
                 }
             }
 
+            // rewind to checkpoint, then reallocate.
+            // This is for form's sake, so that DArena considers memory
+            // to be 'allocated'.  DArenaVector<T> doesn't care for itself,
+            // but this preserves expected behavior of visit_pools().
+            //
+            store_.restore(zero_ckp_);
+            store_.alloc(xo::reflect::typeseq::id<std::byte>(), req_z);
+            
             this->size_ = z;
         }
 

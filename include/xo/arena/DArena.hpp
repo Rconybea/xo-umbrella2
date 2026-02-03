@@ -205,7 +205,7 @@ namespace xo {
             void establish_initial_guard() noexcept;
 
             /** checkpoint arena state.  Revert to the same state with
-             *  @ref rstore
+             *  @ref restore
              **/
             Checkpoint checkpoint() noexcept { return Checkpoint(free_); }
 
