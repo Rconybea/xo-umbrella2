@@ -45,6 +45,8 @@ namespace xo {
             [[noreturn]] size_type       available(Copaque) const noexcept override { _fatal(); }
             [[noreturn]] size_type       allocated(Copaque) const noexcept override { _fatal(); }
             [[noreturn]] bool             contains(Copaque, const void *) const noexcept override { _fatal(); }
+            [[noreturn]] void          visit_pools(Copaque,
+                                                   const MemorySizeVisitor &) const override { _fatal(); }
             [[noreturn]] AllocError     last_error(Copaque) const noexcept override { _fatal(); }
             [[noreturn]] AllocInfo      alloc_info(Copaque, value_type) const noexcept override { _fatal(); }
             // defn in .cpp - problematic to require compiler know vt<AAllocIterator> defn here

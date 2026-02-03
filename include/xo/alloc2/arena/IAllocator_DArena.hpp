@@ -40,6 +40,8 @@ namespace xo {
             static size_type committed(const DArena &) noexcept;
             static size_type available(const DArena &) noexcept;
             static size_type allocated(const DArena &) noexcept;
+            static void visit_pools(const DArena &,
+                                    const MemorySizeVisitor & visitor);
             static bool contains(const DArena &, const void * p) noexcept;
             static AllocError last_error(const DArena &) noexcept;
             /** retrieve allocation bookkeeping info for @p mem from arena @p d **/

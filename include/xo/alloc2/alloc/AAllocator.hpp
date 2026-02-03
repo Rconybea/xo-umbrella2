@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <xo/arena/MemorySizeInfo.hpp>
 #include <xo/arena/AllocError.hpp>
 #include "AllocInfo.hpp"
 //#include "AllocIterator.hpp"
@@ -33,9 +34,11 @@ namespace xo {
         struct AAllocator {
             /** @defgroup mm-allocator-type-traits allocator type traits **/
             ///@{
-            /** @brief type used for allocation amounts **/
+            /** memory size report **/
+            using MemorySizeInfo = xo::mm::MemorySizeInfo;
+            /** type used for allocation amounts **/
             using size_type = std::size_t;
-            /** @brief type used for allocation responses **/
+            /** type used for allocation responses **/
             using value_type = std::byte *;
             /** object header, if configured **/
             using header_type = std::uint64_t;
@@ -95,6 +98,12 @@ namespace xo {
              *  Includes alloc headers and guard regions
              **/
             virtual size_type allocated(Copaque d) const noexcept = 0;
+            /** call @p fn(i,n,info) for each memory pool owned by this allocator.
+             *  Note: using std::function instead of obj<> to avoid leveling trouble
+             *  with DArena
+             **/
+            virtual void visit_pools(Copaque d,
+                                     const MemorySizeVisitor & fn) const = 0;
             /** true iff allocator @p d is responsible for memory at address @p p.
              **/
             virtual bool contains(Copaque d, const void * p) const noexcept = 0;
@@ -146,12 +155,6 @@ namespace xo {
             virtual value_type alloc_copy(Opaque d, value_type src) const = 0;
             /** reset allocator @p d to empty state. **/
             virtual void clear(Opaque d) const = 0;
-#ifdef OBSOLETE
-            /** Destruct allocator @p d.
-             *  Releases allocator memory to operating system.
-             **/
-            virtual void destruct_data(Opaque d) const = 0;
-#endif
 
             ///@}
         }; /*AAllocator*/

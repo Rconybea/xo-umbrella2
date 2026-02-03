@@ -41,7 +41,7 @@ namespace xo {
             typeseq _typeseq() const noexcept override { return s_typeseq; }
             /** invoke native c++ dtor **/
             void _drop(Opaque d) const noexcept override { _dcast(d).~DRepr(); }
-            
+
             // const methods
 
             std::string_view    name(Copaque d) const noexcept override { return I::name(_dcast(d)); }
@@ -53,6 +53,7 @@ namespace xo {
             bool            contains(Copaque d, const void * p) const noexcept override {
                 return I::contains(_dcast(d), p);
             }
+            void         visit_pools(Copaque d, const MemorySizeVisitor & fn) const override { I::visit_pools(_dcast(d), fn); }
             AllocError    last_error(Copaque d) const noexcept override { return I::last_error(_dcast(d)); }
             AllocInfo     alloc_info(Copaque d, value_type mem) const noexcept override {
                 return I::alloc_info(_dcast(d), mem);
