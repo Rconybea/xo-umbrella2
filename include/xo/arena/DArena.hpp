@@ -138,11 +138,13 @@ namespace xo {
              **/
             AllocHeader * end_header() const noexcept;
 
+            /** report memory use for this arena to @p fn.
+             *  For DArena reporting just one pool = arena's memory range
+             **/
+            void visit_pools(const MemorySizeVisitor & fn) const;
+
             /** get header from allocated object address **/
             header_type * obj2hdr(void * obj) noexcept;
-
-            /** resource ocnsumption in normal form **/
-            MemorySizeInfo _store_info() const noexcept;
 
             /** report alloc book-keeping info for allocation at @p mem
              *

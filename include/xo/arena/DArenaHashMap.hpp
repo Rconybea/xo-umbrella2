@@ -45,7 +45,7 @@ namespace xo {
             using value_type = std::pair<const Key, Value>;
             using key_hash = Hash;
             using key_equal = Equal;
-            using MemorySizeInfo = xo::mm::MemorySizeInfo;
+            using MemorySizeVisitor = xo::mm::MemorySizeVisitor;
             using byte = std::byte;
             using group_type = detail::ControlGroup;
             using store_type = detail::HashMapStore<Key, Value>;
@@ -77,9 +77,8 @@ namespace xo {
             iterator begin() { return _promote_iterator(_begin_aux()); }
             iterator end() { return _promote_iterator(_end_aux()); }
 
-            std::size_t _n_store() const noexcept { return store_._n_store(); }
-            MemorySizeInfo _store_info(std::size_t i) const noexcept {
-                return store_._store_info(i);
+            void visit_pools(const MemorySizeVisitor & visitor) const {
+                return store_.visit_pools(visitor);
             }
 
             /** insert @p kv_pair into hash map.
