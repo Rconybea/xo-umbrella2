@@ -38,6 +38,7 @@ namespace xo {
             {}
 
             /** (copy ctor not supported -- ownership is unique) **/
+            box(const box & other) = delete;
 
             // --------------------------------
 
@@ -73,8 +74,10 @@ namespace xo {
 
             ~box() {
                 auto p = this->data();
-                this->_drop();
-                ::operator delete(p);
+                if (p) {
+                    this->_drop();
+                    ::operator delete(p);
+                }
             }
         };
     } /*namespace facet*/

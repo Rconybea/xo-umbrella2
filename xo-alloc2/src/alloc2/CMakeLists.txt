@@ -17,6 +17,8 @@ set(SELF_SRCS
 #    DArenaIterator.cpp
     IAllocIterator_DArenaIterator.cpp
 
+    IResourceVisitor_Any.cpp
+
     )
 
 xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 ${SELF_SRCS})

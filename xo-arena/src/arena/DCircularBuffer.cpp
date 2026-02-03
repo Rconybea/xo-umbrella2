@@ -79,6 +79,31 @@ namespace xo {
         {
         }
 
+        std::size_t
+        DCircularBuffer::_n_store() const noexcept
+        {
+            return 2;
+        }
+
+        MemorySizeInfo
+        DCircularBuffer::_store_info(std::size_t i) const noexcept
+        {
+            switch (i) {
+            case 0:
+                return MemorySizeInfo(config_.name_,
+                                      occupied_range_.size(),
+                                      mapped_range_.size(),
+                                      reserved_range_.size());
+            case 1:
+                return pinned_spans_._store_info();
+            default:
+                break;
+            }
+
+            return MemorySizeInfo::sentinel();
+        }
+            
+
         bool
         DCircularBuffer::verify_ok(verify_policy policy) const
         {
