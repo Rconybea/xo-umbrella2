@@ -18,6 +18,23 @@ add_definitions(${PROJECT_CXX_FLAGS})
 
 # ----------------------------------------------------------------
 
+# note: manual target; generated code committed to git
+xo_add_genfacet(
+    TARGET xo-alloc2-facet-resourcevisitor
+    FACET ResourceVisitor
+    INPUT idl/ResourceVisitor.json5
+    OUTPUT_HPP_DIR include/xo/alloc2
+    OUTPUT_IMPL_SUBDIR visitor
+    OUTPUT_CPP_DIR src/alloc2
+)
+
+# ----------------------------------------------------------------
+
+xo_add_genfacet_all(xo-alloc2-genfacet-all)
+
+# ----------------------------------------------------------------
+
+
 # must complete definition of expression lib before configuring examples
 add_subdirectory(src/alloc2)
 add_subdirectory(utest)
