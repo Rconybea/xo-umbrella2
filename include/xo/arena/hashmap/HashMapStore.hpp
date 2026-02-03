@@ -20,6 +20,7 @@ namespace xo {
                 using control_vector_type = xo::mm::DArenaVector<uint8_t>;
                 using slot_vector_type = xo::mm::DArenaVector<value_type>;
                 using MemorySizeVisitor = xo::mm::MemorySizeVisitor;
+                using MemorySizeInfo = xo::mm::MemorySizeInfo;
 
             public:
                 /** group_exp2: number of groups {x, 2^x} **/
@@ -51,8 +52,20 @@ namespace xo {
                 float load_factor() const noexcept { return size_ / static_cast<float>(n_slot_); }
 
                 void visit_pools(const MemorySizeVisitor & visitor) const {
-                    control_.visit_pools(visitor);
-                    slots_.visit_pools(visitor);
+                    // complexity here in service of HashMapStore-specific value for MemorySizeInfo.used 
+
+                    MemorySizeInfo ctl_info;
+                    MemorySizeInfo slot_info;
+
+                    control_.visit_pools([&ctl_info](const auto & x) { ctl_info = x; });
+                    slots_.visit_pools([&slot_info](const auto & x) { slot_info = x; });
+
+                    // control: 1 byte per (key,value) pair
+                    ctl_info.used_ = size_;
+                    slot_info.used_ = size_ * sizeof(value_type);
+
+                    visitor(ctl_info);
+                    visitor(slot_info);
                 }
 
                 void resize_from_empty(const std::pair<size_type,

@@ -167,7 +167,12 @@ namespace xo {
 
         void
         DArena::visit_pools(const MemorySizeVisitor & fn) const {
+            /** arena can't tell purpose of allocated memory;
+             *  must assume it's all used
+             **/
+
             fn(MemorySizeInfo(config_.name_,
+                              this->allocated() /*used*/,
                               this->allocated(),
                               this->committed(),
                               this->reserved()));

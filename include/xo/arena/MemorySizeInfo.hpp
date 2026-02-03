@@ -15,15 +15,18 @@ namespace xo {
         struct MemorySizeInfo {
             using size_type = std::size_t;
 
-            MemorySizeInfo(std::string_view name, std::size_t a, std::size_t c, std::size_t r)
-              : resource_name_{name}, allocated_{a}, committed_{c}, reserved_{r}
+            MemorySizeInfo() = default;
+            MemorySizeInfo(std::string_view name, std::size_t u, std::size_t a, std::size_t c, std::size_t r)
+              : resource_name_{name}, used_{u}, allocated_{a}, committed_{c}, reserved_{r}
             {}
 
-            static MemorySizeInfo sentinel() { return MemorySizeInfo("", 0, 0, 0); }
+            static MemorySizeInfo sentinel() { return MemorySizeInfo(); }
 
             /** resource name **/
             std::string_view resource_name_;
-            /** memory in-use **/
+            /** memory used (excluding wasted space) **/
+            std::size_t used_  = 0;
+            /** memory allocated (including wasted space e.g. empty slots in hash tables **/
             std::size_t allocated_ = 0;
             /** memory committed (backed by physical memory) **/
             std::size_t committed_ = 0;
