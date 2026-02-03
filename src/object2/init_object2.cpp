@@ -1,5 +1,5 @@
 /** @file init_object2.cpp
-*
+ *
  *  @author Roland Conybeare, Jan 2026
  **/
 
