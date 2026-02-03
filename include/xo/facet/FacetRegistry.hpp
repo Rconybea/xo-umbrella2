@@ -10,6 +10,7 @@
 #include "facet_implementation.hpp"
 #include "typeseq.hpp"
 #include "obj.hpp"
+#include <xo/arena/DArenaHashMap.hpp>
 #include <xo/indentlog/scope.hpp>
 #include <xo/indentlog/print/tostr.hpp>
 #include <unordered_map>
@@ -38,6 +39,7 @@ namespace xo {
          **/
         class FacetRegistry {
         public:
+            using MemorySizeVisitor = xo::mm::MemorySizeVisitor;
             using typeseq = xo::reflect::typeseq;
             using key_type = std::pair<typeseq, typeseq>;
 
@@ -51,9 +53,12 @@ namespace xo {
                 }
             };
 
-            /** singleton instance **/
-            static FacetRegistry & instance() {
-                static FacetRegistry s_instance;
+            /** singleton instance.
+             *  @p hint_max_capacity is a lower bound for swiss hash map implementation.
+             *  Only honored the first time instance is called.
+             **/
+            static FacetRegistry & instance(uint32_t hint_max_capacity = 1024) {
+                static FacetRegistry s_instance(hint_max_capacity);
                 return s_instance;
             }
 
@@ -87,6 +92,11 @@ namespace xo {
 
             /** Number of registered (facet, repr) pairs **/
             std::size_t size() const { return registry_.size(); }
+
+            /** visit memory pools owned by facet registry **/
+            void visit_pools(const MemorySizeVisitor & visitor) {
+                registry_.visit_pools(visitor);
+            }
 
             /** Check if implementation is registered **/
             bool contains(typeseq facet_id,
@@ -221,10 +231,12 @@ namespace xo {
             }
 
         private:
-            FacetRegistry() = default;
+            FacetRegistry(uint32_t hint_max_capacity)
+              : registry_("facets", hint_max_capacity, false /*!debug_flag*/) {}
 
             /** runtime lookup table (AFacet,DRepr) -> impl **/
-            std::unordered_map<key_type, const void *, KeyHash> registry_;
+            xo::map::DArenaHashMap<key_type, const void *, KeyHash> registry_;
+            //std::unordered_map<key_type, const void *, KeyHash> registry_;
         };
 
     } /*namespace facet*/
