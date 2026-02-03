@@ -96,8 +96,18 @@ namespace xo {
                     .store_header_flag_ = false});
 
             for (uint32_t igen = 0, ngen = cfg.n_generation_; igen < ngen; ++igen) {
-                space_storage_[0][igen] = DArena::map(cfg.arena_config_);
-                space_storage_[1][igen] = DArena::map(cfg.arena_config_);
+                {
+                    char buf[40];
+                    snprintf(buf, sizeof(buf), "x1-space-G%u-a", igen);
+
+                    space_storage_[0][igen] = DArena::map(cfg.arena_config_.with_name(std::string(buf)));
+                }
+                {
+                    char buf[40];
+                    snprintf(buf, sizeof(buf), "x1-space-G%u-b", igen);
+
+                    space_storage_[1][igen] = DArena::map(cfg.arena_config_.with_name(std::string(buf)));
+                }
 
                 space_[role::to_space()][igen] = &space_storage_[0][igen];
                 space_[role::from_space()][igen] = &space_storage_[1][igen];
@@ -106,6 +116,19 @@ namespace xo {
             for (uint32_t igen = cfg.n_generation_; igen < c_max_generation; ++igen) {
                 space_[role::to_space()][igen] = nullptr;
                 space_[role::from_space()][igen] = nullptr;
+            }
+        }
+
+        void
+        DX1Collector::visit_pools(const MemorySizeVisitor & visitor) const
+        {
+            object_types_.visit_pools(visitor);
+            roots_.visit_pools(visitor);
+
+            for (uint32_t i = 0; i < c_n_role; ++i) {
+                for (uint32_t j = 0; j < config_.n_generation_; ++j) {
+                    space_storage_[i][j].visit_pools(visitor);
+                }
             }
         }
 

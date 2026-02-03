@@ -5,7 +5,8 @@
 
 #pragma once
 
-#include <cstdint>
+#include <string_view>
+#include <cstddef>
 
 namespace xo {
     namespace mm {
@@ -31,7 +32,12 @@ namespace xo {
             std::size_t reserved_ = 0;
         };
 
-    } 
+        /** function that visits MemorySizeInfo for a collection of @p n memory pools.
+         *  Each pool reported with index @p i in [0, n), with associated
+         *  size record @p info.
+         **/
+        using MemorySizeVisitor = std::function<void (const MemorySizeInfo & info)>;
+    }
 }
 
 /* end MemorySizeInfo.hpp */

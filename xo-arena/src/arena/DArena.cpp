@@ -165,13 +165,12 @@ namespace xo {
             return (header_type *)((byte *)obj - sizeof(header_type));
         }
 
-        MemorySizeInfo
-        DArena::_store_info() const noexcept
-        {
-            return MemorySizeInfo(config_.name_,
-                                  this->allocated(),
-                                  this->committed(),
-                                  this->reserved());
+        void
+        DArena::visit_pools(const MemorySizeVisitor & fn) const {
+            fn(MemorySizeInfo(config_.name_,
+                              this->allocated(),
+                              this->committed(),
+                              this->reserved()));
         }
 
         AllocInfo

@@ -48,6 +48,8 @@ namespace xo {
             static size_type available(const DX1Collector &) noexcept;
             /** space used by @p d across all {roles, generations}. **/
             static size_type allocated(const DX1Collector &) noexcept;
+            /** visit memory pools owned by this allocator; call fn(info) for each pool **/
+            static void visit_pools(const DX1Collector & d, const MemorySizeVisitor & fn);
             /** true iff address @p p comes from collector @p d **/
             static bool contains(const DX1Collector & d, const void * p) noexcept;
             /** report last error, if any, for collector @p d **/

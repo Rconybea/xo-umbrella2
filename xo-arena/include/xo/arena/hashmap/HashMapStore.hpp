@@ -19,7 +19,7 @@ namespace xo {
                 using group_type = detail::ControlGroup;
                 using control_vector_type = xo::mm::DArenaVector<uint8_t>;
                 using slot_vector_type = xo::mm::DArenaVector<value_type>;
-                using MemorySizeInfo = xo::mm::MemorySizeInfo;
+                using MemorySizeVisitor = xo::mm::MemorySizeVisitor;
 
             public:
                 /** group_exp2: number of groups {x, 2^x} **/
@@ -48,16 +48,9 @@ namespace xo {
                 size_type capacity() const noexcept { return n_group_ * c_group_size; }
                 float load_factor() const noexcept { return size_ / static_cast<float>(n_slot_); }
 
-                std::size_t _n_store() const noexcept { return 2; }
-                MemorySizeInfo _store_info(std::size_t i) const noexcept {
-                    switch (i) {
-                    case 0:
-                        return control_._store_info();
-                    case 1:
-                        return slots_._store_info();
-                    }
-
-                    return MemorySizeInfo::sentinel();
+                void visit_pools(const MemorySizeVisitor & visitor) const {
+                    control_.visit_pools(visitor);
+                    slots_.visit_pools(visitor);
                 }
 
                 void resize_from_empty(const std::pair<size_type,

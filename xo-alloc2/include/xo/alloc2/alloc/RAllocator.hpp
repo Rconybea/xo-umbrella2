@@ -39,6 +39,7 @@ namespace xo {
             size_type    committed() const noexcept { return O::iface()->committed(O::data()); }
             size_type    available() const noexcept { return O::iface()->available(O::data()); }
             size_type    allocated() const noexcept { return O::iface()->allocated(O::data()); }
+            void       visit_pools(const MemorySizeVisitor & fn) const { O::iface()->visit_pools(O::data(), fn); }
             bool          contains(const void * p) const noexcept { return O::iface()->contains(O::data(), p); }
             AllocError  last_error() const noexcept { return O::iface()->last_error(O::data()); }
             AllocInfo   alloc_info(value_type mem) const noexcept { return O::iface()->alloc_info(O::data(), mem); }

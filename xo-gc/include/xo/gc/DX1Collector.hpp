@@ -81,7 +81,7 @@ namespace xo {
             /** faceted object pointer to this instance */
             template <typename AFacet = AAllocator>
             obj<AFacet,DX1Collector> ref() { return obj<AFacet,DX1Collector>(this); }
-            
+
 #ifdef NOT_YET
             /** create instance with default configuration,
              *  generation size @p gen_z
@@ -109,6 +109,11 @@ namespace xo {
             size_type available_total() const noexcept;
             /** total allocated memory in bytes, across all {role, generation} **/
             size_type allocated_total() const noexcept;
+
+            /** introspection for memory use.
+             *  Call @p visitor(info) for each pool owned by this allocator
+             **/
+            void visit_pools(const MemorySizeVisitor & visitor) const;
 
             /** true iff address @p addr allocated from this collector
              *  in role @p r (according to current GC state)
