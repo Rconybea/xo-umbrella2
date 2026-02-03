@@ -253,6 +253,15 @@ namespace xo {
                 //iface_ = *std::launder(&iface_);
             }
 
+            /** use this to access non-facet methods,
+             *  _when representation is known at compile time_.
+             *
+             * Deliberately disable this for variants
+             **/
+            DRepr * operator->()
+            requires (!std::is_same_v<DataType, DVariantPlaceholder>)
+            { return data_; }
+
 #ifdef NOPE
             DRepr & operator*() { return *data_; }
 #endif
