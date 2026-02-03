@@ -83,6 +83,7 @@ namespace xo {
         DCircularBuffer::visit_pools(const MemorySizeVisitor & visitor) const
         {
             visitor(MemorySizeInfo(config_.name_,
+                                   occupied_range_.size() /*used*/,
                                    occupied_range_.size(),
                                    mapped_range_.size(),
                                    reserved_range_.size()));
