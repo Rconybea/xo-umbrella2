@@ -75,7 +75,7 @@ namespace xo {
           mapped_range_{reserved_range_.prefix(0)},
           occupied_range_{mapped_range_.prefix(0)},
           input_range_{occupied_range_.prefix(0)},
-          pinned_spans_{}
+          pinned_spans_{DArenaVector<span_type>::map(ArenaConfig().with_name(config.name_ + "-pins"))}
         {
         }
 

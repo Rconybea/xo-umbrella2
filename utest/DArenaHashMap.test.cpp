@@ -24,7 +24,7 @@ namespace xo {
         {
             using HashMap = DArenaHashMap<int, int>;
 
-            HashMap map;
+            HashMap map("utest");
 
             REQUIRE(map.empty());
             REQUIRE(map.size() == 0);
@@ -36,7 +36,7 @@ namespace xo {
         {
             using HashMap = DArenaHashMap<int, int>;
 
-            HashMap map(257);
+            HashMap map("utest", 257);
 
             REQUIRE(map.empty());
             REQUIRE(map.size() == 0);
@@ -49,7 +49,7 @@ namespace xo {
         {
             using HashMap = DArenaHashMap<int, int>;
 
-            HashMap map;
+            HashMap map("utest");
 
             REQUIRE(map.empty());
             REQUIRE(map.size() == 0);
@@ -209,7 +209,7 @@ namespace xo {
              */
 
             for (std::uint32_t n = 0; n <= 8; ) {
-                HashMap hash_map;
+                HashMap hash_map("utest");
 
                 auto test_fn = [&rgen, &hash_map](bool dbg_flag,
                                                   std::uint32_t n)
@@ -245,7 +245,7 @@ namespace xo {
 
             using HashMap = DArenaHashMap<int, int>;
 
-            HashMap map;
+            HashMap map("utest");
 
             // copy keys here so we can print stuff
             std::vector<int> key_v;
@@ -336,7 +336,7 @@ namespace xo {
         {
             using HashMap = DArenaHashMap<std::string_view, int>;
 
-            HashMap map(1024);
+            HashMap map("utest", 1024);
 
             REQUIRE(map.verify_ok());
 

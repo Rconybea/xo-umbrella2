@@ -55,9 +55,11 @@ namespace xo {
 
         public:
             /** create hash map **/
-            DArenaHashMap(size_type hint_max_capacity,
+            DArenaHashMap(const std::string & name,
+                          size_type hint_max_capacity,
                           bool debug_flag = false);
-            DArenaHashMap(Hash && hash = Hash(),
+            DArenaHashMap(const std::string & name,
+                          Hash && hash = Hash(),
                           Equal && eq = Equal(),
                           size_type hint_max_capacity = 0,
                           bool debug_flag = false);
@@ -196,9 +198,10 @@ namespace xo {
         };
 
         template <typename Key, typename Value, typename Hash, typename Equal>
-        DArenaHashMap<Key, Value, Hash, Equal>::DArenaHashMap(size_type hint_max_capacity,
+        DArenaHashMap<Key, Value, Hash, Equal>::DArenaHashMap(const std::string & name,
+                                                              size_type hint_max_capacity,
                                                               bool debug_flag)
-        : DArenaHashMap(Hash(), Equal(), hint_max_capacity, debug_flag)
+        : DArenaHashMap(name, Hash(), Equal(), hint_max_capacity, debug_flag)
         {
         }
 
@@ -207,13 +210,14 @@ namespace xo {
          *   last 16 bytes will be copy of first 16 bytes
          */
         template <typename Key, typename Value, typename Hash, typename Equal>
-        DArenaHashMap<Key, Value, Hash, Equal>::DArenaHashMap(Hash && hash,
+        DArenaHashMap<Key, Value, Hash, Equal>::DArenaHashMap(const std::string & name,
+                                                              Hash && hash,
                                                               Equal && eq,
                                                               size_type hint_max_capacity,
                                                               bool debug_flag)
         : hash_{std::move(hash)},
           equal_{std::move(eq)},
-          store_{"arenahashmap", lub_exp2(lub_group_mult(hint_max_capacity))},
+          store_{name, lub_exp2(lub_group_mult(hint_max_capacity))},
           debug_flag_{debug_flag}
         {
         }
