@@ -19,6 +19,12 @@ namespace xo {
         struct ArenaConfig {
             /** @defgroup mm-arenaconfig-ctors **/
 
+            ArenaConfig with_name(std::string name) {
+                ArenaConfig copy(*this);
+                copy.name_ = name;
+                return copy;
+            }
+
             ArenaConfig with_size(std::size_t z) {
                 ArenaConfig copy(*this);
                 copy.size_ = z;

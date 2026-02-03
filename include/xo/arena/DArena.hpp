@@ -7,6 +7,7 @@
 
 #include "ArenaConfig.hpp"
 #include "AllocError.hpp"
+#include "MemorySizeInfo.hpp"
 #include "AllocInfo.hpp"
 #include <xo/reflectutil/typeseq.hpp>
 
@@ -140,6 +141,9 @@ namespace xo {
             /** get header from allocated object address **/
             header_type * obj2hdr(void * obj) noexcept;
 
+            /** resource ocnsumption in normal form **/
+            MemorySizeInfo _store_info() const noexcept;
+
             /** report alloc book-keeping info for allocation at @p mem
              *
              *  Require:
@@ -205,6 +209,7 @@ namespace xo {
 
             /** restore arena state to previously-established checkpoint **/
             void restore(Checkpoint ckp) noexcept { free_ = ckp.free_; }
+
 
             /** discard all allocated memory, return to empty state
              *  Promise:

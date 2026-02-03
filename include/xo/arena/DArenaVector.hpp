@@ -79,6 +79,11 @@ namespace xo {
             constexpr T * data() { return reinterpret_cast<T*>(store_.lo_); }
             constexpr const T * data() const { return reinterpret_cast<const T*>(store_.lo_); }
 
+            /** arena used for element storage
+             *  (Might prefer obj<AResourceVisitor> here; refrain to avoid leveling violation)
+             **/
+            MemorySizeInfo _store_info() const { return store_._store_info(); }
+
             /** reserve space, if possible, for at least @p z elements.
              *  Always limited by ArenaConfig.size_
              **/
