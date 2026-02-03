@@ -33,11 +33,13 @@ namespace xo {
                   control_{control_vector_type::map
                     (xo::mm::ArenaConfig{
                         .name_ = name + "-ctl",
-                        .size_ = control_size(n_slot_)})},
+                        .size_ = control_size(n_slot_),
+                        .store_header_flag_ = false})},
                   slots_{slot_vector_type::map
                     (xo::mm::ArenaConfig{
                         .name_ = name + "-slots",
-                        .size_ = n_slot_ * sizeof(value_type)})}
+                        .size_ = n_slot_ * sizeof(value_type),
+                        .store_header_flag_ = false})}
                 {
                     /* here: arenas have allocated address range, but no committed memory yet */
 

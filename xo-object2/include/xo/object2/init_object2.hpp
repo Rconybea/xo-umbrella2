@@ -1,5 +1,5 @@
 /** @file init_object2.hpp
-*
+ *
  *  @author Roland Conybeare, Jan 2026
  **/
 
