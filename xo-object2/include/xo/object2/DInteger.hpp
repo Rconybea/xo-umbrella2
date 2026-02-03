@@ -28,7 +28,7 @@ namespace xo {
             /** allocate boxed value @p x using memory from @p mm **/
             static DInteger * _box(obj<AAllocator> mm, long x);
 
-            double value() const noexcept { return value_; }
+            long value() const noexcept { return value_; }
 
             bool pretty(const ppindentinfo & ppii) const;
 
