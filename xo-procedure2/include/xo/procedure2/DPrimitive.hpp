@@ -76,8 +76,10 @@ namespace xo {
 
             TypeDescr fn_td() const noexcept { return fn_td_; }
 
-            bool is_nary() const noexcept { return false; }
+            std::string_view name() const noexcept { return name_; }
             static constexpr std::int32_t n_args() noexcept { return Traits::n_args; }
+
+            bool is_nary() const noexcept { return false; }
 
             obj<AGCObject> apply_nocheck(obj<ARuntimeContext> rcx, const DArray * args) {
                 return _apply_nocheck(rcx, args,
