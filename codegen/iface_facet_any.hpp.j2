@@ -62,8 +62,11 @@ namespace {{facet_ns2}} {
 
         // from {{abstract_facet}}
 
-        // const methods
+        // builtin methods
         typeseq _typeseq() const noexcept override { return s_typeseq; }
+        [[noreturn]] void _drop(Opaque) const noexcept override { _fatal(); }
+
+        // const methods
         {% for md in const_methods %}
         [[noreturn]] {{md.return_type}} {{md.name}}({{md.args | argtypes}}) {{md | qualifiers}} override { _fatal(); }
         {% endfor %}
