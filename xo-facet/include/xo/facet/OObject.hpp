@@ -59,6 +59,10 @@ namespace xo {
          **/
         template <typename AFacet, typename DRepr = DVariantPlaceholder>
         struct OObject {
+            static_assert(has_facet_impl<AFacet, DRepr>,
+                          "Missing FacetImplementation<AFacet,DRepr> specialization. "
+                          "Did you include IFacet_DRepr.hpp (via the convenience header)?");
+
             using FacetType = AFacet;
             using ISpecific = FacetImplType<AFacet, DRepr>;
             using DataType = DRepr;

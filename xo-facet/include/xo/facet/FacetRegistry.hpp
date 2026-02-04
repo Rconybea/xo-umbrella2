@@ -236,8 +236,24 @@ namespace xo {
 
             /** runtime lookup table (AFacet,DRepr) -> impl **/
             xo::map::DArenaHashMap<key_type, const void *, KeyHash> registry_;
-            //std::unordered_map<key_type, const void *, KeyHash> registry_;
         };
+
+        // Deferred definitioon of obj<AFacet,DRepr>::to_facet(),
+        // since implementation requires FacetRegistry
+        //
+        template <typename AFacet, typename DRepr>
+        template <typename AOther>
+        obj<AOther,DRepr>
+        obj<AFacet,DRepr>::to_facet()
+        {
+            if constexpr (std::is_same_v<DRepr, DVariantPlaceholder>) {
+                // return type has type-erased data
+                return FacetRegistry::instance().variant<AOther,AFacet>(*this);
+            } else {
+                // return type has known data
+                return obj<AOther,DRepr>(this->data());
+            }
+        }
 
     } /*namespace facet*/
 } /*namespace xo*/
