@@ -68,7 +68,8 @@ namespace xo {
                 requires (std::same_as<Args, obj<AGCObject>> && ...)
             static DArray * array(obj<AAllocator> mm, Args... args);
 
-            obj<AGCObject> operator[](size_type index) const noexcept { return elts_[index]; }
+            const obj<AGCObject> & operator[](size_type index) const noexcept { return elts_[index]; }
+            obj<AGCObject> & operator[](size_type index) noexcept { return elts_[index]; }
 
             ///@}
             /** @defgroup darray-access acecss methods **/
