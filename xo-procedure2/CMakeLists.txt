@@ -91,12 +91,12 @@ xo_add_genfacetimpl(
     OUTPUT_CPP_DIR src/procedure2
 )
 
-add_subdirectory(src/procedure2)
-add_subdirectory(utest)
+xo_add_genfacet_all(xo-procedure2-genfacet-all)
 
 # ----------------------------------------------------------------
 
-xo_add_genfacet_all(xo-procedure2-genfacet-all)
+add_subdirectory(src/procedure2)
+add_subdirectory(utest)
 
 # ----------------------------------------------------------------
 # cmake export

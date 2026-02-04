@@ -2,7 +2,7 @@
  *
  *  Generated automagically from ingredients:
  *  1. code generator:
- *       [/home/roland/proj/xo-umbrella2-claude1/xo-facet/codegen/genfacet]
+ *       [xo-facet/codegen/genfacet]
  *     arguments:
  *       --input [idl/Procedure.json5]
  *  2. jinja2 template for abstract facet .hpp file:
@@ -54,8 +54,11 @@ namespace scm {
 
         // from AProcedure
 
-        // const methods
+        // builtin methods
         typeseq _typeseq() const noexcept override { return s_typeseq; }
+        [[noreturn]] void _drop(Opaque) const noexcept override { _fatal(); }
+
+        // const methods
         [[noreturn]] bool is_nary(Copaque)  const  noexcept override { _fatal(); }
         [[noreturn]] std::int32_t n_args(Copaque)  const  noexcept override { _fatal(); }
 
