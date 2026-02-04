@@ -2,6 +2,7 @@
 
 include(CMakeFindDependencyMacro)
 # note: dependencies here must coordinate with xo-facet/CMakeLists.txt
+find_dependency(xo_arena)
 find_dependency(xo_reflectutil)
 include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Targets.cmake")
 check_required_components("@PROJECT_NAME@")

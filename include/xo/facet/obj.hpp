@@ -6,6 +6,7 @@
 #pragma once
 
 #include "RRouter.hpp"
+//#include "FacetRegistry.hpp"  // nope, would create include cycle
 #include <utility>
 #include <cassert>
 
@@ -126,6 +127,15 @@ namespace xo {
                 {
                     return obj(iface, data);
                 }
+
+            /** - runtime polymorphism (DRepr == DVariantPlaceholder)
+             *      (requires FacetRegistry for lookup)
+             *  - comptime polymorphism (DRepr != DVariantPlaceholder)
+             *
+             *  Definition in FacetRegistry.hpp, to avoid #include dependency
+             **/
+            template <typename AOther>
+            obj<AOther,DRepr> to_facet();
 
             /** enabled when RRouter<AFacet> provides _preincrement.
              *  Note we don't need this trick for comparison operators,
