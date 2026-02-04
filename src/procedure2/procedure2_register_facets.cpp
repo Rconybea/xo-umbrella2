@@ -3,12 +3,9 @@
  *  @author Roland Conybeare, Jan 2026
  **/
 
-#include "DSimpleRcx.hpp"
-#include "detail/IRuntimeContext_DSimpleRcx.hpp"
-
-#include "DPrimitive_gco_2_gco_gco.hpp"
-#include "detail/IGCObject_DPrimitive_gco_2_gco_gco.hpp"
-#include "detail/IPrintable_DPrimitive_gco_2_gco_gco.hpp"
+#include "Procedure.hpp"
+#include "SimpleRcx.hpp"
+#include "Primitive_gco_2_gco_gco.hpp"
 
 #include <xo/gc/GCObject.hpp>
 #include <xo/printable2/Printable.hpp>
@@ -28,11 +25,15 @@ namespace xo {
 
             FacetRegistry::register_impl<ARuntimeContext, DSimpleRcx>();
 
+            FacetRegistry::register_impl<AProcedure, DPrimitive_gco_2_gco_gco>();
             FacetRegistry::register_impl<AGCObject, DPrimitive_gco_2_gco_gco>();
             FacetRegistry::register_impl<APrintable, DPrimitive_gco_2_gco_gco>();
 
             log && log(xtag("DSimpleRcx.tseq", typeseq::id<DSimpleRcx>()));
             log && log(xtag("DPrimitive_gco_2_gco_gco.tseq", typeseq::id<DPrimitive_gco_2_gco_gco>()));
+
+            log && log(xtag("ARuntimeContext.tseq", typeseq::id<ARuntimeContext>()));
+            log && log(xtag("AProcedure.tseq", typeseq::id<AProcedure>()));
 
             return true;
         }
