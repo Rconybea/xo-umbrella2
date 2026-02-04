@@ -189,7 +189,8 @@ namespace xo {
         VirtualSchematikaMachine::execute_one()
         {
             scope log(XO_DEBUG(true));
-            log && log("stack", stack_);
+            log && log(xtag("pc", pc_), xtag("cont", cont_));
+            log && log(xtag("stack", stack_));
 
             using Opcode = VsmInstr::Opcode;
 
