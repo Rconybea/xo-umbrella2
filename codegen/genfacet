@@ -314,6 +314,8 @@ def gen_facet_impl(env,
     router_facet = f'R{facet_name}'
     # RFoo.hpp
     router_facet_hpp_fname = f'{router_facet}.hpp'
+    # user defined content -- whatever you want
+    router_facet_explicit_content = facet_idl['router_facet_explicit_content']
 
     # ================================================================
     # vars for IFacet_DRepr
@@ -384,6 +386,7 @@ def gen_facet_impl(env,
         'router_facet': router_facet,
         'router_facet_hpp_j2': 'router_facet.hpp.j2',
         'router_facet_hpp_fname': router_facet_hpp_fname,
+        'router_facet_explicit_content': router_facet_explicit_content,
         #
         'types': facet_types,
         'local_types': local_types,
