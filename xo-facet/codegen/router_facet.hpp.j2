@@ -56,6 +56,11 @@ public:
     ///@{
     {% endif %}
 
+    // explicit injected content
+    {% for c in router_facet_explicit_content %}
+    {{c}}
+    {% endif %}
+
     // builtin methods
     typeseq _typeseq() const noexcept { return O::iface()->_typeseq(); }
     void _drop() const noexcept { O::iface()->_drop(O::data()); }

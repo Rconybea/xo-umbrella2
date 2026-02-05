@@ -31,6 +31,11 @@ namespace xo {
                 requires std::is_same_v<typename Object::DataType, xo::facet::DVariantPlaceholder>
             : Object(iface, data) {}
 
+            template <typename T>
+            void * alloc_for() noexcept {
+                return O::iface()->alloc(O::data(), typeseq::id<T>(), sizeof(T));
+            }
+
             typeseq       _typeseq() const noexcept { return O::iface()->_typeseq(); }
             void             _drop() const noexcept { O::iface()->_drop(O::data()); }
             std::string_view  name() const noexcept { return O::iface()->name(O::data()); }
