@@ -57,9 +57,9 @@ public:
     {% endif %}
 
     // explicit injected content
-    {% for c in router_facet_explicit_content %}
-    {{c}}
-    {% endif %}
+    {% for content in router_facet_explicit_content %}
+    {{content}}
+    {% endfor %}
 
     // builtin methods
     typeseq _typeseq() const noexcept { return O::iface()->_typeseq(); }

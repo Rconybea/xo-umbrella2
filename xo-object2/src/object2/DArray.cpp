@@ -106,7 +106,7 @@ namespace xo {
         std::size_t
         DArray::shallow_size() const noexcept
         {
-            return sizeof(DArray);
+            return sizeof(DArray) + (capacity_ * sizeof(obj<AGCObject>));
         }
 
         DArray *
