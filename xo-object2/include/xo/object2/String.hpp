@@ -1,6 +1,6 @@
 /** @file String.hpp
  *
- *  @author Roland Conybeare, Feb 22026
+ *  @author Roland Conybeare, Feb 2026
  **/
 
 #pragma once
