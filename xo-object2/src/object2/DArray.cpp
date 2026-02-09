@@ -1,5 +1,5 @@
 /** @file DArray.cpp
-*
+ *
  *  @author Roland Conybeare, Jan 2026
  **/
 
@@ -121,7 +121,9 @@ namespace xo {
                 constexpr auto c_obj_z = sizeof(obj<AGCObject>);
 
                 /* memcpy sufficient for obj<A,D> */
-                ::memcpy((void*)&(copy->elts_[0]), (void*)&(elts_[0]), capacity_ * c_obj_z);
+                ::memcpy((void*)&(copy->elts_[0]),
+                         (void*)&(elts_[0]),
+                         capacity_ * c_obj_z);
             }
 
             return copy;
