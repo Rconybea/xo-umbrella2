@@ -59,6 +59,20 @@ let
     });
   };
 
+  # ghostty tests require ptys
+  ghostty-overlay = self: super: {
+    ghostty = super.ghostty.overrideAttrs (old: {
+      doCheck = false;
+    });
+  };
+
+  # fish tests require ptys
+  fish-overlay = self: super: {
+    fish = super.fish.overrideAttrs (old: {
+      doCheck = false;
+    });
+  };
+
 #  # nixGL not present in my nixpkgs snapshot
 #  nixgl-overlay = self: super: {
 #    nixGL = import (self.fetchFromGitHub {
@@ -192,6 +206,8 @@ let
       swtpm-overlay
       mailutils-overlay
       notmuch-overlay
+      ghostty-overlay
+      fish-overlay
 #      nixgl-overlay
 #      llvm-overlay
       xo-overlay
@@ -240,6 +256,10 @@ let
     pkgs.emacsPackages.notmuch
     pkgs.inconsolata-lgc
     pkgs.fontconfig
+    pkgs.ghostty
+    pkgs.timg
+    pkgs.fish
+    pkgs.nushell
   ];
 
   # xo general-purpose devutils
