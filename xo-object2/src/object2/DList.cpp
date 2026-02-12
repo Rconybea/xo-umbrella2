@@ -148,6 +148,8 @@ namespace xo {
             }
         }
 
+        // ----- GCObject facet ------
+
         auto
         DList::shallow_size() const noexcept -> size_type
         {
@@ -175,7 +177,7 @@ namespace xo {
             auto iface = xo::facet::impl_for<AGCObject,DList>();
             gc.forward_inplace(&iface, (void **)(&rest_));
 
-            return shallow_size();
+            return this->shallow_size();
         }
     } /*namespace scm*/
 } /*namespace xo*/

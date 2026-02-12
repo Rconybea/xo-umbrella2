@@ -4,6 +4,7 @@
  **/
 
 #include "object2_register_facets.hpp"
+#include "RuntimeError.hpp"
 
 #include <xo/object2/array/IGCObject_DArray.hpp>
 #include <xo/object2/list/IGCObject_DList.hpp>
@@ -66,6 +67,9 @@ namespace xo {
             FacetRegistry::register_impl<APrintable, DArray>();
             FacetRegistry::register_impl<ASequence, DArray>();
 
+            FacetRegistry::register_impl<AGCObject, DRuntimeError>();
+            FacetRegistry::register_impl<APrintable, DRuntimeError>();
+
             log && log(xtag("DVariantPlaceholder.tseq", typeseq::id<DVariantPlaceholder>()));
 
             log && log(xtag("DList.tseq", typeseq::id<DList>()));
@@ -74,6 +78,7 @@ namespace xo {
             log && log(xtag("DInteger.tseq", typeseq::id<DInteger>()));
             log && log(xtag("DString.tseq", typeseq::id<DString>()));
             log && log(xtag("DArray.tseq", typeseq::id<DArray>()));
+            log && log(xtag("DRuntimeError.tseq", typeseq::id<DRuntimeError>()));
 
             log && log(xtag("AAllocator.tseq", typeseq::id<AAllocator>()));
             log && log(xtag("APrintable.tseq", typeseq::id<APrintable>()));
