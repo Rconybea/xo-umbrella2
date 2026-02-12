@@ -208,6 +208,34 @@ xo_add_genfacetimpl(
     OUTPUT_CPP_DIR src/object2
 )
 
+# ----------------------------------------------------------------
+
+# note: manual target; generated code committed to git
+xo_add_genfacetimpl(
+    TARGET xo-object2-facetimpl-printable-runtimeerror
+    FACET_PKG xo_printable2
+    FACET Printable
+    REPR RuntimeError
+    INPUT idl/IPrintable_DRuntimeError.json5
+    OUTPUT_HPP_DIR include/xo/object2
+    OUTPUT_IMPL_SUBDIR error
+    OUTPUT_CPP_DIR src/object2
+)
+
+# note: manual target; generated code committed to git
+xo_add_genfacetimpl(
+    TARGET xo-object2-facetimpl-gcobject-runtimeerror
+    FACET_PKG xo_gc
+    FACET GCObject
+    REPR RuntimeError
+    INPUT idl/IGCObject_DRuntimeError.json5
+    OUTPUT_HPP_DIR include/xo/object2
+    OUTPUT_IMPL_SUBDIR error
+    OUTPUT_CPP_DIR src/object2
+)
+
+# ----------------------------------------------------------------
+
 xo_add_genfacet_all(xo-object2-genfacet-all)
 
 # ----------------------------------------------------------------
