@@ -40,4 +40,5 @@
     ],
     nonconst_methods: [
     ],
+    router_facet_explicit_content: [ ],
 }
