@@ -135,7 +135,7 @@ namespace xo {
             for (size_type i = 0; i < size_; ++i) {
                 obj<AGCObject> & elt = elts_[i];
 
-                gc.forward_inplace(elt.iface(), (void **)&(elt.data_));
+                gc.forward_inplace(&elt);
             }
 
             return shallow_size();
