@@ -23,6 +23,16 @@ namespace xo {
             RCollector() = default;
             RCollector(DataPtr data) : Object{std::move(data)} {}
 
+            /** forward op in place. Defined in GCObject.hpp to avoid #include cycle **/
+            template <typename DRepr>
+            void forward_inplace(obj<AGCObject,DRepr> * p_obj);
+
+            /** another convenience template for forwarding.
+             *  Defined in RGCObject.hpp to avoid #include cycle.
+             **/
+            template <typename DRepr>
+            void forward_inplace(DRepr ** pp_repr);
+
             int32_t _typeseq() const noexcept { return O::iface()->_typeseq(); }
             size_type allocated(generation g, role r) const noexcept { return O::iface()->allocated(O::data(), g, r); }
             size_type reserved(generation g, role r) const noexcept { return O::iface()->reserved(O::data(), g, r); }
