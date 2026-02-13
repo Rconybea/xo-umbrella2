@@ -3,13 +3,31 @@
  *  @author Roland Conybeare, Feb 2026
  **/
 
-#include "DRuntimeError.hpp"
+#include "RuntimeError.hpp"
 
 namespace xo {
     using xo::mm::AGCObject;
     using xo::facet::typeseq;
 
     namespace scm {
+
+        obj<AGCObject,DRuntimeError>
+        DRuntimeError::make(obj<AAllocator> mm,
+                            const char * src_fn,
+                            const char * error_descr)
+        {
+            DRuntimeError * err = DRuntimeError::_make(mm, nullptr, nullptr);
+
+            // pedantic: allocate strings after allocating DRuntimeError instance
+
+            DString * src = DString::from_cstr(mm, src_fn);
+            DString * err_descr = DString::from_cstr(mm, error_descr);
+
+            err->src_function_ = src;
+            err->error_descr_ = err_descr;
+
+            return obj<AGCObject,DRuntimeError>(err);
+        }
 
         DRuntimeError *
         DRuntimeError::_make(obj<AAllocator> mm,
