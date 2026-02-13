@@ -172,10 +172,12 @@ namespace xo {
         {
             //scope log(XO_DEBUG(true));
 
-            gc.forward_inplace(head_.iface(), (void **)&(head_.data_));
+            gc.forward_inplace(&head_);
+            //gc.forward_inplace(head_.iface(), (void **)&(head_.data_));
 
-            auto iface = xo::facet::impl_for<AGCObject,DList>();
-            gc.forward_inplace(&iface, (void **)(&rest_));
+            gc.forward_inplace(&rest_);
+            //auto iface = xo::facet::impl_for<AGCObject,DList>();
+            //gc.forward_inplace(&iface, (void **)(&rest_));
 
             return this->shallow_size();
         }
