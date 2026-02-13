@@ -137,6 +137,12 @@ namespace xo {
             template <typename AOther>
             obj<AOther,DRepr> to_facet();
 
+            /** like to_facet<AOther>(),
+             *  but on failure return empty obj instead of throwing exception 
+             **/
+            template <typename AOther>
+            obj<AOther,DRepr> try_to_facet() noexcept;
+
             /** enabled when RRouter<AFacet> provides _preincrement.
              *  Note we don't need this trick for comparison operators,
              *  since return type is fixed.

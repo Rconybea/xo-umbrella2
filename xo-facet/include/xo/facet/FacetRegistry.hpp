@@ -159,7 +159,7 @@ namespace xo {
              *    }
              **/
             template <typename ATo, typename AFrom>
-            obj<ATo> try_variant(obj<AFrom> from) {
+            obj<ATo> try_variant(obj<AFrom> from) noexcept {
                 return try_variant<ATo>(from._typeseq(), from.data());
             }
 
@@ -173,7 +173,7 @@ namespace xo {
              *      = FacetRegistry::variant<ABar>(foo._typeseq(), foo.opaque_data());
              **/
             template <typename AFacet>
-            obj<AFacet> try_variant(typeseq repr_id, void * data) {
+            obj<AFacet> try_variant(typeseq repr_id, void * data) noexcept {
                 const AFacet * iface = this->lookup<AFacet>(repr_id);
 
                 if (iface)
@@ -246,12 +246,37 @@ namespace xo {
         obj<AOther,DRepr>
         obj<AFacet,DRepr>::to_facet()
         {
-            if constexpr (std::is_same_v<DRepr, DVariantPlaceholder>) {
-                // return type has type-erased data
-                return FacetRegistry::instance().variant<AOther,AFacet>(*this);
+            if (this->data()) {
+                if constexpr (std::is_same_v<DRepr, DVariantPlaceholder>) {
+                    // return type has type-erased data
+                    return FacetRegistry::instance().variant<AOther,AFacet>(*this);
+                } else {
+                    // return type has known data
+                    return obj<AOther,DRepr>(this->data());
+                }
             } else {
-                // return type has known data
-                return obj<AOther,DRepr>(this->data());
+                return obj<AOther,DRepr>();
+            }
+        }
+
+        // Deferred definitioon of obj<AFacet,DRepr>::to_facet(),
+        // since implementation requires FacetRegistry
+        //
+        template <typename AFacet, typename DRepr>
+        template <typename AOther>
+        obj<AOther,DRepr>
+        obj<AFacet,DRepr>::try_to_facet() noexcept
+        {
+            if (this->data()) {
+                if constexpr (std::is_same_v<DRepr, DVariantPlaceholder>) {
+                    // return type has type-erased data
+                    return FacetRegistry::instance().try_variant<AOther,AFacet>(*this);
+                } else {
+                    // return type has known data
+                    return obj<AOther,DRepr>(this->data());
+                }
+            } else {
+                return obj<AOther,DRepr>();
             }
         }
 

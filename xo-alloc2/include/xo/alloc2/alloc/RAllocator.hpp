@@ -36,6 +36,19 @@ namespace xo {
                 return O::iface()->alloc(O::data(), typeseq::id<T>(), sizeof(T));
             }
 
+            template <typename T>
+            T * std_copy_for(const T * src) noexcept {
+                // TODO: fix alloc_copy(), should take const std::byte *
+
+                T * copy = (T *)O::iface()->alloc_copy(O::data(), (std::byte*)const_cast<T *>(src));
+
+                if (copy) {
+                    *copy = *src;
+                }
+
+                return copy;
+            }
+
             typeseq       _typeseq() const noexcept { return O::iface()->_typeseq(); }
             void             _drop() const noexcept { O::iface()->_drop(O::data()); }
             std::string_view  name() const noexcept { return O::iface()->name(O::data()); }
