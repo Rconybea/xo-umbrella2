@@ -22,6 +22,12 @@ namespace xo {
              **/
             static DPrimitive_gco_2_gco_gco s_mul_gco_gco_pm;
 
+            /** polymorphic equality comparison
+             *
+             *  TODO: this will want to move to x-numeric/
+             **/
+            static DPrimitive_gco_2_gco_gco s_equal_gco_gco_pm;
+
 #ifdef NOT_YET
             static Primitive_f64_1_f64 s_neg_f64_pm;
 

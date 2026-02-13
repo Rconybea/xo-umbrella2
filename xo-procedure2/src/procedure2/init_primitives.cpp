@@ -5,10 +5,11 @@
 
 #include "init_primitives.hpp"
 #include "DPrimitive.hpp"
-#include <xo/object2/DFloat.hpp>
-#include <xo/object2/number/IGCObject_DFloat.hpp>
-#include <xo/object2/DInteger.hpp>
-#include <xo/object2/number/IGCObject_DInteger.hpp>
+#include <xo/object2/Float.hpp>
+//#include <xo/object2/number/IGCObject_DFloat.hpp>
+#include <xo/object2/Integer.hpp>
+//#include <xo/object2/number/IGCObject_DInteger.hpp>
+#include <xo/object2/Boolean.hpp>
 #include <xo/gc/GCObjectConversion.hpp>
 #include <xo/object2/number/GCObjectConversion_DFloat.hpp>
 #include <xo/object2/number/GCObjectConversion_DInteger.hpp>
@@ -54,9 +55,6 @@ namespace xo {
             // 2. at that point will require polymorphic dispatch
             //    on argument representations, analogous to dispatch
             //    in FacetRegistry
-            // 3. Need concept of a 'runtime context'.
-            //    This will need to be part of the AProcedure api
-            //    e.g. passed to apply_nocheck
 
             typeseq x_tseq = x_gco._typeseq();
             typeseq y_tseq = y_gco._typeseq();
@@ -94,6 +92,65 @@ namespace xo {
                 }
             }
 
+            // here: error
+            throw std::runtime_error(tostr("mul_gco_gco: unexpected argument types xt,yt",
+                                           xtag("x.tseq", x_tseq),
+                                           xtag("y.tseq", y_tseq)));
+            return obj<AGCObject>();
+        }
+
+        obj<AGCObject>
+        equal_gco_gco(obj<ARuntimeContext> rcx,
+                      obj<AGCObject> x_gco,
+                      obj<AGCObject> y_gco)
+        {
+            using xo::reflect::typeseq;
+
+            obj<AAllocator> mm = rcx.allocator();
+
+            // PLACEHOLDER
+
+            // TODO
+            // 1. move this to xo-numeric2/ when available
+            // 2. at that point will require polymorphic dispatch on argument representations.
+            // 
+
+            typeseq x_tseq = x_gco._typeseq();
+            typeseq y_tseq = y_gco._typeseq();
+
+            // FOR NOW: just test runtime values
+            //
+            if (x_tseq == typeseq::id<DInteger>()) {
+                // i64 * ..
+                long   x = GCObjectConversion<long>::from_gco(mm, x_gco);
+
+                if (y_tseq == typeseq::id<DInteger>()) {
+                    // i64 == i64
+                    long   y = GCObjectConversion<long>::from_gco(mm, y_gco);
+
+                    return DBoolean::box<AGCObject>(mm, x == y);
+                } else if (y_tseq == typeseq::id<DFloat>()) {
+                    // i64 == f64
+                    double y = GCObjectConversion<double>::from_gco(mm, y_gco);
+
+                    return DFloat::box<AGCObject>(mm, static_cast<double>(x) == y);
+                }
+            } else if (x_tseq == typeseq::id<DFloat>()) {
+                if (y_tseq == typeseq::id<DInteger>()) {
+                    // f64 == i64.
+                    double x = GCObjectConversion<double>::from_gco(mm, x_gco);
+                    long   y = GCObjectConversion<long>::from_gco(mm, y_gco);
+
+                    return DFloat::box<AGCObject>(mm, x == static_cast<double>(y));
+                } else if (y_tseq == typeseq::id<DFloat>()) {
+                    // f64 * f64.
+                    double x = GCObjectConversion<double>::from_gco(mm, x_gco);
+                    double y = GCObjectConversion<double>::from_gco(mm, y_gco);
+
+                    return DFloat::box<AGCObject>(mm, x == y);
+                }
+            }
+            
             // here: error
             throw std::runtime_error(tostr("mul_gco_gco: unexpected argument types xt,yt",
                                            xtag("x.tseq", x_tseq),
@@ -140,6 +197,9 @@ namespace xo {
 
         DPrimitive_gco_2_gco_gco
         Primitives::s_mul_gco_gco_pm("_mul", &mul_gco_gco);
+
+        DPrimitive_gco_2_gco_gco
+        Primitives::s_equal_gco_gco_pm("_equal", &equal_gco_gco);
 
 #ifdef NOT_YET
         Primitive_f64_1_f64
