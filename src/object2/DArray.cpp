@@ -37,6 +37,23 @@ namespace xo {
             return result;
         }
 
+        DArray *
+        DArray::copy(obj<AAllocator> mm,
+                     DArray * src,
+                     size_type new_cap)
+        {
+            DArray * dest = empty(mm, new_cap);
+
+            /** could just memcpy here **/
+            for (size_type i = 0, n = src->size(); i < n; ++i) {
+                dest->elts_[i] = src->elts_[i];
+            }
+
+            dest->size_ = src->size();
+
+            return dest;
+        }
+
         obj<AGCObject>
         DArray::at(size_type ix) const
         {

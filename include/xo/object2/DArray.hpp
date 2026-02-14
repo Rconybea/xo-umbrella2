@@ -58,6 +58,13 @@ namespace xo {
             static DArray * empty(obj<AAllocator> mm,
                                   size_type cap);
 
+            /** create copy of @p src using memory from @p mm
+             *  with capacity for @p new_cap elements
+             **/
+            static DArray * copy(obj<AAllocator> mm,
+                                 DArray * src,
+                                 size_type new_cap);
+
             /** create array containing elements @p args, using memory from @p mm.
              *  Nullptr if space exhausted.
              *
