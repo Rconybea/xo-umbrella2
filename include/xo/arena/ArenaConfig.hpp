@@ -18,6 +18,9 @@ namespace xo {
          **/
         struct ArenaConfig {
             /** @defgroup mm-arenaconfig-ctors **/
+            ///@{
+
+            /** NOTE: not providing explicit ctors so we can use designated initializers **/
 
             ArenaConfig with_name(std::string name) const {
                 ArenaConfig copy(*this);
@@ -37,6 +40,7 @@ namespace xo {
                 return copy;
             }
 
+            ///@}
             /** @defgroup mm-arenaconfig-instance-vars ArenaConfig members **/
             ///@{
 
