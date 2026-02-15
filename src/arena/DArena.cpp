@@ -65,6 +65,11 @@ namespace xo {
             return DArena(cfg, page_z, align_z, span.lo(), span.hi());
         } /*map*/
 
+        DArena::DArena(const ArenaConfig & cfg)
+        {
+            *this = std::move(map(cfg));
+        }
+
         DArena::DArena(const ArenaConfig & cfg,
                        size_type page_z,
                        size_type arena_align_z,
