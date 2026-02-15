@@ -33,7 +33,7 @@ namespace xo {
                      obj<AGCObject> car,
                      DList * cdr)
         {
-            void * mem = mm.alloc(typeseq::id<DList>(), sizeof(DList));
+            void * mem = mm.alloc_for<DList>();
 
             return new (mem) DList(car, cdr);
         }
@@ -159,12 +159,7 @@ namespace xo {
         DList *
         DList::shallow_copy(obj<AAllocator> mm) const noexcept
         {
-            DList * copy = (DList *)mm.alloc_copy((std::byte *)this);
-
-            if (copy)
-                *copy = *this;
-
-            return copy;
+            return mm.std_copy_for(this);
         }
 
         auto
