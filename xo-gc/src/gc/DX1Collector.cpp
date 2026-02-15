@@ -26,26 +26,20 @@ namespace xo {
     namespace mm {
 
         X1CollectorConfig
+        X1CollectorConfig::with_name(std::string name)
+        {
+            X1CollectorConfig copy = *this;
+            copy.name_ = std::move(name);
+            return copy;
+        }
+
+        X1CollectorConfig
         X1CollectorConfig::with_size(std::size_t gen_z)
         {
             X1CollectorConfig copy = *this;
             copy.arena_config_ = arena_config_.with_size(gen_z);
             return copy;
         }
-
-#ifdef NOT_USING
-        constexpr std::uint64_t
-        X1CollectorConfig::gen_mult() const {
-            return 1ul << arena_config_.header_size_bits_;
-        }
-#endif
-
-#ifdef NOT_USING
-        constexpr std::uint64_t
-        X1CollectorConfig::tseq_mult() const {
-            return 1ul << (gen_bits_ + arena_config_.header_size_bits_);
-        }
-#endif
 
         // ----- GCRunState -----
 

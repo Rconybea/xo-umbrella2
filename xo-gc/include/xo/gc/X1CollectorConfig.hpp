@@ -17,7 +17,12 @@ namespace xo {
             using size_type = std::size_t;
 
             /** copy of this config,
-             *  with @c arena_config_.size_ set to @p gen_z
+             *  but with @ref name_ set to @p name
+             **/
+            X1CollectorConfig with_name(std::string name);
+
+            /** copy of this config,
+             *  but with @c arena_config_.size_ set to @p gen_z
              **/
             X1CollectorConfig with_size(std::size_t gen_z);
 
