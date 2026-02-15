@@ -32,8 +32,8 @@ namespace xo {
             : Object(iface, data) {}
 
             template <typename T>
-            void * alloc_for() noexcept {
-                return O::iface()->alloc(O::data(), typeseq::id<T>(), sizeof(T));
+            void * alloc_for(size_type n = sizeof(T)) noexcept {
+                return O::iface()->alloc(O::data(), typeseq::id<T>(), n);
             }
 
             template <typename T>
