@@ -37,10 +37,15 @@ namespace xo {
             }
 
             template <typename T>
+            void * alloc_copy_for(const T * src) noexcept {
+                return O::iface()->alloc_copy(O::data(), (std::byte*)const_cast<T *>(src));
+            }
+
+            template <typename T>
             T * std_copy_for(const T * src) noexcept {
                 // TODO: fix alloc_copy(), should take const std::byte *
 
-                T * copy = (T *)O::iface()->alloc_copy(O::data(), (std::byte*)const_cast<T *>(src));
+                T * copy = (T *)(this->alloc_copy_for(src));
 
                 if (copy) {
                     *copy = *src;
