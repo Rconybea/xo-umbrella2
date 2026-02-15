@@ -61,6 +61,8 @@ namespace xo {
             dp<DRepr> & operator=(dp<DRepr> && x) {
                 ptr_ = x.ptr_;
                 x.ptr_ = nullptr;
+
+                return *this;
             }
 
             // --------------------------------
