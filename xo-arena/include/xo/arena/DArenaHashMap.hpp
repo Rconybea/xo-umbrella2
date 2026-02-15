@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "ArenaHashMapConfig.hpp"
 #include "DArenaVector.hpp"
 #include "hashmap/verify_policy.hpp"
 #include "hashmap/HashMapStore.hpp"
@@ -57,6 +58,7 @@ namespace xo {
 
         public:
             /** create hash map **/
+            DArenaHashMap(const ArenaHashMapConfig & cfg);
             DArenaHashMap(const std::string & name,
                           size_type hint_max_capacity,
                           bool debug_flag = false);
@@ -198,6 +200,12 @@ namespace xo {
             /** true to enable debug logging **/
             bool debug_flag_ = false;
         };
+
+        template <typename Key, typename Value, typename Hash, typename Equal>
+        DArenaHashMap<Key, Value, Hash, Equal>::DArenaHashMap(const ArenaHashMapConfig & cfg)
+        : DArenaHashMap(cfg.name_, Hash(), Equal(), cfg.hint_max_capacity_, cfg.debug_flag_)
+        {
+        }
 
         template <typename Key, typename Value, typename Hash, typename Equal>
         DArenaHashMap<Key, Value, Hash, Equal>::DArenaHashMap(const std::string & name,
