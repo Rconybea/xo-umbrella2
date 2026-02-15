@@ -80,7 +80,9 @@ namespace xo {
 
             /** null ctor **/
             DArena() = default;
-            /** ctor from already-mapped (but not committed) address range **/
+            /** create arena from @p cfg. Will reserve memory for allocation **/
+            DArena(const ArenaConfig & cfg);
+            /** ctor from already-mapped (but not committed) address range [lo,hi] **/
             DArena(const ArenaConfig & cfg,
                    size_type page_z,
                    size_type arena_align_z,
