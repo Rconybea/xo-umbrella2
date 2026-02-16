@@ -7,4 +7,5 @@ xo_install_include_tree3(include/xo/cxxutil)
 # NOTE:
 # dependency set here must be kept consistent with refcnt/cmake/refcntConfig.cmake.in
 #
+xo_dependency(${SELF_LIB} xo_reflectutil)
 xo_dependency(${SELF_LIB} indentlog)
