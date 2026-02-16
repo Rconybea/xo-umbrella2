@@ -6,22 +6,29 @@
 #include "object2_register_facets.hpp"
 #include "RuntimeError.hpp"
 
-#include <xo/object2/array/IGCObject_DArray.hpp>
-#include <xo/object2/list/IGCObject_DList.hpp>
-#include <xo/object2/boolean/IGCObject_DBoolean.hpp>
-#include <xo/object2/number/IGCObject_DFloat.hpp>
-#include <xo/object2/number/IGCObject_DInteger.hpp>
-#include <xo/object2/string/IGCObject_DString.hpp>
+#include <xo/object2/Array.hpp>
+//#include <xo/object2/List.hpp>
+#include <xo/object2/Boolean.hpp>
+#include <xo/object2/Integer.hpp>
+#include <xo/object2/Float.hpp>
+#include <xo/object2/String.hpp>
 
-#include <xo/object2/array/IPrintable_DArray.hpp>
+//#include <xo/object2/array/IGCObject_DArray.hpp>
+#include <xo/object2/list/IGCObject_DList.hpp>
+//#include <xo/object2/boolean/IGCObject_DBoolean.hpp>
+//#include <xo/object2/number/IGCObject_DFloat.hpp>
+//#include <xo/object2/number/IGCObject_DInteger.hpp>
+//#include <xo/object2/string/IGCObject_DString.hpp>
+
+//#include <xo/object2/array/IPrintable_DArray.hpp>
 #include <xo/object2/list/IPrintable_DList.hpp>
-#include <xo/object2/boolean/IPrintable_DBoolean.hpp>
-#include <xo/object2/number/IPrintable_DFloat.hpp>
-#include <xo/object2/number/IPrintable_DInteger.hpp>
-#include <xo/object2/string/IPrintable_DString.hpp>
+//#include <xo/object2/boolean/IPrintable_DBoolean.hpp>
+//#include <xo/object2/number/IPrintable_DFloat.hpp>
+//#include <xo/object2/number/IPrintable_DInteger.hpp>
+//#include <xo/object2/string/IPrintable_DString.hpp>
 
 #include <xo/object2/list/ISequence_DList.hpp>
-#include <xo/object2/array/ISequence_DArray.hpp>
+//#include <xo/object2/array/ISequence_DArray.hpp>
 
 #include <xo/printable2/detail/APrintable.hpp>
 #include <xo/alloc2/alloc/AAllocator.hpp>

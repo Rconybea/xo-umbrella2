@@ -7,6 +7,7 @@
 #include "object2_register_facets.hpp"
 #include "object2_register_types.hpp"
 #include <xo/gc/CollectorTypeRegistry.hpp>
+#include <xo/alloc2/init_alloc2.hpp>
 
 namespace xo {
     using xo::scm::object2_register_facets;
@@ -27,7 +28,7 @@ namespace xo {
             InitEvidence retval;
 
             /* direct subsystem deps for xo-object2/ */
-            // retval ^= InitSubsys<S_somedep_tag>::require();
+            retval ^= InitSubsys<S_alloc2_tag>::require();
 
             /* xo-expression2/'s own initialization code */
             retval ^= Subsystem::provide<S_object2_tag>("object2", &init);
