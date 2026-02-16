@@ -27,7 +27,6 @@ xo_add_genfacet(
     INPUT idl/Procedure.json5
     OUTPUT_HPP_DIR include/xo/procedure2
     OUTPUT_IMPL_SUBDIR detail
-    OUTPUT_CPP_DIR src/procedure2
     )
 
 # note: manual target; generated code committed to git
@@ -37,7 +36,6 @@ xo_add_genfacet(
     INPUT idl/RuntimeContext.json5
     OUTPUT_HPP_DIR include/xo/procedure2
     OUTPUT_IMPL_SUBDIR detail
-    OUTPUT_CPP_DIR src/procedure2
     )
 
 # ----------------------------------------------------------------
@@ -50,7 +48,6 @@ xo_add_genfacetimpl(
     INPUT idl/IRuntimeContext_DSimpleRcx.json5
     OUTPUT_HPP_DIR include/xo/procedure2
     OUTPUT_IMPL_SUBDIR detail
-    OUTPUT_CPP_DIR src/procedure2
     )
 
 # ----------------------------------------------------------------
@@ -64,7 +61,6 @@ xo_add_genfacetimpl(
     INPUT idl/IProcedure_DPrimitive_gco_2_gco_gco.json5
     OUTPUT_HPP_DIR include/xo/procedure2
     OUTPUT_IMPL_SUBDIR detail
-    OUTPUT_CPP_DIR src/procedure2
 )
 
 # note: manual target; generated code committed to git
@@ -76,7 +72,6 @@ xo_add_genfacetimpl(
     INPUT idl/IGCObject_DPrimitive_gco_2_gco_gco.json5
     OUTPUT_HPP_DIR include/xo/procedure2
     OUTPUT_IMPL_SUBDIR detail
-    OUTPUT_CPP_DIR src/procedure2
 )
 
 # note: manual target; generated code committed to git
@@ -88,7 +83,6 @@ xo_add_genfacetimpl(
     INPUT idl/IPrintable_DPrimitive_gco_2_gco_gco.json5
     OUTPUT_HPP_DIR include/xo/procedure2
     OUTPUT_IMPL_SUBDIR detail
-    OUTPUT_CPP_DIR src/procedure2
 )
 
 xo_add_genfacet_all(xo-procedure2-genfacet-all)
