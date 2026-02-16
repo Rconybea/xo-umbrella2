@@ -147,7 +147,7 @@ namespace xo {
             REQUIRE(arena.allocated() == 0);
 
             size_t z0 = 1;
-            byte * m0 = arena.alloc(typeseq::anon(), 1);
+            byte * m0 = arena.alloc(typeseq::sentinel(), 1);
 
             REQUIRE(m0);
             REQUIRE(arena.last_error().error_ == error::ok);
@@ -159,7 +159,7 @@ namespace xo {
             REQUIRE(arena.committed() <= arena.reserved());
 
             size_t z1 = 16;
-            byte * m1 = arena.alloc(typeseq::anon(), z1);
+            byte * m1 = arena.alloc(typeseq::sentinel(), z1);
 
             REQUIRE(m1);
             REQUIRE(arena.last_error().error_ == error::ok);
@@ -195,7 +195,7 @@ namespace xo {
             REQUIRE(arena.allocated() == 0);
 
             size_t z0 = 1;
-            byte * m0 = arena.alloc(typeseq::anon(), 1);
+            byte * m0 = arena.alloc(typeseq::sentinel(), 1);
 
             REQUIRE(m0);
 
