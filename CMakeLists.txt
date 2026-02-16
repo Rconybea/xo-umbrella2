@@ -25,7 +25,6 @@ xo_add_genfacet(
     INPUT idl/GCObject.json5
     OUTPUT_HPP_DIR include/xo/gc
     OUTPUT_IMPL_SUBDIR detail
-    OUTPUT_CPP_DIR src/gc
 )
 
 # ----------------------------------------------------------------

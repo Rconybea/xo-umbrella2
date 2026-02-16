@@ -2,7 +2,7 @@
  *
  *  Generated automagically from ingredients:
  *  1. code generator:
- *       [/Users/roland/proj/xo-umbrella2/xo-facet/codegen/genfacet]
+ *       [xo-facet/codegen/genfacet]
  *     arguments:
  *       --input [idl/GCObject.json5]
  *  2. jinja2 template for abstract facet .hpp file:
@@ -48,8 +48,13 @@ public:
     /** @defgroup mm-gcobject-router-methods **/
     ///@{
 
-    // const methods
+    // explicit injected content
+
+    // builtin methods
     typeseq _typeseq() const noexcept { return O::iface()->_typeseq(); }
+    void _drop() const noexcept { O::iface()->_drop(O::data()); }
+
+    // const methods
     size_type shallow_size()  const  noexcept {
         return O::iface()->shallow_size(O::data());
     }
