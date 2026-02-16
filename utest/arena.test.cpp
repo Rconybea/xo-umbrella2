@@ -159,7 +159,7 @@ namespace xo {
             REQUIRE(a1o.allocated() == 0);
 
             size_t z0 = 1;
-            byte * m0 = a1o.alloc(typeseq::anon(), 1);
+            byte * m0 = a1o.alloc(typeseq::sentinel(), 1);
 
             REQUIRE(m0);
             REQUIRE(a1o.last_error().error_ == error::ok);
@@ -171,7 +171,7 @@ namespace xo {
             REQUIRE(a1o.committed() <= a1o.reserved());
 
             size_t z1 = 16;
-            byte * m1 = a1o.alloc(typeseq::anon(), z1);
+            byte * m1 = a1o.alloc(typeseq::sentinel(), z1);
 
             REQUIRE(m1);
             REQUIRE(a1o.last_error().error_ == error::ok);
@@ -209,7 +209,7 @@ namespace xo {
             REQUIRE(a1o.allocated() == 0);
 
             size_t z0 = 1;
-            byte * m0 = a1o.alloc(typeseq::anon(), 1);
+            byte * m0 = a1o.alloc(typeseq::sentinel(), 1);
 
             REQUIRE(m0);
 
@@ -253,7 +253,7 @@ namespace xo {
             REQUIRE(a1o.allocated() == 0);
 
             size_t z0 = 1;
-            byte * m0 = a1o.alloc(typeseq::anon(), 1);
+            byte * m0 = a1o.alloc(typeseq::sentinel(), 1);
 
             REQUIRE(m0);
 
@@ -306,7 +306,7 @@ namespace xo {
             REQUIRE(a1o.allocated() == 0);
 
             size_t z0 = cfg.hugepage_z_ + 1;
-            byte * m0 = a1o.alloc(typeseq::anon(), z0);
+            byte * m0 = a1o.alloc(typeseq::sentinel(), z0);
 
             REQUIRE(!m0);
 
