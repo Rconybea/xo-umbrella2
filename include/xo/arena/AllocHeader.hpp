@@ -11,6 +11,13 @@
 
 namespace xo {
     namespace mm {
+        /** @brief per-alloc header
+         *
+         *  Appears immediately before each allocation when
+         *  ArenaConfig.store_header_flag_ is set.
+         *
+         *  See AllocInfo.hpp for encoding of @ref repr_
+         **/
         struct AllocHeader {
             using repr_type = std::uintptr_t;
             using size_type = std::size_t;
