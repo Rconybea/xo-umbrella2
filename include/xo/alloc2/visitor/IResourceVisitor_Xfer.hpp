@@ -39,8 +39,11 @@ namespace mm {
 
         // from AResourceVisitor
 
-        // const methods
+        // builtin methods
         typeseq _typeseq() const noexcept override { return s_typeseq; }
+        void _drop(Opaque d) const noexcept override { _dcast(d).~DRepr(); }
+
+        // const methods
         void on_allocator(Copaque data, obj<AAllocator> mm)  const  noexcept override {
             return I::on_allocator(_dcast(data), mm);
         }
