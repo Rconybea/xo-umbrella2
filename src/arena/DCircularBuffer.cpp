@@ -86,7 +86,8 @@ namespace xo {
                                    occupied_range_.size() /*used*/,
                                    occupied_range_.size(),
                                    mapped_range_.size(),
-                                   reserved_range_.size()));
+                                   reserved_range_.size(),
+                                   nullptr /*detail*/));
 
             pinned_spans_.visit_pools(visitor);
         }
