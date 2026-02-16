@@ -46,6 +46,8 @@ public:
     /** @defgroup scm-procedure-router-methods **/
     ///@{
 
+    // explicit injected content
+
     // builtin methods
     typeseq _typeseq() const noexcept { return O::iface()->_typeseq(); }
     void _drop() const noexcept { O::iface()->_drop(O::data()); }
