@@ -110,7 +110,7 @@ namespace xo {
             REQUIRE(a1o.allocated() == 0);
 
             size_t req_z = 13;
-            byte * mem = gc.alloc(typeseq::anon(), req_z);
+            byte * mem = gc.alloc(typeseq::sentinel(), req_z);
 
             REQUIRE(mem != nullptr);
 

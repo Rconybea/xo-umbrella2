@@ -279,7 +279,7 @@ namespace xo {
         DX1Collector::add_gc_root_poly(obj<AGCObject> * p_root) noexcept
         {
             std::byte * mem
-                = roots_.alloc(typeseq::anon(),
+                = roots_.alloc(typeseq::sentinel(),
                                sizeof(obj<AGCObject>*));
             assert(mem);
 
