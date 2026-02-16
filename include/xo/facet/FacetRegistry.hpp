@@ -7,8 +7,9 @@
 
 #pragma once
 
+#include "TypeRegistry.hpp"
 #include "facet_implementation.hpp"
-#include "typeseq.hpp"
+//#include "typeseq.hpp"
 #include "obj.hpp"
 #include <xo/arena/DArenaHashMap.hpp>
 #include <xo/indentlog/scope.hpp>
@@ -73,6 +74,9 @@ namespace xo {
             template <typename AFacet, typename DRepr>
             static void register_impl() {
                 static FacetImplType<AFacet, DRepr> impl;
+
+                TypeRegistry::register_type<AFacet>();
+                TypeRegistry::register_type<DRepr>();
 
                 instance()._register_impl(typeseq::id<AFacet>(),
                                           typeseq::id<DRepr>(),
