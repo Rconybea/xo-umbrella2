@@ -1,5 +1,6 @@
 {
     mode: "implementation",
+    output_cpp_dir: "src/procedure2",
     includes: [
         //<xo/procedure2/GCObjectConversion_DPrimitive_gco_2_gco_gco.hpp>
         "<xo/gc/GCObject.hpp>",

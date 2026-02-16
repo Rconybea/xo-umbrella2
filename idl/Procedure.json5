@@ -4,6 +4,7 @@
 
 {
     mode: "facet",
+    output_cpp_dir: "src/procedure2",
     // includes in ASyntaxStateMachine.hpp
     includes: [
         "\"RuntimeContext.hpp\"",
