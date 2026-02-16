@@ -176,11 +176,43 @@ namespace xo {
              *  must assume it's all used
              **/
 
+            // assemble histogram
+            MemorySizeInfo::DetailArrayType detail_v;
+            MemorySizeInfo::DetailArrayType * p_detail = nullptr;
+
+            if (config_.store_header_flag_) {
+                p_detail = &detail_v;
+
+                for (const auto & ix : *this) {
+                    typeseq ix_tseq(ix.tseq());
+
+                    // totals in detail_v[0]
+                    MemorySizeDetail & d = detail_v[0];
+                    ++d.n_alloc_;
+                    d.z_alloc_ += ix.size();
+
+                    // O(n) insertion here
+                    for (size_t i = 1; i < detail_v.size(); ++i) {
+                        if (detail_v[i].tseq_.is_sentinel()
+                            || (detail_v[i].tseq_ == ix_tseq))
+                        {
+                            MemorySizeDetail & d = detail_v[i];
+
+                            d.tseq_ = ix_tseq;
+                            ++d.n_alloc_;
+                            d.z_alloc_ += ix.size();
+                            break;
+                        }
+                    }
+                }
+            }
+
             fn(MemorySizeInfo(config_.name_,
                               this->allocated() /*used*/,
                               this->allocated(),
                               this->committed(),
-                              this->reserved()));
+                              this->reserved(),
+                              p_detail));
         }
 
         AllocInfo

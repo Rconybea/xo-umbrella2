@@ -53,12 +53,12 @@ namespace xo {
                 instance()._register_type(r);
             }
 
-            /** Number of registered (facet, repr) pairs **/
-            std::size_t size() const { return registry_.size(); }
-
-            std::string_view id2name(typeseq id) const noexcept {
+            static std::string_view id2name(typeseq id) noexcept {
                 return instance()._id2name(id);
             }
+
+            /** Number of registered (facet, repr) pairs **/
+            std::size_t size() const { return registry_.size(); }
 
             /** visit memory pools owned by facet registry **/
             void visit_pools(const MemorySizeVisitor & visitor) {
