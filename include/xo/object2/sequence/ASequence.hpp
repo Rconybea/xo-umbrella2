@@ -2,7 +2,7 @@
  *
  *  Generated automagically from ingredients:
  *  1. code generator:
- *       [/home/roland/proj/xo-umbrella2-claude1/xo-facet/codegen/genfacet]
+ *       [xo-facet/codegen/genfacet]
  *     arguments:
  *       --input [idl/Sequence.json5]
  *  2. jinja2 template for abstract facet .hpp file:
@@ -51,6 +51,8 @@ public:
     // const methods
     /** RTTI: unique id# for actual runtime data representation **/
     virtual typeseq _typeseq() const noexcept = 0;
+    /** destroy instance @p d; calls c++ dtor only for actual runtime type; does not recover memory **/
+    virtual void _drop(Opaque d) const noexcept = 0;
     /** true iff sequence is empty **/
     virtual bool is_empty(Copaque data)  const  noexcept = 0;
     /** true iff sequence is finite **/

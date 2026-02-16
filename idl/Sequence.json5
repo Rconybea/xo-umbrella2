@@ -1,5 +1,6 @@
 {
     mode: "facet",
+    output_cpp_dir: "src/object2",
     includes: ["<xo/gc/GCObject.hpp>"],
     // extra includes in Sequence.hpp, if any
     user_hpp_includes: [],
@@ -67,4 +68,5 @@
     ],
     nonconst_methods: [
     ],
+    router_facet_explicit_content: []
 }
