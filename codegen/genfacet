@@ -458,7 +458,7 @@ def main():
     # --output-impl-hpp: putting this in .json5, will be able to drop this.
     parser.add_argument('--output-impl-hpp', required=True, help='.hpp detail subdir')
     parser.add_argument('--output-hpp', required=True, help='.hpp output directory')
-    parser.add_argument('--output-cpp', required=True, help='.cpp output directory')
+    parser.add_argument('--output-cpp', required=False, help='.cpp output directory')
 
     args = parser.parse_args()
 
@@ -473,7 +473,12 @@ def main():
     output_impl_hpp_dir = Path(args.output_hpp) / output_impl_hpp_subdir
     output_impl_hpp_dir.mkdir(parents=False, exist_ok=True)
 
-    output_cpp_dir = Path(args.output_cpp)
+    if 'output_cpp_dir' in idl:
+        output_cpp_dir = Path(idl['output_cpp_dir'])
+    elif args.output_cpp:
+        output_cpp_dir = Path(args.output_cpp)
+    else:
+        parser.error("--output-cpp required when .json5 lacks output_cpp_dir")
     output_cpp_dir.mkdir(parents=False, exist_ok=True)
 
     # setup jinja2
