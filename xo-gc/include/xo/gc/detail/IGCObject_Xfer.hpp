@@ -2,7 +2,7 @@
  *
  *  Generated automagically from ingredients:
  *  1. code generator:
- *       [/Users/roland/proj/xo-umbrella2/xo-facet/codegen/genfacet]
+ *       [xo-facet/codegen/genfacet]
  *     arguments:
  *       --input [idl/GCObject.json5]
  *  2. jinja2 template for abstract facet .hpp file:
@@ -44,8 +44,11 @@ namespace mm {
 
         // from AGCObject
 
-        // const methods
+        // builtin methods
         typeseq _typeseq() const noexcept override { return s_typeseq; }
+        void _drop(Opaque d) const noexcept override { _dcast(d).~DRepr(); }
+
+        // const methods
         size_type shallow_size(Copaque data)  const  noexcept override {
             return I::shallow_size(_dcast(data));
         }

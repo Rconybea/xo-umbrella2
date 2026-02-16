@@ -2,7 +2,7 @@
  *
  *  Generated automagically from ingredients:
  *  1. code generator:
- *       [/Users/roland/proj/xo-umbrella2/xo-facet/codegen/genfacet]
+ *       [xo-facet/codegen/genfacet]
  *     arguments:
  *       --input [idl/GCObject.json5]
  *  2. jinja2 template for facet .hpp file:
@@ -45,4 +45,3 @@ namespace xo {
 }
 
 /* end GCObject.hpp */
-

@@ -54,8 +54,11 @@ namespace mm {
 
         // from AResourceVisitor
 
-        // const methods
+        // builtin methods
         typeseq _typeseq() const noexcept override { return s_typeseq; }
+        [[noreturn]] void _drop(Opaque) const noexcept override { _fatal(); }
+
+        // const methods
         [[noreturn]] void on_allocator(Copaque, obj<AAllocator>)  const  noexcept override { _fatal(); }
 
         // nonconst methods

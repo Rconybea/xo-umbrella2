@@ -46,8 +46,13 @@ public:
     /** @defgroup mm-resourcevisitor-router-methods **/
     ///@{
 
-    // const methods
+    // explicit injected content
+
+    // builtin methods
     typeseq _typeseq() const noexcept { return O::iface()->_typeseq(); }
+    void _drop() const noexcept { O::iface()->_drop(O::data()); }
+
+    // const methods
     void on_allocator(obj<AAllocator> mm)  const  noexcept {
         return O::iface()->on_allocator(O::data(), mm);
     }

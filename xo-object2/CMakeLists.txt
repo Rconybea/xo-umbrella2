@@ -25,7 +25,6 @@ xo_add_genfacet(
     INPUT idl/Sequence.json5
     OUTPUT_HPP_DIR include/xo/object2
     OUTPUT_IMPL_SUBDIR sequence
-    OUTPUT_CPP_DIR src/object2
 )
 
 # ----------------------------------------------------------------
@@ -39,7 +38,6 @@ xo_add_genfacetimpl(
     INPUT idl/ISequence_DList.json5
     OUTPUT_HPP_DIR include/xo/object2
     OUTPUT_IMPL_SUBDIR list
-    OUTPUT_CPP_DIR src/object2
 )
 
 # note: manual target; generated code committed to git
@@ -51,7 +49,6 @@ xo_add_genfacetimpl(
     INPUT idl/IPrintable_DList.json5
     OUTPUT_HPP_DIR include/xo/object2
     OUTPUT_IMPL_SUBDIR list
-    OUTPUT_CPP_DIR src/object2
 )
 
 # note: manual target; generated code committed to git
@@ -63,7 +60,6 @@ xo_add_genfacetimpl(
     INPUT idl/IGCObject_DList.json5
     OUTPUT_HPP_DIR include/xo/object2
     OUTPUT_IMPL_SUBDIR list
-    OUTPUT_CPP_DIR src/object2
 )
 
 # ----------------------------------------------------------------
@@ -77,7 +73,6 @@ xo_add_genfacetimpl(
     INPUT idl/IPrintable_DBoolean.json5
     OUTPUT_HPP_DIR include/xo/object2
     OUTPUT_IMPL_SUBDIR boolean
-    OUTPUT_CPP_DIR src/object2
 )
 
 # note: manual target; generated code committed to git
@@ -89,7 +84,6 @@ xo_add_genfacetimpl(
     INPUT idl/IGCObject_DBoolean.json5
     OUTPUT_HPP_DIR include/xo/object2
     OUTPUT_IMPL_SUBDIR boolean
-    OUTPUT_CPP_DIR src/object2
 )
 
 # ----------------------------------------------------------------
@@ -103,7 +97,6 @@ xo_add_genfacetimpl(
     INPUT idl/IPrintable_DFloat.json5
     OUTPUT_HPP_DIR include/xo/object2
     OUTPUT_IMPL_SUBDIR number
-    OUTPUT_CPP_DIR src/object2
 )
 
 # note: manual target; generated code committed to git
@@ -115,7 +108,6 @@ xo_add_genfacetimpl(
     INPUT idl/IGCObject_DFloat.json5
     OUTPUT_HPP_DIR include/xo/object2
     OUTPUT_IMPL_SUBDIR number
-    OUTPUT_CPP_DIR src/object2
 )
 
 # ----------------------------------------------------------------
@@ -129,7 +121,6 @@ xo_add_genfacetimpl(
     INPUT idl/IPrintable_DInteger.json5
     OUTPUT_HPP_DIR include/xo/object2
     OUTPUT_IMPL_SUBDIR number
-    OUTPUT_CPP_DIR src/object2
 )
 
 # note: manual target; generated code committed to git
@@ -141,7 +132,6 @@ xo_add_genfacetimpl(
     INPUT idl/IGCObject_DInteger.json5
     OUTPUT_HPP_DIR include/xo/object2
     OUTPUT_IMPL_SUBDIR number
-    OUTPUT_CPP_DIR src/object2
 )
 
 # ----------------------------------------------------------------
@@ -155,7 +145,6 @@ xo_add_genfacetimpl(
     INPUT idl/IPrintable_DString.json5
     OUTPUT_HPP_DIR include/xo/object2
     OUTPUT_IMPL_SUBDIR string
-    OUTPUT_CPP_DIR src/object2
 )
 
 # note: manual target; generated code committed to git
@@ -167,7 +156,6 @@ xo_add_genfacetimpl(
     INPUT idl/IGCObject_DString.json5
     OUTPUT_HPP_DIR include/xo/object2
     OUTPUT_IMPL_SUBDIR string
-    OUTPUT_CPP_DIR src/object2
 )
 
 # ----------------------------------------------------------------
@@ -181,7 +169,6 @@ xo_add_genfacetimpl(
     INPUT idl/ISequence_DArray.json5
     OUTPUT_HPP_DIR include/xo/object2
     OUTPUT_IMPL_SUBDIR array
-    OUTPUT_CPP_DIR src/object2
 )
 
 # note: manual target; generated code committed to git
@@ -193,7 +180,6 @@ xo_add_genfacetimpl(
     INPUT idl/IPrintable_DArray.json5
     OUTPUT_HPP_DIR include/xo/object2
     OUTPUT_IMPL_SUBDIR array
-    OUTPUT_CPP_DIR src/object2
 )
 
 # note: manual target; generated code committed to git
@@ -205,7 +191,6 @@ xo_add_genfacetimpl(
     INPUT idl/IGCObject_DArray.json5
     OUTPUT_HPP_DIR include/xo/object2
     OUTPUT_IMPL_SUBDIR array
-    OUTPUT_CPP_DIR src/object2
 )
 
 # ----------------------------------------------------------------
@@ -219,7 +204,6 @@ xo_add_genfacetimpl(
     INPUT idl/IPrintable_DRuntimeError.json5
     OUTPUT_HPP_DIR include/xo/object2
     OUTPUT_IMPL_SUBDIR error
-    OUTPUT_CPP_DIR src/object2
 )
 
 # note: manual target; generated code committed to git
@@ -231,7 +215,6 @@ xo_add_genfacetimpl(
     INPUT idl/IGCObject_DRuntimeError.json5
     OUTPUT_HPP_DIR include/xo/object2
     OUTPUT_IMPL_SUBDIR error
-    OUTPUT_CPP_DIR src/object2
 )
 
 # ----------------------------------------------------------------

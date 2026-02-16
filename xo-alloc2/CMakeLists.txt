@@ -25,7 +25,6 @@ xo_add_genfacet(
     INPUT idl/ResourceVisitor.json5
     OUTPUT_HPP_DIR include/xo/alloc2
     OUTPUT_IMPL_SUBDIR visitor
-    OUTPUT_CPP_DIR src/alloc2
 )
 
 # ----------------------------------------------------------------

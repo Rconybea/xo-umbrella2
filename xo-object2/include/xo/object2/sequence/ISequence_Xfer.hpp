@@ -2,7 +2,7 @@
  *
  *  Generated automagically from ingredients:
  *  1. code generator:
- *       [/home/roland/proj/xo-umbrella2-claude1/xo-facet/codegen/genfacet]
+ *       [xo-facet/codegen/genfacet]
  *     arguments:
  *       --input [idl/Sequence.json5]
  *  2. jinja2 template for abstract facet .hpp file:
@@ -40,8 +40,11 @@ namespace scm {
 
         // from ASequence
 
-        // const methods
+        // builtin methods
         typeseq _typeseq() const noexcept override { return s_typeseq; }
+        void _drop(Opaque d) const noexcept override { _dcast(d).~DRepr(); }
+
+        // const methods
         bool is_empty(Copaque data)  const  noexcept override {
             return I::is_empty(_dcast(data));
         }
