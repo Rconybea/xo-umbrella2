@@ -67,7 +67,7 @@ namespace xo {
 
         DArena::DArena(const ArenaConfig & cfg)
         {
-            *this = std::move(map(cfg));
+            *this = map(cfg);
         }
 
         DArena::DArena(const ArenaConfig & cfg,
@@ -290,7 +290,7 @@ namespace xo {
                           (complete_flag
                            ? alloc_mode::sub_complete
                            : alloc_mode::sub_incomplete),
-                          typeseq::anon() /*typeseq: ignored*/,
+                          typeseq::sentinel() /*typeseq: ignored*/,
                           0 /*age - ignored */);
         }
 

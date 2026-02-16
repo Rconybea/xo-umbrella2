@@ -67,7 +67,7 @@ namespace utest {
 
             bool ok_flag = true;
 
-            std::byte * mem = mm.alloc(typeseq::anon(), z);
+            std::byte * mem = mm.alloc(typeseq::sentinel(), z);
 
             log && log(xtag("i_alloc", i_alloc),
                        xtag("si", si),

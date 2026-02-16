@@ -16,8 +16,10 @@ namespace xo {
             using size_type = std::size_t;
 
             MemorySizeInfo() = default;
-            MemorySizeInfo(std::string_view name, std::size_t u, std::size_t a, std::size_t c, std::size_t r)
-              : resource_name_{name}, used_{u}, allocated_{a}, committed_{c}, reserved_{r}
+            MemorySizeInfo(std::string_view name,
+                           std::size_t u, std::size_t a, std::size_t c, std::size_t r)
+                : resource_name_{name},
+                  used_{u}, allocated_{a}, committed_{c}, reserved_{r}
             {}
 
             static MemorySizeInfo sentinel() { return MemorySizeInfo(); }
