@@ -1,6 +1,8 @@
 {
     mode: "facet",
     output_cpp_dir: "src/gc",
+    output_hpp_dir: "include/xo/gc",
+    output_impl_subdir: "detail",
     includes: [
         "<xo/alloc2/Allocator.hpp>",
         "<xo/gc/Collector.hpp>",
