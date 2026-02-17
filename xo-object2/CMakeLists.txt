@@ -23,8 +23,6 @@ xo_add_genfacet(
     TARGET xo-object2-facet-sequence
     FACET Sequence
     INPUT idl/Sequence.json5
-    OUTPUT_HPP_DIR include/xo/object2
-    OUTPUT_IMPL_SUBDIR sequence
 )
 
 # ----------------------------------------------------------------
@@ -36,8 +34,6 @@ xo_add_genfacetimpl(
     FACET Sequence
     REPR List
     INPUT idl/ISequence_DList.json5
-    OUTPUT_HPP_DIR include/xo/object2
-    OUTPUT_IMPL_SUBDIR list
 )
 
 # note: manual target; generated code committed to git
@@ -47,8 +43,6 @@ xo_add_genfacetimpl(
     FACET Printable
     REPR List
     INPUT idl/IPrintable_DList.json5
-    OUTPUT_HPP_DIR include/xo/object2
-    OUTPUT_IMPL_SUBDIR list
 )
 
 # note: manual target; generated code committed to git
@@ -58,8 +52,6 @@ xo_add_genfacetimpl(
     FACET GCObject
     REPR List
     INPUT idl/IGCObject_DList.json5
-    OUTPUT_HPP_DIR include/xo/object2
-    OUTPUT_IMPL_SUBDIR list
 )
 
 # ----------------------------------------------------------------
@@ -71,8 +63,6 @@ xo_add_genfacetimpl(
     FACET Printable
     REPR Boolean
     INPUT idl/IPrintable_DBoolean.json5
-    OUTPUT_HPP_DIR include/xo/object2
-    OUTPUT_IMPL_SUBDIR boolean
 )
 
 # note: manual target; generated code committed to git
@@ -82,8 +72,6 @@ xo_add_genfacetimpl(
     FACET GCObject
     REPR Boolean
     INPUT idl/IGCObject_DBoolean.json5
-    OUTPUT_HPP_DIR include/xo/object2
-    OUTPUT_IMPL_SUBDIR boolean
 )
 
 # ----------------------------------------------------------------
@@ -95,8 +83,6 @@ xo_add_genfacetimpl(
     FACET Printable
     REPR Float
     INPUT idl/IPrintable_DFloat.json5
-    OUTPUT_HPP_DIR include/xo/object2
-    OUTPUT_IMPL_SUBDIR number
 )
 
 # note: manual target; generated code committed to git
@@ -106,8 +92,6 @@ xo_add_genfacetimpl(
     FACET GCObject
     REPR Float
     INPUT idl/IGCObject_DFloat.json5
-    OUTPUT_HPP_DIR include/xo/object2
-    OUTPUT_IMPL_SUBDIR number
 )
 
 # ----------------------------------------------------------------
@@ -119,8 +103,6 @@ xo_add_genfacetimpl(
     FACET Printable
     REPR Integer
     INPUT idl/IPrintable_DInteger.json5
-    OUTPUT_HPP_DIR include/xo/object2
-    OUTPUT_IMPL_SUBDIR number
 )
 
 # note: manual target; generated code committed to git
@@ -130,8 +112,6 @@ xo_add_genfacetimpl(
     FACET GCObject
     REPR Integer
     INPUT idl/IGCObject_DInteger.json5
-    OUTPUT_HPP_DIR include/xo/object2
-    OUTPUT_IMPL_SUBDIR number
 )
 
 # ----------------------------------------------------------------
@@ -143,8 +123,6 @@ xo_add_genfacetimpl(
     FACET Printable
     REPR String
     INPUT idl/IPrintable_DString.json5
-    OUTPUT_HPP_DIR include/xo/object2
-    OUTPUT_IMPL_SUBDIR string
 )
 
 # note: manual target; generated code committed to git
@@ -154,8 +132,6 @@ xo_add_genfacetimpl(
     FACET GCObject
     REPR String
     INPUT idl/IGCObject_DString.json5
-    OUTPUT_HPP_DIR include/xo/object2
-    OUTPUT_IMPL_SUBDIR string
 )
 
 # ----------------------------------------------------------------
@@ -167,8 +143,6 @@ xo_add_genfacetimpl(
     FACET Sequence
     REPR Array
     INPUT idl/ISequence_DArray.json5
-    OUTPUT_HPP_DIR include/xo/object2
-    OUTPUT_IMPL_SUBDIR array
 )
 
 # note: manual target; generated code committed to git
@@ -178,8 +152,6 @@ xo_add_genfacetimpl(
     FACET Printable
     REPR Array
     INPUT idl/IPrintable_DArray.json5
-    OUTPUT_HPP_DIR include/xo/object2
-    OUTPUT_IMPL_SUBDIR array
 )
 
 # note: manual target; generated code committed to git
@@ -189,8 +161,6 @@ xo_add_genfacetimpl(
     FACET GCObject
     REPR Array
     INPUT idl/IGCObject_DArray.json5
-    OUTPUT_HPP_DIR include/xo/object2
-    OUTPUT_IMPL_SUBDIR array
 )
 
 # ----------------------------------------------------------------
@@ -202,9 +172,7 @@ xo_add_genfacetimpl(
     FACET Printable
     REPR RuntimeError
     INPUT idl/IPrintable_DRuntimeError.json5
-    OUTPUT_HPP_DIR include/xo/object2
-    OUTPUT_IMPL_SUBDIR error
-)
+ )
 
 # note: manual target; generated code committed to git
 xo_add_genfacetimpl(
@@ -213,8 +181,6 @@ xo_add_genfacetimpl(
     FACET GCObject
     REPR RuntimeError
     INPUT idl/IGCObject_DRuntimeError.json5
-    OUTPUT_HPP_DIR include/xo/object2
-    OUTPUT_IMPL_SUBDIR error
 )
 
 # ----------------------------------------------------------------
