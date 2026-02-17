@@ -43,8 +43,6 @@ namespace xo {
 
             template <typename T>
             T * std_copy_for(const T * src) noexcept {
-                // TODO: fix alloc_copy(), should take const std::byte *
-
                 T * copy = (T *)(this->alloc_copy_for(src));
 
                 if (copy) {
