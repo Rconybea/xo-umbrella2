@@ -75,9 +75,6 @@ namespace xo {
                 requires (std::same_as<Args, obj<AGCObject>> && ...)
             static DArray * array(obj<AAllocator> mm, Args... args);
 
-            const obj<AGCObject> & operator[](size_type index) const noexcept { return elts_[index]; }
-            obj<AGCObject> & operator[](size_type index) noexcept { return elts_[index]; }
-
             ///@}
             /** @defgroup darray-access acecss methods **/
             ///@{
@@ -91,6 +88,10 @@ namespace xo {
             size_type size() const noexcept { return size_; }
             /** return element @p index of this array (0-based) **/
             obj<AGCObject> at(size_type index) const;
+
+            const obj<AGCObject> & operator[](size_type index) const noexcept { return elts_[index]; }
+            obj<AGCObject> & operator[](size_type index) noexcept { return elts_[index]; }
+
             ///@}
             /** @defgroup darray-iterators iterators **/
             ///@{
@@ -105,6 +106,11 @@ namespace xo {
             ///@}
             /** @defgroup darray-general general methods **/
             ///@{
+
+            /** resize to @p new_size.  @p new_size may not be larger than capacity
+             *  Return true if resize was accomplished; false otherwise.
+             **/
+            bool resize(size_type new_size) noexcept;
 
             ///@}
             /** @defgroup darray-conversion-operators conversion operators **/
