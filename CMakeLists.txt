@@ -23,8 +23,6 @@ xo_add_genfacet(
     TARGET xo-gc-facet-gcobject
     FACET GCObject
     INPUT idl/GCObject.json5
-    OUTPUT_HPP_DIR include/xo/gc
-    OUTPUT_IMPL_SUBDIR detail
 )
 
 # ----------------------------------------------------------------
