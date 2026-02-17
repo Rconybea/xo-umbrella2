@@ -15,12 +15,19 @@ namespace xo {
 #endif
 
         struct Primitives {
-            /** polymorphich multiply
+            /** polymorphic multiply
              *
              *  TODO: this will want to move to xo-numeric/
              *        so we can dispatch on vector, matrix, function types
              **/
             static DPrimitive_gco_2_gco_gco s_mul_gco_gco_pm;
+
+            /** polymorphic subtract
+             *
+             *  TODO: this will want to move to xo-numeric/
+             *        so we can dispatch on vector, matrix, function types
+             **/
+            static DPrimitive_gco_2_gco_gco s_sub_gco_gco_pm;
 
             /** polymorphic equality comparison
              *
