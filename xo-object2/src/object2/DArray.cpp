@@ -84,6 +84,19 @@ namespace xo {
             }
         }
 
+        bool
+        DArray::resize(size_type new_z) noexcept {
+            if (new_z >= capacity_) {
+                return false;
+            } else if (new_z > size_) {
+                // ensure new size is zeroed (we/re not zeroing if/when we shrink)
+                ::memset((std::byte *)(&elts_[size_]), 0, (std::byte *)(&elts_[new_z]) - (std::byte *)(&elts_[size_]));
+            }
+
+            this->size_ = new_z;
+            return true;
+        }
+
         // printing support
 
         bool
