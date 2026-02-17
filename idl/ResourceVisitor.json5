@@ -1,6 +1,8 @@
 {
     mode: "facet",
     output_cpp_dir: "src/alloc2",
+    output_hpp_dir: "include/xo/alloc2",
+    output_impl_subdir: "visitor",
     includes: [
         "\"Allocator.hpp\""
     ],
