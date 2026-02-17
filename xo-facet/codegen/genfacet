@@ -455,38 +455,21 @@ def main():
     parser.add_argument('--input', required=True, help='input IDL JSON5 file')
     # --facet-dir: only with mode=implementation
     parser.add_argument('--facet-dir', required=False, help='base dir for facet json')
-    parser.add_argument('--output-cpp', required=False, help='.cpp output directory')
 
     args = parser.parse_args()
 
     idl_fname = args.input
     idl = load_idl(idl_fname)
 
-    # output_hpp_dir: prefer IDL, fall back to CLI
-    if 'output_hpp_dir' in idl:
-        output_hpp_dir = Path(idl['output_hpp_dir'])
-    elif args.output_hpp:
-        output_hpp_dir = Path(args.output_hpp)
-    else:
-        parser.error("--output-hpp required when .json5 lacks output_hpp_dir")
+    output_hpp_dir = Path(idl['output_hpp_dir'])
     output_hpp_dir.mkdir(parents=False, exist_ok=True)
 
     # output_impl_hpp_subdir: prefer IDL, fall back to CLI
-    if 'output_impl_subdir' in idl:
-        output_impl_hpp_subdir = Path(idl['output_impl_subdir'])
-    elif args.output_impl_hpp:
-        output_impl_hpp_subdir = Path(args.output_impl_hpp)
-    else:
-        parser.error("--output-impl-hpp required when .json5 lacks output_impl_subdir")
+    output_impl_hpp_subdir = Path(idl['output_impl_subdir'])
     output_impl_hpp_dir = output_hpp_dir / output_impl_hpp_subdir
     output_impl_hpp_dir.mkdir(parents=False, exist_ok=True)
 
-    if 'output_cpp_dir' in idl:
-        output_cpp_dir = Path(idl['output_cpp_dir'])
-    elif args.output_cpp:
-        output_cpp_dir = Path(args.output_cpp)
-    else:
-        parser.error("--output-cpp required when .json5 lacks output_cpp_dir")
+    output_cpp_dir = Path(idl['output_cpp_dir'])
     output_cpp_dir.mkdir(parents=False, exist_ok=True)
 
     # setup jinja2
