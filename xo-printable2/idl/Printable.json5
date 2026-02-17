@@ -1,6 +1,8 @@
 {
     mode: "facet",
     output_cpp_dir: "src/printable2",
+    output_hpp_dir: "include/xo/printable2",
+    output_impl_subdir: "detail",
     includes: ["<xo/indentlog/print/ppindentinfo.hpp>"],
     // extra includes in Printable.hpp
     user_hpp_includes: ["\"detail/ppdetail_Printable.hpp\""],

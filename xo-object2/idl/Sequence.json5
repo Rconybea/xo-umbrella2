@@ -1,6 +1,8 @@
 {
     mode: "facet",
     output_cpp_dir: "src/object2",
+    output_hpp_dir: "include/xo/object2",
+    output_impl_subdir: "sequence",
     includes: ["<xo/gc/GCObject.hpp>"],
     // extra includes in Sequence.hpp, if any
     user_hpp_includes: [],

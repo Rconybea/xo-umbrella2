@@ -1,6 +1,8 @@
 {
     mode: "facet",
     output_cpp_dir: "src/procedure2",
+    output_hpp_dir: "include/xo/procedure2",
+    output_impl_subdir: "detail",
     // includes in ARuntimeContext.hpp
     includes: [
         "<xo/alloc2/Allocator.hpp>"
