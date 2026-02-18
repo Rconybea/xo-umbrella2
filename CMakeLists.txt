@@ -80,9 +80,4 @@ xo_add_genfacet_all(xo-procedure2-genfacet-all)
 add_subdirectory(src/procedure2)
 add_subdirectory(utest)
 
-# ----------------------------------------------------------------
-# cmake export
-
-#xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
-
 # end CMakeLists.txt
