@@ -5,10 +5,12 @@
 
 #pragma once
 
+#include "Expression.hpp"
 #include "TypeRef.hpp"
 #include "exprtype.hpp"
-#include <xo/reflect/TaggedPtr.hpp>
+#include <xo/gc/Collector.hpp>
 #include <xo/gc/GCObject.hpp>
+#include <xo/reflect/TaggedPtr.hpp>
 
 namespace xo {
     namespace scm {
@@ -19,23 +21,58 @@ namespace xo {
         public:
             using TaggedPtr = xo::reflect::TaggedPtr;
             using TypeDescr = xo::reflect::TypeDescr;
+            using ACollector = xo::mm::ACollector;
+            using AAllocator = xo::mm::AAllocator;
             using AGCObject = xo::mm::AGCObject;
             using typeseq = xo::reflect::typeseq;
+            using ppindentinfo = xo::print::ppindentinfo;
 
         public:
             explicit DConstant(obj<AGCObject> value) noexcept;
 
+            /** create isntance
+             *  @p mm     memory allocator
+             *  @p value  literal constant
+             **/
+            static obj<AExpression,DConstant> make(obj<AAllocator> mm,
+                                                   obj<AGCObject> value);
+
+            /** create instance
+             *  @p mm     memory allocator
+             *  @p value  literal constant
+             **/
+            static DConstant * _make(obj<AAllocator> mm,
+                                     obj<AGCObject> value);
+
             bool is_resolved() const noexcept { return typeref_.is_resolved(); }
 
-            exprtype extype() const noexcept { return exprtype::constant; }
+            obj<AGCObject> value() const noexcept { return value_; }
             TypeDescr value_td() const noexcept { return typeref_.td(); }
             TaggedPtr value_tp() const noexcept { return TaggedPtr(typeref_.td(), value_.data()); }
 
+            /** @defgroup scm-constant-expression-facet **/
+            ///@{
+
+            exprtype extype() const noexcept { return exprtype::constant; }
             TypeRef typeref() const noexcept { return typeref_; }
             TypeDescr valuetype() const noexcept { return typeref_.td(); }
-            obj<AGCObject> value() const noexcept { return value_; }
-
             void assign_valuetype(TypeDescr td) noexcept { typeref_.resolve(td); }
+
+            ///@}
+            /** @defgroup scm-constant-gcobject-facet **/
+            ///@{
+
+            size_t shallow_size() const noexcept;
+            DConstant * shallow_copy(obj<AAllocator> mm) const noexcept;
+            size_t forward_children(obj<ACollector> gc) noexcept;
+
+            ///@}
+            /** @defgroup scm-constant-printable-facet **/
+            ///@{
+
+            bool pretty(const ppindentinfo & ppii) const;
+
+            ///@}
 
         private:
             static TypeDescr _lookup_td(typeseq tseq);

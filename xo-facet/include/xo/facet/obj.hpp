@@ -6,15 +6,16 @@
 #pragma once
 
 #include "RRouter.hpp"
+//#include "FacetRegistry.hpp"  // nope, would create include cycle
 #include <utility>
 #include <cassert>
 
 namespace xo {
     namespace facet {
         /** object with borrowed state pointer
-         *  - With default Data argument:
+         *  - With default DRepr argument:
          *    type-erased polymorphic container
-         *  - with specific Data argument:
+         *  - with specific DRepr argument:
          *    typed container. Trivially de-virtualizable
          *
          *  Example:
@@ -88,7 +89,7 @@ namespace xo {
              *  - same strategy for holding state (naked / unique / refcounted ...)
              **/
             template <typename DOther>
-            obj(const obj<AFacet, DOther> && other)
+            obj(obj<AFacet, DOther> && other)
                     requires (std::is_same_v<DRepr, DVariantPlaceholder>
                               || std::is_convertible_v<DRepr, DOther>)
               : Super()
@@ -98,12 +99,17 @@ namespace xo {
             }
 
             obj & operator=(const obj & rhs) {
-                /* ensure we replace .iface_ along w/ .ata_ */
+                /* ensure we replace .iface_ along w/ .data_ */
                 this->from_obj(rhs);
                 return *this;
             }
 
-            /** safe downcast from variant. null if downcast fails **/
+            /** safe downcast from variant. null if downcast fails
+             *
+             *  Use:
+             *    obj<AFoo> x = ...;
+             *    obj<AFoo,DQuux> quux = obj<AFoo,DQuux>::from(x);
+             **/
             static obj from(const OObject<AFacet> & other) {
                 return obj(other.template downcast<DRepr>());
             }
@@ -121,6 +127,21 @@ namespace xo {
                 {
                     return obj(iface, data);
                 }
+
+            /** - runtime polymorphism (DRepr == DVariantPlaceholder)
+             *      (requires FacetRegistry for lookup)
+             *  - comptime polymorphism (DRepr != DVariantPlaceholder)
+             *
+             *  Definition in FacetRegistry.hpp, to avoid #include dependency
+             **/
+            template <typename AOther>
+            obj<AOther,DRepr> to_facet();
+
+            /** like to_facet<AOther>(),
+             *  but on failure return empty obj instead of throwing exception 
+             **/
+            template <typename AOther>
+            obj<AOther,DRepr> try_to_facet() noexcept;
 
             /** enabled when RRouter<AFacet> provides _preincrement.
              *  Note we don't need this trick for comparison operators,

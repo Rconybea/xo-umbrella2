@@ -2,7 +2,7 @@
  *
  *  Generated automagically from ingredients:
  *  1. code generator:
- *       [/Users/roland/proj/xo-umbrella2/xo-facet/codegen/genfacet]
+ *       [xo-facet/codegen/genfacet]
  *     arguments:
  *       --input [idl/IGCObject_DFloat.json5]
  *  2. jinja2 template for abstract facet .hpp file:
@@ -14,6 +14,7 @@
 #pragma once
 
 #include "GCObject.hpp"
+#include <xo/object2/number/GCObjectConversion_DFloat.hpp>
 #include <xo/gc/GCObject.hpp>
 #include <xo/alloc2/Allocator.hpp>
 #include "DFloat.hpp"

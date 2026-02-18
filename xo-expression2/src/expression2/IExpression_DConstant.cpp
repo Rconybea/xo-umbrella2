@@ -2,7 +2,7 @@
  *
  *  Generated automagically from ingredients:
  *  1. code generator:
- *       [/home/roland/proj/xo-umbrella2-claude1/xo-facet/codegen/genfacet]
+ *       [xo-facet/codegen/genfacet]
  *     arguments:
  *       --input [idl/IExpression_DConstant.json5]
  *  2. jinja2 template for abstract facet .hpp file:
@@ -11,7 +11,7 @@
  *       [idl/IExpression_DConstant.json5]
 **/
 
-#include "IExpression_DConstant.hpp"
+#include "detail/IExpression_DConstant.hpp"
 
 namespace xo {
     namespace scm {

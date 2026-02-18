@@ -24,7 +24,6 @@ xo_add_genfacet(
     INPUT idl/Printable.json5
     OUTPUT_HPP_DIR include/xo/printable2
     OUTPUT_IMPL_SUBDIR detail
-    OUTPUT_CPP_DIR src/printable2
 )
 
 # ----------------------------------------------------------------

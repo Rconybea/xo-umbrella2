@@ -65,6 +65,11 @@ namespace xo {
             return DArena(cfg, page_z, align_z, span.lo(), span.hi());
         } /*map*/
 
+        DArena::DArena(const ArenaConfig & cfg)
+        {
+            *this = map(cfg);
+        }
+
         DArena::DArena(const ArenaConfig & cfg,
                        size_type page_z,
                        size_type arena_align_z,
@@ -163,6 +168,51 @@ namespace xo {
             assert(config_.store_header_flag_);
 
             return (header_type *)((byte *)obj - sizeof(header_type));
+        }
+
+        void
+        DArena::visit_pools(const MemorySizeVisitor & fn) const {
+            /** arena can't tell purpose of allocated memory;
+             *  must assume it's all used
+             **/
+
+            // assemble histogram
+            MemorySizeInfo::DetailArrayType detail_v;
+            MemorySizeInfo::DetailArrayType * p_detail = nullptr;
+
+            if (config_.store_header_flag_) {
+                p_detail = &detail_v;
+
+                for (const auto & ix : *this) {
+                    typeseq ix_tseq(ix.tseq());
+
+                    // totals in detail_v[0]
+                    MemorySizeDetail & d = detail_v[0];
+                    ++d.n_alloc_;
+                    d.z_alloc_ += ix.size();
+
+                    // O(n) insertion here
+                    for (size_t i = 1; i < detail_v.size(); ++i) {
+                        if (detail_v[i].tseq_.is_sentinel()
+                            || (detail_v[i].tseq_ == ix_tseq))
+                        {
+                            MemorySizeDetail & d = detail_v[i];
+
+                            d.tseq_ = ix_tseq;
+                            ++d.n_alloc_;
+                            d.z_alloc_ += ix.size();
+                            break;
+                        }
+                    }
+                }
+            }
+
+            fn(MemorySizeInfo(config_.name_,
+                              this->allocated() /*used*/,
+                              this->allocated(),
+                              this->committed(),
+                              this->reserved(),
+                              p_detail));
         }
 
         AllocInfo
@@ -272,7 +322,7 @@ namespace xo {
                           (complete_flag
                            ? alloc_mode::sub_complete
                            : alloc_mode::sub_incomplete),
-                          typeseq::anon() /*typeseq: ignored*/,
+                          typeseq::sentinel() /*typeseq: ignored*/,
                           0 /*age - ignored */);
         }
 

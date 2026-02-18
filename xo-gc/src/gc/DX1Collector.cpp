@@ -24,19 +24,22 @@ namespace xo {
     using xo::facet::with_facet;
 
     namespace mm {
-#ifdef NOT_USING
-        constexpr std::uint64_t
-        CollectorConfig::gen_mult() const {
-            return 1ul << arena_config_.header_size_bits_;
-        }
-#endif
 
-#ifdef NOT_USING
-        constexpr std::uint64_t
-        CollectorConfig::tseq_mult() const {
-            return 1ul << (gen_bits_ + arena_config_.header_size_bits_);
+        X1CollectorConfig
+        X1CollectorConfig::with_name(std::string name)
+        {
+            X1CollectorConfig copy = *this;
+            copy.name_ = std::move(name);
+            return copy;
         }
-#endif
+
+        X1CollectorConfig
+        X1CollectorConfig::with_size(std::size_t gen_z)
+        {
+            X1CollectorConfig copy = *this;
+            copy.arena_config_ = arena_config_.with_size(gen_z);
+            return copy;
+        }
 
         // ----- GCRunState -----
 
@@ -60,7 +63,7 @@ namespace xo {
 
         using size_type = xo::mm::DX1Collector::size_type;
 
-        DX1Collector::DX1Collector(const CollectorConfig & cfg) : config_{cfg}
+        DX1Collector::DX1Collector(const X1CollectorConfig & cfg) : config_{cfg}
         {
             assert(config_.arena_config_.header_.size_bits_ +
                    config_.arena_config_.header_.age_bits_ +
@@ -87,8 +90,18 @@ namespace xo {
                     .store_header_flag_ = false});
 
             for (uint32_t igen = 0, ngen = cfg.n_generation_; igen < ngen; ++igen) {
-                space_storage_[0][igen] = DArena::map(cfg.arena_config_);
-                space_storage_[1][igen] = DArena::map(cfg.arena_config_);
+                {
+                    char buf[40];
+                    snprintf(buf, sizeof(buf), "x1-space-G%u-a", igen);
+
+                    space_storage_[0][igen] = DArena::map(cfg.arena_config_.with_name(std::string(buf)));
+                }
+                {
+                    char buf[40];
+                    snprintf(buf, sizeof(buf), "x1-space-G%u-b", igen);
+
+                    space_storage_[1][igen] = DArena::map(cfg.arena_config_.with_name(std::string(buf)));
+                }
 
                 space_[role::to_space()][igen] = &space_storage_[0][igen];
                 space_[role::from_space()][igen] = &space_storage_[1][igen];
@@ -97,6 +110,19 @@ namespace xo {
             for (uint32_t igen = cfg.n_generation_; igen < c_max_generation; ++igen) {
                 space_[role::to_space()][igen] = nullptr;
                 space_[role::from_space()][igen] = nullptr;
+            }
+        }
+
+        void
+        DX1Collector::visit_pools(const MemorySizeVisitor & visitor) const
+        {
+            object_types_.visit_pools(visitor);
+            roots_.visit_pools(visitor);
+
+            for (uint32_t i = 0; i < c_n_role; ++i) {
+                for (uint32_t j = 0; j < config_.n_generation_; ++j) {
+                    space_storage_[i][j].visit_pools(visitor);
+                }
             }
         }
 
@@ -253,7 +279,7 @@ namespace xo {
         DX1Collector::add_gc_root_poly(obj<AGCObject> * p_root) noexcept
         {
             std::byte * mem
-                = roots_.alloc(typeseq::anon(),
+                = roots_.alloc(typeseq::sentinel(),
                                sizeof(obj<AGCObject>*));
             assert(mem);
 

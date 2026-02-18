@@ -1,0 +1,67 @@
+/** @file IGCObject_DBoolean.hpp
+ *
+ *  Generated automagically from ingredients:
+ *  1. code generator:
+ *       [xo-facet/codegen/genfacet]
+ *     arguments:
+ *       --input [idl/IGCObject_DBoolean.json5]
+ *  2. jinja2 template for abstract facet .hpp file:
+ *       [iface_facet_repr.hpp.j2]
+ *  3. idl for facet methods
+ *       [idl/IGCObject_DBoolean.json5]
+ **/
+
+#pragma once
+
+#include "GCObject.hpp"
+#include <xo/gc/GCObject.hpp>
+#include <xo/alloc2/Allocator.hpp>
+#include "DBoolean.hpp"
+
+namespace xo { namespace scm { class IGCObject_DBoolean; } }
+
+namespace xo {
+    namespace facet {
+        template <>
+        struct FacetImplementation<xo::mm::AGCObject,
+                                   xo::scm::DBoolean>
+        {
+            using ImplType = xo::mm::IGCObject_Xfer
+              <xo::scm::DBoolean,
+               xo::scm::IGCObject_DBoolean>;
+        };
+    }
+}
+
+namespace xo {
+    namespace scm {
+        /** @class IGCObject_DBoolean
+         **/
+        class IGCObject_DBoolean {
+        public:
+            /** @defgroup scm-gcobject-dboolean-type-traits **/
+            ///@{
+            using size_type = xo::mm::AGCObject::size_type;
+            using AAllocator = xo::mm::AGCObject::AAllocator;
+            using ACollector = xo::mm::AGCObject::ACollector;
+            using Copaque = xo::mm::AGCObject::Copaque;
+            using Opaque = xo::mm::AGCObject::Opaque;
+            ///@}
+            /** @defgroup scm-gcobject-dboolean-methods **/
+            ///@{
+            // const methods
+            /** memory consumption for this instance **/
+            static size_type shallow_size(const DBoolean & self) noexcept;
+            /** copy instance using allocator **/
+            static Opaque shallow_copy(const DBoolean & self, obj<AAllocator> mm) noexcept;
+
+            // non-const methods
+            /** during GC: forward immdiate children **/
+            static size_type forward_children(DBoolean & self, obj<ACollector> gc) noexcept;
+            ///@}
+        };
+
+    } /*namespace scm*/
+} /*namespace xo*/
+
+/* end */

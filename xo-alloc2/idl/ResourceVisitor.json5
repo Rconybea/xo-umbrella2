@@ -1,0 +1,52 @@
+{
+    mode: "facet",
+    output_cpp_dir: "src/alloc2",
+    output_hpp_dir: "include/xo/alloc2",
+    output_impl_subdir: "visitor",
+    includes: [
+        "\"Allocator.hpp\""
+    ],
+    // extra includes in ResourceVisitor.hpp, if any
+    user_hpp_includes: [],
+    namespace1: "xo",
+    namespace2: "mm",
+    // text after includes, before AResourceVisitor
+    pretext: [ "// {pretext} here" ],
+    facet: "ResourceVisitor",
+    detail_subdir: "visitor",
+    brief: "visitor to inspect resource consumption",
+    using_doxygen: true,
+    doc: [
+        "Visitor to receive measured resource consumption"
+    ],
+    types: [
+        // using size_type = std::size_t
+        {
+            name: "size_type",
+            doc: ["type for length of a sequence"],
+            definition: "std::size_t",
+        },
+//        // using AGCObject = xo::mm::AGCObject
+//        {
+//            name: "AGCObject",
+//            doc: ["facet for types with GC support"],
+//            definition: "xo::mm::AGCObject",
+//        }
+    ],
+    const_methods: [
+        // bool on_memory(name, allocated, committed, reserved) const noexcept
+        {
+            name: "on_allocator",
+            doc: ["report memory consumption"],
+            return_type: "void",
+            args: [
+                {type: "obj<AAllocator>", name: "mm"},
+            ],
+            const: true,
+            noexcept: true,
+            attributes: [],
+        },
+    ],
+    nonconst_methods: [
+    ],
+}

@@ -1,16 +1,21 @@
 {
     mode: "facet",
+    output_cpp_dir: "src/gc",
+    output_hpp_dir: "include/xo/gc",
+    output_impl_subdir: "detail",
     includes: [
         "<xo/alloc2/Allocator.hpp>",
         "<xo/gc/Collector.hpp>",
         "<cstdint>",
         "<cstddef>",
     ],
+    // extra includes in GCObject.hpp, if any
+    user_hpp_includes: [],
+    namespace1: "xo",
+    namespace2: "mm",
     pretext: [
         "namespace xo { namespace mm { struct ACollector; }}",
     ],
-    namespace1: "xo",
-    namespace2: "mm",
     facet: "GCObject",
     detail_subdir: "detail",
     brief: "xxx",
@@ -74,4 +79,5 @@
             attributes: [],
         },
     ],
+    router_facet_explicit_content: []
 }

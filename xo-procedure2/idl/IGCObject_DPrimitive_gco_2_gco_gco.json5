@@ -1,0 +1,19 @@
+{
+    mode: "implementation",
+    output_cpp_dir: "src/procedure2",
+    output_hpp_dir: "include/xo/procedure2",
+    output_impl_subdir: "detail",
+    includes: [
+        //<xo/procedure2/GCObjectConversion_DPrimitive_gco_2_gco_gco.hpp>
+        "<xo/gc/GCObject.hpp>",
+        "<xo/alloc2/Allocator.hpp>",
+    ],
+    local_types: [ ],
+    namespace1: "xo",
+    namespace2: "scm",
+    facet_idl: "idl/GCObject.json5",
+    brief: "provide AGCobject interface for Primitive (gco x gco) -> gco",
+    using_doxygen: true,
+    repr: "DPrimitive_gco_2_gco_gco",
+    doc: [ "implement AGCObject for DPrimitive (gco x gco) -> gco" ],
+}

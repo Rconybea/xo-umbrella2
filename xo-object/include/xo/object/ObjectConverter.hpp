@@ -13,7 +13,7 @@
 namespace xo {
     namespace obj {
         /* Convert between xo::reflect::TaggedPtr and xo::Object for
-         * a particular wrapped c++ type
+         * a particular wrapped c++ type.
          */
         struct Converter {
             using TaggedPtr = xo::reflect::TaggedPtr;
@@ -22,7 +22,9 @@ namespace xo {
 
         public:
             Converter() = default;
-            explicit Converter(ConvertToObjectFn to, ConvertFromObjectFn from) : cvt_to_object_{to}, cvt_from_object_{from} {}
+            explicit Converter(ConvertToObjectFn to,
+                               ConvertFromObjectFn from)
+                : cvt_to_object_{to}, cvt_from_object_{from} {}
 
             /** convert tagged pointer @p tp to new object,
              *  allocated via @p mm.
@@ -58,6 +60,9 @@ namespace xo {
          *    // cvt is a converter for T instances
          *    gp<Object> obj = (*(cvt->cvt_to_object_))(mm,
          *  @endcode
+         *
+         *  ObjectConverter converts at run-time
+         *  @see ObjectConversion for compile-time conversion
          **/
         class ObjectConverter {
         public:

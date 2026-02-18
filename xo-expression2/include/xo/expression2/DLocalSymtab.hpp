@@ -6,6 +6,7 @@
 #pragma once
 
 #include "Binding.hpp"
+#include "DVariable.hpp"
 #include "DUniqueString.hpp"
 //#include "exprtype.hpp"
 //#include <xo/reflect/TaggedPtr.hpp>
@@ -23,15 +24,65 @@ namespace xo {
 //            using AGCObject = xo::mm::AGCObject;
 //            using typeseq = xo::reflect::typeseq;
 
+            using ppindentinfo = xo::print::ppindentinfo;
+            using ACollector = xo::mm::ACollector;
+            using AAllocator = xo::mm::AAllocator;
+            /* note: uint16_t would be fine too */
+            using size_type = std::uint32_t;
+
             struct Slot {
-                // obj<Expression,DVariable> var_;
-                Binding binding_;
+                Slot() = default;
+                explicit Slot(DVariable * var) : var_{var} {}
+
+                /** variable representing a formal argument.
+                 *  binding will be correct only within the same layer
+                 *  as top-level lambda body
+                 *  (i.e. up to the doorstep of each and every nested lambda)
+                 **/
+                DVariable * var_ = nullptr;
             };
 
         public:
-//            explicit DLocalSymtab(obj<AGCObject> value) noexcept;
+            /** @defgroup scm-lambdaexpr-constructors **/
+            ///@{
 
-            /** @defgroup xo-expression2-symboltable-facet symboltable facet**/
+            /** empty instance with parent @p p and capacity for @p n slots.
+             *  Caller must ensure that slots_[0..n) are actually addressable
+             **/
+            DLocalSymtab(DLocalSymtab * p, size_type n);
+
+            /** scaffold empty symtab instance,
+             *  with capacity for @p n slots, using memory from allocator @p mm
+             **/
+            static DLocalSymtab * _make_empty(obj<AAllocator> mm,
+                                              DLocalSymtab * p,
+                                              size_type n);
+
+            ///@}
+            /** @defgroup scm-lambdaexpr-methods **/
+            ///@{
+
+            DLocalSymtab * parent() const noexcept { return parent_; }
+            size_type capacity() const noexcept { return capacity_; }
+            size_type size() const noexcept { return size_; }
+
+             DVariable * lookup_var(Binding ix) noexcept {
+                assert(ix.i_link() == 0);
+                assert(ix.j_slot() < static_cast<int32_t>(size_));
+
+                return slots_[ix.j_slot()].var_;
+            }
+
+            /** increase slot size (provided below capacity) to append
+             *  binding for one local variable.  Local variable will be allocated
+             *  from @p mm, named @p name, with type described by @p typeref.
+             **/
+            Binding append_var(obj<AAllocator> mm,
+                               const DUniqueString * name,
+                               TypeRef typeref);
+
+            ///@}
+            /** @defgroup xo-localsymtab-symboltable-facet symboltable facet**/
             ///@{
 
             /** true for global symbol table **/
@@ -41,9 +92,30 @@ namespace xo {
             Binding lookup_binding(const DUniqueString * sym) const noexcept;
 
             ///@}
+            /** @defgroup xo-localsymtab-gcobject-facet gcobject facet **/
+            ///@{
+
+            std::size_t shallow_size() const noexcept;
+            DLocalSymtab * shallow_copy(obj<AAllocator> mm) const noexcept;
+            std::size_t forward_children(obj<ACollector> gc) noexcept;
+
+            ///@}
+            /** @defgroup xo-localsymtab-printable-facet printable facet **/
+            ///@{
+
+            bool pretty(const ppindentinfo & ppii) const;
+
+            ///@}
 
         private:
-
+            /** parent symbol table from scoping surrounding this one **/
+            DLocalSymtab * parent_ = nullptr;
+            /** actual range of slots_[] array.  Can use indices in [0,..,n) **/
+            size_type capacity_ = 0;
+            /** number of slots in use **/
+            size_type size_ = 0;
+            /** memory for names and bindings **/
+            Slot slots_[];
         };
     } /*namespace scm*/
 } /*namespace xo*/

@@ -27,14 +27,40 @@ namespace xo {
 
             RAllocator() {}
             RAllocator(Object::DataPtr data) : Object{std::move(data)} {}
+            RAllocator(const AAllocator * iface, void * data)
+                requires std::is_same_v<typename Object::DataType, xo::facet::DVariantPlaceholder>
+            : Object(iface, data) {}
+
+            template <typename T>
+            void * alloc_for(size_type n = sizeof(T)) noexcept {
+                return O::iface()->alloc(O::data(), typeseq::id<T>(), n);
+            }
+
+            template <typename T>
+            void * alloc_copy_for(const T * src) noexcept {
+                return O::iface()->alloc_copy(O::data(), (std::byte*)const_cast<T *>(src));
+            }
+
+            template <typename T>
+            T * std_copy_for(const T * src) noexcept {
+                T * copy = (T *)(this->alloc_copy_for(src));
+
+                if (copy) {
+                    *copy = *src;
+                }
+
+                return copy;
+            }
 
             typeseq       _typeseq() const noexcept { return O::iface()->_typeseq(); }
+            void             _drop() const noexcept { O::iface()->_drop(O::data()); }
             std::string_view  name() const noexcept { return O::iface()->name(O::data()); }
             size_type     reserved() const noexcept { return O::iface()->reserved(O::data()); }
             size_type         size() const noexcept  { return O::iface()->size(O::data()); }
             size_type    committed() const noexcept { return O::iface()->committed(O::data()); }
             size_type    available() const noexcept { return O::iface()->available(O::data()); }
             size_type    allocated() const noexcept { return O::iface()->allocated(O::data()); }
+            void       visit_pools(const MemorySizeVisitor & fn) const { O::iface()->visit_pools(O::data(), fn); }
             bool          contains(const void * p) const noexcept { return O::iface()->contains(O::data(), p); }
             AllocError  last_error() const noexcept { return O::iface()->last_error(O::data()); }
             AllocInfo   alloc_info(value_type mem) const noexcept { return O::iface()->alloc_info(O::data(), mem); }

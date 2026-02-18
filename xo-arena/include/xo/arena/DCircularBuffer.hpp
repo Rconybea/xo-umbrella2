@@ -83,6 +83,9 @@ namespace xo {
             const_span_type occupied_range() const noexcept { return occupied_range_; }
             const_span_type    input_range() const noexcept { return input_range_; }
 
+            /** report memory-size info for this buffer to @p fn **/
+            void visit_pools(const MemorySizeVisitor & fn) const;
+
             /** verify DCircularBuffer invariants.
              *  Act on failure according to policy @p p
              *  (combination of throw|log bits)

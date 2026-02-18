@@ -1,0 +1,18 @@
+{
+    mode: "implementation",
+    output_cpp_dir: "src/procedure2",
+    output_hpp_dir: "include/xo/procedure2",
+    output_impl_subdir: "detail",
+    includes: [
+        //"<xo/procedure2/RuntimeContext.hpp>",
+        //"<xo/procedure2/detail/IRuntimeContext_Xfer.hpp>",
+    ],
+    local_types: [ ],
+    namespace1: "xo",
+    namespace2: "scm",
+    facet_idl: "idl/RuntimeContext.json5",
+    brief: "provide ARuntimeContext interface for DSimpleRcx",
+    using_doxygen: true,
+    repr: "DSimpleRcx",
+    doc: [ "implement ARuntimeContext for DSimpleRcx" ],
+}

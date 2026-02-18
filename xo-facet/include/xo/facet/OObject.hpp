@@ -59,6 +59,10 @@ namespace xo {
          **/
         template <typename AFacet, typename DRepr = DVariantPlaceholder>
         struct OObject {
+            static_assert(has_facet_impl<AFacet, DRepr>,
+                          "Missing FacetImplementation<AFacet,DRepr> specialization. "
+                          "Did you include IFacet_DRepr.hpp (via the convenience header)?");
+
             using FacetType = AFacet;
             using ISpecific = FacetImplType<AFacet, DRepr>;
             using DataType = DRepr;
@@ -252,6 +256,15 @@ namespace xo {
                 ::memcpy((void*)this, &oother, sizeof(*this));
                 //iface_ = *std::launder(&iface_);
             }
+
+            /** use this to access non-facet methods,
+             *  _when representation is known at compile time_.
+             *
+             * Deliberately disable this for variants
+             **/
+            DRepr * operator->()
+            requires (!std::is_same_v<DataType, DVariantPlaceholder>)
+            { return data_; }
 
 #ifdef NOPE
             DRepr & operator*() { return *data_; }

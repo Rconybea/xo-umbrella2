@@ -153,7 +153,7 @@ def gen_facet(env,
     router_facet_hpp_fname = f'{router_facet}.hpp'
 
     context = {
-        'genfacet': __file__,
+        'genfacet': 'xo-facet/codegen/genfacet',
         'genfacet_input': idl_fname,
         'using_dox': using_dox,
         'impl_hpp_subdir': facet_detail_subdir,
@@ -314,6 +314,8 @@ def gen_facet_impl(env,
     router_facet = f'R{facet_name}'
     # RFoo.hpp
     router_facet_hpp_fname = f'{router_facet}.hpp'
+    # user defined content -- whatever you want
+    router_facet_explicit_content = facet_idl['router_facet_explicit_content']
 
     # ================================================================
     # vars for IFacet_DRepr
@@ -345,7 +347,7 @@ def gen_facet_impl(env,
     # ================================================================
 
     context = {
-        'genfacet': __file__,
+        'genfacet': 'xo-facet/codegen/genfacet',
         'genfacet_input': idl_fname,
         'using_dox': using_dox,
         'impl_hpp_subdir': output_impl_hpp_subdir,
@@ -384,6 +386,7 @@ def gen_facet_impl(env,
         'router_facet': router_facet,
         'router_facet_hpp_j2': 'router_facet.hpp.j2',
         'router_facet_hpp_fname': router_facet_hpp_fname,
+        'router_facet_explicit_content': router_facet_explicit_content,
         #
         'types': facet_types,
         'local_types': local_types,
@@ -452,25 +455,21 @@ def main():
     parser.add_argument('--input', required=True, help='input IDL JSON5 file')
     # --facet-dir: only with mode=implementation
     parser.add_argument('--facet-dir', required=False, help='base dir for facet json')
-    # --output-impl-hpp: putting this in .json5, will be able to drop this.
-    parser.add_argument('--output-impl-hpp', required=True, help='.hpp detail subdir')
-    parser.add_argument('--output-hpp', required=True, help='.hpp output directory')
-    parser.add_argument('--output-cpp', required=True, help='.cpp output directory')
 
     args = parser.parse_args()
 
     idl_fname = args.input
     idl = load_idl(idl_fname)
 
-    output_hpp_dir = Path(args.output_hpp)
+    output_hpp_dir = Path(idl['output_hpp_dir'])
     output_hpp_dir.mkdir(parents=False, exist_ok=True)
 
-    # TODO: output_impl_hpp_subdir: use idl['detail_subdir'] instead
-    output_impl_hpp_subdir = Path(args.output_impl_hpp)
-    output_impl_hpp_dir = Path(args.output_hpp) / output_impl_hpp_subdir
+    # output_impl_hpp_subdir: prefer IDL, fall back to CLI
+    output_impl_hpp_subdir = Path(idl['output_impl_subdir'])
+    output_impl_hpp_dir = output_hpp_dir / output_impl_hpp_subdir
     output_impl_hpp_dir.mkdir(parents=False, exist_ok=True)
 
-    output_cpp_dir = Path(args.output_cpp)
+    output_cpp_dir = Path(idl['output_cpp_dir'])
     output_cpp_dir.mkdir(parents=False, exist_ok=True)
 
     # setup jinja2
@@ -482,7 +481,8 @@ def main():
 
     env = Environment(loader = FileSystemLoader(template_dir),
                       trim_blocks = True,
-                      lstrip_blocks = True)
+                      lstrip_blocks = True,
+                      keep_trailing_newline = True)
 
     # custom filters.
     # A filter 'foo' provides ability to write '{{var | foo}}' to expand

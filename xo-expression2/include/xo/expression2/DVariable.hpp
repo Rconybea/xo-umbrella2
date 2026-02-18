@@ -10,25 +10,47 @@
 #include "TypeRef.hpp"
 #include "exprtype.hpp"
 #include <xo/reflect/TypeDescr.hpp>
+#include <xo/indentlog/print/pretty.hpp>
 
 namespace xo {
     namespace scm {
 
-        /** @class DVariable*
+        /** @class DVariable
          *  @brief syntax for a variable reference
          **/
         class DVariable {
         public:
+            using ppindentinfo = xo::print::ppindentinfo;
+            using ACollector = xo::mm::ACollector;
+            using AAllocator = xo::mm::AAllocator;
             using TypeDescr = xo::reflect::TypeDescr;
 
         public:
-            DVariable(const DUniqueString & name, const TypeRef & typeref, Binding path)
-                : name_{name}, typeref_{typeref}, path_{path} {}
+            /** create instance
+             *  @p mm      memory allocator
+             *  @p name    variable name
+             *  @p typeref type information for legal values
+             *             (possibly just placeholder when relying on inference)
+             *  @p path    binding path to runtime value.
+             *             This may be computed after parsing;
+             *             mnust be resolved before execution.
+             **/
+            static DVariable * make(obj<AAllocator> mm,
+                                    const DUniqueString * name,
+                                    const TypeRef & typeref,
+                                    Binding path = Binding());
 
-            const DUniqueString & name() const { return name_; }
+            DVariable(const DUniqueString * name,
+                      const TypeRef & typeref,
+                      Binding path);
+
+            const DUniqueString * name() const { return name_; }
             Binding path() const { return path_; }
 
-            /** @defgroup scm-variable-expression-facet**/
+            void assign_name(const DUniqueString * name) { this->name_ = name; }
+            void assign_path(Binding b) { this->path_ = b; }
+
+            /** @defgroup scm-variable-expression-facet **/
             ///@{
 
             exprtype extype() const noexcept { return exprtype::variable; }
@@ -37,10 +59,24 @@ namespace xo {
             void assign_valuetype(TypeDescr td) noexcept;
 
             ///@}
+            /** @defgroup scm-variable-gcobject-facet **/
+            ///@{
+
+            size_t shallow_size() const noexcept;
+            DVariable * shallow_copy(obj<AAllocator> mm) const noexcept;
+            size_t forward_children(obj<ACollector> gc) noexcept;
+
+            ///@}
+            /** @defgroup scm-variable-printable-facet **/
+            ///@{
+
+            bool pretty(const ppindentinfo & ppii) const;
+
+            ///@}
 
         private:
             /** symbol name **/
-            const DUniqueString & name_;
+            const DUniqueString * name_;
             /** variable value always has type consistent
              *  with this description
              **/

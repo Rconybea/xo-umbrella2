@@ -2,17 +2,18 @@
  *
  *  Generated automagically from ingredients:
  *  1. code generator:
- *       [/home/roland/proj/xo-umbrella2-claude1/xo-facet/codegen/genfacet]
+ *       [xo-facet/codegen/genfacet]
  *     arguments:
  *       --input [idl/IGCObject_DString.json5]
  *  2. jinja2 template for abstract facet .hpp file:
- *       [iface_facet_any.hpp.j2]
+ *       [iface_facet_repr.hpp.j2]
  *  3. idl for facet methods
  *       [idl/IGCObject_DString.json5]
  **/
 
 #pragma once
 
+#include "GCObject.hpp"
 #include <xo/gc/GCObject.hpp>
 #include <xo/alloc2/Allocator.hpp>
 #include "DString.hpp"

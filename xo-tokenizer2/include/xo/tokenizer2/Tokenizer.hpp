@@ -61,6 +61,7 @@ namespace xo {
             using error_type = TokenizerError;
             using DCircularBuffer = xo::mm::DCircularBuffer;
             using CircularBufferConfig = xo::mm::CircularBufferConfig;
+            using MemorySizeVisitor = xo::mm::MemorySizeVisitor;
             using span_type = xo::mm::span<const CharT>;
             //using input_state_type = TkInputState;
             using result_type = scan_result;
@@ -90,6 +91,9 @@ namespace xo {
             const TkInputState & input_state() const { return input_state_; }
 #pragma GCC diagnostic pop
 
+            /** visit tokenizer-owned memory pools; invoke visitor(info) for each one **/
+            void visit_pools(const MemorySizeVisitor & visitor) const;
+
             ///@}
 
             /** @defgroup tokenizer-general-methods tokenizer methods **/
@@ -109,19 +113,19 @@ namespace xo {
             static bool is_2char_punctuation(CharT ch);
 
             /** assemble token from text @p token_text.
-             *  @p initial_whitespace   Amount of whitespace input being consumed from input.
+             *  @p ws_span  whitespace preceding token
              *  @p token_text subset of input_line representing a single token.
              *  @p p_input_state input state containing input_line.  On exit current line cleared
              *                   if error
              *
              *  retval.consumed will represent some possibly-empty prefix of @p input
              **/
-            static scan_result assemble_token(std::size_t initial_whitespace,
-                                              const span_type & token_text,
+            static scan_result assemble_token( span_type ws_span,
+                                              span_type token_text,
                                               TkInputState * p_input_state);
 
             /** degenerate version of assemble_token() on reaching end-of-file **/
-            static scan_result assemble_final_token(const span_type & token_text,
+            static scan_result assemble_final_token(span_type token_text,
                                                     TkInputState * p_input_state);
 
             /** true if tokenizer contains stored prefix of
@@ -129,10 +133,11 @@ namespace xo {
              **/
             bool has_prefix() const { return !prefix_.empty(); }
 
-            /** buffer contents of input_cstr.
+            /** copy into buffer the  contents of @p input.
              *  May throw if buffer space exhausted
              **/
-            std::pair<input_error, span_type> buffer_input_line(const char * input_cstr, bool eof_flag);
+            std::pair<input_error, span_type> buffer_input_line(span_type input,
+                                                                bool eof_flag);
 
             /** scan for next input token,  given @p input.
              *  Note:

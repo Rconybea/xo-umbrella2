@@ -4,15 +4,21 @@
  **/
 
 #include "DConstant.hpp"
+#include "detail/IExpression_DConstant.hpp"
 #include "TypeDescr.hpp"
 #include <xo/object2/DFloat.hpp>
 #include <xo/object2/DInteger.hpp>
+#include <xo/facet/FacetRegistry.hpp>
+#include <xo/facet/obj.hpp>
 #include <xo/reflect/Reflect.hpp>
+#include <xo/printable2/Printable.hpp>
 #include <xo/reflectutil/typeseq.hpp>
 
 namespace xo {
     using xo::scm::DFloat;
     using xo::scm::DInteger;
+    using xo::print::APrintable;
+    using xo::facet::FacetRegistry;
     using xo::reflect::Reflect;
     using xo::reflect::TypeDescr;
     using xo::reflect::typeseq;
@@ -34,6 +40,23 @@ namespace xo {
             }
         }
 
+        obj<AExpression,DConstant>
+        DConstant::make(obj<AAllocator> mm,
+                        obj<AGCObject> value)
+        {
+            return obj<AExpression,DConstant>(_make(mm, value));
+        }
+
+        DConstant *
+        DConstant::_make(obj<AAllocator> mm,
+                         obj<AGCObject> value)
+        {
+            void * mem = mm.alloc(typeseq::id<DConstant>(),
+                                  sizeof(DConstant));
+
+            return new (mem) DConstant(value);
+        }
+
         TypeDescr
         DConstant::_lookup_td(typeseq tseq)
         {
@@ -46,6 +69,45 @@ namespace xo {
             }
 
             return nullptr;
+        }
+
+        std::size_t
+        DConstant::shallow_size() const noexcept
+        {
+            return sizeof(DConstant);
+        }
+
+        DConstant *
+        DConstant::shallow_copy(obj<AAllocator> mm) const noexcept
+        {
+            DConstant * copy = (DConstant *)mm.alloc_copy((std::byte *)this);
+
+            if (copy)
+                *copy = *this;
+
+            return copy;
+        }
+
+        std::size_t
+        DConstant::forward_children(obj<ACollector> gc) noexcept
+        {
+            gc.forward_inplace(value_.iface(), (void **)&(value_.data_));
+
+            return shallow_size();
+        }
+
+        bool
+        DConstant::pretty(const ppindentinfo & ppii) const
+        {
+            obj<APrintable> value_pr
+                = FacetRegistry::instance().variant<APrintable,AGCObject>(value_);
+
+            return ppii.pps()->pretty_struct
+                       (ppii,
+                        "DConstant",
+                        refrtag("value_.tseq", value_._typeseq()),
+                        refrtag("value.tseq", value_pr._typeseq()),
+                        refrtag("value", value_pr));
         }
     } /*namespace scm*/
 } /*namespace xo*/

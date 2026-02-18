@@ -33,7 +33,7 @@ namespace xo {
                      obj<AGCObject> car,
                      DList * cdr)
         {
-            void * mem = mm.alloc(typeseq::id<DList>(), sizeof(DList));
+            void * mem = mm.alloc_for<DList>();
 
             return new (mem) DList(car, cdr);
         }
@@ -148,6 +148,8 @@ namespace xo {
             }
         }
 
+        // ----- GCObject facet ------
+
         auto
         DList::shallow_size() const noexcept -> size_type
         {
@@ -157,12 +159,7 @@ namespace xo {
         DList *
         DList::shallow_copy(obj<AAllocator> mm) const noexcept
         {
-            DList * copy = (DList *)mm.alloc_copy((std::byte *)this);
-
-            if (copy)
-                *copy = *this;
-
-            return copy;
+            return mm.std_copy_for(this);
         }
 
         auto
@@ -170,12 +167,14 @@ namespace xo {
         {
             //scope log(XO_DEBUG(true));
 
-            gc.forward_inplace(head_.iface(), (void **)&(head_.data_));
+            gc.forward_inplace(&head_);
+            //gc.forward_inplace(head_.iface(), (void **)&(head_.data_));
 
-            auto iface = xo::facet::impl_for<AGCObject,DList>();
-            gc.forward_inplace(&iface, (void **)(&rest_));
+            gc.forward_inplace(&rest_);
+            //auto iface = xo::facet::impl_for<AGCObject,DList>();
+            //gc.forward_inplace(&iface, (void **)(&rest_));
 
-            return shallow_size();
+            return this->shallow_size();
         }
     } /*namespace scm*/
 } /*namespace xo*/

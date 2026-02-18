@@ -21,6 +21,7 @@ namespace xo {
         class StringTable {
         public:
             using DArena = xo::mm::DArena;
+            using MemorySizeVisitor = xo::mm::MemorySizeVisitor;
             using StringMap = xo::map::DArenaHashMap<std::string_view,
                                                      DUniqueString*>;
             using size_type = StringMap::size_type;
@@ -35,10 +36,18 @@ namespace xo {
             /** return unique string with contents @p key. Idempotent! **/
             const DUniqueString * intern(std::string_view key);
 
+            /** generate unique symbol -- guaranteed not to collide
+             *  with existing symbol in this table.
+             **/
+            const DUniqueString * gensym(std::string_view prefix);
+
             /** verify StringTable invariants.
              *  Act on failure according to policy @p p
              **/
             bool verify_ok(verify_policy p = verify_policy::throw_only()) const;
+
+            /** visit string-table memory pools, call visitor(info) for each **/
+            void visit_pools(const MemorySizeVisitor & visitor) const;
 
         private:
             /** allocate string storage in this arena; use DString to represent each string.

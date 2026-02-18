@@ -1,0 +1,72 @@
+// can regenerate downstream .*pp files with either:
+//   cmake --build -- xo-procedure2-facet-procedure
+//   cmake --build -- xo-procedure2-genfacet-all
+
+{
+    mode: "facet",
+    output_cpp_dir: "src/procedure2",
+    output_hpp_dir: "include/xo/procedure2",
+    output_impl_subdir: "detail",
+    // includes in ASyntaxStateMachine.hpp
+    includes: [
+        "\"RuntimeContext.hpp\"",
+        "<xo/gc/GCObject.hpp>",
+    ],
+    // extra includes in Procedure.hpp, if any
+    user_hpp_includes: [
+    ],
+    namespace1: "xo",
+    namespace2: "scm",
+    // text after includes, before ASyntaxStateMachine
+    pretext: [
+        //"namespace xo { namespace scm { class ARuntimeContext; } }",
+        "namespace xo { namespace scm { class DArray; } }",
+    ],
+    facet: "Procedure",
+    detail_subdir: "detail",
+    brief: "abstraction for a schematika procedure i.e. something callable",
+    using_doxygen: true,
+    doc: [
+        "Abstraction for a schematika procedure"
+    ],
+    types: [
+        {
+            name: "AGCObject",
+            definition: "xo::mm::AGCObject",
+            doc: [ "a gc-aware object" ],
+        },
+        // { name: string, doc: [ string ], definition: string },
+    ],
+    const_methods: [
+        {
+            name: "is_nary",
+            doc: [ "true iff procedure takes n arguments" ],
+            return_type: "bool",
+            args: [],
+            const: true,
+            noexcept: true,
+            attributes: []
+        },
+        {
+            name: "n_args",
+            doc: ["number of arguments. -1 for n-ary" ],
+            return_type: "std::int32_t",
+            args: [],
+            const: true,
+            noexcept: true,
+            attributes: []
+        }
+    ],
+    nonconst_methods: [
+        {
+            name: "apply_nocheck",
+            doc: ["invoke procedure; assume arguments satisfy type system" ],
+            return_type: "obj<AGCObject>",
+            args: [
+                {type: "obj<ARuntimeContext>", name: "rcx"},
+                {type: "const DArray *", name: "args"},
+            ]
+        }
+    ],
+    router_facet_explicit_content: [ ],
+}

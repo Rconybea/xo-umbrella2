@@ -23,23 +23,29 @@ namespace xo {
 #ifdef NOT_YET
             /** a literal constant that refers to a linkable named function **/
             primitive,
+#endif
             /** variable/function definition **/
             define,
+#ifdef NOT_YET
             /** variable assignment **/
             assign,
+#endif
             /** function call **/
             apply,
+
             /** function definition **/
             lambda,
-#endif
-            /** variable reference **/
+
+            /** variable definition **/
             variable,
-#ifdef NOT_YET
+            /** variabele reference (possibly non-local) **/
+            varref,
             /** if-then-else **/
             ifexpr,
             /** sequence **/
             sequence,
-            /** type conversion **/
+#ifdef NOT_YET
+            )            /** type conversion **/
             convert,
 #endif
 
@@ -55,16 +61,22 @@ namespace xo {
             case exprtype::constant: return "constant";
 #ifdef NOT_YET
             case exprtype::primitive: return "primitive";
+#endif
             case exprtype::define: return "define";
+#ifdef NOT_YET
             case exprtype::assign: return "assign";
+#endif
             case exprtype::apply: return "apply";
             case exprtype::lambda: return "lambda";
             case exprtype::variable: return "variable";
+            case exprtype::varref: return "varref";
             case exprtype::ifexpr: return "if_expr";
             case exprtype::sequence: return "sequence";
+#ifdef NOT_YET
             case exprtype::convert: return "convert";
 #endif
-            default: break;
+            case exprtype::N: break;
+            //default: break;
             }
 
             return "???exprtype???";

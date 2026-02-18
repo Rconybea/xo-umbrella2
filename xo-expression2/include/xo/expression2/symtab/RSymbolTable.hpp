@@ -2,7 +2,7 @@
  *
  *  Generated automagically from ingredients:
  *  1. code generator:
- *       [/Users/roland/proj/xo-umbrella2/xo-facet/codegen/genfacet]
+ *       [xo-facet/codegen/genfacet]
  *     arguments:
  *       --input [idl/SymbolTable.json5]
  *  2. jinja2 template for abstract facet .hpp file:
@@ -45,8 +45,13 @@ public:
     /** @defgroup scm-symboltable-router-methods **/
     ///@{
 
-    // const methods
+    // explicit injected content
+
+    // builtin methods
     typeseq _typeseq() const noexcept { return O::iface()->_typeseq(); }
+    void _drop() const noexcept { O::iface()->_drop(O::data()); }
+
+    // const methods
     bool is_global_symtab()  const  noexcept {
         return O::iface()->is_global_symtab(O::data());
     }

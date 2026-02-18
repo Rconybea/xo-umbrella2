@@ -52,6 +52,13 @@ namespace xo {
             return s.allocated();
         }
 
+        void
+        IAllocator_DArena::visit_pools(const DArena & s,
+                                       const MemorySizeVisitor & visitor)
+        {
+            s.visit_pools(visitor);
+        }
+
         bool
         IAllocator_DArena::contains(const DArena & s,
                                     const void * p) noexcept

@@ -19,6 +19,8 @@ namespace xo {
                 using group_type = detail::ControlGroup;
                 using control_vector_type = xo::mm::DArenaVector<uint8_t>;
                 using slot_vector_type = xo::mm::DArenaVector<value_type>;
+                using MemorySizeVisitor = xo::mm::MemorySizeVisitor;
+                using MemorySizeInfo = xo::mm::MemorySizeInfo;
 
             public:
                 /** group_exp2: number of groups {x, 2^x} **/
@@ -31,12 +33,14 @@ namespace xo {
                   n_slot_{group_exp2.second * c_group_size},
                   control_{control_vector_type::map
                     (xo::mm::ArenaConfig{
-                        .name_ = name,
-                        .size_ = control_size(n_slot_)})},
+                        .name_ = name + "-ctl",
+                        .size_ = control_size(n_slot_),
+                        .store_header_flag_ = false})},
                   slots_{slot_vector_type::map
                     (xo::mm::ArenaConfig{
-                        .name_ = name,
-                        .size_ = n_slot_ * sizeof(value_type)})}
+                        .name_ = name + "-slots",
+                        .size_ = n_slot_ * sizeof(value_type),
+                        .store_header_flag_ = false})}
                 {
                     /* here: arenas have allocated address range, but no committed memory yet */
 
@@ -46,6 +50,23 @@ namespace xo {
                 size_type empty() const noexcept { return size_ == 0; }
                 size_type capacity() const noexcept { return n_group_ * c_group_size; }
                 float load_factor() const noexcept { return size_ / static_cast<float>(n_slot_); }
+
+                void visit_pools(const MemorySizeVisitor & visitor) const {
+                    // complexity here in service of HashMapStore-specific value for MemorySizeInfo.used 
+
+                    MemorySizeInfo ctl_info;
+                    MemorySizeInfo slot_info;
+
+                    control_.visit_pools([&ctl_info](const auto & x) { ctl_info = x; });
+                    slots_.visit_pools([&slot_info](const auto & x) { slot_info = x; });
+
+                    // control: 1 byte per (key,value) pair
+                    ctl_info.used_ = size_;
+                    slot_info.used_ = size_ * sizeof(value_type);
+
+                    visitor(ctl_info);
+                    visitor(slot_info);
+                }
 
                 void resize_from_empty(const std::pair<size_type,
                                                        size_type> & group_exp2)

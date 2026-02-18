@@ -5,8 +5,25 @@
 
 #include "expression2_register_facets.hpp"
 
-#include <xo/expression2/detail/IGCObject_DUniqueString.hpp>
-#include <xo/expression2/detail/IPrintable_DUniqueString.hpp>
+#include <xo/expression2/UniqueString.hpp>
+
+#include <xo/expression2/detail/IExpression_DVariable.hpp>
+#include <xo/expression2/detail/IGCObject_DVariable.hpp>
+#include <xo/expression2/detail/IPrintable_DVariable.hpp>
+
+#include <xo/expression2/DefineExpr.hpp>
+#include <xo/expression2/VarRef.hpp>
+#include <xo/expression2/Constant.hpp>
+#include <xo/expression2/ApplyExpr.hpp>
+#include <xo/expression2/LambdaExpr.hpp>
+#include <xo/expression2/IfElseExpr.hpp>
+
+#include <xo/expression2/detail/IExpression_DSequenceExpr.hpp>
+#include <xo/expression2/detail/IGCObject_DSequenceExpr.hpp>
+#include <xo/expression2/detail/IPrintable_DSequenceExpr.hpp>
+
+#include <xo/expression2/GlobalSymtab.hpp>
+#include <xo/expression2/LocalSymtab.hpp>
 
 #include <xo/gc/detail/AGCObject.hpp>
 #include <xo/printable2/detail/APrintable.hpp>
@@ -17,6 +34,7 @@ namespace xo {
     using xo::mm::AGCObject;
     using xo::print::APrintable;
     using xo::facet::FacetRegistry;
+    using xo::facet::TypeRegistry;
     using xo::facet::typeseq;
 
     namespace scm {
@@ -28,7 +46,80 @@ namespace xo {
             FacetRegistry::register_impl<AGCObject, DUniqueString>();
             FacetRegistry::register_impl<APrintable, DUniqueString>();
 
+            // Expression
+            // +- Constant
+            // +- Variable
+            // +- VarRef
+            // +- DefineExpr
+            // +- ApplyExpr
+            // +- LambdaExpr
+            // +- IfElseExpr
+            // \- SequenceExpr
+
+            FacetRegistry::register_impl<AExpression, DConstant>();
+            FacetRegistry::register_impl<AGCObject, DConstant>();
+            FacetRegistry::register_impl<APrintable, DConstant>();
+
+            FacetRegistry::register_impl<AExpression, DVariable>();
+            FacetRegistry::register_impl<AGCObject, DVariable>();
+            FacetRegistry::register_impl<APrintable, DVariable>();
+
+            FacetRegistry::register_impl<AExpression, DVarRef>();
+            FacetRegistry::register_impl<AGCObject, DVarRef>();
+            FacetRegistry::register_impl<APrintable, DVarRef>();
+
+            FacetRegistry::register_impl<AExpression, DDefineExpr>();
+            FacetRegistry::register_impl<AGCObject, DDefineExpr>();
+            FacetRegistry::register_impl<APrintable, DDefineExpr>();
+
+            FacetRegistry::register_impl<AExpression, DApplyExpr>();
+            FacetRegistry::register_impl<AGCObject, DApplyExpr>();
+            FacetRegistry::register_impl<APrintable, DApplyExpr>();
+
+            FacetRegistry::register_impl<AExpression, DLambdaExpr>();
+            FacetRegistry::register_impl<AGCObject, DLambdaExpr>();
+            FacetRegistry::register_impl<APrintable, DLambdaExpr>();
+
+            FacetRegistry::register_impl<AExpression, DIfElseExpr>();
+            FacetRegistry::register_impl<AGCObject, DIfElseExpr>();
+            FacetRegistry::register_impl<APrintable, DIfElseExpr>();
+
+            FacetRegistry::register_impl<AExpression, DSequenceExpr>();
+            FacetRegistry::register_impl<AGCObject, DSequenceExpr>();
+            FacetRegistry::register_impl<APrintable, DSequenceExpr>();
+
+            // SymbolTable
+            // +- LocalSymtab
+            // \- GlobalSymtab
+
+            FacetRegistry::register_impl<ASymbolTable, DLocalSymtab>();
+            FacetRegistry::register_impl<AGCObject, DLocalSymtab>();
+            FacetRegistry::register_impl<APrintable, DLocalSymtab>();
+
+            FacetRegistry::register_impl<ASymbolTable, DGlobalSymtab>();
+            FacetRegistry::register_impl<AGCObject, DGlobalSymtab>();
+            FacetRegistry::register_impl<APrintable, DGlobalSymtab>();
+
+            // until we register facets
+            TypeRegistry::register_type<DGlobalSymtab>();
+
+            TypeRegistry::register_type<DGlobalSymtab::repr_type>();
+
             log && log(xtag("DUniqueString.tseq", typeseq::id<DUniqueString>()));
+            log && log(xtag("DDefineExpr.tseq", typeseq::id<DDefineExpr>()));
+            log && log(xtag("DVariable.tseq", typeseq::id<DVariable>()));
+            log && log(xtag("DVarRef.tseq", typeseq::id<DVarRef>()));
+            log && log(xtag("DConstant.tseq", typeseq::id<DConstant>()));
+            log && log(xtag("DApplyExpr.tseq", typeseq::id<DApplyExpr>()));
+            log && log(xtag("DLambdaExpr.tseq", typeseq::id<DLambdaExpr>()));
+            log && log(xtag("DIfElseExpr.tseq", typeseq::id<DIfElseExpr>()));
+            log && log(xtag("DSequenceExpr.tseq", typeseq::id<DSequenceExpr>()));
+
+            log && log(xtag("DGlobalSymtab.tseq", typeseq::id<DGlobalSymtab>()));
+            log && log(xtag("DLocalSymtab.tseq", typeseq::id<DLocalSymtab>()));
+
+            log && log(xtag("AExpression.tseq", typeseq::id<AExpression>()));
+            log && log(xtag("ASymbolTable.tseq", typeseq::id<ASymbolTable>()));
 
             return true;
         }

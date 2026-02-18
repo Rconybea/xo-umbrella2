@@ -2,6 +2,8 @@
 
 set(SELF_LIB xo_arena)
 set(SELF_SRCS
+    arena_streambuf.cpp
+    ErrorArena.cpp
     cmpresult.cpp
     mmap_util.cpp
     AllocError.cpp

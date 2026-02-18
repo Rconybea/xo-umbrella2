@@ -56,6 +56,12 @@ namespace xo {
             return d.allocated_total();
         }
 
+        void
+        IAllocator_DX1Collector::visit_pools(const DX1Collector & d, const MemorySizeVisitor & visitor)
+        {
+            d.visit_pools(visitor);
+        }
+
         bool
         IAllocator_DX1Collector::contains(const DX1Collector & d, const void * addr) noexcept
         {

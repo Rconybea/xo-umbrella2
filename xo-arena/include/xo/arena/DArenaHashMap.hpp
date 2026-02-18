@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "ArenaHashMapConfig.hpp"
 #include "DArenaVector.hpp"
 #include "hashmap/verify_policy.hpp"
 #include "hashmap/HashMapStore.hpp"
@@ -30,8 +31,10 @@ namespace xo {
          *
          *  Replicates (to the extent feasible) std::unordered_map<K,V>
          *
-         *  @tparam K key type.
-         *  @tparam V value type.
+         *  @tparam Key key type.
+         *  @tparam Value value type.
+         *  @tparam Hash hash function for keys
+         *  @tparam Equal equality function for keys
          **/
         template <typename Key,
                   typename Value,
@@ -45,6 +48,7 @@ namespace xo {
             using value_type = std::pair<const Key, Value>;
             using key_hash = Hash;
             using key_equal = Equal;
+            using MemorySizeVisitor = xo::mm::MemorySizeVisitor;
             using byte = std::byte;
             using group_type = detail::ControlGroup;
             using store_type = detail::HashMapStore<Key, Value>;
@@ -54,9 +58,12 @@ namespace xo {
 
         public:
             /** create hash map **/
-            DArenaHashMap(size_type hint_max_capacity,
+            DArenaHashMap(const ArenaHashMapConfig & cfg);
+            DArenaHashMap(const std::string & name,
+                          size_type hint_max_capacity,
                           bool debug_flag = false);
-            DArenaHashMap(Hash && hash = Hash(),
+            DArenaHashMap(const std::string & name,
+                          Hash && hash = Hash(),
                           Equal && eq = Equal(),
                           size_type hint_max_capacity = 0,
                           bool debug_flag = false);
@@ -75,6 +82,10 @@ namespace xo {
 
             iterator begin() { return _promote_iterator(_begin_aux()); }
             iterator end() { return _promote_iterator(_end_aux()); }
+
+            void visit_pools(const MemorySizeVisitor & visitor) const {
+                return store_.visit_pools(visitor);
+            }
 
             /** insert @p kv_pair into hash map.
              *  Replaces any previous value stored under the same key.
@@ -191,9 +202,16 @@ namespace xo {
         };
 
         template <typename Key, typename Value, typename Hash, typename Equal>
-        DArenaHashMap<Key, Value, Hash, Equal>::DArenaHashMap(size_type hint_max_capacity,
+        DArenaHashMap<Key, Value, Hash, Equal>::DArenaHashMap(const ArenaHashMapConfig & cfg)
+        : DArenaHashMap(cfg.name_, Hash(), Equal(), cfg.hint_max_capacity_, cfg.debug_flag_)
+        {
+        }
+
+        template <typename Key, typename Value, typename Hash, typename Equal>
+        DArenaHashMap<Key, Value, Hash, Equal>::DArenaHashMap(const std::string & name,
+                                                              size_type hint_max_capacity,
                                                               bool debug_flag)
-        : DArenaHashMap(Hash(), Equal(), hint_max_capacity, debug_flag)
+        : DArenaHashMap(name, Hash(), Equal(), hint_max_capacity, debug_flag)
         {
         }
 
@@ -202,13 +220,14 @@ namespace xo {
          *   last 16 bytes will be copy of first 16 bytes
          */
         template <typename Key, typename Value, typename Hash, typename Equal>
-        DArenaHashMap<Key, Value, Hash, Equal>::DArenaHashMap(Hash && hash,
+        DArenaHashMap<Key, Value, Hash, Equal>::DArenaHashMap(const std::string & name,
+                                                              Hash && hash,
                                                               Equal && eq,
                                                               size_type hint_max_capacity,
                                                               bool debug_flag)
         : hash_{std::move(hash)},
           equal_{std::move(eq)},
-          store_{"arenahashmap", lub_exp2(lub_group_mult(hint_max_capacity))},
+          store_{name, lub_exp2(lub_group_mult(hint_max_capacity))},
           debug_flag_{debug_flag}
         {
         }

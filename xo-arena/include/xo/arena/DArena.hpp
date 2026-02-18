@@ -7,6 +7,7 @@
 
 #include "ArenaConfig.hpp"
 #include "AllocError.hpp"
+#include "MemorySizeInfo.hpp"
 #include "AllocInfo.hpp"
 #include <xo/reflectutil/typeseq.hpp>
 
@@ -62,6 +63,13 @@ namespace xo {
                 sub_complete,
             };
 
+            /** @brief Checkpoint for unwinding arena state **/
+            struct Checkpoint {
+                Checkpoint() = default;
+                explicit Checkpoint(std::byte * x) : free_{x} {}
+                std::byte * free_ = nullptr;
+            };
+
             ///@}
 
             /** @defgroup mm-arena-ctors arena constructors and destructors **/
@@ -72,7 +80,9 @@ namespace xo {
 
             /** null ctor **/
             DArena() = default;
-            /** ctor from already-mapped (but not committed) address range **/
+            /** create arena from @p cfg. Will reserve memory for allocation **/
+            DArena(const ArenaConfig & cfg);
+            /** ctor from already-mapped (but not committed) address range [lo,hi] **/
             DArena(const ArenaConfig & cfg,
                    size_type page_z,
                    size_type arena_align_z,
@@ -115,34 +125,6 @@ namespace xo {
              **/
             bool contains(const void * addr) const noexcept { return (lo_ <= addr) && (addr < hi_); }
 
-#ifdef OBSOLETE
-            /** obtain uncommitted contiguous memory range comprising
-             *  a whole multiple of @p align_z bytes, of at least size @p req_z,
-             *  aligned on a @p align_z boundary.  Uncommitted memory is not (yet)
-             *  backed by physical memory.
-             *
-             *  If @p enable_hugepage_flag is true and THP
-             *  (transparent huge pages) are available, use THP for arena memory.
-             *  This relieves TLB and page table memory when @p req_z is a lot larger than
-             *  page size (likely 4KB).  Cost is that arena will consum physical memory in unit
-             *  of @p align_z.  Arena may waste up to @p align_z bytes of memory as a result.
-             *
-             *  If @p enable_hugepage_flag is true, @p align_z should be huge page size
-             *  (probably 2MB) for optimal performance.
-             *
-             *  At present the THP feature is not supported on OSX.
-             *  May be supportable through mach_vm_allocate().
-             *
-             *  Note that we reject MAP_HUGETLB|MAP_HUGE_2MB flags to mmap here,
-             *  since requires previously-reserved memory in /proc/sys/vm/nr_hugepages.
-             *
-             *  @return pair giving reserved memory address range [lo,hi)
-             **/
-            static range_type map_aligned_range(size_type req_z,
-                                                size_type align_z,
-                                                bool enable_hugepage_flag);
-#endif
-
             /** true if arena is mapped i.e. has a reserved address range **/
             bool is_mapped() const noexcept { return (lo_ != nullptr) && (hi_ != nullptr); }
 
@@ -158,6 +140,11 @@ namespace xo {
              **/
             AllocHeader * end_header() const noexcept;
 
+            /** report memory use for this arena to @p fn.
+             *  For DArena reporting just one pool = arena's memory range
+             **/
+            void visit_pools(const MemorySizeVisitor & fn) const;
+
             /** get header from allocated object address **/
             header_type * obj2hdr(void * obj) noexcept;
 
@@ -165,7 +152,8 @@ namespace xo {
              *
              *  Require:
              *  1. @p mem is address returned by allocation on this arena
-             *     i.e. by @ref IAllocator_DArena::alloc() or @ref IAllocator_DArena::alloc_super()
+             *     i.e. by @ref IAllocator_DArena::alloc() or
+             *     @ref IAllocator_DArena::alloc_super()
              *  2. @p mem has not been invalidated since it was allocated
              *     i.e. by call to @ref DArena::clear
              *
@@ -217,6 +205,15 @@ namespace xo {
 
             /** create initial guard **/
             void establish_initial_guard() noexcept;
+
+            /** checkpoint arena state.  Revert to the same state with
+             *  @ref restore
+             **/
+            Checkpoint checkpoint() noexcept { return Checkpoint(free_); }
+
+            /** restore arena state to previously-established checkpoint **/
+            void restore(Checkpoint ckp) noexcept { free_ = ckp.free_; }
+
 
             /** discard all allocated memory, return to empty state
              *  Promise:

@@ -23,7 +23,7 @@ namespace xo {
          *  fixed at construction time, but not part of type.
          *  Can reallocate to change
          **/
-        struct DArray {
+        class DArray {
         public:
             /** @defgroup darray-types type traits **/
             ///@{
@@ -58,6 +58,13 @@ namespace xo {
             static DArray * empty(obj<AAllocator> mm,
                                   size_type cap);
 
+            /** create copy of @p src using memory from @p mm
+             *  with capacity for @p new_cap elements
+             **/
+            static DArray * copy(obj<AAllocator> mm,
+                                 DArray * src,
+                                 size_type new_cap);
+
             /** create array containing elements @p args, using memory from @p mm.
              *  Nullptr if space exhausted.
              *
@@ -81,6 +88,10 @@ namespace xo {
             size_type size() const noexcept { return size_; }
             /** return element @p index of this array (0-based) **/
             obj<AGCObject> at(size_type index) const;
+
+            const obj<AGCObject> & operator[](size_type index) const noexcept { return elts_[index]; }
+            obj<AGCObject> & operator[](size_type index) noexcept { return elts_[index]; }
+
             ///@}
             /** @defgroup darray-iterators iterators **/
             ///@{
@@ -96,6 +107,11 @@ namespace xo {
             /** @defgroup darray-general general methods **/
             ///@{
 
+            /** resize to @p new_size.  @p new_size may not be larger than capacity
+             *  Return true if resize was accomplished; false otherwise.
+             **/
+            bool resize(size_type new_size) noexcept;
+
             ///@}
             /** @defgroup darray-conversion-operators conversion operators **/
             ///@{
@@ -107,6 +123,9 @@ namespace xo {
             ///@}
             /** @defgroup darray-printable-methods **/
             ///@{
+
+            /** pretty-printing support **/
+            bool pretty(const ppindentinfo & ppii) const;
 
             ///@}
             /** @defgroup darray-gcobject-methods **/

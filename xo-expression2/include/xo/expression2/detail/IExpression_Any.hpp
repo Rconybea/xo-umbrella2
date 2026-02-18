@@ -2,7 +2,7 @@
  *
  *  Generated automagically from ingredients:
  *  1. code generator:
- *       [/Users/roland/proj/xo-umbrella2/xo-facet/codegen/genfacet]
+ *       [xo-facet/codegen/genfacet]
  *     arguments:
  *       --input [idl/Expression.json5]
  *  2. jinja2 template for abstract facet .hpp file:
@@ -54,8 +54,11 @@ namespace scm {
 
         // from AExpression
 
-        // const methods
+        // builtin methods
         typeseq _typeseq() const noexcept override { return s_typeseq; }
+        [[noreturn]] void _drop(Opaque) const noexcept override { _fatal(); }
+
+        // const methods
         [[noreturn]] exprtype extype(Copaque)  const  noexcept override { _fatal(); }
         [[noreturn]] TypeRef typeref(Copaque)  const  noexcept override { _fatal(); }
         [[noreturn]] TypeDescr valuetype(Copaque)  const  noexcept override { _fatal(); }

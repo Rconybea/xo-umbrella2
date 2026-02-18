@@ -1,0 +1,129 @@
+{
+    mode: "facet",
+    output_cpp_dir: "src/reader2",
+    output_hpp_dir: "include/xo/reader2",
+    output_impl_subdir: "ssm",
+    // includes in ASyntaxStateMachine.hpp
+    includes: [
+        "\"ParserStateMachine.hpp\"",
+        "\"syntaxstatetype.hpp\"",
+        "<xo/tokenizer2/Token.hpp>",
+        "<xo/reflect/TypeDescr.hpp>",
+    ],
+    // extra includes in SyntaxStateMachine.hpp, if any
+    user_hpp_includes: [],
+    namespace1: "xo",
+    namespace2: "scm",
+    // text after includes, before ASyntaxStateMachine
+    pretext: ["// {pretex} here"],
+    facet: "SyntaxStateMachine",
+    detail_subdir: "ssm",
+    brief: "specialized state machine for parsing some particular schematika syntax",
+    using_doxygen: true,
+    doc: [
+        "Assistant to schematika parser dedicated to particular syntax"
+    ],
+    types: [
+        { name: "TypeDescr", doc: [ "reflected c++ type" ], definition: "xo::reflect::TypeDescr" },
+        // { name: string, doc: [ string ], definition: string },
+    ],
+    const_methods: [
+        {
+            name: "ssm_type",
+            doc: ["identify a type of syntax state machine"],
+            return_type: "syntaxstatetype",
+            args: [],
+            const: true,
+            noexcept: true,
+            attributes: [],
+        },
+        {
+            name: "get_expect_str",
+            doc: ["text describing expected/allowed input to this ssm in current state"],
+            return_type: "std::string_view",
+            args: [],
+            const: true,
+            noexcept: true,
+            attributes: [],
+        },
+    ],
+    nonconst_methods: [
+        {
+            name: "on_token",
+            doc: ["operate state machine for incoming token @p tk"],
+            return_type: "void",
+            args: [
+                {type: "const Token &", name: "tk"},
+                {type: "ParserStateMachine *", name: "p_psm"},
+            ],
+        },
+        {
+            name: "on_parsed_symbol",
+            doc: ["update  stat machine for incoming parsed symbol @p sym"],
+            return_type: "void",
+            args: [
+                {type: "std::string_view", name: "sym"},
+                {type: "ParserStateMachine *", name: "p_psm"},
+            ],
+        },
+        {
+            name: "on_parsed_typedescr",
+            doc: ["operate state machine for incoming type description @p td"],
+            return_type: "void",
+            args: [
+                {type: "TypeDescr", name: "td"},
+                {type: "ParserStateMachine *", name: "p_psm"},
+            ],
+        },
+        {
+            name: "on_parsed_formal",
+            doc: ["operate state machine for formal emitted by nested ssm"],
+            return_type: "void",
+            args: [
+                {type: "const DUniqueString *", name: "param_name"},
+                {type: "TypeDescr", name: "param_type"},
+                {type: "ParserStateMachine *", name: "p_psm"},
+            ],
+        },
+        {
+            name: "on_parsed_formal_with_token",
+            doc: ["operate state machine for formal emitted by nested ssm"],
+            return_type: "void",
+            args: [
+                {type: "const DUniqueString *", name: "param_name"},
+                {type: "TypeDescr", name: "param_type"},
+                {type: "const Token &", name: "tk"},
+                {type: "ParserStateMachine *", name: "p_psm"},
+            ],
+        },
+        {
+            name: "on_parsed_formal_arglist",
+            doc: ["consume formal arglist emitted by nested ssm"],
+            return_type: "void",
+            args: [
+                {type: "DArray *", name: "arglist"},
+                {type: "ParserStateMachine *", name: "p_psm"},
+            ],
+        },
+        {
+            name: "on_parsed_expression",
+            doc: ["update state machine for incoming parsed expression @p expr"],
+            return_type: "void",
+            args: [
+                {type: "obj<AExpression>", name: "expr"},
+                {type: "ParserStateMachine *", name: "p_psm"},
+            ],
+        },
+        {
+            name: "on_parsed_expression_with_token",
+            doc: ["update state machine @p p_psm for incoming parsed expression @p expr followed by token @p tk"],
+            return_type: "void",
+            args: [
+                {type: "obj<AExpression>", name: "expr"},
+                {type: "const Token &", name: "tk"},
+                {type: "ParserStateMachine *", name: "p_psm"},
+            ],
+        },
+    ],
+    router_facet_explicit_content: [ ],
+}

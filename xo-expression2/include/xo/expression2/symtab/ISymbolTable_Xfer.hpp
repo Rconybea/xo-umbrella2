@@ -2,7 +2,7 @@
  *
  *  Generated automagically from ingredients:
  *  1. code generator:
- *       [/Users/roland/proj/xo-umbrella2/xo-facet/codegen/genfacet]
+ *       [xo-facet/codegen/genfacet]
  *     arguments:
  *       --input [idl/SymbolTable.json5]
  *  2. jinja2 template for abstract facet .hpp file:
@@ -39,8 +39,11 @@ namespace scm {
 
         // from ASymbolTable
 
-        // const methods
+        // builtin methods
         typeseq _typeseq() const noexcept override { return s_typeseq; }
+        void _drop(Opaque d) const noexcept override { _dcast(d).~DRepr(); }
+
+        // const methods
         bool is_global_symtab(Copaque data)  const  noexcept override {
             return I::is_global_symtab(_dcast(data));
         }

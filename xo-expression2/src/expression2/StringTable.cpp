@@ -10,6 +10,7 @@
 namespace xo {
     using xo::mm::ArenaConfig;
     using xo::mm::AAllocator;
+    using xo::mm::MemorySizeInfo;
     using xo::facet::with_facet;
     using xo::facet::obj;
 
@@ -18,7 +19,7 @@ namespace xo {
                                  bool debug_flag)
         : strings_{DArena::map(ArenaConfig{.name_ = "strings",
                                            .size_ = hint_max_capacity})},
-          map_{hint_max_capacity}
+          map_{"stringkeys", hint_max_capacity}
         {
             (void)debug_flag;
         }
@@ -70,6 +71,36 @@ namespace xo {
             }
 
             return nullptr;
+        }
+
+        const DUniqueString *
+        StringTable::gensym(std::string_view prefix)
+        {
+            static std::size_t s_counter = 0;
+
+            while (true) {
+                ++s_counter;
+
+                char buf[80];
+                assert(prefix.size() + 20 < sizeof(buf));
+
+                int n = snprintf(buf, sizeof(buf),
+                                 "%s:%lu",
+                                 prefix.data(), s_counter);
+
+                if ((0 < n) && (std::size_t(n) < sizeof(buf)))
+                    buf[n] = '\0';
+                else
+                    buf[sizeof(buf)-1] = '\0';
+
+                std::string_view sv(buf);
+                const DUniqueString * retval = this->lookup(sv);
+                if (!retval) {
+                    /* not already in string view -> we have viable candidate */
+                    retval = this->intern(sv);
+                    return retval;
+                }
+            }
         }
 
         bool
@@ -127,6 +158,13 @@ namespace xo {
             }
 
             return true;
+        }
+
+        void
+        StringTable::visit_pools(const MemorySizeVisitor & visitor) const
+        {
+            strings_.visit_pools(visitor);
+            map_.visit_pools(visitor);
         }
 
     } /*namespace scm*/

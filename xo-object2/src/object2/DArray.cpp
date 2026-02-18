@@ -1,14 +1,19 @@
 /** @file DArray.cpp
-*
+ *
  *  @author Roland Conybeare, Jan 2026
  **/
 
 #include "DArray.hpp"
+#include <xo/printable2/Printable.hpp>
+#include <xo/facet/FacetRegistry.hpp>
+#include <xo/indentlog/print/pretty.hpp>
 #include <xo/indentlog/print/tostr.hpp>
 #include <xo/indentlog/print/tag.hpp>
 #include <cstdint>
 
 namespace xo {
+    using xo::print::APrintable;
+    using xo::facet::FacetRegistry;
     using xo::mm::AGCObject;
     using xo::facet::typeseq;
 
@@ -30,6 +35,23 @@ namespace xo {
             result->size_ = 0;
 
             return result;
+        }
+
+        DArray *
+        DArray::copy(obj<AAllocator> mm,
+                     DArray * src,
+                     size_type new_cap)
+        {
+            DArray * dest = empty(mm, new_cap);
+
+            /** could just memcpy here **/
+            for (size_type i = 0, n = src->size(); i < n; ++i) {
+                dest->elts_[i] = src->elts_[i];
+            }
+
+            dest->size_ = src->size();
+
+            return dest;
         }
 
         obj<AGCObject>
@@ -62,12 +84,59 @@ namespace xo {
             }
         }
 
+        bool
+        DArray::resize(size_type new_z) noexcept {
+            if (new_z >= capacity_) {
+                return false;
+            } else if (new_z > size_) {
+                // ensure new size is zeroed (we/re not zeroing if/when we shrink)
+                ::memset((std::byte *)(&elts_[size_]), 0, (std::byte *)(&elts_[new_z]) - (std::byte *)(&elts_[size_]));
+            }
+
+            this->size_ = new_z;
+            return true;
+        }
+
+        // printing support
+
+        bool
+        DArray::pretty(const ppindentinfo & ppii) const
+        {
+            using xo::print::ppstate;
+
+            ppstate * pps = ppii.pps();
+
+            if (ppii.upto()) {
+                /* perhaps print on one line */
+                pps->write("[");
+
+                for (size_t i = 0, n = this->size(); i < n; ++i ) {
+                    if (i > 0)
+                        pps->write(" ");
+
+                    obj<APrintable> elt
+                        = FacetRegistry::instance().variant<APrintable,AGCObject>(this->at(i));
+
+                    assert(elt.data());
+
+                    if (!pps->print_upto(elt))
+                        return false;
+                }
+
+                pps->write("]");
+                return true;
+            } else {
+                pps->write("[...]");
+                return false;
+            }
+        }
+
         // gc hooks for IGCObject_DArray
 
         std::size_t
         DArray::shallow_size() const noexcept
         {
-            return sizeof(DArray);
+            return sizeof(DArray) + (capacity_ * sizeof(obj<AGCObject>));
         }
 
         DArray *
@@ -82,7 +151,9 @@ namespace xo {
                 constexpr auto c_obj_z = sizeof(obj<AGCObject>);
 
                 /* memcpy sufficient for obj<A,D> */
-                ::memcpy((void*)&(copy->elts_[0]), (void*)&(elts_[0]), capacity_ * c_obj_z);
+                ::memcpy((void*)&(copy->elts_[0]),
+                         (void*)&(elts_[0]),
+                         capacity_ * c_obj_z);
             }
 
             return copy;
@@ -94,7 +165,7 @@ namespace xo {
             for (size_type i = 0; i < size_; ++i) {
                 obj<AGCObject> & elt = elts_[i];
 
-                gc.forward_inplace(elt.iface(), (void **)&(elt.data_));
+                gc.forward_inplace(&elt);
             }
 
             return shallow_size();

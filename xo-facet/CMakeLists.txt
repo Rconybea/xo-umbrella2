@@ -27,6 +27,7 @@ set(SELF_LIB xo_facet)
 xo_add_headeronly_library(${SELF_LIB})
 
 # note: dependencies here must coordinate with cmake/xo_facetConfig.cmake.in
+xo_headeronly_dependency(${SELF_LIB} xo_arena)
 xo_headeronly_dependency(${SELF_LIB} xo_reflectutil)
 
 xo_install_library4(${SELF_LIB} ${PROJECT_NAME}Targets)

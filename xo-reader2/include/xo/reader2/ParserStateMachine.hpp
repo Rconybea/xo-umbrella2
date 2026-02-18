@@ -1,0 +1,364 @@
+/** @file ParserStateMachine.hpp
+ *
+ *  @author Roland Conybeare, Jan 2026
+ **/
+
+#pragma once
+
+#include "ParserResult.hpp"
+#include <xo/expression2/DGlobalSymtab.hpp>
+#include <xo/expression2/DLocalSymtab.hpp>
+#include <xo/expression2/DVariable.hpp>
+#include <xo/expression2/VarRef.hpp>
+#include <xo/expression2/StringTable.hpp>
+#include <xo/tokenizer2/Token.hpp>
+#include <xo/object2/DArray.hpp>
+#include <xo/alloc2/Allocator.hpp>
+#include <xo/arena/ArenaHashMapConfig.hpp>
+#include <xo/arena/DArena.hpp>
+
+namespace xo {
+    namespace scm {
+        // defined in ssm/ASyntaxStateMachine.hpp, but
+        // including here would create include cycle
+        //
+        class ASyntaxStateMachine;
+
+        // note: it's load-bearing here to forward-declare ParserStack,
+        //       see ParserStack.hpp for impl
+        //       because ASyntaxStateMachine.hpp includes ParserStateMachine.hpp;
+        //       before obj<SyntaxStateMachine> is defined.
+        class ParserStack;
+
+        /** @brief State machine embodying Schematika parser
+         **/
+        class ParserStateMachine {
+        public:
+            using TypeDescr = xo::reflect::TypeDescr;
+            using AAllocator = xo::mm::AAllocator;
+            using ArenaConfig = xo::mm::ArenaConfig;
+            using DArena = xo::mm::DArena;
+            using MemorySizeVisitor = xo::mm::MemorySizeVisitor;
+            using ArenaHashMapConfig = xo::map::ArenaHashMapConfig;
+            using size_type = std::size_t;
+
+        public:
+            /**
+             *  @p config        arena configuration for parser state
+             *  @p symtab_config configuration for global symtab
+             *                   (maps separate dedicated memory)
+             *  @p max_stringtable_capacity
+             *                   hard max size for unique stringtable
+             *  @p expr_alloc    allocator for schematika expressions.
+             *                   Probably shared with execution.
+             *  @p aux_alloc     auxiliary allocator for non-copyable memory
+             *                   (e.g. DArenaHashMap for global symtable).
+             *                   If not using X1Collector, this can be the
+             *                   same as @p expr_alloc.
+             **/
+            ParserStateMachine(const ArenaConfig & config,
+                               const ArenaHashMapConfig & symtab_config,
+                               size_type max_stringtable_capacity,
+                               obj<AAllocator> expr_alloc,
+                               obj<AAllocator> aux_alloc);
+
+            /** non-trivial dtor for @ref global_symtab_ **/
+            ~ParserStateMachine() = default;
+
+            /** @defgroup scm-parserstatemachine-accessors accessor methods **/
+            ///@{
+
+            bool debug_flag() const noexcept { return debug_flag_; }
+            ParserStack * stack() const noexcept { return stack_; }
+            obj<AAllocator> expr_alloc() const noexcept { return expr_alloc_; }
+            DGlobalSymtab * global_symtab() const noexcept { return global_symtab_.data(); }
+            DLocalSymtab * local_symtab() const noexcept { return local_symtab_; }
+            const ParserResult & result() const noexcept { return result_; }
+
+            /** true iff state machine is currently idle (at top-level) **/
+            bool is_at_toplevel() const noexcept;
+
+            /** true iff state machine currently has incomplete expression **/
+            bool has_incomplete_expr() const noexcept;
+
+            /** top of parser stack **/
+            obj<ASyntaxStateMachine> top_ssm() const;
+
+            /** visit psm-owned memory pools; call visitor(info) for each **/
+            void visit_pools(const MemorySizeVisitor & visitor) const;
+
+            ///@}
+
+            /** @defgroup scm-parserstatemachine-bookkeeping bookkeeping methods **/
+            ///@{
+
+            /** allocator for parsing stack and ssm's **/
+            DArena & parser_alloc() noexcept { return parser_alloc_; }
+
+            /** establish toplevel @p ssm.  Must have empty stack **/
+            void establish_toplevel_ssm(obj<ASyntaxStateMachine> ssm);
+
+            /** push syntax @p ssm onto @ref stack_, restore parser stack to @p ckp
+             *  when popped
+             **/
+            void push_ssm(DArena::Checkpoint ckp, obj<ASyntaxStateMachine> ssm);
+
+            /** pop syntax state machine from top of @ref stack_ **/
+            void pop_ssm();
+
+            /** get unique string copy of @p str. Idempotent for each @p str.
+             **/
+            const DUniqueString * intern_string(std::string_view str);
+
+            /** get unique (within stringtable) string, beginning with @p prefix **/
+            const DUniqueString * gensym(std::string_view prefix);
+
+            /** get variable reference for @p symbolname in current context, or else nullptr **/
+            DVarRef * lookup_varref(std::string_view symbolname);
+
+            /** push nested local symtab while parsing the body of a lambda expression;
+             *  restore previous symtab at the end of lambda-expression definition.
+             *  See @ref pop_local_symtab
+             **/
+            void push_local_symtab(DLocalSymtab * symtab);
+
+            /** pop nested symbol table from symbol-table stack **/
+            void pop_local_symtab();
+
+            /** add variable to current local environment (innermost lexical scope) **/
+            void upsert_var(DVariable * var);
+
+            /** reset result to none **/
+            void reset_result();
+
+            /** reset after reporting error **/
+            void clear_error_reset();
+
+            ///@}
+
+            /** @defgroup scm-parserstatemachine-inputmethods input methods **/
+            ///@{
+
+            /** update state to respond to parsed symbol @p sym
+             *  (from nested parsing state)
+             **/
+            void on_parsed_symbol(std::string_view sym);
+
+            /** update state to respond to parsed type-description @p td
+             *  (from nested parsing state)
+             **/
+            void on_parsed_typedescr(TypeDescr td);
+
+            /** update state to consume param (name, type) emitted by
+             *  nested (expired) parsing state
+             **/
+            void on_parsed_formal(const DUniqueString * param_name,
+                                  TypeDescr param_type);
+
+            /** update state to consume formal parameter (name, type)
+             *  emitted by nested (now expired) parsing state,
+             *  with trailing token @p tk
+             **/
+            void on_parsed_formal_with_token(const DUniqueString * param_name,
+                                             TypeDescr param_type,
+                                             const Token & tk);
+
+            /** update state to consume formal arugment list
+             *  emitted by nested (expired) parsing state
+             **/
+            void on_parsed_formal_arglist(DArray * arglist);
+
+            /** update state to respond to parsed expression @p expr
+             *  (from nested parsing state)
+             **/
+            void on_parsed_expression(obj<AExpression> expr);
+
+            /** update state to respond to parsed expression @p expr
+             *  (from nested parsing state), with trailing token @p tk.
+             *
+             *  Need to distinguish cases like:
+             *    6    // ) ?          ; allowed    } ?
+             *    f(6  // ) allowed    ; forbidden  } forbidden
+             *    6 +  // ) forbidden  ; forbidden  } forbidden
+             *
+             **/
+            void on_parsed_expression_with_token(obj<AExpression> expr,
+                                                 const Token & tk);
+
+            /** update state to respond to input token @p tk.
+             *  record output (if any) in @ref result_
+             **/
+            void on_token(const Token & tk);
+
+            ///@}
+            /** @defgroup scm-parserstatemachine-error-entrypoints error entry points **/
+            ///@{
+
+            /** capture result expression @p expr **/
+            void capture_result(std::string_view ssm_anme,
+                                obj<AExpression> expr);
+
+            /** capture error message @p errmsg from @p ssm_name,
+             *  as current state machine output.
+             *
+             *  @p errmsg will have been allocated from the @p expr_alloc_ allocator
+             **/
+            void capture_error(std::string_view ssm_name,
+                               const DString * errmsg);
+
+            /** report illegal input from syntax state machine @p ssm_name
+             *  recognized on input token @p tk. @p expect_str describes
+             *  expected input in current ssm state
+             **/
+            void illegal_input_on_token(std::string_view ssm_name,
+                                        const Token & tk,
+                                        std::string_view expect_str);
+
+            /** report illegal input from syntax state machine @p ssm_name
+             *  receiving parsed symbol @p sym. @p expect_str describes
+             *  expected input in current ssm state
+             **/
+            void illegal_input_on_symbol(std::string_view ssm_name,
+                                         std::string_view sym,
+                                         std::string_view expect_str);
+
+            /** report illegal input arriving in syntax state machine (ssm) @p ssm_name
+             *  receiving assembled type-description @p td.
+             *  @p expect_str sketches expected input in current ssm state
+             **/
+            void illegal_input_on_typedescr(std::string_view ssm_name,
+                                            TypeDescr td,
+                                            std::string_view expect_str);
+
+            /** report illegal parsed formal (param_name, param_type) from nested ssm.
+             *  Introducing as placeholder; not expected to be reachable in
+             *  full parser
+             **/
+            void illegal_parsed_formal(std::string_view ssm_name,
+                                       const DUniqueString * param_name,
+                                       TypeDescr param_type,
+                                       std::string_view expect_str);
+
+            /** report illegal parsed formal (param_name, param_type) from nested ssm;
+             *  presented with immediately-following input token @p tk.
+             **/
+            void illegal_parsed_formal_with_token(std::string_view ssm_name,
+                                                  const DUniqueString * param_name,
+                                                  TypeDescr param_type,
+                                                  const Token & tk,
+                                                  std::string_view expect_str);
+
+            /** @p arglist stores obj<AGCObject,DVariable> pointers.
+             **/
+            void illegal_parsed_formal_arglist(std::string_view ssm_name,
+                                               DArray * arglist,
+                                               std::string_view expect_str);
+
+            /** report illegal parsed expression from nested ssm.
+             *  Introducing as placeholder; not clear if this will be reachable
+             *  in full parser
+             **/
+            void illegal_parsed_expression(std::string_view ssm_name,
+                                           obj<AExpression>,
+                                           std::string_view expect_str);
+
+            /** report illegal parsed expression @p expr from nested ssm @p ssm_name,
+             *  presented with immediately-following input token @p tk
+             *  Introducing as placeholder; not clear if this will be reachable
+             *  in full parser
+             **/
+            void illegal_parsed_expression_with_token(std::string_view ssm_name,
+                                                      obj<AExpression> expr,
+                                                      const Token & tk,
+                                                      std::string_view expect_str);
+
+            /** report error - no binding for variable @p sym
+             **/
+            void error_unbound_variable(std::string_view ssm_name,
+                                        std::string_view sym);
+
+            ///@}
+
+        private:
+
+            /** Table containing interned strings + symbols.
+             **/
+            StringTable stringtable_;
+
+            /** Arena for internal parsing stack.
+             *  Must be owned exclusively because destructively
+             *  modified as parser completes parsing of each sub-expression
+             *
+             *  Contents will be a stack of ExprState instances
+             **/
+            DArena parser_alloc_;
+
+            /** Checkpoint of toplevel parser allocator.
+             *  Retore parser_alloc to this checkpoint to proceed
+             *  after encountering a parsing error.
+             **/
+            DArena::Checkpoint parser_alloc_ckp_;
+            /** parser stack. Memory always from @ref parser_alloc_;
+             *  elements that should survive parsing allocate from
+             *  @ref expr_alloc_, see below.
+             **/
+            ParserStack * stack_ = nullptr;
+
+            /** Allocator for parsed expressions.
+             *  Information available during subsequent execution
+             *  (whether compiling or interpreting) must be stored here.
+             *
+             *  Also use this allocator for error messages arising
+             *  during parsing
+             *
+             *  Memory use patterns for executions are not predictable,
+             *  and benefit from garbage collection, e.g. DX1Collector.
+             *
+             *  May alternatively be able to use DArena in a compile-only
+             *  scenario, where top-level Expressions can be discarded
+             *  once compiled.
+             **/
+            obj<AAllocator> expr_alloc_;
+
+            /** Allocator for data with lifetime bounded by this ParserStateMachine
+             *
+             *  Cannot be DX1Collector; for example DArenaHashMap will
+             *  for global symtab will be allocated from here,
+             *  and does not support gc.
+             *
+             *  If @ref expr_alloc_ is an ordinary arena (e.g. DArenaAlloc)
+             *  can have aux_alloc_ = expr_alloc_.
+             *  When expr_alloc_ is a garbage collector (e.g. DX1Collector)
+             *  this needs to be distinct.
+             **/
+            obj<AAllocator> aux_alloc_;
+
+            /** global symbol table.
+             *  Toplevel definitions go here.
+             *
+             *  Uses mmap -> non-trivial destructor.
+             *
+             *  TODO: may want to move ownership upstairs.
+             *        if so, along with stringtable_.
+             *        maybe new struct ParserState?
+             **/
+            dp<DGlobalSymtab> global_symtab_;
+
+            /** symbol table with local bindings.
+             *  non-null during parsing of lambda expressions.
+             *  Always allocated from @p expr_alloc_.
+             *  Push local symbol table here to remember local params
+             *  during the body of a lambda expression.
+             **/
+            DLocalSymtab * local_symtab_ = nullptr;
+
+            /** current output from parser **/
+            ParserResult result_;
+
+            /** true to enable debug output **/
+            bool debug_flag_ = false;
+        };
+    } /*namespace scm*/
+} /*namespace xo*/
+
+/* end ParserStateMachine.hpp */

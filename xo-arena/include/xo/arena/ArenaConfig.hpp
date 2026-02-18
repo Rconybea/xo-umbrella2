@@ -17,6 +17,30 @@ namespace xo {
          *  @brief configuration for a @ref DArena instance
          **/
         struct ArenaConfig {
+            /** @defgroup mm-arenaconfig-ctors **/
+            ///@{
+
+            /** NOTE: not providing explicit ctors so we can use designated initializers **/
+
+            ArenaConfig with_name(std::string name) const {
+                ArenaConfig copy(*this);
+                copy.name_ = name;
+                return copy;
+            }
+
+            ArenaConfig with_size(std::size_t z) const {
+                ArenaConfig copy(*this);
+                copy.size_ = z;
+                return copy;
+            }
+
+            ArenaConfig with_store_header_flag(bool x) const {
+                ArenaConfig copy(*this);
+                copy.store_header_flag_ = x;
+                return copy;
+            }
+
+            ///@}
             /** @defgroup mm-arenaconfig-instance-vars ArenaConfig members **/
             ///@{
 
@@ -30,7 +54,7 @@ namespace xo {
             std::size_t hugepage_z_ = 2 * 1024 * 1024;
             /** true to store header (8 bytes) at the beginning of each allocation.
              *  necessary and sufficient to allows iterating over allocs
-             *  present in arena
+             *  present in arena.
              **/
             bool store_header_flag_ = false;
             /** configuration for per-alloc header **/

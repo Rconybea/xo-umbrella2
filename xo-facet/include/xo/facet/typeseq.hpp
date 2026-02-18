@@ -12,7 +12,7 @@
 namespace xo {
     namespace facet {
         // Re-export from xo::arena namespace
-        using xo::reflect::typeseq_impl;
+        using xo::reflect::typerecd;
         using xo::reflect::typeseq;
     }
 } /*namespace xo*/

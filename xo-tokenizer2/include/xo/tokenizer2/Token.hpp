@@ -92,33 +92,33 @@ namespace xo {
             /** token representing right angle bracket @c ">" **/
             static Token rightangle() { return Token(tokentype::tk_rightangle); }
             /** token representing left parenthesis @c "(" **/
-            static Token leftparen() { return Token(tokentype::tk_leftparen); }
+            static Token leftparen_token() { return Token(tokentype::tk_leftparen); }
             /** Token representing right parenthesis @c ")" **/
-            static Token rightparen() { return Token(tokentype::tk_rightparen); }
+            static Token rightparen_token() { return Token(tokentype::tk_rightparen); }
             /** token representing left bracket @c "[" **/
             static Token leftbracket() { return Token(tokentype::tk_leftbracket); }
             /** token representing right bracket @c "]" **/
             static Token rightbracket() { return Token(tokentype::tk_rightbracket); }
             /** token representing left brace @c "{" **/
-            static Token leftbrace() { return Token(tokentype::tk_leftbrace); }
-            /** token representing right brace @c "}' **/
-            static Token rightbrace() { return Token(tokentype::tk_rightbrace); }
+            static Token leftbrace_token() { return Token(tokentype::tk_leftbrace); }
+            /** token representing right brace @c "}" **/
+            static Token rightbrace_token() { return Token(tokentype::tk_rightbrace); }
             /** token representing period @c "." **/
             static Token dot() { return Token(tokentype::tk_dot); }
             /** token representing comma @c "," **/
-            static Token comma() { return Token(tokentype::tk_comma); }
+            static Token comma_token() { return Token(tokentype::tk_comma); }
             /** token representing colon @c ":" **/
-            static Token colon() { return Token(tokentype::tk_colon); }
+            static Token colon_token() { return Token(tokentype::tk_colon); }
             /** token representing double-colo @c "::" **/
             static Token doublecolon() { return Token(tokentype::tk_doublecolon); }
             /** token representing semicolon @c ";" **/
-            static Token semicolon() { return Token(tokentype::tk_semicolon); }
-            /** token representing single-assignment @c "=" **/
-            static Token singleassign() { return Token(tokentype::tk_singleassign); }
+            static Token semicolon_token() { return Token(tokentype::tk_semicolon); }
+            /** token representing single-assignment @c "=" (editor bait: equal_token) **/
+            static Token singleassign_token() { return Token(tokentype::tk_singleassign); }
             /** token representing unrestricted assignment @c ":=" **/
             static Token assign_token() { return Token(tokentype::tk_assign); }
-            /** token representing indirection @c "->" **/
-            static Token yields() { return Token(tokentype::tk_yields); }
+            /** token representing indirection @c "->" / function return type  **/
+            static Token yields_token() { return Token(tokentype::tk_yields); }
 
             /** token for @c "+" **/
             static Token plus_token() { return Token(tokentype::tk_plus); }
@@ -129,14 +129,19 @@ namespace xo {
             /** token for @c "/" **/
             static Token slash_token() { return Token(tokentype::tk_slash); }
 
+            /** token for @c "==" **/
+            static Token cmpeq_token() { return Token(tokentype::tk_cmpeq); }
+
             /** token representing keyword @c type **/
             static Token type() { return Token(tokentype::tk_type); }
             /** token representing keyword @c def **/
-            static Token def() { return Token(tokentype::tk_def); }
+            static Token def_token() { return Token(tokentype::tk_def); }
             /** token representing keyword @c lambda **/
-            static Token lambda() { return Token(tokentype::tk_lambda); }
+            static Token lambda_token() { return Token(tokentype::tk_lambda); }
             /** token representing keyword @c if **/
             static Token if_token() { return Token(tokentype::tk_if); }
+            /** token representing keyword @c then **/
+            static Token then_token() { return Token(tokentype::tk_then); }
             /** token representing keyword @c else **/
             static Token else_token() { return Token(tokentype::tk_else); }
             /** token representing keyword @c let **/

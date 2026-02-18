@@ -7,9 +7,11 @@
 
 #pragma once
 
+#include "TypeRegistry.hpp"
 #include "facet_implementation.hpp"
-#include "typeseq.hpp"
+//#include "typeseq.hpp"
 #include "obj.hpp"
+#include <xo/arena/DArenaHashMap.hpp>
 #include <xo/indentlog/scope.hpp>
 #include <xo/indentlog/print/tostr.hpp>
 #include <unordered_map>
@@ -38,6 +40,7 @@ namespace xo {
          **/
         class FacetRegistry {
         public:
+            using MemorySizeVisitor = xo::mm::MemorySizeVisitor;
             using typeseq = xo::reflect::typeseq;
             using key_type = std::pair<typeseq, typeseq>;
 
@@ -51,9 +54,12 @@ namespace xo {
                 }
             };
 
-            /** singleton instance **/
-            static FacetRegistry & instance() {
-                static FacetRegistry s_instance;
+            /** singleton instance.
+             *  @p hint_max_capacity is a lower bound for swiss hash map implementation.
+             *  Only honored the first time instance is called.
+             **/
+            static FacetRegistry & instance(uint32_t hint_max_capacity = 1024) {
+                static FacetRegistry s_instance(hint_max_capacity);
                 return s_instance;
             }
 
@@ -68,6 +74,9 @@ namespace xo {
             template <typename AFacet, typename DRepr>
             static void register_impl() {
                 static FacetImplType<AFacet, DRepr> impl;
+
+                TypeRegistry::register_type<AFacet>();
+                TypeRegistry::register_type<DRepr>();
 
                 instance()._register_impl(typeseq::id<AFacet>(),
                                           typeseq::id<DRepr>(),
@@ -87,6 +96,11 @@ namespace xo {
 
             /** Number of registered (facet, repr) pairs **/
             std::size_t size() const { return registry_.size(); }
+
+            /** visit memory pools owned by facet registry **/
+            void visit_pools(const MemorySizeVisitor & visitor) {
+                registry_.visit_pools(visitor);
+            }
 
             /** Check if implementation is registered **/
             bool contains(typeseq facet_id,
@@ -115,7 +129,7 @@ namespace xo {
              *    obj<AFoo> foo
              *      = ...;  // Foo instance with variant impl
              *    obj<ABar> bar
-             *      = FacetRegistry::variant<ABar,AFoo>(foo);
+             *      = FacetRegistry::instance().variant<ABar,AFoo>(foo);
              *
              *    // exception thrown if bar has null data
              *
@@ -128,7 +142,8 @@ namespace xo {
                 if (!retval)
                     throw std::runtime_error(tostr("FacetRegistry::try_variant failed",
                                                    xtag("AFrom.tseq", typeseq::id<AFrom>()),
-                                                   xtag("ATo.tseq", typeseq::id<ATo>())));
+                                                   xtag("ATo.tseq", typeseq::id<ATo>()),
+                                                   xtag("DRepr", from._typeseq())));
 
                 return retval;
             }
@@ -140,7 +155,7 @@ namespace xo {
              *    obj<AFoo> foo
              *      = ...;  // Foo instance with variant impl
              *    obj<ABar> bar
-             *      = FacetRegistry::try_variant<ABar,AFoo>(foo);
+             *      = FacetRegistry::instance().try_variant<ABar,AFoo>(foo);
              *    if (bar) {
              *       // success
              *    } else {
@@ -148,7 +163,7 @@ namespace xo {
              *    }
              **/
             template <typename ATo, typename AFrom>
-            obj<ATo> try_variant(obj<AFrom> from) {
+            obj<ATo> try_variant(obj<AFrom> from) noexcept {
                 return try_variant<ATo>(from._typeseq(), from.data());
             }
 
@@ -162,7 +177,7 @@ namespace xo {
              *      = FacetRegistry::variant<ABar>(foo._typeseq(), foo.opaque_data());
              **/
             template <typename AFacet>
-            obj<AFacet> try_variant(typeseq repr_id, void * data) {
+            obj<AFacet> try_variant(typeseq repr_id, void * data) noexcept {
                 const AFacet * iface = this->lookup<AFacet>(repr_id);
 
                 if (iface)
@@ -220,11 +235,54 @@ namespace xo {
             }
 
         private:
-            FacetRegistry() = default;
+            FacetRegistry(uint32_t hint_max_capacity)
+              : registry_("facets", hint_max_capacity, false /*!debug_flag*/) {}
 
             /** runtime lookup table (AFacet,DRepr) -> impl **/
-            std::unordered_map<key_type, const void *, KeyHash> registry_;
+            xo::map::DArenaHashMap<key_type, const void *, KeyHash> registry_;
         };
+
+        // Deferred definitioon of obj<AFacet,DRepr>::to_facet(),
+        // since implementation requires FacetRegistry
+        //
+        template <typename AFacet, typename DRepr>
+        template <typename AOther>
+        obj<AOther,DRepr>
+        obj<AFacet,DRepr>::to_facet()
+        {
+            if (this->data()) {
+                if constexpr (std::is_same_v<DRepr, DVariantPlaceholder>) {
+                    // return type has type-erased data
+                    return FacetRegistry::instance().variant<AOther,AFacet>(*this);
+                } else {
+                    // return type has known data
+                    return obj<AOther,DRepr>(this->data());
+                }
+            } else {
+                return obj<AOther,DRepr>();
+            }
+        }
+
+        // Deferred definitioon of obj<AFacet,DRepr>::to_facet(),
+        // since implementation requires FacetRegistry
+        //
+        template <typename AFacet, typename DRepr>
+        template <typename AOther>
+        obj<AOther,DRepr>
+        obj<AFacet,DRepr>::try_to_facet() noexcept
+        {
+            if (this->data()) {
+                if constexpr (std::is_same_v<DRepr, DVariantPlaceholder>) {
+                    // return type has type-erased data
+                    return FacetRegistry::instance().try_variant<AOther,AFacet>(*this);
+                } else {
+                    // return type has known data
+                    return obj<AOther,DRepr>(this->data());
+                }
+            } else {
+                return obj<AOther,DRepr>();
+            }
+        }
 
     } /*namespace facet*/
 } /*namespace xo*/

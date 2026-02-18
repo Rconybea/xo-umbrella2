@@ -92,7 +92,15 @@ namespace xo {
             //static_assert(false && "expect specialization <AFacet,DRepr> which should provide ImplType trait");
         };
 
-        /** Retrieve facet implementation for a (facet, datatype) pair **/
+        /** true iff FacetImplementation<AFacet,DRepr> has been specialized with ImplType.
+         *  False when specialization header (IFacet_DRepr.hpp) not included.
+         **/
+        template <typename AFacet, typename DRepr>
+        concept has_facet_impl = requires {
+            typename FacetImplementation<AFacet, DRepr>::ImplType;
+        };
+
+        /** Retrieve facet implementation for a (facet,datatype) pair **/
         template <typename AFacet, typename DRepr>
         using FacetImplType = FacetImplementation<AFacet, DRepr>::ImplType;
 

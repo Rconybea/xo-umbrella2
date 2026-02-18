@@ -3,7 +3,8 @@
 #pragma once
 
 #include "TypeDescrExtra.hpp"
-#include "xo/cxxutil/demangle.hpp"
+#include <xo/indentlog/print/pretty.hpp>
+#include <xo/cxxutil/demangle.hpp>
 #include <iostream>
 #include <typeinfo>
 #include <unordered_map>
@@ -203,6 +204,9 @@ namespace xo {
         /* run-time description for a native c++ type */
         class TypeDescrBase {
         public:
+            using ppindentinfo = xo::print::ppindentinfo;
+
+        public:
             /* type-description objects for a type T is unique,
              *  --> can always use its address
              */
@@ -391,6 +395,9 @@ namespace xo {
             TypeDescr fn_arg(uint32_t i) const { return this->tdextra_->fn_arg(i); }
             bool fn_is_noexcept() const { return this->tdextra_->fn_is_noexcept(); }
 
+            /** pretty-printer support, using @p ppii **/
+            bool pretty(const ppindentinfo & ppii) const;
+
             void display(std::ostream & os) const;
             std::string display_string() const;
 
@@ -543,7 +550,6 @@ namespace xo {
             return os;
         }
 
-
         /* tag to drive overload resolution */
         struct reflected_types_printer {};
 
@@ -567,6 +573,24 @@ namespace xo {
             static TypeDescrTable s_instance;
         };
     } /*namespace reflect*/
+
+    namespace print {
+        template <>
+        struct ppdetail<xo::reflect::TypeDescrBase> {
+            static bool print_pretty(const ppindentinfo & ppii,
+                                     const xo::reflect::TypeDescrBase & td) {
+                return td.pretty(ppii);
+            }
+        };
+
+        template <>
+        struct ppdetail<xo::reflect::TypeDescr> {
+            static bool print_pretty(const ppindentinfo & ppii,
+                                     xo::reflect::TypeDescr td) {
+                return td ? td->pretty(ppii) : true;
+            }
+        };
+    } /*namespace print*/
 } /*namespace xo*/
 
 namespace std {

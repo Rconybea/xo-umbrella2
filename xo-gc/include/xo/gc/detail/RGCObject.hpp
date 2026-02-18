@@ -2,7 +2,7 @@
  *
  *  Generated automagically from ingredients:
  *  1. code generator:
- *       [/home/roland/proj/xo-umbrella2-claude1/xo-facet/codegen/genfacet]
+ *       [xo-facet/codegen/genfacet]
  *     arguments:
  *       --input [idl/GCObject.json5]
  *  2. jinja2 template for abstract facet .hpp file:
@@ -40,13 +40,21 @@ public:
     ///@{
     RGCObject() {}
     RGCObject(Object::DataPtr data) : Object{std::move(data)} {}
+    RGCObject(const AGCObject * iface, void * data)
+      requires std::is_same_v<typename Object::DataType, xo::facet::DVariantPlaceholder>
+      : Object(iface, data) {}
 
     ///@}
     /** @defgroup mm-gcobject-router-methods **/
     ///@{
 
-    // const methods
+    // explicit injected content
+
+    // builtin methods
     typeseq _typeseq() const noexcept { return O::iface()->_typeseq(); }
+    void _drop() const noexcept { O::iface()->_drop(O::data()); }
+
+    // const methods
     size_type shallow_size()  const  noexcept {
         return O::iface()->shallow_size(O::data());
     }
@@ -54,7 +62,7 @@ public:
         return O::iface()->shallow_copy(O::data(), mm);
     }
 
-    // non-const methods
+    // non-const methods (still const in router!)
     size_type forward_children(obj<ACollector> gc)  noexcept {
         return O::iface()->forward_children(O::data(), gc);
     }

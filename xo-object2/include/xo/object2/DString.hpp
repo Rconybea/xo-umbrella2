@@ -78,6 +78,12 @@ namespace xo {
             static DString * from_view(obj<AAllocator> mm,
                                        std::string_view sv);
 
+            /** create string containing a copy @p str.
+             *  Use memory from allocator @p mm.
+             **/
+            static DString * from_str(obj<AAllocator> mm,
+                                      const std::string & str);
+
             /** create string containing a copy of @p sv.
              *  Use memory from allocator @p mm via sub_alloc.
              *  (load-bearing for StringTable)
@@ -278,6 +284,15 @@ namespace xo {
 
             ///@}
         };
+
+        inline std::ostream & operator<<(std::ostream & os, const DString * x) {
+            if (x) {
+                os << std::string_view(*x);
+            } else {
+                os << "nullptr";
+            }
+            return os;
+        }
 
         inline bool operator==(const DString & lhs, const DString & rhs) {
             return DString::compare(lhs, rhs) == 0;

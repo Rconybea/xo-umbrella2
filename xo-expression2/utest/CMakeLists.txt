@@ -5,6 +5,11 @@ set(UTEST_SRCS
     expression2_utest_main.cpp
     StringTable.test.cpp
     X1Collector.test.cpp
+    DConstant.test.cpp
+    DVariable.test.cpp
+    DApplyExpr.test.cpp
+    DDefineExpr.test.cpp
+    DIfElseExpr.test.cpp
 )
 
 xo_add_utest_executable(${UTEST_EXE} ${UTEST_SRCS})

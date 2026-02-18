@@ -4,6 +4,9 @@
  **/
 
 #include "TypeRef.hpp"
+#include <xo/indentlog/print/cond.hpp>
+#include <xo/indentlog/print/pretty.hpp>
+#include <xo/indentlog/print/quoted.hpp>
 
 namespace xo {
     namespace scm {
@@ -60,6 +63,19 @@ namespace xo {
         TypeRef::is_resolved() const noexcept
         {
             return (td_ != nullptr);
+        }
+
+        bool
+        TypeRef::pretty(const ppindentinfo & ppii) const
+        {
+            using xo::print::quot;
+
+            return ppii.pps()->pretty_struct
+                       (ppii,
+                        "TypeRef"
+                        , refrtag("id", quot(id_))
+                        , refrtag("td", cond(td_, td_, "null"))
+                           );
         }
 
     } /*namespace scm*/

@@ -32,7 +32,10 @@ namespace xo {
             const AAllocator * iface() const { return std::launder(this); }
 
             // from AAllocator
+
+            // builtin methods
             typeseq _typeseq() const noexcept  override { return s_typeseq; }
+            void _drop(Opaque) const noexcept override { _fatal(); }
 
             // const methods
             [[noreturn]] std::string_view     name(Copaque) const noexcept override { _fatal(); }
@@ -42,6 +45,8 @@ namespace xo {
             [[noreturn]] size_type       available(Copaque) const noexcept override { _fatal(); }
             [[noreturn]] size_type       allocated(Copaque) const noexcept override { _fatal(); }
             [[noreturn]] bool             contains(Copaque, const void *) const noexcept override { _fatal(); }
+            [[noreturn]] void          visit_pools(Copaque,
+                                                   const MemorySizeVisitor &) const override { _fatal(); }
             [[noreturn]] AllocError     last_error(Copaque) const noexcept override { _fatal(); }
             [[noreturn]] AllocInfo      alloc_info(Copaque, value_type) const noexcept override { _fatal(); }
             // defn in .cpp - problematic to require compiler know vt<AAllocIterator> defn here
@@ -55,7 +60,6 @@ namespace xo {
             [[noreturn]] value_type      sub_alloc(Opaque, std::size_t, bool) const override { _fatal(); }
             [[noreturn]] value_type     alloc_copy(Opaque, value_type) const override { _fatal(); }
             [[noreturn]] void                clear(Opaque) const override { _fatal(); }
-            [[noreturn]] void        destruct_data(Opaque) const override { _fatal(); }
 
         private:
             [[noreturn]] static void _fatal();

@@ -6,6 +6,7 @@
 #include "Tokenizer.hpp"
 
 namespace xo {
+    using xo::mm::MemorySizeInfo;
     using std::byte;
 
     namespace scm {
@@ -19,6 +20,12 @@ namespace xo {
         Tokenizer::discard_current_line()
         {
             this->input_state_.discard_current_line();
+        }
+
+        void
+        Tokenizer::visit_pools(const MemorySizeVisitor & visitor) const
+        {
+            input_buffer_.visit_pools(visitor);
         }
 
         bool
@@ -110,8 +117,8 @@ namespace xo {
         }
 
         auto
-        Tokenizer::assemble_token(std::size_t initial_whitespace,
-                                  const span_type & token_text,
+        Tokenizer::assemble_token(span_type ws_span,
+                                  span_type token_text,
                                   TkInputState * p_input_state) -> result_type
         {
             /* literal|pretty|streamlined */
@@ -119,7 +126,7 @@ namespace xo {
 
             scope log(XO_DEBUG(p_input_state->debug_flag()));
             log && log(xtag("token_text", token_text),
-                       xtag("initial_whitespace", initial_whitespace),
+                       xtag("initial_whitespace", ws_span.size()),
                        xtag("input_state", *p_input_state));
 
             tokentype tk_type = tokentype::tk_invalid;
@@ -595,36 +602,36 @@ namespace xo {
                     tk_text.clear();
             }
 
-            /* input.prefix(0):
-             * require caller preserves current input line until it's entirely exhausted
-             */
-            return result_type(token_type(tk_type, std::move(tk_text)),
-                               p_input_state->current_line().prefix(0));
+            // TOOD: report tk_text as span,
+            //       but must pin / unpin
+
+            return result_type(Token(tk_type, std::move(tk_text)),
+                               span_type::concat(ws_span,
+                                                 span_type(tk_start, tk_end)));
         } /*assemble_token*/
 
         auto
-        Tokenizer::assemble_final_token(const span_type & token_text,
+        Tokenizer::assemble_final_token(span_type token_text,
                                         TkInputState * p_input_state) -> result_type
         {
-            return assemble_token(0 /*initial_whitespace*/,
+            return assemble_token(token_text.prefix(0) /*ws_span*/,
                                   token_text,
                                   p_input_state);
         }
 
         auto
-        Tokenizer::buffer_input_line(const char * input_cstr,
+        Tokenizer::buffer_input_line(span_type input_ext,
                                      bool eof_flag) -> std::pair<input_error, span_type>
         {
             scope log(XO_DEBUG(input_state_.debug_flag()));
 
-            log && log(xtag("input", input_cstr));
+            log && log(xtag("input_ext", input_ext));
 
             auto buf_input_0 = input_buffer_.input_range().hi();
 
-            auto remainder = input_buffer_.append
-                                 (DCircularBuffer::const_span_type::from_cstr(input_cstr));
-            auto remainder2 = input_buffer_.append
-                                  (DCircularBuffer::const_span_type::from_cstr("\n"));
+            auto remainder = input_buffer_.append(input_ext);
+            auto remainder2 = input_buffer_.append(span_type::from_cstr("\n"));
+            //(DCircularBuffer::const_span_type::from_cstr("\n"));
 
             if (!remainder.empty() || !remainder2.empty()) {
                 throw std::runtime_error(tostr("Tokenizer::buffer_line: line too long!",
@@ -633,16 +640,17 @@ namespace xo {
 
             auto buf_input_1 = input_buffer_.input_range().hi();
 
-            span_type input = span_type(buf_input_0,
-                                        buf_input_1);
+            span_type input_ours = span_type(buf_input_0,
+                                             buf_input_1);
 
-            return this->input_state_.capture_current_line(input, eof_flag);
+            return this->input_state_.capture_current_line(input_ours, eof_flag);
         }
 
         auto
         Tokenizer::scan(const span_type & input) -> result_type
         {
             scope log(XO_DEBUG(input_state_.debug_flag()));
+            log && log(xtag("input", input));
 
             /* - Always at beginning of token when scan() invoked
              * - scan will not report any portion of line as consumed until it has
@@ -657,12 +665,14 @@ namespace xo {
             const CharT * ix = this->input_state_.skip_leading_whitespace();
 
             if(ix == input.hi()) {
-                log && log("end input -> consume current line");
+                log && log("end buffered input -> consume current line");
 
                 /* entirety of current line has been tokenized
                  *  -> caller may consume it
                  */
-                return result_type::make_whitespace(this->input_state_.consume_current_line());
+                this->input_state_.consume_current_line();
+
+                return result_type::make_whitespace(input);
             }
 
             /* ix: if ix < input.hi: first non-whitespace character after input_state_.current_pos_ */
@@ -695,27 +705,17 @@ namespace xo {
 
                 ++ix;
 
-#ifdef OBSOLETE // no longer a thing. either input ends in whitespace, or ends translation unit
-                if (ix == input.hi()) {
-                    /* need more input to know if/when token complete */
-                    this->prefix_ += std::string(tk_start, input.hi());
+                CharT ch2 = *ix;
 
-                    log && log(xtag("captured-prefix1", this->prefix_));
-                } else
-#endif
-                    {
-                    CharT ch2 = *ix;
-
-                    if (((ch2 >= '0') && (ch2 <= '9'))
-                        || ((ch2 >= 'A') && (ch2 <= 'Z'))
-                        || ((ch2 >= 'a') && (ch2 <= 'z')))
+                if (((ch2 >= '0') && (ch2 <= '9'))
+                    || ((ch2 >= 'A') && (ch2 <= 'Z'))
+                    || ((ch2 >= 'a') && (ch2 <= 'z')))
                     {
                         /* treat as 1 char punctuation */
                         ;
                     } else {
-                        /* include next char */
-                        ++ix;
-                    }
+                    /* include next char */
+                    ++ix;
                 }
             } else if (*ix == '"') {
                 bool complete_flag = false;
@@ -777,7 +777,7 @@ namespace xo {
 
                             this->input_state_.advance_until(ix);
 
-                            return assemble_token(whitespace_z,
+                            return assemble_token(span_type(input.lo(), tk_start),
                                                   span_type(tk_start, ix) /*token*/,
                                                   &(this->input_state_));
                         }
@@ -801,7 +801,7 @@ namespace xo {
                             this->input_state_.advance_until(ix);
 
                             /* ignore next char and complete token */
-                            return assemble_token(whitespace_z,
+                            return assemble_token(span_type(input.lo(), tk_start),
                                                   span_type(tk_start, ix) /*token*/,
                                                   &(this->input_state_));
                         }
@@ -852,7 +852,7 @@ namespace xo {
 
             this->input_state_.advance_until(ix);
 
-            return assemble_token(whitespace_z,
+            return assemble_token(span_type(input.lo(), tk_start),
                                   span_type(tk_start, ix) /*token*/,
                                   &(this->input_state_));
         } /*_scan_aux*/
