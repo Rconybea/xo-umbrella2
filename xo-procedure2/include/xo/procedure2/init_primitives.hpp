@@ -29,13 +29,13 @@ namespace xo {
              *        so we can dispatch on vector, matrix, function types
              **/
             static DPrimitive_gco_2_gco_gco s_sub_gco_gco_pm;
-#endif
 
             /** polymorphic equality comparison
              *
              *  TODO: this will want to move to x-numeric/
              **/
             static DPrimitive_gco_2_gco_gco s_equal_gco_gco_pm;
+#endif
 
 #ifdef NOT_YET
             static Primitive_f64_1_f64 s_neg_f64_pm;

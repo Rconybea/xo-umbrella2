@@ -6,6 +6,7 @@
 #include "RuntimeError.hpp"
 
 namespace xo {
+    using xo::print::APrintable;
     using xo::mm::AGCObject;
     using xo::facet::typeseq;
 
@@ -89,12 +90,14 @@ namespace xo {
         bool
         DRuntimeError::pretty(const ppindentinfo & ppii) const
         {
-            return ppii.pps()->pretty_struct(ppii,
-                                             "DRuntimeError");
+            return ppii.pps()->pretty_struct
+                (ppii,
+                 "DRuntimeError",
+                 refrtag("src", obj<APrintable,DString>(src_function_)),
+                 refrtag("err", obj<APrintable,DString>(error_descr_)));
         }
 
     } /*namespace scm*/
 } /*namespace xo*/
 
 /* end DRuntimeError.cpp */
-
