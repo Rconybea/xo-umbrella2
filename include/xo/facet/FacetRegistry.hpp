@@ -50,7 +50,8 @@ namespace xo {
                     // combine the two seqno values
                     std::size_t h1 = std::hash<int32_t>{}(k.first.seqno());
                     std::size_t h2 = std::hash<int32_t>{}(k.second.seqno());
-                    return h1 ^ (h2 << 1);
+
+                    return h1 ^ (h2 << 3);
                 }
             };
 
