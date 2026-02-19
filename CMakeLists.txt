@@ -99,11 +99,11 @@ add_subdirectory(xo-callback)
 add_subdirectory(xo-printable2)  # experiment w/ facet object model
 add_subdirectory(xo-alloc)
 add_subdirectory(xo-alloc2)   # experiment w/ facet object model
-add_subdirectory(xo-numeric)  # experiment w/ facet object model
 add_subdirectory(xo-gc)
 add_subdirectory(xo-object)
 add_subdirectory(xo-object2)  # experiment w/ facet object model
 add_subdirectory(xo-procedure2)  # schematika procedure abstraction + runtime context (fomo)
+add_subdirectory(xo-numeric)  # experiment w/ facet object model
 add_subdirectory(xo-ordinaltree)
 #
 add_subdirectory(xo-tokenizer2)  # schematika tokenizer (fomo)
