@@ -46,6 +46,10 @@ namespace xo {
             REQUIRE(s_init.evidence());
         }
 
+        // MOVE THESE TO xo-numeric/
+        // Should work using NumericPrimitives::s_mul_gco_gco
+
+#ifdef OBSOLETE
         TEST_CASE("DPrimitive-n_args", "[procedure2][DPrimitive]")
         {
             // s_mul_gco_gco_pm takes 2 AGCObject args
@@ -137,6 +141,7 @@ namespace xo {
 
             CHECK(output.find("_mul") != std::string::npos);
         }
+#endif
 
     } /*namespace ut*/
 } /*namespace xo*/
