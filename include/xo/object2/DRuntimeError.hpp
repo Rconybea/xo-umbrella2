@@ -42,7 +42,7 @@ namespace xo {
 
             /** @defgroup scm-runtimeerror-printable-facet printable facet **/
             ///@{
-            
+
             bool pretty(const ppindentinfo & ppii) const;
 
             ///@}
