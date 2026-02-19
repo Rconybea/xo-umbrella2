@@ -99,7 +99,6 @@ namespace xo {
                                            xtag("y.tseq", y_tseq)));
             return obj<AGCObject>();
         }
-#endif
 
         obj<AGCObject>
         sub_gco_gco(obj<ARuntimeContext> rcx,
@@ -160,6 +159,7 @@ namespace xo {
                                            xtag("y.tseq", y_tseq)));
             return obj<AGCObject>();
         }
+#endif
 
         obj<AGCObject>
         equal_gco_gco(obj<ARuntimeContext> rcx,
@@ -260,10 +260,10 @@ namespace xo {
 #ifdef OSOLETE
         DPrimitive_gco_2_gco_gco
         Primitives::s_mul_gco_gco_pm("_mul", &mul_gco_gco);
-#endif
 
         DPrimitive_gco_2_gco_gco
         Primitives::s_sub_gco_gco_pm("_sub", &sub_gco_gco);
+#endif
 
         DPrimitive_gco_2_gco_gco
         Primitives::s_equal_gco_gco_pm("_equal", &equal_gco_gco);
