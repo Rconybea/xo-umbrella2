@@ -39,6 +39,7 @@ namespace xo {
         }
 #endif
 
+#ifdef OBSOLETE // see xo-numeric/xo/numeric/NumericPrimitives.cpp
         obj<AGCObject>
         mul_gco_gco(obj<ARuntimeContext> rcx,
                     obj<AGCObject> x_gco,
@@ -98,6 +99,7 @@ namespace xo {
                                            xtag("y.tseq", y_tseq)));
             return obj<AGCObject>();
         }
+#endif
 
         obj<AGCObject>
         sub_gco_gco(obj<ARuntimeContext> rcx,
@@ -255,8 +257,10 @@ namespace xo {
         }
 #endif
 
+#ifdef OSOLETE
         DPrimitive_gco_2_gco_gco
         Primitives::s_mul_gco_gco_pm("_mul", &mul_gco_gco);
+#endif
 
         DPrimitive_gco_2_gco_gco
         Primitives::s_sub_gco_gco_pm("_sub", &sub_gco_gco);

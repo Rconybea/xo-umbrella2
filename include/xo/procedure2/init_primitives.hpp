@@ -15,12 +15,14 @@ namespace xo {
 #endif
 
         struct Primitives {
+#ifdef OBSOLETE // see xo-numeric/src/numeric/NumericPrimitives.cpp
             /** polymorphic multiply
              *
              *  TODO: this will want to move to xo-numeric/
              *        so we can dispatch on vector, matrix, function types
              **/
             static DPrimitive_gco_2_gco_gco s_mul_gco_gco_pm;
+#endif
 
             /** polymorphic subtract
              *
