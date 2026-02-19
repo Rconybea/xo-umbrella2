@@ -22,7 +22,6 @@ namespace xo {
              *        so we can dispatch on vector, matrix, function types
              **/
             static DPrimitive_gco_2_gco_gco s_mul_gco_gco_pm;
-#endif
 
             /** polymorphic subtract
              *
@@ -30,6 +29,7 @@ namespace xo {
              *        so we can dispatch on vector, matrix, function types
              **/
             static DPrimitive_gco_2_gco_gco s_sub_gco_gco_pm;
+#endif
 
             /** polymorphic equality comparison
              *
