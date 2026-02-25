@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "hashmap/DArenaHashMapUtil.hpp"
+#include <xo/arena/hashmap/DArenaHashMapUtil.hpp>
 
 namespace xo {
     namespace map {
