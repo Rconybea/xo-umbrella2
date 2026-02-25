@@ -135,11 +135,12 @@ let
         {
             xo-cmake          = self.callPackage pkgs/xo-cmake.nix          {};
             xo-indentlog      = self.callPackage pkgs/xo-indentlog.nix      { buildDocs = true; buildExamples = true; };
-            xo-refcnt         = self.callPackage pkgs/xo-refcnt.nix         {};
             xo-subsys         = self.callPackage pkgs/xo-subsys.nix         {};
             xo-randomgen      = self.callPackage pkgs/xo-randomgen.nix      {                   buildExamples = true; };
             xo-reflectutil    = self.callPackage pkgs/xo-reflectutil.nix    {};
             xo-arena          = self.callPackage pkgs/xo-arena.nix          {};
+            xo-facet          = self.callPackage pkgs/xo-facet.nix          {};
+            xo-refcnt         = self.callPackage pkgs/xo-refcnt.nix         {};
             xo-ordinaltree    = self.callPackage pkgs/xo-ordinaltree.nix    {};
             xo-flatstring     = self.callPackage pkgs/xo-flatstring.nix     { buildDocs = true; buildExamples = true; };
             xo-pyutil         = self.callPackage pkgs/xo-pyutil.nix         {};
@@ -483,6 +484,7 @@ in
     subsys         = pkgs.xo-subsys;
     randomgen      = pkgs.xo-randomgen;
     arena          = pkgs.xo-arena;
+    facet          = pkgs.xo-facet;
     ordinaltree    = pkgs.xo-ordinaltree;
     flatstring     = pkgs.xo-flatstring;
     pyutil         = pkgs.xo-pyutil;
