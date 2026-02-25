@@ -138,10 +138,11 @@ let
             xo-refcnt         = self.callPackage pkgs/xo-refcnt.nix         {};
             xo-subsys         = self.callPackage pkgs/xo-subsys.nix         {};
             xo-randomgen      = self.callPackage pkgs/xo-randomgen.nix      {                   buildExamples = true; };
+            xo-reflectutil    = self.callPackage pkgs/xo-reflectutil.nix    {};
+            xo-arena          = self.callPackage pkgs/xo-arena.nix          {};
             xo-ordinaltree    = self.callPackage pkgs/xo-ordinaltree.nix    {};
             xo-flatstring     = self.callPackage pkgs/xo-flatstring.nix     { buildDocs = true; buildExamples = true; };
             xo-pyutil         = self.callPackage pkgs/xo-pyutil.nix         {};
-            xo-reflectutil    = self.callPackage pkgs/xo-reflectutil.nix    {};
             xo-reflect        = self.callPackage pkgs/xo-reflect.nix        {};
             xo-pyreflect      = self.callPackage pkgs/xo-pyreflect.nix      {};
             xo-ratio          = self.callPackage pkgs/xo-ratio.nix          { buildDocs = true; buildExamples = true; };
@@ -244,19 +245,43 @@ let
     pkgs.libbsd
   ];
 
+  # emacs
+  emacs4xo = (pkgs.emacsPackagesFor pkgs.emacs30).emacsWithPackages (epkgs: with epkgs; [
+    lsp-mode
+    lsp-ui
+    lsp-ivy
+    flycheck
+    ivy
+    rg
+    transient   # magit dep
+    nix-mode
+    yaml-mode
+    htmlize
+    magit
+    exec-path-from-shell
+    highlight
+    surround
+    projectile
+    treemacs
+    treemacs-projectile
+    company
+    cmake-mode
+    which-key
+    xterm-color
+    yasnippet
+  ]);
+
   # xo ide utils
   ideutils = [
     pkgs.gsettings-desktop-schemas
-    pkgs.emacs30
-#    (pkgs.emacs.pkgs.withPackages (epkgs: [
-#    ]))
+    emacs4xo
     # pkgs.emacs-pgtk  # wayland with treesitter; alternatively pkgs.emacs30 for emacs+tree-sitter
     pkgs.tree-sitter # CLI tool, but not grammars
     pkgs.notmuch
     pkgs.emacsPackages.notmuch
     pkgs.inconsolata-lgc
     pkgs.fontconfig
-] 
+]
 ++ (if pkgs.stdenv.isLinux then [
     pkgs.ghostty
 ] else [])
@@ -457,6 +482,7 @@ in
     refcnt         = pkgs.xo-refcnt;
     subsys         = pkgs.xo-subsys;
     randomgen      = pkgs.xo-randomgen;
+    arena          = pkgs.xo-arena;
     ordinaltree    = pkgs.xo-ordinaltree;
     flatstring     = pkgs.xo-flatstring;
     pyutil         = pkgs.xo-pyutil;
