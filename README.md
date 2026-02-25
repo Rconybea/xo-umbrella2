@@ -26,6 +26,7 @@ $ nix-shell -A shell0  # just nix stdenv: make,gcc,bash etc.
 $ nix-shell -A shell1  # stable environment
 $ nix-shell -A shell2  # stable environment + emacs + lsp
 $ nix-shell -A shell3  # stable environment + emacs + lsp + xorg/opengl/vulkan/imgui stack (wsl2-only)
+$ nix-shell -A shell4-osx  # stable environment + emacs + lsp + imgui stack (osx-only)
 $ nix-shell -A shell4  # wsl2-specific. like shell3, vkcube works (at least on WSL)
 $ nix-shell -A shell5  # wsl2-specific. uses dxg driver for "hardware acceleration"
 $ nix-shell -A shell   # (deprecated) bleeding edge environment
@@ -156,6 +157,12 @@ $ nix-build -A xo-userenv-slow
 
 Same result as `$nix-build -A xo-userenv`, but builds each package serially
 using `xo-build`.
+
+Finally, can also individual XO packages:
+```
+$ nix-build -A xo.cmake
+...
+```
 
 #### Nix + SDL2 + Vulkan + ImGui
 
