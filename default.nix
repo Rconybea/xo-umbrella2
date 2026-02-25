@@ -6,8 +6,8 @@
 {
   # official 24.05 release  # nearly works on macos, clang17, llvm18 except for sphinx-contrib.ditaa
 # probably whould be nixos-25.05.tar.gz here
-#  nixpkgs-path ? fetchTarball "https://github.com/NixOS/nixpkgs/archive/nixos-24.05.tar.gz",
-  nixpkgs-path ? ../nixpkgs,
+  nixpkgs-path ? fetchTarball "https://github.com/NixOS/nixpkgs/archive/nixos-24.11.tar.gz",
+#  nixpkgs-path ? ../nixpkgs,
 
 #  pkgs ? import (fetchTarball {
 #    # 24.05-darwin works on macos, clang17, llvm 18 (copying from xo-nix2)
@@ -256,7 +256,11 @@ let
     pkgs.emacsPackages.notmuch
     pkgs.inconsolata-lgc
     pkgs.fontconfig
+] 
+++ (if pkgs.stdenv.isLinux then [
     pkgs.ghostty
+] else [])
+++ [
     pkgs.timg
     pkgs.fish
     pkgs.nushell
@@ -273,9 +277,9 @@ let
 
     pkgs.lcov
     pkgs.catch2
-    pkgs.gdb
   ]
   ++ (if pkgs.stdenv.isLinux then [
+    pkgs.gdb
     pkgs.strace
   ] else [])
   ++ [
@@ -287,7 +291,11 @@ let
     pkgs.openssh
 
     pkgs.ccache
+]
+++ (if pkgs.stdenv.isLinux then [
     pkgs.distcc
+] else [])
+ ++ [
     pkgs.cmake
     pkgs.pkg-config
     pkgs.unzip
@@ -336,7 +344,7 @@ let
     pkgs.lib.optionals pkgs.stdenv.isDarwin [
       pkgs.darwin.moltenvk
     ] ++
-    [
+    pkgs.lib.optionals pkgs.stdenv.isLinux [
       pkgs.vulkan-tools
       pkgs.vulkan-loader
       pkgs.vulkan-headers
@@ -388,7 +396,7 @@ let
             pkgs.libxml2
             pkgs.libffi
 
-            pkgs.elfutils        # for libelf.so
+            pkgs.elfutils 
             pkgs.ncurses         # for libtinfo.so
             pkgs.expat
             pkgs.zstd
@@ -615,7 +623,7 @@ in
           pkgs.libxml2
           pkgs.libffi
 
-          pkgs.elfutils        # for libelf.so
+          pkgs.elfutils
           pkgs.ncurses         # for libtinfo.so
           pkgs.expat
           pkgs.zstd
