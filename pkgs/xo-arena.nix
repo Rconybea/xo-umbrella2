@@ -4,7 +4,7 @@
 
   # xo dependencies
   xo-cmake,
-#  xo-refcnt,
+  xo-randomgen,
   xo-reflectutil,
   xo-indentlog,
 } :
@@ -15,13 +15,15 @@ stdenv.mkDerivation (finalattrs:
 
     src = ../xo-arena;
 
-    cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake"];
+    cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake"
+                  "-DENABLE_TESTING=1"
+                 ];
     doCheck = true;
     nativeBuildInputs = [
-      cmake catch2 xo-cmake
+      cmake catch2
+      xo-cmake xo-randomgen
     ];
     propagatedBuildInputs = [
-#      xo-refcnt
       xo-reflectutil
       xo-indentlog
     ];
