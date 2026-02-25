@@ -344,8 +344,7 @@ let
     pkgs.lib.optionals pkgs.stdenv.isDarwin [
       pkgs.darwin.moltenvk
     ] ++
-    pkgs.lib.optionals pkgs.stdenv.isLinux [
-      pkgs.vulkan-tools
+    [ pkgs.vulkan-tools
       pkgs.vulkan-loader
       pkgs.vulkan-headers
       pkgs.vulkan-validation-layers
@@ -382,7 +381,7 @@ let
           #    elfutils, ncurses, expat, zstd, zlib, libbsd, gcc.cc.lib)
           #   glxgears runs at ~170fps
           #
-          glpath = pkgs.lib.makeLibraryPath [
+          glpath = pkgs.lib.makeLibraryPath ([
             pkgs.wayland         # for libwayland-client.so
 
             pkgs.xorg.libXau
@@ -396,7 +395,8 @@ let
             pkgs.libxml2
             pkgs.libffi
 
-            pkgs.elfutils 
+          ] ++ (if pkgs.stdenv.isLinux then [ pkgs.elfutils ] else [])
+          ++ [
             pkgs.ncurses         # for libtinfo.so
             pkgs.expat
             pkgs.zstd
@@ -404,7 +404,7 @@ let
             pkgs.libbsd
 
             pkgs.gcc.cc.lib      # for libstdc++.so  (won't blow up cmake, only touching LD_LIBRARY_PATH)
-          ];
+          ]);
         in
           ''
         # CXENV: cosmetic: coordinates with ~/proj/env/dotfiles/bashrc to drive PS1
@@ -610,7 +610,7 @@ in
         #    elfutils, ncurses, expat, zstd, zlib, libbsd, gcc.cc.lib)
         #   glxgears runs at ~170fps
         #
-        glpath = pkgs.lib.makeLibraryPath [
+        glpath = pkgs.lib.makeLibraryPath ([
           pkgs.wayland         # for libwayland-client.so
 
           pkgs.xorg.libXau
@@ -623,7 +623,8 @@ in
           pkgs.libxml2
           pkgs.libffi
 
-          pkgs.elfutils
+        ] ++ (if pkgs.stdenv.isLinux then [ pkgs.elfutils ] else [])
+        ++ [
           pkgs.ncurses         # for libtinfo.so
           pkgs.expat
           pkgs.zstd
@@ -631,7 +632,7 @@ in
           pkgs.libbsd
 
           pkgs.gcc.cc.lib      # for libstdc++.so  (won't blow up cmake, only touching LD_LIBRARY_PATH)
-        ];
+        ]);
       in
         ''
         # CXENV: cosmetic: coordinates with ~/proj/env/dotfiles/bashrc to drive PS1
