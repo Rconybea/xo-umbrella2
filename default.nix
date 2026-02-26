@@ -153,6 +153,7 @@ let
             xo-pyunit         = self.callPackage pkgs/xo-pyunit.nix         {};
             #
             xo-callback       = self.callPackage pkgs/xo-callback.nix       {};
+            xo-printable2     = self.callPackage pkgs/xo-printable2.nix     {};
             xo-webutil        = self.callPackage pkgs/xo-webutil.nix        {};
             xo-pywebutil      = self.callPackage pkgs/xo-pywebutil.nix      {};
             xo-printjson      = self.callPackage pkgs/xo-printjson.nix      {};
@@ -498,6 +499,7 @@ in
     unit           = pkgs.xo-unit;
     pyunit         = pkgs.xo-pyunit;
     callback       = pkgs.xo-callback;
+    printable2     = pkgs.xo-printable2;
     webutil        = pkgs.xo-webutil;
     pywebutil      = pkgs.xo-pywebutil;
     printjson      = pkgs.xo-printjson;
