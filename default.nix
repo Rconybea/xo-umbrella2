@@ -141,6 +141,7 @@ let
             xo-arena          = self.callPackage pkgs/xo-arena.nix          { buildDocs = true; };
             xo-facet          = self.callPackage pkgs/xo-facet.nix          {};
             xo-allocutil      = self.callPackage pkgs/xo-allocutil.nix      {};
+            xo-alloc          = self.callPackage pkgs/xo-alloc.nix          {}; # buildDocs = true;
             xo-refcnt         = self.callPackage pkgs/xo-refcnt.nix         {};
             xo-ordinaltree    = self.callPackage pkgs/xo-ordinaltree.nix    {};
             xo-flatstring     = self.callPackage pkgs/xo-flatstring.nix     { buildDocs = true; buildExamples = true; };
@@ -479,13 +480,14 @@ in
   pkgs = pkgs;
   xo = {
     cmake          = pkgs.xo-cmake;
-#    facet          = pkgs.xo-facet;
     indentlog      = pkgs.xo-indentlog;
     refcnt         = pkgs.xo-refcnt;
     subsys         = pkgs.xo-subsys;
     randomgen      = pkgs.xo-randomgen;
     arena          = pkgs.xo-arena;
     facet          = pkgs.xo-facet;
+    allocutil      = pkgs.xo-allocutil;
+    alloc          = pkgs.xo-alloc;
     ordinaltree    = pkgs.xo-ordinaltree;
     flatstring     = pkgs.xo-flatstring;
     pyutil         = pkgs.xo-pyutil;

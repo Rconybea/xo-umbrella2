@@ -3,6 +3,7 @@
   stdenv, cmake, catch2,
 
   # xo dependencies
+  xo-allocutil,
   xo-cmake,
 #  xo-randomgen,
 #  xo-reflectutil,
