@@ -18,7 +18,15 @@ stdenv.mkDerivation (finalattrs:
     src = ../xo-refcnt;
 
     cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake"];
-    doCheck = true;
-    propagatedBuildInputs = [ xo-indentlog ];
-    nativeBuildInputs = [ cmake catch2 xo-cmake ];
+
+    inherit doCheck;
+
+    propagatedBuildInputs = [
+      xo-reflectutil
+      xo-indentlog
+    ];
+    nativeBuildInputs = [
+      cmake
+      catch2
+      xo-cmake ];
   })
