@@ -20,6 +20,7 @@ Some features: kalman filters, stochastic processes, complex event processing, s
    xo-flatstring/docs/index
    xo-ratio/docs/index
    xo-unit/docs/index
+   xo-gc/docs/index
    xo-tokenizer/docs/index
    xo-reader/docs/index
    xo-jit/docs/index
