@@ -140,6 +140,7 @@ let
             xo-reflectutil    = self.callPackage pkgs/xo-reflectutil.nix    {};
             xo-arena          = self.callPackage pkgs/xo-arena.nix          { buildDocs = true; };
             xo-facet          = self.callPackage pkgs/xo-facet.nix          {};
+            xo-allocutil      = self.callPackage pkgs/xo-allocutil.nix      {};
             xo-refcnt         = self.callPackage pkgs/xo-refcnt.nix         {};
             xo-ordinaltree    = self.callPackage pkgs/xo-ordinaltree.nix    {};
             xo-flatstring     = self.callPackage pkgs/xo-flatstring.nix     { buildDocs = true; buildExamples = true; };
