@@ -138,7 +138,7 @@ let
             xo-subsys         = self.callPackage pkgs/xo-subsys.nix         {};
             xo-randomgen      = self.callPackage pkgs/xo-randomgen.nix      {                   buildExamples = true; };
             xo-reflectutil    = self.callPackage pkgs/xo-reflectutil.nix    {};
-            xo-arena          = self.callPackage pkgs/xo-arena.nix          {};
+            xo-arena          = self.callPackage pkgs/xo-arena.nix          { buildDocs = true; };
             xo-facet          = self.callPackage pkgs/xo-facet.nix          {};
             xo-refcnt         = self.callPackage pkgs/xo-refcnt.nix         {};
             xo-ordinaltree    = self.callPackage pkgs/xo-ordinaltree.nix    {};

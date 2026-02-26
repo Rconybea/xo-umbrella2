@@ -1,9 +1,10 @@
-.. _cmpresult-reference:
+.. _AllocInfo-reference:
 
-cmpresult
-=========
+AllocInfo Reference
+===================
 
-Represent the result of a partially ordered comparison
+Describes a single allocation.
+Requires allocator configured to store per-allocation headers
 
 Context
 -------
@@ -17,34 +18,9 @@ Context
     +-----------------------------------------------------+
     |                     ArenaConfig                     |
     +--------------+------------------------+-------------+
-    |              |        AllocInfo       |         cBLU|
+    |              |        AllocInfo   cBLU|             |
     |              +------------------------+             |
     | AllocError   |  AllocHeaderConfig     |  cmpresult  |
     |              +------------------------+             |
     |              |      AllocHeader       |             |
     +--------------+------------------------+-------------+
-
-
-.. code-block:: cpp
-
-    #include <xo/arena/cmpresult.hpp>
-
-Class
------
-
-.. doxygenclass:: xo::mm::cmpresult
-
-Constructors
-------------
-
-.. doxygengroup:: mm-cmpresult-ctors
-
-Methods
--------
-
-.. doxygengroup:: mm-cmpresult-methods
-
-Member Variables
-----------------
-
-.. doxygengroup:: mm-cmpresult-instance-vars
