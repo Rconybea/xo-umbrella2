@@ -3,7 +3,11 @@
   stdenv, cmake, catch2,
 
   # xo dependencies
-  xo-cmake, xo-indentlog
+  xo-reflectutil,
+  xo-indentlog,
+  xo-cmake,
+
+  doCheck ? true,
 } :
 
 stdenv.mkDerivation (finalattrs:
