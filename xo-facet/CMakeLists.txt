@@ -35,11 +35,22 @@ xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets
 
 # ----------------------------------------------------------------
 
-# Install the generator script
+# Install the generator script:
 install(
     PROGRAMS codegen/genfacet
     DESTINATION share/xo-facet/codegen
     COMPONENT codegen
+)
+
+file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/genfacet-bin
+"#!/bin/bash
+exec \"${CMAKE_INSTALL_FULL_DATADIR}/xo-facet/codegen/genfacet\" \"\$@\"
+")
+
+install(
+    PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/genfacet-bin
+    DESTINATION bin
+    RENAME genfacet
 )
 
 # Install all .j2 template files
