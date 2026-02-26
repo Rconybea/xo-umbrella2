@@ -142,6 +142,7 @@ let
             xo-facet          = self.callPackage pkgs/xo-facet.nix          {};
             xo-allocutil      = self.callPackage pkgs/xo-allocutil.nix      {};
             xo-alloc          = self.callPackage pkgs/xo-alloc.nix          {}; # buildDocs = true;
+            xo-alloc2         = self.callPackage pkgs/xo-alloc2.nix         { buildDocs = true; };
             xo-refcnt         = self.callPackage pkgs/xo-refcnt.nix         {};
             xo-ordinaltree    = self.callPackage pkgs/xo-ordinaltree.nix    {};
             xo-flatstring     = self.callPackage pkgs/xo-flatstring.nix     { buildDocs = true; buildExamples = true; };
@@ -489,6 +490,7 @@ in
     facet          = pkgs.xo-facet;
     allocutil      = pkgs.xo-allocutil;
     alloc          = pkgs.xo-alloc;
+    alloc2         = pkgs.xo-alloc2;
     ordinaltree    = pkgs.xo-ordinaltree;
     flatstring     = pkgs.xo-flatstring;
     pyutil         = pkgs.xo-pyutil;
