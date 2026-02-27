@@ -152,6 +152,7 @@ let
             xo-alloc2         = self.callPackage pkgs/xo-alloc2.nix         { stdenv = jitStdenv; buildDocs = true; };
             xo-gc             = self.callPackage pkgs/xo-gc.nix             { stdenv = jitStdenv; buildDocs = true; };
             xo-object         = self.callPackage pkgs/xo-object.nix         { stdenv = jitStdenv; };
+            xo-object2        = self.callPackage pkgs/xo-object2.nix        { stdenv = jitStdenv; };
             xo-refcnt         = self.callPackage pkgs/xo-refcnt.nix         { stdenv = jitStdenv; };
             xo-ordinaltree    = self.callPackage pkgs/xo-ordinaltree.nix    { stdenv = jitStdenv; };
             xo-pyutil         = self.callPackage pkgs/xo-pyutil.nix         { stdenv = jitStdenv; };
@@ -501,6 +502,7 @@ in
     alloc2         = pkgs.xo-alloc2;
     gc             = pkgs.xo-gc;
     object         = pkgs.xo-object;
+    object2        = pkgs.xo-object2;
     ordinaltree    = pkgs.xo-ordinaltree;
     flatstring     = pkgs.xo-flatstring;
     pyutil         = pkgs.xo-pyutil;
