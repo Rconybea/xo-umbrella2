@@ -752,11 +752,18 @@ in
   #  2 - merge to look like shell4-wsl / shell4-nvidia
   #
   #shell4-osx = pkgs.mkShell.override { stdenv = pkgs.jitStdenv; } { .. } # very high attack surface area
-  shell4-osx = pkgs.mkShell {
-    buildInputs = docutils ++ xodeps ++ devutils ++ ideutils ++ x11utils ++ gldeps ++ vkdeps ++ imguideps;
+  shell4-osx =
+    let
+      clangStdenv = pkgs.overrideCC pkgs.stdenv pkgs.llvmPackages_18.clang;
+    in
+      let jitStdenv = if pkgs.stdenv.isDarwin then clangStdenv else pkgs.stdenv;
+    in
+      (pkgs.mkShell.override { stdenv = jitStdenv; })
+        {
+          buildInputs = docutils ++ xodeps ++ devutils ++ ideutils ++ x11utils ++ gldeps ++ vkdeps ++ imguideps;
 
-    shellHook =
-      ''
+          shellHook =
+            ''
       export CXENV=$CXENV:xo4-WIP
 
         # override SOUCE_DATE_EPOCH to current time (otherwise will get 1980)
@@ -777,7 +784,7 @@ in
       # dependencies on host system libraries
       # glpath = pkgs.lib.makeLibraryPath [ ];
       '';
-  };
+        };
 
   # like shell4 but drop etc/hostwsl2 symlink dir.
   # looks like nixpkgs mesa not built for wsl2 dxg

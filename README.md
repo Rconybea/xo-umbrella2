@@ -49,8 +49,9 @@ If `nix` is available, you probably prefer the nix build, unless working on XO i
 Otherwise continue reading..
 
 ```
-$ cd xo
-$ PREFIX=/path/to/say/usr/local
+$ PREFIX=/path/to/say/home/local
+$ cd xo-umbrella2
+$ (cd xo-cmake && cmake -DCMAKE_INSTALL_PREFIX=$PREFIX -B .build -S . && cmake --install .build)
 $ cmake -B .build -S . -DCMAKE_INSTALL_PREFIX=${PREFIX} -DXO_ENABLE_EXAMPLES=1 -DXO_ENABLE_DOCS=1 -DCMAKE_BUILD_TYPE=debug
 $ cmake --build .build --verbose
 $ cmake --install .build
