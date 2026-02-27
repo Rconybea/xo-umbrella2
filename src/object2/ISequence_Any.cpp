@@ -3,6 +3,7 @@
  **/
 
 #include "sequence/ISequence_Any.hpp"
+#include <exception>
 #include <iostream>
 
 namespace xo {
