@@ -193,6 +193,10 @@ xo_add_genfacet_all(xo-object2-genfacet-all)
 add_subdirectory(src/object2)
 add_subdirectory(utest)
 
+install(DIRECTORY idl/
+    DESTINATION share/${PROJECT_NAME}/idl
+    FILES_MATCHING PATTERN "*.json5")
+
 xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
 
 # ----------------------------------------------------------------

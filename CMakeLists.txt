@@ -82,12 +82,11 @@ add_subdirectory(xo-cmake)
 add_subdirectory(xo-indentlog)
 add_subdirectory(xo-reflectutil)  # header-only reflect support
 add_subdirectory(xo-randomgen)    # xoshiro256ss
-add_subdirectory(xo-arena)   # arena allocator (DArena)
-add_subdirectory(xo-facet)   # sep iface,data
+add_subdirectory(xo-arena)        # arena allocator (DArena)
+add_subdirectory(xo-facet)        # sep iface,data
 add_subdirectory(xo-allocutil)
 add_subdirectory(xo-refcnt)
 add_subdirectory(xo-subsys)
-#add_subdirectory(xo-randomgen)
 add_subdirectory(xo-flatstring)
 add_subdirectory(xo-pyutil)
 add_subdirectory(xo-reflect)
@@ -96,20 +95,20 @@ add_subdirectory(xo-ratio)
 add_subdirectory(xo-unit)
 add_subdirectory(xo-pyunit)
 add_subdirectory(xo-callback)
-add_subdirectory(xo-printable2)  # experiment w/ facet object model
+add_subdirectory(xo-printable2)   # experiment w/ facet object model
 add_subdirectory(xo-alloc)
-add_subdirectory(xo-alloc2)   # experiment w/ facet object model
-add_subdirectory(xo-gc)
+add_subdirectory(xo-alloc2)       # experiment w/ facet object model
+add_subdirectory(xo-gc)           # experiment w/ facet object model
 add_subdirectory(xo-object)
-add_subdirectory(xo-object2)  # experiment w/ facet object model
-add_subdirectory(xo-procedure2)  # schematika procedure abstraction + runtime context (fomo)
-add_subdirectory(xo-numeric)  # experiment w/ facet object model
+add_subdirectory(xo-object2)      # experiment w/ facet object model
+add_subdirectory(xo-procedure2)   # schematika procedure abstraction + runtime context (fomo)
+add_subdirectory(xo-numeric)      # experiment w/ facet object model
 add_subdirectory(xo-ordinaltree)
 #
-add_subdirectory(xo-tokenizer2)  # schematika tokenizer (fomo)
+add_subdirectory(xo-tokenizer2)   # schematika tokenizer (fomo)
 add_subdirectory(xo-expression2)  # schematika expressions (fomo)
-add_subdirectory(xo-reader2)       # schematika expression parser (fomo)
-add_subdirectory(xo-interpreter2)  # schematika interpreter (fomo)
+add_subdirectory(xo-reader2)      # schematika expression parser (fomo)
+add_subdirectory(xo-interpreter2) # schematika interpreter (fomo)
 #
 add_subdirectory(xo-webutil)
 add_subdirectory(xo-pywebutil)

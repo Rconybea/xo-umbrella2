@@ -5,10 +5,12 @@
 
 #include "String.hpp"
 #include "GC.hpp"
-#include "TaggedPtr.hpp"
-#include "xo/reflect/Reflect.hpp"
-#include "xo/indentlog/print/quoted.hpp"
-#include <bsd/string.h>
+#include <xo/reflect/TaggedPtr.hpp>
+#include <xo/reflect/Reflect.hpp>
+#include <xo/indentlog/print/quoted.hpp>
+#ifdef __linux__
+# include <bsd/string.h>
+#endif
 #include <cstddef>
 #include <cstring>
 #include <cassert>

@@ -6,8 +6,8 @@
 {
   # official 24.05 release  # nearly works on macos, clang17, llvm18 except for sphinx-contrib.ditaa
 # probably whould be nixos-25.05.tar.gz here
-#  nixpkgs-path ? fetchTarball "https://github.com/NixOS/nixpkgs/archive/nixos-24.05.tar.gz",
-  nixpkgs-path ? ../nixpkgs,
+  nixpkgs-path ? fetchTarball "https://github.com/NixOS/nixpkgs/archive/nixos-24.11.tar.gz",
+#  nixpkgs-path ? ../nixpkgs,
 
 #  pkgs ? import (fetchTarball {
 #    # 24.05-darwin works on macos, clang17, llvm 18 (copying from xo-nix2)
@@ -84,13 +84,19 @@ let
 #  };
 
   # Problem: builds *everything* with llvm18 toolchain, exposes too many compiler nits
-  llvm-overlay = self: super: {
+  llvm-overlay = self: super:
     # use 'super' when you want to override the terms of a package.
     # use 'self'  when pointing to an existing package
     #
 
-    llvmPackages = super.llvmPackages_18;
-  };
+    let
+      llvmPackages = super.llvmPackages_18;
+    in let
+      clangStdenv = super.overrideCC super.stdenv super.llvmPackages_18.clang;
+    in let
+      jitStdenv = if super.stdenv.isDarwin then clangStdenv else super.stdenv;
+    in
+      { inherit llvmPackages clangStdenv jitStdenv; };
 
   # tests excruciatingly slow
   mailutils-overlay = self: super: {
@@ -133,23 +139,32 @@ let
 
       in
         {
-            xo-cmake          = self.callPackage pkgs/xo-cmake.nix          {};
-            xo-indentlog      = self.callPackage pkgs/xo-indentlog.nix      { buildDocs = true; buildExamples = true; };
-            xo-refcnt         = self.callPackage pkgs/xo-refcnt.nix         {};
-            xo-subsys         = self.callPackage pkgs/xo-subsys.nix         {};
-            xo-randomgen      = self.callPackage pkgs/xo-randomgen.nix      {                   buildExamples = true; };
-            xo-ordinaltree    = self.callPackage pkgs/xo-ordinaltree.nix    {};
-            xo-flatstring     = self.callPackage pkgs/xo-flatstring.nix     { buildDocs = true; buildExamples = true; };
-            xo-pyutil         = self.callPackage pkgs/xo-pyutil.nix         {};
-            xo-reflectutil    = self.callPackage pkgs/xo-reflectutil.nix    {};
-            xo-reflect        = self.callPackage pkgs/xo-reflect.nix        {};
-            xo-pyreflect      = self.callPackage pkgs/xo-pyreflect.nix      {};
-            xo-ratio          = self.callPackage pkgs/xo-ratio.nix          { buildDocs = true; buildExamples = true; };
-            xo-unit           = self.callPackage pkgs/xo-unit.nix           { buildDocs = true; buildExamples = true; };
-            xo-pyunit         = self.callPackage pkgs/xo-pyunit.nix         {};
+            xo-cmake          = self.callPackage pkgs/xo-cmake.nix          { stdenv = jitStdenv; };
+            xo-indentlog      = self.callPackage pkgs/xo-indentlog.nix      { stdenv = jitStdenv; buildDocs = true; buildExamples = true; };
+            xo-subsys         = self.callPackage pkgs/xo-subsys.nix         { stdenv = jitStdenv; };
+            xo-randomgen      = self.callPackage pkgs/xo-randomgen.nix      { stdenv = jitStdenv;                   buildExamples = true; };
+            xo-reflectutil    = self.callPackage pkgs/xo-reflectutil.nix    { stdenv = jitStdenv; };
+            xo-flatstring     = self.callPackage pkgs/xo-flatstring.nix     { stdenv = jitStdenv; buildDocs = true; buildExamples = true; };
+            xo-arena          = self.callPackage pkgs/xo-arena.nix          { stdenv = jitStdenv; buildDocs = true; };
+            xo-facet          = self.callPackage pkgs/xo-facet.nix          { stdenv = jitStdenv; };
+            xo-allocutil      = self.callPackage pkgs/xo-allocutil.nix      { stdenv = jitStdenv; };
+            xo-alloc          = self.callPackage pkgs/xo-alloc.nix          { stdenv = jitStdenv; buildDocs = true; };
+            xo-alloc2         = self.callPackage pkgs/xo-alloc2.nix         { stdenv = jitStdenv; buildDocs = true; };
+            xo-gc             = self.callPackage pkgs/xo-gc.nix             { stdenv = jitStdenv; buildDocs = true; };
+            xo-object         = self.callPackage pkgs/xo-object.nix         { stdenv = jitStdenv; };
+            xo-object2        = self.callPackage pkgs/xo-object2.nix        { stdenv = jitStdenv; };
+            xo-refcnt         = self.callPackage pkgs/xo-refcnt.nix         { stdenv = jitStdenv; };
+            xo-ordinaltree    = self.callPackage pkgs/xo-ordinaltree.nix    { stdenv = jitStdenv; };
+            xo-pyutil         = self.callPackage pkgs/xo-pyutil.nix         { stdenv = jitStdenv; };
+            xo-reflect        = self.callPackage pkgs/xo-reflect.nix        { stdenv = jitStdenv; };
+            xo-pyreflect      = self.callPackage pkgs/xo-pyreflect.nix      { stdenv = jitStdenv; };
+            xo-ratio          = self.callPackage pkgs/xo-ratio.nix          { stdenv = jitStdenv; buildDocs = true; buildExamples = true; };
+            xo-unit           = self.callPackage pkgs/xo-unit.nix           { stdenv = jitStdenv; buildDocs = true; buildExamples = true; };
+            xo-pyunit         = self.callPackage pkgs/xo-pyunit.nix         { stdenv = jitStdenv; };
             #
-            xo-callback       = self.callPackage pkgs/xo-callback.nix       {};
-            xo-webutil        = self.callPackage pkgs/xo-webutil.nix        {};
+            xo-callback       = self.callPackage pkgs/xo-callback.nix       { stdenv = jitStdenv; };
+            xo-printable2     = self.callPackage pkgs/xo-printable2.nix     { stdenv = jitStdenv; };
+            xo-webutil        = self.callPackage pkgs/xo-webutil.nix        { stdenv = jitStdenv; };
             xo-pywebutil      = self.callPackage pkgs/xo-pywebutil.nix      {};
             xo-printjson      = self.callPackage pkgs/xo-printjson.nix      {};
             xo-pyprintjson    = self.callPackage pkgs/xo-pyprintjson.nix    {};
@@ -244,19 +259,47 @@ let
     pkgs.libbsd
   ];
 
+  # emacs
+  emacs4xo = (pkgs.emacsPackagesFor pkgs.emacs30).emacsWithPackages (epkgs: with epkgs; [
+    lsp-mode
+    lsp-ui
+    lsp-ivy
+    flycheck
+    ivy
+    rg
+    transient   # magit dep
+    nix-mode
+    yaml-mode
+    htmlize
+    magit
+    exec-path-from-shell
+    highlight
+    surround
+    projectile
+    treemacs
+    treemacs-projectile
+    company
+    cmake-mode
+    which-key
+    xterm-color
+    yasnippet
+  ]);
+
   # xo ide utils
   ideutils = [
     pkgs.gsettings-desktop-schemas
-    pkgs.emacs30
-#    (pkgs.emacs.pkgs.withPackages (epkgs: [
-#    ]))
+    emacs4xo
     # pkgs.emacs-pgtk  # wayland with treesitter; alternatively pkgs.emacs30 for emacs+tree-sitter
     pkgs.tree-sitter # CLI tool, but not grammars
     pkgs.notmuch
     pkgs.emacsPackages.notmuch
     pkgs.inconsolata-lgc
     pkgs.fontconfig
+]
+++ (if pkgs.stdenv.isLinux then [
     pkgs.ghostty
+] else [])
+++ [
     pkgs.timg
     pkgs.fish
     pkgs.nushell
@@ -273,9 +316,9 @@ let
 
     pkgs.lcov
     pkgs.catch2
-    pkgs.gdb
   ]
   ++ (if pkgs.stdenv.isLinux then [
+    pkgs.gdb
     pkgs.strace
   ] else [])
   ++ [
@@ -287,7 +330,11 @@ let
     pkgs.openssh
 
     pkgs.ccache
+]
+++ (if pkgs.stdenv.isLinux then [
     pkgs.distcc
+] else [])
+ ++ [
     pkgs.cmake
     pkgs.pkg-config
     pkgs.unzip
@@ -336,8 +383,7 @@ let
     pkgs.lib.optionals pkgs.stdenv.isDarwin [
       pkgs.darwin.moltenvk
     ] ++
-    [
-      pkgs.vulkan-tools
+    [ pkgs.vulkan-tools
       pkgs.vulkan-loader
       pkgs.vulkan-headers
       pkgs.vulkan-validation-layers
@@ -374,7 +420,7 @@ let
           #    elfutils, ncurses, expat, zstd, zlib, libbsd, gcc.cc.lib)
           #   glxgears runs at ~170fps
           #
-          glpath = pkgs.lib.makeLibraryPath [
+          glpath = pkgs.lib.makeLibraryPath ([
             pkgs.wayland         # for libwayland-client.so
 
             pkgs.xorg.libXau
@@ -388,7 +434,8 @@ let
             pkgs.libxml2
             pkgs.libffi
 
-            pkgs.elfutils        # for libelf.so
+          ] ++ (if pkgs.stdenv.isLinux then [ pkgs.elfutils ] else [])
+          ++ [
             pkgs.ncurses         # for libtinfo.so
             pkgs.expat
             pkgs.zstd
@@ -396,7 +443,7 @@ let
             pkgs.libbsd
 
             pkgs.gcc.cc.lib      # for libstdc++.so  (won't blow up cmake, only touching LD_LIBRARY_PATH)
-          ];
+          ]);
         in
           ''
         # CXENV: cosmetic: coordinates with ~/proj/env/dotfiles/bashrc to drive PS1
@@ -444,11 +491,18 @@ in
   pkgs = pkgs;
   xo = {
     cmake          = pkgs.xo-cmake;
-#    facet          = pkgs.xo-facet;
     indentlog      = pkgs.xo-indentlog;
     refcnt         = pkgs.xo-refcnt;
     subsys         = pkgs.xo-subsys;
     randomgen      = pkgs.xo-randomgen;
+    arena          = pkgs.xo-arena;
+    facet          = pkgs.xo-facet;
+    allocutil      = pkgs.xo-allocutil;
+    alloc          = pkgs.xo-alloc;
+    alloc2         = pkgs.xo-alloc2;
+    gc             = pkgs.xo-gc;
+    object         = pkgs.xo-object;
+    object2        = pkgs.xo-object2;
     ordinaltree    = pkgs.xo-ordinaltree;
     flatstring     = pkgs.xo-flatstring;
     pyutil         = pkgs.xo-pyutil;
@@ -459,6 +513,7 @@ in
     unit           = pkgs.xo-unit;
     pyunit         = pkgs.xo-pyunit;
     callback       = pkgs.xo-callback;
+    printable2     = pkgs.xo-printable2;
     webutil        = pkgs.xo-webutil;
     pywebutil      = pkgs.xo-pywebutil;
     printjson      = pkgs.xo-printjson;
@@ -602,7 +657,7 @@ in
         #    elfutils, ncurses, expat, zstd, zlib, libbsd, gcc.cc.lib)
         #   glxgears runs at ~170fps
         #
-        glpath = pkgs.lib.makeLibraryPath [
+        glpath = pkgs.lib.makeLibraryPath ([
           pkgs.wayland         # for libwayland-client.so
 
           pkgs.xorg.libXau
@@ -615,7 +670,8 @@ in
           pkgs.libxml2
           pkgs.libffi
 
-          pkgs.elfutils        # for libelf.so
+        ] ++ (if pkgs.stdenv.isLinux then [ pkgs.elfutils ] else [])
+        ++ [
           pkgs.ncurses         # for libtinfo.so
           pkgs.expat
           pkgs.zstd
@@ -623,7 +679,7 @@ in
           pkgs.libbsd
 
           pkgs.gcc.cc.lib      # for libstdc++.so  (won't blow up cmake, only touching LD_LIBRARY_PATH)
-        ];
+        ]);
       in
         ''
         # CXENV: cosmetic: coordinates with ~/proj/env/dotfiles/bashrc to drive PS1
@@ -695,11 +751,19 @@ in
   #  1 - get this to work as standalone copy of shell4-assembly
   #  2 - merge to look like shell4-wsl / shell4-nvidia
   #
-  shell4-osx = pkgs.mkShell {
-    buildInputs = docutils ++ xodeps ++ devutils ++ ideutils ++ x11utils ++ gldeps ++ vkdeps ++ imguideps;
+  #shell4-osx = pkgs.mkShell.override { stdenv = pkgs.jitStdenv; } { .. } # very high attack surface area
+  shell4-osx =
+    let
+      clangStdenv = pkgs.overrideCC pkgs.stdenv pkgs.llvmPackages_18.clang;
+    in
+      let jitStdenv = if pkgs.stdenv.isDarwin then clangStdenv else pkgs.stdenv;
+    in
+      (pkgs.mkShell.override { stdenv = jitStdenv; })
+        {
+          buildInputs = docutils ++ xodeps ++ devutils ++ ideutils ++ x11utils ++ gldeps ++ vkdeps ++ imguideps;
 
-    shellHook =
-      ''
+          shellHook =
+            ''
       export CXENV=$CXENV:xo4-WIP
 
         # override SOUCE_DATE_EPOCH to current time (otherwise will get 1980)
@@ -720,7 +784,7 @@ in
       # dependencies on host system libraries
       # glpath = pkgs.lib.makeLibraryPath [ ];
       '';
-  };
+        };
 
   # like shell4 but drop etc/hostwsl2 symlink dir.
   # looks like nixpkgs mesa not built for wsl2 dxg

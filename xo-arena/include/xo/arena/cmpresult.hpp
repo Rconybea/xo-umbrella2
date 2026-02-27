@@ -24,7 +24,7 @@ namespace xo {
             return os;
         }
 
-        /** Result of a generic comparison operation
+        /** @brief result of a generic comparison operation
          **/
         struct cmpresult {
             /** @defgroup mm-cmpresult-ctors cmpresult ctors **/

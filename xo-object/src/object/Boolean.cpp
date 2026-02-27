@@ -4,8 +4,8 @@
  */
 
 #include "Boolean.hpp"
-#include "TaggedPtr.hpp"
-#include "xo/reflect/Reflect.hpp"
+#include <xo/reflect/TaggedPtr.hpp>
+#include <xo/reflect/Reflect.hpp>
 #include <array>
 #include <cassert>
 #include <cstddef>

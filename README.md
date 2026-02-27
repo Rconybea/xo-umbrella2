@@ -26,6 +26,7 @@ $ nix-shell -A shell0  # just nix stdenv: make,gcc,bash etc.
 $ nix-shell -A shell1  # stable environment
 $ nix-shell -A shell2  # stable environment + emacs + lsp
 $ nix-shell -A shell3  # stable environment + emacs + lsp + xorg/opengl/vulkan/imgui stack (wsl2-only)
+$ nix-shell -A shell4-osx  # stable environment + emacs + lsp + imgui stack (osx-only)
 $ nix-shell -A shell4  # wsl2-specific. like shell3, vkcube works (at least on WSL)
 $ nix-shell -A shell5  # wsl2-specific. uses dxg driver for "hardware acceleration"
 $ nix-shell -A shell   # (deprecated) bleeding edge environment
@@ -48,8 +49,9 @@ If `nix` is available, you probably prefer the nix build, unless working on XO i
 Otherwise continue reading..
 
 ```
-$ cd xo
-$ PREFIX=/path/to/say/usr/local
+$ PREFIX=/path/to/say/home/local
+$ cd xo-umbrella2
+$ (cd xo-cmake && cmake -DCMAKE_INSTALL_PREFIX=$PREFIX -B .build -S . && cmake --install .build)
 $ cmake -B .build -S . -DCMAKE_INSTALL_PREFIX=${PREFIX} -DXO_ENABLE_EXAMPLES=1 -DXO_ENABLE_DOCS=1 -DCMAKE_BUILD_TYPE=debug
 $ cmake --build .build --verbose
 $ cmake --install .build
@@ -156,6 +158,12 @@ $ nix-build -A xo-userenv-slow
 
 Same result as `$nix-build -A xo-userenv`, but builds each package serially
 using `xo-build`.
+
+Finally, can also individual XO packages:
+```
+$ nix-build -A xo.cmake
+...
+```
 
 #### Nix + SDL2 + Vulkan + ImGui
 

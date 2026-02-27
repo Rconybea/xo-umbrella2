@@ -4,6 +4,7 @@
 
 #include "detail/IGCObject_Any.hpp"
 #include <iostream>
+#include <exception>
 
 namespace xo {
 namespace mm {

@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "hashmap/DArenaHashMapUtil.hpp"
-#include "hashmap/ControlGroup.hpp"
+#include <xo/arena/hashmap/DArenaHashMapUtil.hpp>
+#include <xo/arena/hashmap/ControlGroup.hpp>
 
 namespace xo {
     namespace map {
@@ -52,7 +52,7 @@ namespace xo {
                 float load_factor() const noexcept { return size_ / static_cast<float>(n_slot_); }
 
                 void visit_pools(const MemorySizeVisitor & visitor) const {
-                    // complexity here in service of HashMapStore-specific value for MemorySizeInfo.used 
+                    // complexity here in service of HashMapStore-specific value for MemorySizeInfo.used
 
                     MemorySizeInfo ctl_info;
                     MemorySizeInfo slot_info;

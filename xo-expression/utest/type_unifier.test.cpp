@@ -146,7 +146,11 @@ namespace xo {
                     .expect_unify_ok_ = true,
                     .expect_unify_id_{type_var::from_chars("a")},
                     .expect_unify_concrete_ = true,
+#ifdef __APPLE__
+                    .expect_concrete_typename_ = "long long",
+#else
                     .expect_concrete_typename_ = "long int",
+#endif
                     .expect_unify_variable_ = false,
                 },
                 /* same, but reverse order */
@@ -157,7 +161,11 @@ namespace xo {
                     .expect_unify_ok_ = true,
                     .expect_unify_id_{type_var::from_chars("a")},
                     .expect_unify_concrete_ = true,
+#ifdef __APPLE__
+                    .expect_concrete_typename_ = "long long",
+#else
                     .expect_concrete_typename_ = "long int",
+#endif
                     .expect_unify_variable_ = false,
                 },
                 /* matching concrete types */

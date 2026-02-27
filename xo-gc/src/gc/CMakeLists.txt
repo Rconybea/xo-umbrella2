@@ -21,4 +21,5 @@ xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 $
 # note: deps here must also appear in cmake/xo_alloc2Config.cmake.in
 xo_dependency(${SELF_LIB} xo_alloc2)
 xo_dependency(${SELF_LIB} xo_facet)
+xo_dependency(${SELF_LIB} subsys)
 xo_dependency(${SELF_LIB} indentlog)

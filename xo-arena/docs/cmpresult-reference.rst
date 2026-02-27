@@ -37,7 +37,7 @@ Class
 Constructors
 ------------
 
-.. doxgyengroup:: mm-cmpresult-ctors
+.. doxygengroup:: mm-cmpresult-ctors
 
 Methods
 -------
