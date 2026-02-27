@@ -4,6 +4,7 @@
 
 #include "detail/IPrintable_Any.hpp"
 #include <iostream>
+#include <exception>
 
 namespace xo {
 namespace print {

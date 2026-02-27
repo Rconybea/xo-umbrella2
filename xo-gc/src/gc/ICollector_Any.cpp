@@ -5,6 +5,7 @@
 
 #include "detail/ICollector_Any.hpp"
 #include <iostream>
+#include <exception>
 
 namespace xo {
     using xo::facet::DVariantPlaceholder;
