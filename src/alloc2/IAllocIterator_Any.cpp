@@ -5,6 +5,7 @@
 
 #include "alloc/IAllocIterator_Any.hpp"
 #include <iostream>
+#include <exception>
 
 namespace xo {
     namespace mm {

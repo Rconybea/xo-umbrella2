@@ -4,6 +4,7 @@
 
 #include "visitor/IResourceVisitor_Any.hpp"
 #include <iostream>
+#include <exception>
 
 namespace xo {
 namespace mm {
