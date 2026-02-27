@@ -8,8 +8,8 @@
 #include "Float.hpp"
 #include "Boolean.hpp"
 #include "String.hpp"
-#include "TaggedPtr.hpp"
-#include "xo/alloc/Blob.hpp"
+#include <xo/reflect/TaggedPtr.hpp>
+#include <xo/alloc/Blob.hpp>
 
 namespace xo {
     using xo::reflect::Reflect;
@@ -145,6 +145,8 @@ namespace xo {
 
                 // still don't have good solver for this yet
                 assert(false);
+
+                return TaggedPtr::universal_null();
             }
         }
 
