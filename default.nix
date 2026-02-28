@@ -783,6 +783,10 @@ in
 
       # dependencies on host system libraries
       # glpath = pkgs.lib.makeLibraryPath [ ];
+
+      # choose a temp directory that can outlive nix-shell
+      export TMPDIR=$(getconf DARWIN_USER_TEMP_DIR)
+      export TMP=$TMPDIR
       '';
         };
 
