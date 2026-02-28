@@ -18,11 +18,13 @@ namespace xo {
         class DSimpleRcx {
         public:
             using AAllocator = xo::mm::AAllocator;
+            using MemorySizeVisitor = xo::mm::MemorySizeVisitor;
 
         public:
             DSimpleRcx(obj<AAllocator> mm) : allocator_{mm} {}
 
             obj<AAllocator> allocator() const noexcept { return allocator_; }
+            void visit_pools(const MemorySizeVisitor & visitor) const;
 
         private:
             obj<AAllocator> allocator_;

@@ -15,6 +15,7 @@
 
 // includes (via {facet_includes})
 #include <xo/alloc2/Allocator.hpp>
+#include <xo/arena/MemorySizeInfo.hpp>
 #include <xo/facet/obj.hpp>
 #include <xo/facet/facet_implementation.hpp>
 #include <xo/facet/typeseq.hpp>
@@ -40,6 +41,8 @@ public:
     using Opaque = void *;
     /** xo memory allocator **/
     using AAllocator = xo::mm::AAllocator;
+    /** function to visit memory pools **/
+    using MemorySizeVisitor = xo::mm::MemorySizeVisitor;
     ///@}
 
     /** @defgroup scm-runtimecontext-methods **/
@@ -51,6 +54,8 @@ public:
     virtual void _drop(Opaque d) const noexcept = 0;
     /** default allocator to use for objects **/
     virtual obj<AAllocator> allocator(Copaque data)  const  noexcept = 0;
+    /** invoke visitor for each distinct memory pool **/
+    virtual void visit_pools(Copaque data, MemorySizeVisitor visitor)  const = 0;
 
     // nonconst methods
     ///@}

@@ -21,6 +21,12 @@ namespace xo {
             return self.allocator();
         }
 
+        auto
+        IRuntimeContext_DSimpleRcx::visit_pools(const DSimpleRcx & self, MemorySizeVisitor visitor) -> void
+        {
+            self.visit_pools(visitor);
+        }
+
 
     } /*namespace scm*/
 } /*namespace xo*/

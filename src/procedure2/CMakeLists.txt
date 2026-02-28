@@ -6,6 +6,7 @@ set(SELF_SRCS
     init_primitives.cpp
     procedure2_register_types.cpp
     procedure2_register_facets.cpp
+    DSimpleRcx.cpp
     IRuntimeContext_Any.cpp
     IRuntimeContext_DSimpleRcx.cpp
     IProcedure_Any.cpp
@@ -13,8 +14,6 @@ set(SELF_SRCS
     IGCObject_DPrimitive_gco_2_gco_gco.cpp
     IProcedure_DPrimitive_gco_2_gco_gco.cpp
     IPrintable_DPrimitive_gco_2_gco_gco.cpp
-    # Add source files here, e.g.:
-    # procedure2.cpp
 )
 
 xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 ${SELF_SRCS})
