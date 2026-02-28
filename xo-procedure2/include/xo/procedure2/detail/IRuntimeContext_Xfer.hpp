@@ -14,6 +14,7 @@
 #pragma once
 
 #include <xo/alloc2/Allocator.hpp>
+#include <xo/arena/MemorySizeInfo.hpp>
 
 namespace xo {
 namespace scm {
@@ -29,6 +30,7 @@ namespace scm {
         /** integer identifying a type **/
         using typeseq = ARuntimeContext::typeseq;
         using AAllocator = ARuntimeContext::AAllocator;
+        using MemorySizeVisitor = ARuntimeContext::MemorySizeVisitor;
         ///@}
 
         /** @defgroup scm-runtimecontext-xfer-methods **/
@@ -46,6 +48,9 @@ namespace scm {
         // const methods
         obj<AAllocator> allocator(Copaque data)  const  noexcept override {
             return I::allocator(_dcast(data));
+        }
+        void visit_pools(Copaque data, MemorySizeVisitor visitor)  const override {
+            return I::visit_pools(_dcast(data), visitor);
         }
 
         // non-const methods

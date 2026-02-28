@@ -5,7 +5,8 @@
     output_impl_subdir: "detail",
     // includes in ARuntimeContext.hpp
     includes: [
-        "<xo/alloc2/Allocator.hpp>"
+        "<xo/alloc2/Allocator.hpp>",
+        "<xo/arena/MemorySizeInfo.hpp>"
     ],
     // extra includes in RuntimeContext.hpp, if any
     user_hpp_includes: [
@@ -29,6 +30,11 @@
             definition: "xo::mm::AAllocator",
             doc: [ "xo memory allocator" ],
         },
+        {
+            name: "MemorySizeVisitor",
+            definition: "xo::mm::MemorySizeVisitor",
+            doc: [ "function to visit memory pools" ],
+        },
     ],
     const_methods: [
         {
@@ -38,6 +44,17 @@
             args: [],
             const: true,
             noexcept: true,
+            attributes: [],
+        },
+        {
+            name: "visit_pools",
+            doc: [ "invoke visitor for each distinct memory pool" ],
+            return_type: "void",
+            args: [
+                {type: "MemorySizeVisitor", name: "visitor"}
+            ],
+            const: true,
+            noexcept: false,
             attributes: [],
         },
     ],

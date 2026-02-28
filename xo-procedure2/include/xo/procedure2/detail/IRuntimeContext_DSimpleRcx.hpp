@@ -40,6 +40,7 @@ namespace xo {
             /** @defgroup scm-runtimecontext-dsimplercx-type-traits **/
             ///@{
             using AAllocator = xo::scm::ARuntimeContext::AAllocator;
+            using MemorySizeVisitor = xo::scm::ARuntimeContext::MemorySizeVisitor;
             using Copaque = xo::scm::ARuntimeContext::Copaque;
             using Opaque = xo::scm::ARuntimeContext::Opaque;
             ///@}
@@ -48,6 +49,8 @@ namespace xo {
             // const methods
             /** default allocator to use for objects **/
             static obj<AAllocator> allocator(const DSimpleRcx & self) noexcept;
+            /** invoke visitor for each distinct memory pool **/
+            static void visit_pools(const DSimpleRcx & self, MemorySizeVisitor visitor);
 
             // non-const methods
             ///@}

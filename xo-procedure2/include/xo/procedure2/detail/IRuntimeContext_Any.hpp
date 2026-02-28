@@ -45,6 +45,7 @@ namespace scm {
         /** integer identifying a type **/
         using typeseq = xo::facet::typeseq;
         using AAllocator = ARuntimeContext::AAllocator;
+        using MemorySizeVisitor = ARuntimeContext::MemorySizeVisitor;
 
         ///@}
         /** @defgroup scm-runtimecontext-any-methods **/
@@ -60,6 +61,7 @@ namespace scm {
 
         // const methods
         [[noreturn]] obj<AAllocator> allocator(Copaque)  const  noexcept override { _fatal(); }
+        [[noreturn]] void visit_pools(Copaque, MemorySizeVisitor)  const override { _fatal(); }
 
         // nonconst methods
 
