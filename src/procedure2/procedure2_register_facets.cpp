@@ -5,6 +5,7 @@
 
 #include "Procedure.hpp"
 #include "SimpleRcx.hpp"
+#include "Primitive_gco_0.hpp"
 #include "Primitive_gco_2_gco_gco.hpp"
 
 #include <xo/gc/GCObject.hpp>
@@ -24,6 +25,10 @@ namespace xo {
             scope log(XO_DEBUG(true));
 
             FacetRegistry::register_impl<ARuntimeContext, DSimpleRcx>();
+
+            FacetRegistry::register_impl<AProcedure, DPrimitive_gco_0>();
+            FacetRegistry::register_impl<AGCObject, DPrimitive_gco_0>();
+            FacetRegistry::register_impl<APrintable, DPrimitive_gco_0>();
 
             FacetRegistry::register_impl<AProcedure, DPrimitive_gco_2_gco_gco>();
             FacetRegistry::register_impl<AGCObject, DPrimitive_gco_2_gco_gco>();
