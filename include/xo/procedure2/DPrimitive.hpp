@@ -110,7 +110,6 @@ namespace xo {
                 using R = typename Traits::return_type;
 
                 assert(args);
-                assert(args->size() > 0);
 
                 obj<AAllocator> mm = rcx.allocator();
 
