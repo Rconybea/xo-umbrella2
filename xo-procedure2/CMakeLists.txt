@@ -48,6 +48,35 @@ xo_add_genfacetimpl(
 
 # note: manual target; generated code committed to git
 xo_add_genfacetimpl(
+    TARGET xo-procedure2-facetimpl-procedure-primitive_gco_0
+    FACET_PKG xo_procedure2
+    FACET Procedure
+    REPR DPrimitive_gco_0
+    INPUT idl/IProcedure_DPrimitive_gco_0.json5
+)
+
+# note: manual target; generated code committed to git
+xo_add_genfacetimpl(
+    TARGET xo-procedure2-facetimpl-gcobject-primitive_gco_0
+    FACET_PKG xo_gc
+    FACET GCObject
+    REPR Primitive_gco_0
+    INPUT idl/IGCObject_DPrimitive_gco_0.json5
+)
+
+# note: manual target; generated code committed to git
+xo_add_genfacetimpl(
+    TARGET xo-procedure2-facetimpl-printable-primitive_gco_0
+    FACET_PKG xo_printable2
+    FACET Printable
+    REPR Primitive_gco_0
+    INPUT idl/IPrintable_DPrimitive_gco_0.json5
+)
+
+# ----------------------------------------------------------------
+
+# note: manual target; generated code committed to git
+xo_add_genfacetimpl(
     TARGET xo-procedure2-facetimpl-procedure-primitive_gco_2_gco_gco
     FACET_PKG xo_procedure2
     FACET Procedure

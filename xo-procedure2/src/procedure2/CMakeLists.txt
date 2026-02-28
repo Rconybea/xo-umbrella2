@@ -11,6 +11,9 @@ set(SELF_SRCS
     IRuntimeContext_DSimpleRcx.cpp
     IProcedure_Any.cpp
     DPrimitive.cpp
+    IGCObject_DPrimitive_gco_0.cpp
+    IProcedure_DPrimitive_gco_0.cpp
+    IPrintable_DPrimitive_gco_0.cpp
     IGCObject_DPrimitive_gco_2_gco_gco.cpp
     IProcedure_DPrimitive_gco_2_gco_gco.cpp
     IPrintable_DPrimitive_gco_2_gco_gco.cpp

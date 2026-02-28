@@ -5,6 +5,7 @@
 
 #include "procedure2_register_types.hpp"
 
+#include "detail/IGCObject_DPrimitive_gco_0.hpp"
 #include "detail/IGCObject_DPrimitive_gco_2_gco_gco.hpp"
 #include <xo/indentlog/scope.hpp>
 
@@ -25,6 +26,7 @@ namespace xo {
 
             // (note: don't currently intend to support AGCObject for DSimpleRcx)
 
+            ok &= gc.install_type(impl_for<AGCObject, DPrimitive_gco_0>());
             ok &= gc.install_type(impl_for<AGCObject, DPrimitive_gco_2_gco_gco>());
 
             return ok;
