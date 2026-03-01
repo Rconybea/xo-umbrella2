@@ -161,6 +161,12 @@ namespace xo {
              **/
             AllocInfo alloc_info(value_type mem) const noexcept;
 
+            /** convenience template for allocating for a T-instance **/
+            template <typename T>
+            void * alloc_for(size_type n = sizeof(T)) {
+                return this->alloc(typeseq::id<T>(), n);
+            }
+
             /** allocate at least @p z bytes of memory.
              *  Return nullptr and capture error if unable to satisfy request.
              *  May expand committed memory, as long as resulting committed size
