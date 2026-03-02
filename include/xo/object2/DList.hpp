@@ -49,6 +49,9 @@ namespace xo {
             /** return element at 0-based index @p ix **/
             obj<AGCObject> at(size_type ix) const;
 
+            /** assign rest-pointer **/
+            void assign_rest(DList * r);
+
             /** pretty-printing driver; combine layout+printing **/
             bool pretty(const ppindentinfo & ppii) const;
 
