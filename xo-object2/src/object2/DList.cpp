@@ -105,6 +105,14 @@ namespace xo {
             return l->head_;
         }
 
+        void
+        DList::assign_rest(DList * r)
+        {
+            scope log(XO_DEBUG(true), "need write barrier");
+
+            this->rest_ = r;
+        }
+
         bool
         DList::pretty(const ppindentinfo & ppii) const
         {
