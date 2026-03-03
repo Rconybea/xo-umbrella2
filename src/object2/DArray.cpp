@@ -68,6 +68,19 @@ namespace xo {
         }
 
         bool
+        DArray::assign_at(size_type ix, obj<AGCObject> x) noexcept
+        {
+            if (ix >= size_)
+                return false;
+
+            scope log(XO_DEBUG(true), "need write barrier");
+
+            this->elts_[ix] = x;
+
+            return true;
+        }
+
+        bool
         DArray::push_back(obj<AGCObject> elt) noexcept
         {
             if (size_ >= capacity_) {

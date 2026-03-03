@@ -167,6 +167,26 @@ xo_add_genfacetimpl(
 
 # note: manual target; generated code committed to git
 xo_add_genfacetimpl(
+    TARGET xo-object2-facetimpl-printable-dictionary
+    FACET_PKG xo_printable2
+    FACET Printable
+    REPR Dictionary
+    INPUT idl/IPrintable_DDictionary.json5
+ )
+
+# note: manual target; generated code committed to git
+xo_add_genfacetimpl(
+    TARGET xo-object2-facetimpl-gcobject-dictionary
+    FACET_PKG xo_gc
+    FACET GCObject
+    REPR Dictionary
+    INPUT idl/IGCObject_DDictionary.json5
+)
+
+# ----------------------------------------------------------------
+
+# note: manual target; generated code committed to git
+xo_add_genfacetimpl(
     TARGET xo-object2-facetimpl-printable-runtimeerror
     FACET_PKG xo_printable2
     FACET Printable

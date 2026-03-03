@@ -37,6 +37,10 @@ set(SELF_SRCS
     IGCObject_DString.cpp
     IPrintable_DString.cpp
 
+    DDictionary.cpp
+    IGCObject_DDictionary.cpp
+    IPrintable_DDictionary.cpp
+
     DRuntimeError.cpp
     IGCObject_DRuntimeError.cpp
     IPrintable_DRuntimeError.cpp
