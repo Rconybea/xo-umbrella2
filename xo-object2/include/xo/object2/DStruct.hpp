@@ -1,10 +1,11 @@
-/** @file DArray.hpp
+/** @file DStruct.hpp
 *
  *  @author Roland Conybeare, Jan 2026
  **/
 
 #pragma once
 
+#include "DArray.hpp"
 #include <xo/gc/GCObject.hpp>
 #include <xo/gc/Collector.hpp>
 #include <xo/alloc2/Allocator.hpp>
@@ -15,17 +16,17 @@
 
 namespace xo {
     namespace scm {
-        /** @class DArray
-         *  @brief Polymorphic array implementation with gc hooks
+        /** @class DStruct
+         *  @brief Polymorphic in-memory key-value store with gc hooks
          *
-         *  1D Array implementation for Schematika
-         *  Like DString, this implementation has max capacity
-         *  fixed at construction time, but not part of type.
-         *  Can reallocate to change
+         *  Small dictionary implementation for Schematika.
+         *  O(n) lookup, at least for now.  Keys are unique strings.
+         *  Intended to have key-space fixed at comptime.
+         *  Relevant since keys are immortal DUniqueStrings.
          **/
-        class DArray {
+        class DStruct {
         public:
-            /** @defgroup darray-types type traits **/
+            /** @defgroup dstruct-types type traits **/
             ///@{
 
             /** type for array size **/
@@ -40,43 +41,43 @@ namespace xo {
             using ppindentinfo = xo::print::ppindentinfo;
 
             ///@}
-            /** @defgroup darray-ctors constructors **/
+            /** @defgroup dstruct-ctors constructors **/
             ///@{
 
             /** default ctor. zero capacity sentinel **/
-            DArray() = default;
+            DStruct() = default;
 
             /** not simply copyable because of flexible array.
              *  Need allocator. See @ref clone
              **/
-            DArray(const DArray &) = delete;
+            DStruct(const DStruct &) = delete;
 
             /** create empty array with space for @p cap elements
              *  using memory from allocator @p mm.
              *  Nullptr if space exhausted
              **/
-            static DArray * empty(obj<AAllocator> mm,
+            static DStruct * empty(obj<AAllocator> mm,
                                   size_type cap);
 
             /** create copy of @p src using memory from @p mm
              *  with capacity for @p new_cap elements
              **/
-            static DArray * copy(obj<AAllocator> mm,
-                                 DArray * src,
+            static DStruct * copy(obj<AAllocator> mm,
+                                 DStruct * src,
                                  size_type new_cap);
 
             /** create array containing elements @p args, using memory from @p mm.
              *  Nullptr if space exhausted.
              *
              *  Use:
-             *    Darray * v = DArray::array(mm, e1, e2, e3);
+             *    Dstruct * v = DStruct::array(mm, e1, e2, e3);
              **/
             template <typename... Args>
                 requires (std::same_as<Args, obj<AGCObject>> && ...)
-            static DArray * array(obj<AAllocator> mm, Args... args);
+            static DStruct * array(obj<AAllocator> mm, Args... args);
 
             ///@}
-            /** @defgroup darray-access acecss methods **/
+            /** @defgroup dstruct-access acecss methods **/
             ///@{
             /** true iff array is empty **/
             bool is_empty() const noexcept { return size_ == 0; }
@@ -90,29 +91,22 @@ namespace xo {
             obj<AGCObject> at(size_type index) const;
 
             const obj<AGCObject> & operator[](size_type index) const noexcept { return elts_[index]; }
-            // TODO: nuke this or provide LValue shim.  need write barrier!
             obj<AGCObject> & operator[](size_type index) noexcept { return elts_[index]; }
 
             ///@}
-            /** @defgroup darray-iterators iterators **/
+            /** @defgroup dstruct-iterators iterators **/
             ///@{
 
             ///@}
-            /** @defgroup darray-assign assignment **/
+            /** @defgroup dstruct-assign assignment **/
             ///@{
-
-            /** store @p elt at position @p index.
-             *  true on success, false otherwise
-             **/
-            bool assign_at(size_type index, obj<AGCObject> elt) noexcept;
-
             /** append @p elt at the end of array.
              *  true on success, false otherwise
              **/
             bool push_back(obj<AGCObject> elt) noexcept;
 
             ///@}
-            /** @defgroup darray-general general methods **/
+            /** @defgroup dstruct-general general methods **/
             ///@{
 
             /** resize to @p new_size.  @p new_size may not be larger than capacity
@@ -128,33 +122,33 @@ namespace xo {
             void shrink_to_fit() noexcept;
 
             ///@}
-            /** @defgroup darray-conversion-operators conversion operators **/
+            /** @defgroup dstruct-conversion-operators conversion operators **/
             ///@{
 
             ///@}
-            /** @defgroup darray-sequence-methods **/
+            /** @defgroup dstruct-sequence-methods **/
             ///@{
 
             ///@}
-            /** @defgroup darray-printable-methods **/
+            /** @defgroup dstruct-printable-methods **/
             ///@{
 
             /** pretty-printing support **/
             bool pretty(const ppindentinfo & ppii) const;
 
             ///@}
-            /** @defgroup darray-gcobject-methods **/
+            /** @defgroup dstruct-gcobject-methods **/
             ///@{
             /** shallow memory consumption. Excludes child objects **/
             AAllocator::size_type shallow_size() const noexcept;
             /** return shallow copy of this array, using memory from @p mm **/
-            DArray * shallow_copy(obj<AAllocator> mm) const noexcept;
+            DStruct * shallow_copy(obj<AAllocator> mm) const noexcept;
             /** forward elements to @p gc to-space; replace originals with forarding pointers **/
             AAllocator::size_type forward_children(obj<ACollector> gc) noexcept;
             ///@}
 
         private:
-            /** @defgroup darray-instance-variables instance variables **/
+            /** @defgroup dstruct-instance-variables instance variables **/
             ///@{
 
             /** extent of @ref elts_ array **/
@@ -163,18 +157,20 @@ namespace xo {
              *  Invariant: size_ <= capacity_
              **/
             size_type size_ = 0;
-            /** array elements, using flexible array **/
-            obj<AGCObject> elts_[];
+            /** struct keys.  These will be unique strings **/
+            DArray * keys_ = nullptr;
+            /** struct member values **/
+            DArray * values_ = nullptr;
 
             ///@}
         };
 
         template <typename... Args>
-            requires (std::same_as<Args, obj<DArray::AGCObject>> && ...)
-        DArray *
-        DArray::array(obj<AAllocator> mm, Args... args)
+            requires (std::same_as<Args, obj<DStruct::AGCObject>> && ...)
+        DStruct *
+        DStruct::array(obj<AAllocator> mm, Args... args)
         {
-            DArray * result = empty(mm, sizeof...(args));
+            DStruct * result = empty(mm, sizeof...(args));
             if (result) {
                 (result->push_back(args), ...);
             }
@@ -184,4 +180,4 @@ namespace xo {
     } /*namespace scm*/
 } /*namespace xo*/
 
-/* end DArray.hpp */
+/* end DStruct.hpp */
