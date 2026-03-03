@@ -68,7 +68,8 @@ namespace xo {
         }
 
         bool
-        DArray::push_back(obj<AGCObject> elt) noexcept {
+        DArray::push_back(obj<AGCObject> elt) noexcept
+        {
             if (size_ >= capacity_) {
                 return false;
             } else {
@@ -85,7 +86,8 @@ namespace xo {
         }
 
         bool
-        DArray::resize(size_type new_z) noexcept {
+        DArray::resize(size_type new_z) noexcept
+        {
             if (new_z >= capacity_) {
                 return false;
             } else if (new_z > size_) {
@@ -95,6 +97,14 @@ namespace xo {
 
             this->size_ = new_z;
             return true;
+        }
+
+        void
+        DArray::shrink_to_fit() noexcept
+        {
+            if (capacity_ > size_) {
+                this->capacity_ = size_;
+            }
         }
 
         // printing support
