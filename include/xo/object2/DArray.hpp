@@ -112,6 +112,13 @@ namespace xo {
              **/
             bool resize(size_type new_size) noexcept;
 
+            /** reduce array capacity to current array size
+             *
+             *  note: with X1Collector, capacity is reduced but memory not recycled
+             *        until next collection
+             **/
+            void shrink_to_fit() noexcept;
+
             ///@}
             /** @defgroup darray-conversion-operators conversion operators **/
             ///@{
