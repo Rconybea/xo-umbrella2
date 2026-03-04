@@ -14,7 +14,7 @@
     namespace1: "xo",
     namespace2: "mm",
     pretext: [
-        "namespace xo { namespace mm { struct ACollector; }}",
+        "namespace xo { namespace mm { class ACollector; }}",
     ],
     facet: "GCObject",
     detail_subdir: "detail",
