@@ -138,7 +138,7 @@ namespace xo {
             obj<AOther,DRepr> to_facet();
 
             /** like to_facet<AOther>(),
-             *  but on failure return empty obj instead of throwing exception 
+             *  but on failure return empty obj instead of throwing exception
              **/
             template <typename AOther>
             obj<AOther,DRepr> try_to_facet() noexcept;
