@@ -9,6 +9,7 @@
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/facet/obj.hpp>
+#include <xo/indentlog/scope.hpp>
 
 namespace xo {
     namespace scm {
@@ -74,9 +75,33 @@ namespace xo {
 
             static obj<AFacet,DRepr> from_gco(obj<AAllocator>,
                                               obj<AGCObject> gco) {
+                scope log(XO_DEBUG(false));
+
                 if constexpr (std::is_same_v<AFacet, AGCObject>) {
-                    // trivial conversion
-                    return gco;
+                    // Need accurate handling of DVariantPlaceholder.
+                    // runtime type must be some concrete type.
+                    // Only use obj<AFacet,DRepr>::from when DRepr is a concrete type
+
+                    if constexpr (std::is_same_v<DRepr,DVariantPlaceholder>) {
+                        // At comptime gco has unknown repr.  At runtime
+                        // will have some known repr, which assignment here will transfer
+                        return gco;
+                    } else {
+                        // Runtime conversion to concrete type DRepr
+
+                        auto retval = obj<AFacet,DRepr>::from(gco);
+
+                        if (!retval) {
+                            log.retroactively_enable();
+
+                            log && log(xtag("gco.tseq", gco._typeseq()));
+                            log && log(xtag("DRepr.tseq", reflect::typeseq::id<DRepr>()));
+                        }
+
+                        assert(retval);
+
+                        return retval;
+                    }
                 } else {
                     // both runtime and comptime polymorphism
                     // use same path here, since representation of @p gco
