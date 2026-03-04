@@ -3,7 +3,7 @@
  *  @author Roland Conybeare, Jan 2026
  **/
 
-#include <xo/object2/StringOps.hpp>
+#include <xo/stringtable2/StringOps.hpp>
 #include <xo/alloc2/arena/IAllocator_DArena.hpp>
 #include <catch2/catch.hpp>
 #include <cstring>
@@ -19,6 +19,7 @@ namespace xo {
     using xo::facet::obj;
 
     namespace ut {
+
         TEST_CASE("StringOps-empty", "[object2][StringOps]")
         {
             ArenaConfig cfg { .name_ = "testarena",

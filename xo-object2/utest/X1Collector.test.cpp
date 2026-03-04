@@ -15,7 +15,7 @@
 #include "number/IGCObject_DInteger.hpp"
 #include "list/IGCObject_DList.hpp"
 
-#include <xo/gc/CollectorTypeRegistry.hpp>
+#include <xo/alloc2/CollectorTypeRegistry.hpp>
 #include <xo/alloc2/Collector.hpp>
 #include <xo/gc/DX1Collector.hpp>
 

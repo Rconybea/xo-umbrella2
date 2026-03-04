@@ -6,7 +6,7 @@
 #pragma once
 
 #include <xo/object2/Dictionary.hpp>
-#include <xo/object2/String.hpp>
+#include <xo/stringtable2/String.hpp>
 #include <xo/alloc2/GCObject.hpp>
 #include "DPrimitive.hpp"
 

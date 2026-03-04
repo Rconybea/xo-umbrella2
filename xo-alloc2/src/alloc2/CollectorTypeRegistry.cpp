@@ -7,21 +7,24 @@
 namespace xo {
     namespace mm {
         CollectorTypeRegistry &
-        CollectorTypeRegistry::instance() {
+        CollectorTypeRegistry::instance()
+        {
             static CollectorTypeRegistry s_instance;
 
             return s_instance;
         }
 
         void
-        CollectorTypeRegistry::register_types(init_function_type fn) {
+        CollectorTypeRegistry::register_types(init_function_type fn)
+        {
             scope log(XO_DEBUG(true));
 
             init_seq_v_.push_back(fn);
         }
 
         bool
-        CollectorTypeRegistry::install_types(obj<ACollector> gc) {
+        CollectorTypeRegistry::install_types(obj<ACollector> gc)
+        {
             scope log(XO_DEBUG(true));
 
             bool ok = true;

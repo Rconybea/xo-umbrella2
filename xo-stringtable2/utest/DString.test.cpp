@@ -3,7 +3,7 @@
  *  @author Roland Conybeare, Jan 2026
  **/
 
-#include "init_object2.hpp"
+#include "init_stringtable2.hpp"
 #include "StringOps.hpp"
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/alloc2/arena/IAllocator_DArena.hpp>
@@ -21,7 +21,8 @@ namespace xo {
     using xo::facet::obj;
 
     namespace ut {
-        static InitEvidence s_init = (InitSubsys<S_object2_tag>::require());
+
+        static InitEvidence s_init = (InitSubsys<S_stringtable2_tag>::require());
 
         TEST_CASE("DString-init", "[object2][DString]")
         {

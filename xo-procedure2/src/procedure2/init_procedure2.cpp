@@ -9,7 +9,7 @@
 #include "procedure2_register_types.hpp"
 
 #include <xo/object2/init_object2.hpp>
-#include <xo/gc/CollectorTypeRegistry.hpp>
+#include <xo/alloc2/CollectorTypeRegistry.hpp>
 
 namespace xo {
     using xo::scm::procedure2_register_facets;

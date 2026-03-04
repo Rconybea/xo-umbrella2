@@ -12,9 +12,9 @@
 #include <xo/object2/list/IGCObject_DList.hpp>
 #include <xo/object2/list/IPrintable_DList.hpp>
 
-#include <xo/object2/DString.hpp>
-#include <xo/object2/string/IGCObject_DString.hpp>
-#include <xo/object2/string/IPrintable_DString.hpp>
+#include <xo/stringtable2/String.hpp>
+//#include <xo/object2/string/IGCObject_DString.hpp>
+//#include <xo/object2/string/IPrintable_DString.hpp>
 
 #include <xo/object2/DInteger.hpp>
 #include <xo/object2/number/IGCObject_DInteger.hpp>
