@@ -14,6 +14,9 @@ set(SELF_SRCS
     IGCObject_DPrimitive_gco_0.cpp
     IProcedure_DPrimitive_gco_0.cpp
     IPrintable_DPrimitive_gco_0.cpp
+    IGCObject_DPrimitive_gco_1_gco.cpp
+    IProcedure_DPrimitive_gco_1_gco.cpp
+    IPrintable_DPrimitive_gco_1_gco.cpp
     IGCObject_DPrimitive_gco_2_gco_gco.cpp
     IProcedure_DPrimitive_gco_2_gco_gco.cpp
     IPrintable_DPrimitive_gco_2_gco_gco.cpp
