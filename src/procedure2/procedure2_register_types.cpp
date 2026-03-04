@@ -5,7 +5,8 @@
 
 #include "procedure2_register_types.hpp"
 
-#include "detail/IGCObject_DPrimitive_gco_0.hpp"
+#include "Primitive_gco_0.hpp"
+//#include "detail/IGCObject_DPrimitive_gco_0.hpp"
 #include "detail/IGCObject_DPrimitive_gco_1_gco.hpp"
 #include "detail/IGCObject_DPrimitive_gco_2_gco_gco.hpp"
 #include "detail/IGCObject_DPrimitive_gco_3_dict_string_gco.hpp"
