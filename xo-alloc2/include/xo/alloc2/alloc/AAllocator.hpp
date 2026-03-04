@@ -31,7 +31,8 @@ namespace xo {
          *  Implementations of AAllocator will downcast to a
          *  to some specific representation.
          **/
-        struct AAllocator {
+        class AAllocator {
+        public:
             /** @defgroup mm-allocator-type-traits allocator type traits **/
             ///@{
             /** memory size report **/

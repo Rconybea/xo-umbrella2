@@ -6,7 +6,7 @@
 #include "DList.hpp"
 #include "list/IPrintable_DList.hpp"
 #include "list/IGCObject_DList.hpp"
-#include <xo/gc/GCObject.hpp>
+#include <xo/alloc2/GCObject.hpp>
 #include <xo/printable2/Printable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/facet/facet_implementation.hpp>

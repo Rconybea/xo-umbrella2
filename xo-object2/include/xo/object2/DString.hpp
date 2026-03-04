@@ -6,7 +6,7 @@
 #pragma once
 
 #include <xo/alloc2/Allocator.hpp>
-#include <xo/gc/Collector.hpp>
+#include <xo/alloc2/Collector.hpp>
 #include <xo/facet/obj.hpp>
 #include <xo/indentlog/print/ppindentinfo.hpp>
 #include <string_view>
@@ -15,6 +15,8 @@
 //#include <cstdio>
 
 namespace xo {
+    namespace mm { class ACollector; }
+
     namespace scm {
         /** @class DString
          *  @brief String implementation with gc hooks
@@ -111,14 +113,7 @@ namespace xo {
             static DString * printf(obj<AAllocator> mm,
                                     size_type cap,
                                     const char * fmt,
-                                    Args&&... args)
-            {
-                DString * result = DString::empty(mm, cap);
-                if (result) {
-                    result->sprintf(fmt, std::forward<Args>(args)...);
-                }
-                return result;
-            }
+                                    Args&&... args);
 
             ///@}
             /** @defgroup dstring-access access methods **/
@@ -252,8 +247,10 @@ namespace xo {
             /** clone string, using memory from allocator @p mm **/
             DString * shallow_copy(obj<AAllocator> mm) const noexcept;
 
-            /** fixup child pointers (trivial for DString, no children) **/
             size_type forward_children(obj<ACollector> gc) noexcept;
+            /** fixup child pointers (trivial for DString, no children)
+             *  note: cref so we can use forward decl
+             **/
 
             ///@}
 
@@ -284,6 +281,24 @@ namespace xo {
 
             ///@}
         };
+
+        /** create string using printf-style formatting.
+         *  Use memory from allocator @p mm with capacity @p cap.
+         *  Truncates if result exceeds capacity.
+         *  @return pointer to newly created DString
+         **/
+        template <typename... Args>
+        DString * DString::printf(obj<AAllocator> mm,
+                                  size_type cap,
+                                  const char * fmt,
+                                  Args&&... args)
+        {
+            DString * result = DString::empty(mm, cap);
+            if (result) {
+                result->sprintf(fmt, std::forward<Args>(args)...);
+            }
+            return result;
+        }
 
         inline std::ostream & operator<<(std::ostream & os, const DString * x) {
             if (x) {

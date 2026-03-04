@@ -11,8 +11,8 @@
 #include <xo/facet/typeseq.hpp>
 #include <xo/facet/obj.hpp>
 
-#include "generation.hpp"
-#include "role.hpp"
+#include <xo/alloc2/generation.hpp>
+#include <xo/alloc2/role.hpp>
 
 #include <cstdint>
 #include <cstddef>

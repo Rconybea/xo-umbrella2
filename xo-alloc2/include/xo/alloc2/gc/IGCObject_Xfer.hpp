@@ -14,7 +14,7 @@
 #pragma once
 
 #include <xo/alloc2/Allocator.hpp>
-#include <xo/gc/Collector.hpp>
+#include <xo/alloc2/Collector.hpp>
 #include <cstdint>
 #include <cstddef>
 

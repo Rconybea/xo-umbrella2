@@ -15,7 +15,7 @@
 
 // includes (via {facet_includes})
 #include <xo/alloc2/Allocator.hpp>
-#include <xo/gc/Collector.hpp>
+#include <xo/alloc2/Collector.hpp>
 #include <cstdint>
 #include <cstddef>
 #include <xo/facet/obj.hpp>
@@ -31,7 +31,7 @@ using Copaque = const void *;
 using Opaque = void *;
 
 /**
-GC hooks for collector-aware data
+   GC hooks for collector-aware data
 **/
 class AGCObject {
 public:

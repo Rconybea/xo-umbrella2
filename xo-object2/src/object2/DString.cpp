@@ -4,12 +4,13 @@
  **/
 
 #include "DString.hpp"
+#include <xo/alloc2/Allocator.hpp>
 #include <xo/indentlog/print/pretty.hpp>
 #include <algorithm>
 #include <cstring>
 
 namespace xo {
-    using xo::facet::typeseq;
+    using xo::reflect::typeseq;
     using xo::print::ppdetail_atomic;
 
     namespace scm {

@@ -13,10 +13,10 @@
 
 #pragma once
 
-#include "detail/AGCObject.hpp"
-#include "detail/IGCObject_Any.hpp"
-#include "detail/IGCObject_Xfer.hpp"
-#include "detail/RGCObject.hpp"
+#include "gc/AGCObject.hpp"
+#include "gc/IGCObject_Any.hpp"
+#include "gc/IGCObject_Xfer.hpp"
+#include "gc/RGCObject.hpp"
 
 namespace xo {
     namespace mm {

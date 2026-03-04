@@ -4,7 +4,7 @@
  **/
 
 #include "DPrimitive.hpp"
-#include <xo/gc/GCObject.hpp>
+#include <xo/alloc2/GCObject.hpp>
 
 namespace xo {
     namespace scm {

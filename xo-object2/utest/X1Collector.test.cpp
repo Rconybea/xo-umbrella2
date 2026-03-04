@@ -16,7 +16,7 @@
 #include "list/IGCObject_DList.hpp"
 
 #include <xo/gc/CollectorTypeRegistry.hpp>
-#include <xo/gc/Collector.hpp>
+#include <xo/alloc2/Collector.hpp>
 #include <xo/gc/DX1Collector.hpp>
 
 #include <xo/gc/detail/IAllocator_DX1Collector.hpp>

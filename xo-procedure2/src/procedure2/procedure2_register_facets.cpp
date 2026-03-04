@@ -10,7 +10,7 @@
 #include "Primitive_gco_2_gco_gco.hpp"
 #include "Primitive_gco_3_dict_string_gco.hpp"
 
-#include <xo/gc/GCObject.hpp>
+#include <xo/alloc2/GCObject.hpp>
 #include <xo/printable2/Printable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/indentlog/scope.hpp>

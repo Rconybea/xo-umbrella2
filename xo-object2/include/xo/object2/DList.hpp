@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <xo/gc/GCObject.hpp>
+#include <xo/alloc2/GCObject.hpp>
 #include <xo/facet/obj.hpp>
 #include <xo/indentlog/print/ppindentinfo.hpp>
 
