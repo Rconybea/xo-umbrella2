@@ -8,6 +8,7 @@
 #include "detail/IGCObject_DPrimitive_gco_0.hpp"
 #include "detail/IGCObject_DPrimitive_gco_1_gco.hpp"
 #include "detail/IGCObject_DPrimitive_gco_2_gco_gco.hpp"
+#include "detail/IGCObject_DPrimitive_gco_3_dict_string_gco.hpp"
 #include <xo/indentlog/scope.hpp>
 
 namespace xo {
@@ -30,6 +31,7 @@ namespace xo {
             ok &= gc.install_type(impl_for<AGCObject, DPrimitive_gco_0>());
             ok &= gc.install_type(impl_for<AGCObject, DPrimitive_gco_1_gco>());
             ok &= gc.install_type(impl_for<AGCObject, DPrimitive_gco_2_gco_gco>());
+            ok &= gc.install_type(impl_for<AGCObject, DPrimitive_gco_3_dict_string_gco>());
 
             return ok;
         }
