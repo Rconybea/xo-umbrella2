@@ -22,7 +22,7 @@
 #include <xo/facet/facet_implementation.hpp>
 #include <xo/facet/typeseq.hpp>
 
-namespace xo { namespace mm { struct ACollector; }}
+namespace xo { namespace mm { class ACollector; }}
 
 namespace xo {
 namespace mm {

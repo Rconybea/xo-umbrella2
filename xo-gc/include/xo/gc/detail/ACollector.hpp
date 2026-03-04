@@ -30,7 +30,8 @@ namespace xo {
          *
          *  A collector implementation will also support the @ref AAllocator facet, see also
          **/
-        struct ACollector {
+        class ACollector {
+        public:
             using typeseq = xo::facet::typeseq;
             using size_type = std::size_t;
 
