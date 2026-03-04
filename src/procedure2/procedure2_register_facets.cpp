@@ -45,6 +45,7 @@ namespace xo {
             FacetRegistry::register_impl<APrintable, DPrimitive_gco_3_dict_string_gco>();
 
             log && log(xtag("DSimpleRcx.tseq", typeseq::id<DSimpleRcx>()));
+            log && log(xtag("DPrimitive_gco_0.tseq", typeseq::id<DPrimitive_gco_0>()));
             log && log(xtag("DPrimitive_gco_1_gco.tseq", typeseq::id<DPrimitive_gco_1_gco>()));
             log && log(xtag("DPrimitive_gco_2_gco_gco.tseq", typeseq::id<DPrimitive_gco_2_gco_gco>()));
             log && log(xtag("DPrimitive_gco_3_dict_string_gco.tseq", typeseq::id<DPrimitive_gco_3_dict_string_gco>()));
