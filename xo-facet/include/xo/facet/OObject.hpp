@@ -10,6 +10,7 @@
 #include <new>
 #include <cstring>
 #include <cstddef>
+#include <cassert>
 
 namespace xo {
     namespace facet {
@@ -198,19 +199,24 @@ namespace xo {
              *  - assigning from pointer with compatible representation
              *  - implementing the fat-object-pointer equivalent of
              *    assigning a derived pointer to a base pointer.
+             *  - making a mistake (attempting to assign incompatible representations)
              **/
             template <typename DOther>
             OObject & from_data(DOther * other) {
                 static_assert(std::is_same_v<DRepr, DVariantPlaceholder>
                               || std::is_convertible_v<DOther*, DRepr*>);
 
-                if constexpr (!std::is_same_v<DRepr, DVariantPlaceholder>
-                              && std::is_convertible_v<DOther*, DRepr*>)
+                if constexpr (!std::is_same_v<DRepr, DVariantPlaceholder>)
                 {
-                    /* assigning to typed data, from something with consistent
-                     * representation keep .iface_ pointer
-                     */
-                    this->data_ = other;
+                    if (std::is_convertible_v<DOther*, DRepr*>) {
+                        /* assigning to typed data, from something with consistent
+                         * representation. keeping .iface_ pointer
+                         */
+                        this->data_ = other;
+                    } else {
+                        /** DOther not compatible with DRepr. conversion is bad **/
+                        assert(false);
+                    }
                 } else /*DRepr is DVariantPlaceholder*/ {
                     /** assigning to variant
                      *
