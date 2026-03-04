@@ -20,6 +20,9 @@ set(SELF_SRCS
     IGCObject_DPrimitive_gco_2_gco_gco.cpp
     IProcedure_DPrimitive_gco_2_gco_gco.cpp
     IPrintable_DPrimitive_gco_2_gco_gco.cpp
+    IGCObject_DPrimitive_gco_3_dict_string_gco.cpp
+    IProcedure_DPrimitive_gco_3_dict_string_gco.cpp
+    IPrintable_DPrimitive_gco_3_dict_string_gco.cpp
 )
 
 xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 ${SELF_SRCS})
