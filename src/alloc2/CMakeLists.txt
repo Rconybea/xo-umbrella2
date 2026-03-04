@@ -6,6 +6,11 @@ set(SELF_SRCS
     init_alloc2.cpp
     alloc2_register_facets.cpp
 
+    CollectorTypeRegistry.cpp
+
+    ICollector_Any.cpp
+    IGCObject_Any.cpp
+
     AAllocator.cpp
     IAllocator_Any.cpp
     IAllocator_DArena.cpp
