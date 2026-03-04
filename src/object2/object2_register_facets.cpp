@@ -12,7 +12,7 @@
 #include <xo/object2/Boolean.hpp>
 #include <xo/object2/Integer.hpp>
 #include <xo/object2/Float.hpp>
-#include <xo/object2/String.hpp>
+#include <xo/stringtable2/String.hpp>
 
 #include <xo/printable2/detail/APrintable.hpp>
 #include <xo/alloc2/alloc/AAllocator.hpp>
@@ -70,7 +70,6 @@ namespace xo {
             log && log(xtag("DBoolean.tseq", typeseq::id<DBoolean>()));
             log && log(xtag("DFloat.tseq", typeseq::id<DFloat>()));
             log && log(xtag("DInteger.tseq", typeseq::id<DInteger>()));
-            log && log(xtag("DString.tseq", typeseq::id<DString>()));
             log && log(xtag("DArray.tseq", typeseq::id<DArray>()));
             log && log(xtag("DDictionary.tseq", typeseq::id<DDictionary>()));
             log && log(xtag("DRuntimeError.tseq", typeseq::id<DRuntimeError>()));

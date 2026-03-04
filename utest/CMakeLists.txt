@@ -4,8 +4,8 @@ set(UTEST_EXE utest.object2)
 set(UTEST_SRCS
     object2_utest_main.cpp
     DArray.test.cpp
-    DString.test.cpp
-    StringOps.test.cpp
+#    DString.test.cpp
+#    StringOps.test.cpp
     X1Collector.test.cpp
     Printable.test.cpp
 )

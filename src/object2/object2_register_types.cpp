@@ -36,8 +36,6 @@ namespace xo {
 
             ok &= gc.install_type(impl_for<AGCObject, DInteger>());
 
-            ok &= gc.install_type(impl_for<AGCObject, DString>());
-
             ok &= gc.install_type(impl_for<AGCObject, DList>());
 
             ok &= gc.install_type(impl_for<AGCObject, DArray>());

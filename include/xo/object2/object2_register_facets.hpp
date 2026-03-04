@@ -5,8 +5,6 @@
 
 #pragma once
 
-#include <xo/alloc2/Collector.hpp>
-
 namespace xo {
     namespace scm {
         /** Register object2 (facet,impl) combinations with FacetRegistry **/
