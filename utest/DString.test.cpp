@@ -5,6 +5,7 @@
 
 #include "init_object2.hpp"
 #include "StringOps.hpp"
+#include <xo/alloc2/Allocator.hpp>
 #include <xo/alloc2/arena/IAllocator_DArena.hpp>
 #include <catch2/catch.hpp>
 #include <cctype>

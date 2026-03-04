@@ -6,7 +6,7 @@
 #pragma once
 
 #include <xo/alloc2/Allocator.hpp>
-#include <xo/gc/Collector.hpp>
+#include <xo/alloc2/Collector.hpp>
 #include <xo/facet/obj.hpp>
 #include <xo/indentlog/print/ppindentinfo.hpp>
 
