@@ -233,7 +233,7 @@ namespace xo {
              *  Provided when actual type of @ref data_ is not DRepr,
              *  because DRepr is DVariantPlaceholder.
              *
-             *  We can't rely on dynamic_cast here, because DRepr's
+             *  NOTE: We can't rely on dynamic_cast here, because DRepr's
              *  don't need to be related as far as c++ type system is
              *  concerned.
              **/
@@ -241,9 +241,14 @@ namespace xo {
             DOther * downcast() const
                 requires (std::is_same_v<DataType, DVariantPlaceholder>)
             {
-                if (data_ && (typeseq::id<DOther>() == this->iface()->_typeseq())) {
+                if constexpr (std::is_same_v<DOther, DVariantPlaceholder>) {
+                    /* trivialconversion from type-erased to type-erased.
+                     * Don't need to inspect runtime type
+                     */
+                    return data_;
+                } else if (data_ && (typeseq::id<DOther>() == this->iface()->_typeseq())) {
                     /* actual runtime type for data_ is DOther,
-                     * safe to reinterpret
+                     * reported by _typseq() -> safe to reinterpret
                      */
                     return reinterpret_cast<DOther*>(data_);
                 } else {
