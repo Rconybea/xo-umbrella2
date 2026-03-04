@@ -38,10 +38,6 @@ namespace xo {
         {
             scope log(XO_DEBUG(true));
 
-            FacetRegistry::register_impl<AGCObject, DList>();
-            FacetRegistry::register_impl<APrintable, DList>();
-            FacetRegistry::register_impl<ASequence, DList>();
-
             FacetRegistry::register_impl<AGCObject, DBoolean>();
             FacetRegistry::register_impl<APrintable, DBoolean>();
 
@@ -53,6 +49,10 @@ namespace xo {
 
             FacetRegistry::register_impl<AGCObject, DString>();
             FacetRegistry::register_impl<APrintable, DString>();
+
+            FacetRegistry::register_impl<AGCObject, DList>();
+            FacetRegistry::register_impl<APrintable, DList>();
+            FacetRegistry::register_impl<ASequence, DList>();
 
             FacetRegistry::register_impl<AGCObject, DArray>();
             FacetRegistry::register_impl<APrintable, DArray>();
