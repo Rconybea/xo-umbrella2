@@ -3,8 +3,8 @@
  *  @author Roland Conybeare, Dec 2025
  **/
 
-#include "ACollector.hpp"
-#include "ICollector_Xfer.hpp"
+#include <xo/alloc2/gc/ACollector.hpp>
+#include <xo/alloc2/gc/ICollector_Xfer.hpp>
 #include "DX1Collector.hpp"
 
 namespace xo {

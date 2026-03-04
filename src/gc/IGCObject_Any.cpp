@@ -2,7 +2,7 @@
  *
  **/
 
-#include "detail/IGCObject_Any.hpp"
+#include "gc/IGCObject_Any.hpp"
 #include <iostream>
 #include <exception>
 

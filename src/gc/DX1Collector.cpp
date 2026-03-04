@@ -3,13 +3,14 @@
  *  @author Roland Conybeare, Dec 2025
  **/
 
-#include "Allocator.hpp"
+#include <xo/alloc2/GCObject.hpp>
+#include <xo/alloc2/Allocator.hpp>
 #include "detail/IAllocator_DX1Collector.hpp"
 #include "detail/ICollector_DX1Collector.hpp"
 #include "arena/IAllocator_DArena.hpp"
-#include "xo/gc/DX1Collector.hpp"
-#include "xo/gc/DX1CollectorIterator.hpp"
-#include "generation.hpp"
+#include <xo/gc/DX1Collector.hpp>
+#include <xo/gc/DX1CollectorIterator.hpp>
+#include <xo/alloc2/generation.hpp>
 #include "object_age.hpp"
 #include <xo/facet/obj.hpp>
 #include <xo/indentlog/scope.hpp>
