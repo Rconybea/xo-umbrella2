@@ -6,13 +6,11 @@
 #include "init_primitives.hpp"
 #include "DPrimitive.hpp"
 #include <xo/object2/Float.hpp>
-//#include <xo/object2/number/IGCObject_DFloat.hpp>
 #include <xo/object2/Integer.hpp>
-//#include <xo/object2/number/IGCObject_DInteger.hpp>
 #include <xo/object2/Boolean.hpp>
-#include <xo/gc/GCObjectConversion.hpp>
 #include <xo/object2/number/GCObjectConversion_DFloat.hpp>
 #include <xo/object2/number/GCObjectConversion_DInteger.hpp>
+#include <xo/alloc2/GCObjectConversion.hpp>
 #include <xo/facet/facet.hpp>
 #include <cmath>
 

@@ -7,7 +7,7 @@
 
 #include "RuntimeContext.hpp"
 #include <xo/object2/DArray.hpp>
-#include <xo/gc/GCObjectConversion.hpp>
+#include <xo/alloc2/GCObjectConversion.hpp>
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/reflect/Reflect.hpp>
 #include <xo/alloc2/Allocator.hpp>
