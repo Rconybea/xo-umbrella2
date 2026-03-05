@@ -3,7 +3,7 @@
     output_cpp_dir: "src/object2",
     output_hpp_dir: "include/xo/object2",
     output_impl_subdir: "sequence",
-    includes: ["<xo/gc/GCObject.hpp>"],
+    includes: ["<xo/alloc2/GCObject.hpp>"],
     // extra includes in Sequence.hpp, if any
     user_hpp_includes: [],
     namespace1: "xo",

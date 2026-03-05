@@ -150,6 +150,7 @@ let
             xo-allocutil      = self.callPackage pkgs/xo-allocutil.nix      { stdenv = jitStdenv; };
             xo-alloc          = self.callPackage pkgs/xo-alloc.nix          { stdenv = jitStdenv; buildDocs = true; };
             xo-alloc2         = self.callPackage pkgs/xo-alloc2.nix         { stdenv = jitStdenv; buildDocs = true; };
+            xo-stringtable2   = self.callPackage pkgs/xo-stringtable2.nix   { stdenv = jitStdenv; };
             xo-gc             = self.callPackage pkgs/xo-gc.nix             { stdenv = jitStdenv; buildDocs = true; };
             xo-object         = self.callPackage pkgs/xo-object.nix         { stdenv = jitStdenv; };
             xo-object2        = self.callPackage pkgs/xo-object2.nix        { stdenv = jitStdenv; };
@@ -500,6 +501,7 @@ in
     allocutil      = pkgs.xo-allocutil;
     alloc          = pkgs.xo-alloc;
     alloc2         = pkgs.xo-alloc2;
+    stringtable2   = pkgs.xo-stringtable2;
     gc             = pkgs.xo-gc;
     object         = pkgs.xo-object;
     object2        = pkgs.xo-object2;

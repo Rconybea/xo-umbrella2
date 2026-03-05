@@ -48,7 +48,7 @@ xo_add_genfacetimpl(
 # note: manual target; generated code committed to git
 xo_add_genfacetimpl(
     TARGET xo-object2-facetimpl-gcobject-list
-    FACET_PKG xo_gc
+    FACET_PKG xo_alloc2
     FACET GCObject
     REPR List
     INPUT idl/IGCObject_DList.json5
@@ -68,7 +68,7 @@ xo_add_genfacetimpl(
 # note: manual target; generated code committed to git
 xo_add_genfacetimpl(
     TARGET xo-object2-facetimpl-gcobject-boolean
-    FACET_PKG xo_gc
+    FACET_PKG xo_alloc2
     FACET GCObject
     REPR Boolean
     INPUT idl/IGCObject_DBoolean.json5
@@ -88,7 +88,7 @@ xo_add_genfacetimpl(
 # note: manual target; generated code committed to git
 xo_add_genfacetimpl(
     TARGET xo-object2-facetimpl-gcobject-float
-    FACET_PKG xo_gc
+    FACET_PKG xo_alloc2
     FACET GCObject
     REPR Float
     INPUT idl/IGCObject_DFloat.json5
@@ -108,7 +108,7 @@ xo_add_genfacetimpl(
 # note: manual target; generated code committed to git
 xo_add_genfacetimpl(
     TARGET xo-object2-facetimpl-gcobject-integer
-    FACET_PKG xo_gc
+    FACET_PKG xo_alloc2
     FACET GCObject
     REPR Integer
     INPUT idl/IGCObject_DInteger.json5
@@ -137,7 +137,7 @@ xo_add_genfacetimpl(
 # note: manual target; generated code committed to git
 xo_add_genfacetimpl(
     TARGET xo-object2-facetimpl-gcobject-array
-    FACET_PKG xo_gc
+    FACET_PKG xo_alloc2
     FACET GCObject
     REPR Array
     INPUT idl/IGCObject_DArray.json5
@@ -157,7 +157,7 @@ xo_add_genfacetimpl(
 # note: manual target; generated code committed to git
 xo_add_genfacetimpl(
     TARGET xo-object2-facetimpl-gcobject-dictionary
-    FACET_PKG xo_gc
+    FACET_PKG xo_alloc2
     FACET GCObject
     REPR Dictionary
     INPUT idl/IGCObject_DDictionary.json5
@@ -177,7 +177,7 @@ xo_add_genfacetimpl(
 # note: manual target; generated code committed to git
 xo_add_genfacetimpl(
     TARGET xo-object2-facetimpl-gcobject-runtimeerror
-    FACET_PKG xo_gc
+    FACET_PKG xo_alloc2
     FACET GCObject
     REPR RuntimeError
     INPUT idl/IGCObject_DRuntimeError.json5

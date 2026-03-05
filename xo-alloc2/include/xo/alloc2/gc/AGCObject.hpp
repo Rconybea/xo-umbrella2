@@ -31,7 +31,7 @@ using Copaque = const void *;
 using Opaque = void *;
 
 /**
-   GC hooks for collector-aware data
+GC hooks for collector-aware data
 **/
 class AGCObject {
 public:

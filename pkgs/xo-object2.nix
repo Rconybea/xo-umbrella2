@@ -10,8 +10,9 @@
 #  xo-reflectutil,
 #  xo-alloc,
   #  xo-randomgen,
+  xo-stringtable2,
   xo-reflect,
-  xo-gc,
+  xo-alloc2,
   xo-printable2,
   xo-facet,
   xo-subsys,
@@ -40,7 +41,8 @@ stdenv.mkDerivation (finalattrs:
     ];
     propagatedBuildInputs = [
       xo-reflect
-      xo-gc
+      xo-alloc2
+      xo-stringtable2
       xo-printable2
       xo-subsys
       xo-facet

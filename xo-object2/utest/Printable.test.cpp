@@ -20,7 +20,8 @@
 #include <xo/object2/number/IGCObject_DInteger.hpp>
 
 #include <xo/alloc2/Collector.hpp>
-#include <xo/gc/DX1Collector.hpp>
+
+#include <xo/gc/X1Collector.hpp>
 #include <xo/gc/detail/IAllocator_DX1Collector.hpp>
 #include <xo/gc/detail/ICollector_DX1Collector.hpp>
 

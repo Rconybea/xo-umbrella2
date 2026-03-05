@@ -7,7 +7,7 @@
 
 #include "DInteger.hpp"
 #include "number/IGCObject_DInteger.hpp"
-#include <xo/gc/GCObjectConversion.hpp>
+#include <xo/alloc2/GCObjectConversion.hpp>
 
 namespace xo {
     namespace scm {
