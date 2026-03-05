@@ -39,9 +39,10 @@ namespace xo {
         DDictionary::at_index(size_type ix) const
         {
             if (ix < keys_->size()) {
+#ifndef NDEBUG
                 auto key_str = obj<AGCObject,DString>::from((*keys_)[ix]);
-
                 assert(key_str);
+#endif
 
                 return pair_type(this->key_at_index(ix), (*values_)[ix]);
             }
