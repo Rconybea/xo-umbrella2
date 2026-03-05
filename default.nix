@@ -168,6 +168,7 @@ let
             xo-numeric        = self.callPackage pkgs/xo-numeric.nix        { stdenv = jitStdenv; };
 
             xo-ordinaltree    = self.callPackage pkgs/xo-ordinaltree.nix    { stdenv = jitStdenv; };
+            xo-tokenizer2     = self.callPackage pkgs/xo-tokenizer2.nix     { stdenv = jitStdenv;                   buildExamples = true; };
             #
             xo-webutil        = self.callPackage pkgs/xo-webutil.nix        { stdenv = jitStdenv; };
             xo-pywebutil      = self.callPackage pkgs/xo-pywebutil.nix      {};
@@ -521,8 +522,9 @@ in
     object2        = pkgs.xo-object2;
     procedure2     = pkgs.xo-procedure2;
     numeric        = pkgs.xo-numeric;
-
     ordinaltree    = pkgs.xo-ordinaltree;
+    tokenizer2     = pkgs.xo-tokenizer2;
+
     webutil        = pkgs.xo-webutil;
     pywebutil      = pkgs.xo-pywebutil;
     printjson      = pkgs.xo-printjson;
