@@ -5,6 +5,7 @@
 
 #include "stringtable2_register_facets.hpp"
 
+#include <xo/stringtable2/UniqueString.hpp>
 #include <xo/stringtable2/String.hpp>
 
 #include <xo/facet/FacetRegistry.hpp>
@@ -22,6 +23,9 @@ namespace xo {
         stringtable2_register_facets()
         {
             scope log(XO_DEBUG(true));
+
+            FacetRegistry::register_impl<AGCObject, DUniqueString>();
+            FacetRegistry::register_impl<APrintable, DUniqueString>();
 
             FacetRegistry::register_impl<AGCObject, DString>();
             FacetRegistry::register_impl<APrintable, DString>();

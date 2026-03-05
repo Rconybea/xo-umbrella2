@@ -3,7 +3,7 @@
  *  @author Roland Conybeare, Jan 2026
  **/
 
-#include <xo/expression2/StringTable.hpp>
+#include <xo/stringtable2/StringTable.hpp>
 #include <catch2/catch.hpp>
 #include <cstring>
 

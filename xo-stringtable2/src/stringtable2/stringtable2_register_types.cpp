@@ -4,6 +4,7 @@
  **/
 
 #include "stringtable2_register_types.hpp"
+#include "UniqueString.hpp"
 #include "String.hpp"
 
 //#include <xo/facet/FacetRegistry.hpp>
@@ -23,6 +24,7 @@ namespace xo {
 
             bool ok = true;
 
+            ok &= gc.install_type(impl_for<AGCObject, DUniqueString>());
             ok &= gc.install_type(impl_for<AGCObject, DString>());
 
             return ok;

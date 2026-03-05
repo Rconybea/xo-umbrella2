@@ -118,26 +118,6 @@ xo_add_genfacetimpl(
 
 # note: manual target; generated code committed to git
 xo_add_genfacetimpl(
-    TARGET xo-object2-facetimpl-printable-string
-    FACET_PKG xo_printable2
-    FACET Printable
-    REPR String
-    INPUT idl/IPrintable_DString.json5
-)
-
-# note: manual target; generated code committed to git
-xo_add_genfacetimpl(
-    TARGET xo-object2-facetimpl-gcobject-string
-    FACET_PKG xo_gc
-    FACET GCObject
-    REPR String
-    INPUT idl/IGCObject_DString.json5
-)
-
-# ----------------------------------------------------------------
-
-# note: manual target; generated code committed to git
-xo_add_genfacetimpl(
     TARGET xo-object2-facetimpl-sequence-array
     FACET_PKG xo_object2
     FACET Sequence

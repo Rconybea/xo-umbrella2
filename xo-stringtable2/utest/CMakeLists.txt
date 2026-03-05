@@ -3,6 +3,7 @@
 set(UTEST_EXE utest.stringtable2)
 set(UTEST_SRCS
     stringtable2_utest_main.cpp
+    StringTable.test.cpp
     DString.test.cpp
     StringOps.test.cpp
 )

@@ -11,7 +11,7 @@
  *       [idl/IPrintable_DUniqueString.json5]
 **/
 
-#include "detail/IPrintable_DUniqueString.hpp"
+#include "uniquestring/IPrintable_DUniqueString.hpp"
 
 namespace xo {
     namespace scm {

@@ -11,7 +11,7 @@
  *       [idl/IGCObject_DUniqueString.json5]
 **/
 
-#include "detail/IGCObject_DUniqueString.hpp"
+#include "uniquestring/IGCObject_DUniqueString.hpp"
 
 namespace xo {
     namespace scm {

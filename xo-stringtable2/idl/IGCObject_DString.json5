@@ -1,10 +1,10 @@
 {
     mode: "implementation",
-    output_cpp_dir: "src/object2",
-    output_hpp_dir: "include/xo/object2",
+    output_cpp_dir: "src/stringtable2",
+    output_hpp_dir: "include/xo/stringtable2",
     output_impl_subdir: "string",
     includes: [
-        "<xo/gc/GCObject.hpp>",
+        "<xo/alloc2/GCObject.hpp>",
         "<xo/alloc2/Allocator.hpp>"
     ],
     local_types: [ ],
