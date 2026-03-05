@@ -7,7 +7,7 @@
 
 #include "DFloat.hpp"
 #include "number/IGCObject_DFloat.hpp"
-#include <xo/gc/GCObjectConversion.hpp>
+#include <xo/alloc2/GCObjectConversion.hpp>
 
 namespace xo {
     namespace scm {
