@@ -141,30 +141,32 @@ let
         {
             xo-cmake          = self.callPackage pkgs/xo-cmake.nix          { stdenv = jitStdenv; };
             xo-indentlog      = self.callPackage pkgs/xo-indentlog.nix      { stdenv = jitStdenv; buildDocs = true; buildExamples = true; };
-            xo-subsys         = self.callPackage pkgs/xo-subsys.nix         { stdenv = jitStdenv; };
-            xo-randomgen      = self.callPackage pkgs/xo-randomgen.nix      { stdenv = jitStdenv;                   buildExamples = true; };
             xo-reflectutil    = self.callPackage pkgs/xo-reflectutil.nix    { stdenv = jitStdenv; };
-            xo-flatstring     = self.callPackage pkgs/xo-flatstring.nix     { stdenv = jitStdenv; buildDocs = true; buildExamples = true; };
+            xo-randomgen      = self.callPackage pkgs/xo-randomgen.nix      { stdenv = jitStdenv;                   buildExamples = true; };
             xo-arena          = self.callPackage pkgs/xo-arena.nix          { stdenv = jitStdenv; buildDocs = true; };
             xo-facet          = self.callPackage pkgs/xo-facet.nix          { stdenv = jitStdenv; };
             xo-allocutil      = self.callPackage pkgs/xo-allocutil.nix      { stdenv = jitStdenv; };
-            xo-alloc          = self.callPackage pkgs/xo-alloc.nix          { stdenv = jitStdenv; buildDocs = true; };
-            xo-alloc2         = self.callPackage pkgs/xo-alloc2.nix         { stdenv = jitStdenv; buildDocs = true; };
-            xo-stringtable2   = self.callPackage pkgs/xo-stringtable2.nix   { stdenv = jitStdenv; };
-            xo-gc             = self.callPackage pkgs/xo-gc.nix             { stdenv = jitStdenv; buildDocs = true; };
-            xo-object         = self.callPackage pkgs/xo-object.nix         { stdenv = jitStdenv; };
-            xo-object2        = self.callPackage pkgs/xo-object2.nix        { stdenv = jitStdenv; };
             xo-refcnt         = self.callPackage pkgs/xo-refcnt.nix         { stdenv = jitStdenv; };
-            xo-ordinaltree    = self.callPackage pkgs/xo-ordinaltree.nix    { stdenv = jitStdenv; };
+            xo-subsys         = self.callPackage pkgs/xo-subsys.nix         { stdenv = jitStdenv; };
+            xo-flatstring     = self.callPackage pkgs/xo-flatstring.nix     { stdenv = jitStdenv; buildDocs = true; buildExamples = true; };
             xo-pyutil         = self.callPackage pkgs/xo-pyutil.nix         { stdenv = jitStdenv; };
             xo-reflect        = self.callPackage pkgs/xo-reflect.nix        { stdenv = jitStdenv; };
             xo-pyreflect      = self.callPackage pkgs/xo-pyreflect.nix      { stdenv = jitStdenv; };
             xo-ratio          = self.callPackage pkgs/xo-ratio.nix          { stdenv = jitStdenv; buildDocs = true; buildExamples = true; };
             xo-unit           = self.callPackage pkgs/xo-unit.nix           { stdenv = jitStdenv; buildDocs = true; buildExamples = true; };
             xo-pyunit         = self.callPackage pkgs/xo-pyunit.nix         { stdenv = jitStdenv; };
-            #
             xo-callback       = self.callPackage pkgs/xo-callback.nix       { stdenv = jitStdenv; };
             xo-printable2     = self.callPackage pkgs/xo-printable2.nix     { stdenv = jitStdenv; };
+            xo-alloc          = self.callPackage pkgs/xo-alloc.nix          { stdenv = jitStdenv; buildDocs = true; };
+            xo-alloc2         = self.callPackage pkgs/xo-alloc2.nix         { stdenv = jitStdenv; buildDocs = true; };
+            xo-stringtable2   = self.callPackage pkgs/xo-stringtable2.nix   { stdenv = jitStdenv; };
+            xo-gc             = self.callPackage pkgs/xo-gc.nix             { stdenv = jitStdenv; buildDocs = true; };
+            xo-object         = self.callPackage pkgs/xo-object.nix         { stdenv = jitStdenv; };
+            xo-object2        = self.callPackage pkgs/xo-object2.nix        { stdenv = jitStdenv; };
+
+            xo-procedure2     = self.callPackage pkgs/xo-procedure2.nix     { stdenv = jitStdenv; };
+            xo-ordinaltree    = self.callPackage pkgs/xo-ordinaltree.nix    { stdenv = jitStdenv; };
+            #
             xo-webutil        = self.callPackage pkgs/xo-webutil.nix        { stdenv = jitStdenv; };
             xo-pywebutil      = self.callPackage pkgs/xo-pywebutil.nix      {};
             xo-printjson      = self.callPackage pkgs/xo-printjson.nix      {};
@@ -493,22 +495,15 @@ in
   xo = {
     cmake          = pkgs.xo-cmake;
     indentlog      = pkgs.xo-indentlog;
-    refcnt         = pkgs.xo-refcnt;
-    subsys         = pkgs.xo-subsys;
+    reflectutil    = pkgs.xo-reflectutil;
     randomgen      = pkgs.xo-randomgen;
     arena          = pkgs.xo-arena;
     facet          = pkgs.xo-facet;
     allocutil      = pkgs.xo-allocutil;
-    alloc          = pkgs.xo-alloc;
-    alloc2         = pkgs.xo-alloc2;
-    stringtable2   = pkgs.xo-stringtable2;
-    gc             = pkgs.xo-gc;
-    object         = pkgs.xo-object;
-    object2        = pkgs.xo-object2;
-    ordinaltree    = pkgs.xo-ordinaltree;
+    refcnt         = pkgs.xo-refcnt;
+    subsys         = pkgs.xo-subsys;
     flatstring     = pkgs.xo-flatstring;
     pyutil         = pkgs.xo-pyutil;
-    reflectutil    = pkgs.xo-reflectutil;
     reflect        = pkgs.xo-reflect;
     pyreflect      = pkgs.xo-pyreflect;
     ratio          = pkgs.xo-ratio;
@@ -516,6 +511,15 @@ in
     pyunit         = pkgs.xo-pyunit;
     callback       = pkgs.xo-callback;
     printable2     = pkgs.xo-printable2;
+    alloc          = pkgs.xo-alloc;
+    alloc2         = pkgs.xo-alloc2;
+    stringtable2   = pkgs.xo-stringtable2;
+    gc             = pkgs.xo-gc;
+    object         = pkgs.xo-object;
+    object2        = pkgs.xo-object2;
+
+    procedure2     = pkgs.xo-procedure2;
+    ordinaltree    = pkgs.xo-ordinaltree;
     webutil        = pkgs.xo-webutil;
     pywebutil      = pkgs.xo-pywebutil;
     printjson      = pkgs.xo-printjson;

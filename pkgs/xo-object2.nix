@@ -10,6 +10,7 @@
 #  xo-reflectutil,
 #  xo-alloc,
   #  xo-randomgen,
+  xo-gc,
   xo-stringtable2,
   xo-reflect,
   xo-alloc2,
@@ -36,10 +37,10 @@ stdenv.mkDerivation (finalattrs:
 
     nativeBuildInputs = [
       cmake catch2
-#      xo-randomgen
       xo-cmake
     ];
     propagatedBuildInputs = [
+      xo-gc
       xo-reflect
       xo-alloc2
       xo-stringtable2

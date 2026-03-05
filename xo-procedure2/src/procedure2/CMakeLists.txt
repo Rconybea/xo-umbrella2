@@ -35,7 +35,7 @@ xo_install_include_tree3(include/xo/procedure2)
 #       xo-procedure2/cmake/xo_procedure2Config.cmake.in
 
 xo_dependency(${SELF_LIB} xo_object2)
-xo_dependency(${SELF_LIB} xo_gc)
+#xo_dependency(${SELF_LIB} xo_gc)
 xo_dependency(${SELF_LIB} subsys)
 #xo_dependency(${SELF_LIB} xo_indentlog)
 
