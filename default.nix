@@ -165,6 +165,8 @@ let
             xo-object2        = self.callPackage pkgs/xo-object2.nix        { stdenv = jitStdenv; };
 
             xo-procedure2     = self.callPackage pkgs/xo-procedure2.nix     { stdenv = jitStdenv; };
+            xo-numeric        = self.callPackage pkgs/xo-numeric.nix        { stdenv = jitStdenv; };
+
             xo-ordinaltree    = self.callPackage pkgs/xo-ordinaltree.nix    { stdenv = jitStdenv; };
             #
             xo-webutil        = self.callPackage pkgs/xo-webutil.nix        { stdenv = jitStdenv; };
@@ -517,8 +519,9 @@ in
     gc             = pkgs.xo-gc;
     object         = pkgs.xo-object;
     object2        = pkgs.xo-object2;
-
     procedure2     = pkgs.xo-procedure2;
+    numeric        = pkgs.xo-numeric;
+
     ordinaltree    = pkgs.xo-ordinaltree;
     webutil        = pkgs.xo-webutil;
     pywebutil      = pkgs.xo-pywebutil;
