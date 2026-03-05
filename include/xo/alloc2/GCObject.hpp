@@ -18,30 +18,6 @@
 #include "gc/IGCObject_Xfer.hpp"
 #include "gc/RGCObject.hpp"
 
-namespace xo {
-    namespace mm {
-        /** defined here to avoid #include cycle, since
-         *  template obj<AGCObject,DRepr> awkward to make available there
-         **/
-        template <typename Object>
-        template <typename DRepr>
-        void
-        RCollector<Object>::forward_inplace(xo::facet::obj<AGCObject,DRepr> * p_obj)
-        {
-            this->forward_inplace(p_obj->iface(), (void **)&(p_obj->data_));
-        }
-
-        template <typename Object>
-        template <typename DRepr>
-        void
-        RCollector<Object>::forward_inplace(DRepr ** p_repr)
-        {
-            // fetch static interface for DRepr
-            auto iface = xo::facet::impl_for<AGCObject,DRepr>();
-
-            this->forward_inplace(&iface, (void **)p_repr);
-        }
-    }
-}
+#include "gc/RCollector_aux.hpp"
 
 /* end GCObject.hpp */

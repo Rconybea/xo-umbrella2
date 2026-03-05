@@ -1,24 +1,26 @@
 {
     mode: "facet",
-    output_cpp_dir: "src/gc",
-    output_hpp_dir: "include/xo/gc",
-    output_impl_subdir: "detail",
+    output_cpp_dir: "src/alloc2",
+    output_hpp_dir: "include/xo/alloc2",
+    output_impl_subdir: "gc",
     includes: [
         "<xo/alloc2/Allocator.hpp>",
-        "<xo/gc/Collector.hpp>",
+        "<xo/alloc2/Collector.hpp>",
         "<cstdint>",
         "<cstddef>",
     ],
     // extra includes in GCObject.hpp, if any
-    user_hpp_includes: [],
+    user_hpp_includes: [
+        "\"gc/RCollector_aux.hpp\"",
+    ],
     namespace1: "xo",
     namespace2: "mm",
     pretext: [
         "namespace xo { namespace mm { class ACollector; }}",
     ],
     facet: "GCObject",
-    detail_subdir: "detail",
-    brief: "xxx",
+    detail_subdir: "gc",
+    brief: "gc-aware object, providing collector hooks",
     using_doxygen: true,
     doc: [
         "GC hooks for collector-aware data"
