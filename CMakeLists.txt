@@ -18,6 +18,50 @@ set(PROJECT_CXX_FLAGS "")
 add_definitions(${PROJECT_CXX_FLAGS})
 
 # ----------------------------------------------------------------
+
+# note: manual target; generated code committed to git
+xo_add_genfacetimpl(
+    TARGET xo-stringtable2-facetimpl-gcobject-string
+    FACET_PKG xo_alloc2
+    FACET GCObject
+    REPR String
+    INPUT idl/IGCObject_DString.json5
+)
+
+# note: manual target; generated code committed to git
+xo_add_genfacetimpl(
+    TARGET xo-stringtable2-facetimpl-printable-string
+    FACET_PKG xo_printable2
+    FACET Printable
+    REPR String
+    INPUT idl/IPrintable_DString.json5
+)
+
+# ----------------------------------------------------------------
+
+# note: manual target; generated code committed to git
+xo_add_genfacetimpl(
+    TARGET xo-stringtable2-facetimpl-gcobject-uniquestring
+    FACET_PKG xo_alloc2
+    FACET GCObject
+    REPR UniqueString
+    INPUT idl/IGCObject_DUniqueString.json5
+)
+
+# note: manual target; generated code committed to git
+xo_add_genfacetimpl(
+    TARGET xo-stringtable2-facetimpl-printable-uniquestring
+    FACET_PKG xo_printable2
+    FACET Printable
+    REPR UniqueString
+    INPUT idl/IPrintable_DUniqueString.json5
+)
+
+# ----------------------------------------------------------------
+
+xo_add_genfacet_all(xo-stringtable2-genfacet-all)
+
+# ----------------------------------------------------------------
 # output targets
 
 add_subdirectory(src/stringtable2)
