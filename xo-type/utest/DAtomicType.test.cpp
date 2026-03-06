@@ -28,10 +28,76 @@ namespace xo {
             DArena arena = DArena::map(cfg);
             auto alloc = obj<AAllocator,DArena>(&arena);
 
-            auto f64_type = obj<AType,DAtomicType>(DAtomicType::_make(alloc, Metatype::unit()));
+            auto unit_type = obj<AType,DAtomicType>(DAtomicType::_make(alloc, Metatype::unit()));
+            auto i64_type = obj<AType,DAtomicType>(DAtomicType::_make(alloc, Metatype::i64()));
+            auto f64_type = obj<AType,DAtomicType>(DAtomicType::_make(alloc, Metatype::f64()));
+            auto str_type = obj<AType,DAtomicType>(DAtomicType::_make(alloc, Metatype::str()));
+            auto any_type = obj<AType,DAtomicType>(DAtomicType::_make(alloc, Metatype::any()));
+            {
+                REQUIRE(unit_type);
+                REQUIRE(unit_type.metatype().code() == Metatype::unit().code());
 
-            REQUIRE(f64_type);
-            REQUIRE(f64_type.metatype().code() == Metatype::unit().code());
+                REQUIRE(unit_type.is_equal_to(unit_type));
+                REQUIRE(unit_type.is_subtype_of(unit_type));
+            }
+
+            {
+                REQUIRE(i64_type);
+                REQUIRE(i64_type.metatype().code() == Metatype::i64().code());
+
+                REQUIRE(i64_type.is_equal_to(i64_type));
+                REQUIRE(i64_type.is_subtype_of(i64_type));
+
+                REQUIRE(!i64_type.is_subtype_of(unit_type));
+                REQUIRE(!unit_type.is_subtype_of(i64_type));
+            }
+
+            {
+                REQUIRE(f64_type);
+                REQUIRE(f64_type.metatype().code() == Metatype::f64().code());
+
+                REQUIRE(f64_type.is_equal_to(f64_type));
+                REQUIRE(f64_type.is_subtype_of(f64_type));
+
+                REQUIRE(!f64_type.is_subtype_of(unit_type));
+                REQUIRE(!f64_type.is_subtype_of(i64_type));
+                REQUIRE(!unit_type.is_subtype_of(f64_type));
+                REQUIRE(!i64_type.is_subtype_of(f64_type));
+            }
+
+            {
+                REQUIRE(str_type);
+                REQUIRE(str_type.metatype().code() == Metatype::str().code());
+
+                REQUIRE(str_type.is_equal_to(str_type));
+                REQUIRE(str_type.is_subtype_of(str_type));
+
+                REQUIRE(!str_type.is_subtype_of(unit_type));
+                REQUIRE(!str_type.is_subtype_of(i64_type));
+                REQUIRE(!str_type.is_subtype_of(f64_type));
+
+                REQUIRE(!unit_type.is_subtype_of(str_type));
+                REQUIRE(!i64_type.is_subtype_of(str_type));
+                REQUIRE(!f64_type.is_subtype_of(str_type));
+            }
+
+            {
+                REQUIRE(any_type);
+                REQUIRE(any_type.metatype().code() == Metatype::any().code());
+
+                REQUIRE(any_type.is_equal_to(any_type));
+                REQUIRE(any_type.is_subtype_of(any_type));
+
+                REQUIRE(!any_type.is_subtype_of(unit_type));
+                REQUIRE(!any_type.is_subtype_of(i64_type));
+                REQUIRE(!any_type.is_subtype_of(f64_type));
+                REQUIRE(!any_type.is_subtype_of(str_type));
+
+                REQUIRE(unit_type.is_subtype_of(any_type));
+                REQUIRE(i64_type.is_subtype_of(any_type));
+                REQUIRE(f64_type.is_subtype_of(any_type));
+                REQUIRE(str_type.is_subtype_of(any_type));
+            }
         }
 
     } /*namespace ut*/

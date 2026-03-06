@@ -37,6 +37,22 @@
             const: true,
             noexcept: true,
         },
+        {
+            name: "is_equal_to",
+            doc: ["true iff this type is equal to y"],
+            return_type: "bool",
+            args: [
+                {type: "const obj_AType &", name: "y"},
+            ]
+        },
+        {
+            name: "is_subtype_of",
+            doc: ["true iff this is a subtype of y"],
+            return_type: "bool",
+            args: [
+                {type: "const obj_AType &", name: "y"},
+            ]
+        },
 
         // TODO: define methods, e.g.:
         // {
@@ -49,5 +65,6 @@
         // },
     ],
     nonconst_methods: [],
-    router_facet_explicit_content: [],
+    router_facet_explicit_content: [
+    ],
 }

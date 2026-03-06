@@ -47,6 +47,12 @@ namespace scm {
         Metatype metatype(Copaque data)  const  noexcept override {
             return I::metatype(_dcast(data));
         }
+        bool is_equal_to(Copaque data, const obj_AType & y)  override {
+            return I::is_equal_to(_dcast(data), y);
+        }
+        bool is_subtype_of(Copaque data, const obj_AType & y)  override {
+            return I::is_subtype_of(_dcast(data), y);
+        }
 
         // non-const methods
 

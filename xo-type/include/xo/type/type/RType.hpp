@@ -56,6 +56,12 @@ public:
     Metatype metatype()  const  noexcept {
         return O::iface()->metatype(O::data());
     }
+    bool is_equal_to(const obj_AType & y)  {
+        return O::iface()->is_equal_to(O::data(), y);
+    }
+    bool is_subtype_of(const obj_AType & y)  {
+        return O::iface()->is_subtype_of(O::data(), y);
+    }
 
     // non-const methods (still const in router!)
 

@@ -60,6 +60,8 @@ namespace scm {
 
         // const methods
         [[noreturn]] Metatype metatype(Copaque)  const  noexcept override { _fatal(); }
+        [[noreturn]] bool is_equal_to(Copaque, const obj_AType &)  override { _fatal(); }
+        [[noreturn]] bool is_subtype_of(Copaque, const obj_AType &)  override { _fatal(); }
 
         // nonconst methods
 
