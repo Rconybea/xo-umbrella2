@@ -21,5 +21,6 @@ xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 $
 
 xo_dependency(${SELF_LIB} xo_alloc2)
 xo_dependency(${SELF_LIB} xo_facet)
+xo_dependency(${SELF_LIB} subsys)
 
 # end src/type/CMakeLists.txt
