@@ -106,6 +106,7 @@ add_subdirectory(xo-procedure2)   # schematika procedure abstraction + runtime c
 add_subdirectory(xo-numeric)      # experiment w/ facet object model
 add_subdirectory(xo-ordinaltree)
 #
+add_subdirectory(xo-type)         # experiment w/ (fomo)
 add_subdirectory(xo-tokenizer2)   # schematika tokenizer (fomo)
 add_subdirectory(xo-expression2)  # schematika expressions (fomo)
 add_subdirectory(xo-reader2)      # schematika expression parser (fomo)

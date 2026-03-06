@@ -1,0 +1,84 @@
+/** @file IType_Xfer.hpp
+ *
+ *  Generated automagically from ingredients:
+ *  1. code generator:
+ *       [xo-facet/codegen/genfacet]
+ *     arguments:
+ *       --input [idl/Type.json5]
+ *  2. jinja2 template for abstract facet .hpp file:
+ *       [iface_facet_any.hpp.j2]
+ *  3. idl for facet methods
+ *       [idl/Type.json5]
+ **/
+
+#pragma once
+
+#include <xo/type/Metatype.hpp>
+
+namespace xo {
+namespace scm {
+    /** @class IType_Xfer
+     **/
+    template <typename DRepr, typename IType_DRepr>
+    class IType_Xfer : public AType {
+    public:
+        /** @defgroup scm-type-xfer-type-traits **/
+        ///@{
+        /** actual implementation (not generated; often delegates to DRepr) **/
+        using Impl = IType_DRepr;
+        /** integer identifying a type **/
+        using typeseq = AType::typeseq;
+        using obj_AType = AType::obj_AType;
+        ///@}
+
+        /** @defgroup scm-type-xfer-methods **/
+        ///@{
+
+        static const DRepr & _dcast(Copaque d) { return *(const DRepr *)d; }
+        static DRepr & _dcast(Opaque d) { return *(DRepr *)d; }
+
+        // from AType
+
+        // builtin methods
+        typeseq _typeseq() const noexcept override { return s_typeseq; }
+        void _drop(Opaque d) const noexcept override { _dcast(d).~DRepr(); }
+
+        // const methods
+        Metatype metatype(Copaque data)  const  noexcept override {
+            return I::metatype(_dcast(data));
+        }
+
+        // non-const methods
+
+        ///@}
+
+    private:
+        using I = Impl;
+
+    public:
+        /** @defgroup scm-type-xfer-member-vars **/
+        ///@{
+
+        /** typeseq for template parameter DRepr **/
+        static typeseq s_typeseq;
+        /** true iff satisfies facet implementation **/
+        static bool _valid;
+
+        ///@}
+    };
+
+    template <typename DRepr, typename IType_DRepr>
+    xo::facet::typeseq
+    IType_Xfer<DRepr, IType_DRepr>::s_typeseq
+      = xo::facet::typeseq::id<DRepr>();
+
+    template <typename DRepr, typename IType_DRepr>
+    bool
+    IType_Xfer<DRepr, IType_DRepr>::_valid
+      = xo::facet::valid_facet_implementation<AType,
+                                              IType_Xfer>();
+
+} /*namespace scm */
+} /*namespace xo*/
+
+/* end IType_Xfer.hpp */
