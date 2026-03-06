@@ -1,0 +1,53 @@
+{
+    mode: "facet",
+    output_cpp_dir: "src/type",
+    output_hpp_dir: "include/xo/type",
+    output_impl_subdir: "type",
+    includes: [
+        "<xo/type/Metatype.hpp>"
+    ],
+    user_hpp_includes: [
+    ],
+    namespace1: "xo",
+    namespace2: "scm",   // TODO: change to project namespace if different
+    pretext: [
+        "// pretext if any"
+    ],
+    facet: "Type",
+    detail_subdir: "type",
+    brief: "Representation for a Schematika type",
+    using_doxygen: true,
+    doc: [
+        "1. Ability to compare types as members of partial order",
+        "2. ..."
+    ],
+    types: [
+        {
+            name: "obj_AType",
+            doc: [],
+            definition: "xo::facet::obj<AType>",
+        }
+    ],
+    const_methods: [
+        {
+            name: "metatype",
+            doc: ["category for this type"],
+            return_type: "Metatype",
+            args: [],
+            const: true,
+            noexcept: true,
+        },
+
+        // TODO: define methods, e.g.:
+        // {
+        //     name: "my_method",
+        //     doc: ["description"],
+        //     return_type: "bool",
+        //     args: [],
+        //     const: true,
+        //     noexcept: true,
+        // },
+    ],
+    nonconst_methods: [],
+    router_facet_explicit_content: [],
+}
