@@ -5,8 +5,8 @@
     output_impl_subdir: "number",
     includes: [
         "<xo/object2/number/GCObjectConversion_DFloat.hpp>",
-        "<xo/alloc2/GCObject.hpp>",
-        "<xo/alloc2/Allocator.hpp>"
+//        "<xo/alloc2/GCObject.hpp>",
+//        "<xo/alloc2/Allocator.hpp>"
     ],
     local_types: [ ],
     namespace1: "xo",
