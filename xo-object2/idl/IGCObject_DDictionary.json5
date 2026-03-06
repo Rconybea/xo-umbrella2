@@ -4,8 +4,8 @@
     output_hpp_dir: "include/xo/object2",
     output_impl_subdir: "dictionary",
     includes: [
-        "<xo/alloc2/GCObject.hpp>",
-        "<xo/alloc2/Allocator.hpp>"
+//        "<xo/alloc2/GCObject.hpp>",
+//        "<xo/alloc2/Allocator.hpp>"
     ],
     local_types: [ ],
     namespace1: "xo",

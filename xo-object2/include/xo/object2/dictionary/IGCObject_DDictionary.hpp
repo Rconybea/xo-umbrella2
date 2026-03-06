@@ -14,8 +14,6 @@
 #pragma once
 
 #include "GCObject.hpp"
-#include <xo/alloc2/GCObject.hpp>
-#include <xo/alloc2/Allocator.hpp>
 #include "DDictionary.hpp"
 
 namespace xo { namespace scm { class IGCObject_DDictionary; } }
