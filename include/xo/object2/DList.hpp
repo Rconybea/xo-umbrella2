@@ -57,9 +57,12 @@ namespace xo {
 
             // GCObject facet
 
+            /** @defgroup xo-scm-list-gcobject-facet gcobject facet **/
+            ///@{
             size_type shallow_size() const noexcept;
             DList * shallow_copy(obj<AAllocator> mm) const noexcept;
             size_type forward_children(obj<ACollector> gc) noexcept;
+            ///@}
 
             /** first member of list **/
             obj<AGCObject> head_;
