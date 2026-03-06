@@ -16,6 +16,26 @@ namespace xo {
             return new (mem) DAtomicType(mtype);
         }
 
+        // ----- Type facet -----
+
+        bool
+        DAtomicType::is_equal_to(const obj<AType> & y) const noexcept
+        {
+            return (metatype_.code() == y.metatype().code());
+        }
+
+        bool
+        DAtomicType::is_subtype_of(const obj<AType> & y) const noexcept
+        {
+            Metatype x_mtype = metatype_;
+            Metatype y_mtype = y.metatype();
+
+            if (y_mtype.code() == Metatype::code::t_any)
+                return true;
+
+            return (x_mtype.code() == y_mtype.code());
+        }
+
         // ----- GCObject facet -----
 
         std::size_t

@@ -26,6 +26,35 @@ namespace xo {
             }
         }
 
+        bool
+        Metatype::is_atomic() const noexcept
+        {
+            switch (code_) {
+            case code::t_any:
+                return true;
+            case code::t_bool:
+                return true;
+            case code::t_i64:
+                return true;
+            case code::t_f64:
+                return true;
+            case code::t_str:
+                return true;
+            case code::t_sum:
+                return false;
+            case code::t_list:
+                return false;
+            case code::t_array:
+                return false;
+            case code::t_function:
+                return false;
+            case code::t_struct:
+                return false;
+            case code::t_unit:
+                return false;
+            }
+        }
+
     } /*namespace scm*/
 } /*namespace xo*/
 

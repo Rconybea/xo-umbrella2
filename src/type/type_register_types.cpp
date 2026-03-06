@@ -6,6 +6,7 @@
 #include "type_register_types.hpp"
 
 #include "AtomicType.hpp"
+#include "ListType.hpp"
 #include <xo/alloc2/Collector.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/indentlog/scope.hpp>
@@ -25,6 +26,7 @@ namespace xo {
             bool ok = true;
 
             ok &= gc.install_type(impl_for<AGCObject, DAtomicType>());
+            ok &= gc.install_type(impl_for<AGCObject, DListType>());
 
             return ok;
         }

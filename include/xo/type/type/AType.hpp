@@ -53,6 +53,10 @@ public:
     virtual void _drop(Opaque d) const noexcept = 0;
     /** category for this type **/
     virtual Metatype metatype(Copaque data)  const  noexcept = 0;
+    /** true iff this type is equal to y **/
+    virtual bool is_equal_to(Copaque data, const obj_AType & y)  = 0;
+    /** true iff this is a subtype of y **/
+    virtual bool is_subtype_of(Copaque data, const obj_AType & y)  = 0;
 
     // nonconst methods
     ///@}
