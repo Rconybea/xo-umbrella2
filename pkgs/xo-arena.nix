@@ -13,6 +13,7 @@
   xo-indentlog,
   xo-cmake,
 
+  doCheck ? true,
   buildDocs ? false,
 } :
 
@@ -24,10 +25,10 @@ stdenv.mkDerivation (finalattrs:
 
     cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake"]
                   ++ lib.optionals buildDocs ["-DXO_ENABLE_DOCS=on"]
-                  ++ ["-DENABLE_TESTING=1"];
+                  ++ lib.optionals doCheck ["-DENABLE_TESTING=1"];
 
     inherit buildDocs;
-    doCheck = true;
+    inherit doCheck;
 
     postBuild = lib.optionalString buildDocs ''
       cmake --build . -- docs
