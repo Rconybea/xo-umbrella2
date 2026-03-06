@@ -162,6 +162,7 @@ let
             xo-stringtable2   = self.callPackage pkgs/xo-stringtable2.nix   { stdenv = jitStdenv; };
             xo-gc             = self.callPackage pkgs/xo-gc.nix             { stdenv = jitStdenv; buildDocs = true; };
             xo-object         = self.callPackage pkgs/xo-object.nix         { stdenv = jitStdenv; };
+            xo-type           = self.callPackage pkgs/xo-type.nix           { stdenv = jitStdenv; };
             xo-object2        = self.callPackage pkgs/xo-object2.nix        { stdenv = jitStdenv; };
 
             xo-procedure2     = self.callPackage pkgs/xo-procedure2.nix     { stdenv = jitStdenv; };
@@ -519,6 +520,7 @@ in
     stringtable2   = pkgs.xo-stringtable2;
     gc             = pkgs.xo-gc;
     object         = pkgs.xo-object;
+    type           = pkgs.xo-type;
     object2        = pkgs.xo-object2;
     procedure2     = pkgs.xo-procedure2;
     numeric        = pkgs.xo-numeric;

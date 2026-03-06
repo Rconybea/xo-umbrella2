@@ -3,6 +3,7 @@
 include(CMakeFindDependencyMacro)
 find_dependency(xo_alloc2)
 find_dependency(xo_facet)
+find_dependency(subsys)
 
 # note: changes to find_dependency() calls here
 #       must coordinate with xo_dependency() calls
