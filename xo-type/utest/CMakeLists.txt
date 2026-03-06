@@ -5,6 +5,7 @@ set(UTEST_SRCS
     type_utest_main.cpp
     DAtomicType.test.cpp
     DListType.test.cpp
+    DArrayType.test.cpp
 #    DString.test.cpp
 #    StringOps.test.cpp
 #    X1Collector.test.cpp
