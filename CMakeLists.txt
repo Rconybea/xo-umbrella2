@@ -70,6 +70,26 @@ xo_add_genfacetimpl(
 
 # ----------------------------------------------------------------
 
+# note: manual target; generated code committed to git
+xo_add_genfacetimpl(
+    TARGET xo-type-facetimpl-type-arraytype
+    FACET_PKG xo_type
+    FACET Type
+    REPR ArrayType
+    INPUT idl/IType_DArrayType.json5
+)
+
+# note: manual target; generated code committed to git
+xo_add_genfacetimpl(
+    TARGET xo-type-facetimpl-gcobject-arraytype
+    FACET_PKG xo_alloc2
+    FACET GCObject
+    REPR ArrayType
+    INPUT idl/IGCObject_DArrayType.json5
+)
+
+# ----------------------------------------------------------------
+
 xo_add_genfacet_all(xo-type-genfacet-all)
 
 install(DIRECTORY idl/

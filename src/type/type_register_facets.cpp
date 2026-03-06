@@ -7,6 +7,7 @@
 
 #include <xo/type/AtomicType.hpp>
 #include <xo/type/ListType.hpp>
+#include <xo/type/ArrayType.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/indentlog/scope.hpp>
 
@@ -28,8 +29,12 @@ namespace xo {
             FacetRegistry::register_impl<AType, DListType>();
             FacetRegistry::register_impl<AGCObject, DListType>();
 
+            FacetRegistry::register_impl<AType, DArrayType>();
+            FacetRegistry::register_impl<AGCObject, DArrayType>();
+
             log && log(xtag("DAtomicType.tseq", typeseq::id<DAtomicType>()));
             log && log(xtag("DListType.tseq", typeseq::id<DListType>()));
+            log && log(xtag("DArrayType.tseq", typeseq::id<DArrayType>()));
 
             return true;
         }

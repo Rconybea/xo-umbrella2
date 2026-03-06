@@ -46,6 +46,7 @@ namespace xo {
             static Metatype any() { return Metatype(code::t_any); }
 
             static Metatype list() { return Metatype(code::t_list); }
+            static Metatype array() { return Metatype(code::t_array); }
 
             /** description string for this type category **/
             const char * _descr() const noexcept;
