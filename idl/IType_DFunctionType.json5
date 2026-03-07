@@ -1,0 +1,16 @@
+{
+    mode: "implementation",
+    output_cpp_dir: "src/type",
+    output_hpp_dir: "include/xo/type",
+    output_impl_subdir: "function",
+    includes: [],
+    local_types: [],
+    namespace1: "xo",
+    namespace2: "scm",
+
+    facet_idl: "idl/Type.json5",
+    brief: "provide AType interface for DFunctionType",
+    using_doxygen: true,
+    repr: "DFunctionType",
+    doc: [ "implement AType for DFunctionType" ],
+}
