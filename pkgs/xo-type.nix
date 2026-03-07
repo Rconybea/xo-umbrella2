@@ -32,10 +32,7 @@ stdenv.mkDerivation (finalattrs:
       xo-cmake
     ];
     propagatedBuildInputs = [
-#      xo-gc
-#      xo-reflect
       xo-alloc2
-#      xo-stringtable2
 #      xo-printable2
       xo-subsys
       xo-facet

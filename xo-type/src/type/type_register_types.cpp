@@ -8,6 +8,7 @@
 #include "AtomicType.hpp"
 #include "ListType.hpp"
 #include "ArrayType.hpp"
+#include "FunctionType.hpp"
 #include <xo/alloc2/Collector.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/indentlog/scope.hpp>
@@ -29,6 +30,7 @@ namespace xo {
             ok &= gc.install_type(impl_for<AGCObject, DAtomicType>());
             ok &= gc.install_type(impl_for<AGCObject, DListType>());
             ok &= gc.install_type(impl_for<AGCObject, DArrayType>());
+            ok &= gc.install_type(impl_for<AGCObject, DFunctionType>());
 
             return ok;
         }
