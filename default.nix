@@ -171,6 +171,10 @@ let
             xo-ordinaltree    = self.callPackage pkgs/xo-ordinaltree.nix    { stdenv = jitStdenv; };
             xo-tokenizer2     = self.callPackage pkgs/xo-tokenizer2.nix     { stdenv = jitStdenv;                   buildExamples = true; };
             #
+            # xo-expression2
+            # xo-reader2
+            # xo-interpreter2
+            #
             xo-webutil        = self.callPackage pkgs/xo-webutil.nix        { stdenv = jitStdenv; };
             xo-pywebutil      = self.callPackage pkgs/xo-pywebutil.nix      {};
             xo-printjson      = self.callPackage pkgs/xo-printjson.nix      {};
