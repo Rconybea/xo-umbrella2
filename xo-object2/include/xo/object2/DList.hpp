@@ -26,10 +26,13 @@ namespace xo {
             DList(xo::obj<AGCObject> h,
                   DList * r) : head_{h}, rest_{r} {}
 
-            /** sentinel for null list.
+            /** sentinel for null list.  Idempotent.
              *  Application code may prefer ListOps::nil()
              **/
             static DList * _nil();
+
+            /** like _nil(), but retrn fop wrapper **/
+            static obj<AGCObject,DList> nil();
 
             /** list with first element @p car,
              *  followed by contents of list @p cdr.
@@ -39,6 +42,11 @@ namespace xo {
             static DList * _cons(obj<AAllocator> mm,
                                  obj<AGCObject> car,
                                  DList * cdr);
+
+            /** like @c _cons(mm,car,cdr), but return fop wrapper **/
+            static obj<AGCObject,DList> cons(obj<AAllocator> mm,
+                                             obj<AGCObject> car,
+                                             DList * cdr);
 
             /** DList length is at least 1 **/
             bool is_empty() const noexcept;
