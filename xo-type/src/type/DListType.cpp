@@ -31,6 +31,13 @@ namespace xo {
             return new (mem) DListType(elt_type);
         }
 
+        obj<AType, DListType>
+        DListType::make(obj<AAllocator> mm,
+                        obj<AType> elt_type)
+        {
+            return obj<AType, DListType>(_make(mm, elt_type));
+        }
+
         // ----- type facet -----
 
         TypeDescr
