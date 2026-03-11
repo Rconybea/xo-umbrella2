@@ -32,9 +32,12 @@ namespace xo {
 
             explicit DListType(obj<AType> elt);
 
-            /** create instance using memory from @p mm with metatype @p mtype **/
+            /** create instance using memory from @p mm with element type @p elt_type **/
             static DListType * _make(obj<AAllocator> mm,
                                      obj<AType> elt_type);
+            /** create fop to new instance using memory from @p mm with element type @p elt_type **/
+            static obj<AType,DListType> make(obj<AAllocator> mm,
+                                             obj<AType> elt_type);
 
             ///@}
             /** @defgroup xo-scm-listtype-type-facet **/
