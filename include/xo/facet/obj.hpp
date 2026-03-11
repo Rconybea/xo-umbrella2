@@ -135,13 +135,13 @@ namespace xo {
              *  Definition in FacetRegistry.hpp, to avoid #include dependency
              **/
             template <typename AOther>
-            obj<AOther,DRepr> to_facet();
+            obj<AOther,DRepr> to_facet() const;
 
             /** like to_facet<AOther>(),
              *  but on failure return empty obj instead of throwing exception
              **/
             template <typename AOther>
-            obj<AOther,DRepr> try_to_facet() noexcept;
+            obj<AOther,DRepr> try_to_facet() const noexcept;
 
             /** enabled when RRouter<AFacet> provides _preincrement.
              *  Note we don't need this trick for comparison operators,
