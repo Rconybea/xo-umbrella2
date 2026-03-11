@@ -24,7 +24,7 @@ xo_add_genfacetimpl(
     TARGET xo-stringtable2-facetimpl-gcobject-string
     FACET_PKG xo_alloc2
     FACET GCObject
-    REPR String
+#    REPR String
     INPUT idl/IGCObject_DString.json5
 )
 
@@ -33,7 +33,7 @@ xo_add_genfacetimpl(
     TARGET xo-stringtable2-facetimpl-printable-string
     FACET_PKG xo_printable2
     FACET Printable
-    REPR String
+#    REPR String
     INPUT idl/IPrintable_DString.json5
 )
 
@@ -44,7 +44,7 @@ xo_add_genfacetimpl(
     TARGET xo-stringtable2-facetimpl-gcobject-uniquestring
     FACET_PKG xo_alloc2
     FACET GCObject
-    REPR UniqueString
+#    REPR UniqueString
     INPUT idl/IGCObject_DUniqueString.json5
 )
 
@@ -53,7 +53,7 @@ xo_add_genfacetimpl(
     TARGET xo-stringtable2-facetimpl-printable-uniquestring
     FACET_PKG xo_printable2
     FACET Printable
-    REPR UniqueString
+#    REPR UniqueString
     INPUT idl/IPrintable_DUniqueString.json5
 )
 
