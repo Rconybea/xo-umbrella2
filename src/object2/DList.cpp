@@ -17,7 +17,7 @@ namespace xo {
     using xo::print::APrintable;
     using xo::mm::AGCObject;
     using xo::facet::FacetRegistry;
-    using xo::facet::typeseq;
+    //using xo::facet::typeseq;
 
     namespace scm {
         static DList s_null(obj<AGCObject>(), nullptr);
@@ -28,6 +28,12 @@ namespace xo {
             return &s_null;
         }
 
+        obj<AGCObject,DList>
+        DList::nil()
+        {
+            return obj<AGCObject,DList>(_nil());
+        }
+
         DList *
         DList::_cons(obj<AAllocator> mm,
                      obj<AGCObject> car,
@@ -36,6 +42,14 @@ namespace xo {
             void * mem = mm.alloc_for<DList>();
 
             return new (mem) DList(car, cdr);
+        }
+
+        obj<AGCObject,DList>
+        DList::cons(obj<AAllocator> mm,
+                    obj<AGCObject> car,
+                    DList * cdr)
+        {
+            return obj<AGCObject,DList>(_cons(mm, car, cdr));
         }
 
 #ifdef OBSOLETE
@@ -136,8 +150,6 @@ namespace xo {
 
                     obj<APrintable> elt
                         = FacetRegistry::instance().variant<APrintable, AGCObject>(l->head_);
-
-
 
                     assert(elt.data());
 
