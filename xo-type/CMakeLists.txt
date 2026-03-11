@@ -35,7 +35,7 @@ xo_add_genfacetimpl(
     TARGET xo-type-facetimpl-type-atomictype
     FACET_PKG xo_type
     FACET Type
-    REPR AtomicType
+#    REPR AtomicType
     INPUT idl/IType_DAtomicType.json5
 )
 
@@ -44,7 +44,7 @@ xo_add_genfacetimpl(
     TARGET xo-type-facetimpl-gcobject-atomictype
     FACET_PKG xo_alloc2
     FACET GCObject
-    REPR AtomicType
+#    REPR AtomicType
     INPUT idl/IGCObject_DAtomicType.json5
 )
 
@@ -55,7 +55,7 @@ xo_add_genfacetimpl(
     TARGET xo-type-facetimpl-type-listtype
     FACET_PKG xo_type
     FACET Type
-    REPR ListType
+#    REPR ListType
     INPUT idl/IType_DListType.json5
 )
 
@@ -64,7 +64,7 @@ xo_add_genfacetimpl(
     TARGET xo-type-facetimpl-gcobject-listtype
     FACET_PKG xo_alloc2
     FACET GCObject
-    REPR ListType
+#    REPR ListType
     INPUT idl/IGCObject_DListType.json5
 )
 
@@ -75,7 +75,7 @@ xo_add_genfacetimpl(
     TARGET xo-type-facetimpl-type-arraytype
     FACET_PKG xo_type
     FACET Type
-    REPR ArrayType
+#    REPR ArrayType
     INPUT idl/IType_DArrayType.json5
 )
 
@@ -84,7 +84,7 @@ xo_add_genfacetimpl(
     TARGET xo-type-facetimpl-gcobject-arraytype
     FACET_PKG xo_alloc2
     FACET GCObject
-    REPR ArrayType
+#    REPR ArrayType
     INPUT idl/IGCObject_DArrayType.json5
 )
 
@@ -95,7 +95,7 @@ xo_add_genfacetimpl(
     TARGET xo-type-facetimpl-type-functiontype
     FACET_PKG xo_type
     FACET Type
-    REPR FunctionType
+#    REPR FunctionType
     INPUT idl/IType_DFunctionType.json5
 )
 
@@ -104,7 +104,7 @@ xo_add_genfacetimpl(
     TARGET xo-type-facetimpl-gcobject-functiontype
     FACET_PKG xo_alloc2
     FACET GCObject
-    REPR FunctionType
+#    REPR FunctionType
     INPUT idl/IGCObject_DFunctionType.json5
 )
 

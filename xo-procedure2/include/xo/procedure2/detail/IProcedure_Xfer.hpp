@@ -14,7 +14,7 @@
 #pragma once
 
 #include "RuntimeContext.hpp"
-#include <xo/alloc2/GCObject.hpp>
+#include <xo/gc/GCObject.hpp>
 
 namespace xo {
 namespace scm {
