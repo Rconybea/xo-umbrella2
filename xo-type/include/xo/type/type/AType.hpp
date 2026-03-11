@@ -15,6 +15,7 @@
 
 // includes (via {facet_includes})
 #include <xo/type/Metatype.hpp>
+#include <xo/reflect/TypeDescr.hpp>
 #include <xo/facet/obj.hpp>
 #include <xo/facet/facet_implementation.hpp>
 #include <xo/facet/typeseq.hpp>
@@ -42,6 +43,8 @@ public:
     using Opaque = void *;
     /**  **/
     using obj_AType = xo::facet::obj<AType>;
+    /**  **/
+    using TypeDescr = xo::reflect::TypeDescr;
     ///@}
 
     /** @defgroup scm-type-methods **/
@@ -53,10 +56,12 @@ public:
     virtual void _drop(Opaque d) const noexcept = 0;
     /** category for this type **/
     virtual Metatype metatype(Copaque data)  const  noexcept = 0;
+    /** reflected representation for instances of this type **/
+    virtual TypeDescr repr_td(Copaque data)  const  noexcept = 0;
     /** true iff this type is equal to y **/
-    virtual bool is_equal_to(Copaque data, const obj_AType & y)  = 0;
+    virtual bool is_equal_to(Copaque data, const obj_AType & y)  const = 0;
     /** true iff this is a subtype of y **/
-    virtual bool is_subtype_of(Copaque data, const obj_AType & y)  = 0;
+    virtual bool is_subtype_of(Copaque data, const obj_AType & y)  const = 0;
 
     // nonconst methods
     ///@}

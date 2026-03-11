@@ -22,6 +22,12 @@ namespace xo {
         }
 
         auto
+        IType_DArrayType::repr_td(const DArrayType & self) noexcept -> TypeDescr
+        {
+            return self.repr_td();
+        }
+
+        auto
         IType_DArrayType::is_equal_to(const DArrayType & self, const obj_AType & y) -> bool
         {
             return self.is_equal_to(y);

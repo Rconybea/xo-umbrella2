@@ -31,7 +31,7 @@ namespace xo {
             DArena arena = DArena::map(cfg);
             auto alloc = obj<AAllocator,DArena>(&arena);
 
-            auto i64_type = TypeOps::atomic_type(alloc, Metatype::i64());
+            auto i64_type = TypeOps::atomic_type(alloc, Metatype::t_i64());
             auto array_i64_type = TypeOps::array_type(alloc, i64_type);
 
             REQUIRE(array_i64_type);
@@ -43,7 +43,7 @@ namespace xo {
             REQUIRE(array_bool_type);
             REQUIRE(array_bool_type.is_equal_to(array_bool_type));
 
-            auto any_type = TypeOps::atomic_type(alloc, Metatype::any());
+            auto any_type = TypeOps::atomic_type(alloc, Metatype::t_any());
             auto array_any_type = TypeOps::array_type(alloc, any_type);
 
             REQUIRE(array_any_type);

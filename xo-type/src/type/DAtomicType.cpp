@@ -4,8 +4,12 @@
  **/
 
 #include "AtomicType.hpp"
+#include <xo/reflect/Reflect.hpp>
 
 namespace xo {
+    using xo::reflect::Reflect;
+    using xo::reflect::TypeDescr;
+
     namespace scm {
 
         DAtomicType *
@@ -16,7 +20,19 @@ namespace xo {
             return new (mem) DAtomicType(mtype);
         }
 
+        obj<AType,DAtomicType>
+        DAtomicType::make(obj<AAllocator> mm, Metatype mtype)
+        {
+            return obj<AType,DAtomicType>(_make(mm, mtype));
+        }
+
         // ----- Type facet -----
+
+        TypeDescr
+        DAtomicType::repr_td() const noexcept
+        {
+            return Reflect::require<void *>();
+        }
 
         bool
         DAtomicType::is_equal_to(const obj<AType> & y) const noexcept

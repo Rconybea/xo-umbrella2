@@ -22,6 +22,7 @@ namespace xo {
             using ACollector = xo::mm::ACollector;
             using AAllocator = xo::mm::AAllocator;
             using AGCObject = xo::mm::AGCObject;
+            using TypeDescr = xo::reflect::TypeDescr;
 
         public:
             /** @defgroup xo-scm-arraytype-ctors **/
@@ -45,7 +46,8 @@ namespace xo {
             ///@}
             /** @defgroup xo-scm-arraytype-type-facet **/
             ///@{
-            Metatype metatype() const noexcept { return Metatype::array(); }
+            Metatype metatype() const noexcept { return Metatype::t_array(); }
+            TypeDescr repr_td() const noexcept;
             bool is_equal_to(obj<AType> y) const noexcept;
             bool is_subtype_of(const obj<AType> & y) const noexcept;
             ///@}

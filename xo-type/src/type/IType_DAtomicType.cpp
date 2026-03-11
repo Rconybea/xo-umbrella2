@@ -22,6 +22,12 @@ namespace xo {
         }
 
         auto
+        IType_DAtomicType::repr_td(const DAtomicType & self) noexcept -> TypeDescr
+        {
+            return self.repr_td();
+        }
+
+        auto
         IType_DAtomicType::is_equal_to(const DAtomicType & self, const obj_AType & y) -> bool
         {
             return self.is_equal_to(y);

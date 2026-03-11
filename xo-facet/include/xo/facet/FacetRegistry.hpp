@@ -249,7 +249,7 @@ namespace xo {
         template <typename AFacet, typename DRepr>
         template <typename AOther>
         obj<AOther,DRepr>
-        obj<AFacet,DRepr>::to_facet()
+        obj<AFacet,DRepr>::to_facet() const
         {
             if (this->data()) {
                 if constexpr (std::is_same_v<DRepr, DVariantPlaceholder>) {
@@ -270,7 +270,7 @@ namespace xo {
         template <typename AFacet, typename DRepr>
         template <typename AOther>
         obj<AOther,DRepr>
-        obj<AFacet,DRepr>::try_to_facet() noexcept
+        obj<AFacet,DRepr>::try_to_facet() const noexcept
         {
             if (this->data()) {
                 if constexpr (std::is_same_v<DRepr, DVariantPlaceholder>) {

@@ -22,6 +22,12 @@ namespace xo {
         }
 
         auto
+        IType_DFunctionType::repr_td(const DFunctionType & self) noexcept -> TypeDescr
+        {
+            return self.repr_td();
+        }
+
+        auto
         IType_DFunctionType::is_equal_to(const DFunctionType & self, const obj_AType & y) -> bool
         {
             return self.is_equal_to(y);

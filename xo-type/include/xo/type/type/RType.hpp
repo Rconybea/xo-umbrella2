@@ -32,6 +32,7 @@ public:
     using DataPtr = Object::DataPtr;
     using typeseq = xo::reflect::typeseq;
     using obj_AType = AType::obj_AType;
+    using TypeDescr = AType::TypeDescr;
     ///@}
 
     /** @defgroup scm-type-router-ctors **/
@@ -56,10 +57,13 @@ public:
     Metatype metatype()  const  noexcept {
         return O::iface()->metatype(O::data());
     }
-    bool is_equal_to(const obj_AType & y)  {
+    TypeDescr repr_td()  const  noexcept {
+        return O::iface()->repr_td(O::data());
+    }
+    bool is_equal_to(const obj_AType & y)  const {
         return O::iface()->is_equal_to(O::data(), y);
     }
-    bool is_subtype_of(const obj_AType & y)  {
+    bool is_subtype_of(const obj_AType & y)  const {
         return O::iface()->is_subtype_of(O::data(), y);
     }
 

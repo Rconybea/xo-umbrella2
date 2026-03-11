@@ -14,11 +14,20 @@ namespace xo {
             enum class code {
                 /* void */
                 t_unit,
-
                 t_bool,
-                t_i64,
-                t_f64,
                 t_str,
+
+                /* int16_t */
+                t_i16,
+                /* int32_t */
+                t_i32,
+                /* int64_t */
+                t_i64,
+
+                /* float */
+                t_f32,
+                /* double */
+                t_f64,
 
                 /* discriminated union */
                 t_sum,
@@ -38,16 +47,24 @@ namespace xo {
         public:
             explicit Metatype(code x) : code_{x} {}
 
-            static Metatype unit() { return Metatype(code::t_unit); }
-            static Metatype t_bool() { return Metatype(code::t_bool); }
-            static Metatype i64() { return Metatype(code::t_i64); }
-            static Metatype f64() { return Metatype(code::t_f64); }
-            static Metatype str() { return Metatype(code::t_str); }
-            static Metatype any() { return Metatype(code::t_any); }
+            static Metatype t_unit()     { return Metatype(code::t_unit);     }
+            static Metatype t_bool()     { return Metatype(code::t_bool);     }
+            static Metatype t_str()      { return Metatype(code::t_str);      }
 
-            static Metatype list() { return Metatype(code::t_list); }
-            static Metatype array() { return Metatype(code::t_array); }
-            static Metatype function() { return Metatype(code::t_function); }
+            static Metatype t_i16()      { return Metatype(code::t_i16);      }
+            static Metatype t_i32()      { return Metatype(code::t_i32);      }
+            static Metatype t_i64()      { return Metatype(code::t_i64);      }
+
+            static Metatype t_f32()      { return Metatype(code::t_f32);      }
+            static Metatype t_f64()      { return Metatype(code::t_f64);      }
+
+            static Metatype t_sum()      { return Metatype(code::t_sum);      }
+            static Metatype t_list()     { return Metatype(code::t_list);     }
+            static Metatype t_array()    { return Metatype(code::t_array);    }
+            static Metatype t_function() { return Metatype(code::t_function); }
+            static Metatype t_struct()   { return Metatype(code::t_struct);   }
+
+            static Metatype t_any()      { return Metatype(code::t_any);      }
 
             /** description string for this type category **/
             const char * _descr() const noexcept;

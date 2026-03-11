@@ -7,6 +7,7 @@
 
 #include "Type.hpp"
 #include "Metatype.hpp"
+#include <xo/reflect/TypeDescr.hpp>
 #include <xo/alloc2/Collector.hpp>
 #include <xo/alloc2/Allocator.hpp>
 
@@ -21,6 +22,7 @@ namespace xo {
          **/
         class DListType {
         public:
+            using TypeDescr = xo::reflect::TypeDescr;
             using ACollector = xo::mm::ACollector;
             using AAllocator = xo::mm::AAllocator;
 
@@ -31,12 +33,14 @@ namespace xo {
             explicit DListType(obj<AType> elt);
 
             /** create instance using memory from @p mm with metatype @p mtype **/
-            static DListType * _make(obj<AAllocator> mm, obj<AType> elt_type);
+            static DListType * _make(obj<AAllocator> mm,
+                                     obj<AType> elt_type);
 
             ///@}
             /** @defgroup xo-scm-listtype-type-facet **/
             ///@{
-            Metatype metatype() const noexcept { return Metatype::list(); }
+            Metatype metatype() const noexcept { return Metatype::t_list(); }
+            TypeDescr repr_td() const noexcept;
             bool is_equal_to(const obj<AType> & y) const noexcept;
             bool is_subtype_of(const obj<AType> & y) const noexcept;
             ///@}

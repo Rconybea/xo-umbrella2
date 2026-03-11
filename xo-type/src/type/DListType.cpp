@@ -5,11 +5,15 @@
 
 #include "Type.hpp"
 #include "ListType.hpp"
+#include "TypeDescr.hpp"
+#include <xo/reflect/Reflect.hpp>
 #include <xo/alloc2/Collector.hpp>
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 
 namespace xo {
+    using xo::reflect::Reflect;
+    using xo::reflect::TypeDescr;
     using xo::mm::AGCObject;
     using xo::mm::AAllocator;
     using xo::facet::FacetRegistry;
@@ -29,12 +33,18 @@ namespace xo {
 
         // ----- type facet -----
 
+        TypeDescr
+        DListType::repr_td() const noexcept
+        {
+            return Reflect::require<void *>();
+        }
+
         bool
         DListType::is_equal_to(const obj<AType> & y_arg) const noexcept
         {
             Metatype y_mtype = y_arg.metatype();
 
-            if (y_mtype != Metatype::list())
+            if (y_mtype != Metatype::t_list())
                 return false;
 
             auto y = obj<AType,DListType>::from(y_arg);
@@ -49,10 +59,10 @@ namespace xo {
         {
             Metatype y_mtype = y_arg.metatype();
 
-            if (y_mtype == Metatype::any())
+            if (y_mtype == Metatype::t_any())
                 return true;
 
-            if (y_mtype != Metatype::list())
+            if (y_mtype != Metatype::t_list())
                 return false;
 
             auto y = obj<AType,DListType>::from(y_arg);
@@ -81,7 +91,7 @@ namespace xo {
         {
             {
                 auto e = FacetRegistry::instance().variant<AGCObject,AType>(elt_type_);
-                gc.forward_inplace(e.iface(), (void **)&(e.data_));
+                gc.forward_inplace(e.iface(), (void **)&(elt_type_.data_));
             }
 
             return this->shallow_size();
