@@ -14,6 +14,7 @@
 #pragma once
 
 #include <xo/type/Metatype.hpp>
+#include <xo/reflect/TypeDescr.hpp>
 
 namespace xo {
 namespace scm {
@@ -29,6 +30,7 @@ namespace scm {
         /** integer identifying a type **/
         using typeseq = AType::typeseq;
         using obj_AType = AType::obj_AType;
+        using TypeDescr = AType::TypeDescr;
         ///@}
 
         /** @defgroup scm-type-xfer-methods **/
@@ -47,10 +49,13 @@ namespace scm {
         Metatype metatype(Copaque data)  const  noexcept override {
             return I::metatype(_dcast(data));
         }
-        bool is_equal_to(Copaque data, const obj_AType & y)  override {
+        TypeDescr repr_td(Copaque data)  const  noexcept override {
+            return I::repr_td(_dcast(data));
+        }
+        bool is_equal_to(Copaque data, const obj_AType & y)  const override {
             return I::is_equal_to(_dcast(data), y);
         }
-        bool is_subtype_of(Copaque data, const obj_AType & y)  override {
+        bool is_subtype_of(Copaque data, const obj_AType & y)  const override {
             return I::is_subtype_of(_dcast(data), y);
         }
 

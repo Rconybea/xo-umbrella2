@@ -45,6 +45,7 @@ namespace scm {
         /** integer identifying a type **/
         using typeseq = xo::facet::typeseq;
         using obj_AType = AType::obj_AType;
+        using TypeDescr = AType::TypeDescr;
 
         ///@}
         /** @defgroup scm-type-any-methods **/
@@ -60,8 +61,9 @@ namespace scm {
 
         // const methods
         [[noreturn]] Metatype metatype(Copaque)  const  noexcept override { _fatal(); }
-        [[noreturn]] bool is_equal_to(Copaque, const obj_AType &)  override { _fatal(); }
-        [[noreturn]] bool is_subtype_of(Copaque, const obj_AType &)  override { _fatal(); }
+        [[noreturn]] TypeDescr repr_td(Copaque)  const  noexcept override { _fatal(); }
+        [[noreturn]] bool is_equal_to(Copaque, const obj_AType &)  const override { _fatal(); }
+        [[noreturn]] bool is_subtype_of(Copaque, const obj_AType &)  const override { _fatal(); }
 
         // nonconst methods
 

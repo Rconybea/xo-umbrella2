@@ -23,16 +23,20 @@ namespace xo {
         public:
             using ACollector = xo::mm::ACollector;
             using AAllocator = xo::mm::AAllocator;
+            using TypeDescr = xo::reflect::TypeDescr;
 
         public:
             explicit DAtomicType(Metatype m) : metatype_{m} {}
 
             /** create instance using memory from @p mm with metatype @p mtype **/
             static DAtomicType * _make(obj<AAllocator> mm, Metatype mtype);
+            /** create instance **/
+            static obj<AType,DAtomicType> make(obj<AAllocator> mm, Metatype mtype);
 
             /** @defgroup xo-scm-atomictype-type-facet **/
             ///@{
             Metatype metatype() const noexcept { return metatype_; }
+            TypeDescr repr_td() const noexcept;
             bool is_equal_to(const obj<AType> & y) const noexcept;
             bool is_subtype_of(const obj<AType> & y) const noexcept;
             ///@}

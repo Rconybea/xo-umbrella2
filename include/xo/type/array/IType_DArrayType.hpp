@@ -40,6 +40,7 @@ namespace xo {
             /** @defgroup scm-type-darraytype-type-traits **/
             ///@{
             using obj_AType = xo::scm::AType::obj_AType;
+            using TypeDescr = xo::scm::AType::TypeDescr;
             using Copaque = xo::scm::AType::Copaque;
             using Opaque = xo::scm::AType::Opaque;
             ///@}
@@ -48,6 +49,8 @@ namespace xo {
             // const methods
             /** category for this type **/
             static Metatype metatype(const DArrayType & self) noexcept;
+            /** reflected representation for instances of this type **/
+            static TypeDescr repr_td(const DArrayType & self) noexcept;
             /** true iff this type is equal to y **/
             static bool is_equal_to(const DArrayType & self, const obj_AType & y);
             /** true iff this is a subtype of y **/

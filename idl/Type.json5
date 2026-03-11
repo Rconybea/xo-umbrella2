@@ -4,7 +4,8 @@
     output_hpp_dir: "include/xo/type",
     output_impl_subdir: "type",
     includes: [
-        "<xo/type/Metatype.hpp>"
+        "<xo/type/Metatype.hpp>",
+        "<xo/reflect/TypeDescr.hpp>",
     ],
     user_hpp_includes: [
     ],
@@ -26,6 +27,11 @@
             name: "obj_AType",
             doc: [],
             definition: "xo::facet::obj<AType>",
+        },
+        {
+            name: "TypeDescr",
+            doc: [],
+            definition: "xo::reflect::TypeDescr",
         }
     ],
     const_methods: [
@@ -38,12 +44,21 @@
             noexcept: true,
         },
         {
+            name: "repr_td",
+            doc: ["reflected representation for instances of this type"],
+            return_type: "TypeDescr",
+            args: [],
+            const: true,
+            noexcept: true,
+        },
+        {
             name: "is_equal_to",
             doc: ["true iff this type is equal to y"],
             return_type: "bool",
             args: [
                 {type: "const obj_AType &", name: "y"},
-            ]
+            ],
+            const: true,
         },
         {
             name: "is_subtype_of",
@@ -51,18 +66,9 @@
             return_type: "bool",
             args: [
                 {type: "const obj_AType &", name: "y"},
-            ]
+            ],
+            const: true,
         },
-
-        // TODO: define methods, e.g.:
-        // {
-        //     name: "my_method",
-        //     doc: ["description"],
-        //     return_type: "bool",
-        //     args: [],
-        //     const: true,
-        //     noexcept: true,
-        // },
     ],
     nonconst_methods: [],
     router_facet_explicit_content: [

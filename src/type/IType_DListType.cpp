@@ -22,6 +22,12 @@ namespace xo {
         }
 
         auto
+        IType_DListType::repr_td(const DListType & self) noexcept -> TypeDescr
+        {
+            return self.repr_td();
+        }
+
+        auto
         IType_DListType::is_equal_to(const DListType & self, const obj_AType & y) -> bool
         {
             return self.is_equal_to(y);

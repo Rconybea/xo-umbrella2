@@ -4,21 +4,30 @@
  **/
 
 #include "FunctionType.hpp"
+#include <xo/reflect/Reflect.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 
 namespace xo {
+    using xo::reflect::Reflect;
+    using xo::reflect::TypeDescr;
     using xo::facet::FacetRegistry;
 
     namespace scm {
 
         // ----- type facet -----
 
+        TypeDescr
+        DFunctionType::repr_td() const noexcept
+        {
+            return Reflect::require<void *>();
+        }
+
         bool
         DFunctionType::is_equal_to(obj<AType> y_arg) const noexcept
         {
             Metatype y_mtype = y_arg.metatype();
 
-            if (y_mtype != Metatype::function())
+            if (y_mtype != Metatype::t_function())
                 return false;
 
             auto y = obj<AType,DFunctionType>::from(y_arg);
@@ -48,10 +57,10 @@ namespace xo {
         {
             Metatype y_mtype = y_arg.metatype();
 
-            if (y_mtype == Metatype::any())
+            if (y_mtype == Metatype::t_any())
                 return true;
 
-            if (y_mtype != Metatype::function())
+            if (y_mtype != Metatype::t_function())
                 return false;
 
             auto y = obj<AType,DFunctionType>::from(y_arg);
@@ -95,7 +104,7 @@ namespace xo {
         {
             {
                 auto e = FacetRegistry::instance().variant<AGCObject,AType>(return_type_);
-                gc.forward_inplace(e.iface(), (void **)&(e.data_));
+                gc.forward_inplace(e.iface(), (void **)&(return_type_.data_));
             }
 
             gc.forward_inplace(&arg_types_);
