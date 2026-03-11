@@ -144,6 +144,11 @@ add_subdirectory(xo-interpreter)
 add_subdirectory(xo-imgui)
 
 # ----------------------------------------------------------------
+# umbrella-wide facet code generation
+
+xo_umbrella_genfacet_all(xo-genfacet-all)
+
+# ----------------------------------------------------------------
 # documentation.  must follow add_subdirectory() for satellite projects
 
 xo_umbrella_doxygen_deps(
