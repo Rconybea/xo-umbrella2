@@ -14,7 +14,7 @@
 #pragma once
 
 #include "GCObject.hpp"
-#include <xo/gc/GCObject.hpp>
+#include <xo/alloc2/GCObject.hpp>
 #include <xo/alloc2/Allocator.hpp>
 #include "DPrimitive_gco_2_gco_gco.hpp"
 

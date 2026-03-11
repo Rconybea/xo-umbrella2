@@ -10,7 +10,7 @@
     // includes in ASyntaxStateMachine.hpp
     includes: [
         "\"RuntimeContext.hpp\"",
-        "<xo/gc/GCObject.hpp>",
+        "<xo/alloc2/GCObject.hpp>",
     ],
     // extra includes in Procedure.hpp, if any
     user_hpp_includes: [

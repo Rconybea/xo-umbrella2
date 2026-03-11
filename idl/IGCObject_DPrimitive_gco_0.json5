@@ -5,7 +5,7 @@
     output_impl_subdir: "detail",
     includes: [
         //<xo/procedure2/GCObjectConversion_DPrimitive_gco_0.hpp>
-        "<xo/gc/GCObject.hpp>",
+        "<xo/alloc2/GCObject.hpp>",
         "<xo/alloc2/Allocator.hpp>",
     ],
     local_types: [ ],
