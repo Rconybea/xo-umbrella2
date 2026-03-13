@@ -1,4 +1,6 @@
 /** @file CollectorTypeRegistry.cpp
+ *
+ *  @author Roland Conybeare, Mar 2026
  **/
 
 #include "CollectorTypeRegistry.hpp"

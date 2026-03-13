@@ -22,6 +22,9 @@ namespace xo {
 
             RCollector() = default;
             RCollector(DataPtr data) : Object{std::move(data)} {}
+            RCollector(const ACollector * iface, void * data)
+                requires std::is_same_v<typename Object::DataType, xo::facet::DVariantPlaceholder>
+            : Object(iface, data) {}
 
             /** forward op in place. Defined in GCObject.hpp to avoid #include cycle **/
             template <typename DRepr>
@@ -33,6 +36,11 @@ namespace xo {
             template <typename DRepr>
             void forward_inplace(DRepr ** pp_repr);
 
+            /** convenience template where pointer requires pivot **/
+            template <typename AFacet, typename DRepr>
+            requires (!std::is_same_v<AFacet, AGCObject>)
+            void forward_pivot_inplace(obj<AFacet,DRepr> * p_obj);
+
             int32_t _typeseq() const noexcept { return O::iface()->_typeseq(); }
             size_type allocated(generation g, role r) const noexcept { return O::iface()->allocated(O::data(), g, r); }
             size_type reserved(generation g, role r) const noexcept { return O::iface()->reserved(O::data(), g, r); }
@@ -41,6 +49,7 @@ namespace xo {
 
             bool install_type(const AGCObject & iface) { return O::iface()->install_type(O::data(), iface); }
             void add_gc_root_poly(obj<AGCObject> * p_root) { O::iface()->add_gc_root_poly(O::data(), p_root); }
+            void remove_gc_root_poly(obj<AGCObject> * p_root) { O::iface()->remove_gc_root_poly(O::data(), p_root); }
             void request_gc(generation g) { O::iface()->request_gc(O::data(), g); }
             void forward_inplace(AGCObject * lhs_iface, void ** lhs_data) { O::iface()->forward_inplace(O::data(), lhs_iface, lhs_data); }
 
@@ -48,6 +57,12 @@ namespace xo {
             template<typename DRepr>
             void add_gc_root(obj<AGCObject, DRepr> * p_root) {
                 O::iface()->add_gc_root_poly(O::data(), (obj<AGCObject> *)p_root);
+            }
+
+            /** remove root @p p_root **/
+            template <typename DRepr>
+            void remove_gc_root(obj<AGCObject, DRepr> * p_root) {
+                O::iface()->remove_gc_root_poly(O::data(), (obj<AGCObject> *)p_root);
             }
 
             static bool _valid;
