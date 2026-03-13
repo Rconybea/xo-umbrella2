@@ -4,7 +4,7 @@
 
 {
     mode: "facet",
-    output_cpp_dir: "src/procedure2",
+    output_cpp_dir: "src/procedure2/facet",
     output_hpp_dir: "include/xo/procedure2",
     output_impl_subdir: "detail",
     // includes in ASyntaxStateMachine.hpp

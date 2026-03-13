@@ -7,23 +7,23 @@ set(SELF_SRCS
     procedure2_register_types.cpp
     procedure2_register_facets.cpp
     PrimitiveRegistry.cpp
-    DSimpleRcx.cpp
-    IRuntimeContext_Any.cpp
-    IRuntimeContext_DSimpleRcx.cpp
-    IProcedure_Any.cpp
     DPrimitive.cpp
-    IGCObject_DPrimitive_gco_0.cpp
-    IProcedure_DPrimitive_gco_0.cpp
-    IPrintable_DPrimitive_gco_0.cpp
-    IGCObject_DPrimitive_gco_1_gco.cpp
-    IProcedure_DPrimitive_gco_1_gco.cpp
-    IPrintable_DPrimitive_gco_1_gco.cpp
-    IGCObject_DPrimitive_gco_2_gco_gco.cpp
-    IProcedure_DPrimitive_gco_2_gco_gco.cpp
-    IPrintable_DPrimitive_gco_2_gco_gco.cpp
-    IGCObject_DPrimitive_gco_3_dict_string_gco.cpp
-    IProcedure_DPrimitive_gco_3_dict_string_gco.cpp
-    IPrintable_DPrimitive_gco_3_dict_string_gco.cpp
+    DSimpleRcx.cpp
+    facet/IRuntimeContext_Any.cpp
+    facet/IRuntimeContext_DSimpleRcx.cpp
+    facet/IProcedure_Any.cpp
+    facet/IGCObject_DPrimitive_gco_0.cpp
+    facet/IProcedure_DPrimitive_gco_0.cpp
+    facet/IPrintable_DPrimitive_gco_0.cpp
+    facet/IGCObject_DPrimitive_gco_1_gco.cpp
+    facet/IProcedure_DPrimitive_gco_1_gco.cpp
+    facet/IPrintable_DPrimitive_gco_1_gco.cpp
+    facet/IGCObject_DPrimitive_gco_2_gco_gco.cpp
+    facet/IProcedure_DPrimitive_gco_2_gco_gco.cpp
+    facet/IPrintable_DPrimitive_gco_2_gco_gco.cpp
+    facet/IGCObject_DPrimitive_gco_3_dict_string_gco.cpp
+    facet/IProcedure_DPrimitive_gco_3_dict_string_gco.cpp
+    facet/IPrintable_DPrimitive_gco_3_dict_string_gco.cpp
 )
 
 xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 ${SELF_SRCS})
