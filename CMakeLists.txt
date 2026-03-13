@@ -39,7 +39,6 @@ xo_add_genfacet(
 xo_add_genfacetimpl(
     TARGET xo-procedure2-facetimpl-runtimecontext-simplercx
     FACET_PKG xo_procedure2
-#    REPR DSimpleRcx
     INPUT idl/IRuntimeContext_DSimpleRcx.json5
     )
 
@@ -49,7 +48,6 @@ xo_add_genfacetimpl(
 xo_add_genfacetimpl(
     TARGET xo-procedure2-facetimpl-procedure-primitive_gco_0
     FACET_PKG xo_procedure2
-#    REPR DPrimitive_gco_0
     INPUT idl/IProcedure_DPrimitive_gco_0.json5
 )
 
@@ -57,7 +55,6 @@ xo_add_genfacetimpl(
 xo_add_genfacetimpl(
     TARGET xo-procedure2-facetimpl-gcobject-primitive_gco_0
     FACET_PKG xo_alloc2
-#    REPR Primitive_gco_0
     INPUT idl/IGCObject_DPrimitive_gco_0.json5
 )
 
@@ -65,7 +62,6 @@ xo_add_genfacetimpl(
 xo_add_genfacetimpl(
     TARGET xo-procedure2-facetimpl-printable-primitive_gco_0
     FACET_PKG xo_printable2
-#    REPR Primitive_gco_0
     INPUT idl/IPrintable_DPrimitive_gco_0.json5
 )
 
@@ -75,7 +71,6 @@ xo_add_genfacetimpl(
 xo_add_genfacetimpl(
     TARGET xo-procedure2-facetimpl-procedure-primitive_gco_1_gco
     FACET_PKG xo_procedure2
-#    REPR DPrimitive_gco_1_gco
     INPUT idl/IProcedure_DPrimitive_gco_1_gco.json5
 )
 
@@ -83,7 +78,6 @@ xo_add_genfacetimpl(
 xo_add_genfacetimpl(
     TARGET xo-procedure2-facetimpl-gcobject-primitive_gco_1_gco
     FACET_PKG xo_alloc2
-#    REPR Primitive_gco_1_gco
     INPUT idl/IGCObject_DPrimitive_gco_1_gco.json5
 )
 
@@ -91,7 +85,6 @@ xo_add_genfacetimpl(
 xo_add_genfacetimpl(
     TARGET xo-procedure2-facetimpl-printable-primitive_gco_1_gco
     FACET_PKG xo_printable2
-#    REPR Primitive_gco_1_gco
     INPUT idl/IPrintable_DPrimitive_gco_1_gco.json5
 )
 
@@ -101,7 +94,6 @@ xo_add_genfacetimpl(
 xo_add_genfacetimpl(
     TARGET xo-procedure2-facetimpl-procedure-primitive_gco_2_gco_gco
     FACET_PKG xo_procedure2
-#    REPR DPrimitive_gco_2_gco_gco
     INPUT idl/IProcedure_DPrimitive_gco_2_gco_gco.json5
 )
 
@@ -109,7 +101,6 @@ xo_add_genfacetimpl(
 xo_add_genfacetimpl(
     TARGET xo-procedure2-facetimpl-gcobject-primitive_gco_2_gco_gco
     FACET_PKG xo_alloc2
-#    REPR Primitive_gco_2_gco_gco
     INPUT idl/IGCObject_DPrimitive_gco_2_gco_gco.json5
 )
 
@@ -117,7 +108,6 @@ xo_add_genfacetimpl(
 xo_add_genfacetimpl(
     TARGET xo-procedure2-facetimpl-printable-primitive_gco_2_gco_gco
     FACET_PKG xo_printable2
-#    REPR Primitive_gco_2_gco_gco
     INPUT idl/IPrintable_DPrimitive_gco_2_gco_gco.json5
 )
 
@@ -127,7 +117,6 @@ xo_add_genfacetimpl(
 xo_add_genfacetimpl(
     TARGET xo-procedure2-facetimpl-procedure-primitive_gco_3_dict_string_gco
     FACET_PKG xo_procedure2
-#    REPR Dprimitive_gco_3_dict_string_gco
     INPUT idl/IProcedure_DPrimitive_gco_3_dict_string_gco.json5
 )
 
@@ -135,7 +124,6 @@ xo_add_genfacetimpl(
 xo_add_genfacetimpl(
     TARGET xo-procedure2-facetimpl-gcobject-primitive_gco_3_dict_string_gco
     FACET_PKG xo_alloc2
-#    REPR primitive_gco_3_dict_string_gco
     INPUT idl/IGCObject_DPrimitive_gco_3_dict_string_gco.json5
 )
 
@@ -143,7 +131,6 @@ xo_add_genfacetimpl(
 xo_add_genfacetimpl(
     TARGET xo-procedure2-facetimpl-printable-primitive_gco_3_dict_string_gco
     FACET_PKG xo_printable2
-#    REPR primitive_gco_3_dict_string_gco
     INPUT idl/IPrintable_DPrimitive_gco_3_dict_string_gco.json5
 )
 
