@@ -6,6 +6,7 @@
 #pragma once
 
 #include "RuntimeContext.hpp"
+#include <xo/type/Type.hpp>
 #include <xo/object2/DArray.hpp>
 #include <xo/alloc2/GCObjectConversion.hpp>
 #include <xo/alloc2/GCObject.hpp>
@@ -152,7 +153,12 @@ namespace xo {
             /** name of this primitive **/
             std::string_view name_;
 
-            /** type description for function
+            /** primitive type-constructor. These are non-trivial to establish;
+             *  not convenient to establish in ctor
+             **/
+            obj<AType> type_;
+
+            /** type description for implementation function
              *  Note that this type description will have additional first argument
              *  for obj<ARuntimeContext>
              **/
