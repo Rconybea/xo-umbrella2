@@ -29,6 +29,7 @@ namespace xo {
             case code::t_function: return "function";
             case code::t_struct:   return "struct";
 
+            case code::t_numeric:  return "numeric";
             case code::t_any:      return "any";
             }
         }
@@ -68,6 +69,8 @@ namespace xo {
             case code::t_struct:
                 return false;
 
+            case code::t_numeric:
+                return true;
             case code::t_any:
                 return true;
             }
