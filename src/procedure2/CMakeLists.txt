@@ -34,10 +34,9 @@ xo_install_include_tree3(include/xo/procedure2)
 # NOTE: dependency set here must be kept consistent with
 #       xo-procedure2/cmake/xo_procedure2Config.cmake.in
 
+xo_dependency(${SELF_LIB} xo_type)
 xo_dependency(${SELF_LIB} xo_object2)
-#xo_dependency(${SELF_LIB} xo_gc)
 xo_dependency(${SELF_LIB} subsys)
-#xo_dependency(${SELF_LIB} xo_indentlog)
 
 xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
 
