@@ -40,6 +40,9 @@ namespace xo {
                 /* struct<a:T,b:U,..> */
                 t_struct,
 
+                /* any numeric type: i16|i32|i64|f32|f64 */
+                t_numeric,
+
                 /* any type at all */
                 t_any,
             };
@@ -64,6 +67,7 @@ namespace xo {
             static Metatype t_function() { return Metatype(code::t_function); }
             static Metatype t_struct()   { return Metatype(code::t_struct);   }
 
+            static Metatype t_numeric()  { return Metatype(code::t_numeric);  }
             static Metatype t_any()      { return Metatype(code::t_any);      }
 
             /** description string for this type category **/
