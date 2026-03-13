@@ -288,6 +288,14 @@ namespace xo {
         }
 
         void
+        DX1Collector::remove_gc_root_poly(obj<AGCObject> * p_root) noexcept
+        {
+            // iterate over roots_, find p_root and drop it
+
+            (void)p_root;
+        }
+
+        void
         DX1Collector::request_gc(generation upto) noexcept
         {
             if (gc_blocked_ > 0) {

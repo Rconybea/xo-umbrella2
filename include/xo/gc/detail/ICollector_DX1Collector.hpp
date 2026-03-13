@@ -47,6 +47,7 @@ namespace xo {
 
             static bool install_type(DX1Collector & d, const AGCObject & iface);
             static void add_gc_root_poly(DX1Collector & d, obj<AGCObject> * p_root);
+            static void remove_gc_root_poly(DX1Collector & d, obj<AGCObject> * p_root);
             static void request_gc(DX1Collector & d, generation upto);
             static void forward_inplace(DX1Collector & d, AGCObject * lhs_iface, void ** lhs_data);
 

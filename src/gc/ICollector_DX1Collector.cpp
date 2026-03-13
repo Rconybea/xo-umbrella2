@@ -68,6 +68,13 @@ namespace xo {
         }
 
         void
+        ICollector_DX1Collector::remove_gc_root_poly(DX1Collector & d,
+                                                     obj<AGCObject> * p_root)
+        {
+            d.remove_gc_root_poly(p_root);
+        }
+
+        void
         ICollector_DX1Collector::request_gc(DX1Collector & d,
                                             generation upto)
         {
