@@ -102,6 +102,22 @@ xo_add_genfacetimpl(
 
 # ----------------------------------------------------------------
 
+# note: manual target; generated code committed to git
+xo_add_genfacetimpl(
+    TARGET xo-type-facetimpl-type-typevarref
+    FACET_PKG xo_type
+    INPUT idl/IType_DTypeVarRef.json5
+)
+
+# note: manual target; generated code committed to git
+xo_add_genfacetimpl(
+    TARGET xo-type-facetimpl-gcobject-typevarref
+    FACET_PKG xo_alloc2
+    INPUT idl/IGCObject_DTypeVarRef.json5
+)
+
+# ----------------------------------------------------------------
+
 xo_add_genfacet_all(xo-type-genfacet-all)
 
 install(DIRECTORY idl/
