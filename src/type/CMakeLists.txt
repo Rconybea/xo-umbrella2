@@ -11,15 +11,18 @@ set(SELF_SRCS
     DListType.cpp
     DArrayType.cpp
     DFunctionType.cpp
+    DTypeVarRef.cpp
     IType_Any.cpp
     IType_DAtomicType.cpp
     IType_DListType.cpp
     IType_DArrayType.cpp
     IType_DFunctionType.cpp
+    IType_DTypeVarRef.cpp
     IGCObject_DAtomicType.cpp
     IGCObject_DListType.cpp
     IGCObject_DArrayType.cpp
     IGCObject_DFunctionType.cpp
+    IGCObject_DTypeVarRef.cpp
 )
 
 xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 ${SELF_SRCS})

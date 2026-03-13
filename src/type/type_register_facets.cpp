@@ -4,11 +4,12 @@
  **/
 
 #include "type_register_facets.hpp"
+#include "AtomicType.hpp"
+#include "ListType.hpp"
+#include "ArrayType.hpp"
+#include "FunctionType.hpp"
+#include "TypeVarRef.hpp"
 
-#include <xo/type/AtomicType.hpp>
-#include <xo/type/ListType.hpp>
-#include <xo/type/ArrayType.hpp>
-#include <xo/type/FunctionType.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/indentlog/scope.hpp>
 
@@ -36,10 +37,14 @@ namespace xo {
             FacetRegistry::register_impl<AType, DFunctionType>();
             FacetRegistry::register_impl<AGCObject, DFunctionType>();
 
+            FacetRegistry::register_impl<AType, DTypeVarRef>();
+            FacetRegistry::register_impl<AGCObject, DTypeVarRef>();
+
             log && log(xtag("DAtomicType.tseq", typeseq::id<DAtomicType>()));
             log && log(xtag("DListType.tseq", typeseq::id<DListType>()));
             log && log(xtag("DArrayType.tseq", typeseq::id<DArrayType>()));
             log && log(xtag("DFunctionType.tseq", typeseq::id<DFunctionType>()));
+            log && log(xtag("DTypeVarRef.tseq", typeseq::id<DTypeVarRef>()));
 
             return true;
         }
