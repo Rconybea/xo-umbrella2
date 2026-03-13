@@ -6,6 +6,7 @@ set(SELF_SRCS
     init_primitives.cpp
     procedure2_register_types.cpp
     procedure2_register_facets.cpp
+    PrimitiveRegistry.cpp
     DSimpleRcx.cpp
     IRuntimeContext_Any.cpp
     IRuntimeContext_DSimpleRcx.cpp
