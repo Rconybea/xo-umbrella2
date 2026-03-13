@@ -155,8 +155,11 @@ namespace xo {
              **/
             bool install_type(const AGCObject & meta) noexcept;
 
-            /** add GC root at @p root_addr, with type @p typeseq **/
+            /** add GC root at @p *p_root **/
             void add_gc_root_poly(obj<AGCObject> * p_root) noexcept;
+
+            /** remove GC root at @p *p_root **/
+            void remove_gc_root_poly(obj<AGCObject> * p_root) noexcept;
 
             // ----- collection -----
 
