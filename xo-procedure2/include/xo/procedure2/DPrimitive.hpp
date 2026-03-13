@@ -55,6 +55,18 @@ namespace xo {
         }
 
         /** @brief Schematika primitive with fixed number of arguments
+         *
+         *  Distinction between type-constructor (@ref type_) and
+         *  type-description (@ref fn_td_): type-constructor is narrower;
+         *  it may lift into schematika type system some information about function
+         *  behavior.  For example
+         *  @pre
+         *    cons :: (T x list<T>) -> list<T>
+         *  @endpre
+         *  but implementation has signature:
+         *  @pre
+         *    (obj<AGCobject> x obj<AGCObject,DList>) -> obj<AGCObject,DList>
+         *  @endpre
          **/
         template <typename Fn>
         class Primitive {
@@ -70,13 +82,28 @@ namespace xo {
             using ppindentinfo = xo::print::ppindentinfo;
 
         public:
-            Primitive(std::string_view name, Fn fn) : name_{name},
-                                                      fn_td_{Reflect::require<Fn>()},
-                                                      fn_{fn} {}
+            /** @defgroup scm-primitive-ctors constructors **/
+            ///@{
+
+            Primitive(std::string_view name, Fn fn)
+                : name_{name},
+                  fn_td_{Reflect::require<Fn>()},
+                  fn_{fn} {}
+
+            static Primitive * _make(obj<AAllocator> mm, std::string_view name, Fn fn) {
+                void * mem = mm.alloc_for<Primitive>();
+
+                return new (mem) Primitive(name, fn);
+            }
+
+            ///@}
+            /** @defgroup scm-primitive-methods general methods **/
+            ///@{
 
             TypeDescr fn_td() const noexcept { return fn_td_; }
 
             std::string_view name() const noexcept { return name_; }
+
             static constexpr std::int32_t n_args() noexcept { return Traits::n_args; }
 
             bool is_nary() const noexcept { return false; }
@@ -86,6 +113,7 @@ namespace xo {
                                       std::make_index_sequence<Traits::n_args>{});
             }
 
+            ///@}
             /** @defgroup scm-primitive-printable-facet **/
             ///@{
 
@@ -166,8 +194,12 @@ namespace xo {
 
         template <typename Fn>
         std::size_t
-        Primitive<Fn>::forward_children(obj<ACollector>) noexcept {
-            // Primitive holds no GC refs (just string_view + function pointer)
+        Primitive<Fn>::forward_children(obj<ACollector> gc) noexcept {
+            {
+                auto e = type_.to_facet<AGCObject>();  // FacetRegistry dep
+                gc.forward_inplace(e.iface(), (void **)&(type_.data_));
+            }
+
             return this->shallow_size();
         }
 

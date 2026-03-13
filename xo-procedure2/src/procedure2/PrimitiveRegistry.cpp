@@ -1,31 +1,33 @@
-/** @file CollectorTypeRegistry.cpp
+/** @file PrimitiveRegistry.cpp
  *
  *  @author Roland Conybeare, Mar 2026
  **/
 
-#include "CollectorTypeRegistry.hpp"
+#include "PrimitiveRegistry.hpp"
 #include <xo/indentlog/scope.hpp>
 
 namespace xo {
-    namespace mm {
-        CollectorTypeRegistry &
-        CollectorTypeRegistry::instance()
+    namespace scm {
+        PrimitiveRegistry &
+        PrimitiveRegistry::instance()
         {
-            static CollectorTypeRegistry s_instance;
+            static PrimitiveRegistry s_instance;
 
             return s_instance;
         }
 
         void
-        CollectorTypeRegistry::register_types(init_function_type fn)
+        PrimitiveRegistry::register_primitives(InstallSource factory)
         {
             scope log(XO_DEBUG(true));
 
-            init_seq_v_.push_back(fn);
+            init_seq_v_.push_back(factory);
         }
 
         bool
-        CollectorTypeRegistry::install_types(obj<ACollector> gc)
+        PrimitiveRegistry::install_primitives(obj<AAllocator> mm,
+                                              InstallSink sink,
+                                              InstallFlags flags)
         {
             scope log(XO_DEBUG(true));
 
@@ -38,13 +40,10 @@ namespace xo {
             for (const auto & fn : init_seq_v_) {
                 log && log("do install fn (", i+1, "/", n, ")");
 
-                ok = ok & fn(gc);
+                ok = ok & fn(mm, sink, flags);
             }
 
             return ok;
         }
-
-    } /*namespace mm*/
+    }
 } /*namespace xo*/
-
-/* end CollectorTypeRegistry.cpp */

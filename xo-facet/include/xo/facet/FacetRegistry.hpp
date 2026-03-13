@@ -9,7 +9,6 @@
 
 #include "TypeRegistry.hpp"
 #include "facet_implementation.hpp"
-//#include "typeseq.hpp"
 #include "obj.hpp"
 #include <xo/arena/DArenaHashMap.hpp>
 #include <xo/indentlog/scope.hpp>

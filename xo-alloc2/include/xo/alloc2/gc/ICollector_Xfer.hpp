@@ -53,6 +53,9 @@ namespace xo {
             void add_gc_root_poly(Opaque d, obj<AGCObject> * p_root) override {
                 I::add_gc_root_poly(_dcast(d), p_root);
             }
+            void remove_gc_root_poly(Opaque d, obj<AGCObject> * p_root) override {
+                I::remove_gc_root_poly(_dcast(d), p_root);
+            }
             void request_gc(Opaque d, generation upto) override {
                 I::request_gc(_dcast(d), upto);
             }

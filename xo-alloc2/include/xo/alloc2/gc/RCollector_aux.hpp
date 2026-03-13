@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include <xo/facet/FacetRegistry.hpp>
+
 namespace xo {
     namespace mm {
         /** defined here to avoid #include cycle, since
@@ -33,6 +35,16 @@ namespace xo {
             auto iface = xo::facet::impl_for<AGCObject,DRepr>();
 
             this->forward_inplace(&iface, (void **)p_repr);
+        }
+
+        template <typename Object>
+        template <typename AFacet, typename DRepr>
+        requires (!std::is_same_v<AFacet, AGCObject>)
+        void
+        RCollector<Object>::forward_pivot_inplace(obj<AFacet, DRepr> * p_objs)
+        {
+            auto e = xo::facet::FacetRegistry::instance().variant<AGCObject,AFacet>(*p_objs);
+            this->forward_inplace(e.iface(), (void **)&(p_objs->data_));
         }
     }
 }
