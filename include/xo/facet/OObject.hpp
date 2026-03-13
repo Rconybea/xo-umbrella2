@@ -273,7 +273,7 @@ namespace xo {
              *
              * Deliberately disable this for variants
              **/
-            DRepr * operator->()
+            DRepr * operator->() const noexcept
             requires (!std::is_same_v<DataType, DVariantPlaceholder>)
             { return data_; }
 
