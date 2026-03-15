@@ -27,7 +27,7 @@ namespace xo {
             /** create primitive: create cons cell **/
             static DPrimitive_gco_2_gco_gco * make_cons_pm(obj<AAllocator> mm);
 
-            /** create pirmitive for creating a dictionary instance **/
+            /** create primitive for creating a dictionary instance **/
             static DPrimitive_gco_0 * make_dict_make_pm(obj<AAllocator> mm);
 
             /** create primitive that upserts a key,value pair into a dictionary **/
