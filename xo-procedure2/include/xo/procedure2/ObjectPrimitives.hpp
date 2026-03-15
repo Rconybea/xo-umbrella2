@@ -5,7 +5,9 @@
 
 #pragma once
 
-#include <xo/procedure2/DPrimitive_gco_2_gco_gco.hpp>
+#include "Primitive_gco_0.hpp"
+#include "Primitive_gco_2_gco_gco.hpp"
+#include "Primitive_gco_3_dict_string_gco.hpp"
 
 namespace xo {
     namespace scm {
@@ -21,6 +23,12 @@ namespace xo {
         public:
             /** create primitive for fetching nth element of a sequence **/
             static DPrimitive_gco_2_gco_gco * make_nth_pm(obj<AAllocator> mm);
+
+            /** create pirmitive for creating a dictionary instance **/
+            static DPrimitive_gco_0 * make_dict_make_pm(obj<AAllocator> mm);
+
+            /** create primitive that upserts a key,value pair into a dictionary **/
+            static DPrimitive_gco_3_dict_string_gco * make_dict_upsert_pm(obj<AAllocator> mm);
         };
 
     } /*namespace scm*/
