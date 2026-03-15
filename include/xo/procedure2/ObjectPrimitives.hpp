@@ -21,8 +21,11 @@ namespace xo {
             using AAllocator = xo::mm::AAllocator;
 
         public:
-            /** create primitive for fetching nth element of a sequence **/
+            /** create primitive: fetch nth element of a sequence **/
             static DPrimitive_gco_2_gco_gco * make_nth_pm(obj<AAllocator> mm);
+
+            /** create primitive: create cons cell **/
+            static DPrimitive_gco_2_gco_gco * make_cons_pm(obj<AAllocator> mm);
 
             /** create pirmitive for creating a dictionary instance **/
             static DPrimitive_gco_0 * make_dict_make_pm(obj<AAllocator> mm);

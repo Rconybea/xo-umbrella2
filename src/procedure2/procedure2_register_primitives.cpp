@@ -62,6 +62,7 @@ namespace xo {
             bool ok = true;
 
             ok = ok & install_aux(sink, ObjectPrimitives::make_nth_pm(mm), flags);
+            ok = ok & install_aux(sink, ObjectPrimitives::make_cons_pm(mm), flags);
             ok = ok & install_aux(sink, ObjectPrimitives::make_dict_make_pm(mm), flags);
             ok = ok & install_aux(sink, ObjectPrimitives::make_dict_upsert_pm(mm), flags);
 
