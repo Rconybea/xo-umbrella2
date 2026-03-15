@@ -13,9 +13,9 @@
 #include <xo/alloc2/CollectorTypeRegistry.hpp>
 
 namespace xo {
+    using xo::scm::procedure2_register_primitives;
     using xo::scm::procedure2_register_facets;
     using xo::scm::procedure2_register_types;
-    using xo::scm::procedure2_register_primitives;
     using xo::scm::PrimitiveRegistry;
     using xo::mm::CollectorTypeRegistry;
 
