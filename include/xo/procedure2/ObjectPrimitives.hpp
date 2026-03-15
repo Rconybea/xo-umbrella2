@@ -21,6 +21,9 @@ namespace xo {
             using AAllocator = xo::mm::AAllocator;
 
         public:
+            /** create primitive: report current working directory **/
+            static DPrimitive_gco_0 * make_cwd_pm(obj<AAllocator> mm);
+
             /** create primitive: fetch nth element of a sequence **/
             static DPrimitive_gco_2_gco_gco * make_nth_pm(obj<AAllocator> mm);
 

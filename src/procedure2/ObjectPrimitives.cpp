@@ -10,6 +10,7 @@
 #include <xo/object2/Integer.hpp>
 #include <xo/printable2/Printable.hpp>
 #include <xo/stringtable2/String.hpp>
+#include <unistd.h> // for getcwd()
 
 namespace xo {
     using xo::scm::ASequence;
@@ -20,6 +21,23 @@ namespace xo {
     using xo::facet::TypeRegistry;
 
     namespace scm {
+
+        // ----- cwd -----
+
+        obj<AGCObject>
+        xfer_cwd(obj<ARuntimeContext> rcx)
+        {
+            char buf[PATH_MAX];
+            ::getcwd(buf, sizeof(buf));
+
+            return obj<AGCObject,DString>(DString::from_cstr(rcx.allocator(), buf));
+        }
+
+        DPrimitive_gco_0 *
+        ObjectPrimitives::make_cwd_pm(obj<AAllocator> mm)
+        {
+            return DPrimitive_gco_0::_make(mm, "cwd", &xfer_cwd);
+        }
 
         // ----- nth -----
 
