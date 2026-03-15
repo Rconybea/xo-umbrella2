@@ -10,8 +10,10 @@
 
 namespace xo {
     namespace scm {
-        /** Register gc-aware (AGCObject,DRepr) combinations with garbage collector @p gc **/
-        bool procedure2_register_primitives(obj<xo::mm::AAllocator> gc, InstallSink sink);
+        /** Register primitive-factories **/
+        bool procedure2_register_primitives(obj<xo::mm::AAllocator> gc,
+                                            InstallSink sink,
+                                            InstallFlags flags);
     }
 }
 

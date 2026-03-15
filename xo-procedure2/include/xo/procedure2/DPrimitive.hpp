@@ -72,6 +72,7 @@ namespace xo {
         template <typename Fn>
         class Primitive {
         public:
+            using FunctionPtrType = Fn;
             using Traits = detail::PmFnTraits<Fn>;
 
             using ACollector = xo::mm::ACollector;
