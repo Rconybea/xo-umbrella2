@@ -6,6 +6,7 @@
 #pragma once
 
 #include "Primitive_gco_0.hpp"
+#include "Primitive_gco_1_gco.hpp"
 #include "Primitive_gco_2_gco_gco.hpp"
 #include "Primitive_gco_3_dict_string_gco.hpp"
 
@@ -35,6 +36,9 @@ namespace xo {
 
             /** create primitive that upserts a key,value pair into a dictionary **/
             static DPrimitive_gco_3_dict_string_gco * make_dict_upsert_pm(obj<AAllocator> mm);
+
+            /** create primitive: get fixed number of args for function **/
+            static DPrimitive_gco_1_gco * make_fn_n_args_pm(obj<AAllocator> mm);
         };
 
     } /*namespace scm*/

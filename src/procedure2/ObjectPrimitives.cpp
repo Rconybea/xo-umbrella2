@@ -133,6 +133,30 @@ namespace xo {
             return DPrimitive_gco_3_dict_string_gco::_make(mm, "dict_upsert", &xfer_dict_upsert);
         }
 
+        // ----- fn_n_args -----
+
+        obj<AGCObject>
+        xfer_fn_n_args(obj<ARuntimeContext> rcx,
+                       obj<AGCObject> fn_gco)
+        {
+            scope log(XO_DEBUG(true));
+
+            log && log(xtag("fn_gco.tseq", fn_gco._typeseq()));
+            log && log(xtag("fn_gco.tname", TypeRegistry::id2name(fn_gco._typeseq())));
+
+            auto fn_proc = FacetRegistry::instance().try_variant<AProcedure,AGCObject>(fn_gco);
+
+            assert(fn_proc);
+
+            return DInteger::box<AGCObject>(rcx.allocator(), fn_proc.n_args());
+        }
+
+        DPrimitive_gco_1_gco *
+        ObjectPrimitives::make_fn_n_args_pm(obj<AAllocator> mm)
+        {
+            return DPrimitive_gco_1_gco::_make(mm, "fn_n_args", &xfer_fn_n_args);
+        }
+
     } /*namespace scm*/
 } /*namespace xo*/
 
