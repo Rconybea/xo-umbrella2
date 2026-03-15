@@ -7,6 +7,7 @@
 #include "init_primitives.hpp"
 #include "procedure2_register_facets.hpp"
 #include "procedure2_register_types.hpp"
+#include "procedure2_register_primitives.hpp"
 
 #include <xo/object2/init_object2.hpp>
 #include <xo/alloc2/CollectorTypeRegistry.hpp>
@@ -14,6 +15,8 @@
 namespace xo {
     using xo::scm::procedure2_register_facets;
     using xo::scm::procedure2_register_types;
+    using xo::scm::procedure2_register_primitives;
+    using xo::scm::PrimitiveRegistry;
     using xo::mm::CollectorTypeRegistry;
 
     void
@@ -22,6 +25,7 @@ namespace xo {
         procedure2_register_facets();
 
         CollectorTypeRegistry::instance().register_types(&procedure2_register_types);
+        PrimitiveRegistry::instance().register_primitives(&procedure2_register_primitives);
     }
 
     InitEvidence
