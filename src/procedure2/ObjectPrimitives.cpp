@@ -4,16 +4,23 @@
  **/
 
 #include "ObjectPrimitives.hpp"
-#include "Primitive_gco_2_gco_gco.hpp"
+#include <xo/object2/Dictionary.hpp>
 #include <xo/object2/Sequence.hpp>
 #include <xo/object2/Integer.hpp>
+#include <xo/printable2/Printable.hpp>
+#include <xo/stringtable2/String.hpp>
 
 namespace xo {
     using xo::scm::ASequence;
+    using xo::print::APrintable;
     using xo::mm::AAllocator;
     using xo::mm::AGCObject;
+    using xo::facet::FacetRegistry;
+    using xo::facet::TypeRegistry;
 
     namespace scm {
+
+        // ----- nth -----
 
         // TODO: seq_gc -> obj<ASequence>
         //       n_gco -> obj<AGCObject,DInteger>
@@ -23,8 +30,6 @@ namespace xo {
                  obj<AGCObject> seq_gco,
                  obj<AGCObject> n_gco)
         {
-            scope log(XO_DEBUG(true));
-
             (void)rcx;
 
             obj<ASequence> seq = seq_gco.to_facet<ASequence>();
@@ -37,6 +42,54 @@ namespace xo {
         ObjectPrimitives::make_nth_pm(obj<AAllocator> mm)
         {
             return DPrimitive_gco_2_gco_gco::_make(mm, "nth", &xfer_nth);
+        }
+
+        // ----- dict_make -----
+
+        obj<AGCObject>
+        xfer_dict_make(obj<ARuntimeContext> rcx)
+        {
+            return obj<AGCObject,DDictionary>(DDictionary::empty(rcx.allocator(),
+                                                                 8 /*cap*/));
+        }
+
+        DPrimitive_gco_0 *
+        ObjectPrimitives::make_dict_make_pm(obj<AAllocator> mm)
+        {
+            return DPrimitive_gco_0::_make(mm, "dict_make", &xfer_dict_make);
+        }
+
+        // ----- dict_upsert -----
+
+        obj<AGCObject>
+        xfer_dict_upsert(obj<ARuntimeContext> rcx,
+                         obj<AGCObject,DDictionary> dict,
+                         obj<AGCObject,DString> key,
+                         obj<AGCObject> value)
+        {
+            scope log(XO_DEBUG(true));
+
+            log && log(xtag("dict.tseq", dict._typeseq()),
+                       xtag("dict.tname", TypeRegistry::id2name(dict._typeseq())));
+            log && log(xtag("key.tseq", key._typeseq()),
+                       xtag("key.tname", TypeRegistry::id2name(key._typeseq())));
+            log && log(xtag("value.tseq", value._typeseq()),
+                       xtag("value.tname", TypeRegistry::id2name(value._typeseq())));
+
+            auto value_pr = FacetRegistry::instance().variant<APrintable>(value);
+
+            log && log(xtag("value", value_pr));
+
+            dict->upsert(rcx.allocator(),
+                         DDictionary::pair_type(key.data(), value));
+
+            return dict;
+        }
+
+        DPrimitive_gco_3_dict_string_gco *
+        ObjectPrimitives::make_dict_upsert_pm(obj<AAllocator> mm)
+        {
+            return DPrimitive_gco_3_dict_string_gco::_make(mm, "dict_upsert", &xfer_dict_upsert);
         }
 
     } /*namespace scm*/
