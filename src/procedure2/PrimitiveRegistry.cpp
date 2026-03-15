@@ -41,6 +41,7 @@ namespace xo {
                 log && log("do install fn (", i+1, "/", n, ")");
 
                 ok = ok & fn(mm, sink, flags);
+                ++i;
             }
 
             return ok;
