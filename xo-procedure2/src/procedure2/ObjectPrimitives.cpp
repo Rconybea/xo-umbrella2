@@ -6,6 +6,7 @@
 #include "ObjectPrimitives.hpp"
 #include <xo/object2/Dictionary.hpp>
 #include <xo/object2/Sequence.hpp>
+#include <xo/object2/List.hpp>
 #include <xo/object2/Integer.hpp>
 #include <xo/printable2/Printable.hpp>
 #include <xo/stringtable2/String.hpp>
@@ -42,6 +43,28 @@ namespace xo {
         ObjectPrimitives::make_nth_pm(obj<AAllocator> mm)
         {
             return DPrimitive_gco_2_gco_gco::_make(mm, "nth", &xfer_nth);
+        }
+
+        // ----- cons -----
+
+        obj<AGCObject>
+        xfer_cons(obj<ARuntimeContext> rcx,
+                  obj<AGCObject> car,
+                  obj<AGCObject> cdr)
+        {
+            (void)rcx;
+
+            auto cdr_list = obj<AGCObject,DList>::from(cdr);
+
+            return DList::cons(rcx.allocator(),
+                               car,
+                               cdr_list.data());
+        }
+
+        DPrimitive_gco_2_gco_gco *
+        ObjectPrimitives::make_cons_pm(obj<AAllocator> mm)
+        {
+            return DPrimitive_gco_2_gco_gco::_make(mm, "cons", &xfer_cons);
         }
 
         // ----- dict_make -----
