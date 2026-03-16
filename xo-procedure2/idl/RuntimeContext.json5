@@ -5,6 +5,7 @@
     output_impl_subdir: "detail",
     // includes in ARuntimeContext.hpp
     includes: [
+        "<xo/stringtable2/StringTable.hpp>",
         "<xo/alloc2/Allocator.hpp>",
         "<xo/arena/MemorySizeInfo.hpp>"
     ],
@@ -41,6 +42,15 @@
             name: "allocator",
             doc: [ "default allocator to use for objects" ],
             return_type: "obj<AAllocator>",
+            args: [],
+            const: true,
+            noexcept: true,
+            attributes: [],
+        },
+        {
+            name: "stringtable",
+            doc: [ "stringtable for unique symbols" ],
+            return_type: "StringTable *",
             args: [],
             const: true,
             noexcept: true,

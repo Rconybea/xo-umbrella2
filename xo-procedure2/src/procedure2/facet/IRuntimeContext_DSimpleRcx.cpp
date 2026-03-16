@@ -22,6 +22,12 @@ namespace xo {
         }
 
         auto
+        IRuntimeContext_DSimpleRcx::stringtable(const DSimpleRcx & self) noexcept -> StringTable *
+        {
+            return self.stringtable();
+        }
+
+        auto
         IRuntimeContext_DSimpleRcx::visit_pools(const DSimpleRcx & self, MemorySizeVisitor visitor) -> void
         {
             self.visit_pools(visitor);

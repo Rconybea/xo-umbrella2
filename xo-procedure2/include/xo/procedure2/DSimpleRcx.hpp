@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <xo/stringtable2/StringTable.hpp>
 #include <xo/alloc2/Allocator.hpp>
 
 namespace xo {
@@ -21,13 +22,16 @@ namespace xo {
             using MemorySizeVisitor = xo::mm::MemorySizeVisitor;
 
         public:
-            DSimpleRcx(obj<AAllocator> mm) : allocator_{mm} {}
+            DSimpleRcx(obj<AAllocator> mm, StringTable * st)
+                : allocator_{mm}, stringtable_{st} {}
 
             obj<AAllocator> allocator() const noexcept { return allocator_; }
+            StringTable * stringtable() const noexcept { return stringtable_; }
             void visit_pools(const MemorySizeVisitor & visitor) const;
 
         private:
             obj<AAllocator> allocator_;
+            StringTable * stringtable_ = nullptr;
         };
 
     } /*namespace scm*/

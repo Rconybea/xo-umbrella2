@@ -27,6 +27,7 @@ namespace xo {
             using size_type = StringMap::size_type;
 
         public:
+            /** hint_max_capacity in bytes = capacity for strings **/
             StringTable(size_type hint_max_capacity,
                         bool debug_flag = false);
 

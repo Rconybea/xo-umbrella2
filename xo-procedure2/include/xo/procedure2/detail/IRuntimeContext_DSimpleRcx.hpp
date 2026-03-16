@@ -49,6 +49,8 @@ namespace xo {
             // const methods
             /** default allocator to use for objects **/
             static obj<AAllocator> allocator(const DSimpleRcx & self) noexcept;
+            /** stringtable for unique symbols **/
+            static StringTable * stringtable(const DSimpleRcx & self) noexcept;
             /** invoke visitor for each distinct memory pool **/
             static void visit_pools(const DSimpleRcx & self, MemorySizeVisitor visitor);
 

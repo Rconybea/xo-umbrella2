@@ -6,12 +6,14 @@
 #include <xo/procedure2/init_procedure2.hpp>
 #include <xo/procedure2/DSimpleRcx.hpp>
 #include <xo/procedure2/detail/IRuntimeContext_DSimpleRcx.hpp>
+#include <xo/stringtable2/StringTable.hpp>
 #include <xo/alloc2/arena/IAllocator_DArena.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {
     using xo::scm::DSimpleRcx;
     using xo::scm::ARuntimeContext;
+    using xo::scm::StringTable;
     using xo::mm::AAllocator;
     using xo::mm::DArena;
     using xo::mm::ArenaConfig;
@@ -30,12 +32,17 @@ namespace xo {
         {
             ArenaConfig cfg { .name_ = "testarena",
                               .size_ = 4*1024 };
+
             DArena arena = DArena::map(cfg);
             auto alloc = with_facet<AAllocator>::mkobj(&arena);
 
-            DSimpleRcx rcx(alloc);
+            auto stbl = StringTable(1024 /*hint_max_capacity*/,
+                                    false /*!debug_flag*/);
+
+            DSimpleRcx rcx(alloc, &stbl);
 
             REQUIRE((void*)rcx.allocator().data() == (void*)alloc.data());
+            REQUIRE(rcx.stringtable() == &stbl);
         }
 
         TEST_CASE("DSimpleRcx-as-ARuntimeContext", "[procedure2][DSimpleRcx]")
@@ -44,8 +51,10 @@ namespace xo {
                               .size_ = 4*1024 };
             DArena arena = DArena::map(cfg);
             auto alloc = with_facet<AAllocator>::mkobj(&arena);
+            auto stbl = StringTable(1024 /*hint_max_capacity*/,
+                                    false /*!debug_flag*/);
 
-            DSimpleRcx rcx(alloc);
+            DSimpleRcx rcx(alloc, &stbl);
             obj<ARuntimeContext> rcx_obj = with_facet<ARuntimeContext>::mkobj(&rcx);
 
             // verify we can recover allocator from obj<ARuntimeContext>
