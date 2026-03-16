@@ -14,6 +14,7 @@
 #pragma once
 
 // includes (via {facet_includes})
+#include <xo/stringtable2/StringTable.hpp>
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/arena/MemorySizeInfo.hpp>
 #include <xo/facet/obj.hpp>
@@ -54,6 +55,8 @@ public:
     virtual void _drop(Opaque d) const noexcept = 0;
     /** default allocator to use for objects **/
     virtual obj<AAllocator> allocator(Copaque data)  const  noexcept = 0;
+    /** stringtable for unique symbols **/
+    virtual StringTable * stringtable(Copaque data)  const  noexcept = 0;
     /** invoke visitor for each distinct memory pool **/
     virtual void visit_pools(Copaque data, MemorySizeVisitor visitor)  const = 0;
 

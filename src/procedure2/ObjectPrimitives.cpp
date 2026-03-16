@@ -75,6 +75,8 @@ namespace xo {
 
             auto cdr_list = obj<AGCObject,DList>::from(cdr);
 
+            //auto T = DTypeVarRef::_make(rcx.allocator(), "T");
+
             return DList::cons(rcx.allocator(),
                                car,
                                cdr_list.data());

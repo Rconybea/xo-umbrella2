@@ -57,6 +57,9 @@ public:
     obj<AAllocator> allocator()  const  noexcept {
         return O::iface()->allocator(O::data());
     }
+    StringTable * stringtable()  const  noexcept {
+        return O::iface()->stringtable(O::data());
+    }
     void visit_pools(MemorySizeVisitor visitor)  const {
         return O::iface()->visit_pools(O::data(), visitor);
     }

@@ -13,6 +13,7 @@
 
 #pragma once
 
+#include <xo/stringtable2/StringTable.hpp>
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/arena/MemorySizeInfo.hpp>
 
@@ -48,6 +49,9 @@ namespace scm {
         // const methods
         obj<AAllocator> allocator(Copaque data)  const  noexcept override {
             return I::allocator(_dcast(data));
+        }
+        StringTable * stringtable(Copaque data)  const  noexcept override {
+            return I::stringtable(_dcast(data));
         }
         void visit_pools(Copaque data, MemorySizeVisitor visitor)  const override {
             return I::visit_pools(_dcast(data), visitor);

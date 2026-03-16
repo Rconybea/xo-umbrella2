@@ -87,27 +87,36 @@ namespace xo {
             /** @defgroup scm-primitive-ctors constructors **/
             ///@{
 
-            Primitive(std::string_view name, Fn fn)
+            Primitive(std::string_view name, obj<AType> type, Fn fn)
                 : name_{name},
+                  type_{type},
                   fn_td_{Reflect::require<Fn>()},
                   fn_{fn} {}
 
             static Primitive * _make(obj<AAllocator> mm, std::string_view name, Fn fn) {
                 void * mem = mm.alloc_for<Primitive>();
 
-                return new (mem) Primitive(name, fn);
+                return new (mem) Primitive(name, obj<AType>(), fn);
             }
+
+            static Primitive * _make(obj<AAllocator> mm,
+                                     std::string_view name,
+                                     obj<AType> type,
+                                     Fn fn)
+                {
+                    void * mem = mm.alloc_for<Primitive>();
+
+                    return new (mem) Primitive(name, type, fn);
+                }
 
             ///@}
             /** @defgroup scm-primitive-methods general methods **/
             ///@{
 
-            TypeDescr fn_td() const noexcept { return fn_td_; }
-
-            std::string_view name() const noexcept { return name_; }
-
             static constexpr std::int32_t n_args() noexcept { return Traits::n_args; }
 
+            TypeDescr fn_td() const noexcept { return fn_td_; }
+            std::string_view name() const noexcept { return name_; }
             bool is_nary() const noexcept { return false; }
 
             obj<AGCObject> apply_nocheck(obj<ARuntimeContext> rcx, const DArray * args) {
