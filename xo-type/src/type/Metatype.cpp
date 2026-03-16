@@ -31,6 +31,7 @@ namespace xo {
             case code::t_dict:     return "dict";
 
             case code::t_integer:  return "integer";
+            case code::t_booleic:  return "booleic";
             case code::t_numeric:  return "numeric";
             case code::t_callable: return "callable";
             case code::t_any:      return "any";
@@ -75,6 +76,8 @@ namespace xo {
                 return true;
 
             case code::t_integer:
+                return true;
+            case code::t_booleic:
                 return true;
             case code::t_numeric:
                 return true;
