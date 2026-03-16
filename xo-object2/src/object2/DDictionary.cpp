@@ -35,6 +35,21 @@ namespace xo {
             return new (mem) DDictionary(keys, values);
         }
 
+        std::optional<obj<AGCObject>>
+        DDictionary::lookup(const DString * key) const noexcept
+        {
+            for (DArray::size_type i = 0, z = keys_->size(); i < z; ++i) {
+                auto i_key = obj<AGCObject,DString>::from(keys_->at(i));
+
+                assert(i_key);
+
+                if (DString::compare(*key, *i_key.data()) == 0)
+                    return values_->at(i);
+            }
+
+            return {};
+        }
+
         std::pair<const DString *, obj<AGCObject>>
         DDictionary::at_index(size_type ix) const
         {

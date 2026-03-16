@@ -8,6 +8,7 @@
 #include "Primitive_gco_0.hpp"
 #include "Primitive_gco_1_gco.hpp"
 #include "Primitive_gco_2_gco_gco.hpp"
+#include "Primitive_gco_2_dict_string.hpp"
 #include "Primitive_gco_3_dict_string_gco.hpp"
 
 namespace xo {
@@ -33,6 +34,9 @@ namespace xo {
 
             /** create primitive for creating a dictionary instance **/
             static DPrimitive_gco_0 * make_dict_make_pm(obj<AAllocator> mm);
+
+            /** create primitive for creating a dictionary instance **/
+            static DPrimitive_gco_2_dict_string * make_dict_lookup_pm(obj<AAllocator> mm);
 
             /** create primitive that upserts a key,value pair into a dictionary **/
             static DPrimitive_gco_3_dict_string_gco * make_dict_upsert_pm(obj<AAllocator> mm);

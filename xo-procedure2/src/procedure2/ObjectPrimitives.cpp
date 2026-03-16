@@ -4,6 +4,7 @@
  **/
 
 #include "ObjectPrimitives.hpp"
+#include <xo/object2/RuntimeError.hpp>
 #include <xo/object2/Dictionary.hpp>
 #include <xo/object2/Sequence.hpp>
 #include <xo/object2/List.hpp>
@@ -98,6 +99,35 @@ namespace xo {
         ObjectPrimitives::make_dict_make_pm(obj<AAllocator> mm)
         {
             return DPrimitive_gco_0::_make(mm, "dict_make", &xfer_dict_make);
+        }
+
+        // ----- dict_at -----
+
+        obj<AGCObject>
+        xfer_dict_lookup(obj<ARuntimeContext> rcx,
+                         obj<AGCObject,DDictionary> dict,
+                         obj<AGCObject,DString> key)
+        {
+            auto opt = dict->lookup(key.data());
+
+            if (opt) {
+                return opt.value();
+            } else {
+                DString * src_fn = DString::from_cstr(rcx.allocator(), "dict_lookup");
+                DString * error = DString::printf(rcx.allocator(),
+                                                  100,
+                                                  "no value in dict for key [%s]", key.data()->data());
+
+                return obj<AGCObject,DRuntimeError>
+                    (DRuntimeError::_make(rcx.allocator(),
+                                          src_fn, error));
+            }
+        }
+
+        DPrimitive_gco_2_dict_string *
+        ObjectPrimitives::make_dict_lookup_pm(obj<AAllocator> mm)
+        {
+            return DPrimitive_gco_2_dict_string::_make(mm, "dict_lookup", &xfer_dict_lookup);
         }
 
         // ----- dict_upsert -----
