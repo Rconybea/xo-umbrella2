@@ -3,8 +3,7 @@
 set(SELF_LIB xo_object2)
 set(SELF_SRCS
     init_object2.cpp
-    object2_register_types.cpp
-    object2_register_facets.cpp
+    SetupObject2.cpp
 
     GCObjectConversion_DFloat.cpp
     GCObjectConversion_DInteger.cpp
