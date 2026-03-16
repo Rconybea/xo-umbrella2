@@ -11,8 +11,9 @@
 namespace xo {
     namespace scm {
         /** Register primitive-factories **/
-        bool procedure2_register_primitives(obj<xo::mm::AAllocator> gc,
-                                            StringTable * stbl,
+        bool procedure2_register_primitives(obj<ARuntimeContext> rcx,
+                                            //obj<xo::mm::AAllocator> gc,
+                                            //StringTable * stbl,
                                             InstallSink sink,
                                             InstallFlags flags);
     }

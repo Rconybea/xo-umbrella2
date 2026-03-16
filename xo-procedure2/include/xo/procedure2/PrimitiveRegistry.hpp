@@ -60,8 +60,9 @@ namespace xo {
              *  Allocates primitives using memory from mm, delivering them
              *  to InstallSink sink.
              **/
-            using InstallSource = std::function<bool (obj<AAllocator> mm,
-                                                      StringTable * stbl,
+            using InstallSource = std::function<bool (obj<ARuntimeContext> rcx,
+                                                      //obj<AAllocator> mm,
+                                                      //StringTable * stbl,
                                                       InstallSink sink,
                                                       InstallFlags flags)>;
 
@@ -76,8 +77,9 @@ namespace xo {
              *  with global strings in @p stbl.
              *  delivering each primitive to @p sink.
              **/
-            bool install_primitives(obj<AAllocator> mm,
-                                    StringTable * stbl,
+            bool install_primitives(obj<ARuntimeContext> rcx,
+                                    //obj<AAllocator> mm,
+                                    //StringTable * stbl,
                                     InstallSink sink,
                                     InstallFlags flags);
 
