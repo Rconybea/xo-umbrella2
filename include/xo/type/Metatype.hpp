@@ -48,6 +48,9 @@ namespace xo {
                 /** any numeric type: i16|i32|i64|f32|f64 **/
                 t_numeric,
 
+                /** generalized boolean type: bool, function with bool codomain **/
+                t_booleic,
+
                 /** any callable type (e.g. all function types) **/
                 t_callable,
 
@@ -78,6 +81,7 @@ namespace xo {
             static Metatype t_dict()     { return Metatype(code::t_dict);     }
             static Metatype t_integer()  { return Metatype(code::t_integer);  }
             static Metatype t_numeric()  { return Metatype(code::t_numeric);  }
+            static Metatype t_booleic()  { return Metatype(code::t_booleic);  }
             static Metatype t_callable() { return Metatype(code::t_callable); }
             static Metatype t_any()      { return Metatype(code::t_any);      }
 
