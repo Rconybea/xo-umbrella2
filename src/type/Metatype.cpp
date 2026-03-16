@@ -32,6 +32,7 @@ namespace xo {
 
             case code::t_integer:  return "integer";
             case code::t_numeric:  return "numeric";
+            case code::t_callable: return "callable";
             case code::t_any:      return "any";
             }
         }
@@ -76,6 +77,8 @@ namespace xo {
             case code::t_integer:
                 return true;
             case code::t_numeric:
+                return true;
+            case code::t_callable:
                 return true;
             case code::t_any:
                 return true;
