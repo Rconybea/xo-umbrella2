@@ -61,6 +61,7 @@ namespace xo {
              *  to InstallSink sink.
              **/
             using InstallSource = std::function<bool (obj<AAllocator> mm,
+                                                      StringTable * stbl,
                                                       InstallSink sink,
                                                       InstallFlags flags)>;
 
@@ -72,9 +73,11 @@ namespace xo {
             void register_primitives(InstallSource source_fn);
 
             /** create primitives using memory from @p mm,
+             *  with global strings in @p stbl.
              *  delivering each primitive to @p sink.
              **/
             bool install_primitives(obj<AAllocator> mm,
+                                    StringTable * stbl,
                                     InstallSink sink,
                                     InstallFlags flags);
 

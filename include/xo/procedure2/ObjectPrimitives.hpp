@@ -24,16 +24,20 @@ namespace xo {
 
         public:
             /** create primitive: report current working directory **/
-            static DPrimitive_gco_0 * make_cwd_pm(obj<AAllocator> mm);
+            static DPrimitive_gco_0 * make_cwd_pm(obj<AAllocator> mm,
+                                                  StringTable * stbl);
 
             /** create primitive: fetch nth element of a sequence **/
-            static DPrimitive_gco_2_gco_gco * make_nth_pm(obj<AAllocator> mm);
+            static DPrimitive_gco_2_gco_gco * make_nth_pm(obj<AAllocator> mm,
+                                                          StringTable * stbl);
 
             /** create primitive: create cons cell **/
-            static DPrimitive_gco_2_gco_gco * make_cons_pm(obj<AAllocator> mm);
+            static DPrimitive_gco_2_gco_gco * make_cons_pm(obj<AAllocator> mm,
+                                                           StringTable * stbl);
 
             /** create primitive for creating a dictionary instance **/
-            static DPrimitive_gco_0 * make_dict_make_pm(obj<AAllocator> mm);
+            static DPrimitive_gco_0 * make_dict_make_pm(obj<AAllocator> mm,
+                                                        StringTable * stbl);
 
             /** create primitive for creating a dictionary instance **/
             static DPrimitive_gco_2_dict_string * make_dict_lookup_pm(obj<AAllocator> mm);
