@@ -9,6 +9,10 @@
 #include <xo/object2/Sequence.hpp>
 #include <xo/object2/List.hpp>
 #include <xo/object2/Integer.hpp>
+#include <xo/type/FunctionType.hpp>
+#include <xo/type/ListType.hpp>
+#include <xo/type/TypeVarRef.hpp>
+#include <xo/type/AtomicType.hpp>
 #include <xo/printable2/Printable.hpp>
 #include <xo/stringtable2/String.hpp>
 #include <unistd.h> // for getcwd()
@@ -35,9 +39,15 @@ namespace xo {
         }
 
         DPrimitive_gco_0 *
-        ObjectPrimitives::make_cwd_pm(obj<AAllocator> mm)
+        ObjectPrimitives::make_cwd_pm(obj<AAllocator> mm, StringTable * stbl)
         {
-            return DPrimitive_gco_0::_make(mm, "cwd", &xfer_cwd);
+            (void)stbl;
+
+            auto str_ty = DAtomicType::make(mm, Metatype::t_str());
+            auto cwd_ty
+                = obj<AType,DFunctionType>(DFunctionType::_make(mm, str_ty));
+
+            return DPrimitive_gco_0::_make(mm, "cwd", cwd_ty, &xfer_cwd);
         }
 
         // ----- nth -----
@@ -59,9 +69,20 @@ namespace xo {
         }
 
         DPrimitive_gco_2_gco_gco *
-        ObjectPrimitives::make_nth_pm(obj<AAllocator> mm)
+        ObjectPrimitives::make_nth_pm(obj<AAllocator> mm, StringTable * stbl)
         {
-            return DPrimitive_gco_2_gco_gco::_make(mm, "nth", &xfer_nth);
+            auto T_ty = DTypeVarRef::make(mm, stbl->intern("T"));
+            auto list_T_ty = DListType::make(mm, T_ty);
+            auto int_ty = DAtomicType::make(mm, Metatype::t_integer());
+            /** nth_ty: list<T> x int -> T **/
+            auto nth_ty
+                = obj<AType,DFunctionType>
+                (DFunctionType::_make(mm,
+                                      T_ty,
+                                      list_T_ty,
+                                      int_ty));
+
+            return DPrimitive_gco_2_gco_gco::_make(mm, "nth", nth_ty, &xfer_nth);
         }
 
         // ----- cons -----
@@ -75,17 +96,24 @@ namespace xo {
 
             auto cdr_list = obj<AGCObject,DList>::from(cdr);
 
-            //auto T = DTypeVarRef::_make(rcx.allocator(), "T");
-
             return DList::cons(rcx.allocator(),
                                car,
                                cdr_list.data());
         }
 
         DPrimitive_gco_2_gco_gco *
-        ObjectPrimitives::make_cons_pm(obj<AAllocator> mm)
+        ObjectPrimitives::make_cons_pm(obj<AAllocator> mm, StringTable * stbl)
         {
-            return DPrimitive_gco_2_gco_gco::_make(mm, "cons", &xfer_cons);
+            auto T_ty = DTypeVarRef::make(mm, stbl->intern("T"));
+            auto list_T_ty = DListType::make(mm, T_ty);
+            /** cons_ty: T x list<T> -> list<T> **/
+            auto cons_ty
+                = obj<AType,DFunctionType>(DFunctionType::_make(mm,
+                                                                list_T_ty,
+                                                                T_ty,
+                                                                list_T_ty));
+
+            return DPrimitive_gco_2_gco_gco::_make(mm, "cons", cons_ty, &xfer_cons);
         }
 
         // ----- dict_make -----
@@ -98,9 +126,17 @@ namespace xo {
         }
 
         DPrimitive_gco_0 *
-        ObjectPrimitives::make_dict_make_pm(obj<AAllocator> mm)
+        ObjectPrimitives::make_dict_make_pm(obj<AAllocator> mm,
+                                            StringTable * stbl)
         {
-            return DPrimitive_gco_0::_make(mm, "dict_make", &xfer_dict_make);
+            (void)stbl;
+
+            // nit: technically better to use empty struct type here
+            auto dict_ty = DAtomicType::make(mm, Metatype::t_dict());
+            auto pm_ty = obj<AType,DFunctionType>(DFunctionType::_make(mm,
+                                                                       dict_ty));
+
+            return DPrimitive_gco_0::_make(mm, "dict_make", pm_ty, &xfer_dict_make);
         }
 
         // ----- dict_at -----

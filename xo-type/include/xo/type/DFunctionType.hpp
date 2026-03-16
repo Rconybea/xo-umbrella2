@@ -32,16 +32,26 @@ namespace xo {
              *  for a function with return type @p ret_type and arguments @p args
              **/
             template <typename... Args>
-                requires (std::same_as<Args, obj<AType>> && ...)
+                requires (std::convertible_to<Args, obj<AType>> && ...)
             explicit DFunctionType(obj<AAllocator> mm, obj<AType> ret_type, Args... args);
 
             /** create instance using memory from @p mm,
              *  for a function with return type @p ret_type and arguments @p args
              **/
             template <typename... Args>
-                requires (std::same_as<Args, obj<AType>> && ...)
+                requires (std::convertible_to<Args, obj<AType>> && ...)
             static DFunctionType * _make(obj<AAllocator> mm,
                                          obj<AType> ret_type, Args... args);
+
+#ifdef NOT_USING
+            /** create instance using memory from @p mm
+             *  for function with return type @p ret_type and arguments @p args
+             **/
+            template <typename... Args>
+            requires (std::same_as<Args, obj<AType>> && ...)
+            static obj<AType,DFunctionType> make(obj<AAllocator> mm,
+                                                 obj<AType> ret_type, Args... args);
+#endif
 
             ///@}
             /** @defgroup xo-scm-arraytype-type-facet **/
@@ -72,14 +82,14 @@ namespace xo {
         };
 
         template <typename... Args>
-            requires (std::same_as<Args, obj<AType>> && ...)
+            requires (std::convertible_to<Args, obj<AType>> && ...)
         DFunctionType::DFunctionType(obj<AAllocator> mm, obj<AType> return_type, Args... args)
             : return_type_{return_type},
-              arg_types_{DArray::array(mm, args...)}
+              arg_types_{DArray::array(mm, args.template to_facet<AGCObject>()...)}
         {}
 
         template <typename... Args>
-            requires (std::same_as<Args, obj<AType>> && ...)
+            requires (std::convertible_to<Args, obj<AType>> && ...)
         DFunctionType *
         DFunctionType::_make(obj<AAllocator> mm, obj<AType> ret_type, Args... args)
         {
@@ -87,6 +97,18 @@ namespace xo {
 
             return new (mem) DFunctionType(mm, ret_type, args...);
         }
+
+#ifdef NOT_USING
+        template <typename... Args>
+            requires (std::same_as<Args, obj<AType>> && ...)
+        obj<AType,DFunctionType>
+        DFunctionType::make(obj<AAllocator> mm, obj<AType> ret_type, Args... args)
+        {
+            void * mem = mm.alloc_for<DFunctionType>();
+
+            return obj<AType,DFunctionType>(_make(mm, ret_type, args...));
+        }
+#endif
 
     } /*namespace scm*/
 } /*namespace xo*/

@@ -26,6 +26,7 @@ namespace xo {
 
         bool
         PrimitiveRegistry::install_primitives(obj<AAllocator> mm,
+                                              StringTable * stbl,
                                               InstallSink sink,
                                               InstallFlags flags)
         {
@@ -40,7 +41,7 @@ namespace xo {
             for (const auto & fn : init_seq_v_) {
                 log && log("do install fn (", i+1, "/", n, ")");
 
-                ok = ok & fn(mm, sink, flags);
+                ok = ok & fn(mm, stbl, sink, flags);
                 ++i;
             }
 
