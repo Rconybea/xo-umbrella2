@@ -110,12 +110,16 @@ namespace xo {
             /** current dictionary size (number of key-value pairs) **/
             size_type size() const noexcept { return keys_->size(); }
 
+            /** return value associated with @p key, if key is present **/
+            std::optional<obj<AGCObject>> lookup(const DString * key) const noexcept;
+
             /** return element @p key-value pair at position @p index (0-based) **/
             std::pair<const DString *, obj<AGCObject>> at_index(size_type index) const;
             /** return @p i'th key. O(1) **/
             const DString * key_at_index(size_type i) const;
             /** return @p i'th value. O(1)  **/
             obj<AGCObject> value_at_index(size_type i) const;
+
 
             auto operator[](const DString * key) const noexcept { return LValue<decltype(this)>(this, key); }
             auto operator[](const DString * key) noexcept { return LValue<decltype(this)>(this, key); }
