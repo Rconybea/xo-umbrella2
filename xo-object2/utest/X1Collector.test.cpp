@@ -9,7 +9,6 @@
 #include "DInteger.hpp"
 #include "DList.hpp"
 #include "DArray.hpp"
-#include "object2_register_types.hpp"
 
 #include "number/IGCObject_DFloat.hpp"
 #include "number/IGCObject_DInteger.hpp"
@@ -34,7 +33,6 @@
 
 namespace ut {
     using xo::S_object2_tag;
-    using xo::scm::object2_register_types;
     using xo::scm::ListOps;
     using xo::scm::DList;
     using xo::scm::DArray;

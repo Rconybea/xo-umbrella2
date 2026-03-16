@@ -5,16 +5,13 @@
 
 #include "ListOps.hpp"
 #include "DList.hpp"
-#include "object2_register_types.hpp"
-#include "object2_register_facets.hpp"
+#include "SetupObject2.hpp"
 
 #include <xo/object2/DList.hpp>
 #include <xo/object2/list/IGCObject_DList.hpp>
 #include <xo/object2/list/IPrintable_DList.hpp>
 
 #include <xo/stringtable2/String.hpp>
-//#include <xo/object2/string/IGCObject_DString.hpp>
-//#include <xo/object2/string/IPrintable_DString.hpp>
 
 #include <xo/object2/DInteger.hpp>
 #include <xo/object2/number/IGCObject_DInteger.hpp>
@@ -35,8 +32,7 @@
 #include <catch2/catch.hpp>
 
 namespace ut {
-    using xo::scm::object2_register_types;
-    using xo::scm::object2_register_facets;
+    using xo::scm::SetupObject2;
     using xo::scm::ListOps;
     using xo::scm::DList;
     using xo::scm::DInteger;
@@ -89,7 +85,7 @@ namespace ut {
         constexpr bool c_debug_flag = true;
         scope log(XO_DEBUG(c_debug_flag));
 
-        bool ok = object2_register_facets();
+        bool ok = SetupObject2::register_facets();
         REQUIRE(ok);
 
         FacetRegistry::instance().dump(&std::cerr);
@@ -114,7 +110,7 @@ namespace ut {
                 auto gc_o = with_facet<AAllocator>::mkobj(&gc);
                 auto  c_o = with_facet<ACollector>::mkobj(&gc);
 
-                bool ok = object2_register_types(c_o);
+                bool ok = SetupObject2::register_types(c_o);
                 REQUIRE(ok);
 
                 auto l0_o = ListOps::nil();

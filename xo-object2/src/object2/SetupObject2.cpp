@@ -1,9 +1,9 @@
-/** @file object2_register_facets.cpp
+/** @file SetupObject2.cpp
  *
  *  @author Roland Conybeare, Jan 2026
  **/
 
-#include "object2_register_facets.hpp"
+#include "SetupObject2.hpp"
 #include "RuntimeError.hpp"
 
 #include <xo/object2/Dictionary.hpp>
@@ -21,6 +21,7 @@
 
 namespace xo {
     using xo::print::APrintable;
+    using xo::mm::ACollector;
     using xo::mm::AAllocator;
     using xo::mm::AGCObject;
     using xo::scm::DList;
@@ -30,11 +31,12 @@ namespace xo {
     using xo::scm::DArray;
     using xo::facet::DVariantPlaceholder;
     using xo::facet::FacetRegistry;
+    using xo::facet::impl_for;
     using xo::facet::typeseq;
 
     namespace scm {
         bool
-        object2_register_facets()
+        SetupObject2::register_facets()
         {
             scope log(XO_DEBUG(true));
 
@@ -81,7 +83,24 @@ namespace xo {
 
             return true;
         }
+
+        bool
+        SetupObject2::register_types(obj<ACollector> gc)
+        {
+            scope log(XO_DEBUG(true));
+
+            bool ok = true;
+
+            ok &= gc.install_type(impl_for<AGCObject, DBoolean>());
+            ok &= gc.install_type(impl_for<AGCObject, DFloat>());
+            ok &= gc.install_type(impl_for<AGCObject, DInteger>());
+            ok &= gc.install_type(impl_for<AGCObject, DList>());
+            ok &= gc.install_type(impl_for<AGCObject, DArray>());
+            ok &= gc.install_type(impl_for<AGCObject, DDictionary>());
+
+            return ok;
+        }
     } /*namespace scm*/
 } /*namespace xo*/
 
-/* end object2_register_facets.cpp */
+/* end SetupObject2.cpp */
