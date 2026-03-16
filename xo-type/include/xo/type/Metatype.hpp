@@ -48,6 +48,9 @@ namespace xo {
                 /** any numeric type: i16|i32|i64|f32|f64 **/
                 t_numeric,
 
+                /** any callable type (e.g. all function types) **/
+                t_callable,
+
                 /* any type at all */
                 t_any,
             };
@@ -71,10 +74,11 @@ namespace xo {
             static Metatype t_array()    { return Metatype(code::t_array);    }
             static Metatype t_function() { return Metatype(code::t_function); }
             static Metatype t_struct()   { return Metatype(code::t_struct);   }
-            static Metatype t_dict()     { return Metatype(code::t_dict);     }
 
+            static Metatype t_dict()     { return Metatype(code::t_dict);     }
             static Metatype t_integer()  { return Metatype(code::t_integer);  }
             static Metatype t_numeric()  { return Metatype(code::t_numeric);  }
+            static Metatype t_callable() { return Metatype(code::t_callable); }
             static Metatype t_any()      { return Metatype(code::t_any);      }
 
             /** description string for this type category **/
