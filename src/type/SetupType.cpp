@@ -1,9 +1,9 @@
-/** @file type_register_facets.cpp
+/** @file SetupType.cpp
  *
  * @author Roland Conybeare, Feb 2026
  **/
 
-#include "type_register_facets.hpp"
+#include "SetupType.hpp"
 #include "AtomicType.hpp"
 #include "ListType.hpp"
 #include "ArrayType.hpp"
@@ -16,12 +16,13 @@
 namespace xo {
     using xo::mm::AGCObject;
     using xo::facet::FacetRegistry;
+    using xo::facet::impl_for;
     using xo::reflect::typeseq;
 
     namespace scm {
 
         bool
-        type_register_facets()
+        SetupType::register_facets()
         {
             scope log(XO_DEBUG(true));
 
@@ -49,7 +50,22 @@ namespace xo {
             return true;
         }
 
+        bool
+        SetupType::register_types(obj<ACollector> gc)
+        {
+            scope log(XO_DEBUG(true));
+
+            bool ok = true;
+
+            ok &= gc.install_type(impl_for<AGCObject, DAtomicType>());
+            ok &= gc.install_type(impl_for<AGCObject, DListType>());
+            ok &= gc.install_type(impl_for<AGCObject, DArrayType>());
+            ok &= gc.install_type(impl_for<AGCObject, DFunctionType>());
+            ok &= gc.install_type(impl_for<AGCObject, DTypeVarRef>());
+
+            return ok;
+        }
     } /*namespace scm*/
 } /*namespace xo*/
 
-/* end type_register_facets.cpp */
+/* end SetupType.cpp */

@@ -3,8 +3,7 @@
 set(SELF_LIB xo_type)
 set(SELF_SRCS
     init_type.cpp
-    type_register_facets.cpp
-    type_register_types.cpp
+    SetupType.cpp
     TypeOps.cpp
     Metatype.cpp
     DAtomicType.cpp

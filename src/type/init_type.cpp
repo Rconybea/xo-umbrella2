@@ -4,22 +4,20 @@
  **/
 
 #include "init_type.hpp"
-#include "type_register_facets.hpp"
-#include "type_register_types.hpp"
+#include "SetupType.hpp"
 #include <xo/alloc2/CollectorTypeRegistry.hpp>
 #include <xo/alloc2/init_alloc2.hpp>
 
 namespace xo {
-    using xo::scm::type_register_facets;
-    using xo::scm::type_register_types;
+    using xo::scm::SetupType;
     using xo::mm::CollectorTypeRegistry;
 
     void
     InitSubsys<S_type_tag>::init()
         {
-            type_register_facets();
+            SetupType::register_facets();
 
-            CollectorTypeRegistry::instance().register_types(&type_register_types);
+            CollectorTypeRegistry::instance().register_types(&SetupType::register_types);
         }
 
     InitEvidence
