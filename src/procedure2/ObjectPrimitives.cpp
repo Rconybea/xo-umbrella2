@@ -163,9 +163,21 @@ namespace xo {
         }
 
         DPrimitive_gco_2_dict_string *
-        ObjectPrimitives::make_dict_lookup_pm(obj<AAllocator> mm)
+        ObjectPrimitives::make_dict_lookup_pm(obj<AAllocator> mm,
+                                              StringTable * stbl)
         {
-            return DPrimitive_gco_2_dict_string::_make(mm, "dict_lookup", &xfer_dict_lookup);
+            (void)stbl;
+
+            // dict_ty: generic dictionary
+            auto dict_ty = DAtomicType::make(mm, Metatype::t_dict());
+            auto str_ty = DAtomicType::make(mm, Metatype::t_str());
+            auto any_ty = DAtomicType::make(mm, Metatype::t_any());
+            // pm_ty: dict x string -> any
+            auto pm_ty = obj<AType,DFunctionType>
+                (DFunctionType::_make(mm, any_ty, dict_ty, str_ty));
+
+            return DPrimitive_gco_2_dict_string::_make
+                (mm, "dict_lookup", pm_ty, &xfer_dict_lookup);
         }
 
         // ----- dict_upsert -----
@@ -196,9 +208,23 @@ namespace xo {
         }
 
         DPrimitive_gco_3_dict_string_gco *
-        ObjectPrimitives::make_dict_upsert_pm(obj<AAllocator> mm)
+        ObjectPrimitives::make_dict_upsert_pm(obj<AAllocator> mm,
+                                              StringTable * stbl)
         {
-            return DPrimitive_gco_3_dict_string_gco::_make(mm, "dict_upsert", &xfer_dict_upsert);
+            (void)stbl;
+
+            auto dict_ty = DAtomicType::make(mm, Metatype::t_dict());
+            auto str_ty = DAtomicType::make(mm, Metatype::t_str());
+            auto any_ty = DAtomicType::make(mm, Metatype::t_any());
+            // pm_ty: dict x string x any -> dict
+            auto pm_ty = obj<AType,DFunctionType>(DFunctionType::_make(mm,
+                                                                       dict_ty,
+                                                                       dict_ty,
+                                                                       str_ty,
+                                                                       any_ty));
+
+            return DPrimitive_gco_3_dict_string_gco::_make
+                (mm, "dict_upsert", pm_ty, &xfer_dict_upsert);
         }
 
         // ----- fn_n_args -----
@@ -220,9 +246,18 @@ namespace xo {
         }
 
         DPrimitive_gco_1_gco *
-        ObjectPrimitives::make_fn_n_args_pm(obj<AAllocator> mm)
+        ObjectPrimitives::make_fn_n_args_pm(obj<AAllocator> mm,
+                                            StringTable * stbl)
         {
-            return DPrimitive_gco_1_gco::_make(mm, "fn_n_args", &xfer_fn_n_args);
+            (void)stbl;
+
+            auto integer_ty = DAtomicType::make(mm, Metatype::t_integer());
+            auto callable_ty = DAtomicType::make(mm, Metatype::t_callable());
+            auto pm_ty = obj<AType,DFunctionType>(DFunctionType::_make(mm,
+                                                                       integer_ty,
+                                                                       callable_ty));
+
+            return DPrimitive_gco_1_gco::_make(mm, "fn_n_args", pm_ty, &xfer_fn_n_args);
         }
 
     } /*namespace scm*/

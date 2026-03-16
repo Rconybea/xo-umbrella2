@@ -62,13 +62,13 @@ namespace xo {
 
             bool ok = true;
 
-            ok = ok & install_aux(sink, ObjectPrimitives::make_cwd_pm(mm, stbl), flags);
-            ok = ok & install_aux(sink, ObjectPrimitives::make_nth_pm(mm, stbl), flags);
-            ok = ok & install_aux(sink, ObjectPrimitives::make_cons_pm(mm, stbl), flags);
-            ok = ok & install_aux(sink, ObjectPrimitives::make_dict_make_pm(mm, stbl), flags);
-            ok = ok & install_aux(sink, ObjectPrimitives::make_dict_lookup_pm(mm), flags);
-            ok = ok & install_aux(sink, ObjectPrimitives::make_dict_upsert_pm(mm), flags);
-            ok = ok & install_aux(sink, ObjectPrimitives::make_fn_n_args_pm(mm), flags);
+            ok = ok & install_aux(sink, ObjectPrimitives::make_cwd_pm         (mm, stbl), flags);
+            ok = ok & install_aux(sink, ObjectPrimitives::make_nth_pm         (mm, stbl), flags);
+            ok = ok & install_aux(sink, ObjectPrimitives::make_cons_pm        (mm, stbl), flags);
+            ok = ok & install_aux(sink, ObjectPrimitives::make_dict_make_pm   (mm, stbl), flags);
+            ok = ok & install_aux(sink, ObjectPrimitives::make_dict_lookup_pm (mm, stbl), flags);
+            ok = ok & install_aux(sink, ObjectPrimitives::make_dict_upsert_pm (mm, stbl), flags);
+            ok = ok & install_aux(sink, ObjectPrimitives::make_fn_n_args_pm   (mm, stbl), flags);
 
             return ok;
         }
