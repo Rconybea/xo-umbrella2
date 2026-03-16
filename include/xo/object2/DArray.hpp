@@ -72,7 +72,7 @@ namespace xo {
              *    Darray * v = DArray::array(mm, e1, e2, e3);
              **/
             template <typename... Args>
-                requires (std::same_as<Args, obj<AGCObject>> && ...)
+                requires (std::convertible_to<Args, obj<AGCObject>> && ...)
             static DArray * array(obj<AAllocator> mm, Args... args);
 
             ///@}
@@ -170,7 +170,7 @@ namespace xo {
         };
 
         template <typename... Args>
-            requires (std::same_as<Args, obj<DArray::AGCObject>> && ...)
+            requires (std::convertible_to<Args, obj<DArray::AGCObject>> && ...)
         DArray *
         DArray::array(obj<AAllocator> mm, Args... args)
         {
