@@ -8,6 +8,7 @@
 #include "Primitive_gco_0.hpp"
 #include "Primitive_gco_1_gco.hpp"
 #include "Primitive_gco_2_gco_gco.hpp"
+#include "Primitive_gco_2_dict_string.hpp"
 #include "Primitive_gco_3_dict_string_gco.hpp"
 
 #include <xo/alloc2/GCObject.hpp>
@@ -40,6 +41,10 @@ namespace xo {
             FacetRegistry::register_impl<AGCObject, DPrimitive_gco_2_gco_gco>();
             FacetRegistry::register_impl<APrintable, DPrimitive_gco_2_gco_gco>();
 
+            FacetRegistry::register_impl<AProcedure, DPrimitive_gco_2_dict_string>();
+            FacetRegistry::register_impl<AGCObject, DPrimitive_gco_2_dict_string>();
+            FacetRegistry::register_impl<APrintable, DPrimitive_gco_2_dict_string>();
+
             FacetRegistry::register_impl<AProcedure, DPrimitive_gco_3_dict_string_gco>();
             FacetRegistry::register_impl<AGCObject, DPrimitive_gco_3_dict_string_gco>();
             FacetRegistry::register_impl<APrintable, DPrimitive_gco_3_dict_string_gco>();
@@ -48,6 +53,7 @@ namespace xo {
             log && log(xtag("DPrimitive_gco_0.tseq", typeseq::id<DPrimitive_gco_0>()));
             log && log(xtag("DPrimitive_gco_1_gco.tseq", typeseq::id<DPrimitive_gco_1_gco>()));
             log && log(xtag("DPrimitive_gco_2_gco_gco.tseq", typeseq::id<DPrimitive_gco_2_gco_gco>()));
+            log && log(xtag("DPrimitive_gco_2_dict_string.tseq", typeseq::id<DPrimitive_gco_2_dict_string>()));
             log && log(xtag("DPrimitive_gco_3_dict_string_gco.tseq", typeseq::id<DPrimitive_gco_3_dict_string_gco>()));
 
             log && log(xtag("ARuntimeContext.tseq", typeseq::id<ARuntimeContext>()));

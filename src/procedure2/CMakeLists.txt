@@ -23,6 +23,9 @@ set(SELF_SRCS
     facet/IGCObject_DPrimitive_gco_2_gco_gco.cpp
     facet/IProcedure_DPrimitive_gco_2_gco_gco.cpp
     facet/IPrintable_DPrimitive_gco_2_gco_gco.cpp
+    facet/IGCObject_DPrimitive_gco_2_dict_string.cpp
+    facet/IProcedure_DPrimitive_gco_2_dict_string.cpp
+    facet/IPrintable_DPrimitive_gco_2_dict_string.cpp
     facet/IGCObject_DPrimitive_gco_3_dict_string_gco.cpp
     facet/IProcedure_DPrimitive_gco_3_dict_string_gco.cpp
     facet/IPrintable_DPrimitive_gco_3_dict_string_gco.cpp
