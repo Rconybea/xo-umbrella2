@@ -4,9 +4,7 @@ set(SELF_LIB xo_procedure2)
 set(SELF_SRCS
     init_procedure2.cpp
     init_primitives.cpp
-    procedure2_register_primitives.cpp
-    procedure2_register_types.cpp
-    procedure2_register_facets.cpp
+    SetupProcedure2.cpp
     ObjectPrimitives.cpp
     PrimitiveRegistry.cpp
     DPrimitive.cpp

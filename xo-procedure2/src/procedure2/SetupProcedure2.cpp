@@ -1,0 +1,151 @@
+/** @file SetupProcedure2.cpp
+ *
+ *  @author Roland Conybeare, Jan 2026
+ **/
+
+#include "SetupProcedure2.hpp"
+#include "Procedure.hpp"
+#include "ObjectPrimitives.hpp"
+#include "SimpleRcx.hpp"
+#include "Primitive_gco_0.hpp"
+#include "Primitive_gco_1_gco.hpp"
+#include "Primitive_gco_2_gco_gco.hpp"
+#include "Primitive_gco_2_dict_string.hpp"
+#include "Primitive_gco_3_dict_string_gco.hpp"
+
+#include <xo/alloc2/GCObject.hpp>
+#include <xo/printable2/Printable.hpp>
+#include <xo/facet/FacetRegistry.hpp>
+#include <xo/indentlog/scope.hpp>
+
+namespace xo {
+    using xo::mm::AAllocator;
+    using xo::facet::FacetRegistry;
+    using xo::facet::impl_for;
+    using xo::facet::typeseq;
+    using xo::print::APrintable;
+
+    namespace scm {
+        bool
+        SetupProcedure2::register_facets()
+        {
+            scope log(XO_DEBUG(true));
+
+            FacetRegistry::register_impl<ARuntimeContext, DSimpleRcx>();
+
+            FacetRegistry::register_impl<AProcedure, DPrimitive_gco_0>();
+            FacetRegistry::register_impl<AGCObject, DPrimitive_gco_0>();
+            FacetRegistry::register_impl<APrintable, DPrimitive_gco_0>();
+
+            FacetRegistry::register_impl<AProcedure, DPrimitive_gco_1_gco>();
+            FacetRegistry::register_impl<AGCObject, DPrimitive_gco_1_gco>();
+            FacetRegistry::register_impl<APrintable, DPrimitive_gco_1_gco>();
+
+            FacetRegistry::register_impl<AProcedure, DPrimitive_gco_2_gco_gco>();
+            FacetRegistry::register_impl<AGCObject, DPrimitive_gco_2_gco_gco>();
+            FacetRegistry::register_impl<APrintable, DPrimitive_gco_2_gco_gco>();
+
+            FacetRegistry::register_impl<AProcedure, DPrimitive_gco_2_dict_string>();
+            FacetRegistry::register_impl<AGCObject, DPrimitive_gco_2_dict_string>();
+            FacetRegistry::register_impl<APrintable, DPrimitive_gco_2_dict_string>();
+
+            FacetRegistry::register_impl<AProcedure, DPrimitive_gco_3_dict_string_gco>();
+            FacetRegistry::register_impl<AGCObject, DPrimitive_gco_3_dict_string_gco>();
+            FacetRegistry::register_impl<APrintable, DPrimitive_gco_3_dict_string_gco>();
+
+            log && log(xtag("DSimpleRcx.tseq", typeseq::id<DSimpleRcx>()));
+            log && log(xtag("DPrimitive_gco_0.tseq", typeseq::id<DPrimitive_gco_0>()));
+            log && log(xtag("DPrimitive_gco_1_gco.tseq", typeseq::id<DPrimitive_gco_1_gco>()));
+            log && log(xtag("DPrimitive_gco_2_gco_gco.tseq", typeseq::id<DPrimitive_gco_2_gco_gco>()));
+            log && log(xtag("DPrimitive_gco_2_dict_string.tseq", typeseq::id<DPrimitive_gco_2_dict_string>()));
+            log && log(xtag("DPrimitive_gco_3_dict_string_gco.tseq", typeseq::id<DPrimitive_gco_3_dict_string_gco>()));
+
+            log && log(xtag("ARuntimeContext.tseq", typeseq::id<ARuntimeContext>()));
+            log && log(xtag("AProcedure.tseq", typeseq::id<AProcedure>()));
+
+            return true;
+        }
+
+        bool
+        SetupProcedure2::register_types(obj<ACollector> gc)
+        {
+            scope log(XO_DEBUG(true));
+
+            bool ok = true;
+
+            // (note: don't currently intend to support AGCObject for DSimpleRcx)
+
+            ok &= gc.install_type(impl_for<AGCObject, DPrimitive_gco_0>());
+            ok &= gc.install_type(impl_for<AGCObject, DPrimitive_gco_1_gco>());
+            ok &= gc.install_type(impl_for<AGCObject, DPrimitive_gco_2_gco_gco>());
+            ok &= gc.install_type(impl_for<AGCObject, DPrimitive_gco_2_dict_string>());
+            ok &= gc.install_type(impl_for<AGCObject, DPrimitive_gco_3_dict_string_gco>());
+
+            return ok;
+        }
+
+        template <typename PrimitiveRepr>
+        bool install_aux(InstallSink sink,
+                         PrimitiveRepr * pm,
+                         InstallFlags flags)
+        {
+            scope log(XO_DEBUG(true));
+
+            if ((flags & InstallFlags::f_generalpurpose) == InstallFlags::f_generalpurpose) {
+                log && log("create primitive", xtag("name", pm->name()));
+
+                return sink(pm->name(),
+                            pm->fn_td(),
+                            obj<AProcedure,PrimitiveRepr>(pm),
+                            flags);
+            } else {
+                log && log("skip primitive", xtag("name", pm->name()));
+
+                return true;
+            }
+        }
+
+        template <typename Primitive>
+        bool install_aux(InstallSink sink,
+                         obj<AAllocator> mm,
+                         std::string_view name,
+                         typename Primitive::FunctionPtrType impl,
+                         InstallFlags flags)
+        {
+            if (flags != InstallFlags::f_none) {
+                auto pm
+                    = Primitive::_make(mm, name, impl);
+
+                return install_aux(sink, pm, flags);
+            } else {
+                return true;
+            }
+        }
+
+        bool
+        SetupProcedure2::register_primitives(obj<ARuntimeContext> rcx,
+                                             InstallSink sink,
+                                             InstallFlags flags)
+        {
+            obj<AAllocator> mm = rcx.allocator();
+            StringTable * stbl = rcx.stringtable();
+
+            scope log(XO_DEBUG(true));
+
+            bool ok = true;
+
+            ok = ok & install_aux(sink, ObjectPrimitives::make_cwd_pm         (mm, stbl), flags);
+            ok = ok & install_aux(sink, ObjectPrimitives::make_nth_pm         (mm, stbl), flags);
+            ok = ok & install_aux(sink, ObjectPrimitives::make_cons_pm        (mm, stbl), flags);
+            ok = ok & install_aux(sink, ObjectPrimitives::make_dict_make_pm   (mm, stbl), flags);
+            ok = ok & install_aux(sink, ObjectPrimitives::make_dict_lookup_pm (mm, stbl), flags);
+            ok = ok & install_aux(sink, ObjectPrimitives::make_dict_upsert_pm (mm, stbl), flags);
+            ok = ok & install_aux(sink, ObjectPrimitives::make_fn_n_args_pm   (mm, stbl), flags);
+
+            return ok;
+        }
+
+    } /*namespace scm*/
+} /*namespace xo*/
+
+/* end SetupProcedure2.cpp */
