@@ -53,11 +53,15 @@ namespace xo {
         }
 
         bool
-        procedure2_register_primitives(obj<xo::mm::AAllocator> mm,
-                                       StringTable * stbl,
+        procedure2_register_primitives(obj<ARuntimeContext> rcx,
+                                       //obj<xo::mm::AAllocator> mm,
+                                       //StringTable * stbl,
                                        InstallSink sink,
                                        InstallFlags flags)
         {
+            obj<AAllocator> mm = rcx.allocator();
+            StringTable * stbl = rcx.stringtable();
+
             scope log(XO_DEBUG(true));
 
             bool ok = true;
