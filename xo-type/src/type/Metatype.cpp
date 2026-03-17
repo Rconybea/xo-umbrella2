@@ -4,6 +4,7 @@
  **/
 
 #include "Metatype.hpp"
+#include <cassert>
 
 namespace xo {
     namespace scm {
@@ -36,6 +37,9 @@ namespace xo {
             case code::t_callable: return "callable";
             case code::t_any:      return "any";
             }
+
+            assert(false);
+            return "?metatype";
         }
 
         bool
@@ -86,6 +90,9 @@ namespace xo {
             case code::t_any:
                 return true;
             }
+
+            assert(false);
+            return false;
         }
 
     } /*namespace scm*/

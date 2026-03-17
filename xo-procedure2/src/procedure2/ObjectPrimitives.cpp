@@ -33,9 +33,9 @@ namespace xo {
         xfer_cwd(obj<ARuntimeContext> rcx)
         {
             char buf[PATH_MAX];
-            ::getcwd(buf, sizeof(buf));
+            char * cwd = ::getcwd(buf, sizeof(buf));
 
-            return obj<AGCObject,DString>(DString::from_cstr(rcx.allocator(), buf));
+            return obj<AGCObject,DString>(DString::from_cstr(rcx.allocator(), cwd));
         }
 
         DPrimitive_gco_0 *
