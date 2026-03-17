@@ -4,7 +4,7 @@ set(SELF_LIB xo_alloc2)
 set(SELF_SRCS
 
     init_alloc2.cpp
-    alloc2_register_facets.cpp
+    SetupAlloc2.cpp
 
     CollectorTypeRegistry.cpp
 
