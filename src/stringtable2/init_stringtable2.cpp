@@ -4,24 +4,21 @@
  **/
 
 #include "init_stringtable2.hpp"
-#include "stringtable2_register_facets.hpp"
-#include "stringtable2_register_types.hpp"
+#include "SetupStringtable2.hpp"
 #include <xo/stringtable2/init_stringtable2.hpp>
-//n#include <xo/printable2/init_printable2.hpp>
 #include <xo/alloc2/CollectorTypeRegistry.hpp>
 #include <xo/alloc2/init_alloc2.hpp>
 
 namespace xo {
-    using xo::scm::stringtable2_register_facets;
-    using xo::scm::stringtable2_register_types;
+    using xo::scm::SetupStringtable2;
     using xo::mm::CollectorTypeRegistry;
 
     void
     InitSubsys<S_stringtable2_tag>::init()
         {
-            stringtable2_register_facets();
+            SetupStringtable2::register_facets();
 
-            CollectorTypeRegistry::instance().register_types(&stringtable2_register_types);
+            CollectorTypeRegistry::instance().register_types(&SetupStringtable2::register_types);
         }
 
     InitEvidence

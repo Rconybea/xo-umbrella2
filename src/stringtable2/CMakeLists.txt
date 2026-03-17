@@ -3,7 +3,8 @@
 set(SELF_LIB xo_stringtable2)
 set(SELF_SRCS
     init_stringtable2.cpp
-    stringtable2_register_facets.cpp
+    SetupStringtable2.cpp
+    #stringtable2_register_facets.cpp
     stringtable2_register_types.cpp
 
     StringTable.cpp
