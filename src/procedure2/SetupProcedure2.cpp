@@ -84,44 +84,6 @@ namespace xo {
             return ok;
         }
 
-        template <typename PrimitiveRepr>
-        bool install_aux(InstallSink sink,
-                         PrimitiveRepr * pm,
-                         InstallFlags flags)
-        {
-            scope log(XO_DEBUG(true));
-
-            if ((flags & InstallFlags::f_generalpurpose) == InstallFlags::f_generalpurpose) {
-                log && log("create primitive", xtag("name", pm->name()));
-
-                return sink(pm->name(),
-                            pm->fn_td(),
-                            obj<AProcedure,PrimitiveRepr>(pm),
-                            flags);
-            } else {
-                log && log("skip primitive", xtag("name", pm->name()));
-
-                return true;
-            }
-        }
-
-        template <typename Primitive>
-        bool install_aux(InstallSink sink,
-                         obj<AAllocator> mm,
-                         std::string_view name,
-                         typename Primitive::FunctionPtrType impl,
-                         InstallFlags flags)
-        {
-            if (flags != InstallFlags::f_none) {
-                auto pm
-                    = Primitive::_make(mm, name, impl);
-
-                return install_aux(sink, pm, flags);
-            } else {
-                return true;
-            }
-        }
-
         bool
         SetupProcedure2::register_primitives(obj<ARuntimeContext> rcx,
                                              InstallSink sink,
@@ -134,13 +96,34 @@ namespace xo {
 
             bool ok = true;
 
-            ok = ok & install_aux(sink, ObjectPrimitives::make_cwd_pm         (mm, stbl), flags);
-            ok = ok & install_aux(sink, ObjectPrimitives::make_nth_pm         (mm, stbl), flags);
-            ok = ok & install_aux(sink, ObjectPrimitives::make_cons_pm        (mm, stbl), flags);
-            ok = ok & install_aux(sink, ObjectPrimitives::make_dict_make_pm   (mm, stbl), flags);
-            ok = ok & install_aux(sink, ObjectPrimitives::make_dict_lookup_pm (mm, stbl), flags);
-            ok = ok & install_aux(sink, ObjectPrimitives::make_dict_upsert_pm (mm, stbl), flags);
-            ok = ok & install_aux(sink, ObjectPrimitives::make_fn_n_args_pm   (mm, stbl), flags);
+            ok = ok & (PrimitiveRegistry::install_aux
+                       (sink,
+                        ObjectPrimitives::make_cwd_pm(mm, stbl),
+                        flags & InstallFlags::f_generalpurpose));
+            ok = ok & (PrimitiveRegistry::install_aux
+                       (sink,
+                        ObjectPrimitives::make_nth_pm(mm, stbl),
+                        flags & InstallFlags::f_generalpurpose));
+            ok = ok & (PrimitiveRegistry::install_aux
+                       (sink,
+                        ObjectPrimitives::make_cons_pm(mm, stbl),
+                        flags & InstallFlags::f_generalpurpose));
+            ok = ok & (PrimitiveRegistry::install_aux
+                       (sink,
+                        ObjectPrimitives::make_dict_make_pm(mm, stbl),
+                        flags & InstallFlags::f_generalpurpose));
+            ok = ok & (PrimitiveRegistry::install_aux
+                       (sink,
+                        ObjectPrimitives::make_dict_lookup_pm(mm, stbl),
+                        flags & InstallFlags::f_generalpurpose));
+            ok = ok & (PrimitiveRegistry::install_aux
+                       (sink,
+                        ObjectPrimitives::make_dict_upsert_pm(mm, stbl),
+                        flags & InstallFlags::f_generalpurpose));
+            ok = ok & (PrimitiveRegistry::install_aux
+                       (sink,
+                        ObjectPrimitives::make_fn_n_args_pm(mm, stbl),
+                        flags & InstallFlags::f_generalpurpose));
 
             return ok;
         }

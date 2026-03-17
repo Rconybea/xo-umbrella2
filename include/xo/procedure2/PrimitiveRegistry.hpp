@@ -34,8 +34,6 @@ namespace xo {
             return InstallFlags(static_cast<uint64_t>(x) & static_cast<uint64_t>(y));
         }
 
-
-
         /** provided by VSM to receive created primitives.
          *  InstallSink(pm) adopts a primitive
          **/
@@ -70,6 +68,26 @@ namespace xo {
             /** singleton instance **/
             static PrimitiveRegistry & instance();
 
+            template <typename PrimitiveRepr>
+            static bool install_aux(InstallSink sink,
+                                    PrimitiveRepr * pm,
+                                    InstallFlags flags) {
+                scope log(XO_DEBUG(true));
+
+                if (flags != InstallFlags::f_none) {
+                    log && log("create primitive", xtag("name", pm->name()));
+
+                    return sink(pm->name(),
+                                pm->fn_td(),
+                                obj<AProcedure,PrimitiveRepr>(pm),
+                                flags);
+                } else {
+                    log && log("skip primitive", xtag("name", pm->name()));
+
+                    return true;
+                }
+            }
+
             /** remember primitive-factory @p source_fn **/
             void register_primitives(InstallSource source_fn);
 
@@ -82,6 +100,7 @@ namespace xo {
                                     //StringTable * stbl,
                                     InstallSink sink,
                                     InstallFlags flags);
+
 
         private:
             /** a set of factories that create primitives **/
