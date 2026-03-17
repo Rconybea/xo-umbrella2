@@ -17,18 +17,6 @@ namespace xo {
     using xo::scope;
 
     namespace scm {
-        bool
-        stringtable2_register_types(obj<ACollector> gc)
-        {
-            scope log(XO_DEBUG(true));
-
-            bool ok = true;
-
-            ok &= gc.install_type(impl_for<AGCObject, DUniqueString>());
-            ok &= gc.install_type(impl_for<AGCObject, DString>());
-
-            return ok;
-        }
     }
 } /*namespace xo*/
 

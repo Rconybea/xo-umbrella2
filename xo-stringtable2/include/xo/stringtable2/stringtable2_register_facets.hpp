@@ -7,8 +7,6 @@
 
 namespace xo {
     namespace scm {
-        /** Register object2 (facet,impl) combinations with FacetRegistry **/
-        bool stringtable2_register_facets();
     }
 }
 

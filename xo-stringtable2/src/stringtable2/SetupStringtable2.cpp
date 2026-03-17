@@ -1,10 +1,9 @@
-/** @file stringtable2_register_facets.cpp
+/** @file SetupStringtable2.cpp
  *
  *  @author Roland Conybeare, Mar 2026
  **/
 
-#ifdef NOPE
-#include "stringtable2_register_facets.hpp"
+#include "SetupStringtable2.hpp"
 
 #include <xo/stringtable2/UniqueString.hpp>
 #include <xo/stringtable2/String.hpp>
@@ -14,14 +13,16 @@
 
 namespace xo {
     using xo::print::APrintable;
+    using xo::mm::ACollector;
     using xo::mm::AGCObject;
     using xo::scm::DString;
     using xo::facet::FacetRegistry;
     using xo::facet::typeseq;
+    using xo::facet::impl_for;
 
     namespace scm {
         bool
-        stringtable2_register_facets()
+        SetupStringtable2::register_facets()
         {
             scope log(XO_DEBUG(true));
 
@@ -35,8 +36,20 @@ namespace xo {
 
             return true;
         }
+
+        bool
+        SetupStringtable2::register_types(obj<ACollector> gc)
+        {
+            scope log(XO_DEBUG(true));
+
+            bool ok = true;
+
+            ok &= gc.install_type(impl_for<AGCObject, DUniqueString>());
+            ok &= gc.install_type(impl_for<AGCObject, DString>());
+
+            return ok;
+        }
     } /*namespace scm*/
 } /*namespace xo*/
-#endif
 
-/* end stringtable2_register_facets.cpp */
+/* end SetupStringtable2.cpp */

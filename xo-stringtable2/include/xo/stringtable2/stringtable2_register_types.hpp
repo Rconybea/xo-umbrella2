@@ -9,8 +9,6 @@
 
 namespace xo {
     namespace scm {
-        /** Register stringtable2 (facet,impl) combinations with FacetRegistry **/
-        bool stringtable2_register_types(obj<xo::mm::ACollector> gc);
     }
 }
 
