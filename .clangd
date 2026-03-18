@@ -1,2 +1,4 @@
 Diagnostics:
+  Suppress:
+    - pp_pragma_once_in_main_file
   UnusedIncludes: None
