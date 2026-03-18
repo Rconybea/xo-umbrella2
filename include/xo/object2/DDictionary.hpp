@@ -1,5 +1,5 @@
 /** @file DDictionary.hpp
-*
+ *
  *  @author Roland Conybeare, Jan 2026
  **/
 
