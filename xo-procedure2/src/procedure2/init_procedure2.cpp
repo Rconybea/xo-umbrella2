@@ -7,6 +7,7 @@
 #include "init_primitives.hpp"
 #include "SetupProcedure2.hpp"
 #include <xo/object2/init_object2.hpp>
+#include <xo/type/init_type.hpp>
 #include <xo/alloc2/CollectorTypeRegistry.hpp>
 
 namespace xo {
@@ -30,6 +31,7 @@ namespace xo {
 
         /* recursive subsystem deps for xo-object2/ */
         retval ^= InitSubsys<S_object2_tag>::require();
+        retval ^= InitSubsys<S_type_tag>::require();
 
         /* xo-procedure2/'s own initialization code */
         retval ^= Subsystem::provide<S_procedure2_tag>("procedure2", &init);
