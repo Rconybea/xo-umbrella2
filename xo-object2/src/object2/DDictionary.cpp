@@ -184,6 +184,7 @@ namespace xo {
 
                     if (!pps->print_upto(value))
                         return false;
+                    pps->write(";");
                 }
 
                 pps->write("}");
