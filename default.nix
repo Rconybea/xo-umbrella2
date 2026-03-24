@@ -302,6 +302,7 @@ let
     emacs4xo
     # pkgs.emacs-pgtk  # wayland with treesitter; alternatively pkgs.emacs30 for emacs+tree-sitter
     pkgs.tree-sitter # CLI tool, but not grammars
+    pkgs.llvmPackages_18.clang-tools  # clangd for lsp-mode
     pkgs.notmuch
     pkgs.emacsPackages.notmuch
     pkgs.inconsolata-lgc
