@@ -19,6 +19,9 @@ namespace xo {
          **/
         template <typename DRepr>
         struct dp {
+            using repr_type = DRepr;
+
+        public:
             dp() = default;
 
             /** dp takes ownership of data @p ptr;
@@ -55,6 +58,8 @@ namespace xo {
                 }
             }
 
+            static constexpr bool is_gc_eligible() { return DRepr::is_gc_eligible(); }
+
             dp<DRepr> & operator=(const dp<DRepr> & x) = delete;
 
             /** move assignment **/
@@ -73,6 +78,17 @@ namespace xo {
 
             DRepr * operator->() const noexcept { return ptr_; }
             DRepr & operator*() const noexcept { return *ptr_; }
+
+            /** transfer responsibility for pointer to caller,
+             *  setting dp container's copy to nullptr
+             **/
+            DRepr * release() noexcept {
+                DRepr * retval = ptr_;
+
+                this->ptr_ = nullptr;
+
+                return retval;
+            }
 
 #ifdef NOT_YET
             /** explicit conversion to obj<AFacet,DRepr> **/
