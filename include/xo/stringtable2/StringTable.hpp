@@ -31,6 +31,9 @@ namespace xo {
             StringTable(size_type hint_max_capacity,
                         bool debug_flag = false);
 
+            /** false -> not eligible for GC (maps own memory + not moveable) **/
+            static constexpr bool is_gc_eligible() { return false; }
+
             /** lookup interned string; nullptr if not present **/
             const DUniqueString * lookup(std::string_view key) const;
 

@@ -55,6 +55,8 @@ namespace xo {
             /** not copyable **/
             DUniqueString(const DUniqueString &) = delete;
 
+            static constexpr bool is_gc_eligible() { return false; }
+
             ///@}
             /** @defgroup duniquestring-methods methods **/
             ///@{
