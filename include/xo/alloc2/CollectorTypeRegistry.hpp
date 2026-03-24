@@ -59,7 +59,7 @@ namespace xo {
             void register_types(init_function_type init_fn);
 
             /** register known GC-aware types with @p gc.
-             *  Calls @c gc.isntall_type() for each
+             *  Calls @c gc.install_type() for each
              *  such type.
              **/
             bool install_types(obj<ACollector> gc);
