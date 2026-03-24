@@ -102,7 +102,7 @@ namespace xo {
 
         /** Retrieve facet implementation for a (facet,datatype) pair **/
         template <typename AFacet, typename DRepr>
-        using FacetImplType = FacetImplementation<AFacet, DRepr>::ImplType;
+        using FacetImplType = typename FacetImplementation<AFacet, DRepr>::ImplType;
 
         /** Use:
          *    auto iface = xo::facet::impl_for<AGCObject, DList>();
