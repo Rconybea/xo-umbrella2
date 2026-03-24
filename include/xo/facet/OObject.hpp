@@ -180,7 +180,7 @@ namespace xo {
                      * Either way need to force vtable replacement, hence memcpy here
                      */
                     _launder_from(oother);
-                } else if constexpr (std::is_convertible_v<DRepr, DOther>) {
+                } else if constexpr (std::is_convertible_v<DRepr*, DOther*>) {
                     /* other is typed, consistently with *this */
                     this->from_data(oother.data());
                 } else
@@ -189,7 +189,7 @@ namespace xo {
                     //  + may fail at runtime
 
                     static_assert(std::is_same_v<DRepr, DVariantPlaceholder>
-                                  || std::is_convertible_v<DRepr, DOther>);
+                                  || std::is_convertible_v<DRepr*, DOther*>);
                 }
                 return *this;
             }
