@@ -5,9 +5,9 @@
 
 {
   # official 24.05 release  # nearly works on macos, clang17, llvm18 except for sphinx-contrib.ditaa
-# probably whould be nixos-25.05.tar.gz here
-  nixpkgs-path ? fetchTarball "https://github.com/NixOS/nixpkgs/archive/nixos-24.11.tar.gz",
-#  nixpkgs-path ? ../nixpkgs,
+# on roly-chicago-24: using nixos-25.05, local nixpkgs
+#  nixpkgs-path ? fetchTarball "https://github.com/NixOS/nixpkgs/archive/nixos-24.11.tar.gz",
+  nixpkgs-path ? ../nixpkgs,
 
 #  pkgs ? import (fetchTarball {
 #    # 24.05-darwin works on macos, clang17, llvm 18 (copying from xo-nix2)
@@ -294,6 +294,8 @@ let
     which-key
     xterm-color
     yasnippet
+  ] ++ pkgs.lib.optionals pkgs.stdenv.isLinux [
+    notmuch
   ]);
 
   # xo ide utils
