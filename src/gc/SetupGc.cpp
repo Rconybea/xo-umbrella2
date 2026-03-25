@@ -1,0 +1,36 @@
+/** @file SetupGc.cpp
+ *
+ *  @author Roland Conybeare, Mar 2026
+ **/
+
+#include "SetupGc.hpp"
+#include "X1Collector.hpp"
+#include <xo/facet/FacetRegistry.hpp>
+#include <xo/indentlog/scope.hpp>
+
+namespace xo {
+    using xo::mm::AAllocator;
+    using xo::mm::ACollector;
+    using xo::mm::DX1Collector;
+    using xo::facet::FacetRegistry;
+    using xo::reflect::typeseq;
+
+    namespace mm {
+
+        bool
+        SetupGc::register_facets()
+        {
+            scope log(XO_DEBUG(true));
+
+            FacetRegistry::register_impl<AAllocator, DX1Collector>();
+            FacetRegistry::register_impl<ACollector, DX1Collector>();
+
+            log && log(xtag("DX1Collector.tseq", typeseq::id<DX1Collector>()));
+            log && log(xtag("ACollector.tseq",  typeseq::id<ACollector>()));
+
+            return true;
+        }
+    }
+} /*namespace xo*/
+
+/* end SetupGc.cpp */
