@@ -32,6 +32,7 @@ public:
     using DataPtr = Object::DataPtr;
     using typeseq = xo::reflect::typeseq;
     using AAllocator = ARuntimeContext::AAllocator;
+    using ACollector = ARuntimeContext::ACollector;
     using MemorySizeVisitor = ARuntimeContext::MemorySizeVisitor;
     ///@}
 
@@ -56,6 +57,9 @@ public:
     // const methods
     obj<AAllocator> allocator()  const  noexcept {
         return O::iface()->allocator(O::data());
+    }
+    obj<ACollector> collector()  const  noexcept {
+        return O::iface()->collector(O::data());
     }
     StringTable * stringtable()  const  noexcept {
         return O::iface()->stringtable(O::data());

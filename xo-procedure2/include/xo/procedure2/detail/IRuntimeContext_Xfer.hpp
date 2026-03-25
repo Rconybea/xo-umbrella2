@@ -31,6 +31,7 @@ namespace scm {
         /** integer identifying a type **/
         using typeseq = ARuntimeContext::typeseq;
         using AAllocator = ARuntimeContext::AAllocator;
+        using ACollector = ARuntimeContext::ACollector;
         using MemorySizeVisitor = ARuntimeContext::MemorySizeVisitor;
         ///@}
 
@@ -49,6 +50,9 @@ namespace scm {
         // const methods
         obj<AAllocator> allocator(Copaque data)  const  noexcept override {
             return I::allocator(_dcast(data));
+        }
+        obj<ACollector> collector(Copaque data)  const  noexcept override {
+            return I::collector(_dcast(data));
         }
         StringTable * stringtable(Copaque data)  const  noexcept override {
             return I::stringtable(_dcast(data));

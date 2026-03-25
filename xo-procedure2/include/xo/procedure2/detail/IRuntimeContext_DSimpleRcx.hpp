@@ -40,6 +40,7 @@ namespace xo {
             /** @defgroup scm-runtimecontext-dsimplercx-type-traits **/
             ///@{
             using AAllocator = xo::scm::ARuntimeContext::AAllocator;
+            using ACollector = xo::scm::ARuntimeContext::ACollector;
             using MemorySizeVisitor = xo::scm::ARuntimeContext::MemorySizeVisitor;
             using Copaque = xo::scm::ARuntimeContext::Copaque;
             using Opaque = xo::scm::ARuntimeContext::Opaque;
@@ -49,6 +50,8 @@ namespace xo {
             // const methods
             /** default allocator to use for objects **/
             static obj<AAllocator> allocator(const DSimpleRcx & self) noexcept;
+            /** collector facet for allocator. If non-null, same data pointer as allocator **/
+            static obj<ACollector> collector(const DSimpleRcx & self) noexcept;
             /** stringtable for unique symbols **/
             static StringTable * stringtable(const DSimpleRcx & self) noexcept;
             /** invoke visitor for each distinct memory pool **/

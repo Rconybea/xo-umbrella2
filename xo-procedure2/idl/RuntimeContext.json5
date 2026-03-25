@@ -32,6 +32,11 @@
             doc: [ "xo memory allocator" ],
         },
         {
+            name: "ACollector",
+            definition: "xo::mm::ACollector",
+            doc: [ "xo garbage collector" ],
+        },
+        {
             name: "MemorySizeVisitor",
             definition: "xo::mm::MemorySizeVisitor",
             doc: [ "function to visit memory pools" ],
@@ -42,6 +47,15 @@
             name: "allocator",
             doc: [ "default allocator to use for objects" ],
             return_type: "obj<AAllocator>",
+            args: [],
+            const: true,
+            noexcept: true,
+            attributes: [],
+        },
+        {
+            name: "collector",
+            doc: [ "collector facet for allocator. If non-null, same data pointer as allocator" ],
+            return_type: "obj<ACollector>",
             args: [],
             const: true,
             noexcept: true,
