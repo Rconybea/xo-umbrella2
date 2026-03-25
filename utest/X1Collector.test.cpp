@@ -131,11 +131,11 @@ namespace ut {
                     REQUIRE(otypes->reserved() >= cfg.object_types_z_);
                     REQUIRE(otypes->reserved() < cfg.object_types_z_ + otypes->page_z_);
 
-                    const DArena * roots = gc.get_roots();
+                    const DX1Collector::RootSet * roots = gc.get_root_set();
 
                     REQUIRE(roots != nullptr);
-                    REQUIRE(roots->reserved() >= cfg.object_roots_z_);
-                    REQUIRE(roots->reserved() < cfg.object_roots_z_ + roots->page_z_);
+                    REQUIRE(roots->store()->reserved() >= cfg.object_roots_z_);
+                    REQUIRE(roots->store()->reserved() < cfg.object_roots_z_ + roots->store()->page_z_);
 
                     const DArena * from_0 = gc.get_space(role::from_space(), generation{0});
 
