@@ -1,3 +1,18 @@
+# reader2
+
+## globalsymtab for essential primitives
+
+rework essential primitives (*,/,+,-,==,!=,..)
+so parser doesn't rely on magic globalsymtab lookup strings.
+
+## support missing primitives
+
+tokenizer support + utest for !=,<,>,<=,>=
+
+## boolean operators
+
+^ (xor), | (or), & (and), ~ (not)
+
 # gc
 
 ## remove_root
