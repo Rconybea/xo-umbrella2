@@ -51,6 +51,11 @@ namespace xo {
             void add_gc_root_poly(obj<AGCObject> * p_root) { O::iface()->add_gc_root_poly(O::data(), p_root); }
             void remove_gc_root_poly(obj<AGCObject> * p_root) { O::iface()->remove_gc_root_poly(O::data(), p_root); }
             void request_gc(generation g) { O::iface()->request_gc(O::data(), g); }
+
+            void assign_member(void * parent,
+                               obj<AGCObject> * p_lhs,
+                               obj<AGCObject> & rhs) { O::iface()->assign_member(O::data(), parent, p_lhs, rhs); }
+
             void forward_inplace(AGCObject * lhs_iface, void ** lhs_data) { O::iface()->forward_inplace(O::data(), lhs_iface, lhs_data); }
 
             /** add root @p p_root **/

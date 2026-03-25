@@ -8,7 +8,6 @@
 #include <xo/arena/MemorySizeInfo.hpp>
 #include <xo/arena/AllocError.hpp>
 #include "AllocInfo.hpp"
-//#include "AllocIterator.hpp"
 #include "AllocRange.hpp"
 #include "typeseq.hpp"
 #include <xo/facet/obj.hpp>

@@ -170,8 +170,17 @@ namespace xo {
             return (header_type *)((byte *)obj - sizeof(header_type));
         }
 
+        auto
+        DArena::obj2hdr(void * obj) const noexcept -> const header_type *
+        {
+            assert(config_.store_header_flag_);
+
+            return (const header_type *)((byte *)obj - sizeof(header_type));
+        }
+
         void
-        DArena::visit_pools(const MemorySizeVisitor & fn) const {
+        DArena::visit_pools(const MemorySizeVisitor & fn) const
+        {
             /** arena can't tell purpose of allocated memory;
              *  must assume it's all used
              **/

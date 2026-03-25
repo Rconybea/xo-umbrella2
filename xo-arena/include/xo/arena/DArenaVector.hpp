@@ -76,6 +76,7 @@ namespace xo {
             const_iterator cend() const noexcept { return this->_address_of(size_); }
             const_iterator end() const noexcept { return this->cend(); }
 
+            constexpr const DArena * store() const { return &store_; }
             constexpr T * data() { return reinterpret_cast<T*>(store_.lo_); }
             constexpr const T * data() const { return reinterpret_cast<const T*>(store_.lo_); }
 
@@ -223,7 +224,7 @@ namespace xo {
             //
             store_.restore(zero_ckp_);
             store_.alloc(xo::reflect::typeseq::id<std::byte>(), req_z);
-            
+
             this->size_ = z;
         }
 

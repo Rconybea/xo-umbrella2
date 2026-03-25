@@ -68,6 +68,9 @@ namespace xo {
                           size_type hint_max_capacity = 0,
                           bool debug_flag = false);
 
+            /** true for types that support the AGCObject facet; DArenaHashMap gets its own memory! **/
+            static constexpr bool is_gc_eligible() { return false; }
+
             size_type empty() const noexcept { return store_.empty(); }
             size_type groups() const noexcept { return store_.n_group_; }
             size_type size() const noexcept { return store_.size_; }

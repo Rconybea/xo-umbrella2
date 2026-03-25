@@ -23,6 +23,9 @@ namespace xo {
             explicit constexpr generation(value_type x) : value_{x} {}
 
             static generation nursery() { return generation{0}; }
+            static generation sentinel() { return generation(c_max_generation); }
+
+            bool is_sentinel() const noexcept { return value_ == c_max_generation; }
 
             constexpr operator value_type() const { return value_; }
 
@@ -30,6 +33,19 @@ namespace xo {
 
             std::uint32_t value_ = 0;
         };
+
+        inline bool operator==(generation lhs, generation rhs) {
+            return lhs.value_ == rhs.value_;
+        }
+
+        inline bool operator<(generation lhs, generation rhs) {
+            return lhs.value_ < rhs.value_;
+        }
+
+        inline bool operator>(generation lhs, generation rhs) {
+            return lhs.value_ > rhs.value_;
+        }
+
     }
 }
 

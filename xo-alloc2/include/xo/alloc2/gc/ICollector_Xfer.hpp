@@ -59,6 +59,10 @@ namespace xo {
             void request_gc(Opaque d, generation upto) override {
                 I::request_gc(_dcast(d), upto);
             }
+            void assign_member(Opaque d, void * parent,
+                               obj<AGCObject> * p_lhs, obj<AGCObject> & rhs) override {
+                I::assign_member(_dcast(d), parent, p_lhs, rhs);
+            }
             void forward_inplace(Opaque d,
                                  AGCObject * lhs_iface, void ** lhs_data) override {
                 I::forward_inplace(_dcast(d), lhs_iface, lhs_data);

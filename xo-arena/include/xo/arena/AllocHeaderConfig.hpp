@@ -11,7 +11,9 @@
 
 namespace xo {
     namespace mm {
-        /*
+        /**
+         * @brief specifies alloc header layout
+         *
          * Each allocation is preceded by a 64-bit header.
          * Header is split into 3 configurable-width bit fields,
          * labelled (from hi to lo bit order) {tseq, age, size}.
@@ -36,7 +38,7 @@ namespace xo {
          *  0..............01111111   gen_mask_unshifted
          *  0..011111110..........0   gen_mask_shifted
          *             >           <  gen_shift
-         */
+         **/
         struct AllocHeaderConfig {
             using repr_type = AllocHeader;
             using span_type = std::pair<const std::byte *, const std::byte *>;
