@@ -103,6 +103,9 @@ namespace xo {
             /** @defgroup mm-arena-methods **/
             ///@{
 
+            /** false -> not eligible for GC (allocates own memory + not moveable) **/
+            static constexpr bool is_gc_eligible() { return false; }
+
             /** Reserved memory, in bytes. This is the maximum size of this arena. **/
             size_type reserved() const noexcept { return hi_ - lo_; }
             /** Allocated memory in bytes: memory consumed by allocs from this arena,
@@ -124,6 +127,9 @@ namespace xo {
              *  i.e. falls within [@ref lo_, @ref hi_)
              **/
             bool contains(const void * addr) const noexcept { return (lo_ <= addr) && (addr < hi_); }
+
+            /** Truee iff address @p addr is owned by this arena and in allocated regions **/
+            bool contains_allocated(const void * addr) const noexcept { return (lo_ <= addr) && (addr < free_); }
 
             /** true if arena is mapped i.e. has a reserved address range **/
             bool is_mapped() const noexcept { return (lo_ != nullptr) && (hi_ != nullptr); }
@@ -147,6 +153,8 @@ namespace xo {
 
             /** get header from allocated object address **/
             header_type * obj2hdr(void * obj) noexcept;
+            /** get header from allocated object address (const version) **/
+            const header_type * obj2hdr(void * obj) const noexcept;
 
             /** report alloc book-keeping info for allocation at @p mem
              *
