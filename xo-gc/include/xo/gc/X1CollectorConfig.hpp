@@ -26,6 +26,16 @@ namespace xo {
              **/
             X1CollectorConfig with_size(std::size_t gen_z);
 
+            /** copy of this config,
+             *  but with @c debug_flag_ set to @p x
+             **/
+            X1CollectorConfig with_debug_flag(bool x);
+
+            /** copy of this config,
+             *  but with @c sanitize_flag_ set to @p x
+                **/
+            X1CollectorConfig with_sanitize_flag(bool x);
+
             generation age2gen(object_age age) const noexcept {
                 return generation(age % n_survive_threshold_);
             }
@@ -37,13 +47,19 @@ namespace xo {
             std::string name_;
 
             /** Configuration for collector spaces.
-             *  Will have at least {nursery,tenured} x {from,to} spaces.
+             *  Will have (2 x G) of these,
+             *  where G is @ref n_generation_.
              *  Not using name_ member.
              *
              *  REQUIRE:
              *  - arena_config_.store_header_flag_ must be true
              **/
-            ArenaConfig arena_config_;
+            ArenaConfig arena_config_ = ArenaConfig().with_store_header_flag(true);
+
+            /** storage for xgen pointer bookkeeping (aka remembered sets).
+             *  Use 3x this value per generation
+             **/
+            std::size_t mutation_log_z_ = 1024;
 
             /** storage for N object types requires 8*N bytes **/
             std::size_t object_types_z_ = 2*1024*1024;
@@ -85,13 +101,17 @@ namespace xo {
              **/
             uint32_t stats_history_z_ = false;
 
+            /** true to enable sanitize features:
+             *  1. zero out from-space at end of GC cycle
+             **/
+            bool sanitize_flag_ = false;
+
             /** true to enable debug logging **/
             bool debug_flag_ = false;
         };
 
-        
+
     } /*namespace mm*/
 } /*namespace xo*/
 
 /* end X1CollectorConfig.hpp */
-

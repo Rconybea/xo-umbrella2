@@ -21,26 +21,11 @@
 
 namespace xo {
     using xo::mm::AAllocator;
+    using xo::facet::TypeRegistry;
     using xo::facet::typeseq;
     using xo::facet::with_facet;
 
     namespace mm {
-
-        X1CollectorConfig
-        X1CollectorConfig::with_name(std::string name)
-        {
-            X1CollectorConfig copy = *this;
-            copy.name_ = std::move(name);
-            return copy;
-        }
-
-        X1CollectorConfig
-        X1CollectorConfig::with_size(std::size_t gen_z)
-        {
-            X1CollectorConfig copy = *this;
-            copy.arena_config_ = arena_config_.with_size(gen_z);
-            return copy;
-        }
 
         // ----- GCRunState -----
 
@@ -72,45 +57,109 @@ namespace xo {
 
             size_t page_z = getpagesize();
 
+            this->_init_object_types(cfg, page_z);
+            this->_init_gc_roots(cfg, page_z);
+            this->_init_mlogs(cfg, page_z);
+            this->_init_space(cfg);
+        }
+
+        void
+        DX1Collector::_init_object_types(const X1CollectorConfig & cfg, std::size_t page_z)
+        {
             /* 1MB reserved address space enough for up to 128k distinct types.
              * In this case don't want to use hugepages since actual #of types
              * likely << .size/8
              */
-            object_types_ = DArena::map(
-                ArenaConfig{
-                    .name_ = "x1-object-types",
-                    .size_ = cfg.object_types_z_,
-                    .hugepage_z_ = page_z,
-                    .store_header_flag_ = false});
+            this->object_types_
+                = DArena::map(ArenaConfig{.name_ = "x1-object-types",
+                                          .size_ = cfg.object_types_z_,
+                                          .hugepage_z_ = page_z,
+                                          .store_header_flag_ = false});
+        }
 
-            roots_ = DArena::map(
-                ArenaConfig{
-                    .name_ = "x1-object-roots",
-                    .size_ = cfg.object_roots_z_,
-                    .hugepage_z_ = page_z,
-                    .store_header_flag_ = false});
+        void
+        DX1Collector::_init_gc_roots(const X1CollectorConfig & cfg, std::size_t page_z)
+        {
+            this->root_set_
+                = RootSet::map(ArenaConfig{.name_ = "x1-object-roots",
+                                          .size_ = cfg.object_roots_z_,
+                                          .hugepage_z_ = page_z,
+                                          .store_header_flag_ = false});
+        }
+
+        void
+        DX1Collector::_init_mlogs(const X1CollectorConfig & cfg, std::size_t page_z)
+        {
+            for (uint32_t igen = 0, ngen = cfg.n_generation_; igen + 1 < ngen; ++igen) {
+                // special case: no use for mutation log for youngest generation,
+                // so don't trouble to allocate one
+
+                if (igen + 1 < c_max_generation) {
+                    this->mlog_storage_[0][igen] = _make_mlog(igen, 'a', cfg.mutation_log_z_, page_z);
+                    this->mlog_storage_[1][igen] = _make_mlog(igen, 'b', cfg.mutation_log_z_, page_z);
+                    this->mlog_storage_[2][igen] = _make_mlog(igen, 'c', cfg.mutation_log_z_, page_z);
+
+                    this->mlog_[0][igen] = &mlog_storage_[0][igen];
+                    this->mlog_[1][igen] = &mlog_storage_[1][igen];
+                    this->mlog_[2][igen] = &mlog_storage_[2][igen];
+                } else {
+                    assert(false);
+                }
+            }
+
+            if (cfg.n_generation_ > 0) {
+                for (uint32_t igen = cfg.n_generation_ - 1; igen + 1 < c_max_generation; ++igen) {
+                    this->mlog_[0][igen] = nullptr;
+                    this->mlog_[1][igen] = nullptr;
+                    this->mlog_[2][igen] = nullptr;
+                }
+            } else {
+                assert(false);
+            }
+        }
+
+        auto
+        DX1Collector::_make_mlog(uint32_t igen, char tag_char, size_t mlog_z, size_t page_z) -> MutationLog
+        {
+            char buf[40];
+            snprintf(buf, sizeof(buf), "x1-mlog-G%u-%c", igen, tag_char);
+
+            return MutationLog::map(ArenaConfig{.name_ = std::string(buf),
+                                                .size_ = mlog_z,
+                                                .hugepage_z_ = page_z,
+                                                .store_header_flag_ = false});
+        }
+
+        void
+        DX1Collector::_init_space(const X1CollectorConfig & cfg)
+        {
+            assert(c_n_role == 2);
 
             for (uint32_t igen = 0, ngen = cfg.n_generation_; igen < ngen; ++igen) {
-                {
-                    char buf[40];
-                    snprintf(buf, sizeof(buf), "x1-space-G%u-a", igen);
+                if (igen < c_max_generation) {
+                    {
+                        char buf[40];
+                        snprintf(buf, sizeof(buf), "x1-space-G%u-a", igen);
 
-                    space_storage_[0][igen] = DArena::map(cfg.arena_config_.with_name(std::string(buf)));
+                        this->space_storage_[0][igen] = DArena::map(cfg.arena_config_.with_name(std::string(buf)));
+                    }
+                    {
+                        char buf[40];
+                        snprintf(buf, sizeof(buf), "x1-space-G%u-b", igen);
+
+                        this->space_storage_[1][igen] = DArena::map(cfg.arena_config_.with_name(std::string(buf)));
+                    }
+
+                    this->space_[role::to_space()][igen] = &space_storage_[0][igen];
+                    this->space_[role::from_space()][igen] = &space_storage_[1][igen];
+                } else {
+                    assert(false);
                 }
-                {
-                    char buf[40];
-                    snprintf(buf, sizeof(buf), "x1-space-G%u-b", igen);
-
-                    space_storage_[1][igen] = DArena::map(cfg.arena_config_.with_name(std::string(buf)));
-                }
-
-                space_[role::to_space()][igen] = &space_storage_[0][igen];
-                space_[role::from_space()][igen] = &space_storage_[1][igen];
             }
 
             for (uint32_t igen = cfg.n_generation_; igen < c_max_generation; ++igen) {
-                space_[role::to_space()][igen] = nullptr;
-                space_[role::from_space()][igen] = nullptr;
+                this->space_[role::to_space()][igen] = nullptr;
+                this->space_[role::from_space()][igen] = nullptr;
             }
         }
 
@@ -118,11 +167,17 @@ namespace xo {
         DX1Collector::visit_pools(const MemorySizeVisitor & visitor) const
         {
             object_types_.visit_pools(visitor);
-            roots_.visit_pools(visitor);
+            root_set_.visit_pools(visitor);
 
-            for (uint32_t i = 0; i < c_n_role; ++i) {
-                for (uint32_t j = 0; j < config_.n_generation_; ++j) {
+            for (uint32_t j = 0; j < config_.n_generation_; ++j) {
+                for (uint32_t i = 0; i < c_n_role; ++i) {
                     space_storage_[i][j].visit_pools(visitor);
+                }
+            }
+
+            for (uint32_t j = 1; j < config_.n_generation_; ++j) {
+                for (uint32_t i = 0; i < c_n_role + 1; ++i) {
+                    mlog_storage_[i][j].visit_pools(visitor);
                 }
             }
         }
@@ -130,14 +185,31 @@ namespace xo {
         bool
         DX1Collector::contains(role r, const void * addr) const noexcept
         {
+            return !(this->generation_of(r, addr).is_sentinel());
+        }
+
+        bool
+        DX1Collector::contains_allocated(role r, const void * addr) const noexcept
+        {
+            generation g = this->generation_of(r, addr);
+
+            if (g.is_sentinel())
+                return false;
+
+            return this->get_space(r, g)->contains_allocated(addr);
+        }
+
+        generation
+        DX1Collector::generation_of(role r, const void * addr) const noexcept
+        {
             for (generation gi{0}; gi < config_.n_generation_; ++gi) {
                 const DArena * arena = get_space(r, gi);
 
                 if (arena->contains(addr))
-                    return true;
+                    return gi;
             }
 
-            return false;
+            return generation::sentinel();
         }
 
         AllocError
@@ -156,7 +228,7 @@ namespace xo {
                                  size_t (DArena::* get_stat_fn)() const) noexcept
             {
                 size_t z1 = (d.object_types_.*get_stat_fn)();
-                size_t z2 = (d.roots_.*get_stat_fn)();
+                size_t z2 = (d.root_set_.store()->*get_stat_fn)();
 
                 size_t z3 = 0;
 
@@ -255,7 +327,11 @@ namespace xo {
         {
             AGCObject * v = reinterpret_cast<AGCObject *>(object_types_.lo_);
 
-            return &(v[tseq.seqno()]);
+            const AGCObject * target = &(v[tseq.seqno()]);
+
+            assert(reinterpret_cast<const std::byte *>(target) < object_types_.limit_);
+
+            return target;
         }
 
         /* editor bait: register_type */
@@ -279,12 +355,7 @@ namespace xo {
         void
         DX1Collector::add_gc_root_poly(obj<AGCObject> * p_root) noexcept
         {
-            std::byte * mem
-                = roots_.alloc(typeseq::sentinel(),
-                               sizeof(obj<AGCObject>*));
-            assert(mem);
-
-            *(obj<AGCObject> **)mem = p_root;
+            root_set_.push_back(GCRoot(p_root));
         }
 
         void
@@ -337,7 +408,10 @@ namespace xo {
             log && log("step 2b : [STUB] copy pinned");
             log && log("step 3a : [STUB] run destructors");
             log && log("step 3b : [STUB] keep reachable weak pointers");
+
             log && log("step 4  : [STUB] cleanup");
+            this->cleanup_phase(upto);
+
         }
 
         void
@@ -352,6 +426,69 @@ namespace xo {
             }
         }
 
+        void
+        DX1Collector::cleanup_phase(generation upto)
+        {
+            scope log(XO_DEBUG(true), xtag("upto", upto));
+
+            // everything live has been copied out of from-space
+            // -> now set to empty
+            //
+            for (generation g = generation{0}; g < upto; ++g) {
+                if (config_.sanitize_flag_) {
+                    space_[role::from_space()][g]->scrub();
+                }
+
+                space_[role::from_space()][g]->clear();
+            }
+
+            this->runstate_ = GCRunState::gc_not_running();
+        }
+
+        void *
+        DX1Collector::_deep_move_root(obj<AGCObject> from_src,
+                                      generation upto)
+        {
+            // NOTE:
+            // Some roots are non-gc-owned nodes.
+            // GC must still visit immediate children of these nodes
+            // to move gc-owned children.
+            // This implements virtual root node feature,
+            // intended to mitigate mutation log churn.
+
+            scope log(XO_DEBUG(config_.debug_flag_));
+
+            if (!from_src)
+                return nullptr;
+
+            bool src_in_from_space = this->contains(role::from_space(), from_src.data());
+
+            if (src_in_from_space) {
+                return _deep_move_gc_owned(from_src.data(), upto);
+            } else {
+                auto self = this->ref<ACollector>();
+                from_src.forward_children(self);
+                return from_src.data();
+            }
+        }
+
+        void *
+        DX1Collector::_deep_move_interior(void * from_src,
+                                          generation upto)
+        {
+            scope log(XO_DEBUG(config_.debug_flag_));
+
+            if (!from_src)
+                return nullptr;
+
+            bool src_in_from_space = this->contains(role::from_space(), from_src);
+
+            if (!src_in_from_space)
+                return from_src;
+
+            return _deep_move_gc_owned(from_src, upto);
+        }
+
         /*
          * rules:
          * - from_src must be in from-space
@@ -364,23 +501,16 @@ namespace xo {
          * EDITOR: gc -> self
          */
         void *
-        DX1Collector::deep_move(void * from_src, generation upto)
+        DX1Collector::_deep_move_gc_owned(void * from_src,
+                                          generation upto)
         {
             scope log(XO_DEBUG(config_.debug_flag_));
-
-            if (!from_src)
-                return nullptr;
-
-            if (!this->contains(role::from_space(), from_src)) {
-                /* presumeably memory not owned by collector
-                 * (e.g. DBoolean {true, false}, DUniqueString {owned by StringTable} etc.)
-                 */
-                return from_src;
-            }
 
             AllocInfo info = this->alloc_info((std::byte *)from_src);
             AllocHeader hdr = info.header();
             typeseq tseq(info.tseq());
+
+            assert(this->contains_allocated(role::from_space(), from_src));
 
             if (is_forwarding_header(hdr)) {
                 /* already forwarded - pickup destination
@@ -475,6 +605,9 @@ namespace xo {
 
             obj<AAllocator, DX1Collector> alloc(this);
             const AGCObject * iface = lookup_type(tseq);
+
+            assert(iface->_has_null_vptr() == false);
+
             void * to_dest = this->shallow_move(iface, from_src);
 
             std::size_t fixup_work = 0;
@@ -487,23 +620,37 @@ namespace xo {
                 fixup_work = 0;
 
                 for (generation g = generation{0}; g < upto; ++g) {
+                    /** object index for this pass **/
+                    size_t i_obj = 0;
+
                     /* TODO: use AllocIterator here */
                     while(gray_lo_v[g] < to_space(g)->free_) {
                         AllocHeader * hdr = (AllocHeader *)gray_lo_v[g];
                         void * src = (hdr + 1);
 
-                        log && log("fwd children", xtag("src", src));
-
                         const auto & hdr_cfg = config_.arena_config_.header_;
                         typeseq tseq = typeseq(hdr_cfg.tseq(*hdr));
                         size_t z = hdr_cfg.size_with_padding(*hdr);
 
+                        log && log("deep_move_gc_owned: fwd to-space children",
+                                   xtag("g", g),
+                                   xtag("i_obj", i_obj),
+                                   xtag("src", src),
+                                   xtag("tseq", tseq),
+                                   xtag("tname", TypeRegistry::id2name(tseq)),
+                                   xtag("z", z));
+
                         const AGCObject * iface = this->lookup_type(tseq);
+
+                        assert(iface->_has_null_vptr() == false);
+
                         obj<ACollector, DX1Collector> gc(this);
 
                         iface->forward_children(src, gc);
 
                         gray_lo_v[g] = ((std::byte *)src) + z;
+
+                        ++i_obj;
                         ++fixup_work;
                     }
                 }
@@ -512,21 +659,25 @@ namespace xo {
             log && log(xtag("to_dest", to_dest));
 
             return to_dest;
-        }
+        } /*_deep_move_gc_owned*/
 
         void
         DX1Collector::copy_roots(generation upto) noexcept
         {
             scope log(XO_DEBUG(true));
 
-            for (obj<AGCObject> ** p_root = (obj<AGCObject> **)roots_.lo_;
-                 p_root < (obj<AGCObject> **)roots_.free_; ++p_root)
-            {
-                log && log("copy root", xtag("**p_root.data.pre", (**p_root).data_));
+            for (RootSet::size_type i = 0, n = root_set_.size(); i < n; ++i) {
+                GCRoot & slot = root_set_[i];
 
-                (*p_root)->reset_opaque(this->deep_move((*p_root)->data_, upto));
+                log && log("copy root",
+                           xtag("slot.root()", slot.root()),
+                           xtag("slot.root()->data_", slot.root()->data_));
 
-                log && log(xtag("**p_root.data.post", (**p_root).data_));
+                void * root_to = this->_deep_move_root(*slot.root(), upto);
+
+                slot.root()->reset_opaque(root_to);
+
+                log && log(xtag("slot.root()->data_", slot.root()->data_));
             }
         }
 
@@ -590,9 +741,18 @@ namespace xo {
             /* recover allocation size */
             std::size_t alloc_z = some_arena->config_.header_.size_with_padding(alloc_hdr);
 
-            log && log(xtag("some_arena.lo", some_arena->lo_),
-                       xtag("p_header", p_header),
-                       xtag("alloc_z", alloc_z));
+            if (log) {
+                log(xtag("some_arena.lo", some_arena->lo_),
+                    xtag("p_header", p_header),
+                    xtag("alloc_z", alloc_z));
+
+                AllocInfo info = this->alloc_info((std::byte *)object_data);
+                log(xtag("tseq", info.tseq()),
+                    xtag("tname", TypeRegistry::id2name(typeseq(info.tseq()))),
+                    xtag("is_forwarding_tseq", info.is_forwarding_tseq()),
+                    xtag("age", info.age()),
+                    xtag("size", info.size()));
+            }
 
             /* need to be able to fit forwarding pointer
              * in place of forwarded object.
@@ -616,9 +776,9 @@ namespace xo {
                  *                                                   |
                  *                                    (to-space)     |
                  *                                    +---+-+----+   |
-                 *                                    |FWD|G|size|<--/
-                 *                                    +---+-+----+
-                 *                                    |          |
+                 *                                    |TSQ|G|size|   |
+                 *                                    +---+-+----+   |
+                 *                                    |          | <-/
                  *                                    |          |
                  *                                    |          |
                  *                                    +----------+
@@ -638,22 +798,33 @@ namespace xo {
                  *                              |
                  *                              |     (to-space)
                  *                              |     +---+-+----+
-                 *                              \---->|FWD|G|size|
-                 *                                    +---+-+----+
-                 *                                    |          |
+                 *                              |     |TSQ|G|size|
+                 *                              |     +---+-+----+
+                 *                              \---> |          |
                  *                                    |          |
                  *                                    |          |
                  *                                    +----------+
                  */
+
+                if (log) {
+                    log("lhs_data already forwarded", xtag("dest", dest));
+
+                    AllocInfo info = this->alloc_info((std::byte *)dest);
+                    log(xtag("tseq", info.tseq()),
+                        xtag("tname", TypeRegistry::id2name(typeseq(info.tseq()))),
+                        xtag("age", info.age()), xtag("size", info.size()));
+                }
             } else if (this->check_move_policy(alloc_hdr, object_data)) {
                 /* copy object *lhs + replace with forwarding pointer */
+
+                log && log("forward object now");
 
                 /*
                  *   lhs   obj<AGCObject>             (from-space)
                  *    |    +---------+                +---+-+----+
-                 *    \--->| .iface  |                |FWD|G|size| alloc_hdr
+                 *    \--->| .iface  |                |TSQ|G|size| alloc_hdr
                  *         +---------+  object_data   +---+-+----+
-                 *         | .data x----------------->|          |
+                 *         | .data x----------------> |          |
                  *         +---------+                |          |
                  *                                    |          |
                  *                                    +----------+
@@ -673,14 +844,16 @@ namespace xo {
                  *                              |                    |
                  *                              |     (to-space)     |
                  *                              |     +---+-+----+   |
-                 *                              \---->|FWD|G|size|<--/
-                 *                                    +---+-+----+
-                 *                                    |          |
+                 *                              |     |TSQ|G|size|   |
+                 *                              |     +---+-+----+   |
+                 *                              \---> |          | <-/
                  *                                    |          |
                  *                                    |          |
                  *                                    +----------+
                  */
             } else {
+                log && log("object not eligible/required to forward");
+
                 /* object doesn't need to move.
                  * e.g. incremental collection + object is tenured
                  */
@@ -698,6 +871,9 @@ namespace xo {
             void * to_dest = iface->shallow_copy(from_src, alloc);
 
             log && log(xtag("from_src", from_src), xtag("to_dest", to_dest));
+            log && log(xtag("tseq", info.tseq()),
+                       xtag("tname", TypeRegistry::id2name(typeseq(info.tseq()))),
+                       xtag("age", info.age()), xtag("size", info.size()));
 
             if(to_dest == from_src) {
                 assert(false);
@@ -779,6 +955,95 @@ namespace xo {
 
             // deliberately attempt on nursery to-space, to capture error info + return sentinel
             return this->get_space(role::to_space(), generation{0})->alloc_info(mem);
+        }
+
+        // editor bait: write barrier
+        void
+        DX1Collector::assign_member(void * parent, obj<AGCObject> * p_lhs, obj<AGCObject> rhs)
+        {
+            scope log(XO_DEBUG(config_.debug_flag_),
+                      xtag("parent", parent), xtag("lhs", p_lhs), xtag("rhs", rhs.data()));
+
+            // ++ stats.n_mutation_;
+
+            *p_lhs = rhs;
+
+            if (runstate_.is_running()) {
+                // for removal of all doubt:
+                // don't log mutations during GC cycle
+                return;
+            }
+
+            if (!config_.allow_incremental_gc_) {
+                // only need to log mutations when incremental gc is enabled
+                return;
+            }
+
+            // logging policy depends on:
+            // 1. generation of lhs
+            // 2. generation of rhs
+
+            generation src_g = this->generation_of(role::to_space(), p_lhs);
+
+            if (src_g.is_sentinel()) {
+                // only need mlog entries for gc-owned pointers.
+                // In this case pointer does not originate in gc-owned space
+                return;
+            }
+
+            generation dest_g = this->generation_of(role::to_space(), rhs.data());
+
+            if (dest_g.is_sentinel()) {
+                // similarly, don't need mlog entry to non-gc-owned destination
+                return;
+            }
+
+            if (src_g < dest_g) {
+                // young-to-old pointers don't need to be remembered,
+                // since a GC cycle that collects the old generation is guarnatted
+                // to also collect the young generation.
+                return;
+            }
+
+            if (src_g == dest_g) {
+                // for pointers within the same generation, need to log
+                // if source is older than destination.
+
+                const DArena * arena = this->get_space(role::to_space(), src_g);
+
+                const DArena::header_type * src_hdr = arena->obj2hdr(parent);
+                const DArena::header_type * dest_hdr = arena->obj2hdr(rhs.data());
+
+                assert(src_hdr && dest_hdr);
+
+                if (header2age(*src_hdr) <= header2age(*dest_hdr)) {
+                    // source and destination have the same age;
+                    // therefore are always collected on the same set of GC cycles
+                    // -> no need to remember separately.
+                    return;
+                } else {
+                    // even though {src,dest} belong to the same generation:
+                    // source will be eligible for promotion before destination.
+                    // At that point pointer would become a cross-generational pointer,
+                    // so need to track it now.
+
+                    log && log("xage ptr -> must log");
+                }
+            } else {
+                log && log("xgen ptr -> must log");
+            }
+
+            // control here: we have an older->younger pointer, need to log it
+
+            // mlog keyed by generation in which pointer _destination_ resides:
+            // collection that moves destination generation around needs to also
+            // update pointers such as this one
+            //
+            MutationLog * mlog = this->mlog_[role::to_space()][dest_g];
+
+            mlog->push_back(MutationLogEntry(parent,
+                                             reinterpret_cast<void **>(&(p_lhs->data_)),
+                                             rhs));
         }
 
         DX1CollectorIterator

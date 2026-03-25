@@ -63,10 +63,14 @@ namespace xo {
                                                                    16 /*size_bits*/), };
             X1CollectorConfig cfg = { .arena_config_ = arena_cfg,
                                       .n_generation_ = 2,
-                                      .gc_trigger_v_ = {{64*1024, 1024*1024, 0, 0,
+                                      .gc_trigger_v_ = {{64*1024, 1024*1024,
+#ifdef NOPE
+                                                         0, 0,
                                                          0, 0, 0, 0,
                                                          0, 0, 0, 0,
-                                                         0, 0, 0, 0}} };
+                                                         0, 0, 0, 0
+#endif
+                                      }} };
 
             DX1Collector gc = DX1Collector{cfg};
 
@@ -111,10 +115,14 @@ namespace xo {
                                                                    16 /*size_bits*/), };
             X1CollectorConfig cfg = { .arena_config_ = arena_cfg,
                                       .n_generation_ = 2,
-                                      .gc_trigger_v_ = {{64*1024, 1024*1024, 0, 0,
+                                      .gc_trigger_v_ = {{64*1024, 1024*1024,
+#ifdef NOPE
+                                                         0, 0,
                                                          0, 0, 0, 0,
                                                          0, 0, 0, 0,
-                                                         0, 0, 0, 0}} };
+                                                         0, 0, 0, 0
+#endif
+                                      }} };
 
             DX1Collector gc = DX1Collector{cfg};
 
@@ -137,10 +145,14 @@ namespace xo {
                                                                    16 /*size-bits*/), };
             X1CollectorConfig cfg = { .arena_config_ = arena_cfg,
                                       .n_generation_ = 2,
-                                      .gc_trigger_v_ = {{64*1024, 1024*1024, 0, 0,
+                                      .gc_trigger_v_ = {{64*1024, 1024*1024,
+#ifdef NOPE
+                                                         0, 0,
                                                          0, 0, 0, 0,
                                                          0, 0, 0, 0,
-                                                         0, 0, 0, 0}} };
+                                                         0, 0, 0, 0
+#endif
+                                      }} };
 
             DX1Collector gc = DX1Collector{cfg};
 
@@ -167,10 +179,14 @@ namespace xo {
             /* collector with one generation collapses to a non-generational copying collector */
             X1CollectorConfig cfg = { .arena_config_ = arena_cfg,
                                       .n_generation_ = 1,
-                                      .gc_trigger_v_ = {{64*1024, 0, 0, 0,
+                                      .gc_trigger_v_ = {{64*1024, 0,
+#ifdef NOPE
+                                                         0, 0,
                                                          0, 0, 0, 0,
                                                          0, 0, 0, 0,
-                                                         0, 0, 0, 0}} };
+                                                         0, 0, 0, 0
+#endif
+                                      }} };
 
             DX1Collector x1state = DX1Collector{cfg};
 
@@ -211,10 +227,14 @@ namespace xo {
             /* collector with one generation collapses to a non-generational copying collector */
             X1CollectorConfig cfg = { .arena_config_ = arena_cfg,
                                       .n_generation_ = 1,
-                                      .gc_trigger_v_ = {{64*1024, 0, 0, 0,
+                                      .gc_trigger_v_ = {{64*1024, 0,
+#ifdef NOPE
+                                                         0, 0,
                                                          0, 0, 0, 0,
                                                          0, 0, 0, 0,
-                                                         0, 0, 0, 0}} };
+                                                         0, 0, 0, 0
+#endif
+                                      }} };
 
             /* X1 allocator+collector */
             DX1Collector x1state = DX1Collector{cfg};
