@@ -19,13 +19,15 @@ namespace xo {
         class DSimpleRcx {
         public:
             using AAllocator = xo::mm::AAllocator;
+            using ACollector = xo::mm::ACollector;
             using MemorySizeVisitor = xo::mm::MemorySizeVisitor;
 
         public:
             DSimpleRcx(obj<AAllocator> mm, StringTable * st)
-                : allocator_{mm}, stringtable_{st} {}
+            : allocator_{mm}, stringtable_{st} {}
 
             obj<AAllocator> allocator() const noexcept { return allocator_; }
+            obj<ACollector> collector() const noexcept;
             StringTable * stringtable() const noexcept { return stringtable_; }
             void visit_pools(const MemorySizeVisitor & visitor) const;
 

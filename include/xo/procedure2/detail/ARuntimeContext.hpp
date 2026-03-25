@@ -42,6 +42,8 @@ public:
     using Opaque = void *;
     /** xo memory allocator **/
     using AAllocator = xo::mm::AAllocator;
+    /** xo garbage collector **/
+    using ACollector = xo::mm::ACollector;
     /** function to visit memory pools **/
     using MemorySizeVisitor = xo::mm::MemorySizeVisitor;
     ///@}
@@ -55,6 +57,8 @@ public:
     virtual void _drop(Opaque d) const noexcept = 0;
     /** default allocator to use for objects **/
     virtual obj<AAllocator> allocator(Copaque data)  const  noexcept = 0;
+    /** collector facet for allocator. If non-null, same data pointer as allocator **/
+    virtual obj<ACollector> collector(Copaque data)  const  noexcept = 0;
     /** stringtable for unique symbols **/
     virtual StringTable * stringtable(Copaque data)  const  noexcept = 0;
     /** invoke visitor for each distinct memory pool **/
