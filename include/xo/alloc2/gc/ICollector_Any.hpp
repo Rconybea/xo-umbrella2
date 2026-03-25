@@ -41,6 +41,8 @@ namespace xo {
             [[noreturn]] void add_gc_root_poly(Opaque, obj<AGCObject> *) override { _fatal(); }
             [[noreturn]] void remove_gc_root_poly(Opaque, obj<AGCObject> *) override { _fatal(); }
             [[noreturn]] void request_gc(Opaque, generation) override { _fatal(); }
+            [[noreturn]] void assign_member(Opaque, void *,
+                                            obj<AGCObject> *, obj<AGCObject> &) override { _fatal(); }
             [[noreturn]] void forward_inplace(Opaque, AGCObject *, void **) override { _fatal(); }
 
         private:

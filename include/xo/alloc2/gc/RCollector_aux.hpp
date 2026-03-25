@@ -43,9 +43,27 @@ namespace xo {
         void
         RCollector<Object>::forward_pivot_inplace(obj<AFacet, DRepr> * p_objs)
         {
-            auto e = xo::facet::FacetRegistry::instance().variant<AGCObject,AFacet>(*p_objs);
-            this->forward_inplace(e.iface(), (void **)&(p_objs->data_));
+            if (*p_objs) {
+                auto e = xo::facet::FacetRegistry::instance().variant<AGCObject,AFacet>(*p_objs);
+                this->forward_inplace(e.iface(), (void **)&(p_objs->data_));
+            }
         }
+
+        /** gc-aware assignment; engage special book-keeping for cross-gen pointers **/
+        inline void mm_do_assign(obj<ACollector> & gc,
+                                 void * parent,
+                                 obj<AGCObject> * p_lhs,
+                                 obj<AGCObject> & rhs)
+        {
+            if (gc.data()) {
+                gc.assign_member(parent, p_lhs, rhs);
+            } else {
+                // assume null collector downstream from allocator that does not provide collection.
+                // In that no additional assignment work.
+
+                *p_lhs = rhs;
+            }
+        };
     }
 }
 

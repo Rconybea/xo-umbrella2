@@ -76,6 +76,15 @@ namespace xo {
              **/
             virtual void request_gc(Opaque d, generation upto) = 0;
 
+            /** Assign pointer @p p_lhs to destination @p rhs, within parent allocation @p parent
+             *
+             *  Require: gc not in progress
+             **/
+            virtual void assign_member(Opaque d,
+                                       void * parent,
+                                       obj<AGCObject> * p_lhs,
+                                       obj<AGCObject> & rhs) = 0;
+
             /** evacuate @p *lhs, that refers to state with interface @p lhs_iface,
              *  to collector @p d's to-space. Replace *lhs_data with forwarding pointer
              *
