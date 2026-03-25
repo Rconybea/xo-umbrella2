@@ -111,6 +111,10 @@ namespace xo {
                         flags & InstallFlags::f_generalpurpose));
             ok = ok & (PrimitiveRegistry::install_aux
                        (sink,
+                        ObjectPrimitives::make_set_car_pm(mm, stbl),
+                        flags & InstallFlags::f_generalpurpose));
+            ok = ok & (PrimitiveRegistry::install_aux
+                       (sink,
                         ObjectPrimitives::make_dict_make_pm(mm, stbl),
                         flags & InstallFlags::f_generalpurpose));
             ok = ok & (PrimitiveRegistry::install_aux
