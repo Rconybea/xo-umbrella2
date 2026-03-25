@@ -49,6 +49,8 @@ namespace xo {
             static void add_gc_root_poly(DX1Collector & d, obj<AGCObject> * p_root);
             static void remove_gc_root_poly(DX1Collector & d, obj<AGCObject> * p_root);
             static void request_gc(DX1Collector & d, generation upto);
+            static void assign_member(DX1Collector & d, void * parent,
+                                      obj<AGCObject> * p_lhs, obj<AGCObject> & rhs);
             static void forward_inplace(DX1Collector & d, AGCObject * lhs_iface, void ** lhs_data);
 
             static int32_t s_typeseq;

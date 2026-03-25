@@ -26,6 +26,18 @@ namespace xo {
 
             std::uint32_t value_;
         };
+
+        inline bool operator==(object_age lhs, object_age rhs) {
+            return lhs.value_ == rhs.value_;
+        }
+
+        inline bool operator<(object_age lhs, object_age rhs) {
+            return lhs.value_ < rhs.value_;
+        }
+
+        inline bool operator>(object_age lhs, object_age rhs) {
+            return lhs.value_ > rhs.value_;
+        }
     }
 }
 

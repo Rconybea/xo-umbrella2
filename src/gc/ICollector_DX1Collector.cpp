@@ -82,6 +82,15 @@ namespace xo {
         }
 
         void
+        ICollector_DX1Collector::assign_member(DX1Collector & d,
+                                               void * parent,
+                                               obj<AGCObject> * p_lhs,
+                                               obj<AGCObject> & rhs)
+        {
+            d.assign_member(parent, p_lhs, rhs);
+        }
+
+        void
         ICollector_DX1Collector::forward_inplace(DX1Collector & d,
                                                  AGCObject * lhs_iface,
                                                  void ** lhs_data)

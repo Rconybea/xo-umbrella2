@@ -7,11 +7,13 @@
 
 #include "X1CollectorConfig.hpp"
 #include "GCObject.hpp"
+#include "MutationLogEntry.hpp"
 #include "generation.hpp"
 #include "object_age.hpp"
 #include "role.hpp"
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/arena/DArena.hpp>
+#include <xo/arena/DArenaVector.hpp>
 #include <xo/arena/ArenaConfig.hpp>
 #include <memory>
 #include <array>
@@ -64,9 +66,35 @@ namespace xo {
 
         struct DX1CollectorIterator;
 
+        /** @brief GC root struct
+         *
+         *  A root is traversed much like other gc-owned value:
+         *  a. if root is in GC from-space, move it to to-space.
+         *  b. if root is in GC to-space, skip.
+         *     e.g. root belongs to generation not subject to collection this cycle.
+         *  c. if root it not allocated by GC, still do in-place forward on its
+         *     children.  This is load-bearing for ParserStateMachine, for example.
+         *     Allows non-GC object to refer to a dynamic set of gc-owned objects
+         **/
+        struct GCRoot {
+        public:
+            GCRoot() = default;
+            explicit GCRoot(obj<AGCObject> * x) : root_{x} {}
+
+            obj<AGCObject> * root() { return root_; }
+
+        private:
+            obj<AGCObject> * root_ = nullptr;
+        };
+
         // ----- DX1Collector -----
 
+        /** @brief garbage collector 'X1'
+         **/
         struct DX1Collector {
+        public:
+            using RootSet = DArenaVector<GCRoot>;
+            using MutationLog = DArenaVector<MutationLogEntry>;
             using typeseq = xo::facet::typeseq;
             using size_type = DArena::size_type;
             using value_type = DArena::value_type;
@@ -75,6 +103,7 @@ namespace xo {
             /** hard max typeseq for collector-registered types **/
             static constexpr size_t c_max_typeseq = 4096;
 
+        public:
             /** Create X1 collector instance. **/
             explicit DX1Collector(const X1CollectorConfig & cfg);
 
@@ -92,7 +121,7 @@ namespace xo {
             std::string_view name() const { return config_.name_; }
 
             const DArena * get_object_types() const noexcept { return &object_types_; }
-            const DArena * get_roots() const noexcept { return &roots_; }
+            const RootSet * get_root_set() const noexcept { return &root_set_; }
             const DArena * get_space(role r, generation g) const noexcept { return space_[r][g]; }
             DArena * get_space(role r, generation g) noexcept { return space_[r][g]; }
             DArena * from_space(generation g) noexcept { return get_space(role::from_space(), g); }
@@ -119,6 +148,16 @@ namespace xo {
              *  in role @p r (according to current GC state)
              **/
             bool contains(role r, const void * addr) const noexcept;
+
+            /** true iff address @p addr allocated from this collector and currently live
+             *  in role @p r (according to current GC state)
+             **/
+            bool contains_allocated(role r, const void * addr) const noexcept;
+
+            /** generation to which pointer @p addr belongs, given role @p r;
+             *  sentinel if not found in this collector
+             **/
+            generation generation_of(role r, const void * addr) const noexcept;
 
             /** return details from last error (will be in gen0 to-space) **/
             AllocError last_error() const noexcept;
@@ -224,6 +263,21 @@ namespace xo {
              **/
             bool expand(size_type z) noexcept;
 
+            // ----- mutation -----
+
+            /** Modify a gc-owned pointer @p *p_lhs, within allocation @p parent,
+             *  to point to @p rhs.
+             *
+             *  Motivation: need special handling for cross-generational pointers with
+             *  incremental gc.
+             *
+             *  Require:
+             *  - if parent is owned by this collector, it has it's own allocation
+             *    (alloc header immediately precedes object address @c parent.data_)
+             *  - address @p p_lhs falls within extent of allocation for @c parent.data_
+             **/
+            void assign_member(void * parent, obj<AGCObject> * p_lhs, obj<AGCObject> rhs);
+
             // ----- iteration -----
 
             /** alloc iterator at begin position **/
@@ -242,16 +296,36 @@ namespace xo {
             void clear() noexcept;
 
         private:
+            /** aux init function: initialize @ref object_types_ arena **/
+            void _init_object_types(const X1CollectorConfig & cfg, std::size_t page_z);
+            /** aux init function: initialize @ref roots_ arena **/
+            void _init_gc_roots(const X1CollectorConfig & cfg, std::size_t page_z);
+            /** aux init function: initialize @ref mlog_storage_[][] arenas **/
+            void _init_mlogs(const X1CollectorConfig & cfg, std::size_t page_z);
+            /** aux init function: create mutation log **/
+            MutationLog _make_mlog(uint32_t igen, char tag_char, size_t mlog_z, std::size_t page_z);
+            /** aux init function: initialize @ref space_storage_[][] arenas **/
+            void _init_space(const X1CollectorConfig & cfg);
+
             /** swap from- and to- roles for all generations < @p upto **/
             void swap_roles(generation upto) noexcept;
             /** copy roots + everything reachable from them, to to-space **/
             void copy_roots(generation upto) noexcept;
 
-            /** move subgraph at @p from_src to to-space.
-             *
+            /** cleanup after gc **/
+            void cleanup_phase(generation upto);
+
+            /** move root subgraph at @p from_src to to-space.
+             *  If not in gc-space, visit immediate children and move them.
              *  Require: runstate_.is_running()
              **/
-            void * deep_move(void * from_src, generation upto);
+            void * _deep_move_root(obj<AGCObject> from_src, generation upto);
+            /** move interior subgraph at @p from_src to to-space.
+             *  no-op if not in gc-space.
+             **/
+            void * _deep_move_interior(void * from_src, generation upto);
+            /** common driver for _deep_move_root(), _deep_move_interior() **/
+            void * _deep_move_gc_owned(void * from_src, generation upto);
 
         public:
             /** garbage collector configuration **/
@@ -270,15 +344,42 @@ namespace xo {
             /** if > 0: need gc for all generations < gc_pending_upto_ **/
             generation gc_pending_upto_;
 
-            /** (ab)using arena to get extensible list of root objects.
+            /** using arena to get extensible list of root objects.
              *  For each root store one address (type obj<AGCObject>*)
+             *
+             *  An Object x that supports AGCObject, but doesn't live in gc-space,
+             *  will get special treatment if it appears in root_set_:
+             *  collector will traverse x to forward pointers to gc-owned
+             *  targets. In other contexts collector doesn't look inside
+             *  non-gc-owned objects
+             *
+             *  editor bait: root_v
              **/
-            DArena roots_;
+            RootSet root_set_;
+
+            /** Cross-generational mutations tracked in MutationLogs.
+             *  We need three logs per generation:
+             *  A. one to observe and remember mutations in to-space
+             *     during normal operation (between GC cycles)
+             *  B. during GC: 2nd mlog to hold entries from from-mlog
+             *     that will still be needed post-GC (because ptr direction
+             *     from higher gen to lower gen after cycle).
+             *  C. during GC: 3rd mlog to triage entries for which
+             *     liveness of pointer source isn't yet established.
+             *
+             * NOTE: indexed on generation of pointer *destination*
+             **/
+            std::array<MutationLog, c_max_generation - 1> mlog_storage_[c_n_role + 1];
+
+            /** mlog pointers.  The roles of mlog_storage_[*][g] get permuted
+             *  as each collection cycle proceeds
+             **/
+            std::array<MutationLog *, c_max_generation - 1> mlog_[c_n_role + 1];
 
             /** collector-managed memory here.
              *  - space_[1] is from-space
              *  - space_[0] is to-space
-             *  coordinates with role ingc/role.hpp, see also.
+             *  coordinates with role in gc/role.hpp, see also.
              **/
 
             /** arena objects for collector managed memory

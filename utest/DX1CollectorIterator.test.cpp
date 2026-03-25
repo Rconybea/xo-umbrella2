@@ -53,10 +53,14 @@ namespace xo {
                                                                    16 /*size_bits*/), };
             X1CollectorConfig cfg = { .arena_config_ = arena_cfg,
                                       .n_generation_ = 2,
-                                      .gc_trigger_v_ = {{64*1024, 1024*1024, 0, 0,
+                                      .gc_trigger_v_ = {{64*1024, 1024*1024,
+#ifdef NOPE
+                                                         0, 0,
                                                          0, 0, 0, 0,
                                                          0, 0, 0, 0,
-                                                         0, 0, 0, 0}} };
+                                                         0, 0, 0, 0
+#endif
+                                      }} };
 
             DX1Collector gc = DX1Collector{cfg};
 
@@ -96,10 +100,14 @@ namespace xo {
                                                                    16 /*size_bits*/), };
             X1CollectorConfig cfg = { .arena_config_ = arena_cfg,
                                       .n_generation_ = 2,
-                                      .gc_trigger_v_ = {{64*1024, 1024*1024, 0, 0,
+                                      .gc_trigger_v_ = {{64*1024, 1024*1024,
+#ifdef NOPE
+                                                         0, 0,
                                                          0, 0, 0, 0,
                                                          0, 0, 0, 0,
-                                                         0, 0, 0, 0}} };
+                                                         0, 0, 0, 0
+#endif
+                                      }} };
 
             DX1Collector gc = DX1Collector{cfg};
             obj<AAllocator, DX1Collector> a1o{&gc};

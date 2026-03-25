@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "GCObject.hpp"
+#include <xo/alloc2/GCObject.hpp>
 
 namespace xo {
     namespace mm {
