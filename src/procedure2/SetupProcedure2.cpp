@@ -93,42 +93,47 @@ namespace xo {
             obj<AAllocator> mm = rcx.allocator();
             StringTable * stbl = rcx.stringtable();
 
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG(false));
 
             bool ok = true;
 
             ok = ok & (PrimitiveRegistry::install_aux
-                       (sink,
-                        ObjectPrimitives::make_cwd_pm(mm, stbl),
-                        flags & InstallFlags::f_generalpurpose));
+                           (sink,
+                            ObjectPrimitives::make_cwd_pm(mm, stbl),
+                            flags & InstallFlags::f_generalpurpose));
             ok = ok & (PrimitiveRegistry::install_aux
-                       (sink,
-                        ObjectPrimitives::make_nth_pm(mm, stbl),
-                        flags & InstallFlags::f_generalpurpose));
+                           (sink,
+                            ObjectPrimitives::make_nth_pm(mm, stbl),
+                            flags & InstallFlags::f_generalpurpose));
             ok = ok & (PrimitiveRegistry::install_aux
-                       (sink,
-                        ObjectPrimitives::make_cons_pm(mm, stbl),
-                        flags & InstallFlags::f_generalpurpose));
+                           (sink,
+                            ObjectPrimitives::make_cons_pm(mm, stbl),
+                            flags & InstallFlags::f_generalpurpose));
             ok = ok & (PrimitiveRegistry::install_aux
-                       (sink,
-                        ObjectPrimitives::make_set_car_pm(mm, stbl),
-                        flags & InstallFlags::f_generalpurpose));
+                           (sink,
+                            ObjectPrimitives::make_set_car_pm(mm, stbl),
+                            flags & InstallFlags::f_generalpurpose));
             ok = ok & (PrimitiveRegistry::install_aux
-                       (sink,
-                        ObjectPrimitives::make_dict_make_pm(mm, stbl),
-                        flags & InstallFlags::f_generalpurpose));
+                           (sink,
+                            ObjectPrimitives::make_dict_make_pm(mm, stbl),
+                            flags & InstallFlags::f_generalpurpose));
             ok = ok & (PrimitiveRegistry::install_aux
-                       (sink,
-                        ObjectPrimitives::make_dict_lookup_pm(mm, stbl),
-                        flags & InstallFlags::f_generalpurpose));
+                           (sink,
+                            ObjectPrimitives::make_dict_lookup_pm(mm, stbl),
+                            flags & InstallFlags::f_generalpurpose));
             ok = ok & (PrimitiveRegistry::install_aux
-                       (sink,
-                        ObjectPrimitives::make_dict_upsert_pm(mm, stbl),
-                        flags & InstallFlags::f_generalpurpose));
+                           (sink,
+                            ObjectPrimitives::make_dict_upsert_pm(mm, stbl),
+                            flags & InstallFlags::f_generalpurpose));
             ok = ok & (PrimitiveRegistry::install_aux
-                       (sink,
-                        ObjectPrimitives::make_fn_n_args_pm(mm, stbl),
-                        flags & InstallFlags::f_generalpurpose));
+                           (sink,
+                            ObjectPrimitives::make_fn_n_args_pm(mm, stbl),
+                            flags & InstallFlags::f_generalpurpose));
+
+            ok = ok & (PrimitiveRegistry::install_aux
+                           (sink,
+                            GcPrimitives::make_request_gc_pm(mm, stbl),
+                            flags & InstallFlags::f_generalpurpose));
 
             return ok;
         }
