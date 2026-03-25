@@ -31,7 +31,7 @@ namespace xo {
                                               InstallSink sink,
                                               InstallFlags flags)
         {
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG(false));
 
             bool ok = true;
 
