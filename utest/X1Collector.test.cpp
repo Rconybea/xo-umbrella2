@@ -172,7 +172,7 @@ namespace ut {
                     REQUIRE(to_2 == nullptr);
 
                     REQUIRE(gc.reserved_total()
-                            == otypes->reserved() + roots->reserved() + 4 * from_0->reserved());
+                            == otypes->reserved() + roots->store()->reserved() + 4 * from_0->reserved());
 
                     log && log(xtag("from_0", from_0->lo_), xtag("to_0", to_0->lo_));
                 }
