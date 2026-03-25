@@ -72,7 +72,7 @@ namespace xo {
             static bool install_aux(InstallSink sink,
                                     PrimitiveRepr * pm,
                                     InstallFlags flags) {
-                scope log(XO_DEBUG(true));
+                scope log(XO_DEBUG(false));
 
                 if (flags != InstallFlags::f_none) {
                     log && log("create primitive", xtag("name", pm->name()));
