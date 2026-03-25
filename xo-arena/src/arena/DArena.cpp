@@ -584,6 +584,12 @@ namespace xo {
         } /*expand*/
 
         void
+        DArena::scrub() noexcept
+        {
+            ::memset(this->lo_, 0, this->free_ - this->lo_);
+        }
+
+        void
         DArena::clear() noexcept
         {
             this->free_ = lo_;
