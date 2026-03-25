@@ -14,6 +14,9 @@
 
 namespace xo {
     namespace mm {
+        class ACollector;
+        class AGCObject;
+
         /** defined here to avoid #include cycle, since
          *  template obj<AGCObject,DRepr> awkward to make available
          *  in RCollector.hpp
