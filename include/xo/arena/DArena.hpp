@@ -229,6 +229,9 @@ namespace xo {
             void restore(Checkpoint ckp) noexcept { free_ = ckp.free_; }
 
 
+            /** zero out all allocated memory. Likely use case is diagnostics **/
+            void scrub() noexcept;
+
             /** discard all allocated memory, return to empty state
              *  Promise:
              *  - committed memory unchanged
