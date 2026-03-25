@@ -116,6 +116,48 @@ namespace xo {
             return DPrimitive_gco_2_gco_gco::_make(mm, "cons", cons_ty, &xfer_cons);
         }
 
+        // ----- set-car -----
+
+        obj<AGCObject>
+        xfer_set_car(obj<ARuntimeContext> rcx,
+                     obj<AGCObject> cell_arg,
+                     obj<AGCObject> dest)
+        {
+            scope log(XO_DEBUG(true));
+
+            (void)rcx;
+            (void)dest;
+
+            auto cell = obj<AGCObject,DList>::from(cell_arg);
+
+            assert(!cell->is_empty());
+
+            if (!cell->is_empty()) {
+                cell->assign_head(rcx.collector(), dest);
+            }
+
+            return cell;
+        }
+
+        DPrimitive_gco_2_gco_gco *
+        ObjectPrimitives::make_set_car_pm(obj<AAllocator> mm,
+                                          StringTable * stbl)
+        {
+            (void)stbl;
+
+            auto any_ty = DAtomicType::make(mm, Metatype::t_any());
+            auto T_ty = DTypeVarRef::make(mm, stbl->intern("T"));
+            auto list_T_ty = DListType::make(mm, T_ty);
+            /** pm_ty: list<T> x any -> list<T> **/
+            auto pm_ty
+                = obj<AType,DFunctionType>(DFunctionType::_make(mm,
+                                                                list_T_ty,
+                                                                any_ty,
+                                                                list_T_ty));
+
+            return DPrimitive_gco_2_gco_gco::_make(mm, "set-car", pm_ty, &xfer_set_car);
+        }
+
         // ----- dict_make -----
 
         obj<AGCObject>
@@ -233,6 +275,7 @@ namespace xo {
         xfer_fn_n_args(obj<ARuntimeContext> rcx,
                        obj<AGCObject> fn_gco)
         {
+
             scope log(XO_DEBUG(true));
 
             log && log(xtag("fn_gco.tseq", fn_gco._typeseq()));

@@ -57,6 +57,8 @@ namespace xo {
             /** return element at 0-based index @p ix **/
             obj<AGCObject> at(size_type ix) const;
 
+            /** assign head **/
+            void assign_head(obj<ACollector> gc, obj<AGCObject> h);
             /** assign rest-pointer **/
             void assign_rest(DList * r);
 

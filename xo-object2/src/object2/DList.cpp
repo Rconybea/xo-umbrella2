@@ -120,6 +120,14 @@ namespace xo {
         }
 
         void
+        DList::assign_head(obj<ACollector> gc, obj<AGCObject> rhs)
+        {
+            scope log(XO_DEBUG(true), xtag("gc.data", gc.data_));
+
+            mm_do_assign(gc, this, &head_, rhs);
+        }
+
+        void
         DList::assign_rest(DList * r)
         {
             scope log(XO_DEBUG(true), "need write barrier");

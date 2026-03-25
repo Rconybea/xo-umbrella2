@@ -35,6 +35,10 @@ namespace xo {
             static DPrimitive_gco_2_gco_gco * make_cons_pm(obj<AAllocator> mm,
                                                            StringTable * stbl);
 
+            /** create primitive: set first member of cons cell **/
+            static DPrimitive_gco_2_gco_gco * make_set_car_pm(obj<AAllocator> mm,
+                                                              StringTable * stbl);
+
             /** create primitive for creating a dictionary instance **/
             static DPrimitive_gco_0 * make_dict_make_pm(obj<AAllocator> mm,
                                                         StringTable * stbl);
