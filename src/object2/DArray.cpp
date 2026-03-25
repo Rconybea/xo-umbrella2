@@ -185,7 +185,11 @@ namespace xo {
         std::size_t
         DArray::forward_children(obj<ACollector> gc) noexcept
         {
+            scope log(XO_DEBUG(true));
+
             for (size_type i = 0; i < size_; ++i) {
+                log && log("DArray::forward_children (loop)", xtag("i", i), xtag("z", size_));
+
                 obj<AGCObject> & elt = elts_[i];
 
                 gc.forward_inplace(&elt);
