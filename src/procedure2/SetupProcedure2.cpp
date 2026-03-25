@@ -6,6 +6,7 @@
 #include "SetupProcedure2.hpp"
 #include "Procedure.hpp"
 #include "ObjectPrimitives.hpp"
+#include "GcPrimitives.hpp"
 #include "SimpleRcx.hpp"
 #include "Primitive_gco_0.hpp"
 #include "Primitive_gco_1_gco.hpp"

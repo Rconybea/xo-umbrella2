@@ -6,6 +6,7 @@ set(SELF_SRCS
     init_primitives.cpp
     SetupProcedure2.cpp
     ObjectPrimitives.cpp
+    GcPrimitives.cpp
     PrimitiveRegistry.cpp
     DPrimitive.cpp
     DSimpleRcx.cpp
