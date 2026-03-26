@@ -43,6 +43,12 @@ namespace xo {
                                         Generation g, role r) const noexcept = 0;
             virtual size_type committed(Copaque d,
                                         Generation g, role r) const noexcept = 0;
+
+            /** true if gc responsible for address @p addr with role @p r
+             **/
+            virtual bool contains(Copaque d,
+                                  role r, const void * addr) const noexcept = 0;
+
             virtual bool is_type_installed(Copaque d,
                                            typeseq tseq) const noexcept = 0;
 

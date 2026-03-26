@@ -48,6 +48,12 @@ namespace xo {
         }
 
         bool
+        ICollector_DX1Collector::contains(const DX1Collector & d, role r, const void * addr)
+        {
+            return d.contains(r, addr);
+        }
+
+        bool
         ICollector_DX1Collector::is_type_installed(const DX1Collector & d, typeseq tseq)
         {
             return d.is_type_installed(tseq);
