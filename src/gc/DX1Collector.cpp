@@ -29,26 +29,26 @@ namespace xo {
 
         // ----- GCRunState -----
 
-        GCRunState::GCRunState(Mode mode, generation gc_upto)
+        GCRunState::GCRunState(Mode mode, Generation gc_upto)
             : mode_{mode}, gc_upto_{gc_upto}
         {}
 
         GCRunState
         GCRunState::idle()
         {
-            return GCRunState(Mode::idle, generation::sentinel());
+            return GCRunState(Mode::idle, Generation::sentinel());
         }
 
         GCRunState
         GCRunState::verify()
         {
-            return GCRunState(Mode::verify, generation::sentinel());
+            return GCRunState(Mode::verify, Generation::sentinel());
         }
 
         GCRunState
-        GCRunState::gc_upto(generation g)
+        GCRunState::gc_upto(Generation g)
         {
-            return GCRunState(Mode::gc, generation(g + 1));
+            return GCRunState(Mode::gc, Generation(g + 1));
         }
 
         // ----- DX1Collector -----
@@ -197,7 +197,7 @@ namespace xo {
         bool
         DX1Collector::contains_allocated(role r, const void * addr) const noexcept
         {
-            generation g = this->generation_of(r, addr);
+            Generation g = this->generation_of(r, addr);
 
             if (g.is_sentinel())
                 return false;
@@ -205,17 +205,17 @@ namespace xo {
             return this->get_space(r, g)->contains_allocated(addr);
         }
 
-        generation
+        Generation
         DX1Collector::generation_of(role r, const void * addr) const noexcept
         {
-            for (generation gi{0}; gi < config_.n_generation_; ++gi) {
+            for (Generation gi{0}; gi < config_.n_generation_; ++gi) {
                 const DArena * arena = get_space(r, gi);
 
                 if (arena->contains(addr))
                     return gi;
             }
 
-            return generation::sentinel();
+            return Generation::sentinel();
         }
 
         AllocError
@@ -225,7 +225,7 @@ namespace xo {
             // need to adjust here if runtime errors
             // encountered during gc.
 
-            return get_space(role::to_space(), generation::nursery())->last_error_;
+            return get_space(role::to_space(), Generation::nursery())->last_error_;
         }
 
         namespace {
@@ -239,7 +239,7 @@ namespace xo {
                 size_t z3 = 0;
 
                 for (role ri : role::all()) {
-                    for (generation gj{0}; gj < d.config_.n_generation_; ++gj) {
+                    for (Generation gj{0}; gj < d.config_.n_generation_; ++gj) {
                         const DArena * arena = d.get_space(ri, gj);
 
                         assert(arena);
@@ -331,7 +331,7 @@ namespace xo {
         AllocInfo
         DX1Collector::alloc_info(value_type mem) const noexcept {
             for (role ri : role::all()) {
-                for (generation gj{0}; gj < config_.n_generation_; ++gj) {
+                for (Generation gj{0}; gj < config_.n_generation_; ++gj) {
                     const DArena * arena = this->get_space(ri, gj);
 
                     assert(arena);
@@ -343,7 +343,7 @@ namespace xo {
             }
 
             // deliberately attempt on nursery to-space, to capture error info + return sentinel
-            return this->get_space(role::to_space(), generation{0})->alloc_info(mem);
+            return this->get_space(role::to_space(), Generation{0})->alloc_info(mem);
         }
 
         bool
@@ -445,7 +445,7 @@ namespace xo {
         }
 
         void
-        DX1Collector::request_gc(generation upto) noexcept
+        DX1Collector::request_gc(Generation upto) noexcept
         {
             if (gc_blocked_ > 0) {
                 if (gc_pending_upto_ < upto) {
@@ -459,7 +459,7 @@ namespace xo {
         }
 
         void
-        DX1Collector::execute_gc(generation upto) noexcept
+        DX1Collector::execute_gc(Generation upto) noexcept
         {
             scope log(XO_DEBUG(true), xtag("upto", upto));
 
@@ -482,8 +482,8 @@ namespace xo {
             log && log("step 1  : swap from/to roles (now to-space is empty)");
             this->swap_roles(upto);
 
-            log && log(xtag("from_0", get_space(role::from_space(), generation{0})->lo_),
-                       xtag("to_0", get_space(role::to_space(), generation{0})->lo_));
+            log && log(xtag("from_0", get_space(role::from_space(), Generation{0})->lo_),
+                       xtag("to_0", get_space(role::to_space(), Generation{0})->lo_));
 
             log && log("step 2a : copy roots");
             this->copy_roots(upto);
@@ -502,11 +502,11 @@ namespace xo {
         }
 
         void
-        DX1Collector::swap_roles(generation upto) noexcept
+        DX1Collector::swap_roles(Generation upto) noexcept
         {
             scope log(XO_DEBUG(true), xtag("upto", upto));
 
-            for (generation g = generation{0}; g < upto; ++g) {
+            for (Generation g = Generation{0}; g < upto; ++g) {
                 log && log("swap roles", xtag("g", g));
 
                 std::swap(space_[role::to_space()][g], space_[role::from_space()][g]);
@@ -514,14 +514,14 @@ namespace xo {
         }
 
         void
-        DX1Collector::cleanup_phase(generation upto)
+        DX1Collector::cleanup_phase(Generation upto)
         {
             scope log(XO_DEBUG(true), xtag("upto", upto));
 
             // everything live has been copied out of from-space
             // -> now set to empty
             //
-            for (generation g = generation{0}; g < upto; ++g) {
+            for (Generation g = Generation{0}; g < upto; ++g) {
                 if (config_.sanitize_flag_) {
                     space_[role::from_space()][g]->scrub();
                 }
@@ -534,7 +534,7 @@ namespace xo {
 
         void *
         DX1Collector::_deep_move_root(obj<AGCObject> from_src,
-                                      generation upto)
+                                      Generation upto)
         {
             // NOTE:
             // Some roots are non-gc-owned nodes.
@@ -561,7 +561,7 @@ namespace xo {
 
         void *
         DX1Collector::_deep_move_interior(void * from_src,
-                                          generation upto)
+                                          Generation upto)
         {
             scope log(XO_DEBUG(config_.debug_flag_));
 
@@ -589,7 +589,7 @@ namespace xo {
          */
         void *
         DX1Collector::_deep_move_gc_owned(void * from_src,
-                                          generation upto)
+                                          Generation upto)
         {
             scope log(XO_DEBUG(config_.debug_flag_));
 
@@ -686,7 +686,7 @@ namespace xo {
             std::array<std::byte *, c_max_generation> gray_lo_v;
             {
                 for (uint32_t g = 0; g < upto; ++g) {
-                    gray_lo_v[g] = this->to_space(generation{g})->free_;
+                    gray_lo_v[g] = this->to_space(Generation{g})->free_;
                 }
             }
 
@@ -706,7 +706,7 @@ namespace xo {
             do {
                 fixup_work = 0;
 
-                for (generation g = generation{0}; g < upto; ++g) {
+                for (Generation g = Generation{0}; g < upto; ++g) {
                     /** object index for this pass **/
                     size_t i_obj = 0;
 
@@ -749,7 +749,7 @@ namespace xo {
         } /*_deep_move_gc_owned*/
 
         void
-        DX1Collector::copy_roots(generation upto) noexcept
+        DX1Collector::copy_roots(Generation upto) noexcept
         {
             scope log(XO_DEBUG(true));
 
@@ -834,7 +834,7 @@ namespace xo {
              *        allocated object data.
              *        Only using this to get alloc header
              **/
-            DArena * some_arena = this->from_space(generation(0));
+            DArena * some_arena = this->from_space(Generation(0));
 
             DArena::header_type * p_header
                 = some_arena->obj2hdr(object_data);
@@ -969,7 +969,7 @@ namespace xo {
             (void)iface;
             (void)data;
 
-            generation g = this->generation_of(role::to_space(), data);
+            Generation g = this->generation_of(role::to_space(), data);
 
             if (g.is_sentinel()) {
                 g = this->generation_of(role::from_space(), data);
@@ -1028,7 +1028,7 @@ namespace xo {
 
             object_age age = this->header2age(alloc_hdr);
 
-            generation g = config_.age2gen(age);
+            Generation g = config_.age2gen(age);
 
             assert(runstate_.is_running());
 
@@ -1059,8 +1059,8 @@ namespace xo {
         bool
         DX1Collector::expand(size_type z) noexcept
         {
-            if (with_facet<AAllocator>::mkobj(to_space(generation{0})).expand(z))
-                return with_facet<AAllocator>::mkobj(from_space(generation{0})).expand(z);
+            if (with_facet<AAllocator>::mkobj(to_space(Generation{0})).expand(z))
+                return with_facet<AAllocator>::mkobj(from_space(Generation{0})).expand(z);
 
             return false;
         }
@@ -1091,7 +1091,7 @@ namespace xo {
             // 1. generation of lhs
             // 2. generation of rhs
 
-            generation src_g = this->generation_of(role::to_space(), p_lhs);
+            Generation src_g = this->generation_of(role::to_space(), p_lhs);
 
             if (src_g.is_sentinel()) {
                 // only need mlog entries for gc-owned pointers.
@@ -1099,7 +1099,7 @@ namespace xo {
                 return;
             }
 
-            generation dest_g = this->generation_of(role::to_space(), rhs.data());
+            Generation dest_g = this->generation_of(role::to_space(), rhs.data());
 
             if (dest_g.is_sentinel()) {
                 // similarly, don't need mlog entry to non-gc-owned destination
@@ -1161,11 +1161,11 @@ namespace xo {
 
             const DArena * arena
                 = get_space(role::to_space(),
-                            generation{0});
+                            Generation{0});
 
             return DX1CollectorIterator(this,
-                                        generation{0},
-                                        generation{config_.n_generation_},
+                                        Generation{0},
+                                        Generation{config_.n_generation_},
                                         arena->begin(),
                                         arena->end());
         }
@@ -1174,7 +1174,7 @@ namespace xo {
         DX1Collector::end() const noexcept {
             scope log(XO_DEBUG(false));
 
-            generation gen_hi = generation{config_.n_generation_};
+            Generation gen_hi = Generation{config_.n_generation_};
 
             /** valid iterator for end points to end of last DArena.
              *  otherwise will interfere with working compare
@@ -1183,7 +1183,7 @@ namespace xo {
 
             const DArena * arena
                 = get_space(role::to_space(),
-                            generation(config_.n_generation_ - 1));
+                            Generation(config_.n_generation_ - 1));
             DArenaIterator arena_end = arena->end();
 
             return DX1CollectorIterator(this,
@@ -1194,7 +1194,7 @@ namespace xo {
         }
 
         void
-        DX1Collector::reverse_roles(generation g) noexcept {
+        DX1Collector::reverse_roles(Generation g) noexcept {
             assert(g < config_.n_generation_);
 
             std::swap(space_[role::from_space()][g], space_[role::to_space()][g]);
@@ -1203,7 +1203,7 @@ namespace xo {
         void
         DX1Collector::clear() noexcept {
             for (role ri : role::all()) {
-                for (generation gj{0}; gj < config_.n_generation_; ++gj) {
+                for (Generation gj{0}; gj < config_.n_generation_; ++gj) {
                     DArena * arena = this->get_space(ri, gj);
 
                     assert(arena);

@@ -22,8 +22,8 @@ namespace xo {
         struct DX1CollectorIterator {
             DX1CollectorIterator() = default;
             DX1CollectorIterator(const DX1Collector * gc,
-                                 generation gen_ix,
-                                 generation gen_hi,
+                                 Generation gen_ix,
+                                 Generation gen_hi,
                                  DArenaIterator arena_ix,
                                  DArenaIterator arena_hi);
 
@@ -42,8 +42,8 @@ namespace xo {
             bool is_valid() const noexcept { return (gc_ != nullptr); }
             bool is_invalid() const noexcept { return !is_valid(); }
 
-            generation gen_ix() const { return gen_ix_; }
-            generation gen_hi() const { return gen_hi_; }
+            Generation gen_ix() const { return gen_ix_; }
+            Generation gen_hi() const { return gen_hi_; }
             DArenaIterator arena_ix() const { return arena_ix_; }
             DArenaIterator arena_hi() const { return arena_hi_; }
 
@@ -70,8 +70,8 @@ namespace xo {
              *  Current position is within arena for @p gen_ix_ to-space,
              *  Provided @p gen_ix_ < @p gen_hi_
              **/
-            generation gen_ix_;
-            generation gen_hi_;
+            Generation gen_ix_;
+            Generation gen_hi_;
             /** Iterating over allocs in [@p arena_ix_, @p arena_hi_).
              *  Current position is at @p arena_ix_
              **/

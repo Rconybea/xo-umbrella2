@@ -36,8 +36,8 @@ namespace xo {
                 **/
             X1CollectorConfig with_sanitize_flag(bool x);
 
-            generation age2gen(object_age age) const noexcept {
-                return generation(age % n_survive_threshold_);
+            Generation age2gen(object_age age) const noexcept {
+                return Generation(age % n_survive_threshold_);
             }
 
         public:
