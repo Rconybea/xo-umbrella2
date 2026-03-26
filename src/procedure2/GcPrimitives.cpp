@@ -47,7 +47,7 @@ namespace xo {
                                                                        bool_ty,
                                                                        int_ty));
 
-            return DPrimitive_gco_1_gco::_make(mm, "request_gc", pm_ty, &xfer_request_gc);
+            return DPrimitive_gco_1_gco::_make(mm, "request-gc", pm_ty, &xfer_request_gc);
         }
     }
 }
