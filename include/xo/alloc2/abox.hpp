@@ -92,8 +92,16 @@ namespace xo {
             // --------------------------------
 
             /** explicit conversion to obj<AFacet,DRepr> **/
-            obj<AFacet, DRepr> to_op() const noexcept {
+            obj<AFacet, DRepr> to_op() const noexcept
+            requires std::is_same_v<DRepr, xo::facet::DVariantPlaceholder>
+            {
                 return obj<AFacet, DRepr>(this->iface(), this->data());
+            }
+
+            obj<AFacet, DRepr> to_op() const noexcept
+            requires (!std::is_same_v<DRepr, xo::facet::DVariantPlaceholder>)
+            {
+                return obj<AFacet, DRepr>(this->data());
             }
 
             /** Take ownership from unowned object **/
