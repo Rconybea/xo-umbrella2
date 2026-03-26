@@ -48,7 +48,7 @@ namespace ut {
     using xo::mm::DArena;
     using xo::mm::X1CollectorConfig;
     using xo::mm::ArenaConfig;
-    using xo::mm::generation;
+    using xo::mm::Generation;
     using xo::mm::role;
     using xo::mm::padding;
     using xo::facet::with_facet;
@@ -137,7 +137,7 @@ namespace ut {
                     REQUIRE(roots->store()->reserved() >= cfg.object_roots_z_);
                     REQUIRE(roots->store()->reserved() < cfg.object_roots_z_ + roots->store()->page_z_);
 
-                    const DArena * from_0 = gc.get_space(role::from_space(), generation{0});
+                    const DArena * from_0 = gc.get_space(role::from_space(), Generation{0});
 
                     REQUIRE(from_0 != nullptr);
                     REQUIRE(from_0->reserved() >= tc.tenured_z_);
@@ -145,29 +145,29 @@ namespace ut {
                     REQUIRE(from_0->reserved() % from_0->page_z_ == 0);
                     REQUIRE(from_0->allocated() == 0);
 
-                    const DArena * from_1 = gc.get_space(role::from_space(), generation{1});
+                    const DArena * from_1 = gc.get_space(role::from_space(), Generation{1});
 
                     REQUIRE(from_1 != nullptr);
                     REQUIRE(from_1->reserved() == from_0->reserved());
                     REQUIRE(from_1->allocated() == 0);
 
-                    to_0 = gc.get_space(role::to_space(), generation{0});
+                    to_0 = gc.get_space(role::to_space(), Generation{0});
 
                     REQUIRE(to_0 != nullptr);
                     REQUIRE(to_0->reserved() == from_0->reserved());
                     REQUIRE(to_0->allocated() == 0);
 
-                    const DArena * to_1 = gc.get_space(role::to_space(), generation{1});
+                    const DArena * to_1 = gc.get_space(role::to_space(), Generation{1});
 
                     REQUIRE(to_1 != nullptr);
                     REQUIRE(to_1->reserved() == to_0->reserved());
                     REQUIRE(to_1->allocated() == 0);
 
-                    const DArena * from_2 = gc.get_space(role::from_space(), generation{2});
+                    const DArena * from_2 = gc.get_space(role::from_space(), Generation{2});
 
                     REQUIRE(from_2 == nullptr);
 
-                    const DArena * to_2 = gc.get_space(role::to_space(), generation{2});
+                    const DArena * to_2 = gc.get_space(role::to_space(), Generation{2});
 
                     REQUIRE(to_2 == nullptr);
 
@@ -257,7 +257,7 @@ namespace ut {
                 }
 
                 /* no GC roots, so GC is trivial */
-                c_o.request_gc(generation{1});
+                c_o.request_gc(Generation{1});
 
                 log && log(xtag("l0_o.data()", l0_o.data()));
                 log && log(xtag("l0_o.data()->head_.data()", l0_o.data()->head_.data()));
