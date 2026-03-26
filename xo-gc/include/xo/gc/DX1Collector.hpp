@@ -86,9 +86,10 @@ namespace xo {
         struct VerifyStats {
             void clear() { *this = VerifyStats(); }
 
-            std::uint32_t n_ext_  = 0;
-            std::uint32_t n_from_ = 0;
-            std::uint32_t n_to_   = 0;
+            std::uint32_t n_gc_root_ = 0;
+            std::uint32_t n_ext_     = 0;
+            std::uint32_t n_from_    = 0;
+            std::uint32_t n_to_      = 0;
         };
 
         // ----- DX1Collector -----
@@ -98,6 +99,8 @@ namespace xo {
         struct DX1Collector {
         public:
             using RootSet = DArenaVector<GCRoot>;
+            /* TODO: AllocIterator pointing to free pointer instead of std::byte* */
+            using GCMoveCheckpoint = std::array<std::byte *, c_max_generation>;
             using MutationLog = DArenaVector<MutationLogEntry>;
             using typeseq = xo::facet::typeseq;
             using size_type = DArena::size_type;
@@ -154,6 +157,8 @@ namespace xo {
 
             /** true iff address @p addr allocated from this collector and currently live
              *  in role @p r (according to current GC state)
+             *
+             *  (i.e. in [lo,free) for an arena)
              **/
             bool contains_allocated(role r, const void * addr) const noexcept;
 
@@ -334,6 +339,14 @@ namespace xo {
             void * _deep_move_interior(void * from_src, Generation upto);
             /** Common driver for _deep_move_root(), _deep_move_interior() **/
             void * _deep_move_gc_owned(void * from_src, Generation upto);
+            /** snap checkpoint containing allocator state
+             *  use to detect forwarding activity after visiting objects
+             **/
+            GCMoveCheckpoint _snap_move_checkpoint(Generation upto);
+            /** traverse objects allocated after @p ckp, to make sure their children
+             *  are forwarded. Repeat until traverse doesn't find any unforwarded children
+             **/
+            void _forward_children_until_fixpoint(Generation upto, GCMoveCheckpoint ckp);
             /** Evacuate object at @p *lhs_data to to-space.
              *  Replace original with forwarding pointer to new location
              **/
