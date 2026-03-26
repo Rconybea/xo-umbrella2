@@ -29,20 +29,26 @@ namespace xo {
 
         // ----- GCRunState -----
 
-        GCRunState::GCRunState(generation gc_upto)
-            : gc_upto_{gc_upto}
+        GCRunState::GCRunState(Mode mode, generation gc_upto)
+            : mode_{mode}, gc_upto_{gc_upto}
         {}
 
         GCRunState
-        GCRunState::gc_not_running()
+        GCRunState::idle()
         {
-            return GCRunState(generation(0));
+            return GCRunState(Mode::idle, generation::sentinel());
+        }
+
+        GCRunState
+        GCRunState::verify()
+        {
+            return GCRunState(Mode::verify, generation::sentinel());
         }
 
         GCRunState
         GCRunState::gc_upto(generation g)
         {
-            return GCRunState(generation(g + 1));
+            return GCRunState(Mode::gc, generation(g + 1));
         }
 
         // ----- DX1Collector -----
@@ -322,6 +328,78 @@ namespace xo {
             return (vtable != nullptr);
         }
 
+        AllocInfo
+        DX1Collector::alloc_info(value_type mem) const noexcept {
+            for (role ri : role::all()) {
+                for (generation gj{0}; gj < config_.n_generation_; ++gj) {
+                    const DArena * arena = this->get_space(ri, gj);
+
+                    assert(arena);
+
+                    if (arena->contains(mem)) {
+                        return arena->alloc_info(mem);
+                    }
+                }
+            }
+
+            // deliberately attempt on nursery to-space, to capture error info + return sentinel
+            return this->get_space(role::to_space(), generation{0})->alloc_info(mem);
+        }
+
+        bool
+        DX1Collector::verify_ok() noexcept
+        {
+            // 1. visit space pointers
+            //    - verify space_[*] points to space_storage_[*]
+            //    - verify mlog_[*] points to mlog_storage_[*]
+            //
+            // 2. visit roots:
+            //    for each root, verify that immediate child pointers are in to-space
+            //
+            // 3. scan to-space:
+            //    for each object, verify that immediate children are also in to-space
+            //
+            // 4. scan mutation logs:
+            //    verify that entries refer to to-space
+
+            // Each AGCObject impl provides a forward_children() method,
+            // that calls DX1Collector::forward_inplace(iface, &data)
+            //
+            // tactical plan: hijack forward_children.
+            // Add run state so DX1Collector can recognize forward_inplace()
+            // calls made for the purpose of checking child pointers.
+
+            GCRunState saved_runstate = runstate_;
+            {
+                this->runstate_ = GCRunState::verify();
+                this->verify_stats_.clear();
+
+                // 2. visit roots
+                for (GCRoot & root_slot : root_set_) {
+                    VerifyStats pre = verify_stats_;
+
+                    auto gco = *root_slot.root();
+
+                    if (gco) {
+                        // forward_children is hijacked here to verify
+                        // pointer validity
+
+                        gco.forward_children(this->ref<ACollector>());
+                    }
+
+                    VerifyStats post = verify_stats_;
+
+                    // assert fail -> root contains ptr to from-space
+                    assert(pre.n_from_ == post.n_from_);
+                }
+            }
+
+            // restore run state at end of verify cycle
+            this->runstate_ = saved_runstate;
+
+            return true;
+        }
+
         const AGCObject *
         DX1Collector::lookup_type(typeseq tseq) const noexcept
         {
@@ -389,14 +467,19 @@ namespace xo {
 
             //auto t0 = std::chrono::steady_clock::now();
 
-            log && log("step 0a : update run state");
+            if (config_.sanitize_flag_) {
+                log && log("step 0a : verify");
+                this->verify_ok();
+            }
+
+            log && log("step 0b : update run state");
             this->runstate_ = GCRunState::gc_upto(upto);
 
-            log && log("step 0a : [STUB] snapshot alloc state");
+            log && log("step 0c : [STUB] snapshot alloc state");
 
-            log && log("step 0b : [STUB] scan for object statistics");
+            log && log("step 0d : [STUB] scan for object statistics");
 
-            log && log("step 1  : swap from/to roles");
+            log && log("step 1  : swap from/to roles (now to-space is empty)");
             this->swap_roles(upto);
 
             log && log(xtag("from_0", get_space(role::from_space(), generation{0})->lo_),
@@ -409,9 +492,13 @@ namespace xo {
             log && log("step 3a : [STUB] run destructors");
             log && log("step 3b : [STUB] keep reachable weak pointers");
 
-            log && log("step 4  : [STUB] cleanup");
+            log && log("step 4  : cleanup");
             this->cleanup_phase(upto);
 
+            if (config_.sanitize_flag_) {
+                log && log("step 4b : verify");
+                this->verify_ok();
+            }
         }
 
         void
@@ -442,7 +529,7 @@ namespace xo {
                 space_[role::from_space()][g]->clear();
             }
 
-            this->runstate_ = GCRunState::gc_not_running();
+            this->runstate_ = GCRunState::idle();
         }
 
         void *
@@ -685,6 +772,22 @@ namespace xo {
         DX1Collector::forward_inplace(AGCObject * lhs_iface,
                                       void ** lhs_data)
         {
+            if (runstate_.is_running()) {
+                // called during collection phase
+                this->_forward_inplace_aux(lhs_iface, lhs_data);
+            } else if (runstate_.is_verify()) {
+                // called during verify_ok
+                this->_verify_aux(lhs_iface, lhs_data);
+            } else {
+                // should be unreachable
+                assert(false);
+            }
+        }
+
+        void
+        DX1Collector::_forward_inplace_aux(AGCObject * lhs_iface,
+                                           void ** lhs_data)
+        {
             scope log(XO_DEBUG(config_.debug_flag_),
                       xtag("lhs_data", lhs_data),
                       xtag("*lhs_data", *lhs_data));
@@ -858,7 +961,30 @@ namespace xo {
                  * e.g. incremental collection + object is tenured
                  */
             }
-        } /*forward_inplace*/
+        } /*_forward_inplace*/
+
+        void
+        DX1Collector::_verify_aux(AGCObject * iface, void * data)
+        {
+            (void)iface;
+            (void)data;
+
+            generation g = this->generation_of(role::to_space(), data);
+
+            if (g.is_sentinel()) {
+                g = this->generation_of(role::from_space(), data);
+
+                if (!g.is_sentinel()) {
+                    // verify failure - live pointer still refers to from-space
+
+                    ++(verify_stats_.n_from_);
+                } else {
+                    ++(verify_stats_.n_ext_);
+                }
+            } else {
+                ++(verify_stats_.n_to_);
+            }
+        }
 
         void *
         DX1Collector::shallow_move(const AGCObject * iface, void * from_src)
@@ -937,24 +1063,6 @@ namespace xo {
                 return with_facet<AAllocator>::mkobj(from_space(generation{0})).expand(z);
 
             return false;
-        }
-
-        AllocInfo
-        DX1Collector::alloc_info(value_type mem) const noexcept {
-            for (role ri : role::all()) {
-                for (generation gj{0}; gj < config_.n_generation_; ++gj) {
-                    const DArena * arena = this->get_space(ri, gj);
-
-                    assert(arena);
-
-                    if (arena->contains(mem)) {
-                        return arena->alloc_info(mem);
-                    }
-                }
-            }
-
-            // deliberately attempt on nursery to-space, to capture error info + return sentinel
-            return this->get_space(role::to_space(), generation{0})->alloc_info(mem);
         }
 
         // editor bait: write barrier

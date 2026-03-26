@@ -49,17 +49,30 @@ namespace xo {
          *  @brief encapsulate state needed while GC is running
          **/
         struct GCRunState {
-            GCRunState() : gc_upto_{0} {}
-            explicit GCRunState(generation gc_upto);
+            enum class Mode {
+                /** gc not running. X1 available for normal allocation **/
+                idle,
+                /** gc in progress. X1 not available for normal allocation **/
+                gc,
+                /** verify in progress. @ref verify_ok call is on the stack **/
+                verify
+            };
 
-            static GCRunState gc_not_running();
+            GCRunState() : gc_upto_{0} {}
+            GCRunState(Mode mode, generation gc_upto);
+
+            static GCRunState idle();
+            static GCRunState verify();
             static GCRunState gc_upto(generation g);
 
             generation gc_upto() const { return gc_upto_; }
 
-            bool is_running() const { return gc_upto_ > 0; }
+            bool is_running() const { return mode_ == Mode::idle; }
+            bool is_verify() const { return mode_ == Mode::verify; }
 
         private:
+            /** current collector mode **/
+            Mode mode_;
             /** running gc collecting all generations gi < gc_upto **/
             generation gc_upto_;
         };
@@ -87,6 +100,17 @@ namespace xo {
             obj<AGCObject> * root_ = nullptr;
         };
 
+        /** @brief info collected during a @ref DX1Collector::verify_ok call
+         *
+         **/
+        struct VerifyStats {
+            void clear() { *this = VerifyStats(); }
+
+            std::uint32_t n_ext_  = 0;
+            std::uint32_t n_from_ = 0;
+            std::uint32_t n_to_   = 0;
+        };
+
         // ----- DX1Collector -----
 
         /** @brief garbage collector 'X1'
@@ -111,15 +135,10 @@ namespace xo {
             template <typename AFacet = AAllocator>
             obj<AFacet,DX1Collector> ref() { return obj<AFacet,DX1Collector>(this); }
 
-#ifdef NOT_YET
-            /** create instance with default configuration,
-             *  generation size @p gen_z
-             **/
-            static DX1Collector make_std(std::size_t gen_z);
-#endif
+            // ----- access methods -----
 
-            std::string_view name() const { return config_.name_; }
-
+            std::string_view name() const noexcept { return config_.name_; }
+            GCRunState runstate() const noexcept { return runstate_; }
             const DArena * get_object_types() const noexcept { return &object_types_; }
             const RootSet * get_root_set() const noexcept { return &root_set_; }
             const DArena * get_space(role r, generation g) const noexcept { return space_[r][g]; }
@@ -127,6 +146,8 @@ namespace xo {
             DArena * from_space(generation g) noexcept { return get_space(role::from_space(), g); }
             DArena * to_space(generation g) noexcept { return get_space(role::to_space(), g); }
             DArena * new_space() noexcept { return to_space(generation{0}); }
+
+            // ----- basic statistics -----
 
             /** total reserved memory in bytes, across all {role, generation} **/
             size_type reserved_total() const noexcept;
@@ -138,6 +159,8 @@ namespace xo {
             size_type available_total() const noexcept;
             /** total allocated memory in bytes, across all {role, generation} **/
             size_type allocated_total() const noexcept;
+
+            // ----- queries -----
 
             /** introspection for memory use.
              *  Call @p visitor(info) for each pool owned by this allocator
@@ -181,6 +204,9 @@ namespace xo {
             /** Retreive bookkeeping info for allocation at @p mem. **/
             AllocInfo alloc_info(value_type mem) const noexcept;
 
+            /** verify that GC state appears consistent **/
+            bool verify_ok() noexcept;
+
             // ----- app memory model -----
 
             /** lookup interface from type sequence
@@ -193,6 +219,8 @@ namespace xo {
              *  type.
              **/
             bool install_type(const AGCObject & meta) noexcept;
+
+            // ------ gc root management -----
 
             /** add GC root at @p *p_root **/
             void add_gc_root_poly(obj<AGCObject> * p_root) noexcept;
@@ -324,8 +352,16 @@ namespace xo {
              *  no-op if not in gc-space.
              **/
             void * _deep_move_interior(void * from_src, generation upto);
-            /** common driver for _deep_move_root(), _deep_move_interior() **/
+            /** Common driver for _deep_move_root(), _deep_move_interior() **/
             void * _deep_move_gc_owned(void * from_src, generation upto);
+            /** Evacuate object at @p *lhs_data to to-space.
+             *  Replace original with forwarding pointer to new location
+             **/
+            void _forward_inplace_aux(AGCObject * lhs_iface, void ** lhs_data);
+            /** Verify that pointer {@p iface, @p data} is valid:
+             *  destination either in to-space, or somewhere outside this collector
+             **/
+            void _verify_aux(AGCObject * iface, void * data);
 
         public:
             /** garbage collector configuration **/
@@ -341,6 +377,7 @@ namespace xo {
 
             /** gc disabled whenever gc_blocked_ > 0 **/
             uint32_t gc_blocked_ = 0;
+
             /** if > 0: need gc for all generations < gc_pending_upto_ **/
             generation gc_pending_upto_;
 
@@ -391,6 +428,9 @@ namespace xo {
              *  are reversed each time generation g gets collected.
              **/
             std::array<DArena*, c_max_generation> space_[c_n_role];
+
+            /** counters collected during @ref verify_ok call **/
+            VerifyStats verify_stats_;
         };
     } /*namespace mm*/
 } /*namespace xo*/
