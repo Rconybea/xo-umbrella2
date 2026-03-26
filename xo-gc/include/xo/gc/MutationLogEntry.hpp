@@ -25,7 +25,14 @@ namespace xo {
          **/
         class MutationLogEntry {
         public:
+            using AGCObject = xo::mm::AGCObject;
+
+        public:
             MutationLogEntry(void * parent, void ** p_data, obj<AGCObject> snap);
+
+            void * parent() const { return parent_; }
+            void ** p_data() const { return p_data_; }
+            obj<AGCObject> snap() const { return snap_; }
 
         private:
             /** address of object containing logged mutation **/
