@@ -334,7 +334,9 @@ let
   ++ (if pkgs.stdenv.isLinux then [
     pkgs.gdb
     pkgs.strace
-  ] else [])
+  ] else [
+    pkgs.llvmPackages_18.lldb
+  ])
   ++ [
     pkgs.which
     pkgs.man
@@ -803,6 +805,10 @@ in
 
       # dependencies on host system libraries
       # glpath = pkgs.lib.makeLibraryPath [ ];
+
+      # debugserver interacts with a local process to debug it.
+      # requires code signing, so nix can't replicate it.
+      export LLDB_DEBUGSERVER_PATH=/Library/Developer/CommandLineTools/Library/PrivateFrameworks/LLDB.framework/Versions/A/Resources/debugserver
 
       # choose a temp directory that can outlive nix-shell
       export TMPDIR=$(getconf DARWIN_USER_TEMP_DIR)
