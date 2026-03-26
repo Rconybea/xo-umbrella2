@@ -7,6 +7,7 @@
 
 #include "Allocator.hpp"
 #include <xo/facet/obj.hpp>
+#include <exception>
 #include <cassert>
 
 namespace xo {
@@ -76,7 +77,13 @@ namespace xo {
 
                     return abox(data);
                 } else {
-                    assert(false);
+                    auto avail = alloc.available();
+                    auto req = sizeof(DRepr);
+
+                    std::cout << "panic: unable to allocate for abox"
+                              << " :req " << req << " :avail " << avail
+                              << std::endl;
+                    std::terminate();
 
                     return abox();
                 }
