@@ -44,6 +44,7 @@ namespace xo {
             static size_type reserved(const DX1Collector & d, Generation g, role r);
             static size_type committed(const DX1Collector & d, Generation g, role r);
             static bool is_type_installed(const DX1Collector & d, typeseq tseq);
+            static bool contains(const DX1Collector & d, role r, const void * addr);
 
             static bool install_type(DX1Collector & d, const AGCObject & iface);
             static void add_gc_root_poly(DX1Collector & d, obj<AGCObject> * p_root);
