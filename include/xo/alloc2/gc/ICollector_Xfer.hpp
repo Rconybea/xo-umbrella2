@@ -32,13 +32,13 @@ namespace xo {
             // const methods
 
             typeseq _typeseq() const noexcept override { return s_typeseq; }
-            size_type allocated(Copaque d, generation g, role r) const noexcept override {
+            size_type allocated(Copaque d, Generation g, role r) const noexcept override {
                 return I::allocated(_dcast(d), g, r);
             }
-            size_type reserved(Copaque d, generation g, role r) const noexcept override {
+            size_type reserved(Copaque d, Generation g, role r) const noexcept override {
                 return I::reserved(_dcast(d), g, r);
             }
-            size_type committed(Copaque d, generation g, role r) const noexcept override {
+            size_type committed(Copaque d, Generation g, role r) const noexcept override {
                 return I::committed(_dcast(d), g, r);
             }
             bool is_type_installed(Copaque d, typeseq tseq) const noexcept override {
@@ -56,7 +56,7 @@ namespace xo {
             void remove_gc_root_poly(Opaque d, obj<AGCObject> * p_root) override {
                 I::remove_gc_root_poly(_dcast(d), p_root);
             }
-            void request_gc(Opaque d, generation upto) override {
+            void request_gc(Opaque d, Generation upto) override {
                 I::request_gc(_dcast(d), upto);
             }
             void assign_member(Opaque d, void * parent,

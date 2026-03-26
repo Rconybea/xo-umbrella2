@@ -31,16 +31,16 @@ namespace xo {
             typeseq _typeseq() const noexcept override { return s_typeseq; }
 
             // const methods
-            [[noreturn]] size_type allocated(Copaque, generation, role) const noexcept override { _fatal(); }
-            [[noreturn]] size_type reserved(Copaque, generation, role) const noexcept override { _fatal(); }
-            [[noreturn]] size_type committed(Copaque, generation, role) const noexcept override { _fatal(); }
+            [[noreturn]] size_type allocated(Copaque, Generation, role) const noexcept override { _fatal(); }
+            [[noreturn]] size_type reserved(Copaque, Generation, role) const noexcept override { _fatal(); }
+            [[noreturn]] size_type committed(Copaque, Generation, role) const noexcept override { _fatal(); }
             [[noreturn]] bool is_type_installed(Copaque, typeseq) const noexcept override { _fatal(); }
 
             // non-const methods
             [[noreturn]] bool install_type(Opaque, const AGCObject &) noexcept override { _fatal(); }
             [[noreturn]] void add_gc_root_poly(Opaque, obj<AGCObject> *) override { _fatal(); }
             [[noreturn]] void remove_gc_root_poly(Opaque, obj<AGCObject> *) override { _fatal(); }
-            [[noreturn]] void request_gc(Opaque, generation) override { _fatal(); }
+            [[noreturn]] void request_gc(Opaque, Generation) override { _fatal(); }
             [[noreturn]] void assign_member(Opaque, void *,
                                             obj<AGCObject> *, obj<AGCObject> &) override { _fatal(); }
             [[noreturn]] void forward_inplace(Opaque, AGCObject *, void **) override { _fatal(); }

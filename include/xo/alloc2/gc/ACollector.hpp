@@ -38,11 +38,11 @@ namespace xo {
             virtual typeseq _typeseq() const noexcept = 0;
 
             virtual size_type allocated(Copaque d,
-                                        generation g, role r) const noexcept = 0;
+                                        Generation g, role r) const noexcept = 0;
             virtual size_type  reserved(Copaque d,
-                                        generation g, role r) const noexcept = 0;
+                                        Generation g, role r) const noexcept = 0;
             virtual size_type committed(Copaque d,
-                                        generation g, role r) const noexcept = 0;
+                                        Generation g, role r) const noexcept = 0;
             virtual bool is_type_installed(Copaque d,
                                            typeseq tseq) const noexcept = 0;
 
@@ -74,7 +74,7 @@ namespace xo {
              *  3. if collection is currently disabled,
              *     collection will trigger the next time gc is enabled.
              **/
-            virtual void request_gc(Opaque d, generation upto) = 0;
+            virtual void request_gc(Opaque d, Generation upto) = 0;
 
             /** Assign pointer @p p_lhs to destination @p rhs, within parent allocation @p parent
              *
