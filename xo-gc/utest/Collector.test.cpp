@@ -27,7 +27,7 @@ namespace xo {
     using xo::mm::DX1Collector;
     using xo::mm::ArenaConfig;
     using xo::mm::AllocHeaderConfig;
-    using xo::mm::generation;
+    using xo::mm::Generation;
     using xo::mm::c_max_generation;
     using xo::facet::with_facet;
     using xo::scope;
@@ -74,13 +74,13 @@ namespace xo {
 
             DX1Collector gc = DX1Collector{cfg};
 
-            generation g0 = generation{0};
+            Generation g0 = Generation{0};
             REQUIRE(gc.to_space(g0));
             REQUIRE(gc.from_space(g0));
             REQUIRE(gc.to_space(g0)->is_mapped());
             REQUIRE(gc.from_space(g0)->is_mapped());
 
-            generation g1 = generation{1};
+            Generation g1 = Generation{1};
             REQUIRE(gc.to_space(g1));
             REQUIRE(gc.from_space(g1));
             REQUIRE(gc.to_space(g1)->is_mapped());
@@ -92,7 +92,7 @@ namespace xo {
             REQUIRE(gc.from_space(g1) != gc.from_space(g0));
             REQUIRE(gc.to_space(g0) != gc.from_space(g1));
 
-            for (generation gi = generation(2); gi < c_max_generation; ++gi) {
+            for (Generation gi = Generation(2); gi < c_max_generation; ++gi) {
                 INFO(xtag("gi", gi));
 
                 REQUIRE(!gc.to_space(gi));

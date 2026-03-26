@@ -12,7 +12,7 @@
 #include <xo/alloc2/generation.hpp>
 
 namespace xo {
-    using xo::mm::generation;
+    using xo::mm::Generation;
 
     namespace scm {
 
@@ -25,7 +25,7 @@ namespace xo {
             bool have_gc = false;
 
             if (rcx.collector()) {
-                generation upto(obj<AGCObject,DInteger>::from(upto_gco));
+                Generation upto(obj<AGCObject,DInteger>::from(upto_gco));
 
                 rcx.collector().request_gc(upto);
 

@@ -17,7 +17,7 @@ namespace xo {
             size_type
             stat_helper(const DX1Collector & d,
                         size_type (DArena::* getter)() const,
-                        generation g,
+                        Generation g,
                         role r)
             {
                 const DArena * arena = d.get_space(r, g);
@@ -30,19 +30,19 @@ namespace xo {
         }
 
         size_type
-        ICollector_DX1Collector::reserved(const DX1Collector & d, generation g, role r)
+        ICollector_DX1Collector::reserved(const DX1Collector & d, Generation g, role r)
         {
             return stat_helper(d, &DArena::reserved, g, r);
         }
 
         size_type
-        ICollector_DX1Collector::allocated(const DX1Collector & d, generation g, role r)
+        ICollector_DX1Collector::allocated(const DX1Collector & d, Generation g, role r)
         {
             return stat_helper(d, &DArena::allocated, g, r);
         }
 
         size_type
-        ICollector_DX1Collector::committed(const DX1Collector & d, generation g, role r)
+        ICollector_DX1Collector::committed(const DX1Collector & d, Generation g, role r)
         {
             return stat_helper(d, &DArena::committed, g, r);
         }
@@ -76,7 +76,7 @@ namespace xo {
 
         void
         ICollector_DX1Collector::request_gc(DX1Collector & d,
-                                            generation upto)
+                                            Generation upto)
         {
             d.request_gc(upto);
         }

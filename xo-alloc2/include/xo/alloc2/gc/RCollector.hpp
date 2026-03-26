@@ -42,15 +42,15 @@ namespace xo {
             void forward_pivot_inplace(obj<AFacet,DRepr> * p_obj);
 
             int32_t _typeseq() const noexcept { return O::iface()->_typeseq(); }
-            size_type allocated(generation g, role r) const noexcept { return O::iface()->allocated(O::data(), g, r); }
-            size_type reserved(generation g, role r) const noexcept { return O::iface()->reserved(O::data(), g, r); }
-            size_type committed(generation g, role r) const noexcept { return O::iface()->committed(O::data(), g, r); }
+            size_type allocated(Generation g, role r) const noexcept { return O::iface()->allocated(O::data(), g, r); }
+            size_type reserved(Generation g, role r) const noexcept { return O::iface()->reserved(O::data(), g, r); }
+            size_type committed(Generation g, role r) const noexcept { return O::iface()->committed(O::data(), g, r); }
             bool is_type_installed(typeseq tseq) const noexcept { return O::iface()->is_type_installed(O::data(), tseq); }
 
             bool install_type(const AGCObject & iface) { return O::iface()->install_type(O::data(), iface); }
             void add_gc_root_poly(obj<AGCObject> * p_root) { O::iface()->add_gc_root_poly(O::data(), p_root); }
             void remove_gc_root_poly(obj<AGCObject> * p_root) { O::iface()->remove_gc_root_poly(O::data(), p_root); }
-            void request_gc(generation g) { O::iface()->request_gc(O::data(), g); }
+            void request_gc(Generation g) { O::iface()->request_gc(O::data(), g); }
 
             void assign_member(void * parent,
                                obj<AGCObject> * p_lhs,

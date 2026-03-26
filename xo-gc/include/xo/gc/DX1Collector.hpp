@@ -23,26 +23,6 @@ namespace xo {
         template <typename T>
         using up = std::unique_ptr<T>;
 
-#ifdef NOT_YET
-        /** State associated with a single DX1Collector generation
-         **/
-        struct Generation {
-            Generation(uint8_t gen_id, up<DArena> from_space, up<DArena> to_space);
-            ~Generation() = default;
-
-            /** identity of this generation.  Generations are numbered from
-             *  0 (youngest) to N (oldest), with N <= c_max_generation
-             **/
-            uint8_t gen_id_;
-            /** from-space.  empty between collection episodes.
-             *  During collection holds former to-space
-             **/
-            up<DArena> from_space_;
-            /** to-space. New allocations occur here **/
-            up<DArena> to_space_;
-        };
-#endif
-
         // ----- GCRunState -----
 
         /** @class GCRunState
@@ -58,23 +38,23 @@ namespace xo {
                 verify
             };
 
-            GCRunState() : gc_upto_{0} {}
-            GCRunState(Mode mode, generation gc_upto);
+            GCRunState() : mode_{Mode::idle}, gc_upto_{0} {}
+            GCRunState(Mode mode, Generation gc_upto);
 
             static GCRunState idle();
             static GCRunState verify();
-            static GCRunState gc_upto(generation g);
+            static GCRunState gc_upto(Generation g);
 
-            generation gc_upto() const { return gc_upto_; }
+            Generation gc_upto() const { return gc_upto_; }
 
-            bool is_running() const { return mode_ == Mode::idle; }
+            bool is_running() const { return mode_ == Mode::gc; }
             bool is_verify() const { return mode_ == Mode::verify; }
 
         private:
             /** current collector mode **/
-            Mode mode_;
+            Mode mode_ = Mode::idle;
             /** running gc collecting all generations gi < gc_upto **/
-            generation gc_upto_;
+            Generation gc_upto_;
         };
 
         struct DX1CollectorIterator;
@@ -141,11 +121,11 @@ namespace xo {
             GCRunState runstate() const noexcept { return runstate_; }
             const DArena * get_object_types() const noexcept { return &object_types_; }
             const RootSet * get_root_set() const noexcept { return &root_set_; }
-            const DArena * get_space(role r, generation g) const noexcept { return space_[r][g]; }
-            DArena * get_space(role r, generation g) noexcept { return space_[r][g]; }
-            DArena * from_space(generation g) noexcept { return get_space(role::from_space(), g); }
-            DArena * to_space(generation g) noexcept { return get_space(role::to_space(), g); }
-            DArena * new_space() noexcept { return to_space(generation{0}); }
+            const DArena * get_space(role r, Generation g) const noexcept { return space_[r][g]; }
+            DArena * get_space(role r, Generation g) noexcept { return space_[r][g]; }
+            DArena * from_space(Generation g) noexcept { return get_space(role::from_space(), g); }
+            DArena * to_space(Generation g) noexcept { return get_space(role::to_space(), g); }
+            DArena * new_space() noexcept { return to_space(Generation{0}); }
 
             // ----- basic statistics -----
 
@@ -180,7 +160,7 @@ namespace xo {
             /** generation to which pointer @p addr belongs, given role @p r;
              *  sentinel if not found in this collector
              **/
-            generation generation_of(role r, const void * addr) const noexcept;
+            Generation generation_of(role r, const void * addr) const noexcept;
 
             /** return details from last error (will be in gen0 to-space) **/
             AllocError last_error() const noexcept;
@@ -238,10 +218,10 @@ namespace xo {
              *  3. if collection is currently disabled,
              *     collection will trigger the next time gc is enabled.
              **/
-            void request_gc(generation upto) noexcept;
+            void request_gc(Generation upto) noexcept;
 
             /** Execute gc immediately, for all generations < @p upto **/
-            void execute_gc(generation upto) noexcept;
+            void execute_gc(Generation upto) noexcept;
 
             /** Evacuate object at @p *lhs_data to to-space.
              *  Replace original with forwarding pointer to new location
@@ -318,7 +298,7 @@ namespace xo {
             // ----- book-keeping -----
 
             /** reverse to-space and from-space roles for generation g **/
-            void reverse_roles(generation g) noexcept;
+            void reverse_roles(Generation g) noexcept;
 
             /** discard all allocated memory **/
             void clear() noexcept;
@@ -336,24 +316,24 @@ namespace xo {
             void _init_space(const X1CollectorConfig & cfg);
 
             /** swap from- and to- roles for all generations < @p upto **/
-            void swap_roles(generation upto) noexcept;
+            void swap_roles(Generation upto) noexcept;
             /** copy roots + everything reachable from them, to to-space **/
-            void copy_roots(generation upto) noexcept;
+            void copy_roots(Generation upto) noexcept;
 
             /** cleanup after gc **/
-            void cleanup_phase(generation upto);
+            void cleanup_phase(Generation upto);
 
             /** move root subgraph at @p from_src to to-space.
              *  If not in gc-space, visit immediate children and move them.
              *  Require: runstate_.is_running()
              **/
-            void * _deep_move_root(obj<AGCObject> from_src, generation upto);
+            void * _deep_move_root(obj<AGCObject> from_src, Generation upto);
             /** move interior subgraph at @p from_src to to-space.
              *  no-op if not in gc-space.
              **/
-            void * _deep_move_interior(void * from_src, generation upto);
+            void * _deep_move_interior(void * from_src, Generation upto);
             /** Common driver for _deep_move_root(), _deep_move_interior() **/
-            void * _deep_move_gc_owned(void * from_src, generation upto);
+            void * _deep_move_gc_owned(void * from_src, Generation upto);
             /** Evacuate object at @p *lhs_data to to-space.
              *  Replace original with forwarding pointer to new location
              **/
@@ -379,7 +359,7 @@ namespace xo {
             uint32_t gc_blocked_ = 0;
 
             /** if > 0: need gc for all generations < gc_pending_upto_ **/
-            generation gc_pending_upto_;
+            Generation gc_pending_upto_;
 
             /** using arena to get extensible list of root objects.
              *  For each root store one address (type obj<AGCObject>*)

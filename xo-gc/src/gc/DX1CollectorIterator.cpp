@@ -12,8 +12,8 @@
 namespace xo {
     namespace mm {
         DX1CollectorIterator::DX1CollectorIterator(const DX1Collector * gc,
-                                                   generation gen_ix,
-                                                   generation gen_hi,
+                                                   Generation gen_ix,
+                                                   Generation gen_hi,
                                                    DArenaIterator arena_ix,
                                                    DArenaIterator arena_hi) : gc_{gc},
                                                                               gen_ix_{gen_ix},
