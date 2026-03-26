@@ -3,12 +3,13 @@
  *  @author Roland Conybeare, Dec 2025
  **/
 
+#include "X1Collector.hpp"
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/alloc2/Allocator.hpp>
-#include "detail/IAllocator_DX1Collector.hpp"
-#include "detail/ICollector_DX1Collector.hpp"
+//#include "detail/IAllocator_DX1Collector.hpp"
+//#include "detail/ICollector_DX1Collector.hpp"
 #include "arena/IAllocator_DArena.hpp"
-#include <xo/gc/DX1Collector.hpp>
+//#include <xo/gc/DX1Collector.hpp>
 #include <xo/gc/DX1CollectorIterator.hpp>
 #include <xo/alloc2/generation.hpp>
 #include "object_age.hpp"
@@ -382,15 +383,22 @@ namespace xo {
 
                     if (gco) {
                         // forward_children is hijacked here to verify
-                        // pointer validity
+                        // pointer validity.
+                        //
+                        // Nested control re-enters
+                        // - X1Collector::forward_inplace() -> _verify_aux()
+                        //
 
                         gco.forward_children(this->ref<ACollector>());
+
                     }
 
                     VerifyStats post = verify_stats_;
 
                     // assert fail -> root contains ptr to from-space
                     assert(pre.n_from_ == post.n_from_);
+
+                    ++verify_stats_.n_gc_root_;
                 }
             }
 
@@ -403,11 +411,23 @@ namespace xo {
         const AGCObject *
         DX1Collector::lookup_type(typeseq tseq) const noexcept
         {
+            scope log(XO_DEBUG(false));
+
             AGCObject * v = reinterpret_cast<AGCObject *>(object_types_.lo_);
 
             const AGCObject * target = &(v[tseq.seqno()]);
 
-            assert(reinterpret_cast<const std::byte *>(target) < object_types_.limit_);
+            if (reinterpret_cast<const std::byte *>(target) >= object_types_.limit_) {
+                log.retroactively_enable(xtag("tseq", tseq), xtag("tname", TypeRegistry::id2name(tseq)));
+
+                log(xtag("types.allocated", object_types_.allocated()),
+                    xtag("types.committed", object_types_.committed()),
+                    xtag("types.lo", object_types_.lo_),
+                    xtag("types.limit", object_types_.limit_),
+                    xtag("types.hi", object_types_.hi_));
+
+                assert(false);
+            }
 
             return target;
         }
@@ -498,6 +518,11 @@ namespace xo {
             if (config_.sanitize_flag_) {
                 log && log("step 4b : verify");
                 this->verify_ok();
+
+                log && log(xtag("n-gc-root", verify_stats_.n_gc_root_),
+                           xtag("n-ext", verify_stats_.n_ext_),
+                           xtag("n-from", verify_stats_.n_from_),
+                           xtag("n-to", verify_stats_.n_to_));
             }
         }
 
@@ -553,8 +578,23 @@ namespace xo {
             if (src_in_from_space) {
                 return _deep_move_gc_owned(from_src.data(), upto);
             } else {
+                // we aren't moving from_src, it's not gc-owned.
+                // However weare moving all its gc-owned children
+
                 auto self = this->ref<ACollector>();
+
+                GCMoveCheckpoint gray_lo_v = this->_snap_move_checkpoint(upto);
+
                 from_src.forward_children(self);
+
+                // For each generation g:
+                //   traverse objects newer than gray_lo_v[g], to make sure children
+                //   are forwarded.  Fixpoint reached when gray_lo_v[g] doesn't change.
+                //   Remember that forwarding may promote objects to older generation,
+                //   so need multiple passes
+                //
+                this->_forward_children_until_fixpoint(upto, gray_lo_v);
+
                 return from_src.data();
             }
         }
@@ -612,11 +652,47 @@ namespace xo {
             /* here: object at from_src not already forwarded */
 
             if (!this->check_move_policy(hdr, from_src)) {
-                /* object at from_src in generation that is not being collected */
+                /* object at from_src is in generation that is not being collected */
                 log && log("disposition: not moving from_src");
 
                 return from_src;
             }
+
+            log && log("disposition: move subtree");
+
+            /* TODO: AllocIterator pointing to free pointer */
+            GCMoveCheckpoint gray_lo_v = this->_snap_move_checkpoint(upto);
+
+            obj<AAllocator, DX1Collector> alloc(this);
+            const AGCObject * iface = lookup_type(tseq);
+
+            assert(iface->_has_null_vptr() == false);
+
+            void * to_dest = this->shallow_move(iface, from_src);
+
+            this->_forward_children_until_fixpoint(upto, gray_lo_v);
+
+            log && log(xtag("to_dest", to_dest));
+
+            return to_dest;
+        } /*_deep_move_gc_owned*/
+
+        auto
+        DX1Collector::_snap_move_checkpoint(Generation upto) -> GCMoveCheckpoint
+        {
+            GCMoveCheckpoint gray_lo_v;
+
+            for (uint32_t g = 0; g < upto; ++g) {
+                gray_lo_v[g] = this->to_space(Generation{g})->free_;
+            }
+
+            return gray_lo_v;
+        }
+
+        void
+        DX1Collector::_forward_children_until_fixpoint(Generation upto, GCMoveCheckpoint gray_lo_v)
+        {
+            scope log(XO_DEBUG(config_.debug_flag_));
 
             /**
              *  To-space:
@@ -680,23 +756,6 @@ namespace xo {
              *
              **/
 
-            log && log("disposition: move subtree");
-
-            /* TODO: AllocIterator pointing to free pointer */
-            std::array<std::byte *, c_max_generation> gray_lo_v;
-            {
-                for (uint32_t g = 0; g < upto; ++g) {
-                    gray_lo_v[g] = this->to_space(Generation{g})->free_;
-                }
-            }
-
-            obj<AAllocator, DX1Collector> alloc(this);
-            const AGCObject * iface = lookup_type(tseq);
-
-            assert(iface->_has_null_vptr() == false);
-
-            void * to_dest = this->shallow_move(iface, from_src);
-
             std::size_t fixup_work = 0;
 
             /* TODO:
@@ -731,7 +790,7 @@ namespace xo {
 
                         assert(iface->_has_null_vptr() == false);
 
-                        obj<ACollector, DX1Collector> gc(this);
+                        auto gc = this->ref<ACollector>(); //obj<ACollector, DX1Collector> gc(this);
 
                         iface->forward_children(src, gc);
 
@@ -742,11 +801,7 @@ namespace xo {
                     }
                 }
             } while (fixup_work > 0);
-
-            log && log(xtag("to_dest", to_dest));
-
-            return to_dest;
-        } /*_deep_move_gc_owned*/
+        }
 
         void
         DX1Collector::copy_roots(Generation upto) noexcept
@@ -777,7 +832,7 @@ namespace xo {
                 this->_forward_inplace_aux(lhs_iface, lhs_data);
             } else if (runstate_.is_verify()) {
                 // called during verify_ok
-                this->_verify_aux(lhs_iface, lhs_data);
+                this->_verify_aux(lhs_iface, *lhs_data);
             } else {
                 // should be unreachable
                 assert(false);
@@ -966,15 +1021,19 @@ namespace xo {
         void
         DX1Collector::_verify_aux(AGCObject * iface, void * data)
         {
+            scope log(XO_DEBUG(config_.debug_flag_), xtag("data", data));
+
             (void)iface;
             (void)data;
 
-            Generation g = this->generation_of(role::to_space(), data);
+            Generation g1 = this->generation_of(role::to_space(), data);
 
-            if (g.is_sentinel()) {
-                g = this->generation_of(role::from_space(), data);
+            if (g1.is_sentinel()) {
+                assert(this->contains(role::to_space(), data) == false);
 
-                if (!g.is_sentinel()) {
+                Generation g2 = this->generation_of(role::from_space(), data);
+
+                if (!g2.is_sentinel()) {
                     // verify failure - live pointer still refers to from-space
 
                     ++(verify_stats_.n_from_);
@@ -982,6 +1041,8 @@ namespace xo {
                     ++(verify_stats_.n_ext_);
                 }
             } else {
+                assert(this->contains(role::to_space(), data));
+
                 ++(verify_stats_.n_to_);
             }
         }
