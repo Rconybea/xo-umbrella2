@@ -44,6 +44,9 @@ namespace xo {
             bool is_type_installed(Copaque d, typeseq tseq) const noexcept override {
                 return I::is_type_installed(_dcast(d), tseq);
             }
+            bool contains(Copaque d, role r, const void * addr) const noexcept override {
+                return I::contains(_dcast(d), r, addr);
+            }
 
             // non-const methods
 
