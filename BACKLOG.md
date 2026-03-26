@@ -1,19 +1,19 @@
 # reader2
 
-## globalsymtab for essential primitives
-
-rework essential primitives (*,/,+,-,==,!=,..)
-so parser doesn't rely on magic globalsymtab lookup strings.
-
-## support missing primitives
-
-tokenizer support + utest for !=,<,>,<=,>=
-
 ## boolean operators
 
 ^ (xor), | (or), & (and), ~ (not)
 
 # gc
+
+## add_virtual_root
+
+Explicit alternative to `add_gc_root_poly()` for virtual roots.
+Since gc doesn't touch data pointer for virtual roots, we can pass
+`obj<AGCObject>` instead of `obj<AGCObject>*`.
+
+Will evolve some awkwardness in VSM: having to construct a purposeless
+`obj<AGCObject,DVirtualSchematikaMachine>` just to appease the `add_gc_root_poly` signature.
 
 ## remove_root
 
