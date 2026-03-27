@@ -367,6 +367,8 @@ namespace xo {
             // Add run state so DX1Collector can recognize forward_inplace()
             // calls made for the purpose of checking child pointers.
 
+            auto self = this->ref<ACollector>();
+
             GCRunState saved_runstate = runstate_;
             {
                 this->runstate_ = GCRunState::verify();
@@ -386,7 +388,7 @@ namespace xo {
                         // - X1Collector::forward_inplace() -> _verify_aux()
                         //
 
-                        gco.forward_children(this->ref<ACollector>());
+                        gco.forward_children(self);
 
                     }
 
@@ -397,12 +399,49 @@ namespace xo {
 
                     ++verify_stats_.n_gc_root_;
                 }
+
+                // 3. scan to-space for each generation
+                for (Generation g(0); g < config_.n_generation_; ++g) {
+                    const DArena * space = this->get_space(role::to_space(), g);
+
+                    for (const AllocInfo & info : *space) {
+
+                        if (info.is_forwarding_tseq()) {
+                            ++verify_stats_.n_fwd_;
+
+                        } else {
+                            typeseq tseq(info.tseq());
+
+                            const AGCObject * iface = this->lookup_type(tseq);
+
+                            if (iface) {
+                                const void * data = info.payload().first;
+
+                                // assembled fop for gc-aware object
+                                obj<AGCObject> gco(iface, const_cast<void *>(data));
+
+                                // forward_children is hijacked here to verify
+                                // child pointer validity.
+                                //
+                                // Nested control reenters
+                                // X1Collector::forward_inplace()
+                                //
+                                gco.forward_children(self);
+                            } else {
+                                ++verify_stats_.n_no_iface_;
+                                continue;
+                            }
+                        }
+                    }
+                }
             }
 
             // restore run state at end of verify cycle
             this->runstate_ = saved_runstate;
 
-            return true;
+            bool ok = verify_stats_.is_ok();
+
+            return ok;
         }
 
         const AGCObject *
@@ -424,6 +463,7 @@ namespace xo {
                     xtag("types.hi", object_types_.hi_));
 
                 assert(false);
+                return nullptr;
             }
 
             return target;
@@ -487,6 +527,7 @@ namespace xo {
             if (config_.sanitize_flag_) {
                 log && log("step 0a : verify");
                 this->verify_ok();
+
             }
 
             log && log("step 0b : update run state");
@@ -514,12 +555,16 @@ namespace xo {
 
             if (config_.sanitize_flag_) {
                 log && log("step 4b : verify");
-                this->verify_ok();
+                bool ok = this->verify_ok();
 
                 log && log(xtag("n-gc-root", verify_stats_.n_gc_root_),
                            xtag("n-ext", verify_stats_.n_ext_),
                            xtag("n-from", verify_stats_.n_from_),
-                           xtag("n-to", verify_stats_.n_to_));
+                           xtag("n-to", verify_stats_.n_to_),
+                           xtag("n-fwd", verify_stats_.n_fwd_),
+                           xtag("n-no-iface", verify_stats_.n_no_iface_));
+
+                assert(ok);
             }
         }
 
