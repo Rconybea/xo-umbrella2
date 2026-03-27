@@ -84,12 +84,23 @@ namespace xo {
          *
          **/
         struct VerifyStats {
+            bool is_ok() const noexcept {
+                return (n_from_ == 0) && (n_fwd_ == 0) && (n_no_iface_ == 0);
+            }
+
             void clear() { *this = VerifyStats(); }
 
-            std::uint32_t n_gc_root_ = 0;
-            std::uint32_t n_ext_     = 0;
-            std::uint32_t n_from_    = 0;
-            std::uint32_t n_to_      = 0;
+            /** number of gc roots examined **/
+            std::uint32_t n_gc_root_  = 0;
+            std::uint32_t n_ext_      = 0;
+            /** number of from-space objects encountered. Fatal if non-zero **/
+            std::uint32_t n_from_     = 0;
+            /** number of to-space objects encountered. **/
+            std::uint32_t n_to_       = 0;
+            /** counts forwarding object encountered in to-space scan. Fatal if non-zero **/
+            std::uint32_t n_fwd_      = 0;
+            /** counts missing GCObject interface.  Fatal if non-zero **/
+            std::uint32_t n_no_iface_ = 0;
         };
 
         // ----- DX1Collector -----
