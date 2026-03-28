@@ -99,8 +99,17 @@ namespace xo {
             std::uint32_t n_to_       = 0;
             /** counts forwarding object encountered in to-space scan. Fatal if non-zero **/
             std::uint32_t n_fwd_      = 0;
-            /** counts missing GCObject interface.  Fatal if non-zero **/
+            /** counts missing GCObject interface. Fatal if non-zero **/
             std::uint32_t n_no_iface_ = 0;
+            /** live mlog entry refers to to-space, as expected **/
+            std::uint32_t n_mlog_vital_ = 0;
+            /** stale mlog entry. not troubling to verify these **/
+            std::uint32_t n_mlog_stale_ = 0;
+            /** live mlog entry refers to from-space. Fatal if non-zero **/
+            std::uint32_t n_mlog_from_ = 0;
+            /** live mlog entry refers to either some other generation or outside gc-space. Fatal if non-zero **/
+            std::uint32_t n_mlog_wild_ = 0;
+
         };
 
         // ----- DX1Collector -----
