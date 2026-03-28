@@ -1063,7 +1063,7 @@ namespace xo {
         void
         DX1Collector::_verify_aux(AGCObject * iface, void * data)
         {
-            scope log(XO_DEBUG(config_.debug_flag_), xtag("data", data));
+            //scope log(XO_DEBUG(config_.debug_flag_), xtag("data", data));
 
             (void)iface;
             (void)data;
