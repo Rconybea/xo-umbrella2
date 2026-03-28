@@ -221,6 +221,8 @@ namespace xo {
                               this->allocated(),
                               this->committed(),
                               this->reserved(),
+                              lo_,
+                              hi_,
                               p_detail));
         }
 
