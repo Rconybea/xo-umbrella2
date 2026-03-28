@@ -414,7 +414,7 @@ namespace xo {
 
                             const AGCObject * iface = this->lookup_type(tseq);
 
-                            if (iface) {
+                            if (iface && !(iface->_has_null_vptr())) {
                                 const void * data = info.payload().first;
 
                                 // assembled fop for gc-aware object
