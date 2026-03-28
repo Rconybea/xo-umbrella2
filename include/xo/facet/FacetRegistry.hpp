@@ -140,7 +140,7 @@ namespace xo {
                 auto retval = try_variant<ATo>(from);
 
                 if (!retval)
-                    throw std::runtime_error(tostr("FacetRegistry::try_variant failed",
+                    throw std::runtime_error(tostr("FacetRegistry::variant failed",
                                                    xtag("AFrom.tseq", typeseq::id<AFrom>()),
                                                    xtag("AFrom.tname", typerecd::recd<AFrom>().name()),
                                                    xtag("ATo.tseq", typeseq::id<ATo>()),

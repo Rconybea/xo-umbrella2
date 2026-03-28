@@ -122,6 +122,8 @@ def gen_facet(env,
         md['args'] = [{'type': "Opaque", 'name': "data"}] + md['args']
         md['doc'] = '\n'.join(md['doc'])
 
+    router_facet_explicit_content = idl.get('router_facet_explicit_content', [])
+
     # Foo.hpp
     facet_hpp_fname = f'{facet_name}.hpp'
     # AFoo
@@ -193,6 +195,7 @@ def gen_facet(env,
         'router_facet': router_facet,
         'router_facet_hpp_j2': 'router_facet.hpp.j2',
         'router_facet_hpp_fname': router_facet_hpp_fname,
+        'router_facet_explicit_content': router_facet_explicit_content,
         #
         'types': types,
         #
