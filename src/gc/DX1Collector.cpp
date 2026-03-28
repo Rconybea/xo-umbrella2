@@ -424,13 +424,56 @@ namespace xo {
                                 // child pointer validity.
                                 //
                                 // Nested control reenters
-                                // X1Collector::forward_inplace()
+                                // X1Collector::forward_inplace() -> _verify_aux()
                                 //
                                 gco.forward_children(self);
                             } else {
                                 ++verify_stats_.n_no_iface_;
                                 continue;
                             }
+                        }
+                    }
+                }
+
+                // 4. scan mutation logs
+                for (Generation g(0); g + 1 < config_.n_generation_; ++g) {
+                    const DArena * space = this->get_space(role::to_space(), g);
+                    const DArena * from = this->get_space(role::from_space(), g);
+
+                    // mutation log for generation g records *incoming* pointers
+                    // from more senior generations; includes objects from *this*
+                    // generation that are older (track since source promotes before
+                    // destination)
+                    //
+                    for (const MutationLogEntry & mrecd : *(mlog_[role::to_space()][g])) {
+                        // mutation log entries are only valid until the next assignment
+                        // at the source location. Superseded entry may now point
+                        // somewhere else. The snapshot member must however point
+                        // to this generation, since that's preserved as long as the
+                        // log entry survives.
+
+                        void * orig_data = mrecd.snap().data();
+                        void * curr_data = *mrecd.p_data();
+
+                        if (orig_data == curr_data) {
+                            // live mlog entry must point to to-space
+
+                            if (space->contains_allocated(orig_data)) {
+                                ++verify_stats_.n_mlog_vital_;
+                            } else if (from->contains(curr_data)) {
+                                // verify failure.
+                                ++verify_stats_.n_mlog_from_;
+                            } else {
+                                // verify failure.
+                                ++verify_stats_.n_mlog_wild_;
+                            }
+                        } else {
+                            // requirements on superseded log entry:
+                            // - snapshot refers to to-space
+                            //
+                            // no requirements on current data, entry is superseded anyway
+                            //
+                            ++verify_stats_.n_mlog_stale_;
                         }
                     }
                 }
@@ -574,7 +617,11 @@ namespace xo {
                            xtag("n-from", verify_stats_.n_from_),
                            xtag("n-to", verify_stats_.n_to_),
                            xtag("n-fwd", verify_stats_.n_fwd_),
-                           xtag("n-no-iface", verify_stats_.n_no_iface_));
+                           xtag("n-no-iface", verify_stats_.n_no_iface_),
+                           xtag("n-mlog-vital", verify_stats_.n_mlog_vital_),
+                           xtag("n-mlog-stale", verify_stats_.n_mlog_stale_),
+                           xtag("n-mlog-from", verify_stats_.n_mlog_from_),
+                           xtag("n-mlog-wild", verify_stats_.n_mlog_wild_));
 
                 assert(ok);
             }
@@ -1230,8 +1277,8 @@ namespace xo {
 
             if (src_g < dest_g) {
                 // young-to-old pointers don't need to be remembered,
-                // since a GC cycle that collects the old generation is guarnatted
-                // to also collect the young generation.
+                // since a GC cycle that collects an (old) generation is guarnatted
+                // to also collect all younger generations.
                 return;
             }
 
