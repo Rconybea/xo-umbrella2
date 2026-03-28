@@ -34,8 +34,8 @@ namespace xo {
         void
         RCollector<Object>::forward_inplace(DRepr ** p_repr)
         {
-            // fetch static interface for DRepr
-            auto iface = xo::facet::impl_for<AGCObject,DRepr>();
+            // fetch static interface for DRepr (strip const: FacetImplementation specializations use non-const DRepr)
+            auto iface = xo::facet::impl_for<AGCObject, std::remove_const_t<DRepr>>();
 
             this->forward_inplace(&iface, (void **)p_repr);
         }
