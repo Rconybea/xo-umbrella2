@@ -179,7 +179,7 @@ namespace xo {
                 }
             }
 
-            for (uint32_t j = 1; j < config_.n_generation_; ++j) {
+            for (uint32_t j = 0; j + 1 < config_.n_generation_; ++j) {
                 for (uint32_t i = 0; i < c_n_role + 1; ++i) {
                     mlog_storage_[i][j].visit_pools(visitor);
                 }
