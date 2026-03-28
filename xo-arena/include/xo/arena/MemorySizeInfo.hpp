@@ -31,9 +31,10 @@ namespace xo {
             MemorySizeInfo() = default;
             MemorySizeInfo(std::string_view name,
                            std::size_t u, std::size_t a, std::size_t c, std::size_t r,
+                           const void * lo, const void * hi,
                            DetailArrayType * detail)
                 : resource_name_{name},
-                  used_{u}, allocated_{a}, committed_{c}, reserved_{r}, detail_{detail}
+                  used_{u}, allocated_{a}, committed_{c}, reserved_{r}, lo_{lo}, hi_{hi}, detail_{detail}
             {}
 
             static MemorySizeInfo sentinel() { return MemorySizeInfo(); }
@@ -50,6 +51,10 @@ namespace xo {
              *  virtual memory addresses range obtained, whether or not committed
              **/
             std::size_t reserved_ = 0;
+            /** start address (optional) **/
+            const void * lo_ = 0;
+            /** end address (optional) **/
+            const void * hi_ = 0;
 
             /** optional histogram with per-data-type counts **/
             DetailArrayType * detail_ = nullptr;

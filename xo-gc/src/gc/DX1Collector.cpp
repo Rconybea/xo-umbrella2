@@ -524,6 +524,18 @@ namespace xo {
 
             //auto t0 = std::chrono::steady_clock::now();
 
+            log && log("memory");
+            auto visitor = [&log](const MemorySizeInfo & info) {
+                log && log(xtag("resource", info.resource_name_),
+                           xtag("used", info.used_),
+                           xtag("alloc", info.allocated_),
+                           xtag("commit", info.committed_),
+                           xtag("resv", info.reserved_),
+                           xtag("lo", info.lo_),
+                           xtag("hi", info.hi_));
+            };
+            this->visit_pools(visitor);
+
             if (config_.sanitize_flag_) {
                 log && log("step 0a : verify");
                 this->verify_ok();
