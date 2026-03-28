@@ -6,15 +6,38 @@
 #include "GcPrimitives.hpp"
 #include <xo/object2/Integer.hpp>
 #include <xo/object2/Boolean.hpp>
+//#include <xo/gc/X1Collector.hpp>
 #include <xo/type/FunctionType.hpp>
 #include <xo/type/AtomicType.hpp>
 #include <xo/alloc2/Collector.hpp>
 #include <xo/alloc2/generation.hpp>
 
 namespace xo {
+    using xo::mm::ACollector;
+    //using xo::mm::DX1Collector;
     using xo::mm::Generation;
 
     namespace scm {
+
+        // ----- report-gc-status -----
+
+#ifdef NOT_YET
+        obj<AGCObject>
+        xfer_report_gc_status(obj<ARuntimeContext> rcx)
+        {
+            bool have_gc = false;
+
+            if (rcx.collector()) {
+                // status currently only implemented for X1 collector
+
+                auto gc = obj<ACollector,DX1Collector>::from(rcx.collector());
+
+
+            }
+
+            return DBoolean::box(rcx.allocator(), false);
+        }
+#endif
 
         // ----- request-gc -----
 
