@@ -51,8 +51,12 @@ namespace xo {
                  *                   +-------+
                  **/
 
-                auto gco = FacetRegistry::instance().variant<AGCObject,AFacet>(*p_ptr);
-                gc.forward_inplace(gco.iface(), (void **)&(p_ptr->data_));
+                if (*p_ptr) {
+                    auto gco = FacetRegistry::instance().variant<AGCObject,AFacet>(*p_ptr);
+                    gc.forward_inplace(gco.iface(), (void **)&(p_ptr->data_));
+                } else {
+                    // nullptr is trivial to forward
+                }
             }
         };
 

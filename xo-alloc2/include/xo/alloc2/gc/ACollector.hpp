@@ -1,102 +1,127 @@
 /** @file ACollector.hpp
  *
- *  @author Roland Conybeare, Dec 2025
+ *  Generated automagically from ingredients:
+ *  1. code generator:
+ *       [xo-facet/codegen/genfacet]
+ *     arguments:
+ *       --input [idl/Collector.json5]
+ *  2. jinja2 template for abstract facet .hpp file:
+ *       [abstract_facet.hpp.j2]
+ *  3. idl for facet methods
+ *       [idl/Collector.json5]
  **/
 
 #pragma once
 
-//#include "IGCObject_Any.hpp"
-
-#include <xo/facet/facet_implementation.hpp>
-#include <xo/facet/typeseq.hpp>
-#include <xo/facet/obj.hpp>
-
+// includes (via {facet_includes})
+#include <xo/alloc2/Allocator.hpp>
 #include <xo/alloc2/generation.hpp>
 #include <xo/alloc2/role.hpp>
+#include <xo/facet/obj.hpp>
+#include <xo/facet/facet_implementation.hpp>
+#include <xo/facet/typeseq.hpp>
 
-#include <cstdint>
-#include <cstddef>
+namespace xo { namespace mm { class AGCObject; } }
+namespace xo { namespace mm { class IGCObject_Any; } }
+// more pretext here..
 
 namespace xo {
-    namespace mm {
-        using Copaque = const void *;
-        using Opaque = void *;
+namespace mm {
 
-        class AGCObject;
-        class IGCObject_Any; // see IGCObject_Any.hpp
+using Copaque = const void *;
+using Opaque = void *;
 
-        /** @class ACollector
-         *  @brief Abstract facet for the XO garbage collector
-         *
-         *  A collector implementation will also support the @ref AAllocator facet, see also
-         **/
-        class ACollector {
-        public:
-            using typeseq = xo::facet::typeseq;
-            using size_type = std::size_t;
+/**
+A collector must also suppose the @ref AAllocator facet, see also
+**/
+class ACollector {
+public:
+    /** @defgroup mm-collector-type-traits **/
+    ///@{
+    // types
+    /** integer identifying a type **/
+    using typeseq = xo::facet::typeseq;
+    using Copaque = const void *;
+    using Opaque = void *;
+    /** allocation size type **/
+    using size_type = std::size_t;
+    ///@}
 
-            virtual typeseq _typeseq() const noexcept = 0;
+    /** @defgroup mm-collector-methods **/
+    ///@{
+    // const methods
+    /** An uninitialized ACollector instance will have zero vtable pointer (per {linux,osx} abi).
+     *  Use case for this is narrow. We go to some lengths to avoid null vtable pointers. For example
+     *  obj<AFacet> will have non-null vtable (via IFacet_Any) with all methods terminating.
+     **/
+    bool _has_null_vptr() const noexcept { return *reinterpret_cast<const void * const *>(this) == nullptr; }
+    /** RTTI: unique id# for actual runtime data representation **/
+    virtual typeseq _typeseq() const noexcept = 0;
+    /** destroy instance @p d; calls c++ dtor only for actual runtime type; does not recover memory **/
+    virtual void _drop(Opaque d) const noexcept = 0;
+    /** memory in use for this collector **/
+    virtual size_type allocated(Copaque data, Generation g, role r)  const  noexcept = 0;
+    /** memory committed for this collector **/
+    virtual size_type committed(Copaque data, Generation g, role r)  const  noexcept = 0;
+    /** address space reserved for this collector **/
+    virtual size_type reserved(Copaque data, Generation g, role r)  const  noexcept = 0;
+    /** true if gc responsible for data at @p addr, and data belongs to role @p r **/
+    virtual bool contains(Copaque data, role r, const void * addr)  const  noexcept = 0;
+    /** true iff gc-aware object of type @p tseq is installed in this collector **/
+    virtual bool is_type_installed(Copaque data, typeseq tseq)  const  noexcept = 0;
 
-            virtual size_type allocated(Copaque d,
-                                        Generation g, role r) const noexcept = 0;
-            virtual size_type  reserved(Copaque d,
-                                        Generation g, role r) const noexcept = 0;
-            virtual size_type committed(Copaque d,
-                                        Generation g, role r) const noexcept = 0;
+    // nonconst methods
+    /** install interface @p iface for representation with typeseq @p tseq
+in collector @p d.
 
-            /** true if gc responsible for address @p addr with role @p r
-             **/
-            virtual bool contains(Copaque d,
-                                  role r, const void * addr) const noexcept = 0;
+The type AGCObject_Any here is misleading.
+Will have been replaced by an instance of
+  @c AGCObject_Xfer<DFoo,AGCObject_DFoo> for some @c DFoo
+in which case calls through @c std::launder(&iface)
+will properly act on @c DFoo.
 
-            virtual bool is_type_installed(Copaque d,
-                                           typeseq tseq) const noexcept = 0;
+Return false if installation fails (e.g. memory exhausted) **/
+    virtual bool install_type(Opaque data, const AGCObject & iface)  = 0;
+    /** add gc root with address @p p_root. gc will preserve subgraph at this address **/
+    virtual void add_gc_root_poly(Opaque data, obj<AGCObject> * p_root)  = 0;
+    /** remove gc root with address @p p_root. Reverse effect of prior add_gc_root_poly call **/
+    virtual void remove_gc_root_poly(Opaque data, obj<AGCObject> * p_root)  = 0;
+    /** Request immediate collection.
+  1. if collection is enabled, immediately collect all generations
+     up to (but not including) g
+  2. may nevertheless escalate to older generations,
+     depending on collector state.
+  3. if collection is currently disabled,
+     collection will trigger the next time gc is enabled.
+ **/
+    virtual void request_gc(Opaque data, Generation upto)  = 0;
+    /** Assign pointer @p p_lhs to destination @p rhs, within parent allocation @p parent
 
-            /** install interface @p iface for representation with typeseq @p tseq
-             *  in collector @p d.
-             *
-             *  The type AGCObject_Any here is misleading.
-             *  Will have been replaced by an instance of
-             *    @c AGCObject_Xfer<DFoo,AGCObject_DFoo> for some @c DFoo
-             *  in which case calls through @c std::launder(&iface)
-             *  will properly act on @c DFoo.
-             *
-             *  Return false if installation fails (e.g. memory exhausted)
-             **/
-            virtual bool install_type(Opaque d, const AGCObject & iface) = 0;
+Require: gc not in progress **/
+    virtual void assign_member(Opaque data, void * parent, obj<AGCObject> * p_lhs, obj<AGCObject> & rhs)  = 0;
+    /** evacuate @p *lhs, that refers to state with interface @p lhs_iface,
+to collector @p d's to-space. Replace *lhs_data with forwarding pointer
 
-            /** add gc root with address @p p_root **/
-            virtual void add_gc_root_poly(Opaque d, obj<AGCObject> * p_root) = 0;
+Require: gc in progress
+ **/
+    virtual void forward_inplace(Opaque data, AGCObject * lhs_iface, void ** lhs_data)  = 0;
+    ///@}
+}; /*ACollector*/
 
-            /** remove gc root with address @p p_root **/
-            virtual void remove_gc_root_poly(Opaque d, obj<AGCObject> * p_root) = 0;
+/** Implementation ICollector_DRepr of ACollector for state DRepr
+ *  should provide a specialization:
+ *
+ *    template <>
+ *    struct xo::facet::FacetImplementation<ACollector, DRepr> {
+ *        using Impltype = ICollector_DRepr;
+ *    };
+ *
+ *  then ICollector_ImplType<DRepr> --> ICollector_DRepr
+ **/
+template <typename DRepr>
+using ICollector_ImplType = xo::facet::FacetImplType<ACollector, DRepr>;
 
-            /** Request immediate collection.
-             *  1. if collection is enabled, immediately collect all generations
-             *     up to (but not including) g
-             *  2. may nevertheless escalate to older generations,
-             *     depending on collector state.
-             *  3. if collection is currently disabled,
-             *     collection will trigger the next time gc is enabled.
-             **/
-            virtual void request_gc(Opaque d, Generation upto) = 0;
-
-            /** Assign pointer @p p_lhs to destination @p rhs, within parent allocation @p parent
-             *
-             *  Require: gc not in progress
-             **/
-            virtual void assign_member(Opaque d,
-                                       void * parent,
-                                       obj<AGCObject> * p_lhs,
-                                       obj<AGCObject> & rhs) = 0;
-
-            /** evacuate @p *lhs, that refers to state with interface @p lhs_iface,
-             *  to collector @p d's to-space. Replace *lhs_data with forwarding pointer
-             *
-             *  Require: gc in progress
-             **/
-            virtual void forward_inplace(Opaque d, AGCObject * lhs_iface, void ** lhs_data) = 0;
-        };
-    }
-
+} /*namespace mm*/
 } /*namespace xo*/
+
+/* ACollector.hpp */

@@ -179,7 +179,7 @@ namespace xo {
                 }
             }
 
-            for (uint32_t j = 1; j < config_.n_generation_; ++j) {
+            for (uint32_t j = 0; j + 1 < config_.n_generation_; ++j) {
                 for (uint32_t i = 0; i < c_n_role + 1; ++i) {
                     mlog_storage_[i][j].visit_pools(visitor);
                 }
@@ -732,7 +732,8 @@ namespace xo {
         }
 
         void
-        DX1Collector::_forward_children_until_fixpoint(Generation upto, GCMoveCheckpoint gray_lo_v)
+        DX1Collector::_forward_children_until_fixpoint(Generation upto,
+                                                       GCMoveCheckpoint gray_lo_v)
         {
             scope log(XO_DEBUG(config_.debug_flag_));
 
@@ -832,7 +833,7 @@ namespace xo {
 
                         assert(iface->_has_null_vptr() == false);
 
-                        auto gc = this->ref<ACollector>(); //obj<ACollector, DX1Collector> gc(this);
+                        auto gc = this->ref<ACollector>();
 
                         iface->forward_children(src, gc);
 
@@ -887,7 +888,7 @@ namespace xo {
         {
             scope log(XO_DEBUG(config_.debug_flag_),
                       xtag("lhs_data", lhs_data),
-                      xtag("*lhs_data", *lhs_data));
+                      xtag("*lhs_data", lhs_data ? *lhs_data : nullptr));
 
             /* coordinates with DX1Collector::_deep_move() */
 
@@ -909,7 +910,10 @@ namespace xo {
 
             void * object_data = (std::byte *)*lhs_data;
 
-            if (!this->contains(role::from_space(), object_data)) {
+            if (!object_data) {
+                /* trivial to forward nullptr */
+                return;
+            } else if (!this->contains(role::from_space(), object_data)) {
                 /* *lhs_data either:
                  * 1. already in to-space
                  * 2. not in GC-allocated space at all
@@ -919,7 +923,10 @@ namespace xo {
                  * Since not allocated from GC, they don't have
                  * an alloc-header.
                  */
-                log && log("disposition: not in from-space");
+                log && log("disposition: not in from-space. Don't forward, but check children");
+
+                obj<AGCObject> gco(lhs_iface, object_data);
+                gco.forward_children(this->ref<ACollector>());
 
                 return;
             }
@@ -1063,7 +1070,7 @@ namespace xo {
         void
         DX1Collector::_verify_aux(AGCObject * iface, void * data)
         {
-            scope log(XO_DEBUG(config_.debug_flag_), xtag("data", data));
+            //scope log(XO_DEBUG(config_.debug_flag_), xtag("data", data));
 
             (void)iface;
             (void)data;

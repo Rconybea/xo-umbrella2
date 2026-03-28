@@ -19,9 +19,9 @@ add_definitions(${PROJECT_CXX_FLAGS})
 # ----------------------------------------------------------------
 
 xo_add_genfacet(
-    TARGET xo-alloc2-facet-collector2
-    FACET Collector2
-    INPUT idl/Collector2.json5
+    TARGET xo-alloc2-facet-collector
+    FACET Collector
+    INPUT idl/Collector.json5
 )
 
 # ----------------------------------------------------------------
