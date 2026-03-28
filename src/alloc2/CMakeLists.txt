@@ -8,6 +8,8 @@ set(SELF_SRCS
 
     CollectorTypeRegistry.cpp
 
+    facet/ICollector2_Any.cpp
+
     ICollector_Any.cpp
     IGCObject_Any.cpp
 

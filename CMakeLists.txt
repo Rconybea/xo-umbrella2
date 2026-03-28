@@ -18,9 +18,17 @@ add_definitions(${PROJECT_CXX_FLAGS})
 
 # ----------------------------------------------------------------
 
+xo_add_genfacet(
+    TARGET xo-alloc2-facet-collector2
+    FACET Collector2
+    INPUT idl/Collector2.json5
+)
+
+# ----------------------------------------------------------------
+
 # note: manual target; generated code committed to git
 xo_add_genfacet(
-    TARGET xo-gc-facet-gcobject
+    TARGET xo-alloc2-facet-gcobject
     FACET GCObject
     INPUT idl/GCObject.json5
 )
