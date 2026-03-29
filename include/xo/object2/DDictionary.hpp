@@ -112,6 +112,8 @@ namespace xo {
 
             /** return value associated with @p key, if key is present **/
             std::optional<obj<AGCObject>> lookup(const DString * key) const noexcept;
+            /** return value associated with @p key, if key is present **/
+            std::optional<obj<AGCObject>> lookup_cstr(const char * key) const noexcept;
 
             /** return element @p key-value pair at position @p index (0-based) **/
             std::pair<const DString *, obj<AGCObject>> at_index(size_type index) const;
@@ -138,6 +140,11 @@ namespace xo {
              *  @return true if key-value pair updated; false if key not found
              **/
             bool try_update(const pair_type & kvpair);
+
+            /** update key-value pair for existing @p key to map to @p value.
+             *  false if @p key not already present.
+             **/
+            bool try_update_cstr(const char * key, obj<AGCObject> value);
 
             /** convenience method:
              *  try_upsert pair (k, @p value), after boxing c-style string @p key with @p mm to get k
