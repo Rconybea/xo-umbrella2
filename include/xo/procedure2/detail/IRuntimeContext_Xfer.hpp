@@ -54,6 +54,9 @@ namespace scm {
         obj<ACollector> collector(Copaque data)  const  noexcept override {
             return I::collector(_dcast(data));
         }
+        obj<AAllocator> error_allocator(Copaque data)  const  noexcept override {
+            return I::error_allocator(_dcast(data));
+        }
         StringTable * stringtable(Copaque data)  const  noexcept override {
             return I::stringtable(_dcast(data));
         }

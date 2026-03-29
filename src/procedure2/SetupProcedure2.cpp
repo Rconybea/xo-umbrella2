@@ -130,6 +130,13 @@ namespace xo {
                             ObjectPrimitives::make_fn_n_args_pm(mm, stbl),
                             flags & InstallFlags::f_generalpurpose));
 
+            // ----- gc primitives -----
+
+            ok = ok & (PrimitiveRegistry::install_aux
+                           (sink,
+                            GcPrimitives::make_report_gc_statistics_pm(mm, stbl),
+                            flags & InstallFlags::f_generalpurpose));
+
             ok = ok & (PrimitiveRegistry::install_aux
                            (sink,
                             GcPrimitives::make_request_gc_pm(mm, stbl),

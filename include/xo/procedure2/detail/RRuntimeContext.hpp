@@ -61,6 +61,9 @@ public:
     obj<ACollector> collector()  const  noexcept {
         return O::iface()->collector(O::data());
     }
+    obj<AAllocator> error_allocator()  const  noexcept {
+        return O::iface()->error_allocator(O::data());
+    }
     StringTable * stringtable()  const  noexcept {
         return O::iface()->stringtable(O::data());
     }

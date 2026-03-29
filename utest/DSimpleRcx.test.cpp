@@ -39,7 +39,7 @@ namespace xo {
             auto stbl = StringTable(1024 /*hint_max_capacity*/,
                                     false /*!debug_flag*/);
 
-            DSimpleRcx rcx(alloc, &stbl);
+            DSimpleRcx rcx(alloc, alloc, &stbl);
 
             REQUIRE((void*)rcx.allocator().data() == (void*)alloc.data());
             REQUIRE(rcx.stringtable() == &stbl);
@@ -54,7 +54,7 @@ namespace xo {
             auto stbl = StringTable(1024 /*hint_max_capacity*/,
                                     false /*!debug_flag*/);
 
-            DSimpleRcx rcx(alloc, &stbl);
+            DSimpleRcx rcx(alloc, alloc, &stbl);
             obj<ARuntimeContext> rcx_obj = with_facet<ARuntimeContext>::mkobj(&rcx);
 
             // verify we can recover allocator from obj<ARuntimeContext>
