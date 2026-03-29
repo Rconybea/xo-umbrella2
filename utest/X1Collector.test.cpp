@@ -133,11 +133,11 @@ namespace ut {
                 {
                     REQUIRE(gc.name() == "x1_test");
 
-                    const DArena * otypes = gc.get_object_types();
+                    const DX1Collector::ObjectTypeTable * otypes = gc.get_object_types();
 
                     REQUIRE(otypes != nullptr);
-                    REQUIRE(otypes->reserved() >= cfg.object_types_z_);
-                    REQUIRE(otypes->reserved() < cfg.object_types_z_ + otypes->page_z_);
+                    REQUIRE(otypes->store()->reserved() >= cfg.object_types_z_);
+                    REQUIRE(otypes->store()->reserved() < cfg.object_types_z_ + otypes->store()->page_z_);
 
                     const DX1Collector::RootSet * roots = gc.get_root_set();
 
@@ -180,7 +180,7 @@ namespace ut {
                     REQUIRE(to_2 == nullptr);
 
                     REQUIRE(gc.reserved()
-                            == otypes->reserved() + roots->store()->reserved() + 4 * from_0->reserved());
+                            == otypes->store()->reserved() + roots->store()->reserved() + 4 * from_0->reserved());
 
                     log && log(xtag("from_0", from_0->lo_), xtag("to_0", to_0->lo_));
                 }

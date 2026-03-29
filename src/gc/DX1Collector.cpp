@@ -82,10 +82,10 @@ namespace xo {
              * likely << .size/8
              */
             this->object_types_
-                = DArena::map(ArenaConfig{.name_ = "x1-object-types",
-                                          .size_ = cfg.object_types_z_,
-                                          .hugepage_z_ = page_z,
-                                          .store_header_flag_ = false});
+                = ObjectTypeTable::map(ArenaConfig{.name_ = "x1-object-types",
+                                                   .size_ = cfg.object_types_z_,
+                                                   .hugepage_z_ = page_z,
+                                                   .store_header_flag_ = false});
         }
 
         void
@@ -242,7 +242,7 @@ namespace xo {
             accumulate_total_aux(const DX1Collector & d,
                                  size_t (DArena::* get_stat_fn)() const) noexcept
             {
-                size_t z1 = (d.object_types_.*get_stat_fn)();
+                size_t z1 = (d.object_types_.store()->*get_stat_fn)();
                 size_t z2 = (d.root_set_.store()->*get_stat_fn)();
 
                 size_t z3 = 0;
@@ -424,14 +424,14 @@ namespace xo {
         bool
         DX1Collector::is_type_installed(typeseq tseq) const noexcept
         {
-            if (object_types_.committed() < sizeof(AGCObject) * (tseq.seqno() + 1))
+            if (tseq.is_sentinel()
+                || static_cast<ObjectTypeTable::size_type>(tseq.seqno()) > object_types_.size()) {
                 return false;
+            }
 
-            AGCObject * v = reinterpret_cast<AGCObject *>(object_types_.lo_);
+            const ObjectTypeSlot & slot = object_types_[tseq.seqno()];
 
-            void * vtable = *(void **)&(v[tseq.seqno()]);
-
-            return (vtable != nullptr);
+            return slot.is_occupied();
         }
 
         AllocInfo
@@ -600,24 +600,34 @@ namespace xo {
         {
             scope log(XO_DEBUG(false));
 
-            AGCObject * v = reinterpret_cast<AGCObject *>(object_types_.lo_);
+            if (tseq.is_sentinel()
+                || static_cast<ObjectTypeTable::size_type>(tseq.seqno()) > object_types_.size()) {
 
-            const AGCObject * target = &(v[tseq.seqno()]);
+                log.retroactively_enable("out-of-bounds",
+                                         xtag("tseq", tseq), xtag("tname", TypeRegistry::id2name(tseq)));
 
-            if (reinterpret_cast<const std::byte *>(target) >= object_types_.limit_) {
-                log.retroactively_enable(xtag("tseq", tseq), xtag("tname", TypeRegistry::id2name(tseq)));
-
-                log(xtag("types.allocated", object_types_.allocated()),
-                    xtag("types.committed", object_types_.committed()),
-                    xtag("types.lo", object_types_.lo_),
-                    xtag("types.limit", object_types_.limit_),
-                    xtag("types.hi", object_types_.hi_));
+                log(xtag("types.size", object_types_.size()),
+                    xtag("types.allocated", object_types_.store()->allocated()),
+                    xtag("types.committed", object_types_.store()->committed()),
+                    xtag("types.lo", object_types_.store()->lo_),
+                    xtag("types.limit", object_types_.store()->limit_),
+                    xtag("types.hi", object_types_.store()->hi_));
 
                 assert(false);
                 return nullptr;
             }
 
-            return target;
+            const ObjectTypeSlot & slot = object_types_[tseq.seqno()];
+
+            if (slot.is_null()) {
+                log.retroactively_enable("null-vtable",
+                                         xtag("tseq", tseq), xtag("tname", TypeRegistry::id2name(tseq)));
+
+                assert(false);
+                return nullptr;
+            }
+
+            return slot.iface();
         }
 
         /* editor bait: register_type */
@@ -626,14 +636,20 @@ namespace xo {
         {
             typeseq tseq = meta._typeseq();
 
-            bool ok = object_types_.expand(sizeof(AGCObject) * (tseq.seqno() + 1));
-            if (!ok)
-                return false;
+            assert(tseq.seqno() > 0);
 
-            AGCObject * v = reinterpret_cast<AGCObject *>(object_types_.lo_);
+            auto ix = static_cast<ObjectTypeTable::size_type>(tseq.seqno());
 
-            /* explicitly copying vtable pointer here */
-            std::memcpy((void*)&(v[tseq.seqno()]), (void*)&meta, sizeof(AGCObject));
+            if (ix >= object_types_.size()) {
+                if (!object_types_.resize(std::max(2 * object_types_.size(), ix + 1)))
+                    return false;
+            }
+
+            assert(ix < object_types_.size());
+
+            ObjectTypeSlot & slot = object_types_[ix];
+
+            slot.store_iface(&meta);
 
             return true;
         }
