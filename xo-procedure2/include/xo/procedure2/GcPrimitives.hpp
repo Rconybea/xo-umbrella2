@@ -27,6 +27,10 @@ namespace xo {
             static DPrimitive_gco_0 * make_report_gc_object_types_pm(obj<AAllocator> mm,
                                                                      StringTable * stbl);
 
+            /** create primitive: report gc location of a value **/
+            static DPrimitive_gco_1_gco * make_gc_location_of_pm(obj<AAllocator> mm,
+                                                                 StringTable * stbl);
+
             /** create primitive: request collection **/
             static DPrimitive_gco_1_gco * make_request_gc_pm(obj<AAllocator> mm,
                                                              StringTable * stbl);

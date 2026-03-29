@@ -34,6 +34,12 @@ namespace xo {
         }
 
         auto
+        ICollector_DX1Collector::locate_address(const DX1Collector & self, const void * addr) noexcept -> std::int32_t
+        {
+            return self.locate_address(addr);
+        }
+
+        auto
         ICollector_DX1Collector::contains(const DX1Collector & self, role r, const void * addr) noexcept -> bool
         {
             return self.contains(r, addr);

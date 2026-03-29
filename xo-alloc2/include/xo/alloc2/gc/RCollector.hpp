@@ -88,6 +88,9 @@ public:
     size_type reserved(Generation g, role r)  const  noexcept {
         return O::iface()->reserved(O::data(), g, r);
     }
+    std::int32_t locate_address(const void * addr)  const  noexcept {
+        return O::iface()->locate_address(O::data(), addr);
+    }
     bool contains(role r, const void * addr)  const  noexcept {
         return O::iface()->contains(O::data(), r, addr);
     }

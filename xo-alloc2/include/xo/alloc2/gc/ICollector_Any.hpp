@@ -62,6 +62,7 @@ namespace mm {
         [[noreturn]] size_type allocated(Copaque, Generation, role)  const  noexcept override { _fatal(); }
         [[noreturn]] size_type committed(Copaque, Generation, role)  const  noexcept override { _fatal(); }
         [[noreturn]] size_type reserved(Copaque, Generation, role)  const  noexcept override { _fatal(); }
+        [[noreturn]] std::int32_t locate_address(Copaque, const void *)  const  noexcept override { _fatal(); }
         [[noreturn]] bool contains(Copaque, role, const void *)  const  noexcept override { _fatal(); }
         [[noreturn]] bool is_type_installed(Copaque, typeseq)  const  noexcept override { _fatal(); }
         [[noreturn]] bool report_statistics(Copaque, obj<AAllocator>, obj<AAllocator>, obj<AGCObject> *)  const  noexcept override { _fatal(); }

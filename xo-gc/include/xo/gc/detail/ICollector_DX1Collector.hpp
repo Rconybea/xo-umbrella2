@@ -53,6 +53,10 @@ namespace xo {
             static size_type committed(const DX1Collector & self, Generation g, role r) noexcept;
             /** address space reserved for this collector **/
             static size_type reserved(const DX1Collector & self, Generation g, role r) noexcept;
+            /** Location of object in collector. -1 if not in collector memory.
+Other negative values represent collector error states (good luck!).
+Exact meaning of non-negative values up to collector implementation **/
+            static std::int32_t locate_address(const DX1Collector & self, const void * addr) noexcept;
             /** true if gc responsible for data at @p addr, and data belongs to role @p r **/
             static bool contains(const DX1Collector & self, role r, const void * addr) noexcept;
             /** true iff gc-aware object of type @p tseq is installed in this collector **/

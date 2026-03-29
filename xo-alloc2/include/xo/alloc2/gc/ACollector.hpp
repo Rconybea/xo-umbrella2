@@ -65,6 +65,10 @@ public:
     virtual size_type committed(Copaque data, Generation g, role r)  const  noexcept = 0;
     /** address space reserved for this collector **/
     virtual size_type reserved(Copaque data, Generation g, role r)  const  noexcept = 0;
+    /** Location of object in collector. -1 if not in collector memory.
+Other negative values represent collector error states (good luck!).
+Exact meaning of non-negative values up to collector implementation **/
+    virtual std::int32_t locate_address(Copaque data, const void * addr)  const  noexcept = 0;
     /** true if gc responsible for data at @p addr, and data belongs to role @p r **/
     virtual bool contains(Copaque data, role r, const void * addr)  const  noexcept = 0;
     /** true iff gc-aware object of type @p tseq is installed in this collector **/

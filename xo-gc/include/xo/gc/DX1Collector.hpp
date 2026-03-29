@@ -223,6 +223,9 @@ namespace xo {
             /** memory (virtual addresses) reserved for generation @p g in role @p r **/
             size_type reserved(Generation g, role r) const noexcept;
 
+            /** very similar to generation_of(), but satisfies ACollector api **/
+            std::int32_t locate_address(const void * addr) const noexcept;
+
             // ----- full statistics -----
 
             /** Report gc statistics as a dictionary.

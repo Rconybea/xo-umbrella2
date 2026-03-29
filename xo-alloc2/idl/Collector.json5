@@ -50,7 +50,7 @@
             noexcept: true,
             attributes: [],
         },
-        // size_type reserved(Generation g, role r) const noexcept
+        // size_type committed(Generation g, role r) const noexcept
         {
             name: "committed",
             doc: ["memory committed for this collector"],
@@ -71,6 +71,22 @@
             args: [
                 {type: "Generation", name: "g"},
                 {type: "role", name: "r"},
+            ],
+            const: true,
+            noexcept: true,
+            attributes: [],
+        },
+        // int32_t locate() const noexcept
+        {
+            name: "locate_address",
+            doc: [
+                "Location of object in collector. -1 if not in collector memory.",
+                "Other negative values represent collector error states (good luck!).",
+                "Exact meaning of non-negative values up to collector implementation"
+            ],
+            return_type: "std::int32_t",
+            args: [
+                {type: "const void *", name: "addr"},
             ],
             const: true,
             noexcept: true,
