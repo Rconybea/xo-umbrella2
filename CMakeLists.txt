@@ -31,7 +31,6 @@ xo_add_genfacet(
 xo_add_genfacetimpl(
     TARGET xo-object2-facetimpl-sequence-list
     FACET_PKG xo_object2
-#    REPR List
     INPUT idl/ISequence_DList.json5
 )
 

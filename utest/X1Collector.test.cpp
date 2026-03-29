@@ -16,10 +16,9 @@
 
 #include <xo/alloc2/CollectorTypeRegistry.hpp>
 #include <xo/alloc2/Collector.hpp>
-#include <xo/gc/DX1Collector.hpp>
-
-#include <xo/gc/detail/IAllocator_DX1Collector.hpp>
-#include <xo/gc/detail/ICollector_DX1Collector.hpp>
+//#include <xo/gc/DX1Collector.hpp>
+//#include <xo/gc/detail/IAllocator_DX1Collector.hpp>
+//#include <xo/gc/detail/ICollector_DX1Collector.hpp>
 
 #include <xo/arena/AllocInfo.hpp>
 #include <xo/arena/padding.hpp>
@@ -44,9 +43,9 @@ namespace ut {
     using xo::mm::AllocHeader;
     using xo::mm::AllocInfo;
     using xo::mm::AGCObject;
-    using xo::mm::DX1Collector;
+//    using xo::mm::DX1Collector;
     using xo::mm::DArena;
-    using xo::mm::X1CollectorConfig;
+//    using xo::mm::X1CollectorConfig;
     using xo::mm::ArenaConfig;
     using xo::mm::Generation;
     using xo::mm::role;
@@ -171,7 +170,7 @@ namespace ut {
 
                     REQUIRE(to_2 == nullptr);
 
-                    REQUIRE(gc.reserved_total()
+                    REQUIRE(gc.reserved()
                             == otypes->reserved() + roots->store()->reserved() + 4 * from_0->reserved());
 
                     log && log(xtag("from_0", from_0->lo_), xtag("to_0", to_0->lo_));
