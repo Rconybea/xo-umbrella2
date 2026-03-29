@@ -1,63 +1,107 @@
 /** @file ICollector_DX1Collector.hpp
-*
- *  @author Roland Conybeare, Dec 2025
+ *
+ *  Generated automagically from ingredients:
+ *  1. code generator:
+ *       [xo-facet/codegen/genfacet]
+ *     arguments:
+ *       --input [idl/ICollector_DX1Collector.json5]
+ *  2. jinja2 template for abstract facet .hpp file:
+ *       [iface_facet_repr.hpp.j2]
+ *  3. idl for facet methods
+ *       [idl/ICollector_DX1Collector.json5]
  **/
 
 #pragma once
 
-#include <xo/alloc2/gc/ACollector.hpp>
-#include <xo/alloc2/gc/ICollector_Xfer.hpp>
+#include "Collector.hpp"
 #include "DX1Collector.hpp"
 
-namespace xo {
-    namespace mm { struct ICollector_DX1Collector; }
+namespace xo { namespace mm { class ICollector_DX1Collector; } }
 
+namespace xo {
     namespace facet {
         template <>
         struct FacetImplementation<xo::mm::ACollector,
                                    xo::mm::DX1Collector>
         {
-            using ImplType = xo::mm::ICollector_Xfer<xo::mm::DX1Collector,
-                                                     xo::mm::ICollector_DX1Collector>;
+            using ImplType = xo::mm::ICollector_Xfer
+              <xo::mm::DX1Collector,
+               xo::mm::ICollector_DX1Collector>;
         };
     }
+}
 
+namespace xo {
     namespace mm {
-        /* changes here coordinate with
-         *  ACollector      ACollector.hpp
-         *  ICollector_Any  ICollector_Any.hpp
-         *  ICollector_Xfer ICollector_Xfer.hpp
-         *  RCollector      RCollector.hpp
-         */
-        struct ICollector_DX1Collector {
-            using size_type = std::size_t;
-            using header_type = DArena::header_type;
-            using typeseq = xo::facet::typeseq;
+        /** @class ICollector_DX1Collector
+         **/
+        class ICollector_DX1Collector {
+        public:
+            /** @defgroup mm-collector-dx1collector-type-traits **/
+            ///@{
+            using size_type = xo::mm::ACollector::size_type;
+            using Copaque = xo::mm::ACollector::Copaque;
+            using Opaque = xo::mm::ACollector::Opaque;
+            using typeseq = xo::reflect::typeseq;
+            ///@}
+            /** @defgroup mm-collector-dx1collector-methods **/
+            ///@{
+            // const methods
+            /** memory in use for this collector **/
+            static size_type allocated(const DX1Collector & self, Generation g, role r) noexcept;
+            /** memory committed for this collector **/
+            static size_type committed(const DX1Collector & self, Generation g, role r) noexcept;
+            /** address space reserved for this collector **/
+            static size_type reserved(const DX1Collector & self, Generation g, role r) noexcept;
+            /** true if gc responsible for data at @p addr, and data belongs to role @p r **/
+            static bool contains(const DX1Collector & self, role r, const void * addr) noexcept;
+            /** true iff gc-aware object of type @p tseq is installed in this collector **/
+            static bool is_type_installed(const DX1Collector & self, typeseq tseq) noexcept;
+            /** Report gc statistics, at discretion of collector implementation.
+Creates dictionary using memory from @p report_mm.
+If unable to comply (e.g. oom), return runtime error allocated from @p error_mm.
+Avoiding obj<AGCObject> return type to avoid #include cycle **/
+            static bool report_statistics(const DX1Collector & self, obj<AAllocator> report_mm, obj<AAllocator> error_mm, obj<AGCObject> * output) noexcept;
 
-            static bool check_move_policy(const DX1Collector & d,
-                                          header_type alloc_hdr,
-                                          void * object_data);
+            // non-const methods
+            /** install interface @p iface for representation with typeseq @p tseq
+in collector @p d.
 
-            // todo: available()
+The type AGCObject_Any here is misleading.
+Will have been replaced by an instance of
+  @c AGCObject_Xfer<DFoo,AGCObject_DFoo> for some @c DFoo
+in which case calls through @c std::launder(&iface)
+will properly act on @c DFoo.
 
-            static size_type allocated(const DX1Collector & d, Generation g, role r);
-            static size_type reserved(const DX1Collector & d, Generation g, role r);
-            static size_type committed(const DX1Collector & d, Generation g, role r);
-            static bool is_type_installed(const DX1Collector & d, typeseq tseq);
-            static bool contains(const DX1Collector & d, role r, const void * addr);
+Return false if installation fails (e.g. memory exhausted) **/
+            static bool install_type(DX1Collector & self, const AGCObject & iface);
+            /** add gc root with address @p p_root. gc will preserve subgraph at this address **/
+            static void add_gc_root_poly(DX1Collector & self, obj<AGCObject> * p_root);
+            /** remove gc root with address @p p_root. Reverse effect of prior add_gc_root_poly call **/
+            static void remove_gc_root_poly(DX1Collector & self, obj<AGCObject> * p_root);
+            /** Request immediate collection.
+  1. if collection is enabled, immediately collect all generations
+     up to (but not including) g
+  2. may nevertheless escalate to older generations,
+     depending on collector state.
+  3. if collection is currently disabled,
+     collection will trigger the next time gc is enabled.
+ **/
+            static void request_gc(DX1Collector & self, Generation upto);
+            /** Assign pointer @p p_lhs to destination @p rhs, within parent allocation @p parent
 
-            static bool install_type(DX1Collector & d, const AGCObject & iface);
-            static void add_gc_root_poly(DX1Collector & d, obj<AGCObject> * p_root);
-            static void remove_gc_root_poly(DX1Collector & d, obj<AGCObject> * p_root);
-            static void request_gc(DX1Collector & d, Generation upto);
-            static void assign_member(DX1Collector & d, void * parent,
-                                      obj<AGCObject> * p_lhs, obj<AGCObject> & rhs);
-            static void forward_inplace(DX1Collector & d, AGCObject * lhs_iface, void ** lhs_data);
+Require: gc not in progress **/
+            static void assign_member(DX1Collector & self, void * parent, obj<AGCObject> * p_lhs, obj<AGCObject> & rhs);
+            /** evacuate @p *lhs, that refers to state with interface @p lhs_iface,
+to collector @p d's to-space. Replace *lhs_data with forwarding pointer
 
-            static int32_t s_typeseq;
-            static bool _valid;
+Require: gc in progress
+ **/
+            static void forward_inplace(DX1Collector & self, AGCObject * lhs_iface, void ** lhs_data);
+            ///@}
         };
+
     } /*namespace mm*/
 } /*namespace xo*/
 
-/* end ICollector_DX1_Collector.hpp */
+/* end */

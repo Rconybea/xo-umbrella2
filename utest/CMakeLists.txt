@@ -5,7 +5,9 @@ set(UTEST_EXE utest.gc)
 set(UTEST_SRCS
     gc_utest_main.cpp
     Collector.test.cpp
+    X1Collector.test.cpp
     DX1CollectorIterator.test.cpp
+    Object2.test.cpp
     random_allocs.cpp
 )
 

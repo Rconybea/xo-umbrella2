@@ -4,10 +4,12 @@
  **/
 
 #include "X1Collector.hpp"
+#include <xo/gc/DX1CollectorIterator.hpp>
+#include <xo/object2/Dictionary.hpp>
+#include <xo/object2/Integer.hpp>
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/alloc2/Arena.hpp>
-#include <xo/gc/DX1CollectorIterator.hpp>
 #include <xo/alloc2/generation.hpp>
 #include "object_age.hpp"
 #include <xo/facet/obj.hpp>
@@ -18,6 +20,11 @@
 #include <unistd.h> // for ::getpagesize()
 
 namespace xo {
+    // for report_statistics()
+    using xo::scm::DDictionary;
+    using xo::scm::DString;
+    using xo::scm::DInteger;
+
     using xo::mm::AAllocator;
     using xo::facet::TypeRegistry;
     using xo::facet::typeseq;
@@ -165,6 +172,10 @@ namespace xo {
                 this->space_[role::to_space()][igen] = nullptr;
                 this->space_[role::from_space()][igen] = nullptr;
             }
+
+            if (config_.n_generation_ == 2) {
+                assert(this->get_space(role::to_space(), Generation{2}) == nullptr);
+            }
         }
 
         void
@@ -251,7 +262,7 @@ namespace xo {
         }
 
         size_type
-        DX1Collector::reserved_total() const noexcept
+        DX1Collector::reserved() const noexcept
         {
             return accumulate_total_aux(*this, &DArena::reserved);
         }
@@ -259,25 +270,122 @@ namespace xo {
         size_type
         DX1Collector::size_total() const noexcept
         {
-            return committed_total();
+            return this->committed();
         }
 
         size_type
-        DX1Collector::committed_total() const noexcept
+        DX1Collector::committed() const noexcept
         {
             return accumulate_total_aux(*this, &DArena::committed);
         }
 
         size_type
-        DX1Collector::available_total() const noexcept
+        DX1Collector::available() const noexcept
         {
             return accumulate_total_aux(*this, &DArena::available);
         }
 
         size_type
-        DX1Collector::allocated_total() const noexcept
+        DX1Collector::allocated() const noexcept
         {
             return accumulate_total_aux(*this, &DArena::allocated);
+        }
+
+        size_type
+        DX1Collector::mutation_log_entries() const noexcept
+        {
+            size_type z = 0;
+
+            for (Generation gj{0}; gj + 1 < config_.n_generation_; ++gj) {
+                z += mlog_[role::to_space()][gj]->size();
+            }
+
+            return z;
+        }
+
+        namespace {
+            size_type
+            stat_helper(const DX1Collector & d,
+                        size_type (DArena::* getter)() const,
+                        Generation g,
+                        role r)
+            {
+                const DArena * arena = d.get_space(r, g);
+
+                if (arena) [[likely]]
+                    return (arena->*getter)();
+
+                return 0;
+            }
+        }
+
+        size_type
+        DX1Collector::allocated(Generation g, role r) const noexcept
+        {
+            return stat_helper(*this, &DArena::allocated, g, r);
+        }
+
+        size_type
+        DX1Collector::committed(Generation g, role r) const noexcept
+        {
+            return stat_helper(*this, &DArena::committed, g, r);
+        }
+
+        size_type
+        DX1Collector::reserved(Generation g, role r) const noexcept
+        {
+            return stat_helper(*this, &DArena::reserved, g, r);
+        }
+
+        // editor bait: report-gc-statistics
+        bool
+        DX1Collector::report_statistics(obj<AAllocator> mm,
+                                        obj<AAllocator> error_mm,
+                                        obj<AGCObject> * p_output) const noexcept
+        {
+            (void)error_mm;
+
+            DDictionary * rpt = DDictionary::make(mm);
+
+            bool ok = true;
+
+            // note: totals taken across both roles and generations,
+            //       so counts both from-space and to-space
+            //
+            ok &= rpt->upsert_cstr(mm, "n-generation", DInteger::box(mm, config_.n_generation_));
+            ok &= rpt->upsert_cstr(mm, "n-survive-threshold", DInteger::box(mm, config_.n_survive_threshold_));
+            ok &= rpt->upsert_cstr(mm, "allocated", DInteger::box(mm, this->allocated()));
+            ok &= rpt->upsert_cstr(mm, "committed", DInteger::box(mm, this->committed()));
+            ok &= rpt->upsert_cstr(mm, "reserved", DInteger::box(mm, this->reserved()));
+            ok &= rpt->upsert_cstr(mm, "n-mlog-entry", DInteger::box(mm, this->mutation_log_entries()));
+
+            // per-(generation,role) info
+            {
+                for (Generation gi{0}; gi < config_.n_generation_; ++gi) {
+                    for (role rj : role::all()) {
+                        const DArena * arena = this->get_space(rj, gi);
+                        DDictionary * arena_d = DDictionary::make(mm);
+
+                        auto lo = reinterpret_cast<DInteger::value_type>(arena->lo_);
+                        auto free = reinterpret_cast<DInteger::value_type>(arena->free_);
+                        auto limit = reinterpret_cast<DInteger::value_type>(arena->limit_);
+                        auto hi = reinterpret_cast<DInteger::value_type>(arena->hi_);
+
+                        ok &= arena_d->upsert_cstr(mm, "lo", DInteger::box(mm, lo));
+                        ok &= arena_d->upsert_cstr(mm, "d-free", DInteger::box(mm, free - lo));
+                        ok &= arena_d->upsert_cstr(mm, "d-limit", DInteger::box(mm, limit - lo));
+                        ok &= arena_d->upsert_cstr(mm, "d-hi", DInteger::box(mm, hi - lo));
+
+                        const DString * key = DString::from_str(mm, arena->config_.name_);
+
+                        rpt->upsert(mm, std::make_pair(key, obj<AGCObject,DDictionary>(arena_d)));
+                    }
+                }
+            }
+
+            *p_output = obj<AGCObject,DDictionary>(rpt);
+
+            return ok;
         }
 
         size_type

@@ -153,15 +153,38 @@ namespace xo {
             // ----- basic statistics -----
 
             /** total reserved memory in bytes, across all {role, generation} **/
-            size_type reserved_total() const noexcept;
+            size_type reserved() const noexcept;
             /** total size in bytes (same as committed_total()) **/
             size_type size_total() const noexcept;
             /** total committed memory in bytes, across all {role, generation} **/
-            size_type committed_total() const noexcept;
+            size_type committed() const noexcept;
             /** total available memory in bytes, across all {role, generation} **/
-            size_type available_total() const noexcept;
+            size_type available() const noexcept;
             /** total allocated memory in bytes, across all {role, generation} **/
-            size_type allocated_total() const noexcept;
+            size_type allocated() const noexcept;
+
+            /** total number of mutation log entries **/
+            size_type mutation_log_entries() const noexcept;
+
+            /** memory allocated for generation @p g in role @p r **/
+            size_type allocated(Generation g, role r) const noexcept;
+            /** memory committed for generation @p g in role @p r **/
+            size_type committed(Generation g, role r) const noexcept;
+            /** memory (virtual addresses) reserved for generation @p g in role @p r **/
+            size_type reserved(Generation g, role r) const noexcept;
+
+            // ----- full statistics -----
+
+            /** Report gc statistics as a dictionary.
+             *  Providing for the same of making GC statistics visible to schematika programs
+             *
+             *  @p mm        allocate stats dictionary from this allocator.  May be the same as this collector.
+             *  @p error_mm  Allocator for last-report error reporting when out-of-memory.
+             *  @p p_output  on exit @p *p_output contains stats dictionary
+             **/
+            bool report_statistics(obj<AAllocator> mm,
+                                   obj<AAllocator> error_mm,
+                                   obj<AGCObject> * p_output) const noexcept;
 
             // ----- queries -----
 

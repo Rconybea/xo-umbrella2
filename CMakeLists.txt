@@ -18,6 +18,19 @@ add_definitions(${PROJECT_CXX_FLAGS})
 
 # ----------------------------------------------------------------
 
+# note: manual target; generated code committed to git
+xo_add_genfacetimpl(
+    TARGET xo-gc-facetimpl-collector-x1collector
+    FACET_PKG xo_alloc2
+    INPUT idl/ICollector_DX1Collector.json5
+)
+
+# ----------------------------------------------------------------
+
+xo_add_genfacet_all(xo-gc-genfacet-all)
+
+# ----------------------------------------------------------------
+
 # must complete definition of expression lib before configuring examples
 add_subdirectory(src/gc)
 add_subdirectory(utest)

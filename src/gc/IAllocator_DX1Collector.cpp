@@ -29,7 +29,7 @@ namespace xo {
         auto
         IAllocator_DX1Collector::reserved(const DX1Collector & d) noexcept -> size_type
         {
-            return d.reserved_total();
+            return d.reserved();
         }
 
         auto
@@ -41,19 +41,19 @@ namespace xo {
         auto
         IAllocator_DX1Collector::committed(const DX1Collector & d) noexcept -> size_type
         {
-            return d.committed_total();
+            return d.committed();
         }
 
         auto
         IAllocator_DX1Collector::available(const DX1Collector & d) noexcept -> size_type
         {
-            return d.available_total();
+            return d.available();
         }
 
         auto
         IAllocator_DX1Collector::allocated(const DX1Collector & d) noexcept -> size_type
         {
-            return d.allocated_total();
+            return d.allocated();
         }
 
         void
