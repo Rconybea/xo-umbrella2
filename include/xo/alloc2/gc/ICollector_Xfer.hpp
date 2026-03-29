@@ -61,6 +61,9 @@ namespace mm {
         bool is_type_installed(Copaque data, typeseq tseq)  const  noexcept override {
             return I::is_type_installed(_dcast(data), tseq);
         }
+        bool report_statistics(Copaque data, obj<AAllocator> report_mm, obj<AAllocator> error_mm, obj<AGCObject> * output)  const  noexcept override {
+            return I::report_statistics(_dcast(data), report_mm, error_mm, output);
+        }
 
         // non-const methods
         bool install_type(Opaque data, const AGCObject & iface)  override {
