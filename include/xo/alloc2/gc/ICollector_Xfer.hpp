@@ -55,6 +55,9 @@ namespace mm {
         size_type reserved(Copaque data, Generation g, role r)  const  noexcept override {
             return I::reserved(_dcast(data), g, r);
         }
+        std::int32_t locate_address(Copaque data, const void * addr)  const  noexcept override {
+            return I::locate_address(_dcast(data), addr);
+        }
         bool contains(Copaque data, role r, const void * addr)  const  noexcept override {
             return I::contains(_dcast(data), r, addr);
         }
