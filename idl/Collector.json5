@@ -120,6 +120,25 @@
             noexcept: true,
             attributes: [],
         },
+        // bool report_types(obj<AAllocator> report_mm, obj<AAllocator> error_mm, obj<AGCObject> * output);
+        {
+            name: "report_object_types",
+            doc: [
+                "Report gc object types, at discretion of collector implementation.",
+                "Creates dictionary using memory from @p report_mm.",
+                "If unable to comply (e.g. oom), return runtime error allocated from @p error_mm.",
+                "Avoiding obj<AGCObject> return type to avoid #include cycle"
+            ],
+            return_type: "bool",
+            args: [
+                {type: "obj<AAllocator>", name: "report_mm"},
+                {type: "obj<AAllocator>", name: "error_mm"},
+                {type: "obj<AGCObject> *", name: "output"},
+            ],
+            const: true,
+            noexcept: true,
+            attributes: [],
+        },
     ],
     nonconst_methods: [
         // bool install_type(const AGCObject & iface)
