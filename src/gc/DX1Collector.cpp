@@ -342,6 +342,27 @@ namespace xo {
             return stat_helper(*this, &DArena::reserved, g, r);
         }
 
+        std::int32_t
+        DX1Collector::locate_address(const void * addr) const noexcept
+        {
+            Generation g;
+
+            g = this->generation_of(role::to_space(), addr);
+
+            if (!g.is_sentinel())
+                return g;
+
+            g = this->generation_of(role::from_space(), addr);
+
+            if (!g.is_sentinel()) {
+                // use negative values for
+
+                return -1 - g;
+            }
+
+            return -1;
+        }
+
         // editor bait: report-gc-statistics
         bool
         DX1Collector::report_statistics(obj<AAllocator> mm,
@@ -362,6 +383,7 @@ namespace xo {
             //
             ok &= rpt->upsert_cstr(mm, "n-generation", DInteger::box(mm, config_.n_generation_));
             ok &= rpt->upsert_cstr(mm, "n-survive-threshold", DInteger::box(mm, config_.n_survive_threshold_));
+            ok &= rpt->upsert_cstr(mm, "allow-incremental-gc", DBoolean::box(mm, config_.allow_incremental_gc_));
             ok &= rpt->upsert_cstr(mm, "allocated", DInteger::box(mm, this->allocated()));
             ok &= rpt->upsert_cstr(mm, "committed", DInteger::box(mm, this->committed()));
             ok &= rpt->upsert_cstr(mm, "reserved", DInteger::box(mm, this->reserved()));
