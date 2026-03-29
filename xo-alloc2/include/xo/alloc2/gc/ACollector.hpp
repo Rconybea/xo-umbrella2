@@ -74,6 +74,11 @@ Creates dictionary using memory from @p report_mm.
 If unable to comply (e.g. oom), return runtime error allocated from @p error_mm.
 Avoiding obj<AGCObject> return type to avoid #include cycle **/
     virtual bool report_statistics(Copaque data, obj<AAllocator> report_mm, obj<AAllocator> error_mm, obj<AGCObject> * output)  const  noexcept = 0;
+    /** Report gc object types, at discretion of collector implementation.
+Creates dictionary using memory from @p report_mm.
+If unable to comply (e.g. oom), return runtime error allocated from @p error_mm.
+Avoiding obj<AGCObject> return type to avoid #include cycle **/
+    virtual bool report_object_types(Copaque data, obj<AAllocator> report_mm, obj<AAllocator> error_mm, obj<AGCObject> * output)  const  noexcept = 0;
 
     // nonconst methods
     /** install interface @p iface for representation with typeseq @p tseq

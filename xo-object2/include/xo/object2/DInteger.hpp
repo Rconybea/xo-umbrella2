@@ -35,6 +35,8 @@ namespace xo {
 
             operator long() const noexcept { return value_; }
 
+            void assign_value(long x) noexcept { this->value_ = x; }
+
             // GCObject facet
 
             std::size_t shallow_size() const noexcept;

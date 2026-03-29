@@ -50,6 +50,21 @@ namespace xo {
             return {};
         }
 
+        std::optional<obj<AGCObject>>
+        DDictionary::lookup_cstr(const char * key) const noexcept
+        {
+            for (DArray::size_type i = 0, z = keys_->size(); i < z; ++i) {
+                auto i_key = obj<AGCObject,DString>::from(keys_->at(i));
+
+                assert(i_key);
+
+                if (strcmp(key, i_key->data()) == 0)
+                    return values_->at(i);
+            }
+
+            return {};
+        }
+
         std::pair<const DString *, obj<AGCObject>>
         DDictionary::at_index(size_type ix) const
         {
@@ -97,6 +112,24 @@ namespace xo {
 
                 if (*(key_i.data()) == *(kv_pair.first)) {
                     values_->assign_at(i, kv_pair.second);
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        bool
+        DDictionary::try_update_cstr(const char * key, obj<AGCObject> value)
+        {
+            for (size_type i = 0, n = keys_->size(); i < n; ++i) {
+                auto key_i = obj<AGCObject,DString>::from((*keys_)[i]);
+
+                assert(key_i);
+
+                if (strcmp(key, key_i->data()) == 0) {
+                    values_->assign_at(i, value);
+
                     return true;
                 }
             }
@@ -183,8 +216,7 @@ namespace xo {
                 pps->write("{");
 
                 for (size_type i = 0, n = this->size(); i < n; ++i) {
-                    if (i > 0)
-                        pps->write(" ");
+                    pps->write(" ");
 
                     obj<APrintable> key
                         = FacetRegistry::instance().variant<APrintable,AGCObject>((*keys_)[i]);
@@ -203,7 +235,7 @@ namespace xo {
                     pps->write(";");
                 }
 
-                pps->write("}");
+                pps->write(" }");
                 return true;
             } else {
                 pps->write("{");
@@ -211,10 +243,10 @@ namespace xo {
                 for (size_type i = 0, n = this->size(); i < n; ++i) {
                     if (i == 0) {
                         /* indent, but credit initial {. using same line for first (key,value) */
-                        ppii.pps()->indent(std::max(ppii.pps()->indent_width(), 1u) - 1);
+                        pps->indent(std::max(pps->indent_width(), 1u) - 1);
                     } else {
                         /* indent after newline */
-                        ppii.pps()->newline_indent(ppii.ci1());
+                        pps->newline_indent(ppii.ci1());
                     }
 
                     obj<APrintable> key

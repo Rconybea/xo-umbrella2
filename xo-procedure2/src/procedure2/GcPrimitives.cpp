@@ -25,8 +25,6 @@ namespace xo {
         xfer_report_gc_statistics(obj<ARuntimeContext> rcx)
         {
             if (rcx.collector()) {
-                // status currently only implemented for X1 collector
-
                 obj<AGCObject> stats;
                 bool ok = rcx.collector().report_statistics(rcx.allocator(),
                                                             rcx.error_allocator(),
@@ -49,6 +47,36 @@ namespace xo {
             auto pm_ty = obj<AType,DFunctionType>(DFunctionType::_make(mm, any_ty));
 
             return DPrimitive_gco_0::_make(mm, "report-gc-statistics", pm_ty, &xfer_report_gc_statistics);
+        }
+
+        // ----- report-gc-object-types -----
+
+        obj<AGCObject>
+        xfer_report_gc_object_types(obj<ARuntimeContext> rcx)
+        {
+            if (rcx.collector()) {
+                obj<AGCObject> stats;
+                bool ok = rcx.collector().report_object_types(rcx.allocator(), rcx.error_allocator(), &stats);
+
+
+                if (ok && stats)
+                    return stats;
+            }
+
+            return DBoolean::box(rcx.allocator(), false);
+        }
+
+        DPrimitive_gco_0 *
+        GcPrimitives::make_report_gc_object_types_pm(obj<AAllocator> mm,
+                                                     StringTable * stbl)
+        {
+            (void)stbl;
+
+            auto any_ty = DAtomicType::make(mm, Metatype::t_any());
+            auto pm_ty = obj<AType,DFunctionType>(DFunctionType::_make(mm, any_ty));
+
+            return DPrimitive_gco_0::_make(mm, "report-gc-object-types", pm_ty, &xfer_report_gc_object_types);
+
         }
 
         // ----- request-gc -----

@@ -62,6 +62,11 @@ Creates dictionary using memory from @p report_mm.
 If unable to comply (e.g. oom), return runtime error allocated from @p error_mm.
 Avoiding obj<AGCObject> return type to avoid #include cycle **/
             static bool report_statistics(const DX1Collector & self, obj<AAllocator> report_mm, obj<AAllocator> error_mm, obj<AGCObject> * output) noexcept;
+            /** Report gc object types, at discretion of collector implementation.
+Creates dictionary using memory from @p report_mm.
+If unable to comply (e.g. oom), return runtime error allocated from @p error_mm.
+Avoiding obj<AGCObject> return type to avoid #include cycle **/
+            static bool report_object_types(const DX1Collector & self, obj<AAllocator> report_mm, obj<AAllocator> error_mm, obj<AGCObject> * output) noexcept;
 
             // non-const methods
             /** install interface @p iface for representation with typeseq @p tseq

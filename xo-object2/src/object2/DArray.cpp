@@ -101,7 +101,7 @@ namespace xo {
         bool
         DArray::resize(size_type new_z) noexcept
         {
-            if (new_z >= capacity_) {
+            if (new_z > capacity_) {
                 return false;
             } else if (new_z > size_) {
                 // ensure new size is zeroed (we/re not zeroing if/when we shrink)
@@ -149,7 +149,25 @@ namespace xo {
                 pps->write("]");
                 return true;
             } else {
-                pps->write("[...]");
+                pps->write("[");
+
+                for (size_type i = 0, n = this->size(); i < n; ++i) {
+                    if (i == 0) {
+                        /* indent, but credit initial [ */
+                        pps->indent(std::max(pps->indent_width(), 1u) - 1);
+                    } else {
+                        /* indent after newline */
+                        pps->newline_indent(ppii.ci1());
+                    }
+
+                    obj<APrintable> elt = this->at(i).to_facet<APrintable>();
+
+                    assert(elt.data());
+
+                    pps->pretty(elt);
+                }
+
+                pps->write("]");
                 return false;
             }
         }
