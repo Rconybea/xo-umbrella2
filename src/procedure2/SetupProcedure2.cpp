@@ -139,6 +139,11 @@ namespace xo {
 
             ok = ok & (PrimitiveRegistry::install_aux
                            (sink,
+                            GcPrimitives::make_report_gc_object_types_pm(mm, stbl),
+                            flags & InstallFlags::f_generalpurpose));
+
+            ok = ok & (PrimitiveRegistry::install_aux
+                           (sink,
                             GcPrimitives::make_request_gc_pm(mm, stbl),
                             flags & InstallFlags::f_generalpurpose));
 
