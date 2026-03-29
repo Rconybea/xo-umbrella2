@@ -16,13 +16,14 @@ namespace xo {
         struct DInteger {
             using AAllocator = xo::mm::AAllocator;
             using ACollector = xo::mm::ACollector;
+            using AGCObject = xo::mm::AGCObject;
             using ppindentinfo = xo::print::ppindentinfo;
             using value_type = long;
 
             explicit DInteger(long x) : value_{x} {}
 
             /** will likely want this to default to ANumeric, once we have it **/
-            template <typename AFacet>
+            template <typename AFacet = AGCObject>
             static obj<AFacet, DInteger> box(obj<AAllocator> mm, long x);
 
             /** allocate boxed value @p x using memory from @p mm **/

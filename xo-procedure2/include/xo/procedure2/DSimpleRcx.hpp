@@ -23,16 +23,19 @@ namespace xo {
             using MemorySizeVisitor = xo::mm::MemorySizeVisitor;
 
         public:
-            DSimpleRcx(obj<AAllocator> mm, StringTable * st)
-            : allocator_{mm}, stringtable_{st} {}
+            DSimpleRcx(obj<AAllocator> mm, obj<AAllocator> error_mm, StringTable * st)
+            : allocator_{mm}, error_allocator_{error_mm},
+              stringtable_{st} {}
 
             obj<AAllocator> allocator() const noexcept { return allocator_; }
             obj<ACollector> collector() const noexcept;
+            obj<AAllocator> error_allocator() const noexcept { return error_allocator_; }
             StringTable * stringtable() const noexcept { return stringtable_; }
             void visit_pools(const MemorySizeVisitor & visitor) const;
 
         private:
             obj<AAllocator> allocator_;
+            obj<AAllocator> error_allocator_;
             StringTable * stringtable_ = nullptr;
         };
 

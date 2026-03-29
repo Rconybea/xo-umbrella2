@@ -64,6 +64,7 @@ namespace mm {
         [[noreturn]] size_type reserved(Copaque, Generation, role)  const  noexcept override { _fatal(); }
         [[noreturn]] bool contains(Copaque, role, const void *)  const  noexcept override { _fatal(); }
         [[noreturn]] bool is_type_installed(Copaque, typeseq)  const  noexcept override { _fatal(); }
+        [[noreturn]] bool report_statistics(Copaque, obj<AAllocator>, obj<AAllocator>, obj<AGCObject> *)  const  noexcept override { _fatal(); }
 
         // nonconst methods
         [[noreturn]] bool install_type(Opaque, const AGCObject &)  override;

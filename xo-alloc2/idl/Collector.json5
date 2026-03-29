@@ -29,12 +29,6 @@
         "A collector must also suppose the @ref AAllocator facet, see also"
     ],
     types: [
-        // using typeseq = xo::facet::typeseq;  // I think this is automatically provided
-//        {
-//            name: "typeseq",
-//            doc: ["type for an amount of memory"],
-//            definition: "std::size_t",
-//        },
         // using size_type = std::size_t;
         {
             name: "size_type",
@@ -87,7 +81,7 @@
             name: "contains",
             doc: ["true if gc responsible for data at @p addr, and data belongs to role @p r"],
             return_type: "bool",
-            args:[
+            args: [
                 {type: "role", name: "r"},
                 {type: "const void *", name: "addr"},
             ],
@@ -100,8 +94,27 @@
             name: "is_type_installed",
             doc: ["true iff gc-aware object of type @p tseq is installed in this collector"],
             return_type: "bool",
-            args:[
+            args: [
                 {type: "typeseq", name: "tseq"},
+            ],
+            const: true,
+            noexcept: true,
+            attributes: [],
+        },
+        // obj<AGCObject> summary() const noexcept;
+        {
+            name: "report_statistics",
+            doc: [
+                "Report gc statistics, at discretion of collector implementation.",
+                "Creates dictionary using memory from @p report_mm.",
+                "If unable to comply (e.g. oom), return runtime error allocated from @p error_mm.",
+                "Avoiding obj<AGCObject> return type to avoid #include cycle"
+            ],
+            return_type: "bool",
+            args: [
+                {type: "obj<AAllocator>", name: "report_mm"},
+                {type: "obj<AAllocator>", name: "error_mm"},
+                {type: "obj<AGCObject> *", name: "output"},
             ],
             const: true,
             noexcept: true,

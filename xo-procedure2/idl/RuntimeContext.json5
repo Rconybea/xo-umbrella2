@@ -62,6 +62,15 @@
             attributes: [],
         },
         {
+            name: "error_allocator",
+            doc: [ "last-resort allocator for erros. e.g. regular allocator exhausted" ],
+            return_type: "obj<AAllocator>",
+            args: [],
+            const: true,
+            noexcept: true,
+            attributes: [],
+        },
+        {
             name: "stringtable",
             doc: [ "stringtable for unique symbols" ],
             return_type: "StringTable *",

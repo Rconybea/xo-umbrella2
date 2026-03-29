@@ -3,22 +3,21 @@
  *  @author Roland Conybeare, Dec 2025
  **/
 
-#include "init_object2.hpp"
+#include "init_gc.hpp"
 #include "ListOps.hpp"
 #include "DFloat.hpp"
 #include "DInteger.hpp"
 #include "DList.hpp"
 #include "DArray.hpp"
 
-#include "number/IGCObject_DFloat.hpp"
+#include <xo/object2/Float.hpp>
+//#include "number/IGCObject_DFloat.hpp"
 #include "number/IGCObject_DInteger.hpp"
 #include "list/IGCObject_DList.hpp"
 
 #include <xo/alloc2/CollectorTypeRegistry.hpp>
 #include <xo/alloc2/Collector.hpp>
-//#include <xo/gc/DX1Collector.hpp>
-//#include <xo/gc/detail/IAllocator_DX1Collector.hpp>
-//#include <xo/gc/detail/ICollector_DX1Collector.hpp>
+#include <xo/gc/X1Collector.hpp>
 
 #include <xo/arena/AllocInfo.hpp>
 #include <xo/arena/padding.hpp>
@@ -31,7 +30,7 @@
 #include <catch2/catch.hpp>
 
 namespace ut {
-    using xo::S_object2_tag;
+    using xo::S_gc_tag;
     using xo::scm::ListOps;
     using xo::scm::DList;
     using xo::scm::DArray;
@@ -43,13 +42,14 @@ namespace ut {
     using xo::mm::AllocHeader;
     using xo::mm::AllocInfo;
     using xo::mm::AGCObject;
-//    using xo::mm::DX1Collector;
+    using xo::mm::X1CollectorConfig;
+    using xo::mm::DX1Collector;
     using xo::mm::DArena;
-//    using xo::mm::X1CollectorConfig;
     using xo::mm::ArenaConfig;
     using xo::mm::Generation;
     using xo::mm::role;
     using xo::mm::padding;
+    using xo::facet::obj;
     using xo::facet::with_facet;
     using xo::facet::typeseq;
     using xo::Subsystem;
@@ -85,18 +85,20 @@ namespace ut {
         };
     }
 
-    static InitEvidence s_init = (InitSubsys<S_object2_tag>::require());
+    static InitEvidence s_init = (InitSubsys<S_gc_tag>::require());
 
     TEST_CASE("x1", "[gc][x1]")
     {
         // real purpose: ensure s_init survives static linking
         REQUIRE(s_init.evidence());
 
+        Subsystem::initialize_all();
+
         /**
          *  This is a basic Collector test for xo-object2 data types
          **/
 
-        constexpr bool c_debug_flag = false;
+        constexpr bool c_debug_flag = true;
         scope log(XO_DEBUG(c_debug_flag));
 
         for (std::size_t i_tc = 0, n_tc = s_testcase_v.size(); i_tc < n_tc; ++i_tc) {
@@ -118,7 +120,14 @@ namespace ut {
 
                 DX1Collector gc(cfg);
 
+                CollectorTypeRegistry::instance().install_types(obj<ACollector,DX1Collector>(&gc));
+
                 DArena * to_0 = nullptr;
+
+                /* verify configuration */
+                {
+                    REQUIRE(cfg.n_generation_ == 2);
+                }
 
                 /* verify initial collector state */
                 {

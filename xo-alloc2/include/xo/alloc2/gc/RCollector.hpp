@@ -94,6 +94,9 @@ public:
     bool is_type_installed(typeseq tseq)  const  noexcept {
         return O::iface()->is_type_installed(O::data(), tseq);
     }
+    bool report_statistics(obj<AAllocator> report_mm, obj<AAllocator> error_mm, obj<AGCObject> * output)  const  noexcept {
+        return O::iface()->report_statistics(O::data(), report_mm, error_mm, output);
+    }
 
     // non-const methods (still const in router!)
     bool install_type(const AGCObject & iface)  {

@@ -5,6 +5,7 @@
 
 #include "init_gc.hpp"
 #include "SetupGc.hpp"
+#include <xo/object2/init_object2.hpp>
 #include <xo/alloc2/init_alloc2.hpp>
 
 namespace xo {
@@ -21,6 +22,7 @@ namespace xo {
         InitEvidence retval;
 
         /* recursive subsystem deps for xo-gc/ */
+        retval ^= InitSubsys<S_object2_tag>::require();
         retval ^= InitSubsys<S_alloc2_tag>::require();
 
         /* xo-gc/'s own initialization code */

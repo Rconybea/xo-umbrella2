@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "Primitive_gco_0.hpp"
 #include "Primitive_gco_1_gco.hpp"
 
 namespace xo {
@@ -18,6 +19,10 @@ namespace xo {
             using AAllocator = xo::mm::AAllocator;
 
         public:
+            /** create primitive: report gc statistics **/
+            static DPrimitive_gco_0 * make_report_gc_statistics_pm(obj<AAllocator> mm,
+                                                                   StringTable * stbl);
+
             /** create primitive: request collection **/
             static DPrimitive_gco_1_gco * make_request_gc_pm(obj<AAllocator> mm,
                                                              StringTable * stbl);

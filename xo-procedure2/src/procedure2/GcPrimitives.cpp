@@ -21,23 +21,35 @@ namespace xo {
 
         // ----- report-gc-status -----
 
-#ifdef NOT_YET
         obj<AGCObject>
-        xfer_report_gc_status(obj<ARuntimeContext> rcx)
+        xfer_report_gc_statistics(obj<ARuntimeContext> rcx)
         {
-            bool have_gc = false;
-
             if (rcx.collector()) {
                 // status currently only implemented for X1 collector
 
-                auto gc = obj<ACollector,DX1Collector>::from(rcx.collector());
+                obj<AGCObject> stats;
+                bool ok = rcx.collector().report_statistics(rcx.allocator(),
+                                                            rcx.error_allocator(),
+                                                            &stats);
 
-
+                if (ok && stats)
+                    return stats;
             }
 
             return DBoolean::box(rcx.allocator(), false);
         }
-#endif
+
+        DPrimitive_gco_0 *
+        GcPrimitives::make_report_gc_statistics_pm(obj<AAllocator> mm,
+                                                   StringTable * stbl)
+        {
+            (void)stbl;
+
+            auto any_ty = DAtomicType::make(mm, Metatype::t_any());
+            auto pm_ty = obj<AType,DFunctionType>(DFunctionType::_make(mm, any_ty));
+
+            return DPrimitive_gco_0::_make(mm, "report-gc-statistics", pm_ty, &xfer_report_gc_statistics);
+        }
 
         // ----- request-gc -----
 

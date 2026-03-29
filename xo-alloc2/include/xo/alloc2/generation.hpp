@@ -11,7 +11,7 @@
 namespace xo {
     namespace mm {
         /** hard maximum number of generations **/
-        static constexpr uint32_t c_max_generation = 2;
+        static constexpr uint32_t c_max_generation = 3;
 
         /** @class generation
          *  @brief type-safe generation number

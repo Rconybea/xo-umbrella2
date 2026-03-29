@@ -1,0 +1,24 @@
+{
+    mode: "implementation",
+    output_cpp_dir: "src/gc/facet",
+    output_hpp_dir: "include/xo/gc",
+    output_impl_subdir: "detail",
+    includes: [
+//        "<xo/alloc2/GCObject.hpp>",
+//        "<xo/alloc2/Allocator.hpp>"
+    ],
+    local_types: [
+        {
+            name: "typeseq",
+            doc: ["identifies a c++ type"],
+            definition: "xo::reflect::typeseq"
+        },
+    ],
+    namespace1: "xo",
+    namespace2: "mm",
+    facet_idl: "idl/Collector.json5",
+    brief: "provide ACollector interface for DX1Collector",
+    using_doxygen: true,
+    repr: "DX1Collector",
+    doc: [ "implement ACollector for DX1Collector" ],
+}

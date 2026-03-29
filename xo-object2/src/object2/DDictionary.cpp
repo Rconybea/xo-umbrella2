@@ -105,6 +105,22 @@ namespace xo {
         }
 
         bool
+        DDictionary::try_upsert_cstr(obj<AAllocator> mm, const char * key_cstr, obj<AGCObject> value)
+        {
+            const DString * k1 = DString::from_cstr(mm, key_cstr);
+
+            return this->try_upsert(std::make_pair(k1, value));
+        }
+
+        bool
+        DDictionary::upsert_cstr(obj<AAllocator> mm, const char * key_cstr, obj<AGCObject> value)
+        {
+            const DString * k1 = DString::from_cstr(mm, key_cstr);
+
+            return this->upsert(mm, std::make_pair(k1, value));
+        }
+
+        bool
         DDictionary::try_upsert(const pair_type & kv_pair)
         {
             if (this->try_update(kv_pair))
@@ -190,7 +206,29 @@ namespace xo {
                 pps->write("}");
                 return true;
             } else {
-                pps->write("{...}");
+                pps->write("{");
+
+                for (size_type i = 0, n = this->size(); i < n; ++i) {
+                    if (i == 0) {
+                        /* indent, but credit initial {. using same line for first (key,value) */
+                        ppii.pps()->indent(std::max(ppii.pps()->indent_width(), 1u) - 1);
+                    } else {
+                        /* indent after newline */
+                        ppii.pps()->newline_indent(ppii.ci1());
+                    }
+
+                    obj<APrintable> key
+                        = FacetRegistry::instance().variant<APrintable,AGCObject>((*keys_)[i]);
+                    obj<APrintable> value
+                        = FacetRegistry::instance().variant<APrintable,AGCObject>((*values_)[i]);
+
+                    pps->pretty(key);
+                    pps->write(": ");
+                    pps->pretty(value);
+                    pps->write(";");
+                }
+
+                pps->write(" }");
                 return false;
             }
         }

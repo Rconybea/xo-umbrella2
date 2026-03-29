@@ -139,6 +139,16 @@ namespace xo {
              **/
             bool try_update(const pair_type & kvpair);
 
+            /** convenience method:
+             *  try_upsert pair (k, @p value), after boxing c-style string @p key with @p mm to get k
+             **/
+            bool try_upsert_cstr(obj<AAllocator> mm, const char * key, obj<AGCObject> value);
+
+            /** convenience method:
+             *  upsert pair (k, @p value), after boxing c-style string @p key with @p mm to get k
+             **/
+            bool upsert_cstr(obj<AAllocator> mm, const char * key, obj<AGCObject> value);
+
             /** upsert key-value pair @p kvpair into dictionary.
              *  If key kvpair.first not already present, add it.
              *  In either case replace/establish associated value with kvpair.second.
@@ -210,7 +220,7 @@ namespace xo {
         {
             DDictionary * result = empty(mm, sizeof...(args));
             if (result) {
-                (result->upsert(args), ...);
+                (result->upsert(mm, args), ...);
             }
             return result;
         }
