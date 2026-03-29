@@ -89,7 +89,8 @@ namespace xo {
              *  Always limited by ArenaConfig.size_
              **/
             void reserve(size_type z);
-            void resize(size_type z);
+            /** resize to size @p z.  Return true on success. May fail iff oom. **/
+            bool resize(size_type z);
             void shrink_to_fit();
             /** reset vector to empty state **/
             void clear();
@@ -184,7 +185,7 @@ namespace xo {
         }
 
         template <typename T>
-        void
+        bool
         DArenaVector<T>::resize(size_type z) {
             // new arena size in bytes
             size_t req_z = z * sizeof(T);
@@ -192,7 +193,8 @@ namespace xo {
             if (z > size_) {
                 // expand arena to accomodate
 
-                store_.expand(req_z);
+                if (!store_.expand(req_z))
+                    return false;
 
                 // run ctors
                 if constexpr (std::is_trivially_constructible_v<T>) {
@@ -226,6 +228,8 @@ namespace xo {
             store_.alloc(xo::reflect::typeseq::id<std::byte>(), req_z);
 
             this->size_ = z;
+
+            return true;
         }
 
         template <typename T>
