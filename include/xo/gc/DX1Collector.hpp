@@ -96,15 +96,21 @@ namespace xo {
 
             /** true iff this slot is empty **/
             bool is_null() const noexcept {
-                return this->iface()->_has_null_vptr();
+                return this->_iface()->_has_null_vptr();
             }
 
             bool is_occupied() const noexcept {
                 return !this->is_null();
             }
 
-            AGCObject * iface() const noexcept {
+            AGCObject * _iface() const noexcept {
                 return std::launder((AGCObject *)&iface_[0]);
+            }
+
+            AGCObject * iface() const noexcept {
+                AGCObject * x = this->_iface();
+
+                return (x->_has_null_vptr() ? nullptr : x);
             }
 
             /** Store interface pointer @p iface.
@@ -229,6 +235,17 @@ namespace xo {
             bool report_statistics(obj<AAllocator> mm,
                                    obj<AAllocator> error_mm,
                                    obj<AGCObject> * p_output) const noexcept;
+
+            /** Report per-object-type information as a dictionary.
+             *  Scans to-space to count per-object-type information
+             *
+             *  @p mm        allocate stats dictionary from this allocator.  May be the same as this collector.
+             *  @p error_mm  Allocator for last-report error reporting when out-of-memory.
+             *  @p p_output  on exit @p *p_output contains stats dictionary
+             **/
+            bool report_object_types(obj<AAllocator> mm,
+                                     obj<AAllocator> error_mm,
+                                     obj<AGCObject> * p_output) const noexcept;
 
             // ----- queries -----
 

@@ -6,7 +6,10 @@
 #include "X1Collector.hpp"
 #include <xo/gc/DX1CollectorIterator.hpp>
 #include <xo/object2/Dictionary.hpp>
+#include <xo/object2/Array.hpp>
 #include <xo/object2/Integer.hpp>
+#include <xo/object2/Boolean.hpp>
+#include <xo/stringtable2/String.hpp>
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/alloc2/Arena.hpp>
@@ -20,10 +23,12 @@
 #include <unistd.h> // for ::getpagesize()
 
 namespace xo {
-    // for report_statistics()
+    // for report_statistics(), report_object_types()
     using xo::scm::DDictionary;
+    using xo::scm::DArray;
     using xo::scm::DString;
     using xo::scm::DInteger;
+    using xo::scm::DBoolean;
 
     using xo::mm::AAllocator;
     using xo::facet::TypeRegistry;
@@ -347,6 +352,9 @@ namespace xo {
 
             DDictionary * rpt = DDictionary::make(mm);
 
+            if (!rpt)
+                return false;
+
             bool ok = true;
 
             // note: totals taken across both roles and generations,
@@ -384,6 +392,117 @@ namespace xo {
             }
 
             *p_output = obj<AGCObject,DDictionary>(rpt);
+
+            return ok;
+        }
+
+        bool
+        DX1Collector::report_object_types(obj<AAllocator> mm,
+                                          obj<AAllocator> error_mm,
+                                          obj<AGCObject> * p_output) const noexcept
+        {
+            scope log(XO_DEBUG(true));
+
+            (void)error_mm;
+
+            bool ok = true;
+
+            // stats, indexed by tseq
+            // could use c++ vector in scratch space instead of running on
+            // boxed types.
+            //
+            DArray * stats_v = DArray::empty(mm, object_types_.size());
+
+            if (!stats_v)
+                return false;
+
+            stats_v->resize(stats_v->capacity());
+
+            log && log(xtag("object_types_.size", object_types_.size()),
+                       xtag("stats_v.capacity", stats_v->capacity()),
+                       xtag("stats_v.size", stats_v->size()));
+
+            // count #of occupied type slots
+            std::uint32_t n_tseq_present = 0;
+            // largest tseq present with non-null AGCObject* iface
+            std::int32_t max_tseq = 0;
+
+            for (const ObjectTypeSlot & slot : object_types_) {
+                AGCObject * iface = slot.iface();
+
+                if (iface) {
+                    typeseq tseq = iface->_typeseq();
+
+                    ++n_tseq_present;
+                    if (max_tseq < tseq.seqno())
+                        max_tseq = tseq.seqno();
+
+                    assert(tseq.seqno() >= 0);
+
+                    auto tname_sv = TypeRegistry::id2name(tseq);
+                    DString * tname = DString::from_view(mm, tname_sv);
+
+                    DDictionary * recd = DDictionary::make(mm);
+
+                    if (!recd)
+                        return false;
+
+                    recd->upsert_cstr(mm, "name", obj<AGCObject,DString>(tname));
+                    recd->upsert_cstr(mm, "tseq", DInteger::box(mm, tseq.seqno()));
+                    recd->upsert_cstr(mm, "n-live", DInteger::box(mm, 0));
+                    recd->upsert_cstr(mm, "bytes", DInteger::box(mm, 0));
+
+                    stats_v->assign_at(tseq.seqno(), obj<AGCObject,DDictionary>(recd));
+                }
+            }
+
+            // scan to-space, count objects by type
+
+            for (Generation g{0}; g < config_.n_generation_; ++g) {
+                const DArena * arena = this->get_space(role::to_space(), g);
+
+                for (AllocInfo info : *arena) {
+                    if (info.is_forwarding_tseq()) {
+                        assert(false);
+                        return false;
+                    }
+
+                    uint32_t ix = info.tseq();
+                    size_t z = info.size();
+
+                    auto recd = obj<AGCObject,DDictionary>::from(stats_v->at(ix));
+
+                    assert(recd);
+
+                    auto n_live_opt = recd->lookup_cstr("n-live");
+                    assert(n_live_opt);
+                    auto bytes_opt = recd->lookup_cstr("bytes");
+                    assert(bytes_opt);
+
+                    if (n_live_opt && bytes_opt) {
+                        auto n_live_gco = obj<AGCObject,DInteger>::from(n_live_opt.value());
+                        auto bytes_gco = obj<AGCObject,DInteger>::from(bytes_opt.value());
+
+                        n_live_gco->assign_value(n_live_gco->value() + 1);
+                        bytes_gco->assign_value(bytes_gco->value() + z);
+                    }
+                }
+            }
+
+            stats_v->resize(max_tseq + 1);
+
+            DArray * final_stats_v = DArray::empty(mm, n_tseq_present);
+
+            for (std::size_t i = 0, n = stats_v->size(); i < n; ++i) {
+                auto recd = stats_v->at(i);
+
+                if (recd) {
+                    bool ok = final_stats_v->push_back(recd);
+                    assert(ok);
+                }
+            }
+
+            *p_output = obj<AGCObject,DArray>(final_stats_v);
 
             return ok;
         }
