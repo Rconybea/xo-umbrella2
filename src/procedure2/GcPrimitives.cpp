@@ -58,7 +58,6 @@ namespace xo {
                 obj<AGCObject> stats;
                 bool ok = rcx.collector().report_object_types(rcx.allocator(), rcx.error_allocator(), &stats);
 
-
                 if (ok && stats)
                     return stats;
             }
@@ -77,6 +76,33 @@ namespace xo {
 
             return DPrimitive_gco_0::_make(mm, "report-gc-object-types", pm_ty, &xfer_report_gc_object_types);
 
+        }
+
+        // ----- gc-location-of -----
+
+        obj<AGCObject>
+        xfer_gc_location_of(obj<ARuntimeContext> rcx, obj<AGCObject> gco)
+        {
+            std::int32_t location_code = 0;
+
+            if (rcx.collector()) {
+                location_code = rcx.collector().locate_address(gco.data());
+            }
+
+            return DInteger::box(rcx.allocator(), location_code);
+        }
+
+        DPrimitive_gco_1_gco *
+        GcPrimitives::make_gc_location_of_pm(obj<AAllocator> mm,
+                                             StringTable * stbl)
+        {
+            (void)stbl;
+
+            auto int_ty = DAtomicType::make(mm, Metatype::t_integer());
+            auto any_ty = DAtomicType::make(mm, Metatype::t_any());
+            auto pm_ty = obj<AType,DFunctionType>(DFunctionType::_make(mm, int_ty, any_ty));
+
+            return DPrimitive_gco_1_gco::_make(mm, "gc-location-of", pm_ty, &xfer_gc_location_of);
         }
 
         // ----- request-gc -----
