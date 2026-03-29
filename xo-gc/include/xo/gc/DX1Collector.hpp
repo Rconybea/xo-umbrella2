@@ -80,6 +80,49 @@ namespace xo {
             obj<AGCObject> * root_ = nullptr;
         };
 
+        /** @brief Object Interface
+         *
+         *  GC-object interface for a particular type.
+         *  X1 maintains a table of these (X1Collector::object_types_)
+         *  indexed by typeseq.
+         *
+         *  Using a wrapper here for searchability
+         **/
+        struct ObjectTypeSlot {
+            ObjectTypeSlot() {}
+            explicit ObjectTypeSlot(AGCObject * iface) {
+                this->store_iface(iface);
+            }
+
+            /** true iff this slot is empty **/
+            bool is_null() const noexcept {
+                return this->iface()->_has_null_vptr();
+            }
+
+            bool is_occupied() const noexcept {
+                return !this->is_null();
+            }
+
+            AGCObject * iface() const noexcept {
+                return std::launder((AGCObject *)&iface_[0]);
+            }
+
+            /** Store interface pointer @p iface.
+             *  We just want the vtable here
+             **/
+            void store_iface(const AGCObject * iface) {
+                ::memcpy((void*)&(this->iface_[0]), (void*)iface, sizeof(AGCObject));
+            }
+
+        private:
+            /** runtime interface for this object.
+             *  We might prefer to declare this as AGCObject, but that's prohibited
+             *  since AGCObject has abstract methods.
+             *  Main downside of this form is it makes the data unintelligible to debugger.
+             **/
+            alignas(AGCObject) std::byte iface_[sizeof(AGCObject)];
+        };
+
         /** @brief info collected during a @ref DX1Collector::verify_ok call
          *
          **/
@@ -119,6 +162,7 @@ namespace xo {
         struct DX1Collector {
         public:
             using RootSet = DArenaVector<GCRoot>;
+            using ObjectTypeTable = DArenaVector<ObjectTypeSlot>;
             /* TODO: AllocIterator pointing to free pointer instead of std::byte* */
             using GCMoveCheckpoint = std::array<std::byte *, c_max_generation>;
             using MutationLog = DArenaVector<MutationLogEntry>;
@@ -142,7 +186,7 @@ namespace xo {
 
             std::string_view name() const noexcept { return config_.name_; }
             GCRunState runstate() const noexcept { return runstate_; }
-            const DArena * get_object_types() const noexcept { return &object_types_; }
+            const ObjectTypeTable * get_object_types() const noexcept { return &object_types_; }
             const RootSet * get_root_set() const noexcept { return &root_set_; }
             const DArena * get_space(role r, Generation g) const noexcept { return space_[r][g]; }
             DArena * get_space(role r, Generation g) noexcept { return space_[r][g]; }
@@ -409,7 +453,7 @@ namespace xo {
             /** (ab)using arena to get an extensible array of object types.
              *  For each type need to store one (8-byte) IGCObject_Any instance,
              **/
-            DArena object_types_;
+            ObjectTypeTable object_types_;
 
             /** gc disabled whenever gc_blocked_ > 0 **/
             uint32_t gc_blocked_ = 0;

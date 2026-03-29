@@ -97,6 +97,7 @@ namespace xo {
             ok &= gc.install_type(impl_for<AGCObject, DList>());
             ok &= gc.install_type(impl_for<AGCObject, DArray>());
             ok &= gc.install_type(impl_for<AGCObject, DDictionary>());
+            ok &= gc.install_type(impl_for<AGCObject, DRuntimeError>());
 
             return ok;
         }

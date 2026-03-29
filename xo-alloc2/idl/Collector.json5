@@ -101,7 +101,7 @@
             noexcept: true,
             attributes: [],
         },
-        // obj<AGCObject> summary() const noexcept;
+        // bool report_statistics(obj<AAllocator> report_mm, obj<AAllocator> error_mm, obj<AGCObject> * output);
         {
             name: "report_statistics",
             doc: [
