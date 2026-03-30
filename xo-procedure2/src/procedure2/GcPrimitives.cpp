@@ -78,6 +78,34 @@ namespace xo {
 
         }
 
+        // ----- report-gc-object-ages -----
+
+        obj<AGCObject>
+        xfer_report_gc_object_ages(obj<ARuntimeContext> rcx)
+        {
+            if (rcx.collector()) {
+                obj<AGCObject> stats;
+                bool ok = rcx.collector().report_object_ages(rcx.allocator(), rcx.error_allocator(), &stats);
+
+                if (ok && stats)
+                    return stats;
+            }
+
+            return DBoolean::box(rcx.allocator(), false);
+        }
+
+        DPrimitive_gco_0 *
+        GcPrimitives::make_report_gc_object_ages_pm(obj<AAllocator> mm,
+                                                    StringTable * stbl)
+        {
+            (void)stbl;
+
+            auto any_ty = DAtomicType::make(mm, Metatype::t_any());
+            auto pm_ty = obj<AType,DFunctionType>(DFunctionType::_make(mm, any_ty));
+
+            return DPrimitive_gco_0::_make(mm, "report-gc-object-ages", pm_ty, &xfer_report_gc_object_ages);
+        }
+
         // ----- gc-location-of -----
 
         obj<AGCObject>

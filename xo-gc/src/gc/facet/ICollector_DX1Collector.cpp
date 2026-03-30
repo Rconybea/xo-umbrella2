@@ -64,6 +64,12 @@ namespace xo {
         }
 
         auto
+        ICollector_DX1Collector::report_object_ages(const DX1Collector & self, obj<AAllocator> report_mm, obj<AAllocator> error_mm, obj<AGCObject> * output) noexcept -> bool
+        {
+            return self.report_object_ages(report_mm, error_mm, output);
+        }
+
+        auto
         ICollector_DX1Collector::install_type(DX1Collector & self, const AGCObject & iface) -> bool
         {
             return self.install_type(iface);

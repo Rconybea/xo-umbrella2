@@ -250,6 +250,19 @@ namespace xo {
                                      obj<AAllocator> error_mm,
                                      obj<AGCObject> * p_output) const noexcept;
 
+            /** Report per-age-bucket information as an array of dictionaries.
+             *  Scans to-space to count per-age statistics.
+             *  Each dictionary has keys "n-live" and "bytes".
+             *  Array index corresponds to object age.
+             *
+             *  @p mm        allocate stats from this allocator.
+             *  @p error_mm  allocator for error reporting when out-of-memory.
+             *  @p p_output  on exit @p *p_output contains stats array
+             **/
+            bool report_object_ages(obj<AAllocator> mm,
+                                    obj<AAllocator> error_mm,
+                                    obj<AGCObject> * p_output) const noexcept;
+
             // ----- queries -----
 
             /** introspection for memory use.

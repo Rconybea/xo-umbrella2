@@ -529,6 +529,87 @@ namespace xo {
             return ok;
         }
 
+        bool
+        DX1Collector::report_object_ages(obj<AAllocator> mm,
+                                         obj<AAllocator> error_mm,
+                                         obj<AGCObject> * p_output) const noexcept
+        {
+            scope log(XO_DEBUG(true));
+
+            (void)error_mm;
+
+            std::uint64_t n_age = config_.arena_config_.header_.max_age() + 1;
+
+            // stats, indexed by age
+            DArray * stats_v = DArray::empty(mm, n_age);
+
+            if (!stats_v)
+                return false;
+
+            // pre-populate with empty dictionaries for each age bucket
+            for (std::uint64_t a = 0; a < n_age; ++a) {
+                DDictionary * recd = DDictionary::make(mm);
+
+                if (!recd)
+                    return false;
+
+                recd->upsert_cstr(mm, "age", DInteger::box(mm, a));
+                recd->upsert_cstr(mm, "n-live", DInteger::box(mm, 0));
+                recd->upsert_cstr(mm, "bytes", DInteger::box(mm, 0));
+
+                stats_v->push_back(obj<AGCObject,DDictionary>(recd));
+            }
+
+            log && log(xtag("n_age", n_age),
+                       xtag("stats_v.size", stats_v->size()));
+
+            // scan to-space, count objects by age
+
+            // track largest age with at least one object
+            std::int64_t max_age_present = 0;
+
+            for (Generation g{0}; g < config_.n_generation_; ++g) {
+                const DArena * arena = this->get_space(role::to_space(), g);
+
+                for (AllocInfo info : *arena) {
+                    if (info.is_forwarding_tseq()) {
+                        assert(false);
+                        return false;
+                    }
+
+                    uint32_t age = info.age();
+                    size_t z = info.size();
+
+                    if (static_cast<std::int64_t>(age) > max_age_present)
+                        max_age_present = age;
+
+                    auto recd = obj<AGCObject,DDictionary>::from(stats_v->at(age));
+
+                    assert(recd);
+
+                    auto n_live_opt = recd->lookup_cstr("n-live");
+                    assert(n_live_opt);
+                    auto bytes_opt = recd->lookup_cstr("bytes");
+                    assert(bytes_opt);
+
+                    if (n_live_opt && bytes_opt) {
+                        auto n_live_gco = obj<AGCObject,DInteger>::from(n_live_opt.value());
+                        auto bytes_gco = obj<AGCObject,DInteger>::from(bytes_opt.value());
+
+                        n_live_gco->assign_value(n_live_gco->value() + 1);
+                        bytes_gco->assign_value(bytes_gco->value() + z);
+                    }
+                }
+            }
+
+            // trim to only report ages up to max observed
+            stats_v->resize(max_age_present + 1);
+
+            *p_output = obj<AGCObject,DArray>(stats_v);
+
+            return true;
+        }
+
         size_type
         DX1Collector::header2size(header_type hdr) const noexcept
         {

@@ -103,6 +103,9 @@ public:
     bool report_object_types(obj<AAllocator> report_mm, obj<AAllocator> error_mm, obj<AGCObject> * output)  const  noexcept {
         return O::iface()->report_object_types(O::data(), report_mm, error_mm, output);
     }
+    bool report_object_ages(obj<AAllocator> report_mm, obj<AAllocator> error_mm, obj<AGCObject> * output)  const  noexcept {
+        return O::iface()->report_object_ages(O::data(), report_mm, error_mm, output);
+    }
 
     // non-const methods (still const in router!)
     bool install_type(const AGCObject & iface)  {
