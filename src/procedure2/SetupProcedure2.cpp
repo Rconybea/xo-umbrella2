@@ -144,6 +144,11 @@ namespace xo {
 
             ok = ok & (PrimitiveRegistry::install_aux
                            (sink,
+                            GcPrimitives::make_report_gc_object_ages_pm(mm, stbl),
+                            flags & InstallFlags::f_generalpurpose));
+
+            ok = ok & (PrimitiveRegistry::install_aux
+                           (sink,
                             GcPrimitives::make_gc_location_of_pm(mm, stbl),
                             flags & InstallFlags::f_generalpurpose));
 
