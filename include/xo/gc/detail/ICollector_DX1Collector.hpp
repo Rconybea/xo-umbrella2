@@ -71,6 +71,12 @@ Creates dictionary using memory from @p report_mm.
 If unable to comply (e.g. oom), return runtime error allocated from @p error_mm.
 Avoiding obj<AGCObject> return type to avoid #include cycle **/
             static bool report_object_types(const DX1Collector & self, obj<AAllocator> report_mm, obj<AAllocator> error_mm, obj<AGCObject> * output) noexcept;
+            /** Report gc object ages, at discretion of collector implementation.
+Creates array of dictionaries using memory from @p report_mm.
+Each dictionary has keys n-live and bytes, indexed by object age.
+If unable to comply (e.g. oom), return runtime error allocated from @p error_mm.
+Avoiding obj<AGCObject> return type to avoid #include cycle **/
+            static bool report_object_ages(const DX1Collector & self, obj<AAllocator> report_mm, obj<AAllocator> error_mm, obj<AGCObject> * output) noexcept;
 
             // non-const methods
             /** install interface @p iface for representation with typeseq @p tseq
