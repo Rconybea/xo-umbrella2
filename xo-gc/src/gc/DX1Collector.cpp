@@ -384,6 +384,7 @@ namespace xo {
             ok &= rpt->upsert_cstr(mm, "n-generation", DInteger::box(mm, config_.n_generation_));
             ok &= rpt->upsert_cstr(mm, "n-survive-threshold", DInteger::box(mm, config_.n_survive_threshold_));
             ok &= rpt->upsert_cstr(mm, "allow-incremental-gc", DBoolean::box(mm, config_.allow_incremental_gc_));
+            ok &= rpt->upsert_cstr(mm, "sanitize", DBoolean::box(mm, config_.sanitize_flag_));
             ok &= rpt->upsert_cstr(mm, "allocated", DInteger::box(mm, this->allocated()));
             ok &= rpt->upsert_cstr(mm, "committed", DInteger::box(mm, this->committed()));
             ok &= rpt->upsert_cstr(mm, "reserved", DInteger::box(mm, this->reserved()));
@@ -1515,6 +1516,15 @@ namespace xo {
             log && log(xtag("tseq", info.tseq()),
                        xtag("tname", TypeRegistry::id2name(typeseq(info.tseq()))),
                        xtag("age", info.age()), xtag("size", info.size()));
+
+            if (config_.sanitize_flag_) {
+                AllocInfo info_copy = this->alloc_info((std::byte *)to_dest);
+
+                log && log(xtag("age2", info_copy.age()), xtag("size2", info_copy.size()));
+
+                assert((info_copy.age() == config_.arena_config_.header_.max_age())
+                       || (info_copy.age() == info.age() + 1));
+            }
 
             if(to_dest == from_src) {
                 assert(false);
