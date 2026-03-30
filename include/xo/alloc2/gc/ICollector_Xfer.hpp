@@ -70,6 +70,9 @@ namespace mm {
         bool report_object_types(Copaque data, obj<AAllocator> report_mm, obj<AAllocator> error_mm, obj<AGCObject> * output)  const  noexcept override {
             return I::report_object_types(_dcast(data), report_mm, error_mm, output);
         }
+        bool report_object_ages(Copaque data, obj<AAllocator> report_mm, obj<AAllocator> error_mm, obj<AGCObject> * output)  const  noexcept override {
+            return I::report_object_ages(_dcast(data), report_mm, error_mm, output);
+        }
 
         // non-const methods
         bool install_type(Opaque data, const AGCObject & iface)  override {
