@@ -60,6 +60,12 @@ namespace xo {
             std::uint64_t mkheader(std::uint64_t t,
                                    std::uint64_t a,
                                    std::uint64_t z) const noexcept {
+
+                // don't let age wrap around.
+                // Expect std::min() to compile to cmov (no branch)
+                //
+                a = std::min(a, this->max_age());
+
                 uint64_t tseq_bits = (t << (age_bits_ + size_bits_)) & tseq_mask();
                 uint64_t age_bits = (a << size_bits_) & age_mask();
                 uint64_t size_bits = z & size_mask();;
@@ -75,12 +81,16 @@ namespace xo {
                 return ((1ul << tseq_bits_) - 1) << (age_bits_ + size_bits_);
             }
 
+            std::uint64_t max_age() const noexcept {
+                return ((1ul << age_bits_) - 1);
+            }
+
             std::uint64_t age_mask() const noexcept {
                 // e.g.
                 //   00 00 00 FF 00 00 00 00
                 // with age_bits=8, size_bits=32
                 //
-                return ((1ul << age_bits_) - 1) << size_bits_;
+                return this->max_age() << size_bits_;
             }
 
             std::uint64_t size_mask() const noexcept {
