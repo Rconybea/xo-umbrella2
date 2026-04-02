@@ -12,7 +12,7 @@
 
 namespace xo {
     namespace mm {
-        struct DX1Collector;
+        class DX1Collector;
 
         /** @class DX1CollectorIterator
          *  @brief Representation for alloc iterator over X1 collector
