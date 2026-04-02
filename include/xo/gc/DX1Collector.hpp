@@ -129,6 +129,31 @@ namespace xo {
             alignas(AGCObject) std::byte iface_[sizeof(AGCObject)];
         };
 
+        /** @brief statistics from mlog forwarding **/
+        class MutationLogStatistics {
+        public:
+            MutationLogStatistics() = default;
+
+            MutationLogStatistics & operator+=(const MutationLogStatistics & x) {
+                n_stale_ += x.n_stale_;
+                n_live_parent_ += x.n_live_parent_;
+                n_rescue_ += x.n_rescue_;
+                n_triage_ += x.n_triage_;
+
+                return *this;
+            }
+
+        public:
+            /** count superseded mlog entries **/
+            std::size_t n_stale_ = 0;
+            /** count live parents encountered during mlog scan **/
+            std::size_t n_live_parent_ = 0;
+            /** count child subgraphs rescued during mlog scan **/
+            std::size_t n_rescue_ = 0;
+            /** count triaged mlog entries **/
+            std::size_t n_triage_ = 0;
+        };
+
         /** @brief info collected during a @ref DX1Collector::verify_ok call
          *
          **/
@@ -444,6 +469,44 @@ namespace xo {
             void swap_roles(Generation upto) noexcept;
             /** copy roots + everything reachable from them, to to-space **/
             void copy_roots(Generation upto) noexcept;
+
+            /** cureate new mutation log after copying roots **/
+            void forward_mutation_log(Generation upto);
+
+            /** Perform one pass over contents of @p *from_mlog for generation @p gen.
+             *  @p *from_mlog contains all {xgen,xage} pointers that target generation @p gen.
+             *  Surviving mlog entries are moved to either @p *to_mlog or @p *triage_mlog,
+             *  (generation < @p upto being collected this cycle).
+             *
+             *  Each mlog entry gets one of the following outcomes.
+             *  1. skip.   mlog entry has been superseded by another mut at target site.
+             *  2. keep.   mlog entry is live. destination has been evacuated,
+             *             so source must be updated as well.
+             *  3. triage. source of incoming object belongs to a generation that was collected,
+             *             and has not been evacuated. Although appears to be garbage, it may
+             *             be live after all if reachable from the destination of some other
+             *             mlog entry in @p *to_mlog. Store these mlog entries in @p *triage_mlog.
+             *
+             *  @return number of mlog entries moved, whether to @p *to_mlog or @p *triage_mlog.
+             **/
+            MutationLogStatistics _forward_mutation_log_phase(Generation upto,
+                                                              Generation gen,
+                                                              MutationLog * from_mlog,
+                                                              MutationLog * to_mlog,
+                                                              MutationLog * triage_mlog);
+
+            MutationLogStatistics _preserve_child_of_live_parent(Generation upto,
+                                                                 Generation parent_gen,
+                                                                 const MutationLogEntry & from_entry,
+                                                                 MutationLog * keep_mlog);
+
+            /** helper function to decide whether to keep a mutation log entry
+             *  @return true iff mlog entry appended to @p keep_mlog
+             **/
+            bool _check_keep_mutation_aux(const MutationLogEntry & from_entry,
+                                          Generation parent_gen_to,
+                                          void * child_to,
+                                          MutationLog * keep_mlog);
 
             /** cleanup after gc **/
             void cleanup_phase(Generation upto);
