@@ -7,6 +7,7 @@
 
 #include "X1CollectorConfig.hpp"
 #include "GCObject.hpp"
+#include "GCObjectStore.hpp"
 #include "MutationLogState.hpp"
 #include "X1VerifyStats.hpp"
 #include "generation.hpp"
@@ -164,11 +165,11 @@ namespace xo {
             GCRunState runstate() const noexcept { return runstate_; }
             const ObjectTypeTable * get_object_types() const noexcept { return &object_types_; }
             const RootSet * get_root_set() const noexcept { return &root_set_; }
-            const DArena * get_space(role r, Generation g) const noexcept { return space_[r][g]; }
-            DArena * get_space(role r, Generation g) noexcept { return space_[r][g]; }
-            DArena * from_space(Generation g) noexcept { return get_space(role::from_space(), g); }
-            DArena * to_space(Generation g) noexcept { return get_space(role::to_space(), g); }
-            DArena * new_space() noexcept { return to_space(Generation{0}); }
+            const DArena * get_space(role r, Generation g) const noexcept { return gco_store_.get_space(r, g); }
+            DArena * get_space(role r, Generation g) noexcept { return gco_store_.get_space(r, g); }
+            DArena * from_space(Generation g) noexcept { return this->get_space(role::from_space(), g); }
+            DArena * to_space(Generation g) noexcept { return this->get_space(role::to_space(), g); }
+            DArena * new_space() noexcept { return this->to_space(Generation{0}); }
 
             // ----- basic statistics -----
 
@@ -397,8 +398,10 @@ namespace xo {
 
             // ----- book-keeping -----
 
+#ifdef OBSOLETE // see swap_roles()
             /** reverse to-space and from-space roles for generation g **/
             void reverse_roles(Generation g) noexcept;
+#endif
 
             /** discard all allocated memory **/
             void clear() noexcept;
@@ -410,10 +413,6 @@ namespace xo {
             void _init_gc_roots(const X1CollectorConfig & cfg, std::size_t page_z);
             /** aux init function: initialize @ref mlog_storage_[][] arenas **/
             void _init_mlogs(const X1CollectorConfig & cfg, std::size_t page_z);
-#ifdef MOVED
-            /** aux init function: create mutation log **/
-            MutationLog _make_mlog(uint32_t igen, char tag_char, size_t mlog_z, std::size_t page_z);
-#endif
             /** aux init function: initialize @ref space_storage_[][] arenas **/
             void _init_space(const X1CollectorConfig & cfg);
 
@@ -493,21 +492,9 @@ namespace xo {
              **/
             MutationLogState mlog_state_;
 
-            /** collector-managed memory here.
-             *  - space_[1] is from-space
-             *  - space_[0] is to-space
-             *  coordinates with role in gc/role.hpp, see also.
+            /** Collector-managed memory.
              **/
-
-            /** arena objects for collector managed memory
-             *  1:1 with roles, but polarity reverses for each collection
-             **/
-            std::array<DArena, c_max_generation> space_storage_[c_n_role];
-
-            /** arena pointers. The roles of space_storage_[0][g] and space_storage_[1][g]
-             *  are reversed each time generation g gets collected.
-             **/
-            std::array<DArena*, c_max_generation> space_[c_n_role];
+            GCObjectStore gco_store_;
 
             /** counters collected during @ref verify_ok call **/
             VerifyStats verify_stats_;

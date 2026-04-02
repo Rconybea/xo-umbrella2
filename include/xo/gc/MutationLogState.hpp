@@ -16,6 +16,8 @@ namespace xo {
         class DX1Collector;
         class VerifyStats;
 
+        /** @brief container for X1 collector mutation logs
+         **/
         class MutationLogState {
         public:
             using MutationLog = DArenaVector<MutationLogEntry>;
@@ -133,7 +135,7 @@ namespace xo {
 
 
         public:
-            /** number of generations in use.  Same as @ref X1CollectorConfig.n_generation_ **/
+            /** number of generations in use.  Same as @ref X1CollectorConfig::n_generation_ **/
             uint32_t n_generation_ = 0;
             /** true to enable debug logging **/
             bool debug_flag_ = false;

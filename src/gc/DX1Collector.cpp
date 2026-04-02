@@ -66,7 +66,9 @@ namespace xo {
         using size_type = xo::mm::DX1Collector::size_type;
 
         DX1Collector::DX1Collector(const X1CollectorConfig & cfg)
-            : config_{cfg}, mlog_state_{cfg.n_generation_, cfg.debug_flag_}
+        : config_{cfg},
+          mlog_state_{cfg.n_generation_, cfg.debug_flag_},
+          gco_store_{cfg.arena_config_, cfg.n_generation_, cfg.debug_flag_}
         {
             assert(config_.arena_config_.header_.size_bits_ +
                    config_.arena_config_.header_.age_bits_ +
@@ -77,7 +79,9 @@ namespace xo {
             this->_init_object_types(cfg, page_z);
             this->_init_gc_roots(cfg, page_z);
             this->_init_mlogs(cfg, page_z);
+#ifdef MOVED
             this->_init_space(cfg);
+#endif
         }
 
         void
@@ -108,86 +112,6 @@ namespace xo {
         DX1Collector::_init_mlogs(const X1CollectorConfig & cfg, std::size_t page_z)
         {
             this->mlog_state_.init_mlogs(cfg, page_z);
-
-#ifdef MOVED
-            for (uint32_t igen = 0, ngen = cfg.n_generation_; igen + 1 < ngen; ++igen) {
-                // special case: no use for mutation log for youngest generation,
-                // so don't trouble to allocate one
-
-                if (igen + 1 < c_max_generation) {
-                    this->mlog_storage_[0][igen] = _make_mlog(igen, 'a', cfg.mutation_log_z_, page_z);
-                    this->mlog_storage_[1][igen] = _make_mlog(igen, 'b', cfg.mutation_log_z_, page_z);
-                    this->mlog_storage_[2][igen] = _make_mlog(igen, 'c', cfg.mutation_log_z_, page_z);
-
-                    this->mlog_[0][igen] = &mlog_storage_[0][igen];
-                    this->mlog_[1][igen] = &mlog_storage_[1][igen];
-                    this->mlog_[2][igen] = &mlog_storage_[2][igen];
-                } else {
-                    assert(false);
-                }
-            }
-
-            if (cfg.n_generation_ > 0) {
-                for (uint32_t igen = cfg.n_generation_ - 1; igen + 1 < c_max_generation; ++igen) {
-                    this->mlog_[0][igen] = nullptr;
-                    this->mlog_[1][igen] = nullptr;
-                    this->mlog_[2][igen] = nullptr;
-                }
-            } else {
-                assert(false);
-            }
-#endif
-        }
-
-#ifdef MOVED
-        auto
-        DX1Collector::_make_mlog(uint32_t igen, char tag_char, size_t mlog_z, size_t page_z) -> MutationLog
-        {
-            char buf[40];
-            snprintf(buf, sizeof(buf), "x1-mlog-G%u-%c", igen, tag_char);
-
-            return MutationLog::map(ArenaConfig{.name_ = std::string(buf),
-                                                .size_ = mlog_z,
-                                                .hugepage_z_ = page_z,
-                                                .store_header_flag_ = false});
-        }
-#endif
-
-        void
-        DX1Collector::_init_space(const X1CollectorConfig & cfg)
-        {
-            assert(c_n_role == 2);
-
-            for (uint32_t igen = 0, ngen = cfg.n_generation_; igen < ngen; ++igen) {
-                if (igen < c_max_generation) {
-                    {
-                        char buf[40];
-                        snprintf(buf, sizeof(buf), "x1-space-G%u-a", igen);
-
-                        this->space_storage_[0][igen] = DArena::map(cfg.arena_config_.with_name(std::string(buf)));
-                    }
-                    {
-                        char buf[40];
-                        snprintf(buf, sizeof(buf), "x1-space-G%u-b", igen);
-
-                        this->space_storage_[1][igen] = DArena::map(cfg.arena_config_.with_name(std::string(buf)));
-                    }
-
-                    this->space_[role::to_space()][igen] = &space_storage_[0][igen];
-                    this->space_[role::from_space()][igen] = &space_storage_[1][igen];
-                } else {
-                    assert(false);
-                }
-            }
-
-            for (uint32_t igen = cfg.n_generation_; igen < c_max_generation; ++igen) {
-                this->space_[role::to_space()][igen] = nullptr;
-                this->space_[role::from_space()][igen] = nullptr;
-            }
-
-            if (config_.n_generation_ == 2) {
-                assert(this->get_space(role::to_space(), Generation{2}) == nullptr);
-            }
         }
 
         void
@@ -196,21 +120,8 @@ namespace xo {
             object_types_.visit_pools(visitor);
             root_set_.visit_pools(visitor);
 
-            for (uint32_t j = 0; j < config_.n_generation_; ++j) {
-                for (uint32_t i = 0; i < c_n_role; ++i) {
-                    space_storage_[i][j].visit_pools(visitor);
-                }
-            }
-
+            gco_store_.visit_pools(visitor);
             mlog_state_.visit_pools(visitor);
-
-#ifdef MOVED
-            for (uint32_t j = 0; j + 1 < config_.n_generation_; ++j) {
-                for (uint32_t i = 0; i < c_n_role + 1; ++i) {
-                    mlog_storage_[i][j].visit_pools(visitor);
-                }
-            }
-#endif
         }
 
         bool
@@ -959,12 +870,7 @@ namespace xo {
         {
             scope log(XO_DEBUG(true), xtag("upto", upto));
 
-            for (Generation g = Generation{0}; g < upto; ++g) {
-                log && log("swap roles", xtag("g", g));
-
-                std::swap(space_[role::to_space()][g], space_[role::from_space()][g]);
-            }
-
+            gco_store_.swap_roles(upto);
             mlog_state_.swap_roles(upto);
         }
 
@@ -974,108 +880,12 @@ namespace xo {
             mlog_state_.forward_mutation_log(this, upto);
         }
 
-#ifdef MOVED
-        MutationLogStatistics
-        DX1Collector::_preserve_child_of_live_parent(Generation upto,
-                                                     Generation parent_gen,
-                                                     const MutationLogEntry & from_entry,
-                                                     MutationLog * keep_mlog)
-        {
-            void * child_fr = *from_entry.p_data();
-            AllocInfo child_info = this->alloc_info((std::byte *)(child_fr));
-
-            MutationLogStatistics counters;
-
-            // if child collected: new child location in to-space
-            void * child_to = nullptr;
-
-            // parent is alive: gc must ensure child remains alive
-
-            ++counters.n_live_parent_;
-
-            // Parent already recognized as alive. Either not subject to collection
-            // or already evacuated.
-            // (+ remember this need not be 1st pass over mlog entries)
-
-            if (child_info.is_forwarding_tseq()) {
-                // [MLOG1]
-
-                // child already forwarded.
-                // TODO: make this a method on AllocInfo
-                child_to  = *(void **)child_fr;
-
-                // assigning through address of P->C pointer
-                // also makes mlog entry current
-
-            } else {
-                // [MLOG2]
-
-                ++counters.n_rescue_;
-
-                child_to = this->_deep_move_interior(child_fr, upto);
-
-                // update child pointer in parent object
-                *from_entry.p_data() = child_to;
-            }
-
-            // child_to generation in {gen, gen+1}
-
-            this->_check_keep_mutation_aux(from_entry, parent_gen, child_to, keep_mlog);
-
-            return counters;
-        }
-#endif
-
-#ifdef MOVED
-        bool
-        DX1Collector::_check_keep_mutation_aux(const MutationLogEntry & from_entry,
-                                               Generation parent_gen_to,
-                                               void * child_to,
-                                               MutationLog * keep_mlog)
-        {
-            Generation child_gen_to
-                = this->generation_of(role::to_space(), child_to);
-
-            bool need_mlog_entry
-                = ((child_gen_to + 1 < config_.n_generation_)
-                   && (config_.promotion_threshold(parent_gen_to)
-                       > config_.promotion_threshold(child_gen_to)));
-
-            if (need_mlog_entry) {
-                // 1. P->C pointer is still cross-age (xage), and
-                // 2. this matters; in future P will promote before C
-                //
-                // Need to keep entry because parent will be eligible for promotion
-                // before child
-
-                keep_mlog->push_back(from_entry);
-
-                return true;
-            } else {
-                // child now in final generation,
-                // no longer need to track incoming mutations.
-
-                return false;
-            }
-        }
-#endif
-
         void
         DX1Collector::_cleanup_phase(Generation upto)
         {
             scope log(XO_DEBUG(true), xtag("upto", upto));
 
-            // everything live has been copied out of from-space
-            // -> now set to empty
-            //
-            for (Generation g = Generation{0}; g < upto; ++g) {
-                if (config_.sanitize_flag_) {
-                    space_[role::from_space()][g]->scrub();
-                }
-
-                space_[role::from_space()][g]->clear();
-            }
-
+            this->gco_store_.cleanup_phase(upto, config_.sanitize_flag_);
             this->runstate_ = GCRunState::idle();
         }
 
@@ -1786,12 +1596,14 @@ namespace xo {
                                         arena_end);
         }
 
+#ifdef MOVED
         void
         DX1Collector::reverse_roles(Generation g) noexcept {
             assert(g < config_.n_generation_);
 
             std::swap(space_[role::from_space()][g], space_[role::to_space()][g]);
         }
+#endif
 
         void
         DX1Collector::clear() noexcept {

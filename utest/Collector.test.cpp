@@ -91,15 +91,23 @@ namespace xo {
             REQUIRE(gc.to_space(g1) != gc.to_space(g0));
             REQUIRE(gc.from_space(g1) != gc.from_space(g0));
             REQUIRE(gc.to_space(g0) != gc.from_space(g1));
+            REQUIRE(gc.to_space(g1) != gc.from_space(g1));
+
+            for (Generation gi{0}; gi < 2; ++gi) {
+                INFO(xtag("gi", gi));
+
+                REQUIRE(gc.to_space(gi));
+                REQUIRE(gc.from_space(gi));
+
+                REQUIRE(gc.from_space(gi)->is_mapped());
+                REQUIRE(gc.to_space(gi)->is_mapped());
+            }
 
             for (Generation gi = Generation(2); gi < c_max_generation; ++gi) {
                 INFO(xtag("gi", gi));
 
                 REQUIRE(!gc.to_space(gi));
                 REQUIRE(!gc.from_space(gi));
-
-                REQUIRE(!gc.space_storage_[0][gi].is_mapped());
-                REQUIRE(!gc.space_storage_[1][gi].is_mapped());
             }
         }
 
