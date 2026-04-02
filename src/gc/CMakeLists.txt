@@ -15,6 +15,7 @@ set(SELF_SRCS
     DX1CollectorIterator.cpp
 
     X1CollectorConfig.cpp
+    MutationLogState.cpp
     MutationLogEntry.cpp
 
     )

@@ -7,7 +7,8 @@
 
 #include "X1CollectorConfig.hpp"
 #include "GCObject.hpp"
-#include "MutationLogEntry.hpp"
+#include "MutationLogState.hpp"
+#include "X1VerifyStats.hpp"
 #include "generation.hpp"
 #include "object_age.hpp"
 #include "role.hpp"
@@ -129,68 +130,11 @@ namespace xo {
             alignas(AGCObject) std::byte iface_[sizeof(AGCObject)];
         };
 
-        /** @brief statistics from mlog forwarding **/
-        class MutationLogStatistics {
-        public:
-            MutationLogStatistics() = default;
-
-            MutationLogStatistics & operator+=(const MutationLogStatistics & x) {
-                n_stale_ += x.n_stale_;
-                n_live_parent_ += x.n_live_parent_;
-                n_rescue_ += x.n_rescue_;
-                n_triage_ += x.n_triage_;
-
-                return *this;
-            }
-
-        public:
-            /** count superseded mlog entries **/
-            std::size_t n_stale_ = 0;
-            /** count live parents encountered during mlog scan **/
-            std::size_t n_live_parent_ = 0;
-            /** count child subgraphs rescued during mlog scan **/
-            std::size_t n_rescue_ = 0;
-            /** count triaged mlog entries **/
-            std::size_t n_triage_ = 0;
-        };
-
-        /** @brief info collected during a @ref DX1Collector::verify_ok call
-         *
-         **/
-        struct VerifyStats {
-            bool is_ok() const noexcept {
-                return (n_from_ == 0) && (n_fwd_ == 0) && (n_no_iface_ == 0);
-            }
-
-            void clear() { *this = VerifyStats(); }
-
-            /** number of gc roots examined **/
-            std::uint32_t n_gc_root_  = 0;
-            std::uint32_t n_ext_      = 0;
-            /** number of from-space objects encountered. Fatal if non-zero **/
-            std::uint32_t n_from_     = 0;
-            /** number of to-space objects encountered. **/
-            std::uint32_t n_to_       = 0;
-            /** counts forwarding object encountered in to-space scan. Fatal if non-zero **/
-            std::uint32_t n_fwd_      = 0;
-            /** counts missing GCObject interface. Fatal if non-zero **/
-            std::uint32_t n_no_iface_ = 0;
-            /** live mlog entry refers to to-space, as expected **/
-            std::uint32_t n_mlog_vital_ = 0;
-            /** stale mlog entry. not troubling to verify these **/
-            std::uint32_t n_mlog_stale_ = 0;
-            /** live mlog entry refers to from-space. Fatal if non-zero **/
-            std::uint32_t n_mlog_from_ = 0;
-            /** live mlog entry refers to either some other generation or outside gc-space. Fatal if non-zero **/
-            std::uint32_t n_mlog_wild_ = 0;
-
-        };
-
         // ----- DX1Collector -----
 
         /** @brief garbage collector 'X1'
          **/
-        struct DX1Collector {
+        class DX1Collector {
         public:
             using RootSet = DArenaVector<GCRoot>;
             using ObjectTypeTable = DArenaVector<ObjectTypeSlot>;
@@ -215,6 +159,7 @@ namespace xo {
 
             // ----- access methods -----
 
+            const X1CollectorConfig & config() const noexcept { return config_; }
             std::string_view name() const noexcept { return config_.name_; }
             GCRunState runstate() const noexcept { return runstate_; }
             const ObjectTypeTable * get_object_types() const noexcept { return &object_types_; }
@@ -390,6 +335,11 @@ namespace xo {
              **/
             bool check_move_policy(header_type alloc_hdr, void * object_data) const noexcept;
 
+            /** move interior subgraph at @p from_src to to-space.
+             *  no-op if not in gc-space.
+             **/
+            void * deep_move_interior(void * from_src, Generation upto);
+
             // ----- allocation -----
 
             /** simple allocation. allocate @p z bytes of memory
@@ -460,8 +410,10 @@ namespace xo {
             void _init_gc_roots(const X1CollectorConfig & cfg, std::size_t page_z);
             /** aux init function: initialize @ref mlog_storage_[][] arenas **/
             void _init_mlogs(const X1CollectorConfig & cfg, std::size_t page_z);
+#ifdef MOVED
             /** aux init function: create mutation log **/
             MutationLog _make_mlog(uint32_t igen, char tag_char, size_t mlog_z, std::size_t page_z);
+#endif
             /** aux init function: initialize @ref space_storage_[][] arenas **/
             void _init_space(const X1CollectorConfig & cfg);
 
@@ -473,53 +425,14 @@ namespace xo {
             /** cureate new mutation log after copying roots **/
             void forward_mutation_log(Generation upto);
 
-            /** Perform one pass over contents of @p *from_mlog for generation @p gen.
-             *  @p *from_mlog contains all {xgen,xage} pointers that target generation @p gen.
-             *  Surviving mlog entries are moved to either @p *to_mlog or @p *triage_mlog,
-             *  (generation < @p upto being collected this cycle).
-             *
-             *  Each mlog entry gets one of the following outcomes.
-             *  1. skip.   mlog entry has been superseded by another mut at target site.
-             *  2. keep.   mlog entry is live. destination has been evacuated,
-             *             so source must be updated as well.
-             *  3. triage. source of incoming object belongs to a generation that was collected,
-             *             and has not been evacuated. Although appears to be garbage, it may
-             *             be live after all if reachable from the destination of some other
-             *             mlog entry in @p *to_mlog. Store these mlog entries in @p *triage_mlog.
-             *
-             *  @return number of mlog entries moved, whether to @p *to_mlog or @p *triage_mlog.
-             **/
-            MutationLogStatistics _forward_mutation_log_phase(Generation upto,
-                                                              Generation gen,
-                                                              MutationLog * from_mlog,
-                                                              MutationLog * to_mlog,
-                                                              MutationLog * triage_mlog);
-
-            MutationLogStatistics _preserve_child_of_live_parent(Generation upto,
-                                                                 Generation parent_gen,
-                                                                 const MutationLogEntry & from_entry,
-                                                                 MutationLog * keep_mlog);
-
-            /** helper function to decide whether to keep a mutation log entry
-             *  @return true iff mlog entry appended to @p keep_mlog
-             **/
-            bool _check_keep_mutation_aux(const MutationLogEntry & from_entry,
-                                          Generation parent_gen_to,
-                                          void * child_to,
-                                          MutationLog * keep_mlog);
-
             /** cleanup after gc **/
-            void cleanup_phase(Generation upto);
+            void _cleanup_phase(Generation upto);
 
             /** move root subgraph at @p from_src to to-space.
              *  If not in gc-space, visit immediate children and move them.
              *  Require: runstate_.is_running()
              **/
             void * _deep_move_root(obj<AGCObject> from_src, Generation upto);
-            /** move interior subgraph at @p from_src to to-space.
-             *  no-op if not in gc-space.
-             **/
-            void * _deep_move_interior(void * from_src, Generation upto);
             /** Common driver for _deep_move_root(), _deep_move_interior() **/
             void * _deep_move_gc_owned(void * from_src, Generation upto);
             /** snap checkpoint containing allocator state
@@ -570,24 +483,15 @@ namespace xo {
              **/
             RootSet root_set_;
 
-            /** Cross-generational mutations tracked in MutationLogs.
-             *  We need three logs per generation:
-             *  A. one to observe and remember mutations in to-space
-             *     during normal operation (between GC cycles)
-             *  B. during GC: 2nd mlog to hold entries from from-mlog
-             *     that will still be needed post-GC (because ptr direction
-             *     from higher gen to lower gen after cycle).
-             *  C. during GC: 3rd mlog to triage entries for which
-             *     liveness of pointer source isn't yet established.
-             *
-             * NOTE: indexed on generation of pointer *destination*
+            /** "remembered sets": track pointers P->C that require special handling
+             *  during a gc cycle where either:
+             *  1. xgen pointers g(P) > g(C):
+             *     P in a more senior generation than C
+             *  2. xage pointers g(P) = g(C), age(P) > age(C):
+             *     {P,C} in same generation, but in fuutre suriving P would
+             *     get promoted before C.
              **/
-            std::array<MutationLog, c_max_generation - 1> mlog_storage_[c_n_role + 1];
-
-            /** mlog pointers.  The roles of mlog_storage_[*][g] get permuted
-             *  as each collection cycle proceeds
-             **/
-            std::array<MutationLog *, c_max_generation - 1> mlog_[c_n_role + 1];
+            MutationLogState mlog_state_;
 
             /** collector-managed memory here.
              *  - space_[1] is from-space
