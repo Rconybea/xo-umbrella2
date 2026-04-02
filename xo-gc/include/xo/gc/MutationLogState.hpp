@@ -133,7 +133,9 @@ namespace xo {
 
 
         public:
+            /** number of generations in use.  Same as @ref X1CollectorConfig.n_generation_ **/
             uint32_t n_generation_ = 0;
+            /** true to enable debug logging **/
             bool debug_flag_ = false;
 
             /** Cross-generational mutations tracked in MutationLogs.
