@@ -40,6 +40,15 @@ namespace xo {
                 return Generation(age % n_survive_threshold_);
             }
 
+            /** age threshold for promotion to generation @p g **/
+            uint32_t promotion_threshold(Generation g) const noexcept {
+                // TODO: may consider replacing with table-lookup
+                // Require: if two distinct ages promote to some gen g at the same time,
+                //          then they also promote to gen g+k at the same time for all k>0.
+
+                return g * n_survive_threshold_;
+            }
+
         public:
             // ----- Instance Variables -----
 

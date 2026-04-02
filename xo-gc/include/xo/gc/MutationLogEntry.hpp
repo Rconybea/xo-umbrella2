@@ -28,11 +28,15 @@ namespace xo {
             using AGCObject = xo::mm::AGCObject;
 
         public:
+            MutationLogEntry() = default;
             MutationLogEntry(void * parent, void ** p_data, obj<AGCObject> snap);
 
             void * parent() const { return parent_; }
             void ** p_data() const { return p_data_; }
             obj<AGCObject> snap() const { return snap_; }
+
+            /** true if child pointer has been altered since this mlog entry created **/
+            bool is_superseded() const noexcept { return *p_data_ != snap_.data(); }
 
         private:
             /** address of object containing logged mutation **/
@@ -41,7 +45,7 @@ namespace xo {
              *  driving this log entry.
              **/
             void ** p_data_ = nullptr;
-            /** AGCObject i/face pointer, asof assignment responsible for this log entry.
+            /** AGCObject child pointer, asof assignment responsible for this log entry.
              *  If *p_data_ matches snap_.data(), then AGCObject interface is snap_.iface().
              *  Otherwise log entry has been superseded by another assignment.
              **/
