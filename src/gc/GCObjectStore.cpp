@@ -438,6 +438,49 @@ namespace xo {
             return true;
         }
 
+        void *
+        GCObjectStore::_shallow_move(obj<AAllocator> mm,
+                                     const AGCObject * iface,
+                                     void * from_src)
+        {
+            scope log(XO_DEBUG(config_.debug_flag_));
+
+            AllocInfo info = this->alloc_info((std::byte *)from_src);
+
+            //obj<AAllocator, DX1Collector> gc_gco(gc);
+
+            void * to_dest = iface->shallow_copy(from_src, mm);
+
+            log && log(xtag("from_src", from_src), xtag("to_dest", to_dest));
+            log && log(xtag("tseq", info.tseq()),
+                       xtag("tname", TypeRegistry::id2name(typeseq(info.tseq()))),
+                       xtag("age", info.age()),
+                       xtag("size", info.size()));
+
+            if (config_.debug_flag_) {
+                AllocInfo info_copy = this->alloc_info((std::byte *)to_dest);
+
+                log && log(xtag("age2", info_copy.age()), xtag("size2", info_copy.size()));
+
+                assert((info_copy.age() == config_.arena_config_.header_.max_age())
+                       || (info_copy.age() == info.age() + 1));
+            }
+
+            if(to_dest == from_src) {
+                assert(false);
+            } else {
+                *(const_cast<AllocHeader*>(info.p_header_))
+                    = AllocHeader(config_
+                                  .arena_config_
+                                  .header_
+                                  .mark_forwarding_tseq(*info.p_header_));
+
+                *(void **)from_src = to_dest;
+            }
+
+            return to_dest;
+        } /*shallow_move*/
+
 #ifdef MARKED
         void
         GCObjectStore::_forward_children_until_fixpoint(DX1Collector * gc,

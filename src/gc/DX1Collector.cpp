@@ -868,7 +868,7 @@ namespace xo {
 
         void *
         DX1Collector::deep_move_interior(void * from_src,
-                                          Generation upto)
+                                         Generation upto)
         {
             scope log(XO_DEBUG(config_.debug_flag_));
 
@@ -935,7 +935,7 @@ namespace xo {
 
             assert(iface->_has_null_vptr() == false);
 
-            void * to_dest = this->shallow_move(iface, from_src);
+            void * to_dest = this->_shallow_move(iface, from_src);
 
             this->_forward_children_until_fixpoint(upto, gray_lo_v);
 
@@ -1261,7 +1261,7 @@ namespace xo {
                  *                                    +----------+
                  */
 
-                *lhs_data = this->shallow_move(lhs_iface, *lhs_data);
+                *lhs_data = this->_shallow_move(lhs_iface, *lhs_data);
 
                 /*
                  *   lhs   obj<AGCObject>             (from-space)
@@ -1321,42 +1321,11 @@ namespace xo {
         }
 
         void *
-        DX1Collector::shallow_move(const AGCObject * iface, void * from_src)
+        DX1Collector::_shallow_move(const AGCObject * iface, void * from_src)
         {
-            scope log(XO_DEBUG(config_.debug_flag_));
-
-            AllocInfo info = this->alloc_info((std::byte *)from_src);
             obj<AAllocator, DX1Collector> alloc(this);
 
-            void * to_dest = iface->shallow_copy(from_src, alloc);
-
-            log && log(xtag("from_src", from_src), xtag("to_dest", to_dest));
-            log && log(xtag("tseq", info.tseq()),
-                       xtag("tname", TypeRegistry::id2name(typeseq(info.tseq()))),
-                       xtag("age", info.age()), xtag("size", info.size()));
-
-            if (config_.sanitize_flag_) {
-                AllocInfo info_copy = this->alloc_info((std::byte *)to_dest);
-
-                log && log(xtag("age2", info_copy.age()), xtag("size2", info_copy.size()));
-
-                assert((info_copy.age() == config_.arena_config_.header_.max_age())
-                       || (info_copy.age() == info.age() + 1));
-            }
-
-            if(to_dest == from_src) {
-                assert(false);
-            } else {
-                *(const_cast<AllocHeader*>(info.p_header_))
-                    = AllocHeader(config_
-                                  .arena_config_
-                                  .header_
-                                  .mark_forwarding_tseq(*info.p_header_));
-
-                *(void **)from_src = to_dest;
-            }
-
-            return to_dest;
+            return gco_store_._shallow_move(alloc, iface, from_src);
         }
 
         bool
