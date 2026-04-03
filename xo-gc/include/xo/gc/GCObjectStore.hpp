@@ -26,6 +26,8 @@ namespace xo {
         public:
             explicit GCObjectStore(const GCObjectStoreConfig & cfg);
 
+            const GCObjectStoreConfig & config() const noexcept { return config_; }
+
             const DArena * get_space(role r, Generation g) const noexcept { return space_[r][g]; }
             DArena * get_space(role r, Generation g) noexcept { return space_[r][g]; }
             DArena * from_space(Generation g) noexcept { return get_space(role::from_space(), g); }
@@ -52,6 +54,27 @@ namespace xo {
 
             /** Call @p visitor for each memory pool owned by this store **/
             void visit_pools(const MemorySizeVisitor & visitor) const;
+
+            /** true iff address @p addr allocated from this collector
+             *  in role @p r (according to current GC state)
+             **/
+            bool contains(role r, const void * addr) const noexcept;
+
+            /** true iff address @p addr allocated from this collector and currently live
+             *  in role @p r (according to current GC state)
+             *
+             *  (i.e. in [lo,free) for an arena)
+             **/
+            bool contains_allocated(role r, const void * addr) const noexcept;
+
+            /** true iff {@p alloc_hdr, @p object_data} should move for
+             *  a collection of all generations strictly younger than @p upto.
+             *
+             *  Require: runstate_.is_running()
+             **/
+            bool check_move_policy(Generation upto,
+                                   header_type alloc_hdr,
+                                   void * gco_data) const noexcept;
 
             /** For each generation g in [0 ,.., upto)
              *  swap arenas assigned to {to-space, from-space}.

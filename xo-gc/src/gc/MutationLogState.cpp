@@ -426,8 +426,8 @@ namespace xo {
 
             bool need_mlog_entry
                 = ((child_gen_to + 1 < config_.n_generation_)
-                   && (config_.promotion_threshold(parent_gen_to)
-                       > config_.promotion_threshold(child_gen_to)));
+                   && (gco_store.config().promotion_threshold(parent_gen_to)
+                       > gco_store.config().promotion_threshold(child_gen_to)));
 
             if (need_mlog_entry) {
                 // 1. P->C pointer is still cross-age (xage), and

@@ -133,10 +133,48 @@ namespace xo {
             }
         }
 
+        bool
+        GCObjectStore::contains(role r, const void * addr) const noexcept
+        {
+            return !(this->generation_of(r, addr).is_sentinel());
+        }
+
+        bool
+        GCObjectStore::contains_allocated(role r, const void * addr) const noexcept
+        {
+            Generation g = this->generation_of(r, addr);
+
+            if (g.is_sentinel())
+                return false;
+
+            return this->get_space(r, g)->contains_allocated(addr);
+        }
+
+        bool
+        GCObjectStore::check_move_policy(Generation upto,
+                                         header_type alloc_hdr,
+                                         void * object_data) const noexcept
+        {
+            (void)object_data;
+
+            // when gc is moving objects, to- and from- spaces have been
+            // reversed: forwarding pointers are located in from-space and
+            // refer to to-space.
+
+            object_age age = this->header2age(alloc_hdr);
+
+            Generation g = config_.age2gen(age);
+
+            //assert(runstate_.is_running());
+
+            return (g < upto);
+        }
+
         void
         GCObjectStore::swap_roles(Generation upto) noexcept
         {
-            scope log(XO_DEBUG(config_.debug_flag_), xtag("upto", upto));
+            scope log(XO_DEBUG(config_.debug_flag_),
+                      xtag("upto", upto));
 
             for (Generation g = Generation{0}; g < upto; ++g) {
                 log && log("swap roles", xtag("g", g));
