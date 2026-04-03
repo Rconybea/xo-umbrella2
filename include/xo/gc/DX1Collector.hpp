@@ -370,11 +370,13 @@ namespace xo {
             /** cleanup after gc **/
             void _cleanup_phase(Generation upto);
 
+#ifdef OBSOLETE
             /** move root subgraph at @p from_src to to-space.
              *  If not in gc-space, visit immediate children and move them.
              *  Require: runstate_.is_running()
              **/
             void * _deep_move_root(obj<AGCObject> from_src, Generation upto);
+#endif
             /** Common driver for _deep_move_root(), _deep_move_interior() **/
             void * _deep_move_gc_owned(void * from_src, Generation upto);
             /** snap checkpoint containing allocator state

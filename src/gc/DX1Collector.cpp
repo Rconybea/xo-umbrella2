@@ -82,26 +82,6 @@ namespace xo {
             this->_init_mlogs(page_z);
         }
 
-#ifdef OBSOLETE // called from GCObjectStore ctor
-        void
-        DX1Collector::_init_object_types(const X1CollectorConfig & cfg, std::size_t page_z)
-        {
-            gco_state_._init_object_types();
-
-#ifdef MOVED
-            /* 1MB reserved address space enough for up to 128k distinct types.
-             * In this case don't want to use hugepages since actual #of types
-             * likely << .size/8
-             */
-            this->object_types_
-                = ObjectTypeTable::map(ArenaConfig{.name_ = "x1-object-types",
-                                                   .size_ = cfg.object_types_z_,
-                                                   .hugepage_z_ = page_z,
-                                                   .store_header_flag_ = false});
-#endif
-        }
-#endif
-
         void
         DX1Collector::_init_gc_roots(const X1CollectorConfig & cfg, std::size_t page_z)
         {
@@ -803,12 +783,14 @@ namespace xo {
             this->runstate_ = GCRunState::idle();
         }
 
+#ifdef OBSOLETE
         void *
         DX1Collector::_deep_move_root(obj<AGCObject> from_src,
                                       Generation upto)
         {
             return gco_store_._deep_move_root(this, from_src, upto);
         }
+#endif
 
         /*
          * rules:
@@ -855,7 +837,7 @@ namespace xo {
                            xtag("slot.root()", slot.root()),
                            xtag("slot.root()->data_", slot.root()->data_));
 
-                void * root_to = this->_deep_move_root(*slot.root(), upto);
+                void * root_to = gco_store_._deep_move_root(this, *slot.root(), upto);
 
                 slot.root()->reset_opaque(root_to);
 
