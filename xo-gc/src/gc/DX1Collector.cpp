@@ -859,7 +859,7 @@ namespace xo {
 
             if (runstate_.is_running()) {
                 // called during collection phase
-                this->_forward_inplace_aux(lhs_iface, lhs_data, upto);
+                gco_store_._forward_inplace_aux(this, lhs_iface, lhs_data, upto);
             } else if (runstate_.is_verify()) {
                 // called during verify_ok
                 this->_verify_aux(lhs_iface, *lhs_data);
@@ -869,6 +869,7 @@ namespace xo {
             }
         }
 
+#ifdef OBSOLETE
         void
         DX1Collector::_forward_inplace_aux(AGCObject * lhs_iface,
                                            void ** lhs_data,
@@ -878,6 +879,7 @@ namespace xo {
 
             gco_store_._forward_inplace_aux(this, lhs_iface, lhs_data, upto);
         } /*_forward_inplace_aux*/
+#endif
 
         void
         DX1Collector::_verify_aux(AGCObject * iface, void * data)
