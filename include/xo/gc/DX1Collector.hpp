@@ -378,11 +378,11 @@ namespace xo {
             void * _deep_move_root(obj<AGCObject> from_src, Generation upto);
             /** Common driver for _deep_move_root(), _deep_move_interior() **/
             void * _deep_move_gc_owned(void * from_src, Generation upto);
-#endif
             /** snap checkpoint containing allocator state
              *  use to detect forwarding activity after visiting objects
              **/
             GCMoveCheckpoint _snap_move_checkpoint(Generation upto);
+#endif
 
             /** traverse objects allocated after @p ckp, to make sure their children
              *  are forwarded. Repeat until traverse doesn't find any unforwarded children
