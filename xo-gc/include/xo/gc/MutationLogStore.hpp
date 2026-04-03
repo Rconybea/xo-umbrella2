@@ -40,12 +40,39 @@ namespace xo {
             void visit_pools(const MemorySizeVisitor & visitor) const;
 
             /** verify consistent mlog state,
-             *  on behalf of collector @p gc.
+             *  on behalf of gc-aware object store @p gc.
              *  (using gc to identify location of objects).
              *  Update counters in @p *p_verify_stats.
              **/
             void verify_ok(GCObjectStore * gc,
                            X1VerifyStats * p_verify_stats) noexcept;
+
+            /** on behalf of gc-aware object store @p gc,
+             *  change the value of a child pointer at @p p_lhs
+             *  with parent object @p parent.  p_lhs and parent must belong
+             *  to the same allocation.
+             **/
+            void assign_member(GCObjectStore * gc,
+                               void * parent,
+                               obj<AGCObject> * p_lhs,
+                               obj<AGCObject> rhs);
+
+            /** swap {to, from} roles
+             **/
+            void swap_roles(Generation upto) noexcept;
+
+            /** On behalf of collector @p gc:
+             *
+             *  forward mutation logs, for generations 0 <= g < @p upto,
+             *  from from-space to to-space.
+             **/
+            void forward_mutation_log(DX1Collector * gc,
+                                      Generation upto);
+
+        private:
+            /** aux init function: create mutation log **/
+            MutationLog _make_mlog(uint32_t igen, char tag_char,
+                                   size_t mlog_z, std::size_t page_z);
 
             /** Append a single mutation to log for generation @p dest_g
              *  Mutation modifies @p parent at address @p addr,
@@ -64,27 +91,10 @@ namespace xo {
              *  pointer.  This means can alway recover that pointer
              *  by consulting the AllocHeader for the pointer target
              */
-            void append_mutation(Generation dest_g,
-                                 void * parent,
-                                 void ** addr,
-                                 obj<AGCObject> rhs);
-
-            /** swap {to, from} roles
-             **/
-            void swap_roles(Generation upto) noexcept;
-
-            /** On behalf of collector @p gc:
-             *
-             *  forward mutation logs, for generations 0 <= g < @p upto,
-             *  from from-space to to-space.
-             **/
-            void forward_mutation_log(DX1Collector * gc,
-                                      Generation upto);
-
-        private:
-            /** aux init function: create mutation log **/
-            MutationLog _make_mlog(uint32_t igen, char tag_char,
-                                   size_t mlog_z, std::size_t page_z);
+            void _append_mutation(Generation dest_g,
+                                  void * parent,
+                                  void ** addr,
+                                  obj<AGCObject> rhs);
 
             /** On behalf of collctor @p gc:
              *

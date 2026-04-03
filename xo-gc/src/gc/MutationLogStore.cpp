@@ -136,10 +136,89 @@ namespace xo {
         } /*verify_ok*/
 
         void
-        MutationLogStore::append_mutation(Generation dest_g,
-                                          void * parent,
-                                          void ** addr,
-                                          obj<AGCObject> rhs)
+        MutationLogStore::assign_member(GCObjectStore * gco_store,
+                                        void * parent,
+                                        obj<AGCObject> * p_lhs,
+                                        obj<AGCObject> rhs)
+        {
+            scope log(XO_DEBUG(config_.debug_flag_),
+                      xtag("parent", parent), xtag("lhs", p_lhs), xtag("rhs", rhs.data()));
+
+            // ++ stats.n_mutation_;
+
+            *p_lhs = rhs;
+
+            if (!config_.enabled_flag_) {
+                // only need to log mutations when incremental gc is enabled
+                return;
+            }
+
+            // logging policy depends on:
+            // 1. generation of lhs
+            // 2. generation of rhs
+
+            Generation src_g = gco_store->generation_of(role::to_space(), p_lhs);
+
+            if (src_g.is_sentinel()) {
+                // only need mlog entries for gc-owned pointers.
+                // In this case pointer does not originate in gc-owned space
+                return;
+            }
+
+            Generation dest_g = gco_store->generation_of(role::to_space(), rhs.data());
+
+            if (dest_g.is_sentinel()) {
+                // similarly, don't need mlog entry to non-gc-owned destination
+                return;
+            }
+
+            if (src_g < dest_g) {
+                // young-to-old pointers don't need to be remembered,
+                // since a GC cycle that collects an (old) generation is guarnatted
+                // to also collect all younger generations.
+                return;
+            }
+
+            if (src_g == dest_g) {
+                // for pointers within the same generation, need to log
+                // if source is older than destination.
+
+                const DArena * arena = gco_store->get_space(role::to_space(), src_g);
+
+                const DArena::header_type * src_hdr = arena->obj2hdr(parent);
+                const DArena::header_type * dest_hdr = arena->obj2hdr(rhs.data());
+
+                assert(src_hdr && dest_hdr);
+
+                if (gco_store->header2age(*src_hdr) <= gco_store->header2age(*dest_hdr)) {
+                    // source and destination have the same age;
+                    // therefore are always collected on the same set of GC cycles
+                    // -> no need to remember separately.
+                    return;
+                } else {
+                    // even though {src,dest} belong to the same generation:
+                    // source will be eligible for promotion before destination.
+                    // At that point pointer would become a cross-generational pointer,
+                    // so need to track it now.
+
+                    log && log("xage ptr -> must log");
+                }
+            } else {
+                log && log("xgen ptr -> must log");
+            }
+
+            // control here: we have an older->younger pointer, need to log it
+
+            void ** lhs_addr = reinterpret_cast<void **>(&(p_lhs->data_));
+
+            this->_append_mutation(dest_g, parent, lhs_addr, rhs);
+        }
+
+        void
+        MutationLogStore::_append_mutation(Generation dest_g,
+                                           void * parent,
+                                           void ** addr,
+                                           obj<AGCObject> rhs)
         {
             // mlog keyed by generation in which pointer _destination_ resides:
             // collection that moves destination generation around needs to also

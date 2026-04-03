@@ -701,78 +701,19 @@ namespace xo {
 
             // ++ stats.n_mutation_;
 
-            *p_lhs = rhs;
-
             if (runstate_.is_running()) {
+                *p_lhs = rhs;
+
                 // for removal of all doubt:
-                // don't log mutations during GC cycle
+                // don't log mutations during GC cycle.
+                // That said: should not be happening!
+                assert(false);
+
                 return;
-            }
-
-            if (!config_.allow_incremental_gc_) {
-                // only need to log mutations when incremental gc is enabled
-                return;
-            }
-
-            // logging policy depends on:
-            // 1. generation of lhs
-            // 2. generation of rhs
-
-            Generation src_g = this->generation_of(role::to_space(), p_lhs);
-
-            if (src_g.is_sentinel()) {
-                // only need mlog entries for gc-owned pointers.
-                // In this case pointer does not originate in gc-owned space
-                return;
-            }
-
-            Generation dest_g = this->generation_of(role::to_space(), rhs.data());
-
-            if (dest_g.is_sentinel()) {
-                // similarly, don't need mlog entry to non-gc-owned destination
-                return;
-            }
-
-            if (src_g < dest_g) {
-                // young-to-old pointers don't need to be remembered,
-                // since a GC cycle that collects an (old) generation is guarnatted
-                // to also collect all younger generations.
-                return;
-            }
-
-            if (src_g == dest_g) {
-                // for pointers within the same generation, need to log
-                // if source is older than destination.
-
-                const DArena * arena = this->get_space(role::to_space(), src_g);
-
-                const DArena::header_type * src_hdr = arena->obj2hdr(parent);
-                const DArena::header_type * dest_hdr = arena->obj2hdr(rhs.data());
-
-                assert(src_hdr && dest_hdr);
-
-                if (this->header2age(*src_hdr) <= this->header2age(*dest_hdr)) {
-                    // source and destination have the same age;
-                    // therefore are always collected on the same set of GC cycles
-                    // -> no need to remember separately.
-                    return;
-                } else {
-                    // even though {src,dest} belong to the same generation:
-                    // source will be eligible for promotion before destination.
-                    // At that point pointer would become a cross-generational pointer,
-                    // so need to track it now.
-
-                    log && log("xage ptr -> must log");
-                }
             } else {
-                log && log("xgen ptr -> must log");
+                mlog_store_.assign_member(&gco_store_, parent, p_lhs, rhs);
+
             }
-
-            // control here: we have an older->younger pointer, need to log it
-
-            void ** lhs_addr = reinterpret_cast<void **>(&(p_lhs->data_));
-
-            mlog_store_.append_mutation(dest_g, parent, lhs_addr, rhs);
         } /*assign_member*/
 
         DX1CollectorIterator
@@ -813,15 +754,6 @@ namespace xo {
                                         arena_end,
                                         arena_end);
         }
-
-#ifdef MOVED
-        void
-        DX1Collector::reverse_roles(Generation g) noexcept {
-            assert(g < config_.n_generation_);
-
-            std::swap(space_[role::from_space()][g], space_[role::to_space()][g]);
-        }
-#endif
 
         void
         DX1Collector::clear() noexcept {
