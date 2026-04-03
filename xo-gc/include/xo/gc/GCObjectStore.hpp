@@ -26,6 +26,11 @@ namespace xo {
             DArena * to_space(Generation g) noexcept { return get_space(role::to_space(), g); }
             DArena * new_space() noexcept { return to_space(Generation{0}); }
 
+            /** generation to which pointer @p addr belongs, given role @p r;
+             *  sentinel if not found in this collector
+             **/
+            Generation generation_of(role r, const void * addr) const noexcept;
+
             /** Call @p visitor for each memory pool owned by this store **/
             void visit_pools(const MemorySizeVisitor & visitor) const;
 
