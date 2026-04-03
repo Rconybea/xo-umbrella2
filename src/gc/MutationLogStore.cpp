@@ -89,7 +89,7 @@ namespace xo {
 
         void
         MutationLogStore::verify_ok(GCObjectStore * gco_store,
-                                    VerifyStats * p_verify_stats) noexcept
+                                    X1VerifyStats * p_verify_stats) noexcept
         {
             // 4. scan mutation logs
             for (Generation g(0); g + 1 < config_.n_generation_; ++g) {
@@ -402,7 +402,7 @@ namespace xo {
 
                 GCObjectStore & gco_store = gc->gco_store();
 
-                child_to = gco_store._deep_move_interior(gc, child_fr, upto);
+                child_to = gco_store.deep_move_interior(gc, child_fr, upto);
 
                 // update child pointer in parent object
                 *from_entry.p_data() = child_to;

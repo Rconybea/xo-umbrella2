@@ -382,9 +382,7 @@ namespace xo {
             /** if > 0: need gc for all generations < gc_pending_upto_ **/
             Generation gc_pending_upto_;
 
-            /** using arena to get extensible list of root objects.
-             *  For each root store one address (type obj<AGCObject>*)
-             *
+            /**
              *  An Object x that supports AGCObject, but doesn't live in gc-space,
              *  will get special treatment if it appears in root_set_:
              *  collector will traverse x to forward pointers to gc-owned
@@ -410,7 +408,7 @@ namespace xo {
             GCObjectStore gco_store_;
 
             /** counters collected during @ref verify_ok call **/
-            VerifyStats verify_stats_;
+            X1VerifyStats verify_stats_;
         };
     } /*namespace mm*/
 } /*namespace xo*/

@@ -131,28 +131,21 @@ namespace xo {
                                    obj<AGCObject> from_src,
                                    Generation upto);
 
-            /** move interior subgraph at @p from_src to to-space.
-             *  no-op if not in gc-space.
-             **/
-            void * _deep_move_interior(DX1Collector * gc,
-                                       void * from_src,
-                                       Generation upto);
-
-            /** Common driver for _deep_move_root(), _deep_move_interior().
-             *  Move object subgraph @p from_src on behalf of @p gc collection cycle,
-             *  covering generations in [0 ,.., upto).
-             **/
-            void * _deep_move_gc_owned(DX1Collector * gc,
-                                       void * from_src,
-                                       Generation upto);
-
-        private:
         public:
             /** For each generation g in [0 ,.., upto)
              *  swap arenas assigned to {to-space, from-space}.
              *  Invoked once at the beginning of each gc cycle.
              **/
             void swap_roles(Generation upto) noexcept;
+
+            /** move interior subgraph at @p from_src to to-space.
+             *  no-op if not in gc-space.
+             *
+             *  NOTE: load-bearing for MutationLogStore
+             **/
+            void * deep_move_interior(DX1Collector * gc,
+                                      void * from_src,
+                                      Generation upto);
 
             /** Evacuate object at @p *lhs_data to to-space, during collection phase
              *  acting on generations g in [0 ,.., upto).
@@ -191,6 +184,14 @@ namespace xo {
             bool _check_move_policy(header_type alloc_hdr,
                                     void * gco_data,
                                     Generation upto) const noexcept;
+
+            /** Common driver for _deep_move_root(), _deep_move_interior().
+             *  Move object subgraph @p from_src on behalf of @p gc collection cycle,
+             *  covering generations in [0 ,.., upto).
+             **/
+            void * _deep_move_gc_owned(DX1Collector * gc,
+                                       void * from_src,
+                                       Generation upto);
 
             /** traverse objects allocated after @p ckp, to make sure their children
              *  are forwarded. Repeat until traverse doesn't find any unforwarded children.

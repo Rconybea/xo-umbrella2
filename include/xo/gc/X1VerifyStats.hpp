@@ -13,13 +13,13 @@ namespace xo {
         /** @brief info collected during a @ref DX1Collector::verify_ok call
          *  (or @ref MutationLogState::verify_ok call)
          **/
-        class VerifyStats {
+        class X1VerifyStats {
         public:
             bool is_ok() const noexcept {
                 return (n_from_ == 0) && (n_fwd_ == 0) && (n_no_iface_ == 0);
             }
 
-            void clear() { *this = VerifyStats(); }
+            void clear() { *this = X1VerifyStats(); }
 
             /** number of gc roots examined **/
             std::uint32_t n_gc_root_  = 0;
