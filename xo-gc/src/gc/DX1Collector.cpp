@@ -67,12 +67,8 @@ namespace xo {
 
         DX1Collector::DX1Collector(const X1CollectorConfig & cfg)
         : config_{cfg},
-          mlog_state_{
-              MutationLogConfig{
-                  cfg.n_generation_,
-                  cfg.mutation_log_z_,
-                  cfg.debug_flag_}},
-          gco_store_{cfg.arena_config_, cfg.n_generation_, cfg.debug_flag_}
+          mlog_state_{cfg.mlog_config()},
+          gco_store_{cfg.gco_store_config()}
         {
             assert(config_.arena_config_.header_.size_bits_ +
                    config_.arena_config_.header_.age_bits_ +

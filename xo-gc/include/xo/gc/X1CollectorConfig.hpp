@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include "GCObjectStoreConfig.hpp"
+#include "MutationLogConfig.hpp"
 #include "object_age.hpp"
 #include "generation.hpp"
 #include <xo/arena/ArenaConfig.hpp>
@@ -36,18 +38,28 @@ namespace xo {
                 **/
             X1CollectorConfig with_sanitize_flag(bool x);
 
+            /** fetch configuration for gc object store **/
+            GCObjectStoreConfig gco_store_config() const noexcept {
+                return GCObjectStoreConfig(arena_config_,
+                                           n_generation_,
+                                           debug_flag_);
+            }
+
+            /** fetch configuration for mutation log store **/
+            MutationLogConfig mlog_config() const noexcept {
+                return MutationLogConfig(n_generation_,
+                                         n_survive_threshold_,
+                                         mutation_log_z_,
+                                         debug_flag_);
+            }
+
             Generation age2gen(object_age age) const noexcept {
                 return Generation(age % n_survive_threshold_);
             }
 
             /** age threshold for promotion to generation @p g **/
             uint32_t promotion_threshold(Generation g) const noexcept {
-
-                // TODO: may consider replacing with table-lookup
-                // Require: if two distinct ages promote to some gen g at the same time,
-                //          then they also promote to gen g+k at the same time for all k>0.
-
-                return g * n_survive_threshold_;
+                return mlog_config().promotion_threshold(g);
             }
 
         public:

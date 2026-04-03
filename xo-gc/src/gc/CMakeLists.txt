@@ -9,17 +9,20 @@ set(SELF_SRCS
     IAllocator_DX1Collector.cpp
     IAllocIterator_DX1CollectorIterator.cpp
 
+    X1CollectorConfig.cpp
     DX1Collector.cpp
     facet/ICollector_DX1Collector.cpp
 
     DX1CollectorIterator.cpp
 
-    X1CollectorConfig.cpp
+    GCObjectStoreConfig.cpp
     GCObjectStore.cpp
 
     MutationLogConfig.cpp
     MutationLogState.cpp
     MutationLogEntry.cpp
+
+
 
     )
 

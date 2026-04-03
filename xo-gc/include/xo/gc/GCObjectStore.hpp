@@ -5,11 +5,11 @@
 
 #pragma once
 
+#include "GCObjectStoreConfig.hpp"
 #include "generation.hpp"
 #include "object_age.hpp"
 #include <xo/alloc2/role.hpp>
-#include <xo/arena/DArena.hpp>
-#include <xo/arena/ArenaConfig.hpp>
+//#include <xo/arena/ArenaConfig.hpp>
 #include <array>
 
 namespace xo {
@@ -24,7 +24,7 @@ namespace xo {
             using size_type = DArena::size_type;
 
         public:
-            GCObjectStore(const ArenaConfig & arena_cfg, uint32_t ngen, bool debug_flag);
+            explicit GCObjectStore(const GCObjectStoreConfig & cfg);
 
             const DArena * get_space(role r, Generation g) const noexcept { return space_[r][g]; }
             DArena * get_space(role r, Generation g) noexcept { return space_[r][g]; }
@@ -70,19 +70,8 @@ namespace xo {
             void _init_space();
 
         private:
-            /** Configuration for collector spaces.
-             *  Will have (2 x G) of these,
-             *  where G is @ref n_generation_.
-             *  Not using name_ member.
-             *
-             *  REQUIRE:
-             *  - arena_config_.store_header_flag_ must be true
-             **/
-            ArenaConfig arena_config_;
-            /** number of generations in use.  Same as @ref X1CollectorConfig::n_generation_ **/
-            uint32_t n_generation_ = 0;
-            /** true to enable debug logging **/
-            bool debug_flag_ = false;
+            /** configuration for gc-aware object store **/
+            GCObjectStoreConfig config_;
 
             /** arena objects for collector managed memory
              *  1:1 with roles, but polarity reverses for each collection

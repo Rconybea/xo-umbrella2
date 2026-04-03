@@ -10,15 +10,12 @@
 namespace xo {
     namespace mm {
 
-        GCObjectStore::GCObjectStore(const ArenaConfig & arena_cfg,
-                                     uint32_t ngen, bool debug_flag)
-        : arena_config_{arena_cfg},
-          n_generation_{ngen},
-          debug_flag_{debug_flag}
+        GCObjectStore::GCObjectStore(const GCObjectStoreConfig & cfg)
+            : config_{cfg}
         {
-            assert(arena_config_.header_.size_bits_ +
-                   arena_config_.header_.age_bits_ +
-                   arena_config_.header_.tseq_bits_ <= 64);
+            assert(config_.arena_config_.header_.size_bits_ +
+                   config_.arena_config_.header_.age_bits_ +
+                   config_.arena_config_.header_.tseq_bits_ <= 64);
 
             this->_init_space();
         }
@@ -28,21 +25,21 @@ namespace xo {
         {
             assert(c_n_role == 2);
 
-            for (uint32_t igen = 0, ngen = n_generation_; igen < ngen; ++igen) {
+            for (uint32_t igen = 0, ngen = config_.n_generation_; igen < ngen; ++igen) {
                 if (igen < c_max_generation) {
                     {
                         char buf[40];
                         snprintf(buf, sizeof(buf), "x1-space-G%u-a", igen);
 
                         this->space_storage_[0][igen]
-                            = DArena::map(arena_config_.with_name(std::string(buf)));
+                            = DArena::map(config_.arena_config_.with_name(std::string(buf)));
                     }
                     {
                         char buf[40];
                         snprintf(buf, sizeof(buf), "x1-space-G%u-b", igen);
 
                         this->space_storage_[1][igen]
-                            = DArena::map(arena_config_.with_name(std::string(buf)));
+                            = DArena::map(config_.arena_config_.with_name(std::string(buf)));
                     }
 
                     this->space_[role::to_space()][igen] = &space_storage_[0][igen];
@@ -52,12 +49,12 @@ namespace xo {
                 }
             }
 
-            for (uint32_t igen = n_generation_; igen < c_max_generation; ++igen) {
+            for (uint32_t igen = config_.n_generation_; igen < c_max_generation; ++igen) {
                 this->space_[role::to_space()][igen] = nullptr;
                 this->space_[role::from_space()][igen] = nullptr;
             }
 
-            if (n_generation_ == 2) {
+            if (config_.n_generation_ == 2) {
                 assert(this->get_space(role::to_space(), Generation{2}) == nullptr);
             }
         }
@@ -65,7 +62,7 @@ namespace xo {
         Generation
         GCObjectStore::generation_of(role r, const void * addr) const noexcept
         {
-            for (Generation gi{0}; gi < n_generation_; ++gi) {
+            for (Generation gi{0}; gi < config_.n_generation_; ++gi) {
                 const DArena * arena = this->get_space(r, gi);
 
                 if (arena->contains(addr))
@@ -78,7 +75,7 @@ namespace xo {
         auto
         GCObjectStore::header2size(header_type hdr) const noexcept -> size_type
         {
-            uint32_t z = arena_config_.header_.size(hdr);
+            uint32_t z = config_.arena_config_.header_.size(hdr);
 
             return z;
         }
@@ -86,7 +83,7 @@ namespace xo {
         object_age
         GCObjectStore::header2age(header_type hdr) const noexcept
         {
-            uint32_t age = arena_config_.header_.age(hdr);
+            uint32_t age = config_.arena_config_.header_.age(hdr);
 
             assert(age < c_max_object_age);
 
@@ -96,7 +93,7 @@ namespace xo {
         uint32_t
         GCObjectStore::header2tseq(header_type hdr) const noexcept
         {
-            uint32_t tseq = arena_config_.header_.tseq(hdr);
+            uint32_t tseq = config_.arena_config_.header_.tseq(hdr);
 
             return tseq;
         }
@@ -105,13 +102,13 @@ namespace xo {
         GCObjectStore::is_forwarding_header(header_type hdr) const noexcept
         {
             /** forwarding pointer encoded as sentinel tseq **/
-            return arena_config_.header_.is_forwarding_tseq(hdr);
+            return config_.arena_config_.header_.is_forwarding_tseq(hdr);
         }
 
         void
         GCObjectStore::visit_pools(const MemorySizeVisitor & visitor) const
         {
-            for (uint32_t j = 0; j < n_generation_; ++j) {
+            for (uint32_t j = 0; j < config_.n_generation_; ++j) {
                 for (uint32_t i = 0; i < c_n_role; ++i) {
                     space_storage_[i][j].visit_pools(visitor);
                 }
@@ -121,7 +118,7 @@ namespace xo {
         void
         GCObjectStore::swap_roles(Generation upto) noexcept
         {
-            scope log(XO_DEBUG(debug_flag_), xtag("upto", upto));
+            scope log(XO_DEBUG(config_.debug_flag_), xtag("upto", upto));
 
             for (Generation g = Generation{0}; g < upto; ++g) {
                 log && log("swap roles", xtag("g", g));
@@ -134,7 +131,7 @@ namespace xo {
         GCObjectStore::cleanup_phase(Generation upto,
                                      bool sanitize_flag)
         {
-            scope log(XO_DEBUG(debug_flag_), xtag("upto", upto));
+            scope log(XO_DEBUG(config_.debug_flag_), xtag("upto", upto));
 
             // everything live has been copied out of from-space
             // -> now set to empty

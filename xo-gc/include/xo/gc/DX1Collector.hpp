@@ -161,6 +161,8 @@ namespace xo {
             // ----- access methods -----
 
             const X1CollectorConfig & config() const noexcept { return config_; }
+            const GCObjectStore & gco_store() const noexcept { return gco_store_; }
+
             std::string_view name() const noexcept { return config_.name_; }
             GCRunState runstate() const noexcept { return runstate_; }
             const ObjectTypeTable * get_object_types() const noexcept { return &object_types_; }
