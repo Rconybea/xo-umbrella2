@@ -67,7 +67,11 @@ namespace xo {
 
         DX1Collector::DX1Collector(const X1CollectorConfig & cfg)
         : config_{cfg},
-          mlog_state_{cfg.n_generation_, cfg.debug_flag_},
+          mlog_state_{
+              MutationLogConfig{
+                  cfg.n_generation_,
+                  cfg.mutation_log_z_,
+                  cfg.debug_flag_}},
           gco_store_{cfg.arena_config_, cfg.n_generation_, cfg.debug_flag_}
         {
             assert(config_.arena_config_.header_.size_bits_ +
@@ -78,10 +82,7 @@ namespace xo {
 
             this->_init_object_types(cfg, page_z);
             this->_init_gc_roots(cfg, page_z);
-            this->_init_mlogs(cfg, page_z);
-#ifdef MOVED
-            this->_init_space(cfg);
-#endif
+            this->_init_mlogs(page_z);
         }
 
         void
@@ -109,9 +110,9 @@ namespace xo {
         }
 
         void
-        DX1Collector::_init_mlogs(const X1CollectorConfig & cfg, std::size_t page_z)
+        DX1Collector::_init_mlogs(std::size_t page_z)
         {
-            this->mlog_state_.init_mlogs(cfg, page_z);
+            this->mlog_state_.init_mlogs(page_z);
         }
 
         void
@@ -145,7 +146,7 @@ namespace xo {
         DX1Collector::generation_of(role r, const void * addr) const noexcept
         {
             for (Generation gi{0}; gi < config_.n_generation_; ++gi) {
-                const DArena * arena = get_space(r, gi);
+                const DArena * arena = this->get_space(r, gi);
 
                 if (arena->contains(addr))
                     return gi;
@@ -693,7 +694,7 @@ namespace xo {
                 }
 
                 // 4. scan mutation logs
-                mlog_state_.verify_ok(this,
+                mlog_state_.verify_ok(&gco_store_,
                                       &(this->verify_stats_));
             }
 
