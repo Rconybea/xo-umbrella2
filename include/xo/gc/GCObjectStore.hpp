@@ -108,11 +108,19 @@ namespace xo {
              **/
             bool install_type(const AGCObject & meta) noexcept;
 
+            /** Common driver for _deep_move_root(), _deep_move_interior().
+             *  Move object subgraph @p from_src on behalf of @p gc collection cycle,
+             *  covering generations in [0 ,.., upto).
+             **/
+            void * _deep_move_gc_owned(DX1Collector * gc,
+                                       void * from_src,
+                                       Generation upto);
+
             /** during a gc cycle:
              *  evacuate object @p from_src, with gc-object interface @p iface.
              *  Shallow: does not traverse children
              **/
-            void * _shallow_move(obj<AAllocator> mm,
+            void * _shallow_move(DX1Collector * gc,
                                  const AGCObject * iface,
                                  void * from_src);
 
@@ -124,7 +132,7 @@ namespace xo {
              **/
             void _forward_children_until_fixpoint(DX1Collector * gc,
                                                   Generation upto,
-                                                  const GCMoveCheckpoint & gray_lo_v);
+                                                  GCMoveCheckpoint gray_lo_v);
 
             /** true iff {@p alloc_hdr, @p object_data} should move for
              *  a collection of all generations strictly younger than @p upto.

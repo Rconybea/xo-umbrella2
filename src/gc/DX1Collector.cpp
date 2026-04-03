@@ -676,27 +676,6 @@ namespace xo {
         DX1Collector::install_type(const AGCObject & meta) noexcept
         {
             return gco_store_.install_type(meta);
-
-#ifdef MARKED
-            typeseq tseq = meta._typeseq();
-
-            assert(tseq.seqno() > 0);
-
-            auto ix = static_cast<ObjectTypeTable::size_type>(tseq.seqno());
-
-            if (ix >= object_types_.size()) {
-                if (!object_types_.resize(std::max(2 * object_types_.size(), ix + 1)))
-                    return false;
-            }
-
-            assert(ix < object_types_.size());
-
-            ObjectTypeSlot & slot = object_types_[ix];
-
-            slot.store_iface(&meta);
-
-            return true;
-#endif
         }
 
         void
@@ -898,50 +877,7 @@ namespace xo {
         DX1Collector::_deep_move_gc_owned(void * from_src,
                                           Generation upto)
         {
-            scope log(XO_DEBUG(gco_store_.config().debug_flag_));
-
-            AllocInfo info = gco_store_.alloc_info((std::byte *)from_src);
-            AllocHeader hdr = info.header();
-            typeseq tseq(info.tseq());
-
-            assert(gco_store_.contains_allocated(role::from_space(), from_src));
-
-            if (gco_store_.is_forwarding_header(hdr)) {
-                /* already forwarded - pickup destination
-                 *
-                 * Coordinates with forward_inplace()
-                 */
-                log && log("disposition: already forwarded");
-
-                return *(void **)from_src;
-            }
-
-            /* here: object at from_src not already forwarded */
-
-            if (!gco_store_._check_move_policy(hdr, from_src, upto)) {
-                /* object at from_src is in generation that is not being collected */
-                log && log("disposition: not moving from_src");
-
-                return from_src;
-            }
-
-            log && log("disposition: move subtree");
-
-            /* TODO: AllocIterator pointing to free pointer */
-            GCMoveCheckpoint gray_lo_v = gco_store_.snap_move_checkpoint(upto);
-
-            obj<AAllocator, DX1Collector> alloc(this);
-            const AGCObject * iface = lookup_type(tseq);
-
-            assert(iface->_has_null_vptr() == false);
-
-            void * to_dest = this->_shallow_move(iface, from_src);
-
-            this->_forward_children_until_fixpoint(upto, gray_lo_v);
-
-            log && log(xtag("to_dest", to_dest));
-
-            return to_dest;
+            return gco_store_._deep_move_gc_owned(this, from_src, upto);
         } /*_deep_move_gc_owned*/
 
         auto
@@ -952,122 +888,11 @@ namespace xo {
 
         void
         DX1Collector::_forward_children_until_fixpoint(Generation upto,
-                                                       GCMoveCheckpoint gray_lo_v)
+                                                       const GCMoveCheckpoint & gray_lo_v)
         {
             // problem -- need object type lookup
-#ifdef NOT_YET
-            gco_store_._forward_children_until_fixpoint(upto, gray_lo_v);
-#endif
 
-            scope log(XO_DEBUG(config_.debug_flag_));
-
-            /**
-             *  To-space:
-             *
-             *     to_lo = start of to-space
-             *     w,W   = white objects. An object x is white if x
-             *             + all immediate children of x are in to-space
-             *             (also implies this GC cycle put it there)
-             *     g,G   = grey  objects. An object x is gray if it's in to-space,
-             *             but possibly has >0 black children
-             *     _     = free to-space memory
-             *     N     = nursery space (generation{0})
-             *     T     = tenured space (generation{1})
-             *
-             *     wwwwwwwwwwwwwwwwwwwggggggggggggggggggggg_________________...
-             *     ^                  ^                    ^
-             *     to_lo              grey_lo(N)           free_ptr(N)
-             *
-             *  After moving children of one object,
-             *  advancing {nursery_grey_lo, nursery_free_ptr}
-             *
-             *     wwwwwwwwwwwwwwwwwwwWWWWgggggggggggggggggGGGGGGGGGGG______...
-             *     ^                      ^                           ^
-             *     to_lo                  grey_lo(N)                  free_ptr(N)
-             *
-             *  Invariant:
-             *
-             *     objects in [to_lo, gray_lo) are white.
-             *     all gray objects are in [gray_lo, free_ptr)
-             *     memory starting at free_ptr is free.
-             *
-             *  deep_move terminates when gray_lo catches up to free_ptr
-             *
-             *  Above is simplified. Complication is that GC (including incremental) may
-             *  promote objects from nursery (N) to tenured (T)
-             *
-             *  So more accurate before/after picture
-             *
-             *  N  wwwwwwwwwwwwwwwwwwwggggggggggggggggggggg_________________...
-             *     ^                  ^                    ^
-             *     to_lo(N)           grey_lo(N)           free_ptr(N)
-             *
-             *  T  wwwwwwwwwwwwwwgggggggggggg_______________________________...
-             *     ^             ^           ^
-             *     to_lo(T)      grey_lo(T)  free_ptr(N)
-             *
-             *  After moving children of one object,
-             *  advancing {nursery_grey_lo, nursery_free_ptr}
-             *
-             *  N  wwwwwwwwwwwwwwwwwwwWWWWgggggggggggggggggGGGGGGGGGGG_____...
-             *     ^                      ^                           ^
-             *     to_lo(N)               grey_lo(N)                  free_ptr(N)
-             *
-             *  T  wwwwwwwwwwwwwwggggggggggggGGGGG_________________________...
-             *     ^             ^                ^
-             *     to_lo(T)      grey_lo(T)       free_ptr(T)
-             *
-             *  deep_move terminates when both:
-             *  - gray_lo(N) catches up with free_ptr(N)
-             *  - gray_lo(T) catches up with free_ptr(T)
-             *
-             **/
-
-            std::size_t fixup_work = 0;
-
-            /* TODO:
-             * - loop here is bad for memory locality
-             * - replace with depth-first traversal
-             */
-            do {
-                fixup_work = 0;
-
-                for (Generation g = Generation{0}; g < upto; ++g) {
-                    /** object index for this pass **/
-                    size_t i_obj = 0;
-
-                    /* TODO: use AllocIterator here */
-                    while(gray_lo_v[g] < to_space(g)->free_) {
-                        AllocHeader * hdr = (AllocHeader *)gray_lo_v[g];
-                        void * src = (hdr + 1);
-
-                        const auto & hdr_cfg = config_.arena_config_.header_;
-                        typeseq tseq = typeseq(hdr_cfg.tseq(*hdr));
-                        size_t z = hdr_cfg.size_with_padding(*hdr);
-
-                        log && log("deep_move_gc_owned: fwd to-space children",
-                                   xtag("g", g),
-                                   xtag("i_obj", i_obj),
-                                   xtag("src", src),
-                                   xtag("tseq", tseq),
-                                   xtag("tname", TypeRegistry::id2name(tseq)),
-                                   xtag("z", z));
-
-                        const AGCObject * iface = this->lookup_type(tseq);
-
-                        assert(iface->_has_null_vptr() == false);
-
-                        auto gc = this->ref<ACollector>();
-
-                        iface->forward_children(src, gc);
-
-                        gray_lo_v[g] = ((std::byte *)src) + z;
-
-                        ++i_obj;
-                        ++fixup_work;
-                    }
-                }
-            } while (fixup_work > 0);
+            gco_store_._forward_children_until_fixpoint(this, upto, gray_lo_v);
         }
 
         void
@@ -1116,188 +941,6 @@ namespace xo {
             // upto == runstate_.gc_upto()
 
             gco_store_._forward_inplace_aux(this, lhs_iface, lhs_data, upto);
-
-#ifdef MARKED
-            scope log(XO_DEBUG(config_.debug_flag_),
-                      xtag("lhs_data", lhs_data),
-                      xtag("*lhs_data", lhs_data ? *lhs_data : nullptr));
-
-            /* coordinates with DX1Collector::_deep_move() */
-
-            (void)lhs_iface;
-            assert(runstate_.is_running());
-
-            /*
-             *   lhs   obj<AGCObject>
-             *    |    +---------+                +---+-+----+
-             *    \--->| .iface  |                | T |G|size| header
-             *         +---------+  object_data   +---+-+----+
-             *         | .data x----------------->| alloc    |
-             *         +---------+                | data     |
-             *                                    | for      |
-             *                                    | instance |
-             *                                    | ...      |
-             *                                    +----------+
-             */
-
-            void * object_data = (std::byte *)*lhs_data;
-
-            if (!object_data) {
-                /* trivial to forward nullptr */
-                return;
-            } else if (!gco_store_.contains(role::from_space(), object_data)) {
-                /* *lhs_data either:
-                 * 1. already in to-space
-                 * 2. not in GC-allocated space at all
-                 *    (small number of niche examples of this)
-                 *
-                 * It's important we recognize case (2) up front.
-                 * Since not allocated from GC, they don't have
-                 * an alloc-header.
-                 */
-                log && log("disposition: not in from-space. Don't forward, but check children");
-
-                obj<AGCObject> gco(lhs_iface, object_data);
-                gco.forward_children(this->ref<ACollector>());
-
-                return;
-            }
-
-            log && log("disposition: in from-space");
-
-            /** NOTE: for form's sake:
-             *        lookup actual arena that
-             *        allocated object data.
-             *        Only using this to get alloc header
-             **/
-            DArena * some_arena = gco_store_.from_space(Generation(0));
-
-            DArena::header_type * p_header
-                = some_arena->obj2hdr(object_data);
-
-            DArena::header_type alloc_hdr = *p_header;
-
-            /* recover allocation size */
-            std::size_t alloc_z = some_arena->config_.header_.size_with_padding(alloc_hdr);
-
-            if (log) {
-                log(xtag("some_arena.lo", some_arena->lo_),
-                    xtag("p_header", p_header),
-                    xtag("alloc_z", alloc_z));
-
-                AllocInfo info = this->alloc_info((std::byte *)object_data);
-                log(xtag("tseq", info.tseq()),
-                    xtag("tname", TypeRegistry::id2name(typeseq(info.tseq()))),
-                    xtag("is_forwarding_tseq", info.is_forwarding_tseq()),
-                    xtag("age", info.age()),
-                    xtag("size", info.size()));
-            }
-
-            /* need to be able to fit forwarding pointer
-             * in place of forwarded object.
-             *
-             * This is guaranteed anyway, by alignment rules
-             */
-            assert(alloc_z >= sizeof(uintptr_t));
-
-            if (gco_store_.is_forwarding_header(alloc_hdr)) {
-                /* *lhs_data already refers to a forwarding pointer */
-
-                /*
-                 *   lhs   obj<AGCObject>             (from-space)
-                 *    |    +---------+                +---+-+----+
-                 *    \--->| .iface  |                |FWD|G|size| alloc_hdr
-                 *         +---------+  object_data   +---+-+----+
-                 *         | .data x----------------->|     x--------\
-                 *         +---------+                |          |   | dest
-                 *                                    |          |   |
-                 *                                    +----------+   |
-                 *                                                   |
-                 *                                    (to-space)     |
-                 *                                    +---+-+----+   |
-                 *                                    |TSQ|G|size|   |
-                 *                                    +---+-+----+   |
-                 *                                    |          | <-/
-                 *                                    |          |
-                 *                                    |          |
-                 *                                    +----------+
-                 */
-                void * dest = *(void**)object_data;
-
-                *lhs_data = dest;
-                /*
-                 *   lhs   obj<AGCObject>
-                 *    |    +---------+
-                 *    \--->| .iface  |
-                 *         +---------+
-                 *         | .data x------------\
-                 *         +---------+          |
-                 *                              | dest
-                 *                              |
-                 *                              |
-                 *                              |     (to-space)
-                 *                              |     +---+-+----+
-                 *                              |     |TSQ|G|size|
-                 *                              |     +---+-+----+
-                 *                              \---> |          |
-                 *                                    |          |
-                 *                                    |          |
-                 *                                    +----------+
-                 */
-
-                if (log) {
-                    log("lhs_data already forwarded", xtag("dest", dest));
-
-                    AllocInfo info = this->alloc_info((std::byte *)dest);
-                    log(xtag("tseq", info.tseq()),
-                        xtag("tname", TypeRegistry::id2name(typeseq(info.tseq()))),
-                        xtag("age", info.age()), xtag("size", info.size()));
-                }
-            } else if (gco_store_._check_move_policy(alloc_hdr, object_data, upto)) {
-                /* copy object *lhs + replace with forwarding pointer */
-
-                log && log("forward object now");
-
-                /*
-                 *   lhs   obj<AGCObject>             (from-space)
-                 *    |    +---------+                +---+-+----+
-                 *    \--->| .iface  |                |TSQ|G|size| alloc_hdr
-                 *         +---------+  object_data   +---+-+----+
-                 *         | .data x----------------> |          |
-                 *         +---------+                |          |
-                 *                                    |          |
-                 *                                    +----------+
-                 */
-
-                *lhs_data = this->_shallow_move(lhs_iface, *lhs_data);
-
-                /*
-                 *   lhs   obj<AGCObject>             (from-space)
-                 *    |    +---------+                +---+-+----+
-                 *    \--->| .iface  |                |FWD|G|SIZE|
-                 *         +---------+                +---+-+----+
-                 *         | .data x------------\     |     x--------\
-                 *         +---------+          |     |          |   |
-                 *                              |     |          |   |
-                 *                         dest |     +----------+   |
-                 *                              |                    |
-                 *                              |     (to-space)     |
-                 *                              |     +---+-+----+   |
-                 *                              |     |TSQ|G|size|   |
-                 *                              |     +---+-+----+   |
-                 *                              \---> |          | <-/
-                 *                                    |          |
-                 *                                    |          |
-                 *                                    +----------+
-                 */
-            } else {
-                log && log("object not eligible/required to forward");
-
-                /* object doesn't need to move.
-                 * e.g. incremental collection + object is tenured
-                 */
-            }
-#endif
         } /*_forward_inplace_aux*/
 
         void
@@ -1332,9 +975,7 @@ namespace xo {
         void *
         DX1Collector::_shallow_move(const AGCObject * iface, void * from_src)
         {
-            obj<AAllocator, DX1Collector> alloc(this);
-
-            return gco_store_._shallow_move(alloc, iface, from_src);
+            return gco_store_._shallow_move(this, iface, from_src);
         }
 
         bool
