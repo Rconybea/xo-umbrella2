@@ -551,6 +551,11 @@ namespace xo {
             return gco_store_.is_forwarding_header(hdr);
         }
 
+        AllocInfo
+        DX1Collector::alloc_info(value_type mem) const noexcept {
+            return gco_store_.alloc_info(mem);
+        }
+
         bool
         DX1Collector::is_type_installed(typeseq tseq) const noexcept
         {
@@ -562,24 +567,6 @@ namespace xo {
             const ObjectTypeSlot & slot = object_types_[tseq.seqno()];
 
             return slot.is_occupied();
-        }
-
-        AllocInfo
-        DX1Collector::alloc_info(value_type mem) const noexcept {
-            for (role ri : role::all()) {
-                for (Generation gj{0}; gj < config_.n_generation_; ++gj) {
-                    const DArena * arena = this->get_space(ri, gj);
-
-                    assert(arena);
-
-                    if (arena->contains(mem)) {
-                        return arena->alloc_info(mem);
-                    }
-                }
-            }
-
-            // deliberately attempt on nursery to-space, to capture error info + return sentinel
-            return this->get_space(role::to_space(), Generation{0})->alloc_info(mem);
         }
 
         bool

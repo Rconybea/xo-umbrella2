@@ -47,6 +47,9 @@ namespace xo {
             /** true iff original alloc has been replaced by a forwarding pointer **/
             bool is_forwarding_header(header_type hdr) const noexcept;
 
+            /** Retreive bookkeeping info for allocation at @p mem. **/
+            AllocInfo alloc_info(value_type mem) const noexcept;
+
             /** Call @p visitor for each memory pool owned by this store **/
             void visit_pools(const MemorySizeVisitor & visitor) const;
 
