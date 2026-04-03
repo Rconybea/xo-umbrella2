@@ -820,6 +820,7 @@ namespace xo {
         }
 #endif
 
+#ifdef OSBOLETE
         void
         DX1Collector::_forward_children_until_fixpoint(Generation upto,
                                                        const GCMoveCheckpoint & gray_lo_v)
@@ -828,6 +829,7 @@ namespace xo {
 
             gco_store_._forward_children_until_fixpoint(this, upto, gray_lo_v);
         }
+#endif
 
         void
         DX1Collector::copy_roots(Generation upto) noexcept
