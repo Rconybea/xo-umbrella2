@@ -370,31 +370,6 @@ namespace xo {
             /** cleanup after gc **/
             void _cleanup_phase(Generation upto);
 
-#ifdef OBSOLETE
-            /** move root subgraph at @p from_src to to-space.
-             *  If not in gc-space, visit immediate children and move them.
-             *  Require: runstate_.is_running()
-             **/
-            void * _deep_move_root(obj<AGCObject> from_src, Generation upto);
-            /** Common driver for _deep_move_root(), _deep_move_interior() **/
-            void * _deep_move_gc_owned(void * from_src, Generation upto);
-            /** snap checkpoint containing allocator state
-             *  use to detect forwarding activity after visiting objects
-             **/
-            GCMoveCheckpoint _snap_move_checkpoint(Generation upto);
-
-            /** traverse objects allocated after @p ckp, to make sure their children
-             *  are forwarded. Repeat until traverse doesn't find any unforwarded children
-             **/
-            void _forward_children_until_fixpoint(Generation upto,
-                                                  const GCMoveCheckpoint & ckp);
-
-            /** Evacuate object at @p *lhs_data to to-space.
-             *  Replace original with forwarding pointer to new location
-             **/
-            void _forward_inplace_aux(AGCObject * lhs_iface, void ** lhs_data, Generation upto);
-#endif
-
             /** Verify that pointer {@p iface, @p data} is valid:
              *  destination either in to-space, or somewhere outside this collector
              **/

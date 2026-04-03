@@ -314,113 +314,6 @@ namespace xo {
                                           obj<AGCObject> * p_output) const noexcept
         {
             return gco_store_.report_object_types(mm, error_mm, p_output);
-
-#ifdef MOVED
-            scope log(XO_DEBUG(true));
-
-            (void)error_mm;
-
-            bool ok = true;
-
-            // stats, indexed by tseq
-            // could use c++ vector in scratch space instead of running on
-            // boxed types.
-            //
-            DArray * stats_v = DArray::empty(mm, object_types_.size());
-
-            if (!stats_v)
-                return false;
-
-            stats_v->resize(stats_v->capacity());
-
-            log && log(xtag("object_types_.size", object_types_.size()),
-                       xtag("stats_v.capacity", stats_v->capacity()),
-                       xtag("stats_v.size", stats_v->size()));
-
-            // count #of occupied type slots
-            std::uint32_t n_tseq_present = 0;
-            // largest tseq present with non-null AGCObject* iface
-            std::int32_t max_tseq = 0;
-
-            for (const ObjectTypeSlot & slot : object_types_) {
-                AGCObject * iface = slot.iface();
-
-                if (iface) {
-                    typeseq tseq = iface->_typeseq();
-
-                    ++n_tseq_present;
-                    if (max_tseq < tseq.seqno())
-                        max_tseq = tseq.seqno();
-
-                    assert(tseq.seqno() >= 0);
-
-                    auto tname_sv = TypeRegistry::id2name(tseq);
-                    DString * tname = DString::from_view(mm, tname_sv);
-
-                    DDictionary * recd = DDictionary::make(mm);
-
-                    if (!recd)
-                        return false;
-
-                    recd->upsert_cstr(mm, "name", obj<AGCObject,DString>(tname));
-                    recd->upsert_cstr(mm, "tseq", DInteger::box(mm, tseq.seqno()));
-                    recd->upsert_cstr(mm, "n-live", DInteger::box(mm, 0));
-                    recd->upsert_cstr(mm, "bytes", DInteger::box(mm, 0));
-
-                    stats_v->assign_at(tseq.seqno(), obj<AGCObject,DDictionary>(recd));
-                }
-            }
-
-            // scan to-space, count objects by type
-
-            for (Generation g{0}; g < config_.n_generation_; ++g) {
-                const DArena * arena = this->get_space(role::to_space(), g);
-
-                for (AllocInfo info : *arena) {
-                    if (info.is_forwarding_tseq()) {
-                        assert(false);
-                        return false;
-                    }
-
-                    uint32_t ix = info.tseq();
-                    size_t z = info.size();
-
-                    auto recd = obj<AGCObject,DDictionary>::from(stats_v->at(ix));
-
-                    assert(recd);
-
-                    auto n_live_opt = recd->lookup_cstr("n-live");
-                    assert(n_live_opt);
-                    auto bytes_opt = recd->lookup_cstr("bytes");
-                    assert(bytes_opt);
-
-                    if (n_live_opt && bytes_opt) {
-                        auto n_live_gco = obj<AGCObject,DInteger>::from(n_live_opt.value());
-                        auto bytes_gco = obj<AGCObject,DInteger>::from(bytes_opt.value());
-
-                        n_live_gco->assign_value(n_live_gco->value() + 1);
-                        bytes_gco->assign_value(bytes_gco->value() + z);
-                    }
-                }
-            }
-
-            stats_v->resize(max_tseq + 1);
-
-            DArray * final_stats_v = DArray::empty(mm, n_tseq_present);
-
-            for (std::size_t i = 0, n = stats_v->size(); i < n; ++i) {
-                auto recd = stats_v->at(i);
-
-                if (recd) {
-                    bool ok = final_stats_v->push_back(recd);
-                    assert(ok);
-                }
-            }
-
-            *p_output = obj<AGCObject,DArray>(final_stats_v);
-
-            return ok;
-#endif
         }
 
         bool
@@ -428,82 +321,7 @@ namespace xo {
                                          obj<AAllocator> error_mm,
                                          obj<AGCObject> * p_output) const noexcept
         {
-            //return gco_store_.report_object_ages(mm, error_mm, p_output);
-
-            scope log(XO_DEBUG(true));
-
-            (void)error_mm;
-
-            std::uint64_t n_age = config_.arena_config_.header_.max_age() + 1;
-
-            // stats, indexed by age
-            DArray * stats_v = DArray::empty(mm, n_age);
-
-            if (!stats_v)
-                return false;
-
-            // pre-populate with empty dictionaries for each age bucket
-            for (std::uint64_t a = 0; a < n_age; ++a) {
-                DDictionary * recd = DDictionary::make(mm);
-
-                if (!recd)
-                    return false;
-
-                recd->upsert_cstr(mm, "age", DInteger::box(mm, a));
-                recd->upsert_cstr(mm, "n-live", DInteger::box(mm, 0));
-                recd->upsert_cstr(mm, "bytes", DInteger::box(mm, 0));
-
-                stats_v->push_back(obj<AGCObject,DDictionary>(recd));
-            }
-
-            log && log(xtag("n_age", n_age),
-                       xtag("stats_v.size", stats_v->size()));
-
-            // scan to-space, count objects by age
-
-            // track largest age with at least one object
-            std::int64_t max_age_present = 0;
-
-            for (Generation g{0}; g < config_.n_generation_; ++g) {
-                const DArena * arena = this->get_space(role::to_space(), g);
-
-                for (AllocInfo info : *arena) {
-                    if (info.is_forwarding_tseq()) {
-                        assert(false);
-                        return false;
-                    }
-
-                    uint32_t age = info.age();
-                    size_t z = info.size();
-
-                    if (static_cast<std::int64_t>(age) > max_age_present)
-                        max_age_present = age;
-
-                    auto recd = obj<AGCObject,DDictionary>::from(stats_v->at(age));
-
-                    assert(recd);
-
-                    auto n_live_opt = recd->lookup_cstr("n-live");
-                    assert(n_live_opt);
-                    auto bytes_opt = recd->lookup_cstr("bytes");
-                    assert(bytes_opt);
-
-                    if (n_live_opt && bytes_opt) {
-                        auto n_live_gco = obj<AGCObject,DInteger>::from(n_live_opt.value());
-                        auto bytes_gco = obj<AGCObject,DInteger>::from(bytes_opt.value());
-
-                        n_live_gco->assign_value(n_live_gco->value() + 1);
-                        bytes_gco->assign_value(bytes_gco->value() + z);
-                    }
-                }
-            }
-
-            // trim to only report ages up to max observed
-            stats_v->resize(max_age_present + 1);
-
-            *p_output = obj<AGCObject,DArray>(stats_v);
-
-            return true;
+            return gco_store_.report_object_types(mm, error_mm, p_output);
         }
 
         size_type
@@ -783,54 +601,6 @@ namespace xo {
             this->runstate_ = GCRunState::idle();
         }
 
-#ifdef OBSOLETE
-        void *
-        DX1Collector::_deep_move_root(obj<AGCObject> from_src,
-                                      Generation upto)
-        {
-            return gco_store_._deep_move_root(this, from_src, upto);
-        }
-#endif
-
-#ifdef OBSOLETE
-        /*
-         * rules:
-         * - from_src must be in from-space
-         * - object type stored in alloc header
-         * - return value is new location in to-space
-         *
-         * - preserving i/face pointer
-         * - replace destination with forwarding pointer
-         *
-         * EDITOR: gc -> self
-         */
-        void *
-        DX1Collector::_deep_move_gc_owned(void * from_src,
-                                          Generation upto)
-        {
-            return gco_store_._deep_move_gc_owned(this, from_src, upto);
-        } /*_deep_move_gc_owned*/
-#endif
-
-#ifdef OBSOLETE
-        auto
-        DX1Collector::_snap_move_checkpoint(Generation upto) -> GCMoveCheckpoint
-        {
-            return gco_store_.snap_move_checkpoint(upto);
-        }
-#endif
-
-#ifdef OSBOLETE
-        void
-        DX1Collector::_forward_children_until_fixpoint(Generation upto,
-                                                       const GCMoveCheckpoint & gray_lo_v)
-        {
-            // problem -- need object type lookup
-
-            gco_store_._forward_children_until_fixpoint(this, upto, gray_lo_v);
-        }
-#endif
-
         void
         DX1Collector::copy_roots(Generation upto) noexcept
         {
@@ -868,18 +638,6 @@ namespace xo {
                 assert(false);
             }
         }
-
-#ifdef OBSOLETE
-        void
-        DX1Collector::_forward_inplace_aux(AGCObject * lhs_iface,
-                                           void ** lhs_data,
-                                           Generation upto)
-        {
-            // upto == runstate_.gc_upto()
-
-            gco_store_._forward_inplace_aux(this, lhs_iface, lhs_data, upto);
-        } /*_forward_inplace_aux*/
-#endif
 
         void
         DX1Collector::_verify_aux(AGCObject * iface, void * data)
