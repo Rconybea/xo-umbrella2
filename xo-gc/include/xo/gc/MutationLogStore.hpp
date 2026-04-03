@@ -16,7 +16,7 @@
 namespace xo {
     namespace mm {
         class DX1Collector;
-        class VerifyStats;
+        class X1VerifyStats;
 
         /** @brief container for X1 collector mutation logs
          **/
@@ -45,7 +45,7 @@ namespace xo {
              *  Update counters in @p *p_verify_stats.
              **/
             void verify_ok(GCObjectStore * gc,
-                           VerifyStats * p_verify_stats) noexcept;
+                           X1VerifyStats * p_verify_stats) noexcept;
 
             /** Append a single mutation to log for generation @p dest_g
              *  Mutation modifies @p parent at address @p addr,

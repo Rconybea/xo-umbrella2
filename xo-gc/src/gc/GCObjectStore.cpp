@@ -752,9 +752,9 @@ namespace xo {
         }
 
         void *
-        GCObjectStore::_deep_move_interior(DX1Collector * gc,
-                                           void * from_src,
-                                           Generation upto)
+        GCObjectStore::deep_move_interior(DX1Collector * gc,
+                                          void * from_src,
+                                          Generation upto)
         {
             scope log(XO_DEBUG(config_.debug_flag_));
 

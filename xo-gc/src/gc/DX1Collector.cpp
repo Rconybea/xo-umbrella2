@@ -391,7 +391,7 @@ namespace xo {
 
                 // 2. visit roots
                 for (GCRoot & root_slot : root_set_) {
-                    VerifyStats pre = verify_stats_;
+                    X1VerifyStats pre = verify_stats_;
 
                     auto gco = *root_slot.root();
 
@@ -407,7 +407,7 @@ namespace xo {
 
                     }
 
-                    VerifyStats post = verify_stats_;
+                    X1VerifyStats post = verify_stats_;
 
                     // assert fail -> root contains ptr to from-space
                     assert(pre.n_from_ == post.n_from_);
@@ -661,19 +661,6 @@ namespace xo {
                 ++(verify_stats_.n_to_);
             }
         }
-
-#ifdef OBSOLETE
-        bool
-        DX1Collector::check_move_policy(header_type alloc_hdr,
-                                        void * object_data) const noexcept
-        {
-            assert(runstate_.is_running());
-
-            return gco_store_._check_move_policy(alloc_hdr,
-                                                 object_data,
-                                                 runstate_.gc_upto());
-        }
-#endif
 
         auto
         DX1Collector::alloc(typeseq t, size_type z) noexcept -> value_type
