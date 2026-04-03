@@ -539,13 +539,13 @@ namespace xo {
             log && log("step 0d : [STUB] scan for object statistics");
 
             log && log("step 1  : swap from/to roles (now to-space is empty)");
-            this->swap_roles(upto);
+            this->_swap_roles(upto);
 
             log && log(xtag("from_0", get_space(role::from_space(), Generation{0})->lo_),
                        xtag("to_0", get_space(role::to_space(), Generation{0})->lo_));
 
             log && log("step 2a : copy roots");
-            this->copy_roots(upto);
+            this->_copy_roots(upto);
 
             log && log("step 2b : [STUB] copy pinned");
 
@@ -578,7 +578,7 @@ namespace xo {
         }
 
         void
-        DX1Collector::swap_roles(Generation upto) noexcept
+        DX1Collector::_swap_roles(Generation upto) noexcept
         {
             scope log(XO_DEBUG(true), xtag("upto", upto));
 
@@ -596,7 +596,7 @@ namespace xo {
         }
 
         void
-        DX1Collector::copy_roots(Generation upto) noexcept
+        DX1Collector::_copy_roots(Generation upto) noexcept
         {
             scope log(XO_DEBUG(true));
 
