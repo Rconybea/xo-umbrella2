@@ -5,7 +5,9 @@
 
 #pragma once
 
+#include "MutationLogConfig.hpp"
 #include "X1CollectorConfig.hpp"
+#include "GCObjectStore.hpp"
 #include "MutationLogStatistics.hpp"
 #include "MutationLogEntry.hpp"
 #include <xo/arena/DArenaVector.hpp>
@@ -24,12 +26,12 @@ namespace xo {
             using size_type = DArena::size_type;
 
         public:
-            MutationLogState(uint32_t ngen, bool debug_flag);
+            explicit MutationLogState(const MutationLogConfig & config);
 
-            /** Initialize mlog state for configuration @p cfg
+            /** Initialize mlog state
              *  with o/s page size @p page_z
              **/
-            void init_mlogs(const X1CollectorConfig & cfg, std::size_t page_z);
+            void init_mlogs(std::size_t page_z);
 
             /** total number of active mlog entries (across all generations)
              **/
@@ -42,7 +44,7 @@ namespace xo {
              *  (using gc to identify location of objects).
              *  Update counters in @p *p_verify_stats.
              **/
-            void verify_ok(DX1Collector * gc,
+            void verify_ok(GCObjectStore * gc,
                            VerifyStats * p_verify_stats) noexcept;
 
             /** Append a single mutation to log for generation @p dest_g
@@ -67,7 +69,8 @@ namespace xo {
                                  void ** addr,
                                  obj<AGCObject> rhs);
 
-            /** swap {to, from} roles  **/
+            /** swap {to, from} roles
+             **/
             void swap_roles(Generation upto) noexcept;
 
             /** On behalf of collector @p gc:
@@ -135,10 +138,8 @@ namespace xo {
 
 
         public:
-            /** number of generations in use.  Same as @ref X1CollectorConfig::n_generation_ **/
-            uint32_t n_generation_ = 0;
-            /** true to enable debug logging **/
-            bool debug_flag_ = false;
+            /** configuration for mlog store **/
+            MutationLogConfig config_;
 
             /** Cross-generational mutations tracked in MutationLogs.
              *  We need three logs per generation:

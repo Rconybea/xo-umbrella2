@@ -16,6 +16,8 @@ set(SELF_SRCS
 
     X1CollectorConfig.cpp
     GCObjectStore.cpp
+
+    MutationLogConfig.cpp
     MutationLogState.cpp
     MutationLogEntry.cpp
 

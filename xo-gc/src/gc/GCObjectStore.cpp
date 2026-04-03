@@ -75,7 +75,7 @@ namespace xo {
         void
         GCObjectStore::swap_roles(Generation upto) noexcept
         {
-            scope log(XO_DEBUG(true), xtag("upto", upto));
+            scope log(XO_DEBUG(debug_flag_), xtag("upto", upto));
 
             for (Generation g = Generation{0}; g < upto; ++g) {
                 log && log("swap roles", xtag("g", g));
@@ -88,7 +88,7 @@ namespace xo {
         GCObjectStore::cleanup_phase(Generation upto,
                                      bool sanitize_flag)
         {
-            scope log(XO_DEBUG(true), xtag("upto", upto));
+            scope log(XO_DEBUG(debug_flag_), xtag("upto", upto));
 
             // everything live has been copied out of from-space
             // -> now set to empty

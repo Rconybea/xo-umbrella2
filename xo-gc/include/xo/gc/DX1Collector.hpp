@@ -412,7 +412,7 @@ namespace xo {
             /** aux init function: initialize @ref roots_ arena **/
             void _init_gc_roots(const X1CollectorConfig & cfg, std::size_t page_z);
             /** aux init function: initialize @ref mlog_storage_[][] arenas **/
-            void _init_mlogs(const X1CollectorConfig & cfg, std::size_t page_z);
+            void _init_mlogs(std::size_t page_z);
             /** aux init function: initialize @ref space_storage_[][] arenas **/
             void _init_space(const X1CollectorConfig & cfg);
 

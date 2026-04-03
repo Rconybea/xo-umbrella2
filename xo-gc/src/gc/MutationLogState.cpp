@@ -9,36 +9,43 @@
 namespace xo {
     namespace mm {
 
-        MutationLogState::MutationLogState(uint32_t ngen, bool debug_flag)
-            : n_generation_{ngen}, debug_flag_{debug_flag}
+        MutationLogState::MutationLogState(const MutationLogConfig & config)
+            : config_{config}
         {}
 
         void
-        MutationLogState::init_mlogs(const X1CollectorConfig & cfg,
-                                     std::size_t page_z)
+        MutationLogState::init_mlogs(std::size_t page_z)
         {
-            for (uint32_t igen = 0, ngen = cfg.n_generation_; igen + 1 < ngen; ++igen) {
+            assert(c_n_role + 1 == 3);
+
+            for (uint32_t igen = 0, ngen = config_.n_generation_; igen + 1 < ngen; ++igen) {
                 // special case: no use for mutation log for youngest generation,
                 // so don't trouble to allocate one
 
                 if (igen + 1 < c_max_generation) {
-                    this->mlog_storage_[0][igen] = _make_mlog(igen, 'a', cfg.mutation_log_z_, page_z);
-                    this->mlog_storage_[1][igen] = _make_mlog(igen, 'b', cfg.mutation_log_z_, page_z);
-                    this->mlog_storage_[2][igen] = _make_mlog(igen, 'c', cfg.mutation_log_z_, page_z);
+                    std::array<char, 3> label_v{'a', 'b', 'c'};
 
-                    this->mlog_[0][igen] = &mlog_storage_[0][igen];
-                    this->mlog_[1][igen] = &mlog_storage_[1][igen];
-                    this->mlog_[2][igen] = &mlog_storage_[2][igen];
+                    for (std::uint32_t mlog_role = 0; mlog_role < c_n_role + 1; ++mlog_role) {
+                        this->mlog_storage_[mlog_role][igen]
+                            = _make_mlog(igen,
+                                         label_v[mlog_role],
+                                         config_.mutation_log_z_,
+                                         page_z);
+
+                        this->mlog_[mlog_role][igen]
+                            = &(mlog_storage_[mlog_role][igen]);
+                    }
                 } else {
                     assert(false);
                 }
             }
 
-            if (cfg.n_generation_ > 0) {
-                for (uint32_t igen = cfg.n_generation_ - 1; igen + 1 < c_max_generation; ++igen) {
-                    this->mlog_[0][igen] = nullptr;
-                    this->mlog_[1][igen] = nullptr;
-                    this->mlog_[2][igen] = nullptr;
+            if (config_.n_generation_ > 0) {
+                for (std::uint32_t igen = config_.n_generation_ - 1;
+                     igen + 1 < c_max_generation; ++igen) {
+
+                    for (std::uint32_t mlog_role = 0; mlog_role < c_n_role + 1; ++mlog_role)
+                        this->mlog_[mlog_role][igen] = nullptr;
                 }
             } else {
                 assert(false);
@@ -63,7 +70,7 @@ namespace xo {
         {
             size_type z = 0;
 
-            for (Generation gj{0}; gj + 1 < n_generation_; ++gj) {
+            for (Generation gj{0}; gj + 1 < config_.n_generation_; ++gj) {
                 z += mlog_[role::to_space()][gj]->size();
             }
 
@@ -73,7 +80,7 @@ namespace xo {
         void
         MutationLogState::visit_pools(const MemorySizeVisitor & visitor) const
         {
-            for (uint32_t j = 0; j + 1 < n_generation_; ++j) {
+            for (uint32_t j = 0; j + 1 < config_.n_generation_; ++j) {
                 for (uint32_t i = 0; i < c_n_role + 1; ++i) {
                     mlog_storage_[i][j].visit_pools(visitor);
                 }
@@ -81,13 +88,13 @@ namespace xo {
         }
 
         void
-        MutationLogState::verify_ok(DX1Collector * gc,
+        MutationLogState::verify_ok(GCObjectStore * gco_store,
                                     VerifyStats * p_verify_stats) noexcept
         {
             // 4. scan mutation logs
-            for (Generation g(0); g + 1 < n_generation_; ++g) {
-                const DArena * space = gc->get_space(role::to_space(), g);
-                const DArena * from = gc->get_space(role::from_space(), g);
+            for (Generation g(0); g + 1 < config_.n_generation_; ++g) {
+                const DArena * space = gco_store->get_space(role::to_space(), g);
+                const DArena * from = gco_store->get_space(role::from_space(), g);
 
                 // mutation log for generation g records *incoming* pointers
                 // from more senior generations; includes objects from *this*
@@ -168,7 +175,9 @@ namespace xo {
                 // on 1st iteration, for all generations:
                 // - to_mlog, triage_mlog are empty
 
-                for (Generation child_gen{0}; child_gen + 2 < n_generation_; ++child_gen) {
+                for (Generation child_gen{0};
+                     child_gen + 2 < config_.n_generation_;
+                     ++child_gen) {
 
                     MutationLog * from_mlog = this->mlog_[role::from_space()][child_gen];
 
@@ -196,7 +205,7 @@ namespace xo {
             } while (work > 0);
 
             // here: reached fixpoints, any remaining triaged mlogs can be discarded
-            for (Generation child_gen{0}; child_gen + 2 < n_generation_; ++child_gen) {
+            for (Generation child_gen{0}; child_gen + 2 < config_.n_generation_; ++child_gen) {
                 MutationLog * triage_mlog = this->mlog_[c_n_role][child_gen];
 
                 triage_mlog->clear();
@@ -211,7 +220,7 @@ namespace xo {
                                                       MutationLog * keep_mlog,
                                                       MutationLog * triage_mlog)
         {
-            scope log(XO_DEBUG(debug_flag_),
+            scope log(XO_DEBUG(config_.debug_flag_),
                       xtag("child_gen", child_gen),
                       xtag("mlog.size", from_mlog->size()));
 
@@ -415,7 +424,7 @@ namespace xo {
                 = gc->generation_of(role::to_space(), child_to);
 
             bool need_mlog_entry
-                = ((child_gen_to + 1 < n_generation_)
+                = ((child_gen_to + 1 < config_.n_generation_)
                    && (gc->config().promotion_threshold(parent_gen_to)
                        > gc->config().promotion_threshold(child_gen_to)));
 
