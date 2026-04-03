@@ -127,11 +127,10 @@ namespace xo {
 
              *  Require: runstate_.is_running()
              **/
-            void * _deep_move_root(DX1Collector * gc,
-                                   obj<AGCObject> from_src,
-                                   Generation upto);
+            void * deep_move_root(DX1Collector * gc,
+                                  obj<AGCObject> from_src,
+                                  Generation upto);
 
-        public:
             /** For each generation g in [0 ,.., upto)
              *  swap arenas assigned to {to-space, from-space}.
              *  Invoked once at the beginning of each gc cycle.
