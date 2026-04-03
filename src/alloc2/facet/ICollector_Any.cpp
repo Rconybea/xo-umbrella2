@@ -66,6 +66,12 @@ ICollector_Any::assign_member(Opaque, void *, obj<AGCObject> *, obj<AGCObject> &
 }
 
 auto
+ICollector_Any::alloc_copy(Opaque, std::byte *)  -> void *
+{
+    _fatal();
+}
+
+auto
 ICollector_Any::forward_inplace(Opaque, AGCObject *, void **)  -> void
 {
     _fatal();

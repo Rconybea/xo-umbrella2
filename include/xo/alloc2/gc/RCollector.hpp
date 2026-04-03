@@ -47,7 +47,23 @@ public:
     ///@{
 
     // explicit injected content
-    /** forward op in place. Defined in GCObject.hpp to avoid #include cycle **/
+    /** convenience template for gc object copy **/
+    template <typename T>
+    void * alloc_copy_for(const T * src) noexcept {
+        return O::iface()->alloc_copy(O::data(), (std::byte *)const_cast<T *>(src));
+    }
+    
+    /** convenience template for move-constructible T (this is common) **/
+    template <typename T>
+    void * std_copy_for(const T * src) noexcept {
+        void * mem = this->alloc_copy_for(src);
+        if (mem) {
+            new (mem) T(std::move(*src));
+        }
+        return (T *)mem;
+    }
+    
+    /** forward faceted object pointer in place. Defined in GCObject.hpp to avoid #include cycle **/
     template <typename DRepr>
     void forward_inplace(obj<AGCObject,DRepr> * p_obj);
     
@@ -122,6 +138,9 @@ public:
     }
     void assign_member(void * parent, obj<AGCObject> * p_lhs, obj<AGCObject> & rhs)  {
         return O::iface()->assign_member(O::data(), parent, p_lhs, rhs);
+    }
+    void * alloc_copy(std::byte * src)  {
+        return O::iface()->alloc_copy(O::data(), src);
     }
     void forward_inplace(AGCObject * lhs_iface, void ** lhs_data)  {
         return O::iface()->forward_inplace(O::data(), lhs_iface, lhs_data);
