@@ -10,7 +10,7 @@
 #include <xo/type/FunctionType.hpp>
 #include <xo/type/AtomicType.hpp>
 #include <xo/alloc2/Collector.hpp>
-#include <xo/alloc2/generation.hpp>
+#include <xo/alloc2/Generation.hpp>
 
 namespace xo {
     using xo::mm::ACollector;
