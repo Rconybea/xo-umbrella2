@@ -15,7 +15,7 @@
 
 // includes (via {facet_includes})
 #include <xo/alloc2/Allocator.hpp>
-#include <xo/alloc2/generation.hpp>
+#include <xo/alloc2/Generation.hpp>
 #include <xo/alloc2/role.hpp>
 #include <xo/facet/obj.hpp>
 #include <xo/facet/facet_implementation.hpp>
