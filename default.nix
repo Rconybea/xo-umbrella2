@@ -330,6 +330,8 @@ let
 
     pkgs.lcov
     pkgs.catch2
+
+    pkgs.btop
   ]
   ++ (if pkgs.stdenv.isLinux then [
     pkgs.gdb
