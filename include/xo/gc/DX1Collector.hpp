@@ -376,9 +376,9 @@ namespace xo {
              *  Require: runstate_.is_running()
              **/
             void * _deep_move_root(obj<AGCObject> from_src, Generation upto);
-#endif
             /** Common driver for _deep_move_root(), _deep_move_interior() **/
             void * _deep_move_gc_owned(void * from_src, Generation upto);
+#endif
             /** snap checkpoint containing allocator state
              *  use to detect forwarding activity after visiting objects
              **/
