@@ -662,6 +662,7 @@ namespace xo {
             }
         }
 
+#ifdef OBSOLETE
         bool
         DX1Collector::check_move_policy(header_type alloc_hdr,
                                         void * object_data) const noexcept
@@ -672,6 +673,7 @@ namespace xo {
                                                  object_data,
                                                  runstate_.gc_upto());
         }
+#endif
 
         auto
         DX1Collector::alloc(typeseq t, size_type z) noexcept -> value_type
