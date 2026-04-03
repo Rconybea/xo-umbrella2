@@ -845,6 +845,7 @@ namespace xo {
             }
         }
 
+#ifdef OBSOLETE
         void *
         DX1Collector::deep_move_interior(void * from_src,
                                          Generation upto)
@@ -861,6 +862,7 @@ namespace xo {
 
             return _deep_move_gc_owned(from_src, upto);
         }
+#endif
 
         /*
          * rules:

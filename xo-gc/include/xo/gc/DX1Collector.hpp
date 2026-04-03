@@ -110,7 +110,9 @@ namespace xo {
             // ----- access methods -----
 
             const X1CollectorConfig & config() const noexcept { return config_; }
+
             const GCObjectStore & gco_store() const noexcept { return gco_store_; }
+            GCObjectStore & gco_store() noexcept { return gco_store_; }
 
             std::string_view name() const noexcept { return config_.name_; }
             GCRunState runstate() const noexcept { return runstate_; }
@@ -288,11 +290,6 @@ namespace xo {
              *  Require: runstate_.is_running()
              **/
             bool check_move_policy(header_type alloc_hdr, void * object_data) const noexcept;
-
-            /** move interior subgraph at @p from_src to to-space.
-             *  no-op if not in gc-space.
-             **/
-            void * deep_move_interior(void * from_src, Generation upto);
 
             // ----- allocation -----
 

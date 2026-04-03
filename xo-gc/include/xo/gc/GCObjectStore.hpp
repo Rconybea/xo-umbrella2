@@ -108,6 +108,13 @@ namespace xo {
              **/
             bool install_type(const AGCObject & meta) noexcept;
 
+            /** move interior subgraph at @p from_src to to-space.
+             *  no-op if not in gc-space.
+             **/
+            void * deep_move_interior(DX1Collector * gc,
+                                      void * from_src,
+                                      Generation upto);
+
             /** Common driver for _deep_move_root(), _deep_move_interior().
              *  Move object subgraph @p from_src on behalf of @p gc collection cycle,
              *  covering generations in [0 ,.., upto).
