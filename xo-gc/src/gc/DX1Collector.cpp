@@ -662,11 +662,13 @@ namespace xo {
             }
         }
 
+#ifdef OBSOLETE
         void *
         DX1Collector::_shallow_move(const AGCObject * iface, void * from_src)
         {
             return gco_store_._shallow_move(this, iface, from_src);
         }
+#endif
 
         bool
         DX1Collector::check_move_policy(header_type alloc_hdr,
