@@ -812,11 +812,13 @@ namespace xo {
         } /*_deep_move_gc_owned*/
 #endif
 
+#ifdef OBSOLETE
         auto
         DX1Collector::_snap_move_checkpoint(Generation upto) -> GCMoveCheckpoint
         {
             return gco_store_.snap_move_checkpoint(upto);
         }
+#endif
 
         void
         DX1Collector::_forward_children_until_fixpoint(Generation upto,
