@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "generation.hpp"
+#include "Generation.hpp"
 #include "object_age.hpp"
 #include <xo/arena/DArena.hpp>
 

@@ -6,7 +6,7 @@
 #pragma once
 
 #include "object_age.hpp"
-#include "generation.hpp"
+#include "Generation.hpp"
 #include <cstddef>
 #include <cstdint>
 

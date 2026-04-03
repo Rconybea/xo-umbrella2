@@ -15,7 +15,6 @@
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/alloc2/Arena.hpp>
-#include <xo/alloc2/generation.hpp>
 #include "object_age.hpp"
 #include <xo/facet/obj.hpp>
 #include <xo/indentlog/scope.hpp>

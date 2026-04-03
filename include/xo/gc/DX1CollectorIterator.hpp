@@ -6,7 +6,7 @@
 #pragma once
 
 #include "AllocInfo.hpp"
-#include "generation.hpp"
+#include "Generation.hpp"
 #include <xo/arena/DArenaIterator.hpp>
 #include <xo/arena/cmpresult.hpp>
 
