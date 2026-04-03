@@ -146,14 +146,7 @@ namespace xo {
                                        void * from_src,
                                        Generation upto);
 
-            /** during a gc cycle:
-             *  evacuate object @p from_src, with gc-object interface @p iface.
-             *  Shallow: does not traverse children
-             **/
-            void * _shallow_move(DX1Collector * gc,
-                                 const AGCObject * iface,
-                                 void * from_src);
-
+        private:
         public:
             /** For each generation g in [0 ,.., upto)
              *  swap arenas assigned to {to-space, from-space}.
@@ -208,6 +201,14 @@ namespace xo {
             void _forward_children_until_fixpoint(DX1Collector * gc,
                                                   Generation upto,
                                                   GCMoveCheckpoint gray_lo_v);
+
+            /** during a gc cycle:
+             *  evacuate object @p from_src, with gc-object interface @p iface.
+             *  Shallow: does not traverse children
+             **/
+            void * _shallow_move(DX1Collector * gc,
+                                 const AGCObject * iface,
+                                 void * from_src);
 
         private:
             /** configuration for gc-aware object store **/
