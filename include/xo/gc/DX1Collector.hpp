@@ -279,10 +279,12 @@ namespace xo {
              **/
             void forward_inplace(AGCObject * lhs_iface, void ** lhs_data);
 
+#ifdef OBSOLETE
             /** evacuate object with type @p iface at address @p from_src
              *  to to-space. Return new to-space location.
              **/
             void * _shallow_move(const AGCObject * iface, void * from_src);
+#endif
 
             /** true iff {alloc_hdr, object_data} should move for
              *  currently-running collection.
