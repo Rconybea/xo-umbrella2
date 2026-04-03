@@ -130,7 +130,7 @@ namespace xo {
              *  helper function to decide whether to keep a mutation log entry
              *  @return true iff mlog entry appended to @p keep_mlog
              **/
-            bool _check_keep_mutation_aux(DX1Collector * gc,
+            bool _check_keep_mutation_aux(const GCObjectStore & gco_store,
                                           const MutationLogEntry & from_entry,
                                           Generation parent_gen_to,
                                           void * child_to,
