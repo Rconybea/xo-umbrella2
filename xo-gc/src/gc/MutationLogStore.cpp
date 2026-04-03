@@ -400,7 +400,9 @@ namespace xo {
 
                 ++counters.n_rescue_;
 
-                child_to = gc->gco_store().deep_move_interior(gc, child_fr, upto);
+                GCObjectStore & gco_store = gc->gco_store();
+
+                child_to = gco_store._deep_move_interior(gc, child_fr, upto);
 
                 // update child pointer in parent object
                 *from_entry.p_data() = child_to;

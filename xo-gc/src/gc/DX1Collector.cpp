@@ -807,62 +807,8 @@ namespace xo {
         DX1Collector::_deep_move_root(obj<AGCObject> from_src,
                                       Generation upto)
         {
-            // NOTE:
-            // Some roots are non-gc-owned nodes.
-            // GC must still visit immediate children of these nodes
-            // to move gc-owned children.
-            // This implements virtual root node feature,
-            // intended to mitigate mutation log churn.
-
-            scope log(XO_DEBUG(config_.debug_flag_));
-
-            if (!from_src)
-                return nullptr;
-
-            bool src_in_from_space = this->contains(role::from_space(), from_src.data());
-
-            if (src_in_from_space) {
-                return _deep_move_gc_owned(from_src.data(), upto);
-            } else {
-                // we aren't moving from_src, it's not gc-owned.
-                // However weare moving all its gc-owned children
-
-                auto self = this->ref<ACollector>();
-
-                GCMoveCheckpoint gray_lo_v = this->_snap_move_checkpoint(upto);
-
-                from_src.forward_children(self);
-
-                // For each generation g:
-                //   traverse objects newer than gray_lo_v[g], to make sure children
-                //   are forwarded.  Fixpoint reached when gray_lo_v[g] doesn't change.
-                //   Remember that forwarding may promote objects to older generation,
-                //   so need multiple passes
-                //
-                this->_forward_children_until_fixpoint(upto, gray_lo_v);
-
-                return from_src.data();
-            }
+            return gco_store_._deep_move_root(this, from_src, upto);
         }
-
-#ifdef OBSOLETE
-        void *
-        DX1Collector::deep_move_interior(void * from_src,
-                                         Generation upto)
-        {
-            scope log(XO_DEBUG(config_.debug_flag_));
-
-            if (!from_src)
-                return nullptr;
-
-            bool src_in_from_space = this->contains(role::from_space(), from_src);
-
-            if (!src_in_from_space)
-                return from_src;
-
-            return _deep_move_gc_owned(from_src, upto);
-        }
-#endif
 
         /*
          * rules:

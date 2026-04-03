@@ -108,12 +108,22 @@ namespace xo {
              **/
             bool install_type(const AGCObject & meta) noexcept;
 
+            /** move subgraph at @p root to to-space on behalf of collector @p gc
+             *  Special behavior relative to @ref _deep_move_interior :
+             *  If @p root is not in gc-space, visit immediate children and move them in place (!).
+
+             *  Require: runstate_.is_running()
+             **/
+            void * _deep_move_root(DX1Collector * gc,
+                                   obj<AGCObject> from_src,
+                                   Generation upto);
+
             /** move interior subgraph at @p from_src to to-space.
              *  no-op if not in gc-space.
              **/
-            void * deep_move_interior(DX1Collector * gc,
-                                      void * from_src,
-                                      Generation upto);
+            void * _deep_move_interior(DX1Collector * gc,
+                                       void * from_src,
+                                       Generation upto);
 
             /** Common driver for _deep_move_root(), _deep_move_interior().
              *  Move object subgraph @p from_src on behalf of @p gc collection cycle,
