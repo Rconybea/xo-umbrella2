@@ -280,7 +280,7 @@ namespace xo {
             /** evacuate object with type @p iface at address @p from_src
              *  to to-space. Return new to-space location.
              **/
-            void * shallow_move(const AGCObject * iface, void * from_src);
+            void * _shallow_move(const AGCObject * iface, void * from_src);
 
             /** true iff {alloc_hdr, object_data} should move for
              *  currently-running collection.

@@ -108,6 +108,14 @@ namespace xo {
              **/
             bool install_type(const AGCObject & meta) noexcept;
 
+            /** during a gc cycle:
+             *  evacuate object @p from_src, with gc-object interface @p iface.
+             *  Shallow: does not traverse children
+             **/
+            void * _shallow_move(obj<AAllocator> mm,
+                                 const AGCObject * iface,
+                                 void * from_src);
+
             /** traverse objects allocated after @p ckp, to make sure their children
              *  are forwarded. Repeat until traverse doesn't find any unforwarded children.
              *
