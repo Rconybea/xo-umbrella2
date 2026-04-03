@@ -607,7 +607,7 @@ namespace xo {
                            xtag("slot.root()", slot.root()),
                            xtag("slot.root()->data_", slot.root()->data_));
 
-                void * root_to = gco_store_._deep_move_root(this, *slot.root(), upto);
+                void * root_to = gco_store_.deep_move_root(this, *slot.root(), upto);
 
                 slot.root()->reset_opaque(root_to);
 

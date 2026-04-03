@@ -707,9 +707,9 @@ namespace xo {
         }
 
         void *
-        GCObjectStore::_deep_move_root(DX1Collector * gc,
-                                       obj<AGCObject> from_src,
-                                       Generation upto)
+        GCObjectStore::deep_move_root(DX1Collector * gc,
+                                      obj<AGCObject> from_src,
+                                      Generation upto)
         {
             // NOTE:
             // Some roots are non-gc-owned nodes.
