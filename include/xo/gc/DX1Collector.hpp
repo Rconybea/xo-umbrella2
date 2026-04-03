@@ -357,9 +357,9 @@ namespace xo {
             void _init_space(const X1CollectorConfig & cfg);
 
             /** swap from- and to- roles for all generations < @p upto **/
-            void swap_roles(Generation upto) noexcept;
+            void _swap_roles(Generation upto) noexcept;
             /** copy roots + everything reachable from them, to to-space **/
-            void copy_roots(Generation upto) noexcept;
+            void _copy_roots(Generation upto) noexcept;
 
             /** cleanup after gc **/
             void _cleanup_phase(Generation upto);
