@@ -164,15 +164,6 @@ namespace xo {
                                                   Generation upto,
                                                   GCMoveCheckpoint gray_lo_v);
 
-            /** true iff {@p alloc_hdr, @p object_data} should move for
-             *  a collection of all generations strictly younger than @p upto.
-             *
-             *  Require: runstate_.is_running()
-             **/
-            bool _check_move_policy(header_type alloc_hdr,
-                                    void * gco_data,
-                                    Generation upto) const noexcept;
-
         public:
             /** For each generation g in [0 ,.., upto)
              *  swap arenas assigned to {to-space, from-space}.
@@ -208,6 +199,15 @@ namespace xo {
 
             /** auxiliary init function **/
             void _init_space();
+
+            /** true iff {@p alloc_hdr, @p object_data} should move for
+             *  a collection of all generations strictly younger than @p upto.
+             *
+             *  Require: runstate_.is_running()
+             **/
+            bool _check_move_policy(header_type alloc_hdr,
+                                    void * gco_data,
+                                    Generation upto) const noexcept;
 
         private:
             /** configuration for gc-aware object store **/
