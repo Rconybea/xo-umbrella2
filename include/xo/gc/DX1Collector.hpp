@@ -6,7 +6,8 @@
 #pragma once
 
 #include "X1CollectorConfig.hpp"
-#include "GCObject.hpp"
+//#include "ObjectTypeSlot.hpp"
+//#include "GCObject.hpp"
 #include "GCObjectStore.hpp"
 #include "MutationLogState.hpp"
 #include "X1VerifyStats.hpp"
@@ -82,55 +83,6 @@ namespace xo {
             obj<AGCObject> * root_ = nullptr;
         };
 
-        /** @brief Object Interface
-         *
-         *  GC-object interface for a particular type.
-         *  X1 maintains a table of these (X1Collector::object_types_)
-         *  indexed by typeseq.
-         *
-         *  Using a wrapper here for searchability
-         **/
-        struct ObjectTypeSlot {
-            ObjectTypeSlot() {}
-            explicit ObjectTypeSlot(AGCObject * iface) {
-                this->store_iface(iface);
-            }
-
-            /** true iff this slot is empty **/
-            bool is_null() const noexcept {
-                return this->_iface()->_has_null_vptr();
-            }
-
-            bool is_occupied() const noexcept {
-                return !this->is_null();
-            }
-
-            AGCObject * _iface() const noexcept {
-                return std::launder((AGCObject *)&iface_[0]);
-            }
-
-            AGCObject * iface() const noexcept {
-                AGCObject * x = this->_iface();
-
-                return (x->_has_null_vptr() ? nullptr : x);
-            }
-
-            /** Store interface pointer @p iface.
-             *  We just want the vtable here
-             **/
-            void store_iface(const AGCObject * iface) {
-                ::memcpy((void*)&(this->iface_[0]), (void*)iface, sizeof(AGCObject));
-            }
-
-        private:
-            /** runtime interface for this object.
-             *  We might prefer to declare this as AGCObject, but that's prohibited
-             *  since AGCObject has abstract methods.
-             *  Main downside of this form is it makes the data unintelligible to debugger.
-             **/
-            alignas(AGCObject) std::byte iface_[sizeof(AGCObject)];
-        };
-
         // ----- DX1Collector -----
 
         /** @brief garbage collector 'X1'
@@ -165,7 +117,7 @@ namespace xo {
 
             std::string_view name() const noexcept { return config_.name_; }
             GCRunState runstate() const noexcept { return runstate_; }
-            const ObjectTypeTable * get_object_types() const noexcept { return &object_types_; }
+            const ObjectTypeTable * get_object_types() const noexcept { return gco_store_.get_object_types(); }
             const RootSet * get_root_set() const noexcept { return &root_set_; }
             const DArena * get_space(role r, Generation g) const noexcept { return gco_store_.get_space(r, g); }
             DArena * get_space(role r, Generation g) noexcept { return gco_store_.get_space(r, g); }
@@ -204,7 +156,8 @@ namespace xo {
             /** Report gc statistics as a dictionary.
              *  Providing for the same of making GC statistics visible to schematika programs
              *
-             *  @p mm        allocate stats dictionary from this allocator.  May be the same as this collector.
+             *  @p mm        allocate stats dictionary from this allocator.
+             *               May be the same as this collector.
              *  @p error_mm  Allocator for last-report error reporting when out-of-memory.
              *  @p p_output  on exit @p *p_output contains stats dictionary
              **/
@@ -215,7 +168,8 @@ namespace xo {
             /** Report per-object-type information as a dictionary.
              *  Scans to-space to count per-object-type information
              *
-             *  @p mm        allocate stats dictionary from this allocator.  May be the same as this collector.
+             *  @p mm        allocate stats dictionary from this allocator.
+             *               May be the same as this collector.
              *  @p error_mm  Allocator for last-report error reporting when out-of-memory.
              *  @p p_output  on exit @p *p_output contains stats dictionary
              **/
@@ -409,8 +363,10 @@ namespace xo {
             void clear() noexcept;
 
         private:
+#ifdef OBSOLETE
             /** aux init function: initialize @ref object_types_ arena **/
             void _init_object_types(const X1CollectorConfig & cfg, std::size_t page_z);
+#endif
             /** aux init function: initialize @ref roots_ arena **/
             void _init_gc_roots(const X1CollectorConfig & cfg, std::size_t page_z);
             /** aux init function: initialize @ref mlog_storage_[][] arenas **/
@@ -443,7 +399,8 @@ namespace xo {
             /** traverse objects allocated after @p ckp, to make sure their children
              *  are forwarded. Repeat until traverse doesn't find any unforwarded children
              **/
-            void _forward_children_until_fixpoint(Generation upto, GCMoveCheckpoint ckp);
+            void _forward_children_until_fixpoint(Generation upto,
+                                                  GCMoveCheckpoint ckp);
             /** Evacuate object at @p *lhs_data to to-space.
              *  Replace original with forwarding pointer to new location
              **/
@@ -460,10 +417,10 @@ namespace xo {
             /** current gc state **/
             GCRunState runstate_;
 
-            /** (ab)using arena to get an extensible array of object types.
-             *  For each type need to store one (8-byte) IGCObject_Any instance,
-             **/
+#ifdef MARKED
+            /** gc-aware object types **/
             ObjectTypeTable object_types_;
+#endif
 
             /** gc disabled whenever gc_blocked_ > 0 **/
             uint32_t gc_blocked_ = 0;

@@ -15,6 +15,8 @@
 
 namespace xo {
     namespace mm {
+        /** @brief configuration for X1 collector
+         **/
         struct X1CollectorConfig {
             using size_type = std::size_t;
 
@@ -43,15 +45,13 @@ namespace xo {
                 return GCObjectStoreConfig(arena_config_,
                                            n_generation_,
                                            n_survive_threshold_,
+                                           object_types_z_,
                                            debug_flag_);
             }
 
             /** fetch configuration for mutation log store **/
             MutationLogConfig mlog_config() const noexcept {
                 return MutationLogConfig(n_generation_,
-#ifdef OBSOLETE
-                                         n_survive_threshold_,
-#endif
                                          mutation_log_z_,
                                          debug_flag_);
             }

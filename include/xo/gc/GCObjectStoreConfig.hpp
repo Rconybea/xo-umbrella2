@@ -18,6 +18,7 @@ namespace xo {
             GCObjectStoreConfig(const ArenaConfig & arena_cfg,
                                 std::uint32_t ngen,
                                 std::uint32_t nsurvive,
+                                std::size_t object_types_z,
                                 bool debug_flag);
 
             /** generation that would contain an object that has survived
@@ -60,6 +61,9 @@ namespace xo {
              *  advances to the next generation.
              **/
             std::uint32_t n_survive_threshold_ = 2;
+
+            /** storage for N object types requires 8*N bytes **/
+            std::size_t object_types_z_ = 2*1024*1024;
 
             /** true to enable debug logging **/
             bool debug_flag_ = false;
