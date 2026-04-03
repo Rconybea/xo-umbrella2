@@ -4,6 +4,7 @@
  **/
 
 #include "GCObjectStore.hpp"
+#include "X1Collector.hpp"
 
 #include <xo/object2/Dictionary.hpp>
 #include <xo/object2/Array.hpp>
@@ -370,6 +371,192 @@ namespace xo {
 
             return (g < upto);
         }
+
+        void
+        GCObjectStore::_forward_inplace_aux(DX1Collector * gc,
+                                            AGCObject * lhs_iface,
+                                            void ** lhs_data,
+                                            Generation upto)
+        {
+            // upto == runstate_.gc_upto()
+
+            scope log(XO_DEBUG(config_.debug_flag_),
+                      xtag("lhs_data", lhs_data),
+                      xtag("*lhs_data", lhs_data ? *lhs_data : nullptr));
+
+            /* coordinates with DX1Collector::_deep_move() */
+
+            /*
+             *   lhs   obj<AGCObject>
+             *    |    +---------+                +---+-+----+
+             *    \--->| .iface  |                | T |G|size| header
+             *         +---------+  object_data   +---+-+----+
+             *         | .data x----------------->| alloc    |
+             *         +---------+                | data     |
+             *                                    | for      |
+             *                                    | instance |
+             *                                    | ...      |
+             *                                    +----------+
+             */
+
+            void * object_data = (std::byte *)*lhs_data;
+
+            if (!object_data) {
+                /* trivial to forward nullptr */
+                return;
+            } else if (!this->contains(role::from_space(), object_data)) {
+                /* *lhs_data either:
+                 * 1. already in to-space
+                 * 2. not in GC-allocated space at all
+                 *    (small number of niche examples of this)
+                 *
+                 * It's important we recognize case (2) up front.
+                 * Since not allocated from GC, they don't have
+                 * an alloc-header.
+                 */
+                log && log("disposition: not in from-space. Don't forward, but check children");
+
+                obj<AGCObject> gco(lhs_iface, object_data);
+                gco.forward_children(gc->ref<ACollector>());
+
+                return;
+            }
+
+            log && log("disposition: in from-space");
+
+            /** NOTE: for form's sake:
+             *        lookup actual arena that
+             *        allocated object data.
+             *        Only using this to get alloc header
+             **/
+            DArena * some_arena = this->from_space(Generation(0));
+
+            DArena::header_type * p_header
+                = some_arena->obj2hdr(object_data);
+
+            DArena::header_type alloc_hdr = *p_header;
+
+            /* recover allocation size */
+            std::size_t alloc_z = some_arena->config_.header_.size_with_padding(alloc_hdr);
+
+            if (log) {
+                log(xtag("some_arena.lo", some_arena->lo_),
+                    xtag("p_header", p_header),
+                    xtag("alloc_z", alloc_z));
+
+                AllocInfo info = this->alloc_info((std::byte *)object_data);
+                log(xtag("tseq", info.tseq()),
+                    xtag("tname", TypeRegistry::id2name(typeseq(info.tseq()))),
+                    xtag("is_forwarding_tseq", info.is_forwarding_tseq()),
+                    xtag("age", info.age()),
+                    xtag("size", info.size()));
+            }
+
+            /* need to be able to fit forwarding pointer
+             * in place of forwarded object.
+             *
+             * This is guaranteed anyway, by alignment rules
+             */
+            assert(alloc_z >= sizeof(uintptr_t));
+
+            if (this->is_forwarding_header(alloc_hdr)) {
+                /* *lhs_data already refers to a forwarding pointer */
+
+                /*
+                 *   lhs   obj<AGCObject>             (from-space)
+                 *    |    +---------+                +---+-+----+
+                 *    \--->| .iface  |                |FWD|G|size| alloc_hdr
+                 *         +---------+  object_data   +---+-+----+
+                 *         | .data x----------------->|     x--------\
+                 *         +---------+                |          |   | dest
+                 *                                    |          |   |
+                 *                                    +----------+   |
+                 *                                                   |
+                 *                                    (to-space)     |
+                 *                                    +---+-+----+   |
+                 *                                    |TSQ|G|size|   |
+                 *                                    +---+-+----+   |
+                 *                                    |          | <-/
+                 *                                    |          |
+                 *                                    |          |
+                 *                                    +----------+
+                 */
+                void * dest = *(void**)object_data;
+
+                *lhs_data = dest;
+                /*
+                 *   lhs   obj<AGCObject>
+                 *    |    +---------+
+                 *    \--->| .iface  |
+                 *         +---------+
+                 *         | .data x------------\
+                 *         +---------+          |
+                 *                              | dest
+                 *                              |
+                 *                              |
+                 *                              |     (to-space)
+                 *                              |     +---+-+----+
+                 *                              |     |TSQ|G|size|
+                 *                              |     +---+-+----+
+                 *                              \---> |          |
+                 *                                    |          |
+                 *                                    |          |
+                 *                                    +----------+
+                 */
+
+                if (log) {
+                    log("lhs_data already forwarded", xtag("dest", dest));
+
+                    AllocInfo info = this->alloc_info((std::byte *)dest);
+                    log(xtag("tseq", info.tseq()),
+                        xtag("tname", TypeRegistry::id2name(typeseq(info.tseq()))),
+                        xtag("age", info.age()), xtag("size", info.size()));
+                }
+            } else if (this->_check_move_policy(alloc_hdr, object_data, upto)) {
+                /* copy object *lhs + replace with forwarding pointer */
+
+                log && log("forward object now");
+
+                /*
+                 *   lhs   obj<AGCObject>             (from-space)
+                 *    |    +---------+                +---+-+----+
+                 *    \--->| .iface  |                |TSQ|G|size| alloc_hdr
+                 *         +---------+  object_data   +---+-+----+
+                 *         | .data x----------------> |          |
+                 *         +---------+                |          |
+                 *                                    |          |
+                 *                                    +----------+
+                 */
+
+                *lhs_data = this->_shallow_move(gc->ref<AAllocator>(), lhs_iface, *lhs_data);
+
+                /*
+                 *   lhs   obj<AGCObject>             (from-space)
+                 *    |    +---------+                +---+-+----+
+                 *    \--->| .iface  |                |FWD|G|SIZE|
+                 *         +---------+                +---+-+----+
+                 *         | .data x------------\     |     x--------\
+                 *         +---------+          |     |          |   |
+                 *                              |     |          |   |
+                 *                         dest |     +----------+   |
+                 *                              |                    |
+                 *                              |     (to-space)     |
+                 *                              |     +---+-+----+   |
+                 *                              |     |TSQ|G|size|   |
+                 *                              |     +---+-+----+   |
+                 *                              \---> |          | <-/
+                 *                                    |          |
+                 *                                    |          |
+                 *                                    +----------+
+                 */
+            } else {
+                log && log("object not eligible/required to forward");
+
+                /* object doesn't need to move.
+                 * e.g. incremental collection + object is tenured
+                 */
+            }
+        } /*_forward_inplace_aux*/
 
         void
         GCObjectStore::swap_roles(Generation upto) noexcept
