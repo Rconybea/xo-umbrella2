@@ -623,7 +623,7 @@ namespace xo {
 
             if (runstate_.is_running()) {
                 // called during collection phase
-                gco_store_._forward_inplace_aux(this, lhs_iface, lhs_data, upto);
+                gco_store_.forward_inplace_aux(this, lhs_iface, lhs_data, upto);
             } else if (runstate_.is_verify()) {
                 // called during verify_ok
                 this->_verify_aux(lhs_iface, *lhs_data);
@@ -661,14 +661,6 @@ namespace xo {
                 ++(verify_stats_.n_to_);
             }
         }
-
-#ifdef OBSOLETE
-        void *
-        DX1Collector::_shallow_move(const AGCObject * iface, void * from_src)
-        {
-            return gco_store_._shallow_move(this, iface, from_src);
-        }
-#endif
 
         bool
         DX1Collector::check_move_policy(header_type alloc_hdr,
