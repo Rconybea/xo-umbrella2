@@ -145,14 +145,7 @@ namespace xo {
         Generation
         DX1Collector::generation_of(role r, const void * addr) const noexcept
         {
-            for (Generation gi{0}; gi < config_.n_generation_; ++gi) {
-                const DArena * arena = this->get_space(r, gi);
-
-                if (arena->contains(addr))
-                    return gi;
-            }
-
-            return Generation::sentinel();
+            return gco_store_.generation_of(r, addr);
         }
 
         AllocError

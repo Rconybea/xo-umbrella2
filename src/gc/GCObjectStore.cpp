@@ -62,6 +62,19 @@ namespace xo {
             }
         }
 
+        Generation
+        GCObjectStore::generation_of(role r, const void * addr) const noexcept
+        {
+            for (Generation gi{0}; gi < n_generation_; ++gi) {
+                const DArena * arena = this->get_space(r, gi);
+
+                if (arena->contains(addr))
+                    return gi;
+            }
+
+            return Generation::sentinel();
+        }
+
         void
         GCObjectStore::visit_pools(const MemorySizeVisitor & visitor) const
         {
