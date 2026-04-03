@@ -416,39 +416,7 @@ namespace xo {
                 }
 
                 // 3. scan to-space for each generation
-                for (Generation g(0); g < config_.n_generation_; ++g) {
-                    const DArena * space = this->get_space(role::to_space(), g);
-
-                    for (const AllocInfo & info : *space) {
-
-                        if (info.is_forwarding_tseq()) {
-                            ++verify_stats_.n_fwd_;
-
-                        } else {
-                            typeseq tseq(info.tseq());
-
-                            const AGCObject * iface = this->lookup_type(tseq);
-
-                            if (iface && !(iface->_has_null_vptr())) {
-                                const void * data = info.payload().first;
-
-                                // assembled fop for gc-aware object
-                                obj<AGCObject> gco(iface, const_cast<void *>(data));
-
-                                // forward_children is hijacked here to verify
-                                // child pointer validity.
-                                //
-                                // Nested control reenters
-                                // X1Collector::forward_inplace() -> _verify_aux()
-                                //
-                                gco.forward_children(self);
-                            } else {
-                                ++verify_stats_.n_no_iface_;
-                                continue;
-                            }
-                        }
-                    }
-                }
+                gco_store_.verify_ok(this, &(this->verify_stats_));
 
                 // 4. scan mutation logs
                 mlog_store_.verify_ok(&gco_store_,

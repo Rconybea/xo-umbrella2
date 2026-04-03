@@ -7,7 +7,6 @@
 
 #include "GCObjectStoreConfig.hpp"
 #include "ObjectTypeSlot.hpp"
-//#include "Generation.hpp"
 #include "object_age.hpp"
 #include <xo/alloc2/role.hpp>
 #include <array>
@@ -15,6 +14,7 @@
 namespace xo {
     namespace mm {
         class DX1Collector;
+        class X1VerifyStats;
 
         /** @brief container to hold gc-aware objects for X1 collector
          **/
@@ -115,11 +115,27 @@ namespace xo {
              **/
             GCMoveCheckpoint snap_move_checkpoint(Generation upto);
 
+            /** verify consistency of this object store, on behalf of collector @p gc.
+             *  Advancing counters in @p *p_verify_stats.
+             *
+             *  @p gc argument is load-bearing so we have collector interface
+             *  to call AGCObject visitor method (forward_children()) on each
+             *  object stored here.
+             **/
+            void verify_ok(DX1Collector * gc,
+                           X1VerifyStats * p_verify_stats) noexcept;
+
             /** Register object type with this collector.
              *  Provides shallow copy and pointer forwarding for instances of this
              *  type.
              **/
             bool install_type(const AGCObject & meta) noexcept;
+
+            /** For each generation g in [0 ,.., upto)
+             *  swap arenas assigned to {to-space, from-space}.
+             *  Invoked once at the beginning of each gc cycle.
+             **/
+            void swap_roles(Generation upto) noexcept;
 
             /** move subgraph at @p root to to-space on behalf of collector @p gc
              *  Special behavior relative to @ref _deep_move_interior :
@@ -130,12 +146,6 @@ namespace xo {
             void * deep_move_root(DX1Collector * gc,
                                   obj<AGCObject> from_src,
                                   Generation upto);
-
-            /** For each generation g in [0 ,.., upto)
-             *  swap arenas assigned to {to-space, from-space}.
-             *  Invoked once at the beginning of each gc cycle.
-             **/
-            void swap_roles(Generation upto) noexcept;
 
             /** move interior subgraph at @p from_src to to-space.
              *  no-op if not in gc-space.

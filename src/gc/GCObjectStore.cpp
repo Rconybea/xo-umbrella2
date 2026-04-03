@@ -682,6 +682,45 @@ namespace xo {
             return gray_lo_v;
         }
 
+        void
+        GCObjectStore::verify_ok(DX1Collector * gc,
+                                 X1VerifyStats * p_verify_stats) noexcept
+        {
+            for (Generation g(0); g < config_.n_generation_; ++g) {
+                const DArena * space = this->get_space(role::to_space(), g);
+
+                for (const AllocInfo & info : *space) {
+
+                    if (info.is_forwarding_tseq()) {
+                        ++(p_verify_stats->n_fwd_);
+
+                    } else {
+                        typeseq tseq(info.tseq());
+
+                        const AGCObject * iface = this->lookup_type(tseq);
+
+                        if (iface && !(iface->_has_null_vptr())) {
+                            const void * data = info.payload().first;
+
+                            // assembled fop for gc-aware object
+                            obj<AGCObject> gco(iface, const_cast<void *>(data));
+
+                            // forward_children is hijacked here to verify
+                            // child pointer validity.
+                            //
+                            // Nested control reenters
+                            // X1Collector::forward_inplace() -> _verify_aux()
+                            //
+                            gco.forward_children(gc->ref<ACollector>());
+                        } else {
+                            ++(p_verify_stats->n_no_iface_);
+                            continue;
+                        }
+                    }
+                }
+            }
+        }
+
         /* editor bait: register_type */
         bool
         GCObjectStore::install_type(const AGCObject & meta) noexcept
