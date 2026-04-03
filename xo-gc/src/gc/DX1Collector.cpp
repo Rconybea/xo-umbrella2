@@ -550,7 +550,7 @@ namespace xo {
             log && log("step 2b : [STUB] copy pinned");
 
             log && log("step 3  : [STUB] forward mutation log");
-            this->forward_mutation_log(upto);
+            mlog_store_.forward_mutation_log(this, upto);
 
             log && log("step 4a : [STUB] run destructors");
             log && log("step 4b : [STUB] keep reachable weak pointers");
@@ -584,12 +584,6 @@ namespace xo {
 
             gco_store_.swap_roles(upto);
             mlog_store_.swap_roles(upto);
-        }
-
-        void
-        DX1Collector::forward_mutation_log(Generation upto)
-        {
-            mlog_store_.forward_mutation_log(this, upto);
         }
 
         void
