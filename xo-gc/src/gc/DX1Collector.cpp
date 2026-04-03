@@ -792,6 +792,7 @@ namespace xo {
         }
 #endif
 
+#ifdef OBSOLETE
         /*
          * rules:
          * - from_src must be in from-space
@@ -809,6 +810,7 @@ namespace xo {
         {
             return gco_store_._deep_move_gc_owned(this, from_src, upto);
         } /*_deep_move_gc_owned*/
+#endif
 
         auto
         DX1Collector::_snap_move_checkpoint(Generation upto) -> GCMoveCheckpoint
