@@ -173,6 +173,13 @@ namespace xo {
                                     void * gco_data,
                                     Generation upto) const noexcept;
 
+        public:
+            /** For each generation g in [0 ,.., upto)
+             *  swap arenas assigned to {to-space, from-space}.
+             *  Invoked once at the beginning of each gc cycle.
+             **/
+            void swap_roles(Generation upto) noexcept;
+
             /** Evacuate object at @p *lhs_data to to-space, during collection phase
              *  acting on generations g in [0 ,.., upto).
              *  Need @p gc to pass to invoke AGCObject methods shallow_copy() and
@@ -180,16 +187,10 @@ namespace xo {
              *
              *  Replace original with forwarding pointer to new location
              **/
-            void _forward_inplace_aux(DX1Collector * gc,
+            void forward_inplace_aux(DX1Collector * gc,
                                       AGCObject * lhs_iface,
                                       void ** lhs_data,
                                       Generation upto);
-
-            /** For each generation g in [0 ,.., upto)
-             *  swap arenas assigned to {to-space, from-space}.
-             *  Invoked once at the beginning of each gc cycle.
-             **/
-            void swap_roles(Generation upto) noexcept;
 
             /** Cleanup at the end of a gc cycle.
              *  Reset from-space

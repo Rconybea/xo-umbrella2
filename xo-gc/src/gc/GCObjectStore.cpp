@@ -454,10 +454,10 @@ namespace xo {
         }
 
         void
-        GCObjectStore::_forward_inplace_aux(DX1Collector * gc,
-                                            AGCObject * lhs_iface,
-                                            void ** lhs_data,
-                                            Generation upto)
+        GCObjectStore::forward_inplace_aux(DX1Collector * gc,
+                                           AGCObject * lhs_iface,
+                                           void ** lhs_data,
+                                           Generation upto)
         {
             // upto == runstate_.gc_upto()
 
