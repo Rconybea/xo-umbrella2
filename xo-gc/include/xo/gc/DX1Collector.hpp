@@ -279,12 +279,14 @@ namespace xo {
              **/
             void forward_inplace(AGCObject * lhs_iface, void ** lhs_data);
 
+#ifdef OBSOLETE
             /** true iff {alloc_hdr, object_data} should move for
              *  currently-running collection.
              *
              *  Require: runstate_.is_running()
              **/
             bool check_move_policy(header_type alloc_hdr, void * object_data) const noexcept;
+#endif
 
             // ----- allocation -----
 
