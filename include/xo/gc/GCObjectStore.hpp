@@ -154,16 +154,6 @@ namespace xo {
                                  const AGCObject * iface,
                                  void * from_src);
 
-            /** traverse objects allocated after @p ckp, to make sure their children
-             *  are forwarded. Repeat until traverse doesn't find any unforwarded children.
-             *
-             *  1. Breadth-first implementation, bad for memory locality
-             *  2. Need @p gc for per-object-type forward_children api
-             **/
-            void _forward_children_until_fixpoint(DX1Collector * gc,
-                                                  Generation upto,
-                                                  GCMoveCheckpoint gray_lo_v);
-
         public:
             /** For each generation g in [0 ,.., upto)
              *  swap arenas assigned to {to-space, from-space}.
@@ -208,6 +198,16 @@ namespace xo {
             bool _check_move_policy(header_type alloc_hdr,
                                     void * gco_data,
                                     Generation upto) const noexcept;
+
+            /** traverse objects allocated after @p ckp, to make sure their children
+             *  are forwarded. Repeat until traverse doesn't find any unforwarded children.
+             *
+             *  1. Breadth-first implementation, bad for memory locality
+             *  2. Need @p gc for per-object-type forward_children api
+             **/
+            void _forward_children_until_fixpoint(DX1Collector * gc,
+                                                  Generation upto,
+                                                  GCMoveCheckpoint gray_lo_v);
 
         private:
             /** configuration for gc-aware object store **/
