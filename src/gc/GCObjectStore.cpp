@@ -75,6 +75,39 @@ namespace xo {
             return Generation::sentinel();
         }
 
+        auto
+        GCObjectStore::header2size(header_type hdr) const noexcept -> size_type
+        {
+            uint32_t z = arena_config_.header_.size(hdr);
+
+            return z;
+        }
+
+        object_age
+        GCObjectStore::header2age(header_type hdr) const noexcept
+        {
+            uint32_t age = arena_config_.header_.age(hdr);
+
+            assert(age < c_max_object_age);
+
+            return object_age(age);
+        }
+
+        uint32_t
+        GCObjectStore::header2tseq(header_type hdr) const noexcept
+        {
+            uint32_t tseq = arena_config_.header_.tseq(hdr);
+
+            return tseq;
+        }
+
+        bool
+        GCObjectStore::is_forwarding_header(header_type hdr) const noexcept
+        {
+            /** forwarding pointer encoded as sentinel tseq **/
+            return arena_config_.header_.is_forwarding_tseq(hdr);
+        }
+
         void
         GCObjectStore::visit_pools(const MemorySizeVisitor & visitor) const
         {

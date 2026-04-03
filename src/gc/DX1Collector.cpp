@@ -534,34 +534,25 @@ namespace xo {
         size_type
         DX1Collector::header2size(header_type hdr) const noexcept
         {
-            uint32_t z = config_.arena_config_.header_.size(hdr);
-
-            return z;
+            return gco_store_.header2size(hdr);
         }
 
         object_age
         DX1Collector::header2age(header_type hdr) const noexcept
         {
-            uint32_t age = config_.arena_config_.header_.age(hdr);
-
-            assert(age < c_max_object_age);
-
-            return object_age(age);
+            return gco_store_.header2age(hdr);
         }
 
         uint32_t
         DX1Collector::header2tseq(header_type hdr) const noexcept
         {
-            uint32_t tseq = config_.arena_config_.header_.tseq(hdr);
-
-            return tseq;
+            return gco_store_.header2tseq(hdr);
         }
 
         bool
         DX1Collector::is_forwarding_header(header_type hdr) const noexcept
         {
-            /** forwarding pointer encoded as sentinel tseq **/
-            return config_.arena_config_.header_.is_forwarding_tseq(hdr);
+            return gco_store_.is_forwarding_header(hdr);
         }
 
         bool
@@ -1527,7 +1518,7 @@ namespace xo {
 
                 assert(src_hdr && dest_hdr);
 
-                if (header2age(*src_hdr) <= header2age(*dest_hdr)) {
+                if (this->header2age(*src_hdr) <= this->header2age(*dest_hdr)) {
                     // source and destination have the same age;
                     // therefore are always collected on the same set of GC cycles
                     // -> no need to remember separately.

@@ -143,9 +143,9 @@ namespace xo {
             using GCMoveCheckpoint = std::array<std::byte *, c_max_generation>;
             using MutationLog = DArenaVector<MutationLogEntry>;
             using typeseq = xo::facet::typeseq;
-            using size_type = DArena::size_type;
-            using value_type = DArena::value_type;
-            using header_type = DArena::header_type;
+            using size_type = GCObjectStore::size_type;
+            using value_type = GCObjectStore::value_type;
+            using header_type = GCObjectStore::header_type;
 
             /** hard max typeseq for collector-registered types **/
             static constexpr size_t c_max_typeseq = 4096;
