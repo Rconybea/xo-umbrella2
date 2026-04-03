@@ -105,6 +105,24 @@ namespace xo {
             return config_.arena_config_.header_.is_forwarding_tseq(hdr);
         }
 
+        AllocInfo
+        GCObjectStore::alloc_info(value_type mem) const noexcept {
+            for (role ri : role::all()) {
+                for (Generation gj{0}; gj < config_.n_generation_; ++gj) {
+                    const DArena * arena = this->get_space(ri, gj);
+
+                    assert(arena);
+
+                    if (arena->contains(mem)) {
+                        return arena->alloc_info(mem);
+                    }
+                }
+            }
+
+            // deliberately attempt on nursery to-space, to capture error info + return sentinel
+            return this->get_space(role::to_space(), Generation{0})->alloc_info(mem);
+        }
+
         void
         GCObjectStore::visit_pools(const MemorySizeVisitor & visitor) const
         {
