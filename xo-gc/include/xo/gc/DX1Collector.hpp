@@ -6,12 +6,9 @@
 #pragma once
 
 #include "X1CollectorConfig.hpp"
-//#include "ObjectTypeSlot.hpp"
-//#include "GCObject.hpp"
 #include "GCObjectStore.hpp"
-#include "MutationLogState.hpp"
+#include "MutationLogStore.hpp"
 #include "X1VerifyStats.hpp"
-//#include "generation.hpp"
 #include "object_age.hpp"
 #include "role.hpp"
 #include <xo/alloc2/Allocator.hpp>
@@ -354,19 +351,10 @@ namespace xo {
 
             // ----- book-keeping -----
 
-#ifdef OBSOLETE // see swap_roles()
-            /** reverse to-space and from-space roles for generation g **/
-            void reverse_roles(Generation g) noexcept;
-#endif
-
             /** discard all allocated memory **/
             void clear() noexcept;
 
         private:
-#ifdef OBSOLETE
-            /** aux init function: initialize @ref object_types_ arena **/
-            void _init_object_types(const X1CollectorConfig & cfg, std::size_t page_z);
-#endif
             /** aux init function: initialize @ref roots_ arena **/
             void _init_gc_roots(const X1CollectorConfig & cfg, std::size_t page_z);
             /** aux init function: initialize @ref mlog_storage_[][] arenas **/
@@ -417,11 +405,6 @@ namespace xo {
             /** current gc state **/
             GCRunState runstate_;
 
-#ifdef MARKED
-            /** gc-aware object types **/
-            ObjectTypeTable object_types_;
-#endif
-
             /** gc disabled whenever gc_blocked_ > 0 **/
             uint32_t gc_blocked_ = 0;
 
@@ -449,7 +432,7 @@ namespace xo {
              *     {P,C} in same generation, but in fuutre suriving P would
              *     get promoted before C.
              **/
-            MutationLogState mlog_state_;
+            MutationLogStore mlog_store_;
 
             /** Collector-managed memory.
              **/

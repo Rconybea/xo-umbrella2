@@ -1,4 +1,4 @@
-/** @file MutationLogState.hpp
+/** @file MutationLogStore.hpp
  *
  *  @author Roland Conybeare, Apr 2026
  **/
@@ -20,13 +20,13 @@ namespace xo {
 
         /** @brief container for X1 collector mutation logs
          **/
-        class MutationLogState {
+        class MutationLogStore {
         public:
             using MutationLog = DArenaVector<MutationLogEntry>;
             using size_type = DArena::size_type;
 
         public:
-            explicit MutationLogState(const MutationLogConfig & config);
+            explicit MutationLogStore(const MutationLogConfig & config);
 
             /** Initialize mlog state
              *  with o/s page size @p page_z
@@ -164,4 +164,4 @@ namespace xo {
     } /*namespace mm*/
 } /*namespace xo*/
 
-/* end MutationLogState.hpp */
+/* end MutationLogStore.hpp */

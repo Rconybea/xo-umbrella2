@@ -19,7 +19,7 @@ set(SELF_SRCS
     GCObjectStore.cpp
 
     MutationLogConfig.cpp
-    MutationLogState.cpp
+    MutationLogStore.cpp
     MutationLogEntry.cpp
 
 

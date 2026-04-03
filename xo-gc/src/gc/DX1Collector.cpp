@@ -68,7 +68,7 @@ namespace xo {
 
         DX1Collector::DX1Collector(const X1CollectorConfig & cfg)
         : config_{cfg},
-          mlog_state_{cfg.mlog_config()},
+          mlog_store_{cfg.mlog_config()},
           gco_store_{cfg.gco_store_config()}
         {
             assert(config_.arena_config_.header_.size_bits_ +
@@ -115,7 +115,7 @@ namespace xo {
         void
         DX1Collector::_init_mlogs(std::size_t page_z)
         {
-            this->mlog_state_.init_mlogs(page_z);
+            this->mlog_store_.init_mlogs(page_z);
         }
 
         void
@@ -125,7 +125,7 @@ namespace xo {
             root_set_.visit_pools(visitor);
 
             gco_store_.visit_pools(visitor);
-            mlog_state_.visit_pools(visitor);
+            mlog_store_.visit_pools(visitor);
         }
 
         bool
@@ -214,7 +214,7 @@ namespace xo {
         size_type
         DX1Collector::mutation_log_entries() const noexcept
         {
-            return mlog_state_.mutation_log_entries();
+            return mlog_store_.mutation_log_entries();
         }
 
         namespace {
@@ -653,7 +653,7 @@ namespace xo {
                 }
 
                 // 4. scan mutation logs
-                mlog_state_.verify_ok(&gco_store_,
+                mlog_store_.verify_ok(&gco_store_,
                                       &(this->verify_stats_));
             }
 
@@ -806,13 +806,13 @@ namespace xo {
             scope log(XO_DEBUG(true), xtag("upto", upto));
 
             gco_store_.swap_roles(upto);
-            mlog_state_.swap_roles(upto);
+            mlog_store_.swap_roles(upto);
         }
 
         void
         DX1Collector::forward_mutation_log(Generation upto)
         {
-            mlog_state_.forward_mutation_log(this, upto);
+            mlog_store_.forward_mutation_log(this, upto);
         }
 
         void
@@ -1480,7 +1480,7 @@ namespace xo {
 
             void ** lhs_addr = reinterpret_cast<void **>(&(p_lhs->data_));
 
-            mlog_state_.append_mutation(dest_g, parent, lhs_addr, rhs);
+            mlog_store_.append_mutation(dest_g, parent, lhs_addr, rhs);
         } /*assign_member*/
 
         DX1CollectorIterator
