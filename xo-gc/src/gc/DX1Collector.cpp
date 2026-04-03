@@ -5,11 +5,13 @@
 
 #include "X1Collector.hpp"
 #include <xo/gc/DX1CollectorIterator.hpp>
+
 #include <xo/object2/Dictionary.hpp>
 #include <xo/object2/Array.hpp>
 #include <xo/object2/Integer.hpp>
 #include <xo/object2/Boolean.hpp>
 #include <xo/stringtable2/String.hpp>
+
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/alloc2/Arena.hpp>
@@ -76,14 +78,18 @@ namespace xo {
 
             size_t page_z = getpagesize();
 
-            this->_init_object_types(cfg, page_z);
+            //this->_init_object_types(cfg, page_z);
             this->_init_gc_roots(cfg, page_z);
             this->_init_mlogs(page_z);
         }
 
+#ifdef OBSOLETE // called from GCObjectStore ctor
         void
         DX1Collector::_init_object_types(const X1CollectorConfig & cfg, std::size_t page_z)
         {
+            gco_state_._init_object_types();
+
+#ifdef MOVED
             /* 1MB reserved address space enough for up to 128k distinct types.
              * In this case don't want to use hugepages since actual #of types
              * likely << .size/8
@@ -93,7 +99,9 @@ namespace xo {
                                                    .size_ = cfg.object_types_z_,
                                                    .hugepage_z_ = page_z,
                                                    .store_header_flag_ = false});
+#endif
         }
+#endif
 
         void
         DX1Collector::_init_gc_roots(const X1CollectorConfig & cfg, std::size_t page_z)
@@ -114,7 +122,7 @@ namespace xo {
         void
         DX1Collector::visit_pools(const MemorySizeVisitor & visitor) const
         {
-            object_types_.visit_pools(visitor);
+            //object_types_.visit_pools(visitor);
             root_set_.visit_pools(visitor);
 
             gco_store_.visit_pools(visitor);
@@ -154,7 +162,8 @@ namespace xo {
             accumulate_total_aux(const DX1Collector & d,
                                  size_t (DArena::* get_stat_fn)() const) noexcept
             {
-                size_t z1 = (d.object_types_.store()->*get_stat_fn)();
+                //size_t z1 = (d.object_types_.store()->*get_stat_fn)();
+                size_t z1 = (d.gco_store_.get_object_types()->store()->*get_stat_fn)();
                 size_t z2 = (d.root_set_.store()->*get_stat_fn)();
 
                 size_t z3 = 0;
@@ -325,6 +334,9 @@ namespace xo {
                                           obj<AAllocator> error_mm,
                                           obj<AGCObject> * p_output) const noexcept
         {
+            return gco_store_.report_object_types(mm, error_mm, p_output);
+
+#ifdef MOVED
             scope log(XO_DEBUG(true));
 
             (void)error_mm;
@@ -429,6 +441,7 @@ namespace xo {
             *p_output = obj<AGCObject,DArray>(final_stats_v);
 
             return ok;
+#endif
         }
 
         bool
@@ -436,6 +449,8 @@ namespace xo {
                                          obj<AAllocator> error_mm,
                                          obj<AGCObject> * p_output) const noexcept
         {
+            //return gco_store_.report_object_ages(mm, error_mm, p_output);
+
             scope log(XO_DEBUG(true));
 
             (void)error_mm;
@@ -544,14 +559,7 @@ namespace xo {
         bool
         DX1Collector::is_type_installed(typeseq tseq) const noexcept
         {
-            if (tseq.is_sentinel()
-                || static_cast<ObjectTypeTable::size_type>(tseq.seqno()) > object_types_.size()) {
-                return false;
-            }
-
-            const ObjectTypeSlot & slot = object_types_[tseq.seqno()];
-
-            return slot.is_occupied();
+            return gco_store_.is_type_installed(tseq);
         }
 
         bool
@@ -661,42 +669,16 @@ namespace xo {
         const AGCObject *
         DX1Collector::lookup_type(typeseq tseq) const noexcept
         {
-            scope log(XO_DEBUG(false));
-
-            if (tseq.is_sentinel()
-                || static_cast<ObjectTypeTable::size_type>(tseq.seqno()) > object_types_.size()) {
-
-                log.retroactively_enable("out-of-bounds",
-                                         xtag("tseq", tseq), xtag("tname", TypeRegistry::id2name(tseq)));
-
-                log(xtag("types.size", object_types_.size()),
-                    xtag("types.allocated", object_types_.store()->allocated()),
-                    xtag("types.committed", object_types_.store()->committed()),
-                    xtag("types.lo", object_types_.store()->lo_),
-                    xtag("types.limit", object_types_.store()->limit_),
-                    xtag("types.hi", object_types_.store()->hi_));
-
-                assert(false);
-                return nullptr;
-            }
-
-            const ObjectTypeSlot & slot = object_types_[tseq.seqno()];
-
-            if (slot.is_null()) {
-                log.retroactively_enable("null-vtable",
-                                         xtag("tseq", tseq), xtag("tname", TypeRegistry::id2name(tseq)));
-
-                assert(false);
-                return nullptr;
-            }
-
-            return slot.iface();
+            return gco_store_.lookup_type(tseq);
         }
 
         /* editor bait: register_type */
         bool
         DX1Collector::install_type(const AGCObject & meta) noexcept
         {
+            return gco_store_.install_type(meta);
+
+#ifdef MARKED
             typeseq tseq = meta._typeseq();
 
             assert(tseq.seqno() > 0);
@@ -715,6 +697,7 @@ namespace xo {
             slot.store_iface(&meta);
 
             return true;
+#endif
         }
 
         void
@@ -916,15 +899,15 @@ namespace xo {
         DX1Collector::_deep_move_gc_owned(void * from_src,
                                           Generation upto)
         {
-            scope log(XO_DEBUG(config_.debug_flag_));
+            scope log(XO_DEBUG(gco_store_.config().debug_flag_));
 
-            AllocInfo info = this->alloc_info((std::byte *)from_src);
+            AllocInfo info = gco_store_.alloc_info((std::byte *)from_src);
             AllocHeader hdr = info.header();
             typeseq tseq(info.tseq());
 
-            assert(this->contains_allocated(role::from_space(), from_src));
+            assert(gco_store_.contains_allocated(role::from_space(), from_src));
 
-            if (is_forwarding_header(hdr)) {
+            if (gco_store_.is_forwarding_header(hdr)) {
                 /* already forwarded - pickup destination
                  *
                  * Coordinates with forward_inplace()
@@ -936,7 +919,7 @@ namespace xo {
 
             /* here: object at from_src not already forwarded */
 
-            if (!this->check_move_policy(hdr, from_src)) {
+            if (!gco_store_._check_move_policy(hdr, from_src, upto)) {
                 /* object at from_src is in generation that is not being collected */
                 log && log("disposition: not moving from_src");
 
@@ -946,7 +929,7 @@ namespace xo {
             log && log("disposition: move subtree");
 
             /* TODO: AllocIterator pointing to free pointer */
-            GCMoveCheckpoint gray_lo_v = this->_snap_move_checkpoint(upto);
+            GCMoveCheckpoint gray_lo_v = gco_store_.snap_move_checkpoint(upto);
 
             obj<AAllocator, DX1Collector> alloc(this);
             const AGCObject * iface = lookup_type(tseq);
@@ -965,19 +948,18 @@ namespace xo {
         auto
         DX1Collector::_snap_move_checkpoint(Generation upto) -> GCMoveCheckpoint
         {
-            GCMoveCheckpoint gray_lo_v;
-
-            for (uint32_t g = 0; g < upto; ++g) {
-                gray_lo_v[g] = this->to_space(Generation{g})->free_;
-            }
-
-            return gray_lo_v;
+            return gco_store_.snap_move_checkpoint(upto);
         }
 
         void
         DX1Collector::_forward_children_until_fixpoint(Generation upto,
                                                        GCMoveCheckpoint gray_lo_v)
         {
+            // problem -- need object type lookup
+#ifdef NOT_YET
+            gco_store_._forward_children_until_fixpoint(upto, gray_lo_v);
+#endif
+
             scope log(XO_DEBUG(config_.debug_flag_));
 
             /**
@@ -1384,9 +1366,9 @@ namespace xo {
         {
             assert(runstate_.is_running());
 
-            return gco_store_.check_move_policy(runstate_.gc_upto(),
-                                                alloc_hdr,
-                                                object_data);
+            return gco_store_._check_move_policy(alloc_hdr,
+                                                 object_data,
+                                                 runstate_.gc_upto());
         }
 
         auto
