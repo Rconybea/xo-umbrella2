@@ -42,24 +42,27 @@ namespace xo {
             GCObjectStoreConfig gco_store_config() const noexcept {
                 return GCObjectStoreConfig(arena_config_,
                                            n_generation_,
+                                           n_survive_threshold_,
                                            debug_flag_);
             }
 
             /** fetch configuration for mutation log store **/
             MutationLogConfig mlog_config() const noexcept {
                 return MutationLogConfig(n_generation_,
+#ifdef OBSOLETE
                                          n_survive_threshold_,
+#endif
                                          mutation_log_z_,
                                          debug_flag_);
             }
 
             Generation age2gen(object_age age) const noexcept {
-                return Generation(age % n_survive_threshold_);
+                return this->gco_store_config().age2gen(age);
             }
 
             /** age threshold for promotion to generation @p g **/
             uint32_t promotion_threshold(Generation g) const noexcept {
-                return mlog_config().promotion_threshold(g);
+                return this->gco_store_config().promotion_threshold(g);
             }
 
         public:

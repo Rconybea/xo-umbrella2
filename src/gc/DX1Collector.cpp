@@ -124,18 +124,13 @@ namespace xo {
         bool
         DX1Collector::contains(role r, const void * addr) const noexcept
         {
-            return !(this->generation_of(r, addr).is_sentinel());
+            return gco_store_.contains(r, addr);
         }
 
         bool
         DX1Collector::contains_allocated(role r, const void * addr) const noexcept
         {
-            Generation g = this->generation_of(r, addr);
-
-            if (g.is_sentinel())
-                return false;
-
-            return this->get_space(r, g)->contains_allocated(addr);
+            return gco_store_.contains_allocated(r, addr);
         }
 
         Generation
@@ -212,16 +207,6 @@ namespace xo {
         DX1Collector::mutation_log_entries() const noexcept
         {
             return mlog_state_.mutation_log_entries();
-
-#ifdef MOVED
-            size_type z = 0;
-
-            for (Generation gj{0}; gj + 1 < config_.n_generation_; ++gj) {
-                z += mlog_[role::to_space()][gj]->size();
-            }
-
-            return z;
-#endif
         }
 
         namespace {
@@ -1397,19 +1382,11 @@ namespace xo {
         DX1Collector::check_move_policy(header_type alloc_hdr,
                                         void * object_data) const noexcept
         {
-            (void)object_data;
-
-            // when gc is moving objects, to- and from- spaces have been
-            // reversed: forwarding pointers are located in from-space and
-            // refer to to-space.
-
-            object_age age = this->header2age(alloc_hdr);
-
-            Generation g = config_.age2gen(age);
-
             assert(runstate_.is_running());
 
-            return (g < runstate_.gc_upto());
+            return gco_store_.check_move_policy(runstate_.gc_upto(),
+                                                alloc_hdr,
+                                                object_data);
         }
 
         auto
