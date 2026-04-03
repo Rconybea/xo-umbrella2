@@ -384,11 +384,13 @@ namespace xo {
              *  use to detect forwarding activity after visiting objects
              **/
             GCMoveCheckpoint _snap_move_checkpoint(Generation upto);
+
             /** traverse objects allocated after @p ckp, to make sure their children
              *  are forwarded. Repeat until traverse doesn't find any unforwarded children
              **/
             void _forward_children_until_fixpoint(Generation upto,
-                                                  GCMoveCheckpoint ckp);
+                                                  const GCMoveCheckpoint & ckp);
+
             /** Evacuate object at @p *lhs_data to to-space.
              *  Replace original with forwarding pointer to new location
              **/

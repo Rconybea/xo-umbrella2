@@ -528,7 +528,7 @@ namespace xo {
                  *                                    +----------+
                  */
 
-                *lhs_data = this->_shallow_move(gc->ref<AAllocator>(), lhs_iface, *lhs_data);
+                *lhs_data = this->_shallow_move(gc, lhs_iface, *lhs_data);
 
                 /*
                  *   lhs   obj<AGCObject>             (from-space)
@@ -626,7 +626,58 @@ namespace xo {
         }
 
         void *
-        GCObjectStore::_shallow_move(obj<AAllocator> mm,
+        GCObjectStore::_deep_move_gc_owned(DX1Collector * gc,
+                                           void * from_src,
+                                           Generation upto)
+        {
+            scope log(XO_DEBUG(config_.debug_flag_));
+
+            AllocInfo info = this->alloc_info((std::byte *)from_src);
+            AllocHeader hdr = info.header();
+            typeseq tseq(info.tseq());
+
+            assert(this->contains_allocated(role::from_space(), from_src));
+
+            if (this->is_forwarding_header(hdr)) {
+                /* already forwarded - pickup destination
+                 *
+                 * Coordinates with forward_inplace()
+                 */
+                log && log("disposition: already forwarded");
+
+                return *(void **)from_src;
+            }
+
+            /* here: object at from_src not already forwarded */
+
+            if (!this->_check_move_policy(hdr, from_src, upto)) {
+                /* object at from_src is in generation that is not being collected */
+                log && log("disposition: not moving from_src");
+
+                return from_src;
+            }
+
+            log && log("disposition: move subtree");
+
+            /* TODO: AllocIterator pointing to free pointer */
+            GCMoveCheckpoint gray_lo_v = this->snap_move_checkpoint(upto);
+
+            //obj<AAllocator, DX1Collector> alloc(this);
+            const AGCObject * iface = lookup_type(tseq);
+
+            assert(iface->_has_null_vptr() == false);
+
+            void * to_dest = this->_shallow_move(gc, iface, from_src);
+
+            this->_forward_children_until_fixpoint(gc, upto, gray_lo_v);
+
+            log && log(xtag("to_dest", to_dest));
+
+            return to_dest;
+        } /*_deep_move_gc_owned*/
+
+        void *
+        GCObjectStore::_shallow_move(DX1Collector * gc,
                                      const AGCObject * iface,
                                      void * from_src)
         {
@@ -636,7 +687,7 @@ namespace xo {
 
             //obj<AAllocator, DX1Collector> gc_gco(gc);
 
-            void * to_dest = iface->shallow_copy(from_src, mm);
+            void * to_dest = iface->shallow_copy(from_src, gc->ref<AAllocator>());
 
             log && log(xtag("from_src", from_src), xtag("to_dest", to_dest));
             log && log(xtag("tseq", info.tseq()),
@@ -666,13 +717,12 @@ namespace xo {
             }
 
             return to_dest;
-        } /*shallow_move*/
+        } /*_shallow_move*/
 
-#ifdef MARKED
         void
         GCObjectStore::_forward_children_until_fixpoint(DX1Collector * gc,
                                                         Generation upto,
-                                                        const GCMoveCheckpoint & gray_lo_v)
+                                                        GCMoveCheckpoint gray_lo_v)
         {
             scope log(XO_DEBUG(config_.debug_flag_));
 
@@ -772,9 +822,9 @@ namespace xo {
 
                         assert(iface->_has_null_vptr() == false);
 
-                        auto gc = this->ref<ACollector>();
+                        auto gc_gco = gc->ref<ACollector>();
 
-                        iface->forward_children(src, gc);
+                        iface->forward_children(src, gc_gco);
 
                         gray_lo_v[g] = ((std::byte *)src) + z;
 
@@ -784,8 +834,6 @@ namespace xo {
                 }
             } while (fixup_work > 0);
         } /*_forward_children_until_fixpoint*/
-#endif
-
 
     } /*namespace mm*/
 } /*namespace xo*/
