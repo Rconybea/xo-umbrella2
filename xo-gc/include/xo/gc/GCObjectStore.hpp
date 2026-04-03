@@ -6,6 +6,7 @@
 #pragma once
 
 #include "generation.hpp"
+#include "object_age.hpp"
 #include <xo/alloc2/role.hpp>
 #include <xo/arena/DArena.hpp>
 #include <xo/arena/ArenaConfig.hpp>
@@ -17,6 +18,11 @@ namespace xo {
         /** @brief container to hold gc-aware objects for X1 collector
          **/
         class GCObjectStore {
+        public:
+            using header_type = DArena::header_type;
+            using value_type = DArena::value_type;
+            using size_type = DArena::size_type;
+
         public:
             GCObjectStore(const ArenaConfig & arena_cfg, uint32_t ngen, bool debug_flag);
 
@@ -30,6 +36,16 @@ namespace xo {
              *  sentinel if not found in this collector
              **/
             Generation generation_of(role r, const void * addr) const noexcept;
+
+            /** get allocation size from header **/
+            std::size_t header2size(header_type hdr) const noexcept;
+            /** get generation counter from alloc header **/
+            object_age header2age(header_type hdr) const noexcept;
+            /** get tseq from alloc header **/
+            uint32_t header2tseq(header_type hdr) const noexcept;
+
+            /** true iff original alloc has been replaced by a forwarding pointer **/
+            bool is_forwarding_header(header_type hdr) const noexcept;
 
             /** Call @p visitor for each memory pool owned by this store **/
             void visit_pools(const MemorySizeVisitor & visitor) const;
