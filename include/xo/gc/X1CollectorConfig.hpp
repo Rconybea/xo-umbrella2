@@ -51,8 +51,11 @@ namespace xo {
 
             /** fetch configuration for mutation log store **/
             MutationLogConfig mlog_config() const noexcept {
+                bool mlog_enabled_flag = allow_incremental_gc_;
+
                 return MutationLogConfig(n_generation_,
                                          mutation_log_z_,
+                                         mlog_enabled_flag,
                                          debug_flag_);
             }
 
