@@ -626,6 +626,24 @@ namespace xo {
         }
 
         void *
+        GCObjectStore::deep_move_interior(DX1Collector * gc,
+                                          void * from_src,
+                                          Generation upto)
+        {
+            scope log(XO_DEBUG(config_.debug_flag_));
+
+            if (!from_src)
+                return nullptr;
+
+            bool src_in_from_space = this->contains(role::from_space(), from_src);
+
+            if (!src_in_from_space)
+                return from_src;
+
+            return this->_deep_move_gc_owned(gc, from_src, upto);
+        }
+
+        void *
         GCObjectStore::_deep_move_gc_owned(DX1Collector * gc,
                                            void * from_src,
                                            Generation upto)
