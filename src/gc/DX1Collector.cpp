@@ -1094,9 +1094,11 @@ namespace xo {
         DX1Collector::forward_inplace(AGCObject * lhs_iface,
                                       void ** lhs_data)
         {
+            Generation upto = runstate_.gc_upto();
+
             if (runstate_.is_running()) {
                 // called during collection phase
-                this->_forward_inplace_aux(lhs_iface, lhs_data);
+                this->_forward_inplace_aux(lhs_iface, lhs_data, upto);
             } else if (runstate_.is_verify()) {
                 // called during verify_ok
                 this->_verify_aux(lhs_iface, *lhs_data);
@@ -1108,8 +1110,14 @@ namespace xo {
 
         void
         DX1Collector::_forward_inplace_aux(AGCObject * lhs_iface,
-                                           void ** lhs_data)
+                                           void ** lhs_data,
+                                           Generation upto)
         {
+            // upto == runstate_.gc_upto()
+
+            gco_store_._forward_inplace_aux(this, lhs_iface, lhs_data, upto);
+
+#ifdef MARKED
             scope log(XO_DEBUG(config_.debug_flag_),
                       xtag("lhs_data", lhs_data),
                       xtag("*lhs_data", lhs_data ? *lhs_data : nullptr));
@@ -1137,7 +1145,7 @@ namespace xo {
             if (!object_data) {
                 /* trivial to forward nullptr */
                 return;
-            } else if (!this->contains(role::from_space(), object_data)) {
+            } else if (!gco_store_.contains(role::from_space(), object_data)) {
                 /* *lhs_data either:
                  * 1. already in to-space
                  * 2. not in GC-allocated space at all
@@ -1162,7 +1170,7 @@ namespace xo {
              *        allocated object data.
              *        Only using this to get alloc header
              **/
-            DArena * some_arena = this->from_space(Generation(0));
+            DArena * some_arena = gco_store_.from_space(Generation(0));
 
             DArena::header_type * p_header
                 = some_arena->obj2hdr(object_data);
@@ -1192,7 +1200,7 @@ namespace xo {
              */
             assert(alloc_z >= sizeof(uintptr_t));
 
-            if (this->is_forwarding_header(alloc_hdr)) {
+            if (gco_store_.is_forwarding_header(alloc_hdr)) {
                 /* *lhs_data already refers to a forwarding pointer */
 
                 /*
@@ -1245,7 +1253,7 @@ namespace xo {
                         xtag("tname", TypeRegistry::id2name(typeseq(info.tseq()))),
                         xtag("age", info.age()), xtag("size", info.size()));
                 }
-            } else if (this->check_move_policy(alloc_hdr, object_data)) {
+            } else if (gco_store_._check_move_policy(alloc_hdr, object_data, upto)) {
                 /* copy object *lhs + replace with forwarding pointer */
 
                 log && log("forward object now");
@@ -1289,7 +1297,8 @@ namespace xo {
                  * e.g. incremental collection + object is tenured
                  */
             }
-        } /*_forward_inplace*/
+#endif
+        } /*_forward_inplace_aux*/
 
         void
         DX1Collector::_verify_aux(AGCObject * iface, void * data)

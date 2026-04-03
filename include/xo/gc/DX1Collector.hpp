@@ -392,7 +392,8 @@ namespace xo {
             /** Evacuate object at @p *lhs_data to to-space.
              *  Replace original with forwarding pointer to new location
              **/
-            void _forward_inplace_aux(AGCObject * lhs_iface, void ** lhs_data);
+            void _forward_inplace_aux(AGCObject * lhs_iface, void ** lhs_data, Generation upto);
+
             /** Verify that pointer {@p iface, @p data} is valid:
              *  destination either in to-space, or somewhere outside this collector
              **/
