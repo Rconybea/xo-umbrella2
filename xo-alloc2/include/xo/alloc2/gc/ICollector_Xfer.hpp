@@ -90,6 +90,9 @@ namespace mm {
         void assign_member(Opaque data, void * parent, obj<AGCObject> * p_lhs, obj<AGCObject> & rhs)  override {
             return I::assign_member(_dcast(data), parent, p_lhs, rhs);
         }
+        void * alloc_copy(Opaque data, std::byte * src)  override {
+            return I::alloc_copy(_dcast(data), src);
+        }
         void forward_inplace(Opaque data, AGCObject * lhs_iface, void ** lhs_data)  override {
             return I::forward_inplace(_dcast(data), lhs_iface, lhs_data);
         }

@@ -267,6 +267,22 @@
             noexcept: false,
             attributes: [],
         },
+        // void alloc_copy(void * src)
+        {
+            name: "alloc_copy",
+            doc: [
+                "allocate copy of source object at address @p src.",
+                "Source must be owned by this collector.",
+                "Increments object age"
+            ],
+            return_type: "void *",
+            args: [
+                {type: "std::byte *", name: "src"},
+            ],
+            const: false,
+            noexcept: false,
+            attributes: [],
+        },
         // void forward_inplace(AGCObject * lhs_iface, void ** lhs_data);
         {
             name: "forward_inplace",
@@ -288,7 +304,23 @@
         },
     ],
     router_facet_explicit_content: [
-        "/** forward op in place. Defined in GCObject.hpp to avoid #include cycle **/",
+        "/** convenience template for gc object copy **/",
+        "template <typename T>",
+        "void * alloc_copy_for(const T * src) noexcept {",
+        "    return O::iface()->alloc_copy(O::data(), (std::byte *)const_cast<T *>(src));",
+        "}",
+        "",
+        "/** convenience template for move-constructible T (this is common) **/",
+        "template <typename T>",
+        "void * std_copy_for(const T * src) noexcept {",
+        "    void * mem = this->alloc_copy_for(src);",
+        "    if (mem) {",
+        "        new (mem) T(std::move(*src));",
+        "    }",
+        "    return (T *)mem;",
+        "}",
+        "",
+        "/** forward faceted object pointer in place. Defined in GCObject.hpp to avoid #include cycle **/",
         "template <typename DRepr>",
         "void forward_inplace(obj<AGCObject,DRepr> * p_obj);",
         "",

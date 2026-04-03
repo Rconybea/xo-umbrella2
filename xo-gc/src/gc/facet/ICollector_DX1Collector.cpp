@@ -95,6 +95,11 @@ namespace xo {
             self.assign_member(parent, p_lhs, rhs);
         }
         auto
+        ICollector_DX1Collector::alloc_copy(DX1Collector & self, std::byte * src) -> void *
+        {
+            return self.alloc_copy(src);
+        }
+        auto
         ICollector_DX1Collector::forward_inplace(DX1Collector & self, AGCObject * lhs_iface, void ** lhs_data) -> void
         {
             self.forward_inplace(lhs_iface, lhs_data);

@@ -119,6 +119,10 @@ Return false if installation fails (e.g. memory exhausted) **/
 
 Require: gc not in progress **/
     virtual void assign_member(Opaque data, void * parent, obj<AGCObject> * p_lhs, obj<AGCObject> & rhs)  = 0;
+    /** allocate copy of source object at address @p src.
+Source must be owned by this collector.
+Increments object age **/
+    virtual void * alloc_copy(Opaque data, std::byte * src)  = 0;
     /** evacuate @p *lhs, that refers to state with interface @p lhs_iface,
 to collector @p d's to-space. Replace *lhs_data with forwarding pointer
 

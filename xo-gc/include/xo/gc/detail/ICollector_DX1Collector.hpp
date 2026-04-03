@@ -107,6 +107,10 @@ Return false if installation fails (e.g. memory exhausted) **/
 
 Require: gc not in progress **/
             static void assign_member(DX1Collector & self, void * parent, obj<AGCObject> * p_lhs, obj<AGCObject> & rhs);
+            /** allocate copy of source object at address @p src.
+Source must be owned by this collector.
+Increments object age **/
+            static void * alloc_copy(DX1Collector & self, std::byte * src);
             /** evacuate @p *lhs, that refers to state with interface @p lhs_iface,
 to collector @p d's to-space. Replace *lhs_data with forwarding pointer
 
