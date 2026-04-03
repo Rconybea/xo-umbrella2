@@ -364,9 +364,6 @@ namespace xo {
             /** copy roots + everything reachable from them, to to-space **/
             void copy_roots(Generation upto) noexcept;
 
-            /** cureate new mutation log after copying roots **/
-            void forward_mutation_log(Generation upto);
-
             /** cleanup after gc **/
             void _cleanup_phase(Generation upto);
 
