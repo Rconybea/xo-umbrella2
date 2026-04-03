@@ -1,20 +1,20 @@
-/** @file MutationLogState.cpp
+/** @file MutationLogStore.cpp
  *
  *  @author Roland Conybeare, Apr 2026
  **/
 
-#include "MutationLogState.hpp"
+#include "MutationLogStore.hpp"
 #include "DX1Collector.hpp"
 
 namespace xo {
     namespace mm {
 
-        MutationLogState::MutationLogState(const MutationLogConfig & config)
+        MutationLogStore::MutationLogStore(const MutationLogConfig & config)
             : config_{config}
         {}
 
         void
-        MutationLogState::init_mlogs(std::size_t page_z)
+        MutationLogStore::init_mlogs(std::size_t page_z)
         {
             assert(c_n_role + 1 == 3);
 
@@ -53,7 +53,7 @@ namespace xo {
         }
 
         auto
-        MutationLogState::_make_mlog(uint32_t igen, char tag_char,
+        MutationLogStore::_make_mlog(uint32_t igen, char tag_char,
                                      size_t mlog_z, size_t page_z) -> MutationLog
         {
             char buf[40];
@@ -66,7 +66,7 @@ namespace xo {
         }
 
         auto
-        MutationLogState::mutation_log_entries() const noexcept -> size_type
+        MutationLogStore::mutation_log_entries() const noexcept -> size_type
         {
             size_type z = 0;
 
@@ -78,7 +78,7 @@ namespace xo {
         }
 
         void
-        MutationLogState::visit_pools(const MemorySizeVisitor & visitor) const
+        MutationLogStore::visit_pools(const MemorySizeVisitor & visitor) const
         {
             for (uint32_t j = 0; j + 1 < config_.n_generation_; ++j) {
                 for (uint32_t i = 0; i < c_n_role + 1; ++i) {
@@ -88,7 +88,7 @@ namespace xo {
         }
 
         void
-        MutationLogState::verify_ok(GCObjectStore * gco_store,
+        MutationLogStore::verify_ok(GCObjectStore * gco_store,
                                     VerifyStats * p_verify_stats) noexcept
         {
             // 4. scan mutation logs
@@ -136,7 +136,7 @@ namespace xo {
         } /*verify_ok*/
 
         void
-        MutationLogState::append_mutation(Generation dest_g,
+        MutationLogStore::append_mutation(Generation dest_g,
                                           void * parent,
                                           void ** addr,
                                           obj<AGCObject> rhs)
@@ -151,7 +151,7 @@ namespace xo {
         }
 
         void
-        MutationLogState::swap_roles(Generation upto) noexcept
+        MutationLogStore::swap_roles(Generation upto) noexcept
         {
             scope log(XO_DEBUG(true), xtag("upto", upto));
 
@@ -163,7 +163,7 @@ namespace xo {
         }
 
         void
-        MutationLogState::forward_mutation_log(DX1Collector * gc,
+        MutationLogStore::forward_mutation_log(DX1Collector * gc,
                                                Generation upto)
         {
             /** non-zero if at least one object was rescued (from any generation)
@@ -213,7 +213,7 @@ namespace xo {
         }
 
         MutationLogStatistics
-        MutationLogState::_forward_mutation_log_phase(DX1Collector * gc,
+        MutationLogStore::_forward_mutation_log_phase(DX1Collector * gc,
                                                       Generation upto,
                                                       Generation child_gen,
                                                       MutationLog * from_mlog,
@@ -363,7 +363,7 @@ namespace xo {
         }
 
         MutationLogStatistics
-        MutationLogState::_preserve_child_of_live_parent(DX1Collector * gc,
+        MutationLogStore::_preserve_child_of_live_parent(DX1Collector * gc,
                                                          Generation upto,
                                                          Generation parent_gen,
                                                          const MutationLogEntry & from_entry,
@@ -415,7 +415,7 @@ namespace xo {
         }
 
         bool
-        MutationLogState::_check_keep_mutation_aux(const GCObjectStore & gco_store,
+        MutationLogStore::_check_keep_mutation_aux(const GCObjectStore & gco_store,
                                                    const MutationLogEntry & from_entry,
                                                    Generation parent_gen_to,
                                                    void * child_to,
@@ -451,4 +451,4 @@ namespace xo {
     } /*namespace mm*/
 } /*namespace xo*/
 
-/* end MutationLogState.cpp */
+/* end MutationLogStore.cpp */
