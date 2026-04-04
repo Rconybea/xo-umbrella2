@@ -43,7 +43,7 @@ namespace xo {
             /** @defgroup xo-scm-atomictype-gcobject-facet **/
             ///@{
             std::size_t shallow_size() const noexcept;
-            DAtomicType * shallow_move(obj<AAllocator> mm) noexcept;
+            DAtomicType * shallow_move(obj<ACollector> gc) noexcept;
             std::size_t forward_children(obj<ACollector> gc) noexcept;
             ///@}
 

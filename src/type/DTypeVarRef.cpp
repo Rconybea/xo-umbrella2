@@ -82,9 +82,9 @@ namespace xo {
         }
 
         DTypeVarRef *
-        DTypeVarRef::shallow_move(obj<AAllocator> mm) noexcept
+        DTypeVarRef::shallow_move(obj<ACollector> gc) noexcept
         {
-            return mm.std_copy_for(this);
+            return gc.std_copy_for(this);
         }
 
         std::size_t
