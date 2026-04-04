@@ -22,9 +22,9 @@ namespace xo {
         }
 
         auto
-        IGCObject_DPrimitive_gco_3_dict_string_gco::shallow_move(DPrimitive_gco_3_dict_string_gco & self, obj<AAllocator> mm) noexcept -> Opaque
+        IGCObject_DPrimitive_gco_3_dict_string_gco::shallow_move(DPrimitive_gco_3_dict_string_gco & self, obj<ACollector> gc) noexcept -> Opaque
         {
-            return self.shallow_move(mm);
+            return self.shallow_move(gc);
         }
         auto
         IGCObject_DPrimitive_gco_3_dict_string_gco::forward_children(DPrimitive_gco_3_dict_string_gco & self, obj<ACollector> gc) noexcept -> size_type

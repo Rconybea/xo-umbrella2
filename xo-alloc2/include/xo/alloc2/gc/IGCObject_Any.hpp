@@ -64,7 +64,7 @@ namespace mm {
         [[noreturn]] size_type shallow_size(Copaque)  const  noexcept override { _fatal(); }
 
         // nonconst methods
-        [[noreturn]] Opaque shallow_move(Opaque, obj<AAllocator>)  const  noexcept override;
+        [[noreturn]] Opaque shallow_move(Opaque, obj<ACollector>)  const  noexcept override;
         [[noreturn]] size_type forward_children(Opaque, obj<ACollector>)  const  noexcept override;
 
         ///@}

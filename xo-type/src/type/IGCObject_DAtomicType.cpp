@@ -22,9 +22,9 @@ namespace xo {
         }
 
         auto
-        IGCObject_DAtomicType::shallow_move(DAtomicType & self, obj<AAllocator> mm) noexcept -> Opaque
+        IGCObject_DAtomicType::shallow_move(DAtomicType & self, obj<ACollector> gc) noexcept -> Opaque
         {
-            return self.shallow_move(mm);
+            return self.shallow_move(gc);
         }
         auto
         IGCObject_DAtomicType::forward_children(DAtomicType & self, obj<ACollector> gc) noexcept -> size_type

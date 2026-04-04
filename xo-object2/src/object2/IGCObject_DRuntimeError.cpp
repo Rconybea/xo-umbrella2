@@ -22,9 +22,9 @@ namespace xo {
         }
 
         auto
-        IGCObject_DRuntimeError::shallow_move(DRuntimeError & self, obj<AAllocator> mm) noexcept -> Opaque
+        IGCObject_DRuntimeError::shallow_move(DRuntimeError & self, obj<ACollector> gc) noexcept -> Opaque
         {
-            return self.shallow_move(mm);
+            return self.shallow_move(gc);
         }
         auto
         IGCObject_DRuntimeError::forward_children(DRuntimeError & self, obj<ACollector> gc) noexcept -> size_type

@@ -53,7 +53,7 @@ namespace xo {
 
             // non-const methods
             /** move instance using allocator **/
-            static Opaque shallow_move(DArrayType & self, obj<AAllocator> mm) noexcept;
+            static Opaque shallow_move(DArrayType & self, obj<ACollector> gc) noexcept;
             /** during GC: forward immdiate children **/
             static size_type forward_children(DArrayType & self, obj<ACollector> gc) noexcept;
             ///@}

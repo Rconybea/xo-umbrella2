@@ -22,9 +22,9 @@ namespace xo {
         }
 
         auto
-        IGCObject_DDictionary::shallow_move(DDictionary & self, obj<AAllocator> mm) noexcept -> Opaque
+        IGCObject_DDictionary::shallow_move(DDictionary & self, obj<ACollector> gc) noexcept -> Opaque
         {
-            return self.shallow_move(mm);
+            return self.shallow_move(gc);
         }
         auto
         IGCObject_DDictionary::forward_children(DDictionary & self, obj<ACollector> gc) noexcept -> size_type

@@ -22,9 +22,9 @@ namespace xo {
         }
 
         auto
-        IGCObject_DBoolean::shallow_move(DBoolean & self, obj<AAllocator> mm) noexcept -> Opaque
+        IGCObject_DBoolean::shallow_move(DBoolean & self, obj<ACollector> gc) noexcept -> Opaque
         {
-            return self.shallow_move(mm);
+            return self.shallow_move(gc);
         }
         auto
         IGCObject_DBoolean::forward_children(DBoolean & self, obj<ACollector> gc) noexcept -> size_type

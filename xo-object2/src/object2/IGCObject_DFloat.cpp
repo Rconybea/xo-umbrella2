@@ -22,9 +22,9 @@ namespace xo {
         }
 
         auto
-        IGCObject_DFloat::shallow_move(DFloat & self, obj<AAllocator> mm) noexcept -> Opaque
+        IGCObject_DFloat::shallow_move(DFloat & self, obj<ACollector> gc) noexcept -> Opaque
         {
-            return self.shallow_move(mm);
+            return self.shallow_move(gc);
         }
         auto
         IGCObject_DFloat::forward_children(DFloat & self, obj<ACollector> gc) noexcept -> size_type

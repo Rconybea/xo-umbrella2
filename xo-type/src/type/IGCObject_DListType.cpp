@@ -22,9 +22,9 @@ namespace xo {
         }
 
         auto
-        IGCObject_DListType::shallow_move(DListType & self, obj<AAllocator> mm) noexcept -> Opaque
+        IGCObject_DListType::shallow_move(DListType & self, obj<ACollector> gc) noexcept -> Opaque
         {
-            return self.shallow_move(mm);
+            return self.shallow_move(gc);
         }
         auto
         IGCObject_DListType::forward_children(DListType & self, obj<ACollector> gc) noexcept -> size_type

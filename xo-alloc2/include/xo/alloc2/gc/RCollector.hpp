@@ -52,38 +52,38 @@ public:
     void * alloc_copy_for(const T * src) noexcept {
         return O::iface()->alloc_copy(O::data(), (std::byte *)const_cast<T *>(src));
     }
-    
+
     /** convenience template for move-constructible T (this is common) **/
     template <typename T>
-    void * std_copy_for(const T * src) noexcept {
+    T * std_copy_for(T * src) noexcept {
         void * mem = this->alloc_copy_for(src);
         if (mem) {
             return new (mem) T(std::move(*src));
         }
         return nullptr;
     }
-    
+
     /** forward faceted object pointer in place. Defined in GCObject.hpp to avoid #include cycle **/
     template <typename DRepr>
     void forward_inplace(obj<AGCObject,DRepr> * p_obj);
-    
+
     /** another convenience template for forwarding.
      *  Defined in RGCObject.hpp to avoid #include cycle.
     **/
     template <typename DRepr>
     void forward_inplace(DRepr ** pp_repr);
-    
+
     /** convenience template where pointer requires pivot **/
     template <typename AFacet, typename DRepr>
     requires (!std::is_same_v<AFacet, AGCObject>)
     void forward_pivot_inplace(obj<AFacet,DRepr> * p_obj);
-    
+
     /** add root @p p_root **/
     template<typename DRepr>
     void add_gc_root(obj<AGCObject, DRepr> * p_root) {
         O::iface()->add_gc_root_poly(O::data(), (obj<AGCObject> *)p_root);
     }
-    
+
     /** remove root @p p_root **/
     template <typename DRepr>
     void remove_gc_root(obj<AGCObject, DRepr> * p_root) {

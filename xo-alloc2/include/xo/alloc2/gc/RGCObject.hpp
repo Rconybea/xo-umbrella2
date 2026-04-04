@@ -60,8 +60,8 @@ public:
     }
 
     // non-const methods (still const in router!)
-    Opaque shallow_move(obj<AAllocator> mm)  noexcept {
-        return O::iface()->shallow_move(O::data(), mm);
+    Opaque shallow_move(obj<ACollector> gc)  noexcept {
+        return O::iface()->shallow_move(O::data(), gc);
     }
     size_type forward_children(obj<ACollector> gc)  noexcept {
         return O::iface()->forward_children(O::data(), gc);

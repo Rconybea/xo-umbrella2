@@ -88,12 +88,16 @@ namespace xo {
         }
 
         DUniqueString *
-        DUniqueString::shallow_move(obj<AAllocator> mm) const noexcept
+        DUniqueString::shallow_move(obj<ACollector> gc) noexcept
         {
             // well-posed, but not expected to be used.
+            //
+            // Not using gc.std_copy_for() here because compiler doesn't know
+            // actual alloc size of a DUniqueString instance
+
             assert(false);
 
-            DUniqueString * copy = (DUniqueString *)mm.alloc_copy((std::byte *)this);
+            DUniqueString * copy = (DUniqueString *)gc.alloc_copy((std::byte *)this);
 
             if (copy) {
                 // Copy assignment not implemented in general
