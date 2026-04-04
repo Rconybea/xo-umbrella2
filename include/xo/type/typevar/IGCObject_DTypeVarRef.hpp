@@ -55,7 +55,7 @@ namespace xo {
             /** move instance using allocator **/
             static Opaque shallow_move(DTypeVarRef & self, obj<ACollector> gc) noexcept;
             /** during GC: forward immdiate children **/
-            static size_type forward_children(DTypeVarRef & self, obj<ACollector> gc) noexcept;
+            static void forward_children(DTypeVarRef & self, obj<ACollector> gc) noexcept;
             ///@}
         };
 
