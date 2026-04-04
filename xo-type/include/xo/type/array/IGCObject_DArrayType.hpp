@@ -48,8 +48,6 @@ namespace xo {
             /** @defgroup scm-gcobject-darraytype-methods **/
             ///@{
             // const methods
-            /** memory consumption for this instance **/
-            static size_type shallow_size(const DArrayType & self) noexcept;
 
             // non-const methods
             /** move instance using allocator **/

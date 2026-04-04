@@ -16,12 +16,6 @@
 namespace xo {
     namespace scm {
         auto
-        IGCObject_DRuntimeError::shallow_size(const DRuntimeError & self) noexcept -> size_type
-        {
-            return self.shallow_size();
-        }
-
-        auto
         IGCObject_DRuntimeError::shallow_move(DRuntimeError & self, obj<ACollector> gc) noexcept -> Opaque
         {
             return self.shallow_move(gc);

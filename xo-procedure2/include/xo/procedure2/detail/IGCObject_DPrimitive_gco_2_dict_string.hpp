@@ -50,8 +50,6 @@ namespace xo {
             /** @defgroup scm-gcobject-dprimitive_gco_2_dict_string-methods **/
             ///@{
             // const methods
-            /** memory consumption for this instance **/
-            static size_type shallow_size(const DPrimitive_gco_2_dict_string & self) noexcept;
 
             // non-const methods
             /** move instance using allocator **/

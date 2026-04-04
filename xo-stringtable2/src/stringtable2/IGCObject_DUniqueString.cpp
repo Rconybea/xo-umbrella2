@@ -16,12 +16,6 @@
 namespace xo {
     namespace scm {
         auto
-        IGCObject_DUniqueString::shallow_size(const DUniqueString & self) noexcept -> size_type
-        {
-            return self.shallow_size();
-        }
-
-        auto
         IGCObject_DUniqueString::shallow_move(DUniqueString & self, obj<ACollector> gc) noexcept -> Opaque
         {
             return self.shallow_move(gc);

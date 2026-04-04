@@ -16,12 +16,6 @@
 namespace xo {
     namespace scm {
         auto
-        IGCObject_DTypeVarRef::shallow_size(const DTypeVarRef & self) noexcept -> size_type
-        {
-            return self.shallow_size();
-        }
-
-        auto
         IGCObject_DTypeVarRef::shallow_move(DTypeVarRef & self, obj<ACollector> gc) noexcept -> Opaque
         {
             return self.shallow_move(gc);

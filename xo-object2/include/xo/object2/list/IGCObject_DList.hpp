@@ -48,8 +48,6 @@ namespace xo {
             /** @defgroup scm-gcobject-dlist-methods **/
             ///@{
             // const methods
-            /** memory consumption for this instance **/
-            static size_type shallow_size(const DList & self) noexcept;
 
             // non-const methods
             /** move instance using allocator **/

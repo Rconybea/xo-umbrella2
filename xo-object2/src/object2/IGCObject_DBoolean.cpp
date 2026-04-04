@@ -16,12 +16,6 @@
 namespace xo {
     namespace scm {
         auto
-        IGCObject_DBoolean::shallow_size(const DBoolean & self) noexcept -> size_type
-        {
-            return self.shallow_size();
-        }
-
-        auto
         IGCObject_DBoolean::shallow_move(DBoolean & self, obj<ACollector> gc) noexcept -> Opaque
         {
             return self.shallow_move(gc);

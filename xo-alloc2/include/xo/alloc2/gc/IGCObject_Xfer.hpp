@@ -49,9 +49,6 @@ namespace mm {
         void _drop(Opaque d) const noexcept override { _dcast(d).~DRepr(); }
 
         // const methods
-        size_type shallow_size(Copaque data)  const  noexcept override {
-            return I::shallow_size(_dcast(data));
-        }
 
         // non-const methods
         Opaque shallow_move(Opaque data, obj<ACollector> gc)  const  noexcept override {
