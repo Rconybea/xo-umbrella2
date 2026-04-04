@@ -16,12 +16,6 @@
 namespace xo {
     namespace scm {
         auto
-        IGCObject_DString::shallow_size(const DString & self) noexcept -> size_type
-        {
-            return self.shallow_size();
-        }
-
-        auto
         IGCObject_DString::shallow_move(DString & self, obj<ACollector> gc) noexcept -> Opaque
         {
             return self.shallow_move(gc);
