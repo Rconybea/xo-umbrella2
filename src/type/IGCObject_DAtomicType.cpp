@@ -16,12 +16,6 @@
 namespace xo {
     namespace scm {
         auto
-        IGCObject_DAtomicType::shallow_size(const DAtomicType & self) noexcept -> size_type
-        {
-            return self.shallow_size();
-        }
-
-        auto
         IGCObject_DAtomicType::shallow_move(DAtomicType & self, obj<ACollector> gc) noexcept -> Opaque
         {
             return self.shallow_move(gc);

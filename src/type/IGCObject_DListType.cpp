@@ -16,12 +16,6 @@
 namespace xo {
     namespace scm {
         auto
-        IGCObject_DListType::shallow_size(const DListType & self) noexcept -> size_type
-        {
-            return self.shallow_size();
-        }
-
-        auto
         IGCObject_DListType::shallow_move(DListType & self, obj<ACollector> gc) noexcept -> Opaque
         {
             return self.shallow_move(gc);
