@@ -54,7 +54,9 @@
             noexcept: true,
             attributes: [],
         },
-        // Opaque shallow_copy(obj<AAllocator>>) const noexcept
+    ],
+    nonconst_methods: [
+        // Opaque shallow_copy(obj<AAllocator>>) noexcept
         {
             name: "shallow_copy",
             doc: ["copy instance using allocator"],
@@ -66,9 +68,7 @@
             noexcept: true,
             attributes: [],
         },
-    ],
-    nonconst_methods: [
-        // size_type forward_children(obj<ACollector>) const noexcept
+        // size_type forward_children(obj<ACollector>) noexcept
         {
             name: "forward_children",
             doc: ["during GC: forward immdiate children"],

@@ -36,6 +36,12 @@ IGCObject_Any::_valid
 // nonconst methods
 
 auto
+IGCObject_Any::shallow_copy(Opaque, obj<AAllocator>)  const  noexcept -> Opaque
+{
+    _fatal();
+}
+
+auto
 IGCObject_Any::forward_children(Opaque, obj<ACollector>)  const  noexcept -> size_type
 {
     _fatal();

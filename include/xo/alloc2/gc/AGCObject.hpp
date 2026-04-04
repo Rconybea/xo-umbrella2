@@ -64,10 +64,10 @@ public:
     virtual void _drop(Opaque d) const noexcept = 0;
     /** memory consumption for this instance **/
     virtual size_type shallow_size(Copaque data)  const  noexcept = 0;
-    /** copy instance using allocator **/
-    virtual Opaque shallow_copy(Copaque data, obj<AAllocator> mm)  const  noexcept = 0;
 
     // nonconst methods
+    /** copy instance using allocator **/
+    virtual Opaque shallow_copy(Opaque data, obj<AAllocator> mm)  const  noexcept = 0;
     /** during GC: forward immdiate children **/
     virtual size_type forward_children(Opaque data, obj<ACollector> gc)  const  noexcept = 0;
     ///@}

@@ -52,11 +52,11 @@ namespace mm {
         size_type shallow_size(Copaque data)  const  noexcept override {
             return I::shallow_size(_dcast(data));
         }
-        Opaque shallow_copy(Copaque data, obj<AAllocator> mm)  const  noexcept override {
-            return I::shallow_copy(_dcast(data), mm);
-        }
 
         // non-const methods
+        Opaque shallow_copy(Opaque data, obj<AAllocator> mm)  const  noexcept override {
+            return I::shallow_copy(_dcast(data), mm);
+        }
         size_type forward_children(Opaque data, obj<ACollector> gc)  const  noexcept override {
             return I::forward_children(_dcast(data), gc);
         }
