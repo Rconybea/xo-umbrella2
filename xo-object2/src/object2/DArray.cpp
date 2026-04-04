@@ -181,7 +181,7 @@ namespace xo {
         }
 
         DArray *
-        DArray::shallow_copy(obj<AAllocator> mm) const noexcept
+        DArray::shallow_move(obj<AAllocator> mm) const noexcept
         {
             DArray * copy = (DArray *)mm.alloc_copy((std::byte *)this);
 

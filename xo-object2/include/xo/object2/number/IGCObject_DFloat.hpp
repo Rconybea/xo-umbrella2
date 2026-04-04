@@ -53,8 +53,8 @@ namespace xo {
             static size_type shallow_size(const DFloat & self) noexcept;
 
             // non-const methods
-            /** copy instance using allocator **/
-            static Opaque shallow_copy(DFloat & self, obj<AAllocator> mm) noexcept;
+            /** move instance using allocator **/
+            static Opaque shallow_move(DFloat & self, obj<AAllocator> mm) noexcept;
             /** during GC: forward immdiate children **/
             static size_type forward_children(DFloat & self, obj<ACollector> gc) noexcept;
             ///@}

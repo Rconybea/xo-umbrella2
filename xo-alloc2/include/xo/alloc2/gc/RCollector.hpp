@@ -58,9 +58,9 @@ public:
     void * std_copy_for(const T * src) noexcept {
         void * mem = this->alloc_copy_for(src);
         if (mem) {
-            new (mem) T(std::move(*src));
+            return new (mem) T(std::move(*src));
         }
-        return (T *)mem;
+        return nullptr;
     }
     
     /** forward faceted object pointer in place. Defined in GCObject.hpp to avoid #include cycle **/

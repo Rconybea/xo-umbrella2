@@ -34,7 +34,7 @@ namespace xo {
         }
 
         DFloat *
-        DFloat::shallow_copy(obj<AAllocator> mm) const noexcept
+        DFloat::shallow_move(obj<AAllocator> mm) const noexcept
         {
             DFloat * copy = (DFloat *)mm.alloc_copy((std::byte *)this);
 

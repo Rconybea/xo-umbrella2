@@ -88,7 +88,7 @@ namespace xo {
         }
 
         DUniqueString *
-        DUniqueString::shallow_copy(obj<AAllocator> mm) const noexcept
+        DUniqueString::shallow_move(obj<AAllocator> mm) const noexcept
         {
             // well-posed, but not expected to be used.
             assert(false);

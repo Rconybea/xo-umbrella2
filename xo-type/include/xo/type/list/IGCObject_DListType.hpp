@@ -52,8 +52,8 @@ namespace xo {
             static size_type shallow_size(const DListType & self) noexcept;
 
             // non-const methods
-            /** copy instance using allocator **/
-            static Opaque shallow_copy(DListType & self, obj<AAllocator> mm) noexcept;
+            /** move instance using allocator **/
+            static Opaque shallow_move(DListType & self, obj<AAllocator> mm) noexcept;
             /** during GC: forward immdiate children **/
             static size_type forward_children(DListType & self, obj<ACollector> gc) noexcept;
             ///@}

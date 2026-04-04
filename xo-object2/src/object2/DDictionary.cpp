@@ -274,7 +274,7 @@ namespace xo {
         }
 
         DDictionary *
-        DDictionary::shallow_copy(obj<AAllocator> mm) noexcept
+        DDictionary::shallow_move(obj<AAllocator> mm) noexcept
         {
             return mm.std_copy_for(this);
         }

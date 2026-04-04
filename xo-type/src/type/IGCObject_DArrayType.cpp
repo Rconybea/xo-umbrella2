@@ -22,9 +22,9 @@ namespace xo {
         }
 
         auto
-        IGCObject_DArrayType::shallow_copy(DArrayType & self, obj<AAllocator> mm) noexcept -> Opaque
+        IGCObject_DArrayType::shallow_move(DArrayType & self, obj<AAllocator> mm) noexcept -> Opaque
         {
-            return self.shallow_copy(mm);
+            return self.shallow_move(mm);
         }
         auto
         IGCObject_DArrayType::forward_children(DArrayType & self, obj<ACollector> gc) noexcept -> size_type

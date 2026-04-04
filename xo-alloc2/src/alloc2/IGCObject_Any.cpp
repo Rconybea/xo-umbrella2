@@ -36,7 +36,7 @@ IGCObject_Any::_valid
 // nonconst methods
 
 auto
-IGCObject_Any::shallow_copy(Opaque, obj<AAllocator>)  const  noexcept -> Opaque
+IGCObject_Any::shallow_move(Opaque, obj<AAllocator>)  const  noexcept -> Opaque
 {
     _fatal();
 }

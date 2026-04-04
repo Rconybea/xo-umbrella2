@@ -50,7 +50,7 @@ namespace xo {
             ///@{
 
             std::size_t shallow_size() const noexcept;
-            DRuntimeError * shallow_copy(obj<AAllocator> mm) const noexcept;
+            DRuntimeError * shallow_move(obj<AAllocator> mm) const noexcept;
             std::size_t forward_children(obj<ACollector> gc) noexcept;
 
             ///@}

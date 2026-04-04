@@ -56,10 +56,10 @@
         },
     ],
     nonconst_methods: [
-        // Opaque shallow_copy(obj<AAllocator>>) noexcept
+        // Opaque shallow_move(obj<AAllocator>>) noexcept
         {
-            name: "shallow_copy",
-            doc: ["copy instance using allocator"],
+            name: "shallow_move",
+            doc: ["move instance using allocator"],
             return_type: "Opaque",
             args:[
                 {type: "obj<AAllocator>", name: "mm"},
