@@ -36,7 +36,7 @@ namespace xo {
         }
 
         DBoolean *
-        DBoolean::shallow_copy(obj<AAllocator> mm) const noexcept
+        DBoolean::shallow_move(obj<AAllocator> mm) const noexcept
         {
             DBoolean * copy = (DBoolean *)mm.alloc_copy((std::byte *)this);
 

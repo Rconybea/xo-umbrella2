@@ -22,9 +22,9 @@ namespace xo {
         }
 
         auto
-        IGCObject_DInteger::shallow_copy(DInteger & self, obj<AAllocator> mm) noexcept -> Opaque
+        IGCObject_DInteger::shallow_move(DInteger & self, obj<AAllocator> mm) noexcept -> Opaque
         {
-            return self.shallow_copy(mm);
+            return self.shallow_move(mm);
         }
         auto
         IGCObject_DInteger::forward_children(DInteger & self, obj<ACollector> gc) noexcept -> size_type

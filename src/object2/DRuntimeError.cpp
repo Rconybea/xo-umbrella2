@@ -59,7 +59,7 @@ namespace xo {
         }
 
         DRuntimeError *
-        DRuntimeError::shallow_copy(obj<AAllocator> mm) const noexcept
+        DRuntimeError::shallow_move(obj<AAllocator> mm) const noexcept
         {
             DRuntimeError * copy = (DRuntimeError *)mm.alloc_copy((std::byte *)this);
 

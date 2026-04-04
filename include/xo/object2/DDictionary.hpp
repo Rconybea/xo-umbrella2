@@ -203,7 +203,7 @@ namespace xo {
             /** shallow memory consumption. Excludes child objects **/
             AAllocator::size_type shallow_size() const noexcept;
             /** return shallow copy of this array, using memory from @p mm **/
-            DDictionary * shallow_copy(obj<AAllocator> mm) noexcept;
+            DDictionary * shallow_move(obj<AAllocator> mm) noexcept;
             /** forward elements to @p gc to-space; replace originals with forarding pointers **/
             AAllocator::size_type forward_children(obj<ACollector> gc) noexcept;
             ///@}
