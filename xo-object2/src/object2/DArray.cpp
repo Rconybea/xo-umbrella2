@@ -174,12 +174,6 @@ namespace xo {
 
         // gc hooks for IGCObject_DArray
 
-        std::size_t
-        DArray::shallow_size() const noexcept
-        {
-            return sizeof(DArray) + (capacity_ * sizeof(obj<AGCObject>));
-        }
-
         DArray *
         DArray::shallow_move(obj<ACollector> gc) noexcept
         {
@@ -203,7 +197,7 @@ namespace xo {
             return copy;
         }
 
-        std::size_t
+        void
         DArray::forward_children(obj<ACollector> gc) noexcept
         {
             scope log(XO_DEBUG(false));
@@ -215,8 +209,6 @@ namespace xo {
 
                 gc.forward_inplace(&elt);
             }
-
-            return shallow_size();
         }
 
     } /*namespace scm*/

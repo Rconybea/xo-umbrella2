@@ -27,22 +27,16 @@ namespace xo {
             return ppdetail_atomic<double>::print_pretty(ppii, value_);
         }
 
-        size_t
-        DFloat::shallow_size() const noexcept
-        {
-            return sizeof(DFloat);
-        }
-
         DFloat *
         DFloat::shallow_move(obj<ACollector> gc) noexcept
         {
             return gc.std_move_for(this);
         }
 
-        size_t
+        void
         DFloat::forward_children(obj<ACollector>) noexcept
         {
-            return shallow_size();
+            // noop
         }
 
     } /*namespace scm*/

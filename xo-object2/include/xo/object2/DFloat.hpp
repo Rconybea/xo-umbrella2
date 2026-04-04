@@ -34,9 +34,8 @@ namespace xo {
             bool pretty(const ppindentinfo & ppii) const;
 
             // GCObject facet
-            std::size_t shallow_size() const noexcept;
             DFloat * shallow_move(obj<ACollector> gc) noexcept;
-            std::size_t forward_children(obj<ACollector> gc) noexcept;
+            void forward_children(obj<ACollector> gc) noexcept;
 
         private:
 
