@@ -50,10 +50,10 @@ namespace xo {
             // const methods
             /** memory consumption for this instance **/
             static size_type shallow_size(const DRuntimeError & self) noexcept;
-            /** copy instance using allocator **/
-            static Opaque shallow_copy(const DRuntimeError & self, obj<AAllocator> mm) noexcept;
 
             // non-const methods
+            /** copy instance using allocator **/
+            static Opaque shallow_copy(DRuntimeError & self, obj<AAllocator> mm) noexcept;
             /** during GC: forward immdiate children **/
             static size_type forward_children(DRuntimeError & self, obj<ACollector> gc) noexcept;
             ///@}

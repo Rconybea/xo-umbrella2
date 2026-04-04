@@ -22,11 +22,10 @@ namespace xo {
         }
 
         auto
-        IGCObject_DDictionary::shallow_copy(const DDictionary & self, obj<AAllocator> mm) noexcept -> Opaque
+        IGCObject_DDictionary::shallow_copy(DDictionary & self, obj<AAllocator> mm) noexcept -> Opaque
         {
             return self.shallow_copy(mm);
         }
-
         auto
         IGCObject_DDictionary::forward_children(DDictionary & self, obj<ACollector> gc) noexcept -> size_type
         {

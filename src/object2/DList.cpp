@@ -185,7 +185,7 @@ namespace xo {
         }
 
         DList *
-        DList::shallow_copy(obj<AAllocator> mm) const noexcept
+        DList::shallow_copy(obj<AAllocator> mm) noexcept
         {
             return mm.std_copy_for(this);
         }
