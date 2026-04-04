@@ -62,7 +62,7 @@
             doc: ["move instance using allocator"],
             return_type: "Opaque",
             args:[
-                {type: "obj<AAllocator>", name: "mm"},
+                {type: "obj<ACollector>", name: "gc"},
             ],
             const: true,
             noexcept: true,
