@@ -50,7 +50,7 @@ namespace xo {
             /** @defgroup xo-scm-listtype-gcobject-facet **/
             ///@{
             std::size_t shallow_size() const noexcept;
-            DListType * shallow_copy(obj<AAllocator> mm) noexcept;
+            DListType * shallow_move(obj<AAllocator> mm) noexcept;
             std::size_t forward_children(obj<ACollector> gc) noexcept;
             ///@}
 

@@ -42,7 +42,7 @@ namespace xo {
             /** @defgroup xo-scm-arraytype-gcobject-facet **/
             ///@{
             std::size_t shallow_size() const noexcept;
-            DArrayType * shallow_copy(obj<AAllocator> mm) noexcept;
+            DArrayType * shallow_move(obj<AAllocator> mm) noexcept;
             std::size_t forward_children(obj<ACollector> gc) noexcept;
             ///@}
 

@@ -88,7 +88,7 @@ namespace xo {
         }
 
         DListType *
-        DListType::shallow_copy(obj<AAllocator> mm) noexcept
+        DListType::shallow_move(obj<AAllocator> mm) noexcept
         {
             return mm.std_copy_for(this);
         }
