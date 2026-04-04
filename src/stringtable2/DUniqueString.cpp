@@ -81,12 +81,6 @@ namespace xo {
             return result;
         }
 
-        size_t
-        DUniqueString::shallow_size() const noexcept
-        {
-            return sizeof(DUniqueString);
-        }
-
         DUniqueString *
         DUniqueString::shallow_move(obj<ACollector> gc) noexcept
         {
@@ -114,10 +108,10 @@ namespace xo {
             return copy;
         }
 
-        size_t
+        void
         DUniqueString::forward_children(obj<ACollector>) noexcept
         {
-            return shallow_size();
+            // no-op
         }
     } /*namespace scm*/
 } /*namespace xo*/

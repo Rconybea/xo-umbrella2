@@ -88,13 +88,11 @@ namespace xo {
             /** @defgroup duniquestring-gcobject-methods gcobject facet methods **/
             ///@{
 
-            std::size_t shallow_size() const noexcept;
-
             /** clone unique string, using memory from allocator @p mm. **/
             DUniqueString * shallow_move(obj<ACollector> gc) noexcept;
 
             /** fixup child pointers (trivial for DUniqueString, no gc-owned children **/
-            std::size_t forward_children(obj<ACollector> gc) noexcept;
+            void forward_children(obj<ACollector> gc) noexcept;
 
             ///@}
 
