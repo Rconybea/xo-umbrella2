@@ -49,8 +49,6 @@ namespace xo {
             /** @defgroup scm-gcobject-dfloat-methods **/
             ///@{
             // const methods
-            /** memory consumption for this instance **/
-            static size_type shallow_size(const DFloat & self) noexcept;
 
             // non-const methods
             /** move instance using allocator **/
