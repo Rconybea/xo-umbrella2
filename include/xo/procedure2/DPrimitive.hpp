@@ -134,7 +134,7 @@ namespace xo {
             /** @defgroup scm-primitive-gcobject-facet **/
             ///@{
             std::size_t shallow_size() const noexcept;
-            Primitive * shallow_move(obj<AAllocator> mm) const noexcept;
+            Primitive * shallow_move(obj<ACollector> gc) noexcept;
             std::size_t forward_children(obj<ACollector> gc) noexcept;
             ///@}
 
@@ -198,14 +198,8 @@ namespace xo {
 
         template <typename Fn>
         Primitive<Fn> *
-        Primitive<Fn>::shallow_move(obj<AAllocator> mm) const noexcept {
-            void * mem = mm.alloc_copy((std::byte *)this);
-
-            if (mem) {
-                return new (mem) Primitive(*this);
-            }
-
-            return nullptr;
+        Primitive<Fn>::shallow_move(obj<ACollector> gc) noexcept {
+            return gc.std_copy_for(this);
         }
 
         template <typename Fn>
