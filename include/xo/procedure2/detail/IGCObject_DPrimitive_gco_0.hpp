@@ -50,8 +50,6 @@ namespace xo {
             /** @defgroup scm-gcobject-dprimitive_gco_0-methods **/
             ///@{
             // const methods
-            /** memory consumption for this instance **/
-            static size_type shallow_size(const DPrimitive_gco_0 & self) noexcept;
 
             // non-const methods
             /** move instance using allocator **/

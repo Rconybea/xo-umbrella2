@@ -16,12 +16,6 @@
 namespace xo {
     namespace scm {
         auto
-        IGCObject_DPrimitive_gco_2_dict_string::shallow_size(const DPrimitive_gco_2_dict_string & self) noexcept -> size_type
-        {
-            return self.shallow_size();
-        }
-
-        auto
         IGCObject_DPrimitive_gco_2_dict_string::shallow_move(DPrimitive_gco_2_dict_string & self, obj<ACollector> gc) noexcept -> Opaque
         {
             return self.shallow_move(gc);
