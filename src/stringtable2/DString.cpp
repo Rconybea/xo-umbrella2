@@ -158,7 +158,7 @@ namespace xo {
         DString *
         DString::shallow_move(obj<ACollector> gc) noexcept
         {
-            // note: not using gc.std_copy_for() here
+            // note: not using gc.std_move_for() here
             //       b/c DString flexible array means not move-constructible
 
             DString * copy = (DString *)gc.alloc_copy_for(this);
