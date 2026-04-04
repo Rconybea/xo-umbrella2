@@ -54,8 +54,8 @@ namespace mm {
         }
 
         // non-const methods
-        Opaque shallow_copy(Opaque data, obj<AAllocator> mm)  const  noexcept override {
-            return I::shallow_copy(_dcast(data), mm);
+        Opaque shallow_move(Opaque data, obj<AAllocator> mm)  const  noexcept override {
+            return I::shallow_move(_dcast(data), mm);
         }
         size_type forward_children(Opaque data, obj<ACollector> gc)  const  noexcept override {
             return I::forward_children(_dcast(data), gc);
