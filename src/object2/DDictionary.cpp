@@ -267,26 +267,18 @@ namespace xo {
 
         // ----- gcobject facet -----
 
-        std::size_t
-        DDictionary::shallow_size() const noexcept
-        {
-            return sizeof(DDictionary);
-        }
-
         DDictionary *
         DDictionary::shallow_move(obj<ACollector> gc) noexcept
         {
             return gc.std_move_for(this);
         }
 
-        std::size_t
+        void
         DDictionary::forward_children(obj<ACollector> gc) noexcept
         {
 
             gc.forward_inplace(&keys_);
             gc.forward_inplace(&values_);
-
-            return this->shallow_size();
         }
 
     } /*namespace scm*/

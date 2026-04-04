@@ -29,22 +29,16 @@ namespace xo {
                         (value_ ? "true" : "false"));
         }
 
-        size_t
-        DBoolean::shallow_size() const noexcept
-        {
-            return sizeof(DBoolean);
-        }
-
         DBoolean *
         DBoolean::shallow_move(obj<ACollector> gc) noexcept
         {
             return gc.std_move_for(this);
         }
 
-        size_t
+        void
         DBoolean::forward_children(obj<ACollector>) noexcept
         {
-            return shallow_size();
+            // no-op
         }
 
 

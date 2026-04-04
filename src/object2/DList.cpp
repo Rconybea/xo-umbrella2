@@ -178,31 +178,19 @@ namespace xo {
 
         // ----- GCObject facet ------
 
-        auto
-        DList::shallow_size() const noexcept -> size_type
-        {
-            return sizeof(DList);
-        }
-
         DList *
         DList::shallow_move(obj<ACollector> gc) noexcept
         {
             return gc.std_move_for(this);
         }
 
-        auto
-        DList::forward_children(obj<ACollector> gc) noexcept -> size_type
+        void
+        DList::forward_children(obj<ACollector> gc) noexcept
         {
             //scope log(XO_DEBUG(true));
 
             gc.forward_inplace(&head_);
-            //gc.forward_inplace(head_.iface(), (void **)&(head_.data_));
-
             gc.forward_inplace(&rest_);
-            //auto iface = xo::facet::impl_for<AGCObject,DList>();
-            //gc.forward_inplace(&iface, (void **)(&rest_));
-
-            return this->shallow_size();
         }
     } /*namespace scm*/
 } /*namespace xo*/

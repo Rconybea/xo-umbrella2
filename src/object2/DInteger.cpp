@@ -27,24 +27,17 @@ namespace xo {
             return ppdetail_atomic<long>::print_pretty(ppii, value_);
         }
 
-        size_t
-        DInteger::shallow_size() const noexcept
-        {
-            return sizeof(DInteger);
-        }
-
         DInteger *
         DInteger::shallow_move(obj<ACollector> gc) noexcept
         {
             return gc.std_move_for(this);
         }
 
-        size_t
+        void
         DInteger::forward_children(obj<ACollector>) noexcept
         {
-            return shallow_size();
+            // no-op
         }
-
 
     } /*namespace scm*/
 } /*namespace xo*/

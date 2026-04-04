@@ -145,12 +145,10 @@ namespace xo {
             ///@}
             /** @defgroup darray-gcobject-methods **/
             ///@{
-            /** shallow memory consumption. Excludes child objects **/
-            AAllocator::size_type shallow_size() const noexcept;
-            /** return shallow copy of this array, using memory from @p mm **/
+            /** move to new address, mandated by @p gc **/
             DArray * shallow_move(obj<ACollector> gc) noexcept;
             /** forward elements to @p gc to-space; replace originals with forarding pointers **/
-            AAllocator::size_type forward_children(obj<ACollector> gc) noexcept;
+            void forward_children(obj<ACollector> gc) noexcept;
             ///@}
 
         private:
