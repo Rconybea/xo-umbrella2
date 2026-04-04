@@ -110,7 +110,7 @@ namespace xo {
             return slot.is_occupied();
         }
 
-        const AGCObject *
+        AGCObject *
         GCObjectStore::lookup_type(typeseq tseq) const noexcept
         {
             scope log(XO_DEBUG(false));
@@ -846,7 +846,7 @@ namespace xo {
             GCMoveCheckpoint gray_lo_v = this->snap_move_checkpoint(upto);
 
             //obj<AAllocator, DX1Collector> alloc(this);
-            const AGCObject * iface = lookup_type(tseq);
+            AGCObject * iface = this->lookup_type(tseq);
 
             assert(iface->_has_null_vptr() == false);
 
@@ -861,7 +861,7 @@ namespace xo {
 
         void *
         GCObjectStore::_shallow_move(DX1Collector * gc,
-                                     const AGCObject * iface,
+                                     AGCObject * iface,
                                      void * from_src)
         {
             scope log(XO_DEBUG(config_.debug_flag_));
