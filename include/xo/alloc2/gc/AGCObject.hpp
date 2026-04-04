@@ -69,7 +69,7 @@ public:
     /** move instance using allocator **/
     virtual Opaque shallow_move(Opaque data, obj<ACollector> gc)  const  noexcept = 0;
     /** during GC: forward immdiate children **/
-    virtual size_type forward_children(Opaque data, obj<ACollector> gc)  const  noexcept = 0;
+    virtual void forward_children(Opaque data, obj<ACollector> gc)  const  noexcept = 0;
     ///@}
 }; /*AGCObject*/
 

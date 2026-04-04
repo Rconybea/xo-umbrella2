@@ -65,7 +65,7 @@ namespace mm {
 
         // nonconst methods
         [[noreturn]] Opaque shallow_move(Opaque, obj<ACollector>)  const  noexcept override;
-        [[noreturn]] size_type forward_children(Opaque, obj<ACollector>)  const  noexcept override;
+        [[noreturn]] void forward_children(Opaque, obj<ACollector>)  const  noexcept override;
 
         ///@}
 

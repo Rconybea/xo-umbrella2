@@ -63,7 +63,7 @@ public:
     Opaque shallow_move(obj<ACollector> gc)  noexcept {
         return O::iface()->shallow_move(O::data(), gc);
     }
-    size_type forward_children(obj<ACollector> gc)  noexcept {
+    void forward_children(obj<ACollector> gc)  noexcept {
         return O::iface()->forward_children(O::data(), gc);
     }
 
