@@ -245,7 +245,7 @@ namespace xo {
             size_type shallow_size() const noexcept;
 
             /** clone string, using memory from allocator @p mm **/
-            DString * shallow_copy(obj<AAllocator> mm) const noexcept;
+            DString * shallow_move(obj<AAllocator> mm) const noexcept;
 
             size_type forward_children(obj<ACollector> gc) noexcept;
             /** fixup child pointers (trivial for DString, no children)

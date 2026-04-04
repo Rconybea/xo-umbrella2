@@ -156,7 +156,7 @@ namespace xo {
         }
 
         DString *
-        DString::shallow_copy(obj<AAllocator> mm) const noexcept
+        DString::shallow_move(obj<AAllocator> mm) const noexcept
         {
             DString * copy = (DString *)mm.alloc_copy((std::byte *)this);
 
