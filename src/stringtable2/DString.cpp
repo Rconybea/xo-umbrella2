@@ -156,9 +156,12 @@ namespace xo {
         }
 
         DString *
-        DString::shallow_move(obj<AAllocator> mm) const noexcept
+        DString::shallow_move(obj<ACollector> gc) noexcept
         {
-            DString * copy = (DString *)mm.alloc_copy((std::byte *)this);
+            // note: not using gc.std_copy_for() here
+            //       b/c DString flexible array means not move-constructible
+
+            DString * copy = (DString *)gc.alloc_copy_for(this);
 
             if (copy) {
                 copy->capacity_ = capacity_;
