@@ -34,14 +34,9 @@ namespace xo {
         }
 
         DInteger *
-        DInteger::shallow_move(obj<AAllocator> mm) const noexcept
+        DInteger::shallow_move(obj<ACollector> gc) noexcept
         {
-            DInteger * copy = (DInteger *)mm.alloc_copy((std::byte *)this);
-
-            if (copy)
-                *copy = *this;
-
-            return copy;
+            return gc.std_copy_for(this);
         }
 
         size_t

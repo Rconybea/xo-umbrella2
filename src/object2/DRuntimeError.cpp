@@ -59,14 +59,9 @@ namespace xo {
         }
 
         DRuntimeError *
-        DRuntimeError::shallow_move(obj<AAllocator> mm) const noexcept
+        DRuntimeError::shallow_move(obj<ACollector> gc) noexcept
         {
-            DRuntimeError * copy = (DRuntimeError *)mm.alloc_copy((std::byte *)this);
-
-            if (copy)
-                *copy = *this;
-
-            return copy;
+            return gc.std_copy_for(this);
         }
 
         std::size_t

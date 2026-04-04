@@ -70,7 +70,7 @@ namespace xo {
             /** @defgroup xo-scm-list-gcobject-facet gcobject facet **/
             ///@{
             size_type shallow_size() const noexcept;
-            DList * shallow_move(obj<AAllocator> mm) noexcept;
+            DList * shallow_move(obj<ACollector> gc) noexcept;
             size_type forward_children(obj<ACollector> gc) noexcept;
             ///@}
 
