@@ -133,9 +133,8 @@ namespace xo {
             ///@}
             /** @defgroup scm-primitive-gcobject-facet **/
             ///@{
-            std::size_t shallow_size() const noexcept;
             Primitive * shallow_move(obj<ACollector> gc) noexcept;
-            std::size_t forward_children(obj<ACollector> gc) noexcept;
+            void forward_children(obj<ACollector> gc) noexcept;
             ///@}
 
         private:
@@ -191,26 +190,18 @@ namespace xo {
         }
 
         template <typename Fn>
-        std::size_t
-        Primitive<Fn>::shallow_size() const noexcept {
-            return sizeof(*this);
-        }
-
-        template <typename Fn>
         Primitive<Fn> *
         Primitive<Fn>::shallow_move(obj<ACollector> gc) noexcept {
             return gc.std_move_for(this);
         }
 
         template <typename Fn>
-        std::size_t
+        void
         Primitive<Fn>::forward_children(obj<ACollector> gc) noexcept {
             {
                 auto e = type_.to_facet<AGCObject>();  // FacetRegistry dep
                 gc.forward_inplace(e.iface(), (void **)&(type_.data_));
             }
-
-            return this->shallow_size();
         }
 
     } /*namespace scm*/
