@@ -45,15 +45,15 @@
     ],
     const_methods: [
         // size_type shallow_size() const noexcept
-        {
-            name: "shallow_size",
-            doc: ["memory consumption for this instance"],
-            return_type: "size_type",
-            args: [],
-            const: true,
-            noexcept: true,
-            attributes: [],
-        },
+//        {
+//            name: "shallow_size",
+//            doc: ["memory consumption for this instance"],
+//            return_type: "size_type",
+//            args: [],
+//            const: true,
+//            noexcept: true,
+//            attributes: [],
+//        },
     ],
     nonconst_methods: [
         // Opaque shallow_move(obj<AAllocator>>) noexcept

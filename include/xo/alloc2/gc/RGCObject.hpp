@@ -55,9 +55,6 @@ public:
     void _drop() const noexcept { O::iface()->_drop(O::data()); }
 
     // const methods
-    size_type shallow_size()  const  noexcept {
-        return O::iface()->shallow_size(O::data());
-    }
 
     // non-const methods (still const in router!)
     Opaque shallow_move(obj<ACollector> gc)  noexcept {

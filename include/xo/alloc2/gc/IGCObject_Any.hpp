@@ -61,7 +61,6 @@ namespace mm {
         [[noreturn]] void _drop(Opaque) const noexcept override { _fatal(); }
 
         // const methods
-        [[noreturn]] size_type shallow_size(Copaque)  const  noexcept override { _fatal(); }
 
         // nonconst methods
         [[noreturn]] Opaque shallow_move(Opaque, obj<ACollector>)  const  noexcept override;
