@@ -83,7 +83,7 @@ namespace xo {
         }
 
         DArrayType *
-        DArrayType::shallow_copy(obj<AAllocator> mm) const noexcept
+        DArrayType::shallow_copy(obj<AAllocator> mm) noexcept
         {
             return mm.std_copy_for(this);
         }
