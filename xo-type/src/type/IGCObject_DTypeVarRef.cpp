@@ -22,11 +22,10 @@ namespace xo {
         }
 
         auto
-        IGCObject_DTypeVarRef::shallow_copy(const DTypeVarRef & self, obj<AAllocator> mm) noexcept -> Opaque
+        IGCObject_DTypeVarRef::shallow_copy(DTypeVarRef & self, obj<AAllocator> mm) noexcept -> Opaque
         {
             return self.shallow_copy(mm);
         }
-
         auto
         IGCObject_DTypeVarRef::forward_children(DTypeVarRef & self, obj<ACollector> gc) noexcept -> size_type
         {

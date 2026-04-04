@@ -22,11 +22,10 @@ namespace xo {
         }
 
         auto
-        IGCObject_DUniqueString::shallow_copy(const DUniqueString & self, obj<AAllocator> mm) noexcept -> Opaque
+        IGCObject_DUniqueString::shallow_copy(DUniqueString & self, obj<AAllocator> mm) noexcept -> Opaque
         {
             return self.shallow_copy(mm);
         }
-
         auto
         IGCObject_DUniqueString::forward_children(DUniqueString & self, obj<ACollector> gc) noexcept -> size_type
         {

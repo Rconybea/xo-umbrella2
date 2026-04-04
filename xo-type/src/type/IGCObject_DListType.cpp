@@ -22,11 +22,10 @@ namespace xo {
         }
 
         auto
-        IGCObject_DListType::shallow_copy(const DListType & self, obj<AAllocator> mm) noexcept -> Opaque
+        IGCObject_DListType::shallow_copy(DListType & self, obj<AAllocator> mm) noexcept -> Opaque
         {
             return self.shallow_copy(mm);
         }
-
         auto
         IGCObject_DListType::forward_children(DListType & self, obj<ACollector> gc) noexcept -> size_type
         {

@@ -49,7 +49,7 @@ namespace xo {
             /** lookup interface from type sequence
              *  (can use tseq = typeseq::id<T>() for type T)
              **/
-            const AGCObject * lookup_type(typeseq tseq) const noexcept;
+            AGCObject * lookup_type(typeseq tseq) const noexcept;
 
             /** generation to which pointer @p addr belongs, given role @p r;
              *  sentinel if not found in this collector
@@ -217,7 +217,7 @@ namespace xo {
              *  Shallow: does not traverse children
              **/
             void * _shallow_move(DX1Collector * gc,
-                                 const AGCObject * iface,
+                                 AGCObject * iface,
                                  void * from_src);
 
         private:

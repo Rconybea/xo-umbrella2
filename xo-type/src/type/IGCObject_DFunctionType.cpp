@@ -22,11 +22,10 @@ namespace xo {
         }
 
         auto
-        IGCObject_DFunctionType::shallow_copy(const DFunctionType & self, obj<AAllocator> mm) noexcept -> Opaque
+        IGCObject_DFunctionType::shallow_copy(DFunctionType & self, obj<AAllocator> mm) noexcept -> Opaque
         {
             return self.shallow_copy(mm);
         }
-
         auto
         IGCObject_DFunctionType::forward_children(DFunctionType & self, obj<ACollector> gc) noexcept -> size_type
         {

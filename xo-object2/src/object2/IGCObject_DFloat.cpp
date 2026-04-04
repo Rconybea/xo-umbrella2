@@ -22,11 +22,10 @@ namespace xo {
         }
 
         auto
-        IGCObject_DFloat::shallow_copy(const DFloat & self, obj<AAllocator> mm) noexcept -> Opaque
+        IGCObject_DFloat::shallow_copy(DFloat & self, obj<AAllocator> mm) noexcept -> Opaque
         {
             return self.shallow_copy(mm);
         }
-
         auto
         IGCObject_DFloat::forward_children(DFloat & self, obj<ACollector> gc) noexcept -> size_type
         {

@@ -61,7 +61,7 @@ namespace xo {
         }
 
         DAtomicType *
-        DAtomicType::shallow_copy(obj<AAllocator> mm) const noexcept
+        DAtomicType::shallow_copy(obj<AAllocator> mm) noexcept
         {
             return mm.std_copy_for(this);
         }

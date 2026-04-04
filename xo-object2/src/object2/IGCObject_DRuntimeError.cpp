@@ -22,11 +22,10 @@ namespace xo {
         }
 
         auto
-        IGCObject_DRuntimeError::shallow_copy(const DRuntimeError & self, obj<AAllocator> mm) noexcept -> Opaque
+        IGCObject_DRuntimeError::shallow_copy(DRuntimeError & self, obj<AAllocator> mm) noexcept -> Opaque
         {
             return self.shallow_copy(mm);
         }
-
         auto
         IGCObject_DRuntimeError::forward_children(DRuntimeError & self, obj<ACollector> gc) noexcept -> size_type
         {

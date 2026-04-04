@@ -22,11 +22,10 @@ namespace xo {
         }
 
         auto
-        IGCObject_DPrimitive_gco_0::shallow_copy(const DPrimitive_gco_0 & self, obj<AAllocator> mm) noexcept -> Opaque
+        IGCObject_DPrimitive_gco_0::shallow_copy(DPrimitive_gco_0 & self, obj<AAllocator> mm) noexcept -> Opaque
         {
             return self.shallow_copy(mm);
         }
-
         auto
         IGCObject_DPrimitive_gco_0::forward_children(DPrimitive_gco_0 & self, obj<ACollector> gc) noexcept -> size_type
         {

@@ -58,11 +58,11 @@ public:
     size_type shallow_size()  const  noexcept {
         return O::iface()->shallow_size(O::data());
     }
-    Opaque shallow_copy(obj<AAllocator> mm)  const  noexcept {
-        return O::iface()->shallow_copy(O::data(), mm);
-    }
 
     // non-const methods (still const in router!)
+    Opaque shallow_copy(obj<AAllocator> mm)  noexcept {
+        return O::iface()->shallow_copy(O::data(), mm);
+    }
     size_type forward_children(obj<ACollector> gc)  noexcept {
         return O::iface()->forward_children(O::data(), gc);
     }

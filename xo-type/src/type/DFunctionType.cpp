@@ -94,7 +94,7 @@ namespace xo {
         }
 
         DFunctionType *
-        DFunctionType::shallow_copy(obj<AAllocator> mm) const noexcept
+        DFunctionType::shallow_copy(obj<AAllocator> mm) noexcept
         {
             return mm.std_copy_for(this);
         }

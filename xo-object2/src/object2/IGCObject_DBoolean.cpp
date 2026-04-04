@@ -22,11 +22,10 @@ namespace xo {
         }
 
         auto
-        IGCObject_DBoolean::shallow_copy(const DBoolean & self, obj<AAllocator> mm) noexcept -> Opaque
+        IGCObject_DBoolean::shallow_copy(DBoolean & self, obj<AAllocator> mm) noexcept -> Opaque
         {
             return self.shallow_copy(mm);
         }
-
         auto
         IGCObject_DBoolean::forward_children(DBoolean & self, obj<ACollector> gc) noexcept -> size_type
         {
