@@ -27,9 +27,9 @@ namespace xo {
             return self.shallow_move(gc);
         }
         auto
-        IGCObject_DPrimitive_gco_0::forward_children(DPrimitive_gco_0 & self, obj<ACollector> gc) noexcept -> size_type
+        IGCObject_DPrimitive_gco_0::forward_children(DPrimitive_gco_0 & self, obj<ACollector> gc) noexcept -> void
         {
-            return self.forward_children(gc);
+            self.forward_children(gc);
         }
 
     } /*namespace scm*/

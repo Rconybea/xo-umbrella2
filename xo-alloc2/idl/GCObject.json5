@@ -72,7 +72,7 @@
         {
             name: "forward_children",
             doc: ["during GC: forward immdiate children"],
-            return_type: "size_type",
+            return_type: "void",
             args: [
                 {type: "obj<ACollector>", name: "gc"},
             ],
