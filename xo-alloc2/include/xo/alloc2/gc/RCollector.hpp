@@ -55,7 +55,7 @@ public:
 
     /** convenience template for move-constructible T (this is common) **/
     template <typename T>
-    T * std_copy_for(T * src) noexcept {
+    T * std_move_for(T * src) noexcept {
         void * mem = this->alloc_copy_for(src);
         if (mem) {
             return new (mem) T(std::move(*src));

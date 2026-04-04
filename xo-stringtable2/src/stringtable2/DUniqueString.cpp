@@ -92,7 +92,7 @@ namespace xo {
         {
             // well-posed, but not expected to be used.
             //
-            // Not using gc.std_copy_for() here because compiler doesn't know
+            // Not using gc.std_move_for() here because compiler doesn't know
             // actual alloc size of a DUniqueString instance
 
             assert(false);

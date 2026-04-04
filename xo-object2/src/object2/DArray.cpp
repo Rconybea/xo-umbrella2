@@ -183,7 +183,7 @@ namespace xo {
         DArray *
         DArray::shallow_move(obj<ACollector> gc) noexcept
         {
-            // note: not using gc.std_copy_for() here.
+            // note: not using gc.std_move_for() here.
             //       flexible array -> compiler doesn't know actual DArray allocation size
 
             DArray * copy = (DArray *)gc.alloc_copy((std::byte *)this);
