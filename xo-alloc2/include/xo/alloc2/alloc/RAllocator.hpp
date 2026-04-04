@@ -42,14 +42,14 @@ namespace xo {
             }
 
             template <typename T>
-            T * std_copy_for(const T * src) noexcept {
-                T * copy = (T *)(this->alloc_copy_for(src));
+            T * std_copy_for(T * src) noexcept {
+                void * mem = this->alloc_copy_for(src);
 
-                if (copy) {
-                    *copy = *src;
+                if (mem) {
+                    return new (mem) T(std::move(*src));
                 }
 
-                return copy;
+                return nullptr;
             }
 
             typeseq       _typeseq() const noexcept { return O::iface()->_typeseq(); }
