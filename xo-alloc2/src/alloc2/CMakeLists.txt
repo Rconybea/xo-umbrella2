@@ -9,7 +9,9 @@ set(SELF_SRCS
     CollectorTypeRegistry.cpp
 
     facet/ICollector_Any.cpp
+
     IGCObject_Any.cpp
+    facet/IGCObjectVisitor_Any.cpp
 
     AAllocator.cpp
     IAllocator_Any.cpp

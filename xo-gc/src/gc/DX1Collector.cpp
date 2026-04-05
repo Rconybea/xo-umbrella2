@@ -587,11 +587,31 @@ namespace xo {
         DX1Collector::forward_inplace(AGCObject * lhs_iface,
                                       void ** lhs_data)
         {
+            // TODO: streamline once GCObject refactored so that
+            //       forward_children takes GCObjectVisitor instead of Collector
+            //       argument.
+
             Generation upto = runstate_.gc_upto();
 
             if (runstate_.is_running()) {
                 // called during collection phase
                 gco_store_.forward_inplace_aux(this, lhs_iface, lhs_data, upto);
+            } else if (runstate_.is_verify()) {
+                // called during verify_ok
+                this->_verify_aux(lhs_iface, *lhs_data);
+            } else {
+                // should be unreachable
+                assert(false);
+            }
+        }
+
+        void
+        DX1Collector::visit_child(AGCObject * lhs_iface,
+                                  void ** lhs_data)
+        {
+            if (runstate_.is_running()) {
+                // called during collection phase
+                this->forward_inplace(lhs_iface, lhs_data);
             } else if (runstate_.is_verify()) {
                 // called during verify_ok
                 this->_verify_aux(lhs_iface, *lhs_data);

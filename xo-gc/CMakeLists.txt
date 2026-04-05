@@ -25,6 +25,13 @@ xo_add_genfacetimpl(
     INPUT idl/ICollector_DX1Collector.json5
 )
 
+# note: manual target; generated code committed to git
+xo_add_genfacetimpl(
+    TARGET xo-gc-facetimpl-gcobjectvisitor-x1collector
+    FACET_PKG xo_alloc2
+    INPUT idl/IGCObjectVisitor_DX1Collector.json5
+)
+
 # ----------------------------------------------------------------
 
 xo_add_genfacet_all(xo-gc-genfacet-all)
