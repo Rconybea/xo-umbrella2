@@ -37,6 +37,15 @@ xo_add_genfacet(
 
 # note: manual target; generated code committed to git
 xo_add_genfacet(
+    TARGET xo-alloc2-facet-gcobjectvisitor
+    FACET GCObjectVisitor
+    INPUT idl/GCObjectVisitor.json5
+)
+
+# ----------------------------------------------------------------
+
+# note: manual target; generated code committed to git
+xo_add_genfacet(
     TARGET xo-alloc2-facet-resourcevisitor
     FACET ResourceVisitor
     INPUT idl/ResourceVisitor.json5

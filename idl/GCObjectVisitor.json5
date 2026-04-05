@@ -1,0 +1,75 @@
+{
+    mode: "facet",
+    output_cpp_dir: "src/alloc2/facet",
+    output_hpp_dir: "include/xo/alloc2",
+    output_impl_subdir: "gc",
+    includes: [
+//        "<xo/alloc2/Allocator.hpp>",
+//        "<xo/alloc2/Collector.hpp>",
+//        "<cstdint>",
+//        "<cstddef>",
+    ],
+    // extra includes in GCObject.hpp, if any
+    user_hpp_includes: [
+//        "\"gc/RCollector_aux.hpp\"",
+    ],
+    namespace1: "xo",
+    namespace2: "mm",
+    pretext: [
+        "// see GCObject.hpp, also in xo-alloc2/",
+        "namespace xo { namespace mm { class AGCObject; }}",
+    ],
+    facet: "GCObjectVisitor",
+    detail_subdir: "gc",
+    brief: "gc-aware object visitor",
+    using_doxygen: true,
+    doc: [
+        "Visit a gc-aware object. Visitor can traverse and update child pointers in-place."
+    ],
+    types: [
+        // using size_type = std::size_t
+//        {
+//            name: "size_type",
+//            doc: ["type for an amount of memory"],
+//            definition: "std::size_t",
+//        },
+//        {
+//            name: "AAllocator",
+//            doc: ["fomo allocator type"],
+//            definition: "xo::mm::AAllocator",
+//        },
+//        {
+//            name: "ACollector",
+//            doc: ["fomo collector type"],
+//            definition: "xo::mm::ACollector",
+//        },
+    ],
+    const_methods: [
+        // size_type shallow_size() const noexcept
+//        {
+//            name: "shallow_size",
+//            doc: ["memory consumption for this instance"],
+//            return_type: "size_type",
+//            args: [],
+//            const: true,
+//            noexcept: true,
+//            attributes: [],
+//        },
+    ],
+    nonconst_methods: [
+        // void visit_child(AGCObject * iface, void ** pp_data) noexcept;
+        {
+            name: "visit_child",
+            doc: ["visit child of a gc-aware object. May update child in-place!"],
+            return_type: "void",
+            args:[
+                {type: "AGCObject *", name: "iface"},
+                {type: "void **", name: "pp_data"},
+            ],
+            const: true,  // technical const. I/face not modified
+            noexcept: true,
+            attributes: [],
+        },
+    ],
+    router_facet_explicit_content: []
+}
