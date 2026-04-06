@@ -26,7 +26,8 @@ namespace xo {
             using size_type = DArena::size_type;
 
         public:
-            explicit MutationLogStore(const MutationLogConfig & config);
+            explicit MutationLogStore(const MutationLogConfig & config,
+                                      GCObjectStore * gco_store);
 
             /** Initialize mlog state
              *  with o/s page size @p page_z
@@ -140,8 +141,7 @@ namespace xo {
              *  helper function to decide whether to keep a mutation log entry
              *  @return true iff mlog entry appended to @p keep_mlog
              **/
-            bool _check_keep_mutation_aux(const GCObjectStore & gco_store,
-                                          const MutationLogEntry & from_entry,
+            bool _check_keep_mutation_aux(const MutationLogEntry & from_entry,
                                           Generation parent_gen_to,
                                           void * child_to,
                                           MutationLog * keep_mlog);
@@ -150,6 +150,11 @@ namespace xo {
         public:
             /** configuration for mlog store **/
             MutationLogConfig config_;
+
+            /** stores GCOs (gc-aware objects) owned by the incremental collector
+             *  with this mutaiton-log store
+             **/
+            GCObjectStore * gco_store_ = nullptr;
 
             /** Cross-generational mutations tracked in MutationLogs.
              *  We need three logs per generation:
