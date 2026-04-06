@@ -21,9 +21,9 @@ namespace xo {
             return self.shallow_move(gc);
         }
         auto
-        IGCObject_DUniqueString::forward_children(DUniqueString & self, obj<ACollector> gc) noexcept -> void
+        IGCObject_DUniqueString::visit_gco_children(DUniqueString & self, obj<AGCObjectVisitor> fn) noexcept -> void
         {
-            self.forward_children(gc);
+            self.visit_gco_children(fn);
         }
 
     } /*namespace scm*/
