@@ -4,7 +4,7 @@
  **/
 
 #include "MutationLogStore.hpp"
-#include "DX1Collector.hpp"
+#include "X1Collector.hpp" // temporary
 
 namespace xo {
     namespace mm {
@@ -439,17 +439,17 @@ namespace xo {
             }
 
             return counters;
-        }
+        } /*forward_mutation_log_phase*/
 
         MutationLogStatistics
-        MutationLogStore::_preserve_child_of_live_parent(DX1Collector * gc,
+        MutationLogStore::_preserve_child_of_live_parent(DX1Collector * x1gc,
                                                          Generation upto,
                                                          Generation parent_gen,
                                                          const MutationLogEntry & from_entry,
                                                          MutationLog * keep_mlog)
         {
             void * child_fr = *from_entry.p_data();
-            AllocInfo child_info = gc->alloc_info((std::byte *)(child_fr));
+            AllocInfo child_info = x1gc->alloc_info((std::byte *)(child_fr));
 
             MutationLogStatistics counters;
 
@@ -463,6 +463,8 @@ namespace xo {
             // Parent already recognized as alive. Either not subject to collection
             // or already evacuated.
             // (+ remember this need not be 1st pass over mlog entries)
+
+            GCObjectStore & gco_store = x1gc->gco_store();
 
             if (child_info.is_forwarding_tseq()) {
                 // [MLOG1]
@@ -479,9 +481,7 @@ namespace xo {
 
                 ++counters.n_rescue_;
 
-                GCObjectStore & gco_store = gc->gco_store();
-
-                child_to = gco_store.deep_move_interior(gc, child_fr, upto);
+                child_to = gco_store.deep_move_interior(x1gc->ref<AGCObjectVisitor>(), child_fr, upto);
 
                 // update child pointer in parent object
                 *from_entry.p_data() = child_to;
@@ -489,7 +489,7 @@ namespace xo {
 
             // child_to generation in {gen, gen+1}
 
-            this->_check_keep_mutation_aux(gc->gco_store(),
+            this->_check_keep_mutation_aux(gco_store,
                                            from_entry, parent_gen, child_to, keep_mlog);
 
             return counters;

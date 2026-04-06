@@ -13,7 +13,6 @@
 
 namespace xo {
     namespace mm {
-        class DX1Collector;
         class X1VerifyStats;
 
         /** @brief container to hold gc-aware objects for X1 collector
@@ -122,7 +121,7 @@ namespace xo {
              *  to call AGCObject visitor method (forward_children()) on each
              *  object stored here.
              **/
-            void verify_ok(DX1Collector * gc,
+            void verify_ok(obj<AGCObjectVisitor> gc,
                            X1VerifyStats * p_verify_stats) noexcept;
 
             /** Register object type with this collector.
@@ -143,7 +142,7 @@ namespace xo {
 
              *  Require: runstate_.is_running()
              **/
-            void * deep_move_root(DX1Collector * gc,
+            void * deep_move_root(obj<AGCObjectVisitor> gc,
                                   obj<AGCObject> from_src,
                                   Generation upto);
 
@@ -152,7 +151,7 @@ namespace xo {
              *
              *  NOTE: load-bearing for MutationLogStore
              **/
-            void * deep_move_interior(DX1Collector * gc,
+            void * deep_move_interior(obj<AGCObjectVisitor> gc,
                                       void * from_src,
                                       Generation upto);
 
@@ -163,10 +162,10 @@ namespace xo {
              *
              *  Replace original with forwarding pointer to new location
              **/
-            void forward_inplace_aux(DX1Collector * gc,
-                                      AGCObject * lhs_iface,
-                                      void ** lhs_data,
-                                      Generation upto);
+            void forward_inplace_aux(obj<AGCObjectVisitor> gc,
+                                     AGCObject * lhs_iface,
+                                     void ** lhs_data,
+                                     Generation upto);
 
             /** Cleanup at the end of a gc cycle.
              *  Reset from-space
@@ -198,7 +197,7 @@ namespace xo {
              *  Move object subgraph @p from_src on behalf of @p gc collection cycle,
              *  covering generations in [0 ,.., upto).
              **/
-            void * _deep_move_gc_owned(DX1Collector * gc,
+            void * _deep_move_gc_owned(obj<AGCObjectVisitor> gc,
                                        void * from_src,
                                        Generation upto);
 
@@ -208,7 +207,7 @@ namespace xo {
              *  1. Breadth-first implementation, bad for memory locality
              *  2. Need @p gc for per-object-type forward_children api
              **/
-            void _forward_children_until_fixpoint(DX1Collector * gc,
+            void _forward_children_until_fixpoint(obj<AGCObjectVisitor> gc,
                                                   Generation upto,
                                                   GCMoveCheckpoint gray_lo_v);
 
@@ -216,7 +215,7 @@ namespace xo {
              *  evacuate object @p from_src, with gc-object interface @p iface.
              *  Shallow: does not traverse children
              **/
-            void * _shallow_move(DX1Collector * gc,
+            void * _shallow_move(obj<AGCObjectVisitor> gc,
                                  AGCObject * iface,
                                  void * from_src);
 

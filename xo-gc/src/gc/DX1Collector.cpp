@@ -417,7 +417,7 @@ namespace xo {
                 }
 
                 // 3. scan to-space for each generation
-                gco_store_.verify_ok(this, &(this->verify_stats_));
+                gco_store_.verify_ok(this->ref<AGCObjectVisitor>(), &(this->verify_stats_));
 
                 // 4. scan mutation logs
                 mlog_store_.verify_ok(&gco_store_,
@@ -576,7 +576,7 @@ namespace xo {
                            xtag("slot.root()", slot.root()),
                            xtag("slot.root()->data_", slot.root()->data_));
 
-                void * root_to = gco_store_.deep_move_root(this, *slot.root(), upto);
+                void * root_to = gco_store_.deep_move_root(this->ref<AGCObjectVisitor>(), *slot.root(), upto);
 
                 slot.root()->reset_opaque(root_to);
 
@@ -596,7 +596,7 @@ namespace xo {
 
             if (runstate_.is_running()) {
                 // called during collection phase
-                gco_store_.forward_inplace_aux(this, lhs_iface, lhs_data, upto);
+                gco_store_.forward_inplace_aux(this->ref<AGCObjectVisitor>(), lhs_iface, lhs_data, upto);
             } else if (runstate_.is_verify()) {
                 // called during verify_ok
                 this->_verify_aux(lhs_iface, *lhs_data);
@@ -611,8 +611,10 @@ namespace xo {
                                   void ** lhs_data)
         {
             if (runstate_.is_running()) {
+                Generation upto = runstate_.gc_upto();
+
                 // called during collection phase
-                this->forward_inplace(lhs_iface, lhs_data);
+                gco_store_.forward_inplace_aux(this->ref<AGCObjectVisitor>(), lhs_iface, lhs_data, upto);
             } else if (runstate_.is_verify()) {
                 // called during verify_ok
                 this->_verify_aux(lhs_iface, *lhs_data);
