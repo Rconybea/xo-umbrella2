@@ -274,11 +274,10 @@ namespace xo {
         }
 
         void
-        DDictionary::forward_children(obj<ACollector> gc) noexcept
+        DDictionary::visit_gco_children(obj<AGCObjectVisitor> gc) noexcept
         {
-
-            gc.forward_inplace(&keys_);
-            gc.forward_inplace(&values_);
+            gc.visit_child(&keys_);
+            gc.visit_child(&values_);
         }
 
     } /*namespace scm*/

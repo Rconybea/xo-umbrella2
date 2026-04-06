@@ -20,6 +20,7 @@ namespace xo {
             using AGCObject = xo::mm::AGCObject;
             using AAllocator = xo::mm::AAllocator;
             using ACollector = xo::mm::ACollector;
+            using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
             using ppindentinfo = xo::print::ppindentinfo;
 
         public:
@@ -70,7 +71,7 @@ namespace xo {
             /** @defgroup xo-scm-list-gcobject-facet gcobject facet **/
             ///@{
             DList * shallow_move(obj<ACollector> gc) noexcept;
-            void forward_children(obj<ACollector> gc) noexcept;
+            void visit_gco_children(obj<AGCObjectVisitor> gc) noexcept;
             ///@}
 
             /** first member of list **/

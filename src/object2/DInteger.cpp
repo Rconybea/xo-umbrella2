@@ -34,9 +34,9 @@ namespace xo {
         }
 
         void
-        DInteger::forward_children(obj<ACollector>) noexcept
+        DInteger::visit_gco_children(obj<AGCObjectVisitor>) noexcept
         {
-            // no-op
+            // no-op.  childless
         }
 
     } /*namespace scm*/

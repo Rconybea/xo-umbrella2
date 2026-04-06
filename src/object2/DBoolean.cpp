@@ -36,9 +36,9 @@ namespace xo {
         }
 
         void
-        DBoolean::forward_children(obj<ACollector>) noexcept
+        DBoolean::visit_gco_children(obj<AGCObjectVisitor>) noexcept
         {
-            // no-op
+            // no-op. childless
         }
 
 

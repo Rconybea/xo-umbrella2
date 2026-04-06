@@ -8,6 +8,7 @@
 #include "DArray.hpp"
 #include "DString.hpp"
 #include <xo/alloc2/GCObject.hpp>
+#include <xo/alloc2/GCObjectVisitor.hpp>
 #include <xo/alloc2/Collector.hpp>
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/facet/obj.hpp>
@@ -35,6 +36,8 @@ namespace xo {
             using AAllocator = xo::mm::AAllocator;
             /** garbage collector facet **/
             using ACollector = xo::mm::ACollector;
+            /** gc-centric object visitor **/
+            using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
             /** gc-aware object facet **/
             using AGCObject = xo::mm::AGCObject;
             /** pretty-printer state for APrintable **/
@@ -203,7 +206,7 @@ namespace xo {
             /** return shallow copy of this array, using memory from @p mm **/
             DDictionary * shallow_move(obj<ACollector> gc) noexcept;
             /** forward elements to @p gc to-space; replace originals with forwarding pointers **/
-            void forward_children(obj<ACollector> gc) noexcept;
+            void visit_gco_children(obj<AGCObjectVisitor> gc) noexcept;
             ///@}
 
         private:

@@ -36,6 +36,8 @@ namespace xo {
             using ACollector = xo::mm::ACollector;
             /** gc-aware object facet **/
             using AGCObject = xo::mm::AGCObject;
+            /** gc-centric object visitor **/
+            using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
             /** pretty-printer state for APrintable **/
             using ppindentinfo = xo::print::ppindentinfo;
 
@@ -148,7 +150,7 @@ namespace xo {
             /** move to new address, mandated by @p gc **/
             DArray * shallow_move(obj<ACollector> gc) noexcept;
             /** forward elements to @p gc to-space; replace originals with forarding pointers **/
-            void forward_children(obj<ACollector> gc) noexcept;
+            void visit_gco_children(obj<AGCObjectVisitor> gc) noexcept;
             ///@}
 
         private:

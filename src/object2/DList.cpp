@@ -185,12 +185,12 @@ namespace xo {
         }
 
         void
-        DList::forward_children(obj<ACollector> gc) noexcept
+        DList::visit_gco_children(obj<AGCObjectVisitor> gc) noexcept
         {
             //scope log(XO_DEBUG(true));
 
-            gc.forward_inplace(&head_);
-            gc.forward_inplace(&rest_);
+            gc.visit_child(&head_);
+            gc.visit_child(&rest_);
         }
     } /*namespace scm*/
 } /*namespace xo*/
