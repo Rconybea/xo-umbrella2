@@ -4,6 +4,7 @@
     output_hpp_dir: "include/xo/alloc2",
     output_impl_subdir: "gc",
     includes: [
+        "<xo/arena/AllocInfo.hpp>",
 //        "<xo/alloc2/Allocator.hpp>",
 //        "<xo/alloc2/Collector.hpp>",
 //        "<cstdint>",
@@ -18,6 +19,7 @@
     pretext: [
         "// see GCObject.hpp, also in xo-alloc2/",
         "namespace xo { namespace mm { class AGCObject; }}",
+        "namespace xo { namespace mm { class AllocInfo; }}",
     ],
     facet: "GCObjectVisitor",
     detail_subdir: "gc",
@@ -45,16 +47,21 @@
 //        },
     ],
     const_methods: [
-        // size_type shallow_size() const noexcept
-//        {
-//            name: "shallow_size",
-//            doc: ["memory consumption for this instance"],
-//            return_type: "size_type",
-//            args: [],
-//            const: true,
-//            noexcept: true,
-//            attributes: [],
-//        },
+        // AllocInfo alloc_info(void * gco);
+        {
+            name: "alloc_info",
+            doc: [
+                "allocation metadata for gc-aware data at address @p gco.",
+                "@p gco must be the result of a call to collector's alloc() function",
+            ],
+            return_type: "AllocInfo",
+            args: [
+                {type: "void *", name: "addr"},
+            ],
+            const: true,
+            noexcept: false,
+            attributes: [],
+        },
     ],
     nonconst_methods: [
         // void alloc_copy(void * src)
@@ -69,7 +76,7 @@
             args: [
                 {type: "std::byte *", name: "src"},
             ],
-            const: false,
+            const: true,  // refers to interface.
             noexcept: false,
             attributes: [],
         },

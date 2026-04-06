@@ -36,7 +36,7 @@ IGCObjectVisitor_Any::_valid
 // nonconst methods
 
 auto
-IGCObjectVisitor_Any::alloc_copy(Opaque, std::byte *)  -> void *
+IGCObjectVisitor_Any::alloc_copy(Opaque, std::byte *)  const -> void *
 {
     _fatal();
 }

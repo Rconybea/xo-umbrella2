@@ -58,9 +58,10 @@ namespace mm {
         [[noreturn]] void _drop(Opaque) const noexcept override { _fatal(); }
 
         // const methods
+        [[noreturn]] AllocInfo alloc_info(Copaque, void *)  const override { _fatal(); }
 
         // nonconst methods
-        [[noreturn]] void * alloc_copy(Opaque, std::byte *)  override;
+        [[noreturn]] void * alloc_copy(Opaque, std::byte *)  const override;
         [[noreturn]] void visit_child(Opaque, AGCObject *, void **)  const  noexcept override;
 
         ///@}
