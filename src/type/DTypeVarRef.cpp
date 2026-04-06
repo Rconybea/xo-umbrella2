@@ -87,17 +87,16 @@ namespace xo {
             return gc.std_move_for(this);
         }
 
-        std::size_t
-        DTypeVarRef::forward_children(obj<ACollector> gc) noexcept
+        void
+        DTypeVarRef::visit_gco_children(obj<AGCObjectVisitor> gc) noexcept
         {
-            gc.forward_pivot_inplace(&type_);
+            gc.visit_poly_child(&type_);
 
             //{
             //    auto e = FacetRegistry::instance().variant<AGCObject,AType>(type_);
             //    gc.forward_inplace(e.iface(), (void **)&type_.data_);
             //}
 
-            return this->shallow_size();
         }
 
     } /*namespace scm*/

@@ -93,15 +93,14 @@ namespace xo {
             return gc.std_move_for(this);
         }
 
-        std::size_t
-        DListType::forward_children(obj<ACollector> gc) noexcept
+        void
+        DListType::visit_gco_children(obj<AGCObjectVisitor> gc) noexcept
         {
-            {
-                auto e = FacetRegistry::instance().variant<AGCObject,AType>(elt_type_);
-                gc.forward_inplace(e.iface(), (void **)&(elt_type_.data_));
-            }
-
-            return this->shallow_size();
+            gc.visit_poly_child(&elt_type_);
+            //{
+            //    auto e = FacetRegistry::instance().variant<AGCObject,AType>(elt_type_);
+            //    gc.forward_inplace(e.iface(), (void **)&(elt_type_.data_));
+            //}
         }
     }
 }

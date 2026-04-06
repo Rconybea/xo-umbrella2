@@ -8,6 +8,7 @@
 #include "Type.hpp"
 #include "Metatype.hpp"
 #include <xo/alloc2/Collector.hpp>
+#include <xo/alloc2/GCObjectVisitor.hpp>
 #include <xo/alloc2/Allocator.hpp>
 
 namespace xo {
@@ -22,6 +23,7 @@ namespace xo {
         class DAtomicType {
         public:
             using ACollector = xo::mm::ACollector;
+            using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
             using AAllocator = xo::mm::AAllocator;
             using TypeDescr = xo::reflect::TypeDescr;
 
@@ -44,7 +46,7 @@ namespace xo {
             ///@{
             std::size_t shallow_size() const noexcept;
             DAtomicType * shallow_move(obj<ACollector> gc) noexcept;
-            std::size_t forward_children(obj<ACollector> gc) noexcept;
+            void visit_gco_children(obj<AGCObjectVisitor> gc) noexcept;
             ///@}
 
         private:
