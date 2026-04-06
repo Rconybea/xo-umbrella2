@@ -47,6 +47,10 @@ namespace xo {
             // const methods
 
             // non-const methods
+            /** allocate copy of source object at address @p src.
+Source must be owned by this collector.
+Increments object age **/
+            static void * alloc_copy(DX1Collector & self, std::byte * src);
             /** visit child of a gc-aware object. May update child in-place! **/
             static void visit_child(DX1Collector & self, AGCObject * iface, void ** pp_data) noexcept;
             ///@}

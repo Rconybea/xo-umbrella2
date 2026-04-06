@@ -16,6 +16,11 @@
 namespace xo {
     namespace mm {
         auto
+        IGCObjectVisitor_DX1Collector::alloc_copy(DX1Collector & self, std::byte * src) -> void *
+        {
+            return self.alloc_copy(src);
+        }
+        auto
         IGCObjectVisitor_DX1Collector::visit_child(DX1Collector & self, AGCObject * iface, void ** pp_data) noexcept -> void
         {
             self.visit_child(iface, pp_data);

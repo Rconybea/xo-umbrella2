@@ -454,7 +454,7 @@ namespace xo {
         }
 
         void
-        GCObjectStore::forward_inplace_aux(DX1Collector * gc,
+        GCObjectStore::forward_inplace_aux(DX1Collector * x1gc,
                                            AGCObject * lhs_iface,
                                            void ** lhs_data,
                                            Generation upto)
@@ -498,7 +498,7 @@ namespace xo {
                 log && log("disposition: not in from-space. Don't forward, but check children");
 
                 obj<AGCObject> gco(lhs_iface, object_data);
-                gco.visit_gco_children(gc->ref<AGCObjectVisitor>());
+                gco.visit_gco_children(x1gc->ref<AGCObjectVisitor>());
 
                 return;
             }
@@ -609,7 +609,7 @@ namespace xo {
                  *                                    +----------+
                  */
 
-                *lhs_data = this->_shallow_move(gc, lhs_iface, *lhs_data);
+                *lhs_data = this->_shallow_move(x1gc, lhs_iface, *lhs_data);
 
                 /*
                  *   lhs   obj<AGCObject>             (from-space)
@@ -860,7 +860,7 @@ namespace xo {
         } /*_deep_move_gc_owned*/
 
         void *
-        GCObjectStore::_shallow_move(DX1Collector * gc,
+        GCObjectStore::_shallow_move(DX1Collector * x1gc,
                                      AGCObject * iface,
                                      void * from_src)
         {
@@ -870,7 +870,7 @@ namespace xo {
 
             //obj<AAllocator, DX1Collector> gc_gco(gc);
 
-            void * to_dest = iface->shallow_move(from_src, gc->ref<ACollector>());
+            void * to_dest = iface->shallow_move(from_src, x1gc->ref<ACollector>());
 
             log && log(xtag("from_src", from_src), xtag("to_dest", to_dest));
             log && log(xtag("tseq", info.tseq()),
