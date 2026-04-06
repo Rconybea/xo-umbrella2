@@ -46,6 +46,26 @@ public:
     ///@{
 
     // explicit injected content
+    
+    /** visit forward faceted object child pointer in place.
+        Defined in RGCObject.hpp to avoid #include cycle
+     **/
+    template <typename DRepr>
+    void visit_child(xo::facet::obj<AGCObject,DRepr> * p_obj);
+    
+    /** visit typed child data pointer in place.
+        Defined in RGCObject.hpp to avoid #include cycle
+     **/
+    template <typename DRepr>
+    void visit_child(DRepr ** pp_data);
+    
+    /** visit faceted object pointer stored using some facet
+        other than AGCObject
+     **/
+    template <typename AFacet, typename DRepr>
+    requires (!std::is_same_v<AFacet, AGCObject>)
+    void visit_poly_child(obj<AFacet,DRepr> * p_pivot);
+    
 
     // builtin methods
     typeseq _typeseq() const noexcept { return O::iface()->_typeseq(); }

@@ -16,6 +16,7 @@
 // includes (via {facet_includes})
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/alloc2/Collector.hpp>
+#include <xo/alloc2/GCObjectVisitor.hpp>
 #include <cstdint>
 #include <cstddef>
 #include <xo/facet/obj.hpp>
@@ -48,6 +49,8 @@ public:
     using AAllocator = xo::mm::AAllocator;
     /** fomo collector type **/
     using ACollector = xo::mm::ACollector;
+    /** fomo collector type **/
+    using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
     ///@}
 
     /** @defgroup mm-gcobject-methods **/
@@ -66,8 +69,10 @@ public:
     // nonconst methods
     /** move instance using allocator **/
     virtual Opaque shallow_move(Opaque data, obj<ACollector> gc)  const  noexcept = 0;
-    /** during GC: forward immdiate children **/
-    virtual void forward_children(Opaque data, obj<ACollector> gc)  const  noexcept = 0;
+    /** Invoke fn.visit_child(iface,data) for each child GCObject pointer.
+Context: provides address of data pointer so it can be updated in place
+when @p fn invokes garbage collector reentry point **/
+    virtual void visit_gco_children(Opaque data, obj<AGCObjectVisitor> fn)  const  noexcept = 0;
     ///@}
 }; /*AGCObject*/
 

@@ -47,6 +47,7 @@ namespace mm {
         using size_type = AGCObject::size_type;
         using AAllocator = AGCObject::AAllocator;
         using ACollector = AGCObject::ACollector;
+        using AGCObjectVisitor = AGCObject::AGCObjectVisitor;
 
         ///@}
         /** @defgroup mm-gcobject-any-methods **/
@@ -64,7 +65,7 @@ namespace mm {
 
         // nonconst methods
         [[noreturn]] Opaque shallow_move(Opaque, obj<ACollector>)  const  noexcept override;
-        [[noreturn]] void forward_children(Opaque, obj<ACollector>)  const  noexcept override;
+        [[noreturn]] void visit_gco_children(Opaque, obj<AGCObjectVisitor>)  const  noexcept override;
 
         ///@}
 
