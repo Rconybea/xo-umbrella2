@@ -36,6 +36,12 @@ IGCObjectVisitor_Any::_valid
 // nonconst methods
 
 auto
+IGCObjectVisitor_Any::alloc_copy(Opaque, std::byte *)  -> void *
+{
+    _fatal();
+}
+
+auto
 IGCObjectVisitor_Any::visit_child(Opaque, AGCObject *, void **)  const  noexcept -> void
 {
     _fatal();

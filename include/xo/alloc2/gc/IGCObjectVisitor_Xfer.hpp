@@ -44,6 +44,9 @@ namespace mm {
         // const methods
 
         // non-const methods
+        void * alloc_copy(Opaque data, std::byte * src)  override {
+            return I::alloc_copy(_dcast(data), src);
+        }
         void visit_child(Opaque data, AGCObject * iface, void ** pp_data)  const  noexcept override {
             return I::visit_child(_dcast(data), iface, pp_data);
         }
