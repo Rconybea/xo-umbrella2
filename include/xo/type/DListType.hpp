@@ -8,7 +8,7 @@
 #include "Type.hpp"
 #include "Metatype.hpp"
 #include <xo/reflect/TypeDescr.hpp>
-#include <xo/alloc2/Collector.hpp>
+//#include <xo/alloc2/Collector.hpp>
 #include <xo/alloc2/GCObjectVisitor.hpp>
 #include <xo/alloc2/Allocator.hpp>
 
@@ -24,7 +24,7 @@ namespace xo {
         class DListType {
         public:
             using TypeDescr = xo::reflect::TypeDescr;
-            using ACollector = xo::mm::ACollector;
+            //using ACollector = xo::mm::ACollector;
             using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
             using AAllocator = xo::mm::AAllocator;
 
@@ -51,8 +51,7 @@ namespace xo {
             ///@}
             /** @defgroup xo-scm-listtype-gcobject-facet **/
             ///@{
-            std::size_t shallow_size() const noexcept;
-            DListType * shallow_move(obj<ACollector> gc) noexcept;
+            DListType * gco_shallow_move(obj<AGCObjectVisitor> gc) noexcept;
             void visit_gco_children(obj<AGCObjectVisitor> gc) noexcept;
             ///@}
 

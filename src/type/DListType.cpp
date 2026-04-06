@@ -81,14 +81,8 @@ namespace xo {
 
         // ----- gcobject facet -----
 
-        std::size_t
-        DListType::shallow_size() const noexcept
-        {
-            return sizeof(*this);
-        }
-
         DListType *
-        DListType::shallow_move(obj<ACollector> gc) noexcept
+        DListType::gco_shallow_move(obj<AGCObjectVisitor> gc) noexcept
         {
             return gc.std_move_for(this);
         }

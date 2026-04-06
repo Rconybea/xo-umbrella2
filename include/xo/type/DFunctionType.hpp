@@ -8,7 +8,7 @@
 #include "Type.hpp"
 #include "Metatype.hpp"
 #include <xo/object2/Array.hpp>
-#include <xo/alloc2/Collector.hpp>
+//#include <xo/alloc2/Collector.hpp>
 #include <xo/alloc2/GCObjectVisitor.hpp>
 #include <xo/alloc2/Allocator.hpp>
 
@@ -20,7 +20,7 @@ namespace xo {
          **/
         class DFunctionType {
         public:
-            using ACollector = xo::mm::ACollector;
+            //using ACollector = xo::mm::ACollector;
             using AGCObject = xo::mm::AGCObject;
             using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
             using AAllocator = xo::mm::AAllocator;
@@ -65,8 +65,7 @@ namespace xo {
             ///@}
             /** @defgroup xo-scm-arraytype-gcobject-facet **/
             ///@{
-            std::size_t shallow_size() const noexcept;
-            DFunctionType * shallow_move(obj<ACollector> gc) noexcept;
+            DFunctionType * gco_shallow_move(obj<AGCObjectVisitor> gc) noexcept;
             void visit_gco_children(obj<AGCObjectVisitor> gc) noexcept;
             ///@}
 

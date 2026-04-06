@@ -76,14 +76,8 @@ namespace xo {
 
         // ----- gcobject facet -----
 
-        std::size_t
-        DArrayType::shallow_size() const noexcept
-        {
-            return sizeof(*this);
-        }
-
         DArrayType *
-        DArrayType::shallow_move(obj<ACollector> gc) noexcept
+        DArrayType::gco_shallow_move(obj<AGCObjectVisitor> gc) noexcept
         {
             return gc.std_move_for(this);
         }

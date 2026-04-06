@@ -16,9 +16,9 @@
 namespace xo {
     namespace scm {
         auto
-        IGCObject_DTypeVarRef::shallow_move(DTypeVarRef & self, obj<ACollector> gc) noexcept -> Opaque
+        IGCObject_DTypeVarRef::gco_shallow_move(DTypeVarRef & self, obj<AGCObjectVisitor> gc) noexcept -> Opaque
         {
-            return self.shallow_move(gc);
+            return self.gco_shallow_move(gc);
         }
         auto
         IGCObject_DTypeVarRef::visit_gco_children(DTypeVarRef & self, obj<AGCObjectVisitor> fn) noexcept -> void

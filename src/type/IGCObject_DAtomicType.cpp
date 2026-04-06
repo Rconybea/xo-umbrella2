@@ -16,9 +16,9 @@
 namespace xo {
     namespace scm {
         auto
-        IGCObject_DAtomicType::shallow_move(DAtomicType & self, obj<ACollector> gc) noexcept -> Opaque
+        IGCObject_DAtomicType::gco_shallow_move(DAtomicType & self, obj<AGCObjectVisitor> gc) noexcept -> Opaque
         {
-            return self.shallow_move(gc);
+            return self.gco_shallow_move(gc);
         }
         auto
         IGCObject_DAtomicType::visit_gco_children(DAtomicType & self, obj<AGCObjectVisitor> fn) noexcept -> void

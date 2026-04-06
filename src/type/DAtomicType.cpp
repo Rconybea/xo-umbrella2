@@ -54,14 +54,8 @@ namespace xo {
 
         // ----- GCObject facet -----
 
-        std::size_t
-        DAtomicType::shallow_size() const noexcept
-        {
-            return sizeof(DAtomicType);
-        }
-
         DAtomicType *
-        DAtomicType::shallow_move(obj<ACollector> gc) noexcept
+        DAtomicType::gco_shallow_move(obj<AGCObjectVisitor> gc) noexcept
         {
             return gc.std_move_for(this);
         }
