@@ -16,9 +16,9 @@
 namespace xo {
     namespace scm {
         auto
-        IGCObject_DUniqueString::shallow_move(DUniqueString & self, obj<ACollector> gc) noexcept -> Opaque
+        IGCObject_DUniqueString::gco_shallow_move(DUniqueString & self, obj<AGCObjectVisitor> gc) noexcept -> Opaque
         {
-            return self.shallow_move(gc);
+            return self.gco_shallow_move(gc);
         }
         auto
         IGCObject_DUniqueString::visit_gco_children(DUniqueString & self, obj<AGCObjectVisitor> fn) noexcept -> void

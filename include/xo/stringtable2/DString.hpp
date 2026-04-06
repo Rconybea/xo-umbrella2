@@ -6,7 +6,7 @@
 #pragma once
 
 #include <xo/alloc2/Allocator.hpp>
-#include <xo/alloc2/Collector.hpp>
+//#include <xo/alloc2/Collector.hpp>
 #include <xo/alloc2/GCObjectVisitor.hpp>
 #include <xo/facet/obj.hpp>
 #include <xo/indentlog/print/ppindentinfo.hpp>
@@ -47,7 +47,7 @@ namespace xo {
             /** xo allocator **/
             using AAllocator = xo::mm::AAllocator;
             /** garbage collector **/
-            using ACollector = xo::mm::ACollector;
+            //using ACollector = xo::mm::ACollector;
             /** object visitor (garbage collector proxy) **/
             using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
             /** ppindentinfo for APrintable **/
@@ -245,10 +245,8 @@ namespace xo {
             /** @defgroup dstring-gcobject-methods gcobject facet methods **/
             ///@{
 
-            size_type shallow_size() const noexcept;
-
             /** clone string, using memory from allocator @p mm **/
-            DString * shallow_move(obj<ACollector> gc) noexcept;
+            DString * gco_shallow_move(obj<AGCObjectVisitor> gc) noexcept;
 
             /** fixup child pointers (trivial for DString, no children)
              *  note: cref so we can use forward decl

@@ -16,9 +16,9 @@
 namespace xo {
     namespace scm {
         auto
-        IGCObject_DString::shallow_move(DString & self, obj<ACollector> gc) noexcept -> Opaque
+        IGCObject_DString::gco_shallow_move(DString & self, obj<AGCObjectVisitor> gc) noexcept -> Opaque
         {
-            return self.shallow_move(gc);
+            return self.gco_shallow_move(gc);
         }
         auto
         IGCObject_DString::visit_gco_children(DString & self, obj<AGCObjectVisitor> fn) noexcept -> void
