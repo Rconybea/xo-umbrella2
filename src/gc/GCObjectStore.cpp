@@ -498,7 +498,7 @@ namespace xo {
                 log && log("disposition: not in from-space. Don't forward, but check children");
 
                 obj<AGCObject> gco(lhs_iface, object_data);
-                gco.forward_children(gc->ref<ACollector>());
+                gco.visit_gco_children(gc->ref<AGCObjectVisitor>());
 
                 return;
             }
@@ -711,7 +711,7 @@ namespace xo {
                             // Nested control reenters
                             // X1Collector::forward_inplace() -> _verify_aux()
                             //
-                            gco.forward_children(gc->ref<ACollector>());
+                            gco.visit_gco_children(gc->ref<AGCObjectVisitor>());
                         } else {
                             ++(p_verify_stats->n_no_iface_);
                             continue;
@@ -771,12 +771,12 @@ namespace xo {
                 // we aren't moving from_src, it's not gc-owned.
                 // However weare moving all its gc-owned children
 
-                auto gc_obj = gc->ref<ACollector>();
+                auto gc_obj = gc->ref<AGCObjectVisitor>();
 
                 GCMoveCheckpoint gray_lo_v
                     = this->snap_move_checkpoint(upto);
 
-                from_src.forward_children(gc_obj);
+                from_src.visit_gco_children(gc_obj);
 
                 // For each generation g:
                 //   traverse objects newer than gray_lo_v[g], to make sure children
@@ -1005,9 +1005,9 @@ namespace xo {
 
                         assert(iface->_has_null_vptr() == false);
 
-                        auto gc_gco = gc->ref<ACollector>();
+                        auto gc_gco = gc->ref<AGCObjectVisitor>();
 
-                        iface->forward_children(src, gc_gco);
+                        iface->visit_gco_children(src, gc_gco);
 
                         gray_lo_v[g] = ((std::byte *)src) + z;
 

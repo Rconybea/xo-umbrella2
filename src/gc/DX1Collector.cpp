@@ -13,6 +13,7 @@
 #include <xo/stringtable2/String.hpp>
 
 #include <xo/alloc2/GCObject.hpp>
+#include <xo/alloc2/GCObjectVisitor.hpp>
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/alloc2/Arena.hpp>
 #include "object_age.hpp"
@@ -382,7 +383,7 @@ namespace xo {
             // Add run state so DX1Collector can recognize forward_inplace()
             // calls made for the purpose of checking child pointers.
 
-            auto self = this->ref<ACollector>();
+            auto self = this->ref<AGCObjectVisitor>();
 
             GCRunState saved_runstate = runstate_;
             {
@@ -403,7 +404,7 @@ namespace xo {
                         // - X1Collector::forward_inplace() -> _verify_aux()
                         //
 
-                        gco.forward_children(self);
+                        gco.visit_gco_children(self);
 
                     }
 
