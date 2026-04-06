@@ -16,6 +16,12 @@
 namespace xo {
     namespace mm {
         auto
+        IGCObjectVisitor_DX1Collector::alloc_info(const DX1Collector & self, void * addr) -> AllocInfo
+        {
+            return self.alloc_info(addr);
+        }
+
+        auto
         IGCObjectVisitor_DX1Collector::alloc_copy(DX1Collector & self, std::byte * src) -> void *
         {
             return self.alloc_copy(src);

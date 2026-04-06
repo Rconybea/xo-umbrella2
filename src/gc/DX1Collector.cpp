@@ -350,8 +350,8 @@ namespace xo {
         }
 
         AllocInfo
-        DX1Collector::alloc_info(value_type mem) const noexcept {
-            return gco_store_.alloc_info(mem);
+        DX1Collector::alloc_info(void * mem) const noexcept {
+            return gco_store_.alloc_info((std::byte *)(mem));
         }
 
         bool
