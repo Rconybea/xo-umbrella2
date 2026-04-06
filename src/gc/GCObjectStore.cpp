@@ -4,7 +4,7 @@
  **/
 
 #include "GCObjectStore.hpp"
-#include "X1Collector.hpp"
+#include "X1VerifyStats.hpp"
 
 #include <xo/object2/Dictionary.hpp>
 #include <xo/object2/Array.hpp>
@@ -454,7 +454,7 @@ namespace xo {
         }
 
         void
-        GCObjectStore::forward_inplace_aux(DX1Collector * x1gc,
+        GCObjectStore::forward_inplace_aux(obj<AGCObjectVisitor> gc,
                                            AGCObject * lhs_iface,
                                            void ** lhs_data,
                                            Generation upto)
@@ -465,7 +465,7 @@ namespace xo {
                       xtag("lhs_data", lhs_data),
                       xtag("*lhs_data", lhs_data ? *lhs_data : nullptr));
 
-            /* coordinates with DX1Collector::_deep_move() */
+            /* coordinates with _deep_move() */
 
             /*
              *   lhs   obj<AGCObject>
@@ -498,7 +498,7 @@ namespace xo {
                 log && log("disposition: not in from-space. Don't forward, but check children");
 
                 obj<AGCObject> gco(lhs_iface, object_data);
-                gco.visit_gco_children(x1gc->ref<AGCObjectVisitor>());
+                gco.visit_gco_children(gc);
 
                 return;
             }
@@ -609,7 +609,7 @@ namespace xo {
                  *                                    +----------+
                  */
 
-                *lhs_data = this->_shallow_move(x1gc, lhs_iface, *lhs_data);
+                *lhs_data = this->_shallow_move(gc, lhs_iface, *lhs_data);
 
                 /*
                  *   lhs   obj<AGCObject>             (from-space)
@@ -683,7 +683,7 @@ namespace xo {
         }
 
         void
-        GCObjectStore::verify_ok(DX1Collector * gc,
+        GCObjectStore::verify_ok(obj<AGCObjectVisitor> gc,
                                  X1VerifyStats * p_verify_stats) noexcept
         {
             for (Generation g(0); g < config_.n_generation_; ++g) {
@@ -711,7 +711,7 @@ namespace xo {
                             // Nested control reenters
                             // X1Collector::forward_inplace() -> _verify_aux()
                             //
-                            gco.visit_gco_children(gc->ref<AGCObjectVisitor>());
+                            gco.visit_gco_children(gc);
                         } else {
                             ++(p_verify_stats->n_no_iface_);
                             continue;
@@ -746,7 +746,7 @@ namespace xo {
         }
 
         void *
-        GCObjectStore::deep_move_root(DX1Collector * gc,
+        GCObjectStore::deep_move_root(obj<AGCObjectVisitor> gc,
                                       obj<AGCObject> from_src,
                                       Generation upto)
         {
@@ -771,12 +771,10 @@ namespace xo {
                 // we aren't moving from_src, it's not gc-owned.
                 // However weare moving all its gc-owned children
 
-                auto gc_obj = gc->ref<AGCObjectVisitor>();
-
                 GCMoveCheckpoint gray_lo_v
                     = this->snap_move_checkpoint(upto);
 
-                from_src.visit_gco_children(gc_obj);
+                from_src.visit_gco_children(gc);
 
                 // For each generation g:
                 //   traverse objects newer than gray_lo_v[g], to make sure children
@@ -791,7 +789,7 @@ namespace xo {
         }
 
         void *
-        GCObjectStore::deep_move_interior(DX1Collector * gc,
+        GCObjectStore::deep_move_interior(obj<AGCObjectVisitor> gc,
                                           void * from_src,
                                           Generation upto)
         {
@@ -809,7 +807,7 @@ namespace xo {
         }
 
         void *
-        GCObjectStore::_deep_move_gc_owned(DX1Collector * gc,
+        GCObjectStore::_deep_move_gc_owned(obj<AGCObjectVisitor> gc,
                                            void * from_src,
                                            Generation upto)
         {
@@ -860,7 +858,7 @@ namespace xo {
         } /*_deep_move_gc_owned*/
 
         void *
-        GCObjectStore::_shallow_move(DX1Collector * x1gc,
+        GCObjectStore::_shallow_move(obj<AGCObjectVisitor> gc,
                                      AGCObject * iface,
                                      void * from_src)
         {
@@ -870,7 +868,7 @@ namespace xo {
 
             //obj<AAllocator, DX1Collector> gc_gco(gc);
 
-            void * to_dest = iface->gco_shallow_move(from_src, x1gc->ref<AGCObjectVisitor>());
+            void * to_dest = iface->gco_shallow_move(from_src, gc);
 
             log && log(xtag("from_src", from_src), xtag("to_dest", to_dest));
             log && log(xtag("tseq", info.tseq()),
@@ -903,7 +901,7 @@ namespace xo {
         } /*_shallow_move*/
 
         void
-        GCObjectStore::_forward_children_until_fixpoint(DX1Collector * gc,
+        GCObjectStore::_forward_children_until_fixpoint(obj<AGCObjectVisitor> gc,
                                                         Generation upto,
                                                         GCMoveCheckpoint gray_lo_v)
         {
@@ -1005,9 +1003,7 @@ namespace xo {
 
                         assert(iface->_has_null_vptr() == false);
 
-                        auto gc_gco = gc->ref<AGCObjectVisitor>();
-
-                        iface->visit_gco_children(src, gc_gco);
+                        iface->visit_gco_children(src, gc);
 
                         gray_lo_v[g] = ((std::byte *)src) + z;
 
