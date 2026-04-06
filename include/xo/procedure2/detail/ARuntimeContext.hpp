@@ -16,6 +16,7 @@
 // includes (via {facet_includes})
 #include <xo/stringtable2/StringTable.hpp>
 #include <xo/alloc2/Allocator.hpp>
+#include <xo/alloc2/Collector.hpp>
 #include <xo/arena/MemorySizeInfo.hpp>
 #include <xo/facet/obj.hpp>
 #include <xo/facet/facet_implementation.hpp>

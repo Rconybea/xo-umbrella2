@@ -17,7 +17,7 @@
     ],
     namespace1: "xo",
     namespace2: "scm",
-    // text after includes, before ASyntaxStateMachine
+    // text after includes, before AProcedure
     pretext: [
         //"namespace xo { namespace scm { class ARuntimeContext; } }",
         "namespace xo { namespace scm { class DArray; } }",

@@ -16,9 +16,9 @@
 namespace xo {
     namespace scm {
         auto
-        IGCObject_DPrimitive_gco_2_dict_string::shallow_move(DPrimitive_gco_2_dict_string & self, obj<ACollector> gc) noexcept -> Opaque
+        IGCObject_DPrimitive_gco_2_dict_string::gco_shallow_move(DPrimitive_gco_2_dict_string & self, obj<AGCObjectVisitor> gc) noexcept -> Opaque
         {
-            return self.shallow_move(gc);
+            return self.gco_shallow_move(gc);
         }
         auto
         IGCObject_DPrimitive_gco_2_dict_string::visit_gco_children(DPrimitive_gco_2_dict_string & self, obj<AGCObjectVisitor> fn) noexcept -> void
