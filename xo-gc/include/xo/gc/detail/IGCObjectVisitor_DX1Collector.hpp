@@ -45,6 +45,9 @@ namespace xo {
             /** @defgroup mm-gcobjectvisitor-dx1collector-methods **/
             ///@{
             // const methods
+            /** allocation metadata for gc-aware data at address @p gco.
+@p gco must be the result of a call to collector's alloc() function **/
+            static AllocInfo alloc_info(const DX1Collector & self, void * addr);
 
             // non-const methods
             /** allocate copy of source object at address @p src.

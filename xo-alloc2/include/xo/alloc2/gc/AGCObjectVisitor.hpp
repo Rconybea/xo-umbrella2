@@ -14,12 +14,14 @@
 #pragma once
 
 // includes (via {facet_includes})
+#include <xo/arena/AllocInfo.hpp>
 #include <xo/facet/obj.hpp>
 #include <xo/facet/facet_implementation.hpp>
 #include <xo/facet/typeseq.hpp>
 
 // see GCObject.hpp, also in xo-alloc2/
 namespace xo { namespace mm { class AGCObject; }}
+namespace xo { namespace mm { class AllocInfo; }}
 
 namespace xo {
 namespace mm {
@@ -53,12 +55,15 @@ public:
     virtual typeseq _typeseq() const noexcept = 0;
     /** destroy instance @p d; calls c++ dtor only for actual runtime type; does not recover memory **/
     virtual void _drop(Opaque d) const noexcept = 0;
+    /** allocation metadata for gc-aware data at address @p gco.
+@p gco must be the result of a call to collector's alloc() function **/
+    virtual AllocInfo alloc_info(Copaque data, void * addr)  const = 0;
 
     // nonconst methods
     /** allocate copy of source object at address @p src.
 Source must be owned by this collector.
 Increments object age **/
-    virtual void * alloc_copy(Opaque data, std::byte * src)  = 0;
+    virtual void * alloc_copy(Opaque data, std::byte * src)  const = 0;
     /** visit child of a gc-aware object. May update child in-place! **/
     virtual void visit_child(Opaque data, AGCObject * iface, void ** pp_data)  const  noexcept = 0;
     ///@}

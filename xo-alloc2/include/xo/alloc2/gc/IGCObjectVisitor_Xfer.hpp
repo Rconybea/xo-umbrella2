@@ -13,6 +13,7 @@
 
 #pragma once
 
+#include <xo/arena/AllocInfo.hpp>
 
 namespace xo {
 namespace mm {
@@ -42,9 +43,12 @@ namespace mm {
         void _drop(Opaque d) const noexcept override { _dcast(d).~DRepr(); }
 
         // const methods
+        AllocInfo alloc_info(Copaque data, void * addr)  const override {
+            return I::alloc_info(_dcast(data), addr);
+        }
 
         // non-const methods
-        void * alloc_copy(Opaque data, std::byte * src)  override {
+        void * alloc_copy(Opaque data, std::byte * src)  const override {
             return I::alloc_copy(_dcast(data), src);
         }
         void visit_child(Opaque data, AGCObject * iface, void ** pp_data)  const  noexcept override {

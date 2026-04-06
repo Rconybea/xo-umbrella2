@@ -227,7 +227,7 @@ namespace xo {
             bool is_forwarding_header(header_type hdr) const noexcept;
 
             /** Retreive bookkeeping info for allocation at @p mem. **/
-            AllocInfo alloc_info(value_type mem) const noexcept;
+            AllocInfo alloc_info(void * mem) const noexcept;
 
             /** true iff type with id @p tseq has known metadata
              *  (i.e. has appeared in preceding call to install_type

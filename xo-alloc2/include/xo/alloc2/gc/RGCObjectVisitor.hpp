@@ -88,6 +88,9 @@ public:
     void _drop() const noexcept { O::iface()->_drop(O::data()); }
 
     // const methods
+    AllocInfo alloc_info(void * addr)  const {
+        return O::iface()->alloc_info(O::data(), addr);
+    }
 
     // non-const methods (still const in router!)
     void * alloc_copy(std::byte * src)  {
