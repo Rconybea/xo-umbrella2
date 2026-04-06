@@ -6,7 +6,7 @@
 #pragma once
 
 #include <xo/alloc2/GCObject.hpp>
-#include <xo/alloc2/Collector.hpp>
+//#include <xo/alloc2/Collector.hpp>
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/facet/obj.hpp>
 #include <xo/indentlog/print/ppindentinfo.hpp>
@@ -33,7 +33,7 @@ namespace xo {
             /** xo allocator facet **/
             using AAllocator = xo::mm::AAllocator;
             /** garbage collector facet **/
-            using ACollector = xo::mm::ACollector;
+            //using ACollector = xo::mm::ACollector;
             /** gc-aware object facet **/
             using AGCObject = xo::mm::AGCObject;
             /** gc-centric object visitor **/
@@ -148,7 +148,7 @@ namespace xo {
             /** @defgroup darray-gcobject-methods **/
             ///@{
             /** move to new address, mandated by @p gc **/
-            DArray * shallow_move(obj<ACollector> gc) noexcept;
+            DArray * gco_shallow_move(obj<AGCObjectVisitor> gc) noexcept;
             /** forward elements to @p gc to-space; replace originals with forarding pointers **/
             void visit_gco_children(obj<AGCObjectVisitor> gc) noexcept;
             ///@}

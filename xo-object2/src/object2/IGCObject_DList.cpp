@@ -16,9 +16,9 @@
 namespace xo {
     namespace scm {
         auto
-        IGCObject_DList::shallow_move(DList & self, obj<ACollector> gc) noexcept -> Opaque
+        IGCObject_DList::gco_shallow_move(DList & self, obj<AGCObjectVisitor> gc) noexcept -> Opaque
         {
-            return self.shallow_move(gc);
+            return self.gco_shallow_move(gc);
         }
         auto
         IGCObject_DList::visit_gco_children(DList & self, obj<AGCObjectVisitor> fn) noexcept -> void

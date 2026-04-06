@@ -16,9 +16,9 @@
 namespace xo {
     namespace scm {
         auto
-        IGCObject_DArrayType::shallow_move(DArrayType & self, obj<ACollector> gc) noexcept -> Opaque
+        IGCObject_DArrayType::gco_shallow_move(DArrayType & self, obj<AGCObjectVisitor> gc) noexcept -> Opaque
         {
-            return self.shallow_move(gc);
+            return self.gco_shallow_move(gc);
         }
         auto
         IGCObject_DArrayType::visit_gco_children(DArrayType & self, obj<AGCObjectVisitor> fn) noexcept -> void

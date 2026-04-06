@@ -179,7 +179,7 @@ namespace xo {
         // ----- GCObject facet ------
 
         DList *
-        DList::shallow_move(obj<ACollector> gc) noexcept
+        DList::gco_shallow_move(obj<AGCObjectVisitor> gc) noexcept
         {
             return gc.std_move_for(this);
         }

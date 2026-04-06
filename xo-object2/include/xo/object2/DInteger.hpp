@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <xo/alloc2/Collector.hpp>
+//#include <xo/alloc2/Collector.hpp>
 #include <xo/alloc2/GCObjectVisitor.hpp>
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/indentlog/print/ppindentinfo.hpp>
@@ -16,7 +16,7 @@ namespace xo {
     namespace scm {
         struct DInteger {
             using AAllocator = xo::mm::AAllocator;
-            using ACollector = xo::mm::ACollector;
+            //using ACollector = xo::mm::ACollector;
             using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
             using AGCObject = xo::mm::AGCObject;
             using ppindentinfo = xo::print::ppindentinfo;
@@ -41,7 +41,7 @@ namespace xo {
 
             // GCObject facet
 
-            DInteger * shallow_move(obj<ACollector> gc) noexcept;
+            DInteger * gco_shallow_move(obj<AGCObjectVisitor> gc) noexcept;
             void visit_gco_children(obj<AGCObjectVisitor> gc) noexcept;
 
         private:

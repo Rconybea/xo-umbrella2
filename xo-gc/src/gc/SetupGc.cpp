@@ -24,9 +24,12 @@ namespace xo {
 
             FacetRegistry::register_impl<AAllocator, DX1Collector>();
             FacetRegistry::register_impl<ACollector, DX1Collector>();
+            FacetRegistry::register_impl<AGCObjectVisitor, DX1Collector>();
 
             log && log(xtag("DX1Collector.tseq", typeseq::id<DX1Collector>()));
+
             log && log(xtag("ACollector.tseq",  typeseq::id<ACollector>()));
+            log && log(xtag("AGCObjectVisitor.tseq",  typeseq::id<AGCObjectVisitor>()));
 
             return true;
         }

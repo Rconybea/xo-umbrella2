@@ -175,7 +175,7 @@ namespace xo {
         // gc hooks for IGCObject_DArray
 
         DArray *
-        DArray::shallow_move(obj<ACollector> gc) noexcept
+        DArray::gco_shallow_move(obj<AGCObjectVisitor> gc) noexcept
         {
             // note: not using gc.std_move_for() here.
             //       flexible array -> compiler doesn't know actual DArray allocation size

@@ -870,7 +870,7 @@ namespace xo {
 
             //obj<AAllocator, DX1Collector> gc_gco(gc);
 
-            void * to_dest = iface->shallow_move(from_src, x1gc->ref<ACollector>());
+            void * to_dest = iface->gco_shallow_move(from_src, x1gc->ref<AGCObjectVisitor>());
 
             log && log(xtag("from_src", from_src), xtag("to_dest", to_dest));
             log && log(xtag("tseq", info.tseq()),

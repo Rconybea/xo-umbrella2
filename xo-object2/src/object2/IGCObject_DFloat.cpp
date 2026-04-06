@@ -16,9 +16,9 @@
 namespace xo {
     namespace scm {
         auto
-        IGCObject_DFloat::shallow_move(DFloat & self, obj<ACollector> gc) noexcept -> Opaque
+        IGCObject_DFloat::gco_shallow_move(DFloat & self, obj<AGCObjectVisitor> gc) noexcept -> Opaque
         {
-            return self.shallow_move(gc);
+            return self.gco_shallow_move(gc);
         }
         auto
         IGCObject_DFloat::visit_gco_children(DFloat & self, obj<AGCObjectVisitor> fn) noexcept -> void

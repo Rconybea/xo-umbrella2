@@ -76,7 +76,7 @@ namespace xo {
             using FunctionPtrType = Fn;
             using Traits = detail::PmFnTraits<Fn>;
 
-            using ACollector = xo::mm::ACollector;
+            //using ACollector = xo::mm::ACollector;
             using AGCObject = xo::mm::AGCObject;
             using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
             using AAllocator = xo::mm::AAllocator;
@@ -135,7 +135,7 @@ namespace xo {
             ///@}
             /** @defgroup scm-primitive-gcobject-facet **/
             ///@{
-            Primitive * shallow_move(obj<ACollector> gc) noexcept;
+            Primitive * gco_shallow_move(obj<AGCObjectVisitor> gc) noexcept;
             void visit_gco_children(obj<AGCObjectVisitor> gc) noexcept;
             ///@}
 
@@ -193,7 +193,7 @@ namespace xo {
 
         template <typename Fn>
         Primitive<Fn> *
-        Primitive<Fn>::shallow_move(obj<ACollector> gc) noexcept {
+        Primitive<Fn>::gco_shallow_move(obj<AGCObjectVisitor> gc) noexcept {
             return gc.std_move_for(this);
         }
 

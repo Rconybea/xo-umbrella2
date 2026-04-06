@@ -82,7 +82,7 @@ namespace xo {
         }
 
         DUniqueString *
-        DUniqueString::shallow_move(obj<ACollector> gc) noexcept
+        DUniqueString::gco_shallow_move(obj<AGCObjectVisitor> gc) noexcept
         {
             // well-posed, but not expected to be used.
             //

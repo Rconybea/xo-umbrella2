@@ -204,7 +204,7 @@ namespace xo {
             /** @defgroup ddictionary-gcobject-methods **/
             ///@{
             /** return shallow copy of this array, using memory from @p mm **/
-            DDictionary * shallow_move(obj<ACollector> gc) noexcept;
+            DDictionary * gco_shallow_move(obj<AGCObjectVisitor> gc) noexcept;
             /** forward elements to @p gc to-space; replace originals with forwarding pointers **/
             void visit_gco_children(obj<AGCObjectVisitor> gc) noexcept;
             ///@}

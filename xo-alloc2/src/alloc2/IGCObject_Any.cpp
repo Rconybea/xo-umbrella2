@@ -36,7 +36,7 @@ IGCObject_Any::_valid
 // nonconst methods
 
 auto
-IGCObject_Any::shallow_move(Opaque, obj<ACollector>)  const  noexcept -> Opaque
+IGCObject_Any::gco_shallow_move(Opaque, obj<AGCObjectVisitor>)  const  noexcept -> Opaque
 {
     _fatal();
 }

@@ -64,7 +64,7 @@ namespace mm {
         // const methods
 
         // nonconst methods
-        [[noreturn]] Opaque shallow_move(Opaque, obj<ACollector>)  const  noexcept override;
+        [[noreturn]] Opaque gco_shallow_move(Opaque, obj<AGCObjectVisitor>)  const  noexcept override;
         [[noreturn]] void visit_gco_children(Opaque, obj<AGCObjectVisitor>)  const  noexcept override;
 
         ///@}

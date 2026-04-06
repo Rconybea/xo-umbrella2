@@ -149,14 +149,8 @@ namespace xo {
             return this->size_;
         }
 
-        auto
-        DString::shallow_size() const noexcept -> size_type
-        {
-            return sizeof(DString) + capacity_;
-        }
-
         DString *
-        DString::shallow_move(obj<ACollector> gc) noexcept
+        DString::gco_shallow_move(obj<AGCObjectVisitor> gc) noexcept
         {
             // note: not using gc.std_move_for() here
             //       b/c DString flexible array means not move-constructible

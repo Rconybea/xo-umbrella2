@@ -90,7 +90,7 @@ namespace xo {
             ///@{
 
             /** clone unique string, using memory from allocator @p mm. **/
-            DUniqueString * shallow_move(obj<ACollector> gc) noexcept;
+            DUniqueString * gco_shallow_move(obj<AGCObjectVisitor> gc) noexcept;
 
             /** fixup child pointers (trivial for DUniqueString, no gc-owned children **/
             void visit_gco_children(obj<AGCObjectVisitor> gc) noexcept;
