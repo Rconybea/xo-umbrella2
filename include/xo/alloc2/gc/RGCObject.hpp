@@ -58,8 +58,8 @@ public:
     // const methods
 
     // non-const methods (still const in router!)
-    Opaque shallow_move(obj<ACollector> gc)  noexcept {
-        return O::iface()->shallow_move(O::data(), gc);
+    Opaque gco_shallow_move(obj<AGCObjectVisitor> gc)  noexcept {
+        return O::iface()->gco_shallow_move(O::data(), gc);
     }
     void visit_gco_children(obj<AGCObjectVisitor> fn)  noexcept {
         return O::iface()->visit_gco_children(O::data(), fn);

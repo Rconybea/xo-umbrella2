@@ -64,11 +64,14 @@
     nonconst_methods: [
         // Opaque shallow_move(obj<ACollector>) noexcept
         {
-            name: "shallow_move",
-            doc: ["move instance using collector"],
+            name: "gco_shallow_move",
+            doc: [
+                "move instance using object visitor.",
+                "Arguably abusing the word 'visitor' here",
+            ],
             return_type: "Opaque",
             args:[
-                {type: "obj<ACollector>", name: "gc"},
+                {type: "obj<AGCObjectVisitor>", name: "gc"},
             ],
             const: true,
             noexcept: true,
