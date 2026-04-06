@@ -67,7 +67,7 @@ public:
     virtual void _drop(Opaque d) const noexcept = 0;
 
     // nonconst methods
-    /** move instance using allocator **/
+    /** move instance using collector **/
     virtual Opaque shallow_move(Opaque data, obj<ACollector> gc)  const  noexcept = 0;
     /** Invoke fn.visit_child(iface,data) for each child GCObject pointer.
 Context: provides address of data pointer so it can be updated in place

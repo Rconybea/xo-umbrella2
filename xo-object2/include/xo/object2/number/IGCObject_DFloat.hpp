@@ -52,7 +52,7 @@ namespace xo {
             // const methods
 
             // non-const methods
-            /** move instance using allocator **/
+            /** move instance using collector **/
             static Opaque shallow_move(DFloat & self, obj<ACollector> gc) noexcept;
             /** Invoke fn.visit_child(iface,data) for each child GCObject pointer.
 Context: provides address of data pointer so it can be updated in place

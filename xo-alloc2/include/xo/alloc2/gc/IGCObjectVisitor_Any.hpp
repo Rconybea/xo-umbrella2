@@ -60,6 +60,7 @@ namespace mm {
         // const methods
 
         // nonconst methods
+        [[noreturn]] void * alloc_copy(Opaque, std::byte *)  override;
         [[noreturn]] void visit_child(Opaque, AGCObject *, void **)  const  noexcept override;
 
         ///@}

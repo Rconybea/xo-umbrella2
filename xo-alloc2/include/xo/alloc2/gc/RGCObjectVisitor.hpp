@@ -74,6 +74,9 @@ public:
     // const methods
 
     // non-const methods (still const in router!)
+    void * alloc_copy(std::byte * src)  {
+        return O::iface()->alloc_copy(O::data(), src);
+    }
     void visit_child(AGCObject * iface, void ** pp_data)  noexcept {
         return O::iface()->visit_child(O::data(), iface, pp_data);
     }

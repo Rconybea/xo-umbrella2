@@ -55,6 +55,10 @@ public:
     virtual void _drop(Opaque d) const noexcept = 0;
 
     // nonconst methods
+    /** allocate copy of source object at address @p src.
+Source must be owned by this collector.
+Increments object age **/
+    virtual void * alloc_copy(Opaque data, std::byte * src)  = 0;
     /** visit child of a gc-aware object. May update child in-place! **/
     virtual void visit_child(Opaque data, AGCObject * iface, void ** pp_data)  const  noexcept = 0;
     ///@}
