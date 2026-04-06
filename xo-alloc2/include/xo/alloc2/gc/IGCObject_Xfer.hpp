@@ -15,6 +15,7 @@
 
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/alloc2/Collector.hpp>
+#include <xo/alloc2/GCObjectVisitor.hpp>
 #include <cstdint>
 #include <cstddef>
 
@@ -34,6 +35,7 @@ namespace mm {
         using size_type = AGCObject::size_type;
         using AAllocator = AGCObject::AAllocator;
         using ACollector = AGCObject::ACollector;
+        using AGCObjectVisitor = AGCObject::AGCObjectVisitor;
         ///@}
 
         /** @defgroup mm-gcobject-xfer-methods **/
@@ -54,8 +56,8 @@ namespace mm {
         Opaque shallow_move(Opaque data, obj<ACollector> gc)  const  noexcept override {
             return I::shallow_move(_dcast(data), gc);
         }
-        void forward_children(Opaque data, obj<ACollector> gc)  const  noexcept override {
-            return I::forward_children(_dcast(data), gc);
+        void visit_gco_children(Opaque data, obj<AGCObjectVisitor> fn)  const  noexcept override {
+            return I::visit_gco_children(_dcast(data), fn);
         }
 
         ///@}

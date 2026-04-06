@@ -52,32 +52,28 @@ namespace xo {
 
         // ----- GCObject facet -----
 
-        std::size_t
-        DRuntimeError::shallow_size() const noexcept
-        {
-            return sizeof(DRuntimeError);
-        }
-
         DRuntimeError *
         DRuntimeError::shallow_move(obj<ACollector> gc) noexcept
         {
             return gc.std_move_for(this);
         }
 
-        std::size_t
-        DRuntimeError::forward_children(obj<ACollector> gc) noexcept
+        void
+        DRuntimeError::visit_gco_children(obj<AGCObjectVisitor> gc) noexcept
         {
             {
-                auto iface = xo::facet::impl_for<AGCObject,DString>();
-                gc.forward_inplace(&iface, (void **)(&src_function_));
+                gc.visit_child(&src_function_);
+
+                //auto iface = xo::facet::impl_for<AGCObject,DString>();
+                //gc.forward_inplace(&iface, (void **)(&src_function_));
             }
 
             {
-                auto iface = xo::facet::impl_for<AGCObject,DString>();
-                gc.forward_inplace(&iface, (void **)(&error_descr_));
-            }
+                gc.visit_child(&error_descr_);
 
-            return this->shallow_size();
+                //auto iface = xo::facet::impl_for<AGCObject,DString>();
+                //gc.forward_inplace(&iface, (void **)(&error_descr_));
+            }
         }
 
         // ----- Printable facet -----

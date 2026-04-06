@@ -9,6 +9,7 @@
 #include <xo/type/Type.hpp>
 #include <xo/object2/DArray.hpp>
 #include <xo/alloc2/GCObjectConversion.hpp>
+#include <xo/alloc2/GCObjectVisitor.hpp>
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/reflect/Reflect.hpp>
 #include <xo/alloc2/Allocator.hpp>
@@ -76,8 +77,9 @@ namespace xo {
             using Traits = detail::PmFnTraits<Fn>;
 
             using ACollector = xo::mm::ACollector;
-            using AAllocator = xo::mm::AAllocator;
             using AGCObject = xo::mm::AGCObject;
+            using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
+            using AAllocator = xo::mm::AAllocator;
             using DArray = xo::scm::DArray;
             using Reflect = xo::reflect::Reflect;
             using TypeDescr = xo::reflect::TypeDescr;
@@ -134,7 +136,7 @@ namespace xo {
             /** @defgroup scm-primitive-gcobject-facet **/
             ///@{
             Primitive * shallow_move(obj<ACollector> gc) noexcept;
-            void forward_children(obj<ACollector> gc) noexcept;
+            void visit_gco_children(obj<AGCObjectVisitor> gc) noexcept;
             ///@}
 
         private:
@@ -197,11 +199,12 @@ namespace xo {
 
         template <typename Fn>
         void
-        Primitive<Fn>::forward_children(obj<ACollector> gc) noexcept {
-            {
-                auto e = type_.to_facet<AGCObject>();  // FacetRegistry dep
-                gc.forward_inplace(e.iface(), (void **)&(type_.data_));
-            }
+        Primitive<Fn>::visit_gco_children(obj<AGCObjectVisitor> gc) noexcept {
+            gc.visit_poly_child(&type_);
+            //{
+            //    auto e = type_.to_facet<AGCObject>();  // FacetRegistry dep
+            //    gc.forward_inplace(e.iface(), (void **)&(type_.data_));
+            //}
         }
 
     } /*namespace scm*/

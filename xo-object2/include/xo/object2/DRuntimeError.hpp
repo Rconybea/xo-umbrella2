@@ -18,6 +18,7 @@ namespace xo {
         public:
             using AGCObject = xo::mm::AGCObject;
             using ACollector = xo::mm::ACollector;
+            using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
             using AAllocator = xo::mm::AAllocator;
             using ppindentinfo = xo::print::ppindentinfo;
 
@@ -49,9 +50,8 @@ namespace xo {
             /** @defgroup scm-runtimeerror-gcobject-facet gcobject facet **/
             ///@{
 
-            std::size_t shallow_size() const noexcept;
             DRuntimeError * shallow_move(obj<ACollector> gc) noexcept;
-            std::size_t forward_children(obj<ACollector> gc) noexcept;
+            void visit_gco_children(obj<AGCObjectVisitor> gc) noexcept;
 
             ///@}
 

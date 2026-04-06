@@ -34,9 +34,9 @@ namespace xo {
         }
 
         void
-        DFloat::forward_children(obj<ACollector>) noexcept
+        DFloat::visit_gco_children(obj<AGCObjectVisitor>) noexcept
         {
-            // noop
+            // noop -- childless!
         }
 
     } /*namespace scm*/

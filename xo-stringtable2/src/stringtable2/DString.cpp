@@ -172,10 +172,10 @@ namespace xo {
             return copy;
         }
 
-        auto
-        DString::forward_children(obj<ACollector>) noexcept -> size_type
+        void
+        DString::visit_gco_children(obj<AGCObjectVisitor>) noexcept
         {
-            return shallow_size();
+            // no-op.  no children!
         }
 
         bool

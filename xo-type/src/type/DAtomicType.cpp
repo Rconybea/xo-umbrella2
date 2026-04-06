@@ -66,10 +66,10 @@ namespace xo {
             return gc.std_move_for(this);
         }
 
-        std::size_t
-        DAtomicType::forward_children(obj<ACollector>) noexcept
+        void
+        DAtomicType::visit_gco_children(obj<AGCObjectVisitor>) noexcept
         {
-            return this->shallow_size();
+            // no-op.  no children
         }
 
     } /*namespace scm*/

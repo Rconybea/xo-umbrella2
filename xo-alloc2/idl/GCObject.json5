@@ -6,6 +6,7 @@
     includes: [
         "<xo/alloc2/Allocator.hpp>",
         "<xo/alloc2/Collector.hpp>",
+        "<xo/alloc2/GCObjectVisitor.hpp>",
         "<cstdint>",
         "<cstddef>",
     ],
@@ -42,6 +43,11 @@
             doc: ["fomo collector type"],
             definition: "xo::mm::ACollector",
         },
+        {
+            name: "AGCObjectVisitor",
+            doc: ["fomo collector type"],
+            definition: "xo::mm::AGCObjectVisitor",
+        },
     ],
     const_methods: [
         // size_type shallow_size() const noexcept
@@ -68,13 +74,17 @@
             noexcept: true,
             attributes: [],
         },
-        // size_type forward_children(obj<ACollector>) noexcept
+        // size_type visit_gco_children(obj<AGCObjectVisitor>) noexcept
         {
-            name: "forward_children",
-            doc: ["during GC: forward immdiate children"],
+            name: "visit_gco_children",
+            doc: [
+                "Invoke fn.visit_child(iface,data) for each child GCObject pointer.",
+                "Context: provides address of data pointer so it can be updated in place",
+                "when @p fn invokes garbage collector reentry point"
+            ],
             return_type: "void",
             args: [
-                {type: "obj<ACollector>", name: "gc"},
+                {type: "obj<AGCObjectVisitor>", name: "fn"},
             ],
             const: true,
             noexcept: true,

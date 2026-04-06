@@ -8,5 +8,6 @@
 #include "DX1Collector.hpp"
 #include "detail/ICollector_DX1Collector.hpp"
 #include "detail/IAllocator_DX1Collector.hpp"
+#include "detail/IGCObjectVisitor_DX1Collector.hpp"
 
 /* end X1Collector.hpp */

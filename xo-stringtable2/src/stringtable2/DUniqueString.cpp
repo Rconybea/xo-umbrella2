@@ -109,9 +109,9 @@ namespace xo {
         }
 
         void
-        DUniqueString::forward_children(obj<ACollector>) noexcept
+        DUniqueString::visit_gco_children(obj<AGCObjectVisitor>) noexcept
         {
-            // no-op
+            // no-op -- childless!
         }
     } /*namespace scm*/
 } /*namespace xo*/
