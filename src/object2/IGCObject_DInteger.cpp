@@ -16,9 +16,9 @@
 namespace xo {
     namespace scm {
         auto
-        IGCObject_DInteger::shallow_move(DInteger & self, obj<ACollector> gc) noexcept -> Opaque
+        IGCObject_DInteger::gco_shallow_move(DInteger & self, obj<AGCObjectVisitor> gc) noexcept -> Opaque
         {
-            return self.shallow_move(gc);
+            return self.gco_shallow_move(gc);
         }
         auto
         IGCObject_DInteger::visit_gco_children(DInteger & self, obj<AGCObjectVisitor> fn) noexcept -> void

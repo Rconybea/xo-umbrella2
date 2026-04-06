@@ -16,9 +16,9 @@
 namespace xo {
     namespace scm {
         auto
-        IGCObject_DDictionary::shallow_move(DDictionary & self, obj<ACollector> gc) noexcept -> Opaque
+        IGCObject_DDictionary::gco_shallow_move(DDictionary & self, obj<AGCObjectVisitor> gc) noexcept -> Opaque
         {
-            return self.shallow_move(gc);
+            return self.gco_shallow_move(gc);
         }
         auto
         IGCObject_DDictionary::visit_gco_children(DDictionary & self, obj<AGCObjectVisitor> fn) noexcept -> void

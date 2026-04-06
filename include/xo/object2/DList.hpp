@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <xo/alloc2/Collector.hpp>
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/facet/obj.hpp>
 #include <xo/indentlog/print/ppindentinfo.hpp>
@@ -70,7 +71,7 @@ namespace xo {
 
             /** @defgroup xo-scm-list-gcobject-facet gcobject facet **/
             ///@{
-            DList * shallow_move(obj<ACollector> gc) noexcept;
+            DList * gco_shallow_move(obj<AGCObjectVisitor> gc) noexcept;
             void visit_gco_children(obj<AGCObjectVisitor> gc) noexcept;
             ///@}
 

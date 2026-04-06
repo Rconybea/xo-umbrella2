@@ -16,9 +16,9 @@
 namespace xo {
     namespace scm {
         auto
-        IGCObject_DRuntimeError::shallow_move(DRuntimeError & self, obj<ACollector> gc) noexcept -> Opaque
+        IGCObject_DRuntimeError::gco_shallow_move(DRuntimeError & self, obj<AGCObjectVisitor> gc) noexcept -> Opaque
         {
-            return self.shallow_move(gc);
+            return self.gco_shallow_move(gc);
         }
         auto
         IGCObject_DRuntimeError::visit_gco_children(DRuntimeError & self, obj<AGCObjectVisitor> fn) noexcept -> void

@@ -268,7 +268,7 @@ namespace xo {
         // ----- gcobject facet -----
 
         DDictionary *
-        DDictionary::shallow_move(obj<ACollector> gc) noexcept
+        DDictionary::gco_shallow_move(obj<AGCObjectVisitor> gc) noexcept
         {
             return gc.std_move_for(this);
         }
