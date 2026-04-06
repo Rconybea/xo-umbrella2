@@ -69,8 +69,8 @@ namespace xo {
 
         DX1Collector::DX1Collector(const X1CollectorConfig & cfg)
         : config_{cfg},
-          mlog_store_{cfg.mlog_config()},
-          gco_store_{cfg.gco_store_config()}
+          gco_store_{cfg.gco_store_config()},
+          mlog_store_{cfg.mlog_config(), &gco_store_}
         {
             assert(config_.arena_config_.header_.size_bits_ +
                    config_.arena_config_.header_.age_bits_ +

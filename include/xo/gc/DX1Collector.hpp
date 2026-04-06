@@ -389,6 +389,10 @@ namespace xo {
              **/
             RootSet root_set_;
 
+            /** Collector-managed memory.
+             **/
+            GCObjectStore gco_store_;
+
             /** "remembered sets": track pointers P->C that require special handling
              *  during a gc cycle where either:
              *  1. xgen pointers g(P) > g(C):
@@ -398,10 +402,6 @@ namespace xo {
              *     get promoted before C.
              **/
             MutationLogStore mlog_store_;
-
-            /** Collector-managed memory.
-             **/
-            GCObjectStore gco_store_;
 
             /** counters collected during @ref verify_ok call **/
             X1VerifyStats verify_stats_;

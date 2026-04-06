@@ -9,8 +9,10 @@
 namespace xo {
     namespace mm {
 
-        MutationLogStore::MutationLogStore(const MutationLogConfig & config)
-            : config_{config}
+        MutationLogStore::MutationLogStore(const MutationLogConfig & config,
+                                           GCObjectStore * gco_store)
+        : config_{config},
+          gco_store_{gco_store}
         {}
 
         void
@@ -411,8 +413,7 @@ namespace xo {
 
                         MutationLogEntry to_entry(parent_to, p_data_to, from_entry.snap());
 
-                        this->_check_keep_mutation_aux(gc->gco_store(),
-                                                       to_entry,
+                        this->_check_keep_mutation_aux(to_entry,
                                                        parent_gen_to,
                                                        child_to,
                                                        keep_mlog);
@@ -464,7 +465,7 @@ namespace xo {
             // or already evacuated.
             // (+ remember this need not be 1st pass over mlog entries)
 
-            GCObjectStore & gco_store = x1gc->gco_store();
+            //GCObjectStore & gco_store = x1gc->gco_store();
 
             if (child_info.is_forwarding_tseq()) {
                 // [MLOG1]
@@ -481,7 +482,7 @@ namespace xo {
 
                 ++counters.n_rescue_;
 
-                child_to = gco_store.deep_move_interior(x1gc->ref<AGCObjectVisitor>(), child_fr, upto);
+                child_to = gco_store_->deep_move_interior(x1gc->ref<AGCObjectVisitor>(), child_fr, upto);
 
                 // update child pointer in parent object
                 *from_entry.p_data() = child_to;
@@ -489,26 +490,24 @@ namespace xo {
 
             // child_to generation in {gen, gen+1}
 
-            this->_check_keep_mutation_aux(gco_store,
-                                           from_entry, parent_gen, child_to, keep_mlog);
+            this->_check_keep_mutation_aux(from_entry, parent_gen, child_to, keep_mlog);
 
             return counters;
         }
 
         bool
-        MutationLogStore::_check_keep_mutation_aux(const GCObjectStore & gco_store,
-                                                   const MutationLogEntry & from_entry,
+        MutationLogStore::_check_keep_mutation_aux(const MutationLogEntry & from_entry,
                                                    Generation parent_gen_to,
                                                    void * child_to,
                                                    MutationLog * keep_mlog)
         {
             Generation child_gen_to
-                = gco_store.generation_of(role::to_space(), child_to);
+                = gco_store_->generation_of(role::to_space(), child_to);
 
             bool need_mlog_entry
                 = ((child_gen_to + 1 < config_.n_generation_)
-                   && (gco_store.config().promotion_threshold(parent_gen_to)
-                       > gco_store.config().promotion_threshold(child_gen_to)));
+                   && (gco_store_->config().promotion_threshold(parent_gen_to)
+                       > gco_store_->config().promotion_threshold(child_gen_to)));
 
             if (need_mlog_entry) {
                 // 1. P->C pointer is still cross-age (xage), and
