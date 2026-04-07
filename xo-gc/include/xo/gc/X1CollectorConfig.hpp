@@ -8,7 +8,6 @@
 #include "GCObjectStoreConfig.hpp"
 #include "MutationLogConfig.hpp"
 #include "object_age.hpp"
-//#include "Generation.hpp"
 #include <xo/arena/ArenaConfig.hpp>
 #include <array>
 #include <cstdint>

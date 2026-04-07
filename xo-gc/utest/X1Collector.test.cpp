@@ -11,13 +11,13 @@
 #include "DArray.hpp"
 
 #include <xo/object2/Float.hpp>
-//#include "number/IGCObject_DFloat.hpp"
-#include "number/IGCObject_DInteger.hpp"
-#include "list/IGCObject_DList.hpp"
+#include <xo/object2/Integer.hpp>
+#include <xo/object2/List.hpp>
+//#include "list/IGCObject_DList.hpp"
 
-#include <xo/alloc2/CollectorTypeRegistry.hpp>
-#include <xo/alloc2/Collector.hpp>
 #include <xo/gc/X1Collector.hpp>
+//#include <xo/alloc2/Collector.hpp>
+#include <xo/alloc2/CollectorTypeRegistry.hpp>
 
 #include <xo/arena/AllocInfo.hpp>
 #include <xo/arena/padding.hpp>
