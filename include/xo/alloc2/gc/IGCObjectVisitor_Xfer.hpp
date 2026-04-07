@@ -48,7 +48,7 @@ namespace mm {
         AllocInfo alloc_info(Copaque data, void * addr)  const override {
             return I::alloc_info(_dcast(data), addr);
         }
-        Generation generation_of(Copaque data, role r, const void * addr)  const  noexcept override {
+        Generation generation_of(Copaque data, Role r, const void * addr)  const  noexcept override {
             return I::generation_of(_dcast(data), r, addr);
         }
 

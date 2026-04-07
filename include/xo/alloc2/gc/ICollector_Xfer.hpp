@@ -46,19 +46,19 @@ namespace mm {
         void _drop(Opaque d) const noexcept override { _dcast(d).~DRepr(); }
 
         // const methods
-        size_type allocated(Copaque data, Generation g, role r)  const  noexcept override {
+        size_type allocated(Copaque data, Generation g, Role r)  const  noexcept override {
             return I::allocated(_dcast(data), g, r);
         }
-        size_type committed(Copaque data, Generation g, role r)  const  noexcept override {
+        size_type committed(Copaque data, Generation g, Role r)  const  noexcept override {
             return I::committed(_dcast(data), g, r);
         }
-        size_type reserved(Copaque data, Generation g, role r)  const  noexcept override {
+        size_type reserved(Copaque data, Generation g, Role r)  const  noexcept override {
             return I::reserved(_dcast(data), g, r);
         }
         std::int32_t locate_address(Copaque data, const void * addr)  const  noexcept override {
             return I::locate_address(_dcast(data), addr);
         }
-        bool contains(Copaque data, role r, const void * addr)  const  noexcept override {
+        bool contains(Copaque data, Role r, const void * addr)  const  noexcept override {
             return I::contains(_dcast(data), r, addr);
         }
         bool is_type_installed(Copaque data, typeseq tseq)  const  noexcept override {
