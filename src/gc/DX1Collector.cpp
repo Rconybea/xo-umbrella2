@@ -110,19 +110,19 @@ namespace xo {
         }
 
         bool
-        DX1Collector::contains(role r, const void * addr) const noexcept
+        DX1Collector::contains(Role r, const void * addr) const noexcept
         {
             return gco_store_.contains(r, addr);
         }
 
         bool
-        DX1Collector::contains_allocated(role r, const void * addr) const noexcept
+        DX1Collector::contains_allocated(Role r, const void * addr) const noexcept
         {
             return gco_store_.contains_allocated(r, addr);
         }
 
         Generation
-        DX1Collector::generation_of(role r, const void * addr) const noexcept
+        DX1Collector::generation_of(Role r, const void * addr) const noexcept
         {
             return gco_store_.generation_of(r, addr);
         }
@@ -134,7 +134,7 @@ namespace xo {
             // need to adjust here if runtime errors
             // encountered during gc.
 
-            return get_space(role::to_space(), Generation::nursery())->last_error_;
+            return get_space(Role::to_space(), Generation::nursery())->last_error_;
         }
 
         namespace {
@@ -148,7 +148,7 @@ namespace xo {
 
                 size_t z3 = 0;
 
-                for (role ri : role::all()) {
+                for (Role ri : Role::all()) {
                     for (Generation gj{0}; gj < d.config_.n_generation_; ++gj) {
                         const DArena * arena = d.get_space(ri, gj);
 
@@ -203,7 +203,7 @@ namespace xo {
             stat_helper(const DX1Collector & d,
                         size_type (DArena::* getter)() const,
                         Generation g,
-                        role r)
+                        Role r)
             {
                 const DArena * arena = d.get_space(r, g);
 
@@ -215,19 +215,19 @@ namespace xo {
         }
 
         size_type
-        DX1Collector::allocated(Generation g, role r) const noexcept
+        DX1Collector::allocated(Generation g, Role r) const noexcept
         {
             return stat_helper(*this, &DArena::allocated, g, r);
         }
 
         size_type
-        DX1Collector::committed(Generation g, role r) const noexcept
+        DX1Collector::committed(Generation g, Role r) const noexcept
         {
             return stat_helper(*this, &DArena::committed, g, r);
         }
 
         size_type
-        DX1Collector::reserved(Generation g, role r) const noexcept
+        DX1Collector::reserved(Generation g, Role r) const noexcept
         {
             return stat_helper(*this, &DArena::reserved, g, r);
         }
@@ -237,12 +237,12 @@ namespace xo {
         {
             Generation g;
 
-            g = this->generation_of(role::to_space(), addr);
+            g = this->generation_of(Role::to_space(), addr);
 
             if (!g.is_sentinel())
                 return g;
 
-            g = this->generation_of(role::from_space(), addr);
+            g = this->generation_of(Role::from_space(), addr);
 
             if (!g.is_sentinel()) {
                 // use negative values for
@@ -283,7 +283,7 @@ namespace xo {
             // per-(generation,role) info
             {
                 for (Generation gi{0}; gi < config_.n_generation_; ++gi) {
-                    for (role rj : role::all()) {
+                    for (Role rj : Role::all()) {
                         const DArena * arena = this->get_space(rj, gi);
                         DDictionary * arena_d = DDictionary::make(mm);
 
@@ -510,8 +510,8 @@ namespace xo {
             log && log("step 1  : swap from/to roles (now to-space is empty)");
             this->_swap_roles(upto);
 
-            log && log(xtag("from_0", get_space(role::from_space(), Generation{0})->lo_),
-                       xtag("to_0", get_space(role::to_space(), Generation{0})->lo_));
+            log && log(xtag("from_0", get_space(Role::from_space(), Generation{0})->lo_),
+                       xtag("to_0", get_space(Role::to_space(), Generation{0})->lo_));
 
             log && log("step 2a : copy roots");
             this->_copy_roots(upto);
@@ -632,12 +632,12 @@ namespace xo {
             (void)iface;
             (void)data;
 
-            Generation g1 = this->generation_of(role::to_space(), data);
+            Generation g1 = this->generation_of(Role::to_space(), data);
 
             if (g1.is_sentinel()) {
-                assert(this->contains(role::to_space(), data) == false);
+                assert(this->contains(Role::to_space(), data) == false);
 
-                Generation g2 = this->generation_of(role::from_space(), data);
+                Generation g2 = this->generation_of(Role::from_space(), data);
 
                 if (!g2.is_sentinel()) {
                     // verify failure - live pointer still refers to from-space
@@ -647,7 +647,7 @@ namespace xo {
                     ++(verify_stats_.n_ext_);
                 }
             } else {
-                assert(this->contains(role::to_space(), data));
+                assert(this->contains(Role::to_space(), data));
 
                 ++(verify_stats_.n_to_);
             }
@@ -713,7 +713,7 @@ namespace xo {
             scope log(XO_DEBUG(false));
 
             const DArena * arena
-                = get_space(role::to_space(),
+                = get_space(Role::to_space(),
                             Generation{0});
 
             return DX1CollectorIterator(this,
@@ -735,7 +735,7 @@ namespace xo {
              **/
 
             const DArena * arena
-                = get_space(role::to_space(),
+                = get_space(Role::to_space(),
                             Generation(config_.n_generation_ - 1));
             DArenaIterator arena_end = arena->end();
 
@@ -748,7 +748,7 @@ namespace xo {
 
         void
         DX1Collector::clear() noexcept {
-            for (role ri : role::all()) {
+            for (Role ri : Role::all()) {
                 for (Generation gj{0}; gj < config_.n_generation_; ++gj) {
                     DArena * arena = this->get_space(ri, gj);
 

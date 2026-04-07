@@ -50,7 +50,7 @@ namespace xo {
             static AllocInfo alloc_info(const DX1Collector & self, void * addr);
             /** generation to which pointer @p addr belongs, given role @p r;
 sentinel if @p addr is not owned by collector **/
-            static Generation generation_of(const DX1Collector & self, role r, const void * addr) noexcept;
+            static Generation generation_of(const DX1Collector & self, Role r, const void * addr) noexcept;
 
             // non-const methods
             /** allocate copy of source object at address @p src.

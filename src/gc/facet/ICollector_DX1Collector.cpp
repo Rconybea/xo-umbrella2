@@ -16,19 +16,19 @@
 namespace xo {
     namespace mm {
         auto
-        ICollector_DX1Collector::allocated(const DX1Collector & self, Generation g, role r) noexcept -> size_type
+        ICollector_DX1Collector::allocated(const DX1Collector & self, Generation g, Role r) noexcept -> size_type
         {
             return self.allocated(g, r);
         }
 
         auto
-        ICollector_DX1Collector::committed(const DX1Collector & self, Generation g, role r) noexcept -> size_type
+        ICollector_DX1Collector::committed(const DX1Collector & self, Generation g, Role r) noexcept -> size_type
         {
             return self.committed(g, r);
         }
 
         auto
-        ICollector_DX1Collector::reserved(const DX1Collector & self, Generation g, role r) noexcept -> size_type
+        ICollector_DX1Collector::reserved(const DX1Collector & self, Generation g, Role r) noexcept -> size_type
         {
             return self.reserved(g, r);
         }
@@ -40,7 +40,7 @@ namespace xo {
         }
 
         auto
-        ICollector_DX1Collector::contains(const DX1Collector & self, role r, const void * addr) noexcept -> bool
+        ICollector_DX1Collector::contains(const DX1Collector & self, Role r, const void * addr) noexcept -> bool
         {
             return self.contains(r, addr);
         }

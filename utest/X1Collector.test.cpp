@@ -47,7 +47,7 @@ namespace ut {
     using xo::mm::DArena;
     using xo::mm::ArenaConfig;
     using xo::mm::Generation;
-    using xo::mm::role;
+    using xo::mm::Role;
     using xo::mm::padding;
     using xo::facet::obj;
     using xo::facet::with_facet;
@@ -145,7 +145,7 @@ namespace ut {
                     REQUIRE(roots->store()->reserved() >= cfg.object_roots_z_);
                     REQUIRE(roots->store()->reserved() < cfg.object_roots_z_ + roots->store()->page_z_);
 
-                    const DArena * from_0 = gc.get_space(role::from_space(), Generation{0});
+                    const DArena * from_0 = gc.get_space(Role::from_space(), Generation{0});
 
                     REQUIRE(from_0 != nullptr);
                     REQUIRE(from_0->reserved() >= tc.tenured_z_);
@@ -153,29 +153,29 @@ namespace ut {
                     REQUIRE(from_0->reserved() % from_0->page_z_ == 0);
                     REQUIRE(from_0->allocated() == 0);
 
-                    const DArena * from_1 = gc.get_space(role::from_space(), Generation{1});
+                    const DArena * from_1 = gc.get_space(Role::from_space(), Generation{1});
 
                     REQUIRE(from_1 != nullptr);
                     REQUIRE(from_1->reserved() == from_0->reserved());
                     REQUIRE(from_1->allocated() == 0);
 
-                    to_0 = gc.get_space(role::to_space(), Generation{0});
+                    to_0 = gc.get_space(Role::to_space(), Generation{0});
 
                     REQUIRE(to_0 != nullptr);
                     REQUIRE(to_0->reserved() == from_0->reserved());
                     REQUIRE(to_0->allocated() == 0);
 
-                    const DArena * to_1 = gc.get_space(role::to_space(), Generation{1});
+                    const DArena * to_1 = gc.get_space(Role::to_space(), Generation{1});
 
                     REQUIRE(to_1 != nullptr);
                     REQUIRE(to_1->reserved() == to_0->reserved());
                     REQUIRE(to_1->allocated() == 0);
 
-                    const DArena * from_2 = gc.get_space(role::from_space(), Generation{2});
+                    const DArena * from_2 = gc.get_space(Role::from_space(), Generation{2});
 
                     REQUIRE(from_2 == nullptr);
 
-                    const DArena * to_2 = gc.get_space(role::to_space(), Generation{2});
+                    const DArena * to_2 = gc.get_space(Role::to_space(), Generation{2});
 
                     REQUIRE(to_2 == nullptr);
 
@@ -224,7 +224,7 @@ namespace ut {
                     {
                         REQUIRE(x0_o.iface() != nullptr);
                         REQUIRE(x0_o.data() != nullptr);
-                        REQUIRE(gc.contains(role::to_space(), x0_o.data()));
+                        REQUIRE(gc.contains(Role::to_space(), x0_o.data()));
 
                         /* check alloc info for newly-allocated object */
                         AllocInfo info = gc.alloc_info((std::byte *)x0_o.data());
@@ -238,7 +238,7 @@ namespace ut {
                     {
                         REQUIRE(n1_o.iface() != nullptr);
                         REQUIRE(n1_o.data() != nullptr);
-                        REQUIRE(gc.contains(role::to_space(), n1_o.data()));
+                        REQUIRE(gc.contains(Role::to_space(), n1_o.data()));
 
                         /* check alloc info for newly-allocated object */
                         AllocInfo info = gc.alloc_info((std::byte *)n1_o.data());
@@ -252,7 +252,7 @@ namespace ut {
                     {
                         REQUIRE(l0_o.iface() != nullptr);
                         REQUIRE(l0_o.data() != nullptr);
-                        REQUIRE(gc.contains(role::to_space(), l0_o.data()));
+                        REQUIRE(gc.contains(Role::to_space(), l0_o.data()));
 
                         /* check alloc info for newly-allocated object */
                         AllocInfo info = gc.alloc_info((std::byte *)l0_o.data());
@@ -271,16 +271,16 @@ namespace ut {
                 log && log(xtag("l0_o.data()->head_.data()", l0_o.data()->head_.data()));
                 log && log(xtag("x0_o.data()", x0_o.data()));
 
-                REQUIRE(!gc.contains(role::from_space(), x0_o.data()));
-                REQUIRE(gc.contains(role::to_space(), x0_o.data()));
+                REQUIRE(!gc.contains(Role::from_space(), x0_o.data()));
+                REQUIRE(gc.contains(Role::to_space(), x0_o.data()));
                 REQUIRE(x0_o.data()->value() == 3.1415927);
 
-                REQUIRE(!gc.contains(role::from_space(), n1_o.data()));
-                REQUIRE(gc.contains(role::to_space(), n1_o.data()));
+                REQUIRE(!gc.contains(Role::from_space(), n1_o.data()));
+                REQUIRE(gc.contains(Role::to_space(), n1_o.data()));
                 REQUIRE(n1_o.data()->value() == 42);
 
-                REQUIRE(!gc.contains(role::from_space(), l0_o.data()));
-                REQUIRE(gc.contains(role::to_space(), l0_o.data()));
+                REQUIRE(!gc.contains(Role::from_space(), l0_o.data()));
+                REQUIRE(gc.contains(Role::to_space(), l0_o.data()));
                 REQUIRE(l0_o.data()->is_empty() == false);
 
                 REQUIRE((void*)l0_o.data()->head_.data() == (void*)x0_o.data());

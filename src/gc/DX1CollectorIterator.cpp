@@ -42,7 +42,7 @@ namespace xo {
 
                 for (; gen_ix_ < gen_hi_; ++gen_ix_) {
                     const DArena * arena
-                        = gc_->get_space(role::to_space(), gen_ix_);
+                        = gc_->get_space(Role::to_space(), gen_ix_);
 
                     assert(arena);
 
