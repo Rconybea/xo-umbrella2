@@ -59,6 +59,7 @@ namespace mm {
 
         // const methods
         [[noreturn]] AllocInfo alloc_info(Copaque, void *)  const override { _fatal(); }
+        [[noreturn]] Generation generation_of(Copaque, role, const void *)  const  noexcept override { _fatal(); }
 
         // nonconst methods
         [[noreturn]] void * alloc_copy(Opaque, std::byte *)  const override;

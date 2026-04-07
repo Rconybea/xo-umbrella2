@@ -16,7 +16,8 @@ namespace xo {
         /** @class generation
          *  @brief type-safe generation number
          **/
-        struct Generation {
+        class Generation {
+        public:
             using value_type = std::uint32_t;
 
             constexpr Generation() = default;
