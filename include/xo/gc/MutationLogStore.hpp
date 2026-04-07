@@ -115,7 +115,7 @@ namespace xo {
              *
              *  @return number of mlog entries moved, whether to @p *to_mlog or @p *triage_mlog.
              **/
-            MutationLogStatistics _forward_mutation_log_phase(DX1Collector * gc,
+            MutationLogStatistics _forward_mutation_log_phase(obj<AGCObjectVisitor> gc,
                                                               Generation upto,
                                                               Generation gen,
                                                               MutationLog * from_mlog,
@@ -130,7 +130,7 @@ namespace xo {
              *  ensure child C is evacuated, and append @p from_entry to
              *  @p keep_mlog.
              **/
-            MutationLogStatistics _preserve_child_of_live_parent(DX1Collector * gc,
+            MutationLogStatistics _preserve_child_of_live_parent(obj<AGCObjectVisitor> gc,
                                                                  Generation upto,
                                                                  Generation parent_gen,
                                                                  const MutationLogEntry & from_entry,
