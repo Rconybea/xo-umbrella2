@@ -244,7 +244,7 @@ namespace xo {
         }
 
         void
-        MutationLogStore::forward_mutation_log(DX1Collector * gc,
+        MutationLogStore::forward_mutation_log(obj<AGCObjectVisitor> gc,
                                                Generation upto)
         {
             /** non-zero if at least one object was rescued (from any generation)
@@ -266,7 +266,7 @@ namespace xo {
                         MutationLog * to_mlog = this->mlog_[role::to_space()][child_gen];
                         MutationLog * triage_mlog = this->mlog_[c_n_role][child_gen];
 
-                        auto stats = this->_forward_mutation_log_phase(gc->ref<AGCObjectVisitor>(),
+                        auto stats = this->_forward_mutation_log_phase(gc,
                                                                        upto,
                                                                        child_gen,
                                                                        from_mlog,

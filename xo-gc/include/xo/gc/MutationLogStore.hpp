@@ -67,7 +67,7 @@ namespace xo {
              *  forward mutation logs, for generations 0 <= g < @p upto,
              *  from from-space to to-space.
              **/
-            void forward_mutation_log(DX1Collector * gc,
+            void forward_mutation_log(obj<AGCObjectVisitor> gc,
                                       Generation upto);
 
         private:
