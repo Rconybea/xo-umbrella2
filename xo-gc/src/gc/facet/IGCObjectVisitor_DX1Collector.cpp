@@ -22,6 +22,12 @@ namespace xo {
         }
 
         auto
+        IGCObjectVisitor_DX1Collector::generation_of(const DX1Collector & self, role r, const void * addr) noexcept -> Generation
+        {
+            return self.generation_of(r, addr);
+        }
+
+        auto
         IGCObjectVisitor_DX1Collector::alloc_copy(DX1Collector & self, std::byte * src) -> void *
         {
             return self.alloc_copy(src);

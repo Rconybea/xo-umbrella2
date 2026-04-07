@@ -13,6 +13,8 @@
 
 #pragma once
 
+#include <xo/alloc2/Generation.hpp>
+#include <xo/alloc2/role.hpp>
 #include <xo/arena/AllocInfo.hpp>
 
 namespace xo {
@@ -45,6 +47,9 @@ namespace mm {
         // const methods
         AllocInfo alloc_info(Copaque data, void * addr)  const override {
             return I::alloc_info(_dcast(data), addr);
+        }
+        Generation generation_of(Copaque data, role r, const void * addr)  const  noexcept override {
+            return I::generation_of(_dcast(data), r, addr);
         }
 
         // non-const methods

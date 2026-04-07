@@ -4,11 +4,9 @@
     output_hpp_dir: "include/xo/alloc2",
     output_impl_subdir: "gc",
     includes: [
+        "<xo/alloc2/Generation.hpp>",
+        "<xo/alloc2/role.hpp>",
         "<xo/arena/AllocInfo.hpp>",
-//        "<xo/alloc2/Allocator.hpp>",
-//        "<xo/alloc2/Collector.hpp>",
-//        "<cstdint>",
-//        "<cstddef>",
     ],
     // extra includes in GCObject.hpp, if any
     user_hpp_includes: [
@@ -38,7 +36,7 @@
 //        },
     ],
     const_methods: [
-        // AllocInfo alloc_info(void * gco);
+        // AllocInfo alloc_info(void * gco) const noexcept;
         {
             name: "alloc_info",
             doc: [
@@ -53,7 +51,22 @@
             noexcept: false,
             attributes: [],
         },
-        // Generation generation_of(...);
+        // Generation generation_of(role r, const void * addr) const noexcept;
+        {
+            name: "generation_of",
+            doc: [
+                "generation to which pointer @p addr belongs, given role @p r;",
+                "sentinel if @p addr is not owned by collector",
+            ],
+            return_type: "Generation",
+            args: [
+                {type: "role", name: "r"},
+                {type: "const void *", name: "addr"},
+            ],
+            const: true,
+            noexcept: true,
+            attributes: [],
+        },
     ],
     nonconst_methods: [
         // void alloc_copy(void * src)

@@ -91,6 +91,9 @@ public:
     AllocInfo alloc_info(void * addr)  const {
         return O::iface()->alloc_info(O::data(), addr);
     }
+    Generation generation_of(role r, const void * addr)  const  noexcept {
+        return O::iface()->generation_of(O::data(), r, addr);
+    }
 
     // non-const methods (still const in router!)
     void * alloc_copy(std::byte * src)  {

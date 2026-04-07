@@ -17,7 +17,8 @@ namespace xo {
          *  {@ref AAllocator::alloc, @ref AAllocator::alloc_super}
          *
          **/
-        struct AllocInfo {
+        class AllocInfo {
+        public:
             /** @defgroup mm-allocinfo-traits **/
             ///@{
 
