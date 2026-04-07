@@ -63,7 +63,7 @@ public:
     virtual AllocInfo alloc_info(Copaque data, void * addr)  const = 0;
     /** generation to which pointer @p addr belongs, given role @p r;
 sentinel if @p addr is not owned by collector **/
-    virtual Generation generation_of(Copaque data, role r, const void * addr)  const  noexcept = 0;
+    virtual Generation generation_of(Copaque data, Role r, const void * addr)  const  noexcept = 0;
 
     // nonconst methods
     /** allocate copy of source object at address @p src.

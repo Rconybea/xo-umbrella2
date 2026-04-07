@@ -80,20 +80,20 @@ namespace xo {
                             = DArena::map(config_.arena_config_.with_name(std::string(buf)));
                     }
 
-                    this->space_[role::to_space()][igen] = &space_storage_[0][igen];
-                    this->space_[role::from_space()][igen] = &space_storage_[1][igen];
+                    this->space_[Role::to_space()][igen] = &space_storage_[0][igen];
+                    this->space_[Role::from_space()][igen] = &space_storage_[1][igen];
                 } else {
                     assert(false);
                 }
             }
 
             for (uint32_t igen = config_.n_generation_; igen < c_max_generation; ++igen) {
-                this->space_[role::to_space()][igen] = nullptr;
-                this->space_[role::from_space()][igen] = nullptr;
+                this->space_[Role::to_space()][igen] = nullptr;
+                this->space_[Role::from_space()][igen] = nullptr;
             }
 
             if (config_.n_generation_ == 2) {
-                assert(this->get_space(role::to_space(), Generation{2}) == nullptr);
+                assert(this->get_space(Role::to_space(), Generation{2}) == nullptr);
             }
         }
 
@@ -149,7 +149,7 @@ namespace xo {
         }
 
         Generation
-        GCObjectStore::generation_of(role r, const void * addr) const noexcept
+        GCObjectStore::generation_of(Role r, const void * addr) const noexcept
         {
             for (Generation gi{0}; gi < config_.n_generation_; ++gi) {
                 const DArena * arena = this->get_space(r, gi);
@@ -196,7 +196,7 @@ namespace xo {
 
         AllocInfo
         GCObjectStore::alloc_info(value_type mem) const noexcept {
-            for (role ri : role::all()) {
+            for (Role ri : Role::all()) {
                 for (Generation gj{0}; gj < config_.n_generation_; ++gj) {
                     const DArena * arena = this->get_space(ri, gj);
 
@@ -209,7 +209,7 @@ namespace xo {
             }
 
             // deliberately attempt on nursery to-space, to capture error info + return sentinel
-            return this->get_space(role::to_space(), Generation{0})->alloc_info(mem);
+            return this->get_space(Role::to_space(), Generation{0})->alloc_info(mem);
         }
 
         void
@@ -225,13 +225,13 @@ namespace xo {
         }
 
         bool
-        GCObjectStore::contains(role r, const void * addr) const noexcept
+        GCObjectStore::contains(Role r, const void * addr) const noexcept
         {
             return !(this->generation_of(r, addr).is_sentinel());
         }
 
         bool
-        GCObjectStore::contains_allocated(role r, const void * addr) const noexcept
+        GCObjectStore::contains_allocated(Role r, const void * addr) const noexcept
         {
             Generation g = this->generation_of(r, addr);
 
@@ -304,7 +304,7 @@ namespace xo {
             // scan to-space, count objects by type
 
             for (Generation g{0}; g < config_.n_generation_; ++g) {
-                const DArena * arena = this->get_space(role::to_space(), g);
+                const DArena * arena = this->get_space(Role::to_space(), g);
 
                 for (AllocInfo info : *arena) {
                     if (info.is_forwarding_tseq()) {
@@ -392,7 +392,7 @@ namespace xo {
             std::int64_t max_age_present = 0;
 
             for (Generation g{0}; g < config_.n_generation_; ++g) {
-                const DArena * arena = this->get_space(role::to_space(), g);
+                const DArena * arena = this->get_space(Role::to_space(), g);
 
                 for (AllocInfo info : *arena) {
                     if (info.is_forwarding_tseq()) {
@@ -485,7 +485,7 @@ namespace xo {
             if (!object_data) {
                 /* trivial to forward nullptr */
                 return;
-            } else if (!this->contains(role::from_space(), object_data)) {
+            } else if (!this->contains(Role::from_space(), object_data)) {
                 /* *lhs_data either:
                  * 1. already in to-space
                  * 2. not in GC-allocated space at all
@@ -648,7 +648,7 @@ namespace xo {
             for (Generation g = Generation{0}; g < upto; ++g) {
                 log && log("swap roles", xtag("g", g));
 
-                std::swap(space_[role::to_space()][g], space_[role::from_space()][g]);
+                std::swap(space_[Role::to_space()][g], space_[Role::from_space()][g]);
             }
         }
 
@@ -663,10 +663,10 @@ namespace xo {
             //
             for (Generation g = Generation{0}; g < upto; ++g) {
                 if (sanitize_flag) {
-                    space_[role::from_space()][g]->scrub();
+                    space_[Role::from_space()][g]->scrub();
                 }
 
-                space_[role::from_space()][g]->clear();
+                space_[Role::from_space()][g]->clear();
             }
         }
 
@@ -687,7 +687,7 @@ namespace xo {
                                  X1VerifyStats * p_verify_stats) noexcept
         {
             for (Generation g(0); g < config_.n_generation_; ++g) {
-                const DArena * space = this->get_space(role::to_space(), g);
+                const DArena * space = this->get_space(Role::to_space(), g);
 
                 for (const AllocInfo & info : *space) {
 
@@ -762,7 +762,7 @@ namespace xo {
             if (!from_src)
                 return nullptr;
 
-            bool src_in_from_space = this->contains(role::from_space(),
+            bool src_in_from_space = this->contains(Role::from_space(),
                                                     from_src.data());
 
             if (src_in_from_space) {
@@ -798,7 +798,7 @@ namespace xo {
             if (!from_src)
                 return nullptr;
 
-            bool src_in_from_space = this->contains(role::from_space(), from_src);
+            bool src_in_from_space = this->contains(Role::from_space(), from_src);
 
             if (!src_in_from_space)
                 return from_src;
@@ -817,7 +817,7 @@ namespace xo {
             AllocHeader hdr = info.header();
             typeseq tseq(info.tseq());
 
-            assert(this->contains_allocated(role::from_space(), from_src));
+            assert(this->contains_allocated(Role::from_space(), from_src));
 
             if (this->is_forwarding_header(hdr)) {
                 /* already forwarded - pickup destination

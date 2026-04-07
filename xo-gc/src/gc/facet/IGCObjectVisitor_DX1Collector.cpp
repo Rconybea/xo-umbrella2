@@ -22,7 +22,7 @@ namespace xo {
         }
 
         auto
-        IGCObjectVisitor_DX1Collector::generation_of(const DX1Collector & self, role r, const void * addr) noexcept -> Generation
+        IGCObjectVisitor_DX1Collector::generation_of(const DX1Collector & self, Role r, const void * addr) noexcept -> Generation
         {
             return self.generation_of(r, addr);
         }

@@ -33,10 +33,10 @@ namespace xo {
             const GCObjectStoreConfig & config() const noexcept { return config_; }
 
             const ObjectTypeTable * get_object_types() const noexcept { return &object_types_; }
-            const DArena * get_space(role r, Generation g) const noexcept { return space_[r][g]; }
-            DArena * get_space(role r, Generation g) noexcept { return space_[r][g]; }
-            DArena * from_space(Generation g) noexcept { return get_space(role::from_space(), g); }
-            DArena * to_space(Generation g) noexcept { return get_space(role::to_space(), g); }
+            const DArena * get_space(Role r, Generation g) const noexcept { return space_[r][g]; }
+            DArena * get_space(Role r, Generation g) noexcept { return space_[r][g]; }
+            DArena * from_space(Generation g) noexcept { return get_space(Role::from_space(), g); }
+            DArena * to_space(Generation g) noexcept { return get_space(Role::to_space(), g); }
             DArena * new_space() noexcept { return to_space(Generation{0}); }
 
             /** true iff type with id @p tseq has known metadata
@@ -50,10 +50,10 @@ namespace xo {
              **/
             AGCObject * lookup_type(typeseq tseq) const noexcept;
 
-            /** generation to which pointer @p addr belongs, given role @p r;
+            /** generation to which pointer @p addr belongs, given Role @p r;
              *  sentinel if not found in this collector
              **/
-            Generation generation_of(role r, const void * addr) const noexcept;
+            Generation generation_of(Role r, const void * addr) const noexcept;
 
             /** get allocation size from header **/
             std::size_t header2size(header_type hdr) const noexcept;
@@ -72,16 +72,16 @@ namespace xo {
             void visit_pools(const MemorySizeVisitor & visitor) const;
 
             /** true iff address @p addr allocated from this collector
-             *  in role @p r (according to current GC state)
+             *  in Role @p r (according to current GC state)
              **/
-            bool contains(role r, const void * addr) const noexcept;
+            bool contains(Role r, const void * addr) const noexcept;
 
             /** true iff address @p addr allocated from this collector and currently live
-             *  in role @p r (according to current GC state)
+             *  in Role @p r (according to current GC state)
              *
              *  (i.e. in [lo,free) for an arena)
              **/
-            bool contains_allocated(role r, const void * addr) const noexcept;
+            bool contains_allocated(Role r, const void * addr) const noexcept;
 
             /** Report per-age-bucket information as an array of dictionaries.
              *  Scans to-space to count per-age statistics.

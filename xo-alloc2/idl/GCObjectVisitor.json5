@@ -51,7 +51,7 @@
             noexcept: false,
             attributes: [],
         },
-        // Generation generation_of(role r, const void * addr) const noexcept;
+        // Generation generation_of(Role r, const void * addr) const noexcept;
         {
             name: "generation_of",
             doc: [
@@ -60,7 +60,7 @@
             ],
             return_type: "Generation",
             args: [
-                {type: "role", name: "r"},
+                {type: "Role", name: "r"},
                 {type: "const void *", name: "addr"},
             ],
             const: true,

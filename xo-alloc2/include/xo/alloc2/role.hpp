@@ -12,18 +12,19 @@ namespace xo {
     namespace mm {
         static constexpr uint32_t c_n_role = 2;
 
-        struct role {
+        class Role {
+        public:
             using value_type = std::uint32_t;
 
-            explicit constexpr role(value_type x) : role_{x} {}
+            explicit constexpr Role(value_type x) : role_{x} {}
 
-            static constexpr role to_space() { return role{0}; }
-            static constexpr role from_space() { return role{1}; }
+            static constexpr Role to_space() { return Role{0}; }
+            static constexpr Role from_space() { return Role{1}; }
 
-            static constexpr std::array<role, c_n_role> all() { return {{to_space(), from_space()}}; }
+            static constexpr std::array<Role, c_n_role> all() { return {{to_space(), from_space()}}; }
 
-            static constexpr role begin() { return role{0}; }
-            static constexpr role end() { return role{2}; }
+            static constexpr Role begin() { return Role{0}; }
+            static constexpr Role end() { return Role{2}; }
 
             operator value_type() const { return role_; }
 

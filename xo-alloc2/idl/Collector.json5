@@ -37,40 +37,40 @@
         },
     ],
     const_methods: [
-        // size_type allocated(Generation g, role r) const noexcept
+        // size_type allocated(Generation g, Role r) const noexcept
         {
             name: "allocated",
             doc: ["memory in use for this collector"],
             return_type: "size_type",
             args: [
                 {type: "Generation", name: "g"},
-                {type: "role", name: "r"},
+                {type: "Role", name: "r"},
             ],
             const: true,
             noexcept: true,
             attributes: [],
         },
-        // size_type committed(Generation g, role r) const noexcept
+        // size_type committed(Generation g, Role r) const noexcept
         {
             name: "committed",
             doc: ["memory committed for this collector"],
             return_type: "size_type",
             args: [
                 {type: "Generation", name: "g"},
-                {type: "role", name: "r"},
+                {type: "Role", name: "r"},
             ],
             const: true,
             noexcept: true,
             attributes: [],
         },
-        // size_type reserved(Generation g, role r) const noexcept
+        // size_type reserved(Generation g, Role r) const noexcept
         {
             name: "reserved",
             doc: ["address space reserved for this collector"],
             return_type: "size_type",
             args: [
                 {type: "Generation", name: "g"},
-                {type: "role", name: "r"},
+                {type: "Role", name: "r"},
             ],
             const: true,
             noexcept: true,
@@ -92,13 +92,13 @@
             noexcept: true,
             attributes: [],
         },
-        // bool contains(role r, const void * addr) const noexcept
+        // bool contains(Role r, const void * addr) const noexcept
         {
             name: "contains",
-            doc: ["true if gc responsible for data at @p addr, and data belongs to role @p r"],
+            doc: ["true if gc responsible for data at @p addr, and data belongs to Role @p r"],
             return_type: "bool",
             args: [
-                {type: "role", name: "r"},
+                {type: "Role", name: "r"},
                 {type: "const void *", name: "addr"},
             ],
             const: true,

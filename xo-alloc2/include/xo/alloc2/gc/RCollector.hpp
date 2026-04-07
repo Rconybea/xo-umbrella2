@@ -95,19 +95,19 @@ public:
     void _drop() const noexcept { O::iface()->_drop(O::data()); }
 
     // const methods
-    size_type allocated(Generation g, role r)  const  noexcept {
+    size_type allocated(Generation g, Role r)  const  noexcept {
         return O::iface()->allocated(O::data(), g, r);
     }
-    size_type committed(Generation g, role r)  const  noexcept {
+    size_type committed(Generation g, Role r)  const  noexcept {
         return O::iface()->committed(O::data(), g, r);
     }
-    size_type reserved(Generation g, role r)  const  noexcept {
+    size_type reserved(Generation g, Role r)  const  noexcept {
         return O::iface()->reserved(O::data(), g, r);
     }
     std::int32_t locate_address(const void * addr)  const  noexcept {
         return O::iface()->locate_address(O::data(), addr);
     }
-    bool contains(role r, const void * addr)  const  noexcept {
+    bool contains(Role r, const void * addr)  const  noexcept {
         return O::iface()->contains(O::data(), r, addr);
     }
     bool is_type_installed(typeseq tseq)  const  noexcept {

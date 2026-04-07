@@ -60,17 +60,17 @@ public:
     /** destroy instance @p d; calls c++ dtor only for actual runtime type; does not recover memory **/
     virtual void _drop(Opaque d) const noexcept = 0;
     /** memory in use for this collector **/
-    virtual size_type allocated(Copaque data, Generation g, role r)  const  noexcept = 0;
+    virtual size_type allocated(Copaque data, Generation g, Role r)  const  noexcept = 0;
     /** memory committed for this collector **/
-    virtual size_type committed(Copaque data, Generation g, role r)  const  noexcept = 0;
+    virtual size_type committed(Copaque data, Generation g, Role r)  const  noexcept = 0;
     /** address space reserved for this collector **/
-    virtual size_type reserved(Copaque data, Generation g, role r)  const  noexcept = 0;
+    virtual size_type reserved(Copaque data, Generation g, Role r)  const  noexcept = 0;
     /** Location of object in collector. -1 if not in collector memory.
 Other negative values represent collector error states (good luck!).
 Exact meaning of non-negative values up to collector implementation **/
     virtual std::int32_t locate_address(Copaque data, const void * addr)  const  noexcept = 0;
-    /** true if gc responsible for data at @p addr, and data belongs to role @p r **/
-    virtual bool contains(Copaque data, role r, const void * addr)  const  noexcept = 0;
+    /** true if gc responsible for data at @p addr, and data belongs to Role @p r **/
+    virtual bool contains(Copaque data, Role r, const void * addr)  const  noexcept = 0;
     /** true iff gc-aware object of type @p tseq is installed in this collector **/
     virtual bool is_type_installed(Copaque data, typeseq tseq)  const  noexcept = 0;
     /** Report gc statistics, at discretion of collector implementation.

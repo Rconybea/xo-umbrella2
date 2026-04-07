@@ -118,34 +118,34 @@ namespace xo {
             GCRunState runstate() const noexcept { return runstate_; }
             const ObjectTypeTable * get_object_types() const noexcept { return gco_store_.get_object_types(); }
             const RootSet * get_root_set() const noexcept { return &root_set_; }
-            const DArena * get_space(role r, Generation g) const noexcept { return gco_store_.get_space(r, g); }
-            DArena * get_space(role r, Generation g) noexcept { return gco_store_.get_space(r, g); }
-            DArena * from_space(Generation g) noexcept { return this->get_space(role::from_space(), g); }
-            DArena * to_space(Generation g) noexcept { return this->get_space(role::to_space(), g); }
+            const DArena * get_space(Role r, Generation g) const noexcept { return gco_store_.get_space(r, g); }
+            DArena * get_space(Role r, Generation g) noexcept { return gco_store_.get_space(r, g); }
+            DArena * from_space(Generation g) noexcept { return this->get_space(Role::from_space(), g); }
+            DArena * to_space(Generation g) noexcept { return this->get_space(Role::to_space(), g); }
             DArena * new_space() noexcept { return this->to_space(Generation{0}); }
 
             // ----- basic statistics -----
 
-            /** total reserved memory in bytes, across all {role, generation} **/
+            /** total reserved memory in bytes, across all {Role, generation} **/
             size_type reserved() const noexcept;
             /** total size in bytes (same as committed_total()) **/
             size_type size_total() const noexcept;
-            /** total committed memory in bytes, across all {role, generation} **/
+            /** total committed memory in bytes, across all {Role, generation} **/
             size_type committed() const noexcept;
-            /** total available memory in bytes, across all {role, generation} **/
+            /** total available memory in bytes, across all {Role, generation} **/
             size_type available() const noexcept;
-            /** total allocated memory in bytes, across all {role, generation} **/
+            /** total allocated memory in bytes, across all {Role, generation} **/
             size_type allocated() const noexcept;
 
             /** total number of mutation log entries **/
             size_type mutation_log_entries() const noexcept;
 
-            /** memory allocated for generation @p g in role @p r **/
-            size_type allocated(Generation g, role r) const noexcept;
-            /** memory committed for generation @p g in role @p r **/
-            size_type committed(Generation g, role r) const noexcept;
-            /** memory (virtual addresses) reserved for generation @p g in role @p r **/
-            size_type reserved(Generation g, role r) const noexcept;
+            /** memory allocated for generation @p g in Role @p r **/
+            size_type allocated(Generation g, Role r) const noexcept;
+            /** memory committed for generation @p g in Role @p r **/
+            size_type committed(Generation g, Role r) const noexcept;
+            /** memory (virtual addresses) reserved for generation @p g in Role @p r **/
+            size_type reserved(Generation g, Role r) const noexcept;
 
             /** very similar to generation_of(), but satisfies ACollector api **/
             std::int32_t locate_address(const void * addr) const noexcept;
@@ -197,21 +197,21 @@ namespace xo {
             void visit_pools(const MemorySizeVisitor & visitor) const;
 
             /** true iff address @p addr allocated from this collector
-             *  in role @p r (according to current GC state)
+             *  in Role @p r (according to current GC state)
              **/
-            bool contains(role r, const void * addr) const noexcept;
+            bool contains(Role r, const void * addr) const noexcept;
 
             /** true iff address @p addr allocated from this collector and currently live
-             *  in role @p r (according to current GC state)
+             *  in Role @p r (according to current GC state)
              *
              *  (i.e. in [lo,free) for an arena)
              **/
-            bool contains_allocated(role r, const void * addr) const noexcept;
+            bool contains_allocated(Role r, const void * addr) const noexcept;
 
-            /** generation to which pointer @p addr belongs, given role @p r;
+            /** generation to which pointer @p addr belongs, given Role @p r;
              *  sentinel if not found in this collector
              **/
-            Generation generation_of(role r, const void * addr) const noexcept;
+            Generation generation_of(Role r, const void * addr) const noexcept;
 
             /** return details from last error (will be in gen0 to-space) **/
             AllocError last_error() const noexcept;
@@ -352,7 +352,7 @@ namespace xo {
             /** aux init function: initialize @ref space_storage_[][] arenas **/
             void _init_space(const X1CollectorConfig & cfg);
 
-            /** swap from- and to- roles for all generations < @p upto **/
+            /** swap from- and to- Roles for all generations < @p upto **/
             void _swap_roles(Generation upto) noexcept;
             /** copy roots + everything reachable from them, to to-space **/
             void _copy_roots(Generation upto) noexcept;

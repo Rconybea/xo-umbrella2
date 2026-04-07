@@ -73,7 +73,7 @@ namespace xo {
             size_type z = 0;
 
             for (Generation gj{0}; gj + 1 < config_.n_generation_; ++gj) {
-                z += mlog_[role::to_space()][gj]->size();
+                z += mlog_[Role::to_space()][gj]->size();
             }
 
             return z;
@@ -95,15 +95,15 @@ namespace xo {
         {
             // 4. scan mutation logs
             for (Generation g(0); g + 1 < config_.n_generation_; ++g) {
-                const DArena * space = gco_store->get_space(role::to_space(), g);
-                const DArena * from = gco_store->get_space(role::from_space(), g);
+                const DArena * space = gco_store->get_space(Role::to_space(), g);
+                const DArena * from = gco_store->get_space(Role::from_space(), g);
 
                 // mutation log for generation g records *incoming* pointers
                 // from more senior generations; includes objects from *this*
                 // generation that are older (track since source promotes before
                 // destination)
                 //
-                for (const MutationLogEntry & mrecd : *(mlog_[role::to_space()][g])) {
+                for (const MutationLogEntry & mrecd : *(mlog_[Role::to_space()][g])) {
                     // mutation log entries are only valid until the next assignment
                     // at the source location. Superseded entry may now point
                     // somewhere else. The snapshot member must however point
@@ -159,7 +159,7 @@ namespace xo {
             // 1. generation of lhs
             // 2. generation of rhs
 
-            Generation src_g = gco_store->generation_of(role::to_space(), p_lhs);
+            Generation src_g = gco_store->generation_of(Role::to_space(), p_lhs);
 
             if (src_g.is_sentinel()) {
                 // only need mlog entries for gc-owned pointers.
@@ -167,7 +167,7 @@ namespace xo {
                 return;
             }
 
-            Generation dest_g = gco_store->generation_of(role::to_space(), rhs.data());
+            Generation dest_g = gco_store->generation_of(Role::to_space(), rhs.data());
 
             if (dest_g.is_sentinel()) {
                 // similarly, don't need mlog entry to non-gc-owned destination
@@ -185,7 +185,7 @@ namespace xo {
                 // for pointers within the same generation, need to log
                 // if source is older than destination.
 
-                const DArena * arena = gco_store->get_space(role::to_space(), src_g);
+                const DArena * arena = gco_store->get_space(Role::to_space(), src_g);
 
                 const DArena::header_type * src_hdr = arena->obj2hdr(parent);
                 const DArena::header_type * dest_hdr = arena->obj2hdr(rhs.data());
@@ -226,7 +226,7 @@ namespace xo {
             // collection that moves destination generation around needs to also
             // update pointers such as this one
             //
-            MutationLog * mlog = this->mlog_[role::to_space()][dest_g];
+            MutationLog * mlog = this->mlog_[Role::to_space()][dest_g];
 
             mlog->push_back(MutationLogEntry(parent, addr, rhs));
         }
@@ -239,7 +239,7 @@ namespace xo {
             for (Generation g = Generation{0}; g < upto; ++g) {
                 log && log("swap roles", xtag("g", g));
 
-                std::swap(mlog_[role::to_space()][g], mlog_[role::from_space()][g]);
+                std::swap(mlog_[Role::to_space()][g], mlog_[Role::from_space()][g]);
             }
         }
 
@@ -260,10 +260,10 @@ namespace xo {
                      child_gen + 2 < config_.n_generation_;
                      ++child_gen) {
 
-                    MutationLog * from_mlog = this->mlog_[role::from_space()][child_gen];
+                    MutationLog * from_mlog = this->mlog_[Role::from_space()][child_gen];
 
                     if (!from_mlog->empty()) {
-                        MutationLog * to_mlog = this->mlog_[role::to_space()][child_gen];
+                        MutationLog * to_mlog = this->mlog_[Role::to_space()][child_gen];
                         MutationLog * triage_mlog = this->mlog_[c_n_role][child_gen];
 
                         auto stats = this->_forward_mutation_log_phase(gc,
@@ -277,7 +277,7 @@ namespace xo {
 
                         // {from_mlog, triage_mlog} reverse roles
 
-                        std::swap(this->mlog_[role::from_space()][child_gen],
+                        std::swap(this->mlog_[Role::from_space()][child_gen],
                                   this->mlog_[c_n_role][child_gen]);
 
                         work += stats.n_rescue_;
@@ -376,7 +376,7 @@ namespace xo {
 
                 /* here: mlog current */
 
-                Generation parent_gen_to = gc.generation_of(role::to_space(),
+                Generation parent_gen_to = gc.generation_of(Role::to_space(),
                                                             from_entry.parent());
 
                 if (parent_gen_to.is_sentinel()) {
@@ -393,7 +393,7 @@ namespace xo {
                         // TODO: method on AllocInfo to streamline this
                         void * parent_to = *(void **)parent_fr;
 
-                        parent_gen_to = gc.generation_of(role::to_space(),
+                        parent_gen_to = gc.generation_of(Role::to_space(),
                                                          parent_to);
                         parent_info = gc.alloc_info((std::byte *)parent_to);
 
@@ -503,7 +503,7 @@ namespace xo {
                                                    MutationLog * keep_mlog)
         {
             Generation child_gen_to
-                = gco_store_->generation_of(role::to_space(), child_to);
+                = gco_store_->generation_of(Role::to_space(), child_to);
 
             bool need_mlog_entry
                 = ((child_gen_to + 1 < config_.n_generation_)

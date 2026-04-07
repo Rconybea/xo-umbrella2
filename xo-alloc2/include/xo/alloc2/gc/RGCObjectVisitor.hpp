@@ -91,7 +91,7 @@ public:
     AllocInfo alloc_info(void * addr)  const {
         return O::iface()->alloc_info(O::data(), addr);
     }
-    Generation generation_of(role r, const void * addr)  const  noexcept {
+    Generation generation_of(Role r, const void * addr)  const  noexcept {
         return O::iface()->generation_of(O::data(), r, addr);
     }
 

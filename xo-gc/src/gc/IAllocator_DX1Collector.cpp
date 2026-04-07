@@ -65,7 +65,7 @@ namespace xo {
         bool
         IAllocator_DX1Collector::contains(const DX1Collector & d, const void * addr) noexcept
         {
-            return d.contains(role::to_space(), addr);
+            return d.contains(Role::to_space(), addr);
         }
 
         AllocError
