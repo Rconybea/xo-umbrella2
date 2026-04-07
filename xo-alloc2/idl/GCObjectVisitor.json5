@@ -20,6 +20,7 @@
         "// see GCObject.hpp, also in xo-alloc2/",
         "namespace xo { namespace mm { class AGCObject; }}",
         "namespace xo { namespace mm { class AllocInfo; }}",
+        "namespace xo { namespace mm { class Generation; }}",
     ],
     facet: "GCObjectVisitor",
     detail_subdir: "gc",
@@ -34,16 +35,6 @@
 //            name: "size_type",
 //            doc: ["type for an amount of memory"],
 //            definition: "std::size_t",
-//        },
-//        {
-//            name: "AAllocator",
-//            doc: ["fomo allocator type"],
-//            definition: "xo::mm::AAllocator",
-//        },
-//        {
-//            name: "ACollector",
-//            doc: ["fomo collector type"],
-//            definition: "xo::mm::ACollector",
 //        },
     ],
     const_methods: [
@@ -62,6 +53,7 @@
             noexcept: false,
             attributes: [],
         },
+        // Generation generation_of(...);
     ],
     nonconst_methods: [
         // void alloc_copy(void * src)

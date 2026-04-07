@@ -266,7 +266,7 @@ namespace xo {
                         MutationLog * to_mlog = this->mlog_[role::to_space()][child_gen];
                         MutationLog * triage_mlog = this->mlog_[c_n_role][child_gen];
 
-                        auto stats = this->_forward_mutation_log_phase(gc,
+                        auto stats = this->_forward_mutation_log_phase(gc->ref<AGCObjectVisitor>(),
                                                                        upto,
                                                                        child_gen,
                                                                        from_mlog,
@@ -294,7 +294,7 @@ namespace xo {
         }
 
         MutationLogStatistics
-        MutationLogStore::_forward_mutation_log_phase(DX1Collector * gc,
+        MutationLogStore::_forward_mutation_log_phase(obj<AGCObjectVisitor> gc,
                                                       Generation upto,
                                                       Generation child_gen,
                                                       MutationLog * from_mlog,
@@ -377,12 +377,12 @@ namespace xo {
                 /* here: mlog current */
 
                 Generation parent_gen_to = gc->generation_of(role::to_space(),
-                                                               from_entry.parent());
+                                                             from_entry.parent());
 
                 if (parent_gen_to.is_sentinel()) {
                     void * parent_fr = *from_entry.p_data();
 
-                    AllocInfo parent_info = gc->alloc_info((std::byte *)parent_fr);
+                    AllocInfo parent_info = gc.alloc_info((std::byte *)parent_fr);
 
                     if (parent_info.is_forwarding_tseq()) {
                         /* [MLOG3] */
@@ -395,7 +395,7 @@ namespace xo {
 
                         parent_gen_to = gc->generation_of(role::to_space(),
                                                             parent_to);
-                        parent_info = gc->alloc_info((std::byte *)parent_to);
+                        parent_info = gc.alloc_info((std::byte *)parent_to);
 
                         assert(!parent_gen_to.sentinel());
 
@@ -431,11 +431,12 @@ namespace xo {
                 } else {
                     /* [MLOG1, MLOG2] */
 
-                    counters += this->_preserve_child_of_live_parent(gc,
-                                                                     upto,
-                                                                     parent_gen_to,
-                                                                     from_entry,
-                                                                     keep_mlog);
+                    counters
+                        += this->_preserve_child_of_live_parent(gc,
+                                                                upto,
+                                                                parent_gen_to,
+                                                                from_entry,
+                                                                keep_mlog);
                 }
             }
 
@@ -443,14 +444,14 @@ namespace xo {
         } /*forward_mutation_log_phase*/
 
         MutationLogStatistics
-        MutationLogStore::_preserve_child_of_live_parent(DX1Collector * x1gc,
+        MutationLogStore::_preserve_child_of_live_parent(obj<AGCObjectVisitor> gc,
                                                          Generation upto,
                                                          Generation parent_gen,
                                                          const MutationLogEntry & from_entry,
                                                          MutationLog * keep_mlog)
         {
             void * child_fr = *from_entry.p_data();
-            AllocInfo child_info = x1gc->alloc_info((std::byte *)(child_fr));
+            AllocInfo child_info = gc.alloc_info((std::byte *)(child_fr));
 
             MutationLogStatistics counters;
 
@@ -482,7 +483,7 @@ namespace xo {
 
                 ++counters.n_rescue_;
 
-                child_to = gco_store_->deep_move_interior(x1gc->ref<AGCObjectVisitor>(), child_fr, upto);
+                child_to = gco_store_->deep_move_interior(gc, child_fr, upto);
 
                 // update child pointer in parent object
                 *from_entry.p_data() = child_to;
