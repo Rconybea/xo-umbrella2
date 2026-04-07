@@ -376,8 +376,8 @@ namespace xo {
 
                 /* here: mlog current */
 
-                Generation parent_gen_to = gc->generation_of(role::to_space(),
-                                                             from_entry.parent());
+                Generation parent_gen_to = gc.generation_of(role::to_space(),
+                                                            from_entry.parent());
 
                 if (parent_gen_to.is_sentinel()) {
                     void * parent_fr = *from_entry.p_data();
@@ -393,8 +393,8 @@ namespace xo {
                         // TODO: method on AllocInfo to streamline this
                         void * parent_to = *(void **)parent_fr;
 
-                        parent_gen_to = gc->generation_of(role::to_space(),
-                                                            parent_to);
+                        parent_gen_to = gc.generation_of(role::to_space(),
+                                                         parent_to);
                         parent_info = gc.alloc_info((std::byte *)parent_to);
 
                         assert(!parent_gen_to.sentinel());
