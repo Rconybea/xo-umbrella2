@@ -283,25 +283,26 @@
             noexcept: false,
             attributes: [],
         },
-        // void forward_inplace(AGCObject * lhs_iface, void ** lhs_data);
-        {
-            name: "forward_inplace",
-            doc: [
-                "evacuate @p *lhs, that refers to state with interface @p lhs_iface,",
-                "to collector @p d's to-space. Replace *lhs_data with forwarding pointer",
-                "",
-                "Require: gc in progress",
-                "",
-            ],
-            return_type: "void",
-            args: [
-                {type: "AGCObject *", name: "lhs_iface"},
-                {type: "void **", name: "lhs_data"},
-            ],
-            const: false,
-            noexcept: false,
-            attributes: [],
-        },
+        // obsolete. use GCObjectVisitor.visit_child()
+//        // void forward_inplace(AGCObject * lhs_iface, void ** lhs_data);
+//        {
+//            name: "forward_inplace",
+//            doc: [
+//                "evacuate @p *lhs, that refers to state with interface @p lhs_iface,",
+//                "to collector @p d's to-space. Replace *lhs_data with forwarding pointer",
+//                "",
+//                "Require: gc in progress",
+//                "",
+//            ],
+//            return_type: "void",
+//            args: [
+//                {type: "AGCObject *", name: "lhs_iface"},
+//                {type: "void **", name: "lhs_data"},
+//            ],
+//            const: false,
+//            noexcept: false,
+//            attributes: [],
+//        },
     ],
     router_facet_explicit_content: [
         "/** convenience template for gc object copy **/",

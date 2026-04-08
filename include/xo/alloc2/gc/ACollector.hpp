@@ -123,12 +123,6 @@ Require: gc not in progress **/
 Source must be owned by this collector.
 Increments object age **/
     virtual void * alloc_copy(Opaque data, std::byte * src)  = 0;
-    /** evacuate @p *lhs, that refers to state with interface @p lhs_iface,
-to collector @p d's to-space. Replace *lhs_data with forwarding pointer
-
-Require: gc in progress
- **/
-    virtual void forward_inplace(Opaque data, AGCObject * lhs_iface, void ** lhs_data)  = 0;
     ///@}
 }; /*ACollector*/
 

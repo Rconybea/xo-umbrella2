@@ -76,7 +76,6 @@ namespace mm {
         [[noreturn]] void request_gc(Opaque, Generation)  override;
         [[noreturn]] void assign_member(Opaque, void *, obj<AGCObject> *, obj<AGCObject> &)  override;
         [[noreturn]] void * alloc_copy(Opaque, std::byte *)  override;
-        [[noreturn]] void forward_inplace(Opaque, AGCObject *, void **)  override;
 
         ///@}
 
