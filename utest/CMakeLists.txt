@@ -9,7 +9,19 @@ set(UTEST_SRCS
     DX1CollectorIterator.test.cpp
     GCObjectStore.test.cpp
     Object2.test.cpp
+
+    DMockCollector.cpp
+    IGCObjectVisitor_DMockCollector.cpp
+
+    init_gc_utest.cpp
     random_allocs.cpp
+)
+
+# mock collector for unit test
+xo_add_genfacetimpl(
+    TARGET xo-gc-facetimpl-gcobjectvisitor-mockcollector
+    FACET_PKG xo_alloc2
+    INPUT idl/IGCObjectVisitor_DMockCollector.json5
 )
 
 if (ENABLE_TESTING)

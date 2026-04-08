@@ -1,17 +1,19 @@
 /* file gc_utest_main.cpp */
 
-#include <xo/gc/init_gc.hpp>
+#include "init_gc_utest.hpp"
 #include <xo/subsys/Subsystem.hpp>
 
 #define CATCH_CONFIG_RUNNER
 #include <catch2/catch.hpp>
 
-using xo::S_gc_tag;
+using xo::S_gc_utest_tag;
 using xo::InitSubsys;
 using xo::InitEvidence;
 
-// ensure xo-gc properly initialized when Subsystem::initialize_all() runs
-static InitEvidence s_init = (InitSubsys<S_gc_tag>::require());
+// ensure xo-gc/utest as mock subsystem
+// properly initialized when Subsystem::initialize_all() runs
+//
+static InitEvidence s_init = (InitSubsys<S_gc_utest_tag>::require());
 
 int
 main(int argc, char* argv[])

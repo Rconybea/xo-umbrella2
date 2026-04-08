@@ -585,31 +585,12 @@ namespace xo {
         }
 
         void
-        DX1Collector::forward_inplace(AGCObject * lhs_iface,
-                                      void ** lhs_data)
-        {
-            // TODO: streamline once GCObject refactored so that
-            //       forward_children takes GCObjectVisitor instead of Collector
-            //       argument.
-
-            Generation upto = runstate_.gc_upto();
-
-            if (runstate_.is_running()) {
-                // called during collection phase
-                gco_store_.forward_inplace_aux(this->ref<AGCObjectVisitor>(), lhs_iface, lhs_data, upto);
-            } else if (runstate_.is_verify()) {
-                // called during verify_ok
-                this->_verify_aux(lhs_iface, *lhs_data);
-            } else {
-                // should be unreachable
-                assert(false);
-            }
-        }
-
-        void
         DX1Collector::visit_child(AGCObject * lhs_iface,
                                   void ** lhs_data)
         {
+            // MAYBE: adapter distinct from DX1Collector that supports GCObjectVisitor facet,
+            //        calls DX1Collector::_verify_aux()
+
             if (runstate_.is_running()) {
                 Generation upto = runstate_.gc_upto();
 
@@ -661,17 +642,17 @@ namespace xo {
 
         auto
         DX1Collector::super_alloc(typeseq t, size_type z) noexcept -> value_type {
-            return with_facet<AAllocator>::mkobj(new_space()).super_alloc(t, z);
+            return with_facet<AAllocator>::mkobj(this->new_space()).super_alloc(t, z);
         }
 
         auto
         DX1Collector::sub_alloc(size_type z, bool complete) noexcept -> value_type {
-            return with_facet<AAllocator>::mkobj(new_space()).sub_alloc(z, complete);
+            return with_facet<AAllocator>::mkobj(this->new_space()).sub_alloc(z, complete);
         }
 
         auto
         DX1Collector::alloc_copy(value_type src) noexcept -> value_type {
-            return with_facet<AAllocator>::mkobj(new_space()).alloc_copy(src);
+            return with_facet<AAllocator>::mkobj(this->new_space()).alloc_copy(src);
         }
 
         bool
