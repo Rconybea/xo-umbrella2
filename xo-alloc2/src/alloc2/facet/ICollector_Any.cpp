@@ -71,12 +71,6 @@ ICollector_Any::alloc_copy(Opaque, std::byte *)  -> void *
     _fatal();
 }
 
-auto
-ICollector_Any::forward_inplace(Opaque, AGCObject *, void **)  -> void
-{
-    _fatal();
-}
-
 
 } /*namespace mm*/
 } /*namespace xo*/

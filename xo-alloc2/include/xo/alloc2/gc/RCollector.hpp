@@ -142,9 +142,6 @@ public:
     void * alloc_copy(std::byte * src)  {
         return O::iface()->alloc_copy(O::data(), src);
     }
-    void forward_inplace(AGCObject * lhs_iface, void ** lhs_data)  {
-        return O::iface()->forward_inplace(O::data(), lhs_iface, lhs_data);
-    }
 
     ///@}
     /** @defgroup mm-collector-member-vars **/

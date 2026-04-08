@@ -274,13 +274,18 @@ namespace xo {
             /** Execute gc immediately, for all generations < @p upto **/
             void execute_gc(Generation upto) noexcept;
 
+#ifdef OBSOLETE  // replaced by visit_child()
             /** Evacuate object at @p *lhs_data to to-space.
              *  Replace original with forwarding pointer to new location
              **/
             void forward_inplace(AGCObject * lhs_iface, void ** lhs_data);
+#endif
 
-            /** Supports the GCObjectVisitor facet.
-             *  Synonym for forward_inplace
+            /** Supports GCObjectVisitor facet.
+             *  During gc phase:
+             *  1. evacuate object at @p *lhs_data to to-space.
+             *  2. replace @p *lhs_data with forwarding pointer
+             *     to new location.
              **/
             void visit_child(AGCObject * lhs_iface, void ** lhs_data);
 

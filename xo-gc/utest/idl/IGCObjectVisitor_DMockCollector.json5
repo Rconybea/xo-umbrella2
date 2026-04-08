@@ -1,0 +1,27 @@
+{
+    mode: "implementation",
+    output_cpp_dir: ".",
+    output_hpp_dir: "./",
+    output_impl_subdir: ".",
+    includes: [
+//        "<xo/alloc2/GCObject.hpp>",
+//        "<xo/alloc2/Allocator.hpp>"
+    ],
+    local_types: [
+//        {
+//            name: "typeseq",
+//            doc: ["identifies a c++ type"],
+//            definition: "xo::reflect::typeseq"
+//        },
+    ],
+    namespace1: "xo",
+    namespace2: "mm",
+    facet_idl: "idl/GCObjectVisitor.json5",
+    brief: "provide AGCObjectVisitor interface for DMockCollector",
+    using_doxygen: true,
+    repr: "DMockCollector",
+    doc: [
+        "Implement AGCObjectVisitor for DMockCollector.",
+        "Evacuate object pointer (migrate to to-space) during collection phase"
+    ],
+}

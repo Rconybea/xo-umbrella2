@@ -99,11 +99,6 @@ namespace xo {
         {
             return self.alloc_copy(src);
         }
-        auto
-        ICollector_DX1Collector::forward_inplace(DX1Collector & self, AGCObject * lhs_iface, void ** lhs_data) -> void
-        {
-            self.forward_inplace(lhs_iface, lhs_data);
-        }
 
     } /*namespace mm*/
 } /*namespace xo*/

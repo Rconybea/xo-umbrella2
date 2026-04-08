@@ -111,12 +111,6 @@ Require: gc not in progress **/
 Source must be owned by this collector.
 Increments object age **/
             static void * alloc_copy(DX1Collector & self, std::byte * src);
-            /** evacuate @p *lhs, that refers to state with interface @p lhs_iface,
-to collector @p d's to-space. Replace *lhs_data with forwarding pointer
-
-Require: gc in progress
- **/
-            static void forward_inplace(DX1Collector & self, AGCObject * lhs_iface, void ** lhs_data);
             ///@}
         };
 
