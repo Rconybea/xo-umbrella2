@@ -50,6 +50,9 @@ namespace xo {
                                              obj<AGCObject> car,
                                              DList * cdr);
 
+            obj<AGCObject> head() const noexcept { return head_; }
+            DList * rest() const noexcept { return rest_; }
+
             /** DList length is at least 1 **/
             bool is_empty() const noexcept;
             /** DList models a finite sequence **/
