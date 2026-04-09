@@ -98,11 +98,11 @@ namespace ut {
          *  This is a basic Collector test for xo-object2 data types
          **/
 
-        constexpr bool c_debug_flag = true;
-        scope log(XO_DEBUG(c_debug_flag));
+        constexpr bool c_debug_flag = false;
+        scope log(XO_DEBUG(c_debug_flag), "X1Collector test");
 
         for (std::size_t i_tc = 0, n_tc = s_testcase_v.size(); i_tc < n_tc; ++i_tc) {
-            scope log(XO_DEBUG(true), xtag("i_tc", i_tc));
+            scope log(XO_DEBUG(false), xtag("i_tc", i_tc));
 
             try {
                 const testcase_x1 & tc = s_testcase_v[i_tc];

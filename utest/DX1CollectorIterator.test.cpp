@@ -88,7 +88,7 @@ namespace xo {
 
         TEST_CASE("DX1CollectorIterator-2", "[alloc2][gc][DX1Collector]")
         {
-            scope log(XO_DEBUG(false));
+            scope log(XO_DEBUG(false),  "DX1CollectorIterator test");
 
             ArenaConfig arena_cfg = { .name_ = "_test_unused",
                                       .size_ = 4*1024*1024,

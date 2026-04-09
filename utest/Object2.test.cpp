@@ -64,7 +64,7 @@ namespace ut {
     TEST_CASE("printable1", "[pp][x1][list]")
     {
         constexpr bool c_debug_flag = false;
-        scope log(XO_DEBUG(c_debug_flag));
+        scope log(XO_DEBUG(c_debug_flag), "Object2 printable1 test");
 
         bool ok = SetupObject2::register_facets();
         REQUIRE(ok);

@@ -476,7 +476,7 @@ namespace xo {
         void
         DX1Collector::execute_gc(Generation upto) noexcept
         {
-            scope log(XO_DEBUG(true), xtag("upto", upto));
+            scope log(XO_DEBUG(config_.debug_flag_), xtag("upto", upto));
 
             assert(!runstate_.is_running());
 
