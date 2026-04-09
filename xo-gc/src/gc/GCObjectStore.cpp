@@ -130,7 +130,6 @@ namespace xo {
                     xtag("types.limit", object_types_.store()->limit_),
                     xtag("types.hi", object_types_.store()->hi_));
 
-                assert(false);
                 return nullptr;
             }
 
@@ -725,6 +724,9 @@ namespace xo {
         bool
         GCObjectStore::install_type(const AGCObject & meta) noexcept
         {
+            scope log(XO_DEBUG(config_.debug_flag_),
+                      xtag("tseq", meta._typeseq()));
+
             typeseq tseq = meta._typeseq();
 
             assert(tseq.seqno() > 0);
@@ -732,8 +734,11 @@ namespace xo {
             auto ix = static_cast<ObjectTypeTable::size_type>(tseq.seqno());
 
             if (ix >= object_types_.size()) {
-                if (!object_types_.resize(std::max(2 * object_types_.size(), ix + 1)))
+                if (!object_types_.resize(std::max(2 * object_types_.size(), ix + 1))) {
+                    log && log("could not increase object_types_ size");
+
                     return false;
+                }
             }
 
             assert(ix < object_types_.size());
@@ -843,16 +848,19 @@ namespace xo {
             /* TODO: AllocIterator pointing to free pointer */
             GCMoveCheckpoint gray_lo_v = this->snap_move_checkpoint(upto);
 
-            //obj<AAllocator, DX1Collector> alloc(this);
             AGCObject * iface = this->lookup_type(tseq);
 
-            assert(iface->_has_null_vptr() == false);
+            //assert(iface && (iface->_has_null_vptr() == false));
 
-            void * to_dest = this->_shallow_move(gc, iface, from_src);
+            void * to_dest = nullptr;
 
-            this->_forward_children_until_fixpoint(gc, upto, gray_lo_v);
+            if (iface) [[likely]] {
+                to_dest = this->_shallow_move(gc, iface, from_src);
 
-            log && log(xtag("to_dest", to_dest));
+                this->_forward_children_until_fixpoint(gc, upto, gray_lo_v);
+
+                log && log(xtag("to_dest", to_dest));
+            }
 
             return to_dest;
         } /*_deep_move_gc_owned*/
@@ -865,8 +873,6 @@ namespace xo {
             scope log(XO_DEBUG(config_.debug_flag_));
 
             AllocInfo info = this->alloc_info((std::byte *)from_src);
-
-            //obj<AAllocator, DX1Collector> gc_gco(gc);
 
             void * to_dest = iface->gco_shallow_move(from_src, gc);
 

@@ -17,7 +17,7 @@ namespace xo {
     bool
     SetupGcUtest::register_facets()
     {
-        scope log(XO_DEBUG(true));
+        scope log(XO_DEBUG(false));
 
         FacetRegistry::register_impl<AGCObjectVisitor, DMockCollector>();
 
