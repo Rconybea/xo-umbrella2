@@ -31,6 +31,7 @@ namespace ut {
     using xo::mm::AGCObjectVisitor;
     using xo::mm::Generation;
     using xo::mm::Role;
+    using xo::mm::object_age;
     using xo::mm::ArenaConfig;
     using xo::mm::AAllocator;
     using xo::mm::DArena;
@@ -403,7 +404,7 @@ namespace ut {
                 REQUIRE(x2_v[i].gco_._typeseq() == x2_v[i].tseq_);
             }
 
-            // new objects appear in to-space for generation 0
+            // gcos can reveal info about allocs
             for (size_t i = 0, n = x1_v.size(); i < n; ++i)
             {
                 const auto & x1 = x1_v.at(i);
@@ -415,16 +416,22 @@ namespace ut {
                 REQUIRE(obj_info.payload().first == (std::byte *)x1.gco_.data());
                 REQUIRE(obj_info.tseq() == x1.tseq_.seqno());
 
-                for (Generation gi = g0; gi < gn; ++gi) {
-                    INFO(tostr(xtag("gi", gi)));
+                // also can use header2size / header2tseq convenience functions
+                REQUIRE(gcos.header2size(obj_info.header()) == obj_info.size());
+                REQUIRE(gcos.header2age(obj_info.header()) == object_age{0});
+                REQUIRE(gcos.header2tseq(obj_info.header()) == obj_info.tseq());
+            }
 
-                    if (gi == 0)
-                        REQUIRE(gcos.to_space(gi)->allocated() > 0);
-                    else
-                        REQUIRE(gcos.to_space(gi)->allocated() == 0);
+            // new objects appear in to-space for generation 0
+            for (Generation gi = g0; gi < gn; ++gi) {
+                INFO(tostr(xtag("gi", gi)));
 
-                    REQUIRE(gcos.from_space(gi)->allocated() == 0);
-                }
+                if ((gi == 0) && (x1_v.size() > 0))
+                    REQUIRE(gcos.to_space(gi)->allocated() > 0);
+                else
+                    REQUIRE(gcos.to_space(gi)->allocated() == 0);
+
+                REQUIRE(gcos.from_space(gi)->allocated() == 0);
             }
 
             // swap_roles [but only for generation < g1, i.e. g0
@@ -584,6 +591,8 @@ namespace ut {
             // - deep_move_interior()   // used from MutationLogStore
             // - forward_inplace_aux()  // used from DX1Collector.visit_child
             // - cleanup_phase()        // used from DX1Collector._cleanup_phase
+
+            // - report_object_types
 
         }
     }

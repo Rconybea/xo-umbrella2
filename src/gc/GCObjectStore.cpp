@@ -119,6 +119,7 @@ namespace xo {
                 || (static_cast<ObjectTypeTable::size_type>(tseq.seqno())
                     > object_types_.size())) {
 
+                // LCOV_EXCL_START
                 log.retroactively_enable("out-of-bounds",
                                          xtag("tseq", tseq),
                                          xtag("tname", TypeRegistry::id2name(tseq)));
@@ -131,17 +132,20 @@ namespace xo {
                     xtag("types.hi", object_types_.store()->hi_));
 
                 return nullptr;
+                // LCOV_EXCL_STOP
             }
 
             const ObjectTypeSlot & slot = object_types_[tseq.seqno()];
 
             if (slot.is_null()) {
+                // LCOV_EXCL_START
                 log.retroactively_enable("null-vtable",
                                          xtag("tseq", tseq),
                                          xtag("tname", TypeRegistry::id2name(tseq)));
 
                 assert(false);
                 return nullptr;
+                // LCOV_EXCL_STOP
             }
 
             return slot.iface();
