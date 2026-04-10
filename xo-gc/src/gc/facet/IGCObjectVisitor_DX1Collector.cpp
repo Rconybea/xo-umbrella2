@@ -33,9 +33,9 @@ namespace xo {
             return self.alloc_copy(src);
         }
         auto
-        IGCObjectVisitor_DX1Collector::visit_child(DX1Collector & self, AGCObject * iface, void ** pp_data) noexcept -> void
+        IGCObjectVisitor_DX1Collector::visit_child(DX1Collector & self, VisitReason reason, AGCObject * iface, void ** pp_data) noexcept -> void
         {
-            self.visit_child(iface, pp_data);
+            self.visit_child(reason, iface, pp_data);
         }
 
     } /*namespace mm*/

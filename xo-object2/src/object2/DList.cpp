@@ -185,12 +185,10 @@ namespace xo {
         }
 
         void
-        DList::visit_gco_children(obj<AGCObjectVisitor> gc) noexcept
+        DList::visit_gco_children(VisitReason reason, obj<AGCObjectVisitor> gc) noexcept
         {
-            //scope log(XO_DEBUG(true));
-
-            gc.visit_child(&head_);
-            gc.visit_child(&rest_);
+            gc.visit_child(reason, &head_);
+            gc.visit_child(reason, &rest_);
         }
     } /*namespace scm*/
 } /*namespace xo*/

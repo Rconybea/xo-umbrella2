@@ -40,6 +40,8 @@ namespace xo {
             using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
             /** gc-aware object facet **/
             using AGCObject = xo::mm::AGCObject;
+            /** color for gco visitor **/
+            using VisitReason = xo::mm::VisitReason;
             /** pretty-printer state for APrintable **/
             using ppindentinfo = xo::print::ppindentinfo;
             /** canonical type representing a key-value pair **/
@@ -206,7 +208,7 @@ namespace xo {
             /** return shallow copy of this array, using memory from @p mm **/
             DDictionary * gco_shallow_move(obj<AGCObjectVisitor> gc) noexcept;
             /** forward elements to @p gc to-space; replace originals with forwarding pointers **/
-            void visit_gco_children(obj<AGCObjectVisitor> gc) noexcept;
+            void visit_gco_children(VisitReason reason, obj<AGCObjectVisitor> gc) noexcept;
             ///@}
 
         private:

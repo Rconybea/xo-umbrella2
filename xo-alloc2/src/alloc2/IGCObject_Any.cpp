@@ -42,7 +42,7 @@ IGCObject_Any::gco_shallow_move(Opaque, obj<AGCObjectVisitor>)  const  noexcept 
 }
 
 auto
-IGCObject_Any::visit_gco_children(Opaque, obj<AGCObjectVisitor>)  const  noexcept -> void
+IGCObject_Any::visit_gco_children(Opaque, VisitReason, obj<AGCObjectVisitor>)  const  noexcept -> void
 {
     _fatal();
 }

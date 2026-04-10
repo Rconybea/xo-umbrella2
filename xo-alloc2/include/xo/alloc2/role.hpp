@@ -12,6 +12,8 @@ namespace xo {
     namespace mm {
         static constexpr uint32_t c_n_role = 2;
 
+        /** @brief identify GC half-spaces
+         **/
         class Role {
         public:
             using value_type = std::uint32_t;

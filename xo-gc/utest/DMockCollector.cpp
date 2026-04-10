@@ -21,9 +21,12 @@ namespace xo {
         }
 
         void
-        DMockCollector::visit_child(AGCObject * lhs_iface, void ** lhs_data)
+        DMockCollector::visit_child(VisitReason reason, AGCObject * lhs_iface, void ** lhs_data)
         {
-            p_gco_store_->forward_inplace_aux(this->ref<AGCObjectVisitor>(), lhs_iface, lhs_data, upto_);
+            (void)reason;
+
+            p_gco_store_->forward_inplace_aux
+                (this->ref<AGCObjectVisitor>(), lhs_iface, lhs_data, upto_);
         }
 
         std::byte *

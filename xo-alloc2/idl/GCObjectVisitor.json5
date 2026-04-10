@@ -6,6 +6,7 @@
     includes: [
         "<xo/alloc2/Generation.hpp>",
         "<xo/alloc2/role.hpp>",
+        "<xo/alloc2/VisitReason.hpp>",
         "<xo/arena/AllocInfo.hpp>",
     ],
     // extra includes in GCObject.hpp, if any
@@ -85,12 +86,13 @@
             noexcept: false,
             attributes: [],
         },
-        // void visit_child(AGCObject * iface, void ** pp_data) noexcept;
+        // void visit_child(VisitReason reason, AGCObject * iface, void ** pp_data) noexcept;
         {
             name: "visit_child",
             doc: ["visit child of a gc-aware object. May update child in-place!"],
             return_type: "void",
             args:[
+                {type: "VisitReason", name: "reason"},
                 {type: "AGCObject *", name: "iface"},
                 {type: "void **", name: "pp_data"},
             ],
@@ -121,20 +123,20 @@
         "    (for historical reasons - coul d be in RGCObject_aux.hpp?)",
         " **/",
         "template <typename DRepr>",
-        "void visit_child(xo::facet::obj<AGCObject,DRepr> * p_obj);",
+        "void visit_child(VisitReason reason, xo::facet::obj<AGCObject,DRepr> * p_obj);",
         "",
         "/** visit typed child data pointer in place.",
         "    Defined in RGCObject.hpp to avoid #include cycle",
         " **/",
         "template <typename DRepr>",
-        "void visit_child(DRepr ** pp_data);",
+        "void visit_child(VisitReason reason, DRepr ** pp_data);",
         "",
         "/** visit faceted object pointer stored using some facet",
         "    other than AGCObject",
         " **/",
         "template <typename AFacet, typename DRepr>",
         "requires (!std::is_same_v<AFacet, AGCObject>)",
-        "void visit_poly_child(obj<AFacet,DRepr> * p_pivot);",
+        "void visit_poly_child(VisitReason reason, obj<AFacet,DRepr> * p_pivot);",
         "",
     ]
 }

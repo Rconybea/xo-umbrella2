@@ -15,6 +15,7 @@
 
 #include <xo/alloc2/Generation.hpp>
 #include <xo/alloc2/role.hpp>
+#include <xo/alloc2/VisitReason.hpp>
 #include <xo/arena/AllocInfo.hpp>
 
 namespace xo {
@@ -56,8 +57,8 @@ namespace mm {
         void * alloc_copy(Opaque data, std::byte * src)  const override {
             return I::alloc_copy(_dcast(data), src);
         }
-        void visit_child(Opaque data, AGCObject * iface, void ** pp_data)  const  noexcept override {
-            return I::visit_child(_dcast(data), iface, pp_data);
+        void visit_child(Opaque data, VisitReason reason, AGCObject * iface, void ** pp_data)  const  noexcept override {
+            return I::visit_child(_dcast(data), reason, iface, pp_data);
         }
 
         ///@}

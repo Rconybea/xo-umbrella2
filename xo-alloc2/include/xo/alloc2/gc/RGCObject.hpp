@@ -35,6 +35,7 @@ public:
     using AAllocator = AGCObject::AAllocator;
     using ACollector = AGCObject::ACollector;
     using AGCObjectVisitor = AGCObject::AGCObjectVisitor;
+    using VisitReason = AGCObject::VisitReason;
     ///@}
 
     /** @defgroup mm-gcobject-router-ctors **/
@@ -61,8 +62,8 @@ public:
     Opaque gco_shallow_move(obj<AGCObjectVisitor> gc)  noexcept {
         return O::iface()->gco_shallow_move(O::data(), gc);
     }
-    void visit_gco_children(obj<AGCObjectVisitor> fn)  noexcept {
-        return O::iface()->visit_gco_children(O::data(), fn);
+    void visit_gco_children(VisitReason reason, obj<AGCObjectVisitor> fn)  noexcept {
+        return O::iface()->visit_gco_children(O::data(), reason, fn);
     }
 
     ///@}

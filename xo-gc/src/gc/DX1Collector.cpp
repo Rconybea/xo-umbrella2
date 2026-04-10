@@ -404,7 +404,7 @@ namespace xo {
                         // - X1Collector::forward_inplace() -> _verify_aux()
                         //
 
-                        gco.visit_gco_children(self);
+                        gco.visit_gco_children(VisitReason::verify(), self);
 
                     }
 
@@ -585,21 +585,28 @@ namespace xo {
         }
 
         void
-        DX1Collector::visit_child(AGCObject * lhs_iface,
+        DX1Collector::visit_child(VisitReason reason,
+                                  AGCObject * lhs_iface,
                                   void ** lhs_data)
         {
             // MAYBE: adapter distinct from DX1Collector that supports GCObjectVisitor facet,
             //        calls DX1Collector::_verify_aux()
 
-            if (runstate_.is_running()) {
+            switch (reason.code()) {
+            case VisitReason::code::forward:
+            {
                 Generation upto = runstate_.gc_upto();
 
                 // called during collection phase
-                gco_store_.forward_inplace_aux(this->ref<AGCObjectVisitor>(), lhs_iface, lhs_data, upto);
-            } else if (runstate_.is_verify()) {
+                gco_store_.forward_inplace_aux
+                    (this->ref<AGCObjectVisitor>(), lhs_iface, lhs_data, upto);
+                break;
+            }
+            case VisitReason::code::verify:
                 // called during verify_ok
                 this->_verify_aux(lhs_iface, *lhs_data);
-            } else {
+                break;
+            default:
                 // should be unreachable
                 assert(false);
             }

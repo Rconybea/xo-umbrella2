@@ -28,6 +28,7 @@ namespace xo {
             using AAllocator = xo::mm::AAllocator;
             using ACollector = xo::mm::ACollector;
             using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
+            using VisitReason = xo::mm::VisitReason;
             using size_type = DString::size_type;
             using ppindentinfo = xo::print::ppindentinfo;
 
@@ -93,7 +94,7 @@ namespace xo {
             DUniqueString * gco_shallow_move(obj<AGCObjectVisitor> gc) noexcept;
 
             /** fixup child pointers (trivial for DUniqueString, no gc-owned children **/
-            void visit_gco_children(obj<AGCObjectVisitor> gc) noexcept;
+            void visit_gco_children(VisitReason reason, obj<AGCObjectVisitor> gc) noexcept;
 
             ///@}
 

@@ -59,21 +59,10 @@ namespace xo {
         }
 
         void
-        DRuntimeError::visit_gco_children(obj<AGCObjectVisitor> gc) noexcept
+        DRuntimeError::visit_gco_children(VisitReason reason, obj<AGCObjectVisitor> gc) noexcept
         {
-            {
-                gc.visit_child(&src_function_);
-
-                //auto iface = xo::facet::impl_for<AGCObject,DString>();
-                //gc.forward_inplace(&iface, (void **)(&src_function_));
-            }
-
-            {
-                gc.visit_child(&error_descr_);
-
-                //auto iface = xo::facet::impl_for<AGCObject,DString>();
-                //gc.forward_inplace(&iface, (void **)(&error_descr_));
-            }
+            gc.visit_child(reason, &src_function_);
+            gc.visit_child(reason, &error_descr_);
         }
 
         // ----- Printable facet -----

@@ -16,6 +16,7 @@
 // includes (via {facet_includes})
 #include <xo/alloc2/Generation.hpp>
 #include <xo/alloc2/role.hpp>
+#include <xo/alloc2/VisitReason.hpp>
 #include <xo/arena/AllocInfo.hpp>
 #include <xo/facet/obj.hpp>
 #include <xo/facet/facet_implementation.hpp>
@@ -71,7 +72,7 @@ Source must be owned by this collector.
 Increments object age **/
     virtual void * alloc_copy(Opaque data, std::byte * src)  const = 0;
     /** visit child of a gc-aware object. May update child in-place! **/
-    virtual void visit_child(Opaque data, AGCObject * iface, void ** pp_data)  const  noexcept = 0;
+    virtual void visit_child(Opaque data, VisitReason reason, AGCObject * iface, void ** pp_data)  const  noexcept = 0;
     ///@}
 }; /*AGCObjectVisitor*/
 

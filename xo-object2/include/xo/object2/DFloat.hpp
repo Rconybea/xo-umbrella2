@@ -6,7 +6,6 @@
 #pragma once
 
 #include <xo/alloc2/Allocator.hpp>
-//#include <xo/alloc2/Collector.hpp>
 #include <xo/alloc2/GCObjectVisitor.hpp>
 #include <xo/facet/obj.hpp>
 #include <xo/indentlog/print/ppindentinfo.hpp>
@@ -15,8 +14,8 @@ namespace xo {
     namespace scm {
         struct DFloat {
             using AAllocator = xo::mm::AAllocator;
-            //using ACollector = xo::mm::ACollector;
             using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
+            using VisitReason = xo::mm::VisitReason;
             using ppindentinfo = xo::print::ppindentinfo;
             using value_type = double;
 
@@ -37,7 +36,7 @@ namespace xo {
 
             // GCObject facet
             DFloat * gco_shallow_move(obj<AGCObjectVisitor> gc) noexcept;
-            void visit_gco_children(obj<AGCObjectVisitor> gc) noexcept;
+            void visit_gco_children(VisitReason reason, obj<AGCObjectVisitor> gc) noexcept;
 
         private:
 

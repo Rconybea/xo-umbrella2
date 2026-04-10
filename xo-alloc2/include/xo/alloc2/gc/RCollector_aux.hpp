@@ -24,32 +24,33 @@ namespace xo {
         template <typename Object>
         template <typename DRepr>
         void
-        RGCObjectVisitor<Object>::visit_child(xo::facet::obj<AGCObject,DRepr> * p_obj)
+        RGCObjectVisitor<Object>::visit_child(VisitReason reason,
+                                              xo::facet::obj<AGCObject,DRepr> * p_obj)
         {
-            this->visit_child(p_obj->iface(), (void **)&(p_obj->data_));
+            this->visit_child(reason, p_obj->iface(), (void **)&(p_obj->data_));
         }
 
         template <typename Object>
         template <typename DRepr>
         void
-        RGCObjectVisitor<Object>::visit_child(DRepr ** p_repr)
+        RGCObjectVisitor<Object>::visit_child(VisitReason reason, DRepr ** p_repr)
         {
             // fetch static interface for DRepr (strip const: FacetImplementation specializations use non-const DRepr)
             auto iface = xo::facet::impl_for<AGCObject, std::remove_const_t<DRepr>>();
 
-            this->visit_child(&iface, (void **)p_repr);
+            this->visit_child(reason, &iface, (void **)p_repr);
         }
 
         template <typename Object>
         template <typename AFacet, typename DRepr>
         requires (!std::is_same_v<AFacet, AGCObject>)
         void
-        RGCObjectVisitor<Object>::visit_poly_child(obj<AFacet, DRepr> * p_objs)
+        RGCObjectVisitor<Object>::visit_poly_child(VisitReason reason, obj<AFacet, DRepr> * p_objs)
         {
             if (*p_objs) {
                 auto e = xo::facet::FacetRegistry::instance().variant<AGCObject,AFacet>(*p_objs);
 
-                this->visit_child(e.iface(), (void **)&(p_objs->data_));
+                this->visit_child(reason, e.iface(), (void **)&(p_objs->data_));
             }
         }
 

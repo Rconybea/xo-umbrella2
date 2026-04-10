@@ -48,6 +48,11 @@
             doc: ["fomo collector type"],
             definition: "xo::mm::AGCObjectVisitor",
         },
+        {
+            name: "VisitReason",
+            doc: ["hint arg when navigating object graph"],
+            definition: "xo::mm::VisitReason",
+        },
     ],
     const_methods: [
         // size_type shallow_size() const noexcept
@@ -77,7 +82,7 @@
             noexcept: true,
             attributes: [],
         },
-        // size_type visit_gco_children(obj<AGCObjectVisitor>) noexcept
+        // size_type visit_gco_children(VisitReason reason, obj<AGCObjectVisitor>) noexcept
         {
             name: "visit_gco_children",
             doc: [
@@ -87,6 +92,7 @@
             ],
             return_type: "void",
             args: [
+                {type: "VisitReason", name: "reason"},
                 {type: "obj<AGCObjectVisitor>", name: "fn"},
             ],
             const: true,

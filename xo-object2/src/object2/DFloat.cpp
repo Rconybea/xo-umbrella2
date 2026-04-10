@@ -34,7 +34,7 @@ namespace xo {
         }
 
         void
-        DFloat::visit_gco_children(obj<AGCObjectVisitor>) noexcept
+        DFloat::visit_gco_children(VisitReason, obj<AGCObjectVisitor>) noexcept
         {
             // noop -- childless!
         }

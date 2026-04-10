@@ -36,6 +36,7 @@ namespace mm {
         using AAllocator = AGCObject::AAllocator;
         using ACollector = AGCObject::ACollector;
         using AGCObjectVisitor = AGCObject::AGCObjectVisitor;
+        using VisitReason = AGCObject::VisitReason;
         ///@}
 
         /** @defgroup mm-gcobject-xfer-methods **/
@@ -56,8 +57,8 @@ namespace mm {
         Opaque gco_shallow_move(Opaque data, obj<AGCObjectVisitor> gc)  const  noexcept override {
             return I::gco_shallow_move(_dcast(data), gc);
         }
-        void visit_gco_children(Opaque data, obj<AGCObjectVisitor> fn)  const  noexcept override {
-            return I::visit_gco_children(_dcast(data), fn);
+        void visit_gco_children(Opaque data, VisitReason reason, obj<AGCObjectVisitor> fn)  const  noexcept override {
+            return I::visit_gco_children(_dcast(data), reason, fn);
         }
 
         ///@}

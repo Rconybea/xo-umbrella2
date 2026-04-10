@@ -109,7 +109,7 @@ namespace xo {
         }
 
         void
-        DUniqueString::visit_gco_children(obj<AGCObjectVisitor>) noexcept
+        DUniqueString::visit_gco_children(VisitReason, obj<AGCObjectVisitor>) noexcept
         {
             // no-op -- childless!
         }

@@ -26,6 +26,7 @@ namespace xo {
             using TypeDescr = xo::reflect::TypeDescr;
             //using ACollector = xo::mm::ACollector;
             using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
+            using VisitReason = xo::mm::VisitReason;
             using AAllocator = xo::mm::AAllocator;
 
         public:
@@ -52,7 +53,7 @@ namespace xo {
             /** @defgroup xo-scm-listtype-gcobject-facet **/
             ///@{
             DListType * gco_shallow_move(obj<AGCObjectVisitor> gc) noexcept;
-            void visit_gco_children(obj<AGCObjectVisitor> gc) noexcept;
+            void visit_gco_children(VisitReason reason, obj<AGCObjectVisitor> gc) noexcept;
             ///@}
 
         private:

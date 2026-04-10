@@ -167,7 +167,7 @@ namespace xo {
         }
 
         void
-        DString::visit_gco_children(obj<AGCObjectVisitor>) noexcept
+        DString::visit_gco_children(VisitReason, obj<AGCObjectVisitor>) noexcept
         {
             // no-op.  no children!
         }
