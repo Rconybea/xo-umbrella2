@@ -61,7 +61,7 @@ namespace xo {
         }
 
         void
-        DAtomicType::visit_gco_children(obj<AGCObjectVisitor>) noexcept
+        DAtomicType::visit_gco_children(VisitReason, obj<AGCObjectVisitor>) noexcept
         {
             // no-op.  no children
         }

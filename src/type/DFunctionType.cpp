@@ -94,15 +94,10 @@ namespace xo {
         }
 
         void
-        DFunctionType::visit_gco_children(obj<AGCObjectVisitor> gc) noexcept
+        DFunctionType::visit_gco_children(VisitReason reason, obj<AGCObjectVisitor> gc) noexcept
         {
-            gc.visit_poly_child(&return_type_);
-            //{
-            //    auto e = FacetRegistry::instance().variant<AGCObject,AType>(return_type_);
-            //    gc.forward_inplace(e.iface(), (void **)&(return_type_.data_));
-            //}
-
-            gc.visit_child(&arg_types_);
+            gc.visit_poly_child(reason, &return_type_);
+            gc.visit_child(reason, &arg_types_);
         }
 
     } /*namespace scm*/

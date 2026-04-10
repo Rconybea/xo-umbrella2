@@ -82,9 +82,9 @@ namespace xo {
         }
 
         void
-        DTypeVarRef::visit_gco_children(obj<AGCObjectVisitor> gc) noexcept
+        DTypeVarRef::visit_gco_children(VisitReason reason, obj<AGCObjectVisitor> gc) noexcept
         {
-            gc.visit_poly_child(&type_);
+            gc.visit_poly_child(reason, &type_);
 
             //{
             //    auto e = FacetRegistry::instance().variant<AGCObject,AType>(type_);

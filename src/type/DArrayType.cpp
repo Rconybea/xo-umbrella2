@@ -83,13 +83,9 @@ namespace xo {
         }
 
         void
-        DArrayType::visit_gco_children(obj<AGCObjectVisitor> gc) noexcept
+        DArrayType::visit_gco_children(VisitReason reason, obj<AGCObjectVisitor> gc) noexcept
         {
-            gc.visit_poly_child(&elt_type_);
-            //{
-            //    auto e = FacetRegistry::instance().variant<AGCObject,AType>(elt_type_);
-            //    gc.forward_inplace(e.iface(), (void **)&(elt_type_.data_));
-            //}
+            gc.visit_poly_child(reason, &elt_type_);
         }
     }
 }
