@@ -50,6 +50,8 @@ namespace xo {
             //using ACollector = xo::mm::ACollector;
             /** object visitor (garbage collector proxy) **/
             using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
+            /** visitor hint **/
+            using VisitReason = xo::mm::VisitReason;
             /** ppindentinfo for APrintable **/
             using ppindentinfo = xo::print::ppindentinfo;
             ///@}
@@ -251,7 +253,7 @@ namespace xo {
             /** fixup child pointers (trivial for DString, no children)
              *  note: cref so we can use forward decl
              **/
-            void visit_gco_children(obj<AGCObjectVisitor> gc) noexcept;
+            void visit_gco_children(VisitReason reason, obj<AGCObjectVisitor> gc) noexcept;
 
             ///@}
 
