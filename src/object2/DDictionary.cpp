@@ -274,10 +274,10 @@ namespace xo {
         }
 
         void
-        DDictionary::visit_gco_children(obj<AGCObjectVisitor> gc) noexcept
+        DDictionary::visit_gco_children(VisitReason reason, obj<AGCObjectVisitor> gc) noexcept
         {
-            gc.visit_child(&keys_);
-            gc.visit_child(&values_);
+            gc.visit_child(reason, &keys_);
+            gc.visit_child(reason, &values_);
         }
 
     } /*namespace scm*/

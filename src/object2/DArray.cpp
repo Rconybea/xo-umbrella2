@@ -198,16 +198,12 @@ namespace xo {
         }
 
         void
-        DArray::visit_gco_children(obj<AGCObjectVisitor> gc) noexcept
+        DArray::visit_gco_children(VisitReason reason, obj<AGCObjectVisitor> gc) noexcept
         {
-            scope log(XO_DEBUG(false));
-
             for (size_type i = 0; i < size_; ++i) {
-                log && log("DArray::visit_gco_children (loop)", xtag("i", i), xtag("z", size_));
-
                 obj<AGCObject> & elt = elts_[i];
 
-                gc.visit_child(&elt);
+                gc.visit_child(reason, &elt);
             }
         }
 

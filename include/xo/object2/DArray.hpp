@@ -38,6 +38,8 @@ namespace xo {
             using AGCObject = xo::mm::AGCObject;
             /** gc-centric object visitor **/
             using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
+            /** hint for object visitor **/
+            using VisitReason = xo::mm::VisitReason;
             /** pretty-printer state for APrintable **/
             using ppindentinfo = xo::print::ppindentinfo;
 
@@ -150,7 +152,7 @@ namespace xo {
             /** move to new address, mandated by @p gc **/
             DArray * gco_shallow_move(obj<AGCObjectVisitor> gc) noexcept;
             /** forward elements to @p gc to-space; replace originals with forarding pointers **/
-            void visit_gco_children(obj<AGCObjectVisitor> gc) noexcept;
+            void visit_gco_children(VisitReason reason, obj<AGCObjectVisitor> gc) noexcept;
             ///@}
 
         private:

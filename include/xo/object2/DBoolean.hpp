@@ -19,6 +19,7 @@ namespace xo {
             //using ACollector = xo::mm::ACollector;
             using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
             using AGCObject = xo::mm::AGCObject;
+            using VisitReason = xo::mm::VisitReason;
             using ppindentinfo = xo::print::ppindentinfo;
             using value_type = long;
 
@@ -40,7 +41,7 @@ namespace xo {
             // GCObject facet
 
             DBoolean * gco_shallow_move(obj<AGCObjectVisitor> gc) noexcept;
-            void visit_gco_children(obj<AGCObjectVisitor> gc) noexcept;
+            void visit_gco_children(VisitReason reason, obj<AGCObjectVisitor> gc) noexcept;
 
         private:
             /** boxed boolean value **/
