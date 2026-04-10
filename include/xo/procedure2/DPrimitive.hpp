@@ -75,10 +75,9 @@ namespace xo {
         public:
             using FunctionPtrType = Fn;
             using Traits = detail::PmFnTraits<Fn>;
-
-            //using ACollector = xo::mm::ACollector;
             using AGCObject = xo::mm::AGCObject;
             using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
+            using VisitReason = xo::mm::VisitReason;
             using AAllocator = xo::mm::AAllocator;
             using DArray = xo::scm::DArray;
             using Reflect = xo::reflect::Reflect;
@@ -136,7 +135,7 @@ namespace xo {
             /** @defgroup scm-primitive-gcobject-facet **/
             ///@{
             Primitive * gco_shallow_move(obj<AGCObjectVisitor> gc) noexcept;
-            void visit_gco_children(obj<AGCObjectVisitor> gc) noexcept;
+            void visit_gco_children(VisitReason reason, obj<AGCObjectVisitor> gc) noexcept;
             ///@}
 
         private:
@@ -199,8 +198,9 @@ namespace xo {
 
         template <typename Fn>
         void
-        Primitive<Fn>::visit_gco_children(obj<AGCObjectVisitor> gc) noexcept {
-            gc.visit_poly_child(&type_);
+        Primitive<Fn>::visit_gco_children(xo::mm::VisitReason reason,
+                                          obj<AGCObjectVisitor> gc) noexcept {
+            gc.visit_poly_child(reason, &type_);
             //{
             //    auto e = type_.to_facet<AGCObject>();  // FacetRegistry dep
             //    gc.forward_inplace(e.iface(), (void **)&(type_.data_));
