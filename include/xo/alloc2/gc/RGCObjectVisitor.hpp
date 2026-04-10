@@ -67,20 +67,20 @@ public:
         (for historical reasons - coul d be in RGCObject_aux.hpp?)
      **/
     template <typename DRepr>
-    void visit_child(xo::facet::obj<AGCObject,DRepr> * p_obj);
+    void visit_child(VisitReason reason, xo::facet::obj<AGCObject,DRepr> * p_obj);
     
     /** visit typed child data pointer in place.
         Defined in RGCObject.hpp to avoid #include cycle
      **/
     template <typename DRepr>
-    void visit_child(DRepr ** pp_data);
+    void visit_child(VisitReason reason, DRepr ** pp_data);
     
     /** visit faceted object pointer stored using some facet
         other than AGCObject
      **/
     template <typename AFacet, typename DRepr>
     requires (!std::is_same_v<AFacet, AGCObject>)
-    void visit_poly_child(obj<AFacet,DRepr> * p_pivot);
+    void visit_poly_child(VisitReason reason, obj<AFacet,DRepr> * p_pivot);
     
 
     // builtin methods
@@ -99,8 +99,8 @@ public:
     void * alloc_copy(std::byte * src)  {
         return O::iface()->alloc_copy(O::data(), src);
     }
-    void visit_child(AGCObject * iface, void ** pp_data)  noexcept {
-        return O::iface()->visit_child(O::data(), iface, pp_data);
+    void visit_child(VisitReason reason, AGCObject * iface, void ** pp_data)  noexcept {
+        return O::iface()->visit_child(O::data(), reason, iface, pp_data);
     }
 
     ///@}

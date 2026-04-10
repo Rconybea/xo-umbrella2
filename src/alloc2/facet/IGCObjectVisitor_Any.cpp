@@ -42,7 +42,7 @@ IGCObjectVisitor_Any::alloc_copy(Opaque, std::byte *)  const -> void *
 }
 
 auto
-IGCObjectVisitor_Any::visit_child(Opaque, AGCObject *, void **)  const  noexcept -> void
+IGCObjectVisitor_Any::visit_child(Opaque, VisitReason, AGCObject *, void **)  const  noexcept -> void
 {
     _fatal();
 }

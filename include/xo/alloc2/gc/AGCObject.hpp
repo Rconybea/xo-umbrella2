@@ -51,6 +51,8 @@ public:
     using ACollector = xo::mm::ACollector;
     /** fomo collector type **/
     using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
+    /** hint arg when navigating object graph **/
+    using VisitReason = xo::mm::VisitReason;
     ///@}
 
     /** @defgroup mm-gcobject-methods **/
@@ -73,7 +75,7 @@ Arguably abusing the word 'visitor' here **/
     /** Invoke fn.visit_child(iface,data) for each child GCObject pointer.
 Context: provides address of data pointer so it can be updated in place
 when @p fn invokes garbage collector reentry point **/
-    virtual void visit_gco_children(Opaque data, obj<AGCObjectVisitor> fn)  const  noexcept = 0;
+    virtual void visit_gco_children(Opaque data, VisitReason reason, obj<AGCObjectVisitor> fn)  const  noexcept = 0;
     ///@}
 }; /*AGCObject*/
 
