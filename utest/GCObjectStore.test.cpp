@@ -295,9 +295,10 @@ namespace ut {
              *  2. arena2 doesn't have concept of installed types.
              *     It doesn't have or require any builtin ability to traverse an object model
              **/
-            DArena arena2 = DArena::map(ArenaConfig().with_name("arena2-reference")
-                                        .with_size(tc.gc_size_ * tc.n_gen_)
-                                        .with_store_header_flag(true));
+            DArena arena2
+                = DArena::map(ArenaConfig().with_name("arena2-reference")
+                              .with_size(tc.gc_size_ * tc.n_gen_)
+                              .with_store_header_flag(true));
 
             // object type storage will be empty unless we install a type.
             GCObjectStore gcos(gcos_config);
@@ -325,7 +326,7 @@ namespace ut {
                 }
             }
 
-            // verify basic arena partitioning
+            // verify basic arena partitioning + sizing
             {
                 REQUIRE(g0 != g1);
                 REQUIRE(gcos.new_space());
@@ -371,7 +372,7 @@ namespace ut {
                 }
             }
 
-            // allocator
+            // allocator api
             auto alloc = obj<AAllocator,DArena>(gcos.new_space());
 
             // create object(s).
@@ -420,6 +421,7 @@ namespace ut {
                 REQUIRE(gcos.header2size(obj_info.header()) == obj_info.size());
                 REQUIRE(gcos.header2age(obj_info.header()) == object_age{0});
                 REQUIRE(gcos.header2tseq(obj_info.header()) == obj_info.tseq());
+                REQUIRE(gcos.is_forwarding_header(obj_info.header()) == false);
             }
 
             // new objects appear in to-space for generation 0
@@ -441,6 +443,7 @@ namespace ut {
                 for (size_t i = 0, n = x1_v.size(); i < n; ++i) {
                     const auto & x1 = x1_v.at(i);
 
+                    REQUIRE(gcos.contains(Role::from_space(), x1.gco_.data()));
                     REQUIRE(gcos.contains_allocated(Role::from_space(), x1.gco_.data()));
                     AllocInfo obj_info = gcos.alloc_info((std::byte *)x1.gco_.data());
                     REQUIRE(obj_info.size() >= x1.alloc_z_);
@@ -578,7 +581,8 @@ namespace ut {
                     // can still try to move something.
                     // but will fail since type isn't registered
 
-                    auto x1p_data = gcos.deep_move_root(mock_gc_visitor, x1.gco_, g1);
+                    auto x1p_data
+                        = gcos.deep_move_root(mock_gc_visitor, x1.gco_, g1);
 
                     // control here under normal GC use
                     // would represent a configuration fail
@@ -590,10 +594,23 @@ namespace ut {
             // Things to test:
             // - deep_move_interior()   // used from MutationLogStore
             // - forward_inplace_aux()  // used from DX1Collector.visit_child
-            // - cleanup_phase()        // used from DX1Collector._cleanup_phase
 
             // - report_object_types
+            // - report_object_ages()
 
+            bool sanitize_flag = true;
+
+            // swaps to- and from- spaces again
+            // Now from-space will be empty, all live objects in to-space
+
+            gcos.cleanup_phase(g1, sanitize_flag);
+
+#ifdef NOT_YET
+            gcos.verify_ok(xxx objectvisitor,
+                           xxx &verify_stats);
+#endif
+
+            // - verify_ok
         }
     }
 

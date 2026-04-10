@@ -58,7 +58,7 @@ Source must be owned by this collector.
 Increments object age **/
             static void * alloc_copy(DMockCollector & self, std::byte * src);
             /** visit child of a gc-aware object. May update child in-place! **/
-            static void visit_child(DMockCollector & self, AGCObject * iface, void ** pp_data) noexcept;
+            static void visit_child(DMockCollector & self, VisitReason reason, AGCObject * iface, void ** pp_data) noexcept;
             ///@}
         };
 

@@ -26,7 +26,7 @@ namespace xo {
             Generation generation_of(Role r, const void * addr) const noexcept;
             AllocInfo alloc_info(void * mem) const noexcept;
 
-            void visit_child(AGCObject * lhs_iface, void ** lhs_data);
+            void visit_child(VisitReason reason, AGCObject * lhs_iface, void ** lhs_data);
             std::byte * alloc_copy(void * src) noexcept;
 
         private:

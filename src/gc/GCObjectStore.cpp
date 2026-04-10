@@ -501,7 +501,7 @@ namespace xo {
                 log && log("disposition: not in from-space. Don't forward, but check children");
 
                 obj<AGCObject> gco(lhs_iface, object_data);
-                gco.visit_gco_children(gc);
+                gco.visit_gco_children(VisitReason::forward(), gc);
 
                 return;
             }
@@ -714,7 +714,7 @@ namespace xo {
                             // Nested control reenters
                             // X1Collector::forward_inplace() -> _verify_aux()
                             //
-                            gco.visit_gco_children(gc);
+                            gco.visit_gco_children(VisitReason::forward(), gc);
                         } else {
                             ++(p_verify_stats->n_no_iface_);
                             continue;
@@ -783,7 +783,7 @@ namespace xo {
                 GCMoveCheckpoint gray_lo_v
                     = this->snap_move_checkpoint(upto);
 
-                from_src.visit_gco_children(gc);
+                from_src.visit_gco_children(VisitReason::forward(), gc);
 
                 // For each generation g:
                 //   traverse objects newer than gray_lo_v[g], to make sure children
@@ -1013,7 +1013,7 @@ namespace xo {
 
                         assert(iface->_has_null_vptr() == false);
 
-                        iface->visit_gco_children(src, gc);
+                        iface->visit_gco_children(src, VisitReason::forward(), gc);
 
                         gray_lo_v[g] = ((std::byte *)src) + z;
 
