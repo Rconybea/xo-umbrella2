@@ -26,14 +26,16 @@ namespace xo {
                 void * mem = mm.alloc(typeseq::id<DString>(),
                                       sizeof(DString) + cap);
 
-                result = new (mem) DString();
+                if (mem) {
+                    result = new (mem) DString();
 
-                assert(result);
+                    assert(result);
 
-                result->capacity_ = cap;
-                result->size_ = 0;
-                if (cap > 0) {
-                    result->chars_[0] = '\0';
+                    result->capacity_ = cap;
+                    result->size_ = 0;
+                    if (cap > 0) {
+                        result->chars_[0] = '\0';
+                    }
                 }
             }
 
@@ -50,10 +52,15 @@ namespace xo {
             void * mem = mm.alloc(typeseq::id<DString>(),
                                   sizeof(DString) + cap);
 
-            DString * result = new (mem) DString();
-            result->capacity_ = cap;
-            result->size_ = len;
-            std::memcpy(result->chars_, cstr, cap);
+            DString * result = nullptr;
+
+            if (mem) {
+                result = new (mem) DString();
+                result->capacity_ = cap;
+                result->size_ = len;
+
+                std::memcpy(result->chars_, cstr, cap);
+            }
 
             return result;
         }
