@@ -358,10 +358,12 @@ namespace xo {
             /** cleanup after gc **/
             void _cleanup_phase(Generation upto);
 
+#ifdef OBSOLETE
             /** Verify that pointer {@p iface, @p data} is valid:
              *  destination either in to-space, or somewhere outside this collector
              **/
             void _verify_aux(AGCObject * iface, void * data);
+#endif
 
         public:
             /** garbage collector configuration **/

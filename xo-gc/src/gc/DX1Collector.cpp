@@ -604,7 +604,7 @@ namespace xo {
             }
             case VisitReason::code::verify:
                 // called during verify_ok
-                this->_verify_aux(lhs_iface, *lhs_data);
+                gco_store_.verify_aux(lhs_iface, *lhs_data, &verify_stats_);
                 break;
             default:
                 // should be unreachable
@@ -612,6 +612,7 @@ namespace xo {
             }
         }
 
+#ifdef OBSOLETE
         void
         DX1Collector::_verify_aux(AGCObject * iface, void * data)
         {
@@ -640,6 +641,7 @@ namespace xo {
                 ++(verify_stats_.n_to_);
             }
         }
+#endif
 
         auto
         DX1Collector::alloc(typeseq t, size_type z) noexcept -> value_type
