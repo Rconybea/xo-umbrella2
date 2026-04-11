@@ -23,10 +23,17 @@ namespace xo {
         void
         DMockCollector::visit_child(VisitReason reason, AGCObject * lhs_iface, void ** lhs_data)
         {
-            (void)reason;
-
-            p_gco_store_->forward_inplace_aux
-                (this->ref<AGCObjectVisitor>(), lhs_iface, lhs_data, upto_);
+            switch (reason.code()) {
+            case VisitReason::code::forward:
+                p_gco_store_->forward_inplace_aux
+                    (this->ref<AGCObjectVisitor>(), lhs_iface, lhs_data, upto_);
+                break;
+            case VisitReason::code::verify:
+                p_gco_store_->verify_aux(lhs_iface, *lhs_data);
+                break;
+            default:
+                assert(false);
+            }
         }
 
         std::byte *

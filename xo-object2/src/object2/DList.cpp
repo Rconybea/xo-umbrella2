@@ -128,7 +128,7 @@ namespace xo {
         }
 
         void
-        DList::assign_rest(DList * r)
+        DList::_assign_rest(DList * r)
         {
             scope log(XO_DEBUG(true), "need write barrier");
 

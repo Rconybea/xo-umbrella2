@@ -69,7 +69,7 @@ namespace xo {
 
         DX1Collector::DX1Collector(const X1CollectorConfig & cfg)
         : config_{cfg},
-          gco_store_{cfg.gco_store_config()},
+          gco_store_{cfg.gco_store_config(), &verify_stats_},
           mlog_store_{cfg.mlog_config(), &gco_store_}
         {
             assert(config_.arena_config_.header_.size_bits_ +
@@ -417,7 +417,7 @@ namespace xo {
                 }
 
                 // 3. scan to-space for each generation
-                gco_store_.verify_ok(this->ref<AGCObjectVisitor>(), &(this->verify_stats_));
+                gco_store_.verify_ok(this->ref<AGCObjectVisitor>());
 
                 // 4. scan mutation logs
                 mlog_store_.verify_ok(&gco_store_,
@@ -576,7 +576,9 @@ namespace xo {
                            xtag("slot.root()", slot.root()),
                            xtag("slot.root()->data_", slot.root()->data_));
 
-                void * root_to = gco_store_.deep_move_root(this->ref<AGCObjectVisitor>(), *slot.root(), upto);
+                void * root_to = gco_store_.deep_move_root(this->ref<AGCObjectVisitor>(),
+                                                           slot.root()->iface(),
+                                                           (void **)&(slot.root()->data_), upto);
 
                 slot.root()->reset_opaque(root_to);
 
@@ -604,44 +606,13 @@ namespace xo {
             }
             case VisitReason::code::verify:
                 // called during verify_ok
-                gco_store_.verify_aux(lhs_iface, *lhs_data, &verify_stats_);
+                gco_store_.verify_aux(lhs_iface, *lhs_data);
                 break;
             default:
                 // should be unreachable
                 assert(false);
             }
         }
-
-#ifdef OBSOLETE
-        void
-        DX1Collector::_verify_aux(AGCObject * iface, void * data)
-        {
-            //scope log(XO_DEBUG(config_.debug_flag_), xtag("data", data));
-
-            (void)iface;
-            (void)data;
-
-            Generation g1 = this->generation_of(Role::to_space(), data);
-
-            if (g1.is_sentinel()) {
-                assert(this->contains(Role::to_space(), data) == false);
-
-                Generation g2 = this->generation_of(Role::from_space(), data);
-
-                if (!g2.is_sentinel()) {
-                    // verify failure - live pointer still refers to from-space
-
-                    ++(verify_stats_.n_from_);
-                } else {
-                    ++(verify_stats_.n_ext_);
-                }
-            } else {
-                assert(this->contains(Role::to_space(), data));
-
-                ++(verify_stats_.n_to_);
-            }
-        }
-#endif
 
         auto
         DX1Collector::alloc(typeseq t, size_type z) noexcept -> value_type

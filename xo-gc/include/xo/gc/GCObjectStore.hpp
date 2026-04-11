@@ -16,6 +16,11 @@ namespace xo {
         class X1VerifyStats;
 
         /** @brief container to hold gc-aware objects for X1 collector
+         *
+         *  Note: X1VerifyStats are in DX1Collector.
+         *        They need to be there, since also interact with MutationLogStore.
+         *        This is reason for DX1Collector to invoke .verify_aux()
+         *        so it can supply X1VerifyStats location
          **/
         class GCObjectStore {
         public:
@@ -28,16 +33,21 @@ namespace xo {
             using typeseq = xo::reflect::typeseq;
 
         public:
-            explicit GCObjectStore(const GCObjectStoreConfig & cfg);
+            explicit GCObjectStore(const GCObjectStoreConfig & cfg, X1VerifyStats * p_verify_stats);
 
             const GCObjectStoreConfig & config() const noexcept { return config_; }
 
             const ObjectTypeTable * get_object_types() const noexcept { return &object_types_; }
             const DArena * get_space(Role r, Generation g) const noexcept { return space_[r][g]; }
+            const DArena * from_space(Generation g) const noexcept { return this->get_space(Role::from_space(), g); }
+            const DArena * to_space(Generation g) const noexcept { return this->get_space(Role::to_space(), g); }
+            const DArena * new_space() const noexcept { return this->get_space(Role::to_space(), Generation{0}); }
+
             DArena * get_space(Role r, Generation g) noexcept { return space_[r][g]; }
-            DArena * from_space(Generation g) noexcept { return get_space(Role::from_space(), g); }
-            DArena * to_space(Generation g) noexcept { return get_space(Role::to_space(), g); }
-            DArena * new_space() noexcept { return to_space(Generation{0}); }
+            DArena * from_space(Generation g) noexcept { return this->get_space(Role::from_space(), g); }
+            DArena * to_space(Generation g) noexcept { return this->get_space(Role::to_space(), g); }
+            DArena * new_space() noexcept { return this->get_space(Role::to_space(), Generation{0}); }
+            X1VerifyStats * verify_stats() noexcept { return p_verify_stats_; }
 
             /** true iff type with id @p tseq has known metadata
              *  (i.e. has appeared in preceding call to install_type
@@ -124,8 +134,7 @@ namespace xo {
              *  to call AGCObject visitor method (forward_children()) on each
              *  object stored here.
              **/
-            void verify_ok(obj<AGCObjectVisitor> gc,
-                           X1VerifyStats * p_verify_stats) noexcept;
+            void verify_ok(obj<AGCObjectVisitor> gc) noexcept;
 
             /** Register object type with this collector.
              *  Provides shallow copy and pointer forwarding for instances of this
@@ -142,11 +151,14 @@ namespace xo {
             /** move subgraph at @p root to to-space on behalf of collector @p gc
              *  Special behavior relative to @ref _deep_move_interior :
              *  If @p root is not in gc-space, visit immediate children and move them in place (!).
-
+             *
+             *  @return new address for @p from_src
+             *
              *  Require: runstate_.is_running()
              **/
             void * deep_move_root(obj<AGCObjectVisitor> gc,
-                                  obj<AGCObject> from_src,
+                                  const AGCObject * root_iface,
+                                  void ** root_data,
                                   Generation upto);
 
             /** move interior subgraph at @p from_src to to-space.
@@ -157,6 +169,16 @@ namespace xo {
             void * deep_move_interior(obj<AGCObjectVisitor> gc,
                                       void * from_src,
                                       Generation upto);
+
+#ifdef NOT_YET
+            /** Target for GCObjectVisitor facet
+             *  During gc phase (@p reason is 'forward')
+             *  1. evacuate object at @p *lhs_data to to-space.
+             *  2. replace @p *lhs_data with forwarding pointer
+             *     to new location.
+             **/
+            void visit_child(VisitReason reason, AGCObject * lhs_iface, void ** lhs_data);
+#endif
 
             /** Evacuate object at @p *lhs_data to to-space, during collection phase
              *  acting on generations g in [0 ,.., upto).
@@ -172,12 +194,11 @@ namespace xo {
 
             /** categorize fop {@p lhs_iface, @p lhs_data}
              *  based on location of @p lhs_data.
-             *  Update @p *p_verify_stats based on the result:
+             *  Update @ref p_verify_stats_ based on the result:
              *  increment exactly one of {n_from_, n_to_, n_ext_}
              **/
             void verify_aux(AGCObject * lhs_iface,
-                            void * lhs_data,
-                            X1VerifyStats * p_verify_stats);
+                            void * lhs_data);
 
             /** Cleanup at the end of a gc cycle.
              *  Reset from-space
@@ -248,6 +269,8 @@ namespace xo {
              **/
             std::array<DArena*, c_max_generation> space_[c_n_role];
 
+            /** dedicated counters. updated by .verify_aux() **/
+            X1VerifyStats * p_verify_stats_ = nullptr;
         };
 
     } /*namespace mm*/
