@@ -18,6 +18,7 @@ namespace xo {
     using xo::facet::typeseq;
 
     namespace scm {
+        // TODO: error reporting?
         DArray *
         DArray::empty(obj<AAllocator> mm,
                       size_type cap)
@@ -27,12 +28,14 @@ namespace xo {
             void * mem = mm.alloc(typeseq::id<DArray>(),
                                   sizeof(DArray) + cap * sizeof(obj<AGCObject>));
 
-            result = new (mem) DArray();
+            if (mem) [[likely]] {
+                result = new (mem) DArray();
 
-            assert(result);
+                assert(result);
 
-            result->capacity_ = cap;
-            result->size_ = 0;
+                result->capacity_ = cap;
+                result->size_ = 0;
+            }
 
             return result;
         }
@@ -44,12 +47,14 @@ namespace xo {
         {
             DArray * dest = empty(mm, new_cap);
 
-            /** could just memcpy here **/
-            for (size_type i = 0, n = src->size(); i < n; ++i) {
-                dest->elts_[i] = src->elts_[i];
-            }
+            if (dest) [[likely]] {
+                /** could just memcpy here **/
+                for (size_type i = 0, n = src->size(); i < n; ++i) {
+                    dest->elts_[i] = src->elts_[i];
+                }
 
-            dest->size_ = src->size();
+                dest->size_ = src->size();
+            }
 
             return dest;
         }
@@ -96,6 +101,25 @@ namespace xo {
 
                 return true;
             }
+        }
+
+        bool
+        DArray::pop_back(obj<AGCObject> * p_elt) noexcept
+        {
+            if (size_ > 0) {
+                --size_;
+
+                obj<AGCObject> & last = elts_[size_];
+
+                if (p_elt)
+                    *p_elt = last;
+
+                last.reset(); // hygiene
+
+                return true;
+            }
+
+            return false;
         }
 
         bool
