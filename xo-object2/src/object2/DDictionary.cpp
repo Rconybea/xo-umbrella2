@@ -26,13 +26,18 @@ namespace xo {
         {
             void * mem = mm.alloc_for<DDictionary>();
 
-            if (cap <= 0)
-                cap = 1;
+            if (mem) {
+                if (cap <= 0)
+                    cap = 1;
 
-            DArray * keys = DArray::empty(mm, cap);
-            DArray * values = DArray::empty(mm, cap);
+                DArray * keys = DArray::empty(mm, cap);
+                DArray * values = DArray::empty(mm, cap);
 
-            return new (mem) DDictionary(keys, values);
+                if (keys && values)
+                    return new (mem) DDictionary(keys, values);
+            }
+
+            return nullptr;
         }
 
         std::optional<obj<AGCObject>>
@@ -142,7 +147,10 @@ namespace xo {
         {
             const DString * k1 = DString::from_cstr(mm, key_cstr);
 
-            return this->try_upsert(std::make_pair(k1, value));
+            if (k1)
+                return this->try_upsert(std::make_pair(k1, value));
+
+            return false;
         }
 
         bool
@@ -150,7 +158,10 @@ namespace xo {
         {
             const DString * k1 = DString::from_cstr(mm, key_cstr);
 
-            return this->upsert(mm, std::make_pair(k1, value));
+            if (k1)
+                return this->upsert(mm, std::make_pair(k1, value));
+
+            return false;
         }
 
         bool
@@ -162,10 +173,7 @@ namespace xo {
             if (keys_->size() == keys_->capacity())
                 return false;
 
-            keys_->push_back(obj<AGCObject,DString>(const_cast<DString *>(kv_pair.first)));
-            values_->push_back(kv_pair.second);
-
-            return true;
+            return this->_append_kv_aux(kv_pair);
         }
 
         bool
@@ -173,6 +181,8 @@ namespace xo {
         {
             if (this->try_update(kv_pair))
                 return true;
+
+            // key not present -> must expand {key array, value array}
 
             if (keys_->size() == keys_->capacity()) {
                 assert(keys_->capacity() > 0);
@@ -190,10 +200,26 @@ namespace xo {
                 }
             }
 
-            keys_->push_back(obj<AGCObject,DString>(const_cast<DString *>(kv_pair.first)));
-            values_->push_back(kv_pair.second);
+            return this->_append_kv_aux(kv_pair);
+        }
 
-            return true;
+        bool
+        DDictionary::_append_kv_aux(const pair_type & kv_pair)
+        {
+            bool ok
+                = keys_->push_back(obj<AGCObject,DString>(const_cast<DString *>(kv_pair.first)));
+
+            if (ok) {
+                ok = values_->push_back(kv_pair.second);
+
+                if (!ok) {
+                    // since we couldn't insert value, also drop key
+
+                    keys_->pop_back();
+                }
+            }
+
+            return ok;
         }
 
         void
