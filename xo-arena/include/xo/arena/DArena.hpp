@@ -203,19 +203,21 @@ namespace xo {
 
             /** capture error information: advance error count + set last_error **/
             void capture_error(error err,
+                               const char * src_fn,
                                size_type target_z = 0) const;
 
             /** alloc driver. shared by alloc(), super_alloc(), sub_alloc() **/
             value_type _alloc(std::size_t req_z,
                               alloc_mode mode,
                               typeseq tseq,
-                              uint32_t age);
+                              uint32_t age,
+                              const char * src_fn);
 
             /** expand committed space in arena @p d
-             *  to size at least @p z
+             *  to size at least @p z, on behalf of @p src_fn
              *  In practice will round up to a multiple of @ref page_z_.
              **/
-            bool expand(size_type z) noexcept;
+            bool expand(size_type z, const char * src_fn) noexcept;
 
             /** create initial guard **/
             void establish_initial_guard() noexcept;

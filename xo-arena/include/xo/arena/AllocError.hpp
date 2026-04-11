@@ -48,20 +48,25 @@ namespace xo {
                                     uint32_t seq) : error_{err},
                                                     error_seq_{seq} {}
             AllocError(error err,
+                       const char * src_fn,
                            uint32_t seq,
                            size_type req_z,
                            size_type com_z,
-                           size_type rsv_z) : error_{err},
-                                              error_seq_{seq},
-                                              request_z_{req_z},
-                                              committed_z_{com_z},
-                                              reserved_z_{rsv_z} {}
+                       size_type rsv_z) : error_{err},
+                                          src_fn_{src_fn},
+                                          error_seq_{seq},
+                                          request_z_{req_z},
+                                          committed_z_{com_z},
+                                          reserved_z_{rsv_z} {}
 
             static const char * error_description(error x);
 
             /** error code **/
             error error_ = error::ok;
-
+            /** source function. Typically injected with __PRETTY_FUNCTION__
+             *  somewhere suitable on stack
+             **/
+            const char * src_fn_ = nullptr;
             /** sequence# of this error.
              *  Each error event within an allocator gets next sequence number
              **/

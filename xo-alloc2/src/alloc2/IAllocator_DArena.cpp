@@ -113,7 +113,7 @@ namespace xo {
         bool
         IAllocator_DArena::expand(DArena & s, size_t target_z) noexcept
         {
-            return s.expand(target_z);
+            return s.expand(target_z, __PRETTY_FUNCTION__);
         } /*expand*/
 
         std::byte *

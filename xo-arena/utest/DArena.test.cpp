@@ -118,7 +118,7 @@ namespace xo {
             REQUIRE(arena.allocated() == 0);
 
             size_t z2 = 512;
-            bool ok = arena.expand(z2);
+            bool ok = arena.expand(z2, __PRETTY_FUNCTION__);
 
             INFO(xtag("last_error", arena.last_error()));
 

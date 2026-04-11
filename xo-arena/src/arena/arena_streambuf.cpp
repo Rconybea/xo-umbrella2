@@ -51,7 +51,7 @@ namespace xo {
             this->color_escape_chars_ = 0;
             this->color_escape_start_ = nullptr;
         }
-    
+
         void
         arena_streambuf::rewind_to(rewind_state s)
         {
@@ -85,7 +85,7 @@ namespace xo {
 
             /* note: local_ppos_ invariant across expand_to() */
 
-            arena_->expand(new_z);
+            arena_->expand(new_z, __PRETTY_FUNCTION__);
 
             char * p_base = (char *)(arena_->lo_);
             char * p_hi = (char *)(arena_->limit_);
@@ -207,7 +207,7 @@ namespace xo {
 
             return this->pptr() - this->pbase();
         } /*seekoff*/
-    
+
     } /*namespace mm*/
 } /*namespace xo*/
 

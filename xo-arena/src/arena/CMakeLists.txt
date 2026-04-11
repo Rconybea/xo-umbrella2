@@ -11,6 +11,7 @@ set(SELF_SRCS
     DArena.cpp
     DArenaIterator.cpp
     DCircularBuffer.cpp
+    backtrace.cpp
 )
 
 xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 ${SELF_SRCS})
@@ -24,5 +25,7 @@ xo_install_include_tree3(include/xo/arena)
 
 xo_dependency(${SELF_LIB} xo_reflectutil)
 xo_dependency(${SELF_LIB} indentlog)
+xo_external_pkgconfig_dependency(${SELF_LIB} LIBUNWIND libunwind-generic)
+xo_external_pkgconfig_dependency(${SELF_LIB} LIBDW libdw)
 
 # end src/CMakeLists.txt

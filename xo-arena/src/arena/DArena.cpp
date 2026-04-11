@@ -7,6 +7,7 @@
 #include "DArena.hpp"
 #include "DArenaIterator.hpp"
 #include "mmap_util.hpp"
+#include "backtrace.hpp"
 #include <xo/arena/padding.hpp>
 #include <xo/indentlog/scope.hpp>
 #include <xo/indentlog/print/tag.hpp>
@@ -230,7 +231,7 @@ namespace xo {
         DArena::alloc_info(value_type mem) const noexcept
         {
             if (!config_.store_header_flag_) [[unlikely]] {
-                this->capture_error(error::alloc_info_disabled);
+                this->capture_error(error::alloc_info_disabled, __PRETTY_FUNCTION__);
 
                 return AllocInfo::error_not_configured(&config_.header_);
             }
@@ -272,7 +273,7 @@ namespace xo {
         DArena::begin_header() const noexcept
         {
             if (config_.store_header_flag_ == false) {
-                this->capture_error(error::alloc_iterator_not_supported);
+                this->capture_error(error::alloc_iterator_not_supported, __PRETTY_FUNCTION__);
 
                 return nullptr;
             }
@@ -284,7 +285,7 @@ namespace xo {
         DArena::end_header() const noexcept
         {
             if (config_.store_header_flag_ == false) {
-                this->capture_error(error::alloc_iterator_not_supported);
+                this->capture_error(error::alloc_iterator_not_supported, __PRETTY_FUNCTION__);
 
                 return nullptr;
             }
@@ -299,7 +300,11 @@ namespace xo {
              *   exactly 1 header per alloc() call.
              * - store_header_flag follows configuration
              */
-            return _alloc(req_z, alloc_mode::standard, t, 0 /*age*/);
+            return _alloc(req_z,
+                          alloc_mode::standard,
+                          t,
+                          0 /*age*/,
+                          __PRETTY_FUNCTION__);
         }
 
         std::byte *
@@ -316,7 +321,8 @@ namespace xo {
             return _alloc(req_z,
                           alloc_mode::super,
                           t,
-                          0 /*age*/);
+                          0 /*age*/,
+                          __PRETTY_FUNCTION__);
         }
 
         std::byte *
@@ -334,7 +340,8 @@ namespace xo {
                            ? alloc_mode::sub_complete
                            : alloc_mode::sub_incomplete),
                           typeseq::sentinel() /*typeseq: ignored*/,
-                          0 /*age - ignored */);
+                          0 /*age - ignored */,
+                          __PRETTY_FUNCTION__);
         }
 
         std::byte *
@@ -354,17 +361,20 @@ namespace xo {
             typeseq tseq = typeseq(src_info.tseq());
             uint32_t age = src_info.age();
 
-            return _alloc(req_z, alloc_mode::standard, tseq, age + 1);
+            return _alloc(req_z, alloc_mode::standard, tseq, age + 1,
+                          __PRETTY_FUNCTION__);
         }
 
         void
         DArena::capture_error(error err,
+                              const char * src_fn,
                               size_type target_z) const
         {
             DArena * self = const_cast<DArena *>(this);
 
             ++(self->error_count_);
             self->last_error_ = AllocError(err,
+                                           src_fn,
                                            error_count_,
                                            target_z,
                                            committed_z_,
@@ -375,7 +385,8 @@ namespace xo {
         DArena::_alloc(std::size_t req_z,
                        alloc_mode mode,
                        typeseq tseq,
-                       uint32_t age)
+                       uint32_t age,
+                       const char * src_fn)
         {
             scope log(XO_DEBUG(config_.debug_flag_));
 
@@ -444,7 +455,7 @@ namespace xo {
                     hz = sizeof(header);
                 } else {
                     /* req_z doesn't fit in configured header_size_mask bits */
-                    capture_error(error::header_size_mask);
+                    capture_error(error::header_size_mask, src_fn);
                     return nullptr;
                 }
             }
@@ -453,7 +464,7 @@ namespace xo {
 
             assert(padding::is_aligned(z1));
 
-            if (!this->expand(this->allocated() + z1)) [[unlikely]] {
+            if (!this->expand(this->allocated() + z1, src_fn)) [[unlikely]] {
                 /* (error state already captured) */
                 return nullptr;
             }
@@ -509,11 +520,12 @@ namespace xo {
         }
 
         bool
-        DArena::expand(size_t target_z) noexcept
+        DArena::expand(size_t target_z, const char * src_fn) noexcept
         {
             scope log(XO_DEBUG(config_.debug_flag_),
                       xtag("target_z", target_z),
-                      xtag("committed_z", committed_z_));
+                      xtag("committed_z", committed_z_),
+                      xtag("src_fn", src_fn));
 
             if (target_z <= committed_z_) [[likely]] {
                 log && log("trivial success, offset within committed range",
@@ -523,7 +535,12 @@ namespace xo {
             }
 
             if (lo_ + target_z > hi_) [[unlikely]] {
-                this->capture_error(error::reserve_exhausted, target_z);
+                this->capture_error(error::reserve_exhausted, src_fn, target_z);
+
+                fprintf(stderr, "DArena::expand: reserve exhausted");
+                print_backtrace_dwarf(true /*demangle_flag*/);
+                std::terminate();
+
                 return false;
             }
 
@@ -566,7 +583,11 @@ namespace xo {
                             );
                     }
 
-                    capture_error(error::commit_failed, add_commit_z);
+                    this->capture_error(error::commit_failed, src_fn, add_commit_z);
+
+                    fprintf(stderr, "DArena::expand: mprotect failed (system oom?)");
+                    print_backtrace_dwarf(false /*!demangle_flag*/);
+                    
                     return false;
                 }
 
