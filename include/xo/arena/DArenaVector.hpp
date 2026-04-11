@@ -181,7 +181,7 @@ namespace xo {
         template <typename T>
         void
         DArenaVector<T>::reserve(size_type z) {
-            store_.expand(z * sizeof(T));
+            store_.expand(z * sizeof(T), __PRETTY_FUNCTION__);
         }
 
         template <typename T>
@@ -193,7 +193,7 @@ namespace xo {
             if (z > size_) {
                 // expand arena to accomodate
 
-                if (!store_.expand(req_z))
+                if (!store_.expand(req_z, __PRETTY_FUNCTION__))
                     return false;
 
                 // run ctors
@@ -258,7 +258,7 @@ namespace xo {
                 size_type new_z = size_ + 1;
                 size_type req_z = new_z * sizeof(T);
 
-                store_.expand(req_z);
+                store_.expand(req_z, __PRETTY_FUNCTION__);
             }
 
             // move elements [i .. z-1] right by one position.
@@ -283,7 +283,7 @@ namespace xo {
                 size_type new_z = size_ + 1;
                 size_type req_z = new_z * sizeof(T);
 
-                store_.expand(req_z);
+                store_.expand(req_z, __PRETTY_FUNCTION__);
             }
 
             // move elements [i .. z-1] right by one position.
@@ -322,7 +322,7 @@ namespace xo {
             size_type z = size_ + 1;
             size_type req_z = z * sizeof(T);
 
-            if (this->store_.expand(req_z)) {
+            if (this->store_.expand(req_z, __PRETTY_FUNCTION__)) {
                 T * addr = this->_address_of(size_);
 
                 new (addr) T{std::move(x)};
@@ -336,7 +336,7 @@ namespace xo {
         DArenaVector<T>::push_back(const T & x) {
             size_type z = size_ + 1;
 
-            if (this->store_.expand(z * sizeof(T))) {
+            if (this->store_.expand(z * sizeof(T), __PRETTY_FUNCTION__)) {
                 T * addr = this->_address_of(size_);
 
                 new (addr) T{x};

@@ -74,7 +74,7 @@ namespace xo {
                        xtag("bounds_flag", bounds_flag));
 
             if (!contains_flag || !bounds_flag) {
-                arena_->capture_error(error::alloc_iterator_deref);
+                arena_->capture_error(error::alloc_iterator_deref, __PRETTY_FUNCTION__);
 
                 return AllocInfo::error_invalid_iterator(&(arena_->config_.header_));
             }
@@ -122,7 +122,7 @@ namespace xo {
                        xtag("bounds_flag", bounds_flag));
 
             if (!contains_flag || !bounds_flag) {
-                arena_->capture_error(error::alloc_iterator_next);
+                arena_->capture_error(error::alloc_iterator_next, __PRETTY_FUNCTION__);
                 return;
             }
 

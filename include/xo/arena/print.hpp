@@ -20,12 +20,17 @@ namespace xo {
         inline std::ostream &
         operator<<(std::ostream & os, const AllocError & x) {
             os << "<AllocError"
-               << xtag("error", x.error_)
-               << xtag("seq", x.error_seq_)
+               << xtag("error", x.error_);
+
+            if (x.src_fn_)
+                os << xtag("src_fn", x.src_fn_);
+
+            os << xtag("seq", x.error_seq_)
                << xtag("req_z", x.request_z_)
                << xtag("commit_z", x.committed_z_)
                << xtag("resv_z", x.reserved_z_)
                << ">";
+
             return os;
         }
     }
