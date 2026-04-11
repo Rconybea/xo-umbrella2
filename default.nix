@@ -266,6 +266,8 @@ let
     pkgs.libwebsockets
     pkgs.jsoncpp
     pkgs.eigen
+    pkgs.libunwind
+    pkgs.elfutils.dev    # for libdw (DWARF debug info lookup)
     pkgs.zlib
     pkgs.libbsd
   ];
