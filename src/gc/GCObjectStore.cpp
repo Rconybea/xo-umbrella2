@@ -164,6 +164,12 @@ namespace xo {
             return Generation::sentinel();
         }
 
+        AllocError
+        GCObjectStore::last_error() const noexcept
+        {
+            return this->get_space(Role::to_space(), Generation{0})->last_error();
+        }
+
         auto
         GCObjectStore::header2size(header_type hdr) const noexcept -> size_type
         {
@@ -364,16 +370,35 @@ namespace xo {
 
             (void)error_mm;
 
-            std::uint64_t n_age = config_.arena_config_.header_.max_age() + 1;
+            std::uint32_t hard_n_age = config_.arena_config_.header_.max_age() + 1;
+            // maximum age of a still-existing object
+            std::uint32_t soft_max_age = 0; 
+
+            // first pass, establish max age
+            for (Generation g{0}; g < config_.n_generation_; ++g) {
+                const DArena * arena = this->get_space(Role::to_space(), g);
+
+                for (AllocInfo info : *arena) {
+                    if (info.is_forwarding_tseq()) {
+                        assert(false);
+                        return false;
+                    }
+
+                    uint32_t age = info.age();
+
+                    assert(age < hard_n_age);
+
+                    soft_max_age = std::max(soft_max_age, age);
+                }
+            }
 
             // stats, indexed by age
-            DArray * stats_v = DArray::empty(mm, n_age);
+            DArray * stats_v = DArray::empty(mm, soft_max_age + 1);
 
             if (!stats_v)
                 return false;
 
-            // pre-populate with empty dictionaries for each age bucket
-            for (std::uint64_t a = 0; a < n_age; ++a) {
+            for (std::uint32_t a = 0; a <= soft_max_age; ++a) {
                 DDictionary * recd = DDictionary::make(mm);
 
                 if (!recd)
@@ -386,14 +411,12 @@ namespace xo {
                 stats_v->push_back(obj<AGCObject,DDictionary>(recd));
             }
 
-            log && log(xtag("n_age", n_age),
+            log && log(xtag("soft_max_age", soft_max_age),
                        xtag("stats_v.size", stats_v->size()));
 
+            // second pass, populate
             // scan to-space, count objects by age
-
-            // track largest age with at least one object
-            std::int64_t max_age_present = 0;
-
+            //
             for (Generation g{0}; g < config_.n_generation_; ++g) {
                 const DArena * arena = this->get_space(Role::to_space(), g);
 
@@ -405,9 +428,6 @@ namespace xo {
 
                     uint32_t age = info.age();
                     size_t z = info.size();
-
-                    if (static_cast<std::int64_t>(age) > max_age_present)
-                        max_age_present = age;
 
                     auto recd = obj<AGCObject,DDictionary>::from(stats_v->at(age));
 
@@ -427,9 +447,6 @@ namespace xo {
                     }
                 }
             }
-
-            // trim to only report ages up to max observed
-            stats_v->resize(max_age_present + 1);
 
             *p_output = obj<AGCObject,DArray>(stats_v);
 
@@ -641,6 +658,36 @@ namespace xo {
                  */
             }
         } /*_forward_inplace_aux*/
+
+        void
+        GCObjectStore::verify_aux(AGCObject * iface,
+                                  void * data,
+                                  X1VerifyStats * p_verify_stats)
+        {
+            //scope log(XO_DEBUG(config_.debug_flag_), xtag("data", data));
+
+            (void)iface;
+
+            Generation g1 = this->generation_of(Role::to_space(), data);
+
+            if (g1.is_sentinel()) {
+                assert(this->contains(Role::to_space(), data) == false);
+
+                Generation g2 = this->generation_of(Role::from_space(), data);
+
+                if (!g2.is_sentinel()) {
+                    // verify failure - live pointer still refers to from-space
+
+                    ++(p_verify_stats->n_from_);
+                } else {
+                    ++(p_verify_stats->n_ext_);
+                }
+            } else {
+                assert(this->contains(Role::to_space(), data));
+
+                ++(p_verify_stats->n_to_);
+            }
+        }
 
         void
         GCObjectStore::swap_roles(Generation upto) noexcept

@@ -13,6 +13,7 @@
 #include <xo/alloc2/GCObjectVisitor.hpp>
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/alloc2/Arena.hpp>
+#include <xo/arena/print.hpp>
 #include <xo/indentlog/scope.hpp>
 #include <xo/indentlog/print/tag.hpp>
 #include <xo/randomgen/xoshiro256.hpp>
@@ -53,6 +54,8 @@ namespace ut {
             explicit Testcase(uint32_t n_gen, uint32_t n_survive,
                               size_t gc_z, uint32_t type_z,
                               bool do_type_registration,
+                              size_t report_z,
+                              size_t error_z,
                               uint32_t n_test_obj,
                               uint32_t n_test_assign)
                 : n_gen_{n_gen},
@@ -60,6 +63,8 @@ namespace ut {
                   gc_size_{gc_z},
                   object_type_z_{type_z},
                   do_type_registration_{do_type_registration},
+                  report_size_{report_z},
+                  error_size_{error_z},
                   n_test_obj_{n_test_obj},
                   n_test_assign_{n_test_assign}
                 {}
@@ -80,20 +85,29 @@ namespace ut {
              *  (i.e. DBoolean)
              **/
             bool do_type_registration_ = false;
+            /** size for report-output arena **/
+            size_t report_size_ = 0;
+            /** size for error-output arena **/
+            size_t error_size_ = 0;
             /** #of cells in random object graph **/
             uint32_t n_test_obj_ = 0;
             /** #of random assignments to attempt (these may create cycles, for example) **/
             uint32_t n_test_assign_ = 0;
         };
 
+        constexpr uint32_t c_report_z1 = 64 * 1024;
+        constexpr uint32_t c_error_z1 = 16 * 1024;
+
         static std::vector<Testcase> s_testcase_v = {
-            /** n_gen, n_survive, gc_size, object_type_z, do_type_registration, n_obj **/
-            Testcase(2, 4, 16 * 1024, 8 * 128, false, 0, 0),
-            Testcase(2, 4, 16 * 1024, 8 * 128, true,  1, 0),
-            Testcase(2, 4, 16 * 1024, 8 * 128, true,  2, 0),
-            Testcase(2, 4, 16 * 1024, 8 * 128, true,  4, 0),
-            Testcase(2, 4, 16 * 1024, 8 * 128, true,  8, 4),
-            Testcase(2, 4, 16 * 1024, 8 * 128, true, 16, 7),
+            // note: report_z: 64k not sufficient for report_object_ages()
+
+            /** n_gen, n_survive, gc_size, object_type_z, do_type_registration, report_z, error_z, n_obj, n_test_assign **/
+            Testcase(2, 4, 16 * 1024, 8 * 128, false, c_report_z1, c_error_z1,  0, 0),
+            Testcase(2, 4, 16 * 1024, 8 * 128, true,  c_report_z1, c_error_z1,  1, 0),
+            Testcase(2, 4, 16 * 1024, 8 * 128, true,  c_report_z1, c_error_z1,  2, 0),
+            Testcase(2, 4, 16 * 1024, 8 * 128, true,  c_report_z1, c_error_z1,  4, 0),
+            Testcase(2, 4, 16 * 1024, 8 * 128, true,  c_report_z1, c_error_z1,  8, 4),
+            Testcase(2, 4, 16 * 1024, 8 * 128, true,  c_report_z1, c_error_z1, 16, 7),
         };
 
         /** record capturing some stats for a (randomly created) gc-aware object **/
@@ -299,6 +313,22 @@ namespace ut {
                 = DArena::map(ArenaConfig().with_name("arena2-reference")
                               .with_size(tc.gc_size_ * tc.n_gen_)
                               .with_store_header_flag(true));
+
+            /** Arena for holding report output:
+             *  See GCObjectStore methods .report_object_types(), .report_object_ages()
+             **/
+            DArena report_arena
+                = DArena::map(ArenaConfig().with_name("report-arena")
+                              .with_size(tc.report_size_)
+                              .with_store_header_flag(true));
+            obj<AAllocator,DArena> report_mm(&report_arena);
+
+            /** Arena for holding error messages **/
+            DArena error_arena
+                = DArena::map(ArenaConfig().with_name("error-arena")
+                              .with_size(tc.error_size_)
+                              .with_store_header_flag(true));
+            obj<AAllocator,DArena> error_mm(&error_arena);
 
             // object type storage will be empty unless we install a type.
             GCObjectStore gcos(gcos_config);
@@ -611,6 +641,39 @@ namespace ut {
 #endif
 
             // - verify_ok
+
+            {
+                obj<AGCObject> report_gco;
+                bool ok = gcos.report_object_types(report_mm, error_mm, &report_gco);
+
+                REQUIRE(ok);
+                REQUIRE(report_gco);
+
+                // TODO: print report_gco, verify output
+
+                // discard report
+
+                report_gco.reset();
+                report_mm->clear();
+            }
+
+            {
+                obj<AGCObject> report_gco;
+                bool ok = gcos.report_object_ages(report_mm, error_mm, &report_gco);
+
+                if (!ok) {
+                    log.retroactively_enable();
+                    log && log(xtag("error", report_mm.last_error()));
+                }
+
+                REQUIRE(ok);
+                REQUIRE(report_gco);
+
+                // TODO: print report_gco, verify output
+
+                report_gco.reset();
+                report_mm->clear();
+            }
         }
     }
 

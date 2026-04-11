@@ -55,6 +55,9 @@ namespace xo {
              **/
             Generation generation_of(Role r, const void * addr) const noexcept;
 
+            /** return details from last error (i.e. from g0 to-space) **/
+            AllocError last_error() const noexcept;
+
             /** get allocation size from header **/
             std::size_t header2size(header_type hdr) const noexcept;
             /** get generation counter from alloc header **/
@@ -166,6 +169,15 @@ namespace xo {
                                      AGCObject * lhs_iface,
                                      void ** lhs_data,
                                      Generation upto);
+
+            /** categorize fop {@p lhs_iface, @p lhs_data}
+             *  based on location of @p lhs_data.
+             *  Update @p *p_verify_stats based on the result:
+             *  increment exactly one of {n_from_, n_to_, n_ext_}
+             **/
+            void verify_aux(AGCObject * lhs_iface,
+                            void * lhs_data,
+                            X1VerifyStats * p_verify_stats);
 
             /** Cleanup at the end of a gc cycle.
              *  Reset from-space
