@@ -18,7 +18,10 @@ namespace xo {
             void * mem = mm.alloc(typeseq::id<DInteger>(),
                                   sizeof(DInteger));
 
-            return new (mem) DInteger(x);
+            if (mem)
+                return new (mem) DInteger(x);
+
+            return nullptr;
         }
 
         bool
