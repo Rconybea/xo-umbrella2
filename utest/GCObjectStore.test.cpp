@@ -4,6 +4,7 @@
  **/
 
 #include <xo/gc/GCObjectStore.hpp>
+#include <xo/gc/X1VerifyStats.hpp>
 #include "MockCollector.hpp"
 
 #include <xo/object2/ListOps.hpp>
@@ -13,6 +14,7 @@
 #include <xo/alloc2/GCObjectVisitor.hpp>
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/alloc2/Arena.hpp>
+#include <xo/facet/TypeRegistry.hpp>
 #include <xo/arena/print.hpp>
 #include <xo/indentlog/scope.hpp>
 #include <xo/indentlog/print/tag.hpp>
@@ -28,6 +30,7 @@ namespace ut {
     using xo::mm::DMockCollector;
     using xo::mm::GCObjectStoreConfig;
     using xo::mm::GCObjectStore;
+    using xo::mm::X1VerifyStats;
     using xo::mm::AGCObject;
     using xo::mm::AGCObjectVisitor;
     using xo::mm::Generation;
@@ -39,6 +42,7 @@ namespace ut {
     using xo::mm::AllocInfo;
     using xo::mm::c_max_generation;
     using xo::facet::obj;
+    using xo::facet::TypeRegistry;
     using xo::facet::typeseq;
     using xo::facet::impl_for;
     using xo::rng::xoshiro256ss;
@@ -50,14 +54,23 @@ namespace ut {
     using std::uint32_t;
 
     namespace {
+        enum class TestGraphType {
+            /* list cell pointing to itself */
+            selfcycle,
+            /* random object graph */
+            random,
+        };
+
         struct Testcase {
             explicit Testcase(uint32_t n_gen, uint32_t n_survive,
                               size_t gc_z, uint32_t type_z,
                               bool do_type_registration,
                               size_t report_z,
                               size_t error_z,
+                              TestGraphType obj_graph_type,
                               uint32_t n_test_obj,
-                              uint32_t n_test_assign)
+                              uint32_t n_test_assign,
+                              bool debug_flag)
                 : n_gen_{n_gen},
                   n_survive_{n_survive},
                   gc_size_{gc_z},
@@ -65,8 +78,10 @@ namespace ut {
                   do_type_registration_{do_type_registration},
                   report_size_{report_z},
                   error_size_{error_z},
+                  obj_graph_type_{obj_graph_type},
                   n_test_obj_{n_test_obj},
-                  n_test_assign_{n_test_assign}
+                  n_test_assign_{n_test_assign},
+                  debug_flag_{debug_flag}
                 {}
 
             /** number of generations in gco store **/
@@ -89,12 +104,19 @@ namespace ut {
             size_t report_size_ = 0;
             /** size for error-output arena **/
             size_t error_size_ = 0;
+            /** object graph type **/
+            TestGraphType obj_graph_type_ = TestGraphType::random;
             /** #of cells in random object graph **/
             uint32_t n_test_obj_ = 0;
             /** #of random assignments to attempt (these may create cycles, for example) **/
             uint32_t n_test_assign_ = 0;
+
+            /** true to enable debug when attempting this test case **/
+            bool debug_flag_ = false;
         };
 
+        constexpr TestGraphType c_selfcycle = TestGraphType::selfcycle;
+        constexpr TestGraphType c_random = TestGraphType::random;
         constexpr uint32_t c_report_z1 = 64 * 1024;
         constexpr uint32_t c_error_z1 = 16 * 1024;
 
@@ -102,12 +124,14 @@ namespace ut {
             // note: report_z: 64k not sufficient for report_object_ages()
 
             /** n_gen, n_survive, gc_size, object_type_z, do_type_registration, report_z, error_z, n_obj, n_test_assign **/
-            Testcase(2, 4, 16 * 1024, 8 * 128, false, c_report_z1, c_error_z1,  0, 0),
-            Testcase(2, 4, 16 * 1024, 8 * 128, true,  c_report_z1, c_error_z1,  1, 0),
-            Testcase(2, 4, 16 * 1024, 8 * 128, true,  c_report_z1, c_error_z1,  2, 0),
-            Testcase(2, 4, 16 * 1024, 8 * 128, true,  c_report_z1, c_error_z1,  4, 0),
-            Testcase(2, 4, 16 * 1024, 8 * 128, true,  c_report_z1, c_error_z1,  8, 4),
-            Testcase(2, 4, 16 * 1024, 8 * 128, true,  c_report_z1, c_error_z1, 16, 7),
+            Testcase(2, 4, 16 * 1024, 8 * 128, false, c_report_z1, c_error_z1, c_random,    0, 0, false), 
+            Testcase(2, 4, 16 * 1024, 8 * 128, true,  c_report_z1, c_error_z1, c_selfcycle, 1, 0, false), 
+            Testcase(2, 4, 16 * 1024, 8 * 128, true,  c_report_z1, c_error_z1, c_random,    1, 0, false), 
+            Testcase(2, 4, 16 * 1024, 8 * 128, true,  c_report_z1, c_error_z1, c_random,    2, 13, false),
+            Testcase(2, 4, 16 * 1024, 8 * 128, true,  c_report_z1, c_error_z1, c_random,    2, 25, false),
+            Testcase(2, 4, 16 * 1024, 8 * 128, true,  c_report_z1, c_error_z1, c_random,    5,  0, false),
+            Testcase(2, 4, 16 * 1024, 8 * 128, true,  c_report_z1, c_error_z1, c_random,    4,  2, false), 
+            Testcase(2, 4, 16 * 1024, 8 * 128, true,  c_report_z1, c_error_z1, c_random,   50, 25, false), 
         };
 
         /** record capturing some stats for a (randomly created) gc-aware object **/
@@ -122,6 +146,35 @@ namespace ut {
             // representation
             typeseq tseq_;
         };
+
+        /** Create two isomorphic object graphs.
+         *  Each graph comprises a single DList cell
+         *  that points to itself
+         **/
+        void
+        selfcycle_object_graph(std::vector<Recd> * p_v1,
+                               GCObjectStore * p_gcos,
+                               std::vector<Recd> * p_v2,
+                               DArena * arena2)
+        {
+            auto alloc1 = obj<AAllocator,DArena>(p_gcos->new_space());
+            auto alloc2 = obj<AAllocator,DArena>(arena2);
+
+            auto t1 = DBoolean::box(alloc1, true);
+            auto t2 = DBoolean::box(alloc2, true);
+
+            auto l1 = ListOps::cons(alloc1, t1, ListOps::nil());
+            auto l2 = ListOps::cons(alloc2, t2, ListOps::nil());
+
+            // shortcut. Can get away with skipping mm_do_assign(),
+            // because we know lhs of assignment is in the youngest generation
+
+            l1->head_ = l1; // l1->assign_head(gc, l1); // need collector facet
+            l2->head_ = l2; // l2->assign_head(gc, l2); // need collector facet
+
+            p_v1->push_back(Recd(l1, sizeof(DList), typeseq::id<DList>()));
+            p_v2->push_back(Recd(l2, sizeof(DList), typeseq::id<DList>()));
+        }
 
         /** Create two isomorphic random object graphs containing @p n_obj nodes
          *  Using a few basic data types from xo-object2
@@ -147,6 +200,8 @@ namespace ut {
                             std::vector<Recd> * p_v2,
                             DArena * p_arena2)
         {
+            scope log(XO_DEBUG(true));
+
             if (n_obj == 0)
                 return;
 
@@ -229,61 +284,135 @@ namespace ut {
 
             for (uint32_t j = 0; j < n_assign; ++j) {
                 // choose an object at random
-                uint32_t sample = (*p_rgen)() % n_obj;
+                uint32_t lhs_ix = (*p_rgen)() % n_obj;
 
-                assert(sample < p_v->size());
+                assert(lhs_ix < p_v->size());
 
                 // is it a list cell?
-                auto xj = obj<AGCObject,DList>::from((*p_v)[sample].gco_);
-                auto xj2 = obj<AGCObject,DList>::from((*p_v2)[sample].gco_);
+                auto xj1 = obj<AGCObject,DList>::from((*p_v)[lhs_ix].gco_);
+                auto xj2 = obj<AGCObject,DList>::from((*p_v2)[lhs_ix].gco_);
 
-                if (xj) {
+                if (xj1) {
                     assert(xj2);
 
                     // flip a coin -- try modifying one of {car, cdr}
-                    sample = (*p_rgen)() % 100;
+                    uint32_t sample = (*p_rgen)() % 100;
 
                     if (sample < 50) {
                         // modify head.  skip usual gc write-barrier stuff
 
-                        sample = (*p_rgen)() % n_obj;
-                        // rhs could even be xj itself
-                        xj->head_ = (*p_v)[sample].gco_;
-                        xj2->head_ = (*p_v2)[sample].gco_;
-                    } else {
-                        // modify rest, maybe.
+                        uint32_t rhs_ix = (*p_rgen)() % n_obj;
 
-                        sample = (*p_rgen)() % n_obj;
-                        auto rhs = obj<AGCObject,DList>::from((*p_v)[sample].gco_);
-                        auto rhs2 = obj<AGCObject,DList>::from((*p_v2)[sample].gco_);
+                        auto rhs1 = (*p_v)[rhs_ix].gco_;
+                        auto rhs2 = (*p_v2)[rhs_ix].gco_;
 
-                        if (rhs) {
-                            // modify rest.  skip usual gc write-barrier stuff
-
-                            assert(rhs2);
-
-                            xj->rest_ = rhs.data();
-                            xj2->rest_ = rhs2.data();
+                        if (log) {
+                            log("replacing edge in random object graph");
+                            log(xtag("n-obj", n_obj));
+                            log(xtag("lhs-ix", lhs_ix));
+                            log(xtag("rhs-ix", rhs_ix));
+                            log(xtag("rhs.tname", TypeRegistry::id2name(rhs1._typeseq())));
                         }
+                            
+                        // rhs1 could even be xj1 itself (in which case rhs2 is xj2)
+                        xj1->head_ = rhs1;
+                        xj2->head_ = rhs2;
+                    } else {
+                        // don't modify DList.rest_, risks losing acyclic propertly.
+                        // GCObjectStore handles this, but DList.size() assumes
+                        // list is acyclic
                     }
                 }
             }
         } /*random_object_graph*/
     } /*namespace*/
 
+    namespace {
+        // aux functions specific to GCObjectStore-1 unit test below
+
+        void
+        gcos_install_test_types(const Testcase & tc,
+                                GCObjectStore * p_gcos)
+        {
+            // verify that GCOS recongnizes as registered,
+            // the types we intend using for unit test
+            
+            if (tc.do_type_registration_) {
+                {
+                    REQUIRE(p_gcos->install_type(impl_for<AGCObject,DBoolean>()));
+                    REQUIRE(p_gcos->is_type_installed(typeseq::id<DBoolean>()));
+                }
+                {
+                    REQUIRE(p_gcos->install_type(impl_for<AGCObject,DList>()));
+                    REQUIRE(p_gcos->is_type_installed(typeseq::id<DList>()));
+                }
+            }
+        }
+
+        void
+        gcos_verify_arena_partitioning(const Testcase & tc,
+                                       const GCObjectStore & gcos)
+        {
+            Generation g0{0};
+            Generation g1{1};
+            Generation gn{tc.n_gen_};
+
+            // verify basic arena partitioning + sizing
+
+            REQUIRE(g0 != g1);
+            REQUIRE(gcos.new_space());
+            REQUIRE(gcos.new_space() == gcos.get_space(Role::to_space(), g0));
+            REQUIRE(gcos.new_space()->reserved() >= tc.gc_size_);
+            REQUIRE(gcos.from_space(g0));
+
+            for (Generation gi = g1; gi < tc.n_gen_; ++gi) {
+                // all configured generations exist
+                REQUIRE(gcos.to_space(gi));
+                REQUIRE(gcos.from_space(gi));
+
+                // to- and from- space are distinct
+                REQUIRE(gcos.to_space(gi) != gcos.from_space(gi));
+
+                // arenas for different generations are distinct
+                for (Generation gj = g0; gj < gi; ++gj) {
+                    REQUIRE(gcos.to_space(gi) != gcos.to_space(gj));
+                    REQUIRE(gcos.from_space(gi) != gcos.to_space(gj));
+
+                    REQUIRE(gcos.to_space(gi) != gcos.from_space(gj));
+                    REQUIRE(gcos.from_space(gi) != gcos.to_space(gj));
+                }
+            }
+
+            // generations that weren't requested, don't exist
+            if (gn < c_max_generation) {
+                REQUIRE(!gcos.to_space(gn));
+                REQUIRE(!gcos.from_space(gn));
+            }
+        }
+    }
+
     TEST_CASE("GCObjectStore-1", "[GCObjectStore]")
     {
         constexpr bool c_debug_flag = true;
-        scope log(XO_DEBUG(c_debug_flag), "GCObjectStore test");
+        scope log0(XO_DEBUG(c_debug_flag), "GCObjectStore test");
 
         std::uint64_t seed = 12168164826603821466ul;
         //random_seed(&seed);
-        log && log(xtag("seed", seed));
-
-        auto rgen = xoshiro256ss(seed);
+        log0 && log0(xtag("seed", seed));
 
         for (size_t i_tc = 0, n_tc = s_testcase_v.size(); i_tc < n_tc; ++i_tc) {
+            // Loop iterations here are independent.
+            // Could execute test cases in any order
+
+            // deterministic seed choice for each testcase
+            // -> individual cases preserve rng behavior
+            // regardless of testcase order and/or subsetting
+            
+            auto rgen = xoshiro256ss(seed + i_tc);
+
             const Testcase & tc = s_testcase_v[i_tc];
+
+            scope log1(XO_DEBUG(tc.debug_flag_), "testcase loop", xtag("i_tc", i_tc));
 
             INFO(tostr(xtag("i_tc", i_tc), xtag("n_tc", n_tc)));
 
@@ -298,7 +427,7 @@ namespace ut {
                                             tc.n_gen_,
                                             tc.n_survive_,
                                             tc.object_type_z_,
-                                            c_debug_flag);
+                                            tc.debug_flag_);
 
             /** Parallel arena for reference
              *
@@ -330,64 +459,24 @@ namespace ut {
                               .with_store_header_flag(true));
             obj<AAllocator,DArena> error_mm(&error_arena);
 
+            X1VerifyStats verify_stats;
+
             // object type storage will be empty unless we install a type.
-            GCObjectStore gcos(gcos_config);
-
-            // scaffold mock collector doing incremental collection
-            DMockCollector mock_gc(&gcos, Generation{0});
-            auto mock_gc_visitor = mock_gc.ref<AGCObjectVisitor>();
-
-            REQUIRE(gcos.is_type_installed(typeseq::id<DList>()) == false);
-            REQUIRE(gcos.is_type_installed(typeseq::id<DBoolean>()) == false);
+            GCObjectStore gcos(gcos_config, &verify_stats);
 
             Generation g0{0};
             Generation g1{1};
             Generation gn{tc.n_gen_};
 
-            // install gc-aware types that we intend using in unit test
-            if (tc.do_type_registration_) {
-                {
-                    REQUIRE(gcos.install_type(impl_for<AGCObject,DBoolean>()));
-                    REQUIRE(gcos.is_type_installed(typeseq::id<DBoolean>()));
-                }
-                {
-                    REQUIRE(gcos.install_type(impl_for<AGCObject,DList>()));
-                    REQUIRE(gcos.is_type_installed(typeseq::id<DList>()));
-                }
-            }
+            // scaffold mock collector doing incremental collection
+            DMockCollector mock_gc(&gcos, g1);
+            auto mock_gc_visitor = mock_gc.ref<AGCObjectVisitor>();
 
-            // verify basic arena partitioning + sizing
-            {
-                REQUIRE(g0 != g1);
-                REQUIRE(gcos.new_space());
-                REQUIRE(gcos.new_space() == gcos.to_space(g0));
-                REQUIRE(gcos.new_space()->reserved() >= tc.gc_size_);
-                REQUIRE(gcos.from_space(g0));
+            REQUIRE(gcos.is_type_installed(typeseq::id<DList>()) == false);
+            REQUIRE(gcos.is_type_installed(typeseq::id<DBoolean>()) == false);
 
-                for (Generation gi = g1; gi < tc.n_gen_; ++gi) {
-                    // all configured generations exist
-                    REQUIRE(gcos.to_space(gi));
-                    REQUIRE(gcos.from_space(gi));
-
-                    // to- and from- space are distinct
-                    REQUIRE(gcos.to_space(gi) != gcos.from_space(gi));
-
-                    // arenas for different generations are distinct
-                    for (Generation gj = g0; gj < gi; ++gj) {
-                        REQUIRE(gcos.to_space(gi) != gcos.to_space(gj));
-                        REQUIRE(gcos.from_space(gi) != gcos.to_space(gj));
-
-                        REQUIRE(gcos.to_space(gi) != gcos.from_space(gj));
-                        REQUIRE(gcos.from_space(gi) != gcos.to_space(gj));
-                    }
-                }
-
-                // generations that weren't requested, don't exist
-                if (gn < c_max_generation) {
-                    REQUIRE(!gcos.to_space(gn));
-                    REQUIRE(!gcos.from_space(gn));
-                }
-            }
+            gcos_install_test_types(tc, &gcos);
+            gcos_verify_arena_partitioning(tc, gcos);
 
             // verify we have non-zero space!
             {
@@ -411,17 +500,45 @@ namespace ut {
             std::vector<Recd> x1_v;
             std::vector<Recd> x2_v;
             {
-                random_object_graph(tc.n_test_obj_,
-                                    tc.n_test_assign_,
-                                    &rgen,
-                                    &x1_v,
-                                    &gcos,
-                                    &x2_v,
-                                    &arena2);
+                switch (tc.obj_graph_type_) {
+                case TestGraphType::selfcycle:
+                    selfcycle_object_graph(&x1_v,
+                                           &gcos,
+                                           &x2_v,
+                                           &arena2);
+                    break;
+                case TestGraphType::random:
+                    random_object_graph(tc.n_test_obj_,
+                                        tc.n_test_assign_,
+                                        &rgen,
+                                        &x1_v,
+                                        &gcos,
+                                        &x2_v,
+                                        &arena2);
+                    break;
+                }
 
                 //x1_v.push_back(Recd(DBoolean::box(alloc, true),
                 //                    sizeof(DBoolean),
                 //                    typeseq::id<DBoolean>()));
+            }
+
+            log1 && log1("verify before any gcos side effects");
+
+            {
+                // traverses stored objects, updates counters
+                // in verify_stats (= gco.p_verify_stats_, via ctor)
+                //
+                gcos.verify_ok(mock_gc_visitor);
+
+                INFO(tostr(xtag("n_gc_root", verify_stats.n_gc_root_),
+                           xtag("n_ext", verify_stats.n_ext_),
+                           xtag("n_from", verify_stats.n_from_),
+                           xtag("n_to", verify_stats.n_to_),
+                           xtag("n_fwd", verify_stats.n_fwd_),
+                           xtag("n_no_iface", verify_stats.n_no_iface_)));
+
+                REQUIRE(verify_stats.is_ok());
             }
 
             // someday: print the graph. Need a cycle-detecting printer
@@ -502,7 +619,11 @@ namespace ut {
                 const auto & x1 = x1_v.at(i);
                 const auto & x2 = x2_v.at(i);
 
-                INFO(tostr(xtag("i", i), xtag("n", n), xtag("x1.tseq_", x1.tseq_)));
+                log1 && log1("moving roots");
+                log1 && log1(xtag("i", i),
+                           xtag("n", n),
+                           xtag("x1.tseq_", x1.tseq_),
+                           xtag("x1.tname", TypeRegistry::id2name(x1.tseq_)));
 
                 if (tc.do_type_registration_) {
 
@@ -532,18 +653,24 @@ namespace ut {
                     AGCObject * x1p_iface = gcos.lookup_type(x1.tseq_);
                     REQUIRE(x1p_iface);
 
-                    auto x1p_data = gcos.deep_move_root(mock_gc_visitor, x1.gco_, g1);
+                    obj<AGCObject> x1_gco = x1.gco_;
+
+                    // modifies x1.gco_ in place
+                    auto x1p_data = gcos.deep_move_root(mock_gc_visitor,
+                                                        x1p_iface, (void **)&(x1.gco_.data_),
+                                                        g1);
                     REQUIRE(x1p_data);
+                    REQUIRE(x1p_data == x1.gco_.data_);
 
                     obj<AGCObject> x1p_gco(x1p_iface, x1p_data);
 
-                    // obj has been replaced by forwarding pointer to obj2
+                    // obj (x1_gco) now forwarding pointer to x1p_gco = x1.gco_
                     {
-                        REQUIRE(gcos.contains_allocated(Role::from_space(), x1.gco_.data()));
-                        AllocInfo obj_info = gcos.alloc_info((std::byte *)x1.gco_.data());
+                        REQUIRE(gcos.contains_allocated(Role::from_space(), x1_gco.data()));
+                        AllocInfo obj_info = gcos.alloc_info((std::byte *)x1_gco.data());
                         REQUIRE(obj_info.size() >= x1.alloc_z_);
 
-                        REQUIRE(obj_info.payload().first == (std::byte *)x1.gco_.data());
+                        REQUIRE(obj_info.payload().first == (std::byte *)x1_gco.data());
                         REQUIRE(obj_info.is_forwarding_tseq());
                     }
 
@@ -612,7 +739,10 @@ namespace ut {
                     // but will fail since type isn't registered
 
                     auto x1p_data
-                        = gcos.deep_move_root(mock_gc_visitor, x1.gco_, g1);
+                        = gcos.deep_move_root(mock_gc_visitor,
+                                              x1.gco_.iface(),
+                                              (void **)&(x1.gco_.data_),
+                                              g1);
 
                     // control here under normal GC use
                     // would represent a configuration fail
@@ -625,22 +755,30 @@ namespace ut {
             // - deep_move_interior()   // used from MutationLogStore
             // - forward_inplace_aux()  // used from DX1Collector.visit_child
 
-            // - report_object_types
-            // - report_object_ages()
+            {
+                bool sanitize_flag = true;
 
-            bool sanitize_flag = true;
+                // swaps to- and from- spaces again
+                // Now from-space will be empty, all live objects in to-space
 
-            // swaps to- and from- spaces again
-            // Now from-space will be empty, all live objects in to-space
+                gcos.cleanup_phase(g1, sanitize_flag);
+            }
 
-            gcos.cleanup_phase(g1, sanitize_flag);
+            {
+                // traverses stored objects, updates counters
+                // in verify_stats (= gco.p_verify_stats_, via ctor)
+                //
+                gcos.verify_ok(mock_gc_visitor);
 
-#ifdef NOT_YET
-            gcos.verify_ok(xxx objectvisitor,
-                           xxx &verify_stats);
-#endif
+                INFO(tostr(xtag("n_gc_root", verify_stats.n_gc_root_),
+                           xtag("n_ext", verify_stats.n_ext_),
+                           xtag("n_from", verify_stats.n_from_),
+                           xtag("n_to", verify_stats.n_to_),
+                           xtag("n_fwd", verify_stats.n_fwd_),
+                           xtag("n_no_iface", verify_stats.n_no_iface_)));
 
-            // - verify_ok
+                REQUIRE(verify_stats.is_ok());
+            }
 
             {
                 obj<AGCObject> report_gco;
@@ -662,8 +800,8 @@ namespace ut {
                 bool ok = gcos.report_object_ages(report_mm, error_mm, &report_gco);
 
                 if (!ok) {
-                    log.retroactively_enable();
-                    log && log(xtag("error", report_mm.last_error()));
+                    log1.retroactively_enable();
+                    log1 && log1(xtag("error", report_mm.last_error()));
                 }
 
                 REQUIRE(ok);
@@ -671,11 +809,13 @@ namespace ut {
 
                 // TODO: print report_gco, verify output
 
+                // discard report
+                
                 report_gco.reset();
                 report_mm->clear();
             }
-        }
-    }
+        } /* loop over test cases */
+    } /* TEST_CASE(GCObjectStore-1) */
 
 } /*namespace ut*/
 

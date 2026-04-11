@@ -13,6 +13,7 @@
 #include <xo/stringtable2/String.hpp>
 
 #include <xo/arena/DArenaIterator.hpp>
+#include <xo/arena/backtrace.hpp>
 
 #include <xo/facet/TypeRegistry.hpp>
 #include <xo/indentlog/scope.hpp>
@@ -31,8 +32,9 @@ namespace xo {
 
     namespace mm {
 
-        GCObjectStore::GCObjectStore(const GCObjectStoreConfig & cfg)
-            : config_{cfg}
+        GCObjectStore::GCObjectStore(const GCObjectStoreConfig & cfg,
+                                     X1VerifyStats * p_verify_stats)
+        : config_{cfg}, p_verify_stats_{p_verify_stats}
         {
             assert(config_.arena_config_.header_.size_bits_ +
                    config_.arena_config_.header_.age_bits_ +
@@ -473,6 +475,36 @@ namespace xo {
             return (g < upto);
         }
 
+#ifdef NOT_YET
+        void
+        GCObjectStore::visit_child(VisitReason reason,
+                                   AGCObject * lhs_iface,
+                                   void ** lhs_data)
+        {
+            // MAYBE: adapter distinct from DX1Collector that supports GCObjectVisitor facet,
+            //        calls DX1Collector::_verify_aux()
+
+            switch (reason.code()) {
+            case VisitReason::code::forward:
+            {
+                Generation upto = runstate_.gc_upto();
+
+                // called during collection phase
+                this->forward_inplace_aux
+                    (this->ref<AGCObjectVisitor>(), lhs_iface, lhs_data, upto);
+                break;
+            }
+            case VisitReason::code::verify:
+                // called during verify_ok
+                gco_store_.verify_aux(lhs_iface, *lhs_data);
+                break;
+            default:
+                // should be unreachable
+                assert(false);
+            }
+        }
+#endif
+
         void
         GCObjectStore::forward_inplace_aux(obj<AGCObjectVisitor> gc,
                                            AGCObject * lhs_iface,
@@ -558,7 +590,9 @@ namespace xo {
              *
              * This is guaranteed anyway, by alignment rules
              */
-            assert(alloc_z >= sizeof(uintptr_t));
+            if (alloc_z < sizeof(uintptr_t)) {
+                assert(false);
+            }
 
             if (this->is_forwarding_header(alloc_hdr)) {
                 /* *lhs_data already refers to a forwarding pointer */
@@ -661,10 +695,9 @@ namespace xo {
 
         void
         GCObjectStore::verify_aux(AGCObject * iface,
-                                  void * data,
-                                  X1VerifyStats * p_verify_stats)
+                                  void * data)
         {
-            //scope log(XO_DEBUG(config_.debug_flag_), xtag("data", data));
+            scope log(XO_DEBUG(config_.debug_flag_));
 
             (void)iface;
 
@@ -678,14 +711,16 @@ namespace xo {
                 if (!g2.is_sentinel()) {
                     // verify failure - live pointer still refers to from-space
 
-                    ++(p_verify_stats->n_from_);
+                    print_backtrace_dwarf(true /*demangle*/);
+
+                    ++(p_verify_stats_->n_from_);
                 } else {
-                    ++(p_verify_stats->n_ext_);
+                    ++(p_verify_stats_->n_ext_);
                 }
             } else {
                 assert(this->contains(Role::to_space(), data));
 
-                ++(p_verify_stats->n_to_);
+                ++(p_verify_stats_->n_to_);
             }
         }
 
@@ -733,8 +768,7 @@ namespace xo {
         }
 
         void
-        GCObjectStore::verify_ok(obj<AGCObjectVisitor> gc,
-                                 X1VerifyStats * p_verify_stats) noexcept
+        GCObjectStore::verify_ok(obj<AGCObjectVisitor> gc) noexcept
         {
             for (Generation g(0); g < config_.n_generation_; ++g) {
                 const DArena * space = this->get_space(Role::to_space(), g);
@@ -742,7 +776,7 @@ namespace xo {
                 for (const AllocInfo & info : *space) {
 
                     if (info.is_forwarding_tseq()) {
-                        ++(p_verify_stats->n_fwd_);
+                        ++(p_verify_stats_->n_fwd_);
 
                     } else {
                         typeseq tseq(info.tseq());
@@ -755,15 +789,9 @@ namespace xo {
                             // assembled fop for gc-aware object
                             obj<AGCObject> gco(iface, const_cast<void *>(data));
 
-                            // forward_children is hijacked here to verify
-                            // child pointer validity.
-                            //
-                            // Nested control reenters
-                            // X1Collector::forward_inplace() -> _verify_aux()
-                            //
-                            gco.visit_gco_children(VisitReason::forward(), gc);
+                            gco.visit_gco_children(VisitReason::verify(), gc);
                         } else {
-                            ++(p_verify_stats->n_no_iface_);
+                            ++(p_verify_stats_->n_no_iface_);
                             continue;
                         }
                     }
@@ -803,7 +831,8 @@ namespace xo {
 
         void *
         GCObjectStore::deep_move_root(obj<AGCObjectVisitor> gc,
-                                      obj<AGCObject> from_src,
+                                      const AGCObject * root_iface,
+                                      void ** root_data,
                                       Generation upto)
         {
             // NOTE:
@@ -815,22 +844,23 @@ namespace xo {
 
             scope log(XO_DEBUG(config_.debug_flag_));
 
-            if (!from_src)
+            if (!root_data || !*root_data)
                 return nullptr;
 
-            bool src_in_from_space = this->contains(Role::from_space(),
-                                                    from_src.data());
+            bool src_in_from_space = this->contains(Role::from_space(), *root_data);
 
             if (src_in_from_space) {
-                return this->_deep_move_gc_owned(gc, from_src.data(), upto);
+                *root_data = this->_deep_move_gc_owned(gc, *root_data, upto);
             } else {
                 // we aren't moving from_src, it's not gc-owned.
-                // However weare moving all its gc-owned children
+                // However we are moving all its gc-owned children
 
                 GCMoveCheckpoint gray_lo_v
                     = this->snap_move_checkpoint(upto);
 
-                from_src.visit_gco_children(VisitReason::forward(), gc);
+                auto root = obj<AGCObject>(root_iface, *root_data);
+
+                root.visit_gco_children(VisitReason::forward(), gc);
 
                 // For each generation g:
                 //   traverse objects newer than gray_lo_v[g], to make sure children
@@ -840,8 +870,11 @@ namespace xo {
                 //
                 this->_forward_children_until_fixpoint(gc, upto, gray_lo_v);
 
-                return from_src.data();
+                // reminder: *root_data preserved
+
             }
+            
+            return *root_data;
         }
 
         void *
