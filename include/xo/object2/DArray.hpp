@@ -111,9 +111,15 @@ namespace xo {
             bool assign_at(size_type index, obj<AGCObject> elt) noexcept;
 
             /** append @p elt at the end of array.
-             *  true on success, false otherwise
+             *  true on success, false otherwise.
+             *  on failure array is unaltered
              **/
             bool push_back(obj<AGCObject> elt) noexcept;
+
+            /** store last element in array into @p elt and decrement array size.
+             *  true on success; false on failure (implies array was empty)
+             **/
+            bool pop_back(obj<AGCObject> * p_elt = nullptr) noexcept;
 
             ///@}
             /** @defgroup darray-general general methods **/
