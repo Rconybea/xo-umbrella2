@@ -212,6 +212,15 @@ namespace xo {
             ///@}
 
         private:
+            /** @defgroup ddictionary-impl-methods implementation methods **/
+            ///@{
+            /** append {key, value} pair @p kv_pair to this dictionary
+             *  Require: @p kv_pair.first not already present in @ref keys_
+             **/
+            bool _append_kv_aux(const pair_type & kv_pair);
+            ///@}
+
+        private:
             /** @defgroup ddictionary-instance-variables instance variables **/
             ///@{
 
