@@ -389,94 +389,15 @@ namespace ut {
                 REQUIRE(!gcos.from_space(gn));
             }
         }
-    }
 
-    TEST_CASE("GCObjectStore-1", "[GCObjectStore]")
-    {
-        constexpr bool c_debug_flag = true;
-        scope log0(XO_DEBUG(c_debug_flag), "GCObjectStore test");
-
-        std::uint64_t seed = 12168164826603821466ul;
-        //random_seed(&seed);
-        log0 && log0(xtag("seed", seed));
-
-        for (size_t i_tc = 0, n_tc = s_testcase_v.size(); i_tc < n_tc; ++i_tc) {
-            // Loop iterations here are independent.
-            // Could execute test cases in any order
-
-            // deterministic seed choice for each testcase
-            // -> individual cases preserve rng behavior
-            // regardless of testcase order and/or subsetting
-            
-            auto rgen = xoshiro256ss(seed + i_tc);
-
-            const Testcase & tc = s_testcase_v[i_tc];
-
-            scope log1(XO_DEBUG(tc.debug_flag_), "testcase loop", xtag("i_tc", i_tc));
-
-            INFO(tostr(xtag("i_tc", i_tc), xtag("n_tc", n_tc)));
-
-            /** config for each half-space **/
-            ArenaConfig arena_config
-                = (ArenaConfig()
-                   .with_name("arena-name-not-used")
-                   .with_size(tc.gc_size_)
-                   .with_store_header_flag(true));
-
-            GCObjectStoreConfig gcos_config(arena_config,
-                                            tc.n_gen_,
-                                            tc.n_survive_,
-                                            tc.object_type_z_,
-                                            tc.debug_flag_);
-
-            /** Parallel arena for reference
-             *
-             *  We will allocate parallel object model in this arena
-             *  for reference; then compare with GCObjectStore behavior.
-             *
-             *  1. arena2 doesn't have any generation layer cake stuff
-             *  2. arena2 doesn't have concept of installed types.
-             *     It doesn't have or require any builtin ability to traverse an object model
-             **/
-            DArena arena2
-                = DArena::map(ArenaConfig().with_name("arena2-reference")
-                              .with_size(tc.gc_size_ * tc.n_gen_)
-                              .with_store_header_flag(true));
-
-            /** Arena for holding report output:
-             *  See GCObjectStore methods .report_object_types(), .report_object_ages()
-             **/
-            DArena report_arena
-                = DArena::map(ArenaConfig().with_name("report-arena")
-                              .with_size(tc.report_size_)
-                              .with_store_header_flag(true));
-            obj<AAllocator,DArena> report_mm(&report_arena);
-
-            /** Arena for holding error messages **/
-            DArena error_arena
-                = DArena::map(ArenaConfig().with_name("error-arena")
-                              .with_size(tc.error_size_)
-                              .with_store_header_flag(true));
-            obj<AAllocator,DArena> error_mm(&error_arena);
-
-            X1VerifyStats verify_stats;
-
-            // object type storage will be empty unless we install a type.
-            GCObjectStore gcos(gcos_config, &verify_stats);
-
+        void
+        gcos_verify_vacant(const Testcase & tc,
+                           const GCObjectStore & gcos)
+        {
             Generation g0{0};
-            Generation g1{1};
+            //Generation g1{1};
             Generation gn{tc.n_gen_};
 
-            // scaffold mock collector doing incremental collection
-            DMockCollector mock_gc(&gcos, g1);
-            auto mock_gc_visitor = mock_gc.ref<AGCObjectVisitor>();
-
-            REQUIRE(gcos.is_type_installed(typeseq::id<DList>()) == false);
-            REQUIRE(gcos.is_type_installed(typeseq::id<DBoolean>()) == false);
-
-            gcos_install_test_types(tc, &gcos);
-            gcos_verify_arena_partitioning(tc, gcos);
 
             // verify we have non-zero space!
             {
@@ -490,60 +411,65 @@ namespace ut {
                     REQUIRE(gcos.from_space(gi)->reserved() >= tc.gc_size_);
                 }
             }
+        }
 
-            // allocator api
-            auto alloc = obj<AAllocator,DArena>(gcos.new_space());
-
-            // create object(s).
-            // details depend on test case
-
-            std::vector<Recd> x1_v;
-            std::vector<Recd> x2_v;
-            {
-                switch (tc.obj_graph_type_) {
-                case TestGraphType::selfcycle:
-                    selfcycle_object_graph(&x1_v,
-                                           &gcos,
-                                           &x2_v,
-                                           &arena2);
-                    break;
-                case TestGraphType::random:
-                    random_object_graph(tc.n_test_obj_,
-                                        tc.n_test_assign_,
-                                        &rgen,
-                                        &x1_v,
-                                        &gcos,
-                                        &x2_v,
-                                        &arena2);
-                    break;
-                }
-
-                //x1_v.push_back(Recd(DBoolean::box(alloc, true),
-                //                    sizeof(DBoolean),
-                //                    typeseq::id<DBoolean>()));
+        void
+        gcos_construct_ab_object_graphs(const Testcase & tc,
+                                        GCObjectStore * p_gcos,
+                                        DArena * p_arena2,
+                                        std::vector<Recd> * p_x1_v,
+                                        std::vector<Recd> * p_x2_v,
+                                        xoshiro256ss * p_rgen)
+        {
+            switch (tc.obj_graph_type_) {
+            case TestGraphType::selfcycle:
+                selfcycle_object_graph(p_x1_v,
+                                       p_gcos,
+                                       p_x2_v,
+                                       p_arena2);
+                break;
+            case TestGraphType::random:
+                random_object_graph(tc.n_test_obj_,
+                                    tc.n_test_assign_,
+                                    p_rgen,
+                                    p_x1_v,
+                                    p_gcos,
+                                    p_x2_v,
+                                    p_arena2);
+                break;
             }
 
-            log1 && log1("verify before any gcos side effects");
+            //x1_v.push_back(Recd(DBoolean::box(alloc, true),
+            //                    sizeof(DBoolean),
+            //                    typeseq::id<DBoolean>()));
+        }
 
-            {
-                // traverses stored objects, updates counters
-                // in verify_stats (= gco.p_verify_stats_, via ctor)
-                //
-                gcos.verify_ok(mock_gc_visitor);
+        void
+        gcos_verify_consistency(obj<AGCObjectVisitor> mock_gc_visitor,
+                                GCObjectStore * p_gcos,
+                                const X1VerifyStats & verify_stats)
+        {
+            // traverses stored objects, updates counters
+            // in verify_stats (= gco.p_verify_stats_, via ctor)
+            //
+            p_gcos->verify_ok(mock_gc_visitor);
 
-                INFO(tostr(xtag("n_gc_root", verify_stats.n_gc_root_),
-                           xtag("n_ext", verify_stats.n_ext_),
-                           xtag("n_from", verify_stats.n_from_),
-                           xtag("n_to", verify_stats.n_to_),
-                           xtag("n_fwd", verify_stats.n_fwd_),
-                           xtag("n_no_iface", verify_stats.n_no_iface_)));
+            INFO(tostr(xtag("n_gc_root", verify_stats.n_gc_root_),
+                       xtag("n_ext", verify_stats.n_ext_),
+                       xtag("n_from", verify_stats.n_from_),
+                       xtag("n_to", verify_stats.n_to_),
+                       xtag("n_fwd", verify_stats.n_fwd_),
+                       xtag("n_no_iface", verify_stats.n_no_iface_)));
 
-                REQUIRE(verify_stats.is_ok());
-            }
+            REQUIRE(verify_stats.is_ok());
+        }
 
-            // someday: print the graph. Need a cycle-detecting printer
-
+        void
+        gcos_verify_ab_equivalence(const std::vector<Recd> & x1_v,
+                                   const std::vector<Recd> & x2_v)
+        {
             REQUIRE(x1_v.size() == x2_v.size());
+
             for (size_t i = 0, n = x1_v.size(); i < n; ++i) {
                 REQUIRE(x1_v[i].alloc_z_ == x2_v[i].alloc_z_);
                 REQUIRE(x1_v[i].tseq_ == x2_v[i].tseq_);
@@ -551,7 +477,12 @@ namespace ut {
                 REQUIRE(x1_v[i].gco_._typeseq() == x1_v[i].tseq_);
                 REQUIRE(x2_v[i].gco_._typeseq() == x2_v[i].tseq_);
             }
+        }
 
+        void
+        gcos_verify_allocinfo(const GCObjectStore & gcos,
+                              const std::vector<Recd> & x1_v)
+        {
             // gcos can reveal info about allocs
             for (size_t i = 0, n = x1_v.size(); i < n; ++i)
             {
@@ -570,6 +501,15 @@ namespace ut {
                 REQUIRE(gcos.header2tseq(obj_info.header()) == obj_info.tseq());
                 REQUIRE(gcos.is_forwarding_header(obj_info.header()) == false);
             }
+        }
+
+        void
+        gcos_verify_gen0_only_allocated(const Testcase & tc,
+                                        const GCObjectStore & gcos,
+                                        const std::vector<Recd> & x1_v)
+        {
+            Generation g0{0};
+            Generation gn{tc.n_gen_};
 
             // new objects appear in to-space for generation 0
             for (Generation gi = g0; gi < gn; ++gi) {
@@ -582,34 +522,127 @@ namespace ut {
 
                 REQUIRE(gcos.from_space(gi)->allocated() == 0);
             }
+        }
 
-            // swap_roles [but only for generation < g1, i.e. g0
+        void
+        gcos_verify_gen0_fromspace_only_allocated(const Testcase & tc,
+                                                  const GCObjectStore & gcos,
+                                                  const std::vector<Recd> & x1_v)
+        {
+            for (size_t i = 0, n = x1_v.size(); i < n; ++i) {
+                const auto & x1 = x1_v.at(i);
+
+                REQUIRE(gcos.contains(Role::from_space(), x1.gco_.data()));
+                REQUIRE(gcos.contains_allocated(Role::from_space(), x1.gco_.data()));
+                AllocInfo obj_info = gcos.alloc_info((std::byte *)x1.gco_.data());
+                REQUIRE(obj_info.size() >= x1.alloc_z_);
+
+                REQUIRE(obj_info.payload().first == (std::byte *)x1.gco_.data());
+                REQUIRE(obj_info.tseq() == x1.tseq_.seqno());
+
+                Generation g0{0};
+                Generation gn{tc.n_gen_};
+
+                for (Generation gi = g0; gi < gn; ++gi) {
+                    INFO(tostr(xtag("gi", gi)));
+
+                    if (gi == 0)
+                        REQUIRE(gcos.from_space(gi)->allocated() > 0);
+                    else
+                        REQUIRE(gcos.from_space(gi)->allocated() == 0);
+
+                    REQUIRE(gcos.to_space(gi)->allocated() == 0);
+                }
+            }
+        }
+
+        void
+        gcos_verify_forwarding(const GCObjectStore & gcos,
+                               const Recd & x1,
+                               obj<AGCObject> x1_gco)
+        {
+            REQUIRE(gcos.contains_allocated(Role::from_space(), x1_gco.data()));
+            AllocInfo obj_info = gcos.alloc_info((std::byte *)x1_gco.data());
+            REQUIRE(obj_info.size() >= x1.alloc_z_);
+
+            REQUIRE(obj_info.payload().first == (std::byte *)x1_gco.data());
+            REQUIRE(obj_info.is_forwarding_tseq());
+        }
+
+        void
+        gcos_verify_forwarding_destination(const GCObjectStore & gcos,
+                                           const Recd & x1,
+                                           obj<AGCObject> x1p_gco)
+        {
+            REQUIRE(gcos.contains_allocated(Role::to_space(), x1p_gco.data()));
+            AllocInfo obj1p_info = gcos.alloc_info((std::byte *)x1p_gco.data());
+            REQUIRE(obj1p_info.size() >= x1.alloc_z_);
+
+            REQUIRE(obj1p_info.payload().first == (std::byte *)x1p_gco.data());
+            REQUIRE(obj1p_info.tseq() == x1.tseq_.seqno());
+
+            REQUIRE(x1p_gco.data() != nullptr);
+            REQUIRE(gcos.contains(Role::to_space(), x1p_gco.data()));
+            REQUIRE(gcos.contains_allocated(Role::to_space(), x1p_gco.data()));
+        }
+
+        void
+        gcos_verify_forwarded_ab_equivalence(obj<AGCObject> x1p_gco,
+                                             obj<AGCObject> x2_gco)
+        {
+            // written out polymorphic comparison
+
+            // match DBoolean..
+            bool match_attempted = false;
             {
-                gcos.swap_roles(g1);
+                auto x1p_b = obj<AGCObject,DBoolean>::from(x1p_gco);
+                auto x2_b = obj<AGCObject,DBoolean>::from(x2_gco);
 
-                for (size_t i = 0, n = x1_v.size(); i < n; ++i) {
-                    const auto & x1 = x1_v.at(i);
+                if (x1p_b && x2_b) {
+                    match_attempted = true;
 
-                    REQUIRE(gcos.contains(Role::from_space(), x1.gco_.data()));
-                    REQUIRE(gcos.contains_allocated(Role::from_space(), x1.gco_.data()));
-                    AllocInfo obj_info = gcos.alloc_info((std::byte *)x1.gco_.data());
-                    REQUIRE(obj_info.size() >= x1.alloc_z_);
+                    REQUIRE(x1p_b->value() == x2_b->value());
+                }
+            }
 
-                    REQUIRE(obj_info.payload().first == (std::byte *)x1.gco_.data());
-                    REQUIRE(obj_info.tseq() == x1.tseq_.seqno());
+            // match DList..
+            {
+                auto x1p_b = obj<AGCObject,DList>::from(x1p_gco);
+                auto x2_b = obj<AGCObject,DList>::from(x2_gco);
 
-                    for (Generation gi = g0; gi < gn; ++gi) {
-                        INFO(tostr(xtag("gi", gi)));
+                if (x1p_b && x2_b) {
+                    match_attempted = true;
 
-                        if (gi == 0)
-                            REQUIRE(gcos.from_space(gi)->allocated() > 0);
-                        else
-                            REQUIRE(gcos.from_space(gi)->allocated() == 0);
+                    // TODO: we could figure out the index in {x1_v[], x2_v[]}
+                    //       of x*_b {head, rest} respectively,
+                    //       and verify they're consistent.
 
-                        REQUIRE(gcos.to_space(gi)->allocated() == 0);
+                    REQUIRE(x1p_b->head()._typeseq() == x2_b->head()._typeseq());
+                    REQUIRE(x1p_b->size() == x2_b->size());
+
+                    if (x1p_b->rest()) {
+                        REQUIRE(x2_b->rest());
+                    } else {
+                        // unreachable, since using sentinel objectd for nil list
+                        REQUIRE(x2_b->rest() == nullptr);
                     }
                 }
             }
+
+            REQUIRE(match_attempted);
+        }
+
+        void
+        gcos_move_roots_and_verify(const Testcase & tc,
+                                   GCObjectStore * p_gcos,
+                                   obj<AGCObjectVisitor> mock_gc_visitor,
+                                   const std::vector<Recd> & x1_v,
+                                   const std::vector<Recd> & x2_v,
+                                   bool debug_flag)
+        {
+            scope log(XO_DEBUG(debug_flag));
+
+            Generation g1{1};
 
             // try moving everything to to-space.
             // For this to week we must have registered the type,
@@ -619,8 +652,8 @@ namespace ut {
                 const auto & x1 = x1_v.at(i);
                 const auto & x2 = x2_v.at(i);
 
-                log1 && log1("moving roots");
-                log1 && log1(xtag("i", i),
+                log && log("moving roots");
+                log && log(xtag("i", i),
                            xtag("n", n),
                            xtag("x1.tseq_", x1.tseq_),
                            xtag("x1.tname", TypeRegistry::id2name(x1.tseq_)));
@@ -650,99 +683,40 @@ namespace ut {
                     // it's possible that x1.gco_ is already a forwarding pointer
                     // before we call deep_move_root().
 
-                    AGCObject * x1p_iface = gcos.lookup_type(x1.tseq_);
+                    AGCObject * x1p_iface = p_gcos->lookup_type(x1.tseq_);
                     REQUIRE(x1p_iface);
 
+                    // snapshot root before moving
                     obj<AGCObject> x1_gco = x1.gco_;
 
                     // modifies x1.gco_ in place
-                    auto x1p_data = gcos.deep_move_root(mock_gc_visitor,
-                                                        x1p_iface, (void **)&(x1.gco_.data_),
-                                                        g1);
+                    auto x1p_data = p_gcos->deep_move_root(mock_gc_visitor,
+                                                           x1p_iface, (void **)&(x1.gco_.data_),
+                                                           g1);
                     REQUIRE(x1p_data);
                     REQUIRE(x1p_data == x1.gco_.data_);
 
                     obj<AGCObject> x1p_gco(x1p_iface, x1p_data);
 
-                    // obj (x1_gco) now forwarding pointer to x1p_gco = x1.gco_
-                    {
-                        REQUIRE(gcos.contains_allocated(Role::from_space(), x1_gco.data()));
-                        AllocInfo obj_info = gcos.alloc_info((std::byte *)x1_gco.data());
-                        REQUIRE(obj_info.size() >= x1.alloc_z_);
-
-                        REQUIRE(obj_info.payload().first == (std::byte *)x1_gco.data());
-                        REQUIRE(obj_info.is_forwarding_tseq());
-                    }
+                    // obj (x1_gco) now forwarding pointer (to x1p_gco = x1.gco_)
+                    gcos_verify_forwarding(*p_gcos, x1, x1_gco);
 
                     // obj1p same contents as original obj
-                    {
-                        REQUIRE(gcos.contains_allocated(Role::to_space(), x1p_gco.data()));
-                        AllocInfo obj1p_info = gcos.alloc_info((std::byte *)x1p_gco.data());
-                        REQUIRE(obj1p_info.size() >= x1.alloc_z_);
-
-                        REQUIRE(obj1p_info.payload().first == (std::byte *)x1p_gco.data());
-                        REQUIRE(obj1p_info.tseq() == x1.tseq_.seqno());
-                    }
-
-                    REQUIRE(x1p_gco.data() != nullptr);
-                    REQUIRE(gcos.contains(Role::to_space(), x1p_gco.data()));
-                    REQUIRE(gcos.contains_allocated(Role::to_space(), x1p_gco.data()));
+                    gcos_verify_forwarding_destination(*p_gcos, x1, x1p_gco);
 
                     // x1p_gco must look like x2.gco
-
                     REQUIRE(x1p_gco._typeseq() == x2.gco_._typeseq());
 
-                    // written out polymorphic comparison
-                    {
-                        // match DBoolean..
-                        bool match_attempted = false;
-                        {
-                            auto x1p_b = obj<AGCObject,DBoolean>::from(x1p_gco);
-                            auto x2_b = obj<AGCObject,DBoolean>::from(x2.gco_);
-
-                            if (x1p_b && x2_b) {
-                                match_attempted = true;
-
-                                REQUIRE(x1p_b->value() == x2_b->value());
-                            }
-                        }
-
-                        // match DList..
-                        {
-                            auto x1p_b = obj<AGCObject,DList>::from(x1p_gco);
-                            auto x2_b = obj<AGCObject,DList>::from(x2.gco_);
-
-                            if (x1p_b && x2_b) {
-                                match_attempted = true;
-
-                                // TODO: we could figure out the index in {x1_v[], x2_v[]}
-                                //       of x*_b {head, rest} respectively,
-                                //       and verify they're consistent.
-
-                                REQUIRE(x1p_b->head()._typeseq() == x2_b->head()._typeseq());
-                                REQUIRE(x1p_b->size() == x2_b->size());
-
-                                if (x1p_b->rest()) {
-                                    REQUIRE(x2_b->rest());
-                                } else {
-                                    // unreachable, since using sentinel objectd for nil list
-                                    REQUIRE(x2_b->rest() == nullptr);
-                                }
-                            }
-                        }
-
-                        REQUIRE(match_attempted);
-                    }
-
+                    gcos_verify_forwarded_ab_equivalence(x1p_gco, x2.gco_);
                 } else {
                     // can still try to move something.
                     // but will fail since type isn't registered
 
                     auto x1p_data
-                        = gcos.deep_move_root(mock_gc_visitor,
-                                              x1.gco_.iface(),
-                                              (void **)&(x1.gco_.data_),
-                                              g1);
+                        = p_gcos->deep_move_root(mock_gc_visitor,
+                                                 x1.gco_.iface(),
+                                                 (void **)&(x1.gco_.data_),
+                                                 g1);
 
                     // control here under normal GC use
                     // would represent a configuration fail
@@ -750,6 +724,134 @@ namespace ut {
                     REQUIRE(x1p_data == nullptr);
                 }
             }
+        }
+
+        // fixture for GCObjectStore-1 test
+        class GcosFixture {
+        public:
+            explicit GcosFixture(const Testcase & tc);
+
+            GCObjectStoreConfig gcos_config_;
+
+            /** Parallel arena for reference
+             *
+             *  We will allocate parallel object model in this arena
+             *  for reference; then compare with GCObjectStore behavior.
+             *
+             *  1. arena2 doesn't have any generation layer cake stuff
+             *  2. arena2 doesn't have concept of installed types.
+             *     It doesn't have or require any builtin ability to traverse an object model
+             **/
+            DArena arena2_;
+            /** Arena for holding report output:
+             *  See GCObjectStore methods .report_object_types(), .report_object_ages()
+             **/
+            DArena report_arena_;
+            /** Arena for holding error messages **/
+            DArena error_arena_;
+        };
+
+        GcosFixture::GcosFixture(const Testcase & tc)
+        : gcos_config_{ArenaConfig()
+                       .with_name("gcos-fixture-arena-name-notused")
+                       .with_size(tc.gc_size_)
+                       .with_store_header_flag(true),
+                       tc.n_gen_,
+                       tc.n_survive_,
+                       tc.object_type_z_,
+                       tc.debug_flag_},
+          arena2_{DArena::map(ArenaConfig().with_name("arena2-ref")
+                              .with_size(tc.gc_size_ * tc.n_gen_)
+                              .with_store_header_flag(true))},
+          report_arena_{DArena::map(ArenaConfig().with_name("report-arena")
+                                    .with_size(tc.report_size_)
+                                    .with_store_header_flag(true))},
+          error_arena_{DArena::map(ArenaConfig().with_name("error-arena")
+                                   .with_size(tc.error_size_)
+                                   .with_store_header_flag(true))}
+        {}
+        
+    }
+
+    TEST_CASE("GCObjectStore-1", "[GCObjectStore]")
+    {
+        constexpr bool c_debug_flag = true;
+        scope log0(XO_DEBUG(c_debug_flag), "GCObjectStore test");
+
+        std::uint64_t seed = 12168164826603821466ul;
+        //random_seed(&seed);
+        log0 && log0(xtag("seed", seed));
+
+        for (size_t i_tc = 0, n_tc = s_testcase_v.size(); i_tc < n_tc; ++i_tc) {
+            // Loop iterations here are independent.
+            // Could execute test cases in any order
+
+            // deterministic seed choice for each testcase
+            // -> individual cases preserve rng behavior
+            // regardless of testcase order and/or subsetting
+            
+            auto rgen = xoshiro256ss(seed + i_tc);
+
+            const Testcase & tc = s_testcase_v[i_tc];
+
+            scope log1(XO_DEBUG(tc.debug_flag_), "testcase loop", xtag("i_tc", i_tc));
+
+            INFO(tostr(xtag("i_tc", i_tc), xtag("n_tc", n_tc)));
+
+            GcosFixture fixture(tc);
+
+            obj<AAllocator,DArena> report_mm(&fixture.report_arena_);
+            obj<AAllocator,DArena> error_mm(&fixture.error_arena_);
+
+            X1VerifyStats verify_stats;
+
+            // object type storage will be empty unless we install a type.
+            GCObjectStore gcos(fixture.gcos_config_, &verify_stats);
+
+            Generation g0{0};
+            Generation g1{1};
+            Generation gn{tc.n_gen_};
+
+            // scaffold mock collector doing incremental collection
+            DMockCollector mock_gc(&gcos, g1);
+            auto mock_gc_visitor = mock_gc.ref<AGCObjectVisitor>();
+
+            REQUIRE(gcos.is_type_installed(typeseq::id<DList>()) == false);
+            REQUIRE(gcos.is_type_installed(typeseq::id<DBoolean>()) == false);
+
+            gcos_install_test_types(tc, &gcos);
+            gcos_verify_arena_partitioning(tc, gcos);
+            gcos_verify_vacant(tc, gcos);
+
+            // allocator api
+            auto alloc = obj<AAllocator,DArena>(gcos.new_space());
+
+            // create object(s).
+            // details depend on test case
+
+            std::vector<Recd> x1_v;
+            std::vector<Recd> x2_v;
+
+            gcos_construct_ab_object_graphs(tc, &gcos, &fixture.arena2_, &x1_v, &x2_v, &rgen);
+
+            log1 && log1("verify before any gcos side effects");
+
+            gcos_verify_consistency(mock_gc_visitor,
+                                    &gcos,
+                                    verify_stats);
+
+            // someday: print the graph. Need a cycle-detecting printer
+
+            gcos_verify_ab_equivalence(x1_v, x2_v);
+            gcos_verify_allocinfo(gcos, x1_v);
+            gcos_verify_gen0_only_allocated(tc, gcos, x1_v);
+
+            // swap_roles [but only for generation < g1, i.e. g0
+            gcos.swap_roles(g1);
+
+            gcos_verify_gen0_fromspace_only_allocated(tc, gcos, x1_v);
+
+            gcos_move_roots_and_verify(tc, &gcos, mock_gc_visitor, x1_v, x2_v, tc.debug_flag_);
 
             // Things to test:
             // - deep_move_interior()   // used from MutationLogStore
