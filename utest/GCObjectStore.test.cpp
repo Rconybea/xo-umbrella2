@@ -753,6 +753,9 @@ namespace ut {
             DArena report_arena_;
             /** Arena for holding error messages **/
             DArena error_arena_;
+
+            /** statistics collected by GCObjectStore.verify_ok() **/
+            X1VerifyStats verify_stats_;
         };
 
         GcosFixture::GcosFixture(const Testcase & tc)
@@ -807,10 +810,8 @@ namespace ut {
             obj<AAllocator,DArena> report_mm(&fixture.report_arena_);
             obj<AAllocator,DArena> error_mm(&fixture.error_arena_);
 
-            X1VerifyStats verify_stats;
-
             // object type storage will be empty unless we install a type.
-            GCObjectStore gcos(fixture.gcos_config_, &verify_stats);
+            GCObjectStore gcos(fixture.gcos_config_, &fixture.verify_stats_);
 
             REQUIRE(gcos.is_type_installed(typeseq::id<DList>()) == false);
             REQUIRE(gcos.is_type_installed(typeseq::id<DBoolean>()) == false);
@@ -863,14 +864,14 @@ namespace ut {
                 //
                 gcos.verify_ok();
 
-                INFO(tostr(xtag("n_gc_root", verify_stats.n_gc_root_),
-                           xtag("n_ext", verify_stats.n_ext_),
-                           xtag("n_from", verify_stats.n_from_),
-                           xtag("n_to", verify_stats.n_to_),
-                           xtag("n_fwd", verify_stats.n_fwd_),
-                           xtag("n_no_iface", verify_stats.n_no_iface_)));
+                INFO(tostr(xtag("n_gc_root", fixture.verify_stats_.n_gc_root_),
+                           xtag("n_ext", fixture.verify_stats_.n_ext_),
+                           xtag("n_from", fixture.verify_stats_.n_from_),
+                           xtag("n_to", fixture.verify_stats_.n_to_),
+                           xtag("n_fwd", fixture.verify_stats_.n_fwd_),
+                           xtag("n_no_iface", fixture.verify_stats_.n_no_iface_)));
 
-                REQUIRE(verify_stats.is_ok());
+                REQUIRE(fixture.verify_stats_.is_ok());
             }
 
             {
