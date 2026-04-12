@@ -949,6 +949,9 @@ namespace ut {
 
                 gcos_construct_ab_object_graphs(tc, &gcos, &fixture.arena2_, loop_index, &x1_v, &x2_v, &rgen);
 
+                // no allocation errors
+                REQUIRE(gcos.last_error().error_ == xo::mm::error::ok);
+
                 log1 && log1("verify before any gcos side effects");
 
                 gcos_verify_consistency(&gcos);
