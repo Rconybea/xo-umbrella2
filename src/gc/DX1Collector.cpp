@@ -587,19 +587,6 @@ namespace xo {
             }
         }
 
-        void
-        DX1Collector::visit_child(VisitReason reason,
-                                  AGCObject * lhs_iface,
-                                  void ** lhs_data)
-        {
-            // MAYBE: adapter distinct from DX1Collector that supports GCObjectVisitor facet,
-            //        calls DX1Collector::_verify_aux()
-
-            Generation upto = runstate_.gc_upto();
-
-            gco_store_.visit_child_aux(reason, lhs_iface, lhs_data, upto);
-        }
-
         auto
         DX1Collector::alloc(typeseq t, size_type z) noexcept -> value_type
         {

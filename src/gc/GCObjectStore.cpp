@@ -477,38 +477,10 @@ namespace xo {
         }
 
         void
-        GCObjectStore::visit_child_aux(VisitReason reason,
-                                       AGCObject * lhs_iface,
-                                       void ** lhs_data,
-                                       Generation upto)
-        {
-            switch (reason.code()) {
-            case VisitReason::code::forward:
-            {
-                DGCObjectStoreVisitor gcos_visitor(this, upto);
-                auto gcos_visitor_obj
-                    = obj<AGCObjectVisitor,DGCObjectStoreVisitor>(&gcos_visitor);
-
-                // called during collection phase
-                this->forward_inplace_aux
-                    (gcos_visitor_obj, lhs_iface, lhs_data, upto);
-                break;
-            }
-            case VisitReason::code::verify:
-                // called during verify_ok
-                this->verify_aux(lhs_iface, *lhs_data);
-                break;
-            default:
-                // should be unreachable
-                assert(false);
-            }
-        }
-
-        void
-        GCObjectStore::forward_inplace_aux(obj<AGCObjectVisitor> gc,
-                                           AGCObject * lhs_iface,
-                                           void ** lhs_data,
-                                           Generation upto)
+        GCObjectStore::_forward_inplace_aux(obj<AGCObjectVisitor> gc,
+                                            AGCObject * lhs_iface,
+                                            void ** lhs_data,
+                                            Generation upto)
         {
             // upto == runstate_.gc_upto()
 
@@ -693,7 +665,7 @@ namespace xo {
         } /*_forward_inplace_aux*/
 
         void
-        GCObjectStore::verify_aux(AGCObject * iface,
+        GCObjectStore::_verify_aux(AGCObject * iface,
                                   void * data)
         {
             scope log(XO_DEBUG(config_.debug_flag_));
