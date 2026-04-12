@@ -60,10 +60,12 @@ public:
     /** destroy instance @p d; calls c++ dtor only for actual runtime type; does not recover memory **/
     virtual void _drop(Opaque d) const noexcept = 0;
     /** allocation metadata for gc-aware data at address @p gco.
-@p gco must be the result of a call to collector's alloc() function **/
+@p gco must be the result of a call to collector's alloc() function
+note: load-bearing for xo-gc/MutationLogStore **/
     virtual AllocInfo alloc_info(Copaque data, void * addr)  const = 0;
     /** generation to which pointer @p addr belongs, given role @p r;
-sentinel if @p addr is not owned by collector **/
+sentinel if @p addr is not owned by collector.
+note: load-bearing for xo-gc/MutationLogStore **/
     virtual Generation generation_of(Copaque data, Role r, const void * addr)  const  noexcept = 0;
 
     // nonconst methods

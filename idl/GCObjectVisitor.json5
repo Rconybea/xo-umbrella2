@@ -43,6 +43,7 @@
             doc: [
                 "allocation metadata for gc-aware data at address @p gco.",
                 "@p gco must be the result of a call to collector's alloc() function",
+                "note: load-bearing for xo-gc/MutationLogStore",
             ],
             return_type: "AllocInfo",
             args: [
@@ -57,7 +58,8 @@
             name: "generation_of",
             doc: [
                 "generation to which pointer @p addr belongs, given role @p r;",
-                "sentinel if @p addr is not owned by collector",
+                "sentinel if @p addr is not owned by collector.",
+                "note: load-bearing for xo-gc/MutationLogStore",
             ],
             return_type: "Generation",
             args: [
