@@ -812,19 +812,12 @@ namespace ut {
             // object type storage will be empty unless we install a type.
             GCObjectStore gcos(fixture.gcos_config_, &verify_stats);
 
-            Generation g0{0};
-            Generation g1{1};
-            Generation gn{tc.n_gen_};
-
             REQUIRE(gcos.is_type_installed(typeseq::id<DList>()) == false);
             REQUIRE(gcos.is_type_installed(typeseq::id<DBoolean>()) == false);
 
             gcos_install_test_types(tc, &gcos);
             gcos_verify_arena_partitioning(tc, gcos);
             gcos_verify_vacant(tc, gcos);
-
-            // allocator api
-            auto alloc = obj<AAllocator,DArena>(gcos.new_space());
 
             // create object(s).
             // details depend on test case
@@ -845,11 +838,11 @@ namespace ut {
             gcos_verify_gen0_only_allocated(tc, gcos, x1_v);
 
             // swap_roles [but only for generation < g1, i.e. g0
-            gcos.swap_roles(g1);
+            gcos.swap_roles(Generation::g1());
 
             gcos_verify_gen0_fromspace_only_allocated(tc, gcos, x1_v);
 
-            gcos_move_roots_and_verify(tc, &gcos, g1, x1_v, x2_v, tc.debug_flag_);
+            gcos_move_roots_and_verify(tc, &gcos, Generation::g1(), x1_v, x2_v, tc.debug_flag_);
 
             // Things to test:
             // - deep_move_interior()   // used from MutationLogStore
@@ -861,7 +854,7 @@ namespace ut {
                 // swaps to- and from- spaces again
                 // Now from-space will be empty, all live objects in to-space
 
-                gcos.cleanup_phase(g1, sanitize_flag);
+                gcos.cleanup_phase(Generation::g1(), sanitize_flag);
             }
 
             {
