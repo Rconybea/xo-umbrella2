@@ -45,7 +45,9 @@ namespace xo {
 
         std::byte *
         DGCObjectStoreVisitor::alloc_copy(void * src) noexcept {
-            return p_gco_store_->new_space()->alloc_copy((std::byte *)src);
+            // check whether we're promoting src.
+
+            return p_gco_store_->alloc_copy((std::byte *)src);
         }
 
     } /*namespace mm*/

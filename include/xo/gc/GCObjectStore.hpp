@@ -169,6 +169,11 @@ namespace xo {
                                       void * from_src,
                                       Generation upto);
 
+            /** allocate copy of @p src on behalf of a collection cycle.
+             *  Entry point for DGCObjectStoreVisitor::alloc_copy()
+             **/
+            std::byte * alloc_copy(void * src) noexcept;
+
             /** Cleanup at the end of a gc cycle.
              *  Reset from-space
              *  (current from-space is former to-space,
