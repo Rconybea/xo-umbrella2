@@ -45,13 +45,13 @@ namespace xo {
 
             AllocError() = default;
             explicit AllocError(error err,
-                                    uint32_t seq) : error_{err},
-                                                    error_seq_{seq} {}
+                                uint32_t seq) : error_{err},
+                                                error_seq_{seq} {}
             AllocError(error err,
                        const char * src_fn,
-                           uint32_t seq,
-                           size_type req_z,
-                           size_type com_z,
+                       uint32_t seq,
+                       size_type req_z,
+                       size_type com_z,
                        size_type rsv_z) : error_{err},
                                           src_fn_{src_fn},
                                           error_seq_{seq},
