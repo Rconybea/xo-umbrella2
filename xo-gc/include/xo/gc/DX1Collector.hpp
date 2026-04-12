@@ -274,14 +274,6 @@ namespace xo {
             /** Execute gc immediately, for all generations < @p upto **/
             void execute_gc(Generation upto) noexcept;
 
-            /** Supports GCObjectVisitor facet.
-             *  During gc phase (@p reason is 'forward')
-             *  1. evacuate object at @p *lhs_data to to-space.
-             *  2. replace @p *lhs_data with forwarding pointer
-             *     to new location.
-             **/
-            void visit_child(VisitReason reason, AGCObject * lhs_iface, void ** lhs_data);
-
             // ----- allocation -----
 
             /** simple allocation. allocate @p z bytes of memory

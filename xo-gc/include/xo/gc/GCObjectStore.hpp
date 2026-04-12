@@ -169,37 +169,6 @@ namespace xo {
                                       void * from_src,
                                       Generation upto);
 
-            /** Target for GCObjectVisitor facet
-             *  During gc phase (@p reason is 'forward')
-             *  1. evacuate object at @p *lhs_data to to-space.
-             *  2. replace @p *lhs_data with forwarding pointer
-             *     to new location.
-             **/
-            void visit_child_aux(VisitReason reason,
-                                 AGCObject * lhs_iface,
-                                 void ** lhs_data,
-                                 Generation upto);
-
-            /** Evacuate object at @p *lhs_data to to-space, during collection phase
-             *  acting on generations g in [0 ,.., upto).
-             *  Need @p gc to pass to invoke AGCObject methods shallow_copy() and
-             *  forward_children()
-             *
-             *  Replace original with forwarding pointer to new location
-             **/
-            void forward_inplace_aux(obj<AGCObjectVisitor> gc,
-                                     AGCObject * lhs_iface,
-                                     void ** lhs_data,
-                                     Generation upto);
-
-            /** categorize fop {@p lhs_iface, @p lhs_data}
-             *  based on location of @p lhs_data.
-             *  Update @ref p_verify_stats_ based on the result:
-             *  increment exactly one of {n_from_, n_to_, n_ext_}
-             **/
-            void verify_aux(AGCObject * lhs_iface,
-                            void * lhs_data);
-
             /** Cleanup at the end of a gc cycle.
              *  Reset from-space
              *  (current from-space is former to-space,
@@ -251,6 +220,28 @@ namespace xo {
             void * _shallow_move(obj<AGCObjectVisitor> gc,
                                  AGCObject * iface,
                                  void * from_src);
+
+            /** Evacuate object at @p *lhs_data to to-space, during collection phase
+             *  acting on generations g in [0 ,.., upto).
+             *  Need @p gc to pass to invoke AGCObject methods shallow_copy() and
+             *  forward_children()
+             *
+             *  Replace original with forwarding pointer to new location
+             **/
+            void _forward_inplace_aux(obj<AGCObjectVisitor> gc,
+                                      AGCObject * lhs_iface,
+                                      void ** lhs_data,
+                                      Generation upto);
+
+            /** categorize fop {@p lhs_iface, @p lhs_data}
+             *  based on location of @p lhs_data.
+             *  Update @ref p_verify_stats_ based on the result:
+             *  increment exactly one of {n_from_, n_to_, n_ext_}
+             **/
+            void _verify_aux(AGCObject * lhs_iface,
+                             void * lhs_data);
+
+            friend class DGCObjectStoreVisitor;
 
         private:
             /** configuration for gc-aware object store **/

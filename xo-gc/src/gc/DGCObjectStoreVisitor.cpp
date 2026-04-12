@@ -32,11 +32,11 @@ namespace xo {
         {
             switch (reason.code()) {
             case VisitReason::code::forward:
-                p_gco_store_->forward_inplace_aux
+                p_gco_store_->_forward_inplace_aux
                     (this->ref<AGCObjectVisitor>(), lhs_iface, lhs_data, upto_);
                 break;
             case VisitReason::code::verify:
-                p_gco_store_->verify_aux(lhs_iface, *lhs_data);
+                p_gco_store_->_verify_aux(lhs_iface, *lhs_data);
                 break;
             default:
                 assert(false);
