@@ -65,8 +65,10 @@ namespace ut {
                               size_t report_z,
                               size_t error_z,
                               TestGraphType obj_graph_type,
-                              uint32_t n_test_obj,
-                              uint32_t n_test_assign,
+                              uint32_t n_i0_test_obj,
+                              uint32_t n_i0_test_assign,
+                              uint32_t n_i1_test_obj,
+                              uint32_t n_i1_test_assign,
                               bool debug_flag)
                 : n_gen_{n_gen},
                   n_survive_{n_survive},
@@ -76,8 +78,10 @@ namespace ut {
                   report_size_{report_z},
                   error_size_{error_z},
                   obj_graph_type_{obj_graph_type},
-                  n_test_obj_{n_test_obj},
-                  n_test_assign_{n_test_assign},
+                  n_i0_test_obj_{n_i0_test_obj},
+                  n_i0_test_assign_{n_i0_test_assign},
+                  n_i1_test_obj_{n_i1_test_obj},
+                  n_i1_test_assign_{n_i1_test_assign},
                   debug_flag_{debug_flag}
                 {}
 
@@ -103,11 +107,15 @@ namespace ut {
             size_t error_size_ = 0;
             /** object graph type **/
             TestGraphType obj_graph_type_ = TestGraphType::random;
-            /** #of cells in random object graph **/
-            uint32_t n_test_obj_ = 0;
-            /** #of random assignments to attempt (these may create cycles, for example) **/
-            uint32_t n_test_assign_ = 0;
-
+            /** first loop: #of cells in random object graph **/
+            uint32_t n_i0_test_obj_ = 0;
+            /** first loop: #of random assignments to attempt (these may create cycles, for example) **/
+            uint32_t n_i0_test_assign_ = 0;
+            /** 2nd+later loop: #of cells in random object graph **/
+            uint32_t n_i1_test_obj_ = 0;
+            /** 2nd+later loop: #of random assignments to attempt **/
+            uint32_t n_i1_test_assign_ = 0;
+            
             /** true to enable debug when attempting this test case **/
             bool debug_flag_ = false;
         };
@@ -117,19 +125,28 @@ namespace ut {
         constexpr uint32_t c_report_z1 = 64 * 1024;
         constexpr uint32_t c_error_z1 = 16 * 1024;
 
+#      define T true
+#      define F false        
+
         static std::vector<Testcase> s_testcase_v = {
             // note: report_z: 64k not sufficient for report_object_ages()
 
-            /** n_gen, n_survive, gc_size, object_type_z, do_type_registration, report_z, error_z, n_obj, n_test_assign **/
-            Testcase(2, 4, 16 * 1024, 8 * 128, false, c_report_z1, c_error_z1, c_random,    0, 0, false), 
-            Testcase(2, 4, 16 * 1024, 8 * 128, true,  c_report_z1, c_error_z1, c_selfcycle, 1, 0, false), 
-            Testcase(2, 4, 16 * 1024, 8 * 128, true,  c_report_z1, c_error_z1, c_random,    1, 0, false), 
-            Testcase(2, 4, 16 * 1024, 8 * 128, true,  c_report_z1, c_error_z1, c_random,    2, 13, false),
-            Testcase(2, 4, 16 * 1024, 8 * 128, true,  c_report_z1, c_error_z1, c_random,    2, 25, false),
-            Testcase(2, 4, 16 * 1024, 8 * 128, true,  c_report_z1, c_error_z1, c_random,    5,  0, false),
-            Testcase(2, 4, 16 * 1024, 8 * 128, true,  c_report_z1, c_error_z1, c_random,    4,  2, false), 
-            Testcase(2, 4, 16 * 1024, 8 * 128, true,  c_report_z1, c_error_z1, c_random,   50, 25, false), 
+            /** n_gen, n_survive, gc_size, object_type_z, do_type_registration,
+             *  report_z, error_z, n_i0_obj, n_i0_test_assign, debug_flag
+             **/
+            Testcase(2, 4, 16 * 1024, 8 * 128, F, c_report_z1, c_error_z1, c_random,    0,  0, 0, 0, F), 
+            Testcase(2, 4, 16 * 1024, 8 * 128, T, c_report_z1, c_error_z1, c_selfcycle, 1,  0, 0, 0, F), 
+            Testcase(2, 4, 16 * 1024, 8 * 128, T, c_report_z1, c_error_z1, c_random,    1,  0, 0, 0, F), 
+            Testcase(2, 4, 16 * 1024, 8 * 128, T, c_report_z1, c_error_z1, c_random,    2, 13, 0, 0, F),
+            Testcase(2, 4, 16 * 1024, 8 * 128, T, c_report_z1, c_error_z1, c_random,    2, 25, 0, 0, F),
+            Testcase(2, 4, 16 * 1024, 8 * 128, T, c_report_z1, c_error_z1, c_random,    5,  0, 0, 0, F),
+            Testcase(2, 4, 16 * 1024, 8 * 128, T, c_report_z1, c_error_z1, c_random,    4,  2, 0, 0, F), 
+            Testcase(2, 4, 16 * 1024, 8 * 128, T, c_report_z1, c_error_z1, c_random,   50, 25, 0, 0, F), 
+
         };
+
+#      undef T
+#      undef F
 
         /** record capturing some stats for a (randomly created) gc-aware object **/
         struct Recd {
@@ -420,6 +437,7 @@ namespace ut {
         gcos_construct_ab_object_graphs(const Testcase & tc,
                                         GCObjectStore * p_gcos,
                                         DArena * p_arena2,
+                                        uint32_t loop_index,
                                         std::vector<Recd> * p_x1_v,
                                         std::vector<Recd> * p_x2_v,
                                         xoshiro256ss * p_rgen)
@@ -432,13 +450,22 @@ namespace ut {
                                        p_arena2);
                 break;
             case TestGraphType::random:
-                random_object_graph(tc.n_test_obj_,
-                                    tc.n_test_assign_,
-                                    p_rgen,
-                                    p_x1_v,
-                                    p_gcos,
-                                    p_x2_v,
-                                    p_arena2);
+                {
+                    uint32_t n_test_obj = ((loop_index == 0)
+                                           ? tc.n_i0_test_obj_
+                                           : tc.n_i1_test_obj_);
+                    uint32_t n_test_assign = ((loop_index == 0)
+                                              ? tc.n_i0_test_assign_
+                                              : tc.n_i1_test_assign_);
+
+                    random_object_graph(n_test_obj,
+                                        n_test_assign,
+                                        p_rgen,
+                                        p_x1_v,
+                                        p_gcos,
+                                        p_x2_v,
+                                        p_arena2);
+                }
                 break;
             }
 
@@ -829,7 +856,9 @@ namespace ut {
             std::vector<Recd> x1_v;
             std::vector<Recd> x2_v;
 
-            gcos_construct_ab_object_graphs(tc, &gcos, &fixture.arena2_, &x1_v, &x2_v, &rgen);
+            uint32_t loop_index = 0;
+
+            gcos_construct_ab_object_graphs(tc, &gcos, &fixture.arena2_, loop_index, &x1_v, &x2_v, &rgen);
 
             log1 && log1("verify before any gcos side effects");
 
