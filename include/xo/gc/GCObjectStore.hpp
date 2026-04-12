@@ -134,7 +134,7 @@ namespace xo {
              *  to call AGCObject visitor method (forward_children()) on each
              *  object stored here.
              **/
-            void verify_ok(obj<AGCObjectVisitor> gc) noexcept;
+            void verify_ok() noexcept;
 
             /** Register object type with this collector.
              *  Provides shallow copy and pointer forwarding for instances of this
@@ -156,8 +156,7 @@ namespace xo {
              *
              *  Require: runstate_.is_running()
              **/
-            void * deep_move_root(obj<AGCObjectVisitor> gc,
-                                  const AGCObject * root_iface,
+            void * deep_move_root(const AGCObject * root_iface,
                                   void ** root_data,
                                   Generation upto);
 
@@ -170,15 +169,16 @@ namespace xo {
                                       void * from_src,
                                       Generation upto);
 
-#ifdef NOT_YET
             /** Target for GCObjectVisitor facet
              *  During gc phase (@p reason is 'forward')
              *  1. evacuate object at @p *lhs_data to to-space.
              *  2. replace @p *lhs_data with forwarding pointer
              *     to new location.
              **/
-            void visit_child(VisitReason reason, AGCObject * lhs_iface, void ** lhs_data);
-#endif
+            void visit_child_aux(VisitReason reason,
+                                 AGCObject * lhs_iface,
+                                 void ** lhs_data,
+                                 Generation upto);
 
             /** Evacuate object at @p *lhs_data to to-space, during collection phase
              *  acting on generations g in [0 ,.., upto).

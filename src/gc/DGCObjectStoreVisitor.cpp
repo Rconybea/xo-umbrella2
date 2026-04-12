@@ -1,27 +1,34 @@
-/** @file DMockCollector.cpp
+/** @file DGCObjectStoreVisitor.cpp
  *
  *  @author Roland Conybeare, Apr 2026
  **/
 
-#include "MockCollector.hpp"
+#include "GCObjectStoreVisitor.hpp"
+#include "GCObjectStore.hpp"
 
 namespace xo {
     namespace mm {
 
+        DGCObjectStoreVisitor::DGCObjectStoreVisitor(GCObjectStore * gcos,
+                                                     Generation upto)
+        : p_gco_store_{gcos}, upto_{upto}
+        {}
+
         Generation
-        DMockCollector::generation_of(Role r, const void * addr) const noexcept
+        DGCObjectStoreVisitor::generation_of(Role r, const void * addr) const noexcept
         {
             return p_gco_store_->generation_of(r, addr);
         }
 
         AllocInfo
-        DMockCollector::alloc_info(void * mem) const noexcept
+        DGCObjectStoreVisitor::alloc_info(void * mem) const noexcept
         {
             return p_gco_store_->alloc_info((std::byte *)mem);
         }
 
         void
-        DMockCollector::visit_child(VisitReason reason, AGCObject * lhs_iface, void ** lhs_data)
+        DGCObjectStoreVisitor::visit_child(VisitReason reason,
+                                           AGCObject * lhs_iface, void ** lhs_data)
         {
             switch (reason.code()) {
             case VisitReason::code::forward:
@@ -37,11 +44,11 @@ namespace xo {
         }
 
         std::byte *
-        DMockCollector::alloc_copy(void * src) noexcept {
+        DGCObjectStoreVisitor::alloc_copy(void * src) noexcept {
             return p_gco_store_->new_space()->alloc_copy((std::byte *)src);
         }
 
     } /*namespace mm*/
 } /*namespace xo*/
 
-/* end DMockCollector.cpp */
+/* end DGCObjectVisitor.cpp */

@@ -5,6 +5,7 @@
 
 #include "SetupGc.hpp"
 #include "X1Collector.hpp"
+#include "GCObjectStoreVisitor.hpp"
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/indentlog/scope.hpp>
 
@@ -24,9 +25,11 @@ namespace xo {
 
             FacetRegistry::register_impl<AAllocator, DX1Collector>();
             FacetRegistry::register_impl<ACollector, DX1Collector>();
-            FacetRegistry::register_impl<AGCObjectVisitor, DX1Collector>();
+
+            FacetRegistry::register_impl<AGCObjectVisitor, DGCObjectStoreVisitor>();
 
             log && log(xtag("DX1Collector.tseq", typeseq::id<DX1Collector>()));
+            log && log(xtag("DGCObjectStoreVisitor.tseq", typeseq::id<DGCObjectStoreVisitor>()));
 
             log && log(xtag("ACollector.tseq",  typeseq::id<ACollector>()));
             log && log(xtag("AGCObjectVisitor.tseq",  typeseq::id<AGCObjectVisitor>()));

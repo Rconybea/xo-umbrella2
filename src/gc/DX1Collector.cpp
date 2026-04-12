@@ -4,6 +4,7 @@
  **/
 
 #include "X1Collector.hpp"
+#include "GCObjectStoreVisitor.hpp"
 #include <xo/gc/DX1CollectorIterator.hpp>
 
 #include <xo/object2/Dictionary.hpp>
@@ -13,7 +14,6 @@
 #include <xo/stringtable2/String.hpp>
 
 #include <xo/alloc2/GCObject.hpp>
-#include <xo/alloc2/GCObjectVisitor.hpp>
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/alloc2/Arena.hpp>
 #include "object_age.hpp"
@@ -383,7 +383,8 @@ namespace xo {
             // Add run state so DX1Collector can recognize forward_inplace()
             // calls made for the purpose of checking child pointers.
 
-            auto self = this->ref<AGCObjectVisitor>();
+            DGCObjectStoreVisitor visitor(&gco_store_,
+                                          Generation{0} /*not used for verify*/);
 
             GCRunState saved_runstate = runstate_;
             {
@@ -404,8 +405,7 @@ namespace xo {
                         // - X1Collector::forward_inplace() -> _verify_aux()
                         //
 
-                        gco.visit_gco_children(VisitReason::verify(), self);
-
+                        gco.visit_gco_children(VisitReason::verify(), visitor.ref());
                     }
 
                     X1VerifyStats post = verify_stats_;
@@ -417,7 +417,7 @@ namespace xo {
                 }
 
                 // 3. scan to-space for each generation
-                gco_store_.verify_ok(this->ref<AGCObjectVisitor>());
+                gco_store_.verify_ok();
 
                 // 4. scan mutation logs
                 mlog_store_.verify_ok(&gco_store_,
@@ -483,7 +483,7 @@ namespace xo {
             //auto t0 = std::chrono::steady_clock::now();
 
             log && log("memory");
-            auto visitor = [&log](const MemorySizeInfo & info) {
+            auto resource_visitor = [&log](const MemorySizeInfo & info) {
                 log && log(xtag("resource", info.resource_name_),
                            xtag("used", info.used_),
                            xtag("alloc", info.allocated_),
@@ -492,13 +492,15 @@ namespace xo {
                            xtag("lo", info.lo_),
                            xtag("hi", info.hi_));
             };
-            this->visit_pools(visitor);
+            this->visit_pools(resource_visitor);
 
             if (config_.sanitize_flag_) {
                 log && log("step 0a : verify");
                 this->verify_ok();
 
             }
+
+            DGCObjectStoreVisitor gco_visitor(&gco_store_, upto);
 
             log && log("step 0b : update run state");
             this->runstate_ = GCRunState::gc_upto(upto);
@@ -519,7 +521,7 @@ namespace xo {
             log && log("step 2b : [STUB] copy pinned");
 
             log && log("step 3  : [STUB] forward mutation log");
-            mlog_store_.forward_mutation_log(this->ref<AGCObjectVisitor>(), upto);
+            mlog_store_.forward_mutation_log(gco_visitor.ref(), upto);
 
             log && log("step 4a : [STUB] run destructors");
             log && log("step 4b : [STUB] keep reachable weak pointers");
@@ -576,8 +578,7 @@ namespace xo {
                            xtag("slot.root()", slot.root()),
                            xtag("slot.root()->data_", slot.root()->data_));
 
-                void * root_to = gco_store_.deep_move_root(this->ref<AGCObjectVisitor>(),
-                                                           slot.root()->iface(),
+                void * root_to = gco_store_.deep_move_root(slot.root()->iface(),
                                                            (void **)&(slot.root()->data_), upto);
 
                 slot.root()->reset_opaque(root_to);
@@ -594,24 +595,9 @@ namespace xo {
             // MAYBE: adapter distinct from DX1Collector that supports GCObjectVisitor facet,
             //        calls DX1Collector::_verify_aux()
 
-            switch (reason.code()) {
-            case VisitReason::code::forward:
-            {
-                Generation upto = runstate_.gc_upto();
+            Generation upto = runstate_.gc_upto();
 
-                // called during collection phase
-                gco_store_.forward_inplace_aux
-                    (this->ref<AGCObjectVisitor>(), lhs_iface, lhs_data, upto);
-                break;
-            }
-            case VisitReason::code::verify:
-                // called during verify_ok
-                gco_store_.verify_aux(lhs_iface, *lhs_data);
-                break;
-            default:
-                // should be unreachable
-                assert(false);
-            }
+            gco_store_.visit_child_aux(reason, lhs_iface, lhs_data, upto);
         }
 
         auto

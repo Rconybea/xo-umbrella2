@@ -12,9 +12,11 @@ set(SELF_SRCS
     X1CollectorConfig.cpp
     DX1Collector.cpp
     facet/ICollector_DX1Collector.cpp
-    facet/IGCObjectVisitor_DX1Collector.cpp
 
     DX1CollectorIterator.cpp
+
+    DGCObjectStoreVisitor.cpp
+    facet/IGCObjectVisitor_DGCObjectStoreVisitor.cpp
 
     GCObjectStoreConfig.cpp
     GCObjectStore.cpp

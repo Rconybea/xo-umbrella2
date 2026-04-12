@@ -4,6 +4,7 @@
  **/
 
 #include "GCObjectStore.hpp"
+#include "GCObjectStoreVisitor.hpp"
 #include "X1VerifyStats.hpp"
 
 #include <xo/object2/Dictionary.hpp>
@@ -475,35 +476,33 @@ namespace xo {
             return (g < upto);
         }
 
-#ifdef NOT_YET
         void
-        GCObjectStore::visit_child(VisitReason reason,
-                                   AGCObject * lhs_iface,
-                                   void ** lhs_data)
+        GCObjectStore::visit_child_aux(VisitReason reason,
+                                       AGCObject * lhs_iface,
+                                       void ** lhs_data,
+                                       Generation upto)
         {
-            // MAYBE: adapter distinct from DX1Collector that supports GCObjectVisitor facet,
-            //        calls DX1Collector::_verify_aux()
-
             switch (reason.code()) {
             case VisitReason::code::forward:
             {
-                Generation upto = runstate_.gc_upto();
+                DGCObjectStoreVisitor gcos_visitor(this, upto);
+                auto gcos_visitor_obj
+                    = obj<AGCObjectVisitor,DGCObjectStoreVisitor>(&gcos_visitor);
 
                 // called during collection phase
                 this->forward_inplace_aux
-                    (this->ref<AGCObjectVisitor>(), lhs_iface, lhs_data, upto);
+                    (gcos_visitor_obj, lhs_iface, lhs_data, upto);
                 break;
             }
             case VisitReason::code::verify:
                 // called during verify_ok
-                gco_store_.verify_aux(lhs_iface, *lhs_data);
+                this->verify_aux(lhs_iface, *lhs_data);
                 break;
             default:
                 // should be unreachable
                 assert(false);
             }
         }
-#endif
 
         void
         GCObjectStore::forward_inplace_aux(obj<AGCObjectVisitor> gc,
@@ -768,8 +767,11 @@ namespace xo {
         }
 
         void
-        GCObjectStore::verify_ok(obj<AGCObjectVisitor> gc) noexcept
+        GCObjectStore::verify_ok() noexcept
         {
+            Generation unused_gen; 
+            DGCObjectStoreVisitor visitor{this, unused_gen};
+
             for (Generation g(0); g < config_.n_generation_; ++g) {
                 const DArena * space = this->get_space(Role::to_space(), g);
 
@@ -789,7 +791,7 @@ namespace xo {
                             // assembled fop for gc-aware object
                             obj<AGCObject> gco(iface, const_cast<void *>(data));
 
-                            gco.visit_gco_children(VisitReason::verify(), gc);
+                            gco.visit_gco_children(VisitReason::verify(), visitor.ref());
                         } else {
                             ++(p_verify_stats_->n_no_iface_);
                             continue;
@@ -830,8 +832,7 @@ namespace xo {
         }
 
         void *
-        GCObjectStore::deep_move_root(obj<AGCObjectVisitor> gc,
-                                      const AGCObject * root_iface,
+        GCObjectStore::deep_move_root(const AGCObject * root_iface,
                                       void ** root_data,
                                       Generation upto)
         {
@@ -849,8 +850,10 @@ namespace xo {
 
             bool src_in_from_space = this->contains(Role::from_space(), *root_data);
 
+            DGCObjectStoreVisitor visitor(this, upto);
+
             if (src_in_from_space) {
-                *root_data = this->_deep_move_gc_owned(gc, *root_data, upto);
+                *root_data = this->_deep_move_gc_owned(visitor.ref(), *root_data, upto);
             } else {
                 // we aren't moving from_src, it's not gc-owned.
                 // However we are moving all its gc-owned children
@@ -860,7 +863,7 @@ namespace xo {
 
                 auto root = obj<AGCObject>(root_iface, *root_data);
 
-                root.visit_gco_children(VisitReason::forward(), gc);
+                root.visit_gco_children(VisitReason::forward(), visitor.ref());
 
                 // For each generation g:
                 //   traverse objects newer than gray_lo_v[g], to make sure children
@@ -868,7 +871,7 @@ namespace xo {
                 //   Remember that forwarding may promote objects to older generation,
                 //   so need multiple passes
                 //
-                this->_forward_children_until_fixpoint(gc, upto, gray_lo_v);
+                this->_forward_children_until_fixpoint(visitor.ref(), upto, gray_lo_v);
 
                 // reminder: *root_data preserved
 
