@@ -4,7 +4,7 @@ set(SELF_LIB xo_gc)
 set(SELF_SRCS
 
     init_gc.cpp
-    SetupGc.cpp
+    setup_gc.cpp
 
     IAllocator_DX1Collector.cpp
     IAllocIterator_DX1CollectorIterator.cpp

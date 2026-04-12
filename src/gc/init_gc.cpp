@@ -4,7 +4,7 @@
  **/
 
 #include "init_gc.hpp"
-#include "SetupGc.hpp"
+#include "setup_gc.hpp"
 #include <xo/object2/init_object2.hpp>
 #include <xo/alloc2/init_alloc2.hpp>
 
