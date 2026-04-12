@@ -5,8 +5,6 @@
 
 #include <xo/gc/GCObjectStore.hpp>
 #include <xo/gc/X1VerifyStats.hpp>
-#include "MockCollector.hpp"
-
 #include <xo/object2/ListOps.hpp>
 #include <xo/object2/List.hpp>
 #include <xo/object2/Integer.hpp>
@@ -27,7 +25,6 @@ namespace ut {
     using xo::scm::DList;
     using xo::scm::DInteger;
     using xo::scm::DBoolean;
-    using xo::mm::DMockCollector;
     using xo::mm::GCObjectStoreConfig;
     using xo::mm::GCObjectStore;
     using xo::mm::X1VerifyStats;
@@ -395,7 +392,6 @@ namespace ut {
                            const GCObjectStore & gcos)
         {
             Generation g0{0};
-            //Generation g1{1};
             Generation gn{tc.n_gen_};
 
 
@@ -413,6 +409,13 @@ namespace ut {
             }
         }
 
+        /** Generate two copies of a random object graph for test case @p tc.
+         *  Store first graph in @p *p_x1_v, allocating
+         *  entirely from @p p_gcos new-space.
+         *  Store second graph in @p *p_x2_v, allocating
+         *  entirely from @p p_arena2.
+         *  Use random number generator @p_rgen
+         **/
         void
         gcos_construct_ab_object_graphs(const Testcase & tc,
                                         GCObjectStore * p_gcos,
@@ -444,24 +447,26 @@ namespace ut {
             //                    typeseq::id<DBoolean>()));
         }
 
+        /** Invoke built-in consistency verification for @p *p_gcos.
+         **/
         void
-        gcos_verify_consistency(obj<AGCObjectVisitor> mock_gc_visitor,
-                                GCObjectStore * p_gcos,
-                                const X1VerifyStats & verify_stats)
+        gcos_verify_consistency(GCObjectStore * p_gcos)
         {
             // traverses stored objects, updates counters
             // in verify_stats (= gco.p_verify_stats_, via ctor)
             //
-            p_gcos->verify_ok(mock_gc_visitor);
+            p_gcos->verify_ok();
 
-            INFO(tostr(xtag("n_gc_root", verify_stats.n_gc_root_),
-                       xtag("n_ext", verify_stats.n_ext_),
-                       xtag("n_from", verify_stats.n_from_),
-                       xtag("n_to", verify_stats.n_to_),
-                       xtag("n_fwd", verify_stats.n_fwd_),
-                       xtag("n_no_iface", verify_stats.n_no_iface_)));
+            X1VerifyStats * verify_stats = p_gcos->verify_stats();
 
-            REQUIRE(verify_stats.is_ok());
+            INFO(tostr(xtag("n_gc_root", verify_stats->n_gc_root_),
+                       xtag("n_ext", verify_stats->n_ext_),
+                       xtag("n_from", verify_stats->n_from_),
+                       xtag("n_to", verify_stats->n_to_),
+                       xtag("n_fwd", verify_stats->n_fwd_),
+                       xtag("n_no_iface", verify_stats->n_no_iface_)));
+
+            REQUIRE(verify_stats->is_ok());
         }
 
         void
@@ -635,7 +640,7 @@ namespace ut {
         void
         gcos_move_roots_and_verify(const Testcase & tc,
                                    GCObjectStore * p_gcos,
-                                   obj<AGCObjectVisitor> mock_gc_visitor,
+                                   Generation upto,
                                    const std::vector<Recd> & x1_v,
                                    const std::vector<Recd> & x2_v,
                                    bool debug_flag)
@@ -690,9 +695,9 @@ namespace ut {
                     obj<AGCObject> x1_gco = x1.gco_;
 
                     // modifies x1.gco_ in place
-                    auto x1p_data = p_gcos->deep_move_root(mock_gc_visitor,
-                                                           x1p_iface, (void **)&(x1.gco_.data_),
-                                                           g1);
+                    auto x1p_data
+                        = p_gcos->deep_move_root(x1p_iface, (void **)&(x1.gco_.data_), upto);
+
                     REQUIRE(x1p_data);
                     REQUIRE(x1p_data == x1.gco_.data_);
 
@@ -713,8 +718,7 @@ namespace ut {
                     // but will fail since type isn't registered
 
                     auto x1p_data
-                        = p_gcos->deep_move_root(mock_gc_visitor,
-                                                 x1.gco_.iface(),
+                        = p_gcos->deep_move_root(x1.gco_.iface(),
                                                  (void **)&(x1.gco_.data_),
                                                  g1);
 
@@ -812,10 +816,6 @@ namespace ut {
             Generation g1{1};
             Generation gn{tc.n_gen_};
 
-            // scaffold mock collector doing incremental collection
-            DMockCollector mock_gc(&gcos, g1);
-            auto mock_gc_visitor = mock_gc.ref<AGCObjectVisitor>();
-
             REQUIRE(gcos.is_type_installed(typeseq::id<DList>()) == false);
             REQUIRE(gcos.is_type_installed(typeseq::id<DBoolean>()) == false);
 
@@ -836,9 +836,7 @@ namespace ut {
 
             log1 && log1("verify before any gcos side effects");
 
-            gcos_verify_consistency(mock_gc_visitor,
-                                    &gcos,
-                                    verify_stats);
+            gcos_verify_consistency(&gcos);
 
             // someday: print the graph. Need a cycle-detecting printer
 
@@ -851,7 +849,7 @@ namespace ut {
 
             gcos_verify_gen0_fromspace_only_allocated(tc, gcos, x1_v);
 
-            gcos_move_roots_and_verify(tc, &gcos, mock_gc_visitor, x1_v, x2_v, tc.debug_flag_);
+            gcos_move_roots_and_verify(tc, &gcos, g1, x1_v, x2_v, tc.debug_flag_);
 
             // Things to test:
             // - deep_move_interior()   // used from MutationLogStore
@@ -870,7 +868,7 @@ namespace ut {
                 // traverses stored objects, updates counters
                 // in verify_stats (= gco.p_verify_stats_, via ctor)
                 //
-                gcos.verify_ok(mock_gc_visitor);
+                gcos.verify_ok();
 
                 INFO(tostr(xtag("n_gc_root", verify_stats.n_gc_root_),
                            xtag("n_ext", verify_stats.n_ext_),

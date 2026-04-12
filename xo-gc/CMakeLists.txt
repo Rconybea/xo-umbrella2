@@ -27,9 +27,9 @@ xo_add_genfacetimpl(
 
 # note: manual target; generated code committed to git
 xo_add_genfacetimpl(
-    TARGET xo-gc-facetimpl-gcobjectvisitor-x1collector
+    TARGET xo-gc-facetimpl-gcobjectvisitor-gcobjectstorevisitor
     FACET_PKG xo_alloc2
-    INPUT idl/IGCObjectVisitor_DX1Collector.json5
+    INPUT idl/IGCObjectVisitor_DGCObjectStoreVisitor.json5
 )
 
 # ----------------------------------------------------------------
