@@ -695,37 +695,6 @@ namespace xo {
             }
         }
 
-        void
-        GCObjectStore::swap_roles(Generation upto) noexcept
-        {
-            scope log(XO_DEBUG(config_.debug_flag_),
-                      xtag("upto", upto));
-
-            for (Generation g = Generation{0}; g < upto; ++g) {
-                log && log("swap roles", xtag("g", g));
-
-                std::swap(space_[Role::to_space()][g], space_[Role::from_space()][g]);
-            }
-        }
-
-        void
-        GCObjectStore::cleanup_phase(Generation upto,
-                                     bool sanitize_flag)
-        {
-            scope log(XO_DEBUG(config_.debug_flag_), xtag("upto", upto));
-
-            // everything live has been copied out of from-space
-            // -> now set to empty
-            //
-            for (Generation g = Generation{0}; g < upto; ++g) {
-                if (sanitize_flag) {
-                    space_[Role::from_space()][g]->scrub();
-                }
-
-                space_[Role::from_space()][g]->clear();
-            }
-        }
-
         auto
         GCObjectStore::snap_move_checkpoint(Generation upto) -> GCMoveCheckpoint
         {
@@ -801,6 +770,37 @@ namespace xo {
             slot.store_iface(&meta);
 
             return true;
+        }
+
+        void
+        GCObjectStore::swap_roles(Generation upto) noexcept
+        {
+            scope log(XO_DEBUG(config_.debug_flag_),
+                      xtag("upto", upto));
+
+            for (Generation g = Generation{0}; g < upto; ++g) {
+                log && log("swap roles", xtag("g", g));
+
+                std::swap(space_[Role::to_space()][g], space_[Role::from_space()][g]);
+            }
+        }
+
+        void
+        GCObjectStore::cleanup_phase(Generation upto,
+                                     bool sanitize_flag)
+        {
+            scope log(XO_DEBUG(config_.debug_flag_), xtag("upto", upto));
+
+            // everything live has been copied out of from-space
+            // -> now set to empty
+            //
+            for (Generation g = Generation{0}; g < upto; ++g) {
+                if (sanitize_flag) {
+                    space_[Role::from_space()][g]->scrub();
+                }
+
+                space_[Role::from_space()][g]->clear();
+            }
         }
 
         void *
