@@ -46,10 +46,12 @@ namespace xo {
             ///@{
             // const methods
             /** allocation metadata for gc-aware data at address @p gco.
-@p gco must be the result of a call to collector's alloc() function **/
+@p gco must be the result of a call to collector's alloc() function
+note: load-bearing for xo-gc/MutationLogStore **/
             static AllocInfo alloc_info(const DGCObjectStoreVisitor & self, void * addr);
             /** generation to which pointer @p addr belongs, given role @p r;
-sentinel if @p addr is not owned by collector **/
+sentinel if @p addr is not owned by collector.
+note: load-bearing for xo-gc/MutationLogStore **/
             static Generation generation_of(const DGCObjectStoreVisitor & self, Role r, const void * addr) noexcept;
 
             // non-const methods
