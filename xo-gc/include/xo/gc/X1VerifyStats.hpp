@@ -16,7 +16,7 @@ namespace xo {
         class X1VerifyStats {
         public:
             bool is_ok() const noexcept {
-                return (n_from_ == 0) && (n_fwd_ == 0) && (n_no_iface_ == 0);
+                return (n_from_ == 0) && (n_fwd_ == 0) && (n_age_bad_ == 0) && (n_no_iface_ == 0);
             }
 
             void clear() { *this = X1VerifyStats(); }
@@ -30,6 +30,10 @@ namespace xo {
             std::uint32_t n_to_       = 0;
             /** counts forwarding object encountered in to-space scan. Fatal if non-zero **/
             std::uint32_t n_fwd_      = 0;
+            /** counts objects in expected generation for age **/
+            std::uint32_t n_age_ok_   = 0;
+            /** counts objects in wrong generation for age **/
+            std::uint32_t n_age_bad_  = 0;
             /** counts missing GCObject interface. Fatal if non-zero **/
             std::uint32_t n_no_iface_ = 0;
             /** live mlog entry refers to to-space, as expected **/

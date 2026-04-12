@@ -25,10 +25,11 @@ namespace xo {
              *  @p age collections. Equals the number of times object
              *  has been promoted.
              *
-             *  Must be consistent
+             *  Must be consistent with promotion_threshold(g)
              **/
             Generation age2gen(object_age age) const noexcept {
-                return Generation(age % n_survive_threshold_);
+                return Generation(std::min(age / n_survive_threshold_,
+                                           n_generation_ - 1));
             }
 
             /** age threshold for promotion to generation @p g **/

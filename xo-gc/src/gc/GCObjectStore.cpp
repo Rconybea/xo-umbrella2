@@ -375,7 +375,7 @@ namespace xo {
 
             std::uint32_t hard_n_age = config_.arena_config_.header_.max_age() + 1;
             // maximum age of a still-existing object
-            std::uint32_t soft_max_age = 0; 
+            std::uint32_t soft_max_age = 0;
 
             // first pass, establish max age
             for (Generation g{0}; g < config_.n_generation_; ++g) {
@@ -665,8 +665,7 @@ namespace xo {
         } /*_forward_inplace_aux*/
 
         void
-        GCObjectStore::_verify_aux(AGCObject * iface,
-                                  void * data)
+        GCObjectStore::_verify_aux(AGCObject * iface, void * data)
         {
             scope log(XO_DEBUG(config_.debug_flag_));
 
@@ -692,6 +691,13 @@ namespace xo {
                 assert(this->contains(Role::to_space(), data));
 
                 ++(p_verify_stats_->n_to_);
+
+                AllocInfo info = this->alloc_info((std::byte *)data);
+
+                if (config_.age2gen(object_age(info.age())) == g1)
+                    ++(p_verify_stats_->n_age_ok_);
+                else
+                    ++(p_verify_stats_->n_age_bad_);
             }
         }
 
@@ -700,7 +706,9 @@ namespace xo {
         {
             GCMoveCheckpoint gray_lo_v;
 
-            for (uint32_t g = 0; g < upto; ++g) {
+            // If we're collecting gen0, still need to allow for objects getting promoted
+
+            for (uint32_t g = 0; g < std::min(upto + 1, config_.n_generation_); ++g) {
                 gray_lo_v[g] = this->to_space(Generation{g})->free_;
             }
 
@@ -710,7 +718,7 @@ namespace xo {
         void
         GCObjectStore::verify_ok() noexcept
         {
-            Generation unused_gen; 
+            Generation unused_gen;
             DGCObjectStoreVisitor visitor{this, unused_gen};
 
             for (Generation g(0); g < config_.n_generation_; ++g) {
@@ -733,6 +741,8 @@ namespace xo {
                             obj<AGCObject> gco(iface, const_cast<void *>(data));
 
                             gco.visit_gco_children(VisitReason::verify(), visitor.ref());
+
+                            // nested control reenters at GCObjectStore::_verify_aux()
                         } else {
                             ++(p_verify_stats_->n_no_iface_);
                             continue;
@@ -848,7 +858,7 @@ namespace xo {
                 // reminder: *root_data preserved
 
             }
-            
+
             return *root_data;
         }
 
@@ -868,6 +878,35 @@ namespace xo {
                 return from_src;
 
             return this->_deep_move_gc_owned(gc, from_src, upto);
+        }
+
+        std::byte *
+        GCObjectStore::alloc_copy(void * src) noexcept
+        {
+            scope log(XO_DEBUG(true));
+
+            AllocInfo src_info = this->alloc_info((std::byte *)src);
+            uint32_t age1p = std::min(src_info.age() + 1,
+                                      c_max_object_age);
+            /** g_copy will be one of {g, g+1} where g
+             *  is the generation of src
+             **/
+            Generation g_copy = config_.age2gen(object_age(age1p));
+            DArena * dest_arena = this->to_space(g_copy);
+
+            log && log(xtag("age1p", age1p), xtag("g_copy", g_copy));
+
+            // 1. we could have used
+            //      dest_arena->alloc_copy((std::byte *)src);
+            //    here.
+            // 2. but then dest_arena will have to recompute object header.
+            // 3. instead prefer the header info we already have at hand.
+
+            return dest_arena->_alloc(src_info.size(),
+                                      DArena::alloc_mode::standard,
+                                      typeseq(src_info.tseq()),
+                                      age1p,
+                                      __PRETTY_FUNCTION__);
         }
 
         void *
@@ -896,8 +935,21 @@ namespace xo {
             /* here: object at from_src not already forwarded */
 
             if (!this->_check_move_policy(hdr, from_src, upto)) {
-                /* object at from_src is in generation that is not being collected */
-                log && log("disposition: not moving from_src");
+                if (log) {
+                    object_age age = this->header2age(hdr);
+                    Generation expect_g = config_.age2gen(age);
+                    Generation actual_g = this->generation_of(Role::to_space(), from_src);
+                    Generation actual_g2 = this->generation_of(Role::from_space(), from_src);
+
+                    /* object at from_src is in generation that is not being collected.
+                     * g = intended generation
+                     */
+                    log("disposition: not moving from_src",
+                        xtag("age", age),
+                        xtag("expect-g", expect_g),
+                        xtag("actual-g", actual_g),
+                        xtag("actual-g2", actual_g2));
+                }
 
                 return from_src;
             }
@@ -1043,7 +1095,14 @@ namespace xo {
             do {
                 fixup_work = 0;
 
-                for (Generation g = Generation{0}; g < upto; ++g) {
+                // reminder: oldest collected generation is upto-1.
+                // Objects that were in generation upto-1 may have promoted
+                // to generation upto < config_.n_generation_
+                //
+                Generation g_ub(std::min(upto + 1, config_.n_generation_));
+
+                for (Generation g = Generation{0}; g < g_ub; ++g) {
+
                     /** object index for this pass **/
                     size_t i_obj = 0;
 
