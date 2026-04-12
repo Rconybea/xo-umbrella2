@@ -735,6 +735,9 @@ namespace ut {
         public:
             explicit GcosFixture(const Testcase & tc);
 
+            auto report_mm() { return obj<AAllocator,DArena>(&report_arena_); }
+            auto error_mm() { return obj<AAllocator,DArena>(&error_arena_); }
+
             GCObjectStoreConfig gcos_config_;
 
             /** Parallel arena for reference
@@ -756,6 +759,9 @@ namespace ut {
 
             /** statistics collected by GCObjectStore.verify_ok() **/
             X1VerifyStats verify_stats_;
+
+            /** the thing we're exercising using this fixture **/
+            GCObjectStore gcos_;
         };
 
         GcosFixture::GcosFixture(const Testcase & tc)
@@ -775,7 +781,8 @@ namespace ut {
                                     .with_store_header_flag(true))},
           error_arena_{DArena::map(ArenaConfig().with_name("error-arena")
                                    .with_size(tc.error_size_)
-                                   .with_store_header_flag(true))}
+                                   .with_store_header_flag(true))},
+          gcos_{gcos_config_, &verify_stats_}
         {}
         
     }
@@ -807,11 +814,7 @@ namespace ut {
 
             GcosFixture fixture(tc);
 
-            obj<AAllocator,DArena> report_mm(&fixture.report_arena_);
-            obj<AAllocator,DArena> error_mm(&fixture.error_arena_);
-
-            // object type storage will be empty unless we install a type.
-            GCObjectStore gcos(fixture.gcos_config_, &fixture.verify_stats_);
+            GCObjectStore & gcos = fixture.gcos_;
 
             REQUIRE(gcos.is_type_installed(typeseq::id<DList>()) == false);
             REQUIRE(gcos.is_type_installed(typeseq::id<DBoolean>()) == false);
@@ -876,7 +879,7 @@ namespace ut {
 
             {
                 obj<AGCObject> report_gco;
-                bool ok = gcos.report_object_types(report_mm, error_mm, &report_gco);
+                bool ok = gcos.report_object_types(fixture.report_mm(), fixture.error_mm(), &report_gco);
 
                 REQUIRE(ok);
                 REQUIRE(report_gco);
@@ -886,16 +889,16 @@ namespace ut {
                 // discard report
 
                 report_gco.reset();
-                report_mm->clear();
+                fixture.report_mm()->clear();
             }
 
             {
                 obj<AGCObject> report_gco;
-                bool ok = gcos.report_object_ages(report_mm, error_mm, &report_gco);
+                bool ok = gcos.report_object_ages(fixture.report_mm(), fixture.error_mm(), &report_gco);
 
                 if (!ok) {
                     log1.retroactively_enable();
-                    log1 && log1(xtag("error", report_mm.last_error()));
+                    log1 && log1(xtag("error", fixture.report_mm().last_error()));
                 }
 
                 REQUIRE(ok);
@@ -906,7 +909,7 @@ namespace ut {
                 // discard report
                 
                 report_gco.reset();
-                report_mm->clear();
+                fixture.report_mm()->clear();
             }
         } /* loop over test cases */
     } /* TEST_CASE(GCObjectStore-1) */
