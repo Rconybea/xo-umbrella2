@@ -24,6 +24,8 @@ namespace xo {
             explicit constexpr Generation(value_type x) : value_{x} {}
 
             static Generation nursery() { return Generation{0}; }
+            static Generation g0() { return Generation{0}; }
+            static Generation g1() { return Generation{1}; }
             static Generation sentinel() { return Generation(c_max_generation); }
 
             bool is_sentinel() const noexcept { return value_ == c_max_generation; }
