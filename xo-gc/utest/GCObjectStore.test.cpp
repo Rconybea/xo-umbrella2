@@ -3,6 +3,7 @@
  *  @author Roland Conybeare, Apr 2026
  **/
 
+#include "GcosTestutil.hpp"
 #include <xo/gc/GCObjectStore.hpp>
 #include <xo/gc/X1VerifyStats.hpp>
 #include <xo/object2/ListOps.hpp>
@@ -53,13 +54,6 @@ namespace ut {
     using std::uint32_t;
 
     namespace {
-        enum class TestGraphType {
-            /* list cell pointing to itself */
-            selfcycle,
-            /* random object graph */
-            random,
-        };
-
         struct Testcase {
             explicit Testcase(uint32_t n_gen, uint32_t n_survive,
                               size_t gc_z, uint32_t type_z,
@@ -169,283 +163,10 @@ namespace ut {
 #      undef T
 #      undef F
 
-        /** record capturing some stats for a (randomly created) gc-aware object **/
-        struct Recd {
-            Recd() = default;
-            Recd(obj<AGCObject> value, uint32_t z, typeseq tseq) : gco_{value}, alloc_z_{z}, tseq_{tseq} {}
-
-            // random gc-aware value
-            obj<AGCObject> gco_;
-            // expected allocation size (lower bound)
-            uint32_t alloc_z_ = 0;
-            // representation
-            typeseq tseq_;
-        };
-
-        /** Create two isomorphic object graphs.
-         *  Each graph comprises a single DList cell
-         *  that points to itself
-         **/
-        void
-        selfcycle_object_graph(std::vector<Recd> * p_v1,
-                               GCObjectStore * p_gcos,
-                               std::vector<Recd> * p_v2,
-                               DArena * arena2)
-        {
-            auto alloc1 = obj<AAllocator,DArena>(p_gcos->new_space());
-            auto alloc2 = obj<AAllocator,DArena>(arena2);
-
-            auto t1 = DBoolean::box(alloc1, true);
-            auto t2 = DBoolean::box(alloc2, true);
-
-            auto l1 = ListOps::cons(alloc1, t1, ListOps::nil());
-            auto l2 = ListOps::cons(alloc2, t2, ListOps::nil());
-
-            // shortcut. Can get away with skipping mm_do_assign(),
-            // because we know lhs of assignment is in the youngest generation
-
-            l1->head_ = l1; // l1->assign_head(gc, l1); // need collector facet
-            l2->head_ = l2; // l2->assign_head(gc, l2); // need collector facet
-
-            p_v1->push_back(Recd(l1, sizeof(DList), typeseq::id<DList>()));
-            p_v2->push_back(Recd(l2, sizeof(DList), typeseq::id<DList>()));
-        }
-
-        /** Create two isomorphic random object graphs containing @p n_obj nodes
-         *  Using a few basic data types from xo-object2
-         *    DBoolean
-         *    DList
-         *
-         *  Generated objects stored in @p *p_gcos.
-         *  Individual items pushed to @p *p_v.
-         *
-         *  Isomorphic copy in @p *p_arena2,
-         *  with individual items pushed to @p *p_v2.
-         *
-         *  For each i in rance the node (*p_v)[i] is isomorphic to (*p_v2)[i]
-         *  (*p_v)[i] allocated entirely from @p p_gcos->new_space()
-         *  (*p_v2)[i] allocated entirely from @p p_arena2
-         **/
-        void
-        random_object_graph(uint32_t n_new_obj,
-                            uint32_t n_assign,
-                            xoshiro256ss * p_rgen,
-                            std::vector<Recd> * p_v,
-                            GCObjectStore * p_gcos,
-                            std::vector<Recd> * p_v2,
-                            DArena * p_arena2)
-        {
-            scope log(XO_DEBUG(true));
-
-            if (n_new_obj == 0 && n_assign == 0)
-                return;
-
-            for (uint32_t i_obj = 0; i_obj < n_new_obj; ++i_obj) {
-                auto alloc = obj<AAllocator,DArena>(p_gcos->new_space());
-                uint32_t sample = (*p_rgen)() % 100;
-                // randomly-constructed node in object graph
-                obj<AGCObject> xi;
-                uint64_t alloc_z;
-                typeseq tseq;
-
-                // 2nd allocator for copy of object model
-                auto alloc2 = obj<AAllocator,DArena>(p_arena2);
-                // isomorphic node destined for arena2
-                obj<AGCObject> xi2;
-
-                if (sample < 50) {
-                    // create a DBoolean
-                    bool value = ((*p_rgen)() % 2 == 0);
-
-                    xi = DBoolean::box(alloc, value);
-                    alloc_z = sizeof(DBoolean);
-                    tseq = typeseq::id<DBoolean>();
-
-                    xi2 = DBoolean::box(alloc2, value);
-                } else {
-                    // create a DList cell, with random {car, cdr}
-
-                    obj<AGCObject> car = ListOps::nil();
-                    obj<AGCObject,DList> cdr = ListOps::nil();
-
-                    obj<AGCObject> car2 = ListOps::nil();
-                    obj<AGCObject,DList> cdr2 = ListOps::nil();
-
-                    auto z = p_v->size();
-
-                    if (z > 0) {
-                        // random car
-                        {
-                            uint32_t i = ((*p_rgen)() % z);
-                            car = p_v->at(i).gco_;
-
-                            car2 = p_v2->at(i).gco_;
-                        }
-
-                        // random cdr
-                        {
-                            uint32_t i = ((*p_rgen)() % z);
-
-                            // is v[i] a list cell?
-                            {
-                                auto tmp = obj<AGCObject,DList>::from(p_v->at(i).gco_);
-                                if (tmp)
-                                    cdr = tmp;
-                            }
-
-                            {
-                                auto tmp2 = obj<AGCObject,DList>::from(p_v2->at(i).gco_);
-                                if (tmp2)
-                                    cdr2 = tmp2;
-                            }
-                        }
-                    }
-
-                    xi = ListOps::cons(alloc, car, cdr);
-                    alloc_z = sizeof(DList);
-                    tseq = typeseq::id<DList>();
-
-                    xi2 = ListOps::cons(alloc2, car2, cdr2);
-                }
-
-                p_v->push_back(Recd(xi, alloc_z, tseq));
-
-                // also save parallel copy
-                p_v2->push_back(Recd(xi2, alloc_z, tseq));
-            }
-
-            // also make some random modifications,
-            // so that it's possible to create cycles.
-
-            for (uint32_t j = 0; j < n_assign; ++j) {
-                // choose an object at random
-                uint32_t lhs_ix = (*p_rgen)() % p_v->size();
-
-                assert(lhs_ix < p_v->size());
-
-                // is it a list cell?
-                auto xj1 = obj<AGCObject,DList>::from((*p_v)[lhs_ix].gco_);
-                auto xj2 = obj<AGCObject,DList>::from((*p_v2)[lhs_ix].gco_);
-
-                if (xj1) {
-                    assert(xj2);
-
-                    // flip a coin -- try modifying one of {car, cdr}
-                    uint32_t sample = (*p_rgen)() % 100;
-
-                    if (sample < 50) {
-                        // modify head.  skip usual gc write-barrier stuff
-
-                        uint32_t rhs_ix = (*p_rgen)() % p_v->size();
-
-                        auto rhs1 = (*p_v)[rhs_ix].gco_;
-                        auto rhs2 = (*p_v2)[rhs_ix].gco_;
-
-                        if (log) {
-                            log("replacing edge in random object graph");
-                            log(xtag("n-obj", p_v->size()));
-                            log(xtag("lhs-ix", lhs_ix));
-                            log(xtag("rhs-ix", rhs_ix));
-                            log(xtag("rhs.tname", TypeRegistry::id2name(rhs1._typeseq())));
-                        }
-
-                        // rhs1 could even be xj1 itself (in which case rhs2 is xj2)
-                        xj1->head_ = rhs1;
-                        xj2->head_ = rhs2;
-                    } else {
-                        // don't modify DList.rest_, risks losing acyclic propertly.
-                        // GCObjectStore handles this, but DList.size() assumes
-                        // list is acyclic
-                    }
-                }
-            }
-        } /*random_object_graph*/
     } /*namespace*/
 
     namespace {
         // aux functions specific to GCObjectStore-1 unit test below
-
-        void
-        gcos_install_test_types(const Testcase & tc,
-                                GCObjectStore * p_gcos)
-        {
-            // verify that GCOS recongnizes as registered,
-            // the types we intend using for unit test
-
-            if (tc.do_type_registration_) {
-                {
-                    REQUIRE(p_gcos->install_type(impl_for<AGCObject,DBoolean>()));
-                    REQUIRE(p_gcos->is_type_installed(typeseq::id<DBoolean>()));
-                }
-                {
-                    REQUIRE(p_gcos->install_type(impl_for<AGCObject,DList>()));
-                    REQUIRE(p_gcos->is_type_installed(typeseq::id<DList>()));
-                }
-            }
-        }
-
-        void
-        gcos_verify_arena_partitioning(const Testcase & tc,
-                                       const GCObjectStore & gcos)
-        {
-            Generation g0{0};
-            Generation g1{1};
-            Generation gn{tc.n_gen_};
-
-            // verify basic arena partitioning + sizing
-
-            REQUIRE(g0 != g1);
-            REQUIRE(gcos.new_space());
-            REQUIRE(gcos.new_space() == gcos.get_space(Role::to_space(), g0));
-            REQUIRE(gcos.new_space()->reserved() >= tc.gc_size_);
-            REQUIRE(gcos.from_space(g0));
-
-            for (Generation gi = g1; gi < tc.n_gen_; ++gi) {
-                // all configured generations exist
-                REQUIRE(gcos.to_space(gi));
-                REQUIRE(gcos.from_space(gi));
-
-                // to- and from- space are distinct
-                REQUIRE(gcos.to_space(gi) != gcos.from_space(gi));
-
-                // arenas for different generations are distinct
-                for (Generation gj = g0; gj < gi; ++gj) {
-                    REQUIRE(gcos.to_space(gi) != gcos.to_space(gj));
-                    REQUIRE(gcos.from_space(gi) != gcos.to_space(gj));
-
-                    REQUIRE(gcos.to_space(gi) != gcos.from_space(gj));
-                    REQUIRE(gcos.from_space(gi) != gcos.to_space(gj));
-                }
-            }
-
-            // generations that weren't requested, don't exist
-            if (gn < c_max_generation) {
-                REQUIRE(!gcos.to_space(gn));
-                REQUIRE(!gcos.from_space(gn));
-            }
-        }
-
-        void
-        gcos_verify_vacant(const Testcase & tc,
-                           const GCObjectStore & gcos)
-        {
-            Generation g0{0};
-            Generation gn{tc.n_gen_};
-
-
-            // verify we have non-zero space!
-            {
-                for (Generation gi = g0; gi < gn; ++gi) {
-                    INFO(tostr(xtag("gi", gi)));
-
-                    REQUIRE(gcos.to_space(gi)->allocated() == 0);
-                    REQUIRE(gcos.to_space(gi)->reserved() >= tc.gc_size_);
-
-                    REQUIRE(gcos.from_space(gi)->allocated() == 0);
-                    REQUIRE(gcos.from_space(gi)->reserved() >= tc.gc_size_);
-                }
-            }
-        }
 
         /** Generate two copies of a random object graph for test case @p tc.
          *  Store first graph in @p *p_x1_v, allocating
@@ -468,10 +189,10 @@ namespace ut {
             switch (tc.obj_graph_type_) {
             case TestGraphType::selfcycle:
                 if (loop_index == 0) {
-                    selfcycle_object_graph(p_x1_v,
-                                           p_gcos,
-                                           p_x2_v,
-                                           p_arena2);
+                    GcosTestutil::selfcycle_object_graph(p_x1_v,
+                                                         p_gcos,
+                                                         p_x2_v,
+                                                         p_arena2);
                 }
                 break;
             case TestGraphType::random:
@@ -483,13 +204,13 @@ namespace ut {
                                               ? tc.n_i0_test_assign_
                                               : tc.n_i1_test_assign_);
 
-                    random_object_graph(n_test_obj,
-                                        n_test_assign,
-                                        p_rgen,
-                                        p_x1_v,
-                                        p_gcos,
-                                        p_x2_v,
-                                        p_arena2);
+                    GcosTestutil::random_object_graph(n_test_obj,
+                                                      n_test_assign,
+                                                      p_rgen,
+                                                      p_x1_v,
+                                                      p_gcos,
+                                                      p_x2_v,
+                                                      p_arena2);
                 }
                 break;
             }
@@ -932,9 +653,9 @@ namespace ut {
             REQUIRE(gcos.is_type_installed(typeseq::id<DList>()) == false);
             REQUIRE(gcos.is_type_installed(typeseq::id<DBoolean>()) == false);
 
-            gcos_install_test_types(tc, &gcos);
-            gcos_verify_arena_partitioning(tc, gcos);
-            gcos_verify_vacant(tc, gcos);
+            GcosTestutil::gcos_install_test_types(tc.do_type_registration_, &gcos);
+            GcosTestutil::gcos_verify_arena_partitioning(tc.n_gen_, tc.gc_size_, gcos);
+            GcosTestutil::gcos_verify_vacant(tc.n_gen_, tc.gc_size_, gcos);
 
             // create object(s).
             // details depend on test case
