@@ -11,6 +11,8 @@ set(UTEST_SRCS
     GCObjectStore.test.cpp
     Object2.test.cpp
 
+    GcosTestutil.cpp
+
     init_gc_utest.cpp
     random_allocs.cpp
 )
