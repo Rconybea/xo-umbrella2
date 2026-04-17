@@ -4,6 +4,7 @@
  **/
 
 #include "GcosTestutil.hpp"
+#include <xo/gc/X1VerifyStats.hpp>
 #include <xo/object2/ListOps.hpp>
 #include <xo/object2/Boolean.hpp>
 #include <xo/alloc2/Arena.hpp>
@@ -18,13 +19,16 @@ namespace ut {
     using xo::scm::ListOps;
     using xo::scm::DList;
     using xo::scm::DBoolean;
+    using xo::mm::X1VerifyStats;
     using xo::mm::GCObjectStore;
     using xo::mm::AGCObject;
     using xo::mm::AAllocator;
     using xo::mm::DArena;
+    using xo::mm::AllocInfo;
     using xo::mm::Role;
     using xo::mm::Generation;
     using xo::mm::c_max_generation;
+    using xo::mm::object_age;
     using xo::rng::xoshiro256ss;
     using xo::facet::TypeRegistry;
     using xo::facet::obj;
@@ -316,41 +320,127 @@ namespace ut {
                                                   std::vector<Recd> * p_x1_v,
                                                   std::vector<Recd> * p_x2_v,
                                                   xoshiro256ss * p_rgen)
-        {
-            switch (obj_graph_type) {
-            case TestGraphType::selfcycle:
-                if (loop_index == 0) {
-                    GcosTestutil::selfcycle_object_graph(p_x1_v,
-                                                         p_gcos,
-                                                         p_x2_v,
-                                                         p_arena2);
-                }
-                break;
+    {
+        switch (obj_graph_type) {
+        case TestGraphType::selfcycle:
+            if (loop_index == 0) {
+                GcosTestutil::selfcycle_object_graph(p_x1_v,
+                                                     p_gcos,
+                                                     p_x2_v,
+                                                     p_arena2);
+            }
+            break;
 
-            case TestGraphType::random:
-                {
-                    uint32_t n_test_obj = ((loop_index == 0)
-                                           ? n_i0_test_obj
-                                           : n_i1_test_obj);
-                    uint32_t n_test_assign = ((loop_index == 0)
-                                              ? n_i0_test_assign
-                                              : n_i1_test_assign);
+        case TestGraphType::random:
+            {
+                uint32_t n_test_obj = ((loop_index == 0)
+                                       ? n_i0_test_obj
+                                       : n_i1_test_obj);
+                uint32_t n_test_assign = ((loop_index == 0)
+                                          ? n_i0_test_assign
+                                          : n_i1_test_assign);
 
-                    GcosTestutil::random_object_graph(n_test_obj,
-                                                      n_test_assign,
-                                                      p_rgen,
-                                                      p_x1_v,
-                                                      p_gcos,
-                                                      p_x2_v,
-                                                      p_arena2);
-                }
-                break;
+                GcosTestutil::random_object_graph(n_test_obj,
+                                                  n_test_assign,
+                                                  p_rgen,
+                                                  p_x1_v,
+                                                  p_gcos,
+                                                  p_x2_v,
+                                                  p_arena2);
+            }
+            break;
+        }
+
+        //x1_v.push_back(Recd(DBoolean::box(alloc, true),
+        //                    sizeof(DBoolean),
+        //                    typeseq::id<DBoolean>()));
+    }
+
+    void
+    GcosTestutil::gcos_verify_consistency(GCObjectStore * p_gcos)
+    {
+        // traverses stored objects, updates counters
+        // in verify_stats (= gco.p_verify_stats_, via ctor)
+        //
+        p_gcos->verify_ok();
+
+        X1VerifyStats * verify_stats = p_gcos->verify_stats();
+
+        INFO(tostr(xtag("n_gc_root", verify_stats->n_gc_root_),
+                   xtag("n_ext", verify_stats->n_ext_),
+                   xtag("n_from", verify_stats->n_from_),
+                   xtag("n_to", verify_stats->n_to_),
+                   xtag("n_fwd", verify_stats->n_fwd_),
+                   xtag("n_age_ok", verify_stats->n_age_ok_),
+                   xtag("n_age_bad", verify_stats->n_age_bad_),
+                   xtag("n_no_iface", verify_stats->n_no_iface_)));
+
+        REQUIRE(verify_stats->is_ok());
+    }
+
+    void
+    GcosTestutil::gcos_verify_ab_equivalence(const std::vector<Recd> & x1_v,
+                                             const std::vector<Recd> & x2_v)
+    {
+        REQUIRE(x1_v.size() == x2_v.size());
+
+        for (size_t i = 0, n = x1_v.size(); i < n; ++i) {
+            REQUIRE(x1_v[i].alloc_z_ == x2_v[i].alloc_z_);
+            REQUIRE(x1_v[i].tseq_ == x2_v[i].tseq_);
+
+            REQUIRE(x1_v[i].gco_._typeseq() == x1_v[i].tseq_);
+            REQUIRE(x2_v[i].gco_._typeseq() == x2_v[i].tseq_);
+        }
+    }
+
+    void
+    GcosTestutil::gcos_verify_allocinfo(const GCObjectStore & gcos,
+                                        uint32_t loop_index,
+                                        const std::vector<Recd> & x1_v)
+    {
+        // gcos can reveal info about allocs
+        for (size_t i = 0, n = x1_v.size(); i < n; ++i) {
+            const auto & x1 = x1_v.at(i);
+
+            REQUIRE(gcos.contains_allocated(Role::to_space(), x1.gco_.data()));
+            AllocInfo obj_info = gcos.alloc_info((std::byte *)x1.gco_.data());
+            REQUIRE(obj_info.size() >= x1.alloc_z_);
+
+            REQUIRE(obj_info.payload().first == (std::byte *)x1.gco_.data());
+            REQUIRE(obj_info.tseq() == x1.tseq_.seqno());
+
+            // also can use header2size / header2tseq convenience functions
+            REQUIRE(gcos.header2size(obj_info.header()) == obj_info.size());
+            REQUIRE(gcos.header2age(obj_info.header()) <= object_age{loop_index});
+            REQUIRE(gcos.header2tseq(obj_info.header()) == obj_info.tseq());
+            REQUIRE(gcos.is_forwarding_header(obj_info.header()) == false);
+        }
+    }
+
+    void
+    GcosTestutil::gcos_verify_gen0_only_allocated(uint32_t n_gen,
+                                                  const GCObjectStore & gcos,
+                                                  uint32_t loop_index,
+                                                  const std::vector<Recd> & x1_v)
+    {
+        Generation g0{0};
+        Generation gn{n_gen};
+
+        // new objects appear in to-space for generation 0.
+        for (Generation gi = g0; gi < gn; ++gi) {
+            INFO(tostr(xtag("gi", gi)));
+
+            if (loop_index == 0) {
+                if ((gi == 0) && (x1_v.size() > 0))
+                    REQUIRE(gcos.to_space(gi)->allocated() > 0);
+                else
+                    REQUIRE(gcos.to_space(gi)->allocated() == 0);
             }
 
-            //x1_v.push_back(Recd(DBoolean::box(alloc, true),
-            //                    sizeof(DBoolean),
-            //                    typeseq::id<DBoolean>()));
+            REQUIRE(gcos.from_space(gi)->allocated() == 0);
         }
+    }
+
 } /*namespace ut*/
 
 /* end GcosTestutil.cpp */
