@@ -83,6 +83,30 @@ namespace ut {
                                         std::vector<Recd> * p_x1_v,
                                         std::vector<Recd> * p_x2_v,
                                         xoshiro256ss * p_rgen);
+
+        /** Invoke built-in consistency verification for @p *p_gcos.
+         **/
+        static void
+        gcos_verify_consistency(GCObjectStore * p_gcos);
+
+        static void
+        gcos_verify_ab_equivalence(const std::vector<Recd> & x1_v,
+                                   const std::vector<Recd> & x2_v);
+
+        /** verify reasonable alloc info values.
+         *  object store has been subject to @p loop_index
+         *  collection cycles
+         **/
+        static void
+        gcos_verify_allocinfo(const GCObjectStore & gcos,
+                              uint32_t loop_index,
+                              const std::vector<Recd> & x1_v);
+
+        static void
+        gcos_verify_gen0_only_allocated(uint32_t n_gen,
+                                        const GCObjectStore & gcos,
+                                        uint32_t loop_index,
+                                        const std::vector<Recd> & x1_v);
     };
 } /*namespace ut*/
 
