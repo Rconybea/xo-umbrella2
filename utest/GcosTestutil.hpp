@@ -7,10 +7,12 @@
 
 #include <xo/gc/GCObjectStore.hpp>
 #include <xo/alloc2/GCObject.hpp>
+#include <xo/alloc2/Generation.hpp>
 #include <xo/arena/DArena.hpp>
 #include <xo/randomgen/xoshiro256.hpp>
 
 namespace ut {
+    using xo::mm::Generation;
     using xo::facet::obj;
 
     enum class TestGraphType {
@@ -107,6 +109,13 @@ namespace ut {
                                         const GCObjectStore & gcos,
                                         uint32_t loop_index,
                                         const std::vector<Recd> & x1_v);
+
+        static void
+        gcos_verify_gen0_fromspace_only_allocated(uint32_t n_gen,
+                                                  const GCObjectStore & gcos,
+                                                  uint32_t loop_index,
+                                                  Generation upto,
+                                                  const std::vector<Recd> & x1_v);
     };
 } /*namespace ut*/
 

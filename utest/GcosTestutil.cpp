@@ -441,6 +441,69 @@ namespace ut {
         }
     }
 
+    void
+    GcosTestutil::gcos_verify_gen0_fromspace_only_allocated(uint32_t n_gen,
+                                                            const GCObjectStore & gcos,
+                                                            uint32_t loop_index,
+                                                            Generation upto,
+                                                            const std::vector<Recd> & x1_v)
+    {
+        Generation g0{0};
+        Generation gn{n_gen};
+
+        for (Generation gi = g0; gi < gn; ++gi) {
+            if (gi < upto) {
+                // we're collecting generation gi.
+                // Before we begin, to-space had better be empty
+                // (everthing in gi is in from-space)
+
+                REQUIRE(gcos.to_space(gi)->allocated() == 0);
+            } else {
+                // we're not collecting generation gi.
+                // from-space must be empty.
+                // May have content in to-space
+
+                REQUIRE(gcos.from_space(gi)->allocated() == 0);
+            }
+        }
+
+        for (size_t i = 0, n = x1_v.size(); i < n; ++i) {
+            const auto & x1 = x1_v.at(i);
+
+            // x1 should be in gen g from-space (with g < upto)
+            // or in gen g to-space (with g >= upto)
+
+            Generation g_from = gcos.generation_of(Role::from_space(), x1.gco_.data());
+            Generation g_to = gcos.generation_of(Role::to_space(), x1.gco_.data());
+
+            if (g_to.is_sentinel()) {
+                // if not in to-space, must be in from-space
+                REQUIRE(!g_from.is_sentinel());
+
+                // + for some gen we're collecting
+                REQUIRE(g_from < upto);
+
+                REQUIRE(gcos.contains(Role::from_space(), x1.gco_.data()));
+                REQUIRE(gcos.contains_allocated(Role::from_space(), x1.gco_.data()));
+            } else {
+                // if in to-space, must not be in from-space
+                REQUIRE(g_from.is_sentinel());
+
+                // + for some gen we're not collecting
+                REQUIRE(g_to >= upto);
+
+                REQUIRE(gcos.contains(Role::to_space(), x1.gco_.data()));
+                REQUIRE(gcos.contains_allocated(Role::to_space(), x1.gco_.data()));
+            }
+
+            AllocInfo obj_info = gcos.alloc_info((std::byte *)x1.gco_.data());
+            REQUIRE(obj_info.size() >= x1.alloc_z_);
+
+            REQUIRE(obj_info.payload().first == (std::byte *)x1.gco_.data());
+            REQUIRE(obj_info.tseq() == x1.tseq_.seqno());
+        }
+    }
+
 } /*namespace ut*/
 
 /* end GcosTestutil.cpp */
