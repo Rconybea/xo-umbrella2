@@ -41,6 +41,7 @@ namespace ut {
 
     struct GcosTestutil {
         using GCObjectStore = xo::mm::GCObjectStore;
+        using AGCObject = xo::mm::AGCObject;
         using DArena = xo::mm::DArena;
         using xoshiro256ss = xo::rng::xoshiro256ss;
 
@@ -116,6 +117,28 @@ namespace ut {
                                                   uint32_t loop_index,
                                                   Generation upto,
                                                   const std::vector<Recd> & x1_v);
+        static void
+        gcos_move_roots_and_verify(bool do_type_registration,
+                                   GCObjectStore * p_gcos,
+                                   Generation upto,
+                                   const std::vector<Recd> & x1_v,
+                                   const std::vector<Recd> & x2_v,
+                                   bool debug_flag);
+
+        static void
+        gcos_verify_forwarding(const GCObjectStore & gcos,
+                               Generation upto,
+                               const Recd & x1,
+                               obj<AGCObject> x1_gco);
+
+        static void
+        gcos_verify_forwarding_destination(const GCObjectStore & gcos,
+                                           const Recd & x1,
+                                           obj<AGCObject> x1p_gco);
+
+        static void
+        gcos_verify_forwarded_ab_equivalence(obj<AGCObject> x1p_gco,
+                                             obj<AGCObject> x2_gco);
     };
 } /*namespace ut*/
 

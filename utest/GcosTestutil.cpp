@@ -504,6 +504,195 @@ namespace ut {
         }
     }
 
+    void
+    GcosTestutil::gcos_move_roots_and_verify(bool do_type_registration,
+                                             GCObjectStore * p_gcos,
+                                             Generation upto,
+                                             const std::vector<Recd> & x1_v,
+                                             const std::vector<Recd> & x2_v,
+                                             bool debug_flag)
+    {
+        scope log(XO_DEBUG(debug_flag));
+
+        Generation g1{1};
+
+        // try moving everything to to-space.
+        // For this to week we must have registered the type,
+        // so gc knows how to traverse it
+        //
+        for (size_t i = 0, n = x1_v.size(); i < n; ++i) {
+            const auto & x1 = x1_v.at(i);
+            const auto & x2 = x2_v.at(i);
+
+            log && log("moving roots");
+            log && log(xtag("i", i),
+                       xtag("n", n),
+                       xtag("x1.tseq_", x1.tseq_),
+                       xtag("x1.tname", TypeRegistry::id2name(x1.tseq_)));
+
+            if (do_type_registration) {
+
+                /* Action of this loop iteration:
+                 *
+                 *          gcos                     arena2
+                 *   +------------+-----------+    +--------+
+                 *   |    from    |    to     |    |        |
+                 *   |            |           |    |        |
+                 *   |    +----+  |  +-----+  |    | +----+ |
+                 *   |    | x1 |---->| x1p |  |    | | x2 | |
+                 *   |    +----+  |  +-----+  |    | +----+ |
+                 *   |            |           |    |        |
+                 *   +------------+-----------+    +--------+
+                 *
+                 * Before:
+                 *   x1, x2 have the same shape
+                 * After
+                 *   x1 forward to x1p
+                 *   x1p and x2 have the same shape
+                 */
+
+                // note: since members of x1_v[] can refer to each other,
+                // it's possible that x1.gco_ is already a forwarding pointer
+                // before we call deep_move_root().
+
+                AGCObject * x1p_iface = p_gcos->lookup_type(x1.tseq_);
+                REQUIRE(x1p_iface);
+
+                // snapshot root before moving
+                obj<AGCObject> x1_gco = x1.gco_;
+
+                // modifies x1.gco_ in place
+                auto x1p_data
+                    = p_gcos->deep_move_root(x1p_iface, (void **)&(x1.gco_.data_), upto);
+
+                REQUIRE(x1p_data);
+                REQUIRE(x1p_data == x1.gco_.data_);
+
+                obj<AGCObject> x1p_gco(x1p_iface, x1p_data);
+
+                // obj (x1_gco) now forwarding pointer (to x1p_gco = x1.gco_)
+                GcosTestutil::gcos_verify_forwarding(*p_gcos, upto, x1, x1_gco);
+
+                // obj1p in to-space, same contents as original obj
+                gcos_verify_forwarding_destination(*p_gcos, x1, x1p_gco);
+
+                // x1p_gco must look like x2.gco
+                REQUIRE(x1p_gco._typeseq() == x2.gco_._typeseq());
+
+                gcos_verify_forwarded_ab_equivalence(x1p_gco, x2.gco_);
+            } else {
+                // can still try to move something.
+                // but will fail since type isn't registered
+
+                auto x1p_data
+                    = p_gcos->deep_move_root(x1.gco_.iface(),
+                                             (void **)&(x1.gco_.data_),
+                                             g1);
+
+                // control here under normal GC use
+                // would represent a configuration fail
+
+                REQUIRE(x1p_data == nullptr);
+            }
+        }
+    }
+
+    void
+    GcosTestutil::gcos_verify_forwarding(const GCObjectStore & gcos,
+                                         Generation upto,
+                                         const Recd & x1,
+                                         obj<AGCObject> x1_gco)
+    {
+        REQUIRE((gcos.contains_allocated(Role::from_space(), x1_gco.data())
+                 || gcos.contains_allocated(Role::to_space(), x1_gco.data())));
+        AllocInfo obj_info = gcos.alloc_info((std::byte *)x1_gco.data());
+
+        INFO(tostr(xtag("obj_info.tseq", obj_info.tseq()),
+                   xtag("obj_info.tname", TypeRegistry::id2name(typeseq(obj_info.tseq())))));
+
+        REQUIRE(obj_info.size() >= x1.alloc_z_);
+        REQUIRE(obj_info.payload().first == (std::byte *)x1_gco.data());
+
+        if (obj_info.is_forwarding_tseq()) {
+            /* object was forwarded, so got collected */
+            REQUIRE(obj_info.is_forwarding_tseq());
+        } else {
+            /* not forwarded is ok iff in generation g >= upto */
+
+            Generation g = gcos.generation_of(Role::to_space(), x1_gco.data());
+
+            REQUIRE(g >= upto);
+        }
+
+        //            if (!obj_info.is_forwarding_tseq())
+        //                print_backtrace_dwarf(true /*demangle*/);
+
+        //            REQUIRE(obj_info.is_forwarding_tseq());
+    }
+
+    void
+    GcosTestutil::gcos_verify_forwarding_destination(const GCObjectStore & gcos,
+                                                     const Recd & x1,
+                                                     obj<AGCObject> x1p_gco)
+    {
+        REQUIRE(gcos.contains_allocated(Role::to_space(), x1p_gco.data()));
+        AllocInfo obj1p_info = gcos.alloc_info((std::byte *)x1p_gco.data());
+        REQUIRE(obj1p_info.size() >= x1.alloc_z_);
+
+        REQUIRE(obj1p_info.payload().first == (std::byte *)x1p_gco.data());
+        REQUIRE(obj1p_info.tseq() == x1.tseq_.seqno());
+
+        REQUIRE(x1p_gco.data() != nullptr);
+        REQUIRE(gcos.contains(Role::to_space(), x1p_gco.data()));
+        REQUIRE(gcos.contains_allocated(Role::to_space(), x1p_gco.data()));
+    }
+
+    void
+    GcosTestutil::gcos_verify_forwarded_ab_equivalence(obj<AGCObject> x1p_gco,
+                                                       obj<AGCObject> x2_gco)
+    {
+        // written out polymorphic comparison
+
+        // match DBoolean..
+        bool match_attempted = false;
+        {
+            auto x1p_b = obj<AGCObject,DBoolean>::from(x1p_gco);
+            auto x2_b = obj<AGCObject,DBoolean>::from(x2_gco);
+
+            if (x1p_b && x2_b) {
+                match_attempted = true;
+
+                REQUIRE(x1p_b->value() == x2_b->value());
+            }
+        }
+
+        // match DList..
+        {
+            auto x1p_b = obj<AGCObject,DList>::from(x1p_gco);
+            auto x2_b = obj<AGCObject,DList>::from(x2_gco);
+
+            if (x1p_b && x2_b) {
+                match_attempted = true;
+
+                // TODO: we could figure out the index in {x1_v[], x2_v[]}
+                //       of x*_b {head, rest} respectively,
+                //       and verify they're consistent.
+
+                REQUIRE(x1p_b->head()._typeseq() == x2_b->head()._typeseq());
+                REQUIRE(x1p_b->size() == x2_b->size());
+
+                if (x1p_b->rest()) {
+                    REQUIRE(x2_b->rest());
+                } else {
+                    // unreachable, since using sentinel objectd for nil list
+                    REQUIRE(x2_b->rest() == nullptr);
+                }
+            }
+        }
+
+        REQUIRE(match_attempted);
+    }
+
 } /*namespace ut*/
 
 /* end GcosTestutil.cpp */
