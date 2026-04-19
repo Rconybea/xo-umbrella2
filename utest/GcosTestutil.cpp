@@ -4,9 +4,11 @@
  **/
 
 #include "GcosTestutil.hpp"
+#include "MockCollector.hpp"
 #include <xo/gc/X1VerifyStats.hpp>
 #include <xo/object2/ListOps.hpp>
 #include <xo/object2/Boolean.hpp>
+#include <xo/alloc2/Collector.hpp>
 #include <xo/alloc2/Arena.hpp>
 #include <xo/facet/TypeRegistry.hpp>
 #include <xo/randomgen/xoshiro256.hpp>
@@ -19,6 +21,8 @@ namespace ut {
     using xo::scm::ListOps;
     using xo::scm::DList;
     using xo::scm::DBoolean;
+    using xo::mm::ACollector;
+    using xo::mm::DMockCollector;
     using xo::mm::X1VerifyStats;
     using xo::mm::GCObjectStore;
     using xo::mm::AGCObject;
@@ -84,16 +88,19 @@ namespace ut {
     void
     GcosTestutil::random_object_graph(uint32_t n_new_obj,
                                       uint32_t n_assign,
+                                      bool debug_flag,
                                       xoshiro256ss * p_rgen,
                                       std::vector<Recd> * p_v,
                                       GCObjectStore * p_gcos,
                                       std::vector<Recd> * p_v2,
                                       DArena * p_arena2)
     {
-        scope log(XO_DEBUG(true));
+        scope log(XO_DEBUG(debug_flag));
 
         if (n_new_obj == 0 && n_assign == 0)
             return;
+
+        // TODO: combine // alloc setup w/ gco_construct_ab_object_graphs() bolierplate
 
         for (uint32_t i_obj = 0; i_obj < n_new_obj; ++i_obj) {
             auto alloc = obj<AAllocator,DArena>(p_gcos->new_space());
@@ -309,11 +316,14 @@ namespace ut {
      *  @p loop_index counts iteration with one gc-like phase.
      **/
     void
-    GcosTestutil::gcos_construct_ab_object_graphs(TestGraphType obj_graph_type,
+    GcosTestutil::gcos_construct_ab_object_graphs(Step * cmd_seq,
+                                                  TestGraphType obj_graph_type,
                                                   uint32_t n_i0_test_obj,
                                                   uint32_t n_i0_test_assign,
                                                   uint32_t n_i1_test_obj,
                                                   uint32_t n_i1_test_assign,
+                                                  bool debug_flag,
+                                                  MutationLogStore * p_mls,
                                                   GCObjectStore * p_gcos,
                                                   DArena * p_arena2,
                                                   uint32_t loop_index,
@@ -321,34 +331,133 @@ namespace ut {
                                                   std::vector<Recd> * p_x2_v,
                                                   xoshiro256ss * p_rgen)
     {
-        switch (obj_graph_type) {
-        case TestGraphType::selfcycle:
-            if (loop_index == 0) {
-                GcosTestutil::selfcycle_object_graph(p_x1_v,
-                                                     p_gcos,
-                                                     p_x2_v,
-                                                     p_arena2);
-            }
-            break;
+        if (cmd_seq && (loop_index == 0)) {
+            // do scripted sequence only
 
-        case TestGraphType::random:
-            {
-                uint32_t n_test_obj = ((loop_index == 0)
-                                       ? n_i0_test_obj
-                                       : n_i1_test_obj);
-                uint32_t n_test_assign = ((loop_index == 0)
-                                          ? n_i0_test_assign
-                                          : n_i1_test_assign);
+            auto alloc = obj<AAllocator,DArena>(p_gcos->new_space());
+            auto alloc2 = obj<AAllocator,DArena>(p_arena2);
+            DMockCollector mock(p_mls, p_gcos);
+            auto mockgc = obj<ACollector,DMockCollector>(&mock);
 
-                GcosTestutil::random_object_graph(n_test_obj,
-                                                  n_test_assign,
-                                                  p_rgen,
-                                                  p_x1_v,
-                                                  p_gcos,
-                                                  p_x2_v,
-                                                  p_arena2);
+            while (cmd_seq->is_command()) {
+                bool is_alloc = false;
+                obj<AGCObject> xi;
+                obj<AGCObject> xi2;
+                uint64_t alloc_z = 0;
+                typeseq tseq;
+
+                switch (cmd_seq->cmd_) {
+                case Step::Cmd::sentinel:
+                    assert(false); // unreachable
+                    break;
+                case Step::Cmd::make_nil:
+                    // TODO combine with code in random_object_graph()
+                    {
+                        is_alloc = true;
+
+                        xi = ListOps::nil();
+                        alloc_z = 0;  // not in gcos space
+                        tseq = typeseq::id<DList>();
+
+                        xi2 = ListOps::nil();
+
+                        REQUIRE(xi._typeseq() == tseq);
+                        REQUIRE(xi2._typeseq() == tseq);
+                    }
+                    break;
+                case Step::Cmd::make_cons:
+                    // TODO combine with code in random_object_graph()
+                    {
+                        auto h1 = p_x1_v->at(cmd_seq->arg0_ix_).gco_;
+                        auto r1 = obj<AGCObject,DList>::from(p_x1_v->at(cmd_seq->arg1_ix_).gco_);
+                        auto h2 = p_x2_v->at(cmd_seq->arg0_ix_).gco_;
+                        auto r2 = obj<AGCObject,DList>::from(p_x2_v->at(cmd_seq->arg1_ix_).gco_);
+
+                        is_alloc = true;
+
+                        xi = ListOps::cons(alloc, h1, r1);
+                        alloc_z = sizeof(DList);
+                        tseq = typeseq::id<DList>();
+
+                        xi2 = ListOps::cons(alloc2, h2, r2);
+                    }
+                    break;
+                case Step::Cmd::make_bool:
+                    // TODO combine with code in random_object_graph()
+                    {
+                        bool value = (cmd_seq->arg0_ix_ > 0);
+
+                        is_alloc = true;
+
+                        xi = DBoolean::box(alloc, value);
+                        alloc_z = sizeof(DBoolean);
+                        tseq = typeseq::id<DBoolean>();
+
+                        xi2 = DBoolean::box(alloc2, value);
+                    }
+                    break;
+                case Step::Cmd::assign_head:
+                    {
+                        is_alloc = false;
+
+                        auto lhs1 = obj<AGCObject,DList>::from(p_x1_v->at(cmd_seq->arg0_ix_).gco_);
+                        auto rhs1 = p_x2_v->at(cmd_seq->arg1_ix_).gco_;
+                        auto lhs2 = obj<AGCObject,DList>::from(p_x2_v->at(cmd_seq->arg0_ix_).gco_);
+                        auto rhs2 = p_x2_v->at(cmd_seq->arg1_ix_).gco_;
+
+                        assert(lhs1);
+                        assert(!lhs1->is_empty());
+
+                        assert(lhs2);
+                        assert(!lhs2->is_empty());
+
+                        assert(p_mls);
+                        assert(mockgc);
+
+                        lhs1->assign_head(mockgc, rhs1);
+                        // alloc2 is ord arena -> no mlog
+                    }
+                    break;
+                }
+
+                if (is_alloc) {
+                    p_x1_v->push_back(Recd(xi, alloc_z, tseq));
+                    p_x2_v->push_back(Recd(xi2, alloc_z, tseq));
+                }
+
+                ++cmd_seq;
             }
-            break;
+        } else {
+            switch (obj_graph_type) {
+            case TestGraphType::selfcycle:
+                if (loop_index == 0) {
+                    GcosTestutil::selfcycle_object_graph(p_x1_v,
+                                                         p_gcos,
+                                                         p_x2_v,
+                                                         p_arena2);
+                }
+                break;
+
+            case TestGraphType::random:
+                {
+                    uint32_t n_test_obj = ((loop_index == 0)
+                                           ? n_i0_test_obj
+                                           : n_i1_test_obj);
+                    uint32_t n_test_assign = ((loop_index == 0)
+                                              ? n_i0_test_assign
+                                              : n_i1_test_assign);
+
+                    GcosTestutil::random_object_graph(n_test_obj,
+                                                      n_test_assign,
+                                                      debug_flag,
+                                                      p_rgen,
+                                                      p_x1_v,
+                                                      p_gcos,
+                                                      p_x2_v,
+                                                      p_arena2);
+                }
+                break;
+            }
         }
 
         //x1_v.push_back(Recd(DBoolean::box(alloc, true),
@@ -402,18 +511,24 @@ namespace ut {
         for (size_t i = 0, n = x1_v.size(); i < n; ++i) {
             const auto & x1 = x1_v.at(i);
 
-            REQUIRE(gcos.contains_allocated(Role::to_space(), x1.gco_.data()));
-            AllocInfo obj_info = gcos.alloc_info((std::byte *)x1.gco_.data());
-            REQUIRE(obj_info.size() >= x1.alloc_z_);
+            // x1 could be a global, such as ListOps::nil()
+            if (x1.alloc_z_ > 0) {
+                REQUIRE(gcos.contains_allocated(Role::to_space(), x1.gco_.data()));
+                AllocInfo obj_info = gcos.alloc_info((std::byte *)x1.gco_.data());
+                REQUIRE(obj_info.size() >= x1.alloc_z_);
 
-            REQUIRE(obj_info.payload().first == (std::byte *)x1.gco_.data());
-            REQUIRE(obj_info.tseq() == x1.tseq_.seqno());
+                REQUIRE(obj_info.payload().first == (std::byte *)x1.gco_.data());
+                REQUIRE(obj_info.tseq() == x1.tseq_.seqno());
 
-            // also can use header2size / header2tseq convenience functions
-            REQUIRE(gcos.header2size(obj_info.header()) == obj_info.size());
-            REQUIRE(gcos.header2age(obj_info.header()) <= object_age{loop_index});
-            REQUIRE(gcos.header2tseq(obj_info.header()) == obj_info.tseq());
-            REQUIRE(gcos.is_forwarding_header(obj_info.header()) == false);
+                // also can use header2size / header2tseq convenience functions
+                REQUIRE(gcos.header2size(obj_info.header()) == obj_info.size());
+                REQUIRE(gcos.header2age(obj_info.header()) <= object_age{loop_index});
+                REQUIRE(gcos.header2tseq(obj_info.header()) == obj_info.tseq());
+                REQUIRE(gcos.is_forwarding_header(obj_info.header()) == false);
+            } else {
+                REQUIRE(!gcos.contains(Role::to_space(), x1.gco_.data()));
+                REQUIRE(!gcos.contains(Role::from_space(), x1.gco_.data()));
+            }
         }
     }
 
@@ -431,10 +546,12 @@ namespace ut {
             INFO(tostr(xtag("gi", gi)));
 
             if (loop_index == 0) {
-                if ((gi == 0) && (x1_v.size() > 0))
-                    REQUIRE(gcos.to_space(gi)->allocated() > 0);
-                else
+                if ((gi == 0) && (x1_v.size() > 0)) {
+                    // conceivable that x1_v[] only contains non-gco objects
+                    //REQUIRE(gcos.to_space(gi)->allocated() > 0);
+                } else {
                     REQUIRE(gcos.to_space(gi)->allocated() == 0);
+                }
             }
 
             REQUIRE(gcos.from_space(gi)->allocated() == 0);
@@ -473,34 +590,39 @@ namespace ut {
             // x1 should be in gen g from-space (with g < upto)
             // or in gen g to-space (with g >= upto)
 
-            Generation g_from = gcos.generation_of(Role::from_space(), x1.gco_.data());
-            Generation g_to = gcos.generation_of(Role::to_space(), x1.gco_.data());
+            if (x1.alloc_z_ > 0) {
+                Generation g_from = gcos.generation_of(Role::from_space(), x1.gco_.data());
+                Generation g_to = gcos.generation_of(Role::to_space(), x1.gco_.data());
 
-            if (g_to.is_sentinel()) {
-                // if not in to-space, must be in from-space
-                REQUIRE(!g_from.is_sentinel());
+                if (g_to.is_sentinel()) {
+                    // if not in to-space, must be in from-space
+                    REQUIRE(!g_from.is_sentinel());
 
-                // + for some gen we're collecting
-                REQUIRE(g_from < upto);
+                    // + for some gen we're collecting
+                    REQUIRE(g_from < upto);
 
-                REQUIRE(gcos.contains(Role::from_space(), x1.gco_.data()));
-                REQUIRE(gcos.contains_allocated(Role::from_space(), x1.gco_.data()));
+                    REQUIRE(gcos.contains(Role::from_space(), x1.gco_.data()));
+                    REQUIRE(gcos.contains_allocated(Role::from_space(), x1.gco_.data()));
+                } else {
+                    // if in to-space, must not be in from-space
+                    REQUIRE(g_from.is_sentinel());
+
+                    // + for some gen we're not collecting
+                    REQUIRE(g_to >= upto);
+
+                    REQUIRE(gcos.contains(Role::to_space(), x1.gco_.data()));
+                    REQUIRE(gcos.contains_allocated(Role::to_space(), x1.gco_.data()));
+                }
+
+                AllocInfo obj_info = gcos.alloc_info((std::byte *)x1.gco_.data());
+                REQUIRE(obj_info.size() >= x1.alloc_z_);
+
+                REQUIRE(obj_info.payload().first == (std::byte *)x1.gco_.data());
+                REQUIRE(obj_info.tseq() == x1.tseq_.seqno());
             } else {
-                // if in to-space, must not be in from-space
-                REQUIRE(g_from.is_sentinel());
-
-                // + for some gen we're not collecting
-                REQUIRE(g_to >= upto);
-
-                REQUIRE(gcos.contains(Role::to_space(), x1.gco_.data()));
-                REQUIRE(gcos.contains_allocated(Role::to_space(), x1.gco_.data()));
+                REQUIRE(!gcos.contains(Role::to_space(), x1.gco_.data()));
+                REQUIRE(!gcos.contains(Role::from_space(), x1.gco_.data()));
             }
-
-            AllocInfo obj_info = gcos.alloc_info((std::byte *)x1.gco_.data());
-            REQUIRE(obj_info.size() >= x1.alloc_z_);
-
-            REQUIRE(obj_info.payload().first == (std::byte *)x1.gco_.data());
-            REQUIRE(obj_info.tseq() == x1.tseq_.seqno());
         }
     }
 
@@ -603,31 +725,32 @@ namespace ut {
                                          const Recd & x1,
                                          obj<AGCObject> x1_gco)
     {
-        REQUIRE((gcos.contains_allocated(Role::from_space(), x1_gco.data())
-                 || gcos.contains_allocated(Role::to_space(), x1_gco.data())));
-        AllocInfo obj_info = gcos.alloc_info((std::byte *)x1_gco.data());
+        if (x1.alloc_z_ > 0) {
+            REQUIRE((gcos.contains_allocated(Role::from_space(), x1_gco.data())
+                     || gcos.contains_allocated(Role::to_space(), x1_gco.data())));
+            AllocInfo obj_info = gcos.alloc_info((std::byte *)x1_gco.data());
 
-        INFO(tostr(xtag("obj_info.tseq", obj_info.tseq()),
-                   xtag("obj_info.tname", TypeRegistry::id2name(typeseq(obj_info.tseq())))));
+            INFO(tostr(xtag("obj_info.tseq", obj_info.tseq()),
+                       xtag("obj_info.tname", TypeRegistry::id2name(typeseq(obj_info.tseq())))));
 
-        REQUIRE(obj_info.size() >= x1.alloc_z_);
-        REQUIRE(obj_info.payload().first == (std::byte *)x1_gco.data());
+            REQUIRE(obj_info.size() >= x1.alloc_z_);
+            REQUIRE(obj_info.payload().first == (std::byte *)x1_gco.data());
 
-        if (obj_info.is_forwarding_tseq()) {
-            /* object was forwarded, so got collected */
-            REQUIRE(obj_info.is_forwarding_tseq());
-        } else {
-            /* not forwarded is ok iff in generation g >= upto */
+            if (obj_info.is_forwarding_tseq()) {
+                /* object was forwarded, so got collected */
+                REQUIRE(obj_info.is_forwarding_tseq());
+            } else {
+                /* not forwarded is ok iff in generation g >= upto */
 
-            Generation g = gcos.generation_of(Role::to_space(), x1_gco.data());
+                Generation g = gcos.generation_of(Role::to_space(), x1_gco.data());
 
-            REQUIRE(g >= upto);
+                REQUIRE(g >= upto);
+            }
+
+            //            if (!obj_info.is_forwarding_tseq())
+            //                print_backtrace_dwarf(true /*demangle*/);
+            //            REQUIRE(obj_info.is_forwarding_tseq());
         }
-
-        //            if (!obj_info.is_forwarding_tseq())
-        //                print_backtrace_dwarf(true /*demangle*/);
-
-        //            REQUIRE(obj_info.is_forwarding_tseq());
     }
 
     void
@@ -635,16 +758,18 @@ namespace ut {
                                                      const Recd & x1,
                                                      obj<AGCObject> x1p_gco)
     {
-        REQUIRE(gcos.contains_allocated(Role::to_space(), x1p_gco.data()));
-        AllocInfo obj1p_info = gcos.alloc_info((std::byte *)x1p_gco.data());
-        REQUIRE(obj1p_info.size() >= x1.alloc_z_);
+        if (x1.alloc_z_ > 0) {
+            REQUIRE(gcos.contains_allocated(Role::to_space(), x1p_gco.data()));
+            AllocInfo obj1p_info = gcos.alloc_info((std::byte *)x1p_gco.data());
+            REQUIRE(obj1p_info.size() >= x1.alloc_z_);
 
-        REQUIRE(obj1p_info.payload().first == (std::byte *)x1p_gco.data());
-        REQUIRE(obj1p_info.tseq() == x1.tseq_.seqno());
+            REQUIRE(obj1p_info.payload().first == (std::byte *)x1p_gco.data());
+            REQUIRE(obj1p_info.tseq() == x1.tseq_.seqno());
 
-        REQUIRE(x1p_gco.data() != nullptr);
-        REQUIRE(gcos.contains(Role::to_space(), x1p_gco.data()));
-        REQUIRE(gcos.contains_allocated(Role::to_space(), x1p_gco.data()));
+            REQUIRE(x1p_gco.data() != nullptr);
+            REQUIRE(gcos.contains(Role::to_space(), x1p_gco.data()));
+            REQUIRE(gcos.contains_allocated(Role::to_space(), x1p_gco.data()));
+        }
     }
 
     void

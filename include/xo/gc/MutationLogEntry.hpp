@@ -35,7 +35,9 @@ namespace xo {
             void ** p_data() const { return p_data_; }
             obj<AGCObject> snap() const { return snap_; }
 
-            /** true if child pointer has been altered since this mlog entry created **/
+            /** true iff child pointer matches value when this mlog entry created **/
+            bool is_active() const noexcept { return *p_data_ == snap_.data(); }
+            /** true iff child pointer has been altered since this mlog entry created **/
             bool is_superseded() const noexcept { return *p_data_ != snap_.data(); }
 
         private:

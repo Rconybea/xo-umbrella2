@@ -420,8 +420,7 @@ namespace xo {
                 gco_store_.verify_ok();
 
                 // 4. scan mutation logs
-                mlog_store_.verify_ok(&gco_store_,
-                                      &(this->verify_stats_));
+                mlog_store_.verify_ok();
             }
 
             // restore run state at end of verify cycle

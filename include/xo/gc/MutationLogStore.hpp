@@ -18,11 +18,12 @@ namespace xo {
         class DX1Collector;
         class X1VerifyStats;
 
+        using MutationLog = DArenaVector<MutationLogEntry>;
+
         /** @brief container for X1 collector mutation logs
          **/
         class MutationLogStore {
         public:
-            using MutationLog = DArenaVector<MutationLogEntry>;
             using size_type = DArena::size_type;
 
         public:
@@ -34,6 +35,12 @@ namespace xo {
              **/
             void init_mlogs(std::size_t page_z);
 
+            MutationLog * get_mlog(Role r, Generation g) noexcept { return mlog_[r][g]; }
+            const MutationLog * get_mlog(Role r, Generation g) const noexcept { return mlog_[r][g]; }
+            /** reminder: abusing Role because we need one additional mlog **/
+            MutationLog * triage_mlog(Generation g) noexcept { return mlog_[Role{c_n_role}][g]; }
+            const MutationLog * triage_mlog(Generation g) const noexcept { return mlog_[Role{c_n_role}][g]; }
+
             /** total number of active mlog entries (across all generations)
              **/
             size_type mutation_log_entries() const noexcept;
@@ -41,12 +48,10 @@ namespace xo {
             void visit_pools(const MemorySizeVisitor & visitor) const;
 
             /** verify consistent mlog state,
-             *  on behalf of gc-aware object store @p gc.
              *  (using gc to identify location of objects).
-             *  Update counters in @p *p_verify_stats.
+             *  Update counters associated with gco_store_
              **/
-            void verify_ok(GCObjectStore * gc,
-                           X1VerifyStats * p_verify_stats) noexcept;
+            void verify_ok() noexcept;
 
             /** on behalf of gc-aware object store @p gc,
              *  change the value of a child pointer at @p p_lhs
