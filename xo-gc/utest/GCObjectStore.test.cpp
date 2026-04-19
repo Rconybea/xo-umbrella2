@@ -122,6 +122,7 @@ namespace ut {
 
         constexpr TestGraphType c_selfcycle = TestGraphType::selfcycle;
         constexpr TestGraphType c_random = TestGraphType::random;
+        /** arena size for object age/type reports **/
         constexpr uint32_t c_report_z1 = 64 * 1024;
         constexpr uint32_t c_error_z1 = 16 * 1024;
 
@@ -166,7 +167,9 @@ namespace ut {
     namespace {
         // aux functions specific to GCObjectStore-1 unit test below
 
-        // fixture for GCObjectStore-1 test
+        /** Fixture for GCObjectStore-1 test.
+         *  Compare similar but not identical fixture in MutationLogStore.test.cpp
+         **/
         class GcosFixture {
         public:
             explicit GcosFixture(const Testcase & tc);
@@ -174,6 +177,7 @@ namespace ut {
             auto report_mm() { return obj<AAllocator,DArena>(&report_arena_); }
             auto error_mm() { return obj<AAllocator,DArena>(&error_arena_); }
 
+            /** configuration for @ref gcos_ **/
             GCObjectStoreConfig gcos_config_;
 
             /** Parallel arena for reference
@@ -186,6 +190,7 @@ namespace ut {
              *     It doesn't have or require any builtin ability to traverse an object model
              **/
             DArena arena2_;
+
             /** Arena for holding report output:
              *  See GCObjectStore methods .report_object_types(), .report_object_ages()
              **/
@@ -225,7 +230,7 @@ namespace ut {
 
     TEST_CASE("GCObjectStore-1", "[GCObjectStore]")
     {
-        constexpr bool c_debug_flag = true;
+        constexpr bool c_debug_flag = false;
         scope log0(XO_DEBUG(c_debug_flag), "GCObjectStore test");
 
         std::uint64_t seed = 12168164826603821466ul;
@@ -270,11 +275,14 @@ namespace ut {
 
                 // construct, extend, and/or modify object graphs in {x1_v, x2_v}
 
-                GcosTestutil::gcos_construct_ab_object_graphs(tc.obj_graph_type_,
+                GcosTestutil::gcos_construct_ab_object_graphs(nullptr /*cmd_seq*/,
+                                                              tc.obj_graph_type_,
                                                               tc.n_i0_test_obj_,
                                                               tc.n_i0_test_assign_,
                                                               tc.n_i1_test_obj_,
                                                               tc.n_i1_test_assign_,
+                                                              tc.debug_flag_,
+                                                              nullptr /*p_mls*/,
                                                               &gcos,
                                                               &fixture.arena2_,
                                                               loop_index,

@@ -154,6 +154,43 @@ namespace xo {
             return slot.iface();
         }
 
+        namespace {
+            using size_type = GCObjectStore::size_type;
+
+            size_type
+            stat_helper(const GCObjectStore & d,
+                        size_type (DArena::* getter)() const,
+                        Generation g,
+                        Role r)
+            {
+                const DArena * arena = d.get_space(r, g);
+
+                if (arena) [[likely]] {
+                    return (arena->*getter)();
+                }
+
+                return 0;
+            }
+        }
+
+        auto
+        GCObjectStore::allocated(Generation g, Role r) const noexcept -> size_type
+        {
+            return stat_helper(*this, &DArena::allocated, g, r);
+        }
+
+        auto
+        GCObjectStore::committed(Generation g, Role r) const noexcept -> size_type
+        {
+            return stat_helper(*this, &DArena::committed, g, r);
+        }
+
+        auto
+        GCObjectStore::reserved(Generation g, Role r) const noexcept -> size_type
+        {
+            return stat_helper(*this, &DArena::reserved, g, r);
+        }
+
         Generation
         GCObjectStore::generation_of(Role r, const void * addr) const noexcept
         {
@@ -258,7 +295,7 @@ namespace xo {
                                            obj<AAllocator> error_mm,
                                            obj<AGCObject> * p_output) const noexcept
         {
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG(this->config_.debug_flag_));
 
             (void)error_mm;
 
@@ -369,7 +406,7 @@ namespace xo {
                                           obj<AAllocator> error_mm,
                                           obj<AGCObject> * p_output) const noexcept
         {
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG(this->config_.debug_flag_));
 
             (void)error_mm;
 
@@ -883,7 +920,7 @@ namespace xo {
         std::byte *
         GCObjectStore::alloc_copy(void * src) noexcept
         {
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG(config_.debug_flag_));
 
             AllocInfo src_info = this->alloc_info((std::byte *)src);
             uint32_t age1p = std::min(src_info.age() + 1,

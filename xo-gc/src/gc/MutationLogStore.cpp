@@ -90,13 +90,14 @@ namespace xo {
         }
 
         void
-        MutationLogStore::verify_ok(GCObjectStore * gco_store,
-                                    X1VerifyStats * p_verify_stats) noexcept
+        MutationLogStore::verify_ok() noexcept
         {
+            X1VerifyStats * p_verify_stats = gco_store_->verify_stats();
+
             // 4. scan mutation logs
             for (Generation g(0); g + 1 < config_.n_generation_; ++g) {
-                const DArena * space = gco_store->get_space(Role::to_space(), g);
-                const DArena * from = gco_store->get_space(Role::from_space(), g);
+                const DArena * space = gco_store_->get_space(Role::to_space(), g);
+                const DArena * from = gco_store_->get_space(Role::from_space(), g);
 
                 // mutation log for generation g records *incoming* pointers
                 // from more senior generations; includes objects from *this*

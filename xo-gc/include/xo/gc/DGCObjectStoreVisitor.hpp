@@ -26,7 +26,7 @@ namespace xo {
         class DGCObjectStoreVisitor {
         public:
             DGCObjectStoreVisitor(GCObjectStore * gcos, Generation upto);
-            
+
             template <typename AFacet = AGCObjectVisitor>
             obj<AFacet,DGCObjectStoreVisitor> ref() { return obj<AFacet,DGCObjectStoreVisitor>(this); }
 
@@ -46,4 +46,4 @@ namespace xo {
     } /*namespace mm*/
 } /*namespace xo*/
 
-/* end DGCObjectVisitor.hpp */
+/* end DGCObjectStoreVisitor.hpp */

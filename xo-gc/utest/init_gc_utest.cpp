@@ -4,7 +4,7 @@
  **/
 
 #include "init_gc_utest.hpp"
-//#include "MockCollector.hpp"
+#include "MockCollector.hpp"
 #include <xo/gc/init_gc.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/indentlog/scope.hpp>
@@ -19,7 +19,7 @@ namespace xo {
     {
         scope log(XO_DEBUG(false));
 
-        //FacetRegistry::register_impl<AGCObjectVisitor, DMockCollector>();
+        FacetRegistry::register_impl<ACollector, DMockCollector>();
 
         //log && log(xtag("DMockCollector.tseq", typeseq::id<DMockCollector>()));
 

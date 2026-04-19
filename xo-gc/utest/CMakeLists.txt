@@ -11,10 +11,21 @@ set(UTEST_SRCS
     GCObjectStore.test.cpp
     Object2.test.cpp
 
+    DMockCollector.cpp
+    ICollector_DMockCollector.cpp
+
+    MlsTestutil.cpp
     GcosTestutil.cpp
 
     init_gc_utest.cpp
     random_allocs.cpp
+)
+
+# note: manual target; generated code committed to git
+xo_add_genfacetimpl(
+    TARGET xo-gc-facetimpl-collector-mockcollector
+    FACET_PKG xo_alloc2
+    INPUT idl/ICollector_DMockCollector.json5
 )
 
 if (ENABLE_TESTING)

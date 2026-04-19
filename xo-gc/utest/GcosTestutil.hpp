@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include <xo/gc/MutationLogStore.hpp>
 #include <xo/gc/GCObjectStore.hpp>
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/alloc2/Generation.hpp>
@@ -15,7 +16,39 @@ namespace ut {
     using xo::mm::Generation;
     using xo::facet::obj;
 
+    /** specify a step in scripted sequence
+     **/
+    struct Step {
+        enum class Cmd {
+            /** sentinel for end of sequence **/
+            sentinel,
+            /** refer to nil DList **/
+            make_nil,
+            /** allocate DList w/ head x1_v[arg0_ix_], rest x1_v[arg1_ix_] **/
+            make_cons,
+            /** allocate a boolean **/
+            make_bool,
+            /** modify the head of a list x1_v[arg0_ix_]; replace with x1_v[arg1_ix_] **/
+            assign_head,
+
+        };
+
+        Step(Cmd cmd, uint32_t arg0, uint32_t arg1)
+        : cmd_{cmd}, arg0_ix_{arg0}, arg1_ix_{arg1} {}
+
+        bool is_sentinel() const { return cmd_ == Cmd::sentinel; }
+        bool is_command() const { return cmd_ != Cmd::sentinel; }
+
+        Cmd cmd_;
+        /** arg0 object index (index into x1_v[]) **/
+        uint32_t arg0_ix_;
+        /** arg1 object index (index into x1_v[]) **/
+        uint32_t arg1_ix_;
+    };
+
     enum class TestGraphType {
+        /* spelled out sequence of Steps */
+        fixed,
         /* list cell pointing to itself */
         selfcycle,
         /* random object graph */
@@ -40,6 +73,7 @@ namespace ut {
     };
 
     struct GcosTestutil {
+        using MutationLogStore = xo::mm::MutationLogStore;
         using GCObjectStore = xo::mm::GCObjectStore;
         using AGCObject = xo::mm::AGCObject;
         using DArena = xo::mm::DArena;
@@ -54,6 +88,7 @@ namespace ut {
         static void
         random_object_graph(uint32_t n_new_obj,
                             uint32_t n_assign,
+                            bool debug_flag,
                             xoshiro256ss * p_rgen,
                             std::vector<Recd> * p_v,
                             GCObjectStore * p_gcos,
@@ -74,12 +109,17 @@ namespace ut {
                            size_t gc_size,
                            const GCObjectStore & gcos);
 
+        /** sequence of steps. if non-null, ends with step s: s.cmd_ == Step::Cmd::Sentinel
+         **/
         static void
-        gcos_construct_ab_object_graphs(TestGraphType obj_graph_type,
+        gcos_construct_ab_object_graphs(Step * cmd_seq,
+                                        TestGraphType obj_graph_type,
                                         uint32_t n_i0_test_obj,
                                         uint32_t n_i0_test_assign,
                                         uint32_t n_i1_test_obj,
                                         uint32_t n_i1_test_assign,
+                                        bool debug_flag,
+                                        MutationLogStore * p_mls,
                                         GCObjectStore * p_gcos,
                                         DArena * p_arena2,
                                         uint32_t loop_index,

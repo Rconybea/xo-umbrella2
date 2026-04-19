@@ -60,6 +60,18 @@ namespace xo {
              **/
             AGCObject * lookup_type(typeseq tseq) const noexcept;
 
+            /** report allocated memory for role r, generation g
+             **/
+            size_type allocated(Generation g, Role r) const noexcept;
+
+            /** report committed memory for role r, generation g
+             **/
+            size_type committed(Generation g, Role r) const noexcept;
+
+            /** report reserved memory for role r, generation g
+             **/
+            size_type reserved(Generation g, Role r) const noexcept;
+
             /** generation to which pointer @p addr belongs, given Role @p r;
              *  sentinel if not found in this collector
              **/
