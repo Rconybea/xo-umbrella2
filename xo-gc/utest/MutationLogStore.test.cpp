@@ -40,7 +40,7 @@ namespace ut {
                               size_t gc_z,
                               uint32_t type_z,
                               bool do_type_registration,
-                              Step * cmd_seq,
+                              TestSequence test_seq,
                               uint32_t mlog_z,
                               bool mlog_enabled_flag,
                               TestGraphType obj_graph_type,
@@ -57,7 +57,7 @@ namespace ut {
               do_type_registration_{do_type_registration},
               mutation_log_z_{mlog_z},
               mlog_enabled_flag_{mlog_enabled_flag},
-              cmd_seq_{cmd_seq},
+              test_seq_{test_seq},
               obj_graph_type_{obj_graph_type},
               n_gc_loop_{n_gc_loop},
               n_i0_test_obj_{n_i0_test_obj},
@@ -83,8 +83,8 @@ namespace ut {
              *  (load-bearing for incremental gc)
              **/
             bool mlog_enabled_flag_ = false;
-            /** first loop: explicit cell alloc/assign **/
-            Step * cmd_seq_ = nullptr;
+            /** if non-null; run contents of cmd_seq_[i] on loop #i **/
+            TestSequence test_seq_;
             /** object graph type **/
             TestGraphType obj_graph_type_ = TestGraphType::random;
             /** #of gc-like "move all the roots" phases to perform **/
@@ -107,47 +107,96 @@ namespace ut {
 
         using Cmd = Step::Cmd;
 
-        static Step seq0[] = {
+        static Step step_0[] = {
             {Cmd::make_bool, 0, 0}, // #f
-            {Cmd::make_nil, 0, 0},  // #nil
+            {Cmd::make_nil,  0, 0},  // #nil
             {Cmd::make_cons, 0, 1}, // cons(#f,#nil)
-            {Cmd::sentinel, 0, 0},
+            {Cmd::sentinel,  0, 0},
         };
 
-        static Step seq1[] = {
-            {Cmd::make_bool, 0, 0}, // #f
-            {Cmd::make_bool, 1, 0}, // #t
-            {Cmd::make_nil, 0, 0},  // #nil
-            {Cmd::make_cons, 0, 2}, // cons(#f,#nil)
-            {Cmd::assign_head, 3, 1}, // set-car(cons(#f,#nil),#t)
-            {Cmd::sentinel, 0, 0},
+        static Phase phase_0[] = {
+            //
+            // lo   hi    mlog_new_z_[]
+            //  v    v    v
+            {   0,   3,   {0} },
+            {  -1,  -1,   {0} },
         };
 
+        static TestSequence seq_0 { step_0, phase_0 };
+
+        // seq1: side effect on head of cons cell.
+        // But no mlog entry b/c all object ages are equal
+        // -> no x-age pointers
+        //
+        static Step step_1[] = {
+            {Cmd::make_bool,   0, 0}, // [0]: #f
+            {Cmd::make_bool,   1, 0}, // [1]: #t
+            {Cmd::make_nil,    0, 0}, // [2]: #nil
+            {Cmd::make_cons,   0, 2}, // [3]: cons(#f,#nil)
+            {Cmd::assign_head, 3, 1}, //      set-car(cons(#f,#nil),#t)
+            {Cmd::sentinel,    0, 0},
+        };
+
+        static Phase phase_1[] = {
+            //
+            // lo   hi    mlog_new_z_[]
+            //  v    v    v
+            {   0,   5,   {0} },
+            {  -1,  -1,   {0} },
+        };
+
+        static TestSequence seq_1 { step_1, phase_1 };
+
+        static Step step_2[] = {
+            // ----- phase 0 -----
+            {Cmd::make_bool,   0, 0}, // [0]: #f
+            {Cmd::make_bool,   1, 0}, // [1]: #t
+            {Cmd::make_nil,    0, 0}, // [2]: #nil
+            {Cmd::make_cons,   0, 2}, // [3]: cons(#f,#nil)
+            // ----- phase 1 -----
+            {Cmd::make_bool,   1, 0}, // [4]: #t
+            {Cmd::assign_head, 3, 4}, //      set-car(cons(#f,#nil),#t)
+            {Cmd::sentinel,    0, 0},
+        };
+
+        static Phase phase_2[] = {
+            //
+            // lo   hi    mlog_new_z_[]
+            //  v    v    v
+            {   0,   4,   {0} },  // phase 0
+            {   4,   6,   {1} },  // phase 1. set-car makes 1x xgen ptr from g1->g0
+            {  -1,  -1,   {0} },
+        };
+
+        static TestSequence seq_2 { step_2, phase_2 };
+
+#      define seq_nil TestSequence{}
 #      define nil nullptr
 #      define T true
 #      define F false
 
         static std::vector<Testcase> s_testcase_v = {
             /**
-             *                                                                         debug_flag
-             *                                                                n_i1_test_assign  |
-             *                                                               n_i1_test_obj   |  |
-             *                                                        n_i0_test_assign   |   |  |
-             *                                                       n_i0_test_obj   |   |   |  |
-             *                                                       n_gc_loop   |   |   |   |  |
-             *                                               obj_graph_type  |   |   |   |   |  |
-             *                               mlog_enabled_flag            |  |   |   |   |   |  |
-             *                               mutation_log_z  |            |  |   |   |   |   |  |
-             *                                  cmd_seq   |  |            |  |   |   |   |   |  |
-             *              do_type_registration      |   |  |            |  |   |   |   |   |  |
-             *  n_survive       object_type_z  |      |   |  |            |  |   |   |   |   |  |
-             *   n_gen  |    gc_size        |  |      |   |  |            |  |   |   |   |   |  |
-             *       v  v          v        v  v      v   v  v            v  v   v   v   v   v  v
+             *                                                                             debug_flag
+             *                                                                    n_i1_test_assign  |
+             *                                                                   n_i1_test_obj   |  |
+             *                                                            n_i0_test_assign   |   |  |
+             *                                                           n_i0_test_obj   |   |   |  |
+             *                                                           n_gc_loop   |   |   |   |  |
+             *                                                   obj_graph_type  |   |   |   |   |  |
+             *                                   mlog_enabled_flag            |  |   |   |   |   |  |
+             *                                   mutation_log_z  |            |  |   |   |   |   |  |
+             *                                    cmd_seq     |  |            |  |   |   |   |   |  |
+             *              do_type_registration        |     |  |            |  |   |   |   |   |  |
+             *  n_survive       object_type_z  |        |     |  |            |  |   |   |   |   |  |
+             *   n_gen  |    gc_size        |  |        |     |  |            |  |   |   |   |   |  |
+             *       v  v          v        v  v        v     v  v            v  v   v   v   v   v  v
              **/
-            Testcase(2, 4, 16 * 1024, 8 * 128, F,   nil,  0, F,    c_random, 1,  0,  0,  0,  0, F),
-            Testcase(2, 4, 16 * 1024, 8 * 128, T,   nil,  0, F, c_selfcycle, 1,  1,  0,  0,  0, F),
-            Testcase(2, 4, 16 * 1024, 8 * 128, T,  seq0,  0, F,     c_fixed, 1,  0,  0,  0,  0, F),
-            Testcase(2, 4, 16 * 1024, 8 * 128, T,  seq1,  0, F,     c_fixed, 1,  0,  0,  0,  0, T),
+            Testcase(2, 4, 16 * 1024, 8 * 128, F, seq_nil,    0, F,    c_random, 1,  0,  0,  0,  0, F),
+            Testcase(2, 4, 16 * 1024, 8 * 128, T, seq_nil,    0, F, c_selfcycle, 1,  1,  0,  0,  0, F),
+            Testcase(2, 4, 16 * 1024, 8 * 128, T,   seq_0,    0, F,     c_fixed, 1,  0,  0,  0,  0, F),
+            Testcase(2, 4, 16 * 1024, 8 * 128, T,   seq_1,    0, F,     c_fixed, 1,  0,  0,  0,  0, F),
+            Testcase(2, 1, 16 * 1024, 8 * 128, T,   seq_2,  128, T,     c_fixed, 2,  0,  0,  0,  0, T),
         };
 
 #      undef T
@@ -284,7 +333,7 @@ namespace ut {
             for (uint32_t loop_index = 0; loop_index < tc.n_gc_loop_; ++loop_index) {
                 scope log2(XO_DEBUG(tc.debug_flag_), "gc loop", xtag("loop_index", loop_index));
 
-                GcosTestutil::gcos_construct_ab_object_graphs(tc.cmd_seq_,
+                GcosTestutil::gcos_construct_ab_object_graphs(tc.test_seq_,
                                                               tc.obj_graph_type_,
                                                               tc.n_i0_test_obj_,
                                                               tc.n_i0_test_assign_,

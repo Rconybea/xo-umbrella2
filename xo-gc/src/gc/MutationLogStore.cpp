@@ -29,10 +29,10 @@ namespace xo {
 
                     for (std::uint32_t mlog_role = 0; mlog_role < c_n_role + 1; ++mlog_role) {
                         this->mlog_storage_[mlog_role][igen]
-                            = _make_mlog(igen,
-                                         label_v[mlog_role],
-                                         config_.mutation_log_z_,
-                                         page_z);
+                            = this->_make_mlog(igen,
+                                               label_v[mlog_role],
+                                               config_.mutation_log_z_,
+                                               page_z);
 
                         this->mlog_[mlog_role][igen]
                             = &(mlog_storage_[mlog_role][igen]);
@@ -152,6 +152,8 @@ namespace xo {
             *p_lhs = rhs;
 
             if (!config_.enabled_flag_) {
+                log && log(xtag("msg", "noop b/c incremental gc disabled"));
+
                 // only need to log mutations when incremental gc is enabled
                 return;
             }
@@ -163,6 +165,8 @@ namespace xo {
             Generation src_g = gco_store->generation_of(Role::to_space(), p_lhs);
 
             if (src_g.is_sentinel()) {
+                log && log(xtag("msg", "noop because src not gc-owned"));
+
                 // only need mlog entries for gc-owned pointers.
                 // In this case pointer does not originate in gc-owned space
                 return;
@@ -171,11 +175,15 @@ namespace xo {
             Generation dest_g = gco_store->generation_of(Role::to_space(), rhs.data());
 
             if (dest_g.is_sentinel()) {
+                log && log(xtag("msg", "noop because dest not gc-owned"));
+
                 // similarly, don't need mlog entry to non-gc-owned destination
                 return;
             }
 
             if (src_g < dest_g) {
+                log && log(xtag("msg", "noop because src gen younger than dest gen"));
+
                 // young-to-old pointers don't need to be remembered,
                 // since a GC cycle that collects an (old) generation is guarnatted
                 // to also collect all younger generations.
@@ -194,6 +202,8 @@ namespace xo {
                 assert(src_hdr && dest_hdr);
 
                 if (gco_store->header2age(*src_hdr) <= gco_store->header2age(*dest_hdr)) {
+                    log && log(xtag("msg", "noop because src age no older than dest age"));
+
                     // source and destination have the same age;
                     // therefore are always collected on the same set of GC cycles
                     // -> no need to remember separately.
@@ -258,7 +268,7 @@ namespace xo {
                 // - to_mlog, triage_mlog are empty
 
                 for (Generation child_gen{0};
-                     child_gen + 2 < config_.n_generation_;
+                     child_gen + 1 < config_.n_generation_;
                      ++child_gen) {
 
                     MutationLog * from_mlog = this->mlog_[Role::from_space()][child_gen];
