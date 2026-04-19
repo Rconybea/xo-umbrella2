@@ -24,6 +24,7 @@ namespace ut {
     using xo::mm::ACollector;
     using xo::mm::DMockCollector;
     using xo::mm::X1VerifyStats;
+    using xo::mm::MutationLog;
     using xo::mm::GCObjectStore;
     using xo::mm::AGCObject;
     using xo::mm::AAllocator;
@@ -316,7 +317,7 @@ namespace ut {
      *  @p loop_index counts iteration with one gc-like phase.
      **/
     void
-    GcosTestutil::gcos_construct_ab_object_graphs(Step * cmd_seq,
+    GcosTestutil::gcos_construct_ab_object_graphs(TestSequence test_seq,
                                                   TestGraphType obj_graph_type,
                                                   uint32_t n_i0_test_obj,
                                                   uint32_t n_i0_test_assign,
@@ -331,104 +332,185 @@ namespace ut {
                                                   std::vector<Recd> * p_x2_v,
                                                   xoshiro256ss * p_rgen)
     {
-        if (cmd_seq && (loop_index == 0)) {
-            // do scripted sequence only
+        /**  TestSequence memory layout
+         *
+         *  test_seq
+         *    |
+         *    v
+         *    TestSequence
+         *    +-----------+     cmd_seq_[] (shared, sentinel-terminated)
+         *    | cmd_seq_  |---> +-------+-------+-------+-------+-------+-------+
+         *    +-----------+     | step0 | step1 | step2 | step3 | step4 | SENTL |
+         *    | phases_   |-\   +-------+-------+-------+-------+-------+-------+
+         *    +-----------+ |   ix: 0       1       2       3       4       5
+         *                  |
+         *                  |   phases_[] (sentinel-terminated)
+         *                  \-> +-----------+-----------+
+         *                      |  Phase 0  |  SENTINEL |
+         *                      | lo_ix_=0  | lo_ix_=-1 |
+         *                      | hi_ix_=5  | hi_ix_=-1 |
+         *                      | mlog_new_ | mlog_new_ |
+         *                      +-----------+-----------+
+         *
+         *  Phase.lo_ix_ / hi_ix_ index into test_seq->cmd_seq_[].
+         *  Phase 0 executes cmd_seq_[lo_ix_ .. hi_ix_), i.e. steps 0..4.
+         *  Sentinel phase has lo_ix_ == -1.
+         *
+         *  Each Step has {cmd_, arg0_ix_, arg1_ix_}.
+         *  arg0_ix_ and arg1_ix_ index into x1_v[] / x2_v[],
+         *  referring to objects created by earlier steps.
+         *
+         *  Example (seq1):
+         *    step0: {make_bool,   0, 0}  -> x1_v[0] = #f
+         *    step1: {make_bool,   1, 0}  -> x1_v[1] = #t
+         *    step2: {make_nil,    0, 0}  -> x1_v[2] = ()
+         *    step3: {make_cons,   0, 2}  -> x1_v[3] = cons(x1_v[0], x1_v[2]) = (#f)
+         *    step4: {assign_head, 3, 1}  -> set-car!(x1_v[3], x1_v[1])  => (#t)
+         **/
 
-            auto alloc = obj<AAllocator,DArena>(p_gcos->new_space());
-            auto alloc2 = obj<AAllocator,DArena>(p_arena2);
-            DMockCollector mock(p_mls, p_gcos);
-            auto mockgc = obj<ACollector,DMockCollector>(&mock);
+        if (!test_seq.is_sentinel()) {
+            // Explicit command sequence.
+            // Each command creates a new node or modifies an existing one
 
-            while (cmd_seq->is_command()) {
-                bool is_alloc = false;
-                obj<AGCObject> xi;
-                obj<AGCObject> xi2;
-                uint64_t alloc_z = 0;
-                typeseq tseq;
+            // 1. Sequence of commands for this call.
+            //    Will be phases[loop_index] if well-defined.
+            // 2. Expected effect on mutation log
+            //
+            Phase * phase_expect = nullptr;
+            {
+                Phase * p_phase = test_seq.phases_;
 
-                switch (cmd_seq->cmd_) {
-                case Step::Cmd::sentinel:
-                    assert(false); // unreachable
-                    break;
-                case Step::Cmd::make_nil:
-                    // TODO combine with code in random_object_graph()
-                    {
-                        is_alloc = true;
-
-                        xi = ListOps::nil();
-                        alloc_z = 0;  // not in gcos space
-                        tseq = typeseq::id<DList>();
-
-                        xi2 = ListOps::nil();
-
-                        REQUIRE(xi._typeseq() == tseq);
-                        REQUIRE(xi2._typeseq() == tseq);
+                if (test_seq.phases_) {
+                    for (uint32_t i = 0; i < loop_index; ++i) {
+                        if (!p_phase->is_sentinel())
+                            ++p_phase;
+                        else
+                            p_phase = nullptr;
                     }
-                    break;
-                case Step::Cmd::make_cons:
-                    // TODO combine with code in random_object_graph()
-                    {
-                        auto h1 = p_x1_v->at(cmd_seq->arg0_ix_).gco_;
-                        auto r1 = obj<AGCObject,DList>::from(p_x1_v->at(cmd_seq->arg1_ix_).gco_);
-                        auto h2 = p_x2_v->at(cmd_seq->arg0_ix_).gco_;
-                        auto r2 = obj<AGCObject,DList>::from(p_x2_v->at(cmd_seq->arg1_ix_).gco_);
-
-                        is_alloc = true;
-
-                        xi = ListOps::cons(alloc, h1, r1);
-                        alloc_z = sizeof(DList);
-                        tseq = typeseq::id<DList>();
-
-                        xi2 = ListOps::cons(alloc2, h2, r2);
-                    }
-                    break;
-                case Step::Cmd::make_bool:
-                    // TODO combine with code in random_object_graph()
-                    {
-                        bool value = (cmd_seq->arg0_ix_ > 0);
-
-                        is_alloc = true;
-
-                        xi = DBoolean::box(alloc, value);
-                        alloc_z = sizeof(DBoolean);
-                        tseq = typeseq::id<DBoolean>();
-
-                        xi2 = DBoolean::box(alloc2, value);
-                    }
-                    break;
-                case Step::Cmd::assign_head:
-                    {
-                        is_alloc = false;
-
-                        auto lhs1 = obj<AGCObject,DList>::from(p_x1_v->at(cmd_seq->arg0_ix_).gco_);
-                        auto rhs1 = p_x2_v->at(cmd_seq->arg1_ix_).gco_;
-                        auto lhs2 = obj<AGCObject,DList>::from(p_x2_v->at(cmd_seq->arg0_ix_).gco_);
-                        auto rhs2 = p_x2_v->at(cmd_seq->arg1_ix_).gco_;
-
-                        assert(lhs1);
-                        assert(!lhs1->is_empty());
-
-                        assert(lhs2);
-                        assert(!lhs2->is_empty());
-
-                        assert(p_mls);
-                        assert(mockgc);
-
-                        lhs1->assign_head(mockgc, rhs1);
-                        // alloc2 is ord arena -> no mlog
-                    }
-                    break;
                 }
 
-                if (is_alloc) {
-                    p_x1_v->push_back(Recd(xi, alloc_z, tseq));
-                    p_x2_v->push_back(Recd(xi2, alloc_z, tseq));
+                phase_expect = p_phase;
+            }
+
+            Step * cmd_seq = test_seq.cmd_seq_;
+
+            if (phase_expect && cmd_seq) {
+                // Do scripted sequence only.
+                // For this phases that is
+                //   cmd_seq[ix]
+                // for
+                //   phase_expect->lo_ix_ <= ix < phase_expect->hi_ix_
+
+                auto alloc = obj<AAllocator,DArena>(p_gcos->new_space());
+                auto alloc2 = obj<AAllocator,DArena>(p_arena2);
+                DMockCollector mock(p_mls, p_gcos);
+                auto mockgc = obj<ACollector,DMockCollector>(&mock);
+
+                for (int32_t ix = phase_expect->lo_ix_, hi = phase_expect->hi_ix_; ix < hi; ++ix) {
+                    const Step & cmd = cmd_seq[ix];
+
+                    bool is_alloc = false;
+                    obj<AGCObject> xi;
+                    obj<AGCObject> xi2;
+                    uint64_t alloc_z = 0;
+                    typeseq tseq;
+
+                    switch (cmd.cmd_) {
+                    case Step::Cmd::sentinel:
+                        assert(false); // unreachable
+                        break;
+                    case Step::Cmd::make_nil:
+                        // TODO combine with code in random_object_graph()
+                        {
+                            is_alloc = true;
+
+                            xi = ListOps::nil();
+                            alloc_z = 0;  // not in gcos space
+                            tseq = typeseq::id<DList>();
+
+                            xi2 = ListOps::nil();
+
+                            REQUIRE(xi._typeseq() == tseq);
+                            REQUIRE(xi2._typeseq() == tseq);
+                        }
+                        break;
+                    case Step::Cmd::make_cons:
+                        // TODO combine with code in random_object_graph()
+                        {
+                            auto h1 = p_x1_v->at(cmd.arg0_ix_).gco_;
+                            auto r1 = obj<AGCObject,DList>::from(p_x1_v->at(cmd.arg1_ix_).gco_);
+                            auto h2 = p_x2_v->at(cmd.arg0_ix_).gco_;
+                            auto r2 = obj<AGCObject,DList>::from(p_x2_v->at(cmd.arg1_ix_).gco_);
+
+                            is_alloc = true;
+
+                            xi = ListOps::cons(alloc, h1, r1);
+                            alloc_z = sizeof(DList);
+                            tseq = typeseq::id<DList>();
+
+                            xi2 = ListOps::cons(alloc2, h2, r2);
+                        }
+                        break;
+                    case Step::Cmd::make_bool:
+                        // TODO combine with code in random_object_graph()
+                        {
+                            bool value = (cmd.arg0_ix_ > 0);
+
+                            is_alloc = true;
+
+                            xi = DBoolean::box(alloc, value);
+                            alloc_z = sizeof(DBoolean);
+                            tseq = typeseq::id<DBoolean>();
+
+                            xi2 = DBoolean::box(alloc2, value);
+                        }
+                        break;
+                    case Step::Cmd::assign_head:
+                        {
+                            is_alloc = false;
+
+                            auto lhs1 = obj<AGCObject,DList>::from(p_x1_v->at(cmd.arg0_ix_).gco_);
+                            auto rhs1 = p_x1_v->at(cmd.arg1_ix_).gco_;
+
+                            auto lhs2 = obj<AGCObject,DList>::from(p_x2_v->at(cmd.arg0_ix_).gco_);
+                            auto rhs2 = p_x2_v->at(cmd.arg1_ix_).gco_;
+
+                            assert(lhs1);
+                            assert(!lhs1->is_empty());
+
+                            assert(lhs2);
+                            assert(!lhs2->is_empty());
+
+                            assert(p_mls);
+                            assert(mockgc);
+
+                            lhs1->assign_head(mockgc, rhs1);
+                            // alloc2 is ord arena -> no mlog
+                        }
+                        break;
+                    }
+
+                    if (is_alloc) {
+                        p_x1_v->push_back(Recd(xi, alloc_z, tseq));
+                        p_x2_v->push_back(Recd(xi2, alloc_z, tseq));
+                    }
                 }
 
-                ++cmd_seq;
+                // check expected results
+
+                for (Generation gi{0}; gi + 1 < Generation(p_mls->config().n_generation_); ++gi) {
+                    MutationLog * mlog = p_mls->get_mlog(Role::to_space(), gi);
+
+                    REQUIRE(mlog);
+                    REQUIRE(mlog->size() == phase_expect->mlog_new_z_[gi]);
+                }
             }
         } else {
             switch (obj_graph_type) {
+            case TestGraphType::fixed:
+                assert(false); // unreachable
+                break;
+
             case TestGraphType::selfcycle:
                 if (loop_index == 0) {
                     GcosTestutil::selfcycle_object_graph(p_x1_v,

@@ -275,7 +275,7 @@ namespace ut {
 
                 // construct, extend, and/or modify object graphs in {x1_v, x2_v}
 
-                GcosTestutil::gcos_construct_ab_object_graphs(nullptr /*cmd_seq*/,
+                GcosTestutil::gcos_construct_ab_object_graphs(TestSequence{} /*test_seq*/,
                                                               tc.obj_graph_type_,
                                                               tc.n_i0_test_obj_,
                                                               tc.n_i0_test_assign_,

@@ -35,6 +35,7 @@ namespace xo {
              **/
             void init_mlogs(std::size_t page_z);
 
+            const MutationLogConfig & config() const noexcept { return config_; }
             MutationLog * get_mlog(Role r, Generation g) noexcept { return mlog_[r][g]; }
             const MutationLog * get_mlog(Role r, Generation g) const noexcept { return mlog_[r][g]; }
             /** reminder: abusing Role because we need one additional mlog **/

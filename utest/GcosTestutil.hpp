@@ -11,6 +11,7 @@
 #include <xo/alloc2/Generation.hpp>
 #include <xo/arena/DArena.hpp>
 #include <xo/randomgen/xoshiro256.hpp>
+#include <array>
 
 namespace ut {
     using xo::mm::Generation;
@@ -44,6 +45,54 @@ namespace ut {
         uint32_t arg0_ix_;
         /** arg1 object index (index into x1_v[]) **/
         uint32_t arg1_ix_;
+    };
+
+    /** a phase comprises:
+     *  1. start with {gcos,mls} in known + valid state.
+     *  2. perform a sequence of commands
+     *     (in general a mix of allocs and mutations)
+     *     command sequence in @ref cmd_seq_, null-terminated
+     *  3. verify mlog state after sequence
+     *  4. run instrumented collection phase
+     *     4a. swap roles (i.e. from- and to- spaces)
+     *     4b. move roots, see gcos_move_roots_and_verify()
+     *     4c. update mutation log, see forward_mutation_log()
+     *     4d. cleanup (reset from- spaces)
+     *  5. re-verify {gcos,mls} in valid state
+     **/
+    struct Phase {
+        bool is_sentinel() const noexcept { return lo_ix_ == -1; }
+
+        /** Command sequence for this phase.
+         *  See TestSequence.cmd_seq_
+         *  Phase comprises commands cmd_seq_[ix] for lo_ix <= ix < hi_ix
+         **/
+        int32_t lo_ix_ = -1;
+        int32_t hi_ix_ = -1;
+        /** expected number of new entries in
+         *  to-space mutation log after executing @ref cmd_seq_
+         **/
+        std::array<uint32_t, xo::mm::c_max_generation - 1> mlog_new_z_;
+    };
+
+    struct TestSequence {
+        bool is_sentinel() const noexcept { return cmd_seq_ == nullptr; }
+
+        /** shared null-terminated command sequence.
+         *  references are taken relative to cmd_seq_[0].
+         *  A step
+         *    {make_cons, x, y} -> make a cons cell.
+         *                         head from value ~ cmd_seq_[x]
+         *                         rest from value ~ cmd_seq_[y]
+         *
+         **/
+        Step * cmd_seq_ = nullptr;
+
+        /** array of phases.
+         *  One gc cycle per phase.
+         *  Sentinel phase has {lo_ix_ = -1, hi_ix_ = -1};
+         **/
+        Phase * phases_ = nullptr;
     };
 
     enum class TestGraphType {
@@ -110,9 +159,11 @@ namespace ut {
                            const GCObjectStore & gcos);
 
         /** sequence of steps. if non-null, ends with step s: s.cmd_ == Step::Cmd::Sentinel
+         *
+         *  @p p_cmd_seq pointer to null-terminated array of Step[] arrays
          **/
         static void
-        gcos_construct_ab_object_graphs(Step * cmd_seq,
+        gcos_construct_ab_object_graphs(TestSequence test_seq,
                                         TestGraphType obj_graph_type,
                                         uint32_t n_i0_test_obj,
                                         uint32_t n_i0_test_assign,
