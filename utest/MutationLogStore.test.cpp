@@ -67,6 +67,8 @@ namespace ut {
               debug_flag_{debug_flag}
             {}
 
+            bool sanitize_flag() const noexcept { return true; }
+
             /** number of generations in gco store **/
             uint32_t n_gen_ = 0;
             /** object prommotes on surviving this many gc cycles **/
@@ -389,11 +391,7 @@ namespace ut {
                 //
 
                 // reset (+ perhaps clean) from-space
-                {
-                    // TODO: consider moving sanitize_flag to Testcase
-                    bool sanitize_flag = true;
-                    gcos.cleanup_phase(gk, sanitize_flag);
-                }
+                gcos.cleanup_phase(gk, tc.sanitize_flag());
 
                 // scan {gcos, mls} to collect counters in *gcos.verify_stats()
                 {
