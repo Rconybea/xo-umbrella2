@@ -12,6 +12,7 @@
 #include <xo/indentlog/scope.hpp>
 #include <xo/indentlog/print/tag.hpp>
 #include <cassert>
+#include <exception>
 #include <sys/mman.h> // for ::munmap()
 #include <unistd.h> // for ::getpagesize()
 #include <string.h> // for ::memset()
@@ -587,7 +588,7 @@ namespace xo {
 
                     fprintf(stderr, "DArena::expand: mprotect failed (system oom?)");
                     print_backtrace_dwarf(false /*!demangle_flag*/);
-                    
+
                     return false;
                 }
 
