@@ -127,6 +127,8 @@ namespace ut {
 
         static TestSequence seq_0 { step_0, phase_0 };
 
+        // ----------------------------------------------------------------
+
         // seq1: side effect on head of cons cell.
         // But no mlog entry b/c all object ages are equal
         // -> no x-age pointers
@@ -149,6 +151,8 @@ namespace ut {
         };
 
         static TestSequence seq_1 { step_1, phase_1 };
+
+        // ----------------------------------------------------------------
 
         static Step step_2[] = {
             // ----- phase 0 -----
@@ -176,6 +180,38 @@ namespace ut {
 
         static TestSequence seq_2 { step_2, phase_2 };
 
+        // ----------------------------------------------------------------
+
+        static Step step_3[] = {
+            // ----- phase 0 -----
+            {Cmd::make_bool,   0, 0}, // [0]: #f
+            {Cmd::make_bool,   1, 0}, // [1]: #t
+            {Cmd::make_nil,    0, 0}, // [2]: #nil
+            {Cmd::make_cons,   0, 2}, // [3]: cons(#f,#nil)
+            // ----- phase 1 -----
+            {Cmd::make_bool,   1, 0}, // [4]: #t
+            {Cmd::assign_head, 3, 4}, //      set-car(cons(#f,#nil),#t)
+            // ----- phase 2 -----
+            // ----- phase 3 -----
+            // ----- end -----
+            {Cmd::sentinel,    0, 0},
+        };
+
+        static Phase phase_3[] = {
+            //
+            // lo   hi    mlog_new_z_[]
+            //  v    v    v
+            {   0,   4,   {0} },  // phase 0
+            {   4,   6,   {1} },  // phase 1. set-car makes 1x xage ptr
+            {   6,   6,   {1} },  // phase 2. now src in g1, dest in g0
+            {   6,   6,   {0} },  // phase 3. now dest in g1
+            {  -1,  -1,   {0} },
+        };
+
+        static TestSequence seq_3 { step_3, phase_3 };
+
+        // ----------------------------------------------------------------
+
 #      define seq_nil TestSequence{}
 #      define nil nullptr
 #      define T true
@@ -202,7 +238,8 @@ namespace ut {
             Testcase(2, 4, 16 * 1024, 8 * 128, T, seq_nil,    0, F, c_selfcycle, 1,  1,  0,  0,  0, F),
             Testcase(2, 4, 16 * 1024, 8 * 128, T,   seq_0,    0, F,     c_fixed, 1,  0,  0,  0,  0, F),
             Testcase(2, 4, 16 * 1024, 8 * 128, T,   seq_1,    0, F,     c_fixed, 1,  0,  0,  0,  0, F),
-            Testcase(2, 1, 16 * 1024, 8 * 128, T,   seq_2,  128, T,     c_fixed, 3,  0,  0,  0,  0, T),
+            Testcase(2, 1, 16 * 1024, 8 * 128, T,   seq_2,  128, T,     c_fixed, 3,  0,  0,  0,  0, F),
+            Testcase(2, 2, 16 * 1024, 8 * 128, T,   seq_3,  128, T,     c_fixed, 4,  0,  0,  0,  0, T),
         };
 
 #      undef T
