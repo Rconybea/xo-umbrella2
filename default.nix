@@ -267,7 +267,11 @@ let
     pkgs.jsoncpp
     pkgs.eigen
     pkgs.libunwind
+  ] ++ (if pkgs.stdenv.isLinux then [
     pkgs.elfutils.dev    # for libdw (DWARF debug info lookup)
+  ] else [
+    pkgs.llvmPackages_18.libunwind.dev
+  ]) ++ [
     pkgs.zlib
     pkgs.libbsd
   ];

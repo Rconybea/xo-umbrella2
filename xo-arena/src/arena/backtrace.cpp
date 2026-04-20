@@ -4,13 +4,16 @@
  **/
 
 #include "backtrace.hpp"
+#include <iostream>
 #include <array>
 #include <cstdio>
 #include <cstdlib>
 #include <libunwind.h>
 #include <cxxabi.h>
 #include <unistd.h>
-#include <elfutils/libdwfl.h>
+#ifndef __APPLE__
+#  include <elfutils/libdwfl.h>
+#endif
 
 namespace xo {
     void
@@ -67,6 +70,7 @@ namespace xo {
         }
     }
     namespace {
+#ifndef __APPLE__
         // libdwfl requires callbacks for find_elf and find_debuginfo.
         // The offline defaults work for the current process.
         //
@@ -76,10 +80,18 @@ namespace xo {
             .section_address = nullptr,
             .debuginfo_path = nullptr,
         };
+#endif
     }
 
     void
-    print_backtrace_dwarf(bool demangle_flag) {
+    print_backtrace_dwarf(bool demangle_flag)
+    {
+
+#ifdef __APPLE__
+        (void)demangle_flag;
+
+        std::cerr << "backtrace with dwarf symbols not supported on osx" << std::endl;
+#else
         unw_cursor_t cursor;
         unw_context_t cx;
 
@@ -152,6 +164,8 @@ namespace xo {
 
         if (dwfl)
             dwfl_end(dwfl);
+#endif
+
     }
 } /*namespace xo*/
 
