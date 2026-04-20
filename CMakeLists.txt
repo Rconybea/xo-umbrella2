@@ -149,6 +149,12 @@ add_subdirectory(xo-imgui)
 xo_umbrella_genfacet_all(xo-genfacet-all)
 
 # ----------------------------------------------------------------
+# umbrella-wide coverage target + utest binary manifest.
+# no-op unless CMAKE_BUILD_TYPE=coverage.
+
+xo_umbrella_coverage_config()
+
+# ----------------------------------------------------------------
 # documentation.  must follow add_subdirectory() for satellite projects
 
 xo_umbrella_doxygen_deps(

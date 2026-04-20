@@ -334,7 +334,6 @@ let
     pkgs.cloc
     pkgs.bloaty
 
-    pkgs.lcov
     pkgs.catch2
 
     pkgs.btop
@@ -342,8 +341,10 @@ let
   ++ (if pkgs.stdenv.isLinux then [
     pkgs.gdb
     pkgs.strace
+    pkgs.lcov                    # gcov-format coverage post-processing
   ] else [
     pkgs.llvmPackages_18.lldb
+    pkgs.llvmPackages_18.llvm    # llvm-profdata, llvm-cov for source-based coverage
   ])
   ++ [
     pkgs.which

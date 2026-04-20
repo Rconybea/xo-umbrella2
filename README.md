@@ -113,6 +113,8 @@ $ (cd .build && ctest)
 Generate coverage report
 ```
 $ .build/gen-ccov
+# or:
+$ cmake --build .build --target ccov
 ```
 
 Html report left in ``.build/ccov/html/index.html``
