@@ -15,6 +15,7 @@
 #include <xo/randomgen/xoshiro256.hpp>
 #include <xo/randomgen/random_seed.hpp>
 #include <catch2/catch.hpp>
+#include <unistd.h> // for ::getpagesize()
 
 namespace ut {
     using xo::scm::DList;
@@ -100,7 +101,7 @@ namespace ut {
             /** 3rd+later loop: #of random assignments to attempt **/
             uint32_t n_i1_test_assign_ = 0;
             /** true to enable debug when attempting this test case **/
-            bool debug_flag_;
+            bool debug_flag_ = false;
         };
 
         constexpr TestGraphType c_selfcycle = TestGraphType::selfcycle;
@@ -158,6 +159,8 @@ namespace ut {
             // ----- phase 1 -----
             {Cmd::make_bool,   1, 0}, // [4]: #t
             {Cmd::assign_head, 3, 4}, //      set-car(cons(#f,#nil),#t)
+            // ----- phase 2 -----
+            // ----- end -----
             {Cmd::sentinel,    0, 0},
         };
 
@@ -167,6 +170,7 @@ namespace ut {
             //  v    v    v
             {   0,   4,   {0} },  // phase 0
             {   4,   6,   {1} },  // phase 1. set-car makes 1x xgen ptr from g1->g0
+            {   6,   6,   {0} },  // phase 2. now both {src,dest} are in g1
             {  -1,  -1,   {0} },
         };
 
@@ -198,7 +202,7 @@ namespace ut {
             Testcase(2, 4, 16 * 1024, 8 * 128, T, seq_nil,    0, F, c_selfcycle, 1,  1,  0,  0,  0, F),
             Testcase(2, 4, 16 * 1024, 8 * 128, T,   seq_0,    0, F,     c_fixed, 1,  0,  0,  0,  0, F),
             Testcase(2, 4, 16 * 1024, 8 * 128, T,   seq_1,    0, F,     c_fixed, 1,  0,  0,  0,  0, F),
-            Testcase(2, 1, 16 * 1024, 8 * 128, T,   seq_2,  128, T,     c_fixed, 2,  0,  0,  0,  0, T),
+            Testcase(2, 1, 16 * 1024, 8 * 128, T,   seq_2,  128, T,     c_fixed, 3,  0,  0,  0,  0, T),
         };
 
 #      undef T
