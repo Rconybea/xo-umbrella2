@@ -391,8 +391,9 @@ namespace xo {
                                                             from_entry.parent());
 
                 if (parent_gen_to.is_sentinel()) {
-                    void * parent_fr = *from_entry.p_data();
+                    // parent is not in to-space
 
+                    void * parent_fr = from_entry.parent();
                     AllocInfo parent_info = gc.alloc_info((std::byte *)parent_fr);
 
                     if (parent_info.is_forwarding_tseq()) {
@@ -408,7 +409,7 @@ namespace xo {
                                                          parent_to);
                         parent_info = gc.alloc_info((std::byte *)parent_to);
 
-                        assert(!parent_gen_to.sentinel());
+                        assert(!parent_gen_to.is_sentinel());
 
                         // Since parent already forwarded, we don't have to preserve child
                         // or update parent object.
