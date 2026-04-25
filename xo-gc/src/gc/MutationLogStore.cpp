@@ -258,12 +258,21 @@ namespace xo {
         MutationLogStore::forward_mutation_log(obj<AGCObjectVisitor> gc,
                                                Generation upto)
         {
+            scope log0(XO_DEBUG(config_.debug_flag_));
+
             /** non-zero if at least one object was rescued (from any generation)
              *  by mutation log scan
              **/
             std::size_t work = 0;
 
+            /** count outer loop iterations */
+            std::size_t i_fixpoint_loop = 0;
+
             do {
+                scope log1(XO_DEBUG(log0), "fixpoint", xtag("i", i_fixpoint_loop));
+
+                work = 0;
+
                 // on 1st iteration, for all generations:
                 // - to_mlog, triage_mlog are empty
 
@@ -271,7 +280,10 @@ namespace xo {
                      child_gen + 1 < config_.n_generation_;
                      ++child_gen) {
 
-                    MutationLog * from_mlog = this->mlog_[Role::from_space()][child_gen];
+                    scope log2(XO_DEBUG(log1), xtag("gen", child_gen));
+
+                    MutationLog * from_mlog
+                        = this->mlog_[Role::from_space()][child_gen];
 
                     if (!from_mlog->empty()) {
                         MutationLog * to_mlog = this->mlog_[Role::to_space()][child_gen];
@@ -294,10 +306,14 @@ namespace xo {
                         work += stats.n_rescue_;
                     }
                 }
+
+                ++i_fixpoint_loop;
             } while (work > 0);
 
             // here: reached fixpoints, any remaining triaged mlogs can be discarded
             for (Generation child_gen{0}; child_gen + 2 < config_.n_generation_; ++child_gen) {
+                log0 && log0("dismiss unelected triage", xtag("gen", child_gen));
+
                 MutationLog * triage_mlog = this->mlog_[c_n_role][child_gen];
 
                 triage_mlog->clear();
@@ -372,89 +388,85 @@ namespace xo {
 
             for (MutationLogEntry & from_entry : *from_mlog) {
                 if (log) {
-                    log(xtag("i_from", i_from));
+                    log(xtag("i_from", i_from),
+                        xtag("parent", from_entry.parent()),
+                        xtag("snap", from_entry.snap().data()));
                 }
 
-                if (from_entry.is_superseded()) {
-                    // there must be a second mlog entry that refers to
-                    // the new child. Rely on that second entry,
-                    // skipping this one.
+                // fixup gc-owned forwarded pointers in from_entry.
+                // May update from_entry.p_data_, but not *(from_entry.p_data_), since:
+                // 1. *p_data_ may not be gc-owned
+                // 2. want to preserve ability to superseded mlog entry
+                //
+                // load-bearing at least for [MLOG3]
+                //
+                from_entry.check_forward_inplace(gco_store_, &counters);
 
-                    // [MLOG0] obsolete mutation -> skip
-                    ++counters.n_stale_;
-                    continue;
-                }
-
-                /* here: mlog current */
-
+                // Two possibiities for parent in to-space:
+                // 1. belongs to generation not subject to collection this cycle.
+                // 2. from_entry updated above for new location
+                //
                 Generation parent_gen_to = gc.generation_of(Role::to_space(),
                                                             from_entry.parent());
 
                 if (parent_gen_to.is_sentinel()) {
-                    // parent is not in to-space
+                    // parent is not in to-space.
+                    // Only gc-owned parents eligible for mlog entries.
+                    // Therefore parent must be in from-space
+                    // Since not rescued, it may be garbage.
 
-                    void * parent_fr = from_entry.parent();
-                    AllocInfo parent_info = gc.alloc_info((std::byte *)parent_fr);
+                    log && log("parent not in to-space -> must be in from-space");
 
-                    if (parent_info.is_forwarding_tseq()) {
-                        /* [MLOG3] */
+                    Generation parent_gen_from = gc.generation_of(Role::from_space(),
+                                                                  from_entry.parent());
+                    assert(!parent_gen_from.is_sentinel());
 
-                        ++counters.n_live_parent_;
+                    if (from_entry.is_superseded()) {
+                        log && log("entry superseded -> discard");
 
-                        // new parent location in to-space
-                        // TODO: method on AllocInfo to streamline this
-                        void * parent_to = *(void **)parent_fr;
+                        // parent mutated again after from_entry.
+                        // If new child needs rescue, that will rely on mlog
+                        // entry for that second mutation
 
-                        parent_gen_to = gc.generation_of(Role::to_space(),
-                                                         parent_to);
-                        parent_info = gc.alloc_info((std::byte *)parent_to);
-
-                        assert(!parent_gen_to.is_sentinel());
-
-                        // Since parent already forwarded, we don't have to preserve child
-                        // or update parent object. GC already guaranteed to have visited
-                        // parent's child pointers
-                        //
-                        // Do need to replace mlog entry to reflect new parent location.
-
-                        std::size_t offset
-                            = ((std::byte *)from_entry.p_data()
-                               - (std::byte *)from_entry.parent());
-
-                        void ** p_data_to = (void **)((std::byte *)(parent_to) + offset);
-                        //void * child_to = *p_data_to;
-
-                        MutationLogEntry to_entry(parent_to, p_data_to, from_entry.snap());
-
-                        if (to_entry.refresh_snapshot(parent_gen_to, gco_store_))
-                            keep_mlog->push_back(to_entry);
-
-#ifdef OBSOLETE
-                        this->_check_keep_mutation_aux(to_entry,
-                                                       parent_gen_to,
-                                                       child_to,
-                                                       keep_mlog);
-#endif
-
-
+                        ++counters.n_stale_;
                     } else {
-                        ++counters.n_triage_;
+                        log && log("entry current -> triage");
 
-                        // parent hasn't been collected and may be garbage.
-                        // However this is only provisional, since
-                        // parent could turn out to be reachable via some other mutation.
+                        // although parent appears to be garbage,
+                        // it may get rescued via some other mlog entry.
+                        // Keep mlog entry while considering other mutations.
+
+                        ++counters.n_triage_;
 
                         triage_mlog->push_back(from_entry);
                     }
                 } else {
-                    /* [MLOG1, MLOG2] */
+                    // parent in to-space: p_data_ is valid, can check superseded
 
-                    counters
-                        += this->_preserve_child_of_live_parent(gc,
-                                                                upto,
-                                                                parent_gen_to,
-                                                                from_entry,
-                                                                keep_mlog);
+                    log && log("parent in to-space");
+
+                    if (from_entry.is_superseded()) {
+                        log && log("entry superseded -> discard");
+                        // there must be a second mlog entry that refers to
+                        // the new child. Rely on that second entry,
+                        // skipping this one.
+
+                        // [MLOG0] obsolete mutation -> skip
+                        ++counters.n_stale_;
+                    } else {
+                        log && log("entry current -> preserve child");
+
+                        /* [MLOG1, MLOG2] */
+
+                        log && log(xtag("case", "MLOG1|MLOG2"));
+
+                        counters
+                            += this->_preserve_child_of_live_parent(gc,
+                                                                    upto,
+                                                                    parent_gen_to,
+                                                                    from_entry,
+                                                                    keep_mlog);
+                    }
                 }
             }
 
@@ -468,6 +480,8 @@ namespace xo {
                                                          MutationLogEntry & from_entry,
                                                          MutationLog * keep_mlog)
         {
+            scope log(XO_DEBUG(config_.debug_flag_));
+
             void * child_fr = *from_entry.p_data();
             AllocInfo child_info = gc.alloc_info((std::byte *)(child_fr));
 
@@ -489,12 +503,16 @@ namespace xo {
             if (child_info.is_forwarding_tseq()) {
                 // [MLOG1]
 
+                log && log(xtag("case", "MLOG1"), xtag("msg", "child forwarded"));
+
                 // child already forwarded.
                 // TODO: make this a method on AllocInfo
                 child_to  = *(void **)child_fr;
 
             } else {
                 // [MLOG2]
+
+                log && log(xtag("case", "MLOG2"), xtag("msg", "rescue child"));
 
                 ++counters.n_rescue_;
 
@@ -503,7 +521,7 @@ namespace xo {
 
             // update child pointer in parent object.
             // either forwarded or moved
-            *from_entry.p_data() = child_to;
+            *(from_entry.p_data()) = child_to;
 
             // TODO: pass statistics object
             if (from_entry.refresh_snapshot(parent_gen, gco_store_)) {
@@ -514,41 +532,6 @@ namespace xo {
 
             return counters;
         }
-
-#ifdef OBSOLETE
-        void
-        MutationLogStore::_check_keep_mutation_aux(MutationLogEntry & from_entry,
-                                                   Generation parent_gen_to,
-                                                   void * child_to,
-                                                   MutationLog * keep_mlog)
-        {
-            Generation child_gen_to
-                = gco_store_->generation_of(Role::to_space(), child_to);
-
-            bool need_mlog_entry
-                = ((child_gen_to + 1 < config_.n_generation_)
-                   && (gco_store_->config().promotion_threshold(parent_gen_to)
-                       > gco_store_->config().promotion_threshold(child_gen_to)));
-
-            if (need_mlog_entry) {
-                // 1. P->C pointer is still cross-age (xage), and
-                // 2. this matters; in future P will promote before C
-                //
-                // Need to keep entry because parent will be eligible for promotion
-                // before child
-
-                keep_mlog->push_back(from_entry);
-
-                return true;
-            } else {
-                // child now in final generation,
-                // no longer need to track incoming mutations.
-
-                return false;
-            }
-        }
-#endif
-
 
     } /*namespace mm*/
 } /*namespace xo*/

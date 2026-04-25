@@ -10,6 +10,7 @@
 namespace xo {
     namespace mm {
         class GCObjectStore;  // see xo-gc/ GCObjectStore.hpp
+        class MutationLogStatistics; // see xo-gc/ MutationLogStatistics.hpp
 
         /** @brief Track a cross-generational pointer
          *
@@ -38,8 +39,24 @@ namespace xo {
 
             /** true iff child pointer matches value when this mlog entry created **/
             bool is_active() const noexcept { return *p_data_ == snap_.data(); }
-            /** true iff child pointer has been altered since this mlog entry created **/
+            /** true iff child pointer has been altered since this mlog entry created
+             *  WARNING: extra care needed around forwarding pointers
+             **/
             bool is_superseded() const noexcept { return *p_data_ != snap_.data(); }
+
+            /** Update parent and snapshot if either has been forwarded.
+             *  Do not try to correct *p_data_: it might now point outside
+             *  gc-owned space, in which case need not be intelligible
+             **/
+            bool check_forward_inplace(GCObjectStore * gcos,
+                                       MutationLogStatistics * p_counters) noexcept;
+
+            /** update @ref parent_, @ref p_data_ iff parent has been forwarded
+             *  @return true iff encountered forwarded parent
+             *  Require: parent must be gc-owned, since we rely on AllocInfo existing
+             **/
+            bool check_forward_parent_inplace(GCObjectStore * gcos,
+                                              MutationLogStatistics * p_counters) noexcept;
 
             /** Refresh snapshot when *p_data_ does not match snap_.data_
              *  Get updated facet information from destination alloc header.
