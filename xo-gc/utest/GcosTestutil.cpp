@@ -8,6 +8,7 @@
 #include <xo/gc/X1VerifyStats.hpp>
 #include <xo/object2/ListOps.hpp>
 #include <xo/object2/Boolean.hpp>
+#include <xo/object2/Integer.hpp>
 #include <xo/alloc2/Collector.hpp>
 #include <xo/alloc2/Arena.hpp>
 #include <xo/facet/TypeRegistry.hpp>
@@ -21,6 +22,7 @@ namespace ut {
     using xo::scm::ListOps;
     using xo::scm::DList;
     using xo::scm::DBoolean;
+    using xo::scm::DInteger;
     using xo::mm::ACollector;
     using xo::mm::DMockCollector;
     using xo::mm::X1VerifyStats;
@@ -235,6 +237,10 @@ namespace ut {
             {
                 REQUIRE(p_gcos->install_type(impl_for<AGCObject,DBoolean>()));
                 REQUIRE(p_gcos->is_type_installed(typeseq::id<DBoolean>()));
+            }
+            {
+                REQUIRE(p_gcos->install_type(impl_for<AGCObject,DInteger>()));
+                REQUIRE(p_gcos->is_type_installed(typeseq::id<DInteger>()));
             }
             {
                 REQUIRE(p_gcos->install_type(impl_for<AGCObject,DList>()));
@@ -463,6 +469,19 @@ namespace ut {
                             tseq = typeseq::id<DBoolean>();
 
                             xi2 = DBoolean::box(alloc2, value);
+                        }
+                        break;
+                    case Step::Cmd::make_int:
+                        {
+                            int value = cmd.arg0_ix_;
+
+                            is_alloc = true;
+
+                            xi = DInteger::box(alloc, value);
+                            alloc_z = sizeof(DInteger);
+                            tseq = typeseq::id<DInteger>();
+
+                            xi2 = DInteger::box(alloc2, value);
                         }
                         break;
                     case Step::Cmd::assign_head:
@@ -860,11 +879,24 @@ namespace ut {
     {
         // written out polymorphic comparison
 
-        // match DBoolean..
         bool match_attempted = false;
+
+        // match DBoolean..
         {
             auto x1p_b = obj<AGCObject,DBoolean>::from(x1p_gco);
             auto x2_b = obj<AGCObject,DBoolean>::from(x2_gco);
+
+            if (x1p_b && x2_b) {
+                match_attempted = true;
+
+                REQUIRE(x1p_b->value() == x2_b->value());
+            }
+        }
+
+        // match DInteger..
+        {
+            auto x1p_b = obj<AGCObject,DInteger>::from(x1p_gco);
+            auto x2_b = obj<AGCObject,DInteger>::from(x2_gco);
 
             if (x1p_b && x2_b) {
                 match_attempted = true;
