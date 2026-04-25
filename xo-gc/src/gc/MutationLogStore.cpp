@@ -412,7 +412,8 @@ namespace xo {
                         assert(!parent_gen_to.is_sentinel());
 
                         // Since parent already forwarded, we don't have to preserve child
-                        // or update parent object.
+                        // or update parent object. GC already guaranteed to have visited
+                        // parent's child pointers
                         //
                         // Do need to replace mlog entry to reflect new parent location.
 
@@ -421,14 +422,19 @@ namespace xo {
                                - (std::byte *)from_entry.parent());
 
                         void ** p_data_to = (void **)((std::byte *)(parent_to) + offset);
-                        void * child_to = *p_data_to;
+                        //void * child_to = *p_data_to;
 
                         MutationLogEntry to_entry(parent_to, p_data_to, from_entry.snap());
 
+                        if (to_entry.refresh_snapshot(parent_gen_to, gco_store_))
+                            keep_mlog->push_back(to_entry);
+
+#ifdef OBSOLETE
                         this->_check_keep_mutation_aux(to_entry,
                                                        parent_gen_to,
                                                        child_to,
                                                        keep_mlog);
+#endif
 
 
                     } else {
@@ -459,7 +465,7 @@ namespace xo {
         MutationLogStore::_preserve_child_of_live_parent(obj<AGCObjectVisitor> gc,
                                                          Generation upto,
                                                          Generation parent_gen,
-                                                         const MutationLogEntry & from_entry,
+                                                         MutationLogEntry & from_entry,
                                                          MutationLog * keep_mlog)
         {
             void * child_fr = *from_entry.p_data();
@@ -487,29 +493,31 @@ namespace xo {
                 // TODO: make this a method on AllocInfo
                 child_to  = *(void **)child_fr;
 
-                // assigning through address of P->C pointer
-                // also makes mlog entry current
-
             } else {
                 // [MLOG2]
 
                 ++counters.n_rescue_;
 
                 child_to = gco_store_->deep_move_interior(gc, child_fr, upto);
+            }
 
-                // update child pointer in parent object
-                *from_entry.p_data() = child_to;
+            // update child pointer in parent object.
+            // either forwarded or moved
+            *from_entry.p_data() = child_to;
+
+            // TODO: pass statistics object
+            if (from_entry.refresh_snapshot(parent_gen, gco_store_)) {
+                keep_mlog->push_back(from_entry);
             }
 
             // child_to generation in {gen, gen+1}
 
-            this->_check_keep_mutation_aux(from_entry, parent_gen, child_to, keep_mlog);
-
             return counters;
         }
 
-        bool
-        MutationLogStore::_check_keep_mutation_aux(const MutationLogEntry & from_entry,
+#ifdef OBSOLETE
+        void
+        MutationLogStore::_check_keep_mutation_aux(MutationLogEntry & from_entry,
                                                    Generation parent_gen_to,
                                                    void * child_to,
                                                    MutationLog * keep_mlog)
@@ -539,6 +547,7 @@ namespace xo {
                 return false;
             }
         }
+#endif
 
 
     } /*namespace mm*/
