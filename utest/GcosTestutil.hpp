@@ -29,6 +29,8 @@ namespace ut {
             make_cons,
             /** allocate a boolean **/
             make_bool,
+            /** allocate an integer **/
+            make_int,
             /** modify the head of a list x1_v[arg0_ix_]; replace with x1_v[arg1_ix_] **/
             assign_head,
 
@@ -41,7 +43,13 @@ namespace ut {
         bool is_command() const { return cmd_ != Cmd::sentinel; }
 
         Cmd cmd_;
-        /** arg0 object index (index into x1_v[]) **/
+        /** arg0 object index (index into x1_v[])
+         *
+         * when cmd_ is make_bool:
+         *   0 -> false, 1 -> true
+         * when cmd_ is make_int:
+         *   value of integer
+         **/
         uint32_t arg0_ix_;
         /** arg1 object index (index into x1_v[]) **/
         uint32_t arg1_ix_;
