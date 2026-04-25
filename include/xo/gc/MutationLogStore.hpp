@@ -139,18 +139,19 @@ namespace xo {
             MutationLogStatistics _preserve_child_of_live_parent(obj<AGCObjectVisitor> gc,
                                                                  Generation upto,
                                                                  Generation parent_gen,
-                                                                 const MutationLogEntry & from_entry,
+                                                                 MutationLogEntry & from_entry,
                                                                  MutationLog * keep_mlog);
 
+#ifdef OBSOLETE
             /** On behalf of collector @p gc:
              *
              *  helper function to decide whether to keep a mutation log entry
-             *  @return true iff mlog entry appended to @p keep_mlog
              **/
-            bool _check_keep_mutation_aux(const MutationLogEntry & from_entry,
+            void _check_keep_mutation_aux(MutationLogEntry & from_entry,
                                           Generation parent_gen_to,
                                           void * child_to,
                                           MutationLog * keep_mlog);
+#endif
 
 
         public:

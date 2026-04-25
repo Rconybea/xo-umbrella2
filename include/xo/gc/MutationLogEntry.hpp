@@ -9,6 +9,7 @@
 
 namespace xo {
     namespace mm {
+        class GCObjectStore;  // see xo-gc/ GCObjectStore.hpp
 
         /** @brief Track a cross-generational pointer
          *
@@ -39,6 +40,15 @@ namespace xo {
             bool is_active() const noexcept { return *p_data_ == snap_.data(); }
             /** true iff child pointer has been altered since this mlog entry created **/
             bool is_superseded() const noexcept { return *p_data_ != snap_.data(); }
+
+            /** Refresh snapshot when *p_data_ does not match snap_.data_
+             *  Get updated facet information from destination alloc header.
+             *  It's possible that *p_data_ no longer points to gc-owned space
+             *
+             *  @return true if snapshot updated. false if this entry should be discarded
+             **/
+            bool refresh_snapshot(Generation parent_gen,
+                                  GCObjectStore * gcos) noexcept;
 
         private:
             /** address of object containing logged mutation **/

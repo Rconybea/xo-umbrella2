@@ -212,6 +212,51 @@ namespace ut {
 
         // ----------------------------------------------------------------
 
+        static Step step_4[] = {
+            // ----- phase 0 -----
+            {Cmd::make_bool,   0, 0}, // [0]: #f
+            {Cmd::make_bool,   1, 0}, // [1]: #t
+            {Cmd::make_nil,    0, 0}, // [2]: #nil
+            {Cmd::make_cons,   0, 2}, // [3]: cons(#f,#nil)
+
+            // 1st gc
+
+            // ----- phase 1 -----
+            {Cmd::make_bool,   1, 0}, // [4]: #t
+            {Cmd::assign_head, 3, 4}, //      set-car([3],#t)
+
+            // 2nd gc. [0]..[3] promote to g1
+            // [4] in g0 so [3]->[4] requires mlog entry
+
+            // ----- phase 2 -----
+            {Cmd::make_bool,   0, 0}, // [5]: #f
+            {Cmd::assign_head, 3, 5}, //      set-car([3],#f)
+
+            // 3rd gc. [4] promotes to g1,
+            // [5] in g0 so [3]->[5] requires mlog entry
+
+            // ----- phase 3 -----
+            // ----- phase 4 -----
+            // ----- end -----
+            {Cmd::sentinel,    0, 0},
+        };
+
+        static Phase phase_4[] = {
+            //
+            // lo   hi    mlog_new_z_[]
+            //  v    v    v
+            {   0,   4,   {0} },  // phase 0 gc
+            {   4,   6,   {1} },  // phase 1 gc. set-car makes 1x xage ptr
+            {   6,   8,   {2} },  // phase 2 gc. now src in g1, dest [4] in g0
+            {   8,   8,   {1} },  // phase 3 gc. new dest [5] in g0
+            {   8,   8,   {0} },  // phase 4 gc. now dest in g1
+            {  -1,  -1,   {0} },
+        };
+
+        static TestSequence seq_4 { step_4, phase_4 };
+
+        // ----------------------------------------------------------------
+
 #      define seq_nil TestSequence{}
 #      define nil nullptr
 #      define T true
@@ -239,7 +284,8 @@ namespace ut {
             Testcase(2, 4, 16 * 1024, 8 * 128, T,   seq_0,    0, F,     c_fixed, 1,  0,  0,  0,  0, F),
             Testcase(2, 4, 16 * 1024, 8 * 128, T,   seq_1,    0, F,     c_fixed, 1,  0,  0,  0,  0, F),
             Testcase(2, 1, 16 * 1024, 8 * 128, T,   seq_2,  128, T,     c_fixed, 3,  0,  0,  0,  0, F),
-            Testcase(2, 2, 16 * 1024, 8 * 128, T,   seq_3,  128, T,     c_fixed, 4,  0,  0,  0,  0, T),
+            Testcase(2, 2, 16 * 1024, 8 * 128, T,   seq_3,  128, T,     c_fixed, 4,  0,  0,  0,  0, F),
+            Testcase(2, 2, 16 * 1024, 8 * 128, T,   seq_4,  128, T,     c_fixed, 4,  0,  0,  0,  0, T),
         };
 
 #      undef T
@@ -376,6 +422,8 @@ namespace ut {
             for (uint32_t loop_index = 0; loop_index < tc.n_gc_loop_; ++loop_index) {
                 scope log2(XO_DEBUG(tc.debug_flag_), "gc loop", xtag("loop_index", loop_index));
 
+                INFO(xtag("loop_index", loop_index));
+
                 GcosTestutil::gcos_construct_ab_object_graphs(tc.test_seq_,
                                                               tc.obj_graph_type_,
                                                               tc.n_i0_test_obj_,
@@ -442,9 +490,8 @@ namespace ut {
 
                     REQUIRE(gcos.verify_stats()->is_ok());
                 }
-            }
-        }
-
+            } /*one gc cycle per loop*/
+        } /*testcase loop*/
     }
 } /*namespace ut*/
 
