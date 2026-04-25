@@ -135,6 +135,8 @@ namespace xo {
              *  with parent P in generation @p parent_gen:
              *  ensure child C is evacuated, and append @p from_entry to
              *  @p keep_mlog.
+             *
+             *  Require: child is gc-owned
              **/
             MutationLogStatistics _preserve_child_of_live_parent(obj<AGCObjectVisitor> gc,
                                                                  Generation upto,
