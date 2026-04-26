@@ -794,7 +794,8 @@ namespace xo {
         GCObjectStore::install_type(const AGCObject & meta) noexcept
         {
             scope log(XO_DEBUG(config_.debug_flag_),
-                      xtag("tseq", meta._typeseq()));
+                      xtag("tseq", meta._typeseq()),
+                      xtag("tname", TypeRegistry::id2name(meta._typeseq())));
 
             typeseq tseq = meta._typeseq();
 

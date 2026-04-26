@@ -286,7 +286,8 @@ namespace ut {
 
             {Cmd::assign_root, 2, 0}, //      [2] = [0] = 99
 
-            // o.g. [2] now garbage
+            // phase 3 gc (4th gc)
+            // o.g. o.g. [2] would be garbage, if we collected g1
 
             // ----- phase 4 -----
 
