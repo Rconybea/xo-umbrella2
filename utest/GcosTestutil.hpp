@@ -31,6 +31,8 @@ namespace ut {
             make_bool,
             /** allocate an integer **/
             make_int,
+            /** assign a top-level value from one slot to another **/
+            assign_root,
             /** modify the head of a list x1_v[arg0_ix_]; replace with x1_v[arg1_ix_] **/
             assign_head,
 
@@ -49,10 +51,16 @@ namespace ut {
          *   0 -> false, 1 -> true
          * when cmd_ is make_int:
          *   value of integer
+         * when cmd_ is assign_root:
+         *   index of lhs value to replace
          **/
-        uint32_t arg0_ix_;
-        /** arg1 object index (index into x1_v[]) **/
-        uint32_t arg1_ix_;
+        uint32_t arg0_ix_ = 0;
+        /** arg1 object index (index into x1_v[])
+         *
+         *  when cmd_ is assign_root:
+         *    index of rhs value to assign
+         **/
+        uint32_t arg1_ix_ = 0;
     };
 
     /** a phase comprises:
