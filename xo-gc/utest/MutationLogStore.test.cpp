@@ -265,22 +265,31 @@ namespace ut {
             {Cmd::make_nil,    0, 0}, // [1]: #nil
             {Cmd::make_cons,   0, 1}, // [2]: cons([0],[1]) -> cons(99,#nil)
 
-            // 1st gc
+            // phase 0 gc (1st gc)
 
             // ----- phase 1 -----
 
             {Cmd::make_int,   15, 0}, // [3]: 15
             {Cmd::assign_head, 2, 3}, //      set-car([2],[3]) -> set-car([2],15)
 
-            // 2nd gc. [1]..[2] promote to g1
+            // phase 1 gc (2nd gc)
+            // [1]..[2] promote to g1
             // [3] in g0 so [2]->[3] requires mlog entry
 
             // ----- phase 2 -----
             {Cmd::make_int,   24, 0}, // [4]: 33
             {Cmd::assign_head, 2, 4}, //      set-car([2],[4]) -> set-car([2],33)
 
+            // phase 2 gc (3rd gc)
+
             // ----- phase 3 -----
+
+            {Cmd::assign_root, 2, 0}, //      [2] = [0] = 99
+
+            // o.g. [2] now garbage
+
             // ----- phase 4 -----
+
             // ----- end -----
             {Cmd::sentinel,    0, 0},
         };
@@ -292,8 +301,8 @@ namespace ut {
             {   0,   3,   {0} },  // phase 0 gc
             {   3,   5,   {1} },  // phase 1 gc. set-car makes 1x xage ptr
             {   5,   7,   {2} },  // phase 2 gc. now src in g1, dest [3] in g0
-            {   7,   7,   {1} },  // phase 3 gc. new dest [4] in g0
-            {   7,   7,   {0} },  // phase 4 gc. now dest in g1
+            {   7,   8,   {1} },  // phase 3 gc. new dest [4] in g0
+            {   8,   8,   {0} },  // phase 4 gc. now dest [4] in g1
             {  -1,  -1,   {0} },
         };
 
@@ -331,7 +340,7 @@ namespace ut {
             Testcase(2, 1, 16 * 1024, 8 * 128, T,   seq_2,  128, T,     c_fixed, 3,  0,  0,  0,  0, F),
             Testcase(2, 2, 16 * 1024, 8 * 128, T,   seq_3,  128, T,     c_fixed, 4,  0,  0,  0,  0, F),
             Testcase(2, 2, 16 * 1024, 8 * 128, T,   seq_4,  128, T,     c_fixed, 4,  0,  0,  0,  0, F),
-            Testcase(2, 2, 16 * 1024, 8 * 128, T,   seq_5,  128, T,     c_fixed, 4,  0,  0,  0,  0, F),
+            Testcase(2, 2, 16 * 1024, 8 * 128, T,   seq_5,  128, T,     c_fixed, 4,  0,  0,  0,  0, T),
         };
 
 #      undef T

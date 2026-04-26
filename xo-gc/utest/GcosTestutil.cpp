@@ -484,6 +484,27 @@ namespace ut {
                             xi2 = DInteger::box(alloc2, value);
                         }
                         break;
+                    case Step::Cmd::assign_root:
+                        {
+                            is_alloc = false;
+
+                            auto z1 = p_x1_v->at(cmd.arg1_ix_).alloc_z_;
+                            auto tseq1 = p_x1_v->at(cmd.arg1_ix_).tseq_;
+                            auto rhs1 = p_x1_v->at(cmd.arg1_ix_).gco_;
+
+                            auto z2 = p_x2_v->at(cmd.arg1_ix_).alloc_z_;
+                            auto tseq2 = p_x2_v->at(cmd.arg1_ix_).tseq_;
+                            auto rhs2 = p_x2_v->at(cmd.arg1_ix_).gco_;
+
+                            p_x1_v->at(cmd.arg0_ix_).alloc_z_ = z1;
+                            p_x1_v->at(cmd.arg0_ix_).tseq_ = tseq1;
+                            p_x1_v->at(cmd.arg0_ix_).gco_ = rhs1;
+
+                            p_x2_v->at(cmd.arg0_ix_).alloc_z_ = z2;
+                            p_x2_v->at(cmd.arg0_ix_).tseq_ = tseq2;
+                            p_x2_v->at(cmd.arg0_ix_).gco_ = rhs2;
+                        }
+                        break;
                     case Step::Cmd::assign_head:
                         {
                             is_alloc = false;
