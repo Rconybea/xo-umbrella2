@@ -4,6 +4,7 @@
  **/
 
 #include "DArray.hpp"
+#include "gc/RCollector_aux.hpp"
 #include <xo/printable2/Printable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/indentlog/print/pretty.hpp>
@@ -15,13 +16,14 @@ namespace xo {
     using xo::print::APrintable;
     using xo::facet::FacetRegistry;
     using xo::mm::AGCObject;
+    using xo::mm::mm_do_assign;
     using xo::facet::typeseq;
 
     namespace scm {
         // TODO: error reporting?
         DArray *
-        DArray::empty(obj<AAllocator> mm,
-                      size_type cap)
+        DArray::_empty(obj<AAllocator> mm,
+                       size_type cap)
         {
             DArray * result = nullptr;
 
@@ -45,7 +47,7 @@ namespace xo {
                      DArray * src,
                      size_type new_cap)
         {
-            DArray * dest = empty(mm, new_cap);
+            DArray * dest = _empty(mm, new_cap);
 
             if (dest) [[likely]] {
                 /** could just memcpy here **/
@@ -73,20 +75,20 @@ namespace xo {
         }
 
         bool
-        DArray::assign_at(size_type ix, obj<AGCObject> x) noexcept
+        DArray::assign_at(obj<ACollector> gc, size_type ix, obj<AGCObject> x) noexcept
         {
             if (ix >= size_)
                 return false;
 
             scope log(XO_DEBUG(true), "need write barrier");
 
-            this->elts_[ix] = x;
+            mm_do_assign(gc, this, &elts_[ix], x);
 
             return true;
         }
 
         bool
-        DArray::push_back(obj<AGCObject> elt) noexcept
+        DArray::push_back(obj<ACollector> gc, obj<AGCObject> elt) noexcept
         {
             if (size_ >= capacity_) {
                 return false;
@@ -94,8 +96,9 @@ namespace xo {
                 static_assert(!std::is_trivially_constructible_v<obj<AGCObject>>);
 
                 void * mem = &(elts_[size_]);
+                new (mem) obj<AGCObject>();
 
-                new (mem) obj<AGCObject>(elt);
+                mm_do_assign(gc, this, &(elts_[size_]), elt);
 
                 ++(this->size_);
 

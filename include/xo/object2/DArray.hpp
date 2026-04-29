@@ -15,6 +15,24 @@
 
 namespace xo {
     namespace scm {
+        class DArray;
+
+        namespace detail {
+            /** null base case **/
+            static inline bool do_array_push_back(DArray *,
+                                                  obj<xo::mm::ACollector>)
+            {
+                return true;
+            }
+
+            template <typename A, typename... Rest>
+            requires (std::convertible_to<A, obj<xo::mm::AGCObject>>)
+            static bool do_array_push_back(DArray * lhs,
+                                           obj<xo::mm::ACollector> gc,
+                                           A arg1,
+                                           Rest... rest);
+        }
+
         /** @class DArray
          *  @brief Polymorphic array implementation with gc hooks
          *
@@ -30,11 +48,8 @@ namespace xo {
 
             /** type for array size **/
             using size_type = std::uint32_t;
-            /** xo allocator facet **/
             using AAllocator = xo::mm::AAllocator;
-            /** garbage collector facet **/
-            //using ACollector = xo::mm::ACollector;
-            /** gc-aware object facet **/
+            using ACollector = xo::mm::ACollector;
             using AGCObject = xo::mm::AGCObject;
             /** gc-centric object visitor **/
             using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
@@ -59,8 +74,8 @@ namespace xo {
              *  using memory from allocator @p mm.
              *  Nullptr if space exhausted
              **/
-            static DArray * empty(obj<AAllocator> mm,
-                                  size_type cap);
+            static DArray * _empty(obj<AAllocator> mm,
+                                   size_type cap);
 
             /** create copy of @p src using memory from @p mm
              *  with capacity for @p new_cap elements
@@ -80,8 +95,13 @@ namespace xo {
             static DArray * array(obj<AAllocator> mm, Args... args);
 
             ///@}
-            /** @defgroup darray-access acecss methods **/
+            /** @defgroup darray-access access methods **/
             ///@{
+
+            /** create fop for this instance  **/
+            template <typename AFacet = AGCObject>
+            obj<AFacet,DArray> ref() { return obj<AFacet,DArray>(this); }
+
             /** true iff array is empty **/
             bool is_empty() const noexcept { return size_ == 0; }
             /** only support finite arrays :-) **/
@@ -108,13 +128,17 @@ namespace xo {
             /** store @p elt at position @p index.
              *  true on success, false otherwise
              **/
-            bool assign_at(size_type index, obj<AGCObject> elt) noexcept;
+            bool assign_at(obj<ACollector> gc, size_type index, obj<AGCObject> elt) noexcept;
 
             /** append @p elt at the end of array.
              *  true on success, false otherwise.
              *  on failure array is unaltered
              **/
-            bool push_back(obj<AGCObject> elt) noexcept;
+            bool push_back(obj<ACollector> gc, obj<AGCObject> elt) noexcept;
+
+            template <typename... Args>
+            requires (std::convertible_to<Args, obj<AGCObject>> && ...)
+            bool push_back_all(obj<ACollector> gc, Args... args) noexcept;
 
             /** store last element in array into @p elt and decrement array size.
              *  true on success; false on failure (implies array was empty)
@@ -182,11 +206,32 @@ namespace xo {
         DArray *
         DArray::array(obj<AAllocator> mm, Args... args)
         {
-            DArray * result = empty(mm, sizeof...(args));
+            obj<ACollector> gc = mm.try_to_facet<ACollector>();
+            DArray * result = _empty(mm, sizeof...(args));
             if (result) {
-                (result->push_back(args), ...);
+                detail::do_array_push_back(result, gc, args...);
             }
             return result;
+        }
+
+        namespace detail {
+            template <typename A, typename... Rest>
+            requires (std::convertible_to<A, obj<xo::mm::AGCObject>>)
+            static bool do_array_push_back(DArray * lhs,
+                                           obj<xo::mm::ACollector> gc,
+                                           A arg1,
+                                           Rest... rest)
+            {
+                return (lhs->push_back(gc, arg1)
+                        && do_array_push_back(lhs, gc, rest...));
+            }
+        }
+
+        template <typename... Args>
+        requires (std::convertible_to<Args, obj<xo::mm::AGCObject>> && ...)
+        bool
+        DArray::push_back_all(obj<ACollector> gc, Args... args) noexcept {
+            return detail::do_array_push_back(this, gc, args...);
         }
 
     } /*namespace scm*/
