@@ -144,12 +144,12 @@ namespace xo {
              *
              *  @return true if key-value pair updated; false if key not found
              **/
-            bool try_update(const pair_type & kvpair);
+            bool try_update(obj<ACollector> gc, const pair_type & kvpair);
 
             /** update key-value pair for existing @p key to map to @p value.
              *  false if @p key not already present.
              **/
-            bool try_update_cstr(const char * key, obj<AGCObject> value);
+            bool try_update_cstr(obj<ACollector> gc, const char * key, obj<AGCObject> value);
 
             /** convenience method:
              *  try_upsert pair (k, @p value), after boxing c-style string @p key with @p mm to get k
@@ -167,7 +167,7 @@ namespace xo {
              *
              *  False if dictionary already at capacity
              **/
-            bool try_upsert(const pair_type & kvpair);
+            bool try_upsert(obj<ACollector> gc, const pair_type & kvpair);
 
             /** upsert key-value pair @p kvpair into dictionary.
              *  If at capacity, expand capacity, getting new memory from @p mm.
@@ -217,7 +217,7 @@ namespace xo {
             /** append {key, value} pair @p kv_pair to this dictionary
              *  Require: @p kv_pair.first not already present in @ref keys_
              **/
-            bool _append_kv_aux(const pair_type & kv_pair);
+            bool _append_kv_aux(obj<ACollector> gc, const pair_type & kv_pair);
             ///@}
 
         private:

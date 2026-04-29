@@ -110,7 +110,7 @@ namespace xo {
                 *p_lhs = rhs;
             }
         };
-    }
-}
+    } /*namespace mm*/
+} /*namespace xo*/
 
 /* end RCollector_aux.hpp */

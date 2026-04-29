@@ -14,6 +14,7 @@ namespace xo {
     using xo::scm::ListOps;
     using xo::scm::DArray;
     using xo::scm::DInteger;
+    using xo::mm::ACollector;
     using xo::mm::AAllocator;
     using xo::mm::AGCObject;
     using xo::mm::DArena;
@@ -31,7 +32,10 @@ namespace xo {
 
             REQUIRE(arr.is_empty());;
 
-            REQUIRE(arr.push_back(ListOps::nil()) == false);
+            // null_gc: for no memory barrier
+            obj<ACollector> null_gc;
+
+            REQUIRE(arr.push_back(null_gc, ListOps::nil()) == false);
         }
 
         TEST_CASE("DArray-empty", "[object2][DArray]")
@@ -41,7 +45,7 @@ namespace xo {
             DArena arena = DArena::map(cfg);
             auto alloc = with_facet<AAllocator>::mkobj(&arena);
 
-            DArray * arr = DArray::empty(alloc, 16);
+            DArray * arr = DArray::_empty(alloc, 16);
 
             REQUIRE(arr != nullptr);
             REQUIRE(arr->capacity() == 16);
@@ -57,15 +61,16 @@ namespace xo {
                               .size_ = 4*1024 };
             DArena arena = DArena::map(cfg);
             auto alloc = with_facet<AAllocator>::mkobj(&arena);
+            obj<ACollector> null_gc;
 
-            DArray * arr = DArray::empty(alloc, 16);
+            DArray * arr = DArray::_empty(alloc, 16);
             REQUIRE(arr != nullptr);
             REQUIRE(arr->capacity() == 16);
             REQUIRE(arr->size() == 0);
 
             obj<AGCObject> elt = DInteger::box<AGCObject>(alloc, 42);
 
-            bool ok = arr->push_back(elt);
+            bool ok = arr->push_back(null_gc, elt);
 
             REQUIRE(ok == true);
             REQUIRE(arr->is_empty() == false);
@@ -79,8 +84,9 @@ namespace xo {
                               .size_ = 4*1024 };
             DArena arena = DArena::map(cfg);
             auto alloc = with_facet<AAllocator>::mkobj(&arena);
+            obj<ACollector> null_gc;
 
-            DArray * arr = DArray::empty(alloc, 4);
+            DArray * arr = DArray::_empty(alloc, 4);
             REQUIRE(arr != nullptr);
             REQUIRE(arr->capacity() == 4);
             REQUIRE(arr->size() == 0);
@@ -90,7 +96,7 @@ namespace xo {
                 REQUIRE(arr->size() == i);
 
                 obj<AGCObject> elt = DInteger::box<AGCObject>(alloc, 100 + i);
-                bool ok = arr->push_back(elt);
+                bool ok = arr->push_back(null_gc, elt);
                 REQUIRE(ok == true);
 
                 REQUIRE(arr->capacity() == 4);
@@ -106,7 +112,8 @@ namespace xo {
             DArena arena = DArena::map(cfg);
             auto alloc = with_facet<AAllocator>::mkobj(&arena);
 
-            DArray * arr = DArray::empty(alloc, 2);
+            DArray * arr = DArray::_empty(alloc, 2);
+            obj<ACollector> null_gc;
 
             REQUIRE(arr != nullptr);
             REQUIRE(arr->capacity() == 2);
@@ -116,11 +123,11 @@ namespace xo {
             obj<AGCObject> e2 = DInteger::box<AGCObject>(alloc, 2);
             obj<AGCObject> e3 = DInteger::box<AGCObject>(alloc, 3);
 
-            REQUIRE(arr->push_back(e1) == true);
+            REQUIRE(arr->push_back(null_gc, e1) == true);
             REQUIRE(arr->size() == 1);
-            REQUIRE(arr->push_back(e2) == true);
+            REQUIRE(arr->push_back(null_gc, e2) == true);
             REQUIRE(arr->size() == 2);
-            REQUIRE(arr->push_back(e3) == false);
+            REQUIRE(arr->push_back(null_gc, e3) == false);
             REQUIRE(arr->size() == 2);
             REQUIRE(arr->capacity() == 2);
         }
@@ -132,7 +139,8 @@ namespace xo {
             DArena arena = DArena::map(cfg);
             auto alloc = with_facet<AAllocator>::mkobj(&arena);
 
-            DArray * arr = DArray::empty(alloc, 4);
+            DArray * arr = DArray::_empty(alloc, 4);
+            obj<ACollector> null_gc;
 
             REQUIRE(arr != nullptr);
             REQUIRE(arr->size() == 0);
@@ -142,9 +150,9 @@ namespace xo {
             obj<AGCObject> e1 = DInteger::box<AGCObject>(alloc, 200);
             obj<AGCObject> e2 = DInteger::box<AGCObject>(alloc, 300);
 
-            arr->push_back(e0);
-            arr->push_back(e1);
-            arr->push_back(e2);
+            arr->push_back(null_gc, e0);
+            arr->push_back(null_gc, e1);
+            arr->push_back(null_gc, e2);
 
             REQUIRE(arr->size() == 3);
 

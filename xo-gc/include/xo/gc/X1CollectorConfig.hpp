@@ -25,7 +25,19 @@ namespace xo {
             X1CollectorConfig with_name(std::string name);
 
             /** copy of this config,
+             *  but with @ref n_generation_ set to @p n_gen
+             **/
+            X1CollectorConfig with_n_gen(uint32_t n_gen);
+
+            /** copy of this config,
+             *  but with @ref n_survive_ set to @p n_survive
+             **/
+            X1CollectorConfig with_n_survive(uint32_t n_survive);
+
+            /** copy of this config,
              *  but with @c arena_config_.size_ set to @p gen_z
+             *
+             *  TODO: rename to with_halfspace_size()
              **/
             X1CollectorConfig with_size(std::size_t gen_z);
 

@@ -12,7 +12,7 @@
 namespace xo {
     using xo::mm::SetupGcUtest;
     using xo::facet::FacetRegistry;
-    using xo::reflect::typeseq;
+    //using xo::reflect::typeseq;
 
     bool
     SetupGcUtest::register_facets()
@@ -33,7 +33,8 @@ namespace xo {
     }
 
     InitEvidence
-    InitSubsys<S_gc_utest_tag>::require() {
+    InitSubsys<S_gc_utest_tag>::require()
+    {
         InitEvidence retval;
 
         /* recursive subsystem deps for xo-gc/utest */
