@@ -305,7 +305,7 @@ namespace xo {
             // could use c++ vector in scratch space instead of running on
             // boxed types.
             //
-            DArray * stats_v = DArray::empty(mm, object_types_.size());
+            DArray * stats_v = DArray::_empty(mm, object_types_.size());
 
             if (!stats_v)
                 return false;
@@ -346,7 +346,8 @@ namespace xo {
                     recd->upsert_cstr(mm, "n-live", DInteger::box(mm, 0));
                     recd->upsert_cstr(mm, "bytes", DInteger::box(mm, 0));
 
-                    stats_v->assign_at(tseq.seqno(), obj<AGCObject,DDictionary>(recd));
+                    stats_v->assign_at(mm.try_to_facet<ACollector>(),
+                                       tseq.seqno(), obj<AGCObject,DDictionary>(recd));
                 }
             }
 
@@ -385,13 +386,15 @@ namespace xo {
 
             stats_v->resize(max_tseq + 1);
 
-            DArray * final_stats_v = DArray::empty(mm, n_tseq_present);
+            DArray * final_stats_v = DArray::_empty(mm, n_tseq_present);
 
             for (std::size_t i = 0, n = stats_v->size(); i < n; ++i) {
                 auto recd = stats_v->at(i);
 
                 if (recd) {
-                    bool ok = final_stats_v->push_back(recd);
+                    obj<ACollector> gc = mm.try_to_facet<ACollector>();
+
+                    bool ok = final_stats_v->push_back(gc, recd);
                     assert(ok);
                 }
             }
@@ -433,7 +436,7 @@ namespace xo {
             }
 
             // stats, indexed by age
-            DArray * stats_v = DArray::empty(mm, soft_max_age + 1);
+            DArray * stats_v = DArray::_empty(mm, soft_max_age + 1);
 
             if (!stats_v)
                 return false;
@@ -448,7 +451,9 @@ namespace xo {
                 recd->upsert_cstr(mm, "n-live", DInteger::box(mm, 0));
                 recd->upsert_cstr(mm, "bytes", DInteger::box(mm, 0));
 
-                stats_v->push_back(obj<AGCObject,DDictionary>(recd));
+                obj<ACollector> gc = mm.try_to_facet<ACollector>();
+
+                stats_v->push_back(gc, obj<AGCObject,DDictionary>(recd));
             }
 
             log && log(xtag("soft_max_age", soft_max_age),

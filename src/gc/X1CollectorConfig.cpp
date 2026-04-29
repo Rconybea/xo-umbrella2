@@ -17,6 +17,22 @@ namespace xo {
         }
 
         X1CollectorConfig
+        X1CollectorConfig::with_n_gen(std::uint32_t n_gen)
+        {
+            X1CollectorConfig copy = *this;
+            copy.n_generation_ = n_gen;
+            return copy;
+        }
+
+        X1CollectorConfig
+        X1CollectorConfig::with_n_survive(std::uint32_t n_survive)
+        {
+            X1CollectorConfig copy = *this;
+            copy.n_survive_threshold_ = n_survive;
+            return copy;
+        }
+
+        X1CollectorConfig
         X1CollectorConfig::with_size(std::size_t gen_z)
         {
             X1CollectorConfig copy = *this;
