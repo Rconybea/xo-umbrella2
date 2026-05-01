@@ -30,12 +30,12 @@ namespace xo {
             REQUIRE(arr.size() == 0);
             REQUIRE(arr.capacity() == 0);
 
-            REQUIRE(arr.is_empty());;
+            REQUIRE(arr.is_empty());
 
-            // null_gc: for no memory barrier
-            obj<ACollector> null_gc;
+            // null_mm: for no memory barrier
+            obj<AAllocator> null_mm;
 
-            REQUIRE(arr.push_back(null_gc, ListOps::nil()) == false);
+            REQUIRE(arr.push_back(null_mm, ListOps::nil()) == false);
         }
 
         TEST_CASE("DArray-empty", "[object2][DArray]")
@@ -61,7 +61,7 @@ namespace xo {
                               .size_ = 4*1024 };
             DArena arena = DArena::map(cfg);
             auto alloc = with_facet<AAllocator>::mkobj(&arena);
-            obj<ACollector> null_gc;
+            obj<AAllocator> null_mm;
 
             DArray * arr = DArray::_empty(alloc, 16);
             REQUIRE(arr != nullptr);
@@ -70,7 +70,7 @@ namespace xo {
 
             obj<AGCObject> elt = DInteger::box<AGCObject>(alloc, 42);
 
-            bool ok = arr->push_back(null_gc, elt);
+            bool ok = arr->push_back(null_mm, elt);
 
             REQUIRE(ok == true);
             REQUIRE(arr->is_empty() == false);
@@ -84,7 +84,7 @@ namespace xo {
                               .size_ = 4*1024 };
             DArena arena = DArena::map(cfg);
             auto alloc = with_facet<AAllocator>::mkobj(&arena);
-            obj<ACollector> null_gc;
+            obj<AAllocator> null_mm;
 
             DArray * arr = DArray::_empty(alloc, 4);
             REQUIRE(arr != nullptr);
@@ -96,7 +96,7 @@ namespace xo {
                 REQUIRE(arr->size() == i);
 
                 obj<AGCObject> elt = DInteger::box<AGCObject>(alloc, 100 + i);
-                bool ok = arr->push_back(null_gc, elt);
+                bool ok = arr->push_back(null_mm, elt);
                 REQUIRE(ok == true);
 
                 REQUIRE(arr->capacity() == 4);
@@ -113,7 +113,7 @@ namespace xo {
             auto alloc = with_facet<AAllocator>::mkobj(&arena);
 
             DArray * arr = DArray::_empty(alloc, 2);
-            obj<ACollector> null_gc;
+            obj<AAllocator> null_mm;
 
             REQUIRE(arr != nullptr);
             REQUIRE(arr->capacity() == 2);
@@ -123,11 +123,11 @@ namespace xo {
             obj<AGCObject> e2 = DInteger::box<AGCObject>(alloc, 2);
             obj<AGCObject> e3 = DInteger::box<AGCObject>(alloc, 3);
 
-            REQUIRE(arr->push_back(null_gc, e1) == true);
+            REQUIRE(arr->push_back(null_mm, e1) == true);
             REQUIRE(arr->size() == 1);
-            REQUIRE(arr->push_back(null_gc, e2) == true);
+            REQUIRE(arr->push_back(null_mm, e2) == true);
             REQUIRE(arr->size() == 2);
-            REQUIRE(arr->push_back(null_gc, e3) == false);
+            REQUIRE(arr->push_back(null_mm, e3) == false);
             REQUIRE(arr->size() == 2);
             REQUIRE(arr->capacity() == 2);
         }
@@ -140,7 +140,7 @@ namespace xo {
             auto alloc = with_facet<AAllocator>::mkobj(&arena);
 
             DArray * arr = DArray::_empty(alloc, 4);
-            obj<ACollector> null_gc;
+            obj<AAllocator> null_mm;
 
             REQUIRE(arr != nullptr);
             REQUIRE(arr->size() == 0);
@@ -150,9 +150,9 @@ namespace xo {
             obj<AGCObject> e1 = DInteger::box<AGCObject>(alloc, 200);
             obj<AGCObject> e2 = DInteger::box<AGCObject>(alloc, 300);
 
-            arr->push_back(null_gc, e0);
-            arr->push_back(null_gc, e1);
-            arr->push_back(null_gc, e2);
+            arr->push_back(null_mm, e0);
+            arr->push_back(null_mm, e1);
+            arr->push_back(null_mm, e2);
 
             REQUIRE(arr->size() == 3);
 

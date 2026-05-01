@@ -108,7 +108,7 @@ namespace xo {
         }
 
         bool
-        DDictionary::try_update(obj<ACollector> gc, const pair_type & kv_pair)
+        DDictionary::try_update(obj<AAllocator> mm, const pair_type & kv_pair)
         {
             for (size_type i = 0, n = keys_->size(); i < n; ++i) {
                 auto key_i = obj<AGCObject,DString>::from((*keys_)[i]);
@@ -116,7 +116,7 @@ namespace xo {
                 assert(key_i);
 
                 if (*(key_i.data()) == *(kv_pair.first)) {
-                    values_->assign_at(gc, i, kv_pair.second);
+                    values_->assign_at(mm, i, kv_pair.second);
                     return true;
                 }
             }
@@ -125,7 +125,7 @@ namespace xo {
         }
 
         bool
-        DDictionary::try_update_cstr(obj<ACollector> gc, const char * key, obj<AGCObject> value)
+        DDictionary::try_update_cstr(obj<AAllocator> mm, const char * key, obj<AGCObject> value)
         {
             for (size_type i = 0, n = keys_->size(); i < n; ++i) {
                 auto key_i = obj<AGCObject,DString>::from((*keys_)[i]);
@@ -133,7 +133,7 @@ namespace xo {
                 assert(key_i);
 
                 if (strcmp(key, key_i->data()) == 0) {
-                    values_->assign_at(gc, i, value);
+                    values_->assign_at(mm, i, value);
 
                     return true;
                 }
@@ -148,8 +148,8 @@ namespace xo {
             const DString * k1 = DString::from_cstr(mm, key_cstr);
 
             if (k1) {
-                obj<ACollector> gc = mm.try_to_facet<ACollector>();
-                return this->try_upsert(gc, std::make_pair(k1, value));
+                //obj<ACollector> gc = mm.try_to_facet<ACollector>();
+                return this->try_upsert(mm, std::make_pair(k1, value));
             }
 
             return false;
@@ -167,23 +167,23 @@ namespace xo {
         }
 
         bool
-        DDictionary::try_upsert(obj<ACollector> gc, const pair_type & kv_pair)
+        DDictionary::try_upsert(obj<AAllocator> mm, const pair_type & kv_pair)
         {
-            if (this->try_update(gc, kv_pair))
+            if (this->try_update(mm, kv_pair))
                 return true;
 
             if (keys_->size() == keys_->capacity())
                 return false;
 
-            return this->_append_kv_aux(gc, kv_pair);
+            return this->_append_kv_aux(mm, kv_pair);
         }
 
         bool
         DDictionary::upsert(obj<AAllocator> mm, const pair_type & kv_pair)
         {
-            obj<ACollector> gc = mm.try_to_facet<ACollector>();
+            //obj<ACollector> gc = mm.try_to_facet<ACollector>();
 
-            if (this->try_update(gc, kv_pair))
+            if (this->try_update(mm, kv_pair))
                 return true;
 
             // key not present -> must expand {key array, value array}
@@ -204,19 +204,19 @@ namespace xo {
                 }
             }
 
-            return this->_append_kv_aux(gc, kv_pair);
+            return this->_append_kv_aux(mm, kv_pair);
         }
 
         bool
-        DDictionary::_append_kv_aux(obj<ACollector> gc, const pair_type & kv_pair)
+        DDictionary::_append_kv_aux(obj<AAllocator> mm, const pair_type & kv_pair)
         {
             DString * key = const_cast<DString *>(kv_pair.first);
 
             bool ok
-                = keys_->push_back(gc, obj<AGCObject,DString>(key));
+                = keys_->push_back(mm, obj<AGCObject,DString>(key));
 
             if (ok) {
-                ok = values_->push_back(gc, kv_pair.second);
+                ok = values_->push_back(mm, kv_pair.second);
 
                 if (!ok) {
                     // since we couldn't insert value, also drop key

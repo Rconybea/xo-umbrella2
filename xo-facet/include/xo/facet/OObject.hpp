@@ -168,6 +168,7 @@ namespace xo {
 
             DataPtr data() const { return data_; }
             Opaque opaque_data() const { return data_; }
+            Opaque * opaque_data_addr() { return (Opaque *)&data_; }
 
             void reset() { data_ = nullptr; }
             void reset_opaque(Opaque data) { data_ = (DataPtr)data; }

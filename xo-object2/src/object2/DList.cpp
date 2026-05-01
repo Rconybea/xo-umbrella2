@@ -120,7 +120,20 @@ namespace xo {
         }
 
         void
-        DList::assign_head(obj<ACollector> gc, obj<AGCObject> rhs)
+        DList::assign_head(obj<AAllocator> mm, obj<AGCObject> rhs)
+        {
+            scope log(XO_DEBUG(true), xtag("mm.data", mm.data_));
+
+            mm.barrier_assign_aux(this,
+                                  head_.iface(), head_.opaque_data_addr(),
+                                  rhs.iface(), rhs.opaque_data());
+
+            //mm_do_assign(gc, this, &head_, rhs);
+        }
+
+        // vestigial. used in MockCollector
+        void
+        DList::assign_head_gc(obj<ACollector> gc, obj<AGCObject> rhs)
         {
             scope log(XO_DEBUG(true), xtag("gc.data", gc.data_));
 

@@ -4,8 +4,8 @@
  **/
 
 #include "xo/alloc2/Allocator.hpp"
-#include "xo/alloc2/alloc/IAllocator_Xfer.hpp"
-#include "xo/alloc2/arena/IAllocator_DArena.hpp"
+#include "xo/alloc2/Arena.hpp"
+//#include "xo/alloc2/arena/IAllocator_DArena.hpp"
 #include "xo/arena/print.hpp"
 #include "xo/arena/padding.hpp"
 #include <xo/facet/obj.hpp>

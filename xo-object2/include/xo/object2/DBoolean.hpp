@@ -5,7 +5,6 @@
 
 #pragma once
 
-//#include <xo/alloc2/Collector.hpp>
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/alloc2/GCObjectVisitor.hpp>
 #include <xo/indentlog/print/ppindentinfo.hpp>
@@ -16,7 +15,6 @@ namespace xo {
     namespace scm {
         struct DBoolean {
             using AAllocator = xo::mm::AAllocator;
-            //using ACollector = xo::mm::ACollector;
             using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
             using AGCObject = xo::mm::AGCObject;
             using VisitReason = xo::mm::VisitReason;

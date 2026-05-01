@@ -134,6 +134,17 @@ namespace xo {
         }
 
         void
+        IAllocator_DX1Collector::barrier_assign_aux(DX1Collector & d,
+                                                    void * parent,
+                                                    AGCObject * lhs_iface,
+                                                    void ** lhs_data,
+                                                    AGCObject * rhs_iface,
+                                                    void * rhs_data)
+        {
+            d.barrier_assign_aux(parent, lhs_iface, lhs_data, rhs_iface, rhs_data);
+        }
+
+        void
         IAllocator_DX1Collector::destruct_data(DX1Collector & d)
         {
             d.~DX1Collector();

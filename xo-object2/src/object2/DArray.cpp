@@ -75,20 +75,23 @@ namespace xo {
         }
 
         bool
-        DArray::assign_at(obj<ACollector> gc, size_type ix, obj<AGCObject> x) noexcept
+        DArray::assign_at(obj<AAllocator> mm, size_type ix, obj<AGCObject> x) noexcept
         {
             if (ix >= size_)
                 return false;
 
             scope log(XO_DEBUG(true), "need write barrier");
 
-            mm_do_assign(gc, this, &elts_[ix], x);
+            mm.barrier_assign_aux(this,
+                                  elts_[ix].iface(), elts_[ix].opaque_data_addr(),
+                                  x.iface(), x.opaque_data());
+            // mm_do_assign(gc, this, &elts_[ix], x);
 
             return true;
         }
 
         bool
-        DArray::push_back(obj<ACollector> gc, obj<AGCObject> elt) noexcept
+        DArray::push_back(obj<AAllocator> mm, obj<AGCObject> elt) noexcept
         {
             if (size_ >= capacity_) {
                 return false;
@@ -98,7 +101,11 @@ namespace xo {
                 void * mem = &(elts_[size_]);
                 new (mem) obj<AGCObject>();
 
-                mm_do_assign(gc, this, &(elts_[size_]), elt);
+                mm.barrier_assign_aux(this,
+                                      elts_[size_].iface(), elts_[size_].opaque_data_addr(),
+                                      elt.iface(), elt.opaque_data());
+
+                //mm_do_assign(gc, this, &(elts_[size_]), elt);
 
                 ++(this->size_);
 

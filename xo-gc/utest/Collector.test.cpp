@@ -13,8 +13,6 @@
 #include <xo/object2/Array.hpp>
 #include <xo/object2/List.hpp>
 #include <xo/object2/Integer.hpp>
-//#include "detail/ICollector_DX1Collector.hpp"
-//#include "detail/IAllocator_DX1Collector.hpp"
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/randomgen/xoshiro256.hpp>
 #include <xo/randomgen/random_seed.hpp>

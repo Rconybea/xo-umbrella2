@@ -71,6 +71,15 @@ namespace xo {
 
             /** reset to empty state; clears all generations **/
             static void clear(DX1Collector & d);
+            /** assignment of fop (rhs_iface,rhs_data) to (lhs_iface, lhs_data)
+             *  with write barrier (creating mlog entry if creating older->younger pointer
+             **/
+            static void barrier_assign_aux(DX1Collector & d,
+                                           void * parent,
+                                           AGCObject * lhs_iface,
+                                           void ** lhs_data,
+                                           AGCObject * rhs_iface,
+                                           void * rhs_data);
             /** invoke destructor **/
             static void destruct_data(DX1Collector & d);
         };

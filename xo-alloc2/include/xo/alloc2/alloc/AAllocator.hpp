@@ -20,8 +20,8 @@ namespace xo {
         using Copaque = const void *;
         using Opaque = void *;
 
-        // see DArena.hpp
-        struct DArena;
+        class AGCObject;      // see AGCObject.hpp
+        struct DArena;        // see DArena.hpp
 
         /** @class AAllocator
          *  @brief Abstract facet for allocation
@@ -34,6 +34,7 @@ namespace xo {
         public:
             /** @defgroup mm-allocator-type-traits allocator type traits **/
             ///@{
+            using AGCObject = xo::mm::AGCObject;
             /** memory size report **/
             using MemorySizeInfo = xo::mm::MemorySizeInfo;
             /** type used for allocation amounts **/
@@ -155,6 +156,28 @@ namespace xo {
             virtual value_type alloc_copy(Opaque d, value_type src) const = 0;
             /** reset allocator @p d to empty state. **/
             virtual void clear(Opaque d) const = 0;
+            /** assign helper for allocator that may require a write barrier
+             *  (for example Collector). Using obj<AGCObject> here causes
+             *  include cycle, use spelled out form instead;
+             *
+             *  For:
+             *    obj<AGCObject> lhs_ = rhs
+             *  with allocator d, that owns some allocaiton p, would use
+             *    mm.barrier_assign_aux(d, p,
+             *                          lhs_.iface(), lhs_.opaque_data_addr(),
+             *                          rhs.iface(), rhs.opaque_data());
+             *  when lhs has known data type:
+             *    DRepr * lhs_ = rhs.data();
+             *  use
+             *    mm.barrier_assign_aux(d, p,
+             *                          nullptr, lhs_.opaque_data_addr(),
+             *                          rhs.iface(), rhs.opaque_data());
+             *  barrier needs to be able to construct complete fop for rhs
+             *  to administrate write barrier.
+             **/
+            virtual void barrier_assign_aux(Opaque d, void * parent,
+                                            AGCObject * lhs_iface, void ** lhs_data,
+                                            AGCObject * rhs_iface, void * rhs_data) const = 0;
 
             ///@}
         }; /*AAllocator*/
