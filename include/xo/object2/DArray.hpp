@@ -6,7 +6,6 @@
 #pragma once
 
 #include <xo/alloc2/GCObject.hpp>
-//#include <xo/alloc2/Collector.hpp>
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/facet/obj.hpp>
 #include <xo/indentlog/print/ppindentinfo.hpp>
@@ -20,7 +19,7 @@ namespace xo {
         namespace detail {
             /** null base case **/
             static inline bool do_array_push_back(DArray *,
-                                                  obj<xo::mm::ACollector>)
+                                                  obj<xo::mm::AAllocator>)
             {
                 return true;
             }
@@ -28,7 +27,7 @@ namespace xo {
             template <typename A, typename... Rest>
             requires (std::convertible_to<A, obj<xo::mm::AGCObject>>)
             static bool do_array_push_back(DArray * lhs,
-                                           obj<xo::mm::ACollector> gc,
+                                           obj<xo::mm::AAllocator> mm,
                                            A arg1,
                                            Rest... rest);
         }
@@ -49,7 +48,7 @@ namespace xo {
             /** type for array size **/
             using size_type = std::uint32_t;
             using AAllocator = xo::mm::AAllocator;
-            using ACollector = xo::mm::ACollector;
+            //using ACollector = xo::mm::ACollector;
             using AGCObject = xo::mm::AGCObject;
             /** gc-centric object visitor **/
             using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
@@ -114,8 +113,6 @@ namespace xo {
             obj<AGCObject> at(size_type index) const;
 
             const obj<AGCObject> & operator[](size_type index) const noexcept { return elts_[index]; }
-            // TODO: nuke this or provide LValue shim.  need write barrier!
-            obj<AGCObject> & operator[](size_type index) noexcept { return elts_[index]; }
 
             ///@}
             /** @defgroup darray-iterators iterators **/
@@ -128,17 +125,17 @@ namespace xo {
             /** store @p elt at position @p index.
              *  true on success, false otherwise
              **/
-            bool assign_at(obj<ACollector> gc, size_type index, obj<AGCObject> elt) noexcept;
+            bool assign_at(obj<AAllocator> mm, size_type index, obj<AGCObject> elt) noexcept;
 
             /** append @p elt at the end of array.
              *  true on success, false otherwise.
              *  on failure array is unaltered
              **/
-            bool push_back(obj<ACollector> gc, obj<AGCObject> elt) noexcept;
+            bool push_back(obj<AAllocator> mm, obj<AGCObject> elt) noexcept;
 
             template <typename... Args>
             requires (std::convertible_to<Args, obj<AGCObject>> && ...)
-            bool push_back_all(obj<ACollector> gc, Args... args) noexcept;
+            bool push_back_all(obj<AAllocator> mm, Args... args) noexcept;
 
             /** store last element in array into @p elt and decrement array size.
              *  true on success; false on failure (implies array was empty)
@@ -206,10 +203,10 @@ namespace xo {
         DArray *
         DArray::array(obj<AAllocator> mm, Args... args)
         {
-            obj<ACollector> gc = mm.try_to_facet<ACollector>();
+            //obj<ACollector> gc = mm.try_to_facet<ACollector>();
             DArray * result = _empty(mm, sizeof...(args));
             if (result) {
-                detail::do_array_push_back(result, gc, args...);
+                detail::do_array_push_back(result, mm, args...);
             }
             return result;
         }
@@ -218,20 +215,20 @@ namespace xo {
             template <typename A, typename... Rest>
             requires (std::convertible_to<A, obj<xo::mm::AGCObject>>)
             static bool do_array_push_back(DArray * lhs,
-                                           obj<xo::mm::ACollector> gc,
+                                           obj<xo::mm::AAllocator> mm,
                                            A arg1,
                                            Rest... rest)
             {
-                return (lhs->push_back(gc, arg1)
-                        && do_array_push_back(lhs, gc, rest...));
+                return (lhs->push_back(mm, arg1)
+                        && do_array_push_back(lhs, mm, rest...));
             }
         }
 
         template <typename... Args>
         requires (std::convertible_to<Args, obj<xo::mm::AGCObject>> && ...)
         bool
-        DArray::push_back_all(obj<ACollector> gc, Args... args) noexcept {
-            return detail::do_array_push_back(this, gc, args...);
+        DArray::push_back_all(obj<AAllocator> mm, Args... args) noexcept {
+            return detail::do_array_push_back(this, mm, args...);
         }
 
     } /*namespace scm*/

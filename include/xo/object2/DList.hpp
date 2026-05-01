@@ -64,7 +64,8 @@ namespace xo {
             obj<AGCObject> at(size_type ix) const;
 
             /** assign head **/
-            void assign_head(obj<ACollector> gc, obj<AGCObject> h);
+            void assign_head(obj<AAllocator> mm, obj<AGCObject> h);
+            void assign_head_gc(obj<ACollector> gc, obj<AGCObject> h);
             /** assign rest-pointer. Caller responsible for preserving acyclic property! **/
             void _assign_rest(DList * r);
 
