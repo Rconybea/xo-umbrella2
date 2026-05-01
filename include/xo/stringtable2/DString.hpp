@@ -6,7 +6,6 @@
 #pragma once
 
 #include <xo/alloc2/Allocator.hpp>
-//#include <xo/alloc2/Collector.hpp>
 #include <xo/alloc2/GCObjectVisitor.hpp>
 #include <xo/facet/obj.hpp>
 #include <xo/indentlog/print/ppindentinfo.hpp>
@@ -16,8 +15,6 @@
 //#include <cstdio>
 
 namespace xo {
-    namespace mm { class ACollector; }
-
     namespace scm {
         /** @class DString
          *  @brief String implementation with gc hooks
@@ -46,8 +43,6 @@ namespace xo {
             using const_iterator = const char *;
             /** xo allocator **/
             using AAllocator = xo::mm::AAllocator;
-            /** garbage collector **/
-            //using ACollector = xo::mm::ACollector;
             /** object visitor (garbage collector proxy) **/
             using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
             /** visitor hint **/
