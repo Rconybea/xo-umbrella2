@@ -133,7 +133,7 @@ namespace xo {
             assert(!cell->is_empty());
 
             if (!cell->is_empty()) {
-                cell->assign_head(rcx.collector(), dest);
+                cell->assign_head(rcx.allocator(), dest);
             }
 
             return cell;
