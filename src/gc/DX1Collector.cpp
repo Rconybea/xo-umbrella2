@@ -14,7 +14,7 @@
 #include <xo/stringtable2/String.hpp>
 
 #include <xo/alloc2/GCObject.hpp>
-#include <xo/alloc2/Allocator.hpp>
+//#include <xo/alloc2/Allocator_extra.hpp>
 #include <xo/alloc2/Arena.hpp>
 #include "object_age.hpp"
 #include <xo/facet/obj.hpp>
@@ -690,6 +690,19 @@ namespace xo {
                     arena->clear();
                 }
             }
+        }
+
+        void
+        DX1Collector::barrier_assign_aux(void * parent,
+                                         AGCObject * lhs_iface, void ** lhs_data,
+                                         AGCObject * rhs_iface, void * rhs_data)
+        {
+            scope log(XO_DEBUG(config_.debug_flag_),
+                      xtag("parent", parent),
+                      xtag("lhs.iface", lhs_iface), xtag("&lhs.data", lhs_data),
+                      xtag("rhs.iface", rhs_iface), xtag("rhs.data", rhs_data));
+
+            // see .assign_member()
         }
     } /*namespace mm*/
 } /*namespace xo*/

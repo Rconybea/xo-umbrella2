@@ -334,6 +334,14 @@ namespace xo {
             /** discard all allocated memory **/
             void clear() noexcept;
 
+            /** perform fop assignment of (rhs_iface,rhs_data)
+             *  to (lhs_iface,lhs_data) within allocation @parent
+             *  + create mlog entry if necessary.
+             **/
+            void barrier_assign_aux(void * parent,
+                                    AGCObject * lhs_iface, void ** lhs_data,
+                                    AGCObject * rhs_iface, void * rhs_data);
+
         private:
             /** aux init function: initialize @ref roots_ arena **/
             void _init_gc_roots(const X1CollectorConfig & cfg, std::size_t page_z);

@@ -524,14 +524,14 @@ namespace ut {
                             assert(p_mls);
                             assert(mockgc);
 
-                            lhs1->assign_head(mockgc, rhs1);
+                            lhs1->assign_head_gc(mockgc, rhs1);
                             // alloc2 is ord arena -> no mlog
                         }
                         break;
                     }
 
                     if (is_alloc) {
-                        p_x1_v->push_back(Recd(xi, alloc_z, tseq));
+                        p_x1_v->push_back(Recd(xi,  alloc_z, tseq));
                         p_x2_v->push_back(Recd(xi2, alloc_z, tseq));
                     }
                 }

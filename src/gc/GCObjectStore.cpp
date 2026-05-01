@@ -346,7 +346,7 @@ namespace xo {
                     recd->upsert_cstr(mm, "n-live", DInteger::box(mm, 0));
                     recd->upsert_cstr(mm, "bytes", DInteger::box(mm, 0));
 
-                    stats_v->assign_at(mm.try_to_facet<ACollector>(),
+                    stats_v->assign_at(mm, //mm.try_to_facet<ACollector>(),
                                        tseq.seqno(), obj<AGCObject,DDictionary>(recd));
                 }
             }
@@ -392,9 +392,9 @@ namespace xo {
                 auto recd = stats_v->at(i);
 
                 if (recd) {
-                    obj<ACollector> gc = mm.try_to_facet<ACollector>();
+                    //obj<AAllocator> mm = mm.try_to_facet<ACollector>();
 
-                    bool ok = final_stats_v->push_back(gc, recd);
+                    bool ok = final_stats_v->push_back(mm, recd);
                     assert(ok);
                 }
             }
@@ -451,9 +451,9 @@ namespace xo {
                 recd->upsert_cstr(mm, "n-live", DInteger::box(mm, 0));
                 recd->upsert_cstr(mm, "bytes", DInteger::box(mm, 0));
 
-                obj<ACollector> gc = mm.try_to_facet<ACollector>();
+                //obj<ACollector> gc = mm.try_to_facet<ACollector>();
 
-                stats_v->push_back(gc, obj<AGCObject,DDictionary>(recd));
+                stats_v->push_back(mm, obj<AGCObject,DDictionary>(recd));
             }
 
             log && log(xtag("soft_max_age", soft_max_age),
