@@ -7,7 +7,6 @@
 
 #include "Type.hpp"
 #include "Metatype.hpp"
-//#include <xo/alloc2/Collector.hpp>
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/stringtable2/UniqueString.hpp>
 
@@ -22,7 +21,6 @@ namespace xo {
          **/
         class DTypeVarRef {
         public:
-            //using ACollector = xo::mm::ACollector;
             using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
             using VisitReason = xo::mm::VisitReason;
             using AAllocator = xo::mm::AAllocator;

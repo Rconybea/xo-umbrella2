@@ -7,7 +7,6 @@
 #include "ArrayType.hpp"
 #include "TypeDescr.hpp"
 #include <xo/reflect/Reflect.hpp>
-#include <xo/alloc2/Collector.hpp>
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 

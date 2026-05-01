@@ -8,7 +8,6 @@
 #include "Type.hpp"
 #include "Metatype.hpp"
 #include <xo/reflect/TypeDescr.hpp>
-//#include <xo/alloc2/Collector.hpp>
 #include <xo/alloc2/GCObjectVisitor.hpp>
 #include <xo/alloc2/Allocator.hpp>
 
@@ -24,7 +23,6 @@ namespace xo {
         class DListType {
         public:
             using TypeDescr = xo::reflect::TypeDescr;
-            //using ACollector = xo::mm::ACollector;
             using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
             using VisitReason = xo::mm::VisitReason;
             using AAllocator = xo::mm::AAllocator;
