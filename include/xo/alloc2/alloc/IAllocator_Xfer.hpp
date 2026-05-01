@@ -78,6 +78,10 @@ namespace xo {
             value_type    alloc_copy(Opaque d,
                                      value_type src) const override { return I::alloc_copy(_dcast(d), src); }
             void               clear(Opaque d) const override { return I::clear(_dcast(d)); }
+            void  barrier_assign_aux(Opaque d,
+                                     void * parent,
+                                     AGCObject * lhs_iface, void ** lhs_data,
+                                     AGCObject * rhs_iface, void * rhs_data) const override { I::barrier_assign_aux(_dcast(d), parent, lhs_iface, lhs_data, rhs_iface, rhs_data); }
             ///@}
 
         private:

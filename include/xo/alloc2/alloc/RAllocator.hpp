@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "AAllocator.hpp"
+#include "Allocator_basic.hpp" // omits RAllocator_aux
 #include "AllocIterator.hpp"
 #include <xo/facet/RRouter.hpp>
 #include <string>
@@ -66,13 +66,30 @@ namespace xo {
             AllocInfo   alloc_info(value_type mem) const noexcept { return O::iface()->alloc_info(O::data(), mem); }
             range_type alloc_range(DArena & mm) const noexcept { return O::iface()->alloc_range(O::data(), mm); }
 
+            bool            expand(size_type z) { return O::iface()->expand(O::data(), z); }
             value_type       alloc(typeseq t, size_type z) noexcept { return O::iface()->alloc(O::data(), t, z); }
             value_type super_alloc(typeseq t, size_type z) noexcept { return O::iface()->super_alloc(O::data(), t, z); }
             value_type   sub_alloc(size_type z,
                                    bool complete_flag) noexcept { return O::iface()->sub_alloc(O::data(),
                                                                                              z, complete_flag); }
             value_type  alloc_copy(value_type src) noexcept { return O::iface()->alloc_copy(O::data(), src); }
-            bool            expand(size_type z) { return O::iface()->expand(O::data(), z); }
+            void             clear() { O::iface()->clear(O::data()); }
+            void barrier_assign_aux(void * parent,
+                                    AGCObject * lhs_iface, void ** lhs_data,
+                                    AGCObject * rhs_iface, void * rhs_data) noexcept { O::iface()->barrier_assign_aux(O::data(), parent,
+                                                                                                                      lhs_iface, lhs_data,
+                                                                                                                      rhs_iface, rhs_data); }
+
+            void barrier_assign(void * parent,
+                                obj<AGCObject> * p_lhs,
+                                obj<AGCObject> rhs) noexcept;
+#ifdef NOT_YET
+                this->barrier_assign_aux(parent,
+                                         p_lhs->iface(),
+                                         p_lhs->opaque_data_addr(),
+                                         rhs.iface(),
+                                         rhs.opaque_data());
+#endif
 
             static bool _valid;
         };

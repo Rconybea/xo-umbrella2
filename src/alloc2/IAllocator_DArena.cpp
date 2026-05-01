@@ -4,6 +4,7 @@
  **/
 
 #include "AllocIterator.hpp"
+#include "GCObject.hpp"
 #include "arena/IAllocator_DArena.hpp"
 #include "arena/IAllocIterator_DArenaIterator.hpp" // for alloc_range
 #include <xo/arena/DArenaIterator.hpp>
@@ -152,6 +153,31 @@ namespace xo {
         {
             s.clear();
             //s.checkpoint_ = s.lo_;
+        }
+
+        void
+        IAllocator_DArena::barrier_assign_aux(DArena & s,
+                                              void * parent,
+                                              AGCObject * lhs_iface, void ** lhs_data,
+                                              AGCObject * rhs_iface, void * rhs_data)
+        {
+            (void)s;
+            (void)parent;
+
+            // usually would expect this to just forward to DArena.
+            // That's problematic in this case, because DArena is at lower level
+            // relative to obj<AAllocator,DArena>;
+            // recall that DArena is used in the implementation of xo-facet/
+            //
+            // In any case, for DArena no write barrier is applied.
+            // Instead just perform the fop assignment
+
+            // replacing vtable pointer here
+            if (lhs_iface) {
+                ::memcpy((void *)lhs_iface, (void *)rhs_iface, sizeof(AGCObject));
+            }
+
+            *lhs_data = rhs_data;
         }
 
         void

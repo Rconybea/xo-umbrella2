@@ -14,7 +14,7 @@
 #pragma once
 
 // includes (via {facet_includes})
-#include <xo/alloc2/Allocator.hpp>
+#include <xo/alloc2/Allocator_basic.hpp>
 #include <xo/alloc2/Collector.hpp>
 #include <xo/alloc2/GCObjectVisitor.hpp>
 #include <cstdint>

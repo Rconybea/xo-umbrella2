@@ -1,4 +1,4 @@
-/** @file Allocator.hpp
+/** @file Allocator_basic.hpp
  *
  *  @author Roland Conybeare, Dec 2025
  **/
@@ -10,6 +10,6 @@
 #include "alloc/IAllocator_Xfer.hpp"
 #include "alloc/RAllocator.hpp"
 
-#include "alloc/RAllocator_aux.hpp"
+//#include "alloc/RAllocator_aux.hpp"
 
-/* end Allocator.hpp */
+/* end Allocator_basic.hpp */
