@@ -9,10 +9,18 @@
  *       [iface_facet_any.hpp.j2]
  *  3. idl for facet methods
  *       [idl/RuntimeContext.json5]
+ *
+ *  variables:
+ *    {facet_hpp_fname} -> RuntimeContext.hpp
+ *    {impl_hpp_subdir} -> detail
+ *    {facet_ns1} -> xo
+ *    {facet_detail_subdir} -> detail
+ *    {abstract_facet_fname} -> ARuntimeContext.hpp
  **/
 
 #pragma once
 
+#include "ARuntimeContext.hpp"
 #include <xo/stringtable2/StringTable.hpp>
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/alloc2/Collector.hpp>

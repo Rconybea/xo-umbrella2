@@ -9,10 +9,18 @@
  *       [iface_facet_any.hpp.j2]
  *  3. idl for facet methods
  *       [idl/Procedure.json5]
+ *
+ *  variables:
+ *    {facet_hpp_fname} -> Procedure.hpp
+ *    {impl_hpp_subdir} -> detail
+ *    {facet_ns1} -> xo
+ *    {facet_detail_subdir} -> detail
+ *    {abstract_facet_fname} -> AProcedure.hpp
  **/
 
 #pragma once
 
+#include "AProcedure.hpp"
 #include "RuntimeContext.hpp"
 #include <xo/alloc2/GCObject.hpp>
 
