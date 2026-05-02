@@ -148,7 +148,6 @@ namespace xo {
             const DString * k1 = DString::from_cstr(mm, key_cstr);
 
             if (k1) {
-                //obj<ACollector> gc = mm.try_to_facet<ACollector>();
                 return this->try_upsert(mm, std::make_pair(k1, value));
             }
 
@@ -181,8 +180,6 @@ namespace xo {
         bool
         DDictionary::upsert(obj<AAllocator> mm, const pair_type & kv_pair)
         {
-            //obj<ACollector> gc = mm.try_to_facet<ACollector>();
-
             if (this->try_update(mm, kv_pair))
                 return true;
 

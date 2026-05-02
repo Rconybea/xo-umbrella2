@@ -203,7 +203,6 @@ namespace xo {
         DArray *
         DArray::array(obj<AAllocator> mm, Args... args)
         {
-            //obj<ACollector> gc = mm.try_to_facet<ACollector>();
             DArray * result = _empty(mm, sizeof...(args));
             if (result) {
                 detail::do_array_push_back(result, mm, args...);
