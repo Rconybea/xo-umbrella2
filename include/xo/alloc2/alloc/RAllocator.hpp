@@ -80,16 +80,10 @@ namespace xo {
                                                                                                                       lhs_iface, lhs_data,
                                                                                                                       rhs_iface, rhs_data); }
 
+            // see [RAllocator_aux.hpp] for implementation.
             void barrier_assign(void * parent,
                                 obj<AGCObject> * p_lhs,
                                 obj<AGCObject> rhs) noexcept;
-#ifdef NOT_YET
-                this->barrier_assign_aux(parent,
-                                         p_lhs->iface(),
-                                         p_lhs->opaque_data_addr(),
-                                         rhs.iface(),
-                                         rhs.opaque_data());
-#endif
 
             static bool _valid;
         };
