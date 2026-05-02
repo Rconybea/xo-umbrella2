@@ -91,7 +91,12 @@ namespace xo {
         void
         DMockCollector::assign_member(void * parent, obj<AGCObject> * p_lhs, obj<AGCObject> & rhs)
         {
-            mls_->assign_member(gcos_, parent, p_lhs, rhs);
+            mls_->assign_member_aux(gcos_,
+                                    parent,
+                                    p_lhs->iface(),
+                                    p_lhs->opaque_data_addr(),
+                                    rhs.iface(),
+                                    rhs.opaque_data());
         }
 
         void *

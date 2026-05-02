@@ -55,14 +55,22 @@ namespace xo {
             void verify_ok() noexcept;
 
             /** on behalf of gc-aware object store @p gc,
-             *  change the value of a child pointer at @p p_lhs
-             *  with parent object @p parent.  p_lhs and parent must belong
-             *  to the same allocation.
+             *  change the value of a child pointer {@p lhs_iface, @p *lhs_data}
+             *  with parent object @p parent, to point to {@p rhs_iface, @p rhs_data}
+             *  p_lhs and parent must belong to the same allocation.
+             *
+             *  @p lhs_iface can be nullptr, if parent holds ordinary pointer
+             *  instead of fop (i.e. DRepr* instead of obj<AFacet,DRepr>).
+             *
+             *  @p rhs_iface must be non-null, it's load-bearing for mlog entry
+             *  snapshot member.
              **/
-            void assign_member(GCObjectStore * gc,
-                               void * parent,
-                               obj<AGCObject> * p_lhs,
-                               obj<AGCObject> rhs);
+            void assign_member_aux(GCObjectStore * gc,
+                                   void * parent,
+                                   AGCObject * lhs_iface,
+                                   void ** lhs_data,
+                                   AGCObject * rhs_iface,
+                                   void * rhs_data);
 
             /** swap {to, from} roles
              **/

@@ -620,24 +620,11 @@ namespace xo {
         void
         DX1Collector::assign_member(void * parent, obj<AGCObject> * p_lhs, obj<AGCObject> rhs)
         {
-            scope log(XO_DEBUG(config_.debug_flag_),
-                      xtag("parent", parent), xtag("lhs", p_lhs), xtag("rhs", rhs.data()));
-
-            // ++ stats.n_mutation_;
-
-            if (runstate_.is_running()) {
-                *p_lhs = rhs;
-
-                // for removal of all doubt:
-                // don't log mutations during GC cycle.
-                // That said: should not be happening!
-                assert(false);
-
-                return;
-            } else {
-                mlog_store_.assign_member(&gco_store_, parent, p_lhs, rhs);
-
-            }
+            this->barrier_assign_aux(parent,
+                                     p_lhs->iface(),
+                                     p_lhs->opaque_data_addr(),
+                                     rhs.iface(),
+                                     rhs.opaque_data());
         } /*assign_member*/
 
         DX1CollectorIterator
@@ -702,7 +689,12 @@ namespace xo {
                       xtag("lhs.iface", lhs_iface), xtag("&lhs.data", lhs_data),
                       xtag("rhs.iface", rhs_iface), xtag("rhs.data", rhs_data));
 
-            // see .assign_member()
+            mlog_store_.assign_member_aux(&gco_store_,
+                                          parent,
+                                          lhs_iface,
+                                          lhs_data,
+                                          rhs_iface,
+                                          rhs_data);
         }
     } /*namespace mm*/
 } /*namespace xo*/
