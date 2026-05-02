@@ -9,10 +9,18 @@
  *       [iface_facet_any.hpp.j2]
  *  3. idl for facet methods
  *       [idl/Type.json5]
+ *
+ *  variables:
+ *    {facet_hpp_fname} -> Type.hpp
+ *    {impl_hpp_subdir} -> type
+ *    {facet_ns1} -> xo
+ *    {facet_detail_subdir} -> type
+ *    {abstract_facet_fname} -> AType.hpp
  **/
 
 #pragma once
 
+#include "AType.hpp"
 #include <xo/type/Metatype.hpp>
 #include <xo/reflect/TypeDescr.hpp>
 

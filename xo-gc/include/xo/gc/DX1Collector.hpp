@@ -307,7 +307,9 @@ namespace xo {
 
             // ----- mutation -----
 
-            /** Modify a gc-owned pointer @p *p_lhs, within allocation @p parent,
+            /** DEPRECATED. Prefer .barrier_assign_aux().
+             *
+             *  Modify a gc-owned pointer @p *p_lhs, within allocation @p parent,
              *  to point to @p rhs.
              *
              *  Motivation: need special handling for cross-generational pointers with

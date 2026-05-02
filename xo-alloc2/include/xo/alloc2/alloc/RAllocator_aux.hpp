@@ -38,6 +38,23 @@ namespace xo {
                                      rhs.iface(), rhs.opaque_data());
         }
 
+        template <typename Object>
+        template <typename DRepr>
+        void
+        RAllocator<Object>::barrier_assign_drepr(void * parent,
+                                                 DRepr ** lhs_data,
+                                                 DRepr * rhs_data)
+        {
+            // need to get AGCObject i/face that goes with DRepr.
+            obj<AGCObject,DRepr> rhs_gco(rhs_data);
+
+            this->barrier_assign_aux(parent,
+                                     nullptr /*not needed*/,
+                                     lhs_data,
+                                     rhs_gco.iface(),
+                                     rhs_data);
+        }
+
     } /*namespace mm*/
 } /*namespace xo*/
 

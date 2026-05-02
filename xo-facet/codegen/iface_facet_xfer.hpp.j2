@@ -9,10 +9,18 @@
  *       [{{ iface_facet_any_hpp_j2 }}]
  *  3. idl for facet methods
  *       [{{ idl_fname }}]
+ *
+ *  variables:
+ *    {facet_hpp_fname} -> {{facet_hpp_fname}}
+ *    {impl_hpp_subdir} -> {{impl_hpp_subdir}}
+ *    {facet_ns1} -> {{facet_ns1}}
+ *    {facet_detail_subdir} -> {{facet_detail_subdir}}
+ *    {abstract_facet_fname} -> {{abstract_facet_fname}}
  **/
 
 #pragma once
 
+#include "{{abstract_facet_fname}}"
 {% for include_fname in facet_includes %}
 #include {{include_fname}}
 {% endfor %}

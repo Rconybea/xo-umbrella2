@@ -104,6 +104,7 @@ Return false if installation fails (e.g. memory exhausted) **/
  **/
             static void request_gc(DX1Collector & self, Generation upto);
             /** Assign pointer @p p_lhs to destination @p rhs, within parent allocation @p parent
+DEPRECATED. Only used in MockCollector for gc unit test
 
 Require: gc not in progress **/
             static void assign_member(DX1Collector & self, void * parent, obj<AGCObject> * p_lhs, obj<AGCObject> & rhs);

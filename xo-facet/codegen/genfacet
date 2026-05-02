@@ -154,11 +154,13 @@ def gen_facet(env,
     # RFoo.hpp
     router_facet_hpp_fname = f'{router_facet}.hpp'
 
+    # REMINDER: this context for FACET definition, e.g. AGCObject
     context = {
         'genfacet': 'xo-facet/codegen/genfacet',
         'genfacet_input': idl_fname,
         'using_dox': using_dox,
-        'impl_hpp_subdir': facet_detail_subdir,
+        'impl_hpp_subdir': facet_detail_subdir,    # legacy name
+        'facet_detail_subdir': facet_detail_subdir,
         #
         'facet_hpp_j2': 'facet.hpp.j2',
         'facet_includes': facet_includes,

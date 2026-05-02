@@ -33,7 +33,6 @@ public:
     using typeseq = xo::reflect::typeseq;
     using size_type = AGCObject::size_type;
     using AAllocator = AGCObject::AAllocator;
-    using ACollector = AGCObject::ACollector;
     using AGCObjectVisitor = AGCObject::AGCObjectVisitor;
     using VisitReason = AGCObject::VisitReason;
     ///@}

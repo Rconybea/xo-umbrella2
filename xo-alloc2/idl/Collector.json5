@@ -4,7 +4,7 @@
     output_hpp_dir: "include/xo/alloc2",
     output_impl_subdir: "gc",
     includes: [
-        "<xo/alloc2/Allocator.hpp>",
+        "<xo/alloc2/Allocator_basic.hpp>",
         "<xo/alloc2/Generation.hpp>",
         "<xo/alloc2/role.hpp>",
 //        "<cstdint>",
@@ -254,6 +254,7 @@
             name: "assign_member",
             doc: [
                 "Assign pointer @p p_lhs to destination @p rhs, within parent allocation @p parent",
+                "DEPRECATED. Only used in MockCollector for gc unit test",
                 "",
                 "Require: gc not in progress",
             ],

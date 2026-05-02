@@ -9,10 +9,18 @@
  *       [iface_facet_any.hpp.j2]
  *  3. idl for facet methods
  *       [idl/GCObjectVisitor.json5]
+ *
+ *  variables:
+ *    {facet_hpp_fname} -> GCObjectVisitor.hpp
+ *    {impl_hpp_subdir} -> gc
+ *    {facet_ns1} -> xo
+ *    {facet_detail_subdir} -> gc
+ *    {abstract_facet_fname} -> AGCObjectVisitor.hpp
  **/
 
 #pragma once
 
+#include "AGCObjectVisitor.hpp"
 #include <xo/alloc2/Generation.hpp>
 #include <xo/alloc2/role.hpp>
 #include <xo/alloc2/VisitReason.hpp>

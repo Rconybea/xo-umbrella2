@@ -6,7 +6,13 @@
 #include "DList.hpp"
 #include "list/IPrintable_DList.hpp"
 #include "list/IGCObject_DList.hpp"
+#include <xo/alloc2/GCObjectVisitor.hpp>
 #include <xo/alloc2/GCObject.hpp>
+
+// need Collector for mm_do_assign()
+#include <xo/alloc2/Collector.hpp>
+#include <xo/alloc2/gc/RCollector_aux.hpp>  // for mm_do_assign()
+
 #include <xo/printable2/Printable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/facet/facet_implementation.hpp>
@@ -137,7 +143,7 @@ namespace xo {
         {
             scope log(XO_DEBUG(true), xtag("gc.data", gc.data_));
 
-            mm_do_assign(gc, this, &head_, rhs);
+            xo::mm::mm_do_assign(gc, this, &head_, rhs);
         }
 
         void

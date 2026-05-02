@@ -139,17 +139,31 @@ namespace xo {
         } /*verify_ok*/
 
         void
-        MutationLogStore::assign_member(GCObjectStore * gco_store,
-                                        void * parent,
-                                        obj<AGCObject> * p_lhs,
-                                        obj<AGCObject> rhs)
+        MutationLogStore::assign_member_aux(GCObjectStore * gco_store,
+                                            void * parent,
+                                            AGCObject * lhs_iface,
+                                            void ** lhs_addr,
+                                            AGCObject * rhs_iface,
+                                            void * rhs_data)
         {
             scope log(XO_DEBUG(config_.debug_flag_),
-                      xtag("parent", parent), xtag("lhs", p_lhs), xtag("rhs", rhs.data()));
+                      xtag("parent", parent),
+                      xtag("lhs.iface", lhs_iface),
+                      xtag("&lhs.data", lhs_addr),
+                      xtag("rhs.iface", rhs_iface),
+                      xtag("rhs.data", rhs_data));
 
             // ++ stats.n_mutation_;
 
-            *p_lhs = rhs;
+            assert(parent);
+            assert(lhs_addr);
+            assert(rhs_iface);
+            assert(rhs_data);
+
+            if (lhs_iface)
+                *lhs_iface = *rhs_iface;
+
+            *lhs_addr = rhs_data;
 
             if (!config_.enabled_flag_) {
                 log && log(xtag("msg", "noop b/c incremental gc disabled"));
@@ -162,7 +176,7 @@ namespace xo {
             // 1. generation of lhs
             // 2. generation of rhs
 
-            Generation src_g = gco_store->generation_of(Role::to_space(), p_lhs);
+            Generation src_g = gco_store->generation_of(Role::to_space(), lhs_addr);
 
             if (src_g.is_sentinel()) {
                 log && log(xtag("msg", "noop because src not gc-owned"));
@@ -172,7 +186,7 @@ namespace xo {
                 return;
             }
 
-            Generation dest_g = gco_store->generation_of(Role::to_space(), rhs.data());
+            Generation dest_g = gco_store->generation_of(Role::to_space(), rhs_data);
 
             if (dest_g.is_sentinel()) {
                 log && log(xtag("msg", "noop because dest not gc-owned"));
@@ -197,7 +211,7 @@ namespace xo {
                 const DArena * arena = gco_store->get_space(Role::to_space(), src_g);
 
                 const DArena::header_type * src_hdr = arena->obj2hdr(parent);
-                const DArena::header_type * dest_hdr = arena->obj2hdr(rhs.data());
+                const DArena::header_type * dest_hdr = arena->obj2hdr(rhs_data);
 
                 assert(src_hdr && dest_hdr);
 
@@ -222,16 +236,16 @@ namespace xo {
 
             // control here: we have an older->younger pointer, need to log it
 
-            void ** lhs_addr = reinterpret_cast<void **>(&(p_lhs->data_));
+            obj<AGCObject> snap(rhs_iface, rhs_data);
 
-            this->_append_mutation(dest_g, parent, lhs_addr, rhs);
+            this->_append_mutation(dest_g, parent, lhs_addr, snap);
         }
 
         void
         MutationLogStore::_append_mutation(Generation dest_g,
                                            void * parent,
                                            void ** addr,
-                                           obj<AGCObject> rhs)
+                                           obj<AGCObject> snap)
         {
             // mlog keyed by generation in which pointer _destination_ resides:
             // collection that moves destination generation around needs to also
@@ -239,7 +253,7 @@ namespace xo {
             //
             MutationLog * mlog = this->mlog_[Role::to_space()][dest_g];
 
-            mlog->push_back(MutationLogEntry(parent, addr, rhs));
+            mlog->push_back(MutationLogEntry(parent, addr, snap));
         }
 
         void
