@@ -124,11 +124,11 @@ namespace xo {
         {
             scope log(XO_DEBUG(true), xtag("mm.data", mm.data_));
 
-            mm.barrier_assign_aux(this,
-                                  head_.iface(), head_.opaque_data_addr(),
-                                  rhs.iface(), rhs.opaque_data());
+            mm.barrier_assign(this, &head_, rhs);
 
-            //mm_do_assign(gc, this, &head_, rhs);
+            //mm.barrier_assign_aux(this,
+            //                      head_.iface(), head_.opaque_data_addr(),
+            //                      rhs.iface(), rhs.opaque_data());
         }
 
         // vestigial. used in MockCollector
