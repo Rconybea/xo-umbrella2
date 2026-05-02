@@ -67,7 +67,7 @@ namespace xo {
             void assign_head(obj<AAllocator> mm, obj<AGCObject> h);
             void assign_head_gc(obj<ACollector> gc, obj<AGCObject> h);
             /** assign rest-pointer. Caller responsible for preserving acyclic property! **/
-            void _assign_rest(DList * r);
+            void _assign_rest(obj<AAllocator> mm, DList * r);
 
             /** pretty-printing driver; combine layout+printing **/
             bool pretty(const ppindentinfo & ppii) const;
