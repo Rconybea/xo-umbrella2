@@ -9,10 +9,18 @@
  *       [iface_facet_any.hpp.j2]
  *  3. idl for facet methods
  *       [idl/Sequence.json5]
+ *
+ *  variables:
+ *    {facet_hpp_fname} -> Sequence.hpp
+ *    {impl_hpp_subdir} -> sequence
+ *    {facet_ns1} -> xo
+ *    {facet_detail_subdir} -> sequence
+ *    {abstract_facet_fname} -> ASequence.hpp
  **/
 
 #pragma once
 
+#include "ASequence.hpp"
 #include <xo/alloc2/GCObject.hpp>
 
 namespace xo {

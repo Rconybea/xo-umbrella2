@@ -4,7 +4,7 @@
  **/
 
 #include "DArray.hpp"
-#include "gc/RCollector_aux.hpp"
+//#include "gc/RCollector_aux.hpp"
 #include <xo/printable2/Printable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/indentlog/print/pretty.hpp>
@@ -16,7 +16,7 @@ namespace xo {
     using xo::print::APrintable;
     using xo::facet::FacetRegistry;
     using xo::mm::AGCObject;
-    using xo::mm::mm_do_assign;
+    //using xo::mm::mm_do_assign;
     using xo::facet::typeseq;
 
     namespace scm {
