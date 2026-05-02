@@ -141,11 +141,20 @@ namespace xo {
         }
 
         void
-        DList::_assign_rest(DList * r)
+        DList::_assign_rest(DList * rest)
         {
             scope log(XO_DEBUG(true), "need write barrier");
 
-            this->rest_ = r;
+#ifdef NOT_YET
+            obj<AGCObject,DList> rest_gco(rest);
+
+            mm.barrier_assign_aux(this,
+                                  nullptr /*lhs iface unused*/,
+                                  &(this->rest_),
+                                  rest_gco.iface(),
+                                  rest);
+#endif
+            this->rest_ = rest;
         }
 
         bool
