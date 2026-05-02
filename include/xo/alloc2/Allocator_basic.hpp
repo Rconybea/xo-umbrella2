@@ -10,6 +10,4 @@
 #include "alloc/IAllocator_Xfer.hpp"
 #include "alloc/RAllocator.hpp"
 
-//#include "alloc/RAllocator_aux.hpp"
-
 /* end Allocator_basic.hpp */
