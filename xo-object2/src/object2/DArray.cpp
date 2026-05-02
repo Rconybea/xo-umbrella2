@@ -80,13 +80,7 @@ namespace xo {
             if (ix >= size_)
                 return false;
 
-            scope log(XO_DEBUG(true), "need write barrier");
-
             mm.barrier_assign(this, &elts_[ix], x);
-
-            //mm.barrier_assign_aux(this,
-            //                      elts_[ix].iface(), elts_[ix].opaque_data_addr(),
-            //                      x.iface(), x.opaque_data());
 
             return true;
         }
@@ -103,10 +97,6 @@ namespace xo {
                 new (mem) obj<AGCObject>();
 
                 mm.barrier_assign(this, &elts_[size_], elt);
-
-                //mm.barrier_assign_aux(this,
-                //                      elts_[size_].iface(), elts_[size_].opaque_data_addr(),
-                //                      elt.iface(), elt.opaque_data());
 
                 ++(this->size_);
 
