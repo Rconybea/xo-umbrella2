@@ -18,6 +18,4 @@
 #include "gc/IGCObject_Xfer.hpp"
 #include "gc/RGCObject.hpp"
 
-#include "gc/RCollector_aux.hpp"
-
 /* end GCObject.hpp */

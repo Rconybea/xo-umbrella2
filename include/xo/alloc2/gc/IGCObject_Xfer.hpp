@@ -9,12 +9,19 @@
  *       [iface_facet_any.hpp.j2]
  *  3. idl for facet methods
  *       [idl/GCObject.json5]
+ *
+ *  variables:
+ *    {facet_hpp_fname} -> GCObject.hpp
+ *    {impl_hpp_subdir} -> gc
+ *    {facet_ns1} -> xo
+ *    {facet_detail_subdir} -> gc
+ *    {abstract_facet_fname} -> AGCObject.hpp
  **/
 
 #pragma once
 
+#include "AGCObject.hpp"
 #include <xo/alloc2/Allocator_basic.hpp>
-#include <xo/alloc2/Collector.hpp>
 #include <xo/alloc2/GCObjectVisitor.hpp>
 #include <cstdint>
 #include <cstddef>
@@ -34,7 +41,6 @@ namespace mm {
         using typeseq = AGCObject::typeseq;
         using size_type = AGCObject::size_type;
         using AAllocator = AGCObject::AAllocator;
-        using ACollector = AGCObject::ACollector;
         using AGCObjectVisitor = AGCObject::AGCObjectVisitor;
         using VisitReason = AGCObject::VisitReason;
         ///@}

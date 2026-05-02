@@ -9,10 +9,18 @@
  *       [iface_facet_any.hpp.j2]
  *  3. idl for facet methods
  *       [idl/ResourceVisitor.json5]
+ *
+ *  variables:
+ *    {facet_hpp_fname} -> ResourceVisitor.hpp
+ *    {impl_hpp_subdir} -> visitor
+ *    {facet_ns1} -> xo
+ *    {facet_detail_subdir} -> visitor
+ *    {abstract_facet_fname} -> AResourceVisitor.hpp
  **/
 
 #pragma once
 
+#include "AResourceVisitor.hpp"
 #include "Allocator.hpp"
 
 namespace xo {

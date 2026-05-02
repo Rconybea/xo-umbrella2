@@ -85,6 +85,13 @@ namespace xo {
                                 obj<AGCObject> * p_lhs,
                                 obj<AGCObject> rhs) noexcept;
 
+            // Need _drepr suffix to distinguish from .barrier_assign()
+            // see [RAllocator_aux.hpp] for implementation
+            template <typename DRepr>
+            void barrier_assign_drepr(void * parent,
+                                      DRepr ** lhs_data,
+                                      DRepr * rhs_data);
+
             static bool _valid;
         };
 

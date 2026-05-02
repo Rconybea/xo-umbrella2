@@ -116,6 +116,7 @@ Return false if installation fails (e.g. memory exhausted) **/
  **/
     virtual void request_gc(Opaque data, Generation upto)  = 0;
     /** Assign pointer @p p_lhs to destination @p rhs, within parent allocation @p parent
+DEPRECATED. Only used in MockCollector for gc unit test
 
 Require: gc not in progress **/
     virtual void assign_member(Opaque data, void * parent, obj<AGCObject> * p_lhs, obj<AGCObject> & rhs)  = 0;

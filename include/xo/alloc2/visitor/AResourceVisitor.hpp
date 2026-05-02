@@ -14,7 +14,7 @@
 #pragma once
 
 // includes (via {facet_includes})
-#include "Allocator_basic.hpp"
+#include "Allocator.hpp"
 #include <xo/facet/obj.hpp>
 #include <xo/facet/facet_implementation.hpp>
 #include <xo/facet/typeseq.hpp>

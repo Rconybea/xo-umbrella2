@@ -4,8 +4,8 @@
     output_hpp_dir: "include/xo/alloc2",
     output_impl_subdir: "gc",
     includes: [
-        "<xo/alloc2/Allocator.hpp>",
-        "<xo/alloc2/Collector.hpp>",
+        "<xo/alloc2/Allocator_basic.hpp>",
+//        "<xo/alloc2/Collector.hpp>",
         "<xo/alloc2/GCObjectVisitor.hpp>",
         "<cstdint>",
         "<cstddef>",
@@ -38,11 +38,11 @@
             doc: ["fomo allocator type"],
             definition: "xo::mm::AAllocator",
         },
-        {
-            name: "ACollector",
-            doc: ["fomo collector type"],
-            definition: "xo::mm::ACollector",
-        },
+//        {
+//            name: "ACollector",
+//            doc: ["fomo collector type"],
+//            definition: "xo::mm::ACollector",
+//        },
         {
             name: "AGCObjectVisitor",
             doc: ["fomo collector type"],

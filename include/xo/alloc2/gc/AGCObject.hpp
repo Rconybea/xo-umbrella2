@@ -15,7 +15,6 @@
 
 // includes (via {facet_includes})
 #include <xo/alloc2/Allocator_basic.hpp>
-#include <xo/alloc2/Collector.hpp>
 #include <xo/alloc2/GCObjectVisitor.hpp>
 #include <cstdint>
 #include <cstddef>
@@ -47,8 +46,6 @@ public:
     using size_type = std::size_t;
     /** fomo allocator type **/
     using AAllocator = xo::mm::AAllocator;
-    /** fomo collector type **/
-    using ACollector = xo::mm::ACollector;
     /** fomo collector type **/
     using AGCObjectVisitor = xo::mm::AGCObjectVisitor;
     /** hint arg when navigating object graph **/

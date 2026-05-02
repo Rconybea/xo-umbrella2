@@ -46,7 +46,6 @@ namespace mm {
         using typeseq = xo::facet::typeseq;
         using size_type = AGCObject::size_type;
         using AAllocator = AGCObject::AAllocator;
-        using ACollector = AGCObject::ACollector;
         using AGCObjectVisitor = AGCObject::AGCObjectVisitor;
         using VisitReason = AGCObject::VisitReason;
 
