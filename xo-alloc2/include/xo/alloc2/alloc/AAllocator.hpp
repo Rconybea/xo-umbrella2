@@ -159,11 +159,13 @@ namespace xo {
              *  zero @p z.
              **/
             virtual value_type sub_alloc(Opaque d, size_type z, bool complete_flag) const = 0;
+#ifdef OBSOLETE
             /** Allocate copy of an existing object @p src.
              *  Existing object must be contained in @p d.
              *  NOTE: load bearing for copying garbage collector.
              **/
             virtual value_type alloc_copy(Opaque d, value_type src) const = 0;
+#endif
             /** reset allocator @p d to empty state. **/
             virtual void clear(Opaque d) const = 0;
             /** assign helper for allocator that may require a write barrier

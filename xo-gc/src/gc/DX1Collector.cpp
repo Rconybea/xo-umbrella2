@@ -607,7 +607,8 @@ namespace xo {
 
         auto
         DX1Collector::alloc_copy(value_type src) noexcept -> value_type {
-            return with_facet<AAllocator>::mkobj(this->new_space()).alloc_copy(src);
+            return this->new_space()->alloc_copy(src);
+            //return with_facet<AAllocator>::mkobj(this->new_space()).alloc_copy(src);
         }
 
         bool

@@ -10,6 +10,7 @@ set(UTEST_SRCS
 #    Collector.test.cpp
 #    DX1CollectorIterator.test.cpp
     Generation.test.cpp
+    VisitReason.test.cpp
     dp.test.cpp
     random_allocs.cpp
 )
