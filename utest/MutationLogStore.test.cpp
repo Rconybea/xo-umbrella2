@@ -341,7 +341,7 @@ namespace ut {
             Testcase(2, 1, 16 * 1024, 8 * 128, T,   seq_2,  128, T,     c_fixed, 3,  0,  0,  0,  0, F),
             Testcase(2, 2, 16 * 1024, 8 * 128, T,   seq_3,  128, T,     c_fixed, 4,  0,  0,  0,  0, F),
             Testcase(2, 2, 16 * 1024, 8 * 128, T,   seq_4,  128, T,     c_fixed, 4,  0,  0,  0,  0, F),
-            Testcase(2, 2, 16 * 1024, 8 * 128, T,   seq_5,  128, T,     c_fixed, 4,  0,  0,  0,  0, T),
+            Testcase(2, 2, 16 * 1024, 8 * 128, T,   seq_5,  128, T,     c_fixed, 4,  0,  0,  0,  0, F),
         };
 
 #      undef T

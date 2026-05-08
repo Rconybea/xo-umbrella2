@@ -9,6 +9,7 @@ set(UTEST_SRCS
     DX1CollectorIterator.test.cpp
     MutationLogStore.test.cpp
     GCObjectStore.test.cpp
+    GCObjectConversion.test.cpp
     Object2.test.cpp
 
     DMockCollector.cpp

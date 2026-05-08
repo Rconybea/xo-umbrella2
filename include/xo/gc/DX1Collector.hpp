@@ -57,6 +57,24 @@ namespace xo {
             Generation gc_upto_;
         };
 
+        /** @class GcStatistics
+         **/
+        struct GCStatistics {
+        public:
+            GCStatistics() = default;
+            explicit GCStatistics(uint32_t n_gc) : n_gc_{n_gc} {};
+
+            uint32_t n_gc() const noexcept { return n_gc_; }
+
+            void include_gc() {
+                ++n_gc_;
+            }
+
+        private:
+            /** count #gc **/
+            uint32_t n_gc_ = 0;
+        };
+
         struct DX1CollectorIterator;
 
         /** @brief GC root struct
@@ -116,6 +134,8 @@ namespace xo {
 
             std::string_view name() const noexcept { return config_.name_; }
             GCRunState runstate() const noexcept { return runstate_; }
+            const GCStatistics & gc_stats() const noexcept { return gc_stats_; }
+
             const ObjectTypeTable * get_object_types() const noexcept { return gco_store_.get_object_types(); }
             const RootSet * get_root_set() const noexcept { return &root_set_; }
             const DArena * get_space(Role r, Generation g) const noexcept { return gco_store_.get_space(r, g); }
@@ -404,6 +424,9 @@ namespace xo {
              *     get promoted before C.
              **/
             MutationLogStore mlog_store_;
+
+            /** counters collected across GC phases **/
+            GCStatistics gc_stats_;
 
             /** counters collected during @ref verify_ok call **/
             X1VerifyStats verify_stats_;
