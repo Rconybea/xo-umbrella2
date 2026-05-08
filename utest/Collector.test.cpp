@@ -29,6 +29,7 @@ namespace xo {
     using xo::mm::CollectorTypeRegistry;
     using xo::mm::AAllocator;
     using xo::mm::ACollector;
+    using xo::mm::ICollector_Any;
     using xo::mm::AGCObject;
     using xo::mm::X1CollectorConfig;
     using xo::mm::DX1Collector;
@@ -59,6 +60,7 @@ namespace xo {
             REQUIRE(!gc1);
             REQUIRE(gc1.iface() != nullptr);
             REQUIRE(gc1.data() == nullptr);
+            REQUIRE(gc1._typeseq() == typeseq::id<ICollector_Any>());
         }
 
         TEST_CASE("DX1Collector-1", "[alloc2][gc][DX1Collector]")
