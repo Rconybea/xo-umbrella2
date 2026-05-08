@@ -84,7 +84,8 @@ namespace xo {
         }
 
         bool
-        DArray::push_back(obj<AAllocator> mm, obj<AGCObject> elt) noexcept
+        DArray::push_back(obj<AAllocator> mm,
+                          obj<AGCObject> elt) noexcept
         {
             if (size_ >= capacity_) {
                 return false;

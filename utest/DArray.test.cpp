@@ -63,6 +63,9 @@ namespace xo {
             auto alloc = with_facet<AAllocator>::mkobj(&arena);
             obj<AAllocator> null_mm;
 
+            REQUIRE(!null_mm.data());
+            REQUIRE(!null_mm._has_null_vptr()); // any
+
             DArray * arr = DArray::_empty(alloc, 16);
             REQUIRE(arr != nullptr);
             REQUIRE(arr->capacity() == 16);
