@@ -12,6 +12,7 @@
 
 namespace xo {
     namespace mm {
+
         /** @class CollectorTypeRegistry
          *
          *  @brief Runtime registry for gc-aware types
@@ -68,7 +69,8 @@ namespace xo {
             /** initialization steps for a new Collector instance **/
             std::vector<init_function_type> init_seq_v_;
         };
-    }
-}
+
+    } /*namespace mm*/
+} /*namespace xo*/
 
 /* end CollectorTypeRegistry.hpp */

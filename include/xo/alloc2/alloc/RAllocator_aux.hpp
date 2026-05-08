@@ -33,9 +33,14 @@ namespace xo {
                                            obj<AGCObject> * p_lhs,
                                            obj<AGCObject> rhs) noexcept
         {
-            this->barrier_assign_aux(parent,
-                                     p_lhs->iface(), p_lhs->opaque_data_addr(),
-                                     rhs.iface(), rhs.opaque_data());
+            if (this->data()) {
+                this->barrier_assign_aux(parent,
+                                         p_lhs->iface(), p_lhs->opaque_data_addr(),
+                                         rhs.iface(), rhs.opaque_data());
+            } else {
+                // special case: for null allocator want no write-barrier
+                *p_lhs = rhs;
+            }
         }
 
         template <typename Object>
@@ -48,11 +53,16 @@ namespace xo {
             // need to get AGCObject i/face that goes with DRepr.
             obj<AGCObject,DRepr> rhs_gco(rhs_data);
 
-            this->barrier_assign_aux(parent,
-                                     nullptr /*not needed*/,
-                                     lhs_data,
-                                     rhs_gco.iface(),
-                                     rhs_data);
+            if (this->data()) {
+                this->barrier_assign_aux(parent,
+                                         nullptr /*not needed*/,
+                                         lhs_data,
+                                         rhs_gco.iface(),
+                                         rhs_data);
+            } else {
+                // special case: for null allocator want no write-barrier
+                *lhs_data = rhs_data;
+            }
         }
 
     } /*namespace mm*/
