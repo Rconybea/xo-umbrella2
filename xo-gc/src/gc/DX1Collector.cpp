@@ -528,6 +528,9 @@ namespace xo {
             log && log("step 5  : cleanup");
             this->_cleanup_phase(upto);
 
+            log && log("step 6  : update gc statistics");
+            gc_stats_.include_gc();
+
             if (config_.sanitize_flag_) {
                 log && log("step 5b : verify");
                 bool ok = this->verify_ok();
@@ -550,7 +553,7 @@ namespace xo {
         void
         DX1Collector::_swap_roles(Generation upto) noexcept
         {
-            scope log(XO_DEBUG(true), xtag("upto", upto));
+            scope log(XO_DEBUG(config_.debug_flag_), xtag("upto", upto));
 
             gco_store_.swap_roles(upto);
             mlog_store_.swap_roles(upto);
@@ -559,7 +562,7 @@ namespace xo {
         void
         DX1Collector::_cleanup_phase(Generation upto)
         {
-            scope log(XO_DEBUG(true), xtag("upto", upto));
+            scope log(XO_DEBUG(config_.debug_flag_), xtag("upto", upto));
 
             this->gco_store_.cleanup_phase(upto, config_.sanitize_flag_);
             this->runstate_ = GCRunState::idle();
@@ -568,7 +571,7 @@ namespace xo {
         void
         DX1Collector::_copy_roots(Generation upto) noexcept
         {
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG(config_.debug_flag_));
 
             for (RootSet::size_type i = 0, n = root_set_.size(); i < n; ++i) {
                 GCRoot & slot = root_set_[i];

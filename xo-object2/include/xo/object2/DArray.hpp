@@ -76,6 +76,11 @@ namespace xo {
             static DArray * _empty(obj<AAllocator> mm,
                                    size_type cap);
 
+            /** ofp version of _empty(mm,cap) **/
+            template <typename AFacet = AGCObject>
+            static obj<AFacet,DArray> empty(obj<AAllocator> mm,
+                                            size_type cap);
+
             /** create copy of @p src using memory from @p mm
              *  with capacity for @p new_cap elements
              **/
@@ -197,6 +202,15 @@ namespace xo {
 
             ///@}
         };
+
+        template <typename AFacet>
+        obj<AFacet,DArray>
+        DArray::empty(obj<AAllocator> mm, DArray::size_type cap)
+        {
+            DArray * retval = _empty(mm, cap);
+
+            return obj<AFacet,DArray>(retval);
+        }
 
         template <typename... Args>
             requires (std::convertible_to<Args, obj<DArray::AGCObject>> && ...)

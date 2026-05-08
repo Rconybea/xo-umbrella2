@@ -705,7 +705,7 @@ namespace xo {
         void
         GCObjectStore::_verify_aux(AGCObject * iface, void * data)
         {
-            scope log(XO_DEBUG(config_.debug_flag_));
+            scope log(XO_DEBUG(false));
 
             (void)iface;
 
@@ -719,6 +719,7 @@ namespace xo {
                 if (!g2.is_sentinel()) {
                     // verify failure - live pointer still refers to from-space
 
+                    log.retroactively_enable();
                     print_backtrace_dwarf(true /*demangle*/);
 
                     ++(p_verify_stats_->n_from_);
@@ -1020,13 +1021,17 @@ namespace xo {
                                      AGCObject * iface,
                                      void * from_src)
         {
-            scope log(XO_DEBUG(config_.debug_flag_));
+            scope log(XO_DEBUG(config_.debug_flag_),
+                      xtag("iface", iface),
+                      xtag("from_src", from_src));
+
+            assert(!iface->_has_null_vptr());
 
             AllocInfo info = this->alloc_info((std::byte *)from_src);
 
             void * to_dest = iface->gco_shallow_move(from_src, gc);
 
-            log && log(xtag("from_src", from_src), xtag("to_dest", to_dest));
+            log && log(xtag("to_dest", to_dest));
             log && log(xtag("tseq", info.tseq()),
                        xtag("tname", TypeRegistry::id2name(typeseq(info.tseq()))),
                        xtag("age", info.age()),

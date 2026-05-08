@@ -9,6 +9,8 @@ set(UTEST_SRCS
     DArenaIterator.test.cpp
 #    Collector.test.cpp
 #    DX1CollectorIterator.test.cpp
+    Generation.test.cpp
+    dp.test.cpp
     random_allocs.cpp
 )
 

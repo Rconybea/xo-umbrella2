@@ -7,6 +7,7 @@ set(SELF_SRCS
     SetupAlloc2.cpp
 
     CollectorTypeRegistry.cpp
+    GCObjectConversion.cpp
 
     facet/ICollector_Any.cpp
 

@@ -160,8 +160,14 @@ namespace xo {
             assert(rhs_iface);
             assert(rhs_data);
 
-            if (lhs_iface)
-                *lhs_iface = *rhs_iface;
+            if (lhs_iface) {
+                // memcpy (not assignment): lhs_iface points to AGCObject storage
+                // whose vptr was set at construction (e.g. IGCObject_Any from
+                // a default-constructed obj<AGCObject>). Polymorphic copy-assignment
+                // copies AGCObject's data members but NOT the vptr, so it would
+                // leave the slot dispatching to the wrong (often fatal) iface.
+                ::memcpy((void *)lhs_iface, (void *)rhs_iface, sizeof(AGCObject));
+            }
 
             *lhs_addr = rhs_data;
 
@@ -192,6 +198,13 @@ namespace xo {
                 log && log(xtag("msg", "noop because dest not gc-owned"));
 
                 // similarly, don't need mlog entry to non-gc-owned destination
+                return;
+            }
+
+            if (dest_g + 1 == config_.n_generation_) {
+                log && log(xtag("msg", "noop because dest in last gen"));
+
+                // don't need mlog entry to final gen
                 return;
             }
 
@@ -259,7 +272,7 @@ namespace xo {
         void
         MutationLogStore::swap_roles(Generation upto) noexcept
         {
-            scope log(XO_DEBUG(true), xtag("upto", upto));
+            scope log(XO_DEBUG(config_.debug_flag_), xtag("upto", upto));
 
             for (Generation g = Generation{0}; g < upto; ++g) {
                 log && log("swap roles", xtag("g", g));

@@ -3,11 +3,10 @@
  *  @author Roland Conybeare, Dec 2025
  **/
 
-#include "xo/alloc2/Allocator.hpp"
-#include "xo/alloc2/Arena.hpp"
-//#include "xo/alloc2/arena/IAllocator_DArena.hpp"
-#include "xo/arena/print.hpp"
-#include "xo/arena/padding.hpp"
+#include <xo/alloc2/Allocator.hpp>
+#include <xo/alloc2/Arena.hpp>
+#include <xo/arena/print.hpp>
+#include <xo/arena/padding.hpp>
 #include <xo/facet/obj.hpp>
 #include <xo/indentlog/scope.hpp>
 #include <catch2/catch.hpp>
@@ -150,7 +149,6 @@ namespace xo {
                               .size_ = 64*1024,
                               .debug_flag_ = false };
             DArena arena = DArena::map(cfg);
-            //obj<AAllocator, DArena> a1o{&arena};
             auto a1o = with_facet<AAllocator>::mkobj(&arena);
 
             REQUIRE(a1o.reserved() >= cfg.size_);

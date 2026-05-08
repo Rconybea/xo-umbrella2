@@ -13,6 +13,7 @@
 #include <xo/object2/Array.hpp>
 #include <xo/object2/List.hpp>
 #include <xo/object2/Integer.hpp>
+#include <xo/alloc2/CollectorTypeRegistry.hpp>
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/randomgen/xoshiro256.hpp>
 #include <xo/randomgen/random_seed.hpp>
@@ -25,6 +26,7 @@ namespace xo {
     using xo::scm::DList;
     using xo::scm::DArray;
     using xo::scm::DInteger;
+    using xo::mm::CollectorTypeRegistry;
     using xo::mm::AAllocator;
     using xo::mm::ACollector;
     using xo::mm::AGCObject;
@@ -33,9 +35,11 @@ namespace xo {
     using xo::mm::Role;
     using xo::mm::ArenaConfig;
     using xo::mm::AllocHeaderConfig;
+    using xo::mm::AllocHeader;
     using xo::mm::Generation;
     using xo::mm::c_max_generation;
     using xo::facet::with_facet;
+    using xo::reflect::typeseq;
     using xo::scope;
 
     namespace ut {
@@ -321,7 +325,11 @@ namespace xo {
                       .with_n_survive(tc.n_survive_)
                       .with_size(tc.gc_halfspace_z_)
                       .with_debug_flag(tc.debug_flag_))
-            {}
+            {
+                auto gc = obj<ACollector,DX1Collector>(&gc_);
+
+                CollectorTypeRegistry::instance().install_types(gc);
+            }
 
 #          define nil nullptr
 #          define T true
@@ -332,11 +340,11 @@ namespace xo {
                  *                     debug_flag
                  *               object_type_z  |
                  *        gc_halfspace_z     |  |
-                 *   n_survive         |     |  |
-                 *   n_gen   |         |     |  |
-                 *       v   v         v     v  v
+                 *  n_survive          |     |  |
+                 *   n_gen  |          |     |  |
+                 *       v  v          v     v  v
                  **/
-                Testcase(1, 2, 16 * 1024,  128, F),
+                Testcase(1, 2, 16 * 1024,  128, T),
             };
 
 #          undef T
@@ -345,10 +353,23 @@ namespace xo {
         } /*namespace*/
 
         // full collector test.
+        //
+        // PLAN:
+        // eventually: make generative
+        //
+        // Setup (
+        // 1. gc_utest_main.cpp Subsystem::initialize_all()
+        //    invokes per-module plugin init.  Gets types registered
+        //    with FacetRegistry, CollectorTypeRegistry etc.
+        // 2. per-utest collector setup (fixture)
+        //    calls CollectorTypeRegistry::instance().install_types(gc)
+        //    to establish the set of types that collector knows.
+        //
         TEST_CASE("collector-x1-gc", "[alloc2][gc]")
         {
-            scope log(XO_DEBUG(true),
-                      "DX1Collector gc test");
+            const auto & testname = Catch::getResultCapture().getCurrentTestName();
+
+            scope log(XO_DEBUG(true), xtag("test", testname));
 
             //std::uint64_t seed = 7988747704879432247ul;
             //random_seed(&seed);
@@ -372,7 +393,17 @@ namespace xo {
 
                 auto mm = x1.ref<AAllocator>();
                 auto gc = mm.to_facet<ACollector>();
-                Generation g1{1};
+
+                REQUIRE(mm._typeseq() == typeseq::id<DX1Collector>());
+                REQUIRE(gc._typeseq() == typeseq::id<DX1Collector>());
+
+                Generation g0 = Generation::g0();
+
+                REQUIRE(mm.allocated() == tc.object_type_z_);
+                REQUIRE(gc.allocated(g0, Role::to_space()) == 0);
+                REQUIRE(gc.allocated(g0, Role::from_space()) == 0);
+
+                Generation g1 = Generation::g1();
                 {
                     auto roots = DArray::_empty(mm, 1)->ref<AGCObject>();
                     REQUIRE(mm->contains_allocated(Role::to_space(), roots.data()));
@@ -383,12 +414,32 @@ namespace xo {
                         auto x1_gco = obj<AGCObject>(x1);
                         auto l1 = DList::cons(mm, x1, DList::_nil());
 
-#ifdef NOT_YET
-                        REQUIRE(roots->push_back(l1));
+                        REQUIRE(l1._typeseq() == typeseq::id<DList>());
+                        REQUIRE(roots->push_back(mm, l1));
                         REQUIRE(mm->contains_allocated(Role::to_space(), x1.data()));
                         REQUIRE(mm->contains_allocated(Role::to_space(), l1.data()));
 
-                        gc->add_gc_root_poly(&(*roots.operator->())[0]);
+                        REQUIRE(roots->at(0) == l1);
+                        REQUIRE(roots->at(0)._typeseq() == typeseq::id<DList>());
+
+                        // z: total allocated so far
+                        //   3x 8-byte header
+                        //   sizeof(DInteger)
+                        //   sizeof(DList)
+                        //   sizeof(DArray(1))
+                        //
+                        auto z = (3 * sizeof(AllocHeader)
+                                  + sizeof(DInteger)
+                                  + sizeof(DList)
+                                  + sizeof(DArray) + sizeof(obj<AGCObject>));
+                        {
+                            REQUIRE(z == 80);
+                            REQUIRE(mm.allocated() == tc.object_type_z_ + z);
+                            REQUIRE(gc.allocated(g0, Role::to_space()) == z);
+                            REQUIRE(gc.allocated(g1, Role::to_space()) == 0);
+                            REQUIRE(gc.allocated(g0, Role::from_space()) == 0);
+                            REQUIRE(gc.allocated(g1, Role::from_space()) == 0);
+                        }
 
                         gc->request_gc(g1);  // 1st GC
 
@@ -398,9 +449,20 @@ namespace xo {
                         // l1 target got moved, og locn now relabeled from-space
                         REQUIRE(mm->contains(Role::from_space(), l1.data()));
                         REQUIRE(!mm->contains_allocated(Role::from_space(), l1.data()));
-#endif
+
+                        REQUIRE(mm.allocated() == tc.object_type_z_ + z);
+                        REQUIRE(gc.allocated(g0, Role::to_space()) == z);
+                        REQUIRE(gc.allocated(g1, Role::to_space()) == 0);
+                        REQUIRE(gc.allocated(g0, Role::from_space()) == 0);
+                        REQUIRE(gc.allocated(g1, Role::from_space()) == 0);
                     }
+
+                    // NOTE: if this fails:
+                    //       look for preceding GCObjectStore::lookup_type out-of-bounds.
+                    //       May need to add to CollectorTypeRegistry
+                    //
                     REQUIRE(mm->contains_allocated(Role::to_space(), roots.data()));
+
                 }
             }
 

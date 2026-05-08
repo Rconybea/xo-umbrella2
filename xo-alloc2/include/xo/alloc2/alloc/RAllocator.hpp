@@ -52,6 +52,7 @@ namespace xo {
                 return nullptr;
             }
 
+            bool    _has_null_vptr() const noexcept { return O::iface()->_has_null_vptr(); }
             typeseq       _typeseq() const noexcept { return O::iface()->_typeseq(); }
             void             _drop() const noexcept { O::iface()->_drop(O::data()); }
             std::string_view  name() const noexcept { return O::iface()->name(O::data()); }
