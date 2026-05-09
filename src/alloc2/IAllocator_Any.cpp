@@ -25,6 +25,7 @@ namespace xo {
                       << ": attempt to call uninitialized"
                       << " IAllocator_Any method"
                       << std::endl;
+
             std::terminate();
         }
 

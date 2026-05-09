@@ -45,6 +45,9 @@ namespace xo {
             enum code code_;
         };
 
+        inline bool operator==(VisitReason x, VisitReason y) { return x.code() == y.code(); }
+        inline bool operator!=(VisitReason x, VisitReason y) { return x.code() != y.code(); }
+
     } /*namespace mm*/
 } /*namespace xo*/
 
