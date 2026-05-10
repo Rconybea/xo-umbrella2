@@ -179,8 +179,8 @@ namespace xo {
                 obj<AAllocIterator> ix = range.begin();
                 obj<AAllocIterator> end_ix = range.end();
 
-                REQUIRE(ix._typeseq() == typeseq::id<DArenaIterator>());
-                REQUIRE(end_ix._typeseq() == typeseq::id<DArenaIterator>());
+                REQUIRE(ix._typeseq() == typeseq::id<DX1CollectorIterator>());
+                REQUIRE(end_ix._typeseq() == typeseq::id<DX1CollectorIterator>());
                 REQUIRE(ix.iface());
                 REQUIRE(ix.data());
                 REQUIRE(end_ix.iface());

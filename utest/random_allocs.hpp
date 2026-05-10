@@ -34,8 +34,12 @@ namespace utest {
 
         /** generate a random sequence of allocations.
          *  verify allocator behavior
+         *
+         *  Will not alloc more than n_alloc * max_alloc_z bytes
+         *  (not counting allocator overhead)
          **/
         static bool random_allocs(std::uint32_t n_alloc,
+                                  std::uint32_t max_alloc_z,
                                   bool catch_flag,
                                   xo::rng::xoshiro256ss * p_rgen,
                                   xo::facet::obj<AAllocator> alloc);
