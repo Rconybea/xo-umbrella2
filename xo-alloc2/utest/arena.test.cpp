@@ -20,6 +20,7 @@ namespace xo {
     using xo::mm::AllocHeaderConfig;
     using xo::mm::ArenaConfig;
     using xo::mm::AllocHeader;
+    using xo::mm::AllocInfo;
     using xo::mm::padding;
     using xo::mm::error;
     using xo::facet::with_facet;
@@ -223,6 +224,39 @@ namespace xo {
             REQUIRE(a1o.allocated() <= a1o.committed());
             REQUIRE(a1o.allocated() + a1o.available() == a1o.committed());
             REQUIRE(a1o.committed() <= a1o.reserved());
+
+            auto committed0_z = a1o.committed();
+
+            // also test alloc info
+            AllocInfo m0_info = a1o.alloc_info(m0);
+            {
+                REQUIRE(m0_info.size() >= z0);
+
+                // {tseq, age}: feature disabled must be zero
+                REQUIRE(m0_info.tseq() == 0);
+                REQUIRE(m0_info.age() == 0);
+
+                REQUIRE(m0_info.payload().first == m0);
+                REQUIRE(m0_info.payload().second >= m0 + z0);
+
+                REQUIRE(m0_info.guard_z() == cfg.header_.guard_z_);
+                REQUIRE((uint32_t)m0_info.guard_byte() == (uint32_t)cfg.header_.guard_byte_);
+            }
+
+            a1o.clear();
+
+            // allocated size got reset
+            REQUIRE(a1o.allocated() == 0);
+            // committed size unchanged
+            REQUIRE(a1o.committed() == committed0_z);
+            REQUIRE(a1o.last_error().error_ == error::ok);
+            REQUIRE(a1o.last_error().error_seq_ == 0);
+
+            // allocator no longer contains m0 (now points to unallocated but committed memory
+            // (not exposed via AAllocator!
+            // REQUIRE(a1o.contains_allocated(m0) == false);
+
+            REQUIRE(a1o.contains(m0));
         }
 
         TEST_CASE("allocator-alloc-3", "[alloc2][Allocator]")

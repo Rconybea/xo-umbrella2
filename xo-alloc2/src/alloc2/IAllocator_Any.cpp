@@ -15,7 +15,8 @@ namespace xo {
     namespace mm {
 
         void
-        IAllocator_Any::_fatal() {
+        IAllocator_Any::_fatal()
+        {
             /* control here on uninitialized IAllocator_Any.
              * Initialized instance will have specific implementation type
              * e.g. IAllocator_Xfer<DArena>

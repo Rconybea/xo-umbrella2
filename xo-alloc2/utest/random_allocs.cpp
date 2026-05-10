@@ -39,6 +39,7 @@ namespace utest {
 
     bool
     AllocUtil::random_allocs(uint32_t n_alloc,
+                             uint32_t max_alloc_z,
                              bool catch_flag,
                              xoshiro256ss * p_rgen,
                              obj<AAllocator> mm)
@@ -64,6 +65,8 @@ namespace utest {
             double si = ngen(*p_rgen);
             double zi = ::pow(2.0, si);
             std::size_t z = ::ceil(zi);
+            if (z > max_alloc_z)
+                z = max_alloc_z;
 
             bool ok_flag = true;
 

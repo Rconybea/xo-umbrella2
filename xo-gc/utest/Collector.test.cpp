@@ -39,6 +39,7 @@ namespace xo {
     using xo::mm::AllocHeader;
     using xo::mm::Generation;
     using xo::mm::c_max_generation;
+    using xo::facet::DVariantPlaceholder;
     using xo::facet::with_facet;
     using xo::reflect::typeseq;
     using xo::scope;
@@ -60,7 +61,7 @@ namespace xo {
             REQUIRE(!gc1);
             REQUIRE(gc1.iface() != nullptr);
             REQUIRE(gc1.data() == nullptr);
-            REQUIRE(gc1._typeseq() == typeseq::id<ICollector_Any>());
+            REQUIRE(gc1._typeseq() == typeseq::id<DVariantPlaceholder>());
         }
 
         TEST_CASE("DX1Collector-1", "[alloc2][gc][DX1Collector]")
@@ -187,6 +188,15 @@ namespace xo {
         {
             scope log(XO_DEBUG(false), "DX1Collector alloc test");
 
+            constexpr uint32_t c_n_alloc = 25;
+            constexpr uint32_t c_reserved_z = 4*1024*1024;
+            constexpr uint32_t c_max_alloc = c_reserved_z / c_n_alloc;
+            // allowance for per-alloc overhead
+            constexpr uint32_t c_max_alloc_payload = c_max_alloc - 32;
+
+            static_assert(c_max_alloc > 0);
+            static_assert(c_max_alloc_payload < c_max_alloc);
+
             ArenaConfig arena_cfg = { .name_ = "_test_unused",
                                       .size_ = 4*1024*1024,
                                       .store_header_flag_ = true,
@@ -226,22 +236,31 @@ namespace xo {
             auto rng = rng::xoshiro256ss(seed);
 
             bool catch_flag = false;
-            REQUIRE(utest::AllocUtil::random_allocs(25, catch_flag, &rng, x1alloc));
+            REQUIRE(utest::AllocUtil::random_allocs(c_n_alloc, c_max_alloc_payload,
+                                                    catch_flag, &rng, x1alloc));
         }
 
         TEST_CASE("collector-x1-alloc2", "[alloc2][gc]")
         {
-            scope log(XO_DEBUG(false),
+            constexpr bool c_debug_flag = true;
+            scope log(XO_DEBUG(c_debug_flag),
                       "DX1Collector alloc test2");
 
-            ArenaConfig arena_cfg = { .name_ = "_test_unused",
-                                      .size_ = 4*1024*1024,
-                                      .store_header_flag_ = true,
-                                      .header_ = AllocHeaderConfig(8    /*guard_z*/,
-                                                                   0xfd /*guard-byte*/,
-                                                                   0    /*tseq-bits*/,
-                                                                   0    /*age-bits*/,
-                                                                   16   /*size-bits*/),
+            constexpr uint32_t c_n_alloc = 25;
+            constexpr uint32_t c_reserved_z = 4*1024*1024;
+            constexpr uint32_t c_max_alloc = c_reserved_z / c_n_alloc;
+            // allowance for per-alloc overhead
+            constexpr uint32_t c_max_alloc_payload = c_max_alloc - 32;
+
+            ArenaConfig arena_cfg = {
+                .name_ = "_test_unused",
+                .size_ = c_reserved_z,
+                .store_header_flag_ = true,
+                .header_ = AllocHeaderConfig(8    /*guard_z*/,
+                                             0xfd /*guard-byte*/,
+                                             0    /*tseq-bits*/,
+                                             0    /*age-bits*/,
+                                             16   /*size-bits*/),
             };
 
             /* collector with one generation collapses to a non-generational copying collector */
@@ -277,7 +296,8 @@ namespace xo {
 
             // these are not gc-aware objects.
             // just testing ability to work as a low-level allocator
-            REQUIRE(utest::AllocUtil::random_allocs(25, false, &rng, x1alloc));
+            REQUIRE(utest::AllocUtil::random_allocs(c_n_alloc, c_max_alloc_payload,
+                                                    c_debug_flag, &rng, x1alloc));
         }
 
         namespace {

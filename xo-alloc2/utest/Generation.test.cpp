@@ -39,4 +39,4 @@ namespace xo {
     } /*namespace ut*/
 } /*namespace xo*/
 
-/* end Generation.hpp */
+/* end Generation.test.cpp */
