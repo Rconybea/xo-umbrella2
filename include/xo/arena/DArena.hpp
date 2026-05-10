@@ -128,7 +128,7 @@ namespace xo {
              **/
             bool contains(const void * addr) const noexcept { return (lo_ <= addr) && (addr < hi_); }
 
-            /** Truee iff address @p addr is owned by this arena and in allocated regions **/
+            /** True iff address @p addr is owned by this arena and in allocated regions **/
             bool contains_allocated(const void * addr) const noexcept { return (lo_ <= addr) && (addr < free_); }
 
             /** true if arena is mapped i.e. has a reserved address range **/

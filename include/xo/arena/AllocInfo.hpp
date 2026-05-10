@@ -78,7 +78,7 @@ namespace xo {
             /** Number of guard bytes **/
             size_type  guard_z() const noexcept { return p_config_->guard_z_; }
             /** Value (fixed test pattern) of guard byte **/
-            char guard_byte() const noexcept { return p_config_->guard_byte_; }
+            uint8_t guard_byte() const noexcept { return p_config_->guard_byte_; }
 
             ///@}
 
