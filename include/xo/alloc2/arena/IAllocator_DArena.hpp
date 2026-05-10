@@ -72,8 +72,6 @@ namespace xo {
              *  @p complete_flag to true.
              **/
             static value_type sub_alloc(DArena &, size_type z, bool complete_flag);
-            /** allocate copy of @p src in arena @p d. **/
-            static value_type alloc_copy(DArena & d, value_type src);
             static void clear(DArena &);
             /** perform assignment {*lhs_iface, *lhs_data} = {*rhs_iface, rhs_data} **/
             static void barrier_assign_aux(DArena &,

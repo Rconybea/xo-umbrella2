@@ -30,6 +30,8 @@ namespace xo {
 
             operator value_type() const { return role_; }
 
+            Role next() const { return Role(role_ + 1); }
+
             value_type role_ = 0;
         };
     } /*namespace mm*/

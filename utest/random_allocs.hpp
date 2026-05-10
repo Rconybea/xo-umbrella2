@@ -36,6 +36,7 @@ namespace utest {
          *  verify allocator behavior
          **/
         static bool random_allocs(std::uint32_t n_alloc,
+                                  std::uint32_t max_alloc_z,
                                   bool catch_flag,
                                   xo::rng::xoshiro256ss * p_rgen,
                                   xo::facet::obj<AAllocator> alloc);
