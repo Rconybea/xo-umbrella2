@@ -78,7 +78,7 @@ namespace xo {
                                            void * parent,
                                            AGCObject * lhs_iface, void ** lhs_data,
                                            AGCObject * rhs_iface, void * rhs_data);
-            static void destruct_data(DArena &);
+            //static void destruct_data(DArena &);
         };
 
 //        template <>

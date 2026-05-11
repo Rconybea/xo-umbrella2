@@ -97,6 +97,8 @@ namespace xo {
             //obj<AAllocator, DArena> a1o{&arena};
             auto a1o = with_facet<AAllocator>::mkobj(&arena);
 
+            REQUIRE(!a1o._has_null_vptr());
+
             REQUIRE(a1o);
             REQUIRE(a1o.iface() != nullptr);
             REQUIRE(a1o.data() != nullptr);
@@ -110,6 +112,12 @@ namespace xo {
             REQUIRE(a1o.size() == 0);
             REQUIRE(a1o.committed() == 0);
             REQUIRE(a1o.allocated() == 0);
+
+            a1o._drop();
+            {
+                REQUIRE(a1o.allocated() == 0);
+                REQUIRE(a1o.committed() == 0);
+            }
         }
 
         TEST_CASE("allocator-expand-1", "[alloc2][AAllocator]")
@@ -121,6 +129,8 @@ namespace xo {
             DArena arena = DArena::map(cfg);
             //obj<AAllocator, DArena> a1o{&arena};
             auto a1o = with_facet<AAllocator>::mkobj(&arena);
+
+            REQUIRE(!a1o._has_null_vptr());
 
             REQUIRE(a1o.available() == 0);
             REQUIRE(a1o.allocated() == 0);
@@ -141,6 +151,11 @@ namespace xo {
             REQUIRE(a1o.available() == a1o.committed());
             REQUIRE(a1o.allocated() == 0);
 
+            a1o._drop();
+            {
+                REQUIRE(a1o.allocated() == 0);
+                REQUIRE(a1o.committed() == 0);
+            }
         }
 
         TEST_CASE("allocator-alloc-1", "[alloc2][AAllocator]")
@@ -151,6 +166,8 @@ namespace xo {
                               .debug_flag_ = false };
             DArena arena = DArena::map(cfg);
             auto a1o = with_facet<AAllocator>::mkobj(&arena);
+
+            REQUIRE(!a1o._has_null_vptr());
 
             REQUIRE(a1o.reserved() >= cfg.size_);
             REQUIRE(a1o.committed() == 0);
@@ -180,6 +197,12 @@ namespace xo {
             REQUIRE(a1o.allocated() <= a1o.committed());
             REQUIRE(a1o.allocated() + a1o.available() == a1o.committed());
             REQUIRE(a1o.committed() <= a1o.reserved());
+
+            a1o._drop();
+            {
+                REQUIRE(a1o.allocated() == 0);
+                REQUIRE(a1o.committed() == 0);
+            }
         }
 
         TEST_CASE("allocator-alloc-2", "[alloc2][Allocator]")
@@ -201,6 +224,8 @@ namespace xo {
             DArena arena = DArena::map(cfg);
             //obj<AAllocator, DArena> a1o{&arena};
             auto a1o = with_facet<AAllocator>::mkobj(&arena);
+
+            REQUIRE(!a1o._has_null_vptr());
 
             REQUIRE(a1o.reserved() >= cfg.size_);
             REQUIRE(a1o.committed() == 0);
@@ -244,19 +269,26 @@ namespace xo {
             }
 
             a1o.clear();
+            {
+                // allocated size got reset
+                REQUIRE(a1o.allocated() == 0);
+                // committed size unchanged
+                REQUIRE(a1o.committed() == committed0_z);
+                REQUIRE(a1o.last_error().error_ == error::ok);
+                REQUIRE(a1o.last_error().error_seq_ == 0);
 
-            // allocated size got reset
-            REQUIRE(a1o.allocated() == 0);
-            // committed size unchanged
-            REQUIRE(a1o.committed() == committed0_z);
-            REQUIRE(a1o.last_error().error_ == error::ok);
-            REQUIRE(a1o.last_error().error_seq_ == 0);
+                // allocator no longer contains m0 (now points to unallocated but committed memory
+                // (not exposed via AAllocator!
+                // REQUIRE(a1o.contains_allocated(m0) == false);
 
-            // allocator no longer contains m0 (now points to unallocated but committed memory
-            // (not exposed via AAllocator!
-            // REQUIRE(a1o.contains_allocated(m0) == false);
+                REQUIRE(a1o.contains(m0));
+            }
 
-            REQUIRE(a1o.contains(m0));
+            a1o._drop();
+            {
+                REQUIRE(a1o.allocated() == 0);
+                REQUIRE(a1o.committed() == 0);
+            }
         }
 
         TEST_CASE("allocator-alloc-3", "[alloc2][Allocator]")
@@ -278,6 +310,8 @@ namespace xo {
             DArena arena = DArena::map(cfg);
             //obj<AAllocator, DArena> a1o{&arena};
             auto a1o = with_facet<AAllocator>::mkobj(&arena);
+
+            REQUIRE(!a1o._has_null_vptr());
 
             REQUIRE(a1o.reserved() >= cfg.size_);
             REQUIRE(a1o.committed() == 0);
@@ -301,23 +335,30 @@ namespace xo {
             header_type* header = (header_type*)(m0 - sizeof(header_type));
             size_t pad = padding::with_padding(z0) - z0;
             byte * guard1 = m0 + z0 + pad;
+            {
+                REQUIRE(a1o.contains(guard0));
+                REQUIRE(a1o.contains(header));
+                REQUIRE(cfg.header_.size(*header) == padding::with_padding(z0));
+                //REQUIRE(((*header) & cfg.header_size_mask_) == padding::with_padding(z0));
 
-            REQUIRE(a1o.contains(guard0));
-            REQUIRE(a1o.contains(header));
-            REQUIRE(cfg.header_.size(*header) == padding::with_padding(z0));
-            //REQUIRE(((*header) & cfg.header_size_mask_) == padding::with_padding(z0));
+                REQUIRE(a1o.last_error().error_ == error::ok);
+                REQUIRE(a1o.last_error().error_seq_ == 0);
 
-            REQUIRE(a1o.last_error().error_ == error::ok);
-            REQUIRE(a1o.last_error().error_seq_ == 0);
+                REQUIRE(a1o.allocated() == (cfg.header_.guard_z_
+                                            + sizeof(header_type)
+                                            + z0
+                                            + pad
+                                            + cfg.header_.guard_z_));
+                REQUIRE(a1o.allocated() <= a1o.committed());
+                REQUIRE(a1o.allocated() + a1o.available() == a1o.committed());
+                REQUIRE(a1o.committed() <= a1o.reserved());
+            }
 
-            REQUIRE(a1o.allocated() == (cfg.header_.guard_z_
-                                        + sizeof(header_type)
-                                        + z0
-                                        + pad
-                                        + cfg.header_.guard_z_));
-            REQUIRE(a1o.allocated() <= a1o.committed());
-            REQUIRE(a1o.allocated() + a1o.available() == a1o.committed());
-            REQUIRE(a1o.committed() <= a1o.reserved());
+            a1o._drop();
+            {
+                REQUIRE(a1o.allocated() == 0);
+                REQUIRE(a1o.committed() == 0);
+            }
         }
 
         TEST_CASE("allocator-fail-1", "[alloc2][AAllocator]")
@@ -332,6 +373,8 @@ namespace xo {
 
             REQUIRE(cfg.size_ <= cfg.hugepage_z_);
 
+            REQUIRE(!a1o._has_null_vptr());
+
             REQUIRE(a1o.reserved() >= cfg.size_);
             REQUIRE(a1o.committed() == 0);
             REQUIRE(a1o.available() == 0);
@@ -339,17 +382,22 @@ namespace xo {
 
             size_t z0 = cfg.hugepage_z_ + 1;
             byte * m0 = a1o.alloc(typeseq::sentinel(), z0);
-
-            REQUIRE(!m0);
-
             AllocError err = a1o.last_error();
+            {
+                REQUIRE(!m0);
+                REQUIRE(err.error_ == error::reserve_exhausted);
+                REQUIRE(err.error_seq_ == 1);
+                REQUIRE(err.request_z_ >= z0);
+                REQUIRE(err.request_z_ < z0 + padding::c_alloc_alignment);
+                REQUIRE(err.committed_z_ == 0);
+                REQUIRE(err.reserved_z_ == arena.reserved());
+            }
 
-            REQUIRE(err.error_ == error::reserve_exhausted);
-            REQUIRE(err.error_seq_ == 1);
-            REQUIRE(err.request_z_ >= z0);
-            REQUIRE(err.request_z_ < z0 + padding::c_alloc_alignment);
-            REQUIRE(err.committed_z_ == 0);
-            REQUIRE(err.reserved_z_ == arena.reserved());
+            a1o._drop();
+            {
+                REQUIRE(a1o.allocated() == 0);
+                REQUIRE(a1o.committed() == 0);
+            }
         }
     } /*namespace ut*/
 } /*namespace xo*/
