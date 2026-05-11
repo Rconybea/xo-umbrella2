@@ -80,8 +80,10 @@ namespace xo {
                                            void ** lhs_data,
                                            AGCObject * rhs_iface,
                                            void * rhs_data);
+#ifdef OBSOLETE
             /** invoke destructor **/
             static void destruct_data(DX1Collector & d);
+#endif
         };
 
     } /*namespace mm*/

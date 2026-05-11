@@ -6,6 +6,7 @@ set(UTEST_SRCS
     alloc2_utest_main.cpp
     objectmodel.test.cpp
     arena.test.cpp
+    IAllocator_Any.test.cpp
     DArenaIterator.test.cpp
 #    Collector.test.cpp
 #    DX1CollectorIterator.test.cpp

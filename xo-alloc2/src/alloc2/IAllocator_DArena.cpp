@@ -173,11 +173,13 @@ namespace xo {
             *lhs_data = rhs_data;
         }
 
+#ifdef OBSOLETE
         void
         IAllocator_DArena::destruct_data(DArena & s)
         {
             s.~DArena();
         }
+#endif
     } /*namespace mm*/
 } /*namespace xo*/
 

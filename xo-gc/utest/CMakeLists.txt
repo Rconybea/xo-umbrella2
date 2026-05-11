@@ -14,6 +14,7 @@ set(UTEST_SRCS
 
     DMockCollector.cpp
     ICollector_DMockCollector.cpp
+    MockCollector.test.cpp
 
     MlsTestutil.cpp
     GcosTestutil.cpp

@@ -14,6 +14,7 @@ namespace xo {
 
     namespace mm {
 
+        // LCOV_EXCL_START
         void
         IAllocator_Any::_fatal()
         {
@@ -29,6 +30,7 @@ namespace xo {
 
             std::terminate();
         }
+        // LCOV_EXCL_STOP
 
         typeseq
         IAllocator_Any::s_typeseq = typeseq::id<DVariantPlaceholder>();
