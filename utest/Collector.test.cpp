@@ -58,6 +58,7 @@ namespace xo {
             /* empty variant collector */
             obj<ACollector> gc1;
 
+            REQUIRE(!gc1._has_null_vptr());
             REQUIRE(!gc1);
             REQUIRE(gc1.iface() != nullptr);
             REQUIRE(gc1.data() == nullptr);
@@ -150,6 +151,12 @@ namespace xo {
             /* typed collector -- repr known at compile time */
             obj<ACollector, DX1Collector> x1(&gc);
 
+            REQUIRE(!x1._has_null_vptr());
+            REQUIRE(x1.iface());
+            REQUIRE(x1.data());
+
+            x1._drop();
+
             REQUIRE(x1.iface());
             REQUIRE(x1.data());
         }
@@ -179,6 +186,11 @@ namespace xo {
 
             /* typed collector -- repr inferred at compile time */
             auto x1 = with_facet<ACollector>::mkobj(&gc);
+
+            REQUIRE(x1.iface());
+            REQUIRE(x1.data());
+
+            x1._drop();
 
             REQUIRE(x1.iface());
             REQUIRE(x1.data());
@@ -238,6 +250,11 @@ namespace xo {
             bool catch_flag = false;
             REQUIRE(utest::AllocUtil::random_allocs(c_n_alloc, c_max_alloc_payload,
                                                     catch_flag, &rng, x1alloc));
+
+            x1gc._drop();
+
+            REQUIRE(x1gc.iface());
+            REQUIRE(x1gc.data());
         }
 
         TEST_CASE("collector-x1-alloc2", "[alloc2][gc]")
@@ -298,6 +315,11 @@ namespace xo {
             // just testing ability to work as a low-level allocator
             REQUIRE(utest::AllocUtil::random_allocs(c_n_alloc, c_max_alloc_payload,
                                                     c_debug_flag, &rng, x1alloc));
+
+            x1gc._drop();
+
+            REQUIRE(x1gc.iface());
+            REQUIRE(x1gc.data());
         }
 
         namespace {

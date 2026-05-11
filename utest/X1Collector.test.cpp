@@ -119,7 +119,8 @@ namespace ut {
 
                 DX1Collector gc(cfg);
 
-                CollectorTypeRegistry::instance().install_types(obj<ACollector,DX1Collector>(&gc));
+                CollectorTypeRegistry::instance()
+                    .install_types(obj<ACollector,DX1Collector>(&gc));
 
                 DArena * to_0 = nullptr;
 
@@ -219,6 +220,9 @@ namespace ut {
                                               + sizeof(AllocHeader) + sizeof(DInteger)
                                               + sizeof(AllocHeader) + sizeof(DList)));
 
+                auto to0_commit_z = to_0->committed();
+                auto to0_reserved_z = to_0->reserved();
+
                 {
                     {
                         REQUIRE(x0_o.iface() != nullptr);
@@ -284,6 +288,12 @@ namespace ut {
 
                 REQUIRE((void*)l0_o.data()->head_.data() == (void*)x0_o.data());
                 REQUIRE((void*)l0_o.data()->rest_ == (void*)DList::_nil());
+
+                Generation g0 = Generation::g0();
+                REQUIRE(c_o.committed(g0, Role::to_space()) == to0_commit_z);
+                REQUIRE(c_o.reserved(g0, Role::to_space()) == to0_reserved_z);
+                REQUIRE(c_o.locate_address(x0_o.data()) >= 0);
+                REQUIRE(c_o.contains(Role::to_space(), x0_o.data()));
 
             } catch (std::exception & ex) {
                 std::cerr << "caught exception: " << ex.what() << std::endl;

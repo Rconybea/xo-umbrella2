@@ -144,11 +144,13 @@ namespace xo {
             d.barrier_assign_aux(parent, lhs_iface, lhs_data, rhs_iface, rhs_data);
         }
 
+#ifdef OBSOLETE
         void
         IAllocator_DX1Collector::destruct_data(DX1Collector & d)
         {
             d.~DX1Collector();
         }
+#endif
 
     } /*namespace mm*/
 } /*namespace xo*/
