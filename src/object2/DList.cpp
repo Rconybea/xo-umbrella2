@@ -143,7 +143,7 @@ namespace xo {
         {
             scope log(XO_DEBUG(true), xtag("gc.data", gc.data_));
 
-            xo::mm::mm_do_assign(gc, this, &head_, rhs);
+            gc.assign_member(this, &head_, rhs);
         }
 
         void
