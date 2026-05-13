@@ -5,6 +5,7 @@
 
 #include "GcosTestutil.hpp"
 #include <xo/gc/GCObjectStore.hpp>
+#include <xo/gc/GCObjectStoreVisitor.hpp>
 #include <xo/gc/X1VerifyStats.hpp>
 #include <xo/object2/ListOps.hpp>
 #include <xo/object2/List.hpp>
@@ -32,6 +33,8 @@ namespace ut {
     using xo::mm::X1VerifyStats;
     using xo::mm::AGCObject;
     using xo::mm::AGCObjectVisitor;
+    using xo::mm::AGCObjectVisitor;
+    using xo::mm::DGCObjectStoreVisitor;
     using xo::mm::Generation;
     using xo::mm::Role;
     using xo::mm::object_age;
@@ -380,6 +383,18 @@ namespace ut {
 
                     report_gco.reset();
                     fixture.report_mm()->clear();
+                }
+
+                // operate visitor (loose ends revealed by coverage).
+                // mostly tested by moving objects
+                {
+                    DGCObjectStoreVisitor visitor(&gcos, Generation::g0());
+                    auto visitor_fop = obj<AGCObjectVisitor,DGCObjectStoreVisitor>(&visitor);
+
+                    REQUIRE(!visitor_fop.iface()->_has_null_vptr());
+                    REQUIRE(visitor_fop._typeseq() == typeseq::id<DGCObjectStoreVisitor>());
+
+                    visitor_fop._drop();
                 }
             }
         } /* loop over test cases */
