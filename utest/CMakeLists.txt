@@ -13,6 +13,7 @@ set(UTEST_SRCS
     Generation.test.cpp
     Role.test.cpp
     VisitReason.test.cpp
+    ResourceVisitor.test.cpp
     dp.test.cpp
     random_allocs.cpp
 )
