@@ -322,7 +322,7 @@ namespace xo {
                                          obj<AAllocator> error_mm,
                                          obj<AGCObject> * p_output) const noexcept
         {
-            return gco_store_.report_object_types(mm, error_mm, p_output);
+            return gco_store_.report_object_ages(mm, error_mm, p_output);
         }
 
         size_type
@@ -672,15 +672,9 @@ namespace xo {
 
         void
         DX1Collector::clear() noexcept {
-            for (Role ri : Role::all()) {
-                for (Generation gj{0}; gj < config_.n_generation_; ++gj) {
-                    DArena * arena = this->get_space(ri, gj);
-
-                    assert(arena);
-
-                    arena->clear();
-                }
-            }
+            mlog_store_.clear();
+            gco_store_.clear();
+            root_set_.clear();
         }
 
         void

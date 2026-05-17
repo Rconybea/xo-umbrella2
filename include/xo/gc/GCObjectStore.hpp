@@ -195,6 +195,9 @@ namespace xo {
             void cleanup_phase(Generation upto,
                                bool sanitize_flag);
 
+            /** Revert to empty state **/
+            void clear();
+
         private:
 
             /** configure @ref object_types_, using @p page_z **/

@@ -560,6 +560,20 @@ namespace xo {
             return counters;
         }
 
+        void
+        MutationLogStore::clear()
+        {
+            // parallels .init_mlogs(), see also
+
+            for (uint32_t igen = 0, ngen = config_.n_generation_; igen + 1 < ngen; ++igen) {
+                if (igen + 1 < c_max_generation) {
+                    for (std::uint32_t mlog_role = 0; mlog_role < c_n_role + 1; ++mlog_role) {
+                        this->mlog_storage_[mlog_role][igen].clear();
+                    }
+                }
+            }
+        }
+
     } /*namespace mm*/
 } /*namespace xo*/
 

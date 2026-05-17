@@ -84,6 +84,9 @@ namespace xo {
             void forward_mutation_log(obj<AGCObjectVisitor> gc,
                                       Generation upto);
 
+            /** Reset mutation log store to empty state **/
+            void clear();
+
         private:
             /** aux init function: create mutation log **/
             MutationLog _make_mlog(uint32_t igen, char tag_char,

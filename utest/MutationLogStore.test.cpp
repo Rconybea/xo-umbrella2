@@ -24,9 +24,13 @@ namespace ut {
     using xo::scm::DInteger;
     using xo::mm::MutationLogStore;
     using xo::mm::MutationLogConfig;
+    using xo::mm::MutationLog;
+    using xo::mm::MutationLogEntry;
     using xo::mm::GCObjectStore;
     using xo::mm::GCObjectStoreConfig;
     using xo::mm::DGCObjectStoreVisitor;
+    using xo::mm::Role;
+    using xo::mm::Generation;
     using xo::mm::DArena;
     using xo::mm::ArenaConfig;
     using xo::mm::X1VerifyStats;
@@ -435,6 +439,24 @@ namespace ut {
             fixture.mls_.init_mlogs(getpagesize());
 
             {
+                MutationLog * to_0_mlog
+                    = fixture.mls_.get_mlog(Role::to_space(),
+                                            Generation::g0());
+                MutationLog * from_0_mlog
+                    = fixture.mls_.get_mlog(Role::from_space(),
+                                            Generation::g0());
+                MutationLog * triage_0_mlog
+                    = fixture.mls_.triage_mlog(Generation::g0());
+
+                REQUIRE(to_0_mlog);
+                REQUIRE(from_0_mlog);
+                REQUIRE(triage_0_mlog);
+                REQUIRE(to_0_mlog != from_0_mlog);
+                REQUIRE(to_0_mlog != triage_0_mlog);
+                REQUIRE(from_0_mlog != triage_0_mlog);
+            }
+
+            {
                 // updates counters in fixture.verify_stats_
                 fixture.gcos_.verify_ok();
                 fixture.mls_.verify_ok();
@@ -453,6 +475,13 @@ namespace ut {
 
             GCObjectStore & gcos = fixture.gcos_;
             MutationLogStore & mls = fixture.mls_;
+
+            {
+                MutationLogEntry mentry;
+
+                REQUIRE(mentry.parent() == nullptr);
+                REQUIRE(mentry.p_data() == nullptr);
+            }
 
             {
                 // gcos setup.  parallels GCObjectStore.test.cpp
