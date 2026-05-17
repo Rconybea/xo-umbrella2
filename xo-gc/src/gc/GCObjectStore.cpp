@@ -1182,6 +1182,21 @@ namespace xo {
             } while (fixup_work > 0);
         } /*_forward_children_until_fixpoint*/
 
+        void
+        GCObjectStore::clear()
+        {
+            object_types_.clear();
+
+            for (Role ri : Role::all()) {
+                for (Generation gj{0}; gj < config_.n_generation_; ++gj) {
+                    DArena * arena = this->get_space(ri, gj);
+
+                    assert(arena);
+
+                    arena->clear();
+                }
+            }
+        }
     } /*namespace mm*/
 } /*namespace xo*/
 

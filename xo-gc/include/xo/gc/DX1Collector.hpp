@@ -47,6 +47,7 @@ namespace xo {
 
             Generation gc_upto() const { return gc_upto_; }
 
+            bool is_idle() const { return mode_ == Mode::idle; }
             bool is_running() const { return mode_ == Mode::gc; }
             bool is_verify() const { return mode_ == Mode::verify; }
 
@@ -62,7 +63,7 @@ namespace xo {
         struct GCStatistics {
         public:
             GCStatistics() = default;
-            explicit GCStatistics(uint32_t n_gc) : n_gc_{n_gc} {};
+            //explicit GCStatistics(uint32_t n_gc) : n_gc_{n_gc} {};
 
             uint32_t n_gc() const noexcept { return n_gc_; }
 

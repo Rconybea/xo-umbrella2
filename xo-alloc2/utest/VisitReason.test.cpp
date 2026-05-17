@@ -11,7 +11,7 @@ namespace xo {
 
     namespace ut {
 
-        TEST_CASE("visitreason-1", "[visitreason]")
+        TEST_CASE("VisitReason-1", "[visitreason]")
         {
             REQUIRE(VisitReason::unspecified() == VisitReason::unspecified());
 

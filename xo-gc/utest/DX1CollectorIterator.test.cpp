@@ -25,6 +25,7 @@ namespace xo {
     using xo::mm::DArena;
     using xo::mm::DArenaIterator;
     using xo::mm::X1CollectorConfig;
+    using xo::mm::Generation;
     using xo::mm::ArenaConfig;
     using xo::mm::AllocHeaderConfig;
     using xo::mm::cmpresult;
@@ -34,11 +35,16 @@ namespace xo {
     using std::byte;
 
     namespace ut {
+        TEST_CASE("DX1CollectorIterator-0", "[alloc2][gc][DX1Collector]")
+        {
+        }
+
         TEST_CASE("IAllocIterator_Xfer_DX1CollectorIterator", "[alloc2]")
         {
             /* verify IAllocIterator_Xfer is constructible + satisfies concept checks */
             IAllocIterator_Xfer<DX1CollectorIterator, IAllocIterator_DX1CollectorIterator> xfer;
             REQUIRE(IAllocIterator_Xfer<DX1CollectorIterator, IAllocIterator_DX1CollectorIterator>::_valid);
+
         }
 
         TEST_CASE("DX1CollectorIterator-1", "[alloc2][gc][DX1Collector]")
@@ -128,9 +134,24 @@ namespace xo {
                 auto     ix = gc.begin();
                 auto end_ix = gc.end();
 
+                REQUIRE(ix != DX1CollectorIterator::invalid());
+                REQUIRE(end_ix != DX1CollectorIterator::invalid());
+
                 REQUIRE(ix.is_valid());
                 REQUIRE(end_ix.is_valid());
                 REQUIRE(ix != end_ix);
+
+                REQUIRE(ix.gen_ix() == Generation::g0());
+                REQUIRE(ix.gen_ix() < gc.config_.n_generation_);
+                REQUIRE(ix.gen_hi() == gc.config_.n_generation_);
+                REQUIRE(ix.arena_ix() == gc.to_space(Generation::g0())->begin());
+                REQUIRE(ix.arena_hi() == gc.to_space(Generation::g0())->end());
+
+                {
+                    // we have one alloc, so can visit it
+                    auto info = *ix;
+                    REQUIRE(info.is_valid());
+                }
 
                 /* verify obj 'fat pointer' packaging */
                 auto     ix_vt = with_facet<AAllocIterator>::mkobj(&ix);

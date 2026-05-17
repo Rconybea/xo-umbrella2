@@ -11,6 +11,7 @@ set(UTEST_SRCS
     GCObjectStore.test.cpp
     GCObjectConversion.test.cpp
     Object2.test.cpp
+    ObjectAge.test.cpp
 
     DMockCollector.cpp
     ICollector_DMockCollector.cpp

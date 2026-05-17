@@ -10,32 +10,6 @@
 
 #pragma once
 
-#include <xo/facet/FacetRegistry.hpp>
-
-namespace xo {
-    namespace mm {
-        class ACollector;
-        class AGCObject;
-
-        // ----- mm_do_assign -----
-
-        /** gc-aware assignment; engage special book-keeping for cross-gen pointers **/
-        inline void mm_do_assign(obj<ACollector> & gc,
-                                 void * parent,
-                                 obj<AGCObject> * p_lhs,
-                                 obj<AGCObject> & rhs)
-        {
-            if (gc.data()) {
-                gc.assign_member(parent, p_lhs, rhs);
-            } else {
-                // assume null collector downstream from allocator that does not provide collection.
-                // In that no additional assignment work.
-
-                *p_lhs = rhs;
-            }
-        };
-
-    } /*namespace mm*/
-} /*namespace xo*/
+//#include <xo/facet/FacetRegistry.hpp>
 
 /* end RCollector_aux.hpp */

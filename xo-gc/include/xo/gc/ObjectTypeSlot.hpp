@@ -20,9 +20,7 @@ namespace xo {
          **/
         struct ObjectTypeSlot {
             ObjectTypeSlot() {}
-            explicit ObjectTypeSlot(AGCObject * iface) {
-                this->store_iface(iface);
-            }
+            //explicit ObjectTypeSlot(AGCObject * iface) { this->store_iface(iface); }
 
             /** true iff this slot is empty **/
             bool is_null() const noexcept {
