@@ -328,6 +328,7 @@ let
   # xo general-purpose devutils
   devutils = [
     pkgs.nix-tree  # note: needs GHC
+    #pkgs.nix
 
     pkgs.git
     pkgs.gh    # github cli
@@ -335,6 +336,7 @@ let
     pkgs.bloaty
 
     pkgs.catch2
+    pkgs.cli11
 
     pkgs.btop
   ]

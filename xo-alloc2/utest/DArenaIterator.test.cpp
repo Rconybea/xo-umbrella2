@@ -3,10 +3,11 @@
  *  @author Roland Conybeare, Dec 2025
  **/
 
-#include "Allocator.hpp"
-#include "AllocIterator.hpp"
-#include "Arena.hpp"
-//#include "arena/IAllocator_DArena.hpp"
+#include "TestUtil.hpp"
+#include <xo/alloc2/Allocator.hpp>
+#include <xo/alloc2/AllocIterator.hpp>
+#include <xo/alloc2/Arena.hpp>
+#include <xo/alloc2/ArenaIterator.hpp>
 #include "arena/IAllocIterator_DArenaIterator.hpp"
 #include "padding.hpp"
 #include <xo/indentlog/scope.hpp>
@@ -39,6 +40,8 @@ namespace xo {
     namespace ut {
         TEST_CASE("IAllocIterator_Xfer_DArenaIterator", "[alloc2]")
         {
+            auto log = Utest::ut_scope();
+
             /* verify IAllocIterator_Xfer is constructible + satisfies concept checks */
             IAllocIterator_Xfer<DArenaIterator, IAllocIterator_DArenaIterator> xfer;
             REQUIRE(IAllocIterator_Xfer<DArenaIterator, IAllocIterator_DArenaIterator>::_valid);
@@ -46,6 +49,8 @@ namespace xo {
 
         TEST_CASE("IAllocIterator_Any", "[alloc2]")
         {
+            auto log = Utest::ut_scope();
+
             /* verify IAllocIterator_Any is constructible + satisfies concept checks */
             IAllocIterator_Any any;
             REQUIRE(IAllocIterator_Any::_valid);
@@ -53,6 +58,8 @@ namespace xo {
 
         TEST_CASE("obj_IAllocIterator", "[alloc2]")
         {
+            auto log = Utest::ut_scope();
+
             /* verify variant obj constructible */
             obj<AAllocIterator> obj_any;
             REQUIRE(obj_any.iface());
@@ -61,6 +68,8 @@ namespace xo {
 
         TEST_CASE("IAllocIterator-disabled-1", "[alloc2]")
         {
+            auto log = Utest::ut_scope();
+
             /* verify iteration over empty arena */
             /* typed allocator a1o */
             ArenaConfig cfg { .name_       = "testarena",
@@ -97,6 +106,8 @@ namespace xo {
 
         TEST_CASE("IAllocIterator-emptyarena", "[alloc2]")
         {
+            auto log = Utest::ut_scope();
+
             /* verify iteration over empty arena */
             /* typed allocator a1o */
             ArenaConfig cfg { .name_              = "testarena",
@@ -153,7 +164,7 @@ namespace xo {
 
         TEST_CASE("IAllocIterator-singlearena", "[alloc2]")
         {
-            scope log(XO_DEBUG(false));
+            auto log = Utest::ut_scope();
 
             ArenaConfig cfg { .name_              = "testarena",
                               .size_              = 64*1024,

@@ -3,6 +3,7 @@
  *  @author Roland Conybeare, May 2026
  **/
 
+#include "TestUtil.hpp"
 #include <xo/alloc2/ResourceVisitor.hpp>
 #include <catch2/catch.hpp>
 
@@ -13,6 +14,8 @@ namespace xo {
 
         TEST_CASE("ResourceVisitor-1", "[resourcevisitor]")
         {
+            auto log = Utest::ut_scope();
+
             obj<AResourceVisitor> v;
 
             REQUIRE(v.iface());

@@ -1,7 +1,7 @@
 {
   # nixpkgs dependencies
   lib, stdenv, cmake, catch2,
-  doxygen,
+  doxygen, cli11,
 
   python3Packages,
 
@@ -44,6 +44,7 @@ stdenv.mkDerivation (finalattrs:
     nativeBuildInputs = [
       cmake
       catch2
+      cli11
       xo-randomgen
       xo-cmake
     ] ++ lib.optionals buildDocs [

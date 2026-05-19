@@ -79,6 +79,7 @@
  *  Application code will deal with ubox<AComplex,DPolarCoords>
  **/
 
+#include "TestUtil.hpp"
 #include <catch2/catch.hpp>
 #include <cmath>
 #include <cassert>
@@ -576,6 +577,8 @@ namespace xo {
 
         TEST_CASE("objectmodel-specific-1", "[objectmodel]")
         {
+            auto log = Utest::ut_scope();
+
             /* arg=0, mag=1 -> 1+0i */
             DPolarCoords polar{0.0, 1.0};
             IComplex_Specific<DPolarCoords> polar_iface;
@@ -588,6 +591,8 @@ namespace xo {
 
         TEST_CASE("objectmodel-specific-2", "[objectmodel]")
         {
+            auto log = Utest::ut_scope();
+
             /* arg=0, mag=1 -> 1+0i */
             DRectCoords rect{1.0, 0.0};
             IComplex_Specific<DRectCoords> rect_iface;
@@ -600,6 +605,8 @@ namespace xo {
 
         TEST_CASE("uniquebox-1", "[objectmodel]")
         {
+            auto log = Utest::ut_scope();
+
             auto tmp = std::make_unique<DPolarCoords>(0.0, 1.0);
             OUniqueBox<AComplex, DPolarCoords> box{tmp.release()};
 
@@ -611,6 +618,8 @@ namespace xo {
 
         TEST_CASE("router-1", "[objectmodel]")
         {
+            auto log = Utest::ut_scope();
+
             using Object = OUniqueBox<AComplex, DPolarCoords>;
             auto tmp = std::make_unique<DPolarCoords>(0.0, 1.0);
 
@@ -624,6 +633,8 @@ namespace xo {
 
         TEST_CASE("routing-type-1", "[objectmodel]")
         {
+            auto log = Utest::ut_scope();
+
             using Object = OUniqueBox<AComplex, DPolarCoords>;
             auto tmp = std::make_unique<DPolarCoords>(0.0, 1.0);
 
@@ -637,6 +648,8 @@ namespace xo {
 
         TEST_CASE("ubox-1", "[objectmodel]")
         {
+            auto log = Utest::ut_scope();
+
             auto tmp = std::make_unique<DPolarCoords>(0.0, 1.0);
             ubox<AComplex,DPolarCoords> box{tmp.release()};
 
@@ -648,6 +661,8 @@ namespace xo {
 
         TEST_CASE("ubox-2", "[objectmodel]")
         {
+            auto log = Utest::ut_scope();
+
             auto tmp = std::make_unique<DRectCoords>(1.0, 0.0);
             ubox<AComplex,DRectCoords> box{tmp.release()};
 
@@ -659,12 +674,16 @@ namespace xo {
 
         TEST_CASE("ubox-any-1", "[objectmodel]")
         {
+            auto log = Utest::ut_scope();
+
             /* default ctor */
             ubox<AComplex> any;
         }
 
         TEST_CASE("ubox-any-2", "[objectmodel]")
         {
+            auto log = Utest::ut_scope();
+
             /* equivalent to ubox<AComplex,DRectCoords>, but impl doesn't use std::unique_ptr */
             ubox<AComplex,DRectCoords> any{new DRectCoords{1.0, 0.0}};
 
@@ -676,6 +695,8 @@ namespace xo {
 
         TEST_CASE("ubox-any-3", "[objectmodel]")
         {
+            auto log = Utest::ut_scope();
+
             /* equivalent to ubox<AComplex,DRectCoords>, but impl doesn't use std::unique_ptr */
             ubox<AComplex,DRectCoords> z1{new DRectCoords{1.0, 0.0}};
 

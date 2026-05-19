@@ -3,6 +3,7 @@
  *  @author Roland Conybeare, May 2026
  **/
 
+#include "TestUtil.hpp"
 #include <xo/alloc2/Allocator.hpp>
 #include <catch2/catch.hpp>
 #include <sys/wait.h>
@@ -16,6 +17,8 @@ namespace xo {
 
         TEST_CASE("IAllocator_Any", "[alloc2][death]")
         {
+            auto log = Utest::ut_scope();
+
             // null allocator
             obj<AAllocator> alloc_any;
 

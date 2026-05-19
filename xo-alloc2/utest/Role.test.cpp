@@ -3,6 +3,7 @@
  *  @author Roland Conybeare, May 2026
  **/
 
+#include "TestUtil.hpp"
 #include "role.hpp"
 #include <catch2/catch.hpp>
 
@@ -13,6 +14,8 @@ namespace xo {
 
         TEST_CASE("Role-1", "[Role]")
         {
+            auto log = Utest::ut_scope();
+
             /* 1. there are two distinct valid roles, 'to' and 'from',
              * 2. valid roles fall in interval [begin, end)
              */
