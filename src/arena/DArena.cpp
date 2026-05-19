@@ -538,9 +538,9 @@ namespace xo {
             if (lo_ + target_z > hi_) [[unlikely]] {
                 this->capture_error(error::reserve_exhausted, src_fn, target_z);
 
-                fprintf(stderr, "DArena::expand: reserve exhausted");
-                print_backtrace_dwarf(true /*demangle_flag*/);
-                std::terminate();
+                //fprintf(stderr, "DArena::expand: reserve exhausted");
+                //print_backtrace_dwarf(true /*demangle_flag*/);
+                //std::terminate();
 
                 return false;
             }
