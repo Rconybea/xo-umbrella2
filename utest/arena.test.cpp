@@ -3,6 +3,7 @@
  *  @author Roland Conybeare, Dec 2025
  **/
 
+#include "TestUtil.hpp"
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/alloc2/Arena.hpp>
 #include <xo/arena/print.hpp>
@@ -33,6 +34,8 @@ namespace xo {
     namespace ut {
         TEST_CASE("IAllocator_Xfer_DArena", "[alloc2]")
         {
+            auto log = Utest::ut_scope();
+
             IAllocator_Xfer<DArena, IAllocator_DArena> xfer;
 
             REQUIRE(IAllocator_Xfer<DArena, IAllocator_DArena>::_valid);
@@ -40,6 +43,8 @@ namespace xo {
 
         TEST_CASE("DArena-medium", "[alloc2][DArena]")
         {
+            auto log = Utest::ut_scope();
+
             ArenaConfig cfg { .name_ = "testarena",
                               .size_ = 10*1024*1024 };
             DArena arena = DArena::map(cfg);
@@ -83,6 +88,8 @@ namespace xo {
 
         TEST_CASE("allocator-any-1", "[alloc2][AAllocator]")
         {
+            auto log = Utest::ut_scope();
+
             /* empty allocator alloc1 */
             obj<AAllocator> alloc1;
 
@@ -122,6 +129,8 @@ namespace xo {
 
         TEST_CASE("allocator-expand-1", "[alloc2][AAllocator]")
         {
+            auto log = Utest::ut_scope();
+
             /* typed allocator a1o */
             ArenaConfig cfg { .name_ = "testarena",
                               .size_ = 1,
@@ -160,6 +169,8 @@ namespace xo {
 
         TEST_CASE("allocator-alloc-1", "[alloc2][AAllocator]")
         {
+            auto log = Utest::ut_scope();
+
             /* typed allocator a1o */
             ArenaConfig cfg { .name_ = "testarena",
                               .size_ = 64*1024,
@@ -207,6 +218,8 @@ namespace xo {
 
         TEST_CASE("allocator-alloc-2", "[alloc2][Allocator]")
         {
+            auto log = Utest::ut_scope();
+
             using header_type = AllocHeader;
 
             /* typed allocator a1o, with object header */
@@ -293,6 +306,8 @@ namespace xo {
 
         TEST_CASE("allocator-alloc-3", "[alloc2][Allocator]")
         {
+            auto log = Utest::ut_scope();
+
             using header_type = AllocHeader;
 
             /* typed allocator a1o, with object header + guard bytes */
@@ -363,6 +378,8 @@ namespace xo {
 
         TEST_CASE("allocator-fail-1", "[alloc2][AAllocator]")
         {
+            auto log = Utest::ut_scope();
+
             /* typed allocator a1o */
             ArenaConfig cfg { .name_ = "testarena",
                               .size_ = 64*1024,

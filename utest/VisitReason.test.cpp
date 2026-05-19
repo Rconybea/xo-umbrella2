@@ -3,6 +3,7 @@
  *  @author Roland Conybeare, May 2026
  **/
 
+#include "TestUtil.hpp"
 #include <xo/alloc2/VisitReason.hpp>
 #include <catch2/catch.hpp>
 
@@ -13,6 +14,8 @@ namespace xo {
 
         TEST_CASE("VisitReason-1", "[visitreason]")
         {
+            auto log = Utest::ut_scope();
+
             REQUIRE(VisitReason::unspecified() == VisitReason::unspecified());
 
             REQUIRE(VisitReason::unspecified() != VisitReason::forward());

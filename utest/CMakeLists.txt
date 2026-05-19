@@ -4,12 +4,11 @@
 set(UTEST_EXE utest.alloc2)
 set(UTEST_SRCS
     alloc2_utest_main.cpp
+    TestUtil.cpp
     objectmodel.test.cpp
     arena.test.cpp
     IAllocator_Any.test.cpp
     DArenaIterator.test.cpp
-#    Collector.test.cpp
-#    DX1CollectorIterator.test.cpp
     Generation.test.cpp
     Role.test.cpp
     VisitReason.test.cpp

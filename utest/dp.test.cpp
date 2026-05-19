@@ -3,6 +3,7 @@
  *  @author Roland Conybeare, May 2026
  **/
 
+#include "TestUtil.hpp"
 #include "dp.hpp"
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/alloc2/Arena.hpp>
@@ -33,6 +34,8 @@ namespace xo {
 
         TEST_CASE("dp-1", "[dp]")
         {
+            auto log = Utest::ut_scope();
+
             //ArenaConfig cfg { .name_ = "testarena", .size_ = 1024 };
             //DArena arena = DArena::map(cfg);
             //auto mm = obj<AAllocator,DArena>(&arena);
@@ -55,6 +58,8 @@ namespace xo {
 
         TEST_CASE("dp-2", "[dp]")
         {
+            auto log = Utest::ut_scope();
+
             uint32_t counter = 0;
             Foo foo(&counter);
 
@@ -77,6 +82,8 @@ namespace xo {
 
         TEST_CASE("dp-DArena", "[dp][DArena]")
         {
+            auto log = Utest::ut_scope();
+
             ArenaConfig cfg { .name_ = "testarena", .size_ = 1024 };
             DArena arena = DArena::map(cfg);
             //auto mm = obj<AAllocator,DArena>(&arena);

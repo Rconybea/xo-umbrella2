@@ -3,6 +3,7 @@
  *  @author Roland Conybeare, May 2026
  **/
 
+#include "TestUtil.hpp"
 #include "Generation.hpp"
 #include <catch2/catch.hpp>
 
@@ -14,6 +15,8 @@ namespace xo {
 
         TEST_CASE("Generation-1", "[Generation]")
         {
+            auto log = Utest::ut_scope();
+
             REQUIRE(Generation::nursery() == 0);
             REQUIRE(Generation::g0() == 0);
             REQUIRE(Generation::g1() == 1);
