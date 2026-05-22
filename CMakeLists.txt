@@ -87,6 +87,7 @@ add_subdirectory(xo-facet)        # sep iface,data
 add_subdirectory(xo-allocutil)
 add_subdirectory(xo-refcnt)
 add_subdirectory(xo-subsys)
+add_subdirectory(xo-testutil)     # unit test aux functions
 add_subdirectory(xo-flatstring)
 add_subdirectory(xo-pyutil)
 add_subdirectory(xo-reflect)

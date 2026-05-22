@@ -148,6 +148,7 @@ let
             xo-allocutil      = self.callPackage pkgs/xo-allocutil.nix      { stdenv = jitStdenv; };
             xo-refcnt         = self.callPackage pkgs/xo-refcnt.nix         { stdenv = jitStdenv; };
             xo-subsys         = self.callPackage pkgs/xo-subsys.nix         { stdenv = jitStdenv; };
+            xo-testutil       = self.callPackage pkgs/xo-testutil.nix       { stdenv = jitStdenv; };
             xo-flatstring     = self.callPackage pkgs/xo-flatstring.nix     { stdenv = jitStdenv; buildDocs = true; buildExamples = true; };
             xo-pyutil         = self.callPackage pkgs/xo-pyutil.nix         { stdenv = jitStdenv; };
             xo-reflect        = self.callPackage pkgs/xo-reflect.nix        { stdenv = jitStdenv; };
@@ -526,6 +527,7 @@ in
     allocutil      = pkgs.xo-allocutil;
     refcnt         = pkgs.xo-refcnt;
     subsys         = pkgs.xo-subsys;
+    testutil       = pkgs.xo-testutil;
     flatstring     = pkgs.xo-flatstring;
     pyutil         = pkgs.xo-pyutil;
     reflect        = pkgs.xo-reflect;

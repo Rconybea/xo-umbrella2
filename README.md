@@ -164,6 +164,7 @@ using `xo-build`.
 Finally, can also individual XO packages:
 ```
 $ nix-build -A xo.cmake
+$ nix-build -A xo.indentlog
 ...
 ```
 
