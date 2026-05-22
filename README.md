@@ -282,3 +282,15 @@ $ git fetch xo-foo main
 ```
 $ git subtree add --prefix=xo-foo xo-foo main
 ```
+
+## To push changes to satellite repos
+
+```
+$ git subtree push --prefix=xo-foo xo-foo main
+```
+
+## To pull changes from satellite repos
+
+```
+$ git subtree pull --prefix=xo-foo xo-foo main
+```
