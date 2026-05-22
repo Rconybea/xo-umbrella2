@@ -3,7 +3,7 @@
  *  @author Roland Conybeare, May 2026
  **/
 
-#include "TestUtil.hpp"
+#include <xo/testutil/Utest.hpp>
 #include "Generation.hpp"
 #include <catch2/catch.hpp>
 

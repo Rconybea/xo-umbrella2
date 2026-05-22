@@ -79,7 +79,7 @@
  *  Application code will deal with ubox<AComplex,DPolarCoords>
  **/
 
-#include "TestUtil.hpp"
+#include <xo/testutil/Utest.hpp>
 #include <catch2/catch.hpp>
 #include <cmath>
 #include <cassert>
