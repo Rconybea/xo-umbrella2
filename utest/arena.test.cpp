@@ -3,7 +3,7 @@
  *  @author Roland Conybeare, Dec 2025
  **/
 
-#include "TestUtil.hpp"
+#include <xo/testutil/Utest.hpp>
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/alloc2/Arena.hpp>
 #include <xo/arena/print.hpp>
