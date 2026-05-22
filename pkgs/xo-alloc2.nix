@@ -10,7 +10,9 @@
   # xo dependencies
   xo-facet,
   xo-randomgen,
+  xo-arena,
   xo-subsys,
+  xo-testutil,
 #  xo-callback,
 #  xo-unit,
 #  xo-reflect,
@@ -47,6 +49,8 @@ stdenv.mkDerivation (finalattrs:
       cli11
       xo-randomgen
       xo-cmake
+    ] ++ lib.optionals doCheck [
+      xo-testutil
     ] ++ lib.optionals buildDocs [
       doxygen
       sphinx
@@ -58,6 +62,7 @@ stdenv.mkDerivation (finalattrs:
       python3Packages.pillow
     ];
     propagatedBuildInputs = [
+      xo-arena
       xo-facet
       xo-subsys
 #      xo-callback

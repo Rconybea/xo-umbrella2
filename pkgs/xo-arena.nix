@@ -1,7 +1,12 @@
 {
   # nixpkgs dependencies
-  lib, stdenv, cmake, catch2,
+  lib, stdenv,
+
+  cmake, catch2,
   doxygen,
+  elfutils ? null,   # ignored on osx
+  libunwind,
+  pkg-config,
 
   python3Packages,
 
@@ -35,8 +40,11 @@ stdenv.mkDerivation (finalattrs:
     '';
 
     nativeBuildInputs = [
-      cmake catch2
-      xo-cmake xo-randomgen
+      cmake
+      catch2
+      pkg-config
+      xo-cmake
+      xo-randomgen
     ] ++ lib.optionals buildDocs [
       doxygen
       sphinx
@@ -50,5 +58,8 @@ stdenv.mkDerivation (finalattrs:
     propagatedBuildInputs = [
       xo-reflectutil
       xo-indentlog
+      libunwind
+    ] ++ lib.optionals stdenv.isLinux [
+      elfutils.dev
     ];
   })
