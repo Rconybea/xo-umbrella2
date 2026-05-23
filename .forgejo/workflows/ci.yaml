@@ -21,4 +21,4 @@ jobs:
 
       - name: nix store ping
         run:
-          nix store ping
+          nix store info
