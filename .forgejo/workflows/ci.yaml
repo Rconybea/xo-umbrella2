@@ -10,6 +10,7 @@ jobs:
       - name: Setup PATH
         run:
           echo "/nix/var/nix/profiles/default/bin" >> $GITHUB_PATH
+          echo "/var/lib/forgejo-runner/.nix-profile/bin" >> $GITHUB_PATH
 
       - name: Check PATH
         run:
