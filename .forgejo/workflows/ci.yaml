@@ -40,8 +40,12 @@ jobs:
           # 2. could clone from /var/lib/forgejo/gitea-repositories/roland/xo-umbrella2.git
           # 3. instead rely on $GITHUB_SERVER_URL
 
-          git clone --depth=1 $GITHUB_SERVER_URL/roland/xo-umbrella2.git .
+          git clone --quiet --depth=1 $GITHUB_SERVER_URL/roland/xo-umbrella2.git .
 
       - name: build xo-cmake
         run:
           nix-build ci.nix -A xo-cmake
+
+      - name: build xo-indentlog
+        run:
+          nix-build ci.nix -A xo-indentlog
