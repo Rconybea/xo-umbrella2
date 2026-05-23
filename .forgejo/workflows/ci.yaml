@@ -10,7 +10,10 @@ jobs:
   smoke-test:
     runs-on: host
     steps:
-      - name: Check nix version
+      - name: Setup PATH
+        run:
+          echo "/nix/var/nix/profiles/default/bin" >> $GITHUB_PATH
+
+      - name: Check PATH
         run:
           echo $PATH
-          #nix --version
