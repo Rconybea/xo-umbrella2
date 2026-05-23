@@ -3,9 +3,6 @@ on:
   push:
     branches: [main]
 
-env:
-  PATH: /nix/var/nix/profiles/default/bin:$PATH
-
 jobs:
   smoke-test:
     runs-on: host
