@@ -28,6 +28,9 @@ stdenv.mkDerivation (finalattrs:
     inherit buildExamples;
     inherit doCheck;
 
+    preBuild = lib.optionalString buildDocs ''
+      export FONTCONFIG_FILE=${fontconfig.out}/etc/fonts/fonts.conf
+    '';
 
     postBuild = lib.optionalString buildDocs ''
       cmake --build . -- docs
@@ -46,6 +49,4 @@ stdenv.mkDerivation (finalattrs:
                           python3Packages.sphinxcontrib-ditaa
                           python3Packages.sphinxcontrib-plantuml
                         ];
-  } // lib.optionalAttrs buildDocs {
-    FONTCONFIG_FILE = "${fontconfig.out}/etc/fonts/fonts.conf";
   })
