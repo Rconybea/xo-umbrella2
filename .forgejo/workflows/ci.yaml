@@ -16,6 +16,10 @@ jobs:
         run:
           echo $PATH
 
+      - name: Check cwd
+        run:
+          pwd
+
       - name: Check nix version
         run:
           echo $(nix --version)
