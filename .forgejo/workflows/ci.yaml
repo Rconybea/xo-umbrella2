@@ -22,3 +22,7 @@ jobs:
       - name: nix store ping
         run:
           nix store info
+
+      - name: build xo-cmake
+        run:
+          nix-build ci.nix -A xo-cmake
