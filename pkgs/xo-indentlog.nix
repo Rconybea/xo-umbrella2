@@ -4,7 +4,7 @@
 
   python3Packages,
 
-  doxygen, sphinx, graphviz,
+  doxygen, sphinx, graphviz, fontconfig,
 
   xo-cmake,
 
@@ -28,6 +28,7 @@ stdenv.mkDerivation (finalattrs:
     inherit buildExamples;
     inherit doCheck;
 
+
     postBuild = lib.optionalString buildDocs ''
       cmake --build . -- docs
     '';
@@ -39,9 +40,12 @@ stdenv.mkDerivation (finalattrs:
                           doxygen
                           sphinx
                           graphviz
+                          fontconfig
                           python3Packages.sphinx-rtd-theme
                           python3Packages.breathe
                           python3Packages.sphinxcontrib-ditaa
                           python3Packages.sphinxcontrib-plantuml
                         ];
+  } // lib.optionalAttrs buildDocs {
+    FONTCONFIG_FILE = "${fontconfig.out}/etc/fonts/fonts.conf";
   })
