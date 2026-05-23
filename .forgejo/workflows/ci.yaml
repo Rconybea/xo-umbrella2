@@ -23,6 +23,10 @@ jobs:
         run:
           nix store info
 
+      - name: checkout
+        uses:
+          actions/checkout@v4
+
       - name: build xo-cmake
         run:
           nix-build ci.nix -A xo-cmake
