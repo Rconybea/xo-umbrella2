@@ -18,3 +18,7 @@ jobs:
       - name: Check nix version
         run:
           echo $(nix --version)
+
+      - name: nix store ping
+        run:
+          nix store ping
