@@ -1,0 +1,11 @@
+name: CI
+on:
+  push:
+    branches: [main]
+
+jobs:
+  smoke-test:
+    runs-on: host
+    steps:
+      - name: Check nix version
+        run: nix --version
