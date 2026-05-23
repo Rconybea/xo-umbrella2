@@ -34,8 +34,13 @@ jobs:
           nix store info
 
       - name: checkout
-        uses:
-          actions/checkout@v4
+        run: |
+          # 1. actions/checkout@v4 stumbles b/c install is at conybeare.us/git
+          #    checkout manually instead.
+          # 2. could clone from /var/lib/forgejo/gitea-repositories/roland/xo-umbrella2.git
+          # 3. instead rely on $GITHUB_SERVER_URL
+
+          git clone --depth=1 $GITHUB_SERVER_URL/roland/xo-umbrella2.git .
 
       - name: build xo-cmake
         run:
