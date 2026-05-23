@@ -282,3 +282,15 @@ $ git fetch xo-foo main
 ```
 $ git subtree add --prefix=xo-foo xo-foo main
 ```
+
+## Manual git subtree workflow
+
+walk repo history (slow!), extracting all commits that touched prefix (e.g. `xo-foo`),
+synthesize a standalone commit history as if `xo-foo` were its own repo
+(i.e. strip prefix from all paths).
+
+With `-b _demux/xo-foo` stores thhat tip as local branch
+
+```
+$ git subtree split --prefix=xo-foo -b _demux/xo-foo --rejoin
+```
