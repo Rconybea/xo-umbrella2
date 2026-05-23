@@ -8,4 +8,6 @@ jobs:
     runs-on: host
     steps:
       - name: Check nix version
-        run: nix --version
+        run:
+          echo $PATH
+          #nix --version
