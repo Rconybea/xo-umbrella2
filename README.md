@@ -273,11 +273,18 @@ $ (cd result && python3 -m http.server 3000)
 2. add satellite as remote
 
 ```
-$ git remote add xo-foo git@github.com:Rconybea/xo-foo.git
+$ xo-build -n --add-umbrella-remote xo-foo
+git remote add xo-cmake git@github.com:Rconybea/xo-cmake.git
+$ xo-build --add-umbrella-remote xo-foo
+```
+
+3. fetch (for hygiene)
+
+```
 $ git fetch xo-foo main
 ```
 
-3. checkout satellite repo
+4. add subtree to local sandbox
 
 ```
 $ git subtree add --prefix=xo-foo xo-foo main
@@ -285,12 +292,18 @@ $ git subtree add --prefix=xo-foo xo-foo main
 
 ## To push changes to satellite repos
 
+We use an explicit branch for each satellite
 ```
-$ git subtree push --prefix=xo-foo xo-foo main
+$ git branch --show-current
+main
+$ xo-build -n --push-umbrella-remote xo-foo
+git subtree split --rejoin --prefix=xo-foo -b _demux/xo-foo
+git push xo-foo _demux/xo-foo:main
+$ xo-build --push-umbrella-remote xo-foo
 ```
 
 ## To pull changes from satellite repos
 
 ```
-$ git subtree pull --prefix=xo-foo xo-foo main
+$ git subtree pull --prefix=xo-foo xo-foo main --rejoin
 ```
