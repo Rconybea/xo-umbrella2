@@ -14,3 +14,7 @@ jobs:
       - name: Check PATH
         run:
           echo $PATH
+
+      - name: Check nix version
+        run:
+          echo $(nix --version)
