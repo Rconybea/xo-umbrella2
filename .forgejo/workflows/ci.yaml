@@ -53,3 +53,7 @@ jobs:
       - name: build xo-subsys
         run:
           nix-build ci.nix -A xo-subsys
+
+      - name: build xo-flatstring
+        run:
+          nix-build ci.nix -A xo-flatstring
