@@ -69,3 +69,7 @@ jobs:
       - name: build xo-arena
         run:
           nix-build ci.nix -A xo-arena
+
+      - name: build xo-facet
+        run:
+          nix-build ci.nix -A xo-facet
