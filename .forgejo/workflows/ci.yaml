@@ -65,3 +65,7 @@ jobs:
       - name: build xo-reflectutil
         run:
           nix-build ci.nix -A xo-reflectutil
+
+      - name: build xo-arena
+        run:
+          nix-build ci.nix -A xo-arena
