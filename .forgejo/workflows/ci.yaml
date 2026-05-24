@@ -61,3 +61,7 @@ jobs:
       - name: build xo-randomgen
         run:
           nix-build ci.nix -A xo-randomgen
+
+      - name: build xo-reflectutil
+        run:
+          nix-build ci.nix -A xo-reflectutil
