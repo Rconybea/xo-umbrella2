@@ -29,7 +29,9 @@ stdenv.mkDerivation (finalattrs:
     inherit doCheck;
 
     preBuild = lib.optionalString buildDocs ''
+      #echo "FONTCONFIG_FILE=$FONTCONFIG_FILE"
       export FONTCONFIG_FILE=${fontconfig.out}/etc/fonts/fonts.conf
+      #echo "FONTCONFIG_FILE=$FONTCONFIG_FILE"
     '';
 
     postBuild = lib.optionalString buildDocs ''
