@@ -222,10 +222,6 @@ in
 let
   pkgs = import nixpkgs-path {
     overlays = [
-      #qrencode-overlay    # not needed 4sep2025 nixpkgs (? might have src in nix store)
-      #libconfig-overlay   # not needed 4sep2025 nixpkgs (? might have src in nix store)
-      #pipewire-overlay    # not needed 4sep2025 nixpkgs ?
-      #ccache-overlay   # not needed 4sep2025 nixpkgs
       amf-headers-overlay
       dejagnu-overlay
       libffi-overlay
@@ -240,6 +236,31 @@ let
       xo-overlay
     ];
   };
+
+  # bona fide bux in git 2.50.1
+  # bug when using:
+  #   git subtree split ...
+  # git subtree needs to review a set of commits, filtering for those that
+  # intersect with target prefix. e.g.
+  #   git subtree split --prefix=xo-indentlog -b _demux/xo-indentlog
+  #
+  # 1. the split function is building a map old->new from commits in current repo,
+  #    to a smaller set of commits in the split repo:
+  #    it intends finding commits that intersect with anything in prefix,
+  #    adding old->new map entries for each such commit.
+  #
+  # 2. subtree (incorrectly?) decides it needs to cache a commit that does not
+  #    actually intersect prefix.  Calls its cache_set() twice with the same newrev.
+  #    2nd calls aborts, assumes cache should not already contain an oldrev key.
+  #
+  # 3. fix is to permit multiple calls to cache_set() with the same old->new
+  #    mapping.  Keep the abort if called twice with different target commits.
+  #
+  patched-git = pkgs.git.overrideAttrs (old: {
+      postInstall = (old.postInstall or "") + ''
+        patch $out/libexec/git-core/git-subtree ${./patches/git-subtree-cache-fix.patch}
+      '';
+    });
 in
 
 let
@@ -331,7 +352,7 @@ let
     pkgs.nix-tree  # note: needs GHC
     #pkgs.nix
 
-    pkgs.git
+    patched-git # instead of pkgs.git
     pkgs.gh    # github cli
     pkgs.cloc
     pkgs.bloaty
@@ -584,7 +605,7 @@ in
       # also won't build in genuine sandbox
 
       pkgs.nix-tree   # needs GHC btw
-      pkgs.git
+      patched-git  # instead of pkgs.git
       pkgs.openssh
       pkgs.cloc
       pkgs.lcov
