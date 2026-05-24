@@ -13,13 +13,6 @@
   xo-arena,
   xo-subsys,
   xo-testutil,
-#  xo-callback,
-#  xo-unit,
-#  xo-reflect,
-#  xo-randomgen,
-#  xo-reflectutil,
-#  xo-indentlog,
-#  xo-allocutil,
   xo-cmake,
 
   buildDocs ? false,
@@ -65,11 +58,5 @@ stdenv.mkDerivation (finalattrs:
       xo-arena
       xo-facet
       xo-subsys
-#      xo-callback
-#      xo-unit
-#      xo-reflect
-#      xo-allocutil
-#      xo-reflectutil
-#      xo-indentlog
     ];
   })
