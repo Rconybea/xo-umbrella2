@@ -49,3 +49,7 @@ jobs:
       - name: build xo-indentlog
         run:
           nix-build ci.nix -A xo-indentlog
+
+      - name: build xo-subsys
+        run:
+          nix-build ci.nix -A xo-subsys
