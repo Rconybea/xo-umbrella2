@@ -266,7 +266,7 @@ $ (cd result && python3 -m http.server 3000)
 
 4. browse to "<wsl-ip-address>:3000/share/doc/xo-flatstring/html" from windows
 
-## To add a new satellite repo
+## To add a new satellite repo / missing satellite remote
 
 1. check clone in clean state (all local changes committed or unwound)
 
@@ -293,17 +293,25 @@ $ git subtree add --prefix=xo-foo xo-foo main
 ## To push changes to satellite repos
 
 We use an explicit branch for each satellite
+
 ```
 $ git branch --show-current
 main
+
 $ xo-build -n --push-umbrella-remote xo-foo
 git subtree split --rejoin --prefix=xo-foo -b _demux/xo-foo
 git push xo-foo _demux/xo-foo:main
+
 $ xo-build --push-umbrella-remote xo-foo
 ```
 
 ## To pull changes from satellite repos
 
 ```
-$ git subtree pull --prefix=xo-foo xo-foo main --rejoin
+$ xo-build -n --pull-umbrella-remote xo-foo
+git subtree pull xo-foo main --rejoin
+```
+
+```
+$ xo-build --pull-umbrella-remote xo-foo
 ```
