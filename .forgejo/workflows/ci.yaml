@@ -44,36 +44,45 @@ jobs:
 
       - name: build xo-cmake
         run:
+          echo "nix-build ci.nix -A xo-cmake"
           nix-build ci.nix -A xo-cmake
 
       - name: build xo-indentlog
         run:
+          echo "nix-build ci.nix -A xo-indentlog"
           nix-build ci.nix -A xo-indentlog
 
       - name: build xo-subsys
         run:
+          echo "nix-build ci.nix -A xo-subsys"
           nix-build ci.nix -A xo-subsys
 
       - name: build xo-flatstring
         run:
+          echo "nix-build ci.nix -A xo-flatstring"
           nix-build ci.nix -A xo-flatstring
 
       - name: build xo-randomgen
         run:
+          echo "nix-build ci.nix -A xo-randomgen"
           nix-build ci.nix -A xo-randomgen
 
       - name: build xo-reflectutil
         run:
+          echo "nix-build ci.nix -A xo-reflectutil"
           nix-build ci.nix -A xo-reflectutil
 
       - name: build xo-arena
         run:
+          echo "nix-build ci.nix -A xo-arena"
           nix-build ci.nix -A xo-arena
 
       - name: build xo-facet
         run:
+          echo "nix-build ci.nix -A xo-facet"
           nix-build ci.nix -A xo-facet
 
       - name: build xo-alloc2
         run:
+          echo "nix-build ci.nix -A xo-alloc2"
           nix-build ci.nix -A xo-alloc2
