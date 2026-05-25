@@ -42,12 +42,15 @@ let
     fontDirectories = [
       pkgs.inconsolata-lgc
       pkgs.noto-fonts
-      pkgs.noto-fonts-emoji
+      pkgs.noto-fonts-color-emoji
       pkgs.dejavu_fonts
     ];
   };
 
-  # xo deps
+  # xo deps.
+  # (we don't need this for nix-build.
+  #  load-bearing for nix development shell driving a cmake build)
+  #
   xodeps = [
     pkgs.python3Packages.python
     # note: pybind11 won't build on roly-chicago-24a in nix sandbox, runs out of pty devices
@@ -722,7 +725,7 @@ in
 
       # fonts for imgui
       pkgs.noto-fonts
-      pkgs.noto-fonts-emoji
+      pkgs.noto-fonts-color-emoji
       pkgs.dejavu_fonts
     ];
 
