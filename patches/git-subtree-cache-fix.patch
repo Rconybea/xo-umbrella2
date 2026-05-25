@@ -1,0 +1,18 @@
+--- a/git-subtree
++++ b/git-subtree
+@@ -341,7 +341,13 @@ cache_set () {
+	if test "$oldrev" != "latest_old" &&
+		test "$oldrev" != "latest_new" &&
+		test -e "$cachedir/$oldrev"
+	then
+-		die "fatal: cache for $oldrev already exists!"
++		existing=$(cat "$cachedir/$oldrev")
++		if test "$existing" = "$newrev"
++		then
++			return
++		else
++			die "fatal: cache for $oldrev already exists!"
++		fi
+	fi
+	echo "$newrev" >"$cachedir/$oldrev"
+}

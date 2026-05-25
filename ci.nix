@@ -6,6 +6,7 @@
 let
   pkgs = import nixpkgs-path {};
 
+  # xo.nix now returns a plain attrset (not pkgs.extend)
   xoPkgs = import ./xo.nix { inherit pkgs; };
 
 in
