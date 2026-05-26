@@ -3,13 +3,6 @@
   lib, stdenv, cmake, catch2,
 
   # xo dependencies
-#  xo-webutil,
-#  xo-callback,
-#  xo-unit,
-#  xo-refcnt,
-#  xo-reflectutil,
-#  xo-alloc,
-  #  xo-randomgen,
   xo-gc,
   xo-stringtable2,
   xo-reflect,
@@ -18,9 +11,6 @@
   xo-facet,
   xo-subsys,
   xo-cmake,
-#  xo-printjson,
-#  xo-ordinaltree,
-#  xo-indentlog,
   doCheck ? true,
 } :
 

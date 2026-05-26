@@ -9,9 +9,6 @@
 
   # xo dependencies
   xo-facet,
-#  xo-randomgen,
-#  xo-reflectutil,
-#  xo-indentlog,
   xo-cmake,
 
 #  buildDocs ? false,
@@ -39,7 +36,6 @@ stdenv.mkDerivation (finalattrs:
     nativeBuildInputs = [
       cmake catch2
       xo-cmake
-#      xo-randomgen
 #    ] ++ lib.optionals buildDocs [
 #      doxygen
 #      sphinx
@@ -52,7 +48,5 @@ stdenv.mkDerivation (finalattrs:
     ];
     propagatedBuildInputs = [
       xo-facet
-#      xo-reflectutil
-#      xo-indentlog
     ];
   })
