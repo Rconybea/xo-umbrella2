@@ -74,6 +74,10 @@ jobs:
         run:
           nix-build ci.nix -A xo-facet
 
+      - name: build xo-printable2
+        run:
+          nix-build ci.nix -A xo-printable2
+
       - name: build xo-alloc2
         run:
           nix-build ci.nix -A xo-alloc2
