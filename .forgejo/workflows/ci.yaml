@@ -88,7 +88,13 @@ jobs:
 
       - name: build xo-refcnt
         run: |
+          echo -n nix-build ci.nix -A xo-refcnt
           nix-build ci.nix -A xo-refcnt
+
+      - name: build xo-reflect
+        run: |
+          echo -n nix-build ci.nix -A xo-reflect
+          nix-build ci.nix -A xo-reflect
 
 #      - name: build xo-gc
 #        run:
