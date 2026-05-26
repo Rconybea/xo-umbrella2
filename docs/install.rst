@@ -92,7 +92,7 @@ Build XO libraries, assemble sanbox under ``./result``
 
 .. code-block::
 
-    $ nixbuild -A xo-userenv
+    $ nix-build -A xo-userenv
 
 
 Aternatively can enter nix environment, then follow instructions for cmake build:
