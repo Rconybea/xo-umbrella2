@@ -246,25 +246,72 @@ xo-umbrella2/
 
 ```
 
-## To view docs from WSL
+## Build/Install
 
-1. find wsl IP address
+See also docs/install.rst
+
+### cmake build
+
+```
+$ git clone https://github.com/rconybea/xo-umbrella2
+$ cd xo-umbrella2
+$ PREFIX=${HOME}/local  # or /usr/local or ...
+
+# phase1 install helper scripts
+$ cmake -B xo-cmake/.build -S xo-cmake -DCMAKE_INSTALL_PREFIX=$PREFIX
+$ cmake --install xo-cmake/.build
+
+# phase 2 -- configure & build XO, using helpers installed in phase 1.
+# -DENABLE_TESTING=1 : builds unit tests
+# -DXO_ENABLE_DOCS=1 : builds documentation; or 0 to skip
+# -DXO_ENABLE_EXAMPLES=1 : builds examples; or 0 to skip
+# -DXO_ENABLE_OPENGL=1 : builds opengl examples; or 0 to skip
+# -DXO_ENABLE_VULKAN=1 : builds vulkan-dependent graphics pipeline for imgui; or 0 to skip
+$ cmake -B .build -S . -DCMAKE_INSTALL_PREFIX=$PREFIX -DXO_ENABLE_DOCS=1 -DXO_ENABLE_EXAMPLES=1 -DXO_ENABLE_VULKAN=1
+$ cmake --build .build -j
+
+# optionally build docs
+$ cmake --build .build -- docs
+
+# install
+$ cmake --install .build
+```
+
+### nix build
+
+```
+$ nix-build -A xo-userenv
+```
+
+output now in `./result`
+
+## To view docs locally
+
+### find local IP address
+
+wsl:
 
 ```
 $ hostname -I
 ```
 
-2. run nix build
+linux
+```
+$ /usr/sbin/ifconfig -a
+```
+
+### run nix build
+
 ```
 $ nix-build -A xo-userenv
 ```
 
-3. serve docs from some available port
+### serve docs from some available port
 ```
 $ (cd result && python3 -m http.server 3000)
 ```
 
-4. browse to "<wsl-ip-address>:3000/share/doc/xo-flatstring/html" from windows
+browse to "<host-ip-address>:3000/share/doc/xo-flatstring/html"
 
 ## To add a new satellite repo / missing satellite remote
 

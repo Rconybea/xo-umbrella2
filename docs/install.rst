@@ -57,16 +57,23 @@ The first phase bootstraps some generated helper scripts used in the second phas
     $ PREFIX=/usr/local  # for example
 
     # phase 1 -- install helper scripts
-    $ cmake -B .build0 -S xo-cmake -DCMAKE_INSTALL_PREFIX=$PREFIX
-    $ cmake --install .build0
+
+    $ cmake -B xo-cmake/.build -S xo-cmake -DCMAKE_INSTALL_PREFIX=$PREFIX
+    $ cmake --install xo-cmake/.build
 
     # phase 2 -- build XO, using helpers installed in phase 1.
 
+    # -DENABLE_TESTING=1 : builds unit tests
     # -DXO_ENABLE_DOCS=1 : builds documentation; or 0 to skip
-    # -DXO_ENABLE_EXAMPLES=1 : builds example; or 0 to skipos
+    # -DXO_ENABLE_EXAMPLES=1 : builds example; or 0 to skip
+    # -DXO_ENABLE_OPENGL=1 : builds opengl-dependent graphics pipeline/examples for imgui; or 0 to skip
     # -DXO_ENABLE_VULKAN=1 : builds vulkan-dependent graphics pipeline for imgui; or 0 to skip
 
-    $ cmake -B .build -S . -DCMAKE_INSTALL_PREFIX=$PREFIX -DXO_ENABLE_DOCS=1 -DXO_ENABLE_EXAMPLES=1 -DXO_ENABLE_VULKAN=1
+    $ cmake -B .build -S . -DCMAKE_INSTALL_PREFIX=$PREFIX \
+                           -DXO_ENABLE_DOCS=1 \
+                           -DXO_ENABLE_EXAMPLES=1 \
+                           -DXO_ENABLE_OPENGL=1 \
+                           -DXO_ENABLE_VULKAN=1
     $ cmake --build .build -j
 
     # optionally build docs (requires -DXO_ENABLE_DOCS in phase2 config)
