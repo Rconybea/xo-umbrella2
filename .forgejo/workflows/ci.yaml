@@ -90,11 +90,19 @@ jobs:
         run: |
           echo -n nix-build ci.nix -A xo-refcnt
           nix-build ci.nix -A xo-refcnt
+          ls -l ./result
 
       - name: build xo-reflect
         run: |
           echo -n nix-build ci.nix -A xo-reflect
           nix-build ci.nix -A xo-reflect
+          ls -l ./result
+
+      - name: build xo-stringtable2
+        run: |
+          echo -n nix-build ci.nix -A xo-stringtable2
+          nix-build ci.nix -A xo-stringtable2
+          ls -l ./result
 
 #      - name: build xo-gc
 #        run:
