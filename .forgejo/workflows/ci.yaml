@@ -86,6 +86,10 @@ jobs:
         run:
           nix-build ci.nix -A xo-alloc2
 
+      - name: build xo-refcnt
+        run: |
+          nix-build ci.nix -A xo-refcnt
+
 #      - name: build xo-gc
 #        run:
 #          nix-build ci.nix -A xo-gc
