@@ -14,24 +14,24 @@ in
     inherit (xoPkgs)
       xo-cmake
       xo-indentlog
-      xo-reflectutil
+      xo-subsys
+      xo-flatstring
       xo-randomgen
+      xo-reflectutil
       xo-arena
       xo-facet
+      xo-alloc2
+      xo-gc
       xo-allocutil
       xo-refcnt
-      xo-subsys
       xo-testutil
-      xo-flatstring
       xo-reflect
       xo-ratio
       xo-unit
       xo-callback
       xo-printable2
       xo-alloc
-      xo-alloc2
       xo-stringtable2
-      xo-gc
       xo-object
       xo-type
       xo-object2

@@ -27,10 +27,11 @@ let
   xoPackages = {
     xo-cmake          = callPackage pkgs/xo-cmake.nix          { stdenv = jitStdenv; };
     xo-indentlog      = callPackage pkgs/xo-indentlog.nix      { stdenv = jitStdenv; buildDocs = true; buildExamples = true; };
-    xo-reflectutil    = callPackage pkgs/xo-reflectutil.nix    { stdenv = jitStdenv; };
     xo-randomgen      = callPackage pkgs/xo-randomgen.nix      { stdenv = jitStdenv;                   buildExamples = true; };
+    xo-reflectutil    = callPackage pkgs/xo-reflectutil.nix    { stdenv = jitStdenv; };
     xo-arena          = callPackage pkgs/xo-arena.nix          { stdenv = jitStdenv; buildDocs = true; };
     xo-facet          = callPackage pkgs/xo-facet.nix          { stdenv = jitStdenv; };
+    xo-alloc2         = callPackage pkgs/xo-alloc2.nix         { stdenv = jitStdenv; buildDocs = true; };
     xo-allocutil      = callPackage pkgs/xo-allocutil.nix      { stdenv = jitStdenv; };
     xo-refcnt         = callPackage pkgs/xo-refcnt.nix         { stdenv = jitStdenv; };
     xo-subsys         = callPackage pkgs/xo-subsys.nix         { stdenv = jitStdenv; };
@@ -45,7 +46,6 @@ let
     xo-callback       = callPackage pkgs/xo-callback.nix       { stdenv = jitStdenv; };
     xo-printable2     = callPackage pkgs/xo-printable2.nix     { stdenv = jitStdenv; };
     xo-alloc          = callPackage pkgs/xo-alloc.nix          { stdenv = jitStdenv; buildDocs = true; };
-    xo-alloc2         = callPackage pkgs/xo-alloc2.nix         { stdenv = jitStdenv; buildDocs = true; };
     xo-stringtable2   = callPackage pkgs/xo-stringtable2.nix   { stdenv = jitStdenv; };
     xo-gc             = callPackage pkgs/xo-gc.nix             { stdenv = jitStdenv; buildDocs = true; };
     xo-object         = callPackage pkgs/xo-object.nix         { stdenv = jitStdenv; };

@@ -12,8 +12,6 @@
   xo-facet,
   xo-randomgen,
   xo-subsys,
-#  xo-reflectutil,
-#  xo-indentlog,
   xo-cmake,
 
   buildDocs ? false,
@@ -55,7 +53,5 @@ stdenv.mkDerivation (finalattrs:
       xo-alloc2
       xo-facet
       xo-subsys
-#      xo-reflectutil
-#      xo-indentlog
     ];
   })
