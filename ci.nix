@@ -21,6 +21,7 @@ in
       xo-arena
       xo-facet
       xo-printable2
+      xo-testutil
       xo-alloc2
       xo-refcnt
       xo-reflect
@@ -28,7 +29,6 @@ in
       xo-object2
       xo-gc
       xo-allocutil
-      xo-testutil
       xo-ratio
       xo-unit
       xo-callback
