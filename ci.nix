@@ -20,6 +20,7 @@ in
       xo-reflectutil
       xo-arena
       xo-facet
+      xo-printable2
       xo-alloc2
       xo-gc
       xo-allocutil
@@ -29,7 +30,6 @@ in
       xo-ratio
       xo-unit
       xo-callback
-      xo-printable2
       xo-alloc
       xo-stringtable2
       xo-object

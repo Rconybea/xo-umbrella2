@@ -31,6 +31,7 @@ let
     xo-reflectutil    = callPackage pkgs/xo-reflectutil.nix    { stdenv = jitStdenv; };
     xo-arena          = callPackage pkgs/xo-arena.nix          { stdenv = jitStdenv; buildDocs = true; };
     xo-facet          = callPackage pkgs/xo-facet.nix          { stdenv = jitStdenv; };
+    xo-printable2     = callPackage pkgs/xo-printable2.nix     { stdenv = jitStdenv; };
     xo-alloc2         = callPackage pkgs/xo-alloc2.nix         { stdenv = jitStdenv; buildDocs = true; };
     xo-allocutil      = callPackage pkgs/xo-allocutil.nix      { stdenv = jitStdenv; };
     xo-refcnt         = callPackage pkgs/xo-refcnt.nix         { stdenv = jitStdenv; };
@@ -44,7 +45,6 @@ let
     xo-unit           = callPackage pkgs/xo-unit.nix           { stdenv = jitStdenv; buildDocs = true; buildExamples = true; };
     xo-pyunit         = callPackage pkgs/xo-pyunit.nix         { stdenv = jitStdenv; };
     xo-callback       = callPackage pkgs/xo-callback.nix       { stdenv = jitStdenv; };
-    xo-printable2     = callPackage pkgs/xo-printable2.nix     { stdenv = jitStdenv; };
     xo-alloc          = callPackage pkgs/xo-alloc.nix          { stdenv = jitStdenv; buildDocs = true; };
     xo-stringtable2   = callPackage pkgs/xo-stringtable2.nix   { stdenv = jitStdenv; };
     xo-gc             = callPackage pkgs/xo-gc.nix             { stdenv = jitStdenv; buildDocs = true; };
