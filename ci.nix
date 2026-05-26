@@ -22,19 +22,19 @@ in
       xo-facet
       xo-printable2
       xo-alloc2
+      xo-refcnt
+      xo-reflect
+      xo-stringtable2
+      xo-object2
       xo-gc
       xo-allocutil
-      xo-refcnt
       xo-testutil
-      xo-reflect
       xo-ratio
       xo-unit
       xo-callback
       xo-alloc
-      xo-stringtable2
       xo-object
       xo-type
-      xo-object2
       xo-procedure2
       xo-numeric
       xo-ordinaltree

@@ -7,8 +7,6 @@
   xo-printable2,
   xo-arena,
   xo-cmake,
-#  xo-reflectutil,
-#  xo-indentlog,
 } :
 
 stdenv.mkDerivation (finalattrs:
@@ -28,7 +26,5 @@ stdenv.mkDerivation (finalattrs:
       xo-alloc2
       xo-printable2
       xo-arena
-#      xo-reflectutil
-#      xo-indentlog
     ];
   })

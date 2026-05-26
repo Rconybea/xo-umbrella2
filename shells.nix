@@ -324,6 +324,7 @@ in
     arena          = pkgs.xo-arena;
     facet          = pkgs.xo-facet;
     alloc2         = pkgs.xo-alloc2;
+    object2        = pkgs.xo-object2;
     gc             = pkgs.xo-gc;
     allocutil      = pkgs.xo-allocutil;
     refcnt         = pkgs.xo-refcnt;
@@ -340,7 +341,6 @@ in
     stringtable2   = pkgs.xo-stringtable2;
     object         = pkgs.xo-object;
     type           = pkgs.xo-type;
-    object2        = pkgs.xo-object2;
     procedure2     = pkgs.xo-procedure2;
     numeric        = pkgs.xo-numeric;
     ordinaltree    = pkgs.xo-ordinaltree;
