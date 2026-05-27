@@ -8,6 +8,7 @@
   sphinx, graphviz,
 
   # xo dependencies
+  xo-object2,
   xo-alloc2,
   xo-facet,
   xo-randomgen,
@@ -39,6 +40,7 @@ stdenv.mkDerivation (finalattrs:
       cmake catch2
       xo-cmake
       xo-randomgen
+      xo-object2
     ] ++ lib.optionals buildDocs [
       doxygen
       sphinx
