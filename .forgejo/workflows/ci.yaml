@@ -83,8 +83,10 @@ jobs:
           nix-build ci.nix -A xo-testutil
 
       - name: build xo-alloc2
-        run:
+        run: |
+          echo -n nix-build ci.nix -A xo-alloc2
           nix-build ci.nix -A xo-alloc2
+          ls -l ./result
 
       - name: build xo-refcnt
         run: |
