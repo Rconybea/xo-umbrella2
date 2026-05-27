@@ -79,8 +79,10 @@ jobs:
           nix-build ci.nix -A xo-printable2
 
       - name: build xo-testutil
-        run:
+        run: |
+          echo -n nix-build ci.nix -A xo-testutil
           nix-build ci.nix -A xo-testutil
+          ls -l ./result
 
       - name: build xo-alloc2
         run: |
@@ -104,6 +106,12 @@ jobs:
         run: |
           echo -n nix-build ci.nix -A xo-stringtable2
           nix-build ci.nix -A xo-stringtable2
+          ls -l ./result
+
+      - name: build xo-object2
+        run: |
+          echo -n nix-build ci.nix -A xo-object2
+          nix-build ci.nix -A xo-object2
           ls -l ./result
 
 #      - name: build xo-gc
