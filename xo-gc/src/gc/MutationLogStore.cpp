@@ -444,9 +444,12 @@ namespace xo {
 
                     log && log("parent not in to-space -> must be in from-space");
 
+#                  ifndef NDEBUG
                     Generation parent_gen_from = gc.generation_of(Role::from_space(),
                                                                   from_entry.parent());
-                    assert(!parent_gen_from.is_sentinel());
+                    if (!parent_gen_from.is_sentinel())
+                        assert(false);
+#                  endif
 
                     if (from_entry.is_superseded()) {
                         log && log("entry superseded -> discard");
