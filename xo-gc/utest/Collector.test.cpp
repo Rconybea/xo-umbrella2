@@ -325,11 +325,12 @@ namespace xo {
         namespace {
             class Testcase {
             public:
-                Testcase(uint32_t ng, uint32_t ns, size_t gcz, uint32_t otz, bool dbg_flag)
+                Testcase(uint32_t ng, uint32_t ns, size_t gcz, uint32_t otz, uint32_t xotz, bool dbg_flag)
                     : n_gen_{ng},
                       n_survive_{ns},
                       gc_halfspace_z_{gcz},
                       object_type_z_{otz},
+                      expect_object_type_z_{xotz},
                       debug_flag_{dbg_flag}
                     {}
 
@@ -340,7 +341,7 @@ namespace xo {
                 uint32_t n_survive_ = 0;
                 /** size of each generations' half-space, in bytes **/
                 size_t gc_halfspace_z_ = 0;
-                /** storage for object type array, in bytes
+                /** storage for object-type array, in bytes
                  *  one 8-byte facet pointer per type
                  **/
                 uint32_t object_type_z_;
@@ -348,6 +349,8 @@ namespace xo {
                 /** size for error output arena **/
                 size_t error_size_ = 0;
 #endif
+                /** expected size of object-type array, in bytes, after orderly init **/
+                uint32_t expect_object_type_z_ = 0;
                 /** true to enable debug output for this test case **/
                 bool debug_flag_ = false;
             };
@@ -372,6 +375,7 @@ namespace xo {
             {
                 auto gc = obj<ACollector,DX1Collector>(&gc_);
 
+                // auto-install object types
                 CollectorTypeRegistry::instance().install_types(gc);
             }
 
@@ -381,14 +385,15 @@ namespace xo {
 
             static std::vector<Testcase> s_testcase_v = {
                 /**
-                 *                     debug_flag
-                 *               object_type_z  |
-                 *        gc_halfspace_z     |  |
-                 *  n_survive          |     |  |
-                 *   n_gen  |          |     |  |
-                 *       v  v          v     v  v
+                 *                          debug_flag
+                 *             expect_object_type_z  |
+                 *               object_type_z    |  |
+                 *        gc_halfspace_z     |    |  |
+                 *  n_survive          |     |    |  |
+                 *   n_gen  |          |     |    |  |
+                 *       v  v          v     v    v  v
                  **/
-                Testcase(1, 2, 16 * 1024,  128, T),
+                Testcase(1, 2, 16 * 1024,  128,  96, T),
             };
 
 #          undef T
@@ -443,7 +448,9 @@ namespace xo {
 
                 Generation g0 = Generation::g0();
 
-                REQUIRE(mm.allocated() == tc.object_type_z_);
+                // mm.allocated includes: { object-types, roots(=0), arenas(=0) }
+                //
+                REQUIRE(mm.allocated() == tc.expect_object_type_z_);
                 REQUIRE(gc.allocated(g0, Role::to_space()) == 0);
                 REQUIRE(gc.allocated(g0, Role::from_space()) == 0);
 
@@ -478,7 +485,9 @@ namespace xo {
                                   + sizeof(DArray) + sizeof(obj<AGCObject>));
                         {
                             REQUIRE(z == 80);
-                            REQUIRE(mm.allocated() == tc.object_type_z_ + z);
+                            // cf earlier assertion on mm.allocated();
+                            // now adding cost of 3 specific objects
+                            REQUIRE(mm.allocated() == tc.expect_object_type_z_ + z);
                             REQUIRE(gc.allocated(g0, Role::to_space()) == z);
                             REQUIRE(gc.allocated(g1, Role::to_space()) == 0);
                             REQUIRE(gc.allocated(g0, Role::from_space()) == 0);
@@ -494,7 +503,7 @@ namespace xo {
                         REQUIRE(mm->contains(Role::from_space(), l1.data()));
                         REQUIRE(!mm->contains_allocated(Role::from_space(), l1.data()));
 
-                        REQUIRE(mm.allocated() == tc.object_type_z_ + z);
+                        REQUIRE(mm.allocated() == tc.expect_object_type_z_ + z);
                         REQUIRE(gc.allocated(g0, Role::to_space()) == z);
                         REQUIRE(gc.allocated(g1, Role::to_space()) == 0);
                         REQUIRE(gc.allocated(g0, Role::from_space()) == 0);

@@ -168,6 +168,7 @@ namespace xo {
             return accumulate_total_aux(*this, &DArena::reserved);
         }
 
+        // editor bait: size()
         size_type
         DX1Collector::size_total() const noexcept
         {

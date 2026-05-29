@@ -273,11 +273,13 @@ namespace ut {
                 REQUIRE(ok);
 
                 REQUIRE(gc_o.name() == cfg.name_);
-                // nothing committed yet (?)
-                REQUIRE(gc_o.size() == cfg.object_types_z_);
+                // nothing committed yet, execept object types.
+                // committed memory will fit on 1 page
+                REQUIRE(gc_o.size() == getpagesize());
                 // no-op
                 REQUIRE(gc_o.expand(0));
-                REQUIRE(gc_o.size() == cfg.object_types_z_);
+                // committed memory will still fit on 1 page,
+                REQUIRE(gc_o.size() == getpagesize());
 
                 // x0_o will be added as gc root.  x0_o_orig will not
                 auto x0_o = DFloat::box<AGCObject>(gc_o, 3.1415927);
