@@ -33,17 +33,14 @@ stdenv.mkDerivation (finalattrs:
     src = ../xo-pyreflect;
 
     cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake"];
-    doCheck = true;
 
     propagatedBuildInputs = [
-#      xo-refcnt
       xo-pyutil
       xo-reflect
     ];
 
     nativeBuildInputs = [
       cmake
-#      catch2
       xo-cmake
       python3Packages.pybind11
     ];

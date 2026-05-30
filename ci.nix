@@ -26,6 +26,7 @@ in
       xo-refcnt
       xo-pyutil
       xo-reflect
+      xo-pyreflect
       xo-stringtable2
       xo-object2
       xo-gc

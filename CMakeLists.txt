@@ -90,15 +90,15 @@ add_subdirectory(xo-printable2)   # experiment w/ facet object model
 add_subdirectory(xo-testutil)     # unit test aux functions
 add_subdirectory(xo-alloc2)       # experiment w/ facet object model
 add_subdirectory(xo-refcnt)
-add_subdirectory(xo-reflect)
+add_subdirectory(xo-pyutil)
+add_subdirectory(xo-reflect)      # reflection library (pre-fomo)
+add_subdirectory(xo-pyreflect)
 add_subdirectory(xo-stringtable2) # experiment w/ facet object model
 add_subdirectory(xo-object2)      # experiment w/ facet object model
 add_subdirectory(xo-gc)           # experiment w/ facet object model
 add_subdirectory(xo-type)         # experiment w/ facet object model
 add_subdirectory(xo-procedure2)   # schematika procedure abstraction + runtime context (fomo)
 add_subdirectory(xo-allocutil)    # xo-alloc api
-add_subdirectory(xo-pyutil)
-add_subdirectory(xo-pyreflect)
 add_subdirectory(xo-ratio)
 add_subdirectory(xo-unit)
 add_subdirectory(xo-pyunit)
