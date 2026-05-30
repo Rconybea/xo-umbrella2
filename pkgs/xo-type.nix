@@ -3,13 +3,8 @@
   lib, stdenv, cmake, catch2,
 
   # xo dependencies
-#  xo-reflectutil,
-#  xo-alloc,
-  #  xo-randomgen,
-#  xo-gc,
-#  xo-stringtable2,
+  xo-object2,
   xo-alloc2,
-#  xo-printable2,
   xo-facet,
   xo-subsys,
   xo-cmake,
