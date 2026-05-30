@@ -3,6 +3,7 @@
   lib, stdenv, cmake, catch2,
 
   # xo dependencies
+  xo-numeric,
   xo-gc,
   xo-type,
   xo-reflect,
@@ -33,6 +34,7 @@ stdenv.mkDerivation (finalattrs :
       xo-cmake
     ];
     propagatedBuildInputs = [
+      xo-numeric
       xo-gc
       xo-type
       xo-reflect
