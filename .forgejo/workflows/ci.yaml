@@ -67,8 +67,10 @@ jobs:
           nix-build ci.nix -A xo-reflectutil
 
       - name: build xo-arena
-        run:
+        run: |
+          echo -n nix-build ci.nix -A xo-arena
           nix-build ci.nix -A xo-arena
+          ls -l ./result
 
       - name: build xo-facet
         run: |
@@ -128,4 +130,10 @@ jobs:
         run: |
           echo -n nix-build ci.nix -A xo-type
           nix-build ci.nix -A xo-type
+          ls -l ./result
+
+      - name: build xo-procedure2
+        run: |
+          echo -n nix-build ci.nix -A xo-procedure2
+          nix-build ci.nix -A xo-procedure2
           ls -l ./result
