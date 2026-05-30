@@ -1,2 +1,0 @@
-import pyprintjson
-pj=pyprintjson.PrintJson()
