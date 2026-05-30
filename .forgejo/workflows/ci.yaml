@@ -59,8 +59,10 @@ jobs:
           nix-build ci.nix -A xo-flatstring
 
       - name: build xo-randomgen
-        run:
+        run: |
+          echo -n nix-build ci.nix -A xo-randomgen
           nix-build ci.nix -A xo-randomgen
+          ls -l ./result
 
       - name: build xo-reflectutil
         run: |
@@ -114,6 +116,12 @@ jobs:
         run: |
           echo -n nix-build ci.nix -A xo-reflect
           nix-build ci.nix -A xo-reflect
+          ls -l ./result
+
+      - name: build xo-pyreflect
+        run: |
+          echo -n nix-build ci.nix -A xo-pyreflect
+          nix-build ci.nix -A xo-pyreflect
           ls -l ./result
 
       - name: build xo-stringtable2
