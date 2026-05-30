@@ -95,6 +95,7 @@ add_subdirectory(xo-stringtable2) # experiment w/ facet object model
 add_subdirectory(xo-object2)      # experiment w/ facet object model
 add_subdirectory(xo-gc)           # experiment w/ facet object model
 add_subdirectory(xo-type)         # experiment w/ facet object model
+add_subdirectory(xo-procedure2)   # schematika procedure abstraction + runtime context (fomo)
 add_subdirectory(xo-allocutil)    # xo-alloc api
 add_subdirectory(xo-pyutil)
 add_subdirectory(xo-pyreflect)
@@ -105,7 +106,6 @@ add_subdirectory(xo-callback)
 add_subdirectory(xo-alloc)
 #add_subdirectory(xo-reflect2)     # experiment w/ facet object model
 add_subdirectory(xo-object)
-add_subdirectory(xo-procedure2)   # schematika procedure abstraction + runtime context (fomo)
 add_subdirectory(xo-numeric)      # experiment w/ facet object model
 add_subdirectory(xo-ordinaltree)
 #
