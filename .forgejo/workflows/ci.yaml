@@ -63,8 +63,10 @@ jobs:
           nix-build ci.nix -A xo-randomgen
 
       - name: build xo-reflectutil
-        run:
+        run: |
+          echo -n nix-build ci.nix -A xo-reflectutil
           nix-build ci.nix -A xo-reflectutil
+          ls -l ./result
 
       - name: build xo-arena
         run: |
@@ -100,6 +102,12 @@ jobs:
         run: |
           echo -n nix-build ci.nix -A xo-refcnt
           nix-build ci.nix -A xo-refcnt
+          ls -l ./result
+
+      - name: build xo-pyutil
+        run: |
+          echo -n nix-build ci.nix -A xo-pyutil
+          nix-build ci.nix -A xo-pyutil
           ls -l ./result
 
       - name: build xo-reflect
