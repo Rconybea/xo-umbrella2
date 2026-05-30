@@ -55,8 +55,10 @@ jobs:
           nix-build ci.nix -A xo-subsys
 
       - name: build xo-flatstring
-        run:
+        run: |
+          echo -n nix-build ci.nix -A xo-flatstring
           nix-build ci.nix -A xo-flatstring
+          ls -l ./result
 
       - name: build xo-randomgen
         run: |
@@ -152,4 +154,10 @@ jobs:
         run: |
           echo -n nix-build ci.nix -A xo-procedure2
           nix-build ci.nix -A xo-procedure2
+          ls -l ./result
+
+      - name: build xo-numeric
+        run: |
+          echo -n nix-build ci.nix -A xo-numeric
+          nix-build ci.nix -A xo-numeric
           ls -l ./result
