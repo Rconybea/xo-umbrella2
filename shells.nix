@@ -333,6 +333,9 @@ in
     stringtable2   = pkgs.xo-stringtable2;
     object2        = pkgs.xo-object2;
     gc             = pkgs.xo-gc;
+    type           = pkgs.xo-type;
+    procedure2     = pkgs.xo-procedure2;
+    numeric        = pkgs.xo-numeric;
     allocutil      = pkgs.xo-allocutil;
     ratio          = pkgs.xo-ratio;
     unit           = pkgs.xo-unit;
@@ -340,9 +343,6 @@ in
     callback       = pkgs.xo-callback;
     alloc          = pkgs.xo-alloc;
     object         = pkgs.xo-object;
-    type           = pkgs.xo-type;
-    procedure2     = pkgs.xo-procedure2;
-    numeric        = pkgs.xo-numeric;
     ordinaltree    = pkgs.xo-ordinaltree;
     tokenizer2     = pkgs.xo-tokenizer2;
 

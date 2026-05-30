@@ -30,15 +30,15 @@ in
       xo-stringtable2
       xo-object2
       xo-gc
+      xo-type
+      xo-procedure2
+      xo-numeric
       xo-allocutil
       xo-ratio
       xo-unit
       xo-callback
       xo-alloc
       xo-object
-      xo-type
-      xo-procedure2
-      xo-numeric
       xo-ordinaltree
       xo-tokenizer2
       xo-expression
