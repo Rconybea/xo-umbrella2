@@ -71,8 +71,10 @@ jobs:
           nix-build ci.nix -A xo-arena
 
       - name: build xo-facet
-        run:
+        run: |
+          echo -n nix-build ci.nix -A xo-type
           nix-build ci.nix -A xo-facet
+          ls -l ./result
 
       - name: build xo-printable2
         run: |
@@ -120,4 +122,10 @@ jobs:
         run: |
           echo -n nix-build ci.nix -A xo-gc
           nix-build ci.nix -A xo-gc
+          ls -l ./result
+
+      - name: build xo-type
+        run: |
+          echo -n nix-build ci.nix -A xo-type
+          nix-build ci.nix -A xo-type
           ls -l ./result
