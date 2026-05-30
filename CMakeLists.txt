@@ -86,9 +86,9 @@ add_subdirectory(xo-randomgen)    # xoshiro256ss
 add_subdirectory(xo-reflectutil)  # header-only reflect support
 add_subdirectory(xo-arena)        # arena allocator (DArena)
 add_subdirectory(xo-facet)        # sep iface,data
-add_subdirectory(xo-printable2)   # experiment w/ facet object model
+add_subdirectory(xo-printable2)   # experiment w/ facet object model (fomo)
 add_subdirectory(xo-testutil)     # unit test aux functions
-add_subdirectory(xo-alloc2)       # experiment w/ facet object model
+add_subdirectory(xo-alloc2)       # arena api (fomo)
 add_subdirectory(xo-refcnt)
 add_subdirectory(xo-pyutil)
 add_subdirectory(xo-reflect)      # reflection library (pre-fomo)
@@ -99,6 +99,8 @@ add_subdirectory(xo-gc)           # incremental gc + facet object model
 add_subdirectory(xo-type)         # experiment w/ facet object model
 add_subdirectory(xo-procedure2)   # schematika procedure abstraction + runtime context (fomo)
 add_subdirectory(xo-numeric)      # schematika poly arithmetic w/ facet object model
+add_subdirectory(xo-tokenizer2)   # schematika tokenizer (w/ fomo)
+
 add_subdirectory(xo-allocutil)    # xo-alloc api
 add_subdirectory(xo-alloc)        # arena allocator + incremental gc
 add_subdirectory(xo-ratio)
@@ -109,7 +111,6 @@ add_subdirectory(xo-callback)
 add_subdirectory(xo-object)
 add_subdirectory(xo-ordinaltree)
 #
-add_subdirectory(xo-tokenizer2)   # schematika tokenizer (fomo)
 add_subdirectory(xo-expression2)  # schematika expressions (fomo)
 add_subdirectory(xo-reader2)      # schematika expression parser (fomo)
 add_subdirectory(xo-interpreter2) # schematika interpreter (fomo)

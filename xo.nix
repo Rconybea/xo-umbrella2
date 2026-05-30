@@ -46,6 +46,7 @@ let
     xo-type           = callPackage pkgs/xo-type.nix           { stdenv = jitStdenv; };
     xo-procedure2     = callPackage pkgs/xo-procedure2.nix     { stdenv = jitStdenv; };
     xo-numeric        = callPackage pkgs/xo-numeric.nix        { stdenv = jitStdenv; };
+    xo-tokenizer2     = callPackage pkgs/xo-tokenizer2.nix     { stdenv = jitStdenv;                   buildExamples = true; };
     xo-allocutil      = callPackage pkgs/xo-allocutil.nix      { stdenv = jitStdenv; };
     xo-alloc          = callPackage pkgs/xo-alloc.nix          { stdenv = jitStdenv; buildDocs = true; };
     xo-ratio          = callPackage pkgs/xo-ratio.nix          { stdenv = jitStdenv; buildDocs = true; buildExamples = true; };
@@ -54,7 +55,7 @@ let
     xo-callback       = callPackage pkgs/xo-callback.nix       { stdenv = jitStdenv; };
     xo-object         = callPackage pkgs/xo-object.nix         { stdenv = jitStdenv; };
     xo-ordinaltree    = callPackage pkgs/xo-ordinaltree.nix    { stdenv = jitStdenv; };
-    xo-tokenizer2     = callPackage pkgs/xo-tokenizer2.nix     { stdenv = jitStdenv;                   buildExamples = true; };
+ = true; };
     xo-webutil        = callPackage pkgs/xo-webutil.nix        { stdenv = jitStdenv; };
     xo-pywebutil      = callPackage pkgs/xo-pywebutil.nix      {};
     xo-printjson      = callPackage pkgs/xo-printjson.nix      {};

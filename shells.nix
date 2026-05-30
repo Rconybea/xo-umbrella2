@@ -336,6 +336,8 @@ in
     type           = pkgs.xo-type;
     procedure2     = pkgs.xo-procedure2;
     numeric        = pkgs.xo-numeric;
+    tokenizer2     = pkgs.xo-tokenizer2;
+
     allocutil      = pkgs.xo-allocutil;
     alloc          = pkgs.xo-alloc;
     ratio          = pkgs.xo-ratio;
@@ -344,7 +346,6 @@ in
     callback       = pkgs.xo-callback;
     object         = pkgs.xo-object;
     ordinaltree    = pkgs.xo-ordinaltree;
-    tokenizer2     = pkgs.xo-tokenizer2;
 
     webutil        = pkgs.xo-webutil;
     pywebutil      = pkgs.xo-pywebutil;

@@ -33,6 +33,7 @@ in
       xo-type
       xo-procedure2
       xo-numeric
+      xo-tokenizer2
       xo-allocutil
       xo-alloc
       xo-ratio
@@ -40,7 +41,6 @@ in
       xo-callback
       xo-object
       xo-ordinaltree
-      xo-tokenizer2
       xo-expression
       xo-tokenizer
       xo-reader
