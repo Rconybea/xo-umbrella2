@@ -314,6 +314,9 @@ in
 {
   inherit pkgs;
 
+  # load-bearing for
+  #   $ nix-build -A xo.foo
+  #
   xo = {
     cmake          = pkgs.xo-cmake;
     subsys         = pkgs.xo-subsys;
@@ -337,6 +340,7 @@ in
     procedure2     = pkgs.xo-procedure2;
     numeric        = pkgs.xo-numeric;
     tokenizer2     = pkgs.xo-tokenizer2;
+    expression2    = pkgs.xo-expression2;
 
     allocutil      = pkgs.xo-allocutil;
     alloc          = pkgs.xo-alloc;
