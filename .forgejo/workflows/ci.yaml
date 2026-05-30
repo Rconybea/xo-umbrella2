@@ -51,8 +51,10 @@ jobs:
           nix-build ci.nix -A xo-indentlog
 
       - name: build xo-subsys
-        run:
+        run: |
+          echo -n nix-build ci.nix -A xo-subsys
           nix-build ci.nix -A xo-subsys
+          ls -l ./result
 
       - name: build xo-flatstring
         run: |
@@ -160,4 +162,10 @@ jobs:
         run: |
           echo -n nix-build ci.nix -A xo-numeric
           nix-build ci.nix -A xo-numeric
+          ls -l ./result
+
+      - name: build xo-tokenizer2
+        run: |
+          echo -n nix-build ci.nix -A xo-tokenizer2
+          nix-build ci.nix -A xo-tokenizer2
           ls -l ./result
