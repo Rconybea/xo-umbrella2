@@ -2,6 +2,7 @@
   # nixpkgs dependencies
   lib, stdenv, cmake, catch2, replxx,
 
+  xo-stringtable2,
   xo-arena,
   xo-indentlog,
   xo-cmake,
@@ -28,6 +29,7 @@ stdenv.mkDerivation (finalattrs:
       xo-cmake
     ];
     propagatedBuildInputs = [
+      xo-stringtable2
       xo-arena
       xo-indentlog
     ];
