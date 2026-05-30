@@ -2,6 +2,7 @@
   # nixpkgs dependencies
   lib, stdenv, cmake, catch2,
 
+  xo-type,
   xo-object2,
   xo-subsys,
   xo-cmake,
@@ -25,6 +26,7 @@ stdenv.mkDerivation (finalattrs:
       xo-cmake
     ];
     propagatedBuildInputs = [
+      xo-type
       xo-object2
       xo-subsys
     ];

@@ -95,7 +95,7 @@ add_subdirectory(xo-stringtable2) # experiment w/ facet object model
 add_subdirectory(xo-object2)      # experiment w/ facet object model
 add_subdirectory(xo-gc)           # experiment w/ facet object model
 add_subdirectory(xo-type)         # experiment w/ facet object model
-add_subdirectory(xo-allocutil)
+add_subdirectory(xo-allocutil)    # xo-alloc api
 add_subdirectory(xo-pyutil)
 add_subdirectory(xo-pyreflect)
 add_subdirectory(xo-ratio)
