@@ -327,12 +327,12 @@ in
     testutil       = pkgs.xo-testutil;
     alloc2         = pkgs.xo-alloc2;
     refcnt         = pkgs.xo-refcnt;
+    pyutil         = pkgs.xo-pyutil;
     reflect        = pkgs.xo-reflect;
     stringtable2   = pkgs.xo-stringtable2;
     object2        = pkgs.xo-object2;
     gc             = pkgs.xo-gc;
     allocutil      = pkgs.xo-allocutil;
-    pyutil         = pkgs.xo-pyutil;
     pyreflect      = pkgs.xo-pyreflect;
     ratio          = pkgs.xo-ratio;
     unit           = pkgs.xo-unit;

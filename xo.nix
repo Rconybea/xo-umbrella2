@@ -37,12 +37,12 @@ let
     xo-testutil       = callPackage pkgs/xo-testutil.nix       { stdenv = jitStdenv; };
     xo-alloc2         = callPackage pkgs/xo-alloc2.nix         { stdenv = jitStdenv; buildDocs = true; };
     xo-refcnt         = callPackage pkgs/xo-refcnt.nix         { stdenv = jitStdenv; };
+    xo-pyutil         = callPackage pkgs/xo-pyutil.nix         { stdenv = jitStdenv; };
     xo-reflect        = callPackage pkgs/xo-reflect.nix        { stdenv = jitStdenv; };
     xo-stringtable2   = callPackage pkgs/xo-stringtable2.nix   { stdenv = jitStdenv; };
     xo-object2        = callPackage pkgs/xo-object2.nix        { stdenv = jitStdenv; };
     xo-gc             = callPackage pkgs/xo-gc.nix             { stdenv = jitStdenv; buildDocs = true; };
     xo-allocutil      = callPackage pkgs/xo-allocutil.nix      { stdenv = jitStdenv; };
-    xo-pyutil         = callPackage pkgs/xo-pyutil.nix         { stdenv = jitStdenv; };
     xo-pyreflect      = callPackage pkgs/xo-pyreflect.nix      { stdenv = jitStdenv; };
     xo-ratio          = callPackage pkgs/xo-ratio.nix          { stdenv = jitStdenv; buildDocs = true; buildExamples = true; };
     xo-unit           = callPackage pkgs/xo-unit.nix           { stdenv = jitStdenv; buildDocs = true; buildExamples = true; };
