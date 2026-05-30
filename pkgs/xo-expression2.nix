@@ -17,7 +17,7 @@
   doCheck ? true
 } :
 
-stdenv.mmkDerivation (finalattrs :
+stdenv.mkDerivation (finalattrs :
   {
     name = "xo-expression2";
 
