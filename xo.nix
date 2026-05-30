@@ -55,7 +55,6 @@ let
     xo-callback       = callPackage pkgs/xo-callback.nix       { stdenv = jitStdenv; };
     xo-object         = callPackage pkgs/xo-object.nix         { stdenv = jitStdenv; };
     xo-ordinaltree    = callPackage pkgs/xo-ordinaltree.nix    { stdenv = jitStdenv; };
- = true; };
     xo-webutil        = callPackage pkgs/xo-webutil.nix        { stdenv = jitStdenv; };
     xo-pywebutil      = callPackage pkgs/xo-pywebutil.nix      {};
     xo-printjson      = callPackage pkgs/xo-printjson.nix      {};
