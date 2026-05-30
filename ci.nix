@@ -24,6 +24,7 @@ in
       xo-testutil
       xo-alloc2
       xo-refcnt
+      xo-pyutil
       xo-reflect
       xo-stringtable2
       xo-object2
