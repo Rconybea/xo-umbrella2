@@ -4,6 +4,7 @@
 
   # xo dependencies
   xo-object2,
+  xo-reflect,
   xo-alloc2,
   xo-facet,
   xo-subsys,
@@ -28,6 +29,7 @@ stdenv.mkDerivation (finalattrs:
     ];
     propagatedBuildInputs = [
       xo-object2
+      xo-reflect
       xo-alloc2
       xo-subsys
       xo-facet
