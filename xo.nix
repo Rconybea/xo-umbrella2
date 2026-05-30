@@ -47,11 +47,11 @@ let
     xo-procedure2     = callPackage pkgs/xo-procedure2.nix     { stdenv = jitStdenv; };
     xo-numeric        = callPackage pkgs/xo-numeric.nix        { stdenv = jitStdenv; };
     xo-allocutil      = callPackage pkgs/xo-allocutil.nix      { stdenv = jitStdenv; };
+    xo-alloc          = callPackage pkgs/xo-alloc.nix          { stdenv = jitStdenv; buildDocs = true; };
     xo-ratio          = callPackage pkgs/xo-ratio.nix          { stdenv = jitStdenv; buildDocs = true; buildExamples = true; };
     xo-unit           = callPackage pkgs/xo-unit.nix           { stdenv = jitStdenv; buildDocs = true; buildExamples = true; };
     xo-pyunit         = callPackage pkgs/xo-pyunit.nix         { stdenv = jitStdenv; };
     xo-callback       = callPackage pkgs/xo-callback.nix       { stdenv = jitStdenv; };
-    xo-alloc          = callPackage pkgs/xo-alloc.nix          { stdenv = jitStdenv; buildDocs = true; };
     xo-object         = callPackage pkgs/xo-object.nix         { stdenv = jitStdenv; };
     xo-ordinaltree    = callPackage pkgs/xo-ordinaltree.nix    { stdenv = jitStdenv; };
     xo-tokenizer2     = callPackage pkgs/xo-tokenizer2.nix     { stdenv = jitStdenv;                   buildExamples = true; };

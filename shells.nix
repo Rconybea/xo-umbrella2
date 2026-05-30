@@ -337,11 +337,11 @@ in
     procedure2     = pkgs.xo-procedure2;
     numeric        = pkgs.xo-numeric;
     allocutil      = pkgs.xo-allocutil;
+    alloc          = pkgs.xo-alloc;
     ratio          = pkgs.xo-ratio;
     unit           = pkgs.xo-unit;
     pyunit         = pkgs.xo-pyunit;
     callback       = pkgs.xo-callback;
-    alloc          = pkgs.xo-alloc;
     object         = pkgs.xo-object;
     ordinaltree    = pkgs.xo-ordinaltree;
     tokenizer2     = pkgs.xo-tokenizer2;

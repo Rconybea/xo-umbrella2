@@ -95,16 +95,16 @@ add_subdirectory(xo-reflect)      # reflection library (pre-fomo)
 add_subdirectory(xo-pyreflect)
 add_subdirectory(xo-stringtable2) # experiment w/ facet object model
 add_subdirectory(xo-object2)      # experiment w/ facet object model
-add_subdirectory(xo-gc)           # experiment w/ facet object model
+add_subdirectory(xo-gc)           # incremental gc + facet object model
 add_subdirectory(xo-type)         # experiment w/ facet object model
 add_subdirectory(xo-procedure2)   # schematika procedure abstraction + runtime context (fomo)
 add_subdirectory(xo-numeric)      # schematika poly arithmetic w/ facet object model
 add_subdirectory(xo-allocutil)    # xo-alloc api
+add_subdirectory(xo-alloc)        # arena allocator + incremental gc
 add_subdirectory(xo-ratio)
 add_subdirectory(xo-unit)
 add_subdirectory(xo-pyunit)
 add_subdirectory(xo-callback)
-add_subdirectory(xo-alloc)
 #add_subdirectory(xo-reflect2)     # experiment w/ facet object model
 add_subdirectory(xo-object)
 add_subdirectory(xo-ordinaltree)

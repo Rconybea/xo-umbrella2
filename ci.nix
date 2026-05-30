@@ -34,10 +34,10 @@ in
       xo-procedure2
       xo-numeric
       xo-allocutil
+      xo-alloc
       xo-ratio
       xo-unit
       xo-callback
-      xo-alloc
       xo-object
       xo-ordinaltree
       xo-tokenizer2
