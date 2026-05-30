@@ -47,8 +47,10 @@ jobs:
           nix-build ci.nix -A xo-cmake
 
       - name: build xo-indentlog
-        run:
+        run: |
+          echo -n nix-build ci.nix -A xo-indentlog
           nix-build ci.nix -A xo-indentlog
+          ls -l ./result
 
       - name: build xo-subsys
         run: |
@@ -168,4 +170,10 @@ jobs:
         run: |
           echo -n nix-build ci.nix -A xo-tokenizer2
           nix-build ci.nix -A xo-tokenizer2
+          ls -l ./result
+
+      - name: build xo-expression2
+        run: |
+          echo -n nix-build ci.nix -A xo-expression2
+          nix-build ci.nix -A xo-expression2
           ls -l ./result
