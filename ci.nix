@@ -45,8 +45,8 @@ in
       xo-callback
       xo-object
       xo-ordinaltree
-
       xo-expression
+      xo-pyexpression
       xo-tokenizer
       xo-reader
       xo-jit

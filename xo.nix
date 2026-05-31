@@ -58,6 +58,10 @@ let
     xo-callback       = callPackage pkgs/xo-callback.nix       { stdenv = jitStdenv; };
     xo-object         = callPackage pkgs/xo-object.nix         { stdenv = jitStdenv; };
     xo-ordinaltree    = callPackage pkgs/xo-ordinaltree.nix    { stdenv = jitStdenv; };
+    xo-expression     = callPackage pkgs/xo-expression.nix     { stdenv = jitStdenv;                   buildExamples = true; };
+    xo-pyexpression   = callPackage pkgs/xo-pyexpression.nix   { stdenv = jitStdenv; };
+    xo-tokenizer      = callPackage pkgs/xo-tokenizer.nix      { stdenv = jitStdenv; buildDocs = true; buildExamples = true; };
+    xo-reader         = callPackage pkgs/xo-reader.nix         { stdenv = jitStdenv; buildDocs = true; buildExamples = true; };
     xo-webutil        = callPackage pkgs/xo-webutil.nix        { stdenv = jitStdenv; };
     xo-pywebutil      = callPackage pkgs/xo-pywebutil.nix      {};
     xo-printjson      = callPackage pkgs/xo-printjson.nix      {};
@@ -75,10 +79,6 @@ let
     xo-pyprocess      = callPackage pkgs/xo-pyprocess.nix      {};
     xo-kalmanfilter   = callPackage pkgs/xo-kalmanfilter.nix   {};
     xo-pykalmanfilter = callPackage pkgs/xo-pykalmanfilter.nix {};
-    xo-expression     = callPackage pkgs/xo-expression.nix     {                   buildExamples = true; };
-    xo-pyexpression   = callPackage pkgs/xo-pyexpression.nix   {};
-    xo-tokenizer      = callPackage pkgs/xo-tokenizer.nix      { buildDocs = true; buildExamples = true; };
-    xo-reader         = callPackage pkgs/xo-reader.nix         { buildDocs = true; buildExamples = true; };
     xo-jit            = callPackage pkgs/xo-jit.nix            { buildDocs = true; buildExamples = true;
                                                                   llvm = llvmPackages1.llvm; };
     xo-pyjit          = callPackage pkgs/xo-pyjit.nix          {};
