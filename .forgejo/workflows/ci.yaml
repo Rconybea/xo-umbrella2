@@ -191,3 +191,15 @@ jobs:
           echo -n nix-build ci.nix -A xo-interpreter2
           nix-build ci.nix -A xo-interpreter2
           ls -l ./result
+
+      - name: build xo-allocutil
+        run: |
+          echo -n nix-build ci.nix -A xo-allocutil
+          nix-build ci.nix -A xo-allocutil
+          ls -l ./result
+
+      - name: build xo-alloc
+        run: |
+          echo -n nix-build ci.nix -A xo-alloc
+          nix-build ci.nix -A xo-alloc
+          ls -l ./result
