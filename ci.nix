@@ -35,6 +35,7 @@ in
       xo-numeric
       xo-tokenizer2
       xo-expression2
+      xo-reader2
       xo-allocutil
       xo-alloc
       xo-ratio
