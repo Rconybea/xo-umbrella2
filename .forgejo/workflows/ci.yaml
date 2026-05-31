@@ -218,6 +218,6 @@ jobs:
 
       - name: build xo-pyunit
         run: |
-          echo -n nix-build ci.nix -A xo-pyunit
+          echo  nix-build ci.nix -A xo-pyunit
           nix-build ci.nix -A xo-pyunit
           ls -l ./result

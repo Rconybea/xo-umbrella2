@@ -41,9 +41,11 @@ in
       xo-alloc
       xo-ratio
       xo-unit
+      xo-pyunit
       xo-callback
       xo-object
       xo-ordinaltree
+
       xo-expression
       xo-tokenizer
       xo-reader
