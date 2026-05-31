@@ -275,3 +275,9 @@ jobs:
           echo nix-build ci.nix -A xo-jit
           nix-build ci.nix -A xo-jit
           ls -l ./result
+
+      - name: build xo-pyjit
+        run: |
+          echo nix-build ci.nix -A xo-pyjit
+          nix-build ci.nix -A xo-pyjit
+          ls -l ./result
