@@ -128,49 +128,49 @@ jobs:
 
       - name: build xo-pyreflect
         run: |
-          echo -n nix-build ci.nix -A xo-pyreflect
+          echo nix-build ci.nix -A xo-pyreflect
           nix-build ci.nix -A xo-pyreflect
           ls -l ./result
 
       - name: build xo-stringtable2
         run: |
-          echo -n nix-build ci.nix -A xo-stringtable2
+          echo nix-build ci.nix -A xo-stringtable2
           nix-build ci.nix -A xo-stringtable2
           ls -l ./result
 
       - name: build xo-object2
         run: |
-          echo -n nix-build ci.nix -A xo-object2
+          echo nix-build ci.nix -A xo-object2
           nix-build ci.nix -A xo-object2
           ls -l ./result
 
       - name: build xo-gc
         run: |
-          echo -n nix-build ci.nix -A xo-gc
+          echo nix-build ci.nix -A xo-gc
           nix-build ci.nix -A xo-gc
           ls -l ./result
 
       - name: build xo-type
         run: |
-          echo -n nix-build ci.nix -A xo-type
+          echo nix-build ci.nix -A xo-type
           nix-build ci.nix -A xo-type
           ls -l ./result
 
       - name: build xo-procedure2
         run: |
-          echo -n nix-build ci.nix -A xo-procedure2
+          echo nix-build ci.nix -A xo-procedure2
           nix-build ci.nix -A xo-procedure2
           ls -l ./result
 
       - name: build xo-numeric
         run: |
-          echo -n nix-build ci.nix -A xo-numeric
+          echo nix-build ci.nix -A xo-numeric
           nix-build ci.nix -A xo-numeric
           ls -l ./result
 
       - name: build xo-tokenizer2
         run: |
-          echo -n nix-build ci.nix -A xo-tokenizer2
+          echo nix-build ci.nix -A xo-tokenizer2
           nix-build ci.nix -A xo-tokenizer2
           ls -l ./result
 
@@ -244,4 +244,16 @@ jobs:
         run: |
           echo nix-build ci.nix -A xo-ordinaltree
           nix-build ci.nix -A xo-ordinaltree
+          ls -l ./result
+
+      - name: build xo-expression
+        run: |
+          echo nix-build ci.nix -A xo-expression
+          nix-build ci.nix -A xo-expression
+          ls -l ./result
+
+      - name: build xo-pyexpression
+        run: |
+          echo nix-build ci.nix -A xo-pyexpression
+          nix-build ci.nix -A xo-pyexpression
           ls -l ./result
