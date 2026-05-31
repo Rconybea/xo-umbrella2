@@ -43,8 +43,10 @@ jobs:
           git clone --quiet --depth=1 $GITHUB_SERVER_URL/roland/xo-umbrella2.git .
 
       - name: build xo-cmake
-        run:
+        run: |
+          echo -n nix-build ci.nix -A xo-cmake
           nix-build ci.nix -A xo-cmake
+          ls -l ./result
 
       - name: build xo-indentlog
         run: |
@@ -182,4 +184,10 @@ jobs:
         run: |
           echo -n nix-build ci.nix -A xo-reader2
           nix-build ci.nix -A xo-reader2
+          ls -l ./result
+
+      - name: build xo-interpreter2
+        run: |
+          echo -n nix-build ci.nix -A xo-interpreter2
+          nix-build ci.nix -A xo-interpreter2
           ls -l ./result
