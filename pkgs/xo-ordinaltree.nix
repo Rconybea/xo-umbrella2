@@ -3,11 +3,10 @@
   stdenv, cmake, catch2,
 
   # xo dependencies
-  xo-cmake,
+  xo-allocutil,
   xo-refcnt,
   xo-randomgen,
-#  xo-reflect,
-    #, xo-indentlog,
+  xo-cmake,
 } :
 
 stdenv.mkDerivation (finalattrs:
@@ -23,6 +22,7 @@ stdenv.mkDerivation (finalattrs:
       cmake catch2 xo-cmake
     ];
     propagatedBuildInputs = [
+      xo-allocutil
       xo-refcnt
       xo-randomgen
     ];

@@ -1,6 +1,6 @@
 {
   # nixpkgs dependencies
-  lib, stdenv, cmake, catch2,
+  lib, stdenv, cmake, catch2, libbsd,
 
   # xo dependencies
 #  xo-reflect,
@@ -30,7 +30,7 @@ stdenv.mkDerivation (finalattrs:
     inherit doCheck;
 
     nativeBuildInputs = [
-      cmake catch2
+      cmake catch2 libbsd
       xo-randomgen
       xo-cmake
     ];
