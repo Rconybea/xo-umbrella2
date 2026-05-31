@@ -177,3 +177,9 @@ jobs:
           echo -n nix-build ci.nix -A xo-expression2
           nix-build ci.nix -A xo-expression2
           ls -l ./result
+
+      - name: build xo-reader2
+        run: |
+          echo -n nix-build ci.nix -A xo-reader2
+          nix-build ci.nix -A xo-reader2
+          ls -l ./result
