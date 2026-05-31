@@ -203,3 +203,21 @@ jobs:
           echo -n nix-build ci.nix -A xo-alloc
           nix-build ci.nix -A xo-alloc
           ls -l ./result
+
+      - name: build xo-ratio
+        run: |
+          echo -n nix-build ci.nix -A xo-ratio
+          nix-build ci.nix -A xo-ratio
+          ls -l ./result
+
+      - name: build xo-unit
+        run: |
+          echo -n nix-build ci.nix -A xo-unit
+          nix-build ci.nix -A xo-unit
+          ls -l ./result
+
+      - name: build xo-pyunit
+        run: |
+          echo -n nix-build ci.nix -A xo-pyunit
+          nix-build ci.nix -A xo-pyunit
+          ls -l ./result
