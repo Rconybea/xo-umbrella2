@@ -176,48 +176,72 @@ jobs:
 
       - name: build xo-expression2
         run: |
-          echo -n nix-build ci.nix -A xo-expression2
+          echo nix-build ci.nix -A xo-expression2
           nix-build ci.nix -A xo-expression2
           ls -l ./result
 
       - name: build xo-reader2
         run: |
-          echo -n nix-build ci.nix -A xo-reader2
+          echo nix-build ci.nix -A xo-reader2
           nix-build ci.nix -A xo-reader2
           ls -l ./result
 
       - name: build xo-interpreter2
         run: |
-          echo -n nix-build ci.nix -A xo-interpreter2
+          echo nix-build ci.nix -A xo-interpreter2
           nix-build ci.nix -A xo-interpreter2
           ls -l ./result
 
       - name: build xo-allocutil
         run: |
-          echo -n nix-build ci.nix -A xo-allocutil
+          echo nix-build ci.nix -A xo-allocutil
           nix-build ci.nix -A xo-allocutil
           ls -l ./result
 
       - name: build xo-alloc
         run: |
-          echo -n nix-build ci.nix -A xo-alloc
+          echo nix-build ci.nix -A xo-alloc
           nix-build ci.nix -A xo-alloc
           ls -l ./result
 
       - name: build xo-ratio
         run: |
-          echo -n nix-build ci.nix -A xo-ratio
+          echo nix-build ci.nix -A xo-ratio
           nix-build ci.nix -A xo-ratio
           ls -l ./result
 
       - name: build xo-unit
         run: |
-          echo -n nix-build ci.nix -A xo-unit
+          echo nix-build ci.nix -A xo-unit
           nix-build ci.nix -A xo-unit
           ls -l ./result
 
       - name: build xo-pyunit
         run: |
-          echo  nix-build ci.nix -A xo-pyunit
+          echo nix-build ci.nix -A xo-pyunit
           nix-build ci.nix -A xo-pyunit
+          ls -l ./result
+
+      - name: build xo-pyunit
+        run: |
+          echo nix-build ci.nix -A xo-pyunit
+          nix-build ci.nix -A xo-pyunit
+          ls -l ./result
+
+      - name: build xo-callback
+        run: |
+          echo nix-build ci.nix -A xo-callback
+          nix-build ci.nix -A xo-callback
+          ls -l ./result
+
+      - name: build xo-object
+        run: |
+          echo nix-build ci.nix -A xo-object
+          nix-build ci.nix -A xo-object
+          ls -l ./result
+
+      - name: build xo-ordinaltree
+        run: |
+          echo nix-build ci.nix -A xo-ordinaltree
+          nix-build ci.nix -A xo-ordinaltree
           ls -l ./result
