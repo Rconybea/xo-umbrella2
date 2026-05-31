@@ -44,85 +44,85 @@ jobs:
 
       - name: build xo-cmake
         run: |
-          echo -n nix-build ci.nix -A xo-cmake
+          echo nix-build ci.nix -A xo-cmake
           nix-build ci.nix -A xo-cmake
           ls -l ./result
 
       - name: build xo-indentlog
         run: |
-          echo -n nix-build ci.nix -A xo-indentlog
+          echo nix-build ci.nix -A xo-indentlog
           nix-build ci.nix -A xo-indentlog
           ls -l ./result
 
       - name: build xo-subsys
         run: |
-          echo -n nix-build ci.nix -A xo-subsys
+          echo nix-build ci.nix -A xo-subsys
           nix-build ci.nix -A xo-subsys
           ls -l ./result
 
       - name: build xo-flatstring
         run: |
-          echo -n nix-build ci.nix -A xo-flatstring
+          echo nix-build ci.nix -A xo-flatstring
           nix-build ci.nix -A xo-flatstring
           ls -l ./result
 
       - name: build xo-randomgen
         run: |
-          echo -n nix-build ci.nix -A xo-randomgen
+          echo nix-build ci.nix -A xo-randomgen
           nix-build ci.nix -A xo-randomgen
           ls -l ./result
 
       - name: build xo-reflectutil
         run: |
-          echo -n nix-build ci.nix -A xo-reflectutil
+          echo nix-build ci.nix -A xo-reflectutil
           nix-build ci.nix -A xo-reflectutil
           ls -l ./result
 
       - name: build xo-arena
         run: |
-          echo -n nix-build ci.nix -A xo-arena
+          echo nix-build ci.nix -A xo-arena
           nix-build ci.nix -A xo-arena
           ls -l ./result
 
       - name: build xo-facet
         run: |
-          echo -n nix-build ci.nix -A xo-type
+          echo nix-build ci.nix -A xo-type
           nix-build ci.nix -A xo-facet
           ls -l ./result
 
       - name: build xo-printable2
         run: |
-          echo -n nix-build ci.nix -A xo-printable2
+          echo nix-build ci.nix -A xo-printable2
           nix-build ci.nix -A xo-printable2
           ls -l ./result
 
       - name: build xo-testutil
         run: |
-          echo -n nix-build ci.nix -A xo-testutil
+          echo nix-build ci.nix -A xo-testutil
           nix-build ci.nix -A xo-testutil
           ls -l ./result
 
       - name: build xo-alloc2
         run: |
-          echo -n nix-build ci.nix -A xo-alloc2
+          echo nix-build ci.nix -A xo-alloc2
           nix-build ci.nix -A xo-alloc2
           ls -l ./result
 
       - name: build xo-refcnt
         run: |
-          echo -n nix-build ci.nix -A xo-refcnt
+          echo nix-build ci.nix -A xo-refcnt
           nix-build ci.nix -A xo-refcnt
           ls -l ./result
 
       - name: build xo-pyutil
         run: |
-          echo -n nix-build ci.nix -A xo-pyutil
+          echo nix-build ci.nix -A xo-pyutil
           nix-build ci.nix -A xo-pyutil
           ls -l ./result
 
       - name: build xo-reflect
         run: |
-          echo -n nix-build ci.nix -A xo-reflect
+          echo nix-build ci.nix -A xo-reflect
           nix-build ci.nix -A xo-reflect
           ls -l ./result
 
@@ -256,4 +256,22 @@ jobs:
         run: |
           echo nix-build ci.nix -A xo-pyexpression
           nix-build ci.nix -A xo-pyexpression
+          ls -l ./result
+
+      - name: build xo-tokenizer
+        run: |
+          echo nix-build ci.nix -A xo-tokenizer
+          nix-build ci.nix -A xo-tokenizer
+          ls -l ./result
+
+      - name: build xo-reader
+        run: |
+          echo nix-build ci.nix -A xo-reader
+          nix-build ci.nix -A xo-reader
+          ls -l ./result
+
+      - name: build xo-jit
+        run: |
+          echo nix-build ci.nix -A xo-jit
+          nix-build ci.nix -A xo-jit
           ls -l ./result

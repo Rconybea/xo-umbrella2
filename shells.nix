@@ -356,6 +356,7 @@ in
     pyexpression   = pkgs.xo-pyexpression;
     tokenizer      = pkgs.xo-tokenizer;
     reader         = pkgs.xo-reader;
+    jit            = pkgs.xo-jit;
 
     webutil        = pkgs.xo-webutil;
     pywebutil      = pkgs.xo-pywebutil;
@@ -374,7 +375,6 @@ in
     pyprocess      = pkgs.xo-pyprocess;
     kalmanfilter   = pkgs.xo-kalmanfilter;
     pykalmanfilter = pkgs.xo-pykalmanfilter;
-    jit            = pkgs.xo-jit;
     pyjit          = pkgs.xo-pyjit;
   };
 

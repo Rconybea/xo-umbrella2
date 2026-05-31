@@ -62,6 +62,7 @@ let
     xo-pyexpression   = callPackage pkgs/xo-pyexpression.nix   { stdenv = jitStdenv; };
     xo-tokenizer      = callPackage pkgs/xo-tokenizer.nix      { stdenv = jitStdenv; buildDocs = true; buildExamples = true; };
     xo-reader         = callPackage pkgs/xo-reader.nix         { stdenv = jitStdenv; buildDocs = true; buildExamples = true; };
+    xo-jit            = callPackage pkgs/xo-jit.nix            { stdenv = jitStdenv; buildDocs = true; buildExamples = true; llvm = llvmPackages1.llvm; };
     xo-webutil        = callPackage pkgs/xo-webutil.nix        { stdenv = jitStdenv; };
     xo-pywebutil      = callPackage pkgs/xo-pywebutil.nix      {};
     xo-printjson      = callPackage pkgs/xo-printjson.nix      {};
@@ -79,8 +80,6 @@ let
     xo-pyprocess      = callPackage pkgs/xo-pyprocess.nix      {};
     xo-kalmanfilter   = callPackage pkgs/xo-kalmanfilter.nix   {};
     xo-pykalmanfilter = callPackage pkgs/xo-pykalmanfilter.nix {};
-    xo-jit            = callPackage pkgs/xo-jit.nix            { buildDocs = true; buildExamples = true;
-                                                                  llvm = llvmPackages1.llvm; };
     xo-pyjit          = callPackage pkgs/xo-pyjit.nix          {};
     xo-userenv        = callPackage pkgs/xo-userenv.nix        {};
     xo-userenv-slow   = callPackage pkgs/xo-userenv-slow.nix   { stdenv = jitStdenv;
