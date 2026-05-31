@@ -342,6 +342,7 @@ in
     tokenizer2     = pkgs.xo-tokenizer2;
     expression2    = pkgs.xo-expression2;
     reader2        = pkgs.xo-reader2;
+    interpreter2   = pkgs.xo-interpreter2;
 
     allocutil      = pkgs.xo-allocutil;
     alloc          = pkgs.xo-alloc;

@@ -49,6 +49,7 @@ let
     xo-tokenizer2     = callPackage pkgs/xo-tokenizer2.nix     { stdenv = jitStdenv;                   buildExamples = true; };
     xo-expression2    = callPackage pkgs/xo-expression2.nix    { stdenv = jitStdenv; };
     xo-reader2        = callPackage pkgs/xo-reader2.nix        { stdenv = jitStdenv; };
+    xo-interpreter2   = callPackage pkgs/xo-interpreter2.nix   { stdenv = jitStdenv; };
     xo-allocutil      = callPackage pkgs/xo-allocutil.nix      { stdenv = jitStdenv; };
     xo-alloc          = callPackage pkgs/xo-alloc.nix          { stdenv = jitStdenv; buildDocs = true; };
     xo-ratio          = callPackage pkgs/xo-ratio.nix          { stdenv = jitStdenv; buildDocs = true; buildExamples = true; };

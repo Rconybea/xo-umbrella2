@@ -1,15 +1,10 @@
 {
   # nixpkgs dependencies
-  lib, stdenv, cmake, catch2,
+  lib, stdenv, cmake, catch2, replxx,
 
   # xo dependencies
-  xo-numeric,
-  xo-procedure2,
-  xo-type,
-  xo-expression2,
-  xo-tokenizer2,
+  xo-reader2,
   xo-gc,
-  xo-subsys,
   xo-cmake,
 
   # config arguments
@@ -18,9 +13,9 @@
 
 stdenv.mkDerivation (finalattrs :
   {
-    name = "xo-reader2";
+    name = "xo-interpreter2";
 
-    src = ../xo-reader2;
+    src = ../xo-interpreter2;
 
     cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake"]
                   ++ lib.optionals doCheck ["-DENABLE_TESTING=1"];
@@ -28,16 +23,11 @@ stdenv.mkDerivation (finalattrs :
     inherit doCheck;
 
     nativeBuildInputs = [
-      cmake catch2
+      cmake catch2 replxx
       xo-cmake
     ];
     propagatedBuildInputs = [
-      xo-numeric
-      xo-procedure2
-      xo-type
-      xo-expression2
-      xo-tokenizer2
+      xo-reader2
       xo-gc
-      xo-subsys
     ];
   })
