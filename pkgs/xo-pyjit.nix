@@ -6,7 +6,6 @@
   xo-cmake, xo-pyutil, xo-jit,
 
   xo-pyexpression,
-  #xo-pyreflect,
 
   # args
 

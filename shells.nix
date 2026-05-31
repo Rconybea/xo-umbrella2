@@ -357,6 +357,7 @@ in
     tokenizer      = pkgs.xo-tokenizer;
     reader         = pkgs.xo-reader;
     jit            = pkgs.xo-jit;
+    pyjit          = pkgs.xo-pyjit;
 
     webutil        = pkgs.xo-webutil;
     pywebutil      = pkgs.xo-pywebutil;
@@ -375,7 +376,6 @@ in
     pyprocess      = pkgs.xo-pyprocess;
     kalmanfilter   = pkgs.xo-kalmanfilter;
     pykalmanfilter = pkgs.xo-pykalmanfilter;
-    pyjit          = pkgs.xo-pyjit;
   };
 
   # works, but only if build with --option sandbox=false

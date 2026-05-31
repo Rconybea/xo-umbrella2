@@ -50,6 +50,7 @@ in
       xo-tokenizer
       xo-reader
       xo-jit
+      xo-pyjit
       xo-userenv
       ;
   }
