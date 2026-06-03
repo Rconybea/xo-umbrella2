@@ -28,13 +28,13 @@ xo-ordinaltree
 xo-ratio
 xo-unit
 xo-pyunit
+xo-callback
 xo-expression
 xo-pyexpression
 xo-tokenizer
 xo-reader
 xo-jit
 xo-pyjit
-xo-callback
 xo-webutil
 xo-pywebutil
 xo-printjson

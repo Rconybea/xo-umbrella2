@@ -281,3 +281,27 @@ jobs:
           echo nix-build ci.nix -A xo-pyjit
           nix-build ci.nix -A xo-pyjit
           ls -l ./result
+
+      - name: build xo-webutil
+        run: |
+          echo nix-build ci.nix -A xo-webutil
+          nix-build ci.nix -A xo-webutil
+          ls -l ./result
+
+      - name: build xo-pywebutil
+        run: |
+          echo nix-build ci.nix -A xo-pywebutil
+          nix-build ci.nix -A xo-pywebutil
+          ls -l ./result
+
+      - name: build xo-printjson
+        run: |
+          echo nix-build ci.nix -A xo-printjson
+          nix-build ci.nix -A xo-printjson
+          ls -l ./result
+
+      - name: build xo-pyprintjson
+        run: |
+          echo nix-build ci.nix -A xo-pyprintjson
+          nix-build ci.nix -A xo-pyprintjson
+          ls -l ./result
