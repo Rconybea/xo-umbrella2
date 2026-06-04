@@ -72,13 +72,13 @@ let
     xo-pyreactor      = callPackage pkgs/xo-pyreactor.nix      { stdenv = jitStdenv; };
     xo-websock        = callPackage pkgs/xo-websock.nix        { stdenv = jitStdenv; };
     xo-pywebsock      = callPackage pkgs/xo-pywebsock.nix      { stdenv = jitStdenv; };
+    xo-process        = callPackage pkgs/xo-process.nix        { stdenv = jitStdenv; };
+    xo-pyprocess      = callPackage pkgs/xo-pyprocess.nix      { stdenv = jitStdenv; };
     xo-statistics     = callPackage pkgs/xo-statistics.nix     {};
     xo-distribution   = callPackage pkgs/xo-distribution.nix   {};
     xo-pydistribution = callPackage pkgs/xo-pydistribution.nix {};
     xo-simulator      = callPackage pkgs/xo-simulator.nix      {};
     xo-pysimulator    = callPackage pkgs/xo-pysimulator.nix    {};
-    xo-process        = callPackage pkgs/xo-process.nix        {};
-    xo-pyprocess      = callPackage pkgs/xo-pyprocess.nix      {};
     xo-kalmanfilter   = callPackage pkgs/xo-kalmanfilter.nix   {};
     xo-pykalmanfilter = callPackage pkgs/xo-pykalmanfilter.nix {};
     xo-userenv        = callPackage pkgs/xo-userenv.nix        {};

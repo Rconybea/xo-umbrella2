@@ -59,6 +59,8 @@ in
       xo-pyreactor
       xo-websock
       xo-pywebsock
+      xo-process
+      xo-pyprocess
       xo-userenv
       ;
   }

@@ -367,13 +367,13 @@ in
     pyreactor      = pkgs.xo-pyreactor;
     websock        = pkgs.xo-websock;
     pywebsock      = pkgs.xo-pywebsock;
+    process        = pkgs.xo-process;
+    pyprocess      = pkgs.xo-pyprocess;
     statistics     = pkgs.xo-statistics;
     distribution   = pkgs.xo-distribution;
     pydistribution = pkgs.xo-pydistribution;
     simulator      = pkgs.xo-simulator;
     pysimulator    = pkgs.xo-pysimulator;
-    process        = pkgs.xo-process;
-    pyprocess      = pkgs.xo-pyprocess;
     kalmanfilter   = pkgs.xo-kalmanfilter;
     pykalmanfilter = pkgs.xo-pykalmanfilter;
   };
