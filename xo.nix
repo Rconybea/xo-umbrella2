@@ -68,8 +68,8 @@ let
     xo-pywebutil      = callPackage pkgs/xo-pywebutil.nix      { stdenv = jitStdenv; };
     xo-printjson      = callPackage pkgs/xo-printjson.nix      { stdenv = jitStdenv; };
     xo-pyprintjson    = callPackage pkgs/xo-pyprintjson.nix    { stdenv = jitStdenv; };
-    xo-reactor        = callPackage pkgs/xo-reactor.nix        {};
-    xo-pyreactor      = callPackage pkgs/xo-pyreactor.nix      {};
+    xo-reactor        = callPackage pkgs/xo-reactor.nix        { stdenv = jitStdenv; };
+    xo-pyreactor      = callPackage pkgs/xo-pyreactor.nix      { stdenv = jitStdenv; };
     xo-websock        = callPackage pkgs/xo-websock.nix        {};
     xo-pywebsock      = callPackage pkgs/xo-pywebsock.nix      {};
     xo-statistics     = callPackage pkgs/xo-statistics.nix     {};

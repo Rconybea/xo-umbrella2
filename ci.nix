@@ -55,6 +55,8 @@ in
       xo-pywebutil
       xo-printjson
       xo-pyprintjson
+      xo-reactor
+      xo-pyreactor
       xo-userenv
       ;
   }
