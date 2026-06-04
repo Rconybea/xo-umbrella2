@@ -317,3 +317,15 @@ jobs:
           echo nix-build ci.nix -A xo-pyreactor
           nix-build ci.nix -A xo-pyreactor
           ls -l ./result
+
+      - name: build xo-websock
+        run: |
+          echo nix-build ci.nix -A xo-websock
+          nix-build ci.nix -A xo-websock
+          ls -l ./result
+
+      - name: build xo-pywebsock
+        run: |
+          echo nix-build ci.nix -A xo-pywebsock
+          nix-build ci.nix -A xo-pywebsock
+          ls -l ./result

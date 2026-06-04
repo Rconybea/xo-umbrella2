@@ -389,6 +389,7 @@ in
 
       pkgs.nix-tree   # needs GHC btw
       patched-git  # instead of pkgs.git
+      pkgs.git-subrepo
       pkgs.openssh
       pkgs.cloc
       pkgs.lcov

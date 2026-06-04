@@ -57,6 +57,8 @@ in
       xo-pyprintjson
       xo-reactor
       xo-pyreactor
+      xo-websock
+      xo-pywebsock
       xo-userenv
       ;
   }
