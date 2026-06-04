@@ -305,3 +305,15 @@ jobs:
           echo nix-build ci.nix -A xo-pyprintjson
           nix-build ci.nix -A xo-pyprintjson
           ls -l ./result
+
+      - name: build xo-reactor
+        run: |
+          echo nix-build ci.nix -A xo-reactor
+          nix-build ci.nix -A xo-reactor
+          ls -l ./result
+
+      - name: build xo-pyreactor
+        run: |
+          echo nix-build ci.nix -A xo-pyreactor
+          nix-build ci.nix -A xo-pyreactor
+          ls -l ./result
