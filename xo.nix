@@ -65,9 +65,9 @@ let
     xo-jit            = callPackage pkgs/xo-jit.nix            { stdenv = jitStdenv; buildDocs = true; buildExamples = true; llvm = llvmPackages1.llvm; };
     xo-pyjit          = callPackage pkgs/xo-pyjit.nix          { stdenv = jitStdenv; };
     xo-webutil        = callPackage pkgs/xo-webutil.nix        { stdenv = jitStdenv; };
-    xo-pywebutil      = callPackage pkgs/xo-pywebutil.nix      {};
-    xo-printjson      = callPackage pkgs/xo-printjson.nix      {};
-    xo-pyprintjson    = callPackage pkgs/xo-pyprintjson.nix    {};
+    xo-pywebutil      = callPackage pkgs/xo-pywebutil.nix      { stdenv = jitStdenv; };
+    xo-printjson      = callPackage pkgs/xo-printjson.nix      { stdenv = jitStdenv; };
+    xo-pyprintjson    = callPackage pkgs/xo-pyprintjson.nix    { stdenv = jitStdenv; };
     xo-reactor        = callPackage pkgs/xo-reactor.nix        {};
     xo-pyreactor      = callPackage pkgs/xo-pyreactor.nix      {};
     xo-websock        = callPackage pkgs/xo-websock.nix        {};

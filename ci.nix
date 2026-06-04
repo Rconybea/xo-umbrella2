@@ -51,6 +51,10 @@ in
       xo-reader
       xo-jit
       xo-pyjit
+      xo-webutil
+      xo-pywebutil
+      xo-printjson
+      xo-pyprintjson
       xo-userenv
       ;
   }
