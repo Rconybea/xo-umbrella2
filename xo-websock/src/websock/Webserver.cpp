@@ -673,6 +673,9 @@ namespace xo {
                     .cache_reusable        = 0,
                     .cache_revalidate      = 0,
                     .cache_intermediaries  = 0,
+#                  if (LWS_LIBRARY_VERSION_MAJOR > 4 || ((LWS_LIBRARY_VERSION_MAJOR == 4) && (LWS_LIBRARY_VERSION_MINOR >= 4)))
+                    .cache_no              = 0,
+#                  endif
                     .origin_protocol       = LWSMPRO_CALLBACK, /* dynamic */
                     .mountpoint_len        = 4,
                     .basic_auth_login_file = NULL,
