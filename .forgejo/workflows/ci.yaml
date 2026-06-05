@@ -329,3 +329,15 @@ jobs:
           echo nix-build ci.nix -A xo-pywebsock
           nix-build ci.nix -A xo-pywebsock
           ls -l ./result
+
+      - name: build xo-process
+        run: |
+          echo nix-build ci.nix -A xo-process
+          nix-build ci.nix -A xo-process
+          ls -l ./result
+
+      - name: build xo-pyprocess
+        run: |
+          echo nix-build ci.nix -A xo-pyprocess
+          nix-build ci.nix -A xo-pyprocess
+          ls -l ./result
