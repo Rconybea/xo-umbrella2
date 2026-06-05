@@ -682,6 +682,12 @@ namespace xo {
 #                  if ((LWS_LIBRARY_VERSION_MAJOR < 4) || ((LWS_LIBRARY_VERSION_MAJOR == 4) && (LWS_LIBRARY_VERSION_MINOR < 3)))
                     ._unused               = { nullptr, nullptr },
 #                  endif
+#                  if (LWS_LIBRARY_VERSION_MAJOR > 4 || ((LWS_LIBRARY_VERSION_MAJOR == 4) && (LWS_LIBRARY_VERSION_MIN
+                    .cgi_chroot_path       = NULL,
+                    .cgi_wd                = NULL,
+                    .headers               = NULL,
+                    .keepalive_timeout     = 0,
+#                  endif
                 };
             } /*init_mount_dynamic*/
 
