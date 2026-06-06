@@ -1,10 +1,12 @@
 # ci.nix - minimal entry point for CI builds
 # Uses nixpkgs from NIX_PATH by default (whatever the Nix daemon provides)
 #
-{ nixpkgs-path ? <nixpkgs> }:
+{ nixpkgs-path ? <nixpkgs>,
+  overlays ? []
+}:
 
 let
-  pkgs = import nixpkgs-path {};
+  pkgs = import nixpkgs-path { inherit overlays; };
 
   # xo.nix now returns a plain attrset (not pkgs.extend)
   xoPkgs = import ./xo.nix { inherit pkgs; };
