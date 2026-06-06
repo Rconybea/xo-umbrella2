@@ -353,3 +353,9 @@ jobs:
           echo nix-build ci.nix -A xo-pyprocess
           nix-build ci.nix -A xo-pyprocess
           ls -l ./result
+
+      - name: build xo-statistics
+        run: |
+          echo nix-build ci.nix -A xo-statistics
+          nix-build ci.nix -A xo-statistics
+          ls -l ./result
