@@ -330,6 +330,18 @@ jobs:
           nix-build ci.nix -A xo-pywebsock
           ls -l ./result
 
+      - name: build xo-simulator
+        run: |
+          echo nix-build ci.nix -A xo-simulator
+          nix-build ci.nix -A xo-simulator
+          ls -l ./result
+
+      - name: build xo-pysimulator
+        run: |
+          echo nix-build ci.nix -A xo-pysimulator
+          nix-build ci.nix -A xo-pysimulator
+          ls -l ./result
+
       - name: build xo-process
         run: |
           echo nix-build ci.nix -A xo-process
