@@ -57,6 +57,8 @@ in
       xo-pyprintjson
       xo-reactor
       xo-pyreactor
+      xo-simulator
+      xo-pysimulator
       xo-websock
       xo-pywebsock
       xo-process
