@@ -66,6 +66,8 @@ in
       xo-process
       xo-pyprocess
       xo-statistics
+      xo-distribution
+      xo-pydistribution
       xo-userenv
       ;
   }

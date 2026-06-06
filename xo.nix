@@ -77,8 +77,8 @@ let
     xo-websock        = callPackage pkgs/xo-websock.nix        { stdenv = jitStdenv; };
     xo-pywebsock      = callPackage pkgs/xo-pywebsock.nix      { stdenv = jitStdenv; };
     xo-statistics     = callPackage pkgs/xo-statistics.nix     { stdenv = jitStdenv; };
-    xo-distribution   = callPackage pkgs/xo-distribution.nix   {};
-    xo-pydistribution = callPackage pkgs/xo-pydistribution.nix {};
+    xo-distribution   = callPackage pkgs/xo-distribution.nix   { stdenv = jitStdenv; };
+    xo-pydistribution = callPackage pkgs/xo-pydistribution.nix { stdenv = jitStdenv; };
     xo-kalmanfilter   = callPackage pkgs/xo-kalmanfilter.nix   {};
     xo-pykalmanfilter = callPackage pkgs/xo-pykalmanfilter.nix {};
     xo-userenv        = callPackage pkgs/xo-userenv.nix        {};
