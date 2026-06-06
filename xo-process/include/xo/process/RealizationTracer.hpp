@@ -54,11 +54,13 @@ namespace xo {
                 return this->current_;
             } /*next_dt*/
 
-            std::pair<utc_nanos, T> next_eps(double eps) {
+#ifdef NOT_IN_USE // need .advance_eps() for this
+          std::pair<utc_nanos, T> next_eps(double eps) {
                 this->advance_eps(eps);
 
                 return this->current_;
             } /*next_eps*/
+#endif
 
             /* sample with fixed time:
              * - advance to point t+dt,  with dt specified.
