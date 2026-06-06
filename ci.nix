@@ -68,6 +68,8 @@ in
       xo-statistics
       xo-distribution
       xo-pydistribution
+      xo-kalmanfilter
+      xo-pykalmanfilter
       xo-userenv
       ;
   }

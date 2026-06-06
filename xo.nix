@@ -79,9 +79,9 @@ let
     xo-statistics     = callPackage pkgs/xo-statistics.nix     { stdenv = jitStdenv; };
     xo-distribution   = callPackage pkgs/xo-distribution.nix   { stdenv = jitStdenv; };
     xo-pydistribution = callPackage pkgs/xo-pydistribution.nix { stdenv = jitStdenv; };
-    xo-kalmanfilter   = callPackage pkgs/xo-kalmanfilter.nix   {};
-    xo-pykalmanfilter = callPackage pkgs/xo-pykalmanfilter.nix {};
-    xo-userenv        = callPackage pkgs/xo-userenv.nix        {};
+    xo-kalmanfilter   = callPackage pkgs/xo-kalmanfilter.nix   { stdenv = jitStdenv; };
+    xo-pykalmanfilter = callPackage pkgs/xo-pykalmanfilter.nix { stdenv = jitStdenv; };
+    xo-userenv        = callPackage pkgs/xo-userenv.nix        { stdenv = jitStdenv; };
     xo-userenv-slow   = callPackage pkgs/xo-userenv-slow.nix   { stdenv = jitStdenv;
                                                                   llvm = llvmPackages1.llvm; };
     inherit llvmXo;
