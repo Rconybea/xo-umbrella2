@@ -76,7 +76,7 @@ let
     xo-pyprocess      = callPackage pkgs/xo-pyprocess.nix      { stdenv = jitStdenv; };
     xo-websock        = callPackage pkgs/xo-websock.nix        { stdenv = jitStdenv; };
     xo-pywebsock      = callPackage pkgs/xo-pywebsock.nix      { stdenv = jitStdenv; };
-    xo-statistics     = callPackage pkgs/xo-statistics.nix     {};
+    xo-statistics     = callPackage pkgs/xo-statistics.nix     { stdenv = jitStdenv; };
     xo-distribution   = callPackage pkgs/xo-distribution.nix   {};
     xo-pydistribution = callPackage pkgs/xo-pydistribution.nix {};
     xo-kalmanfilter   = callPackage pkgs/xo-kalmanfilter.nix   {};

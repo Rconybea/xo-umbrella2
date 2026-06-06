@@ -63,6 +63,7 @@ in
       xo-pywebsock
       xo-process
       xo-pyprocess
+      xo-statistics
       xo-userenv
       ;
   }
