@@ -359,3 +359,15 @@ jobs:
           echo nix-build ci.nix -A xo-statistics
           nix-build ci.nix -A xo-statistics
           ls -l ./result
+
+      - name: build xo-distribution
+        run: |
+          echo nix-build ci.nix -A xo-distribution
+          nix-build ci.nix -A xo-distribution
+          ls -l ./result
+
+      - name: build xo-pydistribution
+        run: |
+          echo nix-build ci.nix -A xo-pydistribution
+          nix-build ci.nix -A xo-pydistribution
+          ls -l ./result
