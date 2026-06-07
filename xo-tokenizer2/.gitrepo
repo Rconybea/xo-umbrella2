@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:Rconybea/xo-tokenizer2.git
 	branch = main
-	commit = 48a082cb6bd63cf9b2624ac558f0831376fbf47c
-	parent = c5d69d18ac5fa83b47858556c6f10b0979baf1f8
+	commit = 26d42b4f9393c056b1f58af03d192e5d071db9df
+	parent = f42b2a5d65ec4fc92f259596cb5087734b8d41f1
 	method = merge
 	cmdver = 0.4.9
