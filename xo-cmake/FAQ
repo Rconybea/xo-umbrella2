@@ -1,0 +1,120 @@
+# Unit test build can't find library:
+
+Missing dependency at link time
+
+```
+set(SELF_EXE mumble)
+set(SELF_SRCS mumble.cpp)
+
+xo_add_executable(${SELF_EXE} ${SELF_SRCS})
+xo_self_dependency(${SELF_EXE} xo_foo)
+```
+
+and build fails with `cannot find -lxo_bar`.
+
+Possible causes:
+
+1. missing cmake export for a dependency of `xo_foo`.
+   Check `xo_foo/cmake/xo_fooConfig.cmake.in`:
+
+   If `xo_foo` depends on `xo_bar`,  then cmake export
+   needs to have `find_dependency(xo_bar)`
+
+```
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+find_dependency(xo_bar)
+find_dependency(xo_maybemoar)
+
+include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Targets.cmake")
+check_required_components("@PROJECT_NAME@")
+```
+
+# Howto introduce sphinx documentation to an XO project
+
+REMINDER: must re-run `cmake` after introducing skeleton, since build copies files from docs/ to .build directory
+
+Minimal skeleton for docs/ directory:
+
+```
+xo-foo
++- docs
+   +- CMakeLists.txt
+   +- conf.py
+   +- _static
+   +- index.rst
+```
+
+CMakeLists.txt:
+```
+# xo-foo/docs/CMakeLists.txt
+
+xo_doxygen_collect_deps()
+xo_docdir_doxygen_config()
+xo_docdir_sphinx_config(
+    index.rst
+)
+```
+
+conf.py:
+```
+# Configuration file for the Sphinx documentation builder.
+#
+# For the full list of built-in configuration values, see the documentation:
+# https://www.sphinx-doc.org/en/master/usage/configuration.html
+
+# -- Project information -----------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
+
+project = 'xo jit documentation'
+copyright = '2024, Roland Conybeare'
+author = 'Roland Conybeare'
+
+# -- General configuration ---------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
+
+#extensions = []
+extensions = [ "breathe",
+               "sphinx.ext.mathjax",     # inline math
+               "sphinx.ext.autodoc",     # generate info from docstrings
+               "sphinxcontrib.ditaa",    # diagrams-through-ascii-art
+               "sphinxcontrib.plantuml"  # text -> uml diagrams
+              ]
+
+# note: breathe requires doxygen xml output -> must have GENERATE_XML = YES in Doxyfile.in
+#       match project name in Doxyfile.in
+breathe_default_project = "xodoxxml"
+
+templates_path = ['_templates']
+exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
+
+pygments_style = 'sphinx'
+
+# -- Options for HTML output -------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
+
+#html_theme = 'alabaster'
+html_theme = 'sphinx_rtd_theme'
+html_static_path = ['_static']
+html_favicon = '_static/img/favicon.ico'
+```
+
+index.rst:
+```
+xo-foo documentation
+====================
+
+text here
+
+.. toctree::
+   :maxdepth: 2
+   :caption: xo-foo contents
+
+   genindex
+   search
+```
+
+_static:
+
+copy from xo-unit/docs/_static.  Just need .ico

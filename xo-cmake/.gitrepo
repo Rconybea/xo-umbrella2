@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:Rconybea/xo-cmake.git
+	branch = main
+	commit = 3c502d7eaf4f799525bce005d0ed5909cd411a1b
+	parent = 0503ba59e77daddd746e69be847bd9c014ef97be
+	method = merge
+	cmdver = 0.4.9
