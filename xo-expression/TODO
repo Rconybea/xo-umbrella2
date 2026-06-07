@@ -1,0 +1,3 @@
+- In xo-reflect, TypeDescr objects are immortal.
+  In original context rationale was recording information for already-established C++ types.
+  Maybe want to revisit that choice when associating TypeDescr objects with expressions?
