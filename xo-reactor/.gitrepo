@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:Rconybea/xo-reactor.git
 	branch = main
-	commit = a37c8f65f197ae6e1bba755c9082d873bc0789bd
-	parent = f0fb344b3ada65511ccbedf455f85c54c5316ea1
+	commit = 1dd44e1bc0f79797897bc4147942727519c3ce8e
+	parent = 9d6a6ea596679fd4889707193d87b9e16f0124fb
 	method = merge
 	cmdver = 0.4.9
