@@ -1,0 +1,40 @@
+Q1.  how to get a nix development environment that works
+
+1.
+    1. nix stdenv = gcc12Stdenv    (see mkderivation.nix)
+    2. baseInputs has gcc          (but probably doesn't need it)
+    3. devInputs has llvmPackages_16.clang-unwrapped
+
+    This leads to env with
+      CC=gcc
+      CXX=g++
+      NIX_CC=/nix/store/$hash-gcc-wrapper-12.3.0
+
+2.
+
+    1. nix stdenv = clang16Stdenv  (see mkderivation.nix)
+    2. baseInputs has gcc
+    3. devInputs has llvmPackages_16.clang-unwrapped
+
+    This leads to env with:
+      CC=clang
+      CXX=clang++
+      NIX_CC=/nix/store/$hash-clang-wrapper-16.0.1
+
+    To build,  need to tell cmake to use gcc:
+      cmake -DCMAKE_CXX_COMPILER=$(which g++) -DCMAKE_C_COMPILER=$(which gcc) path/to/src
+
+Q2.  how to add a dependency to github workflow
+
+    comments.
+    1. workflow configured in ./.github/cmake-single-platform.yml
+    2. workflow runs on ubuntu vm.  see
+         runs-on: ubuntu-latest
+       in cmake-single-platform.yml
+    3. find a desired dependency
+         $ apt-cache search ${keyword}
+       e.g.
+         $ apt-cache search catch2
+    4. add/edit install step to ./.github/cmake-single-platform.yml
+         - name: Install catch2
+           run: sudo apt-get install -y catch2
