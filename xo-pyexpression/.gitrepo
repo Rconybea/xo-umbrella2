@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:Rconybea/xo-pyexpression.git
 	branch = main
-	commit = be4929de79b95d12a5be1f6cd43b502c87ecea47
-	parent = d1b3ac8d99e8d6ae31ff9c46d6a624455bd3d797
+	commit = 0db7d660e29940d9bd7340a7fc6e3af27ed62366
+	parent = 07d9c64f74f04d629cd30ae93dc27bf88c0672d8
 	method = merge
 	cmdver = 0.4.9
