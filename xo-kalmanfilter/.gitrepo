@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:Rconybea/xo-kalmanfilter.git
 	branch = main
-	commit = c1286626057f346e9a4ccbed95287943d5d76669
-	parent = 9d0d8998debc8e421cbfcb40cff65b5147285413
+	commit = 935befa60a34b947781261259be07846cf26b07e
+	parent = d39d3c00fde88934278d77fff1e9542d0796da6c
 	method = merge
 	cmdver = 0.4.9
