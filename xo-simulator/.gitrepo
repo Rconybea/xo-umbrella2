@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:Rconybea/xo-simulator.git
 	branch = main
-	commit = ef159a596d683df598918647e297e9ceaefa5e87
-	parent = f5ec6f1d25a128de91e185f5f65b63132527c176
+	commit = 180fba16f9877a5f6f81e29ea640f96fa0e2086b
+	parent = c974d3f86fac62a1374716390a74da3ed60c6933
 	method = merge
 	cmdver = 0.4.9
