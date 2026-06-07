@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:Rconybea/xo-websock.git
+	branch = main
+	commit = c6eec3cd50421c6981c288f534ef6fa043c0b737
+	parent = 4d16418ae626a4b7fd7389889e295fcf367a62f2
+	method = merge
+	cmdver = 0.4.9
