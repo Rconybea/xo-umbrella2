@@ -128,6 +128,7 @@ let
     #pkgs.nix
 
     patched-git # instead of pkgs.git
+    pkgs.git-subrepo
     pkgs.gh    # github cli
     pkgs.cloc
     pkgs.bloaty
