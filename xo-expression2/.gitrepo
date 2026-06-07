@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:Rconybea/xo-expression2.git
 	branch = main
-	commit = 9823ce36647bb3f0bf517924e31230627f36ae50
-	parent = 91b119cdef07176b576b40b878a4704617406979
+	commit = cdc0a91872847e10731797700331e1ba56196b9e
+	parent = 4b0cd5222a95b49c7d259180b04bd75c8e5debc6
 	method = merge
 	cmdver = 0.4.9
