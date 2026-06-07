@@ -2,7 +2,7 @@
 
 include(CMakeFindDependencyMacro)
 find_dependency(xo_object2)
-find_dependnecy(reflect)
+find_dependency(reflect)
 find_dependency(xo_alloc2)
 find_dependency(xo_facet)
 find_dependency(subsys)
