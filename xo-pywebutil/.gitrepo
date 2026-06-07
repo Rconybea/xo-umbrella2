@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:Rconybea/xo-pywebutil.git
 	branch = main
-	commit = da18a27f117e97c800b18810d8f1e11689798b28
-	parent = 089c29929ef7a4178f8cf8828e748c80ca695758
+	commit = 90f6bd2525b300f8d67950f4990b6386306ddd14
+	parent = 55fd7d2bc01f0036e881f42bc88556c81a2b2c42
 	method = merge
 	cmdver = 0.4.9
