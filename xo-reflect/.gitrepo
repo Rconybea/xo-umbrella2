@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:Rconybea/xo-reflect.git
 	branch = main
-	commit = f0dcacad6f569d6e5e9ed45d473201a431c63b92
-	parent = 0b886a433882dc7281d7e6f0a62be1afa42385b8
+	commit = 8bf039155e374a2a1f9a3f559523ef05396c0a58
+	parent = 6921669d0097210ab57dac21996b8b5e7a980b8f
 	method = merge
 	cmdver = 0.4.9
