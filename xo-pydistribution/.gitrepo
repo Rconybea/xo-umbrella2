@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:Rconybea/xo-pydistribution.git
 	branch = main
-	commit = e08c80bddaeed981d586a841abc0db3a2e3f8064
-	parent = 422100096e7a3f3ee05eb2da7c5896ad094d7960
+	commit = b7d88ec020e58e9fb329fe1c1a198fe3575afbe9
+	parent = fd04dc67d5eb3c056013bac349d463a5fc19b480
 	method = merge
 	cmdver = 0.4.9
