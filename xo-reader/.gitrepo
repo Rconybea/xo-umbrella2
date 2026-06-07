@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:Rconybea/xo-reader.git
+	branch = main
+	commit = cb652195d3fa3774651c746a621e16f30481c22e
+	parent = f5828f616346f52e282cf86ef8dbc5901b8f5aad
+	method = merge
+	cmdver = 0.4.9
