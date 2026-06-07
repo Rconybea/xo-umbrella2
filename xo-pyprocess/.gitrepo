@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:Rconybea/xo-pyprocess.git
 	branch = main
-	commit = 231a01dbcc63d877848eb1f94e8d9ed7fdd2c624
-	parent = febedbe55088c3916ed10c52b8e0b37fa55d707b
+	commit = 22a3b2587655d8f8d94c0730019f8cca10dec1a4
+	parent = a2358d0d1b5be1964f1c27e8ceafe763ac4a8e5b
 	method = merge
 	cmdver = 0.4.9
