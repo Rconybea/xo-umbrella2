@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:Rconybea/xo-ratio.git
+	branch = main
+	commit = 6b51f238587f8fca206a0e17dc37a27496f600c2
+	parent = 64d92e8148b844877938741501b5d9e9b6d8e54c
+	method = merge
+	cmdver = 0.4.9
