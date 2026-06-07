@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:rconybea/xo-testutil.git
 	branch = main
-	commit = 281418da1c5fc6311aa66485f5f883b597c3c467
-	parent = e0acb52c389319202b9860f3c42149e56b84f3e5
+	commit = c503d65e1a7c9a9abed7552b87038fc9134f6b69
+	parent = 4af6d56a514974a00fff2d976427ce34ab9909ac
 	method = merge
 	cmdver = 0.4.9
