@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:Rconybea/xo-hashable2.git
+	branch = main
+	commit = 403aa44c0d18f40101629f00e498da504e5eb280
+	parent = d52d0d425506903bb6ca811783bf73f9df3cf4c0
+	method = merge
+	cmdver = 0.4.9
