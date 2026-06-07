@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:Rconybea/xo-pyreactor.git
 	branch = main
-	commit = 7400b464eca10229c36aa79e2570922f122b8f55
-	parent = 68eefb1b060a53abfbe20ab2a481f2691bf0ddf4
+	commit = b2b75f985380ef845afb92531ceeb8fdbcbf1034
+	parent = 39c6d3e631753d2c621bcf4406c56d4f34ae7774
 	method = merge
 	cmdver = 0.4.9
