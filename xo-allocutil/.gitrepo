@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:Rconybea/xo-allocutil.git
+	branch = main
+	commit = 24d6e1d08708d0c8b3f4659543387e79c9bd94d0
+	parent = c3292b374c94b3dae4276c32d62b0baaed9ac5d8
+	method = merge
+	cmdver = 0.4.9
