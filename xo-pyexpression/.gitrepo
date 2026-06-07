@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:Rconybea/xo-pyexpression.git
+	branch = main
+	commit = be4929de79b95d12a5be1f6cd43b502c87ecea47
+	parent = d1b3ac8d99e8d6ae31ff9c46d6a624455bd3d797
+	method = merge
+	cmdver = 0.4.9
