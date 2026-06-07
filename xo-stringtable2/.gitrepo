@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:Rconybea/xo-stringtable2.git
+	branch = main
+	commit = 356a03a0d0eb674d5832178b5d1658bda174e7e5
+	parent = 05acb038a7b7ed23eae136cdf20c670eb29d6598
+	method = merge
+	cmdver = 0.4.9
