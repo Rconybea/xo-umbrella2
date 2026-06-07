@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+# $1 = build directory
+
+cd $1
+shift
+
+ctest "${@}"
