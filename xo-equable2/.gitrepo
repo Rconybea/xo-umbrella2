@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:Rconybea/xo-equable2.git
+	branch = main
+	commit = b307822eb488b4f31e2399fc52a47c13eaaf07c8
+	parent = 796361ecc68ed6e7b4347f250d46c9f32b020e05
+	method = merge
+	cmdver = 0.4.9
