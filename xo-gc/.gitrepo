@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:Rconybea/xo-gc.git
 	branch = main
-	commit = b1898230a7bb805ac2afe1f3a910300b664da958
-	parent = 555d4f75fcde6930abf64deca16a2ddb44f00264
+	commit = 7eb7e00ae51f49383769b3e8bea4ccc8db6532fb
+	parent = 85f74d14e4aa2125f88df16fd71040aef34b0dca
 	method = merge
 	cmdver = 0.4.9
