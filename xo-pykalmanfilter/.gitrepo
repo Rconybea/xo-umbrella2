@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:Rconybea/xo-pykalmanfilter.git
+	branch = main
+	commit = 2857a0aaa6b77b90d084c69f5960646c53a7fb06
+	parent = 0ac57979012a39a48b19a859ca7f60ecaae9b7a4
+	method = merge
+	cmdver = 0.4.9
