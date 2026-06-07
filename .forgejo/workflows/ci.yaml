@@ -383,3 +383,9 @@ jobs:
           echo nix-build ci.nix -A xo-pykalmanfilter
           nix-build ci.nix -A xo-pykalmanfilter
           ls -l ./result
+
+      - name: build xo-imgui
+        run: |
+          echo nix-build ci.nix -A xo-imgui
+          nix-build ci.nix -A xo-imgui
+          ls -l ./result

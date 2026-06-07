@@ -57,3 +57,5 @@ xo-interpreter
 xo-interpreter2
 xo-reader2
 xo-symboltable
+xo-equable2
+xo-hashable2
