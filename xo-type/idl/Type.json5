@@ -1,0 +1,76 @@
+{
+    mode: "facet",
+    output_cpp_dir: "src/type",
+    output_hpp_dir: "include/xo/type",
+    output_impl_subdir: "type",
+    includes: [
+        "<xo/type/Metatype.hpp>",
+        "<xo/reflect/TypeDescr.hpp>",
+    ],
+    user_hpp_includes: [
+    ],
+    namespace1: "xo",
+    namespace2: "scm",   // TODO: change to project namespace if different
+    pretext: [
+        "// pretext if any"
+    ],
+    facet: "Type",
+    detail_subdir: "type",
+    brief: "Representation for a Schematika type",
+    using_doxygen: true,
+    doc: [
+        "1. Ability to compare types as members of partial order",
+        "2. ..."
+    ],
+    types: [
+        {
+            name: "obj_AType",
+            doc: [],
+            definition: "xo::facet::obj<AType>",
+        },
+        {
+            name: "TypeDescr",
+            doc: [],
+            definition: "xo::reflect::TypeDescr",
+        }
+    ],
+    const_methods: [
+        {
+            name: "metatype",
+            doc: ["category for this type"],
+            return_type: "Metatype",
+            args: [],
+            const: true,
+            noexcept: true,
+        },
+        {
+            name: "repr_td",
+            doc: ["reflected representation for instances of this type"],
+            return_type: "TypeDescr",
+            args: [],
+            const: true,
+            noexcept: true,
+        },
+        {
+            name: "is_equal_to",
+            doc: ["true iff this type is equal to y"],
+            return_type: "bool",
+            args: [
+                {type: "const obj_AType &", name: "y"},
+            ],
+            const: true,
+        },
+        {
+            name: "is_subtype_of",
+            doc: ["true iff this is a subtype of y"],
+            return_type: "bool",
+            args: [
+                {type: "const obj_AType &", name: "y"},
+            ],
+            const: true,
+        },
+    ],
+    nonconst_methods: [],
+    router_facet_explicit_content: [
+    ],
+}
