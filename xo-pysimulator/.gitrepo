@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:Rconybea/xo-pysimulator.git
 	branch = main
-	commit = ab07c15565658fa0fec21113881b0bb227aac93b
-	parent = 57d46b44d35b8309ff8d0bdc5b605f9226b6946f
+	commit = 7ceeffe80cdd73058ad6e9108e4f6369118ed9cf
+	parent = a3b0672bef662787df9a214dc89e2716dfdcc0b3
 	method = merge
 	cmdver = 0.4.9
