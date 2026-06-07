@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:Rconybea/xo-imgui.git
+	branch = main
+	commit = b2926d26215d013a6c04c768b08566751a79cb93
+	parent = 5a4eca505b3b172bf988fb791572f105d772d3d8
+	method = merge
+	cmdver = 0.4.9
