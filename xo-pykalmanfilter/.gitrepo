@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:Rconybea/xo-pykalmanfilter.git
 	branch = main
-	commit = 2857a0aaa6b77b90d084c69f5960646c53a7fb06
-	parent = 0ac57979012a39a48b19a859ca7f60ecaae9b7a4
+	commit = d227d2b7e0292d909ba64967bac1f7a06d45d934
+	parent = 7b879dd3841f926281624fb0d027b88a392b89bf
 	method = merge
 	cmdver = 0.4.9
