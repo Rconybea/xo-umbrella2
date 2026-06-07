@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:Rconybea/xo-process.git
 	branch = main
-	commit = ff603471b84f5490ebb581ad5b03100d17dbf1da
-	parent = bf7b43020913737a51edb1fa4aaa52ba109eb08d
+	commit = faa39c2be9162d12840f68c58c18a69bb410809b
+	parent = 59fb40c17b72cb209a581963affeb17bca9db0c8
 	method = merge
 	cmdver = 0.4.9
