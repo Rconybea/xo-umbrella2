@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:Rconybea/xo-pyprintjson.git
 	branch = main
-	commit = 18e7c12d06b4d1ca15b2e87b409c8681a15c503a
-	parent = eb90400999eb7b2fed07c6917444177964b4b647
+	commit = 9706bf7604faf225e31577d6aa9be2ce486b861b
+	parent = a668f4215256800f7da13c9691ac29b4912c0ce9
 	method = merge
 	cmdver = 0.4.9
