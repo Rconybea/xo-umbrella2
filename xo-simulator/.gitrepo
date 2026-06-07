@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:Rconybea/xo-simulator.git
+	branch = main
+	commit = ef159a596d683df598918647e297e9ceaefa5e87
+	parent = f5ec6f1d25a128de91e185f5f65b63132527c176
+	method = merge
+	cmdver = 0.4.9
