@@ -1,0 +1,37 @@
+/** @file Procedure.hpp
+ *
+ *  @author Roland Conybeare, Nov 2025
+ **/
+
+#pragma once
+
+#include "Object.hpp"
+#include "CVector.hpp"
+
+namespace xo {
+    namespace gc { class IAlloc; }; // see xo-alloc: xo/alloc/IAlloc.hpp
+
+    namespace obj {
+        /** @class ProcedureInterface
+         *  @brief Interface to a dynamically-typed procedure
+         **/
+        class Procedure : public Object {
+        public:
+            /** downcast from @p x iff x is actually a Procedure. Otherwise nullptr **/
+            static gp<Procedure> from(gp<Object> x) { return gp<Procedure>::from(x); }
+
+            virtual std::size_t n_args() const = 0;
+            virtual gp<Object> apply_nocheck(gc::IAlloc * mm, const CVector<gp<Object>> & args) = 0;
+
+            // inherited from Object..
+
+            // virtual TaggedPtr self_tp() const override;
+            // virtual void display(std::ostream &) const override;
+            // virtual size_t _shallow_size() const override;
+            // virtual Object * _shallow_copy(gc::IAlloc *) const override;
+            // virtual size_t _forward_children(gc::IAlloc *) override;
+        };
+    }
+}
+
+/* end Procedure.hpp */
