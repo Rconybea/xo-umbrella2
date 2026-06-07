@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:Rconybea/xo-pyjit.git
 	branch = main
-	commit = 435ea9fc966b42b9b0debfb2483e056d1afdbfd1
-	parent = 7eb3eeec1da5068187eeb4e4853524361ef1f7d6
+	commit = 0ce4c82fdca0c46e28f05d5d9f22fdfc5954315f
+	parent = e3ba77a7c4bf56daa4cc7b3eb4d1db71fe0426bd
 	method = merge
 	cmdver = 0.4.9
