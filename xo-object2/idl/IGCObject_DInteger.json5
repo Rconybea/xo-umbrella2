@@ -1,0 +1,18 @@
+{
+    mode: "implementation",
+    output_cpp_dir: "src/object2",
+    output_hpp_dir: "include/xo/object2",
+    output_impl_subdir: "number",
+    includes: [
+//        "<xo/alloc2/GCObject.hpp>",
+//        "<xo/alloc2/Allocator.hpp>"
+    ],
+    local_types: [ ],
+    namespace1: "xo",
+    namespace2: "scm",
+    facet_idl: "idl/GCObject.json5",
+    brief: "provide AGCObject interface for DInteger",
+    using_doxygen: true,
+    repr: "DInteger",
+    doc: [ "implement AGCObject for DInteger" ],
+}

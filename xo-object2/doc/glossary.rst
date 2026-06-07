@@ -1,0 +1,1 @@
+gco = gc-aware object
