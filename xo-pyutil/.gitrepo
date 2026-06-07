@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:Rconybea/xo-pyutil.git
 	branch = main
-	commit = dfd5229b82733469c6c21ae8487e68221da18ca9
-	parent = d260f3705e2d1ee232a441420ef79cf35f0db4d4
+	commit = 961131f1f1fa8a3038016b9962b7fbbd7402ef4c
+	parent = febf2acb6b8ee5fc9db746971706675c352b150e
 	method = merge
 	cmdver = 0.4.9
