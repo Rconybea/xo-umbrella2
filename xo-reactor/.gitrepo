@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:Rconybea/xo-reactor.git
+	branch = main
+	commit = a37c8f65f197ae6e1bba755c9082d873bc0789bd
+	parent = f0fb344b3ada65511ccbedf455f85c54c5316ea1
+	method = merge
+	cmdver = 0.4.9
