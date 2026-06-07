@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:Rconybea/xo-imgui.git
 	branch = main
-	commit = b2926d26215d013a6c04c768b08566751a79cb93
-	parent = 5a4eca505b3b172bf988fb791572f105d772d3d8
+	commit = bb61b9d7c967ba95001138070e0b5852e51c6eaf
+	parent = 2da52f64cd6f98d27cb28dd3466441ed4144dc09
 	method = merge
 	cmdver = 0.4.9
