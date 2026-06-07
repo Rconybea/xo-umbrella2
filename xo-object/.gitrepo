@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:Rconybea/xo-object.git
 	branch = main
-	commit = d830632aea126d6d4f9e8f5ab1a59130789bc8bc
-	parent = 9f371f77fc328edb6ae46531489e8992129a804e
+	commit = c51a84491f0c02186b7895c7c31b7763ac2c90dd
+	parent = 1026162ad2972de2c26af8119d15784a112dab5e
 	method = merge
 	cmdver = 0.4.9
