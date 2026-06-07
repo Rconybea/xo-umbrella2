@@ -1,0 +1,158 @@
+/** @file IAllocator_DX1Collector.cpp
+ *
+ *  @author Roland Conybeare, Dec 2025
+ *
+ *  See also ICollector_DX1Collector.cpp for collector facet
+ **/
+
+#include "Collector.hpp" // for obj<ACollector> argument to GCObject.forward_children()
+#include "detail/IAllocator_DX1Collector.hpp"
+#include "detail/IAllocIterator_DX1CollectorIterator.hpp"
+#include "DX1CollectorIterator.hpp"
+#include <xo/alloc2/arena/IAllocator_DArena.hpp>
+
+namespace xo {
+    using xo::facet::with_facet;
+    using xo::facet::typeseq;
+    using std::size_t;
+    using std::byte;
+
+    namespace mm {
+        using value_type = IAllocator_DX1Collector::value_type;
+
+        std::string_view
+        IAllocator_DX1Collector::name(const DX1Collector & d) noexcept
+        {
+            return d.config_.name_;
+        }
+
+        auto
+        IAllocator_DX1Collector::reserved(const DX1Collector & d) noexcept -> size_type
+        {
+            return d.reserved();
+        }
+
+        auto
+        IAllocator_DX1Collector::size(const DX1Collector & d) noexcept -> size_type
+        {
+            return d.size_total();
+        }
+
+        auto
+        IAllocator_DX1Collector::committed(const DX1Collector & d) noexcept -> size_type
+        {
+            return d.committed();
+        }
+
+        auto
+        IAllocator_DX1Collector::available(const DX1Collector & d) noexcept -> size_type
+        {
+            return d.available();
+        }
+
+        auto
+        IAllocator_DX1Collector::allocated(const DX1Collector & d) noexcept -> size_type
+        {
+            return d.allocated();
+        }
+
+        void
+        IAllocator_DX1Collector::visit_pools(const DX1Collector & d, const MemorySizeVisitor & visitor)
+        {
+            d.visit_pools(visitor);
+        }
+
+        bool
+        IAllocator_DX1Collector::contains(const DX1Collector & d, const void * addr) noexcept
+        {
+            return d.contains(Role::to_space(), addr);
+        }
+
+        AllocError
+        IAllocator_DX1Collector::last_error(const DX1Collector & d) noexcept
+        {
+            return d.last_error();
+        }
+
+        auto
+        IAllocator_DX1Collector::alloc_range(const DX1Collector & d,
+                                             DArena & ialloc) noexcept -> range_type
+        {
+            DX1CollectorIterator * begin_ix = construct_with<DX1CollectorIterator>(ialloc, d.begin());
+            DX1CollectorIterator *   end_ix = construct_with<DX1CollectorIterator>(ialloc, d.end());
+
+            obj<AAllocIterator> begin_obj = with_facet<AAllocIterator>::mkobj(begin_ix);
+            obj<AAllocIterator>   end_obj = with_facet<AAllocIterator>::mkobj(  end_ix);
+
+            return AllocRange(std::make_pair(begin_obj, end_obj));
+        }
+
+        auto
+        IAllocator_DX1Collector::alloc(DX1Collector & d,
+                                       typeseq t,
+                                       size_type z) noexcept -> value_type
+        {
+            return d.alloc(t, z);
+        }
+
+        auto
+        IAllocator_DX1Collector::super_alloc(DX1Collector & d,
+                                             typeseq t,
+                                             size_type z) noexcept -> value_type
+        {
+            return d.super_alloc(t, z);
+        }
+
+        auto
+        IAllocator_DX1Collector::sub_alloc(DX1Collector & d, size_type z, bool complete) noexcept -> value_type
+        {
+            return d.sub_alloc(z, complete);
+        }
+
+        auto
+        IAllocator_DX1Collector::alloc_copy(DX1Collector & d, value_type src) noexcept -> value_type
+        {
+            return d.alloc_copy(src);
+        }
+
+        bool
+        IAllocator_DX1Collector::expand(DX1Collector & d, size_type z) noexcept
+        {
+            return d.expand(z);
+        }
+
+        AllocInfo
+        IAllocator_DX1Collector::alloc_info(const DX1Collector & d, value_type mem) noexcept
+        {
+            return d.alloc_info(mem);
+        }
+
+        void
+        IAllocator_DX1Collector::clear(DX1Collector & d)
+        {
+            d.clear();
+        }
+
+        void
+        IAllocator_DX1Collector::barrier_assign_aux(DX1Collector & d,
+                                                    void * parent,
+                                                    AGCObject * lhs_iface,
+                                                    void ** lhs_data,
+                                                    AGCObject * rhs_iface,
+                                                    void * rhs_data)
+        {
+            d.barrier_assign_aux(parent, lhs_iface, lhs_data, rhs_iface, rhs_data);
+        }
+
+#ifdef OBSOLETE
+        void
+        IAllocator_DX1Collector::destruct_data(DX1Collector & d)
+        {
+            d.~DX1Collector();
+        }
+#endif
+
+    } /*namespace mm*/
+} /*namespace xo*/
+
+/* end IAllocator_DX1Collector.cpp */

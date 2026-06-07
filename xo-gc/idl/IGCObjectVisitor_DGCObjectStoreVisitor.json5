@@ -1,0 +1,28 @@
+{
+    mode: "implementation",
+    output_cpp_dir: "src/gc/facet",
+    output_hpp_dir: "include/xo/gc",
+    output_impl_subdir: "detail",
+    includes: [
+//        "<xo/alloc2/GCObject.hpp>",
+//        "<xo/alloc2/Allocator.hpp>"
+    ],
+    local_types: [
+//        {
+//            name: "typeseq",
+//            doc: ["identifies a c++ type"],
+//            definition: "xo::reflect::typeseq"
+//        },
+    ],
+    namespace1: "xo",
+    namespace2: "mm",
+    facet_idl: "idl/GCObjectVisitor.json5",
+    brief: "provide AGCObjectVisitor interface for DGCObjectStoreVisitor",
+    using_doxygen: true,
+    repr: "DGCObjectStoreVisitor",
+    doc: [
+        "Implement AGCObjectVisitor for DGCObjectStoreVisitor.",
+        "Visit a gc-aware object. Either evacuate+forward (for gc cycle),",
+        "or check consistency (for verify_ok)",
+    ],
+}

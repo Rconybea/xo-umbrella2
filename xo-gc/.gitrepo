@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:Rconybea/xo-gc.git
+	branch = main
+	commit = b1898230a7bb805ac2afe1f3a910300b664da958
+	parent = 555d4f75fcde6930abf64deca16a2ddb44f00264
+	method = merge
+	cmdver = 0.4.9
