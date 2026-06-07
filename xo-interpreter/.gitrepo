@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:Rconybea/xo-interpreter.git
+	branch = main
+	commit = 047658a5b367705afe69422a3409c7c068e2a5fb
+	parent = b82663b75d776208cc0921c697475c202fe043ab
+	method = merge
+	cmdver = 0.4.9
