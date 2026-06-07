@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:Rconybea/xo-pyreflect.git
 	branch = main
-	commit = 91a1cc00a69a5a5d05c651043e320799157a66bd
-	parent = 1d682a820a7a3b50ed57d50c182761482d29b0f2
+	commit = 646ed42d99200b082ef2a94f95d5b8c210ac9792
+	parent = ac344b32a25c2fc9a9fa5941efcf80c93a146b04
 	method = merge
 	cmdver = 0.4.9
