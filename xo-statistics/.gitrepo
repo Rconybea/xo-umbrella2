@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:Rconybea/xo-statistics.git
+	branch = main
+	commit = 602f67e7438fb34b31b8c90937665eedc35abd73
+	parent = 18105fc8db67f66dc49c69d2038b9a5c36f970b6
+	method = merge
+	cmdver = 0.4.9
