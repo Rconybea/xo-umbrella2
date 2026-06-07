@@ -1,0 +1,25 @@
+/* @file pydistribution.hpp
+ *
+ * automatically generated from src/pydistribution/pydistribution.hpp.in
+ * see src/pydistribution/CMakeLists.txt
+ */
+
+/* python requires module name = library name
+ * example:
+ *   PYBIND11_MODULE(PYDISTRIBUTION_MODULE_NAME(), m) { ... }
+ */
+#define PYDISTRIBUTION_MODULE_NAME() @SELF_LIB@
+
+/* example:
+ *   py::module_::import(PYDISTRIBUTION_MODULE_NAME_STR)
+ */
+#define PYDISTRIBUTION_MODULE_NAME_STR "@SELF_LIB@"
+
+/* example:
+ *   PYDISTRIBUTION_IMPORT_MODULE()
+ * replaces
+ *   py::module_::import("pydistribution")
+ */
+#define PYDISTRIBUTION_IMPORT_MODULE() py::module_::import("@SELF_LIB@")
+
+/* end pydistribution.hpp */
