@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:Rconybea/xo-reader.git
 	branch = main
-	commit = cb652195d3fa3774651c746a621e16f30481c22e
-	parent = f5828f616346f52e282cf86ef8dbc5901b8f5aad
+	commit = c802a6c154d11175d5e5db403fc998684c925bc8
+	parent = 5c816ba04cbc52aa48dfc99d7ac51a73ebf10e27
 	method = merge
 	cmdver = 0.4.9
