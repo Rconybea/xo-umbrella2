@@ -1,6 +1,12 @@
 @PACKAGE_INIT@
 
 include(CMakeFindDependencyMacro)
-find_dependency(xo_reflect)
+# reminder: deps here must also appear in xo-object/src/object/CMakeLists.txt
+find_dependency(xo_reflectutil)
+find_dependency(xo_unit)
+find_dependency(callback)
+#find_dependency(xo_alloc)
+#find_dependency(xo_flatstring)
 include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Targets.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Share.cmake")
 check_required_components("@PROJECT_NAME@")
