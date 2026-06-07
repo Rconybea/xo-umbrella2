@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:Rconybea/xo-printjson.git
+	branch = main
+	commit = c5c0150292d38736504a6c9a1fdb6ad69dc01dd2
+	parent = c3ed6cd8979e7e0323591c0973b849d24622f85a
+	method = merge
+	cmdver = 0.4.9
