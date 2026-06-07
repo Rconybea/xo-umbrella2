@@ -1,0 +1,41 @@
+/** @file init_reader2.cpp
+ *
+ *  @author Roland Conybeare, Jan 2026
+ **/
+
+#include "init_reader2.hpp"
+#include "SetupReader2.hpp"
+
+#include <xo/expression2/init_expression2.hpp>
+#include <xo/numeric/init_numeric.hpp>
+#include <xo/alloc2/CollectorTypeRegistry.hpp>
+
+namespace xo {
+    using xo::scm::SetupReader2;
+    using xo::mm::CollectorTypeRegistry;
+
+    void
+    InitSubsys<S_reader2_tag>::init()
+    {
+        SetupReader2::register_facets();
+
+        CollectorTypeRegistry::instance().register_types(&SetupReader2::register_types);
+    }
+
+    InitEvidence
+    InitSubsys<S_reader2_tag>::require()
+    {
+        InitEvidence retval;
+
+        /* direct subsystem deps for xo-reader2/ */
+        retval ^= InitSubsys<S_expression2_tag>::require();
+        retval ^= InitSubsys<S_numeric_tag>::require();
+
+        /* xo-reader2/'s own initialization code */
+        retval ^= Subsystem::provide<S_reader2_tag>("reader2", &init);
+
+        return retval;
+    }
+} /*namespace xo*/
+
+/* end init_reader2.cpp */
