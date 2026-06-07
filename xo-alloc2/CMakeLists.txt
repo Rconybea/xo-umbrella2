@@ -1,0 +1,75 @@
+# xo-alloc2/CMakeLists.txt
+
+cmake_minimum_required(VERSION 3.10)
+
+project(xo_alloc2 VERSION 0.1)
+
+include(GNUInstallDirs)
+include(cmake/xo-bootstrap-macros.cmake)
+
+xo_cxx_toplevel_options3()
+
+# ----------------------------------------------------------------
+# c++ settings
+
+set(PROJECT_CXX_FLAGS "")
+#set(PROJECT_CXX_FLAGS "-fconcepts-diagnostics-depth=2")  # gcc-only!
+add_definitions(${PROJECT_CXX_FLAGS})
+
+# ----------------------------------------------------------------
+
+xo_add_genfacet(
+    TARGET xo-alloc2-facet-collector
+    FACET Collector
+    INPUT idl/Collector.json5
+)
+
+# ----------------------------------------------------------------
+
+# note: manual target; generated code committed to git
+xo_add_genfacet(
+    TARGET xo-alloc2-facet-gcobject
+    FACET GCObject
+    INPUT idl/GCObject.json5
+)
+
+# ----------------------------------------------------------------
+
+# note: manual target; generated code committed to git
+xo_add_genfacet(
+    TARGET xo-alloc2-facet-gcobjectvisitor
+    FACET GCObjectVisitor
+    INPUT idl/GCObjectVisitor.json5
+)
+
+# ----------------------------------------------------------------
+
+# note: manual target; generated code committed to git
+xo_add_genfacet(
+    TARGET xo-alloc2-facet-resourcevisitor
+    FACET ResourceVisitor
+    INPUT idl/ResourceVisitor.json5
+    OUTPUT_HPP_DIR include/xo/alloc2
+    OUTPUT_IMPL_SUBDIR visitor
+)
+
+# ----------------------------------------------------------------
+
+xo_add_genfacet_all(xo-alloc2-genfacet-all)
+
+# ----------------------------------------------------------------
+
+
+# must complete definition of expression lib before configuring examples
+add_subdirectory(src/alloc2)
+add_subdirectory(utest)
+
+xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
+
+# ----------------------------------------------------------------
+# docs targets depend on other library/utest/exec targets above,
+# --> must come after them.
+#
+add_subdirectory(docs)
+
+# end CMakeLists.txt

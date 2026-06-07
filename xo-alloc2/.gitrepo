@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:Rconybea/xo-alloc2.git
+	branch = main
+	commit = 4039c29f5d641f1356e640cc9bb3cde7c7e40f2c
+	parent = cf0bd4d975c55177ffce33f2a32bd4257ddb4d20
+	method = merge
+	cmdver = 0.4.9

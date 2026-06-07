@@ -1,0 +1,104 @@
+{
+    mode: "facet",
+    output_cpp_dir: "src/alloc2",
+    output_hpp_dir: "include/xo/alloc2",
+    output_impl_subdir: "gc",
+    includes: [
+        "<xo/alloc2/Allocator_basic.hpp>",
+//        "<xo/alloc2/Collector.hpp>",
+        "<xo/alloc2/GCObjectVisitor.hpp>",
+        "<cstdint>",
+        "<cstddef>",
+    ],
+    // extra includes in GCObject.hpp, if any
+    user_hpp_includes: [
+        "\"gc/RCollector_aux.hpp\"",
+    ],
+    namespace1: "xo",
+    namespace2: "mm",
+    pretext: [
+        "namespace xo { namespace mm { class ACollector; }}",
+    ],
+    facet: "GCObject",
+    detail_subdir: "gc",
+    brief: "gc-aware object, providing collector hooks",
+    using_doxygen: true,
+    doc: [
+        "GC hooks for collector-aware data"
+    ],
+    types: [
+        // using size_type = std::size_t
+        {
+            name: "size_type",
+            doc: ["type for an amount of memory"],
+            definition: "std::size_t",
+        },
+        {
+            name: "AAllocator",
+            doc: ["fomo allocator type"],
+            definition: "xo::mm::AAllocator",
+        },
+//        {
+//            name: "ACollector",
+//            doc: ["fomo collector type"],
+//            definition: "xo::mm::ACollector",
+//        },
+        {
+            name: "AGCObjectVisitor",
+            doc: ["fomo collector type"],
+            definition: "xo::mm::AGCObjectVisitor",
+        },
+        {
+            name: "VisitReason",
+            doc: ["hint arg when navigating object graph"],
+            definition: "xo::mm::VisitReason",
+        },
+    ],
+    const_methods: [
+        // size_type shallow_size() const noexcept
+//        {
+//            name: "shallow_size",
+//            doc: ["memory consumption for this instance"],
+//            return_type: "size_type",
+//            args: [],
+//            const: true,
+//            noexcept: true,
+//            attributes: [],
+//        },
+    ],
+    nonconst_methods: [
+        // Opaque shallow_move(obj<ACollector>) noexcept
+        {
+            name: "gco_shallow_move",
+            doc: [
+                "move instance using object visitor.",
+                "Arguably abusing the word 'visitor' here",
+            ],
+            return_type: "Opaque",
+            args:[
+                {type: "obj<AGCObjectVisitor>", name: "gc"},
+            ],
+            const: true,
+            noexcept: true,
+            attributes: [],
+        },
+        // size_type visit_gco_children(VisitReason reason, obj<AGCObjectVisitor>) noexcept
+        {
+            name: "visit_gco_children",
+            doc: [
+                "Invoke fn.visit_child(iface,data) for each child GCObject pointer.",
+                "Context: provides address of data pointer so it can be updated in place",
+                "when @p fn invokes garbage collector reentry point"
+            ],
+            return_type: "void",
+            args: [
+                {type: "VisitReason", name: "reason"},
+                {type: "obj<AGCObjectVisitor>", name: "fn"},
+            ],
+            const: true,
+            noexcept: true,
+            attributes: [],
+        },
+    ],
+    router_facet_explicit_content: []
+}

@@ -1,0 +1,144 @@
+{
+    mode: "facet",
+    output_cpp_dir: "src/alloc2/facet",
+    output_hpp_dir: "include/xo/alloc2",
+    output_impl_subdir: "gc",
+    includes: [
+        "<xo/alloc2/Generation.hpp>",
+        "<xo/alloc2/role.hpp>",
+        "<xo/alloc2/VisitReason.hpp>",
+        "<xo/arena/AllocInfo.hpp>",
+    ],
+    // extra includes in GCObject.hpp, if any
+    user_hpp_includes: [
+//        "\"gc/RCollector_aux.hpp\"",
+    ],
+    namespace1: "xo",
+    namespace2: "mm",
+    pretext: [
+        "// see GCObject.hpp, also in xo-alloc2/",
+        "namespace xo { namespace mm { class AGCObject; }}",
+        "namespace xo { namespace mm { class AllocInfo; }}",
+        "namespace xo { namespace mm { class Generation; }}",
+    ],
+    facet: "GCObjectVisitor",
+    detail_subdir: "gc",
+    brief: "gc-aware object visitor",
+    using_doxygen: true,
+    doc: [
+        "Visit a gc-aware object. Visitor can traverse and update child pointers in-place."
+    ],
+    types: [
+        // using size_type = std::size_t
+//        {
+//            name: "size_type",
+//            doc: ["type for an amount of memory"],
+//            definition: "std::size_t",
+//        },
+    ],
+    const_methods: [
+        // AllocInfo alloc_info(void * gco) const noexcept;
+        {
+            name: "alloc_info",
+            doc: [
+                "allocation metadata for gc-aware data at address @p gco.",
+                "@p gco must be the result of a call to collector's alloc() function",
+                "note: load-bearing for xo-gc/MutationLogStore",
+            ],
+            return_type: "AllocInfo",
+            args: [
+                {type: "void *", name: "addr"},
+            ],
+            const: true,
+            noexcept: false,
+            attributes: [],
+        },
+        // Generation generation_of(Role r, const void * addr) const noexcept;
+        {
+            name: "generation_of",
+            doc: [
+                "generation to which pointer @p addr belongs, given role @p r;",
+                "sentinel if @p addr is not owned by collector.",
+                "note: load-bearing for xo-gc/MutationLogStore",
+            ],
+            return_type: "Generation",
+            args: [
+                {type: "Role", name: "r"},
+                {type: "const void *", name: "addr"},
+            ],
+            const: true,
+            noexcept: true,
+            attributes: [],
+        },
+    ],
+    nonconst_methods: [
+        // void alloc_copy(void * src)
+        {
+            name: "alloc_copy",
+            doc: [
+                "allocate copy of source object at address @p src.",
+                "Source must be owned by this collector.",
+                "Increments object age"
+            ],
+            return_type: "void *",
+            args: [
+                {type: "std::byte *", name: "src"},
+            ],
+            const: true,  // refers to interface.
+            noexcept: false,
+            attributes: [],
+        },
+        // void visit_child(VisitReason reason, AGCObject * iface, void ** pp_data) noexcept;
+        {
+            name: "visit_child",
+            doc: ["visit child of a gc-aware object. May update child in-place!"],
+            return_type: "void",
+            args:[
+                {type: "VisitReason", name: "reason"},
+                {type: "AGCObject *", name: "iface"},
+                {type: "void **", name: "pp_data"},
+            ],
+            const: true,  // technical const. I/face not modified
+            noexcept: true,
+            attributes: [],
+        },
+    ],
+    router_facet_explicit_content: [
+        "/** convenience: allocate copy for typed pointer **/",
+        "template <typename T>",
+        "void * alloc_copy_for(const T * src) noexcept {",
+        "    return O::iface()->alloc_copy(O::data(), (std::byte *)const_cast<T *>(src));",
+        "}",
+        "",
+        "/** convenience: move typed pointer **/",
+        "template <typename T>",
+        "T * std_move_for(T * src) noexcept {",
+        "    void * mem = this->alloc_copy_for(src);",
+        "    if (mem) {",
+        "        return new (mem) T(std::move(*src));",
+        "    }",
+        "    return nullptr;",
+        "}",
+        "",
+        "/** visit a gcobject child pointer in place.",
+        "    Defined in RCollector_aux.hpp to avoid #include cycle",
+        "    (for historical reasons - coul d be in RGCObject_aux.hpp?)",
+        " **/",
+        "template <typename DRepr>",
+        "void visit_child(VisitReason reason, xo::facet::obj<AGCObject,DRepr> * p_obj);",
+        "",
+        "/** visit typed child data pointer in place.",
+        "    Defined in RGCObject.hpp to avoid #include cycle",
+        " **/",
+        "template <typename DRepr>",
+        "void visit_child(VisitReason reason, DRepr ** pp_data);",
+        "",
+        "/** visit faceted object pointer stored using some facet",
+        "    other than AGCObject",
+        " **/",
+        "template <typename AFacet, typename DRepr>",
+        "requires (!std::is_same_v<AFacet, AGCObject>)",
+        "void visit_poly_child(VisitReason reason, obj<AFacet,DRepr> * p_pivot);",
+        "",
+    ]
+}

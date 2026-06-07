@@ -1,0 +1,92 @@
+/** @file IAllocator_DArena.hpp
+ *
+ *  @author Roland Conybeare, Dec 2025
+ **/
+
+#include "alloc/AAllocator.hpp"
+#include "alloc/IAllocator_Xfer.hpp"
+#include <xo/arena/DArena.hpp>
+
+namespace xo {
+    namespace mm { struct IAllocator_DArena; }
+
+    namespace facet {
+        template <>
+        struct FacetImplementation<xo::mm::AAllocator, xo::mm::DArena> {
+            using ImplType = xo::mm::IAllocator_Xfer<xo::mm::DArena,
+                                                     xo::mm::IAllocator_DArena>;
+        };
+    }
+
+    namespace mm {
+        /** @class IAllocator_DArena
+         *  @brief Provide AAllocator interface for DArena state
+         **/
+        struct IAllocator_DArena {
+            /* changes here coordinate with:
+             *  AAllocator      AAllocator.hpp
+             *  IAllocator_Any  IAllocator_Any.hpp
+             *  IAllocator_Xfer IAllocator_Xfer.hpp
+             *  RAllocator      RAllocator.hpp
+             */
+            using typeseq = xo::facet::typeseq;
+            using size_type = std::size_t;
+            using value_type = std::byte *;
+            using range_type = AAllocator::range_type;
+
+            static std::string_view name(const DArena &) noexcept;
+            static size_type reserved(const DArena &) noexcept;
+            static size_type size(const DArena &) noexcept;
+            static size_type committed(const DArena &) noexcept;
+            static size_type available(const DArena &) noexcept;
+            static size_type allocated(const DArena &) noexcept;
+            static void visit_pools(const DArena &,
+                                    const MemorySizeVisitor & visitor);
+            static bool contains(const DArena &, const void * p) noexcept;
+            static AllocError last_error(const DArena &) noexcept;
+            /** retrieve allocation bookkeeping info for @p mem from arena @p d **/
+            static AllocInfo alloc_info(const DArena &, value_type mem) noexcept;
+            /** create alloc-iterator range over allocs on @d,
+             *  Iterators themselves allocated from @p ialloc.
+             **/
+            static range_type alloc_range(const DArena & d, DArena & ialloc) noexcept;
+
+            /** expand committed space in arena @p d
+             *  to size at least @p z
+             *  In practice will round up to a multiple of @ref page_z_.
+             **/
+            static bool expand(DArena & d, size_type z) noexcept;
+
+            static value_type alloc(DArena &, typeseq t, size_type z);
+            /** when store_header_flag enabled:
+             *   like alloc(), but combine memory consumed by this alloc
+             *   plus following consecutive sub_alloc()'s into a single header.
+             *  otherwise equivalent to alloc()
+             **/
+            static value_type super_alloc(DArena &, typeseq t, size_type z);
+            /** when store_header_flag enabled:
+             *  follow preceding super_alloc() by one or more sub_allocs().
+             *  accumulate total allocated size (including padding) into
+             *  single header. All sub_allocs() except the last must set
+             *  @p complete_flag to false. The last sub_alloc() must set
+             *  @p complete_flag to true.
+             **/
+            static value_type sub_alloc(DArena &, size_type z, bool complete_flag);
+            static void clear(DArena &);
+            /** perform assignment {*lhs_iface, *lhs_data} = {*rhs_iface, rhs_data} **/
+            static void barrier_assign_aux(DArena &,
+                                           void * parent,
+                                           AGCObject * lhs_iface, void ** lhs_data,
+                                           AGCObject * rhs_iface, void * rhs_data);
+            //static void destruct_data(DArena &);
+        };
+
+//        template <>
+//        struct IAllocator_Impl<DArena> {
+//            using ImplType = IAllocator_DArena;
+//        };
+
+    } /*namespace mm*/
+} /*namespace xo*/
+
+/* end IAllocator_DArena.hpp */
