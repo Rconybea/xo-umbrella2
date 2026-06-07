@@ -168,6 +168,7 @@ namespace xo {
             return accumulate_total_aux(*this, &DArena::reserved);
         }
 
+        // editor bait: size()
         size_type
         DX1Collector::size_total() const noexcept
         {
@@ -411,7 +412,8 @@ namespace xo {
                     X1VerifyStats post = verify_stats_;
 
                     // assert fail -> root contains ptr to from-space
-                    assert(pre.n_from_ == post.n_from_);
+                    if (pre.n_from_ != post.n_from_)
+                        assert(false);
 
                     ++verify_stats_.n_gc_root_;
                 }
@@ -535,7 +537,8 @@ namespace xo {
                 log && log("step 5b : verify");
                 bool ok = this->verify_ok();
 
-                log && log(xtag("n-gc-root", verify_stats_.n_gc_root_),
+                log && log(xtag("ok", ok),
+                           xtag("n-gc-root", verify_stats_.n_gc_root_),
                            xtag("n-ext", verify_stats_.n_ext_),
                            xtag("n-from", verify_stats_.n_from_),
                            xtag("n-to", verify_stats_.n_to_),
@@ -546,7 +549,8 @@ namespace xo {
                            xtag("n-mlog-from", verify_stats_.n_mlog_from_),
                            xtag("n-mlog-wild", verify_stats_.n_mlog_wild_));
 
-                assert(ok);
+                if (!ok)
+                    assert(false);
             }
         }
 

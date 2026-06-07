@@ -393,7 +393,8 @@ namespace xo {
 
                 if (recd) {
                     bool ok = final_stats_v->push_back(mm, recd);
-                    assert(ok);
+                    if (!ok)
+                        assert(false);
                 }
             }
 
@@ -427,7 +428,8 @@ namespace xo {
 
                     uint32_t age = info.age();
 
-                    assert(age < hard_n_age);
+                    if (age >= hard_n_age)
+                        assert(false);
 
                     soft_max_age = std::max(soft_max_age, age);
                 }

@@ -39,7 +39,7 @@ namespace ut {
 
         constexpr uint32_t c_space_z = 64*1024;
         constexpr uint32_t c_n_gen = 1;
-        constexpr uint32_t c_n_survive = 0;
+        constexpr uint32_t c_n_survive = 1;
         X1VerifyStats verify_stats;
         GCObjectStoreConfig gcos_config{ArenaConfig()
             .with_name("gcos-arena-name-notused")
