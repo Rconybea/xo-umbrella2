@@ -1,0 +1,35 @@
+# xo-arena/src/CMakeLists.txt
+
+set(SELF_LIB xo_arena)
+set(SELF_SRCS
+    arena_streambuf.cpp
+    ErrorArena.cpp
+    cmpresult.cpp
+    mmap_util.cpp
+    AllocError.cpp
+    AllocInfo.cpp
+    DArena.cpp
+    DArenaIterator.cpp
+    DCircularBuffer.cpp
+    backtrace.cpp
+)
+
+xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 ${SELF_SRCS})
+xo_install_include_tree3(include/xo/arena)
+
+# ----------------------------------------------------------------
+# input dependencies
+#
+# NOTE: dependency set here must be kept consistent with
+#       xo-arena/cmake/xo_arenaConfig.cmake.in
+
+xo_dependency(${SELF_LIB} xo_reflectutil)
+xo_dependency(${SELF_LIB} indentlog)
+
+if (NOT APPLE)
+xo_external_pkgconfig_dependency(${SELF_LIB} LIBUNWIND libunwind-generic)
+xo_external_pkgconfig_dependency(${SELF_LIB} LIBDW libdw)
+else()
+endif()
+
+# end src/CMakeLists.txt
