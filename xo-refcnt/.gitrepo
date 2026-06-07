@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:Rconybea/xo-refcnt.git
 	branch = main
-	commit = bad785bd08321239d433c69190f4557874fdb59d
-	parent = 6b5f5a091766a5dc3b725185cb36dfa1d86dc54a
+	commit = daa1988b7d232850f51e4a4576f8344c2e64ada2
+	parent = d867f22bdda0d73e493ddd4d93cec2c6f8cafe35
 	method = merge
 	cmdver = 0.4.9
