@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:Rconybea/xo-randomgen.git
+	branch = main
+	commit = b9b7650dec2b1ed491ee2c3309c98e88f728d038
+	parent = 4e1dd5679e322b9f6e780d87904e757af5f30254
+	method = merge
+	cmdver = 0.4.9
