@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:Rconybea/xo-pysimulator.git
+	branch = main
+	commit = ab07c15565658fa0fec21113881b0bb227aac93b
+	parent = 57d46b44d35b8309ff8d0bdc5b605f9226b6946f
+	method = merge
+	cmdver = 0.4.9
