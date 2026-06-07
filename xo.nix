@@ -81,6 +81,7 @@ let
     xo-pydistribution = callPackage pkgs/xo-pydistribution.nix { stdenv = jitStdenv; };
     xo-kalmanfilter   = callPackage pkgs/xo-kalmanfilter.nix   { stdenv = jitStdenv; };
     xo-pykalmanfilter = callPackage pkgs/xo-pykalmanfilter.nix { stdenv = jitStdenv; };
+    xo-imgui          = callPackage pkgs/xo-imgui.nix          { stdenv = jitStdenv;                   buildExamples = true; };
     xo-userenv        = callPackage pkgs/xo-userenv.nix        { stdenv = jitStdenv; };
     xo-userenv-slow   = callPackage pkgs/xo-userenv-slow.nix   { stdenv = jitStdenv;
                                                                   llvm = llvmPackages1.llvm; };

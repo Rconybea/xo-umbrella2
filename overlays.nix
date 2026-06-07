@@ -11,6 +11,7 @@ let
         repo = "AMF";
         rev = "v${old.version}";
         sha256 = "sha256-0PgWEq+329/EhI0/CgPsCkJ4CiTsFe56w2O+AcjVUdc=";
+        #sha256 = "sha256-0PgWEq+329/EhI0/CgPsCkJ4CiTsFe56w2O+AcjVUdc=";
         #sha256 = "sha256-u6gvdc1acemd01TO5EbuF3H7HkEJX4GUx73xCo71yPY=";
       };});
   };
@@ -72,6 +73,7 @@ let
 
 in
 [
+  amf-headers-overlay
   dejagnu-overlay
   libffi-overlay
   libqmi-overlay

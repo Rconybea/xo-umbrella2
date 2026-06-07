@@ -377,6 +377,8 @@ in
     pydistribution = pkgs.xo-pydistribution;
     kalmanfilter   = pkgs.xo-kalmanfilter;
     pykalmanfilter = pkgs.xo-pykalmanfilter;
+
+    imgui          = pkgs.xo-imgui;
   };
 
   # works, but only if build with --option sandbox=false

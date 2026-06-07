@@ -70,6 +70,7 @@ in
       xo-pydistribution
       xo-kalmanfilter
       xo-pykalmanfilter
+      xo-imgui
       xo-userenv
       ;
   }
