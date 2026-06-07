@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:Rconybea/xo-pyjit.git
+	branch = main
+	commit = 435ea9fc966b42b9b0debfb2483e056d1afdbfd1
+	parent = 7eb3eeec1da5068187eeb4e4853524361ef1f7d6
+	method = merge
+	cmdver = 0.4.9
