@@ -1,0 +1,101 @@
+/** @file {{abstract_facet_fname}}
+ *
+ *  Generated automagically from ingredients:
+ *  1. code generator:
+ *       [{{genfacet}}]
+ *     arguments:
+ *       --input [{{genfacet_input}}]
+ *  2. jinja2 template for abstract facet .hpp file:
+ *       [{{ abstract_facet_hpp_j2 }}]
+ *  3. idl for facet methods
+ *       [{{ idl_fname }}]
+ **/
+
+#pragma once
+
+// includes (via {facet_includes})
+{% for include_fname in facet_includes %}
+#include {{include_fname}}
+{% endfor %}
+#include <xo/facet/obj.hpp>
+#include <xo/facet/facet_implementation.hpp>
+#include <xo/facet/typeseq.hpp>
+
+{% for line in facet_pretext %}
+{{line}}
+{% endfor %}
+
+namespace {{facet_ns1}} {
+namespace {{facet_ns2}} {
+
+using Copaque = const void *;
+using Opaque = void *;
+
+/**
+{{abstract_facet_doc}}
+**/
+class {{abstract_facet}} {
+public:
+    {% if using_dox %}
+    /** @defgroup {{facet_ns2}}-{{facet_name_lc}}-type-traits **/
+    ///@{
+    {% endif %}
+    // types
+    /** integer identifying a type **/
+    using typeseq = xo::facet::typeseq;
+    using Copaque = const void *;
+    using Opaque = void *;
+    {% for ty in types %}
+    /** {{ty.doc}} **/
+    using {{ty.name}} = {{ty.definition}};
+    {% endfor %}
+    {% if using_dox %}
+    ///@}
+    {% endif %}
+
+    {% if using_dox %}
+    /** @defgroup {{facet_ns2}}-{{facet_name_lc}}-methods **/
+    ///@{
+    {% endif %}
+    // const methods
+    /** An uninitialized {{abstract_facet}} instance will have zero vtable pointer (per {linux,osx} abi).
+     *  Use case for this is narrow. We go to some lengths to avoid null vtable pointers. For example
+     *  obj<AFacet> will have non-null vtable (via IFacet_Any) with all methods terminating.
+     **/
+    bool _has_null_vptr() const noexcept { return *reinterpret_cast<const void * const *>(this) == nullptr; }
+    /** RTTI: unique id# for actual runtime data representation **/
+    virtual typeseq _typeseq() const noexcept = 0;
+    /** destroy instance @p d; calls c++ dtor only for actual runtime type; does not recover memory **/
+    virtual void _drop(Opaque d) const noexcept = 0;
+    {% for md in const_methods %}
+    /** {{md.doc}} **/
+    virtual {{md.return_type}} {{md.name}}({{md.args | args}}) {{md | qualifiers}} = 0;
+    {% endfor %}
+
+    // nonconst methods
+    {% for md in nonconst_methods %}
+    /** {{md.doc}} **/
+    virtual {{md.return_type}} {{md.name}}({{md.args | args}}) {{md | qualifiers}} = 0;
+    {% endfor %}
+    {% if using_dox %}
+    ///@}
+    {% endif %}
+}; /*{{abstract_facet}}*/
+
+/** Implementation {{iface_facet}}_DRepr of {{abstract_facet}} for state DRepr
+ *  should provide a specialization:
+ *
+ *    template <>
+ *    struct xo::facet::FacetImplementation<{{abstract_facet}}, DRepr> {
+ *        using Impltype = {{iface_facet}}_DRepr;
+ *    };
+ *
+ *  then {{iface_facet_impltype}}<DRepr> --> {{iface_facet}}_DRepr
+ **/
+template <typename DRepr>
+using {{iface_facet_impltype}} = xo::facet::FacetImplType<{{abstract_facet}}, DRepr>;
+
+} /*namespace {{facet_ns2}}*/
+} /*namespace {{facet_ns1}}*/
+
+/* {{abstract_facet_fname}} */

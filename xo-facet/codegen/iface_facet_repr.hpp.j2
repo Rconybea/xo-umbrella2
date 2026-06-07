@@ -1,0 +1,79 @@
+/** @file {{iface_facet_repr_hpp_fname}}
+ *
+ *  Generated automagically from ingredients:
+ *  1. code generator:
+ *       [{{genfacet}}]
+ *     arguments:
+ *       --input [{{genfacet_input}}]
+ *  2. jinja2 template for abstract facet .hpp file:
+ *       [{{ iface_facet_repr_hpp_j2 }}]
+ *  3. idl for facet methods
+ *       [{{ idl_fname }}]
+ **/
+
+#pragma once
+
+#include "{{facet_hpp_fname}}"
+{% for include_fname in facet_includes %}
+#include {{include_fname}}
+{% endfor %}
+#include "{{data_repr_hpp_fname}}"
+
+namespace {{repr_ns1}} { namespace {{repr_ns2}} { class {{iface_facet_repr}}; } }
+
+namespace xo {
+    namespace facet {
+        template <>
+        struct FacetImplementation<{{facet_ns1}}::{{facet_ns2}}::{{abstract_facet}},
+                                   {{repr_ns1}}::{{repr_ns2}}::{{data_repr}}>
+        {
+            using ImplType = {{facet_ns1}}::{{facet_ns2}}::{{iface_facet_xfer}}
+              <{{repr_ns1}}::{{repr_ns2}}::{{data_repr}},
+               {{repr_ns1}}::{{repr_ns2}}::{{iface_facet_repr}}>;
+        };
+    }
+}
+
+namespace {{repr_ns1}} {
+    namespace {{repr_ns2}} {
+        /** @class {{iface_facet_repr}}
+         **/
+        class {{iface_facet_repr}} {
+        public:
+            {% if using_dox %}
+            /** @defgroup {{repr_ns2}}-{{facet_name_lc}}-{{data_repr_lc}}-type-traits **/
+            ///@{
+            {% endif %}
+            {% for ty in types %}
+            using {{ty.name}} = {{facet_ns1}}::{{facet_ns2}}::{{abstract_facet}}::{{ty.name}};
+            {% endfor %}
+            using Copaque = {{facet_ns1}}::{{facet_ns2}}::{{abstract_facet}}::Copaque;
+            using Opaque = {{facet_ns1}}::{{facet_ns2}}::{{abstract_facet}}::Opaque;
+            {% for ty in local_types %}
+            using {{ty.name}} = {{ty.definition}};
+            {% endfor %}
+            {% if using_dox %}
+            ///@}
+            /** @defgroup {{repr_ns2}}-{{facet_name_lc}}-{{data_repr_lc}}-methods **/
+            ///@{
+            {% endif %}
+            // const methods
+            {% for md in const_methods %}
+            /** {{md.doc}} **/
+            static {{md.return_type}} {{md.name}}({{md.args | argimplconst(data_repr)}}){{md | staticqual}};
+            {% endfor %}
+
+            // non-const methods
+            {% for md in nonconst_methods %}
+            /** {{md.doc}} **/
+            static {{md.return_type}} {{md.name}}({{md.args | argimplnonconst(data_repr)}}){{md | staticqual}};
+            {% endfor %}
+            {% if using_dox %}
+            ///@}
+            {% endif %}
+        };
+
+    } /*namespace {{repr_ns2}}*/
+} /*namespace {{repr_ns1}}*/
+
+/* end */
