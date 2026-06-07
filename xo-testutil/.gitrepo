@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:rconybea/xo-testutil.git
+	branch = main
+	commit = 281418da1c5fc6311aa66485f5f883b597c3c467
+	parent = e0acb52c389319202b9860f3c42149e56b84f3e5
+	method = merge
+	cmdver = 0.4.9
