@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:Rconybea/xo-pyreactor.git
+	branch = main
+	commit = 7400b464eca10229c36aa79e2570922f122b8f55
+	parent = 68eefb1b060a53abfbe20ab2a481f2691bf0ddf4
+	method = merge
+	cmdver = 0.4.9
