@@ -13,6 +13,7 @@
 #include <xo/indentlog/print/tag.hpp>
 #include <cassert>
 #include <exception>
+#include <new> // for std::launder()
 #include <sys/mman.h> // for ::munmap()
 #include <unistd.h> // for ::getpagesize()
 #include <string.h> // for ::memset()
@@ -142,7 +143,8 @@ namespace xo {
             return *this;
         }
 
-        DArena::~DArena()
+        void
+        DArena::unmap() noexcept
         {
             if (lo_) {
                 //log && log("unmap [lo,hi)",
@@ -153,15 +155,27 @@ namespace xo {
                 ::munmap(lo_, hi_ - lo_);
             }
 
-            // hygiene
-            lo_            = nullptr;
-            committed_z_   = 0;
-            // checkpoint_ = nullptr;
-            free_          = nullptr;
-            limit_         = nullptr;
-            hi_            = nullptr;
-            error_count_   = 0;
-            last_error_    = AllocError();
+            /* Mandatory hygiene: zero the bookkeeping tail so no dangling
+             * pointers survive (e.g. after ~DArena() runs the dtor of a
+             * stack-owned arena).  config_, page_z_, arena_align_z_ are
+             * preserved -- only {lo_ .. last_error_} get cleared.
+             *
+             * The memset goes through a std::launder'd self pointer so the
+             * compiler cannot prove it writes to the dying object and elide
+             * the stores as dead (gcc>=15 does that with a plain member
+             * assignment / un-laundered memset at -O1).  All cleared fields
+             * are trivially-copyable, so byte-zeroing them is well-defined.
+             */
+            DArena * self = std::launder(this);
+            byte * tail = reinterpret_cast<byte *>(&self->lo_);
+            byte * end  = reinterpret_cast<byte *>(self) + sizeof(DArena);
+
+            ::memset(tail, 0, end - tail);
+        }
+
+        DArena::~DArena()
+        {
+            this->unmap();
         }
 
         auto

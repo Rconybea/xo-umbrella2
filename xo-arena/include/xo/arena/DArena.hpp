@@ -241,6 +241,22 @@ namespace xo {
              **/
             void clear() noexcept;
 
+            /** release backing memory and reset bookkeeping to the empty state.
+             *
+             *  Unmaps [@ref lo_, @ref hi_) (if mapped) and zeroes the bookkeeping
+             *  fields {lo_, committed_z_, last_header_, free_, limit_, hi_,
+             *  error_count_, last_error_}.  @ref config_ (and page_z_/arena_align_z_)
+             *  are left intact.
+             *
+             *  Idempotent: a second call is a no-op (lo_ has been cleared).
+             *  Invoked by ~DArena(); also safe to call on a live arena.
+             *
+             *  Note: application code must not rely on observing the zeroed state
+             *  after destruction (that would be UB) -- the zeroing is defensive,
+             *  to avoid leaving dangling pointers behind.
+             **/
+            void unmap() noexcept;
+
             /** swap contents (including configuration) with another arena **/
             void swap(DArena & other) noexcept;
 
