@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:Rconybea/xo-callback.git
 	branch = main
-	commit = 4e1849c726ce3e6addbeb1cc8b3b67051eebf833
-	parent = 20b0588db28420ee3652f8a25008256f506b18b0
+	commit = 7a8070b26b620ec6c759b752cd7e7ccb27435f40
+	parent = 3b12f43edba54c287400e26ae48f90f52a3f12d1
 	method = merge
 	cmdver = 0.4.9
