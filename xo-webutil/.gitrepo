@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:Rconybea/xo-webutil.git
 	branch = main
-	commit = 4dabd13a89292b22ac026d717c1371eac4435aab
-	parent = 25bfd73a9b46c67085bcf7d86ae9c2384a6e52fc
+	commit = 74dfce3cdec813ad01331e51e3f406240551e6b9
+	parent = d0e9f777b076bccdde374c51cbd266197d84febc
 	method = merge
 	cmdver = 0.4.9
