@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:Rconybea/xo-pyprintjson.git
+	branch = main
+	commit = 18e7c12d06b4d1ca15b2e87b409c8681a15c503a
+	parent = eb90400999eb7b2fed07c6917444177964b4b647
+	method = merge
+	cmdver = 0.4.9
