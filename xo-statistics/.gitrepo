@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:Rconybea/xo-statistics.git
 	branch = main
-	commit = 602f67e7438fb34b31b8c90937665eedc35abd73
-	parent = 18105fc8db67f66dc49c69d2038b9a5c36f970b6
+	commit = 2e7f8fa9daff7eaa4e883b69bac54816d8babf83
+	parent = e7da5720f7f42a249ec4d091a823d76eb7fa2ed5
 	method = merge
 	cmdver = 0.4.9
