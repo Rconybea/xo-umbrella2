@@ -1,0 +1,131 @@
+/** @file DSequenceExpr.cpp
+ *
+ *  @author Roland Conybeare, Jan 2026
+ **/
+
+#include "DSequenceExpr.hpp"
+#include "detail/IExpression_DSequenceExpr.hpp"
+#include <xo/object2/Array.hpp>
+#include <xo/alloc2/GCObject.hpp>
+#include <xo/alloc2/Allocator.hpp>
+#include <xo/printable2/Printable.hpp>
+#include <xo/facet/FacetRegistry.hpp>
+#include <xo/facet/obj.hpp>
+#include <xo/reflectutil/typeseq.hpp>
+
+namespace xo {
+    using xo::mm::AGCObject;
+    using xo::print::APrintable;
+    using xo::facet::FacetRegistry;
+    using xo::reflect::typeseq;
+
+    namespace scm {
+
+        DSequenceExpr::DSequenceExpr() = default;
+
+        DSequenceExpr::DSequenceExpr(DArray * xv)
+            : expr_v_{xv}
+        {}
+
+        obj<AExpression,DSequenceExpr>
+        DSequenceExpr::make_empty(obj<AAllocator> mm)
+        {
+            return obj<AExpression,DSequenceExpr>(_make_empty(mm));
+        }
+
+        DSequenceExpr *
+        DSequenceExpr::_make_empty(obj<AAllocator> mm)
+        {
+            void * mem = mm.alloc(typeseq::id<DSequenceExpr>(),
+                                  sizeof(DSequenceExpr));
+
+            DSequenceExpr * expr = new (mem) DSequenceExpr();
+
+            constexpr size_type c_hint_capacity = 8;
+
+            /** allocate 2nd, so it comes after DSequenceExpr in
+             *  memory.  This may later allow realloc
+             **/
+            DArray * expr_v = DArray::_empty(mm,
+                                             c_hint_capacity);
+
+            expr->expr_v_ = expr_v;
+
+            return expr;
+        }
+
+        auto
+        DSequenceExpr::size() const noexcept -> size_type
+        {
+            return expr_v_->size();
+        }
+
+        obj<AExpression>
+        DSequenceExpr::operator[](std::size_t i) const
+        {
+            obj<AGCObject> gco = (*expr_v_)[i];
+
+            return FacetRegistry::instance().variant<AExpression,AGCObject>(gco);
+        }
+
+        void
+        DSequenceExpr::push_back(obj<AAllocator> mm,
+                                 obj<AExpression> expr)
+        {
+            if (expr_v_->size() == expr_v_->capacity()) {
+                /* reallocate+expand */
+
+                DArray * expr_2x_v
+                    = DArray::_empty(mm, 2 * expr_v_->capacity());
+
+                for (size_type i = 0, z = expr_v_->size(); i < z; ++i) {
+                    expr_2x_v->push_back(mm, (*expr_2x_v)[i]);
+                }
+
+                this->expr_v_ = expr_2x_v;
+            }
+
+            obj<AGCObject> expr_gco = expr.to_facet<AGCObject>();
+
+            this->expr_v_->push_back(mm, expr_gco);
+        }
+
+        void
+        DSequenceExpr::assign_valuetype(TypeDescr td) noexcept
+        {
+            typeref_.resolve(td);
+        }
+
+        bool
+        DSequenceExpr::pretty(const ppindentinfo & ppii) const
+        {
+            using xo::print::ppstate;
+
+            auto expr_v_pr = obj<APrintable,DArray>(expr_v_);
+
+            return ppii.pps()->pretty_struct
+                (ppii,
+                 "DSequenceExpr",
+                 refrtag("expr_v", expr_v_pr));
+        }
+
+        // gc hooks for IGCObject_DSequenceExpr
+
+        DSequenceExpr *
+        DSequenceExpr::gco_shallow_move(obj<AGCObjectVisitor> gc) noexcept
+        {
+            return gc.std_move_for(this);
+        }
+
+        void
+        DSequenceExpr::visit_gco_children(VisitReason reason, obj<AGCObjectVisitor> gc) noexcept
+        {
+            typeref_.visit_gco_children(reason, gc);
+
+            gc.visit_child(reason, &expr_v_);
+        }
+
+    } /*namespace scm*/
+} /*namespace xo*/
+
+/* end DSequenceExpr.cpp */
