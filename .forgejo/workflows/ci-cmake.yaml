@@ -23,7 +23,7 @@ jobs:
           echo "::group::xo-cmake build (no-op)"
           cmake --build .build/xo-cmake
           echo "::endgroup"
-          echo "::groupo::xo-cmake install"
+          echo "::group::xo-cmake install"
           cmake --install .build/xo-cmake
           echo "::endgroup"
 
