@@ -1,0 +1,29 @@
+name: cmake-docker
+# Verifies a plain (non-nix) cmake build works inside docker-xo-builder.
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  cmake-build:
+    runs-on: xo-builder
+    steps:
+      - name: checkout
+        run: |
+          git clone --quiet --depth=1 $GITHUB_SERVER_URL/roland/xo-umbrella2.git .
+
+      - name: build xo-cmake
+        run: |
+          PREFIX=$PWD/local
+          cmake -S xo-cmake -B .build/xo-cmake -DCMAKE_INSTALL_PREFIX=$PREFIX
+          cmake --build .build/xo-cmake
+          cmake --install .build/xo-cmake
+
+      - name: build xo-indentlog
+        run: |
+          PREFIX=$PWD/local
+          PATH=$PREFIX/bin:$PATH
+          cmake -S xo-indentlog -B .build/xo-indentlog -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_PREFIX_PATH=$PREFIX
+          cmake --build .build/xo-indentlog
+          cmake --install .build/xo-indentlog
