@@ -13,10 +13,13 @@ jobs:
         run: |
           git clone --quiet --depth=1 $GITHUB_SERVER_URL/roland/xo-umbrella2.git .
 
-      - name: build xo-cmake
+      - name: bootstrap xo-cmake
         run: |
-          PREFIX=$PWD/local
+          PREFIX=${{github.workspace}}/local
+          mkdir -p ${PREFIX}
+          echo "::group::xo-cmake configure"
           cmake -S xo-cmake -B .build/xo-cmake -DCMAKE_INSTALL_PREFIX=$PREFIX
+          echo "::endgroup"
           cmake --build .build/xo-cmake
           cmake --install .build/xo-cmake
 
