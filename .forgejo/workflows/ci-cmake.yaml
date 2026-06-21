@@ -20,13 +20,28 @@ jobs:
           echo "::group::xo-cmake configure"
           cmake -S xo-cmake -B .build/xo-cmake -DCMAKE_INSTALL_PREFIX=$PREFIX
           echo "::endgroup"
+          echo "::group::xo-cmake build (no-op)"
           cmake --build .build/xo-cmake
+          echo "::endgroup"
+          echo "::groupo::xo-cmake install"
           cmake --install .build/xo-cmake
+          echo "::endgroup"
 
       - name: build xo-indentlog
         run: |
           PREFIX=$PWD/local
           PATH=$PREFIX/bin:$PATH
+          echo "::group::xo-indentlog configure"
           cmake -S xo-indentlog -B .build/xo-indentlog -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_PREFIX_PATH=$PREFIX
+          echo "::endgroup"
+          echo "::group::xo-indentlog build"
           cmake --build .build/xo-indentlog
+          echo "::endgroup"
+          echo "::group::xo-indentlog install"
           cmake --install .build/xo-indentlog
+          echo "::endgroup"
+
+      - name: print install path
+        run: |
+          tree ${{github.workspace}}/local
+          
