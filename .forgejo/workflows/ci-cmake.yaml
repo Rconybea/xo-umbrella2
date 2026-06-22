@@ -15,6 +15,7 @@ jobs:
 
       - name: bootstrap xo-cmake
         run: |
+          exec 2>&1  # merge stdout+stderr
           PREFIX=${{github.workspace}}/local
           mkdir -p ${PREFIX}
 
@@ -32,6 +33,7 @@ jobs:
 
       - name: build xo-indentlog
         run: |
+          exec 2>&1  # merge stdout+stderr
           PREFIX=${{github.workspace}}/local
           PATH=$PREFIX/bin:$PATH
 
