@@ -33,7 +33,6 @@ jobs:
 
       - name: build xo-indentlog
         run: |
-          exec 2>&1  # merge stdout+stderr
           PREFIX=${{github.workspace}}/local
           PATH=$PREFIX/bin:$PATH
 
@@ -42,11 +41,11 @@ jobs:
           echo "::endgroup::"
 
           echo "::group::xo-indentlog build"
-          xo-build --build xo-indentlog
+          xo-build --build xo-indentlog 2>&1
           echo "::endgroup::"
 
           echo "::group::xo-indentlog utest"
-          ctest --test-dir xo-indentlog/.build
+          ctest --test-dir xo-indentlog/.build 
           echo "::endgroup::"
 
           echo "::group::xo-indentlog install"
