@@ -31,6 +31,27 @@ jobs:
           cmake --install .build/xo-cmake
           echo "::endgroup::"
 
+      - name: build xo-subsys
+        run: |
+          PREFIX=${{github.workspace}}/local
+          PATH=$PREFIX/bin:$PATH
+
+          echo "::group::xo-subsys configure"
+          xo-build --configure --with-utests --with-examples xo-subsys 
+          echo "::endgroup::"
+
+          echo "::group::xo-subsys build"
+          xo-build --build xo-subsys 2>&1
+          echo "::endgroup::"
+
+          echo "::group::xo-subsys utest"
+          ctest --test-dir xo-subsys/.build 
+          echo "::endgroup::"
+
+          echo "::group::xo-subsys install"
+          xo-build --install xo-subsys
+          echo "::endgroup::"
+
       - name: build xo-indentlog
         run: |
           PREFIX=${{github.workspace}}/local
