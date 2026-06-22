@@ -6,9 +6,12 @@
 Source
 ======
 
-Source code for XO is on github `here`_
+Source code for XO available at:
+- github `here_github`_
+- forgejo `here_forgejo`_
 
-.. _here: https://github.com/rconybea/xo-umbrella2
+.. _here_github: https://github.com/rconybea/xo-umbrella2
+.. _here_forgejo: https://conybeare.us/git/roland/xo-umbrella2
 
 This repo contains source to all the XO libraries,  in the most convenient form for
 building + installing all XO libraries, or developing changes to XO itself.
@@ -32,6 +35,19 @@ XO dependencies (if you're using nix, it will assemble these for you)
 - eigen
 - catch2
 - pybind11
+- json5
+- jinja2  
+- replxx
+- libunwind
+
+XO imgui needs also:
+
+- vulkan
+- moltenvk (for darwin/osx)
+- SDL2
+- glew
+- libGL  
+- dejavu fonts
 
 XO documentation requires:
 
@@ -208,6 +224,20 @@ To run address sanitizer
 
     # phase 2
     $ cmake -B .build -S . -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_BUILD_TYPE=asan
+
+
+Documentation Setup
+-------------------
+
+To build documentation:
+
+.. code-block::
+
+    # can reuse phase 1 cmake-macros-install
+
+	# phase 2
+	$ cmake -B .build -S . -DCMAKE_INSTALL_PREFIX=$PREFIX -DXO_ENABLE_DOCS=1
+	
 
 Sphinx Autobuild Setup
 ----------------------

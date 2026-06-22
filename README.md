@@ -229,6 +229,10 @@ xo-umbrella2/
 +- Doxyfile.in                    doxygen config template; cmake will prepare Doxyfile in build dir
 +- _static/                       static inputs to sphinx
 |
++- doc
+|  +- glossary.rst                glossary for umbrella documentation
+|  \- install.rst                 umbrella install instructions
+|
 +- etc
 |  +- hostegl/                    sample video driver symlinks for WSL2
 |  \- hostubuntu/                 sample video driver symlinks for ubuntu
