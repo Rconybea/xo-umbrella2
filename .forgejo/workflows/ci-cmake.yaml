@@ -37,6 +37,9 @@ jobs:
           echo "::group::xo-indentlog build"
           cmake --build .build/xo-indentlog
           echo "::endgroup::"
+          echo "::group::xo-indentlog utest"
+          ctest --test-dir .build/xo-indentlog
+          echo "::endgroupo::"
           echo "::group::xo-indentlog install"
           cmake --install .build/xo-indentlog
           echo "::endgroup::"
