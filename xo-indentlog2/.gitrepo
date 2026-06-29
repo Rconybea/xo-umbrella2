@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:Rconybea/xo-indentlog2.git
+	branch = main
+	commit = 02dd11ddd3f9df96d0da2c33bfab07139fd66adf
+	parent = f17b38a578e912f98924ca3f5663fdfa6e0b8b4e
+	method = merge
+	cmdver = 0.4.9
