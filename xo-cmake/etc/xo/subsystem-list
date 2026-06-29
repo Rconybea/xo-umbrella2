@@ -5,6 +5,7 @@ xo-randomgen
 xo-flatstring
 xo-reflectutil
 xo-arena
+xo-indentlog2
 xo-facet
 xo-printable2
 xo-testutil
@@ -58,4 +59,3 @@ xo-pyprocess
 xo-kalmanfilter
 xo-pykalmanfilter
 xo-imgui
-
