@@ -75,6 +75,8 @@ let
 
   # emacs
   emacs4xo = (pkgs.emacsPackagesFor pkgs.emacs30).emacsWithPackages (epkgs: with epkgs; [
+    org-roam
+    org-roam-ui
     lsp-mode
     lsp-ui
     lsp-ivy
