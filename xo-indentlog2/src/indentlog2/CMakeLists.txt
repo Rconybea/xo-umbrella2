@@ -5,7 +5,7 @@ set(SELF_SRCS
     LogBuffer.cpp
 )
 
-xo_add_shared_library(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 ${SELF_SRCS})
+xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 ${SELF_SRCS})
 xo_install_include_tree3(include/xo/indentlog2)
 
 # ----------------------------------------------------------------

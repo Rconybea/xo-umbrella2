@@ -85,6 +85,7 @@ add_subdirectory(xo-flatstring)
 add_subdirectory(xo-randomgen)    # xoshiro256ss
 add_subdirectory(xo-reflectutil)  # header-only reflect support
 add_subdirectory(xo-arena)        # arena allocator (DArena)
+add_subdirectory(xo-indentlog2)   # arena-backed version of indentlog
 add_subdirectory(xo-facet)        # sep iface,data
 add_subdirectory(xo-printable2)   # experiment w/ facet object model (fomo)
 add_subdirectory(xo-testutil)     # unit test aux functions
@@ -103,11 +104,11 @@ add_subdirectory(xo-tokenizer2)   # schematika tokenizer (w/ fomo)
 add_subdirectory(xo-expression2)  # schematika expressions (fomo)
 #
 add_subdirectory(xo-allocutil)    # xo-alloc api
-add_subdirectory(xo-alloc)        # arena allocator + incremental gc
 add_subdirectory(xo-ratio)
-add_subdirectory(xo-unit)
-add_subdirectory(xo-pyunit)
+add_subdirectory(xo-unit)         # constexpr dimension checking
 add_subdirectory(xo-callback)
+add_subdirectory(xo-alloc)        # arena allocator + incremental gc
+add_subdirectory(xo-pyunit)
 #add_subdirectory(xo-reflect2)     # experiment w/ facet object model
 add_subdirectory(xo-object)
 add_subdirectory(xo-ordinaltree)

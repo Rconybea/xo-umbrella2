@@ -5,10 +5,11 @@
 
 #pragma once
 
-#include "Object.hpp"
+#include "xo/object/object.hpp"
 #include "xo/reflect/Reflect.hpp"
-//#include "xo/reflect/TaggedPtr.hpp"
 #include "xo/reflect/TypeDrivenMap.hpp"
+#include "xo/allocutil/IAlloc.hpp"
+#include "xo/allocutil/gc_ptr.hpp"
 
 namespace xo {
     namespace obj {
@@ -89,7 +90,7 @@ namespace xo {
              *  throw exception if no converter available, and @p throw_flag set.
              **/
             template <typename T>
-            gp<Object> to_object(IAlloc * mm, const T & x, bool throw_flag);
+            gp<xo::Object> to_object(IAlloc * mm, const T & x, bool throw_flag);
 
             /** convert object @p obj to tagged pointer, with typeid @target_id.
              *  Allocates memory only from @p mm.

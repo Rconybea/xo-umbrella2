@@ -28,6 +28,7 @@
 #include <xo/indentlog/print/tag.hpp>
 
 #include <catch2/catch.hpp>
+#include <unistd.h>  // for getpagesize() on osx
 
 namespace ut {
     using xo::S_gc_tag;

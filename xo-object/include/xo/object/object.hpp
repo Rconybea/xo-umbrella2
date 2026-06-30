@@ -198,6 +198,7 @@ namespace xo {
              **/
             std::uint64_t value_ = 0;
         };
+
     } /*namespace obj*/
 } /*namespace xo*/
 

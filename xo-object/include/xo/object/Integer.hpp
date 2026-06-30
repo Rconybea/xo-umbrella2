@@ -7,12 +7,14 @@
 
 #include "Number.hpp"
 #include "ObjectConversion.hpp"
+#include "xo/reflect/TaggedPtr.hpp"
 #include "xo/indentlog/print/tag.hpp"
 
 namespace xo {
     namespace obj {
         class Integer : public Number  {
         public:
+            using TaggedPtr = xo::reflect::TaggedPtr;
             using IAlloc = xo::gc::IAlloc;
             using int_type = long long;
 

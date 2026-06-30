@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "Object.hpp"
+#include "xo/object/object.hpp"
 
 namespace xo {
     namespace obj {

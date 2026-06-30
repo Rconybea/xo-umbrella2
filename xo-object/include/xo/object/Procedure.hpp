@@ -5,7 +5,8 @@
 
 #pragma once
 
-#include "Object.hpp"
+#include "xo/alloc/Object.hpp"
+#include "xo/allocutil/gc_ptr.hpp"
 #include "CVector.hpp"
 
 namespace xo {
@@ -14,6 +15,9 @@ namespace xo {
     namespace obj {
         /** @class ProcedureInterface
          *  @brief Interface to a dynamically-typed procedure
+         *
+         *  Note: like the other boxed xo::obj types (Boolean, String, ...)
+         *  this is a GC-collectable xo::Object, *not* xo::reflect::Object.
          **/
         class Procedure : public Object {
         public:
