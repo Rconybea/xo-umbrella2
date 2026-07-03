@@ -1,4 +1,7 @@
-/* file alloc2_utest_main.cpp */
+/** @file indentlog2_utest_main.cpp
+ *
+ *  @author Roland Conybeare, Jul 2026
+ **/
 
 // note: do NOT define CATCH_CONFIG_RUNNER/CATCH_CONFIG_MAIN here.  The catch2
 //       implementation (registry + session runner) is compiled once, in
@@ -23,7 +26,7 @@ namespace xo {
 int
 main(int argc, char* argv[])
 {
-    return xo::UtestAppStart("utest.alloc2").run(argc, argv);
+    return xo::UtestAppStart("utest.indentlog2").run(argc, argv);
 }
 
-/* end alloc2_utest_main.cpp */
+/* end indentlog2_utest_main.cpp */

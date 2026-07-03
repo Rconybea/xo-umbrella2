@@ -7,8 +7,15 @@
 
 #include "UtestConfig.hpp"
 
-// caller must define CATCH_CONFIG_RUNNER
+// note: caller must define CATCH_CONFIG_EXTERNAL_INTERFACES (not
+//       CATCH_CONFIG_RUNNER/CATCH_CONFIG_MAIN) before including this header:
+//       we need Catch::TestEventListenerBase + CATCH_REGISTER_LISTENER, but
+//       the catch2 runtime implementation must be compiled exactly once, in
+//       libxo_testutil (UtestAppStart.cpp).  Defining CATCH_CONFIG_RUNNER in a
+//       test executable compiles a second copy of the runtime -> a separate
+//       test registry the runner never sees (esp. on osx; see UtestAppStart).
 #include <catch2/catch.hpp>
+#include <iostream>
 
 namespace xo {
 

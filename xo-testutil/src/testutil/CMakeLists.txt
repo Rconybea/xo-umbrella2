@@ -5,6 +5,7 @@ set(SELF_SRCS
     UtestAppStart.cpp
     UtestConfig.cpp
     Utest.cpp
+    UtestRehearser.cpp
 )
 
 xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 ${SELF_SRCS})

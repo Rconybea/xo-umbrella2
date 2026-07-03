@@ -85,10 +85,10 @@ add_subdirectory(xo-flatstring)
 add_subdirectory(xo-randomgen)    # xoshiro256ss
 add_subdirectory(xo-reflectutil)  # header-only reflect support
 add_subdirectory(xo-arena)        # arena allocator (DArena)
+add_subdirectory(xo-testutil)     # unit test aux functions
 add_subdirectory(xo-indentlog2)   # arena-backed version of indentlog
 add_subdirectory(xo-facet)        # sep iface,data
 add_subdirectory(xo-printable2)   # experiment w/ facet object model (fomo)
-add_subdirectory(xo-testutil)     # unit test aux functions
 add_subdirectory(xo-alloc2)       # arena api (fomo)
 add_subdirectory(xo-refcnt)
 add_subdirectory(xo-pyutil)

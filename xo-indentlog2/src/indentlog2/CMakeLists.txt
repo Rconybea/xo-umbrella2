@@ -2,6 +2,7 @@
 
 set(SELF_LIB xo_indentlog2)
 set(SELF_SRCS
+    LineState.cpp
     LogBuffer.cpp
 )
 
