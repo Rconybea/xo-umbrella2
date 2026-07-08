@@ -81,6 +81,23 @@ let
     });
   };
 
+  # lato:
+  # 1. upstream moved the zip /download/ -> /files/ (fixed in nixpkgs master),
+  #    -> Track new URL
+  # 2. latofonts.com now bot-blocks the default fetcher UA (403).
+  #    -> supply user agent
+  #
+  lato-overlay = final: prev: {
+    lato = prev.lato.overrideAttrs (old: {
+      src = final.fetchzip {
+        url = "https://www.latofonts.com/files/Lato2OFL.zip";
+        stripRoot = false;
+        curlOptsList = [ "--user-agent" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36" ];
+        hash = "sha256-n1TsqigCQIGqyGLGTjLtjHuBf/iCwRlnqh21IHfAuXI=";
+      };
+    });
+  };
+
   # tests excruciatingly slow
   mailutils-overlay = self: super: {
     mailutils = super.mailutils.overrideAttrs (old: {
