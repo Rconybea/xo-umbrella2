@@ -138,15 +138,20 @@ let
     ];
   };
 
-  # igraph (python): dockerTools.buildLayeredImage's flatten-references-graph
-  # helper depends on python igraph at runtime. igraph's runtime deps are tiny
-  # (texttable), but it declares optional-dependencies for plotting (plotly,
-  # matplotlib, cairocffi). buildPythonPackage propagates those into the build
-  # closure (independent of doCheck), so plotly drags in scikit-image -> a
-  # ~150-derivation from-source closure (django, selenium, arrow-cpp, fbthrift,
-  # watchman, ...) just to build a docker image. Drop the optional plotting
-  # extras and skip tests; igraph's runtime behaviour (graph algorithms) is
-  # unaffected, only its optional plotting backends go away.
+  # igraph:
+  # 1. dockerTools.buildLayeredImage's flatten-references-graph
+  #    helper depends on python igraph at runtime.
+  # 2. igraph's runtime deps are tiny (texttable)
+  #    but it declares optional-dependencies for plotting
+  #    (plotly, matplotlib, cairocffi).
+  # 3. Optional deps buildPythonPackage propagate into the build
+  #    closure via buildPythonPackage, drags in monster
+  #    scikit-image with django + selenium + arrow-cpp + fbthrift + ..
+  # 4. We just want ability to build docker images, so drop the
+  #    plotting deps + skip tests.
+  #
+  # Could in future apply this overlay only to dockerTools
+  #
   igraph-overlay = final: prev: {
     pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
       (pyfinal: pyprev: {
@@ -176,13 +181,6 @@ let
   # ghostty tests require ptys
   ghostty-overlay = self: super: {
     ghostty = super.ghostty.overrideAttrs (old: {
-      doCheck = false;
-    });
-  };
-
-  # fish tests require ptys
-  fish-overlay = self: super: {
-    fish = super.fish.overrideAttrs (old: {
       doCheck = false;
     });
   };
