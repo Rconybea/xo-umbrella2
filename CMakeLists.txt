@@ -27,6 +27,9 @@ set(XO_SUBMODULE_BUILD True)
 # global build settings
 
 include(GNUInstallDirs)
+
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/xo-cmake/cmake)
+
 include(cmake/xo-bootstrap-macros.cmake)
 
 # toplevel source directory;  used only with XO_SUBMODULE_BUILD
@@ -34,8 +37,6 @@ set(XO_UMBRELLA_SOURCE_DIR ${CMAKE_SOURCE_DIR})
 set(XO_UMBRELLA_REPO_SUBDIR .)
 # toplevel binary directory;  used only with XO_SUBMODULE_BUILD
 set(XO_UMBRELLA_BINARY_DIR ${CMAKE_BINARY_DIR})
-
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/xo-cmake/cmake)
 
 xo_cxx_toplevel_options3()
 
