@@ -66,6 +66,21 @@ let
     });
   };
 
+  # salsa upstream/1.36 tag was re-pointed and dropped `wrapawk`
+  # (release-tarball-only, never committed).
+  # Use the canonical Debian orig tarball from snapshot.debian.org:
+  # permanent + content-addressed by file hash, so can't drift.
+  #
+  fakeroot-overlay = final: prev: {
+    fakeroot = prev.fakeroot.overrideAttrs (old: {
+      src = final.fetchzip {
+        url = "https://snapshot.debian.org/file/ea895c6632fcf1b38cc84987d1b4daf833ffd430";
+        extension = "tar.gz";   # snapshot URLs carry no extension, we must apply ourselves
+        hash = "sha256-0vM8SsJ+uqp2kAot0/NF/8e/YJX81rlnEdXdgLbyRhc=";
+      };
+    });
+  };
+
   # tests excruciatingly slow
   mailutils-overlay = self: super: {
     mailutils = super.mailutils.overrideAttrs (old: {
@@ -102,9 +117,13 @@ in
   libqmi-overlay
   fop-overlay
   node-overlay
+  fakeroot-overlay
+  lato-overlay
+  plotly-overlay
+  flasgger-overlay
+  igraph-overlay
   swtpm-overlay
   mailutils-overlay
   notmuch-overlay
   ghostty-overlay
-  fish-overlay
 ]
