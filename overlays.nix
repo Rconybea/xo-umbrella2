@@ -138,6 +138,27 @@ let
     ];
   };
 
+  # igraph (python): dockerTools.buildLayeredImage's flatten-references-graph
+  # helper depends on python igraph at runtime. igraph's runtime deps are tiny
+  # (texttable), but it declares optional-dependencies for plotting (plotly,
+  # matplotlib, cairocffi). buildPythonPackage propagates those into the build
+  # closure (independent of doCheck), so plotly drags in scikit-image -> a
+  # ~150-derivation from-source closure (django, selenium, arrow-cpp, fbthrift,
+  # watchman, ...) just to build a docker image. Drop the optional plotting
+  # extras and skip tests; igraph's runtime behaviour (graph algorithms) is
+  # unaffected, only its optional plotting backends go away.
+  igraph-overlay = final: prev: {
+    pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
+      (pyfinal: pyprev: {
+        igraph = pyprev.igraph.overridePythonAttrs (old: {
+          doCheck = false;
+          nativeCheckInputs = [];
+          optional-dependencies = {};
+        });
+      })
+    ];
+  };
+
   # tests excruciatingly slow
   mailutils-overlay = self: super: {
     mailutils = super.mailutils.overrideAttrs (old: {
