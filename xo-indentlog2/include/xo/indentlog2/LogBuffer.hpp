@@ -10,18 +10,20 @@
 
 namespace xo {
     using CharBuffer = xo::mm::DArena;
-    //using CharBuffer = xo::mm::DArenaVector<char>;
 
     /** @brief Arena-backed buffer storage for logging and pretty printing **/
     class LogBuffer {
-        // Adapted from xo::log_streambuf.
-        // 1. Keeping the stateful part
-        // 2. Detaching the streambuf inheritance
-        // 3. Dropping the CharT parameter, just need utf8
+        // Originally adapted from xo::log_streambuf, with changes:
+        // 1. Use DArena for memory.
+        // 2. Accounting in separate class (LineState, q.v.).
+        // 3. Explicit buffer pointers.
+        // 4. Make streambuf dependency optional (see LogStreambuf)
+        // 5. Dropping the CharT parameter, focus utf8
     public:
         using ArenaConfig = xo::mm::ArenaConfig;
         using DArena = xo::mm::DArena;
         using Span = LineState::Span; // = xo::mm::span<char>;
+        using ConstSpan = LineState::ConstSpan; // = xo::mm::span<const char>;
         using MemorySizeVisitor = xo::mm::MemorySizeVisitor;
         using size_t = std::size_t;
 
@@ -29,9 +31,14 @@ namespace xo {
         LogBuffer(const ArenaConfig & config, bool debug_flag);
 
         bool debug_flag() const { return debug_flag_; }
+        size_t lpos() const { return lstate_.lpos(); }
 
         /** allocated buffer extent available to hold content (allocated + available) **/
         Span committed_span();
+        /** used buffer extent **/
+        Span used_span();
+        /** available (contiguous) buffer extent **/
+        Span available_span();
 
         /** visit mapped storage pools; include LogBuffer because it's arena-backed **/
         void visit_pools(const MemorySizeVisitor & fn) const;
@@ -41,10 +48,18 @@ namespace xo {
          **/
         bool expand_to(size_t new_z);
 
+        /** write newline and @p indent spaces **/
+        void newline_indent(uint32_t indent);
+        /** write span @p x to buffer **/
+        void write_span(ConstSpan x);
+
         /** reset to nominal state, ready to receive output,
          *  but with no buffered content. Also resets @ref lstate_
          **/
         void reset_buffer();
+
+        /** require room for @p x chars **/
+        bool _require_avail(uint32_t x);
 
         /** synchronize line accountant @ref lstate_ when dirty
          *  (because chars possibly added to @ref buf_v_)
@@ -61,6 +76,8 @@ namespace xo {
         DArena::Checkpoint buf_ckp_;
         /** start of usable buffered memory **/
         char * pbase_ = nullptr;
+        /** current write pointer **/
+        char * pptr_ = nullptr;
         /** end of usable buffered memory (can be expanded) **/
         char * epptr_ = nullptr;
         /** line state computed incrementally from contents of @ref buf_v_ **/

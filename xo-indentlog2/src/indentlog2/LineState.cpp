@@ -78,7 +78,7 @@ namespace xo {
     {
         if ((*p == '\n') || (*p == '\r')) {
             this->solpos_ = (p+1 - p0);
-            /* reset, since these chars relevant as correction to solpos */
+            /* reset, since these chars only relevant as correction to solpos */
             this->color_escape_chars_ = 0;
             /* -> incomplete color escape, broken by newline */
             this->color_escape_start_ = -1;

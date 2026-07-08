@@ -109,8 +109,10 @@ namespace xo {
         /* ansi  : 30..37, 90..97
          * xterm : 0..255
          *   see [[https://i.stack.imgur.com/KTSQa.png]]
-         *   0..7               standard colors (muted: grey, red, green, yellow, blue, pink, cyan, white)
-         *   8..15              high-intensity colors (grey, red, green, yellow, blue, pink, cyan, white)
+         *   0..7               standard colors
+         *                      (muted: grey, red, green, yellow, blue, pink, cyan, white)
+         *   8..15              high-intensity colors
+         *                      (grey, red, green, yellow, blue, pink, cyan, white)
          *   16..51             chooses hue
          *   16..51 + (0..5)x36 increases whiteness
          * rgb   : r={hi 8 bits}, g={mid 8 bits}, b={lo 8 bits}

@@ -2,8 +2,12 @@
 
 set(SELF_LIB xo_indentlog2)
 set(SELF_SRCS
-    LineState.cpp
+    # LogStreambuf.cpp
     LogBuffer.cpp
+    PrettyPrinter.cpp
+    LineState.cpp
+    PpToken.cpp
+    PpConfig.cpp
 )
 
 xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 ${SELF_SRCS})

@@ -4,6 +4,7 @@
  **/
 
 #include "LogBuffer.hpp"
+#include <cstring>
 
 namespace xo {
     using xo::mm::ArenaConfig;
@@ -11,7 +12,7 @@ namespace xo {
 
     LogBuffer::LogBuffer(const ArenaConfig & config, bool debug_flag)
         : buf_v_{CharBuffer::map(config)},
-          pbase_{nullptr}, epptr_{nullptr}, lstate_{},
+          pbase_{nullptr}, pptr_{nullptr}, epptr_{nullptr}, lstate_{},
           debug_flag_{debug_flag}
     {
         // buf_v_ always contains one allocation, comprising its entire size
@@ -26,6 +27,18 @@ namespace xo {
     LogBuffer::committed_span() -> Span
     {
         return Span(pbase_, epptr_);
+    }
+
+    auto
+    LogBuffer::used_span() -> Span
+    {
+        return Span(pbase_, pptr_);
+    }
+
+    auto
+    LogBuffer::available_span() -> Span
+    {
+        return Span(pptr_, epptr_);
     }
 
     void
@@ -49,6 +62,7 @@ namespace xo {
             buf_ckp_ = buf_v_.checkpoint();
             pbase_ = (char *)buf_v_.alloc(reflect::typeseq::id<char[]>(), z);
 
+            pptr_ = pbase_;
             epptr_ = pbase_ + z;
         } else {
             /* restore to checkpoint, then allocate */
@@ -63,10 +77,57 @@ namespace xo {
             ok = ok && (pbase_ == pbase0);
             assert(ok);
 
+            // keep pptr_, we reallocated in place
             epptr_ = pbase_ + z;
         }
 
         return ok;
+    }
+
+    bool
+    LogBuffer::_require_avail(uint32_t x)
+    {
+        Span out = this->available_span();
+
+        if (x > out.size()) {
+            auto min_z = this->used_span().size() + x;
+
+            // expand to make room
+            if (!this->expand_to(min_z)) {
+                return false;
+            }
+
+            out = this->available_span();
+        }
+
+        return true;
+    }
+
+    void
+    LogBuffer::newline_indent(uint32_t indent)
+    {
+        if (!this->_require_avail(1 + indent)) {
+            assert(false);
+            return;
+        }
+
+        *(pptr_++) = '\n';
+        ::memset(pptr_, ' ', indent);
+        pptr_ += indent;
+    }
+
+    void
+    LogBuffer::write_span(ConstSpan x)
+    {
+        if (!this->_require_avail(x.size())) {
+            assert(false);
+            return;
+        }
+
+        // here: buffer has enough room now
+
+        ::memcpy(pptr_, x.lo(), x.size());
+        pptr_ += x.size();
     }
 
     void
