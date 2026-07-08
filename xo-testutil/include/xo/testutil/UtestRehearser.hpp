@@ -53,11 +53,16 @@ namespace xo {
         bool ok_flag_ = true;
     };
 
-    /* use this instead of REQUIRE(expr) in context of a test_rehearser */
+    /* use this instead of REQUIRE(expr) in context of a test_rehearser:
+     * - first pass detects errors but instead of triggering test failure, enables second pass.
+     * - second pass has verbose logging, also triggers test failure.
+     */
 #  define REHEARSE(rehearser, expr)                        \
     if ((rehearser).is_first_pass()) {                     \
         bool _f = (expr);                                  \
         (rehearser).ok_flag_ = (rehearser).ok_flag_ && _f; \
+        /* for assertion count when 1st pass succeeds */   \
+        if (_f) REQUIRE(_f);                               \
     } else {                                               \
         REQUIRE(expr);                                     \
     }
