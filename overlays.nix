@@ -118,6 +118,26 @@ let
     ];
   };
 
+  # flasgger:
+  # upstream re-tagged v0.9.7.1 to a commit that already incorporates the
+  # flask-2.3 and py3.12 fixes nixpkgs 25.05 applies as patches.
+  # nixpkgs master pins this exact new content hash.
+  # Adopt the new src and drop the obsolete patches
+  #
+  flasgger-overlay = final: prev: {
+    pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
+      (pyfinal: pyprev: {
+        flasgger = pyprev.flasgger.overrideAttrs (old: {
+          src = final.fetchFromGitHub {
+            owner = "flasgger"; repo = "flasgger"; rev = "v0.9.7.1";
+            hash = "sha256-ULEf9DJiz/S2wKlb/vjGto8VCI0QDcm0pkU5rlOwtiE=";
+          };
+          patches = [];
+        });
+      })
+    ];
+  };
+
   # tests excruciatingly slow
   mailutils-overlay = self: super: {
     mailutils = super.mailutils.overrideAttrs (old: {
