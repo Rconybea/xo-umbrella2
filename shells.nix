@@ -382,6 +382,8 @@ in
     pykalmanfilter = pkgs.xo-pykalmanfilter;
 
     imgui          = pkgs.xo-imgui;
+
+    docker-xo-builder = pkgs.docker-xo-builder;
   };
 
   # works, but only if build with --option sandbox=false

@@ -85,6 +85,9 @@ let
     xo-userenv        = callPackage pkgs/xo-userenv.nix        { stdenv = jitStdenv; };
     xo-userenv-slow   = callPackage pkgs/xo-userenv-slow.nix   { stdenv = jitStdenv;
                                                                   llvm = llvmPackages1.llvm; };
+    docker-xo-builder = callPackage pkgs/docker-xo-builder.nix { # stdenv = jitStdenv; # not used
+    };
+
     inherit llvmXo;
   };
 
