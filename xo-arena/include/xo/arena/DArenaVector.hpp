@@ -76,6 +76,9 @@ namespace xo {
             const_iterator cend() const noexcept { return this->_address_of(size_); }
             const_iterator end() const noexcept { return this->cend(); }
 
+            T & back() { return *(this->_address_of(size_ - 1)); }
+            const T & back() const { return *(this->_address_of(size_ - 1)); }
+
             constexpr const DArena * store() const { return &store_; }
             constexpr T * data() { return reinterpret_cast<T*>(store_.lo_); }
             constexpr const T * data() const { return reinterpret_cast<const T*>(store_.lo_); }
@@ -102,6 +105,8 @@ namespace xo {
 
             void push_back(T && x);
             void push_back(const T & x);
+
+            void pop_back();
 
             void swap(DArenaVector & other) noexcept;
 
@@ -342,6 +347,22 @@ namespace xo {
                 new (addr) T{x};
 
                 this->size_ = z;
+            }
+        }
+
+        template <typename T>
+        void
+        DArenaVector<T>::pop_back() {
+            if (size_ > 0) [[likely]] {
+                --size_;
+
+                if constexpr (std::is_trivially_destructible_v<T>) {
+                    // nothing to do
+                } else {
+                    T & x = (*this)[size_];
+
+                    x.~T();
+                }
             }
         }
 
