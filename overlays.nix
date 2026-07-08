@@ -43,6 +43,19 @@ let
     });
   };
 
+  # fop 2.8 source moved.
+  # mirror://apache path 404s because Apache relocated old releases into source/.
+  # Keep nixpkgs' 2.8 + repoint to permanent archive.
+  #
+  fop-overlay = final: prev: {
+    fop = prev.fop.overrideAttrs (old: {
+      src = final.fetchurl {
+        url = "https://archive.apache.org/dist/xmlgraphics/fop/source/fop-2.8-src.tar.gz";
+        hash = "sha256-b7Av17wu6Ar/npKOiwYqzlvBFSIuXTpqTacM1sxtBvc=";
+      };
+    });
+  };
+
   # tests excruciatingly slow
   mailutils-overlay = self: super: {
     mailutils = super.mailutils.overrideAttrs (old: {
@@ -77,6 +90,7 @@ in
   dejagnu-overlay
   libffi-overlay
   libqmi-overlay
+  fop-overlay
   swtpm-overlay
   mailutils-overlay
   notmuch-overlay
