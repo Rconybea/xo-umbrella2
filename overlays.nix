@@ -56,6 +56,16 @@ let
     });
   };
 
+  # nodejs test-runner-output test fails.
+  # advice is that this test is notoriously flaky, and sibling
+  # tests are already disabled in nixpkgs 25.05
+  #
+  node-overlay = final: prev: {
+    nodejs_22 = prev.nodejs_22.overrideAttrs (old: {
+      doCheck = false;
+    });
+  };
+
   # tests excruciatingly slow
   mailutils-overlay = self: super: {
     mailutils = super.mailutils.overrideAttrs (old: {
@@ -91,6 +101,7 @@ in
   libffi-overlay
   libqmi-overlay
   fop-overlay
+  node-overlay
   swtpm-overlay
   mailutils-overlay
   notmuch-overlay
