@@ -98,6 +98,26 @@ let
     });
   };
 
+  # plotly:
+  # GitHub regenerates archive tarballs non-reproducibly -> pinned archive hash drifts.
+  # Fetch the git tree instead, for stability.
+  #
+  # Tag v5.24.1 is a lightweight tag at 5d79b80c (not moved).
+  #
+  plotly-overlay = final: prev: {
+    pythonPackagesExtensions = prev.pythonPackagesExtensions ++ [
+      (pyfinal: pyprev: {
+        plotly = pyprev.plotly.overrideAttrs (old: {
+          src = final.fetchFromGitHub {
+            owner = "plotly"; repo = "plotly.py"; rev = "v5.24.1";
+            forceFetchGit = true;
+            hash = "sha256-wEhStV4ZArZpGMi3w+xEbHHqxNmJ/PZhGuzIvoaQ2l4=";
+          };
+        });
+      })
+    ];
+  };
+
   # tests excruciatingly slow
   mailutils-overlay = self: super: {
     mailutils = super.mailutils.overrideAttrs (old: {
