@@ -10,6 +10,11 @@ namespace xo {
     using std::cerr;
     using std::endl;
 
+    LogStreambuf::LogStreambuf(const ArenaConfig & config,
+                               bool debug_flag)
+      : logbuf_{config, debug_flag)
+    {}
+
     void
     LogStreambuf::reset_stream()
     {

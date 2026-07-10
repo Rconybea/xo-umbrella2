@@ -28,10 +28,17 @@ namespace xo {
                 tk_flags_ = (tk_flags_ & ~k_fits) | fits;
             }
 
+            void establish_size(int32_t tk_viz_len, int32_t tk_len) {
+                tk_viz_len_ = tk_viz_len;
+                tk_len_ = tk_len;
+            }
+
         protected:
             PpToken(PpTokenFlags tk_flags,
                     int32_t tk_viz_len,
                     int32_t tk_len);
+
+            friend class PpState;
 
         private:
             /** token type: k_string|k_begin|k_break|k_end.

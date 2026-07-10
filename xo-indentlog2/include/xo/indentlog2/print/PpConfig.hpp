@@ -3,27 +3,32 @@
  *  @author Roland Conybeare, Jul 2026
  **/
 
+#include "xo/arena/ArenaConfig.hpp"
 #include <cstdint>
 
 namespace xo {
     namespace print {
         class PpConfig {
         public:
+            using ArenaConfig = xo::mm::ArenaConfig;
             using uint32_t = std::uint32_t;
 
         public:
             PpConfig() = default;
-            PpConfig(uint32_t w, uint32_t srm, uint32_t hrm, uint32_t hn);
+            PpConfig(uint32_t w, uint32_t srm, uint32_t hrm, uint32_t hn, const ArenaConfig & logbuf_cfg);
 
             uint32_t indent_width() const { return indent_width_; }
             uint32_t soft_right_margin() const { return soft_right_margin_; }
             uint32_t hard_right_margin() const { return hard_right_margin_; }
             uint32_t hard_max_nesting() const { return hard_max_nesting_; }
+            const ArenaConfig & logbuf_config() const { return logbuf_config_; }
+            bool logbuf_debug_flag() const { return logbuf_debug_flag_; }
 
             PpConfig with_soft_right_margin(uint32_t x);
             PpConfig with_hard_right_margin(uint32_t x);
             PpConfig with_hard_max_nesting(uint32_t x);
             PpConfig with_indent_width(uint32_t x);
+            PpConfig with_logbuf_config(const ArenaConfig & x);
 
         private:
             /** indent per nesting level **/
@@ -48,6 +53,12 @@ namespace xo {
              *  sizeof(uint32_t) * hard_max_nesting_.
              **/
             uint32_t hard_max_nesting_ = 1024 * 1024;
+
+            /** configuration for output buffer **/
+            ArenaConfig logbuf_config_;
+
+            /** debug flag for @ref PpState::logbuf_ **/
+            bool logbuf_debug_flag_ = false;
         };
     } /*namespace print*/
 } /*namespace xo*/

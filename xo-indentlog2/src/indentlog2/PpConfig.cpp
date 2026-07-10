@@ -9,9 +9,9 @@ namespace xo {
     using std::uint32_t;
 
     namespace print {
-        PpConfig::PpConfig(uint32_t w, uint32_t srm, uint32_t hrm, uint32_t hn)
+        PpConfig::PpConfig(uint32_t w, uint32_t srm, uint32_t hrm, uint32_t hn, const ArenaConfig & logbuf_cfg)
             : indent_width_{w}, soft_right_margin_{srm}, hard_right_margin_{hrm},
-              hard_max_nesting_{hn}
+              hard_max_nesting_{hn}, logbuf_config_{logbuf_cfg}
         {}
 
         PpConfig
@@ -21,7 +21,8 @@ namespace xo {
                 x,
                 soft_right_margin_,
                 hard_right_margin_,
-                hard_max_nesting_
+                hard_max_nesting_,
+                logbuf_config_,
             };
         }
 
@@ -32,7 +33,8 @@ namespace xo {
                 indent_width_,
                 x,
                 hard_right_margin_,
-                hard_max_nesting_
+                hard_max_nesting_,
+                logbuf_config_,
             };
         }
 
@@ -43,7 +45,8 @@ namespace xo {
                 indent_width_,
                 soft_right_margin_,
                 x,
-                hard_max_nesting_
+                hard_max_nesting_,
+                logbuf_config_,
             };
         }
 
@@ -54,7 +57,8 @@ namespace xo {
                 indent_width_,
                 soft_right_margin_,
                 hard_right_margin_,
-                x
+                x,
+                logbuf_config_,
             };
         }
     } /*namespace print*/

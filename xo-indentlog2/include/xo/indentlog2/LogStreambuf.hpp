@@ -15,6 +15,8 @@ namespace xo {
         using streamsize = std::streamsize;
 
     public:
+        LogStreambuf(const ArenaConfig & config, bool debug_flag);
+
         /** allocated buffer extned available to hold content (allocated + available) **/
         Span committed_span();
 

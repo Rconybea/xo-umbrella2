@@ -28,6 +28,7 @@ namespace xo {
         using size_t = std::size_t;
 
     public:
+        /** Create instance using @p config for @ref buf_v_ **/
         LogBuffer(const ArenaConfig & config, bool debug_flag);
 
         bool debug_flag() const { return debug_flag_; }
