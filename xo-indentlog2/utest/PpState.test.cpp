@@ -116,7 +116,36 @@ namespace ut {
              PpTokenInput::string(" carrot: 3)"),
              PpTokenInput::end()},
             "foo(apple: 1,\n   banana: 2,\n   carrot: 3)",
-            4 /*soft_right_margin*/),
+            16 /*soft_right_margin*/),
+
+        /* test case: function call + color escapes
+         *   foo(apple: 1,
+         *      banana: 2,
+         *      carrot: 3);
+         */
+        TestCase_PpState(
+            {PpTokenInput::string("foo"),
+             PpTokenInput::begin(),
+             PpTokenInput::string("("),
+             PpTokenInput::string("\033[38;2;180;180;180m"),
+             PpTokenInput::string("apple:"),
+             PpTokenInput::string("\033[0m"),
+             PpTokenInput::string(" 1,"),
+             PpTokenInput::split(),
+             PpTokenInput::string(" "),
+             PpTokenInput::string("\033[38;2;180;180;180m"),
+             PpTokenInput::string("banana:"),
+             PpTokenInput::string("\033[0m"),
+             PpTokenInput::string(" 2,"),
+             PpTokenInput::split(),
+             PpTokenInput::string(" "),
+             PpTokenInput::string("\033[38;2;180;180;180m"),
+             PpTokenInput::string("carrot:"),
+             PpTokenInput::string("\033[0m"),
+             PpTokenInput::string(" 3)"),
+             PpTokenInput::end()},
+            "foo(\033[38;2;180;180;180mapple:\033[0m 1,\n   \033[38;2;180;180;180mbanana:\033[0m 2,\n   \033[38;2;180;180;180mcarrot:\033[0m 3)",
+            16 /*soft_right_margin*/),
     };
 
     void
