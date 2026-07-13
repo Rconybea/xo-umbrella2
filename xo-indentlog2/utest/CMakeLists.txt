@@ -4,13 +4,15 @@
 set(SELF_EXE utest.indentlog2)
 set(SELF_SOURCE_FILES
     indentlog2_utest_main.cpp
-    LineState.test.cpp)
+    LineState.test.cpp
+    LogBuffer.test.cpp
+    PpState.test.cpp)
 
 if (ENABLE_TESTING)
-    add_executable(${SELF_EXE} ${SELF_SOURCE_FILES})
-    xo_include_options2(${SELF_EXE})
-
-    add_test(NAME ${SELF_EXE} COMMAND ${SELF_EXE})
+    # xo_add_utest_executable: add_executable + xo_include_options2 + add_test,
+    # and registers ${SELF_EXE} with all_utest_executables_${PROJECT_NAME}
+    # (and the global utest list)
+    xo_add_utest_executable(${SELF_EXE} ${SELF_SOURCE_FILES})
 
     # ----------------------------------------------------------------
     # internal deps

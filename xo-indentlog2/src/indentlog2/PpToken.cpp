@@ -15,18 +15,19 @@ namespace xo {
     using std::int32_t;
 
     namespace print {
-        PpToken::PpToken(PpTokenFlags tk_flags,
+        PpToken::PpToken(PpTokenFlags tk_type,
                          int32_t tk_viz_len,
                          int32_t tk_len)
-            : tk_flags_{tk_flags},
+            : tk_flags_{tk_type},
               tk_viz_len_{tk_viz_len},
               tk_len_{tk_len}
-        {}
+        {
+        }
 
         uint32_t
         PpToken::alloc_size() const
         {
-            if (tk_flags_ == k_string) {
+            if ((tk_flags_ & k_type_mask) == k_string) {
                 return ((PpStringToken *)this)->alloc_size();
             } else {
                 return sizeof(PpToken);

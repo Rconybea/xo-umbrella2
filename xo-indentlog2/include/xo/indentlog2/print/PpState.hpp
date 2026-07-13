@@ -45,6 +45,7 @@ namespace xo {
          **/
         class PpState {
         public:
+            using MemorySizeVisitor = xo::mm::MemorySizeVisitor;
             using ArenaConfig = xo::mm::ArenaConfig;
             using DArena = xo::mm::DArena;
             using ScanStack = xo::mm::DArenaVector<uint32_t>;
@@ -55,6 +56,9 @@ namespace xo {
              *  Allocates arena for @ref logbuf_
              **/
             explicit PpState(const PpConfig & cfg);
+
+            /** visit mapped storage pools, call @p fn(pool) for each one **/
+            void visit_pools(const MemorySizeVisitor & fn) const;
 
             /** connect printer to output @p p_out **/
             void connect_output(LogBuffer * p_out);
@@ -79,9 +83,10 @@ namespace xo {
              *  Can expand buffer up to size tk_buffer_.reserved()
              **/
             uint32_t available() const;
-
             /** Allocate token (always logically at scan_ix_) of size @p z **/
             void * alloc(uint32_t z);
+            /** Allocate at @ref scan_ix_. Helper for alloc() **/
+            void * alloc_scan_aux(uint32_t z);
 
             /** Expand to make space (at @ref scan_ix_) for token with size @p z **/
             void * expand_for(uint32_t z);

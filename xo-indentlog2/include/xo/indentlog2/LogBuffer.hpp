@@ -33,6 +33,7 @@ namespace xo {
 
         bool debug_flag() const { return debug_flag_; }
         size_t lpos() const { return lstate_.lpos(); }
+        size_t viz_lpos() const { return lstate_.viz_lpos(); }
 
         /** allocated buffer extent available to hold content (allocated + available) **/
         Span committed_span();

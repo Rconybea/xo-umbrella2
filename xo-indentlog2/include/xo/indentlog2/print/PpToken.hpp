@@ -20,7 +20,17 @@ namespace xo {
             int32_t tk_viz_len() const { return tk_viz_len_; }
             int32_t tk_len() const { return tk_len_; }
 
-            bool has_unknown_size() const { return tk_viz_len_ == 0; }
+            bool is_string() const { return (tk_flags_ & k_type_mask) == k_string; }
+            bool is_begin() const { return (tk_flags_ & k_type_mask) == k_begin; }
+            bool size_established() const {
+                auto tk_type = tk_flags_ & k_type_mask;
+                if (tk_type == k_begin)
+                    return (tk_flags_ & k_size_established) != 0;
+
+                // {string, split, end} token size is always established
+                return true;
+            }
+
             uint32_t alloc_size() const;
 
             void set_fits_flag(bool x) {
@@ -29,6 +39,7 @@ namespace xo {
             }
 
             void establish_size(int32_t tk_viz_len, int32_t tk_len) {
+                tk_flags_ = (tk_flags_ & ~k_size_established) | k_size_established;
                 tk_viz_len_ = tk_viz_len;
                 tk_len_ = tk_len;
             }

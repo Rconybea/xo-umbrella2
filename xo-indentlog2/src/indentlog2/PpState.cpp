@@ -45,6 +45,9 @@ namespace xo {
             //
             // For {scan stack, print stack}, max nesting depth is unlimited,
             // rely on configured max.
+
+            // relying on this because bypassing DArena::alloc()
+            assert(tk_buffer_.config_.store_header_flag_ == false);
         }
 
         void
@@ -95,10 +98,12 @@ namespace xo {
             }
 
             PpToken * tk = new (mem) PpToken(k_begin, 0, 0);
+            uint32_t tk_ix = (std::byte *)mem - tk_buffer_.lo_;
 
-            // 1. scan-totals unchanged, since no size info
-            // 2. begin-token cannot trigger printing,
-            //    since doesn't carry any size information.
+            scan_stack_.push_back(tk_ix);
+
+            // begin-token cannot trigger printing,
+            // since doesn't carry any size information.
 
             (void)tk;
         }
@@ -113,13 +118,12 @@ namespace xo {
                 return;
             }
 
-            PpToken * tk = new (mem) PpToken(k_break, 0, 0);
-
-            // 1. scan-totals unchanged, since no size info
-            // 2. begin-token cannot trigger printing,
-            //    since doesn't carry any size information.
+            PpToken * tk = new (mem) PpToken(k_split, 0, 0);
 
             (void)tk;
+
+            // begin-token cannot trigger printing,
+            // since doesn't carry any size information.
         }
 
         void
@@ -133,7 +137,6 @@ namespace xo {
             }
 
             PpToken * tk = new (mem) PpToken(k_end, 0, 0);
-
             (void)tk;
 
             // 1. end-token matches a begin-token
@@ -190,7 +193,7 @@ namespace xo {
             while (print_ix_ != scan_ix_) {
                 PpToken * token = (PpToken *)((char *)tk_buffer_.lo_ + print_ix_);
 
-                if (!token->has_unknown_size()) {
+                if (!token->size_established()) {
                     // need to know next token size before we
                     // print it.
                     break;
@@ -212,15 +215,14 @@ namespace xo {
                     {
                         auto lpos = p_out_->lpos();
 
-                        bool f = ((token->tk_viz_len() > 0)
-                                  && ((lpos + token->tk_viz_len()
-                                       < config_.soft_right_margin())));
+                        bool f = ((lpos + token->tk_viz_len()
+                                   < config_.soft_right_margin()));
 
                         token->set_fits_flag(f);
                         print_stack_.push_back(print_ix_);
                     }
                     break;
-                case k_break:
+                case k_split:
                     {
                         uint32_t parent_ix = print_stack_.back();
                         PpToken * parent = (PpToken *)((char *)tk_buffer_.lo_ + parent_ix);
@@ -265,7 +267,7 @@ namespace xo {
                     if (*p == 'm') {
                         // end color escape
                         color_z = 0;
-                    } else if (isdigit(*p) || (*p != '[') || (*p != ';')) {
+                    } else if (isdigit(*p) || (*p == '[') || (*p == ';')) {
                         // allowed chars within color escape
                         ++color_z;
                     } else {
@@ -285,6 +287,23 @@ namespace xo {
         }
 
         void *
+        PpState::alloc_scan_aux(uint32_t z)
+        {
+            void * retval = (char *)tk_buffer_.lo_ + scan_ix_;
+            scan_ix_ += z;
+
+            // cosmetic: get arena free pointer to extend to upper
+            // orbit of scan_ix_
+            if ((tk_buffer_.free_ < tk_buffer_.lo_ + scan_ix_)
+                && (retval < tk_buffer_.limit_))
+            {
+                tk_buffer_.free_ = tk_buffer_.lo_ + scan_ix_;
+            }
+
+            return retval;
+        }
+
+        void *
         PpState::alloc(uint32_t z)
         {
             if (print_ix_ <= scan_ix_) {
@@ -293,17 +312,14 @@ namespace xo {
                 uint32_t avail1_z = tk_buffer_.committed() - scan_ix_;
 
                 if (z <= avail1_z) {
-                    void * retval = (char *)tk_buffer_.lo_ + scan_ix_;
-                    scan_ix_ += z;
-                    return retval;
+                    return this->alloc_scan_aux(z);
                 } else if (z < print_ix_) {
                     // wrap: start 2nd segment in [tk_buffer_.lo_, print_ix_)
                     extent_ = scan_ix_;
-                    scan_ix_ = 0;
+                    scan_ix_ = z;
 
                     return tk_buffer_.lo_;
                 }
-
                 // fall through
             } else if (scan_ix_ < print_ix_) {
                 // buffer in wrapped state (two segments)
@@ -313,6 +329,7 @@ namespace xo {
                 if (z <= avail2_z) {
                     void * retval = tk_buffer_.lo_ + scan_ix_;
                     scan_ix_ += z;
+
                     return retval;
                 }
 
@@ -357,9 +374,9 @@ namespace xo {
             }
 
             if (print_ix_ <= scan_ix_) {
-                if (scan_ix_ + z <= tk_buffer_.committed()) [[likely]]
-                    return tk_buffer_.lo_ + scan_ix_;
-
+                if (scan_ix_ + z <= tk_buffer_.committed()) [[likely]] {
+                    return this->alloc_scan_aux(z);
+                }
                 // fall through
             } else {
                 // 1. buffer split into two segments
@@ -382,11 +399,11 @@ namespace xo {
                 extent_ = scan_ix_;
 
                 if (scan_ix_ + z < tk_buffer_.committed()) {
-                    return tk_buffer_.lo_ + scan_ix_;
+                    return this->alloc_scan_aux(z);
                 } else if (z < print_ix_) {
                     // wrap: start 2nd segment in [0, print_ix_)
                     extent_ = scan_ix_;
-                    scan_ix_ = 0;
+                    scan_ix_ = z;
 
                     return tk_buffer_.lo_;
                 }
@@ -416,6 +433,14 @@ namespace xo {
                 if ((tk_src <= p) && (p < tk_src + z))
                     ix += offset;
             }
+        }
+
+        void
+        PpState::visit_pools(const MemorySizeVisitor & fn) const
+        {
+            tk_buffer_.visit_pools(fn);
+            scan_stack_.visit_pools(fn);
+            print_stack_.visit_pools(fn);
         }
 
     } /*namespace print*/

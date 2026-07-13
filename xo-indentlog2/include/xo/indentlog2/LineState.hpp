@@ -30,6 +30,7 @@ namespace xo {
         size_t color_escape_start() const { return color_escape_start_; }
 
         size_t lpos() const { return local_ppos_ - solpos_; }
+        size_t viz_lpos() const { return local_ppos_ - color_escape_chars_ - solpos_; }
 
         /** given buffered text in [p0, pn), update line accountant state.
          *  in streambuf terminology: p0 is pbase(), pn is pptr()

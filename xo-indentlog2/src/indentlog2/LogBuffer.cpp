@@ -136,6 +136,9 @@ namespace xo {
         // scrub buffered chars? perhaps offer as option
         // keep {pbase_, epptr_}: allocated extent not changed
 
+        buf_v_.restore(buf_ckp_);
+        pptr_ = pbase_;
+
         lstate_.clear();
     }
 

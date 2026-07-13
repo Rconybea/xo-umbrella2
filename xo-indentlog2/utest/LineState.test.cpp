@@ -4,10 +4,10 @@
  **/
 
 #include "LineState.hpp"
-//#include <xo/testutil/
 #include <xo/randomgen/random_seed.hpp>
 #include <xo/randomgen/xoshiro256.hpp>
-#include <xo/testutil/UtestRehearser.hpp>
+#include <xo/testutil/try_test_array.hpp>
+//#include <xo/testutil/UtestRehearser.hpp>
 #include <catch2/catch.hpp>
 #include <vector>
 
@@ -35,30 +35,6 @@ namespace ut {
         const char * text_ = nullptr;
         std::vector<std::pair<uint32_t, LineState>> break_v_ = {};
     };
-
-    /** e.g. RehearseFn = bool (*)(const TestCase &, UtestRehearser *) **/
-    template<typename TestCase, typename RehearseFn>
-    void try_test_array(const vector<TestCase> & tc_v,
-                        RehearseFn rehearse_fn)
-    {
-        for (size_t i_tc = 0, n_tc = tc_v.size(); i_tc < n_tc; ++i_tc)
-        {
-            const auto & tc = tc_v[i_tc];
-
-            Seed<xoshiro256ss> seed;
-            auto rgen = xoshiro256ss(seed);
-
-            UtestRehearser rh;
-
-            for (auto _ : rh) {
-                /** always do 1st loop.
-                 *  if any test assertions fail, do 2nd loop with verbose logging
-                 **/
-
-                (*rehearse_fn)(tc, &rh);
-            }
-        }
-    }
 
     vector<TestCase_LineState>
     s_linestate_testcase_v = {

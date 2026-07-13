@@ -19,13 +19,14 @@ namespace xo {
             /** discretionary line break here,
              *  e.g. between function arguments.
              **/
-            k_break  = 0x03,
+            k_split  = 0x03,
             /** ends innermost incomplete group (e.g. end of function args) **/
             k_end    = 0x04,
 
-            k_type_mask = 0x07,
+            k_type_mask = (k_string | k_begin | k_split | k_end),
 
-            k_fits   = 0x08,
+            k_size_established = 0x08,
+            k_fits   = 0x10,
         };
     } /*namespace print*/
 } /*namespace xo*/
