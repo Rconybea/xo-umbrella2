@@ -5,10 +5,10 @@ set(SELF_EXE utest.tree)
 set(SELF_SOURCE_FILES tree_utest_main.cpp redblacktree.cpp bplustree.cpp RedBlackTree-gc.test.cpp)
 
 if (ENABLE_TESTING)
-    add_executable(${SELF_EXE} ${SELF_SOURCE_FILES})
-    xo_include_options2(${SELF_EXE})
-
-    add_test(NAME ${SELF_EXE} COMMAND ${SELF_EXE})
+    # xo_add_utest_executable: add_executable + xo_include_options2 + add_test,
+    # and registers ${SELF_EXE} with all_utest_executables_${PROJECT_NAME}
+    # (and the global utest list)
+    xo_add_utest_executable(${SELF_EXE} ${SELF_SOURCE_FILES})
     # need coverage on unit test b/c header-only libraries
     #target_code_coverage(${SELF_EXE} EXCLUDE */nix/store* utest/*)
     #target_code_coverage(${SELF_EXE} AUTO ALL)
