@@ -79,10 +79,12 @@ namespace xo {
             uint32_t count_visible_chars(const char * lo,
                                          const char * hi) const;
 
+#ifdef NOT_USING
             /** Available buffer space (in bytes).
              *  Can expand buffer up to size tk_buffer_.reserved()
              **/
             uint32_t available() const;
+#endif
             /** Allocate token (always logically at scan_ix_) of size @p z **/
             void * alloc(uint32_t z);
             /** Allocate at @ref scan_ix_. Helper for alloc() **/

@@ -339,6 +339,7 @@ namespace xo {
             return this->expand_for(z);
         }
 
+#ifdef NOT_USING
         uint32_t
         PpState::available() const
         {
@@ -359,6 +360,7 @@ namespace xo {
                 return 0;
             }
         }
+#endif
 
         void *
         PpState::expand_for(uint32_t z)
