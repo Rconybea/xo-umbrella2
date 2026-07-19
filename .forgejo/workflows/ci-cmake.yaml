@@ -14,6 +14,7 @@ jobs:
       - name: set PATH
         run: |
           echo "$PREFIX/bin" >> $GITHUB_PATH
+          mkdir -p "$PREFIX"
 
       - name: checkout
         run: |
@@ -23,8 +24,6 @@ jobs:
       - name: bootstrap xo-cmake
         run: |
           exec 2>&1  # merge stdout+stderr
-          PREFIX=${{github.workspace}}/local
-          mkdir -p ${PREFIX}
 
           echo "::group::xo-cmake configure"
           cmake -S xo-cmake -B .build/xo-cmake -DCMAKE_INSTALL_PREFIX=$PREFIX
@@ -40,6 +39,8 @@ jobs:
 
       - name: build xo-subsys
         run: |
+          exec 2>&1
+
           PREFIX=${{github.workspace}}/local
           PATH=$PREFIX/bin:$PATH
 
@@ -61,6 +62,8 @@ jobs:
 
       - name: build xo-indentlog
         run: |
+          exec 2>&1
+
           PREFIX=${{github.workspace}}/local
           PATH=$PREFIX/bin:$PATH
 
@@ -82,6 +85,8 @@ jobs:
 
       - name: build xo-flatstring
         run: |
+          exec 2>&1
+
           PREFIX=${{github.workspace}}/local
           PATH=$PREFIX/bin:$PATH
 
