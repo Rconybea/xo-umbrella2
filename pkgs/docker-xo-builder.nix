@@ -3,6 +3,7 @@
 #         No user exists for uid 0
 #       that we don't see when invoking 'git clone' directly.
 #
+#       See ~/proj/org-howto/articles/2026/06/forgejo-docker-container-registry.org setup
 #       See ~/proj/docker-nix-builder for somewhat more full-featured setup attempt
 #       See ~/proj/nix/docker.nix for the make-me-one-with-everything version
 
@@ -21,6 +22,9 @@
   # archives
   gnutar, gzip,
 
+  # packages
+  pkg-config,
+
   # python toolchain
   python3Packages,
   sphinx ? python3Packages.sphinx,
@@ -31,7 +35,8 @@
   catch2, cmake, gnumake, gcc, doxygen, graphviz,
 
   # base platform stuff
-  gnused, gnugrep, findutils, binutils, bashInteractive, bash, coreutils, lib
+  gawk, gnused, gnugrep, patch, xz, bzip2,
+  diffutils, findutils, binutils, bashInteractive, bash, coreutils, lib
 } :
 
 let
@@ -120,7 +125,7 @@ in
 
 dockerTools.buildLayeredImage {
   name = "docker-xo-builder";
-  tag = "v1";
+  tag = "v2";
   created = "now";   # warning: breaks deterministic output!
 
   # use (lib.getDev foo) on a library package foo
@@ -149,16 +154,23 @@ dockerTools.buildLayeredImage {
                (lib.getDev libwebsockets)
                (lib.getDev jsoncpp)
 
+               pkg-config
+
                gnutar
                gzip
+               xz
+               bzip2
 
                catch2
                cmake
                gnumake
                gcc
 
-               #gnused
+               patch
+               gawk
+               gnused
                gnugrep
+               diffutils
                findutils
                binutils
                bashInteractive
@@ -195,7 +207,10 @@ dockerTools.buildLayeredImage {
     #       2. puts certs under /nix/var/nix/profiles/default/etc/...
     #
     Cmd = [ "/bin/bash" ];
-    Env = [ "SSL_CERT_FILE=/etc/ssl/certs/ca-bundle.crt" ];
+    Env = [
+      "SSL_CERT_FILE=/etc/ssl/certs/ca-bundle.crt"
+      "PKG_CONFIG_PATH=/lib/pkgconfig:/share/pkgconfig"
+    ];
   };
 
 }
