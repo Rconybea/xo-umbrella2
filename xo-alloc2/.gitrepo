@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:Rconybea/xo-alloc2.git
 	branch = main
-	commit = e78f0dd115b8e46daa114a4f70baf69266261406
-	parent = eb4368086d85fdab9a61928067e50ba174ae1ba5
+	commit = 964bee3a5f0150b34f202592f9e5993d45327dec
+	parent = f63d19a37c9dcdb3a9fcf35a004baa70b179c083
 	method = merge
 	cmdver = 0.4.9
