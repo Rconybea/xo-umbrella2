@@ -1,5 +1,5 @@
 /** @file ErrorArena.cpp
-*
+ *
  *  @author Roland Conybeare, Feb 2026
  **/
 
@@ -36,7 +36,7 @@ namespace xo {
 
             return &s_instance;
         }
-        
+
     } /*namespace mm*/
 } /*namespace xo*/
 
