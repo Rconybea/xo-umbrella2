@@ -1,4 +1,4 @@
-ws@PACKAGE_INIT@
+@PACKAGE_INIT@
 
 include(CMakeFindDependencyMacro)
 
