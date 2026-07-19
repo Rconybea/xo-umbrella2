@@ -43,7 +43,7 @@ namespace xo {
         /** available (contiguous) buffer extent **/
         Span available_span() const;
 
-        /** visit mapped storage pools; include LogBuffer because it's arena-backed **/
+        /** visit mapped storage pools **/
         void visit_pools(const MemorySizeVisitor & fn) const;
 
         /** expand buffered character storage to at least @p new_z.

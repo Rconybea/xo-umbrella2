@@ -21,8 +21,15 @@ namespace xo::print {
         using uint32_t = std::uint32_t;
 
     public:
-        PpTokenStreambuf(PpState * pps, uint32_t min_z);
+        explicit PpTokenStreambuf(PpState * pps);
 
+        /** open a new string at the sink end of @ref *pps_;
+         *  write to that string with this streambuf.
+         *
+         *  Require: open() and close() calls must strictly alternate
+         **/
+        void open(uint32_t min_z);
+        /** commit string previously created with open **/
         void commit();
 
         virtual int_type overflow(int_type c) override;
@@ -33,8 +40,10 @@ namespace xo::print {
     private:
         PpState * pps_ = nullptr;
 
+#ifdef OBSOLETE
         /** writeable span.  Same as pps_->current_open_string_->mem_span() **/
         Span write_span_;
+#endif
     };
 } /*namespace xo::print*/
 

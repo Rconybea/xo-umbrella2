@@ -7,8 +7,13 @@
 #include "print/PpState.hpp"
 
 namespace xo::print {
-    PpTokenStreambuf::PpTokenStreambuf(PpState * pps, uint32_t min_z)
+    PpTokenStreambuf::PpTokenStreambuf(PpState * pps)
       : pps_{pps}
+    {
+    }
+
+    void
+    PpTokenStreambuf::open(uint32_t min_z)
     {
         auto span = pps_->open_string(min_z);
 
@@ -19,7 +24,6 @@ namespace xo::print {
     PpTokenStreambuf::commit()
     {
         pps_->commit_string(Span(this->pbase(), this->pptr()));
-        pps_ = nullptr;
     }
 
     auto

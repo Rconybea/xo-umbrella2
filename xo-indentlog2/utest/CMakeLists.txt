@@ -7,7 +7,9 @@ set(SELF_SOURCE_FILES
     LineState.test.cpp
     LogBuffer.test.cpp
     PpState.test.cpp
-    PpTokenStreambuf.test.cpp)
+    PpTokenStreambuf.test.cpp
+    PrettyPrinter.test.cpp
+    FlatSink.test.cpp)
 
 if (ENABLE_TESTING)
     # xo_add_utest_executable: add_executable + xo_include_options2 + add_test,

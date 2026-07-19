@@ -15,7 +15,8 @@ namespace xo {
 
         public:
             PpConfig() = default;
-            PpConfig(uint32_t w, uint32_t srm, uint32_t hrm, uint32_t hn, const ArenaConfig & logbuf_cfg);
+            PpConfig(uint32_t w, uint32_t srm, uint32_t hrm, uint32_t hn, const ArenaConfig & logbuf_cfg,
+                     bool logbuf_debug_flag);
 
             uint32_t indent_width() const { return indent_width_; }
             uint32_t soft_right_margin() const { return soft_right_margin_; }
@@ -29,6 +30,7 @@ namespace xo {
             PpConfig with_hard_max_nesting(uint32_t x);
             PpConfig with_indent_width(uint32_t x);
             PpConfig with_logbuf_config(const ArenaConfig & x);
+            PpConfig with_logbuf_debug_flag(bool x);
 
         private:
             /** indent per nesting level **/

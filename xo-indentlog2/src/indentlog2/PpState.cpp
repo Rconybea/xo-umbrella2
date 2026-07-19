@@ -183,6 +183,8 @@ namespace xo {
         auto
         PpState::open_string(uint32_t min_z) -> Span
         {
+            assert(!this->has_open_string());
+
             uint32_t alloc_z = PpStringToken::alloc_size(min_z);
             uint32_t tk_mem = alloc_z - sizeof(PpStringToken);
 
@@ -220,6 +222,8 @@ namespace xo {
         void
         PpState::commit_string(Span used)
         {
+            assert(this->has_open_string());
+
             PpStringToken * s = current_open_string_;
 
             assert(s);
@@ -306,6 +310,12 @@ namespace xo {
                     break;
                 case k_split:
                     {
+                        /* split with no enclosing group: nothing constrains it,
+                         * so treat like a split in a group that fits (no-op)
+                         */
+                        if (print_stack_.empty())
+                            break;
+
                         uint32_t parent_ix = print_stack_.back();
                         PpToken * parent = (PpToken *)((char *)tk_buffer_.lo_ + parent_ix);
 

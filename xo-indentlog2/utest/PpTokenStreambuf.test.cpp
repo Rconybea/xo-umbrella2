@@ -138,7 +138,8 @@ namespace ut {
                 pps.put_cstr(seg.text_.c_str());
                 break;
             case Segment::k_stream: {
-                PpTokenStreambuf sb(&pps, 1 /*min_z*/);
+                PpTokenStreambuf sb(&pps);
+                sb.open(1 /*min_z*/);
                 std::ostream os(&sb);
                 os << seg.text_;
                 sb.commit();
@@ -181,7 +182,8 @@ namespace ut {
         pps.connect_output(&logbuf);
 
         {
-            PpTokenStreambuf sb(&pps, 1);
+            PpTokenStreambuf sb(&pps);
+            sb.open(1);
             std::ostream os(&sb);
             os << 42 << ' ' << -7;
             sb.commit();

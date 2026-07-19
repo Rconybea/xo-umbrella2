@@ -59,6 +59,11 @@ namespace xo::print {
          **/
         explicit PpState(const PpConfig & cfg);
 
+        /** true iff printer currently has an open string
+         *  (only one permitted at a time, since zero-copy)
+         **/
+        bool has_open_string() const { return current_open_string_ != nullptr; }
+
         /** visit mapped storage pools, call @p fn(pool) for each one **/
         void visit_pools(const MemorySizeVisitor & fn) const;
 

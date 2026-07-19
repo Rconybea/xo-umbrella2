@@ -5,7 +5,9 @@ set(SELF_SRCS
     LogStreambuf.cpp
 	LogConfig.cpp
     LogBuffer.cpp
+	PpSink.cpp
     PrettyPrinter.cpp
+    FlatSink.cpp
 	PpState.cpp
     LineState.cpp
 	PpTokenStreambuf.cpp
