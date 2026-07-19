@@ -14,12 +14,12 @@ jobs:
       - name: set PATH
         run: |
           echo "$PREFIX/bin" >> $GITHUB_PATH
-          mkdir -p "$PREFIX"
 
       - name: checkout
         run: |
           echo PATH=${PATH}
           git clone --quiet --depth=1 $GITHUB_SERVER_URL/roland/xo-umbrella2.git .
+          mkdir -p "$PREFIX"
 
       - name: bootstrap xo-cmake
         run: |
