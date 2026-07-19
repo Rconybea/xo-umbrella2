@@ -6,6 +6,15 @@
 #       See ~/proj/org-howto/articles/2026/06/forgejo-docker-container-registry.org setup
 #       See ~/proj/docker-nix-builder for somewhat more full-featured setup attempt
 #       See ~/proj/nix/docker.nix for the make-me-one-with-everything version
+#
+# To build+deploy:
+#    $ nix-build -A xo.docker-xo-builder   # builds container
+#    $ docker load <$(readlink -f result)  # load into docker
+#    $ docker image tag docker-xo-builder:v2 conybeare.us/roland/docker-xo-builder:v2  #
+#    $ docker image push conybeare.us/roland/docker-xo-builder:v2   # push
+# Then on CI host:
+#    $ docker pull conybeare.us/roland/docker-xo-builder:v2
+# Will be used on next CI build
 
 {
   dockerTools,
@@ -216,6 +225,7 @@ dockerTools.buildLayeredImage {
     Env = [
       "SSL_CERT_FILE=/etc/ssl/certs/ca-bundle.crt"
       "PKG_CONFIG_PATH=/lib/pkgconfig:/share/pkgconfig"
+      "NIX_CFLAGS_COMPILE_${gcc.suffixSalt}=-isystem /include"
       "NIX_LDFLAGS_${gcc.suffixSalt}=-L/lib"
     ];
   };
