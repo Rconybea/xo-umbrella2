@@ -84,6 +84,12 @@ jobs:
           nix-build ci.nix -A xo-arena
           ls -l ./result
 
+      - name: build xo-testutil
+        run: |
+          echo nix-build ci.nix -A xo-testutil
+          nix-build ci.nix -A xo-testutil
+          ls -l ./result
+
       - name: build xo-indentlog2
         run: |
           echo nix-build ci.nix -A xo-indentlog2
@@ -100,12 +106,6 @@ jobs:
         run: |
           echo nix-build ci.nix -A xo-printable2
           nix-build ci.nix -A xo-printable2
-          ls -l ./result
-
-      - name: build xo-testutil
-        run: |
-          echo nix-build ci.nix -A xo-testutil
-          nix-build ci.nix -A xo-testutil
           ls -l ./result
 
       - name: build xo-alloc2
