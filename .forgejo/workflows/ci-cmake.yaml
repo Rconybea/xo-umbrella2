@@ -23,6 +23,11 @@ jobs:
           # list packages known to pkg-config
           pkg-config --list-all
 
+      - name: dirs
+        run: |
+          tree -L 1 /include
+          ls /lib
+
       - name: checkout
         run: |
           echo PATH=${PATH}
