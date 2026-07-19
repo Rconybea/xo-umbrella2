@@ -125,6 +125,24 @@ jobs:
           xo-build --install xo-reflectutil
           echo "::endgroup::"
 
+      - name: build xo-arena
+        run: |
+          echo "::group::xo-arena configure"
+          xo-build --configure --with-utests --with-examples xo-arena 
+          echo "::endgroup::"
+
+          echo "::group::xo-arena build"
+          xo-build --build xo-arena 
+          echo "::endgroup::"
+
+          echo "::group::xo-arena utest"
+          ctest --test-dir xo-arena/.build 
+          echo "::endgroup::"
+
+          echo "::group::xo-arena install"
+          xo-build --install xo-arena
+          echo "::endgroup::"
+
       - name: print install path
         run: |
           tree ${{github.workspace}}/local
