@@ -154,7 +154,9 @@ dockerTools.buildLayeredImage {
                (lib.getDev libwebsockets)
                (lib.getDev jsoncpp)
                (lib.getDev libunwind)
+               (lib.getLib libunwind)
                (lib.getDev elfutils)
+               (lib.getLib elfutils)
 
                pkg-config
 
