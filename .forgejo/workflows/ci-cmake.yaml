@@ -156,6 +156,24 @@ jobs:
           xo-build --install xo-arena
           echo "::endgroup::"
 
+      - name: build xo-testutil
+        run: |
+          echo "::group::xo-testutil configure"
+          xo-build --configure --with-utests --with-examples xo-testutil 
+          echo "::endgroup::"
+
+          echo "::group::xo-testutil build"
+          xo-build --build xo-testutil 
+          echo "::endgroup::"
+
+          echo "::group::xo-testutil utest"
+          ctest --test-dir xo-testutil/.build 
+          echo "::endgroup::"
+
+          echo "::group::xo-testutil install"
+          xo-build --install xo-testutil
+          echo "::endgroup::"
+
       - name: build xo-indentlog2
         run: |
           echo "::group::xo-indentlog2 configure"
