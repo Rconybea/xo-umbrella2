@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:Rconybea/xo-indentlog2.git
 	branch = main
-	commit = 02dd11ddd3f9df96d0da2c33bfab07139fd66adf
-	parent = f17b38a578e912f98924ca3f5663fdfa6e0b8b4e
+	commit = d81a456f76ed91bea66927aef800fc0053a067b8
+	parent = 85f521de31b8a73845563dc739f3ba9e10949ce2
 	method = merge
 	cmdver = 0.4.9
