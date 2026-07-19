@@ -18,6 +18,11 @@ jobs:
         run: |
           echo "$PREFIX/bin" >> $GITHUB_PATH
 
+      - name: pkgconfig
+        run: |
+          # list packages known to pkg-config
+          pkg-config --list-all
+
       - name: checkout
         run: |
           echo PATH=${PATH}
