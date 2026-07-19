@@ -8,9 +8,16 @@ on:
 jobs:
   cmake-build:
     runs-on: xo-builder
+    env:
+      PREFIX: ${{github.workspace}}/local
     steps:
+      - name: set PATH
+        run: |
+          echo "$PREFIX/bin" >> $GITHUB_PATH
+
       - name: checkout
         run: |
+          echo PATH=${PATH}
           git clone --quiet --depth=1 $GITHUB_SERVER_URL/roland/xo-umbrella2.git .
 
       - name: bootstrap xo-cmake
