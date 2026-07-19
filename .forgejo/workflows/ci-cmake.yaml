@@ -107,6 +107,24 @@ jobs:
           xo-build --install xo-randomgen
           echo "::endgroup::"
 
+      - name: build xo-reflectutil
+        run: |
+          echo "::group::xo-reflectutil configure"
+          xo-build --configure --with-utests --with-examples xo-reflectutil 
+          echo "::endgroup::"
+
+          echo "::group::xo-reflectutil build"
+          xo-build --build xo-reflectutil 
+          echo "::endgroup::"
+
+          echo "::group::xo-reflectutil utest"
+          ctest --test-dir xo-reflectutil/.build 
+          echo "::endgroup::"
+
+          echo "::group::xo-reflectutil install"
+          xo-build --install xo-reflectutil
+          echo "::endgroup::"
+
       - name: print install path
         run: |
           tree ${{github.workspace}}/local
