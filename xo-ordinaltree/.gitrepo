@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:Rconybea/xo-ordinaltree.git
 	branch = main
-	commit = 8249ce51a67e7679910ff35bc41495c5a668a79e
-	parent = ba7ae2733ac425b309f7ab8001fa1c7659a38d68
+	commit = b74fe3599025e9bd1d7cd2356e20756ab0dcec1c
+	parent = 99fbf302aac0ed24303cd9849843a3651427b8e3
 	method = merge
 	cmdver = 0.4.9
