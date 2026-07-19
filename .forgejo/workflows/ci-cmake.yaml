@@ -1,5 +1,8 @@
 name: cmake-docker
-# Verifies a plain (non-nix) cmake build works inside docker-xo-builder.
+# - Verifies a plain (non-nix) cmake build works inside docker-xo-builder.
+# Links:
+# - org-howto/articles/2026/06/forgejo/docker-container-registry.org
+# - xo-umbrella2/pkgs/docker-xo-builder.nix
 
 on:
   push:
