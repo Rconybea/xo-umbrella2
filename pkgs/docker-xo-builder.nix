@@ -17,7 +17,7 @@
   git, openssh, curl, wget, cacert,
 
   # xo deps
-  eigen, libwebsockets, jsoncpp, libunwind,
+  eigen, libwebsockets, jsoncpp, libunwind, elfutils,
 
   # archives
   gnutar, gzip,
@@ -154,6 +154,7 @@ dockerTools.buildLayeredImage {
                (lib.getDev libwebsockets)
                (lib.getDev jsoncpp)
                (lib.getDev libunwind)
+               (lib.getDev elfutils)
 
                pkg-config
 
