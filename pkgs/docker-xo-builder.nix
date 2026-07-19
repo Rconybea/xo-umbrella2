@@ -197,11 +197,11 @@ dockerTools.buildLayeredImage {
     echo "${shadow}" > /etc/shadow
     echo "${group}" > /etc/group
 
-    #mkdir -p /tmp
-    #mkdir -p /var/tmp
+    mkdir -p /tmp
+    mkdir -p /var/tmp
 
-    #chmod 1777 /tmp
-    #chmod 1777 /var/tmp
+    chmod 1777 /tmp
+    chmod 1777 /var/tmp
   '';
 
   config = {
@@ -214,6 +214,7 @@ dockerTools.buildLayeredImage {
     Env = [
       "SSL_CERT_FILE=/etc/ssl/certs/ca-bundle.crt"
       "PKG_CONFIG_PATH=/lib/pkgconfig:/share/pkgconfig"
+      "NIX_LDFLAGS_${gcc.suffixSalt}=-L/lib"
     ];
   };
 
