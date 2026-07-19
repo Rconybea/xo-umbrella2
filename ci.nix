@@ -21,6 +21,7 @@ in
       xo-randomgen
       xo-reflectutil
       xo-arena
+      xo-indentlog2
       xo-facet
       xo-printable2
       xo-testutil

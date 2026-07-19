@@ -32,6 +32,7 @@ let
     xo-randomgen      = callPackage pkgs/xo-randomgen.nix      { stdenv = jitStdenv;                   buildExamples = true; };
     xo-reflectutil    = callPackage pkgs/xo-reflectutil.nix    { stdenv = jitStdenv; };
     xo-arena          = callPackage pkgs/xo-arena.nix          { stdenv = jitStdenv; buildDocs = true; };
+    xo-indentlog2     = callPackage pkgs/xo-indentlog2.nix     { stdenv = jitStdenv; buildDocs = false; buildExamples = false; };
     xo-facet          = callPackage pkgs/xo-facet.nix          { stdenv = jitStdenv; };
     xo-printable2     = callPackage pkgs/xo-printable2.nix     { stdenv = jitStdenv; };
     xo-testutil       = callPackage pkgs/xo-testutil.nix       { stdenv = jitStdenv; };

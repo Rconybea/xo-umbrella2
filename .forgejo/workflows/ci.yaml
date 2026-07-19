@@ -84,6 +84,12 @@ jobs:
           nix-build ci.nix -A xo-arena
           ls -l ./result
 
+      - name: build xo-indentlog2
+        run: |
+          echo nix-build ci.nix -A xo-indentlog2
+          nix-build ci.nix -A xo-indentlog2
+          ls -l ./result
+          
       - name: build xo-facet
         run: |
           echo nix-build ci.nix -A xo-type

@@ -328,6 +328,7 @@ in
     flatstring     = pkgs.xo-flatstring;
     reflectutil    = pkgs.xo-reflectutil;
     arena          = pkgs.xo-arena;
+    indentlog2     = pkgs.xo-indentlog2;
     facet          = pkgs.xo-facet;
     printable2     = pkgs.xo-printable2;
     testutil       = pkgs.xo-testutil;
