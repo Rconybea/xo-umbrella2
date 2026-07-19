@@ -59,12 +59,13 @@ namespace xo {
         void
         PpState::put_cstr(const char * c_str)
         {
-            // plan:
-            // 1. append PpStringToken for c_str to tk_buffer_
-            // 2. update {scan_viz_total, scan_total}
-            // 3. print from print_stack_
+            this->put(c_str);
+        }
 
-            uint32_t c_str_z = ::strlen(c_str);
+        void
+        PpState::put(std::string_view str)
+        {
+            uint32_t c_str_z = str.size();
             uint32_t tk_z = PpStringToken::alloc_size(c_str_z);
 
             void * mem = this->alloc(tk_z);
@@ -74,11 +75,11 @@ namespace xo {
                 return;
             }
 
-            uint32_t viz_z = count_visible_chars(c_str, c_str + c_str_z);
+            uint32_t viz_z = count_visible_chars(str.begin(), str.end());
             uint32_t mem_z = tk_z - sizeof(PpStringToken);
 
             PpStringToken * tk
-                = new (mem) PpStringToken(viz_z, c_str_z, mem_z, c_str);
+                = new (mem) PpStringToken(viz_z, c_str_z, mem_z, str.begin());
 
             scan_viz_total_ += tk->tk_viz_len();
             scan_total_ += tk->tk_len();
@@ -106,6 +107,7 @@ namespace xo {
             // since doesn't carry any size information.
 
             (void)tk;
+            assert(tk);
         }
 
         void
@@ -121,6 +123,7 @@ namespace xo {
             PpToken * tk = new (mem) PpToken(k_split, 0, 0);
 
             (void)tk;
+            assert(tk);
 
             // begin-token cannot trigger printing,
             // since doesn't carry any size information.
@@ -138,6 +141,7 @@ namespace xo {
 
             PpToken * tk = new (mem) PpToken(k_end, 0, 0);
             (void)tk;
+            assert(tk);
 
             // 1. end-token matches a begin-token
             //    (specifically the token indexed by top of scan stack).
@@ -176,6 +180,76 @@ namespace xo {
             this->check_print_ready();
         }
 
+        auto
+        PpState::open_string(uint32_t min_z) -> Span
+        {
+            uint32_t alloc_z = PpStringToken::alloc_size(min_z);
+            uint32_t tk_mem = alloc_z - sizeof(PpStringToken);
+
+            void * header = this->alloc(alloc_z);
+            assert(header);
+
+            // counts whatever space is available (possible zero)
+            // _after_ allocation
+
+            uint32_t extra_z = this->available();
+
+            // Keep token capacity padded, given available must leave one buffer
+            // space unused to avoid confusing {empty,full} buffer
+            extra_z -= (extra_z % sizeof(uint32_t));
+
+            char empty_placeholder;
+
+            // PpState will have no available space until open string is committed.
+            this->scan_ix_ += extra_z;
+
+            PpStringToken * s
+                = new (header) PpStringToken(0 /*viz_z*/,
+                                             0 /*size*/,
+                                             tk_mem + extra_z,
+                                             &empty_placeholder);
+
+            assert((const char *)tk_buffer_.lo_ + scan_ix_ == s->span().lo() + s->tk_mem());
+
+            this->current_open_string_ = s;
+
+            return Span(const_cast<char *>(s->mem_span().lo()),
+                        const_cast<char *>(s->mem_span().hi()));
+        }
+
+        void
+        PpState::commit_string(Span used)
+        {
+            PpStringToken * s = current_open_string_;
+
+            assert(s);
+            assert(used.lo() == s->mem_span().lo());
+            assert(used.hi() <= s->mem_span().hi());
+
+            // verify scan_ix_ hasn't been
+            assert((const char *)tk_buffer_.lo_ + scan_ix_ == s->span().lo() + s->tk_mem());
+
+            // now that we know actual string span, shrink to padded-fit
+
+            uint32_t tk_len = used.size();
+            uint32_t tk_viz_len = this->count_visible_chars(used.lo(), used.hi());
+            uint32_t tk_mem = PpStringToken::alloc_size(tk_len) - sizeof(PpStringToken);
+
+            assert(tk_mem <= s->tk_mem());
+
+            s->finalize_inplace(tk_viz_len, tk_len, tk_mem);
+
+            // retreat scan_ix_ based on now-known actual size of s
+            this->scan_ix_ = s->mem_span().hi() - (const char *)tk_buffer_.lo_;
+            this->scan_viz_total_ += tk_viz_len;
+            this->scan_total_ += tk_len;
+
+            this->current_open_string_ = nullptr;
+
+            // (note: noop unless scan stack is empty)
+            this->check_print_ready();
+        }
+
         void
         PpState::check_print_ready()
         {
@@ -189,6 +263,14 @@ namespace xo {
             //         top of print_stack
             //    2.3. if it's a begin, irrevocably set
             //         break flag based on whether it fits
+
+            if (extent_ && (print_ix_ == extent_)) [[unlikely]] {
+                // dead. could unwrap as per below, but want to know
+                assert(false);
+
+                extent_ = 0;
+                print_ix_ = 0;
+            }
 
             while (print_ix_ != scan_ix_) {
                 PpToken * token = (PpToken *)((char *)tk_buffer_.lo_ + print_ix_);
@@ -252,6 +334,14 @@ namespace xo {
                     print_ix_ = 0;
                 }
             }
+
+            if (extent_ && (print_ix_ == extent_)) [[unlikely]] {
+                // could unwrap here, but should be unreachable
+                assert(false);
+
+                extent_ = 0;
+                print_ix_ = 0;
+            }
         }
 
         uint32_t
@@ -314,8 +404,13 @@ namespace xo {
                 if (z <= avail1_z) {
                     return this->alloc_scan_aux(z);
                 } else if (z < print_ix_) {
-                    // wrap: start 2nd segment in [tk_buffer_.lo_, print_ix_)
-                    extent_ = scan_ix_;
+                    if (print_ix_ == scan_ix_) {
+                        // buffer is empty -> restart at 0
+                        print_ix_ = 0;
+                    } else {
+                        // wrap: start 2nd segment in [tk_buffer_.lo_, print_ix_)
+                        extent_ = scan_ix_;
+                    }
                     scan_ix_ = z;
 
                     return tk_buffer_.lo_;
@@ -339,7 +434,6 @@ namespace xo {
             return this->expand_for(z);
         }
 
-#ifdef NOT_USING
         uint32_t
         PpState::available() const
         {
@@ -360,19 +454,20 @@ namespace xo {
                 return 0;
             }
         }
-#endif
 
         void *
         PpState::expand_for(uint32_t z)
         {
-            z = std::max(z, scan_ix_);
+            {
+                auto grow_z = std::max(z, scan_ix_);
 
-            // expand buffer to make room.
-            // If it's wrapped, we're going to insist on unwrapping it.
+                // expand buffer to make room.
+                // If it's wrapped, we're going to insist on unwrapping it.
 
-            if (!tk_buffer_.expand(tk_buffer_.committed() + z, "PpState::expand")) {
-                assert(false);
-                return nullptr;
+                if (!tk_buffer_.expand(tk_buffer_.committed() + grow_z, "PpState::expand")) {
+                    assert(false);
+                    return nullptr;
+                }
             }
 
             if (print_ix_ <= scan_ix_) {
@@ -381,10 +476,11 @@ namespace xo {
                 }
                 // fall through
             } else {
-                // 1. buffer split into two segments
+                // 1. buffer is currently split into two segments
                 //      [print_ix, extent) and [0, scan_ix_).
-                // 2. new memory appears added between the two segments
-                //    use to paste them back together
+                // 2. new memory (reflected in avail_z) has appeared
+                //    /after/ [prinx_ix, extent) so logically between the two segments.
+                //    Use that new memory to paste the two segments back together
 
                 uint32_t avail_z = tk_buffer_.committed() - extent_;
                 uint32_t copy_z = min(scan_ix_, avail_z);
@@ -398,11 +494,18 @@ namespace xo {
                                      copy_z);
 
                 scan_ix_ = extent_ + copy_z;
-                extent_ = scan_ix_;
 
                 if (scan_ix_ + z < tk_buffer_.committed()) {
+                    extent_ = 0; // buffer now unwrapped
+
                     return this->alloc_scan_aux(z);
                 } else if (z < print_ix_) {
+                    // alloc(z) needs to re-introduce wrap
+                    // with 1st segment
+                    //   [print_ix, extent_)
+                    // and 2nd segment
+                    //   [0, scan_ix_) = [0, z)
+
                     // wrap: start 2nd segment in [0, print_ix_)
                     extent_ = scan_ix_;
                     scan_ix_ = z;
@@ -417,8 +520,8 @@ namespace xo {
 
         void
         PpState::reindex_stacks(const char * tk_dest,
-                                      const char * tk_src,
-                                      uint32_t z)
+                                const char * tk_src,
+                                uint32_t z)
         {
             int32_t offset = tk_dest - tk_src;
 

@@ -80,14 +80,30 @@ namespace xo {
                           uint32_t tk_mem,
                           const char * tk_chars);
 
-            Span span() const { return Span(&(tk_chars_[0]),
-                                            &(tk_chars_[this->tk_len()])); }
-            uint32_t alloc_size() const { return sizeof(PpStringToken) + tk_mem_; }
-
             /** padded size in bytes for a PpStringToken instance
-             *  with token size @p tk_size
+             *  with space for tk_size characters.
+             *  Return value includes sizeof(PpStringToken) itself;
+             *  @p tk_size does not.
              **/
             static uint32_t alloc_size(uint32_t tk_size);
+
+            uint32_t tk_mem() const { return tk_mem_; }
+            Span span() const { return Span(&(tk_chars_[0]),
+                                            &(tk_chars_[this->tk_len()])); }
+            Span mem_span() const { return Span(&(tk_chars_[0]),
+                                                &(tk_chars_[this->tk_mem()])); }
+            uint32_t alloc_size() const { return sizeof(PpStringToken) + tk_mem_; }
+
+            /** finalize string token in-place
+             *  @p tk_viz_len  token visible length
+             *  @p tk_len      token length (including non-visible chars)
+             *  @p tk_mem      Space actually used by tk_chars.
+             *                 (will round up for alignment reasons)
+             **/
+            void finalize_inplace(uint32_t tk_viz_len, uint32_t tk_len, uint32_t tk_mem) {
+                this->establish_size(tk_viz_len, tk_len);
+                this->tk_mem_ = tk_mem;
+            }
 
         private:
             /** amount of space used by tk_chars_[]. **/

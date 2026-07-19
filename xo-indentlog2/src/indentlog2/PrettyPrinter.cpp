@@ -21,6 +21,30 @@ namespace xo {
             pps_.connect_output(&logbuf_);
         }
 
+        void
+        PrettyPrinter::put(std::string_view x)
+        {
+            pps_.put(x);
+        }
+
+        void
+        PrettyPrinter::begin()
+        {
+            pps_.begin();
+        }
+
+        void
+        PrettyPrinter::split()
+        {
+            pps_.split();
+        }
+
+        void
+        PrettyPrinter::end()
+        {
+            pps_.end();
+        }
+
     } /*namespace print*/
 } /*namespace xo*/
 

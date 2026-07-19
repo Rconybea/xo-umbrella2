@@ -6,7 +6,8 @@ set(SELF_SOURCE_FILES
     indentlog2_utest_main.cpp
     LineState.test.cpp
     LogBuffer.test.cpp
-    PpState.test.cpp)
+    PpState.test.cpp
+    PpTokenStreambuf.test.cpp)
 
 if (ENABLE_TESTING)
     # xo_add_utest_executable: add_executable + xo_include_options2 + add_test,

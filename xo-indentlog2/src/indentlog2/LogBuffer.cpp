@@ -24,19 +24,19 @@ namespace xo {
     }
 
     auto
-    LogBuffer::committed_span() -> Span
+    LogBuffer::committed_span() const -> Span
     {
         return Span(pbase_, epptr_);
     }
 
     auto
-    LogBuffer::used_span() -> Span
+    LogBuffer::used_span() const -> Span
     {
         return Span(pbase_, pptr_);
     }
 
     auto
-    LogBuffer::available_span() -> Span
+    LogBuffer::available_span() const -> Span
     {
         return Span(pptr_, epptr_);
     }
@@ -50,7 +50,9 @@ namespace xo {
     LogBuffer::expand_to(size_t new_z)
     {
         bool ok = buf_v_.expand(new_z, "LogBuffer::expand_to");
-        assert(ok);
+
+        if (!ok)
+            return false;
 
         if (pbase_ == nullptr) [[unlikely]] {
             // first call -> establish pbase_,
@@ -65,7 +67,10 @@ namespace xo {
             pptr_ = pbase_;
             epptr_ = pbase_ + z;
         } else {
-            /* restore to checkpoint, then allocate */
+            /* restore to checkpoint, then allocate.
+             * This is workaround for missing DArena::realloc().
+             * (+ only need checkpoint if DArena configured with object headers)
+             */
             buf_v_.restore(buf_ckp_);
 
             auto z = buf_v_.available();
@@ -75,7 +80,6 @@ namespace xo {
             pbase_ = (char *)buf_v_.alloc(reflect::typeseq::id<char[]>(), z);
 
             ok = ok && (pbase_ == pbase0);
-            assert(ok);
 
             // keep pptr_, we reallocated in place
             epptr_ = pbase_ + z;
@@ -113,7 +117,8 @@ namespace xo {
 
         *(pptr_++) = '\n';
         ::memset(pptr_, ' ', indent);
-        pptr_ += indent;
+
+        this->_check_update_local_state(pptr_ + indent);
     }
 
     void
@@ -127,7 +132,8 @@ namespace xo {
         // here: buffer has enough room now
 
         ::memcpy(pptr_, x.lo(), x.size());
-        pptr_ += x.size();
+
+        this->_check_update_local_state(pptr_ + x.size());
     }
 
     void
@@ -136,16 +142,19 @@ namespace xo {
         // scrub buffered chars? perhaps offer as option
         // keep {pbase_, epptr_}: allocated extent not changed
 
-        buf_v_.restore(buf_ckp_);
+        if (pbase_) {
+            buf_v_.restore(buf_ckp_);
+        }
         pptr_ = pbase_;
 
         lstate_.clear();
     }
 
     void
-    LogBuffer::_check_update_local_state(const char * pptr)
+    LogBuffer::_check_update_local_state(char * pptr)
     {
         lstate_._check_update_local_state(pbase_, pptr, debug_flag_);
+        this->pptr_ = pptr;
     }
 } /*namespace xo*/
 

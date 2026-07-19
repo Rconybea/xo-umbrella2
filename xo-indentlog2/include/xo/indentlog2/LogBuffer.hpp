@@ -32,15 +32,16 @@ namespace xo {
         LogBuffer(const ArenaConfig & config, bool debug_flag);
 
         bool debug_flag() const { return debug_flag_; }
+        size_t local_ppos() const { return lstate_.local_ppos(); }
         size_t lpos() const { return lstate_.lpos(); }
         size_t viz_lpos() const { return lstate_.viz_lpos(); }
 
         /** allocated buffer extent available to hold content (allocated + available) **/
-        Span committed_span();
+        Span committed_span() const;
         /** used buffer extent **/
-        Span used_span();
+        Span used_span() const;
         /** available (contiguous) buffer extent **/
-        Span available_span();
+        Span available_span() const;
 
         /** visit mapped storage pools; include LogBuffer because it's arena-backed **/
         void visit_pools(const MemorySizeVisitor & fn) const;
@@ -64,9 +65,10 @@ namespace xo {
         bool _require_avail(uint32_t x);
 
         /** synchronize line accountant @ref lstate_ when dirty
-         *  (because chars possibly added to @ref buf_v_)
+         *  (because chars possibly added to @ref buf_v_).
+         *  Also refresh @ref pptr_
          **/
-        void _check_update_local_state(const char * pptr);
+        void _check_update_local_state(char * pptr);
 
     private:
         /** @defgroup LogBuffer-instance-vars **/

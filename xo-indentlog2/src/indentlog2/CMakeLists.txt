@@ -2,11 +2,13 @@
 
 set(SELF_LIB xo_indentlog2)
 set(SELF_SRCS
-    # LogStreambuf.cpp
+    LogStreambuf.cpp
+	LogConfig.cpp
     LogBuffer.cpp
     PrettyPrinter.cpp
 	PpState.cpp
     LineState.cpp
+	PpTokenStreambuf.cpp
     PpToken.cpp
     PpConfig.cpp
 )

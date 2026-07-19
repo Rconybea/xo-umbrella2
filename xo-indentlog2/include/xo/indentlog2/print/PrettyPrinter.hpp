@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "PpSink.hpp"
 #include "PpState.hpp"
 
 namespace xo {
@@ -14,11 +15,19 @@ namespace xo {
          *  @code
          *    PpConfig ppc;
          *    PrettyPrinter pp(ppc);
+         *
          *  @endcode
          **/
-        class PrettyPrinter {
+        class PrettyPrinter : public PpSink {
         public:
             PrettyPrinter(const PpConfig & cfg);
+
+            // inherited from PpSink
+
+            virtual void put(std::string_view x) override final;
+            virtual void begin() override final;
+            virtual void split() override final;
+            virtual void end() override final;
 
         private:
             /** Pretty printer state (+ driver) **/

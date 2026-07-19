@@ -10,19 +10,39 @@ namespace xo {
      **/
     class LogStreambuf : public std::streambuf {
     public:
+        using ArenaConfig = xo::mm::ArenaConfig;
         using traits_type = std::streambuf::traits_type;
         using Span = xo::mm::span<char>;
         using streamsize = std::streamsize;
 
     public:
-        LogStreambuf(const ArenaConfig & config, bool debug_flag);
+        LogStreambuf(LogBuffer * logbuf);
 
         /** allocated buffer extned available to hold content (allocated + available) **/
         Span committed_span();
 
         /** reset stream to empty state, ready to receive output.
+         *  Preserves buffer memory allocation.
          **/
         void reset_stream();
+
+        /** expand log buffer size to at least @p new_z chars
+         *  Require: new_z <= reserved range of backing arena.
+         *  Can fail if physical memory exhausted.
+         *  Returns false if expansion failed.
+         **/
+        bool expand_to(size_t new_z);
+
+        /** verify cross-layer invariant between this streambuf's put-area
+         *  pointers {pbase, pptr, epptr} and the backing @ref logbuf_.
+         *  Intended for assert() in mutators.  See @ref overflow.
+         **/
+        bool verify_ok() const;
+
+        /** synchronize streambuf state {pbase, pptr, epptr} in case of
+         *  independent writes to @ref logbuf_
+         **/
+        void _check_update_streambuf_state();
 
         // inherited from std::streambuf
 
@@ -45,9 +65,17 @@ namespace xo {
         virtual pos_type seekoff(off_type off,
                                  std::ios_base::seekdir dir,
                                  std::ios_base::openmode which) override;
+        /** Push (flush) streambuf write position into @ref logbuf_:
+         *  inform it of chars written through the sputc fast path
+         *  (which bypasses xsputn/overflow) since the last sync.
+         *  This is the "push" half of the native<->streambuf handoff;
+         *  @ref _check_update_streambuf_state is the "pull" half.
+         **/
+        virtual int sync() override;
 
     private:
-        LogBuffer logbuf_;
+        /** buffer stsorage **/
+        LogBuffer * logbuf_ = nullptr;
     };
 } /*namespace xo*/
 

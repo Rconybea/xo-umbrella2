@@ -44,7 +44,13 @@ namespace xo {
             assert(tk_len <= tk_mem);
 
             ::memcpy(tk_chars_, tk_chars, tk_len);
-            ::memset(tk_chars_ + tk_len, '\0', tk_mem - tk_len);
+
+            if (tk_len < tk_mem) {
+                // Not essential.  For intelligibility if inspecting memory.
+
+                *(tk_chars_ + tk_len) = '\0';
+                //::memset(tk_chars_ + tk_len, '\0', tk_mem - tk_len);
+            }
         }
 
         uint32_t
