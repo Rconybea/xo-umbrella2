@@ -23,8 +23,6 @@ jobs:
 
       - name: bootstrap xo-cmake
         run: |
-          exec 2>&1  # merge stdout+stderr
-
           echo "::group::xo-cmake configure"
           cmake -S xo-cmake -B .build/xo-cmake -DCMAKE_INSTALL_PREFIX=$PREFIX
           echo "::endgroup::"
@@ -39,17 +37,12 @@ jobs:
 
       - name: build xo-subsys
         run: |
-          exec 2>&1
-
-          PREFIX=${{github.workspace}}/local
-          PATH=$PREFIX/bin:$PATH
-
           echo "::group::xo-subsys configure"
           xo-build --configure --with-utests --with-examples xo-subsys 
           echo "::endgroup::"
 
           echo "::group::xo-subsys build"
-          xo-build --build xo-subsys 2>&1
+          xo-build --build xo-subsys 
           echo "::endgroup::"
 
           echo "::group::xo-subsys utest"
@@ -62,17 +55,12 @@ jobs:
 
       - name: build xo-indentlog
         run: |
-          exec 2>&1
-
-          PREFIX=${{github.workspace}}/local
-          PATH=$PREFIX/bin:$PATH
-
           echo "::group::xo-indentlog configure"
           xo-build --configure --with-utests --with-examples xo-indentlog 
           echo "::endgroup::"
 
           echo "::group::xo-indentlog build"
-          xo-build --build xo-indentlog 2>&1
+          xo-build --build xo-indentlog 
           echo "::endgroup::"
 
           echo "::group::xo-indentlog utest"
@@ -85,17 +73,12 @@ jobs:
 
       - name: build xo-flatstring
         run: |
-          exec 2>&1
-
-          PREFIX=${{github.workspace}}/local
-          PATH=$PREFIX/bin:$PATH
-
           echo "::group::xo-flatstring configure"
           xo-build --configure --with-utests --with-examples xo-flatstring 
           echo "::endgroup::"
 
           echo "::group::xo-flatstring build"
-          xo-build --build xo-flatstring 2>&1
+          xo-build --build xo-flatstring 
           echo "::endgroup::"
 
           echo "::group::xo-flatstring utest"
