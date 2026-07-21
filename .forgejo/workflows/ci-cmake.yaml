@@ -51,15 +51,15 @@ jobs:
       - name: build xo-subsys
         run: |
           echo "::group::xo-subsys configure"
-          xo-build --configure --with-utests --with-examples xo-subsys 
+          xo-build --configure --with-utests --with-examples xo-subsys
           echo "::endgroup::"
 
           echo "::group::xo-subsys build"
-          xo-build --build xo-subsys 
+          xo-build --build xo-subsys
           echo "::endgroup::"
 
           echo "::group::xo-subsys utest"
-          ctest --test-dir xo-subsys/.build 
+          ctest --test-dir xo-subsys/.build
           echo "::endgroup::"
 
           echo "::group::xo-subsys install"
@@ -69,15 +69,15 @@ jobs:
       - name: build xo-indentlog
         run: |
           echo "::group::xo-indentlog configure"
-          xo-build --configure --with-utests --with-examples xo-indentlog 
+          xo-build --configure --with-utests --with-examples xo-indentlog
           echo "::endgroup::"
 
           echo "::group::xo-indentlog build"
-          xo-build --build xo-indentlog 
+          xo-build --build xo-indentlog
           echo "::endgroup::"
 
           echo "::group::xo-indentlog utest"
-          ctest --test-dir xo-indentlog/.build 
+          ctest --test-dir xo-indentlog/.build
           echo "::endgroup::"
 
           echo "::group::xo-indentlog install"
@@ -87,15 +87,15 @@ jobs:
       - name: build xo-flatstring
         run: |
           echo "::group::xo-flatstring configure"
-          xo-build --configure --with-utests --with-examples xo-flatstring 
+          xo-build --configure --with-utests --with-examples xo-flatstring
           echo "::endgroup::"
 
           echo "::group::xo-flatstring build"
-          xo-build --build xo-flatstring 
+          xo-build --build xo-flatstring
           echo "::endgroup::"
 
           echo "::group::xo-flatstring utest"
-          ctest --test-dir xo-flatstring/.build 
+          ctest --test-dir xo-flatstring/.build
           echo "::endgroup::"
 
           echo "::group::xo-flatstring install"
@@ -105,15 +105,15 @@ jobs:
       - name: build xo-randomgen
         run: |
           echo "::group::xo-randomgen configure"
-          xo-build --configure --with-utests --with-examples xo-randomgen 
+          xo-build --configure --with-utests --with-examples xo-randomgen
           echo "::endgroup::"
 
           echo "::group::xo-randomgen build"
-          xo-build --build xo-randomgen 
+          xo-build --build xo-randomgen
           echo "::endgroup::"
 
           echo "::group::xo-randomgen utest"
-          ctest --test-dir xo-randomgen/.build 
+          ctest --test-dir xo-randomgen/.build
           echo "::endgroup::"
 
           echo "::group::xo-randomgen install"
@@ -123,15 +123,15 @@ jobs:
       - name: build xo-reflectutil
         run: |
           echo "::group::xo-reflectutil configure"
-          xo-build --configure --with-utests --with-examples xo-reflectutil 
+          xo-build --configure --with-utests --with-examples xo-reflectutil
           echo "::endgroup::"
 
           echo "::group::xo-reflectutil build"
-          xo-build --build xo-reflectutil 
+          xo-build --build xo-reflectutil
           echo "::endgroup::"
 
           echo "::group::xo-reflectutil utest"
-          ctest --test-dir xo-reflectutil/.build 
+          ctest --test-dir xo-reflectutil/.build
           echo "::endgroup::"
 
           echo "::group::xo-reflectutil install"
@@ -141,15 +141,15 @@ jobs:
       - name: build xo-arena
         run: |
           echo "::group::xo-arena configure"
-          xo-build --configure --with-utests --with-examples xo-arena 
+          xo-build --configure --with-utests --with-examples xo-arena
           echo "::endgroup::"
 
           echo "::group::xo-arena build"
-          xo-build --build xo-arena 
+          xo-build --build xo-arena
           echo "::endgroup::"
 
           echo "::group::xo-arena utest"
-          ctest --test-dir xo-arena/.build 
+          ctest --test-dir xo-arena/.build
           echo "::endgroup::"
 
           echo "::group::xo-arena install"
@@ -159,15 +159,15 @@ jobs:
       - name: build xo-testutil
         run: |
           echo "::group::xo-testutil configure"
-          xo-build --configure --with-utests --with-examples xo-testutil 
+          xo-build --configure --with-utests --with-examples xo-testutil
           echo "::endgroup::"
 
           echo "::group::xo-testutil build"
-          xo-build --build xo-testutil 
+          xo-build --build xo-testutil
           echo "::endgroup::"
 
           echo "::group::xo-testutil utest"
-          ctest --test-dir xo-testutil/.build 
+          ctest --test-dir xo-testutil/.build
           echo "::endgroup::"
 
           echo "::group::xo-testutil install"
@@ -177,15 +177,15 @@ jobs:
       - name: build xo-indentlog2
         run: |
           echo "::group::xo-indentlog2 configure"
-          xo-build --configure --with-utests --with-examples xo-indentlog2 
+          xo-build --configure --with-utests --with-examples xo-indentlog2
           echo "::endgroup::"
 
           echo "::group::xo-indentlog2 build"
-          xo-build --build xo-indentlog2 
+          xo-build --build xo-indentlog2
           echo "::endgroup::"
 
           echo "::group::xo-indentlog2 utest"
-          ctest --test-dir xo-indentlog2/.build 
+          ctest --test-dir xo-indentlog2/.build
           echo "::endgroup::"
 
           echo "::group::xo-indentlog2 install"
@@ -195,22 +195,39 @@ jobs:
       - name: build xo-facet
         run: |
           echo "::group::xo-facet configure"
-          xo-build --configure --with-utests --with-examples xo-facet 
+          xo-build --configure --with-utests --with-examples xo-facet
           echo "::endgroup::"
 
           echo "::group::xo-facet build"
-          xo-build --build xo-facet 
+          xo-build --build xo-facet
           echo "::endgroup::"
 
           echo "::group::xo-facet utest"
-          ctest --test-dir xo-facet/.build 
+          ctest --test-dir xo-facet/.build
           echo "::endgroup::"
 
           echo "::group::xo-facet install"
           xo-build --install xo-facet
           echo "::endgroup::"
 
+      - name: build xo-printable2
+        run: |
+          echo "::group::xo-printable2 configure"
+          xo-build --configure --with-utests --with-examples xo-printable2
+          echo "::endgroup::"
+
+          echo "::group::xo-printable2 build"
+          xo-build --build xo-printable2
+          echo "::endgroup::"
+
+          echo "::group::xo-printable2 utest"
+          ctest --test-dir xo-printable2/.build
+          echo "::endgroup::"
+
+          echo "::group::xo-printable2 install"
+          xo-build --install xo-printable2
+          echo "::endgroup::"
+
       - name: print install path
         run: |
           tree ${{github.workspace}}/local
-          
