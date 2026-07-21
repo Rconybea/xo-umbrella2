@@ -212,31 +212,12 @@ fi
 printrepo() {
     xoname=$1
 
-    case "$xoname" in
-        # carve-outs for 4 snowflake xo repo names
-        xo-indentlog)
-            echo "${XO_REPO_STEM}/indentlog.git"
-            ;;
-        xo-refcnt)
-            echo "${XO_REPO_STEM}/refcnt.git"
-            ;;
-        xo-subsys)
-            echo "${XO_REPO_STEM}/subsys.git"
-            ;;
-        xo-randomgen)
-            echo "${XO_REPO_STEM}/randomgen.git"
-            ;;
-        xo-reflect)
-            echo "${XO_REPO_STEM}/reflect.git"
-            ;;
-        *)
-            if grep -q $1 ${SUBSYSTEMLIST_FILE}; then
-                echo "${XO_REPO_STEM}/${1}.git"
-            else
-                >&2 echo "$0: unknown xo component [${xoname}]"
-                return 1
-            fi
-    esac
+    if grep -q $1 ${SUBSYSTEMLIST_FILE}; then
+        echo "${XO_REPO_STEM}/${1}.git"
+    else
+        >&2 echo "$0: unknown xo component [${xoname}]"
+        return 1
+    fi
 
     return 0
 }
