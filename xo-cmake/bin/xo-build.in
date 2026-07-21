@@ -37,6 +37,7 @@ Options:
                           Will use NAME/.build as build directory
   --build                 run cmake build for xo library NAME in immediate subdir
   --build-docs            build documentation for xo library NAME in immediate subdir
+  --utest                 run unit tests for xo library NAME
   --install               run cmake install for xo library NAME in immediate subdir
   --realclean             nuke build directory
 
@@ -67,6 +68,7 @@ clone_flag=0
 configure_flag=0
 build_flag=0
 build_docs_flag=0
+utest_flag=0
 install_flag=0
 realclean_flag=0
 pathtosource=
@@ -125,6 +127,9 @@ while [[ $# > 0 ]]; do
             ;;
         --build-docs)
             build_docs_flag=1
+            ;;
+        --utest)
+            utest_flag=1
             ;;
         --install)
             install_flag=1
@@ -410,6 +415,18 @@ fi
 if [[ $build_docs_flag -eq 1 ]]; then
     if [[ -n "$xoname" ]]; then
         cmd="cmake --build $pathtobuild -- docs"
+
+        if [[ $noop_flag -eq 1 ]]; then
+            echo $cmd
+        else
+            $cmd
+        fi
+    fi
+fi
+
+if [[ $utest_flag -eq 1 ]]; then
+    if [[ -n "$xoname" ]]; then
+        cmd="ctest --test-dir $pathtobuild"
 
         if [[ $noop_flag -eq 1 ]]; then
             echo $cmd
