@@ -1579,14 +1579,41 @@ macro(xo_external_pkgconfig_dependency target prefix pkg)
     target_compile_options(${target} PUBLIC ${${prefix}_CFLAGS_OTHER})
 endmacro()
 
+# guard for xo_self_dependency() / xo_self_headeronly_dependency().
+#
+# These are only correct when ${dep} is the library belonging to the project
+# we're currently inside: i.e. dep=xo_foo when inside xo-foo/.
+#
+# For anything else (a separately-built+installed xo package) the dep must come
+# from find_package(), via xo_dependency() or xo_headeronly_dependency().
+# Using xo_self_dependency() there fails *silently*: with no find_package(),
+# ${dep} never resolves to a target, so cmake demotes it to a bare library name
+# (-ldep) and propagates no include directories.  The build then dies later with
+# a confusing missing-header error in an unrelated-looking file.
+#
+macro(xo_self_dependency_guard macroname target dep)
+    if (NOT "${dep}" STREQUAL "${PROJECT_NAME}")
+        message(FATAL_ERROR
+            "${macroname}(${target} ${dep}): [${dep}] is not the library of project [${PROJECT_NAME}].\n"
+            "${macroname}() only works for this project's own library "
+            "(expected [${PROJECT_NAME}]).\n"
+            "For a separately-installed xo package, use xo_dependency(${target} ${dep}) "
+            "-- or xo_headeronly_dependency(${target} ${dep}) if [${dep}] is header-only -- "
+            "which call find_package() so the target actually resolves.")
+    endif()
+endmacro()
+
 # dependency on target provided from this codebase.
 #
 # 1. don't need find_package() in this case,  since details of dep targets
 #    must be known to cmake for it to build them.
 # 2. in any case, can't use find_package() when cmake runs,
 #    because supporting .cmake files haven't been generated yet
+# 3. ${dep} may be defined later than this call (cmake resolves non-imported
+#    targets at generate time), so we check the name, not target existence.
 #
 macro(xo_self_dependency target dep)
+    xo_self_dependency_guard(xo_self_dependency ${target} ${dep})
     target_link_libraries(${target} PUBLIC ${dep})
 endmacro()
 
@@ -1600,6 +1627,7 @@ endmacro()
 # 3. need to use INTERFACE instead of PUBLIC for a header-only dep
 #
 macro(xo_self_headeronly_dependency target dep)
+    xo_self_dependency_guard(xo_self_headeronly_dependency ${target} ${dep})
     target_link_libraries(${target} INTERFACE ${dep})
 endmacro()
 
