@@ -6,6 +6,7 @@
 #pragma once
 
 #include "xo/reflect/Object.hpp"
+#include <bit>
 #include <cstdint>
 
 namespace xo {
@@ -36,7 +37,7 @@ namespace xo {
 
         /** @class object
          *
-         *  @brief dynamically tyyped object; support for schematica
+         *  @brief dynamically tyyped object; support for schematika
          **/
         class object {
         public:
@@ -73,6 +74,7 @@ namespace xo {
                     std::uint32_t bits = masked_value();
 
                     return * reinterpret_cast<float *>(&bits);
+                    return std::bit_cast<float>(bits);
                 } else {
                     return sentinel;
                 }
