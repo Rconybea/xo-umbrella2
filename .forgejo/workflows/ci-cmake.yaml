@@ -51,7 +51,7 @@ jobs:
       - name: build xo-subsys
         run: |
           echo "::group::xo-subsys configure"
-          xo-build --configure --gh-action-log --with-utests --with-examples xo-subsys
+          xo-build --configure --with-utests --with-examples xo-subsys
           echo "::endgroup::"
 
           echo "::group::xo-subsys build"
