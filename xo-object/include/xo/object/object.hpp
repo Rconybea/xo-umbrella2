@@ -70,10 +70,9 @@ namespace xo {
             }
 
             float as_float32(float sentinel = std::numeric_limits<float>::quiet_NaN()) const noexcept {
-                if (tag() == otag::ot_f64) {
+                if (tag() == otag::ot_f32) {
                     std::uint32_t bits = masked_value();
 
-                    return * reinterpret_cast<float *>(&bits);
                     return std::bit_cast<float>(bits);
                 } else {
                     return sentinel;
