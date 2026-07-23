@@ -58,6 +58,43 @@ namespace xo {
             object() = default;
             object(const object & x);
 
+            /** @name Immediate-value factories
+             *
+             *  @brief Construct an @ref object whose payload is embedded directly
+             *  in the tagged word.
+             *
+             *  Pointer-tagged values (@c ot_i64, @c ot_f64, @c ot_zstring,
+             *  @c ot_symbol, @c ot_cons, @c ot_rc_object) embed an address instead,
+             *  so they need allocator support; those factories are deferred until
+             *  the storage/ownership model is settled.
+             */
+            ///@{
+            /** @brief Make the sentinel object (not accessible from schematica). **/
+            static object make_sentinel() noexcept {
+                return object(otag::ot_sentinel, 0);
+            }
+            /** @brief Make a boolean object; truth value in the least-significant bit. **/
+            static object make_boolean(bool x) noexcept {
+                return object(otag::ot_boolean, x ? 1 : 0);
+            }
+            /** @brief Make a character object; ascii in the least-significant 8 bits. **/
+            static object make_char(char x) noexcept {
+                return object(otag::ot_char, static_cast<unsigned char>(x));
+            }
+            /** @brief Make a 32-bit signed integer object.
+             *
+             *  @note Casts via @c uint32_t first, so negative @p x is not
+             *  sign-extended into the tag bits before @ref c_ptr_mask is applied.
+             **/
+            static object make_int32(std::int32_t x) noexcept {
+                return object(otag::ot_i32, static_cast<std::uint32_t>(x));
+            }
+            /** @brief Make a 32-bit floating-point object. **/
+            static object make_float32(float x) noexcept {
+                return object(otag::ot_f32, std::bit_cast<std::uint32_t>(x));
+            }
+            ///@}
+
             otag tag() const noexcept { return (static_cast<otag>(value_ >> c_ptr_bits)); }
             std::uint64_t masked_value() const noexcept { return value_ & c_ptr_mask; }
 
@@ -141,7 +178,8 @@ namespace xo {
 
             /** only use bottom c_ptr_bits (48) from value **/
             void set_tag_value(otag tag, std::uint64_t value) {
-                value_ = (static_cast<std::uint16_t>(tag) | (value & c_ptr_mask));
+                value_ = ((static_cast<std::uint64_t>(tag) << c_ptr_bits)
+                          | (value & c_ptr_mask));
             }
 
         private:
