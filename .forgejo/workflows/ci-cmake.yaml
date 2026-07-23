@@ -228,6 +228,24 @@ jobs:
           xo-build --install xo-printable2
           echo "::endgroup::"
 
+      - name: build xo-alloc2
+        run: |
+          echo "::group::xo-alloc2 configure"
+          xo-build --configure --with-utests --with-examples xo-alloc2
+          echo "::endgroup::"
+
+          echo "::group::xo-alloc2 build"
+          xo-build --build xo-alloc2
+          echo "::endgroup::"
+
+          echo "::group::xo-alloc2 utest"
+          ctest --test-dir xo-alloc2/.build
+          echo "::endgroup::"
+
+          echo "::group::xo-alloc2 install"
+          xo-build --install xo-alloc2
+          echo "::endgroup::"
+
       - name: print install path
         run: |
           tree ${{github.workspace}}/local
