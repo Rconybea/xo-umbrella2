@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:Rconybea/xo-timeutil.git
+	branch = main
+	commit = cbb6156813c4d7fa6773183c63644c32dc67949c
+	parent = fcd20d49b8cf24dbf1d04a69067af9fcb230a080
+	method = merge
+	cmdver = 0.4.9
