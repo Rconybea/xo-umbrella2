@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:Rconybea/xo-cmake.git
 	branch = main
-	commit = 25bac54450fa35002ac2e2e75523f673f82cfe5c
-	parent = 2db6b0e0a79b8d4ebf6f4a466cfc4b5eba5df061
+	commit = ffe9f8f07bad7ca25a8f3a0ba1a0f8434f2fccc6
+	parent = cc0eed4628845ca9fbea3c675665c6eac4b33d5f
 	method = merge
 	cmdver = 0.4.9
