@@ -426,6 +426,42 @@ jobs:
           xo-build --install xo-procedure2
           echo "::endgroup::"
 
+      - name: build xo-numeric
+        run: |
+          echo "::group::xo-numeric configure"
+          xo-build --configure --with-utests --with-examples xo-numeric
+          echo "::endgroup::"
+
+          echo "::group::xo-numeric build"
+          xo-build --build xo-numeric
+          echo "::endgroup::"
+
+          echo "::group::xo-numeric utest"
+          ctest --test-dir xo-numeric/.build
+          echo "::endgroup::"
+
+          echo "::group::xo-numeric install"
+          xo-build --install xo-numeric
+          echo "::endgroup::"
+
+      - name: build xo-tokenizer2
+        run: |
+          echo "::group::xo-tokenizer2 configure"
+          xo-build --configure --with-utests --with-examples xo-tokenizer2
+          echo "::endgroup::"
+
+          echo "::group::xo-tokenizer2 build"
+          xo-build --build xo-tokenizer2
+          echo "::endgroup::"
+
+          echo "::group::xo-tokenizer2 utest"
+          ctest --test-dir xo-tokenizer2/.build
+          echo "::endgroup::"
+
+          echo "::group::xo-tokenizer2 install"
+          xo-build --install xo-tokenizer2
+          echo "::endgroup::"
+
       - name: print install path
         run: |
           tree ${{github.workspace}}/local
