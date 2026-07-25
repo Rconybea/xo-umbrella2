@@ -33,10 +33,10 @@ namespace xo::print {
 
         // inherited from PpSink
 
-        virtual void put(std::string_view x) override final;
-        virtual void begin() override final;
-        virtual void split() override final;
-        virtual void end() override final;
+        virtual PpSink & put(std::string_view x) override final;
+        virtual PpSink & begin() override final;
+        virtual PpSink & split() override final;
+        virtual PpSink & end() override final;
         virtual PpSinkInserter stream_open(uint32_t min_z) override final;
         virtual void stream_commit() override final;
 

@@ -22,22 +22,18 @@ namespace xo::print {
     template <typename T>
     struct Pretty<std::vector<T>> {
         static void print(PpSink & sink, const std::vector<T> & v) {
-            sink.put("[");
-            sink.begin();
+            sink.put("[").begin();
 
             bool first = true;
             for (const T & elt : v) {
-                if (!first) {
-                    sink.put(",");
-                    sink.split();
-                }
+                if (!first)
+                    sink.put(",").split();
                 first = false;
 
                 pp_write(sink, elt);
             }
 
-            sink.end();
-            sink.put("]");
+            sink.end().put("]");
         }
     };
 } /*namespace xo::print*/

@@ -59,17 +59,17 @@ namespace xo::print {
 
     public:
         /** write string comprising contents of @p s **/
-        virtual void put(std::string_view s) = 0;
+        virtual PpSink & put(std::string_view s) = 0;
         /** begin group of nested items.
          *  Sequence begin,[string*,split]*,end
          **/
-        virtual void begin() = 0;
+        virtual PpSink & begin() = 0;
         /** optional split. Marks spot where pretty printer
          *  may introduce line break to fit
          **/
-        virtual void split() = 0;
+        virtual PpSink & split() = 0;
         /** end group of nested items previously  introduced with begin() **/
-        virtual void end() = 0;
+        virtual PpSink & end() = 0;
         /** temporary stream to fill a string token.
          *  Token will be completed by next call to stream_commit().
          *  Example:

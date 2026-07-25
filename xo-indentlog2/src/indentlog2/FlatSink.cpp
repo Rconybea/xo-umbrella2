@@ -6,28 +6,32 @@
 #include "print/FlatSink.hpp"
 
 namespace xo::print {
-    void
+    PpSink &
     FlatSink::put(std::string_view x)
     {
         os_.write(x.data(), x.size());
+        return *this;
     }
 
-    void
+    PpSink &
     FlatSink::begin()
     {
         /* flat output discards group structure */
+        return *this;
     }
 
-    void
+    PpSink &
     FlatSink::split()
     {
         /* flat output ignores splits */
+        return *this;
     }
 
-    void
+    PpSink &
     FlatSink::end()
     {
         /* flat output discards group structure */
+        return *this;
     }
 
     PpSinkInserter

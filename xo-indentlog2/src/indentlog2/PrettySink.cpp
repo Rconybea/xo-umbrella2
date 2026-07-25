@@ -30,28 +30,32 @@ namespace xo {
             logbuf_.visit_pools(fn);
         }
 
-        void
+        PpSink &
         PrettySink::put(std::string_view x)
         {
             pps_.put(x);
+            return *this;
         }
 
-        void
+        PpSink &
         PrettySink::begin()
         {
             pps_.begin();
+            return *this;
         }
 
-        void
+        PpSink &
         PrettySink::split()
         {
             pps_.split();
+            return *this;
         }
 
-        void
+        PpSink &
         PrettySink::end()
         {
             pps_.end();
+            return *this;
         }
 
         PpSinkInserter
