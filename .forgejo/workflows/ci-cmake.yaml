@@ -300,6 +300,24 @@ jobs:
           xo-build --install xo-reflect
           echo "::endgroup::"
 
+      - name: build xo-pyreflect
+        run: |
+          echo "::group::xo-pyreflect configure"
+          xo-build --configure --with-utests --with-examples xo-pyreflect
+          echo "::endgroup::"
+
+          echo "::group::xo-pyreflect build"
+          xo-build --build xo-pyreflect
+          echo "::endgroup::"
+
+          echo "::group::xo-pyreflect utest"
+          ctest --test-dir xo-pyreflect/.build
+          echo "::endgroup::"
+
+          echo "::group::xo-pyreflect install"
+          xo-build --install xo-pyreflect
+          echo "::endgroup::"
+
       - name: print install path
         run: |
           tree ${{github.workspace}}/local
