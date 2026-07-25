@@ -15,7 +15,7 @@ $0 [-u|--usage|-h|--help]
     [--with-examples] [--with-utests] [--with-asm] [--debug-build]
     [--with-opengl=GLFLAG] [--with-vulkan=VKFLAG]
     [-S=SOURCEDIR] [-B=BUILDDIR]
-    NAME
+    [--all | NAME ...]
 EOF
 }
 
@@ -32,6 +32,12 @@ Options:
   --list                  list known xo libraries
   -n | --dry-run          dry-run: don't actually invoke state-changing commands
   --xoname=NAME           operate on xo subsystem NAME
+  --all                   operate on every subsystem from --list, in dependency
+                          order (bottom-up), excluding the xo-cmake bootstrap.
+                          The chosen operations (e.g. --configure --build --utest
+                          --install) run for each subsystem before moving to the
+                          next, so a whole-umbrella cmake build is one command.
+                          Multiple NAMEs may also be given explicitly instead.
   --clone                 git clone xo library NAME in current directory
   --configure             run cmake for xo library NAME in immediate subdir
                           Will use NAME/.build as build directory
@@ -87,6 +93,8 @@ add_umbrella_remote_flag=0
 split_umbrella_remote_flag=0
 pull_umbrella_remote_flag=0
 push_umbrella_remote_flag=0
+all_flag=0
+xonames=()
 
 while [[ $# > 0 ]]; do
     case "$1" in
@@ -116,8 +124,12 @@ while [[ $# > 0 ]]; do
         --list)
             cmd='list'
             ;;
+        --all)
+            all_flag=1
+            ;;
         --xoname=*)
             xoname="${1#*=}"
+            xonames+=("${1#*=}")
             ;;
         --clone)
             clone_flag=1
@@ -178,6 +190,7 @@ while [[ $# > 0 ]]; do
             ;;
         xo-*)
             xoname="$1"
+            xonames+=("$1")
             ;;
         *)
             usage
@@ -190,17 +203,10 @@ done
 
 #echo xoname=$xoname pathtosource=$pathtosource pathtobuild=$pathtobuild
 
-if [[ -z "$pathtosource" ]]; then
-    pathtosource=$xoname
-fi
-
-if [[ -z "$pathtobuild" ]]; then
-    if [[ -n $xoname ]]; then
-        pathtobuild=$xoname/.build
-    else
-        pathtobuild=.build
-    fi
-fi
+# -S/-B overrides (if given) apply per-subsystem below; when empty the
+# source/build dirs are derived from each subsystem name in the loop.
+orig_pathtosource="$pathtosource"
+orig_pathtobuild="$pathtobuild"
 
 SUBSYSTEMLIST_FILE=@CMAKE_INSTALL_FULL_DATADIR@/etc/xo/subsystem-list
 
@@ -242,6 +248,36 @@ set -e
 
 if [[ $cmd == 'list' ]]; then
     subsystem_list
+fi
+
+# resolve the set of subsystems to operate on.
+#   --all           -> every subsystem in dependency order (bottom-up),
+#                      excluding the xo-cmake bootstrap itself
+#   one/more NAMEs  -> exactly those, in the order given
+if [[ $all_flag -eq 1 ]]; then
+    mapfile -t xonames < <(subsystem_list | grep -v '^xo-cmake$')
+fi
+
+# preserve prior single-shot no-op behavior when no subsystem is named
+if [[ ${#xonames[@]} -eq 0 ]]; then
+    xonames=("")
+fi
+
+# --- per-subsystem operations (loop body is intentionally left un-indented) ---
+for xoname in "${xonames[@]}"; do
+
+if [[ -n "$orig_pathtosource" ]]; then
+    pathtosource="$orig_pathtosource"
+else
+    pathtosource="$xoname"
+fi
+
+if [[ -n "$orig_pathtobuild" ]]; then
+    pathtobuild="$orig_pathtobuild"
+elif [[ -n "$xoname" ]]; then
+    pathtobuild="$xoname/.build"
+else
+    pathtobuild=".build"
 fi
 
 if [[ $repo_flag -eq 1 ]]; then
@@ -474,3 +510,5 @@ if [[ $realclean_flag -eq 1 ]]; then
         rm -rf "${pathtobuild}"
     fi
 fi
+
+done
