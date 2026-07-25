@@ -45,6 +45,12 @@ configure_file(
     @ONLY
     )
 
+configure_file(
+    ${PROJECT_SOURCE_DIR}/bin/xo-docker-build.in
+    ${PROJECT_BINARY_DIR}/xo-docker-build
+    @ONLY
+    )
+
 install(
     FILES
     "cmake/xo_macros/xo-project-macros.cmake"
@@ -60,6 +66,7 @@ install(
     "${PROJECT_BINARY_DIR}/xo-cmake-llvmcov-harness"
     "${PROJECT_BINARY_DIR}/xo-cmake-config"
     "${PROJECT_BINARY_DIR}/xo-build"
+    "${PROJECT_BINARY_DIR}/xo-docker-build"
     PERMISSIONS OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
     DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
