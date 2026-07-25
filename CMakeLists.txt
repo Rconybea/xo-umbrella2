@@ -179,3 +179,10 @@ xo_umbrella_sphinx_config(
     index.rst
     docs/install.rst
     docs/glossary.rst)
+
+# ----------------------------------------------------------------
+# inter-subsystem dependency graph, for maintaining the canonical bottom-up
+# order shared by xo-cmake/etc/xo/subsystem-list and ci.nix.
+#   tsort ${CMAKE_BINARY_DIR}/xo-subsystem-edges.txt   # -> dependencies-first order
+
+xo_emit_dependency_edges(${CMAKE_BINARY_DIR}/xo-subsystem-edges.txt)
