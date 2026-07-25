@@ -336,6 +336,24 @@ jobs:
           xo-build --install xo-stringtable2
           echo "::endgroup::"
 
+      - name: build xo-object2
+        run: |
+          echo "::group::xo-object2 configure"
+          xo-build --configure --with-utests --with-examples xo-object2
+          echo "::endgroup::"
+
+          echo "::group::xo-object2 build"
+          xo-build --build xo-object2
+          echo "::endgroup::"
+
+          echo "::group::xo-object2 utest"
+          ctest --test-dir xo-object2/.build
+          echo "::endgroup::"
+
+          echo "::group::xo-object2 install"
+          xo-build --install xo-object2
+          echo "::endgroup::"
+
       - name: print install path
         run: |
           tree ${{github.workspace}}/local
