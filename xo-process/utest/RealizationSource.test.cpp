@@ -8,6 +8,7 @@
 #include "xo/simulator/Simulator.hpp"
 #include "xo/indentlog/print/printer.hpp"
 #include "xo/indentlog/scope.hpp"
+#include <xo/timeutil/timeutil_iostream.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {
@@ -42,7 +43,7 @@ namespace xo {
                                                 123456 /*usec*/);
 
           std::stringstream ss;
-          xo::timeutil::print_utc_ymd_hms_usec(t0, ss);
+          xo::time::print_utc_ymd_hms_usec(t0, ss);
 
           REQUIRE(ss.str() == "20220610:16:29:05.123456");
 

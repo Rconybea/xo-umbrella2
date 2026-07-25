@@ -2,7 +2,9 @@
 
 #pragma once
 
-#include "xo/indentlog/timeutil/timeutil.hpp"
+#include <xo/timeutil/timeutil.hpp>
+#include <xo/timeutil/timeutil_iostream.hpp>
+#include <ostream>
 
 namespace xo {
     namespace time {
@@ -21,7 +23,7 @@ namespace xo {
         operator<<(std::ostream & os,
                    iso8601 x)
         {
-            timeutil::print_iso8601(x.t0_, os);
+            print_iso8601(x.t0_, os);
             return os;
         } /*operator<<*/
 
@@ -42,7 +44,7 @@ namespace xo {
         inline std::ostream &
         operator<<(std::ostream & os, hms_msec x)
         {
-            timeutil::print_hms_msec(x.dt_, os);
+            print_hms_msec(x.dt_, os);
             return os;
         } /*operator<<*/
 
@@ -63,7 +65,7 @@ namespace xo {
         inline std::ostream &
         operator<<(std::ostream & os, hms_usec x)
         {
-            timeutil::print_hms_usec(x.dt_, os);
+            print_hms_usec(x.dt_, os);
             return os;
         } /*operator<<*/
     } /*namespace time*/
@@ -74,14 +76,14 @@ namespace std {
         inline std::ostream & operator<<(std::ostream & os,
                                          xo::time::utc_nanos t0)
         {
-            xo::time::timeutil::print_utc_ymd_hms_usec(t0, os);
+            xo::time::print_utc_ymd_hms_usec(t0, os);
             return os;
         } /*operator<<*/
 
         inline std::ostream & operator<<(std::ostream & os,
                                          xo::time::nanos dt)
         {
-            xo::time::timeutil::print_hms_usec(dt, os);
+            xo::time::print_hms_usec(dt, os);
             return os;
         } /*operator<<*/
     } /*namespace chrono*/

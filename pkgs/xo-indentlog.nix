@@ -7,6 +7,7 @@
   doxygen, sphinx, graphviz, fontconfig,
 
   xo-cmake,
+  xo-timeutil,
 
   buildDocs ? false,
   buildExamples ? false,
@@ -37,6 +38,10 @@ stdenv.mkDerivation (finalattrs:
     postBuild = lib.optionalString buildDocs ''
       cmake --build . -- docs
     '';
+
+    # propagated: indentlog's exported headers (print/time.hpp) include
+    # xo/timeutil headers, so downstream consumers need timeutil too
+    propagatedBuildInputs = [ xo-timeutil ];
 
     nativeBuildInputs = [ cmake
                           catch2

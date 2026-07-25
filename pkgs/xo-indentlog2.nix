@@ -20,7 +20,7 @@ stdenv.mkDerivation (finalattrs:
     name = "xo-indentlog2";
     version = "1.0";
 
-    src = ../xo-indentlog;
+    src = ../xo-indentlog2;
 
     cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake"]
                  ++ lib.optionals buildDocs ["-DXO_ENABLE_DOCS=on"]
@@ -53,4 +53,6 @@ stdenv.mkDerivation (finalattrs:
                           python3Packages.sphinxcontrib-ditaa
                           python3Packages.sphinxcontrib-plantuml
                         ];
+
+    propagatedBuildInputs = [ xo-arena ];
   })
