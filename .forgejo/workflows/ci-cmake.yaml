@@ -264,6 +264,24 @@ jobs:
           xo-build --install xo-refcnt
           echo "::endgroup::"
 
+      - name: build xo-pyutil
+        run: |
+          echo "::group::xo-pyutil configure"
+          xo-build --configure --with-utests --with-examples xo-pyutil
+          echo "::endgroup::"
+
+          echo "::group::xo-pyutil build"
+          xo-build --build xo-pyutil
+          echo "::endgroup::"
+
+          echo "::group::xo-pyutil utest"
+          ctest --test-dir xo-pyutil/.build
+          echo "::endgroup::"
+
+          echo "::group::xo-pyutil install"
+          xo-build --install xo-pyutil
+          echo "::endgroup::"
+
       - name: print install path
         run: |
           tree ${{github.workspace}}/local
