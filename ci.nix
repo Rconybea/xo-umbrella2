@@ -15,6 +15,7 @@ in
   {
     inherit (xoPkgs)
       xo-cmake
+      xo-timeutil
       xo-indentlog
       xo-subsys
       xo-flatstring
