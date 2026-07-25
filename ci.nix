@@ -16,16 +16,16 @@ in
     inherit (xoPkgs)
       xo-cmake
       xo-timeutil
-      xo-indentlog
       xo-subsys
-      xo-flatstring
+      xo-indentlog
       xo-randomgen
+      xo-flatstring
       xo-reflectutil
       xo-arena
-      xo-indentlog2
       xo-facet
       xo-printable2
       xo-testutil
+      xo-indentlog2
       xo-alloc2
       xo-refcnt
       xo-pyutil
@@ -42,11 +42,11 @@ in
       xo-reader2
       xo-interpreter2
       xo-allocutil
-      xo-alloc
       xo-ratio
       xo-unit
       xo-pyunit
       xo-callback
+      xo-alloc
       xo-object
       xo-ordinaltree
       xo-expression
@@ -61,15 +61,15 @@ in
       xo-pyprintjson
       xo-reactor
       xo-pyreactor
-      xo-simulator
-      xo-pysimulator
       xo-websock
       xo-pywebsock
-      xo-process
-      xo-pyprocess
       xo-statistics
       xo-distribution
       xo-pydistribution
+      xo-simulator
+      xo-pysimulator
+      xo-process
+      xo-pyprocess
       xo-kalmanfilter
       xo-pykalmanfilter
       xo-imgui
