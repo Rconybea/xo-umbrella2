@@ -1031,6 +1031,39 @@ macro(xo_add_headeronly_library target)
 endmacro()
 
 # ----------------------------------------------------------------
+# Emit the inter-subsystem dependency graph (one edge per line) to ${outfile}.
+#
+# Intended to run at the end of the umbrella build, after every subsystem's
+# CMakeLists has run, so the GLOBAL xo_dependency_edges property has accumulated
+# an edge for each xo_dependency()/xo_headeronly_dependency() call across all
+# subsystems -- covering library, example, and unit-test dependencies.  Each
+# output line is
+#
+#     <dependency-repo> <dependent-repo>
+#
+# i.e. tsort(1) convention (predecessor first), so
+#
+#     tsort ${outfile}
+#
+# prints subsystems in bottom-up (dependency) order.  A repo name is the
+# basename of a subsystem's source dir (e.g. xo-object); intra-repo edges are
+# dropped at record time.
+#
+function(xo_emit_dependency_edges outfile)
+    get_property(_edges GLOBAL PROPERTY xo_dependency_edges)
+
+    if(_edges)
+        list(REMOVE_DUPLICATES _edges)
+        list(SORT _edges)
+    endif()
+    string(REPLACE ";" "\n" _text "${_edges}")
+    file(WRITE "${outfile}" "${_text}\n")
+
+    message(STATUS "xo_emit_dependency_edges: wrote ${outfile}")
+    message(STATUS "xo_emit_dependency_edges: 'tsort ${outfile}' -> bottom-up subsystem order")
+endfunction()
+
+# ----------------------------------------------------------------
 # use this for an executable
 #
 macro(xo_add_executable target sources)
@@ -1459,6 +1492,22 @@ macro(xo_dependency_helper target visibility dep)
     set_property(
         TARGET ${target}
         PROPERTY xo_deps ${_tmp})
+
+    # record an inter-subsystem dependency edge for xo_emit_dependency_edges().
+    # ${target} may be a library, example, or unit-test executable; the repo it
+    # belongs to is the currently-configuring project (PROJECT_SOURCE_DIR).
+    # ${dep} is a sibling library carrying xo_srcdir (only set in umbrella builds;
+    # in a standalone build ${dep} is find_package-imported and has no xo_srcdir,
+    # so no edge is recorded -- which is fine, edges are only consumed umbrella-wide).
+    get_target_property(_xo_dep_srcdir ${dep} xo_srcdir)
+    if(_xo_dep_srcdir)
+        get_filename_component(_xo_dep_repo "${_xo_dep_srcdir}" NAME)
+        get_filename_component(_xo_self_repo "${PROJECT_SOURCE_DIR}" NAME)
+        if(NOT _xo_dep_repo STREQUAL _xo_self_repo)
+            set_property(GLOBAL APPEND
+                PROPERTY xo_dependency_edges "${_xo_dep_repo} ${_xo_self_repo}")
+        endif()
+    endif()
 
     #list(REMOVE_DUPLICATES _xo_dependency_tmp1)
 endmacro()
