@@ -282,6 +282,24 @@ jobs:
           xo-build --install xo-pyutil
           echo "::endgroup::"
 
+      - name: build xo-reflect
+        run: |
+          echo "::group::xo-reflect configure"
+          xo-build --configure --with-utests --with-examples xo-reflect
+          echo "::endgroup::"
+
+          echo "::group::xo-reflect build"
+          xo-build --build xo-reflect
+          echo "::endgroup::"
+
+          echo "::group::xo-reflect utest"
+          ctest --test-dir xo-reflect/.build
+          echo "::endgroup::"
+
+          echo "::group::xo-reflect install"
+          xo-build --install xo-reflect
+          echo "::endgroup::"
+
       - name: print install path
         run: |
           tree ${{github.workspace}}/local
