@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+
+# Reproduce the Forgejo cmake CI (.forgejo/workflows/ci-cmake.yaml) locally,
+# inside the same docker-xo-builder image the CI runner uses.
+#
+# It bind-mounts the umbrella repo read-only, clones its committed HEAD into a
+# fresh tree inside the container (so it tests exactly what CI would test on a
+# push -- not your uncommitted edits), bootstraps xo-cmake, then runs
+#
+#     xo-build <selection> --configure --build --utest --install \
+#              --with-utests --with-examples --gh-action-log
+#
+# for the selected subsystems.  With no subsystem named it builds --all.
+
+set -euo pipefail
+
+usage() {
+    cat <<EOF
+usage: $(basename "$0") [-n|--dry-run] [--image=IMAGE] [--repo=DIR] [NAME ...]
+
+  -n | --dry-run   print the docker command instead of running it
+  --image=IMAGE    builder image to run in
+                   [default: \${XO_BUILDER_IMAGE:-docker-xo-builder:v2}]
+  --repo=DIR       umbrella repo to clone HEAD from
+                   [default: git toplevel of the current directory]
+  -h | --help      this message
+
+  NAME ...         subsystems to build, in order (e.g. xo-timeutil xo-indentlog).
+                   With none given, builds every subsystem via 'xo-build --all'.
+EOF
+}
+
+image="${XO_BUILDER_IMAGE:-docker-xo-builder:v2}"
+repo=
+dry_run=0
+selection=()
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -h|--help)    usage; exit 0 ;;
+        -n|--dry-run) dry_run=1 ;;
+        --image=*)    image="${1#*=}" ;;
+        --repo=*)     repo="${1#*=}" ;;
+        xo-*|--all)   selection+=("$1") ;;
+        *)            echo "$(basename "$0"): unexpected argument [$1]" >&2; usage >&2; exit 1 ;;
+    esac
+    shift
+done
+
+if [[ -z "$repo" ]]; then
+    repo="$(git rev-parse --show-toplevel)"
+fi
+
+# default to a whole-umbrella build
+if [[ ${#selection[@]} -eq 0 ]]; then
+    selection=(--all)
+fi
+
+# the in-container driver: bootstrap xo-cmake, then xo-build the selection.
+# positional args ("$@") are the subsystem selection.
+inner=$(cat <<'INNER'
+set -euo pipefail
+PREFIX=/work/local
+export PATH="$PREFIX/bin:$PATH"
+
+echo "::group::checkout (clone HEAD of /src)"
+rm -rf /work
+git clone --quiet --depth=1 file:///src /work
+mkdir -p "$PREFIX"
+cd /work
+echo "::endgroup::"
+
+echo "::group::bootstrap xo-cmake"
+cmake -S xo-cmake -B .build/xo-cmake -DCMAKE_INSTALL_PREFIX="$PREFIX"
+cmake --build .build/xo-cmake
+cmake --install .build/xo-cmake
+echo "::endgroup::"
+
+xo-build "$@" --configure --build --utest --install \
+         --with-utests --with-examples --gh-action-log
+INNER
+)
+
+set -- docker run --rm -i -v "${repo}:/src:ro" "${image}" \
+       bash -s -- "${selection[@]}"
+
+if [[ $dry_run -eq 1 ]]; then
+    printf '%q ' "$@"; echo
+    echo "--- with inner script feeding xo-build ${selection[*]} ... ---"
+    exit 0
+fi
+
+exec "$@" <<<"$inner"
