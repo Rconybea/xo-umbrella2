@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:Rconybea/xo-facet.git
 	branch = main
-	commit = 00b2be825864e2481d0beff9a31ec273eed6bbde
-	parent = 8483600ec102a5867ca9b8b2da19993777aaab00
+	commit = ffd9cec3fa2c08c5f6be7ab8caa4ec9bddcc5e1f
+	parent = a091a9b2456578de0d59f56ca92009f9325ff125
 	method = merge
 	cmdver = 0.4.9
