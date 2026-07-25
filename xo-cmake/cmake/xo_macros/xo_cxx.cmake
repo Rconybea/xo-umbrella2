@@ -1508,6 +1508,9 @@ endmacro()
 
 # dependency of a header-only library on another header-only library
 #
+# WARNING: only valid in a LIBRARY target.
+#          For EXECUTABLE targets use xo_dependency()
+#
 macro(xo_headeronly_dependency target dep)
     xo_establish_submodule_build()
 
@@ -1625,6 +1628,9 @@ endmacro()
 # 2. in any case, can't use find_package() when cmake runs,
 #    because supporting .cmake files haven't been generated yet
 # 3. need to use INTERFACE instead of PUBLIC for a header-only dep
+#
+# WARNING: only valid in a LIBRARY target.
+#          Do not use in an EXECUTABLE target
 #
 macro(xo_self_headeronly_dependency target dep)
     xo_self_dependency_guard(xo_self_headeronly_dependency ${target} ${dep})
