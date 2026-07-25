@@ -246,6 +246,24 @@ jobs:
           xo-build --install xo-alloc2
           echo "::endgroup::"
 
+      - name: build xo-refcnt
+        run: |
+          echo "::group::xo-refcnt configure"
+          xo-build --configure --with-utests --with-examples xo-refcnt
+          echo "::endgroup::"
+
+          echo "::group::xo-refcnt build"
+          xo-build --build xo-refcnt
+          echo "::endgroup::"
+
+          echo "::group::xo-refcnt utest"
+          ctest --test-dir xo-refcnt/.build
+          echo "::endgroup::"
+
+          echo "::group::xo-refcnt install"
+          xo-build --install xo-refcnt
+          echo "::endgroup::"
+
       - name: print install path
         run: |
           tree ${{github.workspace}}/local
