@@ -318,6 +318,24 @@ jobs:
           xo-build --install xo-pyreflect
           echo "::endgroup::"
 
+      - name: build xo-stringtable2
+        run: |
+          echo "::group::xo-stringtable2 configure"
+          xo-build --configure --with-utests --with-examples xo-stringtable2
+          echo "::endgroup::"
+
+          echo "::group::xo-stringtable2 build"
+          xo-build --build xo-stringtable2
+          echo "::endgroup::"
+
+          echo "::group::xo-stringtable2 utest"
+          ctest --test-dir xo-stringtable2/.build
+          echo "::endgroup::"
+
+          echo "::group::xo-stringtable2 install"
+          xo-build --install xo-stringtable2
+          echo "::endgroup::"
+
       - name: print install path
         run: |
           tree ${{github.workspace}}/local
