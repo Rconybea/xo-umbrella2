@@ -66,6 +66,24 @@ jobs:
           xo-build --install xo-subsys
           echo "::endgroup::"
 
+      - name: build xo-timeutil
+        run: |
+          echo "::group::xo-timeutil configure"
+          xo-build --configure --with-utests --with-examples xo-timeutil
+          echo "::endgroup::"
+
+          echo "::group::xo-timeutil build"
+          xo-build --build xo-timeutil
+          echo "::endgroup::"
+
+          echo "::group::xo-timeutil utest"
+          ctest --test-dir xo-timeutil/.build
+          echo "::endgroup::"
+
+          echo "::group::xo-timeutil install"
+          xo-build --install xo-timeutil
+          echo "::endgroup::"
+
       - name: build xo-indentlog
         run: |
           echo "::group::xo-indentlog configure"
