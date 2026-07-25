@@ -6,7 +6,7 @@ set(SELF_SRCS
 	LogConfig.cpp
     LogBuffer.cpp
 	PpSink.cpp
-    PrettyPrinter.cpp
+    PrettySink.cpp
     FlatSink.cpp
 	PpState.cpp
     LineState.cpp

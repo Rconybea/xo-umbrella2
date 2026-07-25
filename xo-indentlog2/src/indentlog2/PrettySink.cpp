@@ -1,9 +1,9 @@
-/** @file PrettyPrinter.cpp
+/** @file PrettySink.cpp
  *
  *  @author Roland Conybeare, Jul 2026
  **/
 
-#include "print/PrettyPrinter.hpp"
+#include "print/PrettySink.hpp"
 //#include "print/PpToken.hpp"
 //#include <cassert>
 //#include <cstring>
@@ -14,7 +14,7 @@ namespace xo {
     //using std::min;
 
     namespace print {
-        PrettyPrinter::PrettyPrinter(const PpConfig & cfg)
+        PrettySink::PrettySink(const PpConfig & cfg)
         : pps_{cfg},
           sbuf_{&pps_},
           os_(&sbuf_),
@@ -24,38 +24,38 @@ namespace xo {
         }
 
         void
-        PrettyPrinter::visit_pools(const MemorySizeVisitor & fn) const
+        PrettySink::visit_pools(const MemorySizeVisitor & fn) const
         {
             pps_.visit_pools(fn);
             logbuf_.visit_pools(fn);
         }
 
         void
-        PrettyPrinter::put(std::string_view x)
+        PrettySink::put(std::string_view x)
         {
             pps_.put(x);
         }
 
         void
-        PrettyPrinter::begin()
+        PrettySink::begin()
         {
             pps_.begin();
         }
 
         void
-        PrettyPrinter::split()
+        PrettySink::split()
         {
             pps_.split();
         }
 
         void
-        PrettyPrinter::end()
+        PrettySink::end()
         {
             pps_.end();
         }
 
         PpSinkInserter
-        PrettyPrinter::stream_open(uint32_t min_z)
+        PrettySink::stream_open(uint32_t min_z)
         {
             assert(pps_.has_open_string() == false);
 
@@ -66,7 +66,7 @@ namespace xo {
         }
 
         void
-        PrettyPrinter::stream_commit()
+        PrettySink::stream_commit()
         {
             sbuf_.commit();
         }
@@ -74,4 +74,4 @@ namespace xo {
     } /*namespace print*/
 } /*namespace xo*/
 
-/* end PrettyPrinter.cpp */
+/* end PrettySink.cpp */

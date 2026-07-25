@@ -1,4 +1,4 @@
-/** @file PrettyPrinter.hpp
+/** @file PrettySink.hpp
  *
  *  @author Roland Conybeare, Jul 2026
  **/
@@ -15,16 +15,16 @@ namespace xo {
          *  Use:
          *  @code
          *    PpConfig ppc;
-         *    PrettyPrinter pp(ppc);
+         *    PrettySink pp(ppc);
          *
          *  @endcode
          **/
-        class PrettyPrinter : public PpSink {
+        class PrettySink : public PpSink {
         public:
             using MemorySizeVisitor = xo::mm::MemorySizeVisitor;
 
         public:
-            PrettyPrinter(const PpConfig & cfg);
+            PrettySink(const PpConfig & cfg);
 
             LogBuffer & logbuf() { return logbuf_; }
 
@@ -64,4 +64,4 @@ namespace xo {
     } /*namespace print*/
 } /*namespace xo*/
 
-/* end PrettyPrinter.hpp */
+/* end PrettySink.hpp */

@@ -4,7 +4,7 @@
  **/
 
 #include "print/FlatSink.hpp"
-#include "print/PrettyPrinter.hpp"
+#include "print/PrettySink.hpp"
 #include <xo/arena/ArenaConfig.hpp>
 #include <xo/testutil/try_test_array.hpp>
 #include <catch2/catch.hpp>
@@ -16,7 +16,7 @@
 
 namespace ut {
     using xo::print::FlatSink;
-    using xo::print::PrettyPrinter;
+    using xo::print::PrettySink;
     using xo::print::PpSink;
     using xo::print::PpConfig;
     using xo::mm::ArenaConfig;
@@ -71,7 +71,7 @@ namespace ut {
     /** Unit test setup.
      *  Test sequence:
      *  1. drive step_v_ through a FlatSink; expect exactly exp_output_.
-     *  2. replay the same steps through a PrettyPrinter whose margin is wide
+     *  2. replay the same steps through a PrettySink whose margin is wide
      *     enough that every group fits; expect the same output.
      *     (a fitting group collapses its splits, so pretty == flat)
      **/
@@ -125,13 +125,13 @@ namespace ut {
 
         REHEARSE(*p_rh, ss.str() == tc.exp_output_);
 
-        /* 2. same steps through PrettyPrinter.  Default soft_right_margin (135)
+        /* 2. same steps through PrettySink.  Default soft_right_margin (135)
          *    exceeds every string here, so all groups fit and pretty == flat.
          */
         ArenaConfig logbuf_cfg { .name_ = "utest.FlatSink",
                                  .size_ = 64*1024 };
 
-        PrettyPrinter pp(PpConfig().with_logbuf_config(logbuf_cfg));
+        PrettySink pp(PpConfig().with_logbuf_config(logbuf_cfg));
 
         flatsink_drive(pp, tc.step_v_);
 
@@ -146,7 +146,7 @@ namespace ut {
     }
 
     /* when a group does NOT fit, the two sinks must diverge:
-     * PrettyPrinter honours the split (newline + indent), FlatSink ignores it.
+     * PrettySink honours the split (newline + indent), FlatSink ignores it.
      */
     TEST_CASE("FlatSink.diverges_when_too_wide", "[FlatSink]")
     {
@@ -165,7 +165,7 @@ namespace ut {
         ArenaConfig logbuf_cfg { .name_ = "utest.FlatSink.wide",
                                  .size_ = 64*1024 };
 
-        PrettyPrinter pp(PpConfig()
+        PrettySink pp(PpConfig()
                          .with_logbuf_config(logbuf_cfg)
                          .with_soft_right_margin(4));
 

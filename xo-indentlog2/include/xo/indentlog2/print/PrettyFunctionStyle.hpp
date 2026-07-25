@@ -1,0 +1,23 @@
+/** @file PrettyFunctionStyle.hpp
+ *
+ *  @author Roland Conybeare, Jul 2026
+ **/
+
+#pragma once
+
+#include "Pretty.hpp"
+#include "FunctionStyle.hpp"
+
+namespace xo::print {
+    /** pretty-print a FunctionStyle as its descriptive name.
+     *  Atomic: no group structure.
+     **/
+    template <>
+    struct Pretty<xo::FunctionStyle> {
+        static void print(PpSink & sink, xo::FunctionStyle x) {
+            sink.put(descr_of(x));   /* ADL: xo::descr_of */
+        }
+    };
+} /*namespace xo::print*/
+
+/* end PrettyFunctionStyle.hpp */
