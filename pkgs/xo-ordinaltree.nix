@@ -1,12 +1,18 @@
 {
   # nixpkgs dependencies
-  stdenv, cmake, catch2,
+  lib, stdenv, cmake, catch2,
 
   # xo dependencies
   xo-allocutil,
   xo-refcnt,
   xo-randomgen,
   xo-cmake,
+
+  # test-only xo dependencies
+  xo-object,
+  xo-alloc,
+
+  doCheck ? true,
 } :
 
 stdenv.mkDerivation (finalattrs:
@@ -15,11 +21,16 @@ stdenv.mkDerivation (finalattrs:
 
     src = ../xo-ordinaltree;
 
-    cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake"];
+    cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake"]
+                 ++ lib.optionals doCheck ["-DENABLE_TESTING=1"];
 
-    doCheck = true;
+    inherit doCheck;
     nativeBuildInputs = [
       cmake catch2 xo-cmake
+    ]
+    ++ lib.optionals doCheck [
+      xo-object
+      xo-alloc
     ];
     propagatedBuildInputs = [
       xo-allocutil
