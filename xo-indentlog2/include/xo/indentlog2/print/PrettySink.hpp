@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "PpSink.hpp"
+#include <xo/ppsink/PpSink.hpp>
 #include "PpTokenStreambuf.hpp"
 #include "PpState.hpp"
 

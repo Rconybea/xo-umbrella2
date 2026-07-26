@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "Pretty.hpp"
+#include <xo/ppsink/Pretty.hpp>
 #include <vector>
 
 namespace xo::print {

@@ -3,7 +3,7 @@
  *  @author Roland Conybeare, Jul 2026
  **/
 
-#include "print/FlatSink.hpp"
+#include <xo/ppsink/FlatSink.hpp>
 #include "print/PrettySink.hpp"
 #include <xo/arena/ArenaConfig.hpp>
 #include <xo/testutil/try_test_array.hpp>

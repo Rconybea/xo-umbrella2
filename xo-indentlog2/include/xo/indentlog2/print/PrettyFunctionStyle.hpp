@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "Pretty.hpp"
-#include "FunctionStyle.hpp"
+#include <xo/ppsink/Pretty.hpp>
+#include <xo/ppsink/FunctionStyle.hpp>
 
 namespace xo::print {
     /** pretty-print a FunctionStyle as its descriptive name.

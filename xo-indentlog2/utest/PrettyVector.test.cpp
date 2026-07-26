@@ -8,7 +8,7 @@
 
 #include "print/PrettyVector.hpp"
 #include "print/PrettyFunctionStyle.hpp"
-#include "print/FlatSink.hpp"
+#include <xo/ppsink/FlatSink.hpp>
 #include "print/PrettySink.hpp"
 #include <xo/arena/ArenaConfig.hpp>
 #include <catch2/catch.hpp>

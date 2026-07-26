@@ -5,9 +5,7 @@ set(SELF_SRCS
     LogStreambuf.cpp
 	LogConfig.cpp
     LogBuffer.cpp
-	PpSink.cpp
     PrettySink.cpp
-    FlatSink.cpp
 	PpState.cpp
     LineState.cpp
 	PpTokenStreambuf.cpp
@@ -25,5 +23,6 @@ xo_install_include_tree3(include/xo/indentlog2)
 #       xo-indentlog2/cmake/xo_indentlog2Config.cmake.in
 
 xo_dependency(${SELF_LIB} xo_arena)
+xo_dependency(${SELF_LIB} xo_ppsink)
 
 # end CMakeLists.txt

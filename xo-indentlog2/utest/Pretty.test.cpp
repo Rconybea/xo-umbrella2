@@ -3,8 +3,8 @@
  *  @author Roland Conybeare, Jul 2026
  **/
 
-#include "print/Pretty.hpp"
-#include "print/FlatSink.hpp"
+#include <xo/ppsink/Pretty.hpp>
+#include <xo/ppsink/FlatSink.hpp>
 #include "print/PrettySink.hpp"
 #include <xo/arena/ArenaConfig.hpp>
 #include <catch2/catch.hpp>

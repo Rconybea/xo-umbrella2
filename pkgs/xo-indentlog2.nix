@@ -8,6 +8,7 @@
 
 # xo dependencies
   xo-arena,
+  xo-ppsink,
   xo-cmake,
 
   buildDocs ? false,
@@ -54,5 +55,5 @@ stdenv.mkDerivation (finalattrs:
                           python3Packages.sphinxcontrib-plantuml
                         ];
 
-    propagatedBuildInputs = [ xo-arena ];
+    propagatedBuildInputs = [ xo-arena xo-ppsink ];
   })
