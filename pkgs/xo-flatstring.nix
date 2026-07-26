@@ -10,6 +10,7 @@
 
   buildDocs ? false,
   buildExamples ? false,
+  doCheck ? true,
 } :
 
 stdenv.mkDerivation (finalattrs:
@@ -32,12 +33,13 @@ stdenv.mkDerivation (finalattrs:
 
     cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake"]
                  ++ lib.optionals buildDocs ["-DXO_ENABLE_DOCS=on"]
-                 ++ lib.optionals buildExamples ["-DXO_ENABLE_EXAMPLES=on"];
+                 ++ lib.optionals buildExamples ["-DXO_ENABLE_EXAMPLES=on"]
+                 ++ lib.optionals doCheck ["-DENABLE_TESTING=1"];
 
     inherit buildDocs;
     inherit buildExamples;
 
-    doCheck = true;
+    inherit doCheck;
 
     postBuild = lib.optionalString buildDocs ''
       cmake --build . -- docs
