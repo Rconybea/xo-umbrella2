@@ -1,93 +1,150 @@
 #!/usr/bin/env bash
 
-# Reproduce the Forgejo cmake CI (.forgejo/workflows/ci-cmake.yaml) locally,
-# inside the same docker-xo-builder image the CI runner uses.
+# Build xo subsystems inside the docker-xo-builder container.
 #
-# It bind-mounts the umbrella repo read-only, clones its committed HEAD into a
-# fresh tree inside the container (so it tests exactly what CI would test on a
-# push -- not your uncommitted edits), bootstraps xo-cmake, then runs
+# Two modes, selected by how you point it at source:
 #
-#     xo-build <selection> --configure --build --utest --install \
+#   installed (default)  bootstrap xo-cmake from the snapshot installed
+#       alongside this script (@CMAKE_INSTALL_FULL_DATADIR@/xo-cmake/src), and
+#       take subsystem source by cloning committed HEAD of the target repo.
+#       The container's build tooling therefore always matches the installed
+#       xo-docker-build you ran.  (Not a byte-exact CI reproduction: CI
+#       bootstraps xo-cmake from the cloned HEAD, not from an install.)
+#
+#   worktree             --xo-root-dir[=DIR]: use the xo umbrella worktree DIR
+#       directly -- copy it into the container, bootstrap xo-cmake from
+#       DIR/xo-cmake, and build DIR's subsystems.  Picks up uncommitted edits to
+#       both tooling and subsystem source.
+#
+# In both modes the in-container build is
+#
+#     xo-build <selection> --with-deps --configure --build --utest --install \
 #              --with-utests --with-examples --gh-action-log
 #
-# for the selected subsystems.  With no subsystem named it builds --all.
+# The container starts empty, so --with-deps is always used: naming a subsystem
+# also builds its whole dependency closure.  With no subsystem named it builds
+# --all (the entire umbrella).
 
 set -euo pipefail
 
+# location of the installed xo-cmake bootstrap snapshot (baked at configure time)
+xo_cmake_src="@CMAKE_INSTALL_FULL_DATADIR@/xo-cmake/src"
+
+self="$(basename "$0")"
+
 usage() {
     cat <<EOF
-usage: $(basename "$0") [-n|--dry-run] [--image=IMAGE] [--repo=DIR] [NAME ...]
+usage: ${self} [-n|--dry-run] [--image=IMAGE]
+       ${self} [--repo=DIR | --xo-root-dir[=DIR]] [NAME ...]
 
-  -n | --dry-run   print the docker command instead of running it
-  --image=IMAGE    builder image to run in
-                   [default: \${XO_BUILDER_IMAGE:-docker-xo-builder:v2}]
-  --repo=DIR       umbrella repo to clone HEAD from
-                   [default: git toplevel of the current directory]
-  -h | --help      this message
+  -n | --dry-run     print the docker command instead of running it
+  --image=IMAGE      builder image to run in
+                     [default: \${XO_BUILDER_IMAGE:-docker-xo-builder:v2}]
+  -h | --help        this message
 
-  NAME ...         subsystems to build, in order (e.g. xo-timeutil xo-indentlog).
-                   With none given, builds every subsystem via 'xo-build --all'.
+  --repo=DIR         (installed mode) umbrella repo to clone committed HEAD from
+                     [default: git toplevel of the current directory]
+  --xo-root-dir[=DIR]
+                     (worktree mode) build directly from the xo umbrella worktree
+                     DIR (default: git toplevel of the current directory),
+                     including uncommitted edits.  xo-cmake is bootstrapped from
+                     DIR/xo-cmake instead of the install snapshot.
+
+  NAME ...           subsystems to build (e.g. xo-arena).  Each named subsystem's
+                     dependency closure is built automatically.  With none given,
+                     builds every subsystem via 'xo-build --all'.
 EOF
 }
 
 image="${XO_BUILDER_IMAGE:-docker-xo-builder:v2}"
 repo=
+xo_root_dir=
+xo_root_set=0
 dry_run=0
 selection=()
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        -h|--help)    usage; exit 0 ;;
-        -n|--dry-run) dry_run=1 ;;
-        --image=*)    image="${1#*=}" ;;
-        --repo=*)     repo="${1#*=}" ;;
-        xo-*|--all)   selection+=("$1") ;;
-        *)            echo "$(basename "$0"): unexpected argument [$1]" >&2; usage >&2; exit 1 ;;
+        -h|--help)         usage; exit 0 ;;
+        -n|--dry-run)      dry_run=1 ;;
+        --image=*)         image="${1#*=}" ;;
+        --repo=*)          repo="${1#*=}" ;;
+        --xo-root-dir)     xo_root_set=1 ;;
+        --xo-root-dir=*)   xo_root_set=1; xo_root_dir="${1#*=}" ;;
+        xo-*|--all)        selection+=("$1") ;;
+        *)                 echo "${self}: unexpected argument [$1]" >&2; usage >&2; exit 1 ;;
     esac
     shift
 done
 
-if [[ -z "$repo" ]]; then
-    repo="$(git rev-parse --show-toplevel)"
+if [[ $xo_root_set -eq 1 && -n "$repo" ]]; then
+    echo "${self}: --repo and --xo-root-dir are mutually exclusive" >&2
+    exit 1
 fi
 
-# default to a whole-umbrella build
+# default a whole-umbrella build
 if [[ ${#selection[@]} -eq 0 ]]; then
     selection=(--all)
 fi
 
-# the in-container driver: bootstrap xo-cmake, then xo-build the selection.
-# positional args ("$@") are the subsystem selection.
-inner=$(cat <<'INNER'
+if [[ $xo_root_set -eq 1 ]]; then
+    # ---- worktree mode: source (tooling + subsystems) is the worktree ----
+    mode="worktree"
+    if [[ -z "$xo_root_dir" ]]; then
+        xo_root_dir="$(git rev-parse --show-toplevel)"
+    fi
+    src_mount="$xo_root_dir"
+    # copy the worktree in (uncommitted edits included), minus git + build dirs
+    stage_cmd='tar -C /src --exclude="./.git" --exclude="./.build*" --exclude="*/.build" -cf - . | tar -C /work -xf -'
+    boot_src='/work/xo-cmake'
+    extra_mounts=()
+else
+    # ---- installed mode: tooling from install snapshot, subsystems from HEAD ----
+    mode="installed"
+    if [[ ! -d "$xo_cmake_src" ]]; then
+        echo "${self}: xo-cmake source snapshot not found at:" >&2
+        echo "    ${xo_cmake_src}" >&2
+        echo "  install xo-cmake first, or use --xo-root-dir[=DIR] to build from a worktree." >&2
+        exit 1
+    fi
+    if [[ -z "$repo" ]]; then
+        repo="$(git rev-parse --show-toplevel)"
+    fi
+    src_mount="$repo"
+    stage_cmd='git clone --quiet --depth=1 file:///src /work'
+    boot_src='/xo-cmake-src'
+    extra_mounts=(-v "${xo_cmake_src}:/xo-cmake-src:ro")
+fi
+
+# in-container driver.  host-expanded: ${mode} ${stage_cmd} ${boot_src};
+# container-runtime vars are escaped (\$) so they survive to the container.
+inner=$(cat <<INNER
 set -euo pipefail
 PREFIX=/work/local
-export PATH="$PREFIX/bin:$PATH"
+export PATH="\$PREFIX/bin:\$PATH"
 
-echo "::group::checkout (clone HEAD of /src)"
-rm -rf /work
-git clone --quiet --depth=1 file:///src /work
-mkdir -p "$PREFIX"
+rm -rf /work && mkdir -p /work
+${stage_cmd}
+mkdir -p "\$PREFIX"
 cd /work
-echo "::endgroup::"
 
-echo "::group::bootstrap xo-cmake"
-cmake -S xo-cmake -B .build/xo-cmake -DCMAKE_INSTALL_PREFIX="$PREFIX"
-cmake --build .build/xo-cmake
-cmake --install .build/xo-cmake
-echo "::endgroup::"
+cmake -S "${boot_src}" -B /work/.build/xo-cmake -DCMAKE_INSTALL_PREFIX="\$PREFIX"
+cmake --build /work/.build/xo-cmake
+cmake --install /work/.build/xo-cmake
 
-xo-build "$@" --configure --build --utest --install \
+xo-build "\$@" --with-deps --configure --build --utest --install \\
          --with-utests --with-examples --gh-action-log
 INNER
 )
 
-set -- docker run --rm -i -v "${repo}:/src:ro" "${image}" \
-       bash -s -- "${selection[@]}"
+docker_cmd=(docker run --rm -i -v "${src_mount}:/src:ro" "${extra_mounts[@]}" "${image}"
+            bash -s -- "${selection[@]}")
 
 if [[ $dry_run -eq 1 ]]; then
-    printf '%q ' "$@"; echo
-    echo "--- with inner script feeding xo-build ${selection[*]} ... ---"
+    printf '%q ' "${docker_cmd[@]}"; echo
+    echo "--- mode=${mode}; bootstrap -S ${boot_src}"
+    echo "--- inner: xo-build ${selection[*]} --with-deps --configure --build --utest --install --with-utests --with-examples --gh-action-log"
     exit 0
 fi
 
-exec "$@" <<<"$inner"
+exec "${docker_cmd[@]}" <<<"$inner"

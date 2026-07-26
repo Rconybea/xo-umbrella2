@@ -15,7 +15,7 @@ $0 [-u|--usage|-h|--help]
     [--with-examples] [--with-utests] [--with-asm] [--debug-build]
     [--with-opengl=GLFLAG] [--with-vulkan=VKFLAG]
     [-S=SOURCEDIR] [-B=BUILDDIR]
-    [--all | NAME ...]
+    [--all | [--with-deps] NAME ...]
 EOF
 }
 
@@ -38,6 +38,12 @@ Options:
                           --install) run for each subsystem before moving to the
                           next, so a whole-umbrella cmake build is one command.
                           Multiple NAMEs may also be given explicitly instead.
+  --with-deps             expand the named subsystem(s) to their transitive
+                          dependency closure (using subsystem-edges) and operate
+                          on the whole closure in bottom-up order.  Use this to
+                          build a subsystem from scratch (e.g. in a fresh docker
+                          container) where its dependencies are not yet installed.
+                          Ignored with --all.
   --clone                 git clone xo library NAME in current directory
   --configure             run cmake for xo library NAME in immediate subdir
                           Will use NAME/.build as build directory
@@ -94,6 +100,7 @@ split_umbrella_remote_flag=0
 pull_umbrella_remote_flag=0
 push_umbrella_remote_flag=0
 all_flag=0
+with_deps_flag=0
 xonames=()
 
 while [[ $# > 0 ]]; do
@@ -126,6 +133,9 @@ while [[ $# > 0 ]]; do
             ;;
         --all)
             all_flag=1
+            ;;
+        --with-deps)
+            with_deps_flag=1
             ;;
         --xoname=*)
             xoname="${1#*=}"
@@ -209,6 +219,7 @@ orig_pathtosource="$pathtosource"
 orig_pathtobuild="$pathtobuild"
 
 SUBSYSTEMLIST_FILE=@CMAKE_INSTALL_FULL_DATADIR@/etc/xo/subsystem-list
+SUBSYSTEMEDGES_FILE=@CMAKE_INSTALL_FULL_DATADIR@/etc/xo/subsystem-edges
 
 subsystem_list() {
     cat ${SUBSYSTEMLIST_FILE}
@@ -256,6 +267,44 @@ fi
 #   one/more NAMEs  -> exactly those, in the order given
 if [[ $all_flag -eq 1 ]]; then
     mapfile -t xonames < <(subsystem_list | grep -v '^xo-cmake$')
+fi
+
+# --with-deps: expand the named subsystems to their transitive dependency
+# closure (via subsystem-edges), then order the closure bottom-up using
+# subsystem-list (itself a valid topological order).  No effect together with
+# --all (already the whole graph) or when no subsystem is named.
+if [[ $with_deps_flag -eq 1 && $all_flag -eq 0 && ${#xonames[@]} -gt 0 ]]; then
+    if [[ ! -r "${SUBSYSTEMEDGES_FILE}" ]]; then
+        >&2 echo "$0: --with-deps: cannot read edges file ${SUBSYSTEMEDGES_FILE}"
+        exit 1
+    fi
+
+    # deps_of[dependent] = space-separated direct dependencies.
+    # each edge line is "<dep> <dependent>".
+    declare -A deps_of=()
+    while read -r edge_dep edge_dependent; do
+        [[ -z "$edge_dep" || -z "$edge_dependent" ]] && continue
+        deps_of["$edge_dependent"]+=" $edge_dep"
+    done < "${SUBSYSTEMEDGES_FILE}"
+
+    # transitive closure of the requested subsystems (worklist to fixpoint)
+    declare -A in_closure=()
+    worklist=("${xonames[@]}")
+    while [[ ${#worklist[@]} -gt 0 ]]; do
+        cur="${worklist[0]}"
+        worklist=("${worklist[@]:1}")
+        [[ -n "${in_closure[$cur]:-}" ]] && continue
+        in_closure["$cur"]=1
+        for d in ${deps_of[$cur]:-}; do
+            [[ -z "${in_closure[$d]:-}" ]] && worklist+=("$d")
+        done
+    done
+
+    # rebuild xonames in bottom-up (subsystem-list) order, closure members only
+    xonames=()
+    while IFS= read -r sub; do
+        [[ -n "${in_closure[$sub]:-}" ]] && xonames+=("$sub")
+    done < <(subsystem_list)
 fi
 
 # preserve prior single-shot no-op behavior when no subsystem is named

@@ -74,8 +74,27 @@ install(
 install(
     FILES
     "etc/xo/subsystem-list"
+    "etc/xo/subsystem-edges"
     PERMISSIONS OWNER_READ GROUP_READ WORLD_READ
     DESTINATION ${CMAKE_INSTALL_DATADIR}/etc/xo
+)
+
+# ----------------------------------------------------------------
+# Self-contained bootstrap snapshot of xo-cmake's own source.
+# xo-docker-build (installed mode) bind-mounts this into the builder container
+# and re-bootstraps an identical xo-cmake there, so the container's build
+# tooling always matches this install.  The .in templates are installed
+# unconfigured so they re-bake for the container prefix.
+#
+install(
+    FILES CMakeLists.txt
+    PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/xo-cmake/src
+)
+install(
+    DIRECTORY bin cmake etc share
+    DESTINATION ${CMAKE_INSTALL_DATADIR}/xo-cmake/src
+    USE_SOURCE_PERMISSIONS
 )
 
 # The cmake template gen-ccov.in should be expanded in downstream project;
