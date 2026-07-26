@@ -516,6 +516,24 @@ jobs:
           xo-build --install xo-reader2
           echo "::endgroup::"
 
+      - name: build xo-interpreter2
+        run: |
+          echo "::group::xo-interpreter2 configure"
+          xo-build --configure --with-utests --with-examples xo-interpreter2
+          echo "::endgroup::"
+
+          echo "::group::xo-interpreter2 build"
+          xo-build --build xo-interpreter2
+          echo "::endgroup::"
+
+          echo "::group::xo-interpreter2 utest"
+          ctest --test-dir xo-interpreter2/.build
+          echo "::endgroup::"
+
+          echo "::group::xo-interpreter2 install"
+          xo-build --install xo-interpreter2
+          echo "::endgroup::"
+
       - name: print install path
         run: |
           tree ${{github.workspace}}/local
