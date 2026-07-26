@@ -11,7 +11,8 @@ set(SELF_SOURCE_FILES
     PrettySink.test.cpp
     FlatSink.test.cpp
     Pretty.test.cpp
-    PrettyVector.test.cpp)
+    PrettyVector.test.cpp
+    scope.test.cpp)
 
 if (ENABLE_TESTING)
     # xo_add_utest_executable: add_executable + xo_include_options2 + add_test,

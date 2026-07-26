@@ -3,7 +3,7 @@
 #include <xo/ppsink/scope.hpp>
 #include <string>
 
-namespace xo {
+namespace xo::print {
     void
     scope::emit_indent(xo::print::LogState & st) {
         std::string pad(st.nesting_level() * scope_config::indent_width, ' ');
@@ -35,6 +35,6 @@ namespace xo {
         sink.put(name_);
         sink.put("\n");
     }
-} /*namespace xo*/
+} /*namespace xo::print*/
 
 /* end scope.cpp */

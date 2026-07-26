@@ -22,7 +22,7 @@
 #include <string_view>
 #include <cstdint>
 
-namespace xo {
+namespace xo::print {
     /** @brief process-wide logging configuration (POC subset) **/
     struct scope_config {
         /** spaces of indentation per nesting level **/
@@ -61,6 +61,6 @@ namespace xo {
         /** scope name (e.g. function name); printed in the +/- entry/exit banners **/
         std::string_view name_;
     };
-} /*namespace xo*/
+} /*namespace xo::print*/
 
 /* end scope.hpp */

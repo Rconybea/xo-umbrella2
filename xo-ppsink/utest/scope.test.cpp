@@ -7,7 +7,7 @@
 
 namespace ut {
 
-    using xo::scope;
+    using xo::print::scope;
     using xo::print::FlatSink;
     using xo::print::ThreadLogState;
     using std::stringstream;
