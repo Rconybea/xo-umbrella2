@@ -4,6 +4,8 @@ set(SELF_LIB xo_ppsink)
 set(SELF_SRCS
     PpSink.cpp
     FlatSink.cpp
+    LogState.cpp
+    scope.cpp
 )
 
 xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 ${SELF_SRCS})
