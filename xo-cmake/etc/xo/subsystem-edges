@@ -62,6 +62,7 @@ xo-object2 xo-gc
 xo-object2 xo-procedure2
 xo-object2 xo-type
 xo-ordinaltree xo-reactor
+xo-ppsink xo-indentlog2
 xo-printable2 xo-expression2
 xo-printable2 xo-object2
 xo-printable2 xo-stringtable2
@@ -146,6 +147,7 @@ xo-subsys xo-type
 xo-testutil xo-alloc2
 xo-testutil xo-indentlog2
 xo-timeutil xo-indentlog
+xo-timeutil xo-ppsink
 xo-tokenizer xo-reader
 xo-tokenizer2 xo-reader2
 xo-type xo-expression2
