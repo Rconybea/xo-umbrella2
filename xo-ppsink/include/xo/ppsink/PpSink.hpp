@@ -6,6 +6,11 @@
 #pragma once
 
 #include <string_view>
+// Deliberately not including <ostream> here.
+// This file pulled into satellites that need
+// to invoke PpSink methods.
+// We don't want to force code that supports
+// pretty-printing to #include <ostream>.
 #include <iosfwd>
 #include <cstdint>
 

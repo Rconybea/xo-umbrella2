@@ -10,20 +10,6 @@ namespace xo::print {
         st.sink().put(pad);
     }
 
-    scope::scope(std::string_view name)
-        : name_{name}
-    {
-        xo::print::LogState & st = xo::print::ThreadLogState::thread_log_state();
-        xo::print::PpSink & sink = st.sink();
-
-        emit_indent(st);
-        sink.put("+");
-        sink.put(name_);
-        sink.put("\n");
-
-        st.incr_nesting();
-    }
-
     scope::~scope() {
         xo::print::LogState & st = xo::print::ThreadLogState::thread_log_state();
         xo::print::PpSink & sink = st.sink();
