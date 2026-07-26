@@ -133,7 +133,7 @@ namespace xo {
                 bool is_sentinel() const { return (this->location_ != IL_Regular); }
                 bool is_dereferenceable() const { return !this->is_sentinel(); }
 
-                operator bool() const { return this->is_deferenceable(); }
+                operator bool() const { return this->is_derefenceable(); }
 
                 bool operator==(IteratorBase const & x) const {
                     return  (this->location_ == x.location_) && (this->leafnode_ == x.leafnode_) && (this->ix_ == x.ix_);

@@ -428,7 +428,7 @@ namespace xo {
                      * pointing to 'before the beginning' of this tree.
                      *
                      * will have
-                     *   ix.is_deferenceable() == false
+                     *   ix.is_derefenceable() == false
                      *   (bool)ix == false
                      */
                     return const_iterator(detail::ID_Forward,
