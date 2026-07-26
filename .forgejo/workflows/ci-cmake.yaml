@@ -7,6 +7,9 @@ name: cmake-docker
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - '**.nix'
+      - '**.md'
 
 jobs:
   cmake-build:
