@@ -19,13 +19,8 @@
 
 #include "scope.hpp"
 
-/** capture a scope_setup for the enclosing function.
- *
- *  @p lvl (log level) is accepted for source-compatibility with the legacy
- *  xo-indentlog macro but ignored for now -- log-level gating is a later
- *  feature-parity step.
- **/
-#define XO_ENTER0(lvl) xo::print::scope_setup{ __func__ }
+/** capture a scope_setup for the enclosing function, at log level @p lvl **/
+#define XO_ENTER0(lvl) xo::print::scope_setup{ __func__, xo::print::log_level::lvl }
 
 /** declare an RAII scope logger @p varname for the enclosing function **/
 #define XO_SCOPE(varname, lvl) xo::print::scope varname(XO_ENTER0(lvl))

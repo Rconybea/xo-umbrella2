@@ -9,9 +9,9 @@
  *  same scope code drives flat output (FlatSink, here) and, later,
  *  arena-backed pretty output (PrettySink, in xo-indentlog2).
  *
- *  POC scope: entry/exit banners + per-nesting-level indentation + log().
- *  Deliberately omits (for now) color, timestamps, log levels, code location,
- *  and the function-name styling of the legacy xo-indentlog scope.
+ *  POC scope: entry/exit banners + per-nesting-level indentation + log() +
+ *  log-level gating.  Deliberately omits (for now) color, timestamps, code
+ *  location, and the function-name styling of the legacy xo-indentlog scope.
  *
  *  NOTE: this header is intentionally macro-free.  The terse XO_SCOPE/
  *  XO_ENTER0 convenience macros live in the opt-in header scope_macros.hpp
@@ -24,6 +24,7 @@
 #include "PpSink.hpp"
 #include "Pretty.hpp"
 #include "LogState.hpp"
+#include "log_level.hpp"
 #include <string_view>
 #include <ostream>   /* scope streams values via pp_write -> ins.os() << x */
 #include <utility>
@@ -34,50 +35,74 @@ namespace xo::print {
     struct scope_config {
         /** spaces of indentation per nesting level **/
         static inline std::uint32_t indent_width = 2;
+        /** a scope logs iff its level is at least this severe **/
+        static inline log_level min_log_level = log_level::default_level;
     };
 
     /** @brief captured scope-entry information (POC subset)
      *
      *  Produced by the XO_ENTER0 macro (see scope_macros.hpp) and consumed by
-     *  the scope constructor.  For now it only carries the scope name; log
-     *  level, source location and function-name styling are deferred to the
+     *  the scope constructor.  For now it carries the scope name and level;
+     *  source location and function-name styling are deferred to the
      *  feature-parity pass.
      **/
     struct scope_setup {
         /** scope name (POC: __func__; later __PRETTY_FUNCTION__ + styling) **/
         std::string_view name_;
+        /** severity of this scope; gated against scope_config::min_log_level **/
+        log_level level_ = log_level::always;
+
+        /** true iff a scope entered with this setup should log **/
+        bool is_enabled() const { return level_ >= scope_config::min_log_level; }
     };
 
     /** @brief RAII scope logger: logs entry on construction, exit on destruction,
      *  and log() lines in between, each at the current nesting indentation.
+     *
+     *  A scope whose level is below scope_config::min_log_level is *disabled*:
+     *  it emits nothing and does not affect nesting.  The idiom
+     *  @code log && log(...) @endcode uses operator bool() to skip the log()
+     *  call (and its argument evaluation) for a disabled scope.
      **/
     class scope {
     public:
-        /** enter a scope named @p name (no entry-banner arguments) **/
+        /** enter a scope named @p name (always enabled; no entry-banner args) **/
         explicit scope(std::string_view name)
-            : name_{name}
+            : name_{name}, finalized_{false}
         {
             begin_scope();
         }
 
         /** enter the scope described by @p setup, logging @p args on the entry
-         *  banner (e.g. XO_ENTER0(always), ":x ", x)
+         *  banner (e.g. XO_ENTER0(info), ":n ", n)
          **/
         template <typename... Ts>
         explicit scope(scope_setup setup, Ts &&... args)
-            : name_{setup.name_}
+            : name_{setup.name_}, finalized_{!setup.is_enabled()}
         {
             begin_scope(std::forward<Ts>(args)...);
         }
 
-        ~scope();
+        ~scope() {
+            if (!finalized_)
+                end_scope();
+        }
 
         scope(const scope &) = delete;
         scope & operator=(const scope &) = delete;
 
-        /** log one line: current indent, then each argument via pp_write **/
+        /** true while this scope is enabled (and not yet finalized) **/
+        bool enabled() const { return !finalized_; }
+        operator bool() const { return enabled(); }
+
+        /** log one line: current indent, then each argument via pp_write.
+         *  No-op (returns false) if the scope is disabled.
+         **/
         template <typename... Ts>
-        void log(Ts &&... args) {
+        bool log(Ts &&... args) {
+            if (!enabled())
+                return false;
+
             xo::print::LogState & st = xo::print::ThreadLogState::thread_log_state();
             xo::print::PpSink & sink = st.sink();
 
@@ -86,12 +111,51 @@ namespace xo::print {
             (xo::print::pp_write(sink, args), ...);
             sink.end();
             sink.put("\n");
+
+            return true;
+        }
+
+        /** log(args...) spelled as a call, for the @c log && log(...) idiom **/
+        template <typename... Ts>
+        bool operator()(Ts &&... args) {
+            return log(std::forward<Ts>(args)...);
+        }
+
+        /** optionally end the scope early (before dtor), logging @p args on the
+         *  exit banner (e.g. end_scope("<- :retval ", retval)).  Idempotent.
+         **/
+        template <typename... Ts>
+        void end_scope(Ts &&... args) {
+            if (finalized_)
+                return;
+            finalized_ = true;
+
+            xo::print::LogState & st = xo::print::ThreadLogState::thread_log_state();
+            xo::print::PpSink & sink = st.sink();
+
+            st.decr_nesting();
+
+            emit_indent(st);
+            sink.put("-");
+            sink.put(name_);
+            if constexpr (sizeof...(args) > 0) {
+                sink.put(" ");
+                sink.begin();
+                (xo::print::pp_write(sink, args), ...);
+                sink.end();
+            }
+            sink.put("\n");
         }
 
     private:
-        /** log the entry banner ("+name" + optional args) and increase nesting **/
+        /** log the entry banner ("+name" + optional args) and increase nesting.
+         *  No-op if the scope is disabled.
+         **/
         template <typename... Ts>
         void begin_scope(Ts &&... args) {
+            if (!enabled())
+                return;
+
             xo::print::LogState & st = xo::print::ThreadLogState::thread_log_state();
             xo::print::PpSink & sink = st.sink();
 
@@ -115,6 +179,10 @@ namespace xo::print {
     private:
         /** scope name (e.g. function name); printed in the +/- entry/exit banners **/
         std::string_view name_;
+        /** once true, logging is disabled; set at entry (level gating) or by
+         *  end_scope(); guards against a double exit banner from the dtor
+         **/
+        bool finalized_ = false;
     };
 } /*namespace xo::print*/
 
