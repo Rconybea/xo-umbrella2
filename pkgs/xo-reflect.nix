@@ -1,9 +1,11 @@
 {
   # nixpkgs dependencies
-  stdenv, cmake, catch2,
+  lib, stdenv, cmake, catch2,
 
   # xo dependencies
-  xo-cmake, xo-refcnt, xo-subsys
+  xo-cmake, xo-refcnt, xo-subsys,
+
+  doCheck ? true,
 } :
 
 stdenv.mkDerivation (finalattrs:
@@ -12,8 +14,9 @@ stdenv.mkDerivation (finalattrs:
 
     src = ../xo-reflect;
 
-    cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake"];
-    doCheck = true;
+    cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake"]
+                 ++ lib.optionals doCheck ["-DENABLE_TESTING=1"];
+    inherit doCheck;
     nativeBuildInputs = [ cmake catch2 xo-cmake ];
     propagatedBuildInputs = [ xo-subsys xo-refcnt ];
   })
