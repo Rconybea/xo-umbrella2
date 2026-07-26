@@ -10,8 +10,12 @@
 
   xo-cmake, xo-tokenizer, xo-expression,
 
+  # test-only xo dependencies
+  xo-ratio,
+
   buildDocs ? false,
   buildExamples ? false,
+  doCheck ? true,
 } :
 
 stdenv.mkDerivation (finalattrs:
@@ -25,12 +29,13 @@ stdenv.mkDerivation (finalattrs:
 
     cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake"]
                  ++ lib.optionals buildDocs ["-DXO_ENABLE_DOCS=on"]
-                 ++ lib.optionals buildExamples ["-DXO_ENABLE_EXAMPLES=on"];
+                 ++ lib.optionals buildExamples ["-DXO_ENABLE_EXAMPLES=on"]
+                 ++ lib.optionals doCheck ["-DENABLE_TESTING=1"];
 
     inherit buildDocs;
     inherit buildExamples;
 
-    doCheck = true;
+    inherit doCheck;
 
     propagatedBuildInputs = [
       xo-expression
@@ -49,6 +54,8 @@ stdenv.mkDerivation (finalattrs:
       sphinx
       xo-cmake
       xo-tokenizer
+    ] ++ lib.optionals doCheck [
+      xo-ratio
     ] ++ lib.optionals buildDocs [
       doxygen
       sphinx
