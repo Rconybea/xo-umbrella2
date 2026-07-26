@@ -81,6 +81,7 @@ set(DOX_EXCLUDE_PATTERNS [=[
 
 add_subdirectory(xo-cmake)
 add_subdirectory(xo-timeutil)     # time vocabulary + calendar conveniences
+add_subdirectory(xo-ppsink)       # arena-free pretty-print front-end (PpSink/FlatSink/Pretty)
 add_subdirectory(xo-indentlog)
 add_subdirectory(xo-subsys)
 add_subdirectory(xo-flatstring)

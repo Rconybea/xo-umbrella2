@@ -16,6 +16,7 @@ in
     inherit (xoPkgs)
       xo-cmake
       xo-timeutil
+      xo-ppsink
       xo-subsys
       xo-indentlog
       xo-randomgen

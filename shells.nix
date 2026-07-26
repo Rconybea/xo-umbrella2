@@ -323,6 +323,7 @@ in
   xo = {
     cmake          = pkgs.xo-cmake;
     timeutil       = pkgs.xo-timeutil;
+    ppsink         = pkgs.xo-ppsink;
     subsys         = pkgs.xo-subsys;
     indentlog      = pkgs.xo-indentlog;
     randomgen      = pkgs.xo-randomgen;
