@@ -1,6 +1,6 @@
 {
   # dependencies
-  stdenv, cmake, catch2,
+  lib, stdenv, cmake, catch2,
 
   # xo dependencies
   xo-reflectutil,
@@ -17,7 +17,8 @@ stdenv.mkDerivation (finalattrs:
 
     src = ../xo-refcnt;
 
-    cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake"];
+    cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake"]
+                 ++ lib.optionals doCheck ["-DENABLE_TESTING=1"];
 
     inherit doCheck;
 
