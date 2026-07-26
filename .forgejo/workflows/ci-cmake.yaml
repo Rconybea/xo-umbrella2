@@ -48,24 +48,6 @@ jobs:
           cmake --install .build/xo-cmake
           echo "::endgroup::"
 
-      - name: build xo-subsys
-        run: |
-          echo "::group::xo-subsys configure"
-          xo-build --configure --with-utests --with-examples xo-subsys
-          echo "::endgroup::"
-
-          echo "::group::xo-subsys build"
-          xo-build --build xo-subsys
-          echo "::endgroup::"
-
-          echo "::group::xo-subsys utest"
-          ctest --test-dir xo-subsys/.build
-          echo "::endgroup::"
-
-          echo "::group::xo-subsys install"
-          xo-build --install xo-subsys
-          echo "::endgroup::"
-
       - name: build xo-timeutil
         run: |
           echo "::group::xo-timeutil configure"
@@ -82,6 +64,42 @@ jobs:
 
           echo "::group::xo-timeutil install"
           xo-build --install xo-timeutil
+          echo "::endgroup::"
+
+      - name: build xo-ppsink
+        run: |
+          echo "::group::xo-ppsink configure"
+          xo-build --configure --with-utests --with-examples xo-ppsink
+          echo "::endgroup::"
+
+          echo "::group::xo-ppsink build"
+          xo-build --build xo-ppsink
+          echo "::endgroup::"
+
+          echo "::group::xo-ppsink utest"
+          ctest --test-dir xo-ppsink/.build
+          echo "::endgroup::"
+
+          echo "::group::xo-ppsink install"
+          xo-build --install xo-ppsink
+          echo "::endgroup::"
+
+      - name: build xo-subsys
+        run: |
+          echo "::group::xo-subsys configure"
+          xo-build --configure --with-utests --with-examples xo-subsys
+          echo "::endgroup::"
+
+          echo "::group::xo-subsys build"
+          xo-build --build xo-subsys
+          echo "::endgroup::"
+
+          echo "::group::xo-subsys utest"
+          ctest --test-dir xo-subsys/.build
+          echo "::endgroup::"
+
+          echo "::group::xo-subsys install"
+          xo-build --install xo-subsys
           echo "::endgroup::"
 
       - name: build xo-indentlog

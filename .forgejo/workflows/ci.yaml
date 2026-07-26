@@ -48,16 +48,22 @@ jobs:
           nix-build ci.nix -A xo-cmake
           ls -l ./result
 
-      - name: build xo-subsys
-        run: |
-          echo nix-build ci.nix -A xo-subsys
-          nix-build ci.nix -A xo-subsys
-          ls -l ./result
-
       - name: build xo-timeutil
         run: |
           echo nix-build ci.nix -A xo-timeutil
           nix-build ci.nix -A xo-timeutil
+          ls -l ./result
+
+      - name: build xo-ppsink
+        run: |
+          echo nix-build ci.nix -A xo-ppsink
+          nix-build ci.nix -A xo-ppsink
+          ls -l ./result
+
+      - name: build xo-subsys
+        run: |
+          echo nix-build ci.nix -A xo-subsys
+          nix-build ci.nix -A xo-subsys
           ls -l ./result
 
       - name: build xo-indentlog
