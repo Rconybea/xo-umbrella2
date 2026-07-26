@@ -15,7 +15,7 @@ namespace xo::print {
      *  - adapt an uninstrumented ostream.
      *    Pretty-printing relies on a stream with an attached line accountant
      *    to track position relative to left margin.
-     *  - adapter so that xo::print::Pretty<T> can serve both pretty-printing
+     *  - adapter so that xo::print::Prettifier<T> can serve both pretty-printing
      *    and legacy ostream printing.
      *
      *  Ignores group structure: {begin(), end(), split()} are no-ops.
@@ -24,7 +24,7 @@ namespace xo::print {
      *  Use:
      *  @code
      *    FlatSink sink(cout);
-     *    Pretty<Foo>::print(sink, foo);
+     *    Prettifier<Foo>::print(sink, foo);
      *  @endcode
      **/
     class FlatSink : public PpSink {

@@ -22,11 +22,10 @@
 #pragma once
 
 #include "PpSink.hpp"
-#include "Pretty.hpp"
+#include "pretty_ostream.hpp"   /* pretty(): scope logs arbitrary types, so it needs the operator<< fallback */
 #include "LogState.hpp"
 #include "log_level.hpp"
 #include <string_view>
-#include <ostream>   /* scope streams values via pp_write -> ins.os() << x */
 #include <utility>
 #include <cstdint>
 
@@ -95,7 +94,7 @@ namespace xo::print {
         bool enabled() const { return !finalized_; }
         operator bool() const { return enabled(); }
 
-        /** log one line: current indent, then each argument via pp_write.
+        /** log one line: current indent, then each argument via pretty.
          *  No-op (returns false) if the scope is disabled.
          **/
         template <typename... Ts>
@@ -108,7 +107,7 @@ namespace xo::print {
 
             emit_indent(st);
             sink.begin();
-            (xo::print::pp_write(sink, args), ...);
+            (xo::print::pretty(sink, args), ...);
             sink.end();
             sink.put("\n");
 
@@ -141,7 +140,7 @@ namespace xo::print {
             if constexpr (sizeof...(args) > 0) {
                 sink.put(" ");
                 sink.begin();
-                (xo::print::pp_write(sink, args), ...);
+                (xo::print::pretty(sink, args), ...);
                 sink.end();
             }
             sink.put("\n");
@@ -165,7 +164,7 @@ namespace xo::print {
             if constexpr (sizeof...(args) > 0) {
                 sink.put(" ");
                 sink.begin();
-                (xo::print::pp_write(sink, args), ...);
+                (xo::print::pretty(sink, args), ...);
                 sink.end();
             }
             sink.put("\n");

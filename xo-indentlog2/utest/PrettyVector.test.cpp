@@ -2,7 +2,7 @@
  *
  *  @author Roland Conybeare, Jul 2026
  *
- *  Covers Pretty<std::vector<T>> and Pretty<FunctionStyle>
+ *  Covers Prettifier<std::vector<T>> and Prettifier<FunctionStyle>
  *  (and their composition: a vector of FunctionStyle).
  **/
 
@@ -17,8 +17,8 @@
 #include <vector>
 
 namespace ut {
-    using xo::print::has_pretty;
-    using xo::print::pp_write;
+    using xo::print::has_prettifier;
+    using xo::print::pretty;
     using xo::print::PpSink;
     using xo::print::FlatSink;
     using xo::print::PrettySink;
@@ -28,10 +28,10 @@ namespace ut {
     using std::vector;
 
     /* both specializations opt in; element types without one fall back */
-    static_assert(has_pretty<FunctionStyle>);
-    static_assert(has_pretty<vector<int>>);
-    static_assert(has_pretty<vector<FunctionStyle>>);
-    static_assert(has_pretty<vector<vector<int>>>);
+    static_assert(has_prettifier<FunctionStyle>);
+    static_assert(has_prettifier<vector<int>>);
+    static_assert(has_prettifier<vector<FunctionStyle>>);
+    static_assert(has_prettifier<vector<vector<int>>>);
 
     template <typename Fn>
     static std::string flat_of(Fn && fn) {
@@ -55,44 +55,44 @@ namespace ut {
 
     TEST_CASE("Pretty.FunctionStyle", "[Pretty][FunctionStyle]")
     {
-        REQUIRE(flat_of([](PpSink & s) { pp_write(s, FunctionStyle::literal); }) == "literal");
-        REQUIRE(flat_of([](PpSink & s) { pp_write(s, FunctionStyle::pretty); }) == "pretty");
-        REQUIRE(flat_of([](PpSink & s) { pp_write(s, FunctionStyle::streamlined); }) == "streamlined");
-        REQUIRE(flat_of([](PpSink & s) { pp_write(s, FunctionStyle::simple); }) == "simple");
+        REQUIRE(flat_of([](PpSink & s) { pretty(s, FunctionStyle::literal); }) == "literal");
+        REQUIRE(flat_of([](PpSink & s) { pretty(s, FunctionStyle::pretty); }) == "pretty");
+        REQUIRE(flat_of([](PpSink & s) { pretty(s, FunctionStyle::streamlined); }) == "streamlined");
+        REQUIRE(flat_of([](PpSink & s) { pretty(s, FunctionStyle::simple); }) == "simple");
 
         /* atomic: same through the pretty sink */
-        REQUIRE(pretty_of(0, [](PpSink & s) { pp_write(s, FunctionStyle::simple); }) == "simple");
+        REQUIRE(pretty_of(0, [](PpSink & s) { pretty(s, FunctionStyle::simple); }) == "simple");
     }
 
     TEST_CASE("Pretty.vector.int", "[Pretty][PrettyVector]")
     {
         vector<int> v = {1, 2, 3};
 
-        REQUIRE(flat_of([&](PpSink & s) { pp_write(s, v); }) == "[1,2,3]");
+        REQUIRE(flat_of([&](PpSink & s) { pretty(s, v); }) == "[1,2,3]");
 
         /* wide margin: fits, splits collapse -> same as flat */
-        REQUIRE(pretty_of(0, [&](PpSink & s) { pp_write(s, v); }) == "[1,2,3]");
+        REQUIRE(pretty_of(0, [&](PpSink & s) { pretty(s, v); }) == "[1,2,3]");
 
         /* narrow margin: doesn't fit -> one element per line, indent 2 */
-        REQUIRE(pretty_of(2, [&](PpSink & s) { pp_write(s, v); }) == "[1,\n  2,\n  3]");
+        REQUIRE(pretty_of(2, [&](PpSink & s) { pretty(s, v); }) == "[1,\n  2,\n  3]");
     }
 
     TEST_CASE("Pretty.vector.edges", "[Pretty][PrettyVector]")
     {
-        REQUIRE(flat_of([](PpSink & s) { pp_write(s, vector<int>{}); }) == "[]");
-        REQUIRE(flat_of([](PpSink & s) { pp_write(s, vector<int>{42}); }) == "[42]");
+        REQUIRE(flat_of([](PpSink & s) { pretty(s, vector<int>{}); }) == "[]");
+        REQUIRE(flat_of([](PpSink & s) { pretty(s, vector<int>{42}); }) == "[42]");
 
         /* empty vector: empty group must not block, no split */
-        REQUIRE(pretty_of(1, [](PpSink & s) { pp_write(s, vector<int>{}); }) == "[]");
+        REQUIRE(pretty_of(1, [](PpSink & s) { pretty(s, vector<int>{}); }) == "[]");
     }
 
     TEST_CASE("Pretty.vector.nested", "[Pretty][PrettyVector]")
     {
         vector<vector<int>> v = {{1, 2}, {3}};
 
-        /* inner Pretty<vector<int>> is reached via pp_write on each element */
-        REQUIRE(flat_of([&](PpSink & s) { pp_write(s, v); }) == "[[1,2],[3]]");
-        REQUIRE(pretty_of(0, [&](PpSink & s) { pp_write(s, v); }) == "[[1,2],[3]]");
+        /* inner Prettifier<vector<int>> is reached via pretty on each element */
+        REQUIRE(flat_of([&](PpSink & s) { pretty(s, v); }) == "[[1,2],[3]]");
+        REQUIRE(pretty_of(0, [&](PpSink & s) { pretty(s, v); }) == "[[1,2],[3]]");
     }
 
     TEST_CASE("Pretty.vector.of_functionstyle", "[Pretty][PrettyVector][FunctionStyle]")
@@ -100,7 +100,7 @@ namespace ut {
         vector<FunctionStyle> v = {FunctionStyle::literal, FunctionStyle::simple};
 
         /* composition: vector printer + FunctionStyle printer */
-        REQUIRE(flat_of([&](PpSink & s) { pp_write(s, v); }) == "[literal,simple]");
+        REQUIRE(flat_of([&](PpSink & s) { pretty(s, v); }) == "[literal,simple]");
     }
 }
 

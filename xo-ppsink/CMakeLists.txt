@@ -34,6 +34,7 @@ xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets
 if (XO_ENABLE_EXAMPLES)
     install(TARGETS ppsink_ex1 DESTINATION bin/ppsink/example)
     install(TARGETS ppsink_ex2 DESTINATION bin/ppsink/example)
+    install(TARGETS ppsink_ex3a DESTINATION bin/ppsink/example)
 endif()
 
 # end CMakeLists.txt

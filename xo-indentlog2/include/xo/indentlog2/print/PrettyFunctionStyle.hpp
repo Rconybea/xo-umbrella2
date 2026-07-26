@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <xo/ppsink/Pretty.hpp>
+#include <xo/ppsink/Prettifier.hpp>
 #include <xo/ppsink/FunctionStyle.hpp>
 
 namespace xo::print {
@@ -13,7 +13,7 @@ namespace xo::print {
      *  Atomic: no group structure.
      **/
     template <>
-    struct Pretty<xo::FunctionStyle> {
+    struct Prettifier<xo::FunctionStyle> {
         static void print(PpSink & sink, xo::FunctionStyle x) {
             sink.put(descr_of(x));   /* ADL: xo::descr_of */
         }

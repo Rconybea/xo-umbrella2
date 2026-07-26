@@ -10,7 +10,7 @@ set(SELF_SOURCE_FILES
     PpTokenStreambuf.test.cpp
     PrettySink.test.cpp
     FlatSink.test.cpp
-    Pretty.test.cpp
+    Prettifier.test.cpp
     PrettyVector.test.cpp
     scope.test.cpp)
 

@@ -64,6 +64,12 @@ namespace xo::print {
         using uint32_t = std::uint32_t;
 
     public:
+        /** pretty-print @p x to this sink
+         *  see pretty.hpp for implementation
+         **/
+        template <typename T>
+        void pp(const T & x);
+
         /** write string comprising contents of @p s **/
         virtual PpSink & put(std::string_view s) = 0;
         /** begin group of nested items.

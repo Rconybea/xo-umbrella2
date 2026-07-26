@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <xo/ppsink/Pretty.hpp>
+#include <xo/ppsink/pretty.hpp>
 #include <vector>
 
 namespace xo::print {
@@ -16,11 +16,11 @@ namespace xo::print {
      *    [elt0,
      *      elt1,
      *      ..]
-     *  Elements are emitted via pp_write(), so element types without a
-     *  Pretty<> specialization render via operator<<.
+     *  Elements are emitted via pretty(), so element types without a
+     *  Prettifier<> specialization render via operator<<.
      **/
     template <typename T>
-    struct Pretty<std::vector<T>> {
+    struct Prettifier<std::vector<T>> {
         static void print(PpSink & sink, const std::vector<T> & v) {
             sink.put("[").begin();
 
@@ -30,7 +30,7 @@ namespace xo::print {
                     sink.put(",").split();
                 first = false;
 
-                pp_write(sink, elt);
+                pretty(sink, elt);
             }
 
             sink.end().put("]");
