@@ -32,13 +32,16 @@ stdenv.mkDerivation (finalattrs:
       cmake --build . -- docs
     '';
 
-    propagatedBuildInputs = [ ];
+    # xo-ratio is header-only; its exported cmake config + public headers pull in
+    # these, so consumers (e.g. xo-unit) must receive them transitively.
+    propagatedBuildInputs = [
+      xo-flatstring
+      xo-reflectutil
+    ];
 
     nativeBuildInputs = [
       cmake
       xo-cmake
-      xo-flatstring
-      xo-reflectutil
     ]
     ++ lib.optionals buildExamples [
       xo-indentlog

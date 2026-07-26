@@ -3,9 +3,10 @@
 include(CMakeFindDependencyMacro)
 
 # note: changes to find_dependency() calls here
-#       must coordinate with xo_dependency() calls
-#       in xo-reactor/src/reactor/CMakeLists.txt
+#       must coordinate with xo_(headeronly_)dependency() calls
+#       in xo-ratio/CMakeLists.txt
 #
+find_dependency(xo_reflectutil)
 find_dependency(xo_flatstring)
 #find_dependency(subsys)
 #find_dependency(Eigen3)
