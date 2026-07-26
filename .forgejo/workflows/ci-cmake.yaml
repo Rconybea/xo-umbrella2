@@ -537,6 +537,24 @@ jobs:
           xo-build --install xo-interpreter2
           echo "::endgroup::"
 
+      - name: build xo-allocutil
+        run: |
+          echo "::group::xo-allocutil configure"
+          xo-build --configure --with-utests --with-examples xo-allocutil
+          echo "::endgroup::"
+
+          echo "::group::xo-allocutil build"
+          xo-build --build xo-allocutil
+          echo "::endgroup::"
+
+          echo "::group::xo-allocutil utest"
+          ctest --test-dir xo-allocutil/.build
+          echo "::endgroup::"
+
+          echo "::group::xo-allocutil install"
+          xo-build --install xo-allocutil
+          echo "::endgroup::"
+
       - name: print install path
         run: |
           tree ${{github.workspace}}/local
