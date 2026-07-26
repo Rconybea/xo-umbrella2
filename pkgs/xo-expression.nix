@@ -6,6 +6,7 @@
 
   buildDocs ? false,
   buildExamples ? false,
+  doCheck ? true,
 } :
 
 stdenv.mkDerivation (finalattrs:
@@ -16,12 +17,13 @@ stdenv.mkDerivation (finalattrs:
     src = ../xo-expression;
 
     cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake"]
-                 ++ lib.optionals buildExamples ["-DXO_ENABLE_EXAMPLES=on"];
+                 ++ lib.optionals buildExamples ["-DXO_ENABLE_EXAMPLES=on"]
+                 ++ lib.optionals doCheck ["-DENABLE_TESTING=1"];
 
     inherit buildDocs;
     inherit buildExamples;
 
-    doCheck = true;
+    inherit doCheck;
 
     propagatedBuildInputs = [ xo-reflect
                               xo-flatstring
