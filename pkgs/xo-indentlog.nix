@@ -23,7 +23,8 @@ stdenv.mkDerivation (finalattrs:
 
     cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake"]
                  ++ lib.optionals buildDocs ["-DXO_ENABLE_DOCS=on"]
-                 ++ lib.optionals buildExamples ["-DXO_ENABLE_EXAMPLES=on"];
+                 ++ lib.optionals buildExamples ["-DXO_ENABLE_EXAMPLES=on"]
+                 ++ lib.optionals doCheck ["-DENABLE_TESTING=1"];
 
     inherit buildDocs;
     inherit buildExamples;
