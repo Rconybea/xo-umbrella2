@@ -52,8 +52,6 @@ Options:
   --utest                 run unit tests for xo library NAME
   --install               run cmake install for xo library NAME in immediate subdir
   --realclean             nuke build directory
-  --gh-action-log         if present print ::group / ::endgroup
-                          around configure|build|build-docs|utest|install commands
 
   -S=SOURCEDIR            override path/to/source
   -B=BUILDDIR             override path/to/build
@@ -85,7 +83,6 @@ build_docs_flag=0
 utest_flag=0
 install_flag=0
 realclean_flag=0
-gh_action_log=0
 pathtosource=
 pathtobuild=
 with_examples=0
@@ -161,9 +158,6 @@ while [[ $# > 0 ]]; do
             ;;
         --realclean)
             realclean_flag=1
-            ;;
-        --gh-action-log)
-            gh_action_log=1
             ;;
         --with-examples)
             with_examples=1
@@ -476,18 +470,10 @@ if [[ $build_flag -eq 1 ]]; then
     if [[ -n "$xoname" ]]; then
         cmd="cmake --build $pathtobuild -j"
 
-        if [[ $gh_action_log -eq 1 ]]; then
-            echo "::group::$xoname build"
-        fi
-
         if [[ $noop_flag -eq 1 ]]; then
             echo $cmd
         else
             $cmd
-        fi
-
-        if [[ $gh_action_log -eq 1 ]]; then
-            echo "::endgroup::"
         fi
     fi
 fi
@@ -496,18 +482,10 @@ if [[ $build_docs_flag -eq 1 ]]; then
     if [[ -n "$xoname" ]]; then
         cmd="cmake --build $pathtobuild -- docs"
 
-        if [[ $gh_action_log -eq 1 ]]; then
-            echo "::group::$xoname build docs"
-        fi
-
         if [[ $noop_flag -eq 1 ]]; then
             echo $cmd
         else
             $cmd
-        fi
-
-        if [[ $gh_action_log -eq 1 ]]; then
-            echo "::endgroup::"
         fi
     fi
 fi
@@ -516,18 +494,10 @@ if [[ $utest_flag -eq 1 ]]; then
     if [[ -n "$xoname" ]]; then
         cmd="ctest --test-dir $pathtobuild"
 
-        if [[ $gh_action_log -eq 1 ]]; then
-            echo "::group::$xoname utest"
-        fi
-
         if [[ $noop_flag -eq 1 ]]; then
             echo $cmd
         else
             $cmd
-        fi
-
-        if [[ $gh_action_log -eq 1 ]]; then
-            echo "::endgroup::"
         fi
     fi
 fi
@@ -536,18 +506,10 @@ if [[ $install_flag -eq 1 ]]; then
     if [[ -n "$xoname" ]]; then
         cmd="cmake --install $pathtobuild"
 
-        if [[ $gh_action_log -eq 1 ]]; then
-            echo "::group::$xoname install"
-        fi
-
         if [[ $noop_flag -eq 1 ]]; then
             echo $cmd
         else
             $cmd
-        fi
-
-        if [[ $gh_action_log -eq 1 ]]; then
-            echo "::endgroup::"
         fi
     fi
 fi
