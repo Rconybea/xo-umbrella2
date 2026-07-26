@@ -1,6 +1,6 @@
 {
   # dependencies
-  lib, stdenv, cmake, catch2,
+  lib, stdenv, cmake, catch2, cli11,
 
   python3Packages,
 
@@ -9,6 +9,8 @@
 # xo dependencies
   xo-arena,
   xo-ppsink,
+  xo-randomgen,
+  xo-testutil,
   xo-cmake,
 
   buildDocs ? false,
@@ -25,7 +27,8 @@ stdenv.mkDerivation (finalattrs:
 
     cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake"]
                  ++ lib.optionals buildDocs ["-DXO_ENABLE_DOCS=on"]
-                 ++ lib.optionals buildExamples ["-DXO_ENABLE_EXAMPLES=on"];
+                 ++ lib.optionals buildExamples ["-DXO_ENABLE_EXAMPLES=on"]
+                 ++ lib.optionals doCheck ["-DENABLE_TESTING=1"];
 
     inherit buildDocs;
     inherit buildExamples;
@@ -44,6 +47,11 @@ stdenv.mkDerivation (finalattrs:
     nativeBuildInputs = [ cmake
                           catch2
                           xo-cmake ]
+                        ++ lib.optionals doCheck [
+                          xo-testutil
+                          xo-randomgen
+                          cli11
+                        ]
                         ++ lib.optionals buildDocs [
                           doxygen
                           sphinx

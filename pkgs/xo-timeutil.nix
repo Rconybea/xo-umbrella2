@@ -14,7 +14,8 @@ stdenv.mkDerivation (finalattrs:
 
     src = ../xo-timeutil;
 
-    cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake"];
+    cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake"]
+                 ++ lib.optionals doCheck ["-DENABLE_TESTING=1"];
 
     inherit doCheck;
 
