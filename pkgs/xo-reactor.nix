@@ -1,6 +1,6 @@
 {
   # nixpkgs dependencies
-  stdenv, cmake, catch2,
+  lib, stdenv, cmake, catch2,
 
   # xo dependencies
   xo-cmake,
@@ -9,6 +9,11 @@
   xo-printjson,
   xo-ordinaltree,
     #, xo-indentlog,
+
+  # test-only xo dependencies
+  xo-randomgen,
+
+  doCheck ? true,
 } :
 
 stdenv.mkDerivation (finalattrs:
@@ -17,10 +22,14 @@ stdenv.mkDerivation (finalattrs:
 
     src = ../xo-reactor;
 
-    cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake"];
-    doCheck = true;
+    cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake"]
+                 ++ lib.optionals doCheck ["-DENABLE_TESTING=1"];
+    inherit doCheck;
     nativeBuildInputs = [
       cmake catch2 xo-cmake
+    ]
+    ++ lib.optionals doCheck [
+      xo-randomgen
     ];
     propagatedBuildInputs = [
       xo-reflect
