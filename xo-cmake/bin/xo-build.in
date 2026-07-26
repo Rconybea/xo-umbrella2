@@ -14,7 +14,7 @@ $0 [-u|--usage|-h|--help]
     [--clone|--configure|--build|--install]
     [--with-examples] [--with-utests] [--with-asm] [--debug-build]
     [--with-opengl=GLFLAG] [--with-vulkan=VKFLAG]
-    [-S=SOURCEDIR] [-B=BUILDDIR]
+    [-S=SOURCEDIR] [-B=BUILDDIR] [-j N|--jobs=N]
     [--all | [--with-deps] NAME ...]
 EOF
 }
@@ -55,6 +55,10 @@ Options:
 
   -S=SOURCEDIR            override path/to/source
   -B=BUILDDIR             override path/to/build
+  -j N | --jobs=N         build with N parallel compile jobs (cmake --build -j N).
+                          Default: min(nproc, RAM/~1.5GB), to avoid OOM-killing
+                          the compiler on memory-limited machines.  Takes
+                          precedence over the XO_BUILD_JOBS environment variable.
 
   --with-examples         in configure step, set -DXO_ENABLE_EXAMPLES=1
   --with-utests           in configure step, set -DENABLE_TESTING=1
@@ -85,6 +89,7 @@ install_flag=0
 realclean_flag=0
 pathtosource=
 pathtobuild=
+jobs_arg=
 with_examples=0
 with_utests=0
 with_asm=0
@@ -124,6 +129,20 @@ while [[ $# > 0 ]]; do
             ;;
         -B=*)
             pathtobuild="${1#*=}"
+            ;;
+        -j)
+            shift
+            jobs_arg=$1
+            ;;
+        -j=*)
+            jobs_arg="${1#*=}"
+            ;;
+        --jobs)
+            shift
+            jobs_arg=$1
+            ;;
+        --jobs=*)
+            jobs_arg="${1#*=}"
             ;;
         --list)
             cmd='list'
@@ -211,6 +230,37 @@ done
 # source/build dirs are derived from each subsystem name in the loop.
 orig_pathtosource="$pathtosource"
 orig_pathtobuild="$pathtobuild"
+
+# compile parallelism (jobs passed to cmake --build -j).  Precedence:
+#   1. -j N / --jobs=N command-line argument
+#   2. XO_BUILD_JOBS environment variable
+#   3. memory-aware default (below)
+#
+# A bare "cmake --build -j" passes a no-count -j to make, which runs UNLIMITED
+# parallel jobs.  On a template-heavy subsystem (e.g. xo-expression2's ~49 facet
+# translation units, ~300MB each) that OOM-kills cc1plus on a memory-limited
+# runner (symptom: "g++: fatal error: Killed signal terminated program cc1plus").
+# So the default caps the job count to what RAM allows (~1.5GB budget per job),
+# bounded by cpu count.
+if [[ -n "${jobs_arg}" ]]; then
+    build_jobs="${jobs_arg}"
+elif [[ -n "${XO_BUILD_JOBS:-}" ]]; then
+    build_jobs="${XO_BUILD_JOBS}"
+else
+    build_ncpu=$(nproc 2>/dev/null || echo 1)
+    build_memkb=$(awk '/^MemTotal:/ { print $2 }' /proc/meminfo 2>/dev/null || echo 0)
+    if [[ "${build_memkb}" -gt 0 ]]; then
+        build_memjobs=$(( build_memkb / 1500000 ))   # ~1.5GB per compile job
+        [[ "${build_memjobs}" -lt 1 ]] && build_memjobs=1
+        if [[ "${build_memjobs}" -lt "${build_ncpu}" ]]; then
+            build_jobs="${build_memjobs}"
+        else
+            build_jobs="${build_ncpu}"
+        fi
+    else
+        build_jobs="${build_ncpu}"
+    fi
+fi
 
 SUBSYSTEMLIST_FILE=@CMAKE_INSTALL_FULL_DATADIR@/etc/xo/subsystem-list
 SUBSYSTEMEDGES_FILE=@CMAKE_INSTALL_FULL_DATADIR@/etc/xo/subsystem-edges
@@ -468,7 +518,7 @@ fi
 
 if [[ $build_flag -eq 1 ]]; then
     if [[ -n "$xoname" ]]; then
-        cmd="cmake --build $pathtobuild -j"
+        cmd="cmake --build $pathtobuild -j$build_jobs"
 
         if [[ $noop_flag -eq 1 ]]; then
             echo $cmd
