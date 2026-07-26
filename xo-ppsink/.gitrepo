@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/ingydotnet/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:Rconybea/xo-ppsink.git
+	branch = main
+	commit = 98e9bf7110b83c1d8b4e618ded176a0e4310abae
+	parent = 2947e3f93a607a0e0d174baed2674f0e4cd40f61
+	method = merge
+	cmdver = 0.4.9
