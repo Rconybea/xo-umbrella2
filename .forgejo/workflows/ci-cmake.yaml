@@ -555,22 +555,22 @@ jobs:
           xo-build --install xo-allocutil
           echo "::endgroup::"
 
-      - name: build xo-alloc
+      - name: build xo-ratio
         run: |
-          echo "::group::xo-alloc configure"
-          xo-build --configure --with-utests --with-examples xo-alloc
+          echo "::group::xo-ratio configure"
+          xo-build --configure --with-utests --with-examples xo-ratio
           echo "::endgroup::"
 
-          echo "::group::xo-alloc build"
-          xo-build --build xo-alloc
+          echo "::group::xo-ratio build"
+          xo-build --build xo-ratio
           echo "::endgroup::"
 
-          echo "::group::xo-alloc utest"
-          ctest --test-dir xo-alloc/.build
+          echo "::group::xo-ratio utest"
+          ctest --test-dir xo-ratio/.build
           echo "::endgroup::"
 
-          echo "::group::xo-alloc install"
-          xo-build --install xo-alloc
+          echo "::group::xo-ratio install"
+          xo-build --install xo-ratio
           echo "::endgroup::"
 
       - name: print install path
