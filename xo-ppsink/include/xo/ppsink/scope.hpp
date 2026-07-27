@@ -49,7 +49,8 @@ namespace xo::pp {
          *  same-width blank pad so they align under the banner)
          **/
         static inline bool time_enabled = true;
-        // TODO: static inline bool time_local_flag = true;
+        /** true => local time-of-day; false => UTC **/
+        static inline bool time_local_flag = true;
         /** microsecond precision "HH:MM:SS.uuuuuu" vs millisecond "HH:MM:SS.mmm" **/
         static inline bool time_usec_flag = true;
 

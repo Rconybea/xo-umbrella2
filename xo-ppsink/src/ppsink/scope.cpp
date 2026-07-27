@@ -25,12 +25,17 @@ namespace xo::pp {
         if (real_time) {
             xo::time::utc_nanos now = xo::time::timeutil::now();
 
+            /* time-of-day since midnight, in local or UTC coords */
+            xo::time::nanos since_midnight =
+                (scope_config::time_local_flag
+                 ? xo::time::timeutil::local_split_vs_midnight(now).second
+                 : xo::time::timeutil::utc_split_vs_midnight(now).second);
+
             auto ins = sink.stream_open(width);
             if (scope_config::time_usec_flag)
-                xo::time::print_hms_usec(xo::time::timeutil::utc_split_vs_midnight(now).second,
-                                         ins.os());
+                xo::time::print_hms_usec(since_midnight, ins.os());
             else
-                xo::time::print_utc_hms_msec(now, ins.os());
+                xo::time::print_hms_msec(since_midnight, ins.os());
             ins.os() << ' ';
             /* ins dtor commits the token */
         } else {
