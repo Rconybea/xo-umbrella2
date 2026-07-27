@@ -609,6 +609,24 @@ jobs:
           xo-build --install xo-pyunit
           echo "::endgroup::"
 
+      - name: build xo-callback
+        run: |
+          echo "::group::xo-callback configure"
+          xo-build --configure --with-utests --with-examples xo-callback
+          echo "::endgroup::"
+
+          echo "::group::xo-callback build"
+          xo-build --build xo-callback
+          echo "::endgroup::"
+
+          echo "::group::xo-callback utest"
+          ctest --test-dir xo-callback/.build
+          echo "::endgroup::"
+
+          echo "::group::xo-callback install"
+          xo-build --install xo-callback
+          echo "::endgroup::"
+
       - name: build xo-alloc
         run: |
           echo "::group::xo-alloc configure"
