@@ -53,6 +53,38 @@ namespace xo::pp {
         }
         sink.put(") ");
     }
+
+    void
+    scope::emit_location(xo::pp::PpSink & sink,
+                         std::string_view file, std::uint32_t line) {
+        if (!scope_config::location_enabled || file.empty())
+            return;
+
+        /* basename: portion after the last '/' */
+        std::size_t slash = file.find_last_of('/');
+        std::string_view base = (slash == std::string_view::npos)
+            ? file : file.substr(slash + 1);
+
+        /* right-align at location_tab when the sink knows its column;
+         * otherwise (FlatSink) fall back to a single inline space.
+         */
+        std::optional<std::size_t> col = sink.lpos();
+        if (col.has_value()) {
+            std::size_t tab = scope_config::location_tab;
+            std::size_t cur = *col;
+            std::size_t pad = (cur < tab) ? (tab - cur) : 1;   /* >= 1 space */
+            sink.put(std::string(pad, ' '));
+        } else {
+            sink.put(" ");
+        }
+
+        color_guard g(sink, scope_config::code_location_color);
+        sink.put("[");
+        sink.put(base);
+        sink.put(":");
+        pretty(sink, static_cast<int>(line));
+        sink.put("]");
+    }
 } /*namespace xo::pp*/
 
 /* end scope.cpp */

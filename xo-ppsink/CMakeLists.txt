@@ -40,6 +40,7 @@ if (XO_ENABLE_EXAMPLES)
     install(TARGETS ppsink_ex3d DESTINATION bin/ppsink/example)
     install(TARGETS ppsink_ex3e DESTINATION bin/ppsink/example)
     install(TARGETS ppsink_ex3f DESTINATION bin/ppsink/example)
+    install(TARGETS ppsink_ex3g DESTINATION bin/ppsink/example)
 endif()
 
 # end CMakeLists.txt

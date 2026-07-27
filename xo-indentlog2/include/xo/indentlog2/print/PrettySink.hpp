@@ -54,6 +54,10 @@ namespace xo {
             virtual PpSink & split(std::uint32_t spaces, std::int32_t offset) override final;
             virtual PpSink & newline(std::int32_t offset) override final;
             virtual PpSink & end() override final;
+            /** current visible output column (enables right-aligned fields) **/
+            virtual std::optional<std::size_t> lpos() const override final {
+                return logbuf_.viz_lpos();
+            }
             virtual PpSinkInserter stream_open(uint32_t min_z) override final;
             virtual void stream_commit() override;
 

@@ -26,7 +26,9 @@
 #define XO_ENTER0_(lvl) \
     xo::pp::scope_setup{ __PRETTY_FUNCTION__, \
                          xo::pp::log_level::lvl, \
-                         xo::pp::scope_config::function_style }
+                         xo::pp::scope_config::function_style, \
+                         __FILE__, \
+                         __LINE__ }
 
 /** declare an RAII scope logger @p varname for the enclosing function **/
 #define XO_SCOPE_(varname, lvl) xo::pp::scope varname(XO_ENTER0_(lvl))

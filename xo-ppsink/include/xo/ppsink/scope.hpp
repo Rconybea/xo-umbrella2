@@ -63,6 +63,16 @@ namespace xo::pp {
          *  streamlined => "Class::method"
          **/
         static inline xo::FunctionStyle function_style = xo::FunctionStyle::streamlined;
+        /** if true, append the scope's source location "[file:line]" to the
+         *  entry banner (file/line captured by XO_ENTER0_)
+         **/
+        static inline bool location_enabled = false;
+        /** column at which to right-align "[file:line]" -- honored by sinks
+         *  that report a column (PrettySink); FlatSink falls back to inline
+         **/
+        static inline std::uint32_t location_tab = 80;
+        /** color for the "[file:line]" code location **/
+        static inline color_spec_type code_location_color = color_spec_type::red();
     };
 
     /** @brief captured scope-entry information (POC subset)
@@ -81,6 +91,10 @@ namespace xo::pp {
         log_level level_ = log_level::always;
         /** how to style @ref name_ in the banner (default literal => verbatim) **/
         xo::FunctionStyle style_ = xo::FunctionStyle::literal;
+        /** source file of the entry site (__FILE__); empty => no location **/
+        std::string_view file_ = {};
+        /** source line of the entry site (__LINE__) **/
+        std::uint32_t line_ = 0;
 
         /** true iff a scope entered with this setup should log **/
         bool is_enabled() const { return level_ >= scope_config::min_log_level; }
@@ -108,7 +122,9 @@ namespace xo::pp {
          **/
         template <typename... Ts>
         explicit scope(scope_setup setup, Ts &&... args)
-            : name_{setup.name_}, style_{setup.style_}, finalized_{!setup.is_enabled()}
+            : name_{setup.name_}, style_{setup.style_},
+              file_{setup.file_}, line_{setup.line_},
+              finalized_{!setup.is_enabled()}
         {
             begin_scope(std::forward<Ts>(args)...);
         }
@@ -209,6 +225,7 @@ namespace xo::pp {
                 (xo::pp::pretty(sink, args), ...);
                 sink.end();
             }
+            emit_location(sink, file_, line_);
             sink.put("\n");
 
             st.incr_nesting();
@@ -228,6 +245,13 @@ namespace xo::pp {
          **/
         static void emit_nesting_level(xo::pp::PpSink & sink, std::uint32_t level);
 
+        /** if location_enabled and @p file is non-empty, append the code
+         *  location "[file:line]" -- right-aligned at scope_config::location_tab
+         *  when @p sink reports a column (PrettySink), else inline (FlatSink)
+         **/
+        static void emit_location(xo::pp::PpSink & sink,
+                                  std::string_view file, std::uint32_t line);
+
     private:
         /** scope name (e.g. function name); printed in the +/- entry/exit banners **/
         std::string_view name_;
@@ -235,6 +259,10 @@ namespace xo::pp {
          *  ctor; from scope_setup / scope_config::function_style via XO_ENTER0_)
          **/
         xo::FunctionStyle style_ = xo::FunctionStyle::literal;
+        /** entry-site __FILE__ (empty for the string_view ctor => no location) **/
+        std::string_view file_ = {};
+        /** entry-site __LINE__ **/
+        std::uint32_t line_ = 0;
         /** once true, logging is disabled; set at entry (level gating) or by
          *  end_scope(); guards against a double exit banner from the dtor
          **/

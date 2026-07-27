@@ -12,6 +12,8 @@
 // We don't want to force code that supports
 // pretty-printing to #include <ostream>.
 #include <iosfwd>
+#include <optional>
+#include <cstddef>
 #include <cstdint>
 
 namespace xo::pp {
@@ -99,6 +101,13 @@ namespace xo::pp {
 
         /** end group of nested items previously  introduced with begin() **/
         virtual PpSink & end() = 0;
+
+        /** current visible output column, if this sink tracks one.
+         *  PrettySink does (via its line accountant); FlatSink does not and
+         *  returns nullopt -- the caller then falls back to inline placement
+         *  for right-aligned fields (e.g. a code location).
+         **/
+        virtual std::optional<std::size_t> lpos() const { return std::nullopt; }
         /** temporary stream to fill a string token.
          *  Token will be completed by next call to stream_commit().
          *  Example:

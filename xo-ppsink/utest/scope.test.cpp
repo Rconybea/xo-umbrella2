@@ -1,6 +1,7 @@
 /** @file scope.test.cpp **/
 
 #include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/FlatSink.hpp>
 #include <catch2/catch.hpp>
 #include <sstream>
@@ -67,6 +68,27 @@ namespace ut {
         REQUIRE(dig(9)); REQUIRE(dig(10)); REQUIRE(dig(11));
         REQUIRE(out[12] == ' ');
         REQUIRE(out.substr(13, 4) == "+foo");
+    }
+
+    TEST_CASE("scope-location-inline", "[scope]") {
+        /* FlatSink reports no column, so the code location falls back to inline
+         * placement: one space, then "[<basename>:<line>]".  (basename:line
+         * layout is deterministic; the line value itself is not asserted.)
+         */
+        stringstream ss;
+        FlatSink sink(ss);
+        ThreadLogState::log_set_sink(&sink);
+
+        scope_config::location_enabled = true;
+        { XO_SCOPE_(s, always); }   /* 'always' so it logs regardless of min_log_level */
+        scope_config::location_enabled = false;   /* reset global BEFORE asserting */
+        ThreadLogState::log_set_sink(nullptr);
+
+        std::string out = ss.str();
+        auto b = out.find("[scope.test.cpp:");
+        REQUIRE(b != std::string::npos);
+        REQUIRE(b >= 1);
+        REQUIRE(out[b - 1] == ' ');   /* inline: single space precedes '[' */
     }
 
 } /*namespace ut*/
