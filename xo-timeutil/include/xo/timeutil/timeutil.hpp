@@ -14,7 +14,9 @@
 #include <chrono>
 #include <compare>
 #include <utility>
+#include <string_view>
 #include <cstdint>
+#include <cstdio>
 #include <ctime>
 #include <time.h>
 
@@ -200,6 +202,96 @@ namespace xo {
                 return std::make_pair(t0_tm, usec);
             } /*utc_split_tm*/
         }; /*timeutil*/
+
+        /* ----------------------------------------------------------------
+         * buffer formatters (ostream-free; the format lives here so callers
+         * -- ostream printers in timeutil_iostream.hpp, PpSink printers in
+         * xo-ppsink -- don't replicate it).  Each writes a constant-width
+         * string via snprintf and returns a view of the prefix it filled.
+         * ----------------------------------------------------------------
+         */
+
+        /** format @p dt (duration since midnight) as "HH:MM:SS.mmm" into @p buf
+         *  (needs >= 13 bytes incl NUL); return the written prefix.
+         **/
+        inline std::string_view
+        format_hms_msec(char * buf, std::uint32_t buf_z, nanos dt) {
+            auto hms = std::chrono::hh_mm_ss(dt);
+            int n = std::snprintf(
+                buf, buf_z, "%02d:%02d:%02d.%03d",
+                static_cast<int>(hms.hours().count()),
+                static_cast<int>(hms.minutes().count()),
+                static_cast<int>(hms.seconds().count()),
+                static_cast<int>(std::chrono::duration_cast<milliseconds>(hms.subseconds()).count()));
+            std::size_t len = (n < 0)
+                ? 0u
+                : (static_cast<std::uint32_t>(n) < buf_z
+                   ? static_cast<std::size_t>(n)
+                   : static_cast<std::size_t>(buf_z - 1));
+            return std::string_view(buf, len);
+        } /*format_hms_msec*/
+
+        /** format @p dt (duration since midnight) as "HH:MM:SS.uuuuuu" into
+         *  @p buf (needs >= 16 bytes incl NUL); return the written prefix.
+         **/
+        inline std::string_view
+        format_hms_usec(char * buf, std::uint32_t buf_z, nanos dt) {
+            auto hms = std::chrono::hh_mm_ss(dt);
+            int n = std::snprintf(
+                buf, buf_z, "%02d:%02d:%02d.%06d",
+                static_cast<int>(hms.hours().count()),
+                static_cast<int>(hms.minutes().count()),
+                static_cast<int>(hms.seconds().count()),
+                static_cast<int>(std::chrono::duration_cast<microseconds>(hms.subseconds()).count()));
+            std::size_t len = (n < 0)
+                ? 0u
+                : (static_cast<std::uint32_t>(n) < buf_z
+                   ? static_cast<std::size_t>(n)
+                   : static_cast<std::size_t>(buf_z - 1));
+            return std::string_view(buf, len);
+        } /*format_hms_usec*/
+
+        /** "HH:MM:SS.mmm" for the UTC time-of-day of @p t0 into @p buf (>=13) **/
+        inline std::string_view
+        format_utc_hms_msec(char * buf, std::uint32_t buf_z, utc_nanos t0) {
+            return format_hms_msec(buf, buf_z, timeutil::utc_split_vs_midnight(t0).second);
+        } /*format_utc_hms_msec*/
+
+        /** "yyyymmdd:HH:MM:SS.uuuuuu" (UTC) for @p t0 into @p buf (>=24) **/
+        inline std::string_view
+        format_utc_ymd_hms_usec(char * buf, std::uint32_t buf_z, utc_nanos t0) {
+            auto [t0_tm, t0_usec] = timeutil::utc_split_tm(t0);
+
+            std::size_t n = std::strftime(buf, buf_z, "%Y%m%d:%H:%M:%S.", &t0_tm);
+            if (n == 0)
+                return std::string_view(buf, 0);   /* didn't fit */
+
+            int m = std::snprintf(buf + n, buf_z - n, "%06u",
+                                  static_cast<unsigned>(t0_usec));
+            std::size_t total = n
+                + ((m > 0 && static_cast<std::uint32_t>(m) < (buf_z - n))
+                   ? static_cast<std::size_t>(m)
+                   : (buf_z - n - 1));
+            return std::string_view(buf, total);
+        } /*format_utc_ymd_hms_usec*/
+
+        /** ISO-8601 "yyyy-mm-ddThh:mm:ss.mmmZ" (UTC) for @p t0 into @p buf (>=25) **/
+        inline std::string_view
+        format_iso8601(char * buf, std::uint32_t buf_z, utc_nanos t0) {
+            auto [t0_tm, t0_usec] = timeutil::utc_split_tm(t0);
+
+            std::size_t n = std::strftime(buf, buf_z, "%Y-%m-%dT%H:%M:%S.", &t0_tm);
+            if (n == 0)
+                return std::string_view(buf, 0);   /* didn't fit */
+
+            int m = std::snprintf(buf + n, buf_z - n, "%03uZ",
+                                  static_cast<unsigned>(t0_usec / 1000));
+            std::size_t total = n
+                + ((m > 0 && static_cast<std::uint32_t>(m) < (buf_z - n))
+                   ? static_cast<std::size_t>(m)
+                   : (buf_z - n - 1));
+            return std::string_view(buf, total);
+        } /*format_iso8601*/
 
     } /*namespace time*/
 } /*namespace xo*/
