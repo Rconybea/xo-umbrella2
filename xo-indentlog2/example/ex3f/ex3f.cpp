@@ -27,7 +27,6 @@
 using xo::pp::scope;
 using xo::pp::scope_config;
 using xo::pp::color_config;
-using xo::pp::color_spec_type;
 using xo::pp::log_level;
 using xo::pp::tag;
 using xo::pp::xtag;
@@ -55,8 +54,7 @@ main(int argc, char ** argv) {
     color_config::color_enabled = true;
     scope_config::min_log_level = log_level::info;
     scope_config::indent_width = 2;
-    scope_config::nesting_level_enabled = true;                    /* show "(N)" depth */
-    scope_config::nesting_level_color = color_spec_type::xterm(153);  /* light blue (legacy default xterm 195 is near-white/pale) */
+    scope_config::nesting_level_enabled = true;                    /* show "(N)" depth (default light-blue color) */
 
     ArenaConfig logbuf_cfg { .name_ = "example.ex3f", .size_ = 64*1024 };
     PrettySink pp(PpConfig().with_logbuf_config(logbuf_cfg));
