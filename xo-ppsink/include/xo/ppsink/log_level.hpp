@@ -11,7 +11,7 @@
 
 #include <cstdint>
 
-namespace xo::print {
+namespace xo::pp {
     /** @brief log message severity, ordered least-to-most severe.
      *
      *  Ordering (increasing): never < verbose < chatty < info < warning
@@ -47,6 +47,6 @@ namespace xo::print {
     inline bool operator<=(log_level x, log_level y) {
         return static_cast<std::uint8_t>(x) <= static_cast<std::uint8_t>(y);
     }
-} /*namespace xo::print*/
+} /*namespace xo::pp*/
 
 /* end log_level.hpp */

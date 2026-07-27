@@ -13,7 +13,7 @@
 #include "PpSink.hpp"
 #include <cstdint>
 
-namespace xo::print {
+namespace xo::pp {
     /** @brief per-thread logging state: nesting level + the active sink.
      *
      *  Per-thread so one thread's line doesn't interleave with another's;
@@ -49,6 +49,6 @@ namespace xo::print {
         /** set (or clear, with nullptr) the active sink for the calling thread **/
         static void log_set_sink(PpSink * s);
     };
-} /*namespace xo::print*/
+} /*namespace xo::pp*/
 
 /* end LogState.hpp */

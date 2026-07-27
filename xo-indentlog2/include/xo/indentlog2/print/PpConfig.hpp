@@ -7,7 +7,7 @@
 #include <cstdint>
 
 namespace xo {
-    namespace print {
+    namespace pp {
         class PpConfig {
         public:
             using ArenaConfig = xo::mm::ArenaConfig;
@@ -62,7 +62,7 @@ namespace xo {
             /** debug flag for @ref PpState::logbuf_ **/
             bool logbuf_debug_flag_ = false;
         };
-    } /*namespace print*/
+    } /*namespace pp*/
 } /*namespace xo*/
 
 /* end PpConfig.hpp */

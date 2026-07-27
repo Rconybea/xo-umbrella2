@@ -8,14 +8,14 @@
 #include "PpSink.hpp"
 #include <ostream>
 
-namespace xo::print {
+namespace xo::pp {
     /** @brief Degenerate PpSink that writes flat (unstructured) output to a std::ostream
      *
      *  Purpsoe:
      *  - adapt an uninstrumented ostream.
      *    Pretty-printing relies on a stream with an attached line accountant
      *    to track position relative to left margin.
-     *  - adapter so that xo::print::Prettifier<T> can serve both pretty-printing
+     *  - adapter so that xo::pp::Prettifier<T> can serve both pretty-printing
      *    and legacy ostream printing.
      *
      *  Ignores group structure: {begin(), end(), split()} are no-ops.
@@ -33,9 +33,17 @@ namespace xo::print {
 
         // inherited from PpSink
 
+        /* keep the inherited split()/split(spaces) and newline()
+         * convenience overloads visible alongside the overrides below
+         */
+        using PpSink::split;
+        using PpSink::newline;
+
         virtual PpSink & put(std::string_view x) override final;
         virtual PpSink & begin() override final;
-        virtual PpSink & split() override final;
+        virtual PpSink & begin(std::int32_t offset) override final;
+        virtual PpSink & split(std::uint32_t spaces, std::int32_t offset) override final;
+        virtual PpSink & newline(std::int32_t offset) override final;
         virtual PpSink & end() override final;
         virtual PpSinkInserter stream_open(uint32_t min_z) override final;
         virtual void stream_commit() override final;
@@ -44,6 +52,6 @@ namespace xo::print {
         /** destination for flat output **/
         std::ostream & os_;
     };
-} /*namespace xo::print*/
+} /*namespace xo::pp*/
 
 /* end FlatSink.hpp */

@@ -2,7 +2,7 @@
  *
  *  @author Roland Conybeare, Jul 2026
  *
- *  Opt-in convenience macros for xo::print::scope.
+ *  Opt-in convenience macros for xo::pp::scope.
  *
  *  These are deliberately kept OUT of scope.hpp: the legacy
  *  <xo/indentlog/scope.hpp> defines its own XO_ENTER0 / XO_SCOPE macros, and
@@ -20,10 +20,10 @@
 #include "scope.hpp"
 
 /** capture a scope_setup for the enclosing function, at log level @p lvl **/
-#define XO_ENTER0(lvl) xo::print::scope_setup{ __func__, xo::print::log_level::lvl }
+#define XO_ENTER0(lvl) xo::pp::scope_setup{ __func__, xo::pp::log_level::lvl }
 
 /** declare an RAII scope logger @p varname for the enclosing function **/
-#define XO_SCOPE(varname, lvl) xo::print::scope varname(XO_ENTER0(lvl))
+#define XO_SCOPE(varname, lvl) xo::pp::scope varname(XO_ENTER0(lvl))
 
 #endif /* XO_PPSINK_SCOPE_MACROS_HPP */
 

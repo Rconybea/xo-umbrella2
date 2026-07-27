@@ -5,7 +5,7 @@
 
 #include <xo/ppsink/FlatSink.hpp>
 
-namespace xo::print {
+namespace xo::pp {
     PpSink &
     FlatSink::put(std::string_view x)
     {
@@ -21,9 +21,26 @@ namespace xo::print {
     }
 
     PpSink &
-    FlatSink::split()
+    FlatSink::begin(std::int32_t /*offset*/)
     {
-        /* flat output ignores splits */
+        /* flat output discards group structure (and its indent) */
+        return *this;
+    }
+
+    PpSink &
+    FlatSink::split(std::uint32_t spaces, std::int32_t /*offset*/)
+    {
+        /* flat output never breaks: render a split as its flat spaces */
+        for (std::uint32_t i = 0; i < spaces; ++i)
+            os_.put(' ');
+        return *this;
+    }
+
+    PpSink &
+    FlatSink::newline(std::int32_t /*offset*/)
+    {
+        /* a forced break is a hard newline even in flat output (no indent) */
+        os_.put('\n');
         return *this;
     }
 
@@ -47,6 +64,6 @@ namespace xo::print {
         /* nothing to finalize - no temporary stream */
     }
 
-} /*namespace xo::print*/
+} /*namespace xo::pp*/
 
 /* end FlatSink.cpp */

@@ -7,9 +7,9 @@
 
 namespace ut {
 
-    using xo::print::scope;
-    using xo::print::FlatSink;
-    using xo::print::ThreadLogState;
+    using xo::pp::scope;
+    using xo::pp::FlatSink;
+    using xo::pp::ThreadLogState;
     using std::stringstream;
 
     TEST_CASE("scope-indent-flat", "[scope]") {

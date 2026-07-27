@@ -17,12 +17,12 @@
 #include <vector>
 
 namespace ut {
-    using xo::print::has_prettifier;
-    using xo::print::pretty;
-    using xo::print::PpSink;
-    using xo::print::FlatSink;
-    using xo::print::PrettySink;
-    using xo::print::PpConfig;
+    using xo::pp::has_prettifier;
+    using xo::pp::pretty;
+    using xo::pp::PpSink;
+    using xo::pp::FlatSink;
+    using xo::pp::PrettySink;
+    using xo::pp::PpConfig;
     using xo::FunctionStyle;
     using xo::mm::ArenaConfig;
     using std::vector;

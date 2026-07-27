@@ -13,7 +13,7 @@
 #include <string_view>
 #include <charconv>
 
-namespace xo::print {
+namespace xo::pp {
     /** @brief per-type opt-in to structured pretty-printing.
      *
      *  Specialize for a type @p T that should participate in pretty-printing,
@@ -50,6 +50,6 @@ namespace xo::print {
                                       static_cast<std::size_t>(ptr - buf)));
         }
     };
-} /*namespace xo::print*/
+} /*namespace xo::pp*/
 
 /* end Prettifier.hpp */

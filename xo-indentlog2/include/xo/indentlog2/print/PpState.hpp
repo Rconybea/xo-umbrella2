@@ -10,7 +10,7 @@
 #include "xo/arena/DArena.hpp"
 #include "xo/arena/DArenaVector.hpp"
 
-namespace xo::print {
+namespace xo::pp {
     class PpStringToken; // see PpToken.hpp
 
     /**
@@ -78,10 +78,21 @@ namespace xo::print {
          *  triggers printing at top-level
          **/
         void put_cstr(const char * c_str);
-        /** begin a group (append @c k_begin token) **/
-        void begin();
-        /** add optional break (append @c k_break token) **/
-        void split();
+        /** begin a group; @p offset adds to the running indent until end().
+         *  the no-arg form indents one nesting level (config indent_width).
+         **/
+        void begin(int32_t offset);
+        void begin() { this->begin(config_.indent_width()); }
+        /** optional break.  Group fits: emit @p spaces spaces.
+         *  Group breaks: newline + (running_indent + @p offset).
+         **/
+        void split(uint32_t spaces, int32_t offset);
+        void split() { this->split(0, 0); }
+        void split(uint32_t spaces) { this->split(spaces, 0); }
+        /** forced break: always newline + (running_indent + @p offset),
+         *  forcing every enclosing group to break.
+         **/
+        void newline(int32_t offset = 0);
         /** end a group (append @c k_end token); may trigger printing **/
         void end();
 
@@ -125,6 +136,9 @@ namespace xo::print {
          *  so we know whether it fits.
          **/
         void check_print_ready();
+
+        /** write @p n spaces to the output (no newline) **/
+        void write_spaces(uint32_t n);
 
     private:
         /**
@@ -203,6 +217,11 @@ namespace xo::print {
          *  but which haven't yet been printed to @c *p_out_.
          **/
         PrintStack print_stack_;
+        /** running indent while printing: sum of the offsets of the currently
+         *  open groups (k_begin += offset, k_end -= offset).  A broken split
+         *  indents to (print_indent_ + that split's own offset).
+         **/
+        int32_t print_indent_ = 0;
 
         /** if non-null: a string token initiated by @ref open_string().
          *  Actual size established when @ref commit_string() runs.
@@ -214,6 +233,6 @@ namespace xo::print {
         /** output buffer.  Independently tracks lpos, visible chars **/
         LogBuffer * p_out_ = nullptr;
     };
-} /*namespace xo::print*/
+} /*namespace xo::pp*/
 
 /* end PpState.hpp */

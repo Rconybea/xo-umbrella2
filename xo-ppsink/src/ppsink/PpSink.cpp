@@ -5,7 +5,7 @@
 
 #include <xo/ppsink/PpSink.hpp>
 
-namespace xo::print {
+namespace xo::pp {
     PpSinkInserter::PpSinkInserter(PpSink * ppsink, std::ostream * os)
       : ppsink_{ppsink}, os_{os}
     {

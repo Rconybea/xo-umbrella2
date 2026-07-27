@@ -14,7 +14,7 @@
 #include <iosfwd>
 #include <cstdint>
 
-namespace xo::print {
+namespace xo::pp {
     class PpSink;
 
     /** @brief RAII convenience class to ensure ppsink.stream_commit() invoked
@@ -72,14 +72,31 @@ namespace xo::print {
 
         /** write string comprising contents of @p s **/
         virtual PpSink & put(std::string_view s) = 0;
-        /** begin group of nested items.
+
+        /** begin group of nested items; indent one nesting level.
          *  Sequence begin,[string*,split]*,end
          **/
         virtual PpSink & begin() = 0;
-        /** optional split. Marks spot where pretty printer
-         *  may introduce line break to fit
+        /** begin a group; @p offset adds to the running indent until end() **/
+        virtual PpSink & begin(std::int32_t offset) = 0;
+
+        /** optional line break.
+         *  Group fits: emit @p spaces spaces.
+         *  Group breaks: newline + (running_indent + @p offset).
          **/
-        virtual PpSink & split() = 0;
+        virtual PpSink & split(std::uint32_t spaces, std::int32_t offset) = 0;
+        /** optional break with no extra offset **/
+        PpSink & split(std::uint32_t spaces) { return this->split(spaces, 0); }
+        /** optional zero-width break **/
+        PpSink & split() { return this->split(0, 0); }
+
+        /** forced break: always newline + (running_indent + @p offset),
+         *  forcing every enclosing group to break
+         **/
+        virtual PpSink & newline(std::int32_t offset) = 0;
+        /** forced break with no extra offset **/
+        PpSink & newline() { return this->newline(0); }
+
         /** end group of nested items previously  introduced with begin() **/
         virtual PpSink & end() = 0;
         /** temporary stream to fill a string token.
@@ -101,6 +118,6 @@ namespace xo::print {
     };
 
 
-} /*namespace xo::print*/
+} /*namespace xo::pp*/
 
 /* end PpSink.hpp */

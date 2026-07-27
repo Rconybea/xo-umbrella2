@@ -13,7 +13,7 @@ namespace xo {
     //using std::max;
     //using std::min;
 
-    namespace print {
+    namespace pp {
         PrettySink::PrettySink(const PpConfig & cfg)
         : pps_{cfg},
           sbuf_{&pps_},
@@ -45,9 +45,23 @@ namespace xo {
         }
 
         PpSink &
-        PrettySink::split()
+        PrettySink::begin(std::int32_t offset)
         {
-            pps_.split();
+            pps_.begin(offset);
+            return *this;
+        }
+
+        PpSink &
+        PrettySink::split(std::uint32_t spaces, std::int32_t offset)
+        {
+            pps_.split(spaces, offset);
+            return *this;
+        }
+
+        PpSink &
+        PrettySink::newline(std::int32_t offset)
+        {
+            pps_.newline(offset);
             return *this;
         }
 
@@ -75,7 +89,7 @@ namespace xo {
             sbuf_.commit();
         }
 
-    } /*namespace print*/
+    } /*namespace pp*/
 } /*namespace xo*/
 
 /* end PrettySink.cpp */

@@ -17,9 +17,9 @@
 #include <cstdint>
 
 namespace ut {
-    using xo::print::PpState;
-    using xo::print::PpConfig;
-    using xo::print::PpTokenStreambuf;
+    using xo::pp::PpState;
+    using xo::pp::PpConfig;
+    using xo::pp::PpTokenStreambuf;
     using xo::LogBuffer;
     using xo::mm::ArenaConfig;
     using xo::UtestRehearser;

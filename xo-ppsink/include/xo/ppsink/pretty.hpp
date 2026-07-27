@@ -18,7 +18,7 @@
 #include <string_view>
 #include <type_traits>
 
-namespace xo::print {
+namespace xo::pp {
     /** Emit @p x to @p sink.
      *
      *  Dispatch, in order:
@@ -49,6 +49,6 @@ namespace xo::print {
     PpSink::pp(const T & x) {
         pretty(*this, x);
     }
-} /*namespace xo::print*/
+} /*namespace xo::pp*/
 
 /* end pretty.hpp */

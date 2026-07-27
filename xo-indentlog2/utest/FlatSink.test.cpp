@@ -15,10 +15,10 @@
 #include <utility>
 
 namespace ut {
-    using xo::print::FlatSink;
-    using xo::print::PrettySink;
-    using xo::print::PpSink;
-    using xo::print::PpConfig;
+    using xo::pp::FlatSink;
+    using xo::pp::PrettySink;
+    using xo::pp::PpSink;
+    using xo::pp::PpConfig;
     using xo::mm::ArenaConfig;
     using xo::UtestRehearser;
     using std::string;

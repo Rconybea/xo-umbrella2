@@ -15,8 +15,8 @@
 #include <cstdint>
 
 namespace ut {
-    using xo::print::PrettySink;
-    using xo::print::PpConfig;
+    using xo::pp::PrettySink;
+    using xo::pp::PpConfig;
     using xo::mm::ArenaConfig;
     using xo::UtestRehearser;
     using std::string;

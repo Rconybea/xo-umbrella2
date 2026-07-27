@@ -14,13 +14,15 @@ namespace xo {
     using std::uint32_t;
     using std::int32_t;
 
-    namespace print {
+    namespace pp {
         PpToken::PpToken(PpTokenFlags tk_type,
                          int32_t tk_viz_len,
-                         int32_t tk_len)
+                         int32_t tk_len,
+                         int32_t tk_offset)
             : tk_flags_{tk_type},
               tk_viz_len_{tk_viz_len},
-              tk_len_{tk_len}
+              tk_len_{tk_len},
+              tk_offset_{tk_offset}
         {
         }
 
@@ -62,7 +64,7 @@ namespace xo {
             return padding::with_padding(z0, sizeof(uint32_t));
         }
 
-    } /*namespace print*/
+    } /*namespace pp*/
 } /*namespace xo*/
 
 /* end PpToken.cpp */

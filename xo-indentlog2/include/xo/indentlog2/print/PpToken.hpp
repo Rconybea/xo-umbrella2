@@ -10,7 +10,7 @@
 #include <cstdint>
 
 namespace xo {
-    namespace print {
+    namespace pp {
         class PpToken {
         public:
             using uint32_t = std::uint32_t;
@@ -19,9 +19,17 @@ namespace xo {
             uint32_t tk_flags() const { return tk_flags_; }
             int32_t tk_viz_len() const { return tk_viz_len_; }
             int32_t tk_len() const { return tk_len_; }
+            /** for k_begin: added to the running indent while the group is open.
+             *  for k_split: added to the indent of the line this break starts.
+             **/
+            int32_t tk_offset() const { return tk_offset_; }
 
             bool is_string() const { return (tk_flags_ & k_type_mask) == k_string; }
             bool is_begin() const { return (tk_flags_ & k_type_mask) == k_begin; }
+            bool is_forced() const { return (tk_flags_ & k_forced) != 0; }
+
+            /** mark a k_begin token's group as must-break (contains a forced break) **/
+            void set_forced_flag() { tk_flags_ |= k_forced; }
             bool size_established() const {
                 auto tk_type = tk_flags_ & k_type_mask;
                 if (tk_type == k_begin)
@@ -47,7 +55,8 @@ namespace xo {
         protected:
             PpToken(PpTokenFlags tk_flags,
                     int32_t tk_viz_len,
-                    int32_t tk_len);
+                    int32_t tk_len,
+                    int32_t tk_offset = 0);
 
             friend class PpState;
 
@@ -68,6 +77,11 @@ namespace xo {
              *  +ve :: actual token length (characters)
              **/
             int32_t tk_len_ = 0;
+            /** k_begin: indent contributed while the group is open.
+             *  k_split: extra indent for the line this break starts.
+             *  (unused for k_string/k_end)
+             **/
+            int32_t tk_offset_ = 0;
         };
 
         class PpStringToken : public PpToken {
@@ -113,7 +127,7 @@ namespace xo {
              */
             char tk_chars_[];
         };
-    } /*namespace print*/
+    } /*namespace pp*/
 } /*namespace xo*/
 
 /* end PpToken.hpp */

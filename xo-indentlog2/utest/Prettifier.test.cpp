@@ -36,7 +36,7 @@ namespace ut {
  * they have no Prettifier, so pretty() renders them via operator<< (atomic
  * leaves), exercising a Prettifier type that delegates to fallback members.
  */
-namespace xo::print {
+namespace xo::pp {
     template <>
     struct Prettifier<ut::Point_Pretty> {
         static void print(PpSink & sink, const ut::Point_Pretty & p) {
@@ -50,15 +50,15 @@ namespace xo::print {
             sink.put(")");
         }
     };
-} /*namespace xo::print*/
+} /*namespace xo::pp*/
 
 namespace ut {
-    using xo::print::has_prettifier;
-    using xo::print::pretty;
-    using xo::print::PpSink;
-    using xo::print::FlatSink;
-    using xo::print::PrettySink;
-    using xo::print::PpConfig;
+    using xo::pp::has_prettifier;
+    using xo::pp::pretty;
+    using xo::pp::PpSink;
+    using xo::pp::FlatSink;
+    using xo::pp::PrettySink;
+    using xo::pp::PpConfig;
     using xo::mm::ArenaConfig;
 
     /* compile-time: the concept distinguishes opted-in from fallback types.

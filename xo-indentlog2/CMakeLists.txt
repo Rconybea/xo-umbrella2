@@ -20,7 +20,7 @@ add_definitions(${PROJECT_CXX_FLAGS})
 # ----------------------------------------------------------------
 
 add_subdirectory(src/indentlog2)
-#add_subdirectory(example)
+add_subdirectory(example)
 add_subdirectory(utest)
 
 # ----------------------------------------------------------------

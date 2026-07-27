@@ -5,11 +5,11 @@
 #include <catch2/catch.hpp>
 #include <sstream>
 
-using xo::print::FlatSink;
-using xo::print::PpSink;
-using xo::print::Prettifier;
-using xo::print::pretty;
-using xo::print::has_prettifier;
+using xo::pp::FlatSink;
+using xo::pp::PpSink;
+using xo::pp::Prettifier;
+using xo::pp::pretty;
+using xo::pp::has_prettifier;
 
 /* a type that opts in to Prettifier */
 struct Point_PpsinkTest { int x; int y; };
@@ -22,7 +22,7 @@ operator<<(std::ostream & os, const Plain_PpsinkTest & p) {
     return os << "Plain{" << p.v << "}";
 }
 
-namespace xo::print {
+namespace xo::pp {
     template <>
     struct Prettifier<Point_PpsinkTest> {
         static void print(PpSink & sink, const Point_PpsinkTest & p) {

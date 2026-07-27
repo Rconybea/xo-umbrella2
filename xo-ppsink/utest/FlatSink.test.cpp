@@ -4,8 +4,8 @@
 #include <catch2/catch.hpp>
 #include <sstream>
 
-using xo::print::FlatSink;
-using xo::print::PpSink;
+using xo::pp::FlatSink;
+using xo::pp::PpSink;
 
 TEST_CASE("flatsink-put-and-noop-structure", "[flatsink]") {
     /* FlatSink writes put() text straight through; begin/split/end are no-ops */

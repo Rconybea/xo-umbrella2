@@ -10,7 +10,7 @@
 #include "PpState.hpp"
 
 namespace xo {
-    namespace print {
+    namespace pp {
         /**
          *  Use:
          *  @code
@@ -42,9 +42,17 @@ namespace xo {
 
             // inherited from PpSink
 
+            /* keep the inherited split()/split(spaces) and newline()
+             * convenience overloads visible alongside the overrides below
+             */
+            using PpSink::split;
+            using PpSink::newline;
+
             virtual PpSink & put(std::string_view x) override final;
             virtual PpSink & begin() override final;
-            virtual PpSink & split() override final;
+            virtual PpSink & begin(std::int32_t offset) override final;
+            virtual PpSink & split(std::uint32_t spaces, std::int32_t offset) override final;
+            virtual PpSink & newline(std::int32_t offset) override final;
             virtual PpSink & end() override final;
             virtual PpSinkInserter stream_open(uint32_t min_z) override final;
             virtual void stream_commit() override;
@@ -61,7 +69,7 @@ namespace xo {
             /** Buffer for pretty-printed output **/
             LogBuffer logbuf_;
         };
-    } /*namespace print*/
+    } /*namespace pp*/
 } /*namespace xo*/
 
 /* end PrettySink.hpp */

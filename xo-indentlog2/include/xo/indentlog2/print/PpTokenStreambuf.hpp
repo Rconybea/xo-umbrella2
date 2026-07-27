@@ -9,7 +9,7 @@
 #include <streambuf>
 #include <cstdint>
 
-namespace xo::print {
+namespace xo::pp {
     class PpState; // see print/PpState.hpp
 
     /** @brief Temporary streambuf to assemble a PpStringToken inplace
@@ -45,6 +45,6 @@ namespace xo::print {
         Span write_span_;
 #endif
     };
-} /*namespace xo::print*/
+} /*namespace xo::pp*/
 
 /* end PpTokenStreambuf.hpp */

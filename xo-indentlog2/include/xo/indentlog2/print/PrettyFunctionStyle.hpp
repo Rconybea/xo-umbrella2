@@ -8,7 +8,7 @@
 #include <xo/ppsink/Prettifier.hpp>
 #include <xo/ppsink/FunctionStyle.hpp>
 
-namespace xo::print {
+namespace xo::pp {
     /** pretty-print a FunctionStyle as its descriptive name.
      *  Atomic: no group structure.
      **/
@@ -18,6 +18,6 @@ namespace xo::print {
             sink.put(descr_of(x));   /* ADL: xo::descr_of */
         }
     };
-} /*namespace xo::print*/
+} /*namespace xo::pp*/
 
 /* end PrettyFunctionStyle.hpp */

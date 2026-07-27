@@ -2,10 +2,10 @@
  *
  *  @author Roland Conybeare, Jul 2026
  *
- *  Minimal indenting scope-logger POC, built on xo::print::PpSink.
+ *  Minimal indenting scope-logger POC, built on xo::pp::PpSink.
  *
  *  This is the arena-free logging front-end: it composes output through a
- *  PpSink (see xo::print::LogState for the per-thread active sink), so the
+ *  PpSink (see xo::pp::LogState for the per-thread active sink), so the
  *  same scope code drives flat output (FlatSink, here) and, later,
  *  arena-backed pretty output (PrettySink, in xo-indentlog2).
  *
@@ -29,7 +29,7 @@
 #include <utility>
 #include <cstdint>
 
-namespace xo::print {
+namespace xo::pp {
     /** @brief process-wide logging configuration (POC subset) **/
     struct scope_config {
         /** spaces of indentation per nesting level **/
@@ -102,12 +102,12 @@ namespace xo::print {
             if (!enabled())
                 return false;
 
-            xo::print::LogState & st = xo::print::ThreadLogState::thread_log_state();
-            xo::print::PpSink & sink = st.sink();
+            xo::pp::LogState & st = xo::pp::ThreadLogState::thread_log_state();
+            xo::pp::PpSink & sink = st.sink();
 
             emit_indent(st);
             sink.begin();
-            (xo::print::pretty(sink, args), ...);
+            (xo::pp::pretty(sink, args), ...);
             sink.end();
             sink.put("\n");
 
@@ -129,8 +129,8 @@ namespace xo::print {
                 return;
             finalized_ = true;
 
-            xo::print::LogState & st = xo::print::ThreadLogState::thread_log_state();
-            xo::print::PpSink & sink = st.sink();
+            xo::pp::LogState & st = xo::pp::ThreadLogState::thread_log_state();
+            xo::pp::PpSink & sink = st.sink();
 
             st.decr_nesting();
 
@@ -140,7 +140,7 @@ namespace xo::print {
             if constexpr (sizeof...(args) > 0) {
                 sink.put(" ");
                 sink.begin();
-                (xo::print::pretty(sink, args), ...);
+                (xo::pp::pretty(sink, args), ...);
                 sink.end();
             }
             sink.put("\n");
@@ -155,8 +155,8 @@ namespace xo::print {
             if (!enabled())
                 return;
 
-            xo::print::LogState & st = xo::print::ThreadLogState::thread_log_state();
-            xo::print::PpSink & sink = st.sink();
+            xo::pp::LogState & st = xo::pp::ThreadLogState::thread_log_state();
+            xo::pp::PpSink & sink = st.sink();
 
             emit_indent(st);
             sink.put("+");
@@ -164,7 +164,7 @@ namespace xo::print {
             if constexpr (sizeof...(args) > 0) {
                 sink.put(" ");
                 sink.begin();
-                (xo::print::pretty(sink, args), ...);
+                (xo::pp::pretty(sink, args), ...);
                 sink.end();
             }
             sink.put("\n");
@@ -173,7 +173,7 @@ namespace xo::print {
         }
 
         /** write (nesting_level * indent_width) spaces to the active sink **/
-        static void emit_indent(xo::print::LogState & st);
+        static void emit_indent(xo::pp::LogState & st);
 
     private:
         /** scope name (e.g. function name); printed in the +/- entry/exit banners **/
@@ -183,6 +183,6 @@ namespace xo::print {
          **/
         bool finalized_ = false;
     };
-} /*namespace xo::print*/
+} /*namespace xo::pp*/
 
 /* end scope.hpp */

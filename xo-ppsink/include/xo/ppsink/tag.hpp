@@ -15,7 +15,7 @@
  *  POC subset: autoescape of the value (legacy `unq`) and name-coloring
  *  (legacy `with_color` + tag_config) are deferred to later slices.
  *
- *  NB: namespace xo::print (not xo) to avoid colliding with the legacy
+ *  NB: namespace xo::pp (not xo) to avoid colliding with the legacy
  *  xo::tag when both are visible in one translation unit.
  **/
 
@@ -25,7 +25,7 @@
 #include <utility>
 #include <type_traits>
 
-namespace xo::print {
+namespace xo::pp {
     /** @brief value-escaping policy for a tag (POC: recorded, not yet applied) **/
     enum class tagstyle {
         /** escape embedded whitespace/special chars; quote if needed **/
@@ -86,12 +86,14 @@ namespace xo::print {
             if constexpr (PrefixSpace)
                 sink.put(" ");
 
+            sink.begin();
             sink.put(":");
             sink.put(t.name());
-            sink.put(" ");   /* later: split() to allow a :name / value break */
+            sink.split(1);   /* 1 space if it fits; newline + indent if not */
             pretty(sink, t.value());
+            sink.end();
         }
     };
-} /*namespace xo::print*/
+} /*namespace xo::pp*/
 
 /* end tag.hpp */

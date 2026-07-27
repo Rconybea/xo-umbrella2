@@ -6,7 +6,7 @@
 #pragma once
 
 namespace xo {
-    namespace print {
+    namespace pp {
         enum PpTokenFlags {
             k_nominal = 0,
 
@@ -27,8 +27,12 @@ namespace xo {
 
             k_size_established = 0x08,
             k_fits   = 0x10,
+            /** set on a k_begin token whose group must break, because it
+             *  contains a forced break (see PpState::newline()).
+             **/
+            k_forced = 0x20,
         };
-    } /*namespace print*/
+    } /*namespace pp*/
 } /*namespace xo*/
 
 /* end PpTokenType.hpp */

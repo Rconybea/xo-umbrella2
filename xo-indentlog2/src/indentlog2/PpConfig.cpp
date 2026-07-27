@@ -8,7 +8,7 @@
 namespace xo {
     using std::uint32_t;
 
-    namespace print {
+    namespace pp {
         PpConfig::PpConfig(uint32_t w, uint32_t srm, uint32_t hrm, uint32_t hn, const ArenaConfig & logbuf_cfg,
                            bool logbuf_debug_flag)
             : indent_width_{w}, soft_right_margin_{srm}, hard_right_margin_{hrm},
@@ -75,7 +75,7 @@ namespace xo {
             return retval;
         }
 
-    } /*namespace print*/
+    } /*namespace pp*/
 } /*namesapce xo*/
 
 /* end PpConfig.cpp */

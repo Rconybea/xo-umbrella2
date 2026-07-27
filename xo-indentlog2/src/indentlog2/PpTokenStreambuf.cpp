@@ -6,7 +6,7 @@
 #include "print/PpTokenStreambuf.hpp"
 #include "print/PpState.hpp"
 
-namespace xo::print {
+namespace xo::pp {
     PpTokenStreambuf::PpTokenStreambuf(PpState * pps)
       : pps_{pps}
     {

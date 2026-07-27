@@ -4,7 +4,7 @@
 #include <xo/ppsink/FlatSink.hpp>
 #include <iostream>
 
-namespace xo::print {
+namespace xo::pp {
     namespace {
         /** process-wide default sink: flat output to std::clog.
          *  (POC: whole-program FlatSink; per-thread interleaving not yet addressed)
@@ -33,6 +33,6 @@ namespace xo::print {
     ThreadLogState::log_set_sink(PpSink * s) {
         thread_log_state().set_sink(s);
     }
-} /*namespace xo::print*/
+} /*namespace xo::pp*/
 
 /* end LogState.cpp */

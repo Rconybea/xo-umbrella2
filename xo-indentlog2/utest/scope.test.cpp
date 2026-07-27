@@ -15,10 +15,10 @@
 #include <string>
 
 namespace ut {
-    using xo::print::scope;
-    using xo::print::PrettySink;
-    using xo::print::PpConfig;
-    using xo::print::ThreadLogState;
+    using xo::pp::scope;
+    using xo::pp::PrettySink;
+    using xo::pp::PpConfig;
+    using xo::pp::ThreadLogState;
     using xo::mm::ArenaConfig;
 
     /** run @p fn with a PrettySink installed as the thread's active sink;

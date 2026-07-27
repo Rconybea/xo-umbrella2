@@ -1,6 +1,6 @@
 /* ex1.cpp
  *
- * xo-ppsink port of xo-indentlog/example/ex1, using xo::print::scope.
+ * xo-ppsink port of xo-indentlog/example/ex1, using xo::pp::scope.
  *
  * Same nested-scope structure as the legacy example, but the scope logger
  * here is arena-free: output goes through the thread's active PpSink
@@ -10,7 +10,7 @@
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 
-using xo::print::scope;
+using xo::pp::scope;
 
 void inner(int x) {
     scope log(XO_ENTER0(always), ":x ", x);

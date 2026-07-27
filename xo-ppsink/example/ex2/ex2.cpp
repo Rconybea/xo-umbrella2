@@ -1,6 +1,6 @@
 /* example ex2/ex2.cpp
  *
- * xo-ppsink port of xo-indentlog/example/ex2, using xo::print::scope.
+ * xo-ppsink port of xo-indentlog/example/ex2, using xo::pp::scope.
  *
  * Demonstrates recursion, log-level gating (the `log && log(...)` idiom),
  * and an explicit end_scope() that reports the return value.
@@ -9,9 +9,9 @@
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 
-using xo::print::scope;
-using xo::print::scope_config;
-using xo::print::log_level;
+using xo::pp::scope;
+using xo::pp::scope_config;
+using xo::pp::log_level;
 
 int
 fib(int n) {

@@ -13,7 +13,7 @@ namespace xo {
     using std::max;
     using std::min;
 
-    namespace print {
+    namespace pp {
         PpState::PpState(const PpConfig & cfg)
             : config_{cfg},
               tk_buffer_{DArena::map(ArenaConfig()
@@ -89,7 +89,7 @@ namespace xo {
         }
 
         void
-        PpState::begin()
+        PpState::begin(int32_t offset)
         {
             void * mem = this->alloc(sizeof(PpToken));
 
@@ -98,7 +98,7 @@ namespace xo {
                 return;
             }
 
-            PpToken * tk = new (mem) PpToken(k_begin, 0, 0);
+            PpToken * tk = new (mem) PpToken(k_begin, 0, 0, offset);
             uint32_t tk_ix = (std::byte *)mem - tk_buffer_.lo_;
 
             scan_stack_.push_back(tk_ix);
@@ -111,7 +111,7 @@ namespace xo {
         }
 
         void
-        PpState::split()
+        PpState::split(uint32_t spaces, int32_t offset)
         {
             void * mem = this->alloc(sizeof(PpToken));
 
@@ -120,13 +120,45 @@ namespace xo {
                 return;
             }
 
-            PpToken * tk = new (mem) PpToken(k_split, 0, 0);
+            PpToken * tk = new (mem) PpToken(k_split,
+                                             (int32_t)spaces /*viz_len*/,
+                                             (int32_t)spaces /*len*/,
+                                             offset);
 
             (void)tk;
             assert(tk);
 
-            // begin-token cannot trigger printing,
-            // since doesn't carry any size information.
+            // the flat-form spaces count toward the enclosing group's width,
+            // so a group with a `spaces`-carrying split is measured correctly.
+            scan_viz_total_ += spaces;
+            scan_total_ += spaces;
+
+            // split size is known immediately, but a split never unblocks
+            // printing on its own (only a matching end can), so no
+            // check_print_ready() here -- matches the historical behavior.
+        }
+
+        void
+        PpState::newline(int32_t offset)
+        {
+            // forced break: mark every currently-open group as must-break,
+            // then emit a zero-space split.  Since the enclosing group can no
+            // longer "fit", that split will render as newline+indent.
+            for (auto & ix : scan_stack_) {
+                PpToken * b = (PpToken *)((char *)tk_buffer_.lo_ + ix);
+                b->set_forced_flag();
+            }
+
+            this->split(0 /*spaces*/, offset);
+        }
+
+        void
+        PpState::write_spaces(uint32_t n)
+        {
+            static const char s_space = ' ';
+
+            for (uint32_t i = 0; i < n; ++i)
+                p_out_->write_span(xo::mm::span<const char>(&s_space, &s_space + 1));
         }
 
         void
@@ -302,10 +334,12 @@ namespace xo {
                         auto lpos = p_out_->lpos();
 
                         bool f = ((lpos + token->tk_viz_len()
-                                   < config_.soft_right_margin()));
+                                   < config_.soft_right_margin())
+                                  && !token->is_forced());
 
                         token->set_fits_flag(f);
                         print_stack_.push_back(print_ix_);
+                        print_indent_ += token->tk_offset();
                     }
                     break;
                 case k_split:
@@ -320,12 +354,17 @@ namespace xo {
                         PpToken * parent = (PpToken *)((char *)tk_buffer_.lo_ + parent_ix);
 
                         if (parent->tk_flags() & k_fits) {
-                            // if parent fits, then break is a no-op
+                            // parent fits: render the break as its flat spaces
+                            uint32_t spaces = (uint32_t)token->tk_viz_len();
+                            this->write_spaces(spaces);
+                            print_viz_total_ += spaces;
+                            print_total_ += spaces;
                         } else {
-                            uint32_t indent_z = (print_stack_.size()
-                                                 * config_.indent_width());
+                            // parent doesn't fit: break is newline + indent,
+                            // where indent = running indent + this split's offset
+                            int32_t off = print_indent_ + token->tk_offset();
+                            uint32_t indent_z = (off > 0) ? (uint32_t)off : 0;
 
-                            // if parent doesn't fit, then break is newline+indent
                             p_out_->newline_indent(indent_z);
                             print_viz_total_ += (1 + indent_z);
                             print_total_ += (1 + indent_z);
@@ -333,7 +372,13 @@ namespace xo {
                     }
                     break;
                 case k_end:
-                    print_stack_.pop_back();
+                    if (!print_stack_.empty()) {
+                        uint32_t begin_ix = print_stack_.back();
+                        PpToken * begin_tk
+                            = (PpToken *)((char *)tk_buffer_.lo_ + begin_ix);
+                        print_indent_ -= begin_tk->tk_offset();
+                        print_stack_.pop_back();
+                    }
                     break;
                 }
 
@@ -558,7 +603,7 @@ namespace xo {
             print_stack_.visit_pools(fn);
         }
 
-    } /*namespace print*/
+    } /*namespace pp*/
 } /*namespace xo*/
 
 /* end PpState.cpp */

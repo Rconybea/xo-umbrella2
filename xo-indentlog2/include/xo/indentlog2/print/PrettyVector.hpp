@@ -8,7 +8,7 @@
 #include <xo/ppsink/pretty.hpp>
 #include <vector>
 
-namespace xo::print {
+namespace xo::pp {
     /** pretty-print a std::vector as
      *    [elt0, elt1, ..]
      *  Splits between elements, so a vector that doesn't fit breaks one
@@ -36,6 +36,6 @@ namespace xo::print {
             sink.end().put("]");
         }
     };
-} /*namespace xo::print*/
+} /*namespace xo::pp*/
 
 /* end PrettyVector.hpp */

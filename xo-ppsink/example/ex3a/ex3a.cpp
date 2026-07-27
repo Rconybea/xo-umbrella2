@@ -14,11 +14,11 @@
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag.hpp>
 
-using xo::print::scope;
-using xo::print::scope_config;
-using xo::print::log_level;
-using xo::print::tag;
-using xo::print::xtag;
+using xo::pp::scope;
+using xo::pp::scope_config;
+using xo::pp::log_level;
+using xo::pp::tag;
+using xo::pp::xtag;
 
 int
 fib(int n) {
