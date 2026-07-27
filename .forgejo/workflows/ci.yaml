@@ -230,18 +230,6 @@ jobs:
           nix-build ci.nix -A xo-unit
           ls -l ./result
 
-      - name: build xo-alloc
-        run: |
-          echo nix-build ci.nix -A xo-alloc
-          nix-build ci.nix -A xo-alloc
-          ls -l ./result
-
-      - name: build xo-pyunit
-        run: |
-          echo nix-build ci.nix -A xo-pyunit
-          nix-build ci.nix -A xo-pyunit
-          ls -l ./result
-
       - name: build xo-pyunit
         run: |
           echo nix-build ci.nix -A xo-pyunit
@@ -252,6 +240,12 @@ jobs:
         run: |
           echo nix-build ci.nix -A xo-callback
           nix-build ci.nix -A xo-callback
+          ls -l ./result
+
+      - name: build xo-alloc
+        run: |
+          echo nix-build ci.nix -A xo-alloc
+          nix-build ci.nix -A xo-alloc
           ls -l ./result
 
       - name: build xo-object
