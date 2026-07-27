@@ -717,6 +717,24 @@ jobs:
           xo-build --install xo-pyexpression
           echo "::endgroup::"
 
+      - name: build xo-tokenizer
+        run: |
+          echo "::group::xo-tokenizer configure"
+          xo-build --configure --with-utests --with-examples xo-tokenizer
+          echo "::endgroup::"
+
+          echo "::group::xo-tokenizer build"
+          xo-build --build xo-tokenizer
+          echo "::endgroup::"
+
+          echo "::group::xo-tokenizer utest"
+          ctest --test-dir xo-tokenizer/.build
+          echo "::endgroup::"
+
+          echo "::group::xo-tokenizer install"
+          xo-build --install xo-tokenizer
+          echo "::endgroup::"
+
       - name: print install path
         run: |
           tree ${{github.workspace}}/local
