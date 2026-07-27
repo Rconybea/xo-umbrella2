@@ -663,6 +663,24 @@ jobs:
           xo-build --install xo-object
           echo "::endgroup::"
 
+      - name: build xo-ordinaltree
+        run: |
+          echo "::group::xo-ordinaltree configure"
+          xo-build --configure --with-utests --with-examples xo-ordinaltree
+          echo "::endgroup::"
+
+          echo "::group::xo-ordinaltree build"
+          xo-build --build xo-ordinaltree
+          echo "::endgroup::"
+
+          echo "::group::xo-ordinaltree utest"
+          ctest --test-dir xo-ordinaltree/.build
+          echo "::endgroup::"
+
+          echo "::group::xo-ordinaltree install"
+          xo-build --install xo-ordinaltree
+          echo "::endgroup::"
+
       - name: print install path
         run: |
           tree ${{github.workspace}}/local
