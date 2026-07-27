@@ -699,6 +699,24 @@ jobs:
           xo-build --install xo-expression
           echo "::endgroup::"
 
+      - name: build xo-pyexpression
+        run: |
+          echo "::group::xo-pyexpression configure"
+          xo-build --configure --with-utests --with-examples xo-pyexpression
+          echo "::endgroup::"
+
+          echo "::group::xo-pyexpression build"
+          xo-build --build xo-pyexpression
+          echo "::endgroup::"
+
+          echo "::group::xo-pyexpression utest"
+          ctest --test-dir xo-pyexpression/.build
+          echo "::endgroup::"
+
+          echo "::group::xo-pyexpression install"
+          xo-build --install xo-pyexpression
+          echo "::endgroup::"
+
       - name: print install path
         run: |
           tree ${{github.workspace}}/local
