@@ -101,7 +101,7 @@ namespace xo::pp {
                 sink.put(t.name());
             }
             sink.split(1, 1);   /* 1 space if it fits; newline + indent if not */
-            pretty(sink, t.value());
+            sink.pp(t.value());
             sink.end();
         }
     };
