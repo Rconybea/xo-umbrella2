@@ -25,6 +25,7 @@
 #include "pretty_ostream.hpp"   /* pretty(): scope logs arbitrary types, so it needs the operator<< fallback */
 #include "LogState.hpp"
 #include "log_level.hpp"
+#include "color.hpp"
 #include <string_view>
 #include <utility>
 #include <cstdint>
@@ -36,6 +37,10 @@ namespace xo::pp {
         static inline std::uint32_t indent_width = 2;
         /** a scope logs iff its level is at least this severe **/
         static inline log_level min_log_level = log_level::default_level;
+        /** color for the "+name" entry banner (default none => uncolored) **/
+        static inline color_spec_type function_entry_color = color_spec_type::none();
+        /** color for the "-name" exit banner (default none => uncolored) **/
+        static inline color_spec_type function_exit_color = color_spec_type::none();
     };
 
     /** @brief captured scope-entry information (POC subset)
@@ -135,8 +140,11 @@ namespace xo::pp {
             st.decr_nesting();
 
             emit_indent(st);
-            sink.put("-");
-            sink.put(name_);
+            {
+                color_guard g(sink, scope_config::function_exit_color);
+                sink.put("-");
+                sink.put(name_);
+            }
             if constexpr (sizeof...(args) > 0) {
                 sink.put(" ");
                 sink.begin();
@@ -159,8 +167,11 @@ namespace xo::pp {
             xo::pp::PpSink & sink = st.sink();
 
             emit_indent(st);
-            sink.put("+");
-            sink.put(name_);
+            {
+                color_guard g(sink, scope_config::function_entry_color);
+                sink.put("+");
+                sink.put(name_);
+            }
             if constexpr (sizeof...(args) > 0) {
                 sink.put(" ");
                 sink.begin();

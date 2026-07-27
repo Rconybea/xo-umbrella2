@@ -22,6 +22,7 @@
 #pragma once
 
 #include "pretty.hpp"
+#include "color.hpp"
 #include <utility>
 #include <type_traits>
 
@@ -32,6 +33,12 @@ namespace xo::pp {
         autoescape,
         /** print the value literally **/
         raw,
+    };
+
+    /** @brief process-wide tag rendering configuration **/
+    struct tag_config {
+        /** color for the ":name" part of a tag (default none => uncolored) **/
+        static inline color_spec_type tag_color = color_spec_type::none();
     };
 
     /** @brief key/value pair for logging, printed as ":name value".
@@ -87,8 +94,12 @@ namespace xo::pp {
                 sink.put(" ");
 
             sink.begin(0);
-            sink.put(":");
-            sink.put(t.name());
+            {
+                /* color just the ":name" (value keeps its own color/structure) */
+                color_guard g(sink, tag_config::tag_color);
+                sink.put(":");
+                sink.put(t.name());
+            }
             sink.split(1, 1);   /* 1 space if it fits; newline + indent if not */
             pretty(sink, t.value());
             sink.end();
