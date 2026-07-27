@@ -39,6 +39,10 @@ namespace xo::pp {
     struct tag_config {
         /** color for the ":name" part of a tag (default none => uncolored) **/
         static inline color_spec_type tag_color = color_spec_type::none();
+        /** extra indent for a tag's value when the tag breaks onto its own line
+         *  (the offset passed to split()); default 1
+         **/
+        static inline std::int32_t value_offset = 1;
     };
 
     /** @brief key/value pair for logging, printed as ":name value".
@@ -100,7 +104,7 @@ namespace xo::pp {
                 sink.put(":");
                 sink.put(t.name());
             }
-            sink.split(1, 1);   /* 1 space if it fits; newline + indent if not */
+            sink.split(1, tag_config::value_offset);   /* 1 space if it fits; newline + value_offset indent if not */
             sink.pp(t.value());
             sink.end();
         }
