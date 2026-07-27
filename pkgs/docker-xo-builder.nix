@@ -26,7 +26,7 @@
   git, openssh, curl, wget, cacert,
 
   # xo deps
-  eigen, libwebsockets, jsoncpp, cli11, libunwind, elfutils, replxx,
+  eigen, libwebsockets, jsoncpp, cli11, libunwind, elfutils, replxx, libbsd,
 
   # archives
   gnutar, gzip,
@@ -170,6 +170,8 @@ dockerTools.buildLayeredImage {
                (lib.getLib elfutils)
                (lib.getDev replxx)
                (lib.getLib replxx)
+               (lib.getDev libbsd)
+               (lib.getLib libbsd)
 
                pkg-config
 
