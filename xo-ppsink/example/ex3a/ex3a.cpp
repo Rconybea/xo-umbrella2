@@ -22,7 +22,7 @@ using xo::pp::xtag;
 
 int
 fib(int n) {
-    scope log(XO_ENTER0(info), tag("n", n));
+    scope log(XO_ENTER0_(info), tag("n", n));
 
     int retval = 1;
 
@@ -42,7 +42,7 @@ main(int argc, char ** argv) {
 
     int n = 3;
 
-    scope log(XO_ENTER0(info), tag("n", n));
+    scope log(XO_ENTER0_(info), tag("n", n));
 
     int fn = fib(n);
 

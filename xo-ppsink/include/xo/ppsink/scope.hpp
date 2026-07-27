@@ -13,8 +13,8 @@
  *  log-level gating.  Deliberately omits (for now) color, timestamps, code
  *  location, and the function-name styling of the legacy xo-indentlog scope.
  *
- *  NOTE: this header is intentionally macro-free.  The terse XO_SCOPE/
- *  XO_ENTER0 convenience macros live in the opt-in header scope_macros.hpp
+ *  NOTE: this header is intentionally macro-free.  The terse XO_SCOPE_/
+ *  XO_ENTER0_ convenience macros live in the opt-in header scope_macros.hpp
  *  so that scope.hpp can coexist in one translation unit with the legacy
  *  <xo/indentlog/scope.hpp> (which defines its own XO_* macros).
  **/
@@ -42,7 +42,7 @@ namespace xo::pp {
         static inline color_spec_type function_entry_color = color_spec_type::none();
         /** color for the "-name" exit banner (default none => uncolored) **/
         static inline color_spec_type function_exit_color = color_spec_type::none();
-        /** how to style a __PRETTY_FUNCTION__ banner name (see XO_ENTER0);
+        /** how to style a __PRETTY_FUNCTION__ banner name (see XO_ENTER0_);
          *  streamlined => "Class::method"
          **/
         static inline xo::FunctionStyle function_style = xo::FunctionStyle::streamlined;
@@ -50,13 +50,13 @@ namespace xo::pp {
 
     /** @brief captured scope-entry information (POC subset)
      *
-     *  Produced by the XO_ENTER0 macro (see scope_macros.hpp) and consumed by
+     *  Produced by the XO_ENTER0_ macro (see scope_macros.hpp) and consumed by
      *  the scope constructor.  For now it carries the scope name and level;
      *  source location and function-name styling are deferred to the
      *  feature-parity pass.
      **/
     struct scope_setup {
-        /** scope name -- typically __PRETTY_FUNCTION__ (see XO_ENTER0), styled
+        /** scope name -- typically __PRETTY_FUNCTION__ (see XO_ENTER0_), styled
          *  per @ref style_ when the banner is printed
          **/
         std::string_view name_;
@@ -87,7 +87,7 @@ namespace xo::pp {
         }
 
         /** enter the scope described by @p setup, logging @p args on the entry
-         *  banner (e.g. XO_ENTER0(info), ":n ", n)
+         *  banner (e.g. XO_ENTER0_(info), ":n ", n)
          **/
         template <typename... Ts>
         explicit scope(scope_setup setup, Ts &&... args)
@@ -199,7 +199,7 @@ namespace xo::pp {
         /** scope name (e.g. function name); printed in the +/- entry/exit banners **/
         std::string_view name_;
         /** how to style @ref name_ in the banner (literal for the string_view
-         *  ctor; from scope_setup / scope_config::function_style via XO_ENTER0)
+         *  ctor; from scope_setup / scope_config::function_style via XO_ENTER0_)
          **/
         xo::FunctionStyle style_ = xo::FunctionStyle::literal;
         /** once true, logging is disabled; set at entry (level gating) or by

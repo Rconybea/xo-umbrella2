@@ -26,7 +26,7 @@ struct Quadratic {
 
     /* __PRETTY_FUNCTION__ here is "int Quadratic::evaluate(int) const" */
     int evaluate(int x) const {
-        scope log(XO_ENTER0(info), tag("x", x));
+        scope log(XO_ENTER0_(info), tag("x", x));
 
         int y = (a_ * x + b_) * x + c_;
 

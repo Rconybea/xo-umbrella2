@@ -13,11 +13,11 @@
 using xo::pp::scope;
 
 void inner(int x) {
-    scope log(XO_ENTER0(always), ":x ", x);
+    scope log(XO_ENTER0_(always), ":x ", x);
 }
 
 void outer(int y) {
-    scope log(XO_ENTER0(always), ":y ", y);
+    scope log(XO_ENTER0_(always), ":y ", y);
 
     inner(2*y);
 }
