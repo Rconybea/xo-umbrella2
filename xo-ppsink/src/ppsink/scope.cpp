@@ -49,7 +49,7 @@ namespace xo::pp {
         sink.put("(");
         {
             color_guard g(sink, scope_config::nesting_level_color);
-            pretty(sink, static_cast<int>(level));
+            sink.pp(static_cast<int>(level));
         }
         sink.put(") ");
     }
@@ -82,7 +82,7 @@ namespace xo::pp {
         sink.put("[");
         sink.put(base);
         sink.put(":");
-        pretty(sink, static_cast<int>(line));
+        sink.pp(static_cast<int>(line));
         sink.put("]");
     }
 } /*namespace xo::pp*/
