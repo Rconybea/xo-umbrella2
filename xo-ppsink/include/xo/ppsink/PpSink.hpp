@@ -87,6 +87,14 @@ namespace xo::pp {
         template <typename Dwim>
         void dwim(const Dwim & x);
 
+        /** apply dwim() to each argument, left-to-right:
+         *    sink("f(", begin(2), x, split(0,0), y, end, ")");
+         *  structuring descriptors (begin/split/newline/end) drive layout;
+         *  everything else prints via pp().  See pretty.hpp for implementation.
+         **/
+        template <typename... Ts>
+        void operator()(const Ts &... args);
+
         /** write string comprising contents of @p s **/
         virtual PpSink & put(std::string_view s) = 0;
 

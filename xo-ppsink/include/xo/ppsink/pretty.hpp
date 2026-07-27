@@ -130,6 +130,15 @@ namespace xo::pp {
         xo::pp::dwim(*this, x);
     }
 
+    /** apply dwim() to each argument left-to-right; see PpSink::operator().
+     *  (comma-operator fold sequences the calls left-to-right.)
+     **/
+    template <typename... Ts>
+    void
+    PpSink::operator()(const Ts &... args) {
+        (this->dwim(args), ...);
+    }
+
 } /*namespace xo::pp*/
 
 /* end pretty.hpp */

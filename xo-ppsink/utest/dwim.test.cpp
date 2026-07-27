@@ -31,6 +31,18 @@ namespace ut {
 
         REQUIRE(ss.str() == "(1,2)");
     }
+
+    TEST_CASE("dwim-operator-call", "[dwim]") {
+        /* PpSink::operator() applies dwim() to each argument left-to-right,
+         * so a whole structured line is one call.
+         */
+        stringstream ss;
+        FlatSink sink(ss);
+
+        sink("(", begin(2), 1, ",", split(0, 0), 2, end, ")");
+
+        REQUIRE(ss.str() == "(1,2)");
+    }
 } /*namespace ut*/
 
 /* end dwim.test.cpp */
