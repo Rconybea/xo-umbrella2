@@ -16,6 +16,7 @@
 
 namespace ut {
     using xo::pp::scope;
+    using xo::pp::scope_config;
     using xo::pp::PrettySink;
     using xo::pp::PpConfig;
     using xo::pp::ThreadLogState;
@@ -49,18 +50,21 @@ namespace ut {
         outer.log("bye");
     }
 
-    TEST_CASE("scope-over-prettysink", "[scope][prettysink]") {
+    TEST_CASE("scope-over-prettysink", "[scope][prettysink]")
+    {
+        scope_config::time_enabled = false;
+
         /* wide (default) margin: nothing breaks, so pretty output matches the
          * flat output produced by the same scope code in xo-ppsink's test.
          */
         REQUIRE(scoped_pretty(0, nested_scopes) ==
-                "+outer\n"
+                "+(0) outer\n"
                 "  hello\n"
-                "  +inner\n"
+                "  +(1) inner\n"
                 "    world42\n"
-                "  -inner\n"
+                "  -(1) inner\n"
                 "  bye\n"
-                "-outer\n");
+                "-(0) outer\n");
     }
 }
 

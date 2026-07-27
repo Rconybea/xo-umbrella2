@@ -34,35 +34,43 @@
 namespace xo::pp {
     /** @brief process-wide logging configuration (POC subset) **/
     struct scope_config {
+        /** a scope logs iff its level is at least this severe **/
+        static inline log_level min_log_level = log_level::default_level;
+
         /** spaces of indentation per nesting level **/
         static inline std::uint32_t indent_width = 2;
         /** cap on total indentation (columns): indent stops growing past this,
          *  so deeply-nested scopes don't march off the right side
          **/
         static inline std::uint32_t max_indent_width = 32;
-        /** a scope logs iff its level is at least this severe **/
-        static inline log_level min_log_level = log_level::default_level;
+
         /** if true, prefix each line with a UTC time-of-day timestamp
          *  (banner lines show the time; mid-scope log() lines show a
          *  same-width blank pad so they align under the banner)
          **/
-        static inline bool time_enabled = false;
+        static inline bool time_enabled = true;
+        // TODO: static inline bool time_local_flag = true;
         /** microsecond precision "HH:MM:SS.uuuuuu" vs millisecond "HH:MM:SS.mmm" **/
-        static inline bool time_usec_flag = false;
+        static inline bool time_usec_flag = true;
+
         /** if true, show the nesting depth "(N)" after the +/- banner marker **/
-        static inline bool nesting_level_enabled = false;
+        static inline bool nesting_level_enabled = true;
         /** color for the "(N)" nesting-depth display (when color enabled);
          *  xterm 153 = light blue (legacy used a near-white xterm 195)
          **/
         static inline color_spec_type nesting_level_color = color_spec_type::xterm(153);
-        /** color for the "+name" entry banner (default none => uncolored) **/
-        static inline color_spec_type function_entry_color = color_spec_type::none();
-        /** color for the "-name" exit banner (default none => uncolored) **/
-        static inline color_spec_type function_exit_color = color_spec_type::none();
+
+        // TODO: static inline bool pretty_print_enabled = true;
+
         /** how to style a __PRETTY_FUNCTION__ banner name (see XO_ENTER0_);
          *  streamlined => "Class::method"
          **/
         static inline xo::FunctionStyle function_style = xo::FunctionStyle::streamlined;
+        /** color for the "+name" entry banner (default none => uncolored) **/
+        static inline color_spec_type function_entry_color = color_spec_type::none();
+        /** color for the "-name" exit banner (default none => uncolored) **/
+        static inline color_spec_type function_exit_color = color_spec_type::none();
+
         /** if true, append the scope's source location "[file:line]" to the
          *  entry banner (file/line captured by XO_ENTER0_)
          **/

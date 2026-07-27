@@ -15,37 +15,41 @@ namespace ut {
     using xo::pp::ThreadLogState;
     using std::stringstream;
 
-    TEST_CASE("scope-indent-flat", "[scope]") {
-    /* capture scope output into a stringstream via a FlatSink */
-    stringstream ss;
-    FlatSink sink(ss);
-    ThreadLogState::log_set_sink(&sink);
-
+    TEST_CASE("scope-indent-flat", "[scope]")
     {
-        scope outer("outer");
-        outer.log("hello");
+
+        scope_config::time_enabled = false;
+
+        /* capture scope output into a stringstream via a FlatSink */
+        stringstream ss;
+        FlatSink sink(ss);
+
+        ThreadLogState::log_set_sink(&sink);
         {
-            scope inner("inner");
-            inner.log("world", 42);
+            scope outer("outer");
+            outer.log("hello");
+            {
+                scope inner("inner");
+                inner.log("world", 42);
+            }
+            outer.log("bye");
         }
-        outer.log("bye");
+        ThreadLogState::log_set_sink(nullptr);   /* restore default (clog) */
+
+        REQUIRE(ss.str() ==
+                "+(0) outer\n"
+                "  hello\n"
+                "  +(1) inner\n"
+                "    world42\n"
+                "  -(1) inner\n"
+                "  bye\n"
+                "-(0) outer\n");
     }
 
-    ThreadLogState::log_set_sink(nullptr);   /* restore default (clog) */
-
-    REQUIRE(ss.str() ==
-            "+outer\n"
-            "  hello\n"
-            "  +inner\n"
-            "    world42\n"
-            "  -inner\n"
-            "  bye\n"
-            "-outer\n");
-}
-
-    TEST_CASE("scope-timestamp-format", "[scope]") {
+    TEST_CASE("scope-timestamp-format", "[scope]")
+    {
         /* with time_enabled, a banner line is prefixed by a UTC time-of-day
-         * "HH:MM:SS.mmm " (13 chars).  Value is wall-clock (nondeterministic),
+         * "HH:MM:SS.uuuuuu " (16 chars).  Value is wall-clock (nondeterministic),
          * so we check the FORMAT/width only.
          */
         stringstream ss;
@@ -59,18 +63,20 @@ namespace ut {
 
         std::string out = ss.str();
 
-        /* "HH:MM:SS.mmm +foo\n..." */
-        REQUIRE(out.size() >= 17);
+        /* "HH:MM:SS.uuuuuu +foo\n..." */
+        REQUIRE(out.size() >= 20);
         auto dig = [&](std::size_t i) { return std::isdigit((unsigned char)out[i]) != 0; };
         REQUIRE(dig(0)); REQUIRE(dig(1)); REQUIRE(out[2] == ':');
         REQUIRE(dig(3)); REQUIRE(dig(4)); REQUIRE(out[5] == ':');
         REQUIRE(dig(6)); REQUIRE(dig(7)); REQUIRE(out[8] == '.');
         REQUIRE(dig(9)); REQUIRE(dig(10)); REQUIRE(dig(11));
-        REQUIRE(out[12] == ' ');
-        REQUIRE(out.substr(13, 4) == "+foo");
+        REQUIRE(dig(12)); REQUIRE(dig(13)); REQUIRE(dig(14));
+        REQUIRE(out[15] == ' ');
+        REQUIRE(out.substr(16, 8) == "+(0) foo");
     }
 
-    TEST_CASE("scope-location-inline", "[scope]") {
+    TEST_CASE("scope-location-inline", "[scope]")
+    {
         /* FlatSink reports no column, so the code location falls back to inline
          * placement: one space, then "[<basename>:<line>]".  (basename:line
          * layout is deterministic; the line value itself is not asserted.)
