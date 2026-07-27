@@ -86,10 +86,10 @@ namespace xo::pp {
             if constexpr (PrefixSpace)
                 sink.put(" ");
 
-            sink.begin();
+            sink.begin(0);
             sink.put(":");
             sink.put(t.name());
-            sink.split(1);   /* 1 space if it fits; newline + indent if not */
+            sink.split(1, 1);   /* 1 space if it fits; newline + indent if not */
             pretty(sink, t.value());
             sink.end();
         }
