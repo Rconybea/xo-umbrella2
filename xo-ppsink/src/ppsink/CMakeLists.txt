@@ -2,6 +2,7 @@
 
 set(SELF_LIB xo_ppsink)
 set(SELF_SRCS
+	pretty.cpp
     PpSink.cpp
     FlatSink.cpp
     LogState.cpp

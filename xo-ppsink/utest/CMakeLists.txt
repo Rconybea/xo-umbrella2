@@ -6,6 +6,7 @@ set(SELF_SOURCE_FILES
     FlatSink.test.cpp
     Prettifier.test.cpp
     function_name.test.cpp
+    dwim.test.cpp
     scope.test.cpp)
 
 if (ENABLE_TESTING)

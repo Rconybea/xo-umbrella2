@@ -72,6 +72,21 @@ namespace xo::pp {
         template <typename T>
         void pp(const T & x);
 
+        /** do-what-i-mean structuring convenience
+         *  for custom-printer authors.
+         *  See pretty.hpp for implementation.
+         *
+         *  PpSink & sink = ...;
+         *
+         *  sink.dwim(begin(0));
+         *  sink.dwim(split(0, 1));
+         *  sink.dwim(newline(2));
+         *  sink.dwim(end);
+         *
+         **/
+        template <typename Dwim>
+        void dwim(const Dwim & x);
+
         /** write string comprising contents of @p s **/
         virtual PpSink & put(std::string_view s) = 0;
 

@@ -43,12 +43,93 @@ namespace xo::pp {
         }
     }
 
+    /** Use:
+     *    PpSink & sink = ...;
+     *
+     *    sink.dwim(begin(2));
+     **/
+    struct begin {
+        begin(std::uint32_t o) : offset_{o} {}
+
+        std::uint32_t offset_;
+    };
+
+    /** Use:
+     *    PpSink & sink = ...;
+     *
+     *    sink.dwim(split(1, 2));
+     **/
+    struct split {
+        split(std::uint32_t s, std::int32_t o) : spaces_{s}, offset_{o} {}
+
+        std::uint32_t spaces_;
+        std::int32_t offset_;
+    };
+
+    /** Use:
+     *    PpSink & sink = ...;
+     *
+     *    sink.newline(newline(2));
+     **/
+    struct newline {
+        newline(std::int32_t o) : offset_{o} {}
+
+        std::int32_t offset_;
+    };
+
+    namespace detail {
+        struct _end {};
+    }
+
+    static inline constexpr detail::_end end;
+
+    /** Use:
+     *    PpSink & sink = ...;
+     *
+     *    sink.dwim("foo");       // default: same as pretty(sink,"foo");
+     *    sink.dwim(begin(..));   // dwim: begin group
+     *    sink.dwim(split(..));   // dwim: split to fit
+     *    sink.dwim(newline(..)); // dwim: forced newline
+     *    sink.dwim(end);         // dwim: end group
+     **/
+    template <typename T>
+    void dwim(PpSink & sink, const T & x) {
+        sink.pp(x);
+    }
+
+    /** sink.dwim(begin(...)) **/
+    template <>
+    void dwim(PpSink & sink, const begin & x);
+
+    /** sink.dwim(split(...)) **/
+    template <>
+    void dwim(PpSink & sink, const split & x);
+
+    /** sink.dwim(newline(...)) **/
+    template <>
+    void dwim(PpSink & sink, const newline & x);
+
+    /** sink.dwim(end) **/
+    template <>
+    void dwim(PpSink & sink, const detail::_end & x);
+
     /** member-convenience spelling of pretty(*this, x); see PpSink::pp **/
     template <typename T>
     void
     PpSink::pp(const T & x) {
         pretty(*this, x);
     }
+
+    /** member-convenience spelling of dwim(*this, x); see PpSink::dwim.
+     *  NB: qualify the free function -- unqualified 'dwim' would bind to this
+     *  member (member name hides the namespace-scope function).
+     **/
+    template <typename Dwim>
+    void
+    PpSink::dwim(const Dwim & x) {
+        xo::pp::dwim(*this, x);
+    }
+
 } /*namespace xo::pp*/
 
 /* end pretty.hpp */
