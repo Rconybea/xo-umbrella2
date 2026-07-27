@@ -41,7 +41,7 @@ main(int argc, char ** argv) {
     scope_config::min_log_level = log_level::info;
     scope_config::indent_width = 2;
     scope_config::nesting_level_enabled = true;   /* show "(N)" depth on banners */
-    color_config::color_enabled = true;           /* color just the "(N)" depth */
+    color_config::color_enabled = true;           /* color the "(N)" depth (default light-blue) */
 
     fib(3);
 

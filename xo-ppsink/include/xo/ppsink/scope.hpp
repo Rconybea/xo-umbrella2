@@ -51,8 +51,10 @@ namespace xo::pp {
         static inline bool time_usec_flag = false;
         /** if true, show the nesting depth "(N)" after the +/- banner marker **/
         static inline bool nesting_level_enabled = false;
-        /** color for the "(N)" nesting-depth display (when color enabled) **/
-        static inline color_spec_type nesting_level_color = color_spec_type::xterm(195);
+        /** color for the "(N)" nesting-depth display (when color enabled);
+         *  xterm 153 = light blue (legacy used a near-white xterm 195)
+         **/
+        static inline color_spec_type nesting_level_color = color_spec_type::xterm(153);
         /** color for the "+name" entry banner (default none => uncolored) **/
         static inline color_spec_type function_entry_color = color_spec_type::none();
         /** color for the "-name" exit banner (default none => uncolored) **/
