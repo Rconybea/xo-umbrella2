@@ -19,8 +19,14 @@
 
 #include "scope.hpp"
 
-/** capture a scope_setup for the enclosing function, at log level @p lvl **/
-#define XO_ENTER0(lvl) xo::pp::scope_setup{ __func__, xo::pp::log_level::lvl }
+/** capture a scope_setup for the enclosing function, at log level @p lvl.
+ *  Uses __PRETTY_FUNCTION__ + the configured scope_config::function_style, so
+ *  a class method banners as "Class::method" (streamlined, the default).
+ **/
+#define XO_ENTER0(lvl) \
+    xo::pp::scope_setup{ __PRETTY_FUNCTION__, \
+                         xo::pp::log_level::lvl, \
+                         xo::pp::scope_config::function_style }
 
 /** declare an RAII scope logger @p varname for the enclosing function **/
 #define XO_SCOPE(varname, lvl) xo::pp::scope varname(XO_ENTER0(lvl))

@@ -7,6 +7,7 @@ set(SELF_SRCS
     LogState.cpp
     scope.cpp
     color.cpp
+    function_name.cpp
 )
 
 xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 ${SELF_SRCS})

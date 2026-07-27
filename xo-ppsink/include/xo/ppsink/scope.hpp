@@ -26,6 +26,7 @@
 #include "LogState.hpp"
 #include "log_level.hpp"
 #include "color.hpp"
+#include "function_name.hpp"
 #include <string_view>
 #include <utility>
 #include <cstdint>
@@ -41,6 +42,10 @@ namespace xo::pp {
         static inline color_spec_type function_entry_color = color_spec_type::none();
         /** color for the "-name" exit banner (default none => uncolored) **/
         static inline color_spec_type function_exit_color = color_spec_type::none();
+        /** how to style a __PRETTY_FUNCTION__ banner name (see XO_ENTER0);
+         *  streamlined => "Class::method"
+         **/
+        static inline xo::FunctionStyle function_style = xo::FunctionStyle::streamlined;
     };
 
     /** @brief captured scope-entry information (POC subset)
@@ -51,10 +56,14 @@ namespace xo::pp {
      *  feature-parity pass.
      **/
     struct scope_setup {
-        /** scope name (POC: __func__; later __PRETTY_FUNCTION__ + styling) **/
+        /** scope name -- typically __PRETTY_FUNCTION__ (see XO_ENTER0), styled
+         *  per @ref style_ when the banner is printed
+         **/
         std::string_view name_;
         /** severity of this scope; gated against scope_config::min_log_level **/
         log_level level_ = log_level::always;
+        /** how to style @ref name_ in the banner (default literal => verbatim) **/
+        xo::FunctionStyle style_ = xo::FunctionStyle::literal;
 
         /** true iff a scope entered with this setup should log **/
         bool is_enabled() const { return level_ >= scope_config::min_log_level; }
@@ -82,7 +91,7 @@ namespace xo::pp {
          **/
         template <typename... Ts>
         explicit scope(scope_setup setup, Ts &&... args)
-            : name_{setup.name_}, finalized_{!setup.is_enabled()}
+            : name_{setup.name_}, style_{setup.style_}, finalized_{!setup.is_enabled()}
         {
             begin_scope(std::forward<Ts>(args)...);
         }
@@ -143,7 +152,7 @@ namespace xo::pp {
             {
                 color_guard g(sink, scope_config::function_exit_color);
                 sink.put("-");
-                sink.put(name_);
+                put_function_name(sink, style_, name_);
             }
             if constexpr (sizeof...(args) > 0) {
                 sink.put(" ");
@@ -170,7 +179,7 @@ namespace xo::pp {
             {
                 color_guard g(sink, scope_config::function_entry_color);
                 sink.put("+");
-                sink.put(name_);
+                put_function_name(sink, style_, name_);
             }
             if constexpr (sizeof...(args) > 0) {
                 sink.put(" ");
@@ -189,6 +198,10 @@ namespace xo::pp {
     private:
         /** scope name (e.g. function name); printed in the +/- entry/exit banners **/
         std::string_view name_;
+        /** how to style @ref name_ in the banner (literal for the string_view
+         *  ctor; from scope_setup / scope_config::function_style via XO_ENTER0)
+         **/
+        xo::FunctionStyle style_ = xo::FunctionStyle::literal;
         /** once true, logging is disabled; set at entry (level gating) or by
          *  end_scope(); guards against a double exit banner from the dtor
          **/
