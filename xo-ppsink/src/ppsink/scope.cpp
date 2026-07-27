@@ -84,11 +84,12 @@ namespace xo::pp {
         }
 
         color_guard g(sink, scope_config::code_location_color);
-        sink.put("[");
-        sink.put(base);
-        sink.put(":");
-        sink.pp(static_cast<int>(line));
-        sink.put("]");
+        sink("[", base, ":", static_cast<int>(line), "]");
+        //sink.put("[");
+        //sink.put(base);
+        //sink.put(":");
+        //sink.pp(static_cast<int>(line));
+        //sink.put("]");
     }
 } /*namespace xo::pp*/
 
