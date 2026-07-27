@@ -36,6 +36,10 @@ namespace xo::pp {
     struct scope_config {
         /** spaces of indentation per nesting level **/
         static inline std::uint32_t indent_width = 2;
+        /** cap on total indentation (columns): indent stops growing past this,
+         *  so deeply-nested scopes don't march off the right side
+         **/
+        static inline std::uint32_t max_indent_width = 32;
         /** a scope logs iff its level is at least this severe **/
         static inline log_level min_log_level = log_level::default_level;
         /** color for the "+name" entry banner (default none => uncolored) **/

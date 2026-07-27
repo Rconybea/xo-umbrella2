@@ -6,7 +6,10 @@
 namespace xo::pp {
     void
     scope::emit_indent(xo::pp::LogState & st) {
-        std::string pad(st.nesting_level() * scope_config::indent_width, ' ');
+        std::uint32_t n = st.nesting_level() * scope_config::indent_width;
+        if (n > scope_config::max_indent_width)
+            n = scope_config::max_indent_width;   /* cap deep nesting */
+        std::string pad(n, ' ');
         st.sink().put(pad);
     }
 } /*namespace xo::pp*/
