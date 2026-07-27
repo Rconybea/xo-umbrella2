@@ -39,6 +39,20 @@ namespace xo::pp {
             sink.put(pad);
         }
     }
+
+    void
+    scope::emit_nesting_level(xo::pp::PpSink & sink, std::uint32_t level) {
+        if (!scope_config::nesting_level_enabled)
+            return;
+
+        /* "(" <colored N> ") " -- parens/space plain, depth colored (legacy style) */
+        sink.put("(");
+        {
+            color_guard g(sink, scope_config::nesting_level_color);
+            pretty(sink, static_cast<int>(level));
+        }
+        sink.put(") ");
+    }
 } /*namespace xo::pp*/
 
 /* end scope.cpp */

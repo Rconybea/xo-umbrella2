@@ -49,6 +49,10 @@ namespace xo::pp {
         static inline bool time_enabled = false;
         /** microsecond precision "HH:MM:SS.uuuuuu" vs millisecond "HH:MM:SS.mmm" **/
         static inline bool time_usec_flag = false;
+        /** if true, show the nesting depth "(N)" after the +/- banner marker **/
+        static inline bool nesting_level_enabled = false;
+        /** color for the "(N)" nesting-depth display (when color enabled) **/
+        static inline color_spec_type nesting_level_color = color_spec_type::xterm(195);
         /** color for the "+name" entry banner (default none => uncolored) **/
         static inline color_spec_type function_entry_color = color_spec_type::none();
         /** color for the "-name" exit banner (default none => uncolored) **/
@@ -162,9 +166,10 @@ namespace xo::pp {
 
             emit_time(sink, true /*real_time*/);
             emit_indent(st);
+            sink.put("-");
+            emit_nesting_level(sink, st.nesting_level());
             {
                 color_guard g(sink, scope_config::function_exit_color);
-                sink.put("-");
                 put_function_name(sink, style_, name_);
             }
             if constexpr (sizeof...(args) > 0) {
@@ -190,9 +195,10 @@ namespace xo::pp {
 
             emit_time(sink, true /*real_time*/);
             emit_indent(st);
+            sink.put("+");
+            emit_nesting_level(sink, st.nesting_level());
             {
                 color_guard g(sink, scope_config::function_entry_color);
-                sink.put("+");
                 put_function_name(sink, style_, name_);
             }
             if constexpr (sizeof...(args) > 0) {
@@ -214,6 +220,11 @@ namespace xo::pp {
          *  (so mid-scope log() lines align under the timestamped banner)
          **/
         static void emit_time(xo::pp::PpSink & sink, bool real_time);
+
+        /** if nesting_level_enabled, write "(N) " (N = @p level, colored) to
+         *  @p sink -- the depth display shown after the +/- banner marker
+         **/
+        static void emit_nesting_level(xo::pp::PpSink & sink, std::uint32_t level);
 
     private:
         /** scope name (e.g. function name); printed in the +/- entry/exit banners **/
