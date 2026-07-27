@@ -42,6 +42,13 @@ namespace xo::pp {
         static inline std::uint32_t max_indent_width = 32;
         /** a scope logs iff its level is at least this severe **/
         static inline log_level min_log_level = log_level::default_level;
+        /** if true, prefix each line with a UTC time-of-day timestamp
+         *  (banner lines show the time; mid-scope log() lines show a
+         *  same-width blank pad so they align under the banner)
+         **/
+        static inline bool time_enabled = false;
+        /** microsecond precision "HH:MM:SS.uuuuuu" vs millisecond "HH:MM:SS.mmm" **/
+        static inline bool time_usec_flag = false;
         /** color for the "+name" entry banner (default none => uncolored) **/
         static inline color_spec_type function_entry_color = color_spec_type::none();
         /** color for the "-name" exit banner (default none => uncolored) **/
@@ -123,6 +130,7 @@ namespace xo::pp {
             xo::pp::LogState & st = xo::pp::ThreadLogState::thread_log_state();
             xo::pp::PpSink & sink = st.sink();
 
+            emit_time(sink, false /*real_time: log() lines get a blank time pad*/);
             emit_indent(st);
             sink.begin();
             (xo::pp::pretty(sink, args), ...);
@@ -152,6 +160,7 @@ namespace xo::pp {
 
             st.decr_nesting();
 
+            emit_time(sink, true /*real_time*/);
             emit_indent(st);
             {
                 color_guard g(sink, scope_config::function_exit_color);
@@ -179,6 +188,7 @@ namespace xo::pp {
             xo::pp::LogState & st = xo::pp::ThreadLogState::thread_log_state();
             xo::pp::PpSink & sink = st.sink();
 
+            emit_time(sink, true /*real_time*/);
             emit_indent(st);
             {
                 color_guard g(sink, scope_config::function_entry_color);
@@ -196,8 +206,14 @@ namespace xo::pp {
             st.incr_nesting();
         }
 
-        /** write (nesting_level * indent_width) spaces to the active sink **/
+        /** write (nesting_level * indent_width, capped) spaces to the active sink **/
         static void emit_indent(xo::pp::LogState & st);
+
+        /** if timestamps are enabled, write the leftmost time field to @p sink:
+         *  the real UTC time when @p real_time, else a same-width blank pad
+         *  (so mid-scope log() lines align under the timestamped banner)
+         **/
+        static void emit_time(xo::pp::PpSink & sink, bool real_time);
 
     private:
         /** scope name (e.g. function name); printed in the +/- entry/exit banners **/

@@ -4,10 +4,12 @@
 #include <xo/ppsink/FlatSink.hpp>
 #include <catch2/catch.hpp>
 #include <sstream>
+#include <cctype>
 
 namespace ut {
 
     using xo::pp::scope;
+    using xo::pp::scope_config;
     using xo::pp::FlatSink;
     using xo::pp::ThreadLogState;
     using std::stringstream;
@@ -39,6 +41,33 @@ namespace ut {
             "  bye\n"
             "-outer\n");
 }
+
+    TEST_CASE("scope-timestamp-format", "[scope]") {
+        /* with time_enabled, a banner line is prefixed by a UTC time-of-day
+         * "HH:MM:SS.mmm " (13 chars).  Value is wall-clock (nondeterministic),
+         * so we check the FORMAT/width only.
+         */
+        stringstream ss;
+        FlatSink sink(ss);
+        ThreadLogState::log_set_sink(&sink);
+
+        scope_config::time_enabled = true;
+        { scope s("foo"); }
+        scope_config::time_enabled = false;    /* reset global BEFORE asserting */
+        ThreadLogState::log_set_sink(nullptr);
+
+        std::string out = ss.str();
+
+        /* "HH:MM:SS.mmm +foo\n..." */
+        REQUIRE(out.size() >= 17);
+        auto dig = [&](std::size_t i) { return std::isdigit((unsigned char)out[i]) != 0; };
+        REQUIRE(dig(0)); REQUIRE(dig(1)); REQUIRE(out[2] == ':');
+        REQUIRE(dig(3)); REQUIRE(dig(4)); REQUIRE(out[5] == ':');
+        REQUIRE(dig(6)); REQUIRE(dig(7)); REQUIRE(out[8] == '.');
+        REQUIRE(dig(9)); REQUIRE(dig(10)); REQUIRE(dig(11));
+        REQUIRE(out[12] == ' ');
+        REQUIRE(out.substr(13, 4) == "+foo");
+    }
 
 } /*namespace ut*/
 
