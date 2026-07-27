@@ -591,6 +591,24 @@ jobs:
           xo-build --install xo-unit
           echo "::endgroup::"
 
+      - name: build xo-pyunit
+        run: |
+          echo "::group::xo-pyunit configure"
+          xo-build --configure --with-utests --with-examples xo-pyunit
+          echo "::endgroup::"
+
+          echo "::group::xo-pyunit build"
+          xo-build --build xo-pyunit
+          echo "::endgroup::"
+
+          echo "::group::xo-pyunit utest"
+          ctest --test-dir xo-pyunit/.build
+          echo "::endgroup::"
+
+          echo "::group::xo-pyunit install"
+          xo-build --install xo-pyunit
+          echo "::endgroup::"
+
       - name: print install path
         run: |
           tree ${{github.workspace}}/local
