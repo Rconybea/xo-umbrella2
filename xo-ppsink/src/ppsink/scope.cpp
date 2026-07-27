@@ -1,7 +1,7 @@
 /** @file scope.cpp **/
 
 #include <xo/ppsink/scope.hpp>
-#include <xo/timeutil/timeutil_iostream.hpp>
+#include <xo/ppsink/pp_time.hpp>
 #include <string>
 
 namespace xo::pp {
@@ -31,13 +31,12 @@ namespace xo::pp {
                  ? xo::time::timeutil::local_split_vs_midnight(now).second
                  : xo::time::timeutil::utc_split_vs_midnight(now).second);
 
-            auto ins = sink.stream_open(width);
+            /* PpSink-native (single put token, no ostream fallback) */
             if (scope_config::time_usec_flag)
-                xo::time::print_hms_usec(since_midnight, ins.os());
+                put_hms_usec(sink, since_midnight);
             else
-                xo::time::print_hms_msec(since_midnight, ins.os());
-            ins.os() << ' ';
-            /* ins dtor commits the token */
+                put_hms_msec(sink, since_midnight);
+            sink.put(" ");
         } else {
             /* mid-scope log() line: blank pad so it aligns under the banner */
             std::string pad(width, ' ');

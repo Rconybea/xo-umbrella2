@@ -7,6 +7,7 @@ set(SELF_SOURCE_FILES
     Prettifier.test.cpp
     function_name.test.cpp
     dwim.test.cpp
+    pp_time.test.cpp
     scope.test.cpp)
 
 if (ENABLE_TESTING)
