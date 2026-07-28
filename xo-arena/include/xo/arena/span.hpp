@@ -6,8 +6,10 @@
 #pragma once
 
 #include "xo/indentlog/scope.hpp"
-#include "xo/indentlog/print/ppdetail_atomic.hpp"
-#include <ostream>
+#include <string>
+#include <string_view>
+#include <stdexcept>
+#include <cstring>
 #include <cstdint>
 #include <cassert>
 
@@ -230,14 +232,6 @@ namespace xo {
                 return *this;
             }
 
-            /** print representation for this span on stream @p os **/
-            void print(std::ostream & os) const {
-                os << "<span"
-                   << xtag("addr", (void*)lo_)
-                   << xtag("size", size())
-                   << " :text " << xo::print::quot(std::string_view(lo_, hi_))
-                   << ">";
-            }
             ///@}
 
         private:
@@ -280,50 +274,6 @@ namespace xo {
                     || (lhs.hi() != rhs.hi()));
         }
 
-        /** print a summary of @p x on stream @p os. Intended for diagnostics **/
-        template <typename CharT>
-        inline std::ostream &
-        operator<<(std::ostream & os,
-                   const span<CharT> & x) {
-            x.print(os);
-            return os;
-        }
-
         ///@}
-    } /*namespace scm*/
-
-    namespace print {
-        template <typename CharT>
-        class printspan_impl {
-        public:
-            printspan_impl(xo::mm::span<CharT> x) : span_{x} {}
-
-            xo::mm::span<CharT> span_;
-        };
-
-        template <typename CharT>
-        printspan_impl<CharT> printspan(const xo::mm::span<CharT>& span) {
-            return printspan_impl<CharT>(span);
-        }
-
-        template <typename CharT>
-        inline std::ostream &
-        operator<< (std::ostream & os,
-                    const printspan_impl<CharT> & x)
-        {
-            for (const CharT * p = x.span_.lo(); p < x.span_.hi(); ++p)
-                os << *p;
-
-            return os;
-        }
-
-#ifndef ppdetail_atomic
-        template <typename CharT>        \
-        PPDETAIL_ATOMIC_BODY(printspan_impl<CharT>);
-
-        template <typename CharT>        \
-        PPDETAIL_ATOMIC_BODY(xo::scm::span<CharT>);
-#endif
-
     } /*namespace mm*/
 } /*namespace xo*/

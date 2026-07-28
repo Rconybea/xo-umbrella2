@@ -11,9 +11,6 @@
 #include <unistd.h>  // for ::getpagesize() on osx
 
 namespace xo {
-    using xo::print::operator<<;
-    using xo::print::printspan;
-
     namespace mm {
 
         DCircularBuffer::DCircularBuffer(DCircularBuffer && other)

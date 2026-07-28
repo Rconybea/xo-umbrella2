@@ -4,6 +4,7 @@
 #include <xo/tokenizer2/Token.hpp>
 #include <xo/tokenizer2/tokentype.hpp>
 #include <xo/arena/span.hpp>
+#include <xo/arena/span_ppdetail.hpp>   /* operator<<(ostream, xo::mm::span) for span-valued logging */
 #include <xo/indentlog/log_config.hpp>
 #include <replxx.hxx>
 #include <iostream>
