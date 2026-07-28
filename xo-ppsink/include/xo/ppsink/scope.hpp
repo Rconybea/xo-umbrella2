@@ -208,6 +208,22 @@ namespace xo::pp {
             sink.put("\n");
         }
 
+        /** re-enable a disabled scope and emit its (deferred) entry banner
+         *  now, logging @p args on it.  No-op if the scope is already enabled.
+         *
+         *  Use to turn logging on only when something goes wrong: create the
+         *  scope below the log threshold (silent), then call this on the error
+         *  path so the banner + details appear (cf. a verify_ok() that logs
+         *  only on failure).
+         **/
+        template <typename... Ts>
+        void retroactively_enable(Ts &&... args) {
+            if (finalized_) {
+                finalized_ = false;
+                begin_scope(std::forward<Ts>(args)...);
+            }
+        }
+
     private:
         /** log the entry banner ("+name" + optional args) and increase nesting.
          *  No-op if the scope is disabled.

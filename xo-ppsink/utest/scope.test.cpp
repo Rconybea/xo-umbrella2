@@ -97,6 +97,34 @@ namespace ut {
         REQUIRE(out[b - 1] == ' ');   /* inline: single space precedes '[' */
     }
 
+    TEST_CASE("scope-retroactively-enable", "[scope]") {
+        /* a scope created below the log threshold stays silent, but
+         * retroactively_enable() turns it on and emits the deferred banner.
+         */
+        bool saved_time = scope_config::time_enabled;
+        scope_config::time_enabled = false;   /* deterministic output */
+
+        stringstream ss;
+        FlatSink sink(ss);
+        ThreadLogState::log_set_sink(&sink);
+
+        std::string before;
+        {
+            /* min_log_level defaults to error; 'chatty' < error => disabled */
+            scope log(XO_ENTER0_(chatty), "ctor-args");
+            before = ss.str();
+            log.retroactively_enable("late", 42);
+        }
+
+        scope_config::time_enabled = saved_time;   /* reset BEFORE asserting */
+        ThreadLogState::log_set_sink(nullptr);
+
+        std::string out = ss.str();
+        REQUIRE(before.empty());                             /* disabled: nothing logged */
+        REQUIRE(out.find("late42") != std::string::npos);    /* retro banner emitted */
+        REQUIRE(out.find("ctor-args") == std::string::npos); /* original ctor args discarded */
+    }
+
 } /*namespace ut*/
 
 /* end scope.test.cpp */
