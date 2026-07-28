@@ -4,6 +4,7 @@
  **/
 
 #include <xo/interpreter2/init_interpreter2.hpp>
+#include <xo/arena/span_ppdetail.hpp>   /* operator<<(ostream, xo::mm::span) for span-valued logging */
 #include <xo/interpreter2/VirtualSchematikaMachine.hpp>
 #include <xo/interpreter2/Closure.hpp>
 #include <xo/object2/Array.hpp>

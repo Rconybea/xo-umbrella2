@@ -2,6 +2,7 @@
 
 #include <xo/reader2/init_reader2.hpp>
 #include <xo/reader2/SchematikaReader.hpp>
+#include <xo/arena/span_ppdetail.hpp>   /* operator<<(ostream, xo::mm::span) for span-valued logging */
 #include <xo/gc/X1Collector.hpp>
 #include <xo/gc/detail/IAllocator_DX1Collector.hpp>
 #include <xo/alloc2/Arena.hpp>
