@@ -735,6 +735,24 @@ jobs:
           xo-build --install xo-tokenizer
           echo "::endgroup::"
 
+      - name: build xo-reader
+        run: |
+          echo "::group::xo-reader configure"
+          xo-build --configure --with-utests --with-examples xo-reader
+          echo "::endgroup::"
+
+          echo "::group::xo-reader build"
+          xo-build --build xo-reader
+          echo "::endgroup::"
+
+          echo "::group::xo-reader utest"
+          ctest --test-dir xo-reader/.build
+          echo "::endgroup::"
+
+          echo "::group::xo-reader install"
+          xo-build --install xo-reader
+          echo "::endgroup::"
+
       - name: print install path
         run: |
           tree ${{github.workspace}}/local
