@@ -177,7 +177,7 @@ namespace xo {
         {
             DArenaVector<T> retval;
 
-            retval.store_ = std::move(DArena::map(cfg));
+            retval.store_ = DArena::map(cfg);
             retval.zero_ckp_ = retval.store_.checkpoint();
 
             return retval;
