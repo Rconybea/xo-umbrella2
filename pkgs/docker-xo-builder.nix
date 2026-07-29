@@ -26,7 +26,7 @@
   git, openssh, curl, wget, cacert,
 
   # xo deps
-  eigen, libwebsockets, jsoncpp, cli11, libunwind, elfutils, replxx, libbsd,
+  clang, llvm, eigen, libwebsockets, jsoncpp, cli11, libunwind, elfutils, replxx, libbsd,
 
   # archives
   gnutar, gzip,
@@ -159,6 +159,9 @@ dockerTools.buildLayeredImage {
                doxygen
                graphviz
 
+               clang
+               (lib.getDev llvm)
+               (lib.getLib llvm)
                (lib.getDev eigen)
                (lib.getDev libwebsockets)
                (lib.getDev jsoncpp)
