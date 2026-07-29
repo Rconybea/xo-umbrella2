@@ -6,7 +6,7 @@
 #pragma once
 
 #include "AllocError.hpp"
-#include <xo/indentlog/print/tag.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
 #include <iostream>
 
 namespace xo {
@@ -19,6 +19,8 @@ namespace xo {
 
         inline std::ostream &
         operator<<(std::ostream & os, const AllocError & x) {
+            using xo::pp::xtag;
+
             os << "<AllocError"
                << xtag("error", x.error_);
 
