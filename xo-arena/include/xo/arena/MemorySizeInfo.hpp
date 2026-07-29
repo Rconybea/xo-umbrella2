@@ -24,6 +24,8 @@ namespace xo {
             uint32_t z_alloc_ = 0;
         };
 
+        /** @brief Report memory consumption with arena-aware details
+         **/
         struct MemorySizeInfo {
             using size_type = std::size_t;
             using DetailArrayType = std::array<MemorySizeDetail, 32>;
