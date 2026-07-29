@@ -16,6 +16,7 @@
   xo-randomgen,
   xo-reflectutil,
   xo-indentlog,
+  xo-ppsink,
   xo-cmake,
 
   doCheck ? true,
@@ -58,6 +59,7 @@ stdenv.mkDerivation (finalattrs:
     propagatedBuildInputs = [
       xo-reflectutil
       xo-indentlog
+      xo-ppsink
       libunwind
     ] ++ lib.optionals stdenv.isLinux [
       elfutils.dev

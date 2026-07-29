@@ -33,6 +33,24 @@
 /** declare an RAII scope logger @p varname for the enclosing function **/
 #define XO_SCOPE_(varname, lvl) xo::pp::scope varname(XO_ENTER0_(lvl))
 
+/** capture a scope_setup at level @p lvl, but only *enabled* when @p flag is
+ *  true (otherwise pinned to log_level::never, i.e. disabled).  Mirrors legacy
+ *  XO_ENTER1: the second arg is a runtime enable flag, NOT a banner argument.
+ **/
+#define XO_ENTER1_(lvl, flag) \
+    xo::pp::scope_setup{ __PRETTY_FUNCTION__, \
+                         ((flag) ? xo::pp::log_level::lvl \
+                                 : xo::pp::log_level::never), \
+                         xo::pp::scope_config::function_style, \
+                         __FILE__, \
+                         __LINE__ }
+
+/** capture a scope_setup enabled iff @p flag is true (at log_level::always).
+ *  Use as: xo::pp::scope log(XO_DEBUG_(some_flag));  -- logs only when the
+ *  flag holds.  Mirrors legacy XO_DEBUG = XO_ENTER1(always, flag).
+ **/
+#define XO_DEBUG_(flag) XO_ENTER1_(always, flag)
+
 #endif /* XO_PPSINK_SCOPE_MACROS_HPP */
 
 /* end scope_macros.hpp */

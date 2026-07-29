@@ -25,6 +25,7 @@ xo_install_include_tree3(include/xo/arena)
 
 xo_dependency(${SELF_LIB} xo_reflectutil)
 xo_dependency(${SELF_LIB} indentlog)
+xo_dependency(${SELF_LIB} xo_ppsink)
 
 if (NOT APPLE)
 xo_external_pkgconfig_dependency(${SELF_LIB} LIBUNWIND libunwind-generic)

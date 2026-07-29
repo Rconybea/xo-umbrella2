@@ -8,6 +8,7 @@ set(SELF_SOURCE_FILES
     function_name.test.cpp
     dwim.test.cpp
     pp_time.test.cpp
+    tag_ostream.test.cpp
     scope.test.cpp)
 
 if (ENABLE_TESTING)

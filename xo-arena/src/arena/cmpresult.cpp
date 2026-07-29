@@ -4,10 +4,12 @@
  **/
 
 #include "cmpresult.hpp"
-#include <xo/indentlog/print/tag.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
 #include <iostream>
 
 namespace xo {
+    using xo::pp::xtag;
+
     namespace mm {
         const char *
         comparison2str(comparison x)
@@ -27,7 +29,7 @@ namespace xo {
         void
         cmpresult::display(std::ostream & os) const
         {
-            os << "<cmpresult "
+            os << "<cmpresult"
                << xtag("err", err_)
                << xtag("cmp", cmp_)
                << ">";

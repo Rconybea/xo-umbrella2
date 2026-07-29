@@ -125,6 +125,32 @@ namespace ut {
         REQUIRE(out.find("ctor-args") == std::string::npos); /* original ctor args discarded */
     }
 
+    TEST_CASE("scope-xo-debug-gating", "[scope]") {
+        /* XO_DEBUG_(flag) enables logging (at 'always') iff flag is true. */
+        bool saved_time = scope_config::time_enabled;
+        scope_config::time_enabled = false;   /* deterministic output */
+
+        auto run = [](bool flag) {
+            stringstream ss;
+            FlatSink sink(ss);
+            ThreadLogState::log_set_sink(&sink);
+            {
+                scope log(XO_DEBUG_(flag));
+                log && log("banner", flag);
+            }
+            ThreadLogState::log_set_sink(nullptr);
+            return ss.str();
+        };
+
+        std::string on = run(true);
+        std::string off = run(false);
+
+        scope_config::time_enabled = saved_time;   /* reset BEFORE asserting */
+
+        REQUIRE(on.find("banner") != std::string::npos);   /* flag=true => enabled */
+        REQUIRE(off.empty());                              /* flag=false => never => silent */
+    }
+
 } /*namespace ut*/
 
 /* end scope.test.cpp */
