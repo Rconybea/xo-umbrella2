@@ -1,5 +1,5 @@
 /** @file arena_streambuf.hpp
-*
+ *
  *  @author Roland Conybeare, Feb 2026
  **/
 
@@ -20,7 +20,11 @@ namespace xo {
          *
          *  Arena-based using mmap
          *  Write to self-extending storage array
-         *  Track position relative to start of line
+         *  Track position relative to start of line.
+         *
+         *  Generally prefer the xo-ppsink for printing.
+         *  If you do want an arena-backed streambuf,
+         *  there is a refactored implementation in xo-indentlog2:LogStreambuf
          **/
         class arena_streambuf : public std::streambuf {
         public:
@@ -233,4 +237,3 @@ namespace xo {
 } /*namespace xo*/
 
 /* end arena_streambuf.hpp */
-
