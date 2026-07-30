@@ -8,7 +8,7 @@
 #include "DUniqueString.hpp"
 #include <xo/arena/DArenaHashMap.hpp>
 #include <xo/arena/DArena.hpp>
-#include <xo/arena/hashmap/verify_policy.hpp>
+#include <xo/ppsink/verify_policy.hpp>
 
 namespace xo {
     namespace scm {

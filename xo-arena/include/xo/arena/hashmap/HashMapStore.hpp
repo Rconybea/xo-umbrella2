@@ -7,6 +7,7 @@
 
 #include <xo/arena/hashmap/DArenaHashMapUtil.hpp>
 #include <xo/arena/hashmap/ControlGroup.hpp>
+#include <cassert>
 
 namespace xo {
     namespace map {

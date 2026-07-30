@@ -4,6 +4,9 @@
  **/
 
 #include "StringTable.hpp"
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/alloc2/arena/IAllocator_DArena.hpp>
 
@@ -106,11 +109,11 @@ namespace xo {
         bool
         StringTable::verify_ok(verify_policy policy) const
         {
-            using xo::scope;
-            using xo::xtag;
+            using xo::pp::scope;
+            using xo::pp::xtag;
 
             constexpr const char * c_self = "StringTable::verify_ok";
-            scope log(XO_DEBUG(false));
+            scope log(XO_DEBUG_(false));
 
             /* ST1: underlying hash map passes its invariants */
             if (!map_.verify_ok(policy)) {

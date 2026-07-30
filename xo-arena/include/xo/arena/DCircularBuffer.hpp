@@ -5,7 +5,7 @@
 
 #include "CircularBufferConfig.hpp"
 #include "DArenaVector.hpp"
-#include "hashmap/verify_policy.hpp"
+#include <xo/ppsink/verify_policy.hpp>
 #include "span.hpp"
 #include <cstdint>
 

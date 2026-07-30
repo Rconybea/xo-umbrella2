@@ -7,10 +7,13 @@
 
 #include "ArenaHashMapConfig.hpp"
 #include "DArenaVector.hpp"
-#include "hashmap/verify_policy.hpp"
+#include <xo/ppsink/verify_policy.hpp>
 #include "hashmap/HashMapStore.hpp"
 #include "hashmap/DArenaHashMapIterator.hpp"
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
+#include <cassert>
 #include <algorithm>
 #include <array>
 #include <utility>
@@ -261,7 +264,9 @@ namespace xo {
             -> std::pair<value_type *, bool>
 
         {
-            scope log(XO_DEBUG(false));
+            using xo::pp::scope;
+
+            scope log(XO_DEBUG_(false));
 
             size_type h = hash_value;
             // h1: hi bits: probe sequence
@@ -369,7 +374,9 @@ namespace xo {
         bool
         DArenaHashMap<Key, Value, Hash, Equal>::_try_grow()
         {
-            scope log(XO_DEBUG(false));
+            using xo::pp::scope;
+
+            scope log(XO_DEBUG_(false));
 
             size_type n_group_exponent_2x = 0;
             size_type n_group_2x = 0;
@@ -434,7 +441,10 @@ namespace xo {
                       Hash,
                       Equal>::insert(const std::pair<const Key, Value> & kv_pair)
         {
-            scope log(XO_DEBUG(false));
+            using xo::pp::scope;
+            using xo::pp::xtag;
+
+            scope log(XO_DEBUG_(false));
 
             auto [slot_addr, ins_flag] = this->try_insert(kv_pair);
 
@@ -586,12 +596,11 @@ namespace xo {
         bool
         DArenaHashMap<Key, Value, Hash, Equal>::verify_ok(verify_policy policy) const
         {
-            using xo::scope;
-            using xo::tostr;
-            using xo::xtag;
+            using xo::pp::scope;
+            using xo::pp::xtag;
 
             constexpr const char * c_self = "DArenaHashMap::verify_ok";
-            scope log(XO_DEBUG(debug_flag_),
+            scope log(XO_DEBUG_(debug_flag_),
                       xtag("size", store_.size_));
 
             /* SM1.1: size_ <= n_slot_ */

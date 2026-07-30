@@ -5,13 +5,24 @@
 
 #include "DCircularBuffer.hpp"
 #include "mmap_util.hpp"
-#include <xo/indentlog/scope.hpp>
-#include <xo/indentlog/print/tostr.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
+#include <xo/ppsink/tostr.hpp>
+#include <cassert>
 #include <sys/mman.h>
 #include <unistd.h>  // for ::getpagesize() on osx
 
 namespace xo {
     namespace mm {
+        /* import the ppsink logging vocabulary into namespace mm (where this
+         * code lives) rather than into xo: an inner-namespace using shadows any
+         * legacy xo::scope / xo::xtag that leaks in transitively (e.g. via
+         * span.hpp), which a using in xo itself would instead collide with.
+         */
+        using xo::pp::scope;
+        using xo::pp::xtag;
+        using xo::pp::tostr;
 
         DCircularBuffer::DCircularBuffer(DCircularBuffer && other)
         : config_{other.config_},
@@ -30,7 +41,7 @@ namespace xo {
         DCircularBuffer
         DCircularBuffer::map(const CircularBufferConfig & config)
         {
-            scope log(XO_DEBUG(config.debug_flag_));
+            scope log(XO_DEBUG_(config.debug_flag_));
 
             /* vm page size. 4KB (probably if linux) or 16KB (probably if osx) */
             size_t page_z = getpagesize();
@@ -94,10 +105,8 @@ namespace xo {
         bool
         DCircularBuffer::verify_ok(verify_policy policy) const
         {
-            using xo::xtag;
-
             constexpr const char * c_self = "DCircularBuffer::verify_ok";
-            scope log(XO_DEBUG(false));
+            scope log(XO_DEBUG_(false));
 
             /* CB1: mapped_range_ is subrange of reserved_range_ */
             if ((mapped_range_.lo() < reserved_range_.lo())
@@ -219,7 +228,7 @@ namespace xo {
         void
         DCircularBuffer::consume(const_span_type input)
         {
-            scope log(XO_DEBUG(false), xtag("input", input.to_string_view()));
+            scope log(XO_DEBUG_(false), xtag("input", input.to_string_view()));
 
             if (input.lo() != input_range_.lo()) {
                 assert(false);
@@ -319,7 +328,7 @@ namespace xo {
         bool
         DCircularBuffer::_expand_to(char * hi)
         {
-            scope log(XO_DEBUG(config_.debug_flag_));
+            scope log(XO_DEBUG_(config_.debug_flag_));
 
             if (hi < mapped_range_.hi()) {
                 /* nothing todo */

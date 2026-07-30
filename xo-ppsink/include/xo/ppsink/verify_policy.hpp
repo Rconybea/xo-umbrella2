@@ -1,19 +1,27 @@
 /** @file verify_policy.hpp
-*
+ *
  *  @author Roland Conybeare, Jan 2026
+ *
+ *  policy for a verify_ok() method's error-reporting behavior: silent, log,
+ *  throw, or both.  Written first for DArenaHashMap, but subsystem-agnostic --
+ *  any type with a verify_ok() (RedBlackTree, ...) can use it.
+ *
+ *  Lives in xo-ppsink (not the subsystem being verified) because its only
+ *  dependencies are the ppsink scope logger + xo::pp::tostr.
  **/
 
 #pragma once
 
-#include <xo/indentlog/scope.hpp>
+#include "scope.hpp"
+#include "tostr.hpp"
 #include <string>
+#include <stdexcept>
+#include <cstdint>
 
 namespace xo {
-    // TODO: move xo/indentlog
-
     /** @brief policy for verify_ok behavior.
      *
-     *  Remarke: wrote this for DArenaHashMap,
+     *  Remark: wrote this for DArenaHashMap,
      *  want to incorporate into other subsystems
      *  that provide a verify_ok() method.
      *  e.g. RedBlackTree
@@ -34,8 +42,10 @@ namespace xo {
         bool throw_flag() const noexcept { return flags_ & 0x02; }
 
         template<typename... Tn>
-        bool report_error(scope & log, Tn&&... args)
+        bool report_error(xo::pp::scope & log, Tn&&... args)
         {
+            using xo::pp::tostr;
+
             if (!this->is_silent()) {
                 // TODO: consider global arena here for string
                 std::string msg = tostr(std::forward<Tn>(args)...);
