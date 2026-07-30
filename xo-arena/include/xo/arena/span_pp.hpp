@@ -16,6 +16,7 @@
 #pragma once
 
 #include "xo/arena/span.hpp"
+#include <xo/ppsink/quoted.hpp>
 #include <xo/ppsink/tag.hpp>       /* xo::pp::{Prettifier, xtag, PpSink, pretty} */
 #include <string_view>
 #include <charconv>
@@ -39,12 +40,14 @@ namespace xo::pp {
                                                 x.size());
             (void)ec;   /* cannot fail: buf is large enough */
 
-            sink.begin(0);
             sink.put("<span");
-            sink.pp(xtag("addr", std::string_view(addr_buf)));
-            sink.pp(xtag("size", std::string_view(size_buf,
-                                                  static_cast<std::size_t>(size_end - size_buf))));
-            sink.pp(xtag("text", x.to_string_view()));
+            sink.begin(2);
+            sink.pp(tag("addr", std::string_view(addr_buf)));
+            sink.split(1,2);
+            sink.pp(tag("size", std::string_view(size_buf,
+                                                 static_cast<std::size_t>(size_end - size_buf))));
+            sink.split(1,2);
+            sink.pp(tag("text", unq(x.to_string_view())));
             sink.put(">");
             sink.end();
         }
