@@ -404,7 +404,8 @@ jobs:
           echo "::endgroup::"
 
           echo "::group::xo-gc utest"
-          ctest --test-dir xo-gc/.build
+          xo-build --utest xo-gc
+          #ctest --test-dir xo-gc/.build
           echo "::endgroup::"
 
           echo "::group::xo-gc install"

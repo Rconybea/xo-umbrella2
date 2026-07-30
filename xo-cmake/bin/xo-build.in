@@ -547,7 +547,16 @@ if [[ $utest_flag -eq 1 ]]; then
         if [[ $noop_flag -eq 1 ]]; then
             echo $cmd
         else
-            $cmd
+            # On failure, re-run just the failed tests verbosely so CI logs show
+            # WHY they failed -- the first pass reports only pass/fail per test,
+            # whereas --output-on-failure prints each failed test's output (e.g.
+            # the Catch2 assertion detail).  Preserve the failing exit status so
+            # the build still fails.
+            if ! $cmd; then
+                echo "xo-build: unit tests failed -- re-running failures with --rerun-failed --output-on-failure" 1>&2
+                ctest --test-dir "$pathtobuild" --rerun-failed --output-on-failure || true
+                exit 1
+            fi
         fi
     fi
 fi
