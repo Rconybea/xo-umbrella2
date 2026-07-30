@@ -7,6 +7,7 @@ set(SELF_SOURCE_FILES
     LineState.test.cpp
     LogBuffer.test.cpp
     PpState.test.cpp
+    put_with_escape.test.cpp
     PpTokenStreambuf.test.cpp
     PrettySink.test.cpp
     FlatSink.test.cpp

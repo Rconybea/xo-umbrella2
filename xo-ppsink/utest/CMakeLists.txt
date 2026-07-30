@@ -3,6 +3,7 @@
 set(SELF_EXECUTABLE_NAME utest.ppsink)
 set(SELF_SOURCE_FILES
     ppsink_utest_main.cpp
+    escape.test.cpp
     FlatSink.test.cpp
     Prettifier.test.cpp
     function_name.test.cpp

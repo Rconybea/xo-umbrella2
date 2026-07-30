@@ -5,6 +5,7 @@
 
 #include "print/PpState.hpp"
 #include "print/PpToken.hpp"
+#include <xo/ppsink/escape.hpp>
 #include <cassert>
 #include <cstring>
 
@@ -80,6 +81,74 @@ namespace xo {
 
             PpStringToken * tk
                 = new (mem) PpStringToken(viz_z, c_str_z, mem_z, str.begin());
+
+            scan_viz_total_ += tk->tk_viz_len();
+            scan_total_ += tk->tk_len();
+
+            // (note: noop unless scan stack is empty)
+            this->check_print_ready();
+        }
+
+        void
+        PpState::put_with_escape(std::string_view str, bool quote_flag)
+        {
+            // Escaping expands, so the token is not str.size() bytes: scan for
+            // the expanded size first, then allocate, then expand into the
+            // token.  Can't stream-and-grow, since alloc() places a
+            // PpStringToken of known size.  Scanning also beats reserving
+            // c_max_char_expand per character, which would drive tk_buffer_ to
+            // expand for strings that don't need it.
+
+            uint32_t esc_z = (Escape::str_size(str).size
+                              + (quote_flag ? Escape::c_quote_expand : 0));
+            uint32_t tk_z = PpStringToken::alloc_size(esc_z);
+
+            void * mem = this->alloc(tk_z);
+
+            if (!mem) [[unlikely]] {
+                assert(false);
+                return;
+            }
+
+            uint32_t mem_z = tk_z - sizeof(PpStringToken);
+
+            // Build the token empty, then expand into its char array: unlike
+            // put(), the bytes we mean to store don't exist anywhere yet for
+            // the PpStringToken ctor to copy from.
+
+            char empty_placeholder;
+
+            PpStringToken * tk
+                = new (mem) PpStringToken(0 /*viz_z*/,
+                                          0 /*tk_len*/,
+                                          mem_z,
+                                          &empty_placeholder);
+
+            char * lo = const_cast<char *>(tk->mem_span().lo());
+            char * p = lo;
+
+            if (quote_flag)
+                *p++ = Escape::c_quote;
+
+            p = Escape::str_copy(str, p);
+
+            if (quote_flag)
+                *p++ = Escape::c_quote;
+
+            assert(static_cast<uint32_t>(p - lo) == esc_z);
+
+            // ESC is always escaped, so count_visible_chars() cannot enter a
+            // color-escape run over this range, making viz_z == esc_z.
+            // Computed rather than assumed, so this stays correct if the
+            // escape set changes, and so both put paths look alike.
+
+            uint32_t viz_z = this->count_visible_chars(lo, p);
+
+            // mem_z is already the padded fit for esc_z (we allocated exactly
+            // alloc_size(esc_z)), so there is nothing to shrink here --
+            // cf. commit_string(), which learns the size only afterwards.
+
+            tk->finalize_inplace(viz_z, esc_z, mem_z);
 
             scan_viz_total_ += tk->tk_viz_len();
             scan_total_ += tk->tk_len();

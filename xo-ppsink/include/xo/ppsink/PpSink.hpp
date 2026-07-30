@@ -98,6 +98,24 @@ namespace xo::pp {
         /** write string comprising contents of @p s **/
         virtual PpSink & put(std::string_view s) = 0;
 
+        /** write @p s as a single token, with escapes expanded per escape.hpp
+         *  (backslash, dquote, newline, cr, and control chars as \xNN),
+         *  surrounded by Escape::c_quote iff @p quote_flag.
+         *
+         *  Deciding *whether* to quote (never / only when ambiguous / always)
+         *  is a policy layered on top; applying the quotes has to happen here,
+         *  since they belong in the same token as the content.
+         *
+         *  Not defaulted in terms of put(): the whole expansion must land in
+         *  exactly one token, or the pretty-printer could break a line in the
+         *  middle of an escaped string -- or between a quote and what it quotes.
+         *
+         *  @p quote_flag is deliberately not a defaulted argument: defaults on
+         *  virtuals are taken from the static type, so overrides can silently
+         *  disagree.
+         **/
+        virtual PpSink & put_with_escape(std::string_view s, bool quote_flag) = 0;
+
         /** begin group of nested items; indent one nesting level.
          *  Sequence begin,[string*,split]*,end
          **/

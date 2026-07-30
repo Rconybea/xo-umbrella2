@@ -38,6 +38,13 @@ namespace xo {
         }
 
         PpSink &
+        PrettySink::put_with_escape(std::string_view x, bool quote_flag)
+        {
+            pps_.put_with_escape(x, quote_flag);
+            return *this;
+        }
+
+        PpSink &
         PrettySink::begin()
         {
             pps_.begin();

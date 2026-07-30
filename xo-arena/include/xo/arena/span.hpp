@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "xo/indentlog/scope.hpp"
+//#include "xo/indentlog/scope.hpp"
 #include <string>
 #include <string_view>
 #include <stdexcept>
@@ -105,11 +105,11 @@ namespace xo {
                 if (span2.is_null())
                     return span1;
 
-                if (span1.hi() != span2.lo()) {
-                    scope log(XO_DEBUG(true));
-
-                    log && log(xtag("span1.hi", (void*)span1.hi()), xtag("span2.lo", (void*)span2.lo()));
-                }
+//                if (span1.hi() != span2.lo()) {
+//                    scope log(XO_DEBUG(true));
+//
+//                    log && log(xtag("span1.hi", (void*)span1.hi()), xtag("span2.lo", (void*)span2.lo()));
+//                }
 
                 assert(span1.hi() == span2.lo());
 

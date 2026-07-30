@@ -4,12 +4,54 @@
  **/
 
 #include <xo/ppsink/FlatSink.hpp>
+#include <xo/ppsink/escape.hpp>
 
 namespace xo::pp {
     PpSink &
     FlatSink::put(std::string_view x)
     {
         os_.write(x.data(), x.size());
+        return *this;
+    }
+
+    PpSink &
+    FlatSink::put_with_escape(std::string_view x, bool quote_flag)
+    {
+        /* Flat output has no tokens, so there's nothing to size up front and
+         * nothing that must stay contiguous: expand through a stack buffer,
+         * flushing whenever the next expansion might not fit.
+         *
+         * Goes through Escape::str_copy() (rather than open-coding the rules
+         * here) so FlatSink and PpState can't drift apart.
+         */
+        char buf[256];
+        char * p = buf;
+        /* The flush check runs before each character, so p can advance one
+         * full expansion past flush_limit; reserve that, plus one byte so the
+         * closing quote always fits without another flush.
+         */
+        char * const flush_limit = (buf + sizeof(buf)
+                                    - Escape::c_max_char_expand
+                                    - 1);
+
+        if (quote_flag)
+            *p++ = Escape::c_quote;
+
+        for (char ch : x) {
+            if (p > flush_limit) {
+                os_.write(buf, p - buf);
+                p = buf;
+            }
+
+            p = Escape::str_copy(std::string_view(&ch, 1), p);
+        }
+
+        if (quote_flag)
+            *p++ = Escape::c_quote;
+
+        if (p > buf)
+            os_.write(buf, p - buf);
+
         return *this;
     }
 

@@ -5,9 +5,20 @@
 
 #include "mmap_util.hpp"
 #include "padding.hpp"
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
+#include <xo/ppsink/tostr.hpp>
+#include <cassert>
+#include <stdexcept>
 #include <sys/mman.h> // for mmap
 
 namespace xo {
+    /* the ppsink logging vocabulary, for use below */
+    using xo::pp::scope;
+    using xo::pp::xtag;
+    using xo::pp::tostr;
+
     namespace mm {
         auto
         mmap_util::map_aligned_range(size_t req_z,
@@ -15,7 +26,7 @@ namespace xo {
                                      bool enable_hugepage_flag,
                                      bool debug_flag) -> span_type
         {
-            scope log(XO_DEBUG(debug_flag),
+            scope log(XO_DEBUG_(debug_flag),
                       xtag("req_z", req_z),
                       xtag("align_z", align_z));
 

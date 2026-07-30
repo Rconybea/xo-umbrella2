@@ -78,6 +78,14 @@ namespace xo::pp {
          *  triggers printing at top-level
          **/
         void put_cstr(const char * c_str);
+        /** append @p str as a single token, with escapes expanded per
+         *  xo::pp::Escape (see xo/ppsink/escape.hpp), surrounded by
+         *  Escape::c_quote iff @p quote_flag.
+         *
+         *  Always exactly one token, so the pretty printer can never break a
+         *  line inside the escaped string, or between a quote and its content.
+         **/
+        void put_with_escape(std::string_view str, bool quote_flag);
         /** begin a group; @p offset adds to the running indent until end().
          *  the no-arg form indents one nesting level (config indent_width).
          **/

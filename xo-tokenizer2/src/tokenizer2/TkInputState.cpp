@@ -4,10 +4,20 @@
  **/
 
 #include "TkInputState.hpp"
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 #include <xo/arena/span_ppdetail.hpp>   /* xo::print::printspan (span ostream printing) */
 
 namespace xo {
     namespace scm {
+        /* import the ppsink logging vocabulary into namespace scm rather than
+         * into xo: span_ppdetail.hpp brings the legacy xo::xtag into scope in
+         * this translation unit, and an inner-namespace using shadows it, where
+         * a using in xo itself would instead collide with it.
+         */
+        using xo::pp::scope;
+        using xo::pp::xtag;
+
         using CharT = char;
 
         bool
@@ -38,7 +48,7 @@ namespace xo {
         void
         TkInputState::advance(size_t z)
         {
-            scope log(XO_DEBUG(debug_flag_));
+            scope log(XO_DEBUG_(debug_flag_));
 
             this->current_pos_ += z;
 
@@ -48,7 +58,7 @@ namespace xo {
         void
         TkInputState::advance_until(const CharT * pos)
         {
-            scope log(XO_DEBUG(debug_flag_));
+            scope log(XO_DEBUG_(debug_flag_));
 
             assert(current_line_.lo() <= pos && pos <= current_line_.hi());
 
@@ -85,7 +95,7 @@ namespace xo {
             //       for example including leading whitespace.
             //       See discussion in tokenizer scan() method
 
-            scope log(XO_DEBUG(debug_flag_),
+            scope log(XO_DEBUG_(debug_flag_),
                       xtag("input", input));
 
             /* look ahead to {end of line, end of input}, whichever comes first */
@@ -127,7 +137,7 @@ namespace xo {
         const CharT *
         TkInputState::skip_leading_whitespace()
         {
-            scope log(XO_DEBUG(debug_flag_));
+            scope log(XO_DEBUG_(debug_flag_));
 
             const CharT * ix = current_line_.lo() + current_pos_;
 

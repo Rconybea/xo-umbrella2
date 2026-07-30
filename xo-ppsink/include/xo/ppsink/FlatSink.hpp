@@ -40,6 +40,7 @@ namespace xo::pp {
         using PpSink::newline;
 
         virtual PpSink & put(std::string_view x) override final;
+        virtual PpSink & put_with_escape(std::string_view x, bool quote_flag) override final;
         virtual PpSink & begin() override final;
         virtual PpSink & begin(std::int32_t offset) override final;
         virtual PpSink & split(std::uint32_t spaces, std::int32_t offset) override final;

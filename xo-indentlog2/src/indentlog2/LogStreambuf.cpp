@@ -4,8 +4,11 @@
  **/
 
 #include "LogStreambuf.hpp"
+#include <xo/ppsink/quoted_char_ostream.hpp>
 
 namespace xo {
+    using xo::pp::quoted_char;
+
     using std::streamsize;
     using std::cerr;
     using std::endl;
@@ -74,7 +77,8 @@ namespace xo {
         auto z0 = logbuf_->committed_span().size();
 
         if (logbuf_->debug_flag()) {
-            cerr << "LogStreambuf::overflow: new_ch=" << quoted_char(new_ch) << endl;
+            cerr << "LogStreambuf::overflow: new_ch="
+                 << quoted_char(static_cast<char>(new_ch)) << endl;
         }
 
         /* increase buffer size.  Arena will add at least one page */

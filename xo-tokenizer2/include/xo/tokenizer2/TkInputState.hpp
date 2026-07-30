@@ -6,6 +6,8 @@
 #pragma once
 
 #include "span.hpp"
+#include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
+#include <xo/ppsink/quoted.hpp>        /* unq() */
 
 namespace xo {
     namespace scm {
@@ -211,7 +213,11 @@ namespace xo {
         operator<<(std::ostream & os,
                    const TkInputState & x)
         {
-            using xo::print::unq;
+            /* function-local, so these shadow rather than collide with the
+             * legacy xo::xtag / xo::print::unq wherever those are also visible
+             */
+            using xo::pp::unq;
+            using xo::pp::xtag;
 
             os << "<input_state"
                << xtag("tk", x.tk_start())
