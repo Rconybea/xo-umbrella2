@@ -30,7 +30,7 @@ namespace ut {
         REQUIRE(out.substr(0, 5) == "<span");
         REQUIRE(out.back() == '>');
         REQUIRE(out.find(":size 5") != std::string::npos);
-        REQUIRE(out.find(":text hello") != std::string::npos);
+        REQUIRE(out.find(":text hello") != std::string::npos);   /* unambiguous => bare (unq) */
         REQUIRE(out.find(":addr ") != std::string::npos);
     }
 
@@ -41,7 +41,17 @@ namespace ut {
         std::string out = pretty_of(sp);
 
         REQUIRE(out.find(":size 0") != std::string::npos);
-        REQUIRE(out.find(":text >") != std::string::npos);   /* empty content, then '>' */
+        REQUIRE(out.find(":text \"\">") != std::string::npos); /* empty => ambiguous bare => quoted "" (unq) */
+    }
+
+    TEST_CASE("span_pp-quoted-text", "[span_pp]") {
+        /* text containing a space is ambiguous bare, so unq quotes it */
+        const char * text = "a b";
+        xo::mm::span<const char> sp(text, text + 3);
+
+        std::string out = pretty_of(sp);
+
+        REQUIRE(out.find(":text \"a b\"") != std::string::npos);
     }
 } /*namespace ut*/
 
