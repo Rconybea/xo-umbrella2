@@ -29,6 +29,7 @@ xo_add_headeronly_library(${SELF_LIB})
 # note: dependencies here must coordinate with cmake/xo_facetConfig.cmake.in
 xo_headeronly_dependency(${SELF_LIB} xo_arena)
 xo_headeronly_dependency(${SELF_LIB} xo_reflectutil)
+xo_headeronly_dependency(${SELF_LIB} indentlog)
 
 xo_install_library4(${SELF_LIB} ${PROJECT_NAME}Targets)
 xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)

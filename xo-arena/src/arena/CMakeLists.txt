@@ -24,7 +24,6 @@ xo_install_include_tree3(include/xo/arena)
 #       xo-arena/cmake/xo_arenaConfig.cmake.in
 
 xo_dependency(${SELF_LIB} xo_reflectutil)
-xo_dependency(${SELF_LIB} indentlog)
 xo_dependency(${SELF_LIB} xo_ppsink)
 
 if (NOT APPLE)

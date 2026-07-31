@@ -5,7 +5,7 @@
 
 #include "DArena.hpp"
 #include "print.hpp"
-#include <xo/indentlog/print/tag.hpp>
+#include <xo/ppsink/tag.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {
@@ -16,7 +16,7 @@ namespace xo {
     using xo::mm::padding;
     using xo::mm::error;
     using xo::reflect::typeseq;
-    using xo::xtag;
+    using xo::pp::xtag;
     using std::byte;
 
     namespace ut {

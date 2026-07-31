@@ -5,11 +5,16 @@
 
 #include "DArenaIterator.hpp"
 #include "DArena.hpp"
-#include <xo/indentlog/scope.hpp>
-#include <xo/indentlog/print/tag.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
 #include <cassert>
 
 namespace xo {
+    /* the ppsink logging vocabulary, for use below */
+    using xo::pp::scope;
+    using xo::pp::xtag;
+
     using std::byte;
 
     namespace mm {
@@ -17,7 +22,7 @@ namespace xo {
         DArenaIterator::begin(const DArena * arena)
         {
             constexpr bool c_debug_flag = false;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             AllocHeader * begin_hdr = begin_header(arena);
 
@@ -33,7 +38,7 @@ namespace xo {
         DArenaIterator::end(const DArena * arena)
         {
             constexpr bool c_debug_flag = false;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             AllocHeader * end_hdr = end_header(arena);
 
@@ -65,7 +70,7 @@ namespace xo {
         DArenaIterator::deref() const noexcept
         {
             constexpr bool c_debug_flag = false;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             bool contains_flag = arena_->contains(this->pos_as_byte());
             bool   bounds_flag = (this->pos_as_byte() < arena_->free_);
@@ -91,7 +96,7 @@ namespace xo {
         cmpresult
         DArenaIterator::compare(const DArenaIterator & other_ix) const noexcept
         {
-            scope log(XO_DEBUG(false),
+            scope log(XO_DEBUG_(false),
                       xtag("arena", arena_),
                       xtag("pos", pos_),
                       xtag("other.arena", other_ix.arena_),
@@ -113,7 +118,7 @@ namespace xo {
         DArenaIterator::next() noexcept
         {
             constexpr bool c_debug_flag = false;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             bool contains_flag = arena_->contains(this->pos_as_byte());
             bool   bounds_flag = (this->pos_as_byte() < arena_->free_);

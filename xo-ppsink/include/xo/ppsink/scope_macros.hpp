@@ -51,6 +51,27 @@
  **/
 #define XO_DEBUG_(flag) XO_ENTER1_(always, flag)
 
+/** capture a scope_setup at level @p lvl, enabled only when @p flag is true,
+ *  banner-named @p name1 instead of the enclosing function.  Mirrors legacy
+ *  XO_ENTER2.
+ *
+ *  Note @p name1 is passed through as-is: scope_config::function_style is
+ *  deliberately NOT applied, since an explicit name is not a function
+ *  signature and there is nothing to streamline.
+ **/
+#define XO_ENTER2_(lvl, flag, name1) \
+    xo::pp::scope_setup{ (name1), \
+                         ((flag) ? xo::pp::log_level::lvl \
+                                 : xo::pp::log_level::never), \
+                         xo::FunctionStyle::literal, \
+                         __FILE__, \
+                         __LINE__ }
+
+/** capture a scope_setup enabled iff @p flag is true (at log_level::always),
+ *  banner-named @p name1.  Mirrors legacy XO_DEBUG2.
+ **/
+#define XO_DEBUG2_(flag, name1) XO_ENTER2_(always, flag, name1)
+
 #endif /* XO_PPSINK_SCOPE_MACROS_HPP */
 
 /* end scope_macros.hpp */

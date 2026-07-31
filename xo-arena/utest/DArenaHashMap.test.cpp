@@ -6,12 +6,14 @@
 #include "DArenaHashMap.hpp"
 #include "random_hash_ops.hpp"
 #include <xo/randomgen/random_seed.hpp>
-#include <xo/indentlog/scope.hpp>
-#include <xo/indentlog/print/tag.hpp>
-#include <xo/indentlog/print/hex.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
     using xo::map::DArenaHashMapUtil;
     using xo::map::DArenaHashMap;
     using xo::rng::random_seed;
@@ -241,7 +243,7 @@ namespace xo {
 
         TEST_CASE("DArenaHashMap-operator-bracket", "[arena][DArenaHashMap]")
         {
-            scope log(XO_DEBUG(false));
+            scope log(XO_DEBUG_(false));
 
             using HashMap = DArenaHashMap<int, int>;
 

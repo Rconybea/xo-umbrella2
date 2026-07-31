@@ -15,7 +15,6 @@
   # xo dependencies
   xo-randomgen,
   xo-reflectutil,
-  xo-indentlog,
   xo-ppsink,
   xo-cmake,
 
@@ -58,7 +57,6 @@ stdenv.mkDerivation (finalattrs:
     ];
     propagatedBuildInputs = [
       xo-reflectutil
-      xo-indentlog
       xo-ppsink
       libunwind
     ] ++ lib.optionals stdenv.isLinux [

@@ -9,8 +9,10 @@
 #include "mmap_util.hpp"
 #include "backtrace.hpp"
 #include <xo/arena/padding.hpp>
-#include <xo/indentlog/scope.hpp>
-#include <xo/indentlog/print/tag.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
+#include <xo/ppsink/tostr.hpp>
 #include <cassert>
 #include <exception>
 #include <new> // for std::launder()
@@ -19,6 +21,11 @@
 #include <string.h> // for ::memset()
 
 namespace xo {
+    /* the ppsink logging vocabulary, for use below */
+    using xo::pp::scope;
+    using xo::pp::xtag;
+    using xo::pp::tostr;
+
     using xo::reflect::typeseq;
     using std::byte;
     using std::cerr;
@@ -30,7 +37,7 @@ namespace xo {
         DArena
         DArena::map(const ArenaConfig & cfg)
         {
-            scope log(XO_DEBUG(cfg.debug_flag_));
+            scope log(XO_DEBUG_(cfg.debug_flag_));
 
             /* vm page size. 4KB, probably */
             size_t page_z = getpagesize();
@@ -403,7 +410,7 @@ namespace xo {
                        uint32_t age,
                        const char * src_fn)
         {
-            scope log(XO_DEBUG(config_.debug_flag_));
+            scope log(XO_DEBUG_(config_.debug_flag_));
 
             /*
              *                                                     sub_complete
@@ -537,7 +544,7 @@ namespace xo {
         bool
         DArena::expand(size_t target_z, const char * src_fn) noexcept
         {
-            scope log(XO_DEBUG(config_.debug_flag_),
+            scope log(XO_DEBUG_(config_.debug_flag_),
                       xtag("target_z", target_z),
                       xtag("committed_z", committed_z_),
                       xtag("src_fn", src_fn));

@@ -2,18 +2,22 @@
  *
  *  @author Roland Conybeare, Jul 2024
  *
- *  ostream printing for xo::mm::span (operator<<, printspan, legacy ppdetail).
+ *  Legacy ostream printing for xo::mm::span (operator<<, printspan).
  *
  *  Split out from span.hpp so ppsink-focused subsystems can include span.hpp
  *  (the span type) without pulling in the operator<<-based printing machinery.
  *  Include this header only where you actually print a span to an ostream.
+ *
+ *  Structured (ostream-free) printing lives in span_pp.hpp, as
+ *  Prettifier<span<CharT>>.  This header renders through the ppsink ostream
+ *  bridges, so the two agree on escaping.
  **/
 
 #pragma once
 
 #include "xo/arena/span.hpp"
-#include "xo/indentlog/print/tag.hpp"
-#include "xo/indentlog/print/ppdetail_atomic.hpp"
+#include <xo/ppsink/tag_ostream.hpp>      /* os << xtag(..) */
+#include <xo/ppsink/quoted_ostream.hpp>   /* os << quot(..) */
 #include <ostream>
 #include <string_view>
 
@@ -25,9 +29,9 @@ namespace xo {
         operator<<(std::ostream & os,
                    const span<CharT> & x) {
             os << "<span"
-               << xtag("addr", (void*)x.lo())
-               << xtag("size", x.size())
-               << " :text " << xo::print::quot(std::string_view(x.lo(), x.hi()))
+               << xo::pp::xtag("addr", (void*)x.lo())
+               << xo::pp::xtag("size", x.size())
+               << " :text " << xo::pp::quot(std::string_view(x.lo(), x.hi()))
                << ">";
             return os;
         }
@@ -58,14 +62,13 @@ namespace xo {
             return os;
         }
 
-#ifndef ppdetail_atomic
-        template <typename CharT>        \
-        PPDETAIL_ATOMIC_BODY(printspan_impl<CharT>);
-
-        template <typename CharT>        \
-        PPDETAIL_ATOMIC_BODY(xo::scm::span<CharT>);
-#endif
-
+        /* (dropped: the legacy PPDETAIL_ATOMIC_BODY hooks for printspan_impl
+         * and span.  ppsink customizes via Prettifier instead -- span has one
+         * in span_pp.hpp, and printspan_impl needs none, since it renders its
+         * raw content through the operator<< above.  The second hook named
+         * xo::scm::span, which does not exist -- span lives in xo::mm -- and
+         * only compiled because it was never instantiated.)
+         */
     } /*namespace print*/
 } /*namespace xo*/
 
