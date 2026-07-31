@@ -279,14 +279,8 @@ namespace xo {
         {
             // map_ doesn't contain any gc-owned data, can skip
 
-#ifdef __APPLE__
-            // clang not recognizing these as comptime eligible
             assert(var_map_.is_gc_eligible() == false);
             assert(type_map_.is_gc_eligible() == false);
-#else
-            static_assert(var_map_.is_gc_eligible() == false);
-            static_assert(type_map_.is_gc_eligible() == false);
-#endif
 
             gc.visit_child(reason, &vars_);
             gc.visit_child(reason, &types_);
