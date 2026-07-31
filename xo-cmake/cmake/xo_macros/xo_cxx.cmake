@@ -1338,6 +1338,29 @@ endmacro()
 #
 macro(xo_export_cmake_config projectname projectversion projecttargets)
     include(CMakePackageConfigHelpers)
+
+    # Build the find_dependency() block for ${projectname}Config.cmake from the
+    # xo_deps target property (populated by xo_dependency()), so the installed
+    # config's transitive-dependency list is GENERATED from the xo_dependency()
+    # calls in CMakeLists.txt rather than hand-maintained in parallel with them.
+    # Expanded into the template via @XO_FIND_DEPENDENCY_BLOCK@.
+    #
+    # NB: xo_deps is initialized to the target's own name and then accumulates
+    # its deps, so drop the self-edge before emitting.  This runs at the point
+    # xo_export_cmake_config() is called, so that call must come after all of the
+    # library's xo_dependency() calls (convention: last, before examples/docs).
+    set(XO_FIND_DEPENDENCY_BLOCK "")
+    if(TARGET ${projectname})
+        get_target_property(_xo_config_deps ${projectname} xo_deps)
+        if(_xo_config_deps)
+            list(REMOVE_ITEM _xo_config_deps ${projectname})
+            foreach(_xo_config_dep IN LISTS _xo_config_deps)
+                string(APPEND XO_FIND_DEPENDENCY_BLOCK
+                    "find_dependency(${_xo_config_dep})\n")
+            endforeach()
+        endif()
+    endif()
+
     write_basic_package_version_file(
         "${PROJECT_BINARY_DIR}/${projectname}ConfigVersion.cmake"
         VERSION ${projectversion}
