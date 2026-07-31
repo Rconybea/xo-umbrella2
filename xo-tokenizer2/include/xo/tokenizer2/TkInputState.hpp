@@ -107,7 +107,7 @@ namespace xo {
 
 #pragma GCC diagnostic push
 #ifndef __APPLE__
-#pragma GCC diagnostic ignored "-Wchanges-meaning"
+//#pragma GCC diagnostic ignored "-Wchanges-meaning"
 #endif
             const span_type & current_line() const { return current_line_; }
 #pragma GCC diagnostic pop
