@@ -10,9 +10,14 @@
 //#include <xo/alloc2/Allocator.hpp>
 #include "random_allocs.hpp"
 #include <xo/gc/X1Collector.hpp>
+#include <xo/object2/RuntimeError.hpp>
+#include <xo/object2/Dictionary.hpp>
 #include <xo/object2/Array.hpp>
 #include <xo/object2/List.hpp>
+#include <xo/object2/Float.hpp>
 #include <xo/object2/Integer.hpp>
+#include <xo/object2/Boolean.hpp>
+#include <xo/stringtable2/DUniqueString.hpp>
 #include <xo/alloc2/CollectorTypeRegistry.hpp>
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/randomgen/xoshiro256.hpp>
@@ -23,9 +28,15 @@
 #include <catch2/catch.hpp>
 
 namespace xo {
+    using xo::scm::DRuntimeError;
+    using xo::scm::DDictionary;
     using xo::scm::DList;
     using xo::scm::DArray;
+    using xo::scm::DUniqueString;
+    using xo::scm::DString;
     using xo::scm::DInteger;
+    using xo::scm::DFloat;
+    using xo::scm::DBoolean;
     using xo::mm::CollectorTypeRegistry;
     using xo::mm::AAllocator;
     using xo::mm::ACollector;
@@ -393,7 +404,7 @@ namespace xo {
                  *   n_gen  |          |     |    |  |
                  *       v  v          v     v    v  v
                  **/
-                Testcase(1, 2, 16 * 1024,  128,  96, T),
+                Testcase(1, 2, 16 * 1024,  128, 128, T),
             };
 
 #          undef T
@@ -450,6 +461,17 @@ namespace xo {
 
                 // mm.allocated includes: { object-types, roots(=0), arenas(=0) }
                 //
+                REQUIRE(gc.is_type_installed(typeseq::id<DUniqueString>()));
+                REQUIRE(gc.is_type_installed(typeseq::id<DString>()));
+                REQUIRE(gc.is_type_installed(typeseq::id<DBoolean>()));
+                REQUIRE(gc.is_type_installed(typeseq::id<DFloat>()));
+                REQUIRE(gc.is_type_installed(typeseq::id<DInteger>()));
+                REQUIRE(gc.is_type_installed(typeseq::id<DList>()));
+                REQUIRE(gc.is_type_installed(typeseq::id<DArray>()));
+                REQUIRE(gc.is_type_installed(typeseq::id<DDictionary>()));
+                REQUIRE(gc.is_type_installed(typeseq::id<DRuntimeError>()));
+
+                // (not enough types to trigger expansion)
                 REQUIRE(mm.allocated() == tc.expect_object_type_z_);
                 REQUIRE(gc.allocated(g0, Role::to_space()) == 0);
                 REQUIRE(gc.allocated(g0, Role::from_space()) == 0);
