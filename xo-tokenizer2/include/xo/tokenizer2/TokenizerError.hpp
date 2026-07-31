@@ -66,7 +66,7 @@ namespace xo {
             const std::string & error_description() const { return error_description_; }
 #pragma GCC diagnostic push
 #ifndef __APPLE__
-#pragma GCC diagnostic ignored "-Wchanges-meaning"
+//#pragma GCC diagnostic ignored "-Wchanges-meaning"
 #endif
             const TkInputState & input_state() const { return input_state_; }
 #pragma GCC diagnostic pop
