@@ -25,6 +25,7 @@ xo_toplevel_debug_config2()
 
 set(SELF_LIB subsys)
 xo_add_headeronly_library(${SELF_LIB})
+xo_headeronly_dependency(${SELF_LIB} xo_ppsink)
 xo_install_library4(${SELF_LIB} ${PROJECT_NAME}Targets)
 #add_library(subsys INTERFACE)
 #xo_include_headeronly_options2(subsys)

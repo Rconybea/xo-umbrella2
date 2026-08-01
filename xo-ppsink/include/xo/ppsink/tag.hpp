@@ -23,6 +23,7 @@
 
 #include "pretty.hpp"
 #include "color.hpp"
+#include "stringify.hpp"   /* STRINGIFY -- generic macro, kept for tag/logging callers */
 #include <utility>
 #include <type_traits>
 

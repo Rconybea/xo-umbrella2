@@ -3,6 +3,7 @@
   stdenv, cmake, catch2,
 
   # xo dependencies
+  xo-ppsink,
   xo-cmake,
 
 } :
@@ -17,4 +18,5 @@ stdenv.mkDerivation (finalattrs:
     cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake"];
     #doCheck = true;
     nativeBuildInputs = [ cmake catch2 xo-cmake ];
+    propagatedBuildInputs = [ xo-ppsink ];
   })

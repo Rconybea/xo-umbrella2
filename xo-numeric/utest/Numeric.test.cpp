@@ -17,6 +17,8 @@ namespace xo {
     using xo::mm::MemorySizeInfo;
     using xo::facet::FacetRegistry;
     using xo::facet::TypeRegistry;
+    using xo::pp::scope;
+    using xo::pp::xtag;
     //using xo::facet::with_facet;
     //using xo::facet::obj;
 
@@ -59,7 +61,7 @@ namespace xo {
             const auto & testname = Catch::getResultCapture().getCurrentTestName();
 
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag), xtag("test", testname));
+            scope log(XO_DEBUG_(c_debug_flag), xtag("test", testname));
 
             Fixture fixture(testname);
             {

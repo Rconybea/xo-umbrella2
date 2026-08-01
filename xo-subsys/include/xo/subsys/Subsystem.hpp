@@ -5,7 +5,10 @@
 
 #pragma once
 
-#include "xo/indentlog/scope.hpp"
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
+#include <xo/ppsink/tostr.hpp>
 #include <iostream>
 #include <functional>
 #include <list>
@@ -28,7 +31,6 @@
 //#define VERIFY_SUBSYSTEM(tag) Subsystem::verify_present<tag>(STRINGIFY(tag))
 
 namespace xo {
-    using xo::tostr;
 
     /* evidence that one or more subsystems have been initialized.
      * Used to prevent static linker stripping must-run initialization code
@@ -149,6 +151,8 @@ namespace xo {
 
         template<typename SubsystemTag>
         static bool verify_present(std::string subsys_tag) {
+            using xo::pp::tostr;
+
             SubsystemImpl * subsys = establish<SubsystemTag>();
 
             if (!subsys->require_flag()) {
@@ -234,12 +238,11 @@ namespace xo {
         if (!p_subsys->require_flag()) {
             /* 1st call to .provide() for this SubsystemTag */
 
-            using xo::scope;
-            using xo::xtag;
+            using xo::pp::scope;
 
-            scope log(XO_ENTER0(chatty),
-                      xtag("subsys", subsys_name),
-                      xtag("address", p_subsys));
+            scope log(XO_ENTER0_(chatty),
+                      xo::pp::xtag("subsys", subsys_name),
+                      xo::pp::xtag("address", p_subsys));
 
             *p_subsys = SubsystemImpl<BuildTag>(true /*require_flag*/,
                                                 subsys_name,
@@ -254,8 +257,10 @@ namespace xo {
     bool
     SubsystemImpl<BuildTag>::verify_all_initialized()
     {
+        using xo::pp::scope;
+
         if (s_dirty_flag) {
-            scope log(XO_ENTER0(error), "required subsystems NOT initialized!?");
+            scope log(XO_ENTER0_(error), "required subsystems NOT initialized!?");
 
             for (SubsystemImpl<BuildTag> * subsys : s_subsys_l) {
                 if (!subsys->init_flag()) {
@@ -274,7 +279,10 @@ namespace xo {
     template <typename BuildTag>
     InitEvidence
     SubsystemImpl<BuildTag>::initialize_all() {
-        scope log(XO_ENTER0(chatty));
+        using xo::pp::scope;
+        using xo::pp::xtag;
+
+        scope log(XO_ENTER0_(chatty));
 
         InitEvidence retval;
 

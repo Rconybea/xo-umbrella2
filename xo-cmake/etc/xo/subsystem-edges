@@ -62,6 +62,7 @@ xo-object2 xo-type
 xo-ordinaltree xo-reactor
 xo-ppsink xo-arena
 xo-ppsink xo-indentlog2
+xo-ppsink xo-subsys
 xo-printable2 xo-expression2
 xo-printable2 xo-object2
 xo-printable2 xo-stringtable2
