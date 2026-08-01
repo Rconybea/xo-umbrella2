@@ -26,7 +26,7 @@
   git, openssh, curl, wget, cacert,
 
   # xo deps
-  clang, llvm, eigen, libwebsockets, jsoncpp, cli11, libunwind, elfutils, replxx, libbsd,
+  llvm, eigen, libwebsockets, jsoncpp, cli11, libunwind, elfutils, replxx, libbsd,
 
   # archives
   gnutar, gzip,
@@ -42,6 +42,10 @@
 
   # c++ toolchain
   catch2, cmake, gnumake, gcc, doxygen, graphviz,
+
+  # clang needed for xo-jit, but we want it to come after gcc
+  # so that default is still gcc
+  clang,
 
   # base platform stuff
   gawk, gnused, gnugrep, patch, xz, bzip2,
