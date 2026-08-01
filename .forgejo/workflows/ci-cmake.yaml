@@ -29,7 +29,8 @@ jobs:
             printf '%-8s %s\n' "$c" "${p:+$(readlink -f "$p")}"
           done
           # cmake will use CXX, default to c++
-          echo "cmake should choose: ${CXX:-c++} --version | head -1"
+          choice=$(${CXX:-c++} --version | head -1"
+          echo "build with: ${choice}"
 
       - name: pkgconfig
         run: |
