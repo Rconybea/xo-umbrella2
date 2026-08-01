@@ -46,7 +46,6 @@ xo-indentlog xo-ratio
 xo-indentlog xo-refcnt
 xo-indentlog xo-reflect
 xo-indentlog xo-stringtable2
-xo-indentlog xo-testutil
 xo-indentlog xo-tokenizer
 xo-indentlog xo-tokenizer2
 xo-indentlog xo-unit
@@ -63,6 +62,7 @@ xo-ordinaltree xo-reactor
 xo-ppsink xo-arena
 xo-ppsink xo-indentlog2
 xo-ppsink xo-subsys
+xo-ppsink xo-testutil
 xo-printable2 xo-expression2
 xo-printable2 xo-object2
 xo-printable2 xo-stringtable2
