@@ -148,6 +148,8 @@ namespace xo {
                     .expect_unify_concrete_ = true,
 #ifdef __APPLE__
                     .expect_concrete_typename_ = "long long",
+#elif __clang__
+                    .expect_concrete_typename_ = "long",
 #else
                     .expect_concrete_typename_ = "long int",
 #endif
@@ -163,6 +165,8 @@ namespace xo {
                     .expect_unify_concrete_ = true,
 #ifdef __APPLE__
                     .expect_concrete_typename_ = "long long",
+#elif __clang__
+                    .expect_concrete_typename_ = "long",
 #else
                     .expect_concrete_typename_ = "long int",
 #endif
