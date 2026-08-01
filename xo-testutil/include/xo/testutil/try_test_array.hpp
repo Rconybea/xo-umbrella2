@@ -6,10 +6,11 @@
 #pragma once
 
 #include "UtestRehearser.hpp"
-#include <xo/indentlog/print/tostr.hpp>
-#include <xo/indentlog/print/tag.hpp>
+#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tag.hpp>
 #include <catch2/catch.hpp>
 #include <vector>
+#include <cstddef>
 
 namespace xo {
     /** e.g. RehearseFn = bool (*)(const TestCase &, UtestRehearser *) **/
@@ -17,6 +18,9 @@ namespace xo {
     void try_test_array(const std::vector<TestCase> & tc_v,
                         RehearseFn rehearse_fn)
     {
+        using xo::pp::tostr;
+        using xo::pp::xtag;
+
         for (size_t i_tc = 0, n_tc = tc_v.size(); i_tc < n_tc; ++i_tc)
         {
             const auto & tc = tc_v[i_tc];
