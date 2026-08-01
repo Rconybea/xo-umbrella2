@@ -27,7 +27,7 @@ namespace xo {
 #if defined(__APPLE__)
                 REQUIRE(td->struct_member(0).get_member_td()->short_name() == "long long");
 #elif defined(__clang__)
-                REQUIRE(td->struct_member(0).get_member_td()->short_name() == "long"I;
+                REQUIRE(td->struct_member(0).get_member_td()->short_name() == "long");
 #else
                 REQUIRE(td->struct_member(0).get_member_td()->short_name() == "long int");
 #endif
