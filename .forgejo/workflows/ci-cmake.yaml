@@ -696,20 +696,22 @@ jobs:
 
       - name: build xo-expression
         run: |
-          echo "::group::xo-expression configure"
-          xo-build --configure --with-utests --with-examples xo-expression
+          TARGET=xo-expression
+
+          echo "::group::${TARGET} configure"
+          xo-build --configure --with-utests --with-examples ${TARGET}
           echo "::endgroup::"
 
-          echo "::group::xo-expression build"
-          xo-build --build xo-expression
+          echo "::group::${TARGET} build"
+          xo-build --build ${TARGET}
           echo "::endgroup::"
 
-          echo "::group::xo-expression utest"
-          ctest --test-dir xo-expression/.build
+          echo "::group::${TARGET} utest"
+          xo-build --utest ${TARGET}
           echo "::endgroup::"
 
-          echo "::group::xo-expression install"
-          xo-build --install xo-expression
+          echo "::group::${TARGET} install"
+          xo-build --install ${TARGET}
           echo "::endgroup::"
 
       - name: build xo-pyexpression
