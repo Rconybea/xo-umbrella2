@@ -21,6 +21,16 @@ jobs:
         run: |
           echo "$PREFIX/bin" >> $GITHUB_PATH
 
+      - name: compiler
+        run: |
+          # print canonical choices
+          for c in c++ g++ clang++; do
+            p = "$(command -v "$c" 2>/dev/null || true)"
+            printf '%-8s %s\n' "$c" "${p:+$(readlink -f "$p")}"
+          done
+          # cmake will use CXX, default to c++
+          echo "cmake should choose: ${CXX:-c++} --version | head -1"
+
       - name: pkgconfig
         run: |
           # list packages known to pkg-config
