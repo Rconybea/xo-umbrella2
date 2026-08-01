@@ -41,11 +41,7 @@
   breathe ? python3Packages.breathe,
 
   # c++ toolchain
-  catch2, cmake, gnumake, gcc, doxygen, graphviz,
-
-  # clang needed for xo-jit, but we want it to come after gcc
-  # so that default is still gcc
-  clang,
+  catch2, cmake, gnumake, gcc, clang, doxygen, graphviz,
 
   # base platform stuff
   gawk, gnused, gnugrep, patch, xz, bzip2,
@@ -163,7 +159,6 @@ dockerTools.buildLayeredImage {
                doxygen
                graphviz
 
-               clang
                (lib.getDev llvm)
                (lib.getLib llvm)
                (lib.getDev eigen)
@@ -190,7 +185,8 @@ dockerTools.buildLayeredImage {
                catch2
                cmake
                gnumake
-               gcc
+               gcc      # default gcc ahead of clang.
+               clang
 
                patch
                gawk
