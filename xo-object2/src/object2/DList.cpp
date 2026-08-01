@@ -4,6 +4,7 @@
  **/
 
 #include "DList.hpp"
+#include <xo/indentlog/scope.hpp>
 #include "list/IPrintable_DList.hpp"
 #include "list/IGCObject_DList.hpp"
 #include <xo/alloc2/GCObjectVisitor.hpp>

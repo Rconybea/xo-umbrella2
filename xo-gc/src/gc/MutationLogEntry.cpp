@@ -4,6 +4,7 @@
  **/
 
 #include "MutationLogEntry.hpp"
+#include <xo/indentlog/scope.hpp>
 #include "GCObjectStore.hpp"
 #include "MutationLogStatistics.hpp"
 

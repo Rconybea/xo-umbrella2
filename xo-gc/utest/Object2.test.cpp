@@ -6,6 +6,7 @@
  **/
 
 #include <xo/gc/X1Collector.hpp>
+#include <xo/indentlog/scope.hpp>
 #include <xo/object2/SetupObject2.hpp>
 #include <xo/object2/ListOps.hpp>
 #include <xo/object2/Integer.hpp>

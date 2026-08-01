@@ -11,8 +11,10 @@
 #include "facet_implementation.hpp"
 #include "obj.hpp"
 #include <xo/arena/DArenaHashMap.hpp>
-#include <xo/indentlog/scope.hpp>
-#include <xo/indentlog/print/tostr.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
+#include <xo/ppsink/tostr.hpp>
 //#include <unordered_map>
 #include <utility>
 
@@ -139,13 +141,17 @@ namespace xo {
             obj<ATo> variant(obj<AFrom> from) {
                 auto retval = try_variant<ATo>(from);
 
-                if (!retval)
+                if (!retval) {
+                    using xo::pp::tostr;
+                    using xo::pp::xtag;
+
                     throw std::runtime_error(tostr("FacetRegistry::variant failed",
                                                    xtag("AFrom.tseq", typeseq::id<AFrom>()),
                                                    xtag("AFrom.tname", typerecd::recd<AFrom>().name()),
                                                    xtag("ATo.tseq", typeseq::id<ATo>()),
                                                    xtag("ATo.tname", typerecd::recd<ATo>().name()),
                                                    xtag("DRepr", from._typeseq())));
+                }
 
                 return retval;
             }
@@ -220,7 +226,10 @@ namespace xo {
             const void * _lookup(typeseq facet_id,
                                  typeseq repr_id) const
             {
-                scope log(XO_DEBUG(false));
+                using xo::pp::scope;
+                using xo::pp::xtag;
+
+                scope log(XO_DEBUG_(false));
                 log && log(xtag("facet_id", facet_id),
                            xtag("repr_id", repr_id));
 

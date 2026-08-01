@@ -9,7 +9,6 @@
 
 #include "typeseq.hpp"
 #include <xo/arena/DArenaVector.hpp>
-#include <xo/indentlog/scope.hpp>
 #include <utility>
 
 namespace xo {

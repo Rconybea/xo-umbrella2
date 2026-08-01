@@ -6,6 +6,7 @@
 #pragma once
 
 #include "TkInputState.hpp"
+#include <xo/indentlog/scope.hpp>
 #include "tokentype.hpp"
 #include "span.hpp"
 #include <xo/stringtable2/String.hpp>
