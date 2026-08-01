@@ -567,7 +567,8 @@ jobs:
           echo "::endgroup::"
 
           echo "::group::xo-ratio utest"
-          ctest --test-dir xo-ratio/.build
+          xo-build --utest xo-ratio
+          #ctest --test-dir xo-ratio/.build
           echo "::endgroup::"
 
           echo "::group::xo-ratio install"
