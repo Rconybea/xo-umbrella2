@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
 
 namespace xo {
 
@@ -14,16 +14,19 @@ namespace xo {
      *  Use:
      *    TEST_CASE(name, tags, ..)
      *    {
-     *       scope log = Utest::ut_scope();
+     *       auto log = Utest::ut_scope();
      *
      *       ...
-     *       log && log(xtag("foo", ...));
+     *       log && log(xo::pp::xtag("foo", ...));
      *    }
      *
      *  Honors:
      *    UtestConfig::instance()->debug_flag_
      **/
     struct Utest {
+        /** the (ppsink) scope-logger type that ut_scope() hands out **/
+        using scope = xo::pp::scope;
+
         /** Toplevel logging scope for unit tests.
          *  Integrates with UtestConfig
          **/

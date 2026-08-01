@@ -6,16 +6,18 @@
 #include "UtestAppStart.hpp"
 #include "UtestConfig.hpp"
 #include <xo/subsys/Subsystem.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 #include <CLI/CLI.hpp>
+#include <iostream>
 
 #define CATCH_CONFIG_RUNNER
 #include <catch2/catch.hpp>
 
 namespace xo {
     using xo::UtestConfig;
-    using xo::scope;
-    using xo::xtag;
+    using xo::Subsystem;
+    using xo::pp::scope;
 
     using std::cout;
     using std::cerr;
@@ -66,10 +68,9 @@ namespace xo {
                 argv2.push_back(x.c_str());
         }
 
-        using xo::Subsystem;
         Subsystem::initialize_all();
 
-        scope log(XO_DEBUG(UtestConfig::instance()->debug_flag()),
+        scope log(XO_DEBUG_(UtestConfig::instance()->debug_flag()),
                   "start catch2 session");
 
         // run catch2's test session / help

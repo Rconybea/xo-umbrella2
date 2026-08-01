@@ -12,5 +12,5 @@ xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 $
 xo_install_include_tree3(include/xo/testutil)
 # note: deps here must also appear in cmake/xo_testutilConfig.cmake.in
 xo_dependency(${SELF_LIB} subsys)
-xo_dependency(${SELF_LIB} indentlog)
+xo_dependency(${SELF_LIB} xo_ppsink)
 xo_external_target_dependency(${SELF_LIB} Catch2 Catch2::Catch2)

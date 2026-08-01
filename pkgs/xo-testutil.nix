@@ -9,7 +9,7 @@
 
   # xo dependencies
   xo-subsys,
-  xo-indentlog,
+  xo-ppsink,
   xo-cmake,
 
   buildDocs ? false,
@@ -50,6 +50,6 @@ stdenv.mkDerivation (finalattrs:
     ];
     propagatedBuildInputs = [
       xo-subsys
-      xo-indentlog
+      xo-ppsink
     ];
   })
