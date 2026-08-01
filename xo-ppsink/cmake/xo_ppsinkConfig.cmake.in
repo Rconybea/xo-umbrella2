@@ -2,11 +2,7 @@
 
 include(CMakeFindDependencyMacro)
 
-# note: changes to find_dependency() calls here
-#       must coordinate with xo_(headeronly_)dependency() calls
-#       in xo-ppsink/src/ppsink/CMakeLists.txt
-#
-find_dependency(xo_timeutil)
+@XO_FIND_DEPENDENCY_BLOCK@
 
 include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Targets.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Share.cmake")
