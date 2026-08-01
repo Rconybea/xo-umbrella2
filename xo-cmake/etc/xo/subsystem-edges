@@ -35,7 +35,6 @@ xo-gc xo-reader2
 xo-indentlog xo-alloc
 xo-indentlog xo-alloc2
 xo-indentlog xo-expression2
-xo-indentlog xo-facet
 xo-indentlog xo-flatstring
 xo-indentlog xo-gc
 xo-indentlog xo-imgui
