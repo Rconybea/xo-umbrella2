@@ -787,7 +787,7 @@ jobs:
           echo "::endgroup::"
 
           echo "::group::xo-jit utest"
-          ctest --test-dir xo-jit/.build
+          xo-build --utest ${TARGET}
           echo "::endgroup::"
 
           echo "::group::xo-jit install"
