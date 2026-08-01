@@ -14,8 +14,17 @@ on:
 jobs:
   cmake-build:
     runs-on: xo-builder
+    strategy:
+      fail-fast: false          # a failure in one compiler must not cancel the other
+      max-parallel: 1           # run gcc, then clang -- never both at once (8GB host)
+      matrix:
+        include:
+          - { cc: gcc,   cxx: g++     }
+          - { cc: clang, cxx: clang++ }
     env:
-      PREFIX: ${{github.workspace}}/local
+      CC:  ${{matrix.cc}}
+      CXX: ${{matrix.cxx}}
+      PREFIX: ${{github.workspace}}/local-${{matrix.cc}}
     steps:
       - name: set PATH
         run: |
