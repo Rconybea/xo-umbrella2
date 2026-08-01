@@ -7,19 +7,23 @@
 #include <xo/alloc2/Arena.hpp>
 #include <xo/alloc2/ArenaIterator.hpp>
 #include <xo/facet/FacetRegistry.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
 
 namespace xo {
     using xo::facet::FacetRegistry;
     //using xo::facet::TypeRegistry;
     using xo::reflect::typeseq;
+    using xo::pp::scope;
+    using xo::pp::xtag;
 
     namespace mm {
 
         bool
         SetupAlloc2::register_facets()
         {
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG_(true));
 
             FacetRegistry::register_impl<AAllocator, DArena>();
             FacetRegistry::register_impl<AAllocIterator, DArenaIterator>();

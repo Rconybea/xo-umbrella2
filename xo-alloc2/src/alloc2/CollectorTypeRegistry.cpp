@@ -4,9 +4,14 @@
  **/
 
 #include "CollectorTypeRegistry.hpp"
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
+
     namespace mm {
         CollectorTypeRegistry &
         CollectorTypeRegistry::instance()
@@ -19,7 +24,7 @@ namespace xo {
         void
         CollectorTypeRegistry::register_types(init_function_type fn)
         {
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG_(true));
 
             init_seq_v_.push_back(fn);
         }
@@ -27,7 +32,7 @@ namespace xo {
         bool
         CollectorTypeRegistry::install_types(obj<ACollector> gc)
         {
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG_(true));
 
             bool ok = true;
 

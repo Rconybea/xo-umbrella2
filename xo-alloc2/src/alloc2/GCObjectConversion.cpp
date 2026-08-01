@@ -4,9 +4,11 @@
  **/
 
 #include "GCObjectConversion.hpp"
+#include <xo/ppsink/tag.hpp>
 
 namespace xo {
     using xo::reflect::typeseq;
+    using xo::pp::xtag;
 
     namespace scm {
 

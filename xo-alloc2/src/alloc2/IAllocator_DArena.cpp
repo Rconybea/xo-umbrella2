@@ -10,7 +10,9 @@
 #include <xo/arena/DArenaIterator.hpp>
 #include <xo/arena/padding.hpp>
 #include <xo/facet/obj.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
 #include <cassert>
 #include <cstddef>
 #include <cstring>
@@ -18,6 +20,8 @@
 
 namespace xo {
     using xo::facet::with_facet;
+    using xo::pp::scope;
+    using xo::pp::xtag;
     using std::size_t;
     using std::byte;
 
@@ -82,7 +86,7 @@ namespace xo {
         IAllocator_DArena::alloc_range(const DArena & s,
                                        DArena & ialloc) noexcept -> range_type
         {
-            scope log(XO_DEBUG(false));
+            scope log(XO_DEBUG_(false));
 
             DArenaIterator * begin_ix = construct_with<DArenaIterator>(ialloc, &s, s.begin_header());
             DArenaIterator *   end_ix = construct_with<DArenaIterator>(ialloc, &s, s.end_header());

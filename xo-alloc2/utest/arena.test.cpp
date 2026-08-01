@@ -9,7 +9,8 @@
 #include <xo/arena/print.hpp>
 #include <xo/arena/padding.hpp>
 #include <xo/facet/obj.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/tag.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {
@@ -27,7 +28,7 @@ namespace xo {
     using xo::facet::with_facet;
     using xo::facet::obj;
     using xo::facet::typeseq;
-    using xo::scope;
+    using xo::pp::xtag;
     using std::byte;
     using std::size_t;
 

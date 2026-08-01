@@ -9,7 +9,8 @@
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/facet/obj.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 
 namespace xo {
     namespace scm {
@@ -17,6 +18,7 @@ namespace xo {
         public:
             using AGCObject = xo::mm::AGCObject;
             using typeseq = xo::reflect::typeseq;
+            using scope = xo::pp::scope;
 
             /** helper method fro GCObjectConversion<..>::from_gco()
              *  on conversion failure
@@ -72,6 +74,7 @@ namespace xo {
             using AAllocator = xo::mm::AAllocator;
             using FacetRegistry = xo::facet::FacetRegistry;
             using DVariantPlaceholder = xo::facet::DVariantPlaceholder;
+            using scope = xo::pp::scope;
 
             static obj<AGCObject> to_gco(obj<AAllocator>,
                                          obj<AFacet,DRepr> gco) {
@@ -96,7 +99,7 @@ namespace xo {
              **/
             static obj<AFacet,DRepr> from_gco(obj<AAllocator>,
                                               obj<AGCObject> gco) {
-                scope log(XO_DEBUG(false));
+                scope log(XO_DEBUG_(false));
 
                 if constexpr (std::is_same_v<AFacet, AGCObject>) {
                     // Need accurate handling of DVariantPlaceholder.

@@ -5,10 +5,14 @@
 
 #include "arena/IAllocIterator_DArenaIterator.hpp"
 #include "AllocIterator.hpp"
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
 #include <cassert>
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
     using std::byte;
 
     namespace mm {
@@ -22,7 +26,7 @@ namespace xo {
         IAllocIterator_DArenaIterator::compare(const DArenaIterator & ix,
                                                const obj<AAllocIterator> & other_arg) noexcept
         {
-            scope log(XO_DEBUG(false),
+            scope log(XO_DEBUG_(false),
                       xtag("&ix", &ix),
                       xtag("ix.arena", ix.arena_), xtag("ix.pos", ix.pos_));
 

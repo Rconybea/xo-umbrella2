@@ -23,12 +23,13 @@ namespace xo {
     using xo::mm::AAllocator;
     using xo::mm::DArena;
     using xo::facet::obj;
+    using xo::pp::scope;
 
     namespace ut {
 
         TEST_CASE("GCObjectConversion-1", "[GCObjectConversion]")
         {
-            scope log(XO_DEBUG(true), "GCObjectConversion-1");
+            scope log(XO_DEBUG_(true), "GCObjectConversion-1");
 
             ArenaConfig cfg {
                 .name_ = "testarena",
@@ -60,7 +61,7 @@ namespace xo {
 
         TEST_CASE("GCObjectConversion-2", "[GCObjectConversion]")
         {
-            scope log(XO_DEBUG(true), "GCObjectConversion-2");
+            scope log(XO_DEBUG_(true), "GCObjectConversion-2");
 
             ArenaConfig cfg {
                 .name_ = "testarena",

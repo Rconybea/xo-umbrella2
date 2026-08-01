@@ -10,8 +10,8 @@
 #include <xo/alloc2/ArenaIterator.hpp>
 #include "arena/IAllocIterator_DArenaIterator.hpp"
 #include "padding.hpp"
-#include <xo/indentlog/scope.hpp>
-#include <xo/indentlog/print/tag.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/tag.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {
@@ -34,6 +34,7 @@ namespace xo {
     using xo::facet::DVariantPlaceholder;
     using xo::facet::obj;
     using xo::facet::typeseq;
+    using xo::pp::xtag;
 
     using std::byte;
 
