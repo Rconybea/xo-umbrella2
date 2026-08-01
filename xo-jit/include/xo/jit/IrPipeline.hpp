@@ -12,7 +12,9 @@
 #pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Wunused-parameter"
 # pragma GCC diagnostic ignored "-Wcpp"
-# pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+# ifndef __clang__
+#  pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+# endif
 # include "llvm/ADT/APFloat.h"
 # include "llvm/ADT/STLExtras.h"
 # include "llvm/IR/BasicBlock.h"
