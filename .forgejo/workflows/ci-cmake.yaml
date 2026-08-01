@@ -25,7 +25,7 @@ jobs:
         run: |
           # print canonical choices
           for c in c++ g++ clang++; do
-            p = "$(command -v "$c" 2>/dev/null || true)"
+            p="$(command -v "$c" 2>/dev/null || true)"
             printf '%-8s %s\n' "$c" "${p:+$(readlink -f "$p")}"
           done
           # cmake will use CXX, default to c++
