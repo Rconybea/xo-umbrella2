@@ -3,7 +3,7 @@
   lib, stdenv, cmake, catch2,
 
   # xo dependencies
-  xo-cmake, xo-indentlog,
+  xo-cmake,
 
   buildExamples ? false,
 } :
@@ -22,5 +22,5 @@ stdenv.mkDerivation (finalattrs:
     doCheck = true;
 
     nativeBuildInputs = [ cmake catch2 xo-cmake ];
-    propagatedBuildInputs = [ xo-indentlog ];
+    propagatedBuildInputs = [ ];
   })
