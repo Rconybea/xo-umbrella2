@@ -51,6 +51,15 @@ configure_file(
     @ONLY
     )
 
+configure_file(
+    ${PROJECT_SOURCE_DIR}/bin/xo-deps.in
+    ${PROJECT_BINARY_DIR}/xo-deps
+    @ONLY
+    )
+file(CHMOD ${PROJECT_BINARY_DIR}/xo-deps
+    PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+                GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+
 install(
     FILES
     "cmake/xo_macros/xo-project-macros.cmake"
@@ -67,6 +76,7 @@ install(
     "${PROJECT_BINARY_DIR}/xo-cmake-config"
     "${PROJECT_BINARY_DIR}/xo-build"
     "${PROJECT_BINARY_DIR}/xo-docker-build"
+    "${PROJECT_BINARY_DIR}/xo-deps"
     PERMISSIONS OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
     DESTINATION ${CMAKE_INSTALL_BINDIR}
 )

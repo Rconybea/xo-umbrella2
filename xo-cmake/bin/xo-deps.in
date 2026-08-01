@@ -1,0 +1,376 @@
+#!/usr/bin/env bash
+#
+# xo-deps - visualize the xo subsystem dependency graph
+#
+# Reads the tsort-format edge list produced by xo_emit_dependency_edges()
+# and renders it with graphviz.
+#
+# Usage: xo-deps [options]
+#
+
+set -euo pipefail
+
+# baked at configure time, like xo-build's SUBSYSTEMEDGES_FILE
+INSTALLED_EDGES_FILE=@CMAKE_INSTALL_FULL_DATADIR@/etc/xo/subsystem-edges
+
+usage() {
+    echo "Usage: $0 [options]"
+    echo "  Render the xo subsystem dependency graph."
+    echo ""
+    echo "Options:"
+    echo "  --format=svg|png|dot|html  Output format (default: svg)"
+    echo "  --output=FILE              Output path (default: xo-deps.<format>)"
+    echo "  --edges=FILE               Edge list, tsort format (default: auto-discover)"
+    echo "  --focus=LIB                Only LIB, what it needs, and what needs it"
+    echo "  --deps-of=LIB              Only LIB and what it depends on (upstream)"
+    echo "  --users-of=LIB             Only LIB and what depends on it (downstream)"
+    echo "  --rankdir=TB|LR            Layout direction (default: TB)"
+    echo "  --no-tred                  Keep transitively-implied edges"
+    echo "  --list                     List subsystem names and exit"
+    echo "  -h, --help                 This message"
+    echo ""
+    echo "Edge direction: an arrow reads 'depends on', so it points from a"
+    echo "subsystem to what it requires.  Top-level consumers sit at the top,"
+    echo "leaf dependencies at the bottom.  (The input is tsort order, where"
+    echo "'A B' means B depends on A, so edges are reversed for drawing.)"
+    echo ""
+    echo "By default edges are passed through 'tred' (transitive reduction),"
+    echo "which drops edges already implied by a longer path.  This loses no"
+    echo "reachability information and is what keeps the graph readable."
+    echo ""
+    echo "Edge list is auto-discovered in this order:"
+    echo "  1. --edges=FILE"
+    echo "  2. \$XO_SUBSYSTEM_EDGES"
+    echo "  3. .build/xo-subsystem-edges.txt, searching upward from \$PWD"
+    echo "     (build-generated: reflects the current configure)"
+    echo "  4. ${INSTALLED_EDGES_FILE}"
+    echo "     (installed alongside xo-build's copy)"
+    echo ""
+    echo "Examples:"
+    echo "  $0                                  # whole graph -> xo-deps.svg"
+    echo "  $0 --format=html                    # interactive, click to trace a cone"
+    echo "  $0 --users-of=xo-arena              # what breaks if xo-arena changes"
+    echo "  $0 --deps-of=xo-reader2 --rankdir=LR"
+    exit 1
+}
+
+FORMAT="svg"
+OUTPUT=""
+EDGES=""
+FOCUS=""
+FOCUS_DIR="both"
+RANKDIR="TB"
+USE_TRED=1
+LIST_ONLY=0
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --format=*)   FORMAT="${1#*=}" ;;
+        --output=*)   OUTPUT="${1#*=}" ;;
+        --edges=*)    EDGES="${1#*=}" ;;
+        --focus=*)    FOCUS="${1#*=}"; FOCUS_DIR="both" ;;
+        --deps-of=*)  FOCUS="${1#*=}"; FOCUS_DIR="deps" ;;
+        --users-of=*) FOCUS="${1#*=}"; FOCUS_DIR="users" ;;
+        --rankdir=*)  RANKDIR="${1#*=}" ;;
+        --no-tred)    USE_TRED=0 ;;
+        --list)       LIST_ONLY=1 ;;
+        -h|--help)    usage ;;
+        *) echo "$0: unknown option: $1" >&2; usage ;;
+    esac
+    shift
+done
+
+case "${FORMAT}" in
+    svg|png|dot|html) ;;
+    *) echo "$0: unsupported --format=${FORMAT}" >&2; exit 1 ;;
+esac
+
+# ----------------------------------------------------------------
+# locate edge list
+
+find_edges() {
+    if [[ -n "${EDGES}" ]]; then
+        echo "${EDGES}"; return
+    fi
+    if [[ -n "${XO_SUBSYSTEM_EDGES:-}" ]]; then
+        echo "${XO_SUBSYSTEM_EDGES}"; return
+    fi
+
+    # build-generated copy is the freshest: walk up looking for one
+    local dir="${PWD}"
+    while [[ "${dir}" != "/" ]]; do
+        if [[ -f "${dir}/.build/xo-subsystem-edges.txt" ]]; then
+            echo "${dir}/.build/xo-subsystem-edges.txt"; return
+        fi
+        dir="$(dirname "${dir}")"
+    done
+
+    if [[ -f "${INSTALLED_EDGES_FILE}" ]]; then
+        echo "${INSTALLED_EDGES_FILE}"; return
+    fi
+}
+
+EDGES="$(find_edges)"
+
+if [[ -z "${EDGES}" || ! -f "${EDGES}" ]]; then
+    echo "$0: no edge list found; pass --edges=FILE (see --help)" >&2
+    exit 1
+fi
+
+if [[ "${LIST_ONLY}" -eq 1 ]]; then
+    awk '{print $1; print $2}' "${EDGES}" | sort -u
+    exit 0
+fi
+
+for tool in dot tred; do
+    if ! command -v "${tool}" >/dev/null 2>&1; then
+        echo "$0: '${tool}' not found (install graphviz)" >&2
+        exit 1
+    fi
+done
+
+if [[ -z "${OUTPUT}" ]]; then
+    OUTPUT="xo-deps.${FORMAT}"
+fi
+
+# ----------------------------------------------------------------
+# optionally restrict to one subsystem's dependency cone
+
+filter_edges() {
+    if [[ -z "${FOCUS}" ]]; then
+        cat "${EDGES}"
+        return
+    fi
+
+    awk -v focus="${FOCUS}" -v dir="${FOCUS_DIR}" '
+        # "a b" == b depends on a.  succ[a] = things that depend on a.
+        { succ[$1] = succ[$1] " " $2
+          pred[$2] = pred[$2] " " $1
+          lo[NR] = $1; hi[NR] = $2; n = NR
+          seen[$1] = 1; seen[$2] = 1 }
+
+        function close_over(adj, start,    frontier, next_frontier, node, i, parts, k) {
+            keep[start] = 1
+            frontier = start
+            while (frontier != "") {
+                next_frontier = ""
+                k = split(frontier, parts, " ")
+                for (i = 1; i <= k; ++i) {
+                    node = parts[i]
+                    split(adj[node], nbrs, " ")
+                    for (j in nbrs) {
+                        if (nbrs[j] != "" && !keep[nbrs[j]]) {
+                            keep[nbrs[j]] = 1
+                            next_frontier = next_frontier " " nbrs[j]
+                        }
+                    }
+                    delete nbrs
+                }
+                frontier = next_frontier
+            }
+        }
+
+        END {
+            if (!(focus in seen)) {
+                print "xo-deps: no such subsystem: " focus > "/dev/stderr"
+                exit 1
+            }
+            if (dir == "deps" || dir == "both") close_over(pred, focus)
+            if (dir == "users" || dir == "both") close_over(succ, focus)
+
+            for (i = 1; i <= n; ++i)
+                if (keep[lo[i]] && keep[hi[i]])
+                    print lo[i], hi[i]
+        }
+    ' "${EDGES}"
+}
+
+# ----------------------------------------------------------------
+# emit dot
+
+emit_dot() {
+    local highlight="${FOCUS}"
+
+    # NB: fontcolor and bgcolor are set explicitly on purpose.  Graphviz omits
+    # the fill attribute on <text> when the font is default black, so the label
+    # inherits its color from the viewer -- which renders it near-invisible
+    # against the node fill in a dark-mode SVG viewer.
+    echo "digraph xo {"
+    echo "  graph [rankdir=${RANKDIR}, bgcolor=\"white\", fontname=\"Helvetica\","
+    echo "         nodesep=0.28, ranksep=0.55, splines=true];"
+    echo "  node [shape=box, style=\"rounded,filled\", fillcolor=\"#eef4fa\", color=\"#8FA9C4\","
+    echo "        fontcolor=\"#12212e\", fontname=\"Helvetica\", fontsize=10, height=0.3];"
+    echo "  edge [color=\"#93a6b8\", arrowsize=0.6, penwidth=0.9];"
+
+    if [[ -n "${highlight}" ]]; then
+        echo "  \"${highlight}\" [fillcolor=\"#ffe6b3\", color=\"#d19a2e\","
+        echo "                    fontcolor=\"#4a2f00\", penwidth=1.6];"
+    fi
+
+    # Reverse the tsort orientation on the way out: input "A B" means B depends
+    # on A, and we draw B -> A so an arrow reads "depends on".  That puts
+    # top-level consumers (nothing depends on them) at the top and leaf
+    # dependencies (which depend on nothing) at the bottom.
+    filter_edges | awk '{print "  \"" $2 "\" -> \"" $1 "\";"}'
+    echo "}"
+}
+
+reduce() {
+    if [[ "${USE_TRED}" -eq 1 ]]; then
+        # tred chatters about cycles on stderr; the graph is a DAG, so quiet it
+        tred 2>/dev/null
+    else
+        cat
+    fi
+}
+
+# ----------------------------------------------------------------
+# render
+
+case "${FORMAT}" in
+    dot)
+        emit_dot | reduce > "${OUTPUT}"
+        ;;
+    svg|png)
+        emit_dot | reduce | dot "-T${FORMAT}" -o "${OUTPUT}"
+        ;;
+    html)
+        svg_body="$(emit_dot | reduce | dot -Tsvg)"
+
+        {
+            cat <<'HTML_HEAD'
+<!doctype html>
+<meta charset="utf-8">
+<title>xo dependency graph</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { margin: 0; font: 13px/1.4 Helvetica, Arial, sans-serif; }
+  header { position: sticky; top: 0; padding: 8px 12px; background: Canvas;
+           border-bottom: 1px solid rgba(128,128,128,.35); display: flex;
+           gap: 14px; align-items: center; flex-wrap: wrap; }
+  header b { font-weight: 600; }
+  .key { display: inline-flex; align-items: center; gap: 5px; }
+  .sw { width: 11px; height: 11px; border-radius: 2px; display: inline-block; }
+  .sw.up { background: #d19a2e; }
+  .sw.self { background: #2e7dd1; }
+  .sw.down { background: #3aa06a; }
+  .hint { opacity: .7; }
+  #wrap { padding: 10px; overflow: auto; }
+  svg { max-width: 100%; height: auto; }
+  .node, .edge { cursor: pointer; }
+  .dim { opacity: .12; }
+  .node.self polygon, .node.self path { fill: #cfe3fb !important; stroke: #2e7dd1 !important; stroke-width: 2px; }
+  .node.up   polygon, .node.up   path { fill: #ffe6b3 !important; stroke: #d19a2e !important; }
+  .node.down polygon, .node.down path { fill: #d6f0e2 !important; stroke: #3aa06a !important; }
+  .edge.up   path { stroke: #d19a2e !important; }
+  .edge.up   polygon { fill: #d19a2e !important; stroke: #d19a2e !important; }
+  .edge.down path { stroke: #3aa06a !important; }
+  .edge.down polygon { fill: #3aa06a !important; stroke: #3aa06a !important; }
+</style>
+<header>
+  <b>xo dependency graph</b>
+  <span class="hint">click a node to trace its cone &middot; click background to reset</span>
+  <span class="key"><i class="sw up"></i>depends on (upstream)</span>
+  <span class="key"><i class="sw self"></i>selected</span>
+  <span class="key"><i class="sw down"></i>depended on by (downstream)</span>
+  <span id="status" class="hint"></span>
+</header>
+<div id="wrap">
+HTML_HEAD
+
+            printf '%s\n' "${svg_body}"
+
+            cat <<'HTML_TAIL'
+</div>
+<script>
+(function () {
+  var svg = document.querySelector("#wrap svg");
+  if (!svg) return;
+
+  var nodes = {}, edges = [], up = {}, down = {};
+
+  function titleOf(g) {
+    var t = g.querySelector("title");
+    return t ? t.textContent.trim() : "";
+  }
+
+  svg.querySelectorAll("g.node").forEach(function (g) {
+    nodes[titleOf(g)] = g;
+  });
+
+  // graphviz writes edge titles as "a->b"; here that reads "a depends on b"
+  svg.querySelectorAll("g.edge").forEach(function (g) {
+    var parts = titleOf(g).split("->");
+    if (parts.length !== 2) return;
+    var a = parts[0].trim(), b = parts[1].trim();
+    edges.push({ g: g, from: a, to: b });
+    (up[a] = up[a] || []).push(b);       // a depends on b
+    (down[b] = down[b] || []).push(a);   // b is depended on by a
+  });
+
+  function reach(adj, start) {
+    var seen = {}, stack = [start];
+    while (stack.length) {
+      var cur = stack.pop();
+      (adj[cur] || []).forEach(function (nxt) {
+        if (!seen[nxt]) { seen[nxt] = true; stack.push(nxt); }
+      });
+    }
+    return seen;
+  }
+
+  function clear() {
+    Object.keys(nodes).forEach(function (n) {
+      nodes[n].classList.remove("dim", "self", "up", "down");
+    });
+    edges.forEach(function (e) { e.g.classList.remove("dim", "up", "down"); });
+    document.getElementById("status").textContent = "";
+  }
+
+  function select(name) {
+    clear();
+    var ups = reach(up, name), downs = reach(down, name);
+
+    Object.keys(nodes).forEach(function (n) {
+      if (n === name) nodes[n].classList.add("self");
+      else if (ups[n]) nodes[n].classList.add("up");
+      else if (downs[n]) nodes[n].classList.add("down");
+      else nodes[n].classList.add("dim");
+    });
+
+    edges.forEach(function (e) {
+      var inUp = (ups[e.from] || e.from === name) && (ups[e.to] || e.to === name);
+      var inDown = (downs[e.from] || e.from === name) && (downs[e.to] || e.to === name);
+      if (inUp) e.g.classList.add("up");
+      else if (inDown) e.g.classList.add("down");
+      else e.g.classList.add("dim");
+    });
+
+    document.getElementById("status").textContent =
+      name + " — " + Object.keys(ups).length + " upstream, "
+           + Object.keys(downs).length + " downstream";
+  }
+
+  Object.keys(nodes).forEach(function (n) {
+    nodes[n].addEventListener("click", function (ev) {
+      ev.stopPropagation();
+      select(n);
+    });
+  });
+
+  document.addEventListener("click", clear);
+})();
+</script>
+HTML_TAIL
+        } > "${OUTPUT}"
+        ;;
+esac
+
+n_nodes=$(filter_edges | awk '{print $1; print $2}' | sort -u | wc -l | tr -d ' ')
+n_edges_in=$(filter_edges | wc -l | tr -d ' ')
+n_edges_out=$(emit_dot | reduce | grep -c -- '->' || true)
+
+echo "${OUTPUT}: ${n_nodes} subsystems, ${n_edges_out} edges drawn (of ${n_edges_in})"
+echo "  edges: ${EDGES}"
+
+# end xo-deps
