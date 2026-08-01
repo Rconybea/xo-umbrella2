@@ -4,6 +4,7 @@
 
   xo-cmake, xo-timeutil,
 
+  buildExamples ? false,
   doCheck ? true,
 } :
 
@@ -15,8 +16,10 @@ stdenv.mkDerivation (finalattrs:
     src = ../xo-ppsink;
 
     cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake"]
+                 ++ lib.optionals buildExamples ["-DXO_ENABLE_EXAMPLES=1"]
                  ++ lib.optionals doCheck ["-DENABLE_TESTING=1"];
 
+    inherit buildExamples;
     inherit doCheck;
 
     # xo-ppsink's exported config + public headers pull in xo-timeutil,

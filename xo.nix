@@ -27,7 +27,7 @@ let
   xoPackages = {
     xo-cmake          = callPackage pkgs/xo-cmake.nix          { stdenv = jitStdenv; };
     xo-timeutil       = callPackage pkgs/xo-timeutil.nix       { stdenv = jitStdenv; };
-    xo-ppsink         = callPackage pkgs/xo-ppsink.nix         { stdenv = jitStdenv; };
+    xo-ppsink         = callPackage pkgs/xo-ppsink.nix         { stdenv = jitStdenv;                   buildExamples = true; };
     xo-indentlog      = callPackage pkgs/xo-indentlog.nix      { stdenv = jitStdenv; buildDocs = true; buildExamples = true; };
     xo-subsys         = callPackage pkgs/xo-subsys.nix         { stdenv = jitStdenv; };
     xo-flatstring     = callPackage pkgs/xo-flatstring.nix     { stdenv = jitStdenv; buildDocs = true; buildExamples = true; };
