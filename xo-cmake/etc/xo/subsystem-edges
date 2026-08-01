@@ -1,3 +1,4 @@
+xo-alloc xo-imgui
 xo-alloc xo-object
 xo-alloc xo-ordinaltree
 xo-alloc2 xo-gc
@@ -25,6 +26,7 @@ xo-facet xo-printable2
 xo-facet xo-type
 xo-flatstring xo-expression
 xo-flatstring xo-expression2
+xo-flatstring xo-imgui
 xo-flatstring xo-ratio
 xo-flatstring xo-unit
 xo-gc xo-expression2
@@ -36,6 +38,7 @@ xo-indentlog xo-expression2
 xo-indentlog xo-facet
 xo-indentlog xo-flatstring
 xo-indentlog xo-gc
+xo-indentlog xo-imgui
 xo-indentlog xo-object2
 xo-indentlog xo-ordinaltree
 xo-indentlog xo-printable2
@@ -51,6 +54,7 @@ xo-indentlog xo-unit
 xo-kalmanfilter xo-pykalmanfilter
 xo-numeric xo-expression2
 xo-numeric xo-reader2
+xo-object xo-imgui
 xo-object xo-interpreter
 xo-object xo-ordinaltree
 xo-object2 xo-gc
@@ -86,6 +90,7 @@ xo-pywebutil xo-pywebsock
 xo-randomgen xo-alloc2
 xo-randomgen xo-arena
 xo-randomgen xo-gc
+xo-randomgen xo-imgui
 xo-randomgen xo-indentlog2
 xo-randomgen xo-object
 xo-randomgen xo-ordinaltree
@@ -101,9 +106,11 @@ xo-reactor xo-websock
 xo-reader xo-interpreter
 xo-reader2 xo-interpreter2
 xo-refcnt xo-distribution
+xo-refcnt xo-expression
 xo-refcnt xo-ordinaltree
 xo-refcnt xo-pyexpression
 xo-refcnt xo-pyunit
+xo-refcnt xo-pyutil
 xo-refcnt xo-reflect
 xo-refcnt xo-webutil
 xo-reflect xo-alloc

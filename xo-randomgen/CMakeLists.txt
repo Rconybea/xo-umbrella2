@@ -42,4 +42,5 @@ xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets
 
 if (XO_ENABLE_EXAMPLES)
     install(TARGETS randomgen_ex1 DESTINATION bin/randomgen/example)
+    install(TARGETS randomgen_ex2 DESTINATION bin/randomgen/example)
 endif()
