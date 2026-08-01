@@ -92,6 +92,11 @@ namespace xo {
 
         namespace detail {
             struct Invoker {
+                /** report size of target type (according to sizeof()).
+                 *  Zero for void
+                 **/
+                virtual uint32_t size() const = 0;
+                /** invoke destructor for target type at address @p addr **/
                 virtual void dtor(void * addr) const = 0;
             };
 
@@ -104,6 +109,10 @@ namespace xo {
              **/
             template <typename T>
             struct InvokerAux : public Invoker {
+                virtual uint32_t size() const override {
+                    return sizeof(T);
+                }
+
                 virtual void dtor(void * addr) const override {
                     T * obj = reinterpret_cast<T *>(addr);
 
@@ -111,15 +120,17 @@ namespace xo {
                 }
             };
 
-            /** no dtor for void **/
+            /** no sizeof(), no dtor for void **/
             template<>
             struct InvokerAux<void> : public Invoker {
+                virtual uint32_t size() const override { return 0; }
                 virtual void dtor(void *) const override {}
             };
 
-            /** no dtor for function types **/
+            /** no sizeof(), no dtor for function types **/
             template <typename Ret, typename... Args>
             struct InvokerAux<Ret(Args...)> : public Invoker {
+                virtual uint32_t size() const override { return 0; }
                 virtual void dtor(void *) const override {}
             };
         } /*namespace detail*/
@@ -247,6 +258,10 @@ namespace xo {
             const std::type_info * native_typeinfo() const { return native_typeinfo_; }
             const std::string & canonical_name() const { return canonical_name_; }
             const std::string_view & short_name() const { return short_name_; }
+            /** report allocation size of target type according to sizeof(T) where well-defined.
+             *  0 for void and function types.
+             **/
+            uint32_t size() const { return invoker_->size(); }
             bool complete_flag() const { return complete_flag_; }
             TypeDescrExtra * tdextra() const { return tdextra_.get(); }
             Metatype metatype() const { return tdextra_->metatype(); }
