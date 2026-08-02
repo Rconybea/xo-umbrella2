@@ -6,6 +6,7 @@
 #pragma once
 
 #include "StochasticProcess.hpp"
+#include <xo/timeutil/timeutil.hpp>
 #include "Realization2.hpp"
 #include "RealizationState.hpp"
 

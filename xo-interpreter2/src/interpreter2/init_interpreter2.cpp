@@ -4,6 +4,7 @@
  **/
 
 #include "init_interpreter2.hpp"
+#include <xo/indentlog/scope.hpp>
 #include "SetupInterpreter2.hpp"
 
 #include <xo/reader2/init_reader2.hpp>

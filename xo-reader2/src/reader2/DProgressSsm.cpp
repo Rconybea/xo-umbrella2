@@ -4,6 +4,7 @@
  **/
 
 #include "ProgressSsm.hpp"
+#include <xo/indentlog/scope.hpp>
 
 #include "DExpectExprSsm.hpp"
 #include "ssm/ISyntaxStateMachine_DExpectExprSsm.hpp"

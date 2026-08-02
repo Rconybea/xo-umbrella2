@@ -1,6 +1,7 @@
 /* @file DSequenceSsm.cpp */
 
 #include "DSequenceSsm.hpp"
+#include <xo/indentlog/scope.hpp>
 #include "ssm/ISyntaxStateMachine_DSequenceSsm.hpp"
 #include "DExpectExprSsm.hpp"
 #include <xo/expression2/SequenceExpr.hpp>

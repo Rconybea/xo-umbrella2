@@ -1,6 +1,7 @@
 /* @file websock_utest_main.cpp */
 
 #include "websock/Webserver.hpp"
+#include <xo/timeutil/timeutil.hpp>
 #include "volfit/init_volfit.hpp"
 #include "volfit/Volfit.hpp"
 #include "volfit/VolfitInputCapture.hpp"

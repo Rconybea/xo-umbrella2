@@ -3,6 +3,7 @@
 #pragma once
 
 #include "xo/reactor/EventTimeFn.hpp"
+#include <xo/timeutil/timeutil.hpp>
 
 namespace xo {
     namespace reactor {

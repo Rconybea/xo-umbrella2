@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Reducer.hpp"
+#include <xo/timeutil/timeutil.hpp>
 
 namespace xo {
     namespace reactor {

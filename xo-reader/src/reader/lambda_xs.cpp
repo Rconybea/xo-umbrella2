@@ -1,6 +1,7 @@
 /* @file lambda_xs.cpp */
 
 #include "lambda_xs.hpp"
+#include <xo/indentlog/scope.hpp>
 #include "define_xs.hpp"
 #include "parserstatemachine.hpp"
 #include "exprstatestack.hpp"

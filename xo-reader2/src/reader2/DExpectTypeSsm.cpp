@@ -4,6 +4,7 @@
  **/
 
 #include "ExpectTypeSsm.hpp"
+#include <xo/indentlog/scope.hpp>
 #include "ExpectListTypeSsm.hpp"
 #include "SyntaxStateMachine.hpp"
 #include <xo/type/AtomicType.hpp>

@@ -4,6 +4,7 @@
  **/
 
 #include "ExpectExprSsm.hpp"
+#include <xo/indentlog/scope.hpp>
 #include "ParserStateMachine.hpp"
 #include "ParserStack.hpp"
 #include "SyntaxStateMachine.hpp"

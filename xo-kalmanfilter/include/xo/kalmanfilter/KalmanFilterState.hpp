@@ -3,6 +3,7 @@
 #pragma once
 
 #include "xo/reflect/SelfTagging.hpp"
+#include <xo/timeutil/timeutil.hpp>
 #include "KalmanFilterInput.hpp"
 #include "KalmanFilterTransition.hpp"
 //#include "time/Time.hpp"

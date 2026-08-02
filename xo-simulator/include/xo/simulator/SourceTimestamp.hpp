@@ -6,6 +6,7 @@
 #pragma once
 
 #include "xo/reactor/ReactorSource.hpp"
+#include <xo/timeutil/timeutil.hpp>
 
 namespace xo {
     namespace sim {

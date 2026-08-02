@@ -4,6 +4,7 @@
  **/
 
 #include <xo/interpreter2/init_interpreter2.hpp>
+#include <xo/indentlog/scope.hpp>
 #include <xo/interpreter2/VirtualSchematikaMachine.hpp>
 #include <xo/alloc2/Arena.hpp>
 #include <xo/indentlog2/print/PrettySink.hpp>

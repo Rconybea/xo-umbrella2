@@ -2,6 +2,7 @@
 
 // note: need pyprocess/ here bc pyprocess.hpp is generated, located in build directory
 #include "pyprocess.hpp"
+#include <xo/timeutil/timeutil.hpp>
 #include "xo/pywebutil/pywebutil.hpp"
 #include "xo/process/init_process.hpp"
 #include "xo/process/UpxToConsole.hpp"

@@ -4,6 +4,7 @@
  **/
 
 #include "DDefineSsm.hpp"
+#include <xo/indentlog/scope.hpp>
 #include "DExpectSymbolSsm.hpp"
 #include "DExpectTypeSsm.hpp"
 #include "DExpectExprSsm.hpp"

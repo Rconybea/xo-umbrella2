@@ -5,7 +5,7 @@
 #include "xo/reactor/Reactor.hpp"
 #include "SourceTimestamp.hpp"
 #include "xo/reactor/ReactorSource.hpp"
-#include "xo/refcnt/Refcounted.hpp"
+#include "xo/refcnt/Refcounted_indentlog.hpp"
 //#include "time/Time.hpp"
 #include <vector>
 

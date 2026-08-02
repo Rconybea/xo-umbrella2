@@ -3,6 +3,7 @@
 #pragma once
 
 #include "KalmanFilterSpec.hpp"
+#include <xo/timeutil/timeutil.hpp>
 
 namespace xo {
     namespace kalman {

@@ -4,6 +4,7 @@
  **/
 
 #include "DToplevelSeqSsm.hpp"
+#include <xo/indentlog/scope.hpp>
 #include "ssm/ISyntaxStateMachine_DToplevelSeqSsm.hpp"
 #include "DDefineSsm.hpp"
 #include "DeftypeSsm.hpp"

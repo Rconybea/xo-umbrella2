@@ -1,6 +1,7 @@
 /* @file Sink.test.cpp */
 
 #include "xo/reactor/PollingReactor.hpp"
+#include <xo/timeutil/timeutil.hpp>
 #include "xo/reactor/Sink.hpp"
 #include "xo/indentlog/print/pair.hpp"
 #include "catch2/catch.hpp"

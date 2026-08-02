@@ -1,6 +1,7 @@
 /* @file progress_xs.cpp */
 
 #include "progress_xs.hpp"
+#include <xo/indentlog/scope.hpp>
 #include "apply_xs.hpp"
 #include "exprstatestack.hpp"
 #include "expect_expr_xs.hpp"

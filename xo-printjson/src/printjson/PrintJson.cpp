@@ -4,6 +4,7 @@
  */
 
 #include "PrintJson.hpp"
+#include <xo/timeutil/timeutil.hpp>
 //#include "time/Time.hpp"
 #include "xo/reflect/TypeDescr.hpp"
 #include "xo/indentlog/print/tag.hpp"

@@ -1,6 +1,7 @@
 /* @file exprseq_xs.cpp */
 
 #include "exprseq_xs.hpp"
+#include <xo/indentlog/scope.hpp>
 #include "parserstatemachine.hpp"
 #include "exprstatestack.hpp"
 #include "exprseq_xs.hpp"

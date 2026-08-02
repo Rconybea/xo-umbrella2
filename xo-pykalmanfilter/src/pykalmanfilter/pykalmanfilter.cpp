@@ -1,6 +1,7 @@
 /* @file pykalmanfilter.cpp */
 
 #include "pykalmanfilter.hpp"
+#include <xo/timeutil/timeutil.hpp>
 #include "xo/pyreactor/pyreactor.hpp"
 #include "xo/pyutil/pyutil.hpp"
 

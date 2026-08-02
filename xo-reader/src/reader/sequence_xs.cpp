@@ -1,6 +1,7 @@
 /* @file sequence_xs.cpp */
 
 #include "sequence_xs.hpp"
+#include <xo/indentlog/scope.hpp>
 #include "parserstatemachine.hpp"
 #include "expect_expr_xs.hpp"
 #include "let1_xs.hpp"

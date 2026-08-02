@@ -4,6 +4,7 @@
  */
 
 #include "let1_xs.hpp"
+#include <xo/indentlog/scope.hpp>
 #include "expect_expr_xs.hpp"
 #include "parserstatemachine.hpp"
 #include "xo/expression/Sequence.hpp"

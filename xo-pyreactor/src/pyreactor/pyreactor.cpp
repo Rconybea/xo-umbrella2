@@ -1,6 +1,7 @@
 /* @file pyreactor.cpp */
 
 #include "pyreactor.hpp"
+#include <xo/timeutil/timeutil.hpp>
 #include "xo/pyprintjson/pyprintjson.hpp"
 #include "xo/pyreflect/pyreflect.hpp"
 

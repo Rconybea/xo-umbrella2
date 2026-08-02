@@ -4,6 +4,7 @@
  **/
 
 #include "DExpectSymbolSsm.hpp"
+#include <xo/indentlog/scope.hpp>
 #include "ssm/ISyntaxStateMachine_DExpectSymbolSsm.hpp"
 #include "SyntaxStateMachine.hpp"
 #include "ParserStateMachine.hpp"

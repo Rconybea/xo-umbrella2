@@ -1,6 +1,7 @@
 /* @file exprstate.cpp */
 
 #include "exprstate.hpp"
+#include <xo/indentlog/scope.hpp>
 #include "exprstatestack.hpp"
 #include "parserstatemachine.hpp"
 #include "pretty_parserstatemachine.hpp"

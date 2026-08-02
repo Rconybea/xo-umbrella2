@@ -3,6 +3,7 @@
 #pragma once
 
 #include "AbstractSink.hpp"
+#include <xo/timeutil/timeutil.hpp>
 #include "AbstractSource.hpp"
 #include "PolyAdapterSink.hpp"
 #include "xo/reflect/Reflect.hpp"

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "StochasticProcess.hpp"
+#include <xo/timeutil/timeutil.hpp>
 //#include "time/Time.hpp"
 //#include <boost/range.hpp>
 #include <ranges>

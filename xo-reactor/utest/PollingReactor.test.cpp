@@ -1,6 +1,7 @@
 /* @file PollingReactor.test.cpp */
 
 #include "xo/reactor/init_reactor.hpp"
+#include <xo/timeutil/timeutil.hpp>
 #include "xo/reactor/PollingReactor.hpp"
 #include "xo/reactor/FifoQueue.hpp"
 #include "xo/reactor/Sink.hpp"

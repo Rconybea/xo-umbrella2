@@ -3,6 +3,7 @@
 #pragma once
 
 #include "xo/reflect/SelfTagging.hpp"
+#include <xo/timeutil/timeutil.hpp>
 //#include "time/Time.hpp"
 //#include "xo/refcnt/Refcounted.hpp"
 #include <Eigen/Dense>

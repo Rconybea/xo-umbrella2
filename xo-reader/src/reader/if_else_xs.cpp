@@ -4,6 +4,7 @@
  **/
 
 #include "if_else_xs.hpp"
+#include <xo/indentlog/scope.hpp>
 //#include "exprstatestack.hpp"
 #include "parserstatemachine.hpp"
 #include "expect_expr_xs.hpp"

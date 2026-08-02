@@ -4,6 +4,7 @@
  **/
 
 #include "VsmPrimitives.hpp"
+#include <xo/indentlog/scope.hpp>
 #include <xo/numeric/NumericDispatch.hpp>
 #include <xo/object2/Boolean.hpp>
 #include <xo/type/AtomicType.hpp>

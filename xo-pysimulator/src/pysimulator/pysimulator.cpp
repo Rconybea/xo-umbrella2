@@ -1,6 +1,7 @@
 /* @file pysimulator.cpp */
 
 #include "pysimulator.hpp"
+#include <xo/timeutil/timeutil.hpp>
 #include "xo/pyreactor/pyreactor.hpp"
 
 #include "xo/simulator/Simulator.hpp"

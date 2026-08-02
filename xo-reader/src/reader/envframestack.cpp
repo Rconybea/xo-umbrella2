@@ -4,6 +4,7 @@
  */
 
 #include "envframestack.hpp"
+#include <xo/indentlog/scope.hpp>
 #include "pretty_envframestack.hpp"
 #include "pretty_localenv.hpp"
 

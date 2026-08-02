@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Reactor.hpp"
+#include <xo/indentlog/scope.hpp>
 #include "EventSource.hpp"
 #include "Sink.hpp"
 #include "EventTimeFn2.hpp"

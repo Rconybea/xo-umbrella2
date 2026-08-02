@@ -1,6 +1,7 @@
 /* @file pywebutil.cpp */
 
 #include "pywebutil.hpp"
+#include <xo/timeutil/timeutil.hpp>
 #include "xo/webutil/HttpEndpointDescr.hpp"
 #include "xo/webutil/StreamEndpointDescr.hpp"
 #include "xo/pyutil/pyutil.hpp"

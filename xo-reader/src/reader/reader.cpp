@@ -1,6 +1,7 @@
 /* @file reader.cpp */
 
 #include "reader.hpp"
+#include <xo/indentlog/scope.hpp>
 
 namespace xo {
     namespace scm {

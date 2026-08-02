@@ -4,6 +4,7 @@
  **/
 
 #include "ifelse/DIfElseSsm.hpp"
+#include <xo/indentlog/scope.hpp>
 #include "ifelse/ISyntaxStateMachine_DIfElseSsm.hpp"
 #include "DefineSsm.hpp"
 //#include "define/IPrintable_DDefineSsm.hpp"

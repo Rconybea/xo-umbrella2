@@ -3,6 +3,7 @@
 #pragma once
 
 #include "KalmanFilterStep.hpp"
+#include <xo/timeutil/timeutil.hpp>
 #include "KalmanFilterState.hpp"
 #include "KalmanFilterTransition.hpp"
 #include "KalmanFilterObservable.hpp"

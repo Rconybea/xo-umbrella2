@@ -4,6 +4,7 @@
  **/
 
 #include "VirtualSchematikaMachine.hpp"
+#include <xo/indentlog/scope.hpp>
 #include "DPrimitive_gco_3_dict_string_gco.hpp"
 #include "DPrimitive_gco_2_gco_gco.hpp"
 #include "VsmDefContFrame.hpp"

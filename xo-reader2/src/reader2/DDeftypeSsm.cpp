@@ -4,6 +4,7 @@
  **/
 
 #include "DeftypeSsm.hpp"
+#include <xo/indentlog/scope.hpp>
 #include "syntaxstatetype.hpp"
 #include "ExpectSymbolSsm.hpp"
 #include "ExpectTypeSsm.hpp"

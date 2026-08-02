@@ -3,6 +3,7 @@
 #pragma once
 
 #include "Realizable2Process.hpp"
+#include <xo/timeutil/timeutil.hpp>
 #include "Realization2.hpp"
 #include "RealizationState.hpp"
 #include "xo/randomgen/normalgen.hpp"

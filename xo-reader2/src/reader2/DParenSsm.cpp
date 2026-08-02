@@ -4,6 +4,7 @@
  **/
 
 #include "ParenSsm.hpp"
+#include <xo/indentlog/scope.hpp>
 #include "ExpectExprSsm.hpp"
 #include "syntaxstatetype.hpp"
 #include <xo/alloc2/GCObject.hpp>

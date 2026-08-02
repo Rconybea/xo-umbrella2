@@ -3,6 +3,7 @@
 #pragma once
 
 #include "BrownianMotion.hpp"
+#include <xo/timeutil/timeutil.hpp>
 #include "ExpProcess.hpp"
 
 namespace xo {
