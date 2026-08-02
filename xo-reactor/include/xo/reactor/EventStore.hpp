@@ -2,15 +2,15 @@
 
 #pragma once
 
-#include "Reducer.hpp"
-#include <xo/timeutil/timeutil.hpp>
 #include "EventTimeFn.hpp"
+#include "Reducer.hpp"
 #include "Sink.hpp"
-#include "xo/webutil/HttpEndpointDescr.hpp"
-#include "xo/printjson/PrintJson.hpp"
-#include "xo/reflect/Reflect.hpp"
-#include "xo/ordinaltree/RedBlackTree.hpp"
-#include "xo/ordinaltree/rbtree/OrdinalReduce.hpp"
+#include <xo/ordinaltree/RedBlackTree.hpp>
+#include <xo/ordinaltree/rbtree/OrdinalReduce.hpp>
+#include <xo/printjson/PrintJson.hpp>
+#include <xo/reflect/Reflect.hpp>
+#include <xo/webutil/HttpEndpointDescr.hpp>
+#include <xo/timeutil/timeutil.hpp>
 
 namespace xo {
     namespace reactor {

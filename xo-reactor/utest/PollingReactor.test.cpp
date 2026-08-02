@@ -1,13 +1,13 @@
 /* @file PollingReactor.test.cpp */
 
-#include "xo/reactor/init_reactor.hpp"
-#include <xo/timeutil/timeutil.hpp>
 #include "xo/reactor/PollingReactor.hpp"
+#include "catch2/catch.hpp"
 #include "xo/reactor/FifoQueue.hpp"
 #include "xo/reactor/Sink.hpp"
-#include "xo/randomgen/xoshiro256.hpp"
-#include "xo/indentlog/print/pair.hpp"
-#include "catch2/catch.hpp"
+#include "xo/reactor/init_reactor.hpp"
+#include <xo/indentlog/print/pair.hpp>
+#include <xo/timeutil/timeutil.hpp>
+#include <xo/randomgen/xoshiro256.hpp>
 
 namespace xo {
     //using xo::reactor::Reactor;

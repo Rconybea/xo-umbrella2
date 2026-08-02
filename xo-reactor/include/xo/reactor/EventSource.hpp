@@ -3,7 +3,7 @@
 #pragma once
 
 #include "ReactorSource.hpp"
-#include "xo/callback/CallbackSet.hpp"
+#include <xo/callback/CallbackSet.hpp>
 
 namespace xo {
     namespace reactor {

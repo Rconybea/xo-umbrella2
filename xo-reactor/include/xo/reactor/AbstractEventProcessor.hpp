@@ -2,10 +2,10 @@
 
 #pragma once
 
-#include "xo/refcnt/Refcounted.hpp"
+#include <xo/refcnt/Refcounted.hpp>
 #include <functional>
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace xo {
     namespace reactor {

@@ -4,8 +4,8 @@
 
 #include "Reactor.hpp"
 #include "ReactorSource.hpp"
-#include <vector>
 #include <cstdint>
+#include <vector>
 
 namespace xo {
     namespace reactor {

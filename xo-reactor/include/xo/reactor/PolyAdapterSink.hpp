@@ -6,7 +6,7 @@
 #pragma once
 
 #include "Sink.hpp"
-#include "xo/reflect/Reflect.hpp"
+#include <xo/reflect/Reflect.hpp>
 
 namespace xo {
     namespace reactor {

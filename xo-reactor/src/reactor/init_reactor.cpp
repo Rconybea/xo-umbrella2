@@ -4,7 +4,7 @@
  */
 
 #include "init_reactor.hpp"
-#include "xo/reflect/init_reflect.hpp"
+#include <xo/reflect/init_reflect.hpp>
 
 namespace xo {
     void

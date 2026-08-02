@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "xo/refcnt/Refcounted.hpp"
-#include "xo/indentlog/log_level.hpp"
+#include <xo/refcnt/Refcounted.hpp>
+#include <xo/indentlog/log_level.hpp>
 #include <cstdint>
 
 namespace xo {

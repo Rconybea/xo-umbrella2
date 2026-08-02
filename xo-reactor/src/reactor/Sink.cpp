@@ -1,8 +1,8 @@
 /* @file Sink.cpp */
 
 #include "Sink.hpp"
+#include <xo/refcnt/Refcounted.hpp>
 #include <xo/timeutil/timeutil.hpp>
-#include "xo/refcnt/Refcounted.hpp"
 
 namespace xo {
   namespace reactor {

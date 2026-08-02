@@ -2,9 +2,9 @@
 
 #pragma once
 
-#include "SecondarySource.hpp"
-#include "LastReducer.hpp"
 #include "EventTimeFn.hpp"
+#include "LastReducer.hpp"
+#include "SecondarySource.hpp"
 
 namespace xo {
     namespace reactor {

@@ -5,7 +5,7 @@
 
 #include "Reactor.hpp"
 #include "init_reactor.hpp"
-#include "xo/subsys/Subsystem.hpp"
+#include <xo/subsys/Subsystem.hpp>
 
 namespace xo {
     namespace reactor {

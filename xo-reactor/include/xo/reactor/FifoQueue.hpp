@@ -2,12 +2,12 @@
 
 #pragma once
 
-#include "Reactor.hpp"
-#include <xo/indentlog/scope.hpp>
 #include "EventSource.hpp"
-#include "Sink.hpp"
 #include "EventTimeFn2.hpp"
-#include "xo/callback/CallbackSet.hpp"
+#include "Reactor.hpp"
+#include "Sink.hpp"
+#include <xo/indentlog/scope.hpp>
+#include <xo/callback/CallbackSet.hpp>
 #include <deque>
 
 namespace xo {

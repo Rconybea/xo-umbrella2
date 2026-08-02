@@ -3,9 +3,9 @@
 #pragma once
 
 #include "AbstractEventProcessor.hpp"
-#include "xo/reflect/TypeDescr.hpp"
-#include "xo/callback/CallbackSet.hpp"
-#include "xo/refcnt/Refcounted.hpp"
+#include <xo/reflect/TypeDescr.hpp>
+#include <xo/refcnt/Refcounted.hpp>
+#include <xo/callback/CallbackSet.hpp>
 #include <string>
 
 namespace xo {

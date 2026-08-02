@@ -1,8 +1,8 @@
 /* @file AbstractSource.cpp */
 
 #include "AbstractSource.hpp"
-#include "xo/indentlog/scope.hpp"
-#include "xo/webutil/StreamEndpointDescr.hpp"
+#include <xo/webutil/StreamEndpointDescr.hpp>
+#include <xo/indentlog/scope.hpp>
 //#include "indentlog/scope.hpp"
 
 namespace xo {

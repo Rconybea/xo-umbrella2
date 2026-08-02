@@ -3,12 +3,12 @@
 #pragma once
 
 #include "EventSource.hpp"
-#include <xo/indentlog/scope.hpp>
-#include "Sink.hpp"
-#include "Reactor.hpp"
 #include "HeapReducer.hpp"
-#include "xo/callback/CallbackSet.hpp"
-#include "xo/cxxutil/demangle.hpp"
+#include "Reactor.hpp"
+#include "Sink.hpp"
+#include <xo/indentlog/scope.hpp>
+#include <xo/callback/CallbackSet.hpp>
+#include <xo/cxxutil/demangle.hpp>
 #include <vector>
 
 namespace xo {

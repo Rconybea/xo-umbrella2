@@ -3,13 +3,13 @@
 #pragma once
 
 #include "AbstractSink.hpp"
-#include <xo/timeutil/timeutil.hpp>
 #include "AbstractSource.hpp"
 #include "PolyAdapterSink.hpp"
-#include "xo/reflect/Reflect.hpp"
-#include "xo/indentlog/print/time.hpp"
-#include "xo/indentlog/print/tag.hpp"
-#include "xo/cxxutil/demangle.hpp"
+#include <xo/reflect/Reflect.hpp>
+#include <xo/indentlog/print/tag.hpp>
+#include <xo/indentlog/print/time.hpp>
+#include <xo/timeutil/timeutil.hpp>
+#include <xo/cxxutil/demangle.hpp>
 #include <typeinfo>
 
 namespace xo {
