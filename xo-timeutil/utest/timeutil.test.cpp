@@ -4,8 +4,8 @@
 #include "xo/timeutil/timeutil_iostream.hpp"
 #include <catch2/catch.hpp>
 #include <sstream>
-#include <vector>
 #include <string>
+#include <vector>
 
 using namespace xo;
 using namespace xo::time;

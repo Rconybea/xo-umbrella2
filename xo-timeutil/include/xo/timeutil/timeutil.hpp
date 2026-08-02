@@ -13,11 +13,11 @@
 
 #include <chrono>
 #include <compare>
-#include <utility>
-#include <string_view>
 #include <cstdint>
 #include <cstdio>
 #include <ctime>
+#include <string_view>
+#include <utility>
 #include <time.h>
 
 namespace xo {
