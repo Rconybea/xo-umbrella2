@@ -3,15 +3,15 @@
  *  @author Roland Conybeare, Dec 2025
  **/
 
-#include <xo/alloc2/Allocator.hpp>
-#include "AllocIterator.hpp"
 #include "DX1CollectorIterator.hpp"
-#include "detail/IAllocator_DX1Collector.hpp"
+#include "AllocIterator.hpp"
 #include "detail/IAllocIterator_DX1CollectorIterator.hpp"
-#include <xo/arena/ArenaConfig.hpp>
+#include "detail/IAllocator_DX1Collector.hpp"
 #include "padding.hpp"
-#include <xo/indentlog/scope.hpp>
+#include <xo/alloc2/Allocator.hpp>
+#include <xo/arena/ArenaConfig.hpp>
 #include <xo/indentlog/print/tag.hpp>
+#include <xo/indentlog/scope.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {

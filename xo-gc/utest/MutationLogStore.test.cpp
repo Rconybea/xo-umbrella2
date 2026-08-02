@@ -5,16 +5,16 @@
 
 #include "GcosTestutil.hpp"
 #include "MlsTestutil.hpp"
-#include <xo/object2/List.hpp>
-#include <xo/object2/Boolean.hpp>
-#include <xo/object2/Integer.hpp>
 #include <xo/gc/GCObjectStore.hpp>
 #include <xo/gc/GCObjectStoreVisitor.hpp>
 #include <xo/gc/MutationLogStore.hpp>
 #include <xo/gc/X1VerifyStats.hpp>
+#include <xo/object2/Boolean.hpp>
+#include <xo/object2/Integer.hpp>
+#include <xo/object2/List.hpp>
 #include <xo/indentlog/scope.hpp>
-#include <xo/randomgen/xoshiro256.hpp>
 #include <xo/randomgen/random_seed.hpp>
+#include <xo/randomgen/xoshiro256.hpp>
 #include <catch2/catch.hpp>
 #include <unistd.h> // for ::getpagesize()
 

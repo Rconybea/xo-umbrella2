@@ -4,8 +4,8 @@
  **/
 
 #include "MutationLogStore.hpp"
-#include <xo/indentlog/scope.hpp>
 #include "X1Collector.hpp" // temporary
+#include <xo/indentlog/scope.hpp>
 
 namespace xo {
     namespace mm {

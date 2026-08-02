@@ -5,11 +5,11 @@
 
 #pragma once
 
-#include "MutationLogConfig.hpp"
-#include "X1CollectorConfig.hpp"
 #include "GCObjectStore.hpp"
-#include "MutationLogStatistics.hpp"
+#include "MutationLogConfig.hpp"
 #include "MutationLogEntry.hpp"
+#include "MutationLogStatistics.hpp"
+#include "X1CollectorConfig.hpp"
 #include <xo/arena/DArenaVector.hpp>
 #include <array>
 

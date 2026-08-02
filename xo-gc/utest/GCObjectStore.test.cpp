@@ -7,20 +7,20 @@
 #include <xo/gc/GCObjectStore.hpp>
 #include <xo/gc/GCObjectStoreVisitor.hpp>
 #include <xo/gc/X1VerifyStats.hpp>
-#include <xo/object2/ListOps.hpp>
-#include <xo/object2/List.hpp>
-#include <xo/object2/Integer.hpp>
 #include <xo/object2/Boolean.hpp>
-#include <xo/alloc2/GCObjectVisitor.hpp>
-#include <xo/alloc2/GCObject.hpp>
+#include <xo/object2/Integer.hpp>
+#include <xo/object2/List.hpp>
+#include <xo/object2/ListOps.hpp>
 #include <xo/alloc2/Arena.hpp>
+#include <xo/alloc2/GCObject.hpp>
+#include <xo/alloc2/GCObjectVisitor.hpp>
 #include <xo/facet/TypeRegistry.hpp>
-#include <xo/arena/print.hpp>
 #include <xo/arena/backtrace.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/arena/print.hpp>
 #include <xo/indentlog/print/tag.hpp>
-#include <xo/randomgen/xoshiro256.hpp>
+#include <xo/indentlog/scope.hpp>
 #include <xo/randomgen/random_seed.hpp>
+#include <xo/randomgen/xoshiro256.hpp>
 #include <catch2/catch.hpp>
 
 namespace ut {

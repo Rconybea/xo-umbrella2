@@ -6,8 +6,8 @@
 #include "random_allocs.hpp"
 #include <xo/arena/DArena.hpp>
 #include <xo/arena/padding.hpp>
-#include <xo/indentlog/scope.hpp>
 #include <xo/indentlog/print/tag.hpp>
+#include <xo/indentlog/scope.hpp>
 #include <catch2/catch.hpp>
 #include <map>
 

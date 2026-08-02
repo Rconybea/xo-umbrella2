@@ -6,17 +6,17 @@
 #include "GcosTestutil.hpp"
 #include "MockCollector.hpp"
 #include <xo/gc/X1VerifyStats.hpp>
-#include <xo/object2/ListOps.hpp>
 #include <xo/object2/Boolean.hpp>
 #include <xo/object2/Integer.hpp>
-#include <xo/alloc2/Collector.hpp>
+#include <xo/object2/ListOps.hpp>
 #include <xo/alloc2/Arena.hpp>
+#include <xo/alloc2/Collector.hpp>
 #include <xo/facet/TypeRegistry.hpp>
-#include <xo/randomgen/xoshiro256.hpp>
-#include <xo/indentlog/scope.hpp>
 #include <xo/indentlog/print/tag.hpp>
-#include <vector>
+#include <xo/indentlog/scope.hpp>
+#include <xo/randomgen/xoshiro256.hpp>
 #include <catch2/catch.hpp>
+#include <vector>
 
 namespace ut {
     using xo::scm::ListOps;

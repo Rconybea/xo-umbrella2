@@ -13,8 +13,8 @@
 
 #pragma once
 
-#include "Collector.hpp"
 #include "../DMockCollector.hpp"
+#include "Collector.hpp"
 
 namespace xo { namespace mm { class ICollector_DMockCollector; } }
 

@@ -4,9 +4,9 @@
  **/
 
 #include "MutationLogEntry.hpp"
-#include <xo/indentlog/scope.hpp>
 #include "GCObjectStore.hpp"
 #include "MutationLogStatistics.hpp"
+#include <xo/indentlog/scope.hpp>
 
 namespace xo {
     using xo::mm::MutationLogStatistics;

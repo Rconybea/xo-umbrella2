@@ -6,11 +6,11 @@
 #pragma once
 
 #include <xo/alloc2/GCObjectVisitor.hpp>
-#include <xo/alloc2/VisitReason.hpp>
 #include <xo/alloc2/Generation.hpp>
+#include <xo/alloc2/VisitReason.hpp>
 #include <xo/alloc2/role.hpp>
-#include <xo/arena/AllocInfo.hpp>
 #include <xo/facet/obj.hpp>
+#include <xo/arena/AllocInfo.hpp>
 
 namespace xo {
     namespace mm {

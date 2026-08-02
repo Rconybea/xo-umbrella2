@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <xo/alloc2/alloc/IAllocIterator_Xfer.hpp>
 #include "xo/gc/DX1CollectorIterator.hpp"
+#include <xo/alloc2/alloc/IAllocIterator_Xfer.hpp>
 
 namespace xo {
     namespace mm { struct IAllocIterator_DX1CollectorIterator; }

@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <xo/gc/MutationLogStore.hpp>
 #include <xo/gc/GCObjectStore.hpp>
+#include <xo/gc/MutationLogStore.hpp>
 
 namespace xo {
     namespace mm {

@@ -4,9 +4,9 @@
  **/
 
 #include "setup_gc.hpp"
+#include "GCObjectStoreVisitor.hpp"
 #include "X1Collector.hpp"
 #include "X1CollectorIterator.hpp"
-#include "GCObjectStoreVisitor.hpp"
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/indentlog/scope.hpp>
 

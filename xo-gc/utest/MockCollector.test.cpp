@@ -6,8 +6,8 @@
 #include "MockCollector.hpp"
 #include <xo/gc/X1VerifyStats.hpp>
 #include <xo/object2/Integer.hpp>
-#include <xo/alloc2/Collector.hpp>
 #include <xo/alloc2/Arena.hpp>
+#include <xo/alloc2/Collector.hpp>
 #include <catch2/catch.hpp>
 
 namespace ut {

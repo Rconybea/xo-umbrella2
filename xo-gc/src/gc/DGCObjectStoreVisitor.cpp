@@ -3,8 +3,8 @@
  *  @author Roland Conybeare, Apr 2026
  **/
 
-#include "GCObjectStoreVisitor.hpp"
 #include "GCObjectStore.hpp"
+#include "GCObjectStoreVisitor.hpp"
 
 namespace xo {
     namespace mm {

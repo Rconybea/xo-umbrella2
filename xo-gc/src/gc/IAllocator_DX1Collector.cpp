@@ -5,10 +5,10 @@
  *  See also ICollector_DX1Collector.cpp for collector facet
  **/
 
-#include "Collector.hpp" // for obj<ACollector> argument to GCObject.forward_children()
 #include "detail/IAllocator_DX1Collector.hpp"
-#include "detail/IAllocIterator_DX1CollectorIterator.hpp"
+#include "Collector.hpp" // for obj<ACollector> argument to GCObject.forward_children()
 #include "DX1CollectorIterator.hpp"
+#include "detail/IAllocIterator_DX1CollectorIterator.hpp"
 #include <xo/alloc2/arena/IAllocator_DArena.hpp>
 
 namespace xo {

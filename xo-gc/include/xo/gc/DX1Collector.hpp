@@ -5,18 +5,18 @@
 
 #pragma once
 
-#include "X1CollectorConfig.hpp"
 #include "GCObjectStore.hpp"
 #include "MutationLogStore.hpp"
+#include "X1CollectorConfig.hpp"
 #include "X1VerifyStats.hpp"
 #include "object_age.hpp"
 #include "role.hpp"
 #include <xo/alloc2/Allocator.hpp>
+#include <xo/arena/ArenaConfig.hpp>
 #include <xo/arena/DArena.hpp>
 #include <xo/arena/DArenaVector.hpp>
-#include <xo/arena/ArenaConfig.hpp>
-#include <memory>
 #include <array>
+#include <memory>
 
 namespace xo {
     namespace mm {

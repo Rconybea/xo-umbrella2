@@ -6,17 +6,14 @@
 #include "GCObjectStore.hpp"
 #include "GCObjectStoreVisitor.hpp"
 #include "X1VerifyStats.hpp"
-
-#include <xo/object2/Dictionary.hpp>
 #include <xo/object2/Array.hpp>
-#include <xo/object2/Integer.hpp>
 #include <xo/object2/Boolean.hpp>
+#include <xo/object2/Dictionary.hpp>
+#include <xo/object2/Integer.hpp>
 #include <xo/stringtable2/String.hpp>
-
+#include <xo/facet/TypeRegistry.hpp>
 #include <xo/arena/DArenaIterator.hpp>
 #include <xo/arena/backtrace.hpp>
-
-#include <xo/facet/TypeRegistry.hpp>
 #include <xo/indentlog/scope.hpp>
 #include <cassert>
 #include <unistd.h> // for ::getpagesize()

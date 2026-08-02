@@ -3,32 +3,26 @@
  *  @author Roland Conybeare, Dec 2025
  **/
 
-#include "init_gc.hpp"
-#include "ListOps.hpp"
+#include "DArray.hpp"
 #include "DFloat.hpp"
 #include "DInteger.hpp"
 #include "DList.hpp"
-#include "DArray.hpp"
-
+#include "ListOps.hpp"
+#include "init_gc.hpp"
+#include <xo/gc/X1Collector.hpp>
 #include <xo/object2/Float.hpp>
 #include <xo/object2/Integer.hpp>
 #include <xo/object2/List.hpp>
-
-#include <xo/gc/X1Collector.hpp>
 #include <xo/alloc2/Arena.hpp>
-//#include <xo/alloc2/Collector.hpp>
+// #include <xo/alloc2/Collector.hpp>
 #include <xo/alloc2/CollectorTypeRegistry.hpp>
-
 #include <xo/arena/AllocInfo.hpp>
 #include <xo/arena/padding.hpp>
-
 #include <xo/subsys/Subsystem.hpp>
-
-#include <xo/indentlog/scope.hpp>
 #include <xo/indentlog/print/tag.hpp>
-
+#include <xo/indentlog/scope.hpp>
 #include <catch2/catch.hpp>
-#include <unistd.h>  // for getpagesize() on osx
+#include <unistd.h> // for getpagesize() on osx
 
 namespace ut {
     using xo::S_gc_tag;

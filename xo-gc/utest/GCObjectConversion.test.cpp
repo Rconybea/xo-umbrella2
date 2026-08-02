@@ -4,10 +4,10 @@
  **/
 
 #include "GCObjectConversion.hpp"
-#include <xo/object2/ListOps.hpp>
-#include <xo/object2/List.hpp>
 #include <xo/object2/Array.hpp>
 #include <xo/object2/Integer.hpp>
+#include <xo/object2/List.hpp>
+#include <xo/object2/ListOps.hpp>
 #include <xo/alloc2/Arena.hpp>
 #include <catch2/catch.hpp>
 

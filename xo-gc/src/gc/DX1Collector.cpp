@@ -3,20 +3,18 @@
  *  @author Roland Conybeare, Dec 2025
  **/
 
-#include "X1Collector.hpp"
 #include "GCObjectStoreVisitor.hpp"
+#include "X1Collector.hpp"
 #include <xo/gc/DX1CollectorIterator.hpp>
-
-#include <xo/object2/Dictionary.hpp>
 #include <xo/object2/Array.hpp>
-#include <xo/object2/Integer.hpp>
 #include <xo/object2/Boolean.hpp>
+#include <xo/object2/Dictionary.hpp>
+#include <xo/object2/Integer.hpp>
 #include <xo/stringtable2/String.hpp>
-
 #include <xo/alloc2/GCObject.hpp>
-//#include <xo/alloc2/Allocator_extra.hpp>
-#include <xo/alloc2/Arena.hpp>
+// #include <xo/alloc2/Allocator_extra.hpp>
 #include "object_age.hpp"
+#include <xo/alloc2/Arena.hpp>
 #include <xo/facet/obj.hpp>
 #include <xo/indentlog/scope.hpp>
 #include <cassert>

@@ -10,21 +10,21 @@
 //#include <xo/alloc2/Allocator.hpp>
 #include "random_allocs.hpp"
 #include <xo/gc/X1Collector.hpp>
-#include <xo/object2/RuntimeError.hpp>
-#include <xo/object2/Dictionary.hpp>
 #include <xo/object2/Array.hpp>
-#include <xo/object2/List.hpp>
+#include <xo/object2/Boolean.hpp>
+#include <xo/object2/Dictionary.hpp>
 #include <xo/object2/Float.hpp>
 #include <xo/object2/Integer.hpp>
-#include <xo/object2/Boolean.hpp>
+#include <xo/object2/List.hpp>
+#include <xo/object2/RuntimeError.hpp>
 #include <xo/stringtable2/DUniqueString.hpp>
-#include <xo/alloc2/CollectorTypeRegistry.hpp>
 #include <xo/alloc2/Allocator.hpp>
-#include <xo/randomgen/xoshiro256.hpp>
-#include <xo/randomgen/random_seed.hpp>
-#include <xo/indentlog/scope.hpp>
-#include <xo/indentlog/print/tag.hpp>
+#include <xo/alloc2/CollectorTypeRegistry.hpp>
 #include <xo/indentlog/print/array.hpp>
+#include <xo/indentlog/print/tag.hpp>
+#include <xo/indentlog/scope.hpp>
+#include <xo/randomgen/random_seed.hpp>
+#include <xo/randomgen/xoshiro256.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {

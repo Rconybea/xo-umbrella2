@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <xo/gc/MutationLogStore.hpp>
 #include <xo/gc/GCObjectStore.hpp>
+#include <xo/gc/MutationLogStore.hpp>
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/alloc2/Generation.hpp>
 #include <xo/arena/DArena.hpp>
