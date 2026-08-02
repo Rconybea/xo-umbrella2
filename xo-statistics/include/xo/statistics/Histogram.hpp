@@ -2,11 +2,11 @@
 
 #pragma once
 
-#include "statistics/SampleStatistics.hpp"
 #include "logutil/scope.hpp"
-#include <vector>
+#include "statistics/SampleStatistics.hpp"
 #include <cmath>
 #include <cstdint>
+#include <vector>
 
 namespace xo {
   namespace statistics {
