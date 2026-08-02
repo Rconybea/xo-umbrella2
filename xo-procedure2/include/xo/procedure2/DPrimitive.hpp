@@ -8,17 +8,16 @@
 #include "RuntimeContext.hpp"
 #include <xo/type/Type.hpp>
 #include <xo/object2/DArray.hpp>
+#include <xo/alloc2/Allocator.hpp>
+#include <xo/alloc2/GCObject.hpp>
 #include <xo/alloc2/GCObjectConversion.hpp>
 #include <xo/alloc2/GCObjectVisitor.hpp>
-#include <xo/alloc2/GCObject.hpp>
 #include <xo/reflect/Reflect.hpp>
-#include <xo/alloc2/Allocator.hpp>
 #include <xo/facet/FacetRegistry.hpp>
-
+#include <string_view>
 #include <tuple>
 #include <type_traits>
 #include <utility>
-#include <string_view>
 
 namespace xo {
     namespace scm {

@@ -14,9 +14,9 @@
 #pragma once
 
 #include "Printable.hpp"
+#include "xo/procedure2/DPrimitive_gco_3_dict_string_gco.hpp"
 #include <xo/printable2/Printable.hpp>
 #include <xo/printable2/detail/IPrintable_Xfer.hpp>
-#include "xo/procedure2/DPrimitive_gco_3_dict_string_gco.hpp"
 
 namespace xo { namespace scm { class IPrintable_DPrimitive_gco_3_dict_string_gco; } }
 

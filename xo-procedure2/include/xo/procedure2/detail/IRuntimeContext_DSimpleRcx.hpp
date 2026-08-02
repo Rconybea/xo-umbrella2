@@ -13,8 +13,8 @@
 
 #pragma once
 
-#include "xo/procedure2/RuntimeContext.hpp"
 #include "xo/procedure2/DSimpleRcx.hpp"
+#include "xo/procedure2/RuntimeContext.hpp"
 
 namespace xo { namespace scm { class IRuntimeContext_DSimpleRcx; } }
 

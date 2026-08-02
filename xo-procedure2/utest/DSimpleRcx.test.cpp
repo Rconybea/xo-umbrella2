@@ -3,9 +3,9 @@
  *  @author Roland Conybeare, Jan 2026
  **/
 
-#include <xo/procedure2/init_procedure2.hpp>
 #include <xo/procedure2/DSimpleRcx.hpp>
 #include <xo/procedure2/detail/IRuntimeContext_DSimpleRcx.hpp>
+#include <xo/procedure2/init_procedure2.hpp>
 #include <xo/stringtable2/StringTable.hpp>
 #include <xo/alloc2/arena/IAllocator_DArena.hpp>
 #include <catch2/catch.hpp>

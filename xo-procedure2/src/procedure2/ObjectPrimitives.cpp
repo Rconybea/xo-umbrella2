@@ -4,17 +4,17 @@
  **/
 
 #include "ObjectPrimitives.hpp"
-#include <xo/object2/RuntimeError.hpp>
-#include <xo/object2/Dictionary.hpp>
-#include <xo/object2/Sequence.hpp>
-#include <xo/object2/List.hpp>
-#include <xo/object2/Integer.hpp>
+#include <xo/type/AtomicType.hpp>
 #include <xo/type/FunctionType.hpp>
 #include <xo/type/ListType.hpp>
 #include <xo/type/TypeVarRef.hpp>
-#include <xo/type/AtomicType.hpp>
-#include <xo/printable2/Printable.hpp>
+#include <xo/object2/Dictionary.hpp>
+#include <xo/object2/Integer.hpp>
+#include <xo/object2/List.hpp>
+#include <xo/object2/RuntimeError.hpp>
+#include <xo/object2/Sequence.hpp>
 #include <xo/stringtable2/String.hpp>
+#include <xo/printable2/Printable.hpp>
 #include <unistd.h> // for getcwd()
 
 namespace xo {

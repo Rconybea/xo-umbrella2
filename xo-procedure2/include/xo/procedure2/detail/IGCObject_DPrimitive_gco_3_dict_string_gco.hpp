@@ -14,9 +14,9 @@
 #pragma once
 
 #include "GCObject.hpp"
-#include <xo/alloc2/GCObject.hpp>
-#include <xo/alloc2/Allocator.hpp>
 #include "xo/procedure2/DPrimitive_gco_3_dict_string_gco.hpp"
+#include <xo/alloc2/Allocator.hpp>
+#include <xo/alloc2/GCObject.hpp>
 
 namespace xo { namespace scm { class IGCObject_DPrimitive_gco_3_dict_string_gco; } }
 

@@ -4,8 +4,8 @@
  **/
 
 #include "DPrimitive_gco_3_dict_string_gco.hpp"
-#include "detail/IProcedure_DPrimitive_gco_3_dict_string_gco.hpp"
 #include "detail/IGCObject_DPrimitive_gco_3_dict_string_gco.hpp"
 #include "detail/IPrintable_DPrimitive_gco_3_dict_string_gco.hpp"
+#include "detail/IProcedure_DPrimitive_gco_3_dict_string_gco.hpp"
 
 /* end Primitive_gco_3_dict_string_gco.hpp */

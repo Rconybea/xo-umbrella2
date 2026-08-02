@@ -3,14 +3,14 @@
  *  @author Roland Conybeare, Jan 2026
  **/
 
-#include <xo/procedure2/init_procedure2.hpp>
-#include <xo/procedure2/init_primitives.hpp>
 #include <xo/procedure2/DSimpleRcx.hpp>
-#include <xo/procedure2/detail/IRuntimeContext_DSimpleRcx.hpp>
 #include <xo/procedure2/detail/IPrintable_DPrimitive_gco_2_gco_gco.hpp>
+#include <xo/procedure2/detail/IRuntimeContext_DSimpleRcx.hpp>
+#include <xo/procedure2/init_primitives.hpp>
+#include <xo/procedure2/init_procedure2.hpp>
+#include <xo/object2/DArray.hpp>
 #include <xo/object2/DFloat.hpp>
 #include <xo/object2/DInteger.hpp>
-#include <xo/object2/DArray.hpp>
 #include <xo/object2/number/IGCObject_DFloat.hpp>
 #include <xo/object2/number/IGCObject_DInteger.hpp>
 #include <xo/alloc2/arena/IAllocator_DArena.hpp>

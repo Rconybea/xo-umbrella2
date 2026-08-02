@@ -6,9 +6,9 @@
 #pragma once
 
 #include "Procedure.hpp"
-#include <xo/indentlog/scope.hpp>
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/reflect/TypeDescr.hpp>
+#include <xo/indentlog/scope.hpp>
 #include <functional>
 
 namespace xo {

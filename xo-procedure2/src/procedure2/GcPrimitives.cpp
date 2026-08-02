@@ -4,11 +4,11 @@
  **/
 
 #include "GcPrimitives.hpp"
-#include <xo/object2/Integer.hpp>
 #include <xo/object2/Boolean.hpp>
-//#include <xo/gc/X1Collector.hpp>
-#include <xo/type/FunctionType.hpp>
+#include <xo/object2/Integer.hpp>
+// #include <xo/gc/X1Collector.hpp>
 #include <xo/type/AtomicType.hpp>
+#include <xo/type/FunctionType.hpp>
 #include <xo/alloc2/Collector.hpp>
 #include <xo/alloc2/Generation.hpp>
 

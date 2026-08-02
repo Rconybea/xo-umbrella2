@@ -16,8 +16,8 @@
 // includes (via {facet_includes})
 #include "xo/procedure2/RuntimeContext.hpp"
 #include <xo/alloc2/GCObject.hpp>
-#include <xo/facet/obj.hpp>
 #include <xo/facet/facet_implementation.hpp>
+#include <xo/facet/obj.hpp>
 #include <xo/facet/typeseq.hpp>
 
 namespace xo { namespace scm { class DArray; } }

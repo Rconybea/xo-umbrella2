@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <xo/alloc2/GCObject.hpp>
 #include "DPrimitive.hpp"
+#include <xo/alloc2/GCObject.hpp>
 
 namespace xo {
     namespace scm {

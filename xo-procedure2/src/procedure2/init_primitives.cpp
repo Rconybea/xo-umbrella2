@@ -5,9 +5,9 @@
 
 #include "init_primitives.hpp"
 #include "DPrimitive.hpp"
+#include <xo/object2/Boolean.hpp>
 #include <xo/object2/Float.hpp>
 #include <xo/object2/Integer.hpp>
-#include <xo/object2/Boolean.hpp>
 #include <xo/object2/number/GCObjectConversion_DFloat.hpp>
 #include <xo/object2/number/GCObjectConversion_DInteger.hpp>
 #include <xo/alloc2/GCObjectConversion.hpp>

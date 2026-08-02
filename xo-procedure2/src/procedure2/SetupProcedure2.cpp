@@ -4,16 +4,15 @@
  **/
 
 #include "SetupProcedure2.hpp"
-#include "Procedure.hpp"
-#include "ObjectPrimitives.hpp"
 #include "GcPrimitives.hpp"
-#include "SimpleRcx.hpp"
+#include "ObjectPrimitives.hpp"
 #include "Primitive_gco_0.hpp"
 #include "Primitive_gco_1_gco.hpp"
-#include "Primitive_gco_2_gco_gco.hpp"
 #include "Primitive_gco_2_dict_string.hpp"
+#include "Primitive_gco_2_gco_gco.hpp"
 #include "Primitive_gco_3_dict_string_gco.hpp"
-
+#include "Procedure.hpp"
+#include "SimpleRcx.hpp"
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/printable2/Printable.hpp>
 #include <xo/facet/FacetRegistry.hpp>

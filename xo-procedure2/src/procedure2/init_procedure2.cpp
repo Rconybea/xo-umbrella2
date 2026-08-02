@@ -4,10 +4,10 @@
 **/
 
 #include "init_procedure2.hpp"
-#include "init_primitives.hpp"
 #include "SetupProcedure2.hpp"
-#include <xo/object2/init_object2.hpp>
+#include "init_primitives.hpp"
 #include <xo/type/init_type.hpp>
+#include <xo/object2/init_object2.hpp>
 #include <xo/alloc2/CollectorTypeRegistry.hpp>
 
 namespace xo {

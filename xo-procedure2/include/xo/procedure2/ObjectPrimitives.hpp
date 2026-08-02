@@ -7,8 +7,8 @@
 
 #include "Primitive_gco_0.hpp"
 #include "Primitive_gco_1_gco.hpp"
-#include "Primitive_gco_2_gco_gco.hpp"
 #include "Primitive_gco_2_dict_string.hpp"
+#include "Primitive_gco_2_gco_gco.hpp"
 #include "Primitive_gco_3_dict_string_gco.hpp"
 
 namespace xo {
