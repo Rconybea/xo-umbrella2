@@ -26,7 +26,15 @@ namespace xo {
 int
 main(int argc, char* argv[])
 {
-    return xo::UtestAppStart("utest.indentlog2").run(argc, argv);
+    auto app = xo::UtestAppStart("utest.indentlog2");
+
+    int retval = app.init(argc, argv);
+    if (retval)
+        return retval;
+
+    app.setup();
+
+    return app.run();
 }
 
 /* end indentlog2_utest_main.cpp */

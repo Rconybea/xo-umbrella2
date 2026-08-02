@@ -5,6 +5,8 @@
 
 #pragma once
 
+#include <vector>
+
 namespace xo {
 
     /** @brief Startup sequence for a unit test
@@ -18,11 +20,21 @@ namespace xo {
         /**
          *  Parse program arguments; recognize XO test arguments,
          *  sending remainder to catch2; do subsystem initialization
+         *
+         *  returns -1 on parsing failure
          **/
-        int run(int argc, char * argv[]);
+        int init(int argc, char * argv[]);
+
+        /** alloc global resources, if any **/
+        void setup();
+
+        /** run unit test **/
+        int run();
 
     private:
         const char * app_name_ = "";
+        /** args remaining after parsing --debug, --announce, --help|-h|-? **/
+        std::vector<const char *> argv2_;
     };
 
 } /*namespace xo*/

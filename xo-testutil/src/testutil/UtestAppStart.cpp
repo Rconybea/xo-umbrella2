@@ -24,7 +24,7 @@ namespace xo {
     using std::endl;
 
     int
-    UtestAppStart::run(int argc, char * argv[])
+    UtestAppStart::init(int argc, char * argv[])
     {
         CLI::App app{app_name_};
 
@@ -47,7 +47,7 @@ namespace xo {
         app.allow_extras();
         CLI11_PARSE(app, argc, argv);
 
-        std::vector<const char *> argv2 = {argv[0]};
+        argv2_.push_back(argv[0]);
 
         // note: keep this alive until after Catch::Session().run() below;
         //       argv2 holds pointers into these strings.  (app.remaining()
@@ -61,20 +61,30 @@ namespace xo {
             cout << app.help() << endl;
             cout << "catch2 options" << endl;
 
-            argv2.push_back("--help");
+            argv2_.push_back("--help");
         } else {
             // keep program name
             for (auto & x : remaining)
-                argv2.push_back(x.c_str());
+                argv2_.push_back(x.c_str());
         }
 
-        Subsystem::initialize_all();
+        return 0;
+    }
 
+    void
+    UtestAppStart::setup()
+    {
+        Subsystem::initialize_all();
+    }
+
+    int
+    UtestAppStart::run()
+    {
         scope log(XO_DEBUG_(UtestConfig::instance()->debug_flag()),
                   "start catch2 session");
 
         // run catch2's test session / help
-        return Catch::Session().run(argv2.size(), argv2.data());
+        return Catch::Session().run(argv2_.size(), argv2_.data());
     }
 } /*namespace xo*/
 
