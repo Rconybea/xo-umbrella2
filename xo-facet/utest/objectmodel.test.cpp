@@ -3,18 +3,18 @@
  *  @author Roland Conybeare, Dec 2025
  **/
 
-#include "xo/facet/facet.hpp"
-#include "xo/facet/facet_implementation.hpp"
 #include "xo/facet/FacetRegistry.hpp"
 #include "xo/facet/OObject.hpp"
 #include "xo/facet/RRouter.hpp"
-#include "xo/facet/typeseq.hpp"
+#include "xo/facet/facet.hpp"
+#include "xo/facet/facet_implementation.hpp"
 #include "xo/facet/obj.hpp"
+#include "xo/facet/typeseq.hpp"
 #include <catch2/catch.hpp>
-#include <cmath>
-#include <numbers>
 #include <cassert>
+#include <cmath>
 #include <cstring>
+#include <numbers>
 
 namespace xo {
     using xo::facet::valid_abstract_facet;

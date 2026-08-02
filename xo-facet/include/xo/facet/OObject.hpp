@@ -7,10 +7,10 @@
 
 #include "facet_implementation.hpp"
 #include <xo/reflectutil/typeseq.hpp>
-#include <new>
-#include <cstring>
-#include <cstddef>
 #include <cassert>
+#include <cstddef>
+#include <cstring>
+#include <new>
 
 namespace xo {
     namespace facet {

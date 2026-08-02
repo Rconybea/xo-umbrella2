@@ -6,9 +6,9 @@
 #pragma once
 
 #include "RRouter.hpp"
-//#include "FacetRegistry.hpp"  // nope, would create include cycle
-#include <utility>
+// #include "FacetRegistry.hpp"  // nope, would create include cycle
 #include <cassert>
+#include <utility>
 
 namespace xo {
     namespace facet {

@@ -6,8 +6,8 @@
 #pragma once
 
 #include <concepts>
-#include <type_traits>
 #include <cstdint>
+#include <type_traits>
 
 namespace xo {
     namespace facet {
