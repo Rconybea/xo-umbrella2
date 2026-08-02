@@ -13,8 +13,8 @@
 
 #pragma once
 
-#include "xo/stringtable2/DString.hpp"
 #include "GCObject.hpp"
+#include "xo/stringtable2/DString.hpp"
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/alloc2/GCObject.hpp>
 
