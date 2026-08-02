@@ -1,5 +1,5 @@
-#include <string_view>
 #include <array>
+#include <string_view>
 
 template <std::string_view const & ... Strings>
 struct sv_concat

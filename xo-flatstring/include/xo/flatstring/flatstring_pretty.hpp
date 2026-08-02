@@ -7,7 +7,7 @@
 
 #include "flatstring.hpp"
 #include "flatstring_iostream.hpp"
-#include "xo/indentlog/print/ppdetail_atomic.hpp"
+#include <xo/indentlog/print/ppdetail_atomic.hpp>
 
 namespace xo {
 #ifndef ppdetail_atomic

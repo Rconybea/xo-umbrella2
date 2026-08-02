@@ -5,10 +5,10 @@
 
 #pragma once
 
-#include <string_view>
-#include <sstream>
 #include <algorithm>
 #include <memory>
+#include <sstream>
+#include <string_view>
 
 namespace xo {
     /** @class flatstring
