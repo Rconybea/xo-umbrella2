@@ -2,7 +2,16 @@
 
 #pragma once
 
-#include "xo/indentlog/scope.hpp"
+#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tag.hpp>
+/* TRANSITIONAL re-export.  Refcounted.hpp historically leaked
+ * <xo/indentlog/scope.hpp> (and, through it, timeutil) to every includer.
+ * refcnt's own code now uses xo::pp:: exclusively, but consumers not yet
+ * migrated to xo-ppsink still rely on getting legacy scope/xtag/tostr here.
+ * Drop this once those subsystems (reader, reader2, interpreter2, reactor,
+ * process, ...) are migrated off legacy indentlog.
+ */
+#include <xo/indentlog/scope.hpp>
 #include "xo/cxxutil/demangle.hpp"
 
 //#include <boost/intrusive_ptr.hpp>
@@ -99,7 +108,8 @@ namespace xo {
                     intrusive_ptr_add_ref(ptr_);
                     ; /* trivial aliasing,  proceed */
                 } else {
-                    using xo::xtag;
+                    using xo::pp::tostr;
+                    using xo::pp::xtag;
                     throw std::runtime_error(tostr("attempt to use aliasing ctor with",
                                                    xtag("Y", reflect::type_name<Y>()),
                                                    xtag("T", reflect::type_name<T>())));

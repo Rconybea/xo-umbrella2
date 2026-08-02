@@ -1,10 +1,10 @@
 /* @file intrusive_ptr.test.cpp */
 
 #include "Refcounted.hpp"
-#include "xo/indentlog/scope.hpp"
 #include <catch2/catch.hpp>
 #include <string_view>
 #include <type_traits>
+#include <ostream>
 
 namespace xo {
     using xo::ref::Refcount;

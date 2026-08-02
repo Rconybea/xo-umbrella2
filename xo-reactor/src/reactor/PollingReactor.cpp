@@ -1,6 +1,7 @@
 /* @file PollingReactor.cpp */
 
 #include "PollingReactor.hpp"
+#include <xo/indentlog/scope.hpp>
 
 namespace xo {
     using std::size_t;

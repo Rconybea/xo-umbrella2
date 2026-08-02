@@ -3,7 +3,7 @@
 #include "Displayable.hpp"
 
 namespace xo {
-    using xo::tostr;
+    using xo::pp::tostr;
 
     namespace ref {
         std::string

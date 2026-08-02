@@ -5,6 +5,7 @@
 
 #include "parserstatemachine.hpp"
 #include "exprstatestack.hpp"
+#include <xo/indentlog/scope.hpp>
 #include "pretty_parserstatemachine.hpp"
 #include "pretty_envframestack.hpp"
 #include "pretty_localenv.hpp"

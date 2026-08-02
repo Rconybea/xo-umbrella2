@@ -5,6 +5,7 @@
 
 #include "LocalSymtab.hpp"
 #include "pretty_variable.hpp"
+#include <xo/indentlog/scope.hpp>
 #include "xo/indentlog/print/pretty_vector.hpp"
 #include "xo/indentlog/print/vector.hpp"
 

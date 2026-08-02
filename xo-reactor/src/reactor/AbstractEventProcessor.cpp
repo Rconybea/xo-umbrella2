@@ -2,6 +2,7 @@
 
 #include "AbstractEventProcessor.hpp"
 #include "xo/indentlog/print/tostr.hpp"
+#include <xo/indentlog/print/tag.hpp>
 #include <unordered_map>
 #include <map>
 
