@@ -1,16 +1,15 @@
 /* @file exprseq_xs.cpp */
 
 #include "exprseq_xs.hpp"
-#include <xo/indentlog/scope.hpp>
-#include "parserstatemachine.hpp"
 #include "exprstatestack.hpp"
-#include "exprseq_xs.hpp"
-//#include "expect_expr_xs.hpp"
-#include "progress_xs.hpp"
+#include "parserstatemachine.hpp"
+#include <xo/indentlog/scope.hpp>
+// #include "expect_expr_xs.hpp"
 #include "define_xs.hpp"
-#include "if_else_xs.hpp"
 #include "expect_symbol_xs.hpp"
-#include "xo/expression/Constant.hpp"
+#include "if_else_xs.hpp"
+#include "progress_xs.hpp"
+#include <xo/expression/Constant.hpp>
 
 namespace xo {
     namespace scm {

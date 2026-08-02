@@ -1,13 +1,13 @@
 /* @file sequence_xs.cpp */
 
 #include "sequence_xs.hpp"
-#include <xo/indentlog/scope.hpp>
-#include "parserstatemachine.hpp"
 #include "expect_expr_xs.hpp"
 #include "let1_xs.hpp"
-#include "xo/expression/DefineExpr.hpp"
-#include "xo/expression/Sequence.hpp"
-#include "xo/expression/pretty_expression.hpp"
+#include "parserstatemachine.hpp"
+#include <xo/expression/DefineExpr.hpp>
+#include <xo/expression/Sequence.hpp>
+#include <xo/expression/pretty_expression.hpp>
+#include <xo/indentlog/scope.hpp>
 
 namespace xo {
     using xo::scm::DefineExpr;

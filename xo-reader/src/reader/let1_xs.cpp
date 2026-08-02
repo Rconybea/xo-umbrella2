@@ -4,13 +4,13 @@
  */
 
 #include "let1_xs.hpp"
-#include <xo/indentlog/scope.hpp>
 #include "expect_expr_xs.hpp"
 #include "parserstatemachine.hpp"
-#include "xo/expression/Sequence.hpp"
-#include "xo/expression/DefineExpr.hpp"
-#include "xo/expression/Apply.hpp"
-#include "xo/expression/Lambda.hpp"
+#include <xo/expression/Apply.hpp>
+#include <xo/expression/DefineExpr.hpp>
+#include <xo/expression/Lambda.hpp>
+#include <xo/expression/Sequence.hpp>
+#include <xo/indentlog/scope.hpp>
 
 namespace xo {
     using Sequence = xo::scm::Sequence;

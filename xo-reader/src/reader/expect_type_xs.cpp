@@ -4,9 +4,9 @@
  */
 
 #include "expect_type_xs.hpp"
-#include "parserstatemachine.hpp"
 #include "exprstatestack.hpp"
-#include "xo/reflect/Reflect.hpp"
+#include "parserstatemachine.hpp"
+#include <xo/reflect/Reflect.hpp>
 
 namespace xo {
     using xo::reflect::Reflect;

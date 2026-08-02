@@ -6,7 +6,7 @@
 #pragma once
 
 #include "envframestack.hpp"
-#include "xo/indentlog/print/pretty.hpp"
+#include <xo/indentlog/print/pretty.hpp>
 
 namespace xo {
     namespace print {

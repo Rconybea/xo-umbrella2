@@ -5,11 +5,11 @@
 
 #pragma once
 
-#include "exprstatestack.hpp"
 #include "envframestack.hpp"
+#include "exprstatestack.hpp"
 #include "parser_result.hpp"
 #include "parserstatemachine.hpp"
-#include "xo/expression/GlobalSymtab.hpp"
+#include <xo/expression/GlobalSymtab.hpp>
 #include <stdexcept>
 
 namespace xo {

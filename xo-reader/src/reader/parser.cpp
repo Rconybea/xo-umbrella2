@@ -4,17 +4,17 @@
  */
 
 #include "parser.hpp"
-#include <xo/indentlog/scope.hpp>
-#include "parserstatemachine.hpp"
 #include "define_xs.hpp"
 #include "exprseq_xs.hpp"
+#include "parserstatemachine.hpp"
 #include "pretty_expression.hpp"
-#include "xo/expression/DefineExpr.hpp"
-#include "xo/expression/Constant.hpp"
-#include "xo/expression/ConvertExpr.hpp"
-#include "xo/expression/GlobalSymtab.hpp"
-//#include "xo/expression/LocalSymtab.hpp"
-//#include <regex>
+#include <xo/expression/Constant.hpp>
+#include <xo/expression/ConvertExpr.hpp>
+#include <xo/expression/DefineExpr.hpp>
+#include <xo/expression/GlobalSymtab.hpp>
+#include <xo/indentlog/scope.hpp>
+// #include "xo/expression/LocalSymtab.hpp"
+// #include <regex>
 #include <stdexcept>
 
 namespace xo {

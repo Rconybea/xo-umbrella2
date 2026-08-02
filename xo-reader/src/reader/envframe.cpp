@@ -4,7 +4,7 @@
  */
 
 #include "envframe.hpp"
-#include "xo/indentlog/print/vector.hpp"
+#include <xo/indentlog/print/vector.hpp>
 
 namespace xo {
     using xo::scm::Variable;

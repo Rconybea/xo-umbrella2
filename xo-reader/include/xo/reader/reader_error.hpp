@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "xo/tokenizer/tokenizer_error.hpp"
+#include <xo/tokenizer/tokenizer_error.hpp>
 
 namespace xo {
     namespace scm {

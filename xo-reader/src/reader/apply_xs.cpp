@@ -1,9 +1,9 @@
 /* @file apply_xs.cpp */
 
 #include "apply_xs.hpp"
-#include <xo/indentlog/scope.hpp>
-#include "parserstatemachine.hpp"
 #include "expect_expr_xs.hpp"
+#include "parserstatemachine.hpp"
+#include <xo/indentlog/scope.hpp>
 
 namespace xo {
     namespace scm {

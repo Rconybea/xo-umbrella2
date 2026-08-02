@@ -5,11 +5,11 @@
 
 #include "parserstatemachine.hpp"
 #include "exprstatestack.hpp"
-#include <xo/indentlog/scope.hpp>
-#include "pretty_parserstatemachine.hpp"
 #include "pretty_envframestack.hpp"
 #include "pretty_localenv.hpp"
-#include "xo/expression/pretty_expression.hpp"
+#include "pretty_parserstatemachine.hpp"
+#include <xo/expression/pretty_expression.hpp>
+#include <xo/indentlog/scope.hpp>
 
 namespace xo {
     using xo::scm::LocalSymtab;

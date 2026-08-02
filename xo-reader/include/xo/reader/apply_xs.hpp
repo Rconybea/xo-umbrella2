@@ -3,8 +3,7 @@
 #pragma once
 
 #include "exprstate.hpp"
-#include "xo/expression/Apply.hpp"
-
+#include <xo/expression/Apply.hpp>
 
 namespace xo {
     namespace scm {

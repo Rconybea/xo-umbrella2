@@ -4,9 +4,9 @@
  */
 
 #include "pretty_parserstatemachine.hpp"
-#include "pretty_exprstatestack.hpp"
-#include "pretty_envframestack.hpp"
 #include "exprstatestack.hpp"
+#include "pretty_envframestack.hpp"
+#include "pretty_exprstatestack.hpp"
 
 namespace xo {
     namespace print {

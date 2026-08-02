@@ -1,16 +1,16 @@
 /* @file lambda_xs.cpp */
 
 #include "lambda_xs.hpp"
-#include <xo/indentlog/scope.hpp>
 #include "define_xs.hpp"
-#include "parserstatemachine.hpp"
-#include "exprstatestack.hpp"
-#include "expect_formal_arglist_xs.hpp"
 #include "expect_expr_xs.hpp"
+#include "expect_formal_arglist_xs.hpp"
 #include "expect_type_xs.hpp"
+#include "exprstatestack.hpp"
+#include "parserstatemachine.hpp"
 #include "pretty_expression.hpp"
 #include "pretty_variable.hpp"
-#include "xo/expression/Lambda.hpp"
+#include <xo/expression/Lambda.hpp>
+#include <xo/indentlog/scope.hpp>
 
 namespace xo {
     using xo::scm::Lambda;

@@ -1,12 +1,12 @@
 /* @file paren_xs.cpp */
 
 #include "paren_xs.hpp"
-#include <xo/indentlog/scope.hpp>
-#include "parserstatemachine.hpp"
-#include "exprstatestack.hpp"
-#include "progress_xs.hpp"
 #include "expect_expr_xs.hpp"
-#include "xo/expression/pretty_expression.hpp"
+#include "exprstatestack.hpp"
+#include "parserstatemachine.hpp"
+#include "progress_xs.hpp"
+#include <xo/expression/pretty_expression.hpp>
+#include <xo/indentlog/scope.hpp>
 
 namespace xo {
     namespace scm {

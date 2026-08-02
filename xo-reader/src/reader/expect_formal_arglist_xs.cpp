@@ -4,12 +4,12 @@
  */
 
 #include "expect_formal_arglist_xs.hpp"
-#include "parserstatemachine.hpp"
-#include "exprstatestack.hpp"
 #include "expect_formal_xs.hpp"
 #include "expect_symbol_xs.hpp"
-#include "xo/expression/Variable.hpp"
-#include "xo/indentlog/print/vector.hpp"
+#include "exprstatestack.hpp"
+#include "parserstatemachine.hpp"
+#include <xo/expression/Variable.hpp>
+#include <xo/indentlog/print/vector.hpp>
 
 namespace xo {
     namespace scm {

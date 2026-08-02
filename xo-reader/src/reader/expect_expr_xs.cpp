@@ -4,18 +4,18 @@
  */
 
 #include "expect_expr_xs.hpp"
-#include <xo/indentlog/scope.hpp>
-#include "parserstatemachine.hpp"
-#include "exprstatestack.hpp"
 #include "define_xs.hpp"
-#include "lambda_xs.hpp"
+#include "exprstatestack.hpp"
 #include "if_else_xs.hpp"
+#include "lambda_xs.hpp"
 #include "paren_xs.hpp"
-#include "sequence_xs.hpp"
+#include "parserstatemachine.hpp"
 #include "progress_xs.hpp"
-#include "xo/expression/Lambda.hpp"
-#include "xo/expression/Constant.hpp"
-#include "xo/expression/pretty_expression.hpp"
+#include "sequence_xs.hpp"
+#include <xo/expression/Constant.hpp>
+#include <xo/expression/Lambda.hpp>
+#include <xo/expression/pretty_expression.hpp>
+#include <xo/indentlog/scope.hpp>
 
 namespace xo {
     using xo::scm::Constant;

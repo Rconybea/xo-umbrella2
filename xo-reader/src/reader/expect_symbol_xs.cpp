@@ -4,9 +4,9 @@
  */
 
 #include "expect_symbol_xs.hpp"
-#include <xo/indentlog/scope.hpp>
-#include "parserstatemachine.hpp"
 #include "exprstatestack.hpp"
+#include "parserstatemachine.hpp"
+#include <xo/indentlog/scope.hpp>
 
 namespace xo {
     namespace scm {

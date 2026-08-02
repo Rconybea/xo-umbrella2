@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include "xo/expression/IfExpr.hpp"
 #include "exprstate.hpp"
-#include "xo/indentlog/print/ppdetail_atomic.hpp"
+#include <xo/expression/IfExpr.hpp>
+#include <xo/indentlog/print/ppdetail_atomic.hpp>
 
 namespace xo {
     namespace scm {

@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "xo/expression/LocalSymtab.hpp"
+#include <xo/expression/LocalSymtab.hpp>
 
 namespace xo {
     namespace scm {

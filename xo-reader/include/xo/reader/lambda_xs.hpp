@@ -6,7 +6,7 @@
 #pragma once
 
 #include "exprstate.hpp"
-#include "xo/expression/LocalSymtab.hpp"
+#include <xo/expression/LocalSymtab.hpp>
 //#include <cstdint>
 
 namespace xo {

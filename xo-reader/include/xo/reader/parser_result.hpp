@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "xo/expression/Expression.hpp"
+#include <xo/expression/Expression.hpp>
 
 namespace xo {
     namespace scm {
