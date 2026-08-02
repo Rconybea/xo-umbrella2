@@ -6,8 +6,8 @@
 #pragma once
 
 #include "gc_allocator_traits.hpp"
-#include <memory>
 #include <cstdint>
+#include <memory>
 
 namespace xo {
     template <typename T>

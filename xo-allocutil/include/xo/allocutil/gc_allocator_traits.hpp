@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include <type_traits>
-#include <memory>
 #include <cassert>
+#include <memory>
+#include <type_traits>
 
 namespace xo {
     class IObject;
