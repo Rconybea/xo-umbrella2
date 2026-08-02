@@ -4,9 +4,9 @@
 
 //#include "indentlog/scope.hpp"
 //#include "indentlog/print/tag.hpp"
+#include <cstdint>
 #include <functional>
 #include <vector>
-#include <cstdint>
 
 namespace xo {
     namespace fn {
