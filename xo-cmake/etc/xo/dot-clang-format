@@ -5,7 +5,8 @@
 # or from a build tree's edge list:
 #   xo-gen-clang-format path/to/build/xo-subsystem-edges.txt > .clang-format
 #
-# Only include ordering is specified here; other formatting is left to defaults.
+# Only include ordering (+ preprocessor-directive indentation) is specified
+# here; other formatting is left to defaults.
 Language:        Cpp
 SortIncludes:    CaseSensitive
 # Merge (not Regroup): order includes by the categories below in one block,
