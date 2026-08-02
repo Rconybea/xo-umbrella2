@@ -6,7 +6,7 @@
 #pragma once
 
 #include "Node.hpp"
-#include "xo/indentlog/scope.hpp"
+#include <xo/indentlog/scope.hpp>
 
 namespace xo {
     namespace tree {

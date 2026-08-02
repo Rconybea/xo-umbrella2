@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "xo/allocutil/ObjectVisitor.hpp"
+#include <xo/allocutil/ObjectVisitor.hpp>
 #include <ostream>
 
 namespace xo {

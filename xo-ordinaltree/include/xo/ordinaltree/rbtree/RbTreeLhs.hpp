@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "xo/indentlog/print/tostr.hpp"
+#include <xo/indentlog/print/tostr.hpp>
 #include <stdexcept>
 
 namespace xo {

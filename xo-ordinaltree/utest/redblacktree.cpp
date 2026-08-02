@@ -1,9 +1,9 @@
 /* @file redblacktree.cpp */
 
-#include "random_tree_ops.hpp"
 #include "xo/ordinaltree/RedBlackTree.hpp"
-#include "xo/ordinaltree/rbtree/SumReduce.hpp"
+#include "random_tree_ops.hpp"
 #include "xo/ordinaltree/rbtree/OrdinalReduce.hpp"
+#include "xo/ordinaltree/rbtree/SumReduce.hpp"
 #include <map>
 
 namespace {

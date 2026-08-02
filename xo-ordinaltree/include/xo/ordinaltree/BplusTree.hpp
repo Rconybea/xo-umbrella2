@@ -10,19 +10,19 @@
 #pragma once
 
 //#include "bplustree/BplusTreeNode.hpp"
-#include "bplustree/LeafNode.hpp"
 #include "bplustree/InternalNode.hpp"
 #include "bplustree/Iterator.hpp"
+#include "bplustree/LeafNode.hpp"
 #include "bplustree/Lhs.hpp"
 #include "bplustree/bplustree_tags.hpp"
-#include "xo/indentlog/scope.hpp"
-#include "xo/indentlog/print/tag.hpp"
-#include "xo/indentlog/print/pad.hpp"
-#include <memory> /* for std::unqiue_ptr */
+#include <xo/indentlog/print/pad.hpp>
+#include <xo/indentlog/print/tag.hpp>
+#include <xo/indentlog/scope.hpp>
 #include <algorithm> /* for std::max */
-#include <limits> /* for std::numeric_limits */
-#include <cstdint>
 #include <cassert>
+#include <cstdint>
+#include <limits> /* for std::numeric_limits */
+#include <memory> /* for std::unqiue_ptr */
 #include <unistd.h>
 #if __APPLE__ && __MACH__
 # include <sys/sysctl.h>

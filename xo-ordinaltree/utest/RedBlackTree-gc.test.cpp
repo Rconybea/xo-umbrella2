@@ -6,8 +6,8 @@
 #include "random_tree_ops.hpp"
 #include "xo/ordinaltree/RedBlackTree.hpp"
 #include "xo/ordinaltree/rbtree/SumReduce.hpp"
-#include "xo/object/String.hpp"
-#include "xo/alloc/GC.hpp"
+#include <xo/object/String.hpp>
+#include <xo/alloc/GC.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {
