@@ -5,8 +5,8 @@
 
 #include "init_printjson.hpp"
 #include "PrintJson.hpp"
-#include "xo/reflect/init_reflect.hpp"
-#include "xo/subsys/Subsystem.hpp"
+#include <xo/reflect/init_reflect.hpp>
+#include <xo/subsys/Subsystem.hpp>
 
 namespace xo {
     using xo::json::PrintJsonSingleton;

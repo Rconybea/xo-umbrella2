@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "xo/subsys/Subsystem.hpp"
+#include <xo/subsys/Subsystem.hpp>
 
 namespace xo {
     /* tag to represent the printjson/ subsystem within ordered initialization */

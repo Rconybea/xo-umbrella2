@@ -6,10 +6,10 @@
 #pragma once
 
 #include "JsonPrinter.hpp"
-#include "xo/reflect/TypeDrivenMap.hpp"
-#include "xo/reflect/SelfTagging.hpp"
-#include <memory>
+#include <xo/reflect/SelfTagging.hpp>
+#include <xo/reflect/TypeDrivenMap.hpp>
 #include <iostream>
+#include <memory>
 
 namespace xo {
     namespace json {

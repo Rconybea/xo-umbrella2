@@ -5,8 +5,8 @@
 
 #include "xo/printjson/PrintJson.hpp"
 #include "xo/printjson/init_printjson.hpp"
-#include "xo/reflect/Reflect.hpp"
-#include "xo/reflect/StructReflector.hpp"
+#include <xo/reflect/Reflect.hpp>
+#include <xo/reflect/StructReflector.hpp>
 #include <catch2/catch.hpp>
 #include <iostream>
 #include <sstream>
