@@ -796,4 +796,4 @@ jobs:
 
       - name: print install path
         run: |
-          tree ${{github.workspace}}/local
+          tree $PREFIX
