@@ -3,8 +3,8 @@
 #pragma once
 
 #include "BrownianMotion.hpp"
-#include <xo/timeutil/timeutil.hpp>
 #include "ExpProcess.hpp"
+#include <xo/timeutil/timeutil.hpp>
 
 namespace xo {
     namespace process {

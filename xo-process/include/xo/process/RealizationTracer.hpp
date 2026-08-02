@@ -3,8 +3,8 @@
 #pragma once
 
 #include "StochasticProcess.hpp"
-#include <xo/timeutil/timeutil.hpp>
 #include "xo/refcnt/Refcounted.hpp"
+#include <xo/timeutil/timeutil.hpp>
 
 namespace xo {
     namespace process {

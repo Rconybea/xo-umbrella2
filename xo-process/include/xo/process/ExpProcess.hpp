@@ -5,8 +5,8 @@
 //#include "time/Time.hpp"
 #include "StochasticProcess.hpp"
 #include <xo/timeutil/timeutil.hpp>
-#include <memory>
 #include <cmath>
+#include <memory>
 
 namespace xo {
     namespace process {

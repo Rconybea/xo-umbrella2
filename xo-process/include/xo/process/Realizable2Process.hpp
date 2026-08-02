@@ -5,10 +5,10 @@
 
 #pragma once
 
-#include "StochasticProcess.hpp"
-#include <xo/timeutil/timeutil.hpp>
 #include "Realization2.hpp"
 #include "RealizationState.hpp"
+#include "StochasticProcess.hpp"
+#include <xo/timeutil/timeutil.hpp>
 
 namespace xo {
   namespace process {
