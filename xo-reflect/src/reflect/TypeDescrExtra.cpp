@@ -4,8 +4,8 @@
  */
 
 #include "TypeDescrExtra.hpp"
-#include "TypeDescr.hpp"
 #include "TaggedPtr.hpp"
+#include "TypeDescr.hpp"
 #include <cassert>
 
 namespace xo {

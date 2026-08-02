@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "TypeDescr.hpp"
 #include "TaggedPtr.hpp"
+#include "TypeDescr.hpp"
 
 namespace xo {
     namespace reflect {

@@ -3,8 +3,8 @@
  * author: Roland Conybeare, Aug 2022
  */
 
-#include "xo/reflect/Reflect.hpp"
 #include "xo/reflect/StructReflector.hpp"
+#include "xo/reflect/Reflect.hpp"
 #include <catch2/catch.hpp>
 
 #define STRINGIFY(x) #x

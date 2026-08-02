@@ -6,7 +6,7 @@
 #pragma once
 
 #include "StructReflector.hpp"
-#include "xo/reflectutil/reflect_struct_info.hpp"
+#include <xo/reflectutil/reflect_struct_info.hpp>
 
 namespace xo {
     namespace reflect {

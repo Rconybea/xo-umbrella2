@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include "xo/refcnt/Refcounted.hpp"
-#include "TypeDescr.hpp"
 #include "TaggedRcptr.hpp"
+#include "TypeDescr.hpp"
+#include <xo/refcnt/Refcounted.hpp>
 
 namespace xo {
     namespace reflect {

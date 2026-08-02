@@ -4,7 +4,7 @@
  */
 
 #include "init_reflect.hpp"
-#include "xo/subsys/Subsystem.hpp"
+#include <xo/subsys/Subsystem.hpp>
 
 namespace xo {
     void

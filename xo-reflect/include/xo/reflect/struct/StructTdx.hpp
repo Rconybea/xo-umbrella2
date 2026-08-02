@@ -2,13 +2,13 @@
 
 #pragma once
 
-#include "xo/reflect/TypeDescrExtra.hpp"
-#include "xo/reflect/TaggedPtr.hpp"
 #include "StructMember.hpp"
-//#include "xo/reflect/struct/StructMember.hpp"
-#include <vector>
+#include "xo/reflect/TaggedPtr.hpp"
+#include "xo/reflect/TypeDescrExtra.hpp"
+// #include "xo/reflect/struct/StructMember.hpp"
 #include <functional>
 #include <memory>
+#include <vector>
 
 namespace xo {
     namespace reflect {

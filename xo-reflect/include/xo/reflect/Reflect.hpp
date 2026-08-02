@@ -5,17 +5,17 @@
 
 #pragma once
 
-#include "SelfTagging.hpp"
 #include "EstablishTypeDescr.hpp"
+#include "SelfTagging.hpp"
 #include "atomic/AtomicTdx.hpp"
-#include "pointer/PointerTdx.hpp"
-#include "vector/VectorTdx.hpp"
-#include "struct/StructTdx.hpp"
 #include "function/FunctionTdx.hpp"
-#include "xo/refcnt/Refcounted.hpp"
-#include <vector>
+#include "pointer/PointerTdx.hpp"
+#include "struct/StructTdx.hpp"
+#include "vector/VectorTdx.hpp"
+#include <xo/refcnt/Refcounted.hpp>
 #include <array>
 #include <utility> // for std::pair<>
+#include <vector>
 
 namespace xo {
     namespace reflect {

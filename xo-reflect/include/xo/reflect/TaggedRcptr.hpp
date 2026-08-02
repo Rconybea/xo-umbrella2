@@ -7,8 +7,8 @@
 
 #include "TaggedPtr.hpp"
 // causes #include cycle, reflect/Reflect.hpp includes this header
-//#include "reflect/Reflect.hpp"
-#include "xo/refcnt/Refcounted.hpp"
+// #include "reflect/Reflect.hpp"
+#include <xo/refcnt/Refcounted.hpp>
 
 namespace xo {
     namespace reflect {

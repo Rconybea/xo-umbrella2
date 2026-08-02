@@ -2,11 +2,11 @@
 
 #pragma once
 
-#include "xo/reflect/TypeDescr.hpp"
 #include "xo/reflect/EstablishTypeDescr.hpp"
 #include "xo/reflect/TaggedPtr.hpp"
-#include <string>
+#include "xo/reflect/TypeDescr.hpp"
 #include <memory>
+#include <string>
 
 namespace xo {
     namespace reflect {

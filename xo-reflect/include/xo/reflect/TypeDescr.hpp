@@ -5,15 +5,15 @@
 #include "TypeDescrExtra.hpp"
 #include <xo/indentlog/print/pretty.hpp>
 #include <xo/cxxutil/demangle.hpp>
+#include <cassert>
+#include <cstdint>
+#include <cstring>
 #include <iostream>
+#include <memory>
+#include <string_view>
 #include <typeinfo>
 #include <unordered_map>
 #include <vector>
-#include <string_view>
-#include <memory>
-#include <cstring>
-#include <cstdint>
-#include <cassert>
 
 namespace xo {
     namespace reflect {

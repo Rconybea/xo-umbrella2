@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "xo/reflect/TypeDescrExtra.hpp"
 #include "xo/reflect/EstablishTypeDescr.hpp"
+#include "xo/reflect/TypeDescrExtra.hpp"
 
 namespace xo {
     namespace reflect {
