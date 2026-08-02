@@ -6,8 +6,8 @@
 #pragma once
 
 #include "span.hpp"
-#include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
-#include <xo/ppsink/quoted.hpp>        /* unq() */
+#include <xo/ppsink/quoted.hpp>      /* unq() */
+#include <xo/ppsink/tag_ostream.hpp> /* os << xtag(..) */
 
 namespace xo {
     namespace scm {

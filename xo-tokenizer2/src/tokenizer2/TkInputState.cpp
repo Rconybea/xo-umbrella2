@@ -4,9 +4,9 @@
  **/
 
 #include "TkInputState.hpp"
+#include <xo/arena/span_ppdetail.hpp> /* xo::print::printspan (span ostream printing) */
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
-#include <xo/arena/span_ppdetail.hpp>   /* xo::print::printspan (span ostream printing) */
 
 namespace xo {
     namespace scm {

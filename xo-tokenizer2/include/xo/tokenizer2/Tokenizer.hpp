@@ -5,13 +5,13 @@
 
 #pragma once
 
-#include "Token.hpp"
 #include "TkInputState.hpp"
-#include "span.hpp"
+#include "Token.hpp"
 #include "scan_result.hpp"
+#include "span.hpp"
 #include <xo/arena/DCircularBuffer.hpp>
-#include <xo/indentlog/scope.hpp>
 #include <xo/indentlog/print/ppdetail_atomic.hpp>
+#include <xo/indentlog/scope.hpp>
 #include <cassert>
 
 namespace xo {

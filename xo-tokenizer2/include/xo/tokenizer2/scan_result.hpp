@@ -5,9 +5,9 @@
 
 #pragma once
 
+#include "TkInputState.hpp"
 #include "Token.hpp"
 #include "TokenizerError.hpp"
-#include "TkInputState.hpp"
 
 namespace xo {
     namespace scm {
