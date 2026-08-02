@@ -6,7 +6,7 @@
 #pragma once
 
 #include "Alist.hpp"
-#include "xo/refcnt/Refcounted.hpp"
+#include <xo/refcnt/Refcounted.hpp>
 #include <functional>
 #include <string>
 
