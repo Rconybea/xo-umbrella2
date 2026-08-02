@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "xo/indentlog/print/tag.hpp" // for STRINGIFY
-#include "xo/indentlog/print/ppdetail_atomic.hpp"
+#include <xo/indentlog/print/ppdetail_atomic.hpp>
+#include <xo/indentlog/print/tag.hpp> // for STRINGIFY
 #include <ostream>
 
 namespace xo {

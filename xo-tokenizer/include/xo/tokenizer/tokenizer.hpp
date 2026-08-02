@@ -5,12 +5,12 @@
 
 #pragma once
 
-#include "token.hpp"
 #include "input_state.hpp"
-#include "span.hpp"
 #include "scan_result.hpp"
-#include "xo/indentlog/scope.hpp"
-#include "xo/indentlog/print/ppdetail_atomic.hpp"
+#include "span.hpp"
+#include "token.hpp"
+#include <xo/indentlog/print/ppdetail_atomic.hpp>
+#include <xo/indentlog/scope.hpp>
 #include <cassert>
 
 namespace xo {

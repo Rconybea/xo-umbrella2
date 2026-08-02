@@ -2,11 +2,11 @@
 
 #pragma once
 
-#include "xo/indentlog/scope.hpp"
-#include "xo/indentlog/print/ppdetail_atomic.hpp"
-#include <ostream>
-#include <cstdint>
+#include <xo/indentlog/print/ppdetail_atomic.hpp>
+#include <xo/indentlog/scope.hpp>
 #include <cassert>
+#include <cstdint>
+#include <ostream>
 
 namespace xo {
     namespace scm {

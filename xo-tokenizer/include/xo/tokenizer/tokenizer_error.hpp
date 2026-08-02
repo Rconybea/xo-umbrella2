@@ -6,8 +6,8 @@
 #pragma once
 
 #include "input_state.hpp"
-#include "tokentype.hpp"
 #include "span.hpp"
+#include "tokentype.hpp"
 #include <iomanip>
 
 namespace xo {

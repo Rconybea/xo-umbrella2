@@ -6,11 +6,11 @@
 #pragma once
 
 #include "tokentype.hpp"
-#include "xo/indentlog/print/tag.hpp"
-#include <stdexcept>
-#include <ostream>
-#include <string>
+#include <xo/indentlog/print/tag.hpp>
 #include <cstdint>
+#include <ostream>
+#include <stdexcept>
+#include <string>
 
 namespace xo {
     namespace scm {

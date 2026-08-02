@@ -3,10 +3,10 @@
 #pragma once
 
 #include "span.hpp"
-#include <utility>
-#include <cstdint>
 #include <cassert>
+#include <cstdint>
 #include <new>
+#include <utility>
 
 namespace xo {
     namespace scm {
