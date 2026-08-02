@@ -3,8 +3,8 @@
  *  @author Roland Conybeare, Feb 2026
  **/
 
-#include "init_numeric.hpp"
 #include "NumericDispatch.hpp"
+#include "init_numeric.hpp"
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/facet/TypeRegistry.hpp>
 #include <catch2/catch.hpp>

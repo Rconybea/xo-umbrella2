@@ -5,8 +5,8 @@
 
 #include "init_numeric.hpp"
 #include "SetupNumeric.hpp"
-#include <xo/procedure2/init_procedure2.hpp>
 #include "Subsystem.hpp"
+#include <xo/procedure2/init_procedure2.hpp>
 
 namespace xo {
     using xo::scm::SetupNumeric;

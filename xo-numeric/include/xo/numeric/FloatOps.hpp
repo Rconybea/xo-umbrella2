@@ -9,7 +9,6 @@
 #include <xo/procedure2/RuntimeContext.hpp>
 #include <xo/object2/Float.hpp>
 
-
 namespace xo {
     namespace scm {
 

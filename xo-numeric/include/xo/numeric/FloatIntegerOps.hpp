@@ -10,7 +10,6 @@
 #include <xo/object2/Float.hpp>
 #include <xo/object2/Integer.hpp>
 
-
 namespace xo {
     namespace scm {
 

@@ -4,26 +4,20 @@
  **/
 
 #include "SetupNumeric.hpp"
-#include "NumericDispatch.hpp"
-#include "Numeric.hpp"
-#include "NumericPrimitives.hpp"
-#include "NumericDispatch.hpp"
-
 #include "FloatIntegerOps.hpp"
 #include "FloatOps.hpp"
-#include "float/INumeric_DFloat.hpp"
-
 #include "IntegerOps.hpp"
+#include "Numeric.hpp"
+#include "NumericDispatch.hpp"
+#include "NumericPrimitives.hpp"
+#include "float/INumeric_DFloat.hpp"
 #include "integer/INumeric_DInteger.hpp"
-
 #include <xo/procedure2/Primitive_gco_2_gco_gco.hpp>
-
 #include <xo/object2/DFloat.hpp>
 #include <xo/object2/Integer.hpp>
-
 #include <xo/facet/FacetRegistry.hpp>
-#include <xo/reflectutil/typeseq.hpp>
 #include <xo/indentlog/scope.hpp>
+#include <xo/reflectutil/typeseq.hpp>
 
 namespace xo {
     using xo::mm::AAllocator;
