@@ -18,7 +18,7 @@
 #include <xo/procedure2/detail/IRuntimeContext_Xfer.hpp>
 #include <xo/procedure2/Procedure.hpp>
 #include <xo/procedure2/detail/IProcedure_Xfer.hpp>
-#include "DClosure.hpp"
+#include "xo/interpreter2/DClosure.hpp"
 
 namespace xo { namespace scm { class IProcedure_DClosure; } }
 

@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "DSyntaxStateMachine.hpp"
+#include "xo/reader2/DSyntaxStateMachine.hpp"
 #include <xo/object2/Dictionary.hpp>
 #include <xo/facet/obj.hpp>
 

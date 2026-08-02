@@ -16,7 +16,7 @@
 #include "GCObject.hpp"
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/alloc2/Allocator.hpp>
-#include "DGlobalEnv.hpp"
+#include "xo/reader2/DGlobalEnv.hpp"
 
 namespace xo { namespace scm { class IGCObject_DGlobalEnv; } }
 

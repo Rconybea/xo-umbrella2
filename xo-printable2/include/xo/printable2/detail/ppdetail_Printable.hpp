@@ -4,7 +4,7 @@
  **/
 
 #include <xo/indentlog/print/pretty.hpp>
-#include "Printable.hpp"
+#include "xo/printable2/Printable.hpp"
 
 namespace xo {
     namespace print {

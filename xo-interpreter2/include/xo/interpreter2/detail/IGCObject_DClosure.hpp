@@ -16,7 +16,7 @@
 #include "GCObject.hpp"
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/alloc2/Allocator.hpp>
-#include "DClosure.hpp"
+#include "xo/interpreter2/DClosure.hpp"
 
 namespace xo { namespace scm { class IGCObject_DClosure; } }
 

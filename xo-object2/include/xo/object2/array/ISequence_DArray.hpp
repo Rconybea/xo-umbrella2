@@ -13,8 +13,8 @@
 
 #pragma once
 
-#include "Sequence.hpp"
-#include "DArray.hpp"
+#include "xo/object2/Sequence.hpp"
+#include "xo/object2/DArray.hpp"
 
 namespace xo { namespace scm { class ISequence_DArray; } }
 

@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "DInteger.hpp"
-#include "number/IGCObject_DInteger.hpp"
+#include "xo/object2/DInteger.hpp"
+#include "xo/object2/number/IGCObject_DInteger.hpp"
 #include <xo/alloc2/GCObjectConversion.hpp>
 
 namespace xo {

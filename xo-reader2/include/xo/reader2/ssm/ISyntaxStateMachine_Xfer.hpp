@@ -21,8 +21,8 @@
 #pragma once
 
 #include "ASyntaxStateMachine.hpp"
-#include "ParserStateMachine.hpp"
-#include "syntaxstatetype.hpp"
+#include "xo/reader2/ParserStateMachine.hpp"
+#include "xo/reader2/syntaxstatetype.hpp"
 #include <xo/type/Type.hpp>
 #include <xo/tokenizer2/Token.hpp>
 #include <xo/reflect/TypeDescr.hpp>

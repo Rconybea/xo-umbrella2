@@ -16,7 +16,7 @@
 #include "Printable.hpp"
 #include <xo/printable2/Printable.hpp>
 #include <xo/printable2/detail/IPrintable_Xfer.hpp>
-#include "DVariable.hpp"
+#include "xo/expression2/DVariable.hpp"
 
 namespace xo { namespace scm { class IPrintable_DVariable; } }
 

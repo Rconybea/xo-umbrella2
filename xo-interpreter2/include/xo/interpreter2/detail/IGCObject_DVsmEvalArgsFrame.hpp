@@ -16,7 +16,7 @@
 #include "GCObject.hpp"
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/alloc2/Allocator.hpp>
-#include "DVsmEvalArgsFrame.hpp"
+#include "xo/interpreter2/DVsmEvalArgsFrame.hpp"
 
 namespace xo { namespace scm { class IGCObject_DVsmEvalArgsFrame; } }
 

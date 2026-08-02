@@ -16,7 +16,7 @@
 #include "Printable.hpp"
 #include <xo/printable2/Printable.hpp>
 #include <xo/printable2/detail/IPrintable_Xfer.hpp>
-#include "DBoolean.hpp"
+#include "xo/object2/DBoolean.hpp"
 
 namespace xo { namespace scm { class IPrintable_DBoolean; } }
 

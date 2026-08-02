@@ -21,7 +21,7 @@
 #pragma once
 
 #include "ASymbolTable.hpp"
-#include "Binding.hpp"
+#include "xo/expression2/Binding.hpp"
 #include "DUniqueString.hpp"
 
 namespace xo {

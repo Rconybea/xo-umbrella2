@@ -14,7 +14,7 @@
 #pragma once
 
 // includes (via {facet_includes})
-#include "RuntimeContext.hpp"
+#include "xo/procedure2/RuntimeContext.hpp"
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/facet/obj.hpp>
 #include <xo/facet/facet_implementation.hpp>

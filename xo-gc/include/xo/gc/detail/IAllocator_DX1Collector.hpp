@@ -7,7 +7,7 @@
 
 #include "Allocator.hpp"
 #include "Collector.hpp"
-#include "DX1Collector.hpp"
+#include "xo/gc/DX1Collector.hpp"
 
 namespace xo {
     namespace mm { struct IAllocator_DX1Collector; }

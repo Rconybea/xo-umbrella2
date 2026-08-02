@@ -16,7 +16,7 @@
 #include "GCObject.hpp"
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/alloc2/Allocator.hpp>
-#include "DVsmDefContFrame.hpp"
+#include "xo/interpreter2/DVsmDefContFrame.hpp"
 
 namespace xo { namespace scm { class IGCObject_DVsmDefContFrame; } }
 

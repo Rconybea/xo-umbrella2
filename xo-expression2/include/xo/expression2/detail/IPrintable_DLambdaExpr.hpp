@@ -16,7 +16,7 @@
 #include "Printable.hpp"
 #include <xo/printable2/Printable.hpp>
 #include <xo/printable2/detail/IPrintable_Xfer.hpp>
-#include "DLambdaExpr.hpp"
+#include "xo/expression2/DLambdaExpr.hpp"
 
 namespace xo { namespace scm { class IPrintable_DLambdaExpr; } }
 

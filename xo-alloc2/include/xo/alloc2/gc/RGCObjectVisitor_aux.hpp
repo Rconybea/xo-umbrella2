@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "gc/RGCObjectVisitor.hpp"
+#include "xo/alloc2/gc/RGCObjectVisitor.hpp"
 #include <xo/facet/FacetRegistry.hpp>
 
 namespace xo {

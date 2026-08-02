@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "DSyntaxStateMachine.hpp"
+#include "xo/reader2/DSyntaxStateMachine.hpp"
 #include <xo/expression2/DLambdaExpr.hpp>
 #include <xo/expression2/SymbolTable.hpp>
 //#include <xo/expression2/DLocalSymtab.hpp>

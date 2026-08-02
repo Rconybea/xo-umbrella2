@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "Numeric.hpp"
+#include "xo/numeric/Numeric.hpp"
 #include "DFloat.hpp"
 
 namespace xo { namespace scm { class INumeric_DFloat; } }

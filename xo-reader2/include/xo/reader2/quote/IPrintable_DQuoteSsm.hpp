@@ -16,7 +16,7 @@
 #include "Printable.hpp"
 #include <xo/printable2/Printable.hpp>
 #include <xo/printable2/detail/IPrintable_Xfer.hpp>
-#include "DQuoteSsm.hpp"
+#include "xo/reader2/DQuoteSsm.hpp"
 
 namespace xo { namespace scm { class IPrintable_DQuoteSsm; } }
 

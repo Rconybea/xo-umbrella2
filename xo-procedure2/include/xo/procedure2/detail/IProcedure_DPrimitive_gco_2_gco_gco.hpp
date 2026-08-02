@@ -13,12 +13,12 @@
 
 #pragma once
 
-#include "Procedure.hpp"
+#include "xo/procedure2/Procedure.hpp"
 #include <xo/procedure2/RuntimeContext.hpp>
 #include <xo/procedure2/detail/IRuntimeContext_Xfer.hpp>
 #include <xo/procedure2/Procedure.hpp>
 #include <xo/procedure2/detail/IProcedure_Xfer.hpp>
-#include "DPrimitive_gco_2_gco_gco.hpp"
+#include "xo/procedure2/DPrimitive_gco_2_gco_gco.hpp"
 
 namespace xo { namespace scm { class IProcedure_DPrimitive_gco_2_gco_gco; } }
 

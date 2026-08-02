@@ -16,7 +16,7 @@
 #include "GCObject.hpp"
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/alloc2/Allocator.hpp>
-#include "DDefineExpr.hpp"
+#include "xo/expression2/DDefineExpr.hpp"
 
 namespace xo { namespace scm { class IGCObject_DDefineExpr; } }
 

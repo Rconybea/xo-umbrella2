@@ -16,7 +16,7 @@
 #include "Printable.hpp"
 #include <xo/printable2/Printable.hpp>
 #include <xo/printable2/detail/IPrintable_Xfer.hpp>
-#include "DGlobalSymtab.hpp"
+#include "xo/expression2/DGlobalSymtab.hpp"
 
 namespace xo { namespace scm { class IPrintable_DGlobalSymtab; } }
 

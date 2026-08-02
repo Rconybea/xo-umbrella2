@@ -16,7 +16,7 @@
 #include "Printable.hpp"
 #include <xo/printable2/Printable.hpp>
 #include <xo/printable2/detail/IPrintable_Xfer.hpp>
-#include "DPrimitive_gco_0.hpp"
+#include "xo/procedure2/DPrimitive_gco_0.hpp"
 
 namespace xo { namespace scm { class IPrintable_DPrimitive_gco_0; } }
 

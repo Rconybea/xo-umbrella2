@@ -5,10 +5,10 @@
 
 #pragma once
 
-#include "VsmConfig.hpp"
-#include "VsmInstr.hpp"
-#include "VsmFrame.hpp"
-#include "LocalEnv.hpp"
+#include "xo/interpreter2/VsmConfig.hpp"
+#include "xo/interpreter2/VsmInstr.hpp"
+#include "xo/interpreter2/VsmFrame.hpp"
+#include "xo/interpreter2/LocalEnv.hpp"
 #include "GlobalEnv.hpp"
 #include <xo/object2/RuntimeError.hpp>
 #include <xo/object2/Array.hpp>

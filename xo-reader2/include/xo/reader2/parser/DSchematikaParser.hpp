@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include "ParserConfig.hpp"
-#include "ParserStateMachine.hpp"
-#include "ParserResult.hpp"
+#include "xo/reader2/ParserConfig.hpp"
+#include "xo/reader2/ParserStateMachine.hpp"
+#include "xo/reader2/ParserResult.hpp"
 #include <xo/tokenizer2/Token.hpp>
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/alloc2/GCObjectVisitor.hpp>

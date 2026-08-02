@@ -13,9 +13,9 @@
 
 #pragma once
 
-#include "Expression.hpp"
-#include "Expression.hpp"
-#include "DLambdaExpr.hpp"
+#include "xo/expression2/Expression.hpp"
+#include "xo/expression2/Expression.hpp"
+#include "xo/expression2/DLambdaExpr.hpp"
 
 namespace xo { namespace scm { class IExpression_DLambdaExpr; } }
 

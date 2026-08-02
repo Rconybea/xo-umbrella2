@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "DSyntaxStateMachine.hpp"
+#include "xo/reader2/DSyntaxStateMachine.hpp"
 
 namespace xo {
     namespace scm {

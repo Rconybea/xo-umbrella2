@@ -16,7 +16,7 @@
 #include "Printable.hpp"
 #include <xo/printable2/Printable.hpp>
 #include <xo/printable2/detail/IPrintable_Xfer.hpp>
-#include "DVsmIfElseContFrame.hpp"
+#include "xo/interpreter2/DVsmIfElseContFrame.hpp"
 
 namespace xo { namespace scm { class IPrintable_DVsmIfElseContFrame; } }
 

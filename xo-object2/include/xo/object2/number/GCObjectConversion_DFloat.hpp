@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "DFloat.hpp"
-#include "number/IGCObject_DFloat.hpp"
+#include "xo/object2/DFloat.hpp"
+#include "xo/object2/number/IGCObject_DFloat.hpp"
 #include <xo/alloc2/GCObjectConversion.hpp>
 
 namespace xo {

@@ -14,7 +14,7 @@
 #pragma once
 
 #include "GCObject.hpp"
-#include "DRuntimeError.hpp"
+#include "xo/object2/DRuntimeError.hpp"
 
 namespace xo { namespace scm { class IGCObject_DRuntimeError; } }
 

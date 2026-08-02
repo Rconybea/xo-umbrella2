@@ -14,8 +14,8 @@
 #pragma once
 
 // includes (via {facet_includes})
-#include "TypeRef.hpp"
-#include "exprtype.hpp"
+#include "xo/expression2/TypeRef.hpp"
+#include "xo/expression2/exprtype.hpp"
 #include <xo/reflect/TypeDescr.hpp>
 #include <xo/facet/obj.hpp>
 #include <xo/facet/facet_implementation.hpp>

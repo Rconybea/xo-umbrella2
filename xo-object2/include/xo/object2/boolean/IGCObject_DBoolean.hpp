@@ -14,7 +14,7 @@
 #pragma once
 
 #include "GCObject.hpp"
-#include "DBoolean.hpp"
+#include "xo/object2/DBoolean.hpp"
 
 namespace xo { namespace scm { class IGCObject_DBoolean; } }
 

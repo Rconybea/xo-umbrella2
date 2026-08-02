@@ -16,7 +16,7 @@
 #include "GCObject.hpp"
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/alloc2/Allocator.hpp>
-#include "DSequenceExpr.hpp"
+#include "xo/expression2/DSequenceExpr.hpp"
 
 namespace xo { namespace scm { class IGCObject_DSequenceExpr; } }
 

@@ -12,7 +12,7 @@
 #pragma once
 
 #include "RAllocator.hpp"
-#include "GCObject.hpp"
+#include "xo/alloc2/GCObject.hpp"
 
 namespace xo {
     namespace mm {

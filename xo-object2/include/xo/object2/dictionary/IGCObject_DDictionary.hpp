@@ -14,7 +14,7 @@
 #pragma once
 
 #include "GCObject.hpp"
-#include "DDictionary.hpp"
+#include "xo/object2/DDictionary.hpp"
 
 namespace xo { namespace scm { class IGCObject_DDictionary; } }
 

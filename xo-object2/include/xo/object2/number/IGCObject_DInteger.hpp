@@ -14,7 +14,7 @@
 #pragma once
 
 #include "GCObject.hpp"
-#include "DInteger.hpp"
+#include "xo/object2/DInteger.hpp"
 
 namespace xo { namespace scm { class IGCObject_DInteger; } }
 

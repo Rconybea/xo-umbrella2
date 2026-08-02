@@ -16,7 +16,7 @@
 #include "Printable.hpp"
 #include <xo/printable2/Printable.hpp>
 #include <xo/printable2/detail/IPrintable_Xfer.hpp>
-#include "DExpectFormalArglistSsm.hpp"
+#include "xo/reader2/DExpectFormalArglistSsm.hpp"
 
 namespace xo { namespace scm { class IPrintable_DExpectFormalArglistSsm; } }
 

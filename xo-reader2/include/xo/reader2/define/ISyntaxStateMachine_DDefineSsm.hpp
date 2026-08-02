@@ -13,10 +13,10 @@
 
 #pragma once
 
-#include "SyntaxStateMachine.hpp"
-#include "SyntaxStateMachine.hpp"
-#include "ssm/ISyntaxStateMachine_Xfer.hpp"
-#include "DDefineSsm.hpp"
+#include "xo/reader2/SyntaxStateMachine.hpp"
+#include "xo/reader2/SyntaxStateMachine.hpp"
+#include "xo/reader2/ssm/ISyntaxStateMachine_Xfer.hpp"
+#include "xo/reader2/DDefineSsm.hpp"
 
 namespace xo { namespace scm { class ISyntaxStateMachine_DDefineSsm; } }
 

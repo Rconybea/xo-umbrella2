@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "DSyntaxStateMachine.hpp"
-#include "syntaxstatetype.hpp"
+#include "xo/reader2/DSyntaxStateMachine.hpp"
+#include "xo/reader2/syntaxstatetype.hpp"
 #include <xo/facet/obj.hpp>
 #include <string_view>
 

@@ -16,7 +16,7 @@
 #include "GCObject.hpp"
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/alloc2/Allocator.hpp>
-#include "DVariable.hpp"
+#include "xo/expression2/DVariable.hpp"
 
 namespace xo { namespace scm { class IGCObject_DVariable; } }
 

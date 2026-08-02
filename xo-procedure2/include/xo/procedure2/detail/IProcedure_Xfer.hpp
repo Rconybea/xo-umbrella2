@@ -21,7 +21,7 @@
 #pragma once
 
 #include "AProcedure.hpp"
-#include "RuntimeContext.hpp"
+#include "xo/procedure2/RuntimeContext.hpp"
 #include <xo/alloc2/GCObject.hpp>
 
 namespace xo {

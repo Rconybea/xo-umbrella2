@@ -16,7 +16,7 @@
 #include "GCObject.hpp"
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/alloc2/Allocator.hpp>
-#include "DPrimitive_gco_2_dict_string.hpp"
+#include "xo/procedure2/DPrimitive_gco_2_dict_string.hpp"
 
 namespace xo { namespace scm { class IGCObject_DPrimitive_gco_2_dict_string; } }
 

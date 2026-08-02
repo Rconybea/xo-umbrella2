@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "LogBuffer.hpp"
+#include "xo/indentlog2/LogBuffer.hpp"
 #include "PpConfig.hpp"
 #include <xo/arena/DArena.hpp>
 #include <xo/arena/DArenaVector.hpp>
