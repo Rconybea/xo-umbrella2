@@ -5,10 +5,10 @@
 
 #pragma once
 
-#include "xo/refcnt/Refcounted.hpp"
 #include "Variable.hpp"
 #include "binding_path.hpp"
-#include "xo/indentlog/print/pretty.hpp"
+#include <xo/refcnt/Refcounted.hpp>
+#include <xo/indentlog/print/pretty.hpp>
 
 namespace xo {
 

@@ -3,8 +3,8 @@
 #include "xo/expression/Constant.hpp"
 #include "xo/expression/PrimitiveExpr.hpp"
 #include "xo/expression/llvmintrinsic.hpp"
-#include <iostream>
 #include <cmath>
+#include <iostream>
 #include <math.h>
 
 // address of &sqrt ambiguous on osx/clang

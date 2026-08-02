@@ -4,8 +4,8 @@
 #include "PrimitiveExpr.hpp"
 #include "exprtype.hpp"
 #include "pretty_expression.hpp"
-#include "xo/indentlog/print/vector.hpp"
-#include "xo/indentlog/print/pretty_vector.hpp"
+#include <xo/indentlog/print/pretty_vector.hpp>
+#include <xo/indentlog/print/vector.hpp>
 #include <cstdint>
 
 namespace xo {

@@ -6,7 +6,7 @@
 #include "AssignExpr.hpp"
 #include "pretty_expression.hpp"
 #include "pretty_variable.hpp"
-#include "xo/indentlog/print/tag.hpp"
+#include <xo/indentlog/print/tag.hpp>
 #include <cstdint>
 
 namespace xo {

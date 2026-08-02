@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include "xo/indentlog/print/pretty.hpp"
-#include "xo/refcnt/pretty_refcnt.hpp"
 #include "Expression.hpp"
+#include <xo/refcnt/pretty_refcnt.hpp>
+#include <xo/indentlog/print/pretty.hpp>
 
 namespace xo {
     namespace print {

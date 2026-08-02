@@ -6,8 +6,8 @@
 #pragma once
 
 #include "Expression.hpp"
-#include "xo/reflect/Reflect.hpp"
-#include "xo/reflect/TypeDescr.hpp"
+#include <xo/reflect/Reflect.hpp>
+#include <xo/reflect/TypeDescr.hpp>
 #include <type_traits>
 
 namespace xo {

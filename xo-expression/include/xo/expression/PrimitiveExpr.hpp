@@ -6,10 +6,10 @@
 #pragma once
 
 #include "PrimitiveExprInterface.hpp"
-#include "pretty_expression.hpp"
 #include "llvmintrinsic.hpp"
-#include "xo/reflect/Reflect.hpp"
-#include "xo/indentlog/print/quoted.hpp"
+#include "pretty_expression.hpp"
+#include <xo/reflect/Reflect.hpp>
+#include <xo/indentlog/print/quoted.hpp>
 
 extern "C" {
     /* these symbols needed to link primitives */

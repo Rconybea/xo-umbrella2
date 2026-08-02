@@ -2,9 +2,9 @@
 
 #pragma once
 
-#include "xo/indentlog/print/pretty.hpp"
-#include "xo/refcnt/pretty_refcnt.hpp"
 #include "LocalSymtab.hpp"
+#include <xo/refcnt/pretty_refcnt.hpp>
+#include <xo/indentlog/print/pretty.hpp>
 
 namespace xo {
     namespace print {

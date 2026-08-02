@@ -7,7 +7,7 @@
 
 #include "ProcedureExprInterface.hpp"
 #include "llvmintrinsic.hpp"
-#include "xo/reflect/TaggedPtr.hpp"
+#include <xo/reflect/TaggedPtr.hpp>
 #include <type_traits>
 
 namespace xo {

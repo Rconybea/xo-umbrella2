@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "pretty_expression.hpp"
 #include "Variable.hpp"
+#include "pretty_expression.hpp"
 
 namespace xo {
     namespace print {

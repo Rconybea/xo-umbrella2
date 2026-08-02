@@ -6,12 +6,12 @@
 #pragma once
 
 #include "Expression.hpp"
+#include "LocalSymtab.hpp"
 #include "ProcedureExprInterface.hpp"
 #include "Variable.hpp"
-#include "LocalSymtab.hpp"
 #include <map>
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace xo {
     namespace scm {

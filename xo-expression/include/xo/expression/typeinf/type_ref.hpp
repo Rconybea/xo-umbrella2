@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "xo/flatstring/flatstring.hpp"
-#include "xo/reflect/TypeDescr.hpp"
+#include <xo/reflect/TypeDescr.hpp>
+#include <xo/flatstring/flatstring.hpp>
 
 namespace xo {
     namespace scm {

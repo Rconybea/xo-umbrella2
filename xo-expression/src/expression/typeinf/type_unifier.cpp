@@ -4,7 +4,7 @@
  **/
 
 #include "typeinf/type_unifier.hpp"
-#include "xo/indentlog/print/tag.hpp"
+#include <xo/indentlog/print/tag.hpp>
 
 namespace xo {
     namespace scm {

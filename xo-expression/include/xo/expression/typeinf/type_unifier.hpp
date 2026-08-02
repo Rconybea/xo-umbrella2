@@ -1,7 +1,7 @@
 /** @file type_unifier.hpp **/
 
-#include "type_ref.hpp"
 #include "TypeBlueprint.hpp"
+#include "type_ref.hpp"
 #include <map>
 
 namespace xo {

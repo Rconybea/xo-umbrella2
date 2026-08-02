@@ -4,7 +4,7 @@
  */
 
 #include "xo/expression/typeinf/type_unifier.hpp"
-#include "xo/reflect/Reflect.hpp"
+#include <xo/reflect/Reflect.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {

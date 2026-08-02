@@ -1,7 +1,7 @@
 /** @file TypeBlueprint.hpp **/
 
-#include "xo/refcnt/Refcounted.hpp"
 #include "type_ref.hpp"
+#include <xo/refcnt/Refcounted.hpp>
 #include <map>
 #include <set>
 

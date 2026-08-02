@@ -7,7 +7,7 @@
 
 #include "SymbolTable.hpp"
 #include "Variable.hpp"
-#include "xo/reflect/TypeDescr.hpp"
+#include <xo/reflect/TypeDescr.hpp>
 
 namespace xo {
     namespace scm {

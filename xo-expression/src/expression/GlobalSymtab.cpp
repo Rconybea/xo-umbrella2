@@ -3,9 +3,9 @@
  * author: Roland Conybeare, Jul 2025
  */
 
-#include "xo/indentlog/print/ppdetail_atomic.hpp"
 #include "GlobalSymtab.hpp"
 #include "Expression.hpp"
+#include <xo/indentlog/print/ppdetail_atomic.hpp>
 
 namespace xo {
     namespace scm {
