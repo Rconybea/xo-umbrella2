@@ -5,12 +5,12 @@
 
 #pragma once
 
-#include "xo/indentlog/scope.hpp"
-#include "xo/indentlog/print/tostr.hpp"
-#include "xo/indentlog/print/tag.hpp"
-#include <vector>
-#include <cstdint>
+#include <xo/indentlog/print/tag.hpp>
+#include <xo/indentlog/print/tostr.hpp>
+#include <xo/indentlog/scope.hpp>
 #include <cassert>
+#include <cstdint>
+#include <vector>
 //#include <concepts>
 
 namespace xo {

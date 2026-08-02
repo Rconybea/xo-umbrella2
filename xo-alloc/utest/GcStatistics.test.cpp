@@ -4,9 +4,9 @@
  */
 
 #include "xo/alloc/GcStatistics.hpp"
-#include "xo/indentlog/scope.hpp"
-#include "xo/indentlog/print/tostr.hpp"
-#include "xo/indentlog/print/hex.hpp"
+#include <xo/indentlog/print/hex.hpp>
+#include <xo/indentlog/print/tostr.hpp>
+#include <xo/indentlog/scope.hpp>
 #include <catch2/catch.hpp>
 #include <ranges>
 

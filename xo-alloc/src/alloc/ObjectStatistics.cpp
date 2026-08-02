@@ -4,8 +4,8 @@
  */
 
 #include "ObjectStatistics.hpp"
-#include "xo/reflect/TypeDescr.hpp"
-#include "xo/indentlog/print/pretty_vector.hpp"
+#include <xo/reflect/TypeDescr.hpp>
+#include <xo/indentlog/print/pretty_vector.hpp>
 
 namespace xo {
     namespace gc {

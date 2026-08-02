@@ -5,7 +5,7 @@
 
 //#include "xo/allocutil/IAlloc.hpp"
 #include "xo/alloc/ArenaAlloc.hpp"
-#include "xo/indentlog/print/tag.hpp"
+#include <xo/indentlog/print/tag.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {

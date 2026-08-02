@@ -4,7 +4,7 @@
  */
 
 #include "xo/alloc/CircularBuffer.hpp"
-#include "xo/indentlog/print/vector.hpp"
+#include <xo/indentlog/print/vector.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {

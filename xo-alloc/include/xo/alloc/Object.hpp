@@ -5,10 +5,10 @@
 
 #pragma once
 
-#include "xo/allocutil/IObject.hpp"
-#include "xo/reflect/TaggedPtr.hpp"
-#include "xo/allocutil/ObjectVisitor.hpp"
-#include "xo/allocutil/gc_ptr.hpp"
+#include <xo/reflect/TaggedPtr.hpp>
+#include <xo/allocutil/IObject.hpp>
+#include <xo/allocutil/ObjectVisitor.hpp>
+#include <xo/allocutil/gc_ptr.hpp>
 #include <concepts>
 #include <cstdint>
 

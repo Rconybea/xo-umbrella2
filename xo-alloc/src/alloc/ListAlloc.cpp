@@ -5,7 +5,7 @@
 
 #include "ListAlloc.hpp"
 #include "ArenaAlloc.hpp"
-#include "xo/indentlog/scope.hpp"
+#include <xo/indentlog/scope.hpp>
 #include <cassert>
 #include <cstddef>
 

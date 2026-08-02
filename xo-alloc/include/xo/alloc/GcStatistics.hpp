@@ -5,14 +5,14 @@
 
 #pragma once
 
-#include "generation.hpp"
 #include "CircularBuffer.hpp"
-#include <xo/reflect/TypeDescr.hpp>
+#include "generation.hpp"
 #include <xo/unit/quantity.hpp>
 #include <xo/unit/quantity_iostream.hpp>
+#include <xo/reflect/TypeDescr.hpp>
 #include <xo/indentlog/print/pretty.hpp>
-#include <ostream>
 #include <array>
+#include <ostream>
 
 namespace xo {
     namespace gc {

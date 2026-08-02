@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "xo/allocutil/IAlloc.hpp"
 #include "ObjectStatistics.hpp"
+#include <xo/allocutil/IAlloc.hpp>
 
 namespace xo {
     namespace gc {

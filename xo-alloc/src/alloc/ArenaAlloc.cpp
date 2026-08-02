@@ -6,11 +6,11 @@
 #include "ArenaAlloc.hpp"
 #include "Object.hpp"
 #include "ObjectStatistics.hpp"
-#include "xo/indentlog/scope.hpp"
-#include "xo/indentlog/print/tag.hpp"
+#include <xo/indentlog/print/tag.hpp>
+#include <xo/indentlog/scope.hpp>
+#include <cassert>
 #include <sys/mman.h>
 #include <unistd.h> // for getpagesize() on OSX
-#include <cassert>
 
 namespace xo {
     using std::byte;

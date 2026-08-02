@@ -4,7 +4,7 @@
  */
 
 #include "xo/alloc/GC.hpp"
-#include "xo/allocutil/gc_allocator_traits.hpp"
+#include <xo/allocutil/gc_allocator_traits.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {

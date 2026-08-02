@@ -4,11 +4,11 @@
  */
 
 #include "xo/alloc/ObjectStatistics.hpp"
-#include "xo/reflect/Reflect.hpp"
-#include "xo/indentlog/scope.hpp"
-#include "xo/indentlog/print/ppstr.hpp"
-#include "xo/indentlog/print/tostr.hpp"
-#include "xo/indentlog/print/hex.hpp"
+#include <xo/reflect/Reflect.hpp>
+#include <xo/indentlog/print/hex.hpp>
+#include <xo/indentlog/print/ppstr.hpp>
+#include <xo/indentlog/print/tostr.hpp>
+#include <xo/indentlog/scope.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {

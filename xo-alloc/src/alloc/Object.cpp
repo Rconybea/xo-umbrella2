@@ -4,8 +4,8 @@
  */
 
 #include "Object.hpp"
-#include "GC.hpp"
 #include "Forwarding1.hpp"
+#include "GC.hpp"
 
 using xo::obj::Forwarding1;
 

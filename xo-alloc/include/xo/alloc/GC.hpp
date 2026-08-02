@@ -8,10 +8,10 @@
 #include "ArenaAlloc.hpp"
 #include "GcStatistics.hpp"
 #include "Object.hpp"
-#include "xo/callback/UpCallbackSet.hpp"
-#include "xo/indentlog/print/array.hpp"
-#include <vector>
+#include <xo/indentlog/print/array.hpp>
+#include <xo/callback/UpCallbackSet.hpp>
 #include <array>
+#include <vector>
 
 namespace xo {
     /** types that can participate in GC inherit from this base class.  See Object.hpp in this directory **/

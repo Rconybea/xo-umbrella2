@@ -4,9 +4,9 @@
  */
 
 #include "Forwarding1.hpp"
-#include "xo/reflect/Reflect.hpp"
-#include <cstddef>
+#include <xo/reflect/Reflect.hpp>
 #include <cassert>
+#include <cstddef>
 
 namespace xo {
     using xo::reflect::Reflect;

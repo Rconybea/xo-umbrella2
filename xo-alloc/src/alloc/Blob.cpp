@@ -4,8 +4,8 @@
  **/
 
 #include "Blob.hpp"
-#include "xo/reflect/Reflect.hpp"
-#include "xo/allocutil/IAlloc.hpp"
+#include <xo/reflect/Reflect.hpp>
+#include <xo/allocutil/IAlloc.hpp>
 
 namespace xo {
     using xo::reflect::Reflect;

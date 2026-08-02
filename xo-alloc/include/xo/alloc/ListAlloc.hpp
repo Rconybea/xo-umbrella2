@@ -7,9 +7,9 @@
 
 #include "IAlloc.hpp"
 #include "ObjectStatistics.hpp"
+#include <cstdint>
 #include <list>
 #include <memory>
-#include <cstdint>
 
 namespace xo {
     namespace gc {

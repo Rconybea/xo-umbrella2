@@ -3,12 +3,12 @@
  * author: Roland Conybeare, Jul 2025
  */
 
-#include "GcStatistics.hpp"
 #include "GC.hpp"
+#include "GcStatistics.hpp"
 #include "Object.hpp"
-#include "xo/indentlog/scope.hpp"
-#include <chrono>
+#include <xo/indentlog/scope.hpp>
 #include <cassert>
+#include <chrono>
 #include <cstddef>
 
 namespace xo {

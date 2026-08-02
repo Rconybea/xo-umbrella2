@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include "xo/indentlog/print/pretty.hpp"
-#include <vector>
+#include <xo/indentlog/print/pretty.hpp>
 #include <cstdint>
+#include <vector>
 
 namespace xo {
     namespace reflect { class TypeDescrBase; }

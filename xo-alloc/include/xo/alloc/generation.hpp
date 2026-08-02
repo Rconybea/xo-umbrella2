@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include <ostream>
-#include <cstdint>
 #include <cassert>
+#include <cstdint>
+#include <ostream>
 
 namespace xo {
     namespace gc {
