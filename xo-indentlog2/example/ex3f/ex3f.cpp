@@ -11,12 +11,12 @@
  * Run in a terminal to see color; piped, the raw \033[...m escapes show.
  */
 
+#include <xo/indentlog2/print/PrettySink.hpp>
+#include <xo/arena/ArenaConfig.hpp>
+#include <xo/ppsink/color.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag.hpp>
-#include <xo/ppsink/color.hpp>
-#include <xo/indentlog2/print/PrettySink.hpp>
-#include <xo/arena/ArenaConfig.hpp>
 #include <iostream>
 #include <string>
 

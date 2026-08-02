@@ -8,9 +8,9 @@
  *  active sink.
  **/
 
-#include <xo/ppsink/scope.hpp>
 #include "print/PrettySink.hpp"
 #include <xo/arena/ArenaConfig.hpp>
+#include <xo/ppsink/scope.hpp>
 #include <catch2/catch.hpp>
 #include <sstream>
 #include <string>

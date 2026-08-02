@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include <xo/ppsink/PpSink.hpp>
-#include "PpTokenStreambuf.hpp"
 #include "PpState.hpp"
+#include "PpTokenStreambuf.hpp"
+#include <xo/ppsink/PpSink.hpp>
 
 namespace xo {
     namespace pp {

@@ -4,8 +4,8 @@
  **/
 
 #include "LogBuffer.hpp"
-#include <xo/arena/ArenaConfig.hpp>
 #include <xo/testutil/try_test_array.hpp>
+#include <xo/arena/ArenaConfig.hpp>
 #include <catch2/catch.hpp>
 #include <cstring>
 #include <sstream>

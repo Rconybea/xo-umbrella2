@@ -7,12 +7,12 @@
  **/
 
 #include "print/PrettySink.hpp"
-#include <xo/ppsink/escape.hpp>
 #include <xo/arena/ArenaConfig.hpp>
+#include <xo/ppsink/escape.hpp>
 #include <catch2/catch.hpp>
+#include <cstdint>
 #include <string>
 #include <string_view>
-#include <cstdint>
 
 namespace ut {
     using xo::pp::PrettySink;

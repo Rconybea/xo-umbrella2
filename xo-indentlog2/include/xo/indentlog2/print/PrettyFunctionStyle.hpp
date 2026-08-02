@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <xo/ppsink/Prettifier.hpp>
 #include <xo/ppsink/FunctionStyle.hpp>
+#include <xo/ppsink/Prettifier.hpp>
 
 namespace xo::pp {
     /** pretty-print a FunctionStyle as its descriptive name.

@@ -6,7 +6,7 @@
 #pragma once
 
 #include "LineState.hpp"
-#include "xo/arena/DArena.hpp"
+#include <xo/arena/DArena.hpp>
 #include <iosfwd>
 
 namespace xo {

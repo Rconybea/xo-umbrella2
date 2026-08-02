@@ -3,16 +3,16 @@
  *  @author Roland Conybeare, Jul 2026
  **/
 
-#include <xo/ppsink/FlatSink.hpp>
 #include "print/PrettySink.hpp"
-#include <xo/arena/ArenaConfig.hpp>
 #include <xo/testutil/try_test_array.hpp>
+#include <xo/arena/ArenaConfig.hpp>
+#include <xo/ppsink/FlatSink.hpp>
 #include <catch2/catch.hpp>
-#include <sstream>
 #include <ostream>
+#include <sstream>
 #include <string>
-#include <vector>
 #include <utility>
+#include <vector>
 
 namespace ut {
     using xo::pp::FlatSink;

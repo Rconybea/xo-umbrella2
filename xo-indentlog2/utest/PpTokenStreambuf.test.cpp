@@ -4,17 +4,17 @@
  **/
 
 #include "print/PpTokenStreambuf.hpp"
-#include "print/PpState.hpp"
 #include "LogBuffer.hpp"
-#include <xo/arena/ArenaConfig.hpp>
+#include "print/PpState.hpp"
 #include <xo/testutil/try_test_array.hpp>
+#include <xo/arena/ArenaConfig.hpp>
 #include <catch2/catch.hpp>
+#include <cstdint>
 #include <ostream>
 #include <string>
 #include <string_view>
-#include <vector>
 #include <utility>
-#include <cstdint>
+#include <vector>
 
 namespace ut {
     using xo::pp::PpState;

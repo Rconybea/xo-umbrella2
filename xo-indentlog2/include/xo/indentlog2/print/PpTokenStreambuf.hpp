@@ -6,8 +6,8 @@
 #pragma once
 
 #include <xo/arena/span.hpp>
-#include <streambuf>
 #include <cstdint>
+#include <streambuf>
 
 namespace xo::pp {
     class PpState; // see print/PpState.hpp

@@ -5,10 +5,10 @@
 
 #pragma once
 
-#include "PpConfig.hpp"
 #include "LogBuffer.hpp"
-#include "xo/arena/DArena.hpp"
-#include "xo/arena/DArenaVector.hpp"
+#include "PpConfig.hpp"
+#include <xo/arena/DArena.hpp>
+#include <xo/arena/DArenaVector.hpp>
 
 namespace xo::pp {
     class PpStringToken; // see PpToken.hpp

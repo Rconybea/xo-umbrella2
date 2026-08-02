@@ -3,10 +3,10 @@
  *  @author Roland Conybeare, Jul 2026
  **/
 
-#include <xo/ppsink/pretty_ostream.hpp>   /* Fallback_int exercises the operator<< fallback */
-#include <xo/ppsink/FlatSink.hpp>
 #include "print/PrettySink.hpp"
 #include <xo/arena/ArenaConfig.hpp>
+#include <xo/ppsink/FlatSink.hpp>
+#include <xo/ppsink/pretty_ostream.hpp> /* Fallback_int exercises the operator<< fallback */
 #include <catch2/catch.hpp>
 #include <sstream>
 #include <string>

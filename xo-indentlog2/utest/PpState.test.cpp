@@ -4,13 +4,13 @@
  **/
 
 #include "print/PpState.hpp"
-#include "print/PpTokenType.hpp"
 #include "LogBuffer.hpp"
-#include <xo/arena/ArenaConfig.hpp>
+#include "print/PpTokenType.hpp"
 #include <xo/testutil/try_test_array.hpp>
+#include <xo/arena/ArenaConfig.hpp>
 #include <catch2/catch.hpp>
-#include <cstring>
 #include <cstdint>
+#include <cstring>
 #include <string>
 #include <vector>
 

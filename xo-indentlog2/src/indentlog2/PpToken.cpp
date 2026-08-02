@@ -4,7 +4,7 @@
  **/
 
 #include "print/PpToken.hpp"
-#include "xo/arena/padding.hpp"
+#include <xo/arena/padding.hpp>
 #include <cassert>
 #include <cstring>
 #include <memory>

@@ -3,7 +3,7 @@
  *  @author Roland Conybeare, Jul 2026
  **/
 
-#include "xo/arena/ArenaConfig.hpp"
+#include <xo/arena/ArenaConfig.hpp>
 #include <cstdint>
 
 namespace xo {

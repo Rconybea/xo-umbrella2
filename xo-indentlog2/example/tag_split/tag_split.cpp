@@ -12,13 +12,13 @@
  * emits its flat spaces), so tag-splitting can only be shown here.
  */
 
-#include <xo/ppsink/pretty.hpp>
-#include <xo/ppsink/tag.hpp>
 #include <xo/indentlog2/print/PrettySink.hpp>
 #include <xo/arena/ArenaConfig.hpp>
+#include <xo/ppsink/pretty.hpp>
+#include <xo/ppsink/tag.hpp>
+#include <cstdint>
 #include <iostream>
 #include <string>
-#include <cstdint>
 
 using xo::pp::PrettySink;
 using xo::pp::PpConfig;

@@ -4,10 +4,10 @@
  **/
 
 #include "LineState.hpp"
+#include <xo/testutil/try_test_array.hpp>
 #include <xo/randomgen/random_seed.hpp>
 #include <xo/randomgen/xoshiro256.hpp>
-#include <xo/testutil/try_test_array.hpp>
-//#include <xo/testutil/UtestRehearser.hpp>
+// #include <xo/testutil/UtestRehearser.hpp>
 #include <catch2/catch.hpp>
 #include <vector>
 
