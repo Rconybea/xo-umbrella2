@@ -17,16 +17,16 @@
  */
 
 #include "Webserver.hpp"
-#include "WebsocketSink.hpp"
-#include "WebsockUtil.hpp"
-#include "WsSafetyToken.hpp"
 #include "DynamicEndpoint.hpp"
-#include "xo/printjson/PrintJson.hpp"
-#include <json/json.h>  // for Json::Reader,  to parse json input
+#include "WebsockUtil.hpp"
+#include "WebsocketSink.hpp"
+#include "WsSafetyToken.hpp"
+#include <xo/printjson/PrintJson.hpp>
+#include <json/json.h> // for Json::Reader,  to parse json input
 #include <condition_variable>
-#include <unordered_map>
-#include <regex>
 #include <deque>
+#include <regex>
+#include <unordered_map>
 #include <vector>
 
 namespace xo {

@@ -2,14 +2,14 @@
 
 #pragma once
 
-#include "xo/refcnt/Displayable.hpp"
-#include "xo/printjson/PrintJson.hpp"
-#include "xo/webutil/HttpEndpointDescr.hpp"
-#include "xo/webutil/StreamEndpointDescr.hpp"
-#include <libwebsockets.h>  // temporary,  while moving callbacks
+#include <xo/printjson/PrintJson.hpp>
+#include <xo/webutil/HttpEndpointDescr.hpp>
+#include <xo/webutil/StreamEndpointDescr.hpp>
+#include <xo/refcnt/Displayable.hpp>
+#include <memory>
 #include <thread>
 #include <vector>
-#include <memory>
+#include <libwebsockets.h> // temporary,  while moving callbacks
 
 namespace xo {
     namespace web {

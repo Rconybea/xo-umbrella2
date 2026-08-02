@@ -6,9 +6,9 @@
 #pragma once
 
 #include "EndpointUtil.hpp"
-#include "xo/webutil/HttpEndpointDescr.hpp"
-#include "xo/webutil/StreamEndpointDescr.hpp"
-#include "xo/webutil/Alist.hpp"
+#include <xo/webutil/Alist.hpp>
+#include <xo/webutil/HttpEndpointDescr.hpp>
+#include <xo/webutil/StreamEndpointDescr.hpp>
 #include <regex>
 
 namespace xo {

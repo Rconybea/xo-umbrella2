@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "xo/reactor/AbstractSink.hpp"
-#include "xo/printjson/PrintJson.hpp"
+#include <xo/reactor/AbstractSink.hpp>
+#include <xo/printjson/PrintJson.hpp>
 
 namespace xo {
     namespace web {
