@@ -112,4 +112,16 @@ namespace xo::pp {
     };
 } /*namespace xo::pp*/
 
+/** tag a value with the text of the expression that produced it:
+ *  @code XTAG_(width) @endcode prints as @code :width 7 @endcode
+ *
+ *  Mirrors legacy XTAG(x) = xo::xtag(STRINGIFY(x), x), and lives here for the
+ *  same reason legacy put XTAG in print/tag.hpp -- it is part of the tag
+ *  vocabulary, alongside the STRINGIFY included above.
+ *
+ *  Trailing underscore per the ppsink macro convention (see scope_macros.hpp),
+ *  so a translation unit can pull in both this and legacy indentlog's XTAG.
+ **/
+#define XTAG_(x) xo::pp::xtag(STRINGIFY(x), x)
+
 /* end tag.hpp */

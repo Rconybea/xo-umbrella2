@@ -50,7 +50,7 @@ endif()
 # deps:  logutils, ...
 
 xo_self_headeronly_dependency(${SELF_EXE} xo_flatstring)
-xo_dependency(${SELF_EXE} indentlog)
+xo_dependency(${SELF_EXE} xo_ppsink)
 xo_external_target_dependency(${SELF_EXE} Catch2 Catch2::Catch2)
 
 # end CMakeLists.txt

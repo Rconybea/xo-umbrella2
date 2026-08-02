@@ -44,6 +44,25 @@ namespace ut {
         ss << "<obj" << xtag("a", 1) << xtag("b", 2) << ">";
         REQUIRE(ss.str() == "<obj :a 1 :b 2>");
     }
+    /* XTAG_(x) names the tag after the *expression*, mirroring legacy
+     * XTAG(x) = xo::xtag(STRINGIFY(x), x).  Trailing underscore per the
+     * ppsink convention, so a TU can also pull in legacy indentlog's XTAG.
+     */
+    TEST_CASE("tag_ostream-XTAG_", "[tag_ostream]") {
+        int width = 7;
+        stringstream ss;
+        ss << XTAG_(width);
+        REQUIRE(ss.str() == " :width 7");
+    }
+
+    TEST_CASE("tag_ostream-XTAG_-expression", "[tag_ostream]") {
+        /* the name is the token text, verbatim */
+        int n = 2;
+        stringstream ss;
+        ss << XTAG_(n + 1);
+        REQUIRE(ss.str() == " :n + 1 3");
+    }
+
 } /*namespace ut*/
 
 /* end tag_ostream.test.cpp */
