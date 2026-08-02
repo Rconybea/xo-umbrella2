@@ -3,8 +3,8 @@
 #pragma once
 
 #include "generator.hpp"
-#include <random>
 #include <array>
+#include <random>
 
 namespace xo {
     namespace random {

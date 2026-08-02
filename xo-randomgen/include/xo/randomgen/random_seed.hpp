@@ -1,7 +1,7 @@
 /* @file random_seed.hpp */
 
-#include <iostream>
 #include <cstdint>
+#include <iostream>
 #include <stdlib.h>
 #ifdef _BSD_SOURCE
 # include <bsd/stdlib.h>
