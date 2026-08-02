@@ -282,6 +282,49 @@ namespace ut {
             REQUIRE(buf.committed_span().size() > cap0);   /* grew in place */
             REQUIRE(oss.str() == "pre" + big);             /* "pre" not re-sent */
         }
+
+        SECTION("per-line reclaim: multi-line record drains all lines, buffer stays bounded") {
+            std::ostringstream oss;
+            std::ostringstream expect;
+            LogBuffer buf(cfg, false);
+            buf.set_dest_sbuf(oss.rdbuf());
+
+            /* with a dest attached, newline_indent() drains + reclaims each
+             * completed line, so a record of many lines never grows the buffer
+             * past its initial extent (total content here >> that extent).
+             */
+            const std::size_t cap0 = buf.committed_span().size();
+            const char * line = "line-content-abcdefghijklmnopqrstuvwxyz";  /* 39 chars */
+            const int n = 1000;
+
+            for (int i = 0; i < n; ++i) {
+                wr(buf, line);
+                expect << line;
+                if (i + 1 < n) {
+                    buf.newline_indent(2);
+                    expect << "\n  ";
+                }
+            }
+            buf.reset_buffer();     /* drains the final line */
+
+            REQUIRE(oss.str() == expect.str());          /* every line reached the sink */
+            REQUIRE(buf.committed_span().size() == cap0); /* buffer never had to grow */
+        }
+
+        SECTION("no reclaim without a dest: multi-line content accumulates in the buffer") {
+            LogBuffer buf(cfg, false);      /* no dest attached */
+
+            /* pure-buffer contract: newline_indent must NOT reclaim, so all
+             * lines stay in the buffer for used_span()/output() to read.
+             */
+            wr(buf, "aaa");
+            buf.newline_indent(2);
+            wr(buf, "bbb");
+
+            LogBuffer::Span used = buf.used_span();
+            REQUIRE(used.size() == 3 + 1 + 2 + 3);       /* "aaa" "\n" "  " "bbb" */
+            REQUIRE(std::string(used.lo(), used.hi()) == "aaa\n  bbb");
+        }
     }
 }
 

@@ -113,18 +113,41 @@ namespace xo {
     void
     LogBuffer::newline_indent(uint32_t indent)
     {
-        if (!this->_require_avail(1 + indent)) {
+        // terminate the current line
+        if (!this->_require_avail(1)) {
             assert(false);
             return;
         }
 
-        auto pptr = this->pptr_;
+        {
+            auto pptr = this->pptr_;
+            *(pptr++) = '\n';
+            this->_check_update_local_state(pptr);
+        }
 
-        *(pptr++) = '\n';
-        ::memset(pptr, ' ', indent);
-        pptr += indent;
+        /* Per-line reclaim (only when draining): the line is now complete, so
+         * once flushed its bytes are no longer needed -- reuse the buffer from
+         * porigin_, bounding live memory to ~one line even for a huge record.
+         * The current line is empty at this instant (indent not yet written)
+         * and column has reset to 0, so this needs no move/rebase -- just
+         * flush + rewind + clear.  With no dest_ we must keep accumulating
+         * (preserve full output for output()).
+         */
+        if (dest_)
+            this->reclaim_line();
 
-        this->_check_update_local_state(pptr);
+        // begin the next line with `indent` spaces
+        if (!this->_require_avail(indent)) {
+            assert(false);
+            return;
+        }
+
+        {
+            auto pptr = this->pptr_;
+            ::memset(pptr, ' ', indent);
+            pptr += indent;
+            this->_check_update_local_state(pptr);
+        }
     }
 
     void
@@ -154,16 +177,15 @@ namespace xo {
     }
 
     void
-    LogBuffer::reset_buffer()
+    LogBuffer::reclaim_line()
     {
-        // scrub buffered chars? perhaps offer as option
+        // Drain the completed line, then reuse the buffer from porigin_.
+        // Valid only at a line boundary (current line empty): column has reset
+        // to 0, and lstate_'s fields are offsets from porigin_, so clear() is
+        // the correct fresh-origin state -- nothing to move or rebase.
+        //
         // keep {porigin_, epptr_}: allocated extent not changed
-
-        // drain pending output before reclaiming the memory holding it,
-        // and push it through to the device (record boundary = sync point)
         this->flush();
-        if (dest_)
-            dest_->pubsync();
 
         if (porigin_) {
             buf_v_.restore(buf_ckp_);
@@ -172,6 +194,17 @@ namespace xo {
         this->pptr_ = porigin_;
 
         lstate_.clear();
+    }
+
+    void
+    LogBuffer::reset_buffer()
+    {
+        // drain + reclaim the (final) line, then push it through to the device
+        // (record boundary = sync point)
+        this->reclaim_line();
+
+        if (dest_)
+            dest_->pubsync();
     }
 
     void

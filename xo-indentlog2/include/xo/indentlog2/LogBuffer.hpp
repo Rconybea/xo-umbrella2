@@ -87,6 +87,12 @@ namespace xo {
         void _check_update_local_state(char * pptr);
 
     private:
+        /** drain the completed line to @ref dest_ and rewind the buffer to
+         *  @ref porigin_ for reuse.  Valid only at a line boundary (current
+         *  line empty), where it needs no move: see @ref newline_indent.
+         **/
+        void reclaim_line();
+
         /** @defgroup LogBuffer-instance-vars **/
         ///@{
 
