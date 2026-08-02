@@ -3,11 +3,11 @@
  *  @author Roland Conybeare, Jan 2026
  **/
 
-#include "init_stringtable2.hpp"
 #include "StringOps.hpp"
+#include "init_stringtable2.hpp"
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/alloc2/Arena.hpp>
-//#include <xo/alloc2/arena/IAllocator_DArena.hpp>
+// #include <xo/alloc2/arena/IAllocator_DArena.hpp>
 #include <catch2/catch.hpp>
 #include <cctype>
 #include <cstring>

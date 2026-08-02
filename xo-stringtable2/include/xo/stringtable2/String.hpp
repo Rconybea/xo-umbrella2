@@ -8,7 +8,6 @@
 #include "DString.hpp"
 #include "string/IGCObject_DString.hpp"
 #include "string/IPrintable_DString.hpp"
-
 #include <xo/alloc2/Allocator.hpp>
 
 /* end String.hpp */

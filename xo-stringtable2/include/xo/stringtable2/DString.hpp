@@ -9,9 +9,9 @@
 #include <xo/alloc2/GCObjectVisitor.hpp>
 #include <xo/facet/obj.hpp>
 #include <xo/indentlog/print/ppindentinfo.hpp>
-#include <string_view>
-#include <functional>
 #include <cstdint>
+#include <functional>
+#include <string_view>
 //#include <cstdio>
 
 namespace xo {

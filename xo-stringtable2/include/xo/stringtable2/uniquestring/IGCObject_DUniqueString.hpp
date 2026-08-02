@@ -13,10 +13,10 @@
 
 #pragma once
 
-#include "GCObject.hpp"
-#include <xo/alloc2/GCObject.hpp>
-#include <xo/alloc2/Allocator.hpp>
 #include "DUniqueString.hpp"
+#include "GCObject.hpp"
+#include <xo/alloc2/Allocator.hpp>
+#include <xo/alloc2/GCObject.hpp>
 
 namespace xo { namespace scm { class IGCObject_DUniqueString; } }
 

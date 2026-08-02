@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "string/IGCObject_DString.hpp"
 #include "DString.hpp"
+#include "string/IGCObject_DString.hpp"
 
 namespace xo {
     namespace scm {

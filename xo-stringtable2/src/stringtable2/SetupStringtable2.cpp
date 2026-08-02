@@ -4,10 +4,8 @@
  **/
 
 #include "SetupStringtable2.hpp"
-
-#include <xo/stringtable2/UniqueString.hpp>
 #include <xo/stringtable2/String.hpp>
-
+#include <xo/stringtable2/UniqueString.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/indentlog/scope.hpp>
 

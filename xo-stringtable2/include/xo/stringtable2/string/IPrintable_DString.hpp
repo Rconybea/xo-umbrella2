@@ -13,10 +13,10 @@
 
 #pragma once
 
+#include "DString.hpp"
 #include "Printable.hpp"
 #include <xo/printable2/Printable.hpp>
 #include <xo/printable2/detail/IPrintable_Xfer.hpp>
-#include "DString.hpp"
 
 namespace xo { namespace scm { class IPrintable_DString; } }
 

@@ -13,10 +13,10 @@
 
 #pragma once
 
+#include "DUniqueString.hpp"
 #include "Printable.hpp"
 #include <xo/printable2/Printable.hpp>
 #include <xo/printable2/detail/IPrintable_Xfer.hpp>
-#include "DUniqueString.hpp"
 
 namespace xo { namespace scm { class IPrintable_DUniqueString; } }
 

@@ -4,11 +4,11 @@
  **/
 
 #include "StringTable.hpp"
+#include <xo/alloc2/Allocator.hpp>
+#include <xo/alloc2/arena/IAllocator_DArena.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag.hpp>
-#include <xo/alloc2/Allocator.hpp>
-#include <xo/alloc2/arena/IAllocator_DArena.hpp>
 
 namespace xo {
     using xo::mm::ArenaConfig;
