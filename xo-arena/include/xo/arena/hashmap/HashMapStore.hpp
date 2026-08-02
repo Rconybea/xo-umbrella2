@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <xo/arena/hashmap/DArenaHashMapUtil.hpp>
 #include <xo/arena/hashmap/ControlGroup.hpp>
+#include <xo/arena/hashmap/DArenaHashMapUtil.hpp>
 #include <cassert>
 
 namespace xo {

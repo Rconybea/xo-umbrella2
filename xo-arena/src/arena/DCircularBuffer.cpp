@@ -11,7 +11,7 @@
 #include <xo/ppsink/tostr.hpp>
 #include <cassert>
 #include <sys/mman.h>
-#include <unistd.h>  // for ::getpagesize() on osx
+#include <unistd.h> // for ::getpagesize() on osx
 
 namespace xo {
     namespace mm {

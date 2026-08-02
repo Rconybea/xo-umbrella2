@@ -4,15 +4,15 @@
  **/
 
 #include "backtrace.hpp"
-#include <iostream>
 #include <array>
 #include <cstdio>
 #include <cstdlib>
-#include <libunwind.h>
+#include <iostream>
 #include <cxxabi.h>
+#include <libunwind.h>
 #include <unistd.h>
 #ifndef __APPLE__
-#  include <elfutils/libdwfl.h>
+# include <elfutils/libdwfl.h>
 #endif
 
 namespace xo {

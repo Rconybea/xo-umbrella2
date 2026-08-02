@@ -6,9 +6,9 @@
 #pragma once
 
 #include <xo/reflectutil/typeseq.hpp>
+#include <cstddef>
 #include <functional>
 #include <string_view>
-#include <cstddef>
 
 namespace xo {
     namespace mm {

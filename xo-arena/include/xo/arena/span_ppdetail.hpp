@@ -16,8 +16,8 @@
 #pragma once
 
 #include "xo/arena/span.hpp"
-#include <xo/ppsink/tag_ostream.hpp>      /* os << xtag(..) */
-#include <xo/ppsink/quoted_ostream.hpp>   /* os << quot(..) */
+#include <xo/ppsink/quoted_ostream.hpp> /* os << quot(..) */
+#include <xo/ppsink/tag_ostream.hpp>    /* os << xtag(..) */
 #include <ostream>
 #include <string_view>
 

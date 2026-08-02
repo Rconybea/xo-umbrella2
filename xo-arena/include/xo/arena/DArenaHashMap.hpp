@@ -7,17 +7,17 @@
 
 #include "ArenaHashMapConfig.hpp"
 #include "DArenaVector.hpp"
-#include <xo/ppsink/verify_policy.hpp>
-#include "hashmap/HashMapStore.hpp"
 #include "hashmap/DArenaHashMapIterator.hpp"
+#include "hashmap/HashMapStore.hpp"
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag.hpp>
-#include <cassert>
+#include <xo/ppsink/verify_policy.hpp>
 #include <algorithm>
 #include <array>
-#include <utility>
+#include <cassert>
 #include <cstring>
+#include <utility>
 
 namespace xo {
     namespace map {

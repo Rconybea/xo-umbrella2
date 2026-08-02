@@ -6,12 +6,12 @@
 #pragma once
 
 //#include "xo/indentlog/scope.hpp"
+#include <cassert>
+#include <cstdint>
+#include <cstring>
+#include <stdexcept>
 #include <string>
 #include <string_view>
-#include <stdexcept>
-#include <cstring>
-#include <cstdint>
-#include <cassert>
 
 namespace xo {
     namespace mm {

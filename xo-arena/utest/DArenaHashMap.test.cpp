@@ -5,10 +5,10 @@
 
 #include "DArenaHashMap.hpp"
 #include "random_hash_ops.hpp"
-#include <xo/randomgen/random_seed.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag.hpp>
+#include <xo/randomgen/random_seed.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {

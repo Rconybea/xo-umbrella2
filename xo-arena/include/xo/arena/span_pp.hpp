@@ -17,10 +17,10 @@
 
 #include "xo/arena/span.hpp"
 #include <xo/ppsink/quoted.hpp>
-#include <xo/ppsink/tag.hpp>       /* xo::pp::{Prettifier, xtag, PpSink, pretty} */
-#include <string_view>
+#include <xo/ppsink/tag.hpp> /* xo::pp::{Prettifier, xtag, PpSink, pretty} */
 #include <charconv>
 #include <cstdio>
+#include <string_view>
 
 namespace xo::pp {
     /** @brief structured pretty-printing for xo::mm::span into a PpSink.

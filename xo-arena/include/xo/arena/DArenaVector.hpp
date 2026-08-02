@@ -6,8 +6,8 @@
 #pragma once
 
 #include "DArena.hpp"
+#include <cstring> // for ::memset()
 #include <stdexcept>
-#include <cstring>  // for ::memset()
 
 namespace xo {
     namespace mm {

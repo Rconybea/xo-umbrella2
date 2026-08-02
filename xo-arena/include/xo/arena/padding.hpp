@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <memory>
 #include <cstdint>
+#include <memory>
 
 namespace xo {
     namespace mm {

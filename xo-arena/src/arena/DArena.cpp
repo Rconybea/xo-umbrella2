@@ -6,8 +6,8 @@
 //#include "alloc/AAllocator.hpp"
 #include "DArena.hpp"
 #include "DArenaIterator.hpp"
-#include "mmap_util.hpp"
 #include "backtrace.hpp"
+#include "mmap_util.hpp"
 #include <xo/arena/padding.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
@@ -15,10 +15,10 @@
 #include <xo/ppsink/tostr.hpp>
 #include <cassert>
 #include <exception>
-#include <new> // for std::launder()
+#include <new>        // for std::launder()
+#include <string.h>   // for ::memset()
 #include <sys/mman.h> // for ::munmap()
-#include <unistd.h> // for ::getpagesize()
-#include <string.h> // for ::memset()
+#include <unistd.h>   // for ::getpagesize()
 
 namespace xo {
     /* the ppsink logging vocabulary, for use below */

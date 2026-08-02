@@ -5,10 +5,10 @@
 
 #pragma once
 
-#include "ArenaConfig.hpp"
 #include "AllocError.hpp"
-#include "MemorySizeInfo.hpp"
 #include "AllocInfo.hpp"
+#include "ArenaConfig.hpp"
+#include "MemorySizeInfo.hpp"
 #include <xo/reflectutil/typeseq.hpp>
 
 namespace xo {

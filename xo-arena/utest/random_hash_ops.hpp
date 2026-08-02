@@ -1,9 +1,9 @@
 /* @file random_hash_ops.hpp **/
 
-#include <xo/randomgen/xoshiro256.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag.hpp>
+#include <xo/randomgen/xoshiro256.hpp>
 #include <catch2/catch.hpp>
 #include <algorithm>
 #include <map>

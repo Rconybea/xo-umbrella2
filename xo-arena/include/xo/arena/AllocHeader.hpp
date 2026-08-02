@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include <type_traits>
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
+#include <type_traits>
 
 namespace xo {
     namespace mm {

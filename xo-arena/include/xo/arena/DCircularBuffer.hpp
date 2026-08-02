@@ -5,8 +5,8 @@
 
 #include "CircularBufferConfig.hpp"
 #include "DArenaVector.hpp"
-#include <xo/ppsink/verify_policy.hpp>
 #include "span.hpp"
+#include <xo/ppsink/verify_policy.hpp>
 #include <cstdint>
 
 namespace xo {
