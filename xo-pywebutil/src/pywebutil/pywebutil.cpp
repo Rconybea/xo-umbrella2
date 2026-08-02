@@ -1,10 +1,10 @@
 /* @file pywebutil.cpp */
 
 #include "pywebutil.hpp"
+#include <xo/pyutil/pyutil.hpp>
+#include <xo/webutil/HttpEndpointDescr.hpp>
+#include <xo/webutil/StreamEndpointDescr.hpp>
 #include <xo/timeutil/timeutil.hpp>
-#include "xo/webutil/HttpEndpointDescr.hpp"
-#include "xo/webutil/StreamEndpointDescr.hpp"
-#include "xo/pyutil/pyutil.hpp"
 #include <pybind11/chrono.h>
 
 namespace xo {

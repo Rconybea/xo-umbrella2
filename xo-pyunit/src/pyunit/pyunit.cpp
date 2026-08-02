@@ -2,9 +2,9 @@
 
 // note: need pyreflect/ here bc pyreflect.hpp is generated, located in build directory
 #include "pyunit.hpp"
-#include "xo/unit/xquantity.hpp"
-#include "xo/unit/xquantity_iostream.hpp"
-#include "xo/pyutil/pyutil.hpp"
+#include <xo/unit/xquantity.hpp>
+#include <xo/unit/xquantity_iostream.hpp>
+#include <xo/pyutil/pyutil.hpp>
 //#include <pybind11/pybind11.h>
 //#include <pybind11/stl.h>
 //#include <pybind11/chrono.h>

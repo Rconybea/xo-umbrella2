@@ -1,14 +1,14 @@
 /* @file pyjit.cpp */
 
 #include "pyjit.hpp"
-#include "xo/pyexpression/pyexpression.hpp"
-#include "xo/jit/MachPipeline.hpp"
-#include "xo/jit/intrinsics.hpp"
-#include "xo/expression/PrimitiveExpr.hpp"
-#include "xo/pyutil/pycaller.hpp"
-#include "xo/pyutil/pyutil.hpp"
-#include <llvm/Config/llvm-config.h>
+#include <xo/pyexpression/pyexpression.hpp>
+#include <xo/expression/PrimitiveExpr.hpp>
+#include <xo/pyutil/pycaller.hpp>
+#include <xo/pyutil/pyutil.hpp>
+#include <xo/jit/MachPipeline.hpp>
+#include <xo/jit/intrinsics.hpp>
 #include <pybind11/stl.h>
+#include <llvm/Config/llvm-config.h>
 
 namespace xo {
     namespace jit {

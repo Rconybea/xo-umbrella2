@@ -2,22 +2,22 @@
 
 // note: need pyprocess/ here bc pyprocess.hpp is generated, located in build directory
 #include "pyprocess.hpp"
+#include <xo/process/BrownianMotion.hpp>
+#include <xo/process/ExpProcess.hpp>
+#include <xo/process/RealizationSource.hpp>
+#include <xo/process/StochasticProcess.hpp>
+#include <xo/process/UpxToConsole.hpp>
+#include <xo/process/init_process.hpp>
+#include <xo/pyreactor/pyreactor.hpp>
+#include <xo/reactor/EventStore.hpp>
+#include <xo/reactor/PolyAdapterSink.hpp>
+#include <xo/pywebutil/pywebutil.hpp>
 #include <xo/timeutil/timeutil.hpp>
-#include "xo/pywebutil/pywebutil.hpp"
-#include "xo/process/init_process.hpp"
-#include "xo/process/UpxToConsole.hpp"
-#include "xo/process/StochasticProcess.hpp"
-#include "xo/process/BrownianMotion.hpp"
-#include "xo/process/ExpProcess.hpp"
-#include "xo/process/RealizationSource.hpp"
-#include "xo/pyreactor/pyreactor.hpp"
-#include "xo/reactor/EventStore.hpp"
-#include "xo/reactor/PolyAdapterSink.hpp"
-#include "xo/randomgen/random_seed.hpp"
-#include "xo/randomgen/xoshiro256.hpp"
+#include <xo/randomgen/random_seed.hpp>
+#include <xo/randomgen/xoshiro256.hpp>
+#include <pybind11/chrono.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include <pybind11/chrono.h>
 
 /* xo::ref::intrusive_ptr<T> is an intrusively-reference-counted pointer.
  * always safe to create one from a T* p

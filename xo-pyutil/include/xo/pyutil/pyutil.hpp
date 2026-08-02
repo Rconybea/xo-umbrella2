@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "xo/refcnt/Refcounted.hpp"
-#include "xo/refcnt/Unowned.hpp"
+#include <xo/refcnt/Refcounted.hpp>
+#include <xo/refcnt/Unowned.hpp>
 #include <pybind11/pybind11.h>
 
 /* xo::ref::intrusive_ptr<T> is an intrusively-reference-counted pointer.

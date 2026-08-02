@@ -1,31 +1,29 @@
 /* @file pykalmanfilter.cpp */
 
 #include "pykalmanfilter.hpp"
+#include <xo/kalmanfilter/KalmanFilter.hpp>
+#include <xo/kalmanfilter/KalmanFilterEngine.hpp>
+#include <xo/kalmanfilter/KalmanFilterInput.hpp>
+#include <xo/kalmanfilter/KalmanFilterInputToConsole.hpp>
+#include <xo/kalmanfilter/KalmanFilterObservable.hpp>
+#include <xo/kalmanfilter/KalmanFilterSpec.hpp>
+#include <xo/kalmanfilter/KalmanFilterState.hpp>
+#include <xo/kalmanfilter/KalmanFilterStateToConsole.hpp>
+#include <xo/kalmanfilter/KalmanFilterStep.hpp>
+#include <xo/kalmanfilter/KalmanFilterSvc.hpp>
+#include <xo/kalmanfilter/KalmanFilterTransition.hpp>
+#include <xo/kalmanfilter/init_filter.hpp>
+#include <xo/pyreactor/pyreactor.hpp>
+#include <xo/reactor/EventStore.hpp>
+#include <xo/pyutil/pyutil.hpp>
+#include <xo/refcnt/Refcounted.hpp>
+#include <xo/subsys/Subsystem.hpp>
 #include <xo/timeutil/timeutil.hpp>
-#include "xo/pyreactor/pyreactor.hpp"
-#include "xo/pyutil/pyutil.hpp"
-
-#include "xo/kalmanfilter/init_filter.hpp"
-#include "xo/refcnt/Refcounted.hpp"
-#include "xo/kalmanfilter/KalmanFilterSvc.hpp"
-#include "xo/kalmanfilter/KalmanFilter.hpp"
-#include "xo/kalmanfilter/KalmanFilterEngine.hpp"
-#include "xo/kalmanfilter/KalmanFilterSpec.hpp"
-#include "xo/kalmanfilter/KalmanFilterStep.hpp"
-#include "xo/kalmanfilter/KalmanFilterStateToConsole.hpp"
-#include "xo/kalmanfilter/KalmanFilterState.hpp"
-#include "xo/kalmanfilter/KalmanFilterTransition.hpp"
-#include "xo/kalmanfilter/KalmanFilterObservable.hpp"
-#include "xo/kalmanfilter/KalmanFilterInputToConsole.hpp"
-#include "xo/kalmanfilter/KalmanFilterInput.hpp"
-#include "xo/reactor/EventStore.hpp"
-#include "xo/subsys/Subsystem.hpp"
-
-#include <pybind11/pybind11.h>
-#include <pybind11/eigen.h>
-#include <pybind11/stl.h>
 #include <pybind11/chrono.h>
+#include <pybind11/eigen.h>
 #include <pybind11/functional.h>
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 //#include <pybind11/operators.h>
 
 namespace xo {

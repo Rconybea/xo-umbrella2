@@ -1,13 +1,12 @@
 /* @file pysimulator.cpp */
 
 #include "pysimulator.hpp"
+#include <xo/pyreactor/pyreactor.hpp>
+#include <xo/simulator/Simulator.hpp>
+#include <xo/simulator/SourceTimestamp.hpp>
+#include <xo/simulator/TimeSlip.hpp>
+#include <xo/pyutil/pyutil.hpp>
 #include <xo/timeutil/timeutil.hpp>
-#include "xo/pyreactor/pyreactor.hpp"
-
-#include "xo/simulator/Simulator.hpp"
-#include "xo/simulator/SourceTimestamp.hpp"
-#include "xo/simulator/TimeSlip.hpp"
-#include "xo/pyutil/pyutil.hpp"
 //#include <pybind11/pybind11.h>
 //#include <pybind11/stl.h>
 //#include <pybind11/chrono.h>

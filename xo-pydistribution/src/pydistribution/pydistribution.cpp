@@ -1,10 +1,10 @@
 /* @file pydistribution.cpp */
 
 #include "pydistribution.hpp"
-#include "xo/distribution/Normal.hpp"
-#include "xo/distribution/ExplicitDist.hpp"
-//#include "xo/reflect/SelfTagging.hpp"
-#include "xo/pyutil/pyutil.hpp"
+#include <xo/distribution/ExplicitDist.hpp>
+#include <xo/distribution/Normal.hpp>
+// #include "xo/reflect/SelfTagging.hpp"
+#include <xo/pyutil/pyutil.hpp>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
