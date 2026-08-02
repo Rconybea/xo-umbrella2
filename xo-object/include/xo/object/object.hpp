@@ -8,6 +8,7 @@
 #include <xo/reflect/Object.hpp>
 #include <bit>
 #include <cstdint>
+#include <limits>
 
 namespace xo {
     namespace obj {

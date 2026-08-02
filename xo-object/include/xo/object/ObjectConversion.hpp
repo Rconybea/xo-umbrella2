@@ -6,6 +6,7 @@
 #pragma once
 
 #include "xo/object/object.hpp"
+#include <xo/alloc/Object.hpp>   /* xo::Object (base), xo::gc::IAlloc, gp<> */
 
 namespace xo {
     namespace obj {
