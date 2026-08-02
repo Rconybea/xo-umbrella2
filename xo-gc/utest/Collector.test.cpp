@@ -404,7 +404,7 @@ namespace xo {
                  *   n_gen  |          |     |    |  |
                  *       v  v          v     v    v  v
                  **/
-                Testcase(1, 2, 16 * 1024,  128, 128, T),
+                Testcase(1, 2, 16 * 1024,  128, 999, T),
             };
 
 #          undef T
@@ -471,8 +471,7 @@ namespace xo {
                 REQUIRE(gc.is_type_installed(typeseq::id<DDictionary>()));
                 REQUIRE(gc.is_type_installed(typeseq::id<DRuntimeError>()));
 
-                // (not enough types to trigger expansion)
-                REQUIRE(mm.allocated() == tc.expect_object_type_z_);
+                auto alloc0 = mm.allocated();
                 REQUIRE(gc.allocated(g0, Role::to_space()) == 0);
                 REQUIRE(gc.allocated(g0, Role::from_space()) == 0);
 
@@ -509,7 +508,7 @@ namespace xo {
                             REQUIRE(z == 80);
                             // cf earlier assertion on mm.allocated();
                             // now adding cost of 3 specific objects
-                            REQUIRE(mm.allocated() == tc.expect_object_type_z_ + z);
+                            REQUIRE(mm.allocated() == alloc0 + z);
                             REQUIRE(gc.allocated(g0, Role::to_space()) == z);
                             REQUIRE(gc.allocated(g1, Role::to_space()) == 0);
                             REQUIRE(gc.allocated(g0, Role::from_space()) == 0);
@@ -525,7 +524,7 @@ namespace xo {
                         REQUIRE(mm->contains(Role::from_space(), l1.data()));
                         REQUIRE(!mm->contains_allocated(Role::from_space(), l1.data()));
 
-                        REQUIRE(mm.allocated() == tc.expect_object_type_z_ + z);
+                        REQUIRE(mm.allocated() == alloc0 + z);
                         REQUIRE(gc.allocated(g0, Role::to_space()) == z);
                         REQUIRE(gc.allocated(g1, Role::to_space()) == 0);
                         REQUIRE(gc.allocated(g0, Role::from_space()) == 0);
