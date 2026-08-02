@@ -2,9 +2,9 @@
 
 #include "Refcounted.hpp"
 #include <catch2/catch.hpp>
+#include <ostream>
 #include <string_view>
 #include <type_traits>
-#include <ostream>
 
 namespace xo {
     using xo::ref::Refcount;
