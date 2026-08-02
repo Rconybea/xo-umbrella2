@@ -3,15 +3,15 @@
  *  @author Roland Conybeare, Aug 2024
  **/
 
-#include "ExpectTypeSsm.hpp"
-#include <xo/indentlog/scope.hpp>
 #include "ExpectListTypeSsm.hpp"
+#include "ExpectTypeSsm.hpp"
 #include "SyntaxStateMachine.hpp"
 #include <xo/type/AtomicType.hpp>
 #include <xo/reflect/Reflect.hpp>
 #include <xo/facet/facet_implementation.hpp>
-#include <xo/reflectutil/typeseq.hpp>
 #include <xo/indentlog/print/pretty.hpp>
+#include <xo/indentlog/scope.hpp>
+#include <xo/reflectutil/typeseq.hpp>
 #include <string_view>
 
 namespace xo {

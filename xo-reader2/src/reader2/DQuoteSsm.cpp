@@ -3,8 +3,8 @@
  *  @author Roland Conybeare, Mar 2026
  **/
 
-#include "QuoteSsm.hpp"
 #include "ExpectQLiteralSsm.hpp"
+#include "QuoteSsm.hpp"
 #include "syntaxstatetype.hpp"
 #include <xo/expression2/Constant.hpp>
 //#include <string_view>

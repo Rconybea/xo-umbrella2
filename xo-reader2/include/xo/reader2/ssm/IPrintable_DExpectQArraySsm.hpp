@@ -14,9 +14,9 @@
 #pragma once
 
 #include "Printable.hpp"
+#include "xo/reader2/DExpectQArraySsm.hpp"
 #include <xo/printable2/Printable.hpp>
 #include <xo/printable2/detail/IPrintable_Xfer.hpp>
-#include "xo/reader2/DExpectQArraySsm.hpp"
 
 namespace xo { namespace scm { class IPrintable_DExpectQArraySsm; } }
 

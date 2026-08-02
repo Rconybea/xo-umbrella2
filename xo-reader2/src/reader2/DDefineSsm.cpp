@@ -4,39 +4,47 @@
  **/
 
 #include "DDefineSsm.hpp"
-#include <xo/indentlog/scope.hpp>
+#include "DExpectExprSsm.hpp"
 #include "DExpectSymbolSsm.hpp"
 #include "DExpectTypeSsm.hpp"
-#include "DExpectExprSsm.hpp"
 #include "DefineSsm.hpp"
 #include <xo/expression2/DefineExpr.hpp>
 #include <xo/printable2/Printable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
+#include <xo/indentlog/scope.hpp>
 
-namespace xo {
-    using xo::print::APrintable;
-    using xo::facet::FacetRegistry;
-    using xo::facet::with_facet;
-    using xo::facet::typeseq;
+ namespace xo {
+ using xo::print::APrintable;
+ using xo::facet::FacetRegistry;
+ using xo::facet::with_facet;
+ using xo::facet::typeseq;
 
-    namespace scm {
-        // ----- defexprstatetype -----
+ namespace scm {
+ // ----- defexprstatetype -----
 
-        const char *
-        defexprstatetype_descr(defexprstatetype x) {
-            switch (x) {
-            case defexprstatetype::invalid: return "invalid";
-            case defexprstatetype::def_0: return "def_0";
-            case defexprstatetype::def_1: return "def_1";
-            case defexprstatetype::def_2: return "def_2";
-            case defexprstatetype::def_3: return "def_3";
-            case defexprstatetype::def_4: return "def_4";
-            case defexprstatetype::def_5: return "def_5";
-            case defexprstatetype::def_6: return "def_6";
-            case defexprstatetype::n_defexprstatetype: break;
-            }
+ const char *defexprstatetype_descr(defexprstatetype x) {
+   switch (x) {
+   case defexprstatetype::invalid:
+     return "invalid";
+   case defexprstatetype::def_0:
+     return "def_0";
+   case defexprstatetype::def_1:
+     return "def_1";
+   case defexprstatetype::def_2:
+     return "def_2";
+   case defexprstatetype::def_3:
+     return "def_3";
+   case defexprstatetype::def_4:
+     return "def_4";
+   case defexprstatetype::def_5:
+     return "def_5";
+   case defexprstatetype::def_6:
+     return "def_6";
+   case defexprstatetype::n_defexprstatetype:
+     break;
+   }
 
-            return "???defexprstatetype";
+   return "???defexprstatetype";
         }
 
         std::ostream &

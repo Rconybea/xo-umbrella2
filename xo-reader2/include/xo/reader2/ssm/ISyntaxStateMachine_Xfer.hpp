@@ -25,8 +25,8 @@
 #include "xo/reader2/syntaxstatetype.hpp"
 #include <xo/type/Type.hpp>
 #include <xo/tokenizer2/Token.hpp>
-#include <xo/reflect/TypeDescr.hpp>
 #include <xo/alloc2/GCObjectVisitor.hpp>
+#include <xo/reflect/TypeDescr.hpp>
 
 namespace xo {
 namespace scm {

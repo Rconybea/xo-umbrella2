@@ -6,8 +6,8 @@
 #pragma once
 
 #include <xo/procedure2/PrimitiveRegistry.hpp>
-#include <xo/arena/ArenaHashMapConfig.hpp>
 #include <xo/arena/ArenaConfig.hpp>
+#include <xo/arena/ArenaHashMapConfig.hpp>
 
 namespace xo {
     namespace scm {

@@ -4,9 +4,9 @@
 **/
 
 #include "GlobalEnv.hpp"
-#include <xo/indentlog/scope.hpp>
 #include <xo/expression2/GlobalSymtab.hpp>
 #include <xo/object2/Array.hpp>
+#include <xo/indentlog/scope.hpp>
 
 namespace xo {
     using xo::mm::ACollector;

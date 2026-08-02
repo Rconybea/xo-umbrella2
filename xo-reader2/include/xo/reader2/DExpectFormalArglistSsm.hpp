@@ -10,9 +10,9 @@
 #include <xo/arena/DArena.hpp>
 
 #ifdef NOT_YET
-#include "exprstate.hpp"
-#include "formal_arg.hpp"
-#include <vector>
+# include "exprstate.hpp"
+# include "formal_arg.hpp"
+# include <vector>
 #endif
 
 namespace xo {

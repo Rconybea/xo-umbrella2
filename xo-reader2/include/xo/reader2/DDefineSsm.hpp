@@ -7,8 +7,8 @@
 
 #include "DSyntaxStateMachine.hpp"
 #include "syntaxstatetype.hpp"
-#include <xo/expression2/detail/IExpression_DDefineExpr.hpp>
 #include <xo/expression2/DDefineExpr.hpp>
+#include <xo/expression2/detail/IExpression_DDefineExpr.hpp>
 #include <xo/facet/obj.hpp>
 #include <string_view>
 

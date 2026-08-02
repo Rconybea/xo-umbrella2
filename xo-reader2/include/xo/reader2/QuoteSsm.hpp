@@ -6,7 +6,7 @@
 #pragma once
 
 #include "DQuoteSsm.hpp"
-#include "quote/ISyntaxStateMachine_DQuoteSsm.hpp"
 #include "quote/IPrintable_DQuoteSsm.hpp"
+#include "quote/ISyntaxStateMachine_DQuoteSsm.hpp"
 
 /* end QuoteSsm.hpp */

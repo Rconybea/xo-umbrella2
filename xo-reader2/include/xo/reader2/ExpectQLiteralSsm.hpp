@@ -6,7 +6,7 @@
 #pragma once
 
 #include "DExpectQLiteralSsm.hpp"
-#include "ssm/ISyntaxStateMachine_DExpectQLiteralSsm.hpp"
 #include "ssm/IPrintable_DExpectQLiteralSsm.hpp"
+#include "ssm/ISyntaxStateMachine_DExpectQLiteralSsm.hpp"
 
 /* end ExpectQLiteralSsm.hpp */

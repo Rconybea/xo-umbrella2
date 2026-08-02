@@ -10,9 +10,9 @@
 #include <xo/facet/obj.hpp>
 
 #ifdef NOT_YET
-#include "exprstate.hpp"
-#include "xo/reflect/TypeDescr.hpp"
-#include <iostream>
+# include "exprstate.hpp"
+# include <xo/reflect/TypeDescr.hpp>
+# include <iostream>
 //#include <cstdint>
 #endif
 

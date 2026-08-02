@@ -7,8 +7,8 @@
 
 #include "SyntaxStateMachine.hpp"
 #include <xo/alloc2/GCObjectVisitor.hpp>
-#include <xo/arena/DArena.hpp>
 #include <xo/facet/obj.hpp>
+#include <xo/arena/DArena.hpp>
 #include <xo/indentlog/print/pretty.hpp>
 
 namespace xo {

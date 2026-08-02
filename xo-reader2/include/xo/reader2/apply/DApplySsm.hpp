@@ -10,7 +10,6 @@
 #include <xo/expression2/ApplyExpr.hpp>
 #include <string_view>
 
-
 namespace xo {
     namespace scm {
         /**

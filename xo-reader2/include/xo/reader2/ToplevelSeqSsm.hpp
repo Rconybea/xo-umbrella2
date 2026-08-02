@@ -6,7 +6,7 @@
 #pragma once
 
 #include "DToplevelSeqSsm.hpp"
-#include "ssm/ISyntaxStateMachine_DToplevelSeqSsm.hpp"
 #include "ssm/IPrintable_DToplevelSeqSsm.hpp"
+#include "ssm/ISyntaxStateMachine_DToplevelSeqSsm.hpp"
 
 /* end ToplevelSeqSsm.hpp */

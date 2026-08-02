@@ -6,7 +6,7 @@
 #pragma once
 
 #include "DExpectQArraySsm.hpp"
-#include "ssm/ISyntaxStateMachine_DExpectQArraySsm.hpp"
 #include "ssm/IPrintable_DExpectQArraySsm.hpp"
+#include "ssm/ISyntaxStateMachine_DExpectQArraySsm.hpp"
 
 /* end ExpectQArraySsm.hpp */

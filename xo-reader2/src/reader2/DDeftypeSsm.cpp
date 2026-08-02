@@ -3,13 +3,13 @@
  *  @author Roland Conybeare, Mar 2026
  **/
 
+#include "Constant.hpp"
 #include "DeftypeSsm.hpp"
-#include <xo/indentlog/scope.hpp>
-#include "syntaxstatetype.hpp"
 #include "ExpectSymbolSsm.hpp"
 #include "ExpectTypeSsm.hpp"
-#include "Constant.hpp"
+#include "syntaxstatetype.hpp"
 #include <xo/object2/Boolean.hpp>
+#include <xo/indentlog/scope.hpp>
 #include <string_view>
 
 namespace xo {

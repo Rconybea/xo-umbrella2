@@ -3,12 +3,12 @@
  *  @author Roland Conybeare, Jan 2026
  **/
 
-#include "SchematikaParser.hpp"
-#include "ParserStateMachine.hpp"
-#include "ParserStack.hpp"
 #include "DToplevelSeqSsm.hpp"
-#include <cstddef>
+#include "ParserStack.hpp"
+#include "ParserStateMachine.hpp"
+#include "SchematikaParser.hpp"
 #include <xo/indentlog/scope.hpp>
+#include <cstddef>
 #include <stdexcept>
 
 namespace xo {

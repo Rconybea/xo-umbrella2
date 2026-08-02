@@ -1,17 +1,17 @@
 /* @file DSequenceSsm.cpp */
 
 #include "DSequenceSsm.hpp"
-#include <xo/indentlog/scope.hpp>
-#include "ssm/ISyntaxStateMachine_DSequenceSsm.hpp"
 #include "DExpectExprSsm.hpp"
+#include "ssm/ISyntaxStateMachine_DSequenceSsm.hpp"
 #include <xo/expression2/SequenceExpr.hpp>
 #include <xo/alloc2/GCObject.hpp>
+#include <xo/indentlog/scope.hpp>
 
 #ifdef NOT_YET
-#include "expect_expr_xs.hpp"
-#include "let1_xs.hpp"
-#include "xo/expression/DefineExpr.hpp"
-#include "xo/expression/pretty_expression.hpp"
+# include "expect_expr_xs.hpp"
+# include "let1_xs.hpp"
+# include <xo/expression/DefineExpr.hpp>
+# include <xo/expression/pretty_expression.hpp>
 #endif
 
 namespace xo {

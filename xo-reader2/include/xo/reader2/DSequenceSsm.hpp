@@ -6,10 +6,9 @@
 #pragma once
 
 #include "DSyntaxStateMachine.hpp"
-#include <xo/expression2/DSequenceExpr.hpp>
 #include "syntaxstatetype.hpp"
-#include <xo/expression2/detail/IExpression_DSequenceExpr.hpp>
 #include <xo/expression2/DSequenceExpr.hpp>
+#include <xo/expression2/detail/IExpression_DSequenceExpr.hpp>
 #include <xo/facet/obj.hpp>
 
 namespace xo {

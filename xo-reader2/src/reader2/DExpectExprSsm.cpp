@@ -3,30 +3,30 @@
  *  @author Roland Conybeare, Jan 2026
  **/
 
-#include "ExpectExprSsm.hpp"
-#include <xo/indentlog/scope.hpp>
-#include "ParserStateMachine.hpp"
-#include "ParserStack.hpp"
-#include "SyntaxStateMachine.hpp"
-#include "ProgressSsm.hpp"
 #include "DSequenceSsm.hpp"
+#include "ExpectExprSsm.hpp"
 #include "IfElseSsm.hpp"
 #include "LambdaSsm.hpp"
+#include "ParserStack.hpp"
+#include "ParserStateMachine.hpp"
+#include "ProgressSsm.hpp"
 #include "QuoteSsm.hpp"
+#include "SyntaxStateMachine.hpp"
 #include "syntaxstatetype.hpp"
-#include <xo/expression2/Variable.hpp>
 #include <xo/expression2/Constant.hpp>
+#include <xo/expression2/Variable.hpp>
 #include <xo/object2/Boolean.hpp>
-#include <xo/object2/Integer.hpp>
 #include <xo/object2/Float.hpp>
+#include <xo/object2/Integer.hpp>
 #include <xo/object2/List.hpp>
 #include <xo/stringtable2/String.hpp>
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/facet/facet_implementation.hpp>
+#include <xo/indentlog/scope.hpp>
 
 #ifdef NOT_YET
-#include "define_xs.hpp"
-#include "paren_xs.hpp"
+# include "define_xs.hpp"
+# include "paren_xs.hpp"
 #endif
 
 namespace xo {

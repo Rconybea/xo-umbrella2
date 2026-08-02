@@ -4,8 +4,8 @@
  **/
 
 #include "SchematikaReader.hpp"
+#include <xo/arena/span_ppdetail.hpp> /* operator<<(ostream, xo::mm::span) for span-valued logging */
 #include <xo/indentlog/scope.hpp>
-#include <xo/arena/span_ppdetail.hpp>   /* operator<<(ostream, xo::mm::span) for span-valued logging */
 
 namespace xo {
     using xo::mm::MemorySizeInfo;

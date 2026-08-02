@@ -3,17 +3,17 @@
  *  @author Roland Conybeare, Jan 2026
  **/
 
-#include "LambdaSsm.hpp"
-#include "ExpectFormalArglistSsm.hpp"
-#include "DExpectTypeSsm.hpp"
 #include "DExpectExprSsm.hpp"
+#include "DExpectTypeSsm.hpp"
+#include "ExpectFormalArglistSsm.hpp"
+#include "LambdaSsm.hpp"
 #include "ParserStateMachine.hpp"
 #include "syntaxstatetype.hpp"
-#include <xo/expression2/detail/IExpression_DLambdaExpr.hpp>
 #include <xo/expression2/Variable.hpp>
-//#include <xo/expression2/symtab/ISymbolTable_DLocalSymtab.hpp>
-#include <xo/printable2/Printable.hpp>
+#include <xo/expression2/detail/IExpression_DLambdaExpr.hpp>
+// #include <xo/expression2/symtab/ISymbolTable_DLocalSymtab.hpp>
 #include <xo/alloc2/GCObject.hpp>
+#include <xo/printable2/Printable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/arena/DArena.hpp>
 

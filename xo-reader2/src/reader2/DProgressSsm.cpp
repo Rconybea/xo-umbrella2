@@ -3,38 +3,31 @@
  *  @author Roland Conybeare, Jan 2026
  **/
 
-#include "ProgressSsm.hpp"
-#include <xo/indentlog/scope.hpp>
-
-#include "DExpectExprSsm.hpp"
-#include "ssm/ISyntaxStateMachine_DExpectExprSsm.hpp"
-
 #include "ApplySsm.hpp"
+#include "DExpectExprSsm.hpp"
 #include "ParenSsm.hpp"
-
-#include <xo/numeric/NumericPrimitives.hpp>
-
+#include "ProgressSsm.hpp"
+#include "ssm/ISyntaxStateMachine_DExpectExprSsm.hpp"
 #include <xo/expression2/DApplyExpr.hpp>
-#include <xo/expression2/detail/IExpression_DApplyExpr.hpp>
-
 #include <xo/expression2/DConstant.hpp>
+#include <xo/expression2/detail/IExpression_DApplyExpr.hpp>
 #include <xo/expression2/detail/IExpression_DConstant.hpp>
-
-#include <xo/procedure2/init_primitives.hpp>  // for xo::scm::Primitives
+#include <xo/numeric/NumericPrimitives.hpp>
 #include <xo/procedure2/detail/IGCObject_DPrimitive_gco_2_gco_gco.hpp>
-
+#include <xo/procedure2/init_primitives.hpp> // for xo::scm::Primitives
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/printable2/Printable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
-#include <xo/reflectutil/typeseq.hpp>
 #include <xo/indentlog/print/cond.hpp>
+#include <xo/indentlog/scope.hpp>
+#include <xo/reflectutil/typeseq.hpp>
 
 #ifdef NOT_YET
-#include "expect_expr_xs.hpp"
-#include "pretty_exprstatestack.hpp"
-#include "xo/expression/AssignExpr.hpp"
-#include "xo/expression/Apply.hpp"
-#include "xo/expression/pretty_expression.hpp"
+# include "expect_expr_xs.hpp"
+# include "pretty_exprstatestack.hpp"
+# include <xo/expression/Apply.hpp>
+# include <xo/expression/AssignExpr.hpp>
+# include <xo/expression/pretty_expression.hpp>
 #endif
 
 namespace xo {

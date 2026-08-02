@@ -6,7 +6,7 @@
 #pragma once
 
 #include "DExpectFormalArglistSsm.hpp"
-#include "ssm/ISyntaxStateMachine_DExpectFormalArglistSsm.hpp"
 #include "ssm/IPrintable_DExpectFormalArglistSsm.hpp"
+#include "ssm/ISyntaxStateMachine_DExpectFormalArglistSsm.hpp"
 
 /* end ExpectFormalArglistSsm.hpp */

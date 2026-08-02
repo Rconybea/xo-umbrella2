@@ -6,7 +6,7 @@
 #pragma once
 
 #include "expect_qdict/DExpectQDictSsm.hpp"
-#include "expect_qdict/ISyntaxStateMachine_DExpectQDictSsm.hpp"
 #include "expect_qdict/IPrintable_DExpectQDictSsm.hpp"
+#include "expect_qdict/ISyntaxStateMachine_DExpectQDictSsm.hpp"
 
 /* end ExpectQDictSsm.hpp */

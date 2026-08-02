@@ -13,10 +13,9 @@
 
 #pragma once
 
-#include "xo/reader2/SyntaxStateMachine.hpp"
+#include "DApplySsm.hpp"
 #include "xo/reader2/SyntaxStateMachine.hpp"
 #include "xo/reader2/ssm/ISyntaxStateMachine_Xfer.hpp"
-#include "DApplySsm.hpp"
 
 namespace xo { namespace scm { class ISyntaxStateMachine_DApplySsm; } }
 

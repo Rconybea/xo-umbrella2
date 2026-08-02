@@ -3,13 +3,13 @@
  * @author Roland Conybeare, Jan 2026
  */
 
-#include "ExpectFormalArglistSsm.hpp"
 #include "ExpectFormalArgSsm.hpp"
+#include "ExpectFormalArglistSsm.hpp"
 #include <xo/expression2/Variable.hpp>
 #include <xo/object2/Array.hpp>
-#include <xo/printable2/Printable.hpp>
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/alloc2/arena/IAllocator_DArena.hpp>
+#include <xo/printable2/Printable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/indentlog/scope.hpp>
 

@@ -5,7 +5,6 @@
 
 #include "init_reader2.hpp"
 #include "SetupReader2.hpp"
-
 #include <xo/expression2/init_expression2.hpp>
 #include <xo/numeric/init_numeric.hpp>
 #include <xo/alloc2/CollectorTypeRegistry.hpp>

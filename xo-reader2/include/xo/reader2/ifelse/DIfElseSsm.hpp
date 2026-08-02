@@ -6,10 +6,9 @@
 #pragma once
 
 #include "xo/reader2/DSyntaxStateMachine.hpp"
-#include <xo/expression2/DIfElseExpr.hpp>
 #include "xo/reader2/syntaxstatetype.hpp"
-#include <xo/expression2/detail/IExpression_DIfElseExpr.hpp>
 #include <xo/expression2/DIfElseExpr.hpp>
+#include <xo/expression2/detail/IExpression_DIfElseExpr.hpp>
 #include <xo/facet/obj.hpp>
 
 namespace xo {

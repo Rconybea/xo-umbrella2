@@ -6,8 +6,8 @@
 #pragma once
 
 #include "DSequenceSsm.hpp"
-#include "ssm/ISyntaxStateMachine_DSequenceSsm.hpp"
 #include "ssm/IPrintable_DSequenceSsm.hpp"
+#include "ssm/ISyntaxStateMachine_DSequenceSsm.hpp"
 
 /* end SequenceSsm.hpp */
 

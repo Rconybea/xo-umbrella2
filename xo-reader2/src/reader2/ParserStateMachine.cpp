@@ -4,21 +4,21 @@
  **/
 
 #include "ParserStateMachine.hpp"
+#include "DefineSsm.hpp"
 #include "ParserStack.hpp"
 #include "SyntaxStateMachine.hpp"
 #include "ToplevelSeqSsm.hpp"
-#include "DefineSsm.hpp"
 #include <xo/numeric/NumericPrimitives.hpp>
 #include <xo/procedure2/PrimitiveRegistry.hpp>
 #include <xo/procedure2/SimpleRcx.hpp>
 #include <xo/object2/array/IPrintable_DArray.hpp>
-#include <xo/printable2/Printable.hpp>
 #include <xo/alloc2/Collector.hpp>
 #include <xo/alloc2/arena/IAllocator_DArena.hpp>
+#include <xo/printable2/Printable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
-#include <xo/indentlog/scope.hpp>
-#include <xo/indentlog/print/tostr.hpp>
 #include <xo/indentlog/print/tag.hpp>
+#include <xo/indentlog/print/tostr.hpp>
+#include <xo/indentlog/scope.hpp>
 #include <stdexcept>
 
 namespace xo {

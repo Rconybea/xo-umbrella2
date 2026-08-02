@@ -4,7 +4,7 @@
  **/
 
 #include "lambda/DLambdaSsm.hpp"
-#include "lambda/ISyntaxStateMachine_DLambdaSsm.hpp"
 #include "lambda/IPrintable_DLambdaSsm.hpp"
+#include "lambda/ISyntaxStateMachine_DLambdaSsm.hpp"
 
 /* end LambdaSsm.hpp */

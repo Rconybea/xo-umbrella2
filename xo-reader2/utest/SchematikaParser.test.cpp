@@ -3,25 +3,25 @@
  *  @author Roland Conybeare, Jan 2026
  **/
 
-#include <xo/reader2/SchematikaParser.hpp>
 #include <xo/reader2/DDefineSsm.hpp>
 #include <xo/reader2/DExpectExprSsm.hpp>
 #include <xo/reader2/DefineSsm.hpp>
+#include <xo/reader2/SchematikaParser.hpp>
 #include <xo/reader2/init_reader2.hpp>
-#include <xo/expression2/DefineExpr.hpp>
 #include <xo/expression2/ApplyExpr.hpp>
+#include <xo/expression2/Constant.hpp>
+#include <xo/expression2/DefineExpr.hpp>
 #include <xo/expression2/IfElseExpr.hpp>
 #include <xo/expression2/VarRef.hpp>
-#include <xo/expression2/Constant.hpp>
 #include <xo/procedure2/Primitive_gco_2_gco_gco.hpp>
-#include <xo/object2/List.hpp>
+#include <xo/gc/X1Collector.hpp>
+#include <xo/gc/init_gc.hpp>
 #include <xo/object2/Float.hpp>
 #include <xo/object2/Integer.hpp>
+#include <xo/object2/List.hpp>
 #include <xo/stringtable2/String.hpp>
-#include <xo/gc/init_gc.hpp>
-#include <xo/gc/X1Collector.hpp>
-#include <xo/alloc2/CollectorTypeRegistry.hpp>
 #include <xo/alloc2/Arena.hpp>
+#include <xo/alloc2/CollectorTypeRegistry.hpp>
 #include <xo/facet/TypeRegistry.hpp>
 #include <catch2/catch.hpp>
 

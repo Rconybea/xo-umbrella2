@@ -18,10 +18,10 @@
 #include "xo/reader2/syntaxstatetype.hpp"
 #include <xo/type/Type.hpp>
 #include <xo/tokenizer2/Token.hpp>
-#include <xo/reflect/TypeDescr.hpp>
 #include <xo/alloc2/GCObjectVisitor.hpp>
-#include <xo/facet/obj.hpp>
+#include <xo/reflect/TypeDescr.hpp>
 #include <xo/facet/facet_implementation.hpp>
+#include <xo/facet/obj.hpp>
 #include <xo/facet/typeseq.hpp>
 
 // {pretext} here

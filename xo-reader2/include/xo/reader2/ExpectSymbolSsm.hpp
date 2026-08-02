@@ -6,7 +6,7 @@
 #pragma once
 
 #include "DExpectSymbolSsm.hpp"
-#include "ssm/ISyntaxStateMachine_DExpectSymbolSsm.hpp"
 #include "ssm/IPrintable_DExpectSymbolSsm.hpp"
+#include "ssm/ISyntaxStateMachine_DExpectSymbolSsm.hpp"
 
 /* end ExpectSymbolSsm.hpp */

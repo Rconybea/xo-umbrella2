@@ -7,8 +7,8 @@
 
 #include "DSyntaxStateMachine.hpp"
 #include "syntaxstatetype.hpp"
-#include <xo/indentlog/print/ppindentinfo.hpp>
 #include <xo/facet/obj.hpp>
+#include <xo/indentlog/print/ppindentinfo.hpp>
 
 namespace xo {
     namespace scm {

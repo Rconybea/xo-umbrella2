@@ -4,12 +4,12 @@
  **/
 
 #include "ApplySsm.hpp"
-#include <xo/indentlog/scope.hpp>
 #include "ExpectExprSsm.hpp"
 #include <xo/object2/Array.hpp>
-#include <xo/alloc2/GCObject.hpp>
 #include <xo/alloc2/Arena.hpp>
+#include <xo/alloc2/GCObject.hpp>
 #include <xo/facet/FacetRegistry.hpp>
+#include <xo/indentlog/scope.hpp>
 #include <xo/reflectutil/typeseq.hpp>
 
 //#include "parserstatemachine.hpp"

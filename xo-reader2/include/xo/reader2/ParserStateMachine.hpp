@@ -5,16 +5,16 @@
 
 #pragma once
 
-#include "ParserResult.hpp"
 #include "GlobalEnv.hpp"
+#include "ParserResult.hpp"
+#include <xo/expression2/DVariable.hpp>
 #include <xo/expression2/GlobalSymtab.hpp>
 #include <xo/expression2/LocalSymtab.hpp>
-#include <xo/expression2/DVariable.hpp>
 #include <xo/expression2/VarRef.hpp>
-#include <xo/tokenizer2/Token.hpp>
 #include <xo/procedure2/PrimitiveRegistry.hpp>
 #include <xo/type/Type.hpp>
 #include <xo/object2/DArray.hpp>
+#include <xo/tokenizer2/Token.hpp>
 #include <xo/stringtable2/StringTable.hpp>
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/alloc2/GCObjectVisitor.hpp>
