@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <string_view>
 #include <cstdint>
+#include <string_view>
 
 namespace xo {
     enum class FunctionStyle : std::uint8_t {

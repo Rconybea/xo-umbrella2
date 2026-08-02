@@ -1,7 +1,7 @@
 /** @file function_name.test.cpp **/
 
-#include <xo/ppsink/function_name.hpp>
 #include <xo/ppsink/FlatSink.hpp>
+#include <xo/ppsink/function_name.hpp>
 #include <catch2/catch.hpp>
 #include <sstream>
 

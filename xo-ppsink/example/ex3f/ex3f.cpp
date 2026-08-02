@@ -10,10 +10,10 @@
  * isolate the feature.
  */
 
+#include <xo/ppsink/color.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag.hpp>
-#include <xo/ppsink/color.hpp>
 
 using xo::pp::scope;
 using xo::pp::scope_config;

@@ -17,9 +17,9 @@
 
 #pragma once
 
-#include "quoted_char.hpp"
 #include "FlatSink.hpp"
-#include "pretty.hpp"   /* PpSink::pp */
+#include "pretty.hpp" /* PpSink::pp */
+#include "quoted_char.hpp"
 
 namespace xo::pp {
     inline std::ostream &

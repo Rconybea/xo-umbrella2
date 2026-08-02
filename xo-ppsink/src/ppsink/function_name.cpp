@@ -6,8 +6,8 @@
  **/
 
 #include <xo/ppsink/function_name.hpp>
-#include <string>
 #include <cstdint>
+#include <string>
 
 namespace xo::pp {
     namespace {

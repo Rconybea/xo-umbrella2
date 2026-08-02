@@ -17,7 +17,7 @@
 #pragma once
 
 #include "PpSink.hpp"
-#include <xo/timeutil/timeutil.hpp>   /* xo::time::nanos */
+#include <xo/timeutil/timeutil.hpp> /* xo::time::nanos */
 
 namespace xo::pp {
     /** write "HH:MM:SS.mmm" (12 chars) for @p dt (duration since midnight) **/

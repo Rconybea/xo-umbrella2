@@ -31,8 +31,8 @@
 
 #pragma once
 
-#include "escape.hpp"
 #include "Prettifier.hpp"
+#include "escape.hpp"
 #include <string_view>
 
 namespace xo::pp {

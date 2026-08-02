@@ -1,11 +1,11 @@
 /** @file scope.test.cpp **/
 
+#include <xo/ppsink/FlatSink.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
-#include <xo/ppsink/FlatSink.hpp>
 #include <catch2/catch.hpp>
-#include <sstream>
 #include <cctype>
+#include <sstream>
 
 namespace ut {
 

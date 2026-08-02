@@ -10,8 +10,8 @@
 #pragma once
 
 #include "PpSink.hpp"
-#include <string_view>
 #include <charconv>
+#include <string_view>
 
 namespace xo::pp {
     /** @brief per-type opt-in to structured pretty-printing.

@@ -1,7 +1,7 @@
 /** @file scope.cpp **/
 
-#include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/pp_time.hpp>
+#include <xo/ppsink/scope.hpp>
 #include <string>
 
 namespace xo::pp {

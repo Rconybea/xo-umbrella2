@@ -1,7 +1,7 @@
 /* @file Prettifier.test.cpp */
 
-#include <xo/ppsink/pretty_ostream.hpp>   /* Plain_PpsinkTest exercises the operator<< fallback */
 #include <xo/ppsink/FlatSink.hpp>
+#include <xo/ppsink/pretty_ostream.hpp> /* Plain_PpsinkTest exercises the operator<< fallback */
 #include <catch2/catch.hpp>
 #include <sstream>
 

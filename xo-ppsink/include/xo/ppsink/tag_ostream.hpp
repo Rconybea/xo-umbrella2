@@ -19,9 +19,9 @@
 
 #pragma once
 
-#include "tag.hpp"
 #include "FlatSink.hpp"
-#include "pretty_ostream.hpp"   /* <ostream> + operator<< fallback for tag values */
+#include "pretty_ostream.hpp" /* <ostream> + operator<< fallback for tag values */
+#include "tag.hpp"
 
 namespace xo::pp {
     /** stream a tag to @p os by rendering it through a FlatSink.

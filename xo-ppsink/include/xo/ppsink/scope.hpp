@@ -21,15 +21,15 @@
 
 #pragma once
 
-#include "PpSink.hpp"
-#include "pretty_ostream.hpp"   /* pretty(): scope logs arbitrary types, so it needs the operator<< fallback */
 #include "LogState.hpp"
-#include "log_level.hpp"
+#include "PpSink.hpp"
 #include "color.hpp"
 #include "function_name.hpp"
+#include "log_level.hpp"
+#include "pretty_ostream.hpp" /* pretty(): scope logs arbitrary types, so it needs the operator<< fallback */
+#include <cstdint>
 #include <string_view>
 #include <utility>
-#include <cstdint>
 
 namespace xo::pp {
     /** @brief process-wide logging configuration (POC subset) **/

@@ -11,10 +11,10 @@
 // to invoke PpSink methods.
 // We don't want to force code that supports
 // pretty-printing to #include <ostream>.
-#include <iosfwd>
-#include <optional>
 #include <cstddef>
 #include <cstdint>
+#include <iosfwd>
+#include <optional>
 
 namespace xo::pp {
     class PpSink;

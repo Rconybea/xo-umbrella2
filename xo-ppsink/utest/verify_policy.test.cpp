@@ -4,10 +4,10 @@
  *  report_error() dispatch over a ppsink scope + xo::pp::tostr message.
  **/
 
-#include <xo/ppsink/verify_policy.hpp>
+#include <xo/ppsink/FlatSink.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag.hpp>
-#include <xo/ppsink/FlatSink.hpp>
+#include <xo/ppsink/verify_policy.hpp>
 #include <catch2/catch.hpp>
 #include <sstream>
 #include <stdexcept>

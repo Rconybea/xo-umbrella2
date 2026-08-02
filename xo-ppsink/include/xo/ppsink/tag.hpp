@@ -21,11 +21,11 @@
 
 #pragma once
 
-#include "pretty.hpp"
 #include "color.hpp"
-#include "stringify.hpp"   /* STRINGIFY -- generic macro, kept for tag/logging callers */
-#include <utility>
+#include "pretty.hpp"
+#include "stringify.hpp" /* STRINGIFY -- generic macro, kept for tag/logging callers */
 #include <type_traits>
+#include <utility>
 
 namespace xo::pp {
     /** @brief value-escaping policy for a tag (POC: recorded, not yet applied) **/

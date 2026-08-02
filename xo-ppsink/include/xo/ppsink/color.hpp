@@ -15,8 +15,8 @@
 #pragma once
 
 #include "PpSink.hpp"
-#include <string_view>
 #include <cstdint>
+#include <string_view>
 
 namespace xo::pp {
     /** how a color code is encoded (ANSI SGR subset) **/

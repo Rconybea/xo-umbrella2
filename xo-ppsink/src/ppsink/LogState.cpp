@@ -1,7 +1,7 @@
 /** @file LogState.cpp **/
 
-#include <xo/ppsink/LogState.hpp>
 #include <xo/ppsink/FlatSink.hpp>
+#include <xo/ppsink/LogState.hpp>
 #include <iostream>
 
 namespace xo::pp {

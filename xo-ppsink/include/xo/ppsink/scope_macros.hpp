@@ -17,7 +17,7 @@
 #ifndef XO_PPSINK_SCOPE_MACROS_HPP
 #define XO_PPSINK_SCOPE_MACROS_HPP
 
-#include "scope.hpp"
+# include "scope.hpp"
 
 /** capture a scope_setup for the enclosing function, at log level @p lvl.
  *  Uses __PRETTY_FUNCTION__ + the configured scope_config::function_style, so

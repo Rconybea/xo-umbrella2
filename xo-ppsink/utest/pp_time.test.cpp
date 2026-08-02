@@ -1,10 +1,10 @@
 /** @file pp_time.test.cpp **/
 
-#include <xo/ppsink/pp_time.hpp>
 #include <xo/ppsink/FlatSink.hpp>
+#include <xo/ppsink/pp_time.hpp>
 #include <catch2/catch.hpp>
-#include <sstream>
 #include <chrono>
+#include <sstream>
 
 namespace ut {
     using xo::pp::FlatSink;

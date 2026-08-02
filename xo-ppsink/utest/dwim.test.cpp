@@ -1,7 +1,7 @@
 /** @file dwim.test.cpp **/
 
-#include <xo/ppsink/pretty.hpp>
 #include <xo/ppsink/FlatSink.hpp>
+#include <xo/ppsink/pretty.hpp>
 #include <catch2/catch.hpp>
 #include <sstream>
 

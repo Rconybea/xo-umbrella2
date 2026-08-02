@@ -6,15 +6,15 @@
  *  FlatSink::put_with_escape (the ostream-side application of them).
  **/
 
+#include <xo/ppsink/FlatSink.hpp>
 #include <xo/ppsink/escape.hpp>
 #include <xo/ppsink/quoted_char_ostream.hpp>
 #include <xo/ppsink/quoted_ostream.hpp>
-#include <xo/ppsink/FlatSink.hpp>
 #include <catch2/catch.hpp>
+#include <cstdint>
 #include <sstream>
 #include <string>
 #include <string_view>
-#include <cstdint>
 
 namespace ut {
     using xo::pp::Escape;

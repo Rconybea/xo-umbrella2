@@ -22,9 +22,9 @@
 
 #pragma once
 
-#include "quoted.hpp"
 #include "FlatSink.hpp"
-#include "pretty.hpp"   /* PpSink::pp */
+#include "pretty.hpp" /* PpSink::pp */
+#include "quoted.hpp"
 
 namespace xo::pp {
     template <quotestyle QuoteStyle>

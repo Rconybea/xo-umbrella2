@@ -14,9 +14,9 @@
 
 #include "scope.hpp"
 #include "tostr.hpp"
-#include <string>
-#include <stdexcept>
 #include <cstdint>
+#include <stdexcept>
+#include <string>
 
 namespace xo {
     /** @brief policy for verify_ok behavior.

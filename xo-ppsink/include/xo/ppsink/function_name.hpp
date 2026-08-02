@@ -11,8 +11,8 @@
 
 #pragma once
 
-#include "PpSink.hpp"
 #include "FunctionStyle.hpp"
+#include "PpSink.hpp"
 #include <string_view>
 
 namespace xo::pp {
