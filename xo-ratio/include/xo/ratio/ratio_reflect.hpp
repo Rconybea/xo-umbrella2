@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "xo/reflectutil/reflect_struct_info.hpp"
 #include "ratio.hpp"
+#include <xo/reflectutil/reflect_struct_info.hpp>
 //#include <cstdint>
 
 namespace xo {

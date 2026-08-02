@@ -6,9 +6,9 @@
 #pragma once
 
 #include "ratio_concept.hpp"
-#include "xo/flatstring/flatstring.hpp"
-#include <numeric>
+#include <xo/flatstring/flatstring.hpp>
 #include <compare>
+#include <numeric>
 //#include <type_traits>
 
 namespace xo {

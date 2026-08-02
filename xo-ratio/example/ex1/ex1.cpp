@@ -1,8 +1,8 @@
 /** @file ex1.cpp **/
 
 #include "xo/ratio/ratio_iostream.hpp"
-#include "xo/indentlog/scope.hpp"
-#include "xo/indentlog/print/hex.hpp"
+#include <xo/indentlog/print/hex.hpp>
+#include <xo/indentlog/scope.hpp>
 #include <iostream>
 
 namespace {

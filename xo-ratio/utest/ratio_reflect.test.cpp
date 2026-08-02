@@ -1,7 +1,7 @@
 /* @file ratio_reflect.test.cpp */
 
 #include "xo/ratio/ratio_reflect.hpp"
-#include "xo/reflect/reflect_struct.hpp"
+#include <xo/reflect/reflect_struct.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {
