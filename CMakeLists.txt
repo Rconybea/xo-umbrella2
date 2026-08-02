@@ -187,3 +187,18 @@ xo_umbrella_sphinx_config(
 #   tsort ${CMAKE_BINARY_DIR}/xo-subsystem-edges.txt   # -> dependencies-first order
 
 xo_emit_dependency_edges(${CMAKE_BINARY_DIR}/xo-subsystem-edges.txt)
+
+# candidate .clang-format, whose xo include-ordering categories are derived
+# (descending topological order) from the same edge list.  Adopt with:
+#   cp ${CMAKE_BINARY_DIR}/dot-clang-format ${CMAKE_SOURCE_DIR}/.clang-format
+execute_process(
+    COMMAND ${CMAKE_BINARY_DIR}/xo-cmake/xo-gen-clang-format
+            ${CMAKE_BINARY_DIR}/xo-subsystem-edges.txt
+    OUTPUT_FILE ${CMAKE_BINARY_DIR}/dot-clang-format
+    RESULT_VARIABLE _xo_dot_clang_format_rc)
+if(_xo_dot_clang_format_rc EQUAL 0)
+    message(STATUS "xo-gen-clang-format: wrote ${CMAKE_BINARY_DIR}/dot-clang-format"
+                   " (adopt: cp -> ${CMAKE_SOURCE_DIR}/.clang-format)")
+else()
+    message(WARNING "xo-gen-clang-format: failed (rc=${_xo_dot_clang_format_rc})")
+endif()

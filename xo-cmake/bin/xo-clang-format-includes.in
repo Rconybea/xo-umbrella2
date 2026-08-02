@@ -1,0 +1,134 @@
+#!/usr/bin/env bash
+#
+# xo-clang-format-includes - enforce the xo include-ordering policy, includes-only
+#
+# clang-format has no "sort includes but touch nothing else" mode: a style
+# governs the WHOLE file, so `clang-format -i` would also reindent/rebrace code.
+# This wrapper confines clang-format to each file's leading #include block via
+# `--lines`, so only include statements are ever rewritten.
+#
+# It is opt-in and self-contained: it passes the style explicitly
+# (--style=file:...), so it needs NO root .clang-format -- and during the
+# interim there should NOT be one, or editors/IDEs would reformat whole files
+# against a mostly-default style.
+#
+# Usage:
+#   xo-clang-format-includes [--check|--fix] [--build DIR | --style FILE] FILE...
+#   xo-clang-format-includes [--check|--fix] [--build DIR | --style FILE] --changed [REF]
+#
+#   --check   (default) report files whose includes violate policy; exit 1 if any
+#   --diff    show the unified diff --fix would make, WITHOUT applying it; exit 1 if any
+#   --fix     rewrite includes in place
+#   --build   build directory (as passed to cmake -B): use DIR/dot-clang-format,
+#             the candidate cmake regenerates from the live subsystem graph
+#   --style   explicit dot-clang-format to use (overrides --build)
+#   --changed operate on C/C++ files changed vs REF (default: HEAD)
+#   -R DIR    recurse DIR, operating on every *.hpp / *.cpp under it
+#
+# FILE..., -R DIR, and --changed accumulate; pass any combination.
+#
+# Style resolution, first that applies: --style, then --build/dot-clang-format,
+# then $XO_DOT_CLANG_FORMAT, then the installed snapshot.
+
+set -euo pipefail
+
+STYLE_DEFAULT=@CMAKE_INSTALL_FULL_DATADIR@/etc/xo/dot-clang-format
+
+mode=check
+style=""
+build=""
+changed=0
+ref=HEAD
+files=()
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --check)     mode=check; shift;;
+        --diff)      mode=diff; shift;;
+        --fix)       mode=fix; shift;;
+        --build)     build="$2"; shift 2;;
+        --build=*)   build="${1#--build=}"; shift;;
+        --style)     style="$2"; shift 2;;
+        --style=*)   style="${1#--style=}"; shift;;
+        --changed)   changed=1; shift
+                     if [[ $# -gt 0 && "$1" != -* ]]; then ref="$1"; shift; fi;;
+        -R)          [[ $# -ge 2 ]] || { echo "$0: -R needs a DIR" >&2; exit 2; }
+                     [[ -d "$2" ]]  || { echo "$0: -R: not a directory: $2" >&2; exit 2; }
+                     mapfile -t _rfiles < <(find "$2" -type f \( -name '*.hpp' -o -name '*.cpp' \))
+                     files+=("${_rfiles[@]}")
+                     shift 2;;
+        -h|--help)   sed -n '3,30p' "$0" | sed 's/^# \{0,1\}//'; exit 0;;
+        --)          shift; files+=("$@"); break;;
+        -*)          echo "$0: unknown option: $1" >&2; exit 2;;
+        *)           files+=("$1"); shift;;
+    esac
+done
+
+# style resolution: --style wins, then --build/dot-clang-format (the candidate
+# regenerated from the live graph), then $XO_DOT_CLANG_FORMAT, then installed.
+if [[ -z "$style" ]]; then
+    if [[ -n "$build" ]]; then
+        style="$build/dot-clang-format"
+    else
+        style="${XO_DOT_CLANG_FORMAT:-$STYLE_DEFAULT}"
+    fi
+fi
+if [[ ! -r "$style" ]]; then
+    echo "$0: style file not found: $style" >&2
+    if [[ -n "$build" ]]; then
+        echo "       (from --build $build; has it been configured with cmake?)" >&2
+    else
+        echo "       pass --build DIR or --style FILE, set \$XO_DOT_CLANG_FORMAT, or install xo-cmake" >&2
+    fi
+    exit 2
+fi
+
+if [[ $changed -eq 1 ]]; then
+    mapfile -t _changed < <(git diff --name-only "$ref" -- '*.cpp' '*.hpp' '*.h' '*.cc' '*.hh')
+    files+=("${_changed[@]}")
+fi
+
+if [[ ${#files[@]} -eq 0 ]]; then
+    echo "$0: no files (pass FILE... or --changed)" >&2
+    exit 2
+fi
+
+# Line range of the leading #include block: first #include through the last
+# #include reachable across only blank / comment / preprocessor lines (stop at
+# the first line of real code).  Empty if the file has no top-level includes.
+include_range() {
+    awk '
+        /^[[:space:]]*#[[:space:]]*include/ { if (!first) first=NR; last=NR; next }
+        first && $0 ~ /^[[:space:]]*($|#|\/\/|\/\*|\*)/ { next }   # blank/comment/preproc: keep scanning
+        first { exit }                                            # first real code line: stop
+        END { if (first) print first ":" last }
+    ' "$1"
+}
+
+rc=0
+for f in "${files[@]}"; do
+    [[ -f "$f" ]] || continue
+    rng=$(include_range "$f")
+    [[ -z "$rng" ]] && continue   # no includes to order
+
+    case "$mode" in
+        fix)
+            clang-format --style="file:$style" --lines="$rng" -i "$f"
+            ;;
+        diff)
+            # format to stdout (nothing written) and diff against the original
+            if ! diff -u --label "a/$f" --label "b/$f" \
+                    "$f" <(clang-format --style="file:$style" --lines="$rng" "$f"); then
+                rc=1
+            fi
+            ;;
+        check)
+            if ! clang-format --style="file:$style" --lines="$rng" --dry-run --Werror "$f" 2>/dev/null; then
+                echo "include-order: $f" >&2
+                rc=1
+            fi
+            ;;
+    esac
+done
+
+exit $rc
