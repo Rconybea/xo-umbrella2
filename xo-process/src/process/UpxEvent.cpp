@@ -1,9 +1,9 @@
 /* @file UpxEvent.cpp */
 
 #include "UpxEvent.hpp"
-#include "xo/reflect/StructReflector.hpp"
-#include "xo/indentlog/scope.hpp"
-#include "xo/indentlog/print/tag.hpp"
+#include <xo/reflect/StructReflector.hpp>
+#include <xo/indentlog/print/tag.hpp>
+#include <xo/indentlog/scope.hpp>
 
 namespace xo {
     using xo::reflect::StructReflector;

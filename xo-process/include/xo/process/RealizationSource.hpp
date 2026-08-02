@@ -4,9 +4,9 @@
 
 #include "RealizationCallback.hpp"
 #include "RealizationTracer.hpp"
-#include "xo/callback/CallbackSet.hpp"
-#include "xo/indentlog/scope.hpp"
-#include "xo/reactor/ReactorSource.hpp"
+#include <xo/reactor/ReactorSource.hpp>
+#include <xo/indentlog/scope.hpp>
+#include <xo/callback/CallbackSet.hpp>
 #include <functional>
 
 namespace xo {

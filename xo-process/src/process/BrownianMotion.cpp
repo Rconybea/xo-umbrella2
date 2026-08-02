@@ -1,6 +1,6 @@
 /* @file BrownianMotion.cpp */
 
-#include "xo/reflect/TaggedPtr.hpp"
+#include <xo/reflect/TaggedPtr.hpp>
 #include <xo/indentlog/scope.hpp>
 // #include "time/Time.hpp"
 #include "BrownianMotion.hpp"

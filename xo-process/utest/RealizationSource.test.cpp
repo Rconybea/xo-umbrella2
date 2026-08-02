@@ -2,13 +2,13 @@
 
 //#include "time/Time.hpp"
 #include "xo/process/RealizationSource.hpp"
-#include "xo/process/LogNormalProcess.hpp"
 #include "xo/process/BrownianMotion.hpp"
-#include "xo/randomgen/xoshiro256.hpp"
-#include "xo/simulator/Simulator.hpp"
-#include "xo/indentlog/print/printer.hpp"
-#include "xo/indentlog/scope.hpp"
+#include "xo/process/LogNormalProcess.hpp"
+#include <xo/simulator/Simulator.hpp>
+#include <xo/indentlog/print/printer.hpp>
+#include <xo/indentlog/scope.hpp>
 #include <xo/timeutil/timeutil_iostream.hpp>
+#include <xo/randomgen/xoshiro256.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {

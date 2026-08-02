@@ -3,7 +3,7 @@
 #pragma once
 
 #include "UpxEvent.hpp"
-#include "xo/reactor/Sink.hpp"
+#include <xo/reactor/Sink.hpp>
 
 namespace xo {
     namespace process {

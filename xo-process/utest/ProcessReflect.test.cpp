@@ -1,7 +1,7 @@
 /* @file ProcessReflect.test.cpp */
 
 #include "xo/process/init_process.hpp"
-#include "xo/reflect/Reflect.hpp"
+#include <xo/reflect/Reflect.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {

@@ -6,7 +6,7 @@
 #pragma once
 
 #include "AbstractStochasticProcess.hpp"
-#include "xo/reflect/SelfTagging.hpp"
+#include <xo/reflect/SelfTagging.hpp>
 
 namespace xo {
   namespace process {

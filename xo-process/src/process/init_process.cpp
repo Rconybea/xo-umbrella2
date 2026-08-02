@@ -4,10 +4,9 @@
  */
 
 #include "init_process.hpp"
-#include "xo/printjson/init_printjson.hpp"
-
 #include "UpxEvent.hpp"
-#include "xo/subsys/Subsystem.hpp"
+#include <xo/printjson/init_printjson.hpp>
+#include <xo/subsys/Subsystem.hpp>
 
 namespace xo {
     using xo::process::UpxEvent;
