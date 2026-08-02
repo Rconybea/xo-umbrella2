@@ -26,7 +26,7 @@ Limitations:
 ### Install dependencies
 
 - [github/Rconybea/xo-cmake](https://github.com/Rconybea/xo-cmake) cmake macros
-- [github/Rconybea/xo-indentlog](https://github.com/Rconybea/indentlog) logging (used by unit tests)
+- [github/Rconybea/xo-ppsink](https://github.com/Rconybea/xo-ppsink) pretty-printing + logging (used by unit tests)
 
 ### Clone xo-flatstring
 

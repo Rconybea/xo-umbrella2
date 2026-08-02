@@ -66,11 +66,11 @@ Unit test dependencies:
 
 * `catch2`_ header-only unit-test framework
 * `xo-cmake`_ cmake macros
-* `xo-indentlog`_ logging with call-structure indenting
+* `xo-ppsink`_ pretty-printing, with call-structure-indented logging
 
 .. _catch2: https://github.com/catchorg/Catch2
 .. _xo-cmake: https://github.com/rconybea/xo-cmake
-.. _xo-indentlog: https://github.com/rconybea/indentlog
+.. _xo-ppsink: https://github.com/rconybea/xo-ppsink
 
 To build documentation, will also need:
 
