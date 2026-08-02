@@ -3,8 +3,8 @@
  *  @author Roland Conybeare, Jan 2026
  **/
 
-#include <xo/indentlog/print/pretty.hpp>
 #include "xo/printable2/Printable.hpp"
+#include <xo/indentlog/print/pretty.hpp>
 
 namespace xo {
     namespace print {

@@ -14,11 +14,10 @@
 #pragma once
 
 // includes (via {facet_includes})
-#include <xo/indentlog/print/ppindentinfo.hpp>
-#include <xo/facet/obj.hpp>
 #include <xo/facet/facet_implementation.hpp>
+#include <xo/facet/obj.hpp>
 #include <xo/facet/typeseq.hpp>
-
+#include <xo/indentlog/print/ppindentinfo.hpp>
 
 namespace xo {
 namespace print {
