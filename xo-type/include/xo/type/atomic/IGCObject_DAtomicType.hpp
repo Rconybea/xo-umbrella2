@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "DAtomicType.hpp"
+#include "xo/type/DAtomicType.hpp"
 #include "GCObject.hpp"
 
 namespace xo { namespace scm { class IGCObject_DAtomicType; } }

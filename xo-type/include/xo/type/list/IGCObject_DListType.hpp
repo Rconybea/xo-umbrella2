@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "DListType.hpp"
+#include "xo/type/DListType.hpp"
 #include "GCObject.hpp"
 
 namespace xo { namespace scm { class IGCObject_DListType; } }

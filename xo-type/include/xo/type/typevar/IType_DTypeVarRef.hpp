@@ -14,7 +14,7 @@
 #pragma once
 
 #include "DTypeVarRef.hpp"
-#include "Type.hpp"
+#include "xo/type/Type.hpp"
 
 namespace xo { namespace scm { class IType_DTypeVarRef; } }
 

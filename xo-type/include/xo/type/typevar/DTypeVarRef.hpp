@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "Metatype.hpp"
-#include "Type.hpp"
+#include "xo/type/Metatype.hpp"
+#include "xo/type/Type.hpp"
 #include <xo/stringtable2/UniqueString.hpp>
 #include <xo/alloc2/Allocator.hpp>
 

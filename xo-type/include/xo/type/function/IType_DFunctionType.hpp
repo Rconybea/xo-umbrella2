@@ -13,8 +13,8 @@
 
 #pragma once
 
-#include "DFunctionType.hpp"
-#include "Type.hpp"
+#include "xo/type/DFunctionType.hpp"
+#include "xo/type/Type.hpp"
 
 namespace xo { namespace scm { class IType_DFunctionType; } }
 

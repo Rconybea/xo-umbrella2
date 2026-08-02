@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "DArrayType.hpp"
+#include "xo/type/DArrayType.hpp"
 #include "GCObject.hpp"
 
 namespace xo { namespace scm { class IGCObject_DArrayType; } }

@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include "DFunctionType.hpp"
+#include "xo/type/DFunctionType.hpp"
 #include "GCObject.hpp"
 
 namespace xo { namespace scm { class IGCObject_DFunctionType; } }
