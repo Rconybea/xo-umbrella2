@@ -1,10 +1,10 @@
 /* @file natural_unit.test.cpp */
 
+#include "xo/unit/natural_unit.hpp"
 #include "xo/unit/scaled_unit.hpp"
 #include "xo/unit/scaled_unit_iostream.hpp"
-#include "xo/unit/natural_unit.hpp"
-#include "xo/indentlog/scope.hpp"
-#include "xo/indentlog/print/tag.hpp"
+#include <xo/indentlog/print/tag.hpp>
+#include <xo/indentlog/scope.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {

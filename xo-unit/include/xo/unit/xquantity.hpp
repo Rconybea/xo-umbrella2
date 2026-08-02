@@ -5,9 +5,9 @@
 
 #pragma once
 
+#include "natural_unit.hpp"
 #include "quantity_ops.hpp"
 #include "scaled_unit.hpp"
-#include "natural_unit.hpp"
 
 namespace xo {
     namespace qty {

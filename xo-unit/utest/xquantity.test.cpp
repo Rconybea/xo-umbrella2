@@ -2,14 +2,14 @@
 
 #include "xquantity.hpp"
 #include "xquantity_iostream.hpp"
-#include "xo/randomgen/random_seed.hpp"
-#include "xo/randomgen/xoshiro256.hpp"
-#include "xo/indentlog/scope.hpp"
-#include "xo/indentlog/print/tag.hpp"
+#include <xo/indentlog/print/tag.hpp>
+#include <xo/indentlog/scope.hpp>
+#include <xo/randomgen/random_seed.hpp>
+#include <xo/randomgen/xoshiro256.hpp>
 #include <catch2/catch.hpp>
 #include <set>
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace xo {
     namespace u = xo::qty::u;

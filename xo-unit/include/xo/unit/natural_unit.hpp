@@ -6,8 +6,8 @@
 #pragma once
 
 #include "bpu.hpp"
-#include <cmath>
 #include <cassert>
+#include <cmath>
 
 namespace xo {
     namespace qty {

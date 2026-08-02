@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "xquantity.hpp"
 #include "natural_unit_iostream.hpp"
+#include "xquantity.hpp"
 //#include <iostream>
 
 namespace xo {

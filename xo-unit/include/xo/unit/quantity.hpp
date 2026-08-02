@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "quantity_ops.hpp"
 #include "natural_unit.hpp"
+#include "quantity_ops.hpp"
 #include "scaled_unit.hpp"
 #include "scaled_unit_concept.hpp"
 

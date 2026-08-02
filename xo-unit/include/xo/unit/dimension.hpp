@@ -3,7 +3,7 @@
 #pragma once
 
 #ifdef __APPL__
-# include <vector>  // for std::size_t when building with clang18
+# include <vector> // for std::size_t when building with clang18
 #endif
 #include <cstdint>
 

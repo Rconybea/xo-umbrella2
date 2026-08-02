@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "quantity.hpp"
 #include "natural_unit_iostream.hpp"
+#include "quantity.hpp"
 
 namespace xo {
     namespace qty {

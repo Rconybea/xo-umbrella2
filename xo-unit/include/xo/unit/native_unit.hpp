@@ -6,7 +6,7 @@
 #pragma once
 
 #include "dimension.hpp"
-#include "xo/flatstring/flatstring.hpp"
+#include <xo/flatstring/flatstring.hpp>
 
 namespace xo {
     namespace qty {

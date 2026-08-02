@@ -1,7 +1,7 @@
 /* @file bpu.test.cpp */
 
 #include "xo/unit/bpu.hpp"
-#include "xo/indentlog/scope.hpp"
+#include <xo/indentlog/scope.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {

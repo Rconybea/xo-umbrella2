@@ -1,11 +1,11 @@
 /* @file quantity.test.cpp */
 
 #include "xo/unit/mpl/quantity.hpp"
-#include "xo/reflect/Reflect.hpp"
-//#include <xo/randomgen/random_seed.hpp>
-//#include <xo/randomgen/xoshiro256.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/reflect/Reflect.hpp>
+// #include <xo/randomgen/random_seed.hpp>
+// #include <xo/randomgen/xoshiro256.hpp>
 #include <xo/indentlog/print/tag.hpp>
+#include <xo/indentlog/scope.hpp>
 #include <catch2/catch.hpp>
 #include <compare>
 
