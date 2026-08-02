@@ -13,8 +13,8 @@
 
 #pragma once
 
-#include "Type.hpp"
 #include "DTypeVarRef.hpp"
+#include "Type.hpp"
 
 namespace xo { namespace scm { class IType_DTypeVarRef; } }
 

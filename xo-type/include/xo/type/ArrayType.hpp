@@ -6,7 +6,7 @@
 #pragma once
 
 #include "DArrayType.hpp"
-#include "array/IType_DArrayType.hpp"
 #include "array/IGCObject_DArrayType.hpp"
+#include "array/IType_DArrayType.hpp"
 
 /* end ArrayType.hpp */

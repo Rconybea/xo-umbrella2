@@ -3,8 +3,8 @@
  *  @author Roland Conybeare, Mar 2026
  **/
 
-#include "init_type.hpp"
 #include "AtomicType.hpp"
+#include "init_type.hpp"
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/alloc2/Arena.hpp>
 #include <xo/facet/obj.hpp>

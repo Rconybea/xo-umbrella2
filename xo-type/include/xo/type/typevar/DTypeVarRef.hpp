@@ -5,10 +5,10 @@
 
 #pragma once
 
-#include "Type.hpp"
 #include "Metatype.hpp"
-#include <xo/alloc2/Allocator.hpp>
+#include "Type.hpp"
 #include <xo/stringtable2/UniqueString.hpp>
+#include <xo/alloc2/Allocator.hpp>
 
 namespace xo {
     namespace scm {

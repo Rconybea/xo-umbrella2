@@ -5,8 +5,8 @@
 
 #include "Metatype.hpp"
 #include "TypeVarRef.hpp"
-#include <xo/reflect/Reflect.hpp>
 #include <xo/alloc2/Collector.hpp>
+#include <xo/reflect/Reflect.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 
 namespace xo {

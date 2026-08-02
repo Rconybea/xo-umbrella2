@@ -5,11 +5,11 @@
 
 #pragma once
 
-#include "Type.hpp"
 #include "Metatype.hpp"
-#include <xo/reflect/TypeDescr.hpp>
-#include <xo/alloc2/GCObjectVisitor.hpp>
+#include "Type.hpp"
 #include <xo/alloc2/Allocator.hpp>
+#include <xo/alloc2/GCObjectVisitor.hpp>
+#include <xo/reflect/TypeDescr.hpp>
 
 namespace xo {
     namespace scm {

@@ -6,7 +6,7 @@
 #pragma once
 
 #include "DFunctionType.hpp"
-#include "function/IType_DFunctionType.hpp"
 #include "function/IGCObject_DFunctionType.hpp"
+#include "function/IType_DFunctionType.hpp"
 
 /* end FunctionType.hpp */

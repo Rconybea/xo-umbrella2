@@ -3,9 +3,9 @@
  *  @author Roland Conybeare, Mar 2026
  **/
 
+#include "ArrayType.hpp"
 #include "AtomicType.hpp"
 #include "ListType.hpp"
-#include "ArrayType.hpp"
 #include <xo/alloc2/Allocator.hpp>
 
 namespace xo {

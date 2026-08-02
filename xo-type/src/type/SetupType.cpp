@@ -4,12 +4,11 @@
  **/
 
 #include "SetupType.hpp"
-#include "AtomicType.hpp"
-#include "ListType.hpp"
 #include "ArrayType.hpp"
+#include "AtomicType.hpp"
 #include "FunctionType.hpp"
+#include "ListType.hpp"
 #include "TypeVarRef.hpp"
-
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/indentlog/scope.hpp>
 

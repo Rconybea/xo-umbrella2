@@ -16,8 +16,8 @@
 // includes (via {facet_includes})
 #include <xo/type/Metatype.hpp>
 #include <xo/reflect/TypeDescr.hpp>
-#include <xo/facet/obj.hpp>
 #include <xo/facet/facet_implementation.hpp>
+#include <xo/facet/obj.hpp>
 #include <xo/facet/typeseq.hpp>
 
 // pretext if any

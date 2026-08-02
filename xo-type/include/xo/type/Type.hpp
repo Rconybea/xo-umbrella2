@@ -18,5 +18,4 @@
 #include "type/IType_Xfer.hpp"
 #include "type/RType.hpp"
 
-
 /* end Type.hpp */

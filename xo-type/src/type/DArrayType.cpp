@@ -3,11 +3,11 @@
  *  @author Roland Conybeare, Mar 2026
  **/
 
-#include "Type.hpp"
 #include "ArrayType.hpp"
+#include "Type.hpp"
 #include "TypeDescr.hpp"
-#include <xo/reflect/Reflect.hpp>
 #include <xo/alloc2/Allocator.hpp>
+#include <xo/reflect/Reflect.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 
 namespace xo {

@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "Type.hpp"
 #include "Metatype.hpp"
+#include "Type.hpp"
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/alloc2/GCObjectVisitor.hpp>
 

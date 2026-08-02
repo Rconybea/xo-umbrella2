@@ -13,8 +13,8 @@
 
 #pragma once
 
-#include "GCObject.hpp"
 #include "DAtomicType.hpp"
+#include "GCObject.hpp"
 
 namespace xo { namespace scm { class IGCObject_DAtomicType; } }
 

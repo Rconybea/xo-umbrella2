@@ -6,7 +6,7 @@
 #pragma once
 
 #include "DAtomicType.hpp"
-#include "atomic/IType_DAtomicType.hpp"
 #include "atomic/IGCObject_DAtomicType.hpp"
+#include "atomic/IType_DAtomicType.hpp"
 
 /* end AtomicType.hpp */
