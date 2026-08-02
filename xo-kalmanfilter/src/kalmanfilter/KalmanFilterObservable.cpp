@@ -2,7 +2,7 @@
 
 #include "KalmanFilterObservable.hpp"
 #include "print_eigen.hpp"
-#include "xo/indentlog/scope.hpp"
+#include <xo/indentlog/scope.hpp>
 
 namespace xo {
   using xo::scope;

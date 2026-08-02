@@ -3,11 +3,11 @@
 #include "xo/kalmanfilter/KalmanFilter.hpp"
 #include "xo/kalmanfilter/KalmanFilterEngine.hpp"
 #include "xo/kalmanfilter/print_eigen.hpp"
-#include "xo/statistics/SampleStatistics.hpp"
-#include "xo/randomgen/normalgen.hpp"
-#include "xo/randomgen/xoshiro256.hpp"
-#include "xo/indentlog/scope.hpp"
-#include "xo/indentlog/log_level.hpp"
+#include <xo/indentlog/log_level.hpp>
+#include <xo/indentlog/scope.hpp>
+#include <xo/statistics/SampleStatistics.hpp>
+#include <xo/randomgen/normalgen.hpp>
+#include <xo/randomgen/xoshiro256.hpp>
 #include <catch2/catch.hpp>
 #include <fstream>
 

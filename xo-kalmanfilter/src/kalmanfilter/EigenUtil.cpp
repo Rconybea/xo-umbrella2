@@ -4,12 +4,12 @@
  */
 
 #include "EigenUtil.hpp"
-#include "xo/printjson/PrintJson.hpp"
-#include "xo/reflect/Reflect.hpp"
+#include <xo/printjson/PrintJson.hpp>
+#include <xo/reflect/Reflect.hpp>
 #include <Eigen/Dense>
-#include <memory>
-#include <cstdint>
 #include <cassert>
+#include <cstdint>
+#include <memory>
 
 namespace xo {
     using xo::json::PrintJson;

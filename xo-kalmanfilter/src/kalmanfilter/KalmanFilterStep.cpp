@@ -3,7 +3,7 @@
 #include "KalmanFilterStep.hpp"
 #include "KalmanFilterEngine.hpp"
 #include "KalmanFilterState.hpp"
-#include "xo/indentlog/scope.hpp"
+#include <xo/indentlog/scope.hpp>
 
 namespace xo {
     using xo::scope;

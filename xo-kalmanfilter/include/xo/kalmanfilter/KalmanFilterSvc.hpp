@@ -1,11 +1,11 @@
 /* @file KalmanFilterSvc.hpp */
 
-#include "xo/reactor/Sink.hpp"
-#include "xo/reactor/DirectSourcePtr.hpp"
 #include "KalmanFilter.hpp"
 #include "KalmanFilterInputSource.hpp"
 #include "KalmanFilterOutputCallback.hpp"
-#include "xo/callback/CallbackSet.hpp"
+#include <xo/reactor/DirectSourcePtr.hpp>
+#include <xo/reactor/Sink.hpp>
+#include <xo/callback/CallbackSet.hpp>
 
 namespace xo {
     namespace kalman {

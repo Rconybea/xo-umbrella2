@@ -2,8 +2,9 @@
 
 #pragma once
 
-#include "xo/refcnt/Refcounted.hpp"
 #include "KalmanFilter.hpp"
+#include <xo/reactor/Sink.hpp>
+#include <xo/refcnt/Refcounted.hpp>
 
 namespace xo {
     namespace kalman {

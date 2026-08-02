@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "xo/reactor/EventSource.hpp"
 #include "KalmanFilterInputCallback.hpp"
+#include <xo/reactor/EventSource.hpp>
 
 namespace xo {
     namespace kalman {

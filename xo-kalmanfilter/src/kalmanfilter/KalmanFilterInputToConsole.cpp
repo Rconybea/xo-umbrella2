@@ -1,7 +1,7 @@
 /* @file KalmanFilterInputToConsole.cpp */
 
 #include "KalmanFilterInputToConsole.hpp"
-#include "xo/indentlog/print/tag.hpp"
+#include <xo/indentlog/print/tag.hpp>
 
 namespace xo {
   using xo::xtag;

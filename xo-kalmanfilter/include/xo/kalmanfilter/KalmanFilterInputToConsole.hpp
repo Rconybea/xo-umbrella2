@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "xo/reactor/Sink.hpp"
 #include "KalmanFilterInput.hpp"
+#include <xo/reactor/Sink.hpp>
 
 namespace xo {
     namespace kalman {

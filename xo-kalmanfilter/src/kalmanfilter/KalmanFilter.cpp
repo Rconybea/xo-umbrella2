@@ -1,10 +1,10 @@
 /* @file KalmanFilter.cpp */
 
 #include "KalmanFilter.hpp"
+#include "Eigen/src/Core/Matrix.h"
 #include "KalmanFilterEngine.hpp"
 #include "print_eigen.hpp"
-#include "xo/indentlog/scope.hpp"
-#include "Eigen/src/Core/Matrix.h"
+#include <xo/indentlog/scope.hpp>
 
 namespace xo {
     using xo::time::utc_nanos;

@@ -2,12 +2,12 @@
 
 #pragma once
 
-#include "KalmanFilterStep.hpp"
-#include <xo/timeutil/timeutil.hpp>
-#include "KalmanFilterState.hpp"
-#include "KalmanFilterTransition.hpp"
-#include "KalmanFilterObservable.hpp"
 #include "KalmanFilterInput.hpp"
+#include "KalmanFilterObservable.hpp"
+#include "KalmanFilterState.hpp"
+#include "KalmanFilterStep.hpp"
+#include "KalmanFilterTransition.hpp"
+#include <xo/timeutil/timeutil.hpp>
 
 namespace xo {
     namespace kalman {

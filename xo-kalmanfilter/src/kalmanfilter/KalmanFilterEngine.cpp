@@ -3,9 +3,9 @@
  */
 
 #include "KalmanFilterEngine.hpp"
-#include "print_eigen.hpp"
-#include "xo/indentlog/scope.hpp"
 #include "Eigen/src/Core/Matrix.h"
+#include "print_eigen.hpp"
+#include <xo/indentlog/scope.hpp>
 
 namespace xo {
     using xo::time::utc_nanos;

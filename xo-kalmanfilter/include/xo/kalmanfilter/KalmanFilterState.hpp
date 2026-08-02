@@ -2,14 +2,14 @@
 
 #pragma once
 
-#include "xo/reflect/SelfTagging.hpp"
-#include <xo/timeutil/timeutil.hpp>
 #include "KalmanFilterInput.hpp"
 #include "KalmanFilterTransition.hpp"
-//#include "time/Time.hpp"
+#include <xo/reflect/SelfTagging.hpp>
+#include <xo/timeutil/timeutil.hpp>
+// #include "time/Time.hpp"
 #include <Eigen/Dense>
-#include <functional>
 #include <cstdint>
+#include <functional>
 
 namespace xo {
     namespace kalman {

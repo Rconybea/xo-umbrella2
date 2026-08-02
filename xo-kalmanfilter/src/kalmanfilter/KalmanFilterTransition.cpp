@@ -2,8 +2,8 @@
 
 #include "KalmanFilterTransition.hpp"
 #include "print_eigen.hpp"
-#include "xo/reflect/StructReflector.hpp"
-#include "xo/indentlog/scope.hpp"
+#include <xo/reflect/StructReflector.hpp>
+#include <xo/indentlog/scope.hpp>
 
 namespace xo {
     using xo::reflect::StructReflector;

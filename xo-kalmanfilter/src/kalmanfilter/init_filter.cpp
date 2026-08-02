@@ -4,11 +4,10 @@
  */
 
 #include "init_filter.hpp"
-#include "xo/reactor/init_reactor.hpp"
-
-#include "KalmanFilterState.hpp"
 #include "EigenUtil.hpp"
-#include "xo/printjson/PrintJson.hpp"
+#include "KalmanFilterState.hpp"
+#include <xo/reactor/init_reactor.hpp>
+#include <xo/printjson/PrintJson.hpp>
 
 namespace xo {
     using xo::kalman::KalmanFilterInput;
