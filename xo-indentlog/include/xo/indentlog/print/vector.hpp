@@ -5,9 +5,9 @@
 
 #pragma once
 
+#include <cstdint>
 #include <iostream>
 #include <vector>
-#include <cstdint>
 
 namespace std {
     template<typename T>

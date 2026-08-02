@@ -3,8 +3,8 @@
 #pragma once
 
 #include "ppdetail_atomic.hpp"
-#include <iostream>
 #include <cstdint>
+#include <iostream>
 
 namespace xo {
     /**

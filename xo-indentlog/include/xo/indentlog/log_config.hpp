@@ -3,8 +3,8 @@
 #pragma once
 
 #include "log_level.hpp"
-#include "print/function.hpp"
 #include "print/color.hpp"
+#include "print/function.hpp"
 #include <cstdint>
 
 namespace xo {

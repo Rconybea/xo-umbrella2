@@ -2,8 +2,8 @@
 
 #include "xo/indentlog/print/filename.hpp"
 #include "xo/indentlog/print/tag.hpp"
-#include <vector>
 #include <catch2/catch.hpp>
+#include <vector>
 
 using namespace xo;
 

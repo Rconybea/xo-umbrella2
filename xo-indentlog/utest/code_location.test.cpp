@@ -3,8 +3,8 @@
 #include "xo/indentlog/print/code_location.hpp"
 #include "xo/indentlog/print/color.hpp"
 #include "xo/indentlog/print/tag.hpp"
-#include <vector>
 #include <catch2/catch.hpp>
+#include <vector>
 
 using namespace xo;
 

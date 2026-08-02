@@ -1,7 +1,7 @@
 /* @file pretty_vector.test.cpp */
 
-#include "xo/indentlog/print/pretty.hpp"
 #include "xo/indentlog/print/pretty_vector.hpp"
+#include "xo/indentlog/print/pretty.hpp"
 #include <catch2/catch.hpp>
 #include <sstream>
 

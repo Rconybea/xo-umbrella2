@@ -9,8 +9,8 @@
 #include "tostr.hpp"
 #include <sstream>
 #include <string_view>
-#include <utility>
 #include <type_traits>
+#include <utility>
 
 namespace xo {
     namespace print {

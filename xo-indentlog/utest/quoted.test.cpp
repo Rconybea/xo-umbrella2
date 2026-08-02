@@ -1,8 +1,8 @@
 /* @file fixed.test.cpp */
 
-#include "xo/indentlog/scope.hpp"
 #include "xo/indentlog/print/quoted.hpp"
-//#include "xo/indentlog/print/tag.hpp"
+#include "xo/indentlog/scope.hpp"
+// #include "xo/indentlog/print/tag.hpp"
 #include "xo/indentlog/print/hex.hpp"
 #include <catch2/catch.hpp>
 #include <sstream>

@@ -6,8 +6,8 @@
 #pragma once
 
 #include "ppindentinfo.hpp"
-#include <string>
 #include <cstdint>
+#include <string>
 
 namespace xo {
     namespace print {

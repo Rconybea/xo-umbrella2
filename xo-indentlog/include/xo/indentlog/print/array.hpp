@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include <iostream>
 #include <array>
+#include <iostream>
 
 namespace std {
     template<typename T, size_t N>

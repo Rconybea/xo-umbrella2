@@ -3,14 +3,13 @@
 #pragma once
 
 #include "log_state.hpp"
-#include "print/ppconfig.hpp"
 #include "print/filename.hpp"
+#include "print/ppconfig.hpp"
 #include "print/ppstr.hpp"
 #include "print/tostr.hpp"
-
-#include <stdexcept>
 #include <cstdint>
-#include <memory>   // for std::unique_ptr
+#include <memory> // for std::unique_ptr
+#include <stdexcept>
 
 namespace xo {
 

@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "filename.hpp"
 #include "color.hpp"
+#include "filename.hpp"
 
 namespace xo {
     /* Example:

@@ -5,12 +5,12 @@
 
 #pragma once
 
-#include "pretty.hpp"
 #include "array.hpp" /*printing*/
 #include "pad.hpp"
-#include <vector>
+#include "pretty.hpp"
 #include <array>
 #include <cstdint>
+#include <vector>
 
 namespace xo {
     namespace print {

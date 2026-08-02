@@ -5,15 +5,15 @@
 
 #pragma once
 
-#include "xo/indentlog/print/ppconfig.hpp"
-#include "xo/indentlog/log_streambuf.hpp"
-#include "ppdetail_atomic.hpp"
-#include "tag.hpp"
+#include "log_streambuf.hpp"
 #include "pad.hpp"
-#include <sstream>
-#include <vector>
-#include <utility>
+#include "ppdetail_atomic.hpp"
+#include "print/ppconfig.hpp"
+#include "tag.hpp"
 #include <cstdint>
+#include <sstream>
+#include <utility>
+#include <vector>
 
 namespace xo {
     namespace print {

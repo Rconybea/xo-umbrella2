@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include <iostream>
 #include <cstdint>
+#include <iostream>
 
 namespace xo {
     enum class log_level : std::uint8_t {

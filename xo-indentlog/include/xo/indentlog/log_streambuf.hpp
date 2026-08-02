@@ -3,12 +3,12 @@
 #pragma once
 
 #include "print/quoted_char.hpp"
+#include <cassert>
+#include <cstdint>
+#include <cstring> // e.g. for std::memcpy()
 #include <iostream>
 #include <string_view>
 #include <vector>
-#include <cstring>   // e.g. for std::memcpy()
-#include <cstdint>
-#include <cassert>
 
 namespace xo {
     /** recycling buffer for logging and pretty-printing

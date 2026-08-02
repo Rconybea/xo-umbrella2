@@ -1,9 +1,9 @@
 /* @file log_streambuf.test.cpp */
 
-#include "scope.hpp"
 #include "log_streambuf.hpp"
-#include "print/tag.hpp"
 #include "print/quoted.hpp"
+#include "print/tag.hpp"
+#include "scope.hpp"
 #include <catch2/catch.hpp>
 #include <string_view>
 //#include <sstream>

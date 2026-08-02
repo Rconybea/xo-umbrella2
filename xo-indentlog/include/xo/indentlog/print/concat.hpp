@@ -4,7 +4,7 @@
 
 #include "ppdetail_atomic.hpp"
 #include <ostream>
-#include <utility>  // for std::move()
+#include <utility> // for std::move()
 
 namespace xo {
     template <typename T1, typename T2>

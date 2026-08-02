@@ -1,6 +1,6 @@
 /* @file vector.test.cpp */
 
-#include "xo/indentlog/print/vector.hpp"  /* overload operator<< for std::vector */
+#include "xo/indentlog/print/vector.hpp" /* overload operator<< for std::vector */
 #include "xo/indentlog/print/tag.hpp"
 #include <catch2/catch.hpp>
 #include <sstream>

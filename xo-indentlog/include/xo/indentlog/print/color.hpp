@@ -3,8 +3,8 @@
 #pragma once
 
 #include "ppdetail_atomic.hpp"
-#include <ostream>
 #include <cstdint>
+#include <ostream>
 
 namespace xo {
     enum class color_encoding : std::uint8_t {

@@ -2,10 +2,10 @@
 
 #pragma once
 
-#include "tag_config.hpp"
+#include "color.hpp"
 #include "concat.hpp"
 #include "quoted.hpp"
-#include "color.hpp"
+#include "tag_config.hpp"
 #include <concepts>
 #include <iostream>
 

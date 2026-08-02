@@ -1,9 +1,8 @@
 /* @file function.hpp */
 
 #include "color.hpp"
-
-#include <iostream>
 #include <cstdint>
+#include <iostream>
 
 namespace xo {
     enum class function_style : std::uint8_t {
