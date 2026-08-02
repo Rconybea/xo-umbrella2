@@ -3,8 +3,8 @@
  **/
 
 #include "visitor/IResourceVisitor_Any.hpp"
-#include <iostream>
 #include <exception>
+#include <iostream>
 
 namespace xo {
 namespace mm {

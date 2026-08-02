@@ -6,8 +6,8 @@
 #pragma once
 
 #include "AAllocator.hpp"
-#include "xo/alloc2/AllocIterator.hpp"
 #include "typeseq.hpp"
+#include "xo/alloc2/AllocIterator.hpp"
 #include <xo/facet/obj.hpp>
 
 namespace xo {

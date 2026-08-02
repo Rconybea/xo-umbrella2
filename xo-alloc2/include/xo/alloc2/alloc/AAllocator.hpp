@@ -5,14 +5,14 @@
 
 #pragma once
 
-#include <xo/arena/MemorySizeInfo.hpp>
-#include <xo/arena/AllocError.hpp>
 #include "AllocInfo.hpp"
-#include "xo/alloc2/AllocRange.hpp"
 #include "typeseq.hpp"
-#include <xo/facet/obj.hpp>
+#include "xo/alloc2/AllocRange.hpp"
 #include <xo/facet/facet_implementation.hpp>
+#include <xo/facet/obj.hpp>
 #include <xo/facet/typeseq.hpp>
+#include <xo/arena/AllocError.hpp>
+#include <xo/arena/MemorySizeInfo.hpp>
 #include <string>
 
 namespace xo {

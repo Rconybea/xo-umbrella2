@@ -7,8 +7,8 @@
 
 #include "Allocator.hpp"
 #include <xo/facet/obj.hpp>
-#include <exception>
 #include <cassert>
+#include <exception>
 
 namespace xo {
     namespace mm {

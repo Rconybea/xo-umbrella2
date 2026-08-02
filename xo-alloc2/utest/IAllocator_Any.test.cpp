@@ -3,12 +3,12 @@
  *  @author Roland Conybeare, May 2026
  **/
 
-#include <xo/testutil/Utest.hpp>
 #include <xo/alloc2/Allocator.hpp>
+#include <xo/testutil/Utest.hpp>
 #include <catch2/catch.hpp>
+#include <signal.h>
 #include <sys/wait.h>
 #include <unistd.h>
-#include <signal.h>
 
 namespace xo {
     using xo::mm::AAllocator;

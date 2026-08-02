@@ -3,12 +3,12 @@
  *  @author Roland Conybeare, Dec 2025
  **/
 
-#include <xo/testutil/Utest.hpp>
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/alloc2/Arena.hpp>
-#include <xo/arena/print.hpp>
-#include <xo/arena/padding.hpp>
 #include <xo/facet/obj.hpp>
+#include <xo/testutil/Utest.hpp>
+#include <xo/arena/padding.hpp>
+#include <xo/arena/print.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/tag.hpp>
 #include <catch2/catch.hpp>

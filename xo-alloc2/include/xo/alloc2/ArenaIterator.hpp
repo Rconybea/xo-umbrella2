@@ -9,7 +9,7 @@
 // because xo-arena is a dependency of xo-facet, which we're relying
 // on here
 
-#include <xo/arena/DArenaIterator.hpp>
 #include "arena/IAllocIterator_DArenaIterator.hpp"
+#include <xo/arena/DArenaIterator.hpp>
 
 /* end ArenaIterator.hpp */

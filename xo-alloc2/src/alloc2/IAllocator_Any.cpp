@@ -4,8 +4,8 @@
  **/
 
 #include "alloc/IAllocator_Any.hpp"
-#include <iostream>
 #include <exception>
+#include <iostream>
 
 namespace xo {
     using xo::facet::DVariantPlaceholder;

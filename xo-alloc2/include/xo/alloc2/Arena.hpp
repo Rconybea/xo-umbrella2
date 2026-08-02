@@ -11,7 +11,7 @@
 // a dependency of xo-alloc2
 //
 
-#include <xo/arena/DArena.hpp>
 #include "arena/IAllocator_DArena.hpp"
+#include <xo/arena/DArena.hpp>
 
 /* end Arena.hpp */

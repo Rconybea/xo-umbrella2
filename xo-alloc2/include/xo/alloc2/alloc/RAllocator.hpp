@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "xo/alloc2/Allocator_basic.hpp" // omits RAllocator_aux
 #include "xo/alloc2/AllocIterator.hpp"
+#include "xo/alloc2/Allocator_basic.hpp" // omits RAllocator_aux
 #include <xo/facet/RRouter.hpp>
 #include <string>
 

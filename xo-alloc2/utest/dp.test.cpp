@@ -3,10 +3,10 @@
  *  @author Roland Conybeare, May 2026
  **/
 
-#include <xo/testutil/Utest.hpp>
 #include "dp.hpp"
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/alloc2/Arena.hpp>
+#include <xo/testutil/Utest.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {

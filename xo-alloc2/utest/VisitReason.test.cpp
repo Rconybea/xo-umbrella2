@@ -3,8 +3,8 @@
  *  @author Roland Conybeare, May 2026
  **/
 
-#include <xo/testutil/Utest.hpp>
 #include <xo/alloc2/VisitReason.hpp>
+#include <xo/testutil/Utest.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {

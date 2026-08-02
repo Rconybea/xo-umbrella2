@@ -3,13 +3,13 @@
  *  @author Roland Conybeare, Dec 2025
  **/
 
-#include <xo/testutil/Utest.hpp>
-#include <xo/alloc2/Allocator.hpp>
-#include <xo/alloc2/AllocIterator.hpp>
-#include <xo/alloc2/Arena.hpp>
-#include <xo/alloc2/ArenaIterator.hpp>
 #include "arena/IAllocIterator_DArenaIterator.hpp"
 #include "padding.hpp"
+#include <xo/alloc2/AllocIterator.hpp>
+#include <xo/alloc2/Allocator.hpp>
+#include <xo/alloc2/Arena.hpp>
+#include <xo/alloc2/ArenaIterator.hpp>
+#include <xo/testutil/Utest.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/tag.hpp>
 #include <catch2/catch.hpp>

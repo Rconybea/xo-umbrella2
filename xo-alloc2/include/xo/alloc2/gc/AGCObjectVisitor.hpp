@@ -15,12 +15,12 @@
 
 // includes (via {facet_includes})
 #include <xo/alloc2/Generation.hpp>
-#include <xo/alloc2/role.hpp>
 #include <xo/alloc2/VisitReason.hpp>
-#include <xo/arena/AllocInfo.hpp>
-#include <xo/facet/obj.hpp>
+#include <xo/alloc2/role.hpp>
 #include <xo/facet/facet_implementation.hpp>
+#include <xo/facet/obj.hpp>
 #include <xo/facet/typeseq.hpp>
+#include <xo/arena/AllocInfo.hpp>
 
 // see GCObject.hpp, also in xo-alloc2/
 namespace xo { namespace mm { class AGCObject; }}

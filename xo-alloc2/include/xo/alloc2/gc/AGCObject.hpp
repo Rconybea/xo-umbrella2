@@ -16,11 +16,11 @@
 // includes (via {facet_includes})
 #include <xo/alloc2/Allocator_basic.hpp>
 #include <xo/alloc2/GCObjectVisitor.hpp>
-#include <cstdint>
-#include <cstddef>
-#include <xo/facet/obj.hpp>
 #include <xo/facet/facet_implementation.hpp>
+#include <xo/facet/obj.hpp>
 #include <xo/facet/typeseq.hpp>
+#include <cstddef>
+#include <cstdint>
 
 namespace xo { namespace mm { class ACollector; }}
 

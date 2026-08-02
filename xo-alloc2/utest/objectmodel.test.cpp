@@ -81,8 +81,8 @@
 
 #include <xo/testutil/Utest.hpp>
 #include <catch2/catch.hpp>
-#include <cmath>
 #include <cassert>
+#include <cmath>
 #include <cstring>
 
 namespace xo {

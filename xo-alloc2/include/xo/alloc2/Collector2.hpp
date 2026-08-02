@@ -18,5 +18,4 @@
 #include "gc/ICollector2_Xfer.hpp"
 #include "gc/RCollector2.hpp"
 
-
 /* end Collector2.hpp */

@@ -22,8 +22,8 @@
 
 #include "AGCObjectVisitor.hpp"
 #include <xo/alloc2/Generation.hpp>
-#include <xo/alloc2/role.hpp>
 #include <xo/alloc2/VisitReason.hpp>
+#include <xo/alloc2/role.hpp>
 #include <xo/arena/AllocInfo.hpp>
 
 namespace xo {

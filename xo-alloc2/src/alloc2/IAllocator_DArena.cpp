@@ -3,13 +3,13 @@
  *  @author Roland Conybeare, Dec 2025
  **/
 
+#include "arena/IAllocator_DArena.hpp"
 #include "AllocIterator.hpp"
 #include "GCObject.hpp"
-#include "arena/IAllocator_DArena.hpp"
 #include "arena/IAllocIterator_DArenaIterator.hpp" // for alloc_range
+#include <xo/facet/obj.hpp>
 #include <xo/arena/DArenaIterator.hpp>
 #include <xo/arena/padding.hpp>
-#include <xo/facet/obj.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag.hpp>
