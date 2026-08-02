@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "imgui.h"
 #include "ImSpan.hpp"
+#include "imgui.h"
 #include <algorithm>
 #include <utility>
 

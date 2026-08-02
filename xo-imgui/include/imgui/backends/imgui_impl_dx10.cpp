@@ -34,16 +34,17 @@
 
 #include "imgui.h"
 #ifndef IMGUI_DISABLE
-#include "imgui_impl_dx10.h"
+# include "imgui_impl_dx10.h"
 
 // DirectX
-#include <stdio.h>
-#include <d3d10_1.h>
-#include <d3d10.h>
-#include <d3dcompiler.h>
-#ifdef _MSC_VER
-#pragma comment(lib, "d3dcompiler") // Automatically link with d3dcompiler.lib as we are using D3DCompile() below.
-#endif
+# include <d3d10.h>
+# include <d3d10_1.h>
+# include <d3dcompiler.h>
+# include <stdio.h>
+# ifdef _MSC_VER
+#  pragma comment(lib, "d3dcompiler") // Automatically link with d3dcompiler.lib
+                                      // as we are using D3DCompile() below.
+# endif
 
 // DirectX data
 struct ImGui_ImplDX10_Data

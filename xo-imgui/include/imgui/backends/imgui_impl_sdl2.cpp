@@ -79,27 +79,31 @@
 
 #include "imgui.h"
 #ifndef IMGUI_DISABLE
-#include "imgui_impl_sdl2.h"
+# include "imgui_impl_sdl2.h"
 
 // Clang warnings with -Weverything
-#if defined(__clang__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wimplicit-int-float-conversion"  // warning: implicit conversion from 'xxx' to 'float' may lose precision
-#endif
+# if defined(__clang__)
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored                                             \
+      "-Wimplicit-int-float-conversion" // warning: implicit conversion from
+                                        // 'xxx' to 'float' may lose precision
+# endif
 
 // SDL
-#include <SDL.h>
-#include <SDL_syswm.h>
-#if defined(__APPLE__)
-#include <TargetConditionals.h>
-#endif
+# include <SDL.h>
+# include <SDL_syswm.h>
+# if defined(__APPLE__)
+#  include <TargetConditionals.h>
+# endif
 
-#if SDL_VERSION_ATLEAST(2,0,4) && !defined(__EMSCRIPTEN__) && !defined(__ANDROID__) && !(defined(__APPLE__) && TARGET_OS_IOS) && !defined(__amigaos4__)
-#define SDL_HAS_CAPTURE_AND_GLOBAL_MOUSE    1
-#else
-#define SDL_HAS_CAPTURE_AND_GLOBAL_MOUSE    0
-#endif
-#define SDL_HAS_VULKAN                      SDL_VERSION_ATLEAST(2,0,6)
+# if SDL_VERSION_ATLEAST(2, 0, 4) && !defined(__EMSCRIPTEN__) &&               \
+     !defined(__ANDROID__) && !(defined(__APPLE__) && TARGET_OS_IOS) &&        \
+     !defined(__amigaos4__)
+#  define SDL_HAS_CAPTURE_AND_GLOBAL_MOUSE 1
+# else
+#  define SDL_HAS_CAPTURE_AND_GLOBAL_MOUSE 0
+# endif
+# define SDL_HAS_VULKAN SDL_VERSION_ATLEAST(2, 0, 6)
 
 // SDL Data
 struct ImGui_ImplSDL2_Data

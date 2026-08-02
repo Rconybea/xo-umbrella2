@@ -1,14 +1,14 @@
 #pragma once
 
-#include <vulkan/vulkan.h>
+#include <iostream>
+#include <stdexcept>
+#include <vector>
 #include <SDL.h>
 #include <SDL_vulkan.h>
-#include <imgui.h>
 #include <backends/imgui_impl_sdl2.h>
 #include <backends/imgui_impl_vulkan.h>
-#include <iostream>
-#include <vector>
-#include <stdexcept>
+#include <imgui.h>
+#include <vulkan/vulkan.h>
 
 class MinimalImGuiVulkan {
 public:

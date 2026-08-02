@@ -37,10 +37,10 @@
 
 #include "imgui.h"
 #ifndef IMGUI_DISABLE
-#include "imgui_impl_dx9.h"
+# include "imgui_impl_dx9.h"
 
 // DirectX
-#include <d3d9.h>
+# include <d3d9.h>
 
 // DirectX data
 struct ImGui_ImplDX9_Data

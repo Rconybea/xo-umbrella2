@@ -1,8 +1,8 @@
 /* AppState.cpp */
 
 #include "AppState.hpp"
-#include "xo/object/Integer.hpp"
-#include "xo/object/List.hpp"
+#include <xo/object/Integer.hpp>
+#include <xo/object/List.hpp>
 
 using xo::IObject;
 using xo::obj::Integer;

@@ -113,106 +113,135 @@
 
 #include "imgui.h"
 #ifndef IMGUI_DISABLE
-#include "imgui_impl_opengl3.h"
-#include <stdio.h>
-#include <stdint.h>     // intptr_t
-#if defined(__APPLE__)
-#include <TargetConditionals.h>
-#endif
+# include "imgui_impl_opengl3.h"
+# include <stdint.h> // intptr_t
+# include <stdio.h>
+# if defined(__APPLE__)
+#  include <TargetConditionals.h>
+# endif
 
 // Clang/GCC warnings with -Weverything
-#if defined(__clang__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wold-style-cast"         // warning: use of old-style cast
-#pragma clang diagnostic ignored "-Wsign-conversion"        // warning: implicit conversion changes signedness
-#pragma clang diagnostic ignored "-Wunused-macros"          // warning: macro is not used
-#pragma clang diagnostic ignored "-Wnonportable-system-include-path"
-#pragma clang diagnostic ignored "-Wcast-function-type"     // warning: cast between incompatible function types (for loader)
-#endif
-#if defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpragmas"                  // warning: unknown option after '#pragma GCC diagnostic' kind
-#pragma GCC diagnostic ignored "-Wunknown-warning-option"   // warning: unknown warning group 'xxx'
-#pragma GCC diagnostic ignored "-Wcast-function-type"       // warning: cast between incompatible function types (for loader)
-#endif
+# if defined(__clang__)
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored                                             \
+      "-Wold-style-cast" // warning: use of old-style cast
+#  pragma clang diagnostic ignored                                             \
+      "-Wsign-conversion" // warning: implicit conversion changes signedness
+#  pragma clang diagnostic ignored                                             \
+      "-Wunused-macros" // warning: macro is not used
+#  pragma clang diagnostic ignored "-Wnonportable-system-include-path"
+#  pragma clang diagnostic ignored                                             \
+      "-Wcast-function-type" // warning: cast between incompatible function
+                             // types (for loader)
+# endif
+# if defined(__GNUC__)
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wpragmas" // warning: unknown option after
+                                             // '#pragma GCC diagnostic' kind
+#  pragma GCC diagnostic ignored                                               \
+      "-Wunknown-warning-option" // warning: unknown warning group 'xxx'
+#  pragma GCC diagnostic ignored                                               \
+      "-Wcast-function-type" // warning: cast between incompatible function
+                             // types (for loader)
+# endif
 
 // GL includes
-#if defined(IMGUI_IMPL_OPENGL_ES2)
-#if (defined(__APPLE__) && (TARGET_OS_IOS || TARGET_OS_TV))
-#include <OpenGLES/ES2/gl.h>    // Use GL ES 2
-#else
-#include <GLES2/gl2.h>          // Use GL ES 2
-#endif
-#if defined(__EMSCRIPTEN__)
-#ifndef GL_GLEXT_PROTOTYPES
-#define GL_GLEXT_PROTOTYPES
-#endif
-#include <GLES2/gl2ext.h>
-#endif
-#elif defined(IMGUI_IMPL_OPENGL_ES3)
-#if (defined(__APPLE__) && (TARGET_OS_IOS || TARGET_OS_TV))
-#include <OpenGLES/ES3/gl.h>    // Use GL ES 3
-#else
-#include <GLES3/gl3.h>          // Use GL ES 3
-#endif
-#elif !defined(IMGUI_IMPL_OPENGL_LOADER_CUSTOM)
-// Modern desktop OpenGL doesn't have a standard portable header file to load OpenGL function pointers.
-// Helper libraries are often used for this purpose! Here we are using our own minimal custom loader based on gl3w.
-// In the rest of your app/engine, you can use another loader of your choice (gl3w, glew, glad, glbinding, glext, glLoadGen, etc.).
-// If you happen to be developing a new feature for this backend (imgui_impl_opengl3.cpp):
-// - You may need to regenerate imgui_impl_opengl3_loader.h to add new symbols. See https://github.com/dearimgui/gl3w_stripped
-// - You can temporarily use an unstripped version. See https://github.com/dearimgui/gl3w_stripped/releases
-// Changes to this backend using new APIs should be accompanied by a regenerated stripped loader version.
-#define IMGL3W_IMPL
-#include "imgui_impl_opengl3_loader.h"
-#endif
+# if defined(IMGUI_IMPL_OPENGL_ES2)
+#  if (defined(__APPLE__) && (TARGET_OS_IOS || TARGET_OS_TV))
+#   include <OpenGLES/ES2/gl.h> // Use GL ES 2
+#  else
+#   include <GLES2/gl2.h> // Use GL ES 2
+#  endif
+#  if defined(__EMSCRIPTEN__)
+#   ifndef GL_GLEXT_PROTOTYPES
+#    define GL_GLEXT_PROTOTYPES
+#   endif
+#   include <GLES2/gl2ext.h>
+#  endif
+# elif defined(IMGUI_IMPL_OPENGL_ES3)
+#  if (defined(__APPLE__) && (TARGET_OS_IOS || TARGET_OS_TV))
+#   include <OpenGLES/ES3/gl.h> // Use GL ES 3
+#  else
+#   include <GLES3/gl3.h> // Use GL ES 3
+#  endif
+# elif !defined(IMGUI_IMPL_OPENGL_LOADER_CUSTOM)
+// Modern desktop OpenGL doesn't have a standard portable header file to load
+// OpenGL function pointers. Helper libraries are often used for this purpose!
+// Here we are using our own minimal custom loader based on gl3w. In the rest of
+// your app/engine, you can use another loader of your choice (gl3w, glew, glad,
+// glbinding, glext, glLoadGen, etc.). If you happen to be developing a new
+// feature for this backend (imgui_impl_opengl3.cpp):
+// - You may need to regenerate imgui_impl_opengl3_loader.h to add new symbols.
+// See https://github.com/dearimgui/gl3w_stripped
+// - You can temporarily use an unstripped version. See
+// https://github.com/dearimgui/gl3w_stripped/releases Changes to this backend
+// using new APIs should be accompanied by a regenerated stripped loader
+// version.
+#  define IMGL3W_IMPL
+#  include "imgui_impl_opengl3_loader.h"
+# endif
 
-// Vertex arrays are not supported on ES2/WebGL1 unless Emscripten which uses an extension
-#ifndef IMGUI_IMPL_OPENGL_ES2
-#define IMGUI_IMPL_OPENGL_USE_VERTEX_ARRAY
-#elif defined(__EMSCRIPTEN__)
-#define IMGUI_IMPL_OPENGL_USE_VERTEX_ARRAY
-#define glBindVertexArray       glBindVertexArrayOES
-#define glGenVertexArrays       glGenVertexArraysOES
-#define glDeleteVertexArrays    glDeleteVertexArraysOES
-#define GL_VERTEX_ARRAY_BINDING GL_VERTEX_ARRAY_BINDING_OES
-#endif
+// Vertex arrays are not supported on ES2/WebGL1 unless Emscripten which uses an
+// extension
+# ifndef IMGUI_IMPL_OPENGL_ES2
+#  define IMGUI_IMPL_OPENGL_USE_VERTEX_ARRAY
+# elif defined(__EMSCRIPTEN__)
+#  define IMGUI_IMPL_OPENGL_USE_VERTEX_ARRAY
+#  define glBindVertexArray glBindVertexArrayOES
+#  define glGenVertexArrays glGenVertexArraysOES
+#  define glDeleteVertexArrays glDeleteVertexArraysOES
+#  define GL_VERTEX_ARRAY_BINDING GL_VERTEX_ARRAY_BINDING_OES
+# endif
 
-// Desktop GL 2.0+ has extension and glPolygonMode() which GL ES and WebGL don't have..
-// A desktop ES context can technically compile fine with our loader, so we also perform a runtime checks
-#if !defined(IMGUI_IMPL_OPENGL_ES2) && !defined(IMGUI_IMPL_OPENGL_ES3)
-#define IMGUI_IMPL_OPENGL_HAS_EXTENSIONS        // has glGetIntegerv(GL_NUM_EXTENSIONS)
-#define IMGUI_IMPL_OPENGL_MAY_HAVE_POLYGON_MODE // may have glPolygonMode()
-#endif
+// Desktop GL 2.0+ has extension and glPolygonMode() which GL ES and WebGL don't
+// have.. A desktop ES context can technically compile fine with our loader, so
+// we also perform a runtime checks
+# if !defined(IMGUI_IMPL_OPENGL_ES2) && !defined(IMGUI_IMPL_OPENGL_ES3)
+#  define IMGUI_IMPL_OPENGL_HAS_EXTENSIONS // has
+                                           // glGetIntegerv(GL_NUM_EXTENSIONS)
+#  define IMGUI_IMPL_OPENGL_MAY_HAVE_POLYGON_MODE // may have glPolygonMode()
+# endif
 
-// Desktop GL 2.1+ and GL ES 3.0+ have glBindBuffer() with GL_PIXEL_UNPACK_BUFFER target.
-#if !defined(IMGUI_IMPL_OPENGL_ES2)
-#define IMGUI_IMPL_OPENGL_MAY_HAVE_BIND_BUFFER_PIXEL_UNPACK
-#endif
+// Desktop GL 2.1+ and GL ES 3.0+ have glBindBuffer() with
+// GL_PIXEL_UNPACK_BUFFER target.
+# if !defined(IMGUI_IMPL_OPENGL_ES2)
+#  define IMGUI_IMPL_OPENGL_MAY_HAVE_BIND_BUFFER_PIXEL_UNPACK
+# endif
 
 // Desktop GL 3.1+ has GL_PRIMITIVE_RESTART state
-#if !defined(IMGUI_IMPL_OPENGL_ES2) && !defined(IMGUI_IMPL_OPENGL_ES3) && defined(GL_VERSION_3_1)
-#define IMGUI_IMPL_OPENGL_MAY_HAVE_PRIMITIVE_RESTART
-#endif
+# if !defined(IMGUI_IMPL_OPENGL_ES2) && !defined(IMGUI_IMPL_OPENGL_ES3) &&     \
+     defined(GL_VERSION_3_1)
+#  define IMGUI_IMPL_OPENGL_MAY_HAVE_PRIMITIVE_RESTART
+# endif
 
-// Desktop GL 3.2+ has glDrawElementsBaseVertex() which GL ES and WebGL don't have.
-#if !defined(IMGUI_IMPL_OPENGL_ES2) && !defined(IMGUI_IMPL_OPENGL_ES3) && defined(GL_VERSION_3_2)
-#define IMGUI_IMPL_OPENGL_MAY_HAVE_VTX_OFFSET
-#endif
+// Desktop GL 3.2+ has glDrawElementsBaseVertex() which GL ES and WebGL don't
+// have.
+# if !defined(IMGUI_IMPL_OPENGL_ES2) && !defined(IMGUI_IMPL_OPENGL_ES3) &&     \
+     defined(GL_VERSION_3_2)
+#  define IMGUI_IMPL_OPENGL_MAY_HAVE_VTX_OFFSET
+# endif
 
 // Desktop GL 3.3+ and GL ES 3.0+ have glBindSampler()
-#if !defined(IMGUI_IMPL_OPENGL_ES2) && (defined(IMGUI_IMPL_OPENGL_ES3) || defined(GL_VERSION_3_3))
-#define IMGUI_IMPL_OPENGL_MAY_HAVE_BIND_SAMPLER
-#endif
+# if !defined(IMGUI_IMPL_OPENGL_ES2) &&                                        \
+     (defined(IMGUI_IMPL_OPENGL_ES3) || defined(GL_VERSION_3_3))
+#  define IMGUI_IMPL_OPENGL_MAY_HAVE_BIND_SAMPLER
+# endif
 
 // [Debugging]
-//#define IMGUI_IMPL_OPENGL_DEBUG
-#ifdef IMGUI_IMPL_OPENGL_DEBUG
-#include <stdio.h>
-#define GL_CALL(_CALL)      do { _CALL; GLenum gl_err = glGetError(); if (gl_err != 0) fprintf(stderr, "GL error 0x%x returned from '%s'.\n", gl_err, #_CALL); } while (0)  // Call with error check
-#else
-#define GL_CALL(_CALL)      _CALL   // Call without error check
-#endif
+// #define IMGUI_IMPL_OPENGL_DEBUG
+# ifdef IMGUI_IMPL_OPENGL_DEBUG
+#  include <stdio.h>
+#  define GL_CALL(_CALL)                                                       \
+    do {                                                                       \
+      _CALL;                                                                   \
+      GLenum gl_err = glGetError();                                            \
+      if (gl_err != 0)                                                         \
+        fprintf(stderr, "GL error 0x%x returned from '%s'.\n", gl_err,         \
+                #_CALL);                                                       \
+    } while (0) // Call with error check
+# else
+#  define GL_CALL(_CALL) _CALL // Call without error check
+# endif
 
 // OpenGL Data
 struct ImGui_ImplOpenGL3_Data

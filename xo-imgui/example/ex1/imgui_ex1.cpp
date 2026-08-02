@@ -3,18 +3,17 @@
  * author: Roland Conybeare, Aug 2025
  */
 
-#include <SDL.h>
-#include <GL/glew.h>
-
 #include "SDL_events.h"
-#include "imgui.h"
-#include "backends/imgui_impl_sdl2.h"
 #include "backends/imgui_impl_opengl3.h"
+#include "backends/imgui_impl_sdl2.h"
+#include "imgui.h"
+#include <GL/glew.h>
+#include <SDL.h>
 
-//#include <GLFW/glfw3.h>
+// #include <GLFW/glfw3.h>
 
 #ifdef NOPE
-#include <SDL_opengl.h>
+# include <SDL_opengl.h>
 #endif
 
 #include <iostream>

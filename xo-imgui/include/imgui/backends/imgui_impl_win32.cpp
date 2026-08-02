@@ -75,18 +75,18 @@
 
 #include "imgui.h"
 #ifndef IMGUI_DISABLE
-#include "imgui_impl_win32.h"
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-#include <windowsx.h> // GET_X_LPARAM(), GET_Y_LPARAM()
-#include <tchar.h>
-#include <dwmapi.h>
+# include "imgui_impl_win32.h"
+# ifndef WIN32_LEAN_AND_MEAN
+#  define WIN32_LEAN_AND_MEAN
+# endif
+# include <dwmapi.h>
+# include <tchar.h>
+# include <windows.h>
+# include <windowsx.h> // GET_X_LPARAM(), GET_Y_LPARAM()
 
 // Using XInput for gamepad (will load DLL dynamically)
-#ifndef IMGUI_IMPL_WIN32_DISABLE_GAMEPAD
-#include <xinput.h>
+# ifndef IMGUI_IMPL_WIN32_DISABLE_GAMEPAD
+#  include <xinput.h>
 typedef DWORD(WINAPI* PFN_XInputGetCapabilities)(DWORD, DWORD, XINPUT_CAPABILITIES*);
 typedef DWORD(WINAPI* PFN_XInputGetState)(DWORD, XINPUT_STATE*);
 #endif

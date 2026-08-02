@@ -2,12 +2,12 @@
 
 #pragma once
 
-#include "GcStateDescription.hpp"
 #include "GcCopyDetail.hpp"
-#include "xo/alloc/GC.hpp"
-#include "xo/alloc/Object.hpp"
-#include "xo/randomgen/xoshiro256.hpp"
-#include "xo/randomgen/random_seed.hpp"
+#include "GcStateDescription.hpp"
+#include <xo/alloc/GC.hpp>
+#include <xo/alloc/Object.hpp>
+#include <xo/randomgen/random_seed.hpp>
+#include <xo/randomgen/xoshiro256.hpp>
 #include <cstdint>
 
 struct AppState {

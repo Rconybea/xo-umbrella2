@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "xo/alloc/generation.hpp"
+#include <xo/alloc/generation.hpp>
 #include <cstdint>
 
 /** details of a single copy event performed by GC **/

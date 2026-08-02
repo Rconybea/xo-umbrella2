@@ -2,9 +2,9 @@
 
 #pragma once
 
-#include "xo/alloc/GC.hpp"
 #include "AppState.hpp"
 #include "DrawState.hpp"
+#include <xo/alloc/GC.hpp>
 
 struct DrawState;
 

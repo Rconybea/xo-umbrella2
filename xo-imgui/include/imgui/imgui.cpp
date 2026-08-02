@@ -973,43 +973,51 @@ CODE
 
 #include "imgui.h"
 #ifndef IMGUI_DISABLE
-#include "imgui_internal.h"
+# include "imgui_internal.h"
 
 // System includes
-#include <stdio.h>      // vsnprintf, sscanf, printf
-#include <stdint.h>     // intptr_t
+# include <stdint.h> // intptr_t
+# include <stdio.h>  // vsnprintf, sscanf, printf
 
-// [Windows] On non-Visual Studio compilers, we default to IMGUI_DISABLE_WIN32_DEFAULT_IME_FUNCTIONS unless explicitly enabled
-#if defined(_WIN32) && !defined(_MSC_VER) && !defined(IMGUI_ENABLE_WIN32_DEFAULT_IME_FUNCTIONS) && !defined(IMGUI_DISABLE_WIN32_DEFAULT_IME_FUNCTIONS)
-#define IMGUI_DISABLE_WIN32_DEFAULT_IME_FUNCTIONS
-#endif
+// [Windows] On non-Visual Studio compilers, we default to
+// IMGUI_DISABLE_WIN32_DEFAULT_IME_FUNCTIONS unless explicitly enabled
+# if defined(_WIN32) && !defined(_MSC_VER) &&                                  \
+     !defined(IMGUI_ENABLE_WIN32_DEFAULT_IME_FUNCTIONS) &&                     \
+     !defined(IMGUI_DISABLE_WIN32_DEFAULT_IME_FUNCTIONS)
+#  define IMGUI_DISABLE_WIN32_DEFAULT_IME_FUNCTIONS
+# endif
 
 // [Windows] OS specific includes (optional)
-#if defined(_WIN32) && defined(IMGUI_DISABLE_DEFAULT_FILE_FUNCTIONS) && defined(IMGUI_DISABLE_WIN32_DEFAULT_CLIPBOARD_FUNCTIONS) && defined(IMGUI_DISABLE_WIN32_DEFAULT_IME_FUNCTIONS) && !defined(IMGUI_DISABLE_WIN32_FUNCTIONS)
-#define IMGUI_DISABLE_WIN32_FUNCTIONS
-#endif
-#if defined(_WIN32) && !defined(IMGUI_DISABLE_WIN32_FUNCTIONS)
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#ifndef __MINGW32__
-#include <Windows.h>        // _wfopen, OpenClipboard
-#else
-#include <windows.h>
-#endif
-#if defined(WINAPI_FAMILY) && (WINAPI_FAMILY == WINAPI_FAMILY_APP) // UWP doesn't have all Win32 functions
-#define IMGUI_DISABLE_WIN32_DEFAULT_CLIPBOARD_FUNCTIONS
-#define IMGUI_DISABLE_WIN32_DEFAULT_IME_FUNCTIONS
-#endif
-#endif
+# if defined(_WIN32) && defined(IMGUI_DISABLE_DEFAULT_FILE_FUNCTIONS) &&       \
+     defined(IMGUI_DISABLE_WIN32_DEFAULT_CLIPBOARD_FUNCTIONS) &&               \
+     defined(IMGUI_DISABLE_WIN32_DEFAULT_IME_FUNCTIONS) &&                     \
+     !defined(IMGUI_DISABLE_WIN32_FUNCTIONS)
+#  define IMGUI_DISABLE_WIN32_FUNCTIONS
+# endif
+# if defined(_WIN32) && !defined(IMGUI_DISABLE_WIN32_FUNCTIONS)
+#  ifndef WIN32_LEAN_AND_MEAN
+#   define WIN32_LEAN_AND_MEAN
+#  endif
+#  ifndef NOMINMAX
+#   define NOMINMAX
+#  endif
+#  ifndef __MINGW32__
+#   include <Windows.h> // _wfopen, OpenClipboard
+#  else
+#   include <windows.h>
+#  endif
+#  if defined(WINAPI_FAMILY) &&                                                \
+      (WINAPI_FAMILY ==                                                        \
+       WINAPI_FAMILY_APP) // UWP doesn't have all Win32 functions
+#   define IMGUI_DISABLE_WIN32_DEFAULT_CLIPBOARD_FUNCTIONS
+#   define IMGUI_DISABLE_WIN32_DEFAULT_IME_FUNCTIONS
+#  endif
+# endif
 
 // [Apple] OS specific includes
-#if defined(__APPLE__)
-#include <TargetConditionals.h>
-#endif
+# if defined(__APPLE__)
+#  include <TargetConditionals.h>
+# endif
 
 // Visual Studio warnings
 #ifdef _MSC_VER

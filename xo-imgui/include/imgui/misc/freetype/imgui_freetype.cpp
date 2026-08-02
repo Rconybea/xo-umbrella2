@@ -36,38 +36,45 @@
 
 #include "imgui.h"
 #ifndef IMGUI_DISABLE
-#include "imgui_freetype.h"
-#include "imgui_internal.h"     // ImMin,ImMax,ImFontAtlasBuild*,
-#include <stdint.h>
-#include <ft2build.h>
-#include FT_FREETYPE_H          // <freetype/freetype.h>
-#include FT_MODULE_H            // <freetype/ftmodapi.h>
-#include FT_GLYPH_H             // <freetype/ftglyph.h>
-#include FT_SYNTHESIS_H         // <freetype/ftsynth.h>
+# include "imgui_freetype.h"
+# include "imgui_internal.h" // ImMin,ImMax,ImFontAtlasBuild*,
+# include FT_FREETYPE_H      // <freetype/freetype.h>
+# include FT_GLYPH_H         // <freetype/ftglyph.h>
+# include FT_MODULE_H        // <freetype/ftmodapi.h>
+# include FT_SYNTHESIS_H     // <freetype/ftsynth.h>
+# include <ft2build.h>
+# include <stdint.h>
 
-#ifdef IMGUI_ENABLE_FREETYPE_LUNASVG
-#include FT_OTSVG_H             // <freetype/otsvg.h>
-#include FT_BBOX_H              // <freetype/ftbbox.h>
-#include <lunasvg.h>
-#if !((FREETYPE_MAJOR >= 2) && (FREETYPE_MINOR >= 12))
-#error IMGUI_ENABLE_FREETYPE_LUNASVG requires FreeType version >= 2.12
-#endif
-#endif
+# ifdef IMGUI_ENABLE_FREETYPE_LUNASVG
+#  include FT_BBOX_H  // <freetype/ftbbox.h>
+#  include FT_OTSVG_H // <freetype/otsvg.h>
+#  include <lunasvg.h>
+#  if !((FREETYPE_MAJOR >= 2) && (FREETYPE_MINOR >= 12))
+#   error IMGUI_ENABLE_FREETYPE_LUNASVG requires FreeType version >= 2.12
+#  endif
+# endif
 
-#ifdef _MSC_VER
-#pragma warning (push)
-#pragma warning (disable: 4505)     // unreferenced local function has been removed (stb stuff)
-#pragma warning (disable: 26812)    // [Static Analyzer] The enum type 'xxx' is unscoped. Prefer 'enum class' over 'enum' (Enum.3).
-#endif
+# ifdef _MSC_VER
+#  pragma warning(push)
+#  pragma warning(disable : 4505) // unreferenced local function has been
+                                  // removed (stb stuff)
+#  pragma warning(                                                             \
+      disable : 26812) // [Static Analyzer] The enum type 'xxx' is unscoped.
+                       // Prefer 'enum class' over 'enum' (Enum.3).
+# endif
 
-#ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpragmas"                  // warning: unknown option after '#pragma GCC diagnostic' kind
-#pragma GCC diagnostic ignored "-Wunused-function"          // warning: 'xxxx' defined but not used
-#ifndef __clang__
-#pragma GCC diagnostic ignored "-Wsubobject-linkage"        // warning: 'xxxx' has a field 'xxxx' whose type uses the anonymous namespace
-#endif
-#endif
+# ifdef __GNUC__
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wpragmas" // warning: unknown option after
+                                             // '#pragma GCC diagnostic' kind
+#  pragma GCC diagnostic ignored                                               \
+      "-Wunused-function" // warning: 'xxxx' defined but not used
+#  ifndef __clang__
+#   pragma GCC diagnostic ignored                                              \
+       "-Wsubobject-linkage" // warning: 'xxxx' has a field 'xxxx' whose type
+                             // uses the anonymous namespace
+#  endif
+# endif
 
 //-------------------------------------------------------------------------
 // Data

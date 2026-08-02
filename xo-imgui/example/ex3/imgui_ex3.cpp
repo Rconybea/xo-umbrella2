@@ -4,31 +4,28 @@
  * author: Roland Conybeare, Aug 2025
  */
 
-#include "xo/object/Integer.hpp"
-#include "xo/object/List.hpp"
-#include "xo/alloc/GC.hpp"
-#include "xo/alloc/Object.hpp"
-#include "xo/randomgen/xoshiro256.hpp"
-#include "xo/randomgen/random_seed.hpp"
-#include "xo/object/Integer.hpp"
-#include "xo/flatstring/flatstring.hpp"
-#include "xo/indentlog/scope.hpp"
+# include "SDL_events.h"
+# include "backends/imgui_impl_opengl3.h"
+# include "backends/imgui_impl_sdl2.h"
+# include "imgui.h"
+# include <xo/object/Integer.hpp>
+# include <xo/object/List.hpp>
+# include <xo/alloc/GC.hpp>
+# include <xo/alloc/Object.hpp>
+# include <xo/flatstring/flatstring.hpp>
+# include <xo/indentlog/scope.hpp>
+# include <xo/randomgen/random_seed.hpp>
+# include <xo/randomgen/xoshiro256.hpp>
+# include <cstddef>
+# include <GL/glew.h>
+# include <SDL.h>
 
-#include <SDL.h>
-#include <GL/glew.h>
-#include <cstddef>
+// #include <GLFW/glfw3.h>
 
-#include "SDL_events.h"
-#include "imgui.h"
-#include "backends/imgui_impl_sdl2.h"
-#include "backends/imgui_impl_opengl3.h"
-
-//#include <GLFW/glfw3.h>
-
-#include <iostream>
-#include <fstream>
-#include <algorithm>
-#include <unistd.h>
+# include <algorithm>
+# include <fstream>
+# include <iostream>
+# include <unistd.h>
 
 using xo::gc::generation;
 
@@ -2145,15 +2142,15 @@ int main(int, char **)
  * author: Roland Conybeare, Aug 2025
  */
 
-#include "xo/object/Integer.hpp"
-#include "xo/object/List.hpp"
-#include "xo/alloc/GC.hpp"
-#include "xo/alloc/Object.hpp"
-#include "xo/randomgen/xoshiro256.hpp"
-#include "xo/randomgen/random_seed.hpp"
-#include "xo/object/Integer.hpp"
-#include "xo/flatstring/flatstring.hpp"
-#include "xo/indentlog/scope.hpp"
+#include <xo/object/Integer.hpp>
+#include <xo/object/List.hpp>
+#include <xo/alloc/GC.hpp>
+#include <xo/alloc/Object.hpp>
+#include <xo/randomgen/xoshiro256.hpp>
+#include <xo/randomgen/random_seed.hpp>
+#include <xo/object/Integer.hpp>
+#include <xo/flatstring/flatstring.hpp>
+#include <xo/indentlog/scope.hpp>
 
 #include <SDL.h>
 #include <GL/glew.h>

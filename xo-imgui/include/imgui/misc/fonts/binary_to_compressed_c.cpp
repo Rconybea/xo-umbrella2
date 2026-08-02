@@ -21,10 +21,10 @@
 //   # binary_to_compressed_c.exe -base85 myfont.ttf MyFont > myfont.cpp
 
 #define _CRT_SECURE_NO_WARNINGS
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 #include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 // stb_compress* from stb.h - declaration
 typedef unsigned int stb_uint;

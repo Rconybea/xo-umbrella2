@@ -1,15 +1,13 @@
 /* imgui_ex4.cpp */
 
-#include "xo/imgui/VulkanApp.hpp"
 #include "AppState.hpp"
 #include "DrawState.hpp"
+#include "xo/imgui/VulkanApp.hpp"
+#include <xo/indentlog/scope.hpp>
+#include <fstream>
+#include <iostream>
 #include <backends/imgui_impl_sdl2.h>
 #include <backends/imgui_impl_vulkan.h>
-
-#include "xo/indentlog/scope.hpp"
-
-#include <iostream>
-#include <fstream>
 
 namespace {
     using xo::gc::generation;

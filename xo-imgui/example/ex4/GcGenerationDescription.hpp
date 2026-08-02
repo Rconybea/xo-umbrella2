@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "xo/alloc/GcStatistics.hpp"
+#include <xo/alloc/GcStatistics.hpp>
 #include <cstdint>
 
 /* We need GUI to be able to fall behind true GC state, so we can animate transitions.

@@ -71,36 +71,38 @@
 
 #include "imgui.h"
 #ifndef IMGUI_DISABLE
-#include "imgui_impl_glfw.h"
+# include "imgui_impl_glfw.h"
 
 // Clang warnings with -Weverything
-#if defined(__clang__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wold-style-cast"     // warning: use of old-style cast
-#pragma clang diagnostic ignored "-Wsign-conversion"    // warning: implicit conversion changes signedness
-#endif
+# if defined(__clang__)
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored                                             \
+      "-Wold-style-cast" // warning: use of old-style cast
+#  pragma clang diagnostic ignored                                             \
+      "-Wsign-conversion" // warning: implicit conversion changes signedness
+# endif
 
 // GLFW
-#include <GLFW/glfw3.h>
+# include <GLFW/glfw3.h>
 
-#ifdef _WIN32
-#undef APIENTRY
-#ifndef GLFW_EXPOSE_NATIVE_WIN32
-#define GLFW_EXPOSE_NATIVE_WIN32
-#endif
-#include <GLFW/glfw3native.h>   // for glfwGetWin32Window()
-#endif
-#ifdef __APPLE__
-#ifndef GLFW_EXPOSE_NATIVE_COCOA
-#define GLFW_EXPOSE_NATIVE_COCOA
-#endif
-#include <GLFW/glfw3native.h>   // for glfwGetCocoaWindow()
-#endif
+# ifdef _WIN32
+#  undef APIENTRY
+#  ifndef GLFW_EXPOSE_NATIVE_WIN32
+#   define GLFW_EXPOSE_NATIVE_WIN32
+#  endif
+#  include <GLFW/glfw3native.h> // for glfwGetWin32Window()
+# endif
+# ifdef __APPLE__
+#  ifndef GLFW_EXPOSE_NATIVE_COCOA
+#   define GLFW_EXPOSE_NATIVE_COCOA
+#  endif
+#  include <GLFW/glfw3native.h> // for glfwGetCocoaWindow()
+# endif
 
-#ifdef __EMSCRIPTEN__
-#include <emscripten.h>
-#include <emscripten/html5.h>
-#endif
+# ifdef __EMSCRIPTEN__
+#  include <emscripten.h>
+#  include <emscripten/html5.h>
+# endif
 
 // We gather version tests as define in order to easily see which features are version-dependent.
 #define GLFW_VERSION_COMBINED           (GLFW_VERSION_MAJOR * 1000 + GLFW_VERSION_MINOR * 100 + GLFW_VERSION_REVISION)

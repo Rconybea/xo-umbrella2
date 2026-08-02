@@ -2,8 +2,8 @@
 
 #pragma once
 
-#include "imgui.h"
 #include "ImSpan.hpp"
+#include "imgui.h"
 
 /** Linear scale for transforming between two coordinate systems.
  *    f(x) = m.(x - x0) + y0

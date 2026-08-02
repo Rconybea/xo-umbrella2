@@ -33,12 +33,12 @@ Index of this file:
 
 #include "imgui.h"
 #ifndef IMGUI_DISABLE
-#include "imgui_internal.h"
-#ifdef IMGUI_ENABLE_FREETYPE
-#include "misc/freetype/imgui_freetype.h"
-#endif
+# include "imgui_internal.h"
+# ifdef IMGUI_ENABLE_FREETYPE
+#  include "misc/freetype/imgui_freetype.h"
+# endif
 
-#include <stdio.h>      // vsnprintf, sscanf, printf
+# include <stdio.h> // vsnprintf, sscanf, printf
 
 // Visual Studio warnings
 #ifdef _MSC_VER

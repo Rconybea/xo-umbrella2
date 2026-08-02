@@ -31,12 +31,12 @@
 
 #include "imgui.h"
 #ifndef IMGUI_DISABLE
-#include "imgui_impl_android.h"
-#include <time.h>
-#include <android/native_window.h>
-#include <android/input.h>
-#include <android/keycodes.h>
-#include <android/log.h>
+# include "imgui_impl_android.h"
+# include <android/input.h>
+# include <android/keycodes.h>
+# include <android/log.h>
+# include <android/native_window.h>
+# include <time.h>
 
 // Android data
 static double                                   g_Time = 0.0;

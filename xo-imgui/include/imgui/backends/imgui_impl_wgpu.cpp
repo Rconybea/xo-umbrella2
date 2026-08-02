@@ -37,9 +37,9 @@
 
 #include "imgui.h"
 #ifndef IMGUI_DISABLE
-#include "imgui_impl_wgpu.h"
-#include <limits.h>
-#include <webgpu/webgpu.h>
+# include "imgui_impl_wgpu.h"
+# include <limits.h>
+# include <webgpu/webgpu.h>
 
 // Dear ImGui prototypes from imgui_internal.h
 extern ImGuiID ImHashData(const void* data_p, size_t data_size, ImU32 seed = 0);

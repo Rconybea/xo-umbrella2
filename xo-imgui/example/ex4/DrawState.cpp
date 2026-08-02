@@ -4,7 +4,7 @@
 #include "AnimateGcCopyCb.hpp"
 #include "GcStatistics.hpp"
 #include "xo/imgui/ImScale.hpp"
-#include "xo/indentlog/scope.hpp"
+#include <xo/indentlog/scope.hpp>
 
 using xo::gc::GcStatisticsHistory;
 using xo::gc::generation;

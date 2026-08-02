@@ -2,12 +2,12 @@
 
 #pragma once
 
-#include "GcStatistics.hpp"
-#include "xo/alloc/GC.hpp"
-#include "GenerationLayout.hpp"
-#include "GcStateDescription.hpp"
 #include "GcCopyDetail.hpp"
+#include "GcStateDescription.hpp"
+#include "GcStatistics.hpp"
+#include "GenerationLayout.hpp"
 #include "imgui.h"
+#include <xo/alloc/GC.hpp>
 #include <chrono>
 
 struct AppState;

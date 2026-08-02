@@ -29,20 +29,21 @@
 
 #include "imgui.h"
 #ifndef IMGUI_DISABLE
-#include "imgui_impl_sdlrenderer2.h"
-#include <stdint.h>     // intptr_t
+# include "imgui_impl_sdlrenderer2.h"
+# include <stdint.h> // intptr_t
 
 // Clang warnings with -Weverything
-#if defined(__clang__)
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wsign-conversion"    // warning: implicit conversion changes signedness
-#endif
+# if defined(__clang__)
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored                                             \
+      "-Wsign-conversion" // warning: implicit conversion changes signedness
+# endif
 
 // SDL
-#include <SDL.h>
-#if !SDL_VERSION_ATLEAST(2,0,17)
-#error This backend requires SDL 2.0.17+ because of SDL_RenderGeometry() function
-#endif
+# include <SDL.h>
+# if !SDL_VERSION_ATLEAST(2, 0, 17)
+#  error This backend requires SDL 2.0.17+ because of SDL_RenderGeometry() function
+# endif
 
 // SDL_Renderer data
 struct ImGui_ImplSDLRenderer2_Data
