@@ -1,13 +1,13 @@
 /* @file Simulator.cpp */
 
 //#include "time/Time.hpp" /*need this 1st for tag(., time_point)*/
-#include "init_simulator.hpp"
 #include "Simulator.hpp"
 #include "TimeSlip.hpp"
-#include "xo/indentlog/scope.hpp"
-#include <thread>
+#include "init_simulator.hpp"
+#include <xo/indentlog/scope.hpp>
 #include <algorithm>
 #include <string_view>
+#include <thread>
 
 namespace xo {
     using xo::reactor::ReactorSource;

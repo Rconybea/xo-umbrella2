@@ -4,7 +4,7 @@
  */
 
 #include "init_simulator.hpp"
-#include "xo/reactor/init_reactor.hpp"
+#include <xo/reactor/init_reactor.hpp>
 
 namespace xo {
     void

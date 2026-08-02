@@ -4,8 +4,8 @@
  */
 
 #include "SourceTimestamp.hpp"
-#include "xo/indentlog/print/tag.hpp"
-#include "xo/indentlog/print/tostr.hpp"
+#include <xo/indentlog/print/tag.hpp>
+#include <xo/indentlog/print/tostr.hpp>
 
 namespace xo {
     using xo::xtag;
