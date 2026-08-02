@@ -5,10 +5,10 @@
 
 #pragma once
 
-#include "log_streambuf.hpp"
+#include "xo/indentlog/log_streambuf.hpp"
 #include "pad.hpp"
 #include "ppdetail_atomic.hpp"
-#include "print/ppconfig.hpp"
+#include "ppconfig.hpp"
 #include "tag.hpp"
 #include <cstdint>
 #include <sstream>
