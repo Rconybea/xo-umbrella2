@@ -2,8 +2,8 @@
 
 #include "activation_record.hpp"
 #include "type2llvm.hpp"
-#include "xo/indentlog/scope.hpp"
-#include "xo/indentlog/print/tag.hpp"
+#include <xo/indentlog/print/tag.hpp>
+#include <xo/indentlog/scope.hpp>
 #include <iostream>
 
 namespace xo {

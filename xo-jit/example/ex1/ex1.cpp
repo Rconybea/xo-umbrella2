@@ -1,13 +1,5 @@
 /** @file ex1.cpp **/
 
-#include "xo/jit/MachPipeline.hpp"
-#include "xo/expression/Constant.hpp"
-#include "xo/expression/PrimitiveExpr.hpp"
-#include "xo/expression/Apply.hpp"
-#include "xo/expression/Lambda.hpp"
-#include "xo/expression/Variable.hpp"
-#include <iostream>
-
 #include "llvm/ADT/APFloat.h"
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/IR/BasicBlock.h"
@@ -26,6 +18,13 @@
 #include "llvm/Target/TargetMachine.h"
 #include "llvm/Transforms/InstCombine/InstCombine.h"
 #include "llvm/Transforms/Scalar.h"
+#include "xo/jit/MachPipeline.hpp"
+#include <xo/expression/Apply.hpp>
+#include <xo/expression/Constant.hpp>
+#include <xo/expression/Lambda.hpp>
+#include <xo/expression/PrimitiveExpr.hpp>
+#include <xo/expression/Variable.hpp>
+#include <iostream>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #include "llvm/Transforms/Scalar/GVN.h"

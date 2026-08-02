@@ -6,11 +6,11 @@
 #pragma once
 
 #include "LlvmContext.hpp"
-#include "xo/expression/Lambda.hpp"
+#include <xo/expression/Lambda.hpp>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-# include <llvm/IR/IRBuilder.h>
-# include <llvm/IR/Instructions.h>
+#include <llvm/IR/IRBuilder.h>
+#include <llvm/IR/Instructions.h>
 #pragma GCC diagnostic pop
 #include <map>
 //#include <cstdint>

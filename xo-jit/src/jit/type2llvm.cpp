@@ -1,7 +1,7 @@
 /* @file type2llvm.cpp */
 
 #include "type2llvm.hpp"
-#include "xo/reflect/Reflect.hpp"
+#include <xo/reflect/Reflect.hpp>
 //#include "xo/reflect/struct/StructMember.hpp"
 
 namespace xo {

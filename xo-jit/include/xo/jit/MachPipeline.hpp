@@ -7,20 +7,19 @@
 
 //#include <cstdint>
 
-#include "xo/refcnt/Refcounted.hpp"
 #include "IrPipeline.hpp"
-#include "LlvmContext.hpp"
 #include "Jit.hpp"
+#include "LlvmContext.hpp"
 #include "activation_record.hpp"
-
-#include "xo/expression/Expression.hpp"
-#include "xo/expression/ConstantInterface.hpp"
-#include "xo/expression/PrimitiveExprInterface.hpp"
-#include "xo/expression/Apply.hpp"
-#include "xo/expression/Lambda.hpp"
-#include "xo/expression/Variable.hpp"
-#include "xo/expression/IfExpr.hpp"
-#include "xo/expression/GlobalSymtab.hpp"
+#include <xo/expression/Apply.hpp>
+#include <xo/expression/ConstantInterface.hpp>
+#include <xo/expression/Expression.hpp>
+#include <xo/expression/GlobalSymtab.hpp>
+#include <xo/expression/IfExpr.hpp>
+#include <xo/expression/Lambda.hpp>
+#include <xo/expression/PrimitiveExprInterface.hpp>
+#include <xo/expression/Variable.hpp>
+#include <xo/refcnt/Refcounted.hpp>
 
 /* stuff from kaleidoscope.cpp */
 #include "llvm/ADT/APFloat.h"
@@ -45,7 +44,6 @@
 #include "llvm/Transforms/Scalar/Reassociate.h"
 #include "llvm/Transforms/Scalar/SimplifyCFG.h"
 #include <llvm/ExecutionEngine/Orc/Core.h>
-
 
 namespace xo {
     namespace jit {

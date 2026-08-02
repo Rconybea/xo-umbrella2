@@ -1,11 +1,11 @@
 /* @file MachPipeline.test.cpp */
 
 #include "xo/jit/MachPipeline.hpp"
-#include "xo/expression/PrimitiveExpr.hpp"
-#include "xo/ratio/ratio.hpp"
-#include "xo/ratio/ratio_reflect.hpp"
-#include "xo/reflect/reflect_struct.hpp"
-#include "xo/indentlog/scope.hpp"
+#include <xo/expression/PrimitiveExpr.hpp>
+#include <xo/ratio/ratio.hpp>
+#include <xo/ratio/ratio_reflect.hpp>
+#include <xo/reflect/reflect_struct.hpp>
+#include <xo/indentlog/scope.hpp>
 #include <catch2/catch.hpp>
 #include <cmath>
 
