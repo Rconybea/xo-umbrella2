@@ -160,17 +160,18 @@ for f in "${files[@]}"; do
 
     case "$mode" in
         fix)
-            clang-format --style="file:$style" --lines="$rng" -i "$f"
+            tmp=$(mktemp)
+            if formatted_stream "$f" "$rng" > "$tmp" && [[ -s "$tmp" ]]; then
+                cat "$tmp" > "$f"          # preserve $f's inode / permissions
+            fi
+            rm -f "$tmp"
             ;;
         diff)
-            # format to stdout (nothing written) and diff against the original
-            if ! diff -u --label "a/$f" --label "b/$f" \
-                    "$f" <(clang-format --style="file:$style" --lines="$rng" "$f"); then
-                rc=1
-            fi
+            diff -u --label "a/$f" --label "b/$f" \
+                 "$f" <(formatted_stream "$f" "$rng") || rc=1
             ;;
         check)
-            if ! clang-format --style="file:$style" --lines="$rng" --dry-run --Werror "$f" 2>/dev/null; then
+            if ! diff -q "$f" <(formatted_stream "$f" "$rng") >/dev/null; then
                 echo "include-order: $f" >&2
                 rc=1
             fi
