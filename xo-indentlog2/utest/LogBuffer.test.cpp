@@ -135,6 +135,154 @@ namespace ut {
         try_test_array(s_logbuffer_testcase_v,
                        &logbuffer_test_fn);
     }
+
+    /** Drain semantics: with a streambuf attached via set_dest_sbuf(), the
+     *  not-yet-flushed extent [bpptr_, pptr_) is copied out on flush()/
+     *  reset_buffer() and the watermark advances, so nothing is re-emitted.
+     *  With no dest attached, LogBuffer is a pure accumulator (existing test).
+     **/
+    TEST_CASE("LogBuffer-drain", "[LogBuffer]")
+    {
+        ArenaConfig cfg { .name_ = "utest.LogBuffer.drain", .size_ = 64*1024 };
+
+        auto wr = [](LogBuffer & b, const char * s) {
+            b.write_span(LogBuffer::ConstSpan::from_cstr(s));
+        };
+
+        SECTION("flush drains written bytes to dest") {
+            std::ostringstream oss;
+            LogBuffer buf(cfg, false);
+            buf.set_dest_sbuf(oss.rdbuf());
+
+            wr(buf, "hello");
+            buf.flush();
+
+            REQUIRE(oss.str() == "hello");
+        }
+
+        SECTION("watermark: successive flushes don't re-emit") {
+            std::ostringstream oss;
+            LogBuffer buf(cfg, false);
+            buf.set_dest_sbuf(oss.rdbuf());
+
+            wr(buf, "A");
+            buf.flush();
+            wr(buf, "B");
+            buf.flush();            /* must send only "B", not "AB" again */
+
+            REQUIRE(oss.str() == "AB");
+        }
+
+        SECTION("flush with nothing pending is a no-op") {
+            std::ostringstream oss;
+            LogBuffer buf(cfg, false);
+            buf.set_dest_sbuf(oss.rdbuf());
+
+            wr(buf, "x");
+            buf.flush();
+            buf.flush();            /* bpptr_ == pptr_: nothing to send */
+
+            REQUIRE(oss.str() == "x");
+        }
+
+        SECTION("reset_buffer flushes pending first, then rewinds") {
+            std::ostringstream oss;
+            LogBuffer buf(cfg, false);
+            buf.set_dest_sbuf(oss.rdbuf());
+
+            wr(buf, "hello");       /* no explicit flush */
+            buf.reset_buffer();
+
+            REQUIRE(oss.str() == "hello");
+            REQUIRE(buf.used_span().empty());
+        }
+
+        SECTION("reset_buffer after flush doesn't double-emit") {
+            std::ostringstream oss;
+            LogBuffer buf(cfg, false);
+            buf.set_dest_sbuf(oss.rdbuf());
+
+            wr(buf, "x");
+            buf.flush();
+            buf.reset_buffer();
+
+            REQUIRE(oss.str() == "x");
+        }
+
+        SECTION("newline_indent '\\n' is included in drained output") {
+            std::ostringstream oss;
+            LogBuffer buf(cfg, false);
+            buf.set_dest_sbuf(oss.rdbuf());
+
+            /* newline_indent advances pptr_ past the '\n' before the accounting
+             * call; the flush spans the whole extent so the '\n' is not lost.
+             */
+            wr(buf, "a");
+            buf.newline_indent(2);
+            wr(buf, "b");
+            buf.reset_buffer();
+
+            REQUIRE(oss.str() == "a\n  b");
+        }
+
+        SECTION("multi-record: dest accumulates across resets") {
+            std::ostringstream oss;
+            LogBuffer buf(cfg, false);
+            buf.set_dest_sbuf(oss.rdbuf());
+
+            wr(buf, "rec1");
+            buf.reset_buffer();
+            REQUIRE(buf.used_span().empty());
+
+            wr(buf, "rec2");
+            buf.reset_buffer();
+
+            REQUIRE(oss.str() == "rec1rec2");
+        }
+
+        SECTION("nullptr dest: pure buffer, flush is a no-op") {
+            LogBuffer buf(cfg, false);      /* no dest attached */
+
+            wr(buf, "hello");
+            buf.flush();                    /* no-op, no crash */
+            REQUIRE(buf.used_span().size() == 5);
+
+            buf.reset_buffer();             /* rewinds without draining */
+            REQUIRE(buf.used_span().empty());
+        }
+
+        SECTION("detach mid-stream: post-detach content not drained") {
+            std::ostringstream oss;
+            LogBuffer buf(cfg, false);
+            buf.set_dest_sbuf(oss.rdbuf());
+
+            wr(buf, "kept");
+            buf.flush();
+            buf.set_dest_sbuf(nullptr);     /* detach */
+            wr(buf, "dropped");
+            buf.reset_buffer();             /* flush is now a no-op */
+
+            REQUIRE(oss.str() == "kept");
+        }
+
+        SECTION("drain survives in-place expand_to with watermark past origin") {
+            std::ostringstream oss;
+            LogBuffer buf(cfg, false);
+            buf.set_dest_sbuf(oss.rdbuf());
+
+            wr(buf, "pre");
+            buf.flush();                    /* bpptr_ now past porigin_ */
+
+            std::size_t cap0 = buf.committed_span().size();
+            std::string big(cap0 + 1000, 'z');   /* exceeds capacity -> expand_to */
+
+            wr(buf, big.c_str());
+            buf.flush();
+
+            REQUIRE(buf.committed_span().size() > cap0);   /* grew in place */
+            REQUIRE(oss.str() == "pre" + big);             /* "pre" not re-sent */
+        }
+    }
 }
 
 /* end LogBuffer.test.cpp */
