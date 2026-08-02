@@ -4,10 +4,10 @@
  **/
 
 #include "Schematika.hpp"
-#include "VirtualSchematikaMachine.hpp"
 #include "BuiltinPrimitives.hpp"
 #include "GlobalEnv.hpp"
-#include "xo/reader/reader.hpp"
+#include "VirtualSchematikaMachine.hpp"
+#include <xo/reader/reader.hpp>
 #include <replxx.hxx>
 #include <ostream>
 #include <unistd.h> // for STDIN_FILENO on OSX

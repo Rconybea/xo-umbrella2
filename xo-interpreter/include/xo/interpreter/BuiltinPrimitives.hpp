@@ -3,10 +3,10 @@
  *  @author Roland Conybeare, Nov 2025
  **/
 
-#include "xo/object/ObjectConverter.hpp"
-#include "xo/allocutil/IAlloc.hpp"
-#include "Primitive.hpp"
 #include "GlobalEnv.hpp"
+#include "Primitive.hpp"
+#include <xo/object/ObjectConverter.hpp>
+#include <xo/allocutil/IAlloc.hpp>
 
 namespace xo {
     namespace scm {

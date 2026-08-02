@@ -3,8 +3,8 @@
 #pragma once
 
 #include "Env.hpp"
-#include "xo/allocutil/IAlloc.hpp"
-#include "xo/expression/GlobalSymtab.hpp"
+#include <xo/expression/GlobalSymtab.hpp>
+#include <xo/allocutil/IAlloc.hpp>
 
 namespace xo {
     namespace scm {

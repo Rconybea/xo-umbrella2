@@ -1,12 +1,12 @@
 /** @file LocalEnv.test.cpp **/
 
-#include "xo/interpreter/init_interpreter.hpp"
 #include "xo/interpreter/LocalEnv.hpp"
-#include "xo/object/Integer.hpp"
-#include "xo/alloc/GC.hpp"
+#include "xo/interpreter/init_interpreter.hpp"
+#include <xo/object/Integer.hpp>
+#include <xo/alloc/GC.hpp>
 #include <catch2/catch.hpp>
-#include <vector>
 #include <cstdint>
+#include <vector>
 
 namespace xo {
     using xo::scm::LocalEnv;

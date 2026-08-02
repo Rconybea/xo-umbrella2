@@ -4,8 +4,8 @@
  **/
 
 #include "VsmStackFrame.hpp"
-#include "xo/reflect/Reflect.hpp"
-#include "xo/reflect/StructReflector.hpp"
+#include <xo/reflect/Reflect.hpp>
+#include <xo/reflect/StructReflector.hpp>
 
 namespace xo {
     using xo::reflect::Reflect;

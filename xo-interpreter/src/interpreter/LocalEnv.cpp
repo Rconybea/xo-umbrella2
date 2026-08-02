@@ -1,8 +1,8 @@
 /** @file LocalEnv.cpp **/
 
 #include "LocalEnv.hpp"
-#include "xo/reflect/Reflect.hpp"
-#include "xo/reflect/StructReflector.hpp"
+#include <xo/reflect/Reflect.hpp>
+#include <xo/reflect/StructReflector.hpp>
 #include <cstring>
 
 namespace xo {

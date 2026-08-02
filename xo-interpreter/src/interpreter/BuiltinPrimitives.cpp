@@ -6,9 +6,9 @@
 #include "BuiltinPrimitives.hpp"
 #include "Integer.hpp"
 #include "Primitive.hpp"
-#include "xo/expression/PrimitiveExpr.hpp"
-#include "xo/object/ObjectConversion.hpp"
-#include "xo/reflect/Reflect.hpp"
+#include <xo/object/ObjectConversion.hpp>
+#include <xo/expression/PrimitiveExpr.hpp>
+#include <xo/reflect/Reflect.hpp>
 #include <cstdint>
 
 namespace xo {

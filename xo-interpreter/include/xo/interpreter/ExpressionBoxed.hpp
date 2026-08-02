@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "xo/alloc/Object.hpp"
-#include "xo/expression/Expression.hpp"
+#include <xo/alloc/Object.hpp>
+#include <xo/expression/Expression.hpp>
 
 namespace xo {
     namespace scm {

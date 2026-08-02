@@ -6,8 +6,8 @@
 #pragma once
 
 #include "VsmInstr.hpp"
-#include "xo/object/CVector.hpp"
-#include "xo/alloc/Object.hpp"
+#include <xo/object/CVector.hpp>
+#include <xo/alloc/Object.hpp>
 
 namespace xo {
     namespace scm {

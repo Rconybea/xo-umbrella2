@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "xo/alloc/GC.hpp"
+#include <xo/alloc/GC.hpp>
 
 namespace xo {
     namespace scm {

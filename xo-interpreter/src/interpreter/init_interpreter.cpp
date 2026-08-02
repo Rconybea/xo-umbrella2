@@ -5,7 +5,7 @@
 
 #include "init_interpreter.hpp"
 #include "LocalEnv.hpp"
-#include "xo/subsys/Subsystem.hpp"
+#include <xo/subsys/Subsystem.hpp>
 
 namespace xo {
     using xo::scm::LocalEnv;

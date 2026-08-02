@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "xo/alloc/Object.hpp"
-#include "xo/refcnt/Refcounted.hpp"
+#include <xo/alloc/Object.hpp>
+#include <xo/refcnt/Refcounted.hpp>
 
 namespace xo {
     namespace scm {

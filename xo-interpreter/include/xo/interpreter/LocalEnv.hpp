@@ -1,9 +1,9 @@
 /** @file LocalEnv.hpp **/
 
-#include "Env.hpp"
 #include "CVector.hpp"
-#include "xo/allocutil/IAlloc.hpp"
-#include "xo/expression/LocalSymtab.hpp"
+#include "Env.hpp"
+#include <xo/expression/LocalSymtab.hpp>
+#include <xo/allocutil/IAlloc.hpp>
 #include <cstddef>
 #include <cstdint>
 

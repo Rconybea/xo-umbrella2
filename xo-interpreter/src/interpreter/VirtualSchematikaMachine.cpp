@@ -1,22 +1,22 @@
 /** @file VirtualSchematikaMachine.cpp **/
 
 #include "VirtualSchematikaMachine.hpp"
-#include "VsmInstr.hpp"
 #include "BuiltinPrimitives.hpp"
 #include "ExpressionBoxed.hpp"
-#include "xo/expression/Constant.hpp"
-#include "xo/expression/PrimitiveExprInterface.hpp"
-#include "xo/expression/DefineExpr.hpp"
-#include "xo/expression/AssignExpr.hpp"
-#include "xo/expression/Variable.hpp"
-#include "xo/expression/IfExpr.hpp"
-#include "xo/expression/Sequence.hpp"
-#include "xo/expression/Apply.hpp"
-#include "xo/object/Procedure.hpp"
-#include "xo/object/Primitive.hpp"
-#include "xo/object/Integer.hpp"
-#include "xo/object/Boolean.hpp"
-#include "xo/alloc/GC.hpp"
+#include "VsmInstr.hpp"
+#include <xo/object/Boolean.hpp>
+#include <xo/object/Integer.hpp>
+#include <xo/object/Primitive.hpp>
+#include <xo/object/Procedure.hpp>
+#include <xo/alloc/GC.hpp>
+#include <xo/expression/Apply.hpp>
+#include <xo/expression/AssignExpr.hpp>
+#include <xo/expression/Constant.hpp>
+#include <xo/expression/DefineExpr.hpp>
+#include <xo/expression/IfExpr.hpp>
+#include <xo/expression/PrimitiveExprInterface.hpp>
+#include <xo/expression/Sequence.hpp>
+#include <xo/expression/Variable.hpp>
 
 /** continue after completing a VSM instruction;
  *  achieve by jumping to continuation.
