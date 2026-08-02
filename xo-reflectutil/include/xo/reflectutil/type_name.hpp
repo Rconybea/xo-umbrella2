@@ -3,8 +3,8 @@
 #pragma once
 
 //#include <string>
+#include <array> // std::array
 #include <string_view>
-#include <array>   // std::array
 #include <utility> // std::index_sequence
 
 namespace xo {

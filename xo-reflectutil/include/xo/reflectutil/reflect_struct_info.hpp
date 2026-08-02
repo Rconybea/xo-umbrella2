@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <cstdint>
 #include <cstddef>
+#include <cstdint>
 
 namespace xo {
     namespace reflect {

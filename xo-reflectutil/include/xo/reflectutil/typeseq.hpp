@@ -6,8 +6,8 @@
 #pragma once
 
 #include "type_name.hpp"
-#include <iostream>
 #include <cstdint>
+#include <iostream>
 
 namespace xo {
     namespace reflect {
