@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "VsmInstr.hpp"
 #include "DLocalEnv.hpp"
+#include "VsmInstr.hpp"
 #include <xo/expression2/DApplyExpr.hpp>
 
 namespace xo {

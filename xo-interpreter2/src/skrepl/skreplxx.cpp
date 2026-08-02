@@ -3,16 +3,16 @@
  *  @author Roland Conybeare, Feb 2026
  **/
 
-#include <xo/interpreter2/init_interpreter2.hpp>
-#include <xo/indentlog/scope.hpp>
 #include <xo/interpreter2/VirtualSchematikaMachine.hpp>
+#include <xo/interpreter2/init_interpreter2.hpp>
 #include <xo/alloc2/Arena.hpp>
 #include <xo/indentlog2/print/PrettySink.hpp>
 #include <xo/facet/FacetRegistry.hpp>
+#include <xo/indentlog/scope.hpp>
 #include <replxx.hxx>
 #include <iostream>
 #ifdef __APPLE__
-#include <unistd.h> // for STDIN_FILENO on OSX
+# include <unistd.h> // for STDIN_FILENO on OSX
 #endif
 
 namespace xo {

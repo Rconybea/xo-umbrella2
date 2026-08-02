@@ -14,11 +14,11 @@
 #pragma once
 
 #include "Procedure.hpp"
-#include <xo/procedure2/RuntimeContext.hpp>
-#include <xo/procedure2/detail/IRuntimeContext_Xfer.hpp>
-#include <xo/procedure2/Procedure.hpp>
-#include <xo/procedure2/detail/IProcedure_Xfer.hpp>
 #include "xo/interpreter2/DClosure.hpp"
+#include <xo/procedure2/Procedure.hpp>
+#include <xo/procedure2/RuntimeContext.hpp>
+#include <xo/procedure2/detail/IProcedure_Xfer.hpp>
+#include <xo/procedure2/detail/IRuntimeContext_Xfer.hpp>
 
 namespace xo { namespace scm { class IProcedure_DClosure; } }
 

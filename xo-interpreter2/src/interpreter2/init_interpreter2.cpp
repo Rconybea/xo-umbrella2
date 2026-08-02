@@ -4,12 +4,11 @@
  **/
 
 #include "init_interpreter2.hpp"
-#include <xo/indentlog/scope.hpp>
 #include "SetupInterpreter2.hpp"
-
 #include <xo/reader2/init_reader2.hpp>
 #include <xo/gc/init_gc.hpp>
 #include <xo/alloc2/CollectorTypeRegistry.hpp>
+#include <xo/indentlog/scope.hpp>
 
 namespace xo {
     using xo::scm::SetupInterpreter2;

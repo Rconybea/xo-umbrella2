@@ -3,41 +3,41 @@
  *  @author Roland Conybeare, Jan 2026
  **/
 
-#include "VirtualSchematikaMachine.hpp"
-#include <xo/indentlog/scope.hpp>
-#include "DPrimitive_gco_3_dict_string_gco.hpp"
-#include "DPrimitive_gco_2_gco_gco.hpp"
-#include "VsmDefContFrame.hpp"
-#include "VsmApplyFrame.hpp"
-#include "VsmEvalArgsFrame.hpp"
-#include "VsmApplyClosureFrame.hpp"
-#include "VsmIfElseContFrame.hpp"
-#include "VsmSeqContFrame.hpp"
-#include "VsmRcx.hpp"
 #include "Closure.hpp"
-#include <xo/object2/Sequence.hpp>
-#include <xo/object2/List.hpp>
-#include <xo/numeric/NumericDispatch.hpp>
-#include <xo/expression2/DefineExpr.hpp>
+#include "DPrimitive_gco_2_gco_gco.hpp"
+#include "DPrimitive_gco_3_dict_string_gco.hpp"
+#include "VirtualSchematikaMachine.hpp"
+#include "VsmApplyClosureFrame.hpp"
+#include "VsmApplyFrame.hpp"
+#include "VsmDefContFrame.hpp"
+#include "VsmEvalArgsFrame.hpp"
+#include "VsmIfElseContFrame.hpp"
+#include "VsmRcx.hpp"
+#include "VsmSeqContFrame.hpp"
 #include <xo/expression2/ApplyExpr.hpp>
-#include <xo/expression2/LambdaExpr.hpp>
 #include <xo/expression2/Constant.hpp>
+#include <xo/expression2/DefineExpr.hpp>
+#include <xo/expression2/LambdaExpr.hpp>
 #include <xo/expression2/SequenceExpr.hpp>
-#include <xo/object2/Dictionary.hpp>
-#include <xo/object2/Integer.hpp>
-#include <xo/object2/Boolean.hpp>
-#include <xo/procedure2/RuntimeContext.hpp>
+#include <xo/numeric/NumericDispatch.hpp>
 #include <xo/procedure2/Primitive_gco_0.hpp>
 #include <xo/procedure2/Primitive_gco_1_gco.hpp>
 #include <xo/procedure2/Primitive_gco_2_gco_gco.hpp>
 #include <xo/procedure2/Primitive_gco_3_dict_string_gco.hpp>
+#include <xo/procedure2/RuntimeContext.hpp>
 #include <xo/gc/X1Collector.hpp>
-#include <xo/reflect/Reflect.hpp>
+#include <xo/object2/Boolean.hpp>
+#include <xo/object2/Dictionary.hpp>
+#include <xo/object2/Integer.hpp>
+#include <xo/object2/List.hpp>
+#include <xo/object2/Sequence.hpp>
 #include <xo/stringtable2/UniqueString.hpp>
-#include <xo/alloc2/CollectorTypeRegistry.hpp>
 #include <xo/alloc2/Arena.hpp>
+#include <xo/alloc2/CollectorTypeRegistry.hpp>
 #include <xo/printable2/Printable.hpp>
+#include <xo/reflect/Reflect.hpp>
 #include <xo/facet/FacetRegistry.hpp>
+#include <xo/indentlog/scope.hpp>
 #include <cassert>
 
 namespace xo {

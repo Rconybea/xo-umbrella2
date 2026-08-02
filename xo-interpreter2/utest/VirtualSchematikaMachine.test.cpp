@@ -3,22 +3,21 @@
  *  @author Roland Conybeare, Jan 2026
  **/
 
-#include <xo/interpreter2/init_interpreter2.hpp>
-#include <xo/arena/span_ppdetail.hpp>   /* operator<<(ostream, xo::mm::span) for span-valued logging */
-#include <xo/interpreter2/VirtualSchematikaMachine.hpp>
 #include <xo/interpreter2/Closure.hpp>
+#include <xo/interpreter2/VirtualSchematikaMachine.hpp>
+#include <xo/interpreter2/init_interpreter2.hpp>
 #include <xo/object2/Array.hpp>
-#include <xo/object2/List.hpp>
+#include <xo/object2/Boolean.hpp>
 #include <xo/object2/Float.hpp>
 #include <xo/object2/Integer.hpp>
-#include <xo/object2/Boolean.hpp>
+#include <xo/object2/List.hpp>
 #include <xo/object2/RuntimeError.hpp>
 #include <xo/stringtable2/UniqueString.hpp>
 #include <xo/alloc2/Arena.hpp>
 #include <xo/alloc2/abox.hpp>
 #include <xo/facet/TypeRegistry.hpp>
+#include <xo/arena/span_ppdetail.hpp> /* operator<<(ostream, xo::mm::span) for span-valued logging */
 #include <xo/indentlog/print/hex.hpp>
-
 #include <catch2/catch.hpp>
 
 namespace xo {

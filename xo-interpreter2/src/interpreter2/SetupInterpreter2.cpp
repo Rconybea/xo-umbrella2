@@ -4,24 +4,23 @@
  **/
 
 #include "SetupInterpreter2.hpp"
-#include "VsmPrimitives.hpp"
-#include "DPrimitive_gco_2_gco_gco.hpp"
-#include "VsmDefContFrame.hpp"
-#include "VsmApplyFrame.hpp"
-#include "VsmEvalArgsFrame.hpp"
-#include "VsmApplyClosureFrame.hpp"
-#include "VsmIfElseContFrame.hpp"
-#include "VsmSeqContFrame.hpp"
-#include "Primitive_gco_2_gco_gco.hpp"
 #include "Closure.hpp"
+#include "DPrimitive_gco_2_gco_gco.hpp"
 #include "GlobalEnv.hpp"
 #include "LocalEnv.hpp"
+#include "Primitive_gco_2_gco_gco.hpp"
+#include "VsmApplyClosureFrame.hpp"
+#include "VsmApplyFrame.hpp"
+#include "VsmDefContFrame.hpp"
+#include "VsmEvalArgsFrame.hpp"
+#include "VsmIfElseContFrame.hpp"
+#include "VsmPrimitives.hpp"
 #include "VsmRcx.hpp"
-
+#include "VsmSeqContFrame.hpp"
 #include <xo/printable2/detail/APrintable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
-#include <xo/reflectutil/typeseq.hpp>
 #include <xo/indentlog/scope.hpp>
+#include <xo/reflectutil/typeseq.hpp>
 
 namespace xo {
     using xo::mm::ACollector;

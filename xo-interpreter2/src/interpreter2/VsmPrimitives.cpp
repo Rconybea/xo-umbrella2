@@ -4,11 +4,11 @@
  **/
 
 #include "VsmPrimitives.hpp"
-#include <xo/indentlog/scope.hpp>
 #include <xo/numeric/NumericDispatch.hpp>
-#include <xo/object2/Boolean.hpp>
 #include <xo/type/AtomicType.hpp>
 #include <xo/type/FunctionType.hpp>
+#include <xo/object2/Boolean.hpp>
+#include <xo/indentlog/scope.hpp>
 
 namespace xo {
     //using xo::scm::NumericDispatch;

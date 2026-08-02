@@ -5,8 +5,8 @@
 
 #include "LocalEnv.hpp"
 #include <xo/object2/Array.hpp>
-#include <xo/reflectutil/typeseq.hpp>
 #include <xo/indentlog/scope.hpp>
+#include <xo/reflectutil/typeseq.hpp>
 
 namespace xo {
     using xo::mm::AGCObject;

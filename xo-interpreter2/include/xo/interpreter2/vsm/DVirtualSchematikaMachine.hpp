@@ -5,15 +5,15 @@
 
 #pragma once
 
-#include "xo/interpreter2/VsmConfig.hpp"
-#include "xo/interpreter2/VsmInstr.hpp"
-#include "xo/interpreter2/VsmFrame.hpp"
-#include "xo/interpreter2/LocalEnv.hpp"
 #include "GlobalEnv.hpp"
-#include <xo/object2/RuntimeError.hpp>
-#include <xo/object2/Array.hpp>
+#include "xo/interpreter2/LocalEnv.hpp"
+#include "xo/interpreter2/VsmConfig.hpp"
+#include "xo/interpreter2/VsmFrame.hpp"
+#include "xo/interpreter2/VsmInstr.hpp"
 #include <xo/reader2/SchematikaReader.hpp>
 #include <xo/expression2/Expression.hpp>
+#include <xo/object2/Array.hpp>
+#include <xo/object2/RuntimeError.hpp>
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/alloc2/abox.hpp>
 #include <variant>

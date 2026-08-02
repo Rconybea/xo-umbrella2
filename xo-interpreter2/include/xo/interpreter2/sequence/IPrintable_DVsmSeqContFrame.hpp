@@ -14,9 +14,9 @@
 #pragma once
 
 #include "Printable.hpp"
+#include "xo/interpreter2/DVsmSeqContFrame.hpp"
 #include <xo/printable2/Printable.hpp>
 #include <xo/printable2/detail/IPrintable_Xfer.hpp>
-#include "xo/interpreter2/DVsmSeqContFrame.hpp"
 
 namespace xo { namespace scm { class IPrintable_DVsmSeqContFrame; } }
 

@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <ostream>
 #include <cstdint>
+#include <ostream>
 
 namespace xo {
     namespace scm {
