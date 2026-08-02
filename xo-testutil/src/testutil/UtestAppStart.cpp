@@ -8,8 +8,8 @@
 #include <xo/subsys/Subsystem.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
-#include <CLI/CLI.hpp>
 #include <iostream>
+#include <CLI/CLI.hpp>
 
 #define CATCH_CONFIG_RUNNER
 #include <catch2/catch.hpp>

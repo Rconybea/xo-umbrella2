@@ -6,11 +6,11 @@
 #pragma once
 
 #include "UtestRehearser.hpp"
-#include <xo/ppsink/tostr.hpp>
 #include <xo/ppsink/tag.hpp>
+#include <xo/ppsink/tostr.hpp>
 #include <catch2/catch.hpp>
-#include <vector>
 #include <cstddef>
+#include <vector>
 
 namespace xo {
     /** e.g. RehearseFn = bool (*)(const TestCase &, UtestRehearser *) **/

@@ -15,7 +15,6 @@
 //       test executable compiles a second copy of the runtime -> a separate
 //       test registry the runner never sees (esp. on osx; see UtestAppStart).
 #include <catch2/catch.hpp>
-
 #include <iostream>
 
 namespace xo {
