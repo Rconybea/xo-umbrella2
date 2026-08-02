@@ -161,7 +161,12 @@ for f in "${files[@]}"; do
     case "$mode" in
         fix)
             tmp=$(mktemp)
-            if formatted_stream "$f" "$rng" > "$tmp" && [[ -s "$tmp" ]]; then
+            # Only write when the content actually differs.  Writing
+            # unconditionally would bump every file's mtime on every run, and
+            # make/ninja key off mtime -- so a no-op --fix over the tree would
+            # force a full rebuild.
+            if formatted_stream "$f" "$rng" > "$tmp" && [[ -s "$tmp" ]] \
+                   && ! cmp -s "$tmp" "$f"; then
                 cat "$tmp" > "$f"          # preserve $f's inode / permissions
             fi
             rm -f "$tmp"
