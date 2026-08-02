@@ -13,7 +13,7 @@
   xo-arena,
   xo-subsys,
   xo-testutil,
-  xo-ppsink,
+  xo-indentlog2,
   xo-cmake,
 
   buildDocs ? false,
@@ -59,6 +59,6 @@ stdenv.mkDerivation (finalattrs:
       xo-arena
       xo-facet
       xo-subsys
-      xo-ppsink
+      xo-indentlog2
     ];
   })
