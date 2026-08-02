@@ -8,7 +8,7 @@
 #include <xo/gc/GCObject.hpp>
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/reflect/Reflect.hpp>
-//#include "xo/reflect/TaggedPtr.hpp"
+// #include "xo/reflect/TaggedPtr.hpp"
 #include <xo/reflect/TypeDrivenMap.hpp>
 
 namespace xo {

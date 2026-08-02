@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include <xo/alloc2/GCObject.hpp>
 #include <xo/alloc2/Allocator.hpp>
+#include <xo/alloc2/GCObject.hpp>
 #include <xo/facet/obj.hpp>
 #include <xo/indentlog/print/ppindentinfo.hpp>
 #include <concepts>

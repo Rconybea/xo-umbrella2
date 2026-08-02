@@ -3,31 +3,26 @@
  *  @author Roland Conybeare, Dec 2025
  **/
 
-#include "init_object2.hpp"
-#include "ListOps.hpp"
+#include "DArray.hpp"
 #include "DFloat.hpp"
 #include "DInteger.hpp"
 #include "DList.hpp"
-#include "DArray.hpp"
-
+#include "ListOps.hpp"
+#include "init_object2.hpp"
+#include "list/IGCObject_DList.hpp"
 #include "number/IGCObject_DFloat.hpp"
 #include "number/IGCObject_DInteger.hpp"
-#include "list/IGCObject_DList.hpp"
-
-#include <xo/alloc2/CollectorTypeRegistry.hpp>
 #include <xo/alloc2/Collector.hpp>
-//#include <xo/gc/DX1Collector.hpp>
-//#include <xo/gc/detail/IAllocator_DX1Collector.hpp>
-//#include <xo/gc/detail/ICollector_DX1Collector.hpp>
+#include <xo/alloc2/CollectorTypeRegistry.hpp>
+// #include <xo/gc/DX1Collector.hpp>
+// #include <xo/gc/detail/IAllocator_DX1Collector.hpp>
+// #include <xo/gc/detail/ICollector_DX1Collector.hpp>
 
 #include <xo/arena/AllocInfo.hpp>
 #include <xo/arena/padding.hpp>
-
 #include <xo/subsys/Subsystem.hpp>
-
-#include <xo/indentlog/scope.hpp>
 #include <xo/indentlog/print/tag.hpp>
-
+#include <xo/indentlog/scope.hpp>
 #include <catch2/catch.hpp>
 
 namespace ut {

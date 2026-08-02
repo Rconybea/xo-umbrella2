@@ -6,9 +6,8 @@
 #pragma once
 
 #include "DArray.hpp"
-#include "array/ISequence_DArray.hpp"
 #include "array/IGCObject_DArray.hpp"
 #include "array/IPrintable_DArray.hpp"
-
+#include "array/ISequence_DArray.hpp"
 
 /* end Array.hpp */

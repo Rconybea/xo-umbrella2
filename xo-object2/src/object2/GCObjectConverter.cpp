@@ -4,21 +4,16 @@
  **/
 
 #include "GCObjectConverter.hpp"
-
-#include "DInteger.hpp"
-#include "number/IGCObject_DInteger.hpp"
-
-#include "DFloat.hpp"
-#include "number/IGCObject_DFloat.hpp"
-
 #include "DBoolean.hpp"
-#include "boolean/IGCObject_DBoolean.hpp"
-
+#include "DFloat.hpp"
+#include "DInteger.hpp"
 #include "DString.hpp"
+#include "boolean/IGCObject_DBoolean.hpp"
+#include "number/IGCObject_DFloat.hpp"
+#include "number/IGCObject_DInteger.hpp"
 #include "string/IGCObject_DString.hpp"
-
-#include <xo/facet/obj.hpp>
 #include <xo/reflect/TaggedPtr.hpp>
+#include <xo/facet/obj.hpp>
 //#include "xo/alloc/Blob.hpp"
 
 namespace xo {

@@ -6,8 +6,8 @@
 #pragma once
 
 #include "String.hpp"
-#include <xo/facet/obj.hpp>
 #include <xo/alloc2/Allocator.hpp>
+#include <xo/facet/obj.hpp>
 
 namespace xo {
     namespace scm {

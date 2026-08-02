@@ -14,9 +14,9 @@
 #pragma once
 
 #include "Printable.hpp"
+#include "xo/object2/DFloat.hpp"
 #include <xo/printable2/Printable.hpp>
 #include <xo/printable2/detail/IPrintable_Xfer.hpp>
-#include "xo/object2/DFloat.hpp"
 
 namespace xo { namespace scm { class IPrintable_DFloat; } }
 

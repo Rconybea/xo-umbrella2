@@ -14,9 +14,9 @@
 #pragma once
 
 #include "Printable.hpp"
+#include "xo/object2/DInteger.hpp"
 #include <xo/printable2/Printable.hpp>
 #include <xo/printable2/detail/IPrintable_Xfer.hpp>
-#include "xo/object2/DInteger.hpp"
 
 namespace xo { namespace scm { class IPrintable_DInteger; } }
 

@@ -7,8 +7,8 @@
 #include <xo/printable2/Printable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/indentlog/print/pretty.hpp>
-#include <xo/indentlog/print/tostr.hpp>
 #include <xo/indentlog/print/tag.hpp>
+#include <xo/indentlog/print/tostr.hpp>
 #include <cstdint>
 
 namespace xo {

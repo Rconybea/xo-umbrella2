@@ -5,17 +5,15 @@
 
 #include "SetupObject2.hpp"
 #include "RuntimeError.hpp"
-
-#include <xo/object2/Dictionary.hpp>
 #include <xo/object2/Array.hpp>
-#include <xo/object2/List.hpp>
 #include <xo/object2/Boolean.hpp>
-#include <xo/object2/Integer.hpp>
+#include <xo/object2/Dictionary.hpp>
 #include <xo/object2/Float.hpp>
+#include <xo/object2/Integer.hpp>
+#include <xo/object2/List.hpp>
 #include <xo/stringtable2/String.hpp>
-
-#include <xo/printable2/detail/APrintable.hpp>
 #include <xo/alloc2/alloc/AAllocator.hpp>
+#include <xo/printable2/detail/APrintable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/indentlog/scope.hpp>
 

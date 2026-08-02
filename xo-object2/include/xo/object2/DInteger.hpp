@@ -5,10 +5,10 @@
 
 #pragma once
 
-#include <xo/alloc2/GCObjectVisitor.hpp>
 #include <xo/alloc2/Allocator.hpp>
-#include <xo/indentlog/print/ppindentinfo.hpp>
+#include <xo/alloc2/GCObjectVisitor.hpp>
 #include <xo/facet/obj.hpp>
+#include <xo/indentlog/print/ppindentinfo.hpp>
 #include <cstdint>
 
 namespace xo {

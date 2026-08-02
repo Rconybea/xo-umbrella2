@@ -18,5 +18,4 @@
 #include "sequence/ISequence_Xfer.hpp"
 #include "sequence/RSequence.hpp"
 
-
 /* end Sequence.hpp */
