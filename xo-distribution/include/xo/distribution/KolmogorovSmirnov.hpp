@@ -3,7 +3,7 @@
 #pragma once
 
 #include "Distribution.hpp"
-#include "xo/indentlog/scope.hpp"
+#include <xo/indentlog/scope.hpp>
 #include <cmath>
 #include <cstdint>
 

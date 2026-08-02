@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "xo/refcnt/Refcounted.hpp"
+#include <xo/refcnt/Refcounted.hpp>
 
 namespace xo {
     namespace distribution {

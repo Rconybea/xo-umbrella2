@@ -3,10 +3,10 @@
 #pragma once
 
 #include "xo/distribution/Distribution.hpp"
-#include "xo/ordinaltree/RedBlackTree.hpp"
-#include "xo/indentlog/scope.hpp"
-#include <map>
+#include <xo/ordinaltree/RedBlackTree.hpp>
+#include <xo/indentlog/scope.hpp>
 #include <cstdint>
+#include <map>
 
 namespace xo {
     namespace distribution {

@@ -3,8 +3,8 @@
 #pragma once
 
 #include "xo/distribution/Distribution.hpp"
-#include <limits>
 #include <cmath>
+#include <limits>
 
 namespace xo {
     namespace distribution {

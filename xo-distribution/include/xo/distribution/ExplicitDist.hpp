@@ -7,12 +7,12 @@
 
 #include "Distribution.hpp"
 #include "Normal.hpp"
-#include "xo/indentlog/scope.hpp"
-#include "xo/indentlog/print/vector.hpp"
-#include "xo/indentlog/print/tostr.hpp"
-#include <vector>
+#include <xo/indentlog/print/tostr.hpp>
+#include <xo/indentlog/print/vector.hpp>
+#include <xo/indentlog/scope.hpp>
 #include <cmath>
 #include <cstdint>
+#include <vector>
 
 namespace xo {
     using xo::xtag;
