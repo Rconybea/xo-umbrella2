@@ -4,17 +4,17 @@
  */
 
 #include "xo/object/List.hpp"
-#include "xo/object/String.hpp"
 #include "xo/object/Integer.hpp"
-#include "xo/alloc/GC.hpp"
-#include "xo/alloc/ArenaAlloc.hpp"
-#include "xo/indentlog/scope.hpp"
-#include "xo/indentlog/print/vector.hpp"
-#include "xo/indentlog/print/tag.hpp"
+#include "xo/object/String.hpp"
+#include <xo/alloc/ArenaAlloc.hpp>
+#include <xo/alloc/GC.hpp>
+#include <xo/indentlog/print/tag.hpp>
+#include <xo/indentlog/print/vector.hpp>
+#include <xo/indentlog/scope.hpp>
 #include <catch2/catch.hpp>
 #include <ranges>
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace xo {
     namespace ut {

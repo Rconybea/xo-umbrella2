@@ -4,12 +4,12 @@
  **/
 
 #include "ObjectConverter.hpp"
-#include "Integer.hpp"
-#include "Float.hpp"
 #include "Boolean.hpp"
+#include "Float.hpp"
+#include "Integer.hpp"
 #include "String.hpp"
-#include <xo/reflect/TaggedPtr.hpp>
 #include <xo/alloc/Blob.hpp>
+#include <xo/reflect/TaggedPtr.hpp>
 
 namespace xo {
     using xo::reflect::Reflect;

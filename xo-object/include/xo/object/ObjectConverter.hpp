@@ -6,10 +6,10 @@
 #pragma once
 
 #include "xo/object/object.hpp"
-#include "xo/reflect/Reflect.hpp"
-#include "xo/reflect/TypeDrivenMap.hpp"
-#include "xo/allocutil/IAlloc.hpp"
-#include "xo/allocutil/gc_ptr.hpp"
+#include <xo/reflect/Reflect.hpp>
+#include <xo/reflect/TypeDrivenMap.hpp>
+#include <xo/allocutil/IAlloc.hpp>
+#include <xo/allocutil/gc_ptr.hpp>
 
 namespace xo {
     namespace obj {

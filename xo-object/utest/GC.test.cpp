@@ -3,13 +3,13 @@
  * author: Roland Conybeare, Aug 2025
  */
 
-#include "xo/alloc/GC.hpp"
-#include "xo/object/List.hpp"
 #include "xo/object/Integer.hpp"
-#include "xo/randomgen/random_seed.hpp"
-#include "xo/randomgen/xoshiro256.hpp"
-#include "xo/indentlog/scope.hpp"
-#include "xo/indentlog/print/tag.hpp"
+#include "xo/object/List.hpp"
+#include <xo/alloc/GC.hpp>
+#include <xo/indentlog/print/tag.hpp>
+#include <xo/indentlog/scope.hpp>
+#include <xo/randomgen/random_seed.hpp>
+#include <xo/randomgen/xoshiro256.hpp>
 #include <catch2/catch.hpp>
 #include <unordered_set>
 

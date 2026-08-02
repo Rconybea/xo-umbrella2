@@ -4,7 +4,7 @@
  */
 
 #include "Integer.hpp"
-#include "xo/reflect/Reflect.hpp"
+#include <xo/reflect/Reflect.hpp>
 #include <cstddef>
 
 namespace xo {

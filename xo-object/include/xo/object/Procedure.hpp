@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include "xo/alloc/Object.hpp"
-#include "xo/allocutil/gc_ptr.hpp"
 #include "CVector.hpp"
+#include <xo/alloc/Object.hpp>
+#include <xo/allocutil/gc_ptr.hpp>
 
 namespace xo {
     namespace gc { class IAlloc; }; // see xo-alloc: xo/alloc/IAlloc.hpp

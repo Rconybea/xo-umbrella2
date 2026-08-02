@@ -5,12 +5,12 @@
 
 #pragma once
 
-#include "Procedure.hpp"
-#include "Float.hpp"
-#include "String.hpp"
 #include "Boolean.hpp"
+#include "Float.hpp"
 #include "ObjectConversion.hpp"
-#include "xo/reflect/Reflect.hpp"
+#include "Procedure.hpp"
+#include "String.hpp"
+#include <xo/reflect/Reflect.hpp>
 
 namespace xo {
     namespace obj {

@@ -4,8 +4,8 @@
  **/
 
 #include "List.hpp"
-#include "xo/reflect/Reflect.hpp"
-#include "xo/indentlog/scope.hpp"
+#include <xo/reflect/Reflect.hpp>
+#include <xo/indentlog/scope.hpp>
 #include <cassert>
 #include <cstddef>
 

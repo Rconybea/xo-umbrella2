@@ -5,15 +5,15 @@
 
 #include "String.hpp"
 #include "GC.hpp"
-#include <xo/reflect/TaggedPtr.hpp>
 #include <xo/reflect/Reflect.hpp>
+#include <xo/reflect/TaggedPtr.hpp>
 #include <xo/indentlog/print/quoted.hpp>
 #ifdef __linux__
-# include <bsd/string.h>
+#include <bsd/string.h>
 #endif
+#include <cassert>
 #include <cstddef>
 #include <cstring>
-#include <cassert>
 
 namespace xo {
     using xo::reflect::Reflect;

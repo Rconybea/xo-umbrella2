@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include "xo/alloc/Object.hpp"
 #include "ObjectConversion.hpp"
-#include "xo/indentlog/print/tag.hpp"
+#include <xo/alloc/Object.hpp>
+#include <xo/indentlog/print/tag.hpp>
 
 namespace xo {
     namespace obj {

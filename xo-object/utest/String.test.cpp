@@ -4,13 +4,13 @@
  */
 
 #include "xo/object/String.hpp"
-#include "xo/alloc/GC.hpp"
-#include "xo/alloc/ArenaAlloc.hpp"
-#include "xo/indentlog/scope.hpp"
-#include "xo/indentlog/print/quoted.hpp"
+#include <xo/alloc/ArenaAlloc.hpp>
+#include <xo/alloc/GC.hpp>
+#include <xo/indentlog/print/quoted.hpp>
+#include <xo/indentlog/scope.hpp>
 #include <catch2/catch.hpp>
-#include <cstring>
 #include <cstdint>
+#include <cstring>
 
 namespace xo {
     using xo::gc::IAlloc;

@@ -4,7 +4,7 @@
  */
 
 #include "xo/object/Integer.hpp"
-#include "xo/alloc/GC.hpp"
+#include <xo/alloc/GC.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {

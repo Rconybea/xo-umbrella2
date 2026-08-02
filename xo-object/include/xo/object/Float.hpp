@@ -7,7 +7,7 @@
 
 #include "Number.hpp"
 #include "ObjectConversion.hpp"
-#include "xo/indentlog/print/tag.hpp"
+#include <xo/indentlog/print/tag.hpp>
 
 namespace xo {
     namespace obj {

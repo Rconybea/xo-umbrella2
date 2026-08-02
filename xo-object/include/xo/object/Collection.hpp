@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "xo/alloc/Object.hpp"
+#include <xo/alloc/Object.hpp>
 
 namespace xo {
     namespace obj {
