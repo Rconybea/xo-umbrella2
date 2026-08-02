@@ -5,8 +5,8 @@
 
 #include "print/PpToken.hpp"
 #include "xo/arena/padding.hpp"
-#include <cstring>
 #include <cassert>
+#include <cstring>
 #include <memory>
 
 namespace xo {

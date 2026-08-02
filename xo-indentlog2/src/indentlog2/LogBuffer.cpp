@@ -4,8 +4,8 @@
  **/
 
 #include "LogBuffer.hpp"
-#include <streambuf>
 #include <cstring>
+#include <streambuf>
 
 namespace xo {
     using xo::mm::ArenaConfig;

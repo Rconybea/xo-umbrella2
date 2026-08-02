@@ -4,8 +4,8 @@
  **/
 
 #include "LineState.hpp"
-#include <iostream>
 #include <cassert>
+#include <iostream>
 
 namespace xo {
     using std::cerr;
