@@ -9,11 +9,11 @@
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag.hpp>
 #include <xo/ppsink/tostr.hpp>
-#include <iostream>
+#include <cstddef>
 #include <functional>
+#include <iostream>
 #include <list>
 #include <string_view>
-#include <cstddef>
 
 /* e.g. XO_SUBSYSTEM_TAG(simulator) => xo::S_simulator_tag */
 #define XO_SUBSYSTEM_TAG(subsys_name) xo::S_ ## subsys_name ## _tag
