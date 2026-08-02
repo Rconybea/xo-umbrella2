@@ -104,6 +104,16 @@ namespace xo::pp {
         std::string_view file_ = {};
         /** source line of the entry site (__LINE__) **/
         std::uint32_t line_ = 0;
+        /** optional second banner name, appended verbatim after @ref name_ with
+         *  no separator -- so a caller supplies its own "::" (e.g. name_="Foo",
+         *  name2_="::ctor" banners as "Foo::ctor").  Unlike @ref name_ it is
+         *  neither styled nor colored, matching legacy scope_setup's name2.
+         *
+         *  Declared LAST on purpose: the macros in scope_macros.hpp initialize
+         *  scope_setup positionally, so inserting a field earlier would silently
+         *  shift their arguments.
+         **/
+        std::string_view name2_ = {};
 
         /** true iff a scope entered with this setup should log **/
         bool is_enabled() const { return level_ >= scope_config::min_log_level; }
@@ -131,7 +141,7 @@ namespace xo::pp {
          **/
         template <typename... Ts>
         explicit scope(scope_setup setup, Ts &&... args)
-            : name_{setup.name_}, style_{setup.style_},
+            : name_{setup.name_}, name2_{setup.name2_}, style_{setup.style_},
               file_{setup.file_}, line_{setup.line_},
               finalized_{!setup.is_enabled()}
         {
@@ -199,6 +209,11 @@ namespace xo::pp {
                 color_guard g(sink, scope_config::function_exit_color);
                 put_function_name(sink, style_, name_);
             }
+            /* outside the color guard: name2 is verbatim, matching legacy
+             * (function_name(style, color, name1) << name2)
+             */
+            if (!name2_.empty())
+                sink.put(name2_);
             if constexpr (sizeof...(args) > 0) {
                 sink.put(" ");
                 sink.begin();
@@ -244,6 +259,11 @@ namespace xo::pp {
                 color_guard g(sink, scope_config::function_entry_color);
                 put_function_name(sink, style_, name_);
             }
+            /* outside the color guard: name2 is verbatim, matching legacy
+             * (function_name(style, color, name1) << name2)
+             */
+            if (!name2_.empty())
+                sink.put(name2_);
             if constexpr (sizeof...(args) > 0) {
                 sink.put(" ");
                 sink.begin();
@@ -280,6 +300,10 @@ namespace xo::pp {
     private:
         /** scope name (e.g. function name); printed in the +/- entry/exit banners **/
         std::string_view name_;
+        /** optional second banner name, appended verbatim (unstyled, uncolored)
+         *  immediately after @ref name_; empty => nothing extra printed
+         **/
+        std::string_view name2_ = {};
         /** how to style @ref name_ in the banner (literal for the string_view
          *  ctor; from scope_setup / scope_config::function_style via XO_ENTER0_)
          **/

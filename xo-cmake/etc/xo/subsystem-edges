@@ -63,6 +63,7 @@ xo-ordinaltree xo-reactor
 xo-ppsink xo-alloc2
 xo-ppsink xo-arena
 xo-ppsink xo-indentlog2
+xo-ppsink xo-refcnt
 xo-ppsink xo-subsys
 xo-ppsink xo-testutil
 xo-printable2 xo-expression2

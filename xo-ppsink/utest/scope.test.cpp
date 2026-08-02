@@ -151,6 +151,55 @@ namespace ut {
         REQUIRE(off.empty());                              /* flag=false => never => silent */
     }
 
+    /* XO_LITERAL_ banners from two runtime names, mirroring legacy XO_LITERAL:
+     * name1 is styled/colored, name2 appended verbatim with no separator (so
+     * the caller supplies its own "::"), e.g. self_type + "::ctor".
+     */
+    TEST_CASE("scope-literal-two-names", "[scope]")
+    {
+        bool saved_time = scope_config::time_enabled;
+        scope_config::time_enabled = false;
+
+        stringstream ss;
+        FlatSink sink(ss);
+
+        ThreadLogState::log_set_sink(&sink);
+        {
+            scope lscope(XO_LITERAL_(always, "Refcounted", "::ctor"));
+        }
+        ThreadLogState::log_set_sink(nullptr);
+
+        scope_config::time_enabled = saved_time;   /* reset BEFORE asserting */
+
+        REQUIRE(ss.str() ==
+                "+(0) Refcounted::ctor\n"
+                "-(0) Refcounted::ctor\n");
+    }
+
+    /* an omitted second name must change nothing: every existing call site
+     * builds a scope_setup without one.
+     */
+    TEST_CASE("scope-literal-one-name-unchanged", "[scope]")
+    {
+        bool saved_time = scope_config::time_enabled;
+        scope_config::time_enabled = false;
+
+        stringstream ss;
+        FlatSink sink(ss);
+
+        ThreadLogState::log_set_sink(&sink);
+        {
+            scope lscope(XO_ENTER2_(always, true, "Refcounted"));
+        }
+        ThreadLogState::log_set_sink(nullptr);
+
+        scope_config::time_enabled = saved_time;
+
+        REQUIRE(ss.str() ==
+                "+(0) Refcounted\n"
+                "-(0) Refcounted\n");
+    }
+
 } /*namespace ut*/
 
 /* end scope.test.cpp */

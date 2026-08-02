@@ -72,6 +72,24 @@
  **/
 #define XO_DEBUG2_(flag, name1) XO_ENTER2_(always, flag, name1)
 
+/** capture a scope_setup at level @p lvl, bannered from TWO runtime names.
+ *  Mirrors legacy XO_LITERAL.
+ *
+ *  @p name1 is printed styled/colored; @p name2 is appended verbatim with no
+ *  separator, so the caller supplies its own -- e.g.
+ *  XO_LITERAL_(verbose, self_type, "::ctor") banners as "Foo::ctor".
+ *
+ *  Both names are runtime string_views, so this is the form to reach for when
+ *  the banner is assembled from values rather than __PRETTY_FUNCTION__.
+ **/
+#define XO_LITERAL_(lvl, name1, name2) \
+    xo::pp::scope_setup{ (name1), \
+                         xo::pp::log_level::lvl, \
+                         xo::FunctionStyle::literal, \
+                         __FILE__, \
+                         __LINE__, \
+                         (name2) }
+
 #endif /* XO_PPSINK_SCOPE_MACROS_HPP */
 
 /* end scope_macros.hpp */
