@@ -9,7 +9,7 @@
 #include <xo/reflect/TaggedPtr.hpp>
 #include <xo/indentlog/print/quoted.hpp>
 #ifdef __linux__
-#include <bsd/string.h>
+# include <bsd/string.h>
 #endif
 #include <cassert>
 #include <cstddef>
