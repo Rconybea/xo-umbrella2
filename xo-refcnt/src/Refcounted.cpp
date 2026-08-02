@@ -1,16 +1,9 @@
 /* @file Refcounted.cpp */
 
 #include "Refcounted.hpp"
-#include "pretty_refcnt.hpp"
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
-#ifdef XO_INTRUSIVE_PTR_ENABLE_LOGGING
-/* verbose intrusive_ptr logging stays on legacy indentlog for now: it logs
- * refcounted pointers via the legacy ppdetail<> in pretty_refcnt.hpp, whose
- * migration to ppsink Prettifier is deferred (see pretty_refcnt.hpp).
- */
-# include <xo/indentlog/scope.hpp>
-#endif
+#include <xo/ppsink/tag.hpp>
 
 namespace xo {
     namespace ref {
@@ -25,7 +18,10 @@ namespace xo {
                                   void * this_ptr,
                                   Refcount * x)
             {
-                scope lscope(XO_LITERAL(log_level::verbose, self_type, method_name),
+                using xo::pp::scope;
+                using xo::pp::xtag;
+
+                scope lscope(XO_LITERAL_(verbose, self_type, method_name),
                              "enter",
                              xtag("this", this_ptr),
                              xtag("x", x),
