@@ -6,9 +6,9 @@
 #pragma once
 
 #include <xo/type/Type.hpp>
-#include <xo/reflect/TypeDescr.hpp>
 #include <xo/alloc2/Collector.hpp>
 #include <xo/alloc2/GCObjectVisitor.hpp>
+#include <xo/reflect/TypeDescr.hpp>
 #include <xo/flatstring/flatstring.hpp>
 #include <xo/indentlog/print/pretty.hpp>
 

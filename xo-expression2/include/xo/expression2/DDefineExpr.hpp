@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "Expression.hpp"
 #include "DVariable.hpp"
+#include "Expression.hpp"
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/alloc2/GCObjectVisitor.hpp>
 #include <xo/indentlog/print/pretty.hpp>

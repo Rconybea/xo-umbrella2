@@ -8,8 +8,8 @@
 #include "Expression.hpp"
 #include "TypeRef.hpp"
 #include "exprtype.hpp"
-#include <xo/alloc2/GCObjectVisitor.hpp>
 #include <xo/alloc2/Allocator.hpp>
+#include <xo/alloc2/GCObjectVisitor.hpp>
 #include <string>
 
 namespace xo {

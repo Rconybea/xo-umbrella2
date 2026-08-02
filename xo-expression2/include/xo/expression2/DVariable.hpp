@@ -5,8 +5,8 @@
 
 #pragma once
 
-#include "DUniqueString.hpp"
 #include "Binding.hpp"
+#include "DUniqueString.hpp"
 #include "TypeRef.hpp"
 #include "exprtype.hpp"
 #include <xo/alloc2/GCObjectVisitor.hpp>

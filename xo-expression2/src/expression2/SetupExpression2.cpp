@@ -4,23 +4,19 @@
  **/
 
 #include "SetupExpression2.hpp"
-
+#include <xo/expression2/ApplyExpr.hpp>
+#include <xo/expression2/Constant.hpp>
 #include <xo/expression2/DefineExpr.hpp>
-#include <xo/expression2/Variable.hpp>
+#include <xo/expression2/GlobalSymtab.hpp>
+#include <xo/expression2/IfElseExpr.hpp>
+#include <xo/expression2/LambdaExpr.hpp>
+#include <xo/expression2/LocalSymtab.hpp>
+#include <xo/expression2/SequenceExpr.hpp>
 #include <xo/expression2/Typename.hpp>
 #include <xo/expression2/VarRef.hpp>
-#include <xo/expression2/Constant.hpp>
-#include <xo/expression2/ApplyExpr.hpp>
-#include <xo/expression2/LambdaExpr.hpp>
-#include <xo/expression2/IfElseExpr.hpp>
-#include <xo/expression2/SequenceExpr.hpp>
-
+#include <xo/expression2/Variable.hpp>
 #include <xo/expression2/detail/IGCObject_DSequenceExpr.hpp>
 #include <xo/expression2/detail/IPrintable_DSequenceExpr.hpp>
-
-#include <xo/expression2/GlobalSymtab.hpp>
-#include <xo/expression2/LocalSymtab.hpp>
-
 #include <xo/alloc2/gc/AGCObject.hpp>
 #include <xo/printable2/detail/APrintable.hpp>
 #include <xo/facet/FacetRegistry.hpp>

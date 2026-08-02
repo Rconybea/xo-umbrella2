@@ -6,7 +6,6 @@
 #include "init_expression2.hpp"
 #include "SetupExpression2.hpp"
 #include "expression2_register_types.hpp"
-
 #include <xo/procedure2/init_procedure2.hpp>
 #include <xo/alloc2/CollectorTypeRegistry.hpp>
 

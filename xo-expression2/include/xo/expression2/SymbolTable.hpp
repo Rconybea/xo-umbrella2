@@ -18,5 +18,4 @@
 #include "symtab/ISymbolTable_Xfer.hpp"
 #include "symtab/RSymbolTable.hpp"
 
-
 /* end SymbolTable.hpp */

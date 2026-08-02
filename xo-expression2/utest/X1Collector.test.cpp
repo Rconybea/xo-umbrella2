@@ -6,22 +6,16 @@
  **/
 
 #include "init_expression2.hpp"
-
+#include <xo/gc/X1Collector.hpp>
 #include <xo/object2/DFloat.hpp>
 #include <xo/object2/DInteger.hpp>
 #include <xo/object2/DList.hpp>
-
-#include <xo/gc/X1Collector.hpp>
-
+#include <xo/stringtable2/String.hpp>
 #include <xo/stringtable2/StringTable.hpp>
 #include <xo/stringtable2/UniqueString.hpp>
-#include <xo/stringtable2/String.hpp>
-
 #include <xo/alloc2/CollectorTypeRegistry.hpp>
 #include <xo/subsys/Subsystem.hpp>
-
 #include <catch2/catch.hpp>
-
 #include <cstring>
 
 namespace ut {

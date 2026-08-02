@@ -4,14 +4,14 @@
  **/
 
 #include "Constant.hpp"
-//#include "detail/IExpression_DConstant.hpp"
+// #include "detail/IExpression_DConstant.hpp"
 #include "TypeDescr.hpp"
 #include <xo/object2/DFloat.hpp>
 #include <xo/object2/DInteger.hpp>
+#include <xo/printable2/Printable.hpp>
+#include <xo/reflect/Reflect.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/facet/obj.hpp>
-#include <xo/reflect/Reflect.hpp>
-#include <xo/printable2/Printable.hpp>
 #include <xo/reflectutil/typeseq.hpp>
 
 namespace xo {

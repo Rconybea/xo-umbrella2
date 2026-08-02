@@ -3,8 +3,8 @@
  **/
 
 #include "symtab/ISymbolTable_Any.hpp"
-#include <iostream>
 #include <exception>
+#include <iostream>
 
 namespace xo {
 namespace scm {

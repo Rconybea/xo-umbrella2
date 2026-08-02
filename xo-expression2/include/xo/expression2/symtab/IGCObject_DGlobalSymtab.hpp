@@ -14,9 +14,9 @@
 #pragma once
 
 #include "GCObject.hpp"
-#include <xo/alloc2/GCObject.hpp>
-#include <xo/alloc2/Allocator.hpp>
 #include "xo/expression2/DGlobalSymtab.hpp"
+#include <xo/alloc2/Allocator.hpp>
+#include <xo/alloc2/GCObject.hpp>
 
 namespace xo { namespace scm { class IGCObject_DGlobalSymtab; } }
 

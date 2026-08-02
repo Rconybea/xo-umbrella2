@@ -7,23 +7,17 @@
 #include <xo/expression2/DConstant.hpp>
 #include <xo/expression2/detail/IExpression_DConstant.hpp>
 #include <xo/expression2/detail/IPrintable_DConstant.hpp>
-
+#include <xo/gc/X1Collector.hpp>
 #include <xo/object2/DFloat.hpp>
 #include <xo/object2/DInteger.hpp>
 #include <xo/object2/number/IGCObject_DFloat.hpp>
 #include <xo/object2/number/IGCObject_DInteger.hpp>
-
 #include <xo/alloc2/CollectorTypeRegistry.hpp>
-#include <xo/gc/X1Collector.hpp>
-
 #include <xo/printable2/Printable.hpp>
-#include <xo/facet/FacetRegistry.hpp>
 #include <xo/reflect/Reflect.hpp>
-
+#include <xo/facet/FacetRegistry.hpp>
 #include <xo/indentlog/scope.hpp>
-
 #include <catch2/catch.hpp>
-
 #include <sstream>
 
 namespace ut {

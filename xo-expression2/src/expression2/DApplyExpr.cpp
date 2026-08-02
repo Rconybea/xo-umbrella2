@@ -3,8 +3,8 @@
  *  @author Roland Conybeare, Jan 2026
  **/
 
-#include "Expression.hpp"
 #include "DApplyExpr.hpp"
+#include "Expression.hpp"
 #include "detail/IExpression_DApplyExpr.hpp"
 #include <xo/printable2/Printable.hpp>
 #include <xo/facet/FacetRegistry.hpp>

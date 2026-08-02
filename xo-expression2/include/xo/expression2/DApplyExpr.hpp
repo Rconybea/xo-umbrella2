@@ -8,8 +8,8 @@
 #include "Expression.hpp"
 #include "TypeRef.hpp"
 #include "exprtype.hpp"
-#include <xo/alloc2/GCObjectVisitor.hpp>
 #include <xo/object2/DArray.hpp>
+#include <xo/alloc2/GCObjectVisitor.hpp>
 #include <xo/reflect/TypeDescr.hpp>
 #include <xo/indentlog/print/pretty.hpp>
 

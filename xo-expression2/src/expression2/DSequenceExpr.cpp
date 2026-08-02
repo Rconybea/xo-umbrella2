@@ -6,8 +6,8 @@
 #include "DSequenceExpr.hpp"
 #include "detail/IExpression_DSequenceExpr.hpp"
 #include <xo/object2/Array.hpp>
-#include <xo/alloc2/GCObject.hpp>
 #include <xo/alloc2/Allocator.hpp>
+#include <xo/alloc2/GCObject.hpp>
 #include <xo/printable2/Printable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/facet/obj.hpp>

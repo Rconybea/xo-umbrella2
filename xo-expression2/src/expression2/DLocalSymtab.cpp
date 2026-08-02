@@ -3,10 +3,10 @@
  *  @author Roland Conybeare, Jan 2026
  **/
 
-#include "LocalSymtab.hpp"
-#include "Variable.hpp"
-#include "Typename.hpp"
 #include "DUniqueString.hpp"
+#include "LocalSymtab.hpp"
+#include "Typename.hpp"
+#include "Variable.hpp"
 #include <xo/object2/Array.hpp>
 #include <xo/printable2/Printable.hpp>
 #include <xo/facet/FacetRegistry.hpp>

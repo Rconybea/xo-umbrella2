@@ -14,10 +14,10 @@
 #pragma once
 
 // includes (via {facet_includes})
-#include "xo/expression2/Binding.hpp"
 #include "DUniqueString.hpp"
-#include <xo/facet/obj.hpp>
+#include "xo/expression2/Binding.hpp"
 #include <xo/facet/facet_implementation.hpp>
+#include <xo/facet/obj.hpp>
 #include <xo/facet/typeseq.hpp>
 
 // {pretext} here

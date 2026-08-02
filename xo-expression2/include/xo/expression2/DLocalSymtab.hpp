@@ -6,8 +6,8 @@
 #pragma once
 
 #include "Binding.hpp"
-#include "DVariable.hpp"
 #include "DUniqueString.hpp"
+#include "DVariable.hpp"
 #include <xo/object2/DArray.hpp>
 #include <xo/alloc2/GCObjectVisitor.hpp>
 

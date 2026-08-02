@@ -3,10 +3,10 @@
  *  @author Roland Conybeare, Jan 2026
  **/
 
-#include "GlobalSymtab.hpp"
-#include "Typename.hpp"
 #include "Binding.hpp"
 #include "DUniqueString.hpp"
+#include "GlobalSymtab.hpp"
+#include "Typename.hpp"
 #include <xo/expression2/Expression.hpp>
 #include <xo/expression2/Variable.hpp>
 #include <xo/object2/Array.hpp>

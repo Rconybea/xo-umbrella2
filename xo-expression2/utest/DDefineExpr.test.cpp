@@ -4,31 +4,25 @@
  **/
 
 #include "init_expression2.hpp"
+#include <xo/expression2/Constant.hpp>
 #include <xo/expression2/DDefineExpr.hpp>
 #include <xo/expression2/detail/IExpression_DDefineExpr.hpp>
 #include <xo/expression2/detail/IPrintable_DDefineExpr.hpp>
-#include <xo/expression2/Constant.hpp>
-//#include <xo/expression2/detail/IExpression_DConstant.hpp>
+// #include <xo/expression2/detail/IExpression_DConstant.hpp>
 
 #include <xo/object2/Float.hpp>
-//#include <xo/object2/number/IGCObject_DFloat.hpp>
+// #include <xo/object2/number/IGCObject_DFloat.hpp>
 
 #include <xo/gc/X1Collector.hpp>
-
 #include <xo/stringtable2/StringTable.hpp>
-
 #include <xo/alloc2/CollectorTypeRegistry.hpp>
-
 #include <xo/printable2/Printable.hpp>
-#include <xo/facet/FacetRegistry.hpp>
 #include <xo/reflect/Reflect.hpp>
-
+#include <xo/facet/FacetRegistry.hpp>
 #include <xo/indentlog/scope.hpp>
-
 #include <catch2/catch.hpp>
-
-#include <sstream>
 #include <cstring>
+#include <sstream>
 
 namespace ut {
     using xo::S_expression2_tag;

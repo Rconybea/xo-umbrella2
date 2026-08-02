@@ -5,12 +5,12 @@
 
 #include "DDefineExpr.hpp"
 #include "Variable.hpp"
-#include <xo/alloc2/GCObject.hpp>
 #include <xo/gc/PolyForwarderUtil.hpp>
+#include <xo/alloc2/GCObject.hpp>
 #include <xo/printable2/Printable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
-#include <xo/indentlog/scope.hpp>
 #include <xo/indentlog/print/cond.hpp>
+#include <xo/indentlog/scope.hpp>
 
 namespace xo {
     using xo::mm::poly_forward_inplace;

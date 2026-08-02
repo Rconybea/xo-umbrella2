@@ -5,11 +5,11 @@
 
 #pragma once
 
+#include "DLocalSymtab.hpp"
+#include "DString.hpp"
 #include "Expression.hpp"
 #include "TypeRef.hpp"
 #include "exprtype.hpp"
-#include "DLocalSymtab.hpp"
-#include "DString.hpp"
 #include <xo/alloc2/GCObjectVisitor.hpp>
 #include <xo/facet/obj.hpp>
 
