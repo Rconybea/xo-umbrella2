@@ -87,7 +87,7 @@ namespace ut {
         if (margin > 0)
             cfg = cfg.with_soft_right_margin(margin);
 
-        PrettySink pp(cfg);
+        PrettySink pp(cfg, nullptr);
         fn(pp);
         return std::string(pp.output());
     }

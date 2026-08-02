@@ -4,23 +4,23 @@
  **/
 
 #include "print/PrettySink.hpp"
-//#include "print/PpToken.hpp"
-//#include <cassert>
-//#include <cstring>
+#include <xo/ppsink/LogState.hpp>
+#include <iostream>
 
 namespace xo {
-    //using xo::mm::ArenaConfig;
-    //using std::max;
-    //using std::min;
-
     namespace pp {
-        PrettySink::PrettySink(const PpConfig & cfg)
+        PrettySink::PrettySink(const PpConfig & cfg,
+                               std::streambuf * out)
         : pps_{cfg},
           sbuf_{&pps_},
           os_(&sbuf_),
           logbuf_{cfg.logbuf_config(), cfg.logbuf_debug_flag()}
         {
+            /* collect pretty output in .logbuf_.. */
             pps_.connect_output(&logbuf_);
+
+            /* ..and flush to out */
+            logbuf_.set_dest_sbuf(out);
         }
 
         void
@@ -35,6 +35,24 @@ namespace xo {
         {
             pps_.put(x);
             return *this;
+        }
+
+        PpSink &
+        PrettySink::complete()
+        {
+            /* Terminating newline at top level: check_print_ready() flushes the
+             * whole record into logbuf_.  reset_buffer() then drains it to the
+             * attached streambuf and reclaims the buffer.
+             */
+            pps_.put("\n");
+            logbuf_.reset_buffer();
+            return *this;
+        }
+
+        void
+        PrettySink::set_dest_sbuf(std::streambuf * out)
+        {
+            logbuf_.set_dest_sbuf(out);
         }
 
         PpSink &
@@ -94,6 +112,26 @@ namespace xo {
         PrettySink::stream_commit()
         {
             sbuf_.commit();
+        }
+
+        bool
+        ThreadPrettySink::thread_install_once(const PpConfig & cfg, std::streambuf * out)
+        {
+            if (ThreadLogState::thread_log_state().is_builtin_default()) {
+                // first call with explicit sink
+
+                static thread_local PrettySink * s_pretty_sink = nullptr;
+
+                if (!s_pretty_sink) {
+                    s_pretty_sink = new PrettySink(cfg, out);
+
+                    ThreadLogState::log_set_sink(s_pretty_sink);
+
+                    return true;
+                }
+            }
+
+            return false;
         }
 
     } /*namespace pp*/

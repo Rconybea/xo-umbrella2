@@ -119,7 +119,7 @@ namespace ut {
         if (tc.soft_right_margin_ > 0)
             cfg = cfg.with_soft_right_margin(tc.soft_right_margin_);
 
-        PrettySink pp(cfg);
+        PrettySink pp(cfg, nullptr);
 
         for (const Step_PrettySink & step : tc.step_v_) {
             switch (step.kind_) {
@@ -169,7 +169,7 @@ namespace ut {
         ArenaConfig logbuf_cfg { .name_ = "utest.PrettySink.chained",
                                  .size_ = 64*1024 };
 
-        PrettySink pp(PpConfig().with_logbuf_config(logbuf_cfg));
+        PrettySink pp(PpConfig().with_logbuf_config(logbuf_cfg), nullptr);
 
         {
             auto ins = pp.stream_open(1);

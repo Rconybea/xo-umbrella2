@@ -22,6 +22,9 @@ namespace xo::pp {
      **/
     class LogState {
     public:
+        /** true iff sink never updated by set_sink() **/
+        bool is_builtin_default() { return builtin_flag_; }
+
         std::uint32_t nesting_level() const { return nesting_; }
         void incr_nesting() { ++nesting_; }
         void decr_nesting() { if (nesting_ > 0) --nesting_; }
@@ -31,9 +34,11 @@ namespace xo::pp {
         /** override the active sink (e.g. a capture sink in tests, or a
          *  PrettySink once xo-indentlog2 is available).  nullptr restores default.
          **/
-        void set_sink(PpSink * s) { sink_ = s; }
+        void set_sink(PpSink * s);
 
     private:
+        /** true unless .set_sink() used **/
+        bool builtin_flag_ = true;
         /** current scope nesting depth for this thread; drives indentation **/
         std::uint32_t nesting_ = 0;
         /** sink log output is written to; nullptr => the process default flat sink **/

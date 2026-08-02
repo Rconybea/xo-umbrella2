@@ -75,6 +75,16 @@ namespace xo {
             return retval;
         }
 
+        PpConfig
+        PpConfig::with_logbuf_size(size_t x)
+        {
+            PpConfig retval = *this;
+
+            retval.logbuf_config_.size_ = x;
+
+            return retval;
+        }
+
     } /*namespace pp*/
 } /*namesapce xo*/
 

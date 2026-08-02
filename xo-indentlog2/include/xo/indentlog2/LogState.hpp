@@ -30,7 +30,9 @@ namespace xo {
         /** buffer state **/
         LogBuffer logbuf_;
 
-        /** std::streambuf implementation, storage provided by @ref logbuf_ **/
+        /** std::streambuf implementation, storage provided by @ref logbuf_.
+         *  Provides alternative input path to @ref logbuf_
+         **/
         LogStreambuf sbuf_;
     };
 }

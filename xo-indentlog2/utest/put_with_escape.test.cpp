@@ -39,7 +39,7 @@ namespace ut {
         /** put @p s through a fresh PrettySink via put_with_escape **/
         string
         pp_escape(string_view s, bool quote_flag) {
-            PrettySink pp(escape_test_config(0));
+            PrettySink pp(escape_test_config(0), nullptr /*out*/);
 
             pp.put_with_escape(s, quote_flag);
 
@@ -85,7 +85,7 @@ namespace ut {
          * become a newline.  If the ESC byte went in raw, the tokens would
          * measure 3 wide, the group would "fit", and no break would happen.
          */
-        PrettySink pp(escape_test_config(8));
+        PrettySink pp(escape_test_config(8), nullptr);
 
         pp.begin();
         pp.put_with_escape("\x1b", true);
@@ -102,7 +102,7 @@ namespace ut {
          * or between a quote and what it quotes.  Squeeze it well past the
          * margin and require the rendering stay contiguous.
          */
-        PrettySink pp(escape_test_config(4));
+        PrettySink pp(escape_test_config(4), nullptr);
 
         pp.begin();
         pp.put_with_escape("hello world", true);

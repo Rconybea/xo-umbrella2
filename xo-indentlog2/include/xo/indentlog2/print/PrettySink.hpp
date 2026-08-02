@@ -24,7 +24,13 @@ namespace xo {
             using MemorySizeVisitor = xo::mm::MemorySizeVisitor;
 
         public:
-            PrettySink(const PpConfig & cfg);
+            PrettySink(const PpConfig & cfg, std::streambuf * out);
+
+            /** attach (or detach, with nullptr) a streambuf that completed
+             *  records are drained to (e.g. @c std::clog.rdbuf()).
+             *  Forwards to the underlying @ref logbuf_.
+             **/
+            void set_dest_sbuf(std::streambuf * sb);
 
             LogBuffer & logbuf() { return logbuf_; }
 
@@ -55,6 +61,10 @@ namespace xo {
             virtual PpSink & split(std::uint32_t spaces, std::int32_t offset) override final;
             virtual PpSink & newline(std::int32_t offset) override final;
             virtual PpSink & end() override final;
+            /** record boundary: emit the terminating newline, then drain the
+             *  completed record to the attached streambuf and reclaim logbuf_.
+             **/
+            virtual PpSink & complete() override final;
             /** current visible output column (enables right-aligned fields) **/
             virtual std::optional<std::size_t> lpos() const override final {
                 return logbuf_.viz_lpos();
@@ -73,6 +83,19 @@ namespace xo {
 
             /** Buffer for pretty-printed output **/
             LogBuffer logbuf_;
+        };
+
+        class ThreadPrettySink {
+        public:
+            /** install PrettySink for the calling thread.
+             *  Modifies @code ThreadLogState::thread_log_state().sink() @endcode,
+             *  the first time it is called.  Noop on subsequent calls.
+             *
+             *  @return true iff set output stream; false otherwise.
+             **/
+            static bool thread_install_once(const PpConfig & cfg,
+                                            std::streambuf * out);
+
         };
     } /*namespace pp*/
 } /*namespace xo*/

@@ -39,7 +39,7 @@ render_tag(std::uint32_t margin) {
     if (margin > 0)
         cfg = cfg.with_soft_right_margin(margin);
 
-    PrettySink pp(cfg);
+    PrettySink pp(cfg, nullptr /*out*/);
     pretty(pp, tag("coordinate", 12345));
     return std::string(pp.output());
 }

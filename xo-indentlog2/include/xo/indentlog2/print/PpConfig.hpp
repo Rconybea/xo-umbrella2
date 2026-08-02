@@ -11,6 +11,7 @@ namespace xo {
         class PpConfig {
         public:
             using ArenaConfig = xo::mm::ArenaConfig;
+            using size_t = std::size_t;
             using uint32_t = std::uint32_t;
 
         public:
@@ -31,6 +32,9 @@ namespace xo {
             PpConfig with_indent_width(uint32_t x);
             PpConfig with_logbuf_config(const ArenaConfig & x);
             PpConfig with_logbuf_debug_flag(bool x);
+
+            /** hard max arena size **/
+            PpConfig with_logbuf_size(size_t);
 
         private:
             /** indent per nesting level **/

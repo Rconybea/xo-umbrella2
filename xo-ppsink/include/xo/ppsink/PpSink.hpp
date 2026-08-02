@@ -143,6 +143,14 @@ namespace xo::pp {
         /** end group of nested items previously  introduced with begin() **/
         virtual PpSink & end() = 0;
 
+        /** finish the current record (log line/banner): the caller signals a
+         *  record boundary here instead of emitting a terminating newline
+         *  itself.  Default: emit a newline via put(), preserving the plain
+         *  streaming behavior.  Record-buffering sinks (e.g. PrettySink)
+         *  override to also drain + reclaim at this boundary.
+         **/
+        virtual PpSink & complete() { return this->put("\n"); }
+
         /** current visible output column, if this sink tracks one.
          *  PrettySink does (via its line accountant); FlatSink does not and
          *  returns nullopt -- the caller then falls back to inline placement

@@ -62,7 +62,7 @@ render(FunctionStyle style) {
     scope_config::function_style = style;
 
     ArenaConfig logbuf_cfg { .name_ = "example.ex3c", .size_ = 64*1024 };
-    PrettySink pp(PpConfig().with_logbuf_config(logbuf_cfg));
+    PrettySink pp(PpConfig().with_logbuf_config(logbuf_cfg), nullptr /*out*/);
 
     ThreadLogState::log_set_sink(&pp);
     Quadratic{ 1, -3, 2 }.evaluate(4);

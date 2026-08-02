@@ -131,7 +131,8 @@ namespace ut {
         ArenaConfig logbuf_cfg { .name_ = "utest.FlatSink",
                                  .size_ = 64*1024 };
 
-        PrettySink pp(PpConfig().with_logbuf_config(logbuf_cfg));
+        PrettySink pp(PpConfig().with_logbuf_config(logbuf_cfg),
+                      nullptr /*out*/);
 
         flatsink_drive(pp, tc.step_v_);
 
@@ -167,7 +168,8 @@ namespace ut {
 
         PrettySink pp(PpConfig()
                          .with_logbuf_config(logbuf_cfg)
-                         .with_soft_right_margin(4));
+                         .with_soft_right_margin(4),
+                      nullptr /*out*/);
 
         flatsink_drive(pp, step_v);
 

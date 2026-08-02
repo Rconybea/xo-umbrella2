@@ -12,6 +12,7 @@
 #include "print/PrettySink.hpp"
 #include <xo/arena/ArenaConfig.hpp>
 #include <catch2/catch.hpp>
+#include <sstream>
 #include <string>
 
 namespace ut {
@@ -24,6 +25,10 @@ namespace ut {
 
     /** run @p fn with a PrettySink installed as the thread's active sink;
      *  return the pretty-printed output.
+     *
+     *  Capture via a dest streambuf (not pp.output()): PrettySink drains each
+     *  completed record to the attached sink and reclaims its buffer, so
+     *  output() only ever holds the current (unfinished) record.
      **/
     template <typename Fn>
     static std::string scoped_pretty(std::uint32_t margin, Fn && fn) {
@@ -32,11 +37,14 @@ namespace ut {
         if (margin > 0)
             cfg = cfg.with_soft_right_margin(margin);
 
-        PrettySink pp(cfg);
+        std::ostringstream oss;
+        PrettySink pp(cfg, oss.rdbuf());
+
         ThreadLogState::log_set_sink(&pp);
         fn();
         ThreadLogState::log_set_sink(nullptr);   /* restore default (clog) */
-        return std::string(pp.output());
+
+        return oss.str();
     }
 
     /** the same nested-scope sequence exercised by xo-ppsink's FlatSink test **/

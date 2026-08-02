@@ -6,6 +6,7 @@
 #include <xo/interpreter2/init_interpreter2.hpp>
 #include <xo/interpreter2/VirtualSchematikaMachine.hpp>
 #include <xo/alloc2/Arena.hpp>
+#include <xo/indentlog2/print/PrettySink.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <replxx.hxx>
 #include <iostream>
@@ -16,12 +17,15 @@
 namespace xo {
     using xo::scm::DVirtualSchematikaMachine;
     using xo::scm::VsmResultExt;
+    using xo::pp::ThreadPrettySink;
+    using xo::pp::PpConfig;
     using xo::mm::AAllocator;
     using xo::mm::ArenaConfig;
     using xo::mm::DArena;
     using span_type = xo::mm::span<const char>;
     using xo::facet::FacetRegistry;
     using xo::facet::TypeRegistry;
+    using std::clog;
     using std::cerr;
 
     // presumeably replxx assumes input is a tty anyway?
@@ -166,6 +170,9 @@ namespace xo {
     void
     App::_init()
     {
+        ThreadPrettySink::thread_install_once(PpConfig().with_logbuf_config(ArenaConfig().with_size(1024*1024)),
+                                              clog.rdbuf());
+
         // window to control size of registries ends as soon as we init other subsystems
         TypeRegistry::instance(1024);
         FacetRegistry::instance(1024);

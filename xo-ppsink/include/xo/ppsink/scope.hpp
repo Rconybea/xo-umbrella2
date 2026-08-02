@@ -166,7 +166,7 @@ namespace xo::pp {
             sink.begin();
             (xo::pp::pretty(sink, args), ...);
             sink.end();
-            sink.put("\n");
+            sink.complete();
 
             return true;
         }
@@ -205,7 +205,7 @@ namespace xo::pp {
                 (xo::pp::pretty(sink, args), ...);
                 sink.end();
             }
-            sink.put("\n");
+            sink.complete();
         }
 
         /** re-enable a disabled scope and emit its (deferred) entry banner
@@ -251,7 +251,7 @@ namespace xo::pp {
                 sink.end();
             }
             emit_location(sink, file_, line_);
-            sink.put("\n");
+            sink.complete();
 
             st.incr_nesting();
         }

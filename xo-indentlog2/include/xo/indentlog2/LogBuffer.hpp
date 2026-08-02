@@ -7,6 +7,7 @@
 
 #include "LineState.hpp"
 #include "xo/arena/DArena.hpp"
+#include <iosfwd>
 
 namespace xo {
     using CharBuffer = xo::mm::DArena;
@@ -56,8 +57,23 @@ namespace xo {
         /** write span @p x to buffer **/
         void write_span(ConstSpan x);
 
+        /** attach (or detach, with nullptr) a streambuf that buffered
+         *  output is drained to by @ref flush (hence by @ref reset_buffer).
+         *  nullptr => pure buffer: accumulate, drain nothing (default).
+         **/
+        void set_dest_sbuf(std::streambuf * x) { dest_ = x; }
+
+        /** drain the not-yet-flushed extent [@ref bpptr_, @ref pptr_) to
+         *  @ref dest_ (if attached) and advance @ref bpptr_ to @ref pptr_.
+         *  No-op when no dest_ is attached or nothing is pending.
+         *  Safe to call at any time: LogBuffer writes are irrevocable, so
+         *  drained bytes are never un-written.
+         **/
+        void flush();
+
         /** reset to nominal state, ready to receive output,
-         *  but with no buffered content. Also resets @ref lstate_
+         *  but with no buffered content. Flushes any pending extent first
+         *  (so drained output isn't lost), then resets @ref lstate_.
          **/
         void reset_buffer();
 
@@ -78,8 +94,17 @@ namespace xo {
         CharBuffer buf_v_;
         /** checkpoint for realloc **/
         DArena::Checkpoint buf_ckp_;
-        /** start of usable buffered memory **/
-        char * pbase_ = nullptr;
+        /** pinned origin of usable buffered memory.
+         *  Unlike streambuf's pbase, this does NOT advance on flush:
+         *  @ref lstate_ needs [porigin_, pptr_) to compute line position.
+         **/
+        char * porigin_ = nullptr;
+        /** begin of the not-yet-flushed put area (mirrors @ref epptr_).
+         *  [porigin_, bpptr_) already drained to @ref dest_;
+         *  [bpptr_, pptr_) written but not yet drained.
+         *  This pointer plays the role streambuf calls pbase.
+         **/
+        char * bpptr_ = nullptr;
         /** current write pointer **/
         char * pptr_ = nullptr;
         /** end of usable buffered memory (can be expanded) **/
@@ -88,6 +113,9 @@ namespace xo {
         LineState lstate_;
         /** true to debug LogBuffer itself **/
         bool debug_flag_ = false;
+
+        /** optional drain target; nullptr => pure buffer (see @ref set_dest_sbuf) **/
+        std::streambuf * dest_ = nullptr;
 
         ///@}
     };

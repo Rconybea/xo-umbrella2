@@ -53,7 +53,8 @@ main(int argc, char ** argv) {
     color_config::color_enabled = true;      /* color the location (red default) */
 
     ArenaConfig logbuf_cfg { .name_ = "example.ex3g", .size_ = 64*1024 };
-    PrettySink pp(PpConfig().with_logbuf_config(logbuf_cfg));
+    PrettySink pp(PpConfig().with_logbuf_config(logbuf_cfg),
+                  nullptr /*out*/);
 
     ThreadLogState::log_set_sink(&pp);
     fib(3);

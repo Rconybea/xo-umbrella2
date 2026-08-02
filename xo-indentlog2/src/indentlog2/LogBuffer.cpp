@@ -4,6 +4,7 @@
  **/
 
 #include "LogBuffer.hpp"
+#include <streambuf>
 #include <cstring>
 
 namespace xo {
@@ -12,7 +13,7 @@ namespace xo {
 
     LogBuffer::LogBuffer(const ArenaConfig & config, bool debug_flag)
         : buf_v_{CharBuffer::map(config)},
-          pbase_{nullptr}, pptr_{nullptr}, epptr_{nullptr}, lstate_{},
+          porigin_{nullptr}, bpptr_{nullptr}, pptr_{nullptr}, epptr_{nullptr}, lstate_{},
           debug_flag_{debug_flag}
     {
         // buf_v_ always contains one allocation, comprising its entire size
@@ -26,13 +27,13 @@ namespace xo {
     auto
     LogBuffer::committed_span() const -> Span
     {
-        return Span(pbase_, epptr_);
+        return Span(porigin_, epptr_);
     }
 
     auto
     LogBuffer::used_span() const -> Span
     {
-        return Span(pbase_, pptr_);
+        return Span(porigin_, pptr_);
     }
 
     auto
@@ -54,18 +55,19 @@ namespace xo {
         if (!ok)
             return false;
 
-        if (pbase_ == nullptr) [[unlikely]] {
-            // first call -> establish pbase_,
+        if (porigin_ == nullptr) [[unlikely]] {
+            // first call -> establish porigin_,
             // (arena may prefix with guard bytes / alloc header
             // so possible that available < committed
 
             auto z = buf_v_.available();
 
             buf_ckp_ = buf_v_.checkpoint();
-            pbase_ = (char *)buf_v_.alloc(reflect::typeseq::id<char[]>(), z);
+            porigin_ = (char *)buf_v_.alloc(reflect::typeseq::id<char[]>(), z);
 
-            pptr_ = pbase_;
-            epptr_ = pbase_ + z;
+            bpptr_ = porigin_;
+            pptr_ = porigin_;
+            epptr_ = porigin_ + z;
         } else {
             /* restore to checkpoint, then allocate.
              * This is workaround for missing DArena::realloc().
@@ -75,14 +77,14 @@ namespace xo {
 
             auto z = buf_v_.available();
 
-            auto pbase0 = pbase_;
+            auto porigin0 = porigin_;
 
-            pbase_ = (char *)buf_v_.alloc(reflect::typeseq::id<char[]>(), z);
+            porigin_ = (char *)buf_v_.alloc(reflect::typeseq::id<char[]>(), z);
 
-            ok = ok && (pbase_ == pbase0);
+            ok = ok && (porigin_ == porigin0);
 
-            // keep pptr_, we reallocated in place
-            epptr_ = pbase_ + z;
+            // keep bpptr_/pptr_, we reallocated in place
+            epptr_ = porigin_ + z;
         }
 
         return ok;
@@ -105,6 +107,7 @@ namespace xo {
         }
 
         return true;
+
     }
 
     void
@@ -115,10 +118,13 @@ namespace xo {
             return;
         }
 
-        *(pptr_++) = '\n';
-        ::memset(pptr_, ' ', indent);
+        auto pptr = this->pptr_;
 
-        this->_check_update_local_state(pptr_ + indent);
+        *(pptr++) = '\n';
+        ::memset(pptr, ' ', indent);
+        pptr += indent;
+
+        this->_check_update_local_state(pptr);
     }
 
     void
@@ -131,21 +137,39 @@ namespace xo {
 
         // here: buffer has enough room now
 
-        ::memcpy(pptr_, x.lo(), x.size());
+        auto pptr = pptr_;
+        ::memcpy(pptr, x.lo(), x.size());
+        pptr += x.size();
 
-        this->_check_update_local_state(pptr_ + x.size());
+        this->_check_update_local_state(pptr);
+    }
+
+    void
+    LogBuffer::flush()
+    {
+        if (dest_ && (bpptr_ < pptr_)) {
+            dest_->sputn(bpptr_, pptr_ - bpptr_);
+            bpptr_ = pptr_;
+        }
     }
 
     void
     LogBuffer::reset_buffer()
     {
         // scrub buffered chars? perhaps offer as option
-        // keep {pbase_, epptr_}: allocated extent not changed
+        // keep {porigin_, epptr_}: allocated extent not changed
 
-        if (pbase_) {
+        // drain pending output before reclaiming the memory holding it,
+        // and push it through to the device (record boundary = sync point)
+        this->flush();
+        if (dest_)
+            dest_->pubsync();
+
+        if (porigin_) {
             buf_v_.restore(buf_ckp_);
         }
-        pptr_ = pbase_;
+        this->bpptr_ = porigin_;
+        this->pptr_ = porigin_;
 
         lstate_.clear();
     }
@@ -153,7 +177,7 @@ namespace xo {
     void
     LogBuffer::_check_update_local_state(char * pptr)
     {
-        lstate_._check_update_local_state(pbase_, pptr, debug_flag_);
+        lstate_._check_update_local_state(porigin_, pptr, debug_flag_);
         this->pptr_ = pptr;
     }
 } /*namespace xo*/
