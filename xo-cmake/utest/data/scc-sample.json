@@ -1,0 +1,35 @@
+[
+  {
+    "Name": "C++",
+    "Files": [
+      {"Location": "xo-gc/src/gc/Collector.cpp", "Code": 400, "Complexity": 44, "Generated": false},
+      {"Location": "xo-imgui/include/imgui/imgui.cpp", "Code": 11375, "Complexity": 2100, "Generated": false}
+    ]
+  },
+  {
+    "Name": "C++ Header",
+    "Files": [
+      {"Location": "xo-type/include/xo/type/Type.hpp", "Code": 120, "Complexity": 3, "Generated": true},
+      {"Location": "xo-gc/include/xo/gc/Collector.hpp", "Code": 90, "Complexity": 5, "Generated": false}
+    ]
+  },
+  {
+    "Name": "CMake",
+    "Files": [
+      {"Location": "xo-cmake/cmake/xo_macros/xo_cxx.cmake", "Code": 1066, "Complexity": 30, "Generated": false},
+      {"Location": "xo-gc/CMakeLists.txt", "Code": 25, "Complexity": 1, "Generated": false}
+    ]
+  },
+  {
+    "Name": "Markdown",
+    "Files": [
+      {"Location": "xo-hashable2/README.md", "Code": 1, "Complexity": 0, "Generated": false}
+    ]
+  },
+  {
+    "Name": "Brainfuck",
+    "Files": [
+      {"Location": "xo-gc/weird.bf", "Code": 7, "Complexity": 0, "Generated": false}
+    ]
+  }
+]
