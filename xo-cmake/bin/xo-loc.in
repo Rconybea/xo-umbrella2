@@ -255,6 +255,73 @@ def squarify(items, rect):
     return out
 
 
+# a tile must be able to hold its own label
+LABEL_W = 64.0
+LABEL_H = 18.0
+A_MIN = LABEL_W * LABEL_H
+
+FloorResult = collections.namedtuple("FloorResult", "weights floored inflation")
+Tile = collections.namedtuple("Tile", "subsystem rect kind_rects dominant")
+
+
+def apply_min_area(weights, canvas_area, min_tile_area=A_MIN):
+    """Raise small weights so no tile falls below `min_tile_area`.
+
+    Solves F = T*a/(1 - N*a), which is exactly the F for which
+    F / sum(max(w, F)) >= a -- i.e. the smallest tile lands at min_tile_area.
+    """
+    total = float(sum(weights.values()))
+    n = len(weights)
+    if total <= 0 or n == 0:
+        return FloorResult(dict(weights), [], 0.0)
+
+    a = min_tile_area / canvas_area
+    if n * a >= 1.0:
+        # the canvas is too small to give everyone a legible tile; do not
+        # pretend otherwise by inflating into nonsense
+        return FloorResult(dict(weights), [], 0.0)
+
+    floor = total * a / (1.0 - n * a)
+    floored = sorted(k for k, w in weights.items() if w < floor)
+    if not floored:
+        return FloorResult(dict(weights), [], 0.0)
+
+    adjusted = {k: max(float(w), floor) for k, w in weights.items()}
+    inflation = (sum(adjusted.values()) - total) / total
+    return FloorResult(adjusted, floored, inflation)
+
+
+def layout(groups, canvas, min_tile_area=A_MIN):
+    """groups -> ([Tile], [note]).  Two levels: subsystem, then kind."""
+    notes = []
+    totals = subsystem_loc(groups)
+    if not totals:
+        return [], notes
+
+    floor = apply_min_area(totals, canvas.w * canvas.h, min_tile_area)
+    if floor.floored:
+        notes.append("min-area floor applied to %d subsystem(s) (+%.2f%% area): %s"
+                     % (len(floor.floored), 100.0 * floor.inflation,
+                        ", ".join(floor.floored)))
+
+    tiles = []
+    for placement in squarify(sorted(floor.weights.items()), canvas):
+        kinds = groups[placement.key]
+        dominant = max(sorted(kinds.items()), key=lambda kv: kv[1].loc)[0]
+
+        # subdivide only if every sub-tile can still hold a label
+        area = placement.rect.w * placement.rect.h
+        if len(kinds) > 1 and area >= len(kinds) * min_tile_area:
+            kind_rects = squarify(
+                sorted((k, c.loc) for k, c in kinds.items()), placement.rect)
+        else:
+            kind_rects = []
+
+        tiles.append(Tile(subsystem=placement.key, rect=placement.rect,
+                          kind_rects=kind_rects, dominant=dominant))
+    return tiles, notes
+
+
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
     if "--version" in argv:
