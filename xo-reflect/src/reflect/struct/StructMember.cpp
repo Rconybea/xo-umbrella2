@@ -4,13 +4,9 @@
  */
 
 #include "struct/StructMember.hpp"
-#include <xo/indentlog/scope.hpp>
 #include <type_traits>
 
 namespace xo {
-  using xo::scope;
-  using xo::xtag;
-
   namespace reflect {
     static_assert(std::is_move_constructible_v<StructMember>);
 
