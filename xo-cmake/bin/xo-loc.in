@@ -88,6 +88,102 @@ def normalize(raw):
     return rows
 
 
+# ----------------------------------------------------------------
+# select: apply exclusions, aggregate to (subsystem, kind).
+#
+# Every exclusion is counted and reported.  A treemap that silently drops a
+# third of the tree is worse than no treemap.
+
+DEFAULT_VENDORED = ("xo-imgui/include/imgui/",)
+
+Cell = collections.namedtuple("Cell", "loc complexity nfiles languages")
+# `languages` is optional so callers (and tests) can build a cell positionally
+Cell.__new__.__defaults__ = (None,)
+
+Selection = collections.namedtuple("Selection", "groups notes")
+
+
+def select(rows, known_subsystems,
+           subsystems=None, include_generated=False, include_vendored=False,
+           vendored=DEFAULT_VENDORED, kinds=None, min_loc=20):
+    notes = []
+
+    # 1. xo-* directories only.  The root walk also sees pkgs/, docs/,
+    #    README.md and xo-deps.svg (a *file* matching xo-*).
+    rows = [r for r in rows if r.subsystem in known_subsystems]
+
+    # 2. emptiness is judged on TOTAL loc, before any exclusion.  Judging it on
+    #    code loc would drop xo-cmake, which is a real subsystem that happens to
+    #    be 100% Build.
+    total_by_sub = collections.Counter()
+    for r in rows:
+        total_by_sub[r.subsystem] += r.loc
+    empty = sorted(s for s in known_subsystems if total_by_sub[s] < min_loc)
+    if empty:
+        notes.append("%d subsystem(s) empty, not drawn: %s"
+                     % (len(empty), ", ".join(empty)))
+    rows = [r for r in rows if r.subsystem not in empty]
+
+    # 3. vendored third-party
+    if not include_vendored:
+        def is_vendored(row):
+            return any(row.path.startswith(v) for v in vendored)
+
+        hidden = [r for r in rows if is_vendored(r)]
+        if hidden:
+            notes.append("excluded vendored: %s (%s LOC, %d files)"
+                         % (", ".join(vendored),
+                            sum(r.loc for r in hidden), len(hidden)))
+            rows = [r for r in rows if not is_vendored(r)]
+
+    # 4. generated
+    if not include_generated:
+        hidden = [r for r in rows if r.generated]
+        if hidden:
+            notes.append("excluded %d generated files (%s LOC)"
+                         % (len(hidden), sum(r.loc for r in hidden)))
+        rows = [r for r in rows if not r.generated]
+
+    # 5. explicit kind filter
+    if kinds:
+        rows = [r for r in rows if r.kind in kinds]
+
+    # 6. positional subsystem arguments restrict the OUTPUT (never the walk)
+    if subsystems:
+        rows = [r for r in rows if r.subsystem in set(subsystems)]
+
+    unmapped = sorted({r.language for r in rows if r.kind == "Other"})
+    if unmapped:
+        notes.append("unmapped language(s) bucketed as Other: %s"
+                     % ", ".join(unmapped))
+
+    groups = {}
+    for r in rows:
+        cell = groups.setdefault(r.subsystem, {}).get(
+            r.kind, Cell(0, 0, 0, {}))
+        languages = dict(cell.languages or {})
+        languages[r.language] = languages.get(r.language, 0) + r.loc
+        groups[r.subsystem][r.kind] = Cell(cell.loc + r.loc,
+                                           cell.complexity + r.complexity,
+                                           cell.nfiles + 1,
+                                           languages)
+
+    # a subsystem can survive emptiness yet have nothing left after filtering
+    drained = sorted(s for s in total_by_sub
+                     if s not in empty and s not in groups
+                     and (not subsystems or s in set(subsystems)))
+    if drained:
+        notes.append("%d subsystem(s) have no content in this view: %s"
+                     % (len(drained), ", ".join(drained)))
+
+    return Selection(groups=groups, notes=notes)
+
+
+def subsystem_loc(groups):
+    """subsystem -> total LOC across its kinds."""
+    return {s: sum(c.loc for c in kinds.values()) for s, kinds in groups.items()}
+
+
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
     if "--version" in argv:
