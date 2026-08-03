@@ -3,6 +3,7 @@
 #include "type2llvm.hpp"
 #include <xo/reflect/Reflect.hpp>
 //#include "xo/reflect/struct/StructMember.hpp"
+#include <xo/indentlog/scope.hpp>
 
 namespace xo {
     using xo::reflect::Reflect;

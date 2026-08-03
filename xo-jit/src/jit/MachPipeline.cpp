@@ -4,6 +4,7 @@
 #include "activation_record.hpp"
 #include "type2llvm.hpp"
 #include <xo/expression/pretty_variable.hpp>
+#include <xo/indentlog/scope.hpp>
 #include <string>
 
 namespace xo {

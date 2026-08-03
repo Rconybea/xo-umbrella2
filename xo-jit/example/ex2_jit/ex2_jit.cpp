@@ -25,6 +25,7 @@
 #include <xo/expression/Lambda.hpp>
 #include <xo/expression/PrimitiveExpr.hpp>
 #include <xo/expression/Variable.hpp>
+#include <xo/indentlog/scope.hpp>
 #include <iostream>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
