@@ -133,7 +133,12 @@ let
     pkgs.git-subrepo
     pkgs.gh    # github cli
     pkgs.cloc
+    pkgs.scc   # counts the tree for xo-loc; also in shellpre
     pkgs.bloaty
+
+    # agent tooling: the dataviz skill's palette validator is a node script.
+    # xo-loc itself is python3-stdlib-only and does not need this.
+    pkgs.nodejs
 
     pkgs.catch2
     pkgs.cli11

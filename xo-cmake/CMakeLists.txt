@@ -61,6 +61,15 @@ file(CHMOD ${PROJECT_BINARY_DIR}/xo-deps
                 GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 
 configure_file(
+    ${PROJECT_SOURCE_DIR}/bin/xo-loc.in
+    ${PROJECT_BINARY_DIR}/xo-loc
+    @ONLY
+    )
+file(CHMOD ${PROJECT_BINARY_DIR}/xo-loc
+    PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+                GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
+
+configure_file(
     ${PROJECT_SOURCE_DIR}/bin/xo-gen-clang-format.in
     ${PROJECT_BINARY_DIR}/xo-gen-clang-format
     @ONLY
@@ -95,6 +104,7 @@ install(
     "${PROJECT_BINARY_DIR}/xo-build"
     "${PROJECT_BINARY_DIR}/xo-docker-build"
     "${PROJECT_BINARY_DIR}/xo-deps"
+    "${PROJECT_BINARY_DIR}/xo-loc"
     "${PROJECT_BINARY_DIR}/xo-gen-clang-format"
     "${PROJECT_BINARY_DIR}/xo-clang-format-includes"
     PERMISSIONS OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
