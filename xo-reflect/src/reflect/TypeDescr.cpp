@@ -6,12 +6,18 @@
 #include "TypeDescrExtra.hpp"
 #include "atomic/AtomicTdx.hpp"
 #include "function/FunctionTdx.hpp"
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/pretty_struct.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) in display() */
+#include <xo/ppsink/tostr.hpp>
+#include <sstream>                     /* std::ostringstream -- was via indentlog */
+#include <stdexcept>                   /* std::runtime_error -- was via indentlog */
 
 namespace xo {
-    using xo::scope;
-    using xo::xtag;
-    using xo::tostr;
+    using xo::pp::scope;
+    using xo::pp::xtag;
+    using xo::pp::tostr;
 
     namespace reflect {
         uint32_t
@@ -57,7 +63,7 @@ namespace xo {
                                detail::Invoker * invoker,
                                std::unique_ptr<TypeDescrExtra> tdextra)
         {
-            scope log(XO_DEBUG(false));
+            scope log(XO_DEBUG_(false));
 
             log && log(xtag("canonical_name", canonical_name));
 
@@ -301,17 +307,30 @@ namespace xo {
             return this->tdextra_->child_tp(i, object);
         } /*child_tp*/
 
-        bool
-        TypeDescrBase::pretty(const ppindentinfo & ppii) const
+        /* DRIFT WARNING: the field list here is duplicated by the legacy
+         * ppdetail<> in TypeDescr_ppdetail.hpp.  Keep the two in step.
+         *
+         * id_ (TypeId), complete_flag_ (bool) and metatype (Metatype) have no
+         * Prettifier<>, so they render through pretty()'s operator<< fallback
+         * -- which needs <ostream> visible at the point of instantiation.
+         * scope.hpp / tostr.hpp above supply it; pretty_struct.hpp alone would
+         * not.
+         */
+        void
+        TypeDescrBase::pretty(xo::pp::PpSink & sink) const
         {
-            return ppii.pps()->pretty_struct
-                       (ppii,
-                        "TypeDescr",
-                        refrtag("id", id_),
-                        refrtag("canonical_name", canonical_name_),
-                        refrtag("complete", complete_flag_),
-                        refrtag("metatype", this->metatype()));
+            using xo::pp::field;
 
+            /* bind to a local: field() captures by reference, and metatype()
+             * returns by value.
+             */
+            const Metatype mt = this->metatype();
+
+            sink.pretty_struct("TypeDescr",
+                               field("id", id_),
+                               field("canonical_name", canonical_name_),
+                               field("complete", complete_flag_),
+                               field("metatype", mt));
         }
 
         void
@@ -345,7 +364,7 @@ namespace xo {
         void
         TypeDescrBase::assign_tdextra(std::unique_ptr<TypeDescrExtra> tdx)
         {
-            scope log(XO_ENTER0(verbose),
+            scope log(XO_ENTER0_(verbose),
                       xtag("canonical_name", this->canonical_name()),
                       xtag("tdextra.old", this->tdextra_.get()),
                       xtag("metatype.old", (this->tdextra_

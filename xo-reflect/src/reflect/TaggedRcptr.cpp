@@ -4,11 +4,12 @@
  */
 
 #include "TaggedRcptr.hpp"
-#include <xo/indentlog/print/tag.hpp>
+#include <xo/ppsink/tag_ostream.hpp>   /* xtag + operator<<(ostream, tag) */
+#include <xo/ppsink/tostr.hpp>
 
 namespace xo {
-  using xo::xtag;
-  using xo::tostr;
+  using xo::pp::xtag;
+  using xo::pp::tostr;
 
   namespace reflect {
     void

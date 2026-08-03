@@ -42,11 +42,12 @@ namespace xo::pp {
 
             sink.put("<span");
             sink.begin(2);
+            sink.split(1);
             sink.pp(tag("addr", std::string_view(addr_buf)));
-            sink.split(1,2);
+            sink.split(1);
             sink.pp(tag("size", std::string_view(size_buf,
                                                  static_cast<std::size_t>(size_end - size_buf))));
-            sink.split(1,2);
+            sink.split(1);
             sink.pp(tag("text", unq(x.to_string_view())));
             sink.put(">");
             sink.end();

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "TypeDescrExtra.hpp"
-#include <xo/indentlog/print/pretty.hpp>
+#include <xo/ppsink/PpSink.hpp>
 #include <xo/cxxutil/demangle.hpp>
 #include <cassert>
 #include <cstdint>
@@ -215,9 +215,6 @@ namespace xo {
         /* run-time description for a native c++ type */
         class TypeDescrBase {
         public:
-            using ppindentinfo = xo::print::ppindentinfo;
-
-        public:
             /* type-description objects for a type T is unique,
              *  --> can always use its address
              */
@@ -410,8 +407,13 @@ namespace xo {
             TypeDescr fn_arg(uint32_t i) const { return this->tdextra_->fn_arg(i); }
             bool fn_is_noexcept() const { return this->tdextra_->fn_is_noexcept(); }
 
-            /** pretty-printer support, using @p ppii **/
-            bool pretty(const ppindentinfo & ppii) const;
+            /** structured pretty-printing: render this type description into
+             *  @p sink as  <TypeDescr :id .. :canonical_name .. ..>
+             *
+             *  See TypeDescr_pp.hpp for the Prettifier<> hookup, and
+             *  TypeDescr_ppdetail.hpp for the legacy xo-indentlog equivalent.
+             **/
+            void pretty(xo::pp::PpSink & sink) const;
 
             void display(std::ostream & os) const;
             std::string display_string() const;
@@ -588,25 +590,13 @@ namespace xo {
             static TypeDescrTable s_instance;
         };
     } /*namespace reflect*/
-
-    namespace print {
-        template <>
-        struct ppdetail<xo::reflect::TypeDescrBase> {
-            static bool print_pretty(const ppindentinfo & ppii,
-                                     const xo::reflect::TypeDescrBase & td) {
-                return td.pretty(ppii);
-            }
-        };
-
-        template <>
-        struct ppdetail<xo::reflect::TypeDescr> {
-            static bool print_pretty(const ppindentinfo & ppii,
-                                     xo::reflect::TypeDescr td) {
-                return td ? td->pretty(ppii) : true;
-            }
-        };
-    } /*namespace print*/
 } /*namespace xo*/
+
+/* NB: printing hookups live in separate headers, so TypeDescr.hpp itself
+ * carries no pretty-printing vocabulary:
+ *   TypeDescr_pp.hpp        ppsink Prettifier<>       (the native one)
+ *   TypeDescr_ppdetail.hpp  legacy xo-indentlog ppdetail<>  (transitional)
+ */
 
 namespace std {
     /** @brief overload for hashing xo::reflect::FunctionTdxInfo objects

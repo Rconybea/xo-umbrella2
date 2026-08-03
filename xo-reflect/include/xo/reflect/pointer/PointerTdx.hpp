@@ -7,7 +7,9 @@
 
 #include "xo/reflect/EstablishTypeDescr.hpp"
 #include "xo/reflect/TypeDescrExtra.hpp"
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/tag.hpp>
+#include <xo/ppsink/tostr.hpp>
+#include <stdexcept>   /* std::runtime_error -- used to arrive via indentlog */
 
 namespace xo {
     namespace reflect {
@@ -62,8 +64,8 @@ namespace xo {
             }
 
             virtual TaggedPtr child_tp(uint32_t i, void * object) const override {
-                using xo::tostr;
-                using xo::xtag;
+                using xo::pp::tostr;
+                using xo::pp::xtag;
 
                 target_t * ptr = reinterpret_cast<target_t *>(object);
 
