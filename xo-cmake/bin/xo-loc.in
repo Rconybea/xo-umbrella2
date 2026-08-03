@@ -184,6 +184,77 @@ def subsystem_loc(groups):
     return {s: sum(c.loc for c in kinds.values()) for s, kinds in groups.items()}
 
 
+# ----------------------------------------------------------------
+# layout: squarified treemap (Bruls, Huizing & van Wijk).
+#
+# Pure: weights and a rectangle in, rectangles out.  Nesting is just calling
+# this again on a tile's own rect.
+
+Rect = collections.namedtuple("Rect", "x y w h")
+Placement = collections.namedtuple("Placement", "key rect")
+
+
+def _worst(areas, length):
+    """Worst aspect ratio in a row of the given areas laid along `length`."""
+    total = sum(areas)
+    if total <= 0 or length <= 0:
+        return float("inf")
+    hi, lo = max(areas), min(areas)
+    if lo <= 0:
+        return float("inf")
+    return max((length * length * hi) / (total * total),
+               (total * total) / (length * length * lo))
+
+
+def _place_row(row, rect, out):
+    """Lay `row` (list of (key, area)) along the short side of `rect`.
+
+    Returns the leftover rect.
+    """
+    total = sum(a for _, a in row)
+    if rect.w >= rect.h:
+        width = total / rect.h if rect.h else 0.0
+        y = rect.y
+        for key, area in row:
+            h = area / width if width else 0.0
+            out.append(Placement(key, Rect(rect.x, y, width, h)))
+            y += h
+        return Rect(rect.x + width, rect.y, rect.w - width, rect.h)
+
+    height = total / rect.w if rect.w else 0.0
+    x = rect.x
+    for key, area in row:
+        w = area / height if height else 0.0
+        out.append(Placement(key, Rect(x, rect.y, w, height)))
+        x += w
+    return Rect(rect.x, rect.y + height, rect.w, rect.h - height)
+
+
+def squarify(items, rect):
+    """items: [(key, weight)] -> [Placement] tiling `rect` exactly."""
+    items = [(k, float(w)) for k, w in items if w > 0]
+    if not items or rect.w <= 0 or rect.h <= 0:
+        return []
+
+    total = sum(w for _, w in items)
+    scale = (rect.w * rect.h) / total
+    scaled = sorted(((k, w * scale) for k, w in items), key=lambda kv: -kv[1])
+
+    out = []
+    remaining = rect
+    while scaled:
+        length = min(remaining.w, remaining.h)
+        row = []
+        for key, area in scaled:
+            candidate = [a for _, a in row] + [area]
+            if row and _worst(candidate, length) > _worst([a for _, a in row], length):
+                break
+            row.append((key, area))
+        remaining = _place_row(row, remaining, out)
+        scaled = scaled[len(row):]
+    return out
+
+
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
     if "--version" in argv:

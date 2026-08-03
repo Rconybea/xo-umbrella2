@@ -168,5 +168,70 @@ class TestSubsystemLoc(unittest.TestCase):
         self.assertEqual(totals["xo-gc"], 522)  # 490 Code + 25 Build + 7 Other
 
 
+class TestSquarify(unittest.TestCase):
+    def setUp(self):
+        self.xo_loc = load_xo_loc()
+        self.canvas = self.xo_loc.Rect(0.0, 0.0, 1200.0, 800.0)
+
+    def area(self, rect):
+        return rect.w * rect.h
+
+    def test_empty_input(self):
+        self.assertEqual(self.xo_loc.squarify([], self.canvas), [])
+
+    def test_single_item_fills_the_rect(self):
+        [p] = self.xo_loc.squarify([("a", 10)], self.canvas)
+        self.assertEqual(p.key, "a")
+        self.assertAlmostEqual(p.rect.w, 1200.0)
+        self.assertAlmostEqual(p.rect.h, 800.0)
+
+    def test_tiles_the_rect_exactly(self):
+        items = [("s%d" % i, w) for i, w in
+                 enumerate([12377, 11011, 7184, 6143, 6075, 5519, 109, 130])]
+        placed = self.xo_loc.squarify(items, self.canvas)
+        self.assertEqual(len(placed), len(items))
+        self.assertAlmostEqual(sum(self.area(p.rect) for p in placed),
+                               self.area(self.canvas), places=3)
+
+    def test_area_is_proportional_to_weight(self):
+        items = [("a", 3), ("b", 1)]
+        placed = {p.key: p.rect for p in self.xo_loc.squarify(items, self.canvas)}
+        self.assertAlmostEqual(self.area(placed["a"]) / self.area(placed["b"]),
+                               3.0, places=6)
+
+    def test_every_tile_stays_inside_the_canvas(self):
+        items = [("s%d" % i, i + 1) for i in range(30)]
+        for p in self.xo_loc.squarify(items, self.canvas):
+            self.assertGreaterEqual(p.rect.x, -1e-9)
+            self.assertGreaterEqual(p.rect.y, -1e-9)
+            self.assertLessEqual(p.rect.x + p.rect.w, 1200.0 + 1e-9)
+            self.assertLessEqual(p.rect.y + p.rect.h, 800.0 + 1e-9)
+
+    def test_tiles_do_not_overlap(self):
+        items = [("s%d" % i, i + 1) for i in range(12)]
+        placed = [p.rect for p in self.xo_loc.squarify(items, self.canvas)]
+        for i, a in enumerate(placed):
+            for b in placed[i + 1:]:
+                separated = (a.x + a.w <= b.x + 1e-6 or b.x + b.w <= a.x + 1e-6
+                             or a.y + a.h <= b.y + 1e-6 or b.y + b.h <= a.y + 1e-6)
+                self.assertTrue(separated, "tiles overlap: %r %r" % (a, b))
+
+    def test_aspect_ratios_are_reasonable(self):
+        # the whole point of *squarified* treemaps: no 1000:1 slivers
+        items = [("s%d" % i, w) for i, w in
+                 enumerate([12377, 11011, 7184, 6143, 6075, 5519, 5002, 4451])]
+        for p in self.xo_loc.squarify(items, self.canvas):
+            ratio = max(p.rect.w / p.rect.h, p.rect.h / p.rect.w)
+            self.assertLess(ratio, 8.0, "sliver: %r" % (p.rect,))
+
+    def test_non_positive_weights_are_skipped(self):
+        placed = self.xo_loc.squarify([("a", 10), ("b", 0), ("c", -1)], self.canvas)
+        self.assertEqual([p.key for p in placed], ["a"])
+
+    def test_degenerate_rect_yields_nothing(self):
+        flat = self.xo_loc.Rect(0.0, 0.0, 0.0, 800.0)
+        self.assertEqual(self.xo_loc.squarify([("a", 10)], flat), [])
+
+
 if __name__ == "__main__":
     unittest.main()
