@@ -9,9 +9,83 @@ the only @VAR@ substitution sits inside a string literal, so the unit tests can
 import it straight from the source tree.
 """
 
+import collections
 import sys
 
 XO_LOC_VERSION = "@PROJECT_VERSION@"
+
+
+# ----------------------------------------------------------------
+# normalize: backend output -> a table nothing downstream can tell the
+# backend from.  A cloc adapter would emit the same Row list with
+# complexity=0 and generated=False.
+
+Row = collections.namedtuple(
+    "Row", "subsystem path language kind generated loc complexity")
+
+KIND_BY_LANGUAGE = {
+    # Code
+    "C++": "Code",
+    "C++ Header": "Code",
+    "C Header": "Code",
+    "C": "Code",
+    "Objective C++": "Code",
+    "Python": "Code",
+    "JavaScript": "Code",
+    "GLSL": "Code",
+    "LLVM IR": "Code",
+    # Build
+    "CMake": "Build",
+    "Nix": "Build",
+    "Makefile": "Build",
+    "Autoconf": "Build",
+    "BASH": "Build",
+    "Shell": "Build",
+    "YAML": "Build",
+    "INI": "Build",
+    "Patch": "Build",
+    # Docs
+    "ReStructuredText": "Docs",
+    "Markdown": "Docs",
+    "Plain Text": "Docs",
+    "License": "Docs",
+    "HTML": "Docs",
+    # Data
+    "JSON5": "Data",
+    "JSON": "Data",
+    "Jinja": "Data",
+    "SVG": "Data",
+}
+
+
+def kind_of(language, generated):
+    """Artifact kind for a file.
+
+    'generated' is a per-file property orthogonal to language -- a generated
+    .hpp is still C++ -- so it overrides the language mapping rather than
+    being looked up in it.
+    """
+    if generated:
+        return "Generated"
+    return KIND_BY_LANGUAGE.get(language, "Other")
+
+
+def normalize(raw):
+    """scc --by-file -f json output -> [Row]."""
+    rows = []
+    for lang in raw:
+        language = lang["Name"]
+        for f in lang["Files"]:
+            path = f["Location"]
+            generated = bool(f.get("Generated", False))
+            rows.append(Row(subsystem=path.split("/")[0],
+                            path=path,
+                            language=language,
+                            kind=kind_of(language, generated),
+                            generated=generated,
+                            loc=f["Code"],
+                            complexity=f["Complexity"]))
+    return rows
 
 
 def main(argv=None):
