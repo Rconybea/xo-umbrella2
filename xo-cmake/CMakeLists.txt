@@ -140,3 +140,8 @@ install(
     PERMISSIONS OWNER_READ OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
     DESTINATION ${CMAKE_INSTALL_DATADIR}/xo-macros
 )
+
+if (ENABLE_TESTING)
+    enable_testing()
+    add_subdirectory(utest)
+endif()
