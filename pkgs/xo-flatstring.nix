@@ -6,7 +6,7 @@
 
   sphinx, graphviz,
 
-  xo-cmake, xo-indentlog,
+  xo-cmake, xo-ppsink,
 
   buildDocs ? false,
   buildExamples ? false,
@@ -53,7 +53,7 @@ stdenv.mkDerivation (finalattrs:
       doxygen
       sphinx
       xo-cmake
-      xo-indentlog
+      xo-ppsink
     ]
     ++ lib.optionals buildDocs [
       doxygen
