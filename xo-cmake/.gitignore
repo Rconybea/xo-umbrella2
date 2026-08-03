@@ -1,3 +1,5 @@
 .projectile
 .build
 compile_commands.json
+# loading bin/xo-loc.in as a module drops bytecode next to the source
+__pycache__/
