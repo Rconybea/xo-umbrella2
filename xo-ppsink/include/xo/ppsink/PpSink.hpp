@@ -95,6 +95,22 @@ namespace xo::pp {
         template <typename... Ts>
         void operator()(const Ts &... args);
 
+        /** render a struct-shaped value as
+         *    <Name :f1 v1 :f2 v2>
+         *  breaking, when it does not fit, to
+         *    <Name
+         *      :f1 v1
+         *      :f2 v2>
+         *
+         *  Name each field with field() (see pretty_struct.hpp); a field whose
+         *  present() is false is omitted entirely.  The ppsink replacement for
+         *  legacy ppstate::pretty_struct + refrtag.
+         *
+         *  See pretty_struct.hpp for implementation.
+         **/
+        template <typename... Fields>
+        void pretty_struct(std::string_view name, const Fields &... fields);
+
         /** write string comprising contents of @p s **/
         virtual PpSink & put(std::string_view s) = 0;
 

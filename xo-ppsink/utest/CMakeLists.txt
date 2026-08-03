@@ -9,6 +9,7 @@ set(SELF_SOURCE_FILES
     function_name.test.cpp
     dwim.test.cpp
     pp_time.test.cpp
+    pretty_struct.test.cpp
     tag_ostream.test.cpp
     tostr.test.cpp
     verify_policy.test.cpp
