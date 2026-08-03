@@ -9,6 +9,11 @@
  * <xo/indentlog/scope.hpp> explicitly).  Retire this once the consuming
  * subsystems (reader, reader2, interpreter2, reactor, process, ...) are
  * migrated off legacy indentlog.
+ *
+ * NB: xo-refcnt no longer declares an xo-indentlog dependency, so a consumer
+ * that includes this header must declare one itself.  (refcnt used to
+ * propagate indentlog PUBLICly, which put it on every consumer's command line
+ * and hid whether downstream code had actually migrated.)
  */
 
 #pragma once

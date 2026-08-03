@@ -1,6 +1,16 @@
 /* @file pretty_refcnt.hpp
  *
  * author: Roland Conybeare, Jul 2025
+ *
+ * Transitional compatibility header: legacy xo-indentlog ppdetail<>
+ * specializations for rp<T> / bp<T> / Refcount*.
+ *
+ * These are FORWARDERS -- ppdetail<rp<T>> delegates to ppdetail<T>, so they
+ * cannot migrate to ppsink until the element types T do.  That is why
+ * xo-refcnt still ships legacy printing at all.
+ *
+ * NB: xo-refcnt no longer declares an xo-indentlog dependency, so a consumer
+ * that includes this header must declare one itself.
  */
 
 #pragma once
