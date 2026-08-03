@@ -22,6 +22,7 @@
 #include "WebsocketSink.hpp"
 #include "WsSafetyToken.hpp"
 #include <xo/printjson/PrintJson.hpp>
+#include <xo/indentlog/scope.hpp>   /* scope -- was arriving via xo/reflect */
 #include <json/json.h> // for Json::Reader,  to parse json input
 #include <condition_variable>
 #include <deque>

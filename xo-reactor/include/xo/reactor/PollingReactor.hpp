@@ -4,6 +4,7 @@
 
 #include "Reactor.hpp"
 #include "ReactorSource.hpp"
+#include <xo/indentlog/print/ppdetail_atomic.hpp>   /* PPDETAIL_ATOMIC -- was arriving via xo/reflect */
 #include <cstdint>
 #include <vector>
 

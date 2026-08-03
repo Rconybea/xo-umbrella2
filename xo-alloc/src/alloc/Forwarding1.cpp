@@ -5,6 +5,7 @@
 
 #include "Forwarding1.hpp"
 #include <xo/reflect/Reflect.hpp>
+#include <xo/indentlog/print/tag.hpp>   /* xtag -- was arriving via xo/reflect/Reflect.hpp */
 #include <cassert>
 #include <cstddef>
 

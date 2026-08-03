@@ -6,6 +6,7 @@
 #include "AbstractSource.hpp"
 #include "PolyAdapterSink.hpp"
 #include <xo/reflect/Reflect.hpp>
+#include <xo/indentlog/scope.hpp>   /* scope -- was arriving via xo/reflect */
 #include <xo/indentlog/print/tag.hpp>
 #include <xo/indentlog/print/time.hpp>
 #include <xo/timeutil/timeutil.hpp>

@@ -16,6 +16,7 @@
 #include <xo/stringtable2/String.hpp>
 #include <xo/printable2/Printable.hpp>
 #include <unistd.h> // for getcwd()
+#include <xo/indentlog/scope.hpp>   /* scope -- was arriving via xo/reflect */
 
 namespace xo {
     using xo::scm::ASequence;

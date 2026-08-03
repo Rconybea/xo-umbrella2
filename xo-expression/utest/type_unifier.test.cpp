@@ -5,6 +5,7 @@
 
 #include "xo/expression/typeinf/type_unifier.hpp"
 #include <xo/reflect/Reflect.hpp>
+#include <xo/indentlog/scope.hpp>   /* scope, xtag -- were arriving via xo/reflect */
 #include <catch2/catch.hpp>
 
 namespace xo {

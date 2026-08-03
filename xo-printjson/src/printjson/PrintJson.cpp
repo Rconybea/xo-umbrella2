@@ -8,6 +8,7 @@
 // #include "time/Time.hpp"
 #include <xo/reflect/TypeDescr.hpp>
 #include <xo/indentlog/print/tag.hpp>
+#include <xo/indentlog/print/time.hpp>   /* iso8601 -- was arriving via xo/reflect/TypeDescr.hpp */
 #include <cmath>
 
 namespace xo {

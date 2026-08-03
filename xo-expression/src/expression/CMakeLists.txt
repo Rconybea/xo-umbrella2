@@ -24,7 +24,10 @@ xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 $
 # note: deps here must also appear in cmake/xo_expressionConfig.cmake.in
 xo_dependency(${SELF_LIB} reflect)
 xo_dependency(${SELF_LIB} xo_flatstring)
-#xo_dependency(${SELF_LIB} indentlog)
+# GeneralizedExpression.hpp et al use legacy xo-indentlog (ppstate,
+# ppindentinfo, xtag).  Was arriving transitively via xo-reflect; declared
+# explicitly now that xo-reflect is ppsink-only.
+xo_dependency(${SELF_LIB} indentlog)
 #xo_dependency(${SELF_LIB} subsys)
 
 # end CMakeLists.txt

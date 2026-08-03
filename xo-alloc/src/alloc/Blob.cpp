@@ -5,6 +5,7 @@
 
 #include "Blob.hpp"
 #include <xo/reflect/Reflect.hpp>
+#include <xo/indentlog/print/tag.hpp>   /* xtag -- was arriving via xo/reflect/Reflect.hpp */
 #include <xo/allocutil/IAlloc.hpp>
 
 namespace xo {

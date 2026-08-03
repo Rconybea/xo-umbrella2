@@ -6,6 +6,7 @@
 #include "Forwarding1.hpp"
 #include "ArenaAlloc.hpp"
 #include <xo/reflect/Reflect.hpp>
+#include <xo/indentlog/print/array.hpp>   /* operator<<(ostream, std::array) -- was arriving via xo/reflect */
 #include <catch2/catch.hpp>
 #include <cstring>
 #include <regex>

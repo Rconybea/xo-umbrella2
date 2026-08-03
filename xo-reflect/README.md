@@ -10,10 +10,7 @@ Installs a few cmake ingredients,  along with a build assistant `xo-build` for X
 
 ### build + install other XO dependencies
 ```
-$ xo-build --clone --configure --build --install xo-indentlog
-$ xo-build --clone --configure --build --install xo-refnct
-$ xo-build --clone --configure --build --install xo-subsys
-$ xo-build --clone --configure --build --install xo-reflectutil
+$ xo-build --with-deps --clone --configure --build --install xo-reflect
 ```
 
 Note: can use `-n` to dry-run here

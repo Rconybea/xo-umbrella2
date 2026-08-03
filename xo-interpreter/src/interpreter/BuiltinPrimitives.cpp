@@ -10,6 +10,7 @@
 #include <xo/expression/PrimitiveExpr.hpp>
 #include <xo/reflect/Reflect.hpp>
 #include <cstdint>
+#include <xo/indentlog/scope.hpp>   /* scope -- was arriving via xo/reflect */
 
 namespace xo {
     using xo::reflect::Reflect;

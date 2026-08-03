@@ -18,6 +18,7 @@
 #include <tuple>
 #include <type_traits>
 #include <utility>
+#include <xo/indentlog/print/pretty.hpp>   /* ppstate -- was arriving via xo/reflect */
 
 namespace xo {
     namespace scm {

@@ -7,6 +7,7 @@
 #include "xo/printjson/init_printjson.hpp"
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflect/StructReflector.hpp>
+#include <xo/indentlog/print/tag.hpp>   /* tag -- was arriving via xo/reflect */
 #include <catch2/catch.hpp>
 #include <iostream>
 #include <sstream>

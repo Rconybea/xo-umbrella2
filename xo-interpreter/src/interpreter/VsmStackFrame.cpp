@@ -6,6 +6,7 @@
 #include "VsmStackFrame.hpp"
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflect/StructReflector.hpp>
+#include <xo/indentlog/print/tag.hpp>   /* xtag -- was arriving via xo/reflect */
 
 namespace xo {
     using xo::reflect::Reflect;

@@ -7,6 +7,8 @@
 
 #include "xo/expression/typeinf/type_ref.hpp"
 #include <xo/refcnt/Refcounted.hpp>
+#include <xo/indentlog/print/pretty.hpp>   /* xo::print::ppstate, ppindentinfo --
+                                            * were arriving via xo/reflect/TypeDescr.hpp */
 // #include "xo/reflect/TypeDescr.hpp"
 #include "exprtype.hpp"
 

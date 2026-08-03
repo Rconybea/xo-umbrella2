@@ -1,6 +1,7 @@
 /** @file TypeBlueprint.cpp **/
 
 #include "typeinf/TypeBlueprint.hpp"
+#include <xo/indentlog/print/tag.hpp>   /* xtag -- was arriving via xo/reflect */
 
 namespace xo {
     namespace scm {

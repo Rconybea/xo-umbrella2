@@ -12,6 +12,9 @@ xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 $
 #       must coordinate with find_dependency() calls in
 #       xo-websock/cmake/websockConfig.cmake.in
 xo_dependency(${SELF_LIB} reactor)
+# Webserver.cpp uses legacy xo-indentlog scope logging.  Declared explicitly:
+# xo-reflect no longer propagates xo-indentlog.
+xo_dependency(${SELF_LIB} indentlog)
 xo_dependency(${SELF_LIB} webutil)
 
 # see LibwebsocketsTargets-release.cmake for available targets

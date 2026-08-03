@@ -9,6 +9,7 @@
 #include <xo/object/ObjectConverter.hpp>
 #include <xo/alloc/Object.hpp>
 #include <xo/expression/Expression.hpp>
+#include <xo/indentlog/scope.hpp>   /* log_level -- was arriving via xo/reflect */
 
 namespace xo {
     namespace scm {

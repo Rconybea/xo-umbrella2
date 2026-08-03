@@ -2,6 +2,7 @@
 
 #include "xo/process/init_process.hpp"
 #include <xo/reflect/Reflect.hpp>
+#include <xo/indentlog/scope.hpp>   /* scope -- was arriving via xo/reflect */
 #include <catch2/catch.hpp>
 
 namespace xo {
