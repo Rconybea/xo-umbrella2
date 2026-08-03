@@ -406,6 +406,7 @@ in
       patched-git  # instead of pkgs.git
       pkgs.git-subrepo
       pkgs.openssh
+      pkgs.scc
       pkgs.cloc
       pkgs.lcov
       pkgs.gdb
