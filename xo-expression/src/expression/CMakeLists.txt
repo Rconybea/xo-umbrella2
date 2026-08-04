@@ -21,7 +21,6 @@ set(SELF_SRCS
 )
 
 xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 ${SELF_SRCS})
-# note: deps here must also appear in cmake/xo_expressionConfig.cmake.in
 xo_dependency(${SELF_LIB} reflect)
 xo_dependency(${SELF_LIB} xo_flatstring)
 # GeneralizedExpression.hpp et al use legacy xo-indentlog (ppstate,
