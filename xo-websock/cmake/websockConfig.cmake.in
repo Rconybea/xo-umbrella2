@@ -2,13 +2,13 @@
 
 include(CMakeFindDependencyMacro)
 
-# note: changes to find_dependency() calls here
-#       must coordinate with xo_dependency() calls
-#       in xo-websock/src/websock/CMakeLists.txt
 #
-find_dependency(reactor)
-find_dependency(webutil)
+# Libwebsockets is NOT generated: it arrives via find_package(), not
+# xo_dependency(), and xo_export_cmake_config() only knows about xo deps.
+# Any other external package this subsystem needs has to be listed here too.
 find_dependency(Libwebsockets)
+
+@XO_FIND_DEPENDENCY_BLOCK@
 
 include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Targets.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Share.cmake")
