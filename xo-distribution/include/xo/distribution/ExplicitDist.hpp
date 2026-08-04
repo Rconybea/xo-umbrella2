@@ -7,15 +7,17 @@
 
 #include "Distribution.hpp"
 #include "Normal.hpp"
-#include <xo/indentlog/print/tostr.hpp>
-#include <xo/indentlog/print/vector.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/PrettyVector.hpp>   /* Prettifier<std::vector<T>> */
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>    /* os << xtag(..) */
+#include <xo/ppsink/tostr.hpp>
 #include <cmath>
 #include <cstdint>
 #include <vector>
 
 namespace xo {
-    using xo::xtag;
+    using xo::pp::xtag;
 
     namespace distribution {
         class ProbabilityBucket {
@@ -33,7 +35,7 @@ namespace xo {
             void assign_cdf(double x) { this->cdf_ = x; }
 
             void display(std::ostream & os) const {
-                using xo::xtag;
+                using xo::pp::xtag;
 
                 os << "<ProbabilityBucket"
                    << xtag("wt", this->wt_)
@@ -409,7 +411,8 @@ namespace xo {
                                 Domain const & hi,
                                 Function && fn)
                 {
-                    XO_SCOPE_DISABLED(lscope);
+                    /* legacy XO_SCOPE_DISABLED: a scope pinned to log_level::never */
+                    xo::pp::scope lscope(XO_ENTER0_(never));
 
                     /* note: using inclusive upper index bounds here;
                      *       variying from idiomatic c++ style for symmetry
@@ -646,7 +649,7 @@ namespace xo {
                 os << ">";
             } /*display*/
 
-            std::string display_string() const { return xo::tostr(*this); }
+            std::string display_string() const { return xo::pp::tostr(*this); }
 
         private:
             ExplicitDist(Domain bucket_dx, Domain ref_value)

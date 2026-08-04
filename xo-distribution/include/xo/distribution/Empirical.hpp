@@ -4,7 +4,6 @@
 
 #include "xo/distribution/Distribution.hpp"
 #include <xo/ordinaltree/RedBlackTree.hpp>
-#include <xo/indentlog/scope.hpp>
 #include <cstdint>
 #include <map>
 

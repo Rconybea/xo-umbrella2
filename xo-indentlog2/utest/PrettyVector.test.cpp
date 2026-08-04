@@ -6,7 +6,7 @@
  *  (and their composition: a vector of FunctionStyle).
  **/
 
-#include "print/PrettyVector.hpp"
+#include <xo/ppsink/PrettyVector.hpp>
 #include "print/PrettyFunctionStyle.hpp"
 #include "print/PrettySink.hpp"
 #include <xo/arena/ArenaConfig.hpp>

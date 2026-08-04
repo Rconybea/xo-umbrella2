@@ -4,7 +4,9 @@
 
 #include "Empirical.hpp"
 #include <xo/ordinaltree/RedBlackTree.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
 #include <cstdint>
 #include <map>
 
@@ -33,13 +35,14 @@ namespace xo {
              * if d2 is sampled,  should use .ks_stat_2sided() instead
              */
             std::pair<double, double> ks_stat_1sided(Distribution<Domain> const & d2) const {
-                using xo::scope;
-                using xo::xtag;
+                using xo::pp::scope;
+                using xo::pp::xtag;
 
                 constexpr char const * c_self = "Empirical::ks_stat_1sided";
                 constexpr bool c_logging_enabled = false;
 
-                scope lscope(c_self, c_logging_enabled);
+                /* legacy scope(name, flag) == ppsink XO_DEBUG2_(flag, name) */
+                scope lscope(XO_DEBUG2_(c_logging_enabled, c_self));
 
                 double ks_stat = 0.0;
 

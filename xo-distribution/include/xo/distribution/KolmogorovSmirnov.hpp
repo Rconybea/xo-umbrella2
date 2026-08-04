@@ -3,7 +3,11 @@
 #pragma once
 
 #include "Distribution.hpp"
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
+#include <xo/ppsink/tostr.hpp>
+#include <stdexcept>   /* std::runtime_error -- was arriving via indentlog */
 #include <cmath>
 #include <cstdint>
 
@@ -175,7 +179,7 @@ namespace xo {
             } /*distr2_impl*/
 
             static double distr_impl(double x) {
-                using xo::tostr;
+                using xo::pp::tostr;
 
                 constexpr char const * c_self = "KolmogorovSmirnov::distr_impl";
 
@@ -208,12 +212,12 @@ namespace xo {
              */
             static double ks_pvalue(uint32_t ne, double D)
                 {
-                    using xo::scope;
-                    using xo::xtag;
+                    using xo::pp::scope;
+                    using xo::pp::xtag;
 
                     constexpr bool logging_enabled_flag = false;
 
-                    scope log(XO_DEBUG(logging_enabled_flag));
+                    scope log(XO_DEBUG_(logging_enabled_flag));
 
                     double ne_sqrt = ::sqrt(ne);
 

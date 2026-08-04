@@ -59,6 +59,7 @@ xo-object2 xo-type
 xo-ordinaltree xo-reactor
 xo-ppsink xo-alloc2
 xo-ppsink xo-arena
+xo-ppsink xo-distribution
 xo-ppsink xo-flatstring
 xo-ppsink xo-indentlog2
 xo-ppsink xo-refcnt
