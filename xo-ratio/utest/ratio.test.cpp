@@ -2,18 +2,28 @@
 
 #include "xo/ratio/ratio.hpp"
 #include "xo/ratio/ratio_iostream.hpp"
-#include <xo/indentlog/print/array.hpp>
-#include <xo/indentlog/print/tag.hpp>
-#include <xo/indentlog/print/vector.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/PrettyVector.hpp>  /* Prettifier<std::vector<T>> for XTAG_(ratio_v) */
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
+#include <xo/ppsink/tag_ostream.hpp>   /* INFO()/tostr() reach values via ostream */
+#include <xo/ppsink/tostr.hpp>
 #include <xo/randomgen/random_seed.hpp>
 #include <xo/randomgen/xoshiro256.hpp>
-// #include "xo/indentlog/print/hex.hpp"
+// #include <xo/ppsink/hex.hpp>   // for hex_view(), when inspecting ratio layout
 #include <catch2/catch.hpp>
 #include <numeric>
 #include <random>
 
 namespace xo {
+
+    /* xo::pp names, spelled out: this TU sits in namespace xo, so before the
+     * ppsink migration these resolved to the legacy xo::scope / xo::xtag /
+     * xo::tostr via the enclosing namespace.
+     */
+    using xo::pp::scope;
+    using xo::pp::tostr;
+    using xo::pp::xtag;
 
     using std::exponential_distribution;
     using std::bernoulli_distribution;
@@ -57,7 +67,7 @@ namespace xo {
             /* want to avoid integer overflow when exponentiating */
             constexpr int max_pwr = 5;
 
-            scope log(XO_DEBUG2(debug_flag, "ratio_tests"));
+            scope log(XO_DEBUG2_(debug_flag, "ratio_tests"));
             log && log(xtag("n_ratio", n_ratio));
 
             ratio_distribution<int> ratio_dist(0.25 /*sign_prob*/,
@@ -78,10 +88,10 @@ namespace xo {
                 REQUIRE(std::gcd(ratio_v[i].num(), ratio_v[i].den()) == 1);
             }
 
-            INFO(XTAG(ratio_v));
+            INFO(XTAG_(ratio_v));
 
             for (std::uint32_t i=0; i<n_experiment; ++i) {
-                INFO(tostr(XTAG(i), XTAG(n_experiment)));
+                INFO(tostr(XTAG_(i), XTAG_(n_experiment)));
 
                 /* choose a couple of ratios at random */
                 auto ratio1 = ratio_v[rng() % n_ratio];
@@ -95,7 +105,7 @@ namespace xo {
 
                     double sum_approx = sum.num() / static_cast<double>(sum.den());
 
-                    log && log(XTAG(ratio1), XTAG(ratio2), XTAG(sum));
+                    log && log(XTAG_(ratio1), XTAG_(ratio2), XTAG_(sum));
 
                     REQUIRE(sum_approx == Approx(ratio1_approx + ratio2_approx).epsilon(1e-6));
                     REQUIRE(std::gcd(sum.num(), sum.den()) == 1);
@@ -143,7 +153,7 @@ namespace xo {
 
                     double neg_approx = neg.num() / static_cast<double>(neg.den());
 
-                    log && log(XTAG(ratio1), XTAG(neg));
+                    log && log(XTAG_(ratio1), XTAG_(neg));
 
                     REQUIRE(neg_approx == Approx(-ratio1_approx).epsilon(1e-06));
                     REQUIRE(std::gcd(neg.num(), neg.den()) == 1);
@@ -155,7 +165,7 @@ namespace xo {
 
                     double diff_approx = diff.num() / static_cast<double>(diff.den());
 
-                    log && log(XTAG(ratio1), XTAG(ratio2), XTAG(diff));
+                    log && log(XTAG_(ratio1), XTAG_(ratio2), XTAG_(diff));
 
                     REQUIRE(diff_approx == Approx(ratio1_approx - ratio2_approx).epsilon(1e-6));
                     REQUIRE(std::gcd(diff.num(), diff.den()) == 1);
@@ -167,7 +177,7 @@ namespace xo {
 
                     double prod_approx = prod.num() / static_cast<double>(prod.den());
 
-                    log && log(XTAG(ratio1), XTAG(ratio2), XTAG(prod));
+                    log && log(XTAG_(ratio1), XTAG_(ratio2), XTAG_(prod));
 
                     REQUIRE(prod_approx == Approx(ratio1_approx * ratio2_approx).epsilon(1e-6));
                     REQUIRE(std::gcd(prod.num(), prod.den()) == 1);
@@ -179,7 +189,7 @@ namespace xo {
 
                     double div_approx = div.num() / static_cast<double>(div.den());
 
-                    log && log(XTAG(ratio1), XTAG(ratio2), XTAG(div));
+                    log && log(XTAG_(ratio1), XTAG_(ratio2), XTAG_(div));
 
                     REQUIRE(div_approx == Approx(ratio1_approx * ratio2_approx).epsilon(1e-6));
                     REQUIRE(std::gcd(div.num(), div.den()) == 1);
@@ -197,7 +207,7 @@ namespace xo {
 
                     double pwr_approx = pwr.num() / static_cast<double>(pwr.den());
 
-                    log && log(XTAG(ratio1), XTAG(exp), XTAG(pwr));
+                    log && log(XTAG_(ratio1), XTAG_(exp), XTAG_(pwr));
 
                     REQUIRE(pwr_approx == Approx(::pow(ratio1_approx, exp)).epsilon(1e-6));
                     REQUIRE(std::gcd(pwr.num(), pwr.den()) == 1);
@@ -207,7 +217,7 @@ namespace xo {
                 {
                     auto ratio1_str = ratio1.template to_str<20>();
 
-                    log && log(XTAG(ratio1_str));
+                    log && log(XTAG_(ratio1_str));
 
                     REQUIRE(!ratio1_str.empty());
 

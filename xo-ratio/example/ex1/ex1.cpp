@@ -1,20 +1,28 @@
 /** @file ex1.cpp **/
 
 #include "xo/ratio/ratio_iostream.hpp"
-#include <xo/indentlog/print/hex.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/hex.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
 #include <iostream>
 
 namespace {
-    using xo::xtag;
-    using xo::hex_view;
+    /* NB these two names are used only inside the NOT_USING block below, but
+     * are deliberately left at namespace scope so the compiler keeps checking
+     * them.  A parked debugging prompt that nothing compiles goes stale
+     * silently; this way, renaming xo::pp::hex_view breaks the build here and
+     * the prompt gets updated with it.
+     */
+    using xo::pp::xtag;
+    using xo::pp::hex_view;
 
 #ifdef NOT_USING
     template <std::size_t N>
     xo::flatstring<N>
     flatstring_from_int(int x)
     {
-        XO_SCOPE(log, always);
+        XO_SCOPE_(log, always);
 
         constexpr size_t buf_z = 20;
 
@@ -40,7 +48,9 @@ namespace {
         std::fill_n(retv, N, '\0');
         std::copy_n(buf + i, buf_z - i, retv);
 
-        log && log(xtag("i",i), xtag("buf[i..]", hex_view(buf+i, buf+buf_z, true)));
+        log && log(xtag("i",i),
+                   xtag("buf[i..]", hex_view(buf+i, buf+buf_z,
+                                             xo::pp::hexstyle::with_char)));
 
         return retv;
     }
