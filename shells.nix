@@ -122,6 +122,17 @@ let
     pkgs.timg
     pkgs.fish
     pkgs.nushell
+
+    # detachable sessions, so a claude/editor session started on the console
+    # can be reattached over ssh from another host (e.g. roly-laptop-26 ->
+    # roly-chicago-24 over the tailnet).
+    #
+    # NB provided here, tmux is only on PATH *inside* the dev shell.  The tmux
+    # server itself outlives the shell that started it, so sessions do persist;
+    # what does not is the client binary on a plain ssh login, so reattaching
+    # means entering the shell first (or naming the store path).  Hoisting tmux
+    # ahead of shell entry is the go-claude wrapper's job.
+    pkgs.tmux
   ];
 
   # xo general-purpose devutils
