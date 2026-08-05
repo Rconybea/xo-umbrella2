@@ -8,6 +8,7 @@ set(SELF_SOURCE_FILES
     Prettifier.test.cpp
     function_name.test.cpp
     dwim.test.cpp
+    hex.test.cpp
     pp_time.test.cpp
     pretty_struct.test.cpp
     tag_ostream.test.cpp

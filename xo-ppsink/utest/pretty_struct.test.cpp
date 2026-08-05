@@ -6,72 +6,26 @@
  *
  *  - via FlatSink: the flat *text*, which is what a reader sees when the
  *    struct fits on one line.
- *  - via MarkSink (below): the *token stream*, which FlatSink deliberately
- *    discards (its begin/split/end are no-ops).  ppsink ships no
- *    line-breaking sink -- PrettySink lives in xo-indentlog2, one level up --
- *    so the token stream is the only way to pin layout structure from here.
- *    That structure is exactly what a struct printer gets wrong: a missing
- *    split, or an indent passed to both begin() and split(), produces output
- *    that looks right until it has to wrap.  See
+ *  - via MarkSink (MarkSink.hpp): the *token stream*, which FlatSink
+ *    deliberately discards.  See
  *    xo-indentlog2/utest/pretty_struct.test.cpp for the rendered form.
  **/
 
 #include <xo/ppsink/pretty_struct.hpp>
 #include <xo/ppsink/FlatSink.hpp>
 #include <xo/ppsink/pretty_ostream.hpp>
+#include "MarkSink.hpp"
 #include <catch2/catch.hpp>
 #include <sstream>
 #include <string>
 
 namespace ut {
-    using xo::pp::PpSink;
-    using xo::pp::PpSinkInserter;
     using xo::pp::FlatSink;
     using xo::pp::field;
     using xo::pp::tag;
     using std::stringstream;
 
     namespace {
-        /** PpSink recording the token stream, so a test can assert on the
-         *  structure FlatSink throws away.
-         *    "<G>"      begin()          "<G n>"   begin(n)
-         *    "<S s,o>"  split(s,o)       "<N o>"   newline(o)
-         *    "</G>"     end()
-         **/
-        class MarkSink final : public PpSink {
-        public:
-            explicit MarkSink(std::ostream & os) : os_{os} {}
-
-            using PpSink::split;
-            using PpSink::newline;
-
-            PpSink & put(std::string_view s) override { os_ << s; return *this; }
-            PpSink & put_with_escape(std::string_view s, bool quote_flag) override {
-                if (quote_flag) os_ << '"';
-                os_ << s;
-                if (quote_flag) os_ << '"';
-                return *this;
-            }
-            PpSink & begin() override { os_ << "<G>"; return *this; }
-            PpSink & begin(std::int32_t offset) override {
-                os_ << "<G " << offset << ">"; return *this;
-            }
-            PpSink & split(std::uint32_t spaces, std::int32_t offset) override {
-                os_ << "<S " << spaces << "," << offset << ">"; return *this;
-            }
-            PpSink & newline(std::int32_t offset) override {
-                os_ << "<N " << offset << ">"; return *this;
-            }
-            PpSink & end() override { os_ << "</G>"; return *this; }
-            PpSinkInserter stream_open(std::uint32_t) override {
-                return PpSinkInserter(this, &os_);
-            }
-            void stream_commit() override {}
-
-        private:
-            std::ostream & os_;
-        };
-
         /** counts copies, to pin that field() does not copy its value **/
         struct Watched {
             Watched() = default;
