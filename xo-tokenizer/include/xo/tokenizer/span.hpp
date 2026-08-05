@@ -7,6 +7,7 @@
 #include <cassert>
 #include <cstdint>
 #include <ostream>
+#include <ranges>
 
 namespace xo {
     namespace scm {
@@ -24,6 +25,15 @@ namespace xo {
 
             /** typealias for span size (in units of CharT) **/
             using size_type = std::uint64_t;
+
+            /** typealias for span elements **/
+            using value_type = CharT;
+
+            /** typealias for span iterators.  a raw pointer, which models
+             *  std::contiguous_iterator;  that (with size()) is what makes
+             *  span a std::ranges::contiguous_range.
+             **/
+            using iterator = CharT *;
 
             ///@}
 
@@ -98,6 +108,22 @@ namespace xo {
 
             CharT * lo() const { return lo_; } /* get member span::lo_ */
             CharT * hi() const { return hi_; } /* get member span::hi_ */
+
+            /* begin()/end()/data() make span model
+             * std::ranges::contiguous_range,  so it works with ranged-for,
+             * <algorithm> and std::ranges.
+             *
+             * These return CharT* from a const method, exactly like lo()/hi():
+             * constness of the span does not propagate to its elements.
+             * Same semantics as std::span.
+             *
+             * data() is strictly redundant -- std::ranges::data already works
+             * once begin() returns a pointer -- but it is the spelling generic
+             * code reaches for directly.
+             */
+            iterator begin() const { return lo_; }  /* first element */
+            iterator end() const { return hi_; }    /* one past last element */
+            CharT * data() const { return lo_; }    /* start of the range */
 
             ///@}
 
@@ -289,3 +315,12 @@ namespace xo {
 
     }
 } /*namespace xo*/
+
+/** span is a non-owning view: iterators obtained from it remain valid after
+ *  the span object itself goes away.  Without this specialization
+ *  std::ranges::begin() on an rvalue span yields std::ranges::dangling, so
+ *  e.g. std::ranges::find(make_span(..), c) fails to compile.
+ *  std::span and std::string_view carry the same specialization.
+ **/
+template <typename CharT>
+inline constexpr bool std::ranges::enable_borrowed_range<xo::scm::span<CharT>> = true;

@@ -3,6 +3,7 @@
 set(SELF_EXECUTABLE_NAME utest.tokenizer)
 set(SELF_SOURCE_FILES
     tokenizer_utest_main.cpp
+    span.test.cpp
     tokenizer.test.cpp
     token.test.cpp)
 
