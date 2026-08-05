@@ -40,7 +40,6 @@ xo-indentlog xo-object2
 xo-indentlog xo-ordinaltree
 xo-indentlog xo-printable2
 xo-indentlog xo-pyunit
-xo-indentlog xo-ratio
 xo-indentlog xo-stringtable2
 xo-indentlog xo-tokenizer
 xo-indentlog xo-tokenizer2
@@ -62,6 +61,7 @@ xo-ppsink xo-arena
 xo-ppsink xo-distribution
 xo-ppsink xo-flatstring
 xo-ppsink xo-indentlog2
+xo-ppsink xo-ratio
 xo-ppsink xo-refcnt
 xo-ppsink xo-reflect
 xo-ppsink xo-subsys
