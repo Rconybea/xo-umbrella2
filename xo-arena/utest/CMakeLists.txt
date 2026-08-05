@@ -5,6 +5,7 @@ set(UTEST_EXE utest.arena)
 set(UTEST_SRCS
     arena_utest_main.cpp
 #    objectmodel.test.cpp
+    span.test.cpp
     DArena.test.cpp
     DArenaVector.test.cpp
     DArenaHashMap.test.cpp
