@@ -15,7 +15,8 @@ set(SELF_SOURCE_FILES
     PrettyVector.test.cpp
     scope.test.cpp
     span_pp.test.cpp
-    pretty_struct.test.cpp)
+    pretty_struct.test.cpp
+    hex.test.cpp)
 
 if (ENABLE_TESTING)
     # xo_add_utest_executable: add_executable + xo_include_options2 + add_test,
