@@ -4,4 +4,4 @@ result
 .build*
 .cache
 .projectile
-.scratch
+.xo-backlog
