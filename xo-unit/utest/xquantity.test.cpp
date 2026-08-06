@@ -2,8 +2,11 @@
 
 #include "xquantity.hpp"
 #include "xquantity_iostream.hpp"
-#include <xo/indentlog/print/tag.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
 #include <xo/randomgen/random_seed.hpp>
 #include <xo/randomgen/xoshiro256.hpp>
 #include <catch2/catch.hpp>
@@ -12,6 +15,11 @@
 #include <vector>
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
+    using xo::pp::tag;
+    using xo::pp::tostr;
+
     namespace u = xo::qty::u;
     namespace nu = xo::qty::nu;
 
@@ -67,7 +75,7 @@ namespace xo {
         nu_ratio_debug(const natural_unit<Int> & nu_lhs,
                        const natural_unit<Int> & nu_rhs)
         {
-            XO_SCOPE(log, always);
+            XO_SCOPE_(log, always);
 
             natural_unit<Int2x> ratio = nu_lhs.template to_repr<Int2x>();
 
@@ -149,9 +157,9 @@ namespace xo {
                 /* will combine nu basis units */
 
                 for (size_t i=0; i<n_experiment; ++i) {
-                    scope log1(XO_DEBUG(debug_flag));
+                    scope log1(XO_DEBUG_(debug_flag));
 
-                    INFO(tostr(XTAG(nu), XTAG(i)));
+                    INFO(tostr(XTAG_(nu), XTAG_(i)));
 
                     /* choose which dimensions to use */
                     std::set<xo::qty::dim> dim_set;
@@ -203,7 +211,7 @@ namespace xo {
                     constexpr double max_magdiff_per_bu = 1.1e5;
 
                     for (xo::qty::dim d : dim_set) {
-                        scope log(XO_DEBUG(debug_flag));
+                        scope log(XO_DEBUG_(debug_flag));
 
                         size_t d_j = static_cast<uint32_t>(d);
 
@@ -288,9 +296,9 @@ namespace xo {
                     }
 
                     INFO(xtag("k1=q1/q2", k1));
-                    INFO(XTAG(q1));
+                    INFO(XTAG_(q1));
                     INFO(xtag("k2=q2/q1", k2));
-                    INFO(XTAG(q2));
+                    INFO(XTAG_(q2));
 
                     /* q1/q2, with exact representation (given no fractional dimensions)
                      *
@@ -369,7 +377,7 @@ namespace xo {
         TEST_CASE("xquantity.full", "[xquantity.full]") {
             constexpr bool c_debug_flag = false;
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.xquantity.full"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.xquantity.full"));
 
             // can get bits instead from /dev/random by uncommenting the line below in place of 2nd line
             //rng::Seed<xoshiro256ss> seed;
@@ -385,7 +393,7 @@ namespace xo {
         TEST_CASE("xquantity", "[xquantity]") {
             constexpr bool c_debug_flag = false;
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.xquantity"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.xquantity"));
 
             /* not constexpr until c++26 */
             auto ng = unit_qty(u::nanogram);
@@ -398,7 +406,7 @@ namespace xo {
         TEST_CASE("xquantity2", "[xquantity]") {
             constexpr bool c_debug_flag = false;
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.xquantity2"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.xquantity2"));
 
             /* not constexpr until c++26 */
             xquantity ng = unit_qty(u::nanogram);
@@ -412,7 +420,7 @@ namespace xo {
         TEST_CASE("xquantity3", "[xquantity]") {
             constexpr bool c_debug_flag = false;
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.xquantity3"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.xquantity3"));
 
             /* not constexpr until c++26 */
             xquantity ng = unit_qty(u::nanogram);
@@ -426,7 +434,7 @@ namespace xo {
         TEST_CASE("xquantity4", "[xquantity]") {
             constexpr bool c_debug_flag = false;
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.xquantity4"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.xquantity4"));
 
             /* not constexpr until c++26 */
             xquantity ng = unit_qty(u::nanogram);
@@ -462,7 +470,7 @@ namespace xo {
         TEST_CASE("xquantity5", "[xquantity]") {
             constexpr bool c_debug_flag = false;
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.xquantity5"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.xquantity5"));
 
             /* not constexpr until c++26 */
             xquantity ng = unit_qty(u::nanogram);
@@ -491,7 +499,7 @@ namespace xo {
         TEST_CASE("xquantity6", "[xquantity]") {
             constexpr bool c_debug_flag = false;
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.xquantity6"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.xquantity6"));
 
             /* not constexpr until c++26 */
             xquantity ng = unit_qty(u::nanogram);
@@ -523,7 +531,7 @@ namespace xo {
         TEST_CASE("xquantity7", "[xquantity]") {
             constexpr bool c_debug_flag = false;
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.xquantity7"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.xquantity7"));
 
             /* not constexpr until c++26 */
             xquantity ng = unit_qty(u::nanogram);
@@ -555,7 +563,7 @@ namespace xo {
         TEST_CASE("xquantity.compare", "[xquantity.compare]") {
             constexpr bool c_debug_flag = false;
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.xquantity.compare"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.xquantity.compare"));
 
             /* not constexpr until c++26 */
             xquantity ng = 1000 * unit_qty(u::nanogram);
@@ -614,7 +622,7 @@ namespace xo {
         TEST_CASE("xquantity.compare2", "[xquantity]") {
             constexpr bool c_debug_flag = false;
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.xquantity.compare2"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.xquantity.compare2"));
 
             /* not constexpr until c++26 */
             xquantity ng = unit_qty(u::nanogram);

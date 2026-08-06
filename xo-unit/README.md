@@ -87,7 +87,7 @@ When this completes,  can point local browser to `xo-unit/.build/docs/sphinx/ind
 
 (Note that unit tests involve additional dependencies):
 ```
-$ xo-build --clone --configure --build --install xo-indentlog
+$ xo-build --clone --configure --build --install xo-ppsink
 $ xo-build --clone --configure --build --install xo-randomgen
 ```
 

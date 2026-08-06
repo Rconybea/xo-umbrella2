@@ -17,6 +17,12 @@ namespace xo {
         operator<<(std::ostream & os,
                    const scaled_unit<Int, OuterScale> & x)
         {
+            /* function-local: at namespace scope this would be ambiguous with
+             * legacy xo::xtag in any TU that also sees xo-indentlog.
+             * xo::pp::xtag arrives via natural_unit_iostream -> bpu_iostream.
+             */
+            using xo::pp::xtag;
+
             os << "<scaled-unit"
                << xtag("outer_scale_factor", x.outer_scale_factor_)
                << xtag("outer_scale_sq", x.outer_scale_sq_)

@@ -1,10 +1,16 @@
 /* @file bpu.test.cpp */
 
 #include "xo/unit/bpu.hpp"
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
+
     using xo::qty::abbrev::bpu_abbrev;
     using xo::qty::abbrev::flatstring_from_exponent;
 
@@ -28,7 +34,7 @@ namespace xo {
         TEST_CASE("flatstring_from_exponent", "[flatstring_from_exponent]") {
             constexpr bool c_debug_flag = false;
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.flatstring_from_exponent"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.flatstring_from_exponent"));
 
             log && log(xtag("^-3", flatstring_from_exponent(power_ratio_type(-3,1))));
             log && log(xtag("^-2", flatstring_from_exponent(power_ratio_type(-2,1))));
@@ -61,7 +67,7 @@ namespace xo {
         TEST_CASE("bpu_abbrev", "[bpu_abbrev]") {
             constexpr bool c_debug_flag = false;
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.bpu2_assemble_abbrev"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.bpu2_assemble_abbrev"));
 
             log && log(xtag("1/(kg*kg)", bpu_abbrev(dim::mass, scalefactor_ratio_type(1000, 1), power_ratio_type(-2, 1))));
             log && log(xtag("1/kg", bpu_abbrev(dim::mass, scalefactor_ratio_type(1000, 1), power_ratio_type(-1, 1))));

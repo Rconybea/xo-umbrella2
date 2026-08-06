@@ -5,12 +5,19 @@
 #include <xo/unit/xquantity.hpp>
 #include <xo/unit/xquantity_iostream.hpp>
 #include <xo/pyutil/pyutil.hpp>
+#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/pretty_ostream.hpp>  /* operator<< fallback for xquantity */
 //#include <pybind11/pybind11.h>
 //#include <pybind11/stl.h>
 //#include <pybind11/chrono.h>
 //#include <pybind11/operators.h>
 
 namespace xo {
+    /* this TU sits in namespace xo, so before the ppsink migration
+     * unqualified tostr resolved to legacy xo::tostr.
+     */
+    using xo::pp::tostr;
+
     namespace py = pybind11;
     using Unit = xo::qty::natural_unit<std::int64_t>;
     using XoQuantity = xo::qty::xquantity<double, std::int64_t>;

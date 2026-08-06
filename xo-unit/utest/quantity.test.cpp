@@ -3,10 +3,18 @@
 #include "xo/unit/quantity.hpp"
 #include "xo/unit/quantity_concept.hpp"
 #include "xo/unit/quantity_iostream.hpp"
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
+    using xo::pp::tostr;
+
     namespace qty {
         TEST_CASE("quantity.mass", "[quantity]") {
             constexpr bool c_debug_flag = true;
@@ -17,7 +25,7 @@ namespace xo {
 
             //auto rng = xo::rng::xoshiro256ss(seed);
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.quantity.mass"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.quantity.mass"));
             //log && log("(A)", xtag("foo", foo));
 
             constexpr auto pg = qty::picograms(1.0);
@@ -108,7 +116,7 @@ namespace xo {
         TEST_CASE("quantity.distance", "[quantity]") {
             constexpr bool c_debug_flag = true;
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.quantity.distance"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.quantity.distance"));
 
             constexpr auto pm = qty::picometers(1.0);
             static_assert(quantity_concept<decltype(pm)>);
@@ -197,7 +205,7 @@ namespace xo {
         TEST_CASE("quantity.time", "[quantity]") {
             constexpr bool c_debug_flag = true;
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.quantity.time"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.quantity.time"));
 
             constexpr auto ps = qty::picoseconds(1.0);
             static_assert(quantity_concept<decltype(ps)>);
@@ -374,7 +382,7 @@ namespace xo {
         TEST_CASE("quantity.currency", "[quantity.currency]") {
             constexpr bool c_debug_flag = true;
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.quantity.time"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.quantity.time"));
 
             constexpr auto ccy = qty::currency(1.0);
             static_assert(quantity_concept<decltype(ccy)>);

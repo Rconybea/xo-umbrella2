@@ -20,8 +20,9 @@ if (ENABLE_TESTING)
 
     xo_self_dependency(${SELF_EXE} xo_unit)
     xo_headeronly_dependency(${SELF_EXE} xo_ratio)
-    # at least need explicit {indentlog, randomgen} deps in a submodule build
-    xo_headeronly_dependency(${SELF_EXE} indentlog)
+    # at least need explicit {xo_ppsink, randomgen} deps in a submodule build
+    # xo_dependency, not headeronly: xo-ppsink is a compiled library
+    xo_dependency(${SELF_EXE} xo_ppsink)
     xo_headeronly_dependency(${SELF_EXE} randomgen)
     xo_external_target_dependency(${SELF_EXE} Catch2 Catch2::Catch2)
 endif()

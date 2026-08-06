@@ -3,11 +3,16 @@
 #include "xo/unit/natural_unit.hpp"
 #include "xo/unit/scaled_unit.hpp"
 #include "xo/unit/scaled_unit_iostream.hpp"
-#include <xo/indentlog/print/tag.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
+
     using xo::qty::detail::su_product;
     using xo::qty::detail::su_ratio;
     using xo::qty::detail::nu_ratio_inplace;
@@ -27,7 +32,7 @@ namespace xo {
         TEST_CASE("natural_unit0", "[natural_unit]") {
             constexpr bool c_debug_flag = false;
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.natural_unit0"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.natural_unit0"));
 
             {
                 constexpr natural_unit<int64_t> v
@@ -47,7 +52,7 @@ namespace xo {
         TEST_CASE("natural_unit1", "[natural_unit]") {
             constexpr bool c_debug_flag = false;
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.natural_unit1"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.natural_unit1"));
 
             {
                 constexpr natural_unit<int64_t> v
@@ -66,7 +71,7 @@ namespace xo {
         TEST_CASE("natural_unit2", "[natural_unit]") {
             constexpr bool c_debug_flag = false;
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.natural_unit2"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.natural_unit2"));
 
             {
                 constexpr natural_unit<int64_t> v
@@ -87,7 +92,7 @@ namespace xo {
         TEST_CASE("natural_unit3", "[natural_unit]") {
             constexpr bool c_debug_flag = false;
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.natural_unit3"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.natural_unit3"));
 
             {
                 constexpr natural_unit<int64_t> v
@@ -184,7 +189,7 @@ namespace xo {
 
             //auto rng = xo::rng::xoshiro256ss(seed);
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.bpu_rescale"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.bpu_rescale"));
             //log && log("(A)", xtag("foo", foo));
 
             /* keep spelled-out test.  Will generalize to fractional powers when c++26 available */
@@ -311,7 +316,7 @@ namespace xo {
 
             //auto rng = xo::rng::xoshiro256ss(seed);
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.bpu_product"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.bpu_product"));
             //log && log("(A)", xtag("foo", foo));
 
             {
@@ -350,7 +355,7 @@ namespace xo {
 
             //auto rng = xo::rng::xoshiro256ss(seed);
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.bpu_product2"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.bpu_product2"));
             //log && log("(A)", xtag("foo", foo));
 
             {
@@ -389,7 +394,7 @@ namespace xo {
 
             //auto rng = xo::rng::xoshiro256ss(seed);
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.bpu_array"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.bpu_array"));
             //log && log("(A)", xtag("foo", foo));
 
             {

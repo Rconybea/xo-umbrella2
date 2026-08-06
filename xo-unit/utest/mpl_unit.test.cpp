@@ -15,11 +15,16 @@
 // #include "xo/unit/dim_util2.hpp"
 #include <xo/reflect/Reflect.hpp>
 // #include "xo/cxxutil/demangle.hpp"
-#include <xo/indentlog/print/tag.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
+
     namespace ut {
         /* compile-time tests */
 
@@ -98,7 +103,7 @@ namespace xo {
 
             //auto rng = xo::rng::xoshiro256ss(seed);
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.native_dim_abbrev"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.native_dim_abbrev"));
             //log && log("(A)", xtag("foo", foo));
 
             /* NOTE: the .value_ expression below will fail to compile if missing specialization for
@@ -211,7 +216,7 @@ namespace xo {
         TEST_CASE("dimension", "[dimension]") {
             constexpr bool c_debug_flag = false;
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.dimension"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.dimension"));
             //log && log("(A)", xtag("foo", foo));
 
             using t1 = unit::bpu<unit::dim::currency, std::ratio<1,1>>;
@@ -297,7 +302,7 @@ namespace xo {
 
             //auto rng = xo::rng::xoshiro256ss(seed);
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.dimension2"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.dimension2"));
             //log && log("(A)", xtag("foo", foo));
 
             using di = di_cartesian_product<typename gram::dim_type, typename second::dim_type>;
@@ -322,7 +327,7 @@ namespace xo {
 
             //auto rng = xo::rng::xoshiro256ss(seed);
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.dimension3"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.dimension3"));
             //log && log("(A)", xtag("foo", foo));
 
             using u1 = unit_invert_t<second>;

@@ -134,7 +134,7 @@ Directories under ``PREFIX`` will then contain:
     |     +- unit/
     +- lib
     |  \- cmake
-    |     +- indentlog/
+    |     +- xo_ppsink/
     |     +- randomgen/
     |     +- xo_flatstring/
     |     \- xo_unit/
@@ -163,11 +163,11 @@ Build and Install with Unit Tests Enabled
 Running unit tests require a few additional dependencies:
 
 * `catch2`_ header-only unit-test framework
-* `xo-indentlog`_ logging with call-structure indenting
+* `xo-ppsink`_ pretty-printing sink + logging with call-structure indenting
 * `xo-randomgen`_ fast random number generator (xoshiro256ss)
 
 .. _catch2: https://github.com/catchorg/Catch2
-.. _xo-indentlog: https://github.com/rconybea/indentlog
+.. _xo-ppsink: https://github.com/rconybea/xo-ppsink
 .. _xo-randomgen: https://github.com/rconybea/randomgen
 
 Preamble:
@@ -178,7 +178,7 @@ Preamble:
    cd ~/proj/xo
 
    git clone https://github.com/rconybea/xo-cmake
-   git clone https://github.com/rconybea/indentlog xo-indentlog
+   git clone https://github.com/rconybea/xo-ppsink xo-ppsink
    git clone https://github.com/rconybea/randomgen xo-randomgen
    git clone https://github.com/rconybea/xo-flatstring
    git clone https://github.com/rconybea/xo-ratio
@@ -200,15 +200,15 @@ Build and Install `xo-cmake`:
     cmake --build xo-cmake/.build -j   # placeholder, no-op for now
     cmake --install xo-cmake/.build
 
-Build, Test and Install `xo-indentlog`:
+Build, Test and Install `xo-ppsink`:
 
 .. code-block:: bash
 
-    cmake -DCMAKE_INSTALL_PREFIX=$PREFIX -B xo-indentlog/.build -S xo-indentlog
-    cmake --build xo-indentlog/.build -j
-    cmake --build xo-indentlog/.build -- test   # run unit tests, cmake invokes ctest
-    (cd xo-indentlog/.build && ctest)           # or invoke ctest directly
-    cmake --install xo-indentlog/.build
+    cmake -DCMAKE_INSTALL_PREFIX=$PREFIX -B xo-ppsink/.build -S xo-ppsink
+    cmake --build xo-ppsink/.build -j
+    cmake --build xo-ppsink/.build -- test   # run unit tests, cmake invokes ctest
+    (cd xo-ppsink/.build && ctest)           # or invoke ctest directly
+    cmake --install xo-ppsink/.build
 
 Build and Install `xo-randomgen` (no unit tests yet):
 

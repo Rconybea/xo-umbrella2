@@ -4,11 +4,17 @@
 // #include "xo/unit/scaled_unit.hpp"
 #include "xo/unit/bpu.hpp"
 #include "xo/unit/bu_store.hpp"
-#include <xo/indentlog/print/tag.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
 #include <catch2/catch.hpp>
+#include <cstring>  /* ::strcmp -- was arriving via xo-indentlog */
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
+
     namespace ut {
         /* compile-time tests */
 
@@ -28,7 +34,7 @@ namespace xo {
 
             //auto rng = xo::rng::xoshiro256ss(seed);
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.basis_unit2_store"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.basis_unit2_store"));
             //log && log("(A)", xtag("foo", foo));
 
             log && log(xtag("mass*10^-9",       bu_abbrev_store.bu_abbrev(bu::picogram)));

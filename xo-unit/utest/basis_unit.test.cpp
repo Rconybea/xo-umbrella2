@@ -2,11 +2,17 @@
 
 #include "xo/unit/basis_unit.hpp"
 #include "xo/unit/bu_store.hpp"
-#include <xo/indentlog/scope.hpp>
-// #include "xo/indentlog/print/tag.hpp"
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+// #include <xo/ppsink/tag.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
+
     using xo::qty::scalefactor_ratio_type;
     using xo::qty::bu_abbrev;
     using xo::qty::basis_unit;
@@ -31,7 +37,7 @@ namespace xo {
 
         TEST_CASE("basis_unit1", "[basis_unit]") {
             constexpr bool c_debug_flag = false;
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.basis_unit1"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.basis_unit1"));
 
             static_assert(native_unit2_v[static_cast<int>(dim::mass)].native_dim() == dim::mass);
             static_assert(native_unit2_v[static_cast<int>(dim::distance)].native_dim() == dim::distance);

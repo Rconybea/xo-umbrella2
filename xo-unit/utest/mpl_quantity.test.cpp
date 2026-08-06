@@ -4,12 +4,17 @@
 #include <xo/reflect/Reflect.hpp>
 // #include <xo/randomgen/random_seed.hpp>
 // #include <xo/randomgen/xoshiro256.hpp>
-#include <xo/indentlog/print/tag.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
 #include <catch2/catch.hpp>
 #include <compare>
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
+
     using xo::unit::quantity;
 
     using xo::unit::qty::kilograms;
@@ -53,7 +58,7 @@ namespace xo {
 
             //auto rng = xo::rng::xoshiro256ss(seed);
 
-            //scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.quantity"), xtag("foo", foo), ...);
+            //scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.quantity"), xtag("foo", foo), ...);
             //log && log("(A)", xtag("foo", foo));
 
             quantity<units::second, int64_t> t = seconds(1L);
@@ -67,7 +72,7 @@ namespace xo {
         TEST_CASE("add1", "[quantity]") {
             constexpr bool c_debug_flag = false;
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.add1"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.add1"));
 
             quantity<units::second, int64_t> t1 = seconds(1);
             quantity<units::second, int64_t> t2 = seconds(2);
@@ -90,7 +95,7 @@ namespace xo {
         TEST_CASE("add2", "[quantity]") {
             constexpr bool c_debug_flag = false;
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.add2"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.add2"));
 
             quantity<units::second, int64_t> t1 = seconds(1);
             {
@@ -114,7 +119,7 @@ namespace xo {
 
                 static_assert(std::same_as<decltype(m2_sec), int64_t>);
 
-                log && log(XTAG(m2_sec));
+                log && log(XTAG_(m2_sec));
 
                 CHECK(m2_sec == 120);
             }
@@ -151,7 +156,7 @@ namespace xo {
         TEST_CASE("add4", "[quantity]") {
             constexpr bool c_debug_flag = false;
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.add4"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.add4"));
 
             using u_kgps_result = unit_cartesian_product<units::kilogram, unit_invert_t<units::second>>;
             using u_kgps = u_kgps_result::exact_unit_type;
@@ -198,7 +203,7 @@ namespace xo {
                 static_assert(q2.basis_power<dim::mass> == 1);
                 static_assert(q2.basis_power<dim::time> == -1);
 
-                log && log(XTAG(q1), XTAG(q2));
+                log && log(XTAG_(q1), XTAG_(q2));
 
                 CHECK(strcmp(q1.unit_cstr(), "kg.s^-1") == 0);
                 CHECK(q1.scale() == 0.1);
@@ -217,7 +222,7 @@ namespace xo {
 
             //auto rng = xo::rng::xoshiro256ss(seed);
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.add5"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.add5"));
             //log && log("(A)", xtag("foo", foo));
 
             auto vol_250d = volatility250d(0.2);
@@ -257,7 +262,7 @@ namespace xo {
 
                 static_assert(sum.basis_power<dim::time, double> == -0.5);
 
-                log && log(XTAG(sum));
+                log && log(XTAG_(sum));
 
                 CHECK(strcmp(sum.unit_cstr(), "yr250^-(1/2)") == 0);
                 /* 0.1mo^-(1/2) ~ 0.288675yr250^-(1/2) */
@@ -275,7 +280,7 @@ namespace xo {
 
             //auto rng = xo::rng::xoshiro256ss(seed);
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.mult1"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.mult1"));
             //log && log("(A)", xtag("foo", foo));
 
             auto q0 = milliseconds(5);
@@ -435,7 +440,7 @@ namespace xo {
 
             //auto rng = xo::rng::xoshiro256ss(seed);
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.div1"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.div1"));
             //log && log("(A)", xtag("foo", foo));
 
             auto q0 = milliseconds(5);
@@ -465,7 +470,7 @@ namespace xo {
                 auto r = q0p/q1;
                 static_assert(std::same_as<decltype(r), double>);
 
-                log && log(XTAG(q0p), xtag("q0p/q1", r));
+                log && log(XTAG_(q0p), xtag("q0p/q1", r));
                 log && log(xtag("r.type", Reflect::require<decltype(r)>()->canonical_name()));
 
                 /* verify dimension */
@@ -478,7 +483,7 @@ namespace xo {
             auto r1 = 1.0 / q0;
 
             {
-                log && log(XTAG(q0), xtag("r1=1.0/q0", r1));
+                log && log(XTAG_(q0), xtag("r1=1.0/q0", r1));
 
                 /* verify dimension */
                 static_assert(r1.basis_power<dim::time> == -1);
@@ -497,7 +502,7 @@ namespace xo {
 
             //auto rng = xo::rng::xoshiro256ss(seed);
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.div2"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.div2"));
 
             auto q0 = milliseconds(5);
             auto q1 = milliseconds(20.0);
@@ -565,7 +570,7 @@ namespace xo {
 
             //auto rng = xo::rng::xoshiro256ss(seed);
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.div3"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.div3"));
 
             auto q0 = milliseconds(5);
             auto q1 = milliseconds(20.0);
@@ -573,7 +578,7 @@ namespace xo {
             {
                 auto r = q0/q1;
 
-                log && log(XTAG(q0), XTAG(q1), xtag("q0/q1", r));
+                log && log(XTAG_(q0), XTAG_(q1), xtag("q0/q1", r));
                 log && log(xtag("r.type", Reflect::require<decltype(r)>()->canonical_name()));
 
                 /* verify dimension */
@@ -635,7 +640,7 @@ namespace xo {
 
             //auto rng = xo::rng::xoshiro256ss(seed);
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.div4"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.div4"));
             //log && log("(A)", xtag("foo", foo));
 
             auto q1 = milliseconds(1);
@@ -647,7 +652,7 @@ namespace xo {
              * so q1/q2 ~ 0.6928
              */
 
-            log && log(XTAG(q1), XTAG(q2), xtag("q1/q2", r));
+            log && log(XTAG_(q1), XTAG_(q2), xtag("q1/q2", r));
 
             /* verify dimensionless result */
             static_assert(std::same_as<decltype(r), double>);
@@ -668,7 +673,7 @@ namespace xo {
 
             //auto rng = xo::rng::xoshiro256ss(seed);
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.div5"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.div5"));
             //log && log("(A)", xtag("foo", foo));
 
             auto q1 = volatility250d(0.2);
@@ -680,7 +685,7 @@ namespace xo {
              * so q1/q2 ~ 0.6928
              */
 
-            log && log(XTAG(q1), XTAG(q2), XTAG(q1/q2));
+            log && log(XTAG_(q1), XTAG_(q2), XTAG_(q1/q2));
 
             /* verify dimensionless result */
             static_assert(std::same_as<decltype(r), double>);
@@ -699,7 +704,7 @@ namespace xo {
 
             //auto rng = xo::rng::xoshiro256ss(seed);
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.muldiv5"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.muldiv5"));
             //log && log("(A)", xtag("foo", foo));
 
             auto t = milliseconds(10);
@@ -711,7 +716,7 @@ namespace xo {
              * so q1/q2 ~ 0.6928
              */
 
-            log && log(XTAG(m), XTAG(t), xtag("a=m.t^-2", a));
+            log && log(XTAG_(m), XTAG_(t), xtag("a=m.t^-2", a));
 
             /* verify dimensions of result + sticky units */
             CHECK(strcmp(t.unit_cstr(), "ms") == 0);
@@ -734,7 +739,7 @@ namespace xo {
 
             //auto rng = xo::rng::xoshiro256ss(seed);
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.rescale"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.rescale"));
             //log && log("(A)", xtag("foo", foo));
 
             auto q = kilograms(150.0) / minutes(1); /* 150.0kg.min^-1 */
@@ -742,7 +747,7 @@ namespace xo {
             CHECK(strcmp(q.unit_cstr(), "kg.min^-1") == 0);
             CHECK(q.scale() == 150.0);
 
-            log && log(XTAG(q));
+            log && log(XTAG_(q));
 
             namespace u = xo::unit::units;
 
@@ -751,21 +756,21 @@ namespace xo {
             CHECK(strcmp(q1.unit_cstr(), "kg.ms^-1") == 0);
             CHECK(q1.scale() == 0.0025);
 
-            log && log(XTAG(q1));
+            log && log(XTAG_(q1));
 
             auto q2 = q1.with_basis_unit<u::gram>(); /* 2.5g.ms^-1 */
 
             CHECK(strcmp(q2.unit_cstr(), "g.ms^-1") == 0);
             CHECK(q2.scale() == 2.5);
 
-            log && log(XTAG(q2));
+            log && log(XTAG_(q2));
 
             auto q3 = q2.with_basis_unit<u::second>(); /* 2500g.s^-1 */
 
             CHECK(strcmp(q3.unit_cstr(), "g.s^-1") == 0);
             CHECK(q3.scale() == 2500.0);
 
-            log && log(XTAG(q3));
+            log && log(XTAG_(q3));
         } /*TEST_CASE(rescale)*/
 
         TEST_CASE("rescale2", "[quantity]") {
@@ -777,7 +782,7 @@ namespace xo {
 
             //auto rng = xo::rng::xoshiro256ss(seed);
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.rescale2"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.rescale2"));
             //log && log("(A)", xtag("foo", foo));
 
             namespace u = xo::unit::unit_qty;
@@ -785,7 +790,7 @@ namespace xo {
             auto q1 = kilometers(150.0) / u::hour;
             auto q2 = q1.with_units_from(u::meter / u::second);
 
-            log && log(XTAG(q1), XTAG(q2));
+            log && log(XTAG_(q1), XTAG_(q2));
         } /*TEST_CASE(rescale2)*/
 
         TEST_CASE("compare1", "[quantity]") {
@@ -797,7 +802,7 @@ namespace xo {
 
             //auto rng = xo::rng::xoshiro256ss(seed);
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.compare1"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.compare1"));
             //log && log("(A)", xtag("foo", foo));
 
             namespace u = xo::unit::unit_qty;
@@ -819,7 +824,7 @@ namespace xo {
             CHECK(q2 < q1);
             CHECK(q2 <= q1);
 
-            log && log(XTAG(q1), XTAG(q2), XTAG(is_gt(q1<=>q2)));
+            log && log(XTAG_(q1), XTAG_(q2), XTAG_(is_gt(q1<=>q2)));
         } /*TEST_CASE(compare1)*/
 
         TEST_CASE("compare2", "[quantity]") {
@@ -831,7 +836,7 @@ namespace xo {
 
             //auto rng = xo::rng::xoshiro256ss(seed);
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.compare2"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.compare2"));
             //log && log("(A)", xtag("foo", foo));
 
             namespace u = xo::unit::unit_qty;
@@ -853,7 +858,7 @@ namespace xo {
             CHECK(q2 < q1);
             CHECK(q2 <= q1);
 
-            log && log(XTAG(q1), XTAG(q2), XTAG(is_gt(q1<=>q2)));
+            log && log(XTAG_(q1), XTAG_(q2), XTAG_(is_gt(q1<=>q2)));
         } /*TEST_CASE(compare2)*/
 
     } /*namespace ut*/

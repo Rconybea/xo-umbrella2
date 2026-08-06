@@ -2,11 +2,16 @@
 
 #include "xo/unit/scaled_unit.hpp"
 #include "xo/unit/scaled_unit_iostream.hpp"
-#include <xo/indentlog/print/tag.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
+
     namespace qty {
         using su64_type = scaled_unit<std::int64_t>;
         using xo::qty::detail::su_product;
@@ -33,7 +38,7 @@ namespace xo {
         TEST_CASE("su_product", "[scaled_unit]") {
             constexpr bool c_debug_flag = false;
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.su_product"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.su_product"));
 
             {
                 constexpr natural_unit<int64_t> v
@@ -73,7 +78,7 @@ namespace xo {
         TEST_CASE("scaled_unit0", "[scaled_unit]") {
             constexpr bool c_debug_flag = false;
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.scaled_unit0"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.scaled_unit0"));
 
             constexpr auto ng = u::nanogram;
             constexpr auto ng2 = ng * ng;
@@ -88,7 +93,7 @@ namespace xo {
         TEST_CASE("scaled_unit1", "[scaled_unit]") {
             constexpr bool c_debug_flag = false;
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.scaled_unit1"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.scaled_unit1"));
 
             constexpr auto ng = u::nanogram;
             constexpr auto ng2 = ng / ng;
@@ -103,7 +108,7 @@ namespace xo {
         TEST_CASE("scaled_unit2", "[scaled_unit]") {
             constexpr bool c_debug_flag = false;
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.scaled_unit2"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.scaled_unit2"));
 
             constexpr auto ms = u::millisecond;
             constexpr auto ms2 = ms * ms;

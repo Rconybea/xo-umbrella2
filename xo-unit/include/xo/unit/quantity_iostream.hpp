@@ -21,19 +21,19 @@ namespace xo {
 
     } /*namespace qty*/
 
-    namespace print {
-#ifndef ppdetail_atomic
-        template <auto NaturalUnit, typename Repr>
-        struct ppdetail<xo::qty::quantity<NaturalUnit, Repr>> {
-            using target_type = xo::qty::quantity<NaturalUnit, Repr>;
-
-            static bool print_pretty(const ppindentinfo & ppii,
-                                     const target_type & x) {
-                return ppdetail_atomic<target_type>::print_pretty(ppii, x);
-            }
-        };
-#endif
-    } /*namespace print*/
+    /* NB there was a legacy xo-indentlog ppdetail<quantity<..>> here, declaring
+     * quantity a print-atom by delegating to ppdetail_atomic<>.  Deleted, not
+     * ported, for two reasons:
+     *
+     * 1. It was dead code.  It sat under #ifndef ppdetail_atomic, and
+     *    xo-indentlog's ppdetail_atomic.hpp defines that macro
+     *    unconditionally -- so the block never compiled in any build that saw
+     *    indentlog.  Dropping the indentlog include is what "activated" it.
+     * 2. ppsink needs no equivalent.  Its primary Prettifier<T> template is
+     *    empty, so a type with no specialization already falls through to the
+     *    string-like leaf and then to operator<< -- which is exactly what
+     *    declaring it an atom was asking for.  operator<< is right above.
+     */
 } /*namespace xo*/
 
 /** end quantity_iostream.hpp **/

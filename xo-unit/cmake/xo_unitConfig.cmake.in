@@ -4,7 +4,7 @@ include(CMakeFindDependencyMacro)
 
 find_dependency(xo_flatstring)
 find_dependency(xo_ratio)
-find_dependency(indentlog)
+find_dependency(xo_ppsink)
 #find_dependency(printjson)
 #find_dependency(callback)
 
