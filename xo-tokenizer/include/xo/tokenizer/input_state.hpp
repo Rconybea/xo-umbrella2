@@ -135,6 +135,20 @@ namespace xo {
             std::pair<input_error, span_type> capture_current_line(const span_type & input,
                                                                    bool eof_flag);
 
+            /** Add @p z to the count of whitespace preceding the next token.
+             *
+             *  capture_current_line() resets .whitespace, since it is counted
+             *  from the start of a line.  When whitespace separating two tokens
+             *  straddles a line boundary the caller advances the line mid-skip,
+             *  and uses this to carry the earlier count across -- .whitespace
+             *  counts whitespace since the end of the preceding token, and a
+             *  newline between two tokens is whitespace like any other.
+             *
+             *  Alters:
+             *    .whitespace
+             **/
+            void add_whitespace(std::size_t z) { this->whitespace_ += z; }
+
             /** atomically return current line while discarding it from input state
              *
              *  Alters
@@ -298,7 +312,13 @@ namespace xo {
             while ((eol < input.hi()) && (*eol != '\n'))
                 ++eol;
 
-            if (*eol == '\n') {
+            /* NB the loop stops either ON a newline or AT input.hi().  Testing
+             * *eol to tell those apart (as this did) dereferences one past the
+             * end of the span whenever the input has no newline.
+             */
+            const bool found_newline = (eol < input.hi());
+
+            if (found_newline) {
                 /* include \n at end-of-line */
                 ++eol;
             } else {
@@ -330,8 +350,15 @@ namespace xo {
 
             this->whitespace_ = 0;
 
-            /* skip whitespace + remember beginning of most recent line */
-            while (is_whitespace(*ix) && (ix != current_line_.hi())) {
+            /* skip whitespace + remember beginning of most recent line.
+             *
+             * NB bounds check FIRST: the operands were previously the other way
+             * round, so *ix was dereferenced before ix was known to be in range,
+             * reading one past the end of the line (SIGSEGV when the buffer ends
+             * on a page boundary).  Uses < rather than != so an ix that somehow
+             * overshoots terminates instead of running away -- cf. line 298.
+             */
+            while ((ix < current_line_.hi()) && is_whitespace(*ix)) {
                 ++ix;
 
                 ++(this->whitespace_);

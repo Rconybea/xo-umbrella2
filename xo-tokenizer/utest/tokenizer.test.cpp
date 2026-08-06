@@ -408,7 +408,16 @@ namespace xo {
                     {
                         log && log(xtag("i_tk", i_tk));
 
-                        auto sr = tkz.scan(in_span, in_span.empty());
+                        /* eof=true: in_span is the whole input, so there is no
+                         * more coming.  Was in_span.empty(), which is false for
+                         * every non-empty testcase -- so the tokenizer was told
+                         * "more input follows", capture_current_line() returned
+                         * input_error::incomplete for a line with no newline,
+                         * and no token could ever be produced.  Every assertion
+                         * below is guarded by tk.is_valid(), so the whole case
+                         * passed vacuously.
+                         */
+                        auto sr = tkz.scan(in_span, true /*eof*/);
                         const auto & tk = sr.get_token();
 
                         if (tk.is_valid()) {

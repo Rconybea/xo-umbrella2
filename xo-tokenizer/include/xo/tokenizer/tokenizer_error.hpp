@@ -60,7 +60,16 @@ namespace xo {
 #endif
             const input_state_type & input_state() const { return input_state_; }
 #pragma GCC diagnostic pop
-            size_t tk_start() const { return input_state_.current_pos(); }
+            /* offset of the token's FIRST character from the start of the line.
+             *
+             * NB was input_state_.current_pos(), which is where scanning had
+             * advanced to by the time the error was raised -- i.e. the END of
+             * the offending token, not its start.  Reporting e.g. 9 rather
+             * than 0 for the single token "123.456ez".  input_state_.tk_start()
+             * is the line-relative token start (set by skip_leading_whitespace),
+             * and is what render() at the bottom of this file already uses.
+             */
+            size_t tk_start() const { return input_state_.tk_start(); }
             size_t whitespace() const { return input_state_.whitespace(); }
             size_t error_pos() const { return error_pos_; }
 

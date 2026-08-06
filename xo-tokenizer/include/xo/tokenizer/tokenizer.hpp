@@ -739,11 +739,23 @@ namespace xo {
                     tk_text.clear();
             }
 
-            /* input.prefix(0):
-             * require caller preserves current input line until it's entirely exhausted
+            /* consumed = the whitespace skipped ahead of this token, plus the
+             * token itself: a token-bearing result releases exactly the input
+             * it accounted for.
+             *
+             * Was current_line().prefix(0) -- always empty, under a "caller
+             * preserves the whole input line until it is entirely exhausted"
+             * policy.  That left .consumed() unpopulated on every token result,
+             * so callers had nothing to advance their input span by.
+             *
+             * NB initial_whitespace is contiguous and immediately precedes the
+             * token (see scan(), which reads it from input_state_.whitespace()
+             * before assembling), so token_text.lo() - initial_whitespace is
+             * the start of the gap following the previous token.
              */
             return result_type(token_type(tk_type, std::move(tk_text)),
-                               input_state_ref.current_line().prefix(0));
+                               span_type(token_text.lo() - initial_whitespace,
+                                         token_text.hi()));
         } /*assemble_token*/
 
         /* TODO: input_state_ as argument ? */
@@ -777,9 +789,58 @@ namespace xo {
              */
 
             /* automagically no-ops when the same input presented twice */
-            this->input_state_.capture_current_line(input, eof_flag);
+            auto [capture_err, line] = this->input_state_.capture_current_line(input, eof_flag);
+
+            if (capture_err != input_error::ok) {
+                /* no complete line available (no newline, and not eof), so
+                 * input_state_.current_line_ was not established.  Must not
+                 * proceed: skip_leading_whitespace() would return nullptr and
+                 * every deref below would be on a null line.
+                 */
+                log && log("incomplete input -> need complete line");
+
+                return result_type::make_partial(input.prefix(0ul));
+            }
 
             const CharT * ix = this->input_state_.skip_leading_whitespace();
+
+            /* An input span is a block of text that may cross several lines,
+             * but skip_leading_whitespace() is line-scoped: it stops at
+             * current_line_.hi() (see its contract in input_state.hpp).  So
+             * when leading whitespace carries us to the end of the buffered
+             * line and the span still holds input, advance to the next line
+             * and keep skipping.
+             *
+             * current_line_ exists "only to report errors" -- it is the line
+             * quoted back by tokenizer_error::report() -- so it must name the
+             * line containing the scan position, not whichever line the span
+             * happened to start on.  Without this, scanning a token on line 2
+             * leaves current_line_ describing line 1, and advance_until()
+             * asserts.
+             *
+             * whitespace_ is accumulated across the hop: it counts whitespace
+             * since the end of the preceding token, and a newline separating
+             * two tokens is whitespace like any other.
+             */
+            while ((ix < input.hi())
+                   && (ix == this->input_state_.current_line().hi()))
+            {
+                const std::size_t ws_so_far = this->input_state_.whitespace();
+
+                auto [next_err, next_line]
+                    = this->input_state_.capture_current_line(span_type(ix, input.hi()),
+                                                              eof_flag);
+
+                if (next_err != input_error::ok) {
+                    log && log("incomplete next line -> need more input");
+
+                    return result_type::make_partial(input.prefix(0ul));
+                }
+
+                ix = this->input_state_.skip_leading_whitespace();
+
+                this->input_state_.add_whitespace(ws_so_far);
+            }
 
             if(ix == input.hi()) {
                 log && log("end input -> consume current line");
@@ -820,15 +881,20 @@ namespace xo {
 
                 ++ix;
 
-#ifdef OBSOLETE // no longer a thing. either input ends in whitespace, or ends translation unit
                 if (ix == input.hi()) {
-                    /* need more input to know if/when token complete */
-                    this->prefix_ += std::string(tk_start, input.hi());
-
-                    log && log(xtag("captured-prefix1", this->prefix_));
-                } else
-#endif
-                    {
+                    /* lead char ends the input, so there is no 2nd char to
+                     * look at:  the token is complete as 1-char punctuation
+                     * (e.g. "<" -> tk_leftangle).
+                     *
+                     * NB do NOT dereference ix here.  Same guard as the '-'
+                     * and '>' branches below.  It was previously #ifdef'd out
+                     * as "no longer a thing -- either input ends in whitespace,
+                     * or ends translation unit"; that invariant does not hold,
+                     * and without the guard ix advances to input.hi()+1, which
+                     * the scan loop below (`ix != input.hi()`) then walks past
+                     * the end of the buffer.
+                     */
+                } else {
                     CharT ch2 = *ix;
 
                     if (((ch2 >= '0') && (ch2 <= '9'))
@@ -874,13 +940,23 @@ namespace xo {
                 }
 
                 if (!complete_flag) {
-                    log && log("unterminated string literal");
-
-                    return result_type::make_error_consume_current_line
-                               (__FUNCTION__ /*src_function*/,
-                                "unterminated string literal",
-                                (ix - tk_start),
-                                this->input_state_);
+                    /* Deliberately NOT reporting an error here.  scan() only
+                     * knows "no closing quote was found"; assemble_token() walks
+                     * the literal and can say *why* -- either
+                     *   "expecting key following escape character \"   (trailing \)
+                     * or
+                     *   "missing terminating '\"' to complete literal string"
+                     * Returning a generic "unterminated string literal" from
+                     * here pre-empted both and attributed the error to scan.
+                     *
+                     * Fall through to the common tail, which hands
+                     * [tk_start, ix) to assemble_token().
+                     *
+                     * NB the naked newline/CR case above IS reported here: that
+                     * one is scan()'s to diagnose, since assemble_token() never
+                     * sees across a line.
+                     */
+                    log && log("unterminated string literal -> defer to assemble_token");
                 }
             } else {
                 /* ix is start of some token */
