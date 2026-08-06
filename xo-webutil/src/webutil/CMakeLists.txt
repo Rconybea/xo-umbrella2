@@ -11,8 +11,8 @@ xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 $
 
 xo_dependency(${SELF_LIB} refcnt)
 xo_dependency(${SELF_LIB} callback)
-# StreamEndpointDescr.cpp / HttpEndpointDescr.cpp include <xo/indentlog/print/tag.hpp>.
-# Declared explicitly: xo-refcnt no longer propagates xo-indentlog.
-xo_dependency(${SELF_LIB} indentlog)
+# StreamEndpointDescr.cpp / HttpEndpointDescr.cpp use xo::pp::{xtag,tostr}.
+# Only the .cpp files -- no public header of xo-webutil needs it.
+xo_dependency(${SELF_LIB} xo_ppsink)
 
 # end CMakeLists.txt
