@@ -48,20 +48,12 @@ namespace xo {
     namespace web {
         inline std::ostream &
         operator<<(std::ostream & os, StreamEndpointDescr const & x) {
-            xo::pp::FlatSink sink(os);
-
-            x.pretty(sink);
-
-            return os;
+            return xo::pp::pp_to_stream(os, x);
         } /*operator<<*/
 
         inline std::ostream &
         operator<<(std::ostream & os, HttpEndpointDescr const & x) {
-            xo::pp::FlatSink sink(os);
-
-            x.pretty(sink);
-
-            return os;
+            return xo::pp::pp_to_stream(os, x);
         } /*operator<<*/
     } /*namespace web*/
 } /*namespace xo*/

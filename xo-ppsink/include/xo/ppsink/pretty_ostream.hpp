@@ -17,6 +17,32 @@
 #pragma once
 
 #include "pretty.hpp"
+#include <FlatSink.hpp>
 #include <ostream>
+
+namespace xo::pp {
+
+    /** Write @p x on stream @p os, using a FlatSink.
+     *  Equivalent to os << x, except that it can use
+     *  Prettifier<T>::print() where available,
+     *  to determine printing.
+     *
+     *  Although it uses pretty-printing infra,
+     *  this path will not pretty-print.
+     *
+     *  May use with pretty-enabled classes to provide
+     *  legacy operator<<. E.g. see webutil_ostream.hpp
+     *
+     *  For bona-fide pretty-printing see xo-indentlog2::PrettySink
+     **/
+    template <typename T>
+    inline std::ostream &
+    pp_to_stream(std::ostream & os, const T & x) {
+        FlatSink sink(os);
+        sink.pp(x);
+        return os;
+    }
+
+}
 
 /* end pretty_ostream.hpp */

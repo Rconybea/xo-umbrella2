@@ -38,10 +38,7 @@ namespace xo {
 
             /** structured pretty-printing: render this descriptor into @p sink.
              *
-             *  This is the rendering primitive -- Prettifier below and
-             *  display_string() both go through it.  Deliberately a PpSink
-             *  rather than a std::ostream: see webutil_ostream.hpp if you want
-             *  @c os << descr .
+             *  See webutil_ostream.hpp for @c os << StreamEndpointDescr.
              **/
             void pretty(xo::pp::PpSink & sink) const;
 
@@ -70,14 +67,7 @@ namespace xo {
 } /*namespace xo*/
 
 namespace xo::pp {
-    /** pretty-print a StreamEndpointDescr into a PpSink.
-     *
-     *  Lives here, not in a separate _pp.hpp, because the class already
-     *  declares pretty(PpSink&) -- so this header depends on xo-ppsink either
-     *  way, and making the ppsink path the opt-in one would get the ergonomics
-     *  backwards.  webutil_ostream.hpp is the opt-in header, for the ostream
-     *  path we would rather callers inside xo did not take.
-     **/
+    /** pretty-print a StreamEndpointDescr into a PpSink. **/
     template <>
     struct Prettifier<xo::web::StreamEndpointDescr> {
         static void print(PpSink & sink, const xo::web::StreamEndpointDescr & x) {
