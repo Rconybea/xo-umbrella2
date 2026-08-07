@@ -4,10 +4,21 @@
  */
 
 #include "GcStatistics.hpp"
-#include <xo/indentlog/print/pretty_vector.hpp>
+#include <xo/ppsink/pretty_array.hpp>    /* Prettifier<std::array<T,N>> for gen_v_ */
+#include <xo/ppsink/PrettyVector.hpp>   /* Prettifier<std::vector<T>> */
+#include <xo/ppsink/pretty_struct.hpp>
+#include <xo/ppsink/tag_ostream.hpp>    /* os << xtag(..) in display() */
+#include <ostream>
 
 namespace xo {
     namespace gc {
+        /* NB in namespace xo::gc, not namespace xo -- one scope in, so an
+         * unqualified xtag cannot become ambiguous with legacy xo::xtag if
+         * some header in this TU makes it visible.  xrtag -> xtag: ppsink's
+         * xtag does not escape, matching legacy tagstyle::raw.
+         */
+        using xo::pp::xtag;
+
         void
         PerGenerationStatistics::include_gc(std::size_t alloc_z,
                                             std::size_t before_z,
@@ -33,12 +44,12 @@ namespace xo {
         PerGenerationStatistics::display(std::ostream & os) const
         {
             os << "<PerGenerationStatistics"
-               << xrtag("used", used_z_)
-               << xrtag("n_gc", n_gc_)
-               << xrtag("new_alloc_z", new_alloc_z_)
-               << xrtag("scanned_z", scanned_z_)
-               << xrtag("survive_z", survive_z_)
-               << xrtag("promote_z", promote_z_)
+               << xtag("used", used_z_)
+               << xtag("n_gc", n_gc_)
+               << xtag("new_alloc_z", new_alloc_z_)
+               << xtag("scanned_z", scanned_z_)
+               << xtag("survive_z", survive_z_)
+               << xtag("promote_z", promote_z_)
                << ">";
         }
 
@@ -72,9 +83,9 @@ namespace xo {
         GcStatistics::display(std::ostream & os) const
         {
             os << "<GcStatistics"
-               << xrtag("gen_v", gen_v_)
-               << xrtag("total_allocated", total_allocated_)
-               << xrtag("total_promoted_sab", total_promoted_sab_)
+               << xtag("gen_v", gen_v_)
+               << xtag("total_allocated", total_allocated_)
+               << xtag("total_promoted_sab", total_promoted_sab_)
                 // total_promoted
                 // n_mtuation
                 // n_logged_mutation
@@ -88,17 +99,17 @@ namespace xo {
         GcStatisticsExt::display(std::ostream & os) const
         {
             os << "<GcStatisticsExt"
-               << xrtag("gen_v", gen_v_)
-               << xrtag("total_allocated", total_allocated_)
-               << xrtag("total_promoted_sab", total_promoted_)
-               << xrtag("nursery_z", nursery_z_)
-               << xrtag("nursery_before_ckp_z", nursery_before_checkpoint_z_)
-               << xrtag("nursery_after_ckp_z", nursery_after_checkpoint_z_)
-               << xrtag("tenured_z", tenured_z_)
-               << xrtag("n_mutation", n_mutation_)
-               << xrtag("n_logged_mutation", n_logged_mutation_)
-               << xrtag("n_xgen_mutation", n_xgen_mutation_)
-               << xrtag("n_xckp_mutation", n_xckp_mutation_)
+               << xtag("gen_v", gen_v_)
+               << xtag("total_allocated", total_allocated_)
+               << xtag("total_promoted_sab", total_promoted_)
+               << xtag("nursery_z", nursery_z_)
+               << xtag("nursery_before_ckp_z", nursery_before_checkpoint_z_)
+               << xtag("nursery_after_ckp_z", nursery_after_checkpoint_z_)
+               << xtag("tenured_z", tenured_z_)
+               << xtag("n_mutation", n_mutation_)
+               << xtag("n_logged_mutation", n_logged_mutation_)
+               << xtag("n_xgen_mutation", n_xgen_mutation_)
+               << xtag("n_xckp_mutation", n_xckp_mutation_)
                 // << xtag("per_type_stats", per_type_stats_)
                << ">";
         }
@@ -114,7 +125,7 @@ namespace xo {
             auto rate = gz / dt_sec;
             float retval = rate.scale();
 
-            //scope log(XO_DEBUG(true));
+            //scope log(XO_DEBUG_(true));
             //log && log(xtag("gz", gz), xtag("dt_sec", dt_sec), xtag("rate", rate), xtag("rate/sec", retval));
 
             return retval;
@@ -124,91 +135,84 @@ namespace xo {
         GcStatisticsHistoryItem::display(std::ostream & os) const
         {
             os << "<GcStatisticsHistoryItem"
-               << xrtag("upto", upto_)
-               << xrtag("survive_z", survive_z_)
-               << xrtag("promote_z", promote_z_)
-               << xrtag("persist_z", persist_z_)
-               << xrtag("effort_z", effort_z_)
-               << xrtag("garbage0_z", garbage0_z_)
-               << xrtag("garbage1_z", garbage1_z_)
-               << xrtag("garbageN_z", garbageN_z_)
-               << xrtag("dt", dt_)
+               << xtag("upto", upto_)
+               << xtag("survive_z", survive_z_)
+               << xtag("promote_z", promote_z_)
+               << xtag("persist_z", persist_z_)
+               << xtag("effort_z", effort_z_)
+               << xtag("garbage0_z", garbage0_z_)
+               << xtag("garbage1_z", garbage1_z_)
+               << xtag("garbageN_z", garbageN_z_)
+               << xtag("dt", dt_)
                << ">";
         }
 
     } /*namespace gc*/
 
-    namespace print {
-        bool
-        ppdetail<xo::gc::PerGenerationStatistics>::print_pretty(const ppindentinfo & ppii,
-                                                                const xo::gc::PerGenerationStatistics & x)
-        {
-            return ppii.pps()->pretty_struct(ppii,
-                                             "PerGenerationStatistics",
-                                             refrtag("used_z", x.used_z_),
-                                             refrtag("n_gc", x.n_gc_),
-                                             refrtag("new_alloc_z", x.new_alloc_z_),
-                                             refrtag("scanned_z", x.scanned_z_),
-                                             refrtag("survive_z", x.survive_z_),
-                                             refrtag("promote_z", x.promote_z_)
-                );
-        }
-
-        bool
-        ppdetail<xo::gc::GcStatistics>::print_pretty(const ppindentinfo & ppii,
-                                                     const xo::gc::GcStatistics & x)
-        {
-            return ppii.pps()->pretty_struct(ppii,
-                                             "GcStatistics",
-                                             refrtag("gen_v", x.gen_v_),
-                                             refrtag("total_allocated", x.total_allocated_),
-                                             refrtag("total_promoted_sab", x.total_promoted_sab_),
-                                             refrtag("total_promoted", x.total_promoted_),
-                                             refrtag("n_mutation", x.n_mutation_),
-                                             refrtag("n_logged_mutation", x.n_logged_mutation_),
-                                             refrtag("n_xgen_mutation", x.n_xgen_mutation_),
-                                             refrtag("n_xckp_mutation", x.n_xckp_mutation_)
-                );
-        }
-
-
-        bool
-        ppdetail<xo::gc::GcStatisticsExt>::print_pretty(const ppindentinfo & ppii,
-                                                        const xo::gc::GcStatisticsExt & x)
-        {
-            return ppii.pps()->pretty_struct(ppii,
-                                             "GcStatisticsExt",
-                                             refrtag("gen_v", x.gen_v_),
-                                             refrtag("total_allocated", x.total_allocated_),
-                                             refrtag("total_promoted_sab", x.total_promoted_sab_),
-                                             refrtag("total_promoted", x.total_promoted_),
-                                             refrtag("n_mutation", x.n_mutation_),
-                                             refrtag("n_logged_mutation", x.n_logged_mutation_),
-                                             refrtag("n_xgen_mutation", x.n_xgen_mutation_),
-                                             refrtag("n_xckp_mutation", x.n_xckp_mutation_),
-                                             refrtag("nursery_z", x.nursery_z_),
-                                             refrtag("nursery_before_checkpoint_z", x.nursery_before_checkpoint_z_),
-                                             refrtag("nursery_after_checkpoint_z", x.nursery_after_checkpoint_z_),
-                                             refrtag("tenured_z", x.tenured_z_));
-        }
-
-        bool
-        ppdetail<xo::gc::GcStatisticsHistoryItem>::print_pretty(const ppindentinfo & ppii,
-                                                                const xo::gc::GcStatisticsHistoryItem & x)
-        {
-            return ppii.pps()->pretty_struct(ppii,
-                                             "GcStatisticsHistoryItem",
-                                             refrtag("upto", gen2str(x.upto_)),
-                                             refrtag("survive_z", x.survive_z_),
-                                             refrtag("promote_z", x.promote_z_),
-                                             refrtag("persist_z", x.persist_z_),
-                                             refrtag("effort_z", x.effort_z_),
-                                             refrtag("garbage0_z", x.garbage0_z_),
-                                             refrtag("garbage1_z", x.garbage1_z_),
-                                             refrtag("garbageN_z", x.garbageN_z_),
-                                             refrtag("dt", x.dt_));
-        }
-    } /*namespace print*/
 } /*namespace xo*/
 
-/* end GcStatistics.cpp */
+namespace xo::pp {
+    void
+    Prettifier<xo::gc::PerGenerationStatistics>::print(PpSink & sink, const xo::gc::PerGenerationStatistics & x)
+    {
+        sink.pretty_struct("PerGenerationStatistics",
+                           field("used_z", x.used_z_),
+                           field("n_gc", x.n_gc_),
+                           field("new_alloc_z", x.new_alloc_z_),
+                           field("scanned_z", x.scanned_z_),
+                           field("survive_z", x.survive_z_),
+                           field("promote_z", x.promote_z_));
+    }
+
+    void
+    Prettifier<xo::gc::GcStatistics>::print(PpSink & sink, const xo::gc::GcStatistics & x)
+    {
+        sink.pretty_struct("GcStatistics",
+                           field("gen_v", x.gen_v_),
+                           field("total_allocated", x.total_allocated_),
+                           field("total_promoted_sab", x.total_promoted_sab_),
+                           field("total_promoted", x.total_promoted_),
+                           field("n_mutation", x.n_mutation_),
+                           field("n_logged_mutation", x.n_logged_mutation_),
+                           field("n_xgen_mutation", x.n_xgen_mutation_),
+                           field("n_xckp_mutation", x.n_xckp_mutation_));
+    }
+
+    void
+    Prettifier<xo::gc::GcStatisticsExt>::print(PpSink & sink, const xo::gc::GcStatisticsExt & x)
+    {
+        sink.pretty_struct("GcStatisticsExt",
+                           field("gen_v", x.gen_v_),
+                           field("total_allocated", x.total_allocated_),
+                           field("total_promoted_sab", x.total_promoted_sab_),
+                           field("total_promoted", x.total_promoted_),
+                           field("n_mutation", x.n_mutation_),
+                           field("n_logged_mutation", x.n_logged_mutation_),
+                           field("n_xgen_mutation", x.n_xgen_mutation_),
+                           field("n_xckp_mutation", x.n_xckp_mutation_),
+                           field("nursery_z", x.nursery_z_),
+                           field("nursery_before_checkpoint_z", x.nursery_before_checkpoint_z_),
+                           field("nursery_after_checkpoint_z", x.nursery_after_checkpoint_z_),
+                           field("tenured_z", x.tenured_z_));
+    }
+
+    void
+    Prettifier<xo::gc::GcStatisticsHistoryItem>::print(PpSink & sink, const xo::gc::GcStatisticsHistoryItem & x)
+    {
+        /* bind to a local: field() captures by reference (like legacy
+         * refrtag), and gen2str() returns by value.
+         */
+        const char * const upto_str = gen2str(x.upto_);
+
+        sink.pretty_struct("GcStatisticsHistoryItem",
+                           field("upto", upto_str),
+                           field("survive_z", x.survive_z_),
+                           field("promote_z", x.promote_z_),
+                           field("persist_z", x.persist_z_),
+                           field("effort_z", x.effort_z_),
+                           field("garbage0_z", x.garbage0_z_),
+                           field("garbage1_z", x.garbage1_z_),
+                           field("garbageN_z", x.garbageN_z_),
+                           field("dt", x.dt_));
+    }
+} /*namespace xo::pp*/

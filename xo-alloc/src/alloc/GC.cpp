@@ -6,13 +6,24 @@
 #include "GC.hpp"
 #include "GcStatistics.hpp"
 #include "Object.hpp"
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 #include <cassert>
 #include <chrono>
 #include <cstddef>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
 
 namespace xo {
     namespace gc {
+        /* NB one scope in from namespace xo, not at xo scope: a using-decl
+         * there would be *ambiguous* with legacy xo::xtag (still visible via
+         * headers that have not migrated) rather than shadowing it.
+         */
+        using xo::pp::scope;
+        using xo::pp::tostr;
+        using xo::pp::xtag;
+
         bool
         MutationLogEntry::is_child_forwarded() const
         {
@@ -31,7 +42,7 @@ namespace xo {
         MutationLogEntry::parent_destination() const
         {
             //const bool c_debug_flag = true;
-            //scope log(XO_DEBUG(c_debug_flag));
+            //scope log(XO_DEBUG_(c_debug_flag));
 
             if (parent_->_is_forwarded()) {
                 //log && log("parent is forwarded", xtag("parent", (void*)parent_));
@@ -456,7 +467,7 @@ namespace xo {
         std::byte *
         GC::alloc_gc_copy(std::size_t z, const void * src)
         {
-            scope log(XO_DEBUG(config_.debug_flag_),
+            scope log(XO_DEBUG_(config_.debug_flag_),
                       xtag("z", z),
                       xtag("+pad", IAlloc::alloc_padding(z)));
 
@@ -522,7 +533,7 @@ namespace xo {
         void
         GC::assign_member(IObject * parent, IObject ** lhs, IObject * rhs)
         {
-            scope log(XO_DEBUG(config_.debug_flag_),
+            scope log(XO_DEBUG_(config_.debug_flag_),
                       xtag("parent", parent), xtag("lhs", lhs), xtag("rhs", rhs));
 
             ++gc_statistics_.n_mutation_;
@@ -589,7 +600,7 @@ namespace xo {
         void
         GC::forward_inplace(IObject ** lhs)
         {
-            scope log(XO_DEBUG(config_.debug_flag_), xtag("lhs", lhs));
+            scope log(XO_DEBUG_(config_.debug_flag_), xtag("lhs", lhs));
 
             Object::_forward_inplace(lhs, this);
         }
@@ -612,7 +623,7 @@ namespace xo {
                                 const void * const * lhs,
                                 bool may_throw_flag) const
         {
-            scope log(XO_DEBUG(config_.debug_flag_),
+            scope log(XO_DEBUG_(config_.debug_flag_),
                       xtag("P", parent), xtag("L", lhs));
 
             if (!this->contains(parent)) {
@@ -756,7 +767,7 @@ namespace xo {
         void
         GC::swap_spaces(generation target)
         {
-            scope log(XO_DEBUG(this->debug_flag()), xtag("upto", target));
+            scope log(XO_DEBUG_(this->debug_flag()), xtag("upto", target));
 
             // will be copying into the memory regions currently labelled FromSpace
 
@@ -855,7 +866,7 @@ namespace xo {
         void
         GC::copy_globals(generation upto)
         {
-            scope log(XO_DEBUG(config_.debug_flag_),
+            scope log(XO_DEBUG_(config_.debug_flag_),
                       xtag("roots", gc_root_v_.size()));
 
             for (IObject ** pp_root : gc_root_v_) {
@@ -870,7 +881,7 @@ namespace xo {
                                               MutationLog * defer_mlog,
                                               ObjectStatistics * per_type_stats)
         {
-            scope log(XO_DEBUG(config_.debug_flag_), xtag("from_mlog.size", from_mlog->size()));
+            scope log(XO_DEBUG_(config_.debug_flag_), xtag("from_mlog.size", from_mlog->size()));
 
             /* categorize pointers based on combination of {source address, destination address},
              * only care about the generation associated with an address.
@@ -1065,7 +1076,7 @@ namespace xo {
                                        MutationLog * defer_mlog,
                                        ObjectStatistics * /*per_type_stats*/)
         {
-            scope log(XO_DEBUG(config_.debug_flag_), xtag("from_mlog.size", from_mlog->size()));
+            scope log(XO_DEBUG_(config_.debug_flag_), xtag("from_mlog.size", from_mlog->size()));
 
             /* categorize pointers based on combination of {source address, destination address},
              * only care about the generation associated with an address.
@@ -1282,7 +1293,7 @@ namespace xo {
         void
         GC::forward_mutation_log(generation upto)
         {
-            scope log(XO_DEBUG(config_.debug_flag_));
+            scope log(XO_DEBUG_(config_.debug_flag_));
 
             if (upto == generation::tenured) {
                 this->full_gc_forward_mlog
@@ -1296,7 +1307,7 @@ namespace xo {
         void
         GC::cleanup_phase(generation upto, nanos dt)
         {
-            scope log(XO_DEBUG(config_.stats_flag_));
+            scope log(XO_DEBUG_(config_.stats_flag_));
 
             std::size_t N0_before_gc = nursery_from()->after_checkpoint();
             std::size_t N1_before_gc = nursery_from()->before_checkpoint();
@@ -1408,7 +1419,7 @@ namespace xo {
         void
         GC::execute_gc(generation upto)
         {
-            scope log(XO_DEBUG(config_.stats_flag_ || config_.debug_flag_));
+            scope log(XO_DEBUG_(config_.stats_flag_ || config_.debug_flag_));
 
             auto t0 = std::chrono::steady_clock::now();
 
@@ -1458,9 +1469,9 @@ namespace xo {
             this->cleanup_phase(upto, xo::qty::qty::nanoseconds(dt.count()));
 
             log && log("object statistics [nursery]:");
-            log && log(refrtag("stats", object_statistics_sab_[gen2int(generation::nursery)]));
+            log && log(xtag("stats", object_statistics_sab_[gen2int(generation::nursery)]));
             log && log("object statistics [tenured]:");
-            log && log(refrtag("stats", object_statistics_sab_[gen2int(generation::tenured)]));
+            log && log(xtag("stats", object_statistics_sab_[gen2int(generation::tenured)]));
 
             this->runstate_ = GCRunstate();
 

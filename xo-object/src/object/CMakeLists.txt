@@ -15,4 +15,7 @@ xo_headeronly_dependency(${SELF_LIB} xo_reflectutil)
 xo_headeronly_dependency(${SELF_LIB} xo_unit)
 xo_headeronly_dependency(${SELF_LIB} callback)
 xo_dependency(${SELF_LIB} xo_alloc)
+# xo-object's headers/sources use legacy xo-indentlog (scope, xtag, quot,
+# print/vector).  Declared explicitly: xo-alloc no longer propagates it.
+xo_dependency(${SELF_LIB} indentlog)
 #xo_dependency(${SELF_LIB} reflect)  # should be able to get this indirectly via xo_alloc

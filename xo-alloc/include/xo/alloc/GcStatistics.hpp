@@ -10,7 +10,8 @@
 #include <xo/unit/quantity.hpp>
 #include <xo/unit/quantity_iostream.hpp>
 #include <xo/reflect/TypeDescr.hpp>
-#include <xo/indentlog/print/pretty.hpp>
+#include <xo/ppsink/PpSink.hpp>
+#include <xo/ppsink/Prettifier.hpp>
 #include <array>
 #include <ostream>
 
@@ -261,27 +262,29 @@ namespace xo {
         using GcStatisticsHistory = CircularBuffer<GcStatisticsHistoryItem>;
     } /*namespace gc*/
 
-    namespace print {
-        template <>
-        struct ppdetail<xo::gc::PerGenerationStatistics> {
-            static bool print_pretty(const ppindentinfo &, const xo::gc::PerGenerationStatistics &);
-        };
-
-        template<>
-        struct ppdetail<xo::gc::GcStatistics> {
-            static bool print_pretty(const ppindentinfo &, const xo::gc::GcStatistics &);
-        };
-
-        template<>
-        struct ppdetail<xo::gc::GcStatisticsExt> {
-            static bool print_pretty(const ppindentinfo &, const xo::gc::GcStatisticsExt &);
-        };
-
-        template<>
-        struct ppdetail<xo::gc::GcStatisticsHistoryItem> {
-            static bool print_pretty(const ppindentinfo &, const xo::gc::GcStatisticsHistoryItem &);
-        };
-    } /*namespace print*/
 } /*namespace xo*/
+
+namespace xo::pp {
+    template <>
+    struct Prettifier<xo::gc::PerGenerationStatistics> {
+        static void print(PpSink & sink, const xo::gc::PerGenerationStatistics & x);
+    };
+
+    template <>
+    struct Prettifier<xo::gc::GcStatistics> {
+        static void print(PpSink & sink, const xo::gc::GcStatistics & x);
+    };
+
+    template <>
+    struct Prettifier<xo::gc::GcStatisticsExt> {
+        static void print(PpSink & sink, const xo::gc::GcStatisticsExt & x);
+    };
+
+    template <>
+    struct Prettifier<xo::gc::GcStatisticsHistoryItem> {
+        static void print(PpSink & sink, const xo::gc::GcStatisticsHistoryItem & x);
+    };
+
+} /*namespace xo::pp*/
 
 /* end GcStatistics.hpp */

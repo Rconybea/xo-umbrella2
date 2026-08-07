@@ -5,7 +5,7 @@
 
 #include "Forwarding1.hpp"
 #include <xo/reflect/Reflect.hpp>
-#include <xo/indentlog/print/tag.hpp>   /* xtag -- was arriving via xo/reflect/Reflect.hpp */
+#include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
 #include <cassert>
 #include <cstddef>
 
@@ -14,6 +14,12 @@ namespace xo {
     using xo::reflect::TaggedPtr;
 
     namespace obj {
+        /* NB one scope in from namespace xo, not at xo scope: a using-decl
+         * there would be *ambiguous* with legacy xo::xtag (still visible via
+         * headers that have not migrated) rather than shadowing it.
+         */
+        using xo::pp::xtag;
+
         Forwarding1::Forwarding1(gp<IObject> dest)
             : dest_{dest}
         {}

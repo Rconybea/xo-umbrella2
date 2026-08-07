@@ -5,12 +5,21 @@
 
 #include "ListAlloc.hpp"
 #include "ArenaAlloc.hpp"
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 #include <cassert>
 #include <cstddef>
+#include <xo/ppsink/tag_ostream.hpp>
 
 namespace xo {
     namespace gc {
+        /* NB one scope in from namespace xo, not at xo scope: a using-decl
+         * there would be *ambiguous* with legacy xo::xtag (still visible via
+         * headers that have not migrated) rather than shadowing it.
+         */
+        using xo::pp::scope;
+        using xo::pp::xtag;
+
         ListAlloc::ListAlloc(std::unique_ptr<ArenaAlloc> hd,
                              ArenaAlloc * marked,
                              std::size_t cz, std::size_t nz, std::size_t tz,
@@ -179,7 +188,7 @@ namespace xo {
         std::size_t
         ListAlloc::before_checkpoint() const
         {
-            scope log(XO_DEBUG(false && debug_flag_), xtag("marked", marked_ ? marked_->name() : ""));
+            scope log(XO_DEBUG_(false && debug_flag_), xtag("marked", marked_ ? marked_->name() : ""));
 
             if (marked_) {
                 if (full_l_.empty()) {
@@ -234,7 +243,7 @@ namespace xo {
         std::size_t
         ListAlloc::after_checkpoint() const
         {
-            scope log(XO_DEBUG(false && debug_flag_), xtag("marked", marked_ ? marked_->name() : ""));
+            scope log(XO_DEBUG_(false && debug_flag_), xtag("marked", marked_ ? marked_->name() : ""));
 
             if (!marked_)
                 return 0;
@@ -298,7 +307,7 @@ namespace xo {
         bool
         ListAlloc::reset(std::size_t z)
         {
-            scope log(XO_DEBUG(debug_flag_), xtag("z", z));
+            scope log(XO_DEBUG_(debug_flag_), xtag("z", z));
 
             bool recycle_head_bucket = hd_ && (z <= hd_->size());
 
@@ -323,7 +332,7 @@ namespace xo {
         bool
         ListAlloc::expand(std::size_t z, const std::string & name)
         {
-            scope log(XO_DEBUG(debug_flag_), xtag("name", name));
+            scope log(XO_DEBUG_(debug_flag_), xtag("name", name));
 
             //log && log("before", xtag("before_ckp", this->before_checkpoint()));
 
@@ -362,7 +371,7 @@ namespace xo {
 
         void
         ListAlloc::checkpoint() {
-            scope log(XO_DEBUG(debug_flag_));
+            scope log(XO_DEBUG_(debug_flag_));
 
             hd_->checkpoint();
 
@@ -373,7 +382,7 @@ namespace xo {
 
         std::byte *
         ListAlloc::alloc(std::size_t z) {
-            scope log(XO_DEBUG(debug_flag_));
+            scope log(XO_DEBUG_(debug_flag_));
 
             /* ArenaAlloc::alloc() may modify its own size */
 

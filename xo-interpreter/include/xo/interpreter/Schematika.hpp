@@ -6,6 +6,8 @@
 #pragma once
 
 #include <xo/alloc/GC.hpp>
+/* xo::log_level -- was arriving via xo/alloc/GC.hpp, now ppsink-only */
+#include <xo/indentlog/log_level.hpp>
 
 namespace xo {
     namespace scm {

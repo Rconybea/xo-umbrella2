@@ -5,7 +5,7 @@
 
 #include "Blob.hpp"
 #include <xo/reflect/Reflect.hpp>
-#include <xo/indentlog/print/tag.hpp>   /* xtag -- was arriving via xo/reflect/Reflect.hpp */
+#include <xo/ppsink/tag_ostream.hpp>   /* os << xo::pp::xtag(..) */
 #include <xo/allocutil/IAlloc.hpp>
 
 namespace xo {
@@ -28,7 +28,7 @@ namespace xo {
     void
     Blob::display(std::ostream & os) const
     {
-        os << "<blob" << xtag("z", z_) << ">";
+        os << "<blob" << xo::pp::xtag("z", z_) << ">";
     }
 
     std::size_t

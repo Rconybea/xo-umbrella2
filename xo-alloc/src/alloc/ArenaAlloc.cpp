@@ -6,16 +6,26 @@
 #include "ArenaAlloc.hpp"
 #include "Object.hpp"
 #include "ObjectStatistics.hpp"
-#include <xo/indentlog/print/tag.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 #include <cassert>
 #include <sys/mman.h>
+#include <xo/ppsink/tostr.hpp>
 #include <unistd.h> // for getpagesize() on OSX
 
 namespace xo {
     using std::byte;
 
     namespace gc {
+        /* NB one scope in from namespace xo, not at xo scope: a using-decl
+         * there would be *ambiguous* with legacy xo::xtag (still visible via
+         * headers that have not migrated) rather than shadowing it.
+         */
+        using xo::pp::scope;
+        using xo::pp::tostr;
+        using xo::pp::xtag;
+
         namespace {
             /* alignment better be a power of 2 */
             std::size_t
@@ -35,7 +45,7 @@ namespace xo {
                                std::size_t z,
                                bool debug_flag)
         {
-            scope log(XO_DEBUG(debug_flag), xtag("name", name));
+            scope log(XO_DEBUG_(debug_flag), xtag("name", name));
 
             constexpr size_t c_hugepage_z = 2 * 1024 * 1024;
 
@@ -129,7 +139,7 @@ namespace xo {
 
         ArenaAlloc::~ArenaAlloc()
         {
-            scope log(XO_DEBUG(debug_flag_));
+            scope log(XO_DEBUG_(debug_flag_));
 
             // hygiene..
 
@@ -161,7 +171,7 @@ namespace xo {
         bool
         ArenaAlloc::expand(size_t offset_z)
         {
-            scope log(XO_DEBUG(debug_flag_), xtag("offset_z", offset_z), xtag("committed_z", committed_z_));
+            scope log(XO_DEBUG_(debug_flag_), xtag("offset_z", offset_z), xtag("committed_z", committed_z_));
 
             if (offset_z <= committed_z_) {
                 log && log("trivial success, offset within committed range",
@@ -260,7 +270,7 @@ namespace xo {
         ArenaAlloc::capture_object_statistics(capture_phase phase,
                                               ObjectStatistics * p_dest) const
         {
-            scope log(XO_DEBUG(debug_flag_),
+            scope log(XO_DEBUG_(debug_flag_),
                       xtag("name", name_),
                       xtag("capacity", limit_ - lo_),
                       xtag("alloc", free_ptr_ - lo_),
@@ -386,7 +396,7 @@ namespace xo {
         std::byte *
         ArenaAlloc::alloc(std::size_t z0)
         {
-            scope log(XO_DEBUG(debug_flag_));
+            scope log(XO_DEBUG_(debug_flag_));
 
             /* word size for alignment */
             constexpr uint32_t c_bpw = sizeof(std::uintptr_t);

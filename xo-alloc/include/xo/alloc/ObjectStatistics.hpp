@@ -5,8 +5,10 @@
 
 #pragma once
 
-#include <xo/indentlog/print/pretty.hpp>
+#include <xo/ppsink/PpSink.hpp>
+#include <xo/ppsink/Prettifier.hpp>
 #include <cstdint>
+#include <iosfwd>
 #include <vector>
 
 namespace xo {
@@ -71,17 +73,22 @@ namespace xo {
 
     } /*namespace gc*/
 
-    namespace print {
-        template <>
-        struct ppdetail<xo::gc::PerObjectTypeStatistics> {
-            static bool print_pretty(const ppindentinfo &, const xo::gc::PerObjectTypeStatistics &);
-        };
-
-        template <>
-        struct ppdetail<xo::gc::ObjectStatistics> {
-            static bool print_pretty(const ppindentinfo &, const xo::gc::ObjectStatistics &);
-        };
-    } /*namespace print*/
 } /*namespace xo*/
+
+namespace xo::pp {
+    /* structured pretty-printing.  Defined in ObjectStatistics.cpp -- these
+     * need TypeDescrBase (for short_name()), which this header only
+     * forward-declares.
+     */
+    template <>
+    struct Prettifier<xo::gc::PerObjectTypeStatistics> {
+        static void print(PpSink & sink, const xo::gc::PerObjectTypeStatistics & x);
+    };
+
+    template <>
+    struct Prettifier<xo::gc::ObjectStatistics> {
+        static void print(PpSink & sink, const xo::gc::ObjectStatistics & x);
+    };
+} /*namespace xo::pp*/
 
 /* end ObjectStatistics.hpp */

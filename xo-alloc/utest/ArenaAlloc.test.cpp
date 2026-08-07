@@ -4,6 +4,7 @@
  */
 
 #include "xo/alloc/ArenaAlloc.hpp"
+#include <iostream>
 #include <catch2/catch.hpp>
 
 namespace xo {
@@ -52,6 +53,7 @@ namespace xo {
                 auto mem = alloc->alloc(std::max(tc.arena_z_, alloc->hugepage_z()));
 
                 REQUIRE(mem != nullptr);
+
 
                 REQUIRE(mem == free0);
 

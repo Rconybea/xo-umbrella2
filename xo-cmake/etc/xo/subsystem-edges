@@ -33,11 +33,11 @@ xo-flatstring xo-unit
 xo-gc xo-expression2
 xo-gc xo-interpreter2
 xo-gc xo-reader2
-xo-indentlog xo-alloc
 xo-indentlog xo-expression
 xo-indentlog xo-expression2
 xo-indentlog xo-gc
 xo-indentlog xo-imgui
+xo-indentlog xo-object
 xo-indentlog xo-object2
 xo-indentlog xo-ordinaltree
 xo-indentlog xo-printable2
@@ -46,6 +46,7 @@ xo-indentlog xo-reactor
 xo-indentlog xo-stringtable2
 xo-indentlog xo-tokenizer
 xo-indentlog xo-tokenizer2
+xo-indentlog2 xo-alloc
 xo-indentlog2 xo-alloc2
 xo-indentlog2 xo-interpreter2
 xo-jit xo-pyjit
@@ -59,6 +60,7 @@ xo-object2 xo-gc
 xo-object2 xo-procedure2
 xo-object2 xo-type
 xo-ordinaltree xo-reactor
+xo-ppsink xo-alloc
 xo-ppsink xo-alloc2
 xo-ppsink xo-arena
 xo-ppsink xo-distribution

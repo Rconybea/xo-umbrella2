@@ -5,42 +5,78 @@
 
 #include "xo/alloc/ObjectStatistics.hpp"
 #include <xo/reflect/Reflect.hpp>
-#include <xo/indentlog/print/hex.hpp>
-#include <xo/indentlog/print/ppstr.hpp>
-#include <xo/indentlog/print/tostr.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/hex.hpp>
+#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/pretty.hpp>
+#include "print/PrettySink.hpp"
+#include <xo/arena/ArenaConfig.hpp>
+#include <iostream>
 #include <catch2/catch.hpp>
+
+#include <string>
+#include <xo/ppsink/tag_ostream.hpp>
 
 namespace xo {
     using xo::gc::ObjectStatistics;
     using xo::gc::PerObjectTypeStatistics;
     using xo::reflect::Reflect;
-    using xo::print::ppconfig;
+
+
+    namespace {
+        /** render @p x with line breaking, as legacy toppstr2(ppconfig, x) did.
+         *
+         *  toppstr2 is not ported to ppsink: it is superseded by PrettySink,
+         *  which is the sink that actually does line breaking (ppsink's own
+         *  tostr uses a FlatSink and never breaks).  PrettySink lives in
+         *  xo-indentlog2, hence this utest's dependency on it.
+         *
+         *  NB the arena name must be unique per call: two PrettySinks sharing
+         *  an ArenaConfig name interfere, and the symptom is wrong indentation
+         *  in whichever case runs second.
+         **/
+        template <typename T>
+        std::string
+        toppstr(const T & x) {
+            static int seq = 0;
+
+            xo::mm::ArenaConfig logbuf_cfg {
+                .name_ = "utest.alloc.pretty." + std::to_string(++seq),
+                .size_ = 64*1024 };
+
+            xo::pp::PrettySink pps(xo::pp::PpConfig().with_logbuf_config(logbuf_cfg), nullptr);
+
+            pps.pp(x);
+
+            return std::string(pps.output());
+        }
+    } /*namespace*/
 
     namespace ut {
+        /* one scope in from namespace xo: a using-decl at xo scope would be
+         * *ambiguous* with legacy xo::xtag (visible via headers that have not
+         * migrated) rather than shadowing it.
+         */
+        using xo::pp::tostr;
+        using xo::pp::xtag;
+
         TEST_CASE("PerObjectTypeStatistics", "[alloc][gc]")
         {
-            bool saved = tag_config::tag_color_enabled;
-
-            tag_config::tag_color_enabled = false;
-
             PerObjectTypeStatistics stats;
 
             std::string s = tostr(stats);
 
             //std::cerr << hex_view(s.c_str(), s.c_str() + s.length(), true /*as_text*/) << std::endl;
 
+
+
             REQUIRE(s == "<PerObjectTypeStatistics :td nullptr :scanned_n 0 :scanned_z 0 :survive_n 0 :survive_z 0>");
 
-            tag_config::tag_color_enabled = saved;
         }
 
         TEST_CASE("PerObjectTypeStatistics-1", "[alloc][gc]")
         {
-            bool saved = tag_config::tag_color_enabled;
-
-            tag_config::tag_color_enabled = false;
-
             PerObjectTypeStatistics stats;
             stats.td_ = Reflect::require<bool>();
             stats.scanned_n_ = 4;
@@ -52,53 +88,43 @@ namespace xo {
 
             //std::cerr << hex_view(s.c_str(), s.c_str() + s.length(), true /*as_text*/) << std::endl;
 
+
+
             REQUIRE(s == "<PerObjectTypeStatistics :td bool :scanned_n 4 :scanned_z 16 :survive_n 2 :survive_z 8>");
 
-            tag_config::tag_color_enabled = saved;
         }
 
         TEST_CASE("ObjectStatistics", "[alloc][gc]")
         {
-            bool saved = tag_config::tag_color_enabled;
-
-            tag_config::tag_color_enabled = false;
-
             ObjectStatistics stats;
 
             std::string s = tostr(stats);
 
-            REQUIRE(s == "<ObjectStatistics>");
 
-            tag_config::tag_color_enabled = saved;
+
+            REQUIRE(s == "<ObjectTypeStatistics :per_type_stats_v []>");
+
         }
 
         TEST_CASE("ObjectStatistics-1", "[alloc][gc]")
         {
-            bool saved = tag_config::tag_color_enabled;
-
-            tag_config::tag_color_enabled = false;
-
             ObjectStatistics stats;
             stats.per_type_stats_v_.push_back(PerObjectTypeStatistics());
 
             std::string s = tostr(stats);
 
-            REQUIRE(s == "<ObjectStatistics :[0] <PerObjectTypeStatistics :td nullptr :scanned_n 0 :scanned_z 0 :survive_n 0 :survive_z 0>>");
 
-            tag_config::tag_color_enabled = saved;
+
+            REQUIRE(s == "<ObjectTypeStatistics :per_type_stats_v [<PerObjectTypeStatistics :td nullptr :scanned_n 0 :scanned_z 0 :survive_n 0 :survive_z 0>]>");
+
         }
 
         TEST_CASE("ObjectStatistics-pretty", "[alloc][gc][pretty]")
         {
-            bool saved = tag_config::tag_color_enabled;
-
-            tag_config::tag_color_enabled = false;
-
             std::stringstream ss;
-            ppconfig ppc;
             ObjectStatistics stats;
 
-            std::string actual = toppstr2(ppc, stats);
+            std::string actual = toppstr(stats);
             std::string expected
                 = ("<ObjectTypeStatistics :per_type_stats_v []>");
 
@@ -122,17 +148,14 @@ namespace xo {
                 }
             }
 
+
+
             REQUIRE(actual == expected);
 
-            tag_config::tag_color_enabled = saved;
         }
 
         TEST_CASE("ObjectStatistics-pretty-1", "[alloc][gc][pretty]")
         {
-            bool saved = tag_config::tag_color_enabled;
-
-            tag_config::tag_color_enabled = false;
-
             PerObjectTypeStatistics objstats;
             objstats.td_ = Reflect::require<bool>();
             objstats.scanned_n_ = 4;
@@ -141,21 +164,18 @@ namespace xo {
             objstats.survive_z_ = 8;
 
             std::stringstream ss;
-            ppconfig ppc;
             ObjectStatistics stats;
             stats.per_type_stats_v_.push_back(objstats);
 
-            std::string actual = toppstr2(ppc, stats);
+            std::string actual = toppstr(stats);
 
             std::string expected
-                = ("<ObjectTypeStatistics\n"
-                   "  :per_type_stats_v\n"
-                   "    [ <PerObjectTypeStatistics\n"
-                   "        :td bool\n"
-                   "        :scanned_n 4\n"
-                   "        :scanned_z 16\n"
-                   "        :survive_n 2\n"
-                   "        :survive_z 8> ]>");
+                = ("<ObjectTypeStatistics :per_type_stats_v [<PerObjectTypeStatistics\n"
+                   "      :td bool\n"
+                   "      :scanned_n 4\n"
+                   "      :scanned_z 16\n"
+                   "      :survive_n 2\n"
+                   "      :survive_z 8>]>");
 
             if (actual != expected) {
                 CHECK(actual == expected);
@@ -177,7 +197,6 @@ namespace xo {
                 }
             }
 
-            tag_config::tag_color_enabled = saved;
         }
     }
 } /*namespace xo*/

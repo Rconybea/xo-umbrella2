@@ -4,13 +4,23 @@
  */
 
 #include "xo/alloc/CircularBuffer.hpp"
-#include <xo/indentlog/print/vector.hpp>
+#include <xo/ppsink/PrettyVector.hpp>
+#include <iostream>
 #include <catch2/catch.hpp>
+#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
 
 namespace xo {
     using xo::gc::CircularBuffer;
 
     namespace ut {
+        /* one scope in from namespace xo: a using-decl at xo scope would be
+         * *ambiguous* with legacy xo::xtag (visible via headers that have not
+         * migrated) rather than shadowing it.
+         */
+        using xo::pp::tostr;
+        using xo::pp::xtag;
+
         TEST_CASE("circular_buffer_0", "[circular_buffer]")
         {
             CircularBuffer<std::string> q(10, false /*debug_flag*/);
@@ -117,7 +127,7 @@ namespace xo {
 
                 INFO(tostr(xtag("i_tc", i_tc),
                            xtag("capacity", tc.capacity_),
-                           xrtag("contents", tc.contents_)));
+                           xtag("contents", tc.contents_)));
 
                 for (std::size_t j_phase = 0; j_phase < 2; ++j_phase) {
                     constexpr bool c_debug_flag = false;
@@ -154,6 +164,7 @@ namespace xo {
                             }
                             ++i;
                         }
+
 
                         REQUIRE(i == std::min(n, tc.capacity_));
 

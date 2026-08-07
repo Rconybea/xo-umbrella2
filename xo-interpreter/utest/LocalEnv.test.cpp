@@ -7,6 +7,8 @@
 #include <catch2/catch.hpp>
 #include <cstdint>
 #include <vector>
+/* xo::scope -- was arriving via xo/alloc/GC.hpp, now ppsink-only */
+#include <xo/indentlog/scope.hpp>
 
 namespace xo {
     using xo::scm::LocalEnv;

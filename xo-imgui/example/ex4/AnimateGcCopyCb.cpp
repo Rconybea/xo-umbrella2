@@ -1,6 +1,10 @@
 /* AnimateGcCopyCb.cpp */
 
 #include "AnimateGcCopyCb.hpp"
+/* xo::scope / xo::xtag -- were arriving via xo/alloc/GC.hpp,
+ * which is now ppsink-only.
+ */
+#include <xo/indentlog/scope.hpp>
 
 void
 AnimateGcCopyCb::notify_gc_copy(std::size_t z,

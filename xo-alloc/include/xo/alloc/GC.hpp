@@ -8,7 +8,6 @@
 #include "ArenaAlloc.hpp"
 #include "GcStatistics.hpp"
 #include "Object.hpp"
-#include <xo/indentlog/print/array.hpp>
 #include <xo/callback/UpCallbackSet.hpp>
 #include <array>
 #include <vector>

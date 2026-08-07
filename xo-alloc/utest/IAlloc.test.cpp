@@ -5,7 +5,8 @@
 
 //#include "xo/allocutil/IAlloc.hpp"
 #include "xo/alloc/ArenaAlloc.hpp"
-#include <xo/indentlog/print/tag.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <iostream>
 #include <catch2/catch.hpp>
 
 namespace xo {
@@ -13,6 +14,12 @@ namespace xo {
     using xo::gc::ArenaAlloc;
 
     namespace ut {
+        /* one scope in from namespace xo: a using-decl at xo scope would be
+         * *ambiguous* with legacy xo::xtag (visible via headers that have not
+         * migrated) rather than shadowing it.
+         */
+        using xo::pp::xtag;
+
         TEST_CASE("ialloc", "[alloc]")
         {
             static_assert((sizeof(std::uintptr_t) == 8) && "possibly fine if this fails, but would want to know");

@@ -5,9 +5,10 @@
 
 #pragma once
 
-#include <xo/indentlog/print/tag.hpp>
-#include <xo/indentlog/print/tostr.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
 #include <cassert>
 #include <cstdint>
 #include <vector>
@@ -95,9 +96,13 @@ namespace xo {
             // void shrink_to_fit(); // not implemented
 
             reference at(size_type pos) {
+                using xo::pp::tostr;
+                using xo::pp::xtag;
+
                 if ((pos < 0) || (pos >= size_)) {
                     throw std::out_of_range(tostr("CircularBuffer::at: index out of range",
-                                                  xtag("pos", pos), xtag("size", size_)));
+                                                  xtag("pos", pos),
+                                                  xtag("size", size_)));
                 }
 
                 return contents_[this->location_of(pos)];
@@ -202,7 +207,11 @@ namespace xo {
         template <typename T>
         CircularBuffer<T> &
         CircularBuffer<T>::push_back(const T & x) {
-            scope log(XO_DEBUG(debug_flag_), rtag("x", x), xrtag("size", size_));
+            using xo::pp::scope;
+            using xo::pp::xtag;
+            using xo::pp::tag;
+
+            scope log(XO_DEBUG_(debug_flag_), tag("x", x), xtag("size", size_));
 
             if (size_ < contents_.size()) {
                 ++size_;

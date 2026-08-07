@@ -6,7 +6,8 @@
 #include "Forwarding1.hpp"
 #include "ArenaAlloc.hpp"
 #include <xo/reflect/Reflect.hpp>
-#include <xo/indentlog/print/array.hpp>   /* operator<<(ostream, std::array) -- was arriving via xo/reflect */
+#include <xo/ppsink/pretty_array.hpp>   /* Prettifier<std::array<T,N>> */
+#include <xo/ppsink/pretty_ostream.hpp> /* pp_to_stream */
 #include <catch2/catch.hpp>
 #include <cstring>
 #include <regex>
@@ -32,7 +33,13 @@ namespace xo {
                     return Reflect::make_tp(const_cast<DummyObject*>(this));
                 }
 
-                void display(std::ostream & os) const final override { os << data_; }
+                /* legacy print/array.hpp supplied operator<<(ostream, std::array);
+                 * ppsink has Prettifier<std::array<T,N>> instead, reached from an
+                 * ostream via pp_to_stream().
+                 */
+                void display(std::ostream & os) const final override {
+                    xo::pp::pp_to_stream(os, data_);
+                }
 
                 virtual std::size_t _shallow_size() const final override { return sizeof(*this); }
                 virtual IObject * _shallow_copy(gc::IAlloc * mm) const final override { return new (Cpof(mm, this)) DummyObject(*this); }
@@ -46,9 +53,6 @@ namespace xo {
 
         TEST_CASE("Forwarding1", "[gc][alloc]")
         {
-            bool saved = tag_config::tag_color_enabled;
-            tag_config::tag_color_enabled = false;
-
             gp<Object> obj = new DummyObject("Well, I wasn't expecting that!");
             gp<Forwarding1> fwd = new Forwarding1(obj);
 
@@ -69,7 +73,6 @@ namespace xo {
 
             //REQUIRE(ss.str() == "<fwd :dest DummyObject>");
 
-            tag_config::tag_color_enabled = saved;
         }
 
         TEST_CASE("IAlloc.assign_member", "[gc][alloc]")

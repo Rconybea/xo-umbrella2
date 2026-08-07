@@ -17,7 +17,7 @@ xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 $
 xo_headeronly_dependency(${SELF_LIB} xo_allocutil)
 # xo-unit used for time measurement
 xo_headeronly_dependency(${SELF_LIB} xo_unit)
-xo_dependency(${SELF_LIB} indentlog)
+xo_dependency(${SELF_LIB} xo_ppsink)
 xo_dependency(${SELF_LIB} reflect)
 xo_headeronly_dependency(${SELF_LIB} callback)
 

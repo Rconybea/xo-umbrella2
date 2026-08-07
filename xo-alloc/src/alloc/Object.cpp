@@ -42,7 +42,10 @@ namespace xo {
     Object::_forward(IObject * src,
                      gc::IAlloc * gc)
     {
-        scope log(XO_DEBUG(gc->debug_flag()), xtag("src", src));
+        using xo::pp::scope;
+        using xo::pp::xtag;
+
+        scope log(XO_DEBUG_(gc->debug_flag()), xtag("src", src));
 
         if (!src)
             return src;
@@ -68,7 +71,10 @@ namespace xo {
     IObject *
     Object::_deep_move(IObject * from_src, gc::GC * gc, gc::ObjectStatistics * /*stats*/)
     {
-        scope log(XO_DEBUG(gc->config().debug_flag_));
+        using xo::pp::scope;
+        using xo::pp::xtag;
+
+        scope log(XO_DEBUG_(gc->config().debug_flag_));
 
         using gc::generation;
 
