@@ -17,7 +17,7 @@
 #pragma once
 
 #include "pretty.hpp"
-#include <FlatSink.hpp>
+#include "FlatSink.hpp"
 #include <ostream>
 
 namespace xo::pp {
