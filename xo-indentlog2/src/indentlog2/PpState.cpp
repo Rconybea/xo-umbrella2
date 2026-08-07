@@ -167,7 +167,18 @@ namespace xo {
                 return;
             }
 
-            PpToken * tk = new (mem) PpToken(k_begin, 0, 0, offset);
+            // Stash the scan totals as of this begin, so end() can recover the
+            // group's own width as (scan totals then) - (scan totals now).
+            //
+            // Safe to borrow the size fields for this: size_established() keys
+            // off the k_size_established flag (set only by establish_size()),
+            // and check_print_ready() stops at the first token whose size is not
+            // established -- so nothing reads these as a *size* before end()
+            // overwrites them.
+            PpToken * tk = new (mem) PpToken(k_begin,
+                                             (int32_t)scan_viz_total_ /*snapshot*/,
+                                             (int32_t)scan_total_ /*snapshot*/,
+                                             offset);
             uint32_t tk_ix = (std::byte *)mem - tk_buffer_.lo_;
 
             scan_stack_.push_back(tk_ix);
@@ -265,16 +276,32 @@ namespace xo {
             }
 
             // Size for begin_token is sum of strings scanned until corresponding end token.
+            //
+            // NB measured against the scan totals SNAPSHOTTED BY begin() (stashed
+            // in the token's size fields), not against print_viz_total_.
+            //
+            // print_viz_total_ is how much has been *printed*, which says nothing
+            // about where this group started -- and printing is deferred until a
+            // group's fate is known, so it is typically far behind.  Using it made
+            // a group's measured width include everything scanned before the group
+            // even opened.  The deeper the nesting, the more foreign content was
+            // counted, so inner groups reported far too wide and broke when they
+            // would have fit.  Symptoms: a record whose flat form was well inside
+            // the margin still broke; identical siblings laid out differently; and
+            // output that stopped responding to the margin once everything had
+            // bottomed out.
+            const uint32_t begin_viz_total = (uint32_t)begin_token->tk_viz_len();
+            const uint32_t begin_total = (uint32_t)begin_token->tk_len();
 
-            if ((scan_viz_total_ < print_viz_total_)
-                || (scan_total_ < print_total_)) [[unlikely]] {
+            if ((scan_viz_total_ < begin_viz_total)
+                || (scan_total_ < begin_total)) [[unlikely]] {
 
                 assert(false);
                 return;
             }
 
-            uint32_t tk_viz_z = scan_viz_total_ - print_viz_total_;
-            uint32_t tk_z = scan_total_ - print_total_;
+            uint32_t tk_viz_z = scan_viz_total_ - begin_viz_total;
+            uint32_t tk_z = scan_total_ - begin_total;
 
             begin_token->establish_size(tk_viz_z, tk_z);
 

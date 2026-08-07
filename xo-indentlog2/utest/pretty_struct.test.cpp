@@ -108,10 +108,10 @@ namespace ut {
         Inner inner;
         int alpha = 1;
 
-        std::string out = render(14, "Out", field("alpha", alpha), field("in", inner));
+        std::string out = render(12, "Out", field("alpha", alpha), field("in", inner));
 
         INFO(out);
-        REQUIRE(out == "<Out\n  :alpha 1\n  :in\n   <In\n    :x\n     1>>");
+        REQUIRE(out == "<Out\n  :alpha 1\n  :in\n   <In\n    :x 1>>");
 
         /* the accumulation itself, stated directly */
         REQUIRE(out.find("\n  :alpha") != std::string::npos);   /* outer: 2 */

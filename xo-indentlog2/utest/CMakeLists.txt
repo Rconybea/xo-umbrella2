@@ -16,6 +16,7 @@ set(SELF_SOURCE_FILES
     scope.test.cpp
     span_pp.test.cpp
     pretty_struct.test.cpp
+    group_fit.test.cpp
     hex.test.cpp)
 
 if (ENABLE_TESTING)

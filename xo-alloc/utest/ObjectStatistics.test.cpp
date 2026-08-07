@@ -170,12 +170,7 @@ namespace xo {
             std::string actual = toppstr(stats);
 
             std::string expected
-                = ("<ObjectTypeStatistics :per_type_stats_v [<PerObjectTypeStatistics\n"
-                   "      :td bool\n"
-                   "      :scanned_n 4\n"
-                   "      :scanned_z 16\n"
-                   "      :survive_n 2\n"
-                   "      :survive_z 8>]>");
+                = ("<ObjectTypeStatistics :per_type_stats_v [<PerObjectTypeStatistics :td bool :scanned_n 4 :scanned_z 16 :survive_n 2 :survive_z 8>]>");
 
             if (actual != expected) {
                 CHECK(actual == expected);
