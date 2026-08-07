@@ -21,6 +21,7 @@ add_definitions(${PROJECT_CXX_FLAGS})
 # sources
 
 add_subdirectory(src/webutil)
+add_subdirectory(utest)
 
 # ----------------------------------------------------------------
 # provide find_package() support

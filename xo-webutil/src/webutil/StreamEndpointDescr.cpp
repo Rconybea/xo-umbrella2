@@ -1,7 +1,8 @@
 /* @file StreamEndpointDescr.cpp */
 
 #include "StreamEndpointDescr.hpp"
-#include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
+#include <xo/ppsink/pretty_struct.hpp>
+#include <xo/ppsink/quoted.hpp>
 #include <xo/ppsink/tostr.hpp>
 
 namespace xo {
@@ -15,23 +16,25 @@ namespace xo {
         {}
 
         void
-        StreamEndpointDescr::display(std::ostream & os) const {
-            /* function-local: a namespace-scope using here would become
-             * ambiguous (not shadowing) if any header in this TU ever makes
-             * legacy xo::xtag visible again.
-             */
-            using xo::pp::xtag;
+        StreamEndpointDescr::pretty(xo::pp::PpSink & sink) const {
+            using xo::pp::field;
+            using xo::pp::unq;
 
-            os << "<StreamEndpointDescr" << xtag("uri_pattern", uri_pattern_) << ">";
-        } /*display*/
+            /* unq(): quotes only when bare would be ambiguous, so an ordinary
+             * uri pattern renders exactly as before, while one containing
+             * whitespace -- or an empty one, which used to render as the
+             * misleading "<StreamEndpointDescr :uri_pattern >" -- gets quoted.
+             */
+            sink.pretty_struct("StreamEndpointDescr",
+                               field("uri_pattern", unq(uri_pattern_)));
+        } /*pretty*/
 
         std::string
         StreamEndpointDescr::display_string() const {
             using xo::pp::tostr;
 
-            /* renders via operator<<(ostream&, StreamEndpointDescr) above --
-             * ppsink has no Prettifier for this type, so pretty() falls through
-             * to the operator<< path that tostr.hpp pulls in.
+            /* routes through Prettifier<StreamEndpointDescr> (declared in the
+             * header), which calls pretty() above.  No operator<< involved.
              */
             return tostr(*this);
         }

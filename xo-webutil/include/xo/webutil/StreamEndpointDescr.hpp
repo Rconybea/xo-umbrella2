@@ -8,6 +8,8 @@
 #include "Alist.hpp"
 #include <xo/refcnt/Refcounted.hpp>
 #include <xo/callback/CallbackSet.hpp>
+#include <xo/ppsink/PpSink.hpp>
+#include <xo/ppsink/Prettifier.hpp>
 #include <functional>
 
 namespace xo {
@@ -34,7 +36,14 @@ namespace xo {
             StreamSubscribeFn const & subscribe_fn() const { return subscribe_fn_; }
             StreamUnsubscribeFn const & unsubscribe_fn() const { return unsubscribe_fn_; }
 
-            void display(std::ostream & os) const;
+            /** structured pretty-printing: render this descriptor into @p sink.
+             *
+             *  This is the rendering primitive -- Prettifier below and
+             *  display_string() both go through it.  Deliberately a PpSink
+             *  rather than a std::ostream: see webutil_ostream.hpp if you want
+             *  @c os << descr .
+             **/
+            void pretty(xo::pp::PpSink & sink) const;
 
             std::string display_string() const;
 
@@ -57,13 +66,24 @@ namespace xo {
             StreamUnsubscribeFn unsubscribe_fn_;
         }; /*StreamEndpointDescr*/
 
-        inline std::ostream &
-        operator<<(std::ostream & os, StreamEndpointDescr const & x) {
-            x.display(os);
-            return os;
-        } /*operator<<*/
-
     } /*namespace web*/
 } /*namespace xo*/
+
+namespace xo::pp {
+    /** pretty-print a StreamEndpointDescr into a PpSink.
+     *
+     *  Lives here, not in a separate _pp.hpp, because the class already
+     *  declares pretty(PpSink&) -- so this header depends on xo-ppsink either
+     *  way, and making the ppsink path the opt-in one would get the ergonomics
+     *  backwards.  webutil_ostream.hpp is the opt-in header, for the ostream
+     *  path we would rather callers inside xo did not take.
+     **/
+    template <>
+    struct Prettifier<xo::web::StreamEndpointDescr> {
+        static void print(PpSink & sink, const xo::web::StreamEndpointDescr & x) {
+            x.pretty(sink);
+        }
+    };
+} /*namespace xo::pp*/
 
 /* end StreamEndpointDescr.hpp */

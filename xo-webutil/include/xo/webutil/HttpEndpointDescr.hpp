@@ -7,7 +7,14 @@
 
 #include "Alist.hpp"
 #include <xo/refcnt/Refcounted.hpp>
+#include <xo/ppsink/PpSink.hpp>
+#include <xo/ppsink/Prettifier.hpp>
 #include <functional>
+/* HttpEndpointFn names std::ostream* -- a pointer, so a forward declaration is
+ * enough.  Was arriving transitively (via Refcounted.hpp's operator<<), leaving
+ * this header not self-contained.
+ */
+#include <iosfwd>
 #include <string>
 
 namespace xo {
@@ -30,7 +37,17 @@ namespace xo {
             std::string const & uri_pattern() const { return uri_pattern_; }
             HttpEndpointFn const & endpoint_fn() const { return endpoint_fn_; }
 
-            void display(std::ostream & os) const;
+            /** structured pretty-printing: render this descriptor into @p sink.
+             *
+             *  This is the rendering primitive -- Prettifier below and
+             *  display_string() both go through it.  Deliberately a PpSink
+             *  rather than a std::ostream: see webutil_ostream.hpp if you want
+             *  @c os << descr .
+             *
+             *  NB the std::ostream* in HttpEndpointFn above is a different
+             *  thing -- it carries HTTP response payload, not diagnostics.
+             **/
+            void pretty(xo::pp::PpSink & sink) const;
 
             std::string display_string() const;
 
@@ -56,13 +73,24 @@ namespace xo {
             HttpEndpointFn endpoint_fn_;
         }; /*HttpEndpointDescr*/
 
-        inline std::ostream &
-        operator<<(std::ostream & os, HttpEndpointDescr const & x) {
-            x.display(os);
-            return os;
-        } /*operator<<*/
-
     } /*namespace web*/
 } /*namespace xo*/
+
+namespace xo::pp {
+    /** pretty-print an HttpEndpointDescr into a PpSink.
+     *
+     *  Lives here, not in a separate _pp.hpp, because the class already
+     *  declares pretty(PpSink&) -- so this header depends on xo-ppsink either
+     *  way, and making the ppsink path the opt-in one would get the ergonomics
+     *  backwards.  webutil_ostream.hpp is the opt-in header, for the ostream
+     *  path we would rather callers inside xo did not take.
+     **/
+    template <>
+    struct Prettifier<xo::web::HttpEndpointDescr> {
+        static void print(PpSink & sink, const xo::web::HttpEndpointDescr & x) {
+            x.pretty(sink);
+        }
+    };
+} /*namespace xo::pp*/
 
 /* end EndpointDescr.hpp */
