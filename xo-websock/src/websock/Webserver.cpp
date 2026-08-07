@@ -22,7 +22,9 @@
 #include "WebsocketSink.hpp"
 #include "WsSafetyToken.hpp"
 #include <xo/printjson/PrintJson.hpp>
-#include <xo/indentlog/scope.hpp>   /* scope -- was arriving via xo/reflect */
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
 #include <json/json.h> // for Json::Reader,  to parse json input
 #include <condition_variable>
 #include <deque>
@@ -35,10 +37,18 @@ namespace xo {
     using xo::reactor::AbstractSink;
     using xo::json::PrintJson;
     using xo::fn::CallbackId;
-    using xo::scope;
-    using xo::xtag;
 
     namespace web {
+        /* NB these sit in namespace xo::web, NOT namespace xo.
+         * xo-reactor's public headers (AbstractSink.hpp, Sink.hpp) still
+         * include legacy xo-indentlog, so xo::xtag is visible in this TU.
+         * A using-declaration at namespace-xo scope would be *ambiguous*
+         * with it rather than shadowing it; one scope further in, ordinary
+         * unqualified lookup stops here and never reaches xo::xtag.
+         */
+        using xo::pp::scope;
+        using xo::pp::xtag;
+
         char const *
         RunstateUtil::runstate_descr(Runstate x)
         {
@@ -146,7 +156,7 @@ namespace xo {
                 void store_message(uint32_t msg_seq,
                                    std::string const & text,
                                    WsSessionSafetyToken const & wsession_token) {
-                    scope log(XO_ENTER0(info));
+                    scope log(XO_ENTER0_(info));
 
                     wsession_token.verify();
 
@@ -178,7 +188,7 @@ namespace xo {
 
                 int lws_write_aux(WsSafetyToken const & ws_safety_token)
                     {
-                        scope log(XO_ENTER0(info));
+                        scope log(XO_ENTER0_(info));
 
                         ws_safety_token.verify();
 
@@ -375,7 +385,7 @@ namespace xo {
                                     DynamicEndpoint * endpoint,
                                     rp<AbstractSink> const & ws_sink) {
 
-                scope log(XO_ENTER0(info),
+                scope log(XO_ENTER0_(info),
                           xtag("incoming_cmd", incoming_cmd));
 
                 std::unique_ptr<WebsocketSubscriptionRecd> sub_recd_uptr
@@ -398,7 +408,7 @@ namespace xo {
             } /*subscribe_endpoint*/
 
             void send_text(std::string text) {
-                scope log(XO_ENTER0(info));
+                scope log(XO_ENTER0_(info));
 
                 std::unique_lock<std::mutex> lock(this->mutex_);
 
@@ -456,7 +466,7 @@ namespace xo {
              *   ws_safety_token provides evidence of this
              */
             void lws_write_pending(WsSafetyToken const & ws_safety_token) {
-                scope log(XO_ENTER0(info));
+                scope log(XO_ENTER0_(info));
 
                 log && log(xtag("output_buf", (void*)this->output_buf_));
 
@@ -557,7 +567,7 @@ namespace xo {
              */
             void prepare_outbound_message(std::string text,
                                           WsSessionSafetyToken const & wss_token) {
-                scope log(XO_ENTER0(info));
+                scope log(XO_ENTER0_(info));
 
                 /* sequence# for this outbound message */
                 uint32_t msg_seq = this->generate_msg_seq();
@@ -1019,7 +1029,7 @@ namespace xo {
                                                per_vhost_data__minimal * /*vhd*/,
                                                WsSafetyToken const & ws_safety_token)
         {
-            scope log(XO_ENTER0(info));
+            scope log(XO_ENTER0_(info));
 
             log && log("enter",
                        xtag("this", (void*)this),
@@ -1243,7 +1253,7 @@ namespace xo {
             lookup_stem(std::string const & stem,
                         EndpointMap const & ep_map)
             {
-                scope log(XO_DEBUG(true /*debug_flag*/),
+                scope log(XO_DEBUG_(true /*debug_flag*/),
                           xtag("stem", stem));
 
                 auto ix = ep_map.find(stem);
@@ -1360,7 +1370,7 @@ namespace xo {
              *    "stream": "usl"}
              */
 
-            scope log(XO_ENTER0(info),
+            scope log(XO_ENTER0_(info),
                       xtag("incoming_cmd", incoming_cmd));
 
             Json::Value root;
@@ -1471,7 +1481,7 @@ namespace xo {
         WebserverImpl::send_text(uint32_t session_id,
                                  std::string text)
         {
-            scope log(XO_ENTER0(info));
+            scope log(XO_ENTER0_(info));
             log && log(xtag("session_id", session_id),
                        xtag(".session_v.size", this->session_v_.size()));
 
@@ -1494,7 +1504,7 @@ namespace xo {
         void
         WebserverImpl::lws_write_pending_traffic(WsSafetyToken const & ws_safety_token)
         {
-            scope log(XO_ENTER0(info));
+            scope log(XO_ENTER0_(info));
 
             ws_safety_token.verify();
 
@@ -1514,7 +1524,7 @@ namespace xo {
                                   rp<PrintJson> const & pjson)
                 : WebserverImpl(ws_config, pjson)
                 {
-                    scope log(XO_DEBUG(true /*debug_flag*/),
+                    scope log(XO_DEBUG_(true /*debug_flag*/),
                               xtag("self", (void*)this));
 
                     this->set_lws_log_level();
@@ -1614,7 +1624,7 @@ namespace xo {
                                               void * input,
                                               size_t input_z)
         {
-            scope log(XO_ENTER0(info),
+            scope log(XO_ENTER0_(info),
                       xtag("wsi", (void*)wsi));
 
             lwsl_user("WebserverImpl::notify_minimal: enter"
@@ -1827,7 +1837,7 @@ namespace xo {
                               LWS_WRITE_TEXT);
 #endif
 
-                //XO_SCOPE(lscope);
+                //XO_SCOPE_(lscope);
 
                 /* pss->output_msg_ was populated from WebserverImpl.send_text(), q.v. */
 
@@ -1905,7 +1915,7 @@ namespace xo {
         void
         WebserverImplWsThread::run()
         {
-            scope log(XO_DEBUG(false /*debug_flag*/));
+            scope log(XO_DEBUG_(false /*debug_flag*/));
 
             lwsl_user("LWS minimal http server dynamic"
                       " | visit http://localhost:%d\n", this->ws_config_.port());

@@ -8,7 +8,10 @@
 #include <xo/printjson/PrintJson.hpp>
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflect/TaggedPtr.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/quoted_ostream.hpp>   /* ss << quot(..) */
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>      /* ss << xtag(..) */
 
 namespace xo {
     using xo::reactor::AbstractSource;
@@ -16,12 +19,22 @@ namespace xo {
     using xo::reflect::Reflect;
     using xo::reflect::TaggedPtr;
     using xo::reflect::TypeDescr;
-    using xo::print::quot;
-    using xo::print::qcstr;
-    using xo::scope;
-    using xo::xtag;
+    /* legacy quot(x) was just quot(x) for a char const *;
+     * xo::pp::quot takes std::string_view, so it covers both.
+     */
 
     namespace web {
+        /* NB these sit in namespace xo::web, NOT namespace xo.
+         * xo-reactor's public headers (AbstractSink.hpp, Sink.hpp) still
+         * include legacy xo-indentlog, so xo::xtag is visible in this TU.
+         * A using-declaration at namespace-xo scope would be *ambiguous*
+         * with it rather than shadowing it; one scope further in, ordinary
+         * unqualified lookup stops here and never reaches xo::xtag.
+         */
+        using xo::pp::quot;
+        using xo::pp::scope;
+        using xo::pp::xtag;
+
         /* a sink that publishes to a websocket.
          * The websocket api creates a WebsocketSink instance
          * on behalf of an incoming subscription request.
@@ -97,13 +110,13 @@ namespace xo {
         void
         WebsocketSinkImpl::notify_ev_tp(TaggedPtr const & ev_tp)
         {
-            scope log(XO_DEBUG(true /*debug_flag*/));
+            scope log(XO_DEBUG_(true /*debug_flag*/));
 
             std::stringstream ss;
 
             /* format message envelope */
-            ss << "{" << qcstr("stream") << ": " << quot(this->stream_name_)
-               << ", " << qcstr("event") << ": ";
+            ss << "{" << quot("stream") << ": " << quot(this->stream_name_)
+               << ", " << quot("event") << ": ";
 
             /* format event as json */
             this->pjson_->print_tp(ev_tp, &ss);

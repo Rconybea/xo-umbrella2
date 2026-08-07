@@ -46,7 +46,6 @@ xo-indentlog xo-reactor
 xo-indentlog xo-stringtable2
 xo-indentlog xo-tokenizer
 xo-indentlog xo-tokenizer2
-xo-indentlog xo-websock
 xo-indentlog2 xo-alloc2
 xo-indentlog2 xo-interpreter2
 xo-jit xo-pyjit
@@ -72,6 +71,7 @@ xo-ppsink xo-reflect
 xo-ppsink xo-subsys
 xo-ppsink xo-testutil
 xo-ppsink xo-unit
+xo-ppsink xo-websock
 xo-ppsink xo-webutil
 xo-printable2 xo-expression2
 xo-printable2 xo-object2
