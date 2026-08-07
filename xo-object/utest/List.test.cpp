@@ -8,9 +8,10 @@
 #include "xo/object/String.hpp"
 #include <xo/alloc/ArenaAlloc.hpp>
 #include <xo/alloc/GC.hpp>
-#include <xo/indentlog/print/tag.hpp>
-#include <xo/indentlog/print/vector.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
+#include <xo/ppsink/PrettyVector.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 #include <catch2/catch.hpp>
 #include <ranges>
 #include <string>
@@ -18,6 +19,13 @@
 
 namespace xo {
     namespace ut {
+        /* one scope in from namespace xo: a using-decl at xo scope would be
+         * *ambiguous* with legacy xo::xtag (still visible via headers that
+         * have not migrated) rather than shadowing it.
+         */
+        using xo::pp::scope;
+        using xo::pp::xtag;
+
         using xo::obj::List;
         using xo::obj::String;
         using xo::obj::Integer;
@@ -73,7 +81,7 @@ namespace xo {
                 Object::mm = gc.get();
 
                 {
-                    scope log(XO_DEBUG(c_debug_flag));
+                    scope log(XO_DEBUG_(c_debug_flag));
                     log && log(xtag("i_tc", i_tc), xtag("tc.v_.size", tc.v_.size()));
 
                     std::vector<gp<List>> root_v(tc.v_.size());
@@ -240,7 +248,7 @@ namespace xo {
                 Object::mm = gc.get();
 
                 {
-                    scope log(XO_DEBUG(c_debug_flag));
+                    scope log(XO_DEBUG_(c_debug_flag));
                     log && log(xtag("i_tc", i_tc), xtag("tc.v_.size", tc.v_.size()));
 
                     std::vector<gp<List>> root_v(tc.v_.size());

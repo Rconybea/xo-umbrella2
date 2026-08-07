@@ -7,7 +7,7 @@
 #include "GC.hpp"
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflect/TaggedPtr.hpp>
-#include <xo/indentlog/print/quoted.hpp>
+#include <xo/ppsink/quoted_ostream.hpp>   /* os << quot(..) */
 #ifdef __linux__
 # include <bsd/string.h>
 #endif
@@ -18,9 +18,14 @@
 namespace xo {
     using xo::reflect::Reflect;
     using xo::reflect::TaggedPtr;
-    using xo::print::quot;
 
     namespace obj {
+        /* one scope in from namespace xo: a using-decl at xo scope would be
+         * *ambiguous* with legacy xo::xtag (still visible via headers that
+         * have not migrated) rather than shadowing it.
+         */
+        using xo::pp::quot;
+
         String::String(owner owner, std::size_t z, char * s)
             : owner_{owner}, z_chars_{z}, chars_{s}
         {}

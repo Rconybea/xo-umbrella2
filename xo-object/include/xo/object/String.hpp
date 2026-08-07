@@ -5,7 +5,7 @@
 
 #include "ObjectConversion.hpp"
 #include <xo/alloc/Object.hpp>
-#include <xo/indentlog/print/tag.hpp>
+#include <xo/ppsink/tag_ostream.hpp>   /* os << xo::pp::xtag(..) */
 #include <xo/allocutil/IAlloc.hpp>
 
 namespace xo {
@@ -144,6 +144,12 @@ namespace xo {
                 return String::copy(mm, x.c_str());
             }
             static std::string from_object(gc::IAlloc *, gp<Object> x) {
+                /* NB qualified, not a using-declaration.  The argument type
+                 * gp<Object> lives in namespace xo, so ADL adds legacy
+                 * xo::xtag to the candidate set -- and ADL is not suppressed
+                 * by a using-decl, at block scope or otherwise.  Only a
+                 * qualified call avoids the ambiguity.
+                 */
                 gp<String> x_str = String::from(x);
                 if (x_str.get()) {
                     /* note: ignores allocator, always uses heap.
@@ -155,8 +161,8 @@ namespace xo {
                     return std::string(x_str->c_str());
                 } else {
                     throw std::runtime_error
-                        (tostr("ObjectConversion_String"
-                               ": x found where string expected", xtag("x", x)));
+                        (xo::pp::tostr("ObjectConversion_String"
+                               ": x found where string expected", xo::pp::xtag("x", x)));
                 }
 
             }

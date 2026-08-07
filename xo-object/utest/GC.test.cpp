@@ -6,12 +6,14 @@
 #include "xo/object/Integer.hpp"
 #include "xo/object/List.hpp"
 #include <xo/alloc/GC.hpp>
-#include <xo/indentlog/print/tag.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 #include <xo/randomgen/random_seed.hpp>
 #include <xo/randomgen/xoshiro256.hpp>
 #include <catch2/catch.hpp>
 #include <unordered_set>
+#include <xo/ppsink/tostr.hpp>
 
 namespace xo {
     using xo::obj::List;
@@ -24,6 +26,14 @@ namespace xo {
     using xo::rng::xoshiro256ss;
 
     namespace ut {
+        /* one scope in from namespace xo: a using-decl at xo scope would be
+         * *ambiguous* with legacy xo::xtag (still visible via headers that
+         * have not migrated) rather than shadowing it.
+         */
+        using xo::pp::scope;
+        using xo::pp::tostr;
+        using xo::pp::xtag;
+
 
         // Also see GC unit tests in xo-alloc/utest
 
@@ -585,7 +595,7 @@ namespace xo {
             for (std::size_t i_tc = 0, n_tc = s_testcase_v.size(); i_tc < n_tc; ++i_tc) {
                 const testcase_stresstest & tc = s_testcase_v[i_tc];
 
-                scope log(XO_DEBUG(tc.gc_stats_flag_));
+                scope log(XO_DEBUG_(tc.gc_stats_flag_));
 
                 up<GC> gc = GC::make(
                     {

@@ -6,11 +6,13 @@
 #include "xo/object/String.hpp"
 #include <xo/alloc/ArenaAlloc.hpp>
 #include <xo/alloc/GC.hpp>
-#include <xo/indentlog/print/quoted.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 #include <catch2/catch.hpp>
 #include <cstdint>
 #include <cstring>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/quoted.hpp>
 
 namespace xo {
     using xo::gc::IAlloc;
@@ -20,6 +22,13 @@ namespace xo {
     using xo::obj::String;
 
     namespace ut {
+        /* one scope in from namespace xo: a using-decl at xo scope would be
+         * *ambiguous* with legacy xo::xtag (still visible via headers that
+         * have not migrated) rather than shadowing it.
+         */
+        using xo::pp::scope;
+        using xo::pp::xtag;
+
 
         namespace {
             struct Testcase_String {
@@ -121,7 +130,7 @@ namespace xo {
                 Object::mm = gc.get();
 
                 {
-                    scope log(XO_DEBUG(false));
+                    scope log(XO_DEBUG_(false));
 
                     std::size_t n_string = 0;
                     std::size_t expected_alloc_z = 0;
@@ -140,7 +149,7 @@ namespace xo {
                                                + IAlloc::with_padding(1 + s_str.length()));
                         expected_alloc_z += alloc_z;
 
-                        log && log(xtag("s_str", xo::print::unq(s_str)),
+                        log && log(xtag("s_str", xo::pp::unq(s_str)),
                                    xtag("s_str.length", s_str.length()),
                                    xtag("alloc_z", alloc_z));
                         log && log(xtag("expected_alloc_z", expected_alloc_z));

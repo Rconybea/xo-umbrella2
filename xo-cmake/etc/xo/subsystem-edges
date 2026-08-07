@@ -37,7 +37,6 @@ xo-indentlog xo-expression
 xo-indentlog xo-expression2
 xo-indentlog xo-gc
 xo-indentlog xo-imgui
-xo-indentlog xo-object
 xo-indentlog xo-object2
 xo-indentlog xo-ordinaltree
 xo-indentlog xo-printable2
@@ -66,6 +65,7 @@ xo-ppsink xo-arena
 xo-ppsink xo-distribution
 xo-ppsink xo-flatstring
 xo-ppsink xo-indentlog2
+xo-ppsink xo-object
 xo-ppsink xo-pyunit
 xo-ppsink xo-ratio
 xo-ppsink xo-refcnt

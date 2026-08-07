@@ -31,6 +31,9 @@ namespace xo {
          */
         class HttpEndpointDescr {
         public:
+            using PpSink = xo::pp::PpSink;
+
+        public:
             HttpEndpointDescr(std::string uri_pattern,
                               HttpEndpointFn endpoint_fn);
 
@@ -47,7 +50,7 @@ namespace xo {
              *  NB the std::ostream* in HttpEndpointFn above is a different
              *  thing -- it carries HTTP response payload, not diagnostics.
              **/
-            void pretty(xo::pp::PpSink & sink) const;
+            void pretty(PpSink & sink) const;
 
             std::string display_string() const;
 

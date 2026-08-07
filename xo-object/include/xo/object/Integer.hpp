@@ -8,7 +8,7 @@
 #include "Number.hpp"
 #include "ObjectConversion.hpp"
 #include <xo/reflect/TaggedPtr.hpp>
-#include <xo/indentlog/print/tag.hpp>
+#include <xo/ppsink/tag_ostream.hpp>   /* os << xo::pp::xtag(..) */
 
 namespace xo {
     namespace obj {
@@ -48,11 +48,17 @@ namespace xo {
                 return new (MMPtr(mm)) Integer(x);
             }
             static IntType from_object(gc::IAlloc *, gp<Object> x) {
+                /* NB qualified, not a using-declaration.  The argument type
+                 * gp<Object> lives in namespace xo, so ADL adds legacy
+                 * xo::xtag to the candidate set -- and ADL is not suppressed
+                 * by a using-decl, at block scope or otherwise.  Only a
+                 * qualified call avoids the ambiguity.
+                 */
                 gp<Integer> x_int = Integer::from(x);
                 if (x_int.get()) {
                     return x_int->value();
                 } else {
-                    throw std::runtime_error(tostr("ObjectConversion_Integer: x found where Integer expected", xtag("x", x)));
+                    throw std::runtime_error(xo::pp::tostr("ObjectConversion_Integer: x found where Integer expected", xo::pp::xtag("x", x)));
                 }
             }
         };

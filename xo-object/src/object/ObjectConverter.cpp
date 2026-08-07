@@ -10,6 +10,8 @@
 #include "String.hpp"
 #include <xo/alloc/Blob.hpp>
 #include <xo/reflect/TaggedPtr.hpp>
+#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
 
 namespace xo {
     using xo::reflect::Reflect;
@@ -18,6 +20,13 @@ namespace xo {
     using xo::gc::IAlloc;
 
     namespace obj {
+        /* one scope in from namespace xo: a using-decl at xo scope would be
+         * *ambiguous* with legacy xo::xtag (still visible via headers that
+         * have not migrated) rather than shadowing it.
+         */
+        using xo::pp::tostr;
+        using xo::pp::xtag;
+
         namespace {
             template <typename T>
             gp<Object>

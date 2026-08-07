@@ -7,7 +7,7 @@
 
 #include "ObjectConversion.hpp"
 #include <xo/alloc/Object.hpp>
-#include <xo/indentlog/print/tag.hpp>
+#include <xo/ppsink/tag_ostream.hpp>   /* os << xo::pp::xtag(..) */
 
 namespace xo {
     namespace obj {
@@ -45,11 +45,17 @@ namespace xo {
                 return Boolean::boolean_obj(x);
             }
             static BoolType from_object(gc::IAlloc *, gp<Object> x) {
+                /* NB qualified, not a using-declaration.  The argument type
+                 * gp<Object> lives in namespace xo, so ADL adds legacy
+                 * xo::xtag to the candidate set -- and ADL is not suppressed
+                 * by a using-decl, at block scope or otherwise.  Only a
+                 * qualified call avoids the ambiguity.
+                 */
                 gp<Boolean> x_bool = Boolean::from(x);
                 if (x_bool.get()) {
                     return x_bool->value();
                 } else {
-                    throw std::runtime_error(tostr("ObjectConversion_Boolean: x found where Boolean expected", xtag("x", x)));
+                    throw std::runtime_error(xo::pp::tostr("ObjectConversion_Boolean: x found where Boolean expected", xo::pp::xtag("x", x)));
                 }
             }
         };

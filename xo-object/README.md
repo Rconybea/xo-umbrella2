@@ -13,7 +13,7 @@ Installs a few cmake ingredients,  along with a build assistant `xo-build` for X
 
 ### build + install other necessary XO dependencies
 ```
-$ xo-build --clone --configure --build --install xo-indentlog
+$ xo-build --clone --configure --build --install xo-ppsink
 $ xo-build --clone --configure --build --install xo-refnct
 $ xo-build --clone --configure --build --install xo-subsys
 $ xo-build --clone --configure --build --install xo-reflect

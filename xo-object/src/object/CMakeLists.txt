@@ -15,7 +15,7 @@ xo_headeronly_dependency(${SELF_LIB} xo_reflectutil)
 xo_headeronly_dependency(${SELF_LIB} xo_unit)
 xo_headeronly_dependency(${SELF_LIB} callback)
 xo_dependency(${SELF_LIB} xo_alloc)
-# xo-object's headers/sources use legacy xo-indentlog (scope, xtag, quot,
-# print/vector).  Declared explicitly: xo-alloc no longer propagates it.
-xo_dependency(${SELF_LIB} indentlog)
+# PUBLIC: Boolean/Float/Integer/String.hpp use xo::pp::{xtag,tostr} in
+# inline bodies, so consumers need ppsink too.
+xo_dependency(${SELF_LIB} xo_ppsink)
 #xo_dependency(${SELF_LIB} reflect)  # should be able to get this indirectly via xo_alloc

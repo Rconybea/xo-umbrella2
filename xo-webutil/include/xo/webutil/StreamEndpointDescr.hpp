@@ -28,6 +28,9 @@ namespace xo {
          */
         class StreamEndpointDescr {
         public:
+            using PpSink = xo::pp::PpSink;
+
+        public:
             StreamEndpointDescr(std::string uri_pattern,
                                 StreamSubscribeFn subscribe_fn,
                                 StreamUnsubscribeFn unsubscribe_fn);
@@ -40,7 +43,7 @@ namespace xo {
              *
              *  See webutil_ostream.hpp for @c os << StreamEndpointDescr.
              **/
-            void pretty(xo::pp::PpSink & sink) const;
+            void pretty(PpSink & sink) const;
 
             std::string display_string() const;
 
