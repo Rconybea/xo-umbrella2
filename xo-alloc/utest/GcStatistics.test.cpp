@@ -185,10 +185,7 @@ namespace xo {
                 }
             }
 
-
-
             REQUIRE(actual == expected);
-
         }
     }
 } /*namespace xo*/
