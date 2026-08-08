@@ -30,6 +30,9 @@
 
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
+    using xo::pp::tostr;
     using xo::gc::GC;
     using xo::obj::Procedure;
     using xo::obj::Integer;
@@ -105,7 +108,7 @@ namespace xo {
 
         VirtualSchematikaMachineFlyweight::VirtualSchematikaMachineFlyweight(gc::IAlloc * mm,
                                                                              gp<GlobalEnv> env,
-                                                                             log_level ll) :
+                                                                             xo::pp::log_level ll) :
             object_mm_{mm},
             toplevel_env_{env},
             log_level_{ll}
@@ -116,9 +119,9 @@ namespace xo {
 
         VirtualSchematikaMachine::VirtualSchematikaMachine(gc::IAlloc * mm,
                                                            gp<GlobalEnv> env,
-                                                           log_level ll) : flyweight_{mm, env, ll}
+                                                           xo::pp::log_level ll) : flyweight_{mm, env, ll}
         {
-            scope log(XO_DEBUG(true), xtag("env", env), xtag("symtab", env->symtab()));
+            scope log(XO_DEBUG_(true), xtag("env", env), xtag("symtab", env->symtab()));
 
             this->env_ = env;
 
@@ -163,7 +166,7 @@ namespace xo {
                   SchematikaError>
         VirtualSchematikaMachine::eval(bp<Expression> expr, gp<GlobalEnv> env)
         {
-            scope log(XO_DEBUG(true), xtag("env", env), xtag("symtab", env->symtab()));
+            scope log(XO_DEBUG_(true), xtag("env", env), xtag("symtab", env->symtab()));
 
             this->pc_    = &VsmOps::eval_op;
             this->expr_  = expr.promote();
@@ -188,7 +191,7 @@ namespace xo {
         void
         VirtualSchematikaMachine::execute_one()
         {
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG_(true));
             log && log(xtag("pc", pc_), xtag("cont", cont_));
             log && log(xtag("stack", stack_));
 
@@ -307,7 +310,7 @@ namespace xo {
         {
             using xo::scm::ConstantInterface;
 
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG_(true));
 
             bp<ConstantInterface> expr = ConstantInterface::from(expr_);
 
@@ -343,7 +346,7 @@ namespace xo {
             using xo::obj::Primitive;
             using xo::reflect::TaggedPtr;
 
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG_(true));
 
             bp<PrimitiveExprInterface> expr = PrimitiveExprInterface::from(expr_);
 
@@ -369,7 +372,7 @@ namespace xo {
         {
             using xo::scm::DefineExpr;
 
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG_(true));
 
             auto mm = flyweight_.object_mm_;
 
@@ -412,7 +415,7 @@ namespace xo {
         {
             using xo::scm::AssignExpr;
 
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG_(true));
 
             auto mm = flyweight_.object_mm_;
 
@@ -461,7 +464,7 @@ namespace xo {
         void
         VirtualSchematikaMachine::do_complete_assign_op()
         {
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG_(true));
 
             /*
              * - value: contains result of evaluating rhs of define
@@ -493,7 +496,7 @@ namespace xo {
         {
             using xo::scm::Variable;
 
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG_(true));
 
             bp<Variable> var = Variable::from(expr_);
 
@@ -533,7 +536,7 @@ namespace xo {
         {
             using xo::scm::IfExpr;
 
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG_(true));
 
             gc::IAlloc * mm = flyweight_.object_mm_;
 
@@ -566,7 +569,7 @@ namespace xo {
         {
             using xo::scm::IfExpr;
 
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG_(true));
 
             /*
              * - value: contains result of evaluating test condition of if-expr
@@ -617,7 +620,7 @@ namespace xo {
         {
             using xo::scm::Sequence;
 
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG_(true));
 
             gc::IAlloc * mm = flyweight_.object_mm_;
 
@@ -667,7 +670,7 @@ namespace xo {
         {
             using xo::scm::Sequence;
 
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG_(true));
 
             /* - stack: top frame has 2 slots:
              *    [0] : seq (boxed Sequence)
@@ -718,7 +721,7 @@ namespace xo {
 
             using xo::scm::Apply;
 
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG_(true));
 
             gc::IAlloc * mm = flyweight_.object_mm_;
 
@@ -756,7 +759,7 @@ namespace xo {
         {
             using xo::scm::Apply;
 
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG_(true));
 
             /* - stack: top frame has 2 slots
              *    [0] : apply (boxed Apply)
@@ -822,7 +825,7 @@ namespace xo {
         void
         VirtualSchematikaMachine::apply_op()
         {
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG_(true));
 
             auto mm = flyweight_.object_mm_;
 

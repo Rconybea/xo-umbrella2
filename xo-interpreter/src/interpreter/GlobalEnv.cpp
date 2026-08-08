@@ -2,9 +2,13 @@
 
 #include "GlobalEnv.hpp"
 #include <xo/reflect/Reflect.hpp>
-#include <xo/indentlog/scope.hpp>   /* scope -- was arriving via xo/reflect */
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
     using xo::reflect::Reflect;
     using xo::reflect::TaggedPtr;
 
@@ -39,7 +43,7 @@ namespace xo {
         gp<Object> *
         GlobalEnv::lookup_slot(const std::string & vname)
         {
-            scope log(XO_DEBUG(true), xtag("name", vname));
+            scope log(XO_DEBUG_(true), xtag("name", vname));
 
             assert(slot_map_.get());
 
@@ -56,7 +60,7 @@ namespace xo {
         gp<Object> *
         GlobalEnv::establish_var(bp<Variable> var)
         {
-            scope log(XO_DEBUG(true), xtag("name", var->name()), xtag("type", var->valuetype()));
+            scope log(XO_DEBUG_(true), xtag("name", var->name()), xtag("type", var->valuetype()));
 
             // Warning: altering declared type for an already-existing variable
             // invalidates any type checking that relied on that variable.

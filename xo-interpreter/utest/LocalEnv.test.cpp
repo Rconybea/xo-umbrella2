@@ -8,9 +8,12 @@
 #include <cstdint>
 #include <vector>
 /* xo::scope -- was arriving via xo/alloc/GC.hpp, now ppsink-only */
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
     using xo::scm::LocalEnv;
     using xo::obj::Integer;
     using xo::gc::GC;
@@ -46,7 +49,7 @@ namespace xo {
             constexpr bool c_debug_flag = false;
 
             for (std::size_t i_tc = 0, n_tc = s_testcase_v.size(); i_tc < n_tc; ++i_tc) {
-                scope log(XO_DEBUG(c_debug_flag), xtag("test", "LocalEnv2"), xtag("i_tc", i_tc));
+                scope log(XO_DEBUG_(c_debug_flag), xtag("test", "LocalEnv2"), xtag("i_tc", i_tc));
 
                 const Testcase_LocalEnv & tc = s_testcase_v[i_tc];
 
@@ -71,7 +74,7 @@ namespace xo {
 
             try {
                 for (std::size_t i_tc = 0, n_tc = s_testcase_v.size(); i_tc < n_tc; ++i_tc) {
-                    scope log(XO_DEBUG(c_debug_flag), xtag("test", "LocalEnv2"), xtag("i_tc", i_tc));
+                    scope log(XO_DEBUG_(c_debug_flag), xtag("test", "LocalEnv2"), xtag("i_tc", i_tc));
 
                     const Testcase_LocalEnv & tc = s_testcase_v[i_tc];
 

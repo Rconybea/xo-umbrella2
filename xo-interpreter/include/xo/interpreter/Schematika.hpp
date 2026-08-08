@@ -6,8 +6,8 @@
 #pragma once
 
 #include <xo/alloc/GC.hpp>
-/* xo::log_level -- was arriving via xo/alloc/GC.hpp, now ppsink-only */
-#include <xo/indentlog/log_level.hpp>
+/* xo::pp::log_level, named in Config below */
+#include <xo/ppsink/log_level.hpp>
 
 namespace xo {
     namespace scm {
@@ -34,7 +34,7 @@ namespace xo {
                 gc::Config gc_config_;
 
                 /** control schematika vsm logging **/
-                log_level vsm_log_level_;
+                xo::pp::log_level vsm_log_level_;
             };
 
             using IAlloc = xo::gc::IAlloc;

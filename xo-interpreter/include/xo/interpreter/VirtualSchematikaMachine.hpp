@@ -9,7 +9,7 @@
 #include <xo/object/ObjectConverter.hpp>
 #include <xo/alloc/Object.hpp>
 #include <xo/expression/Expression.hpp>
-#include <xo/indentlog/scope.hpp>   /* log_level -- was arriving via xo/reflect */
+#include <xo/ppsink/log_level.hpp>
 
 namespace xo {
     namespace scm {
@@ -17,7 +17,7 @@ namespace xo {
         struct VirtualSchematikaMachineFlyweight {
             explicit VirtualSchematikaMachineFlyweight(gc::IAlloc * mm,
                                                        gp<GlobalEnv> env,
-                                                       log_level log_level);
+                                                       xo::pp::log_level log_level);
 
             /** memory allocator for interpreter operation. **/
             gc::IAlloc * object_mm_ = nullptr;
@@ -26,7 +26,7 @@ namespace xo {
             /** convert TaggedPtr->Object **/
             xo::obj::ObjectConverter object_converter_;
             /** control logging level. higher values -> more logging **/
-            log_level log_level_;
+            xo::pp::log_level log_level_;
         };
 
         /** @class VirtualSchematikaMachine
@@ -38,7 +38,7 @@ namespace xo {
             using IAlloc = xo::gc::IAlloc;
 
         public:
-            VirtualSchematikaMachine(IAlloc * mm, gp<GlobalEnv> toplevel_env, log_level log_level);
+            VirtualSchematikaMachine(IAlloc * mm, gp<GlobalEnv> toplevel_env, xo::pp::log_level log_level);
             ~VirtualSchematikaMachine();
 
             gp<GlobalEnv> toplevel_env() const { return flyweight_.toplevel_env_; }

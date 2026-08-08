@@ -16,10 +16,13 @@
  * the two ambiguous by ADL (the tag argument types live in namespace xo).
  * Retire when xo-interpreter migrates to ppsink.
  */
-#include <xo/indentlog/print/tag.hpp>
-#include <xo/indentlog/scope.hpp>   /* scope -- was arriving via xo/reflect */
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 
 namespace xo {
+    using xo::pp::scope;
     using xo::reflect::Reflect;
     using xo::reflect::TaggedPtr;
     using xo::reflect::TypeDescr;
@@ -34,7 +37,7 @@ namespace xo {
         void
         BuiltinPrimitives::install(gc::IAlloc * mm, gp<GlobalEnv> env)
         {
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG_(true));
 
             // add(x,y)
             {

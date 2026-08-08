@@ -5,7 +5,7 @@
 int
 main(int argc, char ** argv)
 {
-    using xo::log_level;
+    using xo::pp::log_level;
     using xo::scm::Schematika;
 
     Schematika::Config cfg;

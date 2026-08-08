@@ -35,7 +35,6 @@ xo-gc xo-interpreter2
 xo-gc xo-reader2
 xo-indentlog xo-expression2
 xo-indentlog xo-gc
-xo-indentlog xo-interpreter
 xo-indentlog xo-jit
 xo-indentlog xo-object2
 xo-indentlog xo-printable2
@@ -43,7 +42,10 @@ xo-indentlog xo-stringtable2
 xo-indentlog xo-tokenizer2
 xo-indentlog2 xo-alloc
 xo-indentlog2 xo-alloc2
+xo-indentlog2 xo-expression
+xo-indentlog2 xo-interpreter
 xo-indentlog2 xo-interpreter2
+xo-indentlog2 xo-reader
 xo-jit xo-pyjit
 xo-kalmanfilter xo-pykalmanfilter
 xo-numeric xo-expression2
@@ -63,6 +65,7 @@ xo-ppsink xo-expression
 xo-ppsink xo-flatstring
 xo-ppsink xo-imgui
 xo-ppsink xo-indentlog2
+xo-ppsink xo-interpreter
 xo-ppsink xo-kalmanfilter
 xo-ppsink xo-object
 xo-ppsink xo-ordinaltree

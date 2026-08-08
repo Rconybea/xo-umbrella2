@@ -10,13 +10,32 @@
 #include <xo/reader/reader.hpp>
 #include <replxx.hxx>
 #include <ostream>
+#include <xo/indentlog2/print/PrettySink.hpp>
+#include <xo/expression/pretty_expression.hpp>
 #include <unistd.h> // for STDIN_FILENO on OSX
 
 namespace xo {
+
+    namespace {
+        /** render @p expr with line breaking, as legacy ppstate_standalone did **/
+        template <typename T>
+        void render_expr(std::ostream & os, const T & expr) {
+            static int seq = 0;
+
+            xo::mm::ArenaConfig logbuf_cfg { .name_ = "schematika." + std::to_string(++seq),
+                                             .size_ = 64*1024 };
+
+            xo::pp::PpConfig cfg = xo::pp::PpConfig().with_logbuf_config(logbuf_cfg);
+
+            xo::pp::PrettySink pp(cfg, nullptr);
+            pp.pp(expr);
+
+            os << pp.output() << std::endl;
+        }
+    } /*namespace*/
+    using xo::pp::scope;
     using xo::gc::IAlloc;
     using xo::gc::GC;
-    using xo::print::ppconfig;
-    using xo::print::ppstate_standalone;
     using replxx::Replxx;
     using namespace std;
 
@@ -146,7 +165,7 @@ namespace xo {
         void
         Schematika::Impl::interactive_repl()
         {
-            scope log(XO_DEBUG(true));
+            scope log(XO_DEBUG_(true));
 
             using span_type = xo::scm::span<const char>;
 
@@ -203,10 +222,7 @@ namespace xo {
 
                     if (expr) {
                         /** configuration for pretty-printing **/
-                        ppconfig ppc;
-                        ppstate_standalone pps(&cout, 0, &ppc);
-
-                        //pps.prettyn(expr);
+                        //render_expr(cout, expr);
 
                         // TODO:
                         auto [ value, scm_error ] = this->vsm_.toplevel_eval(expr);
@@ -247,10 +263,7 @@ namespace xo {
             auto [expr, _1, _2, error] = rdr.read_expr(input, true /*eof*/);
 
             if (expr) {
-                ppconfig ppc;
-                ppstate_standalone pps(&cout, 0, &ppc);
-
-                pps.prettyn<rp<Expression>>(rp<Expression>(expr));
+                render_expr(cout, rp<Expression>(expr));
             } else if (error.is_error()) {
                 cout << "parsing error (detected in " << error.src_function() << "): " << endl;
                 error.report(cout);
