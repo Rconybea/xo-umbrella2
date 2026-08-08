@@ -15,18 +15,29 @@
 #include "bplustree/LeafNode.hpp"
 #include "bplustree/Lhs.hpp"
 #include "bplustree/bplustree_tags.hpp"
-#include <xo/indentlog/print/pad.hpp>
-#include <xo/indentlog/print/tag.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/pad_ostream.hpp>     /* os << xo::pp::pad(..) */
+#include <xo/ppsink/tag_ostream.hpp>     /* os << xo::pp::xtag(..) */
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 #include <algorithm> /* for std::max */
 #include <cassert>
 #include <cstdint>
 #include <limits> /* for std::numeric_limits */
 #include <memory> /* for std::unqiue_ptr */
 #include <unistd.h>
+/* std::clog -- was arriving via xo/indentlog/scope.hpp */
+#include <iostream>
 #if __APPLE__ && __MACH__
 # include <sys/sysctl.h>
+#include <xo/ppsink/tostr.hpp>
 #endif
+
+/* NB xo::pp names are QUALIFIED throughout this header rather than brought in
+ * by using-declarations: a using-decl at namespace scope in a public header
+ * leaks into every consumer's scope, and a function-local one is not enough
+ * either -- ADL adds legacy xo::xtag whenever an argument type lives in
+ * namespace xo, and merges it into the candidate set.
+ */
 
 namespace xo {
     namespace tree {
@@ -238,10 +249,9 @@ namespace xo {
         operator<<(std::ostream & os,
                    BplusStdProperties<Key, Value, OrdinalTag> const & p)
         {
-            using xo::xtag;
 
             os << "<BplusStdProperties"
-               << xtag("branching_factor", p.branching_factor())
+               << xo::pp::xtag("branching_factor", p.branching_factor())
                << ">";
 
             return os;
@@ -304,11 +314,9 @@ namespace xo {
              * - throw_flag=false -> return false;
              */
             bool verify_ok(bool throw_flag = true) const {
-                using xo::scope;
-                using xo::xtag;
 
-                //scope x("verify_ok");
-                //x.log(xtag("n_element", this->n_element_));
+                //xo::pp::scope x("verify_ok");
+                //x.log(xo::pp::xtag("n_element", this->n_element_));
 
                 std::size_t z = 0;
 
@@ -321,14 +329,14 @@ namespace xo {
                     return false;
                 }
 
-                //x.log(xtag("z", z));
+                //x.log(xo::pp::xtag("z", z));
 
                 if (z != this->n_element_) {
                     if (throw_flag) {
-                        std::string err = tostr("BplusTree::verify_ok"
+                        std::string err = xo::pp::tostr("BplusTree::verify_ok"
                                                 ": bad key count",
-                                                xtag("expected", this->n_element_),
-                                                xtag("counted", z));
+                                                xo::pp::xtag("expected", this->n_element_),
+                                                xo::pp::xtag("counted", z));
 
                         throw std::runtime_error(err);
                     }
@@ -384,13 +392,11 @@ namespace xo {
              * - 0 <= i < .size
              */
             const_iterator find_ith(std::size_t i_tree) const {
-                using xo::tostr;
-                using xo::xtag;
 
                 if (i_tree >= this->size()) {
-                    throw std::runtime_error(tostr("BplusTree::find_ith: expected index i in range [0..n)",
-                                                   xtag("i", i_tree),
-                                                   xtag("n", this->size())));
+                    throw std::runtime_error(xo::pp::tostr("BplusTree::find_ith: expected index i in range [0..n)",
+                                                   xo::pp::xtag("i", i_tree),
+                                                   xo::pp::xtag("n", this->size())));
                 }
 
                 GenericNodeType * generic_node = this->root_.get();
@@ -402,8 +408,8 @@ namespace xo {
                 const_iterator ix = this->find(k);
 
                 if (ix == this->cend()) {
-                    throw std::out_of_range(tostr("BplusTree::at: expected key argument to appear in tree",
-                                                  xtag("key", k)));
+                    throw std::out_of_range(xo::pp::tostr("BplusTree::at: expected key argument to appear in tree",
+                                                  xo::pp::xtag("key", k)));
                 }
 
                 return BpTreeConstLhs(this, ix.item_addr());
@@ -453,17 +459,15 @@ namespace xo {
              *          false if existing key (tree size unchanged)
              */
             std::pair<const_iterator, bool> insert(std::pair<Key const, Value> const & kv_pair) {
-                using xo::scope;
-                using xo::xtag;
 
-                scope log(XO_DEBUG(this->debug_flag()),
-                          xtag("key", kv_pair.first),
-                          xtag("value", kv_pair.second),
-                          xtag("root", this->root_.get())
-                           //xtag("nesting", x.nesting_level())
+                xo::pp::scope log(XO_DEBUG_(this->debug_flag()),
+                          xo::pp::xtag("key", kv_pair.first),
+                          xo::pp::xtag("value", kv_pair.second),
+                          xo::pp::xtag("root", this->root_.get())
+                           //xo::pp::xtag("nesting", x.nesting_level())
                     );
 
-                log && log(xtag("bptree[before-insert]", (char const *)"..."));
+                log && log(xo::pp::xtag("bptree[before-insert]", (char const *)"..."));
                 if (log) this->print(std::clog, log.nesting_level()+2);
 
                 std::pair<const_iterator, bool> retval;
@@ -471,7 +475,7 @@ namespace xo {
                 if (this->root_) {
                     NodeType root_type = this->root_->node_type();
 
-                    log && log(xtag("root_type", root_type));
+                    log && log(xo::pp::xtag("root_type", root_type));
 
                     switch (root_type) {
                     case NodeType::leaf:
@@ -485,7 +489,7 @@ namespace xo {
                     retval = this->create_root_aux(kv_pair);
                 }
 
-                log && log(xtag("bptree[after-insert]", (char const *)"..."));
+                log && log(xo::pp::xtag("bptree[after-insert]", (char const *)"..."));
                 if (log) this->print(std::clog, log.nesting_level() + 2);
 
                 log.end_scope();
@@ -509,14 +513,12 @@ namespace xo {
              *         false if key not found
              */
             bool erase(Key const & key) {
-                using xo::scope;
-                using xo::xtag;
 
-                scope log(XO_DEBUG(this->debug_flag()),
-                          xtag("key", key),
-                          xtag("root", this->root_.get()));
+                xo::pp::scope log(XO_DEBUG_(this->debug_flag()),
+                          xo::pp::xtag("key", key),
+                          xo::pp::xtag("root", this->root_.get()));
 
-                log && log(xtag("bptree[before-erase]", (char const *)"..."));
+                log && log(xo::pp::xtag("bptree[before-erase]", (char const *)"..."));
                 if (log) this->print(std::clog, log.nesting_level()+2);
 
                 bool retval = false;
@@ -524,7 +526,7 @@ namespace xo {
                 if (this->root_) {
                     NodeType root_type = this->root_->node_type();
 
-                    log && log(xtag("root_type", root_type));
+                    log && log(xo::pp::xtag("root_type", root_type));
 
                     switch (root_type) {
                     case NodeType::leaf:
@@ -538,7 +540,7 @@ namespace xo {
                     /* tree empty,  certainly doesn't contain key */
                 }
 
-                log && log(xtag("bptree[after-erase]", (char const *)"..."));
+                log && log(xo::pp::xtag("bptree[after-erase]", (char const *)"..."));
                 if (log) this->print(std::clog, log.nesting_level()+2);
 
                 log.end_scope();
@@ -547,17 +549,15 @@ namespace xo {
             } /*erase*/
 
             void print(std::ostream & os, std::int32_t indent = 0) const {
-                using xo::xtag;
-                using xo::pad;
 
-                os << pad(indent) << "<BplusTree";
-                os << xtag("properties", properties_);
-                os << xtag("n_element", n_element_);
+                os << xo::pp::pad(indent) << "<BplusTree";
+                os << xo::pp::xtag("properties", properties_);
+                os << xo::pp::xtag("n_element", n_element_);
                 os << std::endl;
 
-                os << pad(indent+1)
-                   << xtag("root", (void*)root_.get())
-                   << xtag("treez", logutil::nodesize(root_.get()));
+                os << xo::pp::pad(indent+1)
+                   << xo::pp::xtag("root", (void*)root_.get())
+                   << xo::pp::xtag("treez", logutil::nodesize(root_.get()));
 
                 this->print_aux(os, this->root_.get(), indent+2);
 
@@ -596,21 +596,19 @@ namespace xo {
              * but short-circuit if internal inconsistency detected
              */
             std::size_t verify_helper(bool throw_flag) const {
-                using xo::scope;
-                using xo::xtag;
 
-                //scope x("BplusTree.verify_helper");
+                //xo::pp::scope x("BplusTree.verify_helper");
 
                 if (Properties::ordinal_tag_value() == tags::ordinal_enabled) {
                     /* verify tree size (maintained in each node) matches toplevel tree size) */
                     if (this->root_ != nullptr) {
                         if (this->size() != BplusTreeUtil<Key, Value, Properties>::get_node_size(this->root_.get())) {
                             if (throw_flag) {
-                                throw std::runtime_error(tostr("BplusTree::verify_helper"
+                                throw std::runtime_error(xo::pp::tostr("BplusTree::verify_helper"
                                                                ": mismatched tree size computation",
-                                                               xtag("root", this->root_.get()),
-                                                               xtag("bptree.n_element", this->size()),
-                                                               xtag("bptree.root.size", logutil::nodesize(this->root_.get()))));
+                                                               xo::pp::xtag("root", this->root_.get()),
+                                                               xo::pp::xtag("bptree.n_element", this->size()),
+                                                               xo::pp::xtag("bptree.root.size", logutil::nodesize(this->root_.get()))));
                             } else {
                                 return -1;
                             }
@@ -625,12 +623,12 @@ namespace xo {
                 if (this->root_ == nullptr) {
                     if (this->leafnode_begin_ != nullptr || this->leafnode_end_ != nullptr) {
                         if (throw_flag) {
-                            throw std::runtime_error(tostr("BplusTree::verify_helper"
+                            throw std::runtime_error(xo::pp::tostr("BplusTree::verify_helper"
                                                            ": expected null .leafnode_begin / .leafnode_end pointers"
                                                            " with empty tree",
-                                                           xtag("root", this->root_.get()),
-                                                           xtag("leafnode_begin", this->leafnode_begin_),
-                                                           xtag("leafnode_end", this->leafnode_end_)));
+                                                           xo::pp::xtag("root", this->root_.get()),
+                                                           xo::pp::xtag("leafnode_begin", this->leafnode_begin_),
+                                                           xo::pp::xtag("leafnode_end", this->leafnode_end_)));
                         } else {
                             return -1;
                         }
@@ -645,14 +643,14 @@ namespace xo {
                         || (rightmost_fr.node() != this->leafnode_end_))
                     {
                         if (throw_flag) {
-                            throw std::runtime_error(tostr("BplusTree::verify_helper"
+                            throw std::runtime_error(xo::pp::tostr("BplusTree::verify_helper"
                                                            ": expected .leafnode_begin / .leafnode_end pointers"
                                                            " to match computed first/last leaf nodes",
-                                                           xtag("root", this->root_.get()),
-                                                           xtag("leafnode_begin[stored]", this->leafnode_begin_),
-                                                           xtag("leafnode_begin[computed]", leftmost_fr.node()),
-                                                           xtag("leafnode_end[stored]", this->leafnode_end_),
-                                                           xtag("leafnode_end[computed]", rightmost_fr.node())));
+                                                           xo::pp::xtag("root", this->root_.get()),
+                                                           xo::pp::xtag("leafnode_begin[stored]", this->leafnode_begin_),
+                                                           xo::pp::xtag("leafnode_begin[computed]", leftmost_fr.node()),
+                                                           xo::pp::xtag("leafnode_end[stored]", this->leafnode_end_),
+                                                           xo::pp::xtag("leafnode_end[computed]", rightmost_fr.node())));
                         } else {
                             return -1;
                         }
@@ -698,23 +696,21 @@ namespace xo {
              */
             std::pair<const_iterator, bool>
             leaf_insert_aux(std::pair<Key const, Value> const & kv_pair) {
-                using xo::scope;
-                using xo::xtag;
 
                 /* will add/replace key,value pair in existing root (which is a leaf) node */
 
-                scope log(XO_DEBUG(this->debug_flag()),
-                          xtag("key", kv_pair.first),
-                          xtag("value", kv_pair.second));
+                xo::pp::scope log(XO_DEBUG_(this->debug_flag()),
+                          xo::pp::xtag("key", kv_pair.first),
+                          xo::pp::xtag("value", kv_pair.second));
 
                 /* root node is a leaf node:
                  * - tree has between 1 and b elements (where b = branching factor)
                  */
                 LeafNodeType * leaf = reinterpret_cast<LeafNodeType *>(this->root_.get());
 
-                log && log(xtag("leaf", leaf),
-                           xtag("leaf.n_elt", leaf->n_elt()),
-                           xtag("leaf.bf", leaf->branching_factor()));
+                log && log(xo::pp::xtag("leaf", leaf),
+                           xo::pp::xtag("leaf.n_elt", leaf->n_elt()),
+                           xo::pp::xtag("leaf.bf", leaf->branching_factor()));
 
                 /* .elt_v[]
                  *
@@ -728,8 +724,8 @@ namespace xo {
                  */
                 std::pair<bool, std::size_t> lub_ix_recd = leaf->find_lub_ix(kv_pair.first);
 
-                log && log(xtag("lub_ix_recd.first", lub_ix_recd.first),
-                           xtag("lub_ix_recd.second", lub_ix_recd.second));
+                log && log(xo::pp::xtag("lub_ix_recd.first", lub_ix_recd.first),
+                           xo::pp::xtag("lub_ix_recd.second", lub_ix_recd.second));
 
                 if (lub_ix_recd.first) {
                     leaf->assign_leaf_value(lub_ix_recd.second - 1, kv_pair.second);
@@ -839,12 +835,10 @@ namespace xo {
              */
             std::pair<const_iterator, bool>
             internal_insert_aux(std::pair<Key const, Value> const & kv_pair) {
-                using xo::scope;
-                using xo::xtag;
 
-                scope log(XO_DEBUG(this->debug_flag()),
-                          xtag("key", kv_pair.first),
-                          xtag("value", kv_pair.second));
+                xo::pp::scope log(XO_DEBUG_(this->debug_flag()),
+                          xo::pp::xtag("key", kv_pair.first),
+                          xo::pp::xtag("value", kv_pair.second));
 
                 /* root node is an internal node:
                  * - tree has at least b elements (where b = branching factor)
@@ -852,14 +846,14 @@ namespace xo {
                 FindNodeResult<LeafNodeType> leaffindresult = this->find_leaf_node(kv_pair.first);
                 LeafNodeType * leaf = leaffindresult.node();
 
-                log && log(xtag("leaf", leaf),
-                           xtag("leaf.n_elt", leaf->n_elt()),
-                           xtag("leaf.bf", leaf->branching_factor()));
+                log && log(xo::pp::xtag("leaf", leaf),
+                           xo::pp::xtag("leaf.n_elt", leaf->n_elt()),
+                           xo::pp::xtag("leaf.bf", leaf->branching_factor()));
 
                 std::pair<bool, std::size_t> lub_ix_recd = leaf->find_lub_ix(kv_pair.first);
 
-                log && log(xtag("lub_ix_recd.first", lub_ix_recd.first),
-                           xtag("lub_ix_recd.second", lub_ix_recd.second));
+                log && log(xo::pp::xtag("lub_ix_recd.first", lub_ix_recd.first),
+                           xo::pp::xtag("lub_ix_recd.second", lub_ix_recd.second));
 
                 if (lub_ix_recd.first) {
                     /* key already in tree,  just updating associated value */
@@ -931,9 +925,9 @@ namespace xo {
                      */
 
                     log && log("split leaf to get lower_leaf",
-                               xtag("lower_leaf", lower_leaf.get()),
-                               xtag("leaf.n_elt", leaf->n_elt()),
-                               xtag("lower_leaf.n_elt", lower_leaf->n_elt()));
+                               xo::pp::xtag("lower_leaf", lower_leaf.get()),
+                               xo::pp::xtag("leaf.n_elt", leaf->n_elt()),
+                               xo::pp::xtag("lower_leaf.n_elt", lower_leaf->n_elt()));
 
                     assert(lub_ix_recd.second <= lower_leaf->n_elt());
 
@@ -1020,9 +1014,9 @@ namespace xo {
                      */
 
                     log && log("split leaf to get upper_leaf",
-                               xtag("upper_leaf", upper_leaf.get()),
-                               xtag("leaf.n_elt", leaf->n_elt()),
-                               xtag("upper_leaf.n_elt", upper_leaf->n_elt()));
+                               xo::pp::xtag("upper_leaf", upper_leaf.get()),
+                               xo::pp::xtag("leaf.n_elt", leaf->n_elt()),
+                               xo::pp::xtag("upper_leaf.n_elt", upper_leaf->n_elt()));
 
                     assert(lub_ix_recd.second >= leaf->n_elt());
 
@@ -1067,11 +1061,11 @@ namespace xo {
                     lub_ix = ancestor->find_lub_ix(new_key);
 
                     log && log("fixup ancestors",
-                               xtag("new_key", new_key),
-                               xtag("new_node", new_node.get()),
-                               xtag("new_node.size", logutil::nodesize(new_node.get())),
-                               xtag("ancestor", ancestor),
-                               xtag("lub_ix", lub_ix));
+                               xo::pp::xtag("new_key", new_key),
+                               xo::pp::xtag("new_node", new_node.get()),
+                               xo::pp::xtag("new_node.size", logutil::nodesize(new_node.get())),
+                               xo::pp::xtag("ancestor", ancestor),
+                               xo::pp::xtag("lub_ix", lub_ix));
 
                     /* on this iteration,  need to introduce (new_key, new_node) to ancestor */
 
@@ -1082,8 +1076,8 @@ namespace xo {
                         std::size_t new_z = BplusTreeUtil<Key, Value, Properties>::get_node_size(new_node.get());
 
                         log && log("insert into ancestor, since it has room",
-                                   xtag("ancestor.size[pre-insert]", logutil::nodesize(ancestor)),
-                                   xtag("new_z", logutil::nodesize(new_node.get())));
+                                   xo::pp::xtag("ancestor.size[pre-insert]", logutil::nodesize(ancestor)),
+                                   xo::pp::xtag("new_z", logutil::nodesize(new_node.get())));
 
                         /* room for 1 more child */
                         ancestor->insert_node(lub_ix,
@@ -1105,20 +1099,20 @@ namespace xo {
                                  true));
                     } else {
                         log && log("pre-split (will split ancestor to make room for new node)",
-                                   xtag("ancestor", ancestor),
-                                   xtag("ancestor.size", logutil::nodesize(ancestor)),
-                                   xtag("new_node", new_node.get()),
-                                   xtag("new_node.size", logutil::nodesize(new_node.get())));
+                                   xo::pp::xtag("ancestor", ancestor),
+                                   xo::pp::xtag("ancestor.size", logutil::nodesize(ancestor)),
+                                   xo::pp::xtag("new_node", new_node.get()),
+                                   xo::pp::xtag("new_node.size", logutil::nodesize(new_node.get())));
 
                         /* no room in ancestor,  need to split */
 
                         std::unique_ptr<InternalNodeType> upper_ancestor(ancestor->split_internal());
 
                         log && log("post-split",
-                                   xtag("ancestor", ancestor),
-                                   xtag("ancestor.size", logutil::nodesize(ancestor)),
-                                   xtag("upper_ancestor", upper_ancestor.get()),
-                                   xtag("upper_ancestor.size", logutil::nodesize(upper_ancestor.get())));
+                                   xo::pp::xtag("ancestor", ancestor),
+                                   xo::pp::xtag("ancestor.size", logutil::nodesize(ancestor)),
+                                   xo::pp::xtag("upper_ancestor", upper_ancestor.get()),
+                                   xo::pp::xtag("upper_ancestor.size", logutil::nodesize(upper_ancestor.get())));
 
                         /* this size temporarily excluded from tree */
                         std::size_t decr_z = BplusTreeUtil<Key, Value, Properties>::get_node_size(upper_ancestor.get());
@@ -1135,7 +1129,7 @@ namespace xo {
 
                         if (lub_ix <= ancestor->n_elt()) {
                             log && log("insert into (existing post-split) LH ancestor");
-                            log && log(xtag("lub_ix", lub_ix), xtag("new_node", new_node.get()), xtag("new_z", new_z));
+                            log && log(xo::pp::xtag("lub_ix", lub_ix), xo::pp::xtag("new_node", new_node.get()), xo::pp::xtag("new_z", new_z));
 
                             ancestor->insert_node(lub_ix,
                                                   std::move(new_node),
@@ -1147,8 +1141,8 @@ namespace xo {
                             BplusTreeUtil<Key, Value, Properties>::post_modify_add_ancestor_size(ancestor, new_z, this->debug_flag());
 
                             log && log("LH ancestor size",
-                                       xtag("ancestor", ancestor),
-                                       xtag("ancestor.size", logutil::nodesize(ancestor)));
+                                       xo::pp::xtag("ancestor", ancestor),
+                                       xo::pp::xtag("ancestor.size", logutil::nodesize(ancestor)));
 
                             /* note next loop iteration will fixup upper_ancestor.
                              * upper_ancestor != ancestor
@@ -1156,9 +1150,9 @@ namespace xo {
                             this->post_modify_correct_ancestor_glb_keys(ancestor);
                         } else {
                             log && log("insert into (new) RH ancestor");
-                            log && log(xtag("ix", lub_ix - ancestor->n_elt()),
-                                       xtag("new_node", new_node.get()),
-                                       xtag("new_z", new_z));
+                            log && log(xo::pp::xtag("ix", lub_ix - ancestor->n_elt()),
+                                       xo::pp::xtag("new_node", new_node.get()),
+                                       xo::pp::xtag("new_z", new_z));
 
                             upper_ancestor->insert_node(lub_ix - ancestor->n_elt(),
                                                         std::move(new_node),
@@ -1168,8 +1162,8 @@ namespace xo {
                             BplusTreeUtil<Key, Value, Properties>::node_add_size(upper_ancestor.get(), new_z);
 
                             log && log("upper ancestor size",
-                                       xtag("upper_ancestor", ancestor),
-                                       xtag("upper_ancestor.size", logutil::nodesize(ancestor)));
+                                       xo::pp::xtag("upper_ancestor", ancestor),
+                                       xo::pp::xtag("upper_ancestor.size", logutil::nodesize(ancestor)));
 
                         }
 
@@ -1193,8 +1187,8 @@ namespace xo {
                  * 3. new_node is not present in .root
                  */
 
-                log && log(xtag("root.n_elt", this->root_->n_elt()),
-                           xtag("new_node.n_elt", new_node->n_elt()));
+                log && log(xo::pp::xtag("root.n_elt", this->root_->n_elt()),
+                           xo::pp::xtag("new_node.n_elt", new_node->n_elt()));
 
                 this->root_ = std::move(InternalNodeType::make_2(std::move(this->root_),
                                                                  std::move(new_node)));
@@ -1241,15 +1235,13 @@ namespace xo {
              * - return true iff key found (in which case #of leaf node items decremented)
              */
             bool leaf_erase_aux(Key const & key) {
-                using xo::scope;
-                using xo::xtag;
 
                 LeafNodeType * leaf = reinterpret_cast<LeafNodeType *>(this->root_.get());
 
-                scope log(XO_DEBUG(this->debug_flag()),
-                          xtag("leaf", leaf),
-                          xtag("leaf.n_elt", leaf->n_elt()),
-                          xtag("leaf.bf", leaf->branching_factor()));
+                xo::pp::scope log(XO_DEBUG_(this->debug_flag()),
+                          xo::pp::xtag("leaf", leaf),
+                          xo::pp::xtag("leaf.n_elt", leaf->n_elt()),
+                          xo::pp::xtag("leaf.bf", leaf->branching_factor()));
 
                 /* .elt_v[]
                  *
@@ -1263,8 +1255,8 @@ namespace xo {
                  */
                 std::pair<bool, std::size_t> lub_ix_recd = leaf->find_lub_ix(key);
 
-                log && log(xtag("lub_ix_recd.first", lub_ix_recd.first),
-                           xtag("lub_ix_recd.second", lub_ix_recd.second));
+                log && log(xo::pp::xtag("lub_ix_recd.first", lub_ix_recd.first),
+                           xo::pp::xtag("lub_ix_recd.second", lub_ix_recd.second));
 
                 if (!lub_ix_recd.first) {
                     /* key is not present in tree --> don't modify anything */
@@ -1303,11 +1295,9 @@ namespace xo {
              * - return true iff key found (in which case #of key,value pairs decremented)
              */
             bool internal_erase_aux(Key const & key) {
-                using xo::scope;
-                using xo::xtag;
 
-                scope log(XO_DEBUG(this->debug_flag()),
-                          xtag("key", key));
+                xo::pp::scope log(XO_DEBUG_(this->debug_flag()),
+                          xo::pp::xtag("key", key));
 
                 std::size_t const bf = this->branching_factor();
 
@@ -1335,15 +1325,15 @@ namespace xo {
                 FindNodeResult<LeafNodeType> leaffindresult = this->find_leaf_node(key);
                 LeafNodeType * leaf = leaffindresult.node();
 
-                log && log(xtag("leaf", leaffindresult.node()),
-                           xtag("leaf.n_elt", leaffindresult.node()->n_elt()),
-                           xtag("leaf.loc", leaffindresult.ix()),
-                           xtag("bf", bf));
+                log && log(xo::pp::xtag("leaf", leaffindresult.node()),
+                           xo::pp::xtag("leaf.n_elt", leaffindresult.node()->n_elt()),
+                           xo::pp::xtag("leaf.loc", leaffindresult.ix()),
+                           xo::pp::xtag("bf", bf));
 
                 std::pair<bool, std::size_t> lub_ix_recd = leaffindresult.node()->find_lub_ix(key);
 
-                log && log(xtag("lub_ix_recd.first", lub_ix_recd.first),
-                           xtag("lub_ix_recd.second", lub_ix_recd.second));
+                log && log(xo::pp::xtag("lub_ix_recd.first", lub_ix_recd.first),
+                           xo::pp::xtag("lub_ix_recd.second", lub_ix_recd.second));
 
                 if (!lub_ix_recd.first) {
                     /* key not in tree */
@@ -1370,9 +1360,9 @@ namespace xo {
                 if (lub_ix_recd.second == 1) {
                     /* glb_key for this leaf node changed (to larger value) */
                     log && log("fix glb",
-                               xtag("@", parent),
-                               xtag("old-glb", parent->glb_key()),
-                               xtag("new-glb", leaf->glb_key()));
+                               xo::pp::xtag("@", parent),
+                               xo::pp::xtag("old-glb", parent->glb_key()),
+                               xo::pp::xtag("new-glb", leaf->glb_key()));
 
                     /* we dropped smallest key from [leaf] --> correct glb key for leaf in its immediate parent */
                     parent->lookup_elt(leaffindresult.ix()).set_key(leaf->glb_key());
@@ -1452,9 +1442,9 @@ namespace xo {
 
                             std::size_t n_redistrib = n/2 - leaf->n_elt();
 
-                            log && log(xtag("n/2", n/2),
-                                       xtag("leaf.n", leaf->n_elt()),
-                                       xtag("n_redistrib", n_redistrib));
+                            log && log(xo::pp::xtag("n/2", n/2),
+                                       xo::pp::xtag("leaf.n", leaf->n_elt()),
+                                       xo::pp::xtag("n_redistrib", n_redistrib));
 
                             /* can redistribute one or more nodes from left_sibling -> leaf
                              * after redistribution:
@@ -1549,18 +1539,16 @@ namespace xo {
             } /*post_modify_sub_ancestor_size*/
 
             void post_modify_correct_ancestor_glb_keys(InternalNodeType * parent) {
-                using xo::scope;
-                using xo::xtag;
 
-                scope log(XO_DEBUG(this->debug_flag()),
-                          xtag("parent", parent));
+                xo::pp::scope log(XO_DEBUG_(this->debug_flag()),
+                          xo::pp::xtag("parent", parent));
 
                 InternalNodeType * grandparent = parent->parent();
 
                 std::size_t i_ancestor = 0;;
                 while (grandparent) {
-                    log && log(xtag("i_ancestor", i_ancestor),
-                               xtag("grandparent", grandparent));
+                    log && log(xo::pp::xtag("i_ancestor", i_ancestor),
+                               xo::pp::xtag("grandparent", grandparent));
 
                     /* find index position of parent subtree,  as child of grandparent
                      * Can only use .find_ix() when key-invariants are satisfied.
@@ -1569,7 +1557,7 @@ namespace xo {
                      */
                     std::size_t parent_ix = grandparent->locate_child_by_address(parent);
 
-                    log && log(xtag("parent.loc", parent_ix));
+                    log && log(xo::pp::xtag("parent.loc", parent_ix));
 
                     if (grandparent->lookup_elt(parent_ix).key() == parent->glb_key()) {
                         log && log("grandparent[parent.loc].key == parent.glb_key --> done");
@@ -1597,18 +1585,16 @@ namespace xo {
             } /*post_modify_correct_leafnode_endpoints*/
 
             void post_remove_shrink_ancestor_path(InternalNodeType * node) {
-                using xo::scope;
-                using xo::xtag;
 
-                scope log(XO_DEBUG(this->debug_flag()));
+                xo::pp::scope log(XO_DEBUG_(this->debug_flag()));
 
                 std::size_t const bf = node->branching_factor();
 
                 while (node
                        && (node != this->root_.get())) {
 
-                    log && log(xtag("node", node),
-                               xtag("node.n_elt", node->n_elt()));
+                    log && log(xo::pp::xtag("node", node),
+                               xo::pp::xtag("node.n_elt", node->n_elt()));
 
                     if (2 * node->n_elt() >= bf)
                         break;
@@ -1635,8 +1621,8 @@ namespace xo {
 
                         if (n >= 2 * ((bf + 1) / 2)) {
                             log && log("redistribute from right_sibling",
-                                       xtag("lh.n", node->n_elt()),
-                                       xtag("rh.n", right_sibling->n_elt()));
+                                       xo::pp::xtag("lh.n", node->n_elt()),
+                                       xo::pp::xtag("rh.n", right_sibling->n_elt()));
 
                             /* can redistribute one or more nodes from right_sibling -> node
                              *
@@ -1665,8 +1651,8 @@ namespace xo {
 
                         if (n >= 2 * ((bf + 1) / 2)) {
                             log && log("redistribute from left_sibling",
-                                       xtag("lh.n", left_sibling->n_elt()),
-                                       xtag("rh.n", node->n_elt()));
+                                       xo::pp::xtag("lh.n", left_sibling->n_elt()),
+                                       xo::pp::xtag("rh.n", node->n_elt()));
 
                             /* redistribute one or more nodes from left_sibling -> node */
                             node->prepend_from_lh_sibling(left_sibling,
@@ -1726,24 +1712,22 @@ namespace xo {
                            GenericNodeType const * node,
                            std::uint32_t indent) const
             {
-                using xo::xtag;
 
                 if (node) {
                     switch(node->node_type()) {
                     case NodeType::internal:
                         {
-                            using xo::pad;
 
                             InternalNodeType const * internal = reinterpret_cast<InternalNodeType const *>(node);
 
                             for (std::uint32_t i=0, n=internal->n_elt(); i<n; ++i) {
                                 os << std::endl
-                                   << pad(indent)
+                                   << xo::pp::pad(indent)
                                    << ":child " << i << "/" << n
-                                   << xtag("n", internal->lookup_elt(i).child()->n_elt())
-                                   << xtag("treez", logutil::nodesize(internal->lookup_elt(i).child()))
-                                   << xtag("glb", internal->lookup_elt(i).key())
-                                   << xtag("@", internal->lookup_elt(i).child());
+                                   << xo::pp::xtag("n", internal->lookup_elt(i).child()->n_elt())
+                                   << xo::pp::xtag("treez", logutil::nodesize(internal->lookup_elt(i).child()))
+                                   << xo::pp::xtag("glb", internal->lookup_elt(i).key())
+                                   << xo::pp::xtag("@", internal->lookup_elt(i).child());
 
                                 this->print_aux(os,
                                                 internal->lookup_elt(i).child(),
@@ -1753,13 +1737,12 @@ namespace xo {
                         break;
                     case NodeType::leaf:
                         {
-                            using xo::pad;
 
                             LeafNodeType const * leaf = reinterpret_cast<LeafNodeType const *>(node);
 
                             for (std::uint32_t i=0, n=leaf->n_elt(); i<n; ++i) {
                                 os << std::endl
-                                   << pad(indent)
+                                   << xo::pp::pad(indent)
                                    << leaf->lookup_elt(i).key()
                                    << ": " << leaf->lookup_elt(i).value();
                             }

@@ -38,8 +38,8 @@ xo-indentlog xo-expression2
 xo-indentlog xo-gc
 xo-indentlog xo-kalmanfilter
 xo-indentlog xo-object2
-xo-indentlog xo-ordinaltree
 xo-indentlog xo-printable2
+xo-indentlog xo-process
 xo-indentlog xo-pyreactor
 xo-indentlog xo-simulator
 xo-indentlog xo-stringtable2
@@ -67,6 +67,7 @@ xo-ppsink xo-flatstring
 xo-ppsink xo-imgui
 xo-ppsink xo-indentlog2
 xo-ppsink xo-object
+xo-ppsink xo-ordinaltree
 xo-ppsink xo-printjson
 xo-ppsink xo-pyunit
 xo-ppsink xo-ratio

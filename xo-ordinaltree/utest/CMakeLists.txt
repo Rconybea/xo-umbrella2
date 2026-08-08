@@ -20,7 +20,8 @@ if (ENABLE_TESTING)
     xo_dependency(${SELF_EXE} xo_object)
     xo_dependency(${SELF_EXE} xo_alloc)
     xo_dependency(${SELF_EXE} refcnt)
-    xo_dependency(${SELF_EXE} indentlog)
+    # NB no xo-indentlog: the utests use xo::pp::{scope,xtag,tostr} now,
+    # and get xo_ppsink transitively from xo_ordinaltree.
     xo_dependency(${SELF_EXE} randomgen)
 
     # ----------------------------------------------------------------

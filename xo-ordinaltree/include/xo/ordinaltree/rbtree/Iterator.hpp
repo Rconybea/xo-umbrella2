@@ -6,6 +6,15 @@
 #pragma once
 
 #include "Node.hpp"
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
+
+/* NB xo::pp names are QUALIFIED throughout this header rather than brought in
+ * by using-declarations: a using-decl at namespace scope in a public header
+ * leaks into every consumer's scope, and a function-local one is not enough
+ * either -- ADL adds legacy xo::xtag whenever an argument type lives in
+ * namespace xo, and merges it into the candidate set.
+ */
 
 namespace xo {
     namespace tree {
@@ -134,12 +143,11 @@ namespace xo {
                 } /*operator!=*/
 
                 void print(std::ostream & os) const {
-                    using xo::xtag;
 
                     os << "<rbtree-iterator"
-                       << xtag("dirn", dirn_)
-                       << xtag("loc", location_)
-                       << xtag("node", node_)
+                       << xo::pp::xtag("dirn", dirn_)
+                       << xo::pp::xtag("loc", location_)
+                       << xo::pp::xtag("node", node_)
                        << ">";
                 } /*print*/
 
@@ -159,10 +167,9 @@ namespace xo {
 
             protected:
                 void check_regular() const {
-                    using xo::tostr;
 
                     if(this->location_ != IL_Regular)
-                        throw std::runtime_error(tostr("rbtree iterator: cannot deref iterator"
+                        throw std::runtime_error(xo::pp::tostr("rbtree iterator: cannot deref iterator"
                                                        " in non-regular state"));
                 } /*check_regular*/
 

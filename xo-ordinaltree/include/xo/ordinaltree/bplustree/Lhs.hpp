@@ -29,8 +29,7 @@ namespace xo {
                     : p_tree_{tree}, item_{item} {}
 
                 operator mapped_type const & () const {
-                    //using xo::tostr;
-
+                    //
                     if (!this->item_) {
                         throw std::runtime_error
                             ("bptree: attempt to use empty lhs object as rvalue");

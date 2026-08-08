@@ -160,6 +160,23 @@ namespace xo::pp {
         bool enabled() const { return !finalized_; }
         operator bool() const { return enabled(); }
 
+        /** current scope nesting depth for the calling thread.
+         *
+         *  Counterpart of legacy xo::scope::nesting_level().  Useful when a
+         *  caller hand-indents output that a sink is not laying out for it --
+         *  e.g. xo-ordinaltree's tree dumps do
+         *  @code
+         *    if (log) this->print(std::clog, log.nesting_level() + 2);
+         *  @endcode
+         *
+         *  NB prefer letting the sink do it (begin()/split()/end() carry a
+         *  running indent and adapt to the margin); this exists for printers
+         *  that predate that and write to a bare ostream.
+         **/
+        std::uint32_t nesting_level() const {
+            return ThreadLogState::thread_log_state().nesting_level();
+        }
+
         /** log one line: current indent, then each argument via pretty.
          *  No-op (returns false) if the scope is disabled.
          **/

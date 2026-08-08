@@ -17,6 +17,8 @@
 #ifndef XO_PPSINK_SCOPE_MACROS_HPP
 #define XO_PPSINK_SCOPE_MACROS_HPP
 
+#include <stdexcept>   /* XO_EXPECT_ */
+
 # include "scope.hpp"
 
 /** capture a scope_setup for the enclosing function, at log level @p lvl.
@@ -89,6 +91,18 @@
                          __FILE__, \
                          __LINE__, \
                          (name2) }
+
+
+/** @brief throw std::runtime_error(@p msg) unless @p f holds.
+ *
+ *  Counterpart of legacy XO_EXPECT.  A precondition check rather than a
+ *  printing facility -- it lives here only because legacy put it in
+ *  scope.hpp and call sites expect it alongside the scope macros.
+ *
+ *  Trailing underscore per the ppsink convention, so it can coexist with
+ *  legacy XO_EXPECT in a partially-migrated TU.
+ **/
+#define XO_EXPECT_(f, msg) if(!(f)) { throw std::runtime_error(msg); }
 
 #endif /* XO_PPSINK_SCOPE_MACROS_HPP */
 

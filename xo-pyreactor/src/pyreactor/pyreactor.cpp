@@ -17,13 +17,15 @@
 // #include <pybind11/pybind11.h>
 // #include <pybind11/chrono.h>
 #include <pybind11/stl.h>
+#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/pp_time.hpp>
 
 namespace xo {
     using xo::json::PrintJsonSingleton;
     using xo::fn::CallbackId;
     using xo::ref::Refcount;
     using xo::time::utc_nanos;
-    using xo::tostr;
+    using xo::pp::tostr;
     namespace py = pybind11;
 
     namespace reactor {

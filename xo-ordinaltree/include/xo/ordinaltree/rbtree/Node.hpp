@@ -7,7 +7,8 @@
 
 #include "RbTypes.hpp"
 #include <xo/reflect/Reflect.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 #include <xo/allocutil/IAlloc.hpp>
 #include <xo/allocutil/IObject.hpp>
 #include <xo/allocutil/ObjectVisitor.hpp>
@@ -15,6 +16,14 @@
 #include <cassert>
 #include <concepts>
 #include <utility>
+#include <xo/ppsink/tag_ostream.hpp>
+
+/* NB xo::pp names are QUALIFIED throughout this header rather than brought in
+ * by using-declarations: a using-decl at namespace scope in a public header
+ * leaks into every consumer's scope, and a function-local one is not enough
+ * either -- ADL adds legacy xo::xtag whenever an argument type lives in
+ * namespace xo, and merges it into the candidate set.
+ */
 
 namespace xo {
     namespace tree {
@@ -160,7 +169,7 @@ namespace xo {
                                            Node * lhs,
                                            Node * rhs,
                                            bool debug_flag) {
-                    scope log(XO_DEBUG(debug_flag));
+                    xo::pp::scope log(XO_DEBUG_(debug_flag));
 
                     assert(lhs->parent() != rhs->parent());
 
@@ -170,11 +179,11 @@ namespace xo {
                     /* can have null parent if either {lhs, rhs} is root node */
 
                     if (log) {
-                        log("pre", xtag("lhs", lhs), xtag("rhs", rhs));
-                        log(xtag("lhs.left", lhs->left_child()),
-                            xtag("lhs.right", lhs->right_child()));
-                        log(xtag("rhs.left", rhs->left_child()),
-                            xtag("rhs.right", rhs->right_child()));
+                        log("pre", xo::pp::xtag("lhs", lhs), xo::pp::xtag("rhs", rhs));
+                        log(xo::pp::xtag("lhs.left", lhs->left_child()),
+                            xo::pp::xtag("lhs.right", lhs->right_child()));
+                        log(xo::pp::xtag("rhs.left", rhs->left_child()),
+                            xo::pp::xtag("rhs.right", rhs->right_child()));
                     }
 
                     assert(lhs != rhs->left_child() && "not implemented");
@@ -301,12 +310,10 @@ namespace xo {
                  * editor bait: recalc_local_size()
                  */
                 void local_recalc_size(Reduce const & reduce_fn) {
-                    using xo::scope;
-                    using xo::xtag;
 
                     constexpr bool c_logging_enabled = false;
 
-                    scope log(XO_DEBUG(c_logging_enabled));
+                    xo::pp::scope log(XO_DEBUG_(c_logging_enabled));
 
                     this->size_ = (1
                                    + Node::tree_size(this->left_child())
@@ -316,10 +323,10 @@ namespace xo {
                     this->reduced_ = Node::reduced_pair(reduce_fn, this);
 
                     log && log("done recalc for key k, value v, reduced r",
-                               xtag("k", this->key()),
-                               xtag("v", this->value()),
-                               xtag("r1", this->reduced1()),
-                               xtag("r2", this->reduced2()));
+                               xo::pp::xtag("k", this->key()),
+                               xo::pp::xtag("v", this->value()),
+                               xo::pp::xtag("r1", this->reduced1()),
+                               xo::pp::xtag("r2", this->reduced2()));
                 } /*local_recalc_size*/
 
                 // ----- inherited from GcObjectInterface -----

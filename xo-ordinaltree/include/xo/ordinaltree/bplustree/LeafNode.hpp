@@ -3,8 +3,18 @@
 #pragma once
 
 #include "GenericNode.hpp"
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 #include <cassert>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
+
+/* NB xo::pp names are QUALIFIED throughout this header rather than brought in
+ * by using-declarations: a using-decl at namespace scope in a public header
+ * leaks into every consumer's scope, and a function-local one is not enough
+ * either -- ADL adds legacy xo::xtag whenever an argument type lives in
+ * namespace xo, and merges it into the candidate set.
+ */
 
 namespace xo {
     namespace tree {
@@ -224,19 +234,17 @@ namespace xo {
         LeafNode<Key, Value, Properties>::make(std::pair<Key const, Value> kv_pair,
                                                Properties const & properties)
         {
-            using xo::scope;
-            using xo::xtag;
 
             std::size_t mem_z = node_sizeof(properties.branching_factor());
             /* storage for LeafNode,  including storage cost for flexible array LeafNode.elt_v[] */
             std::uint8_t * mem = new std::uint8_t[mem_z];
 
 #ifdef NOT_IN_USE
-            scope x("LeafNode.make");
-            x.log(xtag("sizeof(LeafNode)", sizeof(LeafNode)),
-                  xtag("bf", properties.branching_factor()),
-                  xtag("mem_z", mem_z),
-                  xtag("mem", (void *)mem));
+            xo::pp::scope x("LeafNode.make");
+            x.log(xo::pp::xtag("sizeof(LeafNode)", sizeof(LeafNode)),
+                  xo::pp::xtag("bf", properties.branching_factor()),
+                  xo::pp::xtag("mem_z", mem_z),
+                  xo::pp::xtag("mem", (void *)mem));
 #endif
 
             return std::unique_ptr<LeafNode>(new (mem) LeafNode(std::move(kv_pair),
@@ -249,8 +257,6 @@ namespace xo {
                                                 std::size_t hi_ix,
                                                 LeafNode * src)
         {
-            using xo::scope;
-            using xo::xtag;
 
             std::size_t branching_factor = src->branching_factor();
 
@@ -261,11 +267,11 @@ namespace xo {
             std::uint8_t * mem = new std::uint8_t[mem_z];
 
 #ifdef NOT_IN_USE
-            scope x("LeafNode.annex");
-            x.log(xtag("sizeof(LeafNode)", sizeof(LeafNode)),
-                  xtag("bf", branching_factor),
-                  xtag("mem_z", mem_z),
-                  xtag("mem", (void *)mem));
+            xo::pp::scope x("LeafNode.annex");
+            x.log(xo::pp::xtag("sizeof(LeafNode)", sizeof(LeafNode)),
+                  xo::pp::xtag("bf", branching_factor),
+                  xo::pp::xtag("mem_z", mem_z),
+                  xo::pp::xtag("mem", (void *)mem));
 #endif
 
             std::unique_ptr<LeafNode> new_node(new (mem) LeafNode(branching_factor));
@@ -345,29 +351,27 @@ namespace xo {
         LeafNode<Key, Value, Properties>::insert_leaf_item(std::size_t ix,
                                                            std::pair<Key const, Value> const & kv_pair,
                                                            bool debug_flag) {
-            using xo::scope;
-            using xo::xtag;
 
-            scope log(XO_DEBUG(debug_flag),
-                      xtag("self", this),
-                      xtag("n_elt", this->n_elt()),
-                      xtag("bf", this->branching_factor()),
-                      xtag("ix", ix),
-                      xtag("key", kv_pair.first),
-                      xtag("value", kv_pair.second));
+            xo::pp::scope log(XO_DEBUG_(debug_flag),
+                      xo::pp::xtag("self", this),
+                      xo::pp::xtag("n_elt", this->n_elt()),
+                      xo::pp::xtag("bf", this->branching_factor()),
+                      xo::pp::xtag("ix", ix),
+                      xo::pp::xtag("key", kv_pair.first),
+                      xo::pp::xtag("value", kv_pair.second));
 
             if (this->n_elt_ >= this->branching_factor()) {
                 assert(false);
-                throw std::runtime_error(tostr("LeafNode::insert_leaf: leaf already full",
-                                               xtag("leaf.n_elt", this->n_elt()),
-                                               xtag("branching_factor", this->branching_factor())));
+                throw std::runtime_error(xo::pp::tostr("LeafNode::insert_leaf: leaf already full",
+                                               xo::pp::xtag("leaf.n_elt", this->n_elt()),
+                                               xo::pp::xtag("branching_factor", this->branching_factor())));
             }
 
             std::size_t pos_ix = this->n_elt_;
 
             while (pos_ix > ix) {
-                //scope x1("loop");
-                //x1.log(xtag("pos_ix", pos_ix));
+                //xo::pp::scope x1("loop");
+                //x1.log(xo::pp::xtag("pos_ix", pos_ix));
 
                 this->lookup_elt(pos_ix) = std::move(this->lookup_elt(pos_ix - 1));
                 --pos_ix;
@@ -382,19 +386,17 @@ namespace xo {
         template <typename Key, typename Value, typename Properties>
         void
         LeafNode<Key, Value, Properties>::remove_leaf(std::size_t ix, bool debug_flag) {
-            using xo::scope;
-            using xo::xtag;
 
-            scope log(XO_DEBUG(debug_flag),
-                      xtag("self", this),
-                      xtag("n_elt", this->n_elt()),
-                      xtag("bf", this->branching_factor()),
-                      xtag("ix", ix));
+            xo::pp::scope log(XO_DEBUG_(debug_flag),
+                      xo::pp::xtag("self", this),
+                      xo::pp::xtag("n_elt", this->n_elt()),
+                      xo::pp::xtag("bf", this->branching_factor()),
+                      xo::pp::xtag("ix", ix));
 
             if (this->n_elt_ == 0) {
-                throw std::runtime_error(tostr("LeafNode::remove_leaf: leaf already empty",
-                                               xtag("leaf.n_elt", this->n_elt()),
-                                               xtag("branching_factor", this->branching_factor())));
+                throw std::runtime_error(xo::pp::tostr("LeafNode::remove_leaf: leaf already empty",
+                                               xo::pp::xtag("leaf.n_elt", this->n_elt()),
+                                               xo::pp::xtag("branching_factor", this->branching_factor())));
             }
 
             /* TODO: removal action for position pos_ix (maintain reductions) */
@@ -403,8 +405,8 @@ namespace xo {
             std::size_t end_ix = this->n_elt_ - 1;
 
             while (pos_ix < end_ix) {
-                //scope x1("loop");
-                //x1.log(xtag("pos_ix", pos_ix));
+                //xo::pp::scope x1("loop");
+                //x1.log(xo::pp::xtag("pos_ix", pos_ix));
 
                 this->lookup_elt(pos_ix) = std::move(this->lookup_elt(pos_ix + 1));
                 ++pos_ix;
@@ -416,18 +418,16 @@ namespace xo {
         template <typename Key, typename Value, typename Properties>
         void
         LeafNode<Key, Value, Properties>::prepend_from_lh_sibling(LeafNode<Key, Value, Properties> * lh, std::size_t n, bool debug_flag) {
-            using xo::scope;
-            using xo::xtag;
 
-            scope log(XO_DEBUG(debug_flag),
-                      xtag("n", n));
+            xo::pp::scope log(XO_DEBUG_(debug_flag),
+                      xo::pp::xtag("n", n));
 
             if (this->n_elt() + n > this->branching_factor()) {
                 assert(false);
-                throw std::runtime_error(tostr("LeafNode.prepend_from_lh_sibling: expected combined #elt <= bf",
-                                               xtag("self.n_elt", this->n_elt()),
-                                               xtag("n", n),
-                                               xtag("bf", this->branching_factor())));
+                throw std::runtime_error(xo::pp::tostr("LeafNode.prepend_from_lh_sibling: expected combined #elt <= bf",
+                                               xo::pp::xtag("self.n_elt", this->n_elt()),
+                                               xo::pp::xtag("n", n),
+                                               xo::pp::xtag("bf", this->branching_factor())));
             }
 
             std::size_t n_lh = lh->n_elt();
@@ -457,14 +457,13 @@ namespace xo {
         template <typename Key, typename Value, typename Properties>
         void
         LeafNode<Key, Value, Properties>::append_from_rh_sibling(std::size_t n, LeafNode<Key, Value, Properties> * rh) {
-            using xo::xtag;
 
             if (this->n_elt() + n > this->branching_factor()) {
                 assert(false);
-                throw std::runtime_error(tostr("LeafNode.append_from_rh_sibling: expected combined #elt <= bf",
-                                               xtag("self.n_elt", this->n_elt()),
-                                               xtag("n", n),
-                                               xtag("bf", this->branching_factor())));
+                throw std::runtime_error(xo::pp::tostr("LeafNode.append_from_rh_sibling: expected combined #elt <= bf",
+                                               xo::pp::xtag("self.n_elt", this->n_elt()),
+                                               xo::pp::xtag("n", n),
+                                               xo::pp::xtag("bf", this->branching_factor())));
             }
 
             std::size_t n_lh = this->n_elt();
@@ -516,14 +515,13 @@ namespace xo {
                                                         Key const & lub_key,
                                                         LeafNodeType const * lh_leaf,
                                                         LeafNodeType const * rh_leaf) const {
-            using xo::xtag;
 
             /* verify immediate parent pointer is correct */
             if (this->parent() != parent) {
-                throw std::runtime_error(tostr("LeafNode::verify_helper"
+                throw std::runtime_error(xo::pp::tostr("LeafNode::verify_helper"
                                                ": expected parent pointer to refer to actual parent",
-                                               xtag("stored_parent", this->parent()),
-                                               xtag("actual_parent", parent)));
+                                               xo::pp::xtag("stored_parent", this->parent()),
+                                               xo::pp::xtag("actual_parent", parent)));
             }
 
             /* verify locally stored keys appear in sorted order */
@@ -535,11 +533,11 @@ namespace xo {
                 if (prev.key() < elt.key()) {
                     ;
                 } else {
-                    throw std::runtime_error(tostr("LeafNode::verify_helper"
+                    throw std::runtime_error(xo::pp::tostr("LeafNode::verify_helper"
                                                    ": expected local keys in strictly increasing order",
-                                                   xtag("i", i),
-                                                   xtag("key(i-1)", prev.key()),
-                                                   xtag("key(i)", elt.key())));
+                                                   xo::pp::xtag("i", i),
+                                                   xo::pp::xtag("key(i-1)", prev.key()),
+                                                   xo::pp::xtag("key(i)", elt.key())));
                 }
             }
 
@@ -547,11 +545,11 @@ namespace xo {
                 if (this->lookup_elt(n-1).key() < lub_key) {
                     ;
                 } else {
-                    throw std::runtime_error(tostr("LeafNode::verify_helper"
+                    throw std::runtime_error(xo::pp::tostr("LeafNode::verify_helper"
                                                    ": expected last local key before parent-supplied lub key",
-                                                   xtag("n", n),
-                                                   xtag("key(n-1)", this->lookup_elt(n-1).key()),
-                                                   xtag("lub_key", lub_key)));
+                                                   xo::pp::xtag("n", n),
+                                                   xo::pp::xtag("key(n-1)", this->lookup_elt(n-1).key()),
+                                                   xo::pp::xtag("lub_key", lub_key)));
                 }
             }
 
@@ -559,25 +557,25 @@ namespace xo {
             if ((lh_leaf && (lh_leaf->next_leafnode() != this))
                 || (this->prev_leafnode() != lh_leaf))
             {
-                throw std::runtime_error(tostr("LeafNode::verify_helper"
+                throw std::runtime_error(xo::pp::tostr("LeafNode::verify_helper"
                                                ": inconsistent prev/next leaf pointers",
-                                               xtag("parent", parent),
-                                               xtag("lh_leaf", lh_leaf),
-                                               xtag("lh_leaf.next", lh_leaf ? lh_leaf->next_leafnode() : nullptr),
-                                               xtag("self", this),
-                                               xtag("self.prev", this->prev_leafnode())));
+                                               xo::pp::xtag("parent", parent),
+                                               xo::pp::xtag("lh_leaf", lh_leaf),
+                                               xo::pp::xtag("lh_leaf.next", lh_leaf ? lh_leaf->next_leafnode() : nullptr),
+                                               xo::pp::xtag("self", this),
+                                               xo::pp::xtag("self.prev", this->prev_leafnode())));
             }
 
             if ((this->next_leafnode() != rh_leaf)
                 || (rh_leaf && (rh_leaf->prev_leafnode() != this)))
             {
-                throw std::runtime_error(tostr("LeafNode::verify_helper"
+                throw std::runtime_error(xo::pp::tostr("LeafNode::verify_helper"
                                                ": inconsistent prev/next leaf pointers",
-                                               xtag("parent", parent),
-                                               xtag("self", this),
-                                               xtag("self.next", this->next_leafnode()),
-                                               xtag("rh_leaf", rh_leaf),
-                                               xtag("rh_leaf.prev", rh_leaf ? rh_leaf->prev_leafnode() : nullptr)));
+                                               xo::pp::xtag("parent", parent),
+                                               xo::pp::xtag("self", this),
+                                               xo::pp::xtag("self.next", this->next_leafnode()),
+                                               xo::pp::xtag("rh_leaf", rh_leaf),
+                                               xo::pp::xtag("rh_leaf.prev", rh_leaf ? rh_leaf->prev_leafnode() : nullptr)));
             }
 
             return this->n_elt();
@@ -586,16 +584,15 @@ namespace xo {
         template <typename Key, typename Value, typename Properties>
         void
         LeafNode<Key, Value, Properties>::verify_glb_key(Key const & key) const {
-            using xo::xtag;
 
             LeafNodeItemType const & elt = this->lookup_elt(0);
 
             if (elt.key() != key) {
-                throw std::runtime_error(tostr("LeafNode::verify_glb_key"
+                throw std::runtime_error(xo::pp::tostr("LeafNode::verify_glb_key"
                                                ": expected stored greatest-lower-bound key to match leftmost leaf's key",
-                                               xtag("@", this),
-                                               xtag("reported_key", key),
-                                               xtag("actual_key", elt.key())));
+                                               xo::pp::xtag("@", this),
+                                               xo::pp::xtag("reported_key", key),
+                                               xo::pp::xtag("actual_key", elt.key())));
             }
         } /*verify_glb_key*/
 
@@ -637,11 +634,9 @@ namespace xo {
                                                    std::size_t branching_factor)
             : LeafNodeShim<Key, Value, Properties>(NodeType::leaf, branching_factor)
         {
-            using xo::scope;
-            using xo::xtag;
 
 #ifdef NOT_USING_DEBUG
-            scope x("LeafNode.ctor");
+            xo::pp::scope x("LeafNode.ctor");
 #endif
 
             this->n_elt_ = 1;
@@ -650,15 +645,15 @@ namespace xo {
              */
 
 #ifdef NOT_USING_DEBUG
-            x.log(xtag("elt[0]", &(this->lookup_elt(0))));
+            x.log(xo::pp::xtag("elt[0]", &(this->lookup_elt(0))));
 #endif
 
             new (&(this->lookup_elt(0))) LeafNodeItemType(kv_pair);
 
             for (std::size_t i = 1, n = branching_factor; i < n; ++i) {
 #ifdef NOT_USING_DEBUG
-                x.log(xtag("i", i),
-                      xtag("elt[i]", &(this->lookup_elt(i))));
+                x.log(xo::pp::xtag("i", i),
+                      xo::pp::xtag("elt[i]", &(this->lookup_elt(i))));
 #endif
 
                 /* using placement-new to invoke ctor explicitly */

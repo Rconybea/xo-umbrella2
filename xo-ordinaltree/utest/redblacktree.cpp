@@ -16,9 +16,8 @@ namespace {
     using utest::Util;
     using utest::TreeUtil;
 
-    using xo::scope;
-    using xo::scope_setup;
-    using xo::xtag;
+    using xo::pp::scope;
+    using xo::pp::xtag;
 
     //using RbTree = RedBlackTree<int, double, OrdinalReduce<double>>;
     using RbTree = RedBlackTree<int, double, SumReduce<double>>;
@@ -153,7 +152,7 @@ namespace {
 
                 bool debug_flag = (attention == 1);
 
-                scope log(XO_DEBUG2(debug_flag, "rbtree"));
+                scope log(XO_DEBUG2_(debug_flag, "rbtree"));
                 log && log(xtag("size", n));
 
                 ok_flag = true;

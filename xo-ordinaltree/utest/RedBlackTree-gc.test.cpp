@@ -9,6 +9,9 @@
 #include <xo/object/String.hpp>
 #include <xo/alloc/GC.hpp>
 #include <catch2/catch.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
 
 namespace xo {
     using xo::gc::GC;
@@ -20,6 +23,12 @@ namespace xo {
     using utest::TreeUtil;
 
     namespace ut {
+        /* one scope in from namespace xo: a using-decl at xo scope would be
+         * ambiguous with legacy xo::xtag rather than shadowing it.
+         */
+        using xo::pp::scope;
+        using xo::pp::xtag;
+
 
         namespace {
             struct Testcase_RbTree {
@@ -68,7 +77,7 @@ namespace xo {
                 auto rgen = xo::rng::xoshiro256ss(seed);
 
                 for (std::uint32_t n=0; n<1; ++n) {
-                    scope log(XO_DEBUG2(c_debug_flag, "rbtree-gc-1"));
+                    scope log(XO_DEBUG2_(c_debug_flag, "rbtree-gc-1"));
 
                     up<GC> gc = GC::make(
                                          {
@@ -142,7 +151,7 @@ namespace xo {
                     for (std::uint32_t attention = 0; !ok_flag && (attention < 2); ++attention) {
                         bool debug_flag = c_debug_flag || (attention == 1);
 
-                        scope log(XO_DEBUG2(debug_flag, "rbtree-gc-1"), xtag("i_tc", i_tc), xtag("n", n));
+                        scope log(XO_DEBUG2_(debug_flag, "rbtree-gc-1"), xtag("i_tc", i_tc), xtag("n", n));
 
                         INFO(tostr(xtag("i_tc", i_tc), xtag("n", n)));
 
@@ -425,7 +434,7 @@ namespace xo {
                     for (std::uint32_t attention = 0; !ok_flag && (attention < 2); ++attention) {
                         bool debug_flag = c_debug_flag || (attention == 1);
 
-                        scope log(XO_DEBUG2(debug_flag, "rbtree-gc-1"), xtag("i_tc", i_tc), xtag("n", n));
+                        scope log(XO_DEBUG2_(debug_flag, "rbtree-gc-1"), xtag("i_tc", i_tc), xtag("n", n));
 
                         INFO(tostr(xtag("i_tc", i_tc), xtag("n", n)));
 

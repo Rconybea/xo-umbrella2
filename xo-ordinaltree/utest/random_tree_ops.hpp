@@ -1,13 +1,15 @@
 /* @file random_tree_ops.hpp **/
 
 #include "catch2/catch.hpp"
-#include <xo/indentlog/print/tag.hpp>
-#include <xo/indentlog/print/vector.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/tag_ostream.hpp>     /* os << xtag(..) */
+#include <xo/ppsink/PrettyVector.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 #include <xo/randomgen/xoshiro256.hpp>
 #include <algorithm>
 #include <map>
 #include <vector>
+#include <xo/ppsink/tostr.hpp>
 
 namespace utest {
     struct Util {
@@ -86,11 +88,12 @@ namespace utest {
                        xo::rng::xoshiro256ss * p_rgen,
                        Tree * p_tree)
         {
-            using xo::xtag;
+            using xo::pp::tostr;
+            using xo::pp::xtag;
 
             bool ok_flag = true;
 
-            xo::scope log(XO_DEBUG(catch_flag), xtag("n-keys", keys.size()));
+            xo::pp::scope log(XO_DEBUG_(catch_flag), xtag("n-keys", keys.size()));
 
             REQUIRE_ORFAIL(ok_flag, catch_flag, p_tree->verify_ok(catch_flag));
 
@@ -155,11 +158,12 @@ namespace utest {
         {
             // TODO: rewrite in terms of 'random_inserts with explicit vector'.
 
-            using xo::xtag;
+            using xo::pp::tostr;
+            using xo::pp::xtag;
 
             bool ok_flag = true;
 
-            xo::scope log(XO_DEBUG(catch_flag), xtag("lo", lo), xtag("hi", hi), xtag("k", k));
+            xo::pp::scope log(XO_DEBUG_(catch_flag), xtag("lo", lo), xtag("hi", hi), xtag("k", k));
 
             REQUIRE_ORFAIL(ok_flag, catch_flag, p_tree->verify_ok(catch_flag));
 
@@ -221,12 +225,13 @@ namespace utest {
                        xo::rng::xoshiro256ss * p_rgen,
                        Tree * p_tree)
         {
-            using xo::scope;
-            using xo::xtag;
+            using xo::pp::scope;
+            using xo::pp::tostr;
+            using xo::pp::xtag;
 
             bool ok_flag = true;
 
-            xo::scope log(XO_DEBUG(catch_flag));
+            xo::pp::scope log(XO_DEBUG_(catch_flag));
 
             REQUIRE_ORFAIL(ok_flag, catch_flag, p_tree->verify_ok(catch_flag));
 
@@ -297,10 +302,11 @@ namespace utest {
                        Tree const & tree,
                        xo::rng::xoshiro256ss * p_rgen)
         {
-            using xo::scope;
-            using xo::xtag;
+            using xo::pp::scope;
+            using xo::pp::tostr;
+            using xo::pp::xtag;
 
-            xo::scope log(XO_DEBUG(catch_flag));
+            xo::pp::scope log(XO_DEBUG_(catch_flag));
 
             /* -> false if/when verification fails */
             bool ok_flag = true;
@@ -346,13 +352,14 @@ namespace utest {
                              bool catch_flag,
                              Tree const & tree)
         {
-            using xo::scope;
-            using xo::xtag;
+            using xo::pp::scope;
+            using xo::pp::tostr;
+            using xo::pp::xtag;
 
             /* -> false if/when verification fails */
             bool ok_flag = true;
 
-            xo::scope log(XO_DEBUG(catch_flag));
+            xo::pp::scope log(XO_DEBUG_(catch_flag));
 
             std::size_t const n = tree.size();
             std::size_t i = 0;
@@ -392,15 +399,16 @@ namespace utest {
                                      bool catch_flag,
                                      Tree const & tree)
         {
-            using xo::scope;
-            using xo::xtag;
+            using xo::pp::scope;
+            using xo::pp::tostr;
+            using xo::pp::xtag;
 
             /* -> false if/when verification fails */
             bool ok_flag = true;
 
             std::size_t const n = tree.size();
 
-            xo::scope log(XO_DEBUG(catch_flag));
+            xo::pp::scope log(XO_DEBUG_(catch_flag));
 
             log && log("tree with size n", xtag("n", n));
 
@@ -541,10 +549,11 @@ namespace utest {
                           bool catch_flag,
                           Tree const & rbtree)
         {
-            using xo::scope;
-            using xo::xtag;
+            using xo::pp::scope;
+            using xo::pp::tostr;
+            using xo::pp::xtag;
 
-            scope log(XO_DEBUG(catch_flag));
+            scope log(XO_DEBUG_(catch_flag));
 
             /* -> false if/when check fails */
             bool ok_flag = true;
@@ -590,10 +599,11 @@ namespace utest {
                        Tree * p_rbtree,
                        xo::rng::xoshiro256ss * p_rgen)
         {
-            using xo::scope;
-            using xo::xtag;
+            using xo::pp::scope;
+            using xo::pp::tostr;
+            using xo::pp::xtag;
 
-            scope log(XO_DEBUG(catch_flag));
+            scope log(XO_DEBUG_(catch_flag));
 
             /* -> false if/when check fails */
             bool ok_flag = true;

@@ -42,6 +42,6 @@ xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets
 # xo-ordinaltree is also header-only
 xo_headeronly_dependency(${SELF_LIB} xo_allocutil)
 xo_headeronly_dependency(${SELF_LIB} randomgen)
-# rbtree/Node.hpp includes <xo/indentlog/scope.hpp>.  Declared explicitly:
-# xo-printjson no longer propagates xo-indentlog.
-xo_headeronly_dependency(${SELF_LIB} indentlog)
+# PUBLIC: the tree headers use xo::pp::{scope,xtag,tostr,quot,pad} in
+# inline bodies, so consumers need ppsink too.
+xo_headeronly_dependency(${SELF_LIB} xo_ppsink)

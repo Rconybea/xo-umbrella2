@@ -4,8 +4,9 @@
 
 #include "BplusTree.hpp"
 #include "random_tree_ops.hpp"
-#include <xo/indentlog/print/array.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/pretty_array.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 #include <xo/randomgen/random_seed.hpp>
 #include <catch2/catch.hpp>
 
@@ -19,9 +20,9 @@ namespace {
 
     using utest::TreeUtil;
 
-    using xo::scope;
+    using xo::pp::scope;
     //using xo::scope_setup;
-    using xo::xtag;
+    using xo::pp::xtag;
 
     using BtreeKey = int;
     using BtreeValue = double;
@@ -331,7 +332,7 @@ namespace {
                                                debug_flag);
                     BpTree bptree(properties);
 
-                    scope log(XO_DEBUG2(debug_flag, "bptree"),
+                    scope log(XO_DEBUG2_(debug_flag, "bptree"),
                               xtag("vm_page_size", Machdep::get_page_size()),
                               xtag("branching_factor", bptree.branching_factor()),
                               xtag("leaf_node_size", sizeof(BpTree::LeafNodeType)),
@@ -377,7 +378,7 @@ namespace {
                                                    debug_flag);
                         BpTree bptree(properties);
 
-                        scope log(XO_DEBUG2(debug_flag, "bptree"),
+                        scope log(XO_DEBUG2_(debug_flag, "bptree"),
                                   xtag("vm_page_size", Machdep::get_page_size()),
                                   xtag("branching_factor", bptree.branching_factor()),
                                   xtag("leaf_node_size", sizeof(BpTree::LeafNodeType)),

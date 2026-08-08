@@ -5,8 +5,15 @@
 
 #pragma once
 
-#include <xo/indentlog/print/tostr.hpp>
+#include <xo/ppsink/tostr.hpp>
 #include <stdexcept>
+
+/* NB xo::pp names are QUALIFIED throughout this header rather than brought in
+ * by using-declarations: a using-decl at namespace scope in a public header
+ * leaks into every consumer's scope, and a function-local one is not enough
+ * either -- ADL adds legacy xo::xtag whenever an argument type lives in
+ * namespace xo, and merges it into the candidate set.
+ */
 
 namespace xo {
     namespace tree {
@@ -33,11 +40,10 @@ namespace xo {
                     {}
 
                 operator mapped_type const & () const {
-                    using xo::tostr;
 
                     if (!this->node_) {
                         throw std::runtime_error
-                            (tostr("RedBlackTreeLhsBase: attempt to use empty lhs object as rvalue"));
+                            (xo::pp::tostr("RedBlackTreeLhsBase: attempt to use empty lhs object as rvalue"));
                     }
 
                     return this->node_->contents().second;
@@ -88,7 +94,6 @@ namespace xo {
                     : RedBlackTreeLhsBase<RedBlackTree, RbNode>(tree, node), key_(key) {}
 
                 RedBlackTreeLhs & operator=(mapped_type const & v) {
-                    using xo::tostr;
 
                     constexpr bool c_debug_flag = false;
 
@@ -110,14 +115,13 @@ namespace xo {
                         assert(false);
 
                         throw std::runtime_error
-                            (tostr("rbtree: attempt to apply operator= thru empty lhs object"));
+                            (xo::pp::tostr("rbtree: attempt to apply operator= thru empty lhs object"));
                     }
 
                     return *this;
                 } /*operator=*/
 
                 RedBlackTreeLhs & operator+=(mapped_type const & v) {
-                    using xo::tostr;
 
                     if(this->p_tree_) {
                         if(this->node_) {
@@ -140,7 +144,7 @@ namespace xo {
                         assert(false);
 
                         throw std::runtime_error
-                            (tostr("rbtree: attempt to apply operator+= through empty lhs object"));
+                            (xo::pp::tostr("rbtree: attempt to apply operator+= through empty lhs object"));
                     }
 
                     return *this;

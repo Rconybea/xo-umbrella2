@@ -12,15 +12,24 @@
 #include "rbtree/NullReduce.hpp"
 #include "rbtree/RbTreeLhs.hpp"
 #include "rbtree/RbTreeUtil.hpp"
-#include <xo/indentlog/print/pad.hpp>
-#include <xo/indentlog/print/quoted.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/quoted_ostream.hpp>  /* os << xo::pp::quot(..) */
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 #include <array>
 #include <cassert>
 #include <cmath>
 #include <concepts>
 #include <iterator>
 #include <stdexcept>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
+
+/* NB xo::pp names are QUALIFIED throughout this header rather than brought in
+ * by using-declarations: a using-decl at namespace scope in a public header
+ * leaks into every consumer's scope, and a function-local one is not enough
+ * either -- ADL adds legacy xo::xtag whenever an argument type lives in
+ * namespace xo, and merges it into the candidate set.
+ */
 
 namespace xo {
     namespace tree {
@@ -341,7 +350,7 @@ namespace xo {
              */
             RbTreeConstLhs operator[](Key const & k) const
                 {
-                    //scope log(XO_DEBUG(true), xtag("variant", "readonly"), xtag("key", k));
+                    //xo::pp::scope log(XO_DEBUG_(true), xo::pp::xtag("variant", "readonly"), xo::pp::xtag("key", k));
 
                     RbNode const * node = RbUtil::find(this->root_, k, this->compare_);
 
@@ -376,7 +385,7 @@ namespace xo {
              *                 // v.node contents may have been copied and v.node deleted
              */
             RbTreeLhs operator[](Key const & k) {
-                //scope log(XO_DEBUG(true), tag("variant", "autoinsert"), tag("key", k));
+                //xo::pp::scope log(XO_DEBUG_(true), tag("variant", "autoinsert"), tag("key", k));
 
                 std::pair<bool, RbNode *> insert_result
                     = RbUtil::template insert_aux<node_allocator_type>(this->compare_,
@@ -414,8 +423,6 @@ namespace xo {
              * editor bait: invert_integral
              */
             const_iterator cfind_sum_glb(ReducedValue const & y) const {
-                using xo::tostr;
-                using xo::xtag;
 
                 //char const * c_self = "RedBlackTree::find_sum_glb";
 
@@ -511,11 +518,9 @@ namespace xo {
 
             std::pair<iterator, bool>
             insert(std::pair<Key const, Value> && kv_pair) {
-                using xo::scope;
-                using xo::xtag;
 
                 constexpr bool c_logging_enabled = false;
-                scope log(XO_DEBUG(c_logging_enabled));
+                xo::pp::scope log(XO_DEBUG_(c_logging_enabled));
 
                 RbNode * adj_root = this->root_;
 
@@ -548,9 +553,9 @@ namespace xo {
             } /*insert*/
 
             bool erase(Key const & key) {
-                scope log(XO_DEBUG(debug_flag_), xtag("size", size_));
+                xo::pp::scope log(XO_DEBUG_(debug_flag_), xo::pp::xtag("size", size_));
                 if (log) {
-                    log("pre", xtag("key", key), xtag("tree", *this));
+                    log("pre", xo::pp::xtag("key", key), xo::pp::xtag("tree", *this));
                 }
 
                 RbNode * adj_root = this->root_;
@@ -575,7 +580,7 @@ namespace xo {
                 }
 
                 if (log) {
-                    log("post", xtag("tree", *this));
+                    log("post", xo::pp::xtag("tree", *this));
                 }
 
                 return retval;
@@ -602,13 +607,10 @@ namespace xo {
              */
             bool verify_ok(bool /*throw_flag_not_implemented*/ = true) const
             {
-                using xo::scope;
-                using xo::tostr;
-                using xo::xtag;
 
                 constexpr const char *c_self = "RedBlackTree::verify_ok";
 
-                scope log(XO_DEBUG(debug_flag_), xtag("size", size_));
+                xo::pp::scope log(XO_DEBUG_(debug_flag_), xo::pp::xtag("size", size_));
                 if (debug_flag_) {
                     // look forward to upgrading this to pp
                     this->display_to_log();
@@ -616,19 +618,19 @@ namespace xo {
 
                 /* RB0. */
                 if (root_ == nullptr) {
-                    XO_EXPECT(size_ == 0, tostr(c_self, ": expect .size=0 with null root",
-                                                xtag("size", size_)));
+                    XO_EXPECT_(size_ == 0, xo::pp::tostr(c_self, ": expect .size=0 with null root",
+                                                xo::pp::xtag("size", size_)));
                 }
 
                 /* RB1. */
                 if (root_ != nullptr) {
-                    XO_EXPECT(root_->parent() == nullptr,
-                              tostr(c_self, ": expect root->parent=nullptr",
-                                    xtag("parent", root_->parent())));
-                    XO_EXPECT(root_->size() == this->size_,
-                              tostr(c_self, ": expect self.size=root.size",
-                                    xtag("self.size", size_),
-                                    xtag("root.size", root_->size())));
+                    XO_EXPECT_(root_->parent() == nullptr,
+                              xo::pp::tostr(c_self, ": expect root->parent=nullptr",
+                                    xo::pp::xtag("parent", root_->parent())));
+                    XO_EXPECT_(root_->size() == this->size_,
+                              xo::pp::tostr(c_self, ": expect self.size=root.size",
+                                    xo::pp::xtag("self.size", size_),
+                                    xo::pp::xtag("root.size", root_->size())));
                 }
 
                 /* height (counting only black nodes) of tree */
@@ -641,14 +643,14 @@ namespace xo {
                                                           &black_height);
 
                 /* RB8. RedBlackTree.size() equals #of nodes in tree */
-                XO_EXPECT(n_node == this->size_,
-                          tostr(c_self, ": expect self.size={#of nodes n in tree}",
-                                xtag("self.size", size_),
-                                xtag("n", n_node)));
+                XO_EXPECT_(n_node == this->size_,
+                          xo::pp::tostr(c_self, ": expect self.size={#of nodes n in tree}",
+                                xo::pp::xtag("self.size", size_),
+                                xo::pp::xtag("n", n_node)));
 
                 if (debug_flag_)
-                    log && log(xtag("size", this->size_),
-                               xtag("blackheight", black_height));
+                    log && log(xo::pp::xtag("size", this->size_),
+                               xo::pp::xtag("blackheight", black_height));
 
                 return true;
             } /*verify_ok*/

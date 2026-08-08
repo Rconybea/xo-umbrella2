@@ -4,7 +4,15 @@
 
 #include "IteratorUtil.hpp"
 #include "LeafNode.hpp"
-#include <xo/indentlog/print/tostr.hpp>
+#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+
+/* NB xo::pp names are QUALIFIED throughout this header rather than brought in
+ * by using-declarations: a using-decl at namespace scope in a public header
+ * leaks into every consumer's scope, and a function-local one is not enough
+ * either -- ADL adds legacy xo::xtag whenever an argument type lives in
+ * namespace xo, and merges it into the candidate set.
+ */
 
 namespace xo {
     namespace tree {
@@ -144,13 +152,12 @@ namespace xo {
                 }
 
                 void print(std::ostream & os) const {
-                    using xo::xtag;
 
                     os << "<bptree-iterator"
-                       << xtag("dirn", dirn_)
-                       << xtag("loc", location_)
-                       << xtag("leaf", leafnode_)
-                       << xtag("ix", ix_)
+                       << xo::pp::xtag("dirn", dirn_)
+                       << xo::pp::xtag("loc", location_)
+                       << xo::pp::xtag("leaf", leafnode_)
+                       << xo::pp::xtag("ix", ix_)
                        << ">";
                 } /*print*/
 
@@ -233,13 +240,11 @@ namespace xo {
 
             private:
                 void check_regular() const {
-                    using xo::tostr;
-                    using xo::xtag;
 
                     if (this->location_ != IL_Regular) {
-                        throw std::runtime_error(tostr("bplustree iterator: cannot deref iterator"
+                        throw std::runtime_error(xo::pp::tostr("bplustree iterator: cannot deref iterator"
                                                        " in sentinel state",
-                                                       xtag("loc", this->location_)));
+                                                       xo::pp::xtag("loc", this->location_)));
                     }
                 } /*check_regular*/
 

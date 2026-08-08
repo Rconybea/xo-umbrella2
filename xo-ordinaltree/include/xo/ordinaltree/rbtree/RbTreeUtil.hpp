@@ -6,7 +6,18 @@
 #pragma once
 
 #include "Node.hpp"
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/pad_ostream.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
+
+/* NB xo::pp names are QUALIFIED throughout this header rather than brought in
+ * by using-declarations: a using-decl at namespace scope in a public header
+ * leaks into every consumer's scope, and a function-local one is not enough
+ * either -- ADL adds legacy xo::xtag whenever an argument type lives in
+ * namespace xo, and merges it into the candidate set.
+ */
 
 namespace xo {
     namespace tree {
@@ -277,12 +288,10 @@ namespace xo {
                 static RbNode * find_sum_glb(Reduce const & reduce_fn,
                                              RbNode * N,
                                              typename Reduce::value_type y) {
-                    using xo::scope;
-                    using xo::xtag;
 
                     constexpr char const * c_self = "RbTreeUtil::find_sum_glb";
                     constexpr bool c_logging_enabled = false;
-                    scope log(XO_DEBUG(c_logging_enabled));
+                    xo::pp::scope log(XO_DEBUG_(c_logging_enabled));
 
                     if(!N) {
                         log && log(c_self, ": return nullptr");
@@ -295,12 +304,12 @@ namespace xo {
                         = RbNode::reduce_aux(reduce_fn, N->right_child());
 
                     log && log("with",
-                               xtag("y", y),
-                               xtag("N.key", N->key()),
-                               xtag("N.value", N->value()),
-                               xtag("N.reduced1", N->reduced1()),
-                               xtag("left_sum", left_sum),
-                               xtag("right_sum", right_sum));
+                               xo::pp::xtag("y", y),
+                               xo::pp::xtag("N.key", N->key()),
+                               xo::pp::xtag("N.value", N->value()),
+                               xo::pp::xtag("N.reduced1", N->reduced1()),
+                               xo::pp::xtag("left_sum", left_sum),
+                               xo::pp::xtag("right_sum", right_sum));
 
                     if (y <= left_sum) {
                         return find_sum_glb(reduce_fn, N->left_child(), y);
@@ -478,10 +487,8 @@ namespace xo {
                                        Reduce const & reduce_fn,
                                        bool debug_flag,
                                        RbNode ** pp_root) {
-                    using xo::scope;
-                    using xo::xtag;
 
-                    scope log(XO_DEBUG(debug_flag));
+                    xo::pp::scope log(XO_DEBUG_(debug_flag));
 
                     Direction other_d = other(d);
 
@@ -493,12 +500,12 @@ namespace xo {
 
                     if (log.enabled()) {
                         log("rotate-", (d == D_Left) ? "left" : "right",
-                            " at", xtag("A", A), xtag("A.key", A->key()), xtag("B", B),
-                            xtag("B.key", B->key()));
+                            " at", xo::pp::xtag("A", A), xo::pp::xtag("A.key", A->key()), xo::pp::xtag("B", B),
+                            xo::pp::xtag("B.key", B->key()));
 
                         if (G) {
-                            log("with G", xtag("G", G),
-                                xtag("G.key", G->key()));
+                            log("with G", xo::pp::xtag("G", G),
+                                xo::pp::xtag("G.key", G->key()));
                             // display_aux(D_Invalid /*side*/, G, 0, &lscope);
                         } else {
                             log("with A at root");
@@ -529,10 +536,10 @@ namespace xo {
                  * after insert/remove affecting N
                  */
                 static void fixup_ancestor_size(Reduce const & reduce_fn, RbNode *N, bool debug_flag) {
-                    scope log(XO_DEBUG(debug_flag));
+                    xo::pp::scope log(XO_DEBUG_(debug_flag));
                     size_t depth = 0;
                     for (; N && depth < 128; ++depth) {
-                        log && log("fixup size: ", xtag("N", N), xtag("ancestors", depth));
+                        log && log("fixup size: ", xo::pp::xtag("N", N), xo::pp::xtag("ancestors", depth));
                         N->local_recalc_size(reduce_fn);
                         N = N->parent();
                     }
@@ -571,13 +578,10 @@ namespace xo {
                                             Reduce const & reduce_fn,
                                             bool debug_flag,
                                             RbNode ** pp_root) {
-                    using xo::scope;
-                    using xo::xtag;
-                    using xo::print::ccs;
-
+                    
                     constexpr bool c_excessive_verify_enabled = false;
 
-                    scope log(XO_DEBUG(debug_flag));
+                    xo::pp::scope log(XO_DEBUG_(debug_flag));
 
                     RbNode *P = G->child(d);
 
@@ -588,18 +592,18 @@ namespace xo {
                         if (log.enabled()) {
                             if (G) {
                                 log("consider node G with d-child P",
-                                    xtag("iter", iter), xtag("G", G),
-                                    xtag("G.col", ccs((G->color() == C_Red) ? "r" : "B")),
-                                    xtag("G.key", G->key()),
-                                    xtag("d", ccs((d == D_Left) ? "L" : "R")),
-                                    xtag("P", P),
-                                    xtag("P.col", ccs((P->color() == C_Red) ? "r" : "B")),
-                                    xtag("P.key", P->key()));
+                                    xo::pp::xtag("iter", iter), xo::pp::xtag("G", G),
+                                    xo::pp::xtag("G.col", ((G->color() == C_Red) ? "r" : "B")),
+                                    xo::pp::xtag("G.key", G->key()),
+                                    xo::pp::xtag("d", ((d == D_Left) ? "L" : "R")),
+                                    xo::pp::xtag("P", P),
+                                    xo::pp::xtag("P.col", ((P->color() == C_Red) ? "r" : "B")),
+                                    xo::pp::xtag("P.key", P->key()));
                             } else {
-                                log("consider root P", xtag("iter", iter),
-                                    xtag("P", P),
-                                    xtag("P.col", ccs((P->color() == C_Red) ? "r" : "B")),
-                                    xtag("P.key", P->key()));
+                                log("consider root P", xo::pp::xtag("iter", iter),
+                                    xo::pp::xtag("P", P),
+                                    xo::pp::xtag("P.col", ((P->color() == C_Red) ? "r" : "B")),
+                                    xo::pp::xtag("P.key", P->key()));
                             }
 
                             RbTreeUtil::display_aux(D_Invalid /*side*/, G ? G : P, 0 /*d*/,
@@ -652,22 +656,22 @@ namespace xo {
                         RbNode * U = G->child(other_d);
 
                         if (log.enabled()) {
-                            log("got R,S,U", xtag("R", R), xtag("S", S),
-                                xtag("U", U));
+                            log("got R,S,U", xo::pp::xtag("R", R), xo::pp::xtag("S", S),
+                                xo::pp::xtag("U", U));
                             if (R) {
                                 log("with",
-                                    xtag("R.col", color2str(R->color())),
-                                    xtag("R.key", R->key()));
+                                    xo::pp::xtag("R.col", color2str(R->color())),
+                                    xo::pp::xtag("R.key", R->key()));
                             }
                             if (S) {
                                 log("with",
-                                    xtag("S.col", ccs(S->color() == C_Black ? "B" : "r")),
-                                    xtag("S.key", S->key()));
+                                    xo::pp::xtag("S.col", (S->color() == C_Black ? "B" : "r")),
+                                    xo::pp::xtag("S.key", S->key()));
                             }
                             if (U) {
                                 log("with",
-                                    xtag("U.col", ccs(U->color() == C_Black ? "B" : "r")),
-                                    xtag("U.key", U->key()));
+                                    xo::pp::xtag("U.col", (U->color() == C_Black ? "B" : "r")),
+                                    xo::pp::xtag("U.key", U->key()));
                             }
                         }
 
@@ -713,8 +717,8 @@ namespace xo {
 
                         if (RbNode::is_red(S)) {
                             log && log("rotate-", (d == D_Left) ? "left" : "right",
-                                       " at P", xtag("P", P), xtag("P.key", P->key()),
-                                       xtag("S", S), xtag("S.key", S->key()));
+                                       " at P", xo::pp::xtag("P", P), xo::pp::xtag("P.key", P->key()),
+                                       xo::pp::xtag("S", S), xo::pp::xtag("S.key", S->key()));
 
                             /* preparatory step: rotate P in d direction if "inner child"
                              * (S) is red inner-child = right-child of left-parent or vice
@@ -753,7 +757,7 @@ namespace xo {
 
                         log && log("rotate-",
                                    (other_d == D_Left) ? "left" : "right", " at G",
-                                   xtag("G", G), xtag("G.key", G->key()));
+                                   xo::pp::xtag("G", G), xo::pp::xtag("G.key", G->key()));
 
                         RbTreeUtil::rotate(alloc, other_d, G, reduce_fn, debug_flag, pp_root);
 
@@ -763,8 +767,8 @@ namespace xo {
                                 GG = P;
 
                             if (log.enabled()) {
-                                log("verify subtree at GG", xtag("GG", GG),
-                                    xtag("GG.key", GG->key()));
+                                log("verify subtree at GG", xo::pp::xtag("GG", GG),
+                                    xo::pp::xtag("GG.key", GG->key()));
 
                                 RbTreeUtil::verify_subtree_ok(alloc, reduce_fn, GG, nullptr /*&black_height*/);
                                 RbTreeUtil::display_aux(D_Invalid, GG, 0 /*depth*/, &log);
@@ -806,9 +810,8 @@ namespace xo {
                            bool debug_flag,
                            RbNode ** pp_root)
                     {
-                        using xo::xtag;
 
-                        scope log(XO_DEBUG(debug_flag));
+                        xo::pp::scope log(XO_DEBUG_(debug_flag));
 
                         RbNode * N = *pp_root;
 
@@ -830,7 +833,7 @@ namespace xo {
                                  */
                                 RbTreeUtil::fixup_ancestor_size(reduce_fn, N, debug_flag);
 
-                                //log && log(xtag("path", (char const *)"A"));
+                                //log && log(xo::pp::xtag("path", (char const *)"A"));
 
                                 /* since we didn't change the set of nodes,
                                  * tree is still in RB-shape,  don't need to call fixup_red_shape()
@@ -855,10 +858,10 @@ namespace xo {
                             RbNode * new_node = RbNode::make_leaf(alloc,
                                                                   kv_pair,
                                                                   reduce_fn.leaf(kv_pair.second));
-                            log && log(xtag("act", "N gets new leaf"),
-                                       xtag("N", N),
-                                       xtag("d", d),
-                                       xtag("new_node", new_node));
+                            log && log(xo::pp::xtag("act", "N gets new leaf"),
+                                       xo::pp::xtag("N", N),
+                                       xo::pp::xtag("d", d),
+                                       xo::pp::xtag("new_node", new_node));
 
                             N->assign_child_reparent(alloc,
                                                      d,
@@ -872,8 +875,8 @@ namespace xo {
                                 const void * const * lhs
                                     = reinterpret_cast<const void * const *>(N->child_addr(Direction::D_Left));
 
-                                XO_EXPECT(gc.check_write_barrier(src, lhs, false),
-                                          tostr("RbTreeUtil::insert_aux",
+                                XO_EXPECT_(gc.check_write_barrier(src, lhs, false),
+                                          xo::pp::tostr("RbTreeUtil::insert_aux",
                                                 ": expect mlog entry for xgen child pointer"));
                             }
 
@@ -884,7 +887,7 @@ namespace xo {
                             /* after adding a node,  must rebalance to restore RB-shape */
                             RbTreeUtil::fixup_red_shape(alloc, d, N, reduce_fn, debug_flag, pp_root);
 
-                            //log && log(xtag("path", (char const *)"B"));
+                            //log && log(xo::pp::xtag("path", (char const *)"B"));
 
                             /* note: new_node=N.child(d) is true before call to fixup_red_shape(),
                              *       but not necessarily after
@@ -904,7 +907,7 @@ namespace xo {
                              * new node is only node in the tree
                              */
 
-                            //log && log(xtag("path", (char const *)"C"));
+                            //log && log(xo::pp::xtag("path", (char const *)"C"));
 
                             return std::make_pair(true, *pp_root);
                         }
@@ -930,15 +933,12 @@ namespace xo {
                                               bool debug_flag,
                                               RbNode **pp_root)
                     {
-                        using xo::scope;
-                        using xo::xtag;
-                        using xo::print::ccs;
-
+                        
                         using traits = xo::gc::gc_allocator_traits<NodeAllocator>;
 
                         //constexpr char const *c_self = "RbTreeUtil::remove_black_leaf";
 
-                        scope log(XO_DEBUG(debug_flag));
+                        xo::pp::scope log(XO_DEBUG_(debug_flag));
 
                         assert(pp_root);
 
@@ -1039,12 +1039,12 @@ namespace xo {
 
                             if (log.enabled()) {
                                 log("rebalance at parent P of curtailed subtree N",
-                                    xtag("P", P),
-                                    xtag("P.col", ccs(P->color() == C_Black ? "B" : "r")),
-                                    xtag("P.key", P->key()));
-                                log("with sibling S, nephews C,D", xtag("S", S),
-                                    xtag("S.col", ccs(S->color() == C_Black ? "B" : "r")),
-                                    xtag("C", C), xtag("D", D));
+                                    xo::pp::xtag("P", P),
+                                    xo::pp::xtag("P.col", (P->color() == C_Black ? "B" : "r")),
+                                    xo::pp::xtag("P.key", P->key()));
+                                log("with sibling S, nephews C,D", xo::pp::xtag("S", S),
+                                    xo::pp::xtag("S.col", (S->color() == C_Black ? "B" : "r")),
+                                    xo::pp::xtag("C", C), xo::pp::xtag("D", D));
                             }
 
                             if (is_black(P) && is_black(S) && is_black(C) && is_black(D)) {
@@ -1105,11 +1105,11 @@ namespace xo {
                                 log("case 3: S red, P,C,D black -> rotate at P to promote S");
                                 log("case 3: + make P red instead of S");
                                 log("case 3: with",
-                                    xtag("P", P),
-                                    xtag("P.col", ccs(P->color() == C_Black ? "B" : "r")),
-                                    xtag("P.key", P->key()), xtag("S", S),
-                                    xtag("S.col", ccs(S->color() == C_Black ? "B" : "r")),
-                                    xtag("S.key", S->key()));
+                                    xo::pp::xtag("P", P),
+                                    xo::pp::xtag("P.col", (P->color() == C_Black ? "B" : "r")),
+                                    xo::pp::xtag("P.key", P->key()), xo::pp::xtag("S", S),
+                                    xo::pp::xtag("S.col", (S->color() == C_Black ? "B" : "r")),
+                                    xo::pp::xtag("S.key", S->key()));
                             }
 
                             /* since S is red, {P,C,D} are all black
@@ -1183,11 +1183,11 @@ namespace xo {
                             if (log.enabled()) {
                                 log("case 4: P red, N,S,C,D black -> recolor and finish");
                                 log("case 4: with",
-                                    xtag("P", P),
-                                    xtag("P.col", ccs(P->color() == C_Black ? "B" : "r")),
-                                    xtag("P.key", P->key()), xtag("S", S),
-                                    xtag("S.col", ccs(S->color() == C_Black ? "B" : "r")),
-                                    xtag("S.key", S->key()));
+                                    xo::pp::xtag("P", P),
+                                    xo::pp::xtag("P.col", (P->color() == C_Black ? "B" : "r")),
+                                    xo::pp::xtag("P.key", P->key()), xo::pp::xtag("S", S),
+                                    xo::pp::xtag("S.col", (S->color() == C_Black ? "B" : "r")),
+                                    xo::pp::xtag("S.key", S->key()));
                             }
 
                             assert(is_black(N));
@@ -1388,14 +1388,12 @@ namespace xo {
                                       Reduce const & reduce_fn,
                                       bool debug_flag,
                                       RbNode ** pp_root) {
-                    using xo::scope;
-                    using xo::xtag;
 
-                    scope log(XO_DEBUG(debug_flag));
+                    xo::pp::scope log(XO_DEBUG_(debug_flag));
 
                     RbNode * N = *pp_root;
 
-                    log && log("enter", xtag("root", N));
+                    log && log("enter", xo::pp::xtag("root", N));
 
                     /*
                      * here the triangle ascii art indicates a tree structure,
@@ -1426,8 +1424,8 @@ namespace xo {
 
                     if (log) {
                         log("got lower bound",
-                            xtag("N", N),
-                            xtag("N.key", N->key()));
+                            xo::pp::xtag("N", N),
+                            xo::pp::xtag("N.key", N->key()));
                         RbTreeUtil::display_aux(D_Invalid, N, 0 /*depth*/, &log);
                     }
 
@@ -1439,9 +1437,9 @@ namespace xo {
                     RbNode * X = N->left_child();
                     RbNode * Y = N->right_child();
 
-                    log && log(xtag("P", P),
-                               xtag("X", X),
-                               xtag("Y", Y));
+                    log && log(xo::pp::xtag("P", P),
+                               xo::pp::xtag("X", X),
+                               xo::pp::xtag("Y", Y));
 
                     if (X == nullptr) {
                         /* N has 0 or 1 children */
@@ -1455,7 +1453,7 @@ namespace xo {
 
                         RbNode * W = R->left_child();
 
-                        log && log(xtag("R", R), xtag("W", W));
+                        log && log(xo::pp::xtag("R", R), xo::pp::xtag("W", W));
 
                         if (P == nullptr) {
                             /* R will replace N -> becomes new root */
@@ -1604,7 +1602,7 @@ namespace xo {
                                              bool debug_flag,
                                              RbNode ** pp_root) {
 
-                    scope log(XO_DEBUG(debug_flag));
+                    xo::pp::scope log(XO_DEBUG_(debug_flag));
 
                     using traits = xo::gc::gc_allocator_traits<NodeAllocator>;
 
@@ -1641,7 +1639,7 @@ namespace xo {
                                 *pp_root = nullptr;
                             }
 
-                            log && log("delete red root node", xtag("addr", N));
+                            log && log("delete red root node", xo::pp::xtag("addr", N));
                             traits::deallocate(alloc, N, 1);
                         } else {
                             assert(false);
@@ -1675,7 +1673,7 @@ namespace xo {
                                 RbNode::replace_root_reparent(R, pp_root);
                             }
 
-                            log && log("delete node", xtag("addr", N));
+                            log && log("delete node", xo::pp::xtag("addr", N));
                             traits::deallocate(alloc, N, 1);
                         } else {
                             /* N is black with no children,
@@ -1688,7 +1686,7 @@ namespace xo {
                                 /* N was root node */
                                 *pp_root = nullptr;
 
-                                log && log("delete black root node", xtag("addr", N));
+                                log && log("delete black root node", xo::pp::xtag("addr", N));
                                 traits::deallocate(alloc, N, 1);
                             }
                         }
@@ -1718,14 +1716,11 @@ namespace xo {
                                                 RbNode const * N,
                                                 int32_t * p_black_height)
                     {
-                        using xo::scope;
-                        using xo::xtag;
-                        using xo::print::ccs;
-                        using allocator_traits = xo::gc::gc_allocator_traits<NodeAllocator>;
+                                                using allocator_traits = xo::gc::gc_allocator_traits<NodeAllocator>;
 
                         constexpr char const *c_self = "RbTreeUtil::verify_subtree_ok";
 
-                        // scope lscope(c_self);
+                        // xo::pp::scope lscope(c_self);
 
                         /* counts #of nodes in subtree rooted at N */
                         size_t i_node = 0;
@@ -1746,62 +1741,62 @@ namespace xo {
                                           &black_height] (RbNode const * x,
                                                           uint32_t bd)
                             {
-                                XO_EXPECT(x->_is_forwarded() == false,
-                                          tostr(c_self, (": stray forwarding pointer where node expected"),
-                                                xtag("i", i_node), xtag("node[i]", x)
+                                XO_EXPECT_(x->_is_forwarded() == false,
+                                          xo::pp::tostr(c_self, (": stray forwarding pointer where node expected"),
+                                                xo::pp::xtag("i", i_node), xo::pp::xtag("node[i]", x)
                                                 ));
 
                                 if (x->parent()) {
                                     const void * src = x;
                                     const void * const * lhs = reinterpret_cast<const void * const *>(x->parent_addr());
 
-                                    XO_EXPECT(gc.check_write_barrier(src, lhs, false),
-                                              tostr(c_self, (": expect mlog entry for xgen parent pointer"),
-                                                    xtag("i", i_node), xtag("node[i]", x),
-                                                    xtag("key[i]", x->key()),
-                                                    xtag("parent", x->parent())));
+                                    XO_EXPECT_(gc.check_write_barrier(src, lhs, false),
+                                              xo::pp::tostr(c_self, (": expect mlog entry for xgen parent pointer"),
+                                                    xo::pp::xtag("i", i_node), xo::pp::xtag("node[i]", x),
+                                                    xo::pp::xtag("key[i]", x->key()),
+                                                    xo::pp::xtag("parent", x->parent())));
                                 }
 
                                 /* RB2. if c=x->child(d), then c->parent()=x */
 
                                 if (x->left_child()) {
-                                    XO_EXPECT(x->left_child()->_is_forwarded() == false,
-                                              tostr(c_self, (": forwarding pointer where left child expected"),
-                                                    xtag("i", i_node), xtag("node[i]", x),
-                                                    xtag("key[i]", x->key()),
-                                                    xtag("child", x->left_child())
+                                    XO_EXPECT_(x->left_child()->_is_forwarded() == false,
+                                              xo::pp::tostr(c_self, (": forwarding pointer where left child expected"),
+                                                    xo::pp::xtag("i", i_node), xo::pp::xtag("node[i]", x),
+                                                    xo::pp::xtag("key[i]", x->key()),
+                                                    xo::pp::xtag("child", x->left_child())
                                                     ));
 
                                     {
                                         const void * parent = x;
                                         const void * const * lhs = reinterpret_cast<const void * const *>(x->child_addr(detail::Direction(0)));
 
-                                        XO_EXPECT(gc.check_write_barrier(parent, lhs, false),
-                                                  tostr(c_self, (": expect mlog entry for xgen left child pointer"),
-                                                        xtag("i", i_node), xtag("node[i]", x),
-                                                        xtag("key[i]", x->key()),
-                                                        xtag("child", x->left_child())));
+                                        XO_EXPECT_(gc.check_write_barrier(parent, lhs, false),
+                                                  xo::pp::tostr(c_self, (": expect mlog entry for xgen left child pointer"),
+                                                        xo::pp::xtag("i", i_node), xo::pp::xtag("node[i]", x),
+                                                        xo::pp::xtag("key[i]", x->key()),
+                                                        xo::pp::xtag("child", x->left_child())));
                                     }
 
-                                    XO_EXPECT(x == x->left_child()->parent(),
-                                              tostr(c_self, (": expect symmetric child/parent pointers"),
-                                                    xtag("i", i_node), xtag("node[i]", x),
-                                                    xtag("key[i]", x->key()),
-                                                    xtag("child", x->left_child()),
-                                                    xtag("child.key", x->left_child()->key()),
-                                                    xtag("child.parent", x->left_child()->parent()),
-                                                    xtag("child.parent._is_forwarded",
+                                    XO_EXPECT_(x == x->left_child()->parent(),
+                                              xo::pp::tostr(c_self, (": expect symmetric child/parent pointers"),
+                                                    xo::pp::xtag("i", i_node), xo::pp::xtag("node[i]", x),
+                                                    xo::pp::xtag("key[i]", x->key()),
+                                                    xo::pp::xtag("child", x->left_child()),
+                                                    xo::pp::xtag("child.key", x->left_child()->key()),
+                                                    xo::pp::xtag("child.parent", x->left_child()->parent()),
+                                                    xo::pp::xtag("child.parent._is_forwarded",
                                                          x->left_child()->parent()->_is_forwarded())
                                                     ));
 
                                 }
 
                                 if (x->right_child()) {
-                                    XO_EXPECT(x->right_child()->_is_forwarded() == false,
-                                              tostr(c_self, (": forwarding pointer where right child expected"),
-                                                    xtag("i", i_node), xtag("node[i]", x),
-                                                    xtag("key[i]", x->key()),
-                                                    xtag("child", x->right_child())
+                                    XO_EXPECT_(x->right_child()->_is_forwarded() == false,
+                                              xo::pp::tostr(c_self, (": forwarding pointer where right child expected"),
+                                                    xo::pp::xtag("i", i_node), xo::pp::xtag("node[i]", x),
+                                                    xo::pp::xtag("key[i]", x->key()),
+                                                    xo::pp::xtag("child", x->right_child())
                                                     ));
 
                                     {
@@ -1809,22 +1804,22 @@ namespace xo {
                                         const void * const * lhs
                                             = reinterpret_cast<const void * const *>(x->child_addr(Direction::D_Right));
 
-                                        XO_EXPECT(gc.check_write_barrier(parent, lhs, false),
-                                                  tostr(c_self, (": expect mlog entry for xgen right child pointer"),
-                                                        xtag("i", i_node), xtag("node[i]", x),
-                                                        xtag("key[i]", x->key()),
-                                                        xtag("child", x->right_child())));
+                                        XO_EXPECT_(gc.check_write_barrier(parent, lhs, false),
+                                                  xo::pp::tostr(c_self, (": expect mlog entry for xgen right child pointer"),
+                                                        xo::pp::xtag("i", i_node), xo::pp::xtag("node[i]", x),
+                                                        xo::pp::xtag("key[i]", x->key()),
+                                                        xo::pp::xtag("child", x->right_child())));
                                     }
 
-                                    XO_EXPECT(x == x->right_child()->parent(),
-                                              tostr(c_self, ": expect symmetric child/parent pointers",
-                                                    xtag("i", i_node),
-                                                    xtag("node[i]", x),
-                                                    xtag("key[i]", x->key()),
-                                                    xtag("child", x->right_child()),
-                                                    xtag("child.key", x->right_child()->key()),
-                                                    xtag("child.parent", x->right_child()->parent()),
-                                                    xtag("child.parent._is_forwarded", x->right_child()->parent()->_is_forwarded())
+                                    XO_EXPECT_(x == x->right_child()->parent(),
+                                              xo::pp::tostr(c_self, ": expect symmetric child/parent pointers",
+                                                    xo::pp::xtag("i", i_node),
+                                                    xo::pp::xtag("node[i]", x),
+                                                    xo::pp::xtag("key[i]", x->key()),
+                                                    xo::pp::xtag("child", x->right_child()),
+                                                    xo::pp::xtag("child.key", x->right_child()->key()),
+                                                    xo::pp::xtag("child.parent", x->right_child()->parent()),
+                                                    xo::pp::xtag("child.parent._is_forwarded", x->right_child()->parent()->_is_forwarded())
                                                     ));
                                 }
 
@@ -1834,13 +1829,13 @@ namespace xo {
                                     if (black_height == 0) {
                                         black_height = bd;
                                     } else {
-                                        XO_EXPECT(black_height == bd,
-                                                  tostr(c_self,
+                                        XO_EXPECT_(black_height == bd,
+                                                  xo::pp::tostr(c_self,
                                                         ": expect all RB-tree nodes to have the same "
                                                         "black-height",
-                                                        xtag("i1", i_black_height), xtag("i2", i_node),
-                                                        xtag("blackheight(i1)", black_height),
-                                                        xtag("blackheight(i2)", bd)));
+                                                        xo::pp::xtag("i1", i_black_height), xo::pp::xtag("i2", i_node),
+                                                        xo::pp::xtag("blackheight(i1)", black_height),
+                                                        xo::pp::xtag("blackheight(i2)", bd)));
                                     }
                                 }
 
@@ -1855,27 +1850,27 @@ namespace xo {
                                         ? x->right_child()
                                         : nullptr));
 
-                                XO_EXPECT(
+                                XO_EXPECT_(
                                     x->is_red_violation() == false,
-                                    tostr(c_self,
-                                          ccs(": expect RB-shape tree to have no red violations but "
+                                    xo::pp::tostr(c_self,
+                                          (": expect RB-shape tree to have no red violations but "
                                               "red y is child of red x"),
-                                          xtag("i", i_node), xtag("x.addr", x),
-                                          xtag("x.col", ccs((x->color() == C_Black) ? "B" : "r")),
-                                          xtag("x.key", x->key()),
-                                          xtag("y.addr", red_child),
-                                          xtag("y.col", ccs((red_child->color() == C_Black) ? "B" : "r")),
-                                          xtag("y.key", red_child->key())));
+                                          xo::pp::xtag("i", i_node), xo::pp::xtag("x.addr", x),
+                                          xo::pp::xtag("x.col", ((x->color() == C_Black) ? "B" : "r")),
+                                          xo::pp::xtag("x.key", x->key()),
+                                          xo::pp::xtag("y.addr", red_child),
+                                          xo::pp::xtag("y.col", ((red_child->color() == C_Black) ? "B" : "r")),
+                                          xo::pp::xtag("y.key", red_child->key())));
 
                                 /* RB5.  inorder traversal visits nodes in strictly increasing key order */
 
                                 if (last_key) {
-                                    XO_EXPECT((*last_key) < x->key(),
-                                              tostr(c_self,
+                                    XO_EXPECT_((*last_key) < x->key(),
+                                              xo::pp::tostr(c_self,
                                                     ": expect inorder traversal to visit keys"
                                                     " in strictly increasing order",
-                                                    xtag("i", i_node), xtag("key[i-1]", *last_key),
-                                                    xtag("key[i]", x->key())));
+                                                    xo::pp::xtag("i", i_node), xo::pp::xtag("key[i-1]", *last_key),
+                                                    xo::pp::xtag("key[i]", x->key())));
                                 }
 
                                 last_key = &(x->key());
@@ -1883,15 +1878,15 @@ namespace xo {
                                 /* RB6. Node::size reports the size of the subtree reachable from that
                                  *      node by child pointers.
                                  */
-                                XO_EXPECT(x->size() == (tree_size(x->left_child())
+                                XO_EXPECT_(x->size() == (tree_size(x->left_child())
                                                         + 1
                                                         + tree_size(x->right_child())),
-                                          tostr(c_self,
+                                          xo::pp::tostr(c_self,
                                                 ": expect Node::size to be 1 + sum of childrens' size",
-                                                xtag("i", i_node),
-                                                xtag("key[i]", x->key()),
-                                                xtag("left.size", tree_size(x->left_child())),
-                                                xtag("right.size", tree_size(x->right_child()))));
+                                                xo::pp::xtag("i", i_node),
+                                                xo::pp::xtag("key[i]", x->key()),
+                                                xo::pp::xtag("left.size", tree_size(x->left_child())),
+                                                xo::pp::xtag("right.size", tree_size(x->right_child()))));
 
                                 /* RB7. Node::reduced reports the value of
                                  *       f(f(L, Node::value), R)
@@ -1901,21 +1896,21 @@ namespace xo {
                                 auto reduced_pair
                                     = RbNode::reduced_pair(reduce_fn, x);
 
-                                XO_EXPECT(reduce_fn.is_equal
+                                XO_EXPECT_(reduce_fn.is_equal
                                           (x->reduced1(), reduced_pair.first),
-                                          tostr(c_self,
+                                          xo::pp::tostr(c_self,
                                                 ": expect Node::reduced to be reduce_fn"
                                                 " applied to (.L, .value)",
-                                                xtag("node.reduced1", x->reduced1()),
-                                                xtag("reduced_pair.first", reduced_pair.first)));
+                                                xo::pp::xtag("node.reduced1", x->reduced1()),
+                                                xo::pp::xtag("reduced_pair.first", reduced_pair.first)));
 
-                                XO_EXPECT(reduce_fn.is_equal
+                                XO_EXPECT_(reduce_fn.is_equal
                                           (x->reduced2(), reduced_pair.second),
-                                          tostr(c_self,
+                                          xo::pp::tostr(c_self,
                                                 ": expect Node::reduced to be reduce_fn"
                                                 " applied to (.L, .value, .R)",
-                                                xtag("node.reduced2", x->reduced2()),
-                                                xtag("reduce2_expr", reduced_pair.second)));
+                                                xo::pp::xtag("node.reduced2", x->reduced2()),
+                                                xo::pp::xtag("reduce2_expr", reduced_pair.second)));
 
                                 ++i_node;
                             };
@@ -1928,10 +1923,10 @@ namespace xo {
                         /* RB8. inorder traversal visits all the nodes */
                         std::size_t subtree_z = N ? N->size() : 0ul;
 
-                        XO_EXPECT(i_node == subtree_z,
-                                  tostr(c_self, ": expect visit count = node.size",
-                                        xtag("visit_count", i_node),
-                                        xtag("node.size", 0)));
+                        XO_EXPECT_(i_node == subtree_z,
+                                  xo::pp::tostr(c_self, ": expect visit count = node.size",
+                                        xo::pp::xtag("visit_count", i_node),
+                                        xo::pp::xtag("node.size", 0)));
 
                         return i_node;
                     } /*verify_subtree_ok*/
@@ -1940,24 +1935,21 @@ namespace xo {
                  *  indent by node depth @p d
                  **/
                 static void display_aux(Direction side, RbNode const *N, uint32_t d,
-                                        xo::scope *p_scope) {
-                    using xo::pad;
-                    using xo::xtag;
-                    using xo::print::ccs;
-
+                                        xo::pp::scope *p_scope) {
+                    
                     if (N) {
-                        p_scope->log(pad(d),
-                                     xtag("addr", N),
-                                     xtag("par", N->parent()),
-                                     xtag("side", ccs((side == D_Left)    ? "L"
+                        p_scope->log(xo::pp::pad(d),
+                                     xo::pp::xtag("addr", N),
+                                     xo::pp::xtag("par", N->parent()),
+                                     xo::pp::xtag("side", ((side == D_Left)    ? "L"
                                                       : (side == D_Right) ? "R"
                                                       : "root")),
-                                     xtag("col", ccs(N->is_black() ? "B" : "r")),
-                                     xtag("key", N->key()),
-                                     xtag("value", N->value()),
-                                     xtag("wt", N->size()),
-                                     xtag("reduced1", N->reduced1()),
-                                     xtag("reduced2", N->reduced2()));
+                                     xo::pp::xtag("col", (N->is_black() ? "B" : "r")),
+                                     xo::pp::xtag("key", N->key()),
+                                     xo::pp::xtag("value", N->value()),
+                                     xo::pp::xtag("wt", N->size()),
+                                     xo::pp::xtag("reduced1", N->reduced1()),
+                                     xo::pp::xtag("reduced2", N->reduced2()));
                         display_aux(D_Left, N->left_child(), d + 1, p_scope);
                         display_aux(D_Right, N->right_child(), d + 1, p_scope);
                     }
@@ -1967,9 +1959,8 @@ namespace xo {
                  *  indent by node depth @p d
                  **/
                 static void display(RbNode const *N, uint32_t d) {
-                    using xo::scope;
 
-                    scope log(XO_DEBUG(true /*debug_flag*/));
+                    xo::pp::scope log(XO_DEBUG_(true /*debug_flag*/));
 
                     display_aux(D_Invalid, N, d, &log);
 

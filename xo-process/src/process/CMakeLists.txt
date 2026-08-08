@@ -16,4 +16,7 @@ xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 $
 #
 xo_dependency(${SELF_LIB} reactor)
 xo_dependency(${SELF_LIB} printjson)
+# BrownianMotion.cpp / ExpProcess.cpp include <xo/indentlog/scope.hpp>.
+# Declared explicitly: xo-reactor and xo-printjson no longer propagate it.
+xo_dependency(${SELF_LIB} indentlog)
 #xo_dependency(${SELF_LIB} callback)

@@ -1,5 +1,6 @@
 /* @file random_seed.hpp */
 
+#include <array>
 #include <cstdint>
 #include <iostream>
 #include <stdlib.h>
@@ -76,8 +77,21 @@ namespace xo {
         operator<<(std::ostream & os,
                    Seed<T> const & x)
         {
-            /* NOTE: if compile error here,  may want caller to #include [indentlog/print/vector.hpp] */
-            os << x.seed_;
+            /* Written out here rather than relying on an array inserter the
+             * caller happened to include.  Legacy xo-indentlog supplied one --
+             * declared inside namespace std, which is undefined behaviour --
+             * and this header carried a NOTE telling callers to include it.
+             * A six-line loop makes xo-randomgen self-contained and keeps the
+             * rendering identical: "[a b c d]".
+             */
+            os << "[";
+            for (std::size_t i = 0, n = x.seed_.size(); i < n; ++i) {
+                if (i > 0)
+                    os << " ";
+                os << x.seed_[i];
+            }
+            os << "]";
+
             return os;
         } /*operator<<*/
 
