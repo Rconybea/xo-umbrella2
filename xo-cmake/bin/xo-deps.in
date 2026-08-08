@@ -18,12 +18,13 @@ usage() {
     echo "  Render the xo subsystem dependency graph."
     echo ""
     echo "Options:"
-    echo "  --format=svg|png|dot|html  Output format (default: svg)"
+    echo "  --format=svg|png|dot|html|names  Output format (default: svg)"
     echo "  --output=FILE              Output path (default: xo-deps.<format>)"
     echo "  --edges=FILE               Edge list, tsort format (default: auto-discover)"
     echo "  --focus=LIB                Only LIB, what it needs, and what needs it"
     echo "  --deps-of=LIB              Only LIB and what it depends on (upstream)"
     echo "  --users-of=LIB             Only LIB and what depends on it (downstream)"
+    echo "  --why=X:Y                  Does X depend on Y?  Print the path; exit 1 if none"
     echo "  --rankdir=TB|LR            Layout direction (default: TB)"
     echo "  --no-tred                  Keep transitively-implied edges"
     echo "  --list                     List subsystem names and exit"
@@ -46,11 +47,28 @@ usage() {
     echo "  4. ${INSTALLED_EDGES_FILE}"
     echo "     (installed alongside xo-build's copy)"
     echo ""
+    echo "Answering questions (no graphviz needed):"
+    echo "  --format=names prints subsystem names, one per line, instead of a"
+    echo "  picture -- so a claim about the graph can be checked by a command"
+    echo "  rather than by reading a diagram.  Combine it with --deps-of /"
+    echo "  --users-of.  --why answers a single yes/no with its evidence, and"
+    echo "  sets an exit code, so it can gate a script."
+    echo ""
     echo "Examples:"
     echo "  $0                                  # whole graph -> xo-deps.svg"
     echo "  $0 --format=html                    # interactive, click to trace a cone"
     echo "  $0 --users-of=xo-arena              # what breaks if xo-arena changes"
     echo "  $0 --deps-of=xo-reader2 --rankdir=LR"
+    echo ""
+    echo "  # blast radius: every subsystem that would be touched by reworking Y"
+    echo "  $0 --users-of=xo-printable2 --format=names"
+    echo ""
+    echo "  # upstream closure: everything X needs"
+    echo "  $0 --deps-of=xo-expression --format=names"
+    echo ""
+    echo "  # does X depend on Y, directly or transitively?"
+    echo "  $0 --why=xo-tokenizer2:xo-printable2   # prints the path, exit 0"
+    echo "  $0 --why=xo-expression:xo-printable2   # prints nothing, exit 1"
     exit 1
 }
 
@@ -62,6 +80,7 @@ FOCUS_DIR="both"
 RANKDIR="TB"
 USE_TRED=1
 LIST_ONLY=0
+WHY=""
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -71,6 +90,7 @@ while [[ $# -gt 0 ]]; do
         --focus=*)    FOCUS="${1#*=}"; FOCUS_DIR="both" ;;
         --deps-of=*)  FOCUS="${1#*=}"; FOCUS_DIR="deps" ;;
         --users-of=*) FOCUS="${1#*=}"; FOCUS_DIR="users" ;;
+        --why=*)      WHY="${1#*=}" ;;
         --rankdir=*)  RANKDIR="${1#*=}" ;;
         --no-tred)    USE_TRED=0 ;;
         --list)       LIST_ONLY=1 ;;
@@ -81,9 +101,14 @@ while [[ $# -gt 0 ]]; do
 done
 
 case "${FORMAT}" in
-    svg|png|dot|html) ;;
+    svg|png|dot|html|names) ;;
     *) echo "$0: unsupported --format=${FORMAT}" >&2; exit 1 ;;
 esac
+
+if [[ -n "${WHY}" && "${WHY}" != *:* ]]; then
+    echo "$0: --why wants X:Y (does X depend on Y?), got '${WHY}'" >&2
+    exit 1
+fi
 
 # ----------------------------------------------------------------
 # locate edge list
@@ -122,14 +147,83 @@ if [[ "${LIST_ONLY}" -eq 1 ]]; then
     exit 0
 fi
 
-for tool in dot tred; do
+# ----------------------------------------------------------------
+# --why=X:Y -- does X depend on Y, directly or transitively?
+#
+# Answers with the shortest dependency path as evidence, and an exit code so
+# it can gate a script:  if xo-deps --why=a:b >/dev/null; then ...
+#
+# Input is tsort order: "a b" means b depends on a.  So "X depends on Y"
+# walks pred[]: from X to the things X requires.
+
+if [[ -n "${WHY}" ]]; then
+    awk -v from="${WHY%%:*}" -v to="${WHY##*:}" '
+        { pred[$2] = pred[$2] " " $1
+          seen[$1] = 1; seen[$2] = 1 }
+
+        END {
+            if (!(from in seen)) {
+                print "xo-deps: no such subsystem: " from > "/dev/stderr"; exit 2
+            }
+            if (!(to in seen)) {
+                print "xo-deps: no such subsystem: " to > "/dev/stderr"; exit 2
+            }
+
+            # BFS from `from` over pred[], recording parents, so the path we
+            # report is a shortest one rather than whatever DFS stumbled into.
+            frontier = from; visited[from] = 1
+            while (frontier != "") {
+                next_frontier = ""
+                k = split(frontier, cur, " ")
+                for (i = 1; i <= k; ++i) {
+                    node = cur[i]
+                    m = split(pred[node], nbrs, " ")
+                    for (j = 1; j <= m; ++j) {
+                        nb = nbrs[j]
+                        if (nb == "" || (nb in visited)) continue
+                        visited[nb] = 1
+                        parent[nb] = node
+                        if (nb == to) { found = 1; break }
+                        next_frontier = next_frontier " " nb
+                    }
+                    delete nbrs
+                    if (found) break
+                }
+                if (found) break
+                frontier = next_frontier
+            }
+
+            if (!found) exit 1
+
+            # walk parents back from `to`, then print from `from` forward
+            n = 0; node = to
+            while (node != from) { chain[++n] = node; node = parent[node] }
+            line = from
+            for (i = n; i >= 1; --i) line = line " -> " chain[i]
+            print line
+        }
+    ' "${EDGES}"
+    exit $?
+fi
+
+# graphviz is only needed for the picture formats
+case "${FORMAT}" in
+    svg|png|html) NEED_TOOLS="dot" ;;
+    dot)          NEED_TOOLS="" ;;
+    names)        NEED_TOOLS="" ;;
+esac
+if [[ "${USE_TRED}" -eq 1 && "${FORMAT}" != "names" ]]; then
+    NEED_TOOLS="${NEED_TOOLS} tred"
+fi
+for tool in ${NEED_TOOLS}; do
     if ! command -v "${tool}" >/dev/null 2>&1; then
         echo "$0: '${tool}' not found (install graphviz)" >&2
         exit 1
     fi
 done
 
-if [[ -z "${OUTPUT}" ]]; then
+# `names` is a query, not an artifact: default to stdout so it pipes.
+if [[ -z "${OUTPUT}" && "${FORMAT}" != "names" ]]; then
     OUTPUT="xo-deps.${FORMAT}"
 fi
 
@@ -228,6 +322,17 @@ reduce() {
 # render
 
 case "${FORMAT}" in
+    names)
+        # every subsystem in the selected cone, one per line.  The focus itself
+        # is included -- "what depends on Y" reads naturally as including Y.
+        # No tred: transitive reduction changes which EDGES are drawn, never
+        # which NODES are reachable, and it is reachability we are reporting.
+        if [[ -n "${OUTPUT}" ]]; then
+            filter_edges | awk '{print $1; print $2}' | sort -u > "${OUTPUT}"
+        else
+            filter_edges | awk '{print $1; print $2}' | sort -u
+        fi
+        ;;
     dot)
         emit_dot | reduce > "${OUTPUT}"
         ;;
@@ -365,6 +470,15 @@ HTML_TAIL
         } > "${OUTPUT}"
         ;;
 esac
+
+# `names` is a query: its stdout is the answer, so the summary would corrupt
+# anything piping it.  Report to stderr instead (and skip the edges-drawn
+# count, which is about rendering and means nothing here).
+if [[ "${FORMAT}" == "names" ]]; then
+    n_nodes=$(filter_edges | awk '{print $1; print $2}' | sort -u | wc -l | tr -d ' ')
+    echo "xo-deps: ${n_nodes} subsystems; edges: ${EDGES}" >&2
+    exit 0
+fi
 
 n_nodes=$(filter_edges | awk '{print $1; print $2}' | sort -u | wc -l | tr -d ' ')
 n_edges_in=$(filter_edges | wc -l | tr -d ' ')
