@@ -4,10 +4,15 @@
  */
 
 #include "xo/tokenizer/tokenizer.hpp"
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {
     using xo::scm::tokentype;
+    using xo::pp::scope;
+    using xo::pp::xtag;
     using token = xo::scm::token<char>;
     using xo::scm::span;
 
@@ -220,7 +225,7 @@ namespace xo {
                 rehearser rh;
 
                 for (auto _ : rh) {
-                    scope log(XO_DEBUG2(rh.enable_debug(), "tokenizer"));
+                    scope log(XO_DEBUG2_(rh.enable_debug(), "tokenizer"));
 
                     log && log(xtag("i_tc", i_tc), xtag("input", testcase.input_));
 
@@ -393,7 +398,7 @@ namespace xo {
                 rehearser rh;
 
                 for (auto _ : rh) {
-                    scope log(XO_DEBUG2(rh.enable_debug(), "tokenizer2"));
+                    scope log(XO_DEBUG2_(rh.enable_debug(), "tokenizer2"));
 
                     log && log(xtag("i_tc", i_tc), xtag("input", testcase.input_));
 
@@ -550,7 +555,7 @@ namespace xo {
                     rehearser rh(0);
 
                     for (auto _ : rh) {
-                        scope log(XO_DEBUG2(c_force_debug || rh.enable_debug(), "tokenizer3"));
+                        scope log(XO_DEBUG2_(c_force_debug || rh.enable_debug(), "tokenizer3"));
 
                         log && log(xtag("pass", _), xtag("ok(-)", rh.ok_flag_));
                         log && log(xtag("i_tc", i_tc), xtag("input", testcase.input_));

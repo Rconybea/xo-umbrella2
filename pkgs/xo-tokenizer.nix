@@ -6,7 +6,7 @@
 
   doxygen, sphinx, graphviz,
 
-  xo-cmake, xo-indentlog,
+  xo-cmake, xo-ppsink,
 
   buildDocs ? false,
   buildExamples ? false,
@@ -36,7 +36,7 @@ stdenv.mkDerivation (finalattrs:
 
     nativeBuildInputs = [ cmake catch2
                           xo-cmake
-                          xo-indentlog
+                          xo-ppsink
                         ]
     ++ lib.optionals buildDocs [
       doxygen

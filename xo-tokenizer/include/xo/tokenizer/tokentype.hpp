@@ -5,8 +5,7 @@
 
 #pragma once
 
-#include <xo/indentlog/print/ppdetail_atomic.hpp>
-#include <xo/indentlog/print/tag.hpp> // for STRINGIFY
+#include <xo/ppsink/stringify.hpp>
 #include <ostream>
 
 namespace xo {
@@ -181,12 +180,6 @@ namespace xo {
             return os;
         }
     } /*namespace scm*/
-
-#ifndef ppdetail_atomic
-    namespace print {
-        PPDETAIL_ATOMIC(xo::scm::tokentype);
-    } /*namespace print*/
-#endif
 } /*namespace xo*/
 
 /* end tokentype.hpp */

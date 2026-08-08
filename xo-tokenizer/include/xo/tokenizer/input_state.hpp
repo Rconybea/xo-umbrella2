@@ -6,6 +6,12 @@
 #pragma once
 
 #include "span.hpp"
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/quoted.hpp>   /* unq() */
+/* operator<< streams tags and quot() to an ostream */
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/quoted_ostream.hpp>
 
 namespace xo {
     namespace scm {
@@ -249,7 +255,10 @@ namespace xo {
         template <typename CharT>
         void
         input_state<CharT>::advance(size_t z) {
-            scope log(XO_DEBUG(debug_flag_));
+            using xo::pp::scope;
+            using xo::pp::xtag;
+
+            scope log(XO_DEBUG_(debug_flag_));
 
             this->current_pos_ += z;
 
@@ -259,7 +268,10 @@ namespace xo {
         template <typename CharT>
         void
         input_state<CharT>::advance_until(const CharT * pos) {
-            scope log(XO_DEBUG(debug_flag_));
+            using xo::pp::scope;
+            using xo::pp::xtag;
+
+            scope log(XO_DEBUG_(debug_flag_));
 
             assert(current_line_.lo() <= pos && pos <= current_line_.hi());
 
@@ -281,6 +293,9 @@ namespace xo {
         template <typename CharT>
         void
         input_state<CharT>::discard_current_line() {
+            using xo::pp::scope;
+            using xo::pp::xtag;
+
             this->current_line_ = span_type::make_null();
             this->current_pos_ = 0;
             this->whitespace_ = 0;
@@ -291,12 +306,15 @@ namespace xo {
         input_state<CharT>::capture_current_line(const span_type & input,
                                                  bool eof_flag) -> std::pair<input_error, span_type>
         {
+            using xo::pp::scope;
+            using xo::pp::xtag;
+
             // see also discard_current_line()
             // note: must capture entirety of first line,
             //       for example including leading whitespace.
             //       See discussion in tokenizer scan() method
 
-            scope log(XO_DEBUG(debug_flag_));
+            scope log(XO_DEBUG_(debug_flag_));
 
             /* look ahead to {end of line, end of input}, whichever comes first */
             const CharT * sol = input.lo();
@@ -344,7 +362,11 @@ namespace xo {
         const CharT *
         input_state<CharT>::skip_leading_whitespace()
         {
-            scope log(XO_DEBUG(debug_flag_));
+            using xo::pp::scope;
+            using xo::pp::unq;
+            using xo::pp::xtag;
+
+            scope log(XO_DEBUG_(debug_flag_));
 
             const CharT * ix = current_line_.lo() + current_pos_;
 
@@ -375,7 +397,8 @@ namespace xo {
         operator<<(std::ostream & os,
                    const input_state<CharT>& x)
         {
-            using xo::print::unq;
+            using xo::pp::unq;
+            using xo::pp::xtag;
 
             os << "<input_state"
             << xtag("tk", x.tk_start())

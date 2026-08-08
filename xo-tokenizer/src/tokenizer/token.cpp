@@ -4,6 +4,5 @@
  **/
 
 #include "token.hpp"
-#include <xo/indentlog/print/tag.hpp>
 
 /** end token.cpp **/

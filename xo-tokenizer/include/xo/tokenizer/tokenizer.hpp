@@ -9,8 +9,10 @@
 #include "scan_result.hpp"
 #include "span.hpp"
 #include "token.hpp"
-#include <xo/indentlog/print/ppdetail_atomic.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag.hpp>
+#include <xo/ppsink/tostr.hpp>
 #include <cassert>
 
 namespace xo {
@@ -258,10 +260,15 @@ namespace xo {
                                          const span_type & token_text,
                                          input_state_type & input_state_ref) -> result_type
         {
-            /* literal|pretty|streamlined */
-            log_config::style = function_style::streamlined;
+            using xo::pp::scope;
+            using xo::pp::tostr;
+            using xo::pp::xtag;
 
-            scope log(XO_DEBUG(input_state_ref.debug_flag()));
+            /* literal|pretty|streamlined */
+
+            xo::pp::scope_config::function_style = xo::FunctionStyle::streamlined;
+
+            scope log(XO_DEBUG_(input_state_ref.debug_flag()));
             log && log(xtag("token_text", token_text),
                        xtag("initial_whitespace", initial_whitespace),
                        xtag("input_state", input_state_ref));
@@ -774,7 +781,10 @@ namespace xo {
         tokenizer<CharT>::scan(const span_type & input,
                                bool eof_flag) -> result_type
         {
-            scope log(XO_DEBUG(input_state_.debug_flag()));
+            using xo::pp::scope;
+            using xo::pp::xtag;
+
+            scope log(XO_DEBUG_(input_state_.debug_flag()));
 
             log && log(xtag("input", input));
 
@@ -1071,7 +1081,9 @@ namespace xo {
         template <typename CharT>
         auto
         tokenizer<CharT>::scan2(const span_type & input, bool eof) -> result_type {
-            scope log(XO_DEBUG(input_state_.debug_flag()));
+            using xo::pp::scope;
+
+            scope log(XO_DEBUG_(input_state_.debug_flag()));
 
             auto sr = this->scan(input);
 
@@ -1117,7 +1129,10 @@ namespace xo {
         template <typename CharT>
         auto
         tokenizer<CharT>::notify_eof(const span_type & input) -> result_type {
-            scope log(XO_DEBUG(input_state_.debug_flag()));
+            using xo::pp::scope;
+            using xo::pp::xtag;
+
+            scope log(XO_DEBUG_(input_state_.debug_flag()));
 
             log && log(xtag("prefix_", prefix_), xtag("prefix_.size", prefix_.size()), xtag("input", input));
 

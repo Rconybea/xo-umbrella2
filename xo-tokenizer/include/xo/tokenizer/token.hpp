@@ -6,7 +6,10 @@
 #pragma once
 
 #include "tokentype.hpp"
-#include <xo/indentlog/print/tag.hpp>
+#include <xo/ppsink/tag.hpp>
+#include <xo/ppsink/tostr.hpp>
+/* print() streams tags to an ostream */
+#include <xo/ppsink/tag_ostream.hpp>
 #include <cstdint>
 #include <ostream>
 #include <stdexcept>
@@ -210,6 +213,9 @@ namespace xo {
         template <typename CharT>
         bool
         token<CharT>::bool_value() const {
+            using xo::pp::tostr;
+            using xo::pp::xtag;
+
             if (tk_type_ != tokentype::tk_bool) {
                 throw (std::runtime_error
                        (tostr("token::bool_value",
@@ -233,6 +239,9 @@ namespace xo {
         template <typename CharT>
         std::int64_t
         token<CharT>::i64_value() const {
+            using xo::pp::tostr;
+            using xo::pp::xtag;
+
             if (tk_type_ != tokentype::tk_i64) {
                 throw (std::runtime_error
                        (tostr("token::i64_value",
@@ -289,6 +298,9 @@ namespace xo {
         template <typename CharT>
         double
         token<CharT>::f64_value() const {
+            using xo::pp::tostr;
+            using xo::pp::xtag;
+
             if (tk_type_ != tokentype::tk_f64) {
                 throw (std::runtime_error
                        (tostr("token::f64_value",
@@ -445,6 +457,8 @@ namespace xo {
         template <typename CharT>
         void
         token<CharT>::print(std::ostream & os) const {
+            using xo::pp::xtag;
+
             os << "<token"
                << xtag("type", tk_type_);
             if (has_variable_text())
@@ -461,12 +475,6 @@ namespace xo {
             return os;
         }
     } /*Namespace scm*/
-
-#ifndef ppdetail_atomic
-    namespace print {
-        PPDETAIL_ATOMIC(xo::scm::token<char>);
-    }
-#endif
 
 } /*namespace xo*/
 

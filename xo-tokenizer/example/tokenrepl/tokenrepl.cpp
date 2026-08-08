@@ -25,11 +25,11 @@ main() {
     using tokenizer_type = tokenizer<char>;
     using span_type = tokenizer_type::span_type;
 
-    xo::log_config::min_log_level = xo::log_level::severe;
+    xo::pp::scope_config::min_log_level = xo::pp::log_level::severe;
 
     bool interactive = isatty(STDIN_FILENO);
 
-    tokenizer_type tkz(xo::log_config::min_log_level <= xo::log_level::info);
+    tokenizer_type tkz(xo::pp::scope_config::min_log_level <= xo::pp::log_level::info);
     string input_str;
 
     size_t line_no = 1;

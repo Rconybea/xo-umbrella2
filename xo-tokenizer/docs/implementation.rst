@@ -13,7 +13,7 @@ Library dependency tower for *xo-tokenizer*:
     +-----------------+
     |  xo_tokenizer   |
     +-----------------+
-    |  xo_indentlog   |
+    |   xo_ppsink    |
     +-----------------+
     |    xo_cmake     |
     +-----------------+

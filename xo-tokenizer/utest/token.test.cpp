@@ -4,12 +4,16 @@
  */
 
 #include "xo/tokenizer/token.hpp"
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
 #include <catch2/catch.hpp>
 #include <memory>
 
 namespace xo {
     using token = xo::scm::token<char>;
     using xo::scm::tokentype;
+    using xo::pp::tostr;
+    using xo::pp::xtag;
 
     namespace ut {
         // also see tokenizer.test.cpp for syntax

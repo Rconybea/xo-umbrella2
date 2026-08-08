@@ -21,21 +21,21 @@ Tested with gcc 13.3
 Install
 =======
 
-``xo-tokenizer`` uses supporting library ``xo-indentlog`` and cmake macros ``xo-cmake``.
+``xo-tokenizer`` uses supporting library ``xo-ppsink`` and cmake macros ``xo-cmake``.
 These are on github:
 
 - `xo-tokenizer source`_ (Schematika tokenizer)
-- `xo-indentlog source`_ (structured logging)
+- `xo-ppsink source`_ (pretty-printing sink)
 - `xo-cmake source`_ (shared cmake macros)
 
 .. _xo-tokenizer source: https://github.com/rconybea/xo-tokenizer
-.. _xo-indentlog source: https://github.com/rconybea/indentlog
+.. _xo-ppsink source: https://github.com/rconybea/xo-ppsink
 .. _xo-cmake source: https://github.com/rconybea/xo-cmake
 
 Installing from source
 ----------------------
 
-Install scripts for `xo-tokenizer` and `xo-indentlog` depend on helper scripts installed from `xo-cmake`.
+Install scripts for `xo-tokenizer` and `xo-ppsink` depend on helper scripts installed from `xo-cmake`.
 
 Preamble:
 
@@ -59,11 +59,11 @@ Install `xo-cmake`:
     cmake --build xo-cmake/.build -j    # placeholder, can omit for now
     cmake --install xo-cmake/.build
 
-Install `xo-indentlog`:
+Install `xo-ppsink`:
 
 .. code-block:: bash
 
-    xo-build --clone --configure --build --install indentlog
+    xo-build --clone --configure --build --install xo-ppsink
 
 Install `xo-tokenizer`:
 
@@ -82,11 +82,11 @@ Directories under ``PREFIX`` will then contain:
     |  \- xo-cmake-lcov-harness
     +- include
     |  \- xo
-    |     +- indentlog/
+    |     +- ppsink/
     |     \- tokenizer/
     +- lib
     |  \- cmake
-    |     +- indentlog/
+    |     +- xo_ppsink/
     |     \- xo_tokenizer/
     +- share
        \- cmake

@@ -2,8 +2,12 @@
 
 #pragma once
 
-#include <xo/indentlog/print/ppdetail_atomic.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+/* print() streams tags to an ostream */
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/quoted.hpp>   /* quot() */
+#include <xo/ppsink/quoted_ostream.hpp>
 #include <cassert>
 #include <cstdint>
 #include <ostream>
@@ -82,13 +86,16 @@ namespace xo {
 
             /** @brief concatenate two contiguous spans */
             static span concat(const span & span1, const span & span2) {
+                using xo::pp::scope;
+                using xo::pp::xtag;
+
                 if (span1.is_null())
                     return span2;
                 if (span2.is_null())
                     return span1;
 
                 if (span1.hi() != span2.lo()) {
-                    scope log(XO_DEBUG(true));
+                    scope log(XO_DEBUG_(true));
 
                     log && log(xtag("span1.hi", (void*)span1.hi()), xtag("span2.lo", (void*)span2.lo()));
                 }
@@ -220,10 +227,12 @@ namespace xo {
 
             /** print representation for this span on stream @p os **/
             void print(std::ostream & os) const {
+                using xo::pp::xtag;
+
                 os << "<span"
                    << xtag("addr", (void*)lo_)
                    << xtag("size", size())
-                   << " :text " << xo::print::quot(std::string_view(lo_, hi_))
+                   << " :text " << xo::pp::quot(std::string_view(lo_, hi_))
                    << ">";
             }
             ///@}
@@ -304,14 +313,6 @@ namespace xo {
 
             return os;
         }
-
-#ifndef ppdetail_atomic
-        template <typename CharT>        \
-        PPDETAIL_ATOMIC_BODY(printspan_impl<CharT>);
-
-        template <typename CharT>        \
-        PPDETAIL_ATOMIC_BODY(xo::scm::span<CharT>);
-#endif
 
     }
 } /*namespace xo*/

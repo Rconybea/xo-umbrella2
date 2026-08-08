@@ -8,7 +8,12 @@
 #include "input_state.hpp"
 #include "span.hpp"
 #include "tokentype.hpp"
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+/* print() streams tags to an ostream */
+#include <xo/ppsink/tag_ostream.hpp>
 #include <iomanip>
+#include <cstring>   /* strlen -- was arriving via xo-indentlog */
 
 namespace xo {
     namespace scm {
@@ -42,7 +47,10 @@ namespace xo {
                   input_state_{input_state},
                   error_pos_{error_pos}
                 {
-                    scope log(XO_DEBUG(input_state.debug_flag()));
+                    using xo::pp::scope;
+                    using xo::pp::xtag;
+
+                    scope log(XO_DEBUG_(input_state.debug_flag()));
 
                     log && log(xtag("input_state.current_pos", input_state.current_pos()),
                                xtag("error_pos", error_pos));
@@ -114,6 +122,8 @@ namespace xo {
         template <typename CharT>
         void
         tokenizer_error<CharT>::print(std::ostream & os) const {
+            using xo::pp::xtag;
+
             os << "<tokenizer-error"
                << xtag("src-function", src_function_)
                << xtag("message", error_description_)
