@@ -54,6 +54,7 @@ in
       xo-pyexpression
       xo-tokenizer
       xo-reader
+      xo-interpreter
       xo-jit
       xo-pyjit
       xo-webutil

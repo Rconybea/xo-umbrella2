@@ -31,7 +31,15 @@ stdenv.mkDerivation (finalattrs:
 
     doCheck = true;
 
-    propagatedBuildInputs = [ ];
+    # PUBLIC deps: xo_readerConfig.cmake does find_dependency() on these, so a
+    # consumer must be able to resolve them -- nativeBuildInputs would satisfy
+    # xo-reader's own build but propagate nothing.  Latent until xo-interpreter
+    # was packaged (2026-08-08) and became xo-reader's first nix consumer.
+    propagatedBuildInputs = [ xo-expression
+                              xo-tokenizer
+                              xo-ppsink
+                              xo-indentlog2
+                            ];
 
     postBuild = lib.optionalString buildDocs ''
       cmake --build . -- docs
@@ -40,10 +48,6 @@ stdenv.mkDerivation (finalattrs:
     nativeBuildInputs = [ cmake
                            catch2
                            xo-cmake
-                           xo-expression
-                           xo-tokenizer
-                           xo-ppsink
-                           xo-indentlog2
                          ]
     ++ lib.optionals buildExamples [ replxx ]
     ++ lib.optionals buildDocs [

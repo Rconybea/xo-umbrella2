@@ -65,6 +65,7 @@ let
     xo-pyexpression   = callPackage pkgs/xo-pyexpression.nix   { stdenv = jitStdenv; };
     xo-tokenizer      = callPackage pkgs/xo-tokenizer.nix      { stdenv = jitStdenv; buildDocs = true; buildExamples = true; };
     xo-reader         = callPackage pkgs/xo-reader.nix         { stdenv = jitStdenv; buildDocs = true; buildExamples = true; };
+    xo-interpreter    = callPackage pkgs/xo-interpreter.nix    { stdenv = jitStdenv;                   buildExamples = true; };
     xo-jit            = callPackage pkgs/xo-jit.nix            { stdenv = jitStdenv; buildDocs = true; buildExamples = true; llvm = llvmPackages1.llvm; };
     xo-pyjit          = callPackage pkgs/xo-pyjit.nix          { stdenv = jitStdenv; };
     xo-webutil        = callPackage pkgs/xo-webutil.nix        { stdenv = jitStdenv; };

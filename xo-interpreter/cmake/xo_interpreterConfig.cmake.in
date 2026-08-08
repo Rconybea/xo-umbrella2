@@ -1,8 +1,23 @@
 # Generated from xo_export_cmake_config(). DO NOT EDIT
+#
+# ...except for the find_dependency() calls below the @PACKAGE_INIT@, which are
+# NOT generated -- see the comment there.
 
 @PACKAGE_INIT@
 
 include(CMakeFindDependencyMacro)
+
+# NOT generated: these arrive via find_package(), not xo_dependency(), and
+# xo_export_cmake_config() only knows about xo deps.  Both appear in this
+# target's INTERFACE_LINK_LIBRARIES, so a consumer must be able to resolve
+# them:
+#   replxx::replxx    xo_external_target_dependency(), src/interpreter/CMakeLists.txt:27
+#   Threads::Threads  raw target_link_libraries(),      src/interpreter/CMakeLists.txt:28
+#
+# NB replxx::replxx contains "::", so an unresolved name is a HARD cmake error
+# at generate time rather than a degraded -lreplxx at link time.
+find_dependency(replxx)
+find_dependency(Threads)
 
 @XO_FIND_DEPENDENCY_BLOCK@
 

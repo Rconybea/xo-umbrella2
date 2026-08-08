@@ -378,6 +378,7 @@ in
     pyexpression       = pkgs.xo-pyexpression;
     tokenizer          = pkgs.xo-tokenizer;
     reader             = pkgs.xo-reader;
+    interpreter        = pkgs.xo-interpreter;
     jit                = pkgs.xo-jit;
     pyjit              = pkgs.xo-pyjit;
 
