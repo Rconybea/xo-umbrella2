@@ -122,26 +122,22 @@ namespace xo::pp {
         concept has_present_flag = requires (const F & f) {
             { f.present() } -> std::convertible_to<bool>;
         };
-
-        template <typename F>
-        inline void pretty_struct_field(PpSink & sink, const F & f) {
-            if constexpr (has_present_flag<F>) {
-                if (!f.present())
-                    return;      /* absent: drop the field AND its separator */
-            }
-            sink.split(1);
-            sink.pp(f);
-        }
     } /*namespace detail*/
 
-    /** see PpSink::pretty_struct.
+    /** @brief RAII scope emitting  <Name :f1 v1 :f2 v2>  one field at a time.
+     *
+     *  The single place the struct token stream is produced: pretty_struct()
+     *  is a thin variadic wrapper over this, so the four shape rules below are
+     *  stated once.  Reach for struct_scope directly only when the field count
+     *  is a runtime value -- a loop cannot contribute to a variadic pack.
      *
      *  Emits, in order:
      *      put("<") put(name) begin()
-     *        [ split(1) pp(field) ]*        -- absent fields skipped entirely
-     *      put(">") end()
+     *        [ separator  pp(field) ]*      -- absent fields skipped entirely
+     *      put(">") end()                   -- from the destructor
      *
-     *  Four shape rules, each easy to get subtly wrong:
+     *  Four shape rules, each easy to get subtly wrong (span_pp.hpp and commit
+     *  e07b98b1 each got one wrong):
      *
      *  - put(name) precedes begin(), so the header stays on the opening line
      *    when the group breaks.
@@ -155,19 +151,95 @@ namespace xo::pp {
      *    passing the indent to both double-counts (broken fields land at 2x
      *    the intended column).
      *
-     *  - split(1) before EVERY field including the first, matching legacy,
+     *  - a separator before EVERY field including the first, matching legacy,
      *    which emits " " ahead of each member.  Without it the first field
      *    abuts the name: <Name:f1 v1 ...>.
+     *
+     *  The closing ">" belongs INSIDE the group (before end()), which the
+     *  destructor makes impossible to forget.
+     **/
+    class struct_scope {
+    public:
+        /** @p force_break: separate fields with newline() rather than split(),
+         *  so the struct always renders multi-line even where it would fit.
+         *  A deliberate layout policy; see PpSink::struct_open.
+         **/
+        struct_scope(PpSink & sink, std::string_view name, bool force_break)
+            : sink_{sink}, force_break_{force_break}
+        {
+            sink_.put("<");
+            sink_.put(name);
+            sink_.begin();
+        }
+
+        ~struct_scope() {
+            sink_.put(">");
+            sink_.end();
+        }
+
+        /* holds a PpSink & and owns an emission bracket: neither copyable nor
+         * movable.  struct_open() returns one by value via guaranteed elision.
+         */
+        struct_scope(const struct_scope &) = delete;
+        struct_scope & operator=(const struct_scope &) = delete;
+
+        /** add ":name value"; omitted entirely when @p present is false **/
+        template <typename Value>
+        struct_scope & field(std::string_view name,
+                             const Value & value,
+                             bool present = true)
+        {
+            if (present) {
+                this->separator();
+                /* qualified: `field` is also this member's name */
+                sink_.pp(xo::pp::field(name, value));
+            }
+            return *this;
+        }
+
+        /** add an already-built field-like value (anything renderable); its
+         *  present() is consulted when it has one, as with pretty_struct().
+         **/
+        template <typename F>
+        struct_scope & item(const F & f) {
+            if constexpr (detail::has_present_flag<F>) {
+                if (!f.present())
+                    return *this;   /* absent: drop the field AND its separator */
+            }
+            this->separator();
+            sink_.pp(f);
+            return *this;
+        }
+
+    private:
+        void separator() {
+            if (force_break_)
+                sink_.newline(0);
+            else
+                sink_.split(1, 0);
+        }
+
+    private:
+        PpSink & sink_;
+        /** true: always break between fields, regardless of fit **/
+        bool force_break_ = false;
+    }; /*struct_scope*/
+
+    /** see PpSink::struct_open **/
+    inline struct_scope
+    PpSink::struct_open(std::string_view name, bool force_break) {
+        return struct_scope(*this, name, force_break);
+    }
+
+    /** see PpSink::pretty_struct.  A compile-time field list is just a
+     *  struct_scope that never force-breaks.
      **/
     template <typename... Fields>
     void
     PpSink::pretty_struct(std::string_view name, const Fields &... fields) {
-        this->put("<");
-        this->put(name);
-        this->begin();
-        (detail::pretty_struct_field(*this, fields), ...);
-        this->put(">");
-        this->end();
+        struct_scope st(*this, name, false /*force_break*/);
+
+        (st.item(fields), ...);
     }
 
 } /*namespace xo::pp*/

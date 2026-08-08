@@ -61,6 +61,12 @@ namespace xo::pp {
      *  pretty-printing during implementation of xo-facet itself.
      *  May revisit later.
      **/
+
+    /** RAII scope for a struct with a runtime number of fields; defined in
+     *  pretty_struct.hpp.  Named here so PpSink::struct_open() can return it.
+     **/
+    class struct_scope;
+
     class PpSink {
     public:
         using uint32_t = std::uint32_t;
@@ -110,6 +116,28 @@ namespace xo::pp {
          **/
         template <typename... Fields>
         void pretty_struct(std::string_view name, const Fields &... fields);
+
+        /** open a struct whose fields are added one at a time, for a field
+         *  count that is only known at runtime:
+         *
+         *    {
+         *        auto st = sink.struct_open("stack", stack.size() > 1);
+         *        st.field("size", stack.size());
+         *        for (std::size_t i = 0; i < stack.size(); ++i)
+         *            st.field(tostr("[", i, "]"), stack[i]);
+         *    }   // ">" and end() emitted here
+         *
+         *  pretty_struct() is this with a compile-time field list; reach for
+         *  struct_open() only when a loop contributes fields.
+         *
+         *  @p force_break: separate fields with a forced break rather than an
+         *  optional one, so the struct always renders multi-line even where it
+         *  would fit.  For a deliberate layout policy -- NOT a substitute for
+         *  the sink's own fit decision.
+         *
+         *  See pretty_struct.hpp for implementation.
+         **/
+        struct_scope struct_open(std::string_view name, bool force_break = false);
 
         /** write string comprising contents of @p s **/
         virtual PpSink & put(std::string_view s) = 0;
