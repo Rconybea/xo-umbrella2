@@ -2,12 +2,10 @@
 
 include(CMakeFindDependencyMacro)
 
-# note: changes to find_dependency() calls here
-#       must coordinate with xo_dependency() calls
-#       in xo-process/src/process/CMakeLists.txt
+# find_dependency() calls generated from the xo_dependency() calls in
+# xo-process/src/process/CMakeLists.txt, so the two cannot drift apart.
 #
-find_dependency(reactor)
-find_dependency(printjson)
+@XO_FIND_DEPENDENCY_BLOCK@
 
 include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Targets.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Share.cmake")
