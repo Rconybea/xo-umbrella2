@@ -4,6 +4,10 @@
  */
 
 #include "SDL_events.h"
+/* std::chrono -- was arriving transitively via xo/indentlog/scope.hpp,
+ * which pulled in xo/timeutil.  ppsink's scope.hpp does not.
+ */
+#include <chrono>
 #include "backends/imgui_impl_opengl3.h"
 #include "backends/imgui_impl_sdl2.h"
 #include "imgui.h"
@@ -12,7 +16,10 @@
 #include <xo/alloc/GC.hpp>
 #include <xo/alloc/Object.hpp>
 #include <xo/flatstring/flatstring.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
 #include <xo/randomgen/random_seed.hpp>
 #include <xo/randomgen/xoshiro256.hpp>
 #include <cstddef>
@@ -510,8 +517,8 @@ using xo::gc::GC;
 using xo::gc::GcStatisticsExt;
 using xo::gc::GcStatisticsHistory;
 using xo::gc::GcStatisticsHistoryItem;
-using xo::xtag;
-using xo::scope;
+using xo::pp::xtag;
+using xo::pp::scope;
 using xo::flatstring;
 using std::size_t;
 
@@ -648,7 +655,7 @@ void
 draw_generation(const GenerationLayout & layout,
                 ImDrawList * draw_list)
 {
-    //scope log(XO_DEBUG(with_labels));
+    //scope log(XO_DEBUG_(with_labels));
 
     using xo::gc::generation;
 
@@ -965,7 +972,7 @@ draw_gc_history(const GcStateDescription & gcstate,
                 bool debug_flag,
                 ImDrawList * draw_list)
 {
-    scope log(XO_DEBUG(debug_flag));
+    scope log(XO_DEBUG_(debug_flag));
 
     float lm = 10;
     float tm = 25;
@@ -1146,7 +1153,7 @@ draw_gc_efficiency(const GcStateDescription & gcstate,
                    bool debug_flag,
                    ImDrawList * draw_list)
 {
-    scope log(XO_DEBUG(debug_flag));
+    scope log(XO_DEBUG_(debug_flag));
 
     float lm = 10;
     float tm = 25;
@@ -1690,13 +1697,13 @@ AnimateGcCopyCb::notify_gc_copy(std::size_t z,
                                 generation src_gen,
                                 generation dest_gen)
 {
-    using xo::scope;
-    using xo::xtag;
+    using xo::pp::scope;
+    using xo::pp::xtag;
     using xo::gc::generation_result;
     using xo::gc::generation;
     using xo::gc::role;
 
-    scope log(XO_DEBUG(false),
+    scope log(XO_DEBUG_(false),
               xtag("z", z),
               xtag("src", src_addr),
               xtag("dest", dest_addr),
@@ -1742,7 +1749,7 @@ int main(int, char **)
 {
     using namespace std;
 
-    scope log(XO_DEBUG(true));
+    scope log(XO_DEBUG_(true));
 
     std::cout << "Hello, world!" << std::endl;
 
@@ -1841,7 +1848,7 @@ int main(int, char **)
 
     if (fonts_path) {
         const float font_size = 14.0f;
-        std::string font_path = xo::tostr(fonts_path, "/truetype/DejaVuSans.ttf");
+        std::string font_path = xo::pp::tostr(fonts_path, "/truetype/DejaVuSans.ttf");
 
         /* check file exists */
         std::ifstream font_in(font_path);

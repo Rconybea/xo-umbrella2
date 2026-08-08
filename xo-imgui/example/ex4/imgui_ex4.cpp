@@ -1,9 +1,16 @@
 /* imgui_ex4.cpp */
 
 #include "AppState.hpp"
+/* std::chrono -- was arriving transitively via xo/indentlog/scope.hpp,
+ * which pulled in xo/timeutil.  ppsink's scope.hpp does not.
+ */
+#include <chrono>
 #include "DrawState.hpp"
 #include "xo/imgui/VulkanApp.hpp"
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
 #include <fstream>
 #include <iostream>
 #include <backends/imgui_impl_sdl2.h>
@@ -11,15 +18,15 @@
 
 namespace {
     using xo::gc::generation;
-    using xo::scope;
-    using xo::xtag;
+    using xo::pp::scope;
+    using xo::pp::xtag;
 
 
     void
     app_duty_cycle_top(AppState * p_app_state,
                        DrawState * p_draw_state)
     {
-        scope log(XO_DEBUG(false));
+        scope log(XO_DEBUG_(false));
 
         log && log(xtag("imgui_cx", (void*)ImGui::GetCurrentContext()));
 
@@ -49,7 +56,7 @@ namespace {
              * that callback captures copy details (per object!) in AppState
              */
             if (p_app_state->gc_->enable_gc_once()) {
-                scope log(XO_DEBUG(true));
+                scope log(XO_DEBUG_(true));
 
                 log && log(xtag("gc-type", (p_app_state->upto_ == generation::tenured) ? "full" : "incremental"));
 
@@ -79,7 +86,7 @@ namespace {
 
         return [p_app_state, p_draw_state, p_counter](VulkanApp * vulkan_app, ImGuiContext * imgui_cx)
             {
-                scope log(XO_DEBUG(false));
+                scope log(XO_DEBUG_(false));
 
                 app_duty_cycle_top(p_app_state, p_draw_state);
 
@@ -231,7 +238,7 @@ namespace {
 
     void app_imgui_load_fonts(ImGuiContext * imgui_cx)
     {
-        scope log(XO_DEBUG(false));
+        scope log(XO_DEBUG_(false));
         log && log(xtag("imgui_cx", (void*)ImGui::GetCurrentContext()));
 
         ImGuiIO & io = ImGui::GetIO(); (void)io;
@@ -244,7 +251,7 @@ namespace {
 
         if (fonts_path) {
             const float font_size = 14.0f;
-            std::string font_path = xo::tostr(fonts_path, "/truetype/DejaVuSans.ttf");
+            std::string font_path = xo::pp::tostr(fonts_path, "/truetype/DejaVuSans.ttf");
 
             /* check file exists */
             std::ifstream font_in(font_path);
@@ -284,7 +291,7 @@ namespace {
 int main() {
     printf("Hello world\n");
 
-    scope log(XO_DEBUG(true));
+    scope log(XO_DEBUG_(true));
     log && log("starting main");
 
     AppState app_state;

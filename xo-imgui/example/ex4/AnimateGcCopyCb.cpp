@@ -4,7 +4,9 @@
 /* xo::scope / xo::xtag -- were arriving via xo/alloc/GC.hpp,
  * which is now ppsink-only.
  */
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
 
 void
 AnimateGcCopyCb::notify_gc_copy(std::size_t z,
@@ -13,13 +15,13 @@ AnimateGcCopyCb::notify_gc_copy(std::size_t z,
                                 generation src_gen,
                                 generation dest_gen)
 {
-    using xo::scope;
-    using xo::xtag;
+    using xo::pp::scope;
+    using xo::pp::xtag;
     using xo::gc::generation_result;
     using xo::gc::generation;
     using xo::gc::role;
 
-    scope log(XO_DEBUG(false),
+    scope log(XO_DEBUG_(false),
               xtag("z", z),
               xtag("src", src_addr),
               xtag("dest", dest_addr),

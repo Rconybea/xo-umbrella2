@@ -45,5 +45,6 @@ if (XO_ENABLE_VULKAN)
     #
     target_include_directories(${SELF_LIB} PUBLIC ${IMGUI_INCLUDE_DIR}/imgui)
 
-    xo_dependency(${SELF_LIB} indentlog)
+    # NB no xo-indentlog dep: nothing under src/ or include/ uses it.
+    # (the examples use xo::pp::{scope,xtag} and declare xo_ppsink)
 endif()

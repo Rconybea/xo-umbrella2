@@ -4,12 +4,14 @@
 #include "AnimateGcCopyCb.hpp"
 #include "GcStatistics.hpp"
 #include "xo/imgui/ImScale.hpp"
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
 
 using xo::gc::GcStatisticsHistory;
 using xo::gc::generation;
-using xo::scope;
-using xo::xtag;
+using xo::pp::scope;
+using xo::pp::xtag;
 
 xo::up<xo::gc::GcCopyCallback>
 DrawState::make_gc_copy_animation(AppState * app_state)
@@ -26,7 +28,7 @@ void
 DrawState::draw_generation(const GenerationLayout & layout,
                            ImDrawList * draw_list)
 {
-    //scope log(XO_DEBUG(with_labels));
+    //scope log(XO_DEBUG_(with_labels));
 
     using xo::gc::generation;
 
@@ -414,7 +416,7 @@ DrawState::draw_gc_history(const GcStateDescription & gcstate,
                            bool debug_flag,
                            ImDrawList * draw_list)
 {
-    scope log(XO_DEBUG(debug_flag));
+    scope log(XO_DEBUG_(debug_flag));
 
     if (gc_history.empty())
         return;
@@ -631,7 +633,7 @@ DrawState::draw_gc_efficiency(const GcStateDescription & gcstate,
                               bool debug_flag,
                               ImDrawList * draw_list)
 {
-    scope log(XO_DEBUG(debug_flag));
+    scope log(XO_DEBUG_(debug_flag));
 
     float lm = 10;
     float tm = 25;
