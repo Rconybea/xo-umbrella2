@@ -5,9 +5,13 @@
 #include "print_eigen.hpp"
 #include <xo/reflect/StructReflector.hpp>
 #include <xo/reflect/TaggedPtr.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 #include <ostream>
 #include <string>
+#include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
+#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/pp_time.hpp>      /* Prettifier<utc_nanos>: keeps xo's space-free format */
 
 namespace xo {
     using xo::reflect::Reflect;
@@ -18,13 +22,18 @@ namespace xo {
     using logutil::matrix;
     using logutil::vector;
     //using xo::scope;
-    using xo::xtag;
-    using xo::tostr;
     //using Eigen::LDLT;
     using Eigen::MatrixXd;
     using Eigen::VectorXd;
 
     namespace kalman {
+        /* one scope in from namespace xo: a using-decl at xo scope would be
+         * *ambiguous* with legacy xo::xtag (still visible via headers that
+         * have not migrated) rather than shadowing it.
+         */
+        using xo::pp::tostr;
+        using xo::pp::xtag;
+
         // ----- KalmanFilterState -----
 
         rp<KalmanFilterState>

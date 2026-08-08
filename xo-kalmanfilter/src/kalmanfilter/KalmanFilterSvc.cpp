@@ -4,14 +4,21 @@
 /* xo::scope / xo::xtag -- were arriving via xo-reactor headers,
  * which are now ppsink-only.
  */
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
 
 namespace xo {
   using xo::rp;
-  using xo::scope;
-  using xo::xtag;
 
   namespace kalman {
+        /* one scope in from namespace xo: a using-decl at xo scope would be
+         * *ambiguous* with legacy xo::xtag (still visible via headers that
+         * have not migrated) rather than shadowing it.
+         */
+      using xo::pp::scope;
+      using xo::pp::xtag;
+
     rp<KalmanFilterSvc>
     KalmanFilterSvc::make(KalmanFilterSpec spec)
     {

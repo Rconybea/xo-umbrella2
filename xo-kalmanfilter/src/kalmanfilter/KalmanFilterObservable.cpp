@@ -2,14 +2,21 @@
 
 #include "KalmanFilterObservable.hpp"
 #include "print_eigen.hpp"
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
 
 namespace xo {
-  using xo::scope;
   using logutil::matrix;
-  using xo::xtag;
 
   namespace kalman {
+        /* one scope in from namespace xo: a using-decl at xo scope would be
+         * *ambiguous* with legacy xo::xtag (still visible via headers that
+         * have not migrated) rather than shadowing it.
+         */
+      using xo::pp::scope;
+      using xo::pp::xtag;
+
     KalmanFilterObservable
     KalmanFilterObservable::keep_all(MatrixXd H,
                      MatrixXd R)
@@ -29,7 +36,7 @@ namespace xo {
                                     MatrixXd H,
                                     MatrixXd R)
     {
-        scope log(XO_DEBUG(false /*debug_flag*/));
+        scope log(XO_DEBUG_(false /*debug_flag*/));
 
         /* Hp:
          *   - keep rows in H with indices that appear in keep[]

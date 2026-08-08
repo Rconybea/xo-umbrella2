@@ -5,20 +5,28 @@
 #include "print_eigen.hpp"
 #include <xo/reflect/StructReflector.hpp>
 #include <xo/reflect/TaggedRcptr.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
+#include <xo/ppsink/pp_time.hpp>      /* Prettifier<utc_nanos>: keeps xo's space-free format */
 
 namespace xo {
     using xo::reflect::Reflect;
     using xo::reflect::TaggedRcptr;
     using xo::reflect::StructReflector;
-    using xo::scope;
     using logutil::matrix;
-    using xo::xtag;
     using Eigen::MatrixXd;
     using Eigen::VectorXi;
     using std::uint32_t;
 
     namespace kalman {
+        /* one scope in from namespace xo: a using-decl at xo scope would be
+         * *ambiguous* with legacy xo::xtag (still visible via headers that
+         * have not migrated) rather than shadowing it.
+         */
+        using xo::pp::scope;
+        using xo::pp::xtag;
+
         rp<KalmanFilterInput>
         KalmanFilterInput::make(utc_nanos tkp1,
                                 VectorXb const & presence,
@@ -43,7 +51,7 @@ namespace xo {
         VectorXi
         KalmanFilterInput::make_kept_index() const
         {
-            scope log(XO_DEBUG(false /*!debug_flag*/));
+            scope log(XO_DEBUG_(false /*!debug_flag*/));
 
             log && log(xtag("presence", matrix(presence_)));
 

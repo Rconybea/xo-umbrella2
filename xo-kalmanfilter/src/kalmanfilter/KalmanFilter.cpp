@@ -4,18 +4,27 @@
 #include "Eigen/src/Core/Matrix.h"
 #include "KalmanFilterEngine.hpp"
 #include "print_eigen.hpp"
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
+#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/pp_time.hpp>      /* Prettifier<utc_nanos>: keeps xo's space-free format */
 
 namespace xo {
     using xo::time::utc_nanos;
     //using logutil::matrix;
-    using xo::scope;
-    using xo::tostr;
-    using xo::xtag;
     using Eigen::MatrixXd;
     using Eigen::VectorXd;
 
     namespace kalman {
+        /* one scope in from namespace xo: a using-decl at xo scope would be
+         * *ambiguous* with legacy xo::xtag (still visible via headers that
+         * have not migrated) rather than shadowing it.
+         */
+        using xo::pp::scope;
+        using xo::pp::tostr;
+        using xo::pp::xtag;
+
         // ----- KalmanFilter -----
 
         KalmanFilter::KalmanFilter(KalmanFilterSpec spec)
@@ -26,7 +35,7 @@ namespace xo {
         void
         KalmanFilter::notify_input(rp<KalmanFilterInput> const & input_kp1)
         {
-            scope log(XO_ENTER0(info));
+            scope log(XO_ENTER0_(info));
 
             /* on entry:
              *    .state_ext refers to t(k)

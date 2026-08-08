@@ -3,13 +3,17 @@
 #include "xo/kalmanfilter/KalmanFilter.hpp"
 #include "xo/kalmanfilter/KalmanFilterEngine.hpp"
 #include "xo/kalmanfilter/print_eigen.hpp"
-#include <xo/indentlog/log_level.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/log_level.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 #include <xo/statistics/SampleStatistics.hpp>
 #include <xo/randomgen/normalgen.hpp>
 #include <xo/randomgen/xoshiro256.hpp>
 #include <catch2/catch.hpp>
 #include <fstream>
+#include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
+#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/pp_time.hpp>      /* Prettifier<utc_nanos>: keeps xo's space-free format */
 
 namespace xo {
     using xo::kalman::KalmanFilterSpec;
@@ -27,13 +31,20 @@ namespace xo {
     using xo::time::utc_nanos;
     using xo::time::seconds;
     using xo::rp;
-    using xo::log_level;
     using logutil::matrix;
-    using xo::print::ccs;
-    using Eigen::MatrixXd;
+        using Eigen::MatrixXd;
     using Eigen::VectorXd;
 
     namespace ut {
+        /* one scope in from namespace xo: a using-decl at xo scope would be
+         * *ambiguous* with legacy xo::xtag (still visible via headers that
+         * have not migrated) rather than shadowing it.
+         */
+        using xo::pp::log_level;
+        using xo::pp::scope;
+        using xo::pp::tostr;
+        using xo::pp::xtag;
+
         namespace {
             /* step for kalman filter with:
              * - single state variable x[0]
@@ -505,7 +516,7 @@ namespace xo {
              */
 
             constexpr bool c_debug_enabled = false;
-            scope lscope(XO_DEBUG2(c_debug_enabled, "TEST(kalman_revert)"));
+            scope lscope(XO_DEBUG2_(c_debug_enabled, "TEST(kalman_revert)"));
 
             /* seed for rng */
             uint64_t seed = 14950139742636922572UL;
@@ -632,7 +643,7 @@ namespace xo {
                      self_test_name.c_str(),
                      self_test_name.c_str());
 
-            INFO(tostr(self_test_name, xtag("cmd", ccs(cmd_buf))));
+            INFO(tostr(self_test_name, xtag("cmd", (cmd_buf))));
 
             std::int32_t err = ::system(cmd_buf);
 

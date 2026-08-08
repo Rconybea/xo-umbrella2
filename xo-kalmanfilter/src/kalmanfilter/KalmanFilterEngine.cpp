@@ -5,18 +5,27 @@
 #include "KalmanFilterEngine.hpp"
 #include "Eigen/src/Core/Matrix.h"
 #include "print_eigen.hpp"
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
+#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/pp_time.hpp>      /* Prettifier<utc_nanos>: keeps xo's space-free format */
 
 namespace xo {
     using xo::time::utc_nanos;
     using logutil::matrix;
-    using xo::scope;
-    using xo::xtag;
     using Eigen::LDLT;
     using Eigen::MatrixXd;
     using Eigen::VectorXd;
 
     namespace kalman {
+        /* one scope in from namespace xo: a using-decl at xo scope would be
+         * *ambiguous* with legacy xo::xtag (still visible via headers that
+         * have not migrated) rather than shadowing it.
+         */
+        using xo::pp::scope;
+        using xo::pp::xtag;
+
         // ----- KalmanFilterEngine -----
 
         rp<KalmanFilterState>
@@ -36,7 +45,7 @@ namespace xo {
             MatrixXd const & Q = f.transition_cov();
 
             if(F.cols() != x.rows()) {
-                scope log(XO_DEBUG(true /*debug_flag*/));
+                scope log(XO_DEBUG_(true /*debug_flag*/));
 
                 log("error: F*x: expected F.cols=x.rows",
                     xtag("F.cols", F.cols()), xtag("x.rows", x.rows()));
@@ -66,7 +75,7 @@ namespace xo {
         {
             constexpr bool c_debug_enabled = false;
 
-            scope log(XO_DEBUG(c_debug_enabled));
+            scope log(XO_DEBUG_(c_debug_enabled));
 
             /* P(k+1|k) :: [n x n] */
             MatrixXd const & P_ext = skp1_ext->state_cov();
@@ -113,7 +122,7 @@ namespace xo {
         KalmanFilterEngine::kalman_gain(rp<KalmanFilterState> const & skp1_ext,
                                         KalmanFilterObservable const & h)
         {
-            scope log(XO_DEBUG(false /*debug_enabled*/));
+            scope log(XO_DEBUG_(false /*debug_enabled*/));
 
             /* P(k+1|k) */
             MatrixXd const & P_ext = skp1_ext->state_cov();

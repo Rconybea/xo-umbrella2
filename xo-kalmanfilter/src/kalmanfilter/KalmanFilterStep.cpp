@@ -3,16 +3,24 @@
 #include "KalmanFilterStep.hpp"
 #include "KalmanFilterEngine.hpp"
 #include "KalmanFilterState.hpp"
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
+#include <xo/ppsink/tostr.hpp>
 
 namespace xo {
-    using xo::scope;
-    using xo::tostr;
-    using xo::xtag;
     using Eigen::MatrixXd;
     using Eigen::VectorXd;
 
     namespace kalman {
+        /* one scope in from namespace xo: a using-decl at xo scope would be
+         * *ambiguous* with legacy xo::xtag (still visible via headers that
+         * have not migrated) rather than shadowing it.
+         */
+        using xo::pp::scope;
+        using xo::pp::tostr;
+        using xo::pp::xtag;
+
         rp<KalmanFilterState>
         KalmanFilterStep::extrapolate() const
         {

@@ -3,14 +3,21 @@
 #include "KalmanFilterTransition.hpp"
 #include "print_eigen.hpp"
 #include <xo/reflect/StructReflector.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
 
 namespace xo {
     using xo::reflect::StructReflector;
     using logutil::matrix;
-    using xo::xtag;
 
     namespace kalman {
+        /* one scope in from namespace xo: a using-decl at xo scope would be
+         * *ambiguous* with legacy xo::xtag (still visible via headers that
+         * have not migrated) rather than shadowing it.
+         */
+        using xo::pp::xtag;
+
         void
         KalmanFilterTransition::reflect_self()
         {
