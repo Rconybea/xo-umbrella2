@@ -2,11 +2,13 @@
 
 #include "xo/process/init_process.hpp"
 #include <xo/reflect/Reflect.hpp>
-#include <xo/indentlog/scope.hpp>   /* scope -- was arriving via xo/reflect */
+#include <xo/ppsink/scope.hpp>   /* scope -- was arriving via xo/reflect */
+#include <xo/ppsink/scope_macros.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {
     using xo::reflect::TypeDescrBase;
+    using xo::pp::scope;
 
     namespace ut {
         static InitEvidence s_init = (InitSubsys<S_process_tag>::require());
@@ -17,7 +19,7 @@ namespace xo {
             char const * c_self = "TEST_CASE:process-reflect";
             constexpr bool c_logging_enabled = true;
 
-            scope log(XO_DEBUG2(c_logging_enabled, c_self));
+            scope log(XO_DEBUG2_(c_logging_enabled, c_self));
 
             // this ought to work but doesn't (too much output?)...
             //log && log(xo::reflect::reflected_types_printer());

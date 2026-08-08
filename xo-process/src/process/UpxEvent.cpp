@@ -2,13 +2,15 @@
 
 #include "UpxEvent.hpp"
 #include <xo/reflect/StructReflector.hpp>
-#include <xo/indentlog/print/tag.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
 
 namespace xo {
     using xo::reflect::StructReflector;
-    using xo::tostr;
-    using xo::xtag;
+    using xo::pp::tostr;
+    using xo::pp::xtag;
 
     namespace process {
         UpxEvent::UpxEvent() = default;

@@ -10,13 +10,9 @@ xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 $
 # ----------------------------------------------------------------
 # external dependencies
 
-# note: changes to xo_dependency() calls here
-#       must coordinate with find_dependency() calls
-#       in xo-process/cmake/processConfig.cmake.in
-#
 xo_dependency(${SELF_LIB} reactor)
 xo_dependency(${SELF_LIB} printjson)
-# BrownianMotion.cpp / ExpProcess.cpp include <xo/indentlog/scope.hpp>.
-# Declared explicitly: xo-reactor and xo-printjson no longer propagate it.
-xo_dependency(${SELF_LIB} indentlog)
+# RealizationSource.hpp / RealizationCallback.hpp name xo::pp:: in public
+# headers, so this is PUBLIC.
+xo_dependency(${SELF_LIB} xo_ppsink)
 #xo_dependency(${SELF_LIB} callback)

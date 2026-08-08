@@ -5,8 +5,8 @@
 #include "xo/process/BrownianMotion.hpp"
 #include "xo/process/LogNormalProcess.hpp"
 #include <xo/simulator/Simulator.hpp>
-#include <xo/indentlog/print/printer.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 #include <xo/timeutil/timeutil_iostream.hpp>
 #include <xo/randomgen/xoshiro256.hpp>
 #include <catch2/catch.hpp>
@@ -26,9 +26,8 @@ namespace xo {
   using xo::time::timeutil;
   using xo::time::seconds;
   using xo::time::utc_nanos;
-  //using xo::print::printer;
-  using xo::scope;
-  using xo::xtag;
+  using xo::pp::scope;
+  using xo::pp::xtag;
   using std::chrono::hours;
   using std::chrono::minutes;
 
@@ -84,7 +83,7 @@ namespace xo {
 
           constexpr bool c_logging_enabled = false;
 
-          scope log(XO_DEBUG2(c_logging_enabled, c_self));
+          scope log(XO_DEBUG2_(c_logging_enabled, c_self));
 
           /* arbitrary 'starting time' */
           utc_nanos t0 = timeutil::ymd_hms_usec(20220610 /*ymd*/,
@@ -168,7 +167,7 @@ namespace xo {
           constexpr char const * c_self = "TEST_CASE:sim-brownian-motion-with-sink";
           constexpr bool c_logging_enabled = false;
 
-          scope log(XO_DEBUG2(c_logging_enabled, c_self));
+          scope log(XO_DEBUG2_(c_logging_enabled, c_self));
 
           utc_nanos t0 = timeutil::ymd_hms_usec(20220718 /*ymd*/,
                                                 120000 /*hms*/,
@@ -196,10 +195,7 @@ namespace xo {
           constexpr char const * c_self = "TEST_CASE:sim-lognormal";
           constexpr bool c_logging_enabled = false;
 
-          /* legacy XO_LITERAL wants the legacy log_level; set_loglevel() above
-           * wants xo::pp::log_level, since that is Reactor's API type now.
-           */
-          scope log(XO_LITERAL(log_level::never, c_self, ""));
+          scope log(XO_LITERAL_(never, c_self, ""));
 
           /* arbitrary 'starting time' */
           utc_nanos t0 = timeutil::ymd_hms_usec(20220610 /*ymd*/,

@@ -1,15 +1,16 @@
 /* @file BrownianMotion.cpp */
 
 #include <xo/reflect/TaggedPtr.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 // #include "time/Time.hpp"
 #include "BrownianMotion.hpp"
 #include <cmath>
 
 namespace xo {
     using xo::time::utc_nanos;
-    using xo::scope;
-    using xo::xtag;
+    using xo::pp::scope;
+    using xo::pp::xtag;
 
     namespace process {
         double
@@ -32,7 +33,7 @@ namespace xo {
         {
             constexpr bool c_logging_enabled = false;
 
-            scope log(XO_DEBUG(c_logging_enabled));
+            scope log(XO_DEBUG_(c_logging_enabled));
 
             /* sample brownian motion starting at t0;
              * offset by lo.second

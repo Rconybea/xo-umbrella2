@@ -5,7 +5,10 @@
 #include "RealizationCallback.hpp"
 #include "RealizationTracer.hpp"
 #include <xo/reactor/ReactorSource.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+/* display() streams tags to an ostream */
+#include <xo/ppsink/tag_ostream.hpp>
 #include <xo/callback/CallbackSet.hpp>
 #include <functional>
 
@@ -34,9 +37,9 @@ namespace xo {
                 //constexpr char const * c_self = "RealizationSimSource<>::dtor";
                 constexpr bool c_logging_enabled = false;
 
-                scope log(XO_DEBUG(c_logging_enabled),
-                          "delete instance",
-                          xtag("p", this));
+                xo::pp::scope log(XO_DEBUG_(c_logging_enabled),
+                                  "delete instance",
+                                  xo::pp::xtag("p", this));
             } /*dtor*/
 
             static rp<RealizationSourceBase>
@@ -44,17 +47,15 @@ namespace xo {
                  nanos ev_interval_dt,
                  EventSink const & ev_sink)
                 {
-                    using xo::scope;
-                    using xo::xtag;
 
                     constexpr bool c_logging_enabled = false;
 
                     auto p = new RealizationSourceBase(tracer, ev_interval_dt, ev_sink);
 
-                    scope log(XO_DEBUG(c_logging_enabled),
-                              "create instance",
-                              xtag("p", p),
-                              xtag("bytes", sizeof(RealizationSourceBase)));
+                    xo::pp::scope log(XO_DEBUG_(c_logging_enabled),
+                                      "create instance",
+                                      xo::pp::xtag("p", p),
+                                      xo::pp::xtag("bytes", sizeof(RealizationSourceBase)));
 
                     return p;
                 } /*make*/
@@ -154,12 +155,11 @@ namespace xo {
             }
 
             virtual void display(std::ostream & os) const override {
-                using xo::xtag;
 
                 os << "<RealizationSourceBase"
-                   << xtag("name", this->name())
-                   << xtag("n_out_ev", this->n_out_ev())
-                    //<< xtag("ev_interval_dt", ev_interval_dt_)
+                   << xo::pp::xtag("name", this->name())
+                   << xo::pp::xtag("n_out_ev", this->n_out_ev())
+                    //<< xo::pp::xtag("ev_interval_dt", ev_interval_dt_)
                    << ">";
             } /*display*/
 
@@ -263,7 +263,7 @@ namespace xo {
                     = "RealizationSource::attach_sink";
 
                 //scope lscope(c_self_name);
-                //lscope.log(xtag("T", reflect::type_name<T>()));
+                //lscope.log(xo::pp::xtag("T", reflect::type_name<T>()));
 
                 rp<reactor::Sink1<EventType>> event_sink
                     = reactor::Sink1<EventType>::require_native(c_self_name, sink);
@@ -278,12 +278,11 @@ namespace xo {
             } /*detach_sink*/
 
             virtual void display(std::ostream & os) const override {
-                using xo::xtag;
 
                 os << "<RealizationSource"
-                   << xtag("name", this->name())
-                   << xtag("n_out_ev", this->n_out_ev())
-                    //<< xtag("ev_interval_dt", this->ev_interval_dt())
+                   << xo::pp::xtag("name", this->name())
+                   << xo::pp::xtag("n_out_ev", this->n_out_ev())
+                    //<< xo::pp::xtag("ev_interval_dt", this->ev_interval_dt())
                    << ">";
             } /*display*/
 

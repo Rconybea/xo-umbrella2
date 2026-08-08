@@ -3,7 +3,7 @@
 #pragma once
 
 #include <xo/reactor/Sink.hpp>
-#include <xo/indentlog/print/pair.hpp>
+#include <xo/ppsink/pretty_pair.hpp>
 #include <xo/timeutil/timeutil.hpp>
 // #include "time/Time.hpp"
 #include <utility>
