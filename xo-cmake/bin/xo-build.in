@@ -31,6 +31,13 @@ Options:
   -h | --help             this help message
   --list                  list known xo libraries
   -n | --dry-run          dry-run: don't actually invoke state-changing commands
+  -q | --quiet            quiet on success, loud on failure.  Buffers each
+                          phase's output and prints one line per subsystem;
+                          on failure prints everything that was buffered and
+                          exits non-zero.  Never hides an error -- unlike
+                          redirecting to /dev/null, which also discards the
+                          diagnostics and makes a failed build look identical
+                          to a successful one.
   --xoname=NAME           operate on xo subsystem NAME
   --all                   operate on every subsystem from --list, in dependency
                           order (bottom-up), excluding the xo-cmake bootstrap.
@@ -79,6 +86,7 @@ EOF
 
 cmd=
 noop_flag=0
+quiet_flag=0
 xoname=
 clone_flag=0
 configure_flag=0
@@ -115,6 +123,9 @@ while [[ $# > 0 ]]; do
             ;;
         -n | --dry-run)
             noop_flag=1
+            ;;
+        -q | --quiet)
+            quiet_flag=1
             ;;
         -S)
             shift
@@ -356,8 +367,54 @@ if [[ ${#xonames[@]} -eq 0 ]]; then
     xonames=("")
 fi
 
+# ----------------------------------------------------------------
+# run one phase, honouring --quiet.
+#
+# Quiet means QUIET ON SUCCESS, LOUD ON FAILURE: buffer the phase's output and
+# discard it only if the phase succeeded.  The contract matters more than the
+# noise reduction -- the obvious alternative,
+#
+#     xo-build ... >/dev/null 2>&1
+#
+# also discards the diagnostics, so a failing build is indistinguishable from a
+# passing one unless the caller separately checks $?.  If the caller then runs
+# ctest, it silently tests the PREVIOUS binary.  That has actually happened
+# (see .xo-backlog/xo-cmake/issues/01-xo-build-quiet-flag.md).
+#
+# Deliberately buffers rather than filtering cmake's output: a filter has to
+# know every shape of error message, and anything it fails to match disappears.
+#
+run_phase() {
+    local label="$1"; shift
+
+    if [[ ${quiet_flag} -eq 0 ]]; then
+        "$@"
+        return
+    fi
+
+    local log rc
+    log=$(mktemp "${TMPDIR:-/tmp}/xo-build-XXXXXX")
+
+    set +e
+    "$@" > "${log}" 2>&1
+    rc=$?
+    set -e
+
+    if [[ ${rc} -ne 0 ]]; then
+        >&2 echo "xo-build: ${label} FAILED for [${xoname:-.}] (exit ${rc}); output follows:"
+        >&2 cat "${log}"
+        rm -f "${log}"
+        exit ${rc}
+    fi
+
+    rm -f "${log}"
+}
+
 # --- per-subsystem operations (loop body is intentionally left un-indented) ---
 for xoname in "${xonames[@]}"; do
+
+# ops actually performed for this subsystem, for the --quiet summary line
+phases_done=()
 
 if [[ -n "$orig_pathtosource" ]]; then
     pathtosource="$orig_pathtosource"
@@ -511,7 +568,8 @@ cd ${cwd} && ${cmd}
 EOF
             chmod +rx ${rebootcmake}
 
-            $cmd
+            run_phase configure $cmd
+            phases_done+=(configure)
         fi
     fi
 fi
@@ -523,7 +581,8 @@ if [[ $build_flag -eq 1 ]]; then
         if [[ $noop_flag -eq 1 ]]; then
             echo $cmd
         else
-            $cmd
+            run_phase build $cmd
+            phases_done+=(build)
         fi
     fi
 fi
@@ -552,11 +611,24 @@ if [[ $utest_flag -eq 1 ]]; then
             # whereas --output-on-failure prints each failed test's output (e.g.
             # the Catch2 assertion detail).  Preserve the failing exit status so
             # the build still fails.
-            if ! $cmd; then
+            # quiet buffers the pass/fail summary; the rerun below is the
+            # interesting output and always goes to the terminal.
+            utest_rc=0
+            if [[ ${quiet_flag} -eq 1 ]]; then
+                utest_log=$(mktemp "${TMPDIR:-/tmp}/xo-build-utest-XXXXXX")
+                set +e; $cmd > "${utest_log}" 2>&1; utest_rc=$?; set -e
+                [[ ${utest_rc} -ne 0 ]] && cat "${utest_log}" 1>&2
+                rm -f "${utest_log}"
+            else
+                set +e; $cmd; utest_rc=$?; set -e
+            fi
+
+            if [[ ${utest_rc} -ne 0 ]]; then
                 echo "xo-build: unit tests failed -- re-running failures with --rerun-failed --output-on-failure" 1>&2
                 ctest --test-dir "$pathtobuild" --rerun-failed --output-on-failure || true
                 exit 1
             fi
+            phases_done+=(utest)
         fi
     fi
 fi
@@ -568,7 +640,8 @@ if [[ $install_flag -eq 1 ]]; then
         if [[ $noop_flag -eq 1 ]]; then
             echo $cmd
         else
-            $cmd
+            run_phase install $cmd
+            phases_done+=(install)
         fi
     fi
 fi
@@ -579,6 +652,13 @@ if [[ $realclean_flag -eq 1 ]]; then
     else
         rm -rf "${pathtobuild}"
     fi
+fi
+
+# --quiet: one line per subsystem, so a long --all run still shows progress.
+# Reaching here at all means every phase succeeded -- run_phase exits on the
+# first failure.
+if [[ ${quiet_flag} -eq 1 && ${#phases_done[@]} -gt 0 ]]; then
+    echo "xo-build: ${xoname:-.} ok (${phases_done[*]})"
 fi
 
 done
