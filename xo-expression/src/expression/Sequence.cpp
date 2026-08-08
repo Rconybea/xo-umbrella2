@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <xo/ppsink/tag_ostream.hpp>
 #include <xo/ppsink/pretty_struct.hpp>
+#include <xo/ppsink/concat.hpp>
 
 namespace xo {
     using xo::pp::field;
@@ -70,9 +71,7 @@ namespace xo {
             os << "<Sequence";
             std::size_t i = 0;
             for (const auto & x : expr_v_) {
-                std::string i_str = tostr("[", i, "]");
-
-                os << xtag(i_str.c_str(), x);
+                os << xtag(xo::pp::concat("[", i, "]"), x);
                 ++i;
             }
 
@@ -86,7 +85,7 @@ namespace xo {
 
             std::size_t i = 0;
             for (const auto & expr_i : expr_v_) {
-                st.field("[" + std::to_string(i) + "]", expr_i);
+                st.field(xo::pp::concat("[", i, "]"), expr_i);
                 ++i;
             }
         }

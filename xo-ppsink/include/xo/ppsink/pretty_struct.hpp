@@ -63,18 +63,22 @@ namespace xo::pp {
      *  through pretty(), and only *consults* present() when the field type has
      *  one.  So tag("k", v) is a perfectly good field when a copy is wanted.
      **/
-    template <typename Value>
+    template <typename Name, typename Value>
     class field_impl {
     public:
-        field_impl(std::string_view name, const Value & value, bool present)
-            : name_{name}, value_{&value}, present_{present} {}
+        field_impl(const Name & name, const Value & value, bool present)
+            : name_{&name}, value_{&value}, present_{present} {}
 
-        std::string_view name() const { return name_; }
+        const Name & name() const { return *name_; }
         const Value & value() const { return *value_; }
         bool present() const { return present_; }
 
     private:
-        std::string_view name_;
+        /** @p Name is usually a string literal or std::string_view, but any
+         *  renderable will do -- notably concat() (concat.hpp), which composes
+         *  a label without building a std::string for it.
+         **/
+        const Name * name_;
         const Value * value_;
         bool present_ = true;
     };
@@ -83,25 +87,29 @@ namespace xo::pp {
      *  (see field_impl for the lifetime rule).  Omitted from the output
      *  entirely when @p present is false.
      **/
-    template <typename Value>
-    field_impl<Value>
-    field(std::string_view name, const Value & value, bool present = true) {
-        return field_impl<Value>(name, value, present);
+    template <typename Name, typename Value>
+    field_impl<Name, Value>
+    field(const Name & name, const Value & value, bool present = true) {
+        return field_impl<Name, Value>(name, value, present);
     }
 
     /** render ":name value" -- same shape as Prettifier<tag_impl>, without the
      *  copy, and without tag's optional leading space (pretty_struct emits the
      *  separator itself).
      **/
-    template <typename Value>
-    struct Prettifier<field_impl<Value>> {
-        static void print(PpSink & sink, const field_impl<Value> & f) {
+    template <typename Name, typename Value>
+    struct Prettifier<field_impl<Name, Value>> {
+        static void print(PpSink & sink, const field_impl<Name, Value> & f) {
             sink.begin(0);
             {
                 /* color just the ":name" (value keeps its own color/structure) */
                 color_guard g(sink, tag_config::tag_color);
                 sink.put(":");
-                sink.put(f.name());
+                /* pp(), not put(): a name may be any renderable (e.g. concat).
+                 * For a string_view or literal this is the same string-like
+                 * leaf that put() would have taken.
+                 */
+                sink.pp(f.name());
             }
             sink.split(1, tag_config::value_offset);
             sink.pp(f.value());
@@ -184,8 +192,8 @@ namespace xo::pp {
         struct_scope & operator=(const struct_scope &) = delete;
 
         /** add ":name value"; omitted entirely when @p present is false **/
-        template <typename Value>
-        struct_scope & field(std::string_view name,
+        template <typename Name, typename Value>
+        struct_scope & field(const Name & name,
                              const Value & value,
                              bool present = true)
         {

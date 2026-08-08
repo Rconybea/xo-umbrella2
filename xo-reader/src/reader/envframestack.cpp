@@ -11,6 +11,7 @@
 #include <xo/ppsink/tag_ostream.hpp>
 #include <xo/ppsink/tostr.hpp>
 #include <xo/ppsink/pretty_struct.hpp>
+#include <xo/ppsink/concat.hpp>
 
 namespace xo {
     using xo::pp::field;
@@ -117,7 +118,7 @@ namespace xo {
             st.field("size", z);
 
             for (std::size_t i = 0; i < z; ++i)
-                st.field(xo::pp::tostr("[", z-i-1, "]"), stack_[i]);
+                st.field(xo::pp::concat("[", z-i-1, "]"), stack_[i]);
         }
     } /*namespace scm*/
 } /*namespace xo*/

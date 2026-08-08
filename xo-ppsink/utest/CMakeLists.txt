@@ -12,6 +12,7 @@ set(SELF_SOURCE_FILES
     pad.test.cpp
     pp_time.test.cpp
     struct_scope.test.cpp
+    concat.test.cpp
     pretty_struct.test.cpp
     tag_ostream.test.cpp
     tostr.test.cpp

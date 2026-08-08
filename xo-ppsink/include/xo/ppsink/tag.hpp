@@ -103,7 +103,11 @@ namespace xo::pp {
                 /* color just the ":name" (value keeps its own color/structure) */
                 color_guard g(sink, tag_config::tag_color);
                 sink.put(":");
-                sink.put(t.name());
+                /* pp(), not put(): a name may be any renderable (e.g. concat,
+                 * concat.hpp).  For a string-like name this is the same
+                 * string-like leaf that put() would have taken.
+                 */
+                sink.pp(t.name());
             }
             sink.split(1, tag_config::value_offset);   /* 1 space if it fits; newline + value_offset indent if not */
             sink.pp(t.value());

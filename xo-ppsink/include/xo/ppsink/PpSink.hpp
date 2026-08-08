@@ -124,7 +124,7 @@ namespace xo::pp {
          *        auto st = sink.struct_open("stack", stack.size() > 1);
          *        st.field("size", stack.size());
          *        for (std::size_t i = 0; i < stack.size(); ++i)
-         *            st.field(tostr("[", i, "]"), stack[i]);
+         *            st.field(concat("[", i, "]"), stack[i]);
          *    }   // ">" and end() emitted here
          *
          *  pretty_struct() is this with a compile-time field list; reach for
