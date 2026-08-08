@@ -62,7 +62,6 @@ if (XO_ENABLE_EXAMPLES)
         #
         target_include_directories(${SELF_EXE} PUBLIC ${IMGUI_INCLUDE_DIR}/imgui)
 
-        xo_self_dependency(${SELF_EXE} xo_imgui)
         xo_dependency(${SELF_EXE} xo_object)
         xo_dependency(${SELF_EXE} randomgen)
         xo_dependency(${SELF_EXE} xo_flatstring)

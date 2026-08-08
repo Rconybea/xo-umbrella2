@@ -28,7 +28,6 @@ if (XO_ENABLE_EXAMPLES)
                     ${IMGUI_INCLUDE_DIR}/imgui/backends/imgui_impl_opengl3.cpp
         )
         xo_include_options2(${SELF_EXE})
-        xo_self_dependency(${SELF_EXE} xo_imgui)
 
         # OpenGL dependency
 
