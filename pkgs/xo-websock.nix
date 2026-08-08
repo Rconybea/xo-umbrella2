@@ -4,7 +4,9 @@
 
   # xo dependencies
   xo-cmake,
+  xo-webutil,
 
+  xo-ppsink,
   xo-reactor,
 
 } :
@@ -21,6 +23,8 @@ stdenv.mkDerivation (finalattrs:
       cmake catch2 xo-cmake
     ];
     propagatedBuildInputs = [
+      xo-webutil
+      xo-ppsink
       libwebsockets
       jsoncpp
 

@@ -4,6 +4,7 @@
 
   # xo dependencies
   xo-cmake, xo-pyutil, xo-jit,
+  xo-refcnt,
 
   xo-pyexpression,
 
@@ -31,7 +32,8 @@ stdenv.mkDerivation (finalattrs:
     cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake"];
     doCheck = true;
     nativeBuildInputs = [ cmake catch2 xo-cmake ];
-    propagatedBuildInputs = [ xo-pyutil
+    propagatedBuildInputs = [
+                              xo-refcnt xo-pyutil
                               #xo-pyreflect
                               xo-pyexpression
                               xo-jit ];

@@ -6,6 +6,7 @@
 
   # xo dependencies
   xo-cmake,
+  xo-pyutil,
   #xo-refcnt,
   xo-websock,
 
@@ -23,6 +24,7 @@ stdenv.mkDerivation (finalattrs:
     #doCheck = true;
     nativeBuildInputs = [ cmake catch2 xo-cmake ];
     propagatedBuildInputs = [
+xo-pyutil
 #      xo-printjson
       xo-pywebutil
       xo-pyreflect

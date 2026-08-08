@@ -4,6 +4,7 @@
 
   # xo dependencies
   xo-cmake,
+  xo-reflectutil,
   xo-arena,
 } :
 
@@ -21,6 +22,7 @@ stdenv.mkDerivation (finalattrs:
       cmake catch2 xo-cmake
     ];
     propagatedBuildInputs = [
+      xo-reflectutil
       xo-arena
     ];
   })

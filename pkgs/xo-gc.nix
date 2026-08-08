@@ -14,6 +14,7 @@
   xo-randomgen,
   xo-subsys,
   xo-cmake,
+  xo-indentlog,
 
   buildDocs ? false,
   doCheck ? true,
@@ -52,6 +53,7 @@ stdenv.mkDerivation (finalattrs:
       python3Packages.pillow
     ];
     propagatedBuildInputs = [
+      xo-indentlog
       xo-alloc2
       xo-facet
       xo-subsys

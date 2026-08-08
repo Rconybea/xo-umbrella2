@@ -10,6 +10,7 @@
   xo-facet,
   xo-subsys,
   xo-cmake,
+  xo-indentlog,
   doCheck ? true,
 } :
 
@@ -29,6 +30,7 @@ stdenv.mkDerivation (finalattrs:
       xo-cmake
     ];
     propagatedBuildInputs = [
+      xo-indentlog
       xo-reflect
       xo-alloc2
       xo-stringtable2

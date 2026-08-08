@@ -4,6 +4,7 @@
 
   # xo dependencies
   xo-cmake,
+  xo-ppsink,
 #  xo-refcnt,
   xo-reflect,
     #, xo-indentlog,
@@ -24,6 +25,7 @@ stdenv.mkDerivation (finalattrs:
       cmake catch2 xo-cmake
     ];
     propagatedBuildInputs = [
+xo-ppsink
 #      xo-refcnt
       xo-reflect
 #      xo-indentlog

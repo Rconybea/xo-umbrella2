@@ -6,6 +6,7 @@
 
   # xo dependencies
   xo-cmake,
+  xo-indentlog,
 
   xo-reactor,
   #xo-webutil,
@@ -44,6 +45,7 @@ stdenv.mkDerivation (finalattrs:
     doCheck = true;
 
     propagatedBuildInputs = [
+xo-indentlog
 #      xo-refcnt
 #      xo-pyutil
       xo-pyprintjson

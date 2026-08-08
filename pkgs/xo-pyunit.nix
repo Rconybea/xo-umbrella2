@@ -4,6 +4,8 @@
 
   # xo dependencies
   xo-cmake, #xo-refcnt,
+  xo-refcnt,
+  xo-ppsink,
   xo-pyutil, #xo-reflect,
   xo-unit,
 
@@ -32,6 +34,8 @@ stdenv.mkDerivation (finalattrs:
     doCheck = true;
     nativeBuildInputs = [ cmake catch2 xo-cmake ];
     propagatedBuildInputs = [
+      xo-refcnt
+      xo-ppsink
       #xo-refcnt
       xo-pyutil
       #xo-reflect

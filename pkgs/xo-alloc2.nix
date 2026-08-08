@@ -16,6 +16,7 @@
   xo-indentlog2,
   xo-cmake,
 
+  xo-ppsink,
   buildDocs ? false,
   doCheck ? true,
 } :
@@ -56,6 +57,7 @@ stdenv.mkDerivation (finalattrs:
       python3Packages.pillow
     ];
     propagatedBuildInputs = [
+      xo-ppsink
       xo-arena
       xo-facet
       xo-subsys

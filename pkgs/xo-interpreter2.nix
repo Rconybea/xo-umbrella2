@@ -6,6 +6,7 @@
   xo-reader2,
   xo-gc,
   xo-cmake,
+  xo-indentlog2,
 
   # config arguments
   doCheck ? true
@@ -27,6 +28,7 @@ stdenv.mkDerivation (finalattrs :
       xo-cmake
     ];
     propagatedBuildInputs = [
+      xo-indentlog2
       xo-reader2
       xo-gc
     ];

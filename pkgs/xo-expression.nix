@@ -4,6 +4,10 @@
 
   xo-cmake, xo-reflect, xo-flatstring,
 
+  xo-indentlog,
+
+  xo-refcnt,
+
   buildDocs ? false,
   buildExamples ? false,
   doCheck ? true,
@@ -25,7 +29,9 @@ stdenv.mkDerivation (finalattrs:
 
     inherit doCheck;
 
-    propagatedBuildInputs = [ xo-reflect
+    propagatedBuildInputs = [
+                              xo-indentlog
+                              xo-refcnt xo-reflect
                               xo-flatstring
                             ];
     nativeBuildInputs = [ cmake

@@ -12,9 +12,10 @@
   xo-alloc,
   xo-randomgen,
   xo-cmake,
+  xo-ppsink,
 #  xo-printjson,
 #  xo-ordinaltree,
-  xo-indentlog,
+
   doCheck ? true,
 } :
 
@@ -35,6 +36,7 @@ stdenv.mkDerivation (finalattrs:
       xo-cmake
     ];
     propagatedBuildInputs = [
+      xo-ppsink
       xo-callback
       xo-unit
       xo-refcnt
@@ -44,6 +46,5 @@ stdenv.mkDerivation (finalattrs:
 #      xo-ordinaltree
       xo-alloc
       xo-reflectutil
-      xo-indentlog
     ];
   })

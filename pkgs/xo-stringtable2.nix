@@ -7,6 +7,8 @@
   xo-printable2,
   xo-arena,
   xo-cmake,
+  xo-indentlog,
+  xo-subsys,
 } :
 
 stdenv.mkDerivation (finalattrs:
@@ -23,6 +25,8 @@ stdenv.mkDerivation (finalattrs:
       cmake catch2 xo-cmake
     ];
     propagatedBuildInputs = [
+      xo-indentlog
+      xo-subsys
       xo-alloc2
       xo-printable2
       xo-arena

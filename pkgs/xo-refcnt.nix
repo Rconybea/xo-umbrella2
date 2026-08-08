@@ -5,7 +5,7 @@
   # xo dependencies
   xo-reflectutil,
   xo-ppsink,
-  xo-indentlog,
+
   xo-cmake,
 
   doCheck ? true,
@@ -26,7 +26,6 @@ stdenv.mkDerivation (finalattrs:
     propagatedBuildInputs = [
       xo-reflectutil
       xo-ppsink
-      xo-indentlog
     ];
     nativeBuildInputs = [
       cmake

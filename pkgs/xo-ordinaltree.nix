@@ -8,6 +8,7 @@
   xo-randomgen,
   xo-cmake,
 
+  xo-ppsink,
   # test-only xo dependencies
   xo-object,
   xo-alloc,
@@ -33,6 +34,7 @@ stdenv.mkDerivation (finalattrs:
       xo-alloc
     ];
     propagatedBuildInputs = [
+      xo-ppsink
       xo-allocutil
       xo-refcnt
       xo-randomgen

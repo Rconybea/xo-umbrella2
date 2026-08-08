@@ -6,8 +6,9 @@
 
   doxygen, sphinx, graphviz,
 
-  xo-cmake, xo-ratio, xo-flatstring, xo-indentlog,
+  xo-cmake, xo-ratio, xo-flatstring,
 
+  xo-ppsink,
   # test-only xo dependencies
   xo-randomgen,
 
@@ -37,7 +38,7 @@ stdenv.mkDerivation (finalattrs:
       cmake --build . -- docs
     '';
 
-    propagatedBuildInputs = [ xo-ratio xo-flatstring ];
+    propagatedBuildInputs = [ xo-ratio xo-flatstring xo-ppsink ];
 
     nativeBuildInputs = [
       cmake
@@ -46,10 +47,8 @@ stdenv.mkDerivation (finalattrs:
     ]
     ++ lib.optionals doCheck [
       xo-randomgen
-      xo-indentlog
     ]
     ++ lib.optionals buildExamples [
-      xo-indentlog
     ]
     ++ lib.optionals buildDocs [
       doxygen

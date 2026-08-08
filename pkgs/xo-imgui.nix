@@ -14,9 +14,15 @@
   # xo dependencies
   xo-randomgen ? null,
   xo-object ? null,
-  xo-indentlog,
+
   xo-cmake,
 
+  xo-alloc,
+
+  xo-flatstring,
+
+
+  xo-ppsink,
   buildExamples ? false,
 } :
 
@@ -40,8 +46,9 @@ stdenv.mkDerivation (finalattrs:
     ];
 
     propagatedBuildInputs = [
-      xo-indentlog
-
+      xo-alloc
+      xo-flatstring
+      xo-ppsink
       vulkan-headers
       vulkan-loader
       SDL2.dev

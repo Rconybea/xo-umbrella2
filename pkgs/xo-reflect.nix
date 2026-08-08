@@ -4,6 +4,7 @@
 
   # xo dependencies
   xo-cmake, xo-refcnt, xo-subsys,
+  xo-ppsink,
 
   doCheck ? true,
 } :
@@ -18,5 +19,5 @@ stdenv.mkDerivation (finalattrs:
                  ++ lib.optionals doCheck ["-DENABLE_TESTING=1"];
     inherit doCheck;
     nativeBuildInputs = [ cmake catch2 xo-cmake ];
-    propagatedBuildInputs = [ xo-subsys xo-refcnt ];
+    propagatedBuildInputs = [ xo-subsys xo-refcnt xo-ppsink ];
   })

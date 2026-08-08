@@ -3,6 +3,8 @@
   lib, stdenv, cmake, catch2,
 
   xo-cmake,
+
+  xo-ppsink,
   xo-refcnt,
 
   doCheck ? true,
@@ -22,6 +24,7 @@ stdenv.mkDerivation (finalattrs:
       cmake catch2 xo-cmake
     ];
     propagatedBuildInputs = [
+      xo-ppsink
       xo-refcnt
     ];
   })

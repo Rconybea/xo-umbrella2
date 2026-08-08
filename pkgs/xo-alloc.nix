@@ -13,10 +13,12 @@
   xo-reflect,
 #  xo-randomgen,
   xo-reflectutil,
-  xo-indentlog,
+
   xo-allocutil,
   xo-cmake,
+  xo-indentlog2,
 
+  xo-ppsink,
   buildDocs ? false,
   doCheck ? true,
 } :
@@ -54,11 +56,12 @@ stdenv.mkDerivation (finalattrs:
       python3Packages.pillow
     ];
     propagatedBuildInputs = [
+      xo-indentlog2
+      xo-ppsink
       xo-callback
       xo-unit
       xo-reflect
       xo-allocutil
       xo-reflectutil
-      xo-indentlog
     ];
   })

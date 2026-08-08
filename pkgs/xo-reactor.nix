@@ -4,6 +4,8 @@
 
   # xo dependencies
   xo-cmake,
+  xo-callback,
+  xo-ppsink,
   xo-reflect,
   xo-webutil,
   xo-printjson,
@@ -32,6 +34,8 @@ stdenv.mkDerivation (finalattrs:
       xo-randomgen
     ];
     propagatedBuildInputs = [
+      xo-callback
+      xo-ppsink
       xo-reflect
       xo-webutil
       xo-printjson

@@ -4,6 +4,9 @@
 
   # xo dependencies
   xo-cmake,
+  xo-indentlog,
+  xo-printjson,
+  xo-reactor,
   xo-simulator,
 
   doCheck ? true,
@@ -22,6 +25,9 @@ stdenv.mkDerivation (finalattrs:
       cmake catch2 xo-cmake
     ];
     propagatedBuildInputs = [
+      xo-indentlog
+      xo-printjson
+      xo-reactor
       xo-simulator
     ];
   })

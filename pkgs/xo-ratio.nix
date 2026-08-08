@@ -6,8 +6,9 @@
 
   doxygen, sphinx, graphviz,
 
-  xo-cmake, xo-flatstring, xo-reflectutil, xo-indentlog,
+  xo-cmake, xo-flatstring, xo-reflectutil,
 
+  xo-ppsink,
   # test-only xo dependencies
   xo-reflect, xo-randomgen,
 
@@ -40,6 +41,7 @@ stdenv.mkDerivation (finalattrs:
     # xo-ratio is header-only; its exported cmake config + public headers pull in
     # these, so consumers (e.g. xo-unit) must receive them transitively.
     propagatedBuildInputs = [
+      xo-ppsink
       xo-flatstring
       xo-reflectutil
     ];
@@ -52,10 +54,8 @@ stdenv.mkDerivation (finalattrs:
       catch2
       xo-reflect
       xo-randomgen
-      xo-indentlog
     ]
     ++ lib.optionals buildExamples [
-      xo-indentlog
     ]
     ++ lib.optionals buildDocs [
       doxygen

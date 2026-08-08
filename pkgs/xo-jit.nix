@@ -10,6 +10,8 @@
 
   xo-cmake, xo-tokenizer, xo-expression,
 
+  xo-reflectutil,
+
   # test-only xo dependencies
   xo-ratio,
 
@@ -39,6 +41,7 @@ stdenv.mkDerivation (finalattrs:
     #inherit doCheck;
 
     propagatedBuildInputs = [
+      xo-reflectutil
       xo-expression
     ];
 
