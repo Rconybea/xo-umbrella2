@@ -28,6 +28,7 @@ usage() {
     echo "  --rankdir=TB|LR            Layout direction (default: TB)"
     echo "  --no-tred                  Keep transitively-implied edges"
     echo "  --list                     List subsystem names and exit"
+    echo "  -q, --quiet                Suppress the trailing summary line"
     echo "  -h, --help                 This message"
     echo ""
     echo "Edge direction: an arrow reads 'depends on', so it points from a"
@@ -81,6 +82,7 @@ RANKDIR="TB"
 USE_TRED=1
 LIST_ONLY=0
 WHY=""
+QUIET=0
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -94,6 +96,7 @@ while [[ $# -gt 0 ]]; do
         --rankdir=*)  RANKDIR="${1#*=}" ;;
         --no-tred)    USE_TRED=0 ;;
         --list)       LIST_ONLY=1 ;;
+        -q|--quiet)   QUIET=1 ;;
         -h|--help)    usage ;;
         *) echo "$0: unknown option: $1" >&2; usage ;;
     esac
@@ -474,6 +477,10 @@ esac
 # `names` is a query: its stdout is the answer, so the summary would corrupt
 # anything piping it.  Report to stderr instead (and skip the edges-drawn
 # count, which is about rendering and means nothing here).
+if [[ "${QUIET}" -eq 1 ]]; then
+    exit 0
+fi
+
 if [[ "${FORMAT}" == "names" ]]; then
     n_nodes=$(filter_edges | awk '{print $1; print $2}' | sort -u | wc -l | tr -d ' ')
     echo "xo-deps: ${n_nodes} subsystems; edges: ${EDGES}" >&2
