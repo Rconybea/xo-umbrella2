@@ -284,6 +284,12 @@ jobs:
           nix-build ci.nix -A xo-reader
           ls -l ./result
 
+      - name: build xo-interpreter
+        run: |
+          echo nix-build ci.nix -A xo-interpreter
+          nix-build ci.nix -A xo-interpreter
+          ls -l ./result
+
       - name: build xo-jit
         run: |
           echo nix-build ci.nix -A xo-jit
