@@ -15,3 +15,7 @@ xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 $
 #       in xo-simulator/cmake/simulatorConfig.cmake.in
 #
 xo_dependency(${SELF_LIB} reactor)
+# Simulator.hpp includes <xo/refcnt/Refcounted_indentlog.hpp> (a deliberate
+# legacy compat header).  Declared explicitly: xo-printjson no longer
+# propagates xo-indentlog.
+xo_dependency(${SELF_LIB} indentlog)

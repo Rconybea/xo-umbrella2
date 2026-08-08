@@ -7,8 +7,9 @@
 #include <xo/timeutil/timeutil.hpp>
 // #include "time/Time.hpp"
 #include <xo/reflect/TypeDescr.hpp>
-#include <xo/indentlog/print/tag.hpp>
-#include <xo/indentlog/print/time.hpp>   /* iso8601 -- was arriving via xo/reflect/TypeDescr.hpp */
+#include <xo/ppsink/quoted_ostream.hpp>     /* os << quot(..) */
+#include <xo/ppsink/tag_ostream.hpp>        /* os << xtag(..) */
+#include <xo/ppsink/pp_time_ostream.hpp>    /* os << iso8601(..) */
 #include <cmath>
 
 namespace xo {
@@ -19,11 +20,16 @@ namespace xo {
     using xo::reflect::TypeDescr;
     using xo::reflect::TaggedPtr;
     using xo::reflect::TaggedRcptr;
-    using xo::print::quot;
-    using xo::time::iso8601;
-    using xo::xtag;
 
     namespace json {
+        /* one scope in from namespace xo: a using-decl at xo scope would be
+         * *ambiguous* with legacy xo::xtag (still visible via headers that
+         * have not migrated) rather than shadowing it.
+         */
+        using xo::pp::iso8601;
+        using xo::pp::quot;
+        using xo::pp::xtag;
+
         TaggedRcptr
         PrintJson::self_tp()
         {

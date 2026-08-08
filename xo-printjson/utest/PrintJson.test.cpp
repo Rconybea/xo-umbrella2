@@ -7,7 +7,7 @@
 #include "xo/printjson/init_printjson.hpp"
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflect/StructReflector.hpp>
-#include <xo/indentlog/print/tag.hpp>   /* tag -- was arriving via xo/reflect */
+#include <xo/ppsink/tag_ostream.hpp>   /* os << tag(..) */
 #include <catch2/catch.hpp>
 #include <iostream>
 #include <sstream>
@@ -21,6 +21,11 @@ namespace xo {
     using xo::reflect::TaggedPtr;
 
     namespace ut {
+        /* one scope in from namespace xo: a using-decl at xo scope would be
+         * ambiguous with legacy xo::tag rather than shadowing it.
+         */
+        using xo::pp::tag;
+
         InitEvidence s_init_evidence = InitSubsys<S_printjson_tag>::require();
 
         namespace {

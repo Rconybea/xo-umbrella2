@@ -6,11 +6,10 @@ set(SELF_SRCS PrintJson.cpp init_printjson.cpp)
 xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 ${SELF_SRCS})
 
 # ----------------------------------------------------------------
-# dependencies: indentlog, ...
+# dependencies: ...
 
 xo_dependency(${SELF_LIB} reflect)
-# public headers + sources use legacy xo-indentlog (tag/time).  Declared
-# explicitly: xo-reflect no longer propagates xo-indentlog.
-xo_dependency(${SELF_LIB} indentlog)
+# PrintJson.cpp uses xo::pp::{xtag,iso8601}; no public header needs it.
+xo_dependency(${SELF_LIB} xo_ppsink)
 
 # end CMakeLists.txt
