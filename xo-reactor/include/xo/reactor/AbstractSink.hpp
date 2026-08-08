@@ -6,9 +6,18 @@
 #include <xo/reflect/TaggedPtr.hpp>
 #include <xo/reflect/TypeDescr.hpp>
 // #include "time/Time.hpp"
-#include <xo/indentlog/print/tag.hpp>
+#include <xo/ppsink/tag_ostream.hpp>   /* os << xo::pp::xtag(..) */
 #include <xo/cxxutil/demangle.hpp>
 #include <typeinfo>
+
+/* NB xo::pp names are QUALIFIED throughout this header, not brought in by
+ * using-declarations.  Two reasons:
+ *   - a using-decl at namespace scope in a public header leaks into every
+ *     consumer's scope;
+ *   - a function-local one is not enough either: ADL adds legacy xo::xtag
+ *     whenever an argument type lives in namespace xo, and merges it into
+ *     the candidate set.  Only a qualified call avoids that.
+ */
 
 namespace xo {
   namespace reactor {

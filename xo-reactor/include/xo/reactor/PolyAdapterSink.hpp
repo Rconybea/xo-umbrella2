@@ -8,6 +8,15 @@
 #include "Sink.hpp"
 #include <xo/reflect/Reflect.hpp>
 
+/* NB xo::pp names are QUALIFIED throughout this header, not brought in by
+ * using-declarations.  Two reasons:
+ *   - a using-decl at namespace scope in a public header leaks into every
+ *     consumer's scope;
+ *   - a function-local one is not enough either: ADL adds legacy xo::xtag
+ *     whenever an argument type lives in namespace xo, and merges it into
+ *     the candidate set.  Only a qualified call avoids that.
+ */
+
 namespace xo {
     namespace reactor {
         /* adapter between a source that delivers a particular event type T,
@@ -71,11 +80,10 @@ namespace xo {
                 this->poly_sink_->visit_direct_consumers(fn);
             }
             virtual void display(std::ostream & os) const override {
-                using xo::xtag;
                 os << "<PolyAdapterSink"
-                   << xtag("addr", (void*)this)
-                   << xtag("T", reflect::type_name<T>())
-                   << xtag("poly", this->poly_sink_)
+                   << xo::pp::xtag("addr", (void*)this)
+                   << xo::pp::xtag("T", reflect::type_name<T>())
+                   << xo::pp::xtag("poly", this->poly_sink_)
                    << ">";
             } /*display*/
 

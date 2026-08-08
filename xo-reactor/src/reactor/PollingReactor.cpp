@@ -1,7 +1,9 @@
 /* @file PollingReactor.cpp */
 
 #include "PollingReactor.hpp"
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
 
 namespace xo {
     using std::size_t;
@@ -9,6 +11,13 @@ namespace xo {
     using std::int64_t;
 
     namespace reactor {
+        /* one scope in from namespace xo: a using-decl at xo scope would be
+         * *ambiguous* with legacy xo::xtag (still visible via headers that
+         * have not migrated) rather than shadowing it.
+         */
+        using xo::pp::scope;
+        using xo::pp::xtag;
+
         bool
         PollingReactor::add_source(bp<ReactorSource> src)
         {
@@ -79,7 +88,7 @@ namespace xo {
         {
             int64_t ix = this->find_nonempty_source(this->next_ix_);
 
-            scope log(XO_DEBUG(this->loglevel() <= log_level::chatty));
+            scope log(XO_DEBUG_(this->loglevel() <= xo::pp::log_level::chatty));
 
             log && log(xtag("self", this), xtag("src_ix", ix));
 

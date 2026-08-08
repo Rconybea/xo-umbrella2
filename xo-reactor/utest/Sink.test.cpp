@@ -3,7 +3,7 @@
 #include "xo/reactor/Sink.hpp"
 #include "catch2/catch.hpp"
 #include "xo/reactor/PollingReactor.hpp"
-#include <xo/indentlog/print/pair.hpp>
+#include <xo/ppsink/pretty_pair.hpp>   /* Prettifier<std::pair<T,U>> */
 #include <xo/timeutil/timeutil.hpp>
 
 namespace xo {

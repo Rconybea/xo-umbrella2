@@ -10,6 +10,7 @@
 #pragma once
 
 #include <cstdint>
+#include <string_view>
 
 namespace xo::pp {
     /** @brief log message severity, ordered least-to-most severe.
@@ -34,6 +35,30 @@ namespace xo::pp {
 
         default_level = error
     };
+
+    /** @brief name of @p x, e.g. "chatty".
+     *
+     *  ostream-free by design, like the rest of this header; see
+     *  log_level_ostream.hpp for @c os << level .  The legacy xo-indentlog
+     *  log_level had an operator<< and no name accessor; splitting them lets a
+     *  caller name a level without pulling in <ostream>.
+     **/
+    inline constexpr std::string_view
+    log_level_name(log_level x) noexcept {
+        switch (x) {
+        case log_level::never:   return "never";
+        case log_level::verbose: return "verbose";
+        case log_level::chatty:  return "chatty";
+        case log_level::info:    return "info";
+        case log_level::warning: return "warning";
+        case log_level::error:   return "error";
+        case log_level::severe:  return "severe";
+        case log_level::always:  return "always";
+        case log_level::silent:  return "silent";
+        }
+
+        return "?log_level";
+    }
 
     inline bool operator> (log_level x, log_level y) {
         return static_cast<std::uint8_t>(x) >  static_cast<std::uint8_t>(y);

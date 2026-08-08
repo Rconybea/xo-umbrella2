@@ -4,7 +4,6 @@
 
 #include "Reactor.hpp"
 #include "ReactorSource.hpp"
-#include <xo/indentlog/print/ppdetail_atomic.hpp>   /* PPDETAIL_ATOMIC -- was arriving via xo/reflect */
 #include <cstdint>
 #include <vector>
 
@@ -48,14 +47,17 @@ namespace xo {
 
     } /*namespace reactor*/
 
-#ifndef ppdetail_atomic
-    namespace print {
-        using PollingReactorPointer = xo::reactor::PollingReactor*;
-        // placeholder, until we implement pretty-printing
-        PPDETAIL_ATOMIC(xo::reactor::PollingReactor);
-        PPDETAIL_ATOMIC(PollingReactorPointer);
-    }
-#endif
+    /* NB there was a legacy PPDETAIL_ATOMIC block here, declaring PollingReactor
+     * (and PollingReactor*) print-atoms.  Deleted, not ported, for two reasons:
+     *
+     * 1. It was dead code.  It sat under #ifndef ppdetail_atomic, and
+     *    xo-indentlog's ppdetail_atomic.hpp defines that macro unconditionally,
+     *    so the block never compiled in any build that saw indentlog.
+     * 2. ppsink needs no equivalent: its primary Prettifier<T> template is
+     *    empty, so a type with no specialization already falls through to the
+     *    string-like leaf and then to operator<< -- which is exactly what
+     *    declaring it an atom was asking for.
+     */
 } /*namespace xo*/
 
 /* end PollingReactor.hpp */

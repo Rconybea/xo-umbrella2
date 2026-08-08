@@ -27,4 +27,7 @@ xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 $
 #            [xo-kalmanfilter/cmake/xo_kalmanfilterConfig.cmake.in]
 
 xo_dependency(${SELF_LIB} reactor)
+# KalmanFilterSvc.cpp uses legacy xo-indentlog (scope, xtag).  Declared
+# explicitly: xo-reactor no longer propagates xo-indentlog.
+xo_dependency(${SELF_LIB} indentlog)
 xo_external_target_dependency(${SELF_LIB} Eigen3 Eigen3::Eigen)

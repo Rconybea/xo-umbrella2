@@ -1,16 +1,22 @@
 /* @file AbstractEventProcessor.cp */
 
 #include "AbstractEventProcessor.hpp"
-#include <xo/indentlog/print/tag.hpp>
-#include <xo/indentlog/print/tostr.hpp>
+#include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
+#include <xo/ppsink/tostr.hpp>
 #include <map>
 #include <unordered_map>
 
 namespace xo {
-    using xo::tostr;
     using std::uint32_t;
 
     namespace reactor {
+        /* one scope in from namespace xo: a using-decl at xo scope would be
+         * *ambiguous* with legacy xo::xtag (still visible via headers that
+         * have not migrated) rather than shadowing it.
+         */
+        using xo::pp::tostr;
+        using xo::pp::xtag;
+
         namespace {
             /* search all event processors ep reachable (dowstream) from x,
              * add to *m;

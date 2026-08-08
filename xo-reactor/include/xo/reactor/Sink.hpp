@@ -6,12 +6,23 @@
 #include "AbstractSource.hpp"
 #include "PolyAdapterSink.hpp"
 #include <xo/reflect/Reflect.hpp>
-#include <xo/indentlog/scope.hpp>   /* scope -- was arriving via xo/reflect */
-#include <xo/indentlog/print/tag.hpp>
-#include <xo/indentlog/print/time.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>   /* os << xo::pp::xtag(..) */
 #include <xo/timeutil/timeutil.hpp>
 #include <xo/cxxutil/demangle.hpp>
 #include <typeinfo>
+#include <xo/ppsink/pretty_ostream.hpp>   /* pp_to_stream */
+#include <xo/ppsink/pretty_pair.hpp>      /* Prettifier<std::pair<T,U>> */
+
+/* NB xo::pp names are QUALIFIED throughout this header, not brought in by
+ * using-declarations.  Two reasons:
+ *   - a using-decl at namespace scope in a public header leaks into every
+ *     consumer's scope;
+ *   - a function-local one is not enough either: ADL adds legacy xo::xtag
+ *     whenever an argument type lives in namespace xo, and merges it into
+ *     the candidate set.  Only a qualified call avoids that.
+ */
 
 namespace xo {
     namespace reactor {
@@ -45,8 +56,6 @@ namespace xo {
             static rp<Sink1<T>> require_native(std::string_view caller,
                                                rp<AbstractSink> const & sink)
                 {
-                    using xo::scope;
-                    using xo::xtag;
 
                     /* 1. if sink expects events of type T,
                      *    make direct connection
@@ -64,8 +73,8 @@ namespace xo {
 
                     if (sink->allow_polymorphic_source()) {
 #ifdef DEBUG_NOT_USING
-                        scope lscope("Sink1<T>::require_native: create PolyAdapterSink");
-                        lscope.log(xtag("caller", caller));
+                        xo::pp::scope lscope("Sink1<T>::require_native: create PolyAdapterSink");
+                        lscope.log(xo::pp::xtag("caller", caller));
 #endif
 
                         return PolyAdapterSink<T>::make(sink);
@@ -79,21 +88,21 @@ namespace xo {
 
                         std::size_t src_hashcode = typeid(T).hash_code();
 
-                        throw std::runtime_error(tostr("Sink1<T>::require_native"
+                        throw std::runtime_error(xo::pp::tostr("Sink1<T>::require_native"
                                                        ": wanted to sink S,  but sink expects T",
-                                                       xtag("caller", caller),
-                                                       xtag("T", sink->sink_ev_type()->canonical_name()),
-                                                       xtag("S", reflect::type_name<T>()),
-                                                       xtag("required_hashcode", typeid(Sink1<T>).hash_code()),
-                                                       xtag("required_name", typeid(Sink1<T>).name()),
-                                                       xtag("src_hashcode", src_hashcode),
-                                                       xtag("sink_hashcode", sink->sink_ev_type()->native_typeinfo()->hash_code())
+                                                       xo::pp::xtag("caller", caller),
+                                                       xo::pp::xtag("T", sink->sink_ev_type()->canonical_name()),
+                                                       xo::pp::xtag("S", reflect::type_name<T>()),
+                                                       xo::pp::xtag("required_hashcode", typeid(Sink1<T>).hash_code()),
+                                                       xo::pp::xtag("required_name", typeid(Sink1<T>).name()),
+                                                       xo::pp::xtag("src_hashcode", src_hashcode),
+                                                       xo::pp::xtag("sink_hashcode", sink->sink_ev_type()->native_typeinfo()->hash_code())
 #ifdef DEBUG_EVENT_TYPEINFO
-                                                       , xtag("sink_hashcode", sink->item_typeinfo()->hash_code())
-                                                       , xtag("sink_parent_hashcode", sink_parent_typeinfo->hash_code())
-                                                       , xtag("sink_parent_name", sink_parent_typeinfo->name())
-                                                       , xtag("sink.type", sink->self_typename())
-                                                       , xtag("sink.parent_type", sink->parent_typename())
+                                                       , xo::pp::xtag("sink_hashcode", sink->item_typeinfo()->hash_code())
+                                                       , xo::pp::xtag("sink_parent_hashcode", sink_parent_typeinfo->hash_code())
+                                                       , xo::pp::xtag("sink_parent_name", sink_parent_typeinfo->name())
+                                                       , xo::pp::xtag("sink.type", sink->self_typename())
+                                                       , xo::pp::xtag("sink.parent_type", sink->parent_typename())
 #endif
                                                      ));
                     }
@@ -119,17 +128,16 @@ namespace xo {
             } /*attach_source*/
 
             virtual void notify_ev_tp(TaggedPtr const & ev_tp) override {
-                using xo::xtag;
 
                 T * p_ev = ev_tp.recover_native<T>();
 
                 if (p_ev) {
                     this->notify_ev(*p_ev);
                 } else {
-                    throw std::runtime_error(tostr("Sink1<T>::notify_ev_tp"
+                    throw std::runtime_error(xo::pp::tostr("Sink1<T>::notify_ev_tp"
                                                    ": unable to convert ev_tp to T",
-                                                   xtag("ev_tp.type", ev_tp.td()->canonical_name()),
-                                                   xtag("T", reflect::type_name<T>())));
+                                                   xo::pp::xtag("ev_tp.type", ev_tp.td()->canonical_name()),
+                                                   xo::pp::xtag("T", reflect::type_name<T>())));
                 }
             } /*notify_ev_tp*/
         }; /*Sink1*/
@@ -166,11 +174,10 @@ namespace xo {
             } /*notify_ev*/
 
             virtual void display(std::ostream & os) const override {
-                using xo::xtag;
 
                 os << "<SinkToFunction"
-                   << xtag("name", this->name())
-                   << xtag("n_in_ev", this->n_in_ev())
+                   << xo::pp::xtag("name", this->name())
+                   << xo::pp::xtag("n_in_ev", this->n_in_ev())
                    << ">";
             } /*display*/
 
@@ -193,15 +200,20 @@ namespace xo {
 
                 ++(this->n_in_ev_);
 
-                std::cout << ev << std::endl;
+                /* pp_to_stream, not `std::cout << ev`: routes through
+                 * Prettifier<T> when there is one (e.g. std::pair, which
+                 * legacy covered with an operator<< declared -- illegally --
+                 * in namespace std), and falls back to operator<< otherwise.
+                 */
+                xo::pp::pp_to_stream(std::cout, ev);
+                std::cout << std::endl;
             } /*notify_ev*/
 
             virtual void display(std::ostream & os) const override {
-                using xo::xtag;
 
                 os << "<SinkToConsole"
-                   << xtag("name", this->name())
-                   << xtag("n_in_ev", this->n_in_ev())
+                   << xo::pp::xtag("name", this->name())
+                   << xo::pp::xtag("n_in_ev", this->n_in_ev())
                    << ">";
             } /*display*/
 

@@ -1,6 +1,10 @@
 /* @file KalmanFilterSvc.cpp */
 
 #include "KalmanFilterSvc.hpp"
+/* xo::scope / xo::xtag -- were arriving via xo-reactor headers,
+ * which are now ppsink-only.
+ */
+#include <xo/indentlog/scope.hpp>
 
 namespace xo {
   using xo::rp;

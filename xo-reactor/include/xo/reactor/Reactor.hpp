@@ -3,7 +3,7 @@
 #pragma once
 
 #include <xo/refcnt/Refcounted.hpp>
-#include <xo/indentlog/log_level.hpp>
+#include <xo/ppsink/log_level.hpp>
 #include <cstdint>
 
 namespace xo {
@@ -17,8 +17,8 @@ namespace xo {
         public:
             virtual ~Reactor() = default;
 
-            log_level loglevel() const { return loglevel_; }
-            void set_loglevel(log_level loglevel) { loglevel_ = loglevel; }
+            xo::pp::log_level loglevel() const { return loglevel_; }
+            void set_loglevel(xo::pp::log_level loglevel) { loglevel_ = loglevel; }
 
             /* add source src to this reactor.
              * on success, invoke src.notify_reactor_add(this)
@@ -70,7 +70,7 @@ namespace xo {
 
         private:
             /* control logging verbosity */
-            log_level loglevel_;
+            xo::pp::log_level loglevel_;
         }; /*Reactor*/
 
         inline std::ostream &

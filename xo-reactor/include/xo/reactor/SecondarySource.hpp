@@ -6,10 +6,20 @@
 #include "HeapReducer.hpp"
 #include "Reactor.hpp"
 #include "Sink.hpp"
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 #include <xo/callback/CallbackSet.hpp>
 #include <xo/cxxutil/demangle.hpp>
 #include <vector>
+
+/* NB xo::pp names are QUALIFIED throughout this header, not brought in by
+ * using-declarations.  Two reasons:
+ *   - a using-decl at namespace scope in a public header leaks into every
+ *     consumer's scope;
+ *   - a function-local one is not enough either: ADL adds legacy xo::xtag
+ *     whenever an argument type lives in namespace xo, and merges it into
+ *     the candidate set.  Only a qualified call avoids that.
+ */
 
 namespace xo {
     namespace reactor {
@@ -59,15 +69,13 @@ namespace xo {
 
             template<typename T>
             void notify_secondary_event_v(T const & v) {
-                using xo::scope;
-                using xo::xtag;
 
                 if (v.empty())
                     return;
 
-                scope log(XO_DEBUG(this->debug_sim_flag_));
+                xo::pp::scope log(XO_DEBUG_(this->debug_sim_flag_));
 
-                log && log(xtag("name", this->name()));
+                log && log(xo::pp::xtag("name", this->name()));
 
                 if (this->upstream_exhausted_) {
                     throw std::runtime_error("SecondarySource::notify_secondary_event_v"
@@ -85,8 +93,8 @@ namespace xo {
                     ++n_ev;
                 }
 
-                log && log(xtag("T", reflect::type_name<T>()),
-                           xtag("n_ev", n_ev));
+                log && log(xo::pp::xtag("T", reflect::type_name<T>()),
+                           xo::pp::xtag("n_ev", n_ev));
 
                 if (n_ev > 0) {
                     /* if reducer is empty when .notify_secondary_event_v() begins,
@@ -129,8 +137,6 @@ namespace xo {
             virtual bool is_exhausted() const override { return this->upstream_exhausted_ && this->is_empty(); }
 
             virtual utc_nanos sim_current_tm() const override {
-                using xo::scope;
-                using xo::xtag;
 
                 if (this->reducer_.is_empty()) {
                     /* this is a tricky case.
@@ -145,9 +151,9 @@ namespace xo {
                      */
                     return this->current_tm_;
                 } else {
-                    scope log(XO_DEBUG(false /*this->debug_sim_flag_*/),
-                              xtag("name", this->name_),
-                              xtag("next_tm", this->reducer_.next_tm()));
+                    xo::pp::scope log(XO_DEBUG_(false /*this->debug_sim_flag_*/),
+                              xo::pp::xtag("name", this->name_),
+                              xo::pp::xtag("next_tm", this->reducer_.next_tm()));
 
                     return this->reducer_.next_tm();
                 }
@@ -263,15 +269,13 @@ namespace xo {
              *              become non-empty --> must notify reactor
              */
             void postprocess_secondary_event(bool is_priming) {
-                using xo::scope;
-                using xo::xtag;
 
                 Reactor * reactor = this->parent_reactor_;
 
-                scope log(XO_DEBUG(this->debug_sim_flag_),
-                          xtag("name", name_),
-                          xtag("reactor", (void*)reactor),
-                          xtag("is_priming", is_priming));
+                xo::pp::scope log(XO_DEBUG_(this->debug_sim_flag_),
+                          xo::pp::xtag("name", name_),
+                          xo::pp::xtag("reactor", (void*)reactor),
+                          xo::pp::xtag("is_priming", is_priming));
 
                 if (reactor) {
                     if (is_priming) {
@@ -288,10 +292,10 @@ namespace xo {
              * invoke callback whenever replay_flag is true
              */
             std::uint64_t deliver_one_aux(bool replay_flag) {
-                scope log(XO_DEBUG(this->debug_sim_flag_),
-                          xtag("name", this->name_),
-                          xtag("reducer.empty", this->reducer_.is_empty()),
-                          xtag("replay_flag", replay_flag));
+                xo::pp::scope log(XO_DEBUG_(this->debug_sim_flag_),
+                          xo::pp::xtag("name", this->name_),
+                          xo::pp::xtag("reducer.empty", this->reducer_.is_empty()),
+                          xo::pp::xtag("replay_flag", replay_flag));
 
                 if (this->reducer_.is_empty())
                     return 0;

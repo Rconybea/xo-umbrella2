@@ -12,6 +12,15 @@
 #include <xo/webutil/HttpEndpointDescr.hpp>
 #include <xo/timeutil/timeutil.hpp>
 
+/* NB xo::pp names are QUALIFIED throughout this header, not brought in by
+ * using-declarations.  Two reasons:
+ *   - a using-decl at namespace scope in a public header leaks into every
+ *     consumer's scope;
+ *   - a function-local one is not enough either: ADL adds legacy xo::xtag
+ *     whenever an argument type lives in namespace xo, and merges it into
+ *     the candidate set.  Only a qualified call avoids that.
+ */
+
 namespace xo {
     namespace reactor {
 
@@ -222,17 +231,16 @@ namespace xo {
             virtual void clear() override { this->tree_.clear(); }
 
             virtual void insert_tp(TaggedPtr const & ev_tp) override {
-                using xo::xtag;
 
                 Event * p_ev = ev_tp.recover_native<Event>();
 
                 if (p_ev) {
                     this->insert(*p_ev);
                 } else {
-                    throw std::runtime_error(tostr("StructEventStore<Event>::insert_tp"
+                    throw std::runtime_error(xo::pp::tostr("StructEventStore<Event>::insert_tp"
                                                    ": unable to convert ev_tp to Event",
-                                                   xtag("ev_tp.type", ev_tp.td()->canonical_name()),
-                                                   xtag("Event", reflect::type_name<Event>())));
+                                                   xo::pp::xtag("ev_tp.type", ev_tp.td()->canonical_name()),
+                                                   xo::pp::xtag("Event", reflect::type_name<Event>())));
                 }
             } /*insert_tp*/
 
@@ -248,11 +256,10 @@ namespace xo {
             // ----- Inherited from AbstractSource -----
 
             virtual void display(std::ostream & os) const override {
-                using xo::xtag;
 
                 os << "<EventStoreImpl"
-                   << xtag("name", this->name())
-                   << xtag("n_in_ev", this->n_in_ev())
+                   << xo::pp::xtag("name", this->name())
+                   << xo::pp::xtag("n_in_ev", this->n_in_ev())
                    << ">";
             } /*display*/
 

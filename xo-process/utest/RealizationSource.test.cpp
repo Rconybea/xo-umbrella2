@@ -10,6 +10,8 @@
 #include <xo/timeutil/timeutil_iostream.hpp>
 #include <xo/randomgen/xoshiro256.hpp>
 #include <catch2/catch.hpp>
+/* Reactor::loglevel() is xo::pp::log_level now (xo-reactor migrated) */
+#include <xo/ppsink/log_level.hpp>
 
 namespace xo {
   using xo::sim::Simulator;
@@ -65,7 +67,7 @@ namespace xo {
                                                 123456 /*usec*/);
 
           rp<Simulator> sim = Simulator::make(t0);
-          sim->set_loglevel(log_level::chatty);
+          sim->set_loglevel(xo::pp::log_level::chatty);
 
           REQUIRE(sim->is_exhausted());
 
@@ -91,8 +93,8 @@ namespace xo {
 
           rp<Simulator> sim = Simulator::make(t0);
           sim->set_loglevel(c_logging_enabled
-                            ? log_level::chatty
-                            : log_level::error);
+                            ? xo::pp::log_level::chatty
+                            : xo::pp::log_level::error);
 
           REQUIRE(sim->is_exhausted());
 
@@ -194,6 +196,9 @@ namespace xo {
           constexpr char const * c_self = "TEST_CASE:sim-lognormal";
           constexpr bool c_logging_enabled = false;
 
+          /* legacy XO_LITERAL wants the legacy log_level; set_loglevel() above
+           * wants xo::pp::log_level, since that is Reactor's API type now.
+           */
           scope log(XO_LITERAL(log_level::never, c_self, ""));
 
           /* arbitrary 'starting time' */
@@ -203,8 +208,8 @@ namespace xo {
 
           rp<Simulator> sim = Simulator::make(t0);
           sim->set_loglevel(c_logging_enabled
-                            ? log_level::chatty
-                            : log_level::error);
+                            ? xo::pp::log_level::chatty
+                            : xo::pp::log_level::error);
 
           REQUIRE(sim->is_exhausted());
 

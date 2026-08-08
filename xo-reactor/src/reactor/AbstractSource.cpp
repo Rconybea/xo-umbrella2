@@ -2,7 +2,8 @@
 
 #include "AbstractSource.hpp"
 #include <xo/webutil/StreamEndpointDescr.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 //#include "indentlog/scope.hpp"
 
 namespace xo {
@@ -10,6 +11,12 @@ namespace xo {
     using xo::reactor::AbstractSink;
 
     namespace reactor {
+        /* one scope in from namespace xo: a using-decl at xo scope would be
+         * *ambiguous* with legacy xo::xtag (still visible via headers that
+         * have not migrated) rather than shadowing it.
+         */
+        using xo::pp::scope;
+
         StreamEndpointDescr
         AbstractSource::stream_endpoint_descr(std::string const & url_prefix)
         {

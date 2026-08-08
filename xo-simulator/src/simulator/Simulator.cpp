@@ -8,6 +8,14 @@
 #include <algorithm>
 #include <string_view>
 #include <thread>
+/* Reactor::loglevel() is xo::pp::log_level now (xo-reactor migrated) */
+#include <xo/ppsink/log_level.hpp>
+/* legacy xo::xtag renders via operator<<, so the ppsink log_level
+ * needs its inserter here.  NB the tag call is qualified xo::xtag:
+ * unqualified, ADL would add xo::pp::xtag (the argument type is in
+ * xo::pp) and the two candidates would be ambiguous.
+ */
+#include <xo/ppsink/log_level_ostream.hpp>
 
 namespace xo {
     using xo::reactor::ReactorSource;
@@ -410,7 +418,7 @@ namespace xo {
         std::uint64_t
         Simulator::advance_one_event()
         {
-            bool debug_flag = (this->loglevel() <= log_level::chatty);
+            bool debug_flag = (this->loglevel() <= xo::pp::log_level::chatty);
 
             if(this->sim_heap_.empty()) {
                 scope log(XO_DEBUG(debug_flag));
@@ -428,7 +436,7 @@ namespace xo {
             utc_nanos src_tm = this->sim_heap_.front().t0();
 
             scope log(XO_DEBUG(debug_flag),
-                      xtag("threshold-loglevel", this->loglevel()),
+                      xo::xtag("threshold-loglevel", this->loglevel()),
                       xtag("src", src != nullptr),
                       xtag("src.name", src->name()),
                       xtag("sim.src_tm", src_tm),

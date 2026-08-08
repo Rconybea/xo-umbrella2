@@ -5,9 +5,11 @@
 #include "xo/reactor/FifoQueue.hpp"
 #include "xo/reactor/Sink.hpp"
 #include "xo/reactor/init_reactor.hpp"
-#include <xo/indentlog/print/pair.hpp>
+#include <xo/ppsink/pretty_pair.hpp>   /* Prettifier<std::pair<T,U>> */
 #include <xo/timeutil/timeutil.hpp>
 #include <xo/randomgen/xoshiro256.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/scope.hpp>
 
 namespace xo {
     //using xo::reactor::Reactor;
@@ -61,6 +63,13 @@ namespace xo {
     static InitEvidence s_evidence = InitSubsys<S_reactor_tag>::require();
 
     namespace ut {
+        /* one scope in from namespace xo: a using-decl at xo scope would be
+         * *ambiguous* with legacy xo::xtag (still visible via headers that
+         * have not migrated) rather than shadowing it.
+         */
+        using xo::pp::scope;
+        using xo::pp::xtag;
+
         TEST_CASE("polling0", "[reactor]") {
             Subsystem::initialize_all();
 
@@ -80,7 +89,7 @@ namespace xo {
                           bool catch_flag,
                           xo::rng::xoshiro256ss * p_rgen)
         {
-            scope log(XO_DEBUG(catch_flag));
+            scope log(XO_DEBUG_(catch_flag));
             log && log(xtag("n", n));
 
             bool ok_flag = true;
@@ -90,8 +99,8 @@ namespace xo {
 
             if (ok_flag)
                 reactor->set_loglevel(catch_flag
-                                      ? log_level::always
-                                      : log_level::error);
+                                      ? xo::pp::log_level::always
+                                      : xo::pp::log_level::error);
 
             rp<TestQueue> q = TestQueue::make();
             REQUIRE_ORFAIL(ok_flag, catch_flag, q.get() != nullptr);
@@ -197,8 +206,8 @@ namespace xo {
         TEST_CASE("polling1", "[reactor]") {
             Subsystem::initialize_all();
 
-            //log_config::style = function_style::streamlined;
-            log_config::location_tab = 100;
+            //xo::pp::scope_config::style = function_style::streamlined;
+            xo::pp::scope_config::location_tab = 100;
 
             /* random data to exercise queue + reactor */
 

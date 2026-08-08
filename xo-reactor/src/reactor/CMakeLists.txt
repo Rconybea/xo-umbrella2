@@ -18,9 +18,9 @@ xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 $
 #
 #xo_dependency(${SELF_LIB} xo_ordinaltree)  # for some reason wants to link -lxo_ordinaltree ??
 xo_dependency(${SELF_LIB} reflect)
-# Sink.hpp / PollingReactor.hpp use legacy xo-indentlog (scope/tag/time).
-# Declared explicitly: xo-reflect no longer propagates xo-indentlog.
-xo_dependency(${SELF_LIB} indentlog)
+# PUBLIC: Sink.hpp / AbstractSink.hpp / Reactor.hpp use xo::pp::{scope,xtag,
+# log_level} in inline bodies, so consumers need ppsink too.
+xo_dependency(${SELF_LIB} xo_ppsink)
 xo_dependency(${SELF_LIB} webutil)
 xo_dependency(${SELF_LIB} printjson)
 xo_dependency(${SELF_LIB} callback)

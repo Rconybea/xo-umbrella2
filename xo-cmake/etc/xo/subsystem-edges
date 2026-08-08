@@ -41,7 +41,6 @@ xo-indentlog xo-object2
 xo-indentlog xo-ordinaltree
 xo-indentlog xo-printable2
 xo-indentlog xo-printjson
-xo-indentlog xo-reactor
 xo-indentlog xo-stringtable2
 xo-indentlog xo-tokenizer
 xo-indentlog xo-tokenizer2
@@ -68,6 +67,7 @@ xo-ppsink xo-indentlog2
 xo-ppsink xo-object
 xo-ppsink xo-pyunit
 xo-ppsink xo-ratio
+xo-ppsink xo-reactor
 xo-ppsink xo-refcnt
 xo-ppsink xo-reflect
 xo-ppsink xo-subsys
