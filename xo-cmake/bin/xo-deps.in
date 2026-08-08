@@ -43,7 +43,8 @@ usage() {
     echo "Edge list is auto-discovered in this order:"
     echo "  1. --edges=FILE"
     echo "  2. \$XO_SUBSYSTEM_EDGES"
-    echo "  3. .build/xo-subsystem-edges.txt, searching upward from \$PWD"
+    echo "  3. .build/subsystem-edges, else .build/subsystem-partial-edges,"
+    echo "     searching upward from \$PWD"
     echo "     (build-generated: reflects the current configure)"
     echo "  4. ${INSTALLED_EDGES_FILE}"
     echo "     (installed alongside xo-build's copy)"
@@ -127,8 +128,16 @@ find_edges() {
     # build-generated copy is the freshest: walk up looking for one
     local dir="${PWD}"
     while [[ "${dir}" != "/" ]]; do
-        if [[ -f "${dir}/.build/xo-subsystem-edges.txt" ]]; then
-            echo "${dir}/.build/xo-subsystem-edges.txt"; return
+        if [[ -f "${dir}/.build/subsystem-edges" ]]; then
+            echo "${dir}/.build/subsystem-edges"; return
+        fi
+        # fall back to a partial graph: better than nothing for a local query,
+        # but it under-reports -- warn, since a missing edge here looks
+        # identical to a genuine absence.
+        if [[ -f "${dir}/.build/subsystem-partial-edges" ]]; then
+            echo "xo-deps: using ${dir}/.build/subsystem-partial-edges --" \
+                 "graph is INCOMPLETE (configured with examples/tests/vulkan off)" >&2
+            echo "${dir}/.build/subsystem-partial-edges"; return
         fi
         dir="$(dirname "${dir}")"
     done

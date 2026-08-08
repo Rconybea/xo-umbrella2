@@ -56,7 +56,7 @@ cat <<'HEADER'
 # Regenerate from the committed snapshot:
 #   xo-gen-clang-format > .clang-format
 # or from a build tree's edge list:
-#   xo-gen-clang-format path/to/build/xo-subsystem-edges.txt > .clang-format
+#   xo-gen-clang-format path/to/build/subsystem-edges > .clang-format
 #
 # Only include ordering (+ preprocessor-directive indentation) is specified
 # here; other formatting is left to defaults.

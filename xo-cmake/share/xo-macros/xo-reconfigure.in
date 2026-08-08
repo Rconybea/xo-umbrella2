@@ -4,6 +4,7 @@
 
 dry_run_flag=false
 clobber=false
+capture_edges=false
 testing=@ENABLE_TESTING@
 
 orig_path=@CMAKE_BINARY_DIR@/reconfigure
@@ -32,6 +33,9 @@ while [[ $# -gt 0 ]]; do
         --clobber)
             clobber=true
             ;;
+        --capture-subsystem-edges)
+            capture_edges=true
+            ;;
         --)
             break;
             ;;
@@ -42,16 +46,91 @@ while [[ $# -gt 0 ]]; do
             echo "                      [--print-source-dir|--print-build-dir]"
             echo "                      [--clobber]"
             echo "                      [--enable-testing|--disable-testing]"
+            echo "                      [--capture-subsystem-edges]"
             echo "                      -- CMAKE_ARGS"
             echo ""
             echo "1. clobber ignores --enable-testing/--disable-testing flags"
             echo "   use to cleanse build directory when stale build artifacts"
             echo "   are confusing cmake"
+            echo ""
+            echo "2. --capture-subsystem-edges publishes this build directory"
+            echo "   dependency graph to xo-cmake/etc/xo/subsystem-edges."
+            echo "   Refuses unless the configure was fully provisioned: cmake"
+            echo "   names the generated file subsystem-edges when every guard"
+            echo "   that gates a xo_dependency() call was on, and"
+            echo "   subsystem-partial-edges otherwise.  Does not reconfigure."
             exit 1
     esac
 
     shift
 done
+
+# ----------------------------------------------------------------
+# --capture-subsystem-edges: publish the dependency graph
+#
+# cmake encodes completeness in the BASENAME (see xo_emit_dependency_edges):
+#   subsystem-edges          -- every guard gating a xo_dependency() was on
+#   subsystem-partial-edges  -- at least one was off, so edges are missing
+#
+# So this is a file-existence test, not a switch audit: there is no list here
+# that can fall out of step with the guards in the cmake.
+
+if [[ ${capture_edges} == true ]]; then
+    src_dir=@CMAKE_SOURCE_DIR@
+    build_dir=@CMAKE_BINARY_DIR@
+    complete_file=${build_dir}/subsystem-edges
+    partial_file=${build_dir}/subsystem-partial-edges
+    dest=${src_dir}/xo-cmake/etc/xo/subsystem-edges
+
+    if [[ ! -e ${dest} ]]; then
+        2>&1 echo "xo-reconfigure: --capture-subsystem-edges: no ${dest}"
+        2>&1 echo "  this looks like a satellite build; the graph is only"
+        2>&1 echo "  meaningful from the umbrella toplevel."
+        exit 1
+    fi
+
+    if [[ ! -f ${complete_file} ]]; then
+        2>&1 echo "xo-reconfigure: refusing to publish an incomplete dependency graph"
+        if [[ -f ${partial_file} ]]; then
+            2>&1 echo "  this build wrote ${partial_file},"
+            2>&1 echo "  meaning a config-time guard around xo_dependency() calls was off:"
+            2>&1 echo "    ENABLE_TESTING=@ENABLE_TESTING@" \
+                      "XO_ENABLE_EXAMPLES=@XO_ENABLE_EXAMPLES@" \
+                      "XO_ENABLE_VULKAN=@XO_ENABLE_VULKAN@"
+            2>&1 echo "  edges behind the disabled guards are MISSING; publishing them"
+            2>&1 echo "  would make 'xo-build --with-deps' build too little."
+            2>&1 echo ""
+            2>&1 echo "  reconfigure with all three enabled, then retry."
+        else
+            2>&1 echo "  no graph in ${build_dir} at all -- configure first."
+        fi
+        exit 1
+    fi
+
+    if [[ ${dry_run_flag} == true ]]; then
+        2>&1 echo "would copy ${complete_file}"
+        2>&1 echo "        -> ${dest}"
+        diff "${dest}" "${complete_file}" && 2>&1 echo "(no change)"
+        exit 0
+    fi
+
+    # show what is changing: the reviewable artifact
+    if diff "${dest}" "${complete_file}" > /dev/null; then
+        2>&1 echo "xo-reconfigure: subsystem-edges already up to date"
+        exit 0
+    fi
+
+    2>&1 echo "xo-reconfigure: publishing subsystem-edges; changes:"
+    diff "${dest}" "${complete_file}" || true
+
+    cp "${complete_file}" "${dest}"
+
+    2>&1 echo ""
+    2>&1 echo "xo-reconfigure: wrote ${dest}"
+    2>&1 echo "  NB xo-build reads the INSTALLED copy -- to take effect:"
+    2>&1 echo "     xo-build --configure --build --install xo-cmake"
+    exit 0
+fi
 
 # Build the cmake command
 CMAKE_CMD=(

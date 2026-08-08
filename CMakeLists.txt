@@ -184,16 +184,20 @@ xo_umbrella_sphinx_config(
 # ----------------------------------------------------------------
 # inter-subsystem dependency graph, for maintaining the canonical bottom-up
 # order shared by xo-cmake/etc/xo/subsystem-list and ci.nix.
-#   tsort ${CMAKE_BINARY_DIR}/xo-subsystem-edges.txt   # -> dependencies-first order
+#   tsort ${CMAKE_BINARY_DIR}/subsystem-edges   # -> dependencies-first order
+#
+# NB the basename depends on provisioning: a fully-enabled configure writes
+# subsystem-edges, a partial one writes subsystem-partial-edges.  See
+# xo_emit_dependency_edges().
 
-xo_emit_dependency_edges(${CMAKE_BINARY_DIR}/xo-subsystem-edges.txt)
+xo_emit_dependency_edges(${CMAKE_BINARY_DIR} XO_SUBSYSTEM_EDGES_FILE)
 
 # candidate .clang-format, whose xo include-ordering categories are derived
 # (descending topological order) from the same edge list.  Adopt with:
 #   cp ${CMAKE_BINARY_DIR}/dot-clang-format ${CMAKE_SOURCE_DIR}/.clang-format
 execute_process(
     COMMAND ${CMAKE_BINARY_DIR}/xo-cmake/xo-gen-clang-format
-            ${CMAKE_BINARY_DIR}/xo-subsystem-edges.txt
+            ${XO_SUBSYSTEM_EDGES_FILE}
     OUTPUT_FILE ${CMAKE_BINARY_DIR}/dot-clang-format
     RESULT_VARIABLE _xo_dot_clang_format_rc)
 if(_xo_dot_clang_format_rc EQUAL 0)

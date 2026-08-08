@@ -1049,18 +1049,70 @@ endmacro()
 # basename of a subsystem's source dir (e.g. xo-object); intra-repo edges are
 # dropped at record time.
 #
-function(xo_emit_dependency_edges outfile)
+# Write the inter-subsystem dependency graph to ${outdir}, and report the path
+# written in ${outvar}.
+#
+# THE BASENAME ENCODES WHETHER THE GRAPH IS COMPLETE:
+#
+#   subsystem-edges           every guard that gates a dependency declaration
+#                             was ON: safe to copy over
+#                             xo-cmake/etc/xo/subsystem-edges
+#   subsystem-partial-edges   at least one such guard was OFF, so edges are
+#                             MISSING.  Still useful for xo-deps in this build
+#                             directory; NOT safe to publish.
+#
+# A xo_dependency() call inside `if (SOME_SWITCH)` emits no edge when that
+# switch is off, so a graph captured from a partial configure silently
+# under-reports -- and an under-reporting graph makes `xo-build --with-deps`
+# build too little, failing far away from the cause.  Encoding completeness in
+# the NAME means neither a human `cp` nor a script can mistake one for the
+# other, and there is no separate list of "which switches matter" to fall out
+# of date.
+#
+# WHEN ADDING A NEW config-time guard around xo_dependency() calls, add it to
+# the eligibility test below -- that is the single place this knowledge lives.
+#
+function(xo_emit_dependency_edges outdir outvar)
     get_property(_edges GLOBAL PROPERTY xo_dependency_edges)
 
     if(_edges)
         list(REMOVE_DUPLICATES _edges)
         list(SORT _edges)
     endif()
-    string(REPLACE ";" "\n" _text "${_edges}")
-    file(WRITE "${outfile}" "${_text}\n")
 
-    message(STATUS "xo_emit_dependency_edges: wrote ${outfile}")
-    message(STATUS "xo_emit_dependency_edges: 'tsort ${outfile}' -> bottom-up subsystem order")
+    # guards that gate xo_dependency()-family calls.  Measured 2026-08-08:
+    # XO_ENABLE_EXAMPLES 88 calls, ENABLE_TESTING 45, XO_ENABLE_VULKAN 6.
+    set(_disabled "")
+    foreach(_sw ENABLE_TESTING XO_ENABLE_EXAMPLES XO_ENABLE_VULKAN)
+        if(NOT ${_sw})
+            list(APPEND _disabled ${_sw})
+        endif()
+    endforeach()
+
+    if(_disabled)
+        set(_outfile "${outdir}/subsystem-partial-edges")
+    else()
+        set(_outfile "${outdir}/subsystem-edges")
+    endif()
+
+    string(REPLACE ";" "\n" _text "${_edges}")
+    file(WRITE "${_outfile}" "${_text}\n")
+
+    set(${outvar} "${_outfile}" PARENT_SCOPE)
+
+    message(STATUS "xo_emit_dependency_edges: wrote ${_outfile}")
+
+    if(_disabled)
+        string(REPLACE ";" " " _disabled_str "${_disabled}")
+        message(STATUS
+            "xo_emit_dependency_edges: PARTIAL -- off: ${_disabled_str};"
+            " edges behind those guards are missing, do not publish this graph")
+    else()
+        message(STATUS
+            "xo_emit_dependency_edges: complete;"
+            " publish with './reconfigure --capture-subsystem-edges'")
+    endif()
+    message(STATUS "xo_emit_dependency_edges: 'tsort ${_outfile}' -> bottom-up subsystem order")
 endfunction()
 
 # ----------------------------------------------------------------
