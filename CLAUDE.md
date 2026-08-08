@@ -9,6 +9,12 @@ Issues and specs live as markdown under `.xo-backlog/<feature-slug>/` (spec at
 separate, shared repo — commit and push changes there, not here. See
 `docs/agents/issue-tracker.md`.
 
+**Read `.xo-backlog/CONVENTIONS.md` before writing a ticket or verifying a
+change.** It covers how claims in tickets must be grounded, the `xo-deps`
+queries for checking dependency claims, and the build/test/nix recipe for this
+tree — including the flags whose absence has silently hidden breakage
+(`--with-examples`, `-q` rather than `>/dev/null`).
+
 ### Domain docs
 
 Single-context — `CONTEXT.md` + `docs/adr/` at the repo root, created lazily by
