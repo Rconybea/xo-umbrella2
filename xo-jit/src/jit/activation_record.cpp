@@ -2,11 +2,17 @@
 
 #include "activation_record.hpp"
 #include "type2llvm.hpp"
-#include <xo/indentlog/print/tag.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
 #include <iostream>
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
     namespace jit {
         using std::cerr;
         using std::endl;
@@ -39,7 +45,7 @@ namespace xo {
             constexpr bool c_debug_flag = true;
             using xo::scope;
 
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             auto ix = frame_.find(x);
 
@@ -64,7 +70,7 @@ namespace xo {
             constexpr bool c_debug_flag = true;
             using xo::scope;
 
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             log && log(xtag("var", x),
                        xtag("binding", binding));
@@ -94,7 +100,7 @@ namespace xo {
             constexpr bool c_debug_flag = true;
             using xo::scope;
 
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             log && log(xtag("llvm_fn", (void*)llvm_fn),
                        xtag("i_arg", i_arg),
@@ -139,7 +145,7 @@ namespace xo {
             constexpr bool c_debug_flag = true;
             using xo::scope;
 
-            scope log(XO_DEBUG(c_debug_flag),
+            scope log(XO_DEBUG_(c_debug_flag),
                       xtag("llvm_fn", (void*)llvm_fn));
 
             llvm::StructType * localenv_llvm_type
@@ -204,7 +210,7 @@ namespace xo {
             constexpr bool c_debug_flag = true;
             using xo::scope;
 
-            scope log(XO_DEBUG(c_debug_flag),
+            scope log(XO_DEBUG_(c_debug_flag),
                       xtag("lambda-name", lambda_->name()));
 
             llvm::IRBuilder<> tmp_ir_builder(&llvm_fn->getEntryBlock(),

@@ -3,9 +3,14 @@
 #include "type2llvm.hpp"
 #include <xo/reflect/Reflect.hpp>
 //#include "xo/reflect/struct/StructMember.hpp"
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
     using xo::reflect::Reflect;
     using xo::reflect::TypeDescr;
     using xo::reflect::StructMember;
@@ -65,7 +70,7 @@ namespace xo {
         {
             constexpr bool c_debug_flag = false;
 
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             int n_ast_fn_arg = fn_td->n_fn_arg();
 
@@ -324,7 +329,7 @@ namespace xo {
         {
             constexpr bool c_debug_flag = false;
 
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             /* would be precisely correct to use create_localenv_llvm_type()
              * here.  However judged not sufficiently helpful.

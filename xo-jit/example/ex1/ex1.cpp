@@ -24,7 +24,10 @@
 #include <xo/expression/Lambda.hpp>
 #include <xo/expression/PrimitiveExpr.hpp>
 #include <xo/expression/Variable.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
 #include <iostream>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
@@ -33,6 +36,9 @@
 #include "llvm/Transforms/Scalar/Reassociate.h"
 #include "llvm/Transforms/Scalar/SimplifyCFG.h"
 #include <cmath>
+
+using xo::pp::scope;
+using xo::pp::xtag;
 
 namespace {
     // need wrappers to fix type signature for osx/clang15.  Perhaps sqrt() is a macro or template (?)
@@ -57,7 +63,7 @@ namespace {
 
 int
 main() {
-    using xo::scope;
+    using xo::pp::scope;
     using xo::jit::MachPipeline;
     using xo::scm::make_constant;
     using xo::scm::make_primitive;
@@ -66,7 +72,7 @@ main() {
     using xo::scm::make_var;
     using xo::scm::make_lambda;
     using xo::reflect::Reflect;
-    using xo::xtag;
+    using xo::pp::xtag;
     using std::cerr;
     using std::endl;
 
@@ -83,7 +89,7 @@ main() {
 
     //static_assert(std::is_function_v<decltype(&foo)>);
 
-    scope log(XO_DEBUG(true));
+    scope log(XO_DEBUG_(true));
 
     {
         auto expr = make_constant(7.0);

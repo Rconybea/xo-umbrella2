@@ -4,10 +4,16 @@
 #include "activation_record.hpp"
 #include "type2llvm.hpp"
 #include <xo/expression/pretty_variable.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
 #include <string>
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
+    using xo::pp::tostr;
     using xo::scm::exprtype;
     using xo::scm::Expression;
     using xo::scm::ConstantInterface;
@@ -171,7 +177,7 @@ namespace xo {
         {
             constexpr bool c_debug_flag = true;
 
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             /** note: documentation (such as it is) for llvm::Function here:
              *
@@ -257,7 +263,7 @@ namespace xo {
         {
             constexpr bool c_debug_flag = true;
 
-            scope log(XO_DEBUG(c_debug_flag),
+            scope log(XO_DEBUG_(c_debug_flag),
                       xtag("primitive-name", expr->name()));
 
             constexpr const char * c_prefix = "w.";
@@ -374,7 +380,7 @@ namespace xo {
                                                 llvm::IRBuilder<> & ir_builder)
         {
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             llvm::StructType * closure_lvtype
                 = type2llvm::create_closureapi_lvtype(llvm_cx_.borrow(), expr);
@@ -399,7 +405,7 @@ namespace xo {
         {
             constexpr bool c_debug_flag = true;
 
-            scope log(XO_DEBUG(c_debug_flag),
+            scope log(XO_DEBUG_(c_debug_flag),
                       xtag("apply", apply));
 
             // see here:
@@ -669,7 +675,7 @@ namespace xo {
         {
             constexpr bool c_debug_flag = true;
 
-            scope log(XO_DEBUG(c_debug_flag),
+            scope log(XO_DEBUG_(c_debug_flag),
                       xtag("lambda-name", lambda->name()));
 
             this->global_env_->require_global(lambda->name(), lambda);
@@ -730,7 +736,7 @@ namespace xo {
         {
             constexpr bool c_debug_flag = true;
 
-            scope log(XO_DEBUG(c_debug_flag),
+            scope log(XO_DEBUG_(c_debug_flag),
                       xtag("lambda-name", lambda->name()));
 
             global_env_->require_global(lambda->name(), lambda.get());

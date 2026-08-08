@@ -10,9 +10,7 @@
 
   xo-cmake, xo-tokenizer, xo-expression,
 
-  # TRANSITIONAL: xo-jit uses legacy xo-indentlog directly; it used to arrive
-  # via xo-expression, which has migrated to xo-ppsink.
-  xo-indentlog,
+  xo-ppsink,
 
   xo-reflectutil,
 
@@ -47,7 +45,7 @@ stdenv.mkDerivation (finalattrs:
     propagatedBuildInputs = [
       xo-reflectutil
       xo-expression
-      xo-indentlog
+      xo-ppsink
     ];
 
     postBuild = lib.optionalString buildDocs ''

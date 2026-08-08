@@ -7,11 +7,12 @@
 
 #include "LlvmContext.hpp"
 #include <xo/expression/Lambda.hpp>
-/* operator<< below names xtag unqualified; it used to arrive via
- * xo-expression's headers.  Legacy indentlog, matching xo-jit's own
- * (transitional) dependency -- retire when xo-jit moves to ppsink.
+/* xtag is written out qualified below: this is a public header and the tag
+ * argument types live in namespace xo, so an unqualified call would also reach
+ * legacy xo::xtag by ADL in any consumer that still sees xo-indentlog.
  */
-#include <xo/indentlog/print/tag.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <llvm/IR/IRBuilder.h>
@@ -76,9 +77,9 @@ namespace xo {
         inline std::ostream &
         operator<<(std::ostream & os, const runtime_binding_detail & x) {
             os << "<runtime_binding_detail"
-               << xtag("i_argno", x.i_argno_)
-               << xtag("llvm_addr", (void*)x.llvm_addr_)
-               << xtag("llvm_type", (void*)x.llvm_type_)
+               << xo::pp::xtag("i_argno", x.i_argno_)
+               << xo::pp::xtag("llvm_addr", (void*)x.llvm_addr_)
+               << xo::pp::xtag("llvm_type", (void*)x.llvm_type_)
                << ">";
 
             return os;

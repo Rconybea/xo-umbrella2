@@ -4,6 +4,9 @@
 #include <string>
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
+    using xo::pp::tostr;
     using xo::scm::exprtype;
     using xo::scm::Expression;
     using xo::scm::ConstantInterface;
@@ -343,7 +346,7 @@ namespace xo {
             constexpr bool c_debug_flag = true;
             using xo::scope;
 
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             /** note: documentation (such as it is) for llvm::Function here:
              *
@@ -430,7 +433,7 @@ namespace xo {
             constexpr bool c_debug_flag = true;
             using xo::scope;
 
-            scope log(XO_DEBUG(c_debug_flag),
+            scope log(XO_DEBUG_(c_debug_flag),
                       xtag("apply", apply));
 
             // see here:
@@ -593,7 +596,7 @@ namespace xo {
             constexpr bool c_debug_flag = true;
             using xo::scope;
 
-            scope log(XO_DEBUG(c_debug_flag),
+            scope log(XO_DEBUG_(c_debug_flag),
                       xtag("llvm_fn", (void*)llvm_fn),
                       xtag("var_name", var_name),
                       xtag("var_type", var_type->short_name()));
@@ -649,7 +652,7 @@ namespace xo {
             constexpr bool c_debug_flag = true;
             using xo::scope;
 
-            scope log(XO_DEBUG(c_debug_flag),
+            scope log(XO_DEBUG_(c_debug_flag),
                       xtag("lambda-name", lambda->name()));
 
             global_env_[lambda->name()] = lambda.get();
@@ -707,7 +710,7 @@ namespace xo {
             constexpr bool c_debug_flag = true;
             using xo::scope;
 
-            scope log(XO_DEBUG(c_debug_flag),
+            scope log(XO_DEBUG_(c_debug_flag),
                       xtag("lambda-name", lambda->name()));
 
             global_env_[lambda->name()] = lambda.get();

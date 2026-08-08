@@ -9,8 +9,15 @@
 #include <xo/jit/intrinsics.hpp>
 #include <pybind11/stl.h>
 #include <llvm/Config/llvm-config.h>
+/* tostr/xtag used below; they used to arrive via xo-jit's headers,
+ * which no longer pull in legacy xo-indentlog.
+ */
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
 
 namespace xo {
+    using xo::pp::tostr;
+    using xo::pp::xtag;
     namespace jit {
         using xo::scm::Expression;
         using xo::scm::make_primitive;

@@ -5,11 +5,17 @@
 #include <xo/ratio/ratio.hpp>
 #include <xo/ratio/ratio_reflect.hpp>
 #include <xo/reflect/reflect_struct.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
 #include <catch2/catch.hpp>
 #include <cmath>
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
+    using xo::pp::tostr;
     using xo::jit::MachPipeline;
     using xo::scm::make_apply;
     using xo::scm::make_var;
@@ -120,7 +126,7 @@ namespace xo {
 
             //auto rng = xo::rng::xoshiro256ss(seed);
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.machpipeline.fptr"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.machpipeline.fptr"));
             //log && log("(A)", xtag("foo", foo));
 
 
@@ -199,7 +205,7 @@ namespace xo {
         TEST_CASE("machpipeline.wrap", "[llvm][llvm_closure]") {
             constexpr bool c_debug_flag = true;
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.machpipelin.wrap"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.machpipelin.wrap"));
 
             auto jit = MachPipeline::make();
 
@@ -289,7 +295,7 @@ namespace xo {
 
             //auto rng = xo::rng::xoshiro256ss(seed);
 
-            scope log(XO_DEBUG2(c_debug_flag, "TEST_CASE.machpipeline.struct"));
+            scope log(XO_DEBUG2_(c_debug_flag, "TEST_CASE.machpipeline.struct"));
             //log && log("(A)", xtag("foo", foo));
 
             auto jit = MachPipeline::make();
