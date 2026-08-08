@@ -6,6 +6,7 @@
 
   # xo dependencies
   xo-cmake,
+  xo-ppsink,
   xo-pyutil,
 
   xo-simulator,
@@ -46,6 +47,7 @@ stdenv.mkDerivation (finalattrs:
     propagatedBuildInputs = [
 xo-pyutil
 #      xo-refcnt
+      xo-ppsink
       xo-pyreactor
       xo-simulator
 #      xo-reflect

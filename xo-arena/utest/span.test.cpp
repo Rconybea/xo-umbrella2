@@ -8,7 +8,7 @@
  *  concept here and still be wrong.
  **/
 
-#include "span.hpp"
+#include <xo/arena/span.hpp>
 #include <catch2/catch.hpp>
 #include <algorithm>
 #include <numeric>

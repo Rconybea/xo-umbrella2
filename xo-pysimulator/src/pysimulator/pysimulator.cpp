@@ -7,6 +7,8 @@
 #include <xo/simulator/TimeSlip.hpp>
 #include <xo/pyutil/pyutil.hpp>
 #include <xo/timeutil/timeutil.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
 //#include <pybind11/pybind11.h>
 //#include <pybind11/stl.h>
 //#include <pybind11/chrono.h>
@@ -51,7 +53,8 @@ namespace xo {
                 .def("heap_contents", &Simulator::heap_contents)
                 .def("log_heap_contents",
                      [](Simulator & self) {
-                         scope log(XO_LITERAL(log_level::always, "pysimulator", ".log_heap_contents"));
+                         xo::pp::scope log(XO_LITERAL_(always, "pysimulator",
+                                                       ".log_heap_contents"));
                          self.log_heap_contents(&log);
                      })
                 .def("__repr__", &Simulator::display_string);

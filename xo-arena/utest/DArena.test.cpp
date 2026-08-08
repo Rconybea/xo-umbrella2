@@ -4,7 +4,7 @@
  **/
 
 #include "DArena.hpp"
-#include "print.hpp"
+#include <xo/arena/print.hpp>
 #include <xo/ppsink/tag.hpp>
 #include <catch2/catch.hpp>
 

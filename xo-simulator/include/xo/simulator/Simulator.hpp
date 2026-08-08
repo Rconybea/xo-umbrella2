@@ -5,7 +5,8 @@
 #include "SourceTimestamp.hpp"
 #include <xo/reactor/Reactor.hpp>
 #include <xo/reactor/ReactorSource.hpp>
-#include <xo/refcnt/Refcounted_indentlog.hpp>
+#include <xo/refcnt/Refcounted.hpp>
+#include <xo/ppsink/scope.hpp>
 // #include "time/Time.hpp"
 #include <vector>
 
@@ -155,7 +156,7 @@ namespace xo {
             std::vector<SourceTimestamp> heap_contents() const;
 
             /* print heap contents to *p_scope.  intended for diagnostics */
-            void log_heap_contents(xo::scope * p_scope) const;
+            void log_heap_contents(xo::pp::scope * p_scope) const;
 
             /* human-readable string identifying this simulator */
             std::string display_string() const;

@@ -4,23 +4,24 @@
 #include "Simulator.hpp"
 #include "TimeSlip.hpp"
 #include "init_simulator.hpp"
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/log_level.hpp>
+/* display() writes tags to an ostream; log_level_ostream.hpp supplies the
+ * inserter for the log_level tag value.
+ */
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/log_level_ostream.hpp>
 #include <algorithm>
 #include <string_view>
 #include <thread>
-/* Reactor::loglevel() is xo::pp::log_level now (xo-reactor migrated) */
-#include <xo/ppsink/log_level.hpp>
-/* legacy xo::xtag renders via operator<<, so the ppsink log_level
- * needs its inserter here.  NB the tag call is qualified xo::xtag:
- * unqualified, ADL would add xo::pp::xtag (the argument type is in
- * xo::pp) and the two candidates would be ambiguous.
- */
-#include <xo/ppsink/log_level_ostream.hpp>
 
 namespace xo {
     using xo::reactor::ReactorSource;
     using xo::time::utc_nanos;
     using xo::time::nanos;
+    using xo::pp::scope;
+    using xo::pp::xtag;
 
     namespace sim {
         class RaiiDeliveryWork {
@@ -48,7 +49,7 @@ namespace xo {
         } /*ctor*/
 
         Simulator::~Simulator() {
-            scope log(XO_ENTER0(verbose), "clear heap..");
+            scope log(XO_ENTER0_(verbose), "clear heap..");
 
             this->sim_heap_.clear();
 
@@ -98,7 +99,7 @@ namespace xo {
         void
         Simulator::notify_source_primed(bp<ReactorSource> src)
         {
-            scope log(XO_ENTER1(always, src->debug_sim_flag()));
+            scope log(XO_ENTER1_(always, src->debug_sim_flag()));
 
             bp<ReactorSource> sim_src
                 = bp<ReactorSource>::from(src);
@@ -155,7 +156,7 @@ namespace xo {
         bool
         Simulator::add_source(bp<ReactorSource> sim_src)
         {
-            scope log(XO_ENTER1(always, sim_src->debug_sim_flag()));
+            scope log(XO_ENTER1_(always, sim_src->debug_sim_flag()));
 
             log && log("enter",
                        xtag("src", sim_src.get()),
@@ -231,7 +232,7 @@ namespace xo {
         bool
         Simulator::remove_source(bp<ReactorSource> sim_src)
         {
-            scope log(XO_DEBUG(sim_src->debug_sim_flag()));
+            scope log(XO_DEBUG_(sim_src->debug_sim_flag()));
 
             log && log("enter",
                        xtag("src", sim_src.get()),
@@ -273,7 +274,7 @@ namespace xo {
             std::size_t simheap_z
                 = this->sim_heap_.size();
 
-            scope log(XO_DEBUG(src->debug_sim_flag()),
+            scope log(XO_DEBUG_(src->debug_sim_flag()),
                       xtag("src.name", src->name()),
                       xtag("simheap_z", simheap_z),
                       xtag("src.sim_current_tm", src->sim_current_tm()));
@@ -312,7 +313,7 @@ namespace xo {
         Simulator::complete_delivery_work()
         {
             for (ReentrantSimulatorCmd const & cmd : this->reentrant_cmd_v_) {
-                scope log(XO_DEBUG(cmd.src() && cmd.src()->debug_sim_flag()),
+                scope log(XO_DEBUG_(cmd.src() && cmd.src()->debug_sim_flag()),
                           "complete reentrant work",
                           xtag("src.name", cmd.src()->name()));
 
@@ -421,7 +422,7 @@ namespace xo {
             bool debug_flag = (this->loglevel() <= xo::pp::log_level::chatty);
 
             if(this->sim_heap_.empty()) {
-                scope log(XO_DEBUG(debug_flag));
+                scope log(XO_DEBUG_(debug_flag));
 
                 /* nothing todo */
                 return 0;
@@ -435,8 +436,8 @@ namespace xo {
 
             utc_nanos src_tm = this->sim_heap_.front().t0();
 
-            scope log(XO_DEBUG(debug_flag),
-                      xo::xtag("threshold-loglevel", this->loglevel()),
+            scope log(XO_DEBUG_(debug_flag),
+                      xtag("threshold-loglevel", this->loglevel()),
                       xtag("src", src != nullptr),
                       xtag("src.name", src->name()),
                       xtag("sim.src_tm", src_tm),
@@ -508,7 +509,7 @@ namespace xo {
         {
             Subsystem::verify_all_initialized();
 
-            scope log(XO_ENTER0(info));
+            scope log(XO_ENTER0_(info));
 
             assert(!this->delivery_in_progress_);
 
