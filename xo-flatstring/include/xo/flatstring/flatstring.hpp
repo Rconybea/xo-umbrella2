@@ -404,14 +404,15 @@ namespace xo {
         constexpr flatstring & append(const flatstring<N2> & x,
                                       size_type pos, size_type count = npos)
             {
+                /* NB the destination bound is on i_dest, not i_src.
+                 */
                 std::size_t i_src = 0;
                 std::size_t i_dest = size();
-                for (;
-                     i_src < std::min(std::min(count,
-                                               (x.fixed_capacity-1 > pos)
+                const std::size_t src_avail = ((x.fixed_capacity-1 > pos)
                                                ? x.fixed_capacity-1 - pos
-                                               : 0ul),
-                                      N-1);
+                                               : 0ul);
+                for (;
+                     (i_src < std::min(count, src_avail)) && (i_dest < N-1);
                      ++i_src, ++i_dest)
                     value_[i_dest] = x.value_[pos+i_src];
                 for (; i_dest < N; ++i_dest)
