@@ -36,6 +36,8 @@ xo-gc xo-reader2
 xo-indentlog xo-expression
 xo-indentlog xo-expression2
 xo-indentlog xo-gc
+xo-indentlog xo-interpreter
+xo-indentlog xo-jit
 xo-indentlog xo-object2
 xo-indentlog xo-printable2
 xo-indentlog xo-stringtable2
