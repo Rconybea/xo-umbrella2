@@ -1,5 +1,12 @@
 @PACKAGE_INIT@
 
+include(CMakeFindDependencyMacro)
+
+# find_dependency() calls generated from the xo_dependency() calls in
+# xo-pyreactor/src/pyreactor/CMakeLists.txt, so the two cannot drift apart.
+#
+@XO_FIND_DEPENDENCY_BLOCK@
+
 include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Targets.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/@PROJECT_NAME@Share.cmake")
 check_required_components("@PROJECT_NAME@")

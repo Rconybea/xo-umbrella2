@@ -5,6 +5,6 @@ set(SELF_SRCS pyreactor.cpp)
 
 xo_pybind11_library(${SELF_LIB} ${PROJECT_NAME}Targets ${SELF_SRCS})
 xo_pybind11_dependency(${SELF_LIB} reactor)
-# reaches legacy xo-indentlog headers via xo-refcnt's compat header.
-xo_pybind11_dependency(${SELF_LIB} indentlog)
+# pyreactor.cpp includes <xo/ppsink/tostr.hpp> + <xo/ppsink/pp_time.hpp>.
+xo_pybind11_dependency(${SELF_LIB} xo_ppsink)
 xo_pybind11_header_dependency(${SELF_LIB} xo_pyprintjson)
