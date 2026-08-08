@@ -32,7 +32,6 @@ xo_add_headeronly_library(${SELF_LIB})
 #
 xo_install_library4(${SELF_LIB} ${PROJECT_NAME}Targets)
 # (note: ..Targets from xo_install_library2())
-xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
 
 # ----------------------------------------------------------------
 # input dependencies
@@ -45,3 +44,8 @@ xo_headeronly_dependency(${SELF_LIB} randomgen)
 # PUBLIC: the tree headers use xo::pp::{scope,xtag,tostr,quot,pad} in
 # inline bodies, so consumers need ppsink too.
 xo_headeronly_dependency(${SELF_LIB} xo_ppsink)
+
+# NB must follow the xo_dependency() calls above: xo_export_cmake_config()
+# generates the installed config's find_dependency() block from the target's
+# accumulated deps at the point it is called.
+xo_export_cmake_config(${PROJECT_NAME} ${PROJECT_VERSION} ${PROJECT_NAME}Targets)
