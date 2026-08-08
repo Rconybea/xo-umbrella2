@@ -10,6 +10,13 @@
 #include <xo/expression/PrimitiveExpr.hpp>
 #include <xo/reflect/Reflect.hpp>
 #include <cstdint>
+/* xo-object's Primitive.hpp::display() names xtag unqualified, and used
+ * to get it via xo-expression's headers.  Legacy indentlog here, NOT
+ * ppsink: this TU already sees xo::xtag, and adding xo::pp::xtag makes
+ * the two ambiguous by ADL (the tag argument types live in namespace xo).
+ * Retire when xo-interpreter migrates to ppsink.
+ */
+#include <xo/indentlog/print/tag.hpp>
 #include <xo/indentlog/scope.hpp>   /* scope -- was arriving via xo/reflect */
 
 namespace xo {

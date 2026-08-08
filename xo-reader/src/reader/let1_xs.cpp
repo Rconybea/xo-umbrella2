@@ -10,9 +10,13 @@
 #include <xo/expression/DefineExpr.hpp>
 #include <xo/expression/Lambda.hpp>
 #include <xo/expression/Sequence.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
 
 namespace xo {
+    using xo::pp::scope;
     using Sequence = xo::scm::Sequence;
     using DefineExpr = xo::scm::DefineExpr;
     using Apply = xo::scm::Apply;
@@ -68,7 +72,7 @@ namespace xo {
                          parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             bp<DefineExpr> def_expr = DefineExpr::from(expr);
 
@@ -105,7 +109,7 @@ namespace xo {
              */
 
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             bp<DefineExpr> def_expr = DefineExpr::from(expr);
 

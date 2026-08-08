@@ -3,8 +3,13 @@
 #include "Sequence.hpp"
 #include "pretty_expression.hpp"
 #include <cstddef>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/pretty_struct.hpp>
 
 namespace xo {
+    using xo::pp::field;
+    using xo::pp::xtag;
+    using xo::pp::tostr;
     namespace scm {
         std::set<std::string>
         Sequence::get_free_variables() const {
@@ -68,51 +73,21 @@ namespace xo {
                 std::string i_str = tostr("[", i, "]");
 
                 os << xtag(i_str.c_str(), x);
+                ++i;
             }
 
             os << ">";
         }
 
-        std::uint32_t
-        Sequence::pretty_print(const ppindentinfo & ppii) const
+        void
+        Sequence::pretty(xo::pp::PpSink & sink) const
         {
-            ppstate * pps = ppii.pps();
+            auto st = sink.struct_open("Sequence");
 
-            if (ppii.upto()) {
-                if (!pps->print_upto("<Sequence"))
-                    return false;
-
-                std::size_t i = 0;
-                for (const auto & expr_i : expr_v_) {
-                    if (!pps->has_margin())
-                        return false;
-
-                    std::string i_str = tostr("[", i, "]");
-                    if (!pps->print_upto_tag(i_str.c_str(), expr_i))
-                        return false;
-                    ++i;
-                }
-
-                if (!pps->has_margin())
-                    return false;
-
-                pps->write(">");
-
-                return true;
-            } else {
-                pps->write("<Sequence");
-
-                std::size_t i = 0;
-                for (const auto & expr_i : expr_v_) {
-                    std::string i_str = tostr("[", i, "]");
-                    pps->newline_pretty_tag(ppii.ci1(),
-                                            i_str.c_str(),
-                                            expr_i);
-                    ++i;
-                }
-
-                pps->write(">");
-                return false;
+            std::size_t i = 0;
+            for (const auto & expr_i : expr_v_) {
+                st.field("[" + std::to_string(i) + "]", expr_i);
+                ++i;
             }
         }
     } /*namespace scm*/

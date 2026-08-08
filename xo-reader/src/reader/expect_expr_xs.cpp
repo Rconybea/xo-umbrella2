@@ -15,9 +15,16 @@
 #include <xo/expression/Constant.hpp>
 #include <xo/expression/Lambda.hpp>
 #include <xo/expression/pretty_expression.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/pretty_struct.hpp>
 
 namespace xo {
+    using xo::pp::field;
+    using xo::pp::xtag;
+    using xo::pp::scope;
     using xo::scm::Constant;
 
     namespace scm {
@@ -68,7 +75,7 @@ namespace xo {
         expect_expr_xs::on_def_token(const token_type & tk,
                                      parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             if (allow_defs_) {
                 define_xs::start(p_psm);
@@ -81,7 +88,7 @@ namespace xo {
         expect_expr_xs::on_lambda_token(const token_type & /*tk*/,
                                         parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             //constexpr const char * self_name = "exprstate::on_leftparen";
 
@@ -99,7 +106,7 @@ namespace xo {
         expect_expr_xs::on_leftparen_token(const token_type & /*tk*/,
                                            parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             //constexpr const char * self_name = "exprstate::on_leftparen";
 
@@ -111,7 +118,7 @@ namespace xo {
         expect_expr_xs::on_leftbrace_token(const token_type & /*tk*/,
                                            parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             /* push lparen_0 to remember to look for subsequent rightparen. */
             sequence_xs::start(p_psm);
@@ -122,7 +129,7 @@ namespace xo {
                                             parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             if (cxl_on_rightbrace_) {
                 auto self = p_psm->pop_exprstate();
@@ -139,7 +146,7 @@ namespace xo {
         expect_expr_xs::on_symbol_token(const token_type & tk,
                                         parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             log && log(xtag("tk", tk));
 
@@ -191,7 +198,7 @@ namespace xo {
         expect_expr_xs::on_bool_token(const token_type & tk,
                                       parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             progress_xs::start
                 (Constant<bool>::make(tk.bool_value()),
@@ -202,7 +209,7 @@ namespace xo {
         expect_expr_xs::on_i64_token(const token_type & tk,
                                      parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()),
+            scope log(XO_DEBUG_(p_psm->debug_flag()),
                       xtag("tk", tk),
                       xtag("do", "push progress xs w/ tk value"));
 
@@ -215,7 +222,7 @@ namespace xo {
         expect_expr_xs::on_f64_token(const token_type & tk,
                                      parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             //constexpr const char * self_name = "exprstate::on_f64_token";
 
@@ -232,7 +239,7 @@ namespace xo {
         expect_expr_xs::on_string_token(const token_type & tk,
                                         parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             /* e.g.
              *   def msg = "hello, world";
@@ -247,7 +254,7 @@ namespace xo {
         expect_expr_xs::on_expr(bp<Expression> expr,
                                 parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             log && log(xtag("exstype", this->exs_type_),
                        xtag("expr", expr.promote()));
@@ -262,7 +269,7 @@ namespace xo {
         expect_expr_xs::on_expr_with_semicolon(bp<Expression> expr,
                                                parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             log && log(xtag("exstype", this->exs_type_),
                        xtag("expr", expr.promote()));
@@ -281,12 +288,12 @@ namespace xo {
                << ">";
         }
 
-        bool
-        expect_expr_xs::pretty_print(const xo::print::ppindentinfo & ppii) const
+        void
+        expect_expr_xs::pretty(xo::pp::PpSink & sink) const
         {
-            return ppii.pps()->pretty_struct(ppii, "expect_expr_xs",
-                                             refrtag("allow_defs", allow_defs_),
-                                             refrtag("cxl_on_rightbrace", cxl_on_rightbrace_));
+            sink.pretty_struct("expect_expr_xs",
+                                             field("allow_defs", allow_defs_),
+                                             field("cxl_on_rightbrace", cxl_on_rightbrace_));
         }
 
     } /*namespace scm*/

@@ -7,6 +7,11 @@
 
 #include "LlvmContext.hpp"
 #include <xo/expression/Lambda.hpp>
+/* operator<< below names xtag unqualified; it used to arrive via
+ * xo-expression's headers.  Legacy indentlog, matching xo-jit's own
+ * (transitional) dependency -- retire when xo-jit moves to ppsink.
+ */
+#include <xo/indentlog/print/tag.hpp>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <llvm/IR/IRBuilder.h>
@@ -79,13 +84,6 @@ namespace xo {
             return os;
         }
     }
-
-#ifndef ppdetail_atomic
-    namespace print {
-        PPDETAIL_ATOMIC(xo::jit::runtime_binding_path);
-        PPDETAIL_ATOMIC(xo::jit::runtime_binding_detail);
-    }
-#endif
 
     namespace jit {
         /**

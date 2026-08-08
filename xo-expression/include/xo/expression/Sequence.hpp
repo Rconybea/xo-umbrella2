@@ -41,7 +41,7 @@ namespace xo {
             // ----- from GeneralizedExpression ----
 
             virtual void display(std::ostream & os) const override;
-            virtual std::uint32_t pretty_print(const ppindentinfo & ppii) const override;
+            virtual void pretty(xo::pp::PpSink & sink) const override;
 
         private:
             /** sequence of expressions;  evaluate in left-to-right order.

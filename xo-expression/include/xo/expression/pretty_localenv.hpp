@@ -3,37 +3,36 @@
 #pragma once
 
 #include "LocalSymtab.hpp"
-#include <xo/refcnt/pretty_refcnt.hpp>
-#include <xo/indentlog/print/pretty.hpp>
+#include <xo/refcnt/Refcounted_pp.hpp>   /* Prettifier<rp<T>> forwarder */
+#include <xo/ppsink/pretty.hpp>
 
-namespace xo {
-    namespace print {
-        template <>
-        struct ppdetail<xo::scm::SymbolTable> {
-            static bool print_pretty(const ppindentinfo & ppii, const xo::scm::SymbolTable & x) {
-                return x.pretty_print(ppii);
-            }
-        };
+namespace xo::pp {
+    template <>
+    struct Prettifier<xo::scm::SymbolTable> {
+        static void print(PpSink & sink, const xo::scm::SymbolTable & x) {
+            x.pretty(sink);
+        }
+    };
 
-        template <>
-        struct ppdetail<xo::scm::LocalSymtab> {
-            static bool print_pretty(const ppindentinfo & ppii, const xo::scm::LocalSymtab & x) {
-                return x.pretty_print(ppii);
-            }
-        };
+    template <>
+    struct Prettifier<xo::scm::LocalSymtab> {
+        static void print(PpSink & sink, const xo::scm::LocalSymtab & x) {
+            x.pretty(sink);
+        }
+    };
 
-        template <>
-        struct ppdetail<xo::scm::LocalSymtab*> {
-            static bool print_pretty(const ppindentinfo & ppii, const xo::scm::LocalSymtab* x) {
-                if (x) {
-                    return x->pretty_print(ppii);
-                } else {
-                    ppii.pps()->write("<nullptr ");
-                    ppii.pps()->write(reflect::type_name<xo::scm::LocalSymtab>());
-                    ppii.pps()->write(">");
-                    return ppii.pps()->has_margin();
-                }
+    template <>
+    struct Prettifier<xo::scm::LocalSymtab *> {
+        static void print(PpSink & sink, const xo::scm::LocalSymtab * x) {
+            if (x) {
+                x->pretty(sink);
+            } else {
+                sink.put("<nullptr ");
+                sink.put(xo::reflect::type_name<xo::scm::LocalSymtab>());
+                sink.put(">");
             }
-        };
-    }
-}
+        }
+    };
+} /*namespace xo::pp*/
+
+/* end pretty_localenv.hpp */

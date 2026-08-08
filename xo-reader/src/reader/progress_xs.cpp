@@ -9,9 +9,16 @@
 #include <xo/expression/Apply.hpp>
 #include <xo/expression/AssignExpr.hpp>
 #include <xo/expression/pretty_expression.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/pretty_struct.hpp>
 
 namespace xo {
+    using xo::pp::xtag;
+    using xo::pp::tostr;
+    using xo::pp::scope;
     using xo::scm::Expression;
     using xo::scm::AssignExpr;
     using xo::scm::Variable;
@@ -311,7 +318,7 @@ namespace xo {
         progress_xs::on_expr(bp<Expression> expr,
                              parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()), xtag("expr", expr));
+            scope log(XO_DEBUG_(p_psm->debug_flag()), xtag("expr", expr));
 
             /* note: previous token probably an operator,
              *       handled from progress_xs::on_operator_token(),
@@ -354,7 +361,7 @@ namespace xo {
         progress_xs::on_expr_with_semicolon(bp<Expression> expr,
                                             parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             log && log(xtag("lhs", lhs_), xtag("op", op_type_), xtag("expr", expr));
 
@@ -396,7 +403,7 @@ namespace xo {
         {
             /* note: implementation parllels .on_semicolon_token(), .on_rightparen_token() */
 
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             constexpr const char * self_name = "progress::xs::on_comma_token";
 
@@ -454,7 +461,7 @@ namespace xo {
         {
             /* note: implementation parallels .on_rightparen_token() */
 
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             rp<Expression> expr = this->assemble_expr(p_psm);
 
@@ -501,7 +508,7 @@ namespace xo {
         progress_xs::on_leftparen_token(const token_type & tk,
                                         parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             /* input like:
              *   'foo(' -> expect function call.  might continue 'foo(a,b,c)'
@@ -545,7 +552,7 @@ namespace xo {
          {
              /* note: implementation parallels .on_semicolon_token() */
 
-             scope log(XO_DEBUG(p_psm->debug_flag()));
+             scope log(XO_DEBUG_(p_psm->debug_flag()));
 
              constexpr const char * self_name = "progress_xs::on_rightparen";
 
@@ -587,7 +594,7 @@ namespace xo {
         progress_xs::on_then_token(const token_type & tk,
                                    parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             rp<Expression> expr = this->assemble_expr(p_psm);
 
@@ -609,7 +616,7 @@ namespace xo {
         progress_xs::on_else_token(const token_type & tk,
                                    parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             rp<Expression> expr = this->assemble_expr(p_psm);
 
@@ -630,7 +637,7 @@ namespace xo {
         progress_xs::on_rightbrace_token(const token_type & tk,
                                          parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             rp<Expression> expr = this->assemble_expr(p_psm);
 
@@ -685,7 +692,7 @@ namespace xo {
         progress_xs::on_operator_token(const token_type & tk,
                                        parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             constexpr const char * c_self_name = "progress_xs::on_operator_token";
 
@@ -757,7 +764,7 @@ namespace xo {
         progress_xs::on_bool_token(const token_type & tk,
                                    parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             constexpr const char * c_self_name = "progress_xs::on_bool_token";
             const char * exp = get_expect_str();
@@ -774,7 +781,7 @@ namespace xo {
                                   parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             constexpr const char * c_self_name = "progress_xs::on_i64_token";
             const char * exp = get_expect_str();
@@ -791,7 +798,7 @@ namespace xo {
                                   parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             constexpr const char * c_self_name = "progress_xs::on_f64_token";
             const char * exp = get_expect_str();
@@ -817,26 +824,19 @@ namespace xo {
             os << ">";
         }
 
-        bool
-        progress_xs::pretty_print(const xo::print::ppindentinfo & ppii) const
+        void
+        progress_xs::pretty(xo::pp::PpSink & sink) const
         {
-            if (ppii.upto()) {
-                return (ppii.pps()->print_upto("<progress_xs")
-                        && (lhs_ ? ppii.pps()->print_upto(refrtag("lhs", lhs_)) : true)
-                        && (op_type_ != optype::invalid ? ppii.pps()->print_upto(refrtag("op", op_type_)) : true)
-                        && (rhs_ ? ppii.pps()->print_upto(refrtag("rhs", rhs_)) : true)
-                        && ppii.pps()->print_upto(">"));
-            } else {
-                ppii.pps()->write("<progress_xs ");
-                if (lhs_)
-                    ppii.pps()->pretty(refrtag("lhs", lhs_));
-                if (op_type_ != optype::invalid)
-                    ppii.pps()->pretty(refrtag("op", op_type_));
-                if (rhs_)
-                    ppii.pps()->pretty(refrtag("rhs", rhs_));
-                ppii.pps()->write(">");
-                return false;
-            }
+            using xo::pp::field;
+
+            /* the legacy version guarded each field with an `if`, in both the
+             * fit pass and the print pass; field()'s present flag says the same
+             * thing once.  An absent field drops its separator too.
+             */
+            sink.pretty_struct("progress_xs",
+                               field("lhs", lhs_, lhs_.get() != nullptr),
+                               field("op", op_type_, op_type_ != optype::invalid),
+                               field("rhs", rhs_, rhs_.get() != nullptr));
         }
 
     } /*namespace scm*/

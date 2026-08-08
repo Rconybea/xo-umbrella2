@@ -12,12 +12,18 @@
 #include <xo/expression/ConvertExpr.hpp>
 #include <xo/expression/DefineExpr.hpp>
 #include <xo/expression/GlobalSymtab.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
 // #include "xo/expression/LocalSymtab.hpp"
 // #include <regex>
 #include <stdexcept>
 
 namespace xo {
+    using xo::pp::xtag;
+    using xo::pp::tostr;
+    using xo::pp::scope;
     using xo::scm::Expression;
     using xo::scm::LocalSymtab;
     using xo::reflect::TypeDescr;
@@ -55,7 +61,7 @@ namespace xo {
         const parser_result &
         parser::include_token(const token_type & tk)
         {
-            scope log(XO_DEBUG(psm_.debug_flag()), xtag("tk", tk));
+            scope log(XO_DEBUG_(psm_.debug_flag()), xtag("tk", tk));
 
             if (psm_.xs_stack_.empty()) {
                 throw std::runtime_error(tostr("parser::include_token",
@@ -66,7 +72,7 @@ namespace xo {
 
             /* stack_ is non-empty */
 
-            log && log(xrefrtag("top", psm_.xs_stack_.top_exprstate()));
+            log && log(xtag("top", psm_.xs_stack_.top_exprstate()));
 
             psm_.xs_stack_.top_exprstate().on_input(tk, &psm_);
 

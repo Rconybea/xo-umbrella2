@@ -33,7 +33,6 @@ xo-flatstring xo-unit
 xo-gc xo-expression2
 xo-gc xo-interpreter2
 xo-gc xo-reader2
-xo-indentlog xo-expression
 xo-indentlog xo-expression2
 xo-indentlog xo-gc
 xo-indentlog xo-interpreter
@@ -60,6 +59,7 @@ xo-ppsink xo-alloc
 xo-ppsink xo-alloc2
 xo-ppsink xo-arena
 xo-ppsink xo-distribution
+xo-ppsink xo-expression
 xo-ppsink xo-flatstring
 xo-ppsink xo-imgui
 xo-ppsink xo-indentlog2
@@ -73,6 +73,7 @@ xo-ppsink xo-pysimulator
 xo-ppsink xo-pyunit
 xo-ppsink xo-ratio
 xo-ppsink xo-reactor
+xo-ppsink xo-reader
 xo-ppsink xo-refcnt
 xo-ppsink xo-reflect
 xo-ppsink xo-simulator

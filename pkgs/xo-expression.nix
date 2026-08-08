@@ -4,7 +4,11 @@
 
   xo-cmake, xo-reflect, xo-flatstring,
 
-  xo-indentlog,
+  xo-ppsink,
+
+  # test-only: PrettySink, for the rendered-layout assertions in
+  # utest/pretty.test.cpp (same pattern as pkgs/xo-alloc.nix)
+  xo-indentlog2,
 
   xo-refcnt,
 
@@ -30,12 +34,14 @@ stdenv.mkDerivation (finalattrs:
     inherit doCheck;
 
     propagatedBuildInputs = [
-                              xo-indentlog
+                              xo-ppsink
                               xo-refcnt xo-reflect
                               xo-flatstring
                             ];
     nativeBuildInputs = [ cmake
                           catch2
                           xo-cmake
+                        ] ++ lib.optionals doCheck [
+                          xo-indentlog2
                         ];
   })

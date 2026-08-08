@@ -3,6 +3,8 @@
 #include "xo/reader/reader.hpp"
 #include <replxx.hxx>
 #include <iostream>
+#include <xo/indentlog2/print/PrettySink.hpp>
+#include <xo/expression/pretty_expression.hpp>
 #include <unistd.h> // for isatty
 
 // presumeably replxx assumes input is a tty
@@ -60,14 +62,30 @@ welcome(std::ostream& os)
     os << endl;
 }
 
+/** render @p expr with line breaking, as legacy ppstate_standalone did **/
+template <typename T>
+static void
+render_expr(std::ostream & os, const T & expr) {
+    static int seq = 0;
+
+    xo::mm::ArenaConfig logbuf_cfg { .name_ = "exprreplxx." + std::to_string(++seq),
+                                     .size_ = 64*1024 };
+
+    xo::pp::PpConfig cfg = xo::pp::PpConfig().with_logbuf_config(logbuf_cfg);
+
+    xo::pp::PrettySink pp(cfg, nullptr);
+
+    pp.pp(expr);
+
+    os << pp.output() << std::endl;
+}
+
 int
 main()
 {
     using namespace replxx;
     using namespace xo::scm;
     using xo::scm::Expression;
-    using xo::print::ppconfig;
-    using xo::print::ppstate_standalone;
     using xo::rp;
     using namespace std;
 
@@ -104,10 +122,7 @@ main()
             auto [expr, consumed, psz, error] = rdr.read_expr(input, eof);
 
             if (expr) {
-                ppconfig ppc;
-                ppstate_standalone pps(&cout, 0, &ppc);
-
-                pps.prettyn(expr);
+                render_expr(cout, expr);
             } else if (error.is_error()) {
                 cout << "parsing error (detected in " << error.src_function() << "): " << endl;
                 error.report(cout);
@@ -130,10 +145,7 @@ main()
     auto [expr, _1, _2, error] = rdr.read_expr(input, true /*eof*/);
 
     if (expr) {
-        ppconfig ppc;
-        ppstate_standalone pps(&cout, 0, &ppc);
-
-        pps.prettyn<rp<Expression>>(rp<Expression>(expr));
+        render_expr(cout, rp<Expression>(expr));
     } else if (error.is_error()) {
         cout << "parsing error (detected in " << error.src_function() << "): " << endl;
         error.report(cout);

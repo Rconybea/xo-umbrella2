@@ -7,48 +7,30 @@
 #include "exprstatestack.hpp"
 #include "pretty_envframestack.hpp"
 #include "pretty_exprstatestack.hpp"
+#include <xo/ppsink/pretty_struct.hpp>
 
-namespace xo {
-    namespace print {
-        bool
-        ppdetail<xo::scm::parserstatemachine>::print_pretty(const ppindentinfo & ppii, const xo::scm::parserstatemachine & x)
-        {
-            ppstate * pps = ppii.pps();
+namespace xo::pp {
+    void
+    Prettifier<xo::scm::parserstatemachine>::print(PpSink & sink,
+                                                   const xo::scm::parserstatemachine & x)
+    {
+        /* parserstatemachine is not part of the expression hierarchy, so there
+         * is no virtual involved -- this is a plain Prettifier.
+         */
+        sink.pretty_struct("psm",
+                           field("stack", x.xs_stack_),
+                           field("env_stack", x.env_stack_));
+    }
 
-            if (ppii.upto()) {
-                if (!pps->print_upto("<psm"))
-                    return false;
+    void
+    Prettifier<xo::scm::parserstatemachine *>::print(PpSink & sink,
+                                                     const xo::scm::parserstatemachine * x)
+    {
+        if (x)
+            Prettifier<xo::scm::parserstatemachine>::print(sink, *x);
+        else
+            sink.put("<nullptr>");
+    }
+} /*namespace xo::pp*/
 
-                if (!pps->print_upto_tag("stack", &x.xs_stack_))
-                    return false;
-
-                if (!pps->print_upto_tag("env_stack", &x.env_stack_))
-                    return false;
-
-                return pps->print_upto(">");
-            } else {
-                pps->write("<psm");
-                pps->newline_pretty_tag(ppii.ci1(), "stack", &x.xs_stack_);
-                pps->newline_pretty_tag(ppii.ci1(), "env_stack", &x.env_stack_);
-                pps->write(">");
-
-                return false;
-            }
-        }
-
-        bool
-        ppdetail<xo::scm::parserstatemachine *>::print_pretty(const ppindentinfo & ppii, const xo::scm::parserstatemachine * x)
-        {
-            if (x) {
-                return ppdetail<xo::scm::parserstatemachine>::print_pretty(ppii, *x);
-            } else {
-                if (ppii.upto()) {
-                    return ppii.pps()->print_upto("<nullptr>");
-                } else {
-                    ppii.pps()->write("<nullptr>");
-                    return false;
-                }
-            }
-        }
-    } /*namespace print*/
-} /*namespace xo*/
+/* end pretty_parserstatemachine.cpp */

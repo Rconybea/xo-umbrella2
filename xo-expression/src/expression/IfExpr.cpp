@@ -3,9 +3,14 @@
 #include "IfExpr.hpp"
 #include "pretty_expression.hpp"
 #include "pretty_variable.hpp"
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/pretty_struct.hpp>
 //#include "xo/indentlog/print/vector.hpp"
 
 namespace xo {
+    using xo::pp::field;
+    using xo::pp::xtag;
+    using xo::pp::tostr;
     namespace scm {
         auto IfExpr::check_consistent_valuetype(const rp<Expression> & when_true,
                                                 const rp<Expression> & when_false) -> TypeDescr
@@ -57,12 +62,12 @@ namespace xo {
             os << ">";
         } /*display*/
 
-        std::uint32_t
-        IfExpr::pretty_print(const ppindentinfo & ppii) const {
-            return ppii.pps()->pretty_struct(ppii, "IfExpr",
-                                             refrtag("test", test_),
-                                             refrtag("when_true", when_true_),
-                                             refrtag("when_false", when_false_));
+        void
+        IfExpr::pretty(xo::pp::PpSink & sink) const {
+            sink.pretty_struct("IfExpr",
+                                             field("test", test_),
+                                             field("when_true", when_true_),
+                                             field("when_false", when_false_));
         }
 
         rp<IfExprAccess>

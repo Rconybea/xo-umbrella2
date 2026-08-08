@@ -8,20 +8,23 @@
 #include "Variable.hpp"
 #include "pretty_expression.hpp"
 
-namespace xo {
-    namespace print {
-        template <>
-        struct ppdetail<xo::scm::Variable> {
-            static bool print_pretty(const ppindentinfo & ppii, const xo::scm::Variable & x) {
-                return x.pretty_print(ppii);
-            }
-        };
+namespace xo::pp {
+    template <>
+    struct Prettifier<xo::scm::Variable> {
+        static void print(PpSink & sink, const xo::scm::Variable & x) {
+            x.pretty(sink);
+        }
+    };
 
-        template <>
-        struct ppdetail<xo::scm::Variable *> {
-            static bool print_pretty(const ppindentinfo & ppii, const xo::scm::Variable * x) {
-                return x->pretty_print(ppii);
-            }
-        };
-    }
-}
+    template <>
+    struct Prettifier<xo::scm::Variable *> {
+        static void print(PpSink & sink, const xo::scm::Variable * x) {
+            if (x)
+                x->pretty(sink);
+            else
+                sink.put("<nullptr Variable>");
+        }
+    };
+} /*namespace xo::pp*/
+
+/* end pretty_variable.hpp */

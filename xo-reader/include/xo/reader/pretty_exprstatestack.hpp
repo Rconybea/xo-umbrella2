@@ -6,29 +6,29 @@
 #pragma once
 
 #include "exprstatestack.hpp"
-#include <xo/indentlog/print/pretty.hpp>
+#include <xo/ppsink/pretty.hpp>
 
-namespace xo {
-    namespace print {
-        template <>
-        struct ppdetail<xo::scm::exprstatestack*> {
-            static inline bool print_pretty(const ppindentinfo & ppii, const xo::scm::exprstatestack * p) {
-                return p->pretty_print(ppii);
-            }
-        };
+namespace xo::pp {
+    template <>
+    struct Prettifier<xo::scm::exprstatestack *> {
+        static void print(PpSink & sink, const xo::scm::exprstatestack * p) {
+            if (p) p->pretty(sink); else sink.put("<nullptr exprstatestack>");
+        }
+    };
 
-        template <>
-        struct ppdetail<const xo::scm::exprstatestack*> {
-            static inline bool print_pretty(const ppindentinfo & ppii, const xo::scm::exprstatestack * p) {
-                return p->pretty_print(ppii);
-            }
-        };
+    template <>
+    struct Prettifier<const xo::scm::exprstatestack *> {
+        static void print(PpSink & sink, const xo::scm::exprstatestack * p) {
+            if (p) p->pretty(sink); else sink.put("<nullptr exprstatestack>");
+        }
+    };
 
-        template <>
-        struct ppdetail<xo::scm::exprstate*> {
-            static inline bool print_pretty(const ppindentinfo & ppii, const xo::scm::exprstate * p) {
-                return p->pretty_print(ppii);
-            }
-        };
-    } /*namespace print*/
-} /*namespace xo*/
+    template <>
+    struct Prettifier<xo::scm::exprstate *> {
+        static void print(PpSink & sink, const xo::scm::exprstate * p) {
+            if (p) p->pretty(sink); else sink.put("<nullptr exprstate>");
+        }
+    };
+} /*namespace xo::pp*/
+
+/* end pretty_exprstatestack.hpp */

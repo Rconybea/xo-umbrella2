@@ -102,7 +102,7 @@ namespace xo {
 #endif
 
             virtual void display(std::ostream & os) const override;
-            virtual std::uint32_t pretty_print(const ppindentinfo & ppi) const override;
+            virtual void pretty(xo::pp::PpSink & sink) const override;
 
         protected:
             /**

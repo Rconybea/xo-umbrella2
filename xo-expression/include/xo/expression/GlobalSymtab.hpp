@@ -48,7 +48,7 @@ namespace xo {
             virtual void upsert_local(bp<Variable> target) override;
 
             virtual void print(std::ostream & os) const override;
-            virtual std::uint32_t pretty_print(const xo::print::ppindentinfo & ppii) const override;
+            virtual void pretty(xo::pp::PpSink & sink) const override;
 
         private:
             GlobalSymtab();

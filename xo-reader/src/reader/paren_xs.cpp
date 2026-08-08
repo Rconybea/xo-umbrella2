@@ -6,9 +6,14 @@
 #include "parserstatemachine.hpp"
 #include "progress_xs.hpp"
 #include <xo/expression/pretty_expression.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
 
 namespace xo {
+    using xo::pp::xtag;
+    using xo::pp::scope;
     namespace scm {
         const char *
         parenexprstatetype_descr(parenexprstatetype x)
@@ -94,7 +99,7 @@ namespace xo {
                                   parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             log && log(xtag("exstype", p_psm->top_exprstate().exs_type()));
 
@@ -154,7 +159,7 @@ namespace xo {
                                       parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             constexpr const char * c_self_name = "paren_xs::on_rightparen";
 
@@ -177,7 +182,7 @@ namespace xo {
                                parserstatemachine * /*p_psm*/)
         {
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             constexpr const char * c_self_name = "paren_xs::on_i64";
 
@@ -189,7 +194,7 @@ namespace xo {
                                parserstatemachine * /*p_psm*/)
         {
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             constexpr const char * c_self_name = "paren_xs::on_f64";
 
@@ -201,7 +206,7 @@ namespace xo {
                           parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             log && log(xtag("exstype", this->exs_type_),
                        xtag("expr", expr));

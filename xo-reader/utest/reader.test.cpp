@@ -4,6 +4,8 @@
 #include <catch2/catch.hpp>
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
     using xo::scm::reader;
     using xo::scm::GlobalSymtab;
 

@@ -8,6 +8,8 @@
 #include <catch2/catch.hpp>
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
     using parser_type = xo::scm::parser;
     using token_type = parser_type::token_type;
     using xo::scm::GlobalSymtab;

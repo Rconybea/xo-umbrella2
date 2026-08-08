@@ -6,8 +6,7 @@
 #pragma once
 
 #include "exprstate.hpp"
-#include <xo/indentlog/print/pretty.hpp>
-#include <xo/indentlog/print/vector.hpp>
+#include <xo/ppsink/pretty_struct.hpp>
 
 namespace xo {
     namespace scm {
@@ -16,8 +15,6 @@ namespace xo {
          **/
         class exprstatestack {
         public:
-            using ppstate = xo::print::ppstate;
-            using ppindentinfo = xo::print::ppindentinfo;
 
         public:
             exprstatestack() {}
@@ -51,7 +48,7 @@ namespace xo {
             }
 
             void print (std::ostream & os) const;
-            bool pretty_print(const ppindentinfo & ppii) const;
+            void pretty(xo::pp::PpSink & sink) const;
 
         private:
             std::vector<std::unique_ptr<exprstate>> stack_;

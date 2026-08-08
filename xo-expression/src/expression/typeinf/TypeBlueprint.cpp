@@ -1,9 +1,12 @@
 /** @file TypeBlueprint.cpp **/
 
 #include "typeinf/TypeBlueprint.hpp"
-#include <xo/indentlog/print/tag.hpp>   /* xtag -- was arriving via xo/reflect */
+#include <xo/ppsink/tag.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
 
 namespace xo {
+    using xo::pp::xtag;
     namespace scm {
         TypeBlueprint::TypeBlueprint(const type_ref & x)
             : ref_{x}

@@ -7,6 +7,9 @@
   doxygen, sphinx, graphviz,
 
   xo-cmake, xo-expression, xo-tokenizer,
+  xo-ppsink,
+  # PrettySink, used by the exprreplxx example
+  xo-indentlog2,
 
   buildDocs ? false,
   buildExamples ? false,
@@ -39,6 +42,8 @@ stdenv.mkDerivation (finalattrs:
                            xo-cmake
                            xo-expression
                            xo-tokenizer
+                           xo-ppsink
+                           xo-indentlog2
                          ]
     ++ lib.optionals buildExamples [ replxx ]
     ++ lib.optionals buildDocs [

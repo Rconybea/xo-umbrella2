@@ -7,9 +7,15 @@
 #include <xo/expression/DefineExpr.hpp>
 #include <xo/expression/Sequence.hpp>
 #include <xo/expression/pretty_expression.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/pretty_struct.hpp>
 
 namespace xo {
+    using xo::pp::xtag;
+    using xo::pp::scope;
     using xo::scm::DefineExpr;
 
     namespace scm {
@@ -37,7 +43,7 @@ namespace xo {
         sequence_xs::on_expr(bp<Expression> expr,
                              parserstatemachine * p_psm)
         {
-             scope log(XO_DEBUG(p_psm->debug_flag()));
+             scope log(XO_DEBUG_(p_psm->debug_flag()));
 
              log && log(xtag("expr", expr.promote()));
 
@@ -120,11 +126,11 @@ namespace xo {
             os << "<sequence_xs" << xtag("expr_v.size", expr_v_.size()) << ">";
         }
 
-        bool
-        sequence_xs::pretty_print(const xo::print::ppindentinfo & ppii) const
+        void
+        sequence_xs::pretty(xo::pp::PpSink & sink) const
         {
-            return ppii.pps()->pretty_struct(ppii, "sequence_xs",
-                                             xrefrtag("expr_v.size", expr_v_.size()));
+            sink.pretty_struct("sequence_xs",
+                                             xtag("expr_v.size", expr_v_.size()));
         }
 
     } /*namespace scm*/

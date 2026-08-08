@@ -5,11 +5,17 @@
 
 #include "LocalSymtab.hpp"
 #include "pretty_variable.hpp"
-#include <xo/indentlog/print/pretty_vector.hpp>
-#include <xo/indentlog/print/vector.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/PrettyVector.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/pretty_struct.hpp>
 
 namespace xo {
+    using xo::pp::xtag;
+    using xo::pp::tostr;
+    using xo::pp::scope;
     namespace scm {
         rp<LocalSymtab>
         LocalSymtab::make_empty() {
@@ -39,7 +45,7 @@ namespace xo {
               parent_env_{parent_env}
         {
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag), xtag("this", (void*)this), xtag("argv", argv_));
+            scope log(XO_DEBUG_(c_debug_flag), xtag("this", (void*)this), xtag("argv", argv_));
         }
 
         binding_path
@@ -105,28 +111,23 @@ namespace xo {
                << ">";
         }
 
-        std::uint32_t
-        LocalSymtab::pretty_print(const xo::print::ppindentinfo & ppii) const {
-            using xo::print::ppstate;
+        void
+        LocalSymtab::pretty(xo::pp::PpSink & sink) const {
+            using xo::pp::field;
 
-            ppstate * pps = ppii.pps();
+            /* NB `this` is printed.  The legacy two-pass version disagreed with
+             * itself: the fit pass measured `<LocalSymtab :argv ...>` while the
+             * print pass emitted `this` as well, so the single-line form could
+             * overflow the right margin.  The print branch was the intended
+             * one -- xtag("this", (void*)this) is the house idiom for these
+             * dumps -- so the fit branch was the bug.  Single-pass makes the
+             * two impossible to disagree.
+             */
+            const void * self = this;
 
-            if (ppii.upto()) {
-                if (!pps->print_upto("<LocalSymtab"))
-                    return false;
-                if (!pps->print_upto_tag("argv", argv_))
-                    return false;
-                pps->write(">");
-
-                return true;
-            } else {
-                pps->write("<LocalSymtab");
-                pps->newline_pretty_tag(ppii.ci1(), "this", (void*)this);
-                pps->newline_pretty_tag(ppii.ci1(), "argv", argv_);
-                pps->write(">");
-
-                return false;
-            }
+            sink.pretty_struct("LocalSymtab",
+                               field("this", self),
+                               field("argv", argv_));
         }
 
     } /*namespace scm*/

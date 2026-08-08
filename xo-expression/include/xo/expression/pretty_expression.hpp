@@ -6,26 +6,26 @@
 #pragma once
 
 #include "Expression.hpp"
-#include <xo/refcnt/pretty_refcnt.hpp>
-#include <xo/indentlog/print/pretty.hpp>
+#include <xo/refcnt/Refcounted_pp.hpp>   /* Prettifier<rp<T>> forwarder */
+#include <xo/ppsink/pretty.hpp>
 
-namespace xo {
-    namespace print {
-        template<>
-        struct ppdetail<xo::scm::GeneralizedExpression> {
-            static bool print_pretty(const ppindentinfo & ppii,
-                                     const xo::scm::GeneralizedExpression & x) {
-                return x.pretty_print(ppii);
-            }
-        };
+namespace xo::pp {
+    /* the hierarchy dispatches dynamically through the virtual
+     * GeneralizedExpression::pretty(); these just enter it.
+     */
+    template <>
+    struct Prettifier<xo::scm::GeneralizedExpression> {
+        static void print(PpSink & sink, const xo::scm::GeneralizedExpression & x) {
+            x.pretty(sink);
+        }
+    };
 
-        template <>
-        struct ppdetail<xo::scm::Expression> {
-            static bool print_pretty(const ppindentinfo & ppii,
-                                     const xo::scm::Expression & x) {
-                return x.pretty_print(ppii);
-            }
-        };
+    template <>
+    struct Prettifier<xo::scm::Expression> {
+        static void print(PpSink & sink, const xo::scm::Expression & x) {
+            x.pretty(sink);
+        }
+    };
+} /*namespace xo::pp*/
 
-    }
-}
+/* end pretty_expression.hpp */

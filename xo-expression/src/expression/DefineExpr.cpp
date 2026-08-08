@@ -7,8 +7,12 @@
 #include "Variable.hpp"
 #include "pretty_expression.hpp"
 #include <cstdint>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/pretty_struct.hpp>
 
 namespace xo {
+    using xo::pp::field;
+    using xo::pp::xtag;
     namespace scm {
         rp<DefineExpr>
         DefineExpr::make(std::string lhs_name,
@@ -60,13 +64,13 @@ namespace xo {
                << ">";
         } /*display*/
 
-        std::uint32_t
-        DefineExpr::pretty_print(const ppindentinfo & ppii) const
+        void
+        DefineExpr::pretty(xo::pp::PpSink & sink) const
         {
-            return ppii.pps()->pretty_struct(ppii, "Define",
-                                             //refrtag("type", this->valuetype()), // need pretty
-                                             refrtag("name", lhs_var_->name()),
-                                             refrtag("rhs", rhs_));
+            sink.pretty_struct("Define",
+                                             //field("type", this->valuetype()), // need pretty
+                                             field("name", lhs_var_->name()),
+                                             field("rhs", rhs_));
         }
 
         // ----- DefineExprAccess -----

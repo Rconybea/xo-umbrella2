@@ -9,9 +9,11 @@
 #include "exprstatestack.hpp"
 #include "parserstatemachine.hpp"
 #include <xo/expression/Variable.hpp>
-#include <xo/indentlog/print/vector.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/PrettyVector.hpp>
 
 namespace xo {
+    using xo::pp::xtag;
     namespace scm {
         const char *
         formalarglstatetype_descr(formalarglstatetype x) {

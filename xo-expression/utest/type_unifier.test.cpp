@@ -5,10 +5,16 @@
 
 #include "xo/expression/typeinf/type_unifier.hpp"
 #include <xo/reflect/Reflect.hpp>
-#include <xo/indentlog/scope.hpp>   /* scope, xtag -- were arriving via xo/reflect */
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
 #include <catch2/catch.hpp>
 
 namespace xo {
+    using xo::pp::scope;
+    using xo::pp::xtag;
+    using xo::pp::tostr;
     namespace ut {
         // rehearser copied from xo_tokenizer/utest/tokenizer.test.cpp
 
@@ -215,7 +221,7 @@ namespace xo {
                      * TypeBlueprint instances modified in place by unification
                      */
 
-                    scope log(XO_DEBUG2(rh.enable_debug(), "unifier"));
+                    scope log(XO_DEBUG2_(rh.enable_debug(), "unifier"));
 
                     auto lhs = testcase.lhs_();
                     auto rhs = testcase.rhs_();

@@ -10,9 +10,17 @@
 #include "pretty_expression.hpp"
 #include "pretty_variable.hpp"
 #include <xo/expression/Lambda.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/quoted.hpp>
+#include <xo/ppsink/pretty_struct.hpp>
 
 namespace xo {
+    using xo::pp::field;
+    using xo::pp::xtag;
+    using xo::pp::scope;
     using xo::scm::Lambda;
     using xo::scm::LocalSymtab;
 
@@ -159,7 +167,7 @@ namespace xo {
                                 parserstatemachine * p_psm)
         {
             constexpr const char * c_self_name = "lambda_xs::on_typedescr";
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             assert(td);
 
@@ -202,7 +210,7 @@ namespace xo {
                     if (def_var->valuetype() == nullptr) {
                         log && log("assign discovered lambda type T to enclosing define",
                                    xtag("lhs", def_var.get()),
-                                   xtag("T", print::unq(this->lambda_td_->canonical_name())));
+                                   xtag("T", xo::pp::unq(this->lambda_td_->canonical_name())));
 
                         def_var->assign_valuetype(lambda_td_);
                     } else {
@@ -301,12 +309,12 @@ namespace xo {
                << ">";
         }
 
-        bool
-        lambda_xs::pretty_print(const xo::print::ppindentinfo & ppii) const
+        void
+        lambda_xs::pretty(xo::pp::PpSink & sink) const
         {
-            return ppii.pps()->pretty_struct(ppii, "lambda_xs",
-                                             refrtag("lmxs_type", lmxs_type_),
-                                             refrtag("body", body_));
+            sink.pretty_struct("lambda_xs",
+                                             field("lmxs_type", lmxs_type_),
+                                             field("body", body_));
         }
 
     } /*namespace scm*/

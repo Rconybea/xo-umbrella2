@@ -5,12 +5,15 @@
 #include "parserstatemachine.hpp"
 #include "pretty_expression.hpp"
 #include "pretty_parserstatemachine.hpp"
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
 // #include "formal_arg.hpp"
 #include <xo/expression/Variable.hpp>
-#include <xo/indentlog/print/pretty_vector.hpp>
-#include <xo/indentlog/print/vector.hpp>
+#include <xo/ppsink/PrettyVector.hpp>
 #include <stdexcept>
+#include <xo/ppsink/pretty_struct.hpp>
 //#include "define_xs.hpp"
 //#include "progress_xs.hpp"
 //#include "paren_xs.hpp"
@@ -19,10 +22,13 @@
 //#include "xo/reflect/Reflect.hpp"
 
 namespace xo {
+    using xo::pp::field;
+    using xo::pp::xtag;
+    using xo::pp::tostr;
+    using xo::pp::scope;
     //using xo::scm::Constant;
     //using xo::reflect::Reflect;
     using xo::reflect::TypeDescr;
-    using xo::print::ppindentinfo;
 
     namespace scm {
         const char *
@@ -69,7 +75,7 @@ namespace xo {
         exprstate::on_def_token(const token_type & tk,
                                 parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             log && log(xtag("exstype", p_psm->top_exprstate().exs_type()));
 
@@ -94,7 +100,7 @@ namespace xo {
                                    parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             log && log(xtag("exstype", p_psm->top_exprstate().exs_type()));
 
@@ -110,7 +116,7 @@ namespace xo {
         {
             /* returning type description to something that wants it */
 
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             log && log(xtag("exstype",
                             p_psm->top_exprstate().exs_type()));
@@ -128,7 +134,7 @@ namespace xo {
             /* returning type description to something that wants it */
 
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             log && log(xtag("exstype",
                             p_psm->top_exprstate().exs_type()));
@@ -151,7 +157,7 @@ namespace xo {
             /* returning type description to something that wants it */
 
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             log && log(xtag("exstype",
                             p_psm->top_exprstate().exs_type()));
@@ -171,7 +177,7 @@ namespace xo {
         exprstate::on_colon_token(const token_type & tk,
                                   parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             constexpr const char * c_self_name = "exprstate::on_colon";
             const char * exp = get_expect_str();
@@ -184,7 +190,7 @@ namespace xo {
                                   parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             constexpr const char * c_self_name = "exprstate::on_comma";
             const char * exp = get_expect_str();
@@ -197,7 +203,7 @@ namespace xo {
                                       parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             constexpr const char * c_self_name = "exprstate::on_semicolon";
             const char * exp = get_expect_str();
@@ -209,7 +215,7 @@ namespace xo {
         exprstate::on_singleassign_token(const token_type & tk,
                                          parserstatemachine * p_psm) {
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             constexpr const char * c_self_name = "exprstate::on_singleassign_token";
             const char * exp = get_expect_str();
@@ -222,7 +228,7 @@ namespace xo {
                                    parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             constexpr const char * c_self_name = "exprstate::on_assign_token";
             const char * exp = get_expect_str();
@@ -235,7 +241,7 @@ namespace xo {
         exprstate::on_leftparen_token(const token_type & tk,
                                       parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             constexpr const char * c_self_name = "exprstate::on_leftparen_token";
             const char * exp = get_expect_str();
@@ -248,7 +254,7 @@ namespace xo {
                                        parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             constexpr const char * c_self_name = "exprstate::on_rightparen";
             const char * exp = get_expect_str();
@@ -261,7 +267,7 @@ namespace xo {
                                       parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             constexpr const char * c_self_name = "exprstate::on_leftbrace_token";
             const char * exp = get_expect_str();
@@ -274,7 +280,7 @@ namespace xo {
                                        parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             constexpr const char * c_self_name = "exprstate::on_rightbrace_token";
             const char * exp = get_expect_str();
@@ -287,7 +293,7 @@ namespace xo {
                                      parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             constexpr const char * c_self_name = "exprstate::on_operator_token";
             const char * exp = get_expect_str();
@@ -299,7 +305,7 @@ namespace xo {
         exprstate::on_if_token(const token_type & tk,
                                parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             constexpr const char * c_self_name = "exprstate::on_if_token";
             const char * exp = get_expect_str();
@@ -311,7 +317,7 @@ namespace xo {
         exprstate::on_then_token(const token_type & tk,
                                parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             constexpr const char * c_self_name = "exprstate::on_then_token";
             const char * exp = get_expect_str();
@@ -323,7 +329,7 @@ namespace xo {
         exprstate::on_else_token(const token_type & tk,
                                parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             constexpr const char * c_self_name = "exprstate::on_else_token";
             const char * exp = get_expect_str();
@@ -335,7 +341,7 @@ namespace xo {
         exprstate::on_bool_token(const token_type & tk,
                                  parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             constexpr const char * c_self_name = "exprstate::on_bool_token";
             const char * exp = get_expect_str();
@@ -347,7 +353,7 @@ namespace xo {
         exprstate::on_i64_token(const token_type & tk,
                                 parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             constexpr const char * c_self_name = "exprstate::on_i64_token";
             const char * exp = get_expect_str();
@@ -359,7 +365,7 @@ namespace xo {
         exprstate::on_f64_token(const token_type & tk,
                                 parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             constexpr const char * c_self_name = "exprstate::on_f64_token";
             const char * exp = get_expect_str();
@@ -371,7 +377,7 @@ namespace xo {
         exprstate::on_string_token(const token_type & tk,
                                    parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             constexpr const char * c_self_name = "exprstate::on_string_token";
             const char * exp = get_expect_str();
@@ -383,7 +389,7 @@ namespace xo {
         exprstate::on_input(const token_type & tk,
                             parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
             log && log(xtag("tk", tk));
             log && log(xtag("state", *this));
             log && log(xtag("psm", p_psm));
@@ -531,7 +537,7 @@ namespace xo {
                            parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             log && log(xtag("exstype", this->exs_type_),
                        xtag("expr", expr));
@@ -547,7 +553,7 @@ namespace xo {
                                           parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             log && log(xtag("exstype", this->exs_type_),
                        xtag("expr", expr));
@@ -566,7 +572,7 @@ namespace xo {
              * will override this method
              */
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             log && log(xtag("exstype", this->exs_type_),
                        xtag("symbol_name", symbol_name));
@@ -585,11 +591,11 @@ namespace xo {
             os << ">";
         }
 
-        bool
-        exprstate::pretty_print(const ppindentinfo & ppii) const
+        void
+        exprstate::pretty(xo::pp::PpSink & sink) const
         {
-            return ppii.pps()->pretty_struct(ppii, "exprstate",
-                                             refrtag("type", exs_type_));
+            sink.pretty_struct("exprstate",
+                                             field("type", exs_type_));
         }
 
         void

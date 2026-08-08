@@ -88,7 +88,7 @@ namespace xo {
             virtual void upsert_local(bp<Variable> target) override;
 
             virtual void print(std::ostream & os) const override;
-            virtual std::uint32_t pretty_print(const print::ppindentinfo & ppii) const override;
+            virtual void pretty(xo::pp::PpSink & sink) const override;
 
         private:
             LocalSymtab(const std::vector<rp<Variable>> & argv, const rp<SymbolTable> & parent_env);

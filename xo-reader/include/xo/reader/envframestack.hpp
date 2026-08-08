@@ -14,8 +14,6 @@ namespace xo {
          **/
         class envframestack {
         public:
-            using ppstate      = xo::print::ppstate;
-            using ppindentinfo = xo::print::ppindentinfo;
 
         public:
             envframestack() {}
@@ -60,7 +58,7 @@ namespace xo {
             }
 
             void print (std::ostream & os) const;
-            bool pretty_print(const ppindentinfo & ppii) const;
+            void pretty(xo::pp::PpSink & sink) const;
 
         private:
             std::vector<rp<SymbolTable>> stack_;

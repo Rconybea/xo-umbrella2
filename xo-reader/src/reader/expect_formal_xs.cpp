@@ -9,8 +9,10 @@
 #include "exprstatestack.hpp"
 #include "parserstatemachine.hpp"
 #include <xo/expression/Variable.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
 
 namespace xo {
+    using xo::pp::xtag;
     using xo::scm::Variable;
     using xo::reflect::TypeDescr;
 

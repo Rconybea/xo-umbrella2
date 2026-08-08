@@ -3,7 +3,10 @@
 #include "exprseq_xs.hpp"
 #include "exprstatestack.hpp"
 #include "parserstatemachine.hpp"
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
 // #include "expect_expr_xs.hpp"
 #include "define_xs.hpp"
 #include "expect_symbol_xs.hpp"
@@ -12,6 +15,7 @@
 #include <xo/expression/Constant.hpp>
 
 namespace xo {
+    using xo::pp::scope;
     namespace scm {
         std::unique_ptr<exprseq_xs>
         exprseq_xs::make(exprseqtype seqtype)
@@ -54,7 +58,7 @@ namespace xo {
                                  parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             define_xs::start(p_psm);
 
@@ -127,7 +131,7 @@ namespace xo {
             using xo::scm::Constant;
 
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             constexpr const char * c_self_name = "exprseq_xs::on_bool_token";
 
@@ -153,7 +157,7 @@ namespace xo {
         {
             using xo::scm::Constant;
 
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             constexpr const char * c_self_name = "exprseq_xs::on_i64_token";
 
@@ -179,7 +183,7 @@ namespace xo {
         {
             using xo::scm::Constant;
 
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             constexpr const char * c_self_name = "exprseq_xs::on_f64_token";
 
@@ -205,7 +209,7 @@ namespace xo {
         {
             using xo::scm::Constant;
 
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             constexpr const char * c_self_name = "exprseq_xs::on_string_token";
 

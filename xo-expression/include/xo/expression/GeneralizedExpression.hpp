@@ -7,8 +7,7 @@
 
 #include "xo/expression/typeinf/type_ref.hpp"
 #include <xo/refcnt/Refcounted.hpp>
-#include <xo/indentlog/print/pretty.hpp>   /* xo::print::ppstate, ppindentinfo --
-                                            * were arriving via xo/reflect/TypeDescr.hpp */
+#include <xo/ppsink/PpSink.hpp>   /* xo::pp::PpSink -- named by pretty() below */
 // #include "xo/reflect/TypeDescr.hpp"
 #include "exprtype.hpp"
 
@@ -26,8 +25,7 @@ namespace xo {
             using type_ref     = xo::scm::type_ref;
             using prefix_type  = xo::scm::prefix_type;
             using TypeDescr    = xo::reflect::TypeDescr;
-            using ppstate      = xo::print::ppstate;
-            using ppindentinfo = xo::print::ppindentinfo;
+            using PpSink       = xo::pp::PpSink;
 
         public:
             /** if @p valuetype is null, generate unique type variable
@@ -47,8 +45,11 @@ namespace xo {
             virtual void display(std::ostream & os) const = 0;
             /** human-readable string representation **/
             virtual std::string display_string() const;
-            /** pretty printing support.  See [xo-indentlog/xo/indentlog/pretty.hpp] **/
-            virtual std::uint32_t pretty_print(const ppindentinfo & ppii) const = 0;
+            /** pretty-print to  sink.  Single-pass: the sink decides where groups
+             *  break, so an implementation just emits its structure.  See
+             *  xo-ppsink/pretty_struct.hpp (pretty_struct / struct_open).
+             **/
+            virtual void pretty(xo::pp::PpSink & sink) const = 0;
 
             /** useful when scaffolding expressions in a parser **/
             void assign_valuetype(TypeDescr x) { valuetype_ref_.resolve_to(x); }

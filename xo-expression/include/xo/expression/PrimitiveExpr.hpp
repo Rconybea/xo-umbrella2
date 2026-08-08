@@ -9,7 +9,10 @@
 #include "llvmintrinsic.hpp"
 #include "pretty_expression.hpp"
 #include <xo/reflect/Reflect.hpp>
-#include <xo/indentlog/print/quoted.hpp>
+#include <xo/ppsink/quoted.hpp>
+#include <xo/ppsink/quoted_ostream.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/pretty_struct.hpp>
 
 extern "C" {
     /* these symbols needed to link primitives */
@@ -84,6 +87,8 @@ namespace xo {
             // ----- Expression -----
 
             virtual void display(std::ostream & os) const override {
+                using xo::pp::xtag;
+
                 os << "<PrimitiveExpr"
                    << xtag("name", name_)
                    << xtag("type", this->value_td()->short_name())
@@ -91,18 +96,20 @@ namespace xo {
                    << ">";
             }
 
-            virtual std::uint32_t pretty_print(const ppindentinfo & ppii) const override {
+            virtual void pretty(xo::pp::PpSink & sink) const override {
+                using xo::pp::field;
+
                 /* 1. rtag instead of refrtag:
-                 *    print::quot() is a temporary rvalue; lifetime ends before control enters pretty_struct()
+                 *    xo::pp::quot() is a temporary rvalue; lifetime ends before control enters pretty_struct()
                  *
                  * 2. value cast to void*:
                  *    we don't have pretty printer for native function pointers anyway
                  *    + simplifies ppdetail_atomic
                  */
-                return ppii.pps()->pretty_struct(ppii, "PrimitiveExpr",
-                                                 refrtag("name", name_),
-                                                 rtag("type", print::quot(this->valuetype()->short_name())),
-                                                 refrtag("value", (void*)(this->value())));
+                sink.pretty_struct("PrimitiveExpr",
+                                                 field("name", name_),
+                                                 field("type", xo::pp::quot(this->valuetype()->short_name())),
+                                                 field("value", (void*)(this->value())));
             }
 
         private:

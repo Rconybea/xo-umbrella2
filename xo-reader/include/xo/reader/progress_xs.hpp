@@ -149,7 +149,7 @@ namespace xo {
                                       parserstatemachine * p_psm) override;
 
             virtual void print(std::ostream & os) const override;
-            virtual bool pretty_print(const print::ppindentinfo & ppii) const override;
+            virtual void pretty(xo::pp::PpSink & sink) const override;
 
         private:
             static std::unique_ptr<progress_xs> make(rp<Expression> valex,
@@ -177,12 +177,6 @@ namespace xo {
             rp<Expression> rhs_;
         };
     } /*namespace scm*/
-
-#ifndef ppdetail_atomic
-    namespace print {
-        PPDETAIL_ATOMIC(xo::scm::optype);
-    }
-#endif
 } /*namespace xo*/
 
 

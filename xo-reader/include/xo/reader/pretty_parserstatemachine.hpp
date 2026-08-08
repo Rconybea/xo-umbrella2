@@ -6,18 +6,21 @@
 #pragma once
 
 #include "parserstatemachine.hpp"
-#include <xo/indentlog/print/pretty.hpp>
+#include <xo/ppsink/pretty.hpp>
 
-namespace xo {
-    namespace print {
-        template<>
-        struct ppdetail<xo::scm::parserstatemachine> {
-            static bool print_pretty(const ppindentinfo & ppii, const xo::scm::parserstatemachine & x);
-        };
+namespace xo::pp {
+    /* parserstatemachine is not in the expression hierarchy: no virtual,
+     * these render it directly.  Defined in pretty_parserstatemachine.cpp.
+     */
+    template <>
+    struct Prettifier<xo::scm::parserstatemachine> {
+        static void print(PpSink & sink, const xo::scm::parserstatemachine & x);
+    };
 
-        template<>
-        struct ppdetail<xo::scm::parserstatemachine*> {
-            static bool print_pretty(const ppindentinfo & ppii, const xo::scm::parserstatemachine * x);
-        };
-    }
-} /*namespace xo*/
+    template <>
+    struct Prettifier<xo::scm::parserstatemachine *> {
+        static void print(PpSink & sink, const xo::scm::parserstatemachine * x);
+    };
+} /*namespace xo::pp*/
+
+/* end pretty_parserstatemachine.hpp */

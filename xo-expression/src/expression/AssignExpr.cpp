@@ -6,10 +6,15 @@
 #include "AssignExpr.hpp"
 #include "pretty_expression.hpp"
 #include "pretty_variable.hpp"
-#include <xo/indentlog/print/tag.hpp>
+#include <xo/ppsink/tag.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
 #include <cstdint>
+#include <xo/ppsink/pretty_struct.hpp>
 
 namespace xo {
+    using xo::pp::field;
+    using xo::pp::xtag;
     namespace scm {
         rp<AssignExpr>
         AssignExpr::make(const rp<Variable> & lhs,
@@ -90,11 +95,11 @@ namespace xo {
                << ">";
         }
 
-        std::uint32_t
-        AssignExpr::pretty_print(const ppindentinfo & ppii) const {
-            return ppii.pps()->pretty_struct(ppii, "AssignExpr",
-                                             refrtag("lhs", lhs_),
-                                             refrtag("rhs", rhs_));
+        void
+        AssignExpr::pretty(xo::pp::PpSink & sink) const {
+            sink.pretty_struct("AssignExpr",
+                                             field("lhs", lhs_),
+                                             field("rhs", rhs_));
         }
     } /*namespace scm*/
 } /*namespace xo*/

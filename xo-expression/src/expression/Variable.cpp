@@ -3,8 +3,13 @@
 #include "Variable.hpp"
 #include "SymbolTable.hpp"
 #include "pretty_expression.hpp"
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/quoted.hpp>
+#include <xo/ppsink/pretty_struct.hpp>
 
 namespace xo {
+    using xo::pp::field;
+    using xo::pp::xtag;
     namespace scm {
         std::string
         Variable::gensym(const std::string & prefix) {
@@ -39,14 +44,14 @@ namespace xo {
             os << ">";
         } /*display*/
 
-        std::uint32_t
-        Variable::pretty_print(const ppindentinfo & ppii) const {
+        void
+        Variable::pretty(xo::pp::PpSink & sink) const {
             /* 1. rtag instead of refrtag:
-             *    print::quot() is a temporary rvalue; lifetime ends before control enters pretty_struct()
+             *    xo::pp::quot() is a temporary rvalue; lifetime ends before control enters pretty_struct()
              */
-            return ppii.pps()->pretty_struct(ppii, "Variable",
-                                             refrtag("name", name_),
-                                             rtag("type", print::unq(this->valuetype()
+            sink.pretty_struct("Variable",
+                                             field("name", name_),
+                                             field("type", xo::pp::unq(this->valuetype()
                                                                       ? this->valuetype()->short_name()
                                                                       : "nullptr")));
         }

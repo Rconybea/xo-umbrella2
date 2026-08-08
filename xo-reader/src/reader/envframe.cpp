@@ -4,9 +4,11 @@
  */
 
 #include "envframe.hpp"
-#include <xo/indentlog/print/vector.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/PrettyVector.hpp>
 
 namespace xo {
+    using xo::pp::xtag;
     using xo::scm::Variable;
 
     namespace scm {

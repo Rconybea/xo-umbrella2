@@ -9,9 +9,14 @@
 #include "pretty_localenv.hpp"
 #include "pretty_parserstatemachine.hpp"
 #include <xo/expression/pretty_expression.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
 
 namespace xo {
+    using xo::pp::xtag;
+    using xo::pp::scope;
     using xo::scm::LocalSymtab;
     using xo::scm::Variable;
 
@@ -58,7 +63,7 @@ namespace xo {
 
         void
         parserstatemachine::push_envframe(const rp<LocalEnv> & x) {
-            scope log(XO_DEBUG(debug_flag_));
+            scope log(XO_DEBUG_(debug_flag_));
 
             log && log(xtag("frame", x));
 
@@ -67,7 +72,7 @@ namespace xo {
 
         rp<SymbolTable>
         parserstatemachine::pop_envframe() {
-            scope log(XO_DEBUG(debug_flag_));
+            scope log(XO_DEBUG_(debug_flag_));
 
             return env_stack_.pop_envframe();
         }
@@ -75,7 +80,7 @@ namespace xo {
         void
         parserstatemachine::on_expr(bp<Expression> x)
         {
-            scope log(XO_DEBUG(debug_flag_));
+            scope log(XO_DEBUG_(debug_flag_));
 
             log && log(xtag("x", x),
                        xtag("psm", this));
@@ -86,7 +91,7 @@ namespace xo {
         void
         parserstatemachine::on_expr_with_semicolon(bp<Expression> x)
         {
-            scope log(XO_DEBUG(debug_flag_));
+            scope log(XO_DEBUG_(debug_flag_));
 
             log && log(xtag("x", x),
                        xtag("psm", this));
@@ -99,7 +104,7 @@ namespace xo {
         void
         parserstatemachine::on_symbol(const std::string & x)
         {
-            scope log(XO_DEBUG(debug_flag_));
+            scope log(XO_DEBUG_(debug_flag_));
 
             log && log(xtag("x", x),
                        xtag("psm", this));
@@ -110,7 +115,7 @@ namespace xo {
         void
         parserstatemachine::on_semicolon_token(const token_type & tk)
         {
-            scope log(XO_DEBUG(debug_flag_));
+            scope log(XO_DEBUG_(debug_flag_));
 
             log && log(xtag("tk", tk),
                        xtag("psm", this));
@@ -121,7 +126,7 @@ namespace xo {
         void
         parserstatemachine::on_operator_token(const token_type & tk)
         {
-            scope log(XO_DEBUG(debug_flag_));
+            scope log(XO_DEBUG_(debug_flag_));
 
             log && log(xtag("tk", tk),
                        xtag("psm", this));
@@ -132,7 +137,7 @@ namespace xo {
         void
         parserstatemachine::on_leftbrace_token(const token_type & tk)
         {
-            scope log(XO_DEBUG(debug_flag_));
+            scope log(XO_DEBUG_(debug_flag_));
 
             log && log(xtag("tk", tk),
                        xtag("psm", this));
@@ -143,7 +148,7 @@ namespace xo {
         void
         parserstatemachine::on_rightbrace_token(const token_type & tk)
         {
-            scope log(XO_DEBUG(debug_flag_));
+            scope log(XO_DEBUG_(debug_flag_));
 
             log && log(xtag("tk", tk),
                        xtag("psm", this));
@@ -154,7 +159,7 @@ namespace xo {
         void
         parserstatemachine::on_then_token(const token_type & tk)
         {
-            scope log(XO_DEBUG(debug_flag_));
+            scope log(XO_DEBUG_(debug_flag_));
 
             log && log(xtag("tk", tk),
                        xtag("psm", this));
@@ -165,7 +170,7 @@ namespace xo {
         void
         parserstatemachine::on_else_token(const token_type & tk)
         {
-            scope log(XO_DEBUG(debug_flag_));
+            scope log(XO_DEBUG_(debug_flag_));
 
             log && log(xtag("tk", tk),
                        xtag("psm", this));
@@ -176,7 +181,7 @@ namespace xo {
         void
         parserstatemachine::on_f64_token(const token_type & tk)
         {
-            scope log(XO_DEBUG(debug_flag_));
+            scope log(XO_DEBUG_(debug_flag_));
 
             log && log(xtag("tk", tk),
                        xtag("psm", this));

@@ -3,9 +3,17 @@
 #include "apply_xs.hpp"
 #include "expect_expr_xs.hpp"
 #include "parserstatemachine.hpp"
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/pretty_struct.hpp>
+#include <xo/ppsink/PrettyVector.hpp>
 
 namespace xo {
+    using xo::pp::field;
+    using xo::pp::xtag;
+    using xo::pp::scope;
     namespace scm {
         // ----- applyexprstatetype -----
 
@@ -40,7 +48,7 @@ namespace xo {
         apply_xs::start(rp<Expression> fn_expr,
                         parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             p_psm->push_exprstate(apply_xs::make());
             p_psm->top_exprstate().on_expr(fn_expr.get(), p_psm);
@@ -69,7 +77,7 @@ namespace xo {
         apply_xs::on_expr(bp<Expression> expr,
                           parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             switch (applyxs_type_) {
             case applyexprstatetype::invalid:
@@ -107,7 +115,7 @@ namespace xo {
         apply_xs::on_comma_token(const token_type & tk,
                                  parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             if (this->applyxs_type_ == applyexprstatetype::apply_3) {
                 this->applyxs_type_ = applyexprstatetype::apply_2;
@@ -124,7 +132,7 @@ namespace xo {
         apply_xs::on_leftparen_token(const token_type & tk,
                                      parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             log && log("applyxs_type", applyxs_type_);
 
@@ -143,7 +151,7 @@ namespace xo {
         apply_xs::on_rightparen_token(const token_type & tk,
                                       parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             log && log("applyxs_type", applyxs_type_);
 
@@ -174,13 +182,13 @@ namespace xo {
             os << ">";
         }
 
-        bool
-        apply_xs::pretty_print(const xo::print::ppindentinfo & ppii) const
+        void
+        apply_xs::pretty(xo::pp::PpSink & sink) const
         {
-            return ppii.pps()->pretty_struct(ppii, "apply_xs",
-                                             refrtag("applyxs_type", applyxs_type_),
-                                             refrtag("fn_expr", fn_expr_),
-                                             refrtag("args_expr_v", args_expr_v_));
+            sink.pretty_struct("apply_xs",
+                                             field("applyxs_type", applyxs_type_),
+                                             field("fn_expr", fn_expr_),
+                                             field("args_expr_v", args_expr_v_));
         }
 
     } /*namespace scm*/

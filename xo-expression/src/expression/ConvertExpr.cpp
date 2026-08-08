@@ -5,8 +5,13 @@
 
 #include "ConvertExpr.hpp"
 #include "pretty_expression.hpp"
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/quoted.hpp>
+#include <xo/ppsink/pretty_struct.hpp>
 
 namespace xo {
+    using xo::pp::field;
+    using xo::pp::xtag;
     namespace scm {
         rp<ConvertExpr>
         ConvertExpr::make(TypeDescr dest_type,
@@ -32,11 +37,11 @@ namespace xo {
                << ">";
         }
 
-        std::uint32_t
-        ConvertExpr::pretty_print(const ppindentinfo & ppii) const {
-            return ppii.pps()->pretty_struct(ppii, "Convert",
-                                             rtag("dest_type", print::quot(this->valuetype()->short_name())),
-                                             refrtag("arg", arg_));
+        void
+        ConvertExpr::pretty(xo::pp::PpSink & sink) const {
+            sink.pretty_struct("Convert",
+                                             field("dest_type", xo::pp::quot(this->valuetype()->short_name())),
+                                             field("arg", arg_));
         }
 
         // ----- ConvertExprAccess -----

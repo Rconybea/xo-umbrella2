@@ -6,6 +6,8 @@ set(SELF_SRCS exprreplxx.cpp)
 if (XO_ENABLE_EXAMPLES)
     xo_add_executable(${SELF_EXE} ${SELF_SRCS})
     xo_self_dependency(${SELF_EXE} xo_reader)
+    # PrettySink, for rendering expressions with line breaking
+    xo_dependency(${SELF_EXE} xo_indentlog2)
     xo_external_target_dependency(${SELF_EXE} replxx replxx::replxx)
 
     find_package(Threads REQUIRED)

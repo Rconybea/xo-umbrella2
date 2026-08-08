@@ -81,7 +81,7 @@ namespace xo {
                                                 parserstatemachine * p_psm) override;
 
             virtual void print(std::ostream & os) const override;
-            virtual bool pretty_print(const xo::print::ppindentinfo & ppii) const override;
+            virtual void pretty(xo::pp::PpSink & sink) const override;
 
         private:
             static std::unique_ptr<expect_expr_xs> make(bool allow_defs,

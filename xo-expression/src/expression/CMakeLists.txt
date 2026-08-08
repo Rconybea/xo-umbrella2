@@ -23,10 +23,8 @@ set(SELF_SRCS
 xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 ${SELF_SRCS})
 xo_dependency(${SELF_LIB} reflect)
 xo_dependency(${SELF_LIB} xo_flatstring)
-# GeneralizedExpression.hpp et al use legacy xo-indentlog (ppstate,
-# ppindentinfo, xtag).  Was arriving transitively via xo-reflect; declared
-# explicitly now that xo-reflect is ppsink-only.
-xo_dependency(${SELF_LIB} indentlog)
+# public headers name xo::pp::PpSink (GeneralizedExpression::pretty)
+xo_dependency(${SELF_LIB} xo_ppsink)
 #xo_dependency(${SELF_LIB} subsys)
 
 # end CMakeLists.txt

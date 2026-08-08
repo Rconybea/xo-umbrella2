@@ -4,9 +4,13 @@
  **/
 
 #include "typeinf/type_unifier.hpp"
-#include <xo/indentlog/print/tag.hpp>
+#include <xo/ppsink/tag.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
 
 namespace xo {
+    using xo::pp::xtag;
+    using xo::pp::tostr;
     namespace scm {
         std::ostream &
         operator<< (std::ostream & os,
@@ -39,10 +43,10 @@ namespace xo {
                 .error_src_function_ = src_function,
                 .error_description_ = tostr("attempting unify(T1,T2) with T1 -> S1, T2 -> S2",
                                             ": occurs check failed with S1 occuring in S2",
-                                            xrefrtag("T1", t1),
-                                            xrefrtag("T2", t2),
-                                            xrefrtag("S1", s1),
-                                            xrefrtag("S2", s2))
+                                            xtag("T1", t1),
+                                            xtag("T2", t2),
+                                            xtag("S1", s1),
+                                            xtag("S2", s2))
             };
         };
 
@@ -170,10 +174,10 @@ namespace xo {
                     .error_src_function_ = c_self_name,
                     .error_description_ = tostr("attempting unify(T1,T2) with T1 -> S1, T2 -> S2",
                                                 ": incompatible concrete types S1,S2",
-                                                xrefrtag("T1", lhs),
-                                                xrefrtag("T2", rhs),
-                                                xrefrtag("S1", lhs1),
-                                                xrefrtag("S2", rhs1))
+                                                xtag("T1", lhs),
+                                                xtag("T2", rhs),
+                                                xtag("S1", lhs1),
+                                                xtag("S2", rhs1))
                 };
             }
 
@@ -205,10 +209,10 @@ namespace xo {
                 .error_src_function_ = c_self_name,
                 .error_description_ = tostr("attempting unify(T1,T2) with T1 -> S1, T2 -> S2",
                                             "supposedly-unreachable case for S1,S2",
-                                            xrefrtag("T1", lhs),
-                                            xrefrtag("T2", rhs),
-                                            xrefrtag("S1", lhs1),
-                                            xrefrtag("S2", rhs1))
+                                            xtag("T1", lhs),
+                                            xtag("T2", rhs),
+                                            xtag("S1", lhs1),
+                                            xtag("S2", rhs1))
             };
         }
 

@@ -8,6 +8,9 @@
 #include "ConstantInterface.hpp"
 #include "pretty_expression.hpp"
 #include <type_traits>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/quoted.hpp>
+#include <xo/ppsink/pretty_struct.hpp>
 
 namespace xo {
     namespace scm {
@@ -67,6 +70,8 @@ namespace xo {
             }
 
             virtual void display(std::ostream & os) const override {
+                using xo::pp::xtag;
+
                 os << "<Constant";
                 if (value_td_)
                     os << xtag("type", value_td_->short_name());
@@ -76,10 +81,12 @@ namespace xo {
                 os << ">";
             }
 
-            virtual std::uint32_t pretty_print(const ppindentinfo & ppii) const override {
-                return ppii.pps()->pretty_struct(ppii, "Constant",
-                                                 rtag("type", print::quot(this->valuetype()->short_name())),
-                                                 refrtag("value", value_));
+            virtual void pretty(xo::pp::PpSink & sink) const override {
+                using xo::pp::field;
+
+                sink.pretty_struct("Constant",
+                                                 field("type", xo::pp::quot(this->valuetype()->short_name())),
+                                                 field("value", value_));
             }
 
         private:

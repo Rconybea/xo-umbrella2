@@ -4,11 +4,15 @@
 #include "PrimitiveExpr.hpp"
 #include "exprtype.hpp"
 #include "pretty_expression.hpp"
-#include <xo/indentlog/print/pretty_vector.hpp>
-#include <xo/indentlog/print/vector.hpp>
+#include <xo/ppsink/PrettyVector.hpp>
 #include <cstdint>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/pretty_struct.hpp>
 
 namespace xo {
+    using xo::pp::field;
+    using xo::pp::xtag;
+    using xo::pp::tostr;
     namespace scm {
         rp<Apply>
         Apply::make(const rp<Expression> & fn,
@@ -164,12 +168,12 @@ namespace xo {
                << ">";
         }
 
-        std::uint32_t
-        Apply::pretty_print(const ppindentinfo & ppii) const
+        void
+        Apply::pretty(xo::pp::PpSink & sink) const
         {
-            return ppii.pps()->pretty_struct(ppii, "Apply",
-                                             refrtag("fn", fn_),
-                                             refrtag("argv", argv_));
+            sink.pretty_struct("Apply",
+                                             field("fn", fn_),
+                                             field("argv", argv_));
 
 #ifdef OBSOLETE
             ppstate * pps = ppii.pps();

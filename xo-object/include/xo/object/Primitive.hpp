@@ -11,6 +11,11 @@
 #include "Procedure.hpp"
 #include "String.hpp"
 #include <xo/reflect/Reflect.hpp>
+/* display() streams a tag; this header used to rely on its includer
+ * having xtag in scope, which broke once xo-expression stopped
+ * propagating xo-indentlog.
+ */
+#include <xo/ppsink/tag_ostream.hpp>
 
 namespace xo {
     namespace obj {
@@ -85,7 +90,7 @@ namespace xo {
                 return Reflect::make_tp(const_cast<Primitive*>(this));
             }
             virtual void display(std::ostream & os) const final override {
-                os << "<primitive" << xtag("name", Super::name_) << ">";
+                os << "<primitive" << xo::pp::xtag("name", Super::name_) << ">";
             }
             virtual std::size_t _shallow_size() const final override {
                 return sizeof(*this);

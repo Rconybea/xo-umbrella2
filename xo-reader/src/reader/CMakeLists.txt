@@ -29,5 +29,7 @@ set(SELF_SRCS
 xo_add_shared_library4(${SELF_LIB} ${PROJECT_NAME}Targets ${PROJECT_VERSION} 1 ${SELF_SRCS})
 xo_dependency(${SELF_LIB} xo_expression)
 xo_dependency(${SELF_LIB} xo_tokenizer)
+# reader sources name xo::pp:: directly (scope, xtag, field, struct_open)
+xo_dependency(${SELF_LIB} xo_ppsink)
 
 # end CMakeLists.txt

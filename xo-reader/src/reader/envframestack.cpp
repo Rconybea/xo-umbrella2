@@ -6,9 +6,16 @@
 #include "envframestack.hpp"
 #include "pretty_envframestack.hpp"
 #include "pretty_localenv.hpp"
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
+#include <xo/ppsink/pretty_struct.hpp>
 
 namespace xo {
+    using xo::pp::field;
+    using xo::pp::xtag;
+    using xo::pp::scope;
     using xo::scm::LocalSymtab;
     using xo::scm::Variable;
 
@@ -29,7 +36,7 @@ namespace xo {
         envframestack::push_envframe(const rp<SymbolTable> & frame)
         {
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag),
+            scope log(XO_DEBUG_(c_debug_flag),
                       xtag("frame", frame));
 
             std::size_t z = stack_.size();
@@ -42,7 +49,7 @@ namespace xo {
         rp<SymbolTable>
         envframestack::pop_envframe() {
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             std::size_t z = stack_.size();
 
@@ -96,43 +103,21 @@ namespace xo {
             os << ">" << std::endl;
         }
 
-        bool
-        envframestack::pretty_print(const ppindentinfo & ppii) const
+        void
+        envframestack::pretty(xo::pp::PpSink & sink) const
         {
-            ppstate * pps = ppii.pps();
+            /* force_break preserves the legacy policy, which bailed out of the
+             * fit pass ("always multiple lines if more than one element in
+             * stack") rather than letting the margin decide.
+             */
+            const std::size_t z = stack_.size();
 
-            if (ppii.upto()) {
-                if (stack_.size() > 1)
-                    return false;
+            auto st = sink.struct_open("envframestack", z > 1 /*force_break*/);
 
-                if (!pps->print_upto("<envframestack"))
-                    return false;
+            st.field("size", z);
 
-                if (!pps->print_upto_tag("size", stack_.size()))
-                    return false;
-
-                if ((stack_.size() > 0)
-                    && !pps->print_upto_tag("[0]", stack_[0]))
-                {
-                    return false;
-                }
-
-                pps->write(">");
-
-                return true;
-            } else {
-                pps->write("<envframestack");
-
-                pps->newline_pretty_tag(ppii.ci1(), "size", stack_.size());
-
-                for (std::size_t i = 0, z = stack_.size(); i < z; ++i) {
-                    std::string i_str = tostr("[", z-i-1, "]");
-                    pps->newline_pretty_tag(ppii.ci1(), i_str, stack_[i]);
-                }
-                pps->write(">");
-
-                return false;
-            }
+            for (std::size_t i = 0; i < z; ++i)
+                st.field(xo::pp::tostr("[", z-i-1, "]"), stack_[i]);
         }
     } /*namespace scm*/
 } /*namespace xo*/

@@ -1,9 +1,14 @@
 /* @file reader.cpp */
 
 #include "reader.hpp"
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
 
 namespace xo {
+    using xo::pp::xtag;
+    using xo::pp::scope;
     namespace scm {
         reader::reader(const rp<GlobalSymtab> & toplevel_symtab, bool debug_flag) :
             tokenizer_{debug_flag},
@@ -33,7 +38,7 @@ namespace xo {
         reader_result
         reader::read_expr(const span_type & input_arg, bool eof_flag)
         {
-            scope log(XO_DEBUG(this->debug_flag()));
+            scope log(XO_DEBUG_(this->debug_flag()));
 
             span_type input = input_arg;
 

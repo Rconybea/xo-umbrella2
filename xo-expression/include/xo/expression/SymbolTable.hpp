@@ -8,7 +8,7 @@
 #include "Variable.hpp"
 #include "binding_path.hpp"
 #include <xo/refcnt/Refcounted.hpp>
-#include <xo/indentlog/print/pretty.hpp>
+#include <xo/ppsink/pretty_struct.hpp>
 
 namespace xo {
 
@@ -53,7 +53,7 @@ namespace xo {
             virtual void upsert_local(bp<Variable> target) = 0;
 
             virtual void print(std::ostream & os) const = 0;
-            virtual std::uint32_t pretty_print(const xo::print::ppindentinfo & ppii) const = 0;
+            virtual void pretty(xo::pp::PpSink & sink) const = 0;
         };
 
         inline std::ostream &

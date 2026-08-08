@@ -6,23 +6,22 @@
 #pragma once
 
 #include "envframestack.hpp"
-#include <xo/indentlog/print/pretty.hpp>
+#include <xo/ppsink/pretty.hpp>
 
-namespace xo {
-    namespace print {
-        template <>
-        struct ppdetail<const xo::scm::envframestack*> {
-            static inline bool print_pretty(const ppindentinfo & ppii, const xo::scm::envframestack * p) {
-                return p->pretty_print(ppii);
-            }
-        };
+namespace xo::pp {
+    template <>
+    struct Prettifier<const xo::scm::envframestack *> {
+        static void print(PpSink & sink, const xo::scm::envframestack * p) {
+            if (p) p->pretty(sink); else sink.put("<nullptr envframestack>");
+        }
+    };
 
-        template <>
-        struct ppdetail<xo::scm::envframestack*> {
-            static inline bool print_pretty(const ppindentinfo & ppii, const xo::scm::envframestack * p) {
-                return p->pretty_print(ppii);
-            }
-        };
+    template <>
+    struct Prettifier<xo::scm::envframestack *> {
+        static void print(PpSink & sink, const xo::scm::envframestack * p) {
+            if (p) p->pretty(sink); else sink.put("<nullptr envframestack>");
+        }
+    };
+} /*namespace xo::pp*/
 
-    } /*namespace print*/
-} /*namespace xo*/
+/* end pretty_envframestack.hpp */

@@ -5,9 +5,11 @@
 
 #include "GlobalSymtab.hpp"
 #include "Expression.hpp"
-#include <xo/indentlog/print/ppdetail_atomic.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/pretty_struct.hpp>
 
 namespace xo {
+    using xo::pp::xtag;
     namespace scm {
         GlobalSymtab::GlobalSymtab() = default;
 
@@ -34,28 +36,14 @@ namespace xo {
                << ">";
         }
 
-        std::uint32_t
-        GlobalSymtab::pretty_print(const xo::print::ppindentinfo & ppii) const
+        void
+        GlobalSymtab::pretty(xo::pp::PpSink & sink) const
         {
-            using xo::print::ppstate;
+            using xo::pp::field;
 
-            ppstate * pps = ppii.pps();
+            const std::size_t size = global_map_.size();
 
-            if (ppii.upto()) {
-                if (!pps->print_upto("<GlobalEnv"))
-                    return false;
-                if (!pps->print_upto_tag("size", global_map_.size()))
-                    return false;
-                pps->write(">");
-
-                return true;
-            } else {
-                pps->write("<GlobalEnv");
-                pps->newline_pretty_tag(ppii.ci1(), "size", global_map_.size());
-                pps->write(">");
-
-                return false;
-            }
+            sink.pretty_struct("GlobalEnv", field("size", size));
         }
     } /*namespace scm*/
 } /*namespace xo*/

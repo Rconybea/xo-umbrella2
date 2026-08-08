@@ -5,6 +5,7 @@
 #include <cstdint>
 
 namespace xo {
+    using xo::pp::tostr;
     namespace scm {
         namespace {
             using xo::scm::prefix_type;
@@ -49,8 +50,8 @@ namespace xo {
         }
 
 #ifdef SUPERSEDED // currently all derived expression types support pretty printing
-        std::uint32_t
-        GeneralizedExpression::pretty_print(const ppindentinfo & ppii) const {
+        void
+        GeneralizedExpression::pretty(xo::pp::PpSink & sink) const {
             // Slooooow fallback for subtypes that don't implement pretty printing support
             // Currently have support for:
             // - Variable

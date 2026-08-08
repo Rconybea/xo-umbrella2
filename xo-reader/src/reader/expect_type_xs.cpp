@@ -9,6 +9,8 @@
 #include <xo/reflect/Reflect.hpp>
 
 namespace xo {
+    using xo::pp::xtag;
+    using xo::pp::tostr;
     using xo::reflect::Reflect;
 
     namespace scm {

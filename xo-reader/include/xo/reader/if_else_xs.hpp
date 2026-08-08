@@ -7,7 +7,6 @@
 
 #include "exprstate.hpp"
 #include <xo/expression/IfExpr.hpp>
-#include <xo/indentlog/print/ppdetail_atomic.hpp>
 
 namespace xo {
     namespace scm {
@@ -99,11 +98,7 @@ namespace xo {
         };
     } /*namespace scm*/
 
-    namespace print {
-#ifndef ppdetail_atomic
-        PPDETAIL_ATOMIC(xo::scm::ifexprstatetype);
-#endif
-    }
+    namespace print {    }
 } /*namespace xo*/
 
 /* end if_else_xs.hpp */

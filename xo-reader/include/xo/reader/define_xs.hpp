@@ -8,7 +8,6 @@
 #include "exprstate.hpp"
 #include <xo/expression/ConvertExpr.hpp>
 #include <xo/expression/DefineExpr.hpp>
-#include <xo/indentlog/print/ppdetail_atomic.hpp>
 //#include <cstdint>
 
 namespace xo {
@@ -108,7 +107,7 @@ namespace xo {
                                       parserstatemachine * p_psm) override;
 
             virtual void print(std::ostream & os) const override;
-            virtual bool pretty_print(const print::ppindentinfo & ppii) const override;
+            virtual void pretty(xo::pp::PpSink & sink) const override;
 
         private:
             static std::unique_ptr<define_xs> make();
@@ -123,12 +122,6 @@ namespace xo {
             rp<ConvertExprAccess> cvt_expr_;
         };
     } /*namespace scm*/
-
-#ifndef ppdetail_atomic
-    namespace print {
-        PPDETAIL_ATOMIC(xo::scm::defexprstatetype);
-    }
-#endif
 } /*namespace xo*/
 
 

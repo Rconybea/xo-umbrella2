@@ -6,12 +6,16 @@
 #include "pretty_variable.hpp"
 #include <xo/reflect/TypeDescr.hpp>
 #include <xo/reflect/function/FunctionTdx.hpp>
-#include <xo/indentlog/print/pretty_vector.hpp>
-#include <xo/indentlog/print/vector.hpp>
+#include <xo/ppsink/PrettyVector.hpp>
 #include <map>
 #include <sstream>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/pretty_struct.hpp>
 
 namespace xo {
+    using xo::pp::field;
+    using xo::pp::xtag;
+    using xo::pp::tostr;
     using xo::reflect::TypeDescr;
     using xo::reflect::TypeDescrBase;
     using xo::reflect::FunctionTdxInfo;
@@ -349,13 +353,13 @@ namespace xo {
                << ">";
         } /*display*/
 
-        std::uint32_t
-        Lambda::pretty_print(const ppindentinfo & ppii) const
+        void
+        Lambda::pretty(xo::pp::PpSink & sink) const
         {
-            return ppii.pps()->pretty_struct(ppii, "Lambda",
-                                             refrtag("name", name_),
-                                             refrtag("argv", local_env_->argv()),
-                                             refrtag("body", body_));
+            sink.pretty_struct("Lambda",
+                                             field("name", name_),
+                                             field("argv", local_env_->argv()),
+                                             field("body", body_));
         }
 
         // ----- Lambda Access -----

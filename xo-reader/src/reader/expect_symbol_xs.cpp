@@ -6,9 +6,14 @@
 #include "expect_symbol_xs.hpp"
 #include "exprstatestack.hpp"
 #include "parserstatemachine.hpp"
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
 
 namespace xo {
+    using xo::pp::xtag;
+    using xo::pp::scope;
     namespace scm {
         std::unique_ptr<expect_symbol_xs>
         expect_symbol_xs::make() {
@@ -30,7 +35,7 @@ namespace xo {
                                           parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             log && log(xtag("tk", tk));
 

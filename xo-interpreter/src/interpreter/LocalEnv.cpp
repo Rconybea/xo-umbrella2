@@ -3,6 +3,9 @@
 #include "LocalEnv.hpp"
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflect/StructReflector.hpp>
+#include <xo/ppsink/quoted.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
 #include <cstring>
 
 namespace xo {
@@ -13,7 +16,9 @@ namespace xo {
     using xo::reflect::TypeDescrExtra;
     using xo::reflect::EstablishTypeDescr;
     using xo::reflect::StlVectorTdx;
-    using xo::print::quot;
+    using xo::pp::quot;
+    using xo::pp::tostr;
+    using xo::pp::xtag;
 
     namespace scm {
         namespace {

@@ -4,13 +4,17 @@
  **/
 
 #include "if_else_xs.hpp"
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/scope.hpp>
+#include <xo/ppsink/scope_macros.hpp>
+#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/tostr.hpp>
 // #include "exprstatestack.hpp"
 #include "expect_expr_xs.hpp"
 #include "parserstatemachine.hpp"
-#include <xo/indentlog/print/ppdetail_atomic.hpp>
 
 namespace xo {
+    using xo::pp::xtag;
+    using xo::pp::scope;
     namespace scm {
         // ----- ifexprstatetype -----
 
@@ -48,7 +52,7 @@ namespace xo {
         if_else_xs::start(parserstatemachine * p_psm)
         {
             constexpr bool c_debug_flag = true;
-            scope log(XO_DEBUG(c_debug_flag));
+            scope log(XO_DEBUG_(c_debug_flag));
 
             p_psm->push_exprstate(if_else_xs::make());
             p_psm->top_exprstate().on_if_token(token_type::if_token(), p_psm);
@@ -106,7 +110,7 @@ namespace xo {
         if_else_xs::on_if_token(const token_type & tk,
                                 parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             log && log("ifxs_type", ifxs_type_);
 
@@ -127,7 +131,7 @@ namespace xo {
         if_else_xs::on_then_token(const token_type & tk,
                                   parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             log && log("ifxs_type", ifxs_type_);
 
@@ -148,7 +152,7 @@ namespace xo {
         if_else_xs::on_else_token(const token_type & tk,
                                   parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             log && log("ifxs_type", ifxs_type_);
 
@@ -183,7 +187,7 @@ namespace xo {
         if_else_xs::on_rightbrace_token(const token_type & tk,
                                         parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             this->finish_and_continue(p_psm);
             p_psm->on_rightbrace_token(tk);
@@ -193,7 +197,7 @@ namespace xo {
         if_else_xs::on_semicolon_token(const token_type & tk,
                                        parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             log && log("ifxs_type", ifxs_type_);
 
@@ -225,7 +229,7 @@ namespace xo {
         if_else_xs::on_expr(bp<Expression> expr,
                             parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
             log && log(xtag("ifxs_type", ifxs_type_));
 
@@ -268,7 +272,7 @@ namespace xo {
         if_else_xs::on_expr_with_semicolon(bp<Expression> expr,
                                            parserstatemachine * p_psm)
         {
-            scope log(XO_DEBUG(p_psm->debug_flag()));
+            scope log(XO_DEBUG_(p_psm->debug_flag()));
 
 
             log && log(xtag("ifxs_type", ifxs_type_));
