@@ -450,6 +450,66 @@ namespace xo {
         } /*TEST_CASE(flatstring_int128)*/
 
 
+        /** append() had no coverage at all until 2026-08-08, which is how the
+         *  overflow below survived: it corrupts memory silently, so nothing
+         *  short of a sanitizer notices.
+         **/
+        TEST_CASE("flatstring_append_cstr", "[flatstring][append]") {
+            flatstring<8> s;
+
+            s.append("ab");
+            REQUIRE(std::string(s.c_str()) == "ab");
+
+            s.append("cd");
+            REQUIRE(std::string(s.c_str()) == "abcd");
+
+            /* capacity 8 => 7 chars; the tail must be dropped, not written past */
+            s.append("efghijkl");
+            REQUIRE(s.size() == 7);
+            REQUIRE(std::string(s.c_str()) == "abcdefg");
+        }
+
+        TEST_CASE("flatstring_append_flatstring_repeated", "[flatstring][append]") {
+            /* THE regression test.
+             *
+             * append(flatstring, pos, count) used to bound the SOURCE index by
+             * the destination capacity N-1, while writing at
+             * i_dest = size() + i_src.  So appending onto a non-empty
+             * flatstring wrote up to size() past the end -- fine for the first
+             * append of a sequence, corrupting for every one after.
+             *
+             * Found via xo-unit's natural_unit::abbrev(), which joins several
+             * bpu abbrevs into a flatstring<32> and segfaulted in CI once a
+             * unit had 2+ basis units.
+             */
+            const flatstring<8> src("abcdefg");   /* 7 chars, full */
+            flatstring<16> dest;
+
+            dest.append(src, 0, flatstring<16>::npos);
+            REQUIRE(std::string(dest.c_str()) == "abcdefg");
+
+            /* the append that used to overflow */
+            dest.append(src, 0, flatstring<16>::npos);
+            REQUIRE(dest.size() <= 15);
+            REQUIRE(std::string(dest.c_str()) == "abcdefgabcdefg");
+
+            /* and one more, which must truncate rather than run off the end */
+            dest.append(src, 0, flatstring<16>::npos);
+            REQUIRE(dest.size() == 15);
+            REQUIRE(std::string(dest.c_str()) == "abcdefgabcdefga");
+        }
+
+        TEST_CASE("flatstring_append_flatstring_pos", "[flatstring][append]") {
+            const flatstring<8> src("abcdefg");
+            flatstring<16> dest;
+
+            dest.append(src, 2, 3);
+            REQUIRE(std::string(dest.c_str()) == "cde");
+
+            dest.append(src, 5, flatstring<16>::npos);
+            REQUIRE(std::string(dest.c_str()) == "cdefg");
+        }
+
     } /*namespace ut*/
 } /*namespace xo*/
 
