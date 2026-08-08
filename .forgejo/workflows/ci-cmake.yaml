@@ -605,7 +605,7 @@ jobs:
           echo "::endgroup::"
 
           echo "::group::xo-unit utest"
-          ctest --test-dir xo-unit/.build
+          xo-build --utest xo-unit
           echo "::endgroup::"
 
           echo "::group::xo-unit install"
@@ -623,7 +623,7 @@ jobs:
           echo "::endgroup::"
 
           echo "::group::xo-pyunit utest"
-          ctest --test-dir xo-pyunit/.build
+          xo-build --utest xo-pyunit
           echo "::endgroup::"
 
           echo "::group::xo-pyunit install"
