@@ -29,6 +29,15 @@ namespace xo {
                         (value_ ? "true" : "false"));
         }
 
+        void
+        DBoolean::pretty(xo::pp::PpSink & sink) const
+        {
+            /* leaf, as pretty_deprecated was: ppdetail_atomic is a bare
+             * pps()->write(x) with no framing (pretty.hpp:363).
+             */
+            sink.pp(value_ ? "true" : "false");
+        }
+
         DBoolean *
         DBoolean::gco_shallow_move(obj<AGCObjectVisitor> gc) noexcept
         {
