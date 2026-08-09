@@ -11,6 +11,7 @@ set(SELF_SOURCE_FILES
     PpTokenStreambuf.test.cpp
     PrettySink.test.cpp
     FlatSink.test.cpp
+    toppstr.test.cpp
     Prettifier.test.cpp
     PrettyVector.test.cpp
     scope.test.cpp

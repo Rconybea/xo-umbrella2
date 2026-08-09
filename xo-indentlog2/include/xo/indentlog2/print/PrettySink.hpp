@@ -15,7 +15,7 @@ namespace xo {
          *  Use:
          *  @code
          *    PpConfig ppc;
-         *    PrettySink pp(ppc);
+         *    PrettySink pp(ppc, nullptr);
          *
          *  @endcode
          **/
@@ -24,6 +24,9 @@ namespace xo {
             using MemorySizeVisitor = xo::mm::MemorySizeVisitor;
 
         public:
+            /** @p cfg.  pretty-printing configuration.
+             *  @p out.  if non-null, forward output to this streambuf.
+             **/
             PrettySink(const PpConfig & cfg, std::streambuf * out);
 
             /** attach (or detach, with nullptr) a streambuf that completed
