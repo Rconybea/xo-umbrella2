@@ -97,7 +97,7 @@ namespace xo {
         }
 
         bool
-        DSequenceExpr::pretty(const ppindentinfo & ppii) const
+        DSequenceExpr::pretty_deprecated(const ppindentinfo & ppii) const
         {
             using xo::print::ppstate;
 

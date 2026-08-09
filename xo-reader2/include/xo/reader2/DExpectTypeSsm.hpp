@@ -81,7 +81,7 @@ namespace xo {
             /** @defgroup scm-expecttype-printable-facet printable facet methods **/
             ///@{
 
-            bool pretty(const ppindentinfo & ppii) const;
+            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             ///@}
             /** @defgroup scm-expecttypessm-gc-support gc support methods **/

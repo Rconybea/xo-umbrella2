@@ -249,7 +249,7 @@ namespace xo {
 #endif
 
         bool
-        DSequenceSsm::pretty(const xo::print::ppindentinfo & ppii) const
+        DSequenceSsm::pretty_deprecated(const xo::print::ppindentinfo & ppii) const
         {
             return ppii.pps()->pretty_struct
                        (ppii,

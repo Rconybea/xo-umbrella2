@@ -16,9 +16,9 @@
 namespace xo {
     namespace scm {
         auto
-        IPrintable_DVarRef::pretty(const DVarRef & self, const ppindentinfo & ppii) -> bool
+        IPrintable_DVarRef::pretty_deprecated(const DVarRef & self, const ppindentinfo & ppii) -> bool
         {
-            return self.pretty(ppii);
+            return self.pretty_deprecated(ppii);
         }
 
 

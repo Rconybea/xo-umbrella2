@@ -31,11 +31,14 @@
         },
     ],
     const_methods: [
-        // bool pretty(const ppindentinfo & ppii) const
+        // bool pretty_deprecated(const ppindentinfo & ppii) const
         {
-            name: "pretty",
+            name: "pretty_deprecated",
             doc: [
-                "Pretty-printing support for this object.",
+                "Pretty-printing support for this object.  DEPRECATED:",
+                "the legacy two-pass ppindentinfo protocol, being replaced by",
+                "pretty(PpSink&).  See",
+                ".xo-backlog/xo-printable2/issues/01-aprintable-pretty-ppsink.md",
                 "See [xo-indentlog/xo/indentlog/pretty.hpp]",
             ],
             return_type: "bool",

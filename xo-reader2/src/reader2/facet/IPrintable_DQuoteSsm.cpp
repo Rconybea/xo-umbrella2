@@ -16,9 +16,9 @@
 namespace xo {
     namespace scm {
         auto
-        IPrintable_DQuoteSsm::pretty(const DQuoteSsm & self, const ppindentinfo & ppii) -> bool
+        IPrintable_DQuoteSsm::pretty_deprecated(const DQuoteSsm & self, const ppindentinfo & ppii) -> bool
         {
-            return self.pretty(ppii);
+            return self.pretty_deprecated(ppii);
         }
 
 

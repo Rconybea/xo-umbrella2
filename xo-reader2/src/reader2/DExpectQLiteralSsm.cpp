@@ -249,7 +249,7 @@ namespace xo {
         }
 
         bool
-        DExpectQLiteralSsm::pretty(const ppindentinfo & ppii) const
+        DExpectQLiteralSsm::pretty_deprecated(const ppindentinfo & ppii) const
         {
             return ppii.pps()->pretty_struct(ppii,
                                              "DExpectQLiteralSsm",

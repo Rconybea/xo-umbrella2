@@ -385,7 +385,7 @@ namespace xo {
 #endif
 
         bool
-        DApplySsm::pretty(const ppindentinfo & ppii) const
+        DApplySsm::pretty_deprecated(const ppindentinfo & ppii) const
         {
             // TODO: const-correct version of obj<> template
             auto fn_expr = const_cast<DApplySsm*>(this)->fn_expr_.to_facet<APrintable>();

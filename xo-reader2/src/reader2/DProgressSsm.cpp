@@ -1016,7 +1016,7 @@ namespace xo {
 #endif
 
         bool
-        DProgressSsm::pretty(const xo::print::ppindentinfo & ppii) const
+        DProgressSsm::pretty_deprecated(const xo::print::ppindentinfo & ppii) const
         {
             scope log(XO_DEBUG(false));
             log && log(xtag("lhs_.tseq", lhs_._typeseq()));

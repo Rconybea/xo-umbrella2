@@ -163,7 +163,7 @@ namespace xo {
         }
 
         bool
-        DLambdaExpr::pretty(const ppindentinfo & ppii) const
+        DLambdaExpr::pretty_deprecated(const ppindentinfo & ppii) const
         {
             auto body
                 = FacetRegistry::instance().try_variant<APrintable,

@@ -141,7 +141,7 @@ namespace xo {
         // ----- printable facet -----
 
         bool
-        DApplyExpr::pretty(const ppindentinfo & ppii) const {
+        DApplyExpr::pretty_deprecated(const ppindentinfo & ppii) const {
             using xo::print::ppstate;
 
             ppstate * pps = ppii.pps();

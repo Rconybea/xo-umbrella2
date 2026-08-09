@@ -93,7 +93,7 @@ namespace xo {
         }
 
         bool
-        DDefineExpr::pretty(const ppindentinfo & ppii) const
+        DDefineExpr::pretty_deprecated(const ppindentinfo & ppii) const
         {
             assert(lhs_var_);
 

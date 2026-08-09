@@ -195,7 +195,7 @@ namespace xo {
             /** @defgroup scm-progressssm-printable-facet printable facet methods **/
             ///@{
 
-            bool pretty(const ppindentinfo & ppii) const;
+            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             ///@}
 

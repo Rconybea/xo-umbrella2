@@ -147,7 +147,7 @@ namespace xo {
         // printing support
 
         bool
-        DArray::pretty(const ppindentinfo & ppii) const
+        DArray::pretty_deprecated(const ppindentinfo & ppii) const
         {
             using xo::print::ppstate;
 

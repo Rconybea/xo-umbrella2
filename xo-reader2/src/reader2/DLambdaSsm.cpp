@@ -448,7 +448,7 @@ namespace xo {
 #endif
 
         bool
-        DLambdaSsm::pretty(const ppindentinfo & ppii) const
+        DLambdaSsm::pretty_deprecated(const ppindentinfo & ppii) const
         {
             obj<APrintable> body
                 = FacetRegistry::instance().try_variant<APrintable,

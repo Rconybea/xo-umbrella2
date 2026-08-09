@@ -80,7 +80,7 @@ namespace xo {
         // ----- printable facet -----
 
         bool
-        DClosure::pretty(const ppindentinfo & ppii) const
+        DClosure::pretty_deprecated(const ppindentinfo & ppii) const
         {
             obj<APrintable,DLambdaExpr> lambda_pr(const_cast<DLambdaExpr *>(lambda_));
             obj<APrintable,DLocalEnv> env_pr(const_cast<DLocalEnv *>(env_));

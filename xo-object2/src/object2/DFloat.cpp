@@ -22,7 +22,7 @@ namespace xo {
         }
 
         bool
-        DFloat::pretty(const ppindentinfo & ppii) const
+        DFloat::pretty_deprecated(const ppindentinfo & ppii) const
         {
             return ppdetail_atomic<double>::print_pretty(ppii, value_);
         }

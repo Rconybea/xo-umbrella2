@@ -495,7 +495,7 @@ namespace xo {
         }
 
         bool
-        DIfElseSsm::pretty(const ppindentinfo & ppii) const
+        DIfElseSsm::pretty_deprecated(const ppindentinfo & ppii) const
         {
             auto expr
                 = FacetRegistry::instance().variant<APrintable,

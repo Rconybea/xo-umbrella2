@@ -12,7 +12,7 @@ namespace xo {
         struct ppdetail<xo::facet::obj<APrintable, DRepr>> {
             static bool print_pretty(const ppindentinfo & ppii,
                                      const xo::facet::obj<APrintable, DRepr> & x) {
-                return x.pretty(ppii);
+                return x.pretty_deprecated(ppii);
             }
         };
     }

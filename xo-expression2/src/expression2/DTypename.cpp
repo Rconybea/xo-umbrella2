@@ -55,7 +55,7 @@ namespace xo {
         }
 
         bool
-        DTypename::pretty(const ppindentinfo & ppii) const
+        DTypename::pretty_deprecated(const ppindentinfo & ppii) const
         {
             using xo::print::quot;
 

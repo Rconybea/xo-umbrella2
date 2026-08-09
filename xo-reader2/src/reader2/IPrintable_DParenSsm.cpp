@@ -16,9 +16,9 @@
 namespace xo {
     namespace scm {
         auto
-        IPrintable_DParenSsm::pretty(const DParenSsm & self, const ppindentinfo & ppii) -> bool
+        IPrintable_DParenSsm::pretty_deprecated(const DParenSsm & self, const ppindentinfo & ppii) -> bool
         {
-            return self.pretty(ppii);
+            return self.pretty_deprecated(ppii);
         }
 
 

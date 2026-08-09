@@ -56,7 +56,7 @@ namespace xo {
         }
 
         bool
-        ParserStack::pretty(const ppindentinfo & ppii) const
+        ParserStack::pretty_deprecated(const ppindentinfo & ppii) const
         {
             auto * pps = ppii.pps();
 

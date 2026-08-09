@@ -196,7 +196,7 @@ namespace xo {
         }
 
         bool
-        DExpectListTypeSsm::pretty(const ppindentinfo & ppii) const
+        DExpectListTypeSsm::pretty_deprecated(const ppindentinfo & ppii) const
         {
             return ppii.pps()->pretty_struct
                 (ppii,

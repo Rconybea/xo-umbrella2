@@ -103,7 +103,7 @@ namespace xo {
         // ----- printable facet -----
 
         bool
-        DIfElseExpr::pretty(const ppindentinfo & ppii) const
+        DIfElseExpr::pretty_deprecated(const ppindentinfo & ppii) const
         {
             auto test
                 = FacetRegistry::instance().try_variant<APrintable,

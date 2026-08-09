@@ -118,7 +118,7 @@ namespace xo {
             /** @defgroup scm-expectqlistssm-printable-facet printable facet methods **/
             ///@{
 
-            bool pretty(const ppindentinfo & ppii) const;
+            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             ///@}
             /** @defgroup scm-expectqlistssm-gc-support gc support methods **/

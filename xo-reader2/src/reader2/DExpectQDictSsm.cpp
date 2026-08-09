@@ -252,7 +252,7 @@ namespace xo {
         }
 
         bool
-        DExpectQDictSsm::pretty(const ppindentinfo & ppii) const
+        DExpectQDictSsm::pretty_deprecated(const ppindentinfo & ppii) const
         {
             obj<AGCObject,DDictionary> dict(dict_);
             obj<APrintable,DDictionary> dict_pr(dict_);

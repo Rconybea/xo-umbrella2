@@ -109,7 +109,7 @@ namespace xo {
         // ----- printable facet -----
 
         bool
-        DLocalEnv::pretty(const ppindentinfo & ppii) const noexcept
+        DLocalEnv::pretty_deprecated(const ppindentinfo & ppii) const noexcept
         {
             // print local bindings, perhaps
             //   symtab_

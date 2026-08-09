@@ -205,7 +205,7 @@ namespace xo {
         }
 
         bool
-        DExpectQListSsm::pretty(const ppindentinfo & ppii) const
+        DExpectQListSsm::pretty_deprecated(const ppindentinfo & ppii) const
         {
             obj<AGCObject,DList> list(start_);
             auto list_pr = FacetRegistry::instance().variant<APrintable,AGCObject>(list);

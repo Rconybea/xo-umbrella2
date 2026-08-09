@@ -58,7 +58,7 @@ namespace xo {
             /** @defgrouop scm-vsmseqcontframe-printable-facet printable facet **/
             ///@{
 
-            bool pretty(const ppindentinfo & ppii) const noexcept;
+            bool pretty_deprecated(const ppindentinfo & ppii) const noexcept;
 
             ///@}
 

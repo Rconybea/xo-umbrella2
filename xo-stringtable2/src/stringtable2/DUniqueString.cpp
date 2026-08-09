@@ -45,9 +45,9 @@ namespace xo {
         }
 
         bool
-        DUniqueString::pretty(const ppindentinfo & ppii) const
+        DUniqueString::pretty_deprecated(const ppindentinfo & ppii) const
         {
-            return _text()->pretty(ppii);
+            return _text()->pretty_deprecated(ppii);
         }
 
         DUniqueString *

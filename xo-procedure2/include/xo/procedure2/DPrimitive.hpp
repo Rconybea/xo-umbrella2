@@ -12,13 +12,13 @@
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/alloc2/GCObjectConversion.hpp>
 #include <xo/alloc2/GCObjectVisitor.hpp>
-#include <xo/reflect/Reflect.hpp>
 #include <xo/facet/FacetRegistry.hpp>
+#include <xo/reflect/Reflect.hpp>
+#include <xo/indentlog/print/pretty.hpp> /* ppstate -- was arriving via xo/reflect */
 #include <string_view>
 #include <tuple>
 #include <type_traits>
 #include <utility>
-#include <xo/indentlog/print/pretty.hpp>   /* ppstate -- was arriving via xo/reflect */
 
 namespace xo {
     namespace scm {
@@ -129,7 +129,7 @@ namespace xo {
             /** @defgroup scm-primitive-printable-facet **/
             ///@{
 
-            bool pretty(const ppindentinfo & ppii) const;
+            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             ///@}
             /** @defgroup scm-primitive-gcobject-facet **/
@@ -180,7 +180,7 @@ namespace xo {
 
         template <typename Fn>
         bool
-        Primitive<Fn>::pretty(const ppindentinfo & ppii) const
+        Primitive<Fn>::pretty_deprecated(const ppindentinfo & ppii) const
         {
             return ppii.pps()->pretty_struct
                        (ppii,

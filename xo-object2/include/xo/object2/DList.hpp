@@ -70,7 +70,7 @@ namespace xo {
             void _assign_rest(obj<AAllocator> mm, DList * r);
 
             /** pretty-printing driver; combine layout+printing **/
-            bool pretty(const ppindentinfo & ppii) const;
+            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             // GCObject facet
 

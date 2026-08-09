@@ -68,7 +68,7 @@ namespace xo {
         // ----- Printable facet -----
 
         bool
-        DRuntimeError::pretty(const ppindentinfo & ppii) const
+        DRuntimeError::pretty_deprecated(const ppindentinfo & ppii) const
         {
             return ppii.pps()->pretty_struct
                 (ppii,

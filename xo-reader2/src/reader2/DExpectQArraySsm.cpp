@@ -209,7 +209,7 @@ namespace xo {
         }
 
         bool
-        DExpectQArraySsm::pretty(const ppindentinfo & ppii) const
+        DExpectQArraySsm::pretty_deprecated(const ppindentinfo & ppii) const
         {
             obj<AGCObject,DArray> array(array_);
             auto array_pr = FacetRegistry::instance().variant<APrintable,AGCObject>(array);

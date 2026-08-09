@@ -16,9 +16,9 @@
 namespace xo {
     namespace scm {
         auto
-        IPrintable_DString::pretty(const DString & self, const ppindentinfo & ppii) -> bool
+        IPrintable_DString::pretty_deprecated(const DString & self, const ppindentinfo & ppii) -> bool
         {
-            return self.pretty(ppii);
+            return self.pretty_deprecated(ppii);
         }
 
 

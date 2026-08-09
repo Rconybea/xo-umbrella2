@@ -74,7 +74,7 @@ namespace xo {
             /** @defgroup scm-expectsymbol-printable-facet printable facet methods **/
             ///@{
 
-            bool pretty(const ppindentinfo & ppii) const;
+            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             ///@}
             /** @defgroup scm-expectsymbolssm-gc-support gc support methods **/

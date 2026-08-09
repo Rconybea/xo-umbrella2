@@ -7,8 +7,8 @@
 #include "ExpectTypeSsm.hpp"
 #include "SyntaxStateMachine.hpp"
 #include <xo/type/AtomicType.hpp>
-#include <xo/reflect/Reflect.hpp>
 #include <xo/facet/facet_implementation.hpp>
+#include <xo/reflect/Reflect.hpp>
 #include <xo/indentlog/print/pretty.hpp>
 #include <xo/indentlog/scope.hpp>
 #include <xo/reflectutil/typeseq.hpp>
@@ -191,7 +191,7 @@ namespace xo {
         }
 
         bool
-        DExpectTypeSsm::pretty(const ppindentinfo & ppii) const
+        DExpectTypeSsm::pretty_deprecated(const ppindentinfo & ppii) const
         {
             return ppii.pps()->pretty_struct
                 (ppii,

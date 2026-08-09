@@ -71,7 +71,7 @@ namespace xo {
         }
 
         bool
-        ParserResult::pretty(const ppindentinfo & ppii) const
+        ParserResult::pretty_deprecated(const ppindentinfo & ppii) const
         {
             switch (result_type_) {
             case parser_result_type::none:

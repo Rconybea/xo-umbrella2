@@ -65,7 +65,7 @@ namespace xo {
             /** @defgroup scm-closure-printable-facet **/
             ///@{
 
-            bool pretty(const ppindentinfo & ppii) const;
+            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             ///@}
 

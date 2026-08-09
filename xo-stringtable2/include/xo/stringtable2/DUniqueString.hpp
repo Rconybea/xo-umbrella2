@@ -84,7 +84,7 @@ namespace xo {
             /** @defgroup duniquestring-printable-methods printable facet methods **/
             ///@{
 
-            bool pretty(const ppindentinfo & ppii) const;
+            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             ///@}
             /** @defgroup duniquestring-gcobject-methods gcobject facet methods **/

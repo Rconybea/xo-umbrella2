@@ -53,8 +53,8 @@ public:
     void _drop() const noexcept { O::iface()->_drop(O::data()); }
 
     // const methods
-    bool pretty(const ppindentinfo & ppii)  const {
-        return O::iface()->pretty(O::data(), ppii);
+    bool pretty_deprecated(const ppindentinfo & ppii)  const {
+        return O::iface()->pretty_deprecated(O::data(), ppii);
     }
 
     // non-const methods (still const in router!)

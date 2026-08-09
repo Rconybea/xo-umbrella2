@@ -155,7 +155,7 @@ namespace xo {
             ///@{
 
             /** pretty-printing driver; combine layout+printing **/
-            bool pretty(const ppindentinfo & ppii) const;
+            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             ///@}
             /** @defgroup scm-toplevelseqssm-gc-support gc support methods **/

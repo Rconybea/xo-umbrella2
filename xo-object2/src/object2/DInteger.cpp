@@ -25,7 +25,7 @@ namespace xo {
         }
 
         bool
-        DInteger::pretty(const ppindentinfo & ppii) const
+        DInteger::pretty_deprecated(const ppindentinfo & ppii) const
         {
             return ppdetail_atomic<long>::print_pretty(ppii, value_);
         }

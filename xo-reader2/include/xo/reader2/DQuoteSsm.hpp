@@ -144,7 +144,7 @@ namespace xo {
             /** @defgroup scm-parenssm-printable-facet printable facet methods **/
             ///@{
 
-            bool pretty(const ppindentinfo & ppii) const;
+            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             ///@}
             /** @defgroup scm-quotessm-gc-support gc support methods */

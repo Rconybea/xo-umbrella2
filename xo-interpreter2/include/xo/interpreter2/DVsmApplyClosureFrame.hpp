@@ -46,7 +46,7 @@ namespace xo {
             void visit_gco_children(VisitReason reason, obj<AGCObjectVisitor> gc) noexcept;
 
             /** pretty-printing support **/
-            bool pretty(const ppindentinfo & ppii) const;
+            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
         protected:
             /** saved VSM stack_ register **/

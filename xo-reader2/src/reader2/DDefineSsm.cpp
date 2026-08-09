@@ -684,7 +684,7 @@
         // ----- printable facet -----
 
         bool
-        DDefineSsm::pretty(const ppindentinfo & ppii) const
+        DDefineSsm::pretty_deprecated(const ppindentinfo & ppii) const
         {
             auto expr
                 = FacetRegistry::instance().variant<APrintable,

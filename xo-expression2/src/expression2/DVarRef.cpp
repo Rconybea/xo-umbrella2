@@ -78,7 +78,7 @@ namespace xo {
         // printable facet
 
         bool
-        DVarRef::pretty(const ppindentinfo & ppii) const
+        DVarRef::pretty_deprecated(const ppindentinfo & ppii) const
         {
             return ppii.pps()->pretty_struct
                        (ppii,

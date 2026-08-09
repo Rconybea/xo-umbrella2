@@ -56,7 +56,7 @@ namespace xo {
         }
 
         bool
-        DVsmEvalArgsFrame::pretty(const ppindentinfo & ppii) const
+        DVsmEvalArgsFrame::pretty_deprecated(const ppindentinfo & ppii) const
         {
             return ppii.pps()->pretty_struct(ppii,
                                              "DVsmEvalArgsFrame",

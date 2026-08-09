@@ -52,8 +52,8 @@ namespace print {
         void _drop(Opaque d) const noexcept override { _dcast(d).~DRepr(); }
 
         // const methods
-        bool pretty(Copaque data, const ppindentinfo & ppii)  const override {
-            return I::pretty(_dcast(data), ppii);
+        bool pretty_deprecated(Copaque data, const ppindentinfo & ppii)  const override {
+            return I::pretty_deprecated(_dcast(data), ppii);
         }
 
         // non-const methods

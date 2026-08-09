@@ -56,7 +56,7 @@ namespace xo {
         }
 
         bool
-        DVsmApplyFrame::pretty(const ppindentinfo & ppii) const
+        DVsmApplyFrame::pretty_deprecated(const ppindentinfo & ppii) const
         {
             return ppii.pps()->pretty_struct(ppii,
                                              "DVsmApplyFrame",

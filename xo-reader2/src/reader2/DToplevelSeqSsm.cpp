@@ -510,7 +510,7 @@ namespace xo {
         }
 
         bool
-        DToplevelSeqSsm::pretty(const ppindentinfo & ppii) const
+        DToplevelSeqSsm::pretty_deprecated(const ppindentinfo & ppii) const
         {
             return ppii.pps()->pretty_struct
                 (ppii,

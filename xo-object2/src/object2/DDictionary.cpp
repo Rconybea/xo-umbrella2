@@ -235,7 +235,7 @@ namespace xo {
         // ----- printable facet ----
 
         bool
-        DDictionary::pretty(const ppindentinfo & ppii) const
+        DDictionary::pretty_deprecated(const ppindentinfo & ppii) const
         {
             using xo::print::ppstate;
 

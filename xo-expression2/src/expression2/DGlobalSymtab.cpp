@@ -289,7 +289,7 @@ namespace xo {
         // ----- printable facet -----
 
         bool
-        DGlobalSymtab::pretty(const ppindentinfo & ppii) const
+        DGlobalSymtab::pretty_deprecated(const ppindentinfo & ppii) const
         {
             return ppii.pps()->pretty_struct
                        (ppii,

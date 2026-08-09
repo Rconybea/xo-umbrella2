@@ -162,7 +162,7 @@ namespace xo {
         }
 
         bool
-        DSchematikaParser::pretty(const ppindentinfo & ppii) const {
+        DSchematikaParser::pretty_deprecated(const ppindentinfo & ppii) const {
             auto * pps = ppii.pps();
 
             if (ppii.upto())

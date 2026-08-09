@@ -109,7 +109,7 @@ namespace xo {
         }
 
         bool
-        TypeRef::pretty(const ppindentinfo & ppii) const
+        TypeRef::pretty_deprecated(const ppindentinfo & ppii) const
         {
             using xo::print::quot;
 

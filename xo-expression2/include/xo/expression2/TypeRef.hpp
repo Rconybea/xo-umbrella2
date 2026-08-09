@@ -72,7 +72,7 @@ namespace xo {
             void resolve(TypeDescr td) noexcept { td_ = td; }
 
             /** pretty-printer support **/
-            bool pretty(const ppindentinfo & ppii) const;
+            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             /** gc support **/
             void visit_gco_children(VisitReason reason, obj<AGCObjectVisitor> gc) noexcept;
@@ -102,7 +102,7 @@ namespace xo {
         template <>
         struct ppdetail<xo::scm::TypeRef> {
             static inline bool print_pretty(const ppindentinfo & ppii, const xo::scm::TypeRef x) {
-                return x.pretty(ppii);
+                return x.pretty_deprecated(ppii);
             }
         };
     }

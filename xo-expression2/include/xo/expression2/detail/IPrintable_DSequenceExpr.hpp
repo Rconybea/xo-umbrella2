@@ -48,9 +48,12 @@ namespace xo {
             /** @defgroup scm-printable-dsequenceexpr-methods **/
             ///@{
             // const methods
-            /** Pretty-printing support for this object.
+            /** Pretty-printing support for this object.  DEPRECATED:
+the legacy two-pass ppindentinfo protocol, being replaced by
+pretty(PpSink&).  See
+.xo-backlog/xo-printable2/issues/01-aprintable-pretty-ppsink.md
 See [xo-indentlog/xo/indentlog/pretty.hpp] **/
-            static bool pretty(const DSequenceExpr & self, const ppindentinfo & ppii);
+            static bool pretty_deprecated(const DSequenceExpr & self, const ppindentinfo & ppii);
 
             // non-const methods
             ///@}

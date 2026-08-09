@@ -246,7 +246,7 @@ namespace xo {
 #endif
 
         bool
-        DExpectFormalArgSsm::pretty(const ppindentinfo & ppii) const {
+        DExpectFormalArgSsm::pretty_deprecated(const ppindentinfo & ppii) const {
             if (name_) {
                 return ppii.pps()->pretty_struct
                     (ppii,

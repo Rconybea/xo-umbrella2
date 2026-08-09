@@ -451,7 +451,7 @@ namespace xo {
 #endif
 
         bool
-        DParenSsm::pretty(const ppindentinfo & ppii) const
+        DParenSsm::pretty_deprecated(const ppindentinfo & ppii) const
         {
             return ppii.pps()->pretty_struct(ppii,
                                              "DParenSsm",

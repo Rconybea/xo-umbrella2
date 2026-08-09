@@ -55,7 +55,7 @@ namespace xo {
             /** regular printing **/
             void print(std::ostream & os) const;
             /** pretty-printer support **/
-            bool pretty(const ppindentinfo & ppii) const;
+            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             void visit_gco_children(VisitReason reason,
                                     obj<AGCObjectVisitor> gc) noexcept;
@@ -88,7 +88,7 @@ namespace xo {
         struct ppdetail<xo::scm::ParserStack*> {
             static inline bool print_pretty(const ppindentinfo & ppii, const xo::scm::ParserStack * p) {
                 if (p)
-                    return p->pretty(ppii);
+                    return p->pretty_deprecated(ppii);
                 else
                     return ppii.pps()->print_upto("nullptr");
             }

@@ -159,7 +159,7 @@ namespace xo {
         }
 
         bool
-        DList::pretty(const ppindentinfo & ppii) const
+        DList::pretty_deprecated(const ppindentinfo & ppii) const
         {
             /* adapted from ppstate.pretty_struct(), see also */
 

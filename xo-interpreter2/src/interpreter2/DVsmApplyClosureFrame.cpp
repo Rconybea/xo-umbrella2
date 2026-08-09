@@ -47,7 +47,7 @@ namespace xo {
         }
 
         bool
-        DVsmApplyClosureFrame::pretty(const ppindentinfo & ppii) const
+        DVsmApplyClosureFrame::pretty_deprecated(const ppindentinfo & ppii) const
         {
             return ppii.pps()->pretty_struct
                 (ppii,

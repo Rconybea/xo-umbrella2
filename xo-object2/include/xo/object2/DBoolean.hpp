@@ -32,7 +32,7 @@ namespace xo {
 
             bool value() const noexcept { return value_; }
 
-            bool pretty(const ppindentinfo & ppii) const;
+            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             operator bool() const noexcept { return value_; }
 

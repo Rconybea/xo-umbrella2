@@ -94,7 +94,7 @@ namespace xo {
             /** @defgroup scm-lambdaexpr-printable-facet **/
             ///@{
 
-            bool pretty(const ppindentinfo & ppii) const;
+            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             ///@}
 

@@ -45,7 +45,7 @@ namespace xo {
             /** @defgroup scm-runtimeerror-printable-facet printable facet **/
             ///@{
 
-            bool pretty(const ppindentinfo & ppii) const;
+            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             ///@}
             /** @defgroup scm-runtimeerror-gcobject-facet gcobject facet **/

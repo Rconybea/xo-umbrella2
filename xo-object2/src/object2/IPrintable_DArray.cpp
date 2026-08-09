@@ -16,9 +16,9 @@
 namespace xo {
     namespace scm {
         auto
-        IPrintable_DArray::pretty(const DArray & self, const ppindentinfo & ppii) -> bool
+        IPrintable_DArray::pretty_deprecated(const DArray & self, const ppindentinfo & ppii) -> bool
         {
-            return self.pretty(ppii);
+            return self.pretty_deprecated(ppii);
         }
 
 

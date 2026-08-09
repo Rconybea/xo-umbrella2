@@ -16,9 +16,9 @@
 namespace xo {
     namespace scm {
         auto
-        IPrintable_DExpectTypeSsm::pretty(const DExpectTypeSsm & self, const ppindentinfo & ppii) -> bool
+        IPrintable_DExpectTypeSsm::pretty_deprecated(const DExpectTypeSsm & self, const ppindentinfo & ppii) -> bool
         {
-            return self.pretty(ppii);
+            return self.pretty_deprecated(ppii);
         }
 
 

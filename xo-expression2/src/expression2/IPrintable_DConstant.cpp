@@ -16,9 +16,9 @@
 namespace xo {
     namespace scm {
         auto
-        IPrintable_DConstant::pretty(const DConstant & self, const ppindentinfo & ppii) -> bool
+        IPrintable_DConstant::pretty_deprecated(const DConstant & self, const ppindentinfo & ppii) -> bool
         {
-            return self.pretty(ppii);
+            return self.pretty_deprecated(ppii);
         }
 
 

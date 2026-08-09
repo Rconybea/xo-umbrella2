@@ -48,7 +48,7 @@ namespace xo {
         // printable facet
 
         bool
-        DVsmDefContFrame::pretty(const ppindentinfo & ppii) const noexcept
+        DVsmDefContFrame::pretty_deprecated(const ppindentinfo & ppii) const noexcept
         {
             return ppii.pps()->pretty_struct(ppii,
                                              "DVsmDefContFrame",

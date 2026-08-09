@@ -123,7 +123,7 @@ namespace xo {
             ///@{
 
             /** pretty-printing support **/
-            bool pretty(const ppindentinfo & ppii) const;
+            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             ///@}
 

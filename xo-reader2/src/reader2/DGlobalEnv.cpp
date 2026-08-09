@@ -127,7 +127,7 @@ namespace xo {
         // ----- APrintable facet -----
 
         bool
-        DGlobalEnv::pretty(const ppindentinfo & ppii) const
+        DGlobalEnv::pretty_deprecated(const ppindentinfo & ppii) const
         {
             return ppii.pps()->pretty_struct
                        (ppii,

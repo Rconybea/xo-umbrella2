@@ -59,7 +59,7 @@ namespace print {
         [[noreturn]] void _drop(Opaque) const noexcept override { _fatal(); }
 
         // const methods
-        [[noreturn]] bool pretty(Copaque, const ppindentinfo &)  const override { _fatal(); }
+        [[noreturn]] bool pretty_deprecated(Copaque, const ppindentinfo &)  const override { _fatal(); }
 
         // nonconst methods
 

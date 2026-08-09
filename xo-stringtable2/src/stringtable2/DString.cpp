@@ -180,7 +180,7 @@ namespace xo {
         }
 
         bool
-        DString::pretty(const ppindentinfo & ppii) const
+        DString::pretty_deprecated(const ppindentinfo & ppii) const
         {
             return ppdetail_atomic<const char *>::print_pretty(ppii, &(chars_[0]));
         }

@@ -549,7 +549,7 @@ namespace xo {
 #endif
 
         bool
-        DExpectExprSsm::pretty(const ppindentinfo & ppii) const
+        DExpectExprSsm::pretty_deprecated(const ppindentinfo & ppii) const
         {
             return ppii.pps()->pretty_struct
                 (ppii,

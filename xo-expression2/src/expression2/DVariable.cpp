@@ -50,7 +50,7 @@ namespace xo {
         }
 
         bool
-        DVariable::pretty(const ppindentinfo & ppii) const
+        DVariable::pretty_deprecated(const ppindentinfo & ppii) const
         {
             using xo::print::quot;
 

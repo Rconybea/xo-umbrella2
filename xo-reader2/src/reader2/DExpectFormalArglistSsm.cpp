@@ -296,7 +296,7 @@ namespace xo {
         }
 
         bool
-        DExpectFormalArglistSsm::pretty(const ppindentinfo & ppii) const
+        DExpectFormalArglistSsm::pretty_deprecated(const ppindentinfo & ppii) const
         {
             ppstate * pps = ppii.pps();
 

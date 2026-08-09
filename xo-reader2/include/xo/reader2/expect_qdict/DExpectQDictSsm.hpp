@@ -153,7 +153,7 @@ namespace xo {
             /** @defgroup scm-expectqdictssm-printable-facet printable facet methods **/
             ///@{
 
-            bool pretty(const ppindentinfo & ppii) const;
+            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             ///@}
             /** @defgroup scm-expectqdictssm-gc-support gc support methods **/

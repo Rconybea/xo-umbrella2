@@ -203,7 +203,7 @@ namespace xo {
         }
 
         bool
-        DQuoteSsm::pretty(const ppindentinfo & ppii) const
+        DQuoteSsm::pretty_deprecated(const ppindentinfo & ppii) const
         {
             return ppii.pps()->pretty_struct(ppii,
                                              "DQuoteSsm",

@@ -46,7 +46,7 @@ namespace xo {
             DVsmEvalArgsFrame * gco_shallow_move(obj<AGCObjectVisitor> gc) noexcept;
             void visit_gco_children(VisitReason reason, obj<AGCObjectVisitor> gc) noexcept;
 
-            bool pretty(const ppindentinfo & ppii) const;
+            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
         protected:
             /** parent stack frame **/

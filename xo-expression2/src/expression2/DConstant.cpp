@@ -9,9 +9,9 @@
 #include <xo/object2/DFloat.hpp>
 #include <xo/object2/DInteger.hpp>
 #include <xo/printable2/Printable.hpp>
-#include <xo/reflect/Reflect.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/facet/obj.hpp>
+#include <xo/reflect/Reflect.hpp>
 #include <xo/reflectutil/typeseq.hpp>
 
 namespace xo {
@@ -87,7 +87,7 @@ namespace xo {
         }
 
         bool
-        DConstant::pretty(const ppindentinfo & ppii) const
+        DConstant::pretty_deprecated(const ppindentinfo & ppii) const
         {
             obj<APrintable> value_pr
                 = FacetRegistry::instance().variant<APrintable,AGCObject>(value_);

@@ -16,9 +16,9 @@
 namespace xo {
     namespace scm {
         auto
-        IPrintable_DVariable::pretty(const DVariable & self, const ppindentinfo & ppii) -> bool
+        IPrintable_DVariable::pretty_deprecated(const DVariable & self, const ppindentinfo & ppii) -> bool
         {
-            return self.pretty(ppii);
+            return self.pretty_deprecated(ppii);
         }
 
 

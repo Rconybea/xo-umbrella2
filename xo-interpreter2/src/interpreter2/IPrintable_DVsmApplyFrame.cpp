@@ -16,9 +16,9 @@
 namespace xo {
     namespace scm {
         auto
-        IPrintable_DVsmApplyFrame::pretty(const DVsmApplyFrame & self, const ppindentinfo & ppii) -> bool
+        IPrintable_DVsmApplyFrame::pretty_deprecated(const DVsmApplyFrame & self, const ppindentinfo & ppii) -> bool
         {
-            return self.pretty(ppii);
+            return self.pretty_deprecated(ppii);
         }
 
 

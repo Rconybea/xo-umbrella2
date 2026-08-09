@@ -16,9 +16,9 @@
 namespace xo {
     namespace scm {
         auto
-        IPrintable_DFloat::pretty(const DFloat & self, const ppindentinfo & ppii) -> bool
+        IPrintable_DFloat::pretty_deprecated(const DFloat & self, const ppindentinfo & ppii) -> bool
         {
-            return self.pretty(ppii);
+            return self.pretty_deprecated(ppii);
         }
 
 

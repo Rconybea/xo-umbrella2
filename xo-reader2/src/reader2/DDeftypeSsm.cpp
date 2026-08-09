@@ -264,7 +264,7 @@ namespace xo {
         }
 
         bool
-        DDeftypeSsm::pretty(const ppindentinfo & ppii) const
+        DDeftypeSsm::pretty_deprecated(const ppindentinfo & ppii) const
         {
             return ppii.pps()->pretty_struct(ppii,
                                              "DDeftypeSsm",

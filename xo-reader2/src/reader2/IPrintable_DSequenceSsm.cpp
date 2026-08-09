@@ -16,9 +16,9 @@
 namespace xo {
     namespace scm {
         auto
-        IPrintable_DSequenceSsm::pretty(const DSequenceSsm & self, const ppindentinfo & ppii) -> bool
+        IPrintable_DSequenceSsm::pretty_deprecated(const DSequenceSsm & self, const ppindentinfo & ppii) -> bool
         {
-            return self.pretty(ppii);
+            return self.pretty_deprecated(ppii);
         }
 
 

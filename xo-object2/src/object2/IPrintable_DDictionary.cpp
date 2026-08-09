@@ -16,9 +16,9 @@
 namespace xo {
     namespace scm {
         auto
-        IPrintable_DDictionary::pretty(const DDictionary & self, const ppindentinfo & ppii) -> bool
+        IPrintable_DDictionary::pretty_deprecated(const DDictionary & self, const ppindentinfo & ppii) -> bool
         {
-            return self.pretty(ppii);
+            return self.pretty_deprecated(ppii);
         }
 
 

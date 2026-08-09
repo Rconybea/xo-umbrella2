@@ -131,7 +131,7 @@ namespace xo {
         // ----- printable facet -----
 
         bool
-        DLocalSymtab::pretty(const ppindentinfo & ppii) const
+        DLocalSymtab::pretty_deprecated(const ppindentinfo & ppii) const
         {
             ppstate * pps = ppii.pps();
 

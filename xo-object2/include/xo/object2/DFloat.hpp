@@ -32,7 +32,7 @@ namespace xo {
 
             operator double() const noexcept { return value_; }
 
-            bool pretty(const ppindentinfo & ppii) const;
+            bool pretty_deprecated(const ppindentinfo & ppii) const;
 
             // GCObject facet
             DFloat * gco_shallow_move(obj<AGCObjectVisitor> gc) noexcept;

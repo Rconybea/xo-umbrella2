@@ -22,7 +22,7 @@ namespace xo {
         }
 
         bool
-        DBoolean::pretty(const ppindentinfo & ppii) const
+        DBoolean::pretty_deprecated(const ppindentinfo & ppii) const
         {
             return ppdetail_atomic<const char *>::print_pretty
                        (ppii,

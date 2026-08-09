@@ -138,7 +138,7 @@ namespace xo {
         }
 
         bool
-        DExpectSymbolSsm::pretty(const ppindentinfo & ppii) const
+        DExpectSymbolSsm::pretty_deprecated(const ppindentinfo & ppii) const
         {
             return ppii.pps()->pretty_struct
                 (ppii,
