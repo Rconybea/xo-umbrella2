@@ -53,8 +53,19 @@ namespace ut {
         REQUIRE(pp_escape("a\nb", false) == "a\\nb");
         REQUIRE(pp_escape("a\"b", false) == "a\\\"b");
         REQUIRE(pp_escape("a\\b", false) == "a\\\\b");
-        REQUIRE(pp_escape("a\tb", false) == "a\\x09b");
         REQUIRE(pp_escape("", false) == "");
+
+        /* the short forms, through the PpStringToken path.  This is where a
+         * str_size()/str_copy() disagreement would corrupt the token buffer
+         * rather than merely misformat, since the token is sized first and
+         * filled after -- so the whole short-form set is pinned here, not just
+         * a representative.
+         */
+        REQUIRE(pp_escape("a\tb", false) == "a\\tb");
+        REQUIRE(pp_escape("a\bb", false) == "a\\bb");
+        REQUIRE(pp_escape("a\fb", false) == "a\\fb");
+        /* VT has no short form, so it still costs the full \xNN width */
+        REQUIRE(pp_escape("a\vb", false) == "a\\x0bb");
     }
 
     TEST_CASE("ppstate-put-with-escape-quoted", "[put_with_escape]") {

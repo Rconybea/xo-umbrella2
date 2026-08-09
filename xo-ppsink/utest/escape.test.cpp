@@ -31,8 +31,13 @@ namespace ut {
     static_assert(Escape::str_size("abc").escape_flag == false);
     static_assert(Escape::str_size("a\nb").size == 4);
     static_assert(Escape::str_size("a\nb").escape_flag == true);
-    /* tab has no short form -> \xNN */
-    static_assert(Escape::str_size("\t").size == Escape::c_max_char_expand);
+    /* tab/backspace/formfeed have short forms -> 2 bytes, not \xNN.
+     * VT (0x0b) deliberately does not, so it still costs the full \xNN width.
+     */
+    static_assert(Escape::str_size("\t").size == 2);
+    static_assert(Escape::str_size("\b").size == 2);
+    static_assert(Escape::str_size("\f").size == 2);
+    static_assert(Escape::str_size("\v").size == Escape::c_max_char_expand);
     /* escape_flag is the "needs quotes" predicate, so these are set with
      * nothing escaped
      */
@@ -98,20 +103,27 @@ namespace ut {
     }
 
     TEST_CASE("escape-short-forms", "[escape]") {
-        /* the four escapes with a two-character form */
+        /* the seven escapes with a two-character form */
         REQUIRE(escape_str("\\") == "\\\\");
         REQUIRE(escape_str("\"") == "\\\"");
         REQUIRE(escape_str("\n") == "\\n");
         REQUIRE(escape_str("\r") == "\\r");
+        REQUIRE(escape_str("\t") == "\\t");
+        REQUIRE(escape_str("\b") == "\\b");
+        REQUIRE(escape_str("\f") == "\\f");
 
         REQUIRE(escape_str("a\"b") == "a\\\"b");
         REQUIRE(escape_str("a\\b") == "a\\\\b");
         REQUIRE(escape_str("a\nb") == "a\\nb");
+        REQUIRE(escape_str("a\tb") == "a\\tb");
     }
 
     TEST_CASE("escape-control-chars", "[escape]") {
-        /* control characters have no short form -> \xNN, lowercase hex */
-        REQUIRE(escape_str("\t") == "\\x09");
+        /* control characters WITHOUT a short form -> \xNN, lowercase hex.
+         * VT (0x0b) is the neighbour of \t/\f that deliberately did NOT get a
+         * short form, so it pins that the short-form set stayed bounded.
+         */
+        REQUIRE(escape_str("\v") == "\\x0b");
         REQUIRE(escape_str(string_view("\0", 1)) == "\\x00");
         REQUIRE(escape_str("\x7f") == "\\x7f");
 
@@ -181,7 +193,9 @@ namespace ut {
          * vocabulary instead (see quoted_char.hpp).
          */
         REQUIRE(q('\x1b') == "\\x1b");
-        REQUIRE(q('\t') == "\\x09");
+        REQUIRE(q('\t') == "\\t");
+        REQUIRE(q('\b') == "\\b");
+        REQUIRE(q('\f') == "\\f");
         REQUIRE(q('\0') == "\\x00");
     }
 

@@ -96,11 +96,26 @@ namespace xo::pp {
 
         /** @brief second character of @p uc's two-character escape, or 0 if none.
          *
-         *  Covers the four escapes with a short form:
-         *  @code \ -> \\   " -> \"   newline -> \n   cr -> \r @endcode
+         *  Covers the seven escapes with a short form:
+         *  @code
+         *    \ -> \\   " -> \"   newline -> \n   cr -> \r
+         *    tab -> \t   backspace -> \b   formfeed -> \f
+         *  @endcode
          *
-         *  Consulted before @ref needs_hex, since newline and cr are also
-         *  control characters and their short form is preferred.
+         *  Consulted before @ref needs_hex, since all five of newline, cr, tab,
+         *  backspace and formfeed are also control characters and their short
+         *  form is preferred.
+         *
+         *  This is exactly the set JSON spells with a backslash pair, minus
+         *  @c \/ (which needs no escaping here).  The remaining control
+         *  characters still go to @c \xNN, which is NOT valid JSON -- making
+         *  ppsink output valid JSON needs @c \uXXXX and is a separate question,
+         *  see .xo-backlog/xo-printjson/issues/01-ppsink-api.md.
+         *
+         *  Note the set is wider than what xo-reader accepts back
+         *  (@c \n \r \" \\ only), so an escaped string is not automatically a
+         *  round-trippable Schematika literal -- see
+         *  .xo-backlog/xo-object/issues/01-string-display-schematika.md.
          **/
         static constexpr char
         pair_char(unsigned char uc) noexcept {
@@ -109,6 +124,9 @@ namespace xo::pp {
             case '"':  return '"';
             case '\n': return 'n';
             case '\r': return 'r';
+            case '\t': return 't';
+            case '\b': return 'b';
+            case '\f': return 'f';
             default:   return '\0';
             }
         }
