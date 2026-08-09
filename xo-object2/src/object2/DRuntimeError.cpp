@@ -4,6 +4,7 @@
  **/
 
 #include "RuntimeError.hpp"
+#include <xo/ppsink/pretty_struct.hpp>   /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
     using xo::print::APrintable;
@@ -75,6 +76,22 @@ namespace xo {
                  "DRuntimeError",
                  refrtag("src", obj<APrintable,DString>(src_function_)),
                  refrtag("err", obj<APrintable,DString>(error_descr_)));
+        }
+
+        void
+        DRuntimeError::pretty(xo::pp::PpSink & sink) const
+        {
+            /* named locals, not temporaries in the call: xo::pp::field captures
+             * BY REFERENCE (pretty_struct.hpp:52).  A prvalue argument would in
+             * fact survive to the end of the full-expression, but the header
+             * asks callers not to rely on that.
+             */
+            obj<APrintable,DString> src(src_function_);
+            obj<APrintable,DString> err(error_descr_);
+
+            sink.pretty_struct("DRuntimeError",
+                               xo::pp::field("src", src),
+                               xo::pp::field("err", err));
         }
 
     } /*namespace scm*/
