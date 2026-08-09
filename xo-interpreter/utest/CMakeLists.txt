@@ -10,4 +10,6 @@ set(UTEST_SRCS
 xo_add_utest_executable(${UTEST_EXE} ${UTEST_SRCS})
 xo_self_dependency(${UTEST_EXE} xo_interpreter)
 xo_dependency(${UTEST_EXE} xo_object)
+# UtestAppStart/UtestListener: shared utest main, see interpreter_utest_main.cpp
+xo_dependency(${UTEST_EXE} xo_testutil)
 xo_external_target_dependency(${UTEST_EXE} Catch2 Catch2::Catch2)
