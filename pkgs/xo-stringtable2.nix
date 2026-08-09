@@ -1,14 +1,17 @@
 {
   # nixpkgs dependencies
-  stdenv, cmake, catch2,
+  lib, stdenv, cmake, catch2, cli11,
 
   # xo dependencies
+  xo-testutil,
   xo-alloc2,
   xo-printable2,
   xo-arena,
   xo-cmake,
   xo-indentlog,
   xo-subsys,
+
+  doCheck ? true,
 } :
 
 stdenv.mkDerivation (finalattrs:
@@ -23,6 +26,10 @@ stdenv.mkDerivation (finalattrs:
     doCheck = true;
     nativeBuildInputs = [
       cmake catch2 xo-cmake
+    ]
+    ++ lib.optionals doCheck [
+      xo-testutil
+      cli11
     ];
     propagatedBuildInputs = [
       xo-indentlog
