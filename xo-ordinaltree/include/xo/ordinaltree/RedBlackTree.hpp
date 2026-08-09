@@ -675,6 +675,11 @@ namespace xo {
                     xo::Cpof cpof(gc, this);
                     return new (cpof) RedBlackTree(*this);
                 } else {
+                    /* unreachable, not unfinished: which arm exists is decided
+                     * at compile time by the allocator traits.  See
+                     * FallbackObjectInterface in
+                     * xo-allocutil/include/xo/allocutil/gc_allocator_traits.hpp
+                     */
                     assert(false && "_shallow_copy assumes gc enabled");
                     return nullptr;
                 }
@@ -688,6 +693,9 @@ namespace xo {
 
                     return RedBlackTree::_shallow_size();
                 } else {
+                    /* unreachable, not unfinished -- see the note on
+                     * _shallow_copy above.
+                     */
                     assert(false && "_forward_children assumes gc enabled");
                     return 0ul;
                 }
@@ -720,30 +728,23 @@ namespace xo {
         operator<<(std::ostream & os,
                    RedBlackTree<Key, Value, Reduce, Compare, Allocator> const & tree)
         {
-            /* was an unconditional tree.display(os).  RedBlackTree overrides
-             * the rendering nowhere -- the one at "#ifdef SET_ASIDE" above is
-             * disabled -- so this reaches whichever base the ALLOCATOR gave
-             * this instantiation, and there are two of them:
+            /* was tree.display(os).  RedBlackTree overrides the rendering
+             * nowhere -- the one at "#ifdef SET_ASIDE" above is disabled -- so
+             * this reaches whichever base the ALLOCATOR gave this
+             * instantiation:
              *
-             *   gc allocator  -> xo::Object, whose display(std::ostream&) was
-             *                    replaced by pretty(PpSink&).  See
-             *                    .xo-backlog/xo-alloc/issues/01.
-             *   otherwise     -> xo::gc::FallbackObjectInterface, which still
-             *                    has display(std::ostream&) (a no-op), and is
-             *                    in xo-allocutil, which does not depend on
-             *                    xo-ppsink and so cannot offer pretty().
+             *   gc allocator -> xo::Object                        -> "<Object>"
+             *   otherwise    -> xo::gc::FallbackObjectInterface   -> nothing
              *
-             * Detected by expression validity rather than by naming either
-             * base, so this header needs no dependency on whichever one it
-             * does not have.  Output is unchanged on both paths.
+             * Both spell it pretty(PpSink&), so no compile-time branch is
+             * needed here.  Object::display(std::ostream&) was replaced by
+             * pretty() in .xo-backlog/xo-alloc/issues/01, and the fallback
+             * mirrors it with a no-op taking a forward-declared PpSink.
+             * Output is unchanged on both paths.
              */
-            if constexpr (requires (xo::pp::PpSink & sink) { tree.pretty(sink); }) {
-                xo::pp::FlatSink sink(os);
+            xo::pp::FlatSink sink(os);
 
-                tree.pretty(sink);
-            } else {
-                tree.display(os);
-            }
+            tree.pretty(sink);
 
             return os;
         } /*operator<<*/

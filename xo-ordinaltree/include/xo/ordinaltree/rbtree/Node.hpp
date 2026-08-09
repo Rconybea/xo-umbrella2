@@ -347,6 +347,11 @@ namespace xo {
                         xo::Cpof cpof(gc, this);
                         return new (cpof) Node(*this);
                     } else {
+                        /* unreachable, not unfinished: which arm exists is
+                         * decided at compile time by the allocator traits.  See
+                         * FallbackObjectInterface in
+                         * xo-allocutil/include/xo/allocutil/gc_allocator_traits.hpp
+                         */
                         assert(false && "_shallow_copy assumes gc enabled");
                         return nullptr;
                     }
@@ -380,6 +385,9 @@ namespace xo {
 
                         return Node::_shallow_size();
                     } else {
+                        /* unreachable, not unfinished -- see the note on
+                         * _shallow_copy above.
+                         */
                         assert(false && "_forward_children assumes gc enabled");
                         return 0ul;
                     }

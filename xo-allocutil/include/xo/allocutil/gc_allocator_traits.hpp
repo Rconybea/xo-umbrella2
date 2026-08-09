@@ -9,6 +9,23 @@
 #include <memory>
 #include <type_traits>
 
+/* PpSink is FORWARD-DECLARED, not included, and deliberately so.
+ *
+ * FallbackObjectInterface::pretty() below mirrors xo::Object::pretty() so that
+ * a type can sit on either base -- see RedBlackTree, which picks its base from
+ * its allocator -- but its body is a no-op and never touches the parameter, so
+ * an incomplete type is sufficient for a reference.
+ *
+ * That matters: xo-allocutil has NO dependencies at all (xo-deps --deps-of is
+ * empty) and 15 subsystems depend on it, so including <xo/ppsink/PpSink.hpp>
+ * here would give a foundational leaf its first dependency and propagate it
+ * across all 15 -- to serve a method that does nothing.
+ *
+ * Anything that actually renders needs the real header; this declaration only
+ * lets the signature exist.
+ */
+namespace xo::pp { class PpSink; }
+
 namespace xo {
     class IObject;
 
@@ -17,6 +34,18 @@ namespace xo {
 
         /** object interface for allocators A that don't provide A::gc_object_interface.
          *  See gc_allocator_traits<A>
+         *
+         *  A container can be allocator-aware and *additionally* gc-aware
+         *  depending on its allocator's traits.  xo-ordinaltree is the worked
+         *  example: RedBlackTree and its Node both derive from
+         *  @c gc_allocator_traits<Allocator>::object_interface_type, which is
+         *  xo::Object when the allocator is garbage-collecting and this struct
+         *  otherwise.  The gc-aware configuration has to supply real tracing
+         *  hooks for tree nodes; the plain one must supply none.
+         *
+         *  This class is load-bearing for non-gc allocators.  Make sure you
+         *  have full understanding of both the gc and non-gc contexts before
+         *  disturbing it.
          **/
         struct FallbackObjectInterface {
             /** see also IObject::_requires_gc_hooks **/
@@ -33,7 +62,12 @@ namespace xo {
                 *lhs = rhs;
             }
 
-            virtual void display(std::ostream &) const {}
+            /** mirrors xo::Object::pretty -- see the note on PpSink above.
+             *
+             *  No-op, like the display(std::ostream&) it replaced: a type held
+             *  by a non-gc allocator renders as nothing.
+             **/
+            virtual void pretty(xo::pp::PpSink &) const {}
             virtual bool _is_forwarded() const { return false; }
             virtual std::size_t _shallow_size() const { assert(false); return 0; }
             virtual IObject * _shallow_copy(gc::IAlloc *) const { assert(false); return nullptr; }
