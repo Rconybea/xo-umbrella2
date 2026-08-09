@@ -196,6 +196,30 @@ namespace xo {
             }
         }
 
+        void
+        DArray::pretty(xo::pp::PpSink & sink) const
+        {
+            /* begin(1), not begin(): the offset credits the "[" so that
+             * elements 2..n line up under element 0 when the array breaks,
+             * instead of indenting a full nesting level below it.
+             */
+            sink.put("[").begin(1);
+
+            for (size_type i = 0, n = this->size(); i < n; ++i) {
+                if (i > 0)
+                    sink.split(1);
+
+                obj<APrintable> elt
+                    = FacetRegistry::instance().variant<APrintable,AGCObject>(this->at(i));
+
+                assert(elt.data());
+
+                sink.pp(elt);
+            }
+
+            sink.end().put("]");
+        }
+
         // gc hooks for IGCObject_DArray
 
         DArray *

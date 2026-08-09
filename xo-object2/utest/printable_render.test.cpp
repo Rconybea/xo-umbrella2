@@ -2,7 +2,8 @@
  *
  * author: Roland Conybeare, Aug 2026
  *
- * Phase C verification for xo-object2's LEAF printers.
+ * Phase C verification for xo-object2's printers: the leaves (DInteger,
+ * DBoolean, DFloat), then DRuntimeError (a struct) and DArray (a sequence).
  *
  * Follows the template in xo-stringtable2/utest/printable_render.test.cpp --
  * see .xo-backlog/xo-printable2/issues/01-aprintable-pretty-ppsink.md for why
@@ -19,12 +20,16 @@
  * Expectations are OBSERVED, never predicted.
  */
 
+#include <xo/object2/DArray.hpp>
 #include <xo/object2/DBoolean.hpp>
 #include <xo/object2/DFloat.hpp>
 #include <xo/object2/DInteger.hpp>
 #include <xo/object2/RuntimeError.hpp>
+#include <xo/object2/array/IGCObject_DArray.hpp>
+#include <xo/object2/array/IPrintable_DArray.hpp>
 #include <xo/object2/number/IPrintable_DInteger.hpp>
 #include <xo/object2/number/IPrintable_DFloat.hpp>
+#include <xo/object2/number/IGCObject_DInteger.hpp>
 #include <xo/object2/boolean/IPrintable_DBoolean.hpp>
 #include <xo/object2/SetupObject2.hpp>
 #include <xo/alloc2/arena/IAllocator_DArena.hpp>
@@ -41,6 +46,7 @@
 #include <vector>
 
 namespace xo {
+    using xo::scm::DArray;
     using xo::scm::DBoolean;
     using xo::scm::DFloat;
     using xo::scm::DInteger;
@@ -48,6 +54,7 @@ namespace xo {
     using xo::scm::DString;
     using xo::print::APrintable;
     using xo::mm::AAllocator;
+    using xo::mm::AGCObject;
     using xo::mm::DArena;
     using xo::mm::ArenaConfig;
     using xo::facet::with_facet;
@@ -200,6 +207,66 @@ namespace xo {
                                "  :err\n"
                                "   bad argument>"),
             };
+            /** DArray is the first SEQUENCE printer verified here.  Unlike
+             *  DRuntimeError its arity is not fixed, so the margin decides both
+             *  whether it breaks and how many elements share a line.
+             *
+             *  Note this does NOT render like Prettifier<vector<T>>, which
+             *  indents a broken sequence by a full nesting level
+             *  ("[1,\n  2,\n  3]", pinned in
+             *  xo-indentlog2/utest/PrettyVector.test.cpp).  DArray aligns to
+             *  element 0 instead -- RC's call, matching what legacy rendered.
+             *
+             *  Elements are DIntegers -- leaves already pinned above, so any
+             *  difference here is the array's own framing, not an element's.
+             **/
+            struct Testcase_Array {
+                Testcase_Array(std::uint32_t margin,
+                               std::vector<long> elt_v,
+                               const char * expect_deprecated,
+                               const char * expect_pretty)
+                    : margin_{margin}, elt_v_{std::move(elt_v)},
+                      expect_deprecated_{expect_deprecated},
+                      expect_pretty_{expect_pretty} {}
+
+                std::uint32_t margin_;
+                std::vector<long> elt_v_;
+                /** OBSERVED via pretty_deprecated; delete at phase E **/
+                std::string expect_deprecated_;
+                /** OBSERVED via pretty; outlives phase E **/
+                std::string expect_pretty_;
+            };
+
+            std::vector<Testcase_Array>
+            s_array_v = {
+                /* degenerate: empty group must not break, and must not emit a
+                 * separator it has no elements to separate.
+                 */
+                Testcase_Array(80, {}, "[]", "[]"),
+                Testcase_Array(80, {1}, "[1]", "[1]"),
+                /* fits: one line, space-separated.  identical. */
+                Testcase_Array(80, {1, 2, 3}, "[1 2 3]", "[1 2 3]"),
+                /* REVIEWED DIVERGENCE, deliberate: both stacks align elements
+                 * 2..n under element 0, but they get there differently.
+                 *
+                 * Legacy pads -- it writes a space after "[" so that element 0
+                 * starts at the continuation indent ("[ 100" / "  200").
+                 * ppsink offsets instead: begin(1) credits the bracket, so
+                 * element 0 follows "[" immediately and the continuation indent
+                 * is 1 to match it.  Same alignment, one column left, and no
+                 * whitespace inside a rendering that claims to have none.
+                 */
+                Testcase_Array(8, {100, 200, 300},
+                               "[ 100\n  200\n  300]",
+                               "[100\n 200\n 300]"),
+                /* margin narrower than a single element: no further recourse,
+                 * so the rendering is unchanged from margin 8 rather than
+                 * degenerating.
+                 */
+                Testcase_Array(4, {100, 200, 300},
+                               "[ 100\n  200\n  300]",
+                               "[100\n 200\n 300]"),
+            };
         } /*namespace*/
 
         TEST_CASE("DInteger-render", "[printable][DInteger]")
@@ -328,6 +395,97 @@ namespace xo {
                     REHEARSE(rh, deprecated == tc.expect_deprecated_);
                 }
             }
+        }
+
+        TEST_CASE("DArray-render", "[printable][DArray]")
+        {
+            REQUIRE(xo::scm::SetupObject2::register_facets());
+
+            UtestRehearser rh;
+
+            for (auto _ : rh) {
+                scope log(XO_DEBUG2_(rh.enable_debug(), "DArray-render"));
+
+                for (std::size_t i_tc = 0, n_tc = s_array_v.size(); i_tc < n_tc; ++i_tc) {
+                    const auto & tc = s_array_v[i_tc];
+
+                    ArenaConfig cfg { .name_ = "utest.array." + std::to_string(i_tc),
+                                      .size_ = 4*1024 };
+                    DArena arena = DArena::map(cfg);
+                    auto alloc = with_facet<AAllocator>::mkobj(&arena);
+
+                    DArray * arr = DArray::_empty(alloc, tc.elt_v_.size());
+
+                    REQUIRE(arr != nullptr);
+
+                    for (long elt : tc.elt_v_)
+                        REQUIRE(arr->push_back(alloc, DInteger::box<AGCObject>(alloc, elt)));
+
+                    auto p = with_facet<APrintable>::mkobj(arr);
+
+                    std::string deprecated = render_deprecated(p, tc.margin_);
+                    std::string pretty = render_pretty(p, tc.margin_);
+
+                    log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_),
+                               xtag("deprecated", deprecated), xtag("pretty", pretty));
+
+                    REHEARSE(rh, pretty == tc.expect_pretty_);
+                    REHEARSE(rh, deprecated == tc.expect_deprecated_);
+                }
+            }
+        }
+
+        /** A flat array shows that the group breaks; only a NESTED one shows
+         *  that an inner group indents relative to its parent rather than to
+         *  column 0.  That is the property a sequence printer can get wrong
+         *  without any of the cases above noticing.
+         **/
+        TEST_CASE("DArray-render-nested", "[printable][DArray]")
+        {
+            REQUIRE(xo::scm::SetupObject2::register_facets());
+
+            ArenaConfig cfg { .name_ = "utest.array.nested", .size_ = 4*1024 };
+            DArena arena = DArena::map(cfg);
+            auto alloc = with_facet<AAllocator>::mkobj(&arena);
+
+            /* [[100 200] [300]] */
+            DArray * inner1 = DArray::_empty(alloc, 2);
+            REQUIRE(inner1->push_back(alloc, DInteger::box<AGCObject>(alloc, 100)));
+            REQUIRE(inner1->push_back(alloc, DInteger::box<AGCObject>(alloc, 200)));
+
+            DArray * inner2 = DArray::_empty(alloc, 1);
+            REQUIRE(inner2->push_back(alloc, DInteger::box<AGCObject>(alloc, 300)));
+
+            DArray * outer = DArray::_empty(alloc, 2);
+            REQUIRE(outer->push_back(alloc, with_facet<AGCObject>::mkobj(inner1)));
+            REQUIRE(outer->push_back(alloc, with_facet<AGCObject>::mkobj(inner2)));
+
+            auto p = with_facet<APrintable>::mkobj(outer);
+
+            /* fits */
+            REQUIRE(render_pretty(p, 80) == "[[100 200] [300]]");
+            REQUIRE(render_deprecated(p, 80) == "[[100 200] [300]]");
+
+            /* outer breaks, inner arrays still fit: element 1 lines up under
+             * element 0, i.e. indent 1 -- not column 0, and not the enclosing
+             * indent + a nesting level.
+             */
+            REQUIRE(render_pretty(p, 12) == ("[[100 200]\n"
+                                             " [300]]"));
+            REQUIRE(render_deprecated(p, 12) == ("[ [100 200]\n"
+                                                 "  [300]]"));
+
+            /* both levels break.  The inner array's own "[" sits at column 1, so
+             * its elements align at column 2: the offset composes with the
+             * enclosing indent rather than resetting.  This is the assertion a
+             * flat array cannot make.
+             */
+            REQUIRE(render_pretty(p, 6) == ("[[100\n"
+                                            "  200]\n"
+                                            " [300]]"));
+            REQUIRE(render_deprecated(p, 6) == ("[ [ 100\n"
+                                                "    200]\n"
+                                                "  [ 300]]"));
         }
     } /*namespace ut*/
 } /*namespace xo*/
