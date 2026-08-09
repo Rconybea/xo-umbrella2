@@ -9,6 +9,8 @@
  */
 
 #include "print/toppstr.hpp"
+#include <xo/ppsink/PpStyle.hpp>
+#include <xo/ppsink/pretty_struct.hpp>
 #include <xo/ppsink/pretty_array.hpp>
 #include <xo/ppsink/tostr.hpp>
 #include <catch2/catch.hpp>
@@ -20,6 +22,8 @@
 namespace xo {
     namespace ut {
         using xo::pp::PpConfig;
+        using xo::pp::PpStyle;
+        using xo::pp::color_spec_type;
 
         namespace {
             /** an array is enough structure to break: Prettifier<std::array>
@@ -95,6 +99,38 @@ namespace xo {
                 INFO("iteration " << i << " first=[" << first << "]");
                 REQUIRE(render_at(20) == first);
             }
+        }
+
+        TEST_CASE("toppstr-carries-style", "[toppstr][PpStyle]") {
+            /* The seam PpStyle exists to close: the style is set on a PpConfig
+             * (xo-indentlog2) and consumed by a Prettifier that sees only a
+             * PpSink (xo-ppsink, one subsystem BELOW).  PrettySink installs it
+             * on itself at construction; nothing else connects the two, so a
+             * dropped with_style() would silently render in the default.
+             *
+             * tag() and field() are rendered directly, since they ARE the two
+             * consumers -- and they take the two different colors, which is the
+             * distinction being checked.
+             *
+             * Styles are set explicitly rather than read from the ambient
+             * default, which the utest main has replaced with plain().
+             */
+            PpStyle style;
+            style.tag_color = color_spec_type::ansi(31);          /* red */
+            style.struct_tag_color = color_spec_type::ansi(32);   /* green */
+
+            int x = 1;   /* named: field() captures by reference */
+
+            REQUIRE(xo::pp::toppstr(PpConfig().with_style(style), xo::pp::tag("k", x))
+                    == "\033[31m:k\033[0m 1");
+            REQUIRE(xo::pp::toppstr(PpConfig().with_style(style), xo::pp::field("k", x))
+                    == "\033[32m:k\033[0m 1");
+
+            /* ... and both render bare under plain() */
+            REQUIRE(xo::pp::toppstr(PpConfig().with_style(PpStyle::plain()), xo::pp::tag("k", x))
+                    == ":k 1");
+            REQUIRE(xo::pp::toppstr(PpConfig().with_style(PpStyle::plain()), xo::pp::field("k", x))
+                    == ":k 1");
         }
 
         TEST_CASE("toppstr-overloads", "[toppstr]") {

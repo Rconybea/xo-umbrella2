@@ -21,7 +21,6 @@
 
 using xo::pp::scope;
 using xo::pp::scope_config;
-using xo::pp::color_config;
 using xo::pp::log_level;
 using xo::pp::tag;
 using xo::pp::xtag;
@@ -50,7 +49,6 @@ main(int argc, char ** argv) {
     scope_config::indent_width = 2;
     scope_config::location_enabled = true;   /* append [file:line] */
     scope_config::location_tab = 40;         /* right-align it at column 40 */
-    color_config::color_enabled = true;      /* color the location (red default) */
 
     ArenaConfig logbuf_cfg { .name_ = "example.ex3g", .size_ = 64*1024 };
     PrettySink pp(PpConfig().with_logbuf_config(logbuf_cfg),

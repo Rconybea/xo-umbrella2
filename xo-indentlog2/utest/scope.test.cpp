@@ -10,6 +10,7 @@
 
 #include "print/PrettySink.hpp"
 #include <xo/arena/ArenaConfig.hpp>
+#include <xo/ppsink/color.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <catch2/catch.hpp>
 #include <sstream>
@@ -20,6 +21,7 @@ namespace ut {
     using xo::pp::scope_config;
     using xo::pp::PrettySink;
     using xo::pp::PpConfig;
+    using xo::pp::PpStyle;
     using xo::pp::ThreadLogState;
     using xo::mm::ArenaConfig;
 
@@ -33,7 +35,7 @@ namespace ut {
     template <typename Fn>
     static std::string scoped_pretty(std::uint32_t margin, Fn && fn) {
         ArenaConfig logbuf_cfg { .name_ = "utest.scope", .size_ = 64*1024 };
-        PpConfig cfg = PpConfig().with_logbuf_config(logbuf_cfg);
+        PpConfig cfg = PpConfig().with_logbuf_config(logbuf_cfg).with_style(PpStyle::plain());
         if (margin > 0)
             cfg = cfg.with_soft_right_margin(margin);
 

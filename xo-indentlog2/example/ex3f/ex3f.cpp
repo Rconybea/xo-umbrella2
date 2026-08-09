@@ -26,7 +26,6 @@
 
 using xo::pp::scope;
 using xo::pp::scope_config;
-using xo::pp::color_config;
 using xo::pp::log_level;
 using xo::pp::tag;
 using xo::pp::xtag;
@@ -51,7 +50,6 @@ fib(int n) {
 
 int
 main(int argc, char ** argv) {
-    color_config::color_enabled = true;
     scope_config::min_log_level = log_level::info;
     scope_config::indent_width = 2;
     scope_config::nesting_level_enabled = true;                    /* show "(N)" depth (default light-blue color) */
