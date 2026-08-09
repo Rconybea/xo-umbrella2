@@ -3,6 +3,8 @@
  *  @author Roland Conybeare, Jul 2026
  **/
 
+#pragma once
+
 #include <xo/arena/ArenaConfig.hpp>
 #include <cstdint>
 
