@@ -20,8 +20,7 @@
 
 using xo::pp::scope;
 using xo::pp::scope_config;
-using xo::pp::tag_config;
-using xo::pp::color_config;
+using xo::pp::PpStyle;
 using xo::pp::color_spec_type;
 using xo::pp::log_level;
 using xo::pp::tag;
@@ -44,12 +43,12 @@ fib(int n) {
 
 int
 main(int argc, char ** argv) {
-    color_config::color_enabled = true;
     scope_config::min_log_level = log_level::info;
     scope_config::indent_width = 4;
     scope_config::function_entry_color = color_spec_type::xterm(69);   /* entry: blue-ish */
     scope_config::function_exit_color  = color_spec_type::xterm(70);   /* exit:  green-ish */
-    tag_config::tag_color              = color_spec_type::xterm(166);  /* tag name: orange */
+    PpStyle::default_style().color_enabled = true;
+    PpStyle::default_style().tag_color = color_spec_type::xterm(166);  /* tag name: orange */
 
     int n = 3;
 

@@ -18,7 +18,6 @@
 
 using xo::pp::scope;
 using xo::pp::scope_config;
-using xo::pp::color_config;
 using xo::pp::log_level;
 using xo::pp::tag;
 using xo::pp::xtag;
@@ -42,7 +41,6 @@ main(int argc, char ** argv) {
     scope_config::min_log_level = log_level::info;
     scope_config::indent_width = 2;
     scope_config::location_enabled = true;   /* append [file:line] (inline, FlatSink) */
-    color_config::color_enabled = true;      /* color the location (red default) */
 
     fib(3);
 
