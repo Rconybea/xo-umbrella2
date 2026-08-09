@@ -294,6 +294,48 @@ namespace xo {
             }
         }
 
+        void
+        DDictionary::pretty(xo::pp::PpSink & sink) const
+        {
+            /* begin(1) as for DArray: the offset credits the "{" so that
+             * entries 2..n line up under entry 0 when the dictionary breaks,
+             * instead of indenting a full nesting level below it.
+             */
+            sink.put("{").begin(1);
+
+            for (size_type i = 0, n = this->size(); i < n; ++i) {
+                if (i > 0)
+                    sink.split(1);
+
+                obj<APrintable> key
+                    = FacetRegistry::instance().variant<APrintable,AGCObject>((*keys_)[i]);
+                obj<APrintable> value
+                    = FacetRegistry::instance().variant<APrintable,AGCObject>((*values_)[i]);
+
+                assert(key.data());
+                assert(value.data());
+
+                /* each entry is its OWN group, so that a value too wide for
+                 * the line folds after the key rather than starting inline and
+                 * breaking from wherever the key happened to end.  Without the
+                 * group the split would break whenever the enclosing
+                 * dictionary breaks, putting every entry on two lines.
+                 *
+                 * split(1) rather than put(": "): identical when the entry
+                 * fits, a break point when it does not.
+                 */
+                sink.begin(1);
+                sink.pp(key);
+                sink.put(":");
+                sink.split(1);
+                sink.pp(value);
+                sink.put(";");
+                sink.end();
+            }
+
+            sink.end().put("}");
+        }
+
         // ----- gcobject facet -----
 
         DDictionary *

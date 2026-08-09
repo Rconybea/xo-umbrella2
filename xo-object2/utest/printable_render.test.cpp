@@ -3,7 +3,8 @@
  * author: Roland Conybeare, Aug 2026
  *
  * Phase C verification for xo-object2's printers: the leaves (DInteger,
- * DBoolean, DFloat), then DRuntimeError (a struct) and DArray (a sequence).
+ * DBoolean, DFloat), then DRuntimeError (a struct), DArray (a sequence) and
+ * DDictionary (a keyed sequence).
  *
  * Follows the template in xo-stringtable2/utest/printable_render.test.cpp --
  * see .xo-backlog/xo-printable2/issues/01-aprintable-pretty-ppsink.md for why
@@ -22,11 +23,14 @@
 
 #include <xo/object2/DArray.hpp>
 #include <xo/object2/DBoolean.hpp>
+#include <xo/object2/DDictionary.hpp>
 #include <xo/object2/DFloat.hpp>
 #include <xo/object2/DInteger.hpp>
 #include <xo/object2/RuntimeError.hpp>
 #include <xo/object2/array/IGCObject_DArray.hpp>
 #include <xo/object2/array/IPrintable_DArray.hpp>
+#include <xo/object2/dictionary/IGCObject_DDictionary.hpp>
+#include <xo/object2/dictionary/IPrintable_DDictionary.hpp>
 #include <xo/object2/number/IPrintable_DInteger.hpp>
 #include <xo/object2/number/IPrintable_DFloat.hpp>
 #include <xo/object2/number/IGCObject_DInteger.hpp>
@@ -43,11 +47,13 @@
 #include <catch2/catch.hpp>
 #include <cstdint>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace xo {
     using xo::scm::DArray;
     using xo::scm::DBoolean;
+    using xo::scm::DDictionary;
     using xo::scm::DFloat;
     using xo::scm::DInteger;
     using xo::scm::DRuntimeError;
@@ -267,6 +273,89 @@ namespace xo {
                                "[ 100\n  200\n  300]",
                                "[100\n 200\n 300]"),
             };
+            /** DDictionary is a KEYED sequence: like DArray its arity is
+             *  variable, but each element is itself two printers plus fixed
+             *  punctuation, so the same margin breaks it sooner.
+             *
+             *  Keys are DStrings, which render UNQUOTED (DString::pretty ->
+             *  sink.pp(const char *)); values here are DIntegers.  Both are
+             *  pinned already, so any difference below is the dictionary's own
+             *  framing.
+             *
+             *  Each entry is its own group with a break point after the ":", so
+             *  a value that will not fit folds onto the next line rather than
+             *  starting inline wherever the key ended.  RC's call: the key
+             *  could just as well have been forty characters long, and the
+             *  layout must not depend on that.
+             **/
+            struct Testcase_Dict {
+                using entry_type = std::pair<const char *, long>;
+
+                Testcase_Dict(std::uint32_t margin,
+                              std::vector<entry_type> entry_v,
+                              const char * expect_deprecated,
+                              const char * expect_pretty)
+                    : margin_{margin}, entry_v_{std::move(entry_v)},
+                      expect_deprecated_{expect_deprecated},
+                      expect_pretty_{expect_pretty} {}
+
+                std::uint32_t margin_;
+                std::vector<entry_type> entry_v_;
+                /** OBSERVED via pretty_deprecated; delete at phase E **/
+                std::string expect_deprecated_;
+                /** OBSERVED via pretty; outlives phase E **/
+                std::string expect_pretty_;
+            };
+
+            std::vector<Testcase_Dict>
+            s_dict_v = {
+                /* degenerate: empty group must not break, and must not emit a
+                 * separator it has no entries to separate.  Legacy still pads,
+                 * so an empty dictionary is TWO characters there and one here.
+                 */
+                Testcase_Dict(80, {}, "{ }", "{}"),
+                Testcase_Dict(80, {{"a", 1}}, "{ a: 1; }", "{a: 1;}"),
+                /* fits: one line.  ";" TERMINATES each entry rather than
+                 * separating them, so the last one carries it too -- legacy's
+                 * shape, kept.
+                 */
+                Testcase_Dict(80, {{"a", 1}, {"bb", 22}},
+                              "{ a: 1; bb: 22; }", "{a: 1; bb: 22;}"),
+                /* REVIEWED DIVERGENCE, deliberate, and the same one DArray
+                 * settled: both stacks align entries 2..n under entry 0, but
+                 * legacy gets there by PADDING (a space after "{", so entry 0
+                 * starts at the continuation indent) where ppsink OFFSETS
+                 * (begin(1) credits the brace).  Same alignment, one column
+                 * left, and no interior whitespace.
+                 */
+                Testcase_Dict(12, {{"a", 1}, {"bb", 22}},
+                              "{ a: 1;\n  bb: 22; }",
+                              "{a: 1;\n bb: 22;}"),
+                /* margin narrower than a single entry.  Unlike DArray -- whose
+                 * elements are atomic, so a too-narrow margin has no further
+                 * recourse -- an entry CAN still fold after its ":", and does.
+                 * Legacy has no such break point, so it is unchanged from
+                 * margin 12 while ppsink degrades one step further.
+                 */
+                Testcase_Dict(4, {{"a", 1}, {"bb", 22}},
+                              "{ a: 1;\n  bb: 22; }",
+                              "{a:\n  1;\n bb:\n  22;}"),
+                /* A key wide enough to crowd the margin on its own.  Each entry
+                 * is its own group with a break point after the ":", so the
+                 * value FOLDS onto the next line at entry-indent + 1 and the
+                 * layout stops depending on how long the key was.
+                 *
+                 * REVIEWED DIVERGENCE, deliberate: legacy has no such break
+                 * point, so it emits a 41-column line at a margin of 30 and
+                 * renders margin 12 identically -- it simply cannot fold here.
+                 */
+                Testcase_Dict(30, {{"keep_going_until_close_to_margin", 12345}, {"n", 3}},
+                              "{ keep_going_until_close_to_margin: 12345;\n"
+                              "  n: 3; }",
+                              "{keep_going_until_close_to_margin:\n"
+                              "  12345;\n"
+                              " n: 3;}"),
+            };
         } /*namespace*/
 
         TEST_CASE("DInteger-render", "[printable][DInteger]")
@@ -433,6 +522,117 @@ namespace xo {
                     REHEARSE(rh, deprecated == tc.expect_deprecated_);
                 }
             }
+        }
+
+        TEST_CASE("DDictionary-render", "[printable][DDictionary]")
+        {
+            REQUIRE(xo::scm::SetupObject2::register_facets());
+
+            UtestRehearser rh;
+
+            for (auto _ : rh) {
+                scope log(XO_DEBUG2_(rh.enable_debug(), "DDictionary-render"));
+
+                for (std::size_t i_tc = 0, n_tc = s_dict_v.size(); i_tc < n_tc; ++i_tc) {
+                    const auto & tc = s_dict_v[i_tc];
+
+                    ArenaConfig cfg { .name_ = "utest.dict." + std::to_string(i_tc),
+                                      .size_ = 4*1024 };
+                    DArena arena = DArena::map(cfg);
+                    auto alloc = with_facet<AAllocator>::mkobj(&arena);
+
+                    DDictionary * dict = DDictionary::empty(alloc, tc.entry_v_.size());
+
+                    REQUIRE(dict != nullptr);
+
+                    for (const auto & entry : tc.entry_v_) {
+                        REQUIRE(dict->upsert_cstr(alloc, entry.first,
+                                                  DInteger::box<AGCObject>(alloc, entry.second)));
+                    }
+
+                    auto p = with_facet<APrintable>::mkobj(dict);
+
+                    std::string deprecated = render_deprecated(p, tc.margin_);
+                    std::string pretty = render_pretty(p, tc.margin_);
+
+                    log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_),
+                               xtag("deprecated", deprecated), xtag("pretty", pretty));
+
+                    REHEARSE(rh, pretty == tc.expect_pretty_);
+                    REHEARSE(rh, deprecated == tc.expect_deprecated_);
+                }
+            }
+        }
+
+        /** As with DArray, a flat dictionary shows only that the group breaks.
+         *  Nesting one dictionary inside another is what shows the inner
+         *  group's offset COMPOSING with the enclosing indent rather than
+         *  resetting to column 0 -- and, at margin 16, the entry folding after
+         *  its key before the value is asked to break at all.
+         **/
+        TEST_CASE("DDictionary-render-nested", "[printable][DDictionary]")
+        {
+            REQUIRE(xo::scm::SetupObject2::register_facets());
+
+            ArenaConfig cfg { .name_ = "utest.dict.nested", .size_ = 4*1024 };
+            DArena arena = DArena::map(cfg);
+            auto alloc = with_facet<AAllocator>::mkobj(&arena);
+
+            /* {k: {a: 1; b: 2;}; n: 3;} */
+            DDictionary * inner = DDictionary::empty(alloc, 2);
+            REQUIRE(inner->upsert_cstr(alloc, "a", DInteger::box<AGCObject>(alloc, 1)));
+            REQUIRE(inner->upsert_cstr(alloc, "b", DInteger::box<AGCObject>(alloc, 2)));
+
+            DDictionary * outer = DDictionary::empty(alloc, 2);
+            REQUIRE(outer->upsert_cstr(alloc, "k",
+                                       obj<AGCObject,DDictionary>(inner)));
+            REQUIRE(outer->upsert_cstr(alloc, "n", DInteger::box<AGCObject>(alloc, 3)));
+
+            auto p = with_facet<APrintable>::mkobj(outer);
+
+            /* fits */
+            REQUIRE(render_pretty(p, 80) == "{k: {a: 1; b: 2;}; n: 3;}");
+            REQUIRE(render_deprecated(p, 80) == "{ k: { a: 1; b: 2; }; n: 3; }");
+
+            /* outer breaks, inner still fits: entry 1 lines up under entry 0,
+             * i.e. indent 1.
+             */
+            REQUIRE(render_pretty(p, 20) == ("{k: {a: 1; b: 2;};\n"
+                                             " n: 3;}"));
+            REQUIRE(render_deprecated(p, 20) == ("{ k: { a: 1; b: 2; };\n"
+                                                 "  n: 3; }"));
+
+            /* the entry no longer fits, so it breaks after "k:" and the value
+             * starts a fresh line at entry-indent + 1 = 2.  The nested value
+             * is thereby placed independently of the key's width -- which is
+             * the whole point of giving each entry its own group.
+             *
+             * Legacy has no break point after the key, so it keeps the value
+             * inline and lets the INNER dictionary break instead, indenting to
+             * that dictionary's own column (7).
+             */
+            REQUIRE(render_pretty(p, 16) == ("{k:\n"
+                                             "  {a: 1; b: 2;};\n"
+                                             " n: 3;}"));
+            REQUIRE(render_deprecated(p, 16) == ("{ k: { a: 1;\n"
+                                                 "       b: 2; };\n"
+                                                 "  n: 3; }"));
+
+            /* Both levels break.  The inner dictionary opens at the running
+             * indent (2), so its own begin(1) puts its entries at 3 -- the
+             * offset COMPOSES with the enclosing indent rather than resetting.
+             * That is the assertion a flat dictionary cannot make.
+             *
+             * Legacy is UNCHANGED from margin 16: with no fold after the key it
+             * has no further recourse.
+             */
+            REQUIRE(render_pretty(p, 10) == ("{k:\n"
+                                             "  {a: 1;\n"
+                                             "   b: 2;};\n"
+                                             " n: 3;}"));
+            REQUIRE(render_deprecated(p, 10) == ("{ k: { a: 1;\n"
+                                                 "       b: 2; };\n"
+                                                 "  n: 3; }"));
         }
 
         /** A flat array shows that the group breaks; only a NESTED one shows
