@@ -17,6 +17,7 @@ set(SELF_SOURCE_FILES
     tag_ostream.test.cpp
     tostr.test.cpp
     verify_policy.test.cpp
+    PpStyle.test.cpp
     scope.test.cpp)
 
 if (ENABLE_TESTING)

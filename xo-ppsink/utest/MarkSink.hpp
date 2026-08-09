@@ -19,12 +19,17 @@
 #pragma once
 
 #include <xo/ppsink/PpSink.hpp>
+#include <xo/ppsink/PpStyle.hpp>
 #include <ostream>
 
 namespace ut {
     class MarkSink final : public xo::pp::PpSink {
     public:
-        explicit MarkSink(std::ostream & os) : os_{os} {}
+        using PpSink = xo::pp::PpSink;
+        using PpStyle = xo::pp::PpStyle;
+
+    public:
+        explicit MarkSink(std::ostream & os) : PpSink(PpStyle::default_style()), os_{os} {}
 
         using PpSink::split;
         using PpSink::newline;

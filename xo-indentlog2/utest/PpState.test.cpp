@@ -17,6 +17,7 @@
 namespace ut {
     using xo::pp::PpState;
     using xo::pp::PpConfig;
+    using xo::pp::PpLayoutConfig;
     using xo::pp::PpTokenFlags;
     using xo::pp::k_nominal;
     using xo::pp::k_string;
@@ -152,7 +153,7 @@ namespace ut {
     ppstate_test_fn(const TestCase_PpState & tc,
                     UtestRehearser * p_rh)
     {
-        PpConfig cfg;
+        PpLayoutConfig cfg;
         if (tc.soft_right_margin_ > 0)
             cfg = cfg.with_soft_right_margin(tc.soft_right_margin_);
 

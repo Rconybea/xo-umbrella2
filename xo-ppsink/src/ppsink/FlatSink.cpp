@@ -7,6 +7,10 @@
 #include <xo/ppsink/escape.hpp>
 
 namespace xo::pp {
+    FlatSink::FlatSink(const PpStyle & style, std::ostream & os)
+            : PpSink(style), os_{os}
+    {}
+
     PpSink &
     FlatSink::put(std::string_view x)
     {

@@ -69,11 +69,12 @@ namespace xo::pp {
 } /*namespace xo::pp*/
 
 namespace ut {
-    namespace {
-        using xo::pp::PrettySink;
-        using xo::pp::PpConfig;
-        using xo::mm::ArenaConfig;
+    using xo::pp::PrettySink;
+    using xo::pp::PpConfig;
+    using xo::pp::PpStyle;
+    using xo::mm::ArenaConfig;
 
+    namespace {
         /** render @p x at right margin @p margin.
          *
          *  NB unique arena name per call: two PrettySinks sharing an
@@ -89,7 +90,8 @@ namespace ut {
                               .size_ = 64*1024 };
 
             PrettySink pps(PpConfig().with_logbuf_config(cfg)
-                                     .with_soft_right_margin(margin),
+                                     .with_soft_right_margin(margin)
+                                     .with_style(PpStyle::plain()),
                            nullptr);
 
             pps.pp(x);

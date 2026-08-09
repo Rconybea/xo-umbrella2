@@ -12,8 +12,8 @@
  *  through pretty() (so a pretty-printable value keeps its own structure),
  *  and leaves room to introduce a split() point between :name and value.
  *
- *  POC subset: autoescape of the value (legacy `unq`) and name-coloring
- *  (legacy `with_color` + tag_config) are deferred to later slices.
+ *  POC subset: autoescape of the value (legacy `unq`) is deferred to a later
+ *  slice.  Name-coloring is done, via PpStyle::tag_color (PpStyle.hpp).
  *
  *  NB: namespace xo::pp (not xo) to avoid colliding with the legacy
  *  xo::tag when both are visible in one translation unit.
@@ -36,15 +36,18 @@ namespace xo::pp {
         raw,
     };
 
-    /** @brief process-wide tag rendering configuration **/
-    struct tag_config {
-        /** color for the ":name" part of a tag (default none => uncolored) **/
-        static inline color_spec_type tag_color = color_spec_type::none();
-        /** extra indent for a tag's value when the tag breaks onto its own line
-         *  (the offset passed to split()); default 1
-         **/
-        static inline std::int32_t value_offset = 1;
-    };
+    /* NB: tag rendering configuration used to live here, as a process-wide
+     * `tag_config`.  It is now PpStyle (PpStyle.hpp), reached per-sink through
+     * PpSink::style(), so that a caller can restyle ONE render instead of the
+     * whole process:
+     *
+     *     tag_config::tag_color     -> sink.style().tag_color
+     *                                  PpStyle::default_style().tag_color
+     *     tag_config::value_offset  -> sink.style().tag_value_offset
+     *
+     * Deliberately not left behind as an alias: two names for one setting is
+     * how half a program ends up configuring the other half's copy.
+     */
 
     /** @brief key/value pair for logging, printed as ":name value".
      *
@@ -101,7 +104,7 @@ namespace xo::pp {
             sink.begin(0);
             {
                 /* color just the ":name" (value keeps its own color/structure) */
-                color_guard g(sink, tag_config::tag_color);
+                color_guard g(sink, sink.style().tag_color);
                 sink.put(":");
                 /* pp(), not put(): a name may be any renderable (e.g. concat,
                  * concat.hpp).  For a string-like name this is the same
@@ -109,7 +112,8 @@ namespace xo::pp {
                  */
                 sink.pp(t.name());
             }
-            sink.split(1, tag_config::value_offset);   /* 1 space if it fits; newline + value_offset indent if not */
+            /* 1 space if it fits; newline + tag_value_offset indent if not */
+            sink.split(1, sink.style().tag_value_offset);
             sink.pp(t.value());
             sink.end();
         }

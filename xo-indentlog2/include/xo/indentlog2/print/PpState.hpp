@@ -57,7 +57,7 @@ namespace xo::pp {
         /** Create instance from configuration @p cfg.
          *  Allocates arena for @ref logbuf_
          **/
-        explicit PpState(const PpConfig & cfg);
+        explicit PpState(const PpLayoutConfig & layout);
 
         /** true iff printer currently has an open string
          *  (only one permitted at a time, since zero-copy)
@@ -90,7 +90,7 @@ namespace xo::pp {
          *  the no-arg form indents one nesting level (config indent_width).
          **/
         void begin(int32_t offset);
-        void begin() { this->begin(config_.indent_width()); }
+        void begin() { this->begin(layout_config_.indent_width()); }
         /** optional break.  Group fits: emit @p spaces spaces.
          *  Group breaks: newline + (running_indent + @p offset).
          **/
@@ -168,8 +168,12 @@ namespace xo::pp {
          *         scan_ix     print_ix
          **/
 
-        /** Configuration: max width, indent etc. **/
-        PpConfig config_;
+        /** Configuration: layout-specific: max width, indent etc. **/
+        PpLayoutConfig layout_config_;
+
+        /** Configuration: logbuffer size / debug **/
+        PpLogbufConfig logbuf_config_;
+
         /** Token buffer.
          *  Large enough to contain tokens up to @ref config_.right_margin_
          **/

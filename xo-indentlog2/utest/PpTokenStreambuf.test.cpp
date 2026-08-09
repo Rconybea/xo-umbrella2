@@ -19,6 +19,7 @@
 namespace ut {
     using xo::pp::PpState;
     using xo::pp::PpConfig;
+    using xo::pp::PpLayoutConfig;
     using xo::pp::PpTokenStreambuf;
     using xo::LogBuffer;
     using xo::mm::ArenaConfig;
@@ -123,7 +124,7 @@ namespace ut {
     pptokenstreambuf_test_fn(const TestCase_PpTokenStreambuf & tc,
                              UtestRehearser * p_rh)
     {
-        PpConfig cfg;
+        PpLayoutConfig cfg;
         PpState pps(cfg);
 
         ArenaConfig buf_cfg { .name_ = "utest.PpTokenStreambuf",
@@ -172,7 +173,7 @@ namespace ut {
      */
     TEST_CASE("PpTokenStreambuf.numeric", "[PpTokenStreambuf]")
     {
-        PpConfig cfg;
+        PpLayoutConfig cfg;
         PpState pps(cfg);
 
         ArenaConfig buf_cfg { .name_ = "utest.PpTokenStreambuf.numeric",

@@ -72,7 +72,7 @@ namespace xo::pp {
     toppstr(const PpConfig & cfg, const Ts &... args) {
         PrettySink pps(PpConfig(cfg)
                        .with_logbuf_config(
-                           detail::toppstr_logbuf_config(cfg.logbuf_config().size_)),
+                                           detail::toppstr_logbuf_config(cfg.logbuf().logbuf_config().size_)),
                        nullptr /*out*/);
 
         (pps.pp(args), ...);

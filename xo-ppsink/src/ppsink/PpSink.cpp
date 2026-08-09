@@ -6,6 +6,10 @@
 #include <xo/ppsink/PpSink.hpp>
 
 namespace xo::pp {
+    PpSink::PpSink(const PpStyle & style)
+      : style_{style}
+    {}
+
     PpSinkInserter::PpSinkInserter(PpSink * ppsink, std::ostream * os)
       : ppsink_{ppsink}, os_{os}
     {

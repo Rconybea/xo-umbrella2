@@ -8,19 +8,47 @@
 #include <iostream>
 
 namespace xo {
+    using xo::mm::ArenaConfig;
+
     namespace pp {
         PrettySink::PrettySink(const PpConfig & cfg,
                                std::streambuf * out)
-        : pps_{cfg},
+        : PpSink(PpStyle::default_style()),
+          pps_{cfg.layout()},
           sbuf_{&pps_},
           os_(&sbuf_),
-          logbuf_{cfg.logbuf_config(), cfg.logbuf_debug_flag()}
+          logbuf_{cfg.logbuf().logbuf_config(), cfg.logbuf().logbuf_debug_flag()}
         {
+            /* presentation style travels with the config (PpConfig::style()),
+             * but is CONSUMED through PpSink::style() -- the Prettifiers that
+             * read it are handed only a PpSink.  See PpStyle.hpp.
+             */
+            this->style_ = cfg.style();
+
             /* collect pretty output in .logbuf_.. */
             pps_.connect_output(&logbuf_);
 
             /* ..and flush to out */
             logbuf_.set_dest_sbuf(out);
+        }
+
+        PrettySink
+        PrettySink::scratch(std::string basename,
+                            uint32_t size,
+                            uint32_t margin)
+        {
+            static int s_seq = 0;
+
+            ArenaConfig logbuf_cfg { .name_ = basename + std::to_string(++s_seq),
+                                     .size_ = size };
+
+            PpConfig cfg
+                = PpConfig()
+                   .with_logbuf_config(logbuf_cfg)
+                   .with_soft_right_margin(margin)
+                   .with_style(PpStyle::plain());
+
+            return PrettySink(cfg, nullptr);
         }
 
         void

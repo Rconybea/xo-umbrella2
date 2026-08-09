@@ -31,7 +31,7 @@
 
 #pragma once
 
-#include "tag.hpp"    /* Prettifier, PpSink, pretty(), color_guard, tag_config */
+#include "tag.hpp"    /* Prettifier, PpSink, pretty(), color_guard */
 #include <concepts>
 #include <string_view>
 
@@ -102,8 +102,11 @@ namespace xo::pp {
         static void print(PpSink & sink, const field_impl<Name, Value> & f) {
             sink.begin(0);
             {
-                /* color just the ":name" (value keeps its own color/structure) */
-                color_guard g(sink, tag_config::tag_color);
+                /* color just the ":name" (value keeps its own color/structure).
+                 * struct_tag_color, NOT tag_color: a struct field and a log tag
+                 * are deliberately distinguishable (PpStyle.hpp).
+                 */
+                color_guard g(sink, sink.style().struct_tag_color);
                 sink.put(":");
                 /* pp(), not put(): a name may be any renderable (e.g. concat).
                  * For a string_view or literal this is the same string-like
@@ -111,7 +114,7 @@ namespace xo::pp {
                  */
                 sink.pp(f.name());
             }
-            sink.split(1, tag_config::value_offset);
+            sink.split(1, sink.style().tag_value_offset);
             sink.pp(f.value());
             sink.end();
         }

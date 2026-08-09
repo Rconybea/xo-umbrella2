@@ -5,6 +5,7 @@
 
 #pragma once
 
+#include "PpStyle.hpp"
 #include <string_view>
 // Deliberately not including <ostream> here.
 // This file pulled into satellites that need
@@ -72,6 +73,8 @@ namespace xo::pp {
         using uint32_t = std::uint32_t;
 
     public:
+        explicit PpSink(const PpStyle & style);
+
         /** pretty-print @p x to this sink
          *  see pretty.hpp for implementation
          **/
@@ -217,6 +220,29 @@ namespace xo::pp {
         /** complete string started by stream_open() **/
         virtual void stream_commit() = 0;
 
+        /** @defgroup ppsink-style presentation style **/
+        ///@{
+
+        /** the presentation choices in force for this sink -- see PpStyle.hpp.
+         *
+         *  Held here, at PpSink level, rather than in PpConfig: the Prettifiers
+         *  that consume it (tag.hpp, pretty_struct.hpp) are handed only a
+         *  PpSink &, PpConfig lives in a subsystem ABOVE this one, and a
+         *  FlatSink has no PpConfig at all.
+         *
+         *  Not virtual on purpose: every sink gets this behaviour without
+         *  writing anything, and there is one place the value can come from.
+         **/
+        const PpStyle & style() const { return style_; }
+
+        ///@}
+
+    protected:
+        /** initialised from the process-wide defaults AT CONSTRUCTION -- so
+         *  changing PpStyle::default_style() afterwards does not reach a sink
+         *  that already exists.
+         **/
+        PpStyle style_;
     };
 
 

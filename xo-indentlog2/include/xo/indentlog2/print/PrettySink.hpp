@@ -22,12 +22,18 @@ namespace xo {
         class PrettySink : public PpSink {
         public:
             using MemorySizeVisitor = xo::mm::MemorySizeVisitor;
+            using uint32_t = std::uint32_t;
 
         public:
             /** @p cfg.  pretty-printing configuration.
              *  @p out.  if non-null, forward output to this streambuf.
              **/
             PrettySink(const PpConfig & cfg, std::streambuf * out);
+
+            /** create temporary pretty sink, intended for a unit test **/
+            static PrettySink scratch(std::string basename,
+                                      uint32_t logbuf_z,
+                                      uint32_t margin);
 
             /** attach (or detach, with nullptr) a streambuf that completed
              *  records are drained to (e.g. @c std::clog.rdbuf()).

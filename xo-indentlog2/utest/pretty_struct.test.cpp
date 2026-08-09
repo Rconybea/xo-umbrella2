@@ -24,6 +24,7 @@
 namespace ut {
     using xo::pp::PrettySink;
     using xo::pp::PpConfig;
+    using xo::pp::PpStyle;
     using xo::pp::field;
     using xo::mm::ArenaConfig;
 
@@ -46,7 +47,8 @@ namespace ut {
                 .size_ = 64*1024 };
 
             PpConfig cfg = PpConfig().with_logbuf_config(logbuf_cfg)
-                                     .with_soft_right_margin(margin);
+                                     .with_soft_right_margin(margin)
+                                     .with_style(PpStyle::plain());
 
             PrettySink pp(cfg, nullptr);
 

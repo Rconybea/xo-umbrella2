@@ -15,18 +15,18 @@ namespace xo {
     using std::min;
 
     namespace pp {
-        PpState::PpState(const PpConfig & cfg)
-            : config_{cfg},
+        PpState::PpState(const PpLayoutConfig & layout)
+            : layout_config_{layout},
               tk_buffer_{DArena::map(ArenaConfig()
                                      .with_name("pp-tk-buffer")
                                      .with_size((sizeof(PpStringToken) + 18)
-                                                * cfg.hard_right_margin()))},
+                                                * layout.hard_right_margin()))},
               scan_stack_{ScanStack::map(ArenaConfig()
                                          .with_name("pp-scan-stack")
-                                         .with_size(cfg.hard_max_nesting()))},
+                                         .with_size(layout.hard_max_nesting()))},
               print_stack_{PrintStack::map(ArenaConfig()
                                            .with_name("pp-print-stack")
-                                           .with_size(cfg.hard_max_nesting()))}
+                                           .with_size(layout.hard_max_nesting()))}
         {
             // We reserve virtual memmory for worst-case tk_buffer size.
             // sizeof(PpStringToken) should be 12 bytes;
@@ -430,7 +430,7 @@ namespace xo {
                         auto lpos = p_out_->lpos();
 
                         bool f = ((lpos + token->tk_viz_len()
-                                   < config_.soft_right_margin())
+                                   < layout_config_.soft_right_margin())
                                   && !token->is_forced());
 
                         token->set_fits_flag(f);

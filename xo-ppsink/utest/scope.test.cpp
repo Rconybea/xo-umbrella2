@@ -1,6 +1,7 @@
 /** @file scope.test.cpp **/
 
 #include <xo/ppsink/FlatSink.hpp>
+#include <xo/ppsink/color.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <catch2/catch.hpp>
@@ -12,12 +13,46 @@ namespace ut {
     using xo::pp::scope;
     using xo::pp::scope_config;
     using xo::pp::FlatSink;
+    using xo::pp::PpStyle;
     using xo::pp::ThreadLogState;
     using std::stringstream;
 
+    /* The gate's DEFAULT, asserted directly.  Every other test in this file
+     * turns color off to pin text, so without this one the default could be
+     * flipped back to false and the suite would stay green -- which is how it
+     * came to be false in the first place (color.hpp).
+     */
+    TEST_CASE("color-enabled-by-default", "[scope][color]")
+    {
+        scope_config::time_enabled = false;
+
+        stringstream ss;
+        FlatSink sink(PpStyle::colored(), ss);
+
+        ThreadLogState::log_set_sink(&sink);
+        { scope outer("outer"); }
+        ThreadLogState::log_set_sink(nullptr);
+
+        /* the "(N)" nesting level is colored (scope_config::nesting_level_color,
+         * xterm 153), so the banner carries SGR escapes
+         */
+        REQUIRE(ss.str().find('\033') != std::string::npos);
+
+        /* ... and with the gate off, byte-identical text without them */
+        {
+            stringstream plain_ss;
+            FlatSink plain_sink(plain_ss);
+
+            ThreadLogState::log_set_sink(&plain_sink);
+            { scope outer("outer"); }
+            ThreadLogState::log_set_sink(nullptr);
+
+            REQUIRE(plain_ss.str() == "+(0) outer\n-(0) outer\n");
+        }
+    }
+
     TEST_CASE("scope-indent-flat", "[scope]")
     {
-
         scope_config::time_enabled = false;
 
         /* capture scope output into a stringstream via a FlatSink */
