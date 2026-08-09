@@ -6,6 +6,7 @@ set(UTEST_SRCS
     StringTable.test.cpp
     DString.test.cpp
     StringOps.test.cpp
+    printable_render.test.cpp
 )
 
 xo_add_utest_executable(${UTEST_EXE} ${UTEST_SRCS})

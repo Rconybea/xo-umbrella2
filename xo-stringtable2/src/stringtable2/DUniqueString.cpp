@@ -50,6 +50,12 @@ namespace xo {
             return _text()->pretty_deprecated(ppii);
         }
 
+        void
+        DUniqueString::pretty(xo::pp::PpSink & sink) const
+        {
+            _text()->pretty(sink);
+        }
+
         DUniqueString *
         DUniqueString::from_view(obj<AAllocator> mm,
                                  std::string_view sv)

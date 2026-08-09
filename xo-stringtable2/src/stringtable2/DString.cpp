@@ -185,6 +185,12 @@ namespace xo {
             return ppdetail_atomic<const char *>::print_pretty(ppii, &(chars_[0]));
         }
 
+        void
+        DString::pretty(xo::pp::PpSink & sink) const
+        {
+            sink.pp(&(chars_[0]));
+        }
+
     } /*namespace scm*/
 } /*namespace xo*/
 
