@@ -1,6 +1,6 @@
 {
   # dependencies
-  lib, stdenv, cmake, catch2,
+  lib, stdenv, cmake, catch2, cli11,
 
   python3Packages,
 
@@ -11,6 +11,7 @@
   xo-ppsink,
   # test-only xo dependencies
   xo-reflect, xo-randomgen,
+  xo-testutil,
 
   buildDocs ? false,
   buildExamples ? false,
@@ -51,9 +52,11 @@ stdenv.mkDerivation (finalattrs:
       xo-cmake
     ]
     ++ lib.optionals doCheck [
-      catch2
       xo-reflect
       xo-randomgen
+      xo-testutil
+      catch2
+      cli11
     ]
     ++ lib.optionals buildExamples [
     ]

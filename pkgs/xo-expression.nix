@@ -1,10 +1,11 @@
 {
   # dependencies
-  lib, stdenv, cmake, catch2,
+  lib, stdenv, cmake, catch2, cli11,
 
   xo-cmake, xo-reflect, xo-flatstring,
 
   xo-ppsink,
+  xo-testutil,
 
   # test-only: PrettySink, for the rendered-layout assertions in
   # utest/pretty.test.cpp (same pattern as pkgs/xo-alloc.nix)
@@ -43,5 +44,7 @@ stdenv.mkDerivation (finalattrs:
                           xo-cmake
                         ] ++ lib.optionals doCheck [
                           xo-indentlog2
+                          xo-testutil
+                          cli11
                         ];
   })

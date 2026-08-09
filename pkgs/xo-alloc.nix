@@ -1,6 +1,6 @@
 {
   # nixpkgs dependencies
-  lib, stdenv, cmake, catch2,
+  lib, stdenv, cmake, catch2, cli11,
   doxygen,
 
   python3Packages,
@@ -16,6 +16,7 @@
 
   xo-allocutil,
   xo-cmake,
+  xo-testutil,
   xo-indentlog2,
 
   xo-ppsink,
@@ -31,7 +32,7 @@ stdenv.mkDerivation (finalattrs:
 
     cmakeFlags = ["-DCMAKE_MODULE_PATH=${xo-cmake}/share/cmake"]
                   ++ lib.optionals buildDocs ["-DXO_ENABLE_DOCS=on"]
-                  ++ ["-DENABLE_TESTING=1"];
+                  ++ lib.optionals doCheck ["-DENABLE_TESTING=1"];
 
     inherit buildDocs;
     inherit doCheck;
@@ -45,6 +46,10 @@ stdenv.mkDerivation (finalattrs:
       catch2
       xo-cmake
 #      xo-randomgen
+    ] ++ lib.optionals doCheck [
+      xo-testutil
+      cli11
+      catch2
     ] ++ lib.optionals buildDocs [
       doxygen
       sphinx
