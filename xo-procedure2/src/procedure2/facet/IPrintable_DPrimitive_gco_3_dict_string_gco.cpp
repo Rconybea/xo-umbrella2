@@ -21,6 +21,12 @@ namespace xo {
             return self.pretty_deprecated(ppii);
         }
 
+        auto
+        IPrintable_DPrimitive_gco_3_dict_string_gco::pretty(const DPrimitive_gco_3_dict_string_gco & self, PpSink & sink) -> void
+        {
+            self.pretty(sink);
+        }
+
 
     } /*namespace scm*/
 } /*namespace xo*/

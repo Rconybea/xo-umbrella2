@@ -32,6 +32,7 @@ public:
     using DataPtr = Object::DataPtr;
     using typeseq = xo::reflect::typeseq;
     using ppindentinfo = APrintable::ppindentinfo;
+    using PpSink = APrintable::PpSink;
     ///@}
 
     /** @defgroup print-printable-router-ctors **/
@@ -55,6 +56,9 @@ public:
     // const methods
     bool pretty_deprecated(const ppindentinfo & ppii)  const {
         return O::iface()->pretty_deprecated(O::data(), ppii);
+    }
+    void pretty(PpSink & sink)  const {
+        return O::iface()->pretty(O::data(), sink);
     }
 
     // non-const methods (still const in router!)

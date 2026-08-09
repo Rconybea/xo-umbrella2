@@ -18,6 +18,7 @@
 #include <xo/facet/obj.hpp>
 #include <xo/facet/typeseq.hpp>
 #include <xo/indentlog/print/ppindentinfo.hpp>
+#include <xo/ppsink/PpSink.hpp>
 
 // {pretext} here
 
@@ -41,6 +42,8 @@ public:
     using Opaque = void *;
     /** dynamic pretty-printing state during layout **/
     using ppindentinfo = xo::print::ppindentinfo;
+    /** single-pass pretty-printing sink; see xo-ppsink **/
+    using PpSink = xo::pp::PpSink;
     ///@}
 
     /** @defgroup print-printable-methods **/
@@ -61,6 +64,12 @@ pretty(PpSink&).  See
 .xo-backlog/xo-printable2/issues/01-aprintable-pretty-ppsink.md
 See [xo-indentlog/xo/indentlog/pretty.hpp] **/
     virtual bool pretty_deprecated(Copaque data, const ppindentinfo & ppii)  const = 0;
+    /** Pretty-printing support for this object.
+Single-pass: render into @p sink.  A nested object
+participates in the enclosing structure's line breaking,
+where the deprecated two-pass protocol could not.
+See [xo-ppsink/xo/ppsink/PpSink.hpp] **/
+    virtual void pretty(Copaque data, PpSink & sink)  const = 0;
 
     // nonconst methods
     ///@}

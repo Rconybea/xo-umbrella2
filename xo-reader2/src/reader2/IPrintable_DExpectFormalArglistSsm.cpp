@@ -21,6 +21,12 @@ namespace xo {
             return self.pretty_deprecated(ppii);
         }
 
+        auto
+        IPrintable_DExpectFormalArglistSsm::pretty(const DExpectFormalArglistSsm & self, PpSink & sink) -> void
+        {
+            self.pretty(sink);
+        }
+
 
     } /*namespace scm*/
 } /*namespace xo*/

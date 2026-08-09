@@ -22,6 +22,7 @@
 
 #include "APrintable.hpp"
 #include <xo/indentlog/print/ppindentinfo.hpp>
+#include <xo/ppsink/PpSink.hpp>
 
 namespace xo {
 namespace print {
@@ -37,6 +38,7 @@ namespace print {
         /** integer identifying a type **/
         using typeseq = APrintable::typeseq;
         using ppindentinfo = APrintable::ppindentinfo;
+        using PpSink = APrintable::PpSink;
         ///@}
 
         /** @defgroup print-printable-xfer-methods **/
@@ -54,6 +56,9 @@ namespace print {
         // const methods
         bool pretty_deprecated(Copaque data, const ppindentinfo & ppii)  const override {
             return I::pretty_deprecated(_dcast(data), ppii);
+        }
+        void pretty(Copaque data, PpSink & sink)  const override {
+            return I::pretty(_dcast(data), sink);
         }
 
         // non-const methods

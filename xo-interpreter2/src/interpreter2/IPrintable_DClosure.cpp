@@ -21,6 +21,12 @@ namespace xo {
             return self.pretty_deprecated(ppii);
         }
 
+        auto
+        IPrintable_DClosure::pretty(const DClosure & self, PpSink & sink) -> void
+        {
+            self.pretty(sink);
+        }
+
 
     } /*namespace scm*/
 } /*namespace xo*/

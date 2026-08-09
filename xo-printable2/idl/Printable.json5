@@ -3,7 +3,8 @@
     output_cpp_dir: "src/printable2",
     output_hpp_dir: "include/xo/printable2",
     output_impl_subdir: "detail",
-    includes: ["<xo/indentlog/print/ppindentinfo.hpp>"],
+    includes: ["<xo/indentlog/print/ppindentinfo.hpp>",
+               "<xo/ppsink/PpSink.hpp>"],
     // extra includes in Printable.hpp
     //
     // NB <xo/alloc2/Allocator.hpp> was hand-added to the GENERATED Printable.hpp
@@ -29,6 +30,12 @@
             doc:  ["dynamic pretty-printing state during layout"],
             definition: "xo::print::ppindentinfo",
         },
+        // using PpSink = xo::pp::PpSink
+        {
+            name: "PpSink",
+            doc:  ["single-pass pretty-printing sink; see xo-ppsink"],
+            definition: "xo::pp::PpSink",
+        },
     ],
     const_methods: [
         // bool pretty_deprecated(const ppindentinfo & ppii) const
@@ -44,6 +51,22 @@
             return_type: "bool",
             args: [
                 {type: "const ppindentinfo &", name: "ppii"},
+            ],
+            const: true,
+        },
+        // void pretty(PpSink & sink) const
+        {
+            name: "pretty",
+            doc: [
+                "Pretty-printing support for this object.",
+                "Single-pass: render into @p sink.  A nested object",
+                "participates in the enclosing structure's line breaking,",
+                "where the deprecated two-pass protocol could not.",
+                "See [xo-ppsink/xo/ppsink/PpSink.hpp]",
+            ],
+            return_type: "void",
+            args: [
+                {type: "PpSink &", name: "sink"},
             ],
             const: true,
         },

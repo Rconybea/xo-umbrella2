@@ -70,6 +70,11 @@ namespace xo {
             /** pretty-printing driver; combine layout+printing **/
             bool pretty_deprecated(const ppindentinfo & ppii) const;
 
+            /* PHASE B STUB -- renders nothing until phase C converts this type.
+             * See .xo-backlog/xo-printable2/issues/01-aprintable-pretty-ppsink.md
+             */
+            void pretty(xo::pp::PpSink & sink) const { (void)sink; }
+
             ///@}
             /** @defgroup scm-sequenceexpr-gcobject-facet gcobject facet methods **/
             ///@{

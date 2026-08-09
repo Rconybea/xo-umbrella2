@@ -42,6 +42,7 @@ namespace xo {
             /** @defgroup scm-printable-dapplyssm-type-traits **/
             ///@{
             using ppindentinfo = xo::print::APrintable::ppindentinfo;
+            using PpSink = xo::print::APrintable::PpSink;
             using Copaque = xo::print::APrintable::Copaque;
             using Opaque = xo::print::APrintable::Opaque;
             ///@}
@@ -54,6 +55,12 @@ pretty(PpSink&).  See
 .xo-backlog/xo-printable2/issues/01-aprintable-pretty-ppsink.md
 See [xo-indentlog/xo/indentlog/pretty.hpp] **/
             static bool pretty_deprecated(const DApplySsm & self, const ppindentinfo & ppii);
+            /** Pretty-printing support for this object.
+Single-pass: render into @p sink.  A nested object
+participates in the enclosing structure's line breaking,
+where the deprecated two-pass protocol could not.
+See [xo-ppsink/xo/ppsink/PpSink.hpp] **/
+            static void pretty(const DApplySsm & self, PpSink & sink);
 
             // non-const methods
             ///@}

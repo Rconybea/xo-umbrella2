@@ -131,6 +131,11 @@ namespace xo {
             /** pretty-printing support **/
             bool pretty_deprecated(const ppindentinfo & ppii) const;
 
+            /* PHASE B STUB -- renders nothing until phase C converts this type.
+             * See .xo-backlog/xo-printable2/issues/01-aprintable-pretty-ppsink.md
+             */
+            void pretty(xo::pp::PpSink & sink) const { (void)sink; }
+
             ///@}
             /** @defgroup scm-expectlisttypessm-gc-support gc support methods **/
             ///@{

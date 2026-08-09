@@ -45,6 +45,7 @@ namespace print {
         /** integer identifying a type **/
         using typeseq = xo::facet::typeseq;
         using ppindentinfo = APrintable::ppindentinfo;
+        using PpSink = APrintable::PpSink;
 
         ///@}
         /** @defgroup print-printable-any-methods **/
@@ -60,6 +61,7 @@ namespace print {
 
         // const methods
         [[noreturn]] bool pretty_deprecated(Copaque, const ppindentinfo &)  const override { _fatal(); }
+        [[noreturn]] void pretty(Copaque, PpSink &)  const override { _fatal(); }
 
         // nonconst methods
 
