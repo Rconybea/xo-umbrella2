@@ -11,6 +11,8 @@ if (ENABLE_TESTING)
     xo_self_dependency(${SELF_EXE} webutil)
     # for xo::pp::{FlatSink,tostr} in the tests themselves
     xo_dependency(${SELF_EXE} xo_ppsink)
+    # UtestAppStart/UtestListener: shared utest main, see webutil_utest_main.cpp
+    xo_dependency(${SELF_EXE} xo_testutil)
     xo_external_target_dependency(${SELF_EXE} Catch2 Catch2::Catch2)
 endif()
 
