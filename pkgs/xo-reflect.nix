@@ -3,8 +3,11 @@
   lib, stdenv, cmake, catch2,
 
   # xo dependencies
-  xo-cmake, xo-refcnt, xo-subsys,
+  xo-testutil,
+  xo-refcnt,
+  xo-subsys,
   xo-ppsink,
+  xo-cmake,
 
   doCheck ? true,
 } :
