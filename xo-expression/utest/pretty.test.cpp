@@ -29,6 +29,7 @@
 namespace ut {
     using xo::pp::PrettySink;
     using xo::pp::PpConfig;
+    using xo::pp::PpStyle;
     using xo::mm::ArenaConfig;
     using xo::scm::Expression;
     using xo::scm::Sequence;
@@ -55,16 +56,8 @@ namespace ut {
          **/
         template <typename T>
         std::string render(std::uint32_t margin, const T & x) {
-            static int seq = 0;
-
-            ArenaConfig logbuf_cfg { .name_ = "utest.expression.pretty."
-                                              + std::to_string(++seq),
-                                     .size_ = 64*1024 };
-
-            PpConfig cfg = PpConfig().with_logbuf_config(logbuf_cfg)
-                                     .with_soft_right_margin(margin);
-
-            PrettySink pp(cfg, nullptr);
+            PrettySink pp = PrettySink::scratch("utest.expression.pretty.",
+                                                64*1024, margin);
             pp.pp(x);
             return std::string(pp.output());
         }
