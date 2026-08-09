@@ -10,6 +10,7 @@
 #include <xo/object2/ListOps.hpp>
 #include <xo/object2/SetupObject2.hpp>
 #include <xo/stringtable2/String.hpp>
+#include <xo/indentlog2/print/toppstr.hpp>
 #include <xo/indentlog/scope.hpp>
 #include <catch2/catch.hpp>
 
@@ -38,8 +39,11 @@ namespace ut {
 
     namespace {
         struct testcase_pp {
-            explicit testcase_pp(size_t gc_z, size_t gc_threshold, int z, const std::string & expected)
-            : gc_gen_size_{gc_z}, gc_trigger_threshold_{gc_threshold}, expected_{expected} {
+            explicit testcase_pp(size_t gc_z, size_t gc_threshold, int z,
+                                 const std::string & expected,
+                                 const std::string & expect_pretty)
+            : gc_gen_size_{gc_z}, gc_trigger_threshold_{gc_threshold},
+              expected_{expected}, expect_pretty_{expect_pretty} {
                 for (int i = 0; i < z; ++i) {
                     list_.push_back(1000 + 197 * i);
                 }
@@ -48,17 +52,55 @@ namespace ut {
             size_t gc_gen_size_ = 0;
             size_t gc_trigger_threshold_ = 0;
             std::vector<int> list_;
+            /** OBSERVED rendering via pretty_deprecated.
+             *  Delete at phase E, with the deprecated protocol itself.
+             **/
             std::string expected_;
+            /** OBSERVED rendering via pretty(PpSink&).  The expectation that
+             *  outlives phase E.
+             *
+             *  Case 5 differs from expected_ DELIBERATELY: pretty_deprecated
+             *  could only emit "(...)" when a list did not fit on one line --
+             *  the two-pass protocol's give-up path, not a rendering decision.
+             *  DList::pretty offers break points instead and the sink lays the
+             *  elements out.  Reviewed and accepted 2026-08-09; see
+             *  .xo-backlog/xo-printable2/issues/01-aprintable-pretty-ppsink.md
+             **/
+            std::string expect_pretty_;
         };
 
         std::vector<testcase_pp>
         s_testcase_v = {
-            testcase_pp(16384, 8192, 0, "()"),
-            testcase_pp(16384, 8192, 1, "(01000)"),
-            testcase_pp(16384, 8192, 2, "(01000 1197)"),
-            testcase_pp(16384, 8192, 5, "(01000 1197 01394 1591 01788)"),
-            testcase_pp(16384, 8192, 10, "(01000 1197 01394 1591 01788 1985 02182 2379 02576 2773)"),
-            testcase_pp(16384, 8192, 20, "(...)"),
+            testcase_pp(16384, 8192, 0, "()", "()"),
+            testcase_pp(16384, 8192, 1, "(01000)", "(01000)"),
+            testcase_pp(16384, 8192, 2, "(01000 1197)", "(01000 1197)"),
+            testcase_pp(16384, 8192, 5, "(01000 1197 01394 1591 01788)",
+                                        "(01000 1197 01394 1591 01788)"),
+            testcase_pp(16384, 8192, 10, "(01000 1197 01394 1591 01788 1985 02182 2379 02576 2773)",
+                                         "(01000 1197 01394 1591 01788 1985 02182 2379 02576 2773)"),
+            /* DELIBERATE divergence -- see expect_pretty_ above */
+            testcase_pp(16384, 8192, 20, "(...)",
+                                         R"xo((01000
+  1197
+  01394
+  1591
+  01788
+  1985
+  02182
+  2379
+  02576
+  2773
+  02970
+  3167
+  03364
+  3561
+  03758
+  3955
+  04152
+  4349
+  04546
+  4743))xo"),
+
         };
     }
 
@@ -124,6 +166,13 @@ namespace ut {
                 pps.pretty(l0_po);
 
                 CHECK(ss.str() == string(tc.expected_));
+
+                /* OBSERVE the new protocol at the same margin */
+                std::string modern
+                    = xo::pp::toppstr(xo::pp::PpConfig().with_soft_right_margin(80),
+                                      l0_po);
+                INFO("i_tc=" << i_tc << " deprecated=[" << ss.str() << "] pretty=[" << modern << "]");
+                CHECK(modern == tc.expect_pretty_);
             } catch (std::exception & ex) {
                 std::cerr << "caught exception: " << ex.what() << std::endl;
                 REQUIRE(false);

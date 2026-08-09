@@ -35,6 +35,8 @@ if (ENABLE_TESTING)
     xo_add_utest_executable(${UTEST_EXE} ${UTEST_SRCS})
     xo_headeronly_dependency(${UTEST_EXE} randomgen)
     xo_self_dependency(${UTEST_EXE} xo_gc)
+    # PrettySink (via toppstr) for the phase C new-protocol renderings
+    xo_dependency(${UTEST_EXE} xo_indentlog2)
 #    xo_headeronly_dependency(${UTEST_EXE} indentlog)
     xo_headeronly_dependency(${UTEST_EXE} xo_facet)
     xo_external_target_dependency(${UTEST_EXE} Catch2 Catch2::Catch2)

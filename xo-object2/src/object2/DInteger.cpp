@@ -30,6 +30,15 @@ namespace xo {
             return ppdetail_atomic<long>::print_pretty(ppii, value_);
         }
 
+        void
+        DInteger::pretty(xo::pp::PpSink & sink) const
+        {
+            /* ppdetail_atomic<T>::print_pretty is a bare pps()->write(x) -- a
+             * leaf with no framing (pretty.hpp:363).  Same on the sink side.
+             */
+            sink.pp(value_);
+        }
+
         DInteger *
         DInteger::gco_shallow_move(obj<AGCObjectVisitor> gc) noexcept
         {

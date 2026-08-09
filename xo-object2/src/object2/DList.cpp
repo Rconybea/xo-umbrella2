@@ -199,6 +199,32 @@ namespace xo {
             }
         }
 
+        void
+        DList::pretty(xo::pp::PpSink & sink) const
+        {
+            sink.put("(").begin();
+
+            const DList * l = this;
+
+            size_t i = 0;
+            while (!l->is_empty()) {
+                if (i > 0)
+                    sink.split(1);
+
+                obj<APrintable> elt
+                    = FacetRegistry::instance().variant<APrintable, AGCObject>(l->head_);
+
+                assert(elt.data());
+
+                sink.pp(elt);
+
+                l = l->rest_;
+                ++i;
+            }
+
+            sink.end().put(")");
+        }
+
         // ----- GCObject facet ------
 
         DList *
