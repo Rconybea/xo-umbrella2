@@ -13,8 +13,8 @@
 
 #pragma once
 
+#include "DTypename.hpp"
 #include "Printable.hpp"
-#include "xo/expression2/DTypename.hpp"
 #include <xo/printable2/Printable.hpp>
 #include <xo/printable2/detail/IPrintable_Xfer.hpp>
 

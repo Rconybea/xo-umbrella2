@@ -25,6 +25,23 @@ add_definitions(${PROJECT_CXX_FLAGS})
 add_subdirectory(utest)
 
 # ----------------------------------------------------------------
+# facet packages whose interfaces we generate implementations for.
+#
+# xo_add_genfacetimpl() silently skips (STATUS message only, no target) unless
+# share_<FACET_PKG> already exists at the point of the call, so these must be
+# found FIRST.  add_subdirectory(utest) above does NOT establish them here --
+# xo-expression2 only appears to work because its utest happens to depend on
+# xo_numeric, which finds xo_printable2 transitively.
+#
+# These two are sufficient for every genfacetimpl here, including the
+# FACET_PKG xo_reader2 entries: the finds below establish share_* for the
+# transitive closure, so no self-referential case is left skipped.  Verified by
+# reconfiguring and counting "not available; skipping" -- expect zero.
+
+find_package(xo_printable2 CONFIG REQUIRED)
+find_package(xo_alloc2 CONFIG REQUIRED)
+
+# ----------------------------------------------------------------
 
 # note: manual target; generated code committed to git
 xo_add_genfacetimpl(

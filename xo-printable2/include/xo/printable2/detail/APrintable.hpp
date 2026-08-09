@@ -2,7 +2,7 @@
  *
  *  Generated automagically from ingredients:
  *  1. code generator:
- *       [/home/roland/proj/xo-umbrella2-claude1/xo-facet/codegen/genfacet]
+ *       [xo-facet/codegen/genfacet]
  *     arguments:
  *       --input [idl/Printable.json5]
  *  2. jinja2 template for abstract facet .hpp file:
@@ -18,6 +18,8 @@
 #include <xo/facet/obj.hpp>
 #include <xo/facet/typeseq.hpp>
 #include <xo/indentlog/print/ppindentinfo.hpp>
+
+// {pretext} here
 
 namespace xo {
 namespace print {
@@ -44,8 +46,15 @@ public:
     /** @defgroup print-printable-methods **/
     ///@{
     // const methods
+    /** An uninitialized APrintable instance will have zero vtable pointer (per {linux,osx} abi).
+     *  Use case for this is narrow. We go to some lengths to avoid null vtable pointers. For example
+     *  obj<AFacet> will have non-null vtable (via IFacet_Any) with all methods terminating.
+     **/
+    bool _has_null_vptr() const noexcept { return *reinterpret_cast<const void * const *>(this) == nullptr; }
     /** RTTI: unique id# for actual runtime data representation **/
     virtual typeseq _typeseq() const noexcept = 0;
+    /** destroy instance @p d; calls c++ dtor only for actual runtime type; does not recover memory **/
+    virtual void _drop(Opaque d) const noexcept = 0;
     /** Pretty-printing support for this object.
 See [xo-indentlog/xo/indentlog/pretty.hpp] **/
     virtual bool pretty(Copaque data, const ppindentinfo & ppii)  const = 0;

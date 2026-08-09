@@ -13,8 +13,8 @@
 
 #pragma once
 
+#include "DFloat.hpp"
 #include "Printable.hpp"
-#include "xo/object2/DFloat.hpp"
 #include <xo/printable2/Printable.hpp>
 #include <xo/printable2/detail/IPrintable_Xfer.hpp>
 

@@ -13,8 +13,8 @@
 
 #pragma once
 
+#include "DBoolean.hpp"
 #include "Printable.hpp"
-#include "xo/object2/DBoolean.hpp"
 #include <xo/printable2/Printable.hpp>
 #include <xo/printable2/detail/IPrintable_Xfer.hpp>
 

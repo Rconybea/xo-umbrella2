@@ -13,8 +13,8 @@
 
 #pragma once
 
+#include "DPrimitive_gco_2_gco_gco.hpp"
 #include "Printable.hpp"
-#include "xo/procedure2/DPrimitive_gco_2_gco_gco.hpp"
 #include <xo/printable2/Printable.hpp>
 #include <xo/printable2/detail/IPrintable_Xfer.hpp>
 

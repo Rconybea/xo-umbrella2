@@ -13,8 +13,8 @@
 
 #pragma once
 
+#include "DQuoteSsm.hpp"
 #include "Printable.hpp"
-#include "xo/reader2/DQuoteSsm.hpp"
 #include <xo/printable2/Printable.hpp>
 #include <xo/printable2/detail/IPrintable_Xfer.hpp>
 

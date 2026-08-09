@@ -2,17 +2,25 @@
  *
  *  Generated automagically from ingredients:
  *  1. code generator:
- *       [/home/roland/proj/xo-umbrella2-claude1/xo-facet/codegen/genfacet]
+ *       [xo-facet/codegen/genfacet]
  *     arguments:
  *       --input [idl/Printable.json5]
  *  2. jinja2 template for abstract facet .hpp file:
  *       [iface_facet_any.hpp.j2]
  *  3. idl for facet methods
  *       [idl/Printable.json5]
+ *
+ *  variables:
+ *    {facet_hpp_fname} -> Printable.hpp
+ *    {impl_hpp_subdir} -> detail
+ *    {facet_ns1} -> xo
+ *    {facet_detail_subdir} -> detail
+ *    {abstract_facet_fname} -> APrintable.hpp
  **/
 
 #pragma once
 
+#include "APrintable.hpp"
 #include <xo/indentlog/print/ppindentinfo.hpp>
 
 namespace xo {
@@ -39,8 +47,11 @@ namespace print {
 
         // from APrintable
 
-        // const methods
+        // builtin methods
         typeseq _typeseq() const noexcept override { return s_typeseq; }
+        void _drop(Opaque d) const noexcept override { _dcast(d).~DRepr(); }
+
+        // const methods
         bool pretty(Copaque data, const ppindentinfo & ppii)  const override {
             return I::pretty(_dcast(data), ppii);
         }

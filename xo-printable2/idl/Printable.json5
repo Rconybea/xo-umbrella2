@@ -5,7 +5,12 @@
     output_impl_subdir: "detail",
     includes: ["<xo/indentlog/print/ppindentinfo.hpp>"],
     // extra includes in Printable.hpp
-    user_hpp_includes: ["\"detail/ppdetail_Printable.hpp\""],
+    //
+    // NB <xo/alloc2/Allocator.hpp> was hand-added to the GENERATED Printable.hpp
+    // by b1add3bb ("move Collector facet gc/ -> alloc2/ for levelling") and so
+    // was silently dropped by the next regeneration.  It belongs here instead.
+    user_hpp_includes: ["\"detail/ppdetail_Printable.hpp\"",
+                        "<xo/alloc2/Allocator.hpp>"],
     namespace1: "xo",
     namespace2: "print",
     // text after includes, before APrintable
