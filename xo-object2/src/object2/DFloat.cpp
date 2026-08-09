@@ -27,6 +27,20 @@ namespace xo {
             return ppdetail_atomic<double>::print_pretty(ppii, value_);
         }
 
+        void
+        DFloat::pretty(xo::pp::PpSink & sink) const
+        {
+            /* leaf, as pretty_deprecated was: ppdetail_atomic is a bare
+             * pps()->write(x) with no framing (pretty.hpp:363).
+             *
+             * NB double formatting is the thing to watch here, not structure --
+             * legacy went through ppstate::write(double), the sink through
+             * Prettifier<double>.  Pinned by the render test rather than
+             * assumed equal.
+             */
+            sink.pp(value_);
+        }
+
         DFloat *
         DFloat::gco_shallow_move(obj<AGCObjectVisitor> gc) noexcept
         {
