@@ -15,6 +15,11 @@ queries for checking dependency claims, and the build/test/nix recipe for this
 tree — including the flags whose absence has silently hidden breakage
 (`--with-examples`, `-q` rather than `>/dev/null`).
 
+**Start with `xo-sdlc --milestones`** for what large effort is in flight and how
+far along it is. A milestone is work too big for one ticket; its progress is a
+query over tickets carrying a `Milestone:` line, so it cannot go stale. See the
+Milestones section of `docs/agents/issue-tracker.md`.
+
 ### Domain docs
 
 Single-context — `CONTEXT.md` + `docs/adr/` at the repo root, created lazily by

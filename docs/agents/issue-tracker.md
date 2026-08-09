@@ -23,6 +23,38 @@ the symlink (harmless -- recreate it; the content lives outside this tree).
 - Triage state is recorded as a `Status:` line near the top of each issue file (see `triage-labels.md` for the role strings)
 - Comments and conversation history append to the bottom of the file under a `## Comments` heading
 
+## Milestones
+
+A **milestone** is a unit of work too large for one ticket, not worked on
+directly: it completes when the right set of ordinary tickets are done.
+
+- Milestone file: `.xo-backlog/milestones/<slug>.md`, with a `Status: open|done`
+  line. It holds the reasoning — the design question, the shape of done, links
+  to precedents.
+- **A milestone never lists its tickets.** Each contributing ticket carries a
+  `Milestone: <slug>` line near the top (comma-separated for more than one,
+  like `Blocked by:`), and the set is a query over those.
+- Query with `xo-sdlc --milestones` (open ones, with progress) or
+  `xo-sdlc --milestone=<slug>` (per-ticket detail). `--backlog=DIR` points at a
+  different sandbox's backlog; `--all` includes closed milestones.
+- `xo-sdlc --tickets` lists open tickets across the whole backlog, annotating
+  each with its milestone; `--all` includes closed ones. It shares the
+  done-predicate with the milestone query, so the two views cannot disagree —
+  worth preserving, since an ad-hoc `grep` for `Status:` will quietly use a
+  different notion of "done".
+
+Two properties worth preserving if this is ever reworked:
+
+**Progress is derived, closing is deliberate.** The query counts tickets; you
+still set `Status: done` by hand, because a milestone usually has criteria no
+ticket covers, and because the verification is the valuable half of closing.
+
+**The linkage lives in the tickets, not the milestone.** A hand-maintained list
+in the milestone file would drift the first time someone filed a ticket and
+forgot to add it — the same failure this project has hit repeatedly with
+`subsystem-edges`, `Config.cmake.in` and `pkgs/*.nix`, each fixed by making the
+derived thing derived.
+
 ## When a skill says "publish to the issue tracker"
 
 Create a new file under `.xo-backlog/<feature-slug>/` (creating the directory if needed).
