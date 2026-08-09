@@ -10,4 +10,6 @@ xo_add_utest_executable(${SELF_EXE} ${SELF_SRCS})
 xo_self_dependency(${SELF_EXE} xo_expression)
 # PrettySink: rendered line-breaking assertions live here, following xo-alloc/utest
 xo_dependency(${SELF_EXE} xo_indentlog2)
+# UtestAppStart/UtestListener: shared utest main, see expression_utest_main.cpp
+xo_dependency(${SELF_EXE} xo_testutil)
 xo_external_target_dependency(${SELF_EXE} Catch2 Catch2::Catch2)
