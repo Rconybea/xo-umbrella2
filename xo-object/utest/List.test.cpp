@@ -7,6 +7,7 @@
 #include "xo/object/Integer.hpp"
 #include "xo/object/String.hpp"
 #include <xo/alloc/ArenaAlloc.hpp>
+#include <xo/alloc/alloc_ostream.hpp>   /* os << gp<Object> */
 #include <xo/alloc/GC.hpp>
 #include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
 #include <xo/ppsink/PrettyVector.hpp>

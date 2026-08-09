@@ -6,6 +6,9 @@
 #include "Object.hpp"
 #include "Forwarding1.hpp"
 #include "GC.hpp"
+#include <xo/ppsink/FlatSink.hpp>
+#include <sstream>
+#include <ostream>
 
 using xo::obj::Forwarding1;
 
@@ -33,9 +36,9 @@ namespace xo {
     }
 
      void
-     Object::display(std::ostream & os) const
+     Object::pretty(xo::pp::PpSink & sink) const
      {
-         os << "<Object>";
+         sink.pp("<Object>");
      }
 
     IObject *
@@ -219,17 +222,9 @@ namespace xo {
         (void)fwd;
     }
 
-    std::ostream &
-    operator<< (std::ostream & os, gp<Object> x)
-    {
-        if (x.ptr()) {
-            x->display(os);
-        } else {
-            os << "<nullptr>";
-        }
-
-        return os;
-    }
+    /* operator<<(std::ostream&, gp<Object>) now lives in the opt-in header
+     * xo/alloc/alloc_ostream.hpp -- see the rationale there.
+     */
 
 } /*namespace xo*/
 

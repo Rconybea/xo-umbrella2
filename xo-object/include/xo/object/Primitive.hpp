@@ -11,11 +11,15 @@
 #include "Procedure.hpp"
 #include "String.hpp"
 #include <xo/reflect/Reflect.hpp>
-/* display() streams a tag; this header used to rely on its includer
- * having xtag in scope, which broke once xo-expression stopped
- * propagating xo-indentlog.
+/* pretty() builds a struct; this header used to rely on its includer having
+ * xtag in scope, which broke once xo-expression stopped propagating
+ * xo-indentlog.  Include what it uses.
+ *
+ * NB Primitive is a class template, so pretty() is only compiled where it is
+ * instantiated -- a missing include here builds clean in xo-object and fails
+ * at the first consumer instead (xo-interpreter's BuiltinPrimitives.cpp).
  */
-#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/pretty_struct.hpp>
 
 namespace xo {
     namespace obj {
@@ -89,8 +93,15 @@ namespace xo {
 
                 return Reflect::make_tp(const_cast<Primitive*>(this));
             }
-            virtual void display(std::ostream & os) const final override {
-                os << "<primitive" << xo::pp::xtag("name", Super::name_) << ">";
+            virtual void pretty(xo::pp::PpSink & sink) const final override {
+                /* was: os << "<primitive" << xtag("name", name_) << ">".
+                 * xo::pp:: stays qualified -- a using-decl cannot suppress
+                 * ADL, and the argument types live in namespace xo, so
+                 * unqualified xtag/field would pull legacy xo::xtag into the
+                 * candidate set from any includer that has not migrated.
+                 */
+                sink.pretty_struct("primitive",
+                                   xo::pp::field("name", Super::name_));
             }
             virtual std::size_t _shallow_size() const final override {
                 return sizeof(*this);

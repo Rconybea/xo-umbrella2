@@ -5,6 +5,7 @@
 
 #include "xo/object/String.hpp"
 #include <xo/alloc/ArenaAlloc.hpp>
+#include <xo/alloc/alloc_ostream.hpp>   /* os << gp<Object> */
 #include <xo/alloc/GC.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>

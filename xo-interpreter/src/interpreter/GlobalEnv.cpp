@@ -4,7 +4,7 @@
 #include <xo/reflect/Reflect.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
-#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/pretty_struct.hpp>   /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
     using xo::pp::scope;
@@ -99,9 +99,11 @@ namespace xo {
         }
 
         void
-        GlobalEnv::display(std::ostream & os) const
+        GlobalEnv::pretty(xo::pp::PpSink & sink) const
         {
-            os << "<global-env" << xtag("n", slot_map_->size()) << ">";
+            /* was: os << "<global-env" << xtag("n", slot_map_->size()) << ">" */
+            sink.pretty_struct("global-env",
+                               xo::pp::field("n", slot_map_->size()));
         }
 
         std::size_t

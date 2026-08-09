@@ -5,6 +5,7 @@
 
 #include "Forwarding1.hpp"
 #include "ArenaAlloc.hpp"
+#include "alloc_ostream.hpp"           /* os << gp<Object> */
 #include <xo/reflect/Reflect.hpp>
 #include <xo/ppsink/pretty_array.hpp>   /* Prettifier<std::array<T,N>> */
 #include <xo/ppsink/pretty_ostream.hpp> /* pp_to_stream */
@@ -37,8 +38,12 @@ namespace xo {
                  * ppsink has Prettifier<std::array<T,N>> instead, reached from an
                  * ostream via pp_to_stream().
                  */
-                void display(std::ostream & os) const final override {
-                    xo::pp::pp_to_stream(os, data_);
+                void pretty(xo::pp::PpSink & sink) const final override {
+                    /* was pp_to_stream(os, data_) -- the ostream adapter for
+                     * Prettifier<std::array<T,N>>.  With a sink in hand the
+                     * adapter is unnecessary: hand the array straight over.
+                     */
+                    sink.pp(data_);
                 }
 
                 virtual std::size_t _shallow_size() const final override { return sizeof(*this); }

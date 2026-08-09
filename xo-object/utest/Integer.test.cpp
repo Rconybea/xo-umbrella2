@@ -4,6 +4,7 @@
  */
 
 #include "xo/object/Integer.hpp"
+#include <xo/alloc/alloc_ostream.hpp>   /* os << gp<Object> */
 #include <xo/alloc/GC.hpp>
 #include <catch2/catch.hpp>
 

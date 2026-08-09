@@ -13,6 +13,8 @@
 #include "rbtree/RbTreeLhs.hpp"
 #include "rbtree/RbTreeUtil.hpp"
 #include <xo/ppsink/quoted_ostream.hpp>  /* os << xo::pp::quot(..) */
+#include <xo/ppsink/FlatSink.hpp>        /* operator<< renders via pretty() */
+#include <xo/ppsink/pretty.hpp>          /* PpSink::pp */
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <array>
@@ -718,7 +720,31 @@ namespace xo {
         operator<<(std::ostream & os,
                    RedBlackTree<Key, Value, Reduce, Compare, Allocator> const & tree)
         {
-            tree.display(os);
+            /* was an unconditional tree.display(os).  RedBlackTree overrides
+             * the rendering nowhere -- the one at "#ifdef SET_ASIDE" above is
+             * disabled -- so this reaches whichever base the ALLOCATOR gave
+             * this instantiation, and there are two of them:
+             *
+             *   gc allocator  -> xo::Object, whose display(std::ostream&) was
+             *                    replaced by pretty(PpSink&).  See
+             *                    .xo-backlog/xo-alloc/issues/01.
+             *   otherwise     -> xo::gc::FallbackObjectInterface, which still
+             *                    has display(std::ostream&) (a no-op), and is
+             *                    in xo-allocutil, which does not depend on
+             *                    xo-ppsink and so cannot offer pretty().
+             *
+             * Detected by expression validity rather than by naming either
+             * base, so this header needs no dependency on whichever one it
+             * does not have.  Output is unchanged on both paths.
+             */
+            if constexpr (requires (xo::pp::PpSink & sink) { tree.pretty(sink); }) {
+                xo::pp::FlatSink sink(os);
+
+                tree.pretty(sink);
+            } else {
+                tree.display(os);
+            }
+
             return os;
         } /*operator<<*/
 

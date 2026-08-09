@@ -33,8 +33,8 @@ namespace xo {
         }
 
         void
-        Integer::display(std::ostream & os) const {
-            os << value_;
+        Integer::pretty(xo::pp::PpSink & sink) const {
+            sink.pp(value_);
         }
 
         std::size_t

@@ -43,9 +43,9 @@ namespace xo {
         }
 
         void
-        Boolean::display(std::ostream & os) const
+        Boolean::pretty(xo::pp::PpSink & sink) const
         {
-            os << (value_ ? "#t" : "#f");
+            sink.pp(value_ ? "#t" : "#f");
         }
 
         std::size_t

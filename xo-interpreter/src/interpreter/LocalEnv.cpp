@@ -4,7 +4,7 @@
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflect/StructReflector.hpp>
 #include <xo/ppsink/quoted.hpp>
-#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/pretty_struct.hpp>   /* sink.pretty_struct(..), field(..) */
 #include <xo/ppsink/tostr.hpp>
 #include <cstring>
 
@@ -92,21 +92,25 @@ namespace xo {
         }
 
         void
-        LocalEnv::display(std::ostream & os) const
+        LocalEnv::pretty(xo::pp::PpSink & sink) const
         {
-            os << "<local-env"
-               << xtag("n", slot_v_.size());
+            /* was: os << "<local-env" << xtag("n", slot_v_.size()) << ">".
+             *
+             * The disabled per-slot loop below wants runtime arity, which
+             * pretty_struct's parameter pack cannot express -- use
+             * sink.struct_open(..) when enabling it, not pretty_struct.
+             */
+            sink.pretty_struct("local-env",
+                               xo::pp::field("n", slot_v_.size()));
 
 #ifdef NOT_YET
             for (std::size_t i = 0, n = n_slot(); i < n; ++i) {
                 char buf[24];
                 snprintf(buf, sizeof(buf), "v[%lu]", i);
 
-                os << xtag(buf, lookup(i));
+                sink.pp(xo::pp::xtag(buf, lookup(i)));
             }
 #endif
-
-            os << ">";
         }
 
         std::size_t

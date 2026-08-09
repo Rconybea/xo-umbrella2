@@ -166,8 +166,8 @@ namespace xo {
                 virtual TaggedPtr self_tp() const final override {
                     assert(false); return TaggedPtr::universal_null();
                 }
-                virtual void display(std::ostream & os) const final override {
-                    os << "<TestClass>";
+                virtual void pretty(xo::pp::PpSink & sink) const final override {
+                    sink.pp("<TestClass>");
                 }
                 virtual std::size_t _shallow_size() const final override {
                     assert(false); return sizeof(*this);

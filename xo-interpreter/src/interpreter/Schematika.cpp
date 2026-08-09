@@ -9,6 +9,12 @@
 #include "VirtualSchematikaMachine.hpp"
 #include <xo/reader/reader.hpp>
 #include <replxx.hxx>
+/* os << gp<Object>, flat form.  The REPL has a PrettySink in hand (see the
+ * commented-out pps.pretty(value) at the print-value site) and could render
+ * results with line breaking instead -- deliberately NOT done here, since this
+ * conversion is meant to leave rendered output unchanged.
+ */
+#include <xo/alloc/alloc_ostream.hpp>
 #include <ostream>
 #include <xo/indentlog2/print/PrettySink.hpp>
 #include <xo/expression/pretty_expression.hpp>

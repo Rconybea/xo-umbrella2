@@ -5,7 +5,7 @@
 
 #include "Blob.hpp"
 #include <xo/reflect/Reflect.hpp>
-#include <xo/ppsink/tag_ostream.hpp>   /* os << xo::pp::xtag(..) */
+#include <xo/ppsink/pretty_struct.hpp>   /* sink.pretty_struct(..), field(..) */
 #include <xo/allocutil/IAlloc.hpp>
 
 namespace xo {
@@ -26,9 +26,14 @@ namespace xo {
     }
 
     void
-    Blob::display(std::ostream & os) const
+    Blob::pretty(xo::pp::PpSink & sink) const
     {
-        os << "<blob" << xo::pp::xtag("z", z_) << ">";
+        /* was: os << "<blob" << xtag("z", z_) << ">".
+         * pretty_struct renders the same flat form, and additionally lets the
+         * field break when nested inside a narrow enclosing structure --
+         * pinned by xo-alloc/utest/object_pretty.test.cpp.
+         */
+        sink.pretty_struct("blob", xo::pp::field("z", z_));
     }
 
     std::size_t

@@ -29,9 +29,16 @@ namespace xo {
         }
 
         void
-        ExpressionBoxed::display(std::ostream & os) const
+        ExpressionBoxed::pretty(xo::pp::PpSink & sink) const
         {
-            os << contents_;
+            /* was: os << contents_.
+             *
+             * Deliberately still a bare delegation: ExpressionBoxed is a box,
+             * and its rendering is whatever it wraps.  Do not add framing of
+             * its own here.  Going through the sink rather than an ostream
+             * means the boxed value now nests instead of flattening.
+             */
+            sink.pp(contents_);
         }
 
         std::size_t

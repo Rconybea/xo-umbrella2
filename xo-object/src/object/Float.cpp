@@ -32,8 +32,8 @@ namespace xo {
         }
 
         void
-        Float::display(std::ostream & os) const {
-            os << value_;
+        Float::pretty(xo::pp::PpSink & sink) const {
+            sink.pp(value_);
         }
 
         std::size_t

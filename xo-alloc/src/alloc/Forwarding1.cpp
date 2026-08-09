@@ -5,7 +5,7 @@
 
 #include "Forwarding1.hpp"
 #include <xo/reflect/Reflect.hpp>
-#include <xo/ppsink/tag_ostream.hpp>   /* os << xtag(..) */
+#include <xo/ppsink/pretty_struct.hpp>   /* sink.pretty_struct(..), field(..) */
 #include <cassert>
 #include <cstddef>
 
@@ -14,12 +14,12 @@ namespace xo {
     using xo::reflect::TaggedPtr;
 
     namespace obj {
-        /* NB one scope in from namespace xo, not at xo scope: a using-decl
-         * there would be *ambiguous* with legacy xo::xtag (still visible via
-         * headers that have not migrated) rather than shadowing it.
+        /* NB pretty() qualifies xo::pp::field rather than using-declaring it.
+         * A using-decl at xo scope would be *ambiguous* with legacy xo::xtag
+         * (still visible via headers that have not migrated) rather than
+         * shadowing it; and a using-decl cannot suppress ADL anyway, which is
+         * what pulls the legacy name in for arguments living in namespace xo.
          */
-        using xo::pp::xtag;
-
         Forwarding1::Forwarding1(gp<IObject> dest)
             : dest_{dest}
         {}
@@ -31,12 +31,13 @@ namespace xo {
         }
 
         void
-        Forwarding1::display(std::ostream & os) const
+        Forwarding1::pretty(xo::pp::PpSink & sink) const
         {
-            os << "<fwd"
-               << xtag("dest", (void*)dest_.ptr())
-//               << xtag("dest-td", dest_->self_tp().td()->short_name())
-               << ">";
+            /* was: os << "<fwd" << xtag("dest", (void*)dest_.ptr()) << ">" */
+            sink.pretty_struct("fwd",
+                               xo::pp::field("dest", (void*)dest_.ptr())
+//                             , xo::pp::field("dest-td", dest_->self_tp().td()->short_name())
+                );
         }
 
         IObject *

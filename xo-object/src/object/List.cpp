@@ -78,20 +78,37 @@ namespace xo {
         }
 
         void
-        List::display(std::ostream & os) const
+        List::pretty(xo::pp::PpSink & sink) const
         {
             gp<List> l = const_cast<List*>(this);
 
-            os << "(";
+            /* Framing follows Prettifier<std::array> in
+             * xo-ppsink/include/xo/ppsink/pretty_array.hpp: put the opening
+             * delimiter, begin() a group, split() between elements, then
+             * end() before the closing delimiter.
+             *
+             * split(1) is what the old `os << " "` becomes: one space when the
+             * list fits on a line -- so flat output is byte-identical -- and a
+             * break point when it does not.  A long list could not break at
+             * all before.
+             *
+             * Elements go through sink.pp(), i.e. Prettifier<gp<Object>>, so a
+             * nested list nests structurally rather than flattening.
+             */
+            sink.put("(").begin();
+
             size_t i = 0;
             while (!l->is_nil()) {
                 if (i > 0)
-                    os << " ";
-                os << l->head();
+                    sink.split(1);
+
+                sink.pp(l->head());
+
                 l = l->rest();
                 ++i;
             }
-            os << ")";
+
+            sink.end().put(")");
         }
 
         std::size_t

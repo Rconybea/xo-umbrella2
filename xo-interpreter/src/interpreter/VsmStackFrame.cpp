@@ -6,7 +6,7 @@
 #include "VsmStackFrame.hpp"
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflect/StructReflector.hpp>
-#include <xo/ppsink/tag_ostream.hpp>
+#include <xo/ppsink/pretty_struct.hpp>   /* sink.pretty_struct(..), field(..) */
 #include <xo/ppsink/tostr.hpp>
 
 namespace xo {
@@ -86,21 +86,22 @@ namespace xo {
         }
 
         void
-        VsmStackFrame::display(std::ostream & os) const
+        VsmStackFrame::pretty(xo::pp::PpSink & sink) const
         {
-            os << "<vsm-stack-frame"
-               << xtag("n", slot_v_.size());
+            /* was: os << "<vsm-stack-frame" << xtag("n", slot_v_.size()) << ">".
+             * See LocalEnv::pretty on the disabled per-slot loop.
+             */
+            sink.pretty_struct("vsm-stack-frame",
+                               xo::pp::field("n", slot_v_.size()));
 
 #ifdef NOT_YET
             for (std::size_t i = 0, n = n_slot(); i < n; ++i) {
                 char buf[24];
                 snprintf(buf, sizeof(buf), "v[%lu]", i);
 
-                os << xtag(buf, lookup(i));
+                sink.pp(xo::pp::xtag(buf, lookup(i)));
             }
 #endif
-
-            os << ">";
         }
 
         std::size_t

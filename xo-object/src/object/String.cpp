@@ -128,8 +128,13 @@ namespace xo {
         }
 
         void
-        String::display(std::ostream & os) const {
-            os << quot(c_str());
+        String::pretty(xo::pp::PpSink & sink) const {
+            /* Byte-identical to the display() this replaces.  Whether a
+             * Schematika string value owes a round-trippable literal rather
+             * than quot()'s diagnostic quoting is deliberately NOT settled
+             * here -- see .xo-backlog/xo-object/issues/01.
+             */
+            sink.pp(quot(c_str()));
         }
 
         // ----- GC support -----

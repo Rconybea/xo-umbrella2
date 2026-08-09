@@ -23,7 +23,7 @@ namespace xo {
 
             // inherited from Object..
             virtual TaggedPtr   self_tp() const final override;
-            virtual void        display(std::ostream & os) const final override;
+            virtual void        pretty(xo::pp::PpSink & sink) const final override;
             virtual bool        _is_forwarded() const final override { return true; }
             virtual IObject *   _offset_destination(IObject * src) const final override;
             virtual IObject *   _destination() final override;

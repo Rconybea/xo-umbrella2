@@ -4,6 +4,7 @@ set(UTEST_EXE utest.interpreter)
 set(UTEST_SRCS
     interpreter_utest_main.cpp
     LocalEnv.test.cpp
+    display_baseline.test.cpp
 )
 
 xo_add_utest_executable(${UTEST_EXE} ${UTEST_SRCS})

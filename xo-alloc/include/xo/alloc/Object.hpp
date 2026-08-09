@@ -9,6 +9,12 @@
 #include <xo/allocutil/IObject.hpp>
 #include <xo/allocutil/ObjectVisitor.hpp>
 #include <xo/allocutil/gc_ptr.hpp>
+/* Prettifier.hpp -> PpSink.hpp, which is deliberately ostream-free: it costs
+ * <iosfwd> <string_view> <cstddef> <cstdint> <optional> and nothing more.
+ * Object.hpp sits at the root of the object model, so that weight is the
+ * reason PpSink is preferred here over the printing stack proper.
+ */
+#include <xo/ppsink/Prettifier.hpp>
 #include <concepts>
 #include <cstdint>
 
@@ -121,8 +127,20 @@ namespace xo {
          **/
         virtual TaggedPtr self_tp() const;
 
-        /** print on stream @p os **/
-        virtual void display(std::ostream & os) const;
+        /** structured pretty-printing: render this object into @p sink.
+         *
+         *  This replaced a virtual display(std::ostream&) -- see
+         *  .xo-backlog/xo-alloc/issues/01-object-pretty-ppsink.md.  A PpSink
+         *  nests: an object rendered as part of an enclosing structure
+         *  participates in that structure's line breaking, where an ostream
+         *  inserter flattened it into one unbreakable token.
+         *
+         *  Object's own definition renders "<Object>", so a subclass that
+         *  overrides nothing still prints something identifiable.
+         *
+         *  For a std::ostream, include xo/alloc/alloc_ostream.hpp.
+         **/
+        virtual void pretty(xo::pp::PpSink & sink) const;
 
         // Inherited from IObject..
 
@@ -160,10 +178,35 @@ namespace xo {
         };
     }
 
-    std::ostream &
-    operator<< (std::ostream & os, gp<Object> x);
-
 } /*namespace xo*/
+
+namespace xo::pp {
+    /** pretty-print a gp<T> into a PpSink, for any T in the Object hierarchy.
+     *
+     *  Without this, gp<T> falls through Prettifier's empty primary template
+     *  to operator<<, which flattens the whole object into one string token --
+     *  so a nested object could not break, however narrow the margin.  With
+     *  it, xtag("k", obj) / field("k", obj) / sink.pp(obj) all render the
+     *  object structurally.  Pinned by
+     *  xo-alloc/utest/object_pretty.test.cpp.
+     *
+     *  NB constrained on the whole hierarchy, not written as an exact
+     *  Prettifier<gp<Object>>.  The inserter this replaced took gp<Object> and
+     *  accepted a gp<Derived> by implicit conversion; template argument
+     *  matching grants no such conversion, so an exact specialization would
+     *  silently miss every derived type and send it back to operator<<.
+     **/
+    template <typename T>
+        requires std::derived_from<T, xo::Object>
+    struct Prettifier<xo::gp<T>> {
+        static void print(PpSink & sink, const xo::gp<T> & x) {
+            if (x.ptr())
+                x->pretty(sink);
+            else
+                sink.pp("<nullptr>");
+        }
+    };
+} /*namespace xo::pp*/
 
 void * operator new (std::size_t z, const xo::Cpof & copy);
 

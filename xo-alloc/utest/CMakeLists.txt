@@ -14,6 +14,8 @@ set(UTEST_SRCS
     Forwarding1.test.cpp
     CircularBuffer.test.cpp
     generation.test.cpp
+    display_baseline.test.cpp
+    object_pretty.test.cpp
 )
 
 if (ENABLE_TESTING)
