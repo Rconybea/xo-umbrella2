@@ -25,6 +25,7 @@ if (ENABLE_TESTING)
     xo_dependency(${UTEST_EXE} xo_ppsink)
     # PrettySink (line-breaking sink) -- replaces legacy toppstr2()
     xo_dependency(${UTEST_EXE} xo_indentlog2)
+	xo_dependency(${UTEST_EXE} xo_testutil)
     xo_external_target_dependency(${UTEST_EXE} Catch2 Catch2::Catch2)
 endif()
 
