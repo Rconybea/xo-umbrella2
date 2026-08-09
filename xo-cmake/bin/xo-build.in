@@ -15,6 +15,7 @@ $0 [-u|--usage|-h|--help]
     [--with-examples] [--with-utests] [--with-asm] [--debug-build]
     [--with-opengl=GLFLAG] [--with-vulkan=VKFLAG]
     [-S=SOURCEDIR] [-B=BUILDDIR] [-j N|--jobs=N]
+    [-q|--quiet] [-k|--keep-going]
     [--all | [--with-deps] NAME ...]
 EOF
 }
@@ -38,6 +39,18 @@ Options:
                           redirecting to /dev/null, which also discards the
                           diagnostics and makes a failed build look identical
                           to a successful one.
+  -k | --keep-going       do not stop at the first failure; carry on with work
+                          that does not depend on it, then report a summary and
+                          exit non-zero.  As in make(1).
+                          For --configure/--build/--install, everything
+                          downstream of a failed subsystem is SKIPPED, since it
+                          cannot build against a broken dependency (downstream
+                          set via xo-deps --users-of).
+                          For --utest there is no skipping: a dependent's tests
+                          are independent of a failed subsystem's tests and are
+                          still worth running.  This is what makes a whole-tree
+                          test sweep possible when one subsystem fails
+                          persistently.
   --xoname=NAME           operate on xo subsystem NAME
   --all                   operate on every subsystem from --list, in dependency
                           order (bottom-up), excluding the xo-cmake bootstrap.
@@ -111,7 +124,19 @@ pull_umbrella_remote_flag=0
 push_umbrella_remote_flag=0
 all_flag=0
 with_deps_flag=0
+keep_going_flag=0
 xonames=()
+
+# --keep-going bookkeeping.  failed_subsys/skipped_subsys drive the end-of-run
+# summary; skip_set maps a subsystem to the failed subsystem it is downstream
+# of, so a skip can say what it was skipped for.
+failed_subsys=()
+skipped_subsys=()
+declare -A skip_set=()
+
+# subsystems whose --utest phase found zero tests.  Tracked because ctest exits
+# 0 in that case, so they would otherwise be counted as passes.
+no_tests_subsys=()
 
 while [[ $# > 0 ]]; do
     case "$1" in
@@ -126,6 +151,9 @@ while [[ $# > 0 ]]; do
             ;;
         -q | --quiet)
             quiet_flag=1
+            ;;
+        -k | --keep-going)
+            keep_going_flag=1
             ;;
         -S)
             shift
@@ -384,34 +412,104 @@ fi
 # Deliberately buffers rather than filtering cmake's output: a filter has to
 # know every shape of error message, and anything it fails to match disappears.
 #
+# With --keep-going, a failure returns rc to the caller instead of exiting, so
+# the per-subsystem loop can skip ahead; without it, behaviour is as before.
 run_phase() {
     local label="$1"; shift
 
+    local log rc
+
     if [[ ${quiet_flag} -eq 0 ]]; then
+        set +e
         "$@"
-        return
+        rc=$?
+        set -e
+    else
+        log=$(mktemp "${TMPDIR:-/tmp}/xo-build-XXXXXX")
+
+        set +e
+        "$@" > "${log}" 2>&1
+        rc=$?
+        set -e
+
+        if [[ ${rc} -ne 0 ]]; then
+            >&2 echo "xo-build: ${label} FAILED for [${xoname:-.}] (exit ${rc}); output follows:"
+            >&2 cat "${log}"
+        fi
+
+        rm -f "${log}"
     fi
 
-    local log rc
-    log=$(mktemp "${TMPDIR:-/tmp}/xo-build-XXXXXX")
+    if [[ ${rc} -ne 0 ]]; then
+        [[ ${keep_going_flag} -eq 1 ]] && return ${rc}
+        exit ${rc}
+    fi
+
+    return 0
+}
+
+# --keep-going: everything downstream of a failed subsystem cannot build against
+# it, so drop those rather than reporting cascade failures.  This is `make -k`.
+#
+# NB xo-deps -q, never 2>/dev/null: exit 2 is "no such subsystem" and exit 1 is
+# "no dependents", and hiding stderr makes them indistinguishable -- a typo
+# would then read as "nothing depends on this" and quietly under-skip.  Any
+# non-zero exit means DO NOT PRUNE: attempting too much surfaces as ordinary
+# build errors, where skipping too much leaves a silent gap.
+prune_dependents() {
+    local failed="$1"
+    local deps rc sub
+
+    [[ -z "${failed}" ]] && return 0
+
+    if ! command -v xo-deps > /dev/null 2>&1; then
+        >&2 echo "xo-build: xo-deps not on PATH; not pruning dependents of [${failed}]"
+        return 0
+    fi
 
     set +e
-    "$@" > "${log}" 2>&1
+    deps=$(xo-deps --users-of="${failed}" --format=names -q)
     rc=$?
     set -e
 
     if [[ ${rc} -ne 0 ]]; then
-        >&2 echo "xo-build: ${label} FAILED for [${xoname:-.}] (exit ${rc}); output follows:"
-        >&2 cat "${log}"
-        rm -f "${log}"
-        exit ${rc}
+        >&2 echo "xo-build: could not determine dependents of [${failed}] (xo-deps exit ${rc}); not pruning"
+        return 0
     fi
 
-    rm -f "${log}"
+    while IFS= read -r sub; do
+        [[ -z "${sub}" || "${sub}" == "${failed}" ]] && continue
+        skip_set["${sub}"]="${failed}"
+    done <<< "${deps}"
+
+    return 0
+}
+
+# record a failed phase for the end-of-run summary.  prune=1 for phases whose
+# failure invalidates dependents (configure/build/install); 0 for --utest, where
+# a dependent's tests are independent and still worth running.
+note_failure() {
+    local phase="$1" prune="$2"
+
+    failed_subsys+=("${xoname:-.} (${phase})")
+
+    [[ ${prune} -eq 1 ]] && prune_dependents "${xoname}"
+
+    return 0
 }
 
 # --- per-subsystem operations (loop body is intentionally left un-indented) ---
 for xoname in "${xonames[@]}"; do
+
+# --keep-going: skip anything downstream of a subsystem that already failed.
+# Checked here rather than pruned from xonames in place, because an explicitly
+# named list is taken in the order given -- only --all/--with-deps rebuild it
+# bottom-up -- so a dependent may appear before its dependency.
+if [[ -n "${xoname}" && -n "${skip_set[${xoname}]:-}" ]]; then
+    skipped_subsys+=("${xoname} (depends on ${skip_set[${xoname}]})")
+    >&2 echo "xo-build: ${xoname} SKIPPED (depends on failed ${skip_set[${xoname}]})"
+    continue
+fi
 
 # ops actually performed for this subsystem, for the --quiet summary line
 phases_done=()
@@ -568,7 +666,7 @@ cd ${cwd} && ${cmd}
 EOF
             chmod +rx ${rebootcmake}
 
-            run_phase configure $cmd
+            run_phase configure $cmd || { note_failure configure 1; continue; }
             phases_done+=(configure)
         fi
     fi
@@ -581,7 +679,7 @@ if [[ $build_flag -eq 1 ]]; then
         if [[ $noop_flag -eq 1 ]]; then
             echo $cmd
         else
-            run_phase build $cmd
+            run_phase build $cmd || { note_failure build 1; continue; }
             phases_done+=(build)
         fi
     fi
@@ -606,29 +704,69 @@ if [[ $utest_flag -eq 1 ]]; then
         if [[ $noop_flag -eq 1 ]]; then
             echo $cmd
         else
-            # On failure, re-run just the failed tests verbosely so CI logs show
-            # WHY they failed -- the first pass reports only pass/fail per test,
-            # whereas --output-on-failure prints each failed test's output (e.g.
-            # the Catch2 assertion detail).  Preserve the failing exit status so
-            # the build still fails.
-            # quiet buffers the pass/fail summary; the rerun below is the
-            # interesting output and always goes to the terminal.
-            utest_rc=0
-            if [[ ${quiet_flag} -eq 1 ]]; then
-                utest_log=$(mktemp "${TMPDIR:-/tmp}/xo-build-utest-XXXXXX")
-                set +e; $cmd > "${utest_log}" 2>&1; utest_rc=$?; set -e
-                [[ ${utest_rc} -ne 0 ]] && cat "${utest_log}" 1>&2
-                rm -f "${utest_log}"
-            else
-                set +e; $cmd; utest_rc=$?; set -e
-            fi
+            # A subsystem with no tests at all must NOT report plain "ok":
+            # ctest exits 0 on "No tests were found!!!", so a sweep would count
+            # it as a pass and overstate coverage.  On this tree that is 26 of
+            # 61 subsystems -- enough to make a summary line actively
+            # misleading.  Same defect as .xo-backlog/nix-packaging (packages
+            # built without -DENABLE_TESTING ran zero tests and looked green).
+            #
+            # Counted with `ctest -N`, which executes nothing and reports
+            # "Total Tests: N".  That is ctest's own structured summary, not an
+            # error-message shape, so this is not the kind of output-filtering
+            # ticket 01 argues against.  If the count cannot be parsed we fall
+            # through and run the tests: doing the work is the safe direction,
+            # claiming "no tests" wrongly is not.
+            utest_n=$(ctest --test-dir "$pathtobuild" -N 2>&1 \
+                          | sed -n 's/^Total Tests: \([0-9][0-9]*\)$/\1/p' | tail -1)
 
-            if [[ ${utest_rc} -ne 0 ]]; then
-                echo "xo-build: unit tests failed -- re-running failures with --rerun-failed --output-on-failure" 1>&2
-                ctest --test-dir "$pathtobuild" --rerun-failed --output-on-failure || true
-                exit 1
+            if [[ "${utest_n}" == "0" ]]; then
+                # NB no `continue` here: having no tests is not a failure, so
+                # later phases (--install) and the per-subsystem summary line
+                # must still happen.
+                no_tests_subsys+=("${xoname:-.}")
+                phases_done+=("utest:no-tests")
+
+                if [[ ${quiet_flag} -eq 0 ]]; then
+                    echo "xo-build: ${xoname:-.} has no tests"
+                fi
+            else
+                # On failure, re-run just the failed tests verbosely so CI logs show
+                # WHY they failed -- the first pass reports only pass/fail per test,
+                # whereas --output-on-failure prints each failed test's output (e.g.
+                # the Catch2 assertion detail).  Preserve the failing exit status so
+                # the build still fails.
+                # quiet buffers the pass/fail summary; the rerun below is the
+                # interesting output and always goes to the terminal.
+                utest_rc=0
+                if [[ ${quiet_flag} -eq 1 ]]; then
+                    utest_log=$(mktemp "${TMPDIR:-/tmp}/xo-build-utest-XXXXXX")
+                    set +e; $cmd > "${utest_log}" 2>&1; utest_rc=$?; set -e
+                    [[ ${utest_rc} -ne 0 ]] && cat "${utest_log}" 1>&2
+                    rm -f "${utest_log}"
+                else
+                    set +e; $cmd; utest_rc=$?; set -e
+                fi
+
+                if [[ ${utest_rc} -ne 0 ]]; then
+                    echo "xo-build: unit tests failed for [${xoname:-.}] -- re-running failures with --rerun-failed --output-on-failure" 1>&2
+                    ctest --test-dir "$pathtobuild" --rerun-failed --output-on-failure || true
+
+                    # --keep-going does NOT prune here (note_failure ... 0): a test
+                    # failure does not invalidate a dependent's tests.  The
+                    # dependent built fine, and its tests exercise different code,
+                    # so skipping it would discard real signal.  Contrast the build
+                    # phases, where a dependent cannot build at all.
+                    #
+                    # The `continue` DOES skip this subsystem's remaining phases
+                    # (i.e. --install), which is deliberate: do not install a
+                    # subsystem whose tests just failed.
+                    note_failure utest 0
+                    [[ ${keep_going_flag} -eq 1 ]] && continue
+                    exit 1
+                fi
+                phases_done+=(utest)
             fi
-            phases_done+=(utest)
         fi
     fi
 fi
@@ -640,7 +778,7 @@ if [[ $install_flag -eq 1 ]]; then
         if [[ $noop_flag -eq 1 ]]; then
             echo $cmd
         else
-            run_phase install $cmd
+            run_phase install $cmd || { note_failure install 1; continue; }
             phases_done+=(install)
         fi
     fi
@@ -655,10 +793,50 @@ if [[ $realclean_flag -eq 1 ]]; then
 fi
 
 # --quiet: one line per subsystem, so a long --all run still shows progress.
-# Reaching here at all means every phase succeeded -- run_phase exits on the
-# first failure.
+# Reaching here means every phase succeeded for this subsystem: without
+# --keep-going run_phase exits on the first failure, and with it the call sites
+# `continue` past this line.
 if [[ ${quiet_flag} -eq 1 && ${#phases_done[@]} -gt 0 ]]; then
     echo "xo-build: ${xoname:-.} ok (${phases_done[*]})"
 fi
 
 done
+
+# --- end-of-run summary (--keep-going only) -------------------------------
+#
+# Always report skipped subsystems as skipped.  Reporting only failures would
+# let a partial run read as a full one -- the same defect this flag exists to
+# fix, one level down.
+if [[ ${keep_going_flag} -eq 1 ]]; then
+    if [[ ${#failed_subsys[@]} -gt 0 \
+              || ${#skipped_subsys[@]} -gt 0 \
+              || ${#no_tests_subsys[@]} -gt 0 ]]; then
+        >&2 echo "xo-build: --keep-going summary:"
+
+        for entry in "${failed_subsys[@]:-}"; do
+            [[ -n "${entry}" ]] && >&2 echo "  FAILED   ${entry}"
+        done
+
+        for entry in "${skipped_subsys[@]:-}"; do
+            [[ -n "${entry}" ]] && >&2 echo "  skipped  ${entry}"
+        done
+
+        # Reported even on an otherwise clean run, and deliberately not folded
+        # into the pass count: "60 ok" reads as much stronger evidence than
+        # "34 ok, 26 with no tests".
+        if [[ ${#no_tests_subsys[@]} -gt 0 ]]; then
+            >&2 echo "  no tests ${no_tests_subsys[*]}"
+        fi
+
+        >&2 echo "xo-build: ${#failed_subsys[@]} failed, ${#skipped_subsys[@]} skipped, ${#no_tests_subsys[@]} with no tests"
+    fi
+
+    # NB an `if`, not `[[ ... ]] && exit 1`: as the last statement in the script
+    # the latter returns 1 when the condition is FALSE, so a clean --keep-going
+    # run would exit non-zero.
+    if [[ ${#failed_subsys[@]} -gt 0 ]]; then
+        exit 1
+    fi
+fi
+
+exit 0
