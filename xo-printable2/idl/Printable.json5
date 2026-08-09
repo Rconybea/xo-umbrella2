@@ -11,6 +11,7 @@
     // by b1add3bb ("move Collector facet gc/ -> alloc2/ for levelling") and so
     // was silently dropped by the next regeneration.  It belongs here instead.
     user_hpp_includes: ["\"detail/ppdetail_Printable.hpp\"",
+                        "\"detail/pretty_Printable.hpp\"",
                         "<xo/alloc2/Allocator.hpp>"],
     namespace1: "xo",
     namespace2: "print",
