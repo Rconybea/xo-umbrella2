@@ -22,7 +22,8 @@ namespace xo {
     using xo::gc::ObjectStatistics;
     using xo::gc::PerObjectTypeStatistics;
     using xo::reflect::Reflect;
-
+    using xo::pp::PrettySink;
+    using xo::pp::PpConfig;
 
     namespace {
         /** render @p x with line breaking, as legacy toppstr2(ppconfig, x) did.
@@ -39,13 +40,9 @@ namespace xo {
         template <typename T>
         std::string
         toppstr(const T & x) {
-            static int seq = 0;
-
-            xo::mm::ArenaConfig logbuf_cfg {
-                .name_ = "utest.alloc.pretty." + std::to_string(++seq),
-                .size_ = 64*1024 };
-
-            xo::pp::PrettySink pps(xo::pp::PpConfig().with_logbuf_config(logbuf_cfg), nullptr);
+            auto pps = PrettySink::scratch("utest.alloc.pretty.",
+                                           64*1024,
+                                           135 /*soft_right_margin*/);
 
             pps.pp(x);
 
