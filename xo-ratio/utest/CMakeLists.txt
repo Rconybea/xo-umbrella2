@@ -22,6 +22,8 @@ if (ENABLE_TESTING)
     xo_dependency(${SELF_EXE} randomgen)
     xo_dependency(${SELF_EXE} xo_ppsink)
     xo_dependency(${SELF_EXE} xo_flatstring)
+    # UtestAppStart/UtestListener: shared utest main, see ratio_utest_main.cpp
+    xo_dependency(${SELF_EXE} xo_testutil)
     xo_external_target_dependency(${SELF_EXE} Catch2 Catch2::Catch2)
 endif()
 
