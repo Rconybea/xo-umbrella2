@@ -43,8 +43,6 @@ namespace xo {
 
             //std::cerr << hex_view(s.c_str(), s.c_str() + s.length(), true /*as_text*/) << std::endl;
 
-
-
             REQUIRE(s == "<PerObjectTypeStatistics :td nullptr :scanned_n 0 :scanned_z 0 :survive_n 0 :survive_z 0>");
 
         }
@@ -61,8 +59,6 @@ namespace xo {
             std::string s = tostr(stats);
 
             //std::cerr << hex_view(s.c_str(), s.c_str() + s.length(), true /*as_text*/) << std::endl;
-
-
 
             REQUIRE(s == "<PerObjectTypeStatistics :td bool :scanned_n 4 :scanned_z 16 :survive_n 2 :survive_z 8>");
 

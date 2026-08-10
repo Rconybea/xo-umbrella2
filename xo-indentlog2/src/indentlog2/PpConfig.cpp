@@ -98,13 +98,16 @@ namespace xo {
           : layout_{l}, logbuf_{b}, style_{s}
         {}
 
-        int s_ppconfig_seq = 0;
-
         PpConfig
         PpConfig::scratch_aux(const std::string & basename,
                               uint32_t margin,
                               const PpStyle & style)
         {
+            int s_ppconfig_seq{0};
+
+            // its desirable for arena names to be unique,
+            // so that they can be distinguished in MemorySizeVisitor pools
+
             ArenaConfig logbuf_cfg { .name_ = basename + std::to_string(++s_ppconfig_seq),
                                      .size_ = 64*1024 };
 

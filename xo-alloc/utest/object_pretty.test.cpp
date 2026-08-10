@@ -31,14 +31,6 @@ namespace xo {
     using xo::pp::PpConfig;
 
     namespace {
-        /** render @p fn's output through a PrettySink with soft right margin
-         *  @p margin, and return the rendered text.
-         *
-         *  NB the arena name must be unique per call: two PrettySinks sharing
-         *  an ArenaConfig name interfere, and the symptom is wrong indentation
-         *  in whichever case runs second.  (Same hazard documented in
-         *  ObjectStatistics.test.cpp.)
-         **/
         template <typename Fn>
         std::string
         render(std::uint32_t margin, Fn && fn) {
