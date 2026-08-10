@@ -11,6 +11,7 @@
 #include <xo/reflect/TypeDescr.hpp>
 #include <xo/flatstring/flatstring.hpp>
 #include <xo/indentlog/print/pretty.hpp>
+#include <xo/ppsink/Prettifier.hpp>   /* Prettifier<TypeRef>, below */
 
 namespace xo {
     namespace scm {
@@ -74,12 +75,8 @@ namespace xo {
             /** pretty-printer support **/
             bool pretty_deprecated(const ppindentinfo & ppii) const;
 
-            /* PHASE B STUB -- not yet converted by phase C.  Renders a marker
-             * rather than nothing, so an unconverted printer is VISIBLE in
-             * output instead of silently absent.
-             * See .xo-backlog/xo-printable2/issues/01-aprintable-pretty-ppsink.md
-             */
-            void pretty(xo::pp::PpSink & sink) const { sink.put("STUB:TypeRef"); }
+            /** structured pretty-printing: render this typeref into @p sink **/
+            void pretty(xo::pp::PpSink & sink) const;
 
             /** gc support **/
             void visit_gco_children(VisitReason reason, obj<AGCObjectVisitor> gc) noexcept;
@@ -110,6 +107,22 @@ namespace xo {
         struct ppdetail<xo::scm::TypeRef> {
             static inline bool print_pretty(const ppindentinfo & ppii, const xo::scm::TypeRef x) {
                 return x.pretty_deprecated(ppii);
+            }
+        };
+    }
+
+    namespace pp {
+        /** ppsink mirror of print::ppdetail<TypeRef> above.
+         *
+         *  TypeRef is not a facet D-type, so nothing dispatches to
+         *  TypeRef::pretty() without this: without a Prettifier<> the empty
+         *  primary template sends a TypeRef to operator<<, which it does not
+         *  have.
+         **/
+        template <>
+        struct Prettifier<xo::scm::TypeRef> {
+            static void print(PpSink & sink, const xo::scm::TypeRef & x) {
+                x.pretty(sink);
             }
         };
     }

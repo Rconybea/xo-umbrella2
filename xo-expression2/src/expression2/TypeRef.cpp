@@ -6,10 +6,14 @@
 #include "TypeRef.hpp"
 #include <xo/alloc2/Collector.hpp>
 #include <xo/alloc2/GCObject.hpp>
+#include <xo/reflect/TypeDescr_pp.hpp>   /* Prettifier<TypeDescr> for the :td field */
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/indentlog/print/cond.hpp>
 #include <xo/indentlog/print/pretty.hpp>
 #include <xo/indentlog/print/quoted.hpp>
+#include <xo/ppsink/pretty_struct.hpp>   /* sink.struct_open(..) */
+#include <xo/ppsink/quoted.hpp>          /* xo::pp::quot */
+#include <string_view>
 
 namespace xo {
     using xo::mm::AGCObject;
@@ -119,6 +123,31 @@ namespace xo {
                         , refrtag("id", quot(id_))
                         , refrtag("td", cond(td_, td_, "null"))
                            );
+        }
+
+        void
+        TypeRef::pretty(xo::pp::PpSink & sink) const
+        {
+            /* named locals: field() captures BY REFERENCE (pretty_struct.hpp) */
+            const auto id = xo::pp::quot(id_);
+
+            auto st = sink.struct_open("TypeRef");
+
+            st.field("id", id);
+
+            /* Prettifier<TypeDescr> renders NOTHING for a null descriptor
+             * (TypeDescr_pp.hpp), which for an unresolved TypeRef -- the normal
+             * pre-typecheck state -- would leave a bare ":td" with no value.
+             * Legacy said "null" here (cond(td_, td_, "null")); keep that,
+             * rather than change xo-reflect's policy from this side.
+             */
+            if (td_) {
+                st.field("td", td_);
+            } else {
+                static constexpr std::string_view c_null = "null";
+
+                st.field("td", c_null);
+            }
         }
 
     } /*namespace scm*/
