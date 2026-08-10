@@ -13,6 +13,7 @@
 
 namespace xo {
     using xo::facet::typeseq;
+    using xo::pp::field;
 
     namespace scm {
 
@@ -79,8 +80,8 @@ namespace xo {
             const auto qname = xo::pp::quot(name);
 
             sink.pretty_struct("DVariable",
-                               xo::pp::field("name", qname),
-                               xo::pp::field("typeref", typeref_));
+                               field("name", qname),
+                               field("typeref", typeref_));
         }
 
     } /*namespace scm*/
