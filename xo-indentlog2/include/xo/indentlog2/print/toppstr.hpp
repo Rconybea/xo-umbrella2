@@ -30,50 +30,18 @@
 #include <type_traits>
 
 namespace xo::pp {
-    /** default logbuf arena size, when the caller's PpConfig does not set one.
-     *
-     *  ArenaConfig::size_ defaults to 0, and a PrettySink given a zero-sized
-     *  logbuf aborts -- so every one of the 23 hand-rolled copies had to supply
-     *  a size, and every one of them chose 64k.  That makes it this function's
-     *  default rather than each caller's decision.
-     **/
-    static constexpr std::size_t c_toppstr_default_logbuf_z = 64 * 1024;
-
-    namespace detail {
-        /** fresh logbuf ArenaConfig, with a name unique to this call.
-         *
-         *  The uniqueness is NOT optional and is why callers should not build
-         *  their own: two PrettySinks sharing an ArenaConfig name interfere,
-         *  and the symptom is wrong indentation in whichever renders second --
-         *  a silent wrong answer, not an error.  Six separate files carried a
-         *  comment warning about this before it was encapsulated here.
-         *
-         *  @p size  arena size, taken from the caller's config so that raising
-         *           it for a large rendering still works.
-         **/
-        inline xo::mm::ArenaConfig
-        toppstr_logbuf_config(std::size_t size) {
-            static std::atomic<int> s_seq{0};
-
-            return xo::mm::ArenaConfig{
-                .name_ = "xo.toppstr." + std::to_string(s_seq.fetch_add(1) + 1),
-                .size_ = (size ? size : c_toppstr_default_logbuf_z) };
-        }
-    } /*namespace detail*/
-
     /** render @p args (concatenated, no separator) through a PrettySink
      *  configured by @p cfg, and return the result.
      *
      *  @p cfg supplies the margins and arena size; its logbuf NAME is replaced,
      *  see detail::toppstr_logbuf_config.
+     *
+     *  Caller may use PpConfig::scratch() for example
      **/
     template <typename... Ts>
     std::string
     toppstr(const PpConfig & cfg, const Ts &... args) {
-        PrettySink pps(PpConfig(cfg)
-                       .with_logbuf_config(
-                                           detail::toppstr_logbuf_config(cfg.logbuf().logbuf_config().size_)),
-                       nullptr /*out*/);
+        PrettySink pps(cfg, nullptr /*out*/);
 
         (pps.pp(args), ...);
 
@@ -89,7 +57,7 @@ namespace xo::pp {
         requires (!std::same_as<std::remove_cvref_t<T0>, PpConfig>)
     std::string
     toppstr(const T0 & a0, const Ts &... args) {
-        return toppstr(PpConfig(), a0, args...);
+        return toppstr(PpConfig::plain(), a0, args...);
     }
 } /*namespace xo::pp*/
 

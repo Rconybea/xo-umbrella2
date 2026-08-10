@@ -23,6 +23,7 @@ namespace xo {
     namespace ut {
         using xo::pp::PpConfig;
         using xo::pp::PpStyle;
+        using xo::pp::toppstr;
         using xo::pp::color_spec_type;
 
         namespace {
@@ -33,8 +34,7 @@ namespace xo {
 
             std::string
             render_at(std::uint32_t margin) {
-                return xo::pp::toppstr(PpConfig().with_soft_right_margin(margin),
-                                       s_value);
+                return toppstr(PpConfig::scratch(margin), s_value);
             }
 
             struct Testcase_Toppstr {
@@ -121,24 +121,32 @@ namespace xo {
 
             int x = 1;   /* named: field() captures by reference */
 
-            REQUIRE(xo::pp::toppstr(PpConfig().with_style(style), xo::pp::tag("k", x))
-                    == "\033[31m:k\033[0m 1");
-            REQUIRE(xo::pp::toppstr(PpConfig().with_style(style), xo::pp::field("k", x))
-                    == "\033[32m:k\033[0m 1");
+            {
+                auto ppc = PpConfig::plain().with_style(style);
 
-            /* ... and both render bare under plain() */
-            REQUIRE(xo::pp::toppstr(PpConfig().with_style(PpStyle::plain()), xo::pp::tag("k", x))
-                    == ":k 1");
-            REQUIRE(xo::pp::toppstr(PpConfig().with_style(PpStyle::plain()), xo::pp::field("k", x))
-                    == ":k 1");
+                REQUIRE(toppstr(ppc, xo::pp::tag("k", x))
+                        == "\033[31m:k\033[0m 1");
+                REQUIRE(toppstr(ppc, xo::pp::field("k", x))
+                        == "\033[32m:k\033[0m 1");
+            }
+
+            {
+                auto ppc = PpConfig::plain();
+
+                /* ... and both render bare under plain() */
+                REQUIRE(toppstr(ppc, xo::pp::tag("k", x))
+                        == ":k 1");
+                REQUIRE(toppstr(ppc, xo::pp::field("k", x))
+                        == ":k 1");
+            }
         }
 
         TEST_CASE("toppstr-overloads", "[toppstr]") {
             /* the no-config overload must not be shadowed by the
              * PpConfig-taking one, nor vice versa
              */
-            REQUIRE(xo::pp::toppstr(123) == "123");
-            REQUIRE(xo::pp::toppstr(PpConfig(), 123) == "123");
+            REQUIRE(toppstr(123) == "123");
+            REQUIRE(toppstr(PpConfig::plain(), 123) == "123");
         }
     } /*namespace ut*/
 } /*namespace xo*/

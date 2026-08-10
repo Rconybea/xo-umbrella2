@@ -66,6 +66,7 @@ namespace xo {
     using xo::facet::with_facet;
 
     namespace ut {
+        using xo::pp::PpConfig;
         using xo::pp::scope;
         using xo::pp::xtag;
 
@@ -108,10 +109,7 @@ namespace xo {
                  * the config rather than by flipping a global, so it cannot
                  * leak into whatever runs next.
                  */
-                return xo::pp::toppstr(xo::pp::PpConfig()
-                                       .with_soft_right_margin(margin)
-                                       .with_style(xo::pp::PpStyle::plain()),
-                                       x);
+                return xo::pp::toppstr(PpConfig::scratch(margin), x);
             }
 
             template <typename V>

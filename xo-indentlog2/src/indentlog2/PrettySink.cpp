@@ -37,18 +37,9 @@ namespace xo {
                             uint32_t size,
                             uint32_t margin)
         {
-            static int s_seq = 0;
-
-            ArenaConfig logbuf_cfg { .name_ = basename + std::to_string(++s_seq),
-                                     .size_ = size };
-
-            PpConfig cfg
-                = PpConfig()
-                   .with_logbuf_config(logbuf_cfg)
-                   .with_soft_right_margin(margin)
-                   .with_style(PpStyle::plain());
-
-            return PrettySink(cfg, nullptr);
+            return PrettySink(PpConfig::scratch_aux(basename,
+                                                    margin,
+                                                    PpStyle::plain()).with_logbuf_size(size), nullptr);
         }
 
         void

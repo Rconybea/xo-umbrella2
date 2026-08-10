@@ -52,6 +52,8 @@ namespace xo {
     using xo::facet::obj;
 
     namespace ut {
+        using xo::pp::PpConfig;
+        using xo::pp::toppstr;
         using xo::pp::scope;
         using xo::pp::xtag;
 
@@ -89,10 +91,7 @@ namespace xo {
             template <typename T>
             std::string
             render_pretty(const T & x, std::uint32_t margin) {
-                return xo::pp::toppstr(xo::pp::PpConfig()
-                                       .with_soft_right_margin(margin)
-                                       .with_style(xo::pp::PpStyle::plain()),
-                                       x);
+                return toppstr(PpConfig::scratch(margin), x);
             }
 
             /** replace the digits of ":id <n>" with "N".

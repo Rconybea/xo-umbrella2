@@ -62,6 +62,8 @@ namespace xo {
     using xo::facet::with_facet;
 
     namespace ut {
+        using xo::pp::PpConfig;
+        using xo::pp::toppstr;
         using xo::pp::scope;
         using xo::pp::xtag;
 
@@ -117,8 +119,7 @@ namespace xo {
             template <typename T>
             std::string
             render_pretty(const T & x, std::uint32_t margin) {
-                return xo::pp::toppstr(xo::pp::PpConfig().with_soft_right_margin(margin),
-                                       x);
+                return toppstr(PpConfig::scratch(margin), x);
             }
         } /*namespace*/
 

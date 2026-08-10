@@ -70,6 +70,8 @@ namespace xo {
             PpLogbufConfig with_logbuf_config(const ArenaConfig & x);
             PpLogbufConfig with_logbuf_debug_flag(bool x);
 
+            PpLogbufConfig with_name(const std::string & name);
+
             friend class PpConfig;
 
         private:
@@ -92,7 +94,14 @@ namespace xo {
             PpConfig() = default;
             PpConfig(const PpLayoutConfig & l, const PpLogbufConfig & b, const PpStyle & s);
 
-            static PpConfig plain(const ArenaConfig & logbuf_cfg);
+            /** plain + anonymous **/
+            static PpConfig plain();
+            /** colored + anonymous **/
+            static PpConfig colored();
+            /** config for a temporary pretty sink. useful in unit tests **/
+            static PpConfig scratch(uint32_t margin);
+            /** config for a temporary pretty sink. useful in unit tests **/
+            static PpConfig scratch_aux(const std::string & basename, uint32_t margin, const PpStyle & style);
 
             const PpLayoutConfig & layout() const { return layout_; }
             const PpLogbufConfig & logbuf() const { return logbuf_; }
@@ -112,6 +121,7 @@ namespace xo {
 
             /** hard max arena size **/
             PpConfig with_logbuf_size(size_t);
+            PpConfig with_logbuf_name(const std::string & x);
 
         private:
             /** configuration for layout (no color) **/

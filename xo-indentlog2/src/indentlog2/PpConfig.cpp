@@ -82,16 +82,54 @@ namespace xo {
             return retval;
         }
 
+        PpLogbufConfig
+        PpLogbufConfig::with_name(const std::string & x)
+        {
+            PpLogbufConfig retval = *this;
+
+            retval.logbuf_config_.name_ = x;
+
+            return retval;
+        }
+
         // ------ PpConfig -----
 
         PpConfig::PpConfig(const PpLayoutConfig & l, const PpLogbufConfig & b, const PpStyle & s)
           : layout_{l}, logbuf_{b}, style_{s}
         {}
 
+        int s_ppconfig_seq = 0;
+
         PpConfig
-        PpConfig::plain(const ArenaConfig & logbuf_cfg)
+        PpConfig::scratch_aux(const std::string & basename,
+                              uint32_t margin,
+                              const PpStyle & style)
         {
-            return PpConfig().with_logbuf_config(logbuf_cfg).with_style(PpStyle::plain());
+            ArenaConfig logbuf_cfg { .name_ = basename + std::to_string(++s_ppconfig_seq),
+                                     .size_ = 64*1024 };
+
+            return PpConfig()
+                   .with_logbuf_config(logbuf_cfg)
+                   .with_soft_right_margin(margin)
+                   .with_style(style);
+        }
+
+        PpConfig
+        PpConfig::scratch(uint32_t margin)
+        {
+            return scratch_aux("anon", margin, PpStyle::plain());
+        }
+
+        PpConfig
+        PpConfig::plain()
+        {
+            return scratch(135 /*soft_right_margin*/);
+        }
+
+        PpConfig
+        PpConfig::colored()
+        {
+            return scratch_aux("anon", 135 /*soft_right_margin*/, PpStyle::colored());
         }
 
         PpConfig
@@ -190,6 +228,16 @@ namespace xo {
             PpConfig retval = *this;
 
             retval.logbuf_.logbuf_config_.size_ = x;
+
+            return retval;
+        }
+
+        PpConfig
+        PpConfig::with_logbuf_name(const std::string & x)
+        {
+            PpConfig retval = *this;
+
+            retval.logbuf_.logbuf_config_.name_ = x;
 
             return retval;
         }

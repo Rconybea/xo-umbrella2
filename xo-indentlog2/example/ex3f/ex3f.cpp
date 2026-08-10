@@ -54,8 +54,7 @@ main(int argc, char ** argv) {
     scope_config::indent_width = 2;
     scope_config::nesting_level_enabled = true;                    /* show "(N)" depth (default light-blue color) */
 
-    ArenaConfig logbuf_cfg { .name_ = "example.ex3f", .size_ = 64*1024 };
-    PrettySink pp(PpConfig().with_logbuf_config(logbuf_cfg), nullptr /*out*/);
+    PrettySink pp(PpConfig::colored(), nullptr /*out*/);
 
     ThreadLogState::log_set_sink(&pp);
     fib(3);
