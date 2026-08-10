@@ -6,7 +6,10 @@
 #include "DVariable.hpp"
 #include "exprtype.hpp"
 #include <xo/indentlog/print/quoted.hpp>
+#include <xo/ppsink/pretty_struct.hpp>   /* sink.pretty_struct(..), field(..) */
+#include <xo/ppsink/quoted.hpp>          /* xo::pp::quot */
 #include <cstddef>
+#include <string_view>
 
 namespace xo {
     using xo::facet::typeseq;
@@ -64,6 +67,20 @@ namespace xo {
                         , refrtag("name", quot(name))
                         , refrtag("typeref", typeref_)
                            );
+        }
+
+        void
+        DVariable::pretty(xo::pp::PpSink & sink) const
+        {
+            /* named locals: field() captures BY REFERENCE (pretty_struct.hpp) */
+            auto name = (name_
+                         ? std::string_view(*name_)
+                         : std::string_view(""));
+            const auto qname = xo::pp::quot(name);
+
+            sink.pretty_struct("DVariable",
+                               xo::pp::field("name", qname),
+                               xo::pp::field("typeref", typeref_));
         }
 
     } /*namespace scm*/

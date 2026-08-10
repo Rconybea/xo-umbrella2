@@ -2,8 +2,9 @@
  *
  * author: Roland Conybeare, Aug 2026
  *
- * Phase C verification for xo-expression2's printers.  TypeRef first: it is
- * the subsystem's only leaf, depending on nothing else here.
+ * Phase C verification for xo-expression2's printers, bottom-up.  TypeRef
+ * first: it is the subsystem's only leaf, depending on nothing else here.
+ * Then DVariable, whose :typeref field nests it.
  *
  * Follows the template in xo-object2/utest/printable_render.test.cpp -- see
  * .xo-backlog/xo-printable2/issues/01-aprintable-pretty-ppsink.md for why both
@@ -14,15 +15,26 @@
  * a print::ppdetail<TypeRef>; without one it would fall through Prettifier's
  * empty primary template to an operator<< it does not have.
  *
+ * DVariable, by contrast, IS a facet D-type: it is rendered here through
+ * with_facet<APrintable>::mkobj(), needs a collector to exist at all, and picks
+ * up the nested TypeRef through that Prettifier<TypeRef>.
+ *
  * Expectations are OBSERVED, never predicted.
  */
 
+#include "init_expression2.hpp"
 #include <xo/expression2/TypeRef.hpp>
+#include <xo/expression2/Variable.hpp>   /* convenience header: DVariable + its facet impls */
+#include <xo/gc/X1Collector.hpp>
+#include <xo/stringtable2/StringTable.hpp>
+#include <xo/alloc2/CollectorTypeRegistry.hpp>
+#include <xo/printable2/Printable.hpp>
+#include <xo/indentlog2/print/toppstr.hpp>
 #include <xo/reflect/Reflect.hpp>
 #include <xo/reflect/TypeDescr_ppdetail.hpp>
-#include <xo/indentlog2/print/toppstr.hpp>
-#include <xo/indentlog/print/ppstr.hpp>
+#include <xo/facet/FacetRegistry.hpp>
 #include <xo/testutil/UtestRehearser.hpp>
+#include <xo/indentlog/print/ppstr.hpp>
 #include <xo/ppsink/PpStyle.hpp>
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
@@ -34,7 +46,18 @@
 namespace xo {
     using xo::scm::TypeRef;
     using xo::scm::AType;
+    using xo::scm::DVariable;
+    using xo::scm::DUniqueString;
+    using xo::scm::StringTable;
+    using xo::mm::CollectorTypeRegistry;
+    using xo::mm::AAllocator;
+    using xo::mm::ACollector;
+    using xo::mm::DX1Collector;
+    using xo::mm::X1CollectorConfig;
+    using xo::mm::ArenaConfig;
+    using xo::print::APrintable;
     using xo::facet::obj;
+    using xo::facet::with_facet;
     using xo::reflect::Reflect;
 
     namespace ut {
@@ -42,6 +65,11 @@ namespace xo {
         using xo::pp::toppstr;
         using xo::pp::scope;
         using xo::pp::xtag;
+
+        /** DVariable's APrintable facet is registered by SetupExpression2; the
+         *  TypeRef cases do not need this, but obj<APrintable,DVariable> does.
+         **/
+        static InitEvidence s_init = InitSubsys<S_expression2_tag>::require();
 
         namespace {
             /** render @p x through the DEPRECATED two-pass protocol.
@@ -248,6 +276,182 @@ namespace xo {
                                  "    :metatype\n"
                                  "     atomic>>"),
             };
+
+            /** collector + string table for one DVariable case.
+             *
+             *  DVariable, unlike TypeRef, is a GC-allocated D-type: it needs an
+             *  allocator to exist at all, and its APrintable facet needs
+             *  SetupExpression2's registrations (see s_init below).  One
+             *  collector per case, so a case cannot see another's arena.
+             **/
+            struct VarFixture {
+                explicit VarFixture(const std::string & name)
+                    : gc_{X1CollectorConfig{
+                              .name_ = "printable_render." + name,
+                              .arena_config_ = ArenaConfig{
+                                  .size_ = 8192,
+                                  .store_header_flag_ = true},
+                              .object_types_z_ = 16384,
+                              .gc_trigger_v_{{4096, 4096}},
+                              .debug_flag_ = false}},
+                      table_{1024}
+                {
+                    CollectorTypeRegistry::instance()
+                        .install_types(with_facet<ACollector>::mkobj(&gc_));
+                }
+
+                obj<AAllocator> allocator() { return with_facet<AAllocator>::mkobj(&gc_); }
+
+                /** @p name nullptr means an ANONYMOUS variable -- name_ is a
+                 *  bare pointer with no non-null invariant, and legacy printed
+                 *  the empty string for it.
+                 **/
+                DVariable * make_var(const char * name, Kind kind) {
+                    const DUniqueString * sym = (name ? table_.intern(name) : nullptr);
+
+                    return DVariable::make(this->allocator(), sym, make_typeref(kind));
+                }
+
+                DX1Collector gc_;
+                StringTable table_;
+            };
+
+            /** MARGIN is the case variable, as for TypeRef above; NAME and the
+             *  nested TypeRef's state vary too, since DVariable's printer has a
+             *  branch on name_ and inherits TypeRef's on td_.
+             **/
+            struct Testcase_DVariable {
+                Testcase_DVariable(const char * name,
+                                   Kind kind,
+                                   std::uint32_t margin,
+                                   const char * label,
+                                   const char * expect_deprecated,
+                                   const char * expect_pretty)
+                    : name_{name}, kind_{kind}, margin_{margin}, label_{label},
+                      expect_deprecated_{expect_deprecated},
+                      expect_pretty_{expect_pretty} {}
+
+                /** nullptr -> anonymous variable **/
+                const char * name_;
+                Kind kind_;
+                std::uint32_t margin_;
+                /** distinguishes this case's arena **/
+                const char * label_;
+                /** OBSERVED via pretty_deprecated; delete at phase E **/
+                std::string expect_deprecated_;
+                /** OBSERVED via pretty; outlives phase E **/
+                std::string expect_pretty_;
+            };
+
+            static std::vector<Testcase_DVariable> s_dvariable_v = {
+                /* flat: identical, and the nested TypeRef arrives through
+                 * Prettifier<TypeRef> rather than through a facet -- DVariable
+                 * holds a TypeRef by value, not an obj<APrintable>.
+                 */
+                Testcase_DVariable("myvar", Kind::resolved, 200, "res200",
+                                   "<DVariable :name \"myvar\" :typeref"
+                                   " <TypeRef :id \"\" :td <TypeDescr :id N"
+                                   " :canonical_name double :complete 1"
+                                   " :metatype atomic>>>",
+                                   "<DVariable :name \"myvar\" :typeref"
+                                   " <TypeRef :id \"\" :td <TypeDescr :id N"
+                                   " :canonical_name double :complete 1"
+                                   " :metatype atomic>>>"),
+
+                /* REVIEWED DIVERGENCE, the same one TypeRef pinned, now visible
+                 * at TWO levels: the value of a broken field lands at
+                 * indent+indent_width (legacy, 2) vs indent+tag_value_offset
+                 * (ppsink, 1).  So the nested <TypeRef begins at column 4 vs 3,
+                 * and its own fields at 6 vs 4.  Layout only; same tokens.
+                 */
+                Testcase_DVariable("myvar", Kind::resolved, 80, "res80",
+                                   "<DVariable\n"
+                                   "  :name \"myvar\"\n"
+                                   "  :typeref\n"
+                                   "    <TypeRef\n"
+                                   "      :id \"\"\n"
+                                   "      :td <TypeDescr :id N :canonical_name"
+                                   " double :complete 1 :metatype atomic>>>",
+                                   "<DVariable\n"
+                                   "  :name \"myvar\"\n"
+                                   "  :typeref\n"
+                                   "   <TypeRef\n"
+                                   "    :id \"\"\n"
+                                   "    :td <TypeDescr :id N :canonical_name"
+                                   " double :complete 1 :metatype atomic>>>"),
+
+                /* the second half of that divergence: legacy's TypeDescr is a
+                 * FlatSink render with no break points to offer, so it stays on
+                 * one line however narrow the margin; ppsink breaks it.
+                 */
+                Testcase_DVariable("myvar", Kind::resolved, 40, "res40",
+                                   "<DVariable\n"
+                                   "  :name \"myvar\"\n"
+                                   "  :typeref\n"
+                                   "    <TypeRef\n"
+                                   "      :id \"\"\n"
+                                   "      :td\n"
+                                   "        <TypeDescr :id N :canonical_name"
+                                   " double :complete 1 :metatype atomic>>>",
+                                   "<DVariable\n"
+                                   "  :name \"myvar\"\n"
+                                   "  :typeref\n"
+                                   "   <TypeRef\n"
+                                   "    :id \"\"\n"
+                                   "    :td\n"
+                                   "     <TypeDescr\n"
+                                   "      :id N\n"
+                                   "      :canonical_name double\n"
+                                   "      :complete 1\n"
+                                   "      :metatype atomic>>>"),
+
+                /* unresolved typeref: short enough to stay flat at 200 ... */
+                Testcase_DVariable("myvar", Kind::unresolved, 200, "unres200",
+                                   "<DVariable :name \"myvar\" :typeref"
+                                   " <TypeRef :id \"t:1\" :td null>>",
+                                   "<DVariable :name \"myvar\" :typeref"
+                                   " <TypeRef :id \"t:1\" :td null>>"),
+
+                /* ... at 40 only the OUTER struct breaks, and the nested
+                 * TypeRef still fits its line.  Identical, which is the useful
+                 * part: the two stacks agree wherever nothing is forced.
+                 */
+                Testcase_DVariable("myvar", Kind::unresolved, 40, "unres40",
+                                   "<DVariable\n"
+                                   "  :name \"myvar\"\n"
+                                   "  :typeref <TypeRef :id \"t:1\" :td null>>",
+                                   "<DVariable\n"
+                                   "  :name \"myvar\"\n"
+                                   "  :typeref <TypeRef :id \"t:1\" :td null>>"),
+
+                /* at 20 the nested TypeRef breaks too -- the indent divergence
+                 * again, with no TypeDescr involved.
+                 */
+                Testcase_DVariable("myvar", Kind::unresolved, 20, "unres20",
+                                   "<DVariable\n"
+                                   "  :name \"myvar\"\n"
+                                   "  :typeref\n"
+                                   "    <TypeRef\n"
+                                   "      :id \"t:1\"\n"
+                                   "      :td null>>",
+                                   "<DVariable\n"
+                                   "  :name \"myvar\"\n"
+                                   "  :typeref\n"
+                                   "   <TypeRef\n"
+                                   "    :id \"t:1\"\n"
+                                   "    :td null>>"),
+
+                /* a null name_ renders as "" -- NOT as nothing, and NOT as
+                 * "null".  Both printers reach it through the same
+                 * (name_ ? string_view(*name_) : string_view("")) branch, so
+                 * this pins the branch rather than a formatting rule.
+                 */
+                Testcase_DVariable(nullptr, Kind::unresolved, 200, "anon200",
+                                   "<DVariable :name \"\" :typeref"
+                                   " <TypeRef :id \"t:1\" :td null>>",
+                                   "<DVariable :name \"\" :typeref"
+                                   " <TypeRef :id \"t:1\" :td null>>"),
+            };
         } /*namespace*/
 
         TEST_CASE("TypeRef-render", "[printable][TypeRef]")
@@ -264,6 +468,41 @@ namespace xo {
 
                     std::string deprecated = scrub_type_id(render_deprecated(tr, tc.margin_));
                     std::string pretty = scrub_type_id(render_pretty(tr, tc.margin_));
+
+                    log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_),
+                               xtag("deprecated", deprecated), xtag("pretty", pretty));
+
+                    REHEARSE(rh, pretty == tc.expect_pretty_);
+                    REHEARSE(rh, deprecated == tc.expect_deprecated_);
+                }
+            }
+        }
+
+        TEST_CASE("DVariable-render", "[printable][DVariable]")
+        {
+            REQUIRE(s_init.evidence());
+
+            UtestRehearser rh;
+
+            for (auto _ : rh) {
+                scope log(XO_DEBUG2_(rh.enable_debug(), "DVariable-render"));
+
+                for (std::size_t i_tc = 0, n_tc = s_dvariable_v.size(); i_tc < n_tc; ++i_tc) {
+                    const auto & tc = s_dvariable_v[i_tc];
+
+                    VarFixture fx(tc.label_);
+
+                    DVariable * var = fx.make_var(tc.name_, tc.kind_);
+                    REQUIRE(var != nullptr);
+
+                    /* the facet, not the raw pointer: this is how a DVariable
+                     * is printed in anger, and it is the path phase D removes
+                     * IPrintable::pretty(ppindentinfo) from.
+                     */
+                    auto p = with_facet<APrintable>::mkobj(var);
+
+                    std::string deprecated = scrub_type_id(render_deprecated(p, tc.margin_));
+                    std::string pretty = scrub_type_id(render_pretty(p, tc.margin_));
 
                     log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_),
                                xtag("deprecated", deprecated), xtag("pretty", pretty));
