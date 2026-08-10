@@ -21,29 +21,28 @@
 #include <unistd.h> // for STDIN_FILENO on OSX
 
 namespace xo {
-
-    namespace {
-        /** render @p expr with line breaking, as legacy ppstate_standalone did **/
-        template <typename T>
-        void render_expr(std::ostream & os, const T & expr) {
-            static int seq = 0;
-
-            xo::mm::ArenaConfig logbuf_cfg { .name_ = "schematika." + std::to_string(++seq),
-                                             .size_ = 64*1024 };
-
-            xo::pp::PpConfig cfg = xo::pp::PpConfig().with_logbuf_config(logbuf_cfg);
-
-            xo::pp::PrettySink pp(cfg, nullptr);
-            pp.pp(expr);
-
-            os << pp.output() << std::endl;
-        }
-    } /*namespace*/
+    using xo::pp::PrettySink;
+    using xo::pp::PpConfig;
+    using xo::pp::PpStyle;
     using xo::pp::scope;
     using xo::gc::IAlloc;
     using xo::gc::GC;
     using replxx::Replxx;
     using namespace std;
+
+    namespace {
+        /** render @p expr with line breaking, as legacy ppstate_standalone did **/
+        template <typename T>
+        void render_expr(std::ostream & os, const T & expr) {
+            auto pps = PrettySink(PpConfig::scratch_aux("schematika.", 135, PpStyle::colored()),
+                                  os.rdbuf());
+
+            pps.pp(expr);
+            os << std::endl;
+
+            //os << pp.output() << std::endl;
+        }
+    } /*namespace*/
 
     namespace scm {
 
@@ -193,6 +192,9 @@ namespace xo {
             span_type input;
             std::size_t parser_stack_size = 0;
 
+            PrettySink pps(PpConfig::scratch_aux("skpp.", 135, PpStyle::colored()),
+                           cout.rdbuf());
+
             if (config_.welcome_flag_)
                 welcome(cerr);
 
@@ -269,7 +271,9 @@ namespace xo {
             auto [expr, _1, _2, error] = rdr.read_expr(input, true /*eof*/);
 
             if (expr) {
-                render_expr(cout, rp<Expression>(expr));
+                pps.pp(rp<Expression>(expr));
+                pps.put("\n");
+                //render_expr(cout, rp<Expression>(expr));
             } else if (error.is_error()) {
                 cout << "parsing error (detected in " << error.src_function() << "): " << endl;
                 error.report(cout);
