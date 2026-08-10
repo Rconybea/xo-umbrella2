@@ -14,6 +14,8 @@
 #include <xo/alloc2/GCObjectVisitor.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/reflect/Reflect.hpp>
+#include <xo/reflect/TypeDescr_pp.hpp>   /* Prettifier<TypeDescr> for the :td field */
+#include <xo/ppsink/pretty_struct.hpp>   /* sink.pretty_struct(..), field(..) */
 #include <xo/indentlog/print/pretty.hpp> /* ppstate -- was arriving via xo/reflect */
 #include <string_view>
 #include <tuple>
@@ -131,12 +133,8 @@ namespace xo {
 
             bool pretty_deprecated(const ppindentinfo & ppii) const;
 
-            /* PHASE B STUB -- not yet converted by phase C.  Renders a marker
-             * rather than nothing, so an unconverted printer is VISIBLE in
-             * output instead of silently absent.
-             * See .xo-backlog/xo-printable2/issues/01-aprintable-pretty-ppsink.md
-             */
-            void pretty(xo::pp::PpSink & sink) const { sink.put("STUB:Primitive"); }
+            /** structured pretty-printing: render this primitive into @p sink **/
+            void pretty(xo::pp::PpSink & sink) const;
 
             ///@}
             /** @defgroup scm-primitive-gcobject-facet **/
@@ -195,6 +193,16 @@ namespace xo {
                         refrtag("name", name_),
                         refrtag("td", fn_td_),
                         refrtag("fn", fn_));
+        }
+
+        template <typename Fn>
+        void
+        Primitive<Fn>::pretty(xo::pp::PpSink & sink) const
+        {
+            sink.pretty_struct("Primitive<Fn>",
+                               xo::pp::field("name", name_),
+                               xo::pp::field("td", fn_td_),
+                               xo::pp::field("fn", fn_));
         }
 
         template <typename Fn>
