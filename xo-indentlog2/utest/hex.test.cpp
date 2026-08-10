@@ -54,7 +54,7 @@ namespace ut {
         std::string
         render(std::uint32_t margin, const hex_view & x)
         {
-            return toppstr(PpConfig::scratch_colored(margin), x);
+            return toppstr(PpConfig::scratch_plain(margin), x);
         }
 
         /** a buffer of @p z bytes, values 0, 1, 2, .. **/

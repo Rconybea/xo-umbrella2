@@ -33,8 +33,7 @@ namespace xo::pp {
     /** render @p args (concatenated, no separator) through a PrettySink
      *  configured by @p cfg, and return the result.
      *
-     *  @p cfg supplies the margins and arena size; its logbuf NAME is replaced,
-     *  see detail::toppstr_logbuf_config.
+     *  @p cfg supplies the margins and arena size.
      *
      *  Caller may use PpConfig::plain() / PpConfig::colored() for example
      **/

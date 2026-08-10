@@ -44,7 +44,7 @@ namespace ut {
     template <typename Fn>
     static std::string
     pretty_of(std::uint32_t margin, Fn && fn) {
-        PrettySink pp(PpConfig::scratch_colored(margin), nullptr /*out*/);
+        PrettySink pp(PpConfig::scratch_plain(margin), nullptr /*out*/);
         fn(pp);
         return std::string(pp.output());
     }
@@ -57,7 +57,7 @@ namespace ut {
         REQUIRE(flat_of([](PpSink & s) { pretty(s, FunctionStyle::simple); }) == "simple");
 
         /* atomic: same through the pretty sink */
-        REQUIRE(pretty_of(0, [](PpSink & s) { pretty(s, FunctionStyle::simple); }) == "simple");
+        REQUIRE(pretty_of(135, [](PpSink & s) { pretty(s, FunctionStyle::simple); }) == "simple");
     }
 
     TEST_CASE("Pretty.vector.int", "[Pretty][PrettyVector]")

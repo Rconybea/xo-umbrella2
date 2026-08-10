@@ -40,7 +40,7 @@ namespace xo {
         template <typename T>
         std::string
         render(std::uint32_t margin, const T & x) {
-            return toppstr(PpConfig::scratch_colored(margin), x);
+            return toppstr(PpConfig::scratch_plain(margin), x);
         }
     } /*namespace*/
 

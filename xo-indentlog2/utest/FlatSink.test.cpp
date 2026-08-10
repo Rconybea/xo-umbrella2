@@ -129,7 +129,7 @@ namespace ut {
          *    exceeds every string here, so all groups fit and pretty == flat.
          */
 
-        PrettySink pp(PpConfig::scratch_colored(135), nullptr /*out*/);
+        PrettySink pp(PpConfig::scratch_plain(135), nullptr /*out*/);
 
         flatsink_drive(pp, tc.step_v_);
 
@@ -160,7 +160,7 @@ namespace ut {
             flatsink_drive(sink, step_v);
         }
 
-        PrettySink pp(PpConfig::scratch_colored(4),
+        PrettySink pp(PpConfig::scratch_plain(4),
                       nullptr /*out*/);
 
         flatsink_drive(pp, step_v);

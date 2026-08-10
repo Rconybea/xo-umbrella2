@@ -35,7 +35,7 @@ namespace ut {
     template <typename Fn>
     static std::string scoped_pretty(std::uint32_t margin, Fn && fn) {
         std::ostringstream oss;
-        PrettySink pp(PpConfig::scratch_plain(margin ? margin : 135), oss.rdbuf());
+        PrettySink pp(PpConfig::scratch_plain(margin), oss.rdbuf());
 
         ThreadLogState::log_set_sink(&pp);
         fn();
@@ -62,7 +62,7 @@ namespace ut {
         /* wide (default) margin: nothing breaks, so pretty output matches the
          * flat output produced by the same scope code in xo-ppsink's test.
          */
-        REQUIRE(scoped_pretty(0, nested_scopes) ==
+        REQUIRE(scoped_pretty(135, nested_scopes) ==
                 "+(0) outer\n"
                 "  hello\n"
                 "  +(1) inner\n"

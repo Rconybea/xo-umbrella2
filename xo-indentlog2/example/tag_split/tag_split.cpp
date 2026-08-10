@@ -34,7 +34,7 @@ using xo::mm::ArenaConfig;
  */
 static std::string
 render_tag(std::uint32_t margin) {
-    PrettySink pp(PpConfig::scratch_colored(margin ? margin : 135), nullptr /*out*/);
+    PrettySink pp(PpConfig::scratch_colored(margin), nullptr /*out*/);
     pretty(pp, tag("coordinate", 12345));
     return std::string(pp.output());
 }

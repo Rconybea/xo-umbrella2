@@ -166,7 +166,7 @@ namespace ut {
      */
     TEST_CASE("PrettySink.stream_chained", "[PrettySink]")
     {
-        PrettySink pp(PpConfig::colored(), nullptr);
+        PrettySink pp(PpConfig::plain(), nullptr);
 
         {
             auto ins = pp.stream_open(1);

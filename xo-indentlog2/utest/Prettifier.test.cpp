@@ -82,7 +82,7 @@ namespace ut {
      **/
     template <typename Fn>
     static std::string pretty_of(std::uint32_t margin, Fn && fn) {
-        PrettySink pp(PpConfig::scratch_colored(margin), nullptr);
+        PrettySink pp(PpConfig::scratch_plain(margin), nullptr);
         fn(pp);
         return std::string(pp.output());
     }
