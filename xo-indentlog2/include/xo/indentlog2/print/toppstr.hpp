@@ -57,7 +57,7 @@ namespace xo::pp {
         requires (!std::same_as<std::remove_cvref_t<T0>, PpConfig>)
     std::string
     toppstr(const T0 & a0, const Ts &... args) {
-        return toppstr(PpConfig::plain(), a0, args...);
+        return toppstr(PpConfig::colored(), a0, args...);
     }
 } /*namespace xo::pp*/
 

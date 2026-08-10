@@ -56,8 +56,8 @@ namespace ut {
          **/
         template <typename T>
         std::string render(std::uint32_t margin, const T & x) {
-            PrettySink pp = PrettySink::scratch("utest.expression.pretty.",
-                                                64*1024, margin);
+            PrettySink pp = PrettySink::scratch_plain("utest.expression.pretty.",
+                                                      64*1024, margin);
             pp.pp(x);
             return std::string(pp.output());
         }

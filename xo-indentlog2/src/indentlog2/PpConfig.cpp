@@ -115,21 +115,27 @@ namespace xo {
         }
 
         PpConfig
-        PpConfig::scratch(uint32_t margin)
+        PpConfig::scratch_plain(uint32_t margin)
         {
             return scratch_aux("anon", margin, PpStyle::plain());
         }
 
         PpConfig
+        PpConfig::scratch_colored(uint32_t margin)
+        {
+            return scratch_aux("anon", margin, PpStyle::colored());
+        }
+
+        PpConfig
         PpConfig::plain()
         {
-            return scratch(135 /*soft_right_margin*/);
+            return scratch_plain(135 /*soft_right_margin*/);
         }
 
         PpConfig
         PpConfig::colored()
         {
-            return scratch_aux("anon", 135 /*soft_right_margin*/, PpStyle::colored());
+            return scratch_colored(135 /*soft_right_margin*/);
         }
 
         PpConfig

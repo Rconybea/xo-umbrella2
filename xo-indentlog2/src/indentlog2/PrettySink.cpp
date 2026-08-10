@@ -33,13 +33,22 @@ namespace xo {
         }
 
         PrettySink
-        PrettySink::scratch(std::string basename,
-                            uint32_t size,
-                            uint32_t margin)
+        PrettySink::scratch_plain(std::string basename,
+                                  uint32_t size,
+                                  uint32_t margin)
+        {
+            return scratch_aux(basename, size, margin, PpStyle::plain());
+        }
+
+        PrettySink
+        PrettySink::scratch_aux(std::string basename,
+                                uint32_t size,
+                                uint32_t margin,
+                                const PpStyle & style)
         {
             return PrettySink(PpConfig::scratch_aux(basename,
                                                     margin,
-                                                    PpStyle::plain()).with_logbuf_size(size), nullptr);
+                                                    style).with_logbuf_size(size), nullptr);
         }
 
         void

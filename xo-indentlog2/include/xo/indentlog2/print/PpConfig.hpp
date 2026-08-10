@@ -98,8 +98,10 @@ namespace xo {
             static PpConfig plain();
             /** colored + anonymous **/
             static PpConfig colored();
-            /** config for a temporary pretty sink. useful in unit tests **/
-            static PpConfig scratch(uint32_t margin);
+            /** config for a temporary pretty sink. plain.. useful in unit tests **/
+            static PpConfig scratch_plain(uint32_t margin);
+            /** config for a temporary pretty sink. colored. useful in unit tests **/
+            static PpConfig scratch_colored(uint32_t margin);
             /** config for a temporary pretty sink. useful in unit tests **/
             static PpConfig scratch_aux(const std::string & basename, uint32_t margin, const PpStyle & style);
 

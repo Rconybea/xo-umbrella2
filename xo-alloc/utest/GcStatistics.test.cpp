@@ -40,9 +40,9 @@ namespace xo {
         template <typename T>
         std::string
         toppstr(const T & x) {
-            auto pps = PrettySink::scratch("utest.alloc.pretty.",
-                                           64*1024,
-                                           135 /*soft_right_margin*/);
+            auto pps = PrettySink::scratch_plain("utest.alloc.pretty.",
+                                                 64*1024,
+                                                 135 /*soft_right_margin*/);
 
             pps.pp(x);
 

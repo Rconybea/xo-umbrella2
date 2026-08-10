@@ -109,7 +109,7 @@ namespace xo {
                  * the config rather than by flipping a global, so it cannot
                  * leak into whatever runs next.
                  */
-                return xo::pp::toppstr(PpConfig::scratch(margin), x);
+                return xo::pp::toppstr(PpConfig::scratch_plain(margin), x);
             }
 
             template <typename V>

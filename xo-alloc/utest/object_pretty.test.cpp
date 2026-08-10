@@ -27,6 +27,8 @@
 
 namespace xo {
     using xo::gc::ArenaAlloc;
+    using xo::pp::PrettySink;
+    using xo::pp::PpConfig;
 
     namespace {
         /** render @p fn's output through a PrettySink with soft right margin
@@ -42,14 +44,8 @@ namespace xo {
         render(std::uint32_t margin, Fn && fn) {
             static int seq = 0;
 
-            xo::mm::ArenaConfig logbuf_cfg {
-                .name_ = "utest.alloc.objpretty." + std::to_string(++seq),
-                .size_ = 64*1024 };
-
-            xo::pp::PrettySink pps(xo::pp::PpConfig()
-                                   .with_logbuf_config(logbuf_cfg)
-                                   .with_soft_right_margin(margin),
-                                   nullptr);
+            PrettySink pps(PpConfig::scratch_colored(margin),
+                           nullptr);
 
             fn(pps);
 

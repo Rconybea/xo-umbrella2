@@ -34,7 +34,7 @@ namespace xo {
 
             std::string
             render_at(std::uint32_t margin) {
-                return toppstr(PpConfig::scratch(margin), s_value);
+                return toppstr(PpConfig::scratch_plain(margin), s_value);
             }
 
             struct Testcase_Toppstr {
@@ -139,6 +139,35 @@ namespace xo {
                 REQUIRE(toppstr(ppc, xo::pp::field("k", x))
                         == ":k 1");
             }
+        }
+
+        TEST_CASE("toppstr-no-config-is-colored", "[toppstr][PpStyle]") {
+            /* The no-config overload picks its OWN config, so nothing else in
+             * this file pins what style that is -- every other test passes one
+             * explicitly, in order to pin text.  Without this case the overload
+             * can be switched between PpConfig::plain() and PpConfig::colored()
+             * and the suite stays green: exactly what happened in 522799d7,
+             * where it silently became plain().  See
+             * .xo-backlog/xo-indentlog2/issues/05.
+             *
+             * RC's call: a bare toppstr(x) COLOURS, matching toppstr2 and the
+             * PpConfig-taking overload, so migrating a call site off legacy
+             * never loses colour by itself.
+             *
+             * Values OBSERVED, not predicted.  Note this is deliberately
+             * independent of PpStyle::default_style(), which the utest main has
+             * replaced with plain() -- PpConfig::colored() names its colours.
+             */
+            int x = 1;   /* named: field() captures by reference */
+
+            REQUIRE(toppstr(xo::pp::tag("k", x)) == "\033[38;5;245m:k\033[0m 1");
+            REQUIRE(toppstr(xo::pp::field("k", x)) == "\033[33m:k\033[0m 1");
+
+            /* ... and it is PpConfig::colored() specifically that it picks */
+            REQUIRE(toppstr(xo::pp::tag("k", x))
+                    == toppstr(PpConfig::colored(), xo::pp::tag("k", x)));
+            REQUIRE(toppstr(xo::pp::field("k", x))
+                    == toppstr(PpConfig::colored(), xo::pp::field("k", x)));
         }
 
         TEST_CASE("toppstr-overloads", "[toppstr]") {

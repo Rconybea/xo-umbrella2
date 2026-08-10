@@ -170,7 +170,7 @@ namespace ut {
                 CHECK(ss.str() == string(tc.expected_));
 
                 /* OBSERVE the new protocol at the same margin */
-                std::string modern = toppstr(PpConfig::scratch(80), l0_po);
+                std::string modern = toppstr(PpConfig::scratch_plain(80), l0_po);
                 INFO("i_tc=" << i_tc << " deprecated=[" << ss.str() << "] pretty=[" << modern << "]");
                 CHECK(modern == tc.expect_pretty_);
             } catch (std::exception & ex) {

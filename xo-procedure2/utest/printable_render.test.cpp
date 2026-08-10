@@ -91,7 +91,7 @@ namespace xo {
             template <typename T>
             std::string
             render_pretty(const T & x, std::uint32_t margin) {
-                return toppstr(PpConfig::scratch(margin), x);
+                return toppstr(PpConfig::scratch_plain(margin), x);
             }
 
             /** replace the digits of ":id <n>" with "N".

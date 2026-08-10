@@ -31,9 +31,14 @@ namespace xo {
             PrettySink(const PpConfig & cfg, std::streambuf * out);
 
             /** create temporary pretty sink, intended for a unit test **/
-            static PrettySink scratch(std::string basename,
-                                      uint32_t logbuf_z,
-                                      uint32_t margin);
+            static PrettySink scratch_plain(std::string basename,
+                                            uint32_t logbuf_z,
+                                            uint32_t margin);
+            /** create temporary pretty sink **/
+            static PrettySink scratch_aux(std::string basename,
+                                          uint32_t logbuf_z,
+                                          uint32_t margin,
+                                          const PpStyle & style);
 
             /** attach (or detach, with nullptr) a streambuf that completed
              *  records are drained to (e.g. @c std::clog.rdbuf()).
