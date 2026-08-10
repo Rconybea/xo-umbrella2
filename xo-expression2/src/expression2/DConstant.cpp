@@ -12,6 +12,7 @@
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/facet/obj.hpp>
 #include <xo/reflect/Reflect.hpp>
+#include <xo/ppsink/pretty_struct.hpp>   /* sink.pretty_struct(..), field(..) */
 #include <xo/reflectutil/typeseq.hpp>
 
 namespace xo {
@@ -98,6 +99,29 @@ namespace xo {
                         refrtag("value_.tseq", value_._typeseq()),
                         refrtag("value.tseq", value_pr._typeseq()),
                         refrtag("value", value_pr));
+        }
+
+        void
+        DConstant::pretty(xo::pp::PpSink & sink) const
+        {
+            /* named locals: field() captures BY REFERENCE (pretty_struct.hpp),
+             * and both typeseqs are temporaries returned by value.
+             */
+            obj<APrintable> value_pr
+                = FacetRegistry::instance().variant<APrintable,AGCObject>(value_);
+
+            /* typeseq has no Prettifier<> and no ppdetail<> -- only an
+             * operator<< (xo-reflectutil/typeseq.hpp:115), so these two fields
+             * take ppsink's leaf fallback, as Binding does in DVarRef.
+             * Rendering is the bare seqno either way.
+             */
+            const typeseq data_tseq = value_._typeseq();
+            const typeseq facet_tseq = value_pr._typeseq();
+
+            sink.pretty_struct("DConstant",
+                               xo::pp::field("value_.tseq", data_tseq),
+                               xo::pp::field("value.tseq", facet_tseq),
+                               xo::pp::field("value", value_pr));
         }
     } /*namespace scm*/
 } /*namespace xo*/

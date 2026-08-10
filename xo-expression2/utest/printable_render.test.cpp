@@ -5,7 +5,7 @@
  * Phase C verification for xo-expression2's printers, bottom-up.  TypeRef
  * first: it is the subsystem's only leaf, depending on nothing else here.
  * Then DVariable, whose :typeref field nests it, then DVarRef, then
- * DGlobalSymtab.
+ * DGlobalSymtab, then DConstant.
  *
  * Follows the template in xo-object2/utest/printable_render.test.cpp -- see
  * .xo-backlog/xo-printable2/issues/01-aprintable-pretty-ppsink.md for why both
@@ -24,10 +24,13 @@
  */
 
 #include "init_expression2.hpp"
+#include <xo/expression2/Constant.hpp>      /* likewise DConstant */
 #include <xo/expression2/GlobalSymtab.hpp>  /* likewise DGlobalSymtab */
 #include <xo/expression2/TypeRef.hpp>
 #include <xo/expression2/VarRef.hpp>       /* likewise DVarRef */
 #include <xo/expression2/Variable.hpp>     /* convenience header: DVariable + its facet impls */
+#include <xo/object2/Float.hpp>
+#include <xo/object2/Integer.hpp>
 #include <xo/gc/X1Collector.hpp>
 #include <xo/stringtable2/StringTable.hpp>
 #include <xo/alloc2/arena/IAllocator_DArena.hpp>
@@ -45,7 +48,10 @@
 #include <xo/ppsink/scope_macros.hpp>
 #include <catch2/catch.hpp>
 #include <cstdint>
+#include <cstdlib>
+#include <cctype>
 #include <string>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -55,6 +61,9 @@ namespace xo {
     using xo::scm::DVariable;
     using xo::scm::DVarRef;
     using xo::scm::DGlobalSymtab;
+    using xo::scm::DConstant;
+    using xo::scm::DFloat;
+    using xo::scm::DInteger;
     using xo::scm::Binding;
     using xo::scm::DUniqueString;
     using xo::scm::StringTable;
@@ -140,6 +149,96 @@ namespace xo {
                 }
 
                 return s;
+            }
+
+            /** index of the digits belonging to the ".tseq" at/after @p from,
+             *  or npos.  @p n_digit receives their count.
+             *
+             *  NB the separator is whitespace, not necessarily a SPACE: at a
+             *  narrow margin the value breaks onto its own line, so ".tseq" is
+             *  followed by "\n" plus indent.  Keying on ".tseq " silently
+             *  scrubbed nothing in exactly those cases -- caught because the
+             *  broken-layout expectations then failed.
+             **/
+            std::size_t find_tseq_digits(const std::string & s, std::size_t from,
+                                         std::size_t * n_digit) {
+                const std::string key = ".tseq";
+
+                for (std::size_t i = s.find(key, from); i != std::string::npos;
+                     i = s.find(key, i+1))
+                {
+                    std::size_t b = i + key.size();
+
+                    while (b < s.size() && ::isspace((unsigned char)s[b]))
+                        ++b;
+
+                    std::size_t e = b;
+
+                    while (e < s.size() && ::isdigit((unsigned char)s[e]))
+                        ++e;
+
+                    if (e > b) {
+                        *n_digit = e - b;
+                        return b;
+                    }
+                }
+
+                return std::string::npos;
+            }
+
+            /** replace each ".tseq" value with "N".
+             *
+             *  Same reasoning as scrub_type_id, different counter: a typeseq is
+             *  handed out by xo::reflect::typeseq::id<T>() on first use, and in
+             *  practice that is subsystem registration order
+             *  (SetupObject2::register_facets etc).  Stable today -- DInteger
+             *  is 9 and DFloat 10 on every run -- but it is registration order,
+             *  not a property of DConstant, so pinning the digits would make an
+             *  unrelated object2 registration break this test.
+             *
+             *  What the digits actually SAY is checked separately, in
+             *  DConstant-tseq-fields below.
+             **/
+            std::string scrub_tseq(std::string s) {
+                std::size_t n_digit = 0;
+
+                for (std::size_t i = find_tseq_digits(s, 0, &n_digit);
+                     i != std::string::npos;
+                     i = find_tseq_digits(s, i+1, &n_digit))
+                {
+                    s.replace(i, n_digit, "N");
+                }
+
+                return s;
+            }
+
+            /** the first ".tseq" value in @p s, as a number; -1 if there is
+             *  none.  Used only by DConstant-tseq-fields.
+             **/
+            long first_tseq(const std::string & s) {
+                std::size_t n_digit = 0;
+                std::size_t i = find_tseq_digits(s, 0, &n_digit);
+
+                if (i == std::string::npos)
+                    return -1;
+
+                return ::strtol(s.c_str() + i, nullptr, 10);
+            }
+
+            /** the SECOND ".tseq" value in @p s; -1 if there is none **/
+            long second_tseq(const std::string & s) {
+                std::size_t n_digit = 0;
+                std::size_t i = find_tseq_digits(s, 0, &n_digit);
+
+                if (i == std::string::npos)
+                    return -1;
+
+                std::size_t j = find_tseq_digits(s, i+1, &n_digit);
+
+                if (j == std::string::npos)
+                    return -1;
+
+                return ::strtol(s.c_str() + j, nullptr, 10);
             }
 
             /** which of a TypeRef's two states to build.
@@ -375,6 +474,30 @@ namespace xo {
                 }
 
                 obj<AAllocator> aux_allocator() { return with_facet<AAllocator>::mkobj(&aux_); }
+
+                /** a DConstant boxing @p x.  Integer and float take different
+                 *  paths through DConstant::_lookup_td, and render different
+                 *  D-type typeseqs, so both are cases.
+                 **/
+                template <typename T>
+                DConstant * make_constant(T x) {
+                    /* if constexpr, not a ternary: the two box<> calls return
+                     * different obj<> specializations with no common type.
+                     */
+                    if constexpr (std::is_integral_v<T>) {
+                        obj<AGCObject> value
+                            = DInteger::box<AGCObject>(this->allocator(),
+                                                       static_cast<long>(x));
+
+                        return DConstant::_make(this->allocator(), value);
+                    } else {
+                        obj<AGCObject> value
+                            = DFloat::box<AGCObject>(this->allocator(),
+                                                     static_cast<double>(x));
+
+                        return DConstant::_make(this->allocator(), value);
+                    }
+                }
 
                 DX1Collector gc_;
                 /** non-GC memory for the symbol table's hash maps **/
@@ -734,6 +857,94 @@ namespace xo {
                                        "<DGlobalSymtab :nvar 1 :var_capacity 64"
                                        " :ntype 0 :type_capacity 64>"),
             };
+
+            /** DConstant's :value nests an object2 leaf (DInteger / DFloat),
+             *  both already converted -- so this is the first expression2
+             *  printer nesting a printer from ANOTHER subsystem.
+             *
+             *  is_int_ picks the boxed type; the two .tseq fields are scrubbed
+             *  (see scrub_tseq), so what varies visibly is the :value leaf and
+             *  the layout.
+             **/
+            struct Testcase_DConstant {
+                Testcase_DConstant(bool is_int,
+                                   std::uint32_t margin,
+                                   const char * label,
+                                   const char * expect_deprecated,
+                                   const char * expect_pretty)
+                    : is_int_{is_int}, margin_{margin}, label_{label},
+                      expect_deprecated_{expect_deprecated},
+                      expect_pretty_{expect_pretty} {}
+
+                bool is_int_;
+                std::uint32_t margin_;
+                const char * label_;
+                /** OBSERVED via pretty_deprecated; delete at phase E **/
+                std::string expect_deprecated_;
+                /** OBSERVED via pretty; outlives phase E **/
+                std::string expect_pretty_;
+            };
+
+            static std::vector<Testcase_DConstant> s_constant_v = {
+                /* flat.  :value 42 comes from DInteger's own converted printer,
+                 * reached through the APrintable facet variant -- so this pins
+                 * cross-subsystem nesting, not just DConstant's frame.
+                 */
+                Testcase_DConstant(true, 200, "int.200",
+                                   "<DConstant :value_.tseq N :value.tseq N :value 42>",
+                                   "<DConstant :value_.tseq N :value.tseq N :value 42>"),
+
+                /* struct breaks, all three values still fit their lines */
+                Testcase_DConstant(true, 44, "int.44",
+                                   "<DConstant\n"
+                                   "  :value_.tseq N\n"
+                                   "  :value.tseq N\n"
+                                   "  :value 42>",
+                                   "<DConstant\n"
+                                   "  :value_.tseq N\n"
+                                   "  :value.tseq N\n"
+                                   "  :value 42>"),
+
+                /* margin 14: the two long field names push their values down --
+                 * the known column divergence (legacy 4, ppsink 3) -- while
+                 * :value 42 stays put.  Same shape DGlobalSymtab showed.
+                 */
+                Testcase_DConstant(true, 14, "int.14",
+                                   "<DConstant\n"
+                                   "  :value_.tseq\n"
+                                   "    N\n"
+                                   "  :value.tseq\n"
+                                   "    N\n"
+                                   "  :value 42>",
+                                   "<DConstant\n"
+                                   "  :value_.tseq\n"
+                                   "   N\n"
+                                   "  :value.tseq\n"
+                                   "   N\n"
+                                   "  :value 42>"),
+
+                /* a float constant: DFloat's Prettifier renders 2.5, and the
+                 * boxed type is different (which scrub_tseq hides here and
+                 * DConstant-tseq-fields checks instead).
+                 */
+                Testcase_DConstant(false, 200, "flt.200",
+                                   "<DConstant :value_.tseq N :value.tseq N :value 2.5>",
+                                   "<DConstant :value_.tseq N :value.tseq N :value 2.5>"),
+
+                Testcase_DConstant(false, 14, "flt.14",
+                                   "<DConstant\n"
+                                   "  :value_.tseq\n"
+                                   "    N\n"
+                                   "  :value.tseq\n"
+                                   "    N\n"
+                                   "  :value 2.5>",
+                                   "<DConstant\n"
+                                   "  :value_.tseq\n"
+                                   "   N\n"
+                                   "  :value.tseq\n"
+                                   "   N\n"
+                                   "  :value 2.5>"),
+            };
         } /*namespace*/
 
         TEST_CASE("TypeRef-render", "[printable][TypeRef]")
@@ -877,6 +1088,79 @@ namespace xo {
                     REHEARSE(rh, deprecated == tc.expect_deprecated_);
                 }
             }
+        }
+
+        TEST_CASE("DConstant-render", "[printable][DConstant]")
+        {
+            REQUIRE(s_init.evidence());
+
+            UtestRehearser rh;
+
+            for (auto _ : rh) {
+                scope log(XO_DEBUG2_(rh.enable_debug(), "DConstant-render"));
+
+                for (std::size_t i_tc = 0, n_tc = s_constant_v.size(); i_tc < n_tc; ++i_tc) {
+                    const auto & tc = s_constant_v[i_tc];
+
+                    VarFixture fx(tc.label_);
+
+                    DConstant * k = (tc.is_int_
+                                     ? fx.make_constant(42L)
+                                     : fx.make_constant(2.5));
+                    REQUIRE(k != nullptr);
+
+                    auto p = with_facet<APrintable>::mkobj(k);
+
+                    std::string deprecated = scrub_tseq(render_deprecated(p, tc.margin_));
+                    std::string pretty = scrub_tseq(render_pretty(p, tc.margin_));
+
+                    log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_),
+                               xtag("deprecated", deprecated), xtag("pretty", pretty));
+
+                    REHEARSE(rh, pretty == tc.expect_pretty_);
+                    REHEARSE(rh, deprecated == tc.expect_deprecated_);
+                }
+            }
+        }
+
+        /** what scrub_tseq hides, checked without depending on the numbers.
+         *
+         *  DConstant prints TWO typeseqs -- the boxed D-type's
+         *  (value_._typeseq()) and the APrintable facet obj's
+         *  (value_pr._typeseq()).  Two fields only earn their place if they can
+         *  disagree.  **Observed 2026-08-10: they always agree**, because an
+         *  obj<> carries the D-type's typeseq whichever facet it is viewed
+         *  through, and FacetRegistry::variant() does not change the D-type.
+         *
+         *  So `:value.tseq` is REDUNDANT in the rendering.  Recorded here as a
+         *  pinned property rather than left implicit: a mutation replacing
+         *  value_pr._typeseq() with value_._typeseq() passes every other test
+         *  in this file, and that is a fact about the printer, not a gap in the
+         *  suite.  Dropping the field would be an output-visible change and
+         *  wants its own commit -- see
+         *  .xo-backlog/xo-printable2/issues/01-aprintable-pretty-ppsink.md
+         **/
+        TEST_CASE("DConstant-tseq-fields", "[printable][DConstant]")
+        {
+            REQUIRE(s_init.evidence());
+
+            VarFixture fx_int("tseq.int");
+            VarFixture fx_flt("tseq.flt");
+
+            std::string s_int
+                = render_pretty(with_facet<APrintable>::mkobj(fx_int.make_constant(42L)), 200);
+            std::string s_flt
+                = render_pretty(with_facet<APrintable>::mkobj(fx_flt.make_constant(2.5)), 200);
+
+            CHECK(scrub_tseq(s_int) == "<DConstant :value_.tseq N :value.tseq N :value 42>");
+            CHECK(first_tseq(s_int) > 0);
+
+            /* the two fields agree -- the redundancy described above */
+            CHECK(first_tseq(s_int) == second_tseq(s_int));
+            CHECK(first_tseq(s_flt) == second_tseq(s_flt));
+
+            /* ... and the boxed type IS genuinely discriminated between cases */
+            CHECK(first_tseq(s_int) != first_tseq(s_flt));
         }
     } /*namespace ut*/
 } /*namespace xo*/
