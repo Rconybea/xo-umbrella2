@@ -11,7 +11,9 @@
 
 #include "PpSink.hpp"
 #include <charconv>
+#include <concepts>
 #include <string_view>
+#include <type_traits>
 
 namespace xo::pp {
     /** @brief per-type opt-in to structured pretty-printing.
@@ -36,18 +38,78 @@ namespace xo::pp {
         Prettifier<T>::print(sink, x);
     };
 
-    /** scalar leaf: render an int via std::to_chars (ostream-free).
+    /** integer types that should render as NUMBERS.
      *
-     *  A signed int is at most 11 chars ("-2147483648"); buf[16] is ample.
+     *  Deliberately not simply std::integral.  `char`, `signed char`,
+     *  `unsigned char` and the char8/16/32/wchar types are integral, but
+     *  operator<< renders them as CHARACTERS -- measured 2026-08-10:
+     *  `'A'`, `(signed char)65` and `(unsigned char)65` all print "A", and
+     *  `(std::int8_t)-1` prints one garbage byte.  Bringing them under a
+     *  to_chars Prettifier would turn 'A' into "65" everywhere in xo, which is
+     *  an output-visible change and not the point of this specialization.
+     *
+     *  NB this makes std::int8_t / std::uint8_t character types on any normal
+     *  platform, since they are typedefs for (un)signed char.  That is
+     *  inherited from operator<<, not chosen here.
+     *
+     *  `bool` is excluded too, and handled separately below.
      **/
-    template <>
-    struct Prettifier<int> {
-        static void print(PpSink & sink, int x) {
-            char buf[16];
+    template <typename T>
+    concept pp_number_integral
+        = std::integral<T>
+       && !std::same_as<std::remove_cv_t<T>, bool>
+       && !std::same_as<std::remove_cv_t<T>, char>
+       && !std::same_as<std::remove_cv_t<T>, signed char>
+       && !std::same_as<std::remove_cv_t<T>, unsigned char>
+       && !std::same_as<std::remove_cv_t<T>, wchar_t>
+       && !std::same_as<std::remove_cv_t<T>, char8_t>
+       && !std::same_as<std::remove_cv_t<T>, char16_t>
+       && !std::same_as<std::remove_cv_t<T>, char32_t>;
+
+    /** scalar leaf: render an integer via std::to_chars (ostream-free).
+     *
+     *  Covers every width -- short, int, long, long long and their unsigned
+     *  forms, hence also std::size_t, std::uint32_t and friends.  Before this
+     *  existed only `int` had a Prettifier, so `std::uint32_t` (e.g. a
+     *  container's size()) fell through to the operator<< fallback: correct
+     *  output, but via an ostream, and invisibly.
+     *
+     *  Output-neutral by construction: to_chars and operator<< agree on
+     *  decimal integers, verified across all widths in
+     *  xo-ppsink/utest/Prettifier.test.cpp.
+     *
+     *  An unsigned 64-bit value is at most 20 digits, a signed one 19 plus a
+     *  sign; buf[24] is ample for every width.
+     **/
+    template <pp_number_integral T>
+    struct Prettifier<T> {
+        static void print(PpSink & sink, T x) {
+            char buf[24];
             auto [ptr, ec] = std::to_chars(buf, buf + sizeof(buf), x);
-            (void)ec; /* cannot fail: buf is large enough for any int */
+            (void)ec; /* cannot fail: buf is large enough for any integer */
             sink.put(std::string_view(buf,
                                       static_cast<std::size_t>(ptr - buf)));
+        }
+    };
+
+    /** scalar leaf: render a bool as "1"/"0", ostream-free.
+     *
+     *  **Preserves the current rendering, deliberately.**  operator<< prints a
+     *  bool as 1/0 unless std::boolalpha is set, and nothing in xo sets it --
+     *  measured 2026-08-10.  Renderings already pinned across the tree contain
+     *  it (e.g. TypeDescr's ":complete 1",
+     *  xo-expression2/utest/printable_render.test.cpp).
+     *
+     *  So this specialization removes an ostream round-trip and changes no
+     *  output.  Whether "true"/"false" would be BETTER is open and is now a
+     *  one-line change in one place rather than a property inherited from
+     *  <ostream> -- the same framing as c_default_float_precision above.  It
+     *  would be output-visible and wants its own commit.
+     **/
+    template <>
+    struct Prettifier<bool> {
+        static void print(PpSink & sink, bool x) {
+            sink.put(x ? std::string_view("1") : std::string_view("0"));
         }
     };
 

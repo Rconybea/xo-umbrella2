@@ -2,7 +2,10 @@
 
 #include <xo/ppsink/FlatSink.hpp>
 #include <xo/ppsink/pretty_ostream.hpp> /* Plain_PpsinkTest exercises the operator<< fallback */
+#include <xo/ppsink/tostr.hpp>
 #include <catch2/catch.hpp>
+#include <cstdint>
+#include <limits>
 #include <sstream>
 
 using xo::pp::FlatSink;
@@ -10,6 +13,7 @@ using xo::pp::PpSink;
 using xo::pp::Prettifier;
 using xo::pp::pretty;
 using xo::pp::has_prettifier;
+using xo::pp::tostr;
 
 /* a type that opts in to Prettifier */
 struct Point_PpsinkTest { int x; int y; };
@@ -53,4 +57,71 @@ TEST_CASE("pretty-falls-back-to-operator<<", "[pretty]") {
     pretty(sink, Plain_PpsinkTest{7});      /* stream_open -> operator<< */
 
     REQUIRE(ss.str() == "Plain{7}");
+}
+
+/* Scalar leaves.
+ *
+ * Prettifier<int> used to be the only integer specialization, so every other
+ * width -- notably std::uint32_t, which is what a container's size() usually
+ * is -- fell through to the operator<< fallback: right answer, wrong path, and
+ * silently.  These pin that widening as OUTPUT-NEUTRAL: each expectation below
+ * was observed BEFORE the specializations existed and is unchanged after.
+ *
+ * See .xo-backlog/xo-ppsink/issues/09-scalar-prettifiers.md
+ */
+
+TEST_CASE("prettifier-integer-widths", "[pretty][scalar]") {
+    static_assert(has_prettifier<short>);
+    static_assert(has_prettifier<unsigned short>);
+    static_assert(has_prettifier<int>);
+    static_assert(has_prettifier<unsigned int>);
+    static_assert(has_prettifier<long>);
+    static_assert(has_prettifier<unsigned long>);
+    static_assert(has_prettifier<long long>);
+    static_assert(has_prettifier<unsigned long long>);
+    /* the typedefs that motivated this: sizes and fixed-width ints */
+    static_assert(has_prettifier<std::size_t>);
+    static_assert(has_prettifier<std::uint32_t>);
+    static_assert(has_prettifier<std::int64_t>);
+
+    CHECK(tostr(static_cast<short>(-5)) == "-5");
+    CHECK(tostr(static_cast<unsigned short>(5)) == "5");
+    CHECK(tostr(42) == "42");
+    CHECK(tostr(4000000000u) == "4000000000");
+    CHECK(tostr(-1234567890123L) == "-1234567890123");
+    CHECK(tostr(1234567890123UL) == "1234567890123");
+    CHECK(tostr(static_cast<std::size_t>(42)) == "42");
+
+    /* the extremes: buf[24] must hold the longest rendering of any width */
+    CHECK(tostr(std::numeric_limits<std::int64_t>::min()) == "-9223372036854775808");
+    CHECK(tostr(std::numeric_limits<std::uint64_t>::max()) == "18446744073709551615");
+}
+
+TEST_CASE("prettifier-bool-stays-1-0", "[pretty][scalar]") {
+    static_assert(has_prettifier<bool>);
+
+    /* NOT "true"/"false".  operator<< prints 1/0 without std::boolalpha, and
+     * renderings pinned across the tree already contain it -- e.g. TypeDescr's
+     * ":complete 1".  Prettifier<bool> removes the ostream, not the format.
+     */
+    CHECK(tostr(true) == "1");
+    CHECK(tostr(false) == "0");
+}
+
+TEST_CASE("prettifier-leaves-char-types-alone", "[pretty][scalar]") {
+    /* char IS integral, so a bare std::integral constraint would have caught
+     * these and turned 'A' into "65" everywhere in xo.  pp_number_integral
+     * excludes them on purpose; they keep rendering as CHARACTERS via
+     * operator<<.
+     */
+    static_assert(!has_prettifier<char>);
+    static_assert(!has_prettifier<signed char>);
+    static_assert(!has_prettifier<unsigned char>);
+    /* std::int8_t/uint8_t are typedefs for these, hence also characters */
+    static_assert(!has_prettifier<std::int8_t>);
+    static_assert(!has_prettifier<std::uint8_t>);
+
+    CHECK(tostr('A') == "A");
+    CHECK(tostr(static_cast<signed char>(65)) == "A");
+    CHECK(tostr(static_cast<unsigned char>(65)) == "A");
 }

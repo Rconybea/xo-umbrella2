@@ -22,8 +22,30 @@ namespace ut {
         REQUIRE(tostr(1, 2, 3) == "123");
     }
 
+    /* a type with an operator<< and no Prettifier<> -- the only way left to
+     * reach pretty()'s third dispatch branch.  It used to be enough to pass a
+     * double here, but Prettifier<double> (2026-08-09) and the integer/bool
+     * specializations (2026-08-10) mean the scalars no longer go near it.
+     */
+    struct FallbackOnly_TostrTest { int v; };
+
+    inline std::ostream &
+    operator<<(std::ostream & os, const FallbackOnly_TostrTest & x) {
+        return os << "F(" << x.v << ")";
+    }
+
     TEST_CASE("tostr-fallback", "[tostr]") {
-        /* a double has no Prettifier => operator<< fallback via the FlatSink */
+        static_assert(!xo::pp::has_prettifier<FallbackOnly_TostrTest>);
+
+        REQUIRE(tostr("v=", FallbackOnly_TostrTest{3}) == "v=F(3)");
+    }
+
+    TEST_CASE("tostr-double", "[tostr]") {
+        /* NOT the fallback any more: Prettifier<double> owns this, and renders
+         * to_chars %.6g -- which is exactly what operator<< used to produce.
+         */
+        static_assert(xo::pp::has_prettifier<double>);
+
         REQUIRE(tostr("v=", 2.5) == "v=2.5");
     }
 } /*namespace ut*/

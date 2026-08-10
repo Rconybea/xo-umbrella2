@@ -28,10 +28,32 @@ namespace ut {
         REQUIRE(ss.str() == ":k 42");
     }
 
+    /* see the identical helper in tostr.test.cpp: a double no longer reaches
+     * the fallback (Prettifier<double>, 2026-08-09), so a tag value that
+     * genuinely does has to be a type with an operator<< and no Prettifier<>.
+     */
+    struct FallbackOnly_TagTest { int v; };
+
+    inline std::ostream &
+    operator<<(std::ostream & os, const FallbackOnly_TagTest & x) {
+        return os << "F(" << x.v << ")";
+    }
+
     TEST_CASE("tag_ostream-fallback-value", "[tag_ostream]") {
-        /* a double has no Prettifier => reaches the pretty() operator<< fallback,
-         * which the FlatSink routes back to the ostream.  This is the case the
-         * bridge exists for.
+        /* the tag value reaches pretty()'s operator<< fallback, which the
+         * FlatSink routes back to the ostream.  This is the case the bridge
+         * exists for.
+         */
+        static_assert(!xo::pp::has_prettifier<FallbackOnly_TagTest>);
+
+        stringstream ss;
+        ss << xtag("x", FallbackOnly_TagTest{3});
+        REQUIRE(ss.str() == " :x F(3)");
+    }
+
+    TEST_CASE("tag_ostream-double-value", "[tag_ostream]") {
+        /* a double now goes through Prettifier<double> instead, and the bridge
+         * still produces the same bytes -- which is the property that matters.
          */
         stringstream ss;
         ss << xtag("x", 2.5);
