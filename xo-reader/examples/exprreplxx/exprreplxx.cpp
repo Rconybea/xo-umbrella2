@@ -62,30 +62,15 @@ welcome(std::ostream& os)
     os << endl;
 }
 
-/** render @p expr with line breaking, as legacy ppstate_standalone did **/
-template <typename T>
-static void
-render_expr(std::ostream & os, const T & expr) {
-    static int seq = 0;
-
-    xo::mm::ArenaConfig logbuf_cfg { .name_ = "exprreplxx." + std::to_string(++seq),
-                                     .size_ = 64*1024 };
-
-    xo::pp::PpConfig cfg = xo::pp::PpConfig().with_logbuf_config(logbuf_cfg);
-
-    xo::pp::PrettySink pp(cfg, nullptr);
-
-    pp.pp(expr);
-
-    os << pp.output() << std::endl;
-}
-
 int
 main()
 {
     using namespace replxx;
     using namespace xo::scm;
     using xo::scm::Expression;
+    using xo::pp::PrettySink;
+    using xo::pp::PpConfig;
+    using xo::pp::PpStyle;
     using xo::rp;
     using namespace std;
 
@@ -113,6 +98,11 @@ main()
     span_type input;
     std::size_t parser_stack_size = 0;
 
+    PrettySink pps(PpConfig::scratch_aux("exprxx.",
+                                         135 /*soft_right_margin*/,
+                                         PpStyle::colored()),
+                   cout.rdbuf());
+
     welcome(cerr);
 
     while (replxx_getline(interactive, parser_stack_size, rx, input_str)) {
@@ -122,7 +112,10 @@ main()
             auto [expr, consumed, psz, error] = rdr.read_expr(input, eof);
 
             if (expr) {
-                render_expr(cout, expr);
+                pps.pp(expr);
+                pps.complete();
+
+                //render_expr(cout, expr);
             } else if (error.is_error()) {
                 cout << "parsing error (detected in " << error.src_function() << "): " << endl;
                 error.report(cout);
@@ -145,7 +138,10 @@ main()
     auto [expr, _1, _2, error] = rdr.read_expr(input, true /*eof*/);
 
     if (expr) {
-        render_expr(cout, rp<Expression>(expr));
+        pps.pp(rp<Expression>(expr));
+        pps.complete();
+
+        //render_expr(cout, rp<Expression>(expr));
     } else if (error.is_error()) {
         cout << "parsing error (detected in " << error.src_function() << "): " << endl;
         error.report(cout);

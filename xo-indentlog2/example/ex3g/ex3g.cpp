@@ -50,8 +50,7 @@ main(int argc, char ** argv) {
     scope_config::location_enabled = true;   /* append [file:line] */
     scope_config::location_tab = 40;         /* right-align it at column 40 */
 
-    ArenaConfig logbuf_cfg { .name_ = "example.ex3g", .size_ = 64*1024 };
-    PrettySink pp(PpConfig().with_logbuf_config(logbuf_cfg),
+    PrettySink pp(PpConfig::colored(),
                   nullptr /*out*/);
 
     ThreadLogState::log_set_sink(&pp);

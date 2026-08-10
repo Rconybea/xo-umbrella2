@@ -31,6 +31,7 @@ namespace xo {
     using namespace std;
 
     namespace {
+#ifdef OBSOLETE
         /** render @p expr with line breaking, as legacy ppstate_standalone did **/
         template <typename T>
         void render_expr(std::ostream & os, const T & expr) {
@@ -42,6 +43,7 @@ namespace xo {
 
             //os << pp.output() << std::endl;
         }
+#endif
     } /*namespace*/
 
     namespace scm {
@@ -272,7 +274,7 @@ namespace xo {
 
             if (expr) {
                 pps.pp(rp<Expression>(expr));
-                pps.put("\n");
+                pps.complete();
                 //render_expr(cout, rp<Expression>(expr));
             } else if (error.is_error()) {
                 cout << "parsing error (detected in " << error.src_function() << "): " << endl;

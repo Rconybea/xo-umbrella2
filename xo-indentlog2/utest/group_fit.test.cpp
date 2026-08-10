@@ -26,6 +26,7 @@
 #include <xo/ppsink/pretty_struct.hpp>
 #include <xo/ppsink/PrettyVector.hpp>
 #include "print/PrettySink.hpp"
+#include "print/toppstr.hpp"
 #include <xo/arena/ArenaConfig.hpp>
 #include <catch2/catch.hpp>
 #include <algorithm>
@@ -72,6 +73,7 @@ namespace ut {
     using xo::pp::PrettySink;
     using xo::pp::PpConfig;
     using xo::pp::PpStyle;
+    using xo::pp::toppstr;
     using xo::mm::ArenaConfig;
 
     namespace {
@@ -84,19 +86,7 @@ namespace ut {
         template <typename T>
         std::string
         render(std::uint32_t margin, const T & x) {
-            static int seq = 0;
-
-            ArenaConfig cfg { .name_ = "utest.group_fit." + std::to_string(++seq),
-                              .size_ = 64*1024 };
-
-            PrettySink pps(PpConfig().with_logbuf_config(cfg)
-                                     .with_soft_right_margin(margin)
-                                     .with_style(PpStyle::plain()),
-                           nullptr);
-
-            pps.pp(x);
-
-            return std::string(pps.output());
+            return toppstr(PpConfig::scratch_plain(margin), x);
         }
 
         /** length of the longest line in @p s **/

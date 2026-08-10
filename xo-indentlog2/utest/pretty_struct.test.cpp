@@ -40,17 +40,7 @@ namespace ut {
         std::string
         render(std::uint32_t margin, std::string_view name, const Fields &... fields)
         {
-            static int seq = 0;
-
-            ArenaConfig logbuf_cfg {
-                .name_ = "utest.pretty_struct." + std::to_string(++seq),
-                .size_ = 64*1024 };
-
-            PpConfig cfg = PpConfig().with_logbuf_config(logbuf_cfg)
-                                     .with_soft_right_margin(margin)
-                                     .with_style(PpStyle::plain());
-
-            PrettySink pp(cfg, nullptr);
+            PrettySink pp(PpConfig::scratch_plain(margin), nullptr);
 
             pp.pretty_struct(name, fields...);
 

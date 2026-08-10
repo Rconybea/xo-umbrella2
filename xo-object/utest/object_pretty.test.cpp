@@ -16,6 +16,7 @@
 #include "xo/object/Integer.hpp"
 #include "xo/object/List.hpp"
 #include <xo/alloc/ArenaAlloc.hpp>
+#include <xo/indentlog2/print/toppstr.hpp>
 #include <xo/ppsink/pretty.hpp>
 #include "print/PrettySink.hpp"
 #include <xo/arena/ArenaConfig.hpp>
@@ -26,6 +27,8 @@ namespace xo {
     using xo::gc::ArenaAlloc;
     using xo::obj::Integer;
     using xo::obj::List;
+    using xo::pp::PpConfig;
+    using xo::pp::toppstr;
 
     namespace {
         /** render @p x through a PrettySink with soft right margin @p margin.
@@ -37,20 +40,7 @@ namespace xo {
         template <typename T>
         std::string
         render(std::uint32_t margin, const T & x) {
-            static int seq = 0;
-
-            xo::mm::ArenaConfig logbuf_cfg {
-                .name_ = "utest.object.pretty." + std::to_string(++seq),
-                .size_ = 64*1024 };
-
-            xo::pp::PrettySink pps(xo::pp::PpConfig()
-                                   .with_logbuf_config(logbuf_cfg)
-                                   .with_soft_right_margin(margin),
-                                   nullptr);
-
-            pps.pp(x);
-
-            return std::string(pps.output());
+            return toppstr(PpConfig::scratch_colored(margin), x);
         }
     } /*namespace*/
 

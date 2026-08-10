@@ -82,12 +82,7 @@ namespace ut {
      **/
     template <typename Fn>
     static std::string pretty_of(std::uint32_t margin, Fn && fn) {
-        ArenaConfig logbuf_cfg { .name_ = "utest.Pretty", .size_ = 64*1024 };
-        PpConfig cfg = PpConfig().with_logbuf_config(logbuf_cfg);
-        if (margin > 0)
-            cfg = cfg.with_soft_right_margin(margin);
-
-        PrettySink pp(cfg, nullptr);
+        PrettySink pp(PpConfig::scratch_colored(margin), nullptr);
         fn(pp);
         return std::string(pp.output());
     }
@@ -99,7 +94,7 @@ namespace ut {
         REQUIRE(flat_of([](PpSink & s) { pretty(s, Fallback_int{42}); }) == "42");
         REQUIRE(flat_of([](PpSink & s) { pretty(s, Fallback_int{-7}); }) == "-7");
 
-        REQUIRE(pretty_of(0, [](PpSink & s) { pretty(s, Fallback_int{42}); }) == "42");
+        REQUIRE(pretty_of(135, [](PpSink & s) { pretty(s, Fallback_int{42}); }) == "42");
     }
 
     TEST_CASE("pretty.pretty", "[Pretty]")
@@ -110,7 +105,7 @@ namespace ut {
         REQUIRE(flat_of([&](PpSink & s) { pretty(s, p); }) == "(3,4)");
 
         /* wide margin: group fits, split collapses -> same as flat */
-        REQUIRE(pretty_of(0, [&](PpSink & s) { pretty(s, p); }) == "(3,4)");
+        REQUIRE(pretty_of(135, [&](PpSink & s) { pretty(s, p); }) == "(3,4)");
 
         /* narrow margin: group doesn't fit -> split becomes newline + indent
          * (indent_width default 2, nesting depth 1 => 2 spaces)

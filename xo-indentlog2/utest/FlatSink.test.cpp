@@ -128,11 +128,8 @@ namespace ut {
         /* 2. same steps through PrettySink.  Default soft_right_margin (135)
          *    exceeds every string here, so all groups fit and pretty == flat.
          */
-        ArenaConfig logbuf_cfg { .name_ = "utest.FlatSink",
-                                 .size_ = 64*1024 };
 
-        PrettySink pp(PpConfig().with_logbuf_config(logbuf_cfg),
-                      nullptr /*out*/);
+        PrettySink pp(PpConfig::scratch_colored(135), nullptr /*out*/);
 
         flatsink_drive(pp, tc.step_v_);
 
@@ -163,12 +160,7 @@ namespace ut {
             flatsink_drive(sink, step_v);
         }
 
-        ArenaConfig logbuf_cfg { .name_ = "utest.FlatSink.wide",
-                                 .size_ = 64*1024 };
-
-        PrettySink pp(PpConfig()
-                         .with_logbuf_config(logbuf_cfg)
-                         .with_soft_right_margin(4),
+        PrettySink pp(PpConfig::scratch_colored(4),
                       nullptr /*out*/);
 
         flatsink_drive(pp, step_v);

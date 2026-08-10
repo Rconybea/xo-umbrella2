@@ -5,6 +5,7 @@
 
 #include "xo/alloc/ObjectStatistics.hpp"
 #include <xo/reflect/Reflect.hpp>
+#include <xo/indentlog2/print/toppstr.hpp>
 #include <xo/ppsink/hex.hpp>
 #include <xo/ppsink/tostr.hpp>
 #include <xo/ppsink/scope.hpp>
@@ -24,31 +25,7 @@ namespace xo {
     using xo::reflect::Reflect;
     using xo::pp::PrettySink;
     using xo::pp::PpConfig;
-
-    namespace {
-        /** render @p x with line breaking, as legacy toppstr2(ppconfig, x) did.
-         *
-         *  toppstr2 is not ported to ppsink: it is superseded by PrettySink,
-         *  which is the sink that actually does line breaking (ppsink's own
-         *  tostr uses a FlatSink and never breaks).  PrettySink lives in
-         *  xo-indentlog2, hence this utest's dependency on it.
-         *
-         *  NB the arena name must be unique per call: two PrettySinks sharing
-         *  an ArenaConfig name interfere, and the symptom is wrong indentation
-         *  in whichever case runs second.
-         **/
-        template <typename T>
-        std::string
-        toppstr(const T & x) {
-            auto pps = PrettySink::scratch_plain("utest.alloc.pretty.",
-                                                 64*1024,
-                                                 135 /*soft_right_margin*/);
-
-            pps.pp(x);
-
-            return std::string(pps.output());
-        }
-    } /*namespace*/
+    using xo::pp::toppstr;
 
     namespace ut {
         /* one scope in from namespace xo: a using-decl at xo scope would be
@@ -121,7 +98,7 @@ namespace xo {
             std::stringstream ss;
             ObjectStatistics stats;
 
-            std::string actual = toppstr(stats);
+            std::string actual = toppstr(PpConfig::plain(), stats);
             std::string expected
                 = ("<ObjectTypeStatistics :per_type_stats_v []>");
 
@@ -164,7 +141,7 @@ namespace xo {
             ObjectStatistics stats;
             stats.per_type_stats_v_.push_back(objstats);
 
-            std::string actual = toppstr(stats);
+            std::string actual = toppstr(PpConfig::plain(), stats);
 
             std::string expected
                 = ("<ObjectTypeStatistics :per_type_stats_v [<PerObjectTypeStatistics :td bool :scanned_n 4 :scanned_z 16 :survive_n 2 :survive_z 8>]>");

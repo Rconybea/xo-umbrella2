@@ -36,7 +36,7 @@ namespace xo::pp {
      *  @p cfg supplies the margins and arena size; its logbuf NAME is replaced,
      *  see detail::toppstr_logbuf_config.
      *
-     *  Caller may use PpConfig::scratch() for example
+     *  Caller may use PpConfig::plain() / PpConfig::colored() for example
      **/
     template <typename... Ts>
     std::string

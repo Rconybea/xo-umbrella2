@@ -21,6 +21,7 @@
 #include "xo/expression/pretty_expression.hpp"
 #include "xo/expression/pretty_localenv.hpp"
 #include "print/PrettySink.hpp"
+#include <xo/indentlog2/print/toppstr.hpp>
 #include <xo/arena/ArenaConfig.hpp>
 #include <catch2/catch.hpp>
 #include <string>
@@ -30,6 +31,7 @@ namespace ut {
     using xo::pp::PrettySink;
     using xo::pp::PpConfig;
     using xo::pp::PpStyle;
+    using xo::pp::toppstr;
     using xo::mm::ArenaConfig;
     using xo::scm::Expression;
     using xo::scm::Sequence;
@@ -56,10 +58,7 @@ namespace ut {
          **/
         template <typename T>
         std::string render(std::uint32_t margin, const T & x) {
-            PrettySink pp = PrettySink::scratch_plain("utest.expression.pretty.",
-                                                      64*1024, margin);
-            pp.pp(x);
-            return std::string(pp.output());
+            return toppstr(PpConfig::scratch_plain(margin), x);
         }
 
         rp<Expression> mk_const(double v) { return Constant<double>::make(v); }

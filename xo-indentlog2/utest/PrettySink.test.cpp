@@ -166,10 +166,7 @@ namespace ut {
      */
     TEST_CASE("PrettySink.stream_chained", "[PrettySink]")
     {
-        ArenaConfig logbuf_cfg { .name_ = "utest.PrettySink.chained",
-                                 .size_ = 64*1024 };
-
-        PrettySink pp(PpConfig().with_logbuf_config(logbuf_cfg), nullptr);
+        PrettySink pp(PpConfig::colored(), nullptr);
 
         {
             auto ins = pp.stream_open(1);

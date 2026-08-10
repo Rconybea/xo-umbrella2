@@ -28,6 +28,7 @@
 #include <xo/ppsink/hex.hpp>
 #include <xo/ppsink/pretty.hpp> /* PpSink::pp */
 #include "print/PrettySink.hpp"
+#include "print/toppstr.hpp"
 #include <xo/arena/ArenaConfig.hpp>
 #include <xo/arena/span.hpp>
 #include <catch2/catch.hpp>
@@ -53,20 +54,7 @@ namespace ut {
         std::string
         render(std::uint32_t margin, const hex_view & x)
         {
-            static int seq = 0;
-
-            ArenaConfig logbuf_cfg {
-                .name_ = "utest.hex." + std::to_string(++seq),
-                .size_ = 64*1024 };
-
-            PpConfig cfg = PpConfig().with_logbuf_config(logbuf_cfg)
-                                     .with_soft_right_margin(margin);
-
-            PrettySink pp(cfg, nullptr);
-
-            pp.pp(x);
-
-            return std::string(pp.output());
+            return toppstr(PpConfig::scratch_colored(margin), x);
         }
 
         /** a buffer of @p z bytes, values 0, 1, 2, .. **/

@@ -34,13 +34,8 @@ namespace ut {
      **/
     template <typename Fn>
     static std::string scoped_pretty(std::uint32_t margin, Fn && fn) {
-        ArenaConfig logbuf_cfg { .name_ = "utest.scope", .size_ = 64*1024 };
-        PpConfig cfg = PpConfig().with_logbuf_config(logbuf_cfg).with_style(PpStyle::plain());
-        if (margin > 0)
-            cfg = cfg.with_soft_right_margin(margin);
-
         std::ostringstream oss;
-        PrettySink pp(cfg, oss.rdbuf());
+        PrettySink pp(PpConfig::scratch_plain(margin ? margin : 135), oss.rdbuf());
 
         ThreadLogState::log_set_sink(&pp);
         fn();

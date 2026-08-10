@@ -44,12 +44,7 @@ namespace ut {
     template <typename Fn>
     static std::string
     pretty_of(std::uint32_t margin, Fn && fn) {
-        ArenaConfig logbuf_cfg { .name_ = "utest.PrettyVector", .size_ = 64*1024 };
-        PpConfig cfg = PpConfig().with_logbuf_config(logbuf_cfg);
-        if (margin > 0)
-            cfg = cfg.with_soft_right_margin(margin);
-
-        PrettySink pp(cfg, nullptr /*out*/);
+        PrettySink pp(PpConfig::scratch_colored(margin), nullptr /*out*/);
         fn(pp);
         return std::string(pp.output());
     }
@@ -72,7 +67,7 @@ namespace ut {
         REQUIRE(flat_of([&](PpSink & s) { pretty(s, v); }) == "[1,2,3]");
 
         /* wide margin: fits, splits collapse -> same as flat */
-        REQUIRE(pretty_of(0, [&](PpSink & s) { pretty(s, v); }) == "[1,2,3]");
+        REQUIRE(pretty_of(135, [&](PpSink & s) { pretty(s, v); }) == "[1,2,3]");
 
         /* narrow margin: doesn't fit -> one element per line, indent 2 */
         REQUIRE(pretty_of(2, [&](PpSink & s) { pretty(s, v); }) == "[1,\n  2,\n  3]");
@@ -93,7 +88,7 @@ namespace ut {
 
         /* inner Prettifier<vector<int>> is reached via pretty on each element */
         REQUIRE(flat_of([&](PpSink & s) { pretty(s, v); }) == "[[1,2],[3]]");
-        REQUIRE(pretty_of(0, [&](PpSink & s) { pretty(s, v); }) == "[[1,2],[3]]");
+        REQUIRE(pretty_of(135, [&](PpSink & s) { pretty(s, v); }) == "[[1,2],[3]]");
     }
 
     TEST_CASE("Pretty.vector.of_functionstyle", "[Pretty][PrettyVector][FunctionStyle]")

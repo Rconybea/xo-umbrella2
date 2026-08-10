@@ -40,17 +40,7 @@ namespace ut {
          **/
         template <typename Fn>
         std::string render(std::uint32_t margin, Fn && fn) {
-            static int seq = 0;
-
-            ArenaConfig logbuf_cfg {
-                .name_ = "utest.struct_scope." + std::to_string(++seq),
-                .size_ = 64*1024 };
-
-            PpConfig cfg = PpConfig().with_logbuf_config(logbuf_cfg)
-                                     .with_soft_right_margin(margin)
-                                     .with_style(PpStyle::plain());
-
-            PrettySink pp(cfg, nullptr);
+            PrettySink pp(PpConfig::scratch_plain(margin), nullptr);
 
             fn(pp);
 

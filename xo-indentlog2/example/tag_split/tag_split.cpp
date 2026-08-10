@@ -34,12 +34,7 @@ using xo::mm::ArenaConfig;
  */
 static std::string
 render_tag(std::uint32_t margin) {
-    ArenaConfig logbuf_cfg { .name_ = "example.tag_split", .size_ = 64*1024 };
-    PpConfig cfg = PpConfig().with_logbuf_config(logbuf_cfg);
-    if (margin > 0)
-        cfg = cfg.with_soft_right_margin(margin);
-
-    PrettySink pp(cfg, nullptr /*out*/);
+    PrettySink pp(PpConfig::scratch_colored(margin ? margin : 135), nullptr /*out*/);
     pretty(pp, tag("coordinate", 12345));
     return std::string(pp.output());
 }

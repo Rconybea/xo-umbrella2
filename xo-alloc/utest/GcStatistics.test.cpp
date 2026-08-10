@@ -4,6 +4,7 @@
  */
 
 #include "xo/alloc/GcStatistics.hpp"
+#include <xo/indentlog2/print/toppstr.hpp>
 #include <xo/ppsink/hex.hpp>
 #include <xo/ppsink/tostr.hpp>
 #include <xo/ppsink/scope.hpp>
@@ -24,7 +25,9 @@ namespace xo {
     using xo::gc::PerGenerationStatistics;
     using xo::pp::PrettySink;
     using xo::pp::PpConfig;
+    using xo::pp::toppstr;
 
+#ifdef OBSOLETE
     namespace {
         /** render @p x with line breaking, as legacy toppstr2(ppconfig, x) did.
          *
@@ -40,15 +43,10 @@ namespace xo {
         template <typename T>
         std::string
         toppstr(const T & x) {
-            auto pps = PrettySink::scratch_plain("utest.alloc.pretty.",
-                                                 64*1024,
-                                                 135 /*soft_right_margin*/);
-
-            pps.pp(x);
-
-            return std::string(pps.output());
+            return toppstr(PpConfig::plain(), x);
         }
     } /*namespace*/
+#endif
 
     namespace ut {
         /* one scope in from namespace xo: a using-decl at xo scope would be
@@ -99,7 +97,7 @@ namespace xo {
             std::stringstream ss;
             GcStatistics stats;
 
-            std::string actual = toppstr(stats);
+            std::string actual = toppstr(PpConfig::plain(), stats);
             std::string expected
                 = ("<GcStatistics\n"
                    "  :gen_v\n"
@@ -144,7 +142,7 @@ namespace xo {
             std::stringstream ss;
             GcStatisticsExt stats;
 
-            std::string actual = toppstr(stats);
+            std::string actual = toppstr(PpConfig::plain(), stats);
             std::string expected
                 = ("<GcStatisticsExt\n"
                    "  :gen_v\n"
