@@ -4,7 +4,7 @@
  *
  * Phase C verification for xo-expression2's printers, bottom-up.  TypeRef
  * first: it is the subsystem's only leaf, depending on nothing else here.
- * Then DVariable, whose :typeref field nests it.
+ * Then DVariable, whose :typeref field nests it, then DVarRef.
  *
  * Follows the template in xo-object2/utest/printable_render.test.cpp -- see
  * .xo-backlog/xo-printable2/issues/01-aprintable-pretty-ppsink.md for why both
@@ -25,6 +25,7 @@
 #include "init_expression2.hpp"
 #include <xo/expression2/TypeRef.hpp>
 #include <xo/expression2/Variable.hpp>   /* convenience header: DVariable + its facet impls */
+#include <xo/expression2/VarRef.hpp>     /* likewise DVarRef */
 #include <xo/gc/X1Collector.hpp>
 #include <xo/stringtable2/StringTable.hpp>
 #include <xo/alloc2/CollectorTypeRegistry.hpp>
@@ -47,6 +48,8 @@ namespace xo {
     using xo::scm::TypeRef;
     using xo::scm::AType;
     using xo::scm::DVariable;
+    using xo::scm::DVarRef;
+    using xo::scm::Binding;
     using xo::scm::DUniqueString;
     using xo::scm::StringTable;
     using xo::mm::CollectorTypeRegistry;
@@ -312,6 +315,23 @@ namespace xo {
                     return DVariable::make(this->allocator(), sym, make_typeref(kind));
                 }
 
+                /** @p path is the DEFINING variable's binding; DVarRef::make
+                 *  derives its own via Binding::relative(link, path).
+                 *
+                 *  A sentinel (default-constructed) Binding is not reachable
+                 *  this way -- Binding::relative asserts on it (Binding.cpp) --
+                 *  so "{path}" is not among the cases below.
+                 **/
+                DVarRef * make_varref(const char * name, Binding path, std::int32_t link) {
+                    const DUniqueString * sym = (name ? table_.intern(name) : nullptr);
+
+                    DVariable * var = DVariable::make(this->allocator(), sym,
+                                                      make_typeref(Kind::resolved),
+                                                      path);
+
+                    return DVarRef::make(this->allocator(), var, link);
+                }
+
                 DX1Collector gc_;
                 StringTable table_;
             };
@@ -452,6 +472,109 @@ namespace xo {
                                    "<DVariable :name \"\" :typeref"
                                    " <TypeRef :id \"t:1\" :td null>>"),
             };
+
+            /** DVarRef's own case variables: the DEFINING variable's binding,
+             *  the link count, and the margin.  Its typeref is not printed, so
+             *  it is held at Kind::resolved throughout and is not a variable.
+             **/
+            struct Testcase_DVarRef {
+                Testcase_DVarRef(const char * name,
+                                 Binding path,
+                                 std::int32_t link,
+                                 std::uint32_t margin,
+                                 const char * label,
+                                 const char * expect_deprecated,
+                                 const char * expect_pretty)
+                    : name_{name}, path_{path}, link_{link}, margin_{margin},
+                      label_{label},
+                      expect_deprecated_{expect_deprecated},
+                      expect_pretty_{expect_pretty} {}
+
+                const char * name_;
+                Binding path_;
+                std::int32_t link_;
+                std::uint32_t margin_;
+                const char * label_;
+                /** OBSERVED via pretty_deprecated; delete at phase E **/
+                std::string expect_deprecated_;
+                /** OBSERVED via pretty; outlives phase E **/
+                std::string expect_pretty_;
+            };
+
+            static std::vector<Testcase_DVarRef> s_dvarref_v = {
+                /* flat, identical.  Note :name is NOT quoted -- legacy did not
+                 * quote it here, though DVariable quotes its own :name.  That
+                 * inconsistency is legacy's and is preserved deliberately;
+                 * unifying the two would be an output-visible change wanting
+                 * its own commit.
+                 *
+                 * :path is the point of this printer.  Binding has no
+                 * Prettifier<> and no ppdetail<>, only an operator<<
+                 * (Binding.hpp:58), so it takes ppsink's leaf FALLBACK -- empty
+                 * primary template -> not string-like -> operator<<.  That the
+                 * two renderings agree is the evidence the fallback fires, and
+                 * it is worth pinning because a MISSING Prettifier<> is silent
+                 * for any type that has an operator<< (TypeRef, having none,
+                 * failed loudly instead).
+                 */
+                Testcase_DVarRef("myvar", Binding::local(3), 0, 200, "local0.200",
+                                 "<DVarRef :name myvar :path {path:0:3}>",
+                                 "<DVarRef :name myvar :path {path:0:3}>"),
+
+                /* outer struct breaks; both values still fit their lines */
+                Testcase_DVarRef("myvar", Binding::local(3), 0, 30, "local0.30",
+                                 "<DVarRef\n"
+                                 "  :name myvar\n"
+                                 "  :path {path:0:3}>",
+                                 "<DVarRef\n"
+                                 "  :name myvar\n"
+                                 "  :path {path:0:3}>"),
+
+                /* margin 12: BOTH values break, so the known field-value column
+                 * divergence (legacy 4, ppsink 3) shows up twice in one render.
+                 */
+                Testcase_DVarRef("myvar", Binding::local(3), 0, 12, "local0.12",
+                                 "<DVarRef\n"
+                                 "  :name\n"
+                                 "    myvar\n"
+                                 "  :path\n"
+                                 "    {path:0:3}>",
+                                 "<DVarRef\n"
+                                 "  :name\n"
+                                 "   myvar\n"
+                                 "  :path\n"
+                                 "   {path:0:3}>"),
+
+                /* link 2: DVarRef::make composes its binding via
+                 * Binding::relative(link, vardef->path()), so the rendered
+                 * i_link is 2 rather than the defining variable's 0.  Pins the
+                 * composition, not just the formatting.
+                 */
+                Testcase_DVarRef("myvar", Binding::local(3), 2, 200, "local2.200",
+                                 "<DVarRef :name myvar :path {path:2:3}>",
+                                 "<DVarRef :name myvar :path {path:2:3}>"),
+
+                /* a global binding prints its own way ("{path:global:7}",
+                 * Binding::print) and ignores the link -- Binding::relative
+                 * returns the definition unchanged for globals.
+                 */
+                Testcase_DVarRef("g", Binding::global(7), 0, 200, "global.200",
+                                 "<DVarRef :name g :path {path:global:7}>",
+                                 "<DVarRef :name g :path {path:global:7}>"),
+
+                /* margin 20: :name fits, :path does not -- the divergence on
+                 * one field with the other left alone.
+                 */
+                Testcase_DVarRef("g", Binding::global(7), 0, 20, "global.20",
+                                 "<DVarRef\n"
+                                 "  :name g\n"
+                                 "  :path\n"
+                                 "    {path:global:7}>",
+                                 "<DVarRef\n"
+                                 "  :name g\n"
+                                 "  :path\n"
+                                 "   {path:global:7}>"),
+            };
         } /*namespace*/
 
         TEST_CASE("TypeRef-render", "[printable][TypeRef]")
@@ -511,6 +634,60 @@ namespace xo {
                     REHEARSE(rh, deprecated == tc.expect_deprecated_);
                 }
             }
+        }
+
+        TEST_CASE("DVarRef-render", "[printable][DVarRef]")
+        {
+            REQUIRE(s_init.evidence());
+
+            UtestRehearser rh;
+
+            for (auto _ : rh) {
+                scope log(XO_DEBUG2_(rh.enable_debug(), "DVarRef-render"));
+
+                for (std::size_t i_tc = 0, n_tc = s_dvarref_v.size(); i_tc < n_tc; ++i_tc) {
+                    const auto & tc = s_dvarref_v[i_tc];
+
+                    VarFixture fx(tc.label_);
+
+                    DVarRef * vr = fx.make_varref(tc.name_, tc.path_, tc.link_);
+                    REQUIRE(vr != nullptr);
+
+                    auto p = with_facet<APrintable>::mkobj(vr);
+
+                    std::string deprecated = render_deprecated(p, tc.margin_);
+                    std::string pretty = render_pretty(p, tc.margin_);
+
+                    log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_),
+                               xtag("deprecated", deprecated), xtag("pretty", pretty));
+
+                    REHEARSE(rh, pretty == tc.expect_pretty_);
+                    REHEARSE(rh, deprecated == tc.expect_deprecated_);
+                }
+            }
+        }
+
+        /** the one case that CANNOT be pinned against both protocols.
+         *
+         *  DVarRef::pretty_deprecated does std::string_view(*(this->name()))
+         *  with no null check, and a DVariable's name_ has no non-null
+         *  invariant -- DVariable's own printer guards for exactly this.  So
+         *  legacy is undefined here rather than merely different, and there is
+         *  no legacy rendering to compare against.  DVarRef::pretty() guards,
+         *  matching the sibling printer; this pins that guard.
+         **/
+        TEST_CASE("DVarRef-anon-render", "[printable][DVarRef]")
+        {
+            REQUIRE(s_init.evidence());
+
+            VarFixture fx("anon");
+
+            DVarRef * vr = fx.make_varref(nullptr, Binding::local(1), 0);
+            REQUIRE(vr != nullptr);
+
+            auto p = with_facet<APrintable>::mkobj(vr);
+
+            CHECK(render_pretty(p, 200) == "<DVarRef :name  :path {path:0:1}>");
         }
     } /*namespace ut*/
 } /*namespace xo*/

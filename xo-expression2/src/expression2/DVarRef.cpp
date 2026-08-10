@@ -4,6 +4,8 @@
  **/
 
 #include "DVarRef.hpp"
+#include <xo/ppsink/pretty_struct.hpp>   /* sink.pretty_struct(..), field(..) */
+#include <string_view>
 
 namespace xo {
     using xo::mm::AGCObject;
@@ -85,6 +87,33 @@ namespace xo {
                         "DVarRef",
                         refrtag("name", std::string_view(*(this->name()))),
                         refrtag("path", this->path_));
+        }
+
+        void
+        DVarRef::pretty(xo::pp::PpSink & sink) const
+        {
+            /* named locals: field() captures BY REFERENCE (pretty_struct.hpp) */
+            const DUniqueString * sym = this->name();
+
+            /* legacy dereferenced name() unguarded; a DVariable's name_ has no
+             * non-null invariant (DVariable::pretty guards it), so that is a
+             * latent null deref rather than a rendering decision.  Guarded here
+             * to match the sibling printer; output-identical wherever legacy is
+             * defined.  No quot(), also matching legacy -- DVariable quotes its
+             * :name and DVarRef does not, and unifying them WOULD be an
+             * output-visible change.
+             */
+            auto name = (sym
+                         ? std::string_view(*sym)
+                         : std::string_view(""));
+
+            /* Binding has no Prettifier<> and no ppdetail<> -- only an
+             * operator<< (Binding.hpp:58).  It therefore takes ppsink's leaf
+             * FALLBACK, which is the thing this printer is here to pin.
+             */
+            sink.pretty_struct("DVarRef",
+                               xo::pp::field("name", name),
+                               xo::pp::field("path", path_));
         }
 
     }
