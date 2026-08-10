@@ -1,15 +1,16 @@
 {
   # nixpkgs dependencies
-  lib, stdenv, cmake, catch2, replxx,
+  lib, stdenv, cmake, catch2, replxx, cli11,
 
   # xo dependencies
-  xo-cmake,
   xo-object,
   xo-expression,
   xo-reader,
   xo-ppsink,
+  xo-testutil,
   xo-indentlog2,
   xo-subsys,
+  xo-cmake,
 
   # config arguments
   buildExamples ? true,
@@ -33,8 +34,12 @@ stdenv.mkDerivation (finalattrs :
     inherit doCheck;
 
     nativeBuildInputs = [
-      cmake catch2
+      cmake
       xo-cmake
+    ] ++ lib.optionals doCheck [
+      xo-testutil
+      catch2
+      cli11
     ];
     propagatedBuildInputs = [
       # replxx is PUBLIC on the library target (replxx::replxx appears in its
