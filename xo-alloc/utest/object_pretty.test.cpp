@@ -42,8 +42,6 @@ namespace xo {
         template <typename Fn>
         std::string
         render(std::uint32_t margin, Fn && fn) {
-            static int seq = 0;
-
             PrettySink pps(PpConfig::scratch_plain(margin),
                            nullptr);
 
