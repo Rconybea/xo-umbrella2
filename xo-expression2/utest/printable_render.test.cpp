@@ -4,7 +4,8 @@
  *
  * Phase C verification for xo-expression2's printers, bottom-up.  TypeRef
  * first: it is the subsystem's only leaf, depending on nothing else here.
- * Then DVariable, whose :typeref field nests it, then DVarRef.
+ * Then DVariable, whose :typeref field nests it, then DVarRef, then
+ * DGlobalSymtab.
  *
  * Follows the template in xo-object2/utest/printable_render.test.cpp -- see
  * .xo-backlog/xo-printable2/issues/01-aprintable-pretty-ppsink.md for why both
