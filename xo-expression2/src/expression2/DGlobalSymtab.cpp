@@ -13,6 +13,7 @@
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/pretty_struct.hpp>   /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
     using xo::map::DArenaHashMap;
@@ -298,6 +299,28 @@ namespace xo {
                         refrtag("var_capacity", vars_->capacity()),
                         refrtag("ntype", types_->size()),
                         refrtag("type_capacity", types_->capacity()));
+        }
+
+        void
+        DGlobalSymtab::pretty(xo::pp::PpSink & sink) const
+        {
+            /* NAMED LOCALS ARE LOAD-BEARING here, more so than in the printers
+             * converted before this one: field() captures BY REFERENCE
+             * (pretty_struct.hpp), and every value below is a temporary
+             * returned by value from size()/capacity().  Passing the calls
+             * inline would bind references to temporaries that die before
+             * pretty_struct() renders them.
+             */
+            const size_type nvar = vars_->size();
+            const size_type var_capacity = vars_->capacity();
+            const size_type ntype = types_->size();
+            const size_type type_capacity = types_->capacity();
+
+            sink.pretty_struct("DGlobalSymtab",
+                               xo::pp::field("nvar", nvar),
+                               xo::pp::field("var_capacity", var_capacity),
+                               xo::pp::field("ntype", ntype),
+                               xo::pp::field("type_capacity", type_capacity));
         }
 
     } /*namespace scm*/

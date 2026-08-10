@@ -23,11 +23,13 @@
  */
 
 #include "init_expression2.hpp"
+#include <xo/expression2/GlobalSymtab.hpp>  /* likewise DGlobalSymtab */
 #include <xo/expression2/TypeRef.hpp>
-#include <xo/expression2/Variable.hpp>   /* convenience header: DVariable + its facet impls */
-#include <xo/expression2/VarRef.hpp>     /* likewise DVarRef */
+#include <xo/expression2/VarRef.hpp>       /* likewise DVarRef */
+#include <xo/expression2/Variable.hpp>     /* convenience header: DVariable + its facet impls */
 #include <xo/gc/X1Collector.hpp>
 #include <xo/stringtable2/StringTable.hpp>
+#include <xo/alloc2/arena/IAllocator_DArena.hpp>
 #include <xo/alloc2/CollectorTypeRegistry.hpp>
 #include <xo/printable2/Printable.hpp>
 #include <xo/indentlog2/print/toppstr.hpp>
@@ -35,6 +37,7 @@
 #include <xo/reflect/TypeDescr_ppdetail.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/testutil/UtestRehearser.hpp>
+#include <xo/arena/ArenaHashMapConfig.hpp>
 #include <xo/indentlog/print/ppstr.hpp>
 #include <xo/ppsink/PpStyle.hpp>
 #include <xo/ppsink/scope.hpp>
@@ -42,6 +45,7 @@
 #include <catch2/catch.hpp>
 #include <cstdint>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace xo {
@@ -49,6 +53,7 @@ namespace xo {
     using xo::scm::AType;
     using xo::scm::DVariable;
     using xo::scm::DVarRef;
+    using xo::scm::DGlobalSymtab;
     using xo::scm::Binding;
     using xo::scm::DUniqueString;
     using xo::scm::StringTable;
@@ -56,11 +61,14 @@ namespace xo {
     using xo::mm::AAllocator;
     using xo::mm::ACollector;
     using xo::mm::DX1Collector;
+    using xo::mm::DArena;
+    using xo::mm::AGCObject;
     using xo::mm::X1CollectorConfig;
     using xo::mm::ArenaConfig;
     using xo::print::APrintable;
     using xo::facet::obj;
     using xo::facet::with_facet;
+    using xo::map::ArenaHashMapConfig;
     using xo::reflect::Reflect;
 
     namespace ut {
@@ -332,7 +340,45 @@ namespace xo {
                     return DVarRef::make(this->allocator(), var, link);
                 }
 
+                /** a DGlobalSymtab holding @p name_v as global variables.
+                 *
+                 *  @p hint_capacity feeds ArenaHashMapConfig; the rendered
+                 *  :var_capacity / :type_capacity come from it (rounded up to a
+                 *  power of 2 by DArenaHashMap), so it is a case variable
+                 *  rather than a detail.
+                 *
+                 *  The hash-map superstructure lives outside GC space, hence
+                 *  the separate aux arena -- that is DGlobalSymtab::make's own
+                 *  mm / aux_mm split, not a testing convenience.
+                 **/
+                obj<AGCObject,DGlobalSymtab> make_symtab(std::size_t hint_capacity,
+                                                         const std::vector<const char *> & name_v) {
+                    auto cfg = ArenaHashMapConfig()
+                        .with_name("printable_render.symtab")
+                        .with_hint_max_capacity(hint_capacity);
+
+                    auto symtab = DGlobalSymtab::make(this->allocator(),
+                                                      this->aux_allocator(),
+                                                      cfg, cfg);
+
+                    for (const char * name : name_v) {
+                        DVariable * var
+                            = DVariable::make(this->allocator(),
+                                              table_.intern(name),
+                                              make_typeref(Kind::resolved));
+
+                        symtab.data()->upsert_variable(this->allocator(), var);
+                    }
+
+                    return symtab;
+                }
+
+                obj<AAllocator> aux_allocator() { return with_facet<AAllocator>::mkobj(&aux_); }
+
                 DX1Collector gc_;
+                /** non-GC memory for the symbol table's hash maps **/
+                DArena aux_ = DArena::map(ArenaConfig{ .name_ = "printable_render.aux",
+                                                       .size_ = 256*1024 });
                 StringTable table_;
             };
 
@@ -575,6 +621,118 @@ namespace xo {
                                  "  :path\n"
                                  "   {path:global:7}>"),
             };
+
+            /** DGlobalSymtab's four fields are all std::uint32_t
+             *  (DGlobalSymtab.hpp), so this is the first printer whose every
+             *  value goes through the WIDENED integer Prettifier rather than
+             *  the operator<< fallback -- see
+             *  .xo-backlog/xo-ppsink/issues/09-scalar-prettifiers.md, which was
+             *  done first precisely so these expectations pin a Prettifier.
+             **/
+            struct Testcase_DGlobalSymtab {
+                Testcase_DGlobalSymtab(std::size_t hint_capacity,
+                                       std::vector<const char *> name_v,
+                                       std::uint32_t margin,
+                                       const char * label,
+                                       const char * expect_deprecated,
+                                       const char * expect_pretty)
+                    : hint_capacity_{hint_capacity}, name_v_{std::move(name_v)},
+                      margin_{margin}, label_{label},
+                      expect_deprecated_{expect_deprecated},
+                      expect_pretty_{expect_pretty} {}
+
+                std::size_t hint_capacity_;
+                std::vector<const char *> name_v_;
+                std::uint32_t margin_;
+                const char * label_;
+                /** OBSERVED via pretty_deprecated; delete at phase E **/
+                std::string expect_deprecated_;
+                /** OBSERVED via pretty; outlives phase E **/
+                std::string expect_pretty_;
+            };
+
+            static std::vector<Testcase_DGlobalSymtab> s_symtab_v = {
+                /* an empty symtab still reports a capacity: the hash map is
+                 * sized at construction.  16, not the hint of 8 --
+                 * DArenaHashMap rounds up.
+                 */
+                Testcase_DGlobalSymtab(8, {}, 200, "empty.200",
+                                       "<DGlobalSymtab :nvar 0 :var_capacity 16"
+                                       " :ntype 0 :type_capacity 16>",
+                                       "<DGlobalSymtab :nvar 0 :var_capacity 16"
+                                       " :ntype 0 :type_capacity 16>"),
+
+                /* struct breaks, every field fits its own line.  Identical --
+                 * four scalar fields have no nested structure to disagree over,
+                 * which is what makes this printer the safe one to do first.
+                 */
+                Testcase_DGlobalSymtab(8, {}, 40, "empty.40",
+                                       "<DGlobalSymtab\n"
+                                       "  :nvar 0\n"
+                                       "  :var_capacity 16\n"
+                                       "  :ntype 0\n"
+                                       "  :type_capacity 16>",
+                                       "<DGlobalSymtab\n"
+                                       "  :nvar 0\n"
+                                       "  :var_capacity 16\n"
+                                       "  :ntype 0\n"
+                                       "  :type_capacity 16>"),
+
+                /* margin 14: only the two LONG field names force their values
+                 * onto the next line, so the known column divergence (legacy 4,
+                 * ppsink 3) appears while :nvar and :ntype stay put.
+                 */
+                Testcase_DGlobalSymtab(8, {}, 14, "empty.14",
+                                       "<DGlobalSymtab\n"
+                                       "  :nvar 0\n"
+                                       "  :var_capacity\n"
+                                       "    16\n"
+                                       "  :ntype 0\n"
+                                       "  :type_capacity\n"
+                                       "    16>",
+                                       "<DGlobalSymtab\n"
+                                       "  :nvar 0\n"
+                                       "  :var_capacity\n"
+                                       "   16\n"
+                                       "  :ntype 0\n"
+                                       "  :type_capacity\n"
+                                       "   16>"),
+
+                /* three upserted variables: :nvar tracks them, :ntype does not.
+                 * Pins that the printer reads the two arrays separately rather
+                 * than one count twice.
+                 */
+                Testcase_DGlobalSymtab(8, {"a", "b", "c"}, 200, "three.200",
+                                       "<DGlobalSymtab :nvar 3 :var_capacity 16"
+                                       " :ntype 0 :type_capacity 16>",
+                                       "<DGlobalSymtab :nvar 3 :var_capacity 16"
+                                       " :ntype 0 :type_capacity 16>"),
+
+                Testcase_DGlobalSymtab(8, {"a", "b", "c"}, 14, "three.14",
+                                       "<DGlobalSymtab\n"
+                                       "  :nvar 3\n"
+                                       "  :var_capacity\n"
+                                       "    16\n"
+                                       "  :ntype 0\n"
+                                       "  :type_capacity\n"
+                                       "    16>",
+                                       "<DGlobalSymtab\n"
+                                       "  :nvar 3\n"
+                                       "  :var_capacity\n"
+                                       "   16\n"
+                                       "  :ntype 0\n"
+                                       "  :type_capacity\n"
+                                       "   16>"),
+
+                /* a wider hint moves BOTH capacities, so they are read from the
+                 * maps rather than being a constant that happened to match.
+                 */
+                Testcase_DGlobalSymtab(64, {"a"}, 200, "wide.200",
+                                       "<DGlobalSymtab :nvar 1 :var_capacity 64"
+                                       " :ntype 0 :type_capacity 64>",
+                                       "<DGlobalSymtab :nvar 1 :var_capacity 64"
+                                       " :ntype 0 :type_capacity 64>"),
+            };
         } /*namespace*/
 
         TEST_CASE("TypeRef-render", "[printable][TypeRef]")
@@ -688,6 +846,36 @@ namespace xo {
             auto p = with_facet<APrintable>::mkobj(vr);
 
             CHECK(render_pretty(p, 200) == "<DVarRef :name  :path {path:0:1}>");
+        }
+
+        TEST_CASE("DGlobalSymtab-render", "[printable][DGlobalSymtab]")
+        {
+            REQUIRE(s_init.evidence());
+
+            UtestRehearser rh;
+
+            for (auto _ : rh) {
+                scope log(XO_DEBUG2_(rh.enable_debug(), "DGlobalSymtab-render"));
+
+                for (std::size_t i_tc = 0, n_tc = s_symtab_v.size(); i_tc < n_tc; ++i_tc) {
+                    const auto & tc = s_symtab_v[i_tc];
+
+                    VarFixture fx(tc.label_);
+
+                    auto symtab = fx.make_symtab(tc.hint_capacity_, tc.name_v_);
+
+                    auto p = with_facet<APrintable>::mkobj(symtab.data());
+
+                    std::string deprecated = render_deprecated(p, tc.margin_);
+                    std::string pretty = render_pretty(p, tc.margin_);
+
+                    log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_),
+                               xtag("deprecated", deprecated), xtag("pretty", pretty));
+
+                    REHEARSE(rh, pretty == tc.expect_pretty_);
+                    REHEARSE(rh, deprecated == tc.expect_deprecated_);
+                }
+            }
         }
     } /*namespace ut*/
 } /*namespace xo*/
