@@ -9,6 +9,8 @@
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/printable2/Printable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
+#include <xo/ppsink/quoted.hpp>         /* xo::pp::quot */
 #include <xo/reflectutil/typeseq.hpp>
 
 namespace xo {
@@ -16,6 +18,7 @@ namespace xo {
     using xo::mm::AGCObjectVisitor;
     using xo::print::APrintable;
     using xo::facet::FacetRegistry;
+    using xo::pp::field;
     using xo::reflect::TypeDescr;
     using xo::reflect::TypeDescrBase;
     using xo::reflect::FunctionTdxInfo;
@@ -183,6 +186,37 @@ namespace xo {
             } else {
                 return ppii.pps()->pretty_struct(ppii,
                                                  "LambdaExpr");
+            }
+        }
+
+        void
+        DLambdaExpr::pretty(xo::pp::PpSink & sink) const
+        {
+            auto body
+                = FacetRegistry::instance().try_variant<APrintable,
+                                                        AExpression>(body_expr_);
+
+            /* The if/else stays, and is NOT collapsible into field()'s
+             * `present` flag the way DDefineExpr's optional :rhs was.  There
+             * the branch was per-field; here it is ALL FOUR fields on one
+             * condition -- an incomplete lambda renders as a bare
+             * <LambdaExpr>, not as a struct with its fields dropped.  Writing
+             * it as four identically-gated fields would also mean building
+             * `quot(*name_)` on the path where name_ is null.
+             */
+            if (name_ && body) {
+                /* named locals: field() captures BY REFERENCE (pretty_struct.hpp) */
+                auto name = std::string_view(*name_);
+                const auto qname = xo::pp::quot(name);
+                auto local_symtab_pr = obj<APrintable,DLocalSymtab>(local_symtab_);
+
+                sink.pretty_struct("LambdaExpr",
+                                   field("tref", typeref_),
+                                   field("name", qname),
+                                   field("local_symtab", local_symtab_pr),
+                                   field("body", body));
+            } else {
+                sink.pretty_struct("LambdaExpr");
             }
         }
 

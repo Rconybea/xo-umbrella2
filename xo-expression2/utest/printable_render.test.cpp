@@ -29,6 +29,7 @@
 #include <xo/expression2/DefineExpr.hpp>    /* likewise DDefineExpr */
 #include <xo/expression2/GlobalSymtab.hpp>  /* likewise DGlobalSymtab */
 #include <xo/expression2/IfElseExpr.hpp>     /* likewise DIfElseExpr */
+#include <xo/expression2/LambdaExpr.hpp>     /* likewise DLambdaExpr */
 #include <xo/expression2/LocalSymtab.hpp>    /* likewise DLocalSymtab */
 #include <xo/expression2/SequenceExpr.hpp>   /* likewise DSequenceExpr */
 #include <xo/expression2/TypeRef.hpp>
@@ -74,6 +75,7 @@ namespace xo {
     using xo::scm::DDefineExpr;
     using xo::scm::DApplyExpr;
     using xo::scm::DLocalSymtab;
+    using xo::scm::DLambdaExpr;
     using xo::scm::DAtomicType;
     using xo::scm::Metatype;
     using xo::scm::AExpression;
@@ -669,6 +671,35 @@ namespace xo {
                     }
 
                     return retval;
+                }
+
+                /** a DLambdaExpr named @p name, over a symtab of @p n_var
+                 *  arguments, with a body iff @p with_body.
+                 *
+                 *  Legacy's branch is ALL-OR-NOTHING: `name_ && body` gates the
+                 *  whole struct, so @p name nullptr and @p with_body false are
+                 *  each a case that renders a bare <LambdaExpr> -- not a struct
+                 *  with fields dropped.  Both are exercised.
+                 *
+                 *  The symtab is always real, including for the bare cases: a
+                 *  null one would be a different defect from the one under
+                 *  test, and visit_gco_children dereferences it.
+                 **/
+                DLambdaExpr * make_lambda(const char * name, bool with_body, int n_var) {
+                    DLocalSymtab * symtab = this->make_localsymtab(n_var, 0 /*n_type*/);
+
+                    obj<AExpression> body;
+
+                    if (with_body) {
+                        body = obj<AExpression>(DConstant::make(this->allocator(),
+                                                                DInteger::box<AGCObject>(this->allocator(), 5)));
+                    }
+
+                    return DLambdaExpr::_make(this->allocator(),
+                                              make_typeref(Kind::unresolved),
+                                              (name ? table_.intern(name) : nullptr),
+                                              symtab,
+                                              body);
                 }
 
                 template <typename T>
@@ -1825,6 +1856,217 @@ namespace xo {
                                       "      :td null>>\n"
                                       "  :ntypes 0>"),
             };
+
+            /** DLambdaExpr's branch is ALL-OR-NOTHING, unlike DDefineExpr's
+             *  per-field one: `name_ && body` gates the entire struct, so an
+             *  incomplete lambda renders `<LambdaExpr>` rather than a struct
+             *  with fields omitted.  Both halves of that condition are cases.
+             *
+             *  Its :local_symtab field nests DLocalSymtab, converted just
+             *  before it -- which is why this printer was taken after that one
+             *  rather than before: nothing here pins "STUB:" text.
+             **/
+            struct Testcase_DLambdaExpr {
+                Testcase_DLambdaExpr(const char * name, bool with_body, int n_var,
+                                     std::uint32_t margin, const char * label,
+                                     const char * expect_deprecated,
+                                     const char * expect_pretty)
+                    : name_{name}, with_body_{with_body}, n_var_{n_var},
+                      margin_{margin}, label_{label},
+                      expect_deprecated_{expect_deprecated},
+                      expect_pretty_{expect_pretty} {}
+
+                const char * name_;
+                bool with_body_;
+                int n_var_;
+                std::uint32_t margin_;
+                const char * label_;
+                /** OBSERVED via pretty_deprecated; delete at phase E **/
+                std::string expect_deprecated_;
+                /** OBSERVED via pretty; outlives phase E **/
+                std::string expect_pretty_;
+            };
+
+            static std::vector<Testcase_DLambdaExpr> s_lambda_v = {
+                /* fits on one line: the two stacks agree, and nothing nests
+                 * deeply enough for the field-value column to matter.
+                 */
+                Testcase_DLambdaExpr("f", true, 0, 200, "L0.200",
+                                      "<LambdaExpr :tref <TypeRef :id \"t:N\" :td null> :name \"f\" :local_symtab <LocalSymtab :nvars 0 :ntypes 0> :body <DConstant :value_.tseq N :value.tseq N :value 5>>",
+                                      "<LambdaExpr :tref <TypeRef :id \"t:N\" :td null> :name \"f\" :local_symtab <LocalSymtab :nvars 0 :ntypes 0> :body <DConstant :value_.tseq N :value.tseq N :value 5>>"),
+
+                Testcase_DLambdaExpr("f", true, 0, 60, "L0.60",
+                                      "<LambdaExpr\n"
+                                      "  :tref <TypeRef :id \"t:N\" :td null>\n"
+                                      "  :name \"f\"\n"
+                                      "  :local_symtab <LocalSymtab :nvars 0 :ntypes 0>\n"
+                                      "  :body <DConstant :value_.tseq N :value.tseq N :value 5>>",
+                                      "<LambdaExpr\n"
+                                      "  :tref <TypeRef :id \"t:N\" :td null>\n"
+                                      "  :name \"f\"\n"
+                                      "  :local_symtab <LocalSymtab :nvars 0 :ntypes 0>\n"
+                                      "  :body <DConstant :value_.tseq N :value.tseq N :value 5>>"),
+
+                Testcase_DLambdaExpr("f", true, 0, 30, "L0.30",
+                                      "<LambdaExpr\n"
+                                      "  :tref\n"
+                                      "    <TypeRef\n"
+                                      "      :id \"t:N\"\n"
+                                      "      :td null>\n"
+                                      "  :name \"f\"\n"
+                                      "  :local_symtab\n"
+                                      "    <LocalSymtab\n"
+                                      "      :nvars 0\n"
+                                      "      :ntypes 0>\n"
+                                      "  :body\n"
+                                      "    <DConstant\n"
+                                      "      :value_.tseq N\n"
+                                      "      :value.tseq N\n"
+                                      "      :value 5>>",
+                                      "<LambdaExpr\n"
+                                      "  :tref\n"
+                                      "   <TypeRef\n"
+                                      "    :id \"t:N\"\n"
+                                      "    :td null>\n"
+                                      "  :name \"f\"\n"
+                                      "  :local_symtab\n"
+                                      "   <LocalSymtab\n"
+                                      "    :nvars 0\n"
+                                      "    :ntypes 0>\n"
+                                      "  :body\n"
+                                      "   <DConstant\n"
+                                      "    :value_.tseq N\n"
+                                      "    :value.tseq N\n"
+                                      "    :value 5>>"),
+
+                /* one argument, margin 200.  The :local_symtab value is now wide
+                 * enough that the LAMBDA breaks while the symtab inside it does
+                 * not -- so every field gets its own line and the two stacks
+                 * agree EXACTLY, isolating field order and names from layout.
+                 */
+                Testcase_DLambdaExpr("f", true, 1, 200, "L1.200",
+                                      "<LambdaExpr\n"
+                                      "  :tref <TypeRef :id \"t:N\" :td null>\n"
+                                      "  :name \"f\"\n"
+                                      "  :local_symtab <LocalSymtab :nvars 1 :[0] <DVariable :name \"v1\" :typeref <TypeRef :id \"t:N\" :td null>> :ntypes 0>\n"
+                                      "  :body <DConstant :value_.tseq N :value.tseq N :value 5>>",
+                                      "<LambdaExpr\n"
+                                      "  :tref <TypeRef :id \"t:N\" :td null>\n"
+                                      "  :name \"f\"\n"
+                                      "  :local_symtab <LocalSymtab :nvars 1 :[0] <DVariable :name \"v1\" :typeref <TypeRef :id \"t:N\" :td null>> :ntypes 0>\n"
+                                      "  :body <DConstant :value_.tseq N :value.tseq N :value 5>>"),
+
+                /* the mixed case: the symtab breaks, its one variable does not.
+                 * Exactly one level of the +2/+1 column gap is visible.
+                 */
+                Testcase_DLambdaExpr("f", true, 1, 80, "L1.80",
+                                      "<LambdaExpr\n"
+                                      "  :tref <TypeRef :id \"t:N\" :td null>\n"
+                                      "  :name \"f\"\n"
+                                      "  :local_symtab\n"
+                                      "    <LocalSymtab\n"
+                                      "      :nvars 1\n"
+                                      "      :[0] <DVariable :name \"v1\" :typeref <TypeRef :id \"t:N\" :td null>>\n"
+                                      "      :ntypes 0>\n"
+                                      "  :body <DConstant :value_.tseq N :value.tseq N :value 5>>",
+                                      "<LambdaExpr\n"
+                                      "  :tref <TypeRef :id \"t:N\" :td null>\n"
+                                      "  :name \"f\"\n"
+                                      "  :local_symtab\n"
+                                      "   <LocalSymtab\n"
+                                      "    :nvars 1\n"
+                                      "    :[0] <DVariable :name \"v1\" :typeref <TypeRef :id \"t:N\" :td null>>\n"
+                                      "    :ntypes 0>\n"
+                                      "  :body <DConstant :value_.tseq N :value.tseq N :value 5>>"),
+
+                /* everything breaks, four levels deep -- the deepest nesting in
+                 * this fixture, and where the column gap compounds most.
+                 */
+                Testcase_DLambdaExpr("f", true, 1, 30, "L1.30",
+                                      "<LambdaExpr\n"
+                                      "  :tref\n"
+                                      "    <TypeRef\n"
+                                      "      :id \"t:N\"\n"
+                                      "      :td null>\n"
+                                      "  :name \"f\"\n"
+                                      "  :local_symtab\n"
+                                      "    <LocalSymtab\n"
+                                      "      :nvars 1\n"
+                                      "      :[0]\n"
+                                      "        <DVariable\n"
+                                      "          :name \"v1\"\n"
+                                      "          :typeref\n"
+                                      "            <TypeRef\n"
+                                      "              :id \"t:N\"\n"
+                                      "              :td null>>\n"
+                                      "      :ntypes 0>\n"
+                                      "  :body\n"
+                                      "    <DConstant\n"
+                                      "      :value_.tseq N\n"
+                                      "      :value.tseq N\n"
+                                      "      :value 5>>",
+                                      "<LambdaExpr\n"
+                                      "  :tref\n"
+                                      "   <TypeRef\n"
+                                      "    :id \"t:N\"\n"
+                                      "    :td null>\n"
+                                      "  :name \"f\"\n"
+                                      "  :local_symtab\n"
+                                      "   <LocalSymtab\n"
+                                      "    :nvars 1\n"
+                                      "    :[0]\n"
+                                      "     <DVariable\n"
+                                      "      :name \"v1\"\n"
+                                      "      :typeref\n"
+                                      "       <TypeRef\n"
+                                      "        :id \"t:N\"\n"
+                                      "        :td null>>\n"
+                                      "    :ntypes 0>\n"
+                                      "  :body\n"
+                                      "   <DConstant\n"
+                                      "    :value_.tseq N\n"
+                                      "    :value.tseq N\n"
+                                      "    :value 5>>"),
+
+                Testcase_DLambdaExpr("f", true, 2, 200, "L2.200",
+                                      "<LambdaExpr\n"
+                                      "  :tref <TypeRef :id \"t:N\" :td null>\n"
+                                      "  :name \"f\"\n"
+                                      "  :local_symtab <LocalSymtab :nvars 2 :[0] <DVariable :name \"v1\" :typeref <TypeRef :id \"t:N\" :td null>> :[1] <DVariable :name \"v2\" :typeref <TypeRef :id \"t:N\" :td null>> :ntypes 0>\n"
+                                      "  :body <DConstant :value_.tseq N :value.tseq N :value 5>>",
+                                      "<LambdaExpr\n"
+                                      "  :tref <TypeRef :id \"t:N\" :td null>\n"
+                                      "  :name \"f\"\n"
+                                      "  :local_symtab <LocalSymtab :nvars 2 :[0] <DVariable :name \"v1\" :typeref <TypeRef :id \"t:N\" :td null>> :[1] <DVariable :name \"v2\" :typeref <TypeRef :id \"t:N\" :td null>> :ntypes 0>\n"
+                                      "  :body <DConstant :value_.tseq N :value.tseq N :value 5>>"),
+
+                /* name_ null: the WHOLE struct collapses to a bare <LambdaExpr>.
+                 * Not "fields dropped" -- the body and symtab are present and
+                 * still render nothing.  That is legacy's branch, reproduced.
+                 */
+                Testcase_DLambdaExpr(nullptr, true, 1, 200, "Lanon.200",
+                                      "<LambdaExpr>",
+                                      "<LambdaExpr>"),
+
+                /* and it is margin-invariant, having no break points at all */
+                Testcase_DLambdaExpr(nullptr, true, 1, 30, "Lanon.30",
+                                      "<LambdaExpr>",
+                                      "<LambdaExpr>"),
+
+                /* body absent, name present: the same collapse from the other
+                 * half of the condition.
+                 */
+                Testcase_DLambdaExpr("f", false, 1, 200, "Lnobody.200",
+                                      "<LambdaExpr>",
+                                      "<LambdaExpr>"),
+
+                /* margin 8 against 13 characters: the degenerate form does not
+                 * break even when it cannot fit, because it has nowhere to.
+                 */
+                Testcase_DLambdaExpr("f", false, 1, 8, "Lnobody.8",
+                                      "<LambdaExpr>",
+                                      "<LambdaExpr>"),
+            };
         } /*namespace*/
 
         TEST_CASE("TypeRef-render", "[printable][TypeRef]")
@@ -2248,6 +2490,38 @@ namespace xo {
             REQUIRE(pretty.find(":nvars 0") != std::string::npos);
             REQUIRE(pretty.find(":ntypes 1") != std::string::npos);
             REQUIRE(pretty.find(":[0]") != std::string::npos);
+        }
+        TEST_CASE("DLambdaExpr-render", "[printable][DLambdaExpr]")
+        {
+            REQUIRE(s_init.evidence());
+
+            UtestRehearser rh;
+
+            for (auto _ : rh) {
+                scope log(XO_DEBUG2_(rh.enable_debug(), "DLambdaExpr-render"));
+
+                for (std::size_t i_tc = 0, n_tc = s_lambda_v.size(); i_tc < n_tc; ++i_tc) {
+                    const auto & tc = s_lambda_v[i_tc];
+
+                    VarFixture fx(tc.label_);
+
+                    DLambdaExpr * e = fx.make_lambda(tc.name_, tc.with_body_, tc.n_var_);
+                    REQUIRE(e != nullptr);
+
+                    auto p = with_facet<APrintable>::mkobj(e);
+
+                    std::string deprecated
+                        = scrub_type_id(scrub_typevar(scrub_tseq(render_deprecated(p, tc.margin_))));
+                    std::string pretty
+                        = scrub_type_id(scrub_typevar(scrub_tseq(render_pretty(p, tc.margin_))));
+
+                    log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_),
+                               xtag("deprecated", deprecated), xtag("pretty", pretty));
+
+                    REHEARSE(rh, pretty == tc.expect_pretty_);
+                    REHEARSE(rh, deprecated == tc.expect_deprecated_);
+                }
+            }
         }
     } /*namespace ut*/
 } /*namespace xo*/
