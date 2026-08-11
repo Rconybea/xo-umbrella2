@@ -8,12 +8,14 @@
 #       See ~/proj/nix/docker.nix for the make-me-one-with-everything version
 #
 # To build+deploy:
+#    $ docker image prune -f   # optional hygiene
 #    $ nix-build -A xo.docker-xo-builder   # builds container
 #    $ docker load <$(readlink -f result)  # load into docker
 #    $ docker image tag docker-xo-builder:v2 conybeare.us/roland/docker-xo-builder:v2  #
 #    $ docker image push conybeare.us/roland/docker-xo-builder:v2   # push
 # Then on CI host:
 #    $ docker pull conybeare.us/roland/docker-xo-builder:v2
+#    $ docker image prune -f
 # Will be used on next CI build
 
 {
