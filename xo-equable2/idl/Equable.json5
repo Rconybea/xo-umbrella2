@@ -1,0 +1,45 @@
+{
+    mode: "facet",
+    output_cpp_dir: "src/equable2",
+    output_hpp_dir: "include/xo/equable2",
+    output_impl_subdir: "detail",
+    includes: [
+    ],
+    user_hpp_includes: [
+    ],
+    namespace1: "xo",
+    namespace2: "equable",   // TODO: change to project namespace if different
+    pretext: [],
+    facet: "Equable",
+    detail_subdir: "detail",
+    brief: "equality-comparable objects",
+    using_doxygen: true,
+    doc: [
+        "Trait for data types that support equality comparison.",
+        "PLACEHOLDER: the facet is not designed yet -- const_methods below is",
+        "deliberately empty, so AEquable presently has no methods.  The",
+        "subsystem is scaffolded and builds so that `xo-build --all` covers",
+        "every entry in xo-cmake/etc/xo/subsystem-list."
+    ],
+    types: [
+        {
+            name: "obj_AEquable",
+            doc: [],
+            definition: "xo::facet::obj<AEquable>",
+        }
+    ],
+    const_methods: [
+        // TODO: define methods.  Something along the lines of
+        // {
+        //     name: "equals",
+        //     doc: ["true iff *this compares equal to @p other"],
+        //     return_type: "bool",
+        //     args: [{type: "obj_AEquable", name: "other"}],
+        //     const: true,
+        // },
+        // but the shape is undecided -- see namespace2 above, which is also
+        // still the scaffolded default.
+    ],
+    nonconst_methods: [],
+    router_facet_explicit_content: [],
+}

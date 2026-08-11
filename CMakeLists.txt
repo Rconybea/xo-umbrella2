@@ -102,6 +102,8 @@ add_subdirectory(xo-object2)      # experiment w/ facet object model
 add_subdirectory(xo-gc)           # incremental gc + facet object model
 add_subdirectory(xo-type)         # experiment w/ facet object model
 add_subdirectory(xo-procedure2)   # schematika procedure abstraction + runtime context (fomo)
+add_subdirectory(xo-equable2)     # equality facet -- scaffolded, no methods yet
+add_subdirectory(xo-hashable2)    # hashing facet -- scaffolded, no methods yet
 add_subdirectory(xo-numeric)      # schematika poly arithmetic w/ facet object model
 add_subdirectory(xo-tokenizer2)   # schematika tokenizer (w/ fomo)
 add_subdirectory(xo-expression2)  # schematika expressions (fomo)

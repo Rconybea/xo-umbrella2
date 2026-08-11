@@ -1,0 +1,46 @@
+{
+    mode: "facet",
+    output_cpp_dir: "src/hashable2",
+    output_hpp_dir: "include/xo/hashable2",
+    output_impl_subdir: "detail",
+    includes: [
+    ],
+    user_hpp_includes: [
+    ],
+    namespace1: "xo",
+    namespace2: "hashable",   // TODO: change to project namespace if different
+    pretext: [],
+    facet: "Hashable",
+    detail_subdir: "detail",
+    brief: "hashable objects",
+    using_doxygen: true,
+    doc: [
+        "Trait for data types that can supply a hash of their contents.",
+        "PLACEHOLDER: the facet is not designed yet -- const_methods below is",
+        "deliberately empty, so AHashable presently has no methods.  The",
+        "subsystem is scaffolded and builds so that `xo-build --all` covers",
+        "every entry in xo-cmake/etc/xo/subsystem-list."
+    ],
+    types: [
+        {
+            name: "obj_AHashable",
+            doc: [],
+            definition: "xo::facet::obj<AHashable>",
+        }
+    ],
+    const_methods: [
+        // TODO: define methods.  Something along the lines of
+        // {
+        //     name: "hash",
+        //     doc: ["hash of this object's contents"],
+        //     return_type: "std::size_t",
+        //     args: [],
+        //     const: true,
+        //     noexcept: true,
+        // },
+        // but the shape is undecided -- see namespace2 above, which is also
+        // still the scaffolded default.
+    ],
+    nonconst_methods: [],
+    router_facet_explicit_content: [],
+}

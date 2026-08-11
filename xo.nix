@@ -48,6 +48,8 @@ let
     xo-gc             = callPackage pkgs/xo-gc.nix             { stdenv = jitStdenv; buildDocs = true; };
     xo-type           = callPackage pkgs/xo-type.nix           { stdenv = jitStdenv; };
     xo-procedure2     = callPackage pkgs/xo-procedure2.nix     { stdenv = jitStdenv; };
+    xo-equable2       = callPackage pkgs/xo-equable2.nix       { stdenv = jitStdenv; };
+    xo-hashable2      = callPackage pkgs/xo-hashable2.nix      { stdenv = jitStdenv; };
     xo-numeric        = callPackage pkgs/xo-numeric.nix        { stdenv = jitStdenv; };
     xo-tokenizer2     = callPackage pkgs/xo-tokenizer2.nix     { stdenv = jitStdenv;                   buildExamples = true; };
     xo-expression2    = callPackage pkgs/xo-expression2.nix    { stdenv = jitStdenv; };

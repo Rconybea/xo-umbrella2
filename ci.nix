@@ -37,6 +37,8 @@ in
       xo-gc
       xo-type
       xo-procedure2
+      xo-equable2
+      xo-hashable2
       xo-numeric
       xo-tokenizer2
       xo-expression2
