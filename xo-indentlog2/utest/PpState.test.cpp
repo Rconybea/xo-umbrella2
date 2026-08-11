@@ -13,6 +13,7 @@
 #include <cstring>
 #include <string>
 #include <vector>
+#include <iostream>   /* std::cout -- was arriving via xo/reflectutil/typeseq.hpp */
 
 namespace ut {
     using xo::pp::PpState;

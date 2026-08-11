@@ -15,6 +15,7 @@
 #include <xo/ppsink/scope_macros.hpp>
 #include <xo/ppsink/tag.hpp>
 #include <xo/ppsink/tostr.hpp>
+#include <xo/reflectutil/typeseq_pp.hpp> /* Prettifier<typeseq>: dump() renders typeseqs */
 // #include <unordered_map>
 #include <utility>
 
@@ -199,7 +200,14 @@ namespace xo {
                 (*p_out) << "<FacetRegistry" << std::endl;
                 for (auto & kv : registry_) {
                     (*p_out)
-                    << "  [" << kv.first.first << "," << kv.first.second << "]"
+                    /* tostr(), not `<< tseq`: typeseq has no inserter --
+                     * its rendering lives in Prettifier<typeseq>
+                     * (xo/reflectutil/typeseq_pp.hpp), so typeseq.hpp stays
+                     * free of <ostream>.  See
+                     * .xo-backlog/milestones/ostream-containment.md
+                     */
+                    << "  [" << xo::pp::tostr(kv.first.first)
+                    << "," << xo::pp::tostr(kv.first.second) << "]"
                     << " -> " << kv.second << std::endl;
                 }
                 (*p_out) << ">" << std::endl;

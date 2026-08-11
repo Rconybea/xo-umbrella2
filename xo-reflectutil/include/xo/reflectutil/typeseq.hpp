@@ -7,7 +7,7 @@
 
 #include "type_name.hpp"
 #include <cstdint>
-#include <iostream>
+#include <ostream>
 
 namespace xo {
     namespace reflect {
@@ -111,11 +111,27 @@ namespace xo {
             return lhs.seqno() != rhs.seqno();
         }
 
+        /** RETAINED, for now.
+         *
+         *  Prettifier<typeseq> (typeseq_pp.hpp) is the intended path and this
+         *  inserter should eventually move to a typeseq_ostream.hpp per
+         *  .xo-backlog/milestones/ostream-containment.md.  It cannot go yet:
+         *  every Setup*.cpp in the facet cluster logs typeseqs through LEGACY
+         *  xo-indentlog xtag, which renders via operator<< and has no
+         *  Prettifier to fall back on.  Removing this builds only after those
+         *  sites are swept (or xo-indentlog is deleted).
+         *
+         *  <ostream>, not <iostream>: the header needs the inserter's
+         *  declaration, not the standard stream objects, and xo-reflectutil is
+         *  used by ~50 subsystems -- so <iostream> here was instantiating
+         *  std::ios_base::Init tree-wide for nothing.
+         **/
         inline std::ostream &
         operator<<(std::ostream & s, const typeseq & x) {
             s << x.seqno();
             return s;
         }
+
     } /*namespace reflect*/
 } /*namespace xo*/
 

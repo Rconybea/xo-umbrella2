@@ -2,7 +2,7 @@
   # dependencies
   stdenv, cmake, #catch2,
 
-  xo-cmake, xo-flatstring,
+  xo-cmake, xo-flatstring, xo-ppsink,
 } :
 
 stdenv.mkDerivation (finalattrs:
@@ -17,5 +17,6 @@ stdenv.mkDerivation (finalattrs:
     nativeBuildInputs = [ cmake #catch2
                           xo-cmake
                           xo-flatstring
+                          xo-ppsink
                         ];
   })

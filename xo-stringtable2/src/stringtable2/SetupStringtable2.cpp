@@ -30,7 +30,12 @@ namespace xo {
             FacetRegistry::register_impl<AGCObject, DString>();
             FacetRegistry::register_impl<APrintable, DString>();
 
-            log && log(xtag("DString.tseq", typeseq::id<DString>()));
+            /* .seqno(), not the typeseq itself: this is LEGACY xtag, which
+             * renders via operator<<, and typeseq no longer has one -- its
+             * rendering is Prettifier<typeseq> (xo/reflectutil/typeseq_pp.hpp).
+             * Output is unchanged; the legacy inserter printed seqno() too.
+             */
+            log && log(xtag("DString.tseq", typeseq::id<DString>().seqno()));
 
             return true;
         }

@@ -5,6 +5,7 @@
 
 #include "LogStreambuf.hpp"
 #include <xo/ppsink/quoted_char_ostream.hpp>
+#include <iostream>   /* std::cerr -- was arriving via xo/reflectutil/typeseq.hpp */
 
 namespace xo {
     using xo::pp::quoted_char;
