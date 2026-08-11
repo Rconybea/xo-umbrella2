@@ -9,8 +9,7 @@
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/printable2/Printable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
-#include <xo/indentlog/print/cond.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/pretty_struct.hpp>   /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
     using xo::mm::poly_forward_inplace;
@@ -124,6 +123,34 @@ namespace xo {
                                );
 
             }
+        }
+
+        void
+        DDefineExpr::pretty(xo::pp::PpSink & sink) const
+        {
+            assert(lhs_var_);
+
+            /* named locals: field() captures BY REFERENCE (pretty_struct.hpp).
+             *
+             * lhs is always present -- make() constructs a DVariable
+             * unconditionally, even for make_empty() -- so it takes field()'s
+             * two-argument form.  rhs may be unset, and field()'s third
+             * argument then drops the field and its separator entirely.
+             *
+             * That third argument is what the legacy body could not express:
+             * it duplicates the whole pretty_struct() call in an if/else,
+             * under the comment "xo::print::cond() doesn't resolve the way we
+             * want here".  Two call sites for one structure, kept in step by
+             * hand.  Second consumer of that pattern after DIfElseExpr, which
+             * had four.
+             */
+            auto lhs = obj<APrintable,DVariable>(lhs_var_);
+            auto rhs = FacetRegistry::instance().try_variant<APrintable,
+                                                             AExpression>(rhs_);
+
+            sink.pretty_struct("DDefineExpr",
+                               xo::pp::field("lhs", lhs),
+                               xo::pp::field("rhs", rhs, bool(rhs)));
         }
 
     } /*namespace scm*/

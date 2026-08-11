@@ -25,6 +25,7 @@
 
 #include "init_expression2.hpp"
 #include <xo/expression2/Constant.hpp>      /* likewise DConstant */
+#include <xo/expression2/DefineExpr.hpp>    /* likewise DDefineExpr */
 #include <xo/expression2/GlobalSymtab.hpp>  /* likewise DGlobalSymtab */
 #include <xo/expression2/IfElseExpr.hpp>     /* likewise DIfElseExpr */
 #include <xo/expression2/SequenceExpr.hpp>   /* likewise DSequenceExpr */
@@ -66,6 +67,7 @@ namespace xo {
     using xo::scm::DConstant;
     using xo::scm::DIfElseExpr;
     using xo::scm::DSequenceExpr;
+    using xo::scm::DDefineExpr;
     using xo::scm::AExpression;
     using xo::scm::DFloat;
     using xo::scm::DInteger;
@@ -557,6 +559,30 @@ namespace xo {
                     if (with_false)
                         retval->assign_when_false(obj<AExpression>(DConstant::make(this->allocator(),
                                                                                    DInteger::box<AGCObject>(this->allocator(), 3))));
+
+                    return retval;
+                }
+
+                /** a DDefineExpr for @p name, with an initializer iff @p with_rhs.
+                 *
+                 *  Two independent branches meet here: the OPTIONAL :rhs field,
+                 *  and the nested DVariable's own branch on a null name (@p name
+                 *  nullptr).  Both are converted printers, so nothing here pins
+                 *  "STUB:" text that would move later.
+                 *
+                 *  make_empty() rather than make(): make() would need an
+                 *  obj<AExpression> up front, and the parser's own path is to
+                 *  build the skeleton and fill it in.
+                 **/
+                DDefineExpr * make_define(const char * name, bool with_rhs) {
+                    DDefineExpr * retval = DDefineExpr::make_empty(this->allocator());
+
+                    if (name)
+                        retval->assign_lhs_name(table_.intern(name));
+
+                    if (with_rhs)
+                        retval->assign_rhs(obj<AExpression>(DConstant::make(this->allocator(),
+                                                                           DInteger::box<AGCObject>(this->allocator(), 7))));
 
                     return retval;
                 }
@@ -1263,6 +1289,132 @@ namespace xo {
                                    "   N\n"
                                    "  :value 2.5>"),
             };
+
+            /** DDefineExpr has one optional field (:rhs) and one that is always
+             *  present (:lhs).  Where DIfElseExpr's legacy body used refrtag's
+             *  three-argument form, this one DUPLICATES the whole
+             *  pretty_struct() call in an if/else -- see the "cond() doesn't
+             *  resolve the way we want here" comment in DDefineExpr.cpp.  The
+             *  ppsink body is a single call with field()'s third argument, so
+             *  these cases are the evidence that the two spellings agree.
+             *
+             *  @p name nullptr exercises the nested DVariable's own null-name
+             *  branch at the same time.
+             **/
+            struct Testcase_DDefineExpr {
+                Testcase_DDefineExpr(const char * name, bool with_rhs,
+                                     std::uint32_t margin,
+                                     const char * label,
+                                     const char * expect_deprecated,
+                                     const char * expect_pretty)
+                    : name_{name}, with_rhs_{with_rhs}, margin_{margin},
+                      label_{label},
+                      expect_deprecated_{expect_deprecated},
+                      expect_pretty_{expect_pretty} {}
+
+                /** nullptr -> lhs variable is anonymous **/
+                const char * name_;
+                bool with_rhs_;
+                std::uint32_t margin_;
+                const char * label_;
+                /** OBSERVED via pretty_deprecated; delete at phase E **/
+                std::string expect_deprecated_;
+                /** OBSERVED via pretty; outlives phase E **/
+                std::string expect_pretty_;
+            };
+
+            static std::vector<Testcase_DDefineExpr> s_define_v = {
+                /* no initializer: :rhs and its separator are gone entirely.
+                 * Both stacks agree -- no ":rhs" with an empty value.
+                 */
+                Testcase_DDefineExpr("x", false, 200, "noinit.200",
+                                     "<DDefineExpr :lhs <DVariable :name \"x\" :typeref <TypeRef :id \"\" :td null>>>",
+                                     "<DDefineExpr :lhs <DVariable :name \"x\" :typeref <TypeRef :id \"\" :td null>>>"),
+
+                /* the same, fully broken.  Three levels of nesting, so the
+                 * field-value column divergence (legacy indent+2, ppsink
+                 * indent+1) compounds: 4 vs 3 at :lhs, 8 vs 5 at :typeref.
+                 */
+                Testcase_DDefineExpr("x", false, 30, "noinit.30",
+                                     "<DDefineExpr\n"
+                                     "  :lhs\n"
+                                     "    <DVariable\n"
+                                     "      :name \"x\"\n"
+                                     "      :typeref\n"
+                                     "        <TypeRef\n"
+                                     "          :id \"\"\n"
+                                     "          :td null>>>",
+                                     "<DDefineExpr\n"
+                                     "  :lhs\n"
+                                     "   <DVariable\n"
+                                     "    :name \"x\"\n"
+                                     "    :typeref\n"
+                                     "     <TypeRef\n"
+                                     "      :id \"\"\n"
+                                     "      :td null>>>"),
+
+                /* with an initializer: :rhs appears, flat, identical */
+                Testcase_DDefineExpr("x", true, 200, "init.200",
+                                     "<DDefineExpr :lhs <DVariable :name \"x\" :typeref <TypeRef :id \"\" :td null>> :rhs <DConstant :value_.tseq N :value.tseq N :value 7>>",
+                                     "<DDefineExpr :lhs <DVariable :name \"x\" :typeref <TypeRef :id \"\" :td null>> :rhs <DConstant :value_.tseq N :value.tseq N :value 7>>"),
+
+                /* margin 60 -- THE case worth having.  Here the column
+                 * divergence changes WHAT IS EMITTED, not just where: ppsink's
+                 * :lhs value starts one column earlier, which leaves the nested
+                 * DVariable enough room to stay on one line, where legacy has
+                 * to break it into four.  Elsewhere the two stacks differ only
+                 * in leading whitespace; this pins that the difference can
+                 * cascade into a different line structure.
+                 */
+                Testcase_DDefineExpr("x", true, 60, "init.60",
+                                     "<DDefineExpr\n"
+                                     "  :lhs\n"
+                                     "    <DVariable\n"
+                                     "      :name \"x\"\n"
+                                     "      :typeref <TypeRef :id \"\" :td null>>\n"
+                                     "  :rhs <DConstant :value_.tseq N :value.tseq N :value 7>>",
+                                     "<DDefineExpr\n"
+                                     "  :lhs\n"
+                                     "   <DVariable :name \"x\" :typeref <TypeRef :id \"\" :td null>>\n"
+                                     "  :rhs <DConstant :value_.tseq N :value.tseq N :value 7>>"),
+
+                /* margin 30, both fields present: every level breaks */
+                Testcase_DDefineExpr("x", true, 30, "init.30",
+                                     "<DDefineExpr\n"
+                                     "  :lhs\n"
+                                     "    <DVariable\n"
+                                     "      :name \"x\"\n"
+                                     "      :typeref\n"
+                                     "        <TypeRef\n"
+                                     "          :id \"\"\n"
+                                     "          :td null>>\n"
+                                     "  :rhs\n"
+                                     "    <DConstant\n"
+                                     "      :value_.tseq N\n"
+                                     "      :value.tseq N\n"
+                                     "      :value 7>>",
+                                     "<DDefineExpr\n"
+                                     "  :lhs\n"
+                                     "   <DVariable\n"
+                                     "    :name \"x\"\n"
+                                     "    :typeref\n"
+                                     "     <TypeRef\n"
+                                     "      :id \"\"\n"
+                                     "      :td null>>\n"
+                                     "  :rhs\n"
+                                     "   <DConstant\n"
+                                     "    :value_.tseq N\n"
+                                     "    :value.tseq N\n"
+                                     "    :value 7>>"),
+
+                /* anonymous lhs: DVariable renders :name "" rather than
+                 * dropping the field -- an empty VALUE, not an absent field.
+                 * The contrast with :rhs above is the point.
+                 */
+                Testcase_DDefineExpr(nullptr, true, 200, "anon.200",
+                                     "<DDefineExpr :lhs <DVariable :name \"\" :typeref <TypeRef :id \"\" :td null>> :rhs <DConstant :value_.tseq N :value.tseq N :value 7>>",
+                                     "<DDefineExpr :lhs <DVariable :name \"\" :typeref <TypeRef :id \"\" :td null>> :rhs <DConstant :value_.tseq N :value.tseq N :value 7>>"),
+            };
         } /*namespace*/
 
         TEST_CASE("TypeRef-render", "[printable][TypeRef]")
@@ -1536,6 +1688,38 @@ namespace xo {
 
                     std::string deprecated = scrub_tseq(render_deprecated(p, tc.margin_));
                     std::string pretty = scrub_tseq(render_pretty(p, tc.margin_));
+
+                    log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_),
+                               xtag("deprecated", deprecated), xtag("pretty", pretty));
+
+                    REHEARSE(rh, pretty == tc.expect_pretty_);
+                    REHEARSE(rh, deprecated == tc.expect_deprecated_);
+                }
+            }
+        }
+        TEST_CASE("DDefineExpr-render", "[printable][DDefineExpr]")
+        {
+            REQUIRE(s_init.evidence());
+
+            UtestRehearser rh;
+
+            for (auto _ : rh) {
+                scope log(XO_DEBUG2_(rh.enable_debug(), "DDefineExpr-render"));
+
+                for (std::size_t i_tc = 0, n_tc = s_define_v.size(); i_tc < n_tc; ++i_tc) {
+                    const auto & tc = s_define_v[i_tc];
+
+                    VarFixture fx(tc.label_);
+
+                    DDefineExpr * e = fx.make_define(tc.name_, tc.with_rhs_);
+                    REQUIRE(e != nullptr);
+
+                    auto p = with_facet<APrintable>::mkobj(e);
+
+                    std::string deprecated
+                        = scrub_typevar(scrub_tseq(render_deprecated(p, tc.margin_)));
+                    std::string pretty
+                        = scrub_typevar(scrub_tseq(render_pretty(p, tc.margin_)));
 
                     log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_),
                                xtag("deprecated", deprecated), xtag("pretty", pretty));
