@@ -133,7 +133,27 @@ namespace xo {
                                           std::move(ts_module));
             }
 
-            /** intern @p symbol, binding it to address @p dest **/
+            /** intern @p symbol, binding it to address @p dest.
+             *
+             *  @p dest is always a FUNCTION here -- the caller is
+             *  MachPipeline::codegen_primitive, publishing the address of a
+             *  compiled-in C++ function so jit'd code can call it.  The flags
+             *  have to say so: with a default-constructed JITSymbolFlags the
+             *  symbol interns as [Data][Hidden], which
+             *  MachPipeline::dump_execution_session shows beside the jit's own
+             *  [Callable] entries.
+             *
+             *  MEASURED NEUTRAL for machpipeline.struct's intermittent SIGSEGV
+             *  (2026-08-11): 20 failures in 250 runs both with and without this
+             *  change.  It was made on the theory that [Data] let the linker
+             *  resolve the call as a direct branch out of rel32 range -- jit'd
+             *  code is mmap'd around 0x7..., a non-PIE executable's .text is at
+             *  0x47... -- and that theory is NOT supported.  Kept because
+             *  describing a function as data is wrong on its own terms, not
+             *  because it fixes anything.
+             *
+             *  See .xo-backlog/xo-jit/issues/01-machpipeline-utest-failures.md
+             **/
             template <typename T>
             llvm::Error intern_symbol(const std::string & symbol, T * dest) {
                 auto mangled_sym = mangler_(symbol);
@@ -141,7 +161,8 @@ namespace xo {
                 llvm::orc::SymbolMap symbol_map;
                 symbol_map[mangled_sym]
                     = llvm::orc::ExecutorSymbolDef(llvm::orc::ExecutorAddr::fromPtr(dest),
-                                                   llvm::JITSymbolFlags());
+                                                   (llvm::JITSymbolFlags::Exported
+                                                    | llvm::JITSymbolFlags::Callable));
 
                 auto materializer = llvm::orc::absoluteSymbols(symbol_map);
 

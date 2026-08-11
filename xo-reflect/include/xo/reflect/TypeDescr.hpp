@@ -180,7 +180,7 @@ namespace xo {
              **/
             inline bool operator==(const FunctionTdxInfo & other) const noexcept {
                 if (retval_td_ != other.retval_td_)
-                    return true;
+                    return false;
                 if (arg_td_v_.size() != other.arg_td_v_.size())
                     return false;
 

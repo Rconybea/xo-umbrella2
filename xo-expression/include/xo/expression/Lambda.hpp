@@ -78,6 +78,18 @@ namespace xo {
             const rp<Expression> & body() const { return body_; }
 
             const std::string& i_argname(int i_arg) const { return local_env_->lookup_arg(i_arg)->name(); }
+
+            /** true iff this lambda sits inside another lexical scope, i.e. its
+             *  local environment already has a parent.
+             *
+             *  A NESTED lambda is parented when the enclosing lambda is
+             *  constructed -- @ref Lambda::Lambda calls
+             *  @c body_->attach_envs(local_env_), which reaches a lambda in
+             *  function position.  A TOPLEVEL lambda is not parented until
+             *  something supplies the global environment.  So this is the test
+             *  for "is this lambda toplevel", asked without guessing.
+             **/
+            bool has_lexical_parent() const noexcept { return local_env_->has_parent(); }
             bool needs_closure_flag() const { return !free_var_set_.empty(); }
             bool is_captured(const std::string& var) const { return (captured_var_set_.find(var) != captured_var_set_.end()); }
 

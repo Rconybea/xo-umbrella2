@@ -185,7 +185,20 @@ namespace xo {
                          << endl;
                 }
 
-                auto fn_ptr = llvm_addr.get().toPtr<double(*)(double)>();
+                /* NB the leading void* : every jit'd lambda takes its closure
+                 * environment as an implicit FIRST argument -- the generated
+                 * signature is `double @root4(ptr %.env, double %x)`.  Same
+                 * convention machpipeline.wrap already calls with.
+                 *
+                 * This call site omitted it and still passed, by ABI accident:
+                 * on x86-64 SysV a pointer argument travels in an integer
+                 * register and a double in an SSE register, so the missing
+                 * leading pointer did not displace `input`.  It would displace
+                 * an integer argument -- which is what made machpipeline.struct
+                 * read an uninitialized register.  See
+                 * .xo-backlog/xo-jit/issues/01-machpipeline-utest-failures.md
+                 */
+                auto fn_ptr = llvm_addr.get().toPtr<double(*)(void*, double)>();
 
                 REQUIRE(fn_ptr);
 
@@ -195,7 +208,7 @@ namespace xo {
 
                     INFO(tostr(xtag("j_call", j_call), xtag("input", input), xtag("expected", expected)));
 
-                    auto actual = (*fn_ptr)(input);
+                    auto actual = (*fn_ptr)(nullptr /*env*/, input);
 
                     REQUIRE(actual == expected);
                 }
@@ -379,16 +392,26 @@ namespace xo {
                      << endl;
             }
 
-            auto fn_ptr = llvm_addr.get().toPtr<ratio_type(*)(int,int)>();
+            /* leading void* is the closure environment -- see the note in
+             * machpipeline.fptr.
+             */
+            auto fn_ptr = llvm_addr.get().toPtr<ratio_type(*)(void*, int, int)>();
 
             REQUIRE(fn_ptr);
 
             // ---- invoke compiled function -----
 
-            auto value = (*fn_ptr)(2, 3);
+            auto value = (*fn_ptr)(nullptr /*env*/, 2, 3);
 
             log && log(xtag("value.num", value.num()),
                        xtag("value.den", value.den()));
+
+            /* make_ratio(2,3) -> ratio<int>(2,3).maybe_reduce(), gcd 1.
+             * This assertion did not exist: the value was logged and discarded,
+             * so the test reported success while returning 1/0.
+             */
+            REQUIRE(value.num() == 2);
+            REQUIRE(value.den() == 3);
 
         } /*TEST_CASE(machpipeline.struct)*/
     } /*namespace ut*/

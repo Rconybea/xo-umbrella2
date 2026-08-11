@@ -52,6 +52,16 @@ namespace xo {
                 origin_ = p;
             }
 
+            /** true iff this environment's parent has been established.
+             *
+             *  Lets a caller distinguish "not yet parented" from "parented",
+             *  instead of discovering the difference from @ref assign_parent
+             *  throwing.  @ref MachPipeline::codegen_lambda_defn needs exactly
+             *  that: it may only supply the global environment to a lambda
+             *  that has no enclosing lexical scope.
+             **/
+            bool has_parent() const noexcept { return parent_env_.get() != nullptr; }
+
             /** single-assign this environment's parent **/
             void assign_parent(bp<SymbolTable> p);
 
