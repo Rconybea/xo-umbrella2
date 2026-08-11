@@ -11,6 +11,7 @@
 #include <xo/printable2/Printable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/facet/obj.hpp>
+#include <xo/ppsink/pretty_struct.hpp>   /* sink.pretty_struct(..), field(..) */
 #include <xo/reflectutil/typeseq.hpp>
 
 namespace xo {
@@ -107,6 +108,21 @@ namespace xo {
                 (ppii,
                  "DSequenceExpr",
                  refrtag("expr_v", expr_v_pr));
+        }
+
+        void
+        DSequenceExpr::pretty(xo::pp::PpSink & sink) const
+        {
+            /* named local: field() captures BY REFERENCE (pretty_struct.hpp).
+             *
+             * The DArray does its own framing and line breaking -- it was
+             * converted in xo-object2's phase C -- so this printer supplies
+             * only the enclosing struct and lets the sequence nest.
+             */
+            auto expr_v_pr = obj<APrintable,DArray>(expr_v_);
+
+            sink.pretty_struct("DSequenceExpr",
+                               xo::pp::field("expr_v", expr_v_pr));
         }
 
         // gc hooks for IGCObject_DSequenceExpr

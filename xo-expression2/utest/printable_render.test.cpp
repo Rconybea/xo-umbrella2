@@ -5,7 +5,7 @@
  * Phase C verification for xo-expression2's printers, bottom-up.  TypeRef
  * first: it is the subsystem's only leaf, depending on nothing else here.
  * Then DVariable, whose :typeref field nests it, then DVarRef, then
- * DGlobalSymtab, then DConstant, then DIfElseExpr.
+ * DGlobalSymtab, then DConstant, then DIfElseExpr, then DSequenceExpr.
  *
  * Follows the template in xo-object2/utest/printable_render.test.cpp -- see
  * .xo-backlog/xo-printable2/issues/01-aprintable-pretty-ppsink.md for why both
@@ -27,6 +27,7 @@
 #include <xo/expression2/Constant.hpp>      /* likewise DConstant */
 #include <xo/expression2/GlobalSymtab.hpp>  /* likewise DGlobalSymtab */
 #include <xo/expression2/IfElseExpr.hpp>     /* likewise DIfElseExpr */
+#include <xo/expression2/SequenceExpr.hpp>   /* likewise DSequenceExpr */
 #include <xo/expression2/TypeRef.hpp>
 #include <xo/expression2/VarRef.hpp>       /* likewise DVarRef */
 #include <xo/expression2/Variable.hpp>     /* convenience header: DVariable + its facet impls */
@@ -64,6 +65,7 @@ namespace xo {
     using xo::scm::DGlobalSymtab;
     using xo::scm::DConstant;
     using xo::scm::DIfElseExpr;
+    using xo::scm::DSequenceExpr;
     using xo::scm::AExpression;
     using xo::scm::DFloat;
     using xo::scm::DInteger;
@@ -520,6 +522,24 @@ namespace xo {
                  *  paths through DConstant::_lookup_td, and render different
                  *  D-type typeseqs, so both are cases.
                  **/
+                /** a DSequenceExpr holding @p n DConstant elements.
+                 *
+                 *  n == 0 is a case in its own right: an empty DArray is what
+                 *  the sequence starts as, and how the nested sequence printer
+                 *  renders nothing is worth pinning.
+                 **/
+                DSequenceExpr * make_sequence(int n) {
+                    DSequenceExpr * retval = DSequenceExpr::_make_empty(this->allocator());
+
+                    for (int i = 1; i <= n; ++i) {
+                        retval->push_back(this->allocator(),
+                                          obj<AExpression>(DConstant::make(this->allocator(),
+                                                                           DInteger::box<AGCObject>(this->allocator(), i))));
+                    }
+
+                    return retval;
+                }
+
                 /** a DIfElseExpr with each branch present or absent.
                  *
                  *  Children are DConstants -- converted printers, so nothing
@@ -920,6 +940,99 @@ namespace xo {
                                        " :ntype 0 :type_capacity 64>"),
             };
 
+
+
+            /** DSequenceExpr is one field wrapping a DArray -- so it is the
+             *  first expression2 printer nesting a SEQUENCE rather than a
+             *  struct, and the DArray framing divergence settled in
+             *  xo-object2's phase C reappears here one level down.
+             **/
+            struct Testcase_DSequenceExpr {
+                Testcase_DSequenceExpr(int n_elt,
+                                       std::uint32_t margin,
+                                       const char * label,
+                                       const char * expect_deprecated,
+                                       const char * expect_pretty)
+                    : n_elt_{n_elt}, margin_{margin}, label_{label},
+                      expect_deprecated_{expect_deprecated},
+                      expect_pretty_{expect_pretty} {}
+
+                int n_elt_;
+                std::uint32_t margin_;
+                const char * label_;
+                /** OBSERVED via pretty_deprecated; delete at phase E **/
+                std::string expect_deprecated_;
+                /** OBSERVED via pretty; outlives phase E **/
+                std::string expect_pretty_;
+            };
+
+            static std::vector<Testcase_DSequenceExpr> s_sequence_v = {
+                /* empty sequence: "[]", and identical at EVERY margin -- an
+                 * empty DArray has no break points to offer, so this case never
+                 * diverges however narrow.
+                 */
+                Testcase_DSequenceExpr(0, 200, "seq0.200",
+                                       "<DSequenceExpr :expr_v []>",
+                                       "<DSequenceExpr :expr_v []>"),
+
+                Testcase_DSequenceExpr(0, 30, "seq0.30",
+                                       "<DSequenceExpr :expr_v []>",
+                                       "<DSequenceExpr :expr_v []>"),
+
+                /* one element, flat: identical */
+                Testcase_DSequenceExpr(1, 200, "seq1.200",
+                                       "<DSequenceExpr :expr_v [<DConstant :value_.tseq N :value.tseq N :value 1>]>",
+                                       "<DSequenceExpr :expr_v [<DConstant :value_.tseq N :value.tseq N :value 1>]>"),
+
+                /* REVIEWED DIVERGENCE, and it is DArray's, not this printer's
+                 * -- already settled in xo-object2's phase C and reappearing
+                 * because :expr_v nests a DArray:
+                 *
+                 *   legacy   "[ <DConstant"   -- a space after '[', elements
+                 *                                aligned at column 6
+                 *   ppsink   "[<DConstant"    -- no space, elements at column 3
+                 *
+                 * Stacked on top of the field-value column divergence, so this
+                 * case shows both at once.
+                 */
+                Testcase_DSequenceExpr(1, 30, "seq1.30",
+                                       "<DSequenceExpr\n"
+                                       "  :expr_v\n"
+                                       "    [ <DConstant\n"
+                                       "        :value_.tseq N\n"
+                                       "        :value.tseq N\n"
+                                       "        :value 1>]>",
+                                       "<DSequenceExpr\n"
+                                       "  :expr_v\n"
+                                       "   [<DConstant\n"
+                                       "     :value_.tseq N\n"
+                                       "     :value.tseq N\n"
+                                       "     :value 1>]>"),
+
+                /* three elements at margin 60: the elements each fit a line, so
+                 * this isolates the ELEMENT ALIGNMENT half of the divergence --
+                 * legacy continues at column 6, ppsink at column 3 -- without
+                 * the elements themselves breaking.
+                 */
+                Testcase_DSequenceExpr(3, 60, "seq3.60",
+                                       "<DSequenceExpr\n"
+                                       "  :expr_v\n"
+                                       "    [ <DConstant :value_.tseq N :value.tseq N :value 1>\n"
+                                       "      <DConstant :value_.tseq N :value.tseq N :value 2>\n"
+                                       "      <DConstant :value_.tseq N :value.tseq N :value 3>]>",
+                                       "<DSequenceExpr\n"
+                                       "  :expr_v\n"
+                                       "   [<DConstant :value_.tseq N :value.tseq N :value 1>\n"
+                                       "   <DConstant :value_.tseq N :value.tseq N :value 2>\n"
+                                       "   <DConstant :value_.tseq N :value.tseq N :value 3>]>"),
+
+                /* three elements flat: identical, so the divergence is purely
+                 * about where breaks land, not about which tokens are emitted.
+                 */
+                Testcase_DSequenceExpr(3, 200, "seq3.200",
+                                       "<DSequenceExpr :expr_v [<DConstant :value_.tseq N :value.tseq N :value 1> <DConstant :value_.tseq N :value.tseq N :value 2> <DConstant :value_.tseq N :value.tseq N :value 3>]>",
+                                       "<DSequenceExpr :expr_v [<DConstant :value_.tseq N :value.tseq N :value 1> <DConstant :value_.tseq N :value.tseq N :value 2> <DConstant :value_.tseq N :value.tseq N :value 3>]>"),
+            };
 
             /** DIfElseExpr is the first printer with OPTIONAL fields: legacy
              *  uses refrtag's three-argument form and ppsink field()'s third
@@ -1392,6 +1505,37 @@ namespace xo {
                         = scrub_typevar(scrub_tseq(render_deprecated(p, tc.margin_)));
                     std::string pretty
                         = scrub_typevar(scrub_tseq(render_pretty(p, tc.margin_)));
+
+                    log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_),
+                               xtag("deprecated", deprecated), xtag("pretty", pretty));
+
+                    REHEARSE(rh, pretty == tc.expect_pretty_);
+                    REHEARSE(rh, deprecated == tc.expect_deprecated_);
+                }
+            }
+        }
+
+        TEST_CASE("DSequenceExpr-render", "[printable][DSequenceExpr]")
+        {
+            REQUIRE(s_init.evidence());
+
+            UtestRehearser rh;
+
+            for (auto _ : rh) {
+                scope log(XO_DEBUG2_(rh.enable_debug(), "DSequenceExpr-render"));
+
+                for (std::size_t i_tc = 0, n_tc = s_sequence_v.size(); i_tc < n_tc; ++i_tc) {
+                    const auto & tc = s_sequence_v[i_tc];
+
+                    VarFixture fx(tc.label_);
+
+                    DSequenceExpr * e = fx.make_sequence(tc.n_elt_);
+                    REQUIRE(e != nullptr);
+
+                    auto p = with_facet<APrintable>::mkobj(e);
+
+                    std::string deprecated = scrub_tseq(render_deprecated(p, tc.margin_));
+                    std::string pretty = scrub_tseq(render_pretty(p, tc.margin_));
 
                     log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_),
                                xtag("deprecated", deprecated), xtag("pretty", pretty));
