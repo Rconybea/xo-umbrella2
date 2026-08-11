@@ -11,13 +11,14 @@ $0 [-u|--usage|-h|--help]
      |--split-umbrella-remote
      |--pull-umbrella-remote
      |--push-umbrella-remote]
-    [--clone|--configure|--build|--install]
+    [--clone|--clobber|--configure|--build|--install]
     [--with-examples] [--with-utests] [--with-asm] [--debug-build]
     [--with-opengl=GLFLAG] [--with-vulkan=VKFLAG]
     [-S=SOURCEDIR] [-B=BUILDDIR] [-j N|--jobs=N]
     [-q|--quiet] [-k|--keep-going]
     [--sweep]
     [--all | [--with-deps] NAME ...]
+    [-- CMAKE_ARGS]
 EOF
 }
 
@@ -80,6 +81,25 @@ Options:
                           Exists so the flags above stop being something anyone
                           has to remember: --with-examples in particular, whose
                           absence reports green on a tree that does not build.
+  -- CMAKE_ARGS           everything after -- is appended verbatim to the cmake
+                          CONFIGURE command line, and nowhere else.  Same
+                          convention as xo-reconfigure.  Combines with --sweep,
+                          which forwards them to its configure stage:
+                            xo-build --sweep -- -DCMAKE_CXX_FLAGS=-DXO_FOO
+                          They go last, so they override the flags xo-build sets
+                          itself (cmake takes the final -D for a variable).
+                          An error, not a no-op, without --configure or --sweep:
+                          a silently dropped flag yields a build that looks like
+                          the one you asked for and is not.
+                          NB THEY STICK, deliberately: caching is how cmake lets
+                          you state a variable once.  A later xo-build
+                          --configure without -- does not clear what it never
+                          sets.  To drop them, either name the variable again
+                          with an empty value (-- '-DCMAKE_CXX_FLAGS=') or use
+                          --clobber, which discards the cache wholesale.  An
+                          experimental flag that outlives the experiment is the
+                          same failure as a stale SDL2 cache: the build is not
+                          the one the source implies.
   --clone                 git clone xo library NAME in current directory
   --configure             run cmake for xo library NAME in immediate subdir
                           Will use NAME/.build as build directory
@@ -87,7 +107,20 @@ Options:
   --build-docs            build documentation for xo library NAME in immediate subdir
   --utest                 run unit tests for xo library NAME
   --install               run cmake install for xo library NAME in immediate subdir
-  --realclean             nuke build directory
+  --clobber               discard the build directory.  Runs FIRST, before any
+                          other phase, so cmake starts from an empty cache:
+                            xo-build --clobber --configure --build NAME
+                          Alone, it is just "delete the build directory".
+                          Cache stickiness is a cmake feature -- variables
+                          persist so you need not restate them -- and discarding
+                          the cache is the supported way to opt out of it, and
+                          what you want when you do not know the name of every
+                          variable a past invocation set.  Same name and meaning
+                          as xo-reconfigure --clobber.
+                          Replaced --realclean (removed 2026-08-10), which did
+                          the same thing but ran LAST, so
+                          --realclean --configure --build configured, built, and
+                          then deleted the result.  Nothing in the tree used it.
 
   -S=SOURCEDIR            override path/to/source
   -B=BUILDDIR             override path/to/build
@@ -123,7 +156,7 @@ build_flag=0
 build_docs_flag=0
 utest_flag=0
 install_flag=0
-realclean_flag=0
+clobber_flag=0
 pathtosource=
 pathtobuild=
 jobs_arg=
@@ -147,6 +180,12 @@ xonames=()
 # --sweep re-invokes this script twice, so it needs the argv it was given.
 # Captured before parsing consumes it.
 orig_argv=("$@")
+
+# everything after a literal `--`: extra arguments for the cmake CONFIGURE
+# command line.  Kept as an array, not a string, so a single argument may
+# contain spaces -- `-DCMAKE_CXX_FLAGS=-DA -DB` is one argument to cmake and
+# has to stay one here.
+cmake_extra_args=()
 
 # --keep-going bookkeeping.  failed_subsys/skipped_subsys drive the end-of-run
 # summary; skip_set maps a subsystem to the failed subsystem it is downstream
@@ -245,8 +284,8 @@ while [[ $# > 0 ]]; do
         --install)
             install_flag=1
             ;;
-        --realclean)
-            realclean_flag=1
+        --clobber)
+            clobber_flag=1
             ;;
         --with-examples)
             with_examples=1
@@ -284,6 +323,15 @@ while [[ $# > 0 ]]; do
         xo-*)
             xoname="$1"
             xonames+=("$1")
+            ;;
+        --)
+            # everything after this is for cmake, verbatim.  Same convention as
+            # xo-reconfigure.  NB `break`, not `;;` + shift: the loop must stop
+            # here or a cmake argument that looks like one of ours (say
+            # -DCMAKE_BUILD_TYPE=Debug) would be parsed as ours.
+            shift
+            cmake_extra_args=("$@")
+            break
             ;;
         *)
             usage
@@ -375,6 +423,18 @@ if [[ $cmd == 'list' ]]; then
     subsystem_list
 fi
 
+# Extra cmake arguments are consumed by the configure phase and nowhere else.
+# Refuse rather than ignore them: a flag that is silently dropped produces a
+# build that looks like the one you asked for and is not, which is the failure
+# mode this script's -q and -k flags both exist to prevent.
+if [[ ${#cmake_extra_args[@]} -gt 0 \
+          && ${configure_flag} -eq 0 && ${sweep_flag} -eq 0 ]]; then
+    >&2 echo "$0: arguments after -- are for the cmake configure command line," \
+         "but neither --configure nor --sweep was given:" \
+         "${cmake_extra_args[*]}"
+    exit 1
+fi
+
 # --- --sweep: the whole-tree verification recipe -------------------------
 #
 # Two invocations of this script, not one pass with every phase flag set.
@@ -396,11 +456,33 @@ fi
 #
 if [[ ${sweep_flag} -eq 1 ]]; then
     # replay our own argv, minus --sweep, so -j/-n/--debug-build and friends
-    # reach both stages
+    # reach both stages.  Stop at `--`: those arguments are re-appended last,
+    # below, since each stage adds flags of its own and they must not land on
+    # the far side of the separator.
+    # --clobber is dropped here too, and re-added to stage 1 only.  This is
+    # load-bearing, not tidiness: --clobber is legal on its own, so forwarding
+    # it to stage 2 would delete every build directory and then run ctest
+    # against nothing.  Whenever a flag is replayed into both stages, ask what
+    # it does to a tree that is already built.
     sweep_argv=()
     for sweep_arg in ${orig_argv[@]+"${orig_argv[@]}"}; do
-        [[ "${sweep_arg}" == "--sweep" ]] || sweep_argv+=("${sweep_arg}")
+        [[ "${sweep_arg}" == "--" ]] && break
+        case "${sweep_arg}" in
+            --sweep|--clobber) ;;
+            *) sweep_argv+=("${sweep_arg}") ;;
+        esac
     done
+
+    sweep_stage1=(-q -k --with-utests --with-examples --configure --build --install)
+    if [[ ${clobber_flag} -eq 1 ]]; then
+        sweep_stage1+=(--clobber)
+    fi
+
+    # `-- ARGS` for the sub-invocations, empty when none were given
+    sweep_tail=()
+    if [[ ${#cmake_extra_args[@]} -gt 0 ]]; then
+        sweep_tail=(-- "${cmake_extra_args[@]}")
+    fi
 
     # whole tree unless the caller named subsystems.  NB this runs before the
     # --all expansion below, so xonames still holds only explicit names.
@@ -413,7 +495,8 @@ if [[ ${sweep_flag} -eq 1 ]]; then
 
     >&2 echo "xo-build: --sweep stage 1 of 2: configure, build, install"
     "$0" ${sweep_argv[@]+"${sweep_argv[@]}"} \
-         -q -k --with-utests --with-examples --configure --build --install \
+         "${sweep_stage1[@]}" \
+         ${sweep_tail[@]+"${sweep_tail[@]}"} \
         || sweep_build_rc=1
 
     # Stage 2 runs even when stage 1 failed.  With --keep-going a single bad
@@ -513,6 +596,45 @@ fi
 #
 # With --keep-going, a failure returns rc to the caller instead of exiting, so
 # the per-subsystem loop can skip ahead; without it, behaviour is as before.
+# rm -rf a build directory, with the checks that make that sentence safe.
+#
+# The path is computed, and -B lets the caller supply it, so `xo-build -B=/
+# --clobber` is one keystroke from a very bad afternoon.  Refuse anything that
+# is not a plausible build directory: empty, absolute-root-ish, or a directory
+# holding no cmake artifacts.  Cheap, and the failure it prevents is unbounded.
+safe_rmrf() {
+    local dir="$1"
+
+    if [[ -z "${dir}" || "${dir}" == "/" || "${dir}" == "." || "${dir}" == ".." ]]; then
+        >&2 echo "xo-build: refusing to remove [${dir}]"
+        exit 1
+    fi
+
+    # already gone: nothing to do, and not an error -- --clobber on a fresh
+    # checkout is the normal case
+    [[ -e "${dir}" ]] || return 0
+
+    if [[ ! -d "${dir}" ]]; then
+        >&2 echo "xo-build: refusing to remove [${dir}]: not a directory"
+        exit 1
+    fi
+
+    # A cmake build directory always has one of these.  An empty directory is
+    # fine (a configure that failed early leaves one); a directory with other
+    # people's files in it is not.
+    if [[ -n "$(ls -A "${dir}")" \
+              && ! -e "${dir}/CMakeCache.txt" \
+              && ! -d "${dir}/CMakeFiles" \
+              && ! -e "${dir}/rebootcmake" ]]; then
+        >&2 echo "xo-build: refusing to remove [${dir}]:" \
+             "not empty and does not look like a cmake build directory" \
+             "(no CMakeCache.txt, CMakeFiles/ or rebootcmake)"
+        exit 1
+    fi
+
+    rm -rf "${dir}"
+}
+
 run_phase() {
     local label="$1"; shift
 
@@ -638,9 +760,9 @@ if [[ $repo_flag -eq 1 ]]; then
 fi
 
 if [[ $add_umbrella_remote_flag -eq 1 ]]; then
-    if [[ $clone_flag -eq 1 || $configure_flag -eq 1 || $build_flag -eq 1 || $build_docs_flag -eq 1 || $install_flag -eq 1 || $realclean_flag -eq 1 ]]; then
+    if [[ $clone_flag -eq 1 || $configure_flag -eq 1 || $build_flag -eq 1 || $build_docs_flag -eq 1 || $install_flag -eq 1 || $clobber_flag -eq 1 ]]; then
         2>&1 echo "error: xo-build: repo operation --add-umbrella-remote conflicts with"
-        2>&1 echo "                 build operation --clone|--configure|--build|--build-docs|--install|--realclean"
+        2>&1 echo "                 build operation --clone|--clobber|--configure|--build|--build-docs|--install"
         exit 1
     fi
 
@@ -718,6 +840,31 @@ if [[ $clone_flag -eq 1 ]]; then
     fi
 fi
 
+# --clobber: discard the build directory.  FIRST in the phase order, so that
+# `--clobber --configure` reads as "start over" -- which is the whole point.
+# Same flag name and meaning as xo-reconfigure --clobber.
+#
+# It supersedes --realclean, which was identical except for running LAST, so
+# `--realclean --configure --build` configured, built, then deleted the result.
+# Nothing in the tree ever called it (checked 2026-08-10: zero occurrences
+# outside this file, in CI, docs or scripts), so it was removed rather than
+# kept as an alias -- an alias would silently reverse the ordering for anyone
+# who did depend on the old behaviour, where removal fails loudly.
+#
+# This is the supported way to drop cached cmake state.  Stickiness is a cmake
+# feature, not a bug -- variables persist so you need not re-state them -- and
+# the way to opt out is to discard the cache, not to fight it variable by
+# variable.  `-- '-DCMAKE_CXX_FLAGS='` clears one entry you know the name of;
+# --clobber is what you want when you do not.
+if [[ $clobber_flag -eq 1 ]]; then
+    if [[ $noop_flag -eq 1 ]]; then
+        echo "rm -rf $pathtobuild"
+    else
+        safe_rmrf "${pathtobuild}"
+        phases_done+=(clobber)
+    fi
+fi
+
 if [[ $configure_flag -eq 1 ]]; then
     if [[ -n "$xoname" ]]; then
         testingarg=
@@ -752,8 +899,19 @@ if [[ $configure_flag -eq 1 ]]; then
 
         cmd="cmake -DCMAKE_INSTALL_PREFIX=@CMAKE_INSTALL_PREFIX@ -DCMAKE_MODULE_PATH=@CMAKE_INSTALL_PREFIX@/share/cmake -S $pathtosource -B $pathtobuild ${testingarg} ${examplearg} ${asmarg} ${openglarg} ${vulkanarg} ${cmakebuildtype}"
 
+        # `-- ARGS`, shell-quoted, for the places that need the command as text
+        # (the dry run, and the rebootcmake script).  ${cmd} itself is a string
+        # relied on for word-splitting; the extra arguments are NOT, so that one
+        # argument containing spaces survives as one argument.  They go last, so
+        # a caller can override anything set above -- cmake takes the final -D
+        # for a given variable.
+        extra_str=
+        if [[ ${#cmake_extra_args[@]} -gt 0 ]]; then
+            extra_str=$(printf ' %q' "${cmake_extra_args[@]}")
+        fi
+
         if [[ $noop_flag -eq 1 ]]; then
-            echo $cmd
+            echo "$cmd${extra_str}"
         else
             cwd=$(pwd)
             # write script to re-run cmake later
@@ -764,12 +922,13 @@ if [[ $configure_flag -eq 1 ]]; then
             cat > ${rebootcmake} <<EOF
 #!/usr/bin/env bash
 
-cd ${cwd} && ${cmd}
+cd ${cwd} && ${cmd}${extra_str}
 
 EOF
             chmod +rx ${rebootcmake}
 
-            run_phase configure $cmd || { note_failure configure 1; continue; }
+            run_phase configure $cmd ${cmake_extra_args[@]+"${cmake_extra_args[@]}"} \
+                || { note_failure configure 1; continue; }
             phases_done+=(configure)
         fi
     fi
@@ -891,14 +1050,6 @@ if [[ $install_flag -eq 1 ]]; then
             run_phase install $cmd || { note_failure install 1; continue; }
             phases_done+=(install)
         fi
-    fi
-fi
-
-if [[ $realclean_flag -eq 1 ]]; then
-    if [[ $noop_flag -eq 1 ]]; then
-        echo "rm -rf $pathtobuild"
-    else
-        rm -rf "${pathtobuild}"
     fi
 fi
 
