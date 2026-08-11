@@ -10,7 +10,8 @@
 #include <xo/object2/Array.hpp>
 #include <xo/printable2/Printable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
-#include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/concat.hpp>         /* concat("[", i, "]") for generated names */
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.struct_open(..), struct_scope */
 
 namespace xo {
     using xo::mm::ACollector;
@@ -199,6 +200,47 @@ namespace xo {
                 pps->write(">");
 
                 return false;
+            }
+        }
+
+        void
+        DLocalSymtab::pretty(xo::pp::PpSink & sink) const
+        {
+            /* struct_open(), not pretty_struct(): the field count is
+             * 2 + n_vars + n_types, a runtime value.  Two dynamic-arity loops,
+             * unlike DApplyExpr's one.
+             *
+             * NB struct_scope::field() renders IMMEDIATELY, so unlike the free
+             * xo::pp::field() it does not capture by reference -- the size()
+             * temporaries and the concat below are safe here.
+             */
+            auto st = sink.struct_open("LocalSymtab");
+
+            st.field("nvars", vars_->size());
+
+            for (size_type i = 0, n = vars_->size(); i < n; ++i) {
+                obj<APrintable> var_i = (*vars_)[i].to_facet<APrintable>();
+
+                st.field(xo::pp::concat("[", i, "]"), var_i);
+            }
+
+            st.field("ntypes", types_->size());
+
+            /* The index names COLLIDE with the :vars loop above -- a symtab
+             * with both renders :[0] twice.  Legacy did the same (snprintf
+             * "[%u]" in both loops), and this conversion reproduces it rather
+             * than fixing it; see the ticket.
+             *
+             * to_facet<APrintable> here is on a DTypename, which HAS the
+             * facet.  What throws for a non-empty types_ is one level down --
+             * DTypename's own type_.to_facet<APrintable>(), since xo-type's
+             * D-types have no APrintable.  Confirmed by test, not code-read;
+             * see .xo-backlog/xo-type/issues/01-no-aprintable-facet.md
+             */
+            for (size_type i = 0, n = types_->size(); i < n; ++i) {
+                obj<APrintable> type_i = (*types_)[i].to_facet<APrintable>();
+
+                st.field(xo::pp::concat("[", i, "]"), type_i);
             }
         }
     } /*namespace scm*/

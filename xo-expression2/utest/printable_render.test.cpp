@@ -29,10 +29,12 @@
 #include <xo/expression2/DefineExpr.hpp>    /* likewise DDefineExpr */
 #include <xo/expression2/GlobalSymtab.hpp>  /* likewise DGlobalSymtab */
 #include <xo/expression2/IfElseExpr.hpp>     /* likewise DIfElseExpr */
+#include <xo/expression2/LocalSymtab.hpp>    /* likewise DLocalSymtab */
 #include <xo/expression2/SequenceExpr.hpp>   /* likewise DSequenceExpr */
 #include <xo/expression2/TypeRef.hpp>
 #include <xo/expression2/VarRef.hpp>       /* likewise DVarRef */
 #include <xo/expression2/Variable.hpp>     /* convenience header: DVariable + its facet impls */
+#include <xo/type/AtomicType.hpp>            /* DAtomicType, for DLocalSymtab's :types */
 #include <xo/object2/Float.hpp>
 #include <xo/object2/Integer.hpp>
 #include <xo/gc/X1Collector.hpp>
@@ -51,6 +53,7 @@
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <catch2/catch.hpp>
+#include <iostream>
 #include <cstdint>
 #include <cstdlib>
 #include <cctype>
@@ -70,6 +73,9 @@ namespace xo {
     using xo::scm::DSequenceExpr;
     using xo::scm::DDefineExpr;
     using xo::scm::DApplyExpr;
+    using xo::scm::DLocalSymtab;
+    using xo::scm::DAtomicType;
+    using xo::scm::Metatype;
     using xo::scm::AExpression;
     using xo::scm::DFloat;
     using xo::scm::DInteger;
@@ -625,6 +631,41 @@ namespace xo {
                                            obj<AExpression>(DConstant::make(this->allocator(),
                                                                             DInteger::box<AGCObject>(this->allocator(),
                                                                                                      10 + i))));
+                    }
+
+                    return retval;
+                }
+
+                /** a DLocalSymtab holding @p n_var variables and @p n_type
+                 *  type definitions.
+                 *
+                 *  Two independent dynamic-arity loops, which is what makes
+                 *  this printer different from DApplyExpr's one.  Capacity is
+                 *  exactly the requested count: append_var/append_type assert
+                 *  and no-op past capacity, so an over-tight array would
+                 *  silently produce fewer fields than the case names.
+                 **/
+                DLocalSymtab * make_localsymtab(int n_var, int n_type) {
+                    DLocalSymtab * retval
+                        = DLocalSymtab::_make_empty(this->allocator(),
+                                                    nullptr /*parent*/,
+                                                    n_var, n_type);
+
+                    for (int i = 0; i < n_var; ++i) {
+                        std::string name = "v" + std::to_string(1 + i);
+
+                        retval->append_var(this->allocator(),
+                                           table_.intern(name.c_str()),
+                                           make_typeref(Kind::unresolved));
+                    }
+
+                    for (int i = 0; i < n_type; ++i) {
+                        std::string name = "t" + std::to_string(1 + i);
+
+                        retval->append_type(this->allocator(),
+                                            table_.intern(name.c_str()),
+                                            DAtomicType::make(this->allocator(),
+                                                              Metatype::t_i64()));
                     }
 
                     return retval;
@@ -1638,6 +1679,152 @@ namespace xo {
                                     "    :value.tseq N\n"
                                     "    :value 12>>"),
             };
+            /** DLocalSymtab has TWO dynamic-arity loops -- vars_ then types_ --
+             *  bracketing two scalar fields, :nvars and :ntypes.  Index names
+             *  are generated as "[i]" and COLLIDE between the loops: a symtab
+             *  with both renders :[0] twice.  Legacy did that too (snprintf
+             *  "[%u]" in each loop) and the conversion reproduces it.
+             *
+             *  Only VAR-ONLY cases are here.  A non-empty types_ cannot be
+             *  pinned on either side: legacy THROWS (see
+             *  DLocalSymtab-types-throws below), and ppsink renders
+             *  "STUB:DTypename", which moves when DTypename converts.
+             *
+             *  Unlike DApplyExpr, legacy loses no separator here -- it builds
+             *  fields with xrefrtag/newline_pretty_tag rather than writing the
+             *  struct name and refrtags back to back.  So the ONLY divergence
+             *  is the usual field-value column: legacy indent+2, ppsink
+             *  indent+1, compounding per level.
+             **/
+            struct Testcase_DLocalSymtab {
+                Testcase_DLocalSymtab(int n_var, std::uint32_t margin,
+                                      const char * label,
+                                      const char * expect_deprecated,
+                                      const char * expect_pretty)
+                    : n_var_{n_var}, margin_{margin}, label_{label},
+                      expect_deprecated_{expect_deprecated},
+                      expect_pretty_{expect_pretty} {}
+
+                int n_var_;
+                std::uint32_t margin_;
+                const char * label_;
+                /** OBSERVED via pretty_deprecated; delete at phase E **/
+                std::string expect_deprecated_;
+                /** OBSERVED via pretty; outlives phase E **/
+                std::string expect_pretty_;
+            };
+
+            static std::vector<Testcase_DLocalSymtab> s_localsymtab_v = {
+                /* empty: both scalar fields and neither loop.  The two stacks
+                 * agree exactly -- nothing nests, so no field-value column
+                 * question arises.
+                 */
+                Testcase_DLocalSymtab(0, 200, "s0.200",
+                                      "<LocalSymtab :nvars 0 :ntypes 0>",
+                                      "<LocalSymtab :nvars 0 :ntypes 0>"),
+
+                Testcase_DLocalSymtab(0, 30, "s0.30",
+                                      "<LocalSymtab\n"
+                                      "  :nvars 0\n"
+                                      "  :ntypes 0>",
+                                      "<LocalSymtab\n"
+                                      "  :nvars 0\n"
+                                      "  :ntypes 0>"),
+
+                /* one var, flat.  :ntypes 0 still appears AFTER the loop --
+                 * an empty loop drops its fields but not the count.
+                 */
+                Testcase_DLocalSymtab(1, 200, "s1.200",
+                                      "<LocalSymtab :nvars 1 :[0] <DVariable :name \"v1\" :typeref <TypeRef :id \"t:N\" :td null>> :ntypes 0>",
+                                      "<LocalSymtab :nvars 1 :[0] <DVariable :name \"v1\" :typeref <TypeRef :id \"t:N\" :td null>> :ntypes 0>"),
+
+                /* margin 60: the symtab and the DVariable break, the TypeRef
+                 * does not -- one level of divergence, not three.
+                 */
+                Testcase_DLocalSymtab(1, 60, "s1.60",
+                                      "<LocalSymtab\n"
+                                      "  :nvars 1\n"
+                                      "  :[0]\n"
+                                      "    <DVariable\n"
+                                      "      :name \"v1\"\n"
+                                      "      :typeref <TypeRef :id \"t:N\" :td null>>\n"
+                                      "  :ntypes 0>",
+                                      "<LocalSymtab\n"
+                                      "  :nvars 1\n"
+                                      "  :[0]\n"
+                                      "   <DVariable\n"
+                                      "    :name \"v1\"\n"
+                                      "    :typeref <TypeRef :id \"t:N\" :td null>>\n"
+                                      "  :ntypes 0>"),
+
+                /* margin 30: everything breaks, so the +2 / +1 column gap
+                 * compounds over three levels -- 4 vs 3, 6 vs 4, 8 vs 5.
+                 */
+                Testcase_DLocalSymtab(1, 30, "s1.30",
+                                      "<LocalSymtab\n"
+                                      "  :nvars 1\n"
+                                      "  :[0]\n"
+                                      "    <DVariable\n"
+                                      "      :name \"v1\"\n"
+                                      "      :typeref\n"
+                                      "        <TypeRef\n"
+                                      "          :id \"t:N\"\n"
+                                      "          :td null>>\n"
+                                      "  :ntypes 0>",
+                                      "<LocalSymtab\n"
+                                      "  :nvars 1\n"
+                                      "  :[0]\n"
+                                      "   <DVariable\n"
+                                      "    :name \"v1\"\n"
+                                      "    :typeref\n"
+                                      "     <TypeRef\n"
+                                      "      :id \"t:N\"\n"
+                                      "      :td null>>\n"
+                                      "  :ntypes 0>"),
+
+                /* two vars: the generated names ARE the assertion -- [0] then
+                 * [1], in append order, with v1/v2 following them.
+                 */
+                Testcase_DLocalSymtab(2, 200, "s2.200",
+                                      "<LocalSymtab :nvars 2 :[0] <DVariable :name \"v1\" :typeref <TypeRef :id \"t:N\" :td null>> :[1] <DVariable :name \"v2\" :typeref <TypeRef :id \"t:N\" :td null>> :ntypes 0>",
+                                      "<LocalSymtab :nvars 2 :[0] <DVariable :name \"v1\" :typeref <TypeRef :id \"t:N\" :td null>> :[1] <DVariable :name \"v2\" :typeref <TypeRef :id \"t:N\" :td null>> :ntypes 0>"),
+
+                Testcase_DLocalSymtab(2, 30, "s2.30",
+                                      "<LocalSymtab\n"
+                                      "  :nvars 2\n"
+                                      "  :[0]\n"
+                                      "    <DVariable\n"
+                                      "      :name \"v1\"\n"
+                                      "      :typeref\n"
+                                      "        <TypeRef\n"
+                                      "          :id \"t:N\"\n"
+                                      "          :td null>>\n"
+                                      "  :[1]\n"
+                                      "    <DVariable\n"
+                                      "      :name \"v2\"\n"
+                                      "      :typeref\n"
+                                      "        <TypeRef\n"
+                                      "          :id \"t:N\"\n"
+                                      "          :td null>>\n"
+                                      "  :ntypes 0>",
+                                      "<LocalSymtab\n"
+                                      "  :nvars 2\n"
+                                      "  :[0]\n"
+                                      "   <DVariable\n"
+                                      "    :name \"v1\"\n"
+                                      "    :typeref\n"
+                                      "     <TypeRef\n"
+                                      "      :id \"t:N\"\n"
+                                      "      :td null>>\n"
+                                      "  :[1]\n"
+                                      "   <DVariable\n"
+                                      "    :name \"v2\"\n"
+                                      "    :typeref\n"
+                                      "     <TypeRef\n"
+                                      "      :id \"t:N\"\n"
+                                      "      :td null>>\n"
+                                      "  :ntypes 0>"),
+            };
         } /*namespace*/
 
         TEST_CASE("TypeRef-render", "[printable][TypeRef]")
@@ -1983,6 +2170,84 @@ namespace xo {
                     REHEARSE(rh, deprecated == tc.expect_deprecated_);
                 }
             }
+        }
+        TEST_CASE("DLocalSymtab-render", "[printable][DLocalSymtab]")
+        {
+            REQUIRE(s_init.evidence());
+
+            UtestRehearser rh;
+
+            for (auto _ : rh) {
+                scope log(XO_DEBUG2_(rh.enable_debug(), "DLocalSymtab-render"));
+
+                for (std::size_t i_tc = 0, n_tc = s_localsymtab_v.size(); i_tc < n_tc; ++i_tc) {
+                    const auto & tc = s_localsymtab_v[i_tc];
+
+                    VarFixture fx(tc.label_);
+
+                    DLocalSymtab * e = fx.make_localsymtab(tc.n_var_, 0 /*n_type*/);
+                    REQUIRE(e != nullptr);
+
+                    auto p = with_facet<APrintable>::mkobj(e);
+
+                    std::string deprecated
+                        = scrub_type_id(scrub_typevar(scrub_tseq(render_deprecated(p, tc.margin_))));
+                    std::string pretty
+                        = scrub_type_id(scrub_typevar(scrub_tseq(render_pretty(p, tc.margin_))));
+
+                    log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_),
+                               xtag("deprecated", deprecated), xtag("pretty", pretty));
+
+                    REHEARSE(rh, pretty == tc.expect_pretty_);
+                    REHEARSE(rh, deprecated == tc.expect_deprecated_);
+                }
+            }
+        }
+
+        /** the types_ path, which s_localsymtab_v cannot cover.
+         *
+         *  `.xo-backlog/xo-type/issues/01-no-aprintable-facet.md` recorded the
+         *  throw as UNVERIFIED -- a code-read, since nothing constructed a
+         *  symtab with a non-empty types_.  This is the observation, and it
+         *  corrects where the ticket placed the fault: DLocalSymtab's own
+         *  `(*types_)[i].to_facet<APrintable>()` SUCCEEDS, because DTypename
+         *  has an IPrintable facet.  What throws is one level down, in
+         *  DTypename::pretty_deprecated's `type_.to_facet<APrintable>()`,
+         *  since xo-type's D-types have none.
+         *
+         *  The two sides therefore disagree about more than layout here, and
+         *  only until DTypename converts: ppsink reaches DTypename's PHASE B
+         *  stub, which renders a marker rather than descending into the type.
+         *  So the pretty assertion below is deliberately about the SYMTAB's
+         *  own fields -- it does not pin the stub text.
+         *
+         *  DELETE THE DEPRECATED HALF AT PHASE E.  The pretty half should then
+         *  be revisited: if xo-type gains APrintable, or DTypename adopts
+         *  try_variant + a placeholder, this becomes a rendering test.
+         **/
+        TEST_CASE("DLocalSymtab-types-throws", "[printable][DLocalSymtab]")
+        {
+            REQUIRE(s_init.evidence());
+
+            VarFixture fx("types.throws");
+
+            DLocalSymtab * e = fx.make_localsymtab(0 /*n_var*/, 1 /*n_type*/);
+            REQUIRE(e != nullptr);
+
+            auto p = with_facet<APrintable>::mkobj(e);
+
+            /* legacy: the whole render dies rather than the one field */
+            REQUIRE_THROWS_AS(render_deprecated(p, 200), std::runtime_error);
+
+            /* ppsink: renders, because DTypename's converted printer is still
+             * a stub and never asks for the type's facet
+             */
+            std::string pretty = render_pretty(p, 200);
+
+            REQUIRE(pretty.find("<LocalSymtab") != std::string::npos);
+            REQUIRE(pretty.find(":nvars 0") != std::string::npos);
+            REQUIRE(pretty.find(":ntypes 1") != std::string::npos);
+            REQUIRE(pretty.find(":[0]") != std::string::npos);
         }
     } /*namespace ut*/
 } /*namespace xo*/
