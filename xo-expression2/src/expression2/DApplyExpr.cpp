@@ -8,6 +8,8 @@
 #include "detail/IExpression_DApplyExpr.hpp"
 #include <xo/printable2/Printable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
+#include <xo/ppsink/concat.hpp>         /* concat("arg", n) for generated names */
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.struct_open(..), struct_scope */
 
 namespace xo {
     using xo::print::APrintable;
@@ -189,6 +191,42 @@ namespace xo {
                 pps->write(">");
 
                 return false;
+            }
+        }
+
+        void
+        DApplyExpr::pretty(xo::pp::PpSink & sink) const
+        {
+            /* struct_open(), not pretty_struct(): the field count is n_args_+1,
+             * a runtime value, so no compile-time pack can express it.  First
+             * consumer of the builder in this subsystem; see
+             * .xo-backlog/xo-ppsink/issues/06-dynamic-arity-struct-builder.md
+             *
+             * NB struct_scope::field() renders IMMEDIATELY, so unlike the free
+             * xo::pp::field() it does not capture by reference -- temporaries
+             * (the concat below, the obj<> locals) are safe here.
+             *
+             * The scope's destructor emits ">" and closes the group, hence the
+             * explicit block.
+             */
+            auto st = sink.struct_open("ApplyExpr");
+
+            {
+                obj<APrintable> fn
+                    = FacetRegistry::instance().variant<APrintable>(fn_);
+
+                st.field("fn", fn);
+            }
+
+            /* arg names are 1-BASED and generated: arg1, arg2, ...  Matching
+             * legacy's concat("arg", 1+i_arg); the deprecated printer built the
+             * same names with the same helper.
+             */
+            for (size_type i_arg = 0; i_arg < n_args_; ++i_arg) {
+                obj<APrintable> arg_i
+                    = FacetRegistry::instance().variant<APrintable>(args_[i_arg]);
+
+                st.field(xo::pp::concat("arg", 1 + i_arg), arg_i);
             }
         }
 

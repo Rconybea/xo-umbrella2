@@ -24,6 +24,7 @@
  */
 
 #include "init_expression2.hpp"
+#include <xo/expression2/ApplyExpr.hpp>     /* likewise DApplyExpr */
 #include <xo/expression2/Constant.hpp>      /* likewise DConstant */
 #include <xo/expression2/DefineExpr.hpp>    /* likewise DDefineExpr */
 #include <xo/expression2/GlobalSymtab.hpp>  /* likewise DGlobalSymtab */
@@ -68,6 +69,7 @@ namespace xo {
     using xo::scm::DIfElseExpr;
     using xo::scm::DSequenceExpr;
     using xo::scm::DDefineExpr;
+    using xo::scm::DApplyExpr;
     using xo::scm::AExpression;
     using xo::scm::DFloat;
     using xo::scm::DInteger;
@@ -583,6 +585,47 @@ namespace xo {
                     if (with_rhs)
                         retval->assign_rhs(obj<AExpression>(DConstant::make(this->allocator(),
                                                                            DInteger::box<AGCObject>(this->allocator(), 7))));
+
+                    return retval;
+                }
+
+                /** a DApplyExpr calling variable "f" with @p n_arg constants.
+                 *
+                 *  scaffold() + assign_arg() rather than make2(), so the arity
+                 *  is a case variable -- the whole point of this printer, whose
+                 *  field count is a runtime value.
+                 *
+                 *  Every argument IS assigned: the printer reaches its children
+                 *  through FacetRegistry::variant<APrintable> (not try_variant),
+                 *  so an unassigned slot would be an empty obj<> handed to a
+                 *  facet lookup that does not tolerate one.  A DApplyExpr with
+                 *  holes is a parser-intermediate state; whether it should be
+                 *  printable is a separate question from this conversion.
+                 *
+                 *  fn is a DVariable and the args are DConstants -- both
+                 *  converted, so nothing here pins "STUB:" text.
+                 **/
+                DApplyExpr * make_applyexpr(int n_arg) {
+                    /* Kind::unresolved: its TypeRef renders `:id "t:1" :td null`.
+                     * Kind::resolved would drag in xo-reflect's TypeDescr
+                     * printer -- `<TypeDescr :id 8 :canonical_name double ...>`,
+                     * long, and carrying a process-wide counter -- for no gain
+                     * here.  This printer's subject is field ARITY.
+                     */
+                    DVariable * fn_var = this->make_var("f", Kind::unresolved);
+
+                    DApplyExpr * retval
+                        = DApplyExpr::scaffold(this->allocator(),
+                                               make_typeref(Kind::resolved),
+                                               with_facet<AExpression>::mkobj(fn_var),
+                                               n_arg);
+
+                    for (int i = 0; i < n_arg; ++i) {
+                        retval->assign_arg(i,
+                                           obj<AExpression>(DConstant::make(this->allocator(),
+                                                                            DInteger::box<AGCObject>(this->allocator(),
+                                                                                                     10 + i))));
+                    }
 
                     return retval;
                 }
@@ -1415,6 +1458,186 @@ namespace xo {
                                      "<DDefineExpr :lhs <DVariable :name \"\" :typeref <TypeRef :id \"\" :td null>> :rhs <DConstant :value_.tseq N :value.tseq N :value 7>>",
                                      "<DDefineExpr :lhs <DVariable :name \"\" :typeref <TypeRef :id \"\" :td null>> :rhs <DConstant :value_.tseq N :value.tseq N :value 7>>"),
             };
+
+            /** DApplyExpr's field count is n_args_+1, a RUNTIME value, so this
+             *  is the first printer in the cluster built with
+             *  PpSink::struct_open() rather than pretty_struct().  Field names
+             *  after :fn are generated -- concat("arg", 1+i), 1-based.
+             *
+             *  fn is a DVariable and the args are DConstants, both converted.
+             **/
+            struct Testcase_DApplyExpr {
+                Testcase_DApplyExpr(int n_arg, std::uint32_t margin,
+                                    const char * label,
+                                    const char * expect_deprecated,
+                                    const char * expect_pretty)
+                    : n_arg_{n_arg}, margin_{margin}, label_{label},
+                      expect_deprecated_{expect_deprecated},
+                      expect_pretty_{expect_pretty} {}
+
+                int n_arg_;
+                std::uint32_t margin_;
+                const char * label_;
+                /** OBSERVED via pretty_deprecated; delete at phase E **/
+                std::string expect_deprecated_;
+                /** OBSERVED via pretty; outlives phase E **/
+                std::string expect_pretty_;
+            };
+
+            static std::vector<Testcase_DApplyExpr> s_apply_v = {
+                /* zero args -- only :fn.  THE <DVariable :name \"f\" :typeref <TypeRef :id \"t:N\" :td null>>-FORM DIVERGENCE: legacy
+                 * renders "<ApplyExpr:fn ..." with no space, because its
+                 * hand-rolled print_upto() path writes the struct name and then
+                 * each refrtag with no separator between them.  ppsink emits
+                 * one, as every pretty_struct-based printer already did.
+                 * Legacy is wrong here and this is not a regression; see the
+                 * ticket.
+                 */
+                Testcase_DApplyExpr(0, 200, "a0.200",
+                                    "<ApplyExpr:fn <DVariable :name \"f\" :typeref <TypeRef :id \"t:N\" :td null>>>",
+                                    "<ApplyExpr :fn <DVariable :name \"f\" :typeref <TypeRef :id \"t:N\" :td null>>>"),
+
+                /* broken: the separator question disappears -- a field on its
+                 * own line needs no leading space -- so the two stacks differ
+                 * only by the usual field-value column (legacy +2, ppsink +1),
+                 * compounding over three levels.
+                 */
+                Testcase_DApplyExpr(0, 30, "a0.30",
+                                    "<ApplyExpr\n"
+                                    "  :fn\n"
+                                    "    <DVariable\n"
+                                    "      :name \"f\"\n"
+                                    "      :typeref\n"
+                                    "        <TypeRef\n"
+                                    "          :id \"t:N\"\n"
+                                    "          :td null>>>",
+                                    "<ApplyExpr\n"
+                                    "  :fn\n"
+                                    "   <DVariable\n"
+                                    "    :name \"f\"\n"
+                                    "    :typeref\n"
+                                    "     <TypeRef\n"
+                                    "      :id \"t:N\"\n"
+                                    "      :td null>>>"),
+
+                /* one arg, flat: TWO missing separators in legacy, before :fn
+                 * and before :arg1.  Pins that the defect is per field.
+                 */
+                Testcase_DApplyExpr(1, 200, "a1.200",
+                                    "<ApplyExpr:fn <DVariable :name \"f\" :typeref <TypeRef :id \"t:N\" :td null>>:arg1 <DConstant :value_.tseq N :value.tseq N :value 10>>",
+                                    "<ApplyExpr :fn <DVariable :name \"f\" :typeref <TypeRef :id \"t:N\" :td null>> :arg1 <DConstant :value_.tseq N :value.tseq N :value 10>>"),
+
+                Testcase_DApplyExpr(1, 40, "a1.40",
+                                    "<ApplyExpr\n"
+                                    "  :fn\n"
+                                    "    <DVariable\n"
+                                    "      :name \"f\"\n"
+                                    "      :typeref\n"
+                                    "        <TypeRef :id \"t:N\" :td null>>\n"
+                                    "  :arg1\n"
+                                    "    <DConstant\n"
+                                    "      :value_.tseq N\n"
+                                    "      :value.tseq N\n"
+                                    "      :value 10>>",
+                                    "<ApplyExpr\n"
+                                    "  :fn\n"
+                                    "   <DVariable\n"
+                                    "    :name \"f\"\n"
+                                    "    :typeref\n"
+                                    "     <TypeRef :id \"t:N\" :td null>>\n"
+                                    "  :arg1\n"
+                                    "   <DConstant\n"
+                                    "    :value_.tseq N\n"
+                                    "    :value.tseq N\n"
+                                    "    :value 10>>"),
+
+                /* three args at margin 200: too wide to fit, so it breaks and
+                 * every field fits its own line -- the two stacks agree
+                 * EXACTLY.  The generated names arg1/arg2/arg3 are the
+                 * assertion that matters here.
+                 */
+                Testcase_DApplyExpr(3, 200, "a3.200",
+                                    "<ApplyExpr\n"
+                                    "  :fn <DVariable :name \"f\" :typeref <TypeRef :id \"t:N\" :td null>>\n"
+                                    "  :arg1 <DConstant :value_.tseq N :value.tseq N :value 10>\n"
+                                    "  :arg2 <DConstant :value_.tseq N :value.tseq N :value 11>\n"
+                                    "  :arg3 <DConstant :value_.tseq N :value.tseq N :value 12>>",
+                                    "<ApplyExpr\n"
+                                    "  :fn <DVariable :name \"f\" :typeref <TypeRef :id \"t:N\" :td null>>\n"
+                                    "  :arg1 <DConstant :value_.tseq N :value.tseq N :value 10>\n"
+                                    "  :arg2 <DConstant :value_.tseq N :value.tseq N :value 11>\n"
+                                    "  :arg3 <DConstant :value_.tseq N :value.tseq N :value 12>>"),
+
+                /* margin 60: :fn breaks, the args still fit -- so one field
+                 * diverges and three do not, in one rendering.
+                 */
+                Testcase_DApplyExpr(3, 60, "a3.60",
+                                    "<ApplyExpr\n"
+                                    "  :fn\n"
+                                    "    <DVariable\n"
+                                    "      :name \"f\"\n"
+                                    "      :typeref <TypeRef :id \"t:N\" :td null>>\n"
+                                    "  :arg1 <DConstant :value_.tseq N :value.tseq N :value 10>\n"
+                                    "  :arg2 <DConstant :value_.tseq N :value.tseq N :value 11>\n"
+                                    "  :arg3 <DConstant :value_.tseq N :value.tseq N :value 12>>",
+                                    "<ApplyExpr\n"
+                                    "  :fn\n"
+                                    "   <DVariable\n"
+                                    "    :name \"f\"\n"
+                                    "    :typeref <TypeRef :id \"t:N\" :td null>>\n"
+                                    "  :arg1 <DConstant :value_.tseq N :value.tseq N :value 10>\n"
+                                    "  :arg2 <DConstant :value_.tseq N :value.tseq N :value 11>\n"
+                                    "  :arg3 <DConstant :value_.tseq N :value.tseq N :value 12>>"),
+
+                /* margin 30: everything breaks, at every level */
+                Testcase_DApplyExpr(3, 30, "a3.30",
+                                    "<ApplyExpr\n"
+                                    "  :fn\n"
+                                    "    <DVariable\n"
+                                    "      :name \"f\"\n"
+                                    "      :typeref\n"
+                                    "        <TypeRef\n"
+                                    "          :id \"t:N\"\n"
+                                    "          :td null>>\n"
+                                    "  :arg1\n"
+                                    "    <DConstant\n"
+                                    "      :value_.tseq N\n"
+                                    "      :value.tseq N\n"
+                                    "      :value 10>\n"
+                                    "  :arg2\n"
+                                    "    <DConstant\n"
+                                    "      :value_.tseq N\n"
+                                    "      :value.tseq N\n"
+                                    "      :value 11>\n"
+                                    "  :arg3\n"
+                                    "    <DConstant\n"
+                                    "      :value_.tseq N\n"
+                                    "      :value.tseq N\n"
+                                    "      :value 12>>",
+                                    "<ApplyExpr\n"
+                                    "  :fn\n"
+                                    "   <DVariable\n"
+                                    "    :name \"f\"\n"
+                                    "    :typeref\n"
+                                    "     <TypeRef\n"
+                                    "      :id \"t:N\"\n"
+                                    "      :td null>>\n"
+                                    "  :arg1\n"
+                                    "   <DConstant\n"
+                                    "    :value_.tseq N\n"
+                                    "    :value.tseq N\n"
+                                    "    :value 10>\n"
+                                    "  :arg2\n"
+                                    "   <DConstant\n"
+                                    "    :value_.tseq N\n"
+                                    "    :value.tseq N\n"
+                                    "    :value 11>\n"
+                                    "  :arg3\n"
+                                    "   <DConstant\n"
+                                    "    :value_.tseq N\n"
+                                    "    :value.tseq N\n"
+                                    "    :value 12>>"),
+            };
         } /*namespace*/
 
         TEST_CASE("TypeRef-render", "[printable][TypeRef]")
@@ -1720,6 +1943,38 @@ namespace xo {
                         = scrub_typevar(scrub_tseq(render_deprecated(p, tc.margin_)));
                     std::string pretty
                         = scrub_typevar(scrub_tseq(render_pretty(p, tc.margin_)));
+
+                    log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_),
+                               xtag("deprecated", deprecated), xtag("pretty", pretty));
+
+                    REHEARSE(rh, pretty == tc.expect_pretty_);
+                    REHEARSE(rh, deprecated == tc.expect_deprecated_);
+                }
+            }
+        }
+        TEST_CASE("DApplyExpr-render", "[printable][DApplyExpr]")
+        {
+            REQUIRE(s_init.evidence());
+
+            UtestRehearser rh;
+
+            for (auto _ : rh) {
+                scope log(XO_DEBUG2_(rh.enable_debug(), "DApplyExpr-render"));
+
+                for (std::size_t i_tc = 0, n_tc = s_apply_v.size(); i_tc < n_tc; ++i_tc) {
+                    const auto & tc = s_apply_v[i_tc];
+
+                    VarFixture fx(tc.label_);
+
+                    DApplyExpr * e = fx.make_applyexpr(tc.n_arg_);
+                    REQUIRE(e != nullptr);
+
+                    auto p = with_facet<APrintable>::mkobj(e);
+
+                    std::string deprecated
+                        = scrub_type_id(scrub_typevar(scrub_tseq(render_deprecated(p, tc.margin_))));
+                    std::string pretty
+                        = scrub_type_id(scrub_typevar(scrub_tseq(render_pretty(p, tc.margin_))));
 
                     log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_),
                                xtag("deprecated", deprecated), xtag("pretty", pretty));
