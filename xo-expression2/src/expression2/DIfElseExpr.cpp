@@ -8,6 +8,7 @@
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/printable2/Printable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
+#include <xo/ppsink/pretty_struct.hpp>   /* sink.pretty_struct(..), field(..) */
 #include <xo/reflectutil/typeseq.hpp>
 
 namespace xo {
@@ -126,6 +127,33 @@ namespace xo {
                         refrtag("test", test, test_present),
                         refrtag("when_true", when_true, when_true_present),
                         refrtag("when_false", when_false, when_false_present));
+        }
+
+        void
+        DIfElseExpr::pretty(xo::pp::PpSink & sink) const
+        {
+            /* named locals: field() captures BY REFERENCE (pretty_struct.hpp).
+             * try_variant returns an empty obj<> when the child is absent --
+             * make_empty() leaves all three unset -- so each is a FIELD THAT
+             * MAY NOT EXIST, not a field with an empty value.  field()'s third
+             * argument drops the field and its separator entirely, matching
+             * legacy refrtag's three-argument form.
+             */
+            auto test
+                = FacetRegistry::instance().try_variant<APrintable,
+                                                        AExpression>(test_);
+            auto when_true
+                = FacetRegistry::instance().try_variant<APrintable,
+                                                        AExpression>(when_true_);
+            auto when_false
+                = FacetRegistry::instance().try_variant<APrintable,
+                                                        AExpression>(when_false_);
+
+            sink.pretty_struct("DIfElseExpr",
+                               xo::pp::field("typeref", typeref_),
+                               xo::pp::field("test", test, bool(test)),
+                               xo::pp::field("when_true", when_true, bool(when_true)),
+                               xo::pp::field("when_false", when_false, bool(when_false)));
         }
 
         // ----------------------------------------------------------------

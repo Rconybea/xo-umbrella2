@@ -5,7 +5,7 @@
  * Phase C verification for xo-expression2's printers, bottom-up.  TypeRef
  * first: it is the subsystem's only leaf, depending on nothing else here.
  * Then DVariable, whose :typeref field nests it, then DVarRef, then
- * DGlobalSymtab, then DConstant.
+ * DGlobalSymtab, then DConstant, then DIfElseExpr.
  *
  * Follows the template in xo-object2/utest/printable_render.test.cpp -- see
  * .xo-backlog/xo-printable2/issues/01-aprintable-pretty-ppsink.md for why both
@@ -26,6 +26,7 @@
 #include "init_expression2.hpp"
 #include <xo/expression2/Constant.hpp>      /* likewise DConstant */
 #include <xo/expression2/GlobalSymtab.hpp>  /* likewise DGlobalSymtab */
+#include <xo/expression2/IfElseExpr.hpp>     /* likewise DIfElseExpr */
 #include <xo/expression2/TypeRef.hpp>
 #include <xo/expression2/VarRef.hpp>       /* likewise DVarRef */
 #include <xo/expression2/Variable.hpp>     /* convenience header: DVariable + its facet impls */
@@ -62,6 +63,8 @@ namespace xo {
     using xo::scm::DVarRef;
     using xo::scm::DGlobalSymtab;
     using xo::scm::DConstant;
+    using xo::scm::DIfElseExpr;
+    using xo::scm::AExpression;
     using xo::scm::DFloat;
     using xo::scm::DInteger;
     using xo::scm::Binding;
@@ -184,6 +187,44 @@ namespace xo {
                 }
 
                 return std::string::npos;
+            }
+
+            /** replace the digits in a quoted GENERATED type-variable name:
+             *  :id "if:12"  ->  :id "if:N".
+             *
+             *  A third counter, distinct from TypeDescr's :id (scrub_type_id)
+             *  and from typeseq (scrub_tseq).  DIfElseExpr::_make_empty() builds
+             *  its TypeRef through TypeRef::generate_unique(), which draws on a
+             *  process-wide counter -- so these move with how many TypeRefs the
+             *  run happened to make before this one, including from unrelated
+             *  tests.  The PREFIX is kept: "if:" is a property of the printer
+             *  under test, the number is not.
+             **/
+            std::string scrub_typevar(std::string s) {
+                const std::string key = ":id \"";
+
+                for (std::size_t i = s.find(key); i != std::string::npos; i = s.find(key, i+1)) {
+                    std::size_t b = i + key.size();
+
+                    /* skip the prefix, up to and including its ':' */
+                    while (b < s.size() && s[b] != ':' && s[b] != '"')
+                        ++b;
+
+                    if (b >= s.size() || s[b] != ':')
+                        continue;   /* no prefix separator -- not a generated name */
+
+                    ++b;
+
+                    std::size_t e = b;
+
+                    while (e < s.size() && ::isdigit((unsigned char)s[e]))
+                        ++e;
+
+                    if (e > b)
+                        s.replace(b, e - b, "N");
+                }
+
+                return s;
             }
 
             /** replace each ".tseq" value with "N".
@@ -479,6 +520,27 @@ namespace xo {
                  *  paths through DConstant::_lookup_td, and render different
                  *  D-type typeseqs, so both are cases.
                  **/
+                /** a DIfElseExpr with each branch present or absent.
+                 *
+                 *  Children are DConstants -- converted printers, so nothing
+                 *  here can pin "STUB:" text that would move later.
+                 **/
+                DIfElseExpr * make_ifelse(bool with_test, bool with_true, bool with_false) {
+                    DIfElseExpr * retval = DIfElseExpr::_make_empty(this->allocator());
+
+                    if (with_test)
+                        retval->assign_test(obj<AExpression>(DConstant::make(this->allocator(),
+                                                                            DInteger::box<AGCObject>(this->allocator(), 1))));
+                    if (with_true)
+                        retval->assign_when_true(obj<AExpression>(DConstant::make(this->allocator(),
+                                                                                  DInteger::box<AGCObject>(this->allocator(), 2))));
+                    if (with_false)
+                        retval->assign_when_false(obj<AExpression>(DConstant::make(this->allocator(),
+                                                                                   DInteger::box<AGCObject>(this->allocator(), 3))));
+
+                    return retval;
+                }
+
                 template <typename T>
                 DConstant * make_constant(T x) {
                     /* if constexpr, not a ternary: the two box<> calls return
@@ -858,6 +920,149 @@ namespace xo {
                                        " :ntype 0 :type_capacity 64>"),
             };
 
+
+            /** DIfElseExpr is the first printer with OPTIONAL fields: legacy
+             *  uses refrtag's three-argument form and ppsink field()'s third
+             *  argument, and an absent branch drops the field AND its separator
+             *  rather than rendering an empty value.
+             *
+             *  Children are DConstants (converted), so nothing here pins
+             *  "STUB:" text that would move when a sibling printer lands.
+             **/
+            struct Testcase_DIfElseExpr {
+                Testcase_DIfElseExpr(bool with_test, bool with_true, bool with_false,
+                                     std::uint32_t margin,
+                                     const char * label,
+                                     const char * expect_deprecated,
+                                     const char * expect_pretty)
+                    : with_test_{with_test}, with_true_{with_true},
+                      with_false_{with_false}, margin_{margin}, label_{label},
+                      expect_deprecated_{expect_deprecated},
+                      expect_pretty_{expect_pretty} {}
+
+                bool with_test_;
+                bool with_true_;
+                bool with_false_;
+                std::uint32_t margin_;
+                const char * label_;
+                /** OBSERVED via pretty_deprecated; delete at phase E **/
+                std::string expect_deprecated_;
+                /** OBSERVED via pretty; outlives phase E **/
+                std::string expect_pretty_;
+            };
+
+            static std::vector<Testcase_DIfElseExpr> s_ifelse_v = {
+                /* THE case this printer was worth doing for: all three branches
+                 * absent, so three of four fields vanish and only :typeref is
+                 * rendered.  Both stacks agree -- no ":test" with an empty
+                 * value, no stray separator.
+                 */
+                Testcase_DIfElseExpr(false, false, false, 200, "none.200",
+                                     "<DIfElseExpr :typeref <TypeRef :id \"if:N\" :td null>>",
+                                     "<DIfElseExpr :typeref <TypeRef :id \"if:N\" :td null>>"),
+
+                /* the same, broken: the sole field still breaks normally, and
+                 * the nested TypeRef shows the usual column divergence.
+                 */
+                Testcase_DIfElseExpr(false, false, false, 30, "none.30",
+                                     "<DIfElseExpr\n"
+                                     "  :typeref\n"
+                                     "    <TypeRef\n"
+                                     "      :id \"if:N\"\n"
+                                     "      :td null>>",
+                                     "<DIfElseExpr\n"
+                                     "  :typeref\n"
+                                     "   <TypeRef\n"
+                                     "    :id \"if:N\"\n"
+                                     "    :td null>>"),
+
+                /* one branch present: :test appears, :when_true / :when_false
+                 * stay absent.  Pins that presence is PER FIELD, not all-or-
+                 * nothing.
+                 */
+                Testcase_DIfElseExpr(true, false, false, 200, "test-only.200",
+                                     "<DIfElseExpr :typeref <TypeRef :id \"if:N\" :td null> :test <DConstant :value_.tseq N :value.tseq N :value 1>>",
+                                     "<DIfElseExpr :typeref <TypeRef :id \"if:N\" :td null> :test <DConstant :value_.tseq N :value.tseq N :value 1>>"),
+
+                /* two present, and at margin 60 the second child's value is
+                 * pushed to its own line -- the column divergence again, with
+                 * an absent field still cleanly missing.
+                 */
+                Testcase_DIfElseExpr(true, true, false, 60, "no-else.60",
+                                     "<DIfElseExpr\n"
+                                     "  :typeref <TypeRef :id \"if:N\" :td null>\n"
+                                     "  :test <DConstant :value_.tseq N :value.tseq N :value 1>\n"
+                                     "  :when_true\n"
+                                     "    <DConstant :value_.tseq N :value.tseq N :value 2>>",
+                                     "<DIfElseExpr\n"
+                                     "  :typeref <TypeRef :id \"if:N\" :td null>\n"
+                                     "  :test <DConstant :value_.tseq N :value.tseq N :value 1>\n"
+                                     "  :when_true\n"
+                                     "   <DConstant :value_.tseq N :value.tseq N :value 2>>"),
+
+                /* all four fields.  NB this breaks even at margin 200 -- the
+                 * flat form is 190+ characters -- so there is no all-on-one-line
+                 * case for this printer, and the two stacks agree exactly here.
+                 */
+                Testcase_DIfElseExpr(true, true, true, 200, "all.200",
+                                     "<DIfElseExpr\n"
+                                     "  :typeref <TypeRef :id \"if:N\" :td null>\n"
+                                     "  :test <DConstant :value_.tseq N :value.tseq N :value 1>\n"
+                                     "  :when_true <DConstant :value_.tseq N :value.tseq N :value 2>\n"
+                                     "  :when_false <DConstant :value_.tseq N :value.tseq N :value 3>>",
+                                     "<DIfElseExpr\n"
+                                     "  :typeref <TypeRef :id \"if:N\" :td null>\n"
+                                     "  :test <DConstant :value_.tseq N :value.tseq N :value 1>\n"
+                                     "  :when_true <DConstant :value_.tseq N :value.tseq N :value 2>\n"
+                                     "  :when_false <DConstant :value_.tseq N :value.tseq N :value 3>>"),
+
+                /* margin 30: every child breaks, so the field-value column
+                 * divergence (legacy 4, ppsink 3) appears at both levels for
+                 * all four fields at once -- the widest instance so far.
+                 */
+                Testcase_DIfElseExpr(true, true, true, 30, "all.30",
+                                     "<DIfElseExpr\n"
+                                     "  :typeref\n"
+                                     "    <TypeRef\n"
+                                     "      :id \"if:N\"\n"
+                                     "      :td null>\n"
+                                     "  :test\n"
+                                     "    <DConstant\n"
+                                     "      :value_.tseq N\n"
+                                     "      :value.tseq N\n"
+                                     "      :value 1>\n"
+                                     "  :when_true\n"
+                                     "    <DConstant\n"
+                                     "      :value_.tseq N\n"
+                                     "      :value.tseq N\n"
+                                     "      :value 2>\n"
+                                     "  :when_false\n"
+                                     "    <DConstant\n"
+                                     "      :value_.tseq N\n"
+                                     "      :value.tseq N\n"
+                                     "      :value 3>>",
+                                     "<DIfElseExpr\n"
+                                     "  :typeref\n"
+                                     "   <TypeRef\n"
+                                     "    :id \"if:N\"\n"
+                                     "    :td null>\n"
+                                     "  :test\n"
+                                     "   <DConstant\n"
+                                     "    :value_.tseq N\n"
+                                     "    :value.tseq N\n"
+                                     "    :value 1>\n"
+                                     "  :when_true\n"
+                                     "   <DConstant\n"
+                                     "    :value_.tseq N\n"
+                                     "    :value.tseq N\n"
+                                     "    :value 2>\n"
+                                     "  :when_false\n"
+                                     "   <DConstant\n"
+                                     "    :value_.tseq N\n"
+                                     "    :value.tseq N\n"
+                                     "    :value 3>>"),
+            };
+
             /** DConstant's :value nests an object2 leaf (DInteger / DFloat),
              *  both already converted -- so this is the first expression2
              *  printer nesting a printer from ANOTHER subsystem.
@@ -1161,6 +1366,40 @@ namespace xo {
 
             /* ... and the boxed type IS genuinely discriminated between cases */
             CHECK(first_tseq(s_int) != first_tseq(s_flt));
+        }
+
+        TEST_CASE("DIfElseExpr-render", "[printable][DIfElseExpr]")
+        {
+            REQUIRE(s_init.evidence());
+
+            UtestRehearser rh;
+
+            for (auto _ : rh) {
+                scope log(XO_DEBUG2_(rh.enable_debug(), "DIfElseExpr-render"));
+
+                for (std::size_t i_tc = 0, n_tc = s_ifelse_v.size(); i_tc < n_tc; ++i_tc) {
+                    const auto & tc = s_ifelse_v[i_tc];
+
+                    VarFixture fx(tc.label_);
+
+                    DIfElseExpr * e = fx.make_ifelse(tc.with_test_, tc.with_true_,
+                                                     tc.with_false_);
+                    REQUIRE(e != nullptr);
+
+                    auto p = with_facet<APrintable>::mkobj(e);
+
+                    std::string deprecated
+                        = scrub_typevar(scrub_tseq(render_deprecated(p, tc.margin_)));
+                    std::string pretty
+                        = scrub_typevar(scrub_tseq(render_pretty(p, tc.margin_)));
+
+                    log && log(xtag("i_tc", i_tc), xtag("margin", tc.margin_),
+                               xtag("deprecated", deprecated), xtag("pretty", pretty));
+
+                    REHEARSE(rh, pretty == tc.expect_pretty_);
+                    REHEARSE(rh, deprecated == tc.expect_deprecated_);
+                }
+            }
         }
     } /*namespace ut*/
 } /*namespace xo*/
