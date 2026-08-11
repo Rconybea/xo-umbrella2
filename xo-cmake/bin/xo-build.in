@@ -16,6 +16,7 @@ $0 [-u|--usage|-h|--help]
     [--with-opengl=GLFLAG] [--with-vulkan=VKFLAG]
     [-S=SOURCEDIR] [-B=BUILDDIR] [-j N|--jobs=N]
     [-q|--quiet] [-k|--keep-going]
+    [--sweep]
     [--all | [--with-deps] NAME ...]
 EOF
 }
@@ -64,6 +65,21 @@ Options:
                           build a subsystem from scratch (e.g. in a fresh docker
                           container) where its dependencies are not yet installed.
                           Ignored with --all.
+  --sweep                 whole-tree verification, in two stages:
+                            1. --configure --build --install, with
+                               --with-utests and --with-examples
+                            2. --utest
+                          both with -q and -k, and with --all unless NAMEs are
+                          given.  Two invocations rather than one, because
+                          xo-build runs every chosen phase for a subsystem
+                          before moving to the next -- so a single pass would
+                          test a subsystem before its dependents were built.
+                          Stage 2 runs even if stage 1 failed (that is what -k
+                          is for); the closing banner names the stage that
+                          failed and the exit status is non-zero if either did.
+                          Exists so the flags above stop being something anyone
+                          has to remember: --with-examples in particular, whose
+                          absence reports green on a tree that does not build.
   --clone                 git clone xo library NAME in current directory
   --configure             run cmake for xo library NAME in immediate subdir
                           Will use NAME/.build as build directory
@@ -125,7 +141,12 @@ push_umbrella_remote_flag=0
 all_flag=0
 with_deps_flag=0
 keep_going_flag=0
+sweep_flag=0
 xonames=()
+
+# --sweep re-invokes this script twice, so it needs the argv it was given.
+# Captured before parsing consumes it.
+orig_argv=("$@")
 
 # --keep-going bookkeeping.  failed_subsys/skipped_subsys drive the end-of-run
 # summary; skip_set maps a subsystem to the failed subsystem it is downstream
@@ -137,6 +158,13 @@ declare -A skip_set=()
 # subsystems whose --utest phase found zero tests.  Tracked because ctest exits
 # 0 in that case, so they would otherwise be counted as passes.
 no_tests_subsys=()
+
+# subsystems where every requested phase succeeded and, if --utest was among
+# them, at least one test ran.  Counted rather than derived, so that the
+# end-of-run summary states the pass count instead of leaving the reader to
+# subtract -- a subtraction that silently stops being right the moment the
+# buckets overlap.
+ok_subsys=()
 
 while [[ $# > 0 ]]; do
     case "$1" in
@@ -188,6 +216,9 @@ while [[ $# > 0 ]]; do
             ;;
         --all)
             all_flag=1
+            ;;
+        --sweep)
+            sweep_flag=1
             ;;
         --with-deps)
             with_deps_flag=1
@@ -342,6 +373,74 @@ set -e
 
 if [[ $cmd == 'list' ]]; then
     subsystem_list
+fi
+
+# --- --sweep: the whole-tree verification recipe -------------------------
+#
+# Two invocations of this script, not one pass with every phase flag set.
+# xo-build runs all chosen phases for a subsystem before moving to the next,
+# so a single pass would run xo-alloc's tests before xo-object had been
+# configured.  Separating them also means stage 2 tests a tree that is fully
+# built and installed, and gives two answers instead of one interleaved log:
+# does it build, then does it pass.
+#
+# The flags below are the reason this exists.  Each has been forgotten at
+# least once, and each failure was silent:
+#   --with-examples  examples are where a refactor breaks first; a sweep
+#                    without them reports green on a tree that does not build
+#   --with-utests    without it cmake registers no tests and ctest is happy
+#   -q               rather than >/dev/null, which discards the diagnostics
+#                    and makes a failed build look exactly like a clean one
+#   -k               so one broken subsystem does not hide the state of the
+#                    other sixty
+#
+if [[ ${sweep_flag} -eq 1 ]]; then
+    # replay our own argv, minus --sweep, so -j/-n/--debug-build and friends
+    # reach both stages
+    sweep_argv=()
+    for sweep_arg in ${orig_argv[@]+"${orig_argv[@]}"}; do
+        [[ "${sweep_arg}" == "--sweep" ]] || sweep_argv+=("${sweep_arg}")
+    done
+
+    # whole tree unless the caller named subsystems.  NB this runs before the
+    # --all expansion below, so xonames still holds only explicit names.
+    if [[ ${#xonames[@]} -eq 0 && ${all_flag} -eq 0 ]]; then
+        sweep_argv+=(--all)
+    fi
+
+    sweep_build_rc=0
+    sweep_utest_rc=0
+
+    >&2 echo "xo-build: --sweep stage 1 of 2: configure, build, install"
+    "$0" ${sweep_argv[@]+"${sweep_argv[@]}"} \
+         -q -k --with-utests --with-examples --configure --build --install \
+        || sweep_build_rc=1
+
+    # Stage 2 runs even when stage 1 failed.  With --keep-going a single bad
+    # subsystem does not invalidate the other sixty, and skipping the whole
+    # test sweep for it would discard exactly the signal --keep-going exists
+    # to preserve.  The banner below says which stage failed, so a partial
+    # result cannot be read as a full one.
+    >&2 echo "xo-build: --sweep stage 2 of 2: utest"
+    "$0" ${sweep_argv[@]+"${sweep_argv[@]}"} -q -k --utest \
+        || sweep_utest_rc=1
+
+    if [[ ${sweep_build_rc} -ne 0 && ${sweep_utest_rc} -ne 0 ]]; then
+        >&2 echo "xo-build: --sweep FAILED in both stages (build and utest)"
+    elif [[ ${sweep_build_rc} -ne 0 ]]; then
+        >&2 echo "xo-build: --sweep FAILED in stage 1 (build);" \
+             "stage 2 ran anyway, against a partly-built tree"
+    elif [[ ${sweep_utest_rc} -ne 0 ]]; then
+        >&2 echo "xo-build: --sweep FAILED in stage 2 (utest); the tree builds"
+    else
+        >&2 echo "xo-build: --sweep ok (build and utest)"
+    fi
+
+    if [[ ${sweep_build_rc} -ne 0 || ${sweep_utest_rc} -ne 0 ]]; then
+        exit 1
+    fi
+
+    exit 0
 fi
 
 # resolve the set of subsystems to operate on.
@@ -513,6 +612,10 @@ fi
 
 # ops actually performed for this subsystem, for the --quiet summary line
 phases_done=()
+
+# set by the --utest phase when ctest reported zero tests; consumed by the
+# end-of-loop tally
+this_no_tests=0
 
 if [[ -n "$orig_pathtosource" ]]; then
     pathtosource="$orig_pathtosource"
@@ -724,7 +827,14 @@ if [[ $utest_flag -eq 1 ]]; then
                 # NB no `continue` here: having no tests is not a failure, so
                 # later phases (--install) and the per-subsystem summary line
                 # must still happen.
-                no_tests_subsys+=("${xoname:-.}")
+                #
+                # Recorded as a flag, not appended to no_tests_subsys here:
+                # a later phase may still fail, and the end-of-run buckets
+                # (ok / no tests / failed / skipped) have to stay disjoint if
+                # they are to add up to the number of subsystems attempted.
+                # The append happens at the end of the loop body, which is
+                # reached only when every phase succeeded.
+                this_no_tests=1
                 phases_done+=("utest:no-tests")
 
                 if [[ ${quiet_flag} -eq 0 ]]; then
@@ -800,6 +910,19 @@ if [[ ${quiet_flag} -eq 1 && ${#phases_done[@]} -gt 0 ]]; then
     echo "xo-build: ${xoname:-.} ok (${phases_done[*]})"
 fi
 
+# end-of-run tallies.  Every subsystem that gets here succeeded, so it lands in
+# exactly one of ok / no-tests; the failed and skipped buckets are filled by
+# note_failure and the skip check at the top of the loop, both of which
+# `continue` before this point.  Disjoint by construction, which is what lets
+# the summary line add up to the number attempted.
+if [[ ${#phases_done[@]} -gt 0 ]]; then
+    if [[ ${this_no_tests} -eq 1 ]]; then
+        no_tests_subsys+=("${xoname:-.}")
+    else
+        ok_subsys+=("${xoname:-.}")
+    fi
+fi
+
 done
 
 # --- end-of-run summary (--keep-going only) -------------------------------
@@ -827,9 +950,21 @@ if [[ ${keep_going_flag} -eq 1 ]]; then
         if [[ ${#no_tests_subsys[@]} -gt 0 ]]; then
             >&2 echo "  no tests ${no_tests_subsys[*]}"
         fi
-
-        >&2 echo "xo-build: ${#failed_subsys[@]} failed, ${#skipped_subsys[@]} skipped, ${#no_tests_subsys[@]} with no tests"
     fi
+
+    # Printed even when nothing went wrong: on a clean run this line is the
+    # whole result, and "61 attempted: 61 ok" is a claim you can quote,
+    # whereas silence is indistinguishable from a run that did nothing.
+    #
+    # The four buckets are disjoint and cover every subsystem attempted, so
+    # they add up -- which is the point.  Stating `ok` rather than leaving it
+    # to be derived also removes the standing invitation to subtract wrongly:
+    # "34 ok" used to be arrived at as 61 - 26 - 1 by hand.
+    >&2 echo "xo-build: ${#xonames[@]} attempted:" \
+         "${#ok_subsys[@]} ok," \
+         "${#no_tests_subsys[@]} with no tests," \
+         "${#failed_subsys[@]} failed," \
+         "${#skipped_subsys[@]} skipped"
 
     # NB an `if`, not `[[ ... ]] && exit 1`: as the last statement in the script
     # the latter returns 1 when the condition is FALSE, so a clean --keep-going
