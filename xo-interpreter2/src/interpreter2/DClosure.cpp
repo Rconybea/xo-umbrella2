@@ -11,10 +11,12 @@
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/indentlog/scope.hpp>
 #include <cstddef>
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
     using xo::mm::AGCObject;
     using xo::print::APrintable;
+    using xo::pp::field;
 
     namespace scm {
 
@@ -93,6 +95,26 @@ namespace xo {
                  "DClosure",
                  refrtag("lambda", lambda_pr, lambda_present),
                  refrtag("env", env_pr, env_present));
+        }
+
+        void
+        DClosure::pretty(xo::pp::PpSink & sink) const
+        {
+            obj<APrintable,DLambdaExpr> lambda_pr(const_cast<DLambdaExpr *>(lambda_));
+            obj<APrintable,DLocalEnv> env_pr(const_cast<DLocalEnv *>(env_));
+
+            /* TWO per-field present flags, so legacy's flags map straight onto
+             * field()'s third argument.  Both children are reached by DIRECT
+             * construction of obj<APrintable,T> rather than a registry lookup
+             * -- the shape that aborts on use elsewhere -- but here the
+             * emptiness is TESTED before the field is emitted, so a null
+             * child is an absent field rather than a crash.  That is why
+             * DClosure is absent from
+             * .xo-backlog/xo-reader2/issues/01-ssm-printer-null-children.md.
+             */
+            sink.pretty_struct("DClosure",
+                               field("lambda", lambda_pr, bool(lambda_pr)),
+                               field("env", env_pr, bool(env_pr)));
         }
 
     } /*namespace scm*/

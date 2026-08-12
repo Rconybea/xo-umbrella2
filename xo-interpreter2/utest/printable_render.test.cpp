@@ -27,13 +27,16 @@
  * Expectations are OBSERVED, never predicted.
  */
 
+#include <xo/interpreter2/Closure.hpp>
 #include <xo/interpreter2/LocalEnv.hpp>
+#include <xo/interpreter2/VsmApplyClosureFrame.hpp>
 #include <xo/interpreter2/VsmApplyFrame.hpp>
 #include <xo/interpreter2/VsmDefContFrame.hpp>
 #include <xo/interpreter2/VsmEvalArgsFrame.hpp>
 #include <xo/interpreter2/VsmIfElseContFrame.hpp>
 #include <xo/interpreter2/VsmSeqContFrame.hpp>
 #include <xo/interpreter2/init_interpreter2.hpp>
+#include <xo/expression2/LambdaExpr.hpp>
 #include <xo/expression2/LocalSymtab.hpp>
 #include <xo/object2/Array.hpp>
 #include <xo/object2/Integer.hpp>
@@ -47,6 +50,7 @@
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <catch2/catch.hpp>
+#include <cctype>
 #include <cstdint>
 #include <string>
 
@@ -55,7 +59,11 @@ namespace xo {
     using xo::mm::AAllocator;
     using xo::mm::AGCObject;
     using xo::mm::DArena;
+    using xo::scm::DClosure;
+    using xo::scm::DLambdaExpr;
     using xo::scm::DLocalEnv;
+    using xo::scm::DVsmApplyClosureFrame;
+    using xo::scm::TypeRef;
     using xo::scm::DLocalSymtab;
     using xo::scm::DVsmApplyFrame;
     using xo::scm::DVsmDefContFrame;
@@ -103,6 +111,37 @@ namespace xo {
             std::string
             render_pretty(const T & x, std::uint32_t margin) {
                 return toppstr(PpConfig::scratch_plain(margin), x);
+            }
+
+            /** replace the digits of a "0x..." pointer with "ADDR".
+             *
+             *  Needed by exactly one field: DVsmApplyClosureFrame's `:env`,
+             *  which renders its DLocalEnv* as a raw ADDRESS -- see the
+             *  DVsmApplyClosureFrame test below, and
+             *  .xo-backlog/xo-interpreter2/issues/01-applyclosureframe-env-prints-address.md
+             *
+             *  Same role as scrub_type_id / scrub_tseq in the reader2 and
+             *  expression2 files: pin everything about the rendering except
+             *  the part that cannot be stable across runs.
+             **/
+            std::string scrub_addr(std::string s) {
+                const std::string key = "0x";
+
+                for (std::size_t i = s.find(key); i != std::string::npos;
+                     i = s.find(key, i+1))
+                {
+                    std::size_t j = i + key.size();
+
+                    while (j < s.size() && std::isxdigit(static_cast<unsigned char>(s[j])))
+                        ++j;
+
+                    if (j > i + key.size()) {
+                        s.replace(i + key.size(), j - (i + key.size()), "ADDR");
+                        i += key.size() + 4;
+                    }
+                }
+
+                return s;
             }
 
             /** A plain arena, no collector.
@@ -391,6 +430,202 @@ namespace xo {
                       "   evalargs\n"
                       "  :i_arg\n"
                       "   -1>");
+            }
+        }
+
+        /** DClosure -- two optional children, and the last printer in the
+         *  subsystem with a facet child.
+         *
+         *  Legacy uses PER-FIELD present flags (unlike DLambdaExpr, whose
+         *  branch is all-or-nothing), so all four combinations are distinct
+         *  renderings and all four are pinned.
+         *
+         *  Both children are reached by DIRECT construction of
+         *  obj<APrintable,T>, the shape that aborts on use in
+         *  .xo-backlog/xo-reader2/issues/01-ssm-printer-null-children.md.  It
+         *  is safe HERE, and only here, because the emptiness is tested before
+         *  the field is emitted -- which is why DClosure is absent from that
+         *  ticket.  The `closure.neither` case is what proves it: a DClosure
+         *  with two null children renders `<DClosure>` rather than crashing.
+         *
+         *  The lambda is deliberately built with a null name and no body, so
+         *  it renders as a bare `<LambdaExpr>`.  DLambdaExpr's own rendering
+         *  is pinned in xo-expression2; repeating it here would couple this
+         *  table to that one for no gain.
+         **/
+        TEST_CASE("interpreter2-closure-render", "[printable][interpreter2]")
+        {
+            REQUIRE(s_init.evidence());
+
+            UtestRehearser rh;
+
+            for (auto _ : rh) {
+                scope log(XO_DEBUG2_(rh.enable_debug(),
+                                     "interpreter2-closure-render"));
+
+                auto check = [&rh, &log]
+                    (const char * label, auto pr, std::uint32_t margin,
+                     const char * expect_deprecated, const char * expect_pretty)
+                {
+                    std::string deprecated = render_deprecated(pr, margin);
+                    std::string pretty = render_pretty(pr, margin);
+
+                    log && log(xtag("label", label), xtag("margin", margin),
+                               xtag("deprecated", deprecated),
+                               xtag("pretty", pretty));
+
+                    REHEARSE(rh, pretty == std::string(expect_pretty));
+                    REHEARSE(rh, deprecated == std::string(expect_deprecated));
+                };
+
+                ArenaFixture fx("closure");
+                auto mm = fx.mm();
+
+                DLocalSymtab * symtab = DLocalSymtab::_make_empty(mm, nullptr, 2, 0);
+                DArray * args = DArray::_empty(mm, 4);
+                args->push_back(mm, DInteger::box(mm, 1));
+
+                DLocalEnv * env = DLocalEnv::_make(mm, nullptr, symtab, args);
+
+                DLambdaExpr * lm
+                    = DLambdaExpr::_make(mm,
+                                         TypeRef(TypeRef::type_var::from_chars("t:1"),
+                                                 obj<xo::scm::AType>()),
+                                         nullptr /*name*/,
+                                         symtab,
+                                         obj<xo::scm::AExpression>());
+
+                obj<APrintable,DClosure> both(DClosure::make(mm, lm, env));
+                obj<APrintable,DClosure> no_env(DClosure::make(mm, lm, nullptr));
+                obj<APrintable,DClosure> no_lambda(DClosure::make(mm, nullptr, env));
+                obj<APrintable,DClosure> neither(DClosure::make(mm, nullptr, nullptr));
+
+                check("both", both, 200,
+                      "<DClosure :lambda <LambdaExpr> :env <DLocalEnv :n_args 1>>",
+                      "<DClosure :lambda <LambdaExpr> :env <DLocalEnv :n_args 1>>");
+                check("no-env", no_env, 200,
+                      "<DClosure :lambda <LambdaExpr>>",
+                      "<DClosure :lambda <LambdaExpr>>");
+                check("no-lambda", no_lambda, 200,
+                      "<DClosure :env <DLocalEnv :n_args 1>>",
+                      "<DClosure :env <DLocalEnv :n_args 1>>");
+                check("neither", neither, 200,
+                      "<DClosure>",
+                      "<DClosure>");
+
+                /* margin 24: the nested DLocalEnv breaks too, so the indent
+                 * divergence COMPOUNDS -- 4 vs 3 at the :env value, then 6 vs
+                 * 4 at the nested :n_args.  The two-level version of what
+                 * interpreter2-localenv-render pins at one level.
+                 */
+                check("both", both, 24,
+                      "<DClosure\n"
+                      "  :lambda <LambdaExpr>\n"
+                      "  :env\n"
+                      "    <DLocalEnv\n"
+                      "      :n_args 1>>",
+                      "<DClosure\n"
+                      "  :lambda <LambdaExpr>\n"
+                      "  :env\n"
+                      "   <DLocalEnv\n"
+                      "    :n_args 1>>");
+                check("no-env", no_env, 24,
+                      "<DClosure\n"
+                      "  :lambda <LambdaExpr>>",
+                      "<DClosure\n"
+                      "  :lambda <LambdaExpr>>");
+            }
+        }
+
+        /** DVsmApplyClosureFrame -- the last phase-C conversion outside
+         *  xo-object2, and the one that found a defect.
+         *
+         *  `:env` is `local_env_`, a bare `DLocalEnv*`.  There is no
+         *  `ppdetail<DLocalEnv*>` and no `Prettifier<DLocalEnv*>` --
+         *
+         *    grep -rn 'ppdetail<.*DLocalEnv\|Prettifier<.*DLocalEnv' \
+         *      xo-interpreter2/ --include=*.hpp --include=*.cpp
+         *
+         *  returns nothing -- so BOTH protocols fall through to operator<< on
+         *  a raw pointer and print its ADDRESS.  Measured 2026-08-12.
+         *
+         *  Note what that means: this is NOT a divergence.  The two protocols
+         *  agree byte for byte, address included, which is why the conversion
+         *  reproduces the field literally rather than "fixing" it mid-refactor.
+         *  Compare `DClosure` one test above, which renders the SAME type
+         *  properly because it wraps it in obj<APrintable,DLocalEnv> first.
+         *
+         *  The address is scrubbed to pin the rest of the rendering; that
+         *  scrubbing is also the evidence that the field carries nothing a
+         *  reader can use.  Tracked as
+         *  .xo-backlog/xo-interpreter2/issues/01-applyclosureframe-env-prints-address.md
+         *
+         *  A null local_env_ prints `0`, not `nullptr` -- also observed, also
+         *  a consequence of the same fallback.
+         **/
+        TEST_CASE("interpreter2-applyclosureframe-render", "[printable][interpreter2]")
+        {
+            REQUIRE(s_init.evidence());
+
+            UtestRehearser rh;
+
+            for (auto _ : rh) {
+                scope log(XO_DEBUG2_(rh.enable_debug(),
+                                     "interpreter2-applyclosureframe-render"));
+
+                auto check = [&rh, &log]
+                    (const char * label, auto pr, std::uint32_t margin,
+                     const char * expect_deprecated, const char * expect_pretty)
+                {
+                    std::string deprecated = scrub_addr(render_deprecated(pr, margin));
+                    std::string pretty = scrub_addr(render_pretty(pr, margin));
+
+                    log && log(xtag("label", label), xtag("margin", margin),
+                               xtag("deprecated", deprecated),
+                               xtag("pretty", pretty));
+
+                    REHEARSE(rh, pretty == std::string(expect_pretty));
+                    REHEARSE(rh, deprecated == std::string(expect_deprecated));
+                };
+
+                ArenaFixture fx("applyclosure");
+                auto mm = fx.mm();
+                obj<AGCObject> no_parent;
+
+                DLocalSymtab * symtab = DLocalSymtab::_make_empty(mm, nullptr, 2, 0);
+                DArray * args = DArray::_empty(mm, 4);
+                args->push_back(mm, DInteger::box(mm, 1));
+
+                DLocalEnv * env = DLocalEnv::_make(mm, nullptr, symtab, args);
+
+                obj<APrintable,DVsmApplyClosureFrame> with_env
+                    (DVsmApplyClosureFrame::make(mm, no_parent,
+                                                 VsmInstr::c_apply_cont, env));
+                obj<APrintable,DVsmApplyClosureFrame> null_env
+                    (DVsmApplyClosureFrame::make(mm, no_parent,
+                                                 VsmInstr::c_apply_cont, nullptr));
+
+                check("env", with_env, 200,
+                      "<DVsmApplyClosureFrame :cont apply_cont :env 0xADDR>",
+                      "<DVsmApplyClosureFrame :cont apply_cont :env 0xADDR>");
+                check("null-env", null_env, 200,
+                      "<DVsmApplyClosureFrame :cont apply_cont :env 0>",
+                      "<DVsmApplyClosureFrame :cont apply_cont :env 0>");
+
+                check("env", with_env, 24,
+                      "<DVsmApplyClosureFrame\n"
+                      "  :cont apply_cont\n"
+                      "  :env 0xADDR>",
+                      "<DVsmApplyClosureFrame\n"
+                      "  :cont apply_cont\n"
+                      "  :env 0xADDR>");
+                check("null-env", null_env, 24,
+                      "<DVsmApplyClosureFrame\n"
+                      "  :cont apply_cont\n"
+                      "  :env 0>",
+                      "<DVsmApplyClosureFrame\n"
+                      "  :cont apply_cont\n"
+                      "  :env 0>");
             }
         }
 

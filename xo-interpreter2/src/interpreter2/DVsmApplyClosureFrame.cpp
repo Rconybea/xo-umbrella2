@@ -5,10 +5,12 @@
 
 #include "DVsmApplyClosureFrame.hpp"
 #include "LocalEnv.hpp"
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
     using xo::mm::AGCObject;
     using xo::reflect::typeseq;
+    using xo::pp::field;
 
     namespace scm {
 
@@ -54,6 +56,14 @@ namespace xo {
                  "DVsmApplyClosureFrame",
                  refrtag("cont", cont_),
                  refrtag("env", local_env_));
+        }
+
+        void
+        DVsmApplyClosureFrame::pretty(xo::pp::PpSink & sink) const
+        {
+            sink.pretty_struct("DVsmApplyClosureFrame",
+                               field("cont", cont_),
+                               field("env", local_env_));
         }
     } /*namespace scm*/
 } /*namespace xo*/
