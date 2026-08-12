@@ -69,12 +69,8 @@ namespace xo {
             /** pretty-printing support **/
             bool pretty_deprecated(const ppindentinfo & ppii) const;
 
-            /* PHASE B STUB -- not yet converted by phase C.  Renders a marker
-             * rather than nothing, so an unconverted printer is VISIBLE in
-             * output instead of silently absent.
-             * See .xo-backlog/xo-printable2/issues/01-aprintable-pretty-ppsink.md
-             */
-            void pretty(xo::pp::PpSink & sink) const { sink.put("STUB:ParserResult"); }
+            /** structured pretty-printing: render into @p sink **/
+            void pretty(xo::pp::PpSink & sink) const;
 
             /** gc support: forward gc-eligible children **/
             void visit_gco_children(VisitReason reason, obj<AGCObjectVisitor> gc) noexcept;
@@ -121,6 +117,26 @@ namespace xo {
             }
         };
     }
+
+    namespace pp {
+        /** ParserResult is NOT a facet type, so ppsink cannot reach it
+         *  through APrintable the way the D-types are reached.  Without this
+         *  specialization it falls through to ppsink's leaf FALLBACK to
+         *  operator<<, i.e. to ParserResult::print(std::ostream&) -- which
+         *  renders a DIFFERENT struct (always :expr and :src_fn, quoted
+         *  :error, and never wrapping).  Adding it is what makes .pretty()
+         *  reachable at all; the phase-B stub it replaced was dead code.
+         *
+         *  Two more printers in this subsystem are in the same position:
+         *  ParserStack* and DSchematikaParser*, both still on ppdetail only.
+         **/
+        template <>
+        struct Prettifier<xo::scm::ParserResult> {
+            static void print(PpSink & sink, const xo::scm::ParserResult & x) {
+                x.pretty(sink);
+            }
+        };
+    } /*namespace pp*/
 } /*namespace xo*/
 
 /* end ParserResult.hpp */

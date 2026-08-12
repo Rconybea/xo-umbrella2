@@ -16,8 +16,10 @@
 #include <xo/printable2/Printable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/arena/DArena.hpp>
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
+    using xo::pp::field;
     using xo::print::APrintable;
     using xo::mm::AAllocator;
     using xo::mm::AGCObject;
@@ -468,6 +470,33 @@ namespace xo {
                      refrtag("lmstate", lmstate_),
                      refrtag("expect", this->get_expect_str()));
             }
+        }
+
+        void
+        DLambdaSsm::pretty(xo::pp::PpSink & sink) const
+        {
+            obj<APrintable> body
+                = FacetRegistry::instance().try_variant<APrintable,
+                                                        AExpression>(body_);
+
+            /* named local: get_expect_str() returns BY VALUE. */
+            const auto expect = this->get_expect_str();
+
+            /* legacy's if/else COLLAPSES here: both arms rendered :lmstate
+             * and :expect, and only :body differed.  Contrast DLambdaExpr,
+             * whose single condition gated the WHOLE struct and had to stay
+             * a branch.
+             *
+             * The present FLAG is pinned -- forcing it true is caught.
+             * What is NOT pinned, and cannot be, is the rendering of a
+             * non-null body: body_ is assigned only immediately before this
+             * ssm pops, so it is null at every token boundary and absent
+             * from every rendering of a live parser stack.  See the ticket.
+             */
+            sink.pretty_struct("DLambdaSsm",
+                               field("lmstate", lmstate_),
+                               field("expect", expect),
+                               field("body", body, bool(body)));
         }
 
         void

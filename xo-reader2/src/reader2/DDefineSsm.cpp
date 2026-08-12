@@ -12,8 +12,10 @@
 #include <xo/printable2/Printable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
  namespace xo {
+    using xo::pp::field;
  using xo::print::APrintable;
  using xo::facet::FacetRegistry;
  using xo::facet::with_facet;
@@ -696,6 +698,31 @@
                                              refrtag("defstate", defstate_),
                                              refrtag("expect", this->get_expect_str()),
                                              refrtag("def_expr", expr));
+        }
+
+        void
+        DDefineSsm::pretty(xo::pp::PpSink & sink) const
+        {
+            auto expr
+                = FacetRegistry::instance().variant<APrintable,
+                                                    AExpression>(def_expr_);
+            assert(expr.data());
+
+            /* named local: get_expect_str() returns BY VALUE and field()
+             * captures BY REFERENCE.
+             *
+             * NB get_expect_str() ASSERTS for defstate_ == def_0, which is
+             * exactly the state _make() leaves behind -- so a freshly
+             * constructed DDefineSsm cannot be printed at all, and the
+             * pinned cases in utest drive a real parser to reach def_2/def_4.
+             * Pre-existing on the legacy printer too; reproduced, not fixed.
+             */
+            const auto expect = this->get_expect_str();
+
+            sink.pretty_struct("DDefineSsm",
+                               field("defstate", defstate_),
+                               field("expect", expect),
+                               field("def_expr", expr));
         }
 
         // ----- gc support -----

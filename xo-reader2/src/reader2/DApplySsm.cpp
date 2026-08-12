@@ -11,11 +11,13 @@
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/indentlog/scope.hpp>
 #include <xo/reflectutil/typeseq.hpp>
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 //#include "parserstatemachine.hpp"
 //#include "expect_expr_xs.hpp"
 
 namespace xo {
+    using xo::pp::field;
     using xo::mm::ACollector;
     using xo::mm::AGCObject;
     using xo::print::APrintable;
@@ -396,6 +398,22 @@ namespace xo {
                                              refrtag("applystate", applystate_),
                                              refrtag("expect", this->get_expect_str()),
                                              refrtag("fn_expr", fn_expr, fn_expr_present));
+        }
+
+        void
+        DApplySsm::pretty(xo::pp::PpSink & sink) const
+        {
+            // TODO: const-correct version of obj<> template
+            auto fn_expr
+                = const_cast<DApplySsm*>(this)->fn_expr_.to_facet<APrintable>();
+
+            /* named local: get_expect_str() returns BY VALUE. */
+            const auto expect = this->get_expect_str();
+
+            sink.pretty_struct("DApplySsm",
+                               field("applystate", applystate_),
+                               field("expect", expect),
+                               field("fn_expr", fn_expr, bool(fn_expr)));
         }
 
         void

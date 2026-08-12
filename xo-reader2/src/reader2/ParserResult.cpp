@@ -8,8 +8,10 @@
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/printable2/Printable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
+    using xo::pp::field;
     using xo::print::APrintable;
     using xo::facet::FacetRegistry;
 
@@ -103,6 +105,46 @@ namespace xo {
             }
 
             return false;
+        }
+
+        void
+        ParserResult::pretty(xo::pp::PpSink & sink) const
+        {
+            /* The switch STAYS.  Unlike DLambdaSsm's if/else, these three
+             * arms have three different ARITIES -- :type / :type :expr /
+             * :type :src_fn :error -- and collapsing them onto field()'s
+             * present flag would mean calling variant<APrintable,AExpression>
+             * on the none and error paths, where result_expr_ is null and
+             * that call throws.
+             */
+            switch (result_type_) {
+            case parser_result_type::none:
+                sink.pretty_struct("ParserResult",
+                                   field("type", result_type_));
+                return;
+
+            case parser_result_type::expression:
+                {
+                    auto expr = (FacetRegistry::instance()
+                                 .variant<APrintable,AExpression>(result_expr_));
+
+                    sink.pretty_struct("ParserResult",
+                                       field("type", result_type_),
+                                       field("expr", expr));
+                }
+                return;
+
+            case parser_result_type::error:
+                sink.pretty_struct("ParserResult",
+                                   field("type", result_type_),
+                                   field("src_fn", error_src_fn_),
+                                   field("error", error_description_));
+                return;
+
+            case parser_result_type::N:
+                assert(false);
+                break;
+            }
         }
 
         void

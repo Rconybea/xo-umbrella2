@@ -21,6 +21,7 @@
 #include <xo/indentlog/print/cond.hpp>
 #include <xo/indentlog/scope.hpp>
 #include <xo/reflectutil/typeseq.hpp>
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 #ifdef NOT_YET
 # include "expect_expr_xs.hpp"
@@ -31,6 +32,7 @@
 #endif
 
 namespace xo {
+    using xo::pp::field;
 #ifdef NOT_YET
     using xo::scm::Expression;
     using xo::scm::AssignExpr;
@@ -1040,6 +1042,36 @@ namespace xo {
                         refrtag("rhs", rhs, rhs_present),
                         refrtag("expect", this->get_expect_str())
                         );
+        }
+
+        void
+        DProgressSsm::pretty(xo::pp::PpSink & sink) const
+        {
+            obj<APrintable> lhs
+                = FacetRegistry::instance().try_variant<APrintable,AExpression>(lhs_);
+
+            obj<APrintable> rhs
+                = FacetRegistry::instance().try_variant<APrintable,AExpression>(rhs_);
+
+            /* named local: field() captures BY REFERENCE, and
+             * get_expect_str() returns std::string_view BY VALUE.
+             */
+            const auto expect = this->get_expect_str();
+
+            /* THREE per-field optionals, so legacy's present flags map
+             * straight onto field()'s third argument -- the DExpectFormalArgSsm
+             * pattern, not the DLambdaExpr one.
+             *
+             * Legacy's `scope log(XO_DEBUG(false))` is deliberately not
+             * reproduced: it is disabled, so it emitted nothing, and this
+             * subsystem is migrating off xo-indentlog.
+             */
+            sink.pretty_struct("DProgressSsm",
+                               field("lhs", lhs, bool(lhs)),
+                               field("op", op_type_,
+                                     op_type_ != optype::invalid),
+                               field("rhs", rhs, bool(rhs)),
+                               field("expect", expect));
         }
 
         namespace {

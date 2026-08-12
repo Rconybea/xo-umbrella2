@@ -13,8 +13,10 @@
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/printable2/Printable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
+    using xo::pp::field;
     using xo::print::APrintable;
     using xo::facet::FacetRegistry;
 //    using xo::facet::with_facet;
@@ -508,6 +510,23 @@ namespace xo {
                         "DIfElseSsm",
                         refrtag("ifstate", ifstate_),
                         refrtag("if_expr", expr));
+        }
+
+        void
+        DIfElseSsm::pretty(xo::pp::PpSink & sink) const
+        {
+            auto expr
+                = FacetRegistry::instance().variant<APrintable,
+                                                    AExpression>(if_expr_);
+            assert(expr.data());
+
+            /* the only batch-2 printer with no :expect field, so no
+             * get_expect_str() local is needed.  Legacy's `(void)expr;` is
+             * dropped: expr is used, so the cast was vestigial.
+             */
+            sink.pretty_struct("DIfElseSsm",
+                               field("ifstate", ifstate_),
+                               field("if_expr", expr));
         }
 
         void

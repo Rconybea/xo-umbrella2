@@ -7,8 +7,10 @@
 #include "ExpectQLiteralSsm.hpp"
 #include <xo/stringtable2/String.hpp>
 #include <xo/alloc2/GCObject.hpp>
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
+    using xo::pp::field;
     using xo::print::APrintable;
 
     namespace scm {
@@ -263,6 +265,34 @@ namespace xo {
                                              refrtag("expect", this->get_expect_str()),
                                              refrtag("key", key_, key_),
                                              refrtag("dict", dict_pr));
+        }
+
+        void
+        DExpectQDictSsm::pretty(xo::pp::PpSink & sink) const
+        {
+            obj<APrintable,DDictionary> dict_pr(dict_);
+
+            /* named local: get_expect_str() returns BY VALUE. */
+            const auto expect = this->get_expect_str();
+
+            /* :key is a PER-FIELD optional -- legacy's three-arg
+             * refrtag("key", key_, key_).
+             *
+             * dict_pr is built by DIRECT construction rather than a registry
+             * lookup, which is why a null dict_ ABORTS here (empty obj<>,
+             * uninitialized vtable slot) where its DExpectQList/QArraySsm
+             * siblings merely throw.  Same defect as
+             * .xo-backlog/xo-expression2/issues/02-dtypename-null-type-aborts.md
+             * Pre-existing on both protocols; reproduced, not fixed.
+             *
+             * Legacy's unused `obj<AGCObject,DDictionary> dict(dict_)` is
+             * dropped -- nothing read it.
+             */
+            sink.pretty_struct("DExpectQDictSsm",
+                               field("state", state_),
+                               field("expect", expect),
+                               field("key", key_, bool(key_)),
+                               field("dict", dict_pr));
         }
 
 
