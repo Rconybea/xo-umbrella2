@@ -30,6 +30,7 @@
 #include <xo/expression2/GlobalSymtab.hpp>  /* likewise DGlobalSymtab */
 #include <xo/expression2/IfElseExpr.hpp>     /* likewise DIfElseExpr */
 #include <xo/expression2/LambdaExpr.hpp>     /* likewise DLambdaExpr */
+#include <xo/expression2/Typename.hpp>      /* likewise DTypename */
 #include <xo/expression2/LocalSymtab.hpp>    /* likewise DLocalSymtab */
 #include <xo/expression2/SequenceExpr.hpp>   /* likewise DSequenceExpr */
 #include <xo/expression2/TypeRef.hpp>
@@ -76,6 +77,7 @@ namespace xo {
     using xo::scm::DApplyExpr;
     using xo::scm::DLocalSymtab;
     using xo::scm::DLambdaExpr;
+    using xo::scm::DTypename;
     using xo::scm::DAtomicType;
     using xo::scm::Metatype;
     using xo::scm::AExpression;
@@ -700,6 +702,24 @@ namespace xo {
                                               (name ? table_.intern(name) : nullptr),
                                               symtab,
                                               body);
+                }
+
+                /** a DTypename binding @p name to a type, or to NOTHING when
+                 *  @p with_type is false.
+                 *
+                 *  The null-type case is the only one that can render: a
+                 *  populated DTypename throws, deliberately.  See
+                 *  DTypename-render below.
+                 **/
+                obj<AGCObject,DTypename> make_typename(const char * name, bool with_type) {
+                    obj<AType> type;
+
+                    if (with_type)
+                        type = DAtomicType::make(this->allocator(), Metatype::t_i64());
+
+                    return DTypename::make(this->allocator(),
+                                           (name ? table_.intern(name) : nullptr),
+                                           type);
                 }
 
                 template <typename T>
@@ -2457,15 +2477,13 @@ namespace xo {
          *  DTypename::pretty_deprecated's `type_.to_facet<APrintable>()`,
          *  since xo-type's D-types have none.
          *
-         *  The two sides therefore disagree about more than layout here, and
-         *  only until DTypename converts: ppsink reaches DTypename's PHASE B
-         *  stub, which renders a marker rather than descending into the type.
-         *  So the pretty assertion below is deliberately about the SYMTAB's
-         *  own fields -- it does not pin the stub text.
+         *  The two sides AGREED TO DISAGREE only briefly.  While DTypename was
+         *  a phase-B stub, ppsink rendered here and legacy threw; once
+         *  DTypename converted (same day, keeping to_facet<APrintable>) both
+         *  throw, and the symmetry is back.  See DTypename-render for why the
+         *  throw was kept rather than tolerated.
          *
-         *  DELETE THE DEPRECATED HALF AT PHASE E.  The pretty half should then
-         *  be revisited: if xo-type gains APrintable, or DTypename adopts
-         *  try_variant + a placeholder, this becomes a rendering test.
+         *  Both halves survive phase E, for the same reason as DTypename's.
          **/
         TEST_CASE("DLocalSymtab-types-throws", "[printable][DLocalSymtab]")
         {
@@ -2478,18 +2496,13 @@ namespace xo {
 
             auto p = with_facet<APrintable>::mkobj(e);
 
-            /* legacy: the whole render dies rather than the one field */
-            REQUIRE_THROWS_AS(render_deprecated(p, 200), std::runtime_error);
-
-            /* ppsink: renders, because DTypename's converted printer is still
-             * a stub and never asks for the type's facet
+            /* the whole render dies rather than the one field, on both
+             * protocols: DLocalSymtab's own facet lookup succeeds (types_
+             * holds DTypenames, which HAVE the facet) and DTypename's does
+             * not.  One level deeper than this ticket first claimed.
              */
-            std::string pretty = render_pretty(p, 200);
-
-            REQUIRE(pretty.find("<LocalSymtab") != std::string::npos);
-            REQUIRE(pretty.find(":nvars 0") != std::string::npos);
-            REQUIRE(pretty.find(":ntypes 1") != std::string::npos);
-            REQUIRE(pretty.find(":[0]") != std::string::npos);
+            REQUIRE_THROWS_AS(render_deprecated(p, 200), std::runtime_error);
+            REQUIRE_THROWS_AS(render_pretty(p, 200), std::runtime_error);
         }
         TEST_CASE("DLambdaExpr-render", "[printable][DLambdaExpr]")
         {
@@ -2522,6 +2535,40 @@ namespace xo {
                     REHEARSE(rh, deprecated == tc.expect_deprecated_);
                 }
             }
+        }
+        /** DTypename has NO renderable case, and that is the point.
+         *
+         *  RC's call, 2026-08-11: the printer keeps `to_facet<APrintable>()`
+         *  and throws, rather than tolerating the missing facet with a
+         *  placeholder.  The throw is a standing failing test for
+         *  `.xo-backlog/xo-type/issues/01` -- a "yolo" red test, living in the
+         *  tree rather than in a test file.  Retiring it with a placeholder
+         *  would retire the only thing asserting the gap exists.
+         *
+         *  So this test pins the THROW, on both protocols.  It is expected to
+         *  start failing the day xo-type gains an APrintable facet; that
+         *  failure is the signal, and the fix then is to replace this with a
+         *  rendering test.
+         *
+         *  Both halves survive phase E: unlike every other case in this file,
+         *  the deprecated assertion is not scaffolding for a pinned rendering,
+         *  because there is no rendering.  Delete the deprecated line with the
+         *  rest of phase E; keep the pretty one.
+         **/
+        TEST_CASE("DTypename-render", "[printable][DTypename]")
+        {
+            REQUIRE(s_init.evidence());
+
+            VarFixture fx("typename.throws");
+
+            auto tn = fx.make_typename("t1", true /*with_type*/);
+            auto pr = tn.to_facet<APrintable>();
+
+            /* identical failure on both sides -- the conversion changed
+             * nothing, which is what makes it a pure refactor
+             */
+            REQUIRE_THROWS_AS(render_deprecated(pr, 200), std::runtime_error);
+            REQUIRE_THROWS_AS(render_pretty(pr, 200), std::runtime_error);
         }
     } /*namespace ut*/
 } /*namespace xo*/
