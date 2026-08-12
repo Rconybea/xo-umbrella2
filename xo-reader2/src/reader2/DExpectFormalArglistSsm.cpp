@@ -12,6 +12,8 @@
 #include <xo/printable2/Printable.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/concat.hpp>
+#include <xo/ppsink/pretty_struct.hpp>
 
 namespace xo {
     using xo::print::APrintable;
@@ -355,6 +357,48 @@ namespace xo {
                 pps->write(">");
 
                 return false;
+            }
+        }
+
+        void
+        DExpectFormalArglistSsm::pretty(xo::pp::PpSink & sink) const
+        {
+            /* struct_open(), not pretty_struct(): the field count is
+             * 3 + n_args, a runtime value.  Same shape as DLocalSymtab, and
+             * the reason this printer was hand-rolled in the first place --
+             * legacy had no variadic form for a runtime arity, so it spelled
+             * both passes out by hand.  ppsink does, so the two passes
+             * collapse into one body.
+             *
+             * NB struct_scope::field() renders IMMEDIATELY, so unlike the
+             * free xo::pp::field() it does NOT capture by reference: the
+             * get_expect_str(), size() and concat() temporaries below are
+             * safe here.  (Opposite rule to pretty_struct -- see
+             * pretty_struct.hpp.)
+             *
+             * No force_break: legacy's upto() pass renders flat when it
+             * fits, and only the else-branch newline_indents every field.
+             */
+            auto st = sink.struct_open("DExpectFormalArglistSsm");
+
+            st.field("fastate", fastate_);
+            st.field("expect", this->get_expect_str());
+            st.field("n_args", argl_->size());
+
+            /* try_variant, as legacy had it: an arg with no APrintable
+             * renders empty rather than throwing.
+             */
+            for (size_type i_arg = 0, n_arg = argl_->size();
+                 i_arg < n_arg;
+                 ++i_arg)
+            {
+                auto arg_gco = argl_->at(i_arg);
+                obj<APrintable> arg_pr
+                    = (FacetRegistry::instance()
+                       .try_variant<APrintable,AGCObject>(arg_gco));
+
+                /* legacy built this name with snprintf("arg[%u]", i_arg). */
+                st.field(xo::pp::concat("arg[", i_arg, "]"), arg_pr);
             }
         }
 

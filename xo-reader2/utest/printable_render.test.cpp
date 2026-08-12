@@ -988,6 +988,32 @@ namespace xo {
                 Token::rightbrace_token(), Token::rightbrace_token()
             };
 
+            /*  lambda ( ) { 1.5 }
+             *  ^
+             *  tk0  -- DExpectFormalArglistSsm at argl_0, :n_args 0
+             */
+            const std::vector<Token> arg0_v = {
+                Token::lambda_token(), Token::leftparen_token(),
+                Token::rightparen_token(), Token::leftbrace_token(),
+                Token::f64_token("1.5"), Token::rightbrace_token()
+            };
+
+            /*  lambda ( x : f64 , y : f64 ) { 1.5 }
+             *                  ^          ^
+             *                  tk4        tk8
+             *  -- :n_args 1 and 2: the arg[i] loop at one and two iterations.
+             *     tk0 covers zero, above.
+             */
+            const std::vector<Token> arg2_v = {
+                Token::lambda_token(), Token::leftparen_token(),
+                Token::symbol_token("x"), Token::colon_token(),
+                Token::symbol_token("f64"), Token::comma_token(),
+                Token::symbol_token("y"), Token::colon_token(),
+                Token::symbol_token("f64"), Token::rightparen_token(),
+                Token::leftbrace_token(), Token::f64_token("1.5"),
+                Token::rightbrace_token()
+            };
+
             for (auto _ : rh) {
                 scope log(XO_DEBUG2_(rh.enable_debug(), "reader2-parser-render"));
 
@@ -1141,8 +1167,137 @@ namespace xo {
                            "  :expect semicolon|rightbrace\n"
                            "  :dict {a: 1;}>");
 
+                /* DExpectFormalArglistSsm: a HAND-ROLLED two-pass printer,
+                 * collapsed to struct_open() for its runtime 3 + n_args
+                 * arity.  Its own framing is byte-identical on both
+                 * protocols in every case here; the divergences at margins
+                 * 60 and 30 all begin INSIDE <DVariable, i.e. in children
+                 * converted earlier.
+                 */
+                check_step(arg0_v, "arg0", 0, 200,
+                           "<DExpectFormalArglistSsm :fastate argl_0 :expect leftparen :n_args 0>",
+                           "<DExpectFormalArglistSsm :fastate argl_0 :expect leftparen :n_args 0>");
+
+                check_step(arg0_v, "arg0", 0, 30,
+                           "<DExpectFormalArglistSsm\n"
+                           "  :fastate argl_0\n"
+                           "  :expect leftparen\n"
+                           "  :n_args 0>",
+                           "<DExpectFormalArglistSsm\n"
+                           "  :fastate argl_0\n"
+                           "  :expect leftparen\n"
+                           "  :n_args 0>");
+
+                check_step(arg2_v, "arg2", 4, 200,
+                           "<DExpectFormalArglistSsm\n"
+                           "  :fastate argl_1b\n"
+                           "  :expect comma|rightparen\n"
+                           "  :n_args 1\n"
+                           "  :arg[0] <DVariable :name \"x\" :typeref <TypeRef :id \"\" :td <TypeDescr :id N :canonical_name double :complete 1 :metatype atomic>>>>",
+                           "<DExpectFormalArglistSsm\n"
+                           "  :fastate argl_1b\n"
+                           "  :expect comma|rightparen\n"
+                           "  :n_args 1\n"
+                           "  :arg[0] <DVariable :name \"x\" :typeref <TypeRef :id \"\" :td <TypeDescr :id N :canonical_name double :complete 1 :metatype atomic>>>>");
+
+                check_step(arg2_v, "arg2", 4, 60,
+                           "<DExpectFormalArglistSsm\n"
+                           "  :fastate argl_1b\n"
+                           "  :expect comma|rightparen\n"
+                           "  :n_args 1\n"
+                           "  :arg[0]\n"
+                           "    <DVariable\n"
+                           "      :name \"x\"\n"
+                           "      :typeref\n"
+                           "        <TypeRef\n"
+                           "          :id \"\"\n"
+                           "          :td\n"
+                           "            <TypeDescr :id N :canonical_name double :complete 1 :metatype atomic>>>>",
+                           "<DExpectFormalArglistSsm\n"
+                           "  :fastate argl_1b\n"
+                           "  :expect comma|rightparen\n"
+                           "  :n_args 1\n"
+                           "  :arg[0]\n"
+                           "   <DVariable\n"
+                           "    :name \"x\"\n"
+                           "    :typeref\n"
+                           "     <TypeRef\n"
+                           "      :id \"\"\n"
+                           "      :td\n"
+                           "       <TypeDescr\n"
+                           "        :id N\n"
+                           "        :canonical_name double\n"
+                           "        :complete 1\n"
+                           "        :metatype atomic>>>>");
+
+                check_step(arg2_v, "arg2", 8, 200,
+                           "<DExpectFormalArglistSsm\n"
+                           "  :fastate argl_1b\n"
+                           "  :expect comma|rightparen\n"
+                           "  :n_args 2\n"
+                           "  :arg[0] <DVariable :name \"x\" :typeref <TypeRef :id \"\" :td <TypeDescr :id N :canonical_name double :complete 1 :metatype atomic>>>\n"
+                           "  :arg[1] <DVariable :name \"y\" :typeref <TypeRef :id \"\" :td <TypeDescr :id N :canonical_name double :complete 1 :metatype atomic>>>>",
+                           "<DExpectFormalArglistSsm\n"
+                           "  :fastate argl_1b\n"
+                           "  :expect comma|rightparen\n"
+                           "  :n_args 2\n"
+                           "  :arg[0] <DVariable :name \"x\" :typeref <TypeRef :id \"\" :td <TypeDescr :id N :canonical_name double :complete 1 :metatype atomic>>>\n"
+                           "  :arg[1] <DVariable :name \"y\" :typeref <TypeRef :id \"\" :td <TypeDescr :id N :canonical_name double :complete 1 :metatype atomic>>>>");
+
+                check_step(arg2_v, "arg2", 8, 60,
+                           "<DExpectFormalArglistSsm\n"
+                           "  :fastate argl_1b\n"
+                           "  :expect comma|rightparen\n"
+                           "  :n_args 2\n"
+                           "  :arg[0]\n"
+                           "    <DVariable\n"
+                           "      :name \"x\"\n"
+                           "      :typeref\n"
+                           "        <TypeRef\n"
+                           "          :id \"\"\n"
+                           "          :td\n"
+                           "            <TypeDescr :id N :canonical_name double :complete 1 :metatype atomic>>>\n"
+                           "  :arg[1]\n"
+                           "    <DVariable\n"
+                           "      :name \"y\"\n"
+                           "      :typeref\n"
+                           "        <TypeRef\n"
+                           "          :id \"\"\n"
+                           "          :td\n"
+                           "            <TypeDescr :id N :canonical_name double :complete 1 :metatype atomic>>>>",
+                           "<DExpectFormalArglistSsm\n"
+                           "  :fastate argl_1b\n"
+                           "  :expect comma|rightparen\n"
+                           "  :n_args 2\n"
+                           "  :arg[0]\n"
+                           "   <DVariable\n"
+                           "    :name \"x\"\n"
+                           "    :typeref\n"
+                           "     <TypeRef\n"
+                           "      :id \"\"\n"
+                           "      :td\n"
+                           "       <TypeDescr\n"
+                           "        :id N\n"
+                           "        :canonical_name double\n"
+                           "        :complete 1\n"
+                           "        :metatype atomic>>>\n"
+                           "  :arg[1]\n"
+                           "   <DVariable\n"
+                           "    :name \"y\"\n"
+                           "    :typeref\n"
+                           "     <TypeRef\n"
+                           "      :id \"\"\n"
+                           "      :td\n"
+                           "       <TypeDescr\n"
+                           "        :id N\n"
+                           "        :canonical_name double\n"
+                           "        :complete 1\n"
+                           "        :metatype atomic>>>>");
+
             }
         }
+
+
     } /*namespace ut*/
 } /*namespace xo*/
 
