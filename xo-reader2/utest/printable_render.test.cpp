@@ -1298,6 +1298,214 @@ namespace xo {
         }
 
 
+
+        /** ParserStack + DSchematikaParser -- converted TOGETHER, because
+         *  neither is observable without the other.  DSchematikaParser::psm_
+         *  is private with no accessor, so no test can obtain a ParserStack*;
+         *  it is only ever reached through the parser's own :stack field.
+         *
+         *  Both are non-facet types reached by ppdetail<T*> on the POINTER,
+         *  so both needed a Prettifier<T*> added, not just a pretty() body --
+         *  the same situation as ParserResult, and the last of the three.
+         *  Before this, a parser on the ppsink path fell through to
+         *  operator<< / DSchematikaParser::print(ostream&), which renders a
+         *  DIFFERENT struct (:debug and :has_stack, not :stack), ends with
+         *  std::endl, and colours its tags via legacy xo::xtag.
+         *
+         *  Both use force_break, reproducing legacy's unconditional
+         *  `if (ppii.upto()) return false;`.  The "fresh" case below is what
+         *  pins that decision: <SchematikaParser :stack nullptr> is short
+         *  enough to fit at margin 200, and BOTH protocols break it anyway.
+         *
+         *  Every stack pinned here is made only of ALREADY-CONVERTED ssms.
+         *  A quoted-literal stack would show :[1] STUB:DExpectQListSsm today
+         *  and change when that converts; keeping those out means this table
+         *  does not churn when the last two printers land.  Those two get
+         *  their own cases then -- this conversion is what opened their
+         *  observation window.
+         **/
+        TEST_CASE("reader2-stack-render", "[printable][reader2]")
+        {
+            using xo::scm::Token;
+
+            REQUIRE(s_init.evidence());
+
+            UtestRehearser rh;
+
+            /* -1: render before begin_interactive_session(), so psm_.stack()
+             * is null -- the Prettifier's nullptr branch, which is reachable
+             * only in this window.
+             */
+            const int fresh_upto = -2;
+            /* -1: begin_interactive_session() and no tokens */
+            const int rest_upto = -1;
+            const int d2_upto = 0;
+            const int lam_upto = 3;
+
+            const std::vector<Token> tk_v = {
+                Token::lambda_token(), Token::leftparen_token(),
+                Token::symbol_token("x"), Token::colon_token()
+            };
+            const std::vector<Token> d2_tk_v = { Token::i64_token("1") };
+
+            for (auto _ : rh) {
+                scope log(XO_DEBUG2_(rh.enable_debug(), "reader2-stack-render"));
+
+                auto check_parser = [&rh, &log, &tk_v, &d2_tk_v]
+                    (const char * label, int upto, std::uint32_t margin,
+                     const char * expect_deprecated, const char * expect_pretty)
+                {
+                    ParseFixture fx(std::string(label) + "."
+                                    + std::to_string(margin));
+
+                    if (upto >= -1)
+                        fx.parser_->begin_interactive_session();
+
+                    const std::vector<Token> & src
+                        = (std::string(label) == "d2") ? d2_tk_v : tk_v;
+
+                    for (int i = 0; i <= upto; ++i)
+                        fx.parser_->on_token(src[i]);
+
+                    std::string deprecated
+                        = scrub_tseq(scrub_type_id(
+                              scrub_typevar(render_deprecated(fx.parser_.data(),
+                                                              margin))));
+                    std::string pretty
+                        = scrub_tseq(scrub_type_id(
+                              scrub_typevar(render_pretty(fx.parser_.data(),
+                                                          margin))));
+
+                    log && log(xtag("label", label), xtag("margin", margin),
+                               xtag("deprecated", deprecated),
+                               xtag("pretty", pretty));
+
+                    REHEARSE(rh, pretty == std::string(expect_pretty));
+                    REHEARSE(rh, deprecated == std::string(expect_deprecated));
+                };
+
+                check_parser("fresh", fresh_upto, 200,
+                             "<SchematikaParser\n"
+                             "  :stack nullptr>",
+                             "<SchematikaParser\n"
+                             "  :stack nullptr>");
+
+                check_parser("rest", rest_upto, 200,
+                             "<SchematikaParser\n"
+                             "  :stack\n"
+                             "    <ParserStack\n"
+                             "      :[0] <DToplevelSeqSsm :seqtype toplevel-interactive>>>",
+                             "<SchematikaParser\n"
+                             "  :stack\n"
+                             "   <ParserStack\n"
+                             "    :[0] <DToplevelSeqSsm :seqtype toplevel-interactive>>>");
+
+                check_parser("d2", d2_upto, 200,
+                             "<SchematikaParser\n"
+                             "  :stack\n"
+                             "    <ParserStack\n"
+                             "      :[0] <DProgressSsm :lhs <DConstant :value_.tseq N :value.tseq N :value 1> :expect oper|semicolon|leftparen|rightparen|rightbrace>\n"
+                             "      :[1] <DToplevelSeqSsm :seqtype toplevel-interactive>>>",
+                             "<SchematikaParser\n"
+                             "  :stack\n"
+                             "   <ParserStack\n"
+                             "    :[0] <DProgressSsm :lhs <DConstant :value_.tseq N :value.tseq N :value 1> :expect oper|semicolon|leftparen|rightparen|rightbrace>\n"
+                             "    :[1] <DToplevelSeqSsm :seqtype toplevel-interactive>>>");
+
+                check_parser("d2", d2_upto, 60,
+                             "<SchematikaParser\n"
+                             "  :stack\n"
+                             "    <ParserStack\n"
+                             "      :[0]\n"
+                             "        <DProgressSsm\n"
+                             "          :lhs\n"
+                             "            <DConstant\n"
+                             "              :value_.tseq N\n"
+                             "              :value.tseq N\n"
+                             "              :value 1>\n"
+                             "          :expect\n"
+                             "            oper|semicolon|leftparen|rightparen|rightbrace>\n"
+                             "      :[1] <DToplevelSeqSsm :seqtype toplevel-interactive>>>",
+                             "<SchematikaParser\n"
+                             "  :stack\n"
+                             "   <ParserStack\n"
+                             "    :[0]\n"
+                             "     <DProgressSsm\n"
+                             "      :lhs\n"
+                             "       <DConstant :value_.tseq N :value.tseq N :value 1>\n"
+                             "      :expect\n"
+                             "       oper|semicolon|leftparen|rightparen|rightbrace>\n"
+                             "    :[1] <DToplevelSeqSsm :seqtype toplevel-interactive>>>");
+
+                check_parser("lam", lam_upto, 200,
+                             "<SchematikaParser\n"
+                             "  :stack\n"
+                             "    <ParserStack\n"
+                             "      :[0] <DExpectTypeSsm>\n"
+                             "      :[1] <DExpectFormalArgSsm :fstate formal_2 :expect typename :name x>\n"
+                             "      :[2] <DExpectFormalArglistSsm :fastate argl_1a :expect formal-name :n_args 0>\n"
+                             "      :[3] <DLambdaSsm :lmstate lm_1 :expect lambda-params>\n"
+                             "      :[4] <DToplevelSeqSsm :seqtype toplevel-interactive>>>",
+                             "<SchematikaParser\n"
+                             "  :stack\n"
+                             "   <ParserStack\n"
+                             "    :[0] <DExpectTypeSsm>\n"
+                             "    :[1] <DExpectFormalArgSsm :fstate formal_2 :expect typename :name x>\n"
+                             "    :[2] <DExpectFormalArglistSsm :fastate argl_1a :expect formal-name :n_args 0>\n"
+                             "    :[3] <DLambdaSsm :lmstate lm_1 :expect lambda-params>\n"
+                             "    :[4] <DToplevelSeqSsm :seqtype toplevel-interactive>>>");
+
+                check_parser("lam", lam_upto, 60,
+                             "<SchematikaParser\n"
+                             "  :stack\n"
+                             "    <ParserStack\n"
+                             "      :[0] <DExpectTypeSsm>\n"
+                             "      :[1]\n"
+                             "        <DExpectFormalArgSsm\n"
+                             "          :fstate formal_2\n"
+                             "          :expect typename\n"
+                             "          :name x>\n"
+                             "      :[2]\n"
+                             "        <DExpectFormalArglistSsm\n"
+                             "          :fastate argl_1a\n"
+                             "          :expect formal-name\n"
+                             "          :n_args 0>\n"
+                             "      :[3] <DLambdaSsm :lmstate lm_1 :expect lambda-params>\n"
+                             "      :[4] <DToplevelSeqSsm :seqtype toplevel-interactive>>>",
+                             "<SchematikaParser\n"
+                             "  :stack\n"
+                             "   <ParserStack\n"
+                             "    :[0] <DExpectTypeSsm>\n"
+                             "    :[1]\n"
+                             "     <DExpectFormalArgSsm\n"
+                             "      :fstate formal_2\n"
+                             "      :expect typename\n"
+                             "      :name x>\n"
+                             "    :[2]\n"
+                             "     <DExpectFormalArglistSsm\n"
+                             "      :fastate argl_1a\n"
+                             "      :expect formal-name\n"
+                             "      :n_args 0>\n"
+                             "    :[3] <DLambdaSsm :lmstate lm_1 :expect lambda-params>\n"
+                             "    :[4] <DToplevelSeqSsm :seqtype toplevel-interactive>>>");
+
+
+                /* Prettifier<DSchematikaParser*>'s OWN null branch.  NOT the
+                 * same thing as "fresh" above: that pins :stack nullptr,
+                 * which comes from Prettifier<ParserStack*>.  This one is a
+                 * null PARSER pointer, and without a case for it a mutation
+                 * of its nullptr text goes unnoticed -- found by exactly such
+                 * a mutation, 2026-08-11.
+                 */
+                {
+                    xo::scm::DSchematikaParser * null_parser = nullptr;
+
+                    REHEARSE(rh, render_pretty(null_parser, 200) == "nullptr");
+                    REHEARSE(rh, render_deprecated(null_parser, 200) == "nullptr");
+                }
+            }
+        }
+
     } /*namespace ut*/
 } /*namespace xo*/
 

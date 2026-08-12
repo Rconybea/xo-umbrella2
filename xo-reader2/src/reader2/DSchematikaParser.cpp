@@ -10,6 +10,7 @@
 #include <xo/indentlog/scope.hpp>
 #include <cstddef>
 #include <stdexcept>
+#include <xo/ppsink/pretty_struct.hpp>
 
 namespace xo {
     using xo::mm::ACollector;
@@ -182,6 +183,26 @@ namespace xo {
                         "SchematikaParser",
                         refrtag("stack", psm_.stack())
                            );
+        }
+
+        void
+        DSchematikaParser::pretty(xo::pp::PpSink & sink) const
+        {
+            /* force_break, matching legacy's unconditional
+             * `if (ppii.upto()) return false;`.  With one field this is the
+             * only thing keeping <SchematikaParser :stack ...> off a single
+             * line, and pretty_struct offers no force_break -- hence
+             * struct_open for a compile-time field list.
+             *
+             * NB the struct name is "SchematikaParser", not the D-name.
+             *
+             * st.field() renders immediately, so passing psm_.stack() (a
+             * prvalue) directly is safe here; the free xo::pp::field() would
+             * need a named local.
+             */
+            auto st = sink.struct_open("SchematikaParser", true /*force_break*/);
+
+            st.field("stack", psm_.stack());
         }
 
         DSchematikaParser *

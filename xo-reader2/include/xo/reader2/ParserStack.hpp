@@ -10,6 +10,7 @@
 #include <xo/facet/obj.hpp>
 #include <xo/arena/DArena.hpp>
 #include <xo/indentlog/print/pretty.hpp>
+#include <xo/ppsink/Prettifier.hpp>
 
 namespace xo {
     namespace scm {
@@ -57,12 +58,8 @@ namespace xo {
             /** pretty-printer support **/
             bool pretty_deprecated(const ppindentinfo & ppii) const;
 
-            /* PHASE B STUB -- not yet converted by phase C.  Renders a marker
-             * rather than nothing, so an unconverted printer is VISIBLE in
-             * output instead of silently absent.
-             * See .xo-backlog/xo-printable2/issues/01-aprintable-pretty-ppsink.md
-             */
-            void pretty(xo::pp::PpSink & sink) const { sink.put("STUB:ParserStack"); }
+            /** structured pretty-printing: render into @p sink **/
+            void pretty(xo::pp::PpSink & sink) const;
 
             void visit_gco_children(VisitReason reason,
                                     obj<AGCObjectVisitor> gc) noexcept;
@@ -101,6 +98,25 @@ namespace xo {
             }
         };
     }
+
+    namespace pp {
+        /** ParserStack is not a facet type, so ppsink cannot reach it through
+         *  APrintable.  Specialized on the POINTER, matching the ppdetail<>
+         *  above and the call site (DSchematikaParser passes psm_.stack()).
+         *
+         *  The null case is load-bearing, not defensive: a parser at rest has
+         *  no stack, and legacy's ppdetail<> renders "nullptr" for it.
+         **/
+        template <>
+        struct Prettifier<xo::scm::ParserStack*> {
+            static void print(PpSink & sink, xo::scm::ParserStack * const & x) {
+                if (x)
+                    x->pretty(sink);
+                else
+                    sink.put("nullptr");
+            }
+        };
+    } /*namespace pp*/
 
 } /*namespace xo*/
 

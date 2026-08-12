@@ -11,6 +11,7 @@
 #include <xo/tokenizer2/Token.hpp>
 #include <xo/alloc2/Allocator.hpp>
 #include <xo/alloc2/GCObjectVisitor.hpp>
+#include <xo/ppsink/Prettifier.hpp>
 
 namespace xo {
     namespace scm {
@@ -290,12 +291,8 @@ namespace xo {
             /** pretty-printer support **/
             bool pretty_deprecated(const ppindentinfo & ppii) const;
 
-            /* PHASE B STUB -- not yet converted by phase C.  Renders a marker
-             * rather than nothing, so an unconverted printer is VISIBLE in
-             * output instead of silently absent.
-             * See .xo-backlog/xo-printable2/issues/01-aprintable-pretty-ppsink.md
-             */
-            void pretty(xo::pp::PpSink & sink) const { sink.put("STUB:DSchematikaParser"); }
+            /** structured pretty-printing: render into @p sink **/
+            void pretty(xo::pp::PpSink & sink) const;
 
             ///@}
             /** @defgroup scm-schematikaparser-gcobject-methods **/
@@ -347,6 +344,26 @@ namespace xo {
             }
         };
     }
+
+    namespace pp {
+        /** Specialized on the POINTER, matching the ppdetail<> above.
+         *
+         *  Without this, a parser on the ppsink path fell through to the leaf
+         *  fallback to operator<<, i.e. to DSchematikaParser::print(ostream&)
+         *  -- which renders a DIFFERENT struct (:debug and :has_stack, not
+         *  :stack), terminates it with std::endl, and colours its tags via
+         *  legacy xo::xtag.  Measured 2026-08-11.
+         **/
+        template <>
+        struct Prettifier<xo::scm::DSchematikaParser*> {
+            static void print(PpSink & sink, xo::scm::DSchematikaParser * const & x) {
+                if (x)
+                    x->pretty(sink);
+                else
+                    sink.put("nullptr");
+            }
+        };
+    } /*namespace pp*/
 } /*namespace xo*/
 
 /* end DSchematikaParser.hpp */
