@@ -6,8 +6,10 @@
 #include "DVsmDefContFrame.hpp"
 #include <xo/expression2/DefineExpr.hpp>
 #include <xo/alloc2/Collector.hpp>
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
+    using xo::pp::field;
     namespace scm {
 
         DVsmDefContFrame::DVsmDefContFrame(obj<AGCObject> parent,
@@ -53,6 +55,12 @@ namespace xo {
             return ppii.pps()->pretty_struct(ppii,
                                              "DVsmDefContFrame",
                                              refrtag("cont", cont_));
+        }
+
+        void
+        DVsmDefContFrame::pretty(xo::pp::PpSink & sink) const
+        {
+            sink.pretty_struct("DVsmDefContFrame", field("cont", cont_));
         }
 
     } /*namespace scm*/

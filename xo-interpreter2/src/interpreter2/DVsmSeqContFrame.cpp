@@ -4,8 +4,10 @@
  **/
 
 #include "DVsmSeqContFrame.hpp"
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
+    using xo::pp::field;
     namespace scm {
 
         DVsmSeqContFrame::DVsmSeqContFrame(obj<AGCObject> parent,
@@ -55,6 +57,14 @@ namespace xo {
                                              "DVsmSeqContFrame",
                                              refrtag("cont", cont_),
                                              refrtag("i_seq", i_seq_));
+        }
+
+        void
+        DVsmSeqContFrame::pretty(xo::pp::PpSink & sink) const
+        {
+            sink.pretty_struct("DVsmSeqContFrame",
+                               field("cont", cont_),
+                               field("i_seq", i_seq_));
         }
 
     } /*namespace scm*/

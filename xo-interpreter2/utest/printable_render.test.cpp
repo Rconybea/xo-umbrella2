@@ -28,6 +28,11 @@
  */
 
 #include <xo/interpreter2/LocalEnv.hpp>
+#include <xo/interpreter2/VsmApplyFrame.hpp>
+#include <xo/interpreter2/VsmDefContFrame.hpp>
+#include <xo/interpreter2/VsmEvalArgsFrame.hpp>
+#include <xo/interpreter2/VsmIfElseContFrame.hpp>
+#include <xo/interpreter2/VsmSeqContFrame.hpp>
 #include <xo/interpreter2/init_interpreter2.hpp>
 #include <xo/expression2/LocalSymtab.hpp>
 #include <xo/object2/Array.hpp>
@@ -52,6 +57,12 @@ namespace xo {
     using xo::mm::DArena;
     using xo::scm::DLocalEnv;
     using xo::scm::DLocalSymtab;
+    using xo::scm::DVsmApplyFrame;
+    using xo::scm::DVsmDefContFrame;
+    using xo::scm::DVsmEvalArgsFrame;
+    using xo::scm::DVsmIfElseContFrame;
+    using xo::scm::DVsmSeqContFrame;
+    using xo::scm::VsmInstr;
     using xo::scm::DArray;
     using xo::scm::DInteger;
     using xo::print::APrintable;
@@ -204,6 +215,182 @@ namespace xo {
                           "<DLocalEnv\n"
                           "  :n_args\n"
                           "   3>");
+            }
+        }
+
+        /** The five independent vsm frames, converted as one batch: they
+         *  share a shape (`:cont` plus at most one scalar) and share the one
+         *  question worth asking, so a single table answers it five times.
+         *
+         *  THE QUESTION, now answered: `:cont` is a VsmInstr, which has
+         *  NEITHER a Prettifier<> NOR a ppdetail<>.  Both protocols therefore
+         *  reach it through the leaf fallback to operator<<, which prints the
+         *  opcode name.  That is the same silent path on which ParserResult
+         *  and DSchematikaParser* turned out to render a DIFFERENT struct on
+         *  the ppsink side.  Measured here, not assumed: the two agree
+         *  exactly -- `:cont def_cont` on both -- so no Prettifier<VsmInstr>
+         *  is needed.  The margin-12 rows are what pin that, since a flat
+         *  render alone would not distinguish "agrees" from "both happen to
+         *  fit".
+         *
+         *  The ONLY difference anywhere in this table is the documented
+         *  indent divergence: a value pushed onto its own line is indented by
+         *  legacy's indent_width (2) and ppsink's tag_value_offset (1).
+         *
+         *  None of the five renders its parent/stack link, so `no_parent` is
+         *  fine throughout, and none renders the expression it continues, so
+         *  those are nullptr -- no constructor touches them (verified by
+         *  reading all five make() bodies, which only forward and placement-new).
+         *
+         *  `:i_arg -1` is not a sentinel chosen for the test: it is
+         *  DVsmEvalArgsFrame's initial value (DVsmEvalArgsFrame.hpp:68),
+         *  incremented before each argument.
+         **/
+        TEST_CASE("interpreter2-vsmframe-render", "[printable][interpreter2]")
+        {
+            REQUIRE(s_init.evidence());
+
+            UtestRehearser rh;
+
+            for (auto _ : rh) {
+                scope log(XO_DEBUG2_(rh.enable_debug(),
+                                     "interpreter2-vsmframe-render"));
+
+                auto check = [&rh, &log]
+                    (const char * label, auto pr, std::uint32_t margin,
+                     const char * expect_deprecated, const char * expect_pretty)
+                {
+                    std::string deprecated = render_deprecated(pr, margin);
+                    std::string pretty = render_pretty(pr, margin);
+
+                    log && log(xtag("label", label), xtag("margin", margin),
+                               xtag("deprecated", deprecated),
+                               xtag("pretty", pretty));
+
+                    REHEARSE(rh, pretty == std::string(expect_pretty));
+                    REHEARSE(rh, deprecated == std::string(expect_deprecated));
+                };
+
+                ArenaFixture fx("vsmframe");
+                auto mm = fx.mm();
+                obj<AGCObject> no_parent;
+
+                obj<APrintable,DVsmDefContFrame> defcont
+                    (DVsmDefContFrame::make(mm, no_parent,
+                                            VsmInstr::c_def_cont, nullptr));
+                obj<APrintable,DVsmIfElseContFrame> ifelsecont
+                    (DVsmIfElseContFrame::make(mm, no_parent,
+                                               VsmInstr::c_ifelse_cont, nullptr));
+                obj<APrintable,DVsmSeqContFrame> seqcont
+                    (DVsmSeqContFrame::make(mm, no_parent,
+                                            VsmInstr::c_seq_cont, nullptr,
+                                            7 /*i_seq*/));
+
+                DArray * args = DArray::_empty(mm, 8);
+                for (int i = 0; i < 2; ++i)
+                    args->push_back(mm, DInteger::box(mm, i));
+
+                DVsmApplyFrame * af
+                    = DVsmApplyFrame::make(mm, no_parent,
+                                           VsmInstr::c_apply, args);
+
+                obj<APrintable,DVsmApplyFrame> apply(af);
+                obj<APrintable,DVsmEvalArgsFrame> evalargs
+                    (DVsmEvalArgsFrame::make(mm, af,
+                                             VsmInstr::c_evalargs, nullptr));
+
+                /* --- flat, margin 200 --- */
+
+                check("defcont", defcont, 200,
+                      "<DVsmDefContFrame :cont def_cont>",
+                      "<DVsmDefContFrame :cont def_cont>");
+                check("ifelsecont", ifelsecont, 200,
+                      "<DVsmIfElseContFrame :cont ifelse_cont>",
+                      "<DVsmIfElseContFrame :cont ifelse_cont>");
+                check("seqcont", seqcont, 200,
+                      "<DVsmSeqContFrame :cont seq_cont :i_seq 7>",
+                      "<DVsmSeqContFrame :cont seq_cont :i_seq 7>");
+                check("apply", apply, 200,
+                      "<DVsmApplyFrame :cont apply :n_args 2>",
+                      "<DVsmApplyFrame :cont apply :n_args 2>");
+                check("evalargs", evalargs, 200,
+                      "<DVsmEvalArgsFrame :cont evalargs :i_arg -1>",
+                      "<DVsmEvalArgsFrame :cont evalargs :i_arg -1>");
+
+                /* --- margin 12: the :cont VALUE goes to its own line, which
+                 * is what actually exercises the VsmInstr leaf fallback under
+                 * a break.  The second field still fits beside its tag.
+                 */
+
+                check("defcont", defcont, 12,
+                      "<DVsmDefContFrame\n"
+                      "  :cont\n"
+                      "    def_cont>",
+                      "<DVsmDefContFrame\n"
+                      "  :cont\n"
+                      "   def_cont>");
+                check("ifelsecont", ifelsecont, 12,
+                      "<DVsmIfElseContFrame\n"
+                      "  :cont\n"
+                      "    ifelse_cont>",
+                      "<DVsmIfElseContFrame\n"
+                      "  :cont\n"
+                      "   ifelse_cont>");
+                check("seqcont", seqcont, 12,
+                      "<DVsmSeqContFrame\n"
+                      "  :cont\n"
+                      "    seq_cont\n"
+                      "  :i_seq 7>",
+                      "<DVsmSeqContFrame\n"
+                      "  :cont\n"
+                      "   seq_cont\n"
+                      "  :i_seq 7>");
+                check("apply", apply, 12,
+                      "<DVsmApplyFrame\n"
+                      "  :cont\n"
+                      "    apply\n"
+                      "  :n_args 2>",
+                      "<DVsmApplyFrame\n"
+                      "  :cont\n"
+                      "   apply\n"
+                      "  :n_args 2>");
+                check("evalargs", evalargs, 12,
+                      "<DVsmEvalArgsFrame\n"
+                      "  :cont\n"
+                      "    evalargs\n"
+                      "  :i_arg -1>",
+                      "<DVsmEvalArgsFrame\n"
+                      "  :cont\n"
+                      "   evalargs\n"
+                      "  :i_arg -1>");
+
+                /* --- margin 8: BOTH fields' values break.  Only the two-field
+                 * frames render differently from margin 12, so only they are
+                 * pinned here.
+                 */
+
+                check("seqcont", seqcont, 8,
+                      "<DVsmSeqContFrame\n"
+                      "  :cont\n"
+                      "    seq_cont\n"
+                      "  :i_seq\n"
+                      "    7>",
+                      "<DVsmSeqContFrame\n"
+                      "  :cont\n"
+                      "   seq_cont\n"
+                      "  :i_seq\n"
+                      "   7>");
+                check("evalargs", evalargs, 8,
+                      "<DVsmEvalArgsFrame\n"
+                      "  :cont\n"
+                      "    evalargs\n"
+                      "  :i_arg\n"
+                      "    -1>",
+                      "<DVsmEvalArgsFrame\n"
+                      "  :cont\n"
+                      "   evalargs\n"
+                      "  :i_arg\n"
+                      "   -1>");
             }
         }
 

@@ -6,8 +6,10 @@
 #include "DVsmApplyFrame.hpp"
 #include <xo/object2/Array.hpp>
 #include <xo/indentlog/print/pretty.hpp>
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
+    using xo::pp::field;
     using xo::facet::typeseq;
 
     namespace scm {
@@ -62,6 +64,25 @@ namespace xo {
                                              "DVsmApplyFrame",
                                              refrtag("cont", cont_),
                                              refrtag("n_args", args_->size()));
+        }
+
+        void
+        DVsmApplyFrame::pretty(xo::pp::PpSink & sink) const
+        {
+            /* named local: field() captures BY REFERENCE and size() returns
+             * by value.
+             *
+             * args_ dereferenced unguarded, exactly as legacy does.  Whether
+             * it can be null here is UNVERIFIED -- recorded in
+             * .xo-backlog/xo-reader2/issues/01-ssm-printer-null-children.md
+             * alongside DLocalEnv, which has the identical shape and where
+             * the factory demonstrably does not check.
+             */
+            const auto n_args = args_->size();
+
+            sink.pretty_struct("DVsmApplyFrame",
+                               field("cont", cont_),
+                               field("n_args", n_args));
         }
 
     } /*namespace scm*/

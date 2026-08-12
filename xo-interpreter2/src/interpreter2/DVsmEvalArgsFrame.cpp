@@ -6,8 +6,10 @@
 #include "DVsmEvalArgsFrame.hpp"
 #include <xo/expression2/ApplyExpr.hpp>
 #include <xo/indentlog/print/pretty.hpp>
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
+    using xo::pp::field;
     using xo::facet::typeseq;
     using xo::print::ppindentinfo;
 
@@ -63,6 +65,14 @@ namespace xo {
                                              refrtag("cont", cont_),
                                              refrtag("i_arg", i_arg_));
         }
+        void
+        DVsmEvalArgsFrame::pretty(xo::pp::PpSink & sink) const
+        {
+            sink.pretty_struct("DVsmEvalArgsFrame",
+                               field("cont", cont_),
+                               field("i_arg", i_arg_));
+        }
+
     } /*namespace scm*/
 } /*namespace xo*/
 

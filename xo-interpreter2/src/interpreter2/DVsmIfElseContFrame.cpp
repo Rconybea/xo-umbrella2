@@ -4,8 +4,10 @@
  **/
 
 #include "DVsmIfElseContFrame.hpp"
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
+    using xo::pp::field;
     namespace scm {
 
         DVsmIfElseContFrame::DVsmIfElseContFrame(obj<AGCObject> parent,
@@ -51,6 +53,12 @@ namespace xo {
             return ppii.pps()->pretty_struct(ppii,
                                              "DVsmIfElseContFrame",
                                              refrtag("cont", cont_));
+        }
+
+        void
+        DVsmIfElseContFrame::pretty(xo::pp::PpSink & sink) const
+        {
+            sink.pretty_struct("DVsmIfElseContFrame", field("cont", cont_));
         }
 
     } /*namespace scm*/
