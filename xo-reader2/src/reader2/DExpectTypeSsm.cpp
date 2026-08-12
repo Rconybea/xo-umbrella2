@@ -13,8 +13,10 @@
 #include <xo/indentlog/scope.hpp>
 #include <xo/reflectutil/typeseq.hpp>
 #include <string_view>
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
+    using xo::pp::field;
     using xo::facet::with_facet;
     using xo::reflect::Reflect;
     using xo::reflect::TypeDescr;
@@ -196,6 +198,13 @@ namespace xo {
             return ppii.pps()->pretty_struct
                 (ppii,
                  "DExpectTypeSsm");
+        }
+
+        void
+        DExpectTypeSsm::pretty(xo::pp::PpSink & sink) const
+        {
+            /* no fields; the `corrected` ctor argument is not rendered */
+            sink.pretty_struct("DExpectTypeSsm");
         }
 
         void

@@ -9,8 +9,10 @@
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/indentlog/scope.hpp>
 #include <string_view>
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
+    using xo::pp::field;
     using xo::facet::with_facet;
     using xo::facet::typeseq;
 
@@ -457,6 +459,19 @@ namespace xo {
                                              "DParenSsm",
                                              refrtag("parenstate", parenstate_),
                                              refrtag("expect", this->get_expect_str()));
+        }
+
+        void
+        DParenSsm::pretty(xo::pp::PpSink & sink) const
+        {
+            /* named local: field() captures BY REFERENCE, and get_expect_str()
+             * returns std::string_view BY VALUE (pretty_struct.hpp)
+             */
+            const auto expect = this->get_expect_str();
+
+            sink.pretty_struct("DParenSsm",
+                               field("parenstate", parenstate_),
+                               field("expect", expect));
         }
 
         void

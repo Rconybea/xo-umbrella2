@@ -6,6 +6,7 @@
 #include <xo/expression2/SequenceExpr.hpp>
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 #ifdef NOT_YET
 # include "expect_expr_xs.hpp"
@@ -15,6 +16,7 @@
 #endif
 
 namespace xo {
+    using xo::pp::field;
 #ifdef NOT_YET
     using xo::scm::DDefineExpr;
 #endif
@@ -256,6 +258,17 @@ namespace xo {
                         "DSequenceSsm",
                         refrtag("seq_expr.size", seq_expr_->size()),
                         refrtag("expect", this->get_expect_str()));
+        }
+
+        void
+        DSequenceSsm::pretty(xo::pp::PpSink & sink) const
+        {
+            const auto expect = this->get_expect_str();
+            const auto seq_z = seq_expr_->size();
+
+            sink.pretty_struct("DSequenceSsm",
+                               field("seq_expr.size", seq_z),
+                               field("expect", expect));
         }
 
         void

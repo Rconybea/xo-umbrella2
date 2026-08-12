@@ -23,6 +23,7 @@
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/facet/facet_implementation.hpp>
 #include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 #ifdef NOT_YET
 # include "define_xs.hpp"
@@ -30,6 +31,7 @@
 #endif
 
 namespace xo {
+    using xo::pp::field;
     using xo::scm::DFloat;
     using xo::mm::AGCObject;
 
@@ -558,6 +560,18 @@ namespace xo {
                  refrtag("cxl_on_rightbrace", cxl_on_rightbrace_),
                  refrtag("cxl_on_rightparen", cxl_on_rightparen_),
                  refrtag("expect", this->get_expect_str()));
+        }
+
+        void
+        DExpectExprSsm::pretty(xo::pp::PpSink & sink) const
+        {
+            const auto expect = this->get_expect_str();
+
+            sink.pretty_struct("DExpectExprSsm",
+                               field("allow_defs", allow_defs_),
+                               field("cxl_on_rightbrace", cxl_on_rightbrace_),
+                               field("cxl_on_rightparen", cxl_on_rightparen_),
+                               field("expect", expect));
         }
 
 #ifdef NOT_YET

@@ -9,8 +9,10 @@
 #include <xo/type/ListType.hpp>
 #include <xo/alloc2/GCObject.hpp>
 #include <string_view>
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
+    using xo::pp::field;
     namespace scm {
 
         const char *
@@ -201,6 +203,13 @@ namespace xo {
             return ppii.pps()->pretty_struct
                 (ppii,
                  "DExpectListTypeSsm");
+        }
+
+        void
+        DExpectListTypeSsm::pretty(xo::pp::PpSink & sink) const
+        {
+            /* no fields, though elt_type_ exists -- legacy prints none */
+            sink.pretty_struct("DExpectListTypeSsm");
         }
 
         void

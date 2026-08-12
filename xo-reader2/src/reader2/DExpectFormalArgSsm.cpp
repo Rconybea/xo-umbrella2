@@ -6,8 +6,10 @@
 #include "ExpectFormalArgSsm.hpp"
 #include "ExpectSymbolSsm.hpp"
 #include "ExpectTypeSsm.hpp"
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
+    using xo::pp::field;
     using xo::scm::DVariable;
     using xo::reflect::TypeDescr;
     using xo::facet::typeseq;
@@ -262,6 +264,25 @@ namespace xo {
                      refrtag("expect", this->get_expect_str())
                      );
             }
+        }
+
+        void
+        DExpectFormalArgSsm::pretty(xo::pp::PpSink & sink) const
+        {
+            const auto expect = this->get_expect_str();
+            const auto name = (name_
+                               ? std::string_view(*name_)
+                               : std::string_view(""));
+
+            /* PER-FIELD optional, so legacy's if/else COLLAPSES here -- the
+             * opposite of DLambdaExpr, whose one condition gated the whole
+             * struct and had to stay a branch.  :name is dropped when absent;
+             * the other two always render.  Unquoted, as legacy had it.
+             */
+            sink.pretty_struct("DExpectFormalArgSsm",
+                               field("fstate", fstate_),
+                               field("expect", expect),
+                               field("name", name, bool(name_)));
         }
 
         void

@@ -11,8 +11,10 @@
 #include <xo/object2/Boolean.hpp>
 #include <xo/indentlog/scope.hpp>
 #include <string_view>
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
+    using xo::pp::field;
     namespace scm {
 
         extern const char *
@@ -270,6 +272,16 @@ namespace xo {
                                              "DDeftypeSsm",
                                              refrtag("deftypestate", deftype_xst_),
                                              refrtag("expect", this->get_expect_str()));
+        }
+
+        void
+        DDeftypeSsm::pretty(xo::pp::PpSink & sink) const
+        {
+            const auto expect = this->get_expect_str();
+
+            sink.pretty_struct("DDeftypeSsm",
+                               field("deftypestate", deftype_xst_),
+                               field("expect", expect));
         }
         void
         DDeftypeSsm::visit_gco_children(VisitReason, obj<AGCObjectVisitor>) noexcept

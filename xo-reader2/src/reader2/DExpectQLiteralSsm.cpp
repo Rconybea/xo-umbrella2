@@ -11,8 +11,10 @@
 #include <xo/object2/Integer.hpp>
 #include <xo/stringtable2/String.hpp>
 #include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
+    using xo::pp::field;
 //    using xo::print::APrintable;
 //    using xo::print::ppstate;
 //    using xo::print::ppindentinfo;
@@ -254,6 +256,15 @@ namespace xo {
             return ppii.pps()->pretty_struct(ppii,
                                              "DExpectQLiteralSsm",
                                              refrtag("expect", this->get_expect_str()));
+        }
+
+        void
+        DExpectQLiteralSsm::pretty(xo::pp::PpSink & sink) const
+        {
+            const auto expect = this->get_expect_str();
+
+            sink.pretty_struct("DExpectQLiteralSsm",
+                               field("expect", expect));
         }
         void
         DExpectQLiteralSsm::visit_gco_children(VisitReason, obj<AGCObjectVisitor>) noexcept

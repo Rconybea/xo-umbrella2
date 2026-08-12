@@ -7,8 +7,10 @@
 #include <xo/expression2/GlobalSymtab.hpp>
 #include <xo/object2/Array.hpp>
 #include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
+    using xo::pp::field;
     using xo::mm::ACollector;
     using xo::mm::AAllocator;
     using xo::mm::AGCObject;
@@ -133,6 +135,15 @@ namespace xo {
                        (ppii,
                         "DGlobalEnv",
                         refrtag("n_vars", symtab_->n_vars()));
+        }
+
+        void
+        DGlobalEnv::pretty(xo::pp::PpSink & sink) const
+        {
+            const auto n_vars = symtab_->n_vars();
+
+            sink.pretty_struct("DGlobalEnv",
+                               field("n_vars", n_vars));
         }
 
     } /*namespace scm*/

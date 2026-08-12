@@ -8,8 +8,10 @@
 #include "syntaxstatetype.hpp"
 #include <xo/expression2/Constant.hpp>
 //#include <string_view>
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
+    using xo::pp::field;
     using xo::facet::with_facet;
     using xo::facet::typeseq;
 
@@ -209,6 +211,16 @@ namespace xo {
                                              "DQuoteSsm",
                                              refrtag("quote_xst", quote_xst_),
                                              refrtag("expect", this->get_expect_str()));
+        }
+
+        void
+        DQuoteSsm::pretty(xo::pp::PpSink & sink) const
+        {
+            const auto expect = this->get_expect_str();
+
+            sink.pretty_struct("DQuoteSsm",
+                               field("quote_xst", quote_xst_),
+                               field("expect", expect));
         }
 
         void

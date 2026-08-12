@@ -22,8 +22,10 @@
 #include <xo/stringtable2/String.hpp>
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/indentlog/scope.hpp>
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
+    using xo::pp::field;
     //using xo::scm::DProgressSsm;
     using xo::scm::DConstant;
     //using xo::scm::DFloat;
@@ -516,6 +518,13 @@ namespace xo {
                 (ppii,
                  "DToplevelSeqSsm",
                  refrtag("seqtype", seqtype_));
+        }
+
+        void
+        DToplevelSeqSsm::pretty(xo::pp::PpSink & sink) const
+        {
+            sink.pretty_struct("DToplevelSeqSsm",
+                               field("seqtype", seqtype_));
         }
         void
         DToplevelSeqSsm::visit_gco_children(VisitReason, obj<AGCObjectVisitor>) noexcept

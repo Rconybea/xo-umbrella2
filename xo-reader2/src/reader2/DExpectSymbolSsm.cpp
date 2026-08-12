@@ -11,8 +11,10 @@
 #include <xo/indentlog/scope.hpp>
 #include <string_view>
 //#include <regex>
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
+    using xo::pp::field;
     using xo::facet::with_facet;
     using xo::facet::typeseq;
 
@@ -145,6 +147,15 @@ namespace xo {
                  "DExpectSymbolSsm"
                  //refrtag("member", member_)
                     );
+        }
+
+        void
+        DExpectSymbolSsm::pretty(xo::pp::PpSink & sink) const
+        {
+            /* legacy's :member field is COMMENTED OUT, not conditional --
+             * reproduced as-is, so this renders bare.  See the ticket.
+             */
+            sink.pretty_struct("DExpectSymbolSsm");
         }
         void
         DExpectSymbolSsm::visit_gco_children(VisitReason,

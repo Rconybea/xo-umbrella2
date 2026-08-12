@@ -2,6 +2,10 @@
   # nixpkgs dependencies
   lib, stdenv, cmake, catch2,
 
+  # test-only: UtestRehearser, for the rendered-layout assertions in
+  # utest/printable_render.test.cpp (same pattern as pkgs/xo-expression2.nix)
+  xo-testutil,
+
   # xo dependencies
   xo-numeric,
   xo-procedure2,
@@ -30,6 +34,8 @@ stdenv.mkDerivation (finalattrs :
     nativeBuildInputs = [
       cmake catch2
       xo-cmake
+    ] ++ lib.optionals doCheck [
+      xo-testutil
     ];
     propagatedBuildInputs = [
       xo-numeric

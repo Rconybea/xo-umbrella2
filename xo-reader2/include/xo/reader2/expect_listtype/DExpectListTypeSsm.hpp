@@ -131,12 +131,8 @@ namespace xo {
             /** pretty-printing support **/
             bool pretty_deprecated(const ppindentinfo & ppii) const;
 
-            /* PHASE B STUB -- not yet converted by phase C.  Renders a marker
-             * rather than nothing, so an unconverted printer is VISIBLE in
-             * output instead of silently absent.
-             * See .xo-backlog/xo-printable2/issues/01-aprintable-pretty-ppsink.md
-             */
-            void pretty(xo::pp::PpSink & sink) const { sink.put("STUB:DExpectListTypeSsm"); }
+            /** structured pretty-printing: render into @p sink **/
+            void pretty(xo::pp::PpSink & sink) const;
 
             ///@}
             /** @defgroup scm-expectlisttypessm-gc-support gc support methods **/
