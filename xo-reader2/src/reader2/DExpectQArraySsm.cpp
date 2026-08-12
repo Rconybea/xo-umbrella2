@@ -9,12 +9,14 @@
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/indentlog/print/pretty.hpp>
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
     using xo::print::APrintable;
     using xo::facet::FacetRegistry;
     using xo::mm::ACollector;
     using xo::mm::AGCObject;
+    using xo::pp::field;
 
     namespace scm {
         const char *
@@ -219,6 +221,29 @@ namespace xo {
                                              refrtag("state", state_),
                                              refrtag("expect", this->get_expect_str()),
                                              refrtag("array", array_pr));
+        }
+
+        void
+        DExpectQArraySsm::pretty(xo::pp::PpSink & sink) const
+        {
+            obj<AGCObject,DArray> array(array_);
+            auto array_pr = FacetRegistry::instance().variant<APrintable,AGCObject>(array);
+
+            /* named local: field() captures BY REFERENCE, and
+             * get_expect_str() returns std::string_view BY VALUE.
+             */
+            const auto expect = this->get_expect_str();
+
+            /* No present flags, matching legacy's three unconditional
+             * refrtags.  array_ is nullptr in state qarray_0 -- and only
+             * there, since on_leftbracket_token assigns DArray::_empty() --
+             * and variant() above THROWS for it.  Pre-existing, tracked as
+             * .xo-backlog/xo-reader2/issues/01-ssm-printer-null-children.md.
+             */
+            sink.pretty_struct("DExpectQArraySsm",
+                               field("state", state_),
+                               field("expect", expect),
+                               field("array", array_pr));
         }
         void
         DExpectQArraySsm::visit_gco_children(VisitReason reason,

@@ -1506,6 +1506,237 @@ namespace xo {
             }
         }
 
+        /** DExpectQListSsm + DExpectQArraySsm -- the last two reader2
+         *  printers, and the ones the ParserStack/DSchematikaParser
+         *  conversion above made observable at all.  Neither is reachable
+         *  from a test any other way: both are pushed and popped inside a
+         *  single quoted literal, so the only window on them is a parser
+         *  rendered mid-literal.
+         *
+         *  `#q` takes a LEFTBRACE; the bracket INSIDE it selects the
+         *  container -- `#q { ( .. ) }` a list, `#q { [ .. ] }` an array.
+         *
+         *  These renderings embed DList/DArray output, where DDictionary has
+         *  a deliberate legacy-vs-ppsink divergence pinned in xo-object2
+         *  (`{ }` vs `{}`, at xo-object2/utest/printable_render.test.cpp:314).
+         *  Measured 2026-08-11: DList and DArray have no such divergence --
+         *  converting these two printers changed the STUB: lines and nothing
+         *  else in the observed table.  Hence one expectation string per case
+         *  below would have sufficed; two are kept anyway, since
+         *  expect_deprecated_ is scaffolding that phase E deletes.
+         *
+         *  State qlist_0 / qarray_0 is NOT pinned: start_/array_ are null
+         *  there and the printer throws.  Pre-existing, and tracked as
+         *  .xo-backlog/xo-reader2/issues/01-ssm-printer-null-children.md.
+         **/
+        TEST_CASE("reader2-qliteral-stack-render", "[printable][reader2]")
+        {
+            using xo::scm::Token;
+
+            REQUIRE(s_init.evidence());
+
+            UtestRehearser rh;
+
+            /* `#q { ( 1 2` -- stops before the rightparen that pops the ssm */
+            const std::vector<Token> qlist_tk_v = {
+                Token::quote_token(), Token::leftbrace_token(),
+                Token::leftparen_token(),
+                Token::i64_token("1"), Token::i64_token("2")
+            };
+            /* `#q { [ 1 , 2` -- likewise before the rightbracket */
+            const std::vector<Token> qarray_tk_v = {
+                Token::quote_token(), Token::leftbrace_token(),
+                Token::leftbracket_token(),
+                Token::i64_token("1"), Token::comma_token(),
+                Token::i64_token("2")
+            };
+
+            for (auto _ : rh) {
+                scope log(XO_DEBUG2_(rh.enable_debug(),
+                                     "reader2-qliteral-stack-render"));
+
+                auto check_parser = [&rh, &log]
+                    (const char * label, const std::vector<Token> & src,
+                     std::size_t upto, std::uint32_t margin,
+                     const char * expect_deprecated, const char * expect_pretty)
+                {
+                    ParseFixture fx(std::string(label) + "."
+                                    + std::to_string(margin));
+
+                    fx.parser_->begin_interactive_session();
+
+                    for (std::size_t i = 0; i < upto; ++i)
+                        fx.parser_->on_token(src[i]);
+
+                    std::string deprecated
+                        = scrub_tseq(scrub_type_id(
+                              scrub_typevar(render_deprecated(fx.parser_.data(),
+                                                              margin))));
+                    std::string pretty
+                        = scrub_tseq(scrub_type_id(
+                              scrub_typevar(render_pretty(fx.parser_.data(),
+                                                          margin))));
+
+                    log && log(xtag("label", label), xtag("margin", margin),
+                               xtag("deprecated", deprecated),
+                               xtag("pretty", pretty));
+
+                    REHEARSE(rh, pretty == std::string(expect_pretty));
+                    REHEARSE(rh, deprecated == std::string(expect_deprecated));
+                };
+
+                /* the EMPTY list: `()`, not `( )`.  DList::_nil() is already
+                 * assigned here, so this pins the empty-container rendering
+                 * without touching the null-start_ throw.
+                 */
+                check_parser("qlist-empty", qlist_tk_v, 3, 200,
+                             "<SchematikaParser\n"
+                             "  :stack\n"
+                             "    <ParserStack\n"
+                             "      :[0] <DExpectQLiteralSsm :expect leftparen|leftbracket|leftbrace|string|f64|i64|bool>\n"
+                             "      :[1] <DExpectQListSsm :state qlist_1a :expect qliteral|rightparen :list ()>\n"
+                             "      :[2] <DQuoteSsm :quote_xst quote_2 :expect qliteral>\n"
+                             "      :[3] <DProgressSsm :expect expr1|leftparen>\n"
+                             "      :[4] <DToplevelSeqSsm :seqtype toplevel-interactive>>>",
+                             "<SchematikaParser\n"
+                             "  :stack\n"
+                             "   <ParserStack\n"
+                             "    :[0] <DExpectQLiteralSsm :expect leftparen|leftbracket|leftbrace|string|f64|i64|bool>\n"
+                             "    :[1] <DExpectQListSsm :state qlist_1a :expect qliteral|rightparen :list ()>\n"
+                             "    :[2] <DQuoteSsm :quote_xst quote_2 :expect qliteral>\n"
+                             "    :[3] <DProgressSsm :expect expr1|leftparen>\n"
+                             "    :[4] <DToplevelSeqSsm :seqtype toplevel-interactive>>>");
+
+                check_parser("qlist", qlist_tk_v, 5, 200,
+                             "<SchematikaParser\n"
+                             "  :stack\n"
+                             "    <ParserStack\n"
+                             "      :[0] <DExpectQLiteralSsm :expect leftparen|leftbracket|leftbrace|string|f64|i64|bool>\n"
+                             "      :[1] <DExpectQListSsm :state qlist_1a :expect qliteral|rightparen :list (1 2)>\n"
+                             "      :[2] <DQuoteSsm :quote_xst quote_2 :expect qliteral>\n"
+                             "      :[3] <DProgressSsm :expect expr1|leftparen>\n"
+                             "      :[4] <DToplevelSeqSsm :seqtype toplevel-interactive>>>",
+                             "<SchematikaParser\n"
+                             "  :stack\n"
+                             "   <ParserStack\n"
+                             "    :[0] <DExpectQLiteralSsm :expect leftparen|leftbracket|leftbrace|string|f64|i64|bool>\n"
+                             "    :[1] <DExpectQListSsm :state qlist_1a :expect qliteral|rightparen :list (1 2)>\n"
+                             "    :[2] <DQuoteSsm :quote_xst quote_2 :expect qliteral>\n"
+                             "    :[3] <DProgressSsm :expect expr1|leftparen>\n"
+                             "    :[4] <DToplevelSeqSsm :seqtype toplevel-interactive>>>");
+
+                /* margin 60: the ssm itself breaks, so this is what pins the
+                 * per-field indent -- legacy indent_width 2 against ppsink's
+                 * tag_value_offset 1, compounding with nesting depth.
+                 */
+                check_parser("qlist", qlist_tk_v, 5, 60,
+                             "<SchematikaParser\n"
+                             "  :stack\n"
+                             "    <ParserStack\n"
+                             "      :[0]\n"
+                             "        <DExpectQLiteralSsm\n"
+                             "          :expect\n"
+                             "            leftparen|leftbracket|leftbrace|string|f64|i64|bool>\n"
+                             "      :[1]\n"
+                             "        <DExpectQListSsm\n"
+                             "          :state qlist_1a\n"
+                             "          :expect qliteral|rightparen\n"
+                             "          :list (1 2)>\n"
+                             "      :[2] <DQuoteSsm :quote_xst quote_2 :expect qliteral>\n"
+                             "      :[3] <DProgressSsm :expect expr1|leftparen>\n"
+                             "      :[4] <DToplevelSeqSsm :seqtype toplevel-interactive>>>",
+                             "<SchematikaParser\n"
+                             "  :stack\n"
+                             "   <ParserStack\n"
+                             "    :[0]\n"
+                             "     <DExpectQLiteralSsm\n"
+                             "      :expect\n"
+                             "       leftparen|leftbracket|leftbrace|string|f64|i64|bool>\n"
+                             "    :[1]\n"
+                             "     <DExpectQListSsm\n"
+                             "      :state qlist_1a\n"
+                             "      :expect qliteral|rightparen\n"
+                             "      :list (1 2)>\n"
+                             "    :[2] <DQuoteSsm :quote_xst quote_2 :expect qliteral>\n"
+                             "    :[3] <DProgressSsm :expect expr1|leftparen>\n"
+                             "    :[4] <DToplevelSeqSsm :seqtype toplevel-interactive>>>");
+
+                /* the empty ARRAY: `[]`.  NB :expect still reads
+                 * qliteral|rightPAREN in state qarray_1a -- a mnemonic the
+                 * ssm shares with the list version.  Pinned as observed;
+                 * whether it should say rightbracket is not this refactor's
+                 * question.
+                 */
+                check_parser("qarray-empty", qarray_tk_v, 3, 200,
+                             "<SchematikaParser\n"
+                             "  :stack\n"
+                             "    <ParserStack\n"
+                             "      :[0] <DExpectQLiteralSsm :expect leftparen|leftbracket|leftbrace|string|f64|i64|bool>\n"
+                             "      :[1] <DExpectQArraySsm :state qarray_1a :expect qliteral|rightparen :array []>\n"
+                             "      :[2] <DQuoteSsm :quote_xst quote_2 :expect qliteral>\n"
+                             "      :[3] <DProgressSsm :expect expr1|leftparen>\n"
+                             "      :[4] <DToplevelSeqSsm :seqtype toplevel-interactive>>>",
+                             "<SchematikaParser\n"
+                             "  :stack\n"
+                             "   <ParserStack\n"
+                             "    :[0] <DExpectQLiteralSsm :expect leftparen|leftbracket|leftbrace|string|f64|i64|bool>\n"
+                             "    :[1] <DExpectQArraySsm :state qarray_1a :expect qliteral|rightparen :array []>\n"
+                             "    :[2] <DQuoteSsm :quote_xst quote_2 :expect qliteral>\n"
+                             "    :[3] <DProgressSsm :expect expr1|leftparen>\n"
+                             "    :[4] <DToplevelSeqSsm :seqtype toplevel-interactive>>>");
+
+                check_parser("qarray", qarray_tk_v, 6, 200,
+                             "<SchematikaParser\n"
+                             "  :stack\n"
+                             "    <ParserStack\n"
+                             "      :[0] <DExpectQLiteralSsm :expect leftparen|leftbracket|leftbrace|string|f64|i64|bool>\n"
+                             "      :[1] <DExpectQArraySsm :state qarray_1a :expect qliteral|rightparen :array [1 2]>\n"
+                             "      :[2] <DQuoteSsm :quote_xst quote_2 :expect qliteral>\n"
+                             "      :[3] <DProgressSsm :expect expr1|leftparen>\n"
+                             "      :[4] <DToplevelSeqSsm :seqtype toplevel-interactive>>>",
+                             "<SchematikaParser\n"
+                             "  :stack\n"
+                             "   <ParserStack\n"
+                             "    :[0] <DExpectQLiteralSsm :expect leftparen|leftbracket|leftbrace|string|f64|i64|bool>\n"
+                             "    :[1] <DExpectQArraySsm :state qarray_1a :expect qliteral|rightparen :array [1 2]>\n"
+                             "    :[2] <DQuoteSsm :quote_xst quote_2 :expect qliteral>\n"
+                             "    :[3] <DProgressSsm :expect expr1|leftparen>\n"
+                             "    :[4] <DToplevelSeqSsm :seqtype toplevel-interactive>>>");
+
+                check_parser("qarray", qarray_tk_v, 6, 60,
+                             "<SchematikaParser\n"
+                             "  :stack\n"
+                             "    <ParserStack\n"
+                             "      :[0]\n"
+                             "        <DExpectQLiteralSsm\n"
+                             "          :expect\n"
+                             "            leftparen|leftbracket|leftbrace|string|f64|i64|bool>\n"
+                             "      :[1]\n"
+                             "        <DExpectQArraySsm\n"
+                             "          :state qarray_1a\n"
+                             "          :expect qliteral|rightparen\n"
+                             "          :array [1 2]>\n"
+                             "      :[2] <DQuoteSsm :quote_xst quote_2 :expect qliteral>\n"
+                             "      :[3] <DProgressSsm :expect expr1|leftparen>\n"
+                             "      :[4] <DToplevelSeqSsm :seqtype toplevel-interactive>>>",
+                             "<SchematikaParser\n"
+                             "  :stack\n"
+                             "   <ParserStack\n"
+                             "    :[0]\n"
+                             "     <DExpectQLiteralSsm\n"
+                             "      :expect\n"
+                             "       leftparen|leftbracket|leftbrace|string|f64|i64|bool>\n"
+                             "    :[1]\n"
+                             "     <DExpectQArraySsm\n"
+                             "      :state qarray_1a\n"
+                             "      :expect qliteral|rightparen\n"
+                             "      :array [1 2]>\n"
+                             "    :[2] <DQuoteSsm :quote_xst quote_2 :expect qliteral>\n"
+                             "    :[3] <DProgressSsm :expect expr1|leftparen>\n"
+                             "    :[4] <DToplevelSeqSsm :seqtype toplevel-interactive>>>");
+            }
+        }
+
     } /*namespace ut*/
 } /*namespace xo*/
 

@@ -9,11 +9,13 @@
 #include <xo/alloc2/GCObject.hpp>
 #include <xo/facet/FacetRegistry.hpp>
 #include <xo/indentlog/print/pretty.hpp>
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
     using xo::print::APrintable;
     using xo::facet::FacetRegistry;
     using xo::mm::AGCObject;
+    using xo::pp::field;
 
     namespace scm {
         const char *
@@ -215,6 +217,33 @@ namespace xo {
                                              refrtag("state", state_),
                                              refrtag("expect", this->get_expect_str()),
                                              refrtag("list", list_pr));
+        }
+
+        void
+        DExpectQListSsm::pretty(xo::pp::PpSink & sink) const
+        {
+            obj<AGCObject,DList> list(start_);
+            auto list_pr = FacetRegistry::instance().variant<APrintable,AGCObject>(list);
+
+            /* named local: field() captures BY REFERENCE, and
+             * get_expect_str() returns std::string_view BY VALUE.
+             */
+            const auto expect = this->get_expect_str();
+
+            /* No present flags: legacy passes all three refrtags
+             * unconditionally, and this reproduces that exactly.
+             *
+             * start_ is nullptr in state qlist_0 -- and only there, since
+             * on_leftparen_token assigns DList::_nil(), which is &s_null, NOT
+             * a null pointer.  In qlist_0 variant() above THROWS.  That is
+             * the pre-existing defect tracked as
+             * .xo-backlog/xo-reader2/issues/01-ssm-printer-null-children.md;
+             * this conversion neither introduces nor fixes it.
+             */
+            sink.pretty_struct("DExpectQListSsm",
+                               field("state", state_),
+                               field("expect", expect),
+                               field("list", list_pr));
         }
         void
         DExpectQListSsm::visit_gco_children(VisitReason reason,
