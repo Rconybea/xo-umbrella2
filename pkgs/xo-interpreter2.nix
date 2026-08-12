@@ -2,6 +2,10 @@
   # nixpkgs dependencies
   lib, stdenv, cmake, catch2, replxx,
 
+  # test-only: UtestRehearser, for the rendered-layout assertions in
+  # utest/printable_render.test.cpp (same pattern as pkgs/xo-reader2.nix)
+  xo-testutil,
+
   # xo dependencies
   xo-reader2,
   xo-gc,
@@ -26,6 +30,8 @@ stdenv.mkDerivation (finalattrs :
     nativeBuildInputs = [
       cmake catch2 replxx
       xo-cmake
+    ] ++ lib.optionals doCheck [
+      xo-testutil
     ];
     propagatedBuildInputs = [
       xo-indentlog2

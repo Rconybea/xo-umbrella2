@@ -65,12 +65,8 @@ namespace xo {
 
             bool pretty_deprecated(const ppindentinfo & ppii) const noexcept;
 
-            /* PHASE B STUB -- not yet converted by phase C.  Renders a marker
-             * rather than nothing, so an unconverted printer is VISIBLE in
-             * output instead of silently absent.
-             * See .xo-backlog/xo-printable2/issues/01-aprintable-pretty-ppsink.md
-             */
-            void pretty(xo::pp::PpSink & sink) const { sink.put("STUB:DLocalEnv"); }
+            /** structured pretty-printing: render into @p sink **/
+            void pretty(xo::pp::PpSink & sink) const noexcept;
 
             ///@}
 

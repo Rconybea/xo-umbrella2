@@ -7,10 +7,12 @@
 #include <xo/object2/Array.hpp>
 #include <xo/indentlog/scope.hpp>
 #include <xo/reflectutil/typeseq.hpp>
+#include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
     using xo::mm::AGCObject;
     using xo::reflect::typeseq;
+    using xo::pp::field;
 
     namespace scm {
 
@@ -120,6 +122,29 @@ namespace xo {
                  "DLocalEnv",
                  refrtag("n_args", args_->size())
                     );
+        }
+
+        void
+        DLocalEnv::pretty(xo::pp::PpSink & sink) const noexcept
+        {
+            /* named local: field() captures BY REFERENCE, and size() returns
+             * by value.
+             *
+             * args_ is dereferenced unguarded, exactly as legacy does.
+             * _make() asserts symtab_ but NOT args_, so a null args_
+             * segfaults here -- on both protocols, and before this
+             * conversion as much as after.  Same family as
+             * .xo-backlog/xo-reader2/issues/01-ssm-printer-null-children.md;
+             * not fixed here, since this refactor is not meant to change
+             * behaviour.
+             *
+             * Legacy's comment "print local bindings, perhaps symtab_ args_"
+             * is left above with pretty_deprecated: it is a note about what
+             * this printer could show, not about how it shows it.
+             */
+            const auto n_args = args_->size();
+
+            sink.pretty_struct("DLocalEnv", field("n_args", n_args));
         }
 
     } /*namespace scm*/
