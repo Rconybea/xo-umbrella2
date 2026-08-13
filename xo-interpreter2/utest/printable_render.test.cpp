@@ -49,7 +49,6 @@
 #include <xo/ppsink/scope.hpp>
 #include <xo/ppsink/scope_macros.hpp>
 #include <catch2/catch.hpp>
-#include <cctype>
 #include <cstdint>
 #include <string>
 
@@ -89,37 +88,6 @@ namespace xo {
             std::string
             render_pretty(const T & x, std::uint32_t margin) {
                 return toppstr(PpConfig::scratch_plain(margin), x);
-            }
-
-            /** replace the digits of a "0x..." pointer with "ADDR".
-             *
-             *  Needed by exactly one field: DVsmApplyClosureFrame's `:env`,
-             *  which renders its DLocalEnv* as a raw ADDRESS -- see the
-             *  DVsmApplyClosureFrame test below, and
-             *  .xo-backlog/xo-interpreter2/issues/01-applyclosureframe-env-prints-address.md
-             *
-             *  Same role as scrub_type_id / scrub_tseq in the reader2 and
-             *  expression2 files: pin everything about the rendering except
-             *  the part that cannot be stable across runs.
-             **/
-            std::string scrub_addr(std::string s) {
-                const std::string key = "0x";
-
-                for (std::size_t i = s.find(key); i != std::string::npos;
-                     i = s.find(key, i+1))
-                {
-                    std::size_t j = i + key.size();
-
-                    while (j < s.size() && std::isxdigit(static_cast<unsigned char>(s[j])))
-                        ++j;
-
-                    if (j > i + key.size()) {
-                        s.replace(i + key.size(), j - (i + key.size()), "ADDR");
-                        i += key.size() + 4;
-                    }
-                }
-
-                return s;
             }
 
             /** A plain arena, no collector.
@@ -451,31 +419,29 @@ namespace xo {
             }
         }
 
-        /** DVsmApplyClosureFrame -- the last phase-C conversion outside
-         *  xo-object2, and the one that found a defect.
+        /** DVsmApplyClosureFrame -- `:env` renders the environment, not its
+         *  address.
          *
-         *  `:env` is `local_env_`, a bare `DLocalEnv*`.  There is no
-         *  `ppdetail<DLocalEnv*>` and no `Prettifier<DLocalEnv*>` --
+         *  It used to print the address.  `local_env_` is a raw DLocalEnv*,
+         *  and passing it straight to field() sent it to the leaf fallback
+         *  (operator<< on a pointer): `:env 0x7879d025b098`, and `:env 0` for
+         *  null.  BOTH protocols agreed on that, so the phase-C conversion
+         *  reproduced it deliberately rather than smuggling a behaviour change
+         *  into a mechanical refactor, and the expectations here were pinned
+         *  with the address scrubbed to `0xADDR`.
          *
-         *    grep -rn 'ppdetail<.*DLocalEnv\|Prettifier<.*DLocalEnv' \
-         *      xo-interpreter2/ --include=*.hpp --include=*.cpp
+         *  Fixed 2026-08-13, after phase E removed the deprecated protocol --
+         *  doing it earlier would have forced the deprecated expectations to
+         *  carry the old address form until they were deleted anyway.  The
+         *  field now wraps in obj<APrintable,DLocalEnv> with a present flag,
+         *  exactly as DClosure does for the same type.  `scrub_addr()` went
+         *  with it: nothing in this file renders an address any more.
+         *  See .xo-backlog/xo-interpreter2/issues/01-applyclosureframe-env-prints-address.md
          *
-         *  returns nothing -- so BOTH protocols fall through to operator<< on
-         *  a raw pointer and print its ADDRESS.  Measured 2026-08-12.
-         *
-         *  Note what that means: this is NOT a divergence.  The two protocols
-         *  agree byte for byte, address included, which is why the conversion
-         *  reproduces the field literally rather than "fixing" it mid-refactor.
-         *  Compare `DClosure` one test above, which renders the SAME type
-         *  properly because it wraps it in obj<APrintable,DLocalEnv> first.
-         *
-         *  The address is scrubbed to pin the rest of the rendering; that
-         *  scrubbing is also the evidence that the field carries nothing a
-         *  reader can use.  Tracked as
-         *  .xo-backlog/xo-interpreter2/issues/01-applyclosureframe-env-prints-address.md
-         *
-         *  A null local_env_ prints `0`, not `nullptr` -- also observed, also
-         *  a consequence of the same fallback.
+         *  The null case is the reason for the present flag rather than a
+         *  bare wrap: local_env_ CAN be null, and `null-env` below pins that
+         *  it drops the field rather than dereferencing.  Note that is a
+         *  CHANGE from `:env 0` -- an omitted field, not a rendered zero.
          **/
         TEST_CASE("interpreter2-applyclosureframe-render", "[printable][interpreter2]")
         {
@@ -490,7 +456,7 @@ namespace xo {
                 auto check = [&rh, &log]
                     (const char * label, auto pr, std::uint32_t margin, const char * expect_pretty)
                 {
-                    std::string pretty = scrub_addr(render_pretty(pr, margin));
+                    std::string pretty = render_pretty(pr, margin);
 
                     log && log(xtag("label", label), xtag("margin", margin),
                                xtag("pretty", pretty));
@@ -516,18 +482,23 @@ namespace xo {
                                                  VsmInstr::c_apply_cont, nullptr));
 
                 check("env", with_env, 200,
-                      "<DVsmApplyClosureFrame :cont apply_cont :env 0xADDR>");
+                      "<DVsmApplyClosureFrame :cont apply_cont :env <DLocalEnv :n_args 1>>");
                 check("null-env", null_env, 200,
-                      "<DVsmApplyClosureFrame :cont apply_cont :env 0>");
+                      "<DVsmApplyClosureFrame :cont apply_cont>");
 
+                /* margin 24: the nested DLocalEnv breaks too, so the indent
+                 * divergence compounds -- the same two-level shape as
+                 * interpreter2-closure-render pins for DClosure.
+                 */
                 check("env", with_env, 24,
                       "<DVsmApplyClosureFrame\n"
                       "  :cont apply_cont\n"
-                      "  :env 0xADDR>");
+                      "  :env\n"
+                      "   <DLocalEnv\n"
+                      "    :n_args 1>>");
                 check("null-env", null_env, 24,
                       "<DVsmApplyClosureFrame\n"
-                      "  :cont apply_cont\n"
-                      "  :env 0>");
+                      "  :cont apply_cont>");
             }
         }
 

@@ -5,9 +5,11 @@
 
 #include "DVsmApplyClosureFrame.hpp"
 #include "LocalEnv.hpp"
+#include <xo/printable2/Printable.hpp>
 #include <xo/ppsink/pretty_struct.hpp>  /* sink.pretty_struct(..), field(..) */
 
 namespace xo {
+    using xo::print::APrintable;
     using xo::mm::AGCObject;
     using xo::reflect::typeseq;
     using xo::pp::field;
@@ -51,9 +53,14 @@ namespace xo {
         void
         DVsmApplyClosureFrame::pretty(xo::pp::PpSink & sink) const
         {
+            /*
+             * The present flag is load-bearing, since local_env_ can be null.
+             */
+            obj<APrintable,DLocalEnv> env_pr(local_env_);
+
             sink.pretty_struct("DVsmApplyClosureFrame",
                                field("cont", cont_),
-                               field("env", local_env_));
+                               field("env", env_pr, bool(env_pr)));
         }
     } /*namespace scm*/
 } /*namespace xo*/
